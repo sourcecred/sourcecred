@@ -2,7 +2,7 @@
 
 SourceCred is a system for creating digital tokens, called 'Cred' (¤), for open-source projects. Cred represents credit for doing the work of developing and maintaining the project. For example, people who contribute to SourceCred's development will receive SourceCred¤.
 
-We want to build tools for fairly distributing Cred to contributors, and incentives that act as rewards for having Cred. We want to reward open-source developers for their work. The world benefits tremendously from open-source, and if its developers were fairly rewarded, it would benefit so much more.
+The world benefits tremendously from open-source software, but most open-source developers don't get any recognition or reward. We want to build tools for fairly distributing Cred to those contributors, and incentives that act as rewards for having Cred. We hope these tools will reward open-source developers, and result in the creation of more open software.
 
 SourceCred is in very early stages: as of 2/3/2018, we have just started work. Dandelion is currently working on an initial documentation push:
 
