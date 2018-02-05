@@ -25,4 +25,4 @@
    
 5. **A Protocol**
 
-  SourceCred is focused on an application: funding and incentives for open-source. However, at its core, it is also a protocol: a general purpose way to allocate credit, and flow tokens and rewards to contributors. As we build the application, we will also create clean interfaces so that the underlying protocol can be flexibly re-used in other domains.
+   SourceCred is focused on an application: funding and incentives for open-source. However, at its core, it is also a protocol: a general purpose way to allocate credit, and flow tokens and rewards to contributors. As we build the application, we will also create clean interfaces so that the underlying protocol can be flexibly re-used in other domains.
