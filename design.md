@@ -1,6 +1,7 @@
 # SourceCred Design
 
 ## Design Goals
+
 0. **Useful**
 
    SourceCred is not a pie-in-the-sky project to design a theoretically ideal system. It is useful software that will solve a pressing need: to provide a funding and incentive model for developing open-source software. As such, given the choice between the ideal and the attainable, we will choose the attainable.
@@ -9,11 +10,11 @@
 
    We also recognize that by attempting to allocate credit and value, SourceCred is creating an economic system. Designing economic systems is a weighty responsibility in which small decisions may have large ethical consequences. By default, systems serve the powerful and connected. We will design SourceCred so that it also recognizes the least powerful and least connected contributors.
 
-2. **Economic Value**
+2. **Economically Valuable**
 
    SourceCred will provide a viable funding model for open projects. That means that the tokens it generates need to have some real economic value that is derived from the value of the project. Just allocating credit to contributors is not enough - there needs to be an reason for other agents in the ecosystem to pay contributors for their work.
 
-3. **Robust Incentives**
+3. **Incentive-compatible**
 
    SourceCred will generate robust incentives, so that rational actors trying to earn cred in a project will do so by making material contributions to the project's success and usefulness. The incentive system should be adaptable, so that as participants find ways to game them, communities can modify them to avoid incentive traps.
 
