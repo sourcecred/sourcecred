@@ -1,0 +1,22 @@
+.App {
+  text-align: center;
+}
+
+.anchor-button:visited {
+  color: black;
+}
+
+.App-header {
+  background-color: #222;
+  min-height: 30px;
+  padding: 5px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
