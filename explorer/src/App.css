@@ -1,4 +1,20 @@
 .App {
+  display: grid;
+
+  grid-template-areas: "header header"
+                       "fileexplorer userexplorer";
+
+  grid-template-rows: 50px 1fr;
+  grid-template-columns: 1fr 1fr;
+
+  width: 100%;
+}
+
+html, body, #root, .App {
+  height: 100%;
+}
+
+.App-header {
   text-align: center;
 }
 
@@ -6,11 +22,15 @@
   color: black;
 }
 
+.selected-path {
+  background-color: #ddd;
+}
+
 .App-header {
   background-color: #222;
-  min-height: 30px;
   padding: 5px;
   color: white;
+  grid-area: header;
 }
 
 .App-title {
@@ -19,4 +39,15 @@
 
 .App-intro {
   font-size: large;
+}
+
+
+.file-explorer {
+  grid-area: fileexplorer;
+  background-color: #aea;
+  overflow: scroll;
+}
+
+.user-explorer {
+  grid-area: userexplorer;
 }

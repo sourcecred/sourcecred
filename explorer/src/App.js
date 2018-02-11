@@ -50,7 +50,7 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      selectedFile: "",
+      selectedPath: "",
       selectedUser: null,
     };
   }
@@ -61,18 +61,20 @@ class App extends Component {
           <h1 className="App-title">SourceCred Explorer</h1>
         </header>
         <FileExplorer
-          onSelectFile={(x) => this.setState({selectedFile: x})}
-          selectedFile={this.state.selectedFile}
+          className="file-explorer"
+          onSelectPath={(x) => this.setState({selectedPath: x})}
+          selectedPath={this.state.selectedPath}
           data={data}
         />
         <UserExplorer
-          selectedFile={this.state.selectedFile}
+          className="user-explorer"
+          selectedPath={this.state.selectedPath}
           selectedUser={this.state.selectedUser}
           onSelectUser={(x) => this.setState({selectedUser: x})}
           data={data}
         />
         <CommitExplorer
-          selectedFile={this.state.selectedFile}
+          selectedPath={this.state.selectedPath}
           selectedUser={this.state.selectedUser}
           data={data}
         />
@@ -86,17 +88,18 @@ class FileExplorer extends Component {
     const fileNames = Object.keys(this.props.data.file_to_commits).sort();
     const tree = buildTree(fileNames);
 
-    return <div className="fileContainer" style={{
-      marginLeft: 42,
+    return <div className="file-explorer" style={{
       fontFamily: "monospace",
       textAlign: "left",
     }}>
+      <h3>File Explorer</h3>
       <FileEntry
         alwaysExpand={true}
         name=""
+        path="."
         tree={tree}
-        onSelectFile={(x) => this.props.onSelectFile(x.slice(1))}
-        selectedFile={this.props.selectedFile}
+        onSelectPath={this.props.onSelectPath}
+        selectedPath={this.props.selectedPath}
       />
     </div>
   }
@@ -115,20 +118,22 @@ class FileEntry extends Component {
       <FileEntry
         key={x}
         name={x}
+        path={`${this.props.path}/${x}`}
         alwaysExpand={false}
         tree={this.props.tree[x]}
-        selectedFile={this.props.selectedFile}
-        onSelectFile={(x) =>
-          this.props.onSelectFile(`${this.props.name}/${x}`)
-        }
+        selectedPath={this.props.selectedPath}
+        onSelectPath={this.props.onSelectPath}
+        style={{
+          marginLeft: 25,
+        }}
       />
     )
     const isFolder = topLevels.length > 0 && !this.props.alwaysExpand;
     const toggleExpand = () => this.setState({expanded: !this.state.expanded});
-    return <div style={{
-      marginLeft: 25,
-      backgroundColor: (this.props.name === this.props.selectedFile ? 'yellow' : 'white')
-    }}>
+    const isSelected = this.props.path === this.props.selectedPath;
+    const selectTarget = isSelected ? "." : this.props.path;
+    const onClick = () => this.props.onSelectPath(selectTarget);
+    return <div className={isSelected ? 'selected-path' : ''}>
 
       <p>
         {isFolder && <button
@@ -137,7 +142,7 @@ class FileEntry extends Component {
         <span // TODO should be a button or <a> for accessibility
           style={{
           }}
-          onClick={() => this.props.onSelectFile(this.props.name)}
+          onClick={onClick}
           >{this.props.name}</span>
       </p>
       {(this.state.expanded || this.props.alwaysExpand) && subEntries}
@@ -149,9 +154,9 @@ class UserExplorer extends Component {
 
   render() {
 
-    let files = allSelectedFiles(this.props.selectedFile, this.props.data);
+    let files = allSelectedFiles(this.props.selectedPath, this.props.data);
 
-    return <div />
+    return <div className="user-explorer"> <h3> User Explorer </h3> </div>
   }
 }
 
