@@ -1,15 +1,15 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 import data from './data.json';
 import './App.css';
-import { FileExplorer } from './FileExplorer.js';
-import { UserExplorer } from './UserExplorer.js';
+import { FileExplorer } from './FileExplorer.tsx';
+import { UserExplorer } from './UserExplorer.tsx';
 
-class App extends Component {
+class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      selectedPath: "",
-      selectedUser: null,
+      selectedPath: '',
+      selectedUser: null
     };
   }
   render() {
@@ -20,7 +20,7 @@ class App extends Component {
         </header>
         <FileExplorer
           className="file-explorer"
-          onSelectPath={(x) => this.setState({selectedPath: x})}
+          onSelectPath={x => this.setState({ selectedPath: x })}
           selectedPath={this.state.selectedPath}
           data={data}
         />
@@ -28,7 +28,7 @@ class App extends Component {
           className="user-explorer"
           selectedPath={this.state.selectedPath}
           selectedUser={this.state.selectedUser}
-          onSelectUser={(x) => this.setState({selectedUser: x})}
+          onSelectUser={x => this.setState({ selectedUser: x })}
           data={data}
         />
       </div>

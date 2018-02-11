@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 
 function commitWeight(commit, file) {
   return Math.sqrt(commit.stats[file].lines);
@@ -6,7 +6,7 @@ function commitWeight(commit, file) {
 
 function allSelectedFiles(filepath, data) {
   const fnames = Object.keys(data.file_to_commits);
-  return fnames.filter((x) => x.startsWith(filepath))
+  return fnames.filter(x => x.startsWith(filepath));
 }
 
 function* userWeights(files, data) {
@@ -35,6 +35,11 @@ export class UserExplorer extends Component {
   render() {
     let weights = userWeightForPath(this.props.selectedPath, this.props.data);
 
-    return <div className="user-explorer"> <h3> User Explorer </h3> </div>
+    return (
+      <div className="user-explorer">
+        {' '}
+        <h3> User Explorer </h3>{' '}
+      </div>
+    );
   }
 }
