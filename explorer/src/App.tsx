@@ -1,5 +1,4 @@
 import * as React from 'react';
-import data from './data.json';
 import './App.css';
 import { FileExplorer } from './FileExplorer.tsx';
 import { UserExplorer } from './UserExplorer.tsx';
@@ -9,9 +8,21 @@ class App extends React.Component {
     super();
     this.state = {
       selectedPath: '',
-      selectedUser: null
+      selectedUser: null,
+      data: null
     };
   }
+
+  loadData() {
+    fetch('public/tensorboard_commits.json')
+      .then(response => response.json())
+      .then(json => this.setStaet({ data: json }));
+  }
+
+  componentDidMount() {
+    this.loadData();
+  }
+
   render() {
     return (
       <div className="App">

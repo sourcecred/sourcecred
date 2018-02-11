@@ -4720,7 +4720,7 @@ react-error-overlay@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-3.0.0.tgz#c2bc8f4d91f1375b3dad6d75265d51cd5eeaf655"
 
-react-scripts-ts@1.1.0:
+react-scripts-ts@^2.13.0:
   version "2.13.0"
   resolved "https://registry.yarnpkg.com/react-scripts-ts/-/react-scripts-ts-2.13.0.tgz#d5493035e6d521030f0d3e5e8e5b5872f7df1a28"
   dependencies:
