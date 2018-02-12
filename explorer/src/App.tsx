@@ -2,7 +2,8 @@ import * as React from 'react';
 import './App.css';
 import { FileExplorer } from './FileExplorer';
 import { UserExplorer } from './UserExplorer';
-import { CommitData, emptyCommitData } from './commits';
+import { CommitData } from './commits';
+import data from './commits.json';
 
 interface AppProps {}
 
@@ -18,18 +19,8 @@ class App extends React.Component<AppProps, AppState> {
     this.state = {
       selectedPath: '',
       selectedUser: undefined,
-      data: emptyCommitData()
+      data: data
     };
-  }
-
-  loadData() {
-    fetch('public/tensorboard_commits.json')
-      .then(response => response.json())
-      .then(json => this.setState({ data: json }));
-  }
-
-  componentDidMount() {
-    this.loadData();
   }
 
   render() {
