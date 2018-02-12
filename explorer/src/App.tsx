@@ -1,11 +1,11 @@
 import * as React from 'react';
 import './App.css';
-import { FileExplorer } from './FileExplorer.tsx';
-import { UserExplorer } from './UserExplorer.tsx';
+import { FileExplorer } from './FileExplorer';
+import { UserExplorer } from './UserExplorer';
 
 class App extends React.Component {
-  constructor() {
-    super();
+  constructor(props: any) {
+    super(props);
     this.state = {
       selectedPath: '',
       selectedUser: null,
@@ -16,7 +16,7 @@ class App extends React.Component {
   loadData() {
     fetch('public/tensorboard_commits.json')
       .then(response => response.json())
-      .then(json => this.setStaet({ data: json }));
+      .then(json => this.setState({ data: json }));
   }
 
   componentDidMount() {

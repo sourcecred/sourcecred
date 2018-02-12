@@ -23,7 +23,7 @@ function buildTree(fileNames) {
   return result;
 }
 
-export class FileExplorer extends Component {
+export class FileExplorer extends React.Component {
   render() {
     const fileNames = Object.keys(this.props.data.file_to_commits).sort();
     const tree = buildTree(fileNames);
