@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-function buildTree(fileNames) {
+export function buildTree(fileNames) {
   const sortedFileNames = fileNames.slice().sort();
   const topLevelBuckets = {};
   for (const fileName of sortedFileNames) {
