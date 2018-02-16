@@ -64,11 +64,7 @@ class FileEntry extends Component {
         {isFolder && <button
           style={{marginRight: 3}}
           onClick={toggleExpand}>»</button>}
-        <span // TODO should be a button or <a> for accessibility
-          style={{
-          }}
-          onClick={onClick}
-          >{this.props.name}</span>
+        <a href="javascript: void 0" onClick={onClick}>{this.props.name}</a>
       </p>
       {(this.state.expanded || this.props.alwaysExpand) && subEntries}
     </div>
