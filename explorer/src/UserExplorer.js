@@ -1,40 +1,30 @@
 import React, { Component } from 'react';
-
-function commitWeight(commit, file) {
-  return Math.sqrt(commit.stats[file].lines);
-}
-
-function allSelectedFiles(filepath, data) {
-  const fnames = Object.keys(data.file_to_commits);
-  return fnames.filter((x) => x.startsWith(filepath))
-}
-
-function* userWeights(files, data) {
-  for (const file of files) {
-    for (const commitHash of data.file_to_commits[file]) {
-      const commit = data.commits[commitHash];
-      const w = commitWeight(commit, file);
-      yield [commit.author, w];
-    }
-  }
-}
-
-function userWeightForPath(path, data) {
-  const userWeightMap = new Map();
-  const files = allSelectedFiles(path, data);
-  for (const [user, weight] of userWeights(files, data)) {
-    if (!userWeightMap.has(user)) {
-      userWeightMap[user] = 0;
-    }
-    userWeightMap[user] += weight;
-  }
-  return userWeightMap;
-}
+import {userWeightForPath, commitWeight} from './commitUtils';
 
 export class UserExplorer extends Component {
   render() {
-    let weights = userWeightForPath(this.props.selectedPath, this.props.data);
+    const weights = userWeightForPath(this.props.selectedPath, this.props.data, commitWeight);
+    const sortedUserWeightTuples = Object.entries(weights).sort((a,b) => b[1] - a[1]);
+    const entries = sortedUserWeightTuples.map(authorWeight => { 
+      const [author, weight] = authorWeight;
+      return <UserEntry userId={author} weight={weight} key={author}/>
+    });
+    return <div className="user-explorer"> 
+      <h3> User Explorer </h3> 
+      {entries}
+    </div>
+  }
+}
 
-    return <div className="user-explorer"> <h3> User Explorer </h3> </div>
+class UserEntry extends Component {
+  // Record the cred earned by the user in a given scope
+  // Props: 
+  //  userId, string
+  //  weight, number
+  render() {
+    return <div className="user-entry">
+      <span> {this.props.userId} </span>
+      <span> {this.props.weight.toFixed(1)} </span>
+    </div>
   }
 }

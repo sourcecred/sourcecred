@@ -22,9 +22,14 @@ export function buildTree(fileNames) {
 
 export class FileExplorer extends Component {
   render() {
-    const fileNames = Object.keys(this.props.data.file_to_commits).sort();
+    const fileNames = Object.keys(this.props.data.fileToCommits).sort();
     const tree = buildTree(fileNames);
-
+    const selectPath = (path) => {
+      if (path.startsWith("./")) {
+        path = path.slice(2);
+      }
+      this.props.onSelectPath(path);
+    }
     return <div className="file-explorer" style={{
       fontFamily: "monospace",
       textAlign: "left",
@@ -35,7 +40,7 @@ export class FileExplorer extends Component {
         name=""
         path="."
         tree={tree}
-        onSelectPath={this.props.onSelectPath}
+        onSelectPath={selectPath}
         selectedPath={this.props.selectedPath}
       />
     </div>

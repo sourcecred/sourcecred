@@ -19,6 +19,10 @@ type FileStats = {
 }
 
 export function commitWeight(commit: Commit, filepath: string): number {
+  // hack - GitPython encodes renames in the filepath. ignore for now.
+  if (filepath.indexOf('=>') !== -1) {
+    return 0;
+  }
   return Math.sqrt(commit.stats[filepath].lines);
 }
 
@@ -31,10 +35,14 @@ function *userWeights(files: string[], data: CommitData, weightFn: WeightFn): It
   for (const file of files) {
     for (const commitHash of data.fileToCommits[file]) {
       const commit = data.commits[commitHash];
+      let w;
       if (commit.stats[file] == null) {
-        throw new Error(`commit ${commitHash} missing file ${file}`);
+        // hack - likely due to the GitPython file rename issue
+        console.log(`commit ${commitHash} missing file ${file}`);
+        w = 0;
+      } else {
+        w = weightFn(commit, file);
       }
-      const w = weightFn(commit, file);
       yield [commit.author, w];
     }
   }
