@@ -2,7 +2,7 @@
 
 type CommitData = {
   // TODO improve variable names
-  fileToCommits: {[filename: string]: string};
+  fileToCommits: {[filename: string]: string[]};
   commits: {[commithash: string]: Commit};
   authors: string[];
 }
