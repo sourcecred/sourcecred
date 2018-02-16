@@ -48,7 +48,14 @@ function *userWeights(files: string[], data: CommitData, weightFn: WeightFn): It
   }
 }
 
+/** 
+ * A weight function determines how much commit contributes to the importance
+ * of a particular file. For instance, a weight function might be defined as,
+ * “the number of lines changed in filepath in commit commit”, or “1 if
+ * filepath was changed in commit, else 0”. 
+ */
 type WeightFn = (commit: Commit, filepath: string) => number;
+
 export function userWeightForPath(path: string, data: CommitData, weightFn: WeightFn): {[string]: number} {
   const userWeightMap = {};
   const files = allSelectedFiles(path, data);

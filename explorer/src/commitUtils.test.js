@@ -12,14 +12,14 @@ const exampleData = {
       'stats': {
         'foo.txt': {'lines': 5, 'added': 3, 'deleted': 2},
         'bar.txt': {'lines': 100, 'added': 100, 'deleted': 0}
-        }
-      },
+      }
+    },
     '2': {
       'author': 'wchargin',
       'stats': {
-      'bar.txt': {'lines': 100, 'added': 50, 'deleted': 50},
-        }
-      },
+        'bar.txt': {'lines': 100, 'added': 50, 'deleted': 50},
+      }
+    },
   },
   authors: ['dandelionmane', 'wchargin']
 }
