@@ -1,5 +1,5 @@
 // @flow
-import {userWeightForPath} from './commitUtils';
+import {userWeightForPath, buildTree} from './commitUtils';
 
 const exampleData = {
   fileToCommits: {
@@ -56,3 +56,15 @@ describe('userWeightForPath', () => {
     expect(actual).toEqual(expected);
   })
 })
+
+describe('buildTree', () => {
+  it('handles empty tree', () => {
+    expect(buildTree([])).toEqual({});
+  });
+
+  it('handles trees', () => {
+    const names = ['foo', 'bar/zod', 'bar/zoink'];
+    const expected = {'foo': {}, 'bar': {'zod': {}, 'zoink': {}}};
+    expect(buildTree(names)).toEqual(expected);
+  });
+});

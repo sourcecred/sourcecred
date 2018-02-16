@@ -1,24 +1,5 @@
 import React, { Component } from 'react';
-
-export function buildTree(fileNames) {
-  const sortedFileNames = fileNames.slice().sort();
-  const topLevelBuckets = {};
-  for (const fileName of sortedFileNames) {
-    const topLevel = fileName.split("/")[0];
-    const remainder = fileName.split("/").slice(1).join("/");
-    if (topLevelBuckets[topLevel] == null) {
-      topLevelBuckets[topLevel] = [];
-    }
-    if (remainder !== "") {
-      topLevelBuckets[topLevel].push(remainder);
-    }
-  }
-  const result = {};
-  for (const topLevel of Object.keys(topLevelBuckets)) {
-    result[topLevel] = buildTree(topLevelBuckets[topLevel]);
-  }
-  return result;
-}
+import {buildTree} from './commitUtils';
 
 export class FileExplorer extends Component {
   render() {

@@ -61,15 +61,14 @@ export function userWeightForPath(path: string, data: CommitData, weightFn: Weig
   return userWeightMap;
 }
 
-type FileTree = {[string]: FileTree}; // {[string]: FileTree};
+type FileTree = {[string]: FileTree};
 
-export function buildTree(data: CommitData): FileTree {
-  const fileNames = Object.keys(data.fileToCommits).sort();
-  return _buildTree(fileNames);
+export function buildTree(fileNames: string[]): FileTree {
+  const sortedFileNames = fileNames.slice().sort();
+  return _buildTree(sortedFileNames);
 }
 
-function _buildTree(fileNames: string[]): FileTree {
-  const sortedFileNames = fileNames.slice().sort();
+function _buildTree(sortedFileNames: string[]): FileTree {
   const topLevelBuckets: {[root: string]: string[]} = {};
   for (const fileName of sortedFileNames) {
     const topLevel = fileName.split('/')[0];
