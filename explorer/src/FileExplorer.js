@@ -22,6 +22,8 @@ export function buildTree(fileNames) {
 
 export class FileExplorer extends Component {
   render() {
+    // within the FileExplorer, paths start with "./", outside they don't
+    // which is hacky and should be cleaned up
     const fileNames = Object.keys(this.props.data.fileToCommits).sort();
     const tree = buildTree(fileNames);
     const selectPath = (path) => {
@@ -41,7 +43,7 @@ export class FileExplorer extends Component {
         path="."
         tree={tree}
         onSelectPath={selectPath}
-        selectedPath={this.props.selectedPath}
+        selectedPath={`./${this.props.selectedPath}`}
       />
     </div>
   }
@@ -65,9 +67,6 @@ class FileEntry extends Component {
         tree={this.props.tree[x]}
         selectedPath={this.props.selectedPath}
         onSelectPath={this.props.onSelectPath}
-        style={{
-          marginLeft: 25,
-        }}
       />
     )
     const isFolder = topLevels.length > 0 && !this.props.alwaysExpand;
@@ -75,7 +74,10 @@ class FileEntry extends Component {
     const isSelected = this.props.path === this.props.selectedPath;
     const selectTarget = isSelected ? "." : this.props.path;
     const onClick = () => this.props.onSelectPath(selectTarget);
-    return <div className={isSelected ? 'selected-path' : ''}>
+    return <div 
+        className={isSelected ? 'selected-path' : ''}
+        style={{marginLeft: this.props.path === "." ? 0 : 25}}
+      >
 
       <p>
         {isFolder && <button
