@@ -1,15 +1,13 @@
+// @flow
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {buildTree} from './commitUtils';
-import {propTypes as commitUtilsPropTypes} from './commitUtils';
+import type {CommitData, FileTree} from './commitUtils';
 
-export class FileExplorer extends Component {
-  static propTypes = {
-    selectedPath: PropTypes.string,
-    onSelectPath: PropTypes.func.isRequired,
-    data: commitUtilsPropTypes.commitData.isRequired,
-  }
-
+export class FileExplorer extends Component<{
+    selectedPath: string,
+    onSelectPath: (newPath: string) => void,
+    data: CommitData,
+}> {
   render() {
     // within the FileExplorer, paths start with "./", outside they don't
     // which is hacky and should be cleaned up
@@ -38,19 +36,16 @@ export class FileExplorer extends Component {
   }
 }
 
-class FileEntry extends Component {
-  static propTypes = {
-    name: PropTypes.string.isRequired,
-    path: PropTypes.string.isRequired,
-    alwaysExpand: PropTypes.bool.isRequired,
-
-    // The type for the tree is recursive, and is annoying to specify as
-    // a proptype. The Flow type definition is in commitUtils.js.
-    tree: PropTypes.object.isRequired,
-
-    selectedPath: PropTypes.string.isRequired,
-    onSelectPath: PropTypes.func.isRequired,
-  }
+class FileEntry extends Component<{
+  name: string,
+  path: string,
+  alwaysExpand: bool,
+  tree: FileTree,
+  selectedPath: string,
+  onSelectPath: (newPath: string) => void,
+}, {
+  expanded: bool,
+}> {
 
   constructor() {
     super();
@@ -89,4 +84,5 @@ class FileEntry extends Component {
       {(this.state.expanded || this.props.alwaysExpand) && subEntries}
     </div>
   }
+
 }

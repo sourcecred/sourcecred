@@ -1,10 +1,12 @@
+// @flow
 import React, { Component } from 'react';
 import data from './data.json';
 import './App.css';
 import { FileExplorer } from './FileExplorer.js';
 import { UserExplorer } from './UserExplorer.js';
 
-class App extends Component {
+type AppState = {selectedPath: string, selectedUser: ?string};
+class App extends Component<{}, AppState> {
   constructor() {
     super();
     this.state = {
