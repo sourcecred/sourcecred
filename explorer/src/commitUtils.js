@@ -38,7 +38,6 @@ function *userWeights(files: string[], data: CommitData, weightFn: WeightFn): It
       let w;
       if (commit.stats[file] == null) {
         // hack - likely due to the GitPython file rename issue
-        console.log(`commit ${commitHash} missing file ${file}`);
         w = 0;
       } else {
         w = weightFn(commit, file);
