@@ -1,7 +1,19 @@
 import React, { Component } from 'react';
-import {userWeightForPath, commitWeight} from './commitUtils';
+import PropTypes from 'prop-types';
+import {
+  commitWeight,
+  propTypes as commitUtilsPropTypes,
+  userWeightForPath,
+} from './commitUtils';
 
 export class UserExplorer extends Component {
+  static propTypes = {
+    selectedPath: PropTypes.string.isRequired,
+    selectedUser: PropTypes.string,
+    onSelectUser: PropTypes.func.isRequired,
+    data: commitUtilsPropTypes.commitData.isRequired,
+  }
+
   render() {
     const weights = userWeightForPath(this.props.selectedPath, this.props.data, commitWeight);
     const sortedUserWeightTuples = Object.entries(weights).sort((a,b) => b[1] - a[1]);
@@ -16,11 +28,15 @@ export class UserExplorer extends Component {
   }
 }
 
+/**
+ * Record the cred earned by the user in a given scope.
+ */
 class UserEntry extends Component {
-  // Record the cred earned by the user in a given scope
-  // Props: 
-  //  userId, string
-  //  weight, number
+  static propTypes = {
+    userId: PropTypes.string.isRequired,
+    weight: PropTypes.number.isRequired,
+  }
+
   render() {
     return <div className="user-entry">
       <span> {this.props.userId} </span>
