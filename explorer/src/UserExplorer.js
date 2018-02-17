@@ -1,18 +1,14 @@
+// @flow
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import {
-  commitWeight,
-  propTypes as commitUtilsPropTypes,
-  userWeightForPath,
-} from './commitUtils';
+import {commitWeight, userWeightForPath} from './commitUtils';
+import type {CommitData, FileTree} from './commitUtils';
 
-export class UserExplorer extends Component {
-  static propTypes = {
-    selectedPath: PropTypes.string.isRequired,
-    selectedUser: PropTypes.string,
-    onSelectUser: PropTypes.func.isRequired,
-    data: commitUtilsPropTypes.commitData.isRequired,
-  }
+export class UserExplorer extends Component<{
+  selectedPath: string,
+  selectedUser: ?string,
+  onSelectUser: (newUser: string) => void,
+  data: CommitData,
+}> {
 
   render() {
     const weights = userWeightForPath(this.props.selectedPath, this.props.data, commitWeight);
@@ -29,16 +25,16 @@ export class UserExplorer extends Component {
       {entries}
     </div>
   }
+
 }
 
 /**
  * Record the cred earned by the user in a given scope.
  */
-class UserEntry extends Component {
-  static propTypes = {
-    userId: PropTypes.string.isRequired,
-    weight: PropTypes.number.isRequired,
-  }
+class UserEntry extends Component<{
+    userId: string,
+    weight: number,
+}> {
 
   render() {
     return <div className="user-entry">
@@ -46,4 +42,5 @@ class UserEntry extends Component {
       <span> {this.props.weight.toFixed(1)} </span>
     </div>
   }
+
 }

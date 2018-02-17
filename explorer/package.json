@@ -85,11 +85,17 @@
     ]
   },
   "babel": {
+    "plugins": [
+      "flow-react-proptypes"
+    ],
     "presets": [
       "react-app"
     ]
   },
   "eslintConfig": {
     "extends": "react-app"
+  },
+  "devDependencies": {
+    "babel-plugin-flow-react-proptypes": "^17.1.2"
   }
 }
