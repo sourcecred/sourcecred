@@ -27,10 +27,13 @@
     "flow-bin": "^0.65.0",
     "fs-extra": "3.0.1",
     "html-webpack-plugin": "2.29.0",
+    "husky": "^0.14.3",
     "jest": "20.0.4",
+    "lint-staged": "^6.1.1",
     "object-assign": "4.1.1",
     "postcss-flexbugs-fixes": "3.2.0",
     "postcss-loader": "2.0.8",
+    "prettier": "^1.10.2",
     "promise": "8.0.1",
     "raf": "3.4.0",
     "react": "^16.2.0",
@@ -45,10 +48,16 @@
     "whatwg-fetch": "2.0.3"
   },
   "scripts": {
+    "precommit": "npm run lint-staged",
+    "lint-staged": "lint-staged",
+    "pretty": "prettier --write 'src/**/*.js'",
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
     "flow": "flow"
+  },
+  "lint-staged": {
+    "src/**/*.js": "prettier --list-different"
   },
   "jest": {
     "collectCoverageFrom": [
