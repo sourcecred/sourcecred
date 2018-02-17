@@ -16,7 +16,10 @@ export class UserExplorer extends Component {
 
   render() {
     const weights = userWeightForPath(this.props.selectedPath, this.props.data, commitWeight);
-    const sortedUserWeightTuples = Object.entries(weights).sort((a,b) => b[1] - a[1]);
+    const sortedUserWeightTuples =
+        Object.keys(weights)
+        .map(k => [k, weights[k]])
+        .sort((a,b) => b[1] - a[1]);
     const entries = sortedUserWeightTuples.map(authorWeight => { 
       const [author, weight] = authorWeight;
       return <UserEntry userId={author} weight={weight} key={author}/>
