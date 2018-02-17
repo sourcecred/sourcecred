@@ -1,11 +1,30 @@
 // @flow
 
+import PropTypes from 'prop-types';
+
 type CommitData = {
   // TODO improve variable names
   fileToCommits: {[filename: string]: string[]};
   commits: {[commithash: string]: Commit};
   authors: string[];
 }
+
+export const propTypes = {
+  commitData: PropTypes.shape({
+    fileToCommits: PropTypes.objectOf(
+      PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+    ).isRequired,
+    commits: PropTypes.objectOf(PropTypes.shape({
+      author: PropTypes.string.isRequired,
+      stats: PropTypes.objectOf(PropTypes.shape({
+        lines: PropTypes.number.isRequired,
+        insertions: PropTypes.number.isRequired,
+        deletions: PropTypes.number.isRequired,
+      }).isRequired).isRequired,
+    }).isRequired).isRequired,
+  }),
+};
+
 
 type Commit = {
   author: string;
