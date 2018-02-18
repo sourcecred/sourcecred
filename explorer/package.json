@@ -50,14 +50,14 @@
   "scripts": {
     "precommit": "npm run lint-staged",
     "lint-staged": "lint-staged",
-    "pretty": "prettier --write 'src/**/*.js'",
+    "prettify": "prettier --write '**/*.js'",
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
     "flow": "flow"
   },
   "lint-staged": {
-    "src/**/*.js": "prettier --list-different"
+    "**/*.js": "prettier --list-different"
   },
   "jest": {
     "collectCoverageFrom": [
