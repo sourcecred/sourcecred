@@ -2,21 +2,19 @@
 
 import PropTypes from "prop-types";
 
-export type CommitData = {
-  // TODO improve variable names
-  fileToCommits: {[filename: string]: string[]},
-  commits: {[commithash: string]: Commit},
+type FileStats = {
+  lines: number,
+  insertions: number,
+  deletions: number,
 };
-
 type Commit = {
   author: string,
   stats: {[filename: string]: FileStats},
 };
-
-type FileStats = {
-  lines: number,
-  added: number,
-  deleted: number,
+export type CommitData = {
+  // TODO improve variable names
+  fileToCommits: {[filename: string]: string[]},
+  commits: {[commithash: string]: Commit},
 };
 
 export function commitWeight(commit: Commit, filepath: string): number {
