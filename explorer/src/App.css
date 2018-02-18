@@ -6,16 +6,13 @@
 
   grid-template-rows: 50px 1fr;
   grid-template-columns: 1fr 1fr;
-
+  grid-gap: 4px;
   width: 100%;
 }
 
 html, body, #root, .App {
   height: 100%;
-}
-
-.App-header {
-  text-align: center;
+  font-family: Roboto, sans-serif;
 }
 
 .anchor-button:visited {
@@ -26,11 +23,8 @@ html, body, #root, .App {
   background-color: #ddd;
 }
 
-.App-header {
-  background-color: #222;
-  padding: 5px;
-  color: white;
-  grid-area: header;
+.App-intro {
+  font-size: large;
 }
 
 .App-title {
@@ -41,11 +35,15 @@ html, body, #root, .App {
   font-size: large;
 }
 
+.plugin-pane {
+  overflow: scroll;
+  background-color: white;
+  border-radius: 5px;
+  margin: 8px;
+}
 
 .file-explorer {
   grid-area: fileexplorer;
-  background-color: #aea;
-  overflow: scroll;
 }
 
 .user-explorer {

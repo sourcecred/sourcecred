@@ -20,9 +20,13 @@ export class UserExplorer extends Component<{
       const [author, weight] = authorWeight;
       return <UserEntry userId={author} weight={weight} key={author}/>
     });
-    return <div className="user-explorer"> 
-      <h3> User Explorer </h3> 
-      {entries}
+    return <div
+      className="user-explorer plugin-pane"
+    >
+      <h3 style={{textAlign: "center"}}> User Explorer </h3>
+      <div style={{marginLeft: 8, marginRight: 8}}>
+        {entries}
+      </div>
     </div>
   }
 

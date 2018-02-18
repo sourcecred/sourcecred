@@ -16,9 +16,21 @@ class App extends Component<{}, AppState> {
   }
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <h1 className="App-title">SourceCred Explorer</h1>
+      <div className="App" style={{backgroundColor: "#eeeeee"}}>
+        <header
+
+          style={{
+            backgroundColor: "#01579B",
+            color: "white",
+            gridArea: "header",
+            textAlign: "center",
+            boxShadow: "0px 2px 2px #aeaeae",
+          }}
+          >
+          <h1
+            style={{fontSize: "1.5em"}}
+          >SourceCred Explorer
+          </h1>
         </header>
         <FileExplorer
           className="file-explorer"

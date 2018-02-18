@@ -19,19 +19,18 @@ export class FileExplorer extends Component<{
       }
       this.props.onSelectPath(path);
     }
-    return <div className="file-explorer" style={{
-      fontFamily: "monospace",
-      textAlign: "left",
-    }}>
-      <h3>File Explorer</h3>
-      <FileEntry
-        alwaysExpand={true}
-        name=""
-        path="."
-        tree={tree}
-        onSelectPath={selectPath}
-        selectedPath={`./${this.props.selectedPath}`}
-      />
+    return <div className="file-explorer plugin-pane">
+      <h3 style={{textAlign: "center"}}>File Explorer</h3>
+      <div style={{fontFamily: "monospace"}}>
+        <FileEntry
+          alwaysExpand={true}
+          name=""
+          path="."
+          tree={tree}
+          onSelectPath={selectPath}
+          selectedPath={`./${this.props.selectedPath}`}
+        />
+      </div>
     </div>
   }
 }
