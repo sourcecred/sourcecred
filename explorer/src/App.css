@@ -6,7 +6,7 @@
 
   grid-template-rows: 50px 1fr;
   grid-template-columns: 1fr 1fr;
-  grid-gap: 10px;
+  grid-gap: 4px;
   width: 100%;
 }
 
@@ -35,11 +35,15 @@ html, body, #root, .App {
   font-size: large;
 }
 
+.plugin-pane {
+  overflow: scroll;
+  background-color: white;
+  border-radius: 5px;
+  margin: 8px;
+}
 
 .file-explorer {
   grid-area: fileexplorer;
-  background-color: #aea;
-  overflow: scroll;
 }
 
 .user-explorer {
