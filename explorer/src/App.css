@@ -23,11 +23,8 @@ html, body, #root, .App {
   background-color: #ddd;
 }
 
-.App-header {
-  background-color: #222;
-  padding: 5px;
-  color: white;
-  grid-area: header;
+.App-intro {
+  font-size: large;
 }
 
 .App-title {
