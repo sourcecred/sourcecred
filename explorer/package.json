@@ -105,6 +105,6 @@
     "extends": "react-app"
   },
   "devDependencies": {
-    "babel-plugin-flow-react-proptypes": "^17.1.2"
+    "babel-plugin-flow-react-proptypes": "^18.0.0"
   }
 }
