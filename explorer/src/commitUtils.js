@@ -1,27 +1,27 @@
 // @flow
 
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 export type CommitData = {
   // TODO improve variable names
-  fileToCommits: {[filename: string]: string[]};
-  commits: {[commithash: string]: Commit};
-}
+  fileToCommits: {[filename: string]: string[]},
+  commits: {[commithash: string]: Commit},
+};
 
 type Commit = {
-  author: string;
-  stats: {[filename: string]: FileStats};
-}
+  author: string,
+  stats: {[filename: string]: FileStats},
+};
 
 type FileStats = {
-  lines: number;
-  added: number;
-  deleted: number;
-}
+  lines: number,
+  added: number,
+  deleted: number,
+};
 
 export function commitWeight(commit: Commit, filepath: string): number {
   // hack - GitPython encodes renames in the filepath. ignore for now.
-  if (filepath.indexOf('=>') !== -1) {
+  if (filepath.indexOf("=>") !== -1) {
     return 0;
   }
   return Math.sqrt(commit.stats[filepath].lines);
@@ -29,10 +29,14 @@ export function commitWeight(commit: Commit, filepath: string): number {
 
 function allSelectedFiles(filepath: string, data: CommitData): string[] {
   const fnames = Object.keys(data.fileToCommits);
-  return fnames.filter(x => x.startsWith(filepath));
+  return fnames.filter((x) => x.startsWith(filepath));
 }
 
-function *userWeights(files: string[], data: CommitData, weightFn: WeightFn): Iterable<[string, number]> {
+function* userWeights(
+  files: string[],
+  data: CommitData,
+  weightFn: WeightFn
+): Iterable<[string, number]> {
   for (const file of files) {
     for (const commitHash of data.fileToCommits[file]) {
       const commit = data.commits[commitHash];
@@ -48,15 +52,19 @@ function *userWeights(files: string[], data: CommitData, weightFn: WeightFn): It
   }
 }
 
-/** 
+/**
  * A weight function determines how much commit contributes to the importance
  * of a particular file. For instance, a weight function might be defined as,
  * “the number of lines changed in filepath in commit commit”, or “1 if
- * filepath was changed in commit, else 0”. 
+ * filepath was changed in commit, else 0”.
  */
 type WeightFn = (commit: Commit, filepath: string) => number;
 
-export function userWeightForPath(path: string, data: CommitData, weightFn: WeightFn): {[string]: number} {
+export function userWeightForPath(
+  path: string,
+  data: CommitData,
+  weightFn: WeightFn
+): {[string]: number} {
   const userWeightMap = {};
   const files = allSelectedFiles(path, data);
   for (const [user, weight] of userWeights(files, data, weightFn)) {
@@ -78,15 +86,15 @@ export function buildTree(fileNames: string[]): FileTree {
 function _buildTree(sortedFileNames: string[]): FileTree {
   const topLevelBuckets: {[root: string]: string[]} = {};
   for (const fileName of sortedFileNames) {
-    const topLevel = fileName.split('/')[0];
+    const topLevel = fileName.split("/")[0];
     const remainder = fileName
-      .split('/')
+      .split("/")
       .slice(1)
-      .join('/');
+      .join("/");
     if (topLevelBuckets[topLevel] == null) {
       topLevelBuckets[topLevel] = [];
     }
-    if (remainder !== '') {
+    if (remainder !== "") {
       topLevelBuckets[topLevel].push(remainder);
     }
   }
