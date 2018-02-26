@@ -1,0 +1,13 @@
+{
+  "name": "sourcecred-backend",
+  "version": "0.1.0",
+  "description": "Backend for SourceCred",
+  "main": "index.js",
+  "repository": "https://github.com/SourceCred/SourceCred",
+  "author": "dandelionmane,wchargin",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@octokit/rest": "octokit/rest.js"
+  }
+}
