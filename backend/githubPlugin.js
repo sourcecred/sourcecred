@@ -1,8 +1,6 @@
 // @flow
 
-import type {ID, GraphNode, GraphEdge} from "./graph";
-
-export const GITHUB_PLUGIN_NANE = "sourcecred/github-beta";
+export const GITHUB_PLUGIN_NAME = "sourcecred/github-beta";
 
 export type NodeType = "PULL_REQUEST" | "ISSUE" | "COMMENT" | "USER";
 
