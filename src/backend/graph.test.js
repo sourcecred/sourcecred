@@ -3,13 +3,13 @@ import {addressToString, stringToAddress} from "./graph";
 describe("graph", () => {
   describe("addressToString", () => {
     const makeSimpleAddress = () => ({
-      pluginName: "widgets",
       repositoryName: "megacorp/megawidget",
+      pluginName: "widgets",
       id: "issue#123",
     });
     it("stringifies a simple Address", () => {
       const input = makeSimpleAddress();
-      const expected = "widgets$megacorp/megawidget$issue#123";
+      const expected = "megacorp/megawidget$widgets$issue#123";
       expect(addressToString(input)).toEqual(expected);
     });
     function expectRejection(attribute, value) {
@@ -30,10 +30,10 @@ describe("graph", () => {
 
   describe("stringToAddress", () => {
     it("parses a simple Address-string", () => {
-      const input = "widgets$megacorp/megawidget$issue#123";
+      const input = "megacorp/megawidget$widgets$issue#123";
       const expected = {
-        pluginName: "widgets",
         repositoryName: "megacorp/megawidget",
+        pluginName: "widgets",
         id: "issue#123",
       };
       expect(stringToAddress(input)).toEqual(expected);
@@ -51,11 +51,11 @@ describe("graph", () => {
     const examples = () => [
       {
         object: {
-          pluginName: "widgets",
           repositoryName: "megacorp/megawidget",
+          pluginName: "widgets",
           id: "issue#123",
         },
-        string: "widgets$megacorp/megawidget$issue#123",
+        string: "megacorp/megawidget$widgets$issue#123",
       },
     ];
     examples().forEach((example, index) => {
