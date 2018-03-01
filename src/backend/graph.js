@@ -27,19 +27,19 @@ export type Graph = {
 };
 
 export function addressToString(address: Address) {
-  if (address.pluginName.includes("$")) {
-    const escaped = JSON.stringify(address.pluginName);
-    throw new Error(`address.pluginName must not include "\$": ${escaped}`);
-  }
   if (address.repositoryName.includes("$")) {
     const escaped = JSON.stringify(address.repositoryName);
     throw new Error(`address.repositoryName must not include "\$": ${escaped}`);
+  }
+  if (address.pluginName.includes("$")) {
+    const escaped = JSON.stringify(address.pluginName);
+    throw new Error(`address.pluginName must not include "\$": ${escaped}`);
   }
   if (address.id.includes("$")) {
     const escaped = JSON.stringify(address.id);
     throw new Error(`address.id must not include "\$": ${escaped}`);
   }
-  return `${address.pluginName}\$${address.repositoryName}\$${address.id}`;
+  return `${address.repositoryName}\$${address.pluginName}\$${address.id}`;
 }
 
 export function stringToAddress(string: string) {
@@ -49,8 +49,8 @@ export function stringToAddress(string: string) {
     throw new Error(`Input should have exactly two \$s: ${escaped}`);
   }
   return {
-    pluginName: parts[0],
-    repositoryName: parts[1],
+    repositoryName: parts[0],
+    pluginName: parts[1],
     id: parts[2],
   };
 }
