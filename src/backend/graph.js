@@ -1,47 +1,47 @@
 // @flow
 
-export type ID = {
-  pluginName: string,
+export type Address = {
   repositoryName: string,
-  name: string,
+  pluginName: string,
+  id: string,
 };
 
-export type GraphNode<T> = {
-  id: ID,
-  edges: ID[],
+export type Node<T> = {
+  address: Address,
+  edges: Address[],
   payload: T,
 };
 
-export type GraphEdge<T> = {
-  id: ID,
-  sourceId: ID,
-  destId: ID,
+export type Edge<T> = {
+  address: Address,
+  sourceId: Address,
+  destId: Address,
   weight: number,
   payload: T,
 };
 
 export type Graph = {
-  nodes: {[stringID: string]: GraphNode<mixed>},
-  edges: {[stringID: string]: GraphEdge<mixed>},
+  nodes: {[stringAddress: string]: Node<mixed>},
+  edges: {[stringAddress: string]: Edge<mixed>},
 };
 
-export function idToString(id: ID) {
-  if (id.pluginName.includes("$")) {
-    const escaped = JSON.stringify(id.pluginName);
-    throw new Error(`id.pluginName must not include "\$": ${escaped}`);
+export function addressToString(address: Address) {
+  if (address.pluginName.includes("$")) {
+    const escaped = JSON.stringify(address.pluginName);
+    throw new Error(`address.pluginName must not include "\$": ${escaped}`);
   }
-  if (id.repositoryName.includes("$")) {
-    const escaped = JSON.stringify(id.repositoryName);
-    throw new Error(`id.repositoryName must not include "\$": ${escaped}`);
+  if (address.repositoryName.includes("$")) {
+    const escaped = JSON.stringify(address.repositoryName);
+    throw new Error(`address.repositoryName must not include "\$": ${escaped}`);
   }
-  if (id.name.includes("$")) {
-    const escaped = JSON.stringify(id.name);
-    throw new Error(`id.name must not include "\$": ${escaped}`);
+  if (address.id.includes("$")) {
+    const escaped = JSON.stringify(address.id);
+    throw new Error(`address.id must not include "\$": ${escaped}`);
   }
-  return `${id.pluginName}\$${id.repositoryName}\$${id.name}`;
+  return `${address.pluginName}\$${address.repositoryName}\$${address.id}`;
 }
 
-export function stringToID(string: string) {
+export function stringToAddress(string: string) {
   const parts = string.split("$");
   if (parts.length !== 3) {
     const escaped = JSON.stringify(string);
@@ -50,6 +50,6 @@ export function stringToID(string: string) {
   return {
     pluginName: parts[0],
     repositoryName: parts[1],
-    name: parts[2],
+    id: parts[2],
   };
 }
