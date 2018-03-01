@@ -8,8 +8,6 @@ export type Address = {
 
 export type Node<T> = {
   address: Address,
-  inEdges: Address[],
-  outEdges: Address[],
   payload: T,
 };
 
@@ -23,6 +21,8 @@ export type Edge<T> = {
 export type Graph = {
   nodes: {[stringAddress: string]: Node<mixed>},
   edges: {[stringAddress: string]: Edge<mixed>},
+  outEdges: {[nodeAddress: string]: Address[]},
+  inEdges: {[nodeAddress: string]: Address[]},
 };
 
 export function addressToString(address: Address) {
