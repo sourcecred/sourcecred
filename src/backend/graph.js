@@ -15,8 +15,8 @@ export type Node<T> = {
 
 export type Edge<T> = {
   address: Address,
-  sourceId: Address,
-  destId: Address,
+  src: Address,
+  dst: Address,
   weight: number,
   payload: T,
 };
