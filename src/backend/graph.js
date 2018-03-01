@@ -8,7 +8,8 @@ export type Address = {
 
 export type Node<T> = {
   address: Address,
-  edges: Address[],
+  inEdges: Address[],
+  outEdges: Address[],
   payload: T,
 };
 
