@@ -17,7 +17,6 @@ export type Edge<T> = {
   address: Address,
   src: Address,
   dst: Address,
-  weight: number,
   payload: T,
 };
 
