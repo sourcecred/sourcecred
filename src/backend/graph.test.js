@@ -87,14 +87,14 @@ describe("graph", () => {
         .addEdge(crabIngredientEdge())
         .addEdge(eatEdge());
 
-    const crabLoop = () => ({
+    const crabLoopEdge = () => ({
       address: makeAddress("crab-self-assessment"),
       src: crabNode().address,
       dst: crabNode().address,
       payload: {evaluation: "not effective at avoiding hero"},
     });
 
-    const critCookEdge = () => ({
+    const duplicateCookEdge = () => ({
       address: makeAddress("hero_of_time#0@again_cooks@seafood_fruit_mix#3"),
       src: mealNode().address,
       dst: heroNode().address,
@@ -106,12 +106,16 @@ describe("graph", () => {
 
     const advancedMealGraph = () =>
       simpleMealGraph()
-        .addEdge(crabLoop())
-        .addEdge(critCookEdge());
+        .addEdge(crabLoopEdge())
+        .addEdge(duplicateCookEdge());
 
     describe("construction", () => {
       it("works for a simple graph", () => {
         simpleMealGraph();
+      });
+
+      it("works for an advanced graph", () => {
+        advancedMealGraph();
       });
 
       it("forbids adding an edge with dangling `dst`", () => {
@@ -140,14 +144,21 @@ describe("graph", () => {
     });
 
     describe("getting nodes and edges", () => {
-      it("correctly gets nodes that exist", () => {
+      it("correctly gets nodes in the simple graph", () => {
         const g = simpleMealGraph();
         [heroNode(), bananasNode(), crabNode(), mealNode()].forEach((x) => {
           expect(g.getNode(x.address)).toEqual(x);
         });
       });
 
-      it("correctly gets edges that exist", () => {
+      it("correctly gets nodes in the advanced graph", () => {
+        const g = advancedMealGraph();
+        [heroNode(), bananasNode(), crabNode(), mealNode()].forEach((x) => {
+          expect(g.getNode(x.address)).toEqual(x);
+        });
+      });
+
+      it("correctly gets edges in the simple graph", () => {
         const g = simpleMealGraph();
         [
           pickEdge(),
@@ -156,6 +167,22 @@ describe("graph", () => {
           bananasIngredientEdge(),
           crabIngredientEdge(),
           eatEdge(),
+        ].forEach((x) => {
+          expect(g.getEdge(x.address)).toEqual(x);
+        });
+      });
+
+      it("correctly gets edges in the advanced graph", () => {
+        const g = advancedMealGraph();
+        [
+          pickEdge(),
+          grabEdge(),
+          cookEdge(),
+          bananasIngredientEdge(),
+          crabIngredientEdge(),
+          eatEdge(),
+          crabLoopEdge(),
+          duplicateCookEdge(),
         ].forEach((x) => {
           expect(g.getEdge(x.address)).toEqual(x);
         });
@@ -197,15 +224,17 @@ describe("graph", () => {
 
       it("allows creating self-loops", () => {
         const g = simpleMealGraph();
-        g.addEdge(crabLoop());
-        expect(g.getOutEdges(crabNode().address)).toContainEqual(crabLoop());
-        expect(g.getInEdges(crabNode().address)).toContainEqual(crabLoop());
+        g.addEdge(crabLoopEdge());
+        expect(g.getOutEdges(crabNode().address)).toContainEqual(
+          crabLoopEdge()
+        );
+        expect(g.getInEdges(crabNode().address)).toContainEqual(crabLoopEdge());
       });
 
       it("allows creating multiple edges between the same nodes", () => {
         const g = simpleMealGraph();
-        g.addEdge(critCookEdge());
-        [cookEdge(), critCookEdge()].forEach((e) => {
+        g.addEdge(duplicateCookEdge());
+        [cookEdge(), duplicateCookEdge()].forEach((e) => {
           expect(g.getOutEdges(mealNode().address)).toContainEqual(e);
           expect(g.getEdge(e.address)).toEqual(e);
         });
@@ -248,27 +277,35 @@ describe("graph", () => {
         const nodeAndExpectedEdgePairs = [
           [heroNode(), [eatEdge()]],
           [bananasNode(), [pickEdge()]],
-          [crabNode(), [grabEdge()]],
+          [crabNode(), [grabEdge(), crabLoopEdge()]],
           [
             mealNode(),
-            [bananasIngredientEdge(), crabIngredientEdge(), cookEdge()],
+            [
+              bananasIngredientEdge(),
+              crabIngredientEdge(),
+              cookEdge(),
+              duplicateCookEdge(),
+            ],
           ],
         ];
         nodeAndExpectedEdgePairs.forEach(([node, expectedEdges]) => {
-          const actual = simpleMealGraph().getOutEdges(node.address);
+          const actual = advancedMealGraph().getOutEdges(node.address);
           expectSameSorted(actual, expectedEdges);
         });
       });
 
       it("gets in-edges", () => {
         const nodeAndExpectedEdgePairs = [
-          [heroNode(), [pickEdge(), grabEdge(), cookEdge()]],
+          [
+            heroNode(),
+            [pickEdge(), grabEdge(), cookEdge(), duplicateCookEdge()],
+          ],
           [bananasNode(), [bananasIngredientEdge()]],
-          [crabNode(), [crabIngredientEdge()]],
+          [crabNode(), [crabIngredientEdge(), crabLoopEdge()]],
           [mealNode(), [eatEdge()]],
         ];
         nodeAndExpectedEdgePairs.forEach(([node, expectedEdges]) => {
-          const actual = simpleMealGraph().getInEdges(node.address);
+          const actual = advancedMealGraph().getInEdges(node.address);
           expectSameSorted(actual, expectedEdges);
         });
       });
