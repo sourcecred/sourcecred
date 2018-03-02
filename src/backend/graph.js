@@ -99,6 +99,20 @@ export class Graph {
     }
     return addresses.map((e) => this.getEdge(e));
   }
+
+  /**
+   * Gets all nodes in the graph, in unspecified order.
+   */
+  getAllNodes(): Node<mixed>[] {
+    return Object.keys(this._nodes).map((k) => this._nodes[k]);
+  }
+
+  /**
+   * Gets all edges in the graph, in unspecified order.
+   */
+  getAllEdges(): Edge<mixed>[] {
+    return Object.keys(this._edges).map((k) => this._edges[k]);
+  }
 }
 
 export function addressToString(address: Address) {
