@@ -57,6 +57,7 @@
     "test": "node scripts/test.js --env=jsdom",
     "flow": "flow"
   },
+  "license": "MIT",
   "lint-staged": {
     "**/*.js": "prettier --list-different"
   },
