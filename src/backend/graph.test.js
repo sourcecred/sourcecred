@@ -297,7 +297,7 @@ describe("graph", () => {
 
       it("gets all nodes", () => {
         const expected = [heroNode(), bananasNode(), crabNode(), mealNode()];
-        const actual = mealGraph().getAllNodes();
+        const actual = advancedMealGraph().getAllNodes();
         expectSameSorted(expected, actual);
       });
 
@@ -309,8 +309,10 @@ describe("graph", () => {
           bananasIngredientEdge(),
           crabIngredientEdge(),
           eatEdge(),
+          crabLoopEdge(),
+          duplicateCookEdge(),
         ];
-        const actual = mealGraph().getAllEdges();
+        const actual = advancedMealGraph().getAllEdges();
         expectSameSorted(expected, actual);
       });
 
