@@ -6,17 +6,17 @@ export type Address = {
   id: string,
 };
 
-export type Node<T> = {
+export type Node<T> = {|
   address: Address,
   payload: T,
-};
+|};
 
-export type Edge<T> = {
+export type Edge<T> = {|
   address: Address,
   src: Address,
   dst: Address,
   payload: T,
-};
+|};
 
 export class Graph {
   _nodes: {[nodeAddress: string]: Node<mixed>};
