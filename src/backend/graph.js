@@ -1,21 +1,21 @@
 // @flow
 
-export type Address = {
-  repositoryName: string,
-  pluginName: string,
-  id: string,
-};
+export type Address = {|
+  +repositoryName: string,
+  +pluginName: string,
+  +id: string,
+|};
 
 export type Node<T> = {|
-  address: Address,
-  payload: T,
+  +address: Address,
+  +payload: T,
 |};
 
 export type Edge<T> = {|
-  address: Address,
-  src: Address,
-  dst: Address,
-  payload: T,
+  +address: Address,
+  +src: Address,
+  +dst: Address,
+  +payload: T,
 |};
 
 export class Graph {
