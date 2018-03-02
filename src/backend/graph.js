@@ -38,6 +38,9 @@ export class Graph {
   }
 
   addNode(node: Node<mixed>) {
+    if (node == null) {
+      throw new Error(`node is ${String(node)}`);
+    }
     if (this.getNode(node.address) !== undefined) {
       throw new Error(
         `node at address ${JSON.stringify(node.address)} already exists`
@@ -51,6 +54,9 @@ export class Graph {
   }
 
   addEdge(edge: Edge<mixed>) {
+    if (edge == null) {
+      throw new Error(`edge is ${String(edge)}`);
+    }
     if (this.getEdge(edge.address) !== undefined) {
       throw new Error(
         `edge at address ${JSON.stringify(edge.address)} already exists`
@@ -81,6 +87,9 @@ export class Graph {
    * The order of the resulting array is unspecified.
    */
   getOutEdges(nodeAddress: Address): Edge<mixed>[] {
+    if (nodeAddress == null) {
+      throw new Error(`address is ${String(nodeAddress)}`);
+    }
     const addresses = this._outEdges[addressToString(nodeAddress)];
     if (addresses === undefined) {
       throw new Error(`no node for address ${JSON.stringify(nodeAddress)}`);
@@ -93,6 +102,9 @@ export class Graph {
    * The order of the resulting array is unspecified.
    */
   getInEdges(nodeAddress: Address): Edge<mixed>[] {
+    if (nodeAddress == null) {
+      throw new Error(`address is ${String(nodeAddress)}`);
+    }
     const addresses = this._inEdges[addressToString(nodeAddress)];
     if (addresses === undefined) {
       throw new Error(`no node for address ${JSON.stringify(nodeAddress)}`);
@@ -116,6 +128,9 @@ export class Graph {
 }
 
 export function addressToString(address: Address) {
+  if (address == null) {
+    throw new Error(`address is ${String(address)}`);
+  }
   if (address.repositoryName.includes("$")) {
     const escaped = JSON.stringify(address.repositoryName);
     throw new Error(`address.repositoryName must not include "\$": ${escaped}`);
@@ -132,6 +147,9 @@ export function addressToString(address: Address) {
 }
 
 export function stringToAddress(string: string) {
+  if (string == null) {
+    throw new Error(`address string is ${String(string)}`);
+  }
   const parts = string.split("$");
   if (parts.length !== 3) {
     const escaped = JSON.stringify(string);

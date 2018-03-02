@@ -159,6 +159,45 @@ describe("graph", () => {
       });
     });
 
+    describe("has nice error messages for", () => {
+      [null, undefined].forEach((bad) => {
+        // The following tests have `(bad: any)` because Flow
+        // correctly detects that using `null` and `undefined` here is
+        // bad. Thanks, Flow---but we want to simulate runtime
+        // undefined-pollution, so we'll override you here.
+        it(`adding ${String(bad)} nodes`, () => {
+          expect(() => new Graph().addNode((bad: any))).toThrow(
+            `node is ${String(bad)}`
+          );
+        });
+        it(`adding ${String(bad)} edges`, () => {
+          expect(() => new Graph().addEdge((bad: any))).toThrow(
+            `edge is ${String(bad)}`
+          );
+        });
+        it(`getting ${String(bad)} nodes`, () => {
+          expect(() => new Graph().getNode((bad: any))).toThrow(
+            `address is ${String(bad)}`
+          );
+        });
+        it(`getting ${String(bad)} edges`, () => {
+          expect(() => new Graph().getEdge((bad: any))).toThrow(
+            `address is ${String(bad)}`
+          );
+        });
+        it(`getting ${String(bad)} in-edges`, () => {
+          expect(() => new Graph().getInEdges((bad: any))).toThrow(
+            `address is ${String(bad)}`
+          );
+        });
+        it(`getting ${String(bad)} out-edges`, () => {
+          expect(() => new Graph().getOutEdges((bad: any))).toThrow(
+            `address is ${String(bad)}`
+          );
+        });
+      });
+    });
+
     describe("getting nodes and edges", () => {
       it("correctly gets nodes in the simple graph", () => {
         const g = simpleMealGraph();
