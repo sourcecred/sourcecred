@@ -1,5 +1,7 @@
 // @flow
 
+import deepEqual from "lodash.isequal";
+
 export type Address = {|
   +repositoryName: string,
   +pluginName: string,
@@ -35,6 +37,12 @@ export class Graph {
     this._edges = {};
     this._outEdges = {};
     this._inEdges = {};
+  }
+
+  equals(that: Graph): boolean {
+    return (
+      deepEqual(this._nodes, that._nodes) && deepEqual(this._edges, that._edges)
+    );
   }
 
   addNode(node: Node<mixed>) {

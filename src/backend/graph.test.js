@@ -388,6 +388,46 @@ describe("graph", () => {
         }).toThrow(/no node for address/);
       });
     });
+
+    describe("#equals", () => {
+      it("returns true for identity-equal graphs", () => {
+        const g = advancedMealGraph();
+        expect(g.equals(g)).toBe(true);
+      });
+      it("returns true for deep-equal graphs", () => {
+        expect(advancedMealGraph().equals(advancedMealGraph())).toBe(true);
+      });
+      it("returns false when the LHS has nodes missing in the RHS", () => {
+        expect(advancedMealGraph().equals(simpleMealGraph())).toBe(false);
+      });
+      it("returns false when the RHS has nodes missing in the LHS", () => {
+        expect(simpleMealGraph().equals(advancedMealGraph())).toBe(false);
+      });
+      const extraNode1 = () => ({
+        address: makeAddress("octorok"),
+        payload: {},
+      });
+      const extraNode2 = () => ({
+        address: makeAddress("hinox"),
+        payload: {status: "sleeping"},
+      });
+      it("returns false when the LHS has edges missing in the RHS", () => {
+        const g1 = advancedMealGraph();
+        const g2 = advancedMealGraph().addNode(extraNode1());
+        expect(g1.equals(g2)).toBe(false);
+      });
+      it("returns false when the LHS has edges missing in the RHS", () => {
+        const g1 = advancedMealGraph().addNode(extraNode1());
+        const g2 = advancedMealGraph();
+        expect(g1.equals(g2)).toBe(false);
+      });
+      it("returns true when nodes are added in different orders", () => {
+        const g1 = new Graph().addNode(extraNode1()).addNode(extraNode2());
+        const g2 = new Graph().addNode(extraNode2()).addNode(extraNode1());
+        expect(g1.equals(g2)).toBe(true);
+        expect(g2.equals(g1)).toBe(true);
+      });
+    });
   });
 
   describe("string functions", () => {
