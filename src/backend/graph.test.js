@@ -9,7 +9,7 @@ describe("graph", () => {
     // array with undefined order. We use these functions to
     // canonicalize the ordering so that we can then test equality with
     // `expect(...).toEqual(...)`.
-    function sortedByAddress<T: {address: Address}>(xs: T[]) {
+    function sortedByAddress<T: {+address: Address}>(xs: T[]) {
       function cmp(x1: T, x2: T) {
         const a1 = addressToString(x1.address);
         const a2 = addressToString(x2.address);
@@ -17,7 +17,7 @@ describe("graph", () => {
       }
       return [...xs].sort(cmp);
     }
-    function expectSameSorted<T: {address: Address}>(xs: T[], ys: T[]) {
+    function expectSameSorted<T: {+address: Address}>(xs: T[], ys: T[]) {
       expect(sortedByAddress(xs)).toEqual(sortedByAddress(ys));
     }
 
