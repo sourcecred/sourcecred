@@ -257,6 +257,29 @@ describe("graph", () => {
         ).toBeUndefined();
       });
 
+      it("gets all nodes", () => {
+        const expected = [heroNode(), bananasNode(), crabNode(), mealNode()];
+        const actual = advancedMealGraph().getAllNodes();
+        expectSameSorted(expected, actual);
+      });
+
+      it("gets all edges", () => {
+        const expected = [
+          pickEdge(),
+          grabEdge(),
+          cookEdge(),
+          bananasIngredientEdge(),
+          crabIngredientEdge(),
+          eatEdge(),
+          crabLoopEdge(),
+          duplicateCookEdge(),
+        ];
+        const actual = advancedMealGraph().getAllEdges();
+        expectSameSorted(expected, actual);
+      });
+    });
+
+    describe("creating nodes and edges", () => {
       it("forbids adding a node with existing address", () => {
         expect(() =>
           simpleMealGraph().addNode({
@@ -293,27 +316,6 @@ describe("graph", () => {
           expect(g.getOutEdges(mealNode().address)).toContainEqual(e);
           expect(g.getEdge(e.address)).toEqual(e);
         });
-      });
-
-      it("gets all nodes", () => {
-        const expected = [heroNode(), bananasNode(), crabNode(), mealNode()];
-        const actual = advancedMealGraph().getAllNodes();
-        expectSameSorted(expected, actual);
-      });
-
-      it("gets all edges", () => {
-        const expected = [
-          pickEdge(),
-          grabEdge(),
-          cookEdge(),
-          bananasIngredientEdge(),
-          crabIngredientEdge(),
-          eatEdge(),
-          crabLoopEdge(),
-          duplicateCookEdge(),
-        ];
-        const actual = advancedMealGraph().getAllEdges();
-        expectSameSorted(expected, actual);
       });
 
       // For the next two test cases: we're documenting this behavior,
