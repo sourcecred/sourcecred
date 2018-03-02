@@ -5,6 +5,22 @@ import {Graph, addressToString, stringToAddress} from "./graph";
 
 describe("graph", () => {
   describe("#Graph", () => {
+    // Some Graph functions return a set of results represented as an
+    // array with undefined order. We use these functions to
+    // canonicalize the ordering so that we can then test equality with
+    // `expect(...).toEqual(...)`.
+    function sortedByAddress<T: {address: Address}>(xs: T[]) {
+      function cmp(x1: T, x2: T) {
+        const a1 = addressToString(x1.address);
+        const a2 = addressToString(x2.address);
+        return a1 > a2 ? 1 : a1 < a2 ? -1 : 0;
+      }
+      return [...xs].sort(cmp);
+    }
+    function expectSameSorted<T: {address: Address}>(xs: T[], ys: T[]) {
+      expect(sortedByAddress(xs)).toEqual(sortedByAddress(ys));
+    }
+
     // A Seafood Fruit Mix is made by cooking Mighty Bananas (picked
     // from a tree) and a Razorclaw Crab (grabbed from the beach). In
     // this graph, an edge from `u` to `v` means that `u` thanks `v` for
@@ -206,6 +222,25 @@ describe("graph", () => {
         });
       });
 
+      it("gets all nodes", () => {
+        const expected = [heroNode(), bananasNode(), crabNode(), mealNode()];
+        const actual = mealGraph().getAllNodes();
+        expectSameSorted(expected, actual);
+      });
+
+      it("gets all edges", () => {
+        const expected = [
+          pickEdge(),
+          grabEdge(),
+          cookEdge(),
+          bananasIngredientEdge(),
+          crabIngredientEdge(),
+          eatEdge(),
+        ];
+        const actual = mealGraph().getAllEdges();
+        expectSameSorted(expected, actual);
+      });
+
       // For the next two test cases: we're documenting this behavior,
       // though we're not sure if it's the right behavior. Perhaps we want
       // the namespaces to be forced to be disjoint. In that case, we can
@@ -227,18 +262,6 @@ describe("graph", () => {
     });
 
     describe("in- and out-edges", () => {
-      function sortedByAddress<T: {address: Address}>(xs: T[]) {
-        function cmp(x1: T, x2: T) {
-          const a1 = addressToString(x1.address);
-          const a2 = addressToString(x2.address);
-          return a1 > a2 ? 1 : a1 < a2 ? -1 : 0;
-        }
-        return [...xs].sort(cmp);
-      }
-      function expectSameSorted<T: {address: Address}>(xs: T[], ys: T[]) {
-        expect(sortedByAddress(xs)).toEqual(sortedByAddress(ys));
-      }
-
       it("gets out-edges", () => {
         const nodeAndExpectedEdgePairs = [
           [heroNode(), [eatEdge()]],
