@@ -2,6 +2,7 @@
 
 import type {Address, Addressable} from "./address";
 import {sortedByAddress} from "./address";
+import type {Node, Edge} from "./graph";
 import {Graph} from "./graph";
 import * as demoData from "./graphDemoData";
 
@@ -531,6 +532,46 @@ describe("graph", () => {
       it("should no-op on a deserialization--serialization roundtrip", () => {
         const json = () => demoData.advancedMealGraph().toJSON();
         expect(Graph.fromJSON(json()).toJSON()).toEqual(json());
+      });
+    });
+
+    describe("type-checking", () => {
+      it("allows adding explicitly typed nodes", () => {
+        expect(() => {
+          const stringNode: Node<string> = {
+            address: demoData.makeAddress("hello"),
+            payload: "hello",
+          };
+          const numberNode: Node<number> = {
+            address: demoData.makeAddress("hello"),
+            payload: 17,
+          };
+          new Graph().addNode(stringNode).addNode(numberNode);
+        });
+      });
+
+      it("allows adding explicitly typed edges", () => {
+        expect(() => {
+          const src = {address: demoData.makeAddress("src"), payload: {}};
+          const dst = {address: demoData.makeAddress("dst"), payload: {}};
+          const stringEdge: Edge<string> = {
+            address: demoData.makeAddress("hello"),
+            src: src.address,
+            dst: dst.address,
+            payload: "hello",
+          };
+          const numberEdge: Edge<number> = {
+            address: demoData.makeAddress("hello"),
+            src: src.address,
+            dst: dst.address,
+            payload: 18,
+          };
+          new Graph()
+            .addNode(src)
+            .addNode(dst)
+            .addEdge(stringEdge)
+            .addEdge(numberEdge);
+        });
       });
     });
   });

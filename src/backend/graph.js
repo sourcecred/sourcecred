@@ -17,13 +17,13 @@ export type Edge<T> = {|
 |};
 
 export type GraphJSON = {|
-  +nodes: AddressMapJSON<Node<mixed>>,
-  +edges: AddressMapJSON<Edge<mixed>>,
+  +nodes: AddressMapJSON<Node<any>>,
+  +edges: AddressMapJSON<Edge<any>>,
 |};
 
 export class Graph {
-  _nodes: AddressMap<Node<mixed>>;
-  _edges: AddressMap<Edge<mixed>>;
+  _nodes: AddressMap<Node<any>>;
+  _edges: AddressMap<Edge<any>>;
 
   // The keyset of each of the following fields should equal the keyset
   // of `_nodes`. If `e` is an edge from `u` to `v`, then `e.address`
@@ -66,7 +66,7 @@ export class Graph {
     return result;
   }
 
-  addNode(node: Node<mixed>) {
+  addNode(node: Node<any>) {
     if (node == null) {
       throw new Error(`node is ${String(node)}`);
     }
@@ -81,7 +81,7 @@ export class Graph {
     return this;
   }
 
-  addEdge(edge: Edge<mixed>) {
+  addEdge(edge: Edge<any>) {
     if (edge == null) {
       throw new Error(`edge is ${String(edge)}`);
     }
