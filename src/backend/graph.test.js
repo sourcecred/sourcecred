@@ -428,6 +428,141 @@ describe("graph", () => {
         expect(g2.equals(g1)).toBe(true);
       });
     });
+
+    describe("merging", () => {
+      /**
+       * Decompose the given graph into neighborhood graphs: for each
+       * node `u`, create a graph with just that node, its neighbors,
+       * and its incident edges (in both directions).
+       */
+      function neighborhoodDecomposition(originalGraph: Graph): Graph[] {
+        return originalGraph.getAllNodes().map((node) => {
+          const miniGraph = new Graph();
+          miniGraph.addNode(node);
+          originalGraph.getOutEdges(node.address).forEach((edge) => {
+            if (miniGraph.getNode(edge.dst) === undefined) {
+              miniGraph.addNode(originalGraph.getNode(edge.dst));
+            }
+            miniGraph.addEdge(edge);
+          });
+          originalGraph.getInEdges(node.address).forEach((edge) => {
+            if (miniGraph.getNode(edge.src) === undefined) {
+              miniGraph.addNode(originalGraph.getNode(edge.src));
+            }
+            if (miniGraph.getEdge(edge.address) === undefined) {
+              // This check is necessary to prevent double-adding loops.
+              miniGraph.addEdge(edge);
+            }
+          });
+          return miniGraph;
+        });
+      }
+
+      /**
+       * Decompose the given graph into edge graphs: for each edge `e`,
+       * create a graph with just that edge and its two endpoints.
+       */
+      function edgeDecomposition(originalGraph: Graph): Graph[] {
+        return originalGraph.getAllEdges().map((edge) => {
+          const miniGraph = new Graph();
+          miniGraph.addNode(originalGraph.getNode(edge.src));
+          if (miniGraph.getNode(edge.dst) === undefined) {
+            // This check is necessary to prevent double-adding loops.
+            miniGraph.addNode(originalGraph.getNode(edge.dst));
+          }
+          miniGraph.addEdge(edge);
+          return miniGraph;
+        });
+      }
+
+      it("conservatively recomposes a neighborhood decomposition", () => {
+        const result = neighborhoodDecomposition(advancedMealGraph()).reduce(
+          (g1, g2) => Graph.mergeConservative(g1, g2),
+          new Graph()
+        );
+        expect(result.equals(advancedMealGraph())).toBe(true);
+      });
+
+      it("conservatively recomposes an edge decomposition", () => {
+        const result = edgeDecomposition(advancedMealGraph()).reduce(
+          (g1, g2) => Graph.mergeConservative(g1, g2),
+          new Graph()
+        );
+        expect(result.equals(advancedMealGraph())).toBe(true);
+      });
+
+      it("conservatively merges a graph with itself", () => {
+        const result = Graph.mergeConservative(
+          advancedMealGraph(),
+          advancedMealGraph()
+        );
+        expect(result.equals(advancedMealGraph())).toBe(true);
+      });
+
+      it("conservatively rejects a graph with conflicting nodes", () => {
+        const makeGraph: (nodePayload: string) => Graph = (nodePayload) =>
+          new Graph().addNode({
+            address: makeAddress("conflicting-node"),
+            payload: nodePayload,
+          });
+        const g1 = makeGraph("one");
+        const g2 = makeGraph("two");
+        expect(() => {
+          Graph.mergeConservative(g1, g2);
+        }).toThrow(/distinct nodes with address/);
+      });
+
+      it("conservatively rejects a graph with conflicting edges", () => {
+        const srcAddress = makeAddress("src");
+        const dstAddress = makeAddress("dst");
+        const makeGraph: (edgePayload: string) => Graph = (edgePayload) =>
+          new Graph()
+            .addNode({address: srcAddress, payload: {}})
+            .addNode({address: dstAddress, payload: {}})
+            .addEdge({
+              address: makeAddress("conflicting-edge"),
+              src: srcAddress,
+              dst: dstAddress,
+              payload: edgePayload,
+            });
+        const g1 = makeGraph("one");
+        const g2 = makeGraph("two");
+        expect(() => {
+          Graph.mergeConservative(g1, g2);
+        }).toThrow(/distinct edges with address/);
+      });
+
+      function assertNotCalled(...args) {
+        throw new Error(`called with: ${args.join()}`);
+      }
+      it("has the empty graph as a left identity", () => {
+        const merged = Graph.merge(
+          new Graph(),
+          advancedMealGraph(),
+          assertNotCalled,
+          assertNotCalled
+        );
+        expect(merged.equals(advancedMealGraph())).toBe(true);
+      });
+      it("has the empty graph as a right identity", () => {
+        const merged = Graph.merge(
+          advancedMealGraph(),
+          new Graph(),
+          assertNotCalled,
+          assertNotCalled
+        );
+        expect(merged.equals(advancedMealGraph())).toBe(true);
+      });
+      it("trivially merges the empty graph with itself", () => {
+        const merged = Graph.merge(
+          new Graph(),
+          new Graph(),
+          assertNotCalled,
+          assertNotCalled
+        );
+        expect(merged.equals(new Graph())).toBe(true);
+      });
+    });
   });
 
   describe("string functions", () => {

@@ -133,6 +133,78 @@ export class Graph {
   getAllEdges(): Edge<mixed>[] {
     return Object.keys(this._edges).map((k) => this._edges[k]);
   }
+
+  /**
+   * Merge two graphs. When two nodes have the same address, a resolver
+   * function will be called with the two nodes; the resolver should
+   * return a new node with the same address, which will take the place
+   * of the two nodes in the new graph. Edges have similar behavior.
+   *
+   * The existing graph objects are not modified.
+   */
+  static merge(
+    g1: Graph,
+    g2: Graph,
+    nodeResolver: (Node<mixed>, Node<mixed>) => Node<mixed>,
+    edgeResolver: (Edge<mixed>, Edge<mixed>) => Edge<mixed>
+  ) {
+    const result = new Graph();
+    g1.getAllNodes().forEach((node) => {
+      if (g2.getNode(node.address) !== undefined) {
+        const resolved = nodeResolver(node, g2.getNode(node.address));
+        result.addNode(resolved);
+      } else {
+        result.addNode(node);
+      }
+    });
+    g2.getAllNodes().forEach((node) => {
+      if (result.getNode(node.address) === undefined) {
+        result.addNode(node);
+      }
+    });
+    g1.getAllEdges().forEach((edge) => {
+      if (g2.getEdge(edge.address) !== undefined) {
+        const resolved = edgeResolver(edge, g2.getEdge(edge.address));
+        result.addEdge(resolved);
+      } else {
+        result.addEdge(edge);
+      }
+    });
+    g2.getAllEdges().forEach((edge) => {
+      if (result.getEdge(edge.address) === undefined) {
+        result.addEdge(edge);
+      }
+    });
+    return result;
+  }
+
+  /**
+   * Merge two graphs, assuming that if `g1` and `g2` both have a node
+   * with a given address, then the nodes are deep-equal (and the same
+   * for edges). If this assumption does not hold, this function will
+   * raise an error.
+   */
+  static mergeConservative(g1: Graph, g2: Graph) {
+    function conservativeReducer<T: {+address: Address}>(
+      kinds: string /* used for an error message on mismatch */,
+      a: T,
+      b: T
+    ): T {
+      if (deepEqual(a, b)) {
+        return a;
+      } else {
+        throw new Error(
+          `distinct ${kinds} with address ${addressToString(a.address)}`
+        );
+      }
+    }
+    return Graph.merge(
+      g1,
+      g2,
+      (u, v) => conservativeReducer("nodes", u, v),
+      (e, f) => conservativeReducer("edges", e, f)
+    );
+  }
 }
 
 export function addressToString(address: Address) {
