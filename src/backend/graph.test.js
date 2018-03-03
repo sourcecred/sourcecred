@@ -591,6 +591,14 @@ describe("graph", () => {
       it("rejects an Address with $-signs in id", () => {
         expectRejection("id", "issue$123");
       });
+      it("rejects a null address", () => {
+        expect(() => addressToString((null: any))).toThrow("address is null");
+      });
+      it("rejects a undefined address", () => {
+        expect(() => addressToString((undefined: any))).toThrow(
+          "address is undefined"
+        );
+      });
     });
 
     describe("stringToAddress", () => {
@@ -609,6 +617,16 @@ describe("graph", () => {
           const input = `mega${dollars}corp`;
           expect(() => stringToAddress(input)).toThrow(/exactly two \$s/);
         });
+      });
+      it("rejects a null address string", () => {
+        expect(() => stringToAddress((null: any))).toThrow(
+          "address string is null"
+        );
+      });
+      it("rejects a undefined address string", () => {
+        expect(() => stringToAddress((undefined: any))).toThrow(
+          "address string is undefined"
+        );
       });
     });
 
