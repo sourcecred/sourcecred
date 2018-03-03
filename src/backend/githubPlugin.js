@@ -2,42 +2,42 @@
 
 export const GITHUB_PLUGIN_NAME = "sourcecred/github-beta";
 
-export type NodeType = "PULL_REQUEST" | "ISSUE" | "COMMENT" | "USER";
+export type IssueNodePayload = {|
+  +type: "ISSUE",
+  +title: string,
+  +number: number,
+|};
 
-export type PullRequestPayload = {
-  title: string,
-  isClosed: boolean,
-  isMerged: boolean,
-  dateCreated: number,
-  dateMerged: ?number,
-};
+export type PullRequestNodePayload = {|
+  +type: "PULL_REQUEST",
+  +title: string,
+  +number: number,
+|};
 
-export type IssuePayload = {
-  title: string,
-  isClosed: boolean,
-  dateCreated: number,
-};
+export type CommentNodePayload = {|
+  +type: "COMMENT",
+  +body: string,
+|};
 
-export type ReviewState = "APPROVED" | "COMMENTED" | "CHANGES_REQUESTED";
-export type CommentPayload = {
-  body: string,
-  date: number,
-  state: ?ReviewState,
-};
+export type UserNodePayload = {|
+  +type: "USER",
+  +userName: string,
+|};
 
-export type UserPayload = {
-  githubUserId: number,
-};
+export type NodePayload =
+  | IssueNodePayload
+  | PullRequestNodePayload
+  | CommentNodePayload
+  | UserNodePayload;
+export type NodeType = $ElementType<NodePayload, "type">;
 
-export type GithubNodePayload = {
-  type: NodeType,
-  subpayload: PullRequestPayload | IssuePayload | CommentPayload | UserPayload,
-};
+export type AuthorshipEdgePayload = {|
+  +type: "AUTHORSHIP",
+|};
 
-export type EdgeType = "AUTHOR" | "REFERENCE";
+export type ReferenceEdgePayload = {|
+  +type: "REFERENCE",
+|};
 
-export type AuthorPayload = {
-  // Issue/PR/Comment -> User
-};
-
-export type ReferencePayload = {};
+export type EdgePayload = AuthorshipEdgePayload | ReferenceEdgePayload;
+export type EdgeType = $ElementType<EdgePayload, "type">;
