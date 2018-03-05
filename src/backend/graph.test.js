@@ -1,23 +1,15 @@
 // @flow
 
-import type {Address} from "./graph";
-import {Graph, addressToString, stringToAddress} from "./graph";
+import type {Address, Addressable} from "./address";
+import {sortedByAddress} from "./address";
+import {Graph} from "./graph";
 
 describe("graph", () => {
   describe("#Graph", () => {
     // Some Graph functions return a set of results represented as an
-    // array with undefined order. We use these functions to
-    // canonicalize the ordering so that we can then test equality with
-    // `expect(...).toEqual(...)`.
-    function sortedByAddress<T: {+address: Address}>(xs: T[]) {
-      function cmp(x1: T, x2: T) {
-        const a1 = addressToString(x1.address);
-        const a2 = addressToString(x2.address);
-        return a1 > a2 ? 1 : a1 < a2 ? -1 : 0;
-      }
-      return [...xs].sort(cmp);
-    }
-    function expectSameSorted<T: {+address: Address}>(xs: T[], ys: T[]) {
+    // array with undefined order. We canonicalize the ordering so that
+    // we can then test equality with `expect(...).toEqual(...)`.
+    function expectSameSorted<T: Addressable>(xs: T[], ys: T[]) {
       expect(sortedByAddress(xs)).toEqual(sortedByAddress(ys));
     }
 
@@ -561,99 +553,6 @@ describe("graph", () => {
           assertNotCalled
         );
         expect(merged.equals(new Graph())).toBe(true);
-      });
-    });
-  });
-
-  describe("string functions", () => {
-    describe("addressToString", () => {
-      const makeSimpleAddress = () => ({
-        repositoryName: "megacorp/megawidget",
-        pluginName: "widgets",
-        id: "issue#123",
-      });
-      it("stringifies a simple Address", () => {
-        const input = makeSimpleAddress();
-        const expected = "megacorp/megawidget$widgets$issue#123";
-        expect(addressToString(input)).toEqual(expected);
-      });
-      function expectRejection(attribute, value) {
-        const input = {...makeSimpleAddress(), [attribute]: value};
-        expect(() => addressToString(input)).toThrow(RegExp(attribute));
-        // (escaping regexp in JavaScript is a nightmare; ignore it)
-      }
-      it("rejects an Address with $-signs in plugin name", () => {
-        expectRejection("pluginName", "widg$ets");
-      });
-      it("rejects an Address with $-signs in repository name", () => {
-        expectRejection("repositoryName", "megacorp$megawidget");
-      });
-      it("rejects an Address with $-signs in id", () => {
-        expectRejection("id", "issue$123");
-      });
-      it("rejects a null address", () => {
-        expect(() => addressToString((null: any))).toThrow("address is null");
-      });
-      it("rejects a undefined address", () => {
-        expect(() => addressToString((undefined: any))).toThrow(
-          "address is undefined"
-        );
-      });
-    });
-
-    describe("stringToAddress", () => {
-      it("parses a simple Address-string", () => {
-        const input = "megacorp/megawidget$widgets$issue#123";
-        const expected = {
-          repositoryName: "megacorp/megawidget",
-          pluginName: "widgets",
-          id: "issue#123",
-        };
-        expect(stringToAddress(input)).toEqual(expected);
-      });
-      [0, 1, 3, 4].forEach((n) => {
-        it(`rejects an Address-string with ${n} occurrences of "\$"`, () => {
-          const dollars = Array(n + 1).join("$");
-          const input = `mega${dollars}corp`;
-          expect(() => stringToAddress(input)).toThrow(/exactly two \$s/);
-        });
-      });
-      it("rejects a null address string", () => {
-        expect(() => stringToAddress((null: any))).toThrow(
-          "address string is null"
-        );
-      });
-      it("rejects a undefined address string", () => {
-        expect(() => stringToAddress((undefined: any))).toThrow(
-          "address string is undefined"
-        );
-      });
-    });
-
-    describe("stringToAddress and addressToString interop", () => {
-      const examples = () => [
-        {
-          object: {
-            repositoryName: "megacorp/megawidget",
-            pluginName: "widgets",
-            id: "issue#123",
-          },
-          string: "megacorp/megawidget$widgets$issue#123",
-        },
-      ];
-      examples().forEach((example, index) => {
-        describe(`for example at 0-index ${index}`, () => {
-          it("has stringToAddress a left identity for addressToString", () => {
-            expect(stringToAddress(addressToString(example.object))).toEqual(
-              example.object
-            );
-          });
-          it("has stringToAddress a right identity for addressToString", () => {
-            expect(addressToString(stringToAddress(example.string))).toEqual(
-              example.string
-            );
-          });
-        });
       });
     });
   });

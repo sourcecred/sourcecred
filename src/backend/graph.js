@@ -1,12 +1,8 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
-
-export type Address = {|
-  +repositoryName: string,
-  +pluginName: string,
-  +id: string,
-|};
+import type {Address, Addressable} from "./address";
+import {AddressMap} from "./address";
 
 export type Node<T> = {|
   +address: Address,
@@ -21,28 +17,26 @@ export type Edge<T> = {|
 |};
 
 export class Graph {
-  _nodes: {[nodeAddress: string]: Node<mixed>};
-  _edges: {[edgeAddress: string]: Edge<mixed>};
+  _nodes: AddressMap<Node<mixed>>;
+  _edges: AddressMap<Edge<mixed>>;
 
   // The keyset of each of the following fields should equal the keyset
   // of `_nodes`. If `e` is an edge from `u` to `v`, then `e.address`
   // should appear exactly once in `_outEdges[u.address]` and exactly
   // once in `_inEdges[v.address]` (and every entry in `_inEdges` and
   // `_outEdges` should be of this form).
-  _outEdges: {[nodeAddress: string]: Address[]};
-  _inEdges: {[nodeAddress: string]: Address[]};
+  _outEdges: AddressMap<{|+address: Address, +edges: Address[]|}>;
+  _inEdges: AddressMap<{|+address: Address, +edges: Address[]|}>;
 
   constructor() {
-    this._nodes = {};
-    this._edges = {};
-    this._outEdges = {};
-    this._inEdges = {};
+    this._nodes = new AddressMap();
+    this._edges = new AddressMap();
+    this._outEdges = new AddressMap();
+    this._inEdges = new AddressMap();
   }
 
   equals(that: Graph): boolean {
-    return (
-      deepEqual(this._nodes, that._nodes) && deepEqual(this._edges, that._edges)
-    );
+    return this._nodes.equals(that._nodes) && this._edges.equals(that._edges);
   }
 
   addNode(node: Node<mixed>) {
@@ -54,10 +48,9 @@ export class Graph {
         `node at address ${JSON.stringify(node.address)} already exists`
       );
     }
-    const addressString = addressToString(node.address);
-    this._nodes[addressString] = node;
-    this._outEdges[addressString] = [];
-    this._inEdges[addressString] = [];
+    this._nodes.add(node);
+    this._outEdges.add({address: node.address, edges: []});
+    this._inEdges.add({address: node.address, edges: []});
     return this;
   }
 
@@ -76,18 +69,18 @@ export class Graph {
     if (this.getNode(edge.dst) === undefined) {
       throw new Error(`source ${JSON.stringify(edge.dst)} does not exist`);
     }
-    this._edges[addressToString(edge.address)] = edge;
-    this._outEdges[addressToString(edge.src)].push(edge.address);
-    this._inEdges[addressToString(edge.dst)].push(edge.address);
+    this._edges.add(edge);
+    this._outEdges.get(edge.src).edges.push(edge.address);
+    this._inEdges.get(edge.dst).edges.push(edge.address);
     return this;
   }
 
   getNode(address: Address): Node<mixed> {
-    return this._nodes[addressToString(address)];
+    return this._nodes.get(address);
   }
 
   getEdge(address: Address): Edge<mixed> {
-    return this._edges[addressToString(address)];
+    return this._edges.get(address);
   }
 
   /**
@@ -98,11 +91,11 @@ export class Graph {
     if (nodeAddress == null) {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
-    const addresses = this._outEdges[addressToString(nodeAddress)];
-    if (addresses === undefined) {
+    const result = this._outEdges.get(nodeAddress);
+    if (result === undefined) {
       throw new Error(`no node for address ${JSON.stringify(nodeAddress)}`);
     }
-    return addresses.map((e) => this.getEdge(e));
+    return result.edges.map((e) => this.getEdge(e));
   }
 
   /**
@@ -113,25 +106,25 @@ export class Graph {
     if (nodeAddress == null) {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
-    const addresses = this._inEdges[addressToString(nodeAddress)];
-    if (addresses === undefined) {
+    const result = this._inEdges.get(nodeAddress);
+    if (result === undefined) {
       throw new Error(`no node for address ${JSON.stringify(nodeAddress)}`);
     }
-    return addresses.map((e) => this.getEdge(e));
+    return result.edges.map((e) => this.getEdge(e));
   }
 
   /**
    * Gets all nodes in the graph, in unspecified order.
    */
   getAllNodes(): Node<mixed>[] {
-    return Object.keys(this._nodes).map((k) => this._nodes[k]);
+    return this._nodes.getAll();
   }
 
   /**
    * Gets all edges in the graph, in unspecified order.
    */
   getAllEdges(): Edge<mixed>[] {
-    return Object.keys(this._edges).map((k) => this._edges[k]);
+    return this._edges.getAll();
   }
 
   /**
@@ -185,7 +178,7 @@ export class Graph {
    * raise an error.
    */
   static mergeConservative(g1: Graph, g2: Graph) {
-    function conservativeReducer<T: {+address: Address}>(
+    function conservativeReducer<T: Addressable>(
       kinds: string /* used for an error message on mismatch */,
       a: T,
       b: T
@@ -194,7 +187,7 @@ export class Graph {
         return a;
       } else {
         throw new Error(
-          `distinct ${kinds} with address ${addressToString(a.address)}`
+          `distinct ${kinds} with address ${JSON.stringify(a.address)}`
         );
       }
     }
@@ -205,39 +198,4 @@ export class Graph {
       (e, f) => conservativeReducer("edges", e, f)
     );
   }
-}
-
-export function addressToString(address: Address) {
-  if (address == null) {
-    throw new Error(`address is ${String(address)}`);
-  }
-  if (address.repositoryName.includes("$")) {
-    const escaped = JSON.stringify(address.repositoryName);
-    throw new Error(`address.repositoryName must not include "\$": ${escaped}`);
-  }
-  if (address.pluginName.includes("$")) {
-    const escaped = JSON.stringify(address.pluginName);
-    throw new Error(`address.pluginName must not include "\$": ${escaped}`);
-  }
-  if (address.id.includes("$")) {
-    const escaped = JSON.stringify(address.id);
-    throw new Error(`address.id must not include "\$": ${escaped}`);
-  }
-  return `${address.repositoryName}\$${address.pluginName}\$${address.id}`;
-}
-
-export function stringToAddress(string: string) {
-  if (string == null) {
-    throw new Error(`address string is ${String(string)}`);
-  }
-  const parts = string.split("$");
-  if (parts.length !== 3) {
-    const escaped = JSON.stringify(string);
-    throw new Error(`Input should have exactly two \$s: ${escaped}`);
-  }
-  return {
-    repositoryName: parts[0],
-    pluginName: parts[1],
-    id: parts[2],
-  };
 }
