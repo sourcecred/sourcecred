@@ -1,7 +1,7 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
-import type {Address, Addressable} from "./address";
+import type {Address, Addressable, AddressMapJSON} from "./address";
 import {AddressMap} from "./address";
 
 export type Node<T> = {|
@@ -14,6 +14,11 @@ export type Edge<T> = {|
   +src: Address,
   +dst: Address,
   +payload: T,
+|};
+
+export type GraphJSON = {|
+  +nodes: AddressMapJSON<Node<mixed>>,
+  +edges: AddressMapJSON<Edge<mixed>>,
 |};
 
 export class Graph {
@@ -37,6 +42,28 @@ export class Graph {
 
   equals(that: Graph): boolean {
     return this._nodes.equals(that._nodes) && this._edges.equals(that._edges);
+  }
+
+  toJSON(): GraphJSON {
+    return {
+      nodes: this._nodes.toJSON(),
+      edges: this._edges.toJSON(),
+    };
+  }
+
+  static fromJSON(json: GraphJSON): Graph {
+    const result = new Graph();
+    AddressMap.fromJSON(json.nodes)
+      .getAll()
+      .forEach((node) => {
+        result.addNode(node);
+      });
+    AddressMap.fromJSON(json.edges)
+      .getAll()
+      .forEach((edge) => {
+        result.addEdge(edge);
+      });
+    return result;
   }
 
   addNode(node: Node<mixed>) {
