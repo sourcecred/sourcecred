@@ -10,7 +10,7 @@ export class GraphExplorer extends Component<Props, State> {
   render() {
     return (
       <div>
-        <h1> Graph Explorer </h1>
+        <h1>Graph Explorer</h1>
       </div>
     );
   }
