@@ -1,19 +1,12 @@
 // @flow
 import React, {Component} from "react";
-import data from "./data.json";
 import "./App.css";
-import {FileExplorer} from "./FileExplorer.js";
-import {UserExplorer} from "./UserExplorer.js";
+import {GraphExplorer} from "./GraphExplorer";
 
-type AppState = {selectedPath: string, selectedUser: ?string};
-class App extends Component<{}, AppState> {
-  constructor() {
-    super();
-    this.state = {
-      selectedPath: "",
-      selectedUser: null,
-    };
-  }
+type Props = {};
+type State = {};
+
+class App extends Component<Props, State> {
   render() {
     return (
       <div className="App" style={{backgroundColor: "#eeeeee"}}>
@@ -28,19 +21,8 @@ class App extends Component<{}, AppState> {
         >
           <h1 style={{fontSize: "1.5em"}}>SourceCred Explorer</h1>
         </header>
-        <FileExplorer
-          className="file-explorer"
-          onSelectPath={(x) => this.setState({selectedPath: x})}
-          selectedPath={this.state.selectedPath}
-          data={data}
-        />
-        <UserExplorer
-          className="user-explorer"
-          selectedPath={this.state.selectedPath}
-          selectedUser={this.state.selectedUser}
-          onSelectUser={(x) => this.setState({selectedUser: x})}
-          data={data}
-        />
+
+        <GraphExplorer />
       </div>
     );
   }
