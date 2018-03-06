@@ -3,6 +3,23 @@
 import type {Address, Addressable} from "./address";
 import {sortedByAddress} from "./address";
 import {Graph} from "./graph";
+import {
+  makeAddress,
+  heroNode,
+  bananasNode,
+  crabNode,
+  mealNode,
+  pickEdge,
+  grabEdge,
+  cookEdge,
+  bananasIngredientEdge,
+  crabIngredientEdge,
+  eatEdge,
+  simpleMealGraph,
+  crabLoopEdge,
+  duplicateCookEdge,
+  advancedMealGraph,
+} from "./graphDemoData";
 
 describe("graph", () => {
   describe("#Graph", () => {
@@ -26,96 +43,6 @@ describe("graph", () => {
         id,
       };
     }
-    const heroNode = () => ({
-      address: makeAddress("hero_of_time#0"),
-      payload: {},
-    });
-    const bananasNode = () => ({
-      address: makeAddress("mighty_bananas#1"),
-      payload: {},
-    });
-    const crabNode = () => ({
-      address: makeAddress("razorclaw_crab#2"),
-      payload: {},
-    });
-    const mealNode = () => ({
-      address: makeAddress("seafood_fruit_mix#3"),
-      payload: {
-        effect: ["attack_power", 1],
-      },
-    });
-    const pickEdge = () => ({
-      address: makeAddress("hero_of_time#0@picks@mighty_bananas#1"),
-      src: bananasNode().address,
-      dst: heroNode().address,
-      payload: {},
-    });
-    const grabEdge = () => ({
-      address: makeAddress("hero_of_time#0@grabs@razorclaw_crab#2"),
-      src: crabNode().address,
-      dst: heroNode().address,
-      payload: {},
-    });
-    const cookEdge = () => ({
-      address: makeAddress("hero_of_time#0@cooks@seafood_fruit_mix#3"),
-      src: mealNode().address,
-      dst: heroNode().address,
-      payload: {
-        crit: false,
-      },
-    });
-    const bananasIngredientEdge = () => ({
-      address: makeAddress("mighty_bananas#1@included_in@seafood_fruit_mix#3"),
-      src: mealNode().address,
-      dst: bananasNode().address,
-      payload: {},
-    });
-    const crabIngredientEdge = () => ({
-      address: makeAddress("razorclaw_crab#2@included_in@seafood_fruit_mix#3"),
-      src: mealNode().address,
-      dst: crabNode().address,
-      payload: {},
-    });
-    const eatEdge = () => ({
-      address: makeAddress("hero_of_time#0@eats@seafood_fruit_mix#3"),
-      src: heroNode().address,
-      dst: mealNode().address,
-      payload: {},
-    });
-    const simpleMealGraph = () =>
-      new Graph()
-        .addNode(heroNode())
-        .addNode(bananasNode())
-        .addNode(crabNode())
-        .addNode(mealNode())
-        .addEdge(pickEdge())
-        .addEdge(grabEdge())
-        .addEdge(cookEdge())
-        .addEdge(bananasIngredientEdge())
-        .addEdge(crabIngredientEdge())
-        .addEdge(eatEdge());
-
-    const crabLoopEdge = () => ({
-      address: makeAddress("crab-self-assessment"),
-      src: crabNode().address,
-      dst: crabNode().address,
-      payload: {evaluation: "not effective at avoiding hero"},
-    });
-
-    const duplicateCookEdge = () => ({
-      address: makeAddress("hero_of_time#0@again_cooks@seafood_fruit_mix#3"),
-      src: mealNode().address,
-      dst: heroNode().address,
-      payload: {
-        crit: true,
-        saveScummed: true,
-      },
-    });
-
-    const advancedMealGraph = () =>
-      simpleMealGraph()
-        .addEdge(crabLoopEdge())
-        .addEdge(duplicateCookEdge());
 
     describe("construction", () => {
       it("works for a simple graph", () => {
