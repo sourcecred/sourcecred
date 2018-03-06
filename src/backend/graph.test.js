@@ -555,5 +555,44 @@ describe("graph", () => {
         expect(merged.equals(new Graph())).toBe(true);
       });
     });
+
+    describe("JSON functions", () => {
+      it("should serialize a simple graph", () => {
+        expect(advancedMealGraph().toJSON()).toMatchSnapshot();
+      });
+      it("should work transparently with JSON.stringify", () => {
+        // (This is guaranteed by the `JSON.stringify` API, and is more
+        // as documentation than actual test.)
+        expect(JSON.stringify(advancedMealGraph())).toEqual(
+          JSON.stringify(advancedMealGraph().toJSON())
+        );
+      });
+      it("should canonicalize away node insertion order", () => {
+        const g1 = new Graph().addNode(heroNode()).addNode(mealNode());
+        const g2 = new Graph().addNode(mealNode()).addNode(heroNode());
+        expect(g1.toJSON()).toEqual(g2.toJSON());
+      });
+      it("should canonicalize away edge insertion order", () => {
+        const g1 = new Graph()
+          .addNode(heroNode())
+          .addNode(mealNode())
+          .addEdge(cookEdge())
+          .addEdge(duplicateCookEdge());
+        const g2 = new Graph()
+          .addNode(heroNode())
+          .addNode(mealNode())
+          .addEdge(duplicateCookEdge())
+          .addEdge(cookEdge());
+        expect(g1.toJSON()).toEqual(g2.toJSON());
+      });
+      it("should no-op on a serialization--deserialization roundtrip", () => {
+        const g = () => advancedMealGraph();
+        expect(Graph.fromJSON(g().toJSON()).equals(g())).toBe(true);
+      });
+      it("should no-op on a deserialization--serialization roundtrip", () => {
+        const json = () => advancedMealGraph().toJSON();
+        expect(Graph.fromJSON(json()).toJSON()).toEqual(json());
+      });
+    });
   });
 });
