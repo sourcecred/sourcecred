@@ -12,6 +12,7 @@
  */
 
 const fetchGitHubRepo = require("../fetchGitHubRepo");
+const stringify = require("json-stable-stringify");
 
 function parseArgs() {
   const argv = process.argv.slice(2);
@@ -25,15 +26,7 @@ function parseArgs() {
   const [repoOwner, repoName, ...rest] = argv;
   const result = {repoOwner, repoName};
   if (rest.length === 1) {
-    const token = rest[0];
-    // Sanity check on the token structure
-    if (token.length !== 40) {
-      throw new Error(
-        "Token, when provided, must be a 40-character hex string"
-      );
-    }
-    // We'll assume it's a hex string.
-    result.token = token;
+    result.token = rest[0];
   } else if (rest.length > 1) {
     fail();
   }
@@ -42,9 +35,15 @@ function parseArgs() {
 
 function main() {
   const args = parseArgs();
-  fetchGitHubRepo(args.repoOwner, args.repoName, args.token).then((data) => {
-    console.log(JSON.stringify(data));
-  });
+  fetchGitHubRepo(args.repoOwner, args.repoName, args.token)
+    .then((data) => {
+      console.log(stringify(data, {space: 4}));
+    })
+    .catch((errors) => {
+      console.error("Errors processing the result:");
+      console.error(errors);
+      process.exit(1);
+    });
 }
 
 main();

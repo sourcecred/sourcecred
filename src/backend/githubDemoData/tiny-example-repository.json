@@ -1,0 +1,177 @@
+{
+    "data": {
+        "repository": {
+            "issues": {
+                "nodes": [
+                    {
+                        "author": {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "dandelionmane"
+                        },
+                        "body": "This is just an example issue.",
+                        "comments": {
+                            "nodes": [
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
+                        "number": 1,
+                        "title": "An example issue."
+                    },
+                    {
+                        "author": {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "dandelionmane"
+                        },
+                        "body": "This issue references another issue, namely #1",
+                        "comments": {
+                            "nodes": [
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+                        "number": 2,
+                        "title": "A referencing issue."
+                    },
+                    {
+                        "author": {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "dandelionmane"
+                        },
+                        "body": "Alas, its life as an open issue had only just begun.",
+                        "comments": {
+                            "nodes": [
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
+                        "number": 4,
+                        "title": "A closed pull request"
+                    }
+                ],
+                "pageInfo": {
+                    "hasNextPage": false
+                }
+            },
+            "pullRequests": {
+                "nodes": [
+                    {
+                        "author": {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "dandelionmane"
+                        },
+                        "body": "Oh look, it's a pull request.",
+                        "comments": {
+                            "nodes": [
+                                {
+                                    "author": {
+                                        "__typename": "User",
+                                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                        "login": "dandelionmane"
+                                    },
+                                    "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
+                                    "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
+                                    "url": "https://github.com/sourcecred/tiny-example-repository/pull/3#issuecomment-369162222"
+                                }
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
+                        "number": 3,
+                        "reviews": {
+                            "nodes": [
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "title": "Add README, merge via PR."
+                    },
+                    {
+                        "author": {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "dandelionmane"
+                        },
+                        "body": "@wchargin could you please do the following:\r\n- add a commit comment\r\n- add a review comment requesting some trivial change\r\n- i'll change it\r\n- then approve the pr",
+                        "comments": {
+                            "nodes": [
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
+                        "number": 5,
+                        "reviews": {
+                            "nodes": [
+                                {
+                                    "author": {
+                                        "__typename": "User",
+                                        "id": "MDQ6VXNlcjQzMTc4MDY=",
+                                        "login": "wchargin"
+                                    },
+                                    "body": "hmmm.jpg",
+                                    "comments": {
+                                        "nodes": [
+                                            {
+                                                "author": {
+                                                    "__typename": "User",
+                                                    "id": "MDQ6VXNlcjQzMTc4MDY=",
+                                                    "login": "wchargin"
+                                                },
+                                                "body": "seems a bit capricious",
+                                                "id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA=="
+                                            }
+                                        ],
+                                        "pageInfo": {
+                                            "hasNextPage": false
+                                        }
+                                    },
+                                    "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5",
+                                    "state": "CHANGES_REQUESTED"
+                                },
+                                {
+                                    "author": {
+                                        "__typename": "User",
+                                        "id": "MDQ6VXNlcjQzMTc4MDY=",
+                                        "login": "wchargin"
+                                    },
+                                    "body": "I'm sold",
+                                    "comments": {
+                                        "nodes": [
+                                        ],
+                                        "pageInfo": {
+                                            "hasNextPage": false
+                                        }
+                                    },
+                                    "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4",
+                                    "state": "APPROVED"
+                                }
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "title": "This pull request will be more contentious. I can feel it..."
+                    }
+                ],
+                "pageInfo": {
+                    "hasNextPage": false
+                }
+            }
+        }
+    }
+}

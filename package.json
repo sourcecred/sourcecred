@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@octokit/rest": "octokit/rest.js",
     "autoprefixer": "7.1.6",
     "babel-core": "6.26.0",
     "babel-eslint": "7.2.3",
@@ -30,8 +29,10 @@
     "html-webpack-plugin": "2.29.0",
     "husky": "^0.14.3",
     "jest": "20.0.4",
+    "json-stable-stringify": "^1.0.1",
     "lint-staged": "^6.1.1",
     "lodash.isequal": "^4.5.0",
+    "node-fetch": "^2.1.1",
     "object-assign": "4.1.1",
     "postcss-flexbugs-fixes": "3.2.0",
     "postcss-loader": "2.0.8",

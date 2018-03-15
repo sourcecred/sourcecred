@@ -3,7 +3,7 @@
  * docstring of the default export for more details.
  */
 
-const octokitFactory = require("@octokit/rest");
+const fetch = require("node-fetch");
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -12,119 +12,170 @@ const octokitFactory = require("@octokit/rest");
  *    the GitHub username of the owner of the repository to be scraped
  * @param {String} repoName
  *    the name of the repository to be scraped
- * @param {String?} token
- *    optional authentication token to be used for the GitHub API (used
- *    to get around rate limits); generate a token at:
- *    https://github.com/settings/tokens
+ * @param {String} token
+ *    authentication token to be used for the GitHub API; generate a
+ *    token at: https://github.com/settings/tokens
  * @return {Promise<object>}
  *    a promise that resolves to a JSON object containing the data
- *    scraped from the repository, with the following keys and data from
- *    the corresponding GitHub v3 endpoints:
- *      - issues: `/repos/:owner/:repo/issues`
- *      - pullRequests: `/repos/:owner/:repo/pulls`
- *      - issueComments: `/repos/:owner/:repo/issues/comments`
- *      - pullRequestComments: `/repos/:owner/:repo/pulls/comments`
- *      - pullRequestReviews: `/repos/:owner/:repo/pulls/:pull/reviews`,
- *        but concatenated over `:pull` so that the result is an array
- *        of objects
+ *    scraped from the repository, with data format to be specified
+ *    later
  */
 module.exports = function fetchGitHubRepo(repoOwner, repoName, token) {
-  const authOptions = token ? {type: "token", token} : null;
-  return new Fetcher(repoOwner, repoName, authOptions).fetchAll();
+  repoOwner = String(repoOwner);
+  repoName = String(repoName);
+  token = String(token);
+
+  const validName = /^[A-Za-z0-9_-]*$/;
+  if (!validName.test(repoOwner)) {
+    throw new Error(`Invalid repoOwner: ${repoOwner}`);
+  }
+  if (!validName.test(repoName)) {
+    throw new Error(`Invalid repoName: ${repoName}`);
+  }
+  const validToken = /^[A-Fa-f0-9]{40}$/;
+  if (!validToken.test(token)) {
+    throw new Error(`Invalid token: ${token}`);
+  }
+
+  const query = `query FetchData($repoOwner: String!, $repoName: String!) {
+    repository(owner: $repoOwner, name: $repoName) {
+      issues(first: 100) {
+        pageInfo {
+          hasNextPage
+        }
+        nodes {
+          id
+          title
+          body
+          number
+          author {
+            ...whoami
+          }
+          comments(first: 20) {
+            pageInfo {
+              hasNextPage
+            }
+            nodes {
+              id
+              author {
+                ...whoami
+              }
+              body
+              url
+            }
+          }
+        }
+      }
+      pullRequests(first: 100) {
+        pageInfo {
+          hasNextPage
+        }
+        nodes {
+          id
+          title
+          body
+          number
+          author {
+            ...whoami
+          }
+          comments(first: 20) {
+            pageInfo {
+              hasNextPage
+            }
+            nodes {
+              id
+              author {
+                ...whoami
+              }
+              body
+              url
+            }
+          }
+          reviews(first: 10) {
+            pageInfo {
+              hasNextPage
+            }
+            nodes {
+              id
+              body
+              author {
+                ...whoami
+              }
+              state
+              comments(first: 10) {
+                pageInfo {
+                  hasNextPage
+                }
+                nodes {
+                  id
+                  body
+                  author {
+                    ...whoami
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  fragment whoami on Actor {
+    __typename
+    login
+    ... on User {
+      id
+    }
+    ... on Organization {
+      id
+    }
+    ... on Bot {
+      id
+    }
+  }
+  `;
+  const variables = {repoOwner, repoName};
+  const payload = {query, variables};
+  return postQuery(payload, token);
 };
 
-class Fetcher {
-  constructor(repoOwner, repoName, authOptions = undefined) {
-    this._repoOwner = repoOwner;
-    this._repoName = repoName;
-    this._octokit = octokitFactory(octokitFactory);
-    if (authOptions) {
-      this._octokit.authenticate(authOptions);
+const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
+
+function postQuery(payload, token) {
+  return fetch(GITHUB_GRAPHQL_SERVER, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      Authorization: `bearer ${token}`,
+    },
+  })
+    .then((x) => x.json())
+    .then((x) => {
+      if (x.errors) {
+        return Promise.reject(x);
+      }
+      ensureNoMorePages(x);
+      return Promise.resolve(x);
+    });
+}
+
+function ensureNoMorePages(result, path = []) {
+  if (result == null) {
+    return;
+  }
+  if (result.pageInfo) {
+    if (result.pageInfo.hasNextPage) {
+      throw new Error(`More pages at: ${path.join()}`);
     }
   }
-
-  // Adapted from:
-  // https://www.npmjs.com/package/@octokit/rest#pagination
-  async paginate(promise) {
-    let response = await promise;
-    let {data} = response;
-    while (this._octokit.hasNextPage(response)) {
-      response = await this._octokit.getNextPage(response);
-      data = [...data, ...response.data];
-    }
-    return data;
-  }
-
-  async fetchAll() {
-    const pullRequests = await this.fetchPullRequests();
-    return {
-      issues: await this.fetchIssues(),
-      pullRequests,
-      issueComments: await this.fetchIssueComments(),
-      pullRequestComments: await this.fetchPullRequestComments(),
-      pullRequestReviews: await this.fetchPullRequestReviews(pullRequests),
-    };
-  }
-
-  fetchPullRequests() {
-    return this.paginate(
-      this._octokit.pullRequests.getAll({
-        owner: this._repoOwner,
-        repo: this._repoName,
-        state: "all",
-        per_page: 100,
-      })
-    );
-  }
-
-  fetchIssues() {
-    return this.paginate(
-      this._octokit.issues.getForRepo({
-        owner: this._repoOwner,
-        repo: this._repoName,
-        state: "all",
-        per_page: 100,
-      })
-    );
-  }
-
-  fetchPullRequestComments() {
-    return this.paginate(
-      this._octokit.pullRequests.getCommentsForRepo({
-        owner: this._repoOwner,
-        repo: this._repoName,
-        per_page: 100,
-      })
-    );
-  }
-
-  fetchIssueComments() {
-    return this.paginate(
-      this._octokit.issues.getCommentsForRepo({
-        owner: this._repoOwner,
-        repo: this._repoName,
-        per_page: 100,
-      })
-    );
-  }
-
-  fetchIndividualPullRequestReviews(number) {
-    return this.paginate(
-      this._octokit.pullRequests.getReviews({
-        owner: this._repoOwner,
-        repo: this._repoName,
-        number: number,
-        per_page: 100,
-      })
-    );
-  }
-
-  fetchPullRequestReviews(allPullRequests) {
-    const reviewses = Promise.all(
-      allPullRequests.map((pr) =>
-        this.fetchIndividualPullRequestReviews(pr.number)
-      )
-    );
-    return reviewses.then((xss) => [].concat(...xss));
+  if (Array.isArray(result)) {
+    result.forEach((item, i) => {
+      ensureNoMorePages(item, [...path, i]);
+    });
+  } else if (typeof result === "object") {
+    Object.keys(result).forEach((k) => {
+      ensureNoMorePages(result[k], [...path, k]);
+    });
   }
 }
