@@ -12,6 +12,7 @@
  */
 
 const fetchGitHubRepo = require("../fetchGitHubRepo");
+const stringify = require("json-stable-stringify");
 
 function parseArgs() {
   const argv = process.argv.slice(2);
@@ -36,7 +37,7 @@ function main() {
   const args = parseArgs();
   fetchGitHubRepo(args.repoOwner, args.repoName, args.token)
     .then((data) => {
-      console.log(JSON.stringify(data, null, 4));
+      console.log(stringify(data, {space: 4}));
     })
     .catch((errors) => {
       console.error("Errors processing the result:");

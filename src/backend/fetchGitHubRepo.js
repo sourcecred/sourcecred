@@ -37,8 +37,8 @@ module.exports = function fetchGitHubRepo(repoOwner, repoName, token) {
     throw new Error(`Invalid token: ${token}`);
   }
 
-  const query = `query {
-    repository(owner: "${repoOwner}", name: "${repoName}") {
+  const query = `query FetchData($repoOwner: String!, $repoName: String!) {
+    repository(owner: $repoOwner, name: $repoName) {
       issues(first: 100) {
         pageInfo {
           hasNextPage
@@ -135,15 +135,17 @@ module.exports = function fetchGitHubRepo(repoOwner, repoName, token) {
     }
   }
   `;
-  return postQuery(query, token);
+  const variables = {repoOwner, repoName};
+  const payload = {query, variables};
+  return postQuery(payload, token);
 };
 
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 
-function postQuery(query, token) {
+function postQuery(payload, token) {
   return fetch(GITHUB_GRAPHQL_SERVER, {
     method: "POST",
-    body: JSON.stringify({query}),
+    body: JSON.stringify(payload),
     headers: {
       Authorization: `bearer ${token}`,
     },

@@ -2,17 +2,6 @@
 
 set -eu
 
-canonicalize() {
-  script="$(cat <<EOF
-import json
-import sys
-blob = json.load(sys.stdin)
-json.dump(blob, sys.stdout, indent=4, sort_keys=True)
-EOF
-)"
-  python -c "${script}"
-}
-
 main() {
   if [ -z "${GITHUB_TOKEN:-}" ]; then
     printf >&2 'Please set the GITHUB_TOKEN environment variable\n'
@@ -25,8 +14,8 @@ main() {
     >"${output}" \
     ;
   diff -uw \
-    <(canonicalize <src/backend/githubDemoData/tiny-example-repository.json) \
-    <(canonicalize <"${output}") \
+    src/backend/githubDemoData/tiny-example-repository.json \
+    "${output}" \
     ;
   rm "${output}"
 }
