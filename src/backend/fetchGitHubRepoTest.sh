@@ -10,11 +10,11 @@ main() {
   fi
   output="$(mktemp)"
   node src/backend/bin/fetchAndPrintGitHubRepo.js \
-    sourcecred tiny-example-repository "${GITHUB_TOKEN}" \
+    sourcecred example-repo "${GITHUB_TOKEN}" \
     >"${output}" \
     ;
   diff -uw \
-    src/backend/githubDemoData/tiny-example-repository.json \
+    src/backend/githubDemoData/example-repo.json \
     "${output}" \
     ;
   rm "${output}"
