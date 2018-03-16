@@ -192,24 +192,36 @@ describe("graph", () => {
     });
 
     describe("creating nodes and edges", () => {
-      it("forbids adding a node with existing address", () => {
+      it("forbids adding a node with existing address and different contents", () => {
         expect(() =>
           demoData.simpleMealGraph().addNode({
             address: demoData.crabNode().address,
             payload: {anotherCrab: true},
           })
-        ).toThrow(/already exists/);
+        ).toThrow(/exists with distinct contents/);
       });
 
-      it("forbids adding an edge with existing address", () => {
+      it("adding a node redundantly is a no-op", () => {
+        const simple1 = demoData.simpleMealGraph();
+        const simple2 = demoData.simpleMealGraph().addNode(demoData.heroNode());
+        expect(simple1.equals(simple2)).toBe(true);
+      });
+
+      it("forbids adding an edge with existing address and different contents", () => {
         expect(() =>
           demoData.simpleMealGraph().addEdge({
             address: demoData.cookEdge().address,
             src: demoData.crabNode().address,
             dst: demoData.crabNode().address,
-            payload: {},
+            payload: {isDifferent: true},
           })
-        ).toThrow(/already exists/);
+        ).toThrow(/exists with distinct contents/);
+      });
+
+      it("adding an edge redundantly is a no-op", () => {
+        const simple1 = demoData.simpleMealGraph();
+        const simple2 = demoData.simpleMealGraph().addEdge(demoData.cookEdge());
+        expect(simple1.equals(simple2)).toBe(true);
       });
 
       it("allows creating self-loops", () => {

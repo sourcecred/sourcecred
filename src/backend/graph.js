@@ -70,10 +70,17 @@ export class Graph {
     if (node == null) {
       throw new Error(`node is ${String(node)}`);
     }
-    if (this.getNode(node.address) !== undefined) {
-      throw new Error(
-        `node at address ${JSON.stringify(node.address)} already exists`
-      );
+    const existingNode = this.getNode(node.address);
+    if (existingNode !== undefined) {
+      if (deepEqual(existingNode, node)) {
+        return this;
+      } else {
+        throw new Error(
+          `node at address ${JSON.stringify(
+            node.address
+          )} exists with distinct contents`
+        );
+      }
     }
     this._nodes.add(node);
     this._outEdges.add({address: node.address, edges: []});
@@ -85,10 +92,17 @@ export class Graph {
     if (edge == null) {
       throw new Error(`edge is ${String(edge)}`);
     }
-    if (this.getEdge(edge.address) !== undefined) {
-      throw new Error(
-        `edge at address ${JSON.stringify(edge.address)} already exists`
-      );
+    const existingEdge = this.getEdge(edge.address);
+    if (existingEdge !== undefined) {
+      if (deepEqual(existingEdge, edge)) {
+        return this;
+      } else {
+        throw new Error(
+          `edge at address ${JSON.stringify(
+            edge.address
+          )} exists with distinct contents`
+        );
+      }
     }
     if (this.getNode(edge.src) === undefined) {
       throw new Error(`source ${JSON.stringify(edge.src)} does not exist`);
