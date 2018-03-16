@@ -30,6 +30,26 @@
                         "body": "This issue references another issue, namely #1",
                         "comments": {
                             "nodes": [
+                                {
+                                    "author": {
+                                        "__typename": "User",
+                                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                        "login": "dandelionmane"
+                                    },
+                                    "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-repo/issues/6",
+                                    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
+                                    "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768703"
+                                },
+                                {
+                                    "author": {
+                                        "__typename": "User",
+                                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                        "login": "dandelionmane"
+                                    },
+                                    "body": "We might also reference individual comments directly.\r\nhttps://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
+                                    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
+                                    "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850"
+                                }
                             ],
                             "pageInfo": {
                                 "hasNextPage": false
@@ -56,6 +76,44 @@
                         "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
                         "number": 4,
                         "title": "A closed pull request"
+                    },
+                    {
+                        "author": {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "dandelionmane"
+                        },
+                        "body": "This issue shall shortly have a few comments.",
+                        "comments": {
+                            "nodes": [
+                                {
+                                    "author": {
+                                        "__typename": "User",
+                                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                        "login": "dandelionmane"
+                                    },
+                                    "body": "A wild COMMENT appeared!",
+                                    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODQ0Mg==",
+                                    "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442"
+                                },
+                                {
+                                    "author": {
+                                        "__typename": "User",
+                                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                        "login": "dandelionmane"
+                                    },
+                                    "body": "And the maintainer said, \"Let there be comments!\"",
+                                    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODUzOA==",
+                                    "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538"
+                                }
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
+                        "number": 6,
+                        "title": "An issue with comments"
                     }
                 ],
                 "pageInfo": {
@@ -81,7 +139,7 @@
                                     },
                                     "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
-                                    "url": "https://github.com/sourcecred/tiny-example-repository/pull/3#issuecomment-369162222"
+                                    "url": "https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222"
                                 }
                             ],
                             "pageInfo": {
