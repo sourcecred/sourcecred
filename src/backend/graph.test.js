@@ -376,7 +376,9 @@ describe("graph", () => {
        * node `u`, create a graph with just that node, its neighbors,
        * and its incident edges (in both directions).
        */
-      function neighborhoodDecomposition(originalGraph: Graph): Graph[] {
+      function neighborhoodDecomposition<NP, EP>(
+        originalGraph: Graph<NP, EP>
+      ): Graph<NP, EP>[] {
         return originalGraph.getAllNodes().map((node) => {
           const miniGraph = new Graph();
           miniGraph.addNode(node);
@@ -403,7 +405,9 @@ describe("graph", () => {
        * Decompose the given graph into edge graphs: for each edge `e`,
        * create a graph with just that edge and its two endpoints.
        */
-      function edgeDecomposition(originalGraph: Graph): Graph[] {
+      function edgeDecomposition<NP, EP>(
+        originalGraph: Graph<NP, EP>
+      ): Graph<NP, EP>[] {
         return originalGraph.getAllEdges().map((edge) => {
           const miniGraph = new Graph();
           miniGraph.addNode(originalGraph.getNode(edge.src));
@@ -439,8 +443,47 @@ describe("graph", () => {
         expect(result.equals(demoData.advancedMealGraph())).toBe(true);
       });
 
+      it("conservatively merges graphs of different payload types", () => {
+        const data = {
+          a: () => ({address: demoData.makeAddress("a"), payload: "alpha"}),
+          b: () => ({address: demoData.makeAddress("b"), payload: "bravo"}),
+          u: () => ({
+            address: demoData.makeAddress("u"),
+            src: demoData.makeAddress("a"),
+            dst: demoData.makeAddress("b"),
+            payload: 21,
+          }),
+          c: () => ({address: demoData.makeAddress("c"), payload: true}),
+          d: () => ({address: demoData.makeAddress("d"), payload: false}),
+          v: () => ({
+            address: demoData.makeAddress("v"),
+            src: demoData.makeAddress("c"),
+            dst: demoData.makeAddress("d"),
+            payload: null,
+          }),
+        };
+        const g1: Graph<string, number> = new Graph()
+          .addNode(data.a())
+          .addNode(data.b())
+          .addEdge(data.u());
+        const g2: Graph<boolean, null> = new Graph()
+          .addNode(data.c())
+          .addNode(data.d())
+          .addEdge(data.v());
+        type ResultGraph = Graph<string | boolean, number | null>;
+        const result: ResultGraph = Graph.mergeConservative(g1, g2);
+        const expected: ResultGraph = new Graph()
+          .addNode(data.a())
+          .addNode(data.b())
+          .addEdge(data.u())
+          .addNode(data.c())
+          .addNode(data.d())
+          .addEdge(data.v());
+        expect(result.equals(expected)).toBe(true);
+      });
+
       it("conservatively rejects a graph with conflicting nodes", () => {
-        const makeGraph: (nodePayload: string) => Graph = (nodePayload) =>
+        const makeGraph: (nodePayload: string) => Graph<*, *> = (nodePayload) =>
           new Graph().addNode({
             address: demoData.makeAddress("conflicting-node"),
             payload: nodePayload,
@@ -455,7 +498,7 @@ describe("graph", () => {
       it("conservatively rejects a graph with conflicting edges", () => {
         const srcAddress = demoData.makeAddress("src");
         const dstAddress = demoData.makeAddress("dst");
-        const makeGraph: (edgePayload: string) => Graph = (edgePayload) =>
+        const makeGraph: (edgePayload: string) => Graph<*, *> = (edgePayload) =>
           new Graph()
             .addNode({address: srcAddress, payload: {}})
             .addNode({address: dstAddress, payload: {}})
@@ -558,6 +601,7 @@ describe("graph", () => {
             address: demoData.makeAddress("hello"),
             payload: 17,
           };
+          // This will be a Graph<string | number, *>.
           new Graph().addNode(stringNode).addNode(numberNode);
         });
       });
@@ -578,6 +622,7 @@ describe("graph", () => {
             dst: dst.address,
             payload: 18,
           };
+          // This will be a Graph<{}, string | number>.
           new Graph()
             .addNode(src)
             .addNode(dst)
