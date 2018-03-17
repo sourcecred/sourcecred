@@ -4,26 +4,26 @@ import deepEqual from "lodash.isequal";
 import type {Address, Addressable, AddressMapJSON} from "./address";
 import {AddressMap} from "./address";
 
-export type Node<T> = {|
+export type Node<+T> = {|
   +address: Address,
   +payload: T,
 |};
 
-export type Edge<T> = {|
+export type Edge<+T> = {|
   +address: Address,
   +src: Address,
   +dst: Address,
   +payload: T,
 |};
 
-export type GraphJSON = {|
-  +nodes: AddressMapJSON<Node<any>>,
-  +edges: AddressMapJSON<Edge<any>>,
+export type GraphJSON<NP, EP> = {|
+  +nodes: AddressMapJSON<Node<NP>>,
+  +edges: AddressMapJSON<Edge<EP>>,
 |};
 
-export class Graph {
-  _nodes: AddressMap<Node<any>>;
-  _edges: AddressMap<Edge<any>>;
+export class Graph<NP, EP> {
+  _nodes: AddressMap<Node<NP>>;
+  _edges: AddressMap<Edge<EP>>;
 
   // The keyset of each of the following fields should equal the keyset
   // of `_nodes`. If `e` is an edge from `u` to `v`, then `e.address`
@@ -40,18 +40,18 @@ export class Graph {
     this._inEdges = new AddressMap();
   }
 
-  equals(that: Graph): boolean {
+  equals(that: Graph<NP, EP>): boolean {
     return this._nodes.equals(that._nodes) && this._edges.equals(that._edges);
   }
 
-  toJSON(): GraphJSON {
+  toJSON(): GraphJSON<NP, EP> {
     return {
       nodes: this._nodes.toJSON(),
       edges: this._edges.toJSON(),
     };
   }
 
-  static fromJSON(json: GraphJSON): Graph {
+  static fromJSON<NP, EP>(json: GraphJSON<NP, EP>): Graph<NP, EP> {
     const result = new Graph();
     AddressMap.fromJSON(json.nodes)
       .getAll()
@@ -66,7 +66,7 @@ export class Graph {
     return result;
   }
 
-  addNode(node: Node<any>) {
+  addNode(node: Node<NP>): Graph<NP, EP> {
     if (node == null) {
       throw new Error(`node is ${String(node)}`);
     }
@@ -88,7 +88,7 @@ export class Graph {
     return this;
   }
 
-  addEdge(edge: Edge<any>) {
+  addEdge(edge: Edge<EP>): Graph<NP, EP> {
     if (edge == null) {
       throw new Error(`edge is ${String(edge)}`);
     }
@@ -116,11 +116,11 @@ export class Graph {
     return this;
   }
 
-  getNode(address: Address): Node<mixed> {
+  getNode(address: Address): Node<NP> {
     return this._nodes.get(address);
   }
 
-  getEdge(address: Address): Edge<mixed> {
+  getEdge(address: Address): Edge<EP> {
     return this._edges.get(address);
   }
 
@@ -128,7 +128,7 @@ export class Graph {
    * Gets the array of all out-edges from the node at the given address.
    * The order of the resulting array is unspecified.
    */
-  getOutEdges(nodeAddress: Address): Edge<mixed>[] {
+  getOutEdges(nodeAddress: Address): Edge<EP>[] {
     if (nodeAddress == null) {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
@@ -143,7 +143,7 @@ export class Graph {
    * Gets the array of all in-edges to the node at the given address.
    * The order of the resulting array is unspecified.
    */
-  getInEdges(nodeAddress: Address): Edge<mixed>[] {
+  getInEdges(nodeAddress: Address): Edge<EP>[] {
     if (nodeAddress == null) {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
@@ -157,14 +157,14 @@ export class Graph {
   /**
    * Gets all nodes in the graph, in unspecified order.
    */
-  getAllNodes(): Node<mixed>[] {
+  getAllNodes(): Node<NP>[] {
     return this._nodes.getAll();
   }
 
   /**
    * Gets all edges in the graph, in unspecified order.
    */
-  getAllEdges(): Edge<mixed>[] {
+  getAllEdges(): Edge<EP>[] {
     return this._edges.getAll();
   }
 
@@ -176,13 +176,13 @@ export class Graph {
    *
    * The existing graph objects are not modified.
    */
-  static merge(
-    g1: Graph,
-    g2: Graph,
-    nodeResolver: (Node<mixed>, Node<mixed>) => Node<mixed>,
-    edgeResolver: (Edge<mixed>, Edge<mixed>) => Edge<mixed>
-  ) {
-    const result = new Graph();
+  static merge<NP, EP, N1: NP, E1: EP, N2: NP, E2: EP>(
+    g1: Graph<N1, E1>,
+    g2: Graph<N2, E2>,
+    nodeResolver: (Node<N1>, Node<N2>) => Node<NP>,
+    edgeResolver: (Edge<E1>, Edge<E2>) => Edge<EP>
+  ): Graph<NP, EP> {
+    const result: Graph<NP, EP> = new Graph();
     g1.getAllNodes().forEach((node) => {
       if (g2.getNode(node.address) !== undefined) {
         const resolved = nodeResolver(node, g2.getNode(node.address));
@@ -218,8 +218,11 @@ export class Graph {
    * for edges). If this assumption does not hold, this function will
    * raise an error.
    */
-  static mergeConservative(g1: Graph, g2: Graph) {
-    function conservativeReducer<T: Addressable>(
+  static mergeConservative<NP, EP, N1: NP, E1: EP, N2: NP, E2: EP>(
+    g1: Graph<N1, E1>,
+    g2: Graph<N2, E2>
+  ): Graph<NP, EP> {
+    function conservativeResolver<T: Addressable>(
       kinds: string /* used for an error message on mismatch */,
       a: T,
       b: T
@@ -232,11 +235,12 @@ export class Graph {
         );
       }
     }
-    return Graph.merge(
+    const result: Graph<NP, EP> = Graph.merge(
       g1,
       g2,
-      (u, v) => conservativeReducer("nodes", u, v),
-      (e, f) => conservativeReducer("edges", e, f)
+      (u, v) => conservativeResolver("nodes", u, v),
+      (e, f) => conservativeResolver("edges", e, f)
     );
+    return result;
   }
 }
