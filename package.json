@@ -57,6 +57,7 @@
     "check-pretty": "prettier --list-different '**/*.js'",
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
+    "backend": "node scripts/backend.js",
     "test": "node scripts/test.js --env=jsdom",
     "flow": "flow",
     "travis": "npm run check-pretty && npm run flow && CI=true npm run test"

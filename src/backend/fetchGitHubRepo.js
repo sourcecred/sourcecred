@@ -1,9 +1,10 @@
+// @flow
 /*
  * API to scrape data from a GitHub repo using the GitHub API. See the
  * docstring of the default export for more details.
  */
 
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -20,7 +21,11 @@ const fetch = require("node-fetch");
  *    scraped from the repository, with data format to be specified
  *    later
  */
-module.exports = function fetchGitHubRepo(repoOwner, repoName, token) {
+export default function fetchGitHubRepo(
+  repoOwner: string,
+  repoName: string,
+  token: string
+): Promise<Object> {
   repoOwner = String(repoOwner);
   repoName = String(repoName);
   token = String(token);
@@ -138,7 +143,7 @@ module.exports = function fetchGitHubRepo(repoOwner, repoName, token) {
   const variables = {repoOwner, repoName};
   const payload = {query, variables};
   return postQuery(payload, token);
-};
+}
 
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 

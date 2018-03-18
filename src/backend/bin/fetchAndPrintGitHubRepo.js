@@ -11,8 +11,8 @@
  * from https://github.com/settings/tokens/new.
  */
 
-const fetchGitHubRepo = require("../fetchGitHubRepo");
-const stringify = require("json-stable-stringify");
+import fetchGitHubRepo from "../fetchGitHubRepo";
+import stringify from "json-stable-stringify";
 
 function parseArgs() {
   const argv = process.argv.slice(2);
