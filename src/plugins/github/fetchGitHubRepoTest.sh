@@ -19,7 +19,7 @@ main() {
     >"${output}" \
     ;
   diff -uw \
-    src/backend/githubDemoData/example-repo.json \
+    src/plugins/github/demoData/example-repo.json \
     "${output}" \
     ;
   rm "${output}"
