@@ -33,6 +33,7 @@
     "lint-staged": "^6.1.1",
     "lodash.isequal": "^4.5.0",
     "node-fetch": "^2.1.1",
+    "npm": "^5.7.1",
     "object-assign": "4.1.1",
     "postcss-flexbugs-fixes": "3.2.0",
     "postcss-loader": "2.0.8",
