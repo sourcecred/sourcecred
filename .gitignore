@@ -9,6 +9,9 @@
 # production
 /build
 
+# backend
+/bin
+
 # misc
 .env.local
 .env.development.local

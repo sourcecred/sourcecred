@@ -52,4 +52,15 @@ module.exports = {
   appNodeModules: resolveApp("node_modules"),
   publicUrl: getPublicUrl(resolveApp("package.json")),
   servedPath: getServedPath(resolveApp("package.json")),
+
+  backendBuild: resolveApp("bin"),
+  // This object should have one key-value pair per entry point. For
+  // each key, the value should be the path to the entry point for the
+  // source file, and the key will be the filename of the bundled entry
+  // point within the build directory.
+  backendEntryPoints: {
+    fetchAndPrintGitHubRepo: resolveApp(
+      "src/backend/bin/fetchAndPrintGitHubRepo.js"
+    ),
+  },
 };
