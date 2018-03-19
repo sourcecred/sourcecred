@@ -60,7 +60,7 @@ module.exports = {
   // point within the build directory.
   backendEntryPoints: {
     fetchAndPrintGitHubRepo: resolveApp(
-      "src/backend/bin/fetchAndPrintGitHubRepo.js"
+      "src/plugins/github/bin/fetchAndPrintGitHubRepo.js"
     ),
   },
 };

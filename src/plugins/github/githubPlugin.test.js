@@ -1,7 +1,7 @@
 // @flow
 
 import {GithubParser, getNodeType, getEdgeType} from "./githubPlugin";
-import exampleRepoData from "./githubDemoData/example-repo.json";
+import exampleRepoData from "./demoData/example-repo.json";
 
 describe("GithubParser", () => {
   describe("whole repo parsing", () => {

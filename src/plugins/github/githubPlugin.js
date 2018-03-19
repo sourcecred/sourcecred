@@ -1,8 +1,8 @@
 // @flow
 
-import type {Node, Edge} from "./graph";
-import type {Address} from "./address";
-import {Graph} from "./graph";
+import type {Node, Edge} from "../../core/graph";
+import type {Address} from "../../core/address";
+import {Graph} from "../../core/graph";
 const stringify = require("json-stable-stringify");
 
 export const GITHUB_PLUGIN_NAME = "sourcecred/github-beta";
