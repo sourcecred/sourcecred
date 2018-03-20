@@ -1,0 +1,131 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ContributionList renders some test data in the default state 1`] = `
+<div>
+  <h2>
+    Contributions
+  </h2>
+  <label>
+    Filter by contribution type:
+     
+    <select
+      onChange={[Function]}
+      value="null"
+    >
+      <option
+        value="null"
+      >
+        Show all
+      </option>
+      <option
+        disabled={true}
+        style={
+          Object {
+            "fontWeight": "bold",
+          }
+        }
+      >
+        sourcecred/example-plugin-a
+      </option>
+      <option
+        value="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"type\\":\\"big\\"}"
+      >
+         big
+      </option>
+      <option
+        value="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"type\\":\\"small\\"}"
+      >
+         small
+      </option>
+      <option
+        disabled={true}
+        style={
+          Object {
+            "fontWeight": "bold",
+          }
+        }
+      >
+        sourcecred/example-plugin-b
+      </option>
+      <option
+        value="{\\"pluginName\\":\\"sourcecred/example-plugin-b\\",\\"type\\":\\"very true\\"}"
+      >
+         very true
+      </option>
+    </select>
+  </label>
+  <table>
+    <thead>
+      <tr>
+        <th>
+          Title
+        </th>
+        <th>
+          Artifact
+        </th>
+        <th>
+          Weight
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          the number 111
+        </td>
+        <td>
+          [TODO]
+        </td>
+        <td>
+          [TODO]
+        </td>
+      </tr>
+      <tr>
+        <td>
+          the number 234
+        </td>
+        <td>
+          [TODO]
+        </td>
+        <td>
+          [TODO]
+        </td>
+      </tr>
+      <tr>
+        <td>
+          the number 616
+        </td>
+        <td>
+          [TODO]
+        </td>
+        <td>
+          [TODO]
+        </td>
+      </tr>
+      <tr>
+        <td>
+          TRUE!
+        </td>
+        <td>
+          [TODO]
+        </td>
+        <td>
+          [TODO]
+        </td>
+      </tr>
+      <tr>
+        <td
+          colspan={3}
+        >
+          <i>
+            unknown
+          </i>
+           (plugin: 
+          sourcecred/example-plugin-c
+          )
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
