@@ -114,6 +114,42 @@
                         "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
                         "number": 6,
                         "title": "An issue with comments"
+                    },
+                    {
+                        "author": {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "dandelionmane"
+                        },
+                        "body": "Deal with this, naive string display algorithms!!!!!",
+                        "comments": {
+                            "nodes": [
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "id": "MDU6SXNzdWUzMDY5ODM1NTI=",
+                        "number": 7,
+                        "title": "An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something"
+                    },
+                    {
+                        "author": {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "dandelionmane"
+                        },
+                        "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️\r\nIssue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+                        "comments": {
+                            "nodes": [
+                            ],
+                            "pageInfo": {
+                                "hasNextPage": false
+                            }
+                        },
+                        "id": "MDU6SXNzdWUzMDY5ODUzNjc=",
+                        "number": 8,
+                        "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️"
                     }
                 ],
                 "pageInfo": {
