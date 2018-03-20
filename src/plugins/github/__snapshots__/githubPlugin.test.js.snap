@@ -483,6 +483,32 @@ Object {
         "repositoryName": "sourcecred/example-repo",
       },
     },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"authorID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjE0MDAwMjM=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},\\\\\\"contributionID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDY5ODM1NTI=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"AUTHORSHIP\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDQ6VXNlcjE0MDAwMjM=\\",\\"type\\":\\"USER\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDU6SXNzdWUzMDY5ODM1NTI=\\",\\"type\\":\\"ISSUE\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"authorID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjE0MDAwMjM=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},\\\\\\"contributionID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDY5ODUzNjc=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"AUTHORSHIP\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDQ6VXNlcjE0MDAwMjM=\\",\\"type\\":\\"USER\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDU6SXNzdWUzMDY5ODUzNjc=\\",\\"type\\":\\"ISSUE\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
     "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"authorID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjQzMTc4MDY=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},\\\\\\"contributionID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"AUTHORSHIP\\\\\\"}\\"}": Object {
       "dst": Object {
         "id": "{\\"id\\":\\"MDQ6VXNlcjQzMTc4MDY=\\",\\"type\\":\\"USER\\"}",
@@ -731,6 +757,21 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
         "body": "This issue shall shortly have a few comments.",
         "number": 6,
         "title": "An issue with comments",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDY5ODM1NTI=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "body": "Deal with this, naive string display algorithms!!!!!",
+        "number": 7,
+        "title": "An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDY5ODUzNjc=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️
+Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+        "number": 8,
+        "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
       },
     },
   },
