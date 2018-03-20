@@ -109,6 +109,61 @@ export type NodeID =
   | AuthorNodeID;
 export type NodeType = $ElementType<NodeID, "type">;
 
+// A map from NodeType string to the corresponding ID and payload types.
+// Primarily useful for adding static assertions with $ObjMap, but also
+// useful at the value layer as $ElementType<NodeTypes, "ISSUE">, for
+// instance.
+export type NodeTypes = {|
+  ISSUE: {
+    id: IssueNodeID,
+    payload: IssueNodePayload,
+  },
+  PULL_REQUEST: {
+    id: PullRequestNodeID,
+    payload: PullRequestNodePayload,
+  },
+  COMMENT: {
+    id: CommentNodeID,
+    payload: CommentNodePayload,
+  },
+  PULL_REQUEST_REVIEW_COMMENT: {
+    id: PullRequestReviewCommentNodeID,
+    payload: PullRequestReviewCommentNodePayload,
+  },
+  PULL_REQUEST_REVIEW: {
+    id: PullRequestReviewNodeID,
+    payload: PullRequestReviewNodePayload,
+  },
+  USER: {
+    id: UserNodeID,
+    payload: UserNodePayload,
+  },
+  ORGANIZATION: {
+    id: OrganizationNodeID,
+    payload: OrganizationNodePayload,
+  },
+  BOT: {
+    id: BotNodeID,
+    payload: BotNodePayload,
+  },
+|};
+(function staticAssertions() {
+  // Check that node payload types are exhaustive.
+  (x: NodeType): $Keys<NodeTypes> => x;
+
+  // Check that each type is associated with the correct ID type.
+  // Doesn't work because of a Flow bug; should work if that bug is
+  // fixed: https://github.com/facebook/flow/issues/4211
+  // (Summary of bug: $ElementType<O, -> does not preserve unions.)
+  //
+  // <T: $Keys<NodeTypes>>(
+  //   x: T
+  // ): $ElementType<
+  //   $ElementType<$ElementType<NodeTypes, T>, "id">,
+  //   "type"
+  // > => x;
+});
+
 export type AuthorshipEdgePayload = {};
 export type AuthorshipEdgeID = {
   +type: "AUTHORSHIP",
