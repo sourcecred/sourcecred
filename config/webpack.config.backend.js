@@ -75,9 +75,5 @@ module.exports = {
         process.env.NODE_ENV || "development"
       ),
     }),
-    // See:
-    //   - https://github.com/andris9/encoding/issues/16 (the culprit)
-    //   - https://github.com/bitinn/node-fetch/issues/41 (the solution)
-    new webpack.IgnorePlugin(/\/iconv-loader$/),
   ],
 };

@@ -4,7 +4,7 @@
  * docstring of the default export for more details.
  */
 
-import fetch from "node-fetch";
+import fetch from "isomorphic-fetch";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
