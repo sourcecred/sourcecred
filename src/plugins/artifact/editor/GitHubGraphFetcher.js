@@ -3,6 +3,7 @@
 import React from "react";
 
 import type {Graph} from "../../../core/graph";
+import LocalStore from "./LocalStore";
 import fetchGitHubRepo from "../../github/fetchGitHubRepo";
 import type {
   NodePayload as GitHubNodePayload,
@@ -19,14 +20,17 @@ type State = {
   repoName: string,
 };
 
+const SETTINGS_KEY = "GitHubGraphFetcher.settings";
+
 export class GitHubGraphFetcher extends React.Component<Props, State> {
   constructor() {
     super();
-    this.state = {
+    const defaultState = {
       apiToken: "",
       repoOwner: "",
       repoName: "",
     };
+    this.state = LocalStore.get(SETTINGS_KEY, defaultState);
   }
 
   render() {
@@ -78,6 +82,7 @@ export class GitHubGraphFetcher extends React.Component<Props, State> {
 
   fetchGraph() {
     const {repoOwner, repoName, apiToken} = this.state;
+    LocalStore.set(SETTINGS_KEY, {apiToken, repoOwner, repoName});
     fetchGitHubRepo(repoOwner, repoName, apiToken)
       .then((json) => {
         const parser = new GithubParser(`${repoOwner}/${repoName}`);
