@@ -113,6 +113,7 @@ export default function fetchGitHubRepo(
                 }
                 nodes {
                   id
+                  url
                   body
                   author {
                     ...whoami
