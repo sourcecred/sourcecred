@@ -5,6 +5,7 @@ import {StyleSheet, css} from "aphrodite/no-important";
 
 import type {Node} from "../../../core/graph";
 import {ArtifactList} from "./ArtifactList";
+import {GitHubGraphFetcher} from "./GitHubGraphFetcher";
 import type {ArtifactNodePayload} from "../artifactPlugin";
 
 type Props = {};
@@ -46,6 +47,7 @@ export default class App extends React.Component<Props, State> {
             }));
           }}
         />
+        <GitHubGraphFetcher onCreateGraph={(x) => console.log(x)} />
       </div>
     );
   }
