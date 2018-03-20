@@ -27,12 +27,39 @@ export type PullRequestNodeID = {|
   +id: string,
 |};
 
+export type PullRequestReviewState =
+  | "CHANGES_REQUESTED"
+  | "APPROVED"
+  | "COMMENTED"
+  | "DISMISSED"
+  | "PENDING";
+export type PullRequestReviewNodePayload = {|
+  +body: string,
+  +state: PullRequestReviewState,
+|};
+export type PullRequestReviewNodeID = {|
+  +type: "PULL_REQUEST_REVIEW",
+  +id: string,
+|};
+
 export type CommentNodePayload = {|
   +url: string,
   +body: string,
 |};
 export type CommentNodeID = {|
   +type: "COMMENT",
+  +id: string,
+|};
+
+// We have this as a separate type from regular comments because we may
+// be interested in diff hunks, which are only present on PR review
+// comments.
+export type PullRequestReviewCommentNodePayload = {|
+  +url: string,
+  +body: string,
+|};
+export type PullRequestReviewCommentNodeID = {|
+  +type: "PULL_REQUEST_REVIEW_COMMENT",
   +id: string,
 |};
 
@@ -70,11 +97,15 @@ export type NodePayload =
   | IssueNodePayload
   | PullRequestNodePayload
   | CommentNodePayload
+  | PullRequestReviewCommentNodePayload
+  | PullRequestReviewNodePayload
   | AuthorNodePayload;
 export type NodeID =
   | IssueNodeID
   | PullRequestNodeID
+  | PullRequestReviewCommentNodeID
   | CommentNodeID
+  | PullRequestReviewNodeID
   | AuthorNodeID;
 export type NodeType = $ElementType<NodeID, "type">;
 
@@ -130,9 +161,18 @@ export class GithubParser {
   }
 
   addAuthorship(
-    authoredNodeID: IssueNodeID | PullRequestNodeID | CommentNodeID,
+    authoredNodeID:
+      | IssueNodeID
+      | PullRequestNodeID
+      | CommentNodeID
+      | PullRequestReviewCommentNodeID
+      | PullRequestReviewNodeID,
     authoredNode: Node<
-      IssueNodePayload | PullRequestNodePayload | CommentNodePayload
+      | IssueNodePayload
+      | PullRequestNodePayload
+      | CommentNodePayload
+      | PullRequestReviewCommentNodePayload
+      | PullRequestReviewNodePayload
     >,
     authorJson: *
   ) {
@@ -177,33 +217,63 @@ export class GithubParser {
   }
 
   addComment(
-    parentID: IssueNodeID | PullRequestNodeID,
-    parentNode: Node<IssueNodePayload | PullRequestNodePayload>,
+    parentID: IssueNodeID | PullRequestNodeID | PullRequestReviewNodeID,
+    parentNode: Node<
+      IssueNodePayload | PullRequestNodePayload | PullRequestReviewNodePayload
+    >,
     commentJson: *
   ) {
-    const commentID: CommentNodeID = {type: "COMMENT", id: commentJson.id};
-    const commentNodePayload: CommentNodePayload = {
+    let commentID: CommentNodeID | PullRequestReviewCommentNodeID;
+    if (parentID.type === "PULL_REQUEST_REVIEW") {
+      commentID = {type: "PULL_REQUEST_REVIEW_COMMENT", id: commentJson.id};
+    } else if (parentID.type === "ISSUE" || parentID.type === "PULL_REQUEST") {
+      commentID = {type: "COMMENT", id: commentJson.id};
+    } else {
+      throw new Error(`Unexpected comment parent type ${parentID.type}`);
+    }
+    const commentNodePayload:
+      | CommentNodePayload
+      | PullRequestReviewCommentNodePayload = {
       body: commentJson.body,
       url: commentJson.url,
     };
-    const commentNode: Node<CommentNodePayload> = {
+    const commentNode: Node<
+      CommentNodePayload | PullRequestReviewCommentNodePayload
+    > = {
       address: this.makeAddress(commentID),
       payload: commentNodePayload,
     };
     this.graph.addNode(commentNode);
 
     this.addAuthorship(commentID, commentNode, commentJson.author);
+    this.addContainment(parentID, parentNode, commentID, commentNode);
+  }
 
+  addContainment(
+    parentID: IssueNodeID | PullRequestNodeID | PullRequestReviewNodeID,
+    parentNode: Node<
+      IssueNodePayload | PullRequestNodePayload | PullRequestReviewNodePayload
+    >,
+    childID:
+      | CommentNodeID
+      | PullRequestReviewCommentNodeID
+      | PullRequestReviewNodeID,
+    childNode: Node<
+      | CommentNodePayload
+      | PullRequestReviewCommentNodePayload
+      | PullRequestReviewNodePayload
+    >
+  ) {
     const containmentID: ContainmentEdgeID = {
       type: "CONTAINMENT",
-      childID: commentID,
-      parentID: parentID,
+      childID,
+      parentID,
     };
     const containmentEdge = {
       address: this.makeAddress(containmentID),
       payload: {},
       src: parentNode.address,
-      dst: commentNode.address,
+      dst: childNode.address,
     };
     this.graph.addEdge(containmentEdge);
   }
@@ -247,6 +317,35 @@ export class GithubParser {
     this.addAuthorship(pullRequestID, pullRequestNode, prJson.author);
     prJson.comments.nodes.forEach((c) =>
       this.addComment(pullRequestID, pullRequestNode, c)
+    );
+
+    prJson.reviews.nodes.forEach((r) =>
+      this.addPullRequestReview(pullRequestID, pullRequestNode, r)
+    );
+  }
+
+  addPullRequestReview(
+    pullRequestID: PullRequestNodeID,
+    pullRequestNode: Node<PullRequestNodePayload>,
+    reviewJson: *
+  ) {
+    const reviewID: PullRequestReviewNodeID = {
+      type: "PULL_REQUEST_REVIEW",
+      id: reviewJson.id,
+    };
+    const reviewPayload: PullRequestReviewNodePayload = {
+      state: reviewJson.state,
+      body: reviewJson.body,
+    };
+    const reviewNode: Node<PullRequestReviewNodePayload> = {
+      address: this.makeAddress(reviewID),
+      payload: reviewPayload,
+    };
+    this.graph.addNode(reviewNode);
+    this.addContainment(pullRequestID, pullRequestNode, reviewID, reviewNode);
+    this.addAuthorship(reviewID, reviewNode, reviewJson.author);
+    reviewJson.comments.nodes.forEach((c) =>
+      this.addComment(reviewID, reviewNode, c)
     );
   }
 

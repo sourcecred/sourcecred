@@ -148,8 +148,98 @@ Object {
         "repositoryName": "sourcecred/example-repo",
       },
     },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"authorID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjQzMTc4MDY=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},\\\\\\"contributionID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"AUTHORSHIP\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDQ6VXNlcjQzMTc4MDY=\\",\\"type\\":\\"USER\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"authorID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjQzMTc4MDY=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},\\\\\\"contributionID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"AUTHORSHIP\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDQ6VXNlcjQzMTc4MDY=\\",\\"type\\":\\"USER\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"authorID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjQzMTc4MDY=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},\\\\\\"contributionID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"AUTHORSHIP\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDQ6VXNlcjQzMTc4MDY=\\",\\"type\\":\\"USER\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\",\\"type\\":\\"PULL_REQUEST_REVIEW_COMMENT\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"childID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"parentID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"CONTAINMENT\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\",\\"type\\":\\"PULL_REQUEST\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"childID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"parentID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"CONTAINMENT\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\",\\"type\\":\\"PULL_REQUEST\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"childID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"},\\\\\\"parentID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"CONTAINMENT\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\",\\"type\\":\\"PULL_REQUEST_REVIEW_COMMENT\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
   },
   "nodes": Object {
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "body": "I'm sold",
+        "state": "APPROVED",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "body": "hmmm.jpg",
+        "state": "CHANGES_REQUESTED",
+      },
+    },
     "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}\\"}": Object {
       "payload": Object {
         "body": "@wchargin could you please do the following:
@@ -161,9 +251,20 @@ Object {
         "title": "This pull request will be more contentious. I can feel it...",
       },
     },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "body": "seems a bit capricious",
+        "url": "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
+      },
+    },
     "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjE0MDAwMjM=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"}\\"}": Object {
       "payload": Object {
         "login": "dandelionmane",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjQzMTc4MDY=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "login": "wchargin",
       },
     },
   },
@@ -382,6 +483,71 @@ Object {
         "repositoryName": "sourcecred/example-repo",
       },
     },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"authorID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjQzMTc4MDY=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},\\\\\\"contributionID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"AUTHORSHIP\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDQ6VXNlcjQzMTc4MDY=\\",\\"type\\":\\"USER\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"authorID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjQzMTc4MDY=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},\\\\\\"contributionID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"AUTHORSHIP\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDQ6VXNlcjQzMTc4MDY=\\",\\"type\\":\\"USER\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"authorID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjQzMTc4MDY=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},\\\\\\"contributionID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"AUTHORSHIP\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDQ6VXNlcjQzMTc4MDY=\\",\\"type\\":\\"USER\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\",\\"type\\":\\"PULL_REQUEST_REVIEW_COMMENT\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"childID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"parentID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"CONTAINMENT\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\",\\"type\\":\\"PULL_REQUEST\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"childID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"parentID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"CONTAINMENT\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\",\\"type\\":\\"PULL_REQUEST\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
     "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"childID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"},\\\\\\"parentID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"CONTAINMENT\\\\\\"}\\"}": Object {
       "dst": Object {
         "id": "{\\"id\\":\\"MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==\\",\\"type\\":\\"COMMENT\\"}",
@@ -447,8 +613,33 @@ Object {
         "repositoryName": "sourcecred/example-repo",
       },
     },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"childID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"},\\\\\\"parentID\\\\\\":{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},\\\\\\"type\\\\\\":\\\\\\"CONTAINMENT\\\\\\"}\\"}": Object {
+      "dst": Object {
+        "id": "{\\"id\\":\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\",\\"type\\":\\"PULL_REQUEST_REVIEW_COMMENT\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+      },
+    },
   },
   "nodes": Object {
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "body": "I'm sold",
+        "state": "APPROVED",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "body": "hmmm.jpg",
+        "state": "CHANGES_REQUESTED",
+      },
+    },
     "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}\\"}": Object {
       "payload": Object {
         "body": "Oh look, it's a pull request.",
@@ -498,9 +689,20 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
         "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850",
       },
     },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "body": "seems a bit capricious",
+        "url": "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
+      },
+    },
     "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjE0MDAwMjM=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"}\\"}": Object {
       "payload": Object {
         "login": "dandelionmane",
+      },
+    },
+    "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjQzMTc4MDY=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"}\\"}": Object {
+      "payload": Object {
+        "login": "wchargin",
       },
     },
     "{\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"id\\":\\"{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ4MTg=\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}\\"}": Object {

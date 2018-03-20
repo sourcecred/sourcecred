@@ -13,6 +13,23 @@ describe("GithubParser", () => {
       expect(graph).toMatchSnapshot();
     });
 
+    it("no node or edge has undefined properties in its payload", () => {
+      graph
+        .getAllNodes()
+        .forEach((n) =>
+          Object.keys(n.payload).forEach((k) =>
+            expect((n.payload: any)[k]).toBeDefined()
+          )
+        );
+      graph
+        .getAllEdges()
+        .forEach((e) =>
+          Object.keys(e.payload).forEach((k) =>
+            expect((e.payload: any)[k]).toBeDefined()
+          )
+        );
+    });
+
     it("every comment has an author and container", () => {
       const comments = graph
         .getAllNodes()
