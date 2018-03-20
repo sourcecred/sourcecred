@@ -1,0 +1,324 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`githubPluginAdapter operates on the example repo 1`] = `
+Array [
+  Object {
+    "id": Object {
+      "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4",
+      "type": "PULL_REQUEST_REVIEW",
+    },
+    "payload": Object {
+      "body": "I'm sold",
+      "state": "APPROVED",
+    },
+    "rendered": <div>
+      type: 
+      PULL_REQUEST_REVIEW
+       (details to be implemented)
+</div>,
+    "title": "review of #5: This pull request will be more contentious. I can feel it...",
+    "type": "PULL_REQUEST_REVIEW",
+  },
+  Object {
+    "id": Object {
+      "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5",
+      "type": "PULL_REQUEST_REVIEW",
+    },
+    "payload": Object {
+      "body": "hmmm.jpg",
+      "state": "CHANGES_REQUESTED",
+    },
+    "rendered": <div>
+      type: 
+      PULL_REQUEST_REVIEW
+       (details to be implemented)
+</div>,
+    "title": "review of #5: This pull request will be more contentious. I can feel it...",
+    "type": "PULL_REQUEST_REVIEW",
+  },
+  Object {
+    "id": Object {
+      "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
+      "type": "PULL_REQUEST",
+    },
+    "payload": Object {
+      "body": "Oh look, it's a pull request.",
+      "number": 3,
+      "title": "Add README, merge via PR.",
+    },
+    "rendered": <div>
+      type: 
+      PULL_REQUEST
+       (details to be implemented)
+</div>,
+    "title": "#3: Add README, merge via PR.",
+    "type": "PULL_REQUEST",
+  },
+  Object {
+    "id": Object {
+      "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
+      "type": "PULL_REQUEST",
+    },
+    "payload": Object {
+      "body": "@wchargin could you please do the following:
+- add a commit comment
+- add a review comment requesting some trivial change
+- i'll change it
+- then approve the pr",
+      "number": 5,
+      "title": "This pull request will be more contentious. I can feel it...",
+    },
+    "rendered": <div>
+      type: 
+      PULL_REQUEST
+       (details to be implemented)
+</div>,
+    "title": "#5: This pull request will be more contentious. I can feel it...",
+    "type": "PULL_REQUEST",
+  },
+  Object {
+    "id": Object {
+      "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
+      "type": "COMMENT",
+    },
+    "payload": Object {
+      "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
+      "url": "https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #3: Add README, merge via PR.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": Object {
+      "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODQ0Mg==",
+      "type": "COMMENT",
+    },
+    "payload": Object {
+      "body": "A wild COMMENT appeared!",
+      "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #6: An issue with comments",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": Object {
+      "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODUzOA==",
+      "type": "COMMENT",
+    },
+    "payload": Object {
+      "body": "And the maintainer said, \\"Let there be comments!\\"",
+      "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #6: An issue with comments",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": Object {
+      "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
+      "type": "COMMENT",
+    },
+    "payload": Object {
+      "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-repo/issues/6",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768703",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": Object {
+      "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
+      "type": "COMMENT",
+    },
+    "payload": Object {
+      "body": "We might also reference individual comments directly.
+https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": Object {
+      "id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==",
+      "type": "PULL_REQUEST_REVIEW_COMMENT",
+    },
+    "payload": Object {
+      "body": "seems a bit capricious",
+      "url": "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
+    },
+    "rendered": <div>
+      type: 
+      PULL_REQUEST_REVIEW_COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on review of #5: This pull request will be more contentious. I can feel it...",
+    "type": "PULL_REQUEST_REVIEW_COMMENT",
+  },
+  Object {
+    "id": Object {
+      "id": "MDQ6VXNlcjE0MDAwMjM=",
+      "type": "USER",
+    },
+    "payload": Object {
+      "login": "dandelionmane",
+    },
+    "rendered": <div>
+      type: 
+      USER
+       (details to be implemented)
+</div>,
+    "title": "dandelionmane",
+    "type": "USER",
+  },
+  Object {
+    "id": Object {
+      "id": "MDQ6VXNlcjQzMTc4MDY=",
+      "type": "USER",
+    },
+    "payload": Object {
+      "login": "wchargin",
+    },
+    "rendered": <div>
+      type: 
+      USER
+       (details to be implemented)
+</div>,
+    "title": "wchargin",
+    "type": "USER",
+  },
+  Object {
+    "id": Object {
+      "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
+      "type": "ISSUE",
+    },
+    "payload": Object {
+      "body": "This is just an example issue.",
+      "number": 1,
+      "title": "An example issue.",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#1: An example issue.",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": Object {
+      "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+      "type": "ISSUE",
+    },
+    "payload": Object {
+      "body": "This issue references another issue, namely #1",
+      "number": 2,
+      "title": "A referencing issue.",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#2: A referencing issue.",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": Object {
+      "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
+      "type": "ISSUE",
+    },
+    "payload": Object {
+      "body": "Alas, its life as an open issue had only just begun.",
+      "number": 4,
+      "title": "A closed pull request",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#4: A closed pull request",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": Object {
+      "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
+      "type": "ISSUE",
+    },
+    "payload": Object {
+      "body": "This issue shall shortly have a few comments.",
+      "number": 6,
+      "title": "An issue with comments",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#6: An issue with comments",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": Object {
+      "id": "MDU6SXNzdWUzMDY5ODM1NTI=",
+      "type": "ISSUE",
+    },
+    "payload": Object {
+      "body": "Deal with this, naive string display algorithms!!!!!",
+      "number": 7,
+      "title": "An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#7: An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": Object {
+      "id": "MDU6SXNzdWUzMDY5ODUzNjc=",
+      "type": "ISSUE",
+    },
+    "payload": Object {
+      "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️
+Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+      "number": 8,
+      "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#8: Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+    "type": "ISSUE",
+  },
+]
+`;
