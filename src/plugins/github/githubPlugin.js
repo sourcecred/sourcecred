@@ -147,9 +147,26 @@ export type NodeTypes = {|
     payload: BotNodePayload,
   },
 |};
+
+export type EdgeTypes = {|
+  AUTHORSHIP: {
+    id: AuthorshipEdgeID,
+    payload: AuthorshipEdgePayload,
+  },
+  CONTAINMENT: {
+    id: ContainmentEdgeID,
+    payload: ContainmentEdgePayload,
+  },
+  REFERENCE: {
+    id: ReferenceEdgeID,
+    payload: ReferenceEdgePayload,
+  },
+|};
+
 (function staticAssertions() {
-  // Check that node payload types are exhaustive.
+  // Check that node & edge payload types are exhaustive.
   (x: NodeType): $Keys<NodeTypes> => x;
+  (x: EdgeType): $Keys<EdgeTypes> => x;
 
   // Check that each type is associated with the correct ID type.
   // Doesn't work because of a Flow bug; should work if that bug is
