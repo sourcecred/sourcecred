@@ -24,7 +24,7 @@ import * as GraphQLQueries from "../../graphql/queries";
  *    scraped from the repository, with data format to be specified
  *    later
  */
-export default function fetchGitHubRepo(
+export default function fetchGithubRepo(
   repoOwner: string,
   repoName: string,
   token: string

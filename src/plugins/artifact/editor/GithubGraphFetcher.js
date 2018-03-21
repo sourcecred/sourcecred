@@ -4,15 +4,15 @@ import React from "react";
 
 import type {Graph} from "../../../core/graph";
 import LocalStore from "./LocalStore";
-import fetchGitHubRepo from "../../github/fetchGitHubRepo";
+import fetchGithubRepo from "../../github/fetchGithubRepo";
 import type {
-  NodePayload as GitHubNodePayload,
-  EdgePayload as GitHubEdgePayload,
+  NodePayload as GithubNodePayload,
+  EdgePayload as GithubEdgePayload,
 } from "../../github/githubPlugin";
 import {GithubParser} from "../../github/githubPlugin";
 
 type Props = {
-  onCreateGraph: (graph: Graph<GitHubNodePayload, GitHubEdgePayload>) => void,
+  onCreateGraph: (graph: Graph<GithubNodePayload, GithubEdgePayload>) => void,
 };
 type State = {
   apiToken: string,
@@ -20,9 +20,9 @@ type State = {
   repoName: string,
 };
 
-const SETTINGS_KEY = "GitHubGraphFetcher.settings";
+const SETTINGS_KEY = "GithubGraphFetcher.settings";
 
-export class GitHubGraphFetcher extends React.Component<Props, State> {
+export class GithubGraphFetcher extends React.Component<Props, State> {
   constructor() {
     super();
     const defaultState = {
@@ -83,7 +83,7 @@ export class GitHubGraphFetcher extends React.Component<Props, State> {
   fetchGraph() {
     const {repoOwner, repoName, apiToken} = this.state;
     LocalStore.set(SETTINGS_KEY, {apiToken, repoOwner, repoName});
-    fetchGitHubRepo(repoOwner, repoName, apiToken)
+    fetchGithubRepo(repoOwner, repoName, apiToken)
       .then((json) => {
         const parser = new GithubParser(`${repoOwner}/${repoName}`);
         parser.addData(json.data);

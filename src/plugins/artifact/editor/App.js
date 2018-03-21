@@ -8,18 +8,18 @@ import "./pluginAdapter";
 import type {Graph, Node} from "../../../core/graph";
 import type {ArtifactNodePayload} from "../artifactPlugin";
 import type {
-  NodePayload as GitHubNodePayload,
-  EdgePayload as GitHubEdgePayload,
+  NodePayload as GithubNodePayload,
+  EdgePayload as GithubEdgePayload,
 } from "../../github/githubPlugin";
 import {ArtifactList} from "./ArtifactList";
 import {ContributionList} from "./ContributionList";
-import {GitHubGraphFetcher} from "./GitHubGraphFetcher";
+import {GithubGraphFetcher} from "./GithubGraphFetcher";
 import standardAdapterSet from "./standardAdapterSet";
 
 type Props = {};
 type State = {
   artifacts: Node<ArtifactNodePayload>[],
-  githubGraph: ?Graph<GitHubNodePayload, GitHubEdgePayload>,
+  githubGraph: ?Graph<GithubNodePayload, GithubEdgePayload>,
 };
 
 function createSampleArtifact(name) {
@@ -49,7 +49,7 @@ export default class App extends React.Component<Props, State> {
         <header className={css(styles.header)}>
           <h1>Artifact editor</h1>
         </header>
-        <GitHubGraphFetcher
+        <GithubGraphFetcher
           onCreateGraph={(githubGraph) => {
             this.setState({githubGraph});
           }}

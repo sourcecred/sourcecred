@@ -1,17 +1,17 @@
 /*
  * Command-line utility to fetch GitHub data using the API in
- * ../fetchGitHubRepo, and print it to stdout. Useful for testing or
+ * ../fetchGithubRepo, and print it to stdout. Useful for testing or
  * saving some data to disk.
  *
  * Usage:
  *
- *   node bin/fetchAndPrintGitHubRepo.js REPO_OWNER REPO_NAME [TOKEN]
+ *   node bin/fetchAndPrintGithubRepo.js REPO_OWNER REPO_NAME [TOKEN]
  *
  * where TOKEN is an optional GitHub authentication token, as generated
  * from https://github.com/settings/tokens/new.
  */
 
-import fetchGitHubRepo from "../fetchGitHubRepo";
+import fetchGithubRepo from "../fetchGithubRepo";
 import stringify from "json-stable-stringify";
 
 function parseArgs() {
@@ -35,7 +35,7 @@ function parseArgs() {
 
 function main() {
   const args = parseArgs();
-  fetchGitHubRepo(args.repoOwner, args.repoName, args.token)
+  fetchGithubRepo(args.repoOwner, args.repoName, args.token)
     .then((data) => {
       console.log(stringify(data, {space: 4}));
     })
