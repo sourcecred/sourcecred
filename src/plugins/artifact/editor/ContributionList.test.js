@@ -1,0 +1,162 @@
+// @flow
+
+import React from "react";
+import ReactDOM from "react-dom";
+import reactTestRenderer from "react-test-renderer";
+
+import type {Address} from "../../../core/address";
+import type {Node} from "../../../core/graph";
+import type {PluginAdapter} from "./pluginAdapter";
+import {AdapterSet} from "./adapterSet";
+import {ContributionList} from "./ContributionList";
+import {Graph} from "../../../core/graph";
+
+require("./testUtil").configureAphrodite();
+
+function createTestData(): * {
+  type PayloadA = number;
+  type PayloadB = boolean;
+  type PayloadC = string;
+  type NodePayload = PayloadA | PayloadB | PayloadC;
+  type EdgePayload = null;
+
+  const PLUGIN_A = "sourcecred/example-plugin-a";
+  const PLUGIN_B = "sourcecred/example-plugin-b";
+  const PLUGIN_C = "sourcecred/example-plugin-c";
+
+  function makeAddress(
+    pluginName: typeof PLUGIN_A | typeof PLUGIN_B | typeof PLUGIN_C,
+    id: string
+  ): Address {
+    return {
+      repositoryName: "sourcecred/tests",
+      pluginName,
+      id,
+    };
+  }
+
+  const nodeA1 = () => ({
+    address: makeAddress(PLUGIN_A, "one"),
+    payload: (111: PayloadA),
+  });
+  const nodeA2 = () => ({
+    address: makeAddress(PLUGIN_A, "two"),
+    payload: (234: PayloadA),
+  });
+  const nodeA3 = () => ({
+    address: makeAddress(PLUGIN_A, "three"),
+    payload: (616: PayloadA),
+  });
+  const nodeB4 = () => ({
+    address: makeAddress(PLUGIN_B, "four"),
+    payload: (true: PayloadB),
+  });
+  const nodeC5 = () => ({
+    address: makeAddress(PLUGIN_C, "five"),
+    payload: ("I have no adapter :-(": PayloadC),
+  });
+  const edgeA1A2 = () => ({
+    address: makeAddress(PLUGIN_A, "one-to-two"),
+    payload: null,
+    src: nodeA1().address,
+    dst: nodeA2().address,
+  });
+  const edgeB4A3 = () => ({
+    address: makeAddress(PLUGIN_C, "four-to-three"),
+    payload: null,
+    src: nodeB4().address,
+    dst: nodeA3().address,
+  });
+
+  const graph: () => Graph<NodePayload, EdgePayload> = () =>
+    new Graph()
+      .addNode(nodeA1())
+      .addNode(nodeA2())
+      .addNode(nodeA3())
+      .addNode(nodeB4())
+      .addNode(nodeC5())
+      .addEdge(edgeA1A2())
+      .addEdge(edgeB4A3());
+
+  const adapterA: () => PluginAdapter<PayloadA> = () => ({
+    pluginName: PLUGIN_A,
+    renderer: class RendererA extends React.Component<{
+      graph: Graph<any, any>,
+      node: Node<PayloadA>,
+    }> {
+      render() {
+        const {graph, node} = this.props;
+        const neighborCount = graph.getOutEdges(node.address).length;
+        return (
+          <span>
+            <tt>{node.address.id}</tt> has neighbor count{" "}
+            <strong>{neighborCount}</strong>
+          </span>
+        );
+      }
+    },
+    extractType(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadA>) {
+      return node.payload < 500 ? "small" : "big";
+    },
+    extractTitle(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadA>) {
+      return `the number ${String(node.payload)}`;
+    },
+  });
+
+  const adapterB: () => PluginAdapter<PayloadB> = () => ({
+    pluginName: PLUGIN_B,
+    renderer: class RendererB extends React.Component<{
+      graph: Graph<any, any>,
+      node: Node<PayloadB>,
+    }> {
+      render() {
+        const {node} = this.props;
+        return (
+          <span>
+            Node <em>{node.address.id}</em>: <strong>{node.payload}</strong>
+          </span>
+        );
+      }
+    },
+    extractType(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadB>) {
+      return node.payload ? "very true" : "not so";
+    },
+    extractTitle(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadB>) {
+      return String(node.payload).toUpperCase() + "!";
+    },
+  });
+
+  const adapters: () => AdapterSet = () => {
+    const result = new AdapterSet();
+    result.addAdapter(adapterA());
+    result.addAdapter(adapterB());
+    return result;
+  };
+
+  return {
+    PLUGIN_A,
+    PLUGIN_B,
+    PLUGIN_C,
+    nodeA1,
+    nodeA2,
+    nodeA3,
+    nodeB4,
+    nodeC5,
+    edgeA1A2,
+    edgeB4A3,
+    graph,
+    adapterA,
+    adapterB,
+    adapters,
+  };
+}
+
+describe("ContributionList", () => {
+  it("renders some test data in the default state", () => {
+    const data = createTestData();
+    const result = reactTestRenderer.create(
+      <ContributionList graph={data.graph()} adapters={data.adapters()} />
+    );
+    expect(result).toMatchSnapshot();
+  });
+});
