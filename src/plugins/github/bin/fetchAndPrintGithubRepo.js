@@ -7,7 +7,7 @@
  *
  *   node bin/fetchAndPrintGithubRepo.js REPO_OWNER REPO_NAME [TOKEN]
  *
- * where TOKEN is an optional Github authentication token, as generated
+ * where TOKEN is an optional GitHub authentication token, as generated
  * from https://github.com/settings/tokens/new.
  */
 
