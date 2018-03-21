@@ -22,7 +22,7 @@ import {GITHUB_PLUGIN_NAME, getNodeType} from "../../../github/githubPlugin";
 const adapter: PluginAdapter<NodePayload> = {
   pluginName: GITHUB_PLUGIN_NAME,
 
-  renderer: class GitHubNodeRenderer extends React.Component<{
+  renderer: class GithubNodeRenderer extends React.Component<{
     graph: Graph<any, any>,
     node: Node<NodePayload>,
   }> {

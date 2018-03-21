@@ -14,7 +14,7 @@ main() {
     return 1
   fi
   output="$(mktemp)"
-  node bin/fetchAndPrintGitHubRepo.js \
+  node bin/fetchAndPrintGithubRepo.js \
     sourcecred example-repo "${GITHUB_TOKEN}" \
     >"${output}" \
     ;
