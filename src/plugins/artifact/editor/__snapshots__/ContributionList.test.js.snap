@@ -1,131 +1,391 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ContributionList renders some test data in the default state 1`] = `
-<div>
-  <h2>
-    Contributions
-  </h2>
-  <label>
-    Filter by contribution type:
-     
-    <select
-      onChange={[Function]}
-      value="null"
-    >
-      <option
+<ContributionList
+  adapters={
+    AdapterSet {
+      "adapters": Object {
+        "sourcecred/example-plugin-a": Object {
+          "extractTitle": [Function],
+          "extractType": [Function],
+          "pluginName": "sourcecred/example-plugin-a",
+          "renderer": [Function],
+        },
+        "sourcecred/example-plugin-b": Object {
+          "extractTitle": [Function],
+          "extractType": [Function],
+          "pluginName": "sourcecred/example-plugin-b",
+          "renderer": [Function],
+        },
+      },
+    }
+  }
+  graph={
+    Object {
+      "edges": Object {
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one-to-two\\"}": Object {
+          "dst": Object {
+            "id": "two",
+            "pluginName": "sourcecred/example-plugin-a",
+            "repositoryName": "sourcecred/tests",
+          },
+          "payload": null,
+          "src": Object {
+            "id": "one",
+            "pluginName": "sourcecred/example-plugin-a",
+            "repositoryName": "sourcecred/tests",
+          },
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-c\\",\\"id\\":\\"four-to-three\\"}": Object {
+          "dst": Object {
+            "id": "three",
+            "pluginName": "sourcecred/example-plugin-a",
+            "repositoryName": "sourcecred/tests",
+          },
+          "payload": null,
+          "src": Object {
+            "id": "four",
+            "pluginName": "sourcecred/example-plugin-b",
+            "repositoryName": "sourcecred/tests",
+          },
+        },
+      },
+      "nodes": Object {
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one\\"}": Object {
+          "payload": 111,
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"three\\"}": Object {
+          "payload": 616,
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"two\\"}": Object {
+          "payload": 234,
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-b\\",\\"id\\":\\"four\\"}": Object {
+          "payload": true,
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-c\\",\\"id\\":\\"five\\"}": Object {
+          "payload": "I have no adapter :-(",
+        },
+      },
+    }
+  }
+>
+  <div>
+    <h2>
+      Contributions
+    </h2>
+    <label>
+      Filter by contribution type:
+       
+      <select
+        onChange={[Function]}
         value="null"
       >
-        Show all
-      </option>
-      <option
-        disabled={true}
-        style={
-          Object {
-            "fontWeight": "bold",
+        <option
+          value="null"
+        >
+          Show all
+        </option>
+        <option
+          disabled={true}
+          key="sourcecred/example-plugin-a"
+          style={
+            Object {
+              "fontWeight": "bold",
+            }
           }
-        }
-      >
-        sourcecred/example-plugin-a
-      </option>
-      <option
-        value="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"type\\":\\"big\\"}"
-      >
-         big
-      </option>
-      <option
+        >
+          sourcecred/example-plugin-a
+        </option>
+        <option
+          key="big"
+          value="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"type\\":\\"big\\"}"
+        >
+           big
+        </option>
+        <option
+          key="small"
+          value="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"type\\":\\"small\\"}"
+        >
+           small
+        </option>
+        <option
+          disabled={true}
+          key="sourcecred/example-plugin-b"
+          style={
+            Object {
+              "fontWeight": "bold",
+            }
+          }
+        >
+          sourcecred/example-plugin-b
+        </option>
+        <option
+          key="very true"
+          value="{\\"pluginName\\":\\"sourcecred/example-plugin-b\\",\\"type\\":\\"very true\\"}"
+        >
+           very true
+        </option>
+      </select>
+    </label>
+    <table>
+      <thead>
+        <tr>
+          <th>
+            Title
+          </th>
+          <th>
+            Artifact
+          </th>
+          <th>
+            Weight
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one\\"}"
+        >
+          <td>
+            the number 111
+          </td>
+          <td>
+            [TODO]
+          </td>
+          <td>
+            [TODO]
+          </td>
+        </tr>
+        <tr
+          key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"two\\"}"
+        >
+          <td>
+            the number 234
+          </td>
+          <td>
+            [TODO]
+          </td>
+          <td>
+            [TODO]
+          </td>
+        </tr>
+        <tr
+          key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"three\\"}"
+        >
+          <td>
+            the number 616
+          </td>
+          <td>
+            [TODO]
+          </td>
+          <td>
+            [TODO]
+          </td>
+        </tr>
+        <tr
+          key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-b\\",\\"id\\":\\"four\\"}"
+        >
+          <td>
+            TRUE!
+          </td>
+          <td>
+            [TODO]
+          </td>
+          <td>
+            [TODO]
+          </td>
+        </tr>
+        <tr
+          key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-c\\",\\"id\\":\\"five\\"}"
+        >
+          <td
+            colSpan={3}
+          >
+            <i>
+              unknown
+            </i>
+             (plugin: 
+            sourcecred/example-plugin-c
+            )
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ContributionList>
+`;
+
+exports[`ContributionList updates the node table when a filter is selected 1`] = `
+<ContributionList
+  adapters={
+    AdapterSet {
+      "adapters": Object {
+        "sourcecred/example-plugin-a": Object {
+          "extractTitle": [Function],
+          "extractType": [Function],
+          "pluginName": "sourcecred/example-plugin-a",
+          "renderer": [Function],
+        },
+        "sourcecred/example-plugin-b": Object {
+          "extractTitle": [Function],
+          "extractType": [Function],
+          "pluginName": "sourcecred/example-plugin-b",
+          "renderer": [Function],
+        },
+      },
+    }
+  }
+  graph={
+    Object {
+      "edges": Object {
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one-to-two\\"}": Object {
+          "dst": Object {
+            "id": "two",
+            "pluginName": "sourcecred/example-plugin-a",
+            "repositoryName": "sourcecred/tests",
+          },
+          "payload": null,
+          "src": Object {
+            "id": "one",
+            "pluginName": "sourcecred/example-plugin-a",
+            "repositoryName": "sourcecred/tests",
+          },
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-c\\",\\"id\\":\\"four-to-three\\"}": Object {
+          "dst": Object {
+            "id": "three",
+            "pluginName": "sourcecred/example-plugin-a",
+            "repositoryName": "sourcecred/tests",
+          },
+          "payload": null,
+          "src": Object {
+            "id": "four",
+            "pluginName": "sourcecred/example-plugin-b",
+            "repositoryName": "sourcecred/tests",
+          },
+        },
+      },
+      "nodes": Object {
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one\\"}": Object {
+          "payload": 111,
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"three\\"}": Object {
+          "payload": 616,
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"two\\"}": Object {
+          "payload": 234,
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-b\\",\\"id\\":\\"four\\"}": Object {
+          "payload": true,
+        },
+        "{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-c\\",\\"id\\":\\"five\\"}": Object {
+          "payload": "I have no adapter :-(",
+        },
+      },
+    }
+  }
+>
+  <div>
+    <h2>
+      Contributions
+    </h2>
+    <label>
+      Filter by contribution type:
+       
+      <select
+        onChange={[Function]}
         value="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"type\\":\\"small\\"}"
       >
-         small
-      </option>
-      <option
-        disabled={true}
-        style={
-          Object {
-            "fontWeight": "bold",
-          }
-        }
-      >
-        sourcecred/example-plugin-b
-      </option>
-      <option
-        value="{\\"pluginName\\":\\"sourcecred/example-plugin-b\\",\\"type\\":\\"very true\\"}"
-      >
-         very true
-      </option>
-    </select>
-  </label>
-  <table>
-    <thead>
-      <tr>
-        <th>
-          Title
-        </th>
-        <th>
-          Artifact
-        </th>
-        <th>
-          Weight
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          the number 111
-        </td>
-        <td>
-          [TODO]
-        </td>
-        <td>
-          [TODO]
-        </td>
-      </tr>
-      <tr>
-        <td>
-          the number 234
-        </td>
-        <td>
-          [TODO]
-        </td>
-        <td>
-          [TODO]
-        </td>
-      </tr>
-      <tr>
-        <td>
-          the number 616
-        </td>
-        <td>
-          [TODO]
-        </td>
-        <td>
-          [TODO]
-        </td>
-      </tr>
-      <tr>
-        <td>
-          TRUE!
-        </td>
-        <td>
-          [TODO]
-        </td>
-        <td>
-          [TODO]
-        </td>
-      </tr>
-      <tr>
-        <td
-          colspan={3}
+        <option
+          value="null"
         >
-          <i>
-            unknown
-          </i>
-           (plugin: 
-          sourcecred/example-plugin-c
-          )
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+          Show all
+        </option>
+        <option
+          disabled={true}
+          key="sourcecred/example-plugin-a"
+          style={
+            Object {
+              "fontWeight": "bold",
+            }
+          }
+        >
+          sourcecred/example-plugin-a
+        </option>
+        <option
+          key="big"
+          value="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"type\\":\\"big\\"}"
+        >
+           big
+        </option>
+        <option
+          key="small"
+          value="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"type\\":\\"small\\"}"
+        >
+           small
+        </option>
+        <option
+          disabled={true}
+          key="sourcecred/example-plugin-b"
+          style={
+            Object {
+              "fontWeight": "bold",
+            }
+          }
+        >
+          sourcecred/example-plugin-b
+        </option>
+        <option
+          key="very true"
+          value="{\\"pluginName\\":\\"sourcecred/example-plugin-b\\",\\"type\\":\\"very true\\"}"
+        >
+           very true
+        </option>
+      </select>
+    </label>
+    <table>
+      <thead>
+        <tr>
+          <th>
+            Title
+          </th>
+          <th>
+            Artifact
+          </th>
+          <th>
+            Weight
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one\\"}"
+        >
+          <td>
+            the number 111
+          </td>
+          <td>
+            [TODO]
+          </td>
+          <td>
+            [TODO]
+          </td>
+        </tr>
+        <tr
+          key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"two\\"}"
+        >
+          <td>
+            the number 234
+          </td>
+          <td>
+            [TODO]
+          </td>
+          <td>
+            [TODO]
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ContributionList>
 `;

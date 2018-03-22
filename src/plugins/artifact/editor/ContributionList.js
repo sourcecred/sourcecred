@@ -119,7 +119,7 @@ export class ContributionList extends React.Component<Props, State> {
               if (adapter == null) {
                 return (
                   <tr key={JSON.stringify(node.address)}>
-                    <td colspan={3}>
+                    <td colSpan={3}>
                       <i>unknown</i> (plugin: {node.address.pluginName})
                     </td>
                   </tr>

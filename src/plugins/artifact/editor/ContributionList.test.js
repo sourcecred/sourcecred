@@ -1,8 +1,9 @@
 // @flow
 
+import type {ReactWrapper} from "enzyme";
 import React from "react";
-import ReactDOM from "react-dom";
-import reactTestRenderer from "react-test-renderer";
+import {mount} from "enzyme";
+import enzymeToJSON from "enzyme-to-json";
 
 import type {Address} from "../../../core/address";
 import type {Node} from "../../../core/graph";
@@ -12,6 +13,7 @@ import {ContributionList} from "./ContributionList";
 import {Graph} from "../../../core/graph";
 
 require("./testUtil").configureAphrodite();
+require("./testUtil").configureEnzyme();
 
 function createTestData(): * {
   type PayloadA = number;
@@ -152,11 +154,45 @@ function createTestData(): * {
 }
 
 describe("ContributionList", () => {
-  it("renders some test data in the default state", () => {
+  // Render a contribution list with the above test data.
+  function render() {
     const data = createTestData();
-    const result = reactTestRenderer.create(
+    const result = mount(
       <ContributionList graph={data.graph()} adapters={data.adapters()} />
     );
-    expect(result).toMatchSnapshot();
+    return result;
+  }
+
+  // Select the unique <option> whose text matches the given patern.
+  function simulateSelect(container: ReactWrapper, pattern: RegExp): void {
+    const targetOption = container
+      .find("option")
+      .filterWhere((x) => pattern.test(x.text()));
+    expect(targetOption).toHaveLength(1);
+    container
+      .find("select")
+      .simulate("change", {target: {value: targetOption.prop("value")}});
+  }
+
+  it("renders some test data in the default state", () => {
+    const result = render();
+    expect(enzymeToJSON(result)).toMatchSnapshot();
+  });
+
+  it("updates the node table when a filter is selected", () => {
+    const result = render();
+    simulateSelect(result, /small/);
+    expect(enzymeToJSON(result)).toMatchSnapshot();
+  });
+
+  it("resets the node table when a filter is deselected", () => {
+    const result = render();
+    const originalHtml = result.html();
+    simulateSelect(result, /big/);
+    const intermediateHtml = result.html();
+    simulateSelect(result, /Show all/);
+    const finalHtml = result.html();
+    expect(finalHtml).toEqual(originalHtml);
+    expect(finalHtml).not.toEqual(intermediateHtml);
   });
 });
