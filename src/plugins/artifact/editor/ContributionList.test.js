@@ -2,7 +2,7 @@
 
 import type {ReactWrapper} from "enzyme";
 import React from "react";
-import {mount} from "enzyme";
+import {shallow} from "enzyme";
 import enzymeToJSON from "enzyme-to-json";
 
 import type {Address} from "../../../core/address";
@@ -157,7 +157,7 @@ describe("ContributionList", () => {
   // Render a contribution list with the above test data.
   function render() {
     const data = createTestData();
-    const result = mount(
+    const result = shallow(
       <ContributionList graph={data.graph()} adapters={data.adapters()} />
     );
     return result;

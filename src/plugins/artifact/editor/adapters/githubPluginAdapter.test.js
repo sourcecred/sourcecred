@@ -1,13 +1,16 @@
 // @flow
 
 import React from "react";
-import reactTestRenderer from "react-test-renderer";
+import {shallow} from "enzyme";
+import enzymeToJSON from "enzyme-to-json";
 import stringify from "json-stable-stringify";
 
 import type {NodeID} from "../../../github/githubPlugin";
 import {GithubParser} from "../../../github/githubPlugin";
 import exampleRepoData from "../../../github/demoData/example-repo.json";
 import adapter from "./githubPluginAdapter";
+
+require("../testUtil").configureEnzyme();
 
 describe("githubPluginAdapter", () => {
   it("operates on the example repo", () => {
@@ -22,8 +25,8 @@ describe("githubPluginAdapter", () => {
         payload: node.payload,
         type: adapter.extractType(graph, node),
         title: adapter.extractTitle(graph, node),
-        rendered: reactTestRenderer.create(
-          <adapter.renderer graph={graph} node={node} />
+        rendered: enzymeToJSON(
+          shallow(<adapter.renderer graph={graph} node={node} />)
         ),
       }))
       .sort((a, b) => {
