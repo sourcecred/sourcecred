@@ -7,24 +7,20 @@ const stringify = require("json-stable-stringify");
 
 export const GITHUB_PLUGIN_NAME = "sourcecred/github-beta";
 
+/** Node Types */
+// TODO consider moving types to github/types.js
+export type IssueNodeType = "ISSUE";
 export type IssueNodePayload = {|
   +title: string,
   +number: number,
   +body: string,
 |};
-export type IssueNodeID = {|
-  +type: "ISSUE",
-  +id: string,
-|};
 
+export type PullRequestNodeType = "PULL_REQUEST";
 export type PullRequestNodePayload = {|
   +title: string,
   +number: number,
   +body: string,
-|};
-export type PullRequestNodeID = {|
-  +type: "PULL_REQUEST",
-  +id: string,
 |};
 
 export type PullRequestReviewState =
@@ -33,65 +29,76 @@ export type PullRequestReviewState =
   | "COMMENTED"
   | "DISMISSED"
   | "PENDING";
+export type PullRequestReviewNodeType = "PULL_REQUEST_REVIEW";
 export type PullRequestReviewNodePayload = {|
   +body: string,
   +state: PullRequestReviewState,
 |};
-export type PullRequestReviewNodeID = {|
-  +type: "PULL_REQUEST_REVIEW",
-  +id: string,
-|};
 
+export type CommentNodeType = "COMMENT";
 export type CommentNodePayload = {|
   +url: string,
   +body: string,
-|};
-export type CommentNodeID = {|
-  +type: "COMMENT",
-  +id: string,
 |};
 
 // We have this as a separate type from regular comments because we may
 // be interested in diff hunks, which are only present on PR review
 // comments.
+export type PullRequestReviewCommentNodeType = "PULL_REQUEST_REVIEW_COMMENT";
 export type PullRequestReviewCommentNodePayload = {|
   +url: string,
   +body: string,
 |};
-export type PullRequestReviewCommentNodeID = {|
-  +type: "PULL_REQUEST_REVIEW_COMMENT",
-  +id: string,
-|};
 
+export type UserNodeType = "USER";
 export type UserNodePayload = {|
   +login: string,
 |};
-export type UserNodeID = {|
-  +type: "USER",
-  +id: string,
-|};
 
+export type BotNodeType = "BOT";
 export type BotNodePayload = {|
   +login: string,
 |};
-export type BotNodeID = {|
-  +type: "BOT",
-  +id: string,
-|};
 
+export type OrganizationNodeType = "ORGANIZATION";
 export type OrganizationNodePayload = {|
   +login: string,
 |};
-export type OrganizationNodeID = {|
-  +type: "ORGANIZATION",
-  +id: string,
-|};
 
+export type AuthorNodeType = UserNodeType | BotNodeType | OrganizationNodeType;
 export type AuthorNodePayload =
   | UserNodePayload
   | BotNodePayload
   | OrganizationNodePayload;
-export type AuthorNodeID = UserNodeID | BotNodeID | OrganizationNodeID;
+
+// A map from NodeType string to the corresponding type and payload.
+// Primarily useful for adding static assertions with $ObjMap, but also
+// useful at the value layer as $ElementType<NodeTypes, "ISSUE">, for
+// instance.
+export type NodeTypes = {|
+  ISSUE: {payload: IssueNodePayload, type: IssueNodeType},
+  PULL_REQUEST: {payload: PullRequestNodePayload, type: PullRequestNodeType},
+  COMMENT: {payload: CommentNodePayload, type: CommentNodeType},
+  PULL_REQUEST_REVIEW_COMMENT: {
+    payload: PullRequestReviewCommentNodePayload,
+    type: PullRequestReviewCommentNodeType,
+  },
+  PULL_REQUEST_REVIEW: {
+    payload: PullRequestReviewNodePayload,
+    type: PullRequestReviewNodeType,
+  },
+  USER: {payload: UserNodePayload, type: UserNodeType},
+  ORGANIZATION: {payload: OrganizationNodePayload, type: OrganizationNodeType},
+  BOT: {payload: BotNodePayload, type: BotNodeType},
+|};
+
+export type NodeType =
+  | IssueNodeType
+  | PullRequestNodeType
+  | CommentNodeType
+  | PullRequestReviewNodeType
+  | PullRequestReviewCommentNodeType
+  | AuthorNodeType;
 
 export type NodePayload =
   | IssueNodePayload
@@ -100,68 +107,55 @@ export type NodePayload =
   | PullRequestReviewCommentNodePayload
   | PullRequestReviewNodePayload
   | AuthorNodePayload;
-export type NodeID =
-  | IssueNodeID
-  | PullRequestNodeID
-  | PullRequestReviewCommentNodeID
-  | CommentNodeID
-  | PullRequestReviewNodeID
-  | AuthorNodeID;
-export type NodeType = $ElementType<NodeID, "type">;
 
-// A map from NodeType string to the corresponding ID and payload types.
-// Primarily useful for adding static assertions with $ObjMap, but also
-// useful at the value layer as $ElementType<NodeTypes, "ISSUE">, for
-// instance.
-export type NodeTypes = {|
-  ISSUE: {
-    id: IssueNodeID,
-    payload: IssueNodePayload,
-  },
-  PULL_REQUEST: {
-    id: PullRequestNodeID,
-    payload: PullRequestNodePayload,
-  },
-  COMMENT: {
-    id: CommentNodeID,
-    payload: CommentNodePayload,
-  },
-  PULL_REQUEST_REVIEW_COMMENT: {
-    id: PullRequestReviewCommentNodeID,
-    payload: PullRequestReviewCommentNodePayload,
-  },
-  PULL_REQUEST_REVIEW: {
-    id: PullRequestReviewNodeID,
-    payload: PullRequestReviewNodePayload,
-  },
-  USER: {
-    id: UserNodeID,
-    payload: UserNodePayload,
-  },
-  ORGANIZATION: {
-    id: OrganizationNodeID,
-    payload: OrganizationNodePayload,
-  },
-  BOT: {
-    id: BotNodeID,
-    payload: BotNodePayload,
-  },
-|};
+/** Edge Types */
+// TODO(dandelionmane): remove the ID types when we move
+// edge address generation to core Graph code
+export type AuthorshipEdgePayload = {};
+export type AuthorshipEdgeType = "AUTHORSHIP";
+export type AuthorshipEdgeID = {
+  +contribution: Address,
+  +author: Address,
+};
+export type ContainmentEdgePayload = {};
+export type ContainmentEdgeType = "CONTAINMENT";
+export type ContainmentEdgeID = {
+  +child: Address,
+  +parent: Address,
+};
+export type ReferenceEdgePayload = {};
+export type ReferenceEdgeType = "REFERENCE";
+export type ReferenceEdgeID = {
+  +referrer: Address,
+  +referent: Address,
+};
 
 export type EdgeTypes = {|
   AUTHORSHIP: {
-    id: AuthorshipEdgeID,
     payload: AuthorshipEdgePayload,
+    type: AuthorshipEdgeType,
+    ID: AuthorshipEdgeID,
   },
   CONTAINMENT: {
-    id: ContainmentEdgeID,
     payload: ContainmentEdgePayload,
+    type: ContainmentEdgeType,
+    ID: ContainmentEdgeID,
   },
   REFERENCE: {
-    id: ReferenceEdgeID,
     payload: ReferenceEdgePayload,
+    type: ReferenceEdgeType,
+    ID: ReferenceEdgeID,
   },
 |};
+export type EdgeID = AuthorshipEdgeID | ContainmentEdgeID | ReferenceEdgeID;
+export type EdgePayload =
+  | AuthorshipEdgePayload
+  | ContainmentEdgePayload
+  | ReferenceEdgePayload;
+export type EdgeType =
+  | AuthorshipEdgeType
+  | ContainmentEdgeType
+  | ReferenceEdgeType;
 
 (function staticAssertions() {
   // Check that node & edge payload types are exhaustive.
@@ -180,41 +174,6 @@ export type EdgeTypes = {|
   //   "type"
   // > => x;
 });
-
-export type AuthorshipEdgePayload = {};
-export type AuthorshipEdgeID = {
-  +type: "AUTHORSHIP",
-  +contributionID: NodeID,
-  +authorID: NodeID,
-};
-export type ContainmentEdgePayload = {};
-export type ContainmentEdgeID = {
-  +type: "CONTAINMENT",
-  +childID: NodeID,
-  +parentID: NodeID,
-};
-export type ReferenceEdgePayload = {};
-export type ReferenceEdgeID = {
-  +type: "REFERENCE",
-  +referrer: NodeID,
-  +referent: NodeID,
-};
-
-export type EdgePayload =
-  | AuthorshipEdgePayload
-  | ContainmentEdgePayload
-  | ReferenceEdgePayload;
-export type EdgeID = AuthorshipEdgeID | ContainmentEdgeID | ReferenceEdgeID;
-export type EdgeType = $ElementType<EdgeID, "type">;
-
-export function getNodeType(n: Node<NodePayload>): NodeType {
-  return JSON.parse(n.address.id).type;
-}
-
-export function getEdgeType(e: Edge<EdgePayload>): EdgeType {
-  return JSON.parse(e.address.id).type;
-}
-
 export class GithubParser {
   repositoryName: string;
   graph: Graph<NodePayload, EdgePayload>;
@@ -224,21 +183,25 @@ export class GithubParser {
     this.graph = new Graph();
   }
 
-  makeAddress(id: NodeID | EdgeID): Address {
+  makeNodeAddress(type: NodeType, id: string): Address {
     return {
       pluginName: GITHUB_PLUGIN_NAME,
       repositoryName: this.repositoryName,
+      type,
+      id,
+    };
+  }
+
+  makeEdgeAddress(type: EdgeType, id: EdgeID): Address {
+    return {
+      pluginName: GITHUB_PLUGIN_NAME,
+      repositoryName: this.repositoryName,
+      type,
       id: stringify(id),
     };
   }
 
   addAuthorship(
-    authoredNodeID:
-      | IssueNodeID
-      | PullRequestNodeID
-      | CommentNodeID
-      | PullRequestReviewCommentNodeID
-      | PullRequestReviewNodeID,
     authoredNode: Node<
       | IssueNodePayload
       | PullRequestNodePayload
@@ -249,16 +212,16 @@ export class GithubParser {
     authorJson: *
   ) {
     let authorPayload: AuthorNodePayload = {login: authorJson.login};
-    let authorID: AuthorNodeID;
+    let authorType: NodeType;
     switch (authorJson.__typename) {
       case "User":
-        authorID = {type: "USER", id: authorJson.id};
+        authorType = "USER";
         break;
       case "Bot":
-        authorID = {type: "BOT", id: authorJson.id};
+        authorType = "BOT";
         break;
       case "Organization":
-        authorID = {type: "ORGANIZATION", id: authorJson.id};
+        authorType = "ORGANIZATION";
         break;
       default:
         throw new Error(
@@ -269,18 +232,17 @@ export class GithubParser {
     }
 
     const authorNode: Node<AuthorNodePayload> = {
-      address: this.makeAddress(authorID),
+      address: this.makeNodeAddress(authorType, authorJson.id),
       payload: authorPayload,
     };
     this.graph.addNode(authorNode);
 
     const authorshipID = {
-      type: "AUTHORSHIP",
-      contributionID: authoredNodeID,
-      authorID,
+      contribution: authoredNode.address,
+      author: authorNode.address,
     };
     const authorshipEdge: Edge<AuthorshipEdgePayload> = {
-      address: this.makeAddress(authorshipID),
+      address: this.makeEdgeAddress("AUTHORSHIP", authorshipID),
       payload: {},
       src: authoredNode.address,
       dst: authorNode.address,
@@ -289,20 +251,26 @@ export class GithubParser {
   }
 
   addComment(
-    parentID: IssueNodeID | PullRequestNodeID | PullRequestReviewNodeID,
     parentNode: Node<
       IssueNodePayload | PullRequestNodePayload | PullRequestReviewNodePayload
     >,
     commentJson: *
   ) {
-    let commentID: CommentNodeID | PullRequestReviewCommentNodeID;
-    if (parentID.type === "PULL_REQUEST_REVIEW") {
-      commentID = {type: "PULL_REQUEST_REVIEW_COMMENT", id: commentJson.id};
-    } else if (parentID.type === "ISSUE" || parentID.type === "PULL_REQUEST") {
-      commentID = {type: "COMMENT", id: commentJson.id};
-    } else {
-      throw new Error(`Unexpected comment parent type ${parentID.type}`);
+    let commentType: NodeType;
+    switch (parentNode.address.type) {
+      case "PULL_REQUEST_REVIEW":
+        commentType = "PULL_REQUEST_REVIEW_COMMENT";
+        break;
+      case "PULL_REQUEST":
+      case "ISSUE":
+        commentType = "COMMENT";
+        break;
+      default:
+        throw new Error(
+          `Unexpected comment parent type ${parentNode.address.type}`
+        );
     }
+
     const commentNodePayload:
       | CommentNodePayload
       | PullRequestReviewCommentNodePayload = {
@@ -312,24 +280,19 @@ export class GithubParser {
     const commentNode: Node<
       CommentNodePayload | PullRequestReviewCommentNodePayload
     > = {
-      address: this.makeAddress(commentID),
+      address: this.makeNodeAddress(commentType, commentJson.id),
       payload: commentNodePayload,
     };
     this.graph.addNode(commentNode);
 
-    this.addAuthorship(commentID, commentNode, commentJson.author);
-    this.addContainment(parentID, parentNode, commentID, commentNode);
+    this.addAuthorship(commentNode, commentJson.author);
+    this.addContainment(parentNode, commentNode);
   }
 
   addContainment(
-    parentID: IssueNodeID | PullRequestNodeID | PullRequestReviewNodeID,
     parentNode: Node<
       IssueNodePayload | PullRequestNodePayload | PullRequestReviewNodePayload
     >,
-    childID:
-      | CommentNodeID
-      | PullRequestReviewCommentNodeID
-      | PullRequestReviewNodeID,
     childNode: Node<
       | CommentNodePayload
       | PullRequestReviewCommentNodePayload
@@ -337,12 +300,11 @@ export class GithubParser {
     >
   ) {
     const containmentID: ContainmentEdgeID = {
-      type: "CONTAINMENT",
-      childID,
-      parentID,
+      child: childNode.address,
+      parent: parentNode.address,
     };
     const containmentEdge = {
-      address: this.makeAddress(containmentID),
+      address: this.makeEdgeAddress("CONTAINMENT", containmentID),
       payload: {},
       src: parentNode.address,
       dst: childNode.address,
@@ -351,74 +313,58 @@ export class GithubParser {
   }
 
   addIssue(issueJson: *) {
-    const issueID: IssueNodeID = {type: "ISSUE", id: issueJson.id};
     const issuePayload: IssueNodePayload = {
       number: issueJson.number,
       title: issueJson.title,
       body: issueJson.body,
     };
     const issueNode: Node<IssueNodePayload> = {
-      address: this.makeAddress(issueID),
+      address: this.makeNodeAddress("ISSUE", issueJson.id),
       payload: issuePayload,
     };
     this.graph.addNode(issueNode);
 
-    this.addAuthorship(issueID, issueNode, issueJson.author);
+    this.addAuthorship(issueNode, issueJson.author);
 
-    issueJson.comments.nodes.forEach((c) =>
-      this.addComment(issueID, issueNode, c)
-    );
+    issueJson.comments.nodes.forEach((c) => this.addComment(issueNode, c));
   }
 
   addPullRequest(prJson: *) {
-    const pullRequestID: PullRequestNodeID = {
-      type: "PULL_REQUEST",
-      id: prJson.id,
-    };
     const pullRequestPayload: PullRequestNodePayload = {
       number: prJson.number,
       title: prJson.title,
       body: prJson.body,
     };
     const pullRequestNode: Node<PullRequestNodePayload> = {
-      address: this.makeAddress(pullRequestID),
+      address: this.makeNodeAddress("PULL_REQUEST", prJson.id),
       payload: pullRequestPayload,
     };
     this.graph.addNode(pullRequestNode);
 
-    this.addAuthorship(pullRequestID, pullRequestNode, prJson.author);
-    prJson.comments.nodes.forEach((c) =>
-      this.addComment(pullRequestID, pullRequestNode, c)
-    );
+    this.addAuthorship(pullRequestNode, prJson.author);
+    prJson.comments.nodes.forEach((c) => this.addComment(pullRequestNode, c));
 
     prJson.reviews.nodes.forEach((r) =>
-      this.addPullRequestReview(pullRequestID, pullRequestNode, r)
+      this.addPullRequestReview(pullRequestNode, r)
     );
   }
 
   addPullRequestReview(
-    pullRequestID: PullRequestNodeID,
     pullRequestNode: Node<PullRequestNodePayload>,
     reviewJson: *
   ) {
-    const reviewID: PullRequestReviewNodeID = {
-      type: "PULL_REQUEST_REVIEW",
-      id: reviewJson.id,
-    };
     const reviewPayload: PullRequestReviewNodePayload = {
       state: reviewJson.state,
       body: reviewJson.body,
     };
     const reviewNode: Node<PullRequestReviewNodePayload> = {
-      address: this.makeAddress(reviewID),
+      address: this.makeNodeAddress("PULL_REQUEST_REVIEW", reviewJson.id),
       payload: reviewPayload,
     };
     this.graph.addNode(reviewNode);
-    this.addContainment(pullRequestID, pullRequestNode, reviewID, reviewNode);
-    this.addAuthorship(reviewID, reviewNode, reviewJson.author);
-    reviewJson.comments.nodes.forEach((c) =>
-      this.addComment(reviewID, reviewNode, c)
-    );
+    this.addContainment(pullRequestNode, reviewNode);
+    this.addAuthorship(reviewNode, reviewJson.author);
+    reviewJson.comments.nodes.forEach((c) => this.addComment(reviewNode, c));
   }
 
   addData(dataJson: *) {

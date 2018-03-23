@@ -1,6 +1,6 @@
 // @flow
 
-import {GithubParser, getNodeType, getEdgeType} from "./githubPlugin";
+import {GithubParser} from "./githubPlugin";
 import exampleRepoData from "./demoData/example-repo.json";
 
 describe("GithubParser", () => {
@@ -33,16 +33,16 @@ describe("GithubParser", () => {
     it("every comment has an author and container", () => {
       const comments = graph
         .getAllNodes()
-        .filter((n) => getNodeType(n) === "COMMENT");
+        .filter((n) => n.address.type === "COMMENT");
       expect(comments).not.toHaveLength(0);
       comments.forEach((c) => {
         const authorEdges = graph
           .getOutEdges(c.address)
-          .filter((e) => getEdgeType(e) === "AUTHORSHIP");
+          .filter((e) => e.address.type === "AUTHORSHIP");
         expect(authorEdges.length).toBe(1);
         const containerEdges = graph
           .getInEdges(c.address)
-          .filter((e) => getEdgeType(e) === "CONTAINMENT");
+          .filter((e) => e.address.type === "CONTAINMENT");
         expect(containerEdges.length).toBe(1);
       });
     });
@@ -51,13 +51,13 @@ describe("GithubParser", () => {
       const issuesAndPRs = graph
         .getAllNodes()
         .filter(
-          (n) => ["ISSUE", "PULL_REQUEST"].indexOf(getNodeType(n)) !== -1
+          (n) => ["ISSUE", "PULL_REQUEST"].indexOf(n.address.type) !== -1
         );
       expect(issuesAndPRs).not.toHaveLength(0);
       issuesAndPRs.forEach((x) => {
         const outEdges = graph.getOutEdges(x.address);
         const authorEdges = outEdges.filter(
-          (e) => getEdgeType(e) === "AUTHORSHIP"
+          (e) => e.address.type === "AUTHORSHIP"
         );
         expect(authorEdges.length).toBe(1);
       });

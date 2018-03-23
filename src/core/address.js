@@ -6,6 +6,7 @@ export type Address = {|
   +repositoryName: string,
   +pluginName: string,
   +id: string,
+  +type: string,
 |};
 
 export interface Addressable {

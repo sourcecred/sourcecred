@@ -5,7 +5,6 @@ import {shallow} from "enzyme";
 import enzymeToJSON from "enzyme-to-json";
 import stringify from "json-stable-stringify";
 
-import type {NodeID} from "../../../github/githubPlugin";
 import {GithubParser} from "../../../github/githubPlugin";
 import exampleRepoData from "../../../github/demoData/example-repo.json";
 import adapter from "./githubPluginAdapter";
@@ -21,9 +20,9 @@ describe("githubPluginAdapter", () => {
     const result = graph
       .getAllNodes()
       .map((node) => ({
-        id: (JSON.parse(node.address.id): NodeID),
+        id: node.address.id,
         payload: node.payload,
-        type: adapter.extractType(graph, node),
+        type: node.address.type,
         title: adapter.extractTitle(graph, node),
         rendered: enzymeToJSON(
           shallow(<adapter.renderer graph={graph} node={node} />)
