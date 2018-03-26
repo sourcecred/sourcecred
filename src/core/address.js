@@ -24,7 +24,7 @@ export type AddressMapJSON<T: Addressable> = {
  * addresses.
  */
 export class AddressMap<T: Addressable> {
-  // TODO(@wchargin): Evaluate performance gains from using a triple-map
+  // TODO(@wchargin): Evaluate performance gains from using a nested-map
   // here. Cf. https://jsperf.com/address-string-302039074.
   _data: {[serializedAddress: string]: T};
 
@@ -103,7 +103,7 @@ export class AddressMap<T: Addressable> {
  */
 export function sortedByAddress<T: Addressable>(xs: T[]) {
   function cmp(x1: T, x2: T): -1 | 0 | 1 {
-    // TODO(@wchargin): This can be replaced by three string-comparisons
+    // TODO(@wchargin): This can be replaced by four string-comparisons
     // to avoid stringifying.
     const a1 = JSON.stringify(x1.address);
     const a2 = JSON.stringify(x2.address);
