@@ -2,13 +2,45 @@
 
 exports[`address AddressMap stringifies to JSON 1`] = `
 Object {
-  "{\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"pluginName\\":\\"houseville\\",\\"id\\":\\"mansion\\",\\"type\\":\\"HOME\\"}": Object {
+  "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"HOME\\"}": Object {
     "baths": 5,
     "beds": 10,
   },
-  "{\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"pluginName\\":\\"houseville\\",\\"id\\":\\"mattressStore\\",\\"type\\":\\"BUSINESS\\"}": Object {
+  "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"BUSINESS\\"}": Object {
     "baths": 1,
     "beds": 99,
   },
 }
+`;
+
+exports[`address toString and fromString serialization looks good in snapshot review 1`] = `
+Array [
+  Array [
+    Object {
+      "id": "mansion",
+      "pluginName": "houseville",
+      "repositoryName": "sourcecred/suburbia",
+      "type": "HOME",
+    },
+    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"HOME\\"}",
+  ],
+  Array [
+    Object {
+      "id": "mansion",
+      "pluginName": "houseville",
+      "repositoryName": "sourcecred/suburbia",
+      "type": "HOME",
+    },
+    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"HOME\\"}",
+  ],
+  Array [
+    Object {
+      "id": "mattressStore",
+      "pluginName": "houseville",
+      "repositoryName": "sourcecred/suburbia",
+      "type": "BUSINESS",
+    },
+    "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"BUSINESS\\"}",
+  ],
+]
 `;

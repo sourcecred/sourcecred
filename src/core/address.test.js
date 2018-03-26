@@ -1,7 +1,7 @@
 // @flow
 
 import type {Address} from "./address";
-import {AddressMap, sortedByAddress} from "./address";
+import {AddressMap, fromString, sortedByAddress, toString} from "./address";
 
 describe("address", () => {
   // Some test data using objects that have addresses, like houses.
@@ -150,6 +150,34 @@ describe("address", () => {
       expect(x).toEqual(input());
       expect(sortedByAddress(x)).not.toEqual(input());
       expect(x).toEqual(input());
+    });
+  });
+
+  describe("toString and fromString", () => {
+    const examples = [mansion(), fakeMansion(), mattressStore()];
+    it("simple round trips work", () => {
+      examples.forEach((x) => {
+        expect(x.address).toEqual(fromString(toString(x.address)));
+      });
+    });
+    it("serialization looks good in snapshot review", () => {
+      const serialized = examples.map((x) => [x.address, toString(x.address)]);
+      expect(serialized).toMatchSnapshot();
+    });
+    it("Order of insertion does not matter", () => {
+      const a1 = {
+        pluginName: "foo",
+        type: "bar",
+        id: "zoombat",
+        repositoryName: "oregano",
+      };
+      const a2 = {
+        id: "zoombat",
+        type: "bar",
+        repositoryName: "oregano",
+        pluginName: "foo",
+      };
+      expect(toString(a1)).toEqual(toString(a2));
     });
   });
 });
