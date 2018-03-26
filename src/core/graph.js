@@ -41,6 +41,10 @@ export class Graph<NP, EP> {
     this._inEdges = new AddressMap();
   }
 
+  copy(): Graph<$Supertype<NP>, $Supertype<EP>> {
+    return Graph.mergeConservative(new Graph(), this);
+  }
+
   equals(that: Graph<NP, EP>): boolean {
     return this._nodes.equals(that._nodes) && this._edges.equals(that._edges);
   }
