@@ -154,14 +154,17 @@ describe("address", () => {
   });
 
   describe("toString and fromString", () => {
-    const examples = [mansion(), fakeMansion(), mattressStore()];
+    const examples = () => [mansion(), fakeMansion(), mattressStore()];
     it("simple round trips work", () => {
-      examples.forEach((x) => {
+      examples().forEach((x) => {
         expect(x.address).toEqual(fromString(toString(x.address)));
       });
     });
     it("serialization looks good in snapshot review", () => {
-      const serialized = examples.map((x) => [x.address, toString(x.address)]);
+      const serialized = examples().map((x) => [
+        x.address,
+        toString(x.address),
+      ]);
       expect(serialized).toMatchSnapshot();
     });
     it("Order of insertion does not matter", () => {
