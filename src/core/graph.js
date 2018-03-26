@@ -1,6 +1,7 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
+import stringify from "json-stable-stringify";
 import type {Address, Addressable, AddressMapJSON} from "./address";
 import {AddressMap} from "./address";
 
@@ -243,4 +244,8 @@ export class Graph<NP, EP> {
     );
     return result;
   }
+}
+
+export function edgeID(src: Address, dst: Address): string {
+  return stringify([src, dst]);
 }
