@@ -1,6 +1,7 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
+import stringify from "json-stable-stringify";
 
 export type Address = {|
   +repositoryName: string,
@@ -72,7 +73,7 @@ export class AddressMap<T: Addressable> {
     if (t.address == null) {
       throw new Error(`address is ${String(t.address)}`);
     }
-    const key = JSON.stringify(t.address);
+    const key = toString(t.address);
     this._data[key] = t;
     return this;
   }
@@ -85,7 +86,7 @@ export class AddressMap<T: Addressable> {
     if (address == null) {
       throw new Error(`address is ${String(address)}`);
     }
-    const key = JSON.stringify(address);
+    const key = toString(address);
     return this._data[key];
   }
 
@@ -105,9 +106,17 @@ export function sortedByAddress<T: Addressable>(xs: T[]) {
   function cmp(x1: T, x2: T): -1 | 0 | 1 {
     // TODO(@wchargin): This can be replaced by four string-comparisons
     // to avoid stringifying.
-    const a1 = JSON.stringify(x1.address);
-    const a2 = JSON.stringify(x2.address);
+    const a1 = toString(x1.address);
+    const a2 = toString(x2.address);
     return a1 > a2 ? 1 : a1 < a2 ? -1 : 0;
   }
   return xs.slice().sort(cmp);
+}
+
+export function toString(x: Address): string {
+  return stringify(x);
+}
+
+export function fromString(s: string): Address {
+  return JSON.parse(s);
 }
