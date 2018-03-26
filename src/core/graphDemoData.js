@@ -11,6 +11,7 @@ export function makeAddress(id: string): Address {
   return {
     repositoryName: "sourcecred/eventide",
     pluginName: "hill_cooking_pot",
+    type: "demoType",
     id,
   };
 }

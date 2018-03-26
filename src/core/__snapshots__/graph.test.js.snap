@@ -3,11 +3,12 @@
 exports[`graph #Graph JSON functions should serialize a simple graph 1`] = `
 Object {
   "edges": Object {
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"crab-self-assessment\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"crab-self-assessment\\"}": Object {
       "dst": Object {
         "id": "razorclaw_crab#2",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
       "payload": Object {
         "evaluation": "not effective at avoiding hero",
@@ -16,13 +17,15 @@ Object {
         "id": "razorclaw_crab#2",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"hero_of_time#0@again_cooks@seafood_fruit_mix#3\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"hero_of_time#0@again_cooks@seafood_fruit_mix#3\\"}": Object {
       "dst": Object {
         "id": "hero_of_time#0",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
       "payload": Object {
         "crit": true,
@@ -32,13 +35,15 @@ Object {
         "id": "seafood_fruit_mix#3",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"hero_of_time#0@cooks@seafood_fruit_mix#3\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"hero_of_time#0@cooks@seafood_fruit_mix#3\\"}": Object {
       "dst": Object {
         "id": "hero_of_time#0",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
       "payload": Object {
         "crit": false,
@@ -47,85 +52,96 @@ Object {
         "id": "seafood_fruit_mix#3",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"hero_of_time#0@eats@seafood_fruit_mix#3\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"hero_of_time#0@eats@seafood_fruit_mix#3\\"}": Object {
       "dst": Object {
         "id": "seafood_fruit_mix#3",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
       "payload": Object {},
       "src": Object {
         "id": "hero_of_time#0",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"hero_of_time#0@grabs@razorclaw_crab#2\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"hero_of_time#0@grabs@razorclaw_crab#2\\"}": Object {
       "dst": Object {
         "id": "hero_of_time#0",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
       "payload": Object {},
       "src": Object {
         "id": "razorclaw_crab#2",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"hero_of_time#0@picks@mighty_bananas#1\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"hero_of_time#0@picks@mighty_bananas#1\\"}": Object {
       "dst": Object {
         "id": "hero_of_time#0",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
       "payload": Object {},
       "src": Object {
         "id": "mighty_bananas#1",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"mighty_bananas#1@included_in@seafood_fruit_mix#3\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"mighty_bananas#1@included_in@seafood_fruit_mix#3\\"}": Object {
       "dst": Object {
         "id": "mighty_bananas#1",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
       "payload": Object {},
       "src": Object {
         "id": "seafood_fruit_mix#3",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"razorclaw_crab#2@included_in@seafood_fruit_mix#3\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"razorclaw_crab#2@included_in@seafood_fruit_mix#3\\"}": Object {
       "dst": Object {
         "id": "razorclaw_crab#2",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
       "payload": Object {},
       "src": Object {
         "id": "seafood_fruit_mix#3",
         "pluginName": "hill_cooking_pot",
         "repositoryName": "sourcecred/eventide",
+        "type": "demoType",
       },
     },
   },
   "nodes": Object {
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"hero_of_time#0\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"hero_of_time#0\\"}": Object {
       "payload": Object {},
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"mighty_bananas#1\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"mighty_bananas#1\\"}": Object {
       "payload": Object {},
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"razorclaw_crab#2\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"razorclaw_crab#2\\"}": Object {
       "payload": Object {},
     },
-    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"id\\":\\"seafood_fruit_mix#3\\"}": Object {
+    "{\\"repositoryName\\":\\"sourcecred/eventide\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"demoType\\",\\"id\\":\\"seafood_fruit_mix#3\\"}": Object {
       "payload": Object {
         "effect": Array [
           "attack_power",

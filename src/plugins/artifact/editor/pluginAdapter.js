@@ -8,6 +8,5 @@ export interface PluginAdapter<-NodePayload> {
   renderer: $Subtype<
     ComponentType<{graph: Graph<any, any>, node: Node<NodePayload>}>
   >;
-  extractType(graph: Graph<any, any>, node: Node<NodePayload>): string;
   extractTitle(graph: Graph<any, any>, node: Node<NodePayload>): string;
 }

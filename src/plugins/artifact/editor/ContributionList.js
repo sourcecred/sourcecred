@@ -50,7 +50,7 @@ export class ContributionList extends React.Component<Props, State> {
       if (!typesByPlugin[adapter.pluginName]) {
         typesByPlugin[adapter.pluginName] = new Set();
       }
-      typesByPlugin[adapter.pluginName].add(adapter.extractType(graph, node));
+      typesByPlugin[adapter.pluginName].add(node.address.type);
     });
     function optionGroup(pluginName: string) {
       const header = (
@@ -97,7 +97,7 @@ export class ContributionList extends React.Component<Props, State> {
             return (
               !!adapter &&
               adapter.pluginName === typeFilter.pluginName &&
-              adapter.extractType(graph, node) === typeFilter.type
+              node.address.type === typeFilter.type
             );
           }
         : (node) => true;

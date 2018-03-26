@@ -29,6 +29,7 @@ function createSampleArtifact(name) {
       repositoryName: "sourcecred/devnull",
       pluginName: "sourcecred/artifact-beta",
       id,
+      type: "artifact",
     },
     payload: {name},
   };

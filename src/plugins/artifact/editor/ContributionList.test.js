@@ -28,43 +28,45 @@ function createTestData(): * {
 
   function makeAddress(
     pluginName: typeof PLUGIN_A | typeof PLUGIN_B | typeof PLUGIN_C,
+    type: string,
     id: string
   ): Address {
     return {
       repositoryName: "sourcecred/tests",
       pluginName,
       id,
+      type,
     };
   }
 
   const nodeA1 = () => ({
-    address: makeAddress(PLUGIN_A, "one"),
+    address: makeAddress(PLUGIN_A, "small", "one"),
     payload: (111: PayloadA),
   });
   const nodeA2 = () => ({
-    address: makeAddress(PLUGIN_A, "two"),
+    address: makeAddress(PLUGIN_A, "small", "two"),
     payload: (234: PayloadA),
   });
   const nodeA3 = () => ({
-    address: makeAddress(PLUGIN_A, "three"),
+    address: makeAddress(PLUGIN_A, "big", "three"),
     payload: (616: PayloadA),
   });
   const nodeB4 = () => ({
-    address: makeAddress(PLUGIN_B, "four"),
+    address: makeAddress(PLUGIN_B, "very true", "four"),
     payload: (true: PayloadB),
   });
   const nodeC5 = () => ({
-    address: makeAddress(PLUGIN_C, "five"),
+    address: makeAddress(PLUGIN_C, "ctype", "five"),
     payload: ("I have no adapter :-(": PayloadC),
   });
   const edgeA1A2 = () => ({
-    address: makeAddress(PLUGIN_A, "one-to-two"),
+    address: makeAddress(PLUGIN_A, "atype", "one-to-two"),
     payload: null,
     src: nodeA1().address,
     dst: nodeA2().address,
   });
   const edgeB4A3 = () => ({
-    address: makeAddress(PLUGIN_C, "four-to-three"),
+    address: makeAddress(PLUGIN_C, "ctype", "four-to-three"),
     payload: null,
     src: nodeB4().address,
     dst: nodeA3().address,
@@ -97,9 +99,6 @@ function createTestData(): * {
         );
       }
     },
-    extractType(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadA>) {
-      return node.payload < 500 ? "small" : "big";
-    },
     extractTitle(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadA>) {
       return `the number ${String(node.payload)}`;
     },
@@ -119,9 +118,6 @@ function createTestData(): * {
           </span>
         );
       }
-    },
-    extractType(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadB>) {
-      return node.payload ? "very true" : "not so";
     },
     extractTitle(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadB>) {
       return String(node.payload).toUpperCase() + "!";

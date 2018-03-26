@@ -17,7 +17,7 @@ import type {
   AuthorNodePayload,
 } from "../../../github/githubPlugin";
 import type {PluginAdapter} from "../pluginAdapter";
-import {GITHUB_PLUGIN_NAME, getNodeType} from "../../../github/githubPlugin";
+import {GITHUB_PLUGIN_NAME} from "../../../github/githubPlugin";
 
 const adapter: PluginAdapter<NodePayload> = {
   pluginName: GITHUB_PLUGIN_NAME,
@@ -27,13 +27,9 @@ const adapter: PluginAdapter<NodePayload> = {
     node: Node<NodePayload>,
   }> {
     render() {
-      const type = adapter.extractType(this.props.graph, this.props.node);
+      const type = this.props.node.address.type;
       return <div>type: {type} (details to be implemented)</div>;
     }
-  },
-
-  extractType(graph: *, node: Node<NodePayload>): NodeType {
-    return getNodeType(node);
   },
 
   extractTitle(graph: *, node: Node<NodePayload>): string {
@@ -44,10 +40,7 @@ const adapter: PluginAdapter<NodePayload> = {
     function extractParentTitles(node: Node<NodePayload>): string[] {
       return graph
         .getInEdges(node.address)
-        .filter((e) => {
-          const edgeID: EdgeID = JSON.parse(e.address.id);
-          return edgeID.type === "CONTAINMENT";
-        })
+        .filter((e) => e.address.type === "CONTAINMENT")
         .map((e) => graph.getNode(e.src))
         .map((container) => {
           return adapter.extractTitle(graph, container);
@@ -99,9 +92,9 @@ const adapter: PluginAdapter<NodePayload> = {
       BOT: extractAuthorTitle,
     };
     function fallbackAccessor(node: Node<NodePayload>) {
-      throw new Error(`unknown node type: ${getNodeType(node)}`);
+      throw new Error(`unknown node type: ${node.address.type}`);
     }
-    return (extractors[getNodeType(node)] || fallbackAccessor)(
+    return (extractors[node.address.type] || fallbackAccessor)(
       (node: Node<any>)
     );
   },

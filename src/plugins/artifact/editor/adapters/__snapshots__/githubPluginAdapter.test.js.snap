@@ -3,10 +3,7 @@
 exports[`githubPluginAdapter operates on the example repo 1`] = `
 Array [
   Object {
-    "id": Object {
-      "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4",
-      "type": "PULL_REQUEST_REVIEW",
-    },
+    "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4",
     "payload": Object {
       "body": "I'm sold",
       "state": "APPROVED",
@@ -20,10 +17,7 @@ Array [
     "type": "PULL_REQUEST_REVIEW",
   },
   Object {
-    "id": Object {
-      "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5",
-      "type": "PULL_REQUEST_REVIEW",
-    },
+    "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5",
     "payload": Object {
       "body": "hmmm.jpg",
       "state": "CHANGES_REQUESTED",
@@ -37,10 +31,7 @@ Array [
     "type": "PULL_REQUEST_REVIEW",
   },
   Object {
-    "id": Object {
-      "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
-      "type": "PULL_REQUEST",
-    },
+    "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
     "payload": Object {
       "body": "Oh look, it's a pull request.",
       "number": 3,
@@ -55,10 +46,7 @@ Array [
     "type": "PULL_REQUEST",
   },
   Object {
-    "id": Object {
-      "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
-      "type": "PULL_REQUEST",
-    },
+    "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
     "payload": Object {
       "body": "@wchargin could you please do the following:
 - add a commit comment
@@ -77,10 +65,7 @@ Array [
     "type": "PULL_REQUEST",
   },
   Object {
-    "id": Object {
-      "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
-      "type": "COMMENT",
-    },
+    "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
     "payload": Object {
       "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
       "url": "https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222",
@@ -94,10 +79,7 @@ Array [
     "type": "COMMENT",
   },
   Object {
-    "id": Object {
-      "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODQ0Mg==",
-      "type": "COMMENT",
-    },
+    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODQ0Mg==",
     "payload": Object {
       "body": "A wild COMMENT appeared!",
       "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
@@ -111,10 +93,7 @@ Array [
     "type": "COMMENT",
   },
   Object {
-    "id": Object {
-      "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODUzOA==",
-      "type": "COMMENT",
-    },
+    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODUzOA==",
     "payload": Object {
       "body": "And the maintainer said, \\"Let there be comments!\\"",
       "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
@@ -128,10 +107,7 @@ Array [
     "type": "COMMENT",
   },
   Object {
-    "id": Object {
-      "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
-      "type": "COMMENT",
-    },
+    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
     "payload": Object {
       "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-repo/issues/6",
       "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768703",
@@ -145,10 +121,7 @@ Array [
     "type": "COMMENT",
   },
   Object {
-    "id": Object {
-      "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
-      "type": "COMMENT",
-    },
+    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
     "payload": Object {
       "body": "We might also reference individual comments directly.
 https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
@@ -163,10 +136,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "COMMENT",
   },
   Object {
-    "id": Object {
-      "id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==",
-      "type": "PULL_REQUEST_REVIEW_COMMENT",
-    },
+    "id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==",
     "payload": Object {
       "body": "seems a bit capricious",
       "url": "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
@@ -180,10 +150,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "PULL_REQUEST_REVIEW_COMMENT",
   },
   Object {
-    "id": Object {
-      "id": "MDQ6VXNlcjE0MDAwMjM=",
-      "type": "USER",
-    },
+    "id": "MDQ6VXNlcjE0MDAwMjM=",
     "payload": Object {
       "login": "dandelionmane",
     },
@@ -196,10 +163,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "USER",
   },
   Object {
-    "id": Object {
-      "id": "MDQ6VXNlcjQzMTc4MDY=",
-      "type": "USER",
-    },
+    "id": "MDQ6VXNlcjQzMTc4MDY=",
     "payload": Object {
       "login": "wchargin",
     },
@@ -212,10 +176,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "USER",
   },
   Object {
-    "id": Object {
-      "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
-      "type": "ISSUE",
-    },
+    "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
     "payload": Object {
       "body": "This is just an example issue.",
       "number": 1,
@@ -230,10 +191,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "ISSUE",
   },
   Object {
-    "id": Object {
-      "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
-      "type": "ISSUE",
-    },
+    "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
     "payload": Object {
       "body": "This issue references another issue, namely #1",
       "number": 2,
@@ -248,10 +206,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "ISSUE",
   },
   Object {
-    "id": Object {
-      "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
-      "type": "ISSUE",
-    },
+    "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
     "payload": Object {
       "body": "Alas, its life as an open issue had only just begun.",
       "number": 4,
@@ -266,10 +221,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "ISSUE",
   },
   Object {
-    "id": Object {
-      "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
-      "type": "ISSUE",
-    },
+    "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
     "payload": Object {
       "body": "This issue shall shortly have a few comments.",
       "number": 6,
@@ -284,10 +236,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "ISSUE",
   },
   Object {
-    "id": Object {
-      "id": "MDU6SXNzdWUzMDY5ODM1NTI=",
-      "type": "ISSUE",
-    },
+    "id": "MDU6SXNzdWUzMDY5ODM1NTI=",
     "payload": Object {
       "body": "Deal with this, naive string display algorithms!!!!!",
       "number": 7,
@@ -302,10 +251,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "ISSUE",
   },
   Object {
-    "id": Object {
-      "id": "MDU6SXNzdWUzMDY5ODUzNjc=",
-      "type": "ISSUE",
-    },
+    "id": "MDU6SXNzdWUzMDY5ODUzNjc=",
     "payload": Object {
       "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️
 Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",

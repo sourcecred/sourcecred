@@ -10,26 +10,27 @@ describe("address", () => {
     +beds: number,
     +baths: number,
   |};
-  function makeAddress(id: string): Address {
+  function makeAddress(type: "HOME" | "BUSINESS", id: string): Address {
     return {
       repositoryName: "sourcecred/suburbia",
       pluginName: "houseville",
       id,
+      type,
     };
   }
   const mansion = (): House => ({
-    address: makeAddress("mansion"),
+    address: makeAddress("HOME", "mansion"),
     beds: 10,
     baths: 5,
   });
   const fakeMansion = (): House => ({
     // Same address, different content.
-    address: makeAddress("mansion"),
+    address: makeAddress("HOME", "mansion"),
     beds: 33,
     baths: 88,
   });
   const mattressStore = (): House => ({
-    address: makeAddress("mattressStore"),
+    address: makeAddress("BUSINESS", "mattressStore"),
     beds: 99,
     baths: 1,
   });

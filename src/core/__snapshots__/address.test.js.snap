@@ -2,11 +2,11 @@
 
 exports[`address AddressMap stringifies to JSON 1`] = `
 Object {
-  "{\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"pluginName\\":\\"houseville\\",\\"id\\":\\"mansion\\"}": Object {
+  "{\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"pluginName\\":\\"houseville\\",\\"id\\":\\"mansion\\",\\"type\\":\\"HOME\\"}": Object {
     "baths": 5,
     "beds": 10,
   },
-  "{\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"pluginName\\":\\"houseville\\",\\"id\\":\\"mattressStore\\"}": Object {
+  "{\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"pluginName\\":\\"houseville\\",\\"id\\":\\"mattressStore\\",\\"type\\":\\"BUSINESS\\"}": Object {
     "baths": 1,
     "beds": 99,
   },
