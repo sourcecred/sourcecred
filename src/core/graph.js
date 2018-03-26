@@ -71,6 +71,14 @@ export class Graph<NP, EP> {
     return result;
   }
 
+  _lookupEdges(
+    map: AddressMap<{|+address: Address, +edges: Address[]|}>,
+    key: Address
+  ): Address[] {
+    const result = map.get(key);
+    return result ? result.edges : [];
+  }
+
   addNode(node: Node<NP>): Graph<NP, EP> {
     if (node == null) {
       throw new Error(`node is ${String(node)}`);
@@ -88,8 +96,19 @@ export class Graph<NP, EP> {
       }
     }
     this._nodes.add(node);
-    this._outEdges.add({address: node.address, edges: []});
-    this._inEdges.add({address: node.address, edges: []});
+    this._outEdges.add({
+      address: node.address,
+      edges: this._lookupEdges(this._outEdges, node.address),
+    });
+    this._inEdges.add({
+      address: node.address,
+      edges: this._lookupEdges(this._inEdges, node.address),
+    });
+    return this;
+  }
+
+  removeNode(address: Address): this {
+    this._nodes.remove(address);
     return this;
   }
 
@@ -109,15 +128,35 @@ export class Graph<NP, EP> {
         );
       }
     }
-    if (this.getNode(edge.src) === undefined) {
-      throw new Error(`source ${JSON.stringify(edge.src)} does not exist`);
-    }
-    if (this.getNode(edge.dst) === undefined) {
-      throw new Error(`source ${JSON.stringify(edge.dst)} does not exist`);
-    }
     this._edges.add(edge);
-    this._outEdges.get(edge.src).edges.push(edge.address);
-    this._inEdges.get(edge.dst).edges.push(edge.address);
+
+    const theseOutEdges = this._lookupEdges(this._outEdges, edge.src);
+    theseOutEdges.push(edge.address);
+    this._outEdges.add({address: edge.src, edges: theseOutEdges});
+
+    const theseInEdges = this._lookupEdges(this._inEdges, edge.dst);
+    theseInEdges.push(edge.address);
+    this._inEdges.add({address: edge.dst, edges: theseInEdges});
+
+    return this;
+  }
+
+  removeEdge(address: Address): this {
+    // TODO(perf): This is linear in the degree of the endpoints of the
+    // edge. Consider storing in non-list form.
+    const edge = this.getEdge(address);
+    if (edge) {
+      [
+        this._lookupEdges(this._inEdges, edge.dst),
+        this._lookupEdges(this._outEdges, edge.src),
+      ].forEach((edges) => {
+        const index = edges.findIndex((ea) => deepEqual(ea, address));
+        if (index !== -1) {
+          edges.splice(index, 1);
+        }
+      });
+    }
+    this._edges.remove(address);
     return this;
   }
 
@@ -137,11 +176,9 @@ export class Graph<NP, EP> {
     if (nodeAddress == null) {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
-    const result = this._outEdges.get(nodeAddress);
-    if (result === undefined) {
-      throw new Error(`no node for address ${JSON.stringify(nodeAddress)}`);
-    }
-    return result.edges.map((e) => this.getEdge(e));
+    return this._lookupEdges(this._outEdges, nodeAddress).map((e) =>
+      this.getEdge(e)
+    );
   }
 
   /**
@@ -152,11 +189,9 @@ export class Graph<NP, EP> {
     if (nodeAddress == null) {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
-    const result = this._inEdges.get(nodeAddress);
-    if (result === undefined) {
-      throw new Error(`no node for address ${JSON.stringify(nodeAddress)}`);
-    }
-    return result.edges.map((e) => this.getEdge(e));
+    return this._lookupEdges(this._inEdges, nodeAddress).map((e) =>
+      this.getEdge(e)
+    );
   }
 
   /**

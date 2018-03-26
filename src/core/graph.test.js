@@ -23,32 +23,6 @@ describe("graph", () => {
       it("works for an advanced graph", () => {
         demoData.advancedMealGraph();
       });
-
-      it("forbids adding an edge with dangling `dst`", () => {
-        expect(() => {
-          demoData.simpleMealGraph().addEdge({
-            address: demoData.makeAddress(
-              "treasure_octorok#5@helps_cook@seafood_fruit_mix#3"
-            ),
-            src: demoData.mealNode().address,
-            dst: demoData.makeAddress("treasure_octorok#5"),
-            payload: {},
-          });
-        }).toThrow(/does not exist/);
-      });
-
-      it("forbids adding an edge with dangling `src`", () => {
-        expect(() => {
-          demoData.simpleMealGraph().addEdge({
-            address: demoData.makeAddress(
-              "health_bar#6@healed_by@seafood_fruit_mix#3"
-            ),
-            src: demoData.makeAddress("health_bar#6"),
-            dst: demoData.mealNode().address,
-            payload: {},
-          });
-        }).toThrow(/does not exist/);
-      });
     });
 
     describe("has nice error messages for", () => {
@@ -65,6 +39,16 @@ describe("graph", () => {
         it(`adding ${String(bad)} edges`, () => {
           expect(() => new Graph().addEdge((bad: any))).toThrow(
             `edge is ${String(bad)}`
+          );
+        });
+        it(`removing ${String(bad)} nodes`, () => {
+          expect(() => new Graph().removeNode((bad: any))).toThrow(
+            `address is ${String(bad)}`
+          );
+        });
+        it(`removing ${String(bad)} edges`, () => {
+          expect(() => new Graph().removeEdge((bad: any))).toThrow(
+            `address is ${String(bad)}`
           );
         });
         it(`getting ${String(bad)} nodes`, () => {
@@ -193,6 +177,32 @@ describe("graph", () => {
     });
 
     describe("creating nodes and edges", () => {
+      it("allows adding an edge with dangling `dst`", () => {
+        const edge = () => ({
+          address: demoData.makeAddress(
+            "treasure_octorok#5@helps_cook@seafood_fruit_mix#3"
+          ),
+          src: demoData.mealNode().address,
+          dst: demoData.makeAddress("treasure_octorok#5"),
+          payload: {},
+        });
+        const g = demoData.simpleMealGraph().addEdge(edge());
+        expect(g.getEdge(edge().address)).toEqual(edge());
+      });
+
+      it("allows adding an edge with dangling `src`", () => {
+        const edge = () => ({
+          address: demoData.makeAddress(
+            "health_bar#6@healed_by@seafood_fruit_mix#3"
+          ),
+          src: demoData.makeAddress("health_bar#6"),
+          dst: demoData.mealNode().address,
+          payload: {},
+        });
+        const g = demoData.simpleMealGraph().addEdge(edge());
+        expect(g.getEdge(edge().address)).toEqual(edge());
+      });
+
       it("forbids adding a node with existing address and different contents", () => {
         expect(() =>
           demoData.simpleMealGraph().addNode({
@@ -265,6 +275,47 @@ describe("graph", () => {
       });
     });
 
+    describe("removing nodes and edges", () => {
+      it("is a roundtrip to add and remove and add a node", () => {
+        const n = () => demoData.crabNode();
+
+        const g1 = () => new Graph();
+        expect(g1().getNode(n().address)).toBeUndefined();
+
+        const g2 = () => g1().addNode(n());
+        expect(g2().getNode(n().address)).toEqual(n());
+
+        const g3 = () => g2().removeNode(n().address);
+        expect(g3().getNode(n().address)).toBeUndefined();
+
+        const g4 = () => g3().addNode(n());
+        expect(g4().getNode(n().address)).toEqual(n());
+
+        expect(g1().equals(g3())).toBe(true);
+        expect(g2().equals(g4())).toBe(true);
+      });
+
+      it("is a roundtrip to add and remove and add an edge", () => {
+        const n = () => demoData.crabNode();
+        const e = () => demoData.crabLoopEdge();
+
+        const g1 = () => new Graph().addNode(n());
+        expect(g1().getEdge(e().address)).toBeUndefined();
+
+        const g2 = () => g1().addEdge(e());
+        expect(g2().getEdge(e().address)).toEqual(e());
+
+        const g3 = () => g2().removeEdge(e().address);
+        expect(g3().getEdge(e().address)).toBeUndefined();
+
+        const g4 = () => g3().addEdge(e());
+        expect(g4().getEdge(e().address)).toEqual(e());
+
+        expect(g1().equals(g3())).toBe(true);
+        expect(g2().equals(g4())).toBe(true);
+      });
+    });
+
     describe("in- and out-edges", () => {
       it("gets out-edges", () => {
         const nodeAndExpectedEdgePairs = [
@@ -311,16 +362,146 @@ describe("graph", () => {
         });
       });
 
-      it("fails to get out-edges for a nonexistent node", () => {
-        expect(() => {
-          demoData.simpleMealGraph().getOutEdges(demoData.makeAddress("hinox"));
-        }).toThrow(/no node for address/);
+      it("gets empty out-edges for a nonexistent node", () => {
+        const result = demoData
+          .simpleMealGraph()
+          .getOutEdges(demoData.makeAddress("hinox"));
+        expect(result).toEqual([]);
       });
 
-      it("fails to get in-edges for a nonexistent node", () => {
-        expect(() => {
-          demoData.simpleMealGraph().getInEdges(demoData.makeAddress("hinox"));
-        }).toThrow(/no node for address/);
+      it("gets empty in-edges for a nonexistent node", () => {
+        const result = demoData
+          .simpleMealGraph()
+          .getInEdges(demoData.makeAddress("hinox"));
+        expect(result).toEqual([]);
+      });
+
+      {
+        const danglingSrc = () => ({
+          address: demoData.makeAddress("meaty_rice_balls#8"),
+          payload: {meaty: true},
+        });
+        const danglingDst = () => ({
+          address: demoData.makeAddress("treasure_octorok#5"),
+          payload: {meaty: false},
+        });
+
+        // A valid edge neither of whose endpoints are in the default
+        // demo meal graph.
+        const fullyDanglingEdge = () => ({
+          address: demoData.makeAddress(
+            "treasure_octorok#5@helps_cook@meaty_rice_balls#8"
+          ),
+          src: danglingSrc().address,
+          dst: danglingDst().address,
+          payload: {},
+        });
+
+        it("has in-edges for deleted node with dangling edge", () => {
+          const g = demoData
+            .simpleMealGraph()
+            .addNode(danglingSrc())
+            .addNode(danglingDst())
+            .addEdge(fullyDanglingEdge())
+            .removeNode(danglingSrc().address)
+            .removeNode(danglingDst().address);
+          const inEdges = g.getInEdges(fullyDanglingEdge().dst);
+          expect(inEdges).toEqual([fullyDanglingEdge()]);
+        });
+
+        it("has out-edges for deleted node with dangling edge", () => {
+          const g = demoData
+            .simpleMealGraph()
+            .addNode(danglingSrc())
+            .addNode(danglingDst())
+            .addEdge(fullyDanglingEdge())
+            .removeNode(danglingSrc().address)
+            .removeNode(danglingDst().address);
+          const outEdges = g.getOutEdges(fullyDanglingEdge().src);
+          expect(outEdges).toEqual([fullyDanglingEdge()]);
+        });
+
+        it("has lack of in-edges for deleted edge", () => {
+          const g = demoData
+            .simpleMealGraph()
+            .addNode(danglingSrc())
+            .addNode(danglingDst())
+            .addEdge(fullyDanglingEdge())
+            .removeEdge(fullyDanglingEdge().address);
+          const outEdges = g.getInEdges(fullyDanglingEdge().dst);
+          expect(outEdges).toEqual([]);
+        });
+
+        it("has lack of out-edges for deleted edge", () => {
+          const g = demoData
+            .simpleMealGraph()
+            .addNode(danglingSrc())
+            .addNode(danglingDst())
+            .addEdge(fullyDanglingEdge())
+            .removeEdge(fullyDanglingEdge().address);
+          const outEdges = g.getOutEdges(fullyDanglingEdge().src);
+          expect(outEdges).toEqual([]);
+        });
+
+        it("has in-edges for non-existent node with dangling edge", () => {
+          const g = demoData.simpleMealGraph().addEdge(fullyDanglingEdge());
+          const inEdges = g.getInEdges(fullyDanglingEdge().dst);
+          expect(inEdges).toEqual([fullyDanglingEdge()]);
+        });
+
+        it("has out-edges for non-existent node with dangling edge", () => {
+          const g = demoData.simpleMealGraph().addEdge(fullyDanglingEdge());
+          const outEdges = g.getOutEdges(fullyDanglingEdge().src);
+          expect(outEdges).toEqual([fullyDanglingEdge()]);
+        });
+
+        it("has in-edges that were added before their endpoints", () => {
+          const g = demoData
+            .simpleMealGraph()
+            .addEdge(fullyDanglingEdge())
+            .addNode(danglingDst());
+          const inEdges = g.getInEdges(fullyDanglingEdge().dst);
+          expect(inEdges).toEqual([fullyDanglingEdge()]);
+        });
+
+        it("has out-edges that were added before their endpoints", () => {
+          const g = demoData
+            .simpleMealGraph()
+            .addEdge(fullyDanglingEdge())
+            .addNode(danglingSrc());
+          const outEdges = g.getOutEdges(fullyDanglingEdge().src);
+          expect(outEdges).toEqual([fullyDanglingEdge()]);
+        });
+      }
+    });
+
+    describe("when adding edges multiple times", () => {
+      const originalGraph = () => demoData.advancedMealGraph();
+      const targetEdge = () => demoData.crabLoopEdge();
+      const modifiedGraph = () => {
+        const g = originalGraph();
+        g.addEdge(targetEdge()); // should be redundant
+        g.addEdge(targetEdge()); // should be redundant
+        return g;
+      };
+      it("is idempotent in terms of graph equality", () => {
+        const g1 = originalGraph();
+        const g2 = modifiedGraph();
+        expect(g1.equals(g2)).toBe(true);
+      });
+      it("is idempotent in terms of in-edges", () => {
+        const g1 = originalGraph();
+        const g2 = modifiedGraph();
+        const e1 = sortedByAddress(g1.getInEdges(targetEdge().address));
+        const e2 = sortedByAddress(g2.getInEdges(targetEdge().address));
+        expect(e1).toEqual(e2);
+      });
+      it("is idempotent in terms of out-edges", () => {
+        const g1 = originalGraph();
+        const g2 = modifiedGraph();
+        const e1 = sortedByAddress(g1.getOutEdges(targetEdge().address));
+        const e2 = sortedByAddress(g2.getOutEdges(targetEdge().address));
+        expect(e1).toEqual(e2);
       });
     });
 
