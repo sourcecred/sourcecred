@@ -631,5 +631,32 @@ describe("graph", () => {
         });
       });
     });
+
+    describe("copy", () => {
+      it("separates references from the original", () => {
+        const g1 = demoData.advancedMealGraph();
+        const g2 = g1.copy();
+        const newNode = () => ({
+          address: demoData.makeAddress("brand-new"),
+          payload: 777,
+        });
+        g2.addNode(newNode());
+        expect(g1.getNode(newNode().address)).toBeUndefined();
+        expect(g2.getNode(newNode().address)).toEqual(newNode());
+      });
+
+      it("yields a result equal to the original", () => {
+        const g1 = demoData.advancedMealGraph();
+        const g2 = g1.copy();
+        expect(g1.equals(g2)).toBe(true);
+        expect(g1.equals(demoData.advancedMealGraph())).toBe(true);
+      });
+
+      function itAllowsUpcastingPayloadTypes(
+        g: Graph<{x: string, y: number}, boolean>
+      ): Graph<{x: string}, ?boolean> {
+        return g.copy();
+      }
+    });
   });
 });
