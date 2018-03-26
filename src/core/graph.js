@@ -3,7 +3,7 @@
 import deepEqual from "lodash.isequal";
 import stringify from "json-stable-stringify";
 import type {Address, Addressable, AddressMapJSON} from "./address";
-import {AddressMap, toString as addressToString} from "./address";
+import {AddressMap} from "./address";
 
 export type Node<+T> = {|
   +address: Address,
