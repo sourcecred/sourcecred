@@ -6,7 +6,6 @@ import {Graph} from "../../../../core/graph";
 import type {Node} from "../../../../core/graph";
 import type {
   NodePayload,
-  EdgeID,
   NodeType,
   NodeTypes,
   IssueNodePayload,

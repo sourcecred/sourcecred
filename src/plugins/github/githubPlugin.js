@@ -2,7 +2,7 @@
 
 import type {Node, Edge} from "../../core/graph";
 import type {Address} from "../../core/address";
-import {Graph} from "../../core/graph";
+import {Graph, edgeID} from "../../core/graph";
 const stringify = require("json-stable-stringify");
 
 export const GITHUB_PLUGIN_NAME = "sourcecred/github-beta";
@@ -109,45 +109,27 @@ export type NodePayload =
   | AuthorNodePayload;
 
 /** Edge Types */
-// TODO(dandelionmane): remove the ID types when we move
-// edge address generation to core Graph code
 export type AuthorshipEdgePayload = {};
 export type AuthorshipEdgeType = "AUTHORSHIP";
-export type AuthorshipEdgeID = {
-  +contribution: Address,
-  +author: Address,
-};
 export type ContainmentEdgePayload = {};
 export type ContainmentEdgeType = "CONTAINMENT";
-export type ContainmentEdgeID = {
-  +child: Address,
-  +parent: Address,
-};
 export type ReferenceEdgePayload = {};
 export type ReferenceEdgeType = "REFERENCE";
-export type ReferenceEdgeID = {
-  +referrer: Address,
-  +referent: Address,
-};
 
 export type EdgeTypes = {|
   AUTHORSHIP: {
     payload: AuthorshipEdgePayload,
     type: AuthorshipEdgeType,
-    ID: AuthorshipEdgeID,
   },
   CONTAINMENT: {
     payload: ContainmentEdgePayload,
     type: ContainmentEdgeType,
-    ID: ContainmentEdgeID,
   },
   REFERENCE: {
     payload: ReferenceEdgePayload,
     type: ReferenceEdgeType,
-    ID: ReferenceEdgeID,
   },
 |};
-export type EdgeID = AuthorshipEdgeID | ContainmentEdgeID | ReferenceEdgeID;
 export type EdgePayload =
   | AuthorshipEdgePayload
   | ContainmentEdgePayload
@@ -192,12 +174,12 @@ export class GithubParser {
     };
   }
 
-  makeEdgeAddress(type: EdgeType, id: EdgeID): Address {
+  makeEdgeAddress(type: EdgeType, src: Address, dst: Address): Address {
     return {
       pluginName: GITHUB_PLUGIN_NAME,
       repositoryName: this.repositoryName,
       type,
-      id: stringify(id),
+      id: edgeID(src, dst),
     };
   }
 
@@ -237,12 +219,12 @@ export class GithubParser {
     };
     this.graph.addNode(authorNode);
 
-    const authorshipID = {
-      contribution: authoredNode.address,
-      author: authorNode.address,
-    };
     const authorshipEdge: Edge<AuthorshipEdgePayload> = {
-      address: this.makeEdgeAddress("AUTHORSHIP", authorshipID),
+      address: this.makeEdgeAddress(
+        "AUTHORSHIP",
+        authoredNode.address,
+        authorNode.address
+      ),
       payload: {},
       src: authoredNode.address,
       dst: authorNode.address,
@@ -299,12 +281,12 @@ export class GithubParser {
       | PullRequestReviewNodePayload
     >
   ) {
-    const containmentID: ContainmentEdgeID = {
-      child: childNode.address,
-      parent: parentNode.address,
-    };
     const containmentEdge = {
-      address: this.makeEdgeAddress("CONTAINMENT", containmentID),
+      address: this.makeEdgeAddress(
+        "CONTAINMENT",
+        parentNode.address,
+        childNode.address
+      ),
       payload: {},
       src: parentNode.address,
       dst: childNode.address,
