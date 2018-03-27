@@ -19,14 +19,14 @@ describe("GithubParser", () => {
 
     it("no node or edge has undefined properties in its payload", () => {
       graph
-        .getAllNodes()
+        .getNodes()
         .forEach((n) =>
           Object.keys(n.payload).forEach((k) =>
             expect((n.payload: any)[k]).toBeDefined()
           )
         );
       graph
-        .getAllEdges()
+        .getEdges()
         .forEach((e) =>
           Object.keys(e.payload).forEach((k) =>
             expect((e.payload: any)[k]).toBeDefined()
@@ -36,7 +36,7 @@ describe("GithubParser", () => {
 
     it("every comment has an author and container", () => {
       const comments = graph
-        .getAllNodes()
+        .getNodes()
         .filter((n) => n.address.type === "COMMENT");
       expect(comments).not.toHaveLength(0);
       comments.forEach((c) => {
@@ -53,7 +53,7 @@ describe("GithubParser", () => {
 
     it("every pull request and issue has an author", () => {
       const issuesAndPRs = graph
-        .getAllNodes()
+        .getNodes()
         .filter(
           (n) => ["ISSUE", "PULL_REQUEST"].indexOf(n.address.type) !== -1
         );

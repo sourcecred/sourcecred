@@ -18,7 +18,7 @@ describe("githubPluginAdapter", () => {
     const graph = parser.graph;
 
     const result = graph
-      .getAllNodes()
+      .getNodes()
       .map((node) => ({
         id: node.address.id,
         payload: node.payload,
