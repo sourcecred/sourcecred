@@ -34,7 +34,7 @@ function createSampleArtifact(name) {
       id,
       type: "artifact",
     },
-    payload: {name},
+    payload: {name, description: ""},
   };
 }
 
