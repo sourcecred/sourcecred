@@ -50,24 +50,66 @@ export class ArtifactGraphEditor extends React.Component<Props, State> {
     );
   }
 
+  updateArtifactDescription(
+    oldArtifactNode: Node<NodePayload>,
+    newDescription: string
+  ): void {
+    this.setState(
+      (state) => ({
+        graph: state.graph
+          .copy()
+          .removeNode(oldArtifactNode.address)
+          .addNode({
+            address: oldArtifactNode.address,
+            payload: {
+              name: oldArtifactNode.payload.name,
+              description: newDescription,
+            },
+          }),
+      }),
+      () => {
+        this.props.onChange(this.state.graph);
+      }
+    );
+  }
+
   render() {
     return (
       <div>
         <h2>Artifacts</h2>
-        <ul>
-          {this.state.graph
-            .getAllNodes()
-            .map((x) => <li key={x.address.id}>{x.payload.name}</li>)}
-          <input
-            value={this.state.artifactInProgressName}
-            onChange={(e) => {
-              const value = e.target.value;
-              this.setState((state) => ({
-                artifactInProgressName: value,
-              }));
-            }}
-          />
-        </ul>
+        <table>
+          <thead>
+            <tr>
+              <th>Artifact</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.state.graph.getAllNodes().map((x) => (
+              <tr key={x.address.id}>
+                <td>{x.payload.name}</td>
+                <td>
+                  <textarea
+                    key={`description-${x.address.id}`}
+                    value={x.payload.description}
+                    onChange={(e) => {
+                      this.updateArtifactDescription(x, e.target.value);
+                    }}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <input
+          value={this.state.artifactInProgressName}
+          onChange={(e) => {
+            const value = e.target.value;
+            this.setState((state) => ({
+              artifactInProgressName: value,
+            }));
+          }}
+        />
         <button
           onClick={() => {
             this.addArtifact(this.state.artifactInProgressName);
