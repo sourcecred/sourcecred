@@ -6,13 +6,16 @@ import {StyleSheet, css} from "aphrodite/no-important";
 import "./pluginAdapter";
 
 import type {Graph, Node} from "../../../core/graph";
-import type {ArtifactNodePayload} from "../artifactPlugin";
 import type {
   NodePayload as GithubNodePayload,
   EdgePayload as GithubEdgePayload,
 } from "../../github/githubPlugin";
+import type {
+  NodePayload as ArtifactNodePayload,
+  EdgePayload as ArtifactEdgePayload,
+} from "../artifactPlugin";
 import type {Settings} from "./SettingsConfig";
-import {ArtifactList} from "./ArtifactList";
+import {ArtifactGraphEditor} from "./ArtifactGraphEditor";
 import {ContributionList} from "./ContributionList";
 import {GithubGraphFetcher} from "./GithubGraphFetcher";
 import {SettingsConfig, defaultSettings} from "./SettingsConfig";
@@ -22,21 +25,9 @@ type Props = {};
 type State = {
   artifacts: Node<ArtifactNodePayload>[],
   githubGraph: ?Graph<GithubNodePayload, GithubEdgePayload>,
+  artifactGraph: ?Graph<ArtifactNodePayload, ArtifactEdgePayload>,
   settings: Settings,
 };
-
-function createSampleArtifact(name) {
-  const id = name.toLowerCase().replace(/[^a-z]/g, "-");
-  return {
-    address: {
-      repositoryName: "sourcecred/devnull",
-      pluginName: "sourcecred/artifact-beta",
-      id,
-      type: "artifact",
-    },
-    payload: {name, description: ""},
-  };
-}
 
 export default class App extends React.Component<Props, State> {
   constructor() {
@@ -44,6 +35,7 @@ export default class App extends React.Component<Props, State> {
     this.state = {
       artifacts: [],
       githubGraph: null,
+      artifactGraph: null,
       settings: defaultSettings(),
     };
   }
@@ -65,12 +57,10 @@ export default class App extends React.Component<Props, State> {
             this.setState({githubGraph});
           }}
         />
-        <ArtifactList
-          artifacts={this.state.artifacts}
-          createArtifact={(name) => {
-            this.setState((state) => ({
-              artifacts: [...state.artifacts, createSampleArtifact(name)],
-            }));
+        <ArtifactGraphEditor
+          settings={this.state.settings}
+          onChange={(artifactGraph) => {
+            this.setState({artifactGraph});
           }}
         />
         <ContributionList
