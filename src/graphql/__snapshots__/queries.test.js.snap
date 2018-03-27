@@ -200,6 +200,7 @@ Array [
     ],
     "selections": Array [
       Object {
+        "alias": null,
         "args": Object {
           "id": Object {
             "data": 12345,
@@ -213,6 +214,7 @@ Array [
         "name": "thing",
         "selections": Array [
           Object {
+            "alias": null,
             "args": Object {
               "tasty": Object {
                 "data": true,
@@ -235,16 +237,19 @@ Array [
         "type": "FIELD",
       },
       Object {
+        "alias": null,
         "args": Object {},
         "name": "more",
         "selections": Array [
           Object {
             "selections": Array [
               Object {
+                "alias": null,
                 "args": Object {},
                 "name": "mcguffins",
                 "selections": Array [
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "quantity",
                     "selections": Array [],
@@ -254,6 +259,7 @@ Array [
                 "type": "FIELD",
               },
               Object {
+                "alias": "goo",
                 "args": Object {
                   "state": Object {
                     "data": "SLIMY",
@@ -263,6 +269,7 @@ Array [
                 "name": "slime",
                 "selections": Array [
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "availability",
                     "selections": Array [],
@@ -278,6 +285,7 @@ Array [
           Object {
             "selections": Array [
               Object {
+                "alias": null,
                 "args": Object {
                   "attributes": Object {
                     "data": Object {
@@ -325,10 +333,12 @@ Array [
     "params": Array [],
     "selections": Array [
       Object {
+        "alias": null,
         "args": Object {},
         "name": "rateLimit",
         "selections": Array [
           Object {
+            "alias": null,
             "args": Object {},
             "name": "remaining",
             "selections": Array [],
@@ -344,12 +354,14 @@ Array [
     "name": "otherThings",
     "selections": Array [
       Object {
+        "alias": null,
         "args": Object {},
         "name": "__typename",
         "selections": Array [],
         "type": "FIELD",
       },
       Object {
+        "alias": null,
         "args": Object {},
         "name": "quality",
         "selections": Array [],
@@ -362,7 +374,7 @@ Array [
 ]
 `;
 
-exports[`queries end-to-end-test cases for a query using lots of features should stringify as inline 1`] = `"query QueryWithParameters($qp1: String! $qp2: String!) { thing(id: 12345 name: $qp1) { fruit(type: APPLE tasty: true) ...otherThings } more { ... on Widget { mcguffins { quantity } slime(state: SLIMY) { availability } } ... on Gizmo { cogs(attributes: { teeth: [ 12 14 16 ] shaft: null }) } } } query QueryWithoutParameters { rateLimit { remaining } } fragment otherThings on Thing { __typename quality }"`;
+exports[`queries end-to-end-test cases for a query using lots of features should stringify as inline 1`] = `"query QueryWithParameters($qp1: String! $qp2: String!) { thing(id: 12345 name: $qp1) { fruit(type: APPLE tasty: true) ...otherThings } more { ... on Widget { mcguffins { quantity } goo: slime(state: SLIMY) { availability } } ... on Gizmo { cogs(attributes: { teeth: [ 12 14 16 ] shaft: null }) } } } query QueryWithoutParameters { rateLimit { remaining } } fragment otherThings on Thing { __typename quality }"`;
 
 exports[`queries end-to-end-test cases for a query using lots of features should stringify as multiline 1`] = `
 "query QueryWithParameters($qp1: String! $qp2: String!) {
@@ -375,7 +387,7 @@ exports[`queries end-to-end-test cases for a query using lots of features should
       mcguffins {
         quantity
       }
-      slime(state: SLIMY) {
+      goo: slime(state: SLIMY) {
         availability
       }
     }
@@ -411,6 +423,7 @@ Array [
     ],
     "selections": Array [
       Object {
+        "alias": null,
         "args": Object {
           "name": Object {
             "data": "repoName",
@@ -424,6 +437,7 @@ Array [
         "name": "repository",
         "selections": Array [
           Object {
+            "alias": null,
             "args": Object {
               "first": Object {
                 "data": 100,
@@ -433,10 +447,12 @@ Array [
             "name": "issues",
             "selections": Array [
               Object {
+                "alias": null,
                 "args": Object {},
                 "name": "pageInfo",
                 "selections": Array [
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "hasNextPage",
                     "selections": Array [],
@@ -446,34 +462,40 @@ Array [
                 "type": "FIELD",
               },
               Object {
+                "alias": null,
                 "args": Object {},
                 "name": "nodes",
                 "selections": Array [
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "id",
                     "selections": Array [],
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "title",
                     "selections": Array [],
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "body",
                     "selections": Array [],
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "number",
                     "selections": Array [],
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "author",
                     "selections": Array [
@@ -485,6 +507,7 @@ Array [
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {
                       "first": Object {
                         "data": 20,
@@ -494,10 +517,12 @@ Array [
                     "name": "comments",
                     "selections": Array [
                       Object {
+                        "alias": null,
                         "args": Object {},
                         "name": "pageInfo",
                         "selections": Array [
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "hasNextPage",
                             "selections": Array [],
@@ -507,16 +532,19 @@ Array [
                         "type": "FIELD",
                       },
                       Object {
+                        "alias": null,
                         "args": Object {},
                         "name": "nodes",
                         "selections": Array [
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "id",
                             "selections": Array [],
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "author",
                             "selections": Array [
@@ -528,12 +556,14 @@ Array [
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "body",
                             "selections": Array [],
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "url",
                             "selections": Array [],
@@ -552,6 +582,7 @@ Array [
             "type": "FIELD",
           },
           Object {
+            "alias": null,
             "args": Object {
               "first": Object {
                 "data": 100,
@@ -561,10 +592,12 @@ Array [
             "name": "pullRequests",
             "selections": Array [
               Object {
+                "alias": null,
                 "args": Object {},
                 "name": "pageInfo",
                 "selections": Array [
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "hasNextPage",
                     "selections": Array [],
@@ -574,34 +607,40 @@ Array [
                 "type": "FIELD",
               },
               Object {
+                "alias": null,
                 "args": Object {},
                 "name": "nodes",
                 "selections": Array [
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "id",
                     "selections": Array [],
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "title",
                     "selections": Array [],
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "body",
                     "selections": Array [],
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "number",
                     "selections": Array [],
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {},
                     "name": "author",
                     "selections": Array [
@@ -613,6 +652,7 @@ Array [
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {
                       "first": Object {
                         "data": 20,
@@ -622,10 +662,12 @@ Array [
                     "name": "comments",
                     "selections": Array [
                       Object {
+                        "alias": null,
                         "args": Object {},
                         "name": "pageInfo",
                         "selections": Array [
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "hasNextPage",
                             "selections": Array [],
@@ -635,16 +677,19 @@ Array [
                         "type": "FIELD",
                       },
                       Object {
+                        "alias": null,
                         "args": Object {},
                         "name": "nodes",
                         "selections": Array [
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "id",
                             "selections": Array [],
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "author",
                             "selections": Array [
@@ -656,12 +701,14 @@ Array [
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "body",
                             "selections": Array [],
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "url",
                             "selections": Array [],
@@ -674,6 +721,7 @@ Array [
                     "type": "FIELD",
                   },
                   Object {
+                    "alias": null,
                     "args": Object {
                       "first": Object {
                         "data": 10,
@@ -683,10 +731,12 @@ Array [
                     "name": "reviews",
                     "selections": Array [
                       Object {
+                        "alias": null,
                         "args": Object {},
                         "name": "pageInfo",
                         "selections": Array [
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "hasNextPage",
                             "selections": Array [],
@@ -696,22 +746,26 @@ Array [
                         "type": "FIELD",
                       },
                       Object {
+                        "alias": null,
                         "args": Object {},
                         "name": "nodes",
                         "selections": Array [
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "id",
                             "selections": Array [],
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "body",
                             "selections": Array [],
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "author",
                             "selections": Array [
@@ -723,12 +777,14 @@ Array [
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {},
                             "name": "state",
                             "selections": Array [],
                             "type": "FIELD",
                           },
                           Object {
+                            "alias": null,
                             "args": Object {
                               "first": Object {
                                 "data": 10,
@@ -738,10 +794,12 @@ Array [
                             "name": "comments",
                             "selections": Array [
                               Object {
+                                "alias": null,
                                 "args": Object {},
                                 "name": "pageInfo",
                                 "selections": Array [
                                   Object {
+                                    "alias": null,
                                     "args": Object {},
                                     "name": "hasNextPage",
                                     "selections": Array [],
@@ -751,22 +809,26 @@ Array [
                                 "type": "FIELD",
                               },
                               Object {
+                                "alias": null,
                                 "args": Object {},
                                 "name": "nodes",
                                 "selections": Array [
                                   Object {
+                                    "alias": null,
                                     "args": Object {},
                                     "name": "id",
                                     "selections": Array [],
                                     "type": "FIELD",
                                   },
                                   Object {
+                                    "alias": null,
                                     "args": Object {},
                                     "name": "body",
                                     "selections": Array [],
                                     "type": "FIELD",
                                   },
                                   Object {
+                                    "alias": null,
                                     "args": Object {},
                                     "name": "author",
                                     "selections": Array [
@@ -805,12 +867,14 @@ Array [
     "name": "whoami",
     "selections": Array [
       Object {
+        "alias": null,
         "args": Object {},
         "name": "__typename",
         "selections": Array [],
         "type": "FIELD",
       },
       Object {
+        "alias": null,
         "args": Object {},
         "name": "login",
         "selections": Array [],
@@ -819,6 +883,7 @@ Array [
       Object {
         "selections": Array [
           Object {
+            "alias": null,
             "args": Object {},
             "name": "id",
             "selections": Array [],
@@ -831,6 +896,7 @@ Array [
       Object {
         "selections": Array [
           Object {
+            "alias": null,
             "args": Object {},
             "name": "id",
             "selections": Array [],
@@ -843,6 +909,7 @@ Array [
       Object {
         "selections": Array [
           Object {
+            "alias": null,
             "args": Object {},
             "name": "id",
             "selections": Array [],

@@ -36,6 +36,7 @@ export type FragmentDefinition = {|
 export type Selection = Field | FragmentSpread | InlineFragment;
 export type Field = {|
   +type: "FIELD",
+  +alias: ?string,
   +name: string,
   +args: Arguments,
   +selections: Selection[],
@@ -100,9 +101,20 @@ export const build = {
   field(name: string, args: ?Arguments, selections: ?(Selection[])): Field {
     return {
       type: "FIELD",
+      alias: null,
       name,
       args: args || {},
       selections: selections || [],
+    };
+  },
+
+  alias(newAlias: string, field: Field): Field {
+    return {
+      type: "FIELD",
+      alias: newAlias,
+      name: field.name,
+      args: field.args,
+      selections: field.selections,
     };
   },
 
@@ -308,6 +320,13 @@ export const stringify = {
   },
 
   field(field: Field, ls: LayoutStrategy): string {
+    const aliasPart = (() => {
+      if (field.alias == null) {
+        return "";
+      } else {
+        return `${field.alias}: `;
+      }
+    })();
     const argsPart = (() => {
       if (Object.keys(field.args).length === 0) {
         return "";
@@ -325,7 +344,7 @@ export const stringify = {
         ls.next()
       );
       return ls.join([
-        ls.atom(`${field.name}${argsPart} {`),
+        ls.atom(`${aliasPart}${field.name}${argsPart} {`),
         selectionsPart,
         ls.atom("}"),
       ]);
