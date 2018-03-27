@@ -96,6 +96,19 @@ export class AddressMap<T: Addressable> {
   getAll(): T[] {
     return Object.keys(this._data).map((k) => this._data[k]);
   }
+
+  /**
+   * Remove any object with the given address. If none exists, this
+   * method does nothing.
+   */
+  remove(address: Address): this {
+    if (address == null) {
+      throw new Error(`address is ${String(address)}`);
+    }
+    const key = toString(address);
+    delete this._data[key];
+    return this;
+  }
 }
 
 /**

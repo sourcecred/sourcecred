@@ -54,6 +54,14 @@ describe("address", () => {
       expect(sortedByAddress(actual)).toEqual(sortedByAddress(expected));
     });
 
+    it("removes objects by key", () => {
+      expect(
+        makeMap()
+          .remove(mansion().address)
+          .get(mansion().address)
+      ).toBeUndefined();
+    });
+
     it("stringifies to JSON", () => {
       expect(makeMap().toJSON()).toMatchSnapshot();
     });
@@ -111,6 +119,10 @@ describe("address", () => {
         it(`when getting ${String(bad)} elements`, () => {
           const message = `address is ${String(bad)}`;
           expect(() => makeMap().get((bad: any))).toThrow(message);
+        });
+        it(`when removing ${String(bad)} elements`, () => {
+          const message = `address is ${String(bad)}`;
+          expect(() => makeMap().remove((bad: any))).toThrow(message);
         });
         it(`when adding elements with ${String(bad)} address`, () => {
           const message = `address is ${String(bad)}`;
