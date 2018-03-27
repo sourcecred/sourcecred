@@ -1,6 +1,10 @@
 // @flow
 
-import {GithubParser} from "./githubPlugin";
+import {
+  GithubParser,
+  AUTHORS_EDGE_TYPE,
+  CONTAINS_EDGE_TYPE,
+} from "./githubPlugin";
 import exampleRepoData from "./demoData/example-repo.json";
 
 describe("GithubParser", () => {
@@ -38,11 +42,11 @@ describe("GithubParser", () => {
       comments.forEach((c) => {
         const authorEdges = graph
           .getOutEdges(c.address)
-          .filter((e) => e.address.type === "AUTHORSHIP");
+          .filter((e) => e.address.type === AUTHORS_EDGE_TYPE);
         expect(authorEdges.length).toBe(1);
         const containerEdges = graph
           .getInEdges(c.address)
-          .filter((e) => e.address.type === "CONTAINMENT");
+          .filter((e) => e.address.type === CONTAINS_EDGE_TYPE);
         expect(containerEdges.length).toBe(1);
       });
     });
@@ -57,7 +61,7 @@ describe("GithubParser", () => {
       issuesAndPRs.forEach((x) => {
         const outEdges = graph.getOutEdges(x.address);
         const authorEdges = outEdges.filter(
-          (e) => e.address.type === "AUTHORSHIP"
+          (e) => e.address.type === AUTHORS_EDGE_TYPE
         );
         expect(authorEdges.length).toBe(1);
       });
