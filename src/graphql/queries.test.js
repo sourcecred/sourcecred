@@ -88,9 +88,12 @@ function featurefulQuery(): Body {
         b.field("more", {}, [
           b.inlineFragment("Widget", [
             b.field("mcguffins", {}, [b.field("quantity")]),
-            b.field("slime", {state: b.enumLiteral("SLIMY")}, [
-              b.field("availability"),
-            ]),
+            b.alias(
+              "goo",
+              b.field("slime", {state: b.enumLiteral("SLIMY")}, [
+                b.field("availability"),
+              ])
+            ),
           ]),
           b.inlineFragment("Gizmo", [
             b.field("cogs", {
