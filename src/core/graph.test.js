@@ -156,7 +156,7 @@ describe("graph", () => {
           demoData.crabNode(),
           demoData.mealNode(),
         ];
-        const actual = demoData.advancedMealGraph().getAllNodes();
+        const actual = demoData.advancedMealGraph().getNodes();
         expectSameSorted(expected, actual);
       });
 
@@ -171,7 +171,7 @@ describe("graph", () => {
           demoData.crabLoopEdge(),
           demoData.duplicateCookEdge(),
         ];
-        const actual = demoData.advancedMealGraph().getAllEdges();
+        const actual = demoData.advancedMealGraph().getEdges();
         expectSameSorted(expected, actual);
       });
     });
@@ -560,7 +560,7 @@ describe("graph", () => {
       function neighborhoodDecomposition<NP, EP>(
         originalGraph: Graph<NP, EP>
       ): Graph<NP, EP>[] {
-        return originalGraph.getAllNodes().map((node) => {
+        return originalGraph.getNodes().map((node) => {
           const miniGraph = new Graph();
           miniGraph.addNode(node);
           originalGraph.getOutEdges(node.address).forEach((edge) => {
@@ -589,7 +589,7 @@ describe("graph", () => {
       function edgeDecomposition<NP, EP>(
         originalGraph: Graph<NP, EP>
       ): Graph<NP, EP>[] {
-        return originalGraph.getAllEdges().map((edge) => {
+        return originalGraph.getEdges().map((edge) => {
           const miniGraph = new Graph();
           miniGraph.addNode(originalGraph.getNode(edge.src));
           if (miniGraph.getNode(edge.dst) === undefined) {

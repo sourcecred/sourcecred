@@ -85,7 +85,7 @@ export class ArtifactGraphEditor extends React.Component<Props, State> {
             </tr>
           </thead>
           <tbody>
-            {this.state.graph.getAllNodes().map((x) => (
+            {this.state.graph.getNodes().map((x) => (
               <tr key={x.address.id}>
                 <td>{x.payload.name}</td>
                 <td>

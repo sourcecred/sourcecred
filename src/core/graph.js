@@ -197,14 +197,14 @@ export class Graph<NP, EP> {
   /**
    * Gets all nodes in the graph, in unspecified order.
    */
-  getAllNodes(): Node<NP>[] {
+  getNodes(): Node<NP>[] {
     return this._nodes.getAll();
   }
 
   /**
    * Gets all edges in the graph, in unspecified order.
    */
-  getAllEdges(): Edge<EP>[] {
+  getEdges(): Edge<EP>[] {
     return this._edges.getAll();
   }
 
@@ -223,7 +223,7 @@ export class Graph<NP, EP> {
     edgeResolver: (Edge<E1>, Edge<E2>) => Edge<EP>
   ): Graph<NP, EP> {
     const result: Graph<NP, EP> = new Graph();
-    g1.getAllNodes().forEach((node) => {
+    g1.getNodes().forEach((node) => {
       if (g2.getNode(node.address) !== undefined) {
         const resolved = nodeResolver(node, g2.getNode(node.address));
         result.addNode(resolved);
@@ -231,12 +231,12 @@ export class Graph<NP, EP> {
         result.addNode(node);
       }
     });
-    g2.getAllNodes().forEach((node) => {
+    g2.getNodes().forEach((node) => {
       if (result.getNode(node.address) === undefined) {
         result.addNode(node);
       }
     });
-    g1.getAllEdges().forEach((edge) => {
+    g1.getEdges().forEach((edge) => {
       if (g2.getEdge(edge.address) !== undefined) {
         const resolved = edgeResolver(edge, g2.getEdge(edge.address));
         result.addEdge(resolved);
@@ -244,7 +244,7 @@ export class Graph<NP, EP> {
         result.addEdge(edge);
       }
     });
-    g2.getAllEdges().forEach((edge) => {
+    g2.getEdges().forEach((edge) => {
       if (result.getEdge(edge.address) === undefined) {
         result.addEdge(edge);
       }
