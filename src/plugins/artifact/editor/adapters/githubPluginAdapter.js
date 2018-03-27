@@ -16,7 +16,10 @@ import type {
   AuthorNodePayload,
 } from "../../../github/githubPlugin";
 import type {PluginAdapter} from "../pluginAdapter";
-import {GITHUB_PLUGIN_NAME} from "../../../github/githubPlugin";
+import {
+  GITHUB_PLUGIN_NAME,
+  CONTAINS_EDGE_TYPE,
+} from "../../../github/githubPlugin";
 
 const adapter: PluginAdapter<NodePayload> = {
   pluginName: GITHUB_PLUGIN_NAME,
@@ -39,7 +42,7 @@ const adapter: PluginAdapter<NodePayload> = {
     function extractParentTitles(node: Node<NodePayload>): string[] {
       return graph
         .getInEdges(node.address)
-        .filter((e) => e.address.type === "CONTAINMENT")
+        .filter((e) => e.address.type === CONTAINS_EDGE_TYPE)
         .map((e) => graph.getNode(e.src))
         .map((container) => {
           return adapter.extractTitle(graph, container);
