@@ -1,6 +1,11 @@
 // @flow
 
-import type {Body, FragmentDefinition, Selection} from "../../graphql/queries";
+import type {
+  Body,
+  FragmentDefinition,
+  Selection,
+  QueryDefinition,
+} from "../../graphql/queries";
 import {build} from "../../graphql/queries";
 
 /**
@@ -340,6 +345,129 @@ function* continuationsFromReview(
   }
 }
 
+function* usedFragmentNames(selection: Selection): Iterator<string> {
+  switch (selection.type) {
+    case "FRAGMENT_SPREAD":
+      yield selection.fragmentName;
+      break;
+    case "FIELD":
+    case "INLINE_FRAGMENT":
+      for (const subselection of selection.selections) {
+        yield* usedFragmentNames(subselection);
+      }
+      break;
+    default:
+      throw new Error(`Unknown selection type: ${selection.type}`);
+  }
+}
+
+export function requiredFragments(
+  query: QueryDefinition
+): FragmentDefinition[] {
+  const fragmentsByName = {};
+  createFragments().forEach((fd) => {
+    fragmentsByName[fd.name] = fd;
+  });
+
+  const requiredFragmentNames: Set<string> = new Set();
+
+  let frontier: Set<string> = new Set();
+  query.selections.forEach((selection) => {
+    for (const fragment of usedFragmentNames(selection)) {
+      frontier.add(fragment);
+    }
+  });
+
+  while (frontier.size > 0) {
+    frontier.forEach((name) => {
+      requiredFragmentNames.add(name);
+    });
+    const newFrontier: Set<string> = new Set();
+    for (const name of frontier) {
+      const fragment = fragmentsByName[name];
+      if (fragment == null) {
+        throw new Error(`Unknown fragment: "${fragment}"`);
+      }
+      fragment.selections.forEach((selection) => {
+        for (const fragment of usedFragmentNames(selection)) {
+          newFrontier.add(fragment);
+        }
+      });
+    }
+    frontier = newFrontier;
+  }
+
+  return createFragments().filter((fd) => requiredFragmentNames.has(fd.name));
+}
+
+export async function postQueryExhaustive(
+  postQuery: ({query: Body, variables: {[string]: any}}) => Promise<any>,
+  payload: {query: Body, variables: {[string]: any}}
+) {
+  const originalResult = await postQuery(payload);
+  return resolveContinuations(
+    postQuery,
+    originalResult,
+    Array.from(continuationsFromQuery(originalResult))
+  );
+}
+
+async function resolveContinuations(
+  postQuery: ({query: Body, variables: {[string]: any}}) => Promise<any>,
+  originalResult: any,
+  continuations: $ReadOnlyArray<Continuation>
+): Promise<any> {
+  if (!continuations.length) {
+    return originalResult;
+  }
+  const embeddings = continuations.map((c, i) => ({
+    continuation: c,
+    nonce: `_n${String(i)}`,
+  }));
+  const b = build;
+  const query = b.query(
+    "Continuations",
+    [],
+    embeddings.map(({continuation, nonce}) =>
+      b.alias(
+        nonce,
+        b.field(
+          "node",
+          {id: b.literal(continuation.enclosingNodeId)},
+          continuation.selections.slice()
+        )
+      )
+    )
+  );
+  const body = [query, ...requiredFragments(query)];
+  const payload = {query: body, variables: {}};
+
+  const continuationResult = await postQuery(payload);
+  const mergedResults = mergeContinuationResults(
+    originalResult,
+    continuationResult,
+    embeddings
+  );
+  return resolveContinuations(
+    postQuery,
+    mergedResults,
+    Array.from(continuationsFromQuery(mergedResults))
+  );
+}
+
+export function mergeContinuationResults(
+  originalResult: any,
+  continuationResult: any,
+  continuationEmbeddings: $ReadOnlyArray<{|
+    +continuation: Continuation,
+    +nonce: string,
+  |}>
+) {
+  return continuationEmbeddings.reduce((acc, {continuation, nonce}) => {
+    return merge(acc, continuationResult[nonce], continuation.destinationPath);
+  }, originalResult);
+}
+
 /**
  * Merge structured data from the given `source` into a given subpath of
  * the `destination`. The original inputs are not modified.
@@ -456,7 +584,7 @@ function mergeDirect<T>(destination: T, source: any): T {
  * These fragments are used to construct the root query, and also to
  * fetch more pages of specific entity types.
  */
-function createFragments(): FragmentDefinition[] {
+export function createFragments(): FragmentDefinition[] {
   const b = build;
   const makePageInfo = () =>
     b.field("pageInfo", {}, [b.field("hasNextPage"), b.field("endCursor")]);

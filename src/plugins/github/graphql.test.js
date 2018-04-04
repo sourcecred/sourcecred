@@ -2,11 +2,17 @@
 
 import type {Continuation} from "./graphql";
 import {build} from "../../graphql/queries";
+import {stringify, multilineLayout} from "../../graphql/queries";
 import {
   PAGE_LIMIT,
+  createQuery,
+  createVariables,
   continuationsFromQuery,
   continuationsFromContinuation,
+  createFragments,
   merge,
+  postQueryExhaustive,
+  requiredFragments,
 } from "./graphql";
 
 describe("graphql", () => {
@@ -629,6 +635,333 @@ describe("graphql", () => {
           expect(() => merge({a: 1}, true, [])).toThrow(re());
         });
       });
+    });
+  });
+
+  describe("#postQueryExhaustive", () => {
+    it("finds no fragments in an empty query", () => {
+      const b = build;
+      const query = b.query("Noop", [], []);
+      expect(requiredFragments(query)).toEqual([]);
+    });
+
+    it("finds a fragment with no dependencies", () => {
+      const b = build;
+      const query = b.query(
+        "FindReviewComments",
+        [],
+        [
+          b.field("node", {id: b.literal("some-user")}, [
+            b.inlineFragment("Actor", [b.fragmentSpread("whoami")]),
+          ]),
+        ]
+      );
+      const result = requiredFragments(query);
+      expect(result.map((fd) => fd.name).sort()).toEqual(["whoami"]);
+      result.forEach((fd) => expect(createFragments()).toContainEqual(fd));
+    });
+
+    it("transitively finds dependent fragments", () => {
+      const b = build;
+      const query = b.query(
+        "FindReviewComments",
+        [],
+        [
+          b.field("node", {id: b.literal("some-pull-request")}, [
+            b.inlineFragment("PullRequest", [
+              b.field(
+                "reviews",
+                {
+                  first: b.literal(1),
+                },
+                [b.fragmentSpread("reviews")]
+              ),
+            ]),
+          ]),
+        ]
+      );
+      const result = requiredFragments(query);
+      expect(result.map((fd) => fd.name).sort()).toEqual([
+        "reviewComments",
+        "reviews",
+        "whoami",
+      ]);
+      result.forEach((fd) => expect(createFragments()).toContainEqual(fd));
+    });
+  });
+
+  describe("#postQueryExhaustive", () => {
+    it("resolves a representative query", async () => {
+      const makeAuthor = (name) => ({
+        __typename: "User",
+        login: name,
+        id: `opaque-user-${name}`,
+      });
+      // We'll have three stages:
+      //   - The original result will need more issues, and more
+      //     comments for issue 1, and more reviews for PR 2.
+      //   - The next result will need more issues, and comments for
+      //     issues 1 (original issue) and 3 (new issue).
+      //   - The final result will need no more data.
+      // We obey the contract pretty much exactly, except that we return
+      // far fewer results than are asked for by the query.
+      //
+      // Here is the response to the initial query.
+      const response0 = {
+        repository: {
+          id: "opaque-repo",
+          issues: {
+            pageInfo: {
+              hasNextPage: true,
+              endCursor: "opaque-cursor-issues-v0",
+            },
+            nodes: [
+              {
+                id: "opaque-issue1",
+                title: "Request for comments",
+                body: "Like it says, please comment!",
+                number: 1,
+                author: makeAuthor("decentralion"),
+                comments: {
+                  pageInfo: {
+                    hasNextPage: true,
+                    endCursor: "opaque-cursor-issue1comments-v0",
+                  },
+                  nodes: [
+                    {
+                      id: "opaque-issue1comment1",
+                      body: "Here: I'll start.",
+                      url: "opaque://issue/1/comment/1",
+                      author: makeAuthor("decentralion"),
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          pullRequests: {
+            pageInfo: {
+              hasNextPage: false,
+              endCursor: "opaque-cursor-prs-v0",
+            },
+            nodes: [
+              {
+                id: "opaque-pr2",
+                title: "Fix typo in README",
+                body: "Surely this deserves much cred.",
+                number: 2,
+                author: makeAuthor("wchargin"),
+                comments: {
+                  pageInfo: {
+                    hasNextPage: false,
+                    endCursor: null,
+                  },
+                  nodes: [],
+                },
+                reviews: {
+                  pageInfo: {
+                    hasNextPage: true,
+                    endCursor: "opaque-cursor-pr2reviews-v0",
+                  },
+                  nodes: [
+                    {
+                      id: "opaque-pr2review1",
+                      body: "You actually introduced a new typo instead.",
+                      author: makeAuthor("decentralion"),
+                      state: "CHANGES_REQUESTED",
+                      comments: {
+                        pageInfo: {
+                          hasNextPage: false,
+                          endCursor: null,
+                        },
+                        nodes: [],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      // Here is the response to the continuations generated from the
+      // first query.
+      const response1 = {
+        _n0: {
+          // Requested more issues.
+          issues: {
+            pageInfo: {
+              hasNextPage: true,
+              endCursor: "opaque-cursor-issues-v1",
+            },
+            nodes: [
+              {
+                id: "opaque-issue3",
+                title: "Another",
+                body: "You can comment here, too.",
+                number: 2,
+                author: makeAuthor("wchargin"),
+                comments: {
+                  pageInfo: {
+                    hasNextPage: true,
+                    endCursor: "opaque-cursor-issue3comments-v1",
+                  },
+                  nodes: [
+                    {
+                      id: "opaque-issue3comment1",
+                      body: "What fun!",
+                      url: "opaque://issue/3/comment/1",
+                      author: makeAuthor("decentralion"),
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        _n1: {
+          // Requested more comments for issue 1.
+          comments: {
+            pageInfo: {
+              hasNextPage: true,
+              endCursor: "opaque-cursor-issue1comments-v1",
+            },
+            nodes: [
+              {
+                id: "opaque-issue1comment2",
+                body: "Closing due to no fun allowed.",
+                url: "opaque://issue/1/comment/2",
+                author: makeAuthor("wchargin"),
+              },
+            ],
+          },
+        },
+        _n2: {
+          // Requested more reviews for issue 2.
+          reviews: {
+            pageInfo: {
+              hasNextPage: false,
+              endCursor: "opaque-cursor-pr2reviews-v1",
+            },
+            nodes: [
+              {
+                id: "opaque-pr2review2",
+                body: "Looks godo to me.",
+                author: makeAuthor("decentralion"),
+                state: "APPROVED",
+                comments: {
+                  pageInfo: {
+                    hasNextPage: false,
+                    endCursor: null,
+                  },
+                  nodes: [],
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      // Here is the response to the continuations generated from the
+      // second query.
+      const response2 = {
+        _n0: {
+          // Requested more issues.
+          issues: {
+            pageInfo: {
+              hasNextPage: false,
+              endCursor: "opaque-cursor-issues-v2",
+            },
+            nodes: [
+              {
+                id: "opaque-issue4",
+                title: "Please stop making issues",
+                body: "My mailbox is out of space",
+                number: 4,
+                author: makeAuthor("wchargin"),
+                comments: {
+                  pageInfo: {
+                    hasNextPage: false,
+                    endCursor: "opaque-cursor-issue4comments-v2",
+                  },
+                  nodes: [
+                    {
+                      id: "opaque-issue4comment1",
+                      body: "But you posted the last issue",
+                      url: "opaque://issue/4/comment/1",
+                      author: makeAuthor("decentralion"),
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        _n1: {
+          // Requested more comments for issue 1.
+          comments: {
+            pageInfo: {
+              hasNextPage: false,
+              endCursor: "opaque-cursor-issue1comments-v2",
+            },
+            nodes: [
+              {
+                id: "opaque-issue1comment3",
+                body: "That is not very nice.",
+                url: "opaque://issue/1/comment/3",
+                author: makeAuthor("decentralion"),
+              },
+            ],
+          },
+        },
+        _n2: {
+          // Requested more comments for issue 3.
+          comments: {
+            pageInfo: {
+              hasNextPage: false,
+              endCursor: "opaque-cursor-issue3comments-v2",
+            },
+            nodes: [
+              {
+                id: "opaque-issue3comment2",
+                body: "I will comment on this issue for a second time.",
+                url: "opaque://issue/1/comment/3",
+                author: makeAuthor("decentralion"),
+              },
+            ],
+          },
+        },
+      };
+
+      const postQuery = jest
+        .fn()
+        .mockReturnValueOnce(Promise.resolve(response0))
+        .mockReturnValueOnce(Promise.resolve(response1))
+        .mockReturnValueOnce(Promise.resolve(response2));
+
+      const result = await postQueryExhaustive(postQuery, {
+        query: createQuery(),
+        variables: createVariables("sourcecred", "discussion"),
+      });
+      expect(postQuery).toHaveBeenCalledTimes(3);
+
+      // Make sure it was called with all the right arguments. These
+      // arguments are queries, so format them nicely for easy snapshot
+      // inspection.
+      const formattedArgs = postQuery.mock.calls.map((args) => {
+        expect(args).toHaveLength(1);
+        const [{query, variables}] = args;
+        return {
+          query: stringify.body(query, multilineLayout("  ")),
+          variables,
+        };
+      });
+      expect(formattedArgs).toMatchSnapshot();
+
+      // Save the result snapshot for inspection. In particular, there
+      // shouldn't be any nodes in the snapshot that have more pages.
+      expect(result).toMatchSnapshot();
     });
   });
 });
