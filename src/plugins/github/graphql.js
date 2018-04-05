@@ -352,8 +352,8 @@ function* continuationsFromReview(
  * results. The `postQuery` function may be called multiple times.
  */
 export async function postQueryExhaustive(
-  postQuery: ({query: Body, variables: {[string]: any}}) => Promise<any>,
-  payload: {query: Body, variables: {[string]: any}}
+  postQuery: ({body: Body, variables: {[string]: any}}) => Promise<any>,
+  payload: {body: Body, variables: {[string]: any}}
 ) {
   const originalResult = await postQuery(payload);
   return resolveContinuations(
@@ -368,7 +368,7 @@ export async function postQueryExhaustive(
  * resolve the continuations and return the merged results.
  */
 async function resolveContinuations(
-  postQuery: ({query: Body, variables: {[string]: any}}) => Promise<any>,
+  postQuery: ({body: Body, variables: {[string]: any}}) => Promise<any>,
   originalResult: any,
   continuations: $ReadOnlyArray<Continuation>
 ): Promise<any> {
@@ -398,7 +398,7 @@ async function resolveContinuations(
     )
   );
   const body = [query, ...requiredFragments(query)];
-  const payload = {query: body, variables: {}};
+  const payload = {body, variables: {}};
 
   // Send the continuation query, then merge these results into the
   // original results---then recur, because the new results may

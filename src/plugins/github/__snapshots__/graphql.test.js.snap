@@ -3,7 +3,7 @@
 exports[`graphql #postQueryExhaustive resolves a representative query 1`] = `
 Array [
   Object {
-    "query": "query FetchData($repoOwner: String! $repoName: String!) {
+    "body": "query FetchData($repoOwner: String! $repoName: String!) {
   repository(owner: $repoOwner name: $repoName) {
     id
     issues(first: 100) {
@@ -117,7 +117,7 @@ fragment reviewComments on PullRequestReviewCommentConnection {
     },
   },
   Object {
-    "query": "query Continuations {
+    "body": "query Continuations {
   _n0: node(id: \\"opaque-repo\\") {
     ... on Repository {
       issues(first: 100 after: \\"opaque-cursor-issues-v0\\") {
@@ -219,7 +219,7 @@ fragment reviewComments on PullRequestReviewCommentConnection {
     "variables": Object {},
   },
   Object {
-    "query": "query Continuations {
+    "body": "query Continuations {
   _n0: node(id: \\"opaque-repo\\") {
     ... on Repository {
       issues(first: 100 after: \\"opaque-cursor-issues-v1\\") {

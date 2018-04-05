@@ -45,9 +45,9 @@ export default function fetchGithubRepo(
     throw new Error(`Invalid token: ${token}`);
   }
 
-  const query = createQuery();
+  const body = createQuery();
   const variables = createVariables(repoOwner, repoName);
-  const payload = {query, variables};
+  const payload = {body, variables};
   return postQueryExhaustive(
     (somePayload) => postQuery(somePayload, token),
     payload
@@ -62,9 +62,9 @@ export default function fetchGithubRepo(
 
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 
-function postQuery({query, variables}, token) {
+function postQuery({body, variables}, token) {
   const payload = {
-    query: stringify.body(query, inlineLayout()),
+    query: stringify.body(body, inlineLayout()),
     variables: variables,
   };
   return fetch(GITHUB_GRAPHQL_SERVER, {

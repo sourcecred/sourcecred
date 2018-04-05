@@ -941,7 +941,7 @@ describe("graphql", () => {
         .mockReturnValueOnce(Promise.resolve(response2));
 
       const result = await postQueryExhaustive(postQuery, {
-        query: createQuery(),
+        body: createQuery(),
         variables: createVariables("sourcecred", "discussion"),
       });
       expect(postQuery).toHaveBeenCalledTimes(3);
@@ -951,9 +951,9 @@ describe("graphql", () => {
       // inspection.
       const formattedArgs = postQuery.mock.calls.map((args) => {
         expect(args).toHaveLength(1);
-        const [{query, variables}] = args;
+        const [{body, variables}] = args;
         return {
-          query: stringify.body(query, multilineLayout("  ")),
+          body: stringify.body(body, multilineLayout("  ")),
           variables,
         };
       });
