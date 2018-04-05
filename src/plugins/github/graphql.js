@@ -341,6 +341,118 @@ function* continuationsFromReview(
 }
 
 /**
+ * Merge structured data from the given `source` into a given subpath of
+ * the `destination`. The original inputs are not modified.
+ *
+ * Arrays are merged by concatenation. Objects are merged by recursively
+ * merging each key. Primitives are merged by replacement (the
+ * destination is simply overwritten with the source).
+ *
+ * See test cases for examples.
+ *
+ * NOTE: The type of `source` should be the same as the type of
+ *
+ *     destination[path[0]][path[1]]...[path[path.length - 1]],
+ *
+ * but this constraint cannot be expressed in Flow so we just use `any`.
+ */
+export function merge<T>(
+  destination: T,
+  source: any,
+  path: $ReadOnlyArray<string | number>
+): T {
+  if (path.length === 0) {
+    return mergeDirect(destination, source);
+  }
+
+  function isObject(x) {
+    return !Array.isArray(x) && typeof x === "object" && x != null;
+  }
+  function checkKey(key: string | number, destination: Object | Array<any>) {
+    if (!(key in destination)) {
+      const keyText = JSON.stringify(key);
+      const destinationText = JSON.stringify(destination);
+      throw new Error(
+        `Key ${keyText} not found in destination: ${destinationText}`
+      );
+    }
+  }
+
+  const key = path[0];
+  if (typeof key === "number") {
+    if (!Array.isArray(destination)) {
+      throw new Error(
+        "Found index key for non-array destination: " +
+          JSON.stringify(destination)
+      );
+    }
+    checkKey(key, destination);
+    const newValue = merge(destination[key], source, path.slice(1));
+    const result = destination.slice();
+    result.splice(key, 1, newValue);
+    return result;
+  } else if (typeof key === "string") {
+    if (!isObject(destination)) {
+      throw new Error(
+        "Found string key for non-object destination: " +
+          JSON.stringify(destination)
+      );
+    }
+    const destinationObject: Object = (destination: any);
+    checkKey(key, destinationObject);
+    const newValue = merge(destinationObject[key], source, path.slice(1));
+    return {
+      ...destination,
+      [key]: newValue,
+    };
+  } else {
+    throw new Error(`Unexpected key: ${JSON.stringify(key)}`);
+  }
+}
+
+// Merge, without the path traversal.
+function mergeDirect<T>(destination: T, source: any): T {
+  function isObject(x) {
+    return !Array.isArray(x) && typeof x === "object" && x != null;
+  }
+  if (Array.isArray(source)) {
+    if (!Array.isArray(destination)) {
+      const destinationText = JSON.stringify(destination);
+      const sourceText = JSON.stringify(source);
+      throw new Error(
+        "Tried to merge array into non-array: " +
+          `(source: ${sourceText}; destination: ${destinationText})`
+      );
+    }
+    return destination.concat(source);
+  } else if (isObject(source)) {
+    if (!isObject(destination)) {
+      const destinationText = JSON.stringify(destination);
+      const sourceText = JSON.stringify(source);
+      throw new Error(
+        "Tried to merge object into non-object: " +
+          `(source: ${sourceText}; destination: ${destinationText})`
+      );
+    }
+    const result = {...destination};
+    Object.keys(source).forEach((k) => {
+      result[k] = mergeDirect(result[k], source[k]);
+    });
+    return result;
+  } else {
+    if (Array.isArray(destination) || isObject(destination)) {
+      const destinationText = JSON.stringify(destination);
+      const sourceText = JSON.stringify(source);
+      throw new Error(
+        "Tried to merge primitive into non-primitive: " +
+          `(source: ${sourceText}; destination: ${destinationText})`
+      );
+    }
+    return source;
+  }
+}
+
+/**
  * These fragments are used to construct the root query, and also to
  * fetch more pages of specific entity types.
  */

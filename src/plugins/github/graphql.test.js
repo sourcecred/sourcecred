@@ -6,6 +6,7 @@ import {
   PAGE_LIMIT,
   continuationsFromQuery,
   continuationsFromContinuation,
+  merge,
 } from "./graphql";
 
 describe("graphql", () => {
@@ -375,6 +376,258 @@ describe("graphql", () => {
           continuationsFromContinuation(continuationResult, continuation)
         );
         expect(result).toHaveLength(0);
+      });
+    });
+  });
+
+  describe("#merge", () => {
+    describe("merges at the root", () => {
+      it("replacing primitive numbers", () => {
+        expect(merge(3, 5, [])).toEqual(5);
+      });
+
+      it("replacing primitive strings", () => {
+        expect(merge("three", "five", [])).toEqual("five");
+      });
+
+      it("replacing a primitive string with null", () => {
+        expect(merge("three", null, [])).toEqual(null);
+      });
+
+      it("replacing null with a number", () => {
+        expect(merge(null, 3, [])).toEqual(3);
+      });
+
+      it("concatenating arrays", () => {
+        expect(merge([1, 2], [3, 4], [])).toEqual([1, 2, 3, 4]);
+      });
+
+      it("merging objects", () => {
+        const destination = {a: 1, b: 2};
+        const source = {c: 3, d: 4};
+        const expected = {a: 1, b: 2, c: 3, d: 4};
+        expect(merge(destination, source, [])).toEqual(expected);
+      });
+
+      it("overwriting primitives in an object", () => {
+        const destination = {hasNextPage: true, endCursor: "cursor-aaa"};
+        const source = {hasNextPage: false, endCursor: "cursor-bbb"};
+        expect(merge(destination, source, [])).toEqual(source);
+      });
+
+      it("merging complex structures recursively", () => {
+        const destination = {
+          fst: {a: 1, b: 2},
+          snd: {e: 5, f: 6},
+          fruits: ["apple", "banana"],
+          letters: ["whiskey", "x-ray"],
+        };
+        const source = {
+          fst: {c: 3, d: 4},
+          snd: {g: 7, h: 8},
+          fruits: ["cherry", "durian"],
+          letters: ["yankee", "zulu"],
+        };
+        const expected = {
+          fst: {a: 1, b: 2, c: 3, d: 4},
+          snd: {e: 5, f: 6, g: 7, h: 8},
+          fruits: ["apple", "banana", "cherry", "durian"],
+          letters: ["whiskey", "x-ray", "yankee", "zulu"],
+        };
+        expect(merge(destination, source, [])).toEqual(expected);
+      });
+    });
+
+    describe("traverses", () => {
+      it("down an object path", () => {
+        const destination = {
+          child: {
+            grandchild: {
+              one: 1,
+              two: 2,
+            },
+            otherGrandchild: "world",
+          },
+          otherChild: "hello",
+        };
+        const source = {
+          three: 3,
+          four: 4,
+        };
+        const expected = {
+          child: {
+            grandchild: {
+              one: 1,
+              two: 2,
+              three: 3,
+              four: 4,
+            },
+            otherGrandchild: "world",
+          },
+          otherChild: "hello",
+        };
+        expect(merge(destination, source, ["child", "grandchild"])).toEqual(
+          expected
+        );
+      });
+
+      it("down an array path", () => {
+        const destination = [["change me", [1, 2]], ["ignore me", [5, 6]]];
+        const source = [3, 4];
+        const expected = [["change me", [1, 2, 3, 4]], ["ignore me", [5, 6]]];
+        expect(merge(destination, source, [0, 1])).toEqual(expected);
+      });
+
+      it("down a path of mixed objects and arrays", () => {
+        const destination = {
+          families: [
+            {
+              childCount: 3,
+              children: [
+                {name: "Alice", hobbies: ["acupuncture"]},
+                {name: "Bob", hobbies: ["billiards"]},
+                {name: "Cheryl", hobbies: ["chess"]},
+              ],
+            },
+            {
+              childCount: 0,
+              children: [],
+            },
+          ],
+        };
+        const path = ["families", 0, "children", 2, "hobbies"];
+        const source = ["charades", "cheese-rolling"];
+        const expected = {
+          families: [
+            {
+              childCount: 3,
+              children: [
+                {name: "Alice", hobbies: ["acupuncture"]},
+                {name: "Bob", hobbies: ["billiards"]},
+                {
+                  name: "Cheryl",
+                  hobbies: ["chess", "charades", "cheese-rolling"],
+                },
+              ],
+            },
+            {childCount: 0, children: []},
+          ],
+        };
+        expect(merge(destination, source, path)).toEqual(expected);
+      });
+    });
+
+    describe("doesn't mutate its inputs", () => {
+      it("when merging arrays", () => {
+        const destination = [1, 2];
+        const source = [3, 4];
+        merge(destination, source, []);
+        expect(destination).toEqual([1, 2]);
+        expect(source).toEqual([3, 4]);
+      });
+
+      it("when merging objects", () => {
+        const destination = {a: 1, b: 2};
+        const source = {c: 3, d: 4};
+        merge(destination, source, []);
+        expect(destination).toEqual({a: 1, b: 2});
+        expect(source).toEqual({c: 3, d: 4});
+      });
+
+      test("along an object path", () => {
+        const makeDestination = () => ({
+          child: {
+            grandchild: {
+              one: 1,
+              two: 2,
+            },
+            otherGrandchild: "world",
+          },
+          otherChild: "hello",
+        });
+        const makeSource = () => ({
+          three: 3,
+          four: 4,
+        });
+        const destination = makeDestination();
+        const source = makeSource();
+        merge(destination, source, ["child", "grandchild"]);
+        expect(destination).toEqual(makeDestination());
+        expect(source).toEqual(makeSource());
+      });
+
+      test("along an array path", () => {
+        const makeDestination = () => [
+          ["change me", [1, 2]],
+          ["ignore me", [5, 6]],
+        ];
+        const makeSource = () => [3, 4];
+        const destination = makeDestination();
+        const source = makeSource();
+        merge(destination, source, [0, 1]);
+        expect(destination).toEqual(makeDestination());
+        expect(source).toEqual(makeSource());
+      });
+    });
+
+    describe("complains", () => {
+      describe("about bad keys", () => {
+        it("when given a numeric key into a primitive", () => {
+          expect(() => merge(123, 234, [0])).toThrow(/non-array/);
+        });
+        it("when given a numeric key into null", () => {
+          expect(() => merge(null, null, [0])).toThrow(/non-array/);
+        });
+        describe("when given a numeric key into an object", () => {
+          test("for the usual case of an object with string keys", () => {
+            expect(() => merge({a: 1}, {b: 2}, [0])).toThrow(/non-array/);
+          });
+          test("even when the object has the stringifed version of the key", () => {
+            expect(() =>
+              merge({"0": "zero", "1": "one"}, {"2": "two"}, [0])
+            ).toThrow(/non-array/);
+          });
+        });
+
+        it("when given a string key into a primitive", () => {
+          expect(() => merge(123, 234, ["k"])).toThrow(/non-object/);
+        });
+        it("when given a string key into null", () => {
+          expect(() => merge(null, null, ["k"])).toThrow(/non-object/);
+        });
+        it("when given a string key into an array", () => {
+          expect(() => merge([1, 2], [1, 2], ["k"])).toThrow(/non-object/);
+        });
+
+        it("when given a non-string, non-numeric key", () => {
+          const badKey: any = false;
+          expect(() => merge({a: 1}, {b: 2}, [badKey])).toThrow(/key.*false/);
+        });
+
+        it("when given a non-existent string key", () => {
+          expect(() => merge({a: 1}, {b: 2}, ["c"])).toThrow(/"c" not found/);
+        });
+        it("when given a non-existent numeric key", () => {
+          expect(() => merge([1], [2], [3])).toThrow(/3 not found/);
+        });
+      });
+
+      describe("about source/destination mismatch", () => {
+        it("when merging an array into a non-array", () => {
+          const re = () => /array into non-array/;
+          expect(() => merge({a: 1}, [2], [])).toThrow(re());
+          expect(() => merge(true, [2], [])).toThrow(re());
+        });
+        it("when merging an object into a non-object", () => {
+          const re = () => /object into non-object/;
+          expect(() => merge([1], {b: 2}, [])).toThrow(re());
+          expect(() => merge(true, {b: 2}, [])).toThrow(re());
+        });
+        it("when merging a primitive into a non-primitive", () => {
+          const re = () => /primitive into non-primitive/;
+          expect(() => merge([], true, [])).toThrow(re());
+          expect(() => merge({a: 1}, true, [])).toThrow(re());
+        });
       });
     });
   });
