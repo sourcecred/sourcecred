@@ -152,14 +152,14 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
   Object {
     "id": "MDQ6VXNlcjE0MDAwMjM=",
     "payload": Object {
-      "login": "dandelionmane",
+      "login": "decentralion",
     },
     "rendered": <div>
       type: 
       USER
        (details to be implemented)
 </div>,
-    "title": "dandelionmane",
+    "title": "decentralion",
     "type": "USER",
   },
   Object {

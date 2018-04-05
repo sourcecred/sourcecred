@@ -22,7 +22,7 @@ Object {
   "nodes": Object {
     "{\\"id\\":\\"MDQ6VXNlcjE0MDAwMjM=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
       "payload": Object {
-        "login": "dandelionmane",
+        "login": "decentralion",
       },
     },
     "{\\"id\\":\\"MDU6SXNzdWUzMDA5MzQ4MTg=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"ISSUE\\"}": Object {
@@ -130,7 +130,7 @@ Object {
     },
     "{\\"id\\":\\"MDQ6VXNlcjE0MDAwMjM=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
       "payload": Object {
-        "login": "dandelionmane",
+        "login": "decentralion",
       },
     },
     "{\\"id\\":\\"MDU6SXNzdWUzMDU5OTM3NzM=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"ISSUE\\"}": Object {
@@ -285,7 +285,7 @@ Object {
     },
     "{\\"id\\":\\"MDQ6VXNlcjE0MDAwMjM=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
       "payload": Object {
-        "login": "dandelionmane",
+        "login": "decentralion",
       },
     },
     "{\\"id\\":\\"MDQ6VXNlcjQzMTc4MDY=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
@@ -362,7 +362,7 @@ Object {
     },
     "{\\"id\\":\\"MDQ6VXNlcjE0MDAwMjM=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
       "payload": Object {
-        "login": "dandelionmane",
+        "login": "decentralion",
       },
     },
   },
@@ -803,7 +803,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     },
     "{\\"id\\":\\"MDQ6VXNlcjE0MDAwMjM=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
       "payload": Object {
-        "login": "dandelionmane",
+        "login": "decentralion",
       },
     },
     "{\\"id\\":\\"MDQ6VXNlcjQzMTc4MDY=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {

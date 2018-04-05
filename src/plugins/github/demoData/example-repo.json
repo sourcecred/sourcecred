@@ -7,7 +7,7 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "dandelionmane"
+                            "login": "decentralion"
                         },
                         "body": "This is just an example issue.",
                         "comments": {
@@ -25,7 +25,7 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "dandelionmane"
+                            "login": "decentralion"
                         },
                         "body": "This issue references another issue, namely #1",
                         "comments": {
@@ -34,7 +34,7 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "dandelionmane"
+                                        "login": "decentralion"
                                     },
                                     "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-repo/issues/6",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
@@ -44,7 +44,7 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "dandelionmane"
+                                        "login": "decentralion"
                                     },
                                     "body": "We might also reference individual comments directly.\r\nhttps://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
@@ -63,7 +63,7 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "dandelionmane"
+                            "login": "decentralion"
                         },
                         "body": "Alas, its life as an open issue had only just begun.",
                         "comments": {
@@ -81,7 +81,7 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "dandelionmane"
+                            "login": "decentralion"
                         },
                         "body": "This issue shall shortly have a few comments.",
                         "comments": {
@@ -90,7 +90,7 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "dandelionmane"
+                                        "login": "decentralion"
                                     },
                                     "body": "A wild COMMENT appeared!",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODQ0Mg==",
@@ -100,7 +100,7 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "dandelionmane"
+                                        "login": "decentralion"
                                     },
                                     "body": "And the maintainer said, \"Let there be comments!\"",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODUzOA==",
@@ -119,7 +119,7 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "dandelionmane"
+                            "login": "decentralion"
                         },
                         "body": "Deal with this, naive string display algorithms!!!!!",
                         "comments": {
@@ -137,7 +137,7 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "dandelionmane"
+                            "login": "decentralion"
                         },
                         "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️\r\nIssue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
                         "comments": {
@@ -162,7 +162,7 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "dandelionmane"
+                            "login": "decentralion"
                         },
                         "body": "Oh look, it's a pull request.",
                         "comments": {
@@ -171,7 +171,7 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "dandelionmane"
+                                        "login": "decentralion"
                                     },
                                     "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
@@ -197,7 +197,7 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "dandelionmane"
+                            "login": "decentralion"
                         },
                         "body": "@wchargin could you please do the following:\r\n- add a commit comment\r\n- add a review comment requesting some trivial change\r\n- i'll change it\r\n- then approve the pr",
                         "comments": {
