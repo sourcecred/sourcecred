@@ -1,6 +1,7 @@
 {
     "data": {
         "repository": {
+            "id": "MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=",
             "issues": {
                 "nodes": [
                     {
@@ -14,6 +15,7 @@
                             "nodes": [
                             ],
                             "pageInfo": {
+                                "endCursor": null,
                                 "hasNextPage": false
                             }
                         },
@@ -52,6 +54,7 @@
                                 }
                             ],
                             "pageInfo": {
+                                "endCursor": "Y3Vyc29yOnYyOpHOFkdCkg==",
                                 "hasNextPage": false
                             }
                         },
@@ -70,6 +73,7 @@
                             "nodes": [
                             ],
                             "pageInfo": {
+                                "endCursor": null,
                                 "hasNextPage": false
                             }
                         },
@@ -108,6 +112,7 @@
                                 }
                             ],
                             "pageInfo": {
+                                "endCursor": "Y3Vyc29yOnYyOpHOFkdBWg==",
                                 "hasNextPage": false
                             }
                         },
@@ -126,6 +131,7 @@
                             "nodes": [
                             ],
                             "pageInfo": {
+                                "endCursor": null,
                                 "hasNextPage": false
                             }
                         },
@@ -144,6 +150,7 @@
                             "nodes": [
                             ],
                             "pageInfo": {
+                                "endCursor": null,
                                 "hasNextPage": false
                             }
                         },
@@ -153,6 +160,7 @@
                     }
                 ],
                 "pageInfo": {
+                    "endCursor": "Y3Vyc29yOnYyOpHOEkw5lw==",
                     "hasNextPage": false
                 }
             },
@@ -179,6 +187,7 @@
                                 }
                             ],
                             "pageInfo": {
+                                "endCursor": "Y3Vyc29yOnYyOpHOFgD37g==",
                                 "hasNextPage": false
                             }
                         },
@@ -188,6 +197,7 @@
                             "nodes": [
                             ],
                             "pageInfo": {
+                                "endCursor": null,
                                 "hasNextPage": false
                             }
                         },
@@ -204,6 +214,7 @@
                             "nodes": [
                             ],
                             "pageInfo": {
+                                "endCursor": null,
                                 "hasNextPage": false
                             }
                         },
@@ -232,6 +243,7 @@
                                             }
                                         ],
                                         "pageInfo": {
+                                            "endCursor": "Y3Vyc29yOnYyOpK0MjAxOC0wMy0wMVQwNDoyMzozMFrOCjhGZg==",
                                             "hasNextPage": false
                                         }
                                     },
@@ -249,6 +261,7 @@
                                         "nodes": [
                                         ],
                                         "pageInfo": {
+                                            "endCursor": null,
                                             "hasNextPage": false
                                         }
                                     },
@@ -257,6 +270,7 @@
                                 }
                             ],
                             "pageInfo": {
+                                "endCursor": "Y3Vyc29yOnYyOpO5MjAxOC0wMi0yOFQyMDoyNDo1Ni0wODowMLkyMDE4LTAyLTI4VDIwOjI0OjU2LTA4OjAwzgX6q7Y=",
                                 "hasNextPage": false
                             }
                         },
@@ -264,6 +278,7 @@
                     }
                 ],
                 "pageInfo": {
+                    "endCursor": "Y3Vyc29yOnYyOpHOCj7Pig==",
                     "hasNextPage": false
                 }
             }
