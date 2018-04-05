@@ -345,22 +345,94 @@ function* continuationsFromReview(
   }
 }
 
-function* usedFragmentNames(selection: Selection): Iterator<string> {
-  switch (selection.type) {
-    case "FRAGMENT_SPREAD":
-      yield selection.fragmentName;
-      break;
-    case "FIELD":
-    case "INLINE_FRAGMENT":
-      for (const subselection of selection.selections) {
-        yield* usedFragmentNames(subselection);
-      }
-      break;
-    default:
-      throw new Error(`Unknown selection type: ${selection.type}`);
-  }
+/**
+ * Execute the given query, returning all pages of data throughout the
+ * query. That is: post the query, then find any entities that require
+ * more pages of data, fetch those additional pages, and merge the
+ * results. The `postQuery` function may be called multiple times.
+ */
+export async function postQueryExhaustive(
+  postQuery: ({query: Body, variables: {[string]: any}}) => Promise<any>,
+  payload: {query: Body, variables: {[string]: any}}
+) {
+  const originalResult = await postQuery(payload);
+  return resolveContinuations(
+    postQuery,
+    originalResult,
+    Array.from(continuationsFromQuery(originalResult))
+  );
 }
 
+/**
+ * Given the result of a query and the continuations for that query,
+ * resolve the continuations and return the merged results.
+ */
+async function resolveContinuations(
+  postQuery: ({query: Body, variables: {[string]: any}}) => Promise<any>,
+  originalResult: any,
+  continuations: $ReadOnlyArray<Continuation>
+): Promise<any> {
+  if (!continuations.length) {
+    return originalResult;
+  }
+
+  // Assign each continuation a nonce (unique name) so that we can refer
+  // to it unambiguously, and embed all the continuations into a query.
+  const embeddings = continuations.map((c, i) => ({
+    continuation: c,
+    nonce: `_n${String(i)}`,
+  }));
+  const b = build;
+  const query = b.query(
+    "Continuations",
+    [],
+    embeddings.map(({continuation, nonce}) =>
+      b.alias(
+        nonce,
+        b.field(
+          "node",
+          {id: b.literal(continuation.enclosingNodeId)},
+          continuation.selections.slice()
+        )
+      )
+    )
+  );
+  const body = [query, ...requiredFragments(query)];
+  const payload = {query: body, variables: {}};
+
+  // Send the continuation query, then merge these results into the
+  // original results---then recur, because the new results may
+  // themselves be incomplete.
+  const continuationResult = await postQuery(payload);
+  const mergedResults = embeddings.reduce((acc, {continuation, nonce}) => {
+    return merge(acc, continuationResult[nonce], continuation.destinationPath);
+  }, originalResult);
+  return resolveContinuations(
+    postQuery,
+    mergedResults,
+    Array.from(continuationsFromQuery(mergedResults))
+  );
+}
+
+/**
+ * A GraphQL query includes a query body and some fragment definitions.
+ * It is an error to include unneeded fragment definitions. Therefore,
+ * given a standard set of fragments and an arbitrary query body, we
+ * need to be able to select just the right set of fragments for our
+ * particular query.
+ *
+ * This function finds all fragments that are transitively used by the
+ * given query. That is, it finds all fragments used by the query, all
+ * fragments used by those fragments, and so on. Note that the universe
+ * of fragments is considered to be the result of `createFragments`; it
+ * is an error to use a fragment not defined in the result of that
+ * function.
+ *
+ * Equivalently, construct a graph where the nodes are (a) the query and
+ * (b) all possible fragments, and there is an edge from `a` to `b` if
+ * `a` references `b`. Then, this function finds the set of vertices
+ * reachable from the query node.
+ */
 export function requiredFragments(
   query: QueryDefinition
 ): FragmentDefinition[] {
@@ -369,8 +441,11 @@ export function requiredFragments(
     fragmentsByName[fd.name] = fd;
   });
 
+  // This function implements a BFS on the graph specified in the
+  // docstring, with the provisos that the nodes for fragments are the
+  // fragment names, not the fragments themselves, and that the query
+  // node is implicit (in the initial value of the `frontier`).
   const requiredFragmentNames: Set<string> = new Set();
-
   let frontier: Set<string> = new Set();
   query.selections.forEach((selection) => {
     for (const fragment of usedFragmentNames(selection)) {
@@ -400,72 +475,24 @@ export function requiredFragments(
   return createFragments().filter((fd) => requiredFragmentNames.has(fd.name));
 }
 
-export async function postQueryExhaustive(
-  postQuery: ({query: Body, variables: {[string]: any}}) => Promise<any>,
-  payload: {query: Body, variables: {[string]: any}}
-) {
-  const originalResult = await postQuery(payload);
-  return resolveContinuations(
-    postQuery,
-    originalResult,
-    Array.from(continuationsFromQuery(originalResult))
-  );
-}
-
-async function resolveContinuations(
-  postQuery: ({query: Body, variables: {[string]: any}}) => Promise<any>,
-  originalResult: any,
-  continuations: $ReadOnlyArray<Continuation>
-): Promise<any> {
-  if (!continuations.length) {
-    return originalResult;
+/**
+ * Find all fragment names directly referenced by the given selection.
+ * This does not include transitive fragment references.
+ */
+function* usedFragmentNames(selection: Selection): Iterator<string> {
+  switch (selection.type) {
+    case "FRAGMENT_SPREAD":
+      yield selection.fragmentName;
+      break;
+    case "FIELD":
+    case "INLINE_FRAGMENT":
+      for (const subselection of selection.selections) {
+        yield* usedFragmentNames(subselection);
+      }
+      break;
+    default:
+      throw new Error(`Unknown selection type: ${selection.type}`);
   }
-  const embeddings = continuations.map((c, i) => ({
-    continuation: c,
-    nonce: `_n${String(i)}`,
-  }));
-  const b = build;
-  const query = b.query(
-    "Continuations",
-    [],
-    embeddings.map(({continuation, nonce}) =>
-      b.alias(
-        nonce,
-        b.field(
-          "node",
-          {id: b.literal(continuation.enclosingNodeId)},
-          continuation.selections.slice()
-        )
-      )
-    )
-  );
-  const body = [query, ...requiredFragments(query)];
-  const payload = {query: body, variables: {}};
-
-  const continuationResult = await postQuery(payload);
-  const mergedResults = mergeContinuationResults(
-    originalResult,
-    continuationResult,
-    embeddings
-  );
-  return resolveContinuations(
-    postQuery,
-    mergedResults,
-    Array.from(continuationsFromQuery(mergedResults))
-  );
-}
-
-export function mergeContinuationResults(
-  originalResult: any,
-  continuationResult: any,
-  continuationEmbeddings: $ReadOnlyArray<{|
-    +continuation: Continuation,
-    +nonce: string,
-  |}>
-) {
-  return continuationEmbeddings.reduce((acc, {continuation, nonce}) => {
-    return merge(acc, continuationResult[nonce], continuation.destinationPath);
-  }, originalResult);
 }
 
 /**
