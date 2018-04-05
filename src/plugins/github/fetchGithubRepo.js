@@ -6,8 +6,8 @@
 
 import fetch from "isomorphic-fetch";
 
-import type {Body} from "../../graphql/queries";
-import * as GraphQLQueries from "../../graphql/queries";
+import {stringify, inlineLayout} from "../../graphql/queries";
+import {createQuery, createVariables} from "./graphql";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -45,100 +45,13 @@ export default function fetchGithubRepo(
     throw new Error(`Invalid token: ${token}`);
   }
 
-  const query = GraphQLQueries.stringify.body(
-    createQuery(),
-    GraphQLQueries.inlineLayout()
-  );
-  const variables = {repoOwner, repoName};
+  const query = stringify.body(createQuery(), inlineLayout());
+  const variables = createVariables(repoOwner, repoName);
   const payload = {query, variables};
   return postQuery(payload, token);
 }
 
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
-
-function createQuery(): Body {
-  const b = GraphQLQueries.build;
-  const makePageInfo = () => b.field("pageInfo", {}, [b.field("hasNextPage")]);
-  const makeAuthor = () => b.field("author", {}, [b.fragmentSpread("whoami")]);
-  const body: Body = [
-    b.query(
-      "FetchData",
-      [b.param("repoOwner", "String!"), b.param("repoName", "String!")],
-      [
-        b.field(
-          "repository",
-          {owner: b.variable("repoOwner"), name: b.variable("repoName")},
-          [
-            b.field("issues", {first: b.literal(100)}, [
-              makePageInfo(),
-              b.field("nodes", {}, [
-                b.field("id"),
-                b.field("title"),
-                b.field("body"),
-                b.field("number"),
-                makeAuthor(),
-                b.field("comments", {first: b.literal(20)}, [
-                  makePageInfo(),
-                  b.field("nodes", {}, [
-                    b.field("id"),
-                    makeAuthor(),
-                    b.field("body"),
-                    b.field("url"),
-                  ]),
-                ]),
-              ]),
-            ]),
-            b.field("pullRequests", {first: b.literal(100)}, [
-              makePageInfo(),
-              b.field("nodes", {}, [
-                b.field("id"),
-                b.field("title"),
-                b.field("body"),
-                b.field("number"),
-                makeAuthor(),
-                b.field("comments", {first: b.literal(20)}, [
-                  makePageInfo(),
-                  b.field("nodes", {}, [
-                    b.field("id"),
-                    makeAuthor(),
-                    b.field("body"),
-                    b.field("url"),
-                  ]),
-                ]),
-                b.field("reviews", {first: b.literal(10)}, [
-                  makePageInfo(),
-                  b.field("nodes", {}, [
-                    b.field("id"),
-                    b.field("body"),
-                    makeAuthor(),
-                    b.field("state"),
-                    b.field("comments", {first: b.literal(10)}, [
-                      makePageInfo(),
-                      b.field("nodes", {}, [
-                        b.field("id"),
-                        b.field("body"),
-                        b.field("url"),
-                        makeAuthor(),
-                      ]),
-                    ]),
-                  ]),
-                ]),
-              ]),
-            ]),
-          ]
-        ),
-      ]
-    ),
-    b.fragment("whoami", "Actor", [
-      b.field("__typename"),
-      b.field("login"),
-      b.inlineFragment("User", [b.field("id")]),
-      b.inlineFragment("Organization", [b.field("id")]),
-      b.inlineFragment("Bot", [b.field("id")]),
-    ]),
-  ];
-  return body;
-}
 
 function postQuery(payload, token) {
   return fetch(GITHUB_GRAPHQL_SERVER, {
