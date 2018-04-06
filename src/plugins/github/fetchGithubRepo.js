@@ -7,7 +7,7 @@
 import fetch from "isomorphic-fetch";
 
 import {stringify, inlineLayout} from "../../graphql/queries";
-import {createQuery, createVariables} from "./graphql";
+import {createQuery, createVariables, postQueryExhaustive} from "./graphql";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -45,15 +45,28 @@ export default function fetchGithubRepo(
     throw new Error(`Invalid token: ${token}`);
   }
 
-  const query = stringify.body(createQuery(), inlineLayout());
+  const body = createQuery();
   const variables = createVariables(repoOwner, repoName);
-  const payload = {query, variables};
-  return postQuery(payload, token);
+  const payload = {body, variables};
+  return postQueryExhaustive(
+    (somePayload) => postQuery(somePayload, token),
+    payload
+  ).then((x) => {
+    ensureNoMorePages(x);
+    // TODO: We wrap back up in the "data" object to maintain
+    // compatibility. At some point, let's strip this out and modify
+    // clients of `example-data.json`.
+    return {data: x};
+  });
 }
 
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 
-function postQuery(payload, token) {
+function postQuery({body, variables}, token) {
+  const payload = {
+    query: stringify.body(body, inlineLayout()),
+    variables: variables,
+  };
   return fetch(GITHUB_GRAPHQL_SERVER, {
     method: "POST",
     body: JSON.stringify(payload),
@@ -66,8 +79,7 @@ function postQuery(payload, token) {
       if (x.errors) {
         return Promise.reject(x);
       }
-      ensureNoMorePages(x);
-      return Promise.resolve(x);
+      return Promise.resolve(x.data);
     });
 }
 
