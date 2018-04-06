@@ -946,19 +946,6 @@ describe("graphql", () => {
       });
       expect(postQuery).toHaveBeenCalledTimes(3);
 
-      // Make sure it was called with all the right arguments. These
-      // arguments are queries, so format them nicely for easy snapshot
-      // inspection.
-      const formattedArgs = postQuery.mock.calls.map((args) => {
-        expect(args).toHaveLength(1);
-        const [{body, variables}] = args;
-        return {
-          body: stringify.body(body, multilineLayout("  ")),
-          variables,
-        };
-      });
-      expect(formattedArgs).toMatchSnapshot();
-
       // Save the result snapshot for inspection. In particular, there
       // shouldn't be any nodes in the snapshot that have more pages.
       expect(result).toMatchSnapshot();
