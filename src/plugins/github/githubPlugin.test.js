@@ -17,6 +17,10 @@ describe("GithubParser", () => {
       expect(graph).toMatchSnapshot();
     });
 
+    it("there are no dangling references in the example repo", () => {
+      expect(parser.danglingReferences()).toHaveLength(0);
+    });
+
     it("no node or edge has undefined properties in its payload", () => {
       graph
         .getNodes()
@@ -100,6 +104,64 @@ describe("GithubParser", () => {
       const parser = new GithubParser("sourcecred/example-repo");
       parser.addPullRequest(pr5);
       expect(parser.graph).toMatchSnapshot();
+    });
+  });
+
+  describe("reference detection", () => {
+    // https://github.com/sourcecred/example-repo/issues/1
+    const referredIssue = exampleRepoData.data.repository.issues.nodes[0];
+    expect(referredIssue.number).toBe(1);
+    // https://github.com/sourcecred/example-repo/issues/2
+    const referencingIssue = exampleRepoData.data.repository.issues.nodes[1];
+    expect(referencingIssue.number).toBe(2);
+
+    it("discovers a simple reference", () => {
+      const parser = new GithubParser("sourcecred/example-repo");
+      parser.addIssue(referredIssue);
+      parser.addIssue(referencingIssue);
+      expect(parser.graph).toMatchSnapshot();
+      expect(parser.danglingReferences()).toHaveLength(0);
+    });
+
+    it("discovers references even when parsing issues out of order", () => {
+      // Ensure that we will detect a reference from A to B, even if B hasn't
+      // been discovered at the time that we parse A.
+      const parserA = new GithubParser("sourcecred/example-repo");
+      parserA.addIssue(referredIssue);
+      parserA.addIssue(referencingIssue);
+
+      const parserB = new GithubParser("sourcecred/example-repo");
+      parserB.addIssue(referencingIssue);
+      parserB.addIssue(referredIssue);
+
+      expect(parserA.graph.equals(parserB.graph)).toBe(true);
+    });
+
+    it("handles dangling references gracefully", () => {
+      const parser = new GithubParser("sourcecred/example-repo");
+      parser.addIssue(referencingIssue);
+      expect(parser.danglingReferences()).toEqual(["#1"]);
+    });
+
+    it("throws an error on issue/pr numeric conflict", () => {
+      const issue1 = exampleRepoData.data.repository.issues.nodes[0];
+      expect(issue1.number).toBe(1);
+      const fake_pr1 = {
+        ...exampleRepoData.data.repository.pullRequests.nodes[0],
+      };
+      fake_pr1.number = 1;
+      const errorRe = () => /Got multiple/;
+      //test both directions (pr first, issue first)
+      expect(() => {
+        const parser = new GithubParser("sourcecred/example-repo");
+        parser.addIssue(issue1);
+        parser.addPullRequest(fake_pr1);
+      }).toThrow(errorRe());
+      expect(() => {
+        const parser = new GithubParser("sourcecred/example-repo");
+        parser.addPullRequest(fake_pr1);
+        parser.addIssue(issue1);
+      }).toThrow(errorRe());
     });
   });
 });

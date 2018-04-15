@@ -369,6 +369,152 @@ Object {
 }
 `;
 
+exports[`GithubParser reference detection discovers a simple reference 1`] = `
+Object {
+  "edges": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjE0MDAwMjM=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+      "dst": Object {
+        "id": "MDQ6VXNlcjE0MDAwMjM=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "USER",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "COMMENT",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjE0MDAwMjM=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+      "dst": Object {
+        "id": "MDQ6VXNlcjE0MDAwMjM=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "USER",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "COMMENT",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjE0MDAwMjM=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ4MTg=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+      "dst": Object {
+        "id": "MDQ6VXNlcjE0MDAwMjM=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "USER",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "ISSUE",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjE0MDAwMjM=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ5ODA=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+      "dst": Object {
+        "id": "MDQ6VXNlcjE0MDAwMjM=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "USER",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "ISSUE",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ5ODA=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "COMMENT",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "ISSUE",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ5ODA=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "COMMENT",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "ISSUE",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ5ODA=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ4MTg=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"REFERENCES\\"}": Object {
+      "dst": Object {
+        "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "ISSUE",
+      },
+    },
+  },
+  "nodes": Object {
+    "{\\"id\\":\\"MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"COMMENT\\"}": Object {
+      "payload": Object {
+        "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-repo/issues/6",
+        "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768703",
+      },
+    },
+    "{\\"id\\":\\"MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"COMMENT\\"}": Object {
+      "payload": Object {
+        "body": "We might also reference individual comments directly.
+https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
+        "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850",
+      },
+    },
+    "{\\"id\\":\\"MDQ6VXNlcjE0MDAwMjM=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
+      "payload": Object {
+        "login": "decentralion",
+      },
+    },
+    "{\\"id\\":\\"MDU6SXNzdWUzMDA5MzQ4MTg=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"ISSUE\\"}": Object {
+      "payload": Object {
+        "body": "This is just an example issue.",
+        "number": 1,
+        "title": "An example issue.",
+      },
+    },
+    "{\\"id\\":\\"MDU6SXNzdWUzMDA5MzQ5ODA=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"ISSUE\\"}": Object {
+      "payload": Object {
+        "body": "This issue references another issue, namely #1",
+        "number": 2,
+        "title": "A referencing issue.",
+      },
+    },
+  },
+}
+`;
+
 exports[`GithubParser whole repo parsing parses the entire example-repo as expected 1`] = `
 Object {
   "edges": Object {
@@ -430,6 +576,21 @@ Object {
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
         "type": "PULL_REQUEST",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ5ODA=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"REFERENCES\\"}": Object {
+      "dst": Object {
+        "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "COMMENT",
       },
     },
     "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDQ6VXNlcjE0MDAwMjM=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
@@ -693,6 +854,21 @@ Object {
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
         "type": "COMMENT",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "ISSUE",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ5ODA=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"MDU6SXNzdWUzMDA5MzQ4MTg=\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"REFERENCES\\"}": Object {
+      "dst": Object {
+        "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
+        "pluginName": "sourcecred/github-beta",
+        "repositoryName": "sourcecred/example-repo",
+        "type": "ISSUE",
       },
       "payload": Object {},
       "src": Object {

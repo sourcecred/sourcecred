@@ -1,9 +1,11 @@
 // @flow
 
+const stringify = require("json-stable-stringify");
+
 import type {Node, Edge} from "../../core/graph";
 import type {Address} from "../../core/address";
 import {Graph, edgeID} from "../../core/graph";
-const stringify = require("json-stable-stringify");
+import {findNumericReferences} from "./parseReferences";
 
 export const GITHUB_PLUGIN_NAME = "sourcecred/github-beta";
 
@@ -172,9 +174,21 @@ export class GithubParser {
   repositoryName: string;
   graph: Graph<NodePayload, EdgePayload>;
 
+  // Map from issue/pr # to corresponding node, to efficiently add numeric
+  // references
+  issueOrPrNumberToNode: {
+    [n: number]: Node<IssueNodePayload | PullRequestNodePayload>,
+  };
+  // Keep track of all dangling numeric references, so that if we encounter a
+  // numeric reference to a node before the referred node, we can later resolve
+  // the reference
+  danglingNumericReferences: {[n: number]: Node<NodePayload>[]};
+
   constructor(repositoryName: string) {
     this.repositoryName = repositoryName;
     this.graph = new Graph();
+    this.issueOrPrNumberToNode = {};
+    this.danglingNumericReferences = {};
   }
 
   makeNodeAddress(type: NodeType, id: string): Address {
@@ -280,6 +294,7 @@ export class GithubParser {
     this.graph.addNode(commentNode);
 
     this.addAuthorship(commentNode, commentJson.author);
+    this.parseReferences(commentNode, commentJson.body);
     this.addContainment(parentNode, commentNode);
   }
 
@@ -319,7 +334,8 @@ export class GithubParser {
     this.graph.addNode(issueNode);
 
     this.addAuthorship(issueNode, issueJson.author);
-
+    this.processNumericReferrable(issueNode, issueJson.number);
+    this.parseReferences(issueNode, issueJson.body);
     issueJson.comments.nodes.forEach((c) => this.addComment(issueNode, c));
   }
 
@@ -336,11 +352,29 @@ export class GithubParser {
     this.graph.addNode(pullRequestNode);
 
     this.addAuthorship(pullRequestNode, prJson.author);
+    this.processNumericReferrable(pullRequestNode, prJson.number);
+    this.parseReferences(pullRequestNode, prJson.body);
     prJson.comments.nodes.forEach((c) => this.addComment(pullRequestNode, c));
 
     prJson.reviews.nodes.forEach((r) =>
       this.addPullRequestReview(pullRequestNode, r)
     );
+  }
+
+  processNumericReferrable(
+    node: Node<IssueNodePayload | PullRequestNodePayload>,
+    n: number
+  ) {
+    if (this.issueOrPrNumberToNode[n] != undefined) {
+      throw new Error(`Got multiple Issues/PRs with #${n}`);
+    }
+    this.issueOrPrNumberToNode[n] = node;
+    if (this.danglingNumericReferences[n] !== undefined) {
+      this.danglingNumericReferences[n].forEach((src) => {
+        this.addReference(src, node);
+      });
+    }
+    delete this.danglingNumericReferences[n];
   }
 
   addPullRequestReview(
@@ -358,7 +392,50 @@ export class GithubParser {
     this.graph.addNode(reviewNode);
     this.addContainment(pullRequestNode, reviewNode);
     this.addAuthorship(reviewNode, reviewJson.author);
+    this.parseReferences(reviewNode, reviewJson.body);
     reviewJson.comments.nodes.forEach((c) => this.addComment(reviewNode, c));
+  }
+
+  addReference(src: Node<NodePayload>, dst: Node<NodePayload>) {
+    const referenceEdge: Edge<ReferencesEdgePayload> = {
+      address: this.makeEdgeAddress("REFERENCES", src.address, dst.address),
+      payload: {},
+      src: src.address,
+      dst: dst.address,
+    };
+    this.graph.addEdge(referenceEdge);
+  }
+
+  parseReferences(referringNode: Node<NodePayload>, referringBody: string) {
+    const numericReferences = findNumericReferences(referringBody);
+    numericReferences.forEach((n) => {
+      const referredNode = this.issueOrPrNumberToNode[n];
+      if (referredNode !== undefined) {
+        this.addReference(referringNode, referredNode);
+      } else {
+        // We need to track this dangling reference, in case we just haven't parsed its
+        // referredNode yet
+        if (this.danglingNumericReferences[n] === undefined) {
+          this.danglingNumericReferences[n] = [];
+        }
+        this.danglingNumericReferences[n].push(referringNode);
+      }
+    });
+  }
+
+  /**
+   * Get all the dangling references in this parser's state.
+   *
+   * Since nothing stops users from adding bad references, dangling references
+   * never produce an error. However, it may be useful for logging and testing
+   * purposes to enumerate all of the dandling references left over at the end
+   * of a parse, so as to verify that they are all actually bad references.
+   *
+   * The dangling references are returned as strings, like they would appear in
+   * the src, e.g. "#2" or "https://github.com/sourcecred/sourcecred/pull/123"
+   */
+  danglingReferences(): string[] {
+    return Object.keys(this.danglingNumericReferences).map((x) => `#${x}`);
   }
 
   addData(dataJson: *) {
