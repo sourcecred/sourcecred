@@ -34,6 +34,15 @@ export class GithubGraphFetcher extends React.Component<Props> {
       .then((json) => {
         const parser = new GithubParser(`${repoOwner}/${repoName}`);
         parser.addData(json.data);
+
+        const dangling = parser.danglingReferences();
+        if (dangling.length !== 0) {
+          console.log(
+            `Warning: detected ${dangling.length} dangling references:`
+          );
+          console.log(dangling);
+        }
+
         return Promise.resolve(parser.graph);
       })
       .then((graph) => {
