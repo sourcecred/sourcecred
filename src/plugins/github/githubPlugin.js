@@ -10,6 +10,7 @@ export const GITHUB_PLUGIN_NAME = "sourcecred/github-beta";
 /** Node Types */
 export const ISSUE_NODE_TYPE: "ISSUE" = "ISSUE";
 export type IssueNodePayload = {|
+  +url: string,
   +title: string,
   +number: number,
   +body: string,
@@ -17,6 +18,7 @@ export type IssueNodePayload = {|
 
 export const PULL_REQUEST_NODE_TYPE: "PULL_REQUEST" = "PULL_REQUEST";
 export type PullRequestNodePayload = {|
+  +url: string,
   +title: string,
   +number: number,
   +body: string,
@@ -31,6 +33,7 @@ export type PullRequestReviewState =
 export const PULL_REQUEST_REVIEW_NODE_TYPE: "PULL_REQUEST_REVIEW" =
   "PULL_REQUEST_REVIEW";
 export type PullRequestReviewNodePayload = {|
+  +url: string,
   +body: string,
   +state: PullRequestReviewState,
 |};
@@ -308,6 +311,7 @@ export class GithubParser {
 
   addIssue(issueJson: *) {
     const issuePayload: IssueNodePayload = {
+      url: issueJson.url,
       number: issueJson.number,
       title: issueJson.title,
       body: issueJson.body,
@@ -325,6 +329,7 @@ export class GithubParser {
 
   addPullRequest(prJson: *) {
     const pullRequestPayload: PullRequestNodePayload = {
+      url: prJson.url,
       number: prJson.number,
       title: prJson.title,
       body: prJson.body,
@@ -348,6 +353,7 @@ export class GithubParser {
     reviewJson: *
   ) {
     const reviewPayload: PullRequestReviewNodePayload = {
+      url: reviewJson.url,
       state: reviewJson.state,
       body: reviewJson.body,
     };

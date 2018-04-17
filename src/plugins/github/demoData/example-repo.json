@@ -8,7 +8,8 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "decentralion"
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion"
                         },
                         "body": "This is just an example issue.",
                         "comments": {
@@ -21,13 +22,15 @@
                         },
                         "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
                         "number": 1,
-                        "title": "An example issue."
+                        "title": "An example issue.",
+                        "url": "https://github.com/sourcecred/example-repo/issues/1"
                     },
                     {
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "decentralion"
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion"
                         },
                         "body": "This issue references another issue, namely #1",
                         "comments": {
@@ -36,7 +39,8 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "decentralion"
+                                        "login": "decentralion",
+                                        "url": "https://github.com/decentralion"
                                     },
                                     "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-repo/issues/6",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
@@ -46,7 +50,8 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "decentralion"
+                                        "login": "decentralion",
+                                        "url": "https://github.com/decentralion"
                                     },
                                     "body": "We might also reference individual comments directly.\r\nhttps://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
@@ -60,13 +65,15 @@
                         },
                         "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
                         "number": 2,
-                        "title": "A referencing issue."
+                        "title": "A referencing issue.",
+                        "url": "https://github.com/sourcecred/example-repo/issues/2"
                     },
                     {
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "decentralion"
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion"
                         },
                         "body": "Alas, its life as an open issue had only just begun.",
                         "comments": {
@@ -79,13 +86,15 @@
                         },
                         "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
                         "number": 4,
-                        "title": "A closed pull request"
+                        "title": "A closed pull request",
+                        "url": "https://github.com/sourcecred/example-repo/issues/4"
                     },
                     {
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "decentralion"
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion"
                         },
                         "body": "This issue shall shortly have a few comments.",
                         "comments": {
@@ -94,7 +103,8 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "decentralion"
+                                        "login": "decentralion",
+                                        "url": "https://github.com/decentralion"
                                     },
                                     "body": "A wild COMMENT appeared!",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODQ0Mg==",
@@ -104,7 +114,8 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "decentralion"
+                                        "login": "decentralion",
+                                        "url": "https://github.com/decentralion"
                                     },
                                     "body": "And the maintainer said, \"Let there be comments!\"",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODUzOA==",
@@ -118,13 +129,15 @@
                         },
                         "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
                         "number": 6,
-                        "title": "An issue with comments"
+                        "title": "An issue with comments",
+                        "url": "https://github.com/sourcecred/example-repo/issues/6"
                     },
                     {
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "decentralion"
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion"
                         },
                         "body": "Deal with this, naive string display algorithms!!!!!",
                         "comments": {
@@ -137,13 +150,15 @@
                         },
                         "id": "MDU6SXNzdWUzMDY5ODM1NTI=",
                         "number": 7,
-                        "title": "An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something"
+                        "title": "An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
+                        "url": "https://github.com/sourcecred/example-repo/issues/7"
                     },
                     {
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "decentralion"
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion"
                         },
                         "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️\r\nIssue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
                         "comments": {
@@ -156,7 +171,8 @@
                         },
                         "id": "MDU6SXNzdWUzMDY5ODUzNjc=",
                         "number": 8,
-                        "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️"
+                        "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+                        "url": "https://github.com/sourcecred/example-repo/issues/8"
                     }
                 ],
                 "pageInfo": {
@@ -170,7 +186,8 @@
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "decentralion"
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion"
                         },
                         "body": "Oh look, it's a pull request.",
                         "comments": {
@@ -179,7 +196,8 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjE0MDAwMjM=",
-                                        "login": "decentralion"
+                                        "login": "decentralion",
+                                        "url": "https://github.com/decentralion"
                                     },
                                     "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
                                     "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
@@ -201,13 +219,15 @@
                                 "hasNextPage": false
                             }
                         },
-                        "title": "Add README, merge via PR."
+                        "title": "Add README, merge via PR.",
+                        "url": "https://github.com/sourcecred/example-repo/pull/3"
                     },
                     {
                         "author": {
                             "__typename": "User",
                             "id": "MDQ6VXNlcjE0MDAwMjM=",
-                            "login": "decentralion"
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion"
                         },
                         "body": "@wchargin could you please do the following:\r\n- add a commit comment\r\n- add a review comment requesting some trivial change\r\n- i'll change it\r\n- then approve the pr",
                         "comments": {
@@ -226,7 +246,8 @@
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjQzMTc4MDY=",
-                                        "login": "wchargin"
+                                        "login": "wchargin",
+                                        "url": "https://github.com/wchargin"
                                     },
                                     "body": "hmmm.jpg",
                                     "comments": {
@@ -235,7 +256,8 @@
                                                 "author": {
                                                     "__typename": "User",
                                                     "id": "MDQ6VXNlcjQzMTc4MDY=",
-                                                    "login": "wchargin"
+                                                    "login": "wchargin",
+                                                    "url": "https://github.com/wchargin"
                                                 },
                                                 "body": "seems a bit capricious",
                                                 "id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==",
@@ -248,13 +270,15 @@
                                         }
                                     },
                                     "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5",
-                                    "state": "CHANGES_REQUESTED"
+                                    "state": "CHANGES_REQUESTED",
+                                    "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899"
                                 },
                                 {
                                     "author": {
                                         "__typename": "User",
                                         "id": "MDQ6VXNlcjQzMTc4MDY=",
-                                        "login": "wchargin"
+                                        "login": "wchargin",
+                                        "url": "https://github.com/wchargin"
                                     },
                                     "body": "I'm sold",
                                     "comments": {
@@ -266,15 +290,17 @@
                                         }
                                     },
                                     "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4",
-                                    "state": "APPROVED"
+                                    "state": "APPROVED",
+                                    "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038"
                                 }
                             ],
                             "pageInfo": {
-                                "endCursor": "Y3Vyc29yOnYyOpO5MjAxOC0wMi0yOFQyMDoyNDo1Ni0wODowMLkyMDE4LTAyLTI4VDIwOjI0OjU2LTA4OjAwzgX6q7Y=",
+                                "endCursor": "Y3Vyc29yOnYyOpO5MjAxOC0wMy0wMVQwNjoyNDo1NiswMjowMLkyMDE4LTAzLTAxVDA2OjI0OjU2KzAyOjAwzgX6q7Y=",
                                 "hasNextPage": false
                             }
                         },
-                        "title": "This pull request will be more contentious. I can feel it..."
+                        "title": "This pull request will be more contentious. I can feel it...",
+                        "url": "https://github.com/sourcecred/example-repo/pull/5"
                     }
                 ],
                 "pageInfo": {

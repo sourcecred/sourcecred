@@ -620,6 +620,7 @@ export function createFragments(): FragmentDefinition[] {
     b.fragment("whoami", "Actor", [
       b.field("__typename"),
       b.field("login"),
+      b.field("url"),
       b.inlineFragment("User", [b.field("id")]),
       b.inlineFragment("Organization", [b.field("id")]),
       b.inlineFragment("Bot", [b.field("id")]),
@@ -628,6 +629,7 @@ export function createFragments(): FragmentDefinition[] {
       makePageInfo(),
       b.field("nodes", {}, [
         b.field("id"),
+        b.field("url"),
         b.field("title"),
         b.field("body"),
         b.field("number"),
@@ -641,6 +643,7 @@ export function createFragments(): FragmentDefinition[] {
       makePageInfo(),
       b.field("nodes", {}, [
         b.field("id"),
+        b.field("url"),
         b.field("title"),
         b.field("body"),
         b.field("number"),
@@ -658,6 +661,7 @@ export function createFragments(): FragmentDefinition[] {
       makePageInfo(),
       b.field("nodes", {}, [
         b.field("id"),
+        b.field("url"),
         makeAuthor(),
         b.field("body"),
         b.field("url"),
@@ -667,6 +671,7 @@ export function createFragments(): FragmentDefinition[] {
       makePageInfo(),
       b.field("nodes", {}, [
         b.field("id"),
+        b.field("url"),
         b.field("body"),
         makeAuthor(),
         b.field("state"),
@@ -679,8 +684,8 @@ export function createFragments(): FragmentDefinition[] {
       makePageInfo(),
       b.field("nodes", {}, [
         b.field("id"),
-        b.field("body"),
         b.field("url"),
+        b.field("body"),
         makeAuthor(),
       ]),
     ]),
