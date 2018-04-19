@@ -1,19 +1,15 @@
 // @flow
 
-import {
-  findNumericReferences,
-  findGithubUrlReferences,
-} from "./parseReferences.js";
-import type {GithubUrlMatch} from "./parseReferences.js";
+import {findReferences} from "./parseReferences.js";
 
-describe("reference finding", () => {
-  it("finds no numeric references when not present", () => {
-    expect(findNumericReferences("foo bar bod boink")).toHaveLength(0);
-    expect(findNumericReferences("")).toHaveLength(0);
+describe("findReferences", () => {
+  it("finds no references when not present", () => {
+    expect(findReferences("foo bar bod boink")).toHaveLength(0);
+    expect(findReferences("")).toHaveLength(0);
   });
 
   it("finds trivial numeric references", () => {
-    expect(findNumericReferences("#1, #2, and #3")).toEqual([1, 2, 3]);
+    expect(findReferences("#1, #2, and #3")).toEqual(["#1", "#2", "#3"]);
   });
 
   it("finds numeric references in a multiline string", () => {
@@ -21,33 +17,26 @@ describe("reference finding", () => {
     This is a multiline string.
     It refers to #1. Oh, and to #2 too.
     (#42 might be included too - who knows?)`;
-    expect(findNumericReferences(example)).toEqual([1, 2, 42]);
+    expect(findReferences(example)).toEqual(["#1", "#2", "#42"]);
   });
 
   it("does not find bad references", () => {
-    expect(findNumericReferences("foo#123 #124bar")).toHaveLength(0);
+    expect(findReferences("foo#123 #124bar")).toHaveLength(0);
   });
 
   it("does not yet find concise cross-repo links", () => {
     // The link below is valid, when we add cross-repo support we
     // should fix this test case
-    expect(findNumericReferences("sourcecred/sourcecred#12")).toHaveLength(0);
-  });
-
-  it("finds no url references when not present", () => {
-    expect(findGithubUrlReferences("foo bar bod boink")).toHaveLength(0);
-    expect(findGithubUrlReferences("")).toHaveLength(0);
+    expect(findReferences("sourcecred/sourcecred#12")).toHaveLength(0);
   });
 
   it("finds a trivial url reference", () => {
     expect(
-      findGithubUrlReferences(
-        "https://github.com/sourcecred/sourcecred/issues/86"
-      )
+      findReferences("https://github.com/sourcecred/sourcecred/issues/86")
     ).toHaveLength(1);
   });
 
-  it("parses url references appropriately", () => {
+  it("finds url references", () => {
     const example = `
     A directly linked issue:
 https://github.com/sourcecred/example-repo/issues/1
@@ -75,96 +64,41 @@ https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222
     `;
 
     const expected = [
-      {
-        repoName: "example-repo",
-        repoOwner: "sourcecred",
-        parentType: "issues",
-        number: 1,
-        commentFragment: null,
-      },
-      {
-        repoName: "example-repo",
-        repoOwner: "sourcecred",
-        parentType: "issues",
-        number: 1,
-        commentFragment: {fragmentType: "issue", fragmentNumber: 300934818},
-      },
-      {
-        repoName: "example-repo",
-        repoOwner: "sourcecred",
-        parentType: "pull",
-        number: 3,
-        commentFragment: null,
-      },
-      {
-        repoName: "example-repo",
-        repoOwner: "sourcecred",
-        parentType: "pull",
-        number: 3,
-        commentFragment: {fragmentType: "issue", fragmentNumber: 171887741},
-      },
-      {
-        repoName: "example-repo",
-        repoOwner: "sourcecred",
-        parentType: "issues",
-        number: 6,
-        commentFragment: {
-          fragmentType: "issuecomment",
-          fragmentNumber: 373768442,
-        },
-      },
-      {
-        repoName: "example-repo",
-        repoOwner: "sourcecred",
-        parentType: "pull",
-        number: 5,
-        commentFragment: {
-          fragmentType: "pullrequestreview",
-          fragmentNumber: 100313899,
-        },
-      },
-      {
-        repoName: "example-repo",
-        repoOwner: "sourcecred",
-        parentType: "pull",
-        number: 5,
-        commentFragment: {
-          fragmentType: "discussion_r",
-          fragmentNumber: 171460198,
-        },
-      },
-      {
-        repoName: "example-repo",
-        repoOwner: "sourcecred",
-        parentType: "pull",
-        number: 3,
-        commentFragment: {
-          fragmentType: "issuecomment",
-          fragmentNumber: 369162222,
-        },
-      },
+      "https://github.com/sourcecred/example-repo/issues/1",
+      "https://github.com/sourcecred/example-repo/issues/1#issue-300934818",
+      "https://github.com/sourcecred/example-repo/pull/3",
+      "https://github.com/sourcecred/example-repo/pull/3#issue-171887741",
+      "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
+      "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
+      "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
+      "https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222",
     ];
 
-    expect(findGithubUrlReferences(example)).toEqual(expected);
+    expect(findReferences(example)).toEqual(expected);
   });
 
   it("doesn't find urls mangled with word characters", () => {
     expect(
-      findGithubUrlReferences(
-        "foohttps://github.com/sourcecred/sourcecred/pull/94"
-      )
+      findReferences("foohttps://github.com/sourcecred/sourcecred/pull/94")
     ).toHaveLength(0);
 
     expect(
-      findGithubUrlReferences(
-        "https://github.com/sourcecred/sourcecred/pull/94foo"
-      )
+      findReferences("https://github.com/sourcecred/sourcecred/pull/94foo")
     ).toHaveLength(0);
 
     expect(
-      findGithubUrlReferences(
-        "(https://github.com/sourcecred/sourcecred/pull/94)"
-      )
+      findReferences("(https://github.com/sourcecred/sourcecred/pull/94)")
     ).toHaveLength(1);
+  });
+
+  it("finds a mix of reference types", () => {
+    expect(
+      findReferences(
+        "@wchargin commented on #125, eg https://github.com/sourcecred/sourcecred/pull/125#pullrequestreview-113402856"
+      )
+    ).toEqual([
+      "#125",
+      "https://github.com/sourcecred/sourcecred/pull/125#pullrequestreview-113402856",
+    ]);
   });
 });

@@ -13,26 +13,18 @@ function findAllMatches(re: RegExp, s: string): any[] {
   return matches;
 }
 
-export function findNumericReferences(body: string): number[] {
-  return findAllMatches(/(?:\W|^)#(\d+)(?:\W|$)/g, body).map((x) => +x[1]);
+export function findReferences(body: string): string[] {
+  // Note to maintainer: If it becomes necessary to encode references in a
+  // richer format, consider implementing the type signature described in
+  // https://github.com/sourcecred/sourcecred/pull/130#pullrequestreview-113849998
+  return [...findNumericReferences(body), ...findGithubUrlReferences(body)];
 }
 
-export type GithubUrlMatch = {|
-  +repoName: string,
-  +repoOwner: string,
-  +parentType: "pull" | "issues",
-  +number: number,
-  +commentFragment: ?{|
-    +fragmentType:
-      | "issue" // a directly linked issue or pull request
-      | "issuecomment" // a directly linked regular comment on issue or pull request
-      | "pullrequestreview" // a pull request review
-      | "discussion_r", // a review comment as part of a pull request review
-    +fragmentNumber: number,
-  |},
-|};
+function findNumericReferences(body: string): string[] {
+  return findAllMatches(/(?:\W|^)(#\d+)(?:\W|$)/g, body).map((x) => x[1]);
+}
 
-export function findGithubUrlReferences(body: string): GithubUrlMatch[] {
+function findGithubUrlReferences(body: string): string[] {
   const githubNamePart = /([a-zA-Z0-9_-]+)/.source;
   const urlRegex = new RegExp(
     "" +
@@ -46,20 +38,5 @@ export function findGithubUrlReferences(body: string): GithubUrlMatch[] {
       /(?:\W|$)/.source,
     "gm"
   );
-  return findAllMatches(urlRegex, body).map((match) => {
-    let commentFragment: $ElementType<GithubUrlMatch, "commentFragment">;
-    if (match[5] != null) {
-      // we found a comment fragment
-      commentFragment = {fragmentType: match[6], fragmentNumber: +match[7]};
-    } else {
-      commentFragment = null;
-    }
-    return {
-      repoOwner: match[1],
-      repoName: match[2],
-      parentType: match[3],
-      number: +match[4],
-      commentFragment,
-    };
-  });
+  return findAllMatches(urlRegex, body).map((match) => match[0].trim());
 }
