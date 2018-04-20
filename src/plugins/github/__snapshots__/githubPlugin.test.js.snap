@@ -30,6 +30,7 @@ Object {
         "body": "This is just an example issue.",
         "number": 1,
         "title": "An example issue.",
+        "url": "https://github.com/sourcecred/example-repo/issues/1",
       },
     },
   },
@@ -138,6 +139,7 @@ Object {
         "body": "This issue shall shortly have a few comments.",
         "number": 6,
         "title": "An issue with comments",
+        "url": "https://github.com/sourcecred/example-repo/issues/6",
       },
     },
   },
@@ -258,12 +260,14 @@ Object {
       "payload": Object {
         "body": "I'm sold",
         "state": "APPROVED",
+        "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038",
       },
     },
     "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}": Object {
       "payload": Object {
         "body": "hmmm.jpg",
         "state": "CHANGES_REQUESTED",
+        "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
       },
     },
     "{\\"id\\":\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"PULL_REQUEST\\"}": Object {
@@ -275,6 +279,7 @@ Object {
 - then approve the pr",
         "number": 5,
         "title": "This pull request will be more contentious. I can feel it...",
+        "url": "https://github.com/sourcecred/example-repo/pull/5",
       },
     },
     "{\\"id\\":\\"MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"PULL_REQUEST_REVIEW_COMMENT\\"}": Object {
@@ -352,6 +357,7 @@ Object {
         "body": "Oh look, it's a pull request.",
         "number": 3,
         "title": "Add README, merge via PR.",
+        "url": "https://github.com/sourcecred/example-repo/pull/3",
       },
     },
     "{\\"id\\":\\"MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"COMMENT\\"}": Object {
@@ -738,12 +744,14 @@ Object {
       "payload": Object {
         "body": "I'm sold",
         "state": "APPROVED",
+        "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038",
       },
     },
     "{\\"id\\":\\"MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"PULL_REQUEST_REVIEW\\"}": Object {
       "payload": Object {
         "body": "hmmm.jpg",
         "state": "CHANGES_REQUESTED",
+        "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
       },
     },
     "{\\"id\\":\\"MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"PULL_REQUEST\\"}": Object {
@@ -751,6 +759,7 @@ Object {
         "body": "Oh look, it's a pull request.",
         "number": 3,
         "title": "Add README, merge via PR.",
+        "url": "https://github.com/sourcecred/example-repo/pull/3",
       },
     },
     "{\\"id\\":\\"MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"PULL_REQUEST\\"}": Object {
@@ -762,6 +771,7 @@ Object {
 - then approve the pr",
         "number": 5,
         "title": "This pull request will be more contentious. I can feel it...",
+        "url": "https://github.com/sourcecred/example-repo/pull/5",
       },
     },
     "{\\"id\\":\\"MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"COMMENT\\"}": Object {
@@ -816,6 +826,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
         "body": "This is just an example issue.",
         "number": 1,
         "title": "An example issue.",
+        "url": "https://github.com/sourcecred/example-repo/issues/1",
       },
     },
     "{\\"id\\":\\"MDU6SXNzdWUzMDA5MzQ5ODA=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"ISSUE\\"}": Object {
@@ -823,6 +834,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
         "body": "This issue references another issue, namely #1",
         "number": 2,
         "title": "A referencing issue.",
+        "url": "https://github.com/sourcecred/example-repo/issues/2",
       },
     },
     "{\\"id\\":\\"MDU6SXNzdWUzMDA5MzYzNzQ=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"ISSUE\\"}": Object {
@@ -830,6 +842,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
         "body": "Alas, its life as an open issue had only just begun.",
         "number": 4,
         "title": "A closed pull request",
+        "url": "https://github.com/sourcecred/example-repo/issues/4",
       },
     },
     "{\\"id\\":\\"MDU6SXNzdWUzMDU5OTM3NzM=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"ISSUE\\"}": Object {
@@ -837,6 +850,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
         "body": "This issue shall shortly have a few comments.",
         "number": 6,
         "title": "An issue with comments",
+        "url": "https://github.com/sourcecred/example-repo/issues/6",
       },
     },
     "{\\"id\\":\\"MDU6SXNzdWUzMDY5ODM1NTI=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"ISSUE\\"}": Object {
@@ -844,6 +858,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
         "body": "Deal with this, naive string display algorithms!!!!!",
         "number": 7,
         "title": "An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
+        "url": "https://github.com/sourcecred/example-repo/issues/7",
       },
     },
     "{\\"id\\":\\"MDU6SXNzdWUzMDY5ODUzNjc=\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"ISSUE\\"}": Object {
@@ -852,6 +867,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
 Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
         "number": 8,
         "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+        "url": "https://github.com/sourcecred/example-repo/issues/8",
       },
     },
   },
