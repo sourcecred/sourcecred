@@ -91,6 +91,19 @@ https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222
     ).toHaveLength(1);
   });
 
+  it("finds username references", () => {
+    expect(findReferences("hello to @wchargin from @decentralion!")).toEqual([
+      "@wchargin",
+      "@decentralion",
+    ]);
+  });
+
+  it("finds usernames with hypens and numbers", () => {
+    expect(findReferences("@paddy-hack and @0x00 are valid usernames")).toEqual(
+      ["@paddy-hack", "@0x00"]
+    );
+  });
+
   it("finds a mix of reference types", () => {
     expect(
       findReferences(
@@ -99,6 +112,7 @@ https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222
     ).toEqual([
       "#125",
       "https://github.com/sourcecred/sourcecred/pull/125#pullrequestreview-113402856",
+      "@wchargin",
     ]);
   });
 });
