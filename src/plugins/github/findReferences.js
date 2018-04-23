@@ -17,11 +17,21 @@ export function findReferences(body: string): string[] {
   // Note to maintainer: If it becomes necessary to encode references in a
   // richer format, consider implementing the type signature described in
   // https://github.com/sourcecred/sourcecred/pull/130#pullrequestreview-113849998
-  return [...findNumericReferences(body), ...findGithubUrlReferences(body)];
+  return [
+    ...findNumericReferences(body),
+    ...findGithubUrlReferences(body),
+    ...findUsernameReferences(body),
+  ];
 }
 
 function findNumericReferences(body: string): string[] {
   return findAllMatches(/(?:\W|^)(#\d+)(?:\W|$)/g, body).map((x) => x[1]);
+}
+
+function findUsernameReferences(body: string): string[] {
+  return findAllMatches(/(?:\W|^)(@[a-zA-Z0-9-]+)(?:\W|$)/g, body).map(
+    (x) => x[1]
+  );
 }
 
 function findGithubUrlReferences(body: string): string[] {
