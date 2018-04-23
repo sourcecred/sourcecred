@@ -7,7 +7,6 @@ import type {Node} from "../../../../core/graph";
 import type {
   NodePayload,
   NodeType,
-  NodeTypes,
   IssueNodePayload,
   PullRequestNodePayload,
   CommentNodePayload,
@@ -79,26 +78,27 @@ const adapter: PluginAdapter<NodePayload> = {
     function extractAuthorTitle(node: Node<AuthorNodePayload>) {
       return node.payload.login;
     }
-    type TypedNodeToStringExtractor = <T: $Values<NodeTypes>>(
-      T
-    ) => (node: Node<$ElementType<T, "payload">>) => string;
-    const extractors: $Exact<$ObjMap<NodeTypes, TypedNodeToStringExtractor>> = {
-      ISSUE: extractIssueOrPrTitle,
-      PULL_REQUEST: extractIssueOrPrTitle,
-      COMMENT: (node) => extractCommentTitle("comment", node),
-      PULL_REQUEST_REVIEW_COMMENT: (node) =>
-        extractCommentTitle("review comment", node),
-      PULL_REQUEST_REVIEW: extractPRReviewTitle,
-      USER: extractAuthorTitle,
-      ORGANIZATION: extractAuthorTitle,
-      BOT: extractAuthorTitle,
-    };
-    function fallbackAccessor(node: Node<NodePayload>) {
-      throw new Error(`unknown node type: ${node.address.type}`);
+    const anyNode: Node<any> = node;
+    const type: NodeType = (node.address.type: any);
+    switch (type) {
+      case "ISSUE":
+      case "PULL_REQUEST":
+        return extractIssueOrPrTitle(anyNode);
+      case "COMMENT":
+        return extractCommentTitle("comment", anyNode);
+      case "PULL_REQUEST_REVIEW_COMMENT":
+        return extractCommentTitle("review comment", anyNode);
+      case "PULL_REQUEST_REVIEW":
+        return extractPRReviewTitle(anyNode);
+      case "USER":
+      case "ORGANIZATION":
+      case "BOT":
+        return extractAuthorTitle(anyNode);
+      default:
+        // eslint-disable-next-line no-unused-expressions
+        (type: empty);
+        throw new Error(`unknown node type: ${node.address.type}`);
     }
-    return (extractors[node.address.type] || fallbackAccessor)(
-      (node: Node<any>)
-    );
   },
 };
 
