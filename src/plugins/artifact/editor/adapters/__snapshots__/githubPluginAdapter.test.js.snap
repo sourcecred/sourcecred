@@ -157,6 +157,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "id": "MDQ6VXNlcjE0MDAwMjM=",
     "payload": Object {
       "login": "decentralion",
+      "url": "https://github.com/decentralion",
     },
     "rendered": <div>
       type: 
@@ -170,6 +171,7 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "id": "MDQ6VXNlcjQzMTc4MDY=",
     "payload": Object {
       "login": "wchargin",
+      "url": "https://github.com/wchargin",
     },
     "rendered": <div>
       type: 
