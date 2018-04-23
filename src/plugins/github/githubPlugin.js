@@ -1,9 +1,11 @@
 // @flow
 
+const stringify = require("json-stable-stringify");
+
 import type {Node, Edge} from "../../core/graph";
 import type {Address} from "../../core/address";
 import {Graph, edgeID} from "../../core/graph";
-const stringify = require("json-stable-stringify");
+import {findReferences} from "./findReferences";
 
 export const GITHUB_PLUGIN_NAME = "sourcecred/github-beta";
 
@@ -371,6 +373,69 @@ export class GithubParser {
     this.addContainment(pullRequestNode, reviewNode);
     this.addAuthorship(reviewNode, reviewJson.author);
     reviewJson.comments.nodes.forEach((c) => this.addComment(reviewNode, c));
+  }
+
+  /** Add all the in-repo GitHub reference edges detected.
+   *
+   * Parse all the nodes added to the GitHubParser, detect any
+   * GitHub references (e.g. url, #num, or @login), and add corresponding
+   * REFERENCE type edges.
+   *
+   * Needs to be called after adding data (or it will no-op).
+   * @returns {string[]}: All of the dangling (unparsed) reference strings.
+   */
+  addReferenceEdges(): string[] {
+    const referenceToNode = {};
+    this.graph.getNodes().forEach((node) => {
+      referenceToNode[node.payload.url] = node;
+      const anyNode: Node<any> = node;
+      const type: NodeType = (node.address.type: any);
+      switch (type) {
+        case "ISSUE":
+        case "PULL_REQUEST":
+          referenceToNode[`#${anyNode.payload.number}`] = node;
+          break;
+        case "USER":
+        case "ORGANIZATION":
+        case "BOT":
+          referenceToNode[`@${anyNode.payload.login}`] = node;
+          break;
+        case "COMMENT":
+        case "PULL_REQUEST_REVIEW":
+        case "PULL_REQUEST_REVIEW_COMMENT":
+          break;
+        default:
+          // eslint-disable-next-line no-unused-expressions
+          (type: empty);
+          throw new Error(`unknown node type: ${type}`);
+      }
+    });
+
+    const danglingReferences = [];
+    this.graph.getNodes().forEach((srcNode) => {
+      if (srcNode.payload.body !== undefined) {
+        const references = findReferences(srcNode.payload.body);
+        references.forEach((ref) => {
+          const dstNode = referenceToNode[ref];
+          if (dstNode === undefined) {
+            danglingReferences.push(ref);
+          } else {
+            const referenceEdge: Edge<ReferencesEdgePayload> = {
+              address: this.makeEdgeAddress(
+                "REFERENCES",
+                srcNode.address,
+                dstNode.address
+              ),
+              payload: {},
+              src: srcNode.address,
+              dst: dstNode.address,
+            };
+            this.graph.addEdge(referenceEdge);
+          }
+        });
+      }
+    });
+    return danglingReferences;
   }
 
   addData(dataJson: *) {
