@@ -1,6 +1,6 @@
 // @flow
 
-import {findReferences} from "./parseReferences.js";
+import {findReferences} from "./findReferences.js";
 
 describe("findReferences", () => {
   it("finds no references when not present", () => {
