@@ -57,16 +57,19 @@ export type PullRequestReviewCommentNodePayload = {|
 export const USER_NODE_TYPE: "USER" = "USER";
 export type UserNodePayload = {|
   +login: string,
+  +url: string,
 |};
 
 export const BOT_NODE_TYPE: "BOT" = "BOT";
 export type BotNodePayload = {|
   +login: string,
+  +url: string,
 |};
 
 export const ORGANIZATION_NODE_TYPE: "ORGANIZATION" = "ORGANIZATION";
 export type OrganizationNodePayload = {|
   +login: string,
+  +url: string,
 |};
 
 export type AuthorNodeType =
@@ -208,7 +211,10 @@ export class GithubParser {
     >,
     authorJson: *
   ) {
-    let authorPayload: AuthorNodePayload = {login: authorJson.login};
+    let authorPayload: AuthorNodePayload = {
+      login: authorJson.login,
+      url: authorJson.url,
+    };
     let authorType: NodeType;
     switch (authorJson.__typename) {
       case "User":
