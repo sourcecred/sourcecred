@@ -1,10 +1,8 @@
 // @flow
 
-import {
-  GithubParser,
-  AUTHORS_EDGE_TYPE,
-  CONTAINS_EDGE_TYPE,
-} from "./githubPlugin";
+import {AUTHORS_EDGE_TYPE, CONTAINS_EDGE_TYPE} from "./types";
+
+import {GithubParser} from "./parser";
 import exampleRepoData from "./demoData/example-repo.json";
 
 describe("GithubParser", () => {

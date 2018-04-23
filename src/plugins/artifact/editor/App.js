@@ -9,7 +9,7 @@ import type {Graph, Node} from "../../../core/graph";
 import type {
   NodePayload as GithubNodePayload,
   EdgePayload as GithubEdgePayload,
-} from "../../github/githubPlugin";
+} from "../../github/types";
 import type {
   NodePayload as ArtifactNodePayload,
   EdgePayload as ArtifactEdgePayload,

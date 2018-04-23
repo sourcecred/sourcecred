@@ -5,7 +5,7 @@ import {shallow} from "enzyme";
 import enzymeToJSON from "enzyme-to-json";
 import stringify from "json-stable-stringify";
 
-import {GithubParser} from "../../../github/githubPlugin";
+import {GithubParser} from "../../../github/parser";
 import exampleRepoData from "../../../github/demoData/example-repo.json";
 import adapter from "./githubPluginAdapter";
 
