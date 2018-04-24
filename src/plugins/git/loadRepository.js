@@ -11,6 +11,8 @@
 
 import {execFileSync} from "child_process";
 
+import type {Repository, Hash, Commit, Tree, TreeEntry} from "./types";
+
 export type GitDriver = (args: string[], options?: ExecOptions) => string;
 type ExecOptions = Object; // close enough
 export function localGit(repositoryPath: string): GitDriver {
@@ -23,25 +25,6 @@ export function localGit(repositoryPath: string): GitDriver {
     ).toString();
   };
 }
-
-export type Repository = {|
-  +commits: Map<Hash, Commit>,
-  +trees: Map<Hash, Tree>,
-|};
-export type Hash = string;
-export type Commit = {|
-  +hash: Hash,
-  +treeHash: Hash,
-|};
-export type Tree = {|
-  +hash: Hash,
-  +entries: Map<string, TreeEntry>, // map from name
-|};
-export type TreeEntry = {|
-  +type: "blob" | "commit" | "tree",
-  +name: string,
-  +hash: Hash,
-|};
 
 /**
  * Load a Git repository from disk into memory. The `rootRef` should be
