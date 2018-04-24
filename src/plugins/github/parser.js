@@ -14,6 +14,17 @@ import type {
   PullRequestNodePayload,
   IssueNodePayload,
 } from "./types";
+
+import type {
+  RepositoryJSON,
+  PullRequestReviewJSON,
+  PullRequestJSON,
+  IssueJSON,
+  CommentJSON,
+  AuthorJSON,
+  PullRequestReviewCommentJSON,
+} from "./graphql";
+
 import type {Address} from "../../core/address";
 import {PLUGIN_NAME} from "./pluginName";
 import {Graph, edgeID} from "../../core/graph";
@@ -54,7 +65,7 @@ export class GithubParser {
       | PullRequestReviewCommentNodePayload
       | PullRequestReviewNodePayload
     >,
-    authorJson: *
+    authorJson: AuthorJSON
   ) {
     let authorPayload: AuthorNodePayload = {
       login: authorJson.login,
@@ -102,7 +113,7 @@ export class GithubParser {
     parentNode: Node<
       IssueNodePayload | PullRequestNodePayload | PullRequestReviewNodePayload
     >,
-    commentJson: *
+    commentJson: CommentJSON
   ) {
     let commentType: NodeType;
     switch (parentNode.address.type) {
@@ -160,7 +171,7 @@ export class GithubParser {
     this.graph.addEdge(containsEdge);
   }
 
-  addIssue(issueJson: *) {
+  addIssue(issueJson: IssueJSON) {
     const issuePayload: IssueNodePayload = {
       url: issueJson.url,
       number: issueJson.number,
@@ -178,7 +189,7 @@ export class GithubParser {
     issueJson.comments.nodes.forEach((c) => this.addComment(issueNode, c));
   }
 
-  addPullRequest(prJson: *) {
+  addPullRequest(prJson: PullRequestJSON) {
     const pullRequestPayload: PullRequestNodePayload = {
       url: prJson.url,
       number: prJson.number,
@@ -201,7 +212,7 @@ export class GithubParser {
 
   addPullRequestReview(
     pullRequestNode: Node<PullRequestNodePayload>,
-    reviewJson: *
+    reviewJson: PullRequestReviewJSON
   ) {
     const reviewPayload: PullRequestReviewNodePayload = {
       url: reviewJson.url,
@@ -218,7 +229,7 @@ export class GithubParser {
     reviewJson.comments.nodes.forEach((c) => this.addComment(reviewNode, c));
   }
 
-  addData(dataJson: *) {
+  addData(dataJson: RepositoryJSON) {
     dataJson.repository.issues.nodes.forEach((i) => this.addIssue(i));
     dataJson.repository.pullRequests.nodes.forEach((pr) =>
       this.addPullRequest(pr)
