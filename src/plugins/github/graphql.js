@@ -93,6 +93,22 @@ export type Continuation = {|
   +destinationPath: $ReadOnlyArray<string | number>,
 |};
 
+export type ConnectionJSON<+T> = {|
+  +nodes: $ReadOnlyArray<T>,
+  +pageInfo: {|
+    +endCursor: ?string,
+    +hasNextPage: boolean,
+  |},
+|};
+
+export type RepositoryJSON = {|
+  +repository: {
+    +id: string,
+    +issues: ConnectionJSON<IssueJSON>,
+    +pullRequests: ConnectionJSON<PullRequestJSON>,
+  },
+|};
+
 /**
  * The top-level GitHub query to request data about a repository.
  * Callers will also be interested in `createVariables`.
@@ -607,88 +623,179 @@ function mergeDirect<T>(destination: T, source: any): T {
   }
 }
 
+export type AuthorJSON = {|
+  +__typename: "User" | "Bot" | "Organization",
+  +id: string,
+  +login: string,
+  +url: string,
+|};
+function makePageInfo() {
+  const b = build;
+  return b.field("pageInfo", {}, [
+    b.field("hasNextPage"),
+    b.field("endCursor"),
+  ]);
+}
+function makeAuthor() {
+  const b = build;
+  return b.field("author", {}, [b.fragmentSpread("whoami")]);
+}
+
+function whoamiFragment(): FragmentDefinition {
+  const b = build;
+  return b.fragment("whoami", "Actor", [
+    b.field("__typename"),
+    b.field("login"),
+    b.field("url"),
+    b.inlineFragment("User", [b.field("id")]),
+    b.inlineFragment("Organization", [b.field("id")]),
+    b.inlineFragment("Bot", [b.field("id")]),
+  ]);
+}
+
+export type IssueJSON = {|
+  +id: string,
+  +url: string,
+  +title: string,
+  +body: string,
+  +number: number,
+  +author: AuthorJSON,
+  +comments: ConnectionJSON<CommentJSON>,
+|};
+
+function issuesFragment(): FragmentDefinition {
+  const b = build;
+  return b.fragment("issues", "IssueConnection", [
+    makePageInfo(),
+    b.field("nodes", {}, [
+      b.field("id"),
+      b.field("url"),
+      b.field("title"),
+      b.field("body"),
+      b.field("number"),
+      makeAuthor(),
+      b.field("comments", {first: b.literal(PAGE_SIZE_COMMENTS)}, [
+        b.fragmentSpread("comments"),
+      ]),
+    ]),
+  ]);
+}
+
+export type PullRequestJSON = {|
+  +id: string,
+  +url: string,
+  +title: string,
+  +body: string,
+  +number: number,
+  +author: AuthorJSON,
+  +comments: ConnectionJSON<CommentJSON>,
+  +reviews: ConnectionJSON<PullRequestReviewJSON>,
+|};
+function pullRequestsFragment(): FragmentDefinition {
+  const b = build;
+  return b.fragment("prs", "PullRequestConnection", [
+    makePageInfo(),
+    b.field("nodes", {}, [
+      b.field("id"),
+      b.field("url"),
+      b.field("title"),
+      b.field("body"),
+      b.field("number"),
+      makeAuthor(),
+      b.field("comments", {first: b.literal(PAGE_SIZE_COMMENTS)}, [
+        b.fragmentSpread("comments"),
+      ]),
+      b.field("reviews", {first: b.literal(PAGE_SIZE_REVIEWS)}, [
+        b.fragmentSpread("reviews"),
+      ]),
+    ]),
+  ]);
+}
+
+export type CommentJSON = {|
+  +id: string,
+  +url: string,
+  +body: string,
+  +author: AuthorJSON,
+|};
+function commentsFragment(): FragmentDefinition {
+  const b = build;
+  // (Note: issue comments and PR comments use the same connection type.)
+  return b.fragment("comments", "IssueCommentConnection", [
+    makePageInfo(),
+    b.field("nodes", {}, [
+      b.field("id"),
+      b.field("url"),
+      makeAuthor(),
+      b.field("body"),
+    ]),
+  ]);
+}
+
+export type PullRequestReviewState =
+  | "CHANGES_REQUESTED"
+  | "APPROVED"
+  | "COMMENTED"
+  | "DISMISSED"
+  | "PENDING";
+
+export type PullRequestReviewJSON = {|
+  +id: string,
+  +url: string,
+  +body: string,
+  +author: AuthorJSON,
+  +state: PullRequestReviewState,
+  +comments: ConnectionJSON<PullRequestReviewCommentJSON>,
+|};
+function reviewsFragment(): FragmentDefinition {
+  const b = build;
+  return b.fragment("reviews", "PullRequestReviewConnection", [
+    makePageInfo(),
+    b.field("nodes", {}, [
+      b.field("id"),
+      b.field("url"),
+      b.field("body"),
+      makeAuthor(),
+      b.field("state"),
+      b.field("comments", {first: b.literal(PAGE_SIZE_REVIEW_COMMENTS)}, [
+        b.fragmentSpread("reviewComments"),
+      ]),
+    ]),
+  ]);
+}
+
+export type PullRequestReviewCommentJSON = {|
+  +id: string,
+  +url: string,
+  +body: string,
+  +author: AuthorJSON,
+|};
+function reviewCommentsFragment(): FragmentDefinition {
+  const b = build;
+  return b.fragment("reviewComments", "PullRequestReviewCommentConnection", [
+    makePageInfo(),
+    b.field("nodes", {}, [
+      b.field("id"),
+      b.field("url"),
+      b.field("body"),
+      makeAuthor(),
+    ]),
+  ]);
+}
+
 /**
  * These fragments are used to construct the root query, and also to
  * fetch more pages of specific entity types.
  */
 export function createFragments(): FragmentDefinition[] {
   const b = build;
-  const makePageInfo = () =>
-    b.field("pageInfo", {}, [b.field("hasNextPage"), b.field("endCursor")]);
-  const makeAuthor = () => b.field("author", {}, [b.fragmentSpread("whoami")]);
   return [
-    b.fragment("whoami", "Actor", [
-      b.field("__typename"),
-      b.field("login"),
-      b.field("url"),
-      b.inlineFragment("User", [b.field("id")]),
-      b.inlineFragment("Organization", [b.field("id")]),
-      b.inlineFragment("Bot", [b.field("id")]),
-    ]),
-    b.fragment("issues", "IssueConnection", [
-      makePageInfo(),
-      b.field("nodes", {}, [
-        b.field("id"),
-        b.field("url"),
-        b.field("title"),
-        b.field("body"),
-        b.field("number"),
-        makeAuthor(),
-        b.field("comments", {first: b.literal(PAGE_SIZE_COMMENTS)}, [
-          b.fragmentSpread("comments"),
-        ]),
-      ]),
-    ]),
-    b.fragment("prs", "PullRequestConnection", [
-      makePageInfo(),
-      b.field("nodes", {}, [
-        b.field("id"),
-        b.field("url"),
-        b.field("title"),
-        b.field("body"),
-        b.field("number"),
-        makeAuthor(),
-        b.field("comments", {first: b.literal(PAGE_SIZE_COMMENTS)}, [
-          b.fragmentSpread("comments"),
-        ]),
-        b.field("reviews", {first: b.literal(PAGE_SIZE_REVIEWS)}, [
-          b.fragmentSpread("reviews"),
-        ]),
-      ]),
-    ]),
-    // (Note: issue comments and PR comments use the same connection type.)
-    b.fragment("comments", "IssueCommentConnection", [
-      makePageInfo(),
-      b.field("nodes", {}, [
-        b.field("id"),
-        b.field("url"),
-        makeAuthor(),
-        b.field("body"),
-        b.field("url"),
-      ]),
-    ]),
-    b.fragment("reviews", "PullRequestReviewConnection", [
-      makePageInfo(),
-      b.field("nodes", {}, [
-        b.field("id"),
-        b.field("url"),
-        b.field("body"),
-        makeAuthor(),
-        b.field("state"),
-        b.field("comments", {first: b.literal(PAGE_SIZE_REVIEW_COMMENTS)}, [
-          b.fragmentSpread("reviewComments"),
-        ]),
-      ]),
-    ]),
-    b.fragment("reviewComments", "PullRequestReviewCommentConnection", [
-      makePageInfo(),
-      b.field("nodes", {}, [
-        b.field("id"),
-        b.field("url"),
-        b.field("body"),
-        makeAuthor(),
-      ]),
-    ]),
+    whoamiFragment(),
+    issuesFragment(),
+    pullRequestsFragment(),
+    commentsFragment(),
+    reviewsFragment(),
+    reviewCommentsFragment(),
   ];
 }
 
