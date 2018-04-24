@@ -14,7 +14,7 @@ require("../testUtil").configureEnzyme();
 describe("githubPluginAdapter", () => {
   it("operates on the example repo", () => {
     const parser = new GithubParser("sourcecred/example-repo");
-    parser.addData(exampleRepoData.data);
+    parser.addData(exampleRepoData);
     const graph = parser.graph;
 
     const result = graph
