@@ -1,0 +1,144 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`loadRepository loads from HEAD 1`] = `
+Object {
+  "commits": Map {
+    "677b340674bde17fdaac3b5f5eef929139ef2a52" => Object {
+      "hash": "677b340674bde17fdaac3b5f5eef929139ef2a52",
+      "treeHash": "6152a37dba8aa54dc4bc2d59c1f01c2afeba74b0",
+    },
+    "4be43f1cda04e51e42fec0cfe8e1e2dff116e839" => Object {
+      "hash": "4be43f1cda04e51e42fec0cfe8e1e2dff116e839",
+      "treeHash": "93642dbd1793e84a6f529a1e1b1b4f87a4f5c878",
+    },
+    "cbb26b570d1eed3c681b8f03ff31231c1bffd6d6" => Object {
+      "hash": "cbb26b570d1eed3c681b8f03ff31231c1bffd6d6",
+      "treeHash": "f6736d27cd7eb7e35ae22a906854c700eb5cf6c1",
+    },
+    "301749e9af8cd6e9aee3a49a64029b98a4695e34" => Object {
+      "hash": "301749e9af8cd6e9aee3a49a64029b98a4695e34",
+      "treeHash": "4d5f2603a4b63aa68b8e51facf542a62e4c1d065",
+    },
+  },
+  "trees": Map {
+    "6152a37dba8aa54dc4bc2d59c1f01c2afeba74b0" => Object {
+      "entries": Map {
+        "README.txt" => Object {
+          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "README.txt",
+          "type": "blob",
+        },
+        "src" => Object {
+          "hash": "78fc9c83023386854c6bfdc5761c0e58f68e226f",
+          "name": "src",
+          "type": "tree",
+        },
+      },
+      "hash": "6152a37dba8aa54dc4bc2d59c1f01c2afeba74b0",
+    },
+    "93642dbd1793e84a6f529a1e1b1b4f87a4f5c878" => Object {
+      "entries": Map {
+        "README.txt" => Object {
+          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "README.txt",
+          "type": "blob",
+        },
+        "TODOS.txt" => Object {
+          "hash": "ddec7477206c30c31b81482e56b877a0b3c2638b",
+          "name": "TODOS.txt",
+          "type": "blob",
+        },
+        "src" => Object {
+          "hash": "78fc9c83023386854c6bfdc5761c0e58f68e226f",
+          "name": "src",
+          "type": "tree",
+        },
+      },
+      "hash": "93642dbd1793e84a6f529a1e1b1b4f87a4f5c878",
+    },
+    "f6736d27cd7eb7e35ae22a906854c700eb5cf6c1" => Object {
+      "entries": Map {
+        "README.txt" => Object {
+          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "README.txt",
+          "type": "blob",
+        },
+        "TODOS.txt" => Object {
+          "hash": "ddec7477206c30c31b81482e56b877a0b3c2638b",
+          "name": "TODOS.txt",
+          "type": "blob",
+        },
+        "src" => Object {
+          "hash": "7b79d579b62994faba3b69fdf8aa442586c32681",
+          "name": "src",
+          "type": "tree",
+        },
+      },
+      "hash": "f6736d27cd7eb7e35ae22a906854c700eb5cf6c1",
+    },
+    "4d5f2603a4b63aa68b8e51facf542a62e4c1d065" => Object {
+      "entries": Map {
+        "README.txt" => Object {
+          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "README.txt",
+          "type": "blob",
+        },
+      },
+      "hash": "4d5f2603a4b63aa68b8e51facf542a62e4c1d065",
+    },
+    "78fc9c83023386854c6bfdc5761c0e58f68e226f" => Object {
+      "entries": Map {
+        "index.py" => Object {
+          "hash": "674b0b476989384510304846248b3acd16206782",
+          "name": "index.py",
+          "type": "blob",
+        },
+        "quantum_gravity.py" => Object {
+          "hash": "aea4f28abb23abde151b0ead4063227f8bf6c0b0",
+          "name": "quantum_gravity.py",
+          "type": "blob",
+        },
+      },
+      "hash": "78fc9c83023386854c6bfdc5761c0e58f68e226f",
+    },
+    "7b79d579b62994faba3b69fdf8aa442586c32681" => Object {
+      "entries": Map {
+        "index.py" => Object {
+          "hash": "674b0b476989384510304846248b3acd16206782",
+          "name": "index.py",
+          "type": "blob",
+        },
+        "quantum_gravity.py" => Object {
+          "hash": "887ad856bbc1373da146106c86cb581ad78cdafe",
+          "name": "quantum_gravity.py",
+          "type": "blob",
+        },
+      },
+      "hash": "7b79d579b62994faba3b69fdf8aa442586c32681",
+    },
+  },
+}
+`;
+
+exports[`loadRepository processes an old commit 1`] = `
+Object {
+  "commits": Set {
+    "cbb26b570d1eed3c681b8f03ff31231c1bffd6d6",
+    "301749e9af8cd6e9aee3a49a64029b98a4695e34",
+  },
+  "trees": Set {
+    "f6736d27cd7eb7e35ae22a906854c700eb5cf6c1",
+    "4d5f2603a4b63aa68b8e51facf542a62e4c1d065",
+    "7b79d579b62994faba3b69fdf8aa442586c32681",
+  },
+}
+`;
+
+exports[`we create a deterministic repository 1`] = `
+Array [
+  "301749e9af8cd6e9aee3a49a64029b98a4695e34",
+  "cbb26b570d1eed3c681b8f03ff31231c1bffd6d6",
+  "4be43f1cda04e51e42fec0cfe8e1e2dff116e839",
+  "677b340674bde17fdaac3b5f5eef929139ef2a52",
+]
+`;
