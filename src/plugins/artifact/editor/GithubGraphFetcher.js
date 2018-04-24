@@ -8,8 +8,8 @@ import fetchGithubRepo from "../../github/fetchGithubRepo";
 import type {
   NodePayload as GithubNodePayload,
   EdgePayload as GithubEdgePayload,
-} from "../../github/githubPlugin";
-import {GithubParser} from "../../github/githubPlugin";
+} from "../../github/types";
+import {GithubParser} from "../../github/parser";
 
 type Props = {
   settings: Settings,

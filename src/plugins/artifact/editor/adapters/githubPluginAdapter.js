@@ -13,15 +13,13 @@ import type {
   PullRequestReviewCommentNodePayload,
   PullRequestReviewNodePayload,
   AuthorNodePayload,
-} from "../../../github/githubPlugin";
+} from "../../../github/types";
 import type {PluginAdapter} from "../pluginAdapter";
-import {
-  GITHUB_PLUGIN_NAME,
-  CONTAINS_EDGE_TYPE,
-} from "../../../github/githubPlugin";
+import {PLUGIN_NAME} from "../../../github/pluginName";
+import {CONTAINS_EDGE_TYPE} from "../../../github/types";
 
 const adapter: PluginAdapter<NodePayload> = {
-  pluginName: GITHUB_PLUGIN_NAME,
+  pluginName: PLUGIN_NAME,
 
   renderer: class GithubNodeRenderer extends React.Component<{
     graph: Graph<any, any>,

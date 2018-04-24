@@ -1,179 +1,24 @@
 // @flow
 
 import type {Node, Edge} from "../../core/graph";
+import type {
+  NodeType,
+  EdgeType,
+  NodePayload,
+  EdgePayload,
+  PullRequestReviewNodePayload,
+  AuthorNodePayload,
+  AuthorsEdgePayload,
+  PullRequestReviewCommentNodePayload,
+  CommentNodePayload,
+  PullRequestNodePayload,
+  IssueNodePayload,
+} from "./types";
 import type {Address} from "../../core/address";
+import {PLUGIN_NAME} from "./pluginName";
 import {Graph, edgeID} from "../../core/graph";
 const stringify = require("json-stable-stringify");
 
-export const GITHUB_PLUGIN_NAME = "sourcecred/github-beta";
-
-/** Node Types */
-export const ISSUE_NODE_TYPE: "ISSUE" = "ISSUE";
-export type IssueNodePayload = {|
-  +url: string,
-  +title: string,
-  +number: number,
-  +body: string,
-|};
-
-export const PULL_REQUEST_NODE_TYPE: "PULL_REQUEST" = "PULL_REQUEST";
-export type PullRequestNodePayload = {|
-  +url: string,
-  +title: string,
-  +number: number,
-  +body: string,
-|};
-
-export type PullRequestReviewState =
-  | "CHANGES_REQUESTED"
-  | "APPROVED"
-  | "COMMENTED"
-  | "DISMISSED"
-  | "PENDING";
-export const PULL_REQUEST_REVIEW_NODE_TYPE: "PULL_REQUEST_REVIEW" =
-  "PULL_REQUEST_REVIEW";
-export type PullRequestReviewNodePayload = {|
-  +url: string,
-  +body: string,
-  +state: PullRequestReviewState,
-|};
-
-export const COMMENT_NODE_TYPE: "COMMENT" = "COMMENT";
-export type CommentNodePayload = {|
-  +url: string,
-  +body: string,
-|};
-
-// We have this as a separate type from regular comments because we may
-// be interested in diff hunks, which are only present on PR review
-// comments.
-export const PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE: "PULL_REQUEST_REVIEW_COMMENT" =
-  "PULL_REQUEST_REVIEW_COMMENT";
-export type PullRequestReviewCommentNodePayload = {|
-  +url: string,
-  +body: string,
-|};
-
-export const USER_NODE_TYPE: "USER" = "USER";
-export type UserNodePayload = {|
-  +login: string,
-  +url: string,
-|};
-
-export const BOT_NODE_TYPE: "BOT" = "BOT";
-export type BotNodePayload = {|
-  +login: string,
-  +url: string,
-|};
-
-export const ORGANIZATION_NODE_TYPE: "ORGANIZATION" = "ORGANIZATION";
-export type OrganizationNodePayload = {|
-  +login: string,
-  +url: string,
-|};
-
-export type AuthorNodeType =
-  | typeof USER_NODE_TYPE
-  | typeof BOT_NODE_TYPE
-  | typeof ORGANIZATION_NODE_TYPE;
-export type AuthorNodePayload =
-  | UserNodePayload
-  | BotNodePayload
-  | OrganizationNodePayload;
-
-// A map from NodeType string to the corresponding type and payload.
-// Primarily useful for adding static assertions with $ObjMap, but also
-// useful at the value layer as $ElementType<NodeTypes, "ISSUE">, for
-// instance.
-export type NodeTypes = {|
-  ISSUE: {payload: IssueNodePayload, type: typeof ISSUE_NODE_TYPE},
-  PULL_REQUEST: {
-    payload: PullRequestNodePayload,
-    type: typeof PULL_REQUEST_NODE_TYPE,
-  },
-  COMMENT: {payload: CommentNodePayload, type: typeof COMMENT_NODE_TYPE},
-  PULL_REQUEST_REVIEW_COMMENT: {
-    payload: PullRequestReviewCommentNodePayload,
-    type: typeof PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
-  },
-  PULL_REQUEST_REVIEW: {
-    payload: PullRequestReviewNodePayload,
-    type: typeof PULL_REQUEST_REVIEW_NODE_TYPE,
-  },
-  USER: {payload: UserNodePayload, type: typeof USER_NODE_TYPE},
-  ORGANIZATION: {
-    payload: OrganizationNodePayload,
-    type: typeof ORGANIZATION_NODE_TYPE,
-  },
-  BOT: {payload: BotNodePayload, type: typeof BOT_NODE_TYPE},
-|};
-
-export type NodeType =
-  | typeof ISSUE_NODE_TYPE
-  | typeof PULL_REQUEST_NODE_TYPE
-  | typeof COMMENT_NODE_TYPE
-  | typeof PULL_REQUEST_REVIEW_NODE_TYPE
-  | typeof PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE
-  | AuthorNodeType;
-
-export type NodePayload =
-  | IssueNodePayload
-  | PullRequestNodePayload
-  | CommentNodePayload
-  | PullRequestReviewCommentNodePayload
-  | PullRequestReviewNodePayload
-  | AuthorNodePayload;
-
-/** Edge Types */
-export type AuthorsEdgePayload = {};
-export const AUTHORS_EDGE_TYPE: "AUTHORS" = "AUTHORS";
-export type ContainsEdgePayload = {};
-export const CONTAINS_EDGE_TYPE: "CONTAINS" = "CONTAINS";
-export type ReferencesEdgePayload = {};
-export const REFERENCES_EDGE_TYPE: "REFERENCES" = "REFERENCES";
-
-export type EdgeTypes = {|
-  AUTHORS: {
-    payload: AuthorsEdgePayload,
-    type: typeof AUTHORS_EDGE_TYPE,
-  },
-  CONTAINS: {
-    payload: ContainsEdgePayload,
-    type: typeof CONTAINS_EDGE_TYPE,
-  },
-  REFERENCES: {
-    payload: ReferencesEdgePayload,
-    type: typeof REFERENCES_EDGE_TYPE,
-  },
-|};
-
-export type EdgeType =
-  | typeof AUTHORS_EDGE_TYPE
-  | typeof CONTAINS_EDGE_TYPE
-  | typeof REFERENCES_EDGE_TYPE;
-
-export type EdgePayload =
-  | AuthorsEdgePayload
-  | ContainsEdgePayload
-  | ReferencesEdgePayload;
-
-(function staticAssertions() {
-  // Check that node & edge payload types are exhaustive.
-  (x: NodeType): $Keys<NodeTypes> => x;
-  (x: EdgeType): $Keys<EdgeTypes> => x;
-
-  // Check that each type is associated with the correct ID type.
-  // Doesn't work because of a Flow bug; should work if that bug is
-  // fixed: https://github.com/facebook/flow/issues/4211
-  // (Summary of bug: $ElementType<O, -> does not preserve unions.)
-  //
-  // <T: $Keys<NodeTypes>>(
-  //   x: T
-  // ): $ElementType<
-  //   $ElementType<$ElementType<NodeTypes, T>, "id">,
-  //   "type"
-  // > => x;
-});
 export class GithubParser {
   repositoryName: string;
   graph: Graph<NodePayload, EdgePayload>;
@@ -185,7 +30,7 @@ export class GithubParser {
 
   makeNodeAddress(type: NodeType, id: string): Address {
     return {
-      pluginName: GITHUB_PLUGIN_NAME,
+      pluginName: PLUGIN_NAME,
       repositoryName: this.repositoryName,
       type,
       id,
@@ -194,7 +39,7 @@ export class GithubParser {
 
   makeEdgeAddress(type: EdgeType, src: Address, dst: Address): Address {
     return {
-      pluginName: GITHUB_PLUGIN_NAME,
+      pluginName: PLUGIN_NAME,
       repositoryName: this.repositoryName,
       type,
       id: edgeID(src, dst),
