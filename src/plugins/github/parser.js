@@ -39,12 +39,12 @@ export class GithubParser {
     this.graph = new Graph();
   }
 
-  makeNodeAddress(type: NodeType, id: string): Address {
+  makeNodeAddress(type: NodeType, url: string): Address {
     return {
       pluginName: PLUGIN_NAME,
       repositoryName: this.repositoryName,
       type,
-      id,
+      id: url,
     };
   }
 
@@ -91,7 +91,7 @@ export class GithubParser {
     }
 
     const authorNode: Node<AuthorNodePayload> = {
-      address: this.makeNodeAddress(authorType, authorJson.id),
+      address: this.makeNodeAddress(authorType, authorJson.url),
       payload: authorPayload,
     };
     this.graph.addNode(authorNode);
@@ -139,7 +139,7 @@ export class GithubParser {
     const commentNode: Node<
       CommentNodePayload | PullRequestReviewCommentNodePayload
     > = {
-      address: this.makeNodeAddress(commentType, commentJson.id),
+      address: this.makeNodeAddress(commentType, commentJson.url),
       payload: commentNodePayload,
     };
     this.graph.addNode(commentNode);
@@ -179,7 +179,7 @@ export class GithubParser {
       body: issueJson.body,
     };
     const issueNode: Node<IssueNodePayload> = {
-      address: this.makeNodeAddress("ISSUE", issueJson.id),
+      address: this.makeNodeAddress("ISSUE", issueJson.url),
       payload: issuePayload,
     };
     this.graph.addNode(issueNode);
@@ -197,7 +197,7 @@ export class GithubParser {
       body: prJson.body,
     };
     const pullRequestNode: Node<PullRequestNodePayload> = {
-      address: this.makeNodeAddress("PULL_REQUEST", prJson.id),
+      address: this.makeNodeAddress("PULL_REQUEST", prJson.url),
       payload: pullRequestPayload,
     };
     this.graph.addNode(pullRequestNode);
@@ -220,7 +220,7 @@ export class GithubParser {
       body: reviewJson.body,
     };
     const reviewNode: Node<PullRequestReviewNodePayload> = {
-      address: this.makeNodeAddress("PULL_REQUEST_REVIEW", reviewJson.id),
+      address: this.makeNodeAddress("PULL_REQUEST_REVIEW", reviewJson.url),
       payload: reviewPayload,
     };
     this.graph.addNode(reviewNode);
