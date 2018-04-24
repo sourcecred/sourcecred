@@ -53,10 +53,7 @@ export default function fetchGithubRepo(
     payload
   ).then((x) => {
     ensureNoMorePages(x);
-    // TODO: We wrap back up in the "data" object to maintain
-    // compatibility. At some point, let's strip this out and modify
-    // clients of `example-data.json`.
-    return {data: x};
+    return x;
   });
 }
 

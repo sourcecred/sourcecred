@@ -8,7 +8,7 @@ import exampleRepoData from "./demoData/example-repo.json";
 describe("GithubParser", () => {
   describe("whole repo parsing", () => {
     const parser = new GithubParser("sourcecred/example-repo");
-    parser.addData(exampleRepoData.data);
+    parser.addData(exampleRepoData);
     const graph = parser.graph;
 
     it("parses the entire example-repo as expected", () => {
@@ -68,7 +68,7 @@ describe("GithubParser", () => {
 
   describe("issue parsing", () => {
     it("parses a simple issue (https://github.com/sourcecred/example-repo/issues/1)", () => {
-      const issue1 = exampleRepoData.data.repository.issues.nodes[0];
+      const issue1 = exampleRepoData.repository.issues.nodes[0];
       expect(issue1.number).toBe(1);
       const parser = new GithubParser("sourcecred/example-repo");
       parser.addIssue(issue1);
@@ -76,7 +76,7 @@ describe("GithubParser", () => {
     });
 
     it("parses an issue with comments (https://github.com/sourcecred/example-repo/issues/6)", () => {
-      const issue6 = exampleRepoData.data.repository.issues.nodes[3];
+      const issue6 = exampleRepoData.repository.issues.nodes[3];
       expect(issue6.number).toBe(6);
       const parser = new GithubParser("sourcecred/example-repo");
       parser.addIssue(issue6);
@@ -86,14 +86,14 @@ describe("GithubParser", () => {
 
   describe("pull request parsing", () => {
     it("parses a simple pull request (https://github.com/sourcecred/example-repo/pull/3)", () => {
-      const pr3 = exampleRepoData.data.repository.pullRequests.nodes[0];
+      const pr3 = exampleRepoData.repository.pullRequests.nodes[0];
       expect(pr3.number).toBe(3);
       const parser = new GithubParser("sourcecred/example-repo");
       parser.addPullRequest(pr3);
       expect(parser.graph).toMatchSnapshot();
     });
     it("parses a pr with review comments (https://github.com/sourcecred/example-repo/pull/3)", () => {
-      const pr5 = exampleRepoData.data.repository.pullRequests.nodes[1];
+      const pr5 = exampleRepoData.repository.pullRequests.nodes[1];
       expect(pr5.number).toBe(5);
       const parser = new GithubParser("sourcecred/example-repo");
       parser.addPullRequest(pr5);
