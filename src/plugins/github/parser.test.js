@@ -8,6 +8,23 @@ import {Graph} from "../../core/graph";
 import exampleRepoData from "./demoData/example-repo.json";
 
 describe("GithubParser", () => {
+  function getIssue(n): IssueJSON {
+    const issues = exampleRepoData.repository.issues.nodes;
+    const selected = issues.filter((x) => x.number === n);
+    if (selected.length !== 1) {
+      throw new Error(`Failure finding issue #${n}`);
+    }
+    return selected[0];
+  }
+  function getPR(n): PullRequestJSON {
+    const pulls = exampleRepoData.repository.pullRequests.nodes;
+    const selected = pulls.filter((x) => x.number === n);
+    if (selected.length !== 1) {
+      throw new Error(`Failure finding PR #${n}`);
+    }
+    return selected[0];
+  }
+
   describe("whole repo parsing", () => {
     const graph = parse("sourcecred/example-repo", exampleRepoData);
 
@@ -68,22 +85,6 @@ describe("GithubParser", () => {
     });
   });
 
-  function getIssue(n: number): IssueJSON {
-    const issues = exampleRepoData.repository.issues.nodes;
-    const selected = issues.filter((x) => x.number === n);
-    if (selected.length !== 1) {
-      throw new Error(`Failure finding issue #${n}`);
-    }
-    return selected[0];
-  }
-  function getPR(n: number): PullRequestJSON {
-    const pulls = exampleRepoData.repository.pullRequests.nodes;
-    const selected = pulls.filter((x) => x.number === n);
-    if (selected.length !== 1) {
-      throw new Error(`Failure finding PR #${n}`);
-    }
-    return selected[0];
-  }
   type ExampleInput = {
     issues?: number[],
     prs?: number[],
@@ -132,6 +133,28 @@ describe("GithubParser", () => {
     });
     it("parses a pr with review comments (https://github.com/sourcecred/example-repo/pull/3)", () => {
       expect(parseExample({prs: [5]})).toMatchSnapshot();
+    });
+  });
+
+  describe("reference detection", () => {
+    // These tests are included mostly for regression testing. To be persuaded that the references
+    // were added correctly, see the reference api tests in api.test.js. Those tests are much
+    // easier to read and to be persuaded that the behavior is working as intended.
+    it("discovers a simple reference", () => {
+      expect(parseExample({issues: [1, 2, 6]})).toMatchSnapshot();
+    });
+
+    it("discovers references even when parsing issues out of order", () => {
+      // Ensure that we will detect a reference from A to B, even if B hasn't
+      // been discovered at the time that we parse A.
+      const graphA = parseExample({issues: [1, 2, 6]});
+      const graphB = parseExample({issues: [6, 2, 1]});
+      expect(graphA.equals(graphB)).toBe(true);
+    });
+
+    it("handles dangling references gracefully", () => {
+      const graph = parseExample({issues: [2]});
+      expect(graph).toMatchSnapshot();
     });
   });
 });

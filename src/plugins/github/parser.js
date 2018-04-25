@@ -1,5 +1,7 @@
 // @flow
 
+import stringify from "json-stable-stringify";
+
 import type {Node, Edge} from "../../core/graph";
 import type {
   NodeType,
@@ -12,6 +14,7 @@ import type {
   PullRequestReviewCommentNodePayload,
   CommentNodePayload,
   PullRequestNodePayload,
+  ReferencesEdgePayload,
   IssueNodePayload,
   AuthorSubtype,
 } from "./types";
@@ -28,7 +31,7 @@ import type {
 import type {Address} from "../../core/address";
 import {PLUGIN_NAME} from "./pluginName";
 import {Graph, edgeID} from "../../core/graph";
-const stringify = require("json-stable-stringify");
+import {findReferences} from "./findReferences";
 
 export function parse(
   repositoryName: string,
@@ -36,6 +39,7 @@ export function parse(
 ): Graph<NodePayload, EdgePayload> {
   const parser = new GithubParser(repositoryName);
   parser.addData(repositoryJSON);
+  parser.addReferenceEdges();
   return parser.graph;
 }
 
@@ -237,6 +241,70 @@ class GithubParser {
     this.addContainment(pullRequestNode, reviewNode);
     this.addAuthorship(reviewNode, reviewJson.author);
     reviewJson.comments.nodes.forEach((c) => this.addComment(reviewNode, c));
+  }
+
+  /** Add all the in-repo GitHub reference edges detected.
+   *
+   * Parse all the nodes added to the GitHubParser, detect any
+   * GitHub references (e.g. url, #num, or @login), and add corresponding
+   * REFERENCE type edges.
+   *
+   * Needs to be called after adding data (or it will no-op).
+   * @returns {string[]}: All of the dangling (unparsed) reference strings.
+   */
+  addReferenceEdges(): string[] {
+    const referenceToNode = {};
+    this.graph.nodes().forEach((node) => {
+      referenceToNode[node.payload.url] = node;
+      const anyNode: Node<any> = node;
+      const type: NodeType = (node.address.type: any);
+      switch (type) {
+        case "ISSUE":
+        case "PULL_REQUEST":
+          const thisPayload: IssueNodePayload | PullRequestNodePayload =
+            anyNode.payload;
+          referenceToNode[`#${thisPayload.number}`] = node;
+          break;
+        case "AUTHOR":
+          let authorPayload: AuthorNodePayload = anyNode.payload;
+          referenceToNode[`@${authorPayload.login}`] = node;
+          break;
+        case "COMMENT":
+        case "PULL_REQUEST_REVIEW":
+        case "PULL_REQUEST_REVIEW_COMMENT":
+          break;
+        default:
+          // eslint-disable-next-line no-unused-expressions
+          (type: empty);
+          throw new Error(`unknown node type: ${type}`);
+      }
+    });
+
+    const danglingReferences = [];
+    this.graph.nodes().forEach((srcNode) => {
+      if (srcNode.payload.body !== undefined) {
+        const references = findReferences(srcNode.payload.body);
+        references.forEach((ref) => {
+          const dstNode = referenceToNode[ref];
+          if (dstNode === undefined) {
+            danglingReferences.push(ref);
+          } else {
+            const referenceEdge: Edge<ReferencesEdgePayload> = {
+              address: this.makeEdgeAddress(
+                "REFERENCES",
+                srcNode.address,
+                dstNode.address
+              ),
+              payload: {},
+              src: srcNode.address,
+              dst: dstNode.address,
+            };
+            this.graph.addEdge(referenceEdge);
+          }
+        });
+      }
+    });
+    return danglingReferences;
   }
 
   addData(dataJson: RepositoryJSON) {

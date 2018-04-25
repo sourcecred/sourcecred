@@ -8,6 +8,8 @@ import {
   COMMENT_NODE_TYPE,
   ISSUE_NODE_TYPE,
   PULL_REQUEST_NODE_TYPE,
+  PULL_REQUEST_REVIEW_NODE_TYPE,
+  PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
 } from "./types";
 describe("GitHub porcelain API", () => {
   const graph = parse("sourcecred/example-repo", exampleRepoData);
@@ -125,6 +127,102 @@ describe("GitHub porcelain API", () => {
       expect(() =>
         Author.from(issueOrPRByNumber(2).comments()[0])
       ).toThrowError("to have type AUTHOR");
+    });
+  });
+  describe("References", () => {
+    it("via #-number", () => {
+      const srcIssue = issueOrPRByNumber(2);
+      const references = srcIssue.references();
+      expect(references).toHaveLength(1);
+      // Note: this verifies that we are not counting in-references, as
+      // https://github.com/sourcecred/example-repo/issues/6#issuecomment-385223316
+      // references #2.
+
+      const referenced = Issue.from(references[0]);
+      expect(referenced.number()).toBe(1);
+    });
+
+    describe("by exact url", () => {
+      function expectCommentToHaveSingleReference({commentNumber, type, url}) {
+        const comments = issueOrPRByNumber(2).comments();
+        const references = comments[commentNumber].references();
+        expect(references).toHaveLength(1);
+        expect(references[0].url()).toBe(url);
+        expect(references[0].type()).toBe(type);
+      }
+
+      it("to an issue", () => {
+        expectCommentToHaveSingleReference({
+          commentNumber: 0,
+          type: ISSUE_NODE_TYPE,
+          url: "https://github.com/sourcecred/example-repo/issues/6",
+        });
+      });
+
+      it("to a comment", () => {
+        expectCommentToHaveSingleReference({
+          commentNumber: 1,
+          type: COMMENT_NODE_TYPE,
+          url:
+            "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
+        });
+      });
+
+      it("to a pull request", () => {
+        expectCommentToHaveSingleReference({
+          commentNumber: 2,
+          type: PULL_REQUEST_NODE_TYPE,
+          url: "https://github.com/sourcecred/example-repo/pull/5",
+        });
+      });
+
+      it("to a pull request review", () => {
+        expectCommentToHaveSingleReference({
+          commentNumber: 3,
+          type: PULL_REQUEST_REVIEW_NODE_TYPE,
+          url:
+            "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
+        });
+      });
+
+      it("to a pull request review comment", () => {
+        expectCommentToHaveSingleReference({
+          commentNumber: 4,
+          type: PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
+          url:
+            "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
+        });
+      });
+
+      it("to an author", () => {
+        expectCommentToHaveSingleReference({
+          commentNumber: 5,
+          type: AUTHOR_NODE_TYPE,
+          url: "https://github.com/wchargin",
+        });
+      });
+
+      it("to multiple entities", () => {
+        const references = issueOrPRByNumber(2)
+          .comments()[6]
+          .references();
+        expect(references).toHaveLength(5);
+      });
+
+      it("to no entities", () => {
+        const references = issueOrPRByNumber(2)
+          .comments()[7]
+          .references();
+        expect(references).toHaveLength(0);
+      });
+    });
+
+    it("References by @-author", () => {
+      const pr = issueOrPRByNumber(5);
+      const references = pr.references();
+      expect(references).toHaveLength(1);
+      const referenced = Author.from(references[0]);
+      expect(referenced.login()).toBe("wchargin");
     });
   });
 });
