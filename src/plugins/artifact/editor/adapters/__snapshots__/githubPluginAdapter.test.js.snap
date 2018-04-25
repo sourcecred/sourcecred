@@ -3,37 +3,175 @@
 exports[`githubPluginAdapter operates on the example repo 1`] = `
 Array [
   Object {
-    "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4",
+    "id": "https://github.com/decentralion",
     "payload": Object {
-      "body": "I'm sold",
-      "state": "APPROVED",
-      "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038",
+      "login": "decentralion",
+      "url": "https://github.com/decentralion",
     },
     "rendered": <div>
       type: 
-      PULL_REQUEST_REVIEW
+      USER
        (details to be implemented)
 </div>,
-    "title": "review of #5: This pull request will be more contentious. I can feel it...",
-    "type": "PULL_REQUEST_REVIEW",
+    "title": "decentralion",
+    "type": "USER",
   },
   Object {
-    "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5",
+    "id": "https://github.com/sourcecred/example-repo/issues/1",
     "payload": Object {
-      "body": "hmmm.jpg",
-      "state": "CHANGES_REQUESTED",
-      "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
+      "body": "This is just an example issue.",
+      "number": 1,
+      "title": "An example issue.",
+      "url": "https://github.com/sourcecred/example-repo/issues/1",
     },
     "rendered": <div>
       type: 
-      PULL_REQUEST_REVIEW
+      ISSUE
        (details to be implemented)
 </div>,
-    "title": "review of #5: This pull request will be more contentious. I can feel it...",
-    "type": "PULL_REQUEST_REVIEW",
+    "title": "#1: An example issue.",
+    "type": "ISSUE",
   },
   Object {
-    "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
+    "id": "https://github.com/sourcecred/example-repo/issues/2",
+    "payload": Object {
+      "body": "This issue references another issue, namely #1",
+      "number": 2,
+      "title": "A referencing issue.",
+      "url": "https://github.com/sourcecred/example-repo/issues/2",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#2: A referencing issue.",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768703",
+    "payload": Object {
+      "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-repo/issues/6",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768703",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850",
+    "payload": Object {
+      "body": "We might also reference individual comments directly.
+https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/4",
+    "payload": Object {
+      "body": "Alas, its life as an open issue had only just begun.",
+      "number": 4,
+      "title": "A closed pull request",
+      "url": "https://github.com/sourcecred/example-repo/issues/4",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#4: A closed pull request",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/6",
+    "payload": Object {
+      "body": "This issue shall shortly have a few comments.",
+      "number": 6,
+      "title": "An issue with comments",
+      "url": "https://github.com/sourcecred/example-repo/issues/6",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#6: An issue with comments",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
+    "payload": Object {
+      "body": "A wild COMMENT appeared!",
+      "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #6: An issue with comments",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
+    "payload": Object {
+      "body": "And the maintainer said, \\"Let there be comments!\\"",
+      "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #6: An issue with comments",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/7",
+    "payload": Object {
+      "body": "Deal with this, naive string display algorithms!!!!!",
+      "number": 7,
+      "title": "An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
+      "url": "https://github.com/sourcecred/example-repo/issues/7",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#7: An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/8",
+    "payload": Object {
+      "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️
+Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+      "number": 8,
+      "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+      "url": "https://github.com/sourcecred/example-repo/issues/8",
+    },
+    "rendered": <div>
+      type: 
+      ISSUE
+       (details to be implemented)
+</div>,
+    "title": "#8: Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+    "type": "ISSUE",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/pull/3",
     "payload": Object {
       "body": "Oh look, it's a pull request.",
       "number": 3,
@@ -49,7 +187,21 @@ Array [
     "type": "PULL_REQUEST",
   },
   Object {
-    "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
+    "id": "https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222",
+    "payload": Object {
+      "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
+      "url": "https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #3: Add README, merge via PR.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/pull/5",
     "payload": Object {
       "body": "@wchargin could you please do the following:
 - add a commit comment
@@ -69,78 +221,7 @@ Array [
     "type": "PULL_REQUEST",
   },
   Object {
-    "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
-    "payload": Object {
-      "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
-      "url": "https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222",
-    },
-    "rendered": <div>
-      type: 
-      COMMENT
-       (details to be implemented)
-</div>,
-    "title": "comment on #3: Add README, merge via PR.",
-    "type": "COMMENT",
-  },
-  Object {
-    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODQ0Mg==",
-    "payload": Object {
-      "body": "A wild COMMENT appeared!",
-      "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
-    },
-    "rendered": <div>
-      type: 
-      COMMENT
-       (details to be implemented)
-</div>,
-    "title": "comment on #6: An issue with comments",
-    "type": "COMMENT",
-  },
-  Object {
-    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODUzOA==",
-    "payload": Object {
-      "body": "And the maintainer said, \\"Let there be comments!\\"",
-      "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
-    },
-    "rendered": <div>
-      type: 
-      COMMENT
-       (details to be implemented)
-</div>,
-    "title": "comment on #6: An issue with comments",
-    "type": "COMMENT",
-  },
-  Object {
-    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
-    "payload": Object {
-      "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-repo/issues/6",
-      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768703",
-    },
-    "rendered": <div>
-      type: 
-      COMMENT
-       (details to be implemented)
-</div>,
-    "title": "comment on #2: A referencing issue.",
-    "type": "COMMENT",
-  },
-  Object {
-    "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
-    "payload": Object {
-      "body": "We might also reference individual comments directly.
-https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
-      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850",
-    },
-    "rendered": <div>
-      type: 
-      COMMENT
-       (details to be implemented)
-</div>,
-    "title": "comment on #2: A referencing issue.",
-    "type": "COMMENT",
-  },
-  Object {
-    "id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==",
+    "id": "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
     "payload": Object {
       "body": "seems a bit capricious",
       "url": "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
@@ -154,21 +235,37 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "PULL_REQUEST_REVIEW_COMMENT",
   },
   Object {
-    "id": "MDQ6VXNlcjE0MDAwMjM=",
+    "id": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
     "payload": Object {
-      "login": "decentralion",
-      "url": "https://github.com/decentralion",
+      "body": "hmmm.jpg",
+      "state": "CHANGES_REQUESTED",
+      "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
     },
     "rendered": <div>
       type: 
-      USER
+      PULL_REQUEST_REVIEW
        (details to be implemented)
 </div>,
-    "title": "decentralion",
-    "type": "USER",
+    "title": "review of #5: This pull request will be more contentious. I can feel it...",
+    "type": "PULL_REQUEST_REVIEW",
   },
   Object {
-    "id": "MDQ6VXNlcjQzMTc4MDY=",
+    "id": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038",
+    "payload": Object {
+      "body": "I'm sold",
+      "state": "APPROVED",
+      "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038",
+    },
+    "rendered": <div>
+      type: 
+      PULL_REQUEST_REVIEW
+       (details to be implemented)
+</div>,
+    "title": "review of #5: This pull request will be more contentious. I can feel it...",
+    "type": "PULL_REQUEST_REVIEW",
+  },
+  Object {
+    "id": "https://github.com/wchargin",
     "payload": Object {
       "login": "wchargin",
       "url": "https://github.com/wchargin",
@@ -180,103 +277,6 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
 </div>,
     "title": "wchargin",
     "type": "USER",
-  },
-  Object {
-    "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
-    "payload": Object {
-      "body": "This is just an example issue.",
-      "number": 1,
-      "title": "An example issue.",
-      "url": "https://github.com/sourcecred/example-repo/issues/1",
-    },
-    "rendered": <div>
-      type: 
-      ISSUE
-       (details to be implemented)
-</div>,
-    "title": "#1: An example issue.",
-    "type": "ISSUE",
-  },
-  Object {
-    "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
-    "payload": Object {
-      "body": "This issue references another issue, namely #1",
-      "number": 2,
-      "title": "A referencing issue.",
-      "url": "https://github.com/sourcecred/example-repo/issues/2",
-    },
-    "rendered": <div>
-      type: 
-      ISSUE
-       (details to be implemented)
-</div>,
-    "title": "#2: A referencing issue.",
-    "type": "ISSUE",
-  },
-  Object {
-    "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
-    "payload": Object {
-      "body": "Alas, its life as an open issue had only just begun.",
-      "number": 4,
-      "title": "A closed pull request",
-      "url": "https://github.com/sourcecred/example-repo/issues/4",
-    },
-    "rendered": <div>
-      type: 
-      ISSUE
-       (details to be implemented)
-</div>,
-    "title": "#4: A closed pull request",
-    "type": "ISSUE",
-  },
-  Object {
-    "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
-    "payload": Object {
-      "body": "This issue shall shortly have a few comments.",
-      "number": 6,
-      "title": "An issue with comments",
-      "url": "https://github.com/sourcecred/example-repo/issues/6",
-    },
-    "rendered": <div>
-      type: 
-      ISSUE
-       (details to be implemented)
-</div>,
-    "title": "#6: An issue with comments",
-    "type": "ISSUE",
-  },
-  Object {
-    "id": "MDU6SXNzdWUzMDY5ODM1NTI=",
-    "payload": Object {
-      "body": "Deal with this, naive string display algorithms!!!!!",
-      "number": 7,
-      "title": "An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
-      "url": "https://github.com/sourcecred/example-repo/issues/7",
-    },
-    "rendered": <div>
-      type: 
-      ISSUE
-       (details to be implemented)
-</div>,
-    "title": "#7: An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
-    "type": "ISSUE",
-  },
-  Object {
-    "id": "MDU6SXNzdWUzMDY5ODUzNjc=",
-    "payload": Object {
-      "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️
-Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
-      "number": 8,
-      "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
-      "url": "https://github.com/sourcecred/example-repo/issues/8",
-    },
-    "rendered": <div>
-      type: 
-      ISSUE
-       (details to be implemented)
-</div>,
-    "title": "#8: Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
-    "type": "ISSUE",
   },
 ]
 `;
