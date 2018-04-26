@@ -30,7 +30,16 @@ import {PLUGIN_NAME} from "./pluginName";
 import {Graph, edgeID} from "../../core/graph";
 const stringify = require("json-stable-stringify");
 
-export class GithubParser {
+export function parse(
+  repositoryName: string,
+  repositoryJSON: RepositoryJSON
+): Graph<NodePayload, EdgePayload> {
+  const parser = new GithubParser(repositoryName);
+  parser.addData(repositoryJSON);
+  return parser.graph;
+}
+
+class GithubParser {
   repositoryName: string;
   graph: Graph<NodePayload, EdgePayload>;
 

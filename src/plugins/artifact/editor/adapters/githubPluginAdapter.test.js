@@ -5,7 +5,7 @@ import {shallow} from "enzyme";
 import enzymeToJSON from "enzyme-to-json";
 import stringify from "json-stable-stringify";
 
-import {GithubParser} from "../../../github/parser";
+import {parse} from "../../../github/parser";
 import exampleRepoData from "../../../github/demoData/example-repo.json";
 import adapter from "./githubPluginAdapter";
 
@@ -13,9 +13,7 @@ require("../testUtil").configureEnzyme();
 
 describe("githubPluginAdapter", () => {
   it("operates on the example repo", () => {
-    const parser = new GithubParser("sourcecred/example-repo");
-    parser.addData(exampleRepoData);
-    const graph = parser.graph;
+    const graph = parse("sourcecred/example-repo", exampleRepoData);
 
     const result = graph
       .getNodes()
