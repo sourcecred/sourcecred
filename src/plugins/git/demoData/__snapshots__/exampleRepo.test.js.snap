@@ -8,3 +8,10 @@ Array [
   "677b340674bde17fdaac3b5f5eef929139ef2a52",
 ]
 `;
+
+exports[`createExampleSubmoduleRepo is deterministic 1`] = `
+Array [
+  "762c062fbdc7ec198cd693e95d55b374a08ff3e3",
+  "29ef158bc982733e2ba429fcf73e2f7562244188",
+]
+`;
