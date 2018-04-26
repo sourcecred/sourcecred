@@ -9,7 +9,7 @@ import type {
   NodePayload as GithubNodePayload,
   EdgePayload as GithubEdgePayload,
 } from "../../github/types";
-import {GithubParser} from "../../github/parser";
+import {parse} from "../../github/parser";
 
 type Props = {
   settings: Settings,
@@ -32,9 +32,7 @@ export class GithubGraphFetcher extends React.Component<Props> {
     const {repoOwner, repoName, githubApiToken} = this.props.settings;
     fetchGithubRepo(repoOwner, repoName, githubApiToken)
       .then((json) => {
-        const parser = new GithubParser(`${repoOwner}/${repoName}`);
-        parser.addData(json);
-        return Promise.resolve(parser.graph);
+        return Promise.resolve(parse(`${repoOwner}/${repoName}`, json));
       })
       .then((graph) => {
         this.props.onCreateGraph(graph);
