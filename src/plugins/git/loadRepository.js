@@ -9,22 +9,9 @@
  */
 // @flow
 
-import {execFileSync} from "child_process";
-
+import type {GitDriver} from "./gitUtils";
 import type {Repository, Hash, Commit, Tree, TreeEntry} from "./types";
-
-export type GitDriver = (args: string[], options?: ExecOptions) => string;
-type ExecOptions = Object; // close enough
-export function localGit(repositoryPath: string): GitDriver {
-  return function git(args: string[], options?: ExecOptions): string {
-    // Throws an Error on shell failure.
-    return execFileSync(
-      "git",
-      ["-C", repositoryPath, ...args],
-      options
-    ).toString();
-  };
-}
+import {localGit} from "./gitUtils";
 
 /**
  * Load a Git repository from disk into memory. The `rootRef` should be
