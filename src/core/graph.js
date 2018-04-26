@@ -172,26 +172,52 @@ export class Graph<NP, EP> {
    * Gets the array of all out-edges from the node at the given address.
    * The order of the resulting array is unspecified.
    */
-  getOutEdges(nodeAddress: Address): Edge<EP>[] {
+  getOutEdges(
+    nodeAddress: Address,
+    typeOptions?: {+nodeType?: string, +edgeType?: string}
+  ): Edge<EP>[] {
     if (nodeAddress == null) {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
-    return this._lookupEdges(this._outEdges, nodeAddress).map((e) =>
+    let result = this._lookupEdges(this._outEdges, nodeAddress).map((e) =>
       this.getEdge(e)
     );
+
+    if (typeOptions != null && typeOptions.edgeType != null) {
+      const edgeType = typeOptions.edgeType;
+      result = result.filter((e) => e.address.type === edgeType);
+    }
+    if (typeOptions != null && typeOptions.nodeType != null) {
+      const nodeType = typeOptions.nodeType;
+      result = result.filter((e) => e.dst.type === nodeType);
+    }
+    return result;
   }
 
   /**
    * Gets the array of all in-edges to the node at the given address.
    * The order of the resulting array is unspecified.
    */
-  getInEdges(nodeAddress: Address): Edge<EP>[] {
+  getInEdges(
+    nodeAddress: Address,
+    typeOptions?: {+nodeType?: string, +edgeType?: string}
+  ): Edge<EP>[] {
     if (nodeAddress == null) {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
-    return this._lookupEdges(this._inEdges, nodeAddress).map((e) =>
+    let result = this._lookupEdges(this._inEdges, nodeAddress).map((e) =>
       this.getEdge(e)
     );
+
+    if (typeOptions != null && typeOptions.edgeType != null) {
+      const edgeType = typeOptions.edgeType;
+      result = result.filter((e) => e.address.type === edgeType);
+    }
+    if (typeOptions != null && typeOptions.nodeType != null) {
+      const nodeType = typeOptions.nodeType;
+      result = result.filter((e) => e.src.type === nodeType);
+    }
+    return result;
   }
 
   /**
