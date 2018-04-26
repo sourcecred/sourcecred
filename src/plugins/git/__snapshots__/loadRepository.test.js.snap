@@ -133,12 +133,3 @@ Object {
   },
 }
 `;
-
-exports[`we create a deterministic repository 1`] = `
-Array [
-  "301749e9af8cd6e9aee3a49a64029b98a4695e34",
-  "cbb26b570d1eed3c681b8f03ff31231c1bffd6d6",
-  "4be43f1cda04e51e42fec0cfe8e1e2dff116e839",
-  "677b340674bde17fdaac3b5f5eef929139ef2a52",
-]
-`;

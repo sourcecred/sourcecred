@@ -2,6 +2,7 @@
 
 import tmp from "tmp";
 
+import {createExampleRepo} from "./demoData/exampleRepo";
 import {makeUtils} from "./gitUtils";
 import {loadRepository} from "./loadRepository";
 
@@ -18,54 +19,14 @@ function mkdtemp() {
   return result.name;
 }
 
-function createRepository(): {path: string, commits: string[]} {
-  const repositoryPath = mkdtemp();
-  const git = makeUtils(repositoryPath);
-
-  git.exec(["init"]);
-
-  git.writeAndStage("README.txt", "Amazing physics going on...\n");
-  git.deterministicCommit("Initial commit");
-  const commit1 = git.head();
-
-  git.writeAndStage("src/index.py", "import antigravity\n");
-  git.writeAndStage(
-    "src/quantum_gravity.py",
-    'raise NotImplementedError("TODO(physicists)")\n'
-  );
-  git.writeAndStage("TODOS.txt", "1. Resolve quantum gravity\n");
-  git.deterministicCommit("Discover gravity");
-  const commit2 = git.head();
-
-  git.writeAndStage(
-    "src/quantum_gravity.py",
-    "import random\nif random.random() < 0.5:\n  import antigravity\n"
-  );
-  git.deterministicCommit("Solve quantum gravity");
-  const commit3 = git.head();
-
-  git.exec(["rm", "TODOS.txt"]);
-  git.deterministicCommit("Clean up TODOS");
-  const commit4 = git.head();
-
-  return {
-    path: repositoryPath,
-    commits: [commit1, commit2, commit3, commit4],
-  };
-}
-
-test("we create a deterministic repository", () => {
-  expect(createRepository().commits).toMatchSnapshot();
-});
-
 describe("loadRepository", () => {
   it("loads from HEAD", () => {
-    const repository = createRepository();
+    const repository = createExampleRepo(mkdtemp());
     expect(loadRepository(repository.path, "HEAD")).toMatchSnapshot();
   });
 
   it("processes an old commit", () => {
-    const repository = createRepository();
+    const repository = createExampleRepo(mkdtemp());
     const whole = loadRepository(repository.path, "HEAD");
     const part = loadRepository(repository.path, repository.commits[1]);
 
@@ -88,7 +49,7 @@ describe("loadRepository", () => {
     const repositoryPath = mkdtemp();
     const git = makeUtils(repositoryPath);
 
-    const subproject = createRepository();
+    const subproject = createExampleRepo(mkdtemp());
 
     git.exec(["init"]);
     git.exec(["submodule", "--quiet", "add", subproject.path, "physics"]);
