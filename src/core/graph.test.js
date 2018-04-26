@@ -133,7 +133,7 @@ describe("graph", () => {
         expect(
           demoData
             .simpleMealGraph()
-            .getNode(demoData.makeAddress("treasure_octorok#5"))
+            .getNode(demoData.makeAddress("treasure_octorok#5", "NPC"))
         ).toBeUndefined();
       });
 
@@ -143,7 +143,8 @@ describe("graph", () => {
             .simpleMealGraph()
             .getNode(
               demoData.makeAddress(
-                "treasure_octorok#5@helps_cook@seafood_fruit_mix#3"
+                "treasure_octorok#5@helps_cook@seafood_fruit_mix#3",
+                "ACTION"
               )
             )
         ).toBeUndefined();
@@ -180,10 +181,11 @@ describe("graph", () => {
       it("allows adding an edge with dangling `dst`", () => {
         const edge = () => ({
           address: demoData.makeAddress(
-            "treasure_octorok#5@helps_cook@seafood_fruit_mix#3"
+            "treasure_octorok#5@helps_cook@seafood_fruit_mix#3",
+            "ACTION"
           ),
           src: demoData.mealNode().address,
-          dst: demoData.makeAddress("treasure_octorok#5"),
+          dst: demoData.makeAddress("treasure_octorok#5", "NPC"),
           payload: {},
         });
         const g = demoData.simpleMealGraph().addEdge(edge());
@@ -193,9 +195,10 @@ describe("graph", () => {
       it("allows adding an edge with dangling `src`", () => {
         const edge = () => ({
           address: demoData.makeAddress(
-            "health_bar#6@healed_by@seafood_fruit_mix#3"
+            "health_bar#6@healed_by@seafood_fruit_mix#3",
+            "PLAYER_EFFECT"
           ),
-          src: demoData.makeAddress("health_bar#6"),
+          src: demoData.makeAddress("health_bar#6", "PLAYER_STATE"),
           dst: demoData.mealNode().address,
           payload: {},
         });
@@ -365,24 +368,24 @@ describe("graph", () => {
       it("gets empty out-edges for a nonexistent node", () => {
         const result = demoData
           .simpleMealGraph()
-          .getOutEdges(demoData.makeAddress("hinox"));
+          .getOutEdges(demoData.makeAddress("hinox", "NPC"));
         expect(result).toEqual([]);
       });
 
       it("gets empty in-edges for a nonexistent node", () => {
         const result = demoData
           .simpleMealGraph()
-          .getInEdges(demoData.makeAddress("hinox"));
+          .getInEdges(demoData.makeAddress("hinox", "NPC"));
         expect(result).toEqual([]);
       });
 
       {
         const danglingSrc = () => ({
-          address: demoData.makeAddress("meaty_rice_balls#8"),
+          address: demoData.makeAddress("meaty_rice_balls#8", "FOOD"),
           payload: {meaty: true},
         });
         const danglingDst = () => ({
-          address: demoData.makeAddress("treasure_octorok#5"),
+          address: demoData.makeAddress("treasure_octorok#5", "NPC"),
           payload: {meaty: false},
         });
 
@@ -390,7 +393,8 @@ describe("graph", () => {
         // demo meal graph.
         const fullyDanglingEdge = () => ({
           address: demoData.makeAddress(
-            "treasure_octorok#5@helps_cook@meaty_rice_balls#8"
+            "treasure_octorok#5@helps_cook@meaty_rice_balls#8",
+            "ACTION"
           ),
           src: danglingSrc().address,
           dst: danglingDst().address,
@@ -526,11 +530,11 @@ describe("graph", () => {
         ).toBe(false);
       });
       const extraNode1 = () => ({
-        address: demoData.makeAddress("octorok"),
+        address: demoData.makeAddress("octorok", "NPC"),
         payload: {},
       });
       const extraNode2 = () => ({
-        address: demoData.makeAddress("hinox"),
+        address: demoData.makeAddress("hinox", "NPC"),
         payload: {status: "sleeping"},
       });
       it("returns false when the LHS has edges missing in the RHS", () => {
@@ -626,20 +630,32 @@ describe("graph", () => {
 
       it("conservatively merges graphs of different payload types", () => {
         const data = {
-          a: () => ({address: demoData.makeAddress("a"), payload: "alpha"}),
-          b: () => ({address: demoData.makeAddress("b"), payload: "bravo"}),
+          a: () => ({
+            address: demoData.makeAddress("a", "EXPERIMENT"),
+            payload: "alpha",
+          }),
+          b: () => ({
+            address: demoData.makeAddress("b", "EXPERIMENT"),
+            payload: "bravo",
+          }),
           u: () => ({
-            address: demoData.makeAddress("u"),
-            src: demoData.makeAddress("a"),
-            dst: demoData.makeAddress("b"),
+            address: demoData.makeAddress("u", "EXPERIMENT"),
+            src: demoData.makeAddress("a", "EXPERIMENT"),
+            dst: demoData.makeAddress("b", "EXPERIMENT"),
             payload: 21,
           }),
-          c: () => ({address: demoData.makeAddress("c"), payload: true}),
-          d: () => ({address: demoData.makeAddress("d"), payload: false}),
+          c: () => ({
+            address: demoData.makeAddress("c", "EXPERIMENT"),
+            payload: true,
+          }),
+          d: () => ({
+            address: demoData.makeAddress("d", "EXPERIMENT"),
+            payload: false,
+          }),
           v: () => ({
-            address: demoData.makeAddress("v"),
-            src: demoData.makeAddress("c"),
-            dst: demoData.makeAddress("d"),
+            address: demoData.makeAddress("v", "EXPERIMENT"),
+            src: demoData.makeAddress("c", "EXPERIMENT"),
+            dst: demoData.makeAddress("d", "EXPERIMENT"),
             payload: null,
           }),
         };
@@ -666,7 +682,7 @@ describe("graph", () => {
       it("conservatively rejects a graph with conflicting nodes", () => {
         const makeGraph: (nodePayload: string) => Graph<*, *> = (nodePayload) =>
           new Graph().addNode({
-            address: demoData.makeAddress("conflicting-node"),
+            address: demoData.makeAddress("conflicting-node", "EXPERIMENT"),
             payload: nodePayload,
           });
         const g1 = makeGraph("one");
@@ -677,14 +693,14 @@ describe("graph", () => {
       });
 
       it("conservatively rejects a graph with conflicting edges", () => {
-        const srcAddress = demoData.makeAddress("src");
-        const dstAddress = demoData.makeAddress("dst");
+        const srcAddress = demoData.makeAddress("src", "EXPERIMENT");
+        const dstAddress = demoData.makeAddress("dst", "EXPERIMENT");
         const makeGraph: (edgePayload: string) => Graph<*, *> = (edgePayload) =>
           new Graph()
             .addNode({address: srcAddress, payload: {}})
             .addNode({address: dstAddress, payload: {}})
             .addEdge({
-              address: demoData.makeAddress("conflicting-edge"),
+              address: demoData.makeAddress("conflicting-edge", "EXPERIMENT"),
               src: srcAddress,
               dst: dstAddress,
               payload: edgePayload,
@@ -775,11 +791,11 @@ describe("graph", () => {
       it("allows adding explicitly typed nodes", () => {
         expect(() => {
           const stringNode: Node<string> = {
-            address: demoData.makeAddress("hello"),
+            address: demoData.makeAddress("hello", "EXPERIMENT"),
             payload: "hello",
           };
           const numberNode: Node<number> = {
-            address: demoData.makeAddress("hello"),
+            address: demoData.makeAddress("hello", "EXPERIMENT"),
             payload: 17,
           };
           // This will be a Graph<string | number, *>.
@@ -789,16 +805,22 @@ describe("graph", () => {
 
       it("allows adding explicitly typed edges", () => {
         expect(() => {
-          const src = {address: demoData.makeAddress("src"), payload: {}};
-          const dst = {address: demoData.makeAddress("dst"), payload: {}};
+          const src = {
+            address: demoData.makeAddress("src", "EXPERIMENT"),
+            payload: {},
+          };
+          const dst = {
+            address: demoData.makeAddress("dst", "EXPERIMENT"),
+            payload: {},
+          };
           const stringEdge: Edge<string> = {
-            address: demoData.makeAddress("hello"),
+            address: demoData.makeAddress("hello", "EXPERIMENT"),
             src: src.address,
             dst: dst.address,
             payload: "hello",
           };
           const numberEdge: Edge<number> = {
-            address: demoData.makeAddress("hello"),
+            address: demoData.makeAddress("hello", "EXPERIMENT"),
             src: src.address,
             dst: dst.address,
             payload: 18,
@@ -818,7 +840,7 @@ describe("graph", () => {
         const g1 = demoData.advancedMealGraph();
         const g2 = g1.copy();
         const newNode = () => ({
-          address: demoData.makeAddress("brand-new"),
+          address: demoData.makeAddress("brand-new", "EXPERIMENT"),
           payload: 777,
         });
         g2.addNode(newNode());
