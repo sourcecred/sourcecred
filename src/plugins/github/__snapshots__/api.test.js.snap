@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GitHub porcelain API Author 1`] = `2`;
+
+exports[`GitHub porcelain API Author 2`] = `
+Object {
+  "address": Object {
+    "id": "https://github.com/decentralion",
+    "pluginName": "sourcecred/github-beta",
+    "repositoryName": "sourcecred/example-repo",
+    "type": "AUTHOR",
+  },
+  "payload": Object {
+    "login": "decentralion",
+    "subtype": "USER",
+    "url": "https://github.com/decentralion",
+  },
+}
+`;
+
+exports[`GitHub porcelain API Comment 1`] = `
+Object {
+  "address": Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
+    "pluginName": "sourcecred/github-beta",
+    "repositoryName": "sourcecred/example-repo",
+    "type": "COMMENT",
+  },
+  "payload": Object {
+    "body": "A wild COMMENT appeared!",
+    "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
+  },
+}
+`;
+
+exports[`GitHub porcelain API Issue 1`] = `
+Object {
+  "address": Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/1",
+    "pluginName": "sourcecred/github-beta",
+    "repositoryName": "sourcecred/example-repo",
+    "type": "ISSUE",
+  },
+  "payload": Object {
+    "body": "This is just an example issue.",
+    "number": 1,
+    "title": "An example issue.",
+    "url": "https://github.com/sourcecred/example-repo/issues/1",
+  },
+}
+`;
+
+exports[`GitHub porcelain API PullRequest 1`] = `
+Object {
+  "address": Object {
+    "id": "https://github.com/sourcecred/example-repo/pull/3",
+    "pluginName": "sourcecred/github-beta",
+    "repositoryName": "sourcecred/example-repo",
+    "type": "PULL_REQUEST",
+  },
+  "payload": Object {
+    "body": "Oh look, it's a pull request.",
+    "number": 3,
+    "title": "Add README, merge via PR.",
+    "url": "https://github.com/sourcecred/example-repo/pull/3",
+  },
+}
+`;
