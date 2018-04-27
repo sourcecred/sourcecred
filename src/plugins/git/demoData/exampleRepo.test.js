@@ -2,7 +2,7 @@
 
 import tmp from "tmp";
 
-import {createExampleRepo} from "./exampleRepo";
+import {createExampleRepo, createExampleSubmoduleRepo} from "./exampleRepo";
 
 const cleanups: (() => void)[] = [];
 afterAll(() => {
@@ -20,5 +20,11 @@ function mkdtemp() {
 describe("createExampleRepo", () => {
   it("is deterministic", () => {
     expect(createExampleRepo(mkdtemp()).commits).toMatchSnapshot();
+  });
+});
+
+describe("createExampleSubmoduleRepo", () => {
+  it("is deterministic", () => {
+    expect(createExampleSubmoduleRepo(mkdtemp()).commits).toMatchSnapshot();
   });
 });

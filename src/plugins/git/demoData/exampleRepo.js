@@ -44,3 +44,37 @@ export function createExampleRepo(intoDirectory: string): RepositoryInfo {
 
   return {path: repositoryPath, commits};
 }
+
+/**
+ * Create the example repository that should be included as a submodule
+ * in a larger repository. (This repository does not itself have
+ * submodules.)
+ */
+export function createExampleSubmoduleRepo(
+  intoDirectory: string
+): RepositoryInfo {
+  const repositoryPath = intoDirectory;
+  mkdirp(repositoryPath);
+  const git = makeUtils(repositoryPath);
+  const commits = [];
+
+  git.exec(["init"]);
+
+  git.writeAndStage(
+    "README.txt",
+    [
+      "example-git-submodule\n",
+      "---------------------\n\n",
+      "This simple repository serves no purpose other than to be included as\n",
+      "a submodule in a larger repository.\n",
+    ].join("")
+  );
+  git.deterministicCommit("Initial commit");
+  commits.push(git.head());
+
+  git.writeAndStage("useless.txt", "Nothing to see here; move along.\n");
+  git.deterministicCommit("Add a file, so that we have multiple commits");
+  commits.push(git.head());
+
+  return {path: repositoryPath, commits};
+}
