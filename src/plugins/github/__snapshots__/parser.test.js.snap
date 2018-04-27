@@ -3,12 +3,12 @@
 exports[`GithubParser issue parsing parses a simple issue (https://github.com/sourcecred/example-repo/issues/1) 1`] = `
 Object {
   "edges": Object {
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/1\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/1\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -20,9 +20,10 @@ Object {
     },
   },
   "nodes": Object {
-    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
+    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHOR\\"}": Object {
       "payload": Object {
         "login": "decentralion",
+        "subtype": "USER",
         "url": "https://github.com/decentralion",
       },
     },
@@ -41,12 +42,12 @@ Object {
 exports[`GithubParser issue parsing parses an issue with comments (https://github.com/sourcecred/example-repo/issues/6) 1`] = `
 Object {
   "edges": Object {
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -56,12 +57,12 @@ Object {
         "type": "COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -71,12 +72,12 @@ Object {
         "type": "COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -118,9 +119,10 @@ Object {
     },
   },
   "nodes": Object {
-    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
+    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHOR\\"}": Object {
       "payload": Object {
         "login": "decentralion",
+        "subtype": "USER",
         "url": "https://github.com/decentralion",
       },
     },
@@ -151,12 +153,12 @@ Object {
 exports[`GithubParser pull request parsing parses a pr with review comments (https://github.com/sourcecred/example-repo/pull/3) 1`] = `
 Object {
   "edges": Object {
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -211,12 +213,12 @@ Object {
         "type": "PULL_REQUEST",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/wchargin",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -226,12 +228,12 @@ Object {
         "type": "PULL_REQUEST_REVIEW_COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/wchargin",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -241,12 +243,12 @@ Object {
         "type": "PULL_REQUEST_REVIEW",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/wchargin",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -258,9 +260,10 @@ Object {
     },
   },
   "nodes": Object {
-    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
+    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHOR\\"}": Object {
       "payload": Object {
         "login": "decentralion",
+        "subtype": "USER",
         "url": "https://github.com/decentralion",
       },
     },
@@ -296,9 +299,10 @@ Object {
         "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038",
       },
     },
-    "{\\"id\\":\\"https://github.com/wchargin\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
+    "{\\"id\\":\\"https://github.com/wchargin\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHOR\\"}": Object {
       "payload": Object {
         "login": "wchargin",
+        "subtype": "USER",
         "url": "https://github.com/wchargin",
       },
     },
@@ -309,12 +313,12 @@ Object {
 exports[`GithubParser pull request parsing parses a simple pull request (https://github.com/sourcecred/example-repo/pull/3) 1`] = `
 Object {
   "edges": Object {
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -324,12 +328,12 @@ Object {
         "type": "COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -356,9 +360,10 @@ Object {
     },
   },
   "nodes": Object {
-    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
+    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHOR\\"}": Object {
       "payload": Object {
         "login": "decentralion",
+        "subtype": "USER",
         "url": "https://github.com/decentralion",
       },
     },
@@ -383,12 +388,12 @@ Object {
 exports[`GithubParser whole repo parsing parses the entire example-repo as expected 1`] = `
 Object {
   "edges": Object {
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/1\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/1\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -398,12 +403,12 @@ Object {
         "type": "ISSUE",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768703\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768703\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -413,12 +418,12 @@ Object {
         "type": "COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -428,12 +433,12 @@ Object {
         "type": "COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/2\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/2\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -443,12 +448,12 @@ Object {
         "type": "ISSUE",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/4\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/4\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -458,12 +463,12 @@ Object {
         "type": "ISSUE",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -473,12 +478,12 @@ Object {
         "type": "COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -488,12 +493,12 @@ Object {
         "type": "COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -503,12 +508,12 @@ Object {
         "type": "ISSUE",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/7\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/7\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -518,12 +523,12 @@ Object {
         "type": "ISSUE",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/8\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/issues/8\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -533,12 +538,12 @@ Object {
         "type": "ISSUE",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -548,12 +553,12 @@ Object {
         "type": "COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -563,12 +568,12 @@ Object {
         "type": "PULL_REQUEST",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/decentralion",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -698,12 +703,12 @@ Object {
         "type": "PULL_REQUEST",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/wchargin",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -713,12 +718,12 @@ Object {
         "type": "PULL_REQUEST_REVIEW_COMMENT",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/wchargin",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -728,12 +733,12 @@ Object {
         "type": "PULL_REQUEST_REVIEW",
       },
     },
-    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"USER\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-repo\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/wchargin",
         "pluginName": "sourcecred/github-beta",
         "repositoryName": "sourcecred/example-repo",
-        "type": "USER",
+        "type": "AUTHOR",
       },
       "payload": Object {},
       "src": Object {
@@ -745,9 +750,10 @@ Object {
     },
   },
   "nodes": Object {
-    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
+    "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHOR\\"}": Object {
       "payload": Object {
         "login": "decentralion",
+        "subtype": "USER",
         "url": "https://github.com/decentralion",
       },
     },
@@ -871,9 +877,10 @@ Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌�
         "url": "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100314038",
       },
     },
-    "{\\"id\\":\\"https://github.com/wchargin\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"USER\\"}": Object {
+    "{\\"id\\":\\"https://github.com/wchargin\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"repositoryName\\":\\"sourcecred/example-repo\\",\\"type\\":\\"AUTHOR\\"}": Object {
       "payload": Object {
         "login": "wchargin",
+        "subtype": "USER",
         "url": "https://github.com/wchargin",
       },
     },

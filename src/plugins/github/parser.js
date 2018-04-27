@@ -13,6 +13,7 @@ import type {
   CommentNodePayload,
   PullRequestNodePayload,
   IssueNodePayload,
+  AuthorSubtype,
 } from "./types";
 
 import type {
@@ -76,11 +77,7 @@ class GithubParser {
     >,
     authorJson: AuthorJSON
   ) {
-    let authorPayload: AuthorNodePayload = {
-      login: authorJson.login,
-      url: authorJson.url,
-    };
-    let authorType: NodeType;
+    let authorType: AuthorSubtype;
     switch (authorJson.__typename) {
       case "User":
         authorType = "USER";
@@ -98,9 +95,14 @@ class GithubParser {
           )}`
         );
     }
+    const authorPayload: AuthorNodePayload = {
+      login: authorJson.login,
+      url: authorJson.url,
+      subtype: authorType,
+    };
 
     const authorNode: Node<AuthorNodePayload> = {
-      address: this.makeNodeAddress(authorType, authorJson.url),
+      address: this.makeNodeAddress("AUTHOR", authorJson.url),
       payload: authorPayload,
     };
     this.graph.addNode(authorNode);
