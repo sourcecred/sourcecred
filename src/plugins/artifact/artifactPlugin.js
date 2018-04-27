@@ -38,7 +38,7 @@ export function artifactAddress(
     };
   }
   let id = baseId;
-  for (let i = 0; graph.getNode(address(id)) != null; i++) {
+  for (let i = 0; graph.node(address(id)) != null; i++) {
     id = baseId + "-" + i;
   }
   return address(id);

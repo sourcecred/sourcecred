@@ -83,7 +83,7 @@ export class Graph<NP, EP> {
     if (node == null) {
       throw new Error(`node is ${String(node)}`);
     }
-    const existingNode = this.getNode(node.address);
+    const existingNode = this.node(node.address);
     if (existingNode !== undefined) {
       if (deepEqual(existingNode, node)) {
         return this;
@@ -116,7 +116,7 @@ export class Graph<NP, EP> {
     if (edge == null) {
       throw new Error(`edge is ${String(edge)}`);
     }
-    const existingEdge = this.getEdge(edge.address);
+    const existingEdge = this.edge(edge.address);
     if (existingEdge !== undefined) {
       if (deepEqual(existingEdge, edge)) {
         return this;
@@ -144,7 +144,7 @@ export class Graph<NP, EP> {
   removeEdge(address: Address): this {
     // TODO(perf): This is linear in the degree of the endpoints of the
     // edge. Consider storing in non-list form.
-    const edge = this.getEdge(address);
+    const edge = this.edge(address);
     if (edge) {
       [
         this._lookupEdges(this._inEdges, edge.dst),
@@ -160,11 +160,11 @@ export class Graph<NP, EP> {
     return this;
   }
 
-  getNode(address: Address): Node<NP> {
+  node(address: Address): Node<NP> {
     return this._nodes.get(address);
   }
 
-  getEdge(address: Address): Edge<EP> {
+  edge(address: Address): Edge<EP> {
     return this._edges.get(address);
   }
 
@@ -172,7 +172,7 @@ export class Graph<NP, EP> {
    * Gets the array of all out-edges from the node at the given address.
    * The order of the resulting array is unspecified.
    */
-  getOutEdges(
+  outEdges(
     nodeAddress: Address,
     typeOptions?: {+nodeType?: string, +edgeType?: string}
   ): Edge<EP>[] {
@@ -180,7 +180,7 @@ export class Graph<NP, EP> {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
     let result = this._lookupEdges(this._outEdges, nodeAddress).map((e) =>
-      this.getEdge(e)
+      this.edge(e)
     );
 
     if (typeOptions != null && typeOptions.edgeType != null) {
@@ -198,7 +198,7 @@ export class Graph<NP, EP> {
    * Gets the array of all in-edges to the node at the given address.
    * The order of the resulting array is unspecified.
    */
-  getInEdges(
+  inEdges(
     nodeAddress: Address,
     typeOptions?: {+nodeType?: string, +edgeType?: string}
   ): Edge<EP>[] {
@@ -206,7 +206,7 @@ export class Graph<NP, EP> {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
     let result = this._lookupEdges(this._inEdges, nodeAddress).map((e) =>
-      this.getEdge(e)
+      this.edge(e)
     );
 
     if (typeOptions != null && typeOptions.edgeType != null) {
@@ -227,14 +227,14 @@ export class Graph<NP, EP> {
    * has `nodeAddress` as either `src` or `dst`, and `neighborAddress` is the
    * address at the other end of the edge.
    */
-  getNeighborhood(
+  neighborhood(
     nodeAddress: Address,
     typeOptions?: {+nodeType?: string, +edgeType?: string}
   ): {+edge: Edge<EP>, +neighborAddress: Address}[] {
-    const inNeighbors = this.getInEdges(nodeAddress, typeOptions).map((e) => {
+    const inNeighbors = this.inEdges(nodeAddress, typeOptions).map((e) => {
       return {edge: e, neighborAddress: e.src};
     });
-    const outNeighbors = this.getOutEdges(nodeAddress, typeOptions)
+    const outNeighbors = this.outEdges(nodeAddress, typeOptions)
       // If there are self-reference edges, avoid double counting them.
       .filter((e) => !deepEqual(e.src, e.dst))
       .map((e) => {
@@ -246,14 +246,14 @@ export class Graph<NP, EP> {
   /**
    * Gets all nodes in the graph, in unspecified order.
    */
-  getNodes(): Node<NP>[] {
+  nodes(): Node<NP>[] {
     return this._nodes.getAll();
   }
 
   /**
    * Gets all edges in the graph, in unspecified order.
    */
-  getEdges(): Edge<EP>[] {
+  edges(): Edge<EP>[] {
     return this._edges.getAll();
   }
 
@@ -272,29 +272,29 @@ export class Graph<NP, EP> {
     edgeResolver: (Edge<E1>, Edge<E2>) => Edge<EP>
   ): Graph<NP, EP> {
     const result: Graph<NP, EP> = new Graph();
-    g1.getNodes().forEach((node) => {
-      if (g2.getNode(node.address) !== undefined) {
-        const resolved = nodeResolver(node, g2.getNode(node.address));
+    g1.nodes().forEach((node) => {
+      if (g2.node(node.address) !== undefined) {
+        const resolved = nodeResolver(node, g2.node(node.address));
         result.addNode(resolved);
       } else {
         result.addNode(node);
       }
     });
-    g2.getNodes().forEach((node) => {
-      if (result.getNode(node.address) === undefined) {
+    g2.nodes().forEach((node) => {
+      if (result.node(node.address) === undefined) {
         result.addNode(node);
       }
     });
-    g1.getEdges().forEach((edge) => {
-      if (g2.getEdge(edge.address) !== undefined) {
-        const resolved = edgeResolver(edge, g2.getEdge(edge.address));
+    g1.edges().forEach((edge) => {
+      if (g2.edge(edge.address) !== undefined) {
+        const resolved = edgeResolver(edge, g2.edge(edge.address));
         result.addEdge(resolved);
       } else {
         result.addEdge(edge);
       }
     });
-    g2.getEdges().forEach((edge) => {
-      if (result.getEdge(edge.address) === undefined) {
+    g2.edges().forEach((edge) => {
+      if (result.edge(edge.address) === undefined) {
         result.addEdge(edge);
       }
     });

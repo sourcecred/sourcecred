@@ -42,7 +42,7 @@ export class ContributionList extends React.Component<Props, State> {
     }
     const graph: Graph<any, any> = this.props.graph;
     const typesByPlugin: {[pluginName: string]: Set<string>} = {};
-    graph.getNodes().forEach((node) => {
+    graph.nodes().forEach((node) => {
       const adapter = this.props.adapters.getAdapter(node);
       if (adapter == null) {
         return;
@@ -111,7 +111,7 @@ export class ContributionList extends React.Component<Props, State> {
             </tr>
           </thead>
           <tbody>
-            {this.props.graph.getNodes().map((node) => {
+            {this.props.graph.nodes().map((node) => {
               if (!shouldDisplay(node)) {
                 return null;
               }

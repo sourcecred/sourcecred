@@ -16,7 +16,7 @@ describe("githubPluginAdapter", () => {
     const graph = parse("sourcecred/example-repo", exampleRepoData);
 
     const result = graph
-      .getNodes()
+      .nodes()
       .map((node) => ({
         id: node.address.id,
         payload: node.payload,

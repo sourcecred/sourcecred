@@ -38,9 +38,9 @@ const adapter: PluginAdapter<NodePayload> = {
     // previously queried IDs.)
     function extractParentTitles(node: Node<NodePayload>): string[] {
       return graph
-        .getInEdges(node.address)
+        .inEdges(node.address)
         .filter((e) => e.address.type === CONTAINS_EDGE_TYPE)
-        .map((e) => graph.getNode(e.src))
+        .map((e) => graph.node(e.src))
         .map((container) => {
           return adapter.extractTitle(graph, container);
         });
