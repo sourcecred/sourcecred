@@ -1,9 +1,10 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
+import sortBy from "lodash.sortby";
+import stringify from "json-stable-stringify";
 
 import type {Address, Addressable} from "./address";
-import {sortedByAddress} from "./address";
 import type {Node, Edge} from "./graph";
 import {Graph} from "./graph";
 import * as demoData from "./graphDemoData";
@@ -14,7 +15,8 @@ describe("graph", () => {
     // array with undefined order. We canonicalize the ordering so that
     // we can then test equality with `expect(...).toEqual(...)`.
     function expectSameSorted<T: Addressable>(xs: T[], ys: T[]) {
-      expect(sortedByAddress(xs)).toEqual(sortedByAddress(ys));
+      const sort = (xs) => sortBy(xs, (x) => stringify(x.address));
+      expect(sort(xs)).toEqual(sort(ys));
     }
 
     describe("construction", () => {
@@ -671,16 +673,16 @@ describe("graph", () => {
       it("is idempotent in terms of in-edges", () => {
         const g1 = originalGraph();
         const g2 = modifiedGraph();
-        const e1 = sortedByAddress(g1.getInEdges(targetEdge().address));
-        const e2 = sortedByAddress(g2.getInEdges(targetEdge().address));
-        expect(e1).toEqual(e2);
+        const e1 = g1.getInEdges(targetEdge().address);
+        const e2 = g2.getInEdges(targetEdge().address);
+        expectSameSorted(e1, e2);
       });
       it("is idempotent in terms of out-edges", () => {
         const g1 = originalGraph();
         const g2 = modifiedGraph();
-        const e1 = sortedByAddress(g1.getOutEdges(targetEdge().address));
-        const e2 = sortedByAddress(g2.getOutEdges(targetEdge().address));
-        expect(e1).toEqual(e2);
+        const e1 = g1.getOutEdges(targetEdge().address);
+        const e2 = g2.getOutEdges(targetEdge().address);
+        expectSameSorted(e1, e2);
       });
     });
 

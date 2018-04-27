@@ -1,7 +1,10 @@
 // @flow
 
+import sortBy from "lodash.sortby";
+import stringify from "json-stable-stringify";
+
 import type {Address} from "./address";
-import {AddressMap, fromString, sortedByAddress, toString} from "./address";
+import {AddressMap, fromString, toString} from "./address";
 
 describe("address", () => {
   // Some test data using objects that have addresses, like houses.
@@ -51,7 +54,8 @@ describe("address", () => {
     it("gets all objects, in some order", () => {
       const actual = makeMap().getAll();
       const expected = [mansion(), mattressStore()];
-      expect(sortedByAddress(actual)).toEqual(sortedByAddress(expected));
+      const sort = (xs) => sortBy(xs, (x) => stringify(x.address));
+      expect(sort(actual)).toEqual(sort(actual));
     });
 
     it("removes objects by key", () => {
@@ -134,34 +138,6 @@ describe("address", () => {
           expect(() => makeMap().add(element)).toThrow(message);
         });
       });
-    });
-  });
-
-  describe("sortedByAddress", () => {
-    it("sorts the empty array", () => {
-      expect(sortedByAddress([])).toEqual([]);
-    });
-    it("sorts a sorted array", () => {
-      const input = () => [mansion(), mattressStore()];
-      const output = () => [mansion(), mattressStore()];
-      expect(sortedByAddress(input())).toEqual(output());
-    });
-    it("sorts a reverse-sorted array", () => {
-      const input = () => [mattressStore(), mansion()];
-      const output = () => [mansion(), mattressStore()];
-      expect(sortedByAddress(input())).toEqual(output());
-    });
-    it("sorts an array with duplicates", () => {
-      const input = () => [mattressStore(), mansion(), mattressStore()];
-      const output = () => [mansion(), mattressStore(), mattressStore()];
-      expect(sortedByAddress(input())).toEqual(output());
-    });
-    it("doesn't mutate its input", () => {
-      const input = () => [mattressStore(), mansion()];
-      const x = input();
-      expect(x).toEqual(input());
-      expect(sortedByAddress(x)).not.toEqual(input());
-      expect(x).toEqual(input());
     });
   });
 
