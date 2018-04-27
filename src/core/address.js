@@ -111,21 +111,6 @@ export class AddressMap<T: Addressable> {
   }
 }
 
-/**
- * Create a copy of the given array and sort its elements by their
- * addresses. The original array and its elements are not modified.
- */
-export function sortedByAddress<T: Addressable>(xs: T[]) {
-  function cmp(x1: T, x2: T): -1 | 0 | 1 {
-    // TODO(@wchargin): This can be replaced by four string-comparisons
-    // to avoid stringifying.
-    const a1 = toString(x1.address);
-    const a2 = toString(x2.address);
-    return a1 > a2 ? 1 : a1 < a2 ? -1 : 0;
-  }
-  return xs.slice().sort(cmp);
-}
-
 export function toString(x: Address): string {
   return stringify(x);
 }
