@@ -1,11 +1,9 @@
 // @flow
 
-import fs from "fs";
-import mkdirp from "mkdirp";
-import path from "path";
 import tmp from "tmp";
 
 import type {GitDriver} from "./loadRepository";
+import {makeUtils} from "./gitUtils";
 import {localGit, loadRepository} from "./loadRepository";
 
 const cleanups: (() => void)[] = [];
@@ -21,69 +19,36 @@ function mkdtemp() {
   return result.name;
 }
 
-function deterministicCommit(git: GitDriver, message: string): void {
-  git(
-    [
-      "-c",
-      "user.name=Test Runner",
-      "-c",
-      "user.email=nobody@example.com",
-      "commit",
-      "-m",
-      message,
-    ],
-    {
-      env: {
-        TZ: "UTC",
-        GIT_AUTHOR_DATE: "2001-02-03T04:05:06",
-        GIT_COMMITTER_DATE: "2002-03-04T05:06:07",
-      },
-    }
-  );
-}
-
 function createRepository(): {path: string, commits: string[]} {
   const repositoryPath = mkdtemp();
   const git = localGit(repositoryPath);
+  const gitUtils = makeUtils(git, repositoryPath);
 
   git(["init"]);
 
-  function makeChangesAndCommit(
-    message: string,
-    changes: {[filename: string]: ?string}
-  ): string /* commit SHA */ {
-    Object.keys(changes).forEach((filename) => {
-      const filepath = path.join(repositoryPath, filename);
-      const dirpath = path.join(repositoryPath, path.dirname(filename));
-      if (changes[filename] == null) {
-        fs.unlinkSync(filepath);
-        git(["rm", filename]);
-      } else {
-        const change = changes[filename];
-        mkdirp.sync(dirpath);
-        fs.writeFileSync(filepath, change);
-        git(["add", filename]);
-      }
-    });
-    deterministicCommit(git, message);
-    return git(["rev-parse", "HEAD"]).trim();
-  }
+  gitUtils.writeAndStage("README.txt", "Amazing physics going on...\n");
+  gitUtils.deterministicCommit("Initial commit");
+  const commit1 = gitUtils.head();
 
-  const commit1 = makeChangesAndCommit("Initial commit", {
-    "README.txt": "Amazing physics going on...\n",
-  });
-  const commit2 = makeChangesAndCommit("Discover gravity", {
-    "src/index.py": "import antigravity\n",
-    "src/quantum_gravity.py": 'raise NotImplementedError("TODO(physicists)")\n',
-    "TODOS.txt": "1. Resolve quantum gravity\n",
-  });
-  const commit3 = makeChangesAndCommit("Solve quantum gravity", {
-    "src/quantum_gravity.py":
-      "import random\nif random.random() < 0.5:\n  import antigravity\n",
-  });
-  const commit4 = makeChangesAndCommit("Clean up TODOS", {
-    "TODOS.txt": null,
-  });
+  gitUtils.writeAndStage("src/index.py", "import antigravity\n");
+  gitUtils.writeAndStage(
+    "src/quantum_gravity.py",
+    'raise NotImplementedError("TODO(physicists)")\n'
+  );
+  gitUtils.writeAndStage("TODOS.txt", "1. Resolve quantum gravity\n");
+  gitUtils.deterministicCommit("Discover gravity");
+  const commit2 = gitUtils.head();
+
+  gitUtils.writeAndStage(
+    "src/quantum_gravity.py",
+    "import random\nif random.random() < 0.5:\n  import antigravity\n"
+  );
+  gitUtils.deterministicCommit("Solve quantum gravity");
+  const commit3 = gitUtils.head();
+
+  git(["rm", "TODOS.txt"]);
+  gitUtils.deterministicCommit("Clean up TODOS");
+  const commit4 = gitUtils.head();
 
   return {
     path: repositoryPath,
@@ -124,14 +89,15 @@ describe("loadRepository", () => {
   it("works with submodules", () => {
     const repositoryPath = mkdtemp();
     const git = localGit(repositoryPath);
+    const gitUtils = makeUtils(git, repositoryPath);
 
     const subproject = createRepository();
 
     git(["init"]);
     git(["submodule", "--quiet", "add", subproject.path, "physics"]);
-    deterministicCommit(git, "Initial commit");
+    gitUtils.deterministicCommit("Initial commit");
 
-    const head = git(["rev-parse", "HEAD"]).trim();
+    const head = gitUtils.head();
 
     const repository = loadRepository(repositoryPath, "HEAD");
     const commit = repository.commits.get(head);
