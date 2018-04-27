@@ -3,29 +3,56 @@
 exports[`loadRepository loads from HEAD 1`] = `
 Object {
   "commits": Map {
-    "677b340674bde17fdaac3b5f5eef929139ef2a52" => Object {
-      "hash": "677b340674bde17fdaac3b5f5eef929139ef2a52",
-      "treeHash": "6152a37dba8aa54dc4bc2d59c1f01c2afeba74b0",
+    "3507b7c8690e329477c76b73f8511f78fdbafe52" => Object {
+      "hash": "3507b7c8690e329477c76b73f8511f78fdbafe52",
+      "treeHash": "aeb32ba2769e46068cc09aa05723b5dd81c2e3a0",
     },
-    "4be43f1cda04e51e42fec0cfe8e1e2dff116e839" => Object {
-      "hash": "4be43f1cda04e51e42fec0cfe8e1e2dff116e839",
-      "treeHash": "93642dbd1793e84a6f529a1e1b1b4f87a4f5c878",
+    "1468ff8437299dc4aa426996784be30a87226007" => Object {
+      "hash": "1468ff8437299dc4aa426996784be30a87226007",
+      "treeHash": "77e66e35964b9c0a2cde52fb2640d3004b742feb",
     },
-    "cbb26b570d1eed3c681b8f03ff31231c1bffd6d6" => Object {
-      "hash": "cbb26b570d1eed3c681b8f03ff31231c1bffd6d6",
-      "treeHash": "f6736d27cd7eb7e35ae22a906854c700eb5cf6c1",
+    "d6693032379c8c55aafc72ad355db29ce71396b0" => Object {
+      "hash": "d6693032379c8c55aafc72ad355db29ce71396b0",
+      "treeHash": "c32b1ddc3a622e7a7e30c0b3f56a78eaed19cfab",
     },
-    "301749e9af8cd6e9aee3a49a64029b98a4695e34" => Object {
-      "hash": "301749e9af8cd6e9aee3a49a64029b98a4695e34",
-      "treeHash": "4d5f2603a4b63aa68b8e51facf542a62e4c1d065",
+    "fb67eef11f7f34e4ad530ce36624c47fef0cd2e2" => Object {
+      "hash": "fb67eef11f7f34e4ad530ce36624c47fef0cd2e2",
+      "treeHash": "b936e6133d3316250f0a91779f72c72141279941",
+    },
+    "849572148969b2c3480e8479604ccba3b189092a" => Object {
+      "hash": "849572148969b2c3480e8479604ccba3b189092a",
+      "treeHash": "e5e3b135d4f7d03e9906aead28c7757aa2b676bd",
+    },
+    "db7608c2b4eba9ca72c6e3d636a7795cf9bcb97d" => Object {
+      "hash": "db7608c2b4eba9ca72c6e3d636a7795cf9bcb97d",
+      "treeHash": "5822dfcc81bf3ef8f99f68a21a33d07386fbd7b8",
+    },
+    "486bb61573b09069dc9a55023b06e72049f8556d" => Object {
+      "hash": "486bb61573b09069dc9a55023b06e72049f8556d",
+      "treeHash": "79ee2359849733d6a51fd1b5da1cebdbaa29254f",
     },
   },
   "trees": Map {
-    "6152a37dba8aa54dc4bc2d59c1f01c2afeba74b0" => Object {
+    "aeb32ba2769e46068cc09aa05723b5dd81c2e3a0" => Object {
       "entries": Map {
+        ".gitmodules" => Object {
+          "hash": "8c6cac301e763aa6d36466e0a775eb804be2c311",
+          "name": ".gitmodules",
+          "type": "blob",
+        },
         "README.txt" => Object {
-          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "hash": "6e70bfb555b270a017c743df4cd7d35d5337e0ef",
           "name": "README.txt",
+          "type": "blob",
+        },
+        "pygravitydefier" => Object {
+          "hash": "29ef158bc982733e2ba429fcf73e2f7562244188",
+          "name": "pygravitydefier",
+          "type": "commit",
+        },
+        "science.txt" => Object {
+          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "science.txt",
           "type": "blob",
         },
         "src" => Object {
@@ -34,18 +61,33 @@ Object {
           "type": "tree",
         },
       },
-      "hash": "6152a37dba8aa54dc4bc2d59c1f01c2afeba74b0",
+      "hash": "aeb32ba2769e46068cc09aa05723b5dd81c2e3a0",
     },
-    "93642dbd1793e84a6f529a1e1b1b4f87a4f5c878" => Object {
+    "77e66e35964b9c0a2cde52fb2640d3004b742feb" => Object {
       "entries": Map {
+        ".gitmodules" => Object {
+          "hash": "8c6cac301e763aa6d36466e0a775eb804be2c311",
+          "name": ".gitmodules",
+          "type": "blob",
+        },
         "README.txt" => Object {
-          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "hash": "6e70bfb555b270a017c743df4cd7d35d5337e0ef",
           "name": "README.txt",
           "type": "blob",
         },
         "TODOS.txt" => Object {
           "hash": "ddec7477206c30c31b81482e56b877a0b3c2638b",
           "name": "TODOS.txt",
+          "type": "blob",
+        },
+        "pygravitydefier" => Object {
+          "hash": "29ef158bc982733e2ba429fcf73e2f7562244188",
+          "name": "pygravitydefier",
+          "type": "commit",
+        },
+        "science.txt" => Object {
+          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "science.txt",
           "type": "blob",
         },
         "src" => Object {
@@ -54,18 +96,33 @@ Object {
           "type": "tree",
         },
       },
-      "hash": "93642dbd1793e84a6f529a1e1b1b4f87a4f5c878",
+      "hash": "77e66e35964b9c0a2cde52fb2640d3004b742feb",
     },
-    "f6736d27cd7eb7e35ae22a906854c700eb5cf6c1" => Object {
+    "c32b1ddc3a622e7a7e30c0b3f56a78eaed19cfab" => Object {
       "entries": Map {
+        ".gitmodules" => Object {
+          "hash": "8c6cac301e763aa6d36466e0a775eb804be2c311",
+          "name": ".gitmodules",
+          "type": "blob",
+        },
         "README.txt" => Object {
-          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "hash": "6e70bfb555b270a017c743df4cd7d35d5337e0ef",
           "name": "README.txt",
           "type": "blob",
         },
         "TODOS.txt" => Object {
           "hash": "ddec7477206c30c31b81482e56b877a0b3c2638b",
           "name": "TODOS.txt",
+          "type": "blob",
+        },
+        "pygravitydefier" => Object {
+          "hash": "29ef158bc982733e2ba429fcf73e2f7562244188",
+          "name": "pygravitydefier",
+          "type": "commit",
+        },
+        "science.txt" => Object {
+          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "science.txt",
           "type": "blob",
         },
         "src" => Object {
@@ -74,17 +131,92 @@ Object {
           "type": "tree",
         },
       },
-      "hash": "f6736d27cd7eb7e35ae22a906854c700eb5cf6c1",
+      "hash": "c32b1ddc3a622e7a7e30c0b3f56a78eaed19cfab",
     },
-    "4d5f2603a4b63aa68b8e51facf542a62e4c1d065" => Object {
+    "b936e6133d3316250f0a91779f72c72141279941" => Object {
+      "entries": Map {
+        ".gitmodules" => Object {
+          "hash": "8c6cac301e763aa6d36466e0a775eb804be2c311",
+          "name": ".gitmodules",
+          "type": "blob",
+        },
+        "README.txt" => Object {
+          "hash": "6e70bfb555b270a017c743df4cd7d35d5337e0ef",
+          "name": "README.txt",
+          "type": "blob",
+        },
+        "TODOS.txt" => Object {
+          "hash": "ddec7477206c30c31b81482e56b877a0b3c2638b",
+          "name": "TODOS.txt",
+          "type": "blob",
+        },
+        "pygravitydefier" => Object {
+          "hash": "762c062fbdc7ec198cd693e95d55b374a08ff3e3",
+          "name": "pygravitydefier",
+          "type": "commit",
+        },
+        "science.txt" => Object {
+          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "science.txt",
+          "type": "blob",
+        },
+        "src" => Object {
+          "hash": "7b79d579b62994faba3b69fdf8aa442586c32681",
+          "name": "src",
+          "type": "tree",
+        },
+      },
+      "hash": "b936e6133d3316250f0a91779f72c72141279941",
+    },
+    "e5e3b135d4f7d03e9906aead28c7757aa2b676bd" => Object {
+      "entries": Map {
+        ".gitmodules" => Object {
+          "hash": "8c6cac301e763aa6d36466e0a775eb804be2c311",
+          "name": ".gitmodules",
+          "type": "blob",
+        },
+        "README.txt" => Object {
+          "hash": "6e70bfb555b270a017c743df4cd7d35d5337e0ef",
+          "name": "README.txt",
+          "type": "blob",
+        },
+        "pygravitydefier" => Object {
+          "hash": "762c062fbdc7ec198cd693e95d55b374a08ff3e3",
+          "name": "pygravitydefier",
+          "type": "commit",
+        },
+        "science.txt" => Object {
+          "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "science.txt",
+          "type": "blob",
+        },
+      },
+      "hash": "e5e3b135d4f7d03e9906aead28c7757aa2b676bd",
+    },
+    "5822dfcc81bf3ef8f99f68a21a33d07386fbd7b8" => Object {
       "entries": Map {
         "README.txt" => Object {
+          "hash": "6e70bfb555b270a017c743df4cd7d35d5337e0ef",
+          "name": "README.txt",
+          "type": "blob",
+        },
+        "science.txt" => Object {
           "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "name": "science.txt",
+          "type": "blob",
+        },
+      },
+      "hash": "5822dfcc81bf3ef8f99f68a21a33d07386fbd7b8",
+    },
+    "79ee2359849733d6a51fd1b5da1cebdbaa29254f" => Object {
+      "entries": Map {
+        "README.txt" => Object {
+          "hash": "6e70bfb555b270a017c743df4cd7d35d5337e0ef",
           "name": "README.txt",
           "type": "blob",
         },
       },
-      "hash": "4d5f2603a4b63aa68b8e51facf542a62e4c1d065",
+      "hash": "79ee2359849733d6a51fd1b5da1cebdbaa29254f",
     },
     "78fc9c83023386854c6bfdc5761c0e58f68e226f" => Object {
       "entries": Map {
@@ -123,13 +255,12 @@ Object {
 exports[`loadRepository processes an old commit 1`] = `
 Object {
   "commits": Set {
-    "cbb26b570d1eed3c681b8f03ff31231c1bffd6d6",
-    "301749e9af8cd6e9aee3a49a64029b98a4695e34",
+    "db7608c2b4eba9ca72c6e3d636a7795cf9bcb97d",
+    "486bb61573b09069dc9a55023b06e72049f8556d",
   },
   "trees": Set {
-    "f6736d27cd7eb7e35ae22a906854c700eb5cf6c1",
-    "4d5f2603a4b63aa68b8e51facf542a62e4c1d065",
-    "7b79d579b62994faba3b69fdf8aa442586c32681",
+    "5822dfcc81bf3ef8f99f68a21a33d07386fbd7b8",
+    "79ee2359849733d6a51fd1b5da1cebdbaa29254f",
   },
 }
 `;

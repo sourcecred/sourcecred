@@ -44,34 +44,4 @@ describe("loadRepository", () => {
       trees: new Set(part.trees.keys()),
     }).toMatchSnapshot();
   });
-
-  it("works with submodules", () => {
-    const repositoryPath = mkdtemp();
-    const git = makeUtils(repositoryPath);
-
-    const subproject = createExampleRepo(mkdtemp());
-
-    git.exec(["init"]);
-    git.exec(["submodule", "--quiet", "add", subproject.path, "physics"]);
-    git.deterministicCommit("Initial commit");
-
-    const head = git.head();
-
-    const repository = loadRepository(repositoryPath, "HEAD");
-    const commit = repository.commits.get(head);
-    expect(commit).toEqual(expect.anything());
-    if (commit == null) {
-      throw new Error("Unreachable");
-    }
-    const tree = repository.trees.get(commit.treeHash);
-    expect(tree).toEqual(expect.anything());
-    if (tree == null) {
-      throw new Error("Unreachable");
-    }
-    expect(tree.entries.get("physics")).toEqual({
-      type: "commit",
-      name: "physics",
-      hash: subproject.commits[subproject.commits.length - 1],
-    });
-  });
 });
