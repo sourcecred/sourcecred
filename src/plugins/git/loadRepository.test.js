@@ -13,7 +13,7 @@ afterAll(() => {
 });
 
 function mkdtemp() {
-  const result = tmp.dirSync();
+  const result = tmp.dirSync({unsafeCleanup: true});
   cleanups.push(() => result.removeCallback());
   return result.name;
 }
