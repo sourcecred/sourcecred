@@ -48,7 +48,7 @@ export function createExampleRepo(intoDirectory: string): RepositoryInfo {
       "-----------\n\n",
       "This repository provides example data for the SourceCred Git plugin.\n",
       "Pay no attention to the contents behind the curtain.\n",
-    ].join()
+    ].join("")
   );
   commit("Initial commit");
 
