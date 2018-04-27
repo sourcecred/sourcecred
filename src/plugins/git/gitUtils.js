@@ -12,13 +12,32 @@ export interface Utils {
   deterministicCommit(message: string): void;
 }
 
-export type GitDriver = (args: string[], options?: ExecOptions) => string;
-// `ExecOptions` is the type of the second argument to `execFileSync`.
-// See here for details: https://nodejs.org/api/child_process.html
-type ExecOptions = Object;
+export type GitDriver = (args: string[], env?: {[string]: string}) => string;
 
 export function localGit(repositoryPath: string): GitDriver {
-  return function git(args: string[], options?: ExecOptions): string {
+  return function git(args: string[], env?: {[string]: string}): string {
+    // We standardize the environment variables shown to Git, using
+    // Git's test suite [1] as inspiration. It is particularly important
+    // that `GIT_DIR` be unset from the parent process environment.
+    // Otherwise, these tests have the wrong behavior when running in an
+    // `exec` step of a Git rebase.
+    //
+    // [1]: https://github.com/git/git/blob/1f1cddd558b54bb0ce19c8ace353fd07b758510d/t/test-lib.sh#L90
+    const fullEnv = {
+      // Standardize output.
+      LANG: "C",
+      LC_ALL: "C",
+      PAGER: "cat",
+      TZ: "UTC",
+      // Short-circuit editing.
+      EDITOR: "true", // (this is `true` the command-line program)
+      GIT_MERGE_AUTOEDIT: "no",
+      // Ignore global Git settings, for test isolation.
+      GIT_CONFIG_NOSYSTEM: "1",
+      GIT_ATTR_NOSYSTEM: "1",
+      ...(env || {}),
+    };
+    const options = {env: fullEnv};
     return execFileSync(
       "git",
       ["-C", repositoryPath, ...args],
@@ -56,11 +75,8 @@ export function makeUtils(repositoryPath: string): Utils {
           message,
         ],
         {
-          env: {
-            TZ: "UTC",
-            GIT_AUTHOR_DATE: "2001-02-03T04:05:06",
-            GIT_COMMITTER_DATE: "2002-03-04T05:06:07",
-          },
+          GIT_AUTHOR_DATE: "2001-02-03T04:05:06",
+          GIT_COMMITTER_DATE: "2002-03-04T05:06:07",
         }
       );
     },
