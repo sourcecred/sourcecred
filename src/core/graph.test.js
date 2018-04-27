@@ -251,9 +251,9 @@ describe("graph", () => {
         expect(g.getInEdges(demoData.crabNode().address)).toContainEqual(
           demoData.crabLoopEdge()
         );
-        const crabAdjacencies = g.getAdjacentEdges(demoData.crabNode().address);
-        const crabLoops = crabAdjacencies.filter((e) =>
-          deepEqual(e, demoData.crabLoopEdge())
+        const crabNeighbors = g.getNeighborhood(demoData.crabNode().address);
+        const crabLoops = crabNeighbors.filter(({edge, neighborAddress}) =>
+          deepEqual(edge, demoData.crabLoopEdge())
         );
         expect(crabLoops).toHaveLength(1);
       });
@@ -414,9 +414,12 @@ describe("graph", () => {
             });
           });
         });
-        describe("adjacentEdges", () => {
+        describe("getNeighborhood", () => {
           const eg = new ExampleGraph();
-          const getEdges = (opts) => eg.graph.getAdjacentEdges(eg.root, opts);
+          const getEdges = (opts) =>
+            eg.graph
+              .getNeighborhood(eg.root, opts)
+              .map(({edge, neighborAddress}) => edge);
           const allEdges = [
             eg.inEdges.a1,
             eg.inEdges.a2,
@@ -455,46 +458,96 @@ describe("graph", () => {
           });
         });
       });
-      it("gets adjacent-edges", () => {
-        const nodeAndExpectedEdgePairs = [
-          [
-            demoData.heroNode(),
-            [
-              demoData.eatEdge(),
-              demoData.pickEdge(),
-              demoData.grabEdge(),
-              demoData.cookEdge(),
-              demoData.duplicateCookEdge(),
+      it("gets neighborhood", () => {
+        const nodeAndNeighborhood = [
+          {
+            node: demoData.heroNode(),
+            neighborhood: [
+              {
+                edge: demoData.eatEdge(),
+                neighborAddress: demoData.mealNode().address,
+              },
+              {
+                edge: demoData.pickEdge(),
+                neighborAddress: demoData.bananasNode().address,
+              },
+              {
+                edge: demoData.grabEdge(),
+                neighborAddress: demoData.crabNode().address,
+              },
+              {
+                edge: demoData.cookEdge(),
+                neighborAddress: demoData.mealNode().address,
+              },
+              {
+                edge: demoData.duplicateCookEdge(),
+                neighborAddress: demoData.mealNode().address,
+              },
             ],
-          ],
-          [
-            demoData.bananasNode(),
-            [demoData.pickEdge(), demoData.bananasIngredientEdge()],
-          ],
-          [
-            demoData.crabNode(),
-            [
-              demoData.crabIngredientEdge(),
-              demoData.grabEdge(),
-              demoData.crabLoopEdge(),
+          },
+          {
+            node: demoData.bananasNode(),
+            neighborhood: [
+              {
+                edge: demoData.pickEdge(),
+                neighborAddress: demoData.heroNode().address,
+              },
+              {
+                edge: demoData.bananasIngredientEdge(),
+                neighborAddress: demoData.mealNode().address,
+              },
             ],
-          ],
-          [
-            demoData.mealNode(),
-            [
-              demoData.bananasIngredientEdge(),
-              demoData.crabIngredientEdge(),
-              demoData.cookEdge(),
-              demoData.eatEdge(),
-              demoData.duplicateCookEdge(),
+          },
+          {
+            node: demoData.crabNode(),
+            neighborhood: [
+              {
+                edge: demoData.crabIngredientEdge(),
+                neighborAddress: demoData.mealNode().address,
+              },
+              {
+                edge: demoData.grabEdge(),
+                neighborAddress: demoData.heroNode().address,
+              },
+              {
+                edge: demoData.crabLoopEdge(),
+                neighborAddress: demoData.crabNode().address,
+              },
             ],
-          ],
+          },
+          {
+            node: demoData.mealNode(),
+            neighborhood: [
+              {
+                edge: demoData.bananasIngredientEdge(),
+                neighborAddress: demoData.bananasNode().address,
+              },
+              {
+                edge: demoData.crabIngredientEdge(),
+                neighborAddress: demoData.crabNode().address,
+              },
+              {
+                edge: demoData.cookEdge(),
+                neighborAddress: demoData.heroNode().address,
+              },
+              {
+                edge: demoData.eatEdge(),
+                neighborAddress: demoData.heroNode().address,
+              },
+              {
+                edge: demoData.duplicateCookEdge(),
+                neighborAddress: demoData.heroNode().address,
+              },
+            ],
+          },
         ];
-        nodeAndExpectedEdgePairs.forEach(([node, expectedEdges]) => {
+        nodeAndNeighborhood.forEach(({node, neighborhood}) => {
           const actual = demoData
             .advancedMealGraph()
-            .getAdjacentEdges(node.address);
-          expectSameSorted(actual, expectedEdges);
+            .getNeighborhood(node.address);
+          const sort = (hood) =>
+            sortBy(hood, (hoodlum) => stringify(hoodlum.edge.address));
+          expect(sort(actual)).toEqual(sort(neighborhood));
         });
       });
       it("gets out-edges", () => {
