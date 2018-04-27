@@ -319,7 +319,93 @@ describe("graph", () => {
       });
     });
 
-    describe("in- and out-edges", () => {
+    describe("getInEdges and getOutEdges", () => {
+      describe("type filtering", () => {
+        class ExampleGraph {
+          graph: Graph<{}, {}>;
+          root: Address;
+          idIncrement: number;
+          inEdges: {[string]: Edge<{}>};
+          outEdges: {[string]: Edge<{}>};
+          constructor() {
+            this.graph = new Graph();
+            this.idIncrement = 0;
+            this.root = this.addNode("ROOT").address;
+            this.inEdges = {
+              a1: this.addEdge("A", "1", true),
+              a2: this.addEdge("A", "2", true),
+              b1: this.addEdge("B", "1", true),
+              b2: this.addEdge("B", "2", true),
+            };
+            this.outEdges = {
+              a1: this.addEdge("A", "1", false),
+              a2: this.addEdge("A", "2", false),
+              b1: this.addEdge("B", "1", false),
+              b2: this.addEdge("B", "2", false),
+            };
+          }
+
+          makeAddress(type: string) {
+            const id = (this.idIncrement++).toString();
+            return {
+              id,
+              type,
+              pluginName: "graph-test",
+              repositoryName: "sourcecred",
+            };
+          }
+
+          addNode(type) {
+            const node = {
+              address: this.makeAddress(type),
+              payload: {},
+            };
+            this.graph.addNode(node);
+            return node;
+          }
+
+          addEdge(nodeType, edgeType, isInEdge) {
+            const node = this.addNode(nodeType);
+            const edge = {
+              address: this.makeAddress(edgeType),
+              src: isInEdge ? node.address : this.root,
+              dst: isInEdge ? this.root : node.address,
+              payload: {},
+            };
+            this.graph.addEdge(edge);
+            return edge;
+          }
+        }
+        const exampleGraph = new ExampleGraph();
+        [
+          [
+            "inEdges",
+            exampleGraph.inEdges,
+            (opts) => exampleGraph.graph.getInEdges(exampleGraph.root, opts),
+          ],
+          [
+            "outEdges",
+            exampleGraph.outEdges,
+            (opts) => exampleGraph.graph.getOutEdges(exampleGraph.root, opts),
+          ],
+        ].forEach(([choice, {a1, a2, b1, b2}, getEdges]) => {
+          describe(choice, () => {
+            it("typefiltering is optional", () => {
+              expectSameSorted(getEdges(), [a1, a2, b1, b2]);
+              expectSameSorted(getEdges({}), [a1, a2, b1, b2]);
+            });
+            it("filters on node types", () => {
+              expectSameSorted(getEdges({nodeType: "A"}), [a1, a2]);
+            });
+            it("filters on edge types", () => {
+              expectSameSorted(getEdges({edgeType: "1"}), [a1, b1]);
+            });
+            it("filters on node and edge types", () => {
+              expectSameSorted(getEdges({nodeType: "A", edgeType: "1"}), [a1]);
+            });
+          });
+        });
+      });
       it("gets out-edges", () => {
         const nodeAndExpectedEdgePairs = [
           [demoData.heroNode(), [demoData.eatEdge()]],
