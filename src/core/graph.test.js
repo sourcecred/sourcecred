@@ -1,5 +1,7 @@
 // @flow
 
+import deepEqual from "lodash.isequal";
+
 import type {Address, Addressable} from "./address";
 import {sortedByAddress} from "./address";
 import type {Node, Edge} from "./graph";
@@ -247,6 +249,11 @@ describe("graph", () => {
         expect(g.getInEdges(demoData.crabNode().address)).toContainEqual(
           demoData.crabLoopEdge()
         );
+        const crabAdjacencies = g.getAdjacentEdges(demoData.crabNode().address);
+        const crabLoops = crabAdjacencies.filter((e) =>
+          deepEqual(e, demoData.crabLoopEdge())
+        );
+        expect(crabLoops).toHaveLength(1);
       });
 
       it("allows creating multiple edges between the same nodes", () => {
@@ -404,6 +411,88 @@ describe("graph", () => {
               expectSameSorted(getEdges({nodeType: "A", edgeType: "1"}), [a1]);
             });
           });
+        });
+        describe("adjacentEdges", () => {
+          const eg = new ExampleGraph();
+          const getEdges = (opts) => eg.graph.getAdjacentEdges(eg.root, opts);
+          const allEdges = [
+            eg.inEdges.a1,
+            eg.inEdges.a2,
+            eg.inEdges.b1,
+            eg.inEdges.b2,
+            eg.outEdges.a1,
+            eg.outEdges.a2,
+            eg.outEdges.b1,
+            eg.outEdges.b2,
+          ];
+          it("typefiltering is optional", () => {
+            expectSameSorted(getEdges(), allEdges);
+            expectSameSorted(getEdges({}), allEdges);
+          });
+          it("filters on node types", () => {
+            expectSameSorted(getEdges({nodeType: "A"}), [
+              eg.outEdges.a1,
+              eg.outEdges.a2,
+              eg.inEdges.a1,
+              eg.inEdges.a2,
+            ]);
+          });
+          it("filters on edge types", () => {
+            expectSameSorted(getEdges({edgeType: "1"}), [
+              eg.outEdges.a1,
+              eg.outEdges.b1,
+              eg.inEdges.a1,
+              eg.inEdges.b1,
+            ]);
+          });
+          it("filters on node and edge types", () => {
+            expectSameSorted(getEdges({nodeType: "A", edgeType: "1"}), [
+              eg.outEdges.a1,
+              eg.inEdges.a1,
+            ]);
+          });
+        });
+      });
+      it("gets adjacent-edges", () => {
+        const nodeAndExpectedEdgePairs = [
+          [
+            demoData.heroNode(),
+            [
+              demoData.eatEdge(),
+              demoData.pickEdge(),
+              demoData.grabEdge(),
+              demoData.cookEdge(),
+              demoData.duplicateCookEdge(),
+            ],
+          ],
+          [
+            demoData.bananasNode(),
+            [demoData.pickEdge(), demoData.bananasIngredientEdge()],
+          ],
+          [
+            demoData.crabNode(),
+            [
+              demoData.crabIngredientEdge(),
+              demoData.grabEdge(),
+              demoData.crabLoopEdge(),
+            ],
+          ],
+          [
+            demoData.mealNode(),
+            [
+              demoData.bananasIngredientEdge(),
+              demoData.crabIngredientEdge(),
+              demoData.cookEdge(),
+              demoData.eatEdge(),
+              demoData.duplicateCookEdge(),
+            ],
+          ],
+        ];
+        nodeAndExpectedEdgePairs.forEach(([node, expectedEdges]) => {
+          const actual = demoData
+            .advancedMealGraph()
+            .getAdjacentEdges(node.address);
+          expectSameSorted(actual, expectedEdges);
         });
       });
       it("gets out-edges", () => {
