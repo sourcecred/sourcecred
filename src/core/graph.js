@@ -220,16 +220,27 @@ export class Graph<NP, EP> {
     return result;
   }
 
-  getAdjacentEdges(
+  /**
+   * Find the neighborhood of a given nodeAddress
+   *
+   * By neighborhood, we mean every `{edge, neighborAddress}` such that edge
+   * has `nodeAddress` as either `src` or `dst`, and `neighborAddress` is the
+   * address at the other end of the edge.
+   */
+  getNeighborhood(
     nodeAddress: Address,
     typeOptions?: {+nodeType?: string, +edgeType?: string}
-  ): Edge<EP>[] {
-    const inEdges = this.getInEdges(nodeAddress, typeOptions);
-    // If there are self-reference edges, avoid double counting them.
-    const outEdges = this.getOutEdges(nodeAddress, typeOptions).filter(
-      (e) => !deepEqual(e.src, e.dst)
-    );
-    return [].concat(inEdges, outEdges);
+  ): {+edge: Edge<EP>, +neighborAddress: Address}[] {
+    const inNeighbors = this.getInEdges(nodeAddress, typeOptions).map((e) => {
+      return {edge: e, neighborAddress: e.src};
+    });
+    const outNeighbors = this.getOutEdges(nodeAddress, typeOptions)
+      // If there are self-reference edges, avoid double counting them.
+      .filter((e) => !deepEqual(e.src, e.dst))
+      .map((e) => {
+        return {edge: e, neighborAddress: e.dst};
+      });
+    return [].concat(inNeighbors, outNeighbors);
   }
 
   /**
