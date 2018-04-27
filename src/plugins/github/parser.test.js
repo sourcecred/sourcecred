@@ -17,14 +17,14 @@ describe("GithubParser", () => {
 
     it("no node or edge has undefined properties in its payload", () => {
       graph
-        .getNodes()
+        .nodes()
         .forEach((n) =>
           Object.keys(n.payload).forEach((k) =>
             expect((n.payload: any)[k]).toBeDefined()
           )
         );
       graph
-        .getEdges()
+        .edges()
         .forEach((e) =>
           Object.keys(e.payload).forEach((k) =>
             expect((e.payload: any)[k]).toBeDefined()
@@ -34,16 +34,16 @@ describe("GithubParser", () => {
 
     it("every comment has an author and container", () => {
       const comments = graph
-        .getNodes()
+        .nodes()
         .filter((n) => n.address.type === "COMMENT");
       expect(comments).not.toHaveLength(0);
       comments.forEach((c) => {
         const authorEdges = graph
-          .getOutEdges(c.address)
+          .outEdges(c.address)
           .filter((e) => e.address.type === AUTHORS_EDGE_TYPE);
         expect(authorEdges.length).toBe(1);
         const containerEdges = graph
-          .getInEdges(c.address)
+          .inEdges(c.address)
           .filter((e) => e.address.type === CONTAINS_EDGE_TYPE);
         expect(containerEdges.length).toBe(1);
       });
@@ -51,13 +51,13 @@ describe("GithubParser", () => {
 
     it("every pull request and issue has an author", () => {
       const issuesAndPRs = graph
-        .getNodes()
+        .nodes()
         .filter(
           (n) => ["ISSUE", "PULL_REQUEST"].indexOf(n.address.type) !== -1
         );
       expect(issuesAndPRs).not.toHaveLength(0);
       issuesAndPRs.forEach((x) => {
-        const outEdges = graph.getOutEdges(x.address);
+        const outEdges = graph.outEdges(x.address);
         const authorEdges = outEdges.filter(
           (e) => e.address.type === AUTHORS_EDGE_TYPE
         );
