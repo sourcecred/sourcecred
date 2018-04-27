@@ -220,6 +220,18 @@ export class Graph<NP, EP> {
     return result;
   }
 
+  getAdjacentEdges(
+    nodeAddress: Address,
+    typeOptions?: {+nodeType?: string, +edgeType?: string}
+  ): Edge<EP>[] {
+    const inEdges = this.getInEdges(nodeAddress, typeOptions);
+    // If there are self-reference edges, avoid double counting them.
+    const outEdges = this.getOutEdges(nodeAddress, typeOptions).filter(
+      (e) => !deepEqual(e.src, e.dst)
+    );
+    return [].concat(inEdges, outEdges);
+  }
+
   /**
    * Gets all nodes in the graph, in unspecified order.
    */
