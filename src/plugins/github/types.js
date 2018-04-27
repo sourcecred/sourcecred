@@ -47,32 +47,13 @@ export type PullRequestReviewCommentNodePayload = {|
   +body: string,
 |};
 
-export const USER_NODE_TYPE: "USER" = "USER";
-export type UserNodePayload = {|
+export const AUTHOR_NODE_TYPE: "AUTHOR" = "AUTHOR";
+export type AuthorSubtype = "USER" | "BOT" | "ORGANIZATION";
+export type AuthorNodePayload = {|
   +login: string,
   +url: string,
+  +subtype: AuthorSubtype,
 |};
-
-export const BOT_NODE_TYPE: "BOT" = "BOT";
-export type BotNodePayload = {|
-  +login: string,
-  +url: string,
-|};
-
-export const ORGANIZATION_NODE_TYPE: "ORGANIZATION" = "ORGANIZATION";
-export type OrganizationNodePayload = {|
-  +login: string,
-  +url: string,
-|};
-
-export type AuthorNodeType =
-  | typeof USER_NODE_TYPE
-  | typeof BOT_NODE_TYPE
-  | typeof ORGANIZATION_NODE_TYPE;
-export type AuthorNodePayload =
-  | UserNodePayload
-  | BotNodePayload
-  | OrganizationNodePayload;
 
 // A map from NodeType string to the corresponding type and payload.
 // Primarily useful for adding static assertions with $ObjMap, but also
@@ -93,12 +74,7 @@ export type NodeTypes = {|
     payload: PullRequestReviewNodePayload,
     type: typeof PULL_REQUEST_REVIEW_NODE_TYPE,
   },
-  USER: {payload: UserNodePayload, type: typeof USER_NODE_TYPE},
-  ORGANIZATION: {
-    payload: OrganizationNodePayload,
-    type: typeof ORGANIZATION_NODE_TYPE,
-  },
-  BOT: {payload: BotNodePayload, type: typeof BOT_NODE_TYPE},
+  AUTHOR: {payload: AuthorNodePayload, type: typeof AUTHOR_NODE_TYPE},
 |};
 
 export type NodeType =
@@ -107,7 +83,7 @@ export type NodeType =
   | typeof COMMENT_NODE_TYPE
   | typeof PULL_REQUEST_REVIEW_NODE_TYPE
   | typeof PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE
-  | AuthorNodeType;
+  | typeof AUTHOR_NODE_TYPE;
 
 export type NodePayload =
   | IssueNodePayload

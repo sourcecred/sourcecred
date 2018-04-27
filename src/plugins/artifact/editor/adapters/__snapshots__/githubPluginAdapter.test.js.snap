@@ -6,15 +6,16 @@ Array [
     "id": "https://github.com/decentralion",
     "payload": Object {
       "login": "decentralion",
+      "subtype": "USER",
       "url": "https://github.com/decentralion",
     },
     "rendered": <div>
       type: 
-      USER
+      AUTHOR
        (details to be implemented)
 </div>,
     "title": "decentralion",
-    "type": "USER",
+    "type": "AUTHOR",
   },
   Object {
     "id": "https://github.com/sourcecred/example-repo/issues/1",
@@ -268,15 +269,16 @@ Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌�
     "id": "https://github.com/wchargin",
     "payload": Object {
       "login": "wchargin",
+      "subtype": "USER",
       "url": "https://github.com/wchargin",
     },
     "rendered": <div>
       type: 
-      USER
+      AUTHOR
        (details to be implemented)
 </div>,
     "title": "wchargin",
-    "type": "USER",
+    "type": "AUTHOR",
   },
 ]
 `;

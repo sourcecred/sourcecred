@@ -88,9 +88,7 @@ const adapter: PluginAdapter<NodePayload> = {
         return extractCommentTitle("review comment", anyNode);
       case "PULL_REQUEST_REVIEW":
         return extractPRReviewTitle(anyNode);
-      case "USER":
-      case "ORGANIZATION":
-      case "BOT":
+      case "AUTHOR":
         return extractAuthorTitle(anyNode);
       default:
         // eslint-disable-next-line no-unused-expressions
