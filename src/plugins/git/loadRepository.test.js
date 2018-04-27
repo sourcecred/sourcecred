@@ -2,9 +2,8 @@
 
 import tmp from "tmp";
 
-import type {GitDriver} from "./loadRepository";
 import {makeUtils} from "./gitUtils";
-import {localGit, loadRepository} from "./loadRepository";
+import {loadRepository} from "./loadRepository";
 
 const cleanups: (() => void)[] = [];
 afterAll(() => {
@@ -21,34 +20,33 @@ function mkdtemp() {
 
 function createRepository(): {path: string, commits: string[]} {
   const repositoryPath = mkdtemp();
-  const git = localGit(repositoryPath);
-  const gitUtils = makeUtils(git, repositoryPath);
+  const git = makeUtils(repositoryPath);
 
-  git(["init"]);
+  git.exec(["init"]);
 
-  gitUtils.writeAndStage("README.txt", "Amazing physics going on...\n");
-  gitUtils.deterministicCommit("Initial commit");
-  const commit1 = gitUtils.head();
+  git.writeAndStage("README.txt", "Amazing physics going on...\n");
+  git.deterministicCommit("Initial commit");
+  const commit1 = git.head();
 
-  gitUtils.writeAndStage("src/index.py", "import antigravity\n");
-  gitUtils.writeAndStage(
+  git.writeAndStage("src/index.py", "import antigravity\n");
+  git.writeAndStage(
     "src/quantum_gravity.py",
     'raise NotImplementedError("TODO(physicists)")\n'
   );
-  gitUtils.writeAndStage("TODOS.txt", "1. Resolve quantum gravity\n");
-  gitUtils.deterministicCommit("Discover gravity");
-  const commit2 = gitUtils.head();
+  git.writeAndStage("TODOS.txt", "1. Resolve quantum gravity\n");
+  git.deterministicCommit("Discover gravity");
+  const commit2 = git.head();
 
-  gitUtils.writeAndStage(
+  git.writeAndStage(
     "src/quantum_gravity.py",
     "import random\nif random.random() < 0.5:\n  import antigravity\n"
   );
-  gitUtils.deterministicCommit("Solve quantum gravity");
-  const commit3 = gitUtils.head();
+  git.deterministicCommit("Solve quantum gravity");
+  const commit3 = git.head();
 
-  git(["rm", "TODOS.txt"]);
-  gitUtils.deterministicCommit("Clean up TODOS");
-  const commit4 = gitUtils.head();
+  git.exec(["rm", "TODOS.txt"]);
+  git.deterministicCommit("Clean up TODOS");
+  const commit4 = git.head();
 
   return {
     path: repositoryPath,
@@ -88,16 +86,15 @@ describe("loadRepository", () => {
 
   it("works with submodules", () => {
     const repositoryPath = mkdtemp();
-    const git = localGit(repositoryPath);
-    const gitUtils = makeUtils(git, repositoryPath);
+    const git = makeUtils(repositoryPath);
 
     const subproject = createRepository();
 
-    git(["init"]);
-    git(["submodule", "--quiet", "add", subproject.path, "physics"]);
-    gitUtils.deterministicCommit("Initial commit");
+    git.exec(["init"]);
+    git.exec(["submodule", "--quiet", "add", subproject.path, "physics"]);
+    git.deterministicCommit("Initial commit");
 
-    const head = gitUtils.head();
+    const head = git.head();
 
     const repository = loadRepository(repositoryPath, "HEAD");
     const commit = repository.commits.get(head);

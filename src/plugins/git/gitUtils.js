@@ -1,19 +1,37 @@
 // @flow
 
+import {execFileSync} from "child_process";
 import fs from "fs";
 import mkdirp from "mkdirp";
 import path from "path";
 
-import type {GitDriver} from "./loadRepository";
-
-interface Utils {
+export interface Utils {
+  exec: GitDriver;
   head(): string;
   writeAndStage(filename: string, contents: string): void;
   deterministicCommit(message: string): void;
 }
 
-export function makeUtils(git: GitDriver, repositoryPath: string): Utils {
+export type GitDriver = (args: string[], options?: ExecOptions) => string;
+// `ExecOptions` is the type of the second argument to `execFileSync`.
+// See here for details: https://nodejs.org/api/child_process.html
+type ExecOptions = Object;
+
+export function localGit(repositoryPath: string): GitDriver {
+  return function git(args: string[], options?: ExecOptions): string {
+    return execFileSync(
+      "git",
+      ["-C", repositoryPath, ...args],
+      options
+    ).toString();
+  };
+}
+
+export function makeUtils(repositoryPath: string): Utils {
+  const git = localGit(repositoryPath);
   return {
+    exec: git,
+
     head() {
       return git(["rev-parse", "HEAD"]).trim();
     },
