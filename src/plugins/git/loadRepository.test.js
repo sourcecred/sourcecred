@@ -22,7 +22,12 @@ function mkdtemp() {
 describe("loadRepository", () => {
   it("loads from HEAD", () => {
     const repository = createExampleRepo(mkdtemp());
-    expect(loadRepository(repository.path, "HEAD")).toMatchSnapshot();
+    // In case of failure, run
+    //     src/plugins/git/loadRepositoryTest.sh --updateSnapshot
+    // to update the snapshot, then inspect the resulting changes.
+    expect(loadRepository(repository.path, "HEAD")).toEqual(
+      require("./demoData/example-git.json")
+    );
   });
 
   it("processes an old commit", () => {
