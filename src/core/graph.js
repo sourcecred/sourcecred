@@ -244,17 +244,31 @@ export class Graph<NP, EP> {
   }
 
   /**
-   * Gets all nodes in the graph, in unspecified order.
+   * Get nodes in the graph, in unspecified order.
+   *
+   * If filter is provided, it will return only nodes with the requested type.
    */
-  nodes(): Node<NP>[] {
-    return this._nodes.getAll();
+  nodes(filter?: {type?: string}): Node<NP>[] {
+    let nodes = this._nodes.getAll();
+    if (filter != null && filter.type != null) {
+      const typeFilter = filter.type;
+      nodes = nodes.filter((n) => n.address.type === typeFilter);
+    }
+    return nodes;
   }
 
   /**
-   * Gets all edges in the graph, in unspecified order.
+   * Gets edges in the graph, in unspecified order.
+   *
+   * If filter is provided, it will return only edges with the requested type.
    */
-  edges(): Edge<EP>[] {
-    return this._edges.getAll();
+  edges(filter?: {type?: string}): Edge<EP>[] {
+    let edges = this._edges.getAll();
+    if (filter != null && filter.type != null) {
+      const typeFilter = filter.type;
+      edges = edges.filter((e) => e.address.type === typeFilter);
+    }
+    return edges;
   }
 
   /**

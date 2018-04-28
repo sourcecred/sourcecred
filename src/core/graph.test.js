@@ -165,6 +165,24 @@ describe("graph", () => {
         expectSameSorted(expected, actual);
       });
 
+      it("can filter nodes", () => {
+        const typeAndExpectedNodes = [
+          {type: "PC", nodes: [demoData.heroNode()]},
+          {
+            type: "FOOD",
+            nodes: [
+              demoData.bananasNode(),
+              demoData.crabNode(),
+              demoData.mealNode(),
+            ],
+          },
+        ];
+        typeAndExpectedNodes.forEach(({type, nodes}) => {
+          const actual = demoData.advancedMealGraph().nodes({type});
+          expectSameSorted(actual, nodes);
+        });
+      });
+
       it("gets all edges", () => {
         const expected = [
           demoData.pickEdge(),
@@ -178,6 +196,41 @@ describe("graph", () => {
         ];
         const actual = demoData.advancedMealGraph().edges();
         expectSameSorted(expected, actual);
+      });
+
+      it("can filter edges", () => {
+        const typeAndExpectedEdges = [
+          {
+            type: "ACTION",
+            edges: [
+              demoData.pickEdge(),
+              demoData.grabEdge(),
+              demoData.cookEdge(),
+              demoData.duplicateCookEdge(),
+              demoData.eatEdge(),
+            ],
+          },
+          {
+            type: "INGREDIENT",
+            edges: [
+              demoData.bananasIngredientEdge(),
+              demoData.crabIngredientEdge(),
+            ],
+          },
+          {
+            type: "SILLY",
+            edges: [demoData.crabLoopEdge()],
+          },
+        ];
+        typeAndExpectedEdges.forEach(({type, edges}) => {
+          const actual = demoData.advancedMealGraph().edges({type});
+          expectSameSorted(actual, edges);
+        });
+      });
+      it("filter args are optional", () => {
+        const graph = demoData.advancedMealGraph();
+        expectSameSorted(graph.edges(), graph.edges({}));
+        expectSameSorted(graph.nodes(), graph.nodes({}));
       });
     });
 
