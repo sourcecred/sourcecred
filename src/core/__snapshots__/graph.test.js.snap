@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`graph #Graph JSON functions should serialize a simple graph 1`] = `
+exports[`graph JSON functions should serialize a simple graph 1`] = `
 Object {
   "edges": Object {
     "{\\"id\\":\\"crab-self-assessment\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"repositoryName\\":\\"sourcecred/eventide\\",\\"type\\":\\"SILLY\\"}": Object {
