@@ -26,13 +26,13 @@ export function loadRepository(
   const git = localGit(repositoryPath);
   const commits = findCommits(git, rootRef);
   const trees = findTrees(git, new Set(commits.map((x) => x.treeHash)));
-  return {commits: hashMap(commits), trees: hashMap(trees)};
+  return {commits: objectMap(commits), trees: objectMap(trees)};
 }
 
-function hashMap<T: {+hash: Hash}>(ts: $ReadOnlyArray<T>): Map<Hash, T> {
-  const result = new Map();
+function objectMap<T: {+hash: Hash}>(ts: $ReadOnlyArray<T>): {[Hash]: T} {
+  const result = {};
   ts.forEach((t) => {
-    result.set(t.hash, t);
+    result[t.hash] = t;
   });
   return result;
 }
@@ -62,17 +62,19 @@ function findTrees(git: GitDriver, rootTrees: Set<Hash>): Tree[] {
     frontier.delete(treeHash);
     const tree = loadTree(git, treeHash);
     result.push(tree);
-    for (const entry of tree.entries.values()) {
+    Object.keys(tree.entries).forEach((key) => {
+      const entry = tree.entries[key];
       if (entry.type === "tree" && !visited.has(entry.hash)) {
         frontier.add(entry.hash);
       }
-    }
+    });
   }
   return result;
 }
 
 function loadTree(git: GitDriver, treeHash: Hash): Tree {
-  const entries: TreeEntry[] = git(["ls-tree", "--full-tree", "-z", treeHash])
+  const entries: {[name: string]: TreeEntry} = {};
+  git(["ls-tree", "--full-tree", "-z", treeHash])
     .split("\0")
     .filter((line) => line.length > 0)
     .map((line) => {
@@ -85,7 +87,7 @@ function loadTree(git: GitDriver, treeHash: Hash): Tree {
             `has unexpected type "${type}"`
         );
       }
-      return {name, type, hash};
+      entries[name] = {name, type, hash};
     });
-  return {hash: treeHash, entries: new Map(entries.map((e) => [e.name, e]))};
+  return {hash: treeHash, entries: entries};
 }

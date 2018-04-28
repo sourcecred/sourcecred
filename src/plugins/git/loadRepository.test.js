@@ -31,17 +31,17 @@ describe("loadRepository", () => {
     const part = loadRepository(repository.path, repository.commits[1]);
 
     // Check that `part` is a subset of `whole`...
-    for (const hash of part.commits.keys()) {
-      expect(part.commits.get(hash)).toEqual(whole.commits.get(hash));
-    }
-    for (const hash of part.trees.keys()) {
-      expect(part.trees.get(hash)).toEqual(whole.trees.get(hash));
-    }
+    Object.keys(part.commits).forEach((hash) => {
+      expect(part.commits[hash]).toEqual(whole.commits[hash]);
+    });
+    Object.keys(part.trees).forEach((hash) => {
+      expect(part.trees[hash]).toEqual(whole.trees[hash]);
+    });
 
     // ...and that it's the right subset.
     expect({
-      commits: new Set(part.commits.keys()),
-      trees: new Set(part.trees.keys()),
+      commits: new Set(Object.keys(part.commits)),
+      trees: new Set(Object.keys(part.trees)),
     }).toMatchSnapshot();
   });
 });
