@@ -18,7 +18,9 @@ Object {
 }
 `;
 
-exports[`GitHub porcelain API Comment 1`] = `
+exports[`GitHub porcelain API Comment 1`] = `3`;
+
+exports[`GitHub porcelain API Comment 2`] = `
 Object {
   "address": Object {
     "id": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",

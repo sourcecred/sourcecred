@@ -139,6 +139,20 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "COMMENT",
   },
   Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-385223316",
+    "payload": Object {
+      "body": "This comment references an #2, which itself references an issue. This comment is thus allows us to test that in-references are not included when requesting a Post's references.",
+      "url": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-385223316",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #6: An issue with comments",
+    "type": "COMMENT",
+  },
+  Object {
     "id": "https://github.com/sourcecred/example-repo/issues/7",
     "payload": Object {
       "body": "Deal with this, naive string display algorithms!!!!!",

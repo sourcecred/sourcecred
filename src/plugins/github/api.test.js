@@ -51,7 +51,7 @@ describe("GitHub porcelain API", () => {
       throw new Error("Issue reaching issue!");
     }
     const comments = issue.comments();
-    expect(comments).toHaveLength(2);
+    expect(comments.length).toMatchSnapshot();
     const comment = comments[0];
     expect(comment.type()).toBe(COMMENT_NODE_TYPE);
     expect(comment.body()).toBe("A wild COMMENT appeared!");
