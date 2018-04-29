@@ -12,12 +12,16 @@ import {
 describe("GitHub porcelain API", () => {
   const graph = parse("sourcecred/example-repo", exampleRepoData);
   const repo = new Repository("sourcecred/example-repo", graph);
+  function issueOrPRByNumber(n: number): Issue | PullRequest {
+    const result = repo.issueOrPRByNumber(n);
+    if (result == null) {
+      throw new Error(`Expected Issue/PR ${n} to exist`);
+    }
+    return result;
+  }
 
   it("Issue", () => {
-    const issue = repo.issueOrPRByNumber(1);
-    if (issue == null) {
-      throw new Error("Issue reaching issue!");
-    }
+    const issue = issueOrPRByNumber(1);
     expect(issue.title()).toBe("An example issue.");
     expect(issue.body()).toBe("This is just an example issue.");
     expect(issue.number()).toBe(1);
@@ -31,10 +35,7 @@ describe("GitHub porcelain API", () => {
   });
 
   it("PullRequest", () => {
-    const pullRequest = repo.issueOrPRByNumber(3);
-    if (pullRequest == null) {
-      throw new Error("Issue reaching PR!");
-    }
+    const pullRequest = issueOrPRByNumber(3);
     expect(pullRequest.body()).toBe("Oh look, it's a pull request.");
     expect(pullRequest.url()).toBe(
       "https://github.com/sourcecred/example-repo/pull/3"
@@ -46,10 +47,7 @@ describe("GitHub porcelain API", () => {
   });
 
   it("Comment", () => {
-    const issue = repo.issueOrPRByNumber(6);
-    if (issue == null) {
-      throw new Error("Issue reaching issue!");
-    }
+    const issue = issueOrPRByNumber(6);
     const comments = issue.comments();
     expect(comments.length).toMatchSnapshot();
     const comment = comments[0];
@@ -77,5 +75,28 @@ describe("GitHub porcelain API", () => {
     expect(decentralion.subtype()).toBe("USER");
     expect(decentralion.node()).toMatchSnapshot();
     expect(decentralion.address()).toEqual(decentralion.node().address);
+  });
+
+  describe("type coercion", () => {
+    it("type coercion works when typed correctly", () => {
+      const issue: Issue = Issue.from(issueOrPRByNumber(1));
+      const pr: PullRequest = PullRequest.from(issueOrPRByNumber(3));
+      const author: Author = Author.from(issueOrPRByNumber(3).authors()[0]);
+      const comment: Comment = Comment.from(issueOrPRByNumber(2).comments()[0]);
+    });
+    it("type coercion throws error when typed incorrectly", () => {
+      expect(() => PullRequest.from(issueOrPRByNumber(1))).toThrowError(
+        "to have type PULL_REQUEST"
+      );
+      expect(() => Issue.from(issueOrPRByNumber(3))).toThrowError(
+        "to have type ISSUE"
+      );
+      expect(() =>
+        Comment.from(issueOrPRByNumber(3).authors()[0])
+      ).toThrowError("to have type COMMENT");
+      expect(() =>
+        Author.from(issueOrPRByNumber(2).comments()[0])
+      ).toThrowError("to have type AUTHOR");
+    });
   });
 });
