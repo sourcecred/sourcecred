@@ -33,6 +33,7 @@
     "jest": "20.0.4",
     "json-stable-stringify": "^1.0.1",
     "lint-staged": "^6.1.1",
+    "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
     "lodash.sortby": "^4.7.0",
     "object-assign": "4.1.1",
