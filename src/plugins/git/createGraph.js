@@ -13,7 +13,7 @@ import type {
   EdgeType,
 } from "./types";
 import {Graph, edgeID} from "../../core/graph";
-import {GIT_PLUGIN_NAME, treeEntryId} from "./types";
+import {GIT_PLUGIN_NAME, includesEdgeId, treeEntryId} from "./types";
 
 class GitGraphCreator {
   repositoryName: string;
@@ -85,7 +85,7 @@ class GitGraphCreator {
       const entryEdge = {
         address: this.makeAddress(
           "INCLUDES",
-          edgeID(treeNode.address, entryNode.address)
+          includesEdgeId(tree.hash, entry.name)
         ),
         src: treeNode.address,
         dst: entryNode.address,
