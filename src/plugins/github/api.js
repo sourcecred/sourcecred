@@ -113,7 +113,7 @@ class Post<
         edgeType: AUTHORS_EDGE_TYPE,
         nodeType: AUTHOR_NODE_TYPE,
       })
-      .map(({neighborAddress}) => new Author(this.graph, neighborAddress));
+      .map(({neighbor}) => new Author(this.graph, neighbor));
   }
 
   body(): string {
@@ -130,7 +130,7 @@ class Commentable<T: IssueNodePayload | PullRequestNodePayload> extends Post<
         edgeType: CONTAINS_EDGE_TYPE,
         nodeType: COMMENT_NODE_TYPE,
       })
-      .map(({neighborAddress}) => new Comment(this.graph, neighborAddress));
+      .map(({neighbor}) => new Comment(this.graph, neighbor));
   }
 }
 

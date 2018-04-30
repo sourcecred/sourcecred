@@ -38,14 +38,16 @@ describe("GithubParser", () => {
         .filter((n) => n.address.type === "COMMENT");
       expect(comments).not.toHaveLength(0);
       comments.forEach((c) => {
-        const authorEdges = graph
-          .outEdges(c.address)
-          .filter((e) => e.address.type === AUTHORS_EDGE_TYPE);
-        expect(authorEdges.length).toBe(1);
-        const containerEdges = graph
-          .inEdges(c.address)
-          .filter((e) => e.address.type === CONTAINS_EDGE_TYPE);
-        expect(containerEdges.length).toBe(1);
+        const authorNeighbors = graph.neighborhood(c.address, {
+          edgeType: AUTHORS_EDGE_TYPE,
+          direction: "OUT",
+        });
+        expect(authorNeighbors.length).toBe(1);
+        const containerNeighbors = graph.neighborhood(c.address, {
+          direction: "IN",
+          edgeType: CONTAINS_EDGE_TYPE,
+        });
+        expect(containerNeighbors.length).toBe(1);
       });
     });
 
@@ -57,11 +59,11 @@ describe("GithubParser", () => {
         );
       expect(issuesAndPRs).not.toHaveLength(0);
       issuesAndPRs.forEach((x) => {
-        const outEdges = graph.outEdges(x.address);
-        const authorEdges = outEdges.filter(
-          (e) => e.address.type === AUTHORS_EDGE_TYPE
-        );
-        expect(authorEdges.length).toBe(1);
+        const authorNeighbors = graph.neighborhood(x.address, {
+          edgeType: AUTHORS_EDGE_TYPE,
+          direction: "OUT",
+        });
+        expect(authorNeighbors.length).toBe(1);
       });
     });
   });

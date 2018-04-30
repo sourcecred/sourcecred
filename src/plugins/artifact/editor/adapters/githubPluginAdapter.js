@@ -38,11 +38,12 @@ const adapter: PluginAdapter<NodePayload> = {
     // previously queried IDs.)
     function extractParentTitles(node: Node<NodePayload>): string[] {
       return graph
-        .inEdges(node.address)
-        .filter((e) => e.address.type === CONTAINS_EDGE_TYPE)
-        .map((e) => graph.node(e.src))
-        .map((container) => {
-          return adapter.extractTitle(graph, container);
+        .neighborhood(node.address, {
+          direction: "IN",
+          edgeType: CONTAINS_EDGE_TYPE,
+        })
+        .map(({neighbor}) => {
+          return adapter.extractTitle(graph, graph.node(neighbor));
         });
     }
     function extractIssueOrPrTitle(

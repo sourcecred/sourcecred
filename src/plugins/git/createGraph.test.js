@@ -62,26 +62,31 @@ describe("createGraph", () => {
         id: hash,
       };
 
-      const entryChildren = graph.outEdges(address, {
+      const entryChildren = graph.neighborhood(address, {
         nodeType: TREE_ENTRY_NODE_TYPE,
         edgeType: INCLUDES_EDGE_TYPE,
+        direction: "OUT",
       });
       expect(entryChildren).toHaveLength(
         Object.keys(data.trees[hash].entries).length
       );
-      expect(graph.outEdges(address)).toHaveLength(entryChildren.length);
+      expect(graph.neighborhood(address, {direction: "OUT"})).toHaveLength(
+        entryChildren.length
+      );
 
       expect(graph.node(address)).toEqual({address, payload: {}});
-      const owningCommits = graph.inEdges(address, {
+      const owningCommits = graph.neighborhood(address, {
         nodeType: COMMIT_NODE_TYPE,
         edgeType: HAS_TREE_EDGE_TYPE,
+        direction: "IN",
       });
       expect(owningCommits.length).toBeLessThanOrEqual(1);
-      const parentTreeEntries = graph.inEdges(address, {
+      const parentTreeEntries = graph.neighborhood(address, {
         nodeType: TREE_ENTRY_NODE_TYPE,
         edgeType: HAS_CONTENTS_EDGE_TYPE,
+        direction: "IN",
       });
-      expect(graph.inEdges(address)).toHaveLength(
+      expect(graph.neighborhood(address, {direction: "IN"})).toHaveLength(
         owningCommits.length + parentTreeEntries.length
       );
     });
@@ -110,14 +115,18 @@ describe("createGraph", () => {
           id: treeEntryId(hash, name),
         };
         expect(
-          graph.inEdges(entryAddress, {
+          graph.neighborhood(entryAddress, {
             nodeType: TREE_NODE_TYPE,
             edgeType: INCLUDES_EDGE_TYPE,
+            direction: "IN",
           })
         ).toHaveLength(1);
         const shouldHaveContents = tree.entries[name].type !== "commit";
         expect(
-          graph.outEdges(entryAddress, {edgeType: HAS_CONTENTS_EDGE_TYPE})
+          graph.neighborhood(entryAddress, {
+            edgeType: HAS_CONTENTS_EDGE_TYPE,
+            direction: "OUT",
+          })
         ).toHaveLength(shouldHaveContents ? 1 : 0);
         expect(graph.neighborhood(entryAddress)).toHaveLength(
           shouldHaveContents ? 2 : 1
@@ -142,7 +151,7 @@ describe("createGraph", () => {
         .neighborhood(nodeAddress, filter)
         .filter((x) => predicate(x));
       expect(edges).toHaveLength(1);
-      return edges[0].neighborAddress;
+      return edges[0].neighbor;
     }
 
     function uniqueTree(graph, commitAddress) {
@@ -218,7 +227,9 @@ describe("createGraph", () => {
       expect(graph.node(treeEntryAddress)).toEqual(expect.anything());
       // Submodule commits never have contents, because the commit nodes
       // are from an unknown repository.
-      expect(graph.outEdges(treeEntryAddress)).toHaveLength(0);
+      expect(
+        graph.neighborhood(treeEntryAddress, {direction: "OUT"})
+      ).toHaveLength(0);
     });
   });
 });
