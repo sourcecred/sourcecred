@@ -13,7 +13,18 @@ import type {
   EdgeType,
 } from "./types";
 import {Graph, edgeID} from "../../core/graph";
-import {GIT_PLUGIN_NAME, includesEdgeId, treeEntryId} from "./types";
+import {
+  BLOB_NODE_TYPE,
+  COMMIT_NODE_TYPE,
+  TREE_NODE_TYPE,
+  TREE_ENTRY_NODE_TYPE,
+  INCLUDES_EDGE_TYPE,
+  HAS_CONTENTS_EDGE_TYPE,
+  HAS_TREE_EDGE_TYPE,
+  GIT_PLUGIN_NAME,
+  includesEdgeId,
+  treeEntryId,
+} from "./types";
 
 class GitGraphCreator {
   repositoryName: string;
@@ -45,16 +56,16 @@ class GitGraphCreator {
 
   commitGraph(commit: Commit) {
     const commitNode = {
-      address: this.makeAddress("COMMIT", commit.hash),
+      address: this.makeAddress(COMMIT_NODE_TYPE, commit.hash),
       payload: {},
     };
     const treeNode = {
-      address: this.makeAddress("TREE", commit.treeHash),
+      address: this.makeAddress(TREE_NODE_TYPE, commit.treeHash),
       payload: {},
     };
     const edge = {
       address: this.makeAddress(
-        "HAS_TREE",
+        HAS_TREE_EDGE_TYPE,
         edgeID(commitNode.address, treeNode.address)
       ),
       src: commitNode.address,
@@ -69,7 +80,7 @@ class GitGraphCreator {
 
   treeGraph(tree: Tree) {
     const treeNode = {
-      address: this.makeAddress("TREE", tree.hash),
+      address: this.makeAddress(TREE_NODE_TYPE, tree.hash),
       payload: {},
     };
     const result = new Graph().addNode(treeNode);
@@ -77,14 +88,14 @@ class GitGraphCreator {
       const entry = tree.entries[name];
       const entryNode = {
         address: this.makeAddress(
-          "TREE_ENTRY",
+          TREE_ENTRY_NODE_TYPE,
           treeEntryId(tree.hash, entry.name)
         ),
         payload: {},
       };
       const entryEdge = {
         address: this.makeAddress(
-          "INCLUDES",
+          INCLUDES_EDGE_TYPE,
           includesEdgeId(tree.hash, entry.name)
         ),
         src: treeNode.address,
@@ -97,9 +108,9 @@ class GitGraphCreator {
       } else {
         let contentsNodeType;
         if (entry.type === "tree") {
-          contentsNodeType = "TREE";
+          contentsNodeType = TREE_NODE_TYPE;
         } else if (entry.type === "blob") {
-          contentsNodeType = "BLOB";
+          contentsNodeType = BLOB_NODE_TYPE;
         } else {
           (entry.type: empty);
           throw new Error(`Unknown entry type: ${entry.type}`);
@@ -110,7 +121,7 @@ class GitGraphCreator {
         };
         const contentsEdge = {
           address: this.makeAddress(
-            "HAS_CONTENTS",
+            HAS_CONTENTS_EDGE_TYPE,
             edgeID(entryNode.address, contentsNode.address)
           ),
           src: entryNode.address,

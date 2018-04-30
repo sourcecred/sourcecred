@@ -4,7 +4,16 @@ import cloneDeep from "lodash.clonedeep";
 import deepEqual from "lodash.isequal";
 
 import {createGraph} from "./createGraph";
-import {GIT_PLUGIN_NAME, treeEntryId} from "./types";
+import {
+  COMMIT_NODE_TYPE,
+  GIT_PLUGIN_NAME,
+  HAS_CONTENTS_EDGE_TYPE,
+  HAS_TREE_EDGE_TYPE,
+  INCLUDES_EDGE_TYPE,
+  TREE_ENTRY_NODE_TYPE,
+  TREE_NODE_TYPE,
+  treeEntryId,
+} from "./types";
 
 const makeData = () => cloneDeep(require("./demoData/example-git"));
 
@@ -28,13 +37,16 @@ describe("createGraph", () => {
       const address = {
         pluginName: GIT_PLUGIN_NAME,
         repositoryName: "sourcecred/example-git",
-        type: "COMMIT",
+        type: COMMIT_NODE_TYPE,
         id: hash,
       };
       expect(graph.node(address)).toEqual({address, payload: {}});
       expect(graph.neighborhood(address)).toHaveLength(1);
       expect(
-        graph.neighborhood(address, {nodeType: "TREE", edgeType: "HAS_TREE"})
+        graph.neighborhood(address, {
+          nodeType: TREE_NODE_TYPE,
+          edgeType: HAS_TREE_EDGE_TYPE,
+        })
       ).toHaveLength(1);
     });
   });
@@ -46,13 +58,13 @@ describe("createGraph", () => {
       const address = {
         pluginName: GIT_PLUGIN_NAME,
         repositoryName: "sourcecred/example-git",
-        type: "TREE",
+        type: TREE_NODE_TYPE,
         id: hash,
       };
 
       const entryChildren = graph.outEdges(address, {
-        nodeType: "TREE_ENTRY",
-        edgeType: "INCLUDES",
+        nodeType: TREE_ENTRY_NODE_TYPE,
+        edgeType: INCLUDES_EDGE_TYPE,
       });
       expect(entryChildren).toHaveLength(
         Object.keys(data.trees[hash].entries).length
@@ -61,13 +73,13 @@ describe("createGraph", () => {
 
       expect(graph.node(address)).toEqual({address, payload: {}});
       const owningCommits = graph.inEdges(address, {
-        nodeType: "COMMIT",
-        edgeType: "HAS_TREE",
+        nodeType: COMMIT_NODE_TYPE,
+        edgeType: HAS_TREE_EDGE_TYPE,
       });
       expect(owningCommits.length).toBeLessThanOrEqual(1);
       const parentTreeEntries = graph.inEdges(address, {
-        nodeType: "TREE_ENTRY",
-        edgeType: "HAS_CONTENTS",
+        nodeType: TREE_ENTRY_NODE_TYPE,
+        edgeType: HAS_CONTENTS_EDGE_TYPE,
       });
       expect(graph.inEdges(address)).toHaveLength(
         owningCommits.length + parentTreeEntries.length
@@ -83,22 +95,25 @@ describe("createGraph", () => {
       const treeAddress = {
         pluginName: GIT_PLUGIN_NAME,
         repositoryName: "sourcecred/example-git",
-        type: "TREE",
+        type: TREE_NODE_TYPE,
         id: hash,
       };
       Object.keys(tree.entries).forEach((name) => {
         const entryAddress = {
           pluginName: GIT_PLUGIN_NAME,
           repositoryName: "sourcecred/example-git",
-          type: "TREE_ENTRY",
+          type: TREE_ENTRY_NODE_TYPE,
           id: treeEntryId(hash, name),
         };
         expect(
-          graph.inEdges(entryAddress, {nodeType: "TREE", edgeType: "INCLUDES"})
+          graph.inEdges(entryAddress, {
+            nodeType: TREE_NODE_TYPE,
+            edgeType: INCLUDES_EDGE_TYPE,
+          })
         ).toHaveLength(1);
         const shouldHaveContents = tree.entries[name].type !== "commit";
         expect(
-          graph.outEdges(entryAddress, {edgeType: "HAS_CONTENTS"})
+          graph.outEdges(entryAddress, {edgeType: HAS_CONTENTS_EDGE_TYPE})
         ).toHaveLength(shouldHaveContents ? 1 : 0);
         expect(graph.neighborhood(entryAddress)).toHaveLength(
           shouldHaveContents ? 2 : 1
