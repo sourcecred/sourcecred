@@ -55,7 +55,7 @@ describe("address", () => {
       const actual = makeMap().getAll();
       const expected = [mansion(), mattressStore()];
       const sort = (xs) => sortBy(xs, (x) => stringify(x.address));
-      expect(sort(actual)).toEqual(sort(actual));
+      expect(sort(actual)).toEqual(sort(expected));
     });
 
     it("removes objects by key", () => {

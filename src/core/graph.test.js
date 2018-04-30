@@ -305,7 +305,7 @@ describe("graph", () => {
           demoData.crabLoopEdge()
         );
         const crabNeighbors = g.neighborhood(demoData.crabNode().address);
-        const crabLoops = crabNeighbors.filter(({edge, neighborAddress}) =>
+        const crabLoops = crabNeighbors.filter(({edge}) =>
           deepEqual(edge, demoData.crabLoopEdge())
         );
         expect(crabLoops).toHaveLength(1);
@@ -470,9 +470,7 @@ describe("graph", () => {
         describe("neighborhood", () => {
           const eg = new ExampleGraph();
           const edges = (opts) =>
-            eg.graph
-              .neighborhood(eg.root, opts)
-              .map(({edge, neighborAddress}) => edge);
+            eg.graph.neighborhood(eg.root, opts).map(({edge}) => edge);
           const allEdges = [
             eg.inEdges.a1,
             eg.inEdges.a2,
@@ -1138,7 +1136,7 @@ describe("graph", () => {
         expect(g1.equals(demoData.advancedMealGraph())).toBe(true);
       });
 
-      function itAllowsUpcastingPayloadTypes(
+      function _unused_itAllowsUpcastingPayloadTypes(
         g: Graph<{x: string, y: number}, boolean>
       ): Graph<{x: string}, ?boolean> {
         return g.copy();

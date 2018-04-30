@@ -77,10 +77,10 @@ function loadTree(git: GitDriver, treeHash: Hash): Tree {
   git(["ls-tree", "--full-tree", "-z", treeHash])
     .split("\0")
     .filter((line) => line.length > 0)
-    .map((line) => {
+    .forEach((line) => {
       // See `git help ls-tree`, section OUTPUT FORMAT, for details.
       const [metadata, name] = line.split("\t");
-      const [mode, type, hash] = metadata.split(" ");
+      const [_unused_mode, type, hash] = metadata.split(" ");
       if (type !== "blob" && type !== "commit" && type !== "tree") {
         throw new Error(
           `entry ${treeHash}[${JSON.stringify(name)}] ` +

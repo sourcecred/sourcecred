@@ -2,7 +2,6 @@
 
 import React from "react";
 
-import type {Address} from "../../../core/address";
 import type {Node} from "../../../core/graph";
 import {AdapterSet} from "./adapterSet";
 import {Graph} from "../../../core/graph";
@@ -100,7 +99,7 @@ export class ContributionList extends React.Component<Props, State> {
               node.address.type === typeFilter.type
             );
           }
-        : (node) => true;
+        : (_) => true;
       return (
         <table>
           <thead>

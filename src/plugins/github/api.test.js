@@ -79,10 +79,14 @@ describe("GitHub porcelain API", () => {
 
   describe("type coercion", () => {
     it("type coercion works when typed correctly", () => {
-      const issue: Issue = Issue.from(issueOrPRByNumber(1));
-      const pr: PullRequest = PullRequest.from(issueOrPRByNumber(3));
-      const author: Author = Author.from(issueOrPRByNumber(3).authors()[0]);
-      const comment: Comment = Comment.from(issueOrPRByNumber(2).comments()[0]);
+      const _unused_issue: Issue = Issue.from(issueOrPRByNumber(1));
+      const _unused_pr: PullRequest = PullRequest.from(issueOrPRByNumber(3));
+      const _unused_author: Author = Author.from(
+        issueOrPRByNumber(3).authors()[0]
+      );
+      const _unused_comment: Comment = Comment.from(
+        issueOrPRByNumber(2).comments()[0]
+      );
     });
     it("type coercion throws error when typed incorrectly", () => {
       expect(() => PullRequest.from(issueOrPRByNumber(1))).toThrowError(

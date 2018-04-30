@@ -47,9 +47,7 @@ export class SettingsConfig extends React.Component<Props, State> {
             onChange={(e) => {
               const value = e.target.value;
               this.setState(
-                (state) => ({
-                  githubApiToken: value,
-                }),
+                {githubApiToken: value},
                 this._updateSettings.bind(this)
               );
             }}
@@ -63,9 +61,7 @@ export class SettingsConfig extends React.Component<Props, State> {
             onChange={(e) => {
               const value = e.target.value;
               this.setState(
-                (state) => ({
-                  repoOwner: value,
-                }),
+                {repoOwner: value},
                 this._updateSettings.bind(this)
               );
             }}
@@ -78,12 +74,7 @@ export class SettingsConfig extends React.Component<Props, State> {
             value={this.state.repoName}
             onChange={(e) => {
               const value = e.target.value;
-              this.setState(
-                (state) => ({
-                  repoName: value,
-                }),
-                this._updateSettings.bind(this)
-              );
+              this.setState({repoName: value}, this._updateSettings.bind(this));
             }}
           />
         </label>

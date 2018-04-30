@@ -126,10 +126,10 @@ export type EdgePayload =
   | ContainsEdgePayload
   | ReferencesEdgePayload;
 
-(function staticAssertions() {
+function _unused_staticAssertions() {
   // Check that node & edge payload types are exhaustive.
-  (x: NodeType): $Keys<NodeTypes> => x;
-  (x: EdgeType): $Keys<EdgeTypes> => x;
+  const _unused_exhaustiveNode = (x: NodeType): $Keys<NodeTypes> => x;
+  const _unused_exhaustiveEdge = (x: EdgeType): $Keys<EdgeTypes> => x;
 
   // Check that each type is associated with the correct ID type.
   // Doesn't work because of a Flow bug; should work if that bug is
@@ -142,4 +142,4 @@ export type EdgePayload =
   //   $ElementType<$ElementType<NodeTypes, T>, "id">,
   //   "type"
   // > => x;
-});
+}

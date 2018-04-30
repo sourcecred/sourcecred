@@ -3,7 +3,6 @@
 import tmp from "tmp";
 
 import {createExampleRepo} from "./demoData/exampleRepo";
-import {makeUtils} from "./gitUtils";
 import {loadRepository} from "./loadRepository";
 
 const cleanups: (() => void)[] = [];
