@@ -1,9 +1,7 @@
 // @flow
 
 import cloneDeep from "lodash.clonedeep";
-import deepEqual from "lodash.isequal";
 
-import type {NodeType} from "./types";
 import {createGraph} from "./createGraph";
 import {
   BLOB_NODE_TYPE,
@@ -100,6 +98,10 @@ describe("createGraph", () => {
         type: TREE_NODE_TYPE,
         id: hash,
       };
+      expect(graph.node(treeAddress)).toEqual({
+        address: treeAddress,
+        payload: {},
+      });
       Object.keys(tree.entries).forEach((name) => {
         const entryAddress = {
           pluginName: GIT_PLUGIN_NAME,

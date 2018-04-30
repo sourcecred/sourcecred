@@ -1,7 +1,5 @@
 // @flow
 
-import stringify from "json-stable-stringify";
-
 export const GIT_PLUGIN_NAME = "sourcecred/git-beta";
 
 // Logical types

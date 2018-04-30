@@ -1,12 +1,10 @@
 // @flow
 
 import type {Address} from "../../core/address";
-import type {Node, Edge} from "../../core/graph";
 import type {
   Repository,
   Commit,
   Tree,
-  TreeEntry,
   NodePayload,
   EdgePayload,
   NodeType,
@@ -112,6 +110,7 @@ class GitGraphCreator {
         } else if (entry.type === "blob") {
           contentsNodeType = BLOB_NODE_TYPE;
         } else {
+          // eslint-disable-next-line no-unused-expressions
           (entry.type: empty);
           throw new Error(`Unknown entry type: ${entry.type}`);
         }
