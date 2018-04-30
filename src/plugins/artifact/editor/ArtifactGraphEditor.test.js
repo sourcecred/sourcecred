@@ -2,8 +2,6 @@
 
 import React from "react";
 import {shallow} from "enzyme";
-import enzymeToJSON from "enzyme-to-json";
-import stringify from "json-stable-stringify";
 
 import {Graph} from "../../../core/graph";
 import {ArtifactGraphEditor} from "./ArtifactGraphEditor";

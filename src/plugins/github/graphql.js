@@ -788,7 +788,6 @@ function reviewCommentsFragment(): FragmentDefinition {
  * fetch more pages of specific entity types.
  */
 export function createFragments(): FragmentDefinition[] {
-  const b = build;
   return [
     whoamiFragment(),
     issuesFragment(),

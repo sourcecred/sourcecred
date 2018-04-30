@@ -23,7 +23,6 @@ import type {
   IssueJSON,
   CommentJSON,
   AuthorJSON,
-  PullRequestReviewCommentJSON,
 } from "./graphql";
 
 import type {Address} from "../../core/address";

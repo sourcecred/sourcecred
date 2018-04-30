@@ -290,7 +290,7 @@ export const stringify = {
   },
 
   parameter(parameter: Parameter, ls: LayoutStrategy): string {
-    return ls.atom(`\$${parameter.name}: ${parameter.type}`);
+    return ls.atom(`$${parameter.name}: ${parameter.type}`);
   },
 
   fragmentDefinition(fragment: FragmentDefinition, ls: LayoutStrategy): string {
@@ -388,7 +388,7 @@ export const stringify = {
   },
 
   variableValue(value: VariableValue, ls: LayoutStrategy): string {
-    return ls.atom(`\$${value.data}`);
+    return ls.atom(`$${value.data}`);
   },
 
   literalValue(value: LiteralValue, ls: LayoutStrategy): string {

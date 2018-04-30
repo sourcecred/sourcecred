@@ -105,9 +105,9 @@ export class ArtifactGraphEditor extends React.Component<Props, State> {
           value={this.state.artifactInProgressName}
           onChange={(e) => {
             const value = e.target.value;
-            this.setState((state) => ({
+            this.setState({
               artifactInProgressName: value,
-            }));
+            });
           }}
         />
         <button
