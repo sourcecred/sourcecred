@@ -1,5 +1,7 @@
 // @flow
 
+import stringify from "json-stable-stringify";
+
 import {Graph} from "../../core/graph";
 import type {Node} from "../../core/graph";
 import type {Address} from "../../core/address";
@@ -22,6 +24,16 @@ import {
   ISSUE_NODE_TYPE,
   PULL_REQUEST_NODE_TYPE,
 } from "./types";
+
+export type Entity = Issue | PullRequest | Comment | Author;
+
+function assertEntityType(e: Entity, t: NodeType) {
+  if (e.type() !== t) {
+    throw new Error(
+      `Expected entity at ${stringify(e.address())} to have type ${t}`
+    );
+  }
+}
 
 export class Repository {
   repositoryName: string;
@@ -123,6 +135,10 @@ class Commentable<T: IssueNodePayload | PullRequestNodePayload> extends Post<
 }
 
 export class Author extends GithubEntity<AuthorNodePayload> {
+  static from(e: Entity): Author {
+    assertEntityType(e, AUTHOR_NODE_TYPE);
+    return (e: any);
+  }
   login(): string {
     return this.node().payload.login;
   }
@@ -133,6 +149,10 @@ export class Author extends GithubEntity<AuthorNodePayload> {
 }
 
 export class PullRequest extends Commentable<PullRequestNodePayload> {
+  static from(e: Entity): PullRequest {
+    assertEntityType(e, PULL_REQUEST_NODE_TYPE);
+    return (e: any);
+  }
   number(): number {
     return this.node().payload.number;
   }
@@ -142,6 +162,10 @@ export class PullRequest extends Commentable<PullRequestNodePayload> {
 }
 
 export class Issue extends Commentable<IssueNodePayload> {
+  static from(e: Entity): Issue {
+    assertEntityType(e, ISSUE_NODE_TYPE);
+    return (e: any);
+  }
   number(): number {
     return this.node().payload.number;
   }
@@ -150,4 +174,9 @@ export class Issue extends Commentable<IssueNodePayload> {
   }
 }
 
-export class Comment extends Post<CommentNodePayload> {}
+export class Comment extends Post<CommentNodePayload> {
+  static from(e: Entity): Comment {
+    assertEntityType(e, COMMENT_NODE_TYPE);
+    return (e: any);
+  }
+}
