@@ -169,78 +169,70 @@ export class Graph<NP, EP> {
   }
 
   /**
-   * Gets the array of all out-edges from the node at the given address.
-   * The order of the resulting array is unspecified.
-   */
-  outEdges(
-    nodeAddress: Address,
-    typeOptions?: {+nodeType?: string, +edgeType?: string}
-  ): Edge<EP>[] {
-    if (nodeAddress == null) {
-      throw new Error(`address is ${String(nodeAddress)}`);
-    }
-    let result = this._lookupEdges(this._outEdges, nodeAddress).map((e) =>
-      this.edge(e)
-    );
-
-    if (typeOptions != null && typeOptions.edgeType != null) {
-      const edgeType = typeOptions.edgeType;
-      result = result.filter((e) => e.address.type === edgeType);
-    }
-    if (typeOptions != null && typeOptions.nodeType != null) {
-      const nodeType = typeOptions.nodeType;
-      result = result.filter((e) => e.dst.type === nodeType);
-    }
-    return result;
-  }
-
-  /**
-   * Gets the array of all in-edges to the node at the given address.
-   * The order of the resulting array is unspecified.
-   */
-  inEdges(
-    nodeAddress: Address,
-    typeOptions?: {+nodeType?: string, +edgeType?: string}
-  ): Edge<EP>[] {
-    if (nodeAddress == null) {
-      throw new Error(`address is ${String(nodeAddress)}`);
-    }
-    let result = this._lookupEdges(this._inEdges, nodeAddress).map((e) =>
-      this.edge(e)
-    );
-
-    if (typeOptions != null && typeOptions.edgeType != null) {
-      const edgeType = typeOptions.edgeType;
-      result = result.filter((e) => e.address.type === edgeType);
-    }
-    if (typeOptions != null && typeOptions.nodeType != null) {
-      const nodeType = typeOptions.nodeType;
-      result = result.filter((e) => e.src.type === nodeType);
-    }
-    return result;
-  }
-
-  /**
-   * Find the neighborhood of a given nodeAddress
+   * Find the neighborhood of the node at the given address.
    *
-   * By neighborhood, we mean every `{edge, neighborAddress}` such that edge
-   * has `nodeAddress` as either `src` or `dst`, and `neighborAddress` is the
+   * By neighborhood, we mean every `{edge, neighbor}` such that edge
+   * has `nodeAddress` as either `src` or `dst`, and `neighbor` is the
    * address at the other end of the edge.
+   *
+   * The returned neighbors are filtered according to the `options`. Callers
+   * can filter by nodeType, edgeType, and whether it should be an "IN" edge
+   * (i.e. the provided node is the dst), an "OUT" edge (i.e. provided node is
+   * the src), or "ANY".
    */
   neighborhood(
     nodeAddress: Address,
-    typeOptions?: {+nodeType?: string, +edgeType?: string}
-  ): {+edge: Edge<EP>, +neighborAddress: Address}[] {
-    const inNeighbors = this.inEdges(nodeAddress, typeOptions).map((e) => {
-      return {edge: e, neighborAddress: e.src};
-    });
-    const outNeighbors = this.outEdges(nodeAddress, typeOptions)
-      // If there are self-reference edges, avoid double counting them.
-      .filter((e) => !deepEqual(e.src, e.dst))
-      .map((e) => {
-        return {edge: e, neighborAddress: e.dst};
-      });
-    return [].concat(inNeighbors, outNeighbors);
+    options?: {|
+      +nodeType?: string,
+      +edgeType?: string,
+      +direction?: "IN" | "OUT" | "ANY",
+    |}
+  ): {+edge: Edge<EP>, +neighbor: Address}[] {
+    if (nodeAddress == null) {
+      throw new Error(`address is ${String(nodeAddress)}`);
+    }
+
+    let result: {+edge: Edge<EP>, +neighbor: Address}[] = [];
+    const direction = (options != null && options.direction) || "ANY";
+
+    if (direction === "ANY" || direction === "IN") {
+      let inNeighbors = this._lookupEdges(this._inEdges, nodeAddress).map(
+        (e) => {
+          const edge = this.edge(e);
+          return {edge, neighbor: edge.src};
+        }
+      );
+
+      result = result.concat(inNeighbors);
+    }
+
+    if (direction === "ANY" || direction === "OUT") {
+      let outNeighbors = this._lookupEdges(this._outEdges, nodeAddress).map(
+        (e) => {
+          const edge = this.edge(e);
+          return {edge, neighbor: edge.dst};
+        }
+      );
+
+      if (direction === "ANY") {
+        // If direction is ANY, we already counted self-referencing edges as
+        // an inNeighbor
+        outNeighbors = outNeighbors.filter(
+          ({edge}) => !deepEqual(edge.src, edge.dst)
+        );
+      }
+
+      result = result.concat(outNeighbors);
+    }
+    if (options != null && options.edgeType != null) {
+      const edgeType = options.edgeType;
+      result = result.filter(({edge}) => edge.address.type === edgeType);
+    }
+    if (options != null && options.nodeType != null) {
+      const nodeType = options.nodeType;
+      result = result.filter(({neighbor}) => neighbor.type === nodeType);
+    }
+    return result;
   }
 
   /**

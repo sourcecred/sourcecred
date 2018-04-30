@@ -65,13 +65,8 @@ describe("graph", () => {
             `address is ${String(bad)}`
           );
         });
-        it(`getting ${String(bad)} in-edges`, () => {
-          expect(() => new Graph().inEdges((bad: any))).toThrow(
-            `address is ${String(bad)}`
-          );
-        });
-        it(`getting ${String(bad)} out-edges`, () => {
-          expect(() => new Graph().outEdges((bad: any))).toThrow(
+        it(`getting ${String(bad)} neighborhood`, () => {
+          expect(() => new Graph().neighborhood((bad: any))).toThrow(
             `address is ${String(bad)}`
           );
         });
@@ -298,12 +293,16 @@ describe("graph", () => {
       it("allows creating self-loops", () => {
         const g = demoData.simpleMealGraph();
         g.addEdge(demoData.crabLoopEdge());
-        expect(g.outEdges(demoData.crabNode().address)).toContainEqual(
-          demoData.crabLoopEdge()
-        );
-        expect(g.inEdges(demoData.crabNode().address)).toContainEqual(
-          demoData.crabLoopEdge()
-        );
+        expect(
+          g
+            .neighborhood(demoData.crabNode().address, {direction: "OUT"})
+            .map(({edge}) => edge)
+        ).toContainEqual(demoData.crabLoopEdge());
+        expect(
+          g
+            .neighborhood(demoData.crabNode().address, {direction: "IN"})
+            .map(({edge}) => edge)
+        ).toContainEqual(demoData.crabLoopEdge());
         const crabNeighbors = g.neighborhood(demoData.crabNode().address);
         const crabLoops = crabNeighbors.filter(({edge}) =>
           deepEqual(edge, demoData.crabLoopEdge())
@@ -315,7 +314,11 @@ describe("graph", () => {
         const g = demoData.simpleMealGraph();
         g.addEdge(demoData.duplicateCookEdge());
         [demoData.cookEdge(), demoData.duplicateCookEdge()].forEach((e) => {
-          expect(g.outEdges(demoData.mealNode().address)).toContainEqual(e);
+          expect(
+            g
+              .neighborhood(demoData.mealNode().address, {direction: "OUT"})
+              .map(({edge}) => edge)
+          ).toContainEqual(e);
           expect(g.edge(e.address)).toEqual(e);
         });
       });
@@ -381,7 +384,7 @@ describe("graph", () => {
       });
     });
 
-    describe("inEdges and outEdges", () => {
+    describe("neighborhood detection", () => {
       describe("type filtering", () => {
         class ExampleGraph {
           graph: Graph<{}, {}>;
@@ -441,14 +444,26 @@ describe("graph", () => {
         const exampleGraph = new ExampleGraph();
         [
           [
-            "inEdges",
+            "neighborhood IN",
             exampleGraph.inEdges,
-            (opts) => exampleGraph.graph.inEdges(exampleGraph.root, opts),
+            (opts) =>
+              exampleGraph.graph
+                .neighborhood(exampleGraph.root, {
+                  ...(opts || {}),
+                  direction: "IN",
+                })
+                .map(({edge}) => edge),
           ],
           [
-            "outEdges",
+            "neighborhood OUT",
             exampleGraph.outEdges,
-            (opts) => exampleGraph.graph.outEdges(exampleGraph.root, opts),
+            (opts) =>
+              exampleGraph.graph
+                .neighborhood(exampleGraph.root, {
+                  ...(opts || {}),
+                  direction: "OUT",
+                })
+                .map(({edge}) => edge),
           ],
         ].forEach(([choice, {a1, a2, b1, b2}, edges]) => {
           describe(choice, () => {
@@ -516,23 +531,23 @@ describe("graph", () => {
             neighborhood: [
               {
                 edge: demoData.eatEdge(),
-                neighborAddress: demoData.mealNode().address,
+                neighbor: demoData.mealNode().address,
               },
               {
                 edge: demoData.pickEdge(),
-                neighborAddress: demoData.bananasNode().address,
+                neighbor: demoData.bananasNode().address,
               },
               {
                 edge: demoData.grabEdge(),
-                neighborAddress: demoData.crabNode().address,
+                neighbor: demoData.crabNode().address,
               },
               {
                 edge: demoData.cookEdge(),
-                neighborAddress: demoData.mealNode().address,
+                neighbor: demoData.mealNode().address,
               },
               {
                 edge: demoData.duplicateCookEdge(),
-                neighborAddress: demoData.mealNode().address,
+                neighbor: demoData.mealNode().address,
               },
             ],
           },
@@ -541,11 +556,11 @@ describe("graph", () => {
             neighborhood: [
               {
                 edge: demoData.pickEdge(),
-                neighborAddress: demoData.heroNode().address,
+                neighbor: demoData.heroNode().address,
               },
               {
                 edge: demoData.bananasIngredientEdge(),
-                neighborAddress: demoData.mealNode().address,
+                neighbor: demoData.mealNode().address,
               },
             ],
           },
@@ -554,15 +569,15 @@ describe("graph", () => {
             neighborhood: [
               {
                 edge: demoData.crabIngredientEdge(),
-                neighborAddress: demoData.mealNode().address,
+                neighbor: demoData.mealNode().address,
               },
               {
                 edge: demoData.grabEdge(),
-                neighborAddress: demoData.heroNode().address,
+                neighbor: demoData.heroNode().address,
               },
               {
                 edge: demoData.crabLoopEdge(),
-                neighborAddress: demoData.crabNode().address,
+                neighbor: demoData.crabNode().address,
               },
             ],
           },
@@ -571,23 +586,23 @@ describe("graph", () => {
             neighborhood: [
               {
                 edge: demoData.bananasIngredientEdge(),
-                neighborAddress: demoData.bananasNode().address,
+                neighbor: demoData.bananasNode().address,
               },
               {
                 edge: demoData.crabIngredientEdge(),
-                neighborAddress: demoData.crabNode().address,
+                neighbor: demoData.crabNode().address,
               },
               {
                 edge: demoData.cookEdge(),
-                neighborAddress: demoData.heroNode().address,
+                neighbor: demoData.heroNode().address,
               },
               {
                 edge: demoData.eatEdge(),
-                neighborAddress: demoData.heroNode().address,
+                neighbor: demoData.heroNode().address,
               },
               {
                 edge: demoData.duplicateCookEdge(),
-                neighborAddress: demoData.heroNode().address,
+                neighbor: demoData.heroNode().address,
               },
             ],
           },
@@ -617,7 +632,10 @@ describe("graph", () => {
           ],
         ];
         nodeAndExpectedEdgePairs.forEach(([node, expectedEdges]) => {
-          const actual = demoData.advancedMealGraph().outEdges(node.address);
+          const actual = demoData
+            .advancedMealGraph()
+            .neighborhood(node.address, {direction: "OUT"})
+            .map(({edge}) => edge);
           expectSameSorted(actual, expectedEdges);
         });
       });
@@ -641,7 +659,10 @@ describe("graph", () => {
           [demoData.mealNode(), [demoData.eatEdge()]],
         ];
         nodeAndExpectedEdgePairs.forEach(([node, expectedEdges]) => {
-          const actual = demoData.advancedMealGraph().inEdges(node.address);
+          const actual = demoData
+            .advancedMealGraph()
+            .neighborhood(node.address, {direction: "IN"})
+            .map(({edge}) => edge);
           expectSameSorted(actual, expectedEdges);
         });
       });
@@ -649,14 +670,18 @@ describe("graph", () => {
       it("gets empty out-edges for a nonexistent node", () => {
         const result = demoData
           .simpleMealGraph()
-          .outEdges(demoData.makeAddress("hinox", "NPC"));
+          .neighborhood(demoData.makeAddress("hinox", "NPC"), {
+            direction: "OUT",
+          });
         expect(result).toEqual([]);
       });
 
       it("gets empty in-edges for a nonexistent node", () => {
         const result = demoData
           .simpleMealGraph()
-          .inEdges(demoData.makeAddress("hinox", "NPC"));
+          .neighborhood(demoData.makeAddress("hinox", "NPC"), {
+            direction: "IN",
+          });
         expect(result).toEqual([]);
       });
 
@@ -690,7 +715,9 @@ describe("graph", () => {
             .addEdge(fullyDanglingEdge())
             .removeNode(danglingSrc().address)
             .removeNode(danglingDst().address);
-          const inEdges = g.inEdges(fullyDanglingEdge().dst);
+          const inEdges = g
+            .neighborhood(fullyDanglingEdge().dst, {direction: "IN"})
+            .map(({edge}) => edge);
           expect(inEdges).toEqual([fullyDanglingEdge()]);
         });
 
@@ -702,7 +729,9 @@ describe("graph", () => {
             .addEdge(fullyDanglingEdge())
             .removeNode(danglingSrc().address)
             .removeNode(danglingDst().address);
-          const outEdges = g.outEdges(fullyDanglingEdge().src);
+          const outEdges = g
+            .neighborhood(fullyDanglingEdge().src, {direction: "OUT"})
+            .map(({edge}) => edge);
           expect(outEdges).toEqual([fullyDanglingEdge()]);
         });
 
@@ -713,8 +742,10 @@ describe("graph", () => {
             .addNode(danglingDst())
             .addEdge(fullyDanglingEdge())
             .removeEdge(fullyDanglingEdge().address);
-          const outEdges = g.inEdges(fullyDanglingEdge().dst);
-          expect(outEdges).toEqual([]);
+          const inEdges = g.neighborhood(fullyDanglingEdge().dst, {
+            direction: "IN",
+          });
+          expect(inEdges).toEqual([]);
         });
 
         it("has lack of out-edges for deleted edge", () => {
@@ -724,19 +755,25 @@ describe("graph", () => {
             .addNode(danglingDst())
             .addEdge(fullyDanglingEdge())
             .removeEdge(fullyDanglingEdge().address);
-          const outEdges = g.outEdges(fullyDanglingEdge().src);
+          const outEdges = g.neighborhood(fullyDanglingEdge().src, {
+            direction: "OUT",
+          });
           expect(outEdges).toEqual([]);
         });
 
         it("has in-edges for non-existent node with dangling edge", () => {
           const g = demoData.simpleMealGraph().addEdge(fullyDanglingEdge());
-          const inEdges = g.inEdges(fullyDanglingEdge().dst);
+          const inEdges = g
+            .neighborhood(fullyDanglingEdge().dst, {direction: "IN"})
+            .map(({edge}) => edge);
           expect(inEdges).toEqual([fullyDanglingEdge()]);
         });
 
         it("has out-edges for non-existent node with dangling edge", () => {
           const g = demoData.simpleMealGraph().addEdge(fullyDanglingEdge());
-          const outEdges = g.outEdges(fullyDanglingEdge().src);
+          const outEdges = g
+            .neighborhood(fullyDanglingEdge().src, {direction: "OUT"})
+            .map(({edge}) => edge);
           expect(outEdges).toEqual([fullyDanglingEdge()]);
         });
 
@@ -745,7 +782,9 @@ describe("graph", () => {
             .simpleMealGraph()
             .addEdge(fullyDanglingEdge())
             .addNode(danglingDst());
-          const inEdges = g.inEdges(fullyDanglingEdge().dst);
+          const inEdges = g
+            .neighborhood(fullyDanglingEdge().dst, {direction: "IN"})
+            .map(({edge}) => edge);
           expect(inEdges).toEqual([fullyDanglingEdge()]);
         });
 
@@ -754,7 +793,9 @@ describe("graph", () => {
             .simpleMealGraph()
             .addEdge(fullyDanglingEdge())
             .addNode(danglingSrc());
-          const outEdges = g.outEdges(fullyDanglingEdge().src);
+          const outEdges = g
+            .neighborhood(fullyDanglingEdge().src, {direction: "OUT"})
+            .map(({edge}) => edge);
           expect(outEdges).toEqual([fullyDanglingEdge()]);
         });
       }
@@ -777,15 +818,23 @@ describe("graph", () => {
       it("is idempotent in terms of in-edges", () => {
         const g1 = originalGraph();
         const g2 = modifiedGraph();
-        const e1 = g1.inEdges(taredge().address);
-        const e2 = g2.inEdges(taredge().address);
+        const e1 = g1
+          .neighborhood(taredge().address, {direction: "IN"})
+          .map(({edge}) => edge);
+        const e2 = g2
+          .neighborhood(taredge().address, {direction: "IN"})
+          .map(({edge}) => edge);
         expectSameSorted(e1, e2);
       });
       it("is idempotent in terms of out-edges", () => {
         const g1 = originalGraph();
         const g2 = modifiedGraph();
-        const e1 = g1.outEdges(taredge().address);
-        const e2 = g2.outEdges(taredge().address);
+        const e1 = g1
+          .neighborhood(taredge().address, {direction: "OUT"})
+          .map(({edge}) => edge);
+        const e2 = g2
+          .neighborhood(taredge().address, {direction: "OUT"})
+          .map(({edge}) => edge);
         expectSameSorted(e1, e2);
       });
     });
@@ -848,21 +897,25 @@ describe("graph", () => {
         return originalGraph.nodes().map((node) => {
           const miniGraph = new Graph();
           miniGraph.addNode(node);
-          originalGraph.outEdges(node.address).forEach((edge) => {
-            if (miniGraph.node(edge.dst) === undefined) {
-              miniGraph.addNode(originalGraph.node(edge.dst));
-            }
-            miniGraph.addEdge(edge);
-          });
-          originalGraph.inEdges(node.address).forEach((edge) => {
-            if (miniGraph.node(edge.src) === undefined) {
-              miniGraph.addNode(originalGraph.node(edge.src));
-            }
-            if (miniGraph.edge(edge.address) === undefined) {
-              // This check is necessary to prevent double-adding loops.
+          originalGraph
+            .neighborhood(node.address, {direction: "OUT"})
+            .forEach(({edge}) => {
+              if (miniGraph.node(edge.dst) === undefined) {
+                miniGraph.addNode(originalGraph.node(edge.dst));
+              }
               miniGraph.addEdge(edge);
-            }
-          });
+            });
+          originalGraph
+            .neighborhood(node.address, {direction: "IN"})
+            .forEach(({edge}) => {
+              if (miniGraph.node(edge.src) === undefined) {
+                miniGraph.addNode(originalGraph.node(edge.src));
+              }
+              if (miniGraph.edge(edge.address) === undefined) {
+                // This check is necessary to prevent double-adding loops.
+                miniGraph.addEdge(edge);
+              }
+            });
           return miniGraph;
         });
       }

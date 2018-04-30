@@ -90,7 +90,9 @@ function createTestData(): * {
     }> {
       render() {
         const {graph, node} = this.props;
-        const neighborCount = graph.outEdges(node.address).length;
+        const neighborCount = graph.neighborhood(node.address, {
+          direction: "OUT",
+        }).length;
         return (
           <span>
             <tt>{node.address.id}</tt> has neighbor count{" "}
