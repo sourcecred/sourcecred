@@ -3,8 +3,10 @@
 import cloneDeep from "lodash.clonedeep";
 import deepEqual from "lodash.isequal";
 
+import type {NodeType} from "./types";
 import {createGraph} from "./createGraph";
 import {
+  BLOB_NODE_TYPE,
   COMMIT_NODE_TYPE,
   GIT_PLUGIN_NAME,
   HAS_CONTENTS_EDGE_TYPE,
@@ -120,5 +122,104 @@ describe("createGraph", () => {
         );
       });
     });
+  });
+
+  function uniqueNeighborMatching(
+    graph,
+    nodeAddress,
+    filter?,
+    predicate = (_) => true
+  ) {
+    const edges = graph
+      .neighborhood(nodeAddress, filter)
+      .filter((x) => predicate(x));
+    expect(edges).toHaveLength(1);
+    return edges[0].neighborAddress;
+  }
+
+  function uniqueTree(graph, commitAddress) {
+    return uniqueNeighborMatching(graph, commitAddress, {
+      nodeType: TREE_NODE_TYPE,
+      edgeType: HAS_TREE_EDGE_TYPE,
+    });
+  }
+
+  function uniqueEntry(graph, treeAddress, entryName: string) {
+    return uniqueNeighborMatching(
+      graph,
+      treeAddress,
+      {
+        nodeType: TREE_ENTRY_NODE_TYPE,
+        edgeType: INCLUDES_EDGE_TYPE,
+      },
+      ({edge}) => edge.address.id.endsWith(`:${entryName}`)
+    );
+  }
+
+  function uniqueContents(graph, treeEntryNodeAddress) {
+    return uniqueNeighborMatching(graph, treeEntryNodeAddress, {
+      edgeType: HAS_CONTENTS_EDGE_TYPE,
+    });
+  }
+
+  it("has HEAD^{tree}:src/quantum_gravity.py with correct contents", () => {
+    const data = makeData();
+    const graph = createGraph(data, "sourcecred/example-git");
+
+    const headCommitHash = "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f";
+    expect(data.commits).toEqual(
+      expect.objectContaining({[headCommitHash]: expect.anything()})
+    );
+
+    const headCommitAddress = {
+      pluginName: GIT_PLUGIN_NAME,
+      repositoryName: "sourcecred/example-git",
+      type: COMMIT_NODE_TYPE,
+      id: headCommitHash,
+    };
+    const headTreeAddress = uniqueTree(graph, headCommitAddress);
+    const srcTreeEntryAddress = uniqueEntry(graph, headTreeAddress, "src");
+    const srcTreeAddress = uniqueContents(graph, srcTreeEntryAddress);
+    const blobEntryAddress = uniqueEntry(
+      graph,
+      srcTreeAddress,
+      "quantum_gravity.py"
+    );
+    const blobAddress = uniqueContents(graph, blobEntryAddress);
+    expect(graph.node(blobAddress)).toEqual(
+      expect.objectContaining({
+        address: expect.objectContaining({
+          type: BLOB_NODE_TYPE,
+          id: "aea4f28abb23abde151b0ead4063227f8bf6c0b0",
+        }),
+      })
+    );
+  });
+
+  it("has HEAD^{tree}:pygravitydefier with no contents", () => {
+    const data = makeData();
+    const graph = createGraph(data, "sourcecred/example-git");
+
+    const headCommitHash = "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f";
+    expect(data.commits).toEqual(
+      expect.objectContaining({[headCommitHash]: expect.anything()})
+    );
+
+    const headCommitAddress = {
+      pluginName: GIT_PLUGIN_NAME,
+      repositoryName: "sourcecred/example-git",
+      type: COMMIT_NODE_TYPE,
+      id: headCommitHash,
+    };
+    const headTreeAddress = uniqueTree(graph, headCommitAddress);
+    const treeEntryAddress = uniqueEntry(
+      graph,
+      headTreeAddress,
+      "pygravitydefier"
+    );
+    expect(graph.node(treeEntryAddress)).toEqual(expect.anything());
+    // Submodule commits never have contents, because the commit nodes
+    // are from an unknown repository.
+    expect(graph.outEdges(treeEntryAddress)).toHaveLength(0);
   });
 });
