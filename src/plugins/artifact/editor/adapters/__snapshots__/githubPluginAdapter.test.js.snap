@@ -79,6 +79,97 @@ https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
     "type": "COMMENT",
   },
   Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576185",
+    "payload": Object {
+      "body": "Here's a PR by direct url: https://github.com/sourcecred/example-repo/pull/5",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576185",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576220",
+    "payload": Object {
+      "body": "a PR review by url: https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576220",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576248",
+    "payload": Object {
+      "body": "a PR Review Comment by url: https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576248",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576273",
+    "payload": Object {
+      "body": "a user by url: https://github.com/wchargin",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576273",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576920",
+    "payload": Object {
+      "body": "Here are several references:
+#1 
+#2
+#3 
+
+https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198
+https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899
+",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576920",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
+    "id": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576936",
+    "payload": Object {
+      "body": "This comment has no references.",
+      "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576936",
+    },
+    "rendered": <div>
+      type: 
+      COMMENT
+       (details to be implemented)
+</div>,
+    "title": "comment on #2: A referencing issue.",
+    "type": "COMMENT",
+  },
+  Object {
     "id": "https://github.com/sourcecred/example-repo/issues/4",
     "payload": Object {
       "body": "Alas, its life as an open issue had only just begun.",
