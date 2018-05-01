@@ -55,10 +55,76 @@
                                 "body": "We might also reference individual comments directly.\r\nhttps://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
                                 "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
                                 "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-373768850"
+                            },
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                },
+                                "body": "Here's a PR by direct url: https://github.com/sourcecred/example-repo/pull/5",
+                                "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjE4NQ==",
+                                "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576185"
+                            },
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                },
+                                "body": "a PR review by url: https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
+                                "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjIyMA==",
+                                "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576220"
+                            },
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                },
+                                "body": "a PR Review Comment by url: https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
+                                "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjI0OA==",
+                                "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576248"
+                            },
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                },
+                                "body": "a user by url: https://github.com/wchargin",
+                                "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjI3Mw==",
+                                "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576273"
+                            },
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                },
+                                "body": "Here are several references:\r\n#1 \r\n#2\r\n#3 \r\n\r\nhttps://github.com/sourcecred/example-repo/pull/5#discussion_r171460198\r\nhttps://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899\r\n",
+                                "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjkyMA==",
+                                "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576920"
+                            },
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                },
+                                "body": "This comment has no references.",
+                                "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjkzNg==",
+                                "url": "https://github.com/sourcecred/example-repo/issues/2#issuecomment-385576936"
                             }
                         ],
                         "pageInfo": {
-                            "endCursor": "Y3Vyc29yOnYyOpHOFkdCkg==",
+                            "endCursor": "Y3Vyc29yOnYyOpHOFvtv6A==",
                             "hasNextPage": false
                         }
                     },
