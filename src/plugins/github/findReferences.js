@@ -40,12 +40,14 @@ function findGithubUrlReferences(body: string): string[] {
     "" +
       /(?:\W|^)http(?:s)?:\/\/github.com\//.source +
       githubNamePart +
+      "(?:" +
       /\//.source +
       githubNamePart +
       /\/(issues|pull)\//.source +
       /(\d+)/.source +
       /(#(issue|issuecomment|pullrequestreview|discussion_r)-?(\d+))?/.source +
-      /(?:\W|$)/.source,
+      ")?" +
+      /(?:[^\w/]|$)/.source,
     "gm"
   );
   return findAllMatches(urlRegex, body).map((match) => match[0].trim());
