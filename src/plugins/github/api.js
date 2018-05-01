@@ -28,6 +28,7 @@ import {
   PULL_REQUEST_NODE_TYPE,
   PULL_REQUEST_REVIEW_NODE_TYPE,
   PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
+  REFERENCES_EDGE_TYPE,
 } from "./types";
 
 export type Entity =
@@ -134,6 +135,45 @@ class Post<
 
   body(): string {
     return this.node().payload.body;
+  }
+
+  references(): Entity[] {
+    const result: Entity[] = [];
+    this.graph
+      .neighborhood(this.nodeAddress, {
+        edgeType: REFERENCES_EDGE_TYPE,
+        direction: "OUT",
+      })
+      .forEach(({neighbor}) => {
+        const type: NodeType = (neighbor.type: any);
+        switch (type) {
+          case "ISSUE":
+            result.push(new Issue(this.graph, neighbor));
+            break;
+          case "PULL_REQUEST":
+            result.push(new PullRequest(this.graph, neighbor));
+            break;
+          case "COMMENT":
+            result.push(new Comment(this.graph, neighbor));
+            break;
+          case "AUTHOR":
+            result.push(new Author(this.graph, neighbor));
+            break;
+          case "PULL_REQUEST_REVIEW":
+            result.push(new PullRequestReview(this.graph, neighbor));
+            break;
+          case "PULL_REQUEST_REVIEW_COMMENT":
+            result.push(new PullRequestReviewComment(this.graph, neighbor));
+            break;
+          default:
+            // eslint-disable-next-line no-unused-expressions
+            (type: empty);
+            throw new Error(
+              `Attempted to parse reference to unknown entity type ${type}`
+            );
+        }
+      });
+    return result;
   }
 }
 
