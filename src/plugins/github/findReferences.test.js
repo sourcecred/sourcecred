@@ -104,6 +104,12 @@ https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222
     );
   });
 
+  it("finds username references by exact url", () => {
+    expect(findReferences("greetings https://github.com/wchargin")).toEqual([
+      "https://github.com/wchargin",
+    ]);
+  });
+
   it("finds a mix of reference types", () => {
     expect(
       findReferences(
