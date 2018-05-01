@@ -18,8 +18,10 @@ import {
   TREE_ENTRY_NODE_TYPE,
   INCLUDES_EDGE_TYPE,
   HAS_CONTENTS_EDGE_TYPE,
+  HAS_PARENT_EDGE_TYPE,
   HAS_TREE_EDGE_TYPE,
   GIT_PLUGIN_NAME,
+  hasParentEdgeId,
   includesEdgeId,
   treeEntryId,
 } from "./types";
@@ -61,7 +63,7 @@ class GitGraphCreator {
       address: this.makeAddress(TREE_NODE_TYPE, commit.treeHash),
       payload: {},
     };
-    const edge = {
+    const hasTreeEdge = {
       address: this.makeAddress(
         HAS_TREE_EDGE_TYPE,
         edgeID(commitNode.address, treeNode.address)
@@ -70,10 +72,27 @@ class GitGraphCreator {
       dst: treeNode.address,
       payload: {},
     };
-    return new Graph()
+    const result = new Graph()
       .addNode(commitNode)
       .addNode(treeNode)
-      .addEdge(edge);
+      .addEdge(hasTreeEdge);
+    commit.parentHashes.forEach((parentHash, index) => {
+      const oneBasedParentIndex = index + 1;
+      const parentAddress = this.makeAddress(COMMIT_NODE_TYPE, parentHash);
+      const parentEdge = {
+        address: this.makeAddress(
+          HAS_PARENT_EDGE_TYPE,
+          hasParentEdgeId(commit.hash, oneBasedParentIndex)
+        ),
+        src: commitNode.address,
+        dst: parentAddress,
+        payload: {
+          parentIndex: oneBasedParentIndex,
+        },
+      };
+      result.addEdge(parentEdge);
+    });
+    return result;
   }
 
   treeGraph(tree: Tree) {
