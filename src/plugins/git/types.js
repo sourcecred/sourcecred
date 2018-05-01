@@ -55,6 +55,28 @@ export type NodeType =
 
 // Edges
 
+// CommitNode -> CommitNode
+export const HAS_PARENT_EDGE_TYPE: "HAS_PARENT" = "HAS_PARENT";
+export type HasParentEdgePayload = {|
+  +parentIndex: number, // one-based
+|};
+export function hasParentEdgeId(
+  childCommitHash: Hash,
+  oneBasedParentIndex: number
+) {
+  if (
+    !isFinite(oneBasedParentIndex) ||
+    oneBasedParentIndex !== Math.floor(oneBasedParentIndex) ||
+    oneBasedParentIndex < 1
+  ) {
+    throw new Error(
+      "Expected positive integer parent index, " +
+        `but got: ${String(oneBasedParentIndex)}`
+    );
+  }
+  return `${childCommitHash}^${String(oneBasedParentIndex)}`;
+}
+
 // CommitNode -> TreeNode
 export const HAS_TREE_EDGE_TYPE: "HAS_TREE" = "HAS_TREE";
 export type HasTreeEdgePayload = {||};
@@ -76,12 +98,14 @@ export type HasContentsEdgePayload = {||};
 
 export type EdgeType =
   | typeof HAS_TREE_EDGE_TYPE
+  | typeof HAS_PARENT_EDGE_TYPE
   | typeof INCLUDES_EDGE_TYPE
   | typeof BECOMES_EDGE_TYPE
   | typeof HAS_CONTENTS_EDGE_TYPE;
 
 export type EdgePayload =
   | HasTreeEdgePayload
+  | HasParentEdgePayload
   | IncludesEdgePayload
   | BecomesEdgePayload
   | HasContentsEdgePayload;

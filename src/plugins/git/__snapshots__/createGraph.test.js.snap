@@ -33,6 +33,23 @@ Object {
         "type": "TREE",
       },
     },
+    "{\\"id\\":\\"3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
+      "dst": Object {
+        "id": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
+      },
+      "payload": Object {
+        "parentIndex": 1,
+      },
+      "src": Object {
+        "id": "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
+      },
+    },
     "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"INCLUDES\\"}": Object {
       "dst": Object {
         "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:.gitmodules",
@@ -181,6 +198,23 @@ Object {
         "pluginName": "sourcecred/git-beta",
         "repositoryName": "sourcecred/example-git",
         "type": "TREE",
+      },
+    },
+    "{\\"id\\":\\"69c5aad50eec8f2a0a07c988c3b283a6490eb45b^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
+      "dst": Object {
+        "id": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
+      },
+      "payload": Object {
+        "parentIndex": 1,
+      },
+      "src": Object {
+        "id": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
       },
     },
     "{\\"id\\":\\"78fc9c83023386854c6bfdc5761c0e58f68e226f:index.py\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"INCLUDES\\"}": Object {
@@ -406,6 +440,23 @@ Object {
         "pluginName": "sourcecred/git-beta",
         "repositoryName": "sourcecred/example-git",
         "type": "TREE",
+      },
+    },
+    "{\\"id\\":\\"8d287c3bfbf8455ef30187bf5153ffc1b6eef268^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
+      "dst": Object {
+        "id": "c08ee3a4edea384d5291ffcbf06724a13ed72325",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
+      },
+      "payload": Object {
+        "parentIndex": 1,
+      },
+      "src": Object {
+        "id": "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
       },
     },
     "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"2f7155e359fd0ecb96ffdca66fa45b6ed5792809:README.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
@@ -1051,6 +1102,57 @@ Object {
         "pluginName": "sourcecred/git-beta",
         "repositoryName": "sourcecred/example-git",
         "type": "TREE",
+      },
+    },
+    "{\\"id\\":\\"c08ee3a4edea384d5291ffcbf06724a13ed72325^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
+      "dst": Object {
+        "id": "c2b51945e7457546912a8ce158ed9d294558d294",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
+      },
+      "payload": Object {
+        "parentIndex": 1,
+      },
+      "src": Object {
+        "id": "c08ee3a4edea384d5291ffcbf06724a13ed72325",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
+      },
+    },
+    "{\\"id\\":\\"d160cca97611e9dfed642522ad44408d0292e8ea^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
+      "dst": Object {
+        "id": "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
+      },
+      "payload": Object {
+        "parentIndex": 1,
+      },
+      "src": Object {
+        "id": "d160cca97611e9dfed642522ad44408d0292e8ea",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
+      },
+    },
+    "{\\"id\\":\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
+      "dst": Object {
+        "id": "d160cca97611e9dfed642522ad44408d0292e8ea",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
+      },
+      "payload": Object {
+        "parentIndex": 1,
+      },
+      "src": Object {
+        "id": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "COMMIT",
       },
     },
   },

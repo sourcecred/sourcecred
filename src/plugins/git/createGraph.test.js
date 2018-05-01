@@ -8,6 +8,7 @@ import {
   COMMIT_NODE_TYPE,
   GIT_PLUGIN_NAME,
   HAS_CONTENTS_EDGE_TYPE,
+  HAS_PARENT_EDGE_TYPE,
   HAS_TREE_EDGE_TYPE,
   INCLUDES_EDGE_TYPE,
   TREE_ENTRY_NODE_TYPE,
@@ -41,13 +42,22 @@ describe("createGraph", () => {
         id: hash,
       };
       expect(graph.node(address)).toEqual({address, payload: {}});
-      expect(graph.neighborhood(address)).toHaveLength(1);
       expect(
         graph.neighborhood(address, {
           nodeType: TREE_NODE_TYPE,
           edgeType: HAS_TREE_EDGE_TYPE,
         })
       ).toHaveLength(1);
+      expect(
+        graph.neighborhood(address, {
+          nodeType: COMMIT_NODE_TYPE,
+          edgeType: HAS_PARENT_EDGE_TYPE,
+          direction: "OUT",
+        })
+      ).toHaveLength(data.commits[hash].parentHashes.length);
+      expect(graph.neighborhood(address, {direction: "OUT"})).toHaveLength(
+        1 + data.commits[hash].parentHashes.length
+      );
     });
   });
 
