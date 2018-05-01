@@ -11,6 +11,9 @@ import type {
   NodeType,
   IssueNodePayload,
   PullRequestNodePayload,
+  PullRequestReviewNodePayload,
+  PullRequestReviewCommentNodePayload,
+  PullRequestReviewState,
   CommentNodePayload,
   AuthorNodePayload,
   AuthorSubtype,
@@ -23,9 +26,17 @@ import {
   AUTHOR_NODE_TYPE,
   ISSUE_NODE_TYPE,
   PULL_REQUEST_NODE_TYPE,
+  PULL_REQUEST_REVIEW_NODE_TYPE,
+  PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
 } from "./types";
 
-export type Entity = Issue | PullRequest | Comment | Author;
+export type Entity =
+  | Issue
+  | PullRequest
+  | Comment
+  | Author
+  | PullRequestReview
+  | PullRequestReviewComment;
 
 function assertEntityType(e: Entity, t: NodeType) {
   if (e.type() !== t) {
@@ -105,7 +116,12 @@ class GithubEntity<T: NodePayload> {
 }
 
 class Post<
-  T: IssueNodePayload | PullRequestNodePayload | CommentNodePayload
+  T:
+    | IssueNodePayload
+    | PullRequestNodePayload
+    | CommentNodePayload
+    | PullRequestReviewNodePayload
+    | PullRequestReviewCommentNodePayload
 > extends GithubEntity<T> {
   authors(): Author[] {
     return this.graph
@@ -159,6 +175,14 @@ export class PullRequest extends Commentable<PullRequestNodePayload> {
   title(): string {
     return this.node().payload.title;
   }
+  reviews(): PullRequestReview[] {
+    return this.graph
+      .neighborhood(this.nodeAddress, {
+        edgeType: CONTAINS_EDGE_TYPE,
+        nodeType: PULL_REQUEST_REVIEW_NODE_TYPE,
+      })
+      .map(({neighbor}) => new PullRequestReview(this.graph, neighbor));
+  }
 }
 
 export class Issue extends Commentable<IssueNodePayload> {
@@ -177,6 +201,34 @@ export class Issue extends Commentable<IssueNodePayload> {
 export class Comment extends Post<CommentNodePayload> {
   static from(e: Entity): Comment {
     assertEntityType(e, COMMENT_NODE_TYPE);
+    return (e: any);
+  }
+}
+
+export class PullRequestReview extends Post<PullRequestReviewNodePayload> {
+  static from(e: Entity): PullRequestReview {
+    assertEntityType(e, PULL_REQUEST_REVIEW_NODE_TYPE);
+    return (e: any);
+  }
+  state(): PullRequestReviewState {
+    return this.node().payload.state;
+  }
+
+  comments(): PullRequestReviewComment[] {
+    return this.graph
+      .neighborhood(this.nodeAddress, {
+        edgeType: CONTAINS_EDGE_TYPE,
+        nodeType: PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
+      })
+      .map(({neighbor}) => new PullRequestReviewComment(this.graph, neighbor));
+  }
+}
+
+export class PullRequestReviewComment extends Post<
+  PullRequestReviewCommentNodePayload
+> {
+  static from(e: Entity): PullRequestReviewComment {
+    assertEntityType(e, PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE);
     return (e: any);
   }
 }
