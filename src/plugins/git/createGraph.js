@@ -1,14 +1,17 @@
 // @flow
 
 import type {Address} from "../../core/address";
+import type {Edge, Node} from "../../core/graph";
 import type {
-  Repository,
   Commit,
-  Tree,
-  NodePayload,
   EdgePayload,
-  NodeType,
   EdgeType,
+  IncludesEdgePayload,
+  NodePayload,
+  NodeType,
+  Repository,
+  Tree,
+  TreeEntryNodePayload,
 } from "./types";
 import {Graph, edgeID} from "../../core/graph";
 import {
@@ -103,21 +106,21 @@ class GitGraphCreator {
     const result = new Graph().addNode(treeNode);
     Object.keys(tree.entries).forEach((name) => {
       const entry = tree.entries[name];
-      const entryNode = {
+      const entryNode: Node<TreeEntryNodePayload> = {
         address: this.makeAddress(
           TREE_ENTRY_NODE_TYPE,
           treeEntryId(tree.hash, entry.name)
         ),
-        payload: {},
+        payload: {tree: tree.hash, name},
       };
-      const entryEdge = {
+      const entryEdge: Edge<IncludesEdgePayload> = {
         address: this.makeAddress(
           INCLUDES_EDGE_TYPE,
           includesEdgeId(tree.hash, entry.name)
         ),
         src: treeNode.address,
         dst: entryNode.address,
-        payload: {},
+        payload: {name},
       };
       result.addNode(entryNode).addEdge(entryEdge);
       if (entry.type === "commit") {
