@@ -44,7 +44,7 @@ export type NodePayload =
   | CommitNodePayload
   | TreeNodePayload
   | TreeEntryNodePayload
-  | HasContentsEdgePayload;
+  | BlobNodePayload;
 
 export type NodeType =
   | typeof COMMIT_NODE_TYPE
