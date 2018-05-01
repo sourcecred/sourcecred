@@ -10,6 +10,7 @@ export type Repository = {|
 export type Hash = string;
 export type Commit = {|
   +hash: Hash,
+  +parentHashes: $ReadOnlyArray<Hash>,
   +treeHash: Hash,
 |};
 export type Tree = {|

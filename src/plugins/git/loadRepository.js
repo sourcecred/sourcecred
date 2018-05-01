@@ -38,12 +38,12 @@ function objectMap<T: {+hash: Hash}>(ts: $ReadOnlyArray<T>): {[Hash]: T} {
 }
 
 function findCommits(git: GitDriver, rootRef: string): Commit[] {
-  return git(["log", "--oneline", "--pretty=%H %T", rootRef])
+  return git(["log", "--oneline", "--pretty=%H %T %P", rootRef])
     .split("\n")
     .filter((line) => line.length > 0)
     .map((line) => {
-      const [hash, treeHash] = line.split(" ");
-      return {hash, treeHash};
+      const [hash, treeHash, ...parentHashes] = line.trim().split(" ");
+      return {hash, parentHashes, treeHash};
     });
 }
 
