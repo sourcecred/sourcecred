@@ -91,6 +91,13 @@ https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222
     ).toHaveLength(1);
   });
 
+  it("allows but excludes leading and trailing punctuation", () => {
+    const base = "https://github.com/sourcecred/sourcecred/pull/94";
+    expect(findReferences(`!${base}`)).toEqual([base]);
+    expect(findReferences(`${base}!`)).toEqual([base]);
+    expect(findReferences(`!${base}!`)).toEqual([base]);
+  });
+
   it("finds username references", () => {
     expect(findReferences("hello to @wchargin from @decentralion!")).toEqual([
       "@wchargin",

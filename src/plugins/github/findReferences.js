@@ -35,20 +35,24 @@ function findUsernameReferences(body: string): string[] {
 }
 
 function findGithubUrlReferences(body: string): string[] {
-  const githubNamePart = /([a-zA-Z0-9_-]+)/.source;
+  const githubNamePart = /(?:[a-zA-Z0-9_-]+)/.source;
   const urlRegex = new RegExp(
     "" +
-      /(?:\W|^)http(?:s)?:\/\/github.com\//.source +
+      /(?:\W|^)/.source +
+      "(" +
+      /http(?:s)?:\/\/github.com\//.source +
       githubNamePart +
       "(?:" +
       /\//.source +
       githubNamePart +
-      /\/(issues|pull)\//.source +
-      /(\d+)/.source +
-      /(#(issue|issuecomment|pullrequestreview|discussion_r)-?(\d+))?/.source +
+      /\/(?:issues|pull)\//.source +
+      /(?:\d+)/.source +
+      /(?:#(?:issue|issuecomment|pullrequestreview|discussion_r)-?(?:\d+))?/
+        .source +
       ")?" +
+      ")" +
       /(?:[^\w/]|$)/.source,
     "gm"
   );
-  return findAllMatches(urlRegex, body).map((match) => match[0].trim());
+  return findAllMatches(urlRegex, body).map((match) => match[1]);
 }
