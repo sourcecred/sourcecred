@@ -1,5 +1,7 @@
 // @flow
 
+import stringify from "json-stable-stringify";
+
 export const GIT_PLUGIN_NAME = "sourcecred/git-beta";
 
 // Logical types
@@ -112,7 +114,18 @@ export function includesEdgeId(treeSha: string, name: string): string {
 
 // TreeEntryNode -> TreeEntryNode
 export const BECOMES_EDGE_TYPE: "BECOMES" = "BECOMES";
-export type BecomesEdgePayload = {||};
+export type BecomesEdgePayload = {|
+  +childCommit: Hash,
+  +parentCommit: Hash,
+  +path: $ReadOnlyArray<string>,
+|};
+export function becomesEdgeId(
+  childCommit: Hash,
+  parentCommit: Hash,
+  path: $ReadOnlyArray<string>
+) {
+  return stringify({childCommit, parentCommit, path});
+}
 
 // TreeEntryNode -> BlobNode | TreeNode
 export const HAS_CONTENTS_EDGE_TYPE: "HAS_CONTENTS" = "HAS_CONTENTS";

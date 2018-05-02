@@ -1298,6 +1298,70 @@ Object {
         "type": "COMMIT",
       },
     },
+    "{\\"id\\":\\"{\\\\\\"childCommit\\\\\\":\\\\\\"69c5aad50eec8f2a0a07c988c3b283a6490eb45b\\\\\\",\\\\\\"parentCommit\\\\\\":\\\\\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc\\\\\\",\\\\\\"path\\\\\\":[\\\\\\"src\\\\\\",\\\\\\"quantum_gravity.py\\\\\\"]}\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"BECOMES\\"}": Object {
+      "dst": Object {
+        "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f:quantum_gravity.py",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+      "payload": Object {
+        "childCommit": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+        "parentCommit": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
+        "path": Array [
+          "src",
+          "quantum_gravity.py",
+        ],
+      },
+      "src": Object {
+        "id": "7b79d579b62994faba3b69fdf8aa442586c32681:quantum_gravity.py",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+    },
+    "{\\"id\\":\\"{\\\\\\"childCommit\\\\\\":\\\\\\"69c5aad50eec8f2a0a07c988c3b283a6490eb45b\\\\\\",\\\\\\"parentCommit\\\\\\":\\\\\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc\\\\\\",\\\\\\"path\\\\\\":[\\\\\\"src\\\\\\"]}\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"BECOMES\\"}": Object {
+      "dst": Object {
+        "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:src",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+      "payload": Object {
+        "childCommit": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+        "parentCommit": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
+        "path": Array [
+          "src",
+        ],
+      },
+      "src": Object {
+        "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:src",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+    },
+    "{\\"id\\":\\"{\\\\\\"childCommit\\\\\\":\\\\\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc\\\\\\",\\\\\\"parentCommit\\\\\\":\\\\\\"d160cca97611e9dfed642522ad44408d0292e8ea\\\\\\",\\\\\\"path\\\\\\":[\\\\\\"pygravitydefier\\\\\\"]}\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"BECOMES\\"}": Object {
+      "dst": Object {
+        "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+      "payload": Object {
+        "childCommit": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
+        "parentCommit": "d160cca97611e9dfed642522ad44408d0292e8ea",
+        "path": Array [
+          "pygravitydefier",
+        ],
+      },
+      "src": Object {
+        "id": "569e1d383759903134df75230d63c0090196d4cb:pygravitydefier",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+    },
   },
   "nodes": Object {
     "{\\"id\\":\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"BLOB\\"}": Object {

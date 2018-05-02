@@ -1,8 +1,11 @@
 // @flow
 
+import deepEqual from "lodash.isequal";
+
 import type {Address} from "../../core/address";
 import type {Edge, Node} from "../../core/graph";
 import type {
+  BecomesEdgePayload,
   BlobNodePayload,
   Commit,
   EdgePayload,
@@ -20,6 +23,7 @@ import type {
 } from "./types";
 import {Graph, edgeID} from "../../core/graph";
 import {
+  BECOMES_EDGE_TYPE,
   BLOB_NODE_TYPE,
   COMMIT_NODE_TYPE,
   GIT_PLUGIN_NAME,
@@ -30,6 +34,7 @@ import {
   SUBMODULE_COMMIT_NODE_TYPE,
   TREE_ENTRY_NODE_TYPE,
   TREE_NODE_TYPE,
+  becomesEdgeId,
   hasParentEdgeId,
   includesEdgeId,
   submoduleCommitId,
@@ -64,7 +69,11 @@ class GitGraphCreator {
         this.treeGraph(repository.trees[hash], treeAndNameToSubmoduleUrls)
       ),
     ];
-    return graphs.reduce((g, h) => Graph.mergeConservative(g, h), new Graph());
+    const base = graphs.reduce(
+      (g, h) => Graph.mergeConservative(g, h),
+      new Graph()
+    );
+    return Graph.mergeConservative(base, this.becomesEdges(base));
   }
 
   treeAndNameToSubmoduleUrls(repository: Repository) {
@@ -210,6 +219,159 @@ class GitGraphCreator {
         result.addNode(contentsNode).addEdge(contentsEdge);
       });
     });
+    return result;
+  }
+
+  /**
+   * Create a graph containing the BECOMES edges that should appear in
+   * the provided graph. The provided graph is not mutated.
+   */
+  becomesEdges(
+    graph: Graph<NodePayload, EdgePayload>
+  ): Graph<empty, BecomesEdgePayload> {
+    return []
+      .concat(
+        ...graph
+          .nodes({type: COMMIT_NODE_TYPE})
+          .map(({address: childCommit}) => {
+            return graph
+              .neighborhood(childCommit, {
+                edgeType: HAS_PARENT_EDGE_TYPE,
+                direction: "OUT",
+              })
+              .map(({neighbor: parentCommit}) => ({childCommit, parentCommit}));
+          })
+      )
+      .map(({childCommit, parentCommit}) =>
+        this.becomesEdgesForCommits(graph, childCommit, parentCommit)
+      )
+      .reduce((g, h) => Graph.mergeConservative(g, h), new Graph());
+  }
+
+  /**
+   * Create a graph containing the BECOMES edges that indicate changes
+   * from the given parent commit to the given child commit.
+   */
+  becomesEdgesForCommits(
+    graph: Graph<NodePayload, EdgePayload>,
+    childCommit: Address,
+    parentCommit: Address
+  ): Graph<empty, BecomesEdgePayload> {
+    // Find a commit's tree, as `git rev-parse ${commitAddress}^{tree}`.
+    function uniqueTreeOfCommit(commitAddress: Address): Address {
+      const trees = graph.neighborhood(commitAddress, {
+        edgeType: HAS_TREE_EDGE_TYPE,
+      });
+      if (trees.length !== 1) {
+        const {id} = commitAddress;
+        throw new Error(
+          `expected exactly one tree, but found ${trees.length} at ${id}`
+        );
+      }
+      return trees[0].neighbor;
+    }
+
+    // Collect the INCLUDES edges out of a Tree node, indexed by entry
+    // name.
+    function inclusionsByName(
+      tree: Address
+    ): Map<string, Edge<IncludesEdgePayload>> {
+      return new Map(
+        graph
+          .neighborhood(tree, {
+            edgeType: INCLUDES_EDGE_TYPE,
+            direction: "OUT",
+          })
+          .map(({edge}) => {
+            const typedEdge: Edge<IncludesEdgePayload> = (edge: Edge<any>);
+            return [typedEdge.payload.name, typedEdge];
+          })
+      );
+    }
+
+    // Find all contents of an INCLUDES edge. For subtrees and blobs,
+    // the result should have length exactly 1; for submodule commits,
+    // there may be zero or more entries.
+    function contentses(edge: Edge<IncludesEdgePayload>): Address[] {
+      return graph
+        .neighborhood(edge.dst, {
+          edgeType: HAS_CONTENTS_EDGE_TYPE,
+          direction: "OUT",
+        })
+        .map(({neighbor}) => neighbor);
+    }
+
+    const result = new Graph();
+    const workUnits = [
+      {
+        path: [],
+        beforeTree: uniqueTreeOfCommit(parentCommit),
+        afterTree: uniqueTreeOfCommit(childCommit),
+      },
+    ];
+
+    while (workUnits.length > 0) {
+      const {path, beforeTree, afterTree} = workUnits.pop();
+      const beforeInclusions = inclusionsByName(beforeTree);
+      const afterInclusions = inclusionsByName(afterTree);
+      for (const name of beforeInclusions.keys()) {
+        if (!afterInclusions.has(name)) {
+          continue;
+        }
+        const beforeInclusion = beforeInclusions.get(name);
+        const afterInclusion = afterInclusions.get(name);
+        if (beforeInclusion == null || afterInclusion == null) {
+          // (Flow doesn't know what `Map.prototype.has` does.)
+          throw new Error("Not possible.");
+        }
+        const subpath = [...path, name];
+        const beforeContentses = contentses(beforeInclusion);
+        const afterContentses = contentses(afterInclusion);
+
+        // Add an edge from `b` to `a` for each `(b, a)` in the
+        // cartesian product. Why this semantics? First, note that if
+        // the entries are blobs or subtrees (the vast majority of
+        // cases), then the cartesian product has size exactly 1, and we
+        // create the obvious unique edge. This only becomes interesting
+        // in the case of submodules. An alternate semantics would be to
+        // only create edges between submodule commits with identical
+        // URLs---but then we break the chain of BECOMES edges when the
+        // URL of a repository is changed, which seems incorrect.
+        // Working over the product solves this problem, and also seems
+        // like a reasonable thing to do in principle.
+        beforeContentses.forEach((beforeContents) => {
+          afterContentses.forEach((afterContents) => {
+            if (deepEqual(beforeContents, afterContents)) {
+              // Unchanged blob, subcommit, or subtree. No edges to add.
+              return;
+            }
+            result.addEdge({
+              address: this.makeAddress(
+                BECOMES_EDGE_TYPE,
+                becomesEdgeId(childCommit.id, parentCommit.id, subpath)
+              ),
+              src: beforeInclusion.dst,
+              dst: afterInclusion.dst,
+              payload: {
+                childCommit: childCommit.id,
+                parentCommit: parentCommit.id,
+                path: subpath,
+              },
+            });
+            if (
+              beforeContents.type === TREE_NODE_TYPE &&
+              afterContents.type === TREE_NODE_TYPE
+            ) {
+              workUnits.push({
+                path: subpath,
+                beforeTree: beforeContents,
+                afterTree: afterContents,
+              });
+            }
+          });
+        });
+      }
+    }
     return result;
   }
 }
