@@ -11,6 +11,7 @@ import {
   HAS_PARENT_EDGE_TYPE,
   HAS_TREE_EDGE_TYPE,
   INCLUDES_EDGE_TYPE,
+  SUBMODULE_COMMIT_NODE_TYPE,
   TREE_ENTRY_NODE_TYPE,
   TREE_NODE_TYPE,
   treeEntryId,
@@ -131,16 +132,16 @@ describe("createGraph", () => {
             direction: "IN",
           })
         ).toHaveLength(1);
-        const shouldHaveContents = tree.entries[name].type !== "commit";
+        // Note: this may fail if the test database is changed such that
+        // a submodule has multiple potential URLs (or none at all).
+        // Currently, each submodule has exactly one potential URL.
         expect(
           graph.neighborhood(entryAddress, {
             edgeType: HAS_CONTENTS_EDGE_TYPE,
             direction: "OUT",
           })
-        ).toHaveLength(shouldHaveContents ? 1 : 0);
-        expect(graph.neighborhood(entryAddress)).toHaveLength(
-          shouldHaveContents ? 2 : 1
-        );
+        ).toHaveLength(1);
+        expect(graph.neighborhood(entryAddress)).toHaveLength(2);
       });
     });
   });
@@ -234,12 +235,15 @@ describe("createGraph", () => {
         headTreeAddress,
         "pygravitydefier"
       );
-      expect(graph.node(treeEntryAddress)).toEqual(expect.anything());
-      // Submodule commits never have contents, because the commit nodes
-      // are from an unknown repository.
-      expect(
-        graph.neighborhood(treeEntryAddress, {direction: "OUT"})
-      ).toHaveLength(0);
+      const submoduleCommitAddress = uniqueContents(graph, treeEntryAddress);
+      expect(graph.node(submoduleCommitAddress)).toEqual(
+        expect.objectContaining({
+          address: expect.objectContaining({type: SUBMODULE_COMMIT_NODE_TYPE}),
+          payload: expect.objectContaining({
+            url: expect.stringMatching(/https:.*example-git-submodule/),
+          }),
+        })
+      );
     });
   });
 });
