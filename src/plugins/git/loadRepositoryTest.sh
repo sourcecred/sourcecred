@@ -9,12 +9,14 @@ usage() {
   printf 'Flags:\n'
   printf '  -u|--updateSnapshot\n'
   printf '      Update the stored file instead of checking its contents\n'
+  printf ' --[no-]build\n'
+  printf '      Whether to run "yarn backend" before the test.\n'
+  printf '      Default is --build.\n'
   printf '  --help\n'
   printf '      Show this message\n'
 }
 
 fetch() {
-  yarn backend >&2
   tmpdir="$(mktemp -d)"
   node bin/createExampleRepo.js "${tmpdir}"
   node bin/loadAndPrintGitRepository.js "${tmpdir}"
@@ -33,21 +35,31 @@ update() {
 }
 
 main() {
-  cd "$(git rev-parse --show-toplevel)"
-  if [ $# -eq 0 ]; then
-    check
-  elif [ $# -eq 1 ]; then
-    if [ "$1" = "-u" ] || [ "$1" = "--updateSnapshot" ]; then
-      update
-    elif [ "$1" = "--help" ]; then
+  UPDATE=
+  BUILD=1
+  while [ $# -gt 0 ]; do
+    if [ "$1" = "--help" ]; then
       usage
+      return 0
+    elif [ "$1" = "-u" ] || [ "$1" = "--updateSnapshot" ]; then
+      UPDATE=1
+    elif [ "$1" = "--build" ]; then
+      BUILD=1
+    elif [ "$1" = "--no-build" ]; then
+      BUILD=
     else
       usage >&2
       return 1
     fi
+    shift
+  done
+  if [ -n "${BUILD}" ]; then
+    yarn backend
+  fi
+  if [ -n "${UPDATE}" ]; then
+    update
   else
-    usage >&2
-    return 1
+    check
   fi
 }
 
