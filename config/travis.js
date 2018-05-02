@@ -43,8 +43,7 @@ async function processAll(tasks /*: $ReadOnlyArray<Task> */) {
   const tasksInProgress /*: Map<TaskId, Promise<TaskResult>> */ = new Map();
   const remainingTasks /*: Set<TaskId> */ = new Set(Object.keys(tasksById));
 
-  function spawnTasksWhoseDependenciesHaveCompleted() /*: boolean */ {
-    let madeProgress = false;
+  function spawnTasksWhoseDependenciesHaveCompleted() {
     for (const task of tasks) {
       if (!remainingTasks.has(task.id)) {
         continue;
@@ -56,9 +55,7 @@ async function processAll(tasks /*: $ReadOnlyArray<Task> */) {
       remainingTasks.delete(task.id);
       console.log(chalk.bgBlue.bold.white("  GO  ") + " " + task.id);
       tasksInProgress.set(task.id, processOne(task));
-      madeProgress = true;
     }
-    return madeProgress;
   }
 
   function incompleteDependencies(task /*: Task */) /*: TaskId[] */ {
