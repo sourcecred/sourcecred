@@ -36,6 +36,21 @@ export type TreeNodePayload = {||};
 export const BLOB_NODE_TYPE: "BLOB" = "BLOB";
 export type BlobNodePayload = {||}; // we do not store the content
 
+// In Git, a tree may point to a commit directly; in our graph, we have
+// an explicit notion of "submodule commit", because, a priori, we do
+// not know the repository to which the commit belongs. A submodule
+// commit node stores the hash of the referent commit, as well as the
+// URL to the subproject as listed in the .gitmodules file.
+export const SUBMODULE_COMMIT_NODE_TYPE: "SUBMODULE_COMMIT" =
+  "SUBMODULE_COMMIT";
+export function submoduleCommitId(hash: Hash, submoduleUrl: string) {
+  return `${submoduleUrl}@${hash}`;
+}
+export type SubmoduleCommitPayload = {|
+  +hash: Hash,
+  +url: string, // from .gitmodules file
+|};
+
 export const TREE_ENTRY_NODE_TYPE: "TREE_ENTRY" = "TREE_ENTRY";
 export type TreeEntryNodePayload = {|
   +name: string,
@@ -45,16 +60,18 @@ export function treeEntryId(tree: Hash, name: string): string {
 }
 
 export type NodePayload =
+  | BlobNodePayload
   | CommitNodePayload
-  | TreeNodePayload
+  | SubmoduleCommitPayload
   | TreeEntryNodePayload
-  | BlobNodePayload;
+  | TreeNodePayload;
 
 export type NodeType =
+  | typeof BLOB_NODE_TYPE
   | typeof COMMIT_NODE_TYPE
-  | typeof TREE_NODE_TYPE
+  | typeof SUBMODULE_COMMIT_NODE_TYPE
   | typeof TREE_ENTRY_NODE_TYPE
-  | typeof BLOB_NODE_TYPE;
+  | typeof TREE_NODE_TYPE;
 
 // Edges
 

@@ -588,6 +588,21 @@ Object {
         "type": "TREE_ENTRY",
       },
     },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "SUBMODULE_COMMIT",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:pygravitydefier",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+    },
     "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:science.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
       "dst": Object {
         "id": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
@@ -643,6 +658,21 @@ Object {
       "payload": Object {},
       "src": Object {
         "id": "569e1d383759903134df75230d63c0090196d4cb:TODOS.txt",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"569e1d383759903134df75230d63c0090196d4cb:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "SUBMODULE_COMMIT",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "569e1d383759903134df75230d63c0090196d4cb:pygravitydefier",
         "pluginName": "sourcecred/git-beta",
         "repositoryName": "sourcecred/example-git",
         "type": "TREE_ENTRY",
@@ -783,6 +813,21 @@ Object {
         "type": "TREE_ENTRY",
       },
     },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "SUBMODULE_COMMIT",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:pygravitydefier",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+    },
     "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:science.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
       "dst": Object {
         "id": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
@@ -853,6 +898,21 @@ Object {
       "payload": Object {},
       "src": Object {
         "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:TODOS.txt",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "SUBMODULE_COMMIT",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier",
         "pluginName": "sourcecred/git-beta",
         "repositoryName": "sourcecred/example-git",
         "type": "TREE_ENTRY",
@@ -943,6 +1003,21 @@ Object {
       "payload": Object {},
       "src": Object {
         "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:TODOS.txt",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "TREE_ENTRY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"repositoryName\\\\\\":\\\\\\"sourcecred/example-git\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188",
+        "pluginName": "sourcecred/git-beta",
+        "repositoryName": "sourcecred/example-git",
+        "type": "SUBMODULE_COMMIT",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:pygravitydefier",
         "pluginName": "sourcecred/git-beta",
         "repositoryName": "sourcecred/example-git",
         "type": "TREE_ENTRY",
@@ -1463,6 +1538,18 @@ Object {
     },
     "{\\"id\\":\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"BLOB\\"}": Object {
       "payload": Object {},
+    },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"SUBMODULE_COMMIT\\"}": Object {
+      "payload": Object {
+        "hash": "29ef158bc982733e2ba429fcf73e2f7562244188",
+        "url": "https://github.com/sourcecred/example-git-submodule.git",
+      },
+    },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"repositoryName\\":\\"sourcecred/example-git\\",\\"type\\":\\"SUBMODULE_COMMIT\\"}": Object {
+      "payload": Object {
+        "hash": "762c062fbdc7ec198cd693e95d55b374a08ff3e3",
+        "url": "https://github.com/sourcecred/example-git-submodule.git",
+      },
     },
   },
 }
