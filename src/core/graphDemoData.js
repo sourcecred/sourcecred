@@ -9,7 +9,6 @@ import {Graph} from "./graph";
 
 export function makeAddress(id: string, type: string): Address {
   return {
-    repositoryName: "sourcecred/eventide",
     pluginName: "hill_cooking_pot",
     id,
     type,

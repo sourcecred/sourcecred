@@ -13,7 +13,7 @@ require("../testUtil").configureEnzyme();
 
 describe("githubPluginAdapter", () => {
   it("operates on the example repo", () => {
-    const graph = parse("sourcecred/example-repo", exampleRepoData);
+    const graph = parse(exampleRepoData);
 
     const result = graph
       .nodes()

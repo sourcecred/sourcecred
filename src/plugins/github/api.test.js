@@ -12,8 +12,8 @@ import {
   PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
 } from "./types";
 describe("GitHub porcelain API", () => {
-  const graph = parse("sourcecred/example-repo", exampleRepoData);
-  const repo = new Repository("sourcecred/example-repo", graph);
+  const graph = parse(exampleRepoData);
+  const repo = new Repository(graph);
   function issueOrPRByNumber(n: number): Issue | PullRequest {
     const result = repo.issueOrPRByNumber(n);
     if (result == null) {

@@ -75,7 +75,7 @@ exports[`ContributionList renders some test data in the default state 1`] = `
     </thead>
     <tbody>
       <tr
-        key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one\\",\\"type\\":\\"small\\"}"
+        key="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one\\",\\"type\\":\\"small\\"}"
       >
         <td>
           the number 111
@@ -88,7 +88,7 @@ exports[`ContributionList renders some test data in the default state 1`] = `
         </td>
       </tr>
       <tr
-        key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"two\\",\\"type\\":\\"small\\"}"
+        key="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"two\\",\\"type\\":\\"small\\"}"
       >
         <td>
           the number 234
@@ -101,7 +101,7 @@ exports[`ContributionList renders some test data in the default state 1`] = `
         </td>
       </tr>
       <tr
-        key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"three\\",\\"type\\":\\"big\\"}"
+        key="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"three\\",\\"type\\":\\"big\\"}"
       >
         <td>
           the number 616
@@ -114,7 +114,7 @@ exports[`ContributionList renders some test data in the default state 1`] = `
         </td>
       </tr>
       <tr
-        key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-b\\",\\"id\\":\\"four\\",\\"type\\":\\"very true\\"}"
+        key="{\\"pluginName\\":\\"sourcecred/example-plugin-b\\",\\"id\\":\\"four\\",\\"type\\":\\"very true\\"}"
       >
         <td>
           TRUE!
@@ -127,7 +127,7 @@ exports[`ContributionList renders some test data in the default state 1`] = `
         </td>
       </tr>
       <tr
-        key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-c\\",\\"id\\":\\"five\\",\\"type\\":\\"ctype\\"}"
+        key="{\\"pluginName\\":\\"sourcecred/example-plugin-c\\",\\"id\\":\\"five\\",\\"type\\":\\"ctype\\"}"
       >
         <td
           colSpan={3}
@@ -220,7 +220,7 @@ exports[`ContributionList updates the node table when a filter is selected 1`] =
     </thead>
     <tbody>
       <tr
-        key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one\\",\\"type\\":\\"small\\"}"
+        key="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"one\\",\\"type\\":\\"small\\"}"
       >
         <td>
           the number 111
@@ -233,7 +233,7 @@ exports[`ContributionList updates the node table when a filter is selected 1`] =
         </td>
       </tr>
       <tr
-        key="{\\"repositoryName\\":\\"sourcecred/tests\\",\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"two\\",\\"type\\":\\"small\\"}"
+        key="{\\"pluginName\\":\\"sourcecred/example-plugin-a\\",\\"id\\":\\"two\\",\\"type\\":\\"small\\"}"
       >
         <td>
           the number 234

@@ -34,28 +34,24 @@ import {Graph, edgeID} from "../../core/graph";
 import {findReferences} from "./findReferences";
 
 export function parse(
-  repositoryName: string,
   repositoryJSON: RepositoryJSON
 ): Graph<NodePayload, EdgePayload> {
-  const parser = new GithubParser(repositoryName);
+  const parser = new GithubParser();
   parser.addData(repositoryJSON);
   parser.addReferenceEdges();
   return parser.graph;
 }
 
 class GithubParser {
-  repositoryName: string;
   graph: Graph<NodePayload, EdgePayload>;
 
-  constructor(repositoryName: string) {
-    this.repositoryName = repositoryName;
+  constructor() {
     this.graph = new Graph();
   }
 
   makeNodeAddress(type: NodeType, url: string): Address {
     return {
       pluginName: PLUGIN_NAME,
-      repositoryName: this.repositoryName,
       type,
       id: url,
     };
@@ -64,7 +60,6 @@ class GithubParser {
   makeEdgeAddress(type: EdgeType, src: Address, dst: Address): Address {
     return {
       pluginName: PLUGIN_NAME,
-      repositoryName: this.repositoryName,
       type,
       id: edgeID(src, dst),
     };

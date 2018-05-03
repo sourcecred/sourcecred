@@ -15,7 +15,6 @@ describe("address", () => {
   |};
   function makeAddress(type: "HOME" | "BUSINESS", id: string): Address {
     return {
-      repositoryName: "sourcecred/suburbia",
       pluginName: "houseville",
       id,
       type,
@@ -160,12 +159,10 @@ describe("address", () => {
         pluginName: "foo",
         type: "bar",
         id: "zoombat",
-        repositoryName: "oregano",
       };
       const a2 = {
         id: "zoombat",
         type: "bar",
-        repositoryName: "oregano",
         pluginName: "foo",
       };
       expect(toString(a1)).toEqual(toString(a2));

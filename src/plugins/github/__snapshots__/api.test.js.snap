@@ -7,7 +7,6 @@ Object {
   "address": Object {
     "id": "https://github.com/decentralion",
     "pluginName": "sourcecred/github-beta",
-    "repositoryName": "sourcecred/example-repo",
     "type": "AUTHOR",
   },
   "payload": Object {
@@ -25,7 +24,6 @@ Object {
   "address": Object {
     "id": "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
     "pluginName": "sourcecred/github-beta",
-    "repositoryName": "sourcecred/example-repo",
     "type": "COMMENT",
   },
   "payload": Object {
@@ -40,7 +38,6 @@ Object {
   "address": Object {
     "id": "https://github.com/sourcecred/example-repo/issues/1",
     "pluginName": "sourcecred/github-beta",
-    "repositoryName": "sourcecred/example-repo",
     "type": "ISSUE",
   },
   "payload": Object {
@@ -57,7 +54,6 @@ Object {
   "address": Object {
     "id": "https://github.com/sourcecred/example-repo/pull/3",
     "pluginName": "sourcecred/github-beta",
-    "repositoryName": "sourcecred/example-repo",
     "type": "PULL_REQUEST",
   },
   "payload": Object {

@@ -416,7 +416,6 @@ describe("graph", () => {
               id,
               type,
               pluginName: "graph-test",
-              repositoryName: "sourcecred",
             };
           }
 

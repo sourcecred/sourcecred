@@ -32,7 +32,6 @@ function createTestData(): * {
     id: string
   ): Address {
     return {
-      repositoryName: "sourcecred/tests",
       pluginName,
       id,
       type,

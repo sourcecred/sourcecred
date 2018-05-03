@@ -4,7 +4,6 @@ import deepEqual from "lodash.isequal";
 import stringify from "json-stable-stringify";
 
 export type Address = {|
-  +repositoryName: string,
   +pluginName: string,
   +id: string,
   +type: string,
