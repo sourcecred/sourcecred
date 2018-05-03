@@ -206,8 +206,8 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       deps: [],
     },
     {
-      id: "flow",
-      cmd: ["npm", "run", "--silent", "flow"],
+      id: "flow-check",
+      cmd: ["npm", "run", "--silent", "flow", "check"],
       deps: [],
     },
     {
