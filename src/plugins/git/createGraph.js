@@ -196,6 +196,59 @@ class GitGraphCreator {
   }
 }
 
+export type BecomesEdge = {|
+  +from: {|
+    +tree: Hash,
+    +name: string,
+  |},
+  +to: {|
+    +tree: Hash,
+    +name: string,
+  |},
+  +path: $ReadOnlyArray<string>,
+|};
+
+export function* findBecomesEdgesForCommits(
+  repository: Repository,
+  childCommit: Hash,
+  parentCommit: Hash
+): Iterator<BecomesEdge> {
+  const workUnits = [
+    {
+      path: [],
+      beforeTreeHash: repository.commits[parentCommit].treeHash,
+      afterTreeHash: repository.commits[childCommit].treeHash,
+    },
+  ];
+  while (workUnits.length > 0) {
+    const {path, beforeTreeHash, afterTreeHash} = workUnits.pop();
+    const beforeTree = repository.trees[beforeTreeHash];
+    const afterTree = repository.trees[afterTreeHash];
+    for (const name of Object.keys(beforeTree.entries)) {
+      if (!(name in afterTree.entries)) {
+        continue;
+      }
+      const beforeEntry = beforeTree.entries[name];
+      const afterEntry = afterTree.entries[name];
+      const subpath = [...path, name];
+      if (beforeEntry.hash !== afterEntry.hash) {
+        yield {
+          from: {tree: beforeTreeHash, name},
+          to: {tree: afterTreeHash, name},
+          path: subpath,
+        };
+      }
+      if (beforeEntry.type === "tree" && afterEntry.type === "tree") {
+        workUnits.push({
+          path: subpath,
+          beforeTreeHash: beforeEntry.hash,
+          afterTreeHash: afterEntry.hash,
+        });
+      }
+    }
+  }
+}
+
 export function createGraph(
   repository: Repository
 ): Graph<NodePayload, EdgePayload> {
