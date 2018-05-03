@@ -197,29 +197,29 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
   const basicTasks = [
     {
       id: "check-pretty",
-      cmd: ["npm", "run", "check-pretty"],
+      cmd: ["npm", "run", "--silent", "check-pretty"],
       deps: [],
     },
     {
       id: "lint",
-      cmd: ["npm", "run", "lint"],
+      cmd: ["npm", "run", "--silent", "lint"],
       deps: [],
     },
     {
       id: "flow",
-      cmd: ["npm", "run", "flow"],
+      cmd: ["npm", "run", "--silent", "flow"],
       deps: [],
     },
     {
       id: "ci-test",
-      cmd: ["npm", "run", "ci-test"],
+      cmd: ["npm", "run", "--silent", "ci-test"],
       deps: [],
     },
   ];
   const extraTasks = [
     {
       id: "backend",
-      cmd: ["npm", "run", "backend"],
+      cmd: ["npm", "run", "--silent", "backend"],
       deps: [],
     },
     {
