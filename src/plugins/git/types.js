@@ -37,7 +37,6 @@ export type BlobNodePayload = {||}; // we do not store the content
 
 export const TREE_ENTRY_NODE_TYPE: "TREE_ENTRY" = "TREE_ENTRY";
 export type TreeEntryNodePayload = {|
-  +tree: Hash,
   +name: string,
 |};
 export function treeEntryId(tree: Hash, name: string): string {

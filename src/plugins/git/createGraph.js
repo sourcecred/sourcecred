@@ -111,7 +111,7 @@ class GitGraphCreator {
           TREE_ENTRY_NODE_TYPE,
           treeEntryId(tree.hash, entry.name)
         ),
-        payload: {tree: tree.hash, name},
+        payload: {name},
       };
       const entryEdge: Edge<IncludesEdgePayload> = {
         address: this.makeAddress(
