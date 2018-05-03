@@ -39,39 +39,39 @@ describe("findReferences", () => {
   it("finds url references", () => {
     const example = `
     A directly linked issue:
-https://github.com/sourcecred/example-repo/issues/1
+https://github.com/sourcecred/example-github/issues/1
 
     A directly linked issue with fragment:
-https://github.com/sourcecred/example-repo/issues/1#issue-300934818
+https://github.com/sourcecred/example-github/issues/1#issue-300934818
 
     A directly linked pull request:
-https://github.com/sourcecred/example-repo/pull/3
+https://github.com/sourcecred/example-github/pull/3
 
     A directly linked pull request with fragment:
-https://github.com/sourcecred/example-repo/pull/3#issue-171887741
+https://github.com/sourcecred/example-github/pull/3#issue-171887741
 
     A directly linked issue comment:
-https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442
+https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442
 
     A directly linked pull request review:
-https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899
+https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899
 
     A directly linked pull request review comment:
-https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198
+https://github.com/sourcecred/example-github/pull/5#discussion_r171460198
 
     A directly linked pull request comment:
-https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222
+https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
     `;
 
     const expected = [
-      "https://github.com/sourcecred/example-repo/issues/1",
-      "https://github.com/sourcecred/example-repo/issues/1#issue-300934818",
-      "https://github.com/sourcecred/example-repo/pull/3",
-      "https://github.com/sourcecred/example-repo/pull/3#issue-171887741",
-      "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442",
-      "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
-      "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
-      "https://github.com/sourcecred/example-repo/pull/3#issuecomment-369162222",
+      "https://github.com/sourcecred/example-github/issues/1",
+      "https://github.com/sourcecred/example-github/issues/1#issue-300934818",
+      "https://github.com/sourcecred/example-github/pull/3",
+      "https://github.com/sourcecred/example-github/pull/3#issue-171887741",
+      "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442",
+      "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+      "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+      "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
     ];
 
     expect(findReferences(example)).toEqual(expected);

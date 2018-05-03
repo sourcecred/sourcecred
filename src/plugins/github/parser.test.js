@@ -5,7 +5,7 @@ import type {NodePayload, EdgePayload} from "./types";
 import {parse} from "./parser";
 import type {RepositoryJSON, PullRequestJSON, IssueJSON} from "./graphql";
 import {Graph} from "../../core/graph";
-import exampleRepoData from "./demoData/example-repo.json";
+import exampleRepoData from "./demoData/example-github.json";
 
 describe("GithubParser", () => {
   function getIssue(n): IssueJSON {
@@ -28,7 +28,7 @@ describe("GithubParser", () => {
   describe("whole repo parsing", () => {
     const graph = parse(exampleRepoData);
 
-    it("parses the entire example-repo as expected", () => {
+    it("parses the entire example-github as expected", () => {
       expect(graph).toMatchSnapshot();
     });
 
@@ -118,20 +118,20 @@ describe("GithubParser", () => {
   }
 
   describe("issue parsing", () => {
-    it("parses a simple issue (https://github.com/sourcecred/example-repo/issues/1)", () => {
+    it("parses a simple issue (https://github.com/sourcecred/example-github/issues/1)", () => {
       expect(parseExample({issues: [1]})).toMatchSnapshot();
     });
 
-    it("parses an issue with comments (https://github.com/sourcecred/example-repo/issues/6)", () => {
+    it("parses an issue with comments (https://github.com/sourcecred/example-github/issues/6)", () => {
       expect(parseExample({issues: [6]})).toMatchSnapshot();
     });
   });
 
   describe("pull request parsing", () => {
-    it("parses a simple pull request (https://github.com/sourcecred/example-repo/pull/3)", () => {
+    it("parses a simple pull request (https://github.com/sourcecred/example-github/pull/3)", () => {
       expect(parseExample({prs: [3]})).toMatchSnapshot();
     });
-    it("parses a pr with review comments (https://github.com/sourcecred/example-repo/pull/3)", () => {
+    it("parses a pr with review comments (https://github.com/sourcecred/example-github/pull/3)", () => {
       expect(parseExample({prs: [5]})).toMatchSnapshot();
     });
   });
