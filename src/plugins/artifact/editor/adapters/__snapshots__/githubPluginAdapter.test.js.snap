@@ -371,6 +371,22 @@ Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌�
     "type": "PULL_REQUEST_REVIEW",
   },
   Object {
+    "id": "https://github.com/sourcecred/example-github/pull/9",
+    "payload": Object {
+      "body": "Nominally paired with @wchargin",
+      "number": 9,
+      "title": "An unmerged pull request",
+      "url": "https://github.com/sourcecred/example-github/pull/9",
+    },
+    "rendered": <div>
+      type: 
+      PULL_REQUEST
+       (details to be implemented)
+</div>,
+    "title": "#9: An unmerged pull request",
+    "type": "PULL_REQUEST",
+  },
+  Object {
     "id": "https://github.com/wchargin",
     "payload": Object {
       "login": "wchargin",

@@ -1492,6 +1492,19 @@ Object {
         "type": "PULL_REQUEST",
       },
     },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/9\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/decentralion",
+        "pluginName": "sourcecred/github-beta",
+        "type": "AUTHOR",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github/pull/9",
+        "pluginName": "sourcecred/github-beta",
+        "type": "PULL_REQUEST",
+      },
+    },
     "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
       "dst": Object {
         "id": "https://github.com/sourcecred/example-github/issues/6",
@@ -1882,6 +1895,19 @@ Object {
         "type": "PULL_REQUEST",
       },
     },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/9\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/wchargin",
+        "pluginName": "sourcecred/github-beta",
+        "type": "AUTHOR",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github/pull/9",
+        "pluginName": "sourcecred/github-beta",
+        "type": "PULL_REQUEST",
+      },
+    },
     "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
       "dst": Object {
         "id": "https://github.com/wchargin",
@@ -2097,6 +2123,14 @@ Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌�
         "body": "I'm sold",
         "state": "APPROVED",
         "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038",
+      },
+    },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-github/pull/9\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"PULL_REQUEST\\"}": Object {
+      "payload": Object {
+        "body": "Nominally paired with @wchargin",
+        "number": 9,
+        "title": "An unmerged pull request",
+        "url": "https://github.com/sourcecred/example-github/pull/9",
       },
     },
     "{\\"id\\":\\"https://github.com/wchargin\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHOR\\"}": Object {

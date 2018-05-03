@@ -377,10 +377,39 @@
                     },
                     "title": "This pull request will be more contentious. I can feel it...",
                     "url": "https://github.com/sourcecred/example-github/pull/5"
+                },
+                {
+                    "author": {
+                        "__typename": "User",
+                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                        "login": "decentralion",
+                        "url": "https://github.com/decentralion"
+                    },
+                    "body": "Nominally paired with @wchargin",
+                    "comments": {
+                        "nodes": [
+                        ],
+                        "pageInfo": {
+                            "endCursor": null,
+                            "hasNextPage": false
+                        }
+                    },
+                    "id": "MDExOlB1bGxSZXF1ZXN0MTg1ODA2MTU3",
+                    "number": 9,
+                    "reviews": {
+                        "nodes": [
+                        ],
+                        "pageInfo": {
+                            "endCursor": null,
+                            "hasNextPage": false
+                        }
+                    },
+                    "title": "An unmerged pull request",
+                    "url": "https://github.com/sourcecred/example-github/pull/9"
                 }
             ],
             "pageInfo": {
-                "endCursor": "Y3Vyc29yOnYyOpHOCj7Pig==",
+                "endCursor": "Y3Vyc29yOnYyOpHOCxMtTQ==",
                 "hasNextPage": false
             }
         }
