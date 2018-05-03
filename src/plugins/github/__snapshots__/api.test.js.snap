@@ -49,7 +49,7 @@ Object {
 }
 `;
 
-exports[`GitHub porcelain API has wrappers for PullRequests 1`] = `
+exports[`GitHub porcelain API has wrappers for PullRequests Merged 1`] = `
 Object {
   "address": Object {
     "id": "https://github.com/sourcecred/example-github/pull/3",

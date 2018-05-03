@@ -19,6 +19,7 @@ import type {
   AuthorSubtype,
 } from "./types";
 
+import {MERGED_AS_EDGE_TYPE} from "./types";
 import type {
   RepositoryJSON,
   PullRequestReviewJSON,
@@ -32,6 +33,7 @@ import type {Address} from "../../core/address";
 import {PLUGIN_NAME} from "./pluginName";
 import {Graph, edgeID} from "../../core/graph";
 import {findReferences} from "./findReferences";
+import {commitAddress} from "../git/address";
 
 export function parse(
   repositoryJSON: RepositoryJSON
@@ -217,6 +219,22 @@ class GithubParser {
     prJson.reviews.nodes.forEach((r) =>
       this.addPullRequestReview(pullRequestNode, r)
     );
+
+    if (prJson.mergeCommit != null) {
+      const hash = prJson.mergeCommit.oid;
+      const dstAddr = commitAddress(hash);
+      const mergedAsEdge = {
+        address: this.makeEdgeAddress(
+          MERGED_AS_EDGE_TYPE,
+          pullRequestNode.address,
+          dstAddr
+        ),
+        payload: {hash},
+        src: pullRequestNode.address,
+        dst: dstAddr,
+      };
+      this.graph.addEdge(mergedAsEdge);
+    }
   }
 
   addPullRequestReview(
