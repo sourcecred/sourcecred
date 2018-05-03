@@ -1392,3 +1392,35 @@ Object {
   },
 }
 `;
+
+exports[`findBecomesEdgesForCommits works on the example repository 1`] = `
+Array [
+  Object {
+    "from": Object {
+      "name": "src",
+      "tree": "819fc546cea489476ce8dc90785e9ba7753d0a8f",
+    },
+    "path": Array [
+      "src",
+    ],
+    "to": Object {
+      "name": "src",
+      "tree": "bbf3b8b3d26a4f884b5c022d46851f593d329192",
+    },
+  },
+  Object {
+    "from": Object {
+      "name": "quantum_gravity.py",
+      "tree": "7b79d579b62994faba3b69fdf8aa442586c32681",
+    },
+    "path": Array [
+      "src",
+      "quantum_gravity.py",
+    ],
+    "to": Object {
+      "name": "quantum_gravity.py",
+      "tree": "78fc9c83023386854c6bfdc5761c0e58f68e226f",
+    },
+  },
+]
+`;
