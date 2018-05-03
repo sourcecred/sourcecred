@@ -5,6 +5,9 @@
             "parentHashes": [
                 "69c5aad50eec8f2a0a07c988c3b283a6490eb45b"
             ],
+            "submoduleUrls": {
+                "pygravitydefier": "https://github.com/sourcecred/example-git-submodule.git"
+            },
             "treeHash": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed"
         },
         "69c5aad50eec8f2a0a07c988c3b283a6490eb45b": {
@@ -12,6 +15,9 @@
             "parentHashes": [
                 "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc"
             ],
+            "submoduleUrls": {
+                "pygravitydefier": "https://github.com/sourcecred/example-git-submodule.git"
+            },
             "treeHash": "bbf3b8b3d26a4f884b5c022d46851f593d329192"
         },
         "8d287c3bfbf8455ef30187bf5153ffc1b6eef268": {
@@ -19,6 +25,9 @@
             "parentHashes": [
                 "c08ee3a4edea384d5291ffcbf06724a13ed72325"
             ],
+            "submoduleUrls": {
+                "pygravitydefier": "https://github.com/sourcecred/example-git-submodule.git"
+            },
             "treeHash": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8"
         },
         "c08ee3a4edea384d5291ffcbf06724a13ed72325": {
@@ -26,12 +35,16 @@
             "parentHashes": [
                 "c2b51945e7457546912a8ce158ed9d294558d294"
             ],
+            "submoduleUrls": {
+            },
             "treeHash": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809"
         },
         "c2b51945e7457546912a8ce158ed9d294558d294": {
             "hash": "c2b51945e7457546912a8ce158ed9d294558d294",
             "parentHashes": [
             ],
+            "submoduleUrls": {
+            },
             "treeHash": "bdff5d94193170015d6cbb549b7b630649428b1f"
         },
         "d160cca97611e9dfed642522ad44408d0292e8ea": {
@@ -39,6 +52,9 @@
             "parentHashes": [
                 "8d287c3bfbf8455ef30187bf5153ffc1b6eef268"
             ],
+            "submoduleUrls": {
+                "pygravitydefier": "https://github.com/sourcecred/example-git-submodule.git"
+            },
             "treeHash": "569e1d383759903134df75230d63c0090196d4cb"
         },
         "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc": {
@@ -46,6 +62,9 @@
             "parentHashes": [
                 "d160cca97611e9dfed642522ad44408d0292e8ea"
             ],
+            "submoduleUrls": {
+                "pygravitydefier": "https://github.com/sourcecred/example-git-submodule.git"
+            },
             "treeHash": "819fc546cea489476ce8dc90785e9ba7753d0a8f"
         }
     },
