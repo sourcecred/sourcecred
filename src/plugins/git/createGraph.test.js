@@ -2,14 +2,18 @@
 
 import cloneDeep from "lodash.clonedeep";
 
+import type {Address} from "../../core/address";
+import type {Edge} from "../../core/graph";
 import type {BecomesEdge} from "./createGraph";
-import type {Hash, Tree} from "./types";
+import type {BecomesEdgePayload, Hash, Tree} from "./types";
+import {_makeAddress} from "./address";
 import {
   createGraph,
   findBecomesEdges,
   findBecomesEdgesForCommits,
 } from "./createGraph";
 import {
+  BECOMES_EDGE_TYPE,
   BLOB_NODE_TYPE,
   COMMIT_NODE_TYPE,
   GIT_PLUGIN_NAME,
@@ -143,8 +147,70 @@ describe("createGraph", () => {
             direction: "OUT",
           })
         ).toHaveLength(1);
-        expect(graph.neighborhood(entryAddress)).toHaveLength(2);
+        const becomesCount = graph.neighborhood(entryAddress, {
+          edgeType: BECOMES_EDGE_TYPE,
+        }).length;
+        ["OUT", "IN"].forEach((direction) => {
+          expect(
+            graph.neighborhood(entryAddress, {
+              edgeType: BECOMES_EDGE_TYPE,
+              direction,
+            }).length
+          ).toBeLessThanOrEqual(1);
+        });
+        expect(graph.neighborhood(entryAddress)).toHaveLength(becomesCount + 2);
       });
+    });
+  });
+
+  it('has "becomes" edges with valid paths', () => {
+    const data = makeData();
+    const graph = createGraph(data);
+    const becomings: $ReadOnlyArray<Edge<BecomesEdgePayload>> = graph
+      .edges({type: BECOMES_EDGE_TYPE})
+      .map((edge) => ((edge: Edge<any>): Edge<BecomesEdgePayload>));
+    expect(becomings).not.toHaveLength(0);
+    becomings.forEach((edge) => {
+      expect(edge.dst).not.toEqual(edge.src);
+      const expectedPayload = {
+        name: edge.payload.path[edge.payload.path.length - 1],
+      };
+      expect(graph.node(edge.src)).toEqual(
+        expect.objectContaining({payload: expectedPayload})
+      );
+      expect(graph.node(edge.dst)).toEqual(
+        expect.objectContaining({payload: expectedPayload})
+      );
+
+      const {payload: {childCommit, parentCommit, path}} = edge;
+      expect(path).not.toHaveLength(0);
+      expect(data.commits[childCommit].parentHashes).toEqual(
+        expect.arrayContaining([parentCommit])
+      );
+      function expectedTreeEntryAddress(commit: Hash): Address {
+        const {tree, name} = path.slice(1).reduce(
+          ({tree, name}, newName) => {
+            if (!(tree in data.trees)) {
+              throw new Error(
+                "Unexpected leaf along " +
+                  JSON.stringify(path) +
+                  " from " +
+                  commit
+              );
+            }
+            return {
+              tree: data.trees[tree].entries[name].hash,
+              name: newName,
+            };
+          },
+          {tree: data.commits[commit].treeHash, name: path[0]}
+        );
+        return _makeAddress(TREE_ENTRY_NODE_TYPE, treeEntryId(tree, name));
+      }
+      const parentEntryAddress = expectedTreeEntryAddress(parentCommit);
+      const childEntryAddress = expectedTreeEntryAddress(childCommit);
+      expect(parentEntryAddress).toEqual(edge.src);
+      expect(childEntryAddress).toEqual(edge.dst);
     });
   });
 
