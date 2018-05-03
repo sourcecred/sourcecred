@@ -215,13 +215,13 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       cmd: ["npm", "run", "--silent", "ci-test"],
       deps: [],
     },
-  ];
-  const extraTasks = [
     {
       id: "backend",
       cmd: ["npm", "run", "--silent", "backend"],
       deps: [],
     },
+  ];
+  const extraTasks = [
     {
       id: "fetchGithubRepoTest",
       cmd: ["./src/plugins/github/fetchGithubRepoTest.sh", "--no-build"],
