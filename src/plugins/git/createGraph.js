@@ -1,17 +1,14 @@
 // @flow
 
-import type {Address} from "../../core/address";
 import type {Edge, Node} from "../../core/graph";
 import type {
   BlobNodePayload,
   Commit,
   EdgePayload,
-  EdgeType,
   HasContentsEdgePayload,
   Hash,
   IncludesEdgePayload,
   NodePayload,
-  NodeType,
   Repository,
   SubmoduleCommitPayload,
   Tree,
@@ -22,7 +19,6 @@ import {Graph, edgeID} from "../../core/graph";
 import {
   BLOB_NODE_TYPE,
   COMMIT_NODE_TYPE,
-  GIT_PLUGIN_NAME,
   HAS_CONTENTS_EDGE_TYPE,
   HAS_PARENT_EDGE_TYPE,
   HAS_TREE_EDGE_TYPE,
@@ -35,16 +31,9 @@ import {
   submoduleCommitId,
   treeEntryId,
 } from "./types";
+import {_makeAddress} from "./address";
 
 class GitGraphCreator {
-  makeAddress(type: NodeType | EdgeType, id: string): Address {
-    return {
-      pluginName: GIT_PLUGIN_NAME,
-      type,
-      id,
-    };
-  }
-
   createGraph(repository: Repository): Graph<NodePayload, EdgePayload> {
     const treeAndNameToSubmoduleUrls = this.treeAndNameToSubmoduleUrls(
       repository
@@ -94,15 +83,15 @@ class GitGraphCreator {
 
   commitGraph(commit: Commit) {
     const commitNode = {
-      address: this.makeAddress(COMMIT_NODE_TYPE, commit.hash),
+      address: _makeAddress(COMMIT_NODE_TYPE, commit.hash),
       payload: {},
     };
     const treeNode = {
-      address: this.makeAddress(TREE_NODE_TYPE, commit.treeHash),
+      address: _makeAddress(TREE_NODE_TYPE, commit.treeHash),
       payload: {},
     };
     const hasTreeEdge = {
-      address: this.makeAddress(
+      address: _makeAddress(
         HAS_TREE_EDGE_TYPE,
         edgeID(commitNode.address, treeNode.address)
       ),
@@ -116,9 +105,9 @@ class GitGraphCreator {
       .addEdge(hasTreeEdge);
     commit.parentHashes.forEach((parentHash, index) => {
       const oneBasedParentIndex = index + 1;
-      const parentAddress = this.makeAddress(COMMIT_NODE_TYPE, parentHash);
+      const parentAddress = _makeAddress(COMMIT_NODE_TYPE, parentHash);
       const parentEdge = {
-        address: this.makeAddress(
+        address: _makeAddress(
           HAS_PARENT_EDGE_TYPE,
           hasParentEdgeId(commit.hash, oneBasedParentIndex)
         ),
@@ -135,21 +124,21 @@ class GitGraphCreator {
 
   treeGraph(tree: Tree, treeAndNameToSubmoduleUrls) {
     const treeNode = {
-      address: this.makeAddress(TREE_NODE_TYPE, tree.hash),
+      address: _makeAddress(TREE_NODE_TYPE, tree.hash),
       payload: {},
     };
     const result = new Graph().addNode(treeNode);
     Object.keys(tree.entries).forEach((name) => {
       const entry = tree.entries[name];
       const entryNode: Node<TreeEntryNodePayload> = {
-        address: this.makeAddress(
+        address: _makeAddress(
           TREE_ENTRY_NODE_TYPE,
           treeEntryId(tree.hash, entry.name)
         ),
         payload: {name},
       };
       const entryEdge: Edge<IncludesEdgePayload> = {
-        address: this.makeAddress(
+        address: _makeAddress(
           INCLUDES_EDGE_TYPE,
           includesEdgeId(tree.hash, entry.name)
         ),
@@ -171,7 +160,7 @@ class GitGraphCreator {
             throw new Error(`Unknown entry type: ${entry.type}`);
           }
           const contentsNode: Node<TreeNodePayload> | Node<BlobNodePayload> = {
-            address: this.makeAddress(contentsNodeType, entry.hash),
+            address: _makeAddress(contentsNodeType, entry.hash),
             payload: (({}: any): {||}),
           };
           return [contentsNode];
@@ -179,7 +168,7 @@ class GitGraphCreator {
           // One entry for each possible URL.
           const urls = treeAndNameToSubmoduleUrls[tree.hash][name];
           return urls.map((url): Node<SubmoduleCommitPayload> => ({
-            address: this.makeAddress(
+            address: _makeAddress(
               SUBMODULE_COMMIT_NODE_TYPE,
               submoduleCommitId(entry.hash, url)
             ),
@@ -192,7 +181,7 @@ class GitGraphCreator {
       })();
       contentsNodes.forEach((contentsNode) => {
         const contentsEdge: Edge<HasContentsEdgePayload> = {
-          address: this.makeAddress(
+          address: _makeAddress(
             HAS_CONTENTS_EDGE_TYPE,
             edgeID(entryNode.address, contentsNode.address)
           ),
