@@ -1,7 +1,7 @@
 // @flow
 
 import {parse} from "./parser";
-import exampleRepoData from "./demoData/example-repo.json";
+import exampleRepoData from "./demoData/example-github.json";
 import {Repository, Issue, PullRequest, Comment, Author} from "./api";
 import {
   AUTHOR_NODE_TYPE,
@@ -29,7 +29,7 @@ describe("GitHub porcelain API", () => {
       expect(issue.number()).toBe(1);
       expect(issue.type()).toBe(ISSUE_NODE_TYPE);
       expect(issue.url()).toBe(
-        "https://github.com/sourcecred/example-repo/issues/1"
+        "https://github.com/sourcecred/example-github/issues/1"
       );
       expect(issue.node()).toMatchSnapshot();
       expect(issue.address()).toEqual(issue.node().address);
@@ -41,7 +41,7 @@ describe("GitHub porcelain API", () => {
       expect(pullRequest.body()).toBe("Oh look, it's a pull request.");
       expect(pullRequest.title()).toBe("Add README, merge via PR.");
       expect(pullRequest.url()).toBe(
-        "https://github.com/sourcecred/example-repo/pull/3"
+        "https://github.com/sourcecred/example-github/pull/3"
       );
       expect(pullRequest.number()).toBe(3);
       expect(pullRequest.type()).toBe(PULL_REQUEST_NODE_TYPE);
@@ -65,7 +65,7 @@ describe("GitHub porcelain API", () => {
       expect(comments).toHaveLength(1);
       const comment = comments[0];
       expect(comment.url()).toBe(
-        "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198"
+        "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"
       );
       expect(comment.body()).toBe("seems a bit capricious");
       expect(comment.authors().map((a) => a.login())).toEqual(["wchargin"]);
@@ -79,7 +79,7 @@ describe("GitHub porcelain API", () => {
       expect(comment.type()).toBe(COMMENT_NODE_TYPE);
       expect(comment.body()).toBe("A wild COMMENT appeared!");
       expect(comment.url()).toBe(
-        "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768442"
+        "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442"
       );
       expect(comment.node()).toMatchSnapshot();
       expect(comment.address()).toEqual(comment.node().address);
@@ -135,7 +135,7 @@ describe("GitHub porcelain API", () => {
       const references = srcIssue.references();
       expect(references).toHaveLength(1);
       // Note: this verifies that we are not counting in-references, as
-      // https://github.com/sourcecred/example-repo/issues/6#issuecomment-385223316
+      // https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316
       // references #2.
 
       const referenced = Issue.from(references[0]);
@@ -155,7 +155,7 @@ describe("GitHub porcelain API", () => {
         expectCommentToHaveSingleReference({
           commentNumber: 0,
           type: ISSUE_NODE_TYPE,
-          url: "https://github.com/sourcecred/example-repo/issues/6",
+          url: "https://github.com/sourcecred/example-github/issues/6",
         });
       });
 
@@ -164,7 +164,7 @@ describe("GitHub porcelain API", () => {
           commentNumber: 1,
           type: COMMENT_NODE_TYPE,
           url:
-            "https://github.com/sourcecred/example-repo/issues/6#issuecomment-373768538",
+            "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
         });
       });
 
@@ -172,7 +172,7 @@ describe("GitHub porcelain API", () => {
         expectCommentToHaveSingleReference({
           commentNumber: 2,
           type: PULL_REQUEST_NODE_TYPE,
-          url: "https://github.com/sourcecred/example-repo/pull/5",
+          url: "https://github.com/sourcecred/example-github/pull/5",
         });
       });
 
@@ -181,7 +181,7 @@ describe("GitHub porcelain API", () => {
           commentNumber: 3,
           type: PULL_REQUEST_REVIEW_NODE_TYPE,
           url:
-            "https://github.com/sourcecred/example-repo/pull/5#pullrequestreview-100313899",
+            "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
         });
       });
 
@@ -190,7 +190,7 @@ describe("GitHub porcelain API", () => {
           commentNumber: 4,
           type: PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
           url:
-            "https://github.com/sourcecred/example-repo/pull/5#discussion_r171460198",
+            "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
         });
       });
 

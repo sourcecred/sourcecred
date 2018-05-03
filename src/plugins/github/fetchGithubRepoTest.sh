@@ -2,7 +2,7 @@
 
 set -eu
 
-data_file=src/plugins/github/demoData/example-repo.json
+data_file=src/plugins/github/demoData/example-github.json
 
 usage() {
   printf 'usage: %s [-u|--updateSnapshot] [--[no-]build] [--help]\n' "$0"
@@ -25,7 +25,7 @@ fetch() {
     return 1
   fi
   node bin/fetchAndPrintGithubRepo.js \
-    sourcecred example-repo "${GITHUB_TOKEN}"
+    sourcecred example-github "${GITHUB_TOKEN}"
 }
 
 check() {
