@@ -36,9 +36,11 @@ export const BLOB_NODE_TYPE: "BLOB" = "BLOB";
 export type BlobNodePayload = {||}; // we do not store the content
 
 export const TREE_ENTRY_NODE_TYPE: "TREE_ENTRY" = "TREE_ENTRY";
-export type TreeEntryNodePayload = {||};
-export function treeEntryId(treeSha: string, name: string): string {
-  return `${treeSha}:${name}`;
+export type TreeEntryNodePayload = {|
+  +name: string,
+|};
+export function treeEntryId(tree: Hash, name: string): string {
+  return `${tree}:${name}`;
 }
 
 export type NodePayload =
@@ -83,7 +85,9 @@ export type HasTreeEdgePayload = {||};
 
 // TreeNode -> TreeEntryNode
 export const INCLUDES_EDGE_TYPE: "INCLUDES" = "INCLUDES";
-export type IncludesEdgePayload = {||};
+export type IncludesEdgePayload = {|
+  +name: string,
+|};
 export function includesEdgeId(treeSha: string, name: string): string {
   return `${treeSha}:${name}`;
 }
