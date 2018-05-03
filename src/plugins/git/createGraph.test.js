@@ -4,7 +4,11 @@ import cloneDeep from "lodash.clonedeep";
 
 import type {BecomesEdge} from "./createGraph";
 import type {Hash, Tree} from "./types";
-import {createGraph, findBecomesEdgesForCommits} from "./createGraph";
+import {
+  createGraph,
+  findBecomesEdges,
+  findBecomesEdgesForCommits,
+} from "./createGraph";
 import {
   BLOB_NODE_TYPE,
   COMMIT_NODE_TYPE,
@@ -459,5 +463,12 @@ describe("findBecomesEdgesForCommits", () => {
     expect(expected).toEqual(
       expect.arrayContaining((result.slice(): $ReadOnlyArray<mixed>).slice())
     );
+  });
+});
+
+describe("findBecomesEdges", () => {
+  it("works on the example repository", () => {
+    const data = makeData();
+    expect(Array.from(findBecomesEdges(data))).toMatchSnapshot();
   });
 });
