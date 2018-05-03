@@ -690,6 +690,8 @@ export type PullRequestJSON = {|
   +author: AuthorJSON,
   +comments: ConnectionJSON<CommentJSON>,
   +reviews: ConnectionJSON<PullRequestReviewJSON>,
+  // If present, oid is the commit SHA of the merged commit.
+  +mergeCommit: ?{|+oid: string|},
 |};
 function pullRequestsFragment(): FragmentDefinition {
   const b = build;
@@ -701,6 +703,7 @@ function pullRequestsFragment(): FragmentDefinition {
       b.field("title"),
       b.field("body"),
       b.field("number"),
+      b.field("mergeCommit", {}, [b.field("oid")]),
       makeAuthor(),
       b.field("comments", {first: b.literal(PAGE_SIZE_COMMENTS)}, [
         b.fragmentSpread("comments"),
