@@ -35,18 +35,26 @@ describe("GitHub porcelain API", () => {
       expect(issue.address()).toEqual(issue.node().address);
       expect(issue.authors().map((x) => x.login())).toEqual(["decentralion"]);
     });
-
-    it("PullRequests", () => {
-      const pullRequest = issueOrPRByNumber(3);
-      expect(pullRequest.body()).toBe("Oh look, it's a pull request.");
-      expect(pullRequest.title()).toBe("Add README, merge via PR.");
-      expect(pullRequest.url()).toBe(
-        "https://github.com/sourcecred/example-github/pull/3"
-      );
-      expect(pullRequest.number()).toBe(3);
-      expect(pullRequest.type()).toBe(PULL_REQUEST_NODE_TYPE);
-      expect(pullRequest.node()).toMatchSnapshot();
-      expect(pullRequest.address()).toEqual(pullRequest.node().address);
+    describe("PullRequests", () => {
+      it("Merged", () => {
+        const pullRequest = PullRequest.from(issueOrPRByNumber(3));
+        expect(pullRequest.body()).toBe("Oh look, it's a pull request.");
+        expect(pullRequest.title()).toBe("Add README, merge via PR.");
+        expect(pullRequest.url()).toBe(
+          "https://github.com/sourcecred/example-github/pull/3"
+        );
+        expect(pullRequest.number()).toBe(3);
+        expect(pullRequest.type()).toBe(PULL_REQUEST_NODE_TYPE);
+        expect(pullRequest.node()).toMatchSnapshot();
+        expect(pullRequest.address()).toEqual(pullRequest.node().address);
+        expect(pullRequest.mergeCommitHash()).toEqual(
+          "0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
+        );
+      });
+      it("Unmerged", () => {
+        const pullRequest = PullRequest.from(issueOrPRByNumber(9));
+        expect(pullRequest.mergeCommitHash()).toEqual(null);
+      });
     });
 
     it("Pull Request Reviews", () => {

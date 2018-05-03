@@ -6,30 +6,34 @@ import {Graph} from "../../core/graph";
 import type {Node} from "../../core/graph";
 import type {Address} from "../../core/address";
 import type {
-  NodePayload,
-  EdgePayload,
-  NodeType,
-  IssueNodePayload,
-  PullRequestNodePayload,
-  PullRequestReviewNodePayload,
-  PullRequestReviewCommentNodePayload,
-  PullRequestReviewState,
-  CommentNodePayload,
   AuthorNodePayload,
   AuthorSubtype,
+  CommentNodePayload,
+  EdgePayload,
+  IssueNodePayload,
+  MergedAsEdgePayload,
+  NodePayload,
+  NodeType,
+  PullRequestNodePayload,
+  PullRequestReviewCommentNodePayload,
+  PullRequestReviewNodePayload,
+  PullRequestReviewState,
 } from "./types";
 
 import {
-  CONTAINS_EDGE_TYPE,
-  COMMENT_NODE_TYPE,
   AUTHORS_EDGE_TYPE,
   AUTHOR_NODE_TYPE,
+  COMMENT_NODE_TYPE,
+  CONTAINS_EDGE_TYPE,
   ISSUE_NODE_TYPE,
+  MERGED_AS_EDGE_TYPE,
   PULL_REQUEST_NODE_TYPE,
-  PULL_REQUEST_REVIEW_NODE_TYPE,
   PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
+  PULL_REQUEST_REVIEW_NODE_TYPE,
   REFERENCES_EDGE_TYPE,
 } from "./types";
+
+import {COMMIT_NODE_TYPE} from "../git/types";
 
 export type Entity =
   | Issue
@@ -220,6 +224,25 @@ export class PullRequest extends Commentable<PullRequestNodePayload> {
         nodeType: PULL_REQUEST_REVIEW_NODE_TYPE,
       })
       .map(({neighbor}) => new PullRequestReview(this.graph, neighbor));
+  }
+  mergeCommitHash(): ?string {
+    const mergeEdge = this.graph
+      .neighborhood(this.nodeAddress, {
+        edgeType: MERGED_AS_EDGE_TYPE,
+        nodeType: COMMIT_NODE_TYPE,
+        direction: "OUT",
+      })
+      .map(({edge}) => edge);
+    if (mergeEdge.length > 1) {
+      throw new Error(
+        `Node at ${this.nodeAddress.id} has too many MERGED_AS edges`
+      );
+    }
+    if (mergeEdge.length === 0) {
+      return null;
+    }
+    const payload: MergedAsEdgePayload = (mergeEdge[0].payload: any);
+    return payload.hash;
   }
 }
 

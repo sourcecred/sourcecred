@@ -98,6 +98,8 @@ export type AuthorsEdgePayload = {};
 export const AUTHORS_EDGE_TYPE: "AUTHORS" = "AUTHORS";
 export type ContainsEdgePayload = {};
 export const CONTAINS_EDGE_TYPE: "CONTAINS" = "CONTAINS";
+export type MergedAsEdgePayload = {|+hash: string|};
+export const MERGED_AS_EDGE_TYPE: "MERGED_AS" = "MERGED_AS";
 export type ReferencesEdgePayload = {};
 export const REFERENCES_EDGE_TYPE: "REFERENCES" = "REFERENCES";
 
@@ -110,6 +112,10 @@ export type EdgeTypes = {|
     payload: ContainsEdgePayload,
     type: typeof CONTAINS_EDGE_TYPE,
   },
+  MERGED_AS: {
+    payload: MergedAsEdgePayload,
+    type: typeof MERGED_AS_EDGE_TYPE,
+  },
   REFERENCES: {
     payload: ReferencesEdgePayload,
     type: typeof REFERENCES_EDGE_TYPE,
@@ -119,6 +125,7 @@ export type EdgeTypes = {|
 export type EdgeType =
   | typeof AUTHORS_EDGE_TYPE
   | typeof CONTAINS_EDGE_TYPE
+  | typeof MERGED_AS_EDGE_TYPE
   | typeof REFERENCES_EDGE_TYPE;
 
 export type EdgePayload =
