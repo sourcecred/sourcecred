@@ -2,8 +2,12 @@
 
 import cloneDeep from "lodash.clonedeep";
 
+import type {Address} from "../../core/address";
+import type {Edge} from "../../core/graph";
+import type {BecomesEdgePayload, Hash, Repository} from "./types";
 import {createGraph} from "./createGraph";
 import {
+  BECOMES_EDGE_TYPE,
   BLOB_NODE_TYPE,
   COMMIT_NODE_TYPE,
   GIT_PLUGIN_NAME,
@@ -17,7 +21,45 @@ import {
   treeEntryId,
 } from "./types";
 
-const makeData = () => cloneDeep(require("./demoData/example-git"));
+const makeData = (): Repository => cloneDeep(require("./demoData/example-git"));
+
+function uniqueNeighborMatching(
+  graph,
+  nodeAddress,
+  filter?,
+  predicate = (_) => true
+) {
+  const edges = graph
+    .neighborhood(nodeAddress, filter)
+    .filter((x) => predicate(x));
+  expect(edges).toHaveLength(1);
+  return edges[0].neighbor;
+}
+
+function uniqueTree(graph, commitAddress) {
+  return uniqueNeighborMatching(graph, commitAddress, {
+    nodeType: TREE_NODE_TYPE,
+    edgeType: HAS_TREE_EDGE_TYPE,
+  });
+}
+
+function uniqueEntry(graph, treeAddress, entryName: string) {
+  return uniqueNeighborMatching(
+    graph,
+    treeAddress,
+    {
+      nodeType: TREE_ENTRY_NODE_TYPE,
+      edgeType: INCLUDES_EDGE_TYPE,
+    },
+    ({edge}) => edge.address.id.endsWith(`:${entryName}`)
+  );
+}
+
+function uniqueContents(graph, treeEntryNodeAddress) {
+  return uniqueNeighborMatching(graph, treeEntryNodeAddress, {
+    edgeType: HAS_CONTENTS_EDGE_TYPE,
+  });
+}
 
 describe("createGraph", () => {
   it("processes a simple repository", () => {
@@ -137,8 +179,65 @@ describe("createGraph", () => {
             direction: "OUT",
           })
         ).toHaveLength(1);
-        expect(graph.neighborhood(entryAddress)).toHaveLength(2);
+        const becomesCount = graph.neighborhood(entryAddress, {
+          edgeType: BECOMES_EDGE_TYPE,
+        }).length;
+        ["OUT", "IN"].forEach((direction) => {
+          expect(
+            graph.neighborhood(entryAddress, {
+              edgeType: BECOMES_EDGE_TYPE,
+              direction,
+            }).length
+          ).toBeLessThanOrEqual(1);
+        });
+        expect(graph.neighborhood(entryAddress)).toHaveLength(becomesCount + 2);
       });
+    });
+  });
+
+  it('has "becomes" edges with valid paths', () => {
+    const data = makeData();
+    const graph = createGraph(data, "sourcecred/example-git");
+    const becomings: $ReadOnlyArray<Edge<BecomesEdgePayload>> = graph
+      .edges({type: BECOMES_EDGE_TYPE})
+      .map((edge) => ((edge: Edge<any>): Edge<BecomesEdgePayload>));
+    expect(becomings).not.toHaveLength(0);
+    becomings.forEach((edge) => {
+      expect(edge.dst).not.toEqual(edge.src);
+      const {payload: {childCommit, parentCommit, path}} = edge;
+      expect(path).not.toHaveLength(0);
+      expect(data.commits[childCommit].parentHashes).toEqual(
+        expect.arrayContaining([parentCommit])
+      );
+      function expectedTreeEntryAddress(commit: Hash): Address {
+        const {tree, name} = path.slice(1).reduce(
+          ({tree, name}, newName) => {
+            if (!(tree in data.trees)) {
+              throw new Error(
+                "Unexpected leaf along " +
+                  JSON.stringify(path) +
+                  " from " +
+                  commit
+              );
+            }
+            return {
+              tree: data.trees[tree].entries[name].hash,
+              name: newName,
+            };
+          },
+          {tree: data.commits[commit].treeHash, name: path[0]}
+        );
+        return {
+          pluginName: GIT_PLUGIN_NAME,
+          repositoryName: "sourcecred/example-git",
+          type: TREE_ENTRY_NODE_TYPE,
+          id: treeEntryId(tree, name),
+        };
+      }
+      const parentEntryAddress = expectedTreeEntryAddress(parentCommit);
+      const childEntryAddress = expectedTreeEntryAddress(childCommit);
+      expect(parentEntryAddress).toEqual(edge.src);
+      expect(childEntryAddress).toEqual(edge.dst);
     });
   });
 
@@ -146,44 +245,6 @@ describe("createGraph", () => {
     const headCommitHash = "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f";
     if (makeData().commits[headCommitHash] == null) {
       throw new Error("Commit hash out of date.");
-    }
-
-    function uniqueNeighborMatching(
-      graph,
-      nodeAddress,
-      filter?,
-      predicate = (_) => true
-    ) {
-      const edges = graph
-        .neighborhood(nodeAddress, filter)
-        .filter((x) => predicate(x));
-      expect(edges).toHaveLength(1);
-      return edges[0].neighbor;
-    }
-
-    function uniqueTree(graph, commitAddress) {
-      return uniqueNeighborMatching(graph, commitAddress, {
-        nodeType: TREE_NODE_TYPE,
-        edgeType: HAS_TREE_EDGE_TYPE,
-      });
-    }
-
-    function uniqueEntry(graph, treeAddress, entryName: string) {
-      return uniqueNeighborMatching(
-        graph,
-        treeAddress,
-        {
-          nodeType: TREE_ENTRY_NODE_TYPE,
-          edgeType: INCLUDES_EDGE_TYPE,
-        },
-        ({edge}) => edge.address.id.endsWith(`:${entryName}`)
-      );
-    }
-
-    function uniqueContents(graph, treeEntryNodeAddress) {
-      return uniqueNeighborMatching(graph, treeEntryNodeAddress, {
-        edgeType: HAS_CONTENTS_EDGE_TYPE,
-      });
     }
 
     test("HEAD^{tree}:src/quantum_gravity.py with correct contents", () => {
