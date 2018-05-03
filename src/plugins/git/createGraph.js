@@ -2,6 +2,7 @@
 
 import type {Edge, Node} from "../../core/graph";
 import type {
+  BecomesEdgePayload,
   BlobNodePayload,
   Commit,
   EdgePayload,
@@ -17,6 +18,7 @@ import type {
 } from "./types";
 import {Graph, edgeID} from "../../core/graph";
 import {
+  BECOMES_EDGE_TYPE,
   BLOB_NODE_TYPE,
   COMMIT_NODE_TYPE,
   HAS_CONTENTS_EDGE_TYPE,
@@ -26,6 +28,7 @@ import {
   SUBMODULE_COMMIT_NODE_TYPE,
   TREE_ENTRY_NODE_TYPE,
   TREE_NODE_TYPE,
+  becomesEdgeId,
   hasParentEdgeId,
   includesEdgeId,
   submoduleCommitId,
@@ -45,6 +48,7 @@ class GitGraphCreator {
       ...Object.keys(repository.trees).map((hash) =>
         this.treeGraph(repository.trees[hash], treeAndNameToSubmoduleUrls)
       ),
+      this.becomesEdges(repository),
     ];
     return graphs.reduce((g, h) => Graph.mergeConservative(g, h), new Graph());
   }
@@ -192,6 +196,34 @@ class GitGraphCreator {
         result.addNode(contentsNode).addEdge(contentsEdge);
       });
     });
+    return result;
+  }
+
+  becomesEdges(repository: Repository): Graph<NodePayload, EdgePayload> {
+    const result = new Graph();
+    for (const {
+      childCommit,
+      parentCommit,
+      becomesEdge: {from, to, path},
+    } of findBecomesEdges(repository)) {
+      result.addEdge(
+        ({
+          address: _makeAddress(
+            BECOMES_EDGE_TYPE,
+            becomesEdgeId(childCommit, parentCommit, path)
+          ),
+          src: _makeAddress(
+            TREE_ENTRY_NODE_TYPE,
+            treeEntryId(from.tree, from.name)
+          ),
+          dst: _makeAddress(
+            TREE_ENTRY_NODE_TYPE,
+            treeEntryId(to.tree, to.name)
+          ),
+          payload: {childCommit, parentCommit, path},
+        }: Edge<BecomesEdgePayload>)
+      );
+    }
     return result;
   }
 }
