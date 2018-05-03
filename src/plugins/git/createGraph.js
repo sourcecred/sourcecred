@@ -249,6 +249,26 @@ export function* findBecomesEdgesForCommits(
   }
 }
 
+export function* findBecomesEdges(
+  repository: Repository
+): Iterator<{|
+  +childCommit: Hash,
+  +parentCommit: Hash,
+  +becomesEdge: BecomesEdge,
+|}> {
+  for (const childCommit of Object.keys(repository.commits)) {
+    for (const parentCommit of repository.commits[childCommit].parentHashes) {
+      for (const becomesEdge of findBecomesEdgesForCommits(
+        repository,
+        childCommit,
+        parentCommit
+      )) {
+        yield {childCommit, parentCommit, becomesEdge};
+      }
+    }
+  }
+}
+
 export function createGraph(
   repository: Repository
 ): Graph<NodePayload, EdgePayload> {
