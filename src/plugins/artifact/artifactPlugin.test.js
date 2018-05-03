@@ -5,14 +5,14 @@ import {artifactAddress} from "./artifactPlugin";
 
 describe("artifactPlugin", () => {
   describe("artifactAddress", () => {
-    it("formats the repository name", () => {
+    it("repositoryName included in id", () => {
       const a = artifactAddress(
         new Graph(),
         "not-sourcecred",
         "not-artifact-plugin",
         "Sample artifact!"
       );
-      expect(a.repositoryName).toEqual("not-sourcecred/not-artifact-plugin");
+      expect(a.id.startsWith("not-sourcecred/not-artifact-plugin")).toBe(true);
     });
 
     it("slugifies the artifact name", () => {
@@ -22,7 +22,9 @@ describe("artifactPlugin", () => {
         "not-artifact-plugin",
         "Sample artifact!"
       );
-      expect(a.id).toEqual("sample-artifact-");
+      expect(a.id).toEqual(
+        "not-sourcecred/not-artifact-plugin/sample-artifact-"
+      );
     });
 
     it("resolves collisions", () => {
@@ -42,9 +44,9 @@ describe("artifactPlugin", () => {
         });
       }
       expect(ids).toEqual([
-        "sample-artifact-",
-        "sample-artifact--0",
-        "sample-artifact--1",
+        "not-sourcecred/not-artifact-plugin/sample-artifact-",
+        "not-sourcecred/not-artifact-plugin/sample-artifact--0",
+        "not-sourcecred/not-artifact-plugin/sample-artifact--1",
       ]);
     });
   });

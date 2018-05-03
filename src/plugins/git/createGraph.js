@@ -37,16 +37,9 @@ import {
 } from "./types";
 
 class GitGraphCreator {
-  repositoryName: string;
-
-  constructor(repositoryName) {
-    this.repositoryName = repositoryName;
-  }
-
   makeAddress(type: NodeType | EdgeType, id: string): Address {
     return {
       pluginName: GIT_PLUGIN_NAME,
-      repositoryName: this.repositoryName,
       type,
       id,
     };
@@ -215,8 +208,7 @@ class GitGraphCreator {
 }
 
 export function createGraph(
-  repository: Repository,
-  repositoryName: string
+  repository: Repository
 ): Graph<NodePayload, EdgePayload> {
-  return new GitGraphCreator(repositoryName).createGraph(repository);
+  return new GitGraphCreator().createGraph(repository);
 }

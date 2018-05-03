@@ -26,7 +26,7 @@ describe("GithubParser", () => {
   }
 
   describe("whole repo parsing", () => {
-    const graph = parse("sourcecred/example-repo", exampleRepoData);
+    const graph = parse(exampleRepoData);
 
     it("parses the entire example-repo as expected", () => {
       expect(graph).toMatchSnapshot();
@@ -114,7 +114,7 @@ describe("GithubParser", () => {
         },
       },
     };
-    return parse("sourcecred/example-repo", exampleData);
+    return parse(exampleData);
   }
 
   describe("issue parsing", () => {

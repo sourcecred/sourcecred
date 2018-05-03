@@ -32,7 +32,7 @@ export class GithubGraphFetcher extends React.Component<Props> {
     const {repoOwner, repoName, githubApiToken} = this.props.settings;
     fetchGithubRepo(repoOwner, repoName, githubApiToken)
       .then((json) => {
-        return Promise.resolve(parse(`${repoOwner}/${repoName}`, json));
+        return Promise.resolve(parse(json));
       })
       .then((graph) => {
         this.props.onCreateGraph(graph);

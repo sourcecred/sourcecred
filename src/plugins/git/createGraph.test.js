@@ -21,11 +21,11 @@ const makeData = () => cloneDeep(require("./demoData/example-git"));
 
 describe("createGraph", () => {
   it("processes a simple repository", () => {
-    expect(createGraph(makeData(), "sourcecred/example-git")).toMatchSnapshot();
+    expect(createGraph(makeData())).toMatchSnapshot();
   });
 
   it("has no dangling edges", () => {
-    const graph = createGraph(makeData(), "sourcecred/example-git");
+    const graph = createGraph(makeData());
     graph.edges().forEach((edge) => {
       expect(graph.node(edge.src)).toEqual(expect.anything());
       expect(graph.node(edge.dst)).toEqual(expect.anything());
@@ -34,11 +34,10 @@ describe("createGraph", () => {
 
   it("has all commits, each with correct edges", () => {
     const data = makeData();
-    const graph = createGraph(data, "sourcecred/example-git");
+    const graph = createGraph(data);
     Object.keys(data.commits).forEach((hash) => {
       const address = {
         pluginName: GIT_PLUGIN_NAME,
-        repositoryName: "sourcecred/example-git",
         type: COMMIT_NODE_TYPE,
         id: hash,
       };
@@ -64,11 +63,10 @@ describe("createGraph", () => {
 
   it("has all trees, each with correct edges", () => {
     const data = makeData();
-    const graph = createGraph(data, "sourcecred/example-git");
+    const graph = createGraph(data);
     Object.keys(data.trees).forEach((hash) => {
       const address = {
         pluginName: GIT_PLUGIN_NAME,
-        repositoryName: "sourcecred/example-git",
         type: TREE_NODE_TYPE,
         id: hash,
       };
@@ -105,12 +103,11 @@ describe("createGraph", () => {
 
   it("has all tree entries, each with correct edges", () => {
     const data = makeData();
-    const graph = createGraph(data, "sourcecred/example-git");
+    const graph = createGraph(data);
     Object.keys(data.trees).forEach((hash) => {
       const tree = data.trees[hash];
       const treeAddress = {
         pluginName: GIT_PLUGIN_NAME,
-        repositoryName: "sourcecred/example-git",
         type: TREE_NODE_TYPE,
         id: hash,
       };
@@ -121,7 +118,6 @@ describe("createGraph", () => {
       Object.keys(tree.entries).forEach((name) => {
         const entryAddress = {
           pluginName: GIT_PLUGIN_NAME,
-          repositoryName: "sourcecred/example-git",
           type: TREE_ENTRY_NODE_TYPE,
           id: treeEntryId(hash, name),
         };
@@ -192,11 +188,10 @@ describe("createGraph", () => {
 
     test("HEAD^{tree}:src/quantum_gravity.py with correct contents", () => {
       const data = makeData();
-      const graph = createGraph(data, "sourcecred/example-git");
+      const graph = createGraph(data);
 
       const headCommitAddress = {
         pluginName: GIT_PLUGIN_NAME,
-        repositoryName: "sourcecred/example-git",
         type: COMMIT_NODE_TYPE,
         id: headCommitHash,
       };
@@ -221,11 +216,10 @@ describe("createGraph", () => {
 
     test("HEAD^{tree}:pygravitydefier with no contents", () => {
       const data = makeData();
-      const graph = createGraph(data, "sourcecred/example-git");
+      const graph = createGraph(data);
 
       const headCommitAddress = {
         pluginName: GIT_PLUGIN_NAME,
-        repositoryName: "sourcecred/example-git",
         type: COMMIT_NODE_TYPE,
         id: headCommitHash,
       };

@@ -28,10 +28,10 @@ export function artifactAddress(
   repoName: string,
   artifactName: string
 ): Address {
-  const baseId = artifactName.toLowerCase().replace(NON_SLUG_CHARACTER, "-");
+  const baseName = artifactName.toLowerCase().replace(NON_SLUG_CHARACTER, "-");
+  const baseId = `${repoOwner}/${repoName}/${baseName}`;
   function address(id) {
     return {
-      repositoryName: `${repoOwner}/${repoName}`,
       pluginName: ARTIFACT_PLUGIN_NAME,
       id,
       type: ARTIFACT_NODE_TYPE,

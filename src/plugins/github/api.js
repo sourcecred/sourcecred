@@ -48,11 +48,9 @@ function assertEntityType(e: Entity, t: NodeType) {
 }
 
 export class Repository {
-  repositoryName: string;
   graph: Graph<NodePayload, EdgePayload>;
 
-  constructor(repositoryName: string, graph: Graph<NodePayload, EdgePayload>) {
-    this.repositoryName = repositoryName;
+  constructor(graph: Graph<NodePayload, EdgePayload>) {
     this.graph = graph;
   }
 

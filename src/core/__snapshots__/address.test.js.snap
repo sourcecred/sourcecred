@@ -2,11 +2,11 @@
 
 exports[`address AddressMap stringifies to JSON 1`] = `
 Object {
-  "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"HOME\\"}": Object {
+  "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"HOME\\"}": Object {
     "baths": 5,
     "beds": 10,
   },
-  "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"BUSINESS\\"}": Object {
+  "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"BUSINESS\\"}": Object {
     "baths": 1,
     "beds": 99,
   },
@@ -19,28 +19,25 @@ Array [
     Object {
       "id": "mansion",
       "pluginName": "houseville",
-      "repositoryName": "sourcecred/suburbia",
       "type": "HOME",
     },
-    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"HOME\\"}",
+    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"HOME\\"}",
   ],
   Array [
     Object {
       "id": "mansion",
       "pluginName": "houseville",
-      "repositoryName": "sourcecred/suburbia",
       "type": "HOME",
     },
-    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"HOME\\"}",
+    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"HOME\\"}",
   ],
   Array [
     Object {
       "id": "mattressStore",
       "pluginName": "houseville",
-      "repositoryName": "sourcecred/suburbia",
       "type": "BUSINESS",
     },
-    "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"repositoryName\\":\\"sourcecred/suburbia\\",\\"type\\":\\"BUSINESS\\"}",
+    "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"BUSINESS\\"}",
   ],
 ]
 `;
