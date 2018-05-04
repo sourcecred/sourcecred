@@ -64,6 +64,7 @@ module.exports = {
     cloneAndPrintGitGraph: resolveApp(
       "src/plugins/git/bin/cloneAndPrintGitGraph.js"
     ),
+    printCombinedGraph: resolveApp("src/tools/bin/printCombinedGraph.js"),
     loadAndPrintGitRepository: resolveApp(
       "src/plugins/git/bin/loadAndPrintRepository.js"
     ),
