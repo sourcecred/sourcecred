@@ -41,7 +41,7 @@ class GitGraphCreator {
     const treeAndNameToSubmoduleUrls = this.treeAndNameToSubmoduleUrls(
       repository
     );
-    const graphs = [
+    return Graph.mergeManyConservative([
       ...Object.keys(repository.commits).map((hash) =>
         this.commitGraph(repository.commits[hash])
       ),
@@ -49,17 +49,7 @@ class GitGraphCreator {
         this.treeGraph(repository.trees[hash], treeAndNameToSubmoduleUrls)
       ),
       this.becomesEdges(repository),
-    ];
-    const result = new Graph();
-    graphs.forEach((g) => {
-      g.nodes().forEach((node) => {
-        result.addNode(node);
-      });
-      g.edges().forEach((edge) => {
-        result.addEdge(edge);
-      });
-    });
-    return result;
+    ]);
   }
 
   treeAndNameToSubmoduleUrls(repository: Repository) {

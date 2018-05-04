@@ -338,6 +338,28 @@ export class Graph<NP, EP> {
     );
     return result;
   }
+
+  /**
+   * Equivalent to
+   *
+   *     graphs.reduce((g, h) => Graph.mergeConservative(g, h), new Graph()),
+   *
+   * but uses a mutable accumulator for improved performance.
+   */
+  static mergeManyConservative<NP, EP>(
+    graphs: $ReadOnlyArray<Graph<$Subtype<NP>, $Subtype<EP>>>
+  ): Graph<NP, EP> {
+    const result = new Graph();
+    graphs.forEach((graph) => {
+      graph.nodes().forEach((node) => {
+        result.addNode(node);
+      });
+      graph.edges().forEach((edge) => {
+        result.addEdge(edge);
+      });
+    });
+    return result;
+  }
 }
 
 export function edgeID(src: Address, dst: Address): string {
