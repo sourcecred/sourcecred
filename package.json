@@ -119,6 +119,7 @@
     "enzyme-adapter-react-16": "^1.1.1",
     "enzyme-to-json": "^3.3.3",
     "mkdirp": "^0.5.1",
-    "tmp": "^0.0.33"
+    "tmp": "^0.0.33",
+    "webpack-node-externals": "^1.7.2"
   }
 }
