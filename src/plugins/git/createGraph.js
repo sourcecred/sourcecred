@@ -50,7 +50,16 @@ class GitGraphCreator {
       ),
       this.becomesEdges(repository),
     ];
-    return graphs.reduce((g, h) => Graph.mergeConservative(g, h), new Graph());
+    const result = new Graph();
+    graphs.forEach((g) => {
+      g.nodes().forEach((node) => {
+        result.addNode(node);
+      });
+      g.edges().forEach((edge) => {
+        result.addEdge(edge);
+      });
+    });
+    return result;
   }
 
   treeAndNameToSubmoduleUrls(repository: Repository) {
