@@ -2,6 +2,7 @@ const webpack = require("webpack");
 const eslintFormatter = require("react-dev-utils/eslintFormatter");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const paths = require("./paths");
+const nodeExternals = require("webpack-node-externals");
 
 // This is the backend configuration. It builds applications that target
 // Node and will not run in a browser.
@@ -11,6 +12,7 @@ module.exports = {
   // Target Node instead of the browser.
   target: "node",
   entry: paths.backendEntryPoints,
+  externals: [nodeExternals()],
   output: {
     path: paths.backendBuild,
     // Generated JS file names (with nested folders).
@@ -65,7 +67,6 @@ module.exports = {
         ],
       },
     ],
-    exprContextCritical: false,
   },
   plugins: [
     new webpack.DefinePlugin({
