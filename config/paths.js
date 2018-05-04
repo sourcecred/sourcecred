@@ -68,5 +68,6 @@ module.exports = {
     loadAndPrintGitRepository: resolveApp(
       "src/plugins/git/bin/loadAndPrintRepository.js"
     ),
+    sourcecred: resolveApp("src/tools/sourcecred.js"),
   },
 };
