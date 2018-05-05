@@ -28,7 +28,7 @@ type OverallResult = {|
 |};
 */
 
-module.exports = async function execDepgraph(
+exports.default = async function execDependencyGraph(
   tasks /*: $ReadOnlyArray<Task> */
 ) /*: Promise<OverallResult> */ {
   const tasksById /*: {[TaskId]: Task} */ = {};

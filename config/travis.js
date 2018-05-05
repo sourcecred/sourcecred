@@ -1,6 +1,6 @@
 // @flow
 
-const execDependencyGraph = require("../src/tools/execDependencyGraph");
+const execDependencyGraph = require("../src/tools/execDependencyGraph").default;
 
 main();
 
