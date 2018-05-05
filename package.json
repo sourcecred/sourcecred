@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@oclif/command": "^1.4.20",
+    "@oclif/config": "^1.6.17",
+    "@oclif/plugin-help": "^1.2.10",
     "aphrodite": "^2.1.0",
     "autoprefixer": "7.1.6",
     "babel-core": "6.26.0",
@@ -122,5 +125,12 @@
     "mkdirp": "^0.5.1",
     "tmp": "^0.0.33",
     "webpack-node-externals": "^1.7.2"
+  },
+  "oclif": {
+    "commands": "./bin/commands",
+    "bin": "sourcecred",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   }
 }

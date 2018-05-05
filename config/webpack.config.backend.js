@@ -20,6 +20,7 @@ module.exports = {
     // We don't currently advertise code splitting but Webpack supports it.
     filename: "[name].js",
     chunkFilename: "[name].[chunkhash:8].chunk.js",
+    libraryTarget: "umd",
   },
   resolve: {
     extensions: [".js", ".json"],
