@@ -110,7 +110,7 @@
       "flow-react-proptypes"
     ],
     "presets": [
-      "react-app"
+      "./config/babel"
     ]
   },
   "devDependencies": {
