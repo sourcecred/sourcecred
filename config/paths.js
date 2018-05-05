@@ -57,6 +57,9 @@ module.exports = {
   // source file, and the key will be the filename of the bundled entry
   // point within the build directory.
   backendEntryPoints: {
+    "commands/goodbye": resolveApp("src/cli/commands/goodbye.js"),
+    "commands/example": resolveApp("src/cli/commands/example.js"),
+    sourcecred: resolveApp("src/cli/sourcecred.js"),
     fetchAndPrintGithubRepo: resolveApp(
       "src/plugins/github/bin/fetchAndPrintGithubRepo.js"
     ),
