@@ -49,6 +49,7 @@ const plugins = [
 // https://github.com/facebookincubator/create-react-app/issues/720
 // It’s also nice that we can enforce `NODE_ENV` being specified.
 var env = process.env.BABEL_ENV || process.env.NODE_ENV;
+var backend = !!process.env.SOURCECRED_BACKEND;
 if (env !== "development" && env !== "test" && env !== "production") {
   throw new Error(
     "Using `babel-preset-react-app` requires that you specify `NODE_ENV` or " +
@@ -101,13 +102,14 @@ if (env === "test") {
       [
         require.resolve("babel-preset-env"),
         {
-          targets: {
-            // React parses on ie 9, so we should too
-            ie: 9,
-            // We currently minify with uglify
-            // Remove after https://github.com/mishoo/UglifyJS2/issues/448
-            uglify: true,
-          },
+          targets: backend
+            ? {
+                node: "current",
+              }
+            : {
+                ie: 9,
+                uglify: true,
+              },
           // Disable polyfill transforms
           useBuiltIns: false,
           // Do not transform modules to CJS
@@ -117,18 +119,26 @@ if (env === "test") {
       // JSX, Flow
       require.resolve("babel-preset-react"),
     ],
-    plugins: plugins.concat([
-      // function* () { yield 42; yield 43; }
+    plugins: plugins.concat(
+      backend
+        ? [
+            // Must come before `babel-plugin-transform-regenerator`.
+            require.resolve("babel-plugin-transform-es2015-for-of"),
+          ]
+        : [],
       [
-        require.resolve("babel-plugin-transform-regenerator"),
-        {
-          // Async functions are converted to generators by babel-preset-env
-          async: false,
-        },
-      ],
-      // Adds syntax support for import()
-      require.resolve("babel-plugin-syntax-dynamic-import"),
-    ]),
+        // function* () { yield 42; yield 43; }
+        [
+          require.resolve("babel-plugin-transform-regenerator"),
+          {
+            // Async functions are converted to generators by babel-preset-env
+            async: false,
+          },
+        ],
+        // Adds syntax support for import()
+        require.resolve("babel-plugin-syntax-dynamic-import"),
+      ]
+    ),
   };
 
   if (env === "production") {
