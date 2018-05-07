@@ -10,7 +10,15 @@ import {pluginNames} from "../common";
 const execDependencyGraph = require("../../tools/execDependencyGraph").default;
 
 export default class GraphCommand extends Command {
-  static description = "create the contribution graph for a repository";
+  static description = `\
+create the contribution graph for a repository
+
+Create the contribution graph for a repository. This creates a
+contribution graph for each individual plugin, and then combines the
+individual graphs into one larger graph. The graphs are stored as JSON
+files under OUTPUT_DIR/REPO_OWNER/REPO_NAME, where OUTPUT_DIR is
+configurable.
+`.trim();
 
   static args = [
     {
