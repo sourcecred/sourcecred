@@ -256,6 +256,13 @@
                 "hasNextPage": false
             }
         },
+        "name": "example-github",
+        "owner": {
+            "__typename": "Organization",
+            "id": "MDEyOk9yZ2FuaXphdGlvbjM1NzExNjY3",
+            "login": "sourcecred",
+            "url": "https://github.com/sourcecred"
+        },
         "pullRequests": {
             "nodes": [
                 {
@@ -419,6 +426,7 @@
                 "endCursor": "Y3Vyc29yOnYyOpHOCxMtTQ==",
                 "hasNextPage": false
             }
-        }
+        },
+        "url": "https://github.com/sourcecred/example-github"
     }
 }
