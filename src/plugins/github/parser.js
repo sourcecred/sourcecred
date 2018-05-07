@@ -21,6 +21,7 @@ import type {
 
 import {MERGED_AS_EDGE_TYPE} from "./types";
 import type {
+  GithubResponseJSON,
   RepositoryJSON,
   PullRequestReviewJSON,
   PullRequestJSON,
@@ -36,10 +37,10 @@ import {findReferences} from "./findReferences";
 import {commitAddress} from "../git/address";
 
 export function parse(
-  repositoryJSON: RepositoryJSON
+  githubResponseJSON: GithubResponseJSON
 ): Graph<NodePayload, EdgePayload> {
   const parser = new GithubParser();
-  parser.addData(repositoryJSON);
+  parser.addData(githubResponseJSON);
   parser.addReferenceEdges();
   return parser.graph;
 }
@@ -320,10 +321,12 @@ class GithubParser {
     return danglingReferences;
   }
 
-  addData(dataJson: RepositoryJSON) {
-    dataJson.repository.issues.nodes.forEach((i) => this.addIssue(i));
-    dataJson.repository.pullRequests.nodes.forEach((pr) =>
-      this.addPullRequest(pr)
-    );
+  addRepository(repositoryJSON: RepositoryJSON) {
+    repositoryJSON.issues.nodes.forEach((i) => this.addIssue(i));
+    repositoryJSON.pullRequests.nodes.forEach((pr) => this.addPullRequest(pr));
+  }
+
+  addData(dataJson: GithubResponseJSON) {
+    this.addRepository(dataJson.repository);
   }
 }

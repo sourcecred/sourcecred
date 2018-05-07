@@ -101,12 +101,14 @@ export type ConnectionJSON<+T> = {|
   |},
 |};
 
+export type GithubResponseJSON = {|
+  +repository: RepositoryJSON,
+|};
+
 export type RepositoryJSON = {|
-  +repository: {
-    +id: string,
-    +issues: ConnectionJSON<IssueJSON>,
-    +pullRequests: ConnectionJSON<PullRequestJSON>,
-  },
+  +id: string,
+  +issues: ConnectionJSON<IssueJSON>,
+  +pullRequests: ConnectionJSON<PullRequestJSON>,
 |};
 
 /**

@@ -8,7 +8,7 @@ import fetch from "isomorphic-fetch";
 
 import {stringify, inlineLayout} from "../../graphql/queries";
 import {createQuery, createVariables, postQueryExhaustive} from "./graphql";
-import type {RepositoryJSON} from "./graphql";
+import type {GithubResponseJSON} from "./graphql";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -29,7 +29,7 @@ export default function fetchGithubRepo(
   repoOwner: string,
   repoName: string,
   token: string
-): Promise<RepositoryJSON> {
+): Promise<GithubResponseJSON> {
   repoOwner = String(repoOwner);
   repoName = String(repoName);
   token = String(token);
@@ -52,7 +52,7 @@ export default function fetchGithubRepo(
   return postQueryExhaustive(
     (somePayload) => postQuery(somePayload, token),
     payload
-  ).then((x: RepositoryJSON) => {
+  ).then((x: GithubResponseJSON) => {
     ensureNoMorePages(x);
     return x;
   });

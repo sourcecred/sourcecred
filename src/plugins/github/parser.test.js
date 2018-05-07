@@ -3,7 +3,7 @@
 import {AUTHORS_EDGE_TYPE, CONTAINS_EDGE_TYPE} from "./types";
 import type {NodePayload, EdgePayload} from "./types";
 import {parse} from "./parser";
-import type {RepositoryJSON, PullRequestJSON, IssueJSON} from "./graphql";
+import type {GithubResponseJSON, PullRequestJSON, IssueJSON} from "./graphql";
 import {Graph} from "../../core/graph";
 import exampleRepoData from "./demoData/example-github.json";
 
@@ -95,7 +95,7 @@ describe("GithubParser", () => {
   }: ExampleInput): Graph<NodePayload, EdgePayload> {
     const issues = issueNums.map(getIssue);
     const pullRequests = prNums.map(getPR);
-    const exampleData: RepositoryJSON = {
+    const exampleData: GithubResponseJSON = {
       repository: {
         id: exampleRepoData.repository.id,
         issues: {
