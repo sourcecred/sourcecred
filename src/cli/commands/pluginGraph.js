@@ -3,11 +3,11 @@
 import {Command, flags} from "@oclif/command";
 import stringify from "json-stable-stringify";
 
-import type {PluginName} from "./common";
 import type {Graph} from "../../core/graph";
+import type {PluginName} from "../common";
 import createGitGraph from "../../plugins/git/cloneGitGraph";
 import createGithubGraph from "../../plugins/github/fetchGithubGraph";
-import {pluginNames} from "./common";
+import {pluginNames} from "../common";
 
 export default class PluginGraphCommand extends Command {
   static description = "create the contribution graph for a single plugin";

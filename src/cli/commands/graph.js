@@ -5,7 +5,7 @@ import mkdirp from "mkdirp";
 import os from "os";
 import path from "path";
 
-import {pluginNames} from "./common";
+import {pluginNames} from "../common";
 
 const execDependencyGraph = require("../../tools/execDependencyGraph").default;
 
