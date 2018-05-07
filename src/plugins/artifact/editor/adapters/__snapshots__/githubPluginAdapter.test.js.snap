@@ -18,6 +18,21 @@ Array [
     "type": "AUTHOR",
   },
   Object {
+    "id": "https://github.com/sourcecred/example-github",
+    "payload": Object {
+      "name": "example-github",
+      "owner": "sourcecred",
+      "url": "https://github.com/sourcecred/example-github",
+    },
+    "rendered": <div>
+      type: 
+      REPOSITORY
+       (details to be implemented)
+</div>,
+    "title": "sourcecred/example-github",
+    "type": "REPOSITORY",
+  },
+  Object {
     "id": "https://github.com/sourcecred/example-github/issues/1",
     "payload": Object {
       "body": "This is just an example issue.",

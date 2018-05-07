@@ -18,6 +18,7 @@ import type {
   PullRequestReviewCommentNodePayload,
   PullRequestReviewNodePayload,
   PullRequestReviewState,
+  RepositoryNodePayload,
 } from "./types";
 
 import {
@@ -36,6 +37,7 @@ import {
 import {COMMIT_NODE_TYPE} from "../git/types";
 
 export type Entity =
+  | Repository
   | Issue
   | PullRequest
   | Comment
@@ -48,47 +50,6 @@ function assertEntityType(e: Entity, t: NodeType) {
     throw new Error(
       `Expected entity at ${stringify(e.address())} to have type ${t}`
     );
-  }
-}
-
-export class Repository {
-  graph: Graph<NodePayload, EdgePayload>;
-
-  constructor(graph: Graph<NodePayload, EdgePayload>) {
-    this.graph = graph;
-  }
-
-  issueOrPRByNumber(number: number): ?(Issue | PullRequest) {
-    let result: Issue | PullRequest;
-    this.graph.nodes({type: ISSUE_NODE_TYPE}).forEach((n) => {
-      if (n.payload.number === number) {
-        result = new Issue(this.graph, n.address);
-      }
-    });
-    this.graph.nodes({type: PULL_REQUEST_NODE_TYPE}).forEach((n) => {
-      if (n.payload.number === number) {
-        result = new PullRequest(this.graph, n.address);
-      }
-    });
-    return result;
-  }
-
-  issues(): Issue[] {
-    return this.graph
-      .nodes({type: ISSUE_NODE_TYPE})
-      .map((n) => new Issue(this.graph, n.address));
-  }
-
-  pullRequests(): PullRequest[] {
-    return this.graph
-      .nodes({type: PULL_REQUEST_NODE_TYPE})
-      .map((n) => new PullRequest(this.graph, n.address));
-  }
-
-  authors(): Author[] {
-    return this.graph
-      .nodes({type: AUTHOR_NODE_TYPE})
-      .map((n) => new Author(this.graph, n.address));
   }
 }
 
@@ -115,6 +76,53 @@ class GithubEntity<T: NodePayload> {
 
   address(): Address {
     return this.nodeAddress;
+  }
+}
+
+export class Repository extends GithubEntity<RepositoryNodePayload> {
+  // TODO: Now that the Repository is a node in the graph, re-write methods
+  // that find issues and PRs to find neighbors of the repository rather than
+  // any matching nodes in the graph. Then, behavior will be correct in the
+  // case where we have multiple repositories in the same graph.
+  issueOrPRByNumber(number: number): ?(Issue | PullRequest) {
+    let result: Issue | PullRequest;
+    this.graph.nodes({type: ISSUE_NODE_TYPE}).forEach((n) => {
+      if (n.payload.number === number) {
+        result = new Issue(this.graph, n.address);
+      }
+    });
+    this.graph.nodes({type: PULL_REQUEST_NODE_TYPE}).forEach((n) => {
+      if (n.payload.number === number) {
+        result = new PullRequest(this.graph, n.address);
+      }
+    });
+    return result;
+  }
+
+  owner(): string {
+    return this.node().payload.owner;
+  }
+
+  name(): string {
+    return this.node().payload.name;
+  }
+
+  issues(): Issue[] {
+    return this.graph
+      .nodes({type: ISSUE_NODE_TYPE})
+      .map((n) => new Issue(this.graph, n.address));
+  }
+
+  pullRequests(): PullRequest[] {
+    return this.graph
+      .nodes({type: PULL_REQUEST_NODE_TYPE})
+      .map((n) => new PullRequest(this.graph, n.address));
+  }
+
+  authors(): Author[] {
+    return this.graph
+      .nodes({type: AUTHOR_NODE_TYPE})
+      .map((n) => new Author(this.graph, n.address));
   }
 }
 
@@ -166,6 +174,9 @@ class Post<
             break;
           case "PULL_REQUEST_REVIEW_COMMENT":
             result.push(new PullRequestReviewComment(this.graph, neighbor));
+            break;
+          case "REPOSITORY":
+            result.push(new Repository(this.graph, neighbor));
             break;
           default:
             // eslint-disable-next-line no-unused-expressions

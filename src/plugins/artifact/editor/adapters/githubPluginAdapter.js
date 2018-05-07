@@ -7,6 +7,7 @@ import type {Node} from "../../../../core/graph";
 import type {
   NodePayload,
   NodeType,
+  RepositoryNodePayload,
   IssueNodePayload,
   PullRequestNodePayload,
   CommentNodePayload,
@@ -46,6 +47,9 @@ const adapter: PluginAdapter<NodePayload> = {
           return adapter.extractTitle(graph, graph.node(neighbor));
         });
     }
+    function extractRepositoryTitle(node: Node<RepositoryNodePayload>) {
+      return `${node.payload.owner}/${node.payload.name}`;
+    }
     function extractIssueOrPrTitle(
       node: Node<IssueNodePayload | PullRequestNodePayload>
     ) {
@@ -80,6 +84,8 @@ const adapter: PluginAdapter<NodePayload> = {
     const anyNode: Node<any> = node;
     const type: NodeType = (node.address.type: any);
     switch (type) {
+      case "REPOSITORY":
+        return extractRepositoryTitle(anyNode);
       case "ISSUE":
       case "PULL_REQUEST":
         return extractIssueOrPrTitle(anyNode);

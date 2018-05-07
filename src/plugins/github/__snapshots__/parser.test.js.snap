@@ -25,6 +25,13 @@ Object {
         "url": "https://github.com/decentralion",
       },
     },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-github\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REPOSITORY\\"}": Object {
+      "payload": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "url": "https://github.com/sourcecred/example-github",
+      },
+    },
     "{\\"id\\":\\"https://github.com/sourcecred/example-github/issues/1\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"ISSUE\\"}": Object {
       "payload": Object {
         "body": "This is just an example issue.",
@@ -138,6 +145,13 @@ Object {
         "login": "decentralion",
         "subtype": "USER",
         "url": "https://github.com/decentralion",
+      },
+    },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-github\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REPOSITORY\\"}": Object {
+      "payload": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "url": "https://github.com/sourcecred/example-github",
       },
     },
     "{\\"id\\":\\"https://github.com/sourcecred/example-github/issues/6\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"ISSUE\\"}": Object {
@@ -301,6 +315,13 @@ Object {
         "url": "https://github.com/decentralion",
       },
     },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-github\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REPOSITORY\\"}": Object {
+      "payload": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "url": "https://github.com/sourcecred/example-github",
+      },
+    },
     "{\\"id\\":\\"https://github.com/sourcecred/example-github/pull/5\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"PULL_REQUEST\\"}": Object {
       "payload": Object {
         "body": "@wchargin could you please do the following:
@@ -408,6 +429,13 @@ Object {
         "login": "decentralion",
         "subtype": "USER",
         "url": "https://github.com/decentralion",
+      },
+    },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-github\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REPOSITORY\\"}": Object {
+      "payload": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "url": "https://github.com/sourcecred/example-github",
       },
     },
     "{\\"id\\":\\"https://github.com/sourcecred/example-github/pull/3\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"PULL_REQUEST\\"}": Object {
@@ -843,6 +871,13 @@ Object {
         "url": "https://github.com/decentralion",
       },
     },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-github\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REPOSITORY\\"}": Object {
+      "payload": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "url": "https://github.com/sourcecred/example-github",
+      },
+    },
     "{\\"id\\":\\"https://github.com/sourcecred/example-github/issues/1\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"ISSUE\\"}": Object {
       "payload": Object {
         "body": "This is just an example issue.",
@@ -1189,6 +1224,13 @@ Object {
         "login": "decentralion",
         "subtype": "USER",
         "url": "https://github.com/decentralion",
+      },
+    },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-github\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REPOSITORY\\"}": Object {
+      "payload": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "url": "https://github.com/sourcecred/example-github",
       },
     },
     "{\\"id\\":\\"https://github.com/sourcecred/example-github/issues/2\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"ISSUE\\"}": Object {
@@ -2014,6 +2056,13 @@ Object {
         "login": "decentralion",
         "subtype": "USER",
         "url": "https://github.com/decentralion",
+      },
+    },
+    "{\\"id\\":\\"https://github.com/sourcecred/example-github\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REPOSITORY\\"}": Object {
+      "payload": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "url": "https://github.com/sourcecred/example-github",
       },
     },
     "{\\"id\\":\\"https://github.com/sourcecred/example-github/issues/1\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"ISSUE\\"}": Object {
