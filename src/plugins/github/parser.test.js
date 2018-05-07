@@ -97,7 +97,7 @@ describe("GithubParser", () => {
     const pullRequests = prNums.map(getPR);
     const exampleData: GithubResponseJSON = {
       repository: {
-        id: exampleRepoData.repository.id,
+        ...exampleRepoData.repository,
         issues: {
           nodes: issues,
           pageInfo: {

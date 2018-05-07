@@ -109,6 +109,9 @@ export type RepositoryJSON = {|
   +id: string,
   +issues: ConnectionJSON<IssueJSON>,
   +pullRequests: ConnectionJSON<PullRequestJSON>,
+  +url: string,
+  +name: string,
+  +owner: AuthorJSON,
 |};
 
 /**
@@ -126,6 +129,9 @@ export function createQuery(): Body {
           "repository",
           {owner: b.variable("repoOwner"), name: b.variable("repoName")},
           [
+            b.field("url"),
+            b.field("name"),
+            b.field("owner", {}, [b.fragmentSpread("whoami")]),
             b.field("id"),
             b.field("issues", {first: b.literal(PAGE_SIZE_ISSUES)}, [
               b.fragmentSpread("issues"),
