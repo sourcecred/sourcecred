@@ -68,7 +68,7 @@ function graph(
   console.log("Storing graphs into: " + scopedDirectory);
   mkdirp.sync(scopedDirectory);
   const tasks = makeTasks(scopedDirectory, {repoOwner, repoName, token});
-  execDependencyGraph(tasks).then(({success}) => {
+  execDependencyGraph(tasks, {taskPassLabel: "DONE"}).then(({success}) => {
     process.exitCode = success ? 0 : 1;
   });
 }
