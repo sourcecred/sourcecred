@@ -26,11 +26,33 @@ type TaskResult = {|
 type OverallResult = {|
   +success: boolean,
 |};
+
+// For best-looking results, the task pass, fail, and launch labels
+// should all be of the same width. The default options use a
+// 4-character string for each. Shorter strings with length of the same
+// parity can be extended by symmetrically adding spaces.
+type RunOptions = {|
+  +taskPassLabel?: string,
+  +taskFailLabel?: string,
+  +taskLaunchLabel?: string,
+  +overallPassLabel?: string,
+  +overallFailLabel?: string,
+|};
 */
 
+const defaultOptions = {
+  taskPassLabel: "PASS",
+  taskFailLabel: "FAIL",
+  taskLaunchLabel: " GO ",
+  overallPassLabel: "SUCCESS",
+  overallFailLabel: "FAILURE",
+};
+
 exports.default = async function execDependencyGraph(
-  tasks /*: $ReadOnlyArray<Task> */
+  tasks /*: $ReadOnlyArray<Task> */,
+  options /*:: ?: RunOptions */
 ) /*: Promise<OverallResult> */ {
+  const fullOptions = {...defaultOptions, ...(options || {})};
   const tasksById /*: {[TaskId]: Task} */ = {};
   tasks.forEach((task) => {
     if (tasksById[task.id] !== undefined) {
@@ -43,6 +65,10 @@ exports.default = async function execDependencyGraph(
   const tasksInProgress /*: Map<TaskId, Promise<TaskResult>> */ = new Map();
   const remainingTasks /*: Set<TaskId> */ = new Set(Object.keys(tasksById));
 
+  function spacedLabel(rawLabel /*: string */) /*: string */ {
+    return ` ${rawLabel} `;
+  }
+
   function spawnTasksWhoseDependenciesHaveCompleted() {
     for (const task of tasks) {
       if (!remainingTasks.has(task.id)) {
@@ -53,7 +79,11 @@ exports.default = async function execDependencyGraph(
       }
       // Ready to spawn!
       remainingTasks.delete(task.id);
-      console.log(chalk.bgBlue.bold.white("  GO  ") + " " + task.id);
+      console.log(
+        chalk.bgBlue.bold.white(spacedLabel(fullOptions.taskLaunchLabel)) +
+          " " +
+          task.id
+      );
       tasksInProgress.set(task.id, processTask(task));
     }
   }
@@ -84,8 +114,8 @@ exports.default = async function execDependencyGraph(
   ) {
     const success = result && result.success;
     const badge = success
-      ? chalk.bgGreen.bold.white(" PASS ")
-      : chalk.bgRed.bold.white(" FAIL ");
+      ? chalk.bgGreen.bold.white(spacedLabel(fullOptions.taskPassLabel))
+      : chalk.bgRed.bold.white(spacedLabel(fullOptions.taskFailLabel));
     console.log(`${badge} ${id}`);
 
     if (mode === "OVERVIEW" && success) {
@@ -168,8 +198,8 @@ exports.default = async function execDependencyGraph(
   }
   const overallSuccess /*: boolean */ = failedTasks.length === 0;
   const overallBadge = overallSuccess
-    ? chalk.bgGreen.bold.white(" SUCCESS ")
-    : chalk.bgRed.bold.white(" FAILURE ");
+    ? chalk.bgGreen.bold.white(spacedLabel(fullOptions.overallPassLabel))
+    : chalk.bgRed.bold.white(spacedLabel(fullOptions.overallFailLabel));
   console.log("Final result: " + overallBadge);
   return Promise.resolve({success: overallSuccess});
 };
