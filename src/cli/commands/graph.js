@@ -4,7 +4,7 @@ import {Command, flags} from "@oclif/command";
 import mkdirp from "mkdirp";
 import path from "path";
 
-import {defaultStorageDirectory, pluginNames} from "../common";
+import {pluginNames, sourcecredDirectoryFlag} from "../common";
 
 const execDependencyGraph = require("../../tools/execDependencyGraph").default;
 
@@ -22,8 +22,7 @@ create the contribution graph for a repository
 Create the contribution graph for a repository. This creates a
 contribution graph for each individual plugin, and then combines the
 individual graphs into one larger graph. The graphs are stored as JSON
-files under OUTPUT_DIR/REPO_OWNER/REPO_NAME, where OUTPUT_DIR is
-configurable.
+files under SOURCECRED_DIRECTORY/graphs/REPO_OWNER/REPO_NAME.
 `.trim();
 
   static args = [
@@ -40,12 +39,7 @@ configurable.
   ];
 
   static flags = {
-    "output-directory": flags.string({
-      short: "o",
-      description: "directory into which to store graphs",
-      env: "SOURCECRED_OUTPUT_DIRECTORY",
-      default: defaultStorageDirectory(),
-    }),
+    "sourcecred-directory": sourcecredDirectoryFlag(),
     "github-token": flags.string({
       description:
         "a GitHub API token, as generated at " +
@@ -58,30 +52,38 @@ configurable.
   async run() {
     const {
       args: {repo_owner: repoOwner, repo_name: repoName},
-      flags: {"github-token": token, "output-directory": outputDirectory},
+      flags: {
+        "github-token": token,
+        "sourcecred-directory": sourcecredDirectory,
+      },
     } = this.parse(GraphCommand);
-    graph(outputDirectory, repoOwner, repoName, token);
+    graph(sourcecredDirectory, repoOwner, repoName, token);
   }
 }
 
 function graph(
-  outputDirectory: string,
+  sourcecredDirectory: string,
   repoOwner: string,
   repoName: string,
   token: string
 ) {
-  const scopedDirectory = path.join(outputDirectory, repoOwner, repoName);
-  console.log("Storing graphs into: " + scopedDirectory);
-  mkdirp.sync(scopedDirectory);
-  const tasks = makeTasks(scopedDirectory, {repoOwner, repoName, token});
+  const graphDirectory = path.join(
+    sourcecredDirectory,
+    "graphs",
+    repoOwner,
+    repoName
+  );
+  console.log("Storing graphs into: " + graphDirectory);
+  mkdirp.sync(graphDirectory);
+  const tasks = makeTasks(graphDirectory, {repoOwner, repoName, token});
   execDependencyGraph(tasks, {taskPassLabel: "DONE"}).then(({success}) => {
     process.exitCode = success ? 0 : 1;
   });
 }
 
-function makeTasks(outputDirectory, {repoOwner, repoName, token}) {
+function makeTasks(graphDirectory, {repoOwner, repoName, token}) {
   const taskId = (id) => `create-${id}`;
-  const graphFilename = (id) => path.join(outputDirectory, `graph-${id}.json`);
+  const graphFilename = (id) => path.join(graphDirectory, `graph-${id}.json`);
   const into = "./src/cli/into.sh";
   return [
     ...pluginNames().map((id) => ({
@@ -105,7 +107,7 @@ function makeTasks(outputDirectory, {repoOwner, repoName, token}) {
       id: "combine",
       cmd: [
         into,
-        path.join(outputDirectory, "graph.json"),
+        path.join(graphDirectory, "graph.json"),
         "node",
         "./bin/sourcecred.js",
         "combine",
