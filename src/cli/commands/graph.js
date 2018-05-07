@@ -5,6 +5,8 @@ import mkdirp from "mkdirp";
 import os from "os";
 import path from "path";
 
+import {pluginNames} from "./common";
+
 const execDependencyGraph = require("../../tools/execDependencyGraph").default;
 
 export default class GraphCommand extends Command {
@@ -68,12 +70,11 @@ function graph(
 }
 
 function makeTasks(outputDirectory, {repoOwner, repoName, token}) {
-  const plugins = ["git", "github"];
   const taskId = (id) => `create-${id}`;
   const graphFilename = (id) => path.join(outputDirectory, `graph-${id}.json`);
   const into = "./src/cli/into.sh";
   return [
-    ...plugins.map((id) => ({
+    ...pluginNames().map((id) => ({
       id: taskId(id),
       cmd: [
         into,
@@ -98,9 +99,9 @@ function makeTasks(outputDirectory, {repoOwner, repoName, token}) {
         "node",
         "./bin/sourcecred.js",
         "combine",
-        ...plugins.map((id) => graphFilename(id)),
+        ...pluginNames().map((id) => graphFilename(id)),
       ],
-      deps: plugins.map((id) => taskId(id)),
+      deps: pluginNames().map((id) => taskId(id)),
     },
   ];
 }

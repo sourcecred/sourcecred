@@ -3,9 +3,11 @@
 import {Command, flags} from "@oclif/command";
 import stringify from "json-stable-stringify";
 
+import type {PluginName} from "./common";
 import type {Graph} from "../../core/graph";
 import createGitGraph from "../../plugins/git/cloneGitGraph";
 import createGithubGraph from "../../plugins/github/fetchGithubGraph";
+import {pluginNames} from "./common";
 
 export default class PluginGraphCommand extends Command {
   static description = "create the contribution graph for a single plugin";
@@ -27,7 +29,7 @@ export default class PluginGraphCommand extends Command {
     plugin: flags.string({
       description: "plugin whose graph to generate",
       required: true,
-      options: ["git", "github"],
+      options: pluginNames(),
     }),
     "github-token": flags.string({
       description:
@@ -48,7 +50,7 @@ export default class PluginGraphCommand extends Command {
 }
 
 function pluginGraph(
-  plugin: "git" | "github",
+  plugin: PluginName,
   repoOwner: string,
   repoName: string,
   githubToken?: string
