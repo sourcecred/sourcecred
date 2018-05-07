@@ -29,6 +29,7 @@ export default class GraphCommand extends Command {
     "output-directory": flags.string({
       short: "o",
       description: "directory into which to store graphs",
+      env: "SOURCECRED_OUTPUT_DIRECTORY",
     }),
     "github-token": flags.string({
       description:
