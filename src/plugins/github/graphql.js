@@ -631,6 +631,11 @@ function mergeDirect<T>(destination: T, source: any): T {
   }
 }
 
+// If a user deletes their account, then the author is null
+// (the UI will show that the message was written by @ghost).
+// Therefore, NullableAuthorJSON is preferred to AuthorJSON
+// for most actual usage.
+export type NullableAuthorJSON = AuthorJSON | null;
 export type AuthorJSON = {|
   +__typename: "User" | "Bot" | "Organization",
   +id: string,
@@ -667,7 +672,7 @@ export type IssueJSON = {|
   +title: string,
   +body: string,
   +number: number,
-  +author: AuthorJSON,
+  +author: NullableAuthorJSON,
   +comments: ConnectionJSON<CommentJSON>,
 |};
 
@@ -695,7 +700,7 @@ export type PullRequestJSON = {|
   +title: string,
   +body: string,
   +number: number,
-  +author: AuthorJSON,
+  +author: NullableAuthorJSON,
   +comments: ConnectionJSON<CommentJSON>,
   +reviews: ConnectionJSON<PullRequestReviewJSON>,
   // If present, oid is the commit SHA of the merged commit.
@@ -727,7 +732,7 @@ export type CommentJSON = {|
   +id: string,
   +url: string,
   +body: string,
-  +author: AuthorJSON,
+  +author: NullableAuthorJSON,
 |};
 function commentsFragment(): FragmentDefinition {
   const b = build;
@@ -754,7 +759,7 @@ export type PullRequestReviewJSON = {|
   +id: string,
   +url: string,
   +body: string,
-  +author: AuthorJSON,
+  +author: NullableAuthorJSON,
   +state: PullRequestReviewState,
   +comments: ConnectionJSON<PullRequestReviewCommentJSON>,
 |};
@@ -779,7 +784,7 @@ export type PullRequestReviewCommentJSON = {|
   +id: string,
   +url: string,
   +body: string,
-  +author: AuthorJSON,
+  +author: NullableAuthorJSON,
 |};
 function reviewCommentsFragment(): FragmentDefinition {
   const b = build;
