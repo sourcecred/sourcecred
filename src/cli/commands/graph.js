@@ -2,10 +2,9 @@
 
 import {Command, flags} from "@oclif/command";
 import mkdirp from "mkdirp";
-import os from "os";
 import path from "path";
 
-import {pluginNames} from "../common";
+import {defaultStorageDirectory, pluginNames} from "../common";
 
 const execDependencyGraph = require("../../tools/execDependencyGraph").default;
 
@@ -45,7 +44,7 @@ configurable.
       short: "o",
       description: "directory into which to store graphs",
       env: "SOURCECRED_OUTPUT_DIRECTORY",
-      default: path.join(os.tmpdir(), "sourcecred"),
+      default: defaultStorageDirectory(),
     }),
     "github-token": flags.string({
       description:
