@@ -30,6 +30,7 @@ export default class GraphCommand extends Command {
       short: "o",
       description: "directory into which to store graphs",
       env: "SOURCECRED_OUTPUT_DIRECTORY",
+      default: path.join(os.tmpdir(), "sourcecred"),
     }),
     "github-token": flags.string({
       description:
@@ -43,16 +44,8 @@ export default class GraphCommand extends Command {
   async run() {
     const {
       args: {repo_owner: repoOwner, repo_name: repoName},
-      flags: {"github-token": token, "output-directory": rawOutputDirectory},
+      flags: {"github-token": token, "output-directory": outputDirectory},
     } = this.parse(GraphCommand);
-    const outputDirectory = (() => {
-      if (rawOutputDirectory != null) {
-        return rawOutputDirectory;
-      }
-      const outputDirectory = path.join(os.tmpdir(), "sourcecred", repoName);
-      this.log("Using output directory: " + outputDirectory);
-      return outputDirectory;
-    })();
     graph(outputDirectory, repoOwner, repoName, token);
   }
 }
@@ -63,8 +56,10 @@ function graph(
   repoName: string,
   token: string
 ) {
-  mkdirp.sync(outputDirectory);
-  const tasks = makeTasks(outputDirectory, {repoOwner, repoName, token});
+  const scopedDirectory = path.join(outputDirectory, repoOwner, repoName);
+  console.log("Storing graphs into: " + scopedDirectory);
+  mkdirp.sync(scopedDirectory);
+  const tasks = makeTasks(scopedDirectory, {repoOwner, repoName, token});
   execDependencyGraph(tasks).then(({success}) => {
     process.exitCode = success ? 0 : 1;
   });
