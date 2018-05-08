@@ -1,4 +1,4 @@
-// @no-flow
+// @flow
 /*
  * Command-line utility to fetch GitHub data using the API in
  * ../fetchGithubRepo, and print it to stdout. Useful for testing or
@@ -19,16 +19,14 @@ function parseArgs() {
   const argv = process.argv.slice(2);
   const fail = () => {
     const invocation = process.argv.slice(0, 2).join(" ");
-    throw new Error(`Usage: ${invocation} REPO_OWNER REPO_NAME [TOKEN]`);
+    throw new Error(`Usage: ${invocation} REPO_OWNER REPO_NAME GITHUB_TOKEN`);
   };
   if (argv.length < 2) {
     fail();
   }
-  const [repoOwner, repoName, ...rest] = argv;
-  const result = {repoOwner, repoName};
-  if (rest.length === 1) {
-    result.token = rest[0];
-  } else if (rest.length > 1) {
+  const [repoOwner, repoName, githubToken, ...rest] = argv;
+  const result = {repoOwner, repoName, githubToken};
+  if (rest.length > 0) {
     fail();
   }
   return result;
@@ -36,7 +34,7 @@ function parseArgs() {
 
 function main() {
   const args = parseArgs();
-  fetchGithubRepo(args.repoOwner, args.repoName, args.token)
+  fetchGithubRepo(args.repoOwner, args.repoName, args.githubToken)
     .then((data) => {
       console.log(stringify(data, {space: 4}));
     })
