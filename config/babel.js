@@ -49,7 +49,7 @@ const plugins = [
 // https://github.com/facebookincubator/create-react-app/issues/720
 // It’s also nice that we can enforce `NODE_ENV` being specified.
 var env = process.env.BABEL_ENV || process.env.NODE_ENV;
-var backend = !!process.env.SOURCECRED_BACKEND;
+var backend = process.env.SOURCECRED_BACKEND === "true";
 if (env !== "development" && env !== "test" && env !== "production") {
   throw new Error(
     "Using `babel-preset-react-app` requires that you specify `NODE_ENV` or " +
