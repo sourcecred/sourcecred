@@ -1,4 +1,4 @@
-// @no-flow
+// @flow
 const fs = require("fs");
 const path = require("path");
 const paths = require("./paths");
@@ -20,9 +20,9 @@ var dotenvFiles = [
   // Don't include `.env.local` for `test` environment
   // since normally you expect tests to produce the same
   // results for everyone
-  NODE_ENV !== "test" && `${paths.dotenv}.local`,
+  ...(NODE_ENV !== "test" ? [`${paths.dotenv}.local`] : []),
   paths.dotenv,
-].filter(Boolean);
+];
 
 // Load environment variables from .env* files. Suppress warnings using silent
 // if this file is missing. dotenv will never modify any environment variables
@@ -59,7 +59,7 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
 // injected into the application via DefinePlugin in Webpack configuration.
 const REACT_APP = /^REACT_APP_/i;
 
-function getClientEnvironment(publicUrl) {
+function getClientEnvironment(publicUrl /*: string */) {
   const raw = Object.keys(process.env)
     .filter((key) => REACT_APP.test(key))
     .reduce(
