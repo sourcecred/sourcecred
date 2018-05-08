@@ -61,6 +61,7 @@ module.exports = {
     "commands/combine": resolveApp("src/cli/commands/combine.js"),
     "commands/graph": resolveApp("src/cli/commands/graph.js"),
     "commands/plugin-graph": resolveApp("src/cli/commands/pluginGraph.js"),
+    "commands/start": resolveApp("src/cli/commands/start.js"),
     sourcecred: resolveApp("src/cli/sourcecred.js"),
     fetchAndPrintGithubRepo: resolveApp(
       "src/plugins/github/bin/fetchAndPrintGithubRepo.js"
