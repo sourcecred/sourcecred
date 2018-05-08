@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`GitHub porcelain API has wrappers for Authors 1`] = `2`;
+exports[`GitHub porcelain has wrappers for Authors 1`] = `2`;
 
-exports[`GitHub porcelain API has wrappers for Authors 2`] = `
+exports[`GitHub porcelain has wrappers for Authors 2`] = `
 Object {
   "address": Object {
     "id": "https://github.com/decentralion",
@@ -17,9 +17,9 @@ Object {
 }
 `;
 
-exports[`GitHub porcelain API has wrappers for Comments 1`] = `3`;
+exports[`GitHub porcelain has wrappers for Comments 1`] = `3`;
 
-exports[`GitHub porcelain API has wrappers for Comments 2`] = `
+exports[`GitHub porcelain has wrappers for Comments 2`] = `
 Object {
   "address": Object {
     "id": "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442",
@@ -33,7 +33,7 @@ Object {
 }
 `;
 
-exports[`GitHub porcelain API has wrappers for Issues 1`] = `
+exports[`GitHub porcelain has wrappers for Issues 1`] = `
 Object {
   "address": Object {
     "id": "https://github.com/sourcecred/example-github/issues/1",
@@ -49,7 +49,7 @@ Object {
 }
 `;
 
-exports[`GitHub porcelain API has wrappers for PullRequests Merged 1`] = `
+exports[`GitHub porcelain has wrappers for PullRequests Merged 1`] = `
 Object {
   "address": Object {
     "id": "https://github.com/sourcecred/example-github/pull/3",

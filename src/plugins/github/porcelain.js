@@ -1,5 +1,18 @@
 // @flow
 
+/*
+ * This module contains "Porcelain" for working with GitHub graphs. By
+ * "Porcelain", we mean it is a much more convenient and polished API. It
+ * allows accessing GitHub graph data via a familiar object-oriented API,
+ * rather than needing to use the specific graph-based methods in the
+ * underlying graph.
+ *
+ * In general, the porcelain module provides wrapper objects that contain the
+ * entire GitHub graph, and a pointer to a particular entity in that graph.
+ * Creating the wrappers is extremely cheap; all actual computation (e.g.
+ * finding the body or author of a post) is done lazily when that information
+ * is requested.
+ */
 import stringify from "json-stable-stringify";
 
 import {Graph} from "../../core/graph";
