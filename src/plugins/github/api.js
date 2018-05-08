@@ -31,6 +31,7 @@ import {
   PULL_REQUEST_NODE_TYPE,
   PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
   PULL_REQUEST_REVIEW_NODE_TYPE,
+  REPOSITORY_NODE_TYPE,
   REFERENCES_EDGE_TYPE,
 } from "./types";
 
@@ -50,6 +51,34 @@ function assertEntityType(e: Entity, t: NodeType) {
     throw new Error(
       `Expected entity at ${stringify(e.address())} to have type ${t}`
     );
+  }
+}
+
+export class Porcelain {
+  graph: Graph<NodePayload, EdgePayload>;
+
+  constructor(graph: Graph<NodePayload, EdgePayload>) {
+    this.graph = graph;
+  }
+
+  /* Return all the repositories in the graph */
+  repositories(): Repository[] {
+    return this.graph
+      .nodes({type: REPOSITORY_NODE_TYPE})
+      .map((n) => new Repository(this.graph, n.address));
+  }
+
+  /* Return the repository with the given owner and name */
+  repository(owner: string, name: string): Repository {
+    const repo = this.repositories().filter(
+      (r) => r.owner() === owner && r.name() === name
+    );
+    if (repo.length > 1) {
+      throw new Error(
+        `Unexpectedly found multiple repositories named ${owner}/${name}`
+      );
+    }
+    return repo[0];
   }
 }
 

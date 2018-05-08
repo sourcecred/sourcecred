@@ -2,7 +2,7 @@
 
 import {parse} from "./parser";
 import exampleRepoData from "./demoData/example-github.json";
-import {Repository, Issue, PullRequest, Comment, Author} from "./api";
+import {Porcelain, Issue, PullRequest, Comment, Author} from "./api";
 import {
   AUTHOR_NODE_TYPE,
   COMMENT_NODE_TYPE,
@@ -11,11 +11,11 @@ import {
   PULL_REQUEST_REVIEW_NODE_TYPE,
   PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
 } from "./types";
+
 describe("GitHub porcelain API", () => {
   const graph = parse(exampleRepoData);
-  // TODO: Create a higher level API that contains all the repositories
-  const repoNode = graph.nodes({type: "REPOSITORY"})[0];
-  const repo = new Repository(graph, repoNode.address);
+  const porcelain = new Porcelain(graph);
+  const repo = porcelain.repository("sourcecred", "example-github");
   function issueOrPRByNumber(n: number): Issue | PullRequest {
     const result = repo.issueOrPRByNumber(n);
     if (result == null) {
@@ -23,6 +23,18 @@ describe("GitHub porcelain API", () => {
     }
     return result;
   }
+  describe("has repository finding", () => {
+    it("which works for an existing repository", () => {
+      expect(porcelain.repository("sourcecred", "example-github")).toEqual(
+        expect.anything()
+      );
+    });
+
+    it("which returns undefined when asking for a nonexistent repo", () => {
+      expect(porcelain.repository("sourcecred", "bad-repo")).toBe(undefined);
+    });
+  });
+
   describe("has wrappers for", () => {
     it("Repositories", () => {
       expect(repo.url()).toBe("https://github.com/sourcecred/example-github");
