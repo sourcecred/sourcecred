@@ -41,9 +41,9 @@ function getServedPath(appPackageJson) {
 module.exports = {
   dotenv: resolveApp(".env"),
   appBuild: resolveApp("build"),
-  appPublic: resolveApp("src/plugins/artifact/editor/public"),
-  appHtml: resolveApp("src/plugins/artifact/editor/public/index.html"),
-  appIndexJs: resolveApp("src/plugins/artifact/editor/index.js"),
+  appPublic: resolveApp("src/app/public"),
+  appHtml: resolveApp("src/app/public/index.html"),
+  appIndexJs: resolveApp("src/app/index.js"),
   appPackageJson: resolveApp("package.json"),
   appSrc: resolveApp("src"),
   yarnLockFile: resolveApp("yarn.lock"),
