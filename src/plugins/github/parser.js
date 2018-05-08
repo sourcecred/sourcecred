@@ -27,7 +27,7 @@ import type {
   PullRequestJSON,
   IssueJSON,
   CommentJSON,
-  AuthorJSON,
+  NullableAuthorJSON,
 } from "./graphql";
 
 import type {Address} from "../../core/address";
@@ -76,8 +76,11 @@ class GithubParser {
       | PullRequestReviewCommentNodePayload
       | PullRequestReviewNodePayload
     >,
-    authorJson: AuthorJSON
+    authorJson: NullableAuthorJSON
   ) {
+    if (authorJson == null) {
+      return;
+    }
     let authorType: AuthorSubtype;
     switch (authorJson.__typename) {
       case "User":
