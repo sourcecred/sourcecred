@@ -1,3 +1,4 @@
+// @no-flow
 /*
  * Command-line utility to fetch GitHub data using the API in
  * ../fetchGithubRepo, and print it to stdout. Useful for testing or

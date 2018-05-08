@@ -18,6 +18,11 @@ function main() {
 function makeTasks(mode /*: "BASIC" | "FULL" */) {
   const basicTasks = [
     {
+      id: "ensure-flow-typing",
+      cmd: ["./scripts/ensure-flow.sh"],
+      deps: [],
+    },
+    {
       id: "check-pretty",
       cmd: ["npm", "run", "--silent", "check-pretty"],
       deps: [],
