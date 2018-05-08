@@ -13,7 +13,9 @@ import {
 } from "./types";
 describe("GitHub porcelain API", () => {
   const graph = parse(exampleRepoData);
-  const repo = new Repository(graph);
+  // TODO: Create a higher level API that contains all the repositories
+  const repoNode = graph.nodes({type: "REPOSITORY"})[0];
+  const repo = new Repository(graph, repoNode.address);
   function issueOrPRByNumber(n: number): Issue | PullRequest {
     const result = repo.issueOrPRByNumber(n);
     if (result == null) {
@@ -22,6 +24,11 @@ describe("GitHub porcelain API", () => {
     return result;
   }
   describe("has wrappers for", () => {
+    it("Repositories", () => {
+      expect(repo.url()).toBe("https://github.com/sourcecred/example-github");
+      expect(repo.owner()).toBe("sourcecred");
+      expect(repo.name()).toBe("example-github");
+    });
     it("Issues", () => {
       const issue = issueOrPRByNumber(1);
       expect(issue.title()).toBe("An example issue.");

@@ -1,6 +1,13 @@
 // @flow
 
 /** Node Types */
+export const REPOSITORY_NODE_TYPE: "REPOSITORY" = "REPOSITORY";
+export type RepositoryNodePayload = {|
+  +name: string,
+  +owner: string,
+  +url: string,
+|};
+
 export const ISSUE_NODE_TYPE: "ISSUE" = "ISSUE";
 export type IssueNodePayload = {|
   +url: string,
@@ -60,6 +67,10 @@ export type AuthorNodePayload = {|
 // useful at the value layer as $ElementType<NodeTypes, "ISSUE">, for
 // instance.
 export type NodeTypes = {|
+  REPOSITORY: {
+    payload: RepositoryNodePayload,
+    type: typeof REPOSITORY_NODE_TYPE,
+  },
   ISSUE: {payload: IssueNodePayload, type: typeof ISSUE_NODE_TYPE},
   PULL_REQUEST: {
     payload: PullRequestNodePayload,
@@ -78,6 +89,7 @@ export type NodeTypes = {|
 |};
 
 export type NodeType =
+  | typeof REPOSITORY_NODE_TYPE
   | typeof ISSUE_NODE_TYPE
   | typeof PULL_REQUEST_NODE_TYPE
   | typeof COMMENT_NODE_TYPE
@@ -86,6 +98,7 @@ export type NodeType =
   | typeof AUTHOR_NODE_TYPE;
 
 export type NodePayload =
+  | RepositoryNodePayload
   | IssueNodePayload
   | PullRequestNodePayload
   | CommentNodePayload

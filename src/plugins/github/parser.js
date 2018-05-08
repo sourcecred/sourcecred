@@ -9,6 +9,7 @@ import type {
   NodePayload,
   EdgePayload,
   PullRequestReviewNodePayload,
+  RepositoryNodePayload,
   AuthorNodePayload,
   AuthorsEdgePayload,
   PullRequestReviewCommentNodePayload,
@@ -276,6 +277,8 @@ class GithubParser {
       const anyNode: Node<any> = node;
       const type: NodeType = (node.address.type: any);
       switch (type) {
+        case "REPOSITORY":
+          break;
         case "ISSUE":
         case "PULL_REQUEST":
           const thisPayload: IssueNodePayload | PullRequestNodePayload =
@@ -325,6 +328,16 @@ class GithubParser {
   }
 
   addRepository(repositoryJSON: RepositoryJSON) {
+    const repositoryPayload: RepositoryNodePayload = {
+      url: repositoryJSON.url,
+      name: repositoryJSON.name,
+      owner: repositoryJSON.owner.login,
+    };
+    const repositoryNode: Node<RepositoryNodePayload> = {
+      address: this.makeNodeAddress("REPOSITORY", repositoryJSON.url),
+      payload: repositoryPayload,
+    };
+    this.graph.addNode(repositoryNode);
     repositoryJSON.issues.nodes.forEach((i) => this.addIssue(i));
     repositoryJSON.pullRequests.nodes.forEach((pr) => this.addPullRequest(pr));
   }
