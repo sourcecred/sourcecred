@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
 
-require("./testUtil").configureAphrodite();
+require("../../../app/testUtil").configureAphrodite();
 
 // Check that PropTypes check out.
 it("renders without crashing", () => {

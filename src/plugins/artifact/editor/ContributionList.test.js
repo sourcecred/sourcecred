@@ -12,8 +12,8 @@ import {AdapterSet} from "./adapterSet";
 import {ContributionList} from "./ContributionList";
 import {Graph} from "../../../core/graph";
 
-require("./testUtil").configureAphrodite();
-require("./testUtil").configureEnzyme();
+require("../../../app/testUtil").configureAphrodite();
+require("../../../app/testUtil").configureEnzyme();
 
 function createTestData(): * {
   type PayloadA = number;
