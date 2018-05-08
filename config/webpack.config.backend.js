@@ -1,3 +1,4 @@
+// @no-flow
 const webpack = require("webpack");
 const eslintFormatter = require("react-dev-utils/eslintFormatter");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
