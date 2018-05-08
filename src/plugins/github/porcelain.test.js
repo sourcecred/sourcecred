@@ -2,7 +2,7 @@
 
 import {parse} from "./parser";
 import exampleRepoData from "./demoData/example-github.json";
-import {Porcelain, Issue, PullRequest, Comment, Author} from "./api";
+import {Porcelain, Issue, PullRequest, Comment, Author} from "./porcelain";
 import {
   AUTHOR_NODE_TYPE,
   COMMENT_NODE_TYPE,
@@ -12,7 +12,7 @@ import {
   PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
 } from "./types";
 
-describe("GitHub porcelain API", () => {
+describe("GitHub porcelain", () => {
   const graph = parse(exampleRepoData);
   const porcelain = new Porcelain(graph);
   const repo = porcelain.repository("sourcecred", "example-github");
