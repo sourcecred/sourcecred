@@ -48,6 +48,8 @@ import {
   REFERENCES_EDGE_TYPE,
 } from "./types";
 
+import {PLUGIN_NAME} from "./pluginName";
+
 import {COMMIT_NODE_TYPE} from "../git/types";
 
 export type Entity =
@@ -64,6 +66,44 @@ function assertEntityType(e: Entity, t: NodeType) {
     throw new Error(
       `Expected entity at ${stringify(e.address())} to have type ${t}`
     );
+  }
+}
+
+export function asEntity(
+  g: Graph<NodePayload, EdgePayload>,
+  addr: Address
+): Entity {
+  const type: NodeType = (addr.type: any);
+  if (addr.pluginName !== PLUGIN_NAME) {
+    throw new Error(
+      `Tried to make GitHub porcelain, but got the wrong plugin name: ${stringify(
+        addr
+      )}`
+    );
+  }
+  switch (type) {
+    case "ISSUE":
+      return new Issue(g, addr);
+    case "PULL_REQUEST":
+      return new PullRequest(g, addr);
+    case "COMMENT":
+      return new Comment(g, addr);
+    case "AUTHOR":
+      return new Author(g, addr);
+    case "PULL_REQUEST_REVIEW":
+      return new PullRequestReview(g, addr);
+    case "PULL_REQUEST_REVIEW_COMMENT":
+      return new PullRequestReviewComment(g, addr);
+    case "REPOSITORY":
+      return new Repository(g, addr);
+    default:
+      // eslint-disable-next-line no-unused-expressions
+      (type: empty);
+      throw new Error(
+        `Tried to make GitHub porcelain, but got invalid type: ${stringify(
+          addr
+        )}`
+      );
   }
 }
 
@@ -190,45 +230,12 @@ class Post<
   }
 
   references(): Entity[] {
-    const result: Entity[] = [];
-    this.graph
+    return this.graph
       .neighborhood(this.nodeAddress, {
         edgeType: REFERENCES_EDGE_TYPE,
         direction: "OUT",
       })
-      .forEach(({neighbor}) => {
-        const type: NodeType = (neighbor.type: any);
-        switch (type) {
-          case "ISSUE":
-            result.push(new Issue(this.graph, neighbor));
-            break;
-          case "PULL_REQUEST":
-            result.push(new PullRequest(this.graph, neighbor));
-            break;
-          case "COMMENT":
-            result.push(new Comment(this.graph, neighbor));
-            break;
-          case "AUTHOR":
-            result.push(new Author(this.graph, neighbor));
-            break;
-          case "PULL_REQUEST_REVIEW":
-            result.push(new PullRequestReview(this.graph, neighbor));
-            break;
-          case "PULL_REQUEST_REVIEW_COMMENT":
-            result.push(new PullRequestReviewComment(this.graph, neighbor));
-            break;
-          case "REPOSITORY":
-            result.push(new Repository(this.graph, neighbor));
-            break;
-          default:
-            // eslint-disable-next-line no-unused-expressions
-            (type: empty);
-            throw new Error(
-              `Attempted to parse reference to unknown entity type ${type}`
-            );
-        }
-      });
-    return result;
+      .map(({neighbor}) => asEntity(this.graph, neighbor));
   }
 }
 

@@ -1,8 +1,16 @@
 // @flow
 
+import type {Address} from "../../core/address";
 import {parse} from "./parser";
 import exampleRepoData from "./demoData/example-github.json";
-import {Porcelain, Issue, PullRequest, Comment, Author} from "./porcelain";
+import {
+  asEntity,
+  Porcelain,
+  Issue,
+  PullRequest,
+  Comment,
+  Author,
+} from "./porcelain";
 import {
   AUTHOR_NODE_TYPE,
   COMMENT_NODE_TYPE,
@@ -11,6 +19,8 @@ import {
   PULL_REQUEST_REVIEW_NODE_TYPE,
   PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
 } from "./types";
+
+import {PLUGIN_NAME} from "./pluginName";
 
 describe("GitHub porcelain", () => {
   const graph = parse(exampleRepoData);
@@ -23,6 +33,26 @@ describe("GitHub porcelain", () => {
     }
     return result;
   }
+  describe("asEntity", () => {
+    // Note: In the "wrappers" block, we test that the asEntity method works
+    // for each wrapper type. Here, we just test that it fails as expected.
+    it("errors when given an address with the wrong plugin name", () => {
+      const addr: Address = {
+        pluginName: "the magnificent foo plugin",
+        id: "who are you to ask an id of the magnificent foo plugin?",
+        type: "ISSUE",
+      };
+      expect(() => asEntity(graph, addr)).toThrow("wrong plugin name");
+    });
+    it("errors when given an address with a bad node type", () => {
+      const addr: Address = {
+        pluginName: PLUGIN_NAME,
+        id: "if you keep asking for my id you will make me angry",
+        type: "the foo plugin's magnificence extends to many plugins",
+      };
+      expect(() => asEntity(graph, addr)).toThrow("invalid type");
+    });
+  });
   describe("has repository finding", () => {
     it("which works for an existing repository", () => {
       expect(porcelain.repository("sourcecred", "example-github")).toEqual(
@@ -40,6 +70,7 @@ describe("GitHub porcelain", () => {
       expect(repo.url()).toBe("https://github.com/sourcecred/example-github");
       expect(repo.owner()).toBe("sourcecred");
       expect(repo.name()).toBe("example-github");
+      expect(repo).toEqual(asEntity(graph, repo.address()));
     });
     it("Issues", () => {
       const issue = issueOrPRByNumber(1);
@@ -53,6 +84,7 @@ describe("GitHub porcelain", () => {
       expect(issue.node()).toMatchSnapshot();
       expect(issue.address()).toEqual(issue.node().address);
       expect(issue.authors().map((x) => x.login())).toEqual(["decentralion"]);
+      expect(issue).toEqual(asEntity(graph, issue.address()));
     });
     describe("PullRequests", () => {
       it("Merged", () => {
@@ -69,6 +101,7 @@ describe("GitHub porcelain", () => {
         expect(pullRequest.mergeCommitHash()).toEqual(
           "0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
         );
+        expect(pullRequest).toEqual(asEntity(graph, pullRequest.address()));
       });
       it("Unmerged", () => {
         const pullRequest = PullRequest.from(issueOrPRByNumber(9));
@@ -82,6 +115,7 @@ describe("GitHub porcelain", () => {
       expect(reviews).toHaveLength(2);
       expect(reviews[0].state()).toBe("CHANGES_REQUESTED");
       expect(reviews[1].state()).toBe("APPROVED");
+      expect(reviews[0]).toEqual(asEntity(graph, reviews[0].address()));
     });
 
     it("Pull Request Review Comments", () => {
@@ -96,6 +130,7 @@ describe("GitHub porcelain", () => {
       );
       expect(comment.body()).toBe("seems a bit capricious");
       expect(comment.authors().map((a) => a.login())).toEqual(["wchargin"]);
+      expect(comment).toEqual(asEntity(graph, comment.address()));
     });
 
     it("Comments", () => {
@@ -111,6 +146,7 @@ describe("GitHub porcelain", () => {
       expect(comment.node()).toMatchSnapshot();
       expect(comment.address()).toEqual(comment.node().address);
       expect(comment.authors().map((x) => x.login())).toEqual(["decentralion"]);
+      expect(comment).toEqual(asEntity(graph, comment.address()));
     });
 
     it("Authors", () => {
@@ -127,6 +163,7 @@ describe("GitHub porcelain", () => {
       expect(decentralion.subtype()).toBe("USER");
       expect(decentralion.node()).toMatchSnapshot();
       expect(decentralion.address()).toEqual(decentralion.node().address);
+      expect(decentralion).toEqual(asEntity(graph, decentralion.address()));
     });
   });
 
