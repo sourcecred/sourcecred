@@ -2,11 +2,10 @@
 
 import {Command} from "@oclif/command";
 import chalk from "chalk";
-import child_process from "child_process";
-import express from "express";
+import fs from "fs";
 import {choosePort} from "react-dev-utils/WebpackDevServerUtils";
-import tmp from "tmp";
 
+import apiApp from "../../app/apiApp";
 import {sourcecredDirectoryFlag} from "../common";
 
 // Makes the script crash on unhandled rejections instead of silently
@@ -35,13 +34,10 @@ export default class StartCommand extends Command {
 }
 
 async function startServer(sourcecredDirectory: string) {
-  let server, webpack;
+  let server;
   function cleanup() {
     if (server && server.listening) {
       server.close();
-    }
-    if (webpack) {
-      webpack.kill();
     }
   }
 
@@ -59,10 +55,13 @@ async function startServer(sourcecredDirectory: string) {
     });
   });
 
-  const webpackWorkdir = tmp.dirSync({unsafeCleanup: true}).name;
+  const staticFiles = "./build/";
+  if (!fs.existsSync(staticFiles)) {
+    console.error("Build output not found. Did you run `yarn build`?");
+  }
 
   console.log(chalk.bold("Starting Express..."));
-  const expressApp = createExpressApp(webpackWorkdir, sourcecredDirectory);
+  const expressApp = apiApp(sourcecredDirectory, staticFiles);
   server = await new Promise(async (resolve, _unused_reject) => {
     const port = await choosePort(HOST, DEFAULT_PORT);
     let server = expressApp.listen(port, () => {
@@ -74,44 +73,7 @@ async function startServer(sourcecredDirectory: string) {
     cleanup();
   });
   console.log(
-    chalk.green(`Server listening on port ${server.address().port}. `) +
-      `You might want to wait for Webpack to say ${chalk.bold("[built]")}.`
+    chalk.green(`Server listening on port ${server.address().port}.`)
   );
   console.log();
-
-  console.log(chalk.bold("Starting Webpack..."));
-  webpack = startWebpack(webpackWorkdir);
-  webpack.on("exit", (code, signal) => {
-    console.log(
-      `${chalk.bold("Webpack exited")} with ${code} (signal: ${signal})`
-    );
-    cleanup();
-  });
-}
-
-function createExpressApp(webpackWorkdir, sourcecredDirectory) {
-  const app = express();
-  app.use(express.static(webpackWorkdir));
-  app.use("/__data__", express.static(sourcecredDirectory));
-  return app;
-}
-
-function startWebpack(workdir: string) {
-  const webpack = child_process.spawn(
-    "yarn",
-    [
-      "--silent",
-      "webpack",
-      "--config",
-      "./config/webpack.config.dev.js",
-      "--output-path",
-      workdir,
-      "--watch",
-    ],
-    {
-      env: {...process.env, NODE_ENV: "development"},
-      stdio: "inherit",
-    }
-  );
-  return webpack;
 }
