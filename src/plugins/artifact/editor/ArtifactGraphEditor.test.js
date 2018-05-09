@@ -7,8 +7,8 @@ import {Graph} from "../../../core/graph";
 import {ArtifactGraphEditor} from "./ArtifactGraphEditor";
 import {artifactAddress} from "../artifactPlugin";
 
-require("./testUtil").configureAphrodite();
-require("./testUtil").configureEnzyme();
+require("../../../app/testUtil").configureAphrodite();
+require("../../../app/testUtil").configureEnzyme();
 
 describe("ArtifactGraphEditor", () => {
   function createComponent(onChange) {

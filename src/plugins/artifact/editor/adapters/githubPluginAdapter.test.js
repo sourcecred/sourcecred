@@ -9,7 +9,7 @@ import {parse} from "../../../github/parser";
 import exampleRepoData from "../../../github/demoData/example-github.json";
 import adapter from "./githubPluginAdapter";
 
-require("../testUtil").configureEnzyme();
+require("../../../../app/testUtil").configureEnzyme();
 
 describe("githubPluginAdapter", () => {
   it("operates on the example repo", () => {
