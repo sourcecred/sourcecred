@@ -126,7 +126,7 @@ export class PagerankTable extends React.Component<Props, State> {
         return y - x;
       });
     return (
-      <table>
+      <table style={{borderCollapse: "collapse"}}>
         <thead>
           <tr>
             <th>Node</th>
@@ -169,7 +169,10 @@ class RecursiveTable extends React.Component<RTProps, RTState> {
     const {expanded} = this.state;
     const score = pagerankResult.get(address).probability;
     return [
-      <tr key={JSON.stringify(address)}>
+      <tr
+        key={JSON.stringify(address)}
+        style={{backgroundColor: `rgba(255,0,0,${1 - 0.9 ** depth})`}}
+      >
         <td>
           <button
             style={{marginRight: 5, marginLeft: 15 * depth}}
