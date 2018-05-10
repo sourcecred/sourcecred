@@ -1,9 +1,12 @@
 // @flow
 
+import stringify from "json-stable-stringify";
 import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
+import type {PagerankResult} from "./basicPagerank";
 import {Graph} from "../../core/graph";
+import basicPagerank from "./basicPagerank";
 
 type Props = {};
 type State = {
@@ -62,6 +65,19 @@ export default class App extends React.Component<Props, State> {
           ) : (
             <p>Graph not loaded.</p>
           )}
+          <button
+            disabled={graph == null}
+            onClick={() => {
+              setTimeout(() => {
+                if (graph != null) {
+                  const pagerankResult = basicPagerank(graph);
+                  this.analyzePagerankResult(pagerankResult);
+                }
+              }, 0);
+            }}
+          >
+            Run basic PageRank (results in console)
+          </button>
         </div>
       </div>
     );
@@ -87,6 +103,34 @@ export default class App extends React.Component<Props, State> {
       .catch((e) => {
         console.error("Error while fetching:", e);
       });
+  }
+
+  analyzePagerankResult(pagerankResult: PagerankResult) {
+    const addressKey = ({pluginName, type}) => stringify({pluginName, type});
+    const addressesByKey = {};
+    pagerankResult.getAll().forEach(({address}) => {
+      if (addressesByKey[addressKey(address)] === undefined) {
+        addressesByKey[addressKey(address)] = [];
+      }
+      addressesByKey[addressKey(address)].push(address);
+    });
+    Object.keys(addressesByKey).forEach((key) => {
+      addressesByKey[key] = addressesByKey[key]
+        .slice()
+        .sort((x, y) => {
+          const px = pagerankResult.get(x).probability;
+          const py = pagerankResult.get(y).probability;
+          return px - py;
+        })
+        .reverse();
+      const {pluginName, type} = JSON.parse(key);
+      console.log(`%c${type} (${pluginName})`, "font-weight: bold");
+      addressesByKey[key].slice(0, 5).forEach((address) => {
+        const score = pagerankResult.get(address).probability;
+        const name = address.id;
+        console.log(`  - [${score.toString()}] ${name}`);
+      });
+    });
   }
 }
 
