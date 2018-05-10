@@ -150,7 +150,7 @@ describe("GitHub porcelain", () => {
     });
 
     it("Authors", () => {
-      const authors = repo.authors();
+      const authors = porcelain.authors();
       // So we don't need to manually update the test if a new person posts
       expect(authors.length).toMatchSnapshot();
 
