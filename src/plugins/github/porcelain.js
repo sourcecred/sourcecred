@@ -133,6 +133,12 @@ export class Porcelain {
     }
     return repo[0];
   }
+
+  authors(): Author[] {
+    return this.graph
+      .nodes({type: AUTHOR_NODE_TYPE})
+      .map((n) => new Author(this.graph, n.address));
+  }
 }
 
 class GithubEntity<T: NodePayload> {
@@ -199,12 +205,6 @@ export class Repository extends GithubEntity<RepositoryNodePayload> {
     return this.graph
       .nodes({type: PULL_REQUEST_NODE_TYPE})
       .map((n) => new PullRequest(this.graph, n.address));
-  }
-
-  authors(): Author[] {
-    return this.graph
-      .nodes({type: AUTHOR_NODE_TYPE})
-      .map((n) => new Author(this.graph, n.address));
   }
 }
 
