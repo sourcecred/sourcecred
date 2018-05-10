@@ -4,6 +4,7 @@ import React from "react";
 import stringify from "json-stable-stringify";
 
 import {Graph} from "../../core/graph";
+import type {Address} from "../../core/address";
 import {PLUGIN_NAME as GITHUB_PLUGIN_NAME} from "../../plugins/github/pluginName";
 import {GIT_PLUGIN_NAME} from "../../plugins/git/types";
 import {nodeDescription as githubNodeDescription} from "../../plugins/github/render";
@@ -134,18 +135,37 @@ export class PagerankTable extends React.Component<Props, State> {
           </tr>
         </thead>
         <tbody>
-          {nodesByScore.map((node) => {
-            const score = pagerankResult.get(node.address).probability;
-            return (
-              <tr key={JSON.stringify(node.address)}>
-                <td>{(score * 100).toPrecision(3)}</td>
-                <td>{Math.log(score).toPrecision(3)}</td>
-                <td>{nodeDescription(graph, node.address)}</td>
-              </tr>
-            );
-          })}
+          {nodesByScore.map((node) => (
+            <RecursiveTable
+              address={node.address}
+              graph={graph}
+              pagerankResult={pagerankResult}
+              key={stringify(node.address)}
+            />
+          ))}
         </tbody>
       </table>
+    );
+  }
+}
+
+type RTState = {};
+type RTProps = {|
+  +address: Address,
+  +graph: Graph<any, any>,
+  +pagerankResult: PagerankResult,
+|};
+
+class RecursiveTable extends React.Component<RTProps, RTState> {
+  render() {
+    const {address, graph, pagerankResult} = this.props;
+    const score = pagerankResult.get(address).probability;
+    return (
+      <tr key={JSON.stringify(address)}>
+        <td>{(score * 100).toPrecision(3)}</td>
+        <td>{Math.log(score).toPrecision(3)}</td>
+        <td>{nodeDescription(graph, address)}</td>
+      </tr>
     );
   }
 }
