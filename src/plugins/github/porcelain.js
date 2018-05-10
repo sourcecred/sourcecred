@@ -162,6 +162,10 @@ class GithubEntity<T: NodePayload> {
 }
 
 export class Repository extends GithubEntity<RepositoryNodePayload> {
+  static from(e: Entity): Repository {
+    assertEntityType(e, REPOSITORY_NODE_TYPE);
+    return (e: any);
+  }
   // TODO: Now that the Repository is a node in the graph, re-write methods
   // that find issues and PRs to find neighbors of the repository rather than
   // any matching nodes in the graph. Then, behavior will be correct in the

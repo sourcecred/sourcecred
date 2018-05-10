@@ -6,6 +6,7 @@ import exampleRepoData from "./demoData/example-github.json";
 import {
   asEntity,
   Porcelain,
+  Repository,
   Issue,
   PullRequest,
   Comment,
@@ -169,6 +170,7 @@ describe("GitHub porcelain", () => {
 
   describe("has type coercion that", () => {
     it("allows refining types when correct", () => {
+      const _unused_repo: Repository = Repository.from(repo);
       const _unused_issue: Issue = Issue.from(issueOrPRByNumber(1));
       const _unused_pr: PullRequest = PullRequest.from(issueOrPRByNumber(3));
       const _unused_author: Author = Author.from(
@@ -179,6 +181,9 @@ describe("GitHub porcelain", () => {
       );
     });
     it("throws an error on bad type refinement", () => {
+      expect(() => Repository.from(issueOrPRByNumber(1))).toThrowError(
+        "to have type REPOSITORY"
+      );
       expect(() => PullRequest.from(issueOrPRByNumber(1))).toThrowError(
         "to have type PULL_REQUEST"
       );
