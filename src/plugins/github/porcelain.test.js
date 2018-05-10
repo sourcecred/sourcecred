@@ -3,12 +3,15 @@
 import type {Address} from "../../core/address";
 import {parse} from "./parser";
 import exampleRepoData from "./demoData/example-github.json";
+import type {Entity} from "./porcelain";
 import {
   asEntity,
   Porcelain,
   Repository,
   Issue,
   PullRequest,
+  PullRequestReview,
+  PullRequestReviewComment,
   Comment,
   Author,
 } from "./porcelain";
@@ -27,6 +30,21 @@ describe("GitHub porcelain", () => {
   const graph = parse(exampleRepoData);
   const porcelain = new Porcelain(graph);
   const repo = porcelain.repository("sourcecred", "example-github");
+
+  function expectPropertiesToMatchSnapshot<T: Entity>(
+    entities: $ReadOnlyArray<T>,
+    extractor: (T) => mixed
+  ) {
+    const urlToProperty = {};
+    entities.forEach((e) => {
+      if (e.url() in urlToProperty) {
+        throw new Error(`Duplicate url: ${e.url()}`);
+      }
+      urlToProperty[e.url()] = extractor(e);
+    });
+    expect(urlToProperty).toMatchSnapshot();
+  }
+
   function issueOrPRByNumber(n: number): Issue | PullRequest {
     const result = repo.issueOrPRByNumber(n);
     if (result == null) {
@@ -34,9 +52,159 @@ describe("GitHub porcelain", () => {
     }
     return result;
   }
+
+  const issue = issueOrPRByNumber(2);
+  const comment = issue.comments()[0];
+  const pullRequest = PullRequest.from(issueOrPRByNumber(5));
+  const pullRequestReview = pullRequest.reviews()[0];
+  const pullRequestReviewComment = pullRequestReview.comments()[0];
+  const author = issue.authors()[0];
+  const allWrappers = [
+    issue,
+    pullRequest,
+    comment,
+    pullRequestReview,
+    pullRequestReviewComment,
+    author,
+  ];
+
+  it("all wrappers provide a type() method", () => {
+    expectPropertiesToMatchSnapshot(allWrappers, (e) => e.type());
+  });
+
+  it("all wrappers provide a url() method", () => {
+    expectPropertiesToMatchSnapshot(allWrappers, (e) => e.url());
+  });
+
+  it("all wrappers provide an address() method", () => {
+    allWrappers.forEach((w) => {
+      const addr = w.address();
+      const url = w.url();
+      const type = w.type();
+      expect(addr.id).toBe(url);
+      expect(addr.type).toBe(type);
+      expect(addr.pluginName).toBe(PLUGIN_NAME);
+    });
+  });
+
+  it("all wrappers provide a node() method", () => {
+    allWrappers.forEach((w) => {
+      const node = w.node();
+      const addr = w.address();
+      expect(node.address).toEqual(addr);
+    });
+  });
+
+  describe("type verifiers", () => {
+    it("are provided by all wrappers", () => {
+      // Check each one individually to verify the flowtypes
+      const _unused_repo: Repository = Repository.from(repo);
+      const _unused_issue: Issue = Issue.from(issue);
+      const _unused_pullRequest: PullRequest = PullRequest.from(pullRequest);
+      const _unused_comment: Comment = Comment.from(comment);
+      const _unused_pullRequestReview: PullRequestReview = PullRequestReview.from(
+        pullRequestReview
+      );
+      const _unused_pullRequestReviewComment: PullRequestReviewComment = PullRequestReviewComment.from(
+        pullRequestReviewComment
+      );
+      const _unused_author: Author = Author.from(author);
+      // Check them programatically so that if we add another wrapper, we can't forget to update.
+      allWrappers.forEach((e) => {
+        expect(e.constructor.from(e)).toEqual(e);
+      });
+    });
+    it("and errors are thrown when used incorrectly", () => {
+      expect(() => Repository.from(issue)).toThrowError("to have type");
+      expect(() => Issue.from(repo)).toThrowError("to have type");
+      expect(() => Comment.from(repo)).toThrowError("to have type");
+      expect(() => PullRequest.from(repo)).toThrowError("to have type");
+      expect(() => PullRequestReview.from(repo)).toThrowError("to have type");
+      expect(() => PullRequestReviewComment.from(repo)).toThrowError(
+        "to have type"
+      );
+      expect(() => Author.from(repo)).toThrowError("to have type");
+    });
+  });
+
+  describe("posts", () => {
+    const allPosts = [
+      issue,
+      pullRequest,
+      pullRequestReview,
+      pullRequestReviewComment,
+      comment,
+    ];
+    it("have parents", () => {
+      expectPropertiesToMatchSnapshot(allPosts, (e) => e.parent().url());
+    });
+    it("have bodies", () => {
+      expectPropertiesToMatchSnapshot(allPosts, (e) => e.body());
+    });
+    it("have authors", () => {
+      expectPropertiesToMatchSnapshot(allPosts, (e) =>
+        e.authors().map((a) => a.login())
+      );
+    });
+    it("have references", () => {
+      expectPropertiesToMatchSnapshot(allPosts, (e) =>
+        e.references().map((r) => r.url())
+      );
+    });
+  });
+
+  describe("issues and pull requests", () => {
+    const issuesAndPRs = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) =>
+      issueOrPRByNumber(n)
+    );
+    it("have numbers", () => {
+      expectPropertiesToMatchSnapshot(issuesAndPRs, (e) => e.number());
+    });
+    it("have titles", () => {
+      expectPropertiesToMatchSnapshot(issuesAndPRs, (e) => e.title());
+    });
+    it("have comments", () => {
+      expectPropertiesToMatchSnapshot(issuesAndPRs, (e) =>
+        e.comments().map((c) => c.url())
+      );
+    });
+  });
+
+  describe("pull requests", () => {
+    const prs = [
+      PullRequest.from(issueOrPRByNumber(3)),
+      PullRequest.from(issueOrPRByNumber(5)),
+      PullRequest.from(issueOrPRByNumber(9)),
+    ];
+    it("have mergeCommitHashes", () => {
+      expectPropertiesToMatchSnapshot(prs, (e) => e.mergeCommitHash());
+    });
+
+    it("have reviews", () => {
+      expectPropertiesToMatchSnapshot(prs, (e) =>
+        e.reviews().map((r) => r.url())
+      );
+    });
+  });
+
+  describe("pull request reviews", () => {
+    const reviews = pullRequest.reviews();
+    it("have review comments", () => {
+      expectPropertiesToMatchSnapshot(reviews, (e) =>
+        e.comments().map((e) => e.url())
+      );
+    });
+    it("have states", () => {
+      expectPropertiesToMatchSnapshot(reviews, (e) => e.state());
+    });
+  });
+
   describe("asEntity", () => {
-    // Note: In the "wrappers" block, we test that the asEntity method works
-    // for each wrapper type. Here, we just test that it fails as expected.
+    it("works for each wrapper", () => {
+      allWrappers.forEach((w) => {
+        expect(asEntity(w.graph, w.address())).toEqual(w);
+      });
+    });
     it("errors when given an address with the wrong plugin name", () => {
       const addr: Address = {
         pluginName: "the magnificent foo plugin",
@@ -54,6 +222,7 @@ describe("GitHub porcelain", () => {
       expect(() => asEntity(graph, addr)).toThrow("invalid type");
     });
   });
+
   describe("has repository finding", () => {
     it("which works for an existing repository", () => {
       expect(porcelain.repository("sourcecred", "example-github")).toEqual(
@@ -66,145 +235,6 @@ describe("GitHub porcelain", () => {
     });
   });
 
-  describe("has wrappers for", () => {
-    it("Repositories", () => {
-      expect(repo.url()).toBe("https://github.com/sourcecred/example-github");
-      expect(repo.owner()).toBe("sourcecred");
-      expect(repo.name()).toBe("example-github");
-      expect(repo).toEqual(asEntity(graph, repo.address()));
-    });
-
-    it("Issues", () => {
-      const issue = issueOrPRByNumber(1);
-      expect(issue.title()).toBe("An example issue.");
-      expect(issue.body()).toBe("This is just an example issue.");
-      expect(issue.number()).toBe(1);
-      expect(issue.type()).toBe(ISSUE_NODE_TYPE);
-      expect(issue.url()).toBe(
-        "https://github.com/sourcecred/example-github/issues/1"
-      );
-      expect(issue.node()).toMatchSnapshot();
-      expect(issue.address()).toEqual(issue.node().address);
-      expect(issue.authors().map((x) => x.login())).toEqual(["decentralion"]);
-      expect(issue).toEqual(asEntity(graph, issue.address()));
-      expect(issue.parent()).toEqual(repo);
-    });
-
-    describe("PullRequests", () => {
-      it("Merged", () => {
-        const pullRequest = PullRequest.from(issueOrPRByNumber(3));
-        expect(pullRequest.body()).toBe("Oh look, it's a pull request.");
-        expect(pullRequest.title()).toBe("Add README, merge via PR.");
-        expect(pullRequest.url()).toBe(
-          "https://github.com/sourcecred/example-github/pull/3"
-        );
-        expect(pullRequest.number()).toBe(3);
-        expect(pullRequest.type()).toBe(PULL_REQUEST_NODE_TYPE);
-        expect(pullRequest.node()).toMatchSnapshot();
-        expect(pullRequest.address()).toEqual(pullRequest.node().address);
-        expect(pullRequest.mergeCommitHash()).toEqual(
-          "0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
-        );
-        expect(pullRequest).toEqual(asEntity(graph, pullRequest.address()));
-        expect(pullRequest.parent()).toEqual(repo);
-      });
-      it("Unmerged", () => {
-        const pullRequest = PullRequest.from(issueOrPRByNumber(9));
-        expect(pullRequest.mergeCommitHash()).toEqual(null);
-      });
-    });
-
-    it("Pull Request Reviews", () => {
-      const pr = PullRequest.from(issueOrPRByNumber(5));
-      const reviews = pr.reviews();
-      expect(reviews).toHaveLength(2);
-      expect(reviews[0].state()).toBe("CHANGES_REQUESTED");
-      expect(reviews[1].state()).toBe("APPROVED");
-      expect(reviews[0]).toEqual(asEntity(graph, reviews[0].address()));
-      expect(reviews[0].parent()).toEqual(pr);
-    });
-
-    it("Pull Request Review Comments", () => {
-      const pr = PullRequest.from(issueOrPRByNumber(5));
-      const reviews = pr.reviews();
-      expect(reviews).toHaveLength(2);
-      const comments = reviews[0].comments();
-      expect(comments).toHaveLength(1);
-      const comment = comments[0];
-      expect(comment.parent()).toEqual(reviews[0]);
-      expect(comment.url()).toBe(
-        "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"
-      );
-      expect(comment.body()).toBe("seems a bit capricious");
-      expect(comment.authors().map((a) => a.login())).toEqual(["wchargin"]);
-      expect(comment).toEqual(asEntity(graph, comment.address()));
-    });
-
-    it("Comments", () => {
-      const issue = issueOrPRByNumber(6);
-      const comments = issue.comments();
-      expect(comments.length).toMatchSnapshot();
-      const comment = comments[0];
-      expect(comment.type()).toBe(COMMENT_NODE_TYPE);
-      expect(comment.body()).toBe("A wild COMMENT appeared!");
-      expect(comment.url()).toBe(
-        "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442"
-      );
-      expect(comment.node()).toMatchSnapshot();
-      expect(comment.address()).toEqual(comment.node().address);
-      expect(comment.authors().map((x) => x.login())).toEqual(["decentralion"]);
-      expect(comment).toEqual(asEntity(graph, comment.address()));
-      expect(comment.parent()).toEqual(issue);
-    });
-
-    it("Authors", () => {
-      const authors = porcelain.authors();
-      // So we don't need to manually update the test if a new person posts
-      expect(authors.length).toMatchSnapshot();
-
-      const decentralion = authors.find((x) => x.login() === "decentralion");
-      if (decentralion == null) {
-        throw new Error("Who let the lions out?");
-      }
-      expect(decentralion.url()).toBe("https://github.com/decentralion");
-      expect(decentralion.type()).toBe(AUTHOR_NODE_TYPE);
-      expect(decentralion.subtype()).toBe("USER");
-      expect(decentralion.node()).toMatchSnapshot();
-      expect(decentralion.address()).toEqual(decentralion.node().address);
-      expect(decentralion).toEqual(asEntity(graph, decentralion.address()));
-    });
-  });
-
-  describe("has type coercion that", () => {
-    it("allows refining types when correct", () => {
-      const _unused_repo: Repository = Repository.from(repo);
-      const _unused_issue: Issue = Issue.from(issueOrPRByNumber(1));
-      const _unused_pr: PullRequest = PullRequest.from(issueOrPRByNumber(3));
-      const _unused_author: Author = Author.from(
-        issueOrPRByNumber(3).authors()[0]
-      );
-      const _unused_comment: Comment = Comment.from(
-        issueOrPRByNumber(2).comments()[0]
-      );
-    });
-    it("throws an error on bad type refinement", () => {
-      expect(() => Repository.from(issueOrPRByNumber(1))).toThrowError(
-        "to have type REPOSITORY"
-      );
-      expect(() => PullRequest.from(issueOrPRByNumber(1))).toThrowError(
-        "to have type PULL_REQUEST"
-      );
-      expect(() => Issue.from(issueOrPRByNumber(3))).toThrowError(
-        "to have type ISSUE"
-      );
-      expect(() =>
-        Comment.from(issueOrPRByNumber(3).authors()[0])
-      ).toThrowError("to have type COMMENT");
-      expect(() =>
-        Author.from(issueOrPRByNumber(2).comments()[0])
-      ).toThrowError("to have type AUTHOR");
-    });
-  });
   describe("References", () => {
     it("via #-number", () => {
       const srcIssue = issueOrPRByNumber(2);
