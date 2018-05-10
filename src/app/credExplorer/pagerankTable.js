@@ -129,9 +129,9 @@ export class PagerankTable extends React.Component<Props, State> {
       <table>
         <thead>
           <tr>
+            <th>Node</th>
             <th>Score</th>
             <th>LogScore</th>
-            <th>Node</th>
           </tr>
         </thead>
         <tbody>
@@ -162,9 +162,9 @@ class RecursiveTable extends React.Component<RTProps, RTState> {
     const score = pagerankResult.get(address).probability;
     return (
       <tr key={JSON.stringify(address)}>
+        <td>{nodeDescription(graph, address)}</td>
         <td>{(score * 100).toPrecision(3)}</td>
         <td>{Math.log(score).toPrecision(3)}</td>
-        <td>{nodeDescription(graph, address)}</td>
       </tr>
     );
   }
