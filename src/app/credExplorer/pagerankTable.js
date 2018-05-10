@@ -199,6 +199,12 @@ class RecursiveTable extends React.Component<RTProps, RTState> {
     });
     return neighborMap
       .getAll()
+      .sort((a, b) => {
+        const x = pagerankResult.get(a.address).probability;
+        const y = pagerankResult.get(b.address).probability;
+        return x - y;
+      })
+      .reverse()
       .map(({address}) => (
         <RecursiveTable
           depth={depth + 1}
