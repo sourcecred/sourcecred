@@ -123,9 +123,8 @@ export class PagerankTable extends React.Component<Props, State> {
       .sort((a, b) => {
         const x = pagerankResult.get(a.address).probability;
         const y = pagerankResult.get(b.address).probability;
-        return x - y;
-      })
-      .reverse();
+        return y - x;
+      });
     return (
       <table>
         <thead>
@@ -202,9 +201,8 @@ class RecursiveTable extends React.Component<RTProps, RTState> {
       .sort((a, b) => {
         const x = pagerankResult.get(a.address).probability;
         const y = pagerankResult.get(b.address).probability;
-        return x - y;
+        return y - x;
       })
-      .reverse()
       .map(({address}) => (
         <RecursiveTable
           depth={depth + 1}
