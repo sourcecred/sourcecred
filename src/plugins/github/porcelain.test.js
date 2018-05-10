@@ -24,6 +24,8 @@ import {
   PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
 } from "./types";
 
+import {nodeDescription} from "./render";
+
 import {PLUGIN_NAME} from "./pluginName";
 
 describe("GitHub porcelain", () => {
@@ -330,5 +332,15 @@ describe("GitHub porcelain", () => {
       const referenced = Author.from(references[0]);
       expect(referenced.login()).toBe("wchargin");
     });
+  });
+
+  it("nodes have nice descriptions", () => {
+    // This test really should be in its own file, but for expedience I am
+    // putting it here.  TODO: Refactor general purpose testutils out of this
+    // file, and move this test to render.test.js (assuming we don't move the
+    // description method into the porcelain anyway...)
+    expectPropertiesToMatchSnapshot(allWrappers, (e) =>
+      nodeDescription(e.graph, e.address())
+    );
   });
 });
