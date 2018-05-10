@@ -73,6 +73,7 @@ describe("GitHub porcelain", () => {
       expect(repo.name()).toBe("example-github");
       expect(repo).toEqual(asEntity(graph, repo.address()));
     });
+
     it("Issues", () => {
       const issue = issueOrPRByNumber(1);
       expect(issue.title()).toBe("An example issue.");
@@ -86,7 +87,9 @@ describe("GitHub porcelain", () => {
       expect(issue.address()).toEqual(issue.node().address);
       expect(issue.authors().map((x) => x.login())).toEqual(["decentralion"]);
       expect(issue).toEqual(asEntity(graph, issue.address()));
+      expect(issue.parent()).toEqual(repo);
     });
+
     describe("PullRequests", () => {
       it("Merged", () => {
         const pullRequest = PullRequest.from(issueOrPRByNumber(3));
@@ -103,6 +106,7 @@ describe("GitHub porcelain", () => {
           "0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
         );
         expect(pullRequest).toEqual(asEntity(graph, pullRequest.address()));
+        expect(pullRequest.parent()).toEqual(repo);
       });
       it("Unmerged", () => {
         const pullRequest = PullRequest.from(issueOrPRByNumber(9));
@@ -117,6 +121,7 @@ describe("GitHub porcelain", () => {
       expect(reviews[0].state()).toBe("CHANGES_REQUESTED");
       expect(reviews[1].state()).toBe("APPROVED");
       expect(reviews[0]).toEqual(asEntity(graph, reviews[0].address()));
+      expect(reviews[0].parent()).toEqual(pr);
     });
 
     it("Pull Request Review Comments", () => {
@@ -126,6 +131,7 @@ describe("GitHub porcelain", () => {
       const comments = reviews[0].comments();
       expect(comments).toHaveLength(1);
       const comment = comments[0];
+      expect(comment.parent()).toEqual(reviews[0]);
       expect(comment.url()).toBe(
         "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"
       );
@@ -148,6 +154,7 @@ describe("GitHub porcelain", () => {
       expect(comment.address()).toEqual(comment.node().address);
       expect(comment.authors().map((x) => x.login())).toEqual(["decentralion"]);
       expect(comment).toEqual(asEntity(graph, comment.address()));
+      expect(comment.parent()).toEqual(issue);
     });
 
     it("Authors", () => {

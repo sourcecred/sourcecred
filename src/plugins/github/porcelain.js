@@ -266,6 +266,7 @@ export class Author extends GithubEntity<AuthorNodePayload> {
     assertEntityType(e, AUTHOR_NODE_TYPE);
     return (e: any);
   }
+
   login(): string {
     return this.node().payload.login;
   }
@@ -280,12 +281,15 @@ export class PullRequest extends Commentable<PullRequestNodePayload> {
     assertEntityType(e, PULL_REQUEST_NODE_TYPE);
     return (e: any);
   }
+
   number(): number {
     return this.node().payload.number;
   }
+
   title(): string {
     return this.node().payload.title;
   }
+
   reviews(): PullRequestReview[] {
     return this.graph
       .neighborhood(this.nodeAddress, {
@@ -294,6 +298,11 @@ export class PullRequest extends Commentable<PullRequestNodePayload> {
       })
       .map(({neighbor}) => new PullRequestReview(this.graph, neighbor));
   }
+
+  parent(): Repository {
+    return (_parent(this): any);
+  }
+
   mergeCommitHash(): ?string {
     const mergeEdge = this.graph
       .neighborhood(this.nodeAddress, {
@@ -320,11 +329,17 @@ export class Issue extends Commentable<IssueNodePayload> {
     assertEntityType(e, ISSUE_NODE_TYPE);
     return (e: any);
   }
+
   number(): number {
     return this.node().payload.number;
   }
+
   title(): string {
     return this.node().payload.title;
+  }
+
+  parent(): Repository {
+    return (_parent(this): any);
   }
 }
 
@@ -333,6 +348,10 @@ export class Comment extends Post<CommentNodePayload> {
     assertEntityType(e, COMMENT_NODE_TYPE);
     return (e: any);
   }
+
+  parent(): Issue | PullRequest {
+    return (_parent(this): any);
+  }
 }
 
 export class PullRequestReview extends Post<PullRequestReviewNodePayload> {
@@ -340,8 +359,13 @@ export class PullRequestReview extends Post<PullRequestReviewNodePayload> {
     assertEntityType(e, PULL_REQUEST_REVIEW_NODE_TYPE);
     return (e: any);
   }
+
   state(): PullRequestReviewState {
     return this.node().payload.state;
+  }
+
+  parent(): PullRequest {
+    return (_parent(this): any);
   }
 
   comments(): PullRequestReviewComment[] {
@@ -361,4 +385,18 @@ export class PullRequestReviewComment extends Post<
     assertEntityType(e, PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE);
     return (e: any);
   }
+  parent(): PullRequestReview {
+    return (_parent(this): any);
+  }
+}
+
+function _parent(x: Entity): Entity {
+  const parents = x.graph.neighborhood(x.address(), {
+    edgeType: "CONTAINS",
+    direction: "IN",
+  });
+  if (parents.length !== 1) {
+    throw new Error(`Bad parent relationships for ${stringify(x.address())}`);
+  }
+  return asEntity(x.graph, parents[0].neighbor);
 }
