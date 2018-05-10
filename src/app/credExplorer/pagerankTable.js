@@ -5,6 +5,7 @@ import stringify from "json-stable-stringify";
 
 import {Graph} from "../../core/graph";
 import type {Address} from "../../core/address";
+import {AddressMap} from "../../core/address";
 import {PLUGIN_NAME as GITHUB_PLUGIN_NAME} from "../../plugins/github/pluginName";
 import {GIT_PLUGIN_NAME} from "../../plugins/git/types";
 import {nodeDescription as githubNodeDescription} from "../../plugins/github/render";
@@ -137,6 +138,7 @@ export class PagerankTable extends React.Component<Props, State> {
         <tbody>
           {nodesByScore.map((node) => (
             <RecursiveTable
+              depth={0}
               address={node.address}
               graph={graph}
               pagerankResult={pagerankResult}
@@ -154,6 +156,7 @@ type RTProps = {|
   +address: Address,
   +graph: Graph<any, any>,
   +pagerankResult: PagerankResult,
+  +depth: number,
 |};
 
 class RecursiveTable extends React.Component<RTProps, RTState> {
@@ -163,14 +166,14 @@ class RecursiveTable extends React.Component<RTProps, RTState> {
   }
 
   render() {
-    const {address, graph, pagerankResult} = this.props;
+    const {address, graph, pagerankResult, depth} = this.props;
     const {expanded} = this.state;
     const score = pagerankResult.get(address).probability;
-    return (
+    return [
       <tr key={JSON.stringify(address)}>
         <td>
           <button
-            style={{marginRight: 5}}
+            style={{marginRight: 5, marginLeft: 15 * depth}}
             onClick={() => {
               this.setState(({expanded}) => ({
                 expanded: !expanded,
@@ -183,7 +186,27 @@ class RecursiveTable extends React.Component<RTProps, RTState> {
         </td>
         <td>{(score * 100).toPrecision(3)}</td>
         <td>{Math.log(score).toPrecision(3)}</td>
-      </tr>
-    );
+      </tr>,
+      expanded && this.renderChildren(),
+    ];
+  }
+
+  renderChildren() {
+    const {address, graph, pagerankResult, depth} = this.props;
+    const neighborMap = new AddressMap();
+    graph.neighborhood(address).forEach(({neighbor}) => {
+      neighborMap.add({address: neighbor});
+    });
+    return neighborMap
+      .getAll()
+      .map(({address}) => (
+        <RecursiveTable
+          depth={depth + 1}
+          address={address}
+          graph={graph}
+          pagerankResult={pagerankResult}
+          key={stringify(address)}
+        />
+      ));
   }
 }
