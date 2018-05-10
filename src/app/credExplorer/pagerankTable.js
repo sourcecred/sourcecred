@@ -16,7 +16,7 @@ type Props = {
 };
 
 type State = {
-  typeFilter: ?{|
+  topLevelFilter: ?{|
     +pluginName: string,
     +type: string,
   |},
@@ -39,7 +39,7 @@ function nodeDescription(graph, address) {
 export class PagerankTable extends React.Component<Props, State> {
   constructor() {
     super();
-    this.state = {typeFilter: null};
+    this.state = {topLevelFilter: null};
   }
 
   render() {
@@ -89,9 +89,9 @@ export class PagerankTable extends React.Component<Props, State> {
       <label>
         Filter by contribution type:{" "}
         <select
-          value={JSON.stringify(this.state.typeFilter)}
+          value={JSON.stringify(this.state.topLevelFilter)}
           onChange={(e) => {
-            this.setState({typeFilter: JSON.parse(e.target.value)});
+            this.setState({topLevelFilter: JSON.parse(e.target.value)});
           }}
         >
           <option value={JSON.stringify(null)}>Show all</option>
@@ -113,9 +113,9 @@ export class PagerankTable extends React.Component<Props, State> {
       .slice()
       .filter(
         (n) =>
-          this.state.typeFilter
-            ? n.address.pluginName === this.state.typeFilter.pluginName &&
-              n.address.type === this.state.typeFilter.type
+          this.state.topLevelFilter
+            ? n.address.pluginName === this.state.topLevelFilter.pluginName &&
+              n.address.type === this.state.topLevelFilter.type
             : true
       )
       .sort((a, b) => {
