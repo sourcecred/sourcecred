@@ -16,6 +16,19 @@ Object {
         "type": "ISSUE",
       },
     },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/1\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/1",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
   },
   "nodes": Object {
     "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHOR\\"}": Object {
@@ -136,6 +149,19 @@ Object {
         "id": "https://github.com/sourcecred/example-github/issues/6",
         "pluginName": "sourcecred/github-beta",
         "type": "ISSUE",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/6",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
       },
     },
   },
@@ -265,6 +291,19 @@ Object {
         "id": "https://github.com/sourcecred/example-github/pull/5",
         "pluginName": "sourcecred/github-beta",
         "type": "PULL_REQUEST",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/pull/5",
+        "pluginName": "sourcecred/github-beta",
+        "type": "PULL_REQUEST",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
       },
     },
     "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
@@ -420,6 +459,19 @@ Object {
         "id": "https://github.com/sourcecred/example-github/pull/3",
         "pluginName": "sourcecred/github-beta",
         "type": "PULL_REQUEST",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/pull/3",
+        "pluginName": "sourcecred/github-beta",
+        "type": "PULL_REQUEST",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
       },
     },
   },
@@ -862,6 +914,45 @@ Object {
         "type": "ISSUE",
       },
     },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/1\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/1",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/2\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/2",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/6",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
   },
   "nodes": Object {
     "{\\"id\\":\\"https://github.com/decentralion\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHOR\\"}": Object {
@@ -1215,6 +1306,19 @@ Object {
         "id": "https://github.com/sourcecred/example-github/issues/2",
         "pluginName": "sourcecred/github-beta",
         "type": "ISSUE",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/2\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/2",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
       },
     },
   },
@@ -2008,6 +2112,123 @@ Object {
         "id": "https://github.com/sourcecred/example-github/pull/9",
         "pluginName": "sourcecred/github-beta",
         "type": "PULL_REQUEST",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/1\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/1",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/2\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/2",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/4\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/4",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/6",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/7\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/7",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/8\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/issues/8",
+        "pluginName": "sourcecred/github-beta",
+        "type": "ISSUE",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/pull/3",
+        "pluginName": "sourcecred/github-beta",
+        "type": "PULL_REQUEST",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/pull/5",
+        "pluginName": "sourcecred/github-beta",
+        "type": "PULL_REQUEST",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
+      },
+    },
+    "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/9\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+      "dst": Object {
+        "id": "https://github.com/sourcecred/example-github/pull/9",
+        "pluginName": "sourcecred/github-beta",
+        "type": "PULL_REQUEST",
+      },
+      "payload": Object {},
+      "src": Object {
+        "id": "https://github.com/sourcecred/example-github",
+        "pluginName": "sourcecred/github-beta",
+        "type": "REPOSITORY",
       },
     },
     "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {

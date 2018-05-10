@@ -166,9 +166,14 @@ class GithubParser {
 
   addContainment(
     parentNode: Node<
-      IssueNodePayload | PullRequestNodePayload | PullRequestReviewNodePayload
+      | IssueNodePayload
+      | PullRequestNodePayload
+      | PullRequestReviewNodePayload
+      | RepositoryNodePayload
     >,
     childNode: Node<
+      | IssueNodePayload
+      | PullRequestNodePayload
       | CommentNodePayload
       | PullRequestReviewCommentNodePayload
       | PullRequestReviewNodePayload
@@ -187,7 +192,7 @@ class GithubParser {
     this.graph.addEdge(containsEdge);
   }
 
-  addIssue(issueJson: IssueJSON) {
+  addIssue(repoNode: Node<RepositoryNodePayload>, issueJson: IssueJSON) {
     const issuePayload: IssueNodePayload = {
       url: issueJson.url,
       number: issueJson.number,
@@ -201,11 +206,15 @@ class GithubParser {
     this.graph.addNode(issueNode);
 
     this.addAuthorship(issueNode, issueJson.author);
+    this.addContainment(repoNode, issueNode);
 
     issueJson.comments.nodes.forEach((c) => this.addComment(issueNode, c));
   }
 
-  addPullRequest(prJson: PullRequestJSON) {
+  addPullRequest(
+    repoNode: Node<RepositoryNodePayload>,
+    prJson: PullRequestJSON
+  ) {
     const pullRequestPayload: PullRequestNodePayload = {
       url: prJson.url,
       number: prJson.number,
@@ -219,6 +228,7 @@ class GithubParser {
     this.graph.addNode(pullRequestNode);
 
     this.addAuthorship(pullRequestNode, prJson.author);
+    this.addContainment(repoNode, pullRequestNode);
     prJson.comments.nodes.forEach((c) => this.addComment(pullRequestNode, c));
 
     prJson.reviews.nodes.forEach((r) =>
@@ -338,8 +348,12 @@ class GithubParser {
       payload: repositoryPayload,
     };
     this.graph.addNode(repositoryNode);
-    repositoryJSON.issues.nodes.forEach((i) => this.addIssue(i));
-    repositoryJSON.pullRequests.nodes.forEach((pr) => this.addPullRequest(pr));
+    repositoryJSON.issues.nodes.forEach((issue) =>
+      this.addIssue(repositoryNode, issue)
+    );
+    repositoryJSON.pullRequests.nodes.forEach((pr) =>
+      this.addPullRequest(repositoryNode, pr)
+    );
   }
 
   addData(dataJson: GithubResponseJSON) {
