@@ -172,22 +172,19 @@ export class Repository extends GithubEntity<RepositoryNodePayload> {
     assertEntityType(e, REPOSITORY_NODE_TYPE);
     return (e: any);
   }
-  // TODO: Now that the Repository is a node in the graph, re-write methods
-  // that find issues and PRs to find neighbors of the repository rather than
-  // any matching nodes in the graph. Then, behavior will be correct in the
-  // case where we have multiple repositories in the same graph.
+
   issueOrPRByNumber(number: number): ?(Issue | PullRequest) {
     let result: Issue | PullRequest;
-    this.graph.nodes({type: ISSUE_NODE_TYPE}).forEach((n) => {
-      if (n.payload.number === number) {
-        result = new Issue(this.graph, n.address);
-      }
-    });
-    this.graph.nodes({type: PULL_REQUEST_NODE_TYPE}).forEach((n) => {
-      if (n.payload.number === number) {
-        result = new PullRequest(this.graph, n.address);
-      }
-    });
+    this.graph
+      .neighborhood(this.nodeAddress, {
+        edgeType: CONTAINS_EDGE_TYPE,
+      })
+      .forEach(({neighbor}) => {
+        const payload = this.graph.node(neighbor).payload;
+        if (payload.number === number) {
+          result = (asEntity(this.graph, neighbor): any);
+        }
+      });
     return result;
   }
 
@@ -201,14 +198,22 @@ export class Repository extends GithubEntity<RepositoryNodePayload> {
 
   issues(): Issue[] {
     return this.graph
-      .nodes({type: ISSUE_NODE_TYPE})
-      .map((n) => new Issue(this.graph, n.address));
+      .neighborhood(this.nodeAddress, {
+        direction: "OUT",
+        edgeType: CONTAINS_EDGE_TYPE,
+        nodeType: ISSUE_NODE_TYPE,
+      })
+      .map(({neighbor}) => new Issue(this.graph, neighbor));
   }
 
   pullRequests(): PullRequest[] {
     return this.graph
-      .nodes({type: PULL_REQUEST_NODE_TYPE})
-      .map((n) => new PullRequest(this.graph, n.address));
+      .neighborhood(this.nodeAddress, {
+        direction: "OUT",
+        edgeType: CONTAINS_EDGE_TYPE,
+        nodeType: PULL_REQUEST_NODE_TYPE,
+      })
+      .map(({neighbor}) => new PullRequest(this.graph, neighbor));
   }
 }
 
