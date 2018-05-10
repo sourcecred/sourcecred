@@ -4,9 +4,10 @@ import stringify from "json-stable-stringify";
 import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
-import type {PagerankResult} from "./basicPagerank";
 import {Graph} from "../../core/graph";
+import type {PagerankResult} from "./basicPagerank";
 import basicPagerank from "./basicPagerank";
+import LocalStore from "./LocalStore";
 
 type Props = {};
 type State = {
@@ -14,6 +15,9 @@ type State = {
   repoName: string,
   graph: ?Graph<mixed, mixed>,
 };
+
+const REPO_OWNER_KEY = "repoOwner";
+const REPO_NAME_KEY = "repoName";
 
 export default class App extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -23,6 +27,13 @@ export default class App extends React.Component<Props, State> {
       repoName: "",
       graph: null,
     };
+  }
+
+  componentDidMount() {
+    this.setState((state) => ({
+      repoOwner: LocalStore.get(REPO_OWNER_KEY, state.repoOwner),
+      repoName: LocalStore.get(REPO_NAME_KEY, state.repoName),
+    }));
   }
 
   render() {
@@ -40,7 +51,9 @@ export default class App extends React.Component<Props, State> {
               value={this.state.repoOwner}
               onChange={(e) => {
                 const value = e.target.value;
-                this.setState({repoOwner: value});
+                this.setState({repoOwner: value}, () => {
+                  LocalStore.set(REPO_OWNER_KEY, this.state.repoOwner);
+                });
               }}
             />
           </label>
@@ -51,7 +64,9 @@ export default class App extends React.Component<Props, State> {
               value={this.state.repoName}
               onChange={(e) => {
                 const value = e.target.value;
-                this.setState({repoName: value});
+                this.setState({repoName: value}, () => {
+                  LocalStore.set(REPO_NAME_KEY, this.state.repoName);
+                });
               }}
             />
           </label>
