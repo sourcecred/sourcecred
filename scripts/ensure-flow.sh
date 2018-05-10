@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 set -eu
-comm -13 -z \
-  <(git grep -z --name-only -e @flow -e @no-flow | sort -z) \
-  <(find src config scripts -name '*.js' -print0 | sort -z) \
-  | tr '\0' '\n' \
-  | diff -u /dev/null -
+git grep -Fz --files-without-match -e '@flow' -e '@no-flow' -- '*.js' \
+    | grep -zv '^flow-typed/' \
+    | tr '\0' '\n' \
+    | tee /dev/stderr \
+    | diff -q /dev/null - >/dev/null
