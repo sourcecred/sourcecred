@@ -149,7 +149,7 @@ export class PagerankTable extends React.Component<Props, State> {
   }
 }
 
-type RTState = {};
+type RTState = {expanded: boolean};
 type RTProps = {|
   +address: Address,
   +graph: Graph<any, any>,
@@ -157,12 +157,30 @@ type RTProps = {|
 |};
 
 class RecursiveTable extends React.Component<RTProps, RTState> {
+  constructor() {
+    super();
+    this.state = {expanded: false};
+  }
+
   render() {
     const {address, graph, pagerankResult} = this.props;
+    const {expanded} = this.state;
     const score = pagerankResult.get(address).probability;
     return (
       <tr key={JSON.stringify(address)}>
-        <td>{nodeDescription(graph, address)}</td>
+        <td>
+          <button
+            style={{marginRight: 5}}
+            onClick={() => {
+              this.setState(({expanded}) => ({
+                expanded: !expanded,
+              }));
+            }}
+          >
+            {expanded ? "\u2212" : "+"}
+          </button>
+          {nodeDescription(graph, address)}
+        </td>
         <td>{(score * 100).toPrecision(3)}</td>
         <td>{Math.log(score).toPrecision(3)}</td>
       </tr>
