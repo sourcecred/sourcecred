@@ -72,3 +72,20 @@ export function uniformDistribution(n: number): Distribution {
   }
   return new Float64Array(n).fill(1 / n);
 }
+
+export function sparseMarkovChainAction(
+  chain: SparseMarkovChain,
+  pi: Distribution
+): Distribution {
+  const result = new Float64Array(pi.length);
+  chain.forEach(({neighbor, weight}, dst) => {
+    const inDegree = neighbor.length; // (also `weight.length`)
+    let probability = 0;
+    for (let i = 0; i < inDegree; i++) {
+      const src = neighbor[i];
+      probability += pi[src] * weight[i];
+    }
+    result[dst] = probability;
+  });
+  return result;
+}

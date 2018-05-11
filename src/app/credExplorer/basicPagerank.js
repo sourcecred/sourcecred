@@ -9,7 +9,10 @@ import type {
   Distribution,
   SparseMarkovChain,
 } from "../../core/attribution/markovChain";
-import {uniformDistribution} from "../../core/attribution/markovChain";
+import {
+  sparseMarkovChainAction,
+  uniformDistribution,
+} from "../../core/attribution/markovChain";
 
 export type PagerankResult = AddressMap<{|
   +address: Address,
@@ -114,23 +117,6 @@ export function graphToOrderedSparseMarkovChain(
   return addressMapMarkovChainToOrderedSparseMarkovChain(
     graphToAddressMapMarkovChain(graph)
   );
-}
-
-function sparseMarkovChainAction(
-  chain: SparseMarkovChain,
-  pi: Distribution
-): Distribution {
-  const result = new Float64Array(pi.length);
-  chain.forEach(({neighbor, weight}, dst) => {
-    const inDegree = neighbor.length; // (also `weight.length`)
-    let probability = 0;
-    for (let i = 0; i < inDegree; i++) {
-      const src = neighbor[i];
-      probability += pi[src] * weight[i];
-    }
-    result[dst] = probability;
-  });
-  return result;
 }
 
 function findStationaryDistribution(chain: SparseMarkovChain): Distribution {
