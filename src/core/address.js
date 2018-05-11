@@ -24,9 +24,21 @@ export type AddressMapJSON<T: Addressable> = {
  * addresses.
  */
 export class AddressMap<T: Addressable> {
-  // TODO(@wchargin): Evaluate performance gains from using a nested-map
-  // here. Cf. https://jsperf.com/address-string-302039074.
-  _data: {[serializedAddress: string]: T};
+  /*
+   * Nested structure for fast access.
+   *
+   * It is an representation invariant that there are no empty objects
+   * in this structure (except possibly the top-level object). In
+   * particular, if `_data[somePluginName]` is not `undefined`, then it
+   * is a non-empty object. This is required so that two `AddressMap`s
+   * are logically equal exactly if their `_data` fields are deep-equal.
+   *
+   * This nested structure is significantly more performant than a
+   * simpler version using a flat object keyed by `stringify(address)`.
+   * For basic performance tests, see:
+   *     https://jsperf.com/address-string-302039074
+   */
+  _data: {[pluginName: string]: {[type: string]: {[id: string]: T}}};
 
   /**
    * Create an empty `AddressMap`.
@@ -46,10 +58,17 @@ export class AddressMap<T: Addressable> {
 
   toJSON(): AddressMapJSON<T> {
     const result = {};
-    Object.keys(this._data).forEach((key) => {
-      const node = {...this._data[key]};
-      delete node.address;
-      result[key] = node;
+    Object.keys(this._data).forEach((pluginName) => {
+      const dataForPluginName = this._data[pluginName];
+      Object.keys(dataForPluginName).forEach((type) => {
+        const dataForType = dataForPluginName[type];
+        Object.keys(dataForType).forEach((id) => {
+          const address = {pluginName, id, type};
+          const datum = {...dataForType[id]};
+          delete datum.address;
+          result[toString(address)] = datum;
+        });
+      });
     });
     return result;
   }
@@ -57,7 +76,7 @@ export class AddressMap<T: Addressable> {
   static fromJSON(json: AddressMapJSON<T>): AddressMap<T> {
     const result: AddressMap<T> = new AddressMap();
     Object.keys(json).forEach((key) => {
-      result._data[key] = {...json[key], address: JSON.parse(key)};
+      result.add({...json[key], address: JSON.parse(key)});
     });
     return result;
   }
@@ -69,11 +88,19 @@ export class AddressMap<T: Addressable> {
    * Returns `this` for easy chaining.
    */
   add(t: T): this {
-    if (t.address == null) {
+    const {address} = t;
+    if (address == null) {
       throw new Error(`address is ${String(t.address)}`);
     }
-    const key = toString(t.address);
-    this._data[key] = t;
+    let dataForPluginName = this._data[address.pluginName];
+    if (dataForPluginName === undefined) {
+      this._data[address.pluginName] = dataForPluginName = {};
+    }
+    let dataForType = dataForPluginName[address.type];
+    if (dataForType === undefined) {
+      dataForPluginName[address.type] = dataForType = {};
+    }
+    dataForType[address.id] = t;
     return this;
   }
 
@@ -85,15 +112,32 @@ export class AddressMap<T: Addressable> {
     if (address == null) {
       throw new Error(`address is ${String(address)}`);
     }
-    const key = toString(address);
-    return this._data[key];
+    const dataForPluginName = this._data[address.pluginName];
+    if (dataForPluginName === undefined) {
+      return (undefined: any);
+    }
+    const dataForType = dataForPluginName[address.type];
+    if (dataForType === undefined) {
+      return (undefined: any);
+    }
+    return dataForType[address.id];
   }
 
   /**
    * Get all objects stored in the map, in some unspecified order.
    */
   getAll(): T[] {
-    return Object.keys(this._data).map((k) => this._data[k]);
+    const result = [];
+    Object.keys(this._data).forEach((pluginName) => {
+      const dataForPluginName = this._data[pluginName];
+      Object.keys(dataForPluginName).forEach((type) => {
+        const dataForType = dataForPluginName[type];
+        Object.keys(dataForType).forEach((id) => {
+          result.push(dataForType[id]);
+        });
+      });
+    });
+    return result;
   }
 
   /**
@@ -104,8 +148,21 @@ export class AddressMap<T: Addressable> {
     if (address == null) {
       throw new Error(`address is ${String(address)}`);
     }
-    const key = toString(address);
-    delete this._data[key];
+    const dataForPluginName = this._data[address.pluginName];
+    if (dataForPluginName === undefined) {
+      return this;
+    }
+    const dataForType = dataForPluginName[address.type];
+    if (dataForType === undefined) {
+      return this;
+    }
+    delete dataForType[address.id];
+    if (Object.keys(dataForType).length === 0) {
+      delete dataForPluginName[address.type];
+      if (Object.keys(dataForPluginName).length === 0) {
+        delete this._data[address.pluginName];
+      }
+    }
     return this;
   }
 }
