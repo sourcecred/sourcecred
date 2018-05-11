@@ -65,3 +65,10 @@ export function sparseMarkovChainFromTransitionMatrix(
     };
   });
 }
+
+export function uniformDistribution(n: number): Distribution {
+  if (isNaN(n) || !isFinite(n) || n !== Math.floor(n) || n <= 0) {
+    throw new Error("expected positive integer, but got: " + n);
+  }
+  return new Float64Array(n).fill(1 / n);
+}
