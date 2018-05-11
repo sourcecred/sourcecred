@@ -1,7 +1,7 @@
 // @flow
 
 import {Graph} from "../../core/graph";
-import {graphToTypedArrayMarkovChain} from "./basicPagerank";
+import {graphToOrderedSparseMarkovChain} from "./basicPagerank";
 
 describe("graphToMarkovChain", () => {
   it("is correct for a trivial one-node chain", () => {
@@ -14,6 +14,6 @@ describe("graphToMarkovChain", () => {
       },
       payload: "yes",
     });
-    expect(graphToTypedArrayMarkovChain(g)).toMatchSnapshot();
+    expect(graphToOrderedSparseMarkovChain(g)).toMatchSnapshot();
   });
 });

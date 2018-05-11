@@ -2,7 +2,7 @@
 
 exports[`graphToMarkovChain is correct for a trivial one-node chain 1`] = `
 Object {
-  "inNeighbors": Array [
+  "chain": Array [
     Object {
       "neighbor": Uint32Array [
         0,
