@@ -5,13 +5,16 @@ import type {Edge} from "../../core/graph";
 import {AddressMap} from "../../core/address";
 import {Graph} from "../../core/graph";
 
-export type Distribution = AddressMap<{|
+export type Distribution = {|
+  +nodeOrder: $ReadOnlyArray<Address>,
+  +data: Float64Array,
+|};
+export type PagerankResult = AddressMap<{|
   +address: Address,
   +probability: number,
 |}>;
-export type PagerankResult = Distribution;
 
-type MarkovChain = AddressMap<{|
+type AddressMapMarkovChain = AddressMap<{|
   +address: Address,
   +inNeighbors: AddressMap<{|
     +address: Address,
@@ -19,8 +22,18 @@ type MarkovChain = AddressMap<{|
   |}>,
 |}>;
 
+type TypedArrayMarkovChain = {|
+  +nodeOrder: $ReadOnlyArray<Address>,
+  +inNeighbors: $ReadOnlyArray<{|
+    +neighbor: Uint32Array,
+    +weight: Float64Array,
+  |}>,
+|};
+
 export default function basicPagerank(graph: Graph<any, any>): PagerankResult {
-  return findStationaryDistribution(graphToMarkovChain(graph));
+  return distributionToPagerankResult(
+    findStationaryDistribution(graphToTypedArrayMarkovChain(graph))
+  );
 }
 
 function edgeWeight(
@@ -29,7 +42,9 @@ function edgeWeight(
   return {toWeight: 1, froWeight: 1};
 }
 
-export function graphToMarkovChain(graph: Graph<any, any>): MarkovChain {
+function graphToAddressMapMarkovChain(
+  graph: Graph<any, any>
+): AddressMapMarkovChain {
   const result = new AddressMap();
   const unnormalizedTotalOutWeights = new AddressMap();
 
@@ -70,37 +85,71 @@ export function graphToMarkovChain(graph: Graph<any, any>): MarkovChain {
   return result;
 }
 
-function markovChainAction(mc: MarkovChain, pi: Distribution): Distribution {
-  const result = new AddressMap();
-  mc.getAll().forEach(({address, inNeighbors}) => {
+function addressMapMarkovChainToTypedArrayMarkovChain(
+  mc: AddressMapMarkovChain
+): TypedArrayMarkovChain {
+  // The node ordering is arbitrary, but must be made canonical: calls
+  // to `graph.nodes()` are not guaranteed to be stable.
+  const nodeOrder = mc.getAll().map(({address}) => address);
+  const addressToIndex = new AddressMap();
+  nodeOrder.forEach((address, index) => {
+    addressToIndex.add({address, index});
+  });
+  return {
+    nodeOrder,
+    inNeighbors: nodeOrder.map((address) => {
+      const theseNeighbors = mc.get(address).inNeighbors.getAll();
+      return {
+        neighbor: new Uint32Array(
+          theseNeighbors.map(({address}) => addressToIndex.get(address).index)
+        ),
+        weight: new Float64Array(theseNeighbors.map(({weight}) => weight)),
+      };
+    }),
+  };
+}
+
+export function graphToTypedArrayMarkovChain(
+  graph: Graph<any, any>
+): TypedArrayMarkovChain {
+  return addressMapMarkovChainToTypedArrayMarkovChain(
+    graphToAddressMapMarkovChain(graph)
+  );
+}
+
+function markovChainAction(
+  mc: TypedArrayMarkovChain,
+  pi: Distribution
+): Distribution {
+  const data = new Float64Array(pi.data.length);
+  for (let dst = 0; dst < mc.nodeOrder.length; dst++) {
+    const theseNeighbors = mc.inNeighbors[dst];
+    const inDegree = theseNeighbors.neighbor.length;
     let probability = 0;
-    inNeighbors.getAll().forEach(({address: neighbor, weight}) => {
-      probability += pi.get(neighbor).probability * weight;
-    });
-    result.add({address, probability});
-  });
-  return result;
+    for (let srcIndex = 0; srcIndex < inDegree; srcIndex++) {
+      const src = theseNeighbors.neighbor[srcIndex];
+      probability += pi.data[src] * theseNeighbors.weight[srcIndex];
+    }
+    data[dst] = probability;
+  }
+  return {nodeOrder: pi.nodeOrder, data};
 }
 
-function uniformDistribution(addresses: $ReadOnlyArray<Address>) {
-  const result = new AddressMap();
-  const probability = 1.0 / addresses.length;
-  addresses.forEach((address) => {
-    result.add({address, probability});
-  });
-  return result;
+function uniformDistribution(nodeOrder: $ReadOnlyArray<Address>): Distribution {
+  return {
+    nodeOrder,
+    data: new Float64Array(
+      Array(nodeOrder.length).fill(1.0 / nodeOrder.length)
+    ),
+  };
 }
 
-function findStationaryDistribution(mc: MarkovChain): Distribution {
-  let r0 = uniformDistribution(mc.getAll().map(({address}) => address));
+function findStationaryDistribution(mc: TypedArrayMarkovChain): Distribution {
+  let r0 = uniformDistribution(mc.nodeOrder);
   function computeDelta(pi0, pi1) {
-    return Math.max(
-      ...pi0
-        .getAll()
-        .map(({address}) =>
-          Math.abs(pi0.get(address).probability - pi1.get(address).probability)
-        )
-    );
+    // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
+    // same (i.e., there has been no permutation).
+    return Math.max(...pi0.data.map((x, i) => Math.abs(x - pi1.data[i])));
   }
   let iteration = 0;
   while (true) {
@@ -121,4 +170,13 @@ function findStationaryDistribution(mc: MarkovChain): Distribution {
   // ESLint knows that this next line is unreachable, but Flow doesn't. :-)
   // eslint-disable-next-line no-unreachable
   throw new Error("Unreachable.");
+}
+
+function distributionToPagerankResult(pi: Distribution): PagerankResult {
+  const result = new AddressMap();
+  pi.nodeOrder.forEach((address, i) => {
+    const probability = pi.data[i];
+    result.add({address, probability});
+  });
+  return result;
 }
