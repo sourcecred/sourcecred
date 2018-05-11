@@ -1,6 +1,8 @@
 // @flow
 
+import type {Distribution, SparseMarkovChain} from "./markovChain";
 import {
+  findStationaryDistribution,
   sparseMarkovChainAction,
   sparseMarkovChainFromTransitionMatrix,
   uniformDistribution,
@@ -118,5 +120,63 @@ describe("sparseMarkovChainAction", () => {
     //    0.37500   0.46875   0.28125
     const expected = new Float64Array([0.375, 0.46875, 0.28125]);
     expect(pi1).toEqual(expected);
+  });
+});
+
+function expectAllClose(
+  actual: Float64Array,
+  expected: Float64Array,
+  epsilon: number = 1e-6
+): void {
+  expect(actual).toHaveLength(expected.length);
+  for (let i = 0; i < expected.length; i++) {
+    if (Math.abs(actual[i] - expected[i]) >= epsilon) {
+      expect(actual).toEqual(expected); // will fail
+      return;
+    }
+  }
+}
+
+function expectStationary(chain: SparseMarkovChain, pi: Distribution): void {
+  expectAllClose(sparseMarkovChainAction(chain, pi), pi);
+}
+
+describe("findStationaryDistribution", () => {
+  it("finds an all-accumulating stationary distribution", () => {
+    const chain = sparseMarkovChainFromTransitionMatrix([
+      [1, 0, 0],
+      [0.25, 0, 0.75],
+      [0.25, 0.75, 0],
+    ]);
+    const pi = findStationaryDistribution(chain);
+    expectStationary(chain, pi);
+    const expected = new Float64Array([1, 0, 0]);
+    expectAllClose(pi, expected);
+  });
+
+  it("finds a non-degenerate stationary distribution", () => {
+    // Node 0 is the "center"; nodes 1 through 4 are "satellites". A
+    // satellite transitions to the center with probability 0.5, or to a
+    // cyclically adjacent satellite with probability 0.25 each. The
+    // center transitions to a uniformly random satellite.
+    const chain = sparseMarkovChainFromTransitionMatrix([
+      [0, 0.25, 0.25, 0.25, 0.25],
+      [0.5, 0, 0.25, 0, 0.25],
+      [0.5, 0.25, 0, 0.25, 0],
+      [0.5, 0, 0.25, 0, 0.25],
+      [0.5, 0.25, 0, 0.25, 0],
+    ]);
+    const pi = findStationaryDistribution(chain);
+    expectStationary(chain, pi);
+    const expected = new Float64Array([1 / 3, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
+    expectAllClose(pi, expected);
+  });
+
+  it("finds the stationary distribution of a periodic chain", () => {
+    const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [1, 0]]);
+    const pi = findStationaryDistribution(chain);
+    expectStationary(chain, pi);
+    const expected = new Float64Array([0.5, 0.5]);
+    expectAllClose(pi, expected);
   });
 });

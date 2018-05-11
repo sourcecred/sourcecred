@@ -89,3 +89,50 @@ export function sparseMarkovChainAction(
   });
   return result;
 }
+
+export function findStationaryDistribution(
+  chain: SparseMarkovChain,
+  options?: {|
+    +verbose?: boolean,
+    +convergenceThreshold?: number,
+    +maxIterations?: number,
+  |}
+): Distribution {
+  const fullOptions = {
+    verbose: false,
+    convergenceThreshold: 1e-7,
+    maxIterations: 255,
+    ...(options || {}),
+  };
+  let r0 = uniformDistribution(chain.length);
+  function computeDelta(pi0, pi1) {
+    // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
+    // same (i.e., there has been no permutation).
+    return Math.max(...pi0.map((x, i) => Math.abs(x - pi1[i])));
+  }
+  let iteration = 0;
+  while (true) {
+    iteration++;
+    const r1 = sparseMarkovChainAction(chain, r0);
+    const delta = computeDelta(r0, r1);
+    r0 = r1;
+    if (fullOptions.verbose) {
+      console.log(`[${iteration}] delta = ${delta}`);
+    }
+    if (delta < fullOptions.convergenceThreshold) {
+      if (fullOptions.verbose) {
+        console.log(`[${iteration}] CONVERGED`);
+      }
+      return r0;
+    }
+    if (iteration >= fullOptions.maxIterations) {
+      if (fullOptions.verbose) {
+        console.log(`[${iteration}] FAILED to converge`);
+      }
+      return r0;
+    }
+  }
+  // ESLint knows that this next line is unreachable, but Flow doesn't. :-)
+  // eslint-disable-next-line no-unreachable
+  throw new Error("Unreachable.");
+}
