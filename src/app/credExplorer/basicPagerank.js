@@ -25,8 +25,8 @@ type AddressMapMarkovChain = AddressMap<{|
 type TypedArrayMarkovChain = {|
   +nodeOrder: $ReadOnlyArray<Address>,
   +inNeighbors: $ReadOnlyArray<{|
-    +neighbors: Uint32Array,
-    +inWeights: Float64Array,
+    +neighbor: Uint32Array,
+    +weight: Float64Array,
   |}>,
 |};
 
@@ -100,10 +100,10 @@ function addressMapMarkovChainToTypedArrayMarkovChain(
     inNeighbors: nodeOrder.map((address) => {
       const theseNeighbors = mc.get(address).inNeighbors.getAll();
       return {
-        neighbors: new Uint32Array(
+        neighbor: new Uint32Array(
           theseNeighbors.map(({address}) => addressToIndex.get(address).index)
         ),
-        inWeights: new Float64Array(theseNeighbors.map(({weight}) => weight)),
+        weight: new Float64Array(theseNeighbors.map(({weight}) => weight)),
       };
     }),
   };
@@ -124,11 +124,11 @@ function markovChainAction(
   const data = new Float64Array(pi.data.length);
   for (let dst = 0; dst < mc.nodeOrder.length; dst++) {
     const theseNeighbors = mc.inNeighbors[dst];
-    const inDegree = theseNeighbors.neighbors.length;
+    const inDegree = theseNeighbors.neighbor.length;
     let probability = 0;
     for (let srcIndex = 0; srcIndex < inDegree; srcIndex++) {
-      const src = theseNeighbors.neighbors[srcIndex];
-      probability += pi.data[src] * theseNeighbors.inWeights[srcIndex];
+      const src = theseNeighbors.neighbor[srcIndex];
+      probability += pi.data[src] * theseNeighbors.weight[srcIndex];
     }
     data[dst] = probability;
   }

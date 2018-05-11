@@ -4,11 +4,11 @@ exports[`graphToMarkovChain is correct for a trivial one-node chain 1`] = `
 Object {
   "inNeighbors": Array [
     Object {
-      "inWeights": Float64Array [
-        1,
-      ],
-      "neighbors": Uint32Array [
+      "neighbor": Uint32Array [
         0,
+      ],
+      "weight": Float64Array [
+        1,
       ],
     },
   ],
