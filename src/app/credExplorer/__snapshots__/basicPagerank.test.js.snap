@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`graphToMarkovChain is correct for a trivial one-node chain 1`] = `
+Object {
+  "{\\"id\\":\\"who are you blah blah\\",\\"pluginName\\":\\"the magnificent foo plugin\\",\\"type\\":\\"irrelevant!\\"}": Object {
+    "inNeighbors": Object {
+      "{\\"id\\":\\"who are you blah blah\\",\\"pluginName\\":\\"the magnificent foo plugin\\",\\"type\\":\\"irrelevant!\\"}": Object {
+        "weight": 1,
+      },
+    },
+  },
+}
+`;
