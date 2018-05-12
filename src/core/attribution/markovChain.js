@@ -26,3 +26,42 @@ export type SparseMarkovChain = $ReadOnlyArray<{|
   +neighbor: Uint32Array,
   +weight: Float64Array,
 |}>;
+
+export function sparseMarkovChainFromTransitionMatrix(
+  matrix: $ReadOnlyArray<$ReadOnlyArray<number>>
+): SparseMarkovChain {
+  const n = matrix.length;
+  matrix.forEach((row, i) => {
+    if (row.length !== n) {
+      throw new Error(
+        `expected rows to have length ${n}, but row ${i} has ${row.length}`
+      );
+    }
+  });
+  matrix.forEach((row, i) => {
+    row.forEach((value, j) => {
+      if (isNaN(value) || !isFinite(value) || value < 0) {
+        throw new Error(
+          `expected positive real entries, but [${i}][${j}] is ${value}`
+        );
+      }
+    });
+  });
+  matrix.forEach((row, i) => {
+    const rowsum = row.reduce((a, b) => a + b, 0);
+    if (Math.abs(rowsum - 1) > 1e-6) {
+      throw new Error(
+        `expected rows to sum to 1, but row ${i} sums to ${rowsum}`
+      );
+    }
+  });
+  return matrix.map((_, j) => {
+    const column = matrix
+      .map((row, i) => [i, row[j]])
+      .filter(([_, p]) => p > 0);
+    return {
+      neighbor: new Uint32Array(column.map(([i, _]) => i)),
+      weight: new Float64Array(column.map(([_, p]) => p)),
+    };
+  });
+}
