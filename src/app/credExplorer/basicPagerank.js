@@ -34,7 +34,7 @@ type OrderedSparseMarkovChain = {|
 
 export default function basicPagerank(graph: Graph<any, any>): PagerankResult {
   const {nodeOrder, chain} = graphToOrderedSparseMarkovChain(graph);
-  const pi = findStationaryDistribution(chain);
+  const pi = findStationaryDistribution(chain, {verbose: true});
   return distributionToPagerankResult(nodeOrder, pi);
 }
 
@@ -119,7 +119,20 @@ export function graphToOrderedSparseMarkovChain(
   );
 }
 
-function findStationaryDistribution(chain: SparseMarkovChain): Distribution {
+function findStationaryDistribution(
+  chain: SparseMarkovChain,
+  options?: {|
+    +verbose?: boolean,
+    +convergenceThreshold?: number,
+    +maxIterations?: number,
+  |}
+): Distribution {
+  const fullOptions = {
+    verbose: false,
+    convergenceThreshold: 1e-7,
+    maxIterations: 255,
+    ...(options || {}),
+  };
   let r0 = uniformDistribution(chain.length);
   function computeDelta(pi0, pi1) {
     // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
@@ -132,13 +145,19 @@ function findStationaryDistribution(chain: SparseMarkovChain): Distribution {
     const r1 = sparseMarkovChainAction(chain, r0);
     const delta = computeDelta(r0, r1);
     r0 = r1;
-    console.log(`[${iteration}] delta = ${delta}`);
-    if (delta < 1e-7) {
-      console.log(`[${iteration}] CONVERGED`);
+    if (fullOptions.verbose) {
+      console.log(`[${iteration}] delta = ${delta}`);
+    }
+    if (delta < fullOptions.convergenceThreshold) {
+      if (fullOptions.verbose) {
+        console.log(`[${iteration}] CONVERGED`);
+      }
       return r0;
     }
-    if (iteration >= 255) {
-      console.log(`[${iteration}] FAILED to converge`);
+    if (iteration >= fullOptions.maxIterations) {
+      if (fullOptions.verbose) {
+        console.log(`[${iteration}] FAILED to converge`);
+      }
       return r0;
     }
   }
