@@ -1,6 +1,7 @@
 // @flow
 
 import {
+  sparseMarkovChainAction,
   sparseMarkovChainFromTransitionMatrix,
   uniformDistribution,
 } from "./markovChain";
@@ -94,5 +95,28 @@ describe("uniformDistribution", () => {
     it(`fails when given domain ${String(bad)}`, () => {
       expect(() => uniformDistribution((bad: any))).toThrow("positive integer");
     });
+  });
+});
+
+describe("sparseMarkovChainAction", () => {
+  it("acts properly on a nontrivial chain", () => {
+    // Note: this test case uses only real numbers that are exactly
+    // representable as floating point numbers.
+    const chain = sparseMarkovChainFromTransitionMatrix([
+      [1, 0, 0],
+      [0.25, 0, 0.75],
+      [0.25, 0.75, 0],
+    ]);
+    const pi0 = new Float64Array([0.125, 0.375, 0.625]);
+    const pi1 = sparseMarkovChainAction(chain, pi0);
+    // The expected value is given by `pi0 * A`, where `A` is the
+    // transition matrix. In Octave:
+    // >> A = [ 1 0 0; 0.25 0 0.75 ; 0.25 0.75 0 ];
+    // >> pi0 = [ 0.125 0.375 0.625 ];
+    // >> pi1 = pi0 * A;
+    // >> disp(pi1)
+    //    0.37500   0.46875   0.28125
+    const expected = new Float64Array([0.375, 0.46875, 0.28125]);
+    expect(pi1).toEqual(expected);
   });
 });
