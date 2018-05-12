@@ -9,6 +9,7 @@ import type {
   Distribution,
   SparseMarkovChain,
 } from "../../core/attribution/markovChain";
+import {uniformDistribution} from "../../core/attribution/markovChain";
 
 export type PagerankResult = AddressMap<{|
   +address: Address,
@@ -130,10 +131,6 @@ function sparseMarkovChainAction(
     result[dst] = probability;
   });
   return result;
-}
-
-function uniformDistribution(n: number): Distribution {
-  return new Float64Array(n).fill(1 / n);
 }
 
 function findStationaryDistribution(chain: SparseMarkovChain): Distribution {
