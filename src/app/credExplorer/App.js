@@ -3,7 +3,7 @@
 import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
-import {Graph} from "../../core/graph";
+import {Graph} from "core/graph";
 import basicPagerank from "./basicPagerank";
 import LocalStore from "./LocalStore";
 import type {PagerankResult} from "./basicPagerank";

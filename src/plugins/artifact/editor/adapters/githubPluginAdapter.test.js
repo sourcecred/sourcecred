@@ -5,8 +5,8 @@ import {shallow} from "enzyme";
 import enzymeToJSON from "enzyme-to-json";
 import stringify from "json-stable-stringify";
 
-import {parse} from "../../../github/parser";
-import exampleRepoData from "../../../github/demoData/example-github.json";
+import {parse} from "plugins/github/parser";
+import exampleRepoData from "plugins/github/demoData/example-github.json";
 import adapter from "./githubPluginAdapter";
 
 require("../../../../app/testUtil").configureEnzyme();

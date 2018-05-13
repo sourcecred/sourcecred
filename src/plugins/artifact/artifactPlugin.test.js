@@ -1,6 +1,6 @@
 // @flow
 
-import {Graph} from "../../core/graph";
+import {Graph} from "core/graph";
 import {artifactAddress} from "./artifactPlugin";
 
 describe("artifactPlugin", () => {

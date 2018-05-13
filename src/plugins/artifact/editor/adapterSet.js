@@ -1,6 +1,6 @@
 // @flow
 
-import type {Node} from "../../../core/graph";
+import type {Node} from "core/graph";
 import type {PluginAdapter} from "./pluginAdapter";
 
 export class AdapterSet {

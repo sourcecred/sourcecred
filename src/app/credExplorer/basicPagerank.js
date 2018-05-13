@@ -1,15 +1,15 @@
 // @flow
 
-import type {Address} from "../../core/address";
-import type {Edge} from "../../core/graph";
-import {AddressMap} from "../../core/address";
-import {Graph} from "../../core/graph";
+import type {Address} from "core/address";
+import type {Edge} from "core/graph";
+import {AddressMap} from "core/address";
+import {Graph} from "core/graph";
 
 import type {
   Distribution,
   SparseMarkovChain,
-} from "../../core/attribution/markovChain";
-import {findStationaryDistribution} from "../../core/attribution/markovChain";
+} from "core/attribution/markovChain";
+import {findStationaryDistribution} from "core/attribution/markovChain";
 
 export type PagerankResult = AddressMap<{|
   +address: Address,

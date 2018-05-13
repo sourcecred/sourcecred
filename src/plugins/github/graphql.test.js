@@ -1,7 +1,7 @@
 // @flow
 
 import type {Continuation} from "./graphql";
-import {build} from "../../graphql/queries";
+import {build} from "graphql/queries";
 import {
   PAGE_LIMIT,
   createQuery,

@@ -2,14 +2,14 @@
 
 import React from "react";
 
-import type {Graph} from "../../../core/graph";
+import type {Graph} from "core/graph";
 import type {Settings} from "./SettingsConfig";
-import fetchGithubRepo from "../../github/fetchGithubRepo";
+import fetchGithubRepo from "plugins/github/fetchGithubRepo";
 import type {
   NodePayload as GithubNodePayload,
   EdgePayload as GithubEdgePayload,
-} from "../../github/types";
-import {parse} from "../../github/parser";
+} from "plugins/github/types";
+import {parse} from "plugins/github/parser";
 
 type Props = {
   settings: Settings,

@@ -1,6 +1,6 @@
 // @flow
 
-import {Graph} from "../../core/graph";
+import {Graph} from "core/graph";
 import {graphToOrderedSparseMarkovChain} from "./basicPagerank";
 
 describe("graphToMarkovChain", () => {

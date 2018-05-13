@@ -6,7 +6,7 @@
 
 import fetch from "isomorphic-fetch";
 
-import {stringify, inlineLayout} from "../../graphql/queries";
+import {stringify, inlineLayout} from "graphql/queries";
 import {createQuery, createVariables, postQueryExhaustive} from "./graphql";
 import type {GithubResponseJSON} from "./graphql";
 

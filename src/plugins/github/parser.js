@@ -2,7 +2,7 @@
 
 import stringify from "json-stable-stringify";
 
-import type {Node, Edge} from "../../core/graph";
+import type {Node, Edge} from "core/graph";
 import type {
   NodeType,
   EdgeType,
@@ -31,11 +31,11 @@ import type {
   NullableAuthorJSON,
 } from "./graphql";
 
-import type {Address} from "../../core/address";
+import type {Address} from "core/address";
 import {PLUGIN_NAME} from "./pluginName";
-import {Graph, edgeID} from "../../core/graph";
+import {Graph, edgeID} from "core/graph";
 import {findReferences} from "./findReferences";
-import {commitAddress} from "../git/address";
+import {commitAddress} from "plugins/git/address";
 
 export function parse(
   githubResponseJSON: GithubResponseJSON
