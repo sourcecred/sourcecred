@@ -113,6 +113,11 @@ export function includesEdgeId(treeSha: string, name: string): string {
 }
 
 // TreeEntryNode -> TreeEntryNode
+// TODO: Rename the BECOMES edges to EVOLVES, as then we can cleanly express
+// the bidrectional relationship: EvolvesTo and EvolvesFrom.  Note that doing
+// so is a breaking change, and thus this change should be made after we have a
+// versioning system that can either maintain backcompat or invalidate old
+// serializations. See #280
 export const BECOMES_EDGE_TYPE: "BECOMES" = "BECOMES";
 export type BecomesEdgePayload = {|
   +childCommit: Hash,
