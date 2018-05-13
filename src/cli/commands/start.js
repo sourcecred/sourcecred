@@ -5,7 +5,7 @@ import chalk from "chalk";
 import fs from "fs";
 import {choosePort} from "react-dev-utils/WebpackDevServerUtils";
 
-import apiApp from "../../app/apiApp";
+import apiApp from "app/apiApp";
 import {sourcecredDirectoryFlag} from "../common";
 
 // Makes the script crash on unhandled rejections instead of silently

@@ -2,8 +2,8 @@
 
 import React from "react";
 
-import {Graph} from "../../../../core/graph";
-import type {Node} from "../../../../core/graph";
+import {Graph} from "core/graph";
+import type {Node} from "core/graph";
 import type {
   NodePayload,
   NodeType,
@@ -14,10 +14,10 @@ import type {
   PullRequestReviewCommentNodePayload,
   PullRequestReviewNodePayload,
   AuthorNodePayload,
-} from "../../../github/types";
+} from "plugins/github/types";
 import type {PluginAdapter} from "../pluginAdapter";
-import {PLUGIN_NAME} from "../../../github/pluginName";
-import {CONTAINS_EDGE_TYPE} from "../../../github/types";
+import {PLUGIN_NAME} from "plugins/github/pluginName";
+import {CONTAINS_EDGE_TYPE} from "plugins/github/types";
 
 const adapter: PluginAdapter<NodePayload> = {
   pluginName: PLUGIN_NAME,

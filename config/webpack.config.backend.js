@@ -2,6 +2,7 @@
 const webpack = require("webpack");
 const eslintFormatter = require("react-dev-utils/eslintFormatter");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
+const path = require("path");
 const paths = require("./paths");
 const nodeExternals = require("webpack-node-externals");
 
@@ -24,6 +25,14 @@ module.exports = {
     libraryTarget: "umd",
   },
   resolve: {
+    // This allows you to set a fallback for where Webpack should look for modules.
+    // We placed these paths second because we want `node_modules` to "win"
+    // if there are any conflicts. This matches Node resolution mechanism.
+    // https://github.com/facebookincubator/create-react-app/issues/253
+    modules: ["node_modules", paths.appNodeModules, paths.appSrc].concat(
+      // It is guaranteed to exist because we tweak it in `env.js`
+      process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
+    ),
     extensions: [".js", ".json"],
     plugins: [
       // Prevents users from importing files from outside of src/ (or node_modules/).
