@@ -1,16 +1,16 @@
 // @flow
 
-import cloneGitGraph from "../plugins/git/cloneGitGraph";
-import fetchGithubGraph from "../plugins/github/fetchGithubGraph";
+import cloneGitGraph from "@/plugins/git/cloneGitGraph";
+import fetchGithubGraph from "@/plugins/github/fetchGithubGraph";
 import type {
   NodePayload as GithubNodePayload,
   EdgePayload as GithubEdgePayload,
-} from "../plugins/github/types";
+} from "@/plugins/github/types";
 import type {
   NodePayload as GitNodePayload,
   EdgePayload as GitEdgePayload,
-} from "../plugins/git/types";
-import {Graph} from "../core/graph";
+} from "@/plugins/git/types";
+import {Graph} from "@/core/graph";
 
 export type NodePayload = GitNodePayload | GithubNodePayload;
 export type EdgePayload = GitEdgePayload | GithubEdgePayload;

@@ -5,7 +5,7 @@
  */
 
 import type {NodePayload, EdgePayload} from "./types";
-import type {Graph} from "../../core/graph";
+import type {Graph} from "@/core/graph";
 import fetchGithubRepo from "./fetchGithubRepo";
 import {parse} from "./parser";
 

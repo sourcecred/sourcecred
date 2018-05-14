@@ -2,10 +2,10 @@
 
 import React from "react";
 
-import type {Node} from "../../../core/graph";
+import type {Node} from "@/core/graph";
 import type {Settings} from "./SettingsConfig";
 import type {NodePayload, EdgePayload} from "../artifactPlugin";
-import {Graph} from "../../../core/graph";
+import {Graph} from "@/core/graph";
 import {artifactAddress} from "../artifactPlugin";
 
 type Props = {

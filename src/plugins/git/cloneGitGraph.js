@@ -3,7 +3,7 @@
 import cloneAndLoadRepository from "./cloneAndLoadRepository";
 import {createGraph} from "./createGraph";
 import type {NodePayload, EdgePayload} from "./types";
-import type {Graph} from "../../core/graph";
+import type {Graph} from "@/core/graph";
 
 /**
  * Load Git contribution graph from a fresh clone of a GitHub repo.

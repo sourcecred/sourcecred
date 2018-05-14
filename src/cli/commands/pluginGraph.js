@@ -3,10 +3,10 @@
 import {Command, flags} from "@oclif/command";
 import stringify from "json-stable-stringify";
 
-import type {Graph} from "../../core/graph";
+import type {Graph} from "@/core/graph";
 import type {PluginName} from "../common";
-import createGitGraph from "../../plugins/git/cloneGitGraph";
-import createGithubGraph from "../../plugins/github/fetchGithubGraph";
+import createGitGraph from "@/plugins/git/cloneGitGraph";
+import createGithubGraph from "@/plugins/github/fetchGithubGraph";
 import {pluginNames} from "../common";
 
 // Makes the script crash on unhandled rejections instead of silently

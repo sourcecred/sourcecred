@@ -2,8 +2,8 @@
 
 import cloneDeep from "lodash.clonedeep";
 
-import type {Address} from "../../core/address";
-import type {Edge} from "../../core/graph";
+import type {Address} from "@/core/address";
+import type {Edge} from "@/core/graph";
 import type {BecomesEdge} from "./createGraph";
 import type {BecomesEdgePayload, Hash, Tree} from "./types";
 import {_makeAddress} from "./address";
