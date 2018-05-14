@@ -47,17 +47,33 @@ describe("GitHub porcelain", () => {
     expect(urlToProperty).toMatchSnapshot();
   }
 
-  function issueOrPRByNumber(n: number): Issue | PullRequest {
-    const result = repo.issueOrPRByNumber(n);
+  function issueByNumber(n: number): Issue {
+    const result = repo.issueByNumber(n);
     if (result == null) {
-      throw new Error(`Expected Issue/PR ${n} to exist`);
+      throw new Error(`Expected Issue #${n} to exist`);
     }
     return result;
   }
 
-  const issue = issueOrPRByNumber(2);
+  function prByNumber(n: number): PullRequest {
+    const result = repo.pullRequestByNumber(n);
+    if (result == null) {
+      throw new Error(`Expected PR #${n} to exist`);
+    }
+    return result;
+  }
+
+  function issueOrPrByNumber(n: number): Issue | PullRequest {
+    const result = repo.issueByNumber(n) || repo.pullRequestByNumber(n);
+    if (result == null) {
+      throw new Error(`Expected Issue/PR #${n} to exist`);
+    }
+    return result;
+  }
+
+  const issue = issueByNumber(2);
   const comment = issue.comments()[0];
-  const pullRequest = PullRequest.from(issueOrPRByNumber(5));
+  const pullRequest = prByNumber(5);
   const pullRequestReview = pullRequest.reviews()[0];
   const pullRequestReviewComment = pullRequestReview.comments()[0];
   const author = issue.authors()[0];
@@ -157,7 +173,7 @@ describe("GitHub porcelain", () => {
 
   describe("issues and pull requests", () => {
     const issuesAndPRs = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) =>
-      issueOrPRByNumber(n)
+      issueOrPrByNumber(n)
     );
     it("have numbers", () => {
       expectPropertiesToMatchSnapshot(issuesAndPRs, (e) => e.number());
@@ -173,11 +189,7 @@ describe("GitHub porcelain", () => {
   });
 
   describe("pull requests", () => {
-    const prs = [
-      PullRequest.from(issueOrPRByNumber(3)),
-      PullRequest.from(issueOrPRByNumber(5)),
-      PullRequest.from(issueOrPRByNumber(9)),
-    ];
+    const prs = [prByNumber(3), prByNumber(5), prByNumber(9)];
     it("have mergeCommitHashes", () => {
       expectPropertiesToMatchSnapshot(prs, (e) => e.mergeCommitHash());
     });
@@ -239,7 +251,7 @@ describe("GitHub porcelain", () => {
 
   describe("References", () => {
     it("via #-number", () => {
-      const srcIssue = issueOrPRByNumber(2);
+      const srcIssue = issueByNumber(2);
       const references = srcIssue.references();
       expect(references).toHaveLength(1);
       // Note: this verifies that we are not counting in-references, as
@@ -252,7 +264,7 @@ describe("GitHub porcelain", () => {
 
     describe("by exact url", () => {
       function expectCommentToHaveSingleReference({commentNumber, type, url}) {
-        const comments = issueOrPRByNumber(2).comments();
+        const comments = issueByNumber(2).comments();
         const references = comments[commentNumber].references();
         expect(references).toHaveLength(1);
         expect(references[0].url()).toBe(url);
@@ -311,14 +323,14 @@ describe("GitHub porcelain", () => {
       });
 
       it("to multiple entities", () => {
-        const references = issueOrPRByNumber(2)
+        const references = issueByNumber(2)
           .comments()[6]
           .references();
         expect(references).toHaveLength(5);
       });
 
       it("to no entities", () => {
-        const references = issueOrPRByNumber(2)
+        const references = issueByNumber(2)
           .comments()[7]
           .references();
         expect(references).toHaveLength(0);
@@ -326,7 +338,7 @@ describe("GitHub porcelain", () => {
     });
 
     it("References by @-author", () => {
-      const pr = issueOrPRByNumber(5);
+      const pr = prByNumber(5);
       const references = pr.references();
       expect(references).toHaveLength(1);
       const referenced = Author.from(references[0]);

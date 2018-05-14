@@ -173,19 +173,30 @@ export class Repository extends GithubEntity<RepositoryNodePayload> {
     return (e: any);
   }
 
-  issueOrPRByNumber(number: number): ?(Issue | PullRequest) {
-    let result: Issue | PullRequest;
-    this.graph
-      .neighborhood(this.nodeAddress, {
-        edgeType: CONTAINS_EDGE_TYPE,
-      })
-      .forEach(({neighbor}) => {
-        const payload = this.graph.node(neighbor).payload;
-        if (payload.number === number) {
-          result = (asEntity(this.graph, neighbor): any);
-        }
-      });
-    return result;
+  issueByNumber(number: number): ?Issue {
+    for (const {neighbor} of this.graph.neighborhood(this.nodeAddress, {
+      edgeType: CONTAINS_EDGE_TYPE,
+      direction: "OUT",
+      nodeType: ISSUE_NODE_TYPE,
+    })) {
+      const node = this.graph.node(neighbor);
+      if (node.payload.number === number) {
+        return new Issue(this.graph, neighbor);
+      }
+    }
+  }
+
+  pullRequestByNumber(number: number): ?PullRequest {
+    for (const {neighbor} of this.graph.neighborhood(this.nodeAddress, {
+      edgeType: CONTAINS_EDGE_TYPE,
+      direction: "OUT",
+      nodeType: PULL_REQUEST_NODE_TYPE,
+    })) {
+      const node = this.graph.node(neighbor);
+      if (node.payload.number === number) {
+        return new PullRequest(this.graph, neighbor);
+      }
+    }
   }
 
   owner(): string {
