@@ -3,7 +3,7 @@
 import React from "react";
 import {BrowserRouter as Router, Route, NavLink} from "react-router-dom";
 
-import ArtifactEditor from "../plugins/artifact/editor/App";
+import ArtifactEditor from "@/plugins/artifact/editor/App";
 import CredExplorer from "./credExplorer/App";
 
 export default class App extends React.Component<{}> {

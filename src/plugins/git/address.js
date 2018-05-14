@@ -1,6 +1,6 @@
 // @flow
 
-import type {Address} from "../../core/address";
+import type {Address} from "@/core/address";
 import type {EdgeType, NodeType} from "./types";
 import {COMMIT_NODE_TYPE, GIT_PLUGIN_NAME} from "./types";
 

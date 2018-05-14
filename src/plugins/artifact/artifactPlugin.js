@@ -1,7 +1,7 @@
 // @flow
 
-import type {Address} from "../../core/address";
-import type {Graph} from "../../core/graph";
+import type {Address} from "@/core/address";
+import type {Graph} from "@/core/graph";
 
 export const ARTIFACT_PLUGIN_NAME = "sourcecred/artifact-beta";
 

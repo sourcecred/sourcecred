@@ -3,13 +3,13 @@
 import React from "react";
 import stringify from "json-stable-stringify";
 
-import {Graph} from "../../core/graph";
-import type {Address} from "../../core/address";
-import {AddressMap} from "../../core/address";
-import {PLUGIN_NAME as GITHUB_PLUGIN_NAME} from "../../plugins/github/pluginName";
-import {GIT_PLUGIN_NAME} from "../../plugins/git/types";
-import {nodeDescription as githubNodeDescription} from "../../plugins/github/render";
-import {nodeDescription as gitNodeDescription} from "../../plugins/git/render";
+import {Graph} from "@/core/graph";
+import type {Address} from "@/core/address";
+import {AddressMap} from "@/core/address";
+import {PLUGIN_NAME as GITHUB_PLUGIN_NAME} from "@/plugins/github/pluginName";
+import {GIT_PLUGIN_NAME} from "@/plugins/git/types";
+import {nodeDescription as githubNodeDescription} from "@/plugins/github/render";
+import {nodeDescription as gitNodeDescription} from "@/plugins/git/render";
 import type {PagerankResult} from "./basicPagerank";
 
 type Props = {

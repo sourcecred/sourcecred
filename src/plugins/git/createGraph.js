@@ -1,6 +1,6 @@
 // @flow
 
-import type {Edge, Node} from "../../core/graph";
+import type {Edge, Node} from "@/core/graph";
 import type {
   BecomesEdgePayload,
   BlobNodePayload,
@@ -16,7 +16,7 @@ import type {
   TreeEntryNodePayload,
   TreeNodePayload,
 } from "./types";
-import {Graph, edgeID} from "../../core/graph";
+import {Graph, edgeID} from "@/core/graph";
 import {
   BECOMES_EDGE_TYPE,
   BLOB_NODE_TYPE,

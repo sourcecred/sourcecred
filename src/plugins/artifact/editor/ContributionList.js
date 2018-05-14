@@ -2,9 +2,9 @@
 
 import React from "react";
 
-import type {Node} from "../../../core/graph";
+import type {Node} from "@/core/graph";
 import {AdapterSet} from "./adapterSet";
-import {Graph} from "../../../core/graph";
+import {Graph} from "@/core/graph";
 
 type Props = {
   graph: ?Graph<any, any>,

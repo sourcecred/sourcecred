@@ -15,9 +15,9 @@
  */
 import stringify from "json-stable-stringify";
 
-import {Graph} from "../../core/graph";
-import type {Node} from "../../core/graph";
-import type {Address} from "../../core/address";
+import {Graph} from "@/core/graph";
+import type {Node} from "@/core/graph";
+import type {Address} from "@/core/address";
 import type {
   AuthorNodePayload,
   AuthorSubtype,
@@ -50,7 +50,7 @@ import {
 
 import {PLUGIN_NAME} from "./pluginName";
 
-import {COMMIT_NODE_TYPE} from "../git/types";
+import {COMMIT_NODE_TYPE} from "@/plugins/git/types";
 
 export type Entity =
   | Repository

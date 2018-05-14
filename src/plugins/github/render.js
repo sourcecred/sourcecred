@@ -4,8 +4,8 @@
  * Methods for rendering and displaying GitHub nodes.
  */
 import stringify from "json-stable-stringify";
-import {Graph} from "../../core/graph";
-import type {Address} from "../../core/address";
+import {Graph} from "@/core/graph";
+import type {Address} from "@/core/address";
 import {
   asEntity,
   Issue,

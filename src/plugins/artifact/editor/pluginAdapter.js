@@ -1,6 +1,6 @@
 // @flow
 
-import type {Graph, Node} from "../../../core/graph";
+import type {Graph, Node} from "@/core/graph";
 import type {ComponentType} from "react";
 
 export interface PluginAdapter<-NodePayload> {

@@ -5,11 +5,11 @@ import {StyleSheet, css} from "aphrodite/no-important";
 
 import "./pluginAdapter";
 
-import type {Graph, Node} from "../../../core/graph";
+import type {Graph, Node} from "@/core/graph";
 import type {
   NodePayload as GithubNodePayload,
   EdgePayload as GithubEdgePayload,
-} from "../../github/types";
+} from "@/plugins/github/types";
 import type {
   NodePayload as ArtifactNodePayload,
   EdgePayload as ArtifactEdgePayload,

@@ -7,8 +7,8 @@ import type {
   TreeEntryNodePayload,
   SubmoduleCommitPayload,
 } from "./types";
-import type {Node} from "../../core/graph";
-import {Graph} from "../../core/graph";
+import type {Node} from "@/core/graph";
+import {Graph} from "@/core/graph";
 import {_makeAddress, commitAddress} from "./address";
 import {nodeDescription} from "./render";
 import {submoduleCommitId, treeEntryId} from "./types";

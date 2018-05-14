@@ -5,7 +5,7 @@ import fs from "fs";
 import stringify from "json-stable-stringify";
 import {promisify} from "util";
 
-import {Graph} from "../../core/graph";
+import {Graph} from "@/core/graph";
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will

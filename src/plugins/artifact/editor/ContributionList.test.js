@@ -5,12 +5,12 @@ import React from "react";
 import {shallow} from "enzyme";
 import enzymeToJSON from "enzyme-to-json";
 
-import type {Address} from "../../../core/address";
-import type {Node} from "../../../core/graph";
+import type {Address} from "@/core/address";
+import type {Node} from "@/core/graph";
 import type {PluginAdapter} from "./pluginAdapter";
 import {AdapterSet} from "./adapterSet";
 import {ContributionList} from "./ContributionList";
-import {Graph} from "../../../core/graph";
+import {Graph} from "@/core/graph";
 
 require("../../../app/testUtil").configureAphrodite();
 require("../../../app/testUtil").configureEnzyme();

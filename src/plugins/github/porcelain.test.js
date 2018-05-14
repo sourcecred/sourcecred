@@ -1,6 +1,6 @@
 // @flow
 
-import type {Address} from "../../core/address";
+import type {Address} from "@/core/address";
 import {parse} from "./parser";
 import exampleRepoData from "./demoData/example-github.json";
 import type {Entity} from "./porcelain";

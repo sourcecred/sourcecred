@@ -5,8 +5,8 @@ import type {
   FragmentDefinition,
   Selection,
   QueryDefinition,
-} from "../../graphql/queries";
-import {build} from "../../graphql/queries";
+} from "@/graphql/queries";
+import {build} from "@/graphql/queries";
 
 /**
  * This module defines the GraphQL query that we use to access the
