@@ -90,10 +90,11 @@ if (env === "test") {
       // JSX, Flow
       require.resolve("babel-preset-react"),
     ],
-    plugins: plugins.concat([
+    plugins: [
+      ...plugins,
       // Compiles import() to a deferred require()
       require.resolve("babel-plugin-dynamic-import-node"),
-    ]),
+    ],
   };
 } else {
   module.exports = {
@@ -119,26 +120,25 @@ if (env === "test") {
       // JSX, Flow
       require.resolve("babel-preset-react"),
     ],
-    plugins: plugins.concat(
-      backend
+    plugins: [
+      ...plugins,
+      ...(backend
         ? [
             // Must come before `babel-plugin-transform-regenerator`.
             require.resolve("babel-plugin-transform-es2015-for-of"),
           ]
-        : [],
+        : []),
+      // function* () { yield 42; yield 43; }
       [
-        // function* () { yield 42; yield 43; }
-        [
-          require.resolve("babel-plugin-transform-regenerator"),
-          {
-            // Async functions are converted to generators by babel-preset-env
-            async: false,
-          },
-        ],
-        // Adds syntax support for import()
-        require.resolve("babel-plugin-syntax-dynamic-import"),
-      ]
-    ),
+        require.resolve("babel-plugin-transform-regenerator"),
+        {
+          // Async functions are converted to generators by babel-preset-env
+          async: false,
+        },
+      ],
+      // Adds syntax support for import()
+      require.resolve("babel-plugin-syntax-dynamic-import"),
+    ],
   };
 
   if (env === "production") {
