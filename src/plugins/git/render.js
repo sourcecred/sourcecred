@@ -1,14 +1,15 @@
 // @flow
 
-import type {Address} from "../../core/address";
-import type {Graph} from "../../core/graph";
-import type {NodeType, SubmoduleCommitPayload} from "./types";
+import {NodeReference} from "../../core/porcelain";
+import {SubmoduleCommitReference, GitReference} from "./porcelain";
 
 /**
  * Describe a node provided by the Git plugin.
  */
-export function nodeDescription(graph: Graph<any, any>, address: Address) {
-  const type: NodeType = (address.type: any);
+export function nodeDescription(nodeReference: NodeReference<any>) {
+  const gReference = new GitReference(nodeReference);
+  const type = gReference.type();
+  const address = gReference.address();
   switch (type) {
     case "COMMIT":
       return `commit ${address.id}`;
@@ -17,8 +18,13 @@ export function nodeDescription(graph: Graph<any, any>, address: Address) {
     case "BLOB":
       return `blob ${address.id}`;
     case "SUBMODULE_COMMIT": {
-      const payload: SubmoduleCommitPayload = graph.node(address).payload;
-      return `submodule commit ${payload.hash} in ${payload.url}`;
+      const scRef = new SubmoduleCommitReference(gReference);
+      const scPorcelain = scRef.get();
+      if (scPorcelain != null) {
+        return `submodule commit ${scPorcelain.hash()} in ${scPorcelain.url()}`;
+      } else {
+        return `submodule commit [unknown]`;
+      }
     }
     case "TREE_ENTRY":
       return `entry ${address.id}`;
