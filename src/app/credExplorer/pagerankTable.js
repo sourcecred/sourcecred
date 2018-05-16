@@ -31,7 +31,7 @@ function nodeDescription(ref) {
       return githubNodeDescription(ref);
     }
     case GIT_PLUGIN_NAME: {
-      return gitNodeDescription(ref.graph(), ref.address());
+      return gitNodeDescription(ref);
     }
     default: {
       return stringify(ref.address());

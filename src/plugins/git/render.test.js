@@ -9,6 +9,7 @@ import type {
 } from "./types";
 import type {Node} from "../../core/graph";
 import {Graph} from "../../core/graph";
+import {NodeReference} from "../../core/porcelain";
 import {_makeAddress, commitAddress} from "./address";
 import {nodeDescription} from "./render";
 import {submoduleCommitId, treeEntryId} from "./types";
@@ -19,9 +20,8 @@ describe("nodeDescription", () => {
       address: commitAddress("cafebabe"),
       payload: (({}: any): {||}),
     };
-    expect(nodeDescription(new Graph().addNode(node), node.address)).toEqual(
-      "commit cafebabe"
-    );
+    const ref = new NodeReference(new Graph().addNode(node), node.address);
+    expect(nodeDescription(ref)).toEqual("commit cafebabe");
   });
 
   it("describes trees", () => {
@@ -29,9 +29,8 @@ describe("nodeDescription", () => {
       address: _makeAddress("TREE", "deadbeef"),
       payload: (({}: any): {||}),
     };
-    expect(nodeDescription(new Graph().addNode(node), node.address)).toEqual(
-      "tree deadbeef"
-    );
+    const ref = new NodeReference(new Graph().addNode(node), node.address);
+    expect(nodeDescription(ref)).toEqual("tree deadbeef");
   });
 
   it("describes blobs", () => {
@@ -39,9 +38,8 @@ describe("nodeDescription", () => {
       address: _makeAddress("BLOB", "01010101"),
       payload: (({}: any): {||}),
     };
-    expect(nodeDescription(new Graph().addNode(node), node.address)).toEqual(
-      "blob 01010101"
-    );
+    const ref = new NodeReference(new Graph().addNode(node), node.address);
+    expect(nodeDescription(ref)).toEqual("blob 01010101");
   });
 
   it("describes submodule commits", () => {
@@ -51,9 +49,8 @@ describe("nodeDescription", () => {
       address: _makeAddress("SUBMODULE_COMMIT", submoduleCommitId(hash, url)),
       payload: {hash, url},
     };
-    expect(nodeDescription(new Graph().addNode(node), node.address)).toEqual(
-      `submodule commit ${hash} in ${url}`
-    );
+    const ref = new NodeReference(new Graph().addNode(node), node.address);
+    expect(nodeDescription(ref)).toEqual(`submodule commit ${hash} in ${url}`);
   });
 
   it("describes tree entries", () => {
@@ -63,8 +60,7 @@ describe("nodeDescription", () => {
       address: _makeAddress("TREE_ENTRY", treeEntryId(tree, name)),
       payload: {name},
     };
-    expect(nodeDescription(new Graph().addNode(node), node.address)).toEqual(
-      `entry ${tree}:${name}`
-    );
+    const ref = new NodeReference(new Graph().addNode(node), node.address);
+    expect(nodeDescription(ref)).toEqual(`entry ${tree}:${name}`);
   });
 });
