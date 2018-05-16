@@ -15,9 +15,9 @@
  */
 import stringify from "json-stable-stringify";
 
-import {Graph} from "../../core/graph";
-import type {Node} from "../../core/graph";
 import type {Address} from "../../core/address";
+import {Graph} from "../../core/graph";
+import {NodeReference, NodePorcelain} from "../../core/porcelain";
 import type {
   AuthorNodePayload,
   AuthorSubtype,
@@ -44,36 +44,26 @@ import {
   PULL_REQUEST_NODE_TYPE,
   PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
   PULL_REQUEST_REVIEW_NODE_TYPE,
-  REPOSITORY_NODE_TYPE,
   REFERENCES_EDGE_TYPE,
+  REPOSITORY_NODE_TYPE,
 } from "./types";
 
 import {PLUGIN_NAME} from "./pluginName";
 
 import {COMMIT_NODE_TYPE} from "../git/types";
 
-export type Entity =
-  | Repository
-  | Issue
-  | PullRequest
-  | Comment
-  | Author
-  | PullRequestReview
-  | PullRequestReviewComment;
-
-function assertEntityType(e: Entity, t: NodeType) {
-  if (e.type() !== t) {
+function assertAddressType(address: Address, t: NodeType) {
+  if (address.type !== t) {
     throw new Error(
-      `Expected entity at ${stringify(e.address())} to have type ${t}`
+      `Expected entity at ${stringify(address)} to have type ${t}`
     );
   }
 }
 
-export function asEntity(
-  g: Graph<NodePayload, EdgePayload>,
-  addr: Address
-): Entity {
-  const type: NodeType = (addr.type: any);
+function asGithubReference(
+  ref: NodeReference<any>
+): GithubReference<NodePayload> {
+  const addr = ref.address();
   if (addr.pluginName !== PLUGIN_NAME) {
     throw new Error(
       `Tried to make GitHub porcelain, but got the wrong plugin name: ${stringify(
@@ -81,21 +71,22 @@ export function asEntity(
       )}`
     );
   }
+  const type: NodeType = (addr.type: any);
   switch (type) {
     case "ISSUE":
-      return new Issue(g, addr);
+      return new IssueReference(ref);
     case "PULL_REQUEST":
-      return new PullRequest(g, addr);
+      return new PullRequestReference(ref);
     case "COMMENT":
-      return new Comment(g, addr);
+      return new CommentReference(ref);
     case "AUTHOR":
-      return new Author(g, addr);
+      return new AuthorReference(ref);
     case "PULL_REQUEST_REVIEW":
-      return new PullRequestReview(g, addr);
+      return new PullRequestReviewReference(ref);
     case "PULL_REQUEST_REVIEW_COMMENT":
-      return new PullRequestReviewComment(g, addr);
+      return new PullRequestReviewCommentReference(ref);
     case "REPOSITORY":
-      return new Repository(g, addr);
+      return new RepositoryReference(ref);
     default:
       // eslint-disable-next-line no-unused-expressions
       (type: empty);
@@ -107,7 +98,7 @@ export function asEntity(
   }
 }
 
-export class Porcelain {
+export class GraphPorcelain {
   graph: Graph<NodePayload, EdgePayload>;
 
   constructor(graph: Graph<NodePayload, EdgePayload>) {
@@ -115,216 +106,261 @@ export class Porcelain {
   }
 
   /* Return all the repositories in the graph */
-  repositories(): Repository[] {
+  repositories(): RepositoryReference[] {
     return this.graph
       .nodes({type: REPOSITORY_NODE_TYPE})
-      .map((n) => new Repository(this.graph, n.address));
+      .map(
+        (n) => new RepositoryReference(new NodeReference(this.graph, n.address))
+      );
   }
 
   /* Return the repository with the given owner and name */
-  repository(owner: string, name: string): Repository {
-    const repo = this.repositories().filter(
-      (r) => r.owner() === owner && r.name() === name
-    );
-    if (repo.length > 1) {
-      throw new Error(
-        `Unexpectedly found multiple repositories named ${owner}/${name}`
-      );
+  repository(owner: string, name: string): ?RepositoryReference {
+    for (const repo of this.repositories()) {
+      const repoNode = repo.get();
+      if (
+        repoNode != null &&
+        repoNode.owner() === owner &&
+        repoNode.name() === name
+      ) {
+        return repo;
+      }
     }
-    return repo[0];
-  }
-
-  authors(): Author[] {
-    return this.graph
-      .nodes({type: AUTHOR_NODE_TYPE})
-      .map((n) => new Author(this.graph, n.address));
   }
 }
 
-class GithubEntity<T: NodePayload> {
-  graph: Graph<NodePayload, EdgePayload>;
-  nodeAddress: Address;
-
-  constructor(graph: Graph<NodePayload, EdgePayload>, nodeAddress: Address) {
-    this.graph = graph;
-    this.nodeAddress = nodeAddress;
-  }
-
-  node(): Node<T> {
-    return (this.graph.node(this.nodeAddress): Node<any>);
-  }
-
-  url(): string {
-    return this.node().payload.url;
+export class GithubReference<+T: NodePayload> extends NodeReference<T> {
+  constructor(ref: NodeReference<any>) {
+    const addr = ref.address();
+    if (addr.pluginName !== PLUGIN_NAME) {
+      throw new Error(
+        `Wrong plugin name ${addr.pluginName} for GitHub plugin!`
+      );
+    }
+    super(ref.graph(), addr);
   }
 
   type(): NodeType {
-    return (this.nodeAddress.type: any);
+    return ((super.type(): string): any);
   }
 
-  address(): Address {
-    return this.nodeAddress;
+  get(): ?GithubPorcelain<T> {
+    const nodePorcelain = super.get();
+    if (nodePorcelain != null) {
+      return new GithubPorcelain(nodePorcelain);
+    }
   }
 }
 
-export class Repository extends GithubEntity<RepositoryNodePayload> {
-  static from(e: Entity): Repository {
-    assertEntityType(e, REPOSITORY_NODE_TYPE);
-    return (e: any);
+export class GithubPorcelain<+T: NodePayload> extends NodePorcelain<T> {
+  constructor(nodePorcelain: NodePorcelain<any>) {
+    if (nodePorcelain.ref().address().pluginName !== PLUGIN_NAME) {
+      throw new Error(
+        `Wrong plugin name ${
+          nodePorcelain.ref().address().pluginName
+        } for GitHub plugin!`
+      );
+    }
+    super(nodePorcelain.ref(), nodePorcelain.node());
   }
 
-  issueByNumber(number: number): ?Issue {
-    for (const {neighbor} of this.graph.neighborhood(this.nodeAddress, {
+  url(): string {
+    return this.payload().url;
+  }
+}
+
+export class RepositoryReference extends GithubReference<
+  RepositoryNodePayload
+> {
+  constructor(ref: NodeReference<any>) {
+    super(ref);
+    assertAddressType(ref.address(), REPOSITORY_NODE_TYPE);
+  }
+
+  issueByNumber(number: number): ?IssueReference {
+    const neighbors = this.neighbors({
       edgeType: CONTAINS_EDGE_TYPE,
       direction: "OUT",
       nodeType: ISSUE_NODE_TYPE,
-    })) {
-      const node = this.graph.node(neighbor);
-      if (node.payload.number === number) {
-        return new Issue(this.graph, neighbor);
+    });
+    for (const {ref} of neighbors) {
+      const issueRef = new IssueReference(ref);
+      const node = issueRef.get();
+      if (node != null && node.number() === number) {
+        return issueRef;
       }
     }
   }
 
-  pullRequestByNumber(number: number): ?PullRequest {
-    for (const {neighbor} of this.graph.neighborhood(this.nodeAddress, {
+  pullRequestByNumber(number: number): ?PullRequestReference {
+    const neighbors = this.neighbors({
       edgeType: CONTAINS_EDGE_TYPE,
       direction: "OUT",
       nodeType: PULL_REQUEST_NODE_TYPE,
-    })) {
-      const node = this.graph.node(neighbor);
-      if (node.payload.number === number) {
-        return new PullRequest(this.graph, neighbor);
+    });
+    for (const {ref} of neighbors) {
+      const pullRequest = new PullRequestReference(ref);
+      const node = pullRequest.get();
+      if (node != null && node.number() === number) {
+        return pullRequest;
       }
     }
   }
 
-  owner(): string {
-    return this.node().payload.owner;
+  issues(): IssueReference[] {
+    return this.neighbors({
+      edgeType: CONTAINS_EDGE_TYPE,
+      direction: "OUT",
+      nodeType: ISSUE_NODE_TYPE,
+    }).map(({ref}) => new IssueReference(ref));
   }
 
-  name(): string {
-    return this.node().payload.name;
+  pullRequests(): PullRequestReference[] {
+    return this.neighbors({
+      edgeType: CONTAINS_EDGE_TYPE,
+      direction: "OUT",
+      nodeType: PULL_REQUEST_NODE_TYPE,
+    }).map(({ref}) => new PullRequestReference(ref));
   }
 
-  issues(): Issue[] {
-    return this.graph
-      .neighborhood(this.nodeAddress, {
-        direction: "OUT",
-        edgeType: CONTAINS_EDGE_TYPE,
-        nodeType: ISSUE_NODE_TYPE,
-      })
-      .map(({neighbor}) => new Issue(this.graph, neighbor));
-  }
-
-  pullRequests(): PullRequest[] {
-    return this.graph
-      .neighborhood(this.nodeAddress, {
-        direction: "OUT",
-        edgeType: CONTAINS_EDGE_TYPE,
-        nodeType: PULL_REQUEST_NODE_TYPE,
-      })
-      .map(({neighbor}) => new PullRequest(this.graph, neighbor));
+  get(): ?RepositoryPorcelain {
+    const nodePorcelain = super.get();
+    if (nodePorcelain != null) {
+      return new RepositoryPorcelain(nodePorcelain);
+    }
   }
 }
 
-class Post<
+export class RepositoryPorcelain extends GithubPorcelain<
+  RepositoryNodePayload
+> {
+  constructor(nodePorcelain: NodePorcelain<any>) {
+    assertAddressType(nodePorcelain.ref().address(), REPOSITORY_NODE_TYPE);
+    super(nodePorcelain);
+  }
+
+  owner(): string {
+    return this.payload().owner;
+  }
+
+  name(): string {
+    return this.payload().name;
+  }
+
+  ref(): RepositoryReference {
+    return new RepositoryReference(super.ref());
+  }
+}
+
+class PostReference<
   T:
     | IssueNodePayload
     | PullRequestNodePayload
     | CommentNodePayload
     | PullRequestReviewNodePayload
     | PullRequestReviewCommentNodePayload
-> extends GithubEntity<T> {
-  authors(): Author[] {
-    return this.graph
-      .neighborhood(this.nodeAddress, {
-        edgeType: AUTHORS_EDGE_TYPE,
-        nodeType: AUTHOR_NODE_TYPE,
-      })
-      .map(({neighbor}) => new Author(this.graph, neighbor));
+> extends GithubReference<T> {
+  authors(): AuthorReference[] {
+    return this.neighbors({
+      edgeType: AUTHORS_EDGE_TYPE,
+      nodeType: AUTHOR_NODE_TYPE,
+    }).map(({ref}) => new AuthorReference(ref));
   }
 
+  references(): GithubReference<NodePayload>[] {
+    return this.neighbors({
+      edgeType: REFERENCES_EDGE_TYPE,
+      direction: "OUT",
+    }).map(({ref}) => asGithubReference(ref));
+  }
+}
+
+class PostPorcelain<
+  T:
+    | IssueNodePayload
+    | PullRequestNodePayload
+    | CommentNodePayload
+    | PullRequestReviewNodePayload
+    | PullRequestReviewCommentNodePayload
+> extends GithubPorcelain<T> {
   body(): string {
-    return this.node().payload.body;
-  }
-
-  references(): Entity[] {
-    return this.graph
-      .neighborhood(this.nodeAddress, {
-        edgeType: REFERENCES_EDGE_TYPE,
-        direction: "OUT",
-      })
-      .map(({neighbor}) => asEntity(this.graph, neighbor));
+    return this.payload().body;
   }
 }
 
-class Commentable<T: IssueNodePayload | PullRequestNodePayload> extends Post<
-  T
-> {
-  comments(): Comment[] {
-    return this.graph
-      .neighborhood(this.nodeAddress, {
-        edgeType: CONTAINS_EDGE_TYPE,
-        nodeType: COMMENT_NODE_TYPE,
-      })
-      .map(({neighbor}) => new Comment(this.graph, neighbor));
+class CommentableReference<
+  T: IssueNodePayload | PullRequestNodePayload
+> extends PostReference<T> {
+  comments(): CommentReference[] {
+    return this.neighbors({
+      edgeType: CONTAINS_EDGE_TYPE,
+      nodeType: COMMENT_NODE_TYPE,
+      direction: "OUT",
+    }).map(({ref}) => new CommentReference(ref));
   }
 }
 
-export class Author extends GithubEntity<AuthorNodePayload> {
-  static from(e: Entity): Author {
-    assertEntityType(e, AUTHOR_NODE_TYPE);
-    return (e: any);
+export class AuthorReference extends GithubReference<AuthorNodePayload> {
+  constructor(ref: NodeReference<any>) {
+    super(ref);
+    assertAddressType(ref.address(), AUTHOR_NODE_TYPE);
   }
 
+  get(): ?AuthorPorcelain {
+    const nodePorcelain = super.get();
+    if (nodePorcelain != null) {
+      return new AuthorPorcelain(nodePorcelain);
+    }
+  }
+}
+
+export class AuthorPorcelain extends GithubPorcelain<AuthorNodePayload> {
+  constructor(nodePorcelain: NodePorcelain<any>) {
+    assertAddressType(nodePorcelain.ref().address(), AUTHOR_NODE_TYPE);
+    super(nodePorcelain);
+  }
   login(): string {
-    return this.node().payload.login;
+    return this.payload().login;
   }
 
   subtype(): AuthorSubtype {
-    return this.node().payload.subtype;
+    return this.payload().subtype;
+  }
+
+  ref(): AuthorReference {
+    return new AuthorReference(super.ref());
   }
 }
 
-export class PullRequest extends Commentable<PullRequestNodePayload> {
-  static from(e: Entity): PullRequest {
-    assertEntityType(e, PULL_REQUEST_NODE_TYPE);
-    return (e: any);
+export class PullRequestReference extends CommentableReference<
+  PullRequestNodePayload
+> {
+  constructor(ref: NodeReference<any>) {
+    super(ref);
+    assertAddressType(ref.address(), PULL_REQUEST_NODE_TYPE);
   }
 
-  number(): number {
-    return this.node().payload.number;
-  }
-
-  title(): string {
-    return this.node().payload.title;
-  }
-
-  reviews(): PullRequestReview[] {
-    return this.graph
-      .neighborhood(this.nodeAddress, {
-        edgeType: CONTAINS_EDGE_TYPE,
-        nodeType: PULL_REQUEST_REVIEW_NODE_TYPE,
-      })
-      .map(({neighbor}) => new PullRequestReview(this.graph, neighbor));
-  }
-
-  parent(): Repository {
+  parent(): RepositoryReference {
     return (_parent(this): any);
   }
 
+  reviews(): PullRequestReviewReference[] {
+    return this.neighbors({
+      edgeType: CONTAINS_EDGE_TYPE,
+      nodeType: PULL_REQUEST_REVIEW_NODE_TYPE,
+      direction: "OUT",
+    }).map(({ref}) => new PullRequestReviewReference(ref));
+  }
+
   mergeCommitHash(): ?string {
-    const mergeEdge = this.graph
-      .neighborhood(this.nodeAddress, {
-        edgeType: MERGED_AS_EDGE_TYPE,
-        nodeType: COMMIT_NODE_TYPE,
-        direction: "OUT",
-      })
-      .map(({edge}) => edge);
+    const mergeEdge = this.neighbors({
+      edgeType: MERGED_AS_EDGE_TYPE,
+      nodeType: COMMIT_NODE_TYPE,
+      direction: "OUT",
+    }).map(({edge}) => edge);
     if (mergeEdge.length > 1) {
       throw new Error(
-        `Node at ${this.nodeAddress.id} has too many MERGED_AS edges`
+        `Node at ${stringify(this.address())} has too many MERGED_AS edges`
       );
     }
     if (mergeEdge.length === 0) {
@@ -333,81 +369,188 @@ export class PullRequest extends Commentable<PullRequestNodePayload> {
     const payload: MergedAsEdgePayload = (mergeEdge[0].payload: any);
     return payload.hash;
   }
+
+  get(): ?PullRequestPorcelain {
+    const nodePorcelain = super.get();
+    if (nodePorcelain != null) {
+      return new PullRequestPorcelain(nodePorcelain);
+    }
+  }
 }
 
-export class Issue extends Commentable<IssueNodePayload> {
-  static from(e: Entity): Issue {
-    assertEntityType(e, ISSUE_NODE_TYPE);
-    return (e: any);
+export class PullRequestPorcelain extends PostPorcelain<
+  PullRequestNodePayload
+> {
+  constructor(nodePorcelain: NodePorcelain<any>) {
+    assertAddressType(nodePorcelain.ref().address(), PULL_REQUEST_NODE_TYPE);
+    super(nodePorcelain);
   }
-
   number(): number {
-    return this.node().payload.number;
+    return this.payload().number;
   }
 
   title(): string {
-    return this.node().payload.title;
+    return this.payload().title;
   }
 
-  parent(): Repository {
-    return (_parent(this): any);
-  }
-}
-
-export class Comment extends Post<CommentNodePayload> {
-  static from(e: Entity): Comment {
-    assertEntityType(e, COMMENT_NODE_TYPE);
-    return (e: any);
-  }
-
-  parent(): Issue | PullRequest {
-    return (_parent(this): any);
+  ref(): PullRequestReference {
+    return new PullRequestReference(super.ref());
   }
 }
 
-export class PullRequestReview extends Post<PullRequestReviewNodePayload> {
-  static from(e: Entity): PullRequestReview {
-    assertEntityType(e, PULL_REQUEST_REVIEW_NODE_TYPE);
-    return (e: any);
+export class IssueReference extends CommentableReference<IssueNodePayload> {
+  constructor(ref: NodeReference<any>) {
+    super(ref);
+    assertAddressType(ref.address(), ISSUE_NODE_TYPE);
+  }
+
+  parent(): RepositoryReference {
+    return (_parent(this): any);
+  }
+
+  get(): ?IssuePorcelain {
+    const nodePorcelain = super.get();
+    if (nodePorcelain != null) {
+      return new IssuePorcelain(nodePorcelain);
+    }
+  }
+}
+
+export class IssuePorcelain extends PostPorcelain<IssueNodePayload> {
+  constructor(nodePorcelain: NodePorcelain<any>) {
+    assertAddressType(nodePorcelain.ref().address(), ISSUE_NODE_TYPE);
+    super(nodePorcelain);
+  }
+  number(): number {
+    return this.payload().number;
+  }
+
+  title(): string {
+    return this.payload().title;
+  }
+
+  ref(): IssueReference {
+    return new IssueReference(super.ref());
+  }
+}
+
+export class CommentReference extends PostReference<CommentNodePayload> {
+  constructor(ref: NodeReference<any>) {
+    super(ref);
+    assertAddressType(ref.address(), COMMENT_NODE_TYPE);
+  }
+
+  parent(): IssueReference | PullRequestReference {
+    return (_parent(this): any);
+  }
+
+  get(): ?CommentPorcelain {
+    const nodePorcelain = super.get();
+    if (nodePorcelain != null) {
+      return new CommentPorcelain(nodePorcelain);
+    }
+  }
+}
+
+export class CommentPorcelain extends PostPorcelain<CommentNodePayload> {
+  constructor(nodePorcelain: NodePorcelain<any>) {
+    assertAddressType(nodePorcelain.ref().address(), COMMENT_NODE_TYPE);
+    super(nodePorcelain);
+  }
+  ref(): CommentReference {
+    return new CommentReference(super.ref());
+  }
+}
+
+export class PullRequestReviewReference extends PostReference<
+  PullRequestReviewNodePayload
+> {
+  constructor(ref: NodeReference<any>) {
+    super(ref);
+    assertAddressType(ref.address(), PULL_REQUEST_REVIEW_NODE_TYPE);
+  }
+
+  parent(): PullRequestReference {
+    return (_parent(this): any);
+  }
+
+  comments(): PullRequestReviewCommentReference[] {
+    return this.neighbors({
+      edgeType: CONTAINS_EDGE_TYPE,
+      nodeType: PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
+      direction: "OUT",
+    }).map(({ref}) => new PullRequestReviewCommentReference(ref));
+  }
+
+  get(): ?PullRequestReviewPorcelain {
+    const nodePorcelain = super.get();
+    if (nodePorcelain != null) {
+      return new PullRequestReviewPorcelain(nodePorcelain);
+    }
+  }
+}
+
+export class PullRequestReviewPorcelain extends PostPorcelain<
+  PullRequestReviewNodePayload
+> {
+  constructor(nodePorcelain: NodePorcelain<any>) {
+    assertAddressType(
+      nodePorcelain.ref().address(),
+      PULL_REQUEST_REVIEW_NODE_TYPE
+    );
+    super(nodePorcelain);
   }
 
   state(): PullRequestReviewState {
-    return this.node().payload.state;
+    return this.payload().state;
   }
 
-  parent(): PullRequest {
-    return (_parent(this): any);
-  }
-
-  comments(): PullRequestReviewComment[] {
-    return this.graph
-      .neighborhood(this.nodeAddress, {
-        edgeType: CONTAINS_EDGE_TYPE,
-        nodeType: PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE,
-      })
-      .map(({neighbor}) => new PullRequestReviewComment(this.graph, neighbor));
+  ref(): PullRequestReviewReference {
+    return new PullRequestReviewReference(super.ref());
   }
 }
 
-export class PullRequestReviewComment extends Post<
+export class PullRequestReviewCommentReference extends PostReference<
   PullRequestReviewCommentNodePayload
 > {
-  static from(e: Entity): PullRequestReviewComment {
-    assertEntityType(e, PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE);
-    return (e: any);
+  constructor(ref: NodeReference<any>) {
+    super(ref);
+    assertAddressType(ref.address(), PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE);
   }
-  parent(): PullRequestReview {
+
+  parent(): PullRequestReviewReference {
     return (_parent(this): any);
+  }
+
+  get(): ?PullRequestReviewCommentPorcelain {
+    const nodePorcelain = super.get();
+    if (nodePorcelain != null) {
+      return new PullRequestReviewCommentPorcelain(nodePorcelain);
+    }
   }
 }
 
-function _parent(x: Entity): Entity {
-  const parents = x.graph.neighborhood(x.address(), {
-    edgeType: "CONTAINS",
-    direction: "IN",
-  });
+export class PullRequestReviewCommentPorcelain extends PostPorcelain<
+  PullRequestReviewCommentNodePayload
+> {
+  constructor(nodePorcelain: NodePorcelain<any>) {
+    assertAddressType(
+      nodePorcelain.ref().address(),
+      PULL_REQUEST_REVIEW_COMMENT_NODE_TYPE
+    );
+    super(nodePorcelain);
+  }
+  ref(): PullRequestReviewCommentReference {
+    return new PullRequestReviewCommentReference(super.ref());
+  }
+}
+
+function _parent(
+  x: GithubReference<NodePayload>
+): GithubReference<NodePayload> {
+  const parents = x.neighbors({edgeType: CONTAINS_EDGE_TYPE, direction: "IN"});
   if (parents.length !== 1) {
     throw new Error(`Bad parent relationships for ${stringify(x.address())}`);
   }
-  return asEntity(x.graph, parents[0].neighbor);
+  return asGithubReference(parents[0].ref);
 }

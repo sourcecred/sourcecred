@@ -6,6 +6,7 @@ import stringify from "json-stable-stringify";
 import {Graph} from "../../core/graph";
 import type {Address} from "../../core/address";
 import {AddressMap} from "../../core/address";
+import {NodeReference} from "../../core/porcelain";
 import {PLUGIN_NAME as GITHUB_PLUGIN_NAME} from "../../plugins/github/pluginName";
 import {GIT_PLUGIN_NAME} from "../../plugins/git/types";
 import {nodeDescription as githubNodeDescription} from "../../plugins/github/render";
@@ -24,16 +25,16 @@ type State = {
   |},
 };
 
-function nodeDescription(graph, address) {
-  switch (address.pluginName) {
+function nodeDescription(ref) {
+  switch (ref.address().pluginName) {
     case GITHUB_PLUGIN_NAME: {
-      return githubNodeDescription(graph, address);
+      return githubNodeDescription(ref);
     }
     case GIT_PLUGIN_NAME: {
-      return gitNodeDescription(graph, address);
+      return gitNodeDescription(ref.graph(), ref.address());
     }
     default: {
-      return stringify(address);
+      return stringify(ref.address());
     }
   }
 }
@@ -184,7 +185,7 @@ class RecursiveTable extends React.Component<RTProps, RTState> {
           >
             {expanded ? "\u2212" : "+"}
           </button>
-          {nodeDescription(graph, address)}
+          {nodeDescription(new NodeReference(graph, address))}
         </td>
         <td>{(score * 100).toPrecision(3)}</td>
         <td>{Math.log(score).toPrecision(3)}</td>

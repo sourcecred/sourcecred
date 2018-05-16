@@ -1,20 +1,26 @@
 // @flow
 
-import type {Address} from "../../core/address";
 import {parse} from "./parser";
 import exampleRepoData from "./demoData/example-github.json";
-import type {Entity} from "./porcelain";
 import {
-  asEntity,
-  Porcelain,
-  Repository,
-  Issue,
-  PullRequest,
-  PullRequestReview,
-  PullRequestReviewComment,
-  Comment,
-  Author,
+  AuthorReference,
+  AuthorPorcelain,
+  CommentReference,
+  CommentPorcelain,
+  GithubReference,
+  GraphPorcelain,
+  IssueReference,
+  IssuePorcelain,
+  PullRequestReference,
+  PullRequestPorcelain,
+  PullRequestReviewReference,
+  PullRequestReviewPorcelain,
+  PullRequestReviewCommentReference,
+  PullRequestReviewCommentPorcelain,
+  RepositoryReference,
+  RepositoryPorcelain,
 } from "./porcelain";
+import type {NodePayload} from "./types";
 import {
   AUTHOR_NODE_TYPE,
   COMMENT_NODE_TYPE,
@@ -26,14 +32,19 @@ import {
 
 import {nodeDescription} from "./render";
 
-import {PLUGIN_NAME} from "./pluginName";
-
 describe("GitHub porcelain", () => {
   const graph = parse(exampleRepoData);
-  const porcelain = new Porcelain(graph);
-  const repo = porcelain.repository("sourcecred", "example-github");
+  const porcelain = new GraphPorcelain(graph);
+  const repoRef = porcelain.repository("sourcecred", "example-github");
+  if (repoRef == null) {
+    throw new Error("Where did the repository go?");
+  }
+  const repo = repoRef.get();
+  if (repo == null) {
+    throw new Error("Where did the repository go?");
+  }
 
-  function expectPropertiesToMatchSnapshot<T: Entity>(
+  function expectPropertiesToMatchSnapshot<T: {+url: () => string}>(
     entities: $ReadOnlyArray<T>,
     extractor: (T) => mixed
   ) {
@@ -47,36 +58,75 @@ describe("GitHub porcelain", () => {
     expect(urlToProperty).toMatchSnapshot();
   }
 
-  function issueByNumber(n: number): Issue {
-    const result = repo.issueByNumber(n);
+  function issueByNumber(n: number): IssuePorcelain {
+    const ref = repo.ref().issueByNumber(n);
+    if (ref == null) {
+      throw new Error(`Expected issue #${n} to exist`);
+    }
+    const result = ref.get();
     if (result == null) {
-      throw new Error(`Expected Issue #${n} to exist`);
+      throw new Error(`Expected issue #${n} to exist`);
     }
     return result;
   }
 
-  function prByNumber(n: number): PullRequest {
-    const result = repo.pullRequestByNumber(n);
+  function prByNumber(n: number): PullRequestPorcelain {
+    const ref = repo.ref().pullRequestByNumber(n);
+    if (ref == null) {
+      throw new Error(`Expected pull request #${n} to exist`);
+    }
+    const result = ref.get();
     if (result == null) {
-      throw new Error(`Expected PR #${n} to exist`);
+      throw new Error(`Expected pull request #${n} to exist`);
     }
     return result;
   }
 
-  function issueOrPrByNumber(n: number): Issue | PullRequest {
-    const result = repo.issueByNumber(n) || repo.pullRequestByNumber(n);
+  function issueOrPrByNumber(n: number): IssuePorcelain | PullRequestPorcelain {
+    const ref =
+      repo.ref().issueByNumber(n) || repo.ref().pullRequestByNumber(n);
+    if (ref == null) {
+      throw new Error(`Expected Issue/PR #${n} to exist`);
+    }
+    const result = ref.get();
     if (result == null) {
       throw new Error(`Expected Issue/PR #${n} to exist`);
     }
     return result;
   }
 
-  const issue = issueByNumber(2);
-  const comment = issue.comments()[0];
-  const pullRequest = prByNumber(5);
-  const pullRequestReview = pullRequest.reviews()[0];
-  const pullRequestReviewComment = pullRequestReview.comments()[0];
-  const author = issue.authors()[0];
+  function really<T>(x: ?T): T {
+    if (x == null) {
+      throw new Error(String(x));
+    }
+    return x;
+  }
+  const issue = really(issueByNumber(2));
+  const comment = really(
+    issue
+      .ref()
+      .comments()[0]
+      .get()
+  );
+  const pullRequest = really(prByNumber(5));
+  const pullRequestReview = really(
+    pullRequest
+      .ref()
+      .reviews()[0]
+      .get()
+  );
+  const pullRequestReviewComment = really(
+    pullRequestReview
+      .ref()
+      .comments()[0]
+      .get()
+  );
+  const author = really(
+    issue
+      .ref()
+      .authors()[0]
+      .get()
+  );
   const allWrappers = [
     issue,
     pullRequest,
@@ -87,62 +137,43 @@ describe("GitHub porcelain", () => {
   ];
 
   it("all wrappers provide a type() method", () => {
-    expectPropertiesToMatchSnapshot(allWrappers, (e) => e.type());
+    expectPropertiesToMatchSnapshot(allWrappers, (e) => e.ref().type());
   });
 
   it("all wrappers provide a url() method", () => {
     expectPropertiesToMatchSnapshot(allWrappers, (e) => e.url());
   });
 
-  it("all wrappers provide an address() method", () => {
-    allWrappers.forEach((w) => {
-      const addr = w.address();
-      const url = w.url();
-      const type = w.type();
-      expect(addr.id).toBe(url);
-      expect(addr.type).toBe(type);
-      expect(addr.pluginName).toBe(PLUGIN_NAME);
-    });
+  test("reference constructors throw errors when used incorrectly", () => {
+    expect(() => new RepositoryReference(issue.ref())).toThrowError(
+      "to have type"
+    );
+    expect(() => new IssueReference(repo.ref())).toThrowError("to have type");
+    expect(() => new CommentReference(repo.ref())).toThrowError("to have type");
+    expect(() => new PullRequestReference(repo.ref())).toThrowError(
+      "to have type"
+    );
+    expect(() => new PullRequestReviewReference(repo.ref())).toThrowError(
+      "to have type"
+    );
+    expect(
+      () => new PullRequestReviewCommentReference(repo.ref())
+    ).toThrowError("to have type");
+    expect(() => new AuthorReference(repo.ref())).toThrowError("to have type");
   });
 
-  it("all wrappers provide a node() method", () => {
-    allWrappers.forEach((w) => {
-      const node = w.node();
-      const addr = w.address();
-      expect(node.address).toEqual(addr);
-    });
-  });
-
-  describe("type verifiers", () => {
-    it("are provided by all wrappers", () => {
-      // Check each one individually to verify the flowtypes
-      const _unused_repo: Repository = Repository.from(repo);
-      const _unused_issue: Issue = Issue.from(issue);
-      const _unused_pullRequest: PullRequest = PullRequest.from(pullRequest);
-      const _unused_comment: Comment = Comment.from(comment);
-      const _unused_pullRequestReview: PullRequestReview = PullRequestReview.from(
-        pullRequestReview
-      );
-      const _unused_pullRequestReviewComment: PullRequestReviewComment = PullRequestReviewComment.from(
-        pullRequestReviewComment
-      );
-      const _unused_author: Author = Author.from(author);
-      // Check them programatically so that if we add another wrapper, we can't forget to update.
-      allWrappers.forEach((e) => {
-        expect(e.constructor.from(e)).toEqual(e);
-      });
-    });
-    it("and errors are thrown when used incorrectly", () => {
-      expect(() => Repository.from(issue)).toThrowError("to have type");
-      expect(() => Issue.from(repo)).toThrowError("to have type");
-      expect(() => Comment.from(repo)).toThrowError("to have type");
-      expect(() => PullRequest.from(repo)).toThrowError("to have type");
-      expect(() => PullRequestReview.from(repo)).toThrowError("to have type");
-      expect(() => PullRequestReviewComment.from(repo)).toThrowError(
-        "to have type"
-      );
-      expect(() => Author.from(repo)).toThrowError("to have type");
-    });
+  test("porcelain constructors throw errors when used incorrectly", () => {
+    expect(() => new RepositoryPorcelain(issue)).toThrowError("to have type");
+    expect(() => new IssuePorcelain(repo)).toThrowError("to have type");
+    expect(() => new CommentPorcelain(repo)).toThrowError("to have type");
+    expect(() => new PullRequestPorcelain(repo)).toThrowError("to have type");
+    expect(() => new PullRequestReviewPorcelain(repo)).toThrowError(
+      "to have type"
+    );
+    expect(() => new PullRequestReviewCommentPorcelain(repo)).toThrowError(
+      "to have type"
+    );
+    expect(() => new AuthorPorcelain(repo)).toThrowError("to have type");
   });
 
   describe("posts", () => {
@@ -154,19 +185,32 @@ describe("GitHub porcelain", () => {
       comment,
     ];
     it("have parents", () => {
-      expectPropertiesToMatchSnapshot(allPosts, (e) => e.parent().url());
+      expectPropertiesToMatchSnapshot(allPosts, (e) =>
+        really(
+          e
+            .ref()
+            .parent()
+            .get()
+        ).url()
+      );
     });
     it("have bodies", () => {
       expectPropertiesToMatchSnapshot(allPosts, (e) => e.body());
     });
     it("have authors", () => {
       expectPropertiesToMatchSnapshot(allPosts, (e) =>
-        e.authors().map((a) => a.login())
+        e
+          .ref()
+          .authors()
+          .map((a) => really(a.get()).login())
       );
     });
     it("have references", () => {
       expectPropertiesToMatchSnapshot(allPosts, (e) =>
-        e.references().map((r) => r.url())
+        e
+          .ref()
+          .references()
+          .map((r: GithubReference<NodePayload>) => really(r.get()).url())
       );
     });
   });
@@ -183,7 +227,10 @@ describe("GitHub porcelain", () => {
     });
     it("have comments", () => {
       expectPropertiesToMatchSnapshot(issuesAndPRs, (e) =>
-        e.comments().map((c) => c.url())
+        e
+          .ref()
+          .comments()
+          .map((c) => really(c.get()).url())
       );
     });
   });
@@ -191,49 +238,36 @@ describe("GitHub porcelain", () => {
   describe("pull requests", () => {
     const prs = [prByNumber(3), prByNumber(5), prByNumber(9)];
     it("have mergeCommitHashes", () => {
-      expectPropertiesToMatchSnapshot(prs, (e) => e.mergeCommitHash());
+      expectPropertiesToMatchSnapshot(prs, (e) => e.ref().mergeCommitHash());
     });
 
     it("have reviews", () => {
       expectPropertiesToMatchSnapshot(prs, (e) =>
-        e.reviews().map((r) => r.url())
+        e
+          .ref()
+          .reviews()
+          .map((r) => really(r.get()).url())
       );
     });
   });
 
   describe("pull request reviews", () => {
-    const reviews = pullRequest.reviews();
+    const reviews = pullRequest.ref().reviews();
     it("have review comments", () => {
-      expectPropertiesToMatchSnapshot(reviews, (e) =>
-        e.comments().map((e) => e.url())
+      expectPropertiesToMatchSnapshot(
+        reviews.map((r) => really(r.get())),
+        (e) =>
+          e
+            .ref()
+            .comments()
+            .map((e) => really(e.get()).url())
       );
     });
     it("have states", () => {
-      expectPropertiesToMatchSnapshot(reviews, (e) => e.state());
-    });
-  });
-
-  describe("asEntity", () => {
-    it("works for each wrapper", () => {
-      allWrappers.forEach((w) => {
-        expect(asEntity(w.graph, w.address())).toEqual(w);
-      });
-    });
-    it("errors when given an address with the wrong plugin name", () => {
-      const addr: Address = {
-        pluginName: "the magnificent foo plugin",
-        id: "who are you to ask an id of the magnificent foo plugin?",
-        type: "ISSUE",
-      };
-      expect(() => asEntity(graph, addr)).toThrow("wrong plugin name");
-    });
-    it("errors when given an address with a bad node type", () => {
-      const addr: Address = {
-        pluginName: PLUGIN_NAME,
-        id: "if you keep asking for my id you will make me angry",
-        type: "the foo plugin's magnificence extends to many plugins",
-      };
-      expect(() => asEntity(graph, addr)).toThrow("invalid type");
+      expectPropertiesToMatchSnapshot(
+        reviews.map((r) => really(r.get())),
+        (e) => e.state()
+      );
     });
   });
 
@@ -252,22 +286,24 @@ describe("GitHub porcelain", () => {
   describe("References", () => {
     it("via #-number", () => {
       const srcIssue = issueByNumber(2);
-      const references = srcIssue.references();
+      const references = srcIssue.ref().references();
       expect(references).toHaveLength(1);
       // Note: this verifies that we are not counting in-references, as
       // https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316
       // references #2.
 
-      const referenced = Issue.from(references[0]);
+      const referenced = new IssuePorcelain(really(references[0].get()));
       expect(referenced.number()).toBe(1);
     });
 
     describe("by exact url", () => {
       function expectCommentToHaveSingleReference({commentNumber, type, url}) {
-        const comments = issueByNumber(2).comments();
+        const comments = issueByNumber(2)
+          .ref()
+          .comments();
         const references = comments[commentNumber].references();
         expect(references).toHaveLength(1);
-        expect(references[0].url()).toBe(url);
+        expect(really(references[0].get()).url()).toBe(url);
         expect(references[0].type()).toBe(type);
       }
 
@@ -324,6 +360,7 @@ describe("GitHub porcelain", () => {
 
       it("to multiple entities", () => {
         const references = issueByNumber(2)
+          .ref()
           .comments()[6]
           .references();
         expect(references).toHaveLength(5);
@@ -331,6 +368,7 @@ describe("GitHub porcelain", () => {
 
       it("to no entities", () => {
         const references = issueByNumber(2)
+          .ref()
           .comments()[7]
           .references();
         expect(references).toHaveLength(0);
@@ -339,10 +377,11 @@ describe("GitHub porcelain", () => {
 
     it("References by @-author", () => {
       const pr = prByNumber(5);
-      const references = pr.references();
+      const references = pr.ref().references();
       expect(references).toHaveLength(1);
-      const referenced = Author.from(references[0]);
-      expect(referenced.login()).toBe("wchargin");
+      const referenced = new AuthorReference(references[0]);
+      const login = really(referenced.get()).login();
+      expect(login).toBe("wchargin");
     });
   });
 
@@ -352,7 +391,7 @@ describe("GitHub porcelain", () => {
     // file, and move this test to render.test.js (assuming we don't move the
     // description method into the porcelain anyway...)
     expectPropertiesToMatchSnapshot(allWrappers, (e) =>
-      nodeDescription(e.graph, e.address())
+      nodeDescription(e.ref())
     );
   });
 });
