@@ -21,14 +21,14 @@ export type EdgePayload = GitEdgePayload | GithubEdgePayload;
  *   the GitHub username of the owner of the repository to be cloned
  * @param {String} repoName
  *   the name of the repository to be cloned
- * @return {Promise<Graph<NodePayload, EdgePayload>>}
+ * @return {Promise<Graph>}
  *   a Promise containing the combined contribution graph
  */
 export function loadCombinedGraph(
   repoOwner: string,
   repoName: string,
   token: string
-): Promise<Graph<NodePayload, EdgePayload>> {
+): Promise<Graph> {
   const githubGraphPromise = fetchGithubGraph(repoOwner, repoName, token);
   const gitGraph = cloneGitGraph(repoOwner, repoName);
   return githubGraphPromise.then((x) => Graph.mergeConservative(gitGraph, x));

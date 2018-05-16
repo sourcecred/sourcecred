@@ -1,7 +1,6 @@
 // @flow
 
 import {AUTHORS_EDGE_TYPE, CONTAINS_EDGE_TYPE} from "./types";
-import type {NodePayload, EdgePayload} from "./types";
 import {parse} from "./parser";
 import type {GithubResponseJSON, PullRequestJSON, IssueJSON} from "./graphql";
 import {Graph} from "../../core/graph";
@@ -92,7 +91,7 @@ describe("GithubParser", () => {
   function parseExample({
     issues: issueNums = [],
     prs: prNums = [],
-  }: ExampleInput): Graph<NodePayload, EdgePayload> {
+  }: ExampleInput): Graph {
     const issues = issueNums.map(getIssue);
     const pullRequests = prNums.map(getPR);
     const exampleData: GithubResponseJSON = {

@@ -87,7 +87,7 @@ function pluginGraph(
   }
 }
 
-function display<NP, EP>(promise: Promise<Graph<NP, EP>>) {
+function display(promise: Promise<Graph>) {
   promise.then((graph) => {
     console.log(stringify(graph, {space: 4}));
   });

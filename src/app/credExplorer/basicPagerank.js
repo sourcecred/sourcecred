@@ -29,7 +29,7 @@ type OrderedSparseMarkovChain = {|
   +chain: SparseMarkovChain,
 |};
 
-export default function basicPagerank(graph: Graph<any, any>): PagerankResult {
+export default function basicPagerank(graph: Graph): PagerankResult {
   const {nodeOrder, chain} = graphToOrderedSparseMarkovChain(graph);
   const pi = findStationaryDistribution(chain, {verbose: true});
   return distributionToPagerankResult(nodeOrder, pi);
@@ -41,9 +41,7 @@ function edgeWeight(
   return {toWeight: 1, froWeight: 1};
 }
 
-function graphToAddressMapMarkovChain(
-  graph: Graph<any, any>
-): AddressMapMarkovChain {
+function graphToAddressMapMarkovChain(graph: Graph): AddressMapMarkovChain {
   const result = new AddressMap();
   const unnormalizedTotalOutWeights = new AddressMap();
 
@@ -109,7 +107,7 @@ function addressMapMarkovChainToOrderedSparseMarkovChain(
 }
 
 export function graphToOrderedSparseMarkovChain(
-  graph: Graph<any, any>
+  graph: Graph
 ): OrderedSparseMarkovChain {
   return addressMapMarkovChainToOrderedSparseMarkovChain(
     graphToAddressMapMarkovChain(graph)

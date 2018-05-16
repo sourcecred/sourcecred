@@ -4,10 +4,10 @@ import type {Address} from "./address";
 import type {Edge, Graph, Node} from "./graph";
 
 export class NodeReference<+T> {
-  _graph: Graph<any, any>;
+  _graph: Graph;
   _address: Address;
 
-  constructor(g: Graph<any, any>, a: Address) {
+  constructor(g: Graph, a: Address) {
     this._graph = g;
     this._address = a;
   }
@@ -25,7 +25,7 @@ export class NodeReference<+T> {
       }));
   }
 
-  graph(): Graph<any, any> {
+  graph(): Graph {
     return this._graph;
   }
 

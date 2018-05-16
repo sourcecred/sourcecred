@@ -23,7 +23,7 @@ const adapter: PluginAdapter<NodePayload> = {
   pluginName: PLUGIN_NAME,
 
   renderer: class GithubNodeRenderer extends React.Component<{
-    graph: Graph<any, any>,
+    graph: Graph,
     node: Node<NodePayload>,
   }> {
     render() {

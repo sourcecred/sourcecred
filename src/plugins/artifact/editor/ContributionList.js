@@ -7,7 +7,7 @@ import {AdapterSet} from "./adapterSet";
 import {Graph} from "../../../core/graph";
 
 type Props = {
-  graph: ?Graph<any, any>,
+  graph: ?Graph,
   adapters: AdapterSet,
 };
 type State = {
@@ -39,7 +39,7 @@ export class ContributionList extends React.Component<Props, State> {
     if (this.props.graph == null) {
       return null;
     }
-    const graph: Graph<any, any> = this.props.graph;
+    const graph: Graph = this.props.graph;
     const typesByPlugin: {[pluginName: string]: Set<string>} = {};
     graph.nodes().forEach((node) => {
       const adapter = this.props.adapters.getAdapter(node);
@@ -88,7 +88,7 @@ export class ContributionList extends React.Component<Props, State> {
     if (this.props.graph == null) {
       return <div>(no graph)</div>;
     } else {
-      const graph: Graph<any, any> = this.props.graph;
+      const graph: Graph = this.props.graph;
       const {typeFilter} = this.state;
       const shouldDisplay: (node: Node<any>) => boolean = typeFilter
         ? (node) => {

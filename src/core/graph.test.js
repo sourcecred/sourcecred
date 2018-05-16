@@ -388,7 +388,7 @@ describe("graph", () => {
     describe("neighborhood detection", () => {
       describe("type filtering", () => {
         class ExampleGraph {
-          graph: Graph<{}, {}>;
+          graph: Graph;
           root: Address;
           idIncrement: number;
           inEdges: {[string]: Edge<{}>};
@@ -891,9 +891,7 @@ describe("graph", () => {
        * node `u`, create a graph with just that node, its neighbors,
        * and its incident edges (in both directions).
        */
-      function neighborhoodDecomposition<NP, EP>(
-        originalGraph: Graph<NP, EP>
-      ): Graph<NP, EP>[] {
+      function neighborhoodDecomposition(originalGraph: Graph): Graph[] {
         return originalGraph.nodes().map((node) => {
           const miniGraph = new Graph();
           miniGraph.addNode(node);
@@ -925,9 +923,7 @@ describe("graph", () => {
        * create a graph with just that edge and its two endpoints, and
        * for each isolated node createa graph with just that node.
        */
-      function edgeDecomposition<NP, EP>(
-        originalGraph: Graph<NP, EP>
-      ): Graph<NP, EP>[] {
+      function edgeDecomposition(originalGraph: Graph): Graph[] {
         const edgeGraphs = originalGraph.edges().map((edge) => {
           const miniGraph = new Graph();
           miniGraph.addNode(originalGraph.node(edge.src));
@@ -1001,17 +997,16 @@ describe("graph", () => {
             payload: null,
           }),
         };
-        const g1: Graph<string, number> = new Graph()
+        const g1: Graph = new Graph()
           .addNode(data.a())
           .addNode(data.b())
           .addEdge(data.u());
-        const g2: Graph<boolean, null> = new Graph()
+        const g2: Graph = new Graph()
           .addNode(data.c())
           .addNode(data.d())
           .addEdge(data.v());
-        type ResultGraph = Graph<string | boolean, number | null>;
-        const result: ResultGraph = Graph.mergeConservative(g1, g2);
-        const expected: ResultGraph = new Graph()
+        const result = Graph.mergeConservative(g1, g2);
+        const expected = new Graph()
           .addNode(data.a())
           .addNode(data.b())
           .addEdge(data.u())
@@ -1022,7 +1017,7 @@ describe("graph", () => {
       });
 
       it("conservatively rejects a graph with conflicting nodes", () => {
-        const makeGraph: (nodePayload: string) => Graph<*, *> = (nodePayload) =>
+        const makeGraph: (nodePayload: string) => Graph = (nodePayload) =>
           new Graph().addNode({
             address: demoData.makeAddress("conflicting-node", "EXPERIMENT"),
             payload: nodePayload,
@@ -1037,7 +1032,7 @@ describe("graph", () => {
       it("conservatively rejects a graph with conflicting edges", () => {
         const srcAddress = demoData.makeAddress("src", "EXPERIMENT");
         const dstAddress = demoData.makeAddress("dst", "EXPERIMENT");
-        const makeGraph: (edgePayload: string) => Graph<*, *> = (edgePayload) =>
+        const makeGraph: (edgePayload: string) => Graph = (edgePayload) =>
           new Graph()
             .addNode({address: srcAddress, payload: {}})
             .addNode({address: dstAddress, payload: {}})
@@ -1149,7 +1144,6 @@ describe("graph", () => {
             address: demoData.makeAddress("hello", "EXPERIMENT"),
             payload: 17,
           };
-          // This will be a Graph<string | number, *>.
           new Graph().addNode(stringNode).addNode(numberNode);
         });
       });
@@ -1176,7 +1170,6 @@ describe("graph", () => {
             dst: dst.address,
             payload: 18,
           };
-          // This will be a Graph<{}, string | number>.
           new Graph()
             .addNode(src)
             .addNode(dst)
@@ -1205,12 +1198,6 @@ describe("graph", () => {
         expect(g1.equals(g2)).toBe(true);
         expect(g1.equals(demoData.advancedMealGraph())).toBe(true);
       });
-
-      function _unused_itAllowsUpcastingPayloadTypes(
-        g: Graph<{x: string, y: number}, boolean>
-      ): Graph<{x: string}, ?boolean> {
-        return g.copy();
-      }
     });
   });
 });

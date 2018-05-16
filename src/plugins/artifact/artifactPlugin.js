@@ -23,7 +23,7 @@ export type EdgePayload = IncludesEdgePayload;
 const NON_SLUG_CHARACTER: RegExp = /[^a-z]/g;
 
 export function artifactAddress(
-  graph: Graph<NodePayload, EdgePayload>,
+  graph: Graph,
   repoOwner: string,
   repoName: string,
   artifactName: string

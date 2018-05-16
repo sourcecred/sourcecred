@@ -15,7 +15,7 @@ import type {PagerankResult} from "./basicPagerank";
 
 type Props = {
   pagerankResult: ?PagerankResult,
-  graph: ?Graph<any, any>,
+  graph: ?Graph,
 };
 
 type State = {
@@ -65,7 +65,7 @@ export class PagerankTable extends React.Component<Props, State> {
     if (this.props.graph == null || this.props.pagerankResult == null) {
       throw new Error("Impossible.");
     }
-    const graph: Graph<any, any> = this.props.graph;
+    const graph: Graph = this.props.graph;
     const typesByPlugin: {[pluginName: string]: Set<string>} = {};
     graph.nodes().forEach((node) => {
       if (!typesByPlugin[node.address.pluginName]) {
@@ -154,7 +154,7 @@ export class PagerankTable extends React.Component<Props, State> {
 type RTState = {expanded: boolean};
 type RTProps = {|
   +address: Address,
-  +graph: Graph<any, any>,
+  +graph: Graph,
   +pagerankResult: PagerankResult,
   +depth: number,
 |};

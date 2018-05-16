@@ -13,7 +13,7 @@ type Props = {};
 type State = {
   repoOwner: string,
   repoName: string,
-  graph: ?Graph<mixed, mixed>,
+  graph: ?Graph,
   pagerankResult: ?PagerankResult,
 };
 

@@ -22,7 +22,6 @@ import type {
   AuthorNodePayload,
   AuthorSubtype,
   CommentNodePayload,
-  EdgePayload,
   IssueNodePayload,
   MergedAsEdgePayload,
   NodePayload,
@@ -99,9 +98,9 @@ function asGithubReference(
 }
 
 export class GraphPorcelain {
-  graph: Graph<NodePayload, EdgePayload>;
+  graph: Graph;
 
-  constructor(graph: Graph<NodePayload, EdgePayload>) {
+  constructor(graph: Graph) {
     this.graph = graph;
   }
 
