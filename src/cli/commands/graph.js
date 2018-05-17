@@ -4,7 +4,11 @@ import {Command, flags} from "@oclif/command";
 import mkdirp from "mkdirp";
 import path from "path";
 
-import {pluginNames, sourcecredDirectoryFlag} from "../common";
+import {
+  pluginNames,
+  sourcecredDirectoryFlag,
+  nodeMaxOldSpaceSizeFlag,
+} from "../common";
 
 const execDependencyGraph = require("../../tools/execDependencyGraph").default;
 
@@ -40,6 +44,7 @@ files under SOURCECRED_DIRECTORY/graphs/REPO_OWNER/REPO_NAME.
 
   static flags = {
     "sourcecred-directory": sourcecredDirectoryFlag(),
+    "max-old-space-size": nodeMaxOldSpaceSizeFlag(),
     "github-token": flags.string({
       description:
         "a GitHub API token, as generated at " +
@@ -55,9 +60,10 @@ files under SOURCECRED_DIRECTORY/graphs/REPO_OWNER/REPO_NAME.
       flags: {
         "github-token": token,
         "sourcecred-directory": sourcecredDirectory,
+        "max-old-space-size": maxOldSpaceSize,
       },
     } = this.parse(GraphCommand);
-    graph(sourcecredDirectory, repoOwner, repoName, token);
+    graph(sourcecredDirectory, repoOwner, repoName, token, maxOldSpaceSize);
   }
 }
 
@@ -65,7 +71,8 @@ function graph(
   sourcecredDirectory: string,
   repoOwner: string,
   repoName: string,
-  token: string
+  token: string,
+  maxOldSpaceSize: number
 ) {
   const graphDirectory = path.join(
     sourcecredDirectory,
@@ -75,13 +82,21 @@ function graph(
   );
   console.log("Storing graphs into: " + graphDirectory);
   mkdirp.sync(graphDirectory);
-  const tasks = makeTasks(graphDirectory, {repoOwner, repoName, token});
+  const tasks = makeTasks(graphDirectory, {
+    repoOwner,
+    repoName,
+    token,
+    maxOldSpaceSize,
+  });
   execDependencyGraph(tasks, {taskPassLabel: "DONE"}).then(({success}) => {
     process.exitCode = success ? 0 : 1;
   });
 }
 
-function makeTasks(graphDirectory, {repoOwner, repoName, token}) {
+function makeTasks(
+  graphDirectory,
+  {repoOwner, repoName, token, maxOldSpaceSize}
+) {
   const taskId = (id) => `create-${id}`;
   const graphFilename = (id) => path.join(graphDirectory, `graph-${id}.json`);
   const into = "./src/cli/into.sh";
@@ -92,6 +107,7 @@ function makeTasks(graphDirectory, {repoOwner, repoName, token}) {
         into,
         graphFilename(id),
         "node",
+        `--max_old_space_size=${maxOldSpaceSize}`,
         "./bin/sourcecred.js",
         "plugin-graph",
         "--plugin",
@@ -109,6 +125,7 @@ function makeTasks(graphDirectory, {repoOwner, repoName, token}) {
         into,
         path.join(graphDirectory, "graph.json"),
         "node",
+        `--max_old_space_size=${maxOldSpaceSize}`,
         "./bin/sourcecred.js",
         "combine",
         ...pluginNames().map((id) => graphFilename(id)),

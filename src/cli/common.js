@@ -21,3 +21,11 @@ export function sourcecredDirectoryFlag() {
     default: () => defaultStorageDirectory(),
   });
 }
+
+export function nodeMaxOldSpaceSizeFlag() {
+  return flags.integer({
+    description: "--max_old_space_size flag to node; increases available heap",
+    default: 8192,
+    env: "SOURCECRED_NODE_MAX_OLD_SPACE",
+  });
+}
