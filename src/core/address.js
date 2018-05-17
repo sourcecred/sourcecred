@@ -3,6 +3,9 @@
 import deepEqual from "lodash.isequal";
 import stringify from "json-stable-stringify";
 
+import {toCompat, fromCompat} from "../util/compat";
+import type {Compatible} from "../util/compat";
+
 export type Address = {|
   +pluginName: string,
   +id: string,
@@ -15,9 +18,12 @@ export interface Addressable {
 
 export type SansAddress<T: Addressable> = $Exact<$Diff<T, {+address: Address}>>;
 
-export type AddressMapJSON<T: Addressable> = {
+export type AddressMapJSON<T: Addressable> = Compatible<{
   [serializedAddress: string]: SansAddress<T>,
-};
+}>;
+
+export const COMPAT_TYPE = "sourcecred/sourcecred/AddressMap";
+export const COMPAT_VERSION = "0.1.0";
 
 /**
  * A data structure for storing addressable objects, keyed by their
@@ -70,13 +76,26 @@ export class AddressMap<T: Addressable> {
         });
       });
     });
-    return result;
+    return toCompat(
+      {
+        type: COMPAT_TYPE,
+        version: COMPAT_VERSION,
+      },
+      result
+    );
   }
 
   static fromJSON(json: AddressMapJSON<T>): AddressMap<T> {
+    const decompat = fromCompat(
+      {
+        type: COMPAT_TYPE,
+        version: COMPAT_VERSION,
+      },
+      json
+    );
     const result: AddressMap<T> = new AddressMap();
-    Object.keys(json).forEach((key) => {
-      result.add({...json[key], address: JSON.parse(key)});
+    Object.keys(decompat).forEach((key) => {
+      result.add({...decompat[key], address: JSON.parse(key)});
     });
     return result;
   }
