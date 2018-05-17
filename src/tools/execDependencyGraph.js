@@ -19,6 +19,10 @@ type Task = {|
 type TaskResult = {|
   +id: TaskId,
   +success: boolean,
+  +timeElapsed: {|
+    +secondsPart: number,
+    +nanosecondsPart: number,
+  |},
   +status: number,
   +stdout: string,
   +stderr: string,
@@ -116,7 +120,17 @@ exports.default = async function execDependencyGraph(
     const badge = success
       ? chalk.bgGreen.bold.white(spacedLabel(fullOptions.taskPassLabel))
       : chalk.bgRed.bold.white(spacedLabel(fullOptions.taskFailLabel));
-    console.log(`${badge} ${id}`);
+    const seconds = (() => {
+      if (result == null) {
+        return "";
+      }
+      const secondsNumber = (
+        result.timeElapsed.secondsPart +
+        result.timeElapsed.nanosecondsPart * 1e-9
+      ).toFixed(3);
+      return " " + chalk.blue(`(${secondsNumber}s)`);
+    })();
+    console.log(`${badge} ${id}${seconds}`);
 
     if (mode === "OVERVIEW" && success) {
       return;
@@ -210,10 +224,13 @@ function processTask(task /*: Task */) /*: Promise<TaskResult> */ {
   }
   const file = task.cmd[0];
   const args = task.cmd.slice(1);
+  const startTime = process.hrtime();
   return new Promise((resolve, _unused_reject) => {
     child_process.execFile(file, args, (error, stdout, stderr) => {
+      const [secondsPart, nanosecondsPart] = process.hrtime(startTime);
       resolve({
         id: task.id,
+        timeElapsed: {secondsPart, nanosecondsPart},
         success: !error,
         status: error ? error.code : 0,
         stdout: stdout.toString(),
