@@ -106,9 +106,14 @@ export function findStationaryDistribution(
   };
   let r0 = uniformDistribution(chain.length);
   function computeDelta(pi0, pi1) {
+    let maxDelta = -Infinity;
     // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
     // same (i.e., there has been no permutation).
-    return Math.max(...pi0.map((x, i) => Math.abs(x - pi1[i])));
+    pi0.forEach((x, i) => {
+      const delta = Math.abs(x - pi1[i]);
+      maxDelta = Math.max(delta, maxDelta);
+    });
+    return maxDelta;
   }
   let iteration = 0;
   while (true) {
