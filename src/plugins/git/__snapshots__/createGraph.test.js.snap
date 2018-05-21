@@ -4,7 +4,7 @@ exports[`createGraph processes a simple repository 1`] = `
 Array [
   Object {
     "type": "sourcecred/sourcecred/Graph",
-    "version": "0.1.0",
+    "version": "0.2.0",
   },
   Object {
     "edges": Array [
@@ -14,1144 +14,492 @@ Array [
       },
       Object {
         "{\\"id\\":\\"2f7155e359fd0ecb96ffdca66fa45b6ed5792809:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 2,
           "payload": Object {
             "name": "README.txt",
           },
-          "src": Object {
-            "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 1,
         },
         "{\\"id\\":\\"2f7155e359fd0ecb96ffdca66fa45b6ed5792809:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 3,
           "payload": Object {
             "name": "science.txt",
           },
-          "src": Object {
-            "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 1,
         },
         "{\\"id\\":\\"3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
-          "dst": Object {
-            "id": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "dstIndex": 18,
           "payload": Object {
             "parentIndex": 1,
           },
-          "src": Object {
-            "id": "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 4,
         },
         "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 6,
           "payload": Object {
             "name": ".gitmodules",
           },
-          "src": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 5,
         },
         "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 7,
           "payload": Object {
             "name": "README.txt",
           },
-          "src": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 5,
         },
         "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 8,
           "payload": Object {
             "name": "pygravitydefier",
           },
-          "src": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 5,
         },
         "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 9,
           "payload": Object {
             "name": "science.txt",
           },
-          "src": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 5,
         },
         "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 11,
           "payload": Object {
             "name": ".gitmodules",
           },
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 10,
         },
         "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 12,
           "payload": Object {
             "name": "README.txt",
           },
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 10,
         },
         "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:TODOS.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:TODOS.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 13,
           "payload": Object {
             "name": "TODOS.txt",
           },
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 10,
         },
         "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 14,
           "payload": Object {
             "name": "pygravitydefier",
           },
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 10,
         },
         "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 15,
           "payload": Object {
             "name": "science.txt",
           },
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 10,
         },
         "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:src\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 16,
           "payload": Object {
             "name": "src",
           },
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 10,
         },
         "{\\"id\\":\\"69c5aad50eec8f2a0a07c988c3b283a6490eb45b^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
-          "dst": Object {
-            "id": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "dstIndex": 55,
           "payload": Object {
             "parentIndex": 1,
           },
-          "src": Object {
-            "id": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 18,
         },
         "{\\"id\\":\\"78fc9c83023386854c6bfdc5761c0e58f68e226f:index.py\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f:index.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 20,
           "payload": Object {
             "name": "index.py",
           },
-          "src": Object {
-            "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 19,
         },
         "{\\"id\\":\\"78fc9c83023386854c6bfdc5761c0e58f68e226f:quantum_gravity.py\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f:quantum_gravity.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 21,
           "payload": Object {
             "name": "quantum_gravity.py",
           },
-          "src": Object {
-            "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 19,
         },
         "{\\"id\\":\\"7b79d579b62994faba3b69fdf8aa442586c32681:index.py\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "7b79d579b62994faba3b69fdf8aa442586c32681:index.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 23,
           "payload": Object {
             "name": "index.py",
           },
-          "src": Object {
-            "id": "7b79d579b62994faba3b69fdf8aa442586c32681",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 22,
         },
         "{\\"id\\":\\"7b79d579b62994faba3b69fdf8aa442586c32681:quantum_gravity.py\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "7b79d579b62994faba3b69fdf8aa442586c32681:quantum_gravity.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 24,
           "payload": Object {
             "name": "quantum_gravity.py",
           },
-          "src": Object {
-            "id": "7b79d579b62994faba3b69fdf8aa442586c32681",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 22,
         },
         "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 26,
           "payload": Object {
             "name": ".gitmodules",
           },
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 25,
         },
         "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 27,
           "payload": Object {
             "name": "README.txt",
           },
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 25,
         },
         "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 28,
           "payload": Object {
             "name": "pygravitydefier",
           },
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 25,
         },
         "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 29,
           "payload": Object {
             "name": "science.txt",
           },
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 25,
         },
         "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:src\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 30,
           "payload": Object {
             "name": "src",
           },
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 25,
         },
         "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 32,
           "payload": Object {
             "name": ".gitmodules",
           },
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 31,
         },
         "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 33,
           "payload": Object {
             "name": "README.txt",
           },
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 31,
         },
         "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:TODOS.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:TODOS.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 34,
           "payload": Object {
             "name": "TODOS.txt",
           },
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 31,
         },
         "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 35,
           "payload": Object {
             "name": "pygravitydefier",
           },
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 31,
         },
         "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 36,
           "payload": Object {
             "name": "science.txt",
           },
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 31,
         },
         "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:src\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 37,
           "payload": Object {
             "name": "src",
           },
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 31,
         },
         "{\\"id\\":\\"8d287c3bfbf8455ef30187bf5153ffc1b6eef268^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
-          "dst": Object {
-            "id": "c08ee3a4edea384d5291ffcbf06724a13ed72325",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "dstIndex": 51,
           "payload": Object {
             "parentIndex": 1,
           },
-          "src": Object {
-            "id": "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 40,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"2f7155e359fd0ecb96ffdca66fa45b6ed5792809:README.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "0fb31858c8e3710be77e1dbb8880acf8a5543d82",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 0,
           "payload": Object {},
-          "src": Object {
-            "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 2,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"2f7155e359fd0ecb96ffdca66fa45b6ed5792809:science.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 56,
           "payload": Object {},
-          "src": Object {
-            "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 3,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMIT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_TREE\\"}": Object {
-          "dst": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 25,
           "payload": Object {},
-          "src": Object {
-            "id": "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 4,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:.gitmodules\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"8c6cac301e763aa6d36466e0a775eb804be2c311\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "8c6cac301e763aa6d36466e0a775eb804be2c311",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 39,
           "payload": Object {},
-          "src": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 6,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:README.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "0fb31858c8e3710be77e1dbb8880acf8a5543d82",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 0,
           "payload": Object {},
-          "src": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 7,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3",
-            "pluginName": "sourcecred/git-beta",
-            "type": "SUBMODULE_COMMIT",
-          },
+          "dstIndex": 58,
           "payload": Object {},
-          "src": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 8,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:science.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 56,
           "payload": Object {},
-          "src": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 9,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"569e1d383759903134df75230d63c0090196d4cb:.gitmodules\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"8c6cac301e763aa6d36466e0a775eb804be2c311\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "8c6cac301e763aa6d36466e0a775eb804be2c311",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 39,
           "payload": Object {},
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 11,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"569e1d383759903134df75230d63c0090196d4cb:README.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "0fb31858c8e3710be77e1dbb8880acf8a5543d82",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 0,
           "payload": Object {},
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 12,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"569e1d383759903134df75230d63c0090196d4cb:TODOS.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"ddec7477206c30c31b81482e56b877a0b3c2638b\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "ddec7477206c30c31b81482e56b877a0b3c2638b",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 54,
           "payload": Object {},
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:TODOS.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 13,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"569e1d383759903134df75230d63c0090196d4cb:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3",
-            "pluginName": "sourcecred/git-beta",
-            "type": "SUBMODULE_COMMIT",
-          },
+          "dstIndex": 58,
           "payload": Object {},
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 14,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"569e1d383759903134df75230d63c0090196d4cb:science.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 56,
           "payload": Object {},
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 15,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"569e1d383759903134df75230d63c0090196d4cb:src\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"7b79d579b62994faba3b69fdf8aa442586c32681\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "7b79d579b62994faba3b69fdf8aa442586c32681",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 22,
           "payload": Object {},
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 16,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"69c5aad50eec8f2a0a07c988c3b283a6490eb45b\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMIT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"bbf3b8b3d26a4f884b5c022d46851f593d329192\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_TREE\\"}": Object {
-          "dst": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 42,
           "payload": Object {},
-          "src": Object {
-            "id": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 18,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"78fc9c83023386854c6bfdc5761c0e58f68e226f:index.py\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"674b0b476989384510304846248b3acd16206782\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "674b0b476989384510304846248b3acd16206782",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 17,
           "payload": Object {},
-          "src": Object {
-            "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f:index.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 20,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"78fc9c83023386854c6bfdc5761c0e58f68e226f:quantum_gravity.py\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"aea4f28abb23abde151b0ead4063227f8bf6c0b0\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "aea4f28abb23abde151b0ead4063227f8bf6c0b0",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 41,
           "payload": Object {},
-          "src": Object {
-            "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f:quantum_gravity.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 21,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"7b79d579b62994faba3b69fdf8aa442586c32681:index.py\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"674b0b476989384510304846248b3acd16206782\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "674b0b476989384510304846248b3acd16206782",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 17,
           "payload": Object {},
-          "src": Object {
-            "id": "7b79d579b62994faba3b69fdf8aa442586c32681:index.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 23,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"7b79d579b62994faba3b69fdf8aa442586c32681:quantum_gravity.py\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"887ad856bbc1373da146106c86cb581ad78cdafe\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "887ad856bbc1373da146106c86cb581ad78cdafe",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 38,
           "payload": Object {},
-          "src": Object {
-            "id": "7b79d579b62994faba3b69fdf8aa442586c32681:quantum_gravity.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 24,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:.gitmodules\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"8c6cac301e763aa6d36466e0a775eb804be2c311\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "8c6cac301e763aa6d36466e0a775eb804be2c311",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 39,
           "payload": Object {},
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 26,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:README.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "0fb31858c8e3710be77e1dbb8880acf8a5543d82",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 0,
           "payload": Object {},
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 27,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188",
-            "pluginName": "sourcecred/git-beta",
-            "type": "SUBMODULE_COMMIT",
-          },
+          "dstIndex": 57,
           "payload": Object {},
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 28,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:science.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 56,
           "payload": Object {},
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 29,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:src\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"78fc9c83023386854c6bfdc5761c0e58f68e226f\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 19,
           "payload": Object {},
-          "src": Object {
-            "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 30,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:.gitmodules\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"8c6cac301e763aa6d36466e0a775eb804be2c311\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "8c6cac301e763aa6d36466e0a775eb804be2c311",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 39,
           "payload": Object {},
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 32,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:README.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "0fb31858c8e3710be77e1dbb8880acf8a5543d82",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 0,
           "payload": Object {},
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 33,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:TODOS.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"ddec7477206c30c31b81482e56b877a0b3c2638b\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "ddec7477206c30c31b81482e56b877a0b3c2638b",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 54,
           "payload": Object {},
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:TODOS.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 34,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188",
-            "pluginName": "sourcecred/git-beta",
-            "type": "SUBMODULE_COMMIT",
-          },
+          "dstIndex": 57,
           "payload": Object {},
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 35,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:science.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 56,
           "payload": Object {},
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 36,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:src\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"7b79d579b62994faba3b69fdf8aa442586c32681\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "7b79d579b62994faba3b69fdf8aa442586c32681",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 22,
           "payload": Object {},
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 37,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"8d287c3bfbf8455ef30187bf5153ffc1b6eef268\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMIT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_TREE\\"}": Object {
-          "dst": Object {
-            "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 5,
           "payload": Object {},
-          "src": Object {
-            "id": "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 40,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:.gitmodules\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"8c6cac301e763aa6d36466e0a775eb804be2c311\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "8c6cac301e763aa6d36466e0a775eb804be2c311",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 39,
           "payload": Object {},
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 43,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:README.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "0fb31858c8e3710be77e1dbb8880acf8a5543d82",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 0,
           "payload": Object {},
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 44,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:TODOS.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"ddec7477206c30c31b81482e56b877a0b3c2638b\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "ddec7477206c30c31b81482e56b877a0b3c2638b",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 54,
           "payload": Object {},
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:TODOS.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 45,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:pygravitydefier\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"SUBMODULE_COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188",
-            "pluginName": "sourcecred/git-beta",
-            "type": "SUBMODULE_COMMIT",
-          },
+          "dstIndex": 57,
           "payload": Object {},
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 46,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:science.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 56,
           "payload": Object {},
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 47,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:src\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"78fc9c83023386854c6bfdc5761c0e58f68e226f\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 19,
           "payload": Object {},
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 48,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"bdff5d94193170015d6cbb549b7b630649428b1f:README.txt\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE_ENTRY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"BLOB\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_CONTENTS\\"}": Object {
-          "dst": Object {
-            "id": "0fb31858c8e3710be77e1dbb8880acf8a5543d82",
-            "pluginName": "sourcecred/git-beta",
-            "type": "BLOB",
-          },
+          "dstIndex": 0,
           "payload": Object {},
-          "src": Object {
-            "id": "bdff5d94193170015d6cbb549b7b630649428b1f:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 50,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"c08ee3a4edea384d5291ffcbf06724a13ed72325\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMIT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"2f7155e359fd0ecb96ffdca66fa45b6ed5792809\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_TREE\\"}": Object {
-          "dst": Object {
-            "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 1,
           "payload": Object {},
-          "src": Object {
-            "id": "c08ee3a4edea384d5291ffcbf06724a13ed72325",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 51,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"c2b51945e7457546912a8ce158ed9d294558d294\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMIT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"bdff5d94193170015d6cbb549b7b630649428b1f\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_TREE\\"}": Object {
-          "dst": Object {
-            "id": "bdff5d94193170015d6cbb549b7b630649428b1f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 49,
           "payload": Object {},
-          "src": Object {
-            "id": "c2b51945e7457546912a8ce158ed9d294558d294",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 52,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"d160cca97611e9dfed642522ad44408d0292e8ea\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMIT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"569e1d383759903134df75230d63c0090196d4cb\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_TREE\\"}": Object {
-          "dst": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 10,
           "payload": Object {},
-          "src": Object {
-            "id": "d160cca97611e9dfed642522ad44408d0292e8ea",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 53,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMIT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"819fc546cea489476ce8dc90785e9ba7753d0a8f\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"TREE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_TREE\\"}": Object {
-          "dst": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "dstIndex": 31,
           "payload": Object {},
-          "src": Object {
-            "id": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 55,
         },
         "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:.gitmodules",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 43,
           "payload": Object {
             "name": ".gitmodules",
           },
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 42,
         },
         "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 44,
           "payload": Object {
             "name": "README.txt",
           },
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 42,
         },
         "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:TODOS.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:TODOS.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 45,
           "payload": Object {
             "name": "TODOS.txt",
           },
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 42,
         },
         "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 46,
           "payload": Object {
             "name": "pygravitydefier",
           },
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 42,
         },
         "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:science.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 47,
           "payload": Object {
             "name": "science.txt",
           },
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 42,
         },
         "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:src\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 48,
           "payload": Object {
             "name": "src",
           },
-          "src": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 42,
         },
         "{\\"id\\":\\"bdff5d94193170015d6cbb549b7b630649428b1f:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"INCLUDES\\"}": Object {
-          "dst": Object {
-            "id": "bdff5d94193170015d6cbb549b7b630649428b1f:README.txt",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 50,
           "payload": Object {
             "name": "README.txt",
           },
-          "src": Object {
-            "id": "bdff5d94193170015d6cbb549b7b630649428b1f",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE",
-          },
+          "srcIndex": 49,
         },
         "{\\"id\\":\\"c08ee3a4edea384d5291ffcbf06724a13ed72325^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
-          "dst": Object {
-            "id": "c2b51945e7457546912a8ce158ed9d294558d294",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "dstIndex": 52,
           "payload": Object {
             "parentIndex": 1,
           },
-          "src": Object {
-            "id": "c08ee3a4edea384d5291ffcbf06724a13ed72325",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 51,
         },
         "{\\"id\\":\\"d160cca97611e9dfed642522ad44408d0292e8ea^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
-          "dst": Object {
-            "id": "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "dstIndex": 40,
           "payload": Object {
             "parentIndex": 1,
           },
-          "src": Object {
-            "id": "d160cca97611e9dfed642522ad44408d0292e8ea",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 53,
         },
         "{\\"id\\":\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc^1\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"HAS_PARENT\\"}": Object {
-          "dst": Object {
-            "id": "d160cca97611e9dfed642522ad44408d0292e8ea",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "dstIndex": 53,
           "payload": Object {
             "parentIndex": 1,
           },
-          "src": Object {
-            "id": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
-            "pluginName": "sourcecred/git-beta",
-            "type": "COMMIT",
-          },
+          "srcIndex": 55,
         },
         "{\\"id\\":\\"{\\\\\\"childCommit\\\\\\":\\\\\\"69c5aad50eec8f2a0a07c988c3b283a6490eb45b\\\\\\",\\\\\\"parentCommit\\\\\\":\\\\\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc\\\\\\",\\\\\\"path\\\\\\":[\\\\\\"src\\\\\\",\\\\\\"quantum_gravity.py\\\\\\"]}\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BECOMES\\"}": Object {
-          "dst": Object {
-            "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f:quantum_gravity.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 21,
           "payload": Object {
             "childCommit": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
             "parentCommit": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
@@ -1160,18 +508,10 @@ Array [
               "quantum_gravity.py",
             ],
           },
-          "src": Object {
-            "id": "7b79d579b62994faba3b69fdf8aa442586c32681:quantum_gravity.py",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 24,
         },
         "{\\"id\\":\\"{\\\\\\"childCommit\\\\\\":\\\\\\"69c5aad50eec8f2a0a07c988c3b283a6490eb45b\\\\\\",\\\\\\"parentCommit\\\\\\":\\\\\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc\\\\\\",\\\\\\"path\\\\\\":[\\\\\\"src\\\\\\"]}\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BECOMES\\"}": Object {
-          "dst": Object {
-            "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 48,
           "payload": Object {
             "childCommit": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
             "parentCommit": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
@@ -1179,18 +519,10 @@ Array [
               "src",
             ],
           },
-          "src": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:src",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 37,
         },
         "{\\"id\\":\\"{\\\\\\"childCommit\\\\\\":\\\\\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc\\\\\\",\\\\\\"parentCommit\\\\\\":\\\\\\"d160cca97611e9dfed642522ad44408d0292e8ea\\\\\\",\\\\\\"path\\\\\\":[\\\\\\"pygravitydefier\\\\\\"]}\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BECOMES\\"}": Object {
-          "dst": Object {
-            "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "dstIndex": 35,
           "payload": Object {
             "childCommit": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
             "parentCommit": "d160cca97611e9dfed642522ad44408d0292e8ea",
@@ -1198,270 +530,555 @@ Array [
               "pygravitydefier",
             ],
           },
-          "src": Object {
-            "id": "569e1d383759903134df75230d63c0090196d4cb:pygravitydefier",
-            "pluginName": "sourcecred/git-beta",
-            "type": "TREE_ENTRY",
-          },
+          "srcIndex": 14,
         },
       },
     ],
     "nodes": Array [
       Object {
-        "type": "sourcecred/sourcecred/AddressMap",
-        "version": "0.1.0",
+        "address": Object {
+          "id": "0fb31858c8e3710be77e1dbb8880acf8a5543d82",
+          "pluginName": "sourcecred/git-beta",
+          "type": "BLOB",
+        },
+        "payload": Object {},
       },
       Object {
-        "{\\"id\\":\\"0fb31858c8e3710be77e1dbb8880acf8a5543d82\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BLOB\\"}": Object {
-          "payload": Object {},
+        "address": Object {
+          "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE",
         },
-        "{\\"id\\":\\"2f7155e359fd0ecb96ffdca66fa45b6ed5792809\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE\\"}": Object {
-          "payload": Object {},
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809:README.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"2f7155e359fd0ecb96ffdca66fa45b6ed5792809:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "README.txt",
-          },
+        "payload": Object {
+          "name": "README.txt",
         },
-        "{\\"id\\":\\"2f7155e359fd0ecb96ffdca66fa45b6ed5792809:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "science.txt",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "2f7155e359fd0ecb96ffdca66fa45b6ed5792809:science.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"COMMIT\\"}": Object {
-          "payload": Object {},
+        "payload": Object {
+          "name": "science.txt",
         },
-        "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE\\"}": Object {
-          "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+          "pluginName": "sourcecred/git-beta",
+          "type": "COMMIT",
         },
-        "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": ".gitmodules",
-          },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE",
         },
-        "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "README.txt",
-          },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:.gitmodules",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "pygravitydefier",
-          },
+        "payload": Object {
+          "name": ".gitmodules",
         },
-        "{\\"id\\":\\"3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "science.txt",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:README.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE\\"}": Object {
-          "payload": Object {},
+        "payload": Object {
+          "name": "README.txt",
         },
-        "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": ".gitmodules",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:pygravitydefier",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "README.txt",
-          },
+        "payload": Object {
+          "name": "pygravitydefier",
         },
-        "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:TODOS.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "TODOS.txt",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8:science.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "pygravitydefier",
-          },
+        "payload": Object {
+          "name": "science.txt",
         },
-        "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "science.txt",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "569e1d383759903134df75230d63c0090196d4cb",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE",
         },
-        "{\\"id\\":\\"569e1d383759903134df75230d63c0090196d4cb:src\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "src",
-          },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "569e1d383759903134df75230d63c0090196d4cb:.gitmodules",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"674b0b476989384510304846248b3acd16206782\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BLOB\\"}": Object {
-          "payload": Object {},
+        "payload": Object {
+          "name": ".gitmodules",
         },
-        "{\\"id\\":\\"69c5aad50eec8f2a0a07c988c3b283a6490eb45b\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"COMMIT\\"}": Object {
-          "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "569e1d383759903134df75230d63c0090196d4cb:README.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"78fc9c83023386854c6bfdc5761c0e58f68e226f\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE\\"}": Object {
-          "payload": Object {},
+        "payload": Object {
+          "name": "README.txt",
         },
-        "{\\"id\\":\\"78fc9c83023386854c6bfdc5761c0e58f68e226f:index.py\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "index.py",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "569e1d383759903134df75230d63c0090196d4cb:TODOS.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"78fc9c83023386854c6bfdc5761c0e58f68e226f:quantum_gravity.py\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "quantum_gravity.py",
-          },
+        "payload": Object {
+          "name": "TODOS.txt",
         },
-        "{\\"id\\":\\"7b79d579b62994faba3b69fdf8aa442586c32681\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE\\"}": Object {
-          "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "569e1d383759903134df75230d63c0090196d4cb:pygravitydefier",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"7b79d579b62994faba3b69fdf8aa442586c32681:index.py\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "index.py",
-          },
+        "payload": Object {
+          "name": "pygravitydefier",
         },
-        "{\\"id\\":\\"7b79d579b62994faba3b69fdf8aa442586c32681:quantum_gravity.py\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "quantum_gravity.py",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "569e1d383759903134df75230d63c0090196d4cb:science.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE\\"}": Object {
-          "payload": Object {},
+        "payload": Object {
+          "name": "science.txt",
         },
-        "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": ".gitmodules",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "569e1d383759903134df75230d63c0090196d4cb:src",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "README.txt",
-          },
+        "payload": Object {
+          "name": "src",
         },
-        "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "pygravitydefier",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "674b0b476989384510304846248b3acd16206782",
+          "pluginName": "sourcecred/git-beta",
+          "type": "BLOB",
         },
-        "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "science.txt",
-          },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+          "pluginName": "sourcecred/git-beta",
+          "type": "COMMIT",
         },
-        "{\\"id\\":\\"7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:src\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "src",
-          },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE",
         },
-        "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE\\"}": Object {
-          "payload": Object {},
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f:index.py",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": ".gitmodules",
-          },
+        "payload": Object {
+          "name": "index.py",
         },
-        "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "README.txt",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "78fc9c83023386854c6bfdc5761c0e58f68e226f:quantum_gravity.py",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:TODOS.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "TODOS.txt",
-          },
+        "payload": Object {
+          "name": "quantum_gravity.py",
         },
-        "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "pygravitydefier",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "7b79d579b62994faba3b69fdf8aa442586c32681",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE",
         },
-        "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "science.txt",
-          },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "7b79d579b62994faba3b69fdf8aa442586c32681:index.py",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"819fc546cea489476ce8dc90785e9ba7753d0a8f:src\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "src",
-          },
+        "payload": Object {
+          "name": "index.py",
         },
-        "{\\"id\\":\\"887ad856bbc1373da146106c86cb581ad78cdafe\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BLOB\\"}": Object {
-          "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "7b79d579b62994faba3b69fdf8aa442586c32681:quantum_gravity.py",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"8c6cac301e763aa6d36466e0a775eb804be2c311\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BLOB\\"}": Object {
-          "payload": Object {},
+        "payload": Object {
+          "name": "quantum_gravity.py",
         },
-        "{\\"id\\":\\"8d287c3bfbf8455ef30187bf5153ffc1b6eef268\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"COMMIT\\"}": Object {
-          "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE",
         },
-        "{\\"id\\":\\"aea4f28abb23abde151b0ead4063227f8bf6c0b0\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BLOB\\"}": Object {
-          "payload": Object {},
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:.gitmodules",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE\\"}": Object {
-          "payload": Object {},
+        "payload": Object {
+          "name": ".gitmodules",
         },
-        "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:.gitmodules\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": ".gitmodules",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:README.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "README.txt",
-          },
+        "payload": Object {
+          "name": "README.txt",
         },
-        "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:TODOS.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "TODOS.txt",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:pygravitydefier",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:pygravitydefier\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "pygravitydefier",
-          },
+        "payload": Object {
+          "name": "pygravitydefier",
         },
-        "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:science.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "science.txt",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:science.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"bbf3b8b3d26a4f884b5c022d46851f593d329192:src\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "src",
-          },
+        "payload": Object {
+          "name": "science.txt",
         },
-        "{\\"id\\":\\"bdff5d94193170015d6cbb549b7b630649428b1f\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE\\"}": Object {
-          "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed:src",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"bdff5d94193170015d6cbb549b7b630649428b1f:README.txt\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"TREE_ENTRY\\"}": Object {
-          "payload": Object {
-            "name": "README.txt",
-          },
+        "payload": Object {
+          "name": "src",
         },
-        "{\\"id\\":\\"c08ee3a4edea384d5291ffcbf06724a13ed72325\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"COMMIT\\"}": Object {
-          "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE",
         },
-        "{\\"id\\":\\"c2b51945e7457546912a8ce158ed9d294558d294\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"COMMIT\\"}": Object {
-          "payload": Object {},
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:.gitmodules",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"d160cca97611e9dfed642522ad44408d0292e8ea\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"COMMIT\\"}": Object {
-          "payload": Object {},
+        "payload": Object {
+          "name": ".gitmodules",
         },
-        "{\\"id\\":\\"ddec7477206c30c31b81482e56b877a0b3c2638b\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BLOB\\"}": Object {
-          "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:README.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"COMMIT\\"}": Object {
-          "payload": Object {},
+        "payload": Object {
+          "name": "README.txt",
         },
-        "{\\"id\\":\\"f1f2514ca6d7a6a1a0511957021b1995bf9ace1c\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"BLOB\\"}": Object {
-          "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:TODOS.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
         },
-        "{\\"id\\":\\"https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"SUBMODULE_COMMIT\\"}": Object {
-          "payload": Object {
-            "hash": "29ef158bc982733e2ba429fcf73e2f7562244188",
-            "url": "https://github.com/sourcecred/example-git-submodule.git",
-          },
+        "payload": Object {
+          "name": "TODOS.txt",
         },
-        "{\\"id\\":\\"https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3\\",\\"pluginName\\":\\"sourcecred/git-beta\\",\\"type\\":\\"SUBMODULE_COMMIT\\"}": Object {
-          "payload": Object {
-            "hash": "762c062fbdc7ec198cd693e95d55b374a08ff3e3",
-            "url": "https://github.com/sourcecred/example-git-submodule.git",
-          },
+      },
+      Object {
+        "address": Object {
+          "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:pygravitydefier",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": "pygravitydefier",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:science.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": "science.txt",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "819fc546cea489476ce8dc90785e9ba7753d0a8f:src",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": "src",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "887ad856bbc1373da146106c86cb581ad78cdafe",
+          "pluginName": "sourcecred/git-beta",
+          "type": "BLOB",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "8c6cac301e763aa6d36466e0a775eb804be2c311",
+          "pluginName": "sourcecred/git-beta",
+          "type": "BLOB",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
+          "pluginName": "sourcecred/git-beta",
+          "type": "COMMIT",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "aea4f28abb23abde151b0ead4063227f8bf6c0b0",
+          "pluginName": "sourcecred/git-beta",
+          "type": "BLOB",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:.gitmodules",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": ".gitmodules",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:README.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": "README.txt",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:TODOS.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": "TODOS.txt",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:pygravitydefier",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": "pygravitydefier",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:science.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": "science.txt",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "bbf3b8b3d26a4f884b5c022d46851f593d329192:src",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": "src",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "bdff5d94193170015d6cbb549b7b630649428b1f",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "bdff5d94193170015d6cbb549b7b630649428b1f:README.txt",
+          "pluginName": "sourcecred/git-beta",
+          "type": "TREE_ENTRY",
+        },
+        "payload": Object {
+          "name": "README.txt",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "c08ee3a4edea384d5291ffcbf06724a13ed72325",
+          "pluginName": "sourcecred/git-beta",
+          "type": "COMMIT",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "c2b51945e7457546912a8ce158ed9d294558d294",
+          "pluginName": "sourcecred/git-beta",
+          "type": "COMMIT",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "d160cca97611e9dfed642522ad44408d0292e8ea",
+          "pluginName": "sourcecred/git-beta",
+          "type": "COMMIT",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "ddec7477206c30c31b81482e56b877a0b3c2638b",
+          "pluginName": "sourcecred/git-beta",
+          "type": "BLOB",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
+          "pluginName": "sourcecred/git-beta",
+          "type": "COMMIT",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+          "pluginName": "sourcecred/git-beta",
+          "type": "BLOB",
+        },
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "https://github.com/sourcecred/example-git-submodule.git@29ef158bc982733e2ba429fcf73e2f7562244188",
+          "pluginName": "sourcecred/git-beta",
+          "type": "SUBMODULE_COMMIT",
+        },
+        "payload": Object {
+          "hash": "29ef158bc982733e2ba429fcf73e2f7562244188",
+          "url": "https://github.com/sourcecred/example-git-submodule.git",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "https://github.com/sourcecred/example-git-submodule.git@762c062fbdc7ec198cd693e95d55b374a08ff3e3",
+          "pluginName": "sourcecred/git-beta",
+          "type": "SUBMODULE_COMMIT",
+        },
+        "payload": Object {
+          "hash": "762c062fbdc7ec198cd693e95d55b374a08ff3e3",
+          "url": "https://github.com/sourcecred/example-git-submodule.git",
         },
       },
     ],
