@@ -3,8 +3,15 @@
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 
+import {fromCompat} from "../util/compat";
 import type {Address} from "./address";
-import {AddressMap, fromString, toString} from "./address";
+import {
+  AddressMap,
+  fromString,
+  toString,
+  COMPAT_TYPE,
+  COMPAT_VERSION,
+} from "./address";
 
 describe("address", () => {
   // Some test data using objects that have addresses, like houses.
@@ -70,7 +77,11 @@ describe("address", () => {
     });
 
     it("stringifies elements sans addresses", () => {
-      const json = makeMap().toJSON();
+      const compatJson = makeMap().toJSON();
+      const json = fromCompat(
+        {type: COMPAT_TYPE, version: COMPAT_VERSION},
+        compatJson
+      );
       Object.keys(json).forEach((k) => {
         const value = json[k];
         expect(Object.keys(value).sort()).toEqual(["baths", "beds"]);

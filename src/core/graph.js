@@ -4,6 +4,8 @@ import deepEqual from "lodash.isequal";
 import stringify from "json-stable-stringify";
 import type {Address, Addressable, AddressMapJSON} from "./address";
 import {AddressMap} from "./address";
+import {toCompat, fromCompat} from "../util/compat";
+import type {Compatible} from "../util/compat";
 
 export type Node<+T> = {|
   +address: Address,
@@ -17,10 +19,13 @@ export type Edge<+T> = {|
   +payload: T,
 |};
 
-export type GraphJSON<NP, EP> = {|
+const COMPAT_TYPE = "sourcecred/sourcecred/Graph";
+const COMPAT_VERSION = "0.1.0";
+
+export type GraphJSON<NP, EP> = Compatible<{|
   +nodes: AddressMapJSON<Node<NP>>,
   +edges: AddressMapJSON<Edge<EP>>,
-|};
+|}>;
 
 export class Graph<NP, EP> {
   _nodes: AddressMap<Node<NP>>;
@@ -50,20 +55,30 @@ export class Graph<NP, EP> {
   }
 
   toJSON(): GraphJSON<NP, EP> {
-    return {
-      nodes: this._nodes.toJSON(),
-      edges: this._edges.toJSON(),
-    };
+    return toCompat(
+      {type: COMPAT_TYPE, version: COMPAT_VERSION},
+      {
+        nodes: this._nodes.toJSON(),
+        edges: this._edges.toJSON(),
+      }
+    );
   }
 
   static fromJSON<NP, EP>(json: GraphJSON<NP, EP>): Graph<NP, EP> {
+    const compatJson = fromCompat(
+      {
+        type: COMPAT_TYPE,
+        version: COMPAT_VERSION,
+      },
+      json
+    );
     const result = new Graph();
-    AddressMap.fromJSON(json.nodes)
+    AddressMap.fromJSON(compatJson.nodes)
       .getAll()
       .forEach((node) => {
         result.addNode(node);
       });
-    AddressMap.fromJSON(json.edges)
+    AddressMap.fromJSON(compatJson.edges)
       .getAll()
       .forEach((edge) => {
         result.addEdge(edge);
