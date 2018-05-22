@@ -155,6 +155,7 @@ describe("graph", () => {
           demoData.bananasNode(),
           demoData.crabNode(),
           demoData.mealNode(),
+          demoData.nullPayloadNode(),
         ];
         const actual = demoData.advancedMealGraph().nodes();
         expectSameSorted(expected, actual);
@@ -921,12 +922,13 @@ describe("graph", () => {
 
       /**
        * Decompose the given graph into edge graphs: for each edge `e`,
-       * create a graph with just that edge and its two endpoints.
+       * create a graph with just that edge and its two endpoints, and
+       * for each isolated node createa graph with just that node.
        */
       function edgeDecomposition<NP, EP>(
         originalGraph: Graph<NP, EP>
       ): Graph<NP, EP>[] {
-        return originalGraph.edges().map((edge) => {
+        const edgeGraphs = originalGraph.edges().map((edge) => {
           const miniGraph = new Graph();
           miniGraph.addNode(originalGraph.node(edge.src));
           if (miniGraph.node(edge.dst) === undefined) {
@@ -936,6 +938,13 @@ describe("graph", () => {
           miniGraph.addEdge(edge);
           return miniGraph;
         });
+        const nodeGraphs = originalGraph
+          .nodes()
+          .filter(
+            (node) => originalGraph.neighborhood(node.address).length === 0
+          )
+          .map((node) => new Graph().addNode(node));
+        return [].concat(edgeGraphs, nodeGraphs);
       }
 
       it("conservatively recomposes a neighborhood decomposition", () => {
