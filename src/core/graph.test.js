@@ -1088,6 +1088,15 @@ describe("graph", () => {
           JSON.stringify(demoData.advancedMealGraph().toJSON())
         );
       });
+      it("should canonicalize away phantom nodes", () => {
+        const g1 = new Graph().addNode(demoData.heroNode());
+        const g2 = new Graph()
+          .addNode(demoData.heroNode())
+          .addNode(demoData.mealNode())
+          .removeNode(demoData.mealNode().address);
+        expect(g1.equals(g2)).toBe(true);
+        expect(g2.toJSON()).toEqual(g1.toJSON());
+      });
       it("should canonicalize away node insertion order", () => {
         const g1 = new Graph()
           .addNode(demoData.heroNode())

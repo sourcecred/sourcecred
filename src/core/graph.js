@@ -48,6 +48,10 @@ export class Graph<NP, EP> {
   _nodeIndices: AddressMap<{|+address: Address, +index: Integer|}>;
   _nodes: MaybeNode<NP>[];
   _edges: AddressMap<IndexedEdge<EP>>;
+
+  // If `idx` is the index of a node `v`, then `_outEdges[idx]` is the
+  // list of `e.address` for all edges `e` whose source is `v`.
+  // Likewise, `_inEdges[idx]` has the addresses of all in-edges to `v`.
   _outEdges: Address[][];
   _inEdges: Address[][];
 
@@ -69,23 +73,23 @@ export class Graph<NP, EP> {
     if (theseNodes.length !== thoseNodes.length) {
       return false;
     }
-    for (const node of theseNodes) {
-      if (!deepEqual(node, that.node(node.address))) {
-        return false;
-      }
-    }
 
     const theseEdges = this.edges();
     const thoseEdges = that.edges();
     if (theseEdges.length !== thoseEdges.length) {
       return false;
     }
+
+    for (const node of theseNodes) {
+      if (!deepEqual(node, that.node(node.address))) {
+        return false;
+      }
+    }
     for (const edge of theseEdges) {
       if (!deepEqual(edge, that.edge(edge.address))) {
         return false;
       }
     }
-
     return true;
   }
 
@@ -104,9 +108,14 @@ export class Graph<NP, EP> {
         return {key, oldIndex, data};
       })
       .filter(({oldIndex: idx}) => {
-        // Eliminate dangling nodes with neither in- nor out-edges:
-        // e.g., nodes that exist as a result of an `addNode` followed
-        // by a `removeNode` and no additional incident edges.
+        // Say that a node is a "phantom node" if its address appears in
+        // the graph, but the node does not, and no edge in the graph is
+        // incident to the node. (For instance, if `v` is any node, then
+        // `new Graph().addNode(v).removeNode(v.address)` has `v` as a
+        // phantom node.) The existence of phantom nodes is part of the
+        // internal state but not the logical state, so we remove these
+        // nodes before serializing the graph to ensure logical
+        // canonicity.
         return (
           this._nodes[idx].node !== undefined ||
           this._outEdges[idx].length > 0 ||
@@ -118,14 +127,23 @@ export class Graph<NP, EP> {
       const kb = b.key;
       return ka < kb ? -1 : ka > kb ? +1 : 0;
     });
-    const oldIndexToNewIndex: Integer[] = Array(this._nodes.length).fill(
-      undefined
-    );
+
+    // Let `v` be a node that appears at index `i` in the internal
+    // representation of this graph. If `v` appears at index `j` of the
+    // output, then the following array `arr` has `arr[i] = j`.
+    // Otherwise, `v` is a phantom node. In this case, `arr[i]` is not
+    // defined and should not be accessed.
+    const oldIndexToNewIndex = new Uint32Array(this._nodes.length);
     partialNodes.forEach(({oldIndex}, newIndex) => {
       oldIndexToNewIndex[oldIndex] = newIndex;
     });
+
     const edges = new AddressMap();
     this._edges.getAll().forEach((oldIndexedEdge) => {
+      // Here, we know that the old edge's `srcIndex` and `dstIndex`
+      // indices are in the domain of `oldIndexToNewIndex`, because the
+      // corresponding nodes are not phantom, because `oldIndexedEdge`
+      // is incident to them.
       const newIndexedEdge = {
         address: oldIndexedEdge.address,
         payload: oldIndexedEdge.payload,
@@ -134,6 +152,7 @@ export class Graph<NP, EP> {
       };
       edges.add(newIndexedEdge);
     });
+
     return toCompat(
       {type: COMPAT_TYPE, version: COMPAT_VERSION},
       {
@@ -363,9 +382,7 @@ export class Graph<NP, EP> {
    */
   nodes(filter?: {type?: string}): Node<NP>[] {
     /*:: declare function nonNulls<T>(x: (T | void)[]): T[]; */
-    let nodes = this._nodes.map((x) => x.node).filter((x) => {
-      return Boolean(x);
-    });
+    let nodes = this._nodes.map((x) => x.node).filter((x) => Boolean(x));
     /*:: nodes = nonNulls(nodes); */
     if (filter != null && filter.type != null) {
       const typeFilter = filter.type;
