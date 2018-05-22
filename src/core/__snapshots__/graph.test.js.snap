@@ -4,7 +4,7 @@ exports[`graph #Graph JSON functions should serialize a simple graph 1`] = `
 Array [
   Object {
     "type": "sourcecred/sourcecred/Graph",
-    "version": "0.1.0",
+    "version": "0.2.0",
   },
   Object {
     "edges": Array [
@@ -14,141 +14,99 @@ Array [
       },
       Object {
         "{\\"id\\":\\"crab-self-assessment\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"SILLY\\"}": Object {
-          "dst": Object {
-            "id": "razorclaw_crab#2",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "dstIndex": 2,
           "payload": Object {
             "evaluation": "not effective at avoiding hero",
           },
-          "src": Object {
-            "id": "razorclaw_crab#2",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "srcIndex": 2,
         },
         "{\\"id\\":\\"hero_of_time#0@again_cooks@seafood_fruit_mix#3\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"ACTION\\"}": Object {
-          "dst": Object {
-            "id": "hero_of_time#0",
-            "pluginName": "hill_cooking_pot",
-            "type": "PC",
-          },
+          "dstIndex": 0,
           "payload": Object {
             "crit": true,
             "saveScummed": true,
           },
-          "src": Object {
-            "id": "seafood_fruit_mix#3",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "srcIndex": 3,
         },
         "{\\"id\\":\\"hero_of_time#0@cooks@seafood_fruit_mix#3\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"ACTION\\"}": Object {
-          "dst": Object {
-            "id": "hero_of_time#0",
-            "pluginName": "hill_cooking_pot",
-            "type": "PC",
-          },
+          "dstIndex": 0,
           "payload": Object {
             "crit": false,
           },
-          "src": Object {
-            "id": "seafood_fruit_mix#3",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "srcIndex": 3,
         },
         "{\\"id\\":\\"hero_of_time#0@eats@seafood_fruit_mix#3\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"ACTION\\"}": Object {
-          "dst": Object {
-            "id": "seafood_fruit_mix#3",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "dstIndex": 3,
           "payload": Object {},
-          "src": Object {
-            "id": "hero_of_time#0",
-            "pluginName": "hill_cooking_pot",
-            "type": "PC",
-          },
+          "srcIndex": 0,
         },
         "{\\"id\\":\\"hero_of_time#0@grabs@razorclaw_crab#2\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"ACTION\\"}": Object {
-          "dst": Object {
-            "id": "hero_of_time#0",
-            "pluginName": "hill_cooking_pot",
-            "type": "PC",
-          },
+          "dstIndex": 0,
           "payload": Object {},
-          "src": Object {
-            "id": "razorclaw_crab#2",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "srcIndex": 2,
         },
         "{\\"id\\":\\"hero_of_time#0@picks@mighty_bananas#1\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"ACTION\\"}": Object {
-          "dst": Object {
-            "id": "hero_of_time#0",
-            "pluginName": "hill_cooking_pot",
-            "type": "PC",
-          },
+          "dstIndex": 0,
           "payload": Object {},
-          "src": Object {
-            "id": "mighty_bananas#1",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "srcIndex": 1,
         },
         "{\\"id\\":\\"mighty_bananas#1@included_in@seafood_fruit_mix#3\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"INGREDIENT\\"}": Object {
-          "dst": Object {
-            "id": "mighty_bananas#1",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "dstIndex": 1,
           "payload": Object {},
-          "src": Object {
-            "id": "seafood_fruit_mix#3",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "srcIndex": 3,
         },
         "{\\"id\\":\\"razorclaw_crab#2@included_in@seafood_fruit_mix#3\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"INGREDIENT\\"}": Object {
-          "dst": Object {
-            "id": "razorclaw_crab#2",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "dstIndex": 2,
           "payload": Object {},
-          "src": Object {
-            "id": "seafood_fruit_mix#3",
-            "pluginName": "hill_cooking_pot",
-            "type": "FOOD",
-          },
+          "srcIndex": 3,
         },
       },
     ],
     "nodes": Array [
       Object {
-        "type": "sourcecred/sourcecred/AddressMap",
-        "version": "0.1.0",
+        "address": Object {
+          "id": "hero_of_time#0",
+          "pluginName": "hill_cooking_pot",
+          "type": "PC",
+        },
+        "payload": Object {},
       },
       Object {
-        "{\\"id\\":\\"hero_of_time#0\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"PC\\"}": Object {
-          "payload": Object {},
+        "address": Object {
+          "id": "mighty_bananas#1",
+          "pluginName": "hill_cooking_pot",
+          "type": "FOOD",
         },
-        "{\\"id\\":\\"mighty_bananas#1\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"FOOD\\"}": Object {
-          "payload": Object {},
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "razorclaw_crab#2",
+          "pluginName": "hill_cooking_pot",
+          "type": "FOOD",
         },
-        "{\\"id\\":\\"razorclaw_crab#2\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"FOOD\\"}": Object {
-          "payload": Object {},
+        "payload": Object {},
+      },
+      Object {
+        "address": Object {
+          "id": "seafood_fruit_mix#3",
+          "pluginName": "hill_cooking_pot",
+          "type": "FOOD",
         },
-        "{\\"id\\":\\"seafood_fruit_mix#3\\",\\"pluginName\\":\\"hill_cooking_pot\\",\\"type\\":\\"FOOD\\"}": Object {
-          "payload": Object {
-            "effect": Array [
-              "attack_power",
-              1,
-            ],
-          },
+        "payload": Object {
+          "effect": Array [
+            "attack_power",
+            1,
+          ],
         },
+      },
+      Object {
+        "address": Object {
+          "id": "~000#missingno",
+          "pluginName": "hill_cooking_pot",
+          "type": "EXPERIMENT",
+        },
+        "payload": null,
       },
     ],
   },

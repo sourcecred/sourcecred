@@ -109,7 +109,23 @@ export const duplicateCookEdge = () => ({
   },
 });
 
+// This node is added to and then removed from the advanced meal graph.
+export const phantomNode = () => ({
+  address: makeAddress("restless_cricket#9", "EXPERIMENT"),
+  payload: {},
+});
+
+// This node's payload is literally `null`; it should not be confused
+// with a nonexistent node.
+export const nullPayloadNode = () => ({
+  address: makeAddress("~000#missingno", "EXPERIMENT"),
+  payload: null,
+});
+
 export const advancedMealGraph = () =>
   simpleMealGraph()
     .addEdge(crabLoopEdge())
-    .addEdge(duplicateCookEdge());
+    .addEdge(duplicateCookEdge())
+    .addNode(phantomNode())
+    .removeNode(phantomNode().address)
+    .addNode(nullPayloadNode());

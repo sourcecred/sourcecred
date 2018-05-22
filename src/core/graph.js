@@ -7,6 +7,8 @@ import {AddressMap} from "./address";
 import {toCompat, fromCompat} from "../util/compat";
 import type {Compatible} from "../util/compat";
 
+type Integer = number;
+
 export type Node<+T> = {|
   +address: Address,
   +payload: T,
@@ -19,31 +21,46 @@ export type Edge<+T> = {|
   +payload: T,
 |};
 
-const COMPAT_TYPE = "sourcecred/sourcecred/Graph";
-const COMPAT_VERSION = "0.1.0";
+type IndexedEdge<+T> = {|
+  +address: Address,
+  +srcIndex: Integer,
+  +dstIndex: Integer,
+  +payload: T,
+|};
 
-export type GraphJSON<NP, EP> = Compatible<{|
-  +nodes: AddressMapJSON<Node<NP>>,
-  +edges: AddressMapJSON<Edge<EP>>,
-|}>;
+const COMPAT_TYPE = "sourcecred/sourcecred/Graph";
+const COMPAT_VERSION = "0.2.0";
+
+type NodesSortedByStringifiedAddress<NP> = {|
+  +address: Address,
+  +payload?: NP,
+|}[];
+export type GraphJSON<NP, EP> = {|
+  +nodes: NodesSortedByStringifiedAddress<NP>,
+  +edges: AddressMapJSON<IndexedEdge<EP>>,
+|};
+
+type MaybeNode<+NP> = {|+address: Address, +node: Node<NP> | void|};
 
 export class Graph<NP, EP> {
-  _nodes: AddressMap<Node<NP>>;
-  _edges: AddressMap<Edge<EP>>;
+  // Invariant: sizes of `_nodeIndices`, `_nodes`, `_outEdges`, and
+  // `_inEdges` are all equal.
+  _nodeIndices: AddressMap<{|+address: Address, +index: Integer|}>;
+  _nodes: MaybeNode<NP>[];
+  _edges: AddressMap<IndexedEdge<EP>>;
 
-  // The keyset of each of the following fields should equal the keyset
-  // of `_nodes`. If `e` is an edge from `u` to `v`, then `e.address`
-  // should appear exactly once in `_outEdges[u.address]` and exactly
-  // once in `_inEdges[v.address]` (and every entry in `_inEdges` and
-  // `_outEdges` should be of this form).
-  _outEdges: AddressMap<{|+address: Address, +edges: Address[]|}>;
-  _inEdges: AddressMap<{|+address: Address, +edges: Address[]|}>;
+  // If `idx` is the index of a node `v`, then `_outEdges[idx]` is the
+  // list of `e.address` for all edges `e` whose source is `v`.
+  // Likewise, `_inEdges[idx]` has the addresses of all in-edges to `v`.
+  _outEdges: Address[][];
+  _inEdges: Address[][];
 
   constructor() {
-    this._nodes = new AddressMap();
+    this._nodeIndices = new AddressMap();
+    this._nodes = [];
     this._edges = new AddressMap();
-    this._outEdges = new AddressMap();
-    this._inEdges = new AddressMap();
+    this._outEdges = [];
+    this._inEdges = [];
   }
 
   copy(): Graph<$Supertype<NP>, $Supertype<EP>> {
@@ -51,21 +68,102 @@ export class Graph<NP, EP> {
   }
 
   equals(that: Graph<NP, EP>): boolean {
-    return this._nodes.equals(that._nodes) && this._edges.equals(that._edges);
+    const theseNodes = this.nodes();
+    const thoseNodes = that.nodes();
+    if (theseNodes.length !== thoseNodes.length) {
+      return false;
+    }
+
+    const theseEdges = this.edges();
+    const thoseEdges = that.edges();
+    if (theseEdges.length !== thoseEdges.length) {
+      return false;
+    }
+
+    for (const node of theseNodes) {
+      if (!deepEqual(node, that.node(node.address))) {
+        return false;
+      }
+    }
+    for (const edge of theseEdges) {
+      if (!deepEqual(edge, that.edge(edge.address))) {
+        return false;
+      }
+    }
+    return true;
   }
 
-  toJSON(): GraphJSON<NP, EP> {
+  toJSON(): Compatible<GraphJSON<NP, EP>> {
+    const partialNodes: {|
+      key: string,
+      oldIndex: Integer,
+      data: {|
+        +address: Address,
+        +payload?: NP,
+      |},
+    |}[] = this._nodes
+      .map((maybeNode, oldIndex) => {
+        const key = stringify(maybeNode.address);
+        const data = maybeNode.node || {address: maybeNode.address};
+        return {key, oldIndex, data};
+      })
+      .filter(({oldIndex: idx}) => {
+        // Say that a node is a "phantom node" if its address appears in
+        // the graph, but the node does not, and no edge in the graph is
+        // incident to the node. (For instance, if `v` is any node, then
+        // `new Graph().addNode(v).removeNode(v.address)` has `v` as a
+        // phantom node.) The existence of phantom nodes is part of the
+        // internal state but not the logical state, so we remove these
+        // nodes before serializing the graph to ensure logical
+        // canonicity.
+        return (
+          this._nodes[idx].node !== undefined ||
+          this._outEdges[idx].length > 0 ||
+          this._inEdges[idx].length > 0
+        );
+      });
+    partialNodes.sort((a, b) => {
+      const ka = a.key;
+      const kb = b.key;
+      return ka < kb ? -1 : ka > kb ? +1 : 0;
+    });
+
+    // Let `v` be a node that appears at index `i` in the internal
+    // representation of this graph. If `v` appears at index `j` of the
+    // output, then the following array `arr` has `arr[i] = j`.
+    // Otherwise, `v` is a phantom node. In this case, `arr[i]` is not
+    // defined and should not be accessed.
+    const oldIndexToNewIndex = new Uint32Array(this._nodes.length);
+    partialNodes.forEach(({oldIndex}, newIndex) => {
+      oldIndexToNewIndex[oldIndex] = newIndex;
+    });
+
+    const edges = new AddressMap();
+    this._edges.getAll().forEach((oldIndexedEdge) => {
+      // Here, we know that the old edge's `srcIndex` and `dstIndex`
+      // indices are in the domain of `oldIndexToNewIndex`, because the
+      // corresponding nodes are not phantom, because `oldIndexedEdge`
+      // is incident to them.
+      const newIndexedEdge = {
+        address: oldIndexedEdge.address,
+        payload: oldIndexedEdge.payload,
+        srcIndex: oldIndexToNewIndex[oldIndexedEdge.srcIndex],
+        dstIndex: oldIndexToNewIndex[oldIndexedEdge.dstIndex],
+      };
+      edges.add(newIndexedEdge);
+    });
+
     return toCompat(
       {type: COMPAT_TYPE, version: COMPAT_VERSION},
       {
-        nodes: this._nodes.toJSON(),
-        edges: this._edges.toJSON(),
+        nodes: partialNodes.map((x) => x.data),
+        edges: edges.toJSON(),
       }
     );
   }
 
-  static fromJSON<NP, EP>(json: GraphJSON<NP, EP>): Graph<NP, EP> {
-    const compatJson = fromCompat(
+  static fromJSON<NP, EP>(json: Compatible<GraphJSON<NP, EP>>): Graph<NP, EP> {
+    const compatJson: GraphJSON<NP, EP> = fromCompat(
       {
         type: COMPAT_TYPE,
         version: COMPAT_VERSION,
@@ -73,34 +171,44 @@ export class Graph<NP, EP> {
       json
     );
     const result = new Graph();
-    AddressMap.fromJSON(compatJson.nodes)
-      .getAll()
-      .forEach((node) => {
+    compatJson.nodes.forEach((partialNode) => {
+      if ("payload" in partialNode) {
+        const node: Node<NP> = (partialNode: any);
         result.addNode(node);
-      });
+      } else {
+        result._addNodeAddress(partialNode.address);
+      }
+    });
     AddressMap.fromJSON(compatJson.edges)
       .getAll()
-      .forEach((edge) => {
-        result.addEdge(edge);
+      .forEach((indexedEdge) => {
+        result._addIndexedEdge(indexedEdge);
       });
     return result;
   }
 
-  _lookupEdges(
-    map: AddressMap<{|+address: Address, +edges: Address[]|}>,
-    key: Address
-  ): Address[] {
-    const result = map.get(key);
-    return result ? result.edges : [];
+  _addNodeAddress(address: Address): Integer {
+    const indexDatum = this._nodeIndices.get(address);
+    if (indexDatum != null) {
+      return indexDatum.index;
+    } else {
+      const index = this._nodes.length;
+      this._nodeIndices.add({address, index});
+      this._nodes.push({address, node: undefined});
+      this._outEdges.push([]);
+      this._inEdges.push([]);
+      return index;
+    }
   }
 
-  addNode(node: Node<NP>): Graph<NP, EP> {
+  addNode(node: Node<NP>): this {
     if (node == null) {
       throw new Error(`node is ${String(node)}`);
     }
-    const existingNode = this.node(node.address);
-    if (existingNode !== undefined) {
-      if (deepEqual(existingNode, node)) {
+    const index = this._addNodeAddress(node.address);
+    const maybeNode = this._nodes[index];
+    if (maybeNode.node !== undefined) {
+      if (deepEqual(maybeNode.node, node)) {
         return this;
       } else {
         throw new Error(
@@ -110,60 +218,61 @@ export class Graph<NP, EP> {
         );
       }
     }
-    this._nodes.add(node);
-    this._outEdges.add({
-      address: node.address,
-      edges: this._lookupEdges(this._outEdges, node.address),
-    });
-    this._inEdges.add({
-      address: node.address,
-      edges: this._lookupEdges(this._inEdges, node.address),
-    });
+    this._nodes[index] = {address: maybeNode.address, node};
     return this;
   }
 
   removeNode(address: Address): this {
-    this._nodes.remove(address);
+    const indexDatum = this._nodeIndices.get(address);
+    if (indexDatum != null) {
+      this._nodes[indexDatum.index] = {address, node: undefined};
+    }
     return this;
   }
 
-  addEdge(edge: Edge<EP>): Graph<NP, EP> {
+  addEdge(edge: Edge<EP>): this {
     if (edge == null) {
       throw new Error(`edge is ${String(edge)}`);
     }
-    const existingEdge = this.edge(edge.address);
-    if (existingEdge !== undefined) {
-      if (deepEqual(existingEdge, edge)) {
+    const srcIndex = this._addNodeAddress(edge.src);
+    const dstIndex = this._addNodeAddress(edge.dst);
+    const indexedEdge = {
+      address: edge.address,
+      srcIndex,
+      dstIndex,
+      payload: edge.payload,
+    };
+    return this._addIndexedEdge(indexedEdge);
+  }
+
+  _addIndexedEdge(indexedEdge: IndexedEdge<EP>): this {
+    const existingIndexedEdge = this._edges.get(indexedEdge.address);
+    if (existingIndexedEdge !== undefined) {
+      if (deepEqual(existingIndexedEdge, indexedEdge)) {
         return this;
       } else {
         throw new Error(
           `edge at address ${JSON.stringify(
-            edge.address
+            indexedEdge.address
           )} exists with distinct contents`
         );
       }
     }
-    this._edges.add(edge);
-
-    const theseOutEdges = this._lookupEdges(this._outEdges, edge.src);
-    theseOutEdges.push(edge.address);
-    this._outEdges.add({address: edge.src, edges: theseOutEdges});
-
-    const theseInEdges = this._lookupEdges(this._inEdges, edge.dst);
-    theseInEdges.push(edge.address);
-    this._inEdges.add({address: edge.dst, edges: theseInEdges});
-
+    this._edges.add(indexedEdge);
+    this._outEdges[indexedEdge.srcIndex].push(indexedEdge.address);
+    this._inEdges[indexedEdge.dstIndex].push(indexedEdge.address);
     return this;
   }
 
   removeEdge(address: Address): this {
     // TODO(perf): This is linear in the degree of the endpoints of the
     // edge. Consider storing in non-list form.
-    const edge = this.edge(address);
-    if (edge) {
+    const indexedEdge = this._edges.get(address);
+    if (indexedEdge) {
+      this._edges.remove(address);
       [
-        this._lookupEdges(this._inEdges, edge.dst),
-        this._lookupEdges(this._outEdges, edge.src),
+        this._outEdges[indexedEdge.srcIndex],
+        this._inEdges[indexedEdge.dstIndex],
       ].forEach((edges) => {
         const index = edges.findIndex((ea) => deepEqual(ea, address));
         if (index !== -1) {
@@ -171,16 +280,32 @@ export class Graph<NP, EP> {
         }
       });
     }
-    this._edges.remove(address);
     return this;
   }
 
   node(address: Address): Node<NP> {
-    return this._nodes.get(address);
+    const indexDatum = this._nodeIndices.get(address);
+    if (indexDatum == null) {
+      // We've never heard of this node.
+      return (undefined: any);
+    } else {
+      const node: Node<NP> | void = this._nodes[indexDatum.index].node;
+      return ((node: any): Node<NP>);
+    }
   }
 
   edge(address: Address): Edge<EP> {
-    return this._edges.get(address);
+    const indexedEdge = this._edges.get(address);
+    if (!indexedEdge) {
+      // Lie.
+      return (undefined: any);
+    }
+    return {
+      address: indexedEdge.address,
+      src: this._nodes[indexedEdge.srcIndex].address,
+      dst: this._nodes[indexedEdge.dstIndex].address,
+      payload: indexedEdge.payload,
+    };
   }
 
   /**
@@ -202,33 +327,33 @@ export class Graph<NP, EP> {
       +edgeType?: string,
       +direction?: "IN" | "OUT" | "ANY",
     |}
-  ): {+edge: Edge<EP>, +neighbor: Address}[] {
+  ): {|+edge: Edge<EP>, +neighbor: Address|}[] {
     if (nodeAddress == null) {
       throw new Error(`address is ${String(nodeAddress)}`);
     }
 
-    let result: {+edge: Edge<EP>, +neighbor: Address}[] = [];
+    const indexDatum = this._nodeIndices.get(nodeAddress);
+    if (indexDatum == null) {
+      return [];
+    }
+    const nodeIndex = indexDatum.index;
+
+    let result: {|+edge: Edge<EP>, +neighbor: Address|}[] = [];
     const direction = (options != null && options.direction) || "ANY";
 
     if (direction === "ANY" || direction === "IN") {
-      let inNeighbors = this._lookupEdges(this._inEdges, nodeAddress).map(
-        (e) => {
-          const edge = this.edge(e);
-          return {edge, neighbor: edge.src};
-        }
-      );
-
+      let inNeighbors = this._inEdges[nodeIndex].map((edgeAddress) => {
+        const edge = this.edge(edgeAddress);
+        return {edge, neighbor: edge.src};
+      });
       result = result.concat(inNeighbors);
     }
 
     if (direction === "ANY" || direction === "OUT") {
-      let outNeighbors = this._lookupEdges(this._outEdges, nodeAddress).map(
-        (e) => {
-          const edge = this.edge(e);
-          return {edge, neighbor: edge.dst};
-        }
-      );
-
+      let outNeighbors = this._outEdges[nodeIndex].map((edgeAddress) => {
+        const edge = this.edge(edgeAddress);
+        return {edge, neighbor: edge.dst};
+      });
       if (direction === "ANY") {
         // If direction is ANY, we already counted self-referencing edges as
         // an inNeighbor
@@ -236,9 +361,9 @@ export class Graph<NP, EP> {
           ({edge}) => !deepEqual(edge.src, edge.dst)
         );
       }
-
       result = result.concat(outNeighbors);
     }
+
     if (options != null && options.edgeType != null) {
       const edgeType = options.edgeType;
       result = result.filter(({edge}) => edge.address.type === edgeType);
@@ -256,7 +381,9 @@ export class Graph<NP, EP> {
    * If filter is provided, it will return only nodes with the requested type.
    */
   nodes(filter?: {type?: string}): Node<NP>[] {
-    let nodes = this._nodes.getAll();
+    /*:: declare function nonNulls<T>(x: (T | void)[]): T[]; */
+    let nodes = this._nodes.map((x) => x.node).filter((x) => Boolean(x));
+    /*:: nodes = nonNulls(nodes); */
     if (filter != null && filter.type != null) {
       const typeFilter = filter.type;
       nodes = nodes.filter((n) => n.address.type === typeFilter);
@@ -270,7 +397,12 @@ export class Graph<NP, EP> {
    * If filter is provided, it will return only edges with the requested type.
    */
   edges(filter?: {type?: string}): Edge<EP>[] {
-    let edges = this._edges.getAll();
+    let edges = this._edges.getAll().map((indexedEdge) => ({
+      address: indexedEdge.address,
+      src: this._nodes[indexedEdge.srcIndex].address,
+      dst: this._nodes[indexedEdge.dstIndex].address,
+      payload: indexedEdge.payload,
+    }));
     if (filter != null && filter.type != null) {
       const typeFilter = filter.type;
       edges = edges.filter((e) => e.address.type === typeFilter);
