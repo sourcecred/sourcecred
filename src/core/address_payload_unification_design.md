@@ -42,10 +42,10 @@ porcelain. For instance, the GitHub plugin might have:
 ```javascript
 type GithubNodeType = "PULL_REQUEST" | "PULL_REQUEST_COMMENT";  // e.g.
 class GithubNodePayload<+T: {+url: string}> implements NodePayload {
-  +record: T;
+  +_record: T;
   +_type: GithubNodeType;
   constructor(record: T, type: GithubNodeType) {
-    this.record = record;
+    this._record = record;
     this._type = type;
   }
   address() {
@@ -56,7 +56,7 @@ class GithubNodePayload<+T: {+url: string}> implements NodePayload {
     };
   }
   url() {
-    return this.record.url;
+    return this._record.url;
   }
   toJSON() { throw new Error("Must be implemented by subclass."); }
   static fromJSON() { throw new Error("Must be implemented by subclass."); }
@@ -72,10 +72,10 @@ class PullRequestPayload extends GithubNodePayload<PullRequestJson> {
   constructor(record: PullRequestJson) {
     super(record, "PULL_REQUEST");
   }
-  number(): number { return this.record.number; }
-  title(): string { return this.record.title; }
-  body(): string { return this.record.body; }
-  toJSON() { return toCompat(PULL_REQUEST_COMPAT_INFO, this.record); }
+  number(): number { return this._record.number; }
+  title(): string { return this._record.title; }
+  body(): string { return this._record.body; }
+  toJSON() { return toCompat(PULL_REQUEST_COMPAT_INFO, this._record); }
   static fromJSON(json) { return fromCompat(PULL_REQUEST_COMPAT_INFO, json); }
 }
 const PULL_REQUEST_COMPAT_INFO: CompatInfo = {
