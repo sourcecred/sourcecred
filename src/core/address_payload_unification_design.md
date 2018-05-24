@@ -505,7 +505,7 @@ identifying characteristics:
 const myTreeEntries = neighborsV2({
   direction: "OUT",
   nodeFilter: {
-    pluginName: "sourcecred/git-beta", 
+    pluginName: "sourcecred/git-beta",
     id: {
       type: "TREE_ENTRY",
       name: "pygravitydefier",
@@ -539,12 +539,12 @@ Some external shims, just to make the document typecheck…
 
 ```javascript
 type Json =
-  | string 
-  | number 
+  | string
+  | number
   | {[string]: Json}
-  | $ReadOnlyArray<Json> 
-  | true 
-  | false 
+  | $ReadOnlyArray<Json>
+  | true
+  | false
   | null
   ;
 type CompatInfo = {|
