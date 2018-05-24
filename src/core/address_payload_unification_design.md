@@ -427,9 +427,9 @@ references.
 This API encompasses an improvement to how nodes are handled. Clients
 will usually work with either a `Node<NR, NP>` or a `NodeReference`
 alone. There is still a bit of friction in that some methods are
-inherently on the reference while others are on the porcelain, but this
-is not actually a problem when the `Node<NR, NP>` is treated as a
-package (not destructured): consider
+inherently on the reference while others are on the payload, but this is
+not actually a problem when the `Node<NR, NP>` is treated as a package
+(not destructured): consider
 
 ```javascript
 function someActions(
