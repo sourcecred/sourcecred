@@ -5,7 +5,6 @@ import type {
   BecomesEdgePayload,
   BlobNodePayload,
   Commit,
-  EdgePayload,
   HasContentsEdgePayload,
   Hash,
   IncludesEdgePayload,
@@ -37,7 +36,7 @@ import {
 import {_makeAddress} from "./address";
 
 class GitGraphCreator {
-  createGraph(repository: Repository): Graph<NodePayload, EdgePayload> {
+  createGraph(repository: Repository): Graph {
     const treeAndNameToSubmoduleUrls = this.treeAndNameToSubmoduleUrls(
       repository
     );
@@ -198,7 +197,7 @@ class GitGraphCreator {
     return result;
   }
 
-  becomesEdges(repository: Repository): Graph<NodePayload, EdgePayload> {
+  becomesEdges(repository: Repository): Graph {
     const result = new Graph();
     for (const {
       childCommit,
@@ -300,8 +299,6 @@ export function* findBecomesEdges(
   }
 }
 
-export function createGraph(
-  repository: Repository
-): Graph<NodePayload, EdgePayload> {
+export function createGraph(repository: Repository): Graph {
   return new GitGraphCreator().createGraph(repository);
 }

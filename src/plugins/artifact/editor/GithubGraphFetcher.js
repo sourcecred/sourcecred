@@ -5,15 +5,11 @@ import React from "react";
 import type {Graph} from "../../../core/graph";
 import type {Settings} from "./SettingsConfig";
 import fetchGithubRepo from "../../github/fetchGithubRepo";
-import type {
-  NodePayload as GithubNodePayload,
-  EdgePayload as GithubEdgePayload,
-} from "../../github/types";
 import {parse} from "../../github/parser";
 
 type Props = {
   settings: Settings,
-  onCreateGraph: (graph: Graph<GithubNodePayload, GithubEdgePayload>) => void,
+  onCreateGraph: (graph: Graph) => void,
 };
 
 export class GithubGraphFetcher extends React.Component<Props> {

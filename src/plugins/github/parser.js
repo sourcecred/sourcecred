@@ -6,8 +6,6 @@ import type {Node, Edge} from "../../core/graph";
 import type {
   NodeType,
   EdgeType,
-  NodePayload,
-  EdgePayload,
   PullRequestReviewNodePayload,
   RepositoryNodePayload,
   AuthorNodePayload,
@@ -37,9 +35,7 @@ import {Graph, edgeID} from "../../core/graph";
 import {findReferences} from "./findReferences";
 import {commitAddress} from "../git/address";
 
-export function parse(
-  githubResponseJSON: GithubResponseJSON
-): Graph<NodePayload, EdgePayload> {
+export function parse(githubResponseJSON: GithubResponseJSON): Graph {
   const parser = new GithubParser();
   parser.addData(githubResponseJSON);
   parser.addReferenceEdges();
@@ -47,7 +43,7 @@ export function parse(
 }
 
 class GithubParser {
-  graph: Graph<NodePayload, EdgePayload>;
+  graph: Graph;
 
   constructor() {
     this.graph = new Graph();

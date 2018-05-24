@@ -6,14 +6,7 @@ import {StyleSheet, css} from "aphrodite/no-important";
 import "./pluginAdapter";
 
 import type {Graph, Node} from "../../../core/graph";
-import type {
-  NodePayload as GithubNodePayload,
-  EdgePayload as GithubEdgePayload,
-} from "../../github/types";
-import type {
-  NodePayload as ArtifactNodePayload,
-  EdgePayload as ArtifactEdgePayload,
-} from "../artifactPlugin";
+import type {NodePayload as ArtifactNodePayload} from "../artifactPlugin";
 import type {Settings} from "./SettingsConfig";
 import {ArtifactGraphEditor} from "./ArtifactGraphEditor";
 import {ContributionList} from "./ContributionList";
@@ -24,8 +17,8 @@ import standardAdapterSet from "./standardAdapterSet";
 type Props = {};
 type State = {
   artifacts: Node<ArtifactNodePayload>[],
-  githubGraph: ?Graph<GithubNodePayload, GithubEdgePayload>,
-  artifactGraph: ?Graph<ArtifactNodePayload, ArtifactEdgePayload>,
+  githubGraph: ?Graph,
+  artifactGraph: ?Graph,
   settings: Settings,
 };
 

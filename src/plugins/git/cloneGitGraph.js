@@ -2,7 +2,6 @@
 
 import cloneAndLoadRepository from "./cloneAndLoadRepository";
 import {createGraph} from "./createGraph";
-import type {NodePayload, EdgePayload} from "./types";
 import type {Graph} from "../../core/graph";
 
 /**
@@ -18,7 +17,7 @@ import type {Graph} from "../../core/graph";
 export default function fetchGitGraph(
   repoOwner: string,
   repoName: string
-): Graph<NodePayload, EdgePayload> {
+): Graph {
   const repo = cloneAndLoadRepository(repoOwner, repoName);
   return createGraph(repo);
 }

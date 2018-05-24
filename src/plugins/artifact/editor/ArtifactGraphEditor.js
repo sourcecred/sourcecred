@@ -4,16 +4,16 @@ import React from "react";
 
 import type {Node} from "../../../core/graph";
 import type {Settings} from "./SettingsConfig";
-import type {NodePayload, EdgePayload} from "../artifactPlugin";
+import type {NodePayload} from "../artifactPlugin";
 import {Graph} from "../../../core/graph";
 import {artifactAddress} from "../artifactPlugin";
 
 type Props = {
   settings: Settings,
-  onChange: (Graph<NodePayload, EdgePayload>) => void,
+  onChange: (Graph) => void,
 };
 type State = {
-  graph: Graph<NodePayload, EdgePayload>,
+  graph: Graph,
   artifactInProgressName: string,
 };
 

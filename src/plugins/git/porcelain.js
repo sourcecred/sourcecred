@@ -60,8 +60,8 @@ function assertAddressType(address: Address, t: NodeType) {
 }
 
 export class GraphPorcelain {
-  graph: Graph<any, any>;
-  constructor(graph: Graph<any, any>) {
+  graph: Graph;
+  constructor(graph: Graph) {
     this.graph = graph;
   }
 

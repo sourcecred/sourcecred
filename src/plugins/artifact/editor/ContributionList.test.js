@@ -19,8 +19,6 @@ function createTestData(): * {
   type PayloadA = number;
   type PayloadB = boolean;
   type PayloadC = string;
-  type NodePayload = PayloadA | PayloadB | PayloadC;
-  type EdgePayload = null;
 
   const PLUGIN_A = "sourcecred/example-plugin-a";
   const PLUGIN_B = "sourcecred/example-plugin-b";
@@ -71,7 +69,7 @@ function createTestData(): * {
     dst: nodeA3().address,
   });
 
-  const graph: () => Graph<NodePayload, EdgePayload> = () =>
+  const graph: () => Graph = () =>
     new Graph()
       .addNode(nodeA1())
       .addNode(nodeA2())
@@ -84,7 +82,7 @@ function createTestData(): * {
   const adapterA: () => PluginAdapter<PayloadA> = () => ({
     pluginName: PLUGIN_A,
     renderer: class RendererA extends React.Component<{
-      graph: Graph<any, any>,
+      graph: Graph,
       node: Node<PayloadA>,
     }> {
       render() {
@@ -100,7 +98,7 @@ function createTestData(): * {
         );
       }
     },
-    extractTitle(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadA>) {
+    extractTitle(graph: Graph, node: Node<PayloadA>) {
       return `the number ${String(node.payload)}`;
     },
   });
@@ -108,7 +106,7 @@ function createTestData(): * {
   const adapterB: () => PluginAdapter<PayloadB> = () => ({
     pluginName: PLUGIN_B,
     renderer: class RendererB extends React.Component<{
-      graph: Graph<any, any>,
+      graph: Graph,
       node: Node<PayloadB>,
     }> {
       render() {
@@ -120,7 +118,7 @@ function createTestData(): * {
         );
       }
     },
-    extractTitle(graph: Graph<NodePayload, EdgePayload>, node: Node<PayloadB>) {
+    extractTitle(graph: Graph, node: Node<PayloadB>) {
       return String(node.payload).toUpperCase() + "!";
     },
   });
