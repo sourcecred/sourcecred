@@ -251,7 +251,7 @@ interface PluginHandler<NR: NodeReference, NP: NodePayload> {
   /**
    * Enrich a base reference with plugin-/domain-specific properties.
    */
-  createReference(baseReference: NodeReference, payload: NP): NR;
+  createReference(baseReference: NodeReference): NR;
 
   /**
    * Deserialize a JSON payload, which is guaranteed to be the
@@ -352,7 +352,7 @@ declare class Graph /* no type parameters! */ {
 
   node(address: Address): ?Node<any, any>;
   edge(address: Address): ?Edge;
-  nodeReference(address: Address): NodeReference /* see commentary below */;
+  nodeReference(address: Address): NodeReference;
 
   nodes(filter?: {|+type?: string|}): Iterator<Node<any, any>>;
   edges(filter?: {|+type?: string|}): Iterator<Edge>;
@@ -403,9 +403,8 @@ Some things that are implicit from the types, but are worth mentioning:
     will re-enrich all nodes with their appropriate plugins to get
     payloads and references.
 
-Additionally, the proper semantics of `nodeReference` are not entirely
-clear. There are four cases, depending on the `address` argument passed
-to this method:
+The semantics for `nodeReference` are somewhat subtle. There are four
+cases, depending on the `address` argument passed to this method:
 
   1. The address corresponds to a node in the graph.
   2. The address corresponds to a node that does not appear in the
@@ -415,39 +414,13 @@ to this method:
      appears in `_nodes` due to a prior call to `removeNode`.
   4. The address has never been seen before.
 
-Correspondingly:
-
-  - The semantics for case (1) are clear.
-  - It seems highly probable that, for case (2), we should return a
-    non-null reference: otherwise, it is not clear how we can explore
-    the structure around nodes that we know exist but do not have
-    directly (e.g., to answer the question, “what other commits has the
-    author of this commit authored?” when the “commit” notion comes from
-    a different plugin than the “author” notion (say, a Git plugin and
-    an OAuth plugin), and only the commit graph is loaded).
-  - It also seems clear that cases (3) and (4) should have the same
-    semantics as each other, but it is less clear what these should be.
-  - In these cases, we could elect to either return `undefined` or to
-    return a “null object”: an object for which `get()` returns `null`
-    and `neighbors(_)` returns `[].values()`.
-  - We should also ask—is the address required to be associated with a
-    known plugin? If so, should we ask the plugin to give us a
-    `NodeReference` instance specific to that plugin?
-  - If we later learn about this node, can the formerly dangling
-    reference come “back online”? Should it?
-  - Does this mean that calling `nodeReference` can change the internal
-    state of the graph? How does this impact the graph’s ability to
-    compress its `_nodes`?
-
-Some of these latter questions apply in case (2), too.
-
-One resolution to, I think, all of these questions is to change the
-`PluginHandler.createReference` method so that it does not accept a
-`NodePayload`, or at least to make the payload optional. This has the
-nice property that `PluginHandler<NR, NP>` has two simple functions: one
-to enrich a base reference into an `NR`, and one to enrich a JSON blob
-into an `NP`. I suspect that this is likely a good solution, but I am
-interested to hear other opinions.
+In all cases, we will return a `NodeReference` constructed by the
+appropriate plugin. This implies that calling this method may mutate the
+internal storage in the graph: in case (4), we will have to create a
+phantom node to keep track of the reference. This therefore further
+implies that graphs will be hard-pressed to perform any kind of “index
+pruning” by removing phantom nodes, lest they invalidate existing
+references.
 
 ## Conclusion and next steps
 
