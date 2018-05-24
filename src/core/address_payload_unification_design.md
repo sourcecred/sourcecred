@@ -40,8 +40,9 @@ one for each logical type. These classes can provide domain-specific
 porcelain. For instance, the GitHub plugin might have:
 
 ```javascript
-type GithubNodeType = "PULL_REQUEST" | "PULL_REQUEST_COMMENT";  // e.g.
-class GithubNodePayload<+T: {+url: string}> implements NodePayload {
+type GithubNodeType = "PULL_REQUEST" | "PULL_REQUEST_COMMENT"; // e.g.
+type GithubNodeRecord = PullRequestRecord | PullRequestCommentRecord;
+class GithubNodePayload<+T: GithubNodeRecord> implements NodePayload {
   +_record: T;
   +_type: GithubNodeType;
   constructor(record: T, type: GithubNodeType) {
@@ -58,42 +59,46 @@ class GithubNodePayload<+T: {+url: string}> implements NodePayload {
   url() {
     return this._record.url;
   }
-  toJSON() { throw new Error("Must be implemented by subclass."); }
-  static fromJSON() { throw new Error("Must be implemented by subclass."); }
+  toJSON(): Compatible<GithubNodeJson> {
+    const data = {type: this._type, record: this._record};
+    return toCompat(GITHUB_COMPAT_INFO, data);
+  }
 }
+type GithubNodeJson = {|
+  +type: GithubNodeType,
+  +record: GithubNodeRecord,
+|};
+const GITHUB_COMPAT_INFO: CompatInfo = {
+  type: "sourcecred/sourcecred/github/node-payload",
+  version: "0.1.0",
+};
 
-type PullRequestJson = {|
+type PullRequestRecord = {|
   +url: string,
   +number: number,
   +title: string,
   +body: string,
 |};
-class PullRequestPayload extends GithubNodePayload<PullRequestJson> {
-  constructor(record: PullRequestJson) {
+class PullRequestPayload extends GithubNodePayload<PullRequestRecord> {
+  constructor(record: PullRequestRecord) {
     super(record, "PULL_REQUEST");
   }
   number(): number { return this._record.number; }
   title(): string { return this._record.title; }
   body(): string { return this._record.body; }
-  toJSON() { return toCompat(PULL_REQUEST_COMPAT_INFO, this._record); }
-  static fromJSON(json) { return fromCompat(PULL_REQUEST_COMPAT_INFO, json); }
 }
-const PULL_REQUEST_COMPAT_INFO: CompatInfo = {
-  type: "sourcecred/sourcecred/github/PullRequest",
-  version: "0.1.0",
-};
 
-type PullRequestCommentJson = {|+url: string, /* elided */|};
-declare class PullRequestCommentPayload
-extends GithubNodePayload<PullRequestCommentJson> {
-  constructor(record: PullRequestJson): void;
+type PullRequestCommentRecord = {|+url: string /* elided */|};
+declare class PullRequestCommentPayload extends GithubNodePayload<
+  PullRequestCommentRecord
+> {
+  constructor(record: PullRequestCommentRecord): void;
   /* elided */
 }
 ```
 
 Note that a `NodePayload` should have well-defined serialization
 behavior—probably, but not necessarily, via an explicit `toJSON` method.
-By convention, nodes will have a `static fromJSON` for deserialization.
 
 Note also that `NodePayload`s exist outside the context of a graph: they
 simply define data.
@@ -293,13 +298,15 @@ implements PluginHandler<GithubNodeReference, GithubNodePayload<any>> {
     }
   }
 
-  createPayload(json: any) {
-    const type: GithubNodeType = ((json.type: string): any);
+  createPayload(raw: any) {
+    const json: GithubNodeJson = fromCompat(GITHUB_COMPAT_INFO, raw);
+    const {type, record: rawRecord} = json;
+    const record: any = rawRecord;
     switch (type) {
       case "PULL_REQUEST":
-        return new PullRequestPayload(json);
+        return new PullRequestPayload(record);
       case "PULL_REQUEST_COMMENT":
-        return new PullRequestCommentPayload(json);
+        return new PullRequestCommentPayload(record);
       default:
         // eslint-disable-next-line no-unused-expressions
         (type: empty);
@@ -524,6 +531,11 @@ type CompatInfo = {|
   +type: string,
   +version: string,
 |};
-declare function toCompat(compatInfo: CompatInfo, _: any): any;
-declare function fromCompat(compatInfo: CompatInfo, _: any, _?: any): any;
+opaque type Compatible<T> = [CompatInfo, T];
+declare function toCompat<T>(compatInfo: CompatInfo, obj: T): Compatible<T>;
+declare function fromCompat<T>(
+  compatInfo: CompatInfo,
+  obj: Compatible<T>,
+  handlers: ?{[version: string]: (any) => T}
+): T;
 ```
