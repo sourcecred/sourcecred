@@ -254,10 +254,10 @@ interface PluginHandler<NR: NodeReference, NP: NodePayload> {
   createReference(baseReference: NodeReference, payload: NP): NR;
 
   /**
-   * Deserialize a payload, which is guaranteed to be the serialization
-   * of a previous `NP`.
+   * Deserialize a JSON payload, which is guaranteed to be the
+   * serialization of a previous `NP`.
    */
-  fromJSON(json: Json): NP;
+  createPayload(json: Json): NP;
 }
 ```
 
@@ -266,7 +266,7 @@ Note that a perfectly legal “low-effort” implementation of this is:
 ```javascript
 const noopHandler: PluginHandler<NodeReference, NodePayload> = {
   createReference: (reference, _) => reference,
-  fromJSON: (json: any) => ({address() { return json.address; }}),
+  createPayload: (json: any) => ({address() { return json.address; }}),
 };
 ```
 
@@ -293,7 +293,7 @@ implements PluginHandler<GithubNodeReference, GithubNodePayload<any>> {
     }
   }
 
-  fromJSON(json: any) {
+  createPayload(json: any) {
     const type: GithubNodeType = ((json.type: string): any);
     switch (type) {
       case "PULL_REQUEST":
