@@ -106,9 +106,9 @@ interface NodeReference {
   address(): Address;
   get(): ?Node<any, any>;
 
-  neighbors(options?: NeighborhoodOptions): Iterator<NodeReference>;
+  neighbors(options?: NeighborsOptions): Iterator<NodeReference>;
 }
-type NeighborhoodOptions = {|
+type NeighborsOptions = {|
   +nodeType?: string,
   +edgeType?: string,
   +direction?: "IN" | "OUT" | "ANY",
@@ -152,7 +152,7 @@ class IndexedNodeReference implements NodeReference {
     }
   }
 
-  neighbors(options?: NeighborhoodOptions) {
+  neighbors(options?: NeighborsOptions) {
     this._ensureUpToDate();
     if (this._index == null) {
       return [].values();
@@ -194,7 +194,7 @@ class NodeDelegateReference implements NodeReference {
   graph() { return this._base.graph(); }
   address() { return this._base.address(); }
   get() { return this._base.get(); }
-  neighbors(options?: NeighborhoodOptions) {
+  neighbors(options?: NeighborsOptions) {
     return this._base.neighbors(options);
   }
 }
@@ -364,7 +364,7 @@ declare class Graph /* no type parameters! */ {
   _indexVersion: number;
   _internalNeighbors(
     number: number,
-    options?: NeighborhoodOptions
+    options?: NeighborsOptions
   ): Iterator<NodeReference>;
   _addressToIndex(address: Address): ?number;
 }
@@ -521,14 +521,14 @@ const allFirstPrs = nodesV2({
 });
 
 type FilterV2 = {|+pluginName?: string, +id?: Object|};
-type NeighborhoodOptionsV2 = {|
+type NeighborsOptionsV2 = {|
   +nodeFilter?: FilterV2,
   +edgeFilter?: FilterV2,
   +direction?: "IN" | "OUT" | "ANY",
 |};
 
 declare function neighborsV2(
-  options?: NeighborhoodOptionsV2
+  options?: NeighborsOptionsV2
 ): Iterator<NodeReference>;
 declare function nodesV2(filter?: FilterV2): Iterator<Node<any, any>>;
 ```
