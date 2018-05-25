@@ -2,7 +2,7 @@
 
 import deepEqual from "lodash.isequal";
 import stringify from "json-stable-stringify";
-import type {Address, Addressable, AddressMapJSON} from "./address";
+import type {Address, AddressMapJSON} from "./address";
 import {AddressMap} from "./address";
 import {toCompat, fromCompat} from "../util/compat";
 import type {Compatible} from "../util/compat";
@@ -64,7 +64,7 @@ export class Graph {
   }
 
   copy(): Graph {
-    return Graph.mergeConservative(new Graph(), this);
+    return Graph.mergeConservative([this]);
   }
 
   equals(that: Graph): boolean {
@@ -411,86 +411,16 @@ export class Graph {
   }
 
   /**
-   * Merge two graphs. When two nodes have the same address, a resolver
-   * function will be called with the two nodes; the resolver should
-   * return a new node with the same address, which will take the place
-   * of the two nodes in the new graph. Edges have similar behavior.
+   * Merge a collection of graphs. If multiple graphs have a node with a
+   * particular address, then the nodes must all have identical payload,
+   * and a single copy of this node will be included in the result
+   * graph; if not all nodes are identical, then an error is thrown.
+   * Likewise, all edges at a particular address must have identical
+   * source, destination, and payload.
    *
    * The existing graph objects are not modified.
    */
-  static merge(
-    g1: Graph,
-    g2: Graph,
-    nodeResolver: (Node<any>, Node<any>) => Node<any>,
-    edgeResolver: (Edge<any>, Edge<any>) => Edge<any>
-  ): Graph {
-    const result: Graph = new Graph();
-    g1.nodes().forEach((node) => {
-      if (g2.node(node.address) !== undefined) {
-        const resolved = nodeResolver(node, g2.node(node.address));
-        result.addNode(resolved);
-      } else {
-        result.addNode(node);
-      }
-    });
-    g2.nodes().forEach((node) => {
-      if (result.node(node.address) === undefined) {
-        result.addNode(node);
-      }
-    });
-    g1.edges().forEach((edge) => {
-      if (g2.edge(edge.address) !== undefined) {
-        const resolved = edgeResolver(edge, g2.edge(edge.address));
-        result.addEdge(resolved);
-      } else {
-        result.addEdge(edge);
-      }
-    });
-    g2.edges().forEach((edge) => {
-      if (result.edge(edge.address) === undefined) {
-        result.addEdge(edge);
-      }
-    });
-    return result;
-  }
-
-  /**
-   * Merge two graphs, assuming that if `g1` and `g2` both have a node
-   * with a given address, then the nodes are deep-equal (and the same
-   * for edges). If this assumption does not hold, this function will
-   * raise an error.
-   */
-  static mergeConservative(g1: Graph, g2: Graph): Graph {
-    function conservativeResolver<T: Addressable>(
-      kinds: string /* used for an error message on mismatch */,
-      a: T,
-      b: T
-    ): T {
-      if (deepEqual(a, b)) {
-        return a;
-      } else {
-        throw new Error(
-          `distinct ${kinds} with address ${JSON.stringify(a.address)}`
-        );
-      }
-    }
-    const result: Graph = Graph.merge(
-      g1,
-      g2,
-      (u, v) => conservativeResolver("nodes", u, v),
-      (e, f) => conservativeResolver("edges", e, f)
-    );
-    return result;
-  }
-
-  /**
-   * Equivalent to
-   *
-   *     graphs.reduce((g, h) => Graph.mergeConservative(g, h), new Graph()),
-   *
-   * but uses a mutable accumulator for improved performance.
-   */
-  static mergeManyConservative(graphs: $ReadOnlyArray<Graph>): Graph {
+  static mergeConservative(graphs: $ReadOnlyArray<Graph>): Graph {
     const result = new Graph();
     graphs.forEach((graph) => {
       graph.nodes().forEach((node) => {
