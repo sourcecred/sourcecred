@@ -4,7 +4,7 @@ import {NodePorcelain, NodeReference} from "./porcelain";
 import * as demoData from "./graphDemoData";
 
 function exampleStuff() {
-  const graph = demoData.advancedMealGraph();
+  const graph = demoData.mealGraph();
   const heroNode = demoData.heroNode();
   const heroReference = new NodeReference(graph, heroNode.address);
   const heroPorcelain = new NodePorcelain(heroReference, heroNode);

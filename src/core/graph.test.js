@@ -21,11 +21,11 @@ describe("graph", () => {
 
     describe("construction", () => {
       it("works for a simple graph", () => {
-        demoData.simpleMealGraph();
+        demoData.mealGraph();
       });
 
       it("works for an advanced graph", () => {
-        demoData.advancedMealGraph();
+        demoData.mealGraph();
       });
     });
 
@@ -75,7 +75,7 @@ describe("graph", () => {
 
     describe("getting nodes and edges", () => {
       it("correctly gets nodes in the simple graph", () => {
-        const g = demoData.simpleMealGraph();
+        const g = demoData.mealGraph();
         [
           demoData.heroNode(),
           demoData.bananasNode(),
@@ -87,7 +87,7 @@ describe("graph", () => {
       });
 
       it("correctly gets nodes in the advanced graph", () => {
-        const g = demoData.advancedMealGraph();
+        const g = demoData.mealGraph();
         [
           demoData.heroNode(),
           demoData.bananasNode(),
@@ -99,7 +99,7 @@ describe("graph", () => {
       });
 
       it("correctly gets edges in the simple graph", () => {
-        const g = demoData.simpleMealGraph();
+        const g = demoData.mealGraph();
         [
           demoData.pickEdge(),
           demoData.grabEdge(),
@@ -113,7 +113,7 @@ describe("graph", () => {
       });
 
       it("correctly gets edges in the advanced graph", () => {
-        const g = demoData.advancedMealGraph();
+        const g = demoData.mealGraph();
         [
           demoData.pickEdge(),
           demoData.grabEdge(),
@@ -131,7 +131,7 @@ describe("graph", () => {
       it("returns `undefined` for nodes that do not exist", () => {
         expect(
           demoData
-            .simpleMealGraph()
+            .mealGraph()
             .node(demoData.makeAddress("treasure_octorok#5", "NPC"))
         ).toBeUndefined();
       });
@@ -139,7 +139,7 @@ describe("graph", () => {
       it("returns `undefined` for edges that do not exist", () => {
         expect(
           demoData
-            .simpleMealGraph()
+            .mealGraph()
             .node(
               demoData.makeAddress(
                 "treasure_octorok#5@helps_cook@seafood_fruit_mix#3",
@@ -157,7 +157,7 @@ describe("graph", () => {
           demoData.mealNode(),
           demoData.nullPayloadNode(),
         ];
-        const actual = demoData.advancedMealGraph().nodes();
+        const actual = demoData.mealGraph().nodes();
         expectSameSorted(expected, actual);
       });
 
@@ -174,7 +174,7 @@ describe("graph", () => {
           },
         ];
         typeAndExpectedNodes.forEach(({type, nodes}) => {
-          const actual = demoData.advancedMealGraph().nodes({type});
+          const actual = demoData.mealGraph().nodes({type});
           expectSameSorted(actual, nodes);
         });
       });
@@ -190,7 +190,7 @@ describe("graph", () => {
           demoData.crabLoopEdge(),
           demoData.duplicateCookEdge(),
         ];
-        const actual = demoData.advancedMealGraph().edges();
+        const actual = demoData.mealGraph().edges();
         expectSameSorted(expected, actual);
       });
 
@@ -219,12 +219,12 @@ describe("graph", () => {
           },
         ];
         typeAndExpectedEdges.forEach(({type, edges}) => {
-          const actual = demoData.advancedMealGraph().edges({type});
+          const actual = demoData.mealGraph().edges({type});
           expectSameSorted(actual, edges);
         });
       });
       it("filter args are optional", () => {
-        const graph = demoData.advancedMealGraph();
+        const graph = demoData.mealGraph();
         expectSameSorted(graph.edges(), graph.edges({}));
         expectSameSorted(graph.nodes(), graph.nodes({}));
       });
@@ -241,7 +241,7 @@ describe("graph", () => {
           dst: demoData.makeAddress("treasure_octorok#5", "NPC"),
           payload: {},
         });
-        const g = demoData.simpleMealGraph().addEdge(edge());
+        const g = demoData.mealGraph().addEdge(edge());
         expect(g.edge(edge().address)).toEqual(edge());
       });
 
@@ -255,13 +255,13 @@ describe("graph", () => {
           dst: demoData.mealNode().address,
           payload: {},
         });
-        const g = demoData.simpleMealGraph().addEdge(edge());
+        const g = demoData.mealGraph().addEdge(edge());
         expect(g.edge(edge().address)).toEqual(edge());
       });
 
       it("forbids adding a node with existing address and different contents", () => {
         expect(() =>
-          demoData.simpleMealGraph().addNode({
+          demoData.mealGraph().addNode({
             address: demoData.crabNode().address,
             payload: {anotherCrab: true},
           })
@@ -269,14 +269,14 @@ describe("graph", () => {
       });
 
       it("adding a node redundantly is a no-op", () => {
-        const simple1 = demoData.simpleMealGraph();
-        const simple2 = demoData.simpleMealGraph().addNode(demoData.heroNode());
+        const simple1 = demoData.mealGraph();
+        const simple2 = demoData.mealGraph().addNode(demoData.heroNode());
         expect(simple1.equals(simple2)).toBe(true);
       });
 
       it("forbids adding an edge with existing address and different contents", () => {
         expect(() =>
-          demoData.simpleMealGraph().addEdge({
+          demoData.mealGraph().addEdge({
             address: demoData.cookEdge().address,
             src: demoData.crabNode().address,
             dst: demoData.crabNode().address,
@@ -286,13 +286,13 @@ describe("graph", () => {
       });
 
       it("adding an edge redundantly is a no-op", () => {
-        const simple1 = demoData.simpleMealGraph();
-        const simple2 = demoData.simpleMealGraph().addEdge(demoData.cookEdge());
+        const simple1 = demoData.mealGraph();
+        const simple2 = demoData.mealGraph().addEdge(demoData.cookEdge());
         expect(simple1.equals(simple2)).toBe(true);
       });
 
       it("allows creating self-loops", () => {
-        const g = demoData.simpleMealGraph();
+        const g = demoData.mealGraph();
         g.addEdge(demoData.crabLoopEdge());
         expect(
           g
@@ -312,7 +312,7 @@ describe("graph", () => {
       });
 
       it("allows creating multiple edges between the same nodes", () => {
-        const g = demoData.simpleMealGraph();
+        const g = demoData.mealGraph();
         g.addEdge(demoData.duplicateCookEdge());
         [demoData.cookEdge(), demoData.duplicateCookEdge()].forEach((e) => {
           expect(
@@ -329,7 +329,7 @@ describe("graph", () => {
       // the namespaces to be forced to be disjoint. In that case, we can
       // certainly change these tests.
       it("allows adding an edge with an existing node's address", () => {
-        demoData.simpleMealGraph().addEdge({
+        demoData.mealGraph().addEdge({
           address: demoData.crabNode().address,
           src: demoData.crabNode().address,
           dst: demoData.crabNode().address,
@@ -337,7 +337,7 @@ describe("graph", () => {
         });
       });
       it("allows adding a node with an existing edge's address", () => {
-        demoData.simpleMealGraph().addNode({
+        demoData.mealGraph().addNode({
           address: demoData.cookEdge().address,
           payload: {},
         });
@@ -608,9 +608,7 @@ describe("graph", () => {
           },
         ];
         nodeAndNeighborhood.forEach(({node, neighborhood}) => {
-          const actual = demoData
-            .advancedMealGraph()
-            .neighborhood(node.address);
+          const actual = demoData.mealGraph().neighborhood(node.address);
           const sort = (hood) =>
             sortBy(hood, (hoodlum) => stringify(hoodlum.edge.address));
           expect(sort(actual)).toEqual(sort(neighborhood));
@@ -633,7 +631,7 @@ describe("graph", () => {
         ];
         nodeAndExpectedEdgePairs.forEach(([node, expectedEdges]) => {
           const actual = demoData
-            .advancedMealGraph()
+            .mealGraph()
             .neighborhood(node.address, {direction: "OUT"})
             .map(({edge}) => edge);
           expectSameSorted(actual, expectedEdges);
@@ -660,7 +658,7 @@ describe("graph", () => {
         ];
         nodeAndExpectedEdgePairs.forEach(([node, expectedEdges]) => {
           const actual = demoData
-            .advancedMealGraph()
+            .mealGraph()
             .neighborhood(node.address, {direction: "IN"})
             .map(({edge}) => edge);
           expectSameSorted(actual, expectedEdges);
@@ -669,7 +667,7 @@ describe("graph", () => {
 
       it("gets empty out-edges for a nonexistent node", () => {
         const result = demoData
-          .simpleMealGraph()
+          .mealGraph()
           .neighborhood(demoData.makeAddress("hinox", "NPC"), {
             direction: "OUT",
           });
@@ -678,7 +676,7 @@ describe("graph", () => {
 
       it("gets empty in-edges for a nonexistent node", () => {
         const result = demoData
-          .simpleMealGraph()
+          .mealGraph()
           .neighborhood(demoData.makeAddress("hinox", "NPC"), {
             direction: "IN",
           });
@@ -709,7 +707,7 @@ describe("graph", () => {
 
         it("has in-edges for deleted node with dangling edge", () => {
           const g = demoData
-            .simpleMealGraph()
+            .mealGraph()
             .addNode(danglingSrc())
             .addNode(danglingDst())
             .addEdge(fullyDanglingEdge())
@@ -723,7 +721,7 @@ describe("graph", () => {
 
         it("has out-edges for deleted node with dangling edge", () => {
           const g = demoData
-            .simpleMealGraph()
+            .mealGraph()
             .addNode(danglingSrc())
             .addNode(danglingDst())
             .addEdge(fullyDanglingEdge())
@@ -737,7 +735,7 @@ describe("graph", () => {
 
         it("has lack of in-edges for deleted edge", () => {
           const g = demoData
-            .simpleMealGraph()
+            .mealGraph()
             .addNode(danglingSrc())
             .addNode(danglingDst())
             .addEdge(fullyDanglingEdge())
@@ -750,7 +748,7 @@ describe("graph", () => {
 
         it("has lack of out-edges for deleted edge", () => {
           const g = demoData
-            .simpleMealGraph()
+            .mealGraph()
             .addNode(danglingSrc())
             .addNode(danglingDst())
             .addEdge(fullyDanglingEdge())
@@ -762,7 +760,7 @@ describe("graph", () => {
         });
 
         it("has in-edges for non-existent node with dangling edge", () => {
-          const g = demoData.simpleMealGraph().addEdge(fullyDanglingEdge());
+          const g = demoData.mealGraph().addEdge(fullyDanglingEdge());
           const inEdges = g
             .neighborhood(fullyDanglingEdge().dst, {direction: "IN"})
             .map(({edge}) => edge);
@@ -770,7 +768,7 @@ describe("graph", () => {
         });
 
         it("has out-edges for non-existent node with dangling edge", () => {
-          const g = demoData.simpleMealGraph().addEdge(fullyDanglingEdge());
+          const g = demoData.mealGraph().addEdge(fullyDanglingEdge());
           const outEdges = g
             .neighborhood(fullyDanglingEdge().src, {direction: "OUT"})
             .map(({edge}) => edge);
@@ -779,7 +777,7 @@ describe("graph", () => {
 
         it("has in-edges that were added before their endpoints", () => {
           const g = demoData
-            .simpleMealGraph()
+            .mealGraph()
             .addEdge(fullyDanglingEdge())
             .addNode(danglingDst());
           const inEdges = g
@@ -790,7 +788,7 @@ describe("graph", () => {
 
         it("has out-edges that were added before their endpoints", () => {
           const g = demoData
-            .simpleMealGraph()
+            .mealGraph()
             .addEdge(fullyDanglingEdge())
             .addNode(danglingSrc());
           const outEdges = g
@@ -802,7 +800,7 @@ describe("graph", () => {
     });
 
     describe("when adding edges multiple times", () => {
-      const originalGraph = () => demoData.advancedMealGraph();
+      const originalGraph = () => demoData.mealGraph();
       const taredge = () => demoData.crabLoopEdge();
       const modifiedGraph = () => {
         const g = originalGraph();
@@ -841,23 +839,17 @@ describe("graph", () => {
 
     describe("#equals", () => {
       it("returns true for identity-equal graphs", () => {
-        const g = demoData.advancedMealGraph();
+        const g = demoData.mealGraph();
         expect(g.equals(g)).toBe(true);
       });
       it("returns true for deep-equal graphs", () => {
-        expect(
-          demoData.advancedMealGraph().equals(demoData.advancedMealGraph())
-        ).toBe(true);
+        expect(demoData.mealGraph().equals(demoData.mealGraph())).toBe(true);
       });
       it("returns false when the LHS has nodes missing in the RHS", () => {
-        expect(
-          demoData.advancedMealGraph().equals(demoData.simpleMealGraph())
-        ).toBe(false);
+        expect(demoData.mealGraph().equals(new Graph())).toBe(false);
       });
       it("returns false when the RHS has nodes missing in the LHS", () => {
-        expect(
-          demoData.simpleMealGraph().equals(demoData.advancedMealGraph())
-        ).toBe(false);
+        expect(new Graph().equals(demoData.mealGraph())).toBe(false);
       });
       const extraNode1 = () => ({
         address: demoData.makeAddress("octorok", "NPC"),
@@ -868,13 +860,13 @@ describe("graph", () => {
         payload: {status: "sleeping"},
       });
       it("returns false when the LHS has edges missing in the RHS", () => {
-        const g1 = demoData.advancedMealGraph();
-        const g2 = demoData.advancedMealGraph().addNode(extraNode1());
+        const g1 = demoData.mealGraph();
+        const g2 = demoData.mealGraph().addNode(extraNode1());
         expect(g1.equals(g2)).toBe(false);
       });
       it("returns false when the LHS has edges missing in the RHS", () => {
-        const g1 = demoData.advancedMealGraph().addNode(extraNode1());
-        const g2 = demoData.advancedMealGraph();
+        const g1 = demoData.mealGraph().addNode(extraNode1());
+        const g2 = demoData.mealGraph();
         expect(g1.equals(g2)).toBe(false);
       });
       it("returns true when nodes are added in different orders", () => {
@@ -945,25 +937,25 @@ describe("graph", () => {
 
       it("recomposes a neighborhood decomposition", () => {
         const result = Graph.mergeConservative(
-          neighborhoodDecomposition(demoData.advancedMealGraph())
+          neighborhoodDecomposition(demoData.mealGraph())
         );
-        expect(result.equals(demoData.advancedMealGraph())).toBe(true);
+        expect(result.equals(demoData.mealGraph())).toBe(true);
       });
 
       it("recomposes an edge decomposition", () => {
-        const result = edgeDecomposition(demoData.advancedMealGraph()).reduce(
+        const result = edgeDecomposition(demoData.mealGraph()).reduce(
           (g1, g2) => Graph.mergeConservative([g1, g2]),
           new Graph()
         );
-        expect(result.equals(demoData.advancedMealGraph())).toBe(true);
+        expect(result.equals(demoData.mealGraph())).toBe(true);
       });
 
       it("merges a graph with itself", () => {
         const result = Graph.mergeConservative([
-          demoData.advancedMealGraph(),
-          demoData.advancedMealGraph(),
+          demoData.mealGraph(),
+          demoData.mealGraph(),
         ]);
-        expect(result.equals(demoData.advancedMealGraph())).toBe(true);
+        expect(result.equals(demoData.mealGraph())).toBe(true);
       });
 
       it("rejects a graph with conflicting nodes", () => {
@@ -1000,36 +992,36 @@ describe("graph", () => {
       });
 
       it("is the identity on a singleton list", () => {
-        const merged = Graph.mergeConservative([demoData.advancedMealGraph()]);
-        expect(merged.equals(demoData.advancedMealGraph())).toBe(true);
+        const merged = Graph.mergeConservative([demoData.mealGraph()]);
+        expect(merged.equals(demoData.mealGraph())).toBe(true);
       });
 
       it("has the empty graph as a left identity", () => {
         const merged = Graph.mergeConservative([
           new Graph(),
-          demoData.advancedMealGraph(),
+          demoData.mealGraph(),
         ]);
-        expect(merged.equals(demoData.advancedMealGraph())).toBe(true);
+        expect(merged.equals(demoData.mealGraph())).toBe(true);
       });
 
       it("has the empty graph as a right identity", () => {
         const merged = Graph.mergeConservative([
-          demoData.advancedMealGraph(),
+          demoData.mealGraph(),
           new Graph(),
         ]);
-        expect(merged.equals(demoData.advancedMealGraph())).toBe(true);
+        expect(merged.equals(demoData.mealGraph())).toBe(true);
       });
     });
 
     describe("JSON functions", () => {
       it("should serialize a simple graph", () => {
-        expect(demoData.advancedMealGraph().toJSON()).toMatchSnapshot();
+        expect(demoData.mealGraph().toJSON()).toMatchSnapshot();
       });
       it("should work transparently with JSON.stringify", () => {
         // (This is guaranteed by the `JSON.stringify` API, and is more
         // as documentation than actual test.)
-        expect(JSON.stringify(demoData.advancedMealGraph())).toEqual(
-          JSON.stringify(demoData.advancedMealGraph().toJSON())
+        expect(JSON.stringify(demoData.mealGraph())).toEqual(
+          JSON.stringify(demoData.mealGraph().toJSON())
         );
       });
       it("should canonicalize away phantom nodes", () => {
@@ -1064,11 +1056,11 @@ describe("graph", () => {
         expect(g1.toJSON()).toEqual(g2.toJSON());
       });
       it("should no-op on a serialization--deserialization roundtrip", () => {
-        const g = () => demoData.advancedMealGraph();
+        const g = () => demoData.mealGraph();
         expect(Graph.fromJSON(g().toJSON()).equals(g())).toBe(true);
       });
       it("should no-op on a deserialization--serialization roundtrip", () => {
-        const json = () => demoData.advancedMealGraph().toJSON();
+        const json = () => demoData.mealGraph().toJSON();
         expect(Graph.fromJSON(json()).toJSON()).toEqual(json());
       });
     });
@@ -1121,7 +1113,7 @@ describe("graph", () => {
 
     describe("copy", () => {
       it("separates references from the original", () => {
-        const g1 = demoData.advancedMealGraph();
+        const g1 = demoData.mealGraph();
         const g2 = g1.copy();
         const newNode = () => ({
           address: demoData.makeAddress("brand-new", "EXPERIMENT"),
@@ -1133,10 +1125,10 @@ describe("graph", () => {
       });
 
       it("yields a result equal to the original", () => {
-        const g1 = demoData.advancedMealGraph();
+        const g1 = demoData.mealGraph();
         const g2 = g1.copy();
         expect(g1.equals(g2)).toBe(true);
-        expect(g1.equals(demoData.advancedMealGraph())).toBe(true);
+        expect(g1.equals(demoData.mealGraph())).toBe(true);
       });
     });
   });
