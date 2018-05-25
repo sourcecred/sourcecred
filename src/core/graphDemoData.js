@@ -76,18 +76,6 @@ export const eatEdge = () => ({
   dst: mealNode().address,
   payload: {},
 });
-export const simpleMealGraph = () =>
-  new Graph()
-    .addNode(heroNode())
-    .addNode(bananasNode())
-    .addNode(crabNode())
-    .addNode(mealNode())
-    .addEdge(pickEdge())
-    .addEdge(grabEdge())
-    .addEdge(cookEdge())
-    .addEdge(bananasIngredientEdge())
-    .addEdge(crabIngredientEdge())
-    .addEdge(eatEdge());
 
 export const crabLoopEdge = () => ({
   address: makeAddress("crab-self-assessment", "SILLY"),
@@ -109,7 +97,7 @@ export const duplicateCookEdge = () => ({
   },
 });
 
-// This node is added to and then removed from the advanced meal graph.
+// This node is added to and then removed from the meal graph.
 export const phantomNode = () => ({
   address: makeAddress("restless_cricket#9", "EXPERIMENT"),
   payload: {},
@@ -122,8 +110,18 @@ export const nullPayloadNode = () => ({
   payload: null,
 });
 
-export const advancedMealGraph = () =>
-  simpleMealGraph()
+export const mealGraph = () =>
+  new Graph()
+    .addNode(heroNode())
+    .addNode(bananasNode())
+    .addNode(crabNode())
+    .addNode(mealNode())
+    .addEdge(pickEdge())
+    .addEdge(grabEdge())
+    .addEdge(cookEdge())
+    .addEdge(bananasIngredientEdge())
+    .addEdge(crabIngredientEdge())
+    .addEdge(eatEdge())
     .addEdge(crabLoopEdge())
     .addEdge(duplicateCookEdge())
     .addNode(phantomNode())
