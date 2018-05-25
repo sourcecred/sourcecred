@@ -40,7 +40,7 @@ class GitGraphCreator {
     const treeAndNameToSubmoduleUrls = this.treeAndNameToSubmoduleUrls(
       repository
     );
-    return Graph.mergeManyConservative([
+    return Graph.mergeConservative([
       ...Object.keys(repository.commits).map((hash) =>
         this.commitGraph(repository.commits[hash])
       ),

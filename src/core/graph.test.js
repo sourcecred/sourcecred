@@ -885,7 +885,7 @@ describe("graph", () => {
       });
     });
 
-    describe("merging", () => {
+    describe("mergeConservative", () => {
       /**
        * Decompose the given graph into neighborhood graphs: for each
        * node `u`, create a graph with just that node, its neighbors,
@@ -943,80 +943,30 @@ describe("graph", () => {
         return [].concat(edgeGraphs, nodeGraphs);
       }
 
-      it("conservatively recomposes a neighborhood decomposition", () => {
-        const result = neighborhoodDecomposition(
-          demoData.advancedMealGraph()
-        ).reduce((g1, g2) => Graph.mergeConservative(g1, g2), new Graph());
+      it("recomposes a neighborhood decomposition", () => {
+        const result = Graph.mergeConservative(
+          neighborhoodDecomposition(demoData.advancedMealGraph())
+        );
         expect(result.equals(demoData.advancedMealGraph())).toBe(true);
       });
 
-      it("conservatively recomposes an edge decomposition", () => {
+      it("recomposes an edge decomposition", () => {
         const result = edgeDecomposition(demoData.advancedMealGraph()).reduce(
-          (g1, g2) => Graph.mergeConservative(g1, g2),
+          (g1, g2) => Graph.mergeConservative([g1, g2]),
           new Graph()
         );
         expect(result.equals(demoData.advancedMealGraph())).toBe(true);
       });
 
-      it("conservatively merges a graph with itself", () => {
-        const result = Graph.mergeConservative(
+      it("merges a graph with itself", () => {
+        const result = Graph.mergeConservative([
           demoData.advancedMealGraph(),
-          demoData.advancedMealGraph()
-        );
+          demoData.advancedMealGraph(),
+        ]);
         expect(result.equals(demoData.advancedMealGraph())).toBe(true);
       });
 
-      it("conservatively merges graphs of different payload types", () => {
-        const data = {
-          a: () => ({
-            address: demoData.makeAddress("a", "EXPERIMENT"),
-            payload: "alpha",
-          }),
-          b: () => ({
-            address: demoData.makeAddress("b", "EXPERIMENT"),
-            payload: "bravo",
-          }),
-          u: () => ({
-            address: demoData.makeAddress("u", "EXPERIMENT"),
-            src: demoData.makeAddress("a", "EXPERIMENT"),
-            dst: demoData.makeAddress("b", "EXPERIMENT"),
-            payload: 21,
-          }),
-          c: () => ({
-            address: demoData.makeAddress("c", "EXPERIMENT"),
-            payload: true,
-          }),
-          d: () => ({
-            address: demoData.makeAddress("d", "EXPERIMENT"),
-            payload: false,
-          }),
-          v: () => ({
-            address: demoData.makeAddress("v", "EXPERIMENT"),
-            src: demoData.makeAddress("c", "EXPERIMENT"),
-            dst: demoData.makeAddress("d", "EXPERIMENT"),
-            payload: null,
-          }),
-        };
-        const g1: Graph = new Graph()
-          .addNode(data.a())
-          .addNode(data.b())
-          .addEdge(data.u());
-        const g2: Graph = new Graph()
-          .addNode(data.c())
-          .addNode(data.d())
-          .addEdge(data.v());
-        const result = Graph.mergeConservative(g1, g2);
-        const expected = new Graph()
-          .addNode(data.a())
-          .addNode(data.b())
-          .addEdge(data.u())
-          .addNode(data.c())
-          .addNode(data.d())
-          .addEdge(data.v());
-        expect(result.equals(expected)).toBe(true);
-      });
-
-      it("conservatively rejects a graph with conflicting nodes", () => {
+      it("rejects a graph with conflicting nodes", () => {
         const makeGraph: (nodePayload: string) => Graph = (nodePayload) =>
           new Graph().addNode({
             address: demoData.makeAddress("conflicting-node", "EXPERIMENT"),
@@ -1025,11 +975,11 @@ describe("graph", () => {
         const g1 = makeGraph("one");
         const g2 = makeGraph("two");
         expect(() => {
-          Graph.mergeConservative(g1, g2);
-        }).toThrow(/distinct nodes with address/);
+          Graph.mergeConservative([g1, g2]);
+        }).toThrow(/node.*distinct contents/);
       });
 
-      it("conservatively rejects a graph with conflicting edges", () => {
+      it("rejects a graph with conflicting edges", () => {
         const srcAddress = demoData.makeAddress("src", "EXPERIMENT");
         const dstAddress = demoData.makeAddress("dst", "EXPERIMENT");
         const makeGraph: (edgePayload: string) => Graph = (edgePayload) =>
@@ -1045,39 +995,29 @@ describe("graph", () => {
         const g1 = makeGraph("one");
         const g2 = makeGraph("two");
         expect(() => {
-          Graph.mergeConservative(g1, g2);
-        }).toThrow(/distinct edges with address/);
+          Graph.mergeConservative([g1, g2]);
+        }).toThrow(/edge.*distinct contents/);
       });
 
-      function assertNotCalled(...args) {
-        throw new Error(`called with: ${args.join()}`);
-      }
+      it("is the identity on a singleton list", () => {
+        const merged = Graph.mergeConservative([demoData.advancedMealGraph()]);
+        expect(merged.equals(demoData.advancedMealGraph())).toBe(true);
+      });
+
       it("has the empty graph as a left identity", () => {
-        const merged = Graph.merge(
+        const merged = Graph.mergeConservative([
           new Graph(),
           demoData.advancedMealGraph(),
-          assertNotCalled,
-          assertNotCalled
-        );
+        ]);
         expect(merged.equals(demoData.advancedMealGraph())).toBe(true);
       });
+
       it("has the empty graph as a right identity", () => {
-        const merged = Graph.merge(
+        const merged = Graph.mergeConservative([
           demoData.advancedMealGraph(),
           new Graph(),
-          assertNotCalled,
-          assertNotCalled
-        );
+        ]);
         expect(merged.equals(demoData.advancedMealGraph())).toBe(true);
-      });
-      it("trivially merges the empty graph with itself", () => {
-        const merged = Graph.merge(
-          new Graph(),
-          new Graph(),
-          assertNotCalled,
-          assertNotCalled
-        );
-        expect(merged.equals(new Graph())).toBe(true);
       });
     });
 

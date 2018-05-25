@@ -43,6 +43,6 @@ async function combine(filenames: $ReadOnlyArray<string>) {
       )
     )
   );
-  const result = Graph.mergeManyConservative(graphs);
+  const result = Graph.mergeConservative(graphs);
   console.log(stringify(result, {space: 4}));
 }

@@ -31,5 +31,5 @@ export function loadCombinedGraph(
 ): Promise<Graph> {
   const githubGraphPromise = fetchGithubGraph(repoOwner, repoName, token);
   const gitGraph = cloneGitGraph(repoOwner, repoName);
-  return githubGraphPromise.then((x) => Graph.mergeConservative(gitGraph, x));
+  return githubGraphPromise.then((x) => Graph.mergeConservative([gitGraph, x]));
 }
