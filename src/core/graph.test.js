@@ -944,9 +944,9 @@ describe("graph", () => {
       }
 
       it("recomposes a neighborhood decomposition", () => {
-        const result = neighborhoodDecomposition(
-          demoData.advancedMealGraph()
-        ).reduce((g1, g2) => Graph.mergeConservative([g1, g2]), new Graph());
+        const result = Graph.mergeConservative(
+          neighborhoodDecomposition(demoData.advancedMealGraph())
+        );
         expect(result.equals(demoData.advancedMealGraph())).toBe(true);
       });
 
@@ -1012,7 +1012,7 @@ describe("graph", () => {
         expect(merged.equals(demoData.advancedMealGraph())).toBe(true);
       });
 
-      it("has the empty graph as a left identity", () => {
+      it("has the empty graph as a right identity", () => {
         const merged = Graph.mergeConservative([
           demoData.advancedMealGraph(),
           new Graph(),
