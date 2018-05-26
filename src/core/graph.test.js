@@ -859,14 +859,25 @@ describe("graph", () => {
         address: demoData.makeAddress("hinox", "NPC"),
         payload: {status: "sleeping"},
       });
-      it("returns false when the LHS has edges missing in the RHS", () => {
-        const g1 = demoData.mealGraph();
-        const g2 = demoData.mealGraph().addNode(extraNode1());
-        expect(g1.equals(g2)).toBe(false);
+      const extraEdge = () => ({
+        address: demoData.makeAddress(
+          "octorok@helps_cook@seafood_fruit_mix#3",
+          "ACTION"
+        ),
+        src: demoData.mealNode().address,
+        dst: extraNode1().address,
+        payload: {helpfulness: "very"},
       });
       it("returns false when the LHS has edges missing in the RHS", () => {
-        const g1 = demoData.mealGraph().addNode(extraNode1());
-        const g2 = demoData.mealGraph();
+        const baseGraph = () => demoData.mealGraph().addNode(extraNode1());
+        const g1 = baseGraph().addEdge(extraEdge());
+        const g2 = baseGraph();
+        expect(g1.equals(g2)).toBe(false);
+      });
+      it("returns false when the RHS has edges missing in the LHS", () => {
+        const baseGraph = () => demoData.mealGraph().addNode(extraNode1());
+        const g1 = baseGraph();
+        const g2 = baseGraph().addEdge(extraEdge());
         expect(g1.equals(g2)).toBe(false);
       });
       it("returns true when nodes are added in different orders", () => {
