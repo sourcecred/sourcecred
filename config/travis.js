@@ -23,6 +23,13 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       deps: [],
     },
     {
+      // eslint-disable-next-line no-useless-concat
+      id: "check-stop" + "ships",
+      // eslint-disable-next-line no-useless-concat
+      cmd: ["./scripts/check-stop" + "ships.sh"],
+      deps: [],
+    },
+    {
       id: "check-pretty",
       cmd: ["npm", "run", "--silent", "check-pretty"],
       deps: [],
