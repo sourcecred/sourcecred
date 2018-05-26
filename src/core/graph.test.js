@@ -20,11 +20,7 @@ describe("graph", () => {
     }
 
     describe("construction", () => {
-      it("works for a simple graph", () => {
-        demoData.mealGraph();
-      });
-
-      it("works for an advanced graph", () => {
+      it("works", () => {
         demoData.mealGraph();
       });
     });
@@ -74,45 +70,20 @@ describe("graph", () => {
     });
 
     describe("getting nodes and edges", () => {
-      it("correctly gets nodes in the simple graph", () => {
+      it("correctly gets nodes in the demo graph", () => {
         const g = demoData.mealGraph();
         [
           demoData.heroNode(),
           demoData.bananasNode(),
           demoData.crabNode(),
           demoData.mealNode(),
+          demoData.nullPayloadNode(),
         ].forEach((x) => {
           expect(g.node(x.address)).toEqual(x);
         });
       });
 
-      it("correctly gets nodes in the advanced graph", () => {
-        const g = demoData.mealGraph();
-        [
-          demoData.heroNode(),
-          demoData.bananasNode(),
-          demoData.crabNode(),
-          demoData.mealNode(),
-        ].forEach((x) => {
-          expect(g.node(x.address)).toEqual(x);
-        });
-      });
-
-      it("correctly gets edges in the simple graph", () => {
-        const g = demoData.mealGraph();
-        [
-          demoData.pickEdge(),
-          demoData.grabEdge(),
-          demoData.cookEdge(),
-          demoData.bananasIngredientEdge(),
-          demoData.crabIngredientEdge(),
-          demoData.eatEdge(),
-        ].forEach((x) => {
-          expect(g.edge(x.address)).toEqual(x);
-        });
-      });
-
-      it("correctly gets edges in the advanced graph", () => {
+      it("correctly gets edges in the demo graph", () => {
         const g = demoData.mealGraph();
         [
           demoData.pickEdge(),
@@ -269,9 +240,9 @@ describe("graph", () => {
       });
 
       it("adding a node redundantly is a no-op", () => {
-        const simple1 = demoData.mealGraph();
-        const simple2 = demoData.mealGraph().addNode(demoData.heroNode());
-        expect(simple1.equals(simple2)).toBe(true);
+        const g1 = demoData.mealGraph();
+        const g2 = demoData.mealGraph().addNode(demoData.heroNode());
+        expect(g1.equals(g2)).toBe(true);
       });
 
       it("forbids adding an edge with existing address and different contents", () => {
@@ -286,9 +257,9 @@ describe("graph", () => {
       });
 
       it("adding an edge redundantly is a no-op", () => {
-        const simple1 = demoData.mealGraph();
-        const simple2 = demoData.mealGraph().addEdge(demoData.cookEdge());
-        expect(simple1.equals(simple2)).toBe(true);
+        const g1 = demoData.mealGraph();
+        const g2 = demoData.mealGraph().addEdge(demoData.cookEdge());
+        expect(g1.equals(g2)).toBe(true);
       });
 
       it("allows creating self-loops", () => {
@@ -1025,7 +996,7 @@ describe("graph", () => {
     });
 
     describe("JSON functions", () => {
-      it("should serialize a simple graph", () => {
+      it("should serialize the demo graph", () => {
         expect(demoData.mealGraph().toJSON()).toMatchSnapshot();
       });
       it("should work transparently with JSON.stringify", () => {

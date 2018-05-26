@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`graph #Graph JSON functions should serialize a simple graph 1`] = `
+exports[`graph #Graph JSON functions should serialize the demo graph 1`] = `
 Array [
   Object {
     "type": "sourcecred/sourcecred/Graph",
