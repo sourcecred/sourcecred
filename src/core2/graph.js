@@ -1,6 +1,8 @@
 // @flow
 
+import deepEqual from "lodash.isequal";
 import type {Address, PluginType} from "./address";
+import {AddressMap} from "./address";
 import type {Compatible} from "../util/compat";
 
 export type Node<NR: NodeReference, NP: NodePayload> = {|
@@ -37,9 +39,10 @@ export type Edge<+T> = {|
   +payload: T,
 |};
 
+export type PluginFilter = {|+plugin: string, +type?: string|};
 export type NeighborsOptions = {|
-  +node?: PluginType,
-  +edge?: PluginType,
+  +node?: PluginFilter,
+  +edge?: PluginFilter,
   +direction?: "IN" | "OUT" | "ANY",
 |};
 
@@ -64,31 +67,66 @@ export interface PluginHandler<NR: NodeReference, NP: NodePayload> {
 
 export type Plugins = $ReadOnlyArray<PluginHandler<any, any>>;
 
+type MaybeNode = {|+address: Address, +node: Node<any, any> | void|};
+type Integer = number;
+
 export class Graph {
   _plugins: Plugins;
+  _pluginMap: PluginMap;
+  _nodeIndices: AddressMap<{|+address: Address, +index: Integer|}>;
+  _nodes: MaybeNode[];
 
   constructor(plugins: Plugins) {
     this._plugins = plugins.slice();
+    this._pluginMap = createPluginMap(this._plugins);
+    this._nodes = [];
+    this._nodeIndices = new AddressMap();
   }
 
   ref(address: Address): NodeReference {
-    const _ = address;
-    throw new Error("Graphv2 is not yet implemented");
+    if (address == null) {
+      throw new Error(`address is ${String(address)}`);
+    }
+    // If node has an index and is still present, return the existing ref
+    const indexDatum = this._nodeIndices.get(address);
+    if (indexDatum != null) {
+      const node = this._nodes[indexDatum.index].node;
+      if (node != null) {
+        return node.ref;
+      }
+    }
+    // Otherwise, create a "dummy ref" that isn't backed by a node.
+    const handler = findHandler(this._pluginMap, address.owner.plugin);
+    return handler.createReference(new InternalReference(this, address));
   }
 
   node(address: Address): ?Node<any, any> {
-    const _ = address;
-    throw new Error("Graphv2 is not yet implemented");
+    return this.ref(address).get();
   }
 
   /**
    * Get nodes in the graph, in unspecified order.
    *
-   * If filter is provided, it will return only nodes with the requested type.
+   * If filter is provided, it will return only nodes with the requested plugin name
+   * (and, optionally, type).
    */
-  nodes(filter?: PluginType): Iterator<Node<any, any>> {
-    const _ = filter;
-    throw new Error("Graphv2 is not yet implemented");
+  *nodes(filter?: PluginFilter): Iterator<Node<any, any>> {
+    for (const maybeNode of this._nodes) {
+      const node = maybeNode.node;
+      if (node == null) {
+        continue;
+      }
+      if (filter != null) {
+        const owner = node.address.owner;
+        if (owner.plugin !== filter.plugin) {
+          continue;
+        }
+        if (filter.type != null && owner.type !== filter.type) {
+          continue;
+        }
+      }
+      yield node;
+    }
   }
 
   edge(address: Address): Edge<any> {
@@ -106,14 +144,49 @@ export class Graph {
     throw new Error("Graphv2 is not yet implemented");
   }
 
+  _addNodeAddress(address: Address): Integer {
+    const indexDatum = this._nodeIndices.get(address);
+    if (indexDatum != null) {
+      return indexDatum.index;
+    } else {
+      const index = this._nodes.length;
+      this._nodeIndices.add({address, index});
+      this._nodes.push({address, node: undefined});
+      return index;
+    }
+  }
+
   addNode(payload: NodePayload): this {
-    const _ = payload;
-    throw new Error("Graphv2 is not yet implemented");
+    if (payload == null) {
+      throw new Error(`payload is ${String(payload)}`);
+    }
+    const address = payload.address();
+    const index = this._addNodeAddress(address);
+    const maybeNode = this._nodes[index];
+    if (maybeNode.node !== undefined) {
+      if (deepEqual(maybeNode.node.payload, payload)) {
+        return this;
+      } else {
+        throw new Error(
+          `node at address ${JSON.stringify(
+            address
+          )} exists with distinct contents`
+        );
+      }
+    }
+    const handler = findHandler(this._pluginMap, address.owner.plugin);
+    const ref = handler.createReference(new InternalReference(this, address));
+    const node = {ref, payload, address};
+    this._nodes[index] = {address, node};
+    return this;
   }
 
   removeNode(address: Address): this {
-    const _ = address;
-    throw new Error("Graphv2 is not yet implemented");
+    const indexDatum = this._nodeIndices.get(address);
+    if (indexDatum != null) {
+      this._nodes[indexDatum.index] = {address, node: undefined};
+    }
+    return this;
   }
 
   addEdge(edge: Edge<any>): this {
@@ -144,9 +217,24 @@ export class Graph {
     throw new Error("Graphv2 is not yet implemented");
   }
 
+  /**
+   * Check the equality of two graphs. This verifies that the node and edge
+   * contents are identical; it does not check which plugin handlers are
+   * registered.
+   */
   equals(that: Graph): boolean {
-    const _ = that;
-    throw new Error("Graphv2 is not yet implemented");
+    const theseNodes = Array.from(this.nodes());
+    const thoseNodes = Array.from(that.nodes());
+    if (theseNodes.length !== thoseNodes.length) {
+      return false;
+    }
+
+    for (const node of theseNodes) {
+      if (!deepEqual(node, that.node(node.address))) {
+        return false;
+      }
+    }
+    return true;
   }
 
   copy(): Graph {
@@ -169,6 +257,25 @@ export class Graph {
 
 export type GraphJSON = any;
 
+type PluginMap = {[pluginName: string]: PluginHandler<any, any>};
+function createPluginMap(plugins: Plugins): PluginMap {
+  const pluginMap = {};
+  plugins.forEach((p) => {
+    const name = p.pluginName();
+    if (pluginMap[name] != null) {
+      throw new Error(`Duplicate plugin handler for "${name}"`);
+    }
+    pluginMap[name] = p;
+  });
+  return pluginMap;
+}
+function findHandler(pluginMap: PluginMap, pluginName: string) {
+  if (pluginMap[pluginName] == null) {
+    throw new Error(`No plugin handler for "${pluginName}"`);
+  }
+  return pluginMap[pluginName];
+}
+
 export class DelegateNodeReference implements NodeReference {
   // TODO(@wchargin): Use a Symbol here.
   __DelegateNodeReference_base: NodeReference;
@@ -186,5 +293,36 @@ export class DelegateNodeReference implements NodeReference {
   }
   neighbors(options?: NeighborsOptions) {
     return this.__DelegateNodeReference_base.neighbors(options);
+  }
+}
+
+class InternalReference implements NodeReference {
+  _graph: Graph;
+  _address: Address;
+
+  constructor(graph: Graph, address: Address) {
+    this._graph = graph;
+    this._address = address;
+  }
+
+  graph(): Graph {
+    return this._graph;
+  }
+  address(): Address {
+    return this._address;
+  }
+  get(): ?Node<any, any> {
+    const indexDatum = this._graph._nodeIndices.get(this._address);
+    if (indexDatum == null) {
+      return undefined;
+    }
+    return this._graph._nodes[indexDatum.index].node;
+  }
+
+  neighbors(
+    options?: NeighborsOptions
+  ): Iterator<{|+ref: NodeReference, +edge: Edge<any>|}> {
+    const _ = options;
+    throw new Error("Not implemented");
   }
 }

@@ -119,6 +119,7 @@ interface NodeReference {
 
   neighbors(options?: NeighborsOptions): Iterator<Neighbor<any>>;
 }
+export type PluginFilter = {|+plugin: string, +type?: string|};
 type NeighborsOptions = {|
   +nodeType?: string,
   +edgeType?: string,
@@ -374,8 +375,8 @@ declare class Graph /* no type parameters! */ {
   edge(address: Address): ?Edge<any>;
   ref(address: Address): NodeReference;
 
-  nodes(filter?: {|+type?: string|}): Iterator<Node<any, any>>;
-  edges(filter?: {|+type?: string|}): Iterator<Edge<any>>;
+  nodes(filter?: PluginFilter): Iterator<Node<any, any>>;
+  edges(filter?: PluginFilter): Iterator<Edge<any>>;
 
   static mergeConservative(Iterable<Graph>): Graph;
 
