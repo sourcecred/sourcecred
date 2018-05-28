@@ -65,9 +65,10 @@ export interface PluginHandler<NR: NodeReference, NP: NodePayload> {
 export type Plugins = $ReadOnlyArray<PluginHandler<any, any>>;
 
 export class Graph {
+  _plugins: Plugins;
+
   constructor(plugins: Plugins) {
-    const _ = plugins;
-    throw new Error("Graphv2 is not yet implemented");
+    this._plugins = plugins.slice();
   }
 
   ref(address: Address): NodeReference {
@@ -153,7 +154,7 @@ export class Graph {
   }
 
   plugins(): Plugins {
-    throw new Error("Graphv2 is not yet implemented");
+    return this._plugins.slice();
   }
 
   static fromJSON(plugins: Plugins, json: Compatible<GraphJSON>): Graph {
