@@ -11,5 +11,6 @@ module.exports = {
       },
     ],
     "no-use-before-define": ["off"],
+    "no-useless-constructor": ["off"],
   },
 };
