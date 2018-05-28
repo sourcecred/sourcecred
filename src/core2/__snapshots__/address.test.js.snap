@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`address AddressMap stringifies to JSON 1`] = `
+Array [
+  Object {
+    "type": "sourcecred/sourcecred/AddressMap",
+    "version": "0.1.0",
+  },
+  Object {
+    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"HOME\\"}": Object {
+      "baths": 5,
+      "beds": 10,
+    },
+    "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"BUSINESS\\"}": Object {
+      "baths": 1,
+      "beds": 99,
+    },
+  },
+]
+`;
+
+exports[`address toString and fromString serialization looks good in snapshot review 1`] = `
+Array [
+  Array [
+    Object {
+      "id": "mansion",
+      "pluginName": "houseville",
+      "type": "HOME",
+    },
+    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"HOME\\"}",
+  ],
+  Array [
+    Object {
+      "id": "mansion",
+      "pluginName": "houseville",
+      "type": "HOME",
+    },
+    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"HOME\\"}",
+  ],
+  Array [
+    Object {
+      "id": "mattressStore",
+      "pluginName": "houseville",
+      "type": "BUSINESS",
+    },
+    "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"BUSINESS\\"}",
+  ],
+]
+`;
