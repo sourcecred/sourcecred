@@ -167,3 +167,23 @@ export class Graph {
 }
 
 export type GraphJSON = any;
+
+export class DelegateNodeReference implements NodeReference {
+  // TODO(@wchargin): Use a Symbol here.
+  __DelegateNodeReference_base: NodeReference;
+  constructor(base: NodeReference) {
+    this.__DelegateNodeReference_base = base;
+  }
+  graph() {
+    return this.__DelegateNodeReference_base.graph();
+  }
+  address() {
+    return this.__DelegateNodeReference_base.address();
+  }
+  get() {
+    return this.__DelegateNodeReference_base.get();
+  }
+  neighbors(options?: NeighborsOptions) {
+    return this.__DelegateNodeReference_base.neighbors(options);
+  }
+}
