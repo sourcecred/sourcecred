@@ -17,15 +17,24 @@ point.
 
 ## Core structures
 
-The `Address` type is, for now, unchanged:
+The `Address` type is modified to have an explicit `PluginType`.
 
 ```javascript
-type Address = {|
-  +pluginName: string,
+type PluginType = {|
+  +plugin: string,
   +type: string,
+|};
+
+type Address = {|
+  +owner: PluginType,
   +id: string,
 |};
 ```
+
+(This fixes a design flaw where callers would frequently filter only on
+`type`, naively assuming that all instances of that type were generated
+by plugins the author was aware of. Filtering options now take a
+`PluginType` rather than a raw `type`.)
 
 At the core are two interfaces. First is `NodePayload`:
 
@@ -52,8 +61,7 @@ class GithubNodePayload<+T: GithubNodeRecord> implements NodePayload {
   }
   address() {
     return {
-      pluginName: "sourcecred/github-beta",
-      type: this._type,
+      owner: {plugin: "sourcecred/github-beta", type: this._type},
       id: this.url(),
     };
   }
@@ -219,8 +227,8 @@ class GithubNodeReference extends DelegateNodeReference {
   constructor(base: NodeReference) {
     super(base);
     const address = base.address();
-    if (address.pluginName !== "sourcecred/github-beta") {
-      throw new Error("pluginName: " + address.pluginName);
+    if (address.owner.plugin !== "sourcecred/github-beta") {
+      throw new Error("plugin: " + address.owner.plugin);
     }
   }
 }
@@ -283,10 +291,10 @@ class GithubPluginHandler
 implements PluginHandler<GithubNodeReference, GithubNodePayload<any>> {
   createReference(reference) {
     const address = reference.address();
-    if (address.pluginName !== GITHUB_PLUGIN_NAME) {
-      throw new Error("pluginName: " + address.pluginName);
+    if (address.owner.plugin !== GITHUB_PLUGIN_NAME) {
+      throw new Error("pluginName: " + address.owner.plugin);
     }
-    const type: GithubNodeType = ((address.type: string): any);
+    const type: GithubNodeType = ((address.owner.type: string): any);
     switch (type) {
       case "PULL_REQUEST":
         return new PullRequestReference(reference);

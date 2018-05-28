@@ -4,14 +4,14 @@ exports[`address AddressMap stringifies to JSON 1`] = `
 Array [
   Object {
     "type": "sourcecred/sourcecred/AddressMap",
-    "version": "0.1.0",
+    "version": "0.2.0",
   },
   Object {
-    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"HOME\\"}": Object {
+    "{\\"id\\":\\"mansion\\",\\"owner\\":{\\"plugin\\":\\"houseville\\",\\"type\\":\\"HOME\\"}}": Object {
       "baths": 5,
       "beds": 10,
     },
-    "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"BUSINESS\\"}": Object {
+    "{\\"id\\":\\"mattressStore\\",\\"owner\\":{\\"plugin\\":\\"houseville\\",\\"type\\":\\"BUSINESS\\"}}": Object {
       "baths": 1,
       "beds": 99,
     },
@@ -24,26 +24,32 @@ Array [
   Array [
     Object {
       "id": "mansion",
-      "pluginName": "houseville",
-      "type": "HOME",
+      "owner": Object {
+        "plugin": "houseville",
+        "type": "HOME",
+      },
     },
-    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"HOME\\"}",
+    "{\\"id\\":\\"mansion\\",\\"owner\\":{\\"plugin\\":\\"houseville\\",\\"type\\":\\"HOME\\"}}",
   ],
   Array [
     Object {
       "id": "mansion",
-      "pluginName": "houseville",
-      "type": "HOME",
+      "owner": Object {
+        "plugin": "houseville",
+        "type": "HOME",
+      },
     },
-    "{\\"id\\":\\"mansion\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"HOME\\"}",
+    "{\\"id\\":\\"mansion\\",\\"owner\\":{\\"plugin\\":\\"houseville\\",\\"type\\":\\"HOME\\"}}",
   ],
   Array [
     Object {
       "id": "mattressStore",
-      "pluginName": "houseville",
-      "type": "BUSINESS",
+      "owner": Object {
+        "plugin": "houseville",
+        "type": "BUSINESS",
+      },
     },
-    "{\\"id\\":\\"mattressStore\\",\\"pluginName\\":\\"houseville\\",\\"type\\":\\"BUSINESS\\"}",
+    "{\\"id\\":\\"mattressStore\\",\\"owner\\":{\\"plugin\\":\\"houseville\\",\\"type\\":\\"BUSINESS\\"}}",
   ],
 ]
 `;

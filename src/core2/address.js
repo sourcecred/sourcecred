@@ -6,10 +6,11 @@ import stringify from "json-stable-stringify";
 import {toCompat, fromCompat} from "../util/compat";
 import type {Compatible} from "../util/compat";
 
+export type PluginType = {|+plugin: string, +type: string|};
+
 export type Address = {|
-  +pluginName: string,
+  +owner: PluginType,
   +id: string,
-  +type: string,
 |};
 
 export interface Addressable {
@@ -23,7 +24,7 @@ export type AddressMapJSON<T: Addressable> = Compatible<{
 }>;
 
 export const COMPAT_TYPE = "sourcecred/sourcecred/AddressMap";
-export const COMPAT_VERSION = "0.1.0";
+export const COMPAT_VERSION = "0.2.0";
 
 /**
  * A data structure for storing addressable objects, keyed by their
@@ -35,7 +36,7 @@ export class AddressMap<T: Addressable> {
    *
    * It is an representation invariant that there are no empty objects
    * in this structure (except possibly the top-level object). In
-   * particular, if `_data[somePluginName]` is not `undefined`, then it
+   * particular, if `_data[somePlugin]` is not `undefined`, then it
    * is a non-empty object. This is required so that two `AddressMap`s
    * are logically equal exactly if their `_data` fields are deep-equal.
    *
@@ -44,7 +45,7 @@ export class AddressMap<T: Addressable> {
    * For basic performance tests, see:
    *     https://jsperf.com/address-string-302039074
    */
-  _data: {[pluginName: string]: {[type: string]: {[id: string]: T}}};
+  _data: {[plugin: string]: {[type: string]: {[id: string]: T}}};
 
   /**
    * Create an empty `AddressMap`.
@@ -64,12 +65,13 @@ export class AddressMap<T: Addressable> {
 
   toJSON(): AddressMapJSON<T> {
     const result = {};
-    Object.keys(this._data).forEach((pluginName) => {
-      const dataForPluginName = this._data[pluginName];
-      Object.keys(dataForPluginName).forEach((type) => {
-        const dataForType = dataForPluginName[type];
+    Object.keys(this._data).forEach((plugin) => {
+      const dataForPlugin = this._data[plugin];
+      Object.keys(dataForPlugin).forEach((type) => {
+        const dataForType = dataForPlugin[type];
         Object.keys(dataForType).forEach((id) => {
-          const address = {pluginName, id, type};
+          const owner = {plugin, type};
+          const address = {owner, id};
           const datum = {...dataForType[id]};
           delete datum.address;
           result[toString(address)] = datum;
@@ -111,13 +113,13 @@ export class AddressMap<T: Addressable> {
     if (address == null) {
       throw new Error(`address is ${String(t.address)}`);
     }
-    let dataForPluginName = this._data[address.pluginName];
-    if (dataForPluginName === undefined) {
-      this._data[address.pluginName] = dataForPluginName = {};
+    let dataForPlugin = this._data[address.owner.plugin];
+    if (dataForPlugin === undefined) {
+      this._data[address.owner.plugin] = dataForPlugin = {};
     }
-    let dataForType = dataForPluginName[address.type];
+    let dataForType = dataForPlugin[address.owner.type];
     if (dataForType === undefined) {
-      dataForPluginName[address.type] = dataForType = {};
+      dataForPlugin[address.owner.type] = dataForType = {};
     }
     dataForType[address.id] = t;
     return this;
@@ -131,11 +133,11 @@ export class AddressMap<T: Addressable> {
     if (address == null) {
       throw new Error(`address is ${String(address)}`);
     }
-    const dataForPluginName = this._data[address.pluginName];
-    if (dataForPluginName === undefined) {
+    const dataForPlugin = this._data[address.owner.plugin];
+    if (dataForPlugin === undefined) {
       return (undefined: any);
     }
-    const dataForType = dataForPluginName[address.type];
+    const dataForType = dataForPlugin[address.owner.type];
     if (dataForType === undefined) {
       return (undefined: any);
     }
@@ -147,10 +149,10 @@ export class AddressMap<T: Addressable> {
    */
   getAll(): T[] {
     const result = [];
-    Object.keys(this._data).forEach((pluginName) => {
-      const dataForPluginName = this._data[pluginName];
-      Object.keys(dataForPluginName).forEach((type) => {
-        const dataForType = dataForPluginName[type];
+    Object.keys(this._data).forEach((plugin) => {
+      const dataForPlugin = this._data[plugin];
+      Object.keys(dataForPlugin).forEach((type) => {
+        const dataForType = dataForPlugin[type];
         Object.keys(dataForType).forEach((id) => {
           result.push(dataForType[id]);
         });
@@ -167,19 +169,19 @@ export class AddressMap<T: Addressable> {
     if (address == null) {
       throw new Error(`address is ${String(address)}`);
     }
-    const dataForPluginName = this._data[address.pluginName];
-    if (dataForPluginName === undefined) {
+    const dataForPlugin = this._data[address.owner.plugin];
+    if (dataForPlugin === undefined) {
       return this;
     }
-    const dataForType = dataForPluginName[address.type];
+    const dataForType = dataForPlugin[address.owner.type];
     if (dataForType === undefined) {
       return this;
     }
     delete dataForType[address.id];
     if (Object.keys(dataForType).length === 0) {
-      delete dataForPluginName[address.type];
-      if (Object.keys(dataForPluginName).length === 0) {
-        delete this._data[address.pluginName];
+      delete dataForPlugin[address.owner.type];
+      if (Object.keys(dataForPlugin).length === 0) {
+        delete this._data[address.owner.plugin];
       }
     }
     return this;
