@@ -191,10 +191,10 @@ convenient implementation detail.
 
 Clients won’t directly use `IndexedNodeReference`, though; this will be
 a non-exported class of the `core/graph.js` module. Instead, they will
-provide a semantic extension of `NodeDelegateReference`:
+provide a semantic extension of `DelegateNodeReference`:
 
 ```javascript
-class NodeDelegateReference implements NodeReference {
+class DelegateNodeReference implements NodeReference {
   _base: NodeReference;
   constructor(base: NodeReference) {
     this._base = base;
@@ -208,14 +208,14 @@ class NodeDelegateReference implements NodeReference {
 }
 ```
 
-(Note: `NodeDelegateReference` should actually have `_base` as a
+(Note: `DelegateNodeReference` should actually have `_base` as a
 `Symbol`, but doing so requires Flow-appeasing hackery that I don’t want
 to include in this high-level overview.)
 
 By extending this class, plugins gain great power:
 
 ```javascript
-class GithubNodeReference extends NodeDelegateReference {
+class GithubNodeReference extends DelegateNodeReference {
   constructor(base: NodeReference) {
     super(base);
     const address = base.address();
