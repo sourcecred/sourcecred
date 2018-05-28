@@ -118,7 +118,7 @@ type NeighborsOptions = {|
 |};
 type Neighbor<+T: NodeReference> = {|
   +ref: T,
-  +edge: Edge,
+  +edge: Edge<any>,
 |};
 ```
 
@@ -334,11 +334,11 @@ Graphs, of course, also need to refer to edges. In this proposal, we
 leave edges structurally unchanged, but remove their type parameters:
 
 ```javascript
-type Edge = {|
+type Edge<+T> = {|
   +address: Address,
   +src: Address,
   +dst: Address,
-  +payload: any,
+  +payload: T,
 |};
 ```
 
@@ -357,17 +357,17 @@ declare class Graph /* no type parameters! */ {
   plugins(): Plugins;
 
   addNode(np: NodePayload): this;
-  addEdge(edge: Edge): this;
+  addEdge(edge: Edge<any>): this;
 
   removeNode(address: Address): this;
   removeEdge(address: Address): this;
 
   node(address: Address): ?Node<any, any>;
-  edge(address: Address): ?Edge;
+  edge(address: Address): ?Edge<any>;
   ref(address: Address): NodeReference;
 
   nodes(filter?: {|+type?: string|}): Iterator<Node<any, any>>;
-  edges(filter?: {|+type?: string|}): Iterator<Edge>;
+  edges(filter?: {|+type?: string|}): Iterator<Edge<any>>;
 
   static mergeConservative(Iterable<Graph>): Graph;
 
