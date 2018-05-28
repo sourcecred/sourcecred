@@ -32,6 +32,7 @@ At the core are two interfaces. First is `NodePayload`:
 ```javascript
 interface NodePayload {
   address(): Address;
+  toJSON(): any;
 }
 ```
 
@@ -97,9 +98,6 @@ declare class PullRequestCommentPayload extends GithubNodePayload<
 }
 ```
 
-Note that a `NodePayload` should have well-defined serialization
-behavior—probably, but not necessarily, via an explicit `toJSON` method.
-
 Note also that `NodePayload`s exist outside the context of a graph: they
 simply define data.
 
@@ -111,12 +109,16 @@ interface NodeReference {
   address(): Address;
   get(): ?Node<any, any>;
 
-  neighbors(options?: NeighborsOptions): Iterator<NodeReference>;
+  neighbors(options?: NeighborsOptions): Iterator<Neighbor<any>>;
 }
 type NeighborsOptions = {|
   +nodeType?: string,
   +edgeType?: string,
   +direction?: "IN" | "OUT" | "ANY",
+|};
+type Neighbor<+T: NodeReference> = {|
+  +ref: T,
+  +edge: Edge,
 |};
 ```
 
@@ -127,6 +129,7 @@ together the two core interfaces:
 type Node<NR: NodeReference, NP: NodePayload> = {|
   +ref: NR,
   +payload: NP,
+  +address: Address,
 |};
 ```
 
@@ -232,10 +235,10 @@ class PullRequestReference extends GithubNodeReference {
       nodeType: "PULL_REQUEST_COMMENT",
       edgeType: "CONTAINS",
     })) {
-      if (!(neighbor instanceof PullRequestCommentReference)) {
-        throw new Error(neighbor.constructor.name);
+      if (!(neighbor.ref instanceof PullRequestCommentReference)) {
+        throw new Error(neighbor.ref.constructor.name);
       }
-      yield neighbor;
+      yield neighbor.ref;
     }
   }
 }
@@ -263,26 +266,24 @@ interface PluginHandler<NR: NodeReference, NP: NodePayload> {
    * serialization of a previous `NP`.
    */
   createPayload(json: Json): NP;
+
+  /**
+   * Provide the name of the plugin.
+   * Should return a constant string.
+   */
+  pluginName(): string;
 }
 ```
 
-Note that a perfectly legal “low-effort” implementation of this is:
+A common implementation might be something like:
 
 ```javascript
-const noopHandler: PluginHandler<NodeReference, NodePayload> = {
-  createReference: (reference, _) => reference,
-  createPayload: (json: any) => ({address() { return json.address; }}),
-};
-```
-
-A more common implementation might be something like:
-
-```javascript
+const GITHUB_PLUGIN_NAME = "sourcecred/github-beta"
 class GithubPluginHandler
 implements PluginHandler<GithubNodeReference, GithubNodePayload<any>> {
   createReference(reference) {
     const address = reference.address();
-    if (address.pluginName !== "sourcecred/github-beta") {
+    if (address.pluginName !== GITHUB_PLUGIN_NAME) {
       throw new Error("pluginName: " + address.pluginName);
     }
     const type: GithubNodeType = ((address.type: string): any);
@@ -313,6 +314,8 @@ implements PluginHandler<GithubNodeReference, GithubNodePayload<any>> {
         throw new Error("type: " + type);
     }
   }
+
+  pluginName() { return GITHUB_PLUGIN_NAME; }
 }
 ```
 
@@ -321,7 +324,7 @@ implements PluginHandler<GithubNodeReference, GithubNodePayload<any>> {
 A graph is associated with a fixed set of plugins:
 
 ```javascript
-type Plugins = {[pluginName: string]: PluginHandler<any, any>};
+type Plugins = $ReadOnlyArray<PluginHandler<any, any>>;
 ```
 
 The graph learns about these at construction time, either via the
@@ -349,7 +352,9 @@ declare class Graph /* no type parameters! */ {
   equals(that: Graph): boolean;
 
   toJSON(): GraphJson;
-  static fromJSON(json: GraphJson, plugins: Plugins): Graph;
+  static fromJSON(plugins: Plugins, json: GraphJson): Graph;
+
+  plugins(): Plugins;
 
   addNode(np: NodePayload): this;
   addEdge(edge: Edge): this;
@@ -359,12 +364,12 @@ declare class Graph /* no type parameters! */ {
 
   node(address: Address): ?Node<any, any>;
   edge(address: Address): ?Edge;
-  nodeReference(address: Address): NodeReference;
+  ref(address: Address): NodeReference;
 
   nodes(filter?: {|+type?: string|}): Iterator<Node<any, any>>;
   edges(filter?: {|+type?: string|}): Iterator<Edge>;
 
-  static mergeConservative(Iterator<Graph>): Graph;
+  static mergeConservative(Iterable<Graph>): Graph;
 
   // Some implementation details (but not all of them)…
   _nodes: {|+address: Address, +value: Node<any, any> | void|}[];
@@ -372,7 +377,7 @@ declare class Graph /* no type parameters! */ {
   _internalNeighbors(
     number: number,
     options?: NeighborsOptions
-  ): Iterator<NodeReference>;
+  ): Iterator<Neighbor<any>>;
   _addressToIndex(address: Address): ?number;
 }
 type GraphJson = {/* elided */};
@@ -410,8 +415,8 @@ Some things that are implicit from the types, but are worth mentioning:
     will re-enrich all nodes with their appropriate plugins to get
     payloads and references.
 
-The semantics for `nodeReference` are somewhat subtle. There are four
-cases, depending on the `address` argument passed to this method:
+The semantics for `Graph.ref` are somewhat subtle. There are four cases,
+depending on the `address` argument passed to this method:
 
   1. The address corresponds to a node in the graph.
   2. The address corresponds to a node that does not appear in the
@@ -509,7 +514,7 @@ type NeighborsOptionsV2 = {|
 
 declare function neighborsV2(
   options?: NeighborsOptionsV2
-): Iterator<NodeReference>;
+): Iterator<Neighbor<any>>;
 declare function nodesV2(filter?: FilterV2): Iterator<Node<any, any>>;
 ```
 
