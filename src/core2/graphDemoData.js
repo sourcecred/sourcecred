@@ -12,7 +12,7 @@ export const PLUGIN_NAME = "sourcecred/demo/cooking";
 
 export class Handler implements PluginHandler<DemoReference, DemoPayload<any>> {
   createReference(ref: NodeReference) {
-    switch (ref.address().type) {
+    switch (ref.address().owner.type) {
       case "PC":
         return new HeroReference(ref);
       case "INGREDIENT":
@@ -61,8 +61,7 @@ export class DemoPayload<+T> implements NodePayload {
 
   address() {
     return {
-      pluginName: PLUGIN_NAME,
-      type: this._type,
+      owner: {plugin: PLUGIN_NAME, type: this._type},
       id: String(this._id),
     };
   }

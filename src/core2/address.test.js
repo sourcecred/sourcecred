@@ -22,9 +22,8 @@ describe("address", () => {
   |};
   function makeAddress(type: "HOME" | "BUSINESS", id: string): Address {
     return {
-      pluginName: "houseville",
+      owner: {plugin: "houseville", type},
       id,
-      type,
     };
   }
   const mansion = (): House => ({
@@ -167,14 +166,12 @@ describe("address", () => {
     });
     it("Order of insertion does not matter", () => {
       const a1 = {
-        pluginName: "foo",
-        type: "bar",
+        owner: {plugin: "foo", type: "bar"},
         id: "zoombat",
       };
       const a2 = {
         id: "zoombat",
-        type: "bar",
-        pluginName: "foo",
+        owner: {type: "bar", plugin: "foo"},
       };
       expect(toString(a1)).toEqual(toString(a2));
     });

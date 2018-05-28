@@ -1,6 +1,6 @@
 // @flow
 
-import type {Address} from "./address";
+import type {Address, PluginType} from "./address";
 import type {Compatible} from "../util/compat";
 
 export type Node<NR: NodeReference, NP: NodePayload> = {|
@@ -38,8 +38,8 @@ export type Edge<+T> = {|
 |};
 
 export type NeighborsOptions = {|
-  +nodeType?: string,
-  +edgeType?: string,
+  +node?: PluginType,
+  +edge?: PluginType,
   +direction?: "IN" | "OUT" | "ANY",
 |};
 
@@ -86,7 +86,7 @@ export class Graph {
    *
    * If filter is provided, it will return only nodes with the requested type.
    */
-  nodes(filter?: {|+type?: string|}): Iterator<Node<any, any>> {
+  nodes(filter?: PluginType): Iterator<Node<any, any>> {
     const _ = filter;
     throw new Error("Graphv2 is not yet implemented");
   }
@@ -101,7 +101,7 @@ export class Graph {
    *
    * If filter is provided, it will return only edges with the requested type.
    */
-  edges(filter?: {|+type?: string|}): Iterator<Edge<any>> {
+  edges(filter?: PluginType): Iterator<Edge<any>> {
     const _ = filter;
     throw new Error("Graphv2 is not yet implemented");
   }
