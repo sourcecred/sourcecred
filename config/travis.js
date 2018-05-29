@@ -41,7 +41,15 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
     },
     {
       id: "flow",
-      cmd: ["npm", "run", "--silent", "flow", "--", "--quiet"],
+      cmd: [
+        "npm",
+        "run",
+        "--silent",
+        "flow",
+        "--",
+        "--quiet",
+        "--max-warnings=0",
+      ],
       deps: [],
     },
     {
