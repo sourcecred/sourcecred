@@ -276,23 +276,28 @@ function findHandler(pluginMap: PluginMap, pluginName: string) {
   return pluginMap[pluginName];
 }
 
+const DELEGATE_NODE_REFERENCE_BASE = Symbol("base");
+function getBase(dnr: DelegateNodeReference): NodeReference {
+  // Flow doesn't know about Symbols, so we use this function to
+  // localize the `any`-casts as much as possible.
+  return (dnr: any)[DELEGATE_NODE_REFERENCE_BASE];
+}
+
 export class DelegateNodeReference implements NodeReference {
-  // TODO(@wchargin): Use a Symbol here.
-  __DelegateNodeReference_base: NodeReference;
   constructor(base: NodeReference) {
-    this.__DelegateNodeReference_base = base;
+    (this: any)[DELEGATE_NODE_REFERENCE_BASE] = base;
   }
   graph() {
-    return this.__DelegateNodeReference_base.graph();
+    return getBase(this).graph();
   }
   address() {
-    return this.__DelegateNodeReference_base.address();
+    return getBase(this).address();
   }
   get() {
-    return this.__DelegateNodeReference_base.get();
+    return getBase(this).get();
   }
   neighbors(options?: NeighborsOptions) {
-    return this.__DelegateNodeReference_base.neighbors(options);
+    return getBase(this).neighbors(options);
   }
 }
 
