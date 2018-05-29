@@ -4,6 +4,7 @@ import deepEqual from "lodash.isequal";
 import type {Address} from "./address";
 import {AddressMap} from "./address";
 import type {Compatible} from "../util/compat";
+import stringify from "json-stable-stringify";
 
 export type Node<NR: NodeReference, NP: NodePayload> = {|
   +ref: NR,
@@ -160,6 +161,10 @@ export class Graph {
     if (!indexedEdge) {
       return undefined;
     }
+    return this._upgradeIndexedEdge(indexedEdge);
+  }
+
+  _upgradeIndexedEdge(indexedEdge: IndexedEdge): Edge<any> {
     return {
       address: indexedEdge.address,
       src: this._nodes[indexedEdge.srcIndex].address,
@@ -174,12 +179,9 @@ export class Graph {
    * If filter is provided, it will return only edges with the requested type.
    */
   *edges(options?: PluginFilter): Iterator<Edge<any>> {
-    let edges = this._edges.getAll().map((indexedEdge) => ({
-      address: indexedEdge.address,
-      src: this._nodes[indexedEdge.srcIndex].address,
-      dst: this._nodes[indexedEdge.dstIndex].address,
-      payload: indexedEdge.payload,
-    }));
+    let edges = this._edges
+      .getAll()
+      .map((indexedEdge) => this._upgradeIndexedEdge(indexedEdge));
     const filter = addressFilterer(options);
     for (const edge of edges) {
       if (filter(edge.address)) {
@@ -433,10 +435,51 @@ class InternalReference implements NodeReference {
     return this._graph._nodes[indexDatum.index].node;
   }
 
-  neighbors(
+  *neighbors(
     options?: NeighborsOptions
   ): Iterator<{|+ref: NodeReference, +edge: Edge<any>|}> {
-    const _ = options;
-    throw new Error("Not implemented");
+    const indexDatum = this._graph._nodeIndices.get(this._address);
+    if (indexDatum == null) {
+      return;
+    }
+    const nodeIndex = indexDatum.index;
+
+    const direction = (options && options.direction) || "ANY";
+    const edgeFilter =
+      options == null ? (_) => true : addressFilterer(options.edge);
+    const nodeFilter =
+      options == null ? (_) => true : addressFilterer(options.node);
+
+    const graph = this._graph;
+    const adjacencies = [];
+    if (direction === "ANY" || direction === "IN") {
+      adjacencies.push({list: graph._inEdges[nodeIndex], direction: "IN"});
+    }
+    if (direction === "ANY" || direction === "OUT") {
+      adjacencies.push({list: graph._outEdges[nodeIndex], direction: "OUT"});
+    }
+
+    for (const adjacency of adjacencies) {
+      for (const edgeAddress of adjacency.list) {
+        const indexedEdge = graph._edges.get(edgeAddress);
+        if (indexedEdge == null) {
+          throw new Error(
+            `Edge at address ${stringify(edgeAddress)} does not exist`
+          );
+        }
+        if (direction === "ANY" && adjacency.direction === "IN") {
+          if (indexedEdge.srcIndex === indexedEdge.dstIndex) {
+            continue;
+          }
+        }
+        const edge = graph._upgradeIndexedEdge(indexedEdge);
+        const ref = graph.ref(
+          adjacency.direction === "IN" ? edge.src : edge.dst
+        );
+        if (edgeFilter(edge.address) && nodeFilter(ref.address())) {
+          yield {edge, ref};
+        }
+      }
+    }
   }
 }
