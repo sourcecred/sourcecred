@@ -59,7 +59,7 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
     },
     {
       id: "backend",
-      cmd: ["npm", "run", "--silent", "backend"],
+      cmd: ["npm", "run", "--silent", "backend", "--", "--dry-run"],
       deps: [],
     },
   ];
