@@ -7,7 +7,7 @@ const nodeExternals = require("webpack-node-externals");
 
 // This is the backend configuration. It builds applications that target
 // Node and will not run in a browser.
-module.exports = {
+module.exports = (outputPath) => ({
   // Don't attempt to continue if there are any errors.
   bail: true,
   // Target Node instead of the browser.
@@ -15,7 +15,7 @@ module.exports = {
   entry: paths.backendEntryPoints,
   externals: [nodeExternals()],
   output: {
-    path: paths.backendBuild,
+    path: outputPath,
     // Generated JS file names (with nested folders).
     // There will be one main bundle, and one file per asynchronous chunk.
     // We don't currently advertise code splitting but Webpack supports it.
@@ -77,4 +77,4 @@ module.exports = {
       ),
     }),
   ],
-};
+});
