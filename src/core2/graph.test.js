@@ -136,6 +136,12 @@ describe("graph", () => {
       expect(fooNodes).toEqual([fooNode()]);
       expect(barNodes).toEqual([barNode()]);
     });
+    it("complains if you filter by only type", () => {
+      // $ExpectFlowError
+      expect(() => Array.from(newGraph().nodes({type: "foo"}))).toThrowError(
+        "must filter by plugin"
+      );
+    });
     it("does not return removed nodes", () => {
       const g = newGraph()
         .addNode(barPayload())
