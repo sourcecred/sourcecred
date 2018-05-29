@@ -40,6 +40,17 @@ export type Edge<+T> = {|
 |};
 
 export type PluginFilter = {|+plugin: string, +type?: string|};
+function addressFilterer(options?: PluginFilter) {
+  if (options == null) {
+    return (_: Address) => true;
+  }
+  const {plugin, type} = options;
+  if (plugin == null) {
+    throw new Error("PluginFilters must filter by plugin");
+  }
+  return ({owner}: Address) =>
+    owner.plugin === plugin && (type == null || owner.type === type);
+}
 export type NeighborsOptions = {|
   +node?: PluginFilter,
   +edge?: PluginFilter,
@@ -110,20 +121,15 @@ export class Graph {
    * If filter is provided, it will return only nodes with the requested plugin name
    * (and, optionally, type).
    */
-  *nodes(filter?: PluginFilter): Iterator<Node<any, any>> {
+  *nodes(options?: PluginFilter): Iterator<Node<any, any>> {
+    const filter = addressFilterer(options);
     for (const maybeNode of this._nodes) {
       const node = maybeNode.node;
       if (node == null) {
         continue;
       }
-      if (filter != null) {
-        const owner = node.address.owner;
-        if (owner.plugin !== filter.plugin) {
-          continue;
-        }
-        if (filter.type != null && owner.type !== filter.type) {
-          continue;
-        }
+      if (!filter(node.address)) {
+        continue;
       }
       yield node;
     }
