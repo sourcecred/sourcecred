@@ -149,6 +149,158 @@ describe("graph", () => {
       const nodes = Array.from(g.nodes());
       expect(nodes).toHaveLength(0);
     });
+    it("does not include absent nodes with incident edges", () => {
+      const g = newGraph()
+        .addNode(barPayload())
+        .addEdge({
+          address: {
+            owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"},
+            id: "edge",
+          },
+          src: barPayload().address(),
+          dst: new BarPayload(2, "goodbye").address(),
+          payload: "I have a source, but no destination",
+        });
+      expect(Array.from(g.nodes())).toHaveLength(1);
+    });
+  });
+
+  describe("edge", () => {
+    const srcPayload = () => new BarPayload(1, "first");
+    const dstPayload = () => new BarPayload(2, "second");
+    const edge = ({id = "my-favorite-edge", payload = 12} = {}) => ({
+      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id},
+      src: srcPayload().address(),
+      dst: dstPayload().address(),
+      payload,
+    });
+
+    it("returns a normal edge", () => {
+      expect(
+        newGraph()
+          .addNode(srcPayload())
+          .addNode(dstPayload())
+          .addEdge(edge())
+          .edge(edge().address)
+      ).toEqual(edge());
+    });
+
+    it("returns a dangling edge", () => {
+      expect(
+        newGraph()
+          .addEdge(edge())
+          .edge(edge().address)
+      ).toEqual(edge());
+    });
+
+    it("returns `undefined` for an absent edge", () => {
+      expect(newGraph().edge(edge().address)).toBe(undefined);
+    });
+
+    it("throws for null or undefined address", () => {
+      expect(() => {
+        newGraph().edge((null: any));
+      }).toThrow("null");
+      expect(() => {
+        newGraph().edge((undefined: any));
+      }).toThrow("undefined");
+    });
+  });
+
+  describe("edges", () => {
+    const srcPayload = () => new BarPayload(1, "first");
+    const dstPayload = () => new BarPayload(2, "second");
+    const edge = () => ({
+      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id: "e"},
+      src: srcPayload().address(),
+      dst: dstPayload().address(),
+      payload: 12,
+    });
+
+    it("returns an empty iterator for an empty graph", () => {
+      expect(Array.from(newGraph().edges())).toEqual([]);
+    });
+
+    it("includes a normal edge in the graph", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addNode(srcPayload())
+            .addNode(dstPayload())
+            .addEdge(edge())
+            .edges()
+        )
+      ).toEqual([edge()]);
+    });
+
+    it("includes a dangling edge in the graph", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addEdge(edge())
+            .edges()
+        )
+      ).toEqual([edge()]);
+    });
+
+    it("supports filtering by plugin", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addEdge(edge())
+            .edges({plugin: "SOMEONE_ELSE"})
+        )
+      ).toHaveLength(0);
+      expect(
+        Array.from(
+          newGraph()
+            .addEdge(edge())
+            .edges({plugin: EXAMPLE_PLUGIN_NAME})
+        )
+      ).toHaveLength(1);
+    });
+
+    it("omits removed edges", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addEdge(edge())
+            .removeEdge(edge().address)
+            .edges()
+        )
+      ).toHaveLength(0);
+    });
+
+    it("supports filtering by plugin and type", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addEdge(edge())
+            .edges({plugin: "SOMEONE_ELSE", type: "SOMETHING"})
+        )
+      ).toHaveLength(0);
+      expect(
+        Array.from(
+          newGraph()
+            .addEdge(edge())
+            .edges({plugin: EXAMPLE_PLUGIN_NAME, type: "BOUNDARY"})
+        )
+      ).toHaveLength(0);
+      expect(
+        Array.from(
+          newGraph()
+            .addEdge(edge())
+            .edges({plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"})
+        )
+      ).toHaveLength(1);
+    });
+
+    it("complains if you filter by only type", () => {
+      // $ExpectFlowError
+      expect(() => Array.from(newGraph().nodes({type: "FOO"}))).toThrowError(
+        "must filter by plugin"
+      );
+    });
   });
 
   describe("addNode", () => {
@@ -192,7 +344,165 @@ describe("graph", () => {
     });
   });
 
+  describe("addEdge", () => {
+    const srcPayload = () => new BarPayload(1, "first");
+    const dstPayload = () => new BarPayload(2, "second");
+    const edge = ({id = "my-favorite-edge", payload = 12} = {}) => ({
+      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id},
+      src: srcPayload().address(),
+      dst: dstPayload().address(),
+      payload,
+    });
+
+    it("adds an edge between two existing nodes", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addNode(srcPayload())
+            .addNode(dstPayload())
+            .addEdge(edge())
+            .edges()
+        )
+      ).toEqual([edge()]);
+    });
+
+    it("is idempotent", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addNode(srcPayload())
+            .addNode(dstPayload())
+            .addEdge(edge())
+            .addEdge(edge())
+            .edges()
+        )
+      ).toEqual([edge()]);
+    });
+
+    it("throws an error for a payload conflict at a given address", () => {
+      const e1 = edge({id: "my-edge", payload: "uh"});
+      const e2 = edge({id: "my-edge", payload: "oh"});
+      const g = newGraph()
+        .addNode(srcPayload())
+        .addNode(dstPayload())
+        .addEdge(e1);
+      expect(() => {
+        g.addEdge(e2);
+      }).toThrow("exists with distinct contents");
+    });
+
+    it("adds an edge whose `src` is not present", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addNode(dstPayload())
+            .addEdge(edge())
+            .edges()
+        )
+      ).toEqual([edge()]);
+    });
+
+    it("adds an edge whose `dst` is not present", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addNode(srcPayload())
+            .addEdge(edge())
+            .edges()
+        )
+      ).toEqual([edge()]);
+    });
+
+    it("adds an edge whose `src` and `dst` are not present", () => {
+      expect(
+        Array.from(
+          newGraph()
+            .addEdge(edge())
+            .edges()
+        )
+      ).toEqual([edge()]);
+    });
+
+    it("adds a loop", () => {
+      const e = {...edge(), dst: srcPayload().address()};
+      expect(
+        Array.from(
+          newGraph()
+            .addNode(srcPayload())
+            .addEdge(e)
+            .edges()
+        )
+      ).toEqual([e]);
+    });
+
+    it("throws for null or undefined edge", () => {
+      expect(() => {
+        newGraph().addEdge((null: any));
+      }).toThrow("null");
+      expect(() => {
+        newGraph().addEdge((undefined: any));
+      }).toThrow("undefined");
+    });
+
+    it("throws for null or undefined address", () => {
+      const e = (address: any) => ({...edge(), address});
+      expect(() => {
+        newGraph().addEdge(e(null));
+      }).toThrow("null");
+      expect(() => {
+        newGraph().addEdge(e(undefined));
+      }).toThrow("undefined");
+    });
+
+    it("throws for null or undefined src", () => {
+      const e = (src: any) => ({...edge(), src});
+      expect(() => {
+        newGraph().addEdge(e(null));
+      }).toThrow("null");
+      expect(() => {
+        newGraph().addEdge(e(undefined));
+      }).toThrow("undefined");
+    });
+
+    it("throws for null or undefined dst", () => {
+      const e = (dst: any) => ({...edge(), dst});
+      expect(() => {
+        newGraph().addEdge(e(null));
+      }).toThrow("null");
+      expect(() => {
+        newGraph().addEdge(e(undefined));
+      }).toThrow("undefined");
+    });
+  });
+
+  describe("removeEdge", () => {
+    it("removes a nonexistent edge without error", () => {
+      newGraph().removeEdge({
+        owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"},
+        id: "nope",
+      });
+    });
+
+    it("throws for null or undefined address", () => {
+      expect(() => {
+        newGraph().removeEdge((null: any));
+      }).toThrow("null");
+      expect(() => {
+        newGraph().removeEdge((undefined: any));
+      }).toThrow("undefined");
+    });
+  });
+
   describe("equals", () => {
+    const srcPayload = () => new BarPayload(1, "first");
+    const dstPayload = () => new BarPayload(2, "second");
+    const edge = (payload) => ({
+      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id: "e"},
+      src: srcPayload().address(),
+      dst: dstPayload().address(),
+      payload,
+    });
+
     it("empty graphs are equal", () => {
       expect(newGraph().equals(newGraph())).toBe(true);
     });
@@ -211,10 +521,26 @@ describe("graph", () => {
       const g1 = newGraph().addNode(new BarPayload(1, "there"));
       expect(g0.equals(g1)).toBe(false);
     });
+    it("graphs with different edges are not equal", () => {
+      const g0 = newGraph();
+      const g1 = newGraph().addEdge(edge("hello"));
+      expect(g0.equals(g1)).toBe(false);
+    });
+    it("graphs with different edges at same address are not equal", () => {
+      const g0 = newGraph().addEdge(edge("hello"));
+      const g1 = newGraph().addEdge(edge("there"));
+      expect(g0.equals(g1)).toBe(false);
+    });
     it("adding and removing a node doesn't change equality", () => {
       const g = newGraph()
         .addNode(new FooPayload())
         .removeNode(new FooPayload().address());
+      expect(g.equals(newGraph())).toBe(true);
+    });
+    it("adding and removing an edge doesn't change equality", () => {
+      const g = newGraph()
+        .addEdge(edge("hello"))
+        .removeEdge(edge("hello").address);
       expect(g.equals(newGraph())).toBe(true);
     });
   });

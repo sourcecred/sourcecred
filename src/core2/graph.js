@@ -1,7 +1,7 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
-import type {Address, PluginType} from "./address";
+import type {Address} from "./address";
 import {AddressMap} from "./address";
 import type {Compatible} from "../util/compat";
 
@@ -81,17 +81,37 @@ export type Plugins = $ReadOnlyArray<PluginHandler<any, any>>;
 type MaybeNode = {|+address: Address, +node: Node<any, any> | void|};
 type Integer = number;
 
+type IndexedEdge = {|
+  +address: Address,
+  +srcIndex: Integer,
+  +dstIndex: Integer,
+  +payload: any,
+|};
+
 export class Graph {
   _plugins: Plugins;
   _pluginMap: PluginMap;
-  _nodeIndices: AddressMap<{|+address: Address, +index: Integer|}>;
+
+  // Invariant: sizes of `_nodeIndices`, `_nodes`, `_outEdges`, and
+  // `_inEdges` are all equal.
   _nodes: MaybeNode[];
+  _nodeIndices: AddressMap<{|+address: Address, +index: Integer|}>;
+
+  // If `idx` is the index of a node `v`, then `_outEdges[idx]` is the
+  // list of `e.address` for all edges `e` whose source is `v`.
+  // Likewise, `_inEdges[idx]` has the addresses of all in-edges to `v`.
+  _outEdges: Address[][];
+  _inEdges: Address[][];
+  _edges: AddressMap<IndexedEdge>;
 
   constructor(plugins: Plugins) {
     this._plugins = plugins.slice();
     this._pluginMap = createPluginMap(this._plugins);
     this._nodes = [];
     this._nodeIndices = new AddressMap();
+    this._outEdges = [];
+    this._inEdges = [];
+    this._edges = new AddressMap();
   }
 
   ref(address: Address): NodeReference {
@@ -135,9 +155,17 @@ export class Graph {
     }
   }
 
-  edge(address: Address): Edge<any> {
-    const _ = address;
-    throw new Error("Graphv2 is not yet implemented");
+  edge(address: Address): ?Edge<any> {
+    const indexedEdge = this._edges.get(address);
+    if (!indexedEdge) {
+      return undefined;
+    }
+    return {
+      address: indexedEdge.address,
+      src: this._nodes[indexedEdge.srcIndex].address,
+      dst: this._nodes[indexedEdge.dstIndex].address,
+      payload: indexedEdge.payload,
+    };
   }
 
   /**
@@ -145,9 +173,19 @@ export class Graph {
    *
    * If filter is provided, it will return only edges with the requested type.
    */
-  edges(filter?: PluginType): Iterator<Edge<any>> {
-    const _ = filter;
-    throw new Error("Graphv2 is not yet implemented");
+  *edges(options?: PluginFilter): Iterator<Edge<any>> {
+    let edges = this._edges.getAll().map((indexedEdge) => ({
+      address: indexedEdge.address,
+      src: this._nodes[indexedEdge.srcIndex].address,
+      dst: this._nodes[indexedEdge.dstIndex].address,
+      payload: indexedEdge.payload,
+    }));
+    const filter = addressFilterer(options);
+    for (const edge of edges) {
+      if (filter(edge.address)) {
+        yield edge;
+      }
+    }
   }
 
   _addNodeAddress(address: Address): Integer {
@@ -158,6 +196,8 @@ export class Graph {
       const index = this._nodes.length;
       this._nodeIndices.add({address, index});
       this._nodes.push({address, node: undefined});
+      this._outEdges.push([]);
+      this._inEdges.push([]);
       return index;
     }
   }
@@ -196,13 +236,65 @@ export class Graph {
   }
 
   addEdge(edge: Edge<any>): this {
-    const _ = edge;
-    throw new Error("Graphv2 is not yet implemented");
+    if (edge == null) {
+      throw new Error(`edge is ${String(edge)}`);
+    }
+    if (edge.address == null) {
+      throw new Error(`address is ${String(edge.address)}`);
+    }
+    if (edge.src == null) {
+      throw new Error(`src is ${String(edge.src)}`);
+    }
+    if (edge.dst == null) {
+      throw new Error(`dst is ${String(edge.dst)}`);
+    }
+    const srcIndex = this._addNodeAddress(edge.src);
+    const dstIndex = this._addNodeAddress(edge.dst);
+    const indexedEdge = {
+      address: edge.address,
+      srcIndex,
+      dstIndex,
+      payload: edge.payload,
+    };
+    return this._addIndexedEdge(indexedEdge);
+  }
+
+  _addIndexedEdge(indexedEdge: IndexedEdge): this {
+    const existingIndexedEdge = this._edges.get(indexedEdge.address);
+    if (existingIndexedEdge !== undefined) {
+      if (deepEqual(existingIndexedEdge, indexedEdge)) {
+        return this;
+      } else {
+        throw new Error(
+          `edge at address ${JSON.stringify(
+            indexedEdge.address
+          )} exists with distinct contents`
+        );
+      }
+    }
+    this._edges.add(indexedEdge);
+    this._outEdges[indexedEdge.srcIndex].push(indexedEdge.address);
+    this._inEdges[indexedEdge.dstIndex].push(indexedEdge.address);
+    return this;
   }
 
   removeEdge(address: Address): this {
-    const _ = address;
-    throw new Error("Graphv2 is not yet implemented");
+    // TODO(perf): This is linear in the degree of the endpoints of the
+    // edge. Consider storing in non-list form.
+    const indexedEdge = this._edges.get(address);
+    if (indexedEdge) {
+      this._edges.remove(address);
+      [
+        this._outEdges[indexedEdge.srcIndex],
+        this._inEdges[indexedEdge.dstIndex],
+      ].forEach((edges) => {
+        const index = edges.findIndex((ea) => deepEqual(ea, address));
+        if (index !== -1) {
+          edges.splice(index, 1);
+        }
+      });
+    }
+    return this;
   }
 
   /**
@@ -235,8 +327,19 @@ export class Graph {
       return false;
     }
 
+    const theseEdges = Array.from(this.edges());
+    const thoseEdges = Array.from(that.edges());
+    if (theseEdges.length !== thoseEdges.length) {
+      return false;
+    }
+
     for (const node of theseNodes) {
       if (!deepEqual(node, that.node(node.address))) {
+        return false;
+      }
+    }
+    for (const edge of theseEdges) {
+      if (!deepEqual(edge, that.edge(edge.address))) {
         return false;
       }
     }
