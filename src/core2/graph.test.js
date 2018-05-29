@@ -3,7 +3,7 @@ import stringify from "json-stable-stringify";
 import sortBy from "lodash.sortby";
 
 import type {Node} from "./graph";
-import {Graph} from "./graph";
+import {DelegateNodeReference, Graph} from "./graph";
 
 import {
   FooPayload,
@@ -211,5 +211,61 @@ describe("graph", () => {
         .removeNode(new FooPayload().address());
       expect(g.equals(newGraph())).toBe(true);
     });
+  });
+});
+
+describe("DelegateNodeReference", () => {
+  const makeBase = () => ({
+    graph: jest.fn(),
+    address: jest.fn(),
+    get: jest.fn(),
+    neighbors: jest.fn(),
+  });
+
+  it("has a working constructor", () => {
+    expect(new DelegateNodeReference(makeBase())).toBeInstanceOf(
+      DelegateNodeReference
+    );
+  });
+
+  it("delegates `graph`", () => {
+    const expected = new Graph([]);
+    const ref = {
+      ...makeBase(),
+      graph: jest.fn().mockReturnValueOnce(expected),
+    };
+    expect(new DelegateNodeReference(ref).graph()).toBe(expected);
+    expect(ref.graph.mock.calls).toEqual([[]]);
+  });
+
+  it("delegates `address`", () => {
+    const expected = {owner: {plugin: "foo", type: "bar"}, id: "baz"};
+    const ref = {
+      ...makeBase(),
+      address: jest.fn().mockReturnValueOnce(expected),
+    };
+    expect(new DelegateNodeReference(ref).address()).toBe(expected);
+    expect(ref.address.mock.calls).toEqual([[]]);
+  });
+
+  it("delegates `get`", () => {
+    const expected = {some: "node"};
+    const ref = {
+      ...makeBase(),
+      get: jest.fn().mockReturnValueOnce((expected: any)),
+    };
+    expect(new DelegateNodeReference(ref).get()).toBe(expected);
+    expect(ref.get.mock.calls).toEqual([[]]);
+  });
+
+  it("delegates `neighbors`, with proper options", () => {
+    const options = {direction: "OUT", node: {plugin: "foo", type: "bar"}};
+    const ref = {
+      ...makeBase(),
+      neighbors: jest.fn().mockImplementationOnce((...args) => (args: any)),
+    };
+    const result = new DelegateNodeReference(ref).neighbors(options);
+    expect(result).toEqual([options]);
+    expect(ref.neighbors.mock.calls).toEqual([[options]]);
   });
 });
