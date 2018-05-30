@@ -2,7 +2,7 @@
 import stringify from "json-stable-stringify";
 import sortBy from "lodash.sortby";
 
-import type {Node} from "./graph";
+import type {Node, Edge, NodeReference} from "./graph";
 import {DelegateNodeReference, Graph} from "./graph";
 
 import {
@@ -70,6 +70,138 @@ describe("graph", () => {
       const graph = newGraph();
       expect(() => graph.ref((null: any))).toThrow("null");
       expect(() => graph.ref((undefined: any))).toThrow("undefined");
+    });
+    describe("neighbors", () => {
+      // Note: The tests share more state within this block than in the rest of the code.
+      // It should be fine so long as neighbors never mutates the graph.
+      const edge = (id, src, dst, type = "EDGE") => ({
+        address: {id, owner: {plugin: EXAMPLE_PLUGIN_NAME, type}},
+        src: src.address(),
+        dst: dst.address(),
+        payload: {},
+      });
+      // A cute little diagram:
+      // A>B = edge from A to B
+      // Nodes in the graph: bar, foo, isolated
+      // (Parens) = Repeated or absent node
+      //
+      //    bar
+      //     V
+      //    foo  > (foo)
+      //     V
+      //   (absent)   isolated
+      const foo = new FooPayload();
+      const bar = new BarPayload(1, "hello");
+      const isolated = new BarPayload(666, "ghost");
+      const absent = new BarPayload(404, "hello");
+
+      const bar_foo = edge("bar_foo", bar, foo);
+      const foo_foo = edge("foo_foo", foo, foo, "SELF");
+      const foo_absent = edge("foo_absent", foo, absent);
+      const phantomEdge = edge("spooky", foo, isolated);
+      const graph = newGraph()
+        .addNode(bar)
+        .addNode(foo)
+        .addNode(isolated)
+        .addEdge(bar_foo)
+        .addEdge(foo_foo)
+        .addEdge(foo_absent)
+        .addEdge(phantomEdge)
+        .removeEdge(phantomEdge.address);
+
+      const refFor = (x) => graph.ref(x.address());
+
+      const fooNeighbor = {
+        bar: {edge: bar_foo, ref: refFor(bar)},
+        absent: {edge: foo_absent, ref: refFor(absent)},
+        foo: {edge: foo_foo, ref: refFor(foo)},
+      };
+
+      function expectNeighborsEqual(
+        actual: Iterable<{|+edge: Edge<any>, +ref: NodeReference|}>,
+        expected: {|+edge: Edge<any>, +ref: NodeReference|}[]
+      ) {
+        const sort = (xs) => sortBy(xs, (x) => stringify(x.edge.address));
+        expect(sort(Array.from(actual))).toEqual(sort(expected));
+      }
+
+      it("ref in empty graph has no neighbors", () => {
+        const ref = newGraph().ref(foo.address());
+        expectNeighborsEqual(ref.neighbors(), []);
+      });
+      it("graph with no edges has no neighbors", () => {
+        const g = newGraph()
+          .addNode(foo)
+          .addNode(bar);
+        const ref = g.ref(foo.address());
+        expectNeighborsEqual(ref.neighbors(), []);
+      });
+      it("finds neighbors for an absent node", () => {
+        expectNeighborsEqual(refFor(absent).neighbors(), [
+          {edge: foo_absent, ref: refFor(foo)},
+        ]);
+      });
+      describe("filters by direction:", () => {
+        [
+          ["IN", [fooNeighbor.bar, fooNeighbor.foo]],
+          ["OUT", [fooNeighbor.absent, fooNeighbor.foo]],
+          ["ANY", [fooNeighbor.bar, fooNeighbor.absent, fooNeighbor.foo]],
+          [
+            "unspecified",
+            [fooNeighbor.bar, fooNeighbor.absent, fooNeighbor.foo],
+          ],
+        ].forEach(([direction, expectedNeighbors]) => {
+          it(direction, () => {
+            const options = direction === "unspecified" ? {} : {direction};
+            expectNeighborsEqual(
+              refFor(foo).neighbors(options),
+              expectedNeighbors
+            );
+          });
+        });
+      });
+      describe("filters edges by type:", () => {
+        [
+          ["EDGE", [fooNeighbor.bar, fooNeighbor.absent]],
+          ["SELF", [fooNeighbor.foo]],
+          [
+            "unspecified",
+            [fooNeighbor.bar, fooNeighbor.absent, fooNeighbor.foo],
+          ],
+        ].forEach(([type, expectedNeighbors]) => {
+          it(type, () => {
+            const options =
+              type === "unspecified"
+                ? {}
+                : {edge: {plugin: EXAMPLE_PLUGIN_NAME, type}};
+            expectNeighborsEqual(
+              refFor(foo).neighbors(options),
+              expectedNeighbors
+            );
+          });
+        });
+      });
+      describe("filters nodes by type:", () => {
+        [
+          ["FOO", [fooNeighbor.foo]],
+          ["BAR", [fooNeighbor.bar, fooNeighbor.absent]],
+          [
+            "unspecified",
+            [fooNeighbor.bar, fooNeighbor.absent, fooNeighbor.foo],
+          ],
+        ].forEach(([type, expectedNeighbors]) => {
+          it(type, () => {
+            const options =
+              type === "unspecified"
+                ? {}
+                : {node: {plugin: EXAMPLE_PLUGIN_NAME, type}};
+            expectNeighborsEqual(
+              refFor(foo).neighbors(options),
+              expectedNeighbors
+            );
+          });
+        });
+      });
     });
   });
 
