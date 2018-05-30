@@ -313,8 +313,16 @@ export class Graph {
     plugins: Plugins,
     graphs: $ReadOnlyArray<Graph>
   ): Graph {
-    const _ = {plugins, graphs};
-    throw new Error("Graphv2 is not yet implemented");
+    const result = new Graph(plugins);
+    graphs.forEach((graph) => {
+      for (const node of graph.nodes()) {
+        result.addNode(node.payload);
+      }
+      for (const edge of graph.edges()) {
+        result.addEdge(edge);
+      }
+    });
+    return result;
   }
 
   /**
