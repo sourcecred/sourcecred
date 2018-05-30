@@ -628,6 +628,11 @@ describe("graph", () => {
   describe("mergeConservative", () => {
     const merge = (graphs) => Graph.mergeConservative([new Handler()], graphs);
 
+    it("installs appropriate plugin handlers", () => {
+      const plugins = [new Handler()];
+      expect(Graph.mergeConservative(plugins, []).plugins()).toEqual(plugins);
+    });
+
     it("yields the empty graph on empty input", () => {
       expect(merge([]).equals(newGraph())).toBe(true);
     });
