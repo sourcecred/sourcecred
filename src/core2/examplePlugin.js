@@ -1,10 +1,13 @@
 // @flow
 
+import stringify from "json-stable-stringify";
+
 import type {Address} from "./address";
 import {DelegateNodeReference} from "./graph";
-import type {NodeReference, NodePayload, PluginHandler} from "./graph";
+import type {NodeReference, NodePayload, Edge, PluginHandler} from "./graph";
 
 export type NodeType = "FOO" | "BAR";
+export type EdgeType = "SIMPLE" | "STRANGE";
 export const EXAMPLE_PLUGIN_NAME = "sourcecred/graph-demo-plugin";
 
 export class FooPayload implements NodePayload {
@@ -63,7 +66,77 @@ export class BarReference extends DelegateNodeReference {
   }
 }
 
-export class Handler implements PluginHandler<NodeReference, NodePayload> {
+export class SimpleEdge implements Edge {
+  _src: NodeReference;
+  _dst: NodeReference;
+
+  constructor(src: NodeReference, dst: NodeReference) {
+    this._src = src;
+    this._dst = dst;
+  }
+  src(): NodeReference {
+    return this._src;
+  }
+  dst(): NodeReference {
+    return this._dst;
+  }
+  address(): Address {
+    const srcFragment = stringify(this.src().address());
+    const dstFragment = stringify(this.dst().address());
+    const id = `SIMPLE:${srcFragment}-${dstFragment}`;
+    return {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "SIMPLE"}, id};
+  }
+  toJSON() {
+    return {type: "SIMPLE"};
+  }
+}
+
+export class StrangeEdge implements Edge {
+  _src: NodeReference;
+  _dst: NodeReference;
+  _strangeness: number;
+  _name: string;
+
+  constructor(
+    src: NodeReference,
+    dst: NodeReference,
+    name: string,
+    strangeness: number
+  ) {
+    this._src = src;
+    this._dst = dst;
+    this._name = name;
+    this._strangeness = strangeness;
+  }
+  src(): NodeReference {
+    return this._src;
+  }
+  dst(): NodeReference {
+    return this._dst;
+  }
+  strangeness(): number {
+    return this._strangeness;
+  }
+  name(): string {
+    return this._name;
+  }
+  address(): Address {
+    return {
+      owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "STRANGE"},
+      id: this._name,
+    };
+  }
+  toJSON() {
+    return {type: "STRANGE", name: this._name, strangeness: this._strangeness};
+  }
+}
+
+export class Handler
+  implements PluginHandler<
+      NodeReference,
+      NodePayload,
+      SimpleEdge | StrangeEdge
+    > {
   createReference(ref: NodeReference) {
     const type: NodeType = (ref.address().owner.type: any);
     switch (type) {
@@ -89,6 +162,20 @@ export class Handler implements PluginHandler<NodeReference, NodePayload> {
         // eslint-disable-next-line no-unused-expressions
         (type: empty);
         throw new Error(`Unexpected NodeType: ${type}`);
+    }
+  }
+
+  createEdge(src: NodeReference, dst: NodeReference, json: any) {
+    const type: EdgeType = json.type;
+    switch (type) {
+      case "SIMPLE":
+        return new SimpleEdge(src, dst);
+      case "STRANGE":
+        return new StrangeEdge(src, dst, json.name, json.strangeness);
+      default:
+        // eslint-disable-next-line no-unused-expressions
+        (type: empty);
+        throw new Error(`Unexpected EdgeType: ${type}`);
     }
   }
 

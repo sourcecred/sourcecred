@@ -9,25 +9,34 @@ Array [
   Object {
     "edges": Array [
       Object {
-        "type": "sourcecred/sourcecred/AddressMap",
-        "version": "0.2.0",
+        "dstIndex": 2,
+        "payload": Object {
+          "name": "a_absent",
+          "strangeness": 11,
+          "type": "STRANGE",
+        },
+        "plugin": "sourcecred/graph-demo-plugin",
+        "srcIndex": 0,
       },
       Object {
-        "{\\"id\\":\\"a_absent\\",\\"owner\\":{\\"plugin\\":\\"sourcecred/graph-demo-plugin\\",\\"type\\":\\"EDGE\\"}}": Object {
-          "dstIndex": 2,
-          "payload": "not much",
-          "srcIndex": 0,
+        "dstIndex": 1,
+        "payload": Object {
+          "name": "a_b",
+          "strangeness": 11,
+          "type": "STRANGE",
         },
-        "{\\"id\\":\\"a_b\\",\\"owner\\":{\\"plugin\\":\\"sourcecred/graph-demo-plugin\\",\\"type\\":\\"EDGE\\"}}": Object {
-          "dstIndex": 1,
-          "payload": "not much",
-          "srcIndex": 0,
+        "plugin": "sourcecred/graph-demo-plugin",
+        "srcIndex": 0,
+      },
+      Object {
+        "dstIndex": 1,
+        "payload": Object {
+          "name": "absent_b",
+          "strangeness": 11,
+          "type": "STRANGE",
         },
-        "{\\"id\\":\\"absent_b\\",\\"owner\\":{\\"plugin\\":\\"sourcecred/graph-demo-plugin\\",\\"type\\":\\"EDGE\\"}}": Object {
-          "dstIndex": 1,
-          "payload": "not much",
-          "srcIndex": 2,
-        },
+        "plugin": "sourcecred/graph-demo-plugin",
+        "srcIndex": 2,
       },
     ],
     "nodes": Array [

@@ -2,7 +2,7 @@
 
 import type {Compatible} from "../util/compat";
 import {toCompat, fromCompat} from "../util/compat";
-import type {Address, AddressMapJSON} from "./address";
+import type {Address} from "./address";
 import {AddressMap} from "./address";
 import stringify from "json-stable-stringify";
 import deepEqual from "lodash.isequal";
@@ -14,14 +14,13 @@ export type Node<NR: NodeReference, NP: NodePayload> = {|
 |};
 
 export interface NodePayload {
-  address(): Address;
-
   /**
    * Convert this object to its serialized form. This must be a plain
    * old JSON value: i.e., a value `v` such that
    * `JSON.parse(JSON.stringify(v))` is deep-equal to `v`.
    */
   toJSON(): any;
+  address(): Address;
 }
 
 export interface NodeReference {
@@ -31,15 +30,23 @@ export interface NodeReference {
 
   neighbors(
     options?: NeighborsOptions
-  ): Iterator<{|+ref: NodeReference, +edge: Edge<any>|}>;
+  ): Iterator<{|+ref: NodeReference, +edge: Edge|}>;
 }
 
-export type Edge<+T> = {|
-  +address: Address,
-  +src: Address,
-  +dst: Address,
-  +payload: T,
-|};
+export interface Edge {
+  /**
+   * Convert this object to its serialized form. This must be a plain
+   * old JSON value: i.e., a value `v` such that
+   * `JSON.parse(JSON.stringify(v))` is deep-equal to `v`.
+   * The `src` and `dst` should not be included in the JSON representation;
+   * rather, the PluginHandler.createEdge method will be offered the src
+   * and dst when regenerating the edge from JSON.
+   */
+  toJSON(): any;
+  address(): Address;
+  src(): NodeReference;
+  dst(): NodeReference;
+}
 
 export type PluginFilter = {|+plugin: string, +type?: string|};
 function addressFilterer(options?: PluginFilter) {
@@ -59,17 +66,23 @@ export type NeighborsOptions = {|
   +direction?: "IN" | "OUT" | "ANY",
 |};
 
-export interface PluginHandler<NR: NodeReference, NP: NodePayload> {
+export interface PluginHandler<NR: NodeReference, NP: NodePayload, E: Edge> {
   /**
    * Enrich a base reference with plugin-/domain-specific properties.
    */
   createReference(baseReference: NodeReference): NR;
 
   /**
-   * Deserialize a JSON payload, which is guaranteed to be the
+   * Deserialize a JSON node payload, which is guaranteed to be the
    * serialization of a previous `NP`.
    */
   createPayload(json: any): NP;
+
+  /**
+   * Deserialize a JSON edge payload, which is guaranteed to be the
+   * seriaization of a previous `E`.
+   */
+  createEdge(src: NodeReference, dst: NodeReference, json: any): E;
 
   /**
    * Provide the name of the plugin.
@@ -78,15 +91,22 @@ export interface PluginHandler<NR: NodeReference, NP: NodePayload> {
   pluginName(): string;
 }
 
-export type Plugins = $ReadOnlyArray<PluginHandler<any, any>>;
+export type Plugins = $ReadOnlyArray<PluginHandler<any, any, any>>;
 
 type NodesSortedByStringifiedAddress = (
   | {|+address: Address|}
   | {|+payload: any, +pluginName: string|}
 )[];
+type EdgeJSON = {|
+  payload: any,
+  plugin: string,
+  srcIndex: Integer,
+  dstIndex: Integer,
+|};
+type EdgesSortedByStringifiedAddress = EdgeJSON[];
 export type GraphJSON = {|
   +nodes: NodesSortedByStringifiedAddress,
-  +edges: AddressMapJSON<IndexedEdge>,
+  +edges: EdgesSortedByStringifiedAddress,
 |};
 
 const COMPAT_TYPE = "sourcecred/Graph";
@@ -94,13 +114,7 @@ const COMPAT_VERSION = "0.3.0";
 
 type MaybeNode = {|+address: Address, +node: Node<any, any> | void|};
 type Integer = number;
-
-type IndexedEdge = {|
-  +address: Address,
-  +srcIndex: Integer,
-  +dstIndex: Integer,
-  +payload: any,
-|};
+type AddressEdge = {|+address: Address, +edge: Edge|};
 
 export class Graph {
   _plugins: Plugins;
@@ -114,11 +128,11 @@ export class Graph {
   // If `idx` is the index of a node `v`, then `_outEdges[idx]` is the
   // list of `e.address` for all edges `e` whose source is `v`.
   // Likewise, `_inEdges[idx]` has the addresses of all in-edges to `v`.
-  _outEdges: Address[][];
-  _inEdges: Address[][];
-  _edges: AddressMap<IndexedEdge>;
+  _outEdges: Edge[][];
+  _inEdges: Edge[][];
+  _edges: AddressMap<AddressEdge>;
 
-  constructor(plugins: Plugins) {
+  constructor(plugins: Plugins): Graph {
     this._plugins = plugins.slice();
     this._pluginMap = createPluginMap(this._plugins);
     this._nodes = [];
@@ -126,6 +140,8 @@ export class Graph {
     this._outEdges = [];
     this._inEdges = [];
     this._edges = new AddressMap();
+    // Hack to avoid https://github.com/facebook/flow/issues/6400
+    return this;
   }
 
   ref(address: Address): NodeReference {
@@ -169,21 +185,11 @@ export class Graph {
     }
   }
 
-  edge(address: Address): ?Edge<any> {
-    const indexedEdge = this._edges.get(address);
-    if (!indexedEdge) {
-      return undefined;
+  edge(address: Address): ?Edge {
+    const ea = this._edges.get(address);
+    if (ea != null) {
+      return ea.edge;
     }
-    return this._upgradeIndexedEdge(indexedEdge);
-  }
-
-  _upgradeIndexedEdge(indexedEdge: IndexedEdge): Edge<any> {
-    return {
-      address: indexedEdge.address,
-      src: this._nodes[indexedEdge.srcIndex].address,
-      dst: this._nodes[indexedEdge.dstIndex].address,
-      payload: indexedEdge.payload,
-    };
   }
 
   /**
@@ -191,13 +197,10 @@ export class Graph {
    *
    * If filter is provided, it will return only edges with the requested type.
    */
-  *edges(options?: PluginFilter): Iterator<Edge<any>> {
-    let edges = this._edges
-      .getAll()
-      .map((indexedEdge) => this._upgradeIndexedEdge(indexedEdge));
+  *edges(options?: PluginFilter): Iterator<Edge> {
     const filter = addressFilterer(options);
-    for (const edge of edges) {
-      if (filter(edge.address)) {
+    for (const {edge, address} of this._edges.getAll()) {
+      if (filter(address)) {
         yield edge;
       }
     }
@@ -250,60 +253,83 @@ export class Graph {
     return this;
   }
 
-  addEdge(edge: Edge<any>): this {
+  addEdge(edge: Edge): this {
     if (edge == null) {
       throw new Error(`edge is ${String(edge)}`);
     }
-    if (edge.address == null) {
-      throw new Error(`address is ${String(edge.address)}`);
+    const address = edge.address();
+    if (address == null) {
+      throw new Error(`address is ${String(address)}`);
     }
-    if (edge.src == null) {
-      throw new Error(`src is ${String(edge.src)}`);
+    const src = edge.src();
+    if (src == null) {
+      throw new Error(`src is ${String(src)}`);
     }
-    if (edge.dst == null) {
-      throw new Error(`dst is ${String(edge.dst)}`);
+    const dst = edge.dst();
+    if (dst == null) {
+      throw new Error(`dst is ${String(dst)}`);
     }
-    const srcIndex = this._addNodeAddress(edge.src);
-    const dstIndex = this._addNodeAddress(edge.dst);
-    const indexedEdge = {
-      address: edge.address,
-      srcIndex,
-      dstIndex,
-      payload: edge.payload,
-    };
-    return this._addIndexedEdge(indexedEdge);
-  }
-
-  _addIndexedEdge(indexedEdge: IndexedEdge): this {
-    const existingIndexedEdge = this._edges.get(indexedEdge.address);
-    if (existingIndexedEdge !== undefined) {
-      if (deepEqual(existingIndexedEdge, indexedEdge)) {
-        return this;
-      } else {
+    const existingEdge = this._edges.get(address);
+    if (existingEdge != null) {
+      if (!deepEqual(existingEdge.edge.toJSON(), edge.toJSON())) {
         throw new Error(
-          `edge at address ${JSON.stringify(
-            indexedEdge.address
-          )} exists with distinct contents`
+          `Edge at address ${stringify(address)} exists with distinct contents`
         );
       }
+      const srcAddress = src.address();
+      const existingSrcAddress = existingEdge.edge.src().address();
+      if (!deepEqual(srcAddress, existingSrcAddress)) {
+        throw new Error(
+          `Edge at address ${stringify(address)} exists with distinct src`
+        );
+      }
+      const dstAddress = dst.address();
+      const existingDstAddress = existingEdge.edge.dst().address();
+      if (!deepEqual(dstAddress, existingDstAddress)) {
+        throw new Error(
+          `Edge at address ${stringify(address)} exists with distinct dst`
+        );
+      }
+
+      return this;
     }
-    this._edges.add(indexedEdge);
-    this._outEdges[indexedEdge.srcIndex].push(indexedEdge.address);
-    this._inEdges[indexedEdge.dstIndex].push(indexedEdge.address);
+    // It's possible we were passed refs from a different graph. We will create a new edge
+    // with internal refs for consistency
+    if (src.graph() !== this || dst.graph() !== this) {
+      const edgeConstructor = findHandler(this._pluginMap, address.owner.plugin)
+        .createEdge;
+      edge = edgeConstructor(
+        this.ref(src.address()),
+        this.ref(dst.address()),
+        edge.toJSON()
+      );
+    }
+    // We make a redundant trip through the addressing layer; since
+    // src and dst are both refs, we've likely already done this.
+    // Potential perf optimization to internally expose the index directly.
+    const srcIndex = this._addNodeAddress(edge.src().address());
+    const dstIndex = this._addNodeAddress(edge.dst().address());
+
+    this._edges.add({edge, address: edge.address()});
+    this._outEdges[srcIndex].push(edge);
+    this._inEdges[dstIndex].push(edge);
     return this;
   }
 
   removeEdge(address: Address): this {
     // TODO(perf): This is linear in the degree of the endpoints of the
     // edge. Consider storing in non-list form.
-    const indexedEdge = this._edges.get(address);
-    if (indexedEdge) {
+    const addressEdge = this._edges.get(address);
+    if (addressEdge) {
+      const edge = addressEdge.edge;
       this._edges.remove(address);
-      [
-        this._outEdges[indexedEdge.srcIndex],
-        this._inEdges[indexedEdge.dstIndex],
-      ].forEach((edges) => {
-        const index = edges.findIndex((ea) => deepEqual(ea, address));
+      // As above: Potential perf gain if get index w/o address translation
+      const srcIndex = this._addNodeAddress(edge.src().address());
+      const dstIndex = this._addNodeAddress(edge.dst().address());
+      [this._outEdges[srcIndex], this._inEdges[dstIndex]].forEach((edges) => {
+        const index = edges.findIndex((edge_) =>
+          deepEqual(edge_.address(), address)
+        );
         if (index !== -1) {
           edges.splice(index, 1);
         }
@@ -365,8 +391,18 @@ export class Graph {
         return false;
       }
     }
-    for (const edge of theseEdges) {
-      if (!deepEqual(edge, that.edge(edge.address))) {
+    for (const thisEdge of theseEdges) {
+      const thatEdge = that.edge(thisEdge.address());
+      if (thatEdge == null) {
+        return false;
+      }
+      if (!deepEqual(thisEdge.src().address(), thatEdge.src().address())) {
+        return false;
+      }
+      if (!deepEqual(thisEdge.dst().address(), thatEdge.dst().address())) {
+        return false;
+      }
+      if (!deepEqual(thisEdge.toJSON(), thatEdge.toJSON())) {
         return false;
       }
     }
@@ -404,11 +440,25 @@ export class Graph {
         result.addNode(payload);
       }
     });
-    AddressMap.fromJSON(compatJson.edges)
-      .getAll()
-      .forEach((indexedEdge) => {
-        result._addIndexedEdge(indexedEdge);
-      });
+    function indexToRef(i: Integer): NodeReference {
+      if (i >= result._nodes.length) {
+        throw new Error(
+          `indexToRef out of bounds: ${i}/${result._nodes.length}`
+        );
+      }
+      return result.ref(result._nodes[i].address);
+    }
+    compatJson.edges.forEach((edgeJSON) => {
+      const plugin = edgeJSON.plugin;
+      const srcRef = indexToRef(edgeJSON.srcIndex);
+      const dstRef = indexToRef(edgeJSON.dstIndex);
+      const edge = findHandler(pluginMap, plugin).createEdge(
+        srcRef,
+        dstRef,
+        edgeJSON.payload
+      );
+      result.addEdge(edge);
+    });
     return result;
   }
 
@@ -449,11 +499,12 @@ export class Graph {
           this._inEdges[idx].length > 0
         );
       });
-    partialNodes.sort((a, b) => {
+    function keyCompare(a, b) {
       const ka = a.key;
       const kb = b.key;
       return ka < kb ? -1 : ka > kb ? +1 : 0;
-    });
+    }
+    partialNodes.sort(keyCompare);
 
     // Let `v` be a node that appears at index `i` in the internal
     // representation of this graph. If `v` appears at index `j` of the
@@ -464,33 +515,38 @@ export class Graph {
     partialNodes.forEach(({oldIndex}, newIndex) => {
       oldIndexToNewIndex[oldIndex] = newIndex;
     });
+    const sortedEdges = this._edges
+      .getAll()
+      .map((e) => ({edge: e.edge, key: stringify(e.address)}))
+      .sort(keyCompare)
+      .map(({edge}) => edge);
 
-    const edges = new AddressMap();
-    this._edges.getAll().forEach((oldIndexedEdge) => {
-      // Here, we know that the old edge's `srcIndex` and `dstIndex`
-      // indices are in the domain of `oldIndexToNewIndex`, because the
-      // corresponding nodes are not phantom, because `oldIndexedEdge`
-      // is incident to them.
-      const newIndexedEdge = {
-        address: oldIndexedEdge.address,
-        payload: oldIndexedEdge.payload,
-        srcIndex: oldIndexToNewIndex[oldIndexedEdge.srcIndex],
-        dstIndex: oldIndexToNewIndex[oldIndexedEdge.dstIndex],
-      };
-      edges.add(newIndexedEdge);
-    });
+    const sortedEdgeJSON: EdgesSortedByStringifiedAddress = sortedEdges.map(
+      (e: Edge) => {
+        const oldSrcIndex = this._nodeIndices.get(e.src().address()).index;
+        const oldDstIndex = this._nodeIndices.get(e.dst().address()).index;
+        const srcIndex = oldIndexToNewIndex[oldSrcIndex];
+        const dstIndex = oldIndexToNewIndex[oldDstIndex];
+        return {
+          payload: e.toJSON(),
+          srcIndex,
+          dstIndex,
+          plugin: e.address().owner.plugin,
+        };
+      }
+    );
 
     return toCompat(
       {type: COMPAT_TYPE, version: COMPAT_VERSION},
       {
         nodes: partialNodes.map((x) => x.data),
-        edges: edges.toJSON(),
+        edges: sortedEdgeJSON,
       }
     );
   }
 }
 
-type PluginMap = {[pluginName: string]: PluginHandler<any, any>};
+type PluginMap = {[pluginName: string]: PluginHandler<any, any, any>};
 function createPluginMap(plugins: Plugins): PluginMap {
   const pluginMap = {};
   plugins.forEach((p) => {
@@ -559,7 +615,7 @@ class InternalReference implements NodeReference {
 
   *neighbors(
     options?: NeighborsOptions
-  ): Iterator<{|+ref: NodeReference, +edge: Edge<any>|}> {
+  ): Iterator<{|+ref: NodeReference, +edge: Edge|}> {
     const indexDatum = this._graph._nodeIndices.get(this._address);
     if (indexDatum == null) {
       return;
@@ -582,23 +638,15 @@ class InternalReference implements NodeReference {
     }
 
     for (const adjacency of adjacencies) {
-      for (const edgeAddress of adjacency.list) {
-        const indexedEdge = graph._edges.get(edgeAddress);
-        if (indexedEdge == null) {
-          throw new Error(
-            `Edge at address ${stringify(edgeAddress)} does not exist`
-          );
-        }
+      for (const edge of adjacency.list) {
         if (direction === "ANY" && adjacency.direction === "IN") {
-          if (indexedEdge.srcIndex === indexedEdge.dstIndex) {
+          // Another perf win if we can internally poke thru to node ref index
+          if (deepEqual(edge.src().address(), edge.dst().address())) {
             continue;
           }
         }
-        const edge = graph._upgradeIndexedEdge(indexedEdge);
-        const ref = graph.ref(
-          adjacency.direction === "IN" ? edge.src : edge.dst
-        );
-        if (edgeFilter(edge.address) && nodeFilter(ref.address())) {
+        const ref = adjacency.direction === "IN" ? edge.src() : edge.dst();
+        if (edgeFilter(edge.address()) && nodeFilter(ref.address())) {
           yield {edge, ref};
         }
       }

@@ -9,6 +9,8 @@ import {
   FooPayload,
   FooReference,
   BarPayload,
+  SimpleEdge,
+  StrangeEdge,
   Handler,
   EXAMPLE_PLUGIN_NAME,
 } from "./examplePlugin";
@@ -24,6 +26,13 @@ describe("graph", () => {
   }
 
   const newGraph = () => new Graph([new Handler()]);
+  it("sanity typechecking", () => {
+    // Sadly, as far as Flow is concerned, it is not always the case that a
+    // class constructor returns an instance of its class. See
+    // https://github.com/facebook/flow/issues/6400
+    // $ExpectFlowError
+    expect(() => newGraph().fromulus()).toThrowError();
+  });
 
   describe("plugin handlers", () => {
     it("Graph stores plugins", () => {
@@ -74,32 +83,34 @@ describe("graph", () => {
     describe("neighbors", () => {
       // Note: The tests share more state within this block than in the rest of the code.
       // It should be fine so long as neighbors never mutates the graph.
-      const edge = (id, src, dst, type = "EDGE") => ({
-        address: {id, owner: {plugin: EXAMPLE_PLUGIN_NAME, type}},
-        src: src.address(),
-        dst: dst.address(),
-        payload: {},
-      });
-      // A cute little diagram:
-      // A>B = edge from A to B
-      // Nodes in the graph: bar, foo, isolated
-      // (Parens) = Repeated or absent node
-      //
+      // Here's a diagram of the example graph:
       //    bar
       //     V
       //    foo  > (foo)
       //     V
       //   (absent)   isolated
+      // A>B = edge from A to B
+      // Nodes in the graph: bar, foo, isolated
+      // (Parens) = Repeated or absent node
+      const graph = newGraph();
+      const refFor = (x) => graph.ref(x.address());
+
       const foo = new FooPayload();
       const bar = new BarPayload(1, "hello");
       const isolated = new BarPayload(666, "ghost");
       const absent = new BarPayload(404, "hello");
 
-      const bar_foo = edge("bar_foo", bar, foo);
-      const foo_foo = edge("foo_foo", foo, foo, "SELF");
-      const foo_absent = edge("foo_absent", foo, absent);
-      const phantomEdge = edge("spooky", foo, isolated);
-      const graph = newGraph()
+      const bar_foo = new SimpleEdge(refFor(bar), refFor(foo));
+      const foo_foo = new StrangeEdge(
+        refFor(foo),
+        refFor(foo),
+        "i am a strange loop",
+        42
+      );
+      const foo_absent = new SimpleEdge(refFor(foo), refFor(absent));
+      const phantomEdge = new SimpleEdge(refFor(foo), refFor(isolated));
+
+      graph
         .addNode(bar)
         .addNode(foo)
         .addNode(isolated)
@@ -107,9 +118,7 @@ describe("graph", () => {
         .addEdge(foo_foo)
         .addEdge(foo_absent)
         .addEdge(phantomEdge)
-        .removeEdge(phantomEdge.address);
-
-      const refFor = (x) => graph.ref(x.address());
+        .removeEdge(phantomEdge.address());
 
       const fooNeighbor = {
         bar: {edge: bar_foo, ref: refFor(bar)},
@@ -118,11 +127,12 @@ describe("graph", () => {
       };
 
       function expectNeighborsEqual(
-        actual: Iterable<{|+edge: Edge<any>, +ref: NodeReference|}>,
-        expected: {|+edge: Edge<any>, +ref: NodeReference|}[]
+        actualIterator: Iterable<{|+edge: Edge, +ref: NodeReference|}>,
+        expected: {|+edge: Edge, +ref: NodeReference|}[]
       ) {
-        const sort = (xs) => sortBy(xs, (x) => stringify(x.edge.address));
-        expect(sort(Array.from(actual))).toEqual(sort(expected));
+        const sort = (xs) => sortBy(xs, (x) => stringify(x.edge.address()));
+        const actual = Array.from(actualIterator);
+        expect(sort(actual)).toEqual(sort(expected));
       }
 
       it("ref in empty graph has no neighbors", () => {
@@ -162,8 +172,8 @@ describe("graph", () => {
       });
       describe("filters edges by type:", () => {
         [
-          ["EDGE", [fooNeighbor.bar, fooNeighbor.absent]],
-          ["SELF", [fooNeighbor.foo]],
+          ["SIMPLE", [fooNeighbor.bar, fooNeighbor.absent]],
+          ["STRANGE", [fooNeighbor.foo]],
           [
             "unspecified",
             [fooNeighbor.bar, fooNeighbor.absent, fooNeighbor.foo],
@@ -284,15 +294,12 @@ describe("graph", () => {
     it("does not include absent nodes with incident edges", () => {
       const g = newGraph()
         .addNode(barPayload())
-        .addEdge({
-          address: {
-            owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"},
-            id: "edge",
-          },
-          src: barPayload().address(),
-          dst: new BarPayload(2, "goodbye").address(),
-          payload: "I have a source, but no destination",
-        });
+        .addEdge(
+          new SimpleEdge(
+            newGraph().ref(barPayload().address()),
+            newGraph().ref(new FooPayload().address())
+          )
+        );
       expect(Array.from(g.nodes())).toHaveLength(1);
     });
   });
@@ -300,12 +307,9 @@ describe("graph", () => {
   describe("edge", () => {
     const srcPayload = () => new BarPayload(1, "first");
     const dstPayload = () => new BarPayload(2, "second");
-    const edge = ({id = "my-favorite-edge", payload = 12} = {}) => ({
-      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id},
-      src: srcPayload().address(),
-      dst: dstPayload().address(),
-      payload,
-    });
+    const srcRef = () => newGraph().ref(srcPayload().address());
+    const dstRef = () => newGraph().ref(dstPayload().address());
+    const edge = () => new SimpleEdge(srcRef(), dstRef());
 
     it("returns a normal edge", () => {
       expect(
@@ -313,7 +317,7 @@ describe("graph", () => {
           .addNode(srcPayload())
           .addNode(dstPayload())
           .addEdge(edge())
-          .edge(edge().address)
+          .edge(edge().address())
       ).toEqual(edge());
     });
 
@@ -321,12 +325,12 @@ describe("graph", () => {
       expect(
         newGraph()
           .addEdge(edge())
-          .edge(edge().address)
+          .edge(edge().address())
       ).toEqual(edge());
     });
 
     it("returns `undefined` for an absent edge", () => {
-      expect(newGraph().edge(edge().address)).toBe(undefined);
+      expect(newGraph().edge(edge().address())).toBe(undefined);
     });
 
     it("throws for null or undefined address", () => {
@@ -342,12 +346,9 @@ describe("graph", () => {
   describe("edges", () => {
     const srcPayload = () => new BarPayload(1, "first");
     const dstPayload = () => new BarPayload(2, "second");
-    const edge = () => ({
-      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id: "e"},
-      src: srcPayload().address(),
-      dst: dstPayload().address(),
-      payload: 12,
-    });
+    const srcRef = () => newGraph().ref(srcPayload().address());
+    const dstRef = () => newGraph().ref(dstPayload().address());
+    const edge = () => new SimpleEdge(srcRef(), dstRef());
 
     it("returns an empty iterator for an empty graph", () => {
       expect(Array.from(newGraph().edges())).toEqual([]);
@@ -397,7 +398,7 @@ describe("graph", () => {
         Array.from(
           newGraph()
             .addEdge(edge())
-            .removeEdge(edge().address)
+            .removeEdge(edge().address())
             .edges()
         )
       ).toHaveLength(0);
@@ -422,14 +423,14 @@ describe("graph", () => {
         Array.from(
           newGraph()
             .addEdge(edge())
-            .edges({plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"})
+            .edges({plugin: EXAMPLE_PLUGIN_NAME, type: "SIMPLE"})
         )
       ).toHaveLength(1);
     });
 
     it("complains if you filter by only type", () => {
       // $ExpectFlowError
-      expect(() => Array.from(newGraph().nodes({type: "FOO"}))).toThrowError(
+      expect(() => Array.from(newGraph().edges({type: "FOO"}))).toThrowError(
         "must filter by plugin"
       );
     });
@@ -479,12 +480,10 @@ describe("graph", () => {
   describe("addEdge", () => {
     const srcPayload = () => new BarPayload(1, "first");
     const dstPayload = () => new BarPayload(2, "second");
-    const edge = ({id = "my-favorite-edge", payload = 12} = {}) => ({
-      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id},
-      src: srcPayload().address(),
-      dst: dstPayload().address(),
-      payload,
-    });
+    const srcRef = () => newGraph().ref(srcPayload().address());
+    const dstRef = () => newGraph().ref(dstPayload().address());
+    const edge = ({name = "my-favorite-edge", strangeness = 12} = {}) =>
+      new StrangeEdge(srcRef(), dstRef(), name, strangeness);
 
     it("adds an edge between two existing nodes", () => {
       expect(
@@ -512,15 +511,24 @@ describe("graph", () => {
     });
 
     it("throws an error for a payload conflict at a given address", () => {
-      const e1 = edge({id: "my-edge", payload: "uh"});
-      const e2 = edge({id: "my-edge", payload: "oh"});
-      const g = newGraph()
-        .addNode(srcPayload())
-        .addNode(dstPayload())
-        .addEdge(e1);
-      expect(() => {
-        g.addEdge(e2);
-      }).toThrow("exists with distinct contents");
+      const e1 = edge({name: "my-edge", strangeness: 10});
+      const e2 = edge({name: "my-edge", strangeness: 11});
+      const g = newGraph().addEdge(e1);
+      expect(() => g.addEdge(e2)).toThrow("exists with distinct contents");
+    });
+
+    it("throws an error for a src conflict at a given address", () => {
+      const e1 = new StrangeEdge(srcRef(), srcRef(), "conflict", 11);
+      const e2 = new StrangeEdge(dstRef(), srcRef(), "conflict", 11);
+      const g = newGraph().addEdge(e1);
+      expect(() => g.addEdge(e2)).toThrow("exists with distinct src");
+    });
+
+    it("throws an error for a dst conflict at a given address", () => {
+      const e1 = new StrangeEdge(srcRef(), dstRef(), "conflict", 11);
+      const e2 = new StrangeEdge(srcRef(), srcRef(), "conflict", 11);
+      const g = newGraph().addEdge(e1);
+      expect(() => g.addEdge(e2)).toThrow("exists with distinct dst");
     });
 
     it("adds an edge whose `src` is not present", () => {
@@ -556,7 +564,7 @@ describe("graph", () => {
     });
 
     it("adds a loop", () => {
-      const e = {...edge(), dst: srcPayload().address()};
+      const e = new SimpleEdge(srcRef(), srcRef());
       expect(
         Array.from(
           newGraph()
@@ -577,7 +585,11 @@ describe("graph", () => {
     });
 
     it("throws for null or undefined address", () => {
-      const e = (address: any) => ({...edge(), address});
+      const e = (address: any) => {
+        const edge = new SimpleEdge(srcRef(), dstRef());
+        (edge: any).address = () => address;
+        return edge;
+      };
       expect(() => {
         newGraph().addEdge(e(null));
       }).toThrow("null");
@@ -587,7 +599,11 @@ describe("graph", () => {
     });
 
     it("throws for null or undefined src", () => {
-      const e = (src: any) => ({...edge(), src});
+      const e = (src: any) => {
+        const edge = new SimpleEdge(srcRef(), dstRef());
+        (edge: any).src = () => src;
+        return edge;
+      };
       expect(() => {
         newGraph().addEdge(e(null));
       }).toThrow("null");
@@ -597,13 +613,30 @@ describe("graph", () => {
     });
 
     it("throws for null or undefined dst", () => {
-      const e = (dst: any) => ({...edge(), dst});
+      const e = (dst: any) => {
+        const edge = new SimpleEdge(srcRef(), dstRef());
+        (edge: any).dst = () => dst;
+        return edge;
+      };
       expect(() => {
         newGraph().addEdge(e(null));
       }).toThrow("null");
       expect(() => {
         newGraph().addEdge(e(undefined));
       }).toThrow("undefined");
+    });
+
+    it("adds edges that refer to the right graph", () => {
+      const graph = newGraph();
+      const otherGraph = newGraph();
+      const srcRef = otherGraph.ref(new FooPayload().address());
+      const edge = new SimpleEdge(srcRef, srcRef);
+      graph.addEdge(edge);
+      const edgeFromGraph = graph.edge(edge.address());
+      if (edgeFromGraph == null) {
+        throw new Error("Shocking turn of events");
+      }
+      expect(edgeFromGraph.src().graph()).toEqual(graph);
     });
   });
 
@@ -641,15 +674,12 @@ describe("graph", () => {
       const g = () =>
         newGraph()
           .addNode(new FooPayload())
-          .addEdge({
-            address: {
-              owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"},
-              id: "edge",
-            },
-            src: new FooPayload().address(),
-            dst: new BarPayload(1, "hello").address(),
-            payload: "nothing",
-          });
+          .addEdge(
+            new SimpleEdge(
+              newGraph().ref(new FooPayload().address()),
+              newGraph().ref(new BarPayload(1, "hello").address())
+            )
+          );
       expect(merge([g()]).equals(g())).toBe(true);
     });
 
@@ -659,16 +689,15 @@ describe("graph", () => {
         b: () => new BarPayload(2, "bravo"),
         absent: () => new FooPayload(),
       };
-      const edge = (srcPayload, dstPayload, id): Edge<string> => ({
-        address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id},
-        src: srcPayload.address(),
-        dst: dstPayload.address(),
-        payload: "not much",
-      });
-      const edges: {[string]: () => Edge<string>} = {
-        a_b: () => edge(nodes.a(), nodes.b(), "a_b"),
-        a_absent: () => edge(nodes.a(), nodes.absent(), "a_absent"),
-        b_absent: () => edge(nodes.b(), nodes.absent(), "b_absent"),
+      const edge = (srcPayload, dstPayload): SimpleEdge => {
+        const srcRef = newGraph().ref(srcPayload.address());
+        const dstRef = newGraph().ref(dstPayload.address());
+        return new SimpleEdge(srcRef, dstRef);
+      };
+      const edges: {[string]: () => SimpleEdge} = {
+        a_b: () => edge(nodes.a(), nodes.b()),
+        a_absent: () => edge(nodes.a(), nodes.absent()),
+        b_absent: () => edge(nodes.b(), nodes.absent()),
       };
       const g = newGraph()
         .addNode(nodes.a())
@@ -697,17 +726,14 @@ describe("graph", () => {
     });
 
     it("rejects graphs with conflicting edges", () => {
-      const e = (payload) => ({
-        address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id: "e"},
-        src: new FooPayload().address(),
-        dst: new FooPayload().address(),
-        payload,
-      });
+      const srcRef = newGraph().ref(new FooPayload().address());
+      const e = (strangeness) =>
+        new StrangeEdge(srcRef, srcRef, "loop", strangeness);
       const g = newGraph().addEdge(e(1));
       const h = newGraph().addEdge(e(2));
       expect(() => {
         merge([g, h]);
-      }).toThrow(/edge.*exists with distinct contents/);
+      }).toThrow(/Edge.*exists with distinct contents/);
     });
 
     it("copies its input", () => {
@@ -731,12 +757,13 @@ describe("graph", () => {
   describe("equals", () => {
     const srcPayload = () => new BarPayload(1, "first");
     const dstPayload = () => new BarPayload(2, "second");
-    const edge = (payload) => ({
-      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id: "e"},
-      src: srcPayload().address(),
-      dst: dstPayload().address(),
-      payload,
-    });
+    const edge = (strangeness: number) =>
+      new StrangeEdge(
+        newGraph().ref(srcPayload().address()),
+        newGraph().ref(dstPayload().address()),
+        "eh",
+        strangeness
+      );
 
     it("empty graphs are equal", () => {
       expect(newGraph().equals(newGraph())).toBe(true);
@@ -758,12 +785,12 @@ describe("graph", () => {
     });
     it("graphs with different edges are not equal", () => {
       const g0 = newGraph();
-      const g1 = newGraph().addEdge(edge("hello"));
+      const g1 = newGraph().addEdge(edge(12));
       expect(g0.equals(g1)).toBe(false);
     });
     it("graphs with different edges at same address are not equal", () => {
-      const g0 = newGraph().addEdge(edge("hello"));
-      const g1 = newGraph().addEdge(edge("there"));
+      const g0 = newGraph().addEdge(edge(12));
+      const g1 = newGraph().addEdge(edge(13));
       expect(g0.equals(g1)).toBe(false);
     });
     it("adding and removing a node doesn't change equality", () => {
@@ -776,25 +803,18 @@ describe("graph", () => {
     });
     it("adding and removing an edge doesn't change equality", () => {
       const g = newGraph()
-        .addEdge(edge("hello"))
-        .removeEdge(edge("hello").address);
+        .addEdge(edge(13))
+        .removeEdge(edge(13).address());
       expect(g.equals(newGraph())).toBe(true);
     });
   });
 
   describe("copy", () => {
     it("yields a reference-distinct but logically-equal graph", () => {
-      const g = newGraph()
-        .addNode(new FooPayload())
-        .addEdge({
-          address: {
-            owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"},
-            id: "e",
-          },
-          src: new BarPayload(1, "hello").address(),
-          dst: new BarPayload(2, "there").address(),
-          payload: "stuff",
-        });
+      const g = newGraph().addNode(new FooPayload());
+      const srcRef = g.ref(new BarPayload(1, "hello").address());
+      const dstRef = g.ref(new BarPayload(2, "there").address());
+      g.addEdge(new SimpleEdge(srcRef, dstRef));
       const h = g.copy();
       expect(g).not.toBe(h);
       expect(g.equals(h)).toBe(true);
@@ -817,13 +837,12 @@ describe("graph", () => {
       isolated: () => new BarPayload(4, "..."),
       phantom: () => new BarPayload(5, "boo!"),
     };
-    const edge = (srcPayload, dstPayload, id): Edge<string> => ({
-      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id},
-      src: srcPayload.address(),
-      dst: dstPayload.address(),
-      payload: "not much",
-    });
-    const edges: {[string]: () => Edge<string>} = {
+    const edge = (srcPayload, dstPayload, id): Edge => {
+      const src = newGraph().ref(srcPayload.address());
+      const dst = newGraph().ref(dstPayload.address());
+      return new StrangeEdge(src, dst, id, 11);
+    };
+    const edges: {[string]: () => Edge} = {
       a_b: () => edge(nodes.a(), nodes.b(), "a_b"),
       a_absent: () => edge(nodes.a(), nodes.absent(), "a_absent"),
       absent_b: () => edge(nodes.absent(), nodes.b(), "absent_b"),
@@ -843,7 +862,7 @@ describe("graph", () => {
           .addEdge(edges.a_absent())
           .addEdge(edges.absent_b())
           .addEdge(edges.phantom())
-          .removeEdge(edges.phantom().address)
+          .removeEdge(edges.phantom().address())
           .removeNode(nodes.phantom().address())
       );
     };
@@ -902,7 +921,7 @@ describe("graph", () => {
       const g = newGraph();
       const h = newGraph()
         .addEdge(edges.phantom())
-        .removeEdge(edges.phantom().address);
+        .removeEdge(edges.phantom().address());
       expect(g.toJSON()).toEqual(h.toJSON());
     });
 
