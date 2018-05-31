@@ -343,8 +343,12 @@ export class Graph {
       return false;
     }
 
-    for (const node of theseNodes) {
-      if (!deepEqual(node, that.node(node.address))) {
+    for (const thisNode of theseNodes) {
+      const thatNode = that.node(thisNode.address);
+      if (thatNode == null) {
+        return false;
+      }
+      if (!deepEqual(thisNode.payload.toJSON(), thatNode.payload.toJSON())) {
         return false;
       }
     }

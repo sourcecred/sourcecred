@@ -767,10 +767,12 @@ describe("graph", () => {
       expect(g0.equals(g1)).toBe(false);
     });
     it("adding and removing a node doesn't change equality", () => {
-      const g = newGraph()
+      const g = newGraph().addNode(new BarPayload(1, "along for the ride"));
+      const h = newGraph()
+        .addNode(new BarPayload(1, "along for the ride"))
         .addNode(new FooPayload())
         .removeNode(new FooPayload().address());
-      expect(g.equals(newGraph())).toBe(true);
+      expect(g.equals(h)).toBe(true);
     });
     it("adding and removing an edge doesn't change equality", () => {
       const g = newGraph()
