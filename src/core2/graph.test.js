@@ -808,6 +808,137 @@ describe("graph", () => {
       expect(g.equals(h)).toBe(false);
     });
   });
+
+  describe("JSON serialization", () => {
+    const nodes = {
+      a: () => new BarPayload(1, "alpha"),
+      b: () => new BarPayload(2, "bravo"),
+      absent: () => new BarPayload(3, "goodbye"),
+      isolated: () => new BarPayload(4, "..."),
+      phantom: () => new BarPayload(5, "boo!"),
+    };
+    const edge = (srcPayload, dstPayload, id): Edge<string> => ({
+      address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id},
+      src: srcPayload.address(),
+      dst: dstPayload.address(),
+      payload: "not much",
+    });
+    const edges: {[string]: () => Edge<string>} = {
+      a_b: () => edge(nodes.a(), nodes.b(), "a_b"),
+      a_absent: () => edge(nodes.a(), nodes.absent(), "a_absent"),
+      absent_b: () => edge(nodes.absent(), nodes.b(), "absent_b"),
+      phantom: () => edge(nodes.b(), nodes.a(), "phantom"),
+    };
+    const sampleGraph = () => {
+      return (
+        newGraph()
+          .addNode(nodes.a())
+          // Note that we include the phantom node in the middle of the
+          // nodes (i.e., not last), which forces a re-indexing of the
+          // remaining nodes.
+          .addNode(nodes.phantom())
+          .addNode(nodes.b())
+          .addNode(nodes.isolated())
+          .addEdge(edges.a_b())
+          .addEdge(edges.a_absent())
+          .addEdge(edges.absent_b())
+          .addEdge(edges.phantom())
+          .removeEdge(edges.phantom().address)
+          .removeNode(nodes.phantom().address())
+      );
+    };
+
+    it("serializes a sample graph", () => {
+      expect(sampleGraph().toJSON()).toMatchSnapshot();
+    });
+
+    it("installs appropriate plugin handlers", () => {
+      const g = newGraph();
+      const plugins = g.plugins();
+      expect(plugins).not.toHaveLength(0);
+      expect(Graph.fromJSON(plugins, newGraph().toJSON()).plugins()).toEqual(
+        plugins
+      );
+    });
+
+    it("works transparently with JSON.stringify", () => {
+      // (This is guaranteed by the `JSON.stringify` API, and is more as
+      // documentation than actual test.)
+      expect(JSON.stringify(sampleGraph())).toEqual(
+        JSON.stringify(sampleGraph().toJSON())
+      );
+    });
+
+    it("takes isolated nodes into account", () => {
+      const g1 = newGraph();
+      const g2 = newGraph().addNode(nodes.isolated());
+      expect(g1.toJSON()).not.toEqual(g2.toJSON());
+    });
+
+    it("takes dangling edges into account", () => {
+      const g1 = newGraph();
+      const g2 = newGraph().addEdge(edges.a_absent());
+      const g3 = newGraph()
+        .addNode(nodes.a())
+        .addEdge(edges.a_absent());
+      expect(g1.toJSON()).not.toEqual(g2.toJSON());
+      expect(g2.toJSON()).not.toEqual(g3.toJSON());
+      expect(g3.toJSON()).not.toEqual(g1.toJSON());
+    });
+
+    it("is not affected by phantom nodes", () => {
+      const g = newGraph()
+        .addNode(nodes.a())
+        .addNode(nodes.b());
+      const h = newGraph()
+        .addNode(nodes.a())
+        .addNode(nodes.phantom())
+        .addNode(nodes.b())
+        .removeNode(nodes.phantom().address());
+      expect(g.toJSON()).toEqual(h.toJSON());
+    });
+
+    it("is not affected by phantom edges", () => {
+      const g = newGraph();
+      const h = newGraph()
+        .addEdge(edges.phantom())
+        .removeEdge(edges.phantom().address);
+      expect(g.toJSON()).toEqual(h.toJSON());
+    });
+
+    it("is not affected by node insertion order", () => {
+      const g = newGraph()
+        .addNode(nodes.a())
+        .addNode(nodes.b());
+      const h = newGraph()
+        .addNode(nodes.b())
+        .addNode(nodes.a());
+      expect(g.toJSON()).toEqual(h.toJSON());
+    });
+
+    it("is not affected by edge insertion order", () => {
+      const g = newGraph()
+        .addEdge(edges.a_absent())
+        .addEdge(edges.absent_b());
+      const h = newGraph()
+        .addEdge(edges.absent_b())
+        .addEdge(edges.a_absent());
+      expect(g.toJSON()).toEqual(h.toJSON());
+    });
+
+    it("satisfies `fromJSON plugins . toJSON == id`", () => {
+      const g = sampleGraph();
+      const h = Graph.fromJSON(g.plugins(), g.toJSON());
+      expect(g.equals(h)).toBe(true);
+    });
+
+    it("satisfies `toJSON . fromJSON plugins == id`", () => {
+      const g = sampleGraph();
+      const json1 = g.toJSON();
+      const json2 = Graph.fromJSON(g.plugins(), json1).toJSON();
+      expect(json1).toEqual(json2);
+    });
+  });
 });
 
 describe("DelegateNodeReference", () => {

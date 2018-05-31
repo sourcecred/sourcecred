@@ -1,10 +1,11 @@
 // @flow
 
-import deepEqual from "lodash.isequal";
-import type {Address} from "./address";
-import {AddressMap} from "./address";
 import type {Compatible} from "../util/compat";
+import {toCompat, fromCompat} from "../util/compat";
+import type {Address, AddressMapJSON} from "./address";
+import {AddressMap} from "./address";
 import stringify from "json-stable-stringify";
+import deepEqual from "lodash.isequal";
 
 export type Node<NR: NodeReference, NP: NodePayload> = {|
   +ref: NR,
@@ -78,6 +79,18 @@ export interface PluginHandler<NR: NodeReference, NP: NodePayload> {
 }
 
 export type Plugins = $ReadOnlyArray<PluginHandler<any, any>>;
+
+type NodesSortedByStringifiedAddress = (
+  | {|+address: Address|}
+  | {|+payload: any, +pluginName: string|}
+)[];
+export type GraphJSON = {|
+  +nodes: NodesSortedByStringifiedAddress,
+  +edges: AddressMapJSON<IndexedEdge>,
+|};
+
+const COMPAT_TYPE = "sourcecred/Graph";
+const COMPAT_VERSION = "0.3.0";
 
 type MaybeNode = {|+address: Address, +node: Node<any, any> | void|};
 type Integer = number;
@@ -369,16 +382,113 @@ export class Graph {
   }
 
   static fromJSON(plugins: Plugins, json: Compatible<GraphJSON>): Graph {
-    const _ = {plugins, json};
-    throw new Error("Graphv2 is not yet implemented");
+    const compatJson: GraphJSON = fromCompat(
+      {type: COMPAT_TYPE, version: COMPAT_VERSION},
+      json
+    );
+    const result = new Graph(plugins);
+    const pluginMap = createPluginMap(plugins);
+    compatJson.nodes.forEach((rawPartialNode) => {
+      if ("address" in rawPartialNode) {
+        const partialNode: {|+address: Address|} = (rawPartialNode: any);
+        result._addNodeAddress(partialNode.address);
+      } else {
+        const partialNode: {|
+          +payload: any,
+          +pluginName: string,
+        |} = (rawPartialNode: any);
+        const pluginName: string = partialNode.pluginName;
+        const payload = findHandler(pluginMap, pluginName).createPayload(
+          partialNode.payload
+        );
+        result.addNode(payload);
+      }
+    });
+    AddressMap.fromJSON(compatJson.edges)
+      .getAll()
+      .forEach((indexedEdge) => {
+        result._addIndexedEdge(indexedEdge);
+      });
+    return result;
   }
 
   toJSON(): Compatible<GraphJSON> {
-    throw new Error("Graphv2 is not yet implemented");
+    const partialNodes: {|
+      key: string,
+      oldIndex: Integer,
+      data:
+        | {|+address: Address|}
+        | {|+payload: NodePayload, +pluginName: string|},
+    |}[] = this._nodes
+      .map((maybeNode, oldIndex) => {
+        const key = stringify(maybeNode.address);
+        if (maybeNode.node != null) {
+          const payload: NodePayload = maybeNode.node.payload;
+          const data = {
+            payload: payload.toJSON(),
+            pluginName: payload.address().owner.plugin,
+          };
+          return {key, oldIndex, data};
+        } else {
+          const data = {address: maybeNode.address};
+          return {key, oldIndex, data};
+        }
+      })
+      .filter(({oldIndex: idx}) => {
+        // Say that a node is a "phantom node" if its address appears in
+        // the graph, but the node does not, and no edge in the graph is
+        // incident to the node. (For instance, if `v` is any node, then
+        // `new Graph().addNode(v).removeNode(v.address)` has `v` as a
+        // phantom node.) The existence of phantom nodes is part of the
+        // internal state but not the logical state, so we remove these
+        // nodes before serializing the graph to ensure logical
+        // canonicity.
+        return (
+          this._nodes[idx].node !== undefined ||
+          this._outEdges[idx].length > 0 ||
+          this._inEdges[idx].length > 0
+        );
+      });
+    partialNodes.sort((a, b) => {
+      const ka = a.key;
+      const kb = b.key;
+      return ka < kb ? -1 : ka > kb ? +1 : 0;
+    });
+
+    // Let `v` be a node that appears at index `i` in the internal
+    // representation of this graph. If `v` appears at index `j` of the
+    // output, then the following array `arr` has `arr[i] = j`.
+    // Otherwise, `v` is a phantom node. In this case, `arr[i]` is not
+    // defined and should not be accessed.
+    const oldIndexToNewIndex = new Uint32Array(this._nodes.length);
+    partialNodes.forEach(({oldIndex}, newIndex) => {
+      oldIndexToNewIndex[oldIndex] = newIndex;
+    });
+
+    const edges = new AddressMap();
+    this._edges.getAll().forEach((oldIndexedEdge) => {
+      // Here, we know that the old edge's `srcIndex` and `dstIndex`
+      // indices are in the domain of `oldIndexToNewIndex`, because the
+      // corresponding nodes are not phantom, because `oldIndexedEdge`
+      // is incident to them.
+      const newIndexedEdge = {
+        address: oldIndexedEdge.address,
+        payload: oldIndexedEdge.payload,
+        srcIndex: oldIndexToNewIndex[oldIndexedEdge.srcIndex],
+        dstIndex: oldIndexToNewIndex[oldIndexedEdge.dstIndex],
+      };
+      edges.add(newIndexedEdge);
+    });
+
+    return toCompat(
+      {type: COMPAT_TYPE, version: COMPAT_VERSION},
+      {
+        nodes: partialNodes.map((x) => x.data),
+        edges: edges.toJSON(),
+      }
+    );
   }
 }
-
-export type GraphJSON = any;
 
 type PluginMap = {[pluginName: string]: PluginHandler<any, any>};
 function createPluginMap(plugins: Plugins): PluginMap {
