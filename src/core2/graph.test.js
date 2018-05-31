@@ -625,6 +625,109 @@ describe("graph", () => {
     });
   });
 
+  describe("mergeConservative", () => {
+    const merge = (graphs) => Graph.mergeConservative([new Handler()], graphs);
+
+    it("installs appropriate plugin handlers", () => {
+      const plugins = [new Handler()];
+      expect(Graph.mergeConservative(plugins, []).plugins()).toEqual(plugins);
+    });
+
+    it("yields the empty graph on empty input", () => {
+      expect(merge([]).equals(newGraph())).toBe(true);
+    });
+
+    it("is the identity on a singleton input", () => {
+      const g = () =>
+        newGraph()
+          .addNode(new FooPayload())
+          .addEdge({
+            address: {
+              owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"},
+              id: "edge",
+            },
+            src: new FooPayload().address(),
+            dst: new BarPayload(1, "hello").address(),
+            payload: "nothing",
+          });
+      expect(merge([g()]).equals(g())).toBe(true);
+    });
+
+    it("merges two graphs with nontrivial intersection", () => {
+      const nodes = {
+        a: () => new BarPayload(1, "alpha"),
+        b: () => new BarPayload(2, "bravo"),
+        absent: () => new FooPayload(),
+      };
+      const edge = (srcPayload, dstPayload, id): Edge<string> => ({
+        address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id},
+        src: srcPayload.address(),
+        dst: dstPayload.address(),
+        payload: "not much",
+      });
+      const edges: {[string]: () => Edge<string>} = {
+        a_b: () => edge(nodes.a(), nodes.b(), "a_b"),
+        a_absent: () => edge(nodes.a(), nodes.absent(), "a_absent"),
+        b_absent: () => edge(nodes.b(), nodes.absent(), "b_absent"),
+      };
+      const g = newGraph()
+        .addNode(nodes.a())
+        .addEdge(edges.a_b())
+        .addEdge(edges.a_absent());
+      const h = newGraph()
+        .addNode(nodes.b())
+        .addEdge(edges.a_b())
+        .addEdge(edges.b_absent());
+      const merged = merge([g, h]);
+      const expected = newGraph()
+        .addNode(nodes.a())
+        .addNode(nodes.b())
+        .addEdge(edges.a_b())
+        .addEdge(edges.a_absent())
+        .addEdge(edges.b_absent());
+      expect(merged.equals(expected)).toBe(true);
+    });
+
+    it("rejects graphs with conflicting nodes", () => {
+      const g = newGraph().addNode(new BarPayload(1, "hello"));
+      const h = newGraph().addNode(new BarPayload(1, "there"));
+      expect(() => {
+        merge([g, h]);
+      }).toThrow(/node.*exists with distinct contents/);
+    });
+
+    it("rejects graphs with conflicting edges", () => {
+      const e = (payload) => ({
+        address: {owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"}, id: "e"},
+        src: new FooPayload().address(),
+        dst: new FooPayload().address(),
+        payload,
+      });
+      const g = newGraph().addEdge(e(1));
+      const h = newGraph().addEdge(e(2));
+      expect(() => {
+        merge([g, h]);
+      }).toThrow(/edge.*exists with distinct contents/);
+    });
+
+    it("copies its input", () => {
+      const g = newGraph();
+      const h = merge([g]);
+      expect(g).not.toBe(h);
+      g.addNode(new FooPayload());
+      expect(g.equals(h)).toBe(false);
+    });
+
+    it("yields `ref`s pointing to the proper graphs", () => {
+      const g = newGraph().addNode(new FooPayload());
+      const gRef = g.ref(new FooPayload().address());
+      const h = merge([g]);
+      const hRef = h.ref(new FooPayload().address());
+      expect(gRef.graph()).toBe(g);
+      expect(hRef.graph()).toBe(h);
+    });
+  });
+
   describe("equals", () => {
     const srcPayload = () => new BarPayload(1, "first");
     const dstPayload = () => new BarPayload(2, "second");
