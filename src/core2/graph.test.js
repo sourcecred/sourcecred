@@ -779,6 +779,33 @@ describe("graph", () => {
       expect(g.equals(newGraph())).toBe(true);
     });
   });
+
+  describe("copy", () => {
+    it("yields a reference-distinct but logically-equal graph", () => {
+      const g = newGraph()
+        .addNode(new FooPayload())
+        .addEdge({
+          address: {
+            owner: {plugin: EXAMPLE_PLUGIN_NAME, type: "EDGE"},
+            id: "e",
+          },
+          src: new BarPayload(1, "hello").address(),
+          dst: new BarPayload(2, "there").address(),
+          payload: "stuff",
+        });
+      const h = g.copy();
+      expect(g).not.toBe(h);
+      expect(g.equals(h)).toBe(true);
+      expect(g.plugins()).toEqual(h.plugins());
+    });
+
+    it("allows independent mutation of the original and copied graphs", () => {
+      const g = newGraph();
+      const h = g.copy();
+      g.addNode(new FooPayload());
+      expect(g.equals(h)).toBe(false);
+    });
+  });
 });
 
 describe("DelegateNodeReference", () => {

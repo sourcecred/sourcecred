@@ -357,7 +357,7 @@ export class Graph {
   }
 
   copy(): Graph {
-    throw new Error("Graphv2 is not yet implemented");
+    return Graph.mergeConservative(this.plugins(), [this]);
   }
 
   plugins(): Plugins {
