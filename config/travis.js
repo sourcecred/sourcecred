@@ -65,14 +65,22 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
   ];
   const extraTasks = [
     {
+      id: "backend-in-place",
+      cmd: ["npm", "run", "--silent", "backend"],
+      // This task depends on `check-pretty` in order to work around a
+      // race condition in Prettier:
+      // https://github.com/prettier/prettier/issues/4468
+      deps: ["check-pretty"],
+    },
+    {
       id: "fetchGithubRepoTest",
       cmd: ["./src/plugins/github/fetchGithubRepoTest.sh", "--no-build"],
-      deps: ["backend"],
+      deps: ["backend-in-place"],
     },
     {
       id: "loadRepositoryTest",
       cmd: ["./src/plugins/git/loadRepositoryTest.sh", "--no-build"],
-      deps: ["backend"],
+      deps: ["backend-in-place"],
     },
   ];
   switch (mode) {
