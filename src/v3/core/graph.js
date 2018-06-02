@@ -92,8 +92,20 @@ export function fromEdgeAddress(n: EdgeAddress): string[] {
 }
 
 export class Graph {
+  _nodes: Set<NodeAddress>;
+  // If `e` is an Edge in the graph, then:
+  // * _edges.get(e.address) `deepEquals` e
+  // * _inEdges.get(e.dst) `contains` e
+  // * _outEdges.get(e.src) `contains` e
+  _edges: Map<EdgeAddress, Edge>;
+  _inEdges: Map<NodeAddress, Edge[]>;
+  _outEdges: Map<NodeAddress, Edge[]>;
+
   constructor(): void {
-    throw new Error("constructor");
+    this._nodes = new Set();
+    this._edges = new Map();
+    this._inEdges = new Map();
+    this._outEdges = new Map();
   }
 
   addNode(a: NodeAddress): this {
