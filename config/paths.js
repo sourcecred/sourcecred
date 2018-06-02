@@ -36,13 +36,13 @@ function getServedPath() {
 module.exports = {
   dotenv: resolveApp(".env"),
   appBuild: resolveApp("build"),
-  appPublic: resolveApp("src/app/public"),
-  appHtml: resolveApp("src/app/public/index.html"),
-  appIndexJs: resolveApp("src/app/index.js"),
+  appPublic: resolveApp("src/v1/app/public"),
+  appHtml: resolveApp("src/v1/app/public/index.html"),
+  appIndexJs: resolveApp("src/v1/app/index.js"),
   appPackageJson: resolveApp("package.json"),
   appSrc: resolveApp("src"),
   yarnLockFile: resolveApp("yarn.lock"),
-  testsSetup: resolveApp("src/setupTests.js"),
+  testsSetup: resolveApp("src/v1/setupTests.js"),
   appNodeModules: resolveApp("node_modules"),
   publicUrl: getPublicUrl(),
   servedPath: getServedPath(),
@@ -53,18 +53,20 @@ module.exports = {
   // source file, and the key will be the filename of the bundled entry
   // point within the build directory.
   backendEntryPoints: {
-    "commands/combine": resolveApp("src/cli/commands/combine.js"),
-    "commands/graph": resolveApp("src/cli/commands/graph.js"),
-    "commands/plugin-graph": resolveApp("src/cli/commands/pluginGraph.js"),
-    "commands/start": resolveApp("src/cli/commands/start.js"),
-    apiApp: resolveApp("src/app/apiApp.js"),
-    sourcecred: resolveApp("src/cli/sourcecred.js"),
+    "commands/combine": resolveApp("src/v1/cli/commands/combine.js"),
+    "commands/graph": resolveApp("src/v1/cli/commands/graph.js"),
+    "commands/plugin-graph": resolveApp("src/v1/cli/commands/pluginGraph.js"),
+    "commands/start": resolveApp("src/v1/cli/commands/start.js"),
+    apiApp: resolveApp("src/v1/app/apiApp.js"),
+    sourcecred: resolveApp("src/v1/cli/sourcecred.js"),
     fetchAndPrintGithubRepo: resolveApp(
-      "src/plugins/github/bin/fetchAndPrintGithubRepo.js"
+      "src/v1/plugins/github/bin/fetchAndPrintGithubRepo.js"
     ),
-    createExampleRepo: resolveApp("src/plugins/git/bin/createExampleRepo.js"),
+    createExampleRepo: resolveApp(
+      "src/v1/plugins/git/bin/createExampleRepo.js"
+    ),
     loadAndPrintGitRepository: resolveApp(
-      "src/plugins/git/bin/loadAndPrintRepository.js"
+      "src/v1/plugins/git/bin/loadAndPrintRepository.js"
     ),
   },
 };

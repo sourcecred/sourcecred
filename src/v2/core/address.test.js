@@ -3,7 +3,7 @@
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 
-import {fromCompat} from "../util/compat";
+import {fromCompat} from "../../v1/util/compat";
 import type {Address} from "./address";
 import {
   AddressMap,

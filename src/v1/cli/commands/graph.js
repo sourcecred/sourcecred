@@ -10,7 +10,8 @@ import {
   nodeMaxOldSpaceSizeFlag,
 } from "../common";
 
-const execDependencyGraph = require("../../tools/execDependencyGraph").default;
+const execDependencyGraph = require("../../../tools/execDependencyGraph")
+  .default;
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -99,7 +100,7 @@ function makeTasks(
 ) {
   const taskId = (id) => `create-${id}`;
   const graphFilename = (id) => path.join(graphDirectory, `graph-${id}.json`);
-  const into = "./src/cli/into.sh";
+  const into = "./src/v1/cli/into.sh";
   return [
     ...pluginNames().map((id) => ({
       id: taskId(id),
