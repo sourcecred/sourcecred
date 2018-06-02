@@ -3,8 +3,8 @@
 import deepEqual from "lodash.isequal";
 import stringify from "json-stable-stringify";
 
-import {toCompat, fromCompat} from "../util/compat";
-import type {Compatible} from "../util/compat";
+import {toCompat, fromCompat} from "../../v1/util/compat";
+import type {Compatible} from "../../v1/util/compat";
 
 export type PluginType = {|+plugin: string, +type: string|};
 
