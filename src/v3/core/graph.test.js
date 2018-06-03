@@ -5,6 +5,7 @@ import {
   fromNodeAddress,
   toEdgeAddress,
   fromEdgeAddress,
+  Graph,
 } from "./graph";
 
 describe("core/graph", () => {
@@ -105,6 +106,15 @@ describe("core/graph", () => {
     it("edge and node addresses are distinct", () => {
       expect(toEdgeAddress([""])).not.toEqual(toNodeAddress([""]));
       expect(toEdgeAddress(["foo"])).not.toEqual(toNodeAddress(["foo"]));
+    });
+  });
+
+  describe("Graph class", () => {
+    it("can be constructed", () => {
+      const x = new Graph();
+      // Verify that `x` is not of type `any`
+      // $ExpectFlowError
+      expect(() => x.measureSpectacularity()).toThrow();
     });
   });
 });
