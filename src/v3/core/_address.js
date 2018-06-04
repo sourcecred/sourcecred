@@ -15,8 +15,8 @@ const NODE_CODE_POINT = NODE_PREFIX.charCodeAt(0);
 const EDGE_CODE_POINT = EDGE_PREFIX.charCodeAt(0);
 const SEPARATOR = "\0";
 
-const NODE = Symbol("NODE");
-const EDGE = Symbol("EDGE");
+const NODE: "NODE" = "NODE";
+const EDGE: "EDGE" = "EDGE";
 type AddressType = typeof NODE | typeof EDGE;
 
 function addressType(x: string): ?AddressType {
@@ -33,24 +33,34 @@ function addressType(x: string): ?AddressType {
 export function assertNodeAddress(x: NodeAddress) {
   const type = addressType(x);
   switch (type) {
-    case NODE:
+    case "NODE":
       return;
-    case EDGE:
+    case "EDGE":
       throw new Error(`Expected NodeAddress, got EdgeAddress: ${stringify(x)}`);
-    default:
+    case null:
+    case undefined:
       throw new Error(`Bad address: ${stringify(x)}`);
+    default:
+      // eslint-disable-next-line no-unused-expressions
+      (type: empty);
+      throw new Error(`Invariant violation: ${stringify(x)}`);
   }
 }
 
 export function assertEdgeAddress(x: EdgeAddress) {
   const type = addressType(x);
   switch (type) {
-    case NODE:
+    case "NODE":
       throw new Error(`Expected EdgeAddress, got NodeAddress: ${stringify(x)}`);
-    case EDGE:
+    case "EDGE":
       return;
-    default:
+    case null:
+    case undefined:
       throw new Error(`Bad address: ${stringify(x)}`);
+    default:
+      // eslint-disable-next-line no-unused-expressions
+      (type: empty);
+      throw new Error(`Invariant violation: ${stringify(x)}`);
   }
 }
 
