@@ -74,12 +74,12 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
     },
     {
       id: "fetchGithubRepoTest",
-      cmd: ["./src/plugins/github/fetchGithubRepoTest.sh", "--no-build"],
+      cmd: ["./src/v1/plugins/github/fetchGithubRepoTest.sh", "--no-build"],
       deps: ["backend-in-place"],
     },
     {
       id: "loadRepositoryTest",
-      cmd: ["./src/plugins/git/loadRepositoryTest.sh", "--no-build"],
+      cmd: ["./src/v1/plugins/git/loadRepositoryTest.sh", "--no-build"],
       deps: ["backend-in-place"],
     },
   ];

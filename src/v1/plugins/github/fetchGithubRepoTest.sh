@@ -2,7 +2,7 @@
 
 set -eu
 
-data_file=src/plugins/github/demoData/example-github.json
+data_file=src/v1/plugins/github/demoData/example-github.json
 
 usage() {
   printf 'usage: %s [-u|--updateSnapshot] [--[no-]build] [--help]\n' "$0"
