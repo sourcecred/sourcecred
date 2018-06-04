@@ -1,10 +1,13 @@
 // @flow
 
+import type {NodeAddress, EdgeAddress} from "./_address";
 import {
   assertNodeAddress,
   assertEdgeAddress,
-  nodeAddress,
   edgeAddress,
+  edgeAppend,
+  nodeAddress,
+  nodeAppend,
   toParts,
 } from "./_address";
 
@@ -78,6 +81,68 @@ describe("core/address", () => {
       });
     });
   });
+
+  function checkAppend<
+    Good: NodeAddress | EdgeAddress,
+    Bad: NodeAddress | EdgeAddress
+  >(
+    f: (Good, ...string[]) => Good,
+    goodConstructor: (string[]) => Good,
+    badConstructor: (string[]) => Bad
+  ) {
+    describe(f.name, () => {
+      describe("errors on", () => {
+        [null, undefined].forEach((bad) => {
+          it(`${String(bad)} base input`, () => {
+            // $ExpectFlowError
+            expect(() => f(bad, "foo")).toThrow(String(bad));
+          });
+          it(`${String(bad)} component`, () => {
+            // $ExpectFlowError
+            expect(() => f(goodConstructor(["foo"]), bad)).toThrow(String(bad));
+          });
+        });
+        it("malformed base", () => {
+          // $ExpectFlowError
+          expect(() => f("foo", "foo")).toThrow("Bad address");
+        });
+        it("base of wrong kind", () => {
+          // $ExpectFlowError
+          expect(() => f(badConstructor(["foo"]), "foo")).toThrow(
+            /Expected.*Address/
+          );
+        });
+        it("invalid component", () => {
+          expect(() => f(goodConstructor(["foo"]), "foo\0oo"));
+        });
+      });
+
+      describe("works on", () => {
+        function check(
+          description: string,
+          baseComponents: string[],
+          ...components: string[]
+        ) {
+          test(description, () => {
+            const base = goodConstructor(baseComponents);
+            const expectedParts = [...baseComponents, ...components];
+            expect(toParts(f(base, ...components))).toEqual(expectedParts);
+          });
+        }
+        check("the base address with no extra component", []);
+        check("the base address with empty component", [], "");
+        check("the base address with nonempty component", [], "a");
+        check("the base address with lots of components", [], "a", "b");
+
+        check("a longer address with no extra component", ["a", ""]);
+        check("a longer address with empty component", ["a", ""], "");
+        check("a longer address with nonempty component", ["a", ""], "b");
+        check("a longer address with lots of components", ["a", ""], "b", "c");
+      });
+    });
+  }
+  checkAppend(nodeAppend, nodeAddress, edgeAddress);
+  checkAppend(edgeAppend, edgeAddress, nodeAddress);
 
   describe("type assertions", () => {
     function checkAssertion(f, good, bad, badMsg) {
