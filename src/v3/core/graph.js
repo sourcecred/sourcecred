@@ -43,22 +43,24 @@ export class Graph {
   }
 
   addNode(a: NodeAddress): this {
-    const _ = a;
-    throw new Error("addNode");
+    Address.assertNodeAddress(a);
+    this._nodes.add(a);
+    return this;
   }
 
   removeNode(a: NodeAddress): this {
-    const _ = a;
-    throw new Error("removeNode");
+    Address.assertNodeAddress(a);
+    this._nodes.delete(a);
+    return this;
   }
 
   hasNode(a: NodeAddress): boolean {
-    const _ = a;
-    throw new Error("hasNode");
+    Address.assertNodeAddress(a);
+    return this._nodes.has(a);
   }
 
-  nodes(): Iterator<NodeAddress> {
-    throw new Error("nodes");
+  *nodes(): Iterator<NodeAddress> {
+    yield* this._nodes;
   }
 
   addEdge({src, dst, address}: Edge): this {
