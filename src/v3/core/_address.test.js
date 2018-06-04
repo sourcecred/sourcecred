@@ -1,9 +1,14 @@
 // @flow
 
-import {_Address, assertNodeAddress, assertEdgeAddress} from "./address";
+import {
+  assertNodeAddress,
+  assertEdgeAddress,
+  nodeAddress,
+  edgeAddress,
+  toParts,
+} from "./_address";
 
 describe("core/address", () => {
-  const {nodeAddress, edgeAddress, toParts} = _Address;
   function throwOnNullOrUndefined(f) {
     [null, undefined].forEach((bad) => {
       it(`${f.name} throws on ${String(bad)}`, () => {
@@ -15,20 +20,7 @@ describe("core/address", () => {
 
   function checkAddressFactory(f) {
     describe(f.name, () => {
-      it("creates a base address when called without arguments", () => {
-        const base = f();
-        expect(typeof base).toEqual("string");
-      });
-      it("throws an error when called with explicit null", () => {
-        // $ExpectFlowError
-        expect(() => f(null)).toThrowError("null");
-      });
-      it("creates a base address when called with explicit undefined", () => {
-        expect(f(undefined)).toEqual(f());
-      });
-      it("creates a base address when called with empty list", () => {
-        expect(f()).toEqual(f([]));
-      });
+      throwOnNullOrUndefined(f);
       [null, undefined].forEach((bad) => {
         it(`throws on parts containing ${String(bad)}`, () => {
           // $ExpectFlowError
@@ -59,20 +51,28 @@ describe("core/address", () => {
     throwOnNullOrUndefined(toParts);
     it("throws on malformed address", () => {
       // $ExpectFlowError
-      expect(() => toParts("zookomoobo")).toThrow("Expected Address");
+      expect(() => toParts("zookomoobo")).toThrow(/Expected .*Address/);
+    });
+    it("throws on fake (slash-separated) node address", () => {
+      // $ExpectFlowError
+      expect(() => toParts("N/bad/stuff\0")).toThrow();
+    });
+    it("throws on fake (slash-separated) edge address", () => {
+      // $ExpectFlowError
+      expect(() => toParts("E/bad/stuff\0")).toThrow();
     });
   });
 
   describe("node and edge addresses are distinct", () => {
     it("at a type level", () => {
       // $ExpectFlowError
-      const _unused_edgeAddress: _EdgeAddress = nodeAddress();
+      const _unused_edgeAddress: EdgeAddress = nodeAddress([]);
       // $ExpectFlowError
-      const _unused_nodeAddress: _NodeAddress = edgeAddress();
+      const _unused_nodeAddress: NodeAddress = edgeAddress([]);
     });
     describe("at a value level", () => {
       it("base address", () => {
-        expect(nodeAddress()).not.toEqual(edgeAddress());
+        expect(nodeAddress([])).not.toEqual(edgeAddress([]));
       });
       it("normal address", () => {
         expect(nodeAddress(["foo"])).not.toEqual(edgeAddress(["foo"]));
@@ -102,14 +102,14 @@ describe("core/address", () => {
     }
     checkAssertion(
       assertNodeAddress,
-      nodeAddress(),
-      edgeAddress(),
+      nodeAddress([]),
+      edgeAddress([]),
       "got EdgeAddress"
     );
     checkAssertion(
       assertEdgeAddress,
-      edgeAddress(),
-      nodeAddress(),
+      edgeAddress([]),
+      nodeAddress([]),
       "got NodeAddress"
     );
   });

@@ -1,11 +1,12 @@
 // @flow
 
-import type {_NodeAddress, _EdgeAddress} from "./address";
-import {_Address} from "./address";
+import type {NodeAddress, EdgeAddress} from "./_address";
+import * as Address from "./_address";
 
-export const Address = _Address;
-export type NodeAddress = _NodeAddress;
-export type EdgeAddress = _EdgeAddress;
+export type {NodeAddress, EdgeAddress} from "./_address";
+Object.freeze(Address);
+export {Address};
+
 export type Edge = {|
   +address: EdgeAddress,
   +src: NodeAddress,
