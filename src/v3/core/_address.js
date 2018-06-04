@@ -86,18 +86,40 @@ export function assertAddressArray(arr: $ReadOnlyArray<string>) {
   });
 }
 
+function nullDelimited(components: $ReadOnlyArray<string>): string {
+  return [...components, ""].join(SEPARATOR);
+}
+
 export function nodeAddress(arr: $ReadOnlyArray<string>): NodeAddress {
   assertAddressArray(arr);
-  return [NODE_PREFIX, ...arr, ""].join(SEPARATOR);
+  return NODE_PREFIX + SEPARATOR + nullDelimited(arr);
 }
 
 export function edgeAddress(arr: $ReadOnlyArray<string>): EdgeAddress {
   assertAddressArray(arr);
-  return [EDGE_PREFIX, ...arr, ""].join(SEPARATOR);
+  return EDGE_PREFIX + SEPARATOR + nullDelimited(arr);
 }
 
 export function toParts(a: GenericAddress): string[] {
   assertAddress(a);
   const parts = a.split(SEPARATOR);
   return parts.slice(1, parts.length - 1);
+}
+
+export function nodeAppend(
+  base: NodeAddress,
+  ...components: string[]
+): NodeAddress {
+  assertNodeAddress(base);
+  assertAddressArray(components);
+  return base + nullDelimited(components);
+}
+
+export function edgeAppend(
+  base: EdgeAddress,
+  ...components: string[]
+): EdgeAddress {
+  assertEdgeAddress(base);
+  assertAddressArray(components);
+  return base + nullDelimited(components);
 }
