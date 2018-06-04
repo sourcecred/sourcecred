@@ -182,7 +182,9 @@ describe("createGraph", () => {
         expect.objectContaining({payload: expectedPayload})
       );
 
-      const {payload: {childCommit, parentCommit, path}} = edge;
+      const {
+        payload: {childCommit, parentCommit, path},
+      } = edge;
       expect(path).not.toHaveLength(0);
       expect(data.commits[childCommit].parentHashes).toEqual(
         expect.arrayContaining([parentCommit])

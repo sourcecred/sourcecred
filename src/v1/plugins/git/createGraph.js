@@ -169,16 +169,18 @@ class GitGraphCreator {
         } else {
           // One entry for each possible URL.
           const urls = treeAndNameToSubmoduleUrls[tree.hash][name];
-          return urls.map((url): Node<SubmoduleCommitPayload> => ({
-            address: _makeAddress(
-              SUBMODULE_COMMIT_NODE_TYPE,
-              submoduleCommitId(entry.hash, url)
-            ),
-            payload: {
-              hash: entry.hash,
-              url,
-            },
-          }));
+          return urls.map(
+            (url): Node<SubmoduleCommitPayload> => ({
+              address: _makeAddress(
+                SUBMODULE_COMMIT_NODE_TYPE,
+                submoduleCommitId(entry.hash, url)
+              ),
+              payload: {
+                hash: entry.hash,
+                url,
+              },
+            })
+          );
         }
       })();
       contentsNodes.forEach((contentsNode) => {

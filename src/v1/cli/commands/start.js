@@ -26,9 +26,9 @@ export default class StartCommand extends Command {
   };
 
   async run() {
-    const {flags: {"sourcecred-directory": sourcecredDirectory}} = this.parse(
-      StartCommand
-    );
+    const {
+      flags: {"sourcecred-directory": sourcecredDirectory},
+    } = this.parse(StartCommand);
     startServer(sourcecredDirectory);
   }
 }
