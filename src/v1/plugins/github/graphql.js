@@ -700,6 +700,8 @@ export type PullRequestJSON = {|
   +title: string,
   +body: string,
   +number: number,
+  +additions: number,
+  +deletions: number,
   +author: NullableAuthorJSON,
   +comments: ConnectionJSON<CommentJSON>,
   +reviews: ConnectionJSON<PullRequestReviewJSON>,
@@ -717,6 +719,8 @@ function pullRequestsFragment(): FragmentDefinition {
       b.field("body"),
       b.field("number"),
       b.field("mergeCommit", {}, [b.field("oid")]),
+      b.field("additions"),
+      b.field("deletions"),
       makeAuthor(),
       b.field("comments", {first: b.literal(PAGE_SIZE_COMMENTS)}, [
         b.fragmentSpread("comments"),

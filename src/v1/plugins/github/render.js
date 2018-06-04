@@ -40,7 +40,8 @@ export function nodeDescription(ref: NodeReference<NodePayload>) {
     }
     case "PULL_REQUEST": {
       const pr = new PullRequestPorcelain(porcelain);
-      return `#${pr.number()}: ${pr.title()}`;
+      const diff = `+${pr.additions()}/\u2212${pr.deletions()}`;
+      return `#${pr.number()} (${diff}): ${pr.title()}`;
     }
     case "COMMENT": {
       const comment = new CommentReference(ref);

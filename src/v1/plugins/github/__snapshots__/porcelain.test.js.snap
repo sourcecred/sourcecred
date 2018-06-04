@@ -84,7 +84,7 @@ Object {
   "https://github.com/decentralion": "@decentralion",
   "https://github.com/sourcecred/example-github/issues/2": "#2: A referencing issue.",
   "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703": "comment by @decentralion on #2",
-  "https://github.com/sourcecred/example-github/pull/5": "#5: This pull request will be more contentious. I can feel it...",
+  "https://github.com/sourcecred/example-github/pull/5": "#5 (+1/−0): This pull request will be more contentious. I can feel it...",
   "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198": "review comment by @wchargin on #5",
   "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899": "review by @wchargin on #5",
 }
