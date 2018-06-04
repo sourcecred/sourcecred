@@ -1,8 +1,12 @@
 // @flow
 
-import stringify from "json-stable-stringify";
-export opaque type NodeAddress = string;
-export opaque type EdgeAddress = string;
+import type {NodeAddress, EdgeAddress} from "./_address";
+import * as Address from "./_address";
+
+export type {NodeAddress, EdgeAddress} from "./_address";
+Object.freeze(Address);
+export {Address};
+
 export type Edge = {|
   +address: EdgeAddress,
   +src: NodeAddress,
@@ -20,76 +24,6 @@ export type NeighborsOptions = {|
 |};
 
 export opaque type GraphJSON = any; // TODO
-
-const NODE_PREFIX = "N";
-const EDGE_PREFIX = "E";
-const SEPARATOR = "\0";
-
-function isNodeAddress(x: string): boolean {
-  return x.startsWith(NODE_PREFIX) && x.endsWith(SEPARATOR);
-}
-function isEdgeAddress(x: string): boolean {
-  return x.startsWith(EDGE_PREFIX) && x.endsWith(SEPARATOR);
-}
-
-function assertNodeAddress(x: NodeAddress) {
-  if (x == null) {
-    throw new Error(String(x));
-  }
-  if (!isNodeAddress(x)) {
-    if (isEdgeAddress(x)) {
-      throw new Error(`Expected NodeAddress, got EdgeAddress: ${x}`);
-    }
-    throw new Error(`Malformed address: ${x}`);
-  }
-}
-function assertEdgeAddress(x: EdgeAddress) {
-  if (x == null) {
-    throw new Error(String(x));
-  }
-  if (!isEdgeAddress(x)) {
-    if (isNodeAddress(x)) {
-      throw new Error(`Expected EdgeAddress, got NodeAddress: ${x}`);
-    }
-    throw new Error(`Malformed address: ${x}`);
-  }
-}
-
-function assertAddressArray(arr: $ReadOnlyArray<string>) {
-  if (arr == null) {
-    throw new Error(String(arr));
-  }
-  arr.forEach((s: string) => {
-    if (s == null) {
-      throw new Error(`${String(s)} in ${stringify(arr)}`);
-    }
-    if (s.indexOf(SEPARATOR) !== -1) {
-      throw new Error(`NUL char: ${stringify(arr)}`);
-    }
-  });
-}
-
-export function toNodeAddress(arr: $ReadOnlyArray<string>): NodeAddress {
-  assertAddressArray(arr);
-  return [NODE_PREFIX, ...arr, ""].join(SEPARATOR);
-}
-
-export function fromNodeAddress(n: NodeAddress): string[] {
-  assertNodeAddress(n);
-  const parts = n.split(SEPARATOR);
-  return parts.slice(1, parts.length - 1);
-}
-
-export function toEdgeAddress(arr: $ReadOnlyArray<string>): EdgeAddress {
-  assertAddressArray(arr);
-  return [EDGE_PREFIX, ...arr, ""].join(SEPARATOR);
-}
-
-export function fromEdgeAddress(n: EdgeAddress): string[] {
-  assertEdgeAddress(n);
-  const parts = n.split(SEPARATOR);
-  return parts.slice(1, parts.length - 1);
-}
 
 export class Graph {
   _nodes: Set<NodeAddress>;
