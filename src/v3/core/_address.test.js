@@ -33,7 +33,6 @@ describe("core/address", () => {
             expect(toParts(f(example))).toEqual(example);
           });
         }
-
         checkIdentity("on a simple example", ["an", "example"]);
         describe("with an empty component", () => {
           checkIdentity("at the start", ["", "example"]);
