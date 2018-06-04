@@ -392,6 +392,14 @@ export class PullRequestPorcelain extends PostPorcelain<
     return this.payload().title;
   }
 
+  additions(): number {
+    return this.payload().additions;
+  }
+
+  deletions(): number {
+    return this.payload().deletions;
+  }
+
   ref(): PullRequestReference {
     return new PullRequestReference(super.ref());
   }

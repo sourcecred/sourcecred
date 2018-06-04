@@ -216,6 +216,8 @@ class GithubParser {
       number: prJson.number,
       title: prJson.title,
       body: prJson.body,
+      additions: prJson.additions,
+      deletions: prJson.deletions,
     };
     const pullRequestNode: Node<PullRequestNodePayload> = {
       address: this.makeNodeAddress("PULL_REQUEST", prJson.url),

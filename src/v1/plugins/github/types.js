@@ -22,6 +22,8 @@ export type PullRequestNodePayload = {|
   +title: string,
   +number: number,
   +body: string,
+  +additions: number,
+  +deletions: number,
 |};
 
 export type PullRequestReviewState =

@@ -305,11 +305,13 @@ Array [
           "type": "PULL_REQUEST",
         },
         "payload": Object {
+          "additions": 1,
           "body": "@wchargin could you please do the following:
 - add a commit comment
 - add a review comment requesting some trivial change
 - i'll change it
 - then approve the pr",
+          "deletions": 0,
           "number": 5,
           "title": "This pull request will be more contentious. I can feel it...",
           "url": "https://github.com/sourcecred/example-github/pull/5",
@@ -448,7 +450,9 @@ Array [
           "type": "PULL_REQUEST",
         },
         "payload": Object {
+          "additions": 1,
           "body": "Oh look, it's a pull request.",
+          "deletions": 0,
           "number": 3,
           "title": "Add README, merge via PR.",
           "url": "https://github.com/sourcecred/example-github/pull/3",
@@ -1705,7 +1709,9 @@ Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌�
           "type": "PULL_REQUEST",
         },
         "payload": Object {
+          "additions": 1,
           "body": "Oh look, it's a pull request.",
+          "deletions": 0,
           "number": 3,
           "title": "Add README, merge via PR.",
           "url": "https://github.com/sourcecred/example-github/pull/3",
@@ -1729,11 +1735,13 @@ Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌�
           "type": "PULL_REQUEST",
         },
         "payload": Object {
+          "additions": 1,
           "body": "@wchargin could you please do the following:
 - add a commit comment
 - add a review comment requesting some trivial change
 - i'll change it
 - then approve the pr",
+          "deletions": 0,
           "number": 5,
           "title": "This pull request will be more contentious. I can feel it...",
           "url": "https://github.com/sourcecred/example-github/pull/5",
@@ -1781,7 +1789,9 @@ Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌�
           "type": "PULL_REQUEST",
         },
         "payload": Object {
+          "additions": 3,
           "body": "Nominally paired with @wchargin",
+          "deletions": 0,
           "number": 9,
           "title": "An unmerged pull request",
           "url": "https://github.com/sourcecred/example-github/pull/9",

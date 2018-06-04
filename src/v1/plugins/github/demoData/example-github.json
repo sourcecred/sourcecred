@@ -266,6 +266,7 @@
         "pullRequests": {
             "nodes": [
                 {
+                    "additions": 1,
                     "author": {
                         "__typename": "User",
                         "id": "MDQ6VXNlcjE0MDAwMjM=",
@@ -292,6 +293,7 @@
                             "hasNextPage": false
                         }
                     },
+                    "deletions": 0,
                     "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
                     "mergeCommit": {
                         "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
@@ -309,6 +311,7 @@
                     "url": "https://github.com/sourcecred/example-github/pull/3"
                 },
                 {
+                    "additions": 1,
                     "author": {
                         "__typename": "User",
                         "id": "MDQ6VXNlcjE0MDAwMjM=",
@@ -324,6 +327,7 @@
                             "hasNextPage": false
                         }
                     },
+                    "deletions": 0,
                     "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
                     "mergeCommit": {
                         "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6"
@@ -392,6 +396,7 @@
                     "url": "https://github.com/sourcecred/example-github/pull/5"
                 },
                 {
+                    "additions": 3,
                     "author": {
                         "__typename": "User",
                         "id": "MDQ6VXNlcjE0MDAwMjM=",
@@ -407,6 +412,7 @@
                             "hasNextPage": false
                         }
                     },
+                    "deletions": 0,
                     "id": "MDExOlB1bGxSZXF1ZXN0MTg1ODA2MTU3",
                     "mergeCommit": null,
                     "number": 9,
