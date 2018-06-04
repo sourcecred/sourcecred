@@ -2,3 +2,9 @@ language: node_js
 node_js:
   - "node"
 script: yarn travis
+notifications:
+  email:
+    recipients:
+      wchargin+travis-sourcecred@gmail.com
+      decentralion+travis-sourcecred@dandelion.io
+    on_failure: always
