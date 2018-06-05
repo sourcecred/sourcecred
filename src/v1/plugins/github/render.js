@@ -81,6 +81,13 @@ function num(x: IssueReference | PullRequestReference) {
 function authors(authorable: {+authors: () => AuthorReference[]}) {
   // TODO: modify to accomodate multi-authorship
   const authorRefs = authorable.authors();
-  const firstAuthor = authorRefs[0].get();
-  return firstAuthor != null ? firstAuthor.login() : "[unknown]";
+  const firstAuthorRef = authorRefs[0];
+  if (firstAuthorRef == null) {
+    return "[unknown]";
+  }
+  const firstAuthorNode = firstAuthorRef.get();
+  if (firstAuthorNode == null) {
+    return "[unknown]";
+  }
+  return firstAuthorNode.login();
 }
