@@ -44,9 +44,9 @@ import {build} from "../../graphql/queries";
  *
  * [1]: https://developer.github.com/v4/guides/resource-limitations/#node-limit
  */
-export const PAGE_LIMIT = 100;
-const PAGE_SIZE_ISSUES = 100;
-const PAGE_SIZE_PRS = 100;
+export const PAGE_LIMIT = 50;
+const PAGE_SIZE_ISSUES = 50;
+const PAGE_SIZE_PRS = 50;
 const PAGE_SIZE_COMMENTS = 20;
 const PAGE_SIZE_REVIEWS = 10;
 const PAGE_SIZE_REVIEW_COMMENTS = 10;
