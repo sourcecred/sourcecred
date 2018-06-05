@@ -7,13 +7,6 @@ import {promisify} from "util";
 
 import {Graph} from "../../core/graph";
 
-// Makes the script crash on unhandled rejections instead of silently
-// ignoring them. In the future, promise rejections that are not handled will
-// terminate the Node.js process with a non-zero exit code.
-process.on("unhandledRejection", (err) => {
-  throw err;
-});
-
 export default class CombineCommand extends Command {
   static description =
     "combine multiple contribution graphs into one big graph";
