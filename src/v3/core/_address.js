@@ -130,3 +130,15 @@ export function edgeAppend(
   assertAddressArray(components);
   return base + nullDelimited(components);
 }
+
+export function nodeToString(a: NodeAddress): string {
+  assertNodeAddress(a);
+  const parts = toParts(a);
+  return `nodeAddress(${stringify(parts)})`;
+}
+
+export function edgeToString(a: EdgeAddress): string {
+  assertEdgeAddress(a);
+  const parts = toParts(a);
+  return `edgeAddress(${stringify(parts)})`;
+}

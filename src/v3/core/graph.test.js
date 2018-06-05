@@ -1,6 +1,6 @@
 // @flow
 
-import {Address, Graph} from "./graph";
+import {Address, Graph, edgeToString} from "./graph";
 import type {NodeAddress, EdgeAddress} from "./graph";
 
 describe("core/graph", () => {
@@ -103,6 +103,23 @@ describe("core/graph", () => {
           expect(Array.from(graph.nodes()).sort()).toEqual([n2, n1]);
         });
       });
+    });
+  });
+
+  describe("edgeToString", () => {
+    it("works", () => {
+      const edge = {
+        address: Address.edgeAddress(["one", "two"]),
+        dst: Address.nodeAddress(["five", "six"]),
+        src: Address.nodeAddress(["three", "four"]),
+      };
+      const expected =
+        "{" +
+        'address: edgeAddress(["one","two"]), ' +
+        'src: nodeAddress(["three","four"]), ' +
+        'dst: nodeAddress(["five","six"])' +
+        "}";
+      expect(edgeToString(edge)).toEqual(expected);
     });
   });
 });

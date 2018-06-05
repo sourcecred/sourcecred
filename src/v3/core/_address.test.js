@@ -6,8 +6,10 @@ import {
   assertEdgeAddress,
   edgeAddress,
   edgeAppend,
+  edgeToString,
   nodeAddress,
   nodeAppend,
+  nodeToString,
   toParts,
 } from "./_address";
 
@@ -143,6 +145,42 @@ describe("core/address", () => {
   }
   checkAppend(nodeAppend, nodeAddress, edgeAddress);
   checkAppend(edgeAppend, edgeAddress, nodeAddress);
+
+  function checkToString<
+    Good: NodeAddress | EdgeAddress,
+    Bad: NodeAddress | EdgeAddress
+  >(
+    f: (Good) => string,
+    kind: "NodeAddress" | "EdgeAddress",
+    goodConstructor: (string[]) => Good,
+    badConstructor: (string[]) => Bad
+  ) {
+    describe(f.name, () => {
+      describe("errors on", () => {
+        [null, undefined].forEach((bad) => {
+          it(`${String(bad)} base input`, () => {
+            // $ExpectFlowError
+            expect(() => f(bad)).toThrow(String(bad));
+          });
+        });
+        it("wrong kind", () => {
+          // $ExpectFlowError
+          expect(() => f(badConstructor(["foo"]))).toThrow(`expected ${kind}`);
+        });
+      });
+
+      describe("works on", () => {
+        const camelKind = kind.charAt(0).toLowerCase() + kind.substring(1);
+        expect(f(goodConstructor([]))).toEqual(`${camelKind}([])`);
+        expect(f(goodConstructor([""]))).toEqual(`${camelKind}([""])`);
+        expect(f(goodConstructor(["one", "", "two"]))).toEqual(
+          `${camelKind}(["one","","two"])`
+        );
+      });
+    });
+  }
+  checkToString(nodeToString, "NodeAddress", nodeAddress, edgeAddress);
+  checkToString(edgeToString, "EdgeAddress", edgeAddress, nodeAddress);
 
   describe("type assertions", () => {
     function checkAssertion(f, good, bad, badMsg) {
