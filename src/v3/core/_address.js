@@ -30,58 +30,65 @@ function addressType(x: string): ?AddressType {
   }
 }
 
-export function assertNodeAddress(x: NodeAddress) {
+export function assertNodeAddress(x: NodeAddress, what: string = "node") {
   const type = addressType(x);
   switch (type) {
     case "NODE":
       return;
     case "EDGE":
-      throw new Error(`Expected NodeAddress, got EdgeAddress: ${stringify(x)}`);
+      throw new Error(
+        `${what}: expected NodeAddress, got EdgeAddress: ${stringify(x)}`
+      );
     case null:
     case undefined:
-      throw new Error(`Bad address: ${stringify(x)}`);
+      throw new Error(`${what}: bad address: ${stringify(x)}`);
     default:
       // eslint-disable-next-line no-unused-expressions
       (type: empty);
-      throw new Error(`Invariant violation: ${stringify(x)}`);
+      throw new Error(`${what}: invariant violation: ${stringify(x)}`);
   }
 }
 
-export function assertEdgeAddress(x: EdgeAddress) {
+export function assertEdgeAddress(x: EdgeAddress, what: string = "edge") {
   const type = addressType(x);
   switch (type) {
     case "NODE":
-      throw new Error(`Expected EdgeAddress, got NodeAddress: ${stringify(x)}`);
+      throw new Error(
+        `${what}: expected EdgeAddress, got NodeAddress: ${stringify(x)}`
+      );
     case "EDGE":
       return;
     case null:
     case undefined:
-      throw new Error(`Bad address: ${stringify(x)}`);
+      throw new Error(`${what}: bad address: ${stringify(x)}`);
     default:
       // eslint-disable-next-line no-unused-expressions
       (type: empty);
-      throw new Error(`Invariant violation: ${stringify(x)}`);
+      throw new Error(`${what}: invariant violation: ${stringify(x)}`);
   }
 }
 
-export function assertAddress(x: GenericAddress) {
+export function assertAddress(x: GenericAddress, what: string = "address") {
   if (addressType(x) == null) {
     throw new Error(
-      `Expected NodeAddress or EdgeAddress, got: ${stringify(x)}`
+      `${what}: expected NodeAddress or EdgeAddress, got: ${stringify(x)}`
     );
   }
 }
 
-export function assertAddressArray(arr: $ReadOnlyArray<string>) {
+export function assertAddressArray(
+  arr: $ReadOnlyArray<string>,
+  what: string = "address array"
+) {
   if (arr == null) {
     throw new Error(String(arr));
   }
   arr.forEach((s: string) => {
     if (s == null) {
-      throw new Error(`${String(s)} in ${stringify(arr)}`);
+      throw new Error(`${what}: ${String(s)} in ${stringify(arr)}`);
     }
     if (s.indexOf(SEPARATOR) !== -1) {
-      throw new Error(`NUL char: ${stringify(arr)}`);
+      throw new Error(`${what}: NUL char: ${stringify(arr)}`);
     }
   });
 }

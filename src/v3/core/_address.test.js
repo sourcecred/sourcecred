@@ -53,7 +53,7 @@ describe("core/address", () => {
     throwOnNullOrUndefined(toParts);
     it("throws on malformed address", () => {
       // $ExpectFlowError
-      expect(() => toParts("zookomoobo")).toThrow(/Expected .*Address/);
+      expect(() => toParts("zookomoobo")).toThrow(/expected .*Address/);
     });
     it("throws on fake (slash-separated) node address", () => {
       // $ExpectFlowError
@@ -104,12 +104,12 @@ describe("core/address", () => {
         });
         it("malformed base", () => {
           // $ExpectFlowError
-          expect(() => f("foo", "foo")).toThrow("Bad address");
+          expect(() => f("foo", "foo")).toThrow("bad address");
         });
         it("base of wrong kind", () => {
           // $ExpectFlowError
           expect(() => f(badConstructor(["foo"]), "foo")).toThrow(
-            /Expected.*Address/
+            /expected.*Address/
           );
         });
         it("invalid component", () => {
@@ -159,8 +159,14 @@ describe("core/address", () => {
           expect(() => f(bad)).toThrow(badMsg);
         });
         it("errors on non-address", () => {
+          it("errors on the wrong type of address with a custom message", () => {
+            // $ExpectFlowError
+            expect(() => f(bad, "widget")).toThrow(
+              new RegExp("widget:.*" + badMsg)
+            );
+          });
           // $ExpectFlowError
-          expect(() => f("foomulous")).toThrow("Bad address:");
+          expect(() => f("foomulous")).toThrow("bad address:");
         });
       });
     }
