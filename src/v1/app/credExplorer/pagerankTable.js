@@ -13,6 +13,8 @@ import {nodeDescription as githubNodeDescription} from "../../plugins/github/ren
 import {nodeDescription as gitNodeDescription} from "../../plugins/git/render";
 import type {PagerankResult} from "./basicPagerank";
 
+const MAX_TABLE_ENTRIES = 100;
+
 type Props = {
   pagerankResult: ?PagerankResult,
   graph: ?Graph,
@@ -220,6 +222,7 @@ class RecursiveTables extends React.Component<RecursiveTablesProps> {
         const y = pagerankResult.get(b).probability;
         return y - x;
       })
+      .slice(0, MAX_TABLE_ENTRIES)
       .map((address) => (
         <RecursiveTable
           depth={depth}
