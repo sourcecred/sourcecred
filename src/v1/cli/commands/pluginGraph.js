@@ -9,13 +9,6 @@ import createGitGraph from "../../plugins/git/cloneGitGraph";
 import createGithubGraph from "../../plugins/github/fetchGithubGraph";
 import {pluginNames} from "../common";
 
-// Makes the script crash on unhandled rejections instead of silently
-// ignoring them. In the future, promise rejections that are not handled will
-// terminate the Node.js process with a non-zero exit code.
-process.on("unhandledRejection", (err) => {
-  throw err;
-});
-
 export default class PluginGraphCommand extends Command {
   static description = "create the contribution graph for a single plugin";
 

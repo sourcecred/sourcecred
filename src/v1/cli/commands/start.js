@@ -8,13 +8,6 @@ import {choosePort} from "react-dev-utils/WebpackDevServerUtils";
 import apiApp from "../../app/apiApp";
 import {sourcecredDirectoryFlag} from "../common";
 
-// Makes the script crash on unhandled rejections instead of silently
-// ignoring them. In the future, promise rejections that are not handled will
-// terminate the Node.js process with a non-zero exit code.
-process.on("unhandledRejection", (err) => {
-  throw err;
-});
-
 const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 4000;
 const HOST = process.env.HOST || "0.0.0.0";
 
