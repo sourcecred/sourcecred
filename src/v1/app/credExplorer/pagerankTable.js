@@ -111,21 +111,16 @@ export class PagerankTable extends React.Component<Props, State> {
       throw new Error("Impossible.");
     }
     const {graph, pagerankResult} = this.props;
-    const nodesByScore = graph
+    const addresses = graph
       .nodes()
-      .slice()
+      .map((node) => node.address)
       .filter(
-        (n) =>
+        (address) =>
           this.state.topLevelFilter
-            ? n.address.pluginName === this.state.topLevelFilter.pluginName &&
-              n.address.type === this.state.topLevelFilter.type
+            ? address.pluginName === this.state.topLevelFilter.pluginName &&
+              address.type === this.state.topLevelFilter.type
             : true
-      )
-      .sort((a, b) => {
-        const x = pagerankResult.get(a.address).probability;
-        const y = pagerankResult.get(b.address).probability;
-        return y - x;
-      });
+      );
     return (
       <table style={{borderCollapse: "collapse"}}>
         <thead>
@@ -136,15 +131,12 @@ export class PagerankTable extends React.Component<Props, State> {
           </tr>
         </thead>
         <tbody>
-          {nodesByScore.map((node) => (
-            <RecursiveTable
-              depth={0}
-              address={node.address}
-              graph={graph}
-              pagerankResult={pagerankResult}
-              key={stringify(node.address)}
-            />
-          ))}
+          <RecursiveTables
+            addresses={addresses}
+            graph={graph}
+            pagerankResult={pagerankResult}
+            depth={0}
+          />
         </tbody>
       </table>
     );
@@ -200,16 +192,37 @@ class RecursiveTable extends React.Component<RTProps, RTState> {
     graph.neighborhood(address).forEach(({neighbor}) => {
       neighborMap.add({address: neighbor});
     });
-    return neighborMap
-      .getAll()
+    return (
+      <RecursiveTables
+        addresses={neighborMap.getAll().map(({address}) => address)}
+        graph={graph}
+        pagerankResult={pagerankResult}
+        depth={depth + 1}
+      />
+    );
+  }
+}
+
+type RecursiveTablesProps = {|
+  +addresses: $ReadOnlyArray<Address>,
+  +graph: Graph,
+  +pagerankResult: PagerankResult,
+  +depth: number,
+|};
+
+class RecursiveTables extends React.Component<RecursiveTablesProps> {
+  render() {
+    const {addresses, graph, pagerankResult, depth} = this.props;
+    return addresses
+      .slice()
       .sort((a, b) => {
-        const x = pagerankResult.get(a.address).probability;
-        const y = pagerankResult.get(b.address).probability;
+        const x = pagerankResult.get(a).probability;
+        const y = pagerankResult.get(b).probability;
         return y - x;
       })
-      .map(({address}) => (
+      .map((address) => (
         <RecursiveTable
-          depth={depth + 1}
+          depth={depth}
           address={address}
           graph={graph}
           pagerankResult={pagerankResult}
