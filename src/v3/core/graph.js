@@ -110,3 +110,10 @@ export class Graph {
     throw new Error("merge");
   }
 }
+
+export function edgeToString(edge: Edge): string {
+  const address = Address.edgeToString(edge.address);
+  const src = Address.nodeToString(edge.src);
+  const dst = Address.nodeToString(edge.dst);
+  return `{address: ${address}, src: ${src}, dst: ${dst}}`;
+}
