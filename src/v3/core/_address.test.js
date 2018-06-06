@@ -171,11 +171,17 @@ describe("core/address", () => {
 
       describe("works on", () => {
         const camelKind = kind.charAt(0).toLowerCase() + kind.substring(1);
-        expect(f(goodConstructor([]))).toEqual(`${camelKind}([])`);
-        expect(f(goodConstructor([""]))).toEqual(`${camelKind}([""])`);
-        expect(f(goodConstructor(["one", "", "two"]))).toEqual(
-          `${camelKind}(["one","","two"])`
-        );
+        test("the empty address", () => {
+          expect(f(goodConstructor([]))).toEqual(`${camelKind}([])`);
+        });
+        test("the address with one empty component", () => {
+          expect(f(goodConstructor([""]))).toEqual(`${camelKind}([""])`);
+        });
+        test("a normal address", () => {
+          expect(f(goodConstructor(["one", "", "two"]))).toEqual(
+            `${camelKind}(["one","","two"])`
+          );
+        });
       });
     });
   }
