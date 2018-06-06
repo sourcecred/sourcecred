@@ -142,3 +142,31 @@ export function edgeToString(a: EdgeAddress): string {
   const parts = toParts(a);
   return `edgeAddress(${stringify(parts)})`;
 }
+
+/**
+ * Determine whether the parts of `prefix` form a prefix of the parts of
+ * `address`. That is, determine whether there exists an `i` such that
+ * `toParts(prefix)` equals `toParts(address).slice(0, i)`.
+ */
+export function nodeHasPrefix(
+  address: NodeAddress,
+  prefix: NodeAddress
+): boolean {
+  assertNodeAddress(address);
+  assertNodeAddress(prefix);
+  return address.startsWith(prefix);
+}
+
+/**
+ * Determine whether the parts of `prefix` form a prefix of the parts of
+ * `address`. That is, determine whether there exists an `i` such that
+ * `toParts(prefix)` equals `toParts(address).slice(0, i)`.
+ */
+export function edgeHasPrefix(
+  address: EdgeAddress,
+  prefix: EdgeAddress
+): boolean {
+  assertEdgeAddress(address);
+  assertEdgeAddress(prefix);
+  return address.startsWith(prefix);
+}

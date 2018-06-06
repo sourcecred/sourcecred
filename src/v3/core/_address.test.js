@@ -6,9 +6,11 @@ import {
   assertEdgeAddress,
   edgeAddress,
   edgeAppend,
+  edgeHasPrefix,
   edgeToString,
   nodeAddress,
   nodeAppend,
+  nodeHasPrefix,
   nodeToString,
   toParts,
 } from "./_address";
@@ -187,6 +189,114 @@ describe("core/address", () => {
   }
   checkToString(nodeToString, "NodeAddress", nodeAddress, edgeAddress);
   checkToString(edgeToString, "EdgeAddress", edgeAddress, nodeAddress);
+
+  function checkHasPrefix<
+    Good: NodeAddress | EdgeAddress,
+    Bad: NodeAddress | EdgeAddress
+  >(
+    hasPrefix: (Good, Good) => boolean,
+    kind: "NodeAddress" | "EdgeAddress",
+    goodConstructor: (string[]) => Good,
+    badConstructor: (string[]) => Bad
+  ) {
+    describe(hasPrefix.name, () => {
+      describe("errors on", () => {
+        [null, undefined].forEach((bad) => {
+          it(`${String(bad)} base input`, () => {
+            // $ExpectFlowError
+            expect(() => hasPrefix(bad)).toThrow(String(bad));
+          });
+        });
+        it("wrong kind", () => {
+          // $ExpectFlowError
+          expect(() => hasPrefix(badConstructor(["foo"]))).toThrow(
+            `expected ${kind}`
+          );
+        });
+      });
+
+      const address = goodConstructor;
+      it("accepts the empty prefix of non-empty input", () => {
+        expect(hasPrefix(address(["foo", "bar"]), address([]))).toBe(true);
+      });
+      it("accepts the empty prefix of empty input", () => {
+        expect(hasPrefix(address([]), address([]))).toBe(true);
+      });
+      it("rejects a non-empty prefix of empty input", () => {
+        expect(hasPrefix(address([]), address(["foo", "bar"]))).toBe(false);
+      });
+      it("accepts a normal input", () => {
+        expect(
+          hasPrefix(address(["foo", "bar", "baz"]), address(["foo", "bar"]))
+        ).toBe(true);
+      });
+      it("accepts that an address is a prefix of itself", () => {
+        expect(
+          hasPrefix(address(["foo", "bar"]), address(["foo", "bar"]))
+        ).toBe(true);
+      });
+      it("accepts inputs with empty components", () => {
+        expect(
+          hasPrefix(
+            address(["foo", "", "bar", "", "baz"]),
+            address(["foo", "", "bar", ""])
+          )
+        ).toBe(true);
+      });
+      it("rejects inputs with no nontrivial common prefix", () => {
+        expect(
+          hasPrefix(address(["foo", "bar", "baz"]), address(["bar", "foo"]))
+        ).toBe(false);
+      });
+      it("rejects inputs with insufficiently long common prefix", () => {
+        expect(
+          hasPrefix(address(["foo", "bar", "baz"]), address(["foo", "quux"]))
+        ).toBe(false);
+      });
+      it("rejects when the putative prefix is a proper infix", () => {
+        expect(
+          hasPrefix(address(["foo", "bar", "baz"]), address(["bar"]))
+        ).toBe(false);
+      });
+      it("rejects when the putative prefix is a proper suffix", () => {
+        expect(
+          hasPrefix(address(["foo", "bar", "baz"]), address(["bar", "baz"]))
+        ).toBe(false);
+      });
+      it("rejects when the arguments are reversed", () => {
+        expect(
+          hasPrefix(address(["foo", "bar"]), address(["foo", "bar", "baz"]))
+        ).toBe(false);
+      });
+      it("rejects when the last component is truncated", () => {
+        expect(
+          hasPrefix(address(["foo", "bar", "baz"]), address(["foo", "ba"]))
+        ).toBe(false);
+      });
+      it("rejects when two components have been concatenated", () => {
+        expect(
+          hasPrefix(address(["foo", "bar", "baz"]), address(["foobar", "baz"]))
+        ).toBe(false);
+      });
+      it("rejects an extra empty component in the middle of the base", () => {
+        expect(
+          hasPrefix(address(["foo", "", "baz"]), address(["foo", "baz"]))
+        ).toBe(false);
+      });
+      it("rejects an extra empty component in the middle of the prefix", () => {
+        expect(
+          hasPrefix(address(["foo", "baz"]), address(["foo", "", "baz"]))
+        ).toBe(false);
+      });
+      it("rejects an extra empty component at the end of the prefix", () => {
+        expect(
+          hasPrefix(address(["foo", "baz"]), address(["foo", "baz", ""]))
+        ).toBe(false);
+      });
+    });
+  }
+  checkHasPrefix(nodeHasPrefix, "NodeAddress", nodeAddress, edgeAddress);
+  checkHasPrefix(edgeHasPrefix, "EdgeAddress", edgeAddress, nodeAddress);
 
   describe("type assertions", () => {
     function checkAssertion(f, good, bad, badMsg) {
