@@ -1,6 +1,6 @@
 // @flow
 
-import {Address, Graph, edgeToString} from "./graph";
+import {Address, Direction, Graph, edgeToString} from "./graph";
 import type {NodeAddress, EdgeAddress} from "./graph";
 
 describe("core/graph", () => {
@@ -26,6 +26,15 @@ describe("core/graph", () => {
       expect(() => {
         // $ExpectFlowError
         Address.toParts = wonkyToParts;
+      }).toThrow(/read.only property/);
+    });
+  });
+
+  describe("Direction values", () => {
+    it("are read-only", () => {
+      expect(() => {
+        // $ExpectFlowError
+        Direction.IN = Direction.OUT;
       }).toThrow(/read.only property/);
     });
   });
