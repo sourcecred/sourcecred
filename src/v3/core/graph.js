@@ -16,15 +16,20 @@ export type Edge = {|
 export type Neighbor = {|+node: NodeAddress, +edge: Edge|};
 
 export opaque type DirectionT = Symbol;
-export const Direction: {|+IN: DirectionT, +OUT: DirectionT|} = Object.freeze({
+export const Direction: {|
+  +IN: DirectionT,
+  +OUT: DirectionT,
+  +ANY: DirectionT,
+|} = Object.freeze({
   IN: Symbol("IN"),
   OUT: Symbol("OUT"),
+  ANY: Symbol("ANY"),
 });
 
 export type NeighborsOptions = {|
-  +direction: ?DirectionT,
-  +nodePrefix: ?NodeAddress,
-  +edgePrefix: ?EdgeAddress,
+  +direction: DirectionT,
+  +nodePrefix: NodeAddress,
+  +edgePrefix: EdgeAddress,
 |};
 
 export opaque type GraphJSON = any; // TODO
@@ -127,7 +132,7 @@ export class Graph {
     yield* this._edges.values();
   }
 
-  neighbors(node: NodeAddress, options?: NeighborsOptions): Iterator<Neighbor> {
+  neighbors(node: NodeAddress, options: NeighborsOptions): Iterator<Neighbor> {
     const _ = {node, options};
     throw new Error("neighbors");
   }
