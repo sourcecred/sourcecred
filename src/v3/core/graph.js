@@ -14,11 +14,15 @@ export type Edge = {|
 |};
 
 export type Neighbor = {|+node: NodeAddress, +edge: Edge|};
-export opaque type Direction = Symbol;
-export const IN: Direction = Symbol("IN");
-export const OUT: Direction = Symbol("OUT");
+
+export opaque type DirectionT = Symbol;
+export const Direction: {|+IN: DirectionT, +OUT: DirectionT|} = Object.freeze({
+  IN: Symbol("IN"),
+  OUT: Symbol("OUT"),
+});
+
 export type NeighborsOptions = {|
-  +direction: ?Direction,
+  +direction: ?DirectionT,
   +nodePrefix: ?NodeAddress,
   +edgePrefix: ?EdgeAddress,
 |};
