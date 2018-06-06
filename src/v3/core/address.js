@@ -115,29 +115,79 @@ export function makeAddressModule(options: Options): AddressModule<string> {
     otherNoncesWithSeparators.set(otherNonce + separator, otherName);
   }
 
-  const _ = {name, nonceWithSeparator};
-
   function assertValid(address: Address, what?: string): void {
-    const _ = {address, what};
-    throw new Error("assertValid");
+    // TODO(perf): If this function becomes a bottleneck, consider
+    // omitting it entirely in production. If this is undesirable, a
+    // number of micro-optimizations can be made.
+    const prefix = what == null ? "" : `${what}: `;
+    if (address == null) {
+      throw new Error(prefix + `expected ${name}, got: ${String(address)}`);
+    }
+    if (!address.endsWith(separator)) {
+      throw new Error(prefix + `expected ${name}, got: ${stringify(address)}`);
+    }
+    if (!address.startsWith(nonceWithSeparator)) {
+      for (const [
+        otherNonceWithSeparator,
+        otherName,
+      ] of otherNoncesWithSeparators) {
+        if (address.startsWith(otherNonceWithSeparator)) {
+          throw new Error(
+            prefix + `expected ${name}, got ${otherName}: ${stringify(address)}`
+          );
+        }
+      }
+      throw new Error(prefix + `expected ${name}, got: ${stringify(address)}`);
+    }
+  }
+
+  function partsString(parts: $ReadOnlyArray<string>): string {
+    // This is needed to properly print arrays containing `undefined`.
+    return "[" + parts.map((p) => String(stringify(p))).join(",") + "]";
   }
 
   function assertValidParts(
     parts: $ReadOnlyArray<string>,
     what?: string
   ): void {
-    const _ = {parts, what};
-    throw new Error("assertValidParts");
+    // TODO(perf): If this function becomes a bottleneck, consider
+    // omitting it entirely in production. If this is undesirable, a
+    // number of micro-optimizations can be made.
+    const prefix = what == null ? "" : `${what}: `;
+    if (parts == null) {
+      throw new Error(
+        prefix + `expected array of parts, got: ${String(parts)}`
+      );
+    }
+    parts.forEach((s: string) => {
+      if (s == null) {
+        throw new Error(
+          prefix +
+            `expected array of parts, got ${String(s)} in: ${partsString(
+              parts
+            )}`
+        );
+      }
+      if (s.indexOf(separator) !== -1) {
+        const where = `${stringify(s)} in ${partsString(parts)}`;
+        throw new Error(prefix + `part contains NUL character: ${where}`);
+      }
+    });
+  }
+
+  function nullDelimited(components: $ReadOnlyArray<string>): string {
+    return [...components, ""].join(separator);
   }
 
   function fromParts(parts: $ReadOnlyArray<string>): Address {
-    const _ = parts;
-    throw new Error("fromParts");
+    assertValidParts(parts);
+    return nonce + separator + nullDelimited(parts);
   }
 
   function toParts(address: Address): string[] {
-    const _ = address;
-    throw new Error("toParts");
+    assertValid(address);
+    const parts = address.split(separator);
+    return parts.slice(1, parts.length - 1);
   }
 
   function toString(address: Address): string {

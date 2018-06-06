@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`core/address makeAddressModule has a stable internal representation 1`] = `"\\"F\\\\u0000\\\\u0000hello\\\\u0000\\\\u0000\\\\u0000sweet\\\\u0000world\\\\u0000\\\\u0000\\\\u0000\\\\u0000\\""`;

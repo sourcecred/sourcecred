@@ -58,5 +58,163 @@ describe("core/address", () => {
         FooAddress.assertValid = FooAddress.assertValid;
       }).toThrow(/read.only property/);
     });
+
+    it("has a stable internal representation", () => {
+      const input = ["", "hello", "", "", "sweet", "world", "", "", ""];
+      const address = makeModules().FooAddress.fromParts(input);
+      // We stringify the address here because otherwise literal NUL
+      // characters will appear in the snapshot file.
+      expect(JSON.stringify(address)).toMatchSnapshot();
+    });
+
+    describe("assertValid", () => {
+      const {FooAddress, BarAddress, WatAddress} = makeModules();
+      it("rejects `undefined`", () => {
+        expect(() => {
+          // $ExpectFlowError
+          FooAddress.assertValid(undefined, "widget");
+        }).toThrow("widget: expected FooAddress, got: undefined");
+      });
+      it("rejects `null`", () => {
+        expect(() => {
+          // $ExpectFlowError
+          FooAddress.assertValid(null, "widget");
+        }).toThrow("widget: expected FooAddress, got: null");
+      });
+      it("rejects an address from a known module", () => {
+        const bar = BarAddress.fromParts(["hello"]);
+        expect(() => {
+          FooAddress.assertValid(bar, "widget");
+        }).toThrow("widget: expected FooAddress, got BarAddress:");
+      });
+      it("rejects an address from an unknown module", () => {
+        const wat = WatAddress.fromParts(["hello"]);
+        expect(() => {
+          FooAddress.assertValid(wat, "widget");
+        }).toThrow("widget: expected FooAddress, got:");
+      });
+      it("rejects a string that starts with the nonce but no separator", () => {
+        expect(() => {
+          FooAddress.assertValid("F/things\0", "widget");
+        }).toThrow("widget: expected FooAddress, got:");
+      });
+      it("rejects a string that does not end with a separator", () => {
+        const address = FooAddress.fromParts(["hello"]);
+        const truncated = address.substring(0, address.length - 2);
+        expect(() => {
+          FooAddress.assertValid(truncated, "widget");
+        }).toThrow("widget: expected FooAddress, got:");
+      });
+      it("rejects junk", () => {
+        expect(() => {
+          FooAddress.assertValid("junk", "widget");
+        }).toThrow("widget: expected FooAddress, got:");
+      });
+    });
+
+    describe("assertValidParts", () => {
+      const {FooAddress} = makeModules();
+      it("rejects `undefined`", () => {
+        expect(() => {
+          // $ExpectFlowError
+          FooAddress.assertValidParts(undefined, "widget");
+        }).toThrow("widget: expected array of parts, got: undefined");
+      });
+      it("rejects `null`", () => {
+        expect(() => {
+          // $ExpectFlowError
+          FooAddress.assertValidParts(null, "widget");
+        }).toThrow("widget: expected array of parts, got: null");
+      });
+      it("rejects an array containing `undefined`", () => {
+        expect(() => {
+          // $ExpectFlowError
+          FooAddress.assertValidParts(["hello", undefined, "world"], "widget");
+        }).toThrow(
+          "widget: expected array of parts, got undefined in: " +
+            '["hello",undefined,"world"]'
+        );
+      });
+      it("rejects an array containing `null`", () => {
+        expect(() => {
+          // $ExpectFlowError
+          FooAddress.assertValidParts(["hello", null, "world"], "widget");
+        }).toThrow(
+          "widget: expected array of parts, got null in: " +
+            '["hello",null,"world"]'
+        );
+      });
+      it("rejects an array with a string containing a NUL character", () => {
+        expect(() => {
+          FooAddress.assertValidParts(["hello", "n\0o", "world"], "widget");
+        }).toThrow(
+          "widget: part contains NUL character: " +
+            '"n\\u0000o" in ["hello","n\\u0000o","world"]'
+        );
+      });
+    });
+
+    describe("fromParts", () => {
+      const {FooAddress, BarAddress} = makeModules();
+
+      // We use this next test as a proxy for fully correct validation,
+      // in conjunction with tests on `assertValid` and
+      // `assertValidParts`.
+      it("validates parts", () => {
+        expect(() => {
+          // $ExpectFlowError
+          FooAddress.fromParts(["hello", null, "world"]);
+        }).toThrow(
+          'expected array of parts, got null in: ["hello",null,"world"]'
+        );
+      });
+
+      it("encodes the address kind for the empty address", () => {
+        const foo = FooAddress.fromParts([]);
+        const bar = BarAddress.fromParts([]);
+        expect(foo).not.toEqual(bar);
+      });
+      it("encodes the address kind for a normal address", () => {
+        const foo = FooAddress.fromParts(["hello", "world"]);
+        const bar = BarAddress.fromParts(["hello", "world"]);
+        expect(foo).not.toEqual(bar);
+      });
+    });
+
+    describe("toParts", () => {
+      const {FooAddress, BarAddress} = makeModules();
+
+      // We use this next test as a proxy for fully correct validation,
+      // in conjunction with tests on `assertValid`.
+      it("validates address kind", () => {
+        const bar = BarAddress.fromParts(["hello"]);
+        expect(() => {
+          FooAddress.toParts(bar);
+        }).toThrow("expected FooAddress, got BarAddress:");
+      });
+
+      describe("is a left identity for `fromParts`", () => {
+        function check(description, inputParts) {
+          it(description, () => {
+            const address = FooAddress.fromParts(inputParts);
+            const parts = FooAddress.toParts(address);
+            expect(parts).toEqual(inputParts);
+          });
+        }
+        check("on the empty input", []);
+        check("on an input made of one empty part", [""]);
+        check("on an input made of lots of empty parts", ["", "", ""]);
+        check("on an input with lots of empty parts throughout", [
+          ...["", ""],
+          "hello",
+          ...["", "", ""],
+          "sweet",
+          "world",
+          ...["", "", "", ""],
+        ]);
+        check("on a singleton input", ["jar"]);
+        check("on an input with repeated components", ["jar", "jar"]);
+      });
+    });
   });
 });
