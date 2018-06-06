@@ -261,5 +261,48 @@ describe("core/address", () => {
         expect(Array.from(new Set(inputs)).sort()).toHaveLength(inputs.length);
       });
     });
+
+    describe("append", () => {
+      const {FooAddress, BarAddress} = makeModules();
+
+      // We use these next tests as a proxy for fully correct
+      // validation, in conjunction with tests on `assertValid` and
+      // `assertValidParts`.
+      it("validates address kind", () => {
+        const bar = BarAddress.fromParts(["hello"]);
+        expect(() => {
+          FooAddress.append(bar, "world");
+        }).toThrow("expected FooAddress, got BarAddress:");
+      });
+      it("validates components", () => {
+        const foo = FooAddress.fromParts(["hello"]);
+        expect(() => {
+          // $ExpectFlowError
+          FooAddress.append(foo, "world", null);
+        }).toThrow('expected array of parts, got null in: ["world",null]');
+      });
+
+      describe("is equivalent to the part-wise implementation on", () => {
+        function check(description, baseParts, ...moreParts) {
+          it(description, () => {
+            const base = FooAddress.fromParts(baseParts);
+            const actual = FooAddress.append(base, ...moreParts);
+            const expected = FooAddress.fromParts([...baseParts, ...moreParts]);
+            expect(actual).toEqual(expected);
+          });
+        }
+
+        check("the null address with nothing", []);
+        check("the null address with an empty component", [], "");
+        check("the null address with a nonempty component", [], "a");
+        check("the null address with lots of components", [], "a", "", "b");
+
+        const base = ["a", "", "b", ""];
+        check("a longer address with nothing", base);
+        check("a longer address with an empty component", base, "");
+        check("a longer address with a nonempty component", base, "c");
+        check("a longer address with lots of components", base, "c", "", "d");
+      });
+    });
   });
 });
