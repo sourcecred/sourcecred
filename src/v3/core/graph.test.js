@@ -1,7 +1,11 @@
 // @flow
 
+import sortBy from "lodash.sortby";
+
 import {
   type EdgeAddressT,
+  type Neighbor,
+  type NeighborsOptions,
   type NodeAddressT,
   Direction,
   EdgeAddress,
@@ -94,12 +98,12 @@ describe("core/graph", () => {
               .addEdge(edge());
           it("src", () => {
             expect(() => graph().removeNode(src)).toThrow(
-              "Attempted to remove src of"
+              "Attempted to remove"
             );
           });
           it("dst", () => {
             expect(() => graph().removeNode(dst)).toThrow(
-              "Attempted to remove dst of"
+              "Attempted to remove"
             );
           });
         });
@@ -410,6 +414,15 @@ describe("core/graph", () => {
             .addEdge({src, dst, address})
             .addEdge({src, dst, address});
           expect(edgeArray(g)).toEqual([{src, dst, address}]);
+          expect(
+            Array.from(
+              g.neighbors(src, {
+                direction: Direction.ANY,
+                nodePrefix: NodeAddress.fromParts([]),
+                edgePrefix: EdgeAddress.fromParts([]),
+              })
+            )
+          ).toHaveLength(1);
         });
         it("`removeEdge`", () => {
           const g = new Graph()
@@ -455,6 +468,239 @@ describe("core/graph", () => {
         const before = g._modificationCount;
         g.removeEdge(edge().address);
         expect(g._modificationCount).not.toEqual(before);
+      });
+    });
+
+    describe("neighbors", () => {
+      const foo = NodeAddress.fromParts(["foo", "suffix"]);
+      const loop = NodeAddress.fromParts(["loop"]);
+      const isolated = NodeAddress.fromParts(["isolated"]);
+
+      const foo_loop = {
+        src: foo,
+        dst: loop,
+        address: EdgeAddress.fromParts(["foo", "1"]),
+      };
+      const loop_foo = {
+        src: loop,
+        dst: foo,
+        address: EdgeAddress.fromParts(["foo", "2"]),
+      };
+      const loop_loop = {
+        src: loop,
+        dst: loop,
+        address: EdgeAddress.fromParts(["loop"]),
+      };
+      const repeated_loop_foo = {
+        src: loop,
+        dst: foo,
+        address: EdgeAddress.fromParts(["repeated", "foo"]),
+      };
+      function quiver() {
+        return new Graph()
+          .addNode(foo)
+          .addNode(loop)
+          .addNode(isolated)
+          .addEdge(foo_loop)
+          .addEdge(loop_foo)
+          .addEdge(loop_loop)
+          .addEdge(repeated_loop_foo);
+      }
+
+      function expectNeighbors(
+        node: NodeAddressT,
+        options: NeighborsOptions,
+        expected: Neighbor[]
+      ) {
+        const g = quiver();
+        const actual = Array.from(g.neighbors(node, options));
+        const sorter = (arr) =>
+          sortBy(arr, (neighbor) => neighbor.edge.address);
+        expect(sorter(actual)).toEqual(sorter(expected));
+      }
+
+      it("re-adding a node does not suppress its edges", () => {
+        const graph = quiver().addNode(foo);
+        expect(
+          Array.from(
+            graph.neighbors(foo, {
+              direction: Direction.ANY,
+              nodePrefix: NodeAddress.fromParts([]),
+              edgePrefix: EdgeAddress.fromParts([]),
+            })
+          )
+        ).not.toHaveLength(0);
+      });
+
+      it("isolated node has no neighbors", () => {
+        expectNeighbors(
+          isolated,
+          {
+            direction: Direction.ANY,
+            nodePrefix: NodeAddress.fromParts([]),
+            edgePrefix: EdgeAddress.fromParts([]),
+          },
+          []
+        );
+      });
+
+      function expectLoopNeighbors(dir, nodeParts, edgeParts, expected) {
+        const options = {
+          direction: dir,
+          nodePrefix: NodeAddress.fromParts(nodeParts),
+          edgePrefix: EdgeAddress.fromParts(edgeParts),
+        };
+        expectNeighbors(loop, options, expected);
+      }
+
+      describe("direction filtering", () => {
+        it("IN", () => {
+          expectLoopNeighbors(
+            Direction.IN,
+            [],
+            [],
+            [{node: loop, edge: loop_loop}, {node: foo, edge: foo_loop}]
+          );
+        });
+        it("OUT", () => {
+          expectLoopNeighbors(
+            Direction.OUT,
+            [],
+            [],
+            [
+              {node: loop, edge: loop_loop},
+              {node: foo, edge: repeated_loop_foo},
+              {node: foo, edge: loop_foo},
+            ]
+          );
+        });
+        // verifies that the loop edge is not double-counted.
+        it("ANY", () => {
+          expectLoopNeighbors(
+            Direction.ANY,
+            [],
+            [],
+            [
+              {node: loop, edge: loop_loop},
+              {node: foo, edge: repeated_loop_foo},
+              {node: foo, edge: loop_foo},
+              {node: foo, edge: foo_loop},
+            ]
+          );
+        });
+      });
+
+      describe("node prefix filtering", () => {
+        function nodeExpectNeighbors(parts, expected) {
+          expectNeighbors(
+            loop,
+            {
+              direction: Direction.ANY,
+              nodePrefix: NodeAddress.fromParts(parts),
+              edgePrefix: EdgeAddress.fromParts([]),
+            },
+            expected
+          );
+        }
+        it("returns nodes exactly matching prefix", () => {
+          nodeExpectNeighbors(["loop"], [{node: loop, edge: loop_loop}]);
+        });
+        it("returns nodes inexactly matching prefix", () => {
+          nodeExpectNeighbors(
+            ["foo"],
+            [
+              {node: foo, edge: loop_foo},
+              {node: foo, edge: foo_loop},
+              {node: foo, edge: repeated_loop_foo},
+            ]
+          );
+        });
+        it("returns empty for non-existent prefix", () => {
+          nodeExpectNeighbors(["qux"], []);
+        });
+      });
+
+      describe("edge prefix filtering", () => {
+        function edgeExpectNeighbors(parts, expected) {
+          expectNeighbors(
+            loop,
+            {
+              direction: Direction.ANY,
+              nodePrefix: NodeAddress.fromParts([]),
+              edgePrefix: EdgeAddress.fromParts(parts),
+            },
+            expected
+          );
+        }
+        it("works for an exact address match", () => {
+          edgeExpectNeighbors(
+            ["repeated", "foo"],
+            [{node: foo, edge: repeated_loop_foo}]
+          );
+        });
+        it("works for a proper prefix match", () => {
+          edgeExpectNeighbors(
+            ["foo"],
+            [{node: foo, edge: foo_loop}, {node: foo, edge: loop_foo}]
+          );
+        });
+        it("works when there are no matching edges", () => {
+          edgeExpectNeighbors(["wat"], []);
+        });
+      });
+
+      it("works for node and edge filter combined", () => {
+        expectNeighbors(
+          loop,
+          {
+            direction: Direction.ANY,
+            nodePrefix: NodeAddress.fromParts(["foo"]),
+            edgePrefix: EdgeAddress.fromParts(["repeated"]),
+          },
+          [{node: foo, edge: repeated_loop_foo}]
+        );
+      });
+
+      describe("errors on", () => {
+        const defaultOptions = () => ({
+          direction: Direction.ANY,
+          edgePrefix: EdgeAddress.fromParts([]),
+          nodePrefix: NodeAddress.fromParts([]),
+        });
+        function throwsWith(node, options, message) {
+          // $ExpectFlowError
+          expect(() => new Graph().neighbors(node, options)).toThrow(message);
+        }
+        it("invalid address", () => {
+          // This is a proxy for testing that NodeAddress.assertValid is called.
+          // Thus we don't need to exhaustively test every bad case.
+          throwsWith(
+            EdgeAddress.fromParts([]),
+            defaultOptions(),
+            "NodeAddress"
+          );
+        });
+        it("absent node", () => {
+          throwsWith(
+            NodeAddress.fromParts([]),
+            defaultOptions(),
+            "Node does not exist"
+          );
+        });
+        describe("concurrent modification", () => {
+          it("while in the middle of iteration", () => {
+            const g = quiver();
+            const iterator = g.neighbors(loop, defaultOptions());
+            g._modificationCount++;
+            expect(() => iterator.next()).toThrow("Concurrent modification");
+          });
+          it("at exhaustion", () => {
+            const g = quiver();
+            const iterator = g.neighbors(isolated, defaultOptions());
+            g._modificationCount++;
+            expect(() => iterator.next()).toThrow("Concurrent modification");
+          });
+        });
       });
     });
   });

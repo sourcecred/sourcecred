@@ -52,6 +52,11 @@ export class Graph {
   //
   // Invariant: If an edge `e` is in the graph, then `e.src` and `e.dst`
   // are both in the graph.
+  //
+  // Invariant: For an edge `e`, the following are equivalent:
+  //   - `e` is in the graph;
+  //   - `_inEdges.get(e.dst)` contains `e` exactly once;
+  //   - `_outEdges.get(e.src)` contains `e` exactly once.
   _nodes: Set<NodeAddressT>;
   _edges: Map<EdgeAddressT, Edge>;
   _inEdges: Map<NodeAddressT, Edge[]>;
@@ -97,21 +102,31 @@ export class Graph {
 
   addNode(a: NodeAddressT): this {
     NodeAddress.assertValid(a);
-    this._nodes.add(a);
+    if (!this._nodes.has(a)) {
+      this._nodes.add(a);
+      this._inEdges.set(a, []);
+      this._outEdges.set(a, []);
+    }
     this._markModification();
     return this;
   }
 
   removeNode(a: NodeAddressT): this {
     NodeAddress.assertValid(a);
-    for (const e of this.edges()) {
-      if (e.src === a || e.dst === a) {
-        const srcOrDst = e.src === a ? "src" : "dst";
-        throw new Error(
-          `Attempted to remove ${srcOrDst} of ${edgeToString(e)}`
-        );
-      }
+    const existingInEdges = this._inEdges.get(a) || [];
+    const existingOutEdges = this._outEdges.get(a) || [];
+    const existingEdges = existingInEdges.concat(existingOutEdges);
+    if (existingEdges.length > 0) {
+      const strAddress = NodeAddress.toString(a);
+      const strExampleEdge = edgeToString(existingEdges[0]);
+      throw new Error(
+        `Attempted to remove ${strAddress}, which is incident to ${
+          existingEdges.length
+        } edge(s), e.g.: ${strExampleEdge}`
+      );
     }
+    this._inEdges.delete(a);
+    this._outEdges.delete(a);
     this._nodes.delete(a);
     this._markModification();
     return this;
@@ -160,6 +175,15 @@ export class Graph {
           `conflict between new edge ${strEdge} and existing ${strExisting}`
         );
       }
+    } else {
+      this._edges.set(edge.address, edge);
+      const inEdges = this._inEdges.get(edge.dst);
+      const outEdges = this._outEdges.get(edge.src);
+      if (inEdges == null || outEdges == null) {
+        throw new Error(`Invariant violation on edge ${edgeToString(edge)}`);
+      }
+      inEdges.push(edge);
+      outEdges.push(edge);
     }
     this._edges.set(edge.address, edge);
     this._markModification();
@@ -168,7 +192,28 @@ export class Graph {
 
   removeEdge(address: EdgeAddressT): this {
     EdgeAddress.assertValid(address);
-    this._edges.delete(address);
+    const edge = this._edges.get(address);
+    if (edge != null) {
+      this._edges.delete(address);
+      const inEdges = this._inEdges.get(edge.dst);
+      const outEdges = this._outEdges.get(edge.src);
+      if (inEdges == null || outEdges == null) {
+        throw new Error(`Invariant violation on ${edgeToString(edge)}`);
+      }
+      // TODO(perf): This is linear in the degree of the endpoints of the
+      // edge. Consider storing in non-list form (e.g., `_inEdges` and
+      // `_outEdges` could be `Map<NodeAddressT, Set<EdgeAddressT>>`).
+      [inEdges, outEdges].forEach((edges) => {
+        const index = edges.findIndex((edge) => edge.address === address);
+        if (index === -1) {
+          const strAddress = EdgeAddress.toString(address);
+          throw new Error(
+            `Invariant violation when removing edge@${strAddress}`
+          );
+        }
+        edges.splice(index, 1);
+      });
+    }
     this._markModification();
     return this;
   }
@@ -196,8 +241,55 @@ export class Graph {
   }
 
   neighbors(node: NodeAddressT, options: NeighborsOptions): Iterator<Neighbor> {
-    const _ = {node, options};
-    throw new Error("neighbors");
+    if (!this.hasNode(node)) {
+      throw new Error(`Node does not exist: ${NodeAddress.toString(node)}`);
+    }
+    return this._neighbors(node, options, this._modificationCount);
+  }
+
+  *_neighbors(
+    node: NodeAddressT,
+    options: NeighborsOptions,
+    initialModificationCount: ModificationCount
+  ): Iterator<Neighbor> {
+    const nodeFilter = (n) => NodeAddress.hasPrefix(n, options.nodePrefix);
+    const edgeFilter = (e) => EdgeAddress.hasPrefix(e, options.edgePrefix);
+    const direction = options.direction;
+    const adjacencies: {edges: Edge[], direction: string}[] = [];
+    if (direction === Direction.IN || direction === Direction.ANY) {
+      const inEdges = this._inEdges.get(node);
+      if (inEdges == null) {
+        throw new Error(
+          `Invariant violation: No inEdges for ${NodeAddress.toString(node)}`
+        );
+      }
+      adjacencies.push({edges: inEdges, direction: "IN"});
+    }
+    if (direction === Direction.OUT || direction === Direction.ANY) {
+      const outEdges = this._outEdges.get(node);
+      if (outEdges == null) {
+        throw new Error(
+          `Invariant violation: No outEdges for ${NodeAddress.toString(node)}`
+        );
+      }
+      adjacencies.push({edges: outEdges, direction: "OUT"});
+    }
+
+    for (const adjacency of adjacencies) {
+      for (const edge of adjacency.edges) {
+        if (direction === Direction.ANY && adjacency.direction === "IN") {
+          if (edge.src === edge.dst) {
+            continue; // don't yield loop edges twice.
+          }
+        }
+        const neighborNode = adjacency.direction === "IN" ? edge.src : edge.dst;
+        if (nodeFilter(neighborNode) && edgeFilter(edge.address)) {
+          this._checkForComodification(initialModificationCount);
+          yield {edge, node: neighborNode};
+        }
+      }
+    }
+    this._checkForComodification(initialModificationCount);
   }
 
   copy(): Graph {
