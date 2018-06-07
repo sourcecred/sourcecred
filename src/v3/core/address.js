@@ -196,8 +196,9 @@ export function makeAddressModule(options: Options): AddressModule<string> {
   }
 
   function append(address: Address, ...parts: string[]): Address {
-    const _ = {address, parts};
-    throw new Error("append");
+    assertValid(address);
+    assertValidParts(parts);
+    return address + nullDelimited(parts);
   }
 
   function hasPrefix(address: Address, prefix: Address): boolean {
