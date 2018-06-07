@@ -28,6 +28,29 @@ describe("core/address", () => {
     it("makes address modules using all the options", () => {
       makeModules();
     });
+    it("rejects a module whose nonce contains NUL", () => {
+      expect(() => {
+        makeAddressModule({name: "BadAddress", nonce: "n\0o"});
+      }).toThrow("invalid nonce (contains NUL):");
+    });
+    it("rejects a module with `otherNonces` containing NUL", () => {
+      expect(() => {
+        makeAddressModule({
+          name: "GoodAddress",
+          nonce: "G",
+          otherNonces: new Map().set("n\0o", "BadAddress"),
+        });
+      }).toThrow("invalid otherNonce (contains NUL):");
+    });
+    it("rejects a module with `nonce` in `otherNonces`", () => {
+      expect(() => {
+        makeAddressModule({
+          name: "GoodAddress",
+          nonce: "G",
+          otherNonces: new Map().set("G", "WatAddress"),
+        });
+      }).toThrow("primary nonce listed as otherNonce");
+    });
     it("returns an object with read-only properties", () => {
       const {FooAddress} = makeModules();
       expect(() => {

@@ -1,5 +1,7 @@
 // @flow
 
+import stringify from "json-stable-stringify";
+
 export interface AddressModule<Address> {
   /**
    * Assert at runtime that the provided address is actually a valid
@@ -89,7 +91,31 @@ export type Options = {|
 
 export function makeAddressModule(options: Options): AddressModule<string> {
   type Address = string; // for readability and interface consistency
-  const _ = options;
+  const {name, nonce} = options;
+  const otherNonces = new Map(options.otherNonces || new Map());
+
+  const separator = "\0";
+  if (nonce.indexOf(separator) !== -1) {
+    throw new Error(`invalid nonce (contains NUL): ${stringify(nonce)}`);
+  }
+
+  const nonceWithSeparator = nonce + separator;
+  const otherNoncesWithSeparators = new Map();
+  for (const [otherNonce, otherName] of otherNonces.entries()) {
+    if (otherNonce === nonce) {
+      throw new Error(
+        `primary nonce listed as otherNonce: ${stringify(nonce)}`
+      );
+    }
+    if (otherNonce.indexOf(separator) !== -1) {
+      throw new Error(
+        `invalid otherNonce (contains NUL): ${stringify(otherNonce)}`
+      );
+    }
+    otherNoncesWithSeparators.set(otherNonce + separator, otherName);
+  }
+
+  const _ = {name, nonceWithSeparator};
 
   function assertValid(address: Address, what?: string): void {
     const _ = {address, what};
