@@ -1,48 +1,21 @@
 // @flow
 
 import {
-  type EdgeAddress,
-  type NodeAddress,
-  type _EdgeAddressT,
-  type _NodeAddressT,
-  Address,
+  type EdgeAddressT,
+  type NodeAddressT,
   Direction,
+  EdgeAddress,
   Graph,
+  NodeAddress,
   edgeToString,
 } from "./graph";
 
 describe("core/graph", () => {
-  const {nodeAddress, edgeAddress} = Address;
-  describe("Address re-exports", () => {
-    it("exist", () => {
-      expect(Address).toEqual(expect.anything());
-    });
-    it("include distinct NodeAddress and EdgeAddress types", () => {
-      const node: NodeAddress = nodeAddress([]);
-      const edge: EdgeAddress = edgeAddress([]);
-      // $ExpectFlowError
-      const _unused_badNodeAddress: NodeAddress = edge;
-      // $ExpectFlowError
-      const _unused_badEdgeAddress: EdgeAddress = node;
-    });
-    it("are read-only", () => {
-      const originalToParts = Address.toParts;
-      const wonkyToParts: typeof originalToParts = (a) => [
-        ...originalToParts(a),
-        "wat",
-      ];
-      expect(() => {
-        // $ExpectFlowError
-        Address.toParts = wonkyToParts;
-      }).toThrow(/read.only property/);
-    });
-  });
-
   function _unused_itExportsDistinctNodeAddressAndEdgeAddressTypes() {
     // $ExpectFlowError
-    const _unused_nodeToEdge = (x: _NodeAddressT): _EdgeAddressT => x;
+    const _unused_nodeToEdge = (x: NodeAddressT): EdgeAddressT => x;
     // $ExpectFlowError
-    const _unused_edgeToNode = (x: _EdgeAddressT): _NodeAddressT => x;
+    const _unused_edgeToNode = (x: EdgeAddressT): NodeAddressT => x;
   }
 
   describe("Direction values", () => {
@@ -80,7 +53,7 @@ describe("core/graph", () => {
         describe("edge addresses", () => {
           function rejectsEdgeAddress(f) {
             it(`${f.name} rejects EdgeAddress`, () => {
-              const e = edgeAddress(["foo"]);
+              const e = EdgeAddress.fromParts(["foo"]);
               // $ExpectFlowError
               expect(() => f.call(new Graph(), e)).toThrow("got EdgeAddress");
             });
@@ -88,9 +61,9 @@ describe("core/graph", () => {
           nodeMethods.forEach(rejectsEdgeAddress);
         });
         describe("remove a node that is some edge's", () => {
-          const src = nodeAddress(["src"]);
-          const dst = nodeAddress(["dst"]);
-          const address = edgeAddress(["edge"]);
+          const src = NodeAddress.fromParts(["src"]);
+          const dst = NodeAddress.fromParts(["dst"]);
+          const address = EdgeAddress.fromParts(["edge"]);
           const edge = () => ({src, dst, address});
           const graph = () =>
             new Graph()
@@ -111,7 +84,7 @@ describe("core/graph", () => {
       });
 
       describe("work on", () => {
-        const n1 = nodeAddress(["foo"]);
+        const n1 = NodeAddress.fromParts(["foo"]);
         it("a graph with no nodes", () => {
           const graph = new Graph();
           expect(graph.hasNode(n1)).toBe(false);
@@ -146,7 +119,7 @@ describe("core/graph", () => {
           expect(Array.from(graph.nodes())).toHaveLength(0);
         });
         it("a graph with two nodes", () => {
-          const n2 = nodeAddress([""]);
+          const n2 = NodeAddress.fromParts([""]);
           const graph = new Graph().addNode(n1).addNode(n2);
           expect(graph.hasNode(n1)).toBe(true);
           expect(graph.hasNode(n2)).toBe(true);
@@ -167,7 +140,7 @@ describe("core/graph", () => {
         describe("node addresses", () => {
           function rejectsNodeAddress(f) {
             it(`${f.name} rejects NodeAddress`, () => {
-              const e = nodeAddress(["foo"]);
+              const e = NodeAddress.fromParts(["foo"]);
               // $ExpectFlowError
               expect(() => f.call(new Graph(), e)).toThrow("got NodeAddress");
             });
@@ -177,9 +150,9 @@ describe("core/graph", () => {
 
         describe("addEdge edge validation", () => {
           describe("throws on absent", () => {
-            const src = nodeAddress(["src"]);
-            const dst = nodeAddress(["dst"]);
-            const address = edgeAddress(["hi"]);
+            const src = NodeAddress.fromParts(["src"]);
+            const dst = NodeAddress.fromParts(["dst"]);
+            const address = EdgeAddress.fromParts(["hi"]);
             it("src", () => {
               expect(() =>
                 new Graph().addNode(dst).addEdge({src, dst, address})
@@ -193,8 +166,8 @@ describe("core/graph", () => {
           });
 
           describe("throws on edge with", () => {
-            const n = nodeAddress(["foo"]);
-            const e = edgeAddress(["bar"]);
+            const n = NodeAddress.fromParts(["foo"]);
+            const e = EdgeAddress.fromParts(["bar"]);
             const x = "foomlio";
             const badEdges = [
               {
@@ -240,9 +213,9 @@ describe("core/graph", () => {
       });
 
       describe("on a graph", () => {
-        const src = nodeAddress(["foo"]);
-        const dst = nodeAddress(["bar"]);
-        const address = edgeAddress(["yay"]);
+        const src = NodeAddress.fromParts(["foo"]);
+        const dst = NodeAddress.fromParts(["bar"]);
+        const address = EdgeAddress.fromParts(["yay"]);
 
         describe("that has no edges or nodes", () => {
           it("`hasEdge` is false for some address", () => {
@@ -298,8 +271,8 @@ describe("core/graph", () => {
         });
 
         describe("with multiple loop edges", () => {
-          const e1 = edgeAddress(["e1"]);
-          const e2 = edgeAddress(["e2"]);
+          const e1 = EdgeAddress.fromParts(["e1"]);
+          const e2 = EdgeAddress.fromParts(["e2"]);
           const edge1 = {src, dst: src, address: e1};
           const edge2 = {src, dst: src, address: e2};
           const quiver = () =>
@@ -325,9 +298,9 @@ describe("core/graph", () => {
       });
 
       describe("idempotency of", () => {
-        const src = nodeAddress(["src"]);
-        const dst = nodeAddress(["dst"]);
-        const address = edgeAddress(["hi"]);
+        const src = NodeAddress.fromParts(["src"]);
+        const dst = NodeAddress.fromParts(["dst"]);
+        const address = EdgeAddress.fromParts(["hi"]);
         it("`addEdge`", () => {
           const g = new Graph()
             .addNode(src)
@@ -352,15 +325,15 @@ describe("core/graph", () => {
   describe("edgeToString", () => {
     it("works", () => {
       const edge = {
-        address: Address.edgeAddress(["one", "two"]),
-        dst: Address.nodeAddress(["five", "six"]),
-        src: Address.nodeAddress(["three", "four"]),
+        address: EdgeAddress.fromParts(["one", "two"]),
+        dst: NodeAddress.fromParts(["five", "six"]),
+        src: NodeAddress.fromParts(["three", "four"]),
       };
       const expected =
         "{" +
-        'address: edgeAddress(["one","two"]), ' +
-        'src: nodeAddress(["three","four"]), ' +
-        'dst: nodeAddress(["five","six"])' +
+        'address: EdgeAddress["one","two"], ' +
+        'src: NodeAddress["three","four"], ' +
+        'dst: NodeAddress["five","six"]' +
         "}";
       expect(edgeToString(edge)).toEqual(expected);
     });

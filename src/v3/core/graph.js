@@ -1,36 +1,27 @@
 // @flow
 
-import type {NodeAddress, EdgeAddress} from "./_address";
-import * as Address from "./_address";
 import {makeAddressModule, type AddressModule} from "./address";
 
-export type {NodeAddress, EdgeAddress} from "./_address";
-
-// New-style node and edge address types and modules. Will be made
-// public once implementation is complete.
-export opaque type _NodeAddressT: string = string;
-export opaque type _EdgeAddressT: string = string;
-export const _NodeAddress: AddressModule<_NodeAddressT> = (makeAddressModule({
+export opaque type NodeAddressT: string = string;
+export opaque type EdgeAddressT: string = string;
+export const NodeAddress: AddressModule<NodeAddressT> = (makeAddressModule({
   name: "NodeAddress",
   nonce: "N",
   otherNonces: new Map().set("E", "EdgeAddress"),
 }): AddressModule<string>);
-export const _EdgeAddress: AddressModule<_EdgeAddressT> = (makeAddressModule({
+export const EdgeAddress: AddressModule<EdgeAddressT> = (makeAddressModule({
   name: "EdgeAddress",
   nonce: "E",
   otherNonces: new Map().set("N", "NodeAddress"),
 }): AddressModule<string>);
 
-Object.freeze(Address);
-export {Address};
-
 export type Edge = {|
-  +address: EdgeAddress,
-  +src: NodeAddress,
-  +dst: NodeAddress,
+  +address: EdgeAddressT,
+  +src: NodeAddressT,
+  +dst: NodeAddressT,
 |};
 
-export type Neighbor = {|+node: NodeAddress, +edge: Edge|};
+export type Neighbor = {|+node: NodeAddressT, +edge: Edge|};
 
 export opaque type DirectionT = Symbol;
 export const Direction: {|
@@ -45,8 +36,8 @@ export const Direction: {|
 
 export type NeighborsOptions = {|
   +direction: DirectionT,
-  +nodePrefix: NodeAddress,
-  +edgePrefix: EdgeAddress,
+  +nodePrefix: NodeAddressT,
+  +edgePrefix: EdgeAddressT,
 |};
 
 export opaque type GraphJSON = any; // TODO
@@ -59,10 +50,10 @@ export class Graph {
   //
   // Invariant: If an edge `e` is in the graph, then `e.src` and `e.dst`
   // are both in the graph.
-  _nodes: Set<NodeAddress>;
-  _edges: Map<EdgeAddress, Edge>;
-  _inEdges: Map<NodeAddress, Edge[]>;
-  _outEdges: Map<NodeAddress, Edge[]>;
+  _nodes: Set<NodeAddressT>;
+  _edges: Map<EdgeAddressT, Edge>;
+  _inEdges: Map<NodeAddressT, Edge[]>;
+  _outEdges: Map<NodeAddressT, Edge[]>;
 
   constructor(): void {
     this._nodes = new Set();
@@ -71,14 +62,14 @@ export class Graph {
     this._outEdges = new Map();
   }
 
-  addNode(a: NodeAddress): this {
-    Address.assertNodeAddress(a);
+  addNode(a: NodeAddressT): this {
+    NodeAddress.assertValid(a);
     this._nodes.add(a);
     return this;
   }
 
-  removeNode(a: NodeAddress): this {
-    Address.assertNodeAddress(a);
+  removeNode(a: NodeAddressT): this {
+    NodeAddress.assertValid(a);
     for (const e of this.edges()) {
       if (e.src === a || e.dst === a) {
         const srcOrDst = e.src === a ? "src" : "dst";
@@ -91,19 +82,19 @@ export class Graph {
     return this;
   }
 
-  hasNode(a: NodeAddress): boolean {
-    Address.assertNodeAddress(a);
+  hasNode(a: NodeAddressT): boolean {
+    NodeAddress.assertValid(a);
     return this._nodes.has(a);
   }
 
-  *nodes(): Iterator<NodeAddress> {
+  *nodes(): Iterator<NodeAddressT> {
     yield* this._nodes;
   }
 
   addEdge(edge: Edge): this {
-    Address.assertNodeAddress(edge.src, "edge.src");
-    Address.assertNodeAddress(edge.dst, "edge.dst");
-    Address.assertEdgeAddress(edge.address, "edge.address");
+    NodeAddress.assertValid(edge.src, "edge.src");
+    NodeAddress.assertValid(edge.dst, "edge.dst");
+    EdgeAddress.assertValid(edge.address, "edge.address");
 
     const srcMissing = !this._nodes.has(edge.src);
     const dstMissing = !this._nodes.has(edge.dst);
@@ -129,19 +120,19 @@ export class Graph {
     return this;
   }
 
-  removeEdge(address: EdgeAddress): this {
-    Address.assertEdgeAddress(address);
+  removeEdge(address: EdgeAddressT): this {
+    EdgeAddress.assertValid(address);
     this._edges.delete(address);
     return this;
   }
 
-  hasEdge(address: EdgeAddress): boolean {
-    Address.assertEdgeAddress(address);
+  hasEdge(address: EdgeAddressT): boolean {
+    EdgeAddress.assertValid(address);
     return this._edges.has(address);
   }
 
-  edge(address: EdgeAddress): ?Edge {
-    Address.assertEdgeAddress(address);
+  edge(address: EdgeAddressT): ?Edge {
+    EdgeAddress.assertValid(address);
     return this._edges.get(address);
   }
 
@@ -149,7 +140,7 @@ export class Graph {
     yield* this._edges.values();
   }
 
-  neighbors(node: NodeAddress, options: NeighborsOptions): Iterator<Neighbor> {
+  neighbors(node: NodeAddressT, options: NeighborsOptions): Iterator<Neighbor> {
     const _ = {node, options};
     throw new Error("neighbors");
   }
@@ -174,8 +165,8 @@ export class Graph {
 }
 
 export function edgeToString(edge: Edge): string {
-  const address = Address.edgeToString(edge.address);
-  const src = Address.nodeToString(edge.src);
-  const dst = Address.nodeToString(edge.dst);
+  const address = EdgeAddress.toString(edge.address);
+  const src = NodeAddress.toString(edge.src);
+  const dst = NodeAddress.toString(edge.dst);
   return `{address: ${address}, src: ${src}, dst: ${dst}}`;
 }
