@@ -304,5 +304,111 @@ describe("core/address", () => {
         check("a longer address with lots of components", base, "c", "", "d");
       });
     });
+
+    describe("hasPrefix", () => {
+      const {FooAddress, BarAddress} = makeModules();
+
+      // We use these next tests as a proxy for fully correct
+      // validation, in conjunction with tests on `assertValid`.
+      it("validates first address kind", () => {
+        const fst = BarAddress.fromParts(["hello"]);
+        const snd = FooAddress.fromParts(["world"]);
+        expect(() => {
+          FooAddress.hasPrefix(fst, snd);
+        }).toThrow("address: expected FooAddress, got BarAddress:");
+      });
+      it("validates second address kind", () => {
+        const fst = FooAddress.fromParts(["hello"]);
+        const snd = BarAddress.fromParts(["world"]);
+        expect(() => {
+          FooAddress.hasPrefix(fst, snd);
+        }).toThrow("prefix: expected FooAddress, got BarAddress");
+      });
+
+      const {hasPrefix, fromParts} = FooAddress;
+      it("accepts the empty prefix of non-empty input", () => {
+        expect(hasPrefix(fromParts(["foo", "bar"]), fromParts([]))).toBe(true);
+      });
+      it("accepts the empty prefix of empty input", () => {
+        expect(hasPrefix(fromParts([]), fromParts([]))).toBe(true);
+      });
+      it("rejects a non-empty prefix of empty input", () => {
+        expect(hasPrefix(fromParts([]), fromParts(["foo", "bar"]))).toBe(false);
+      });
+      it("accepts a normal input", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "bar", "baz"]), fromParts(["foo", "bar"]))
+        ).toBe(true);
+      });
+      it("accepts that an address is a prefix of itself", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "bar"]), fromParts(["foo", "bar"]))
+        ).toBe(true);
+      });
+      it("accepts inputs with empty components", () => {
+        expect(
+          hasPrefix(
+            fromParts(["foo", "", "bar", "", "baz"]),
+            fromParts(["foo", "", "bar", ""])
+          )
+        ).toBe(true);
+      });
+      it("rejects inputs with no nontrivial common prefix", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "bar", "baz"]), fromParts(["bar", "foo"]))
+        ).toBe(false);
+      });
+      it("rejects inputs with insufficiently long common prefix", () => {
+        expect(
+          hasPrefix(
+            fromParts(["foo", "bar", "baz"]),
+            fromParts(["foo", "quux"])
+          )
+        ).toBe(false);
+      });
+      it("rejects when the putative prefix is a proper infix", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "bar", "baz"]), fromParts(["bar"]))
+        ).toBe(false);
+      });
+      it("rejects when the putative prefix is a proper suffix", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "bar", "baz"]), fromParts(["bar", "baz"]))
+        ).toBe(false);
+      });
+      it("rejects when the arguments are reversed", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "bar"]), fromParts(["foo", "bar", "baz"]))
+        ).toBe(false);
+      });
+      it("rejects when the last component is truncated", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "bar", "baz"]), fromParts(["foo", "ba"]))
+        ).toBe(false);
+      });
+      it("rejects when two components have been concatenated", () => {
+        expect(
+          hasPrefix(
+            fromParts(["foo", "bar", "baz"]),
+            fromParts(["foobar", "baz"])
+          )
+        ).toBe(false);
+      });
+      it("rejects an extra empty component in the middle of the base", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "", "baz"]), fromParts(["foo", "baz"]))
+        ).toBe(false);
+      });
+      it("rejects an extra empty component in the middle of the prefix", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "baz"]), fromParts(["foo", "", "baz"]))
+        ).toBe(false);
+      });
+      it("rejects an extra empty component at the end of the prefix", () => {
+        expect(
+          hasPrefix(fromParts(["foo", "baz"]), fromParts(["foo", "baz", ""]))
+        ).toBe(false);
+      });
+    });
   });
 });

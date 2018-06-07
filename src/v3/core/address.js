@@ -202,8 +202,9 @@ export function makeAddressModule(options: Options): AddressModule<string> {
   }
 
   function hasPrefix(address: Address, prefix: Address): boolean {
-    const _ = {address, prefix};
-    throw new Error("hasPrefix");
+    assertValid(address, "address");
+    assertValid(prefix, "prefix");
+    return address.startsWith(prefix);
   }
 
   const result = {
