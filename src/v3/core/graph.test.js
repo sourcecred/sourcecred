@@ -1,7 +1,15 @@
 // @flow
 
-import {Address, Direction, Graph, edgeToString} from "./graph";
-import type {NodeAddress, EdgeAddress} from "./graph";
+import {
+  type EdgeAddress,
+  type NodeAddress,
+  type _EdgeAddressT,
+  type _NodeAddressT,
+  Address,
+  Direction,
+  Graph,
+  edgeToString,
+} from "./graph";
 
 describe("core/graph", () => {
   const {nodeAddress, edgeAddress} = Address;
@@ -29,6 +37,13 @@ describe("core/graph", () => {
       }).toThrow(/read.only property/);
     });
   });
+
+  function _unused_itExportsDistinctNodeAddressAndEdgeAddressTypes() {
+    // $ExpectFlowError
+    const _unused_nodeToEdge = (x: _NodeAddressT): _EdgeAddressT => x;
+    // $ExpectFlowError
+    const _unused_edgeToNode = (x: _EdgeAddressT): _NodeAddressT => x;
+  }
 
   describe("Direction values", () => {
     it("are read-only", () => {

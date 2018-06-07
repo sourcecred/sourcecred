@@ -2,8 +2,25 @@
 
 import type {NodeAddress, EdgeAddress} from "./_address";
 import * as Address from "./_address";
+import {makeAddressModule, type AddressModule} from "./address";
 
 export type {NodeAddress, EdgeAddress} from "./_address";
+
+// New-style node and edge address types and modules. Will be made
+// public once implementation is complete.
+export opaque type _NodeAddressT: string = string;
+export opaque type _EdgeAddressT: string = string;
+export const _NodeAddress: AddressModule<_NodeAddressT> = (makeAddressModule({
+  name: "NodeAddress",
+  nonce: "N",
+  otherNonces: new Map().set("E", "EdgeAddress"),
+}): AddressModule<string>);
+export const _EdgeAddress: AddressModule<_EdgeAddressT> = (makeAddressModule({
+  name: "EdgeAddress",
+  nonce: "E",
+  otherNonces: new Map().set("N", "NodeAddress"),
+}): AddressModule<string>);
+
 Object.freeze(Address);
 export {Address};
 
