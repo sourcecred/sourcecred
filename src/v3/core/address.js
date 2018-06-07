@@ -191,8 +191,8 @@ export function makeAddressModule(options: Options): AddressModule<string> {
   }
 
   function toString(address: Address): string {
-    const _ = address;
-    throw new Error("toString");
+    const parts = toParts(address);
+    return `${name}${stringify(parts)}`;
   }
 
   function append(address: Address, ...parts: string[]): Address {

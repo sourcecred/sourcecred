@@ -216,5 +216,50 @@ describe("core/address", () => {
         check("on an input with repeated components", ["jar", "jar"]);
       });
     });
+
+    describe("toString", () => {
+      const {FooAddress, BarAddress} = makeModules();
+      const partsToString = (parts) =>
+        FooAddress.toString(FooAddress.fromParts(parts));
+
+      // We use this next test as a proxy for fully correct validation,
+      // in conjunction with tests on `assertValid`.
+      it("validates address kind", () => {
+        const bar = BarAddress.fromParts(["hello"]);
+        expect(() => {
+          FooAddress.toString(bar);
+        }).toThrow("expected FooAddress, got BarAddress:");
+      });
+
+      it("includes the address kind", () => {
+        expect(partsToString(["hello", "world"])).toContain("FooAddress");
+      });
+      it("includes the address parts", () => {
+        expect(partsToString(["hello", "world"])).toContain("hello");
+        expect(partsToString(["hello", "world"])).toContain("world");
+      });
+      it("does not include any NUL characters", () => {
+        expect(partsToString(["hello", "world"])).not.toContain("\0");
+      });
+      it("works on the empty address", () => {
+        expect(partsToString([])).toEqual(expect.anything());
+      });
+      it("differentiates empty components", () => {
+        // Each of the following should have a different `toString` form.
+        const inputs = [
+          partsToString([]),
+          partsToString([""]),
+          partsToString(["", ""]),
+          partsToString(["hello", "world"]),
+          partsToString(["", "hello", "world"]),
+          partsToString(["", "hello", "", "world"]),
+          partsToString(["", "hello", "", "", "world"]),
+          partsToString(["", "hello", "", "", "world", ""]),
+          partsToString(["", "hello", "", "", "world", "", ""]),
+          partsToString(["", "hello", "", "", "world", "", "", ""]),
+        ];
+        expect(Array.from(new Set(inputs)).sort()).toHaveLength(inputs.length);
+      });
+    });
   });
 });
