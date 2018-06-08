@@ -50,13 +50,21 @@ export class Graph {
   // An edge `e` is in the graph if `_edges.get(e.address)`
   // is deep-equal to `e`.
   //
+  // Invariant: For a node `n`, the following are equivalent:
+  //  1. `n` is in the graph;
+  //  2. `_inEdges.has(n)`;
+  //  3. `_outEdges.has(n)`.
+  //
   // Invariant: If an edge `e` is in the graph, then `e.src` and `e.dst`
   // are both in the graph.
   //
-  // Invariant: For an edge `e`, the following are equivalent:
-  //   - `e` is in the graph;
-  //   - `_inEdges.get(e.dst)` contains `e` exactly once;
-  //   - `_outEdges.get(e.src)` contains `e` exactly once.
+  // Invariant: For an edge `e`, if `e.dst` and `e.src` are in the
+  // graph, the following are equivalent:
+  //  1. `e` is in the graph;
+  //  2. `_inEdges.get(e.dst)` contains `e`;
+  //  3. `_inEdges.get(e.dst)` contains `e` exactly once;
+  //  4. `_outEdges.get(e.src)` contains `e`;
+  //  5. `_outEdges.get(e.src)` contains `e` exactly once.
   _nodes: Set<NodeAddressT>;
   _edges: Map<EdgeAddressT, Edge>;
   _inEdges: Map<NodeAddressT, Edge[]>;
