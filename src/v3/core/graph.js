@@ -1,5 +1,7 @@
 // @flow
 
+import deepEqual from "lodash.isequal";
+
 import {makeAddressModule, type AddressModule} from "./address";
 
 export opaque type NodeAddressT: string = string;
@@ -290,6 +292,15 @@ export class Graph {
       }
     }
     this._checkForComodification(initialModificationCount);
+  }
+
+  equals(that: Graph): boolean {
+    if (!(that instanceof Graph)) {
+      throw new Error(`Expected Graph, got ${String(that)}`);
+    }
+    return (
+      deepEqual(this._nodes, that._nodes) && deepEqual(this._edges, that._edges)
+    );
   }
 
   copy(): Graph {
