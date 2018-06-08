@@ -66,6 +66,7 @@
     "backend": "node scripts/backend.js",
     "test": "node scripts/test.js --env=jsdom",
     "ci-test": "CI=1 npm run test",
+    "coverage": "npm run test -- --coverage",
     "flow": "flow",
     "lint": "eslint src config --max-warnings 0",
     "travis": "node ./config/travis.js"
