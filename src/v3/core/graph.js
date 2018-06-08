@@ -42,6 +42,8 @@ export type NeighborsOptions = {|
 
 export opaque type GraphJSON = any; // TODO
 
+type ModificationCount = number;
+
 export class Graph {
   // A node `n` is in the graph if `_nodes.has(n)`.
   //
@@ -55,16 +57,48 @@ export class Graph {
   _inEdges: Map<NodeAddressT, Edge[]>;
   _outEdges: Map<NodeAddressT, Edge[]>;
 
+  // Incremented each time that any change is made to the graph. Used to
+  // check for comodification.
+  _modificationCount: ModificationCount;
+
   constructor(): void {
+    this._modificationCount = 0;
     this._nodes = new Set();
     this._edges = new Map();
     this._inEdges = new Map();
     this._outEdges = new Map();
   }
 
+  _checkForComodification(since: ModificationCount) {
+    // TODO(perf): Consider eliding this in production.
+    const now = this._modificationCount;
+    if (now === since) {
+      return;
+    }
+    if (now > since) {
+      throw new Error("Concurrent modification detected");
+    }
+    if (now < since) {
+      throw new Error(
+        "Invariant violation: expected modification count in the future"
+      );
+    }
+  }
+
+  _markModification() {
+    // TODO(perf): Consider eliding this in production.
+    if (this._modificationCount >= Number.MAX_SAFE_INTEGER) {
+      throw new Error(
+        `Graph cannot be modified more than ${this._modificationCount} times.`
+      );
+    }
+    this._modificationCount++;
+  }
+
   addNode(a: NodeAddressT): this {
     NodeAddress.assertValid(a);
     this._nodes.add(a);
+    this._markModification();
     return this;
   }
 
@@ -79,6 +113,7 @@ export class Graph {
       }
     }
     this._nodes.delete(a);
+    this._markModification();
     return this;
   }
 
@@ -87,8 +122,18 @@ export class Graph {
     return this._nodes.has(a);
   }
 
-  *nodes(): Iterator<NodeAddressT> {
-    yield* this._nodes;
+  nodes(): Iterator<NodeAddressT> {
+    return this._nodesIterator(this._modificationCount);
+  }
+
+  *_nodesIterator(
+    initialModificationCount: ModificationCount
+  ): Iterator<NodeAddressT> {
+    for (const node of this._nodes) {
+      this._checkForComodification(initialModificationCount);
+      yield node;
+    }
+    this._checkForComodification(initialModificationCount);
   }
 
   addEdge(edge: Edge): this {
@@ -117,12 +162,14 @@ export class Graph {
       }
     }
     this._edges.set(edge.address, edge);
+    this._markModification();
     return this;
   }
 
   removeEdge(address: EdgeAddressT): this {
     EdgeAddress.assertValid(address);
     this._edges.delete(address);
+    this._markModification();
     return this;
   }
 
@@ -136,8 +183,16 @@ export class Graph {
     return this._edges.get(address);
   }
 
-  *edges(): Iterator<Edge> {
-    yield* this._edges.values();
+  edges(): Iterator<Edge> {
+    return this._edgesIterator(this._modificationCount);
+  }
+
+  *_edgesIterator(initialModificationCount: ModificationCount): Iterator<Edge> {
+    for (const edge of this._edges.values()) {
+      this._checkForComodification(initialModificationCount);
+      yield edge;
+    }
+    this._checkForComodification(initialModificationCount);
   }
 
   neighbors(node: NodeAddressT, options: NeighborsOptions): Iterator<Neighbor> {

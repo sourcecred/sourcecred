@@ -43,6 +43,28 @@ describe("core/graph", () => {
       });
     }
 
+    it("throws when trying to perform an unsafe number of modifications", () => {
+      const g = new Graph();
+      g.addNode(NodeAddress.fromParts(["one"]));
+      g.addNode(NodeAddress.fromParts(["two"]));
+      // skip a few
+      g._modificationCount = Number.MAX_SAFE_INTEGER - 1;
+      g.addNode(NodeAddress.fromParts(["ninety-nine"]));
+      expect(() => {
+        g.addNode(NodeAddress.fromParts(["boom"]));
+      }).toThrow("cannot be modified");
+    });
+
+    it("throws in case of modification count reset", () => {
+      const g = new Graph();
+      g.addNode(NodeAddress.fromParts(["stop"]));
+      const iterator = g.nodes();
+      g._modificationCount--;
+      expect(() => {
+        iterator.next();
+      }).toThrow("modification count in the future");
+    });
+
     describe("node methods", () => {
       describe("error on", () => {
         const p = Graph.prototype;
@@ -79,6 +101,21 @@ describe("core/graph", () => {
             expect(() => graph().removeNode(dst)).toThrow(
               "Attempted to remove dst of"
             );
+          });
+        });
+
+        describe("concurrent modification in `nodes`", () => {
+          it("while in the middle of iteration", () => {
+            const g = new Graph().addNode(NodeAddress.fromParts(["node"]));
+            const iterator = g.nodes();
+            g._modificationCount++;
+            expect(() => iterator.next()).toThrow("Concurrent modification");
+          });
+          it("at exhaustion", () => {
+            const g = new Graph();
+            const iterator = g.nodes();
+            g._modificationCount++;
+            expect(() => iterator.next()).toThrow("Concurrent modification");
           });
         });
       });
@@ -124,6 +161,35 @@ describe("core/graph", () => {
           expect(graph.hasNode(n1)).toBe(true);
           expect(graph.hasNode(n2)).toBe(true);
           expect(Array.from(graph.nodes()).sort()).toEqual([n2, n1]);
+        });
+      });
+
+      describe("change the modification count", () => {
+        it("on addNode, when a node is added", () => {
+          const g = new Graph();
+          const before = g._modificationCount;
+          g.addNode(NodeAddress.fromParts(["hello"]));
+          expect(g._modificationCount).not.toEqual(before);
+        });
+        it("on addNode, even when the node already exists", () => {
+          const node = NodeAddress.fromParts(["hello"]);
+          const g = new Graph().addNode(node);
+          const before = g._modificationCount;
+          g.addNode(node);
+          expect(g._modificationCount).not.toEqual(before);
+        });
+        it("on removeNode, when a node is removed", () => {
+          const node = NodeAddress.fromParts(["hello"]);
+          const g = new Graph().addNode(node);
+          const before = g._modificationCount;
+          g.removeNode(node);
+          expect(g._modificationCount).not.toEqual(before);
+        });
+        it("on removeNode, even when the node does not exist", () => {
+          const g = new Graph();
+          const before = g._modificationCount;
+          g.removeNode(NodeAddress.fromParts(["hello"]));
+          expect(g._modificationCount).not.toEqual(before);
         });
       });
     });
@@ -223,6 +289,27 @@ describe("core/graph", () => {
                 expect(() => graph.addEdge(edge)).toThrow(msg);
               });
             });
+          });
+        });
+
+        describe("concurrent modification in `edges`", () => {
+          it("while in the middle of iteration", () => {
+            const g = new Graph()
+              .addNode(NodeAddress.fromParts(["node"]))
+              .addEdge({
+                address: EdgeAddress.fromParts(["edge"]),
+                src: NodeAddress.fromParts(["node"]),
+                dst: NodeAddress.fromParts(["node"]),
+              });
+            const iterator = g.edges();
+            g._modificationCount++;
+            expect(() => iterator.next()).toThrow("Concurrent modification");
+          });
+          it("at exhaustion", () => {
+            const g = new Graph();
+            const iterator = g.edges();
+            g._modificationCount++;
+            expect(() => iterator.next()).toThrow("Concurrent modification");
           });
         });
       });
@@ -333,6 +420,41 @@ describe("core/graph", () => {
             .removeEdge(address);
           expect(edgeArray(g)).toHaveLength(0);
         });
+      });
+    });
+
+    describe("change the modification count", () => {
+      const src = () => NodeAddress.fromParts(["fst"]);
+      const dst = () => NodeAddress.fromParts(["snd"]);
+      const edge = () => ({
+        address: EdgeAddress.fromParts(["bridge"]),
+        src: src(),
+        dst: dst(),
+      });
+      const baseGraph = () => new Graph().addNode(src()).addNode(dst());
+      it("on addEdge, when an edge is added", () => {
+        const g = baseGraph();
+        const before = g._modificationCount;
+        g.addEdge(edge());
+        expect(g._modificationCount).not.toEqual(before);
+      });
+      it("on addEdge, even when the edge already exists", () => {
+        const g = baseGraph().addEdge(edge());
+        const before = g._modificationCount;
+        g.addEdge(edge());
+        expect(g._modificationCount).not.toEqual(before);
+      });
+      it("on removeEdge, when an edge is removed", () => {
+        const g = baseGraph().addEdge(edge());
+        const before = g._modificationCount;
+        g.removeEdge(edge().address);
+        expect(g._modificationCount).not.toEqual(before);
+      });
+      it("on removeEdge, even when the edge does not exist", () => {
+        const g = new Graph();
+        const before = g._modificationCount;
+        g.removeEdge(edge().address);
+        expect(g._modificationCount).not.toEqual(before);
       });
     });
   });
