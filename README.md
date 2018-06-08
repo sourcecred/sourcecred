@@ -1,6 +1,7 @@
 ## SourceCred
 
 [![Build Status](https://travis-ci.org/sourcecred/sourcecred.svg?branch=master)](https://travis-ci.org/sourcecred/sourcecred)
+[![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
 
 ## Vision
 
@@ -74,6 +75,8 @@ develop a MVP, which will have the following basic features:
   into the project repository, making it canonical.
 
 ## Community
-Please consider joining [our community].
+Please consider joining [our Discord chat] or posting on [our forum].
 
-[our community]: https://spectrum.chat/sourcecred
+[our Discord chat]: https://discord.gg/tsBTgc9
+[our forum]: https://spectrum.chat/sourcecred
+
