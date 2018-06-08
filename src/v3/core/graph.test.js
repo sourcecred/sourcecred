@@ -165,6 +165,21 @@ describe("core/graph", () => {
             });
           });
 
+          it("throws on conflicting edge", () => {
+            const src = NodeAddress.fromParts(["src"]);
+            const dst = NodeAddress.fromParts(["dst"]);
+            const address = EdgeAddress.fromParts(["hi"]);
+            const e1 = {src, dst, address};
+            const e2 = {src, dst: src, address};
+            const graph = new Graph()
+              .addNode(src)
+              .addNode(dst)
+              .addEdge(e1);
+            expect(() => graph.addEdge(e2)).toThrow(
+              "conflict between new edge"
+            );
+          });
+
           describe("throws on edge with", () => {
             const n = NodeAddress.fromParts(["foo"]);
             const e = EdgeAddress.fromParts(["bar"]);
