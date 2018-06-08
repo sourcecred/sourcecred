@@ -799,6 +799,54 @@ describe("core/graph", () => {
     });
   });
 
+  describe("copy", () => {
+    it("copies can be independently mutated", () => {
+      const g1 = new Graph();
+      const g2 = g1.copy();
+      g2.addNode(NodeAddress.fromParts(["foo"]));
+      expect(g1.equals(g2)).toBe(false);
+    });
+    it("copies are reference-distinct", () => {
+      const g = new Graph();
+      expect(g).not.toBe(g.copy());
+    });
+    describe("copies are equal to original:", () => {
+      const src = NodeAddress.fromParts(["src"]);
+      const dst = NodeAddress.fromParts(["dst"]);
+      const edge1 = () => ({
+        src,
+        dst,
+        address: EdgeAddress.fromParts(["edge"]),
+      });
+      function expectCopyEqual(g) {
+        const copy = g.copy();
+        expect(copy.equals(g)).toBe(true);
+      }
+      it("empty graph", () => {
+        expectCopyEqual(new Graph());
+      });
+      it("graph with node added and removed", () => {
+        const g = new Graph().addNode(src).removeNode(src);
+        expectCopyEqual(g);
+      });
+      it("graph with an edge", () => {
+        const g = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge1());
+        expectCopyEqual(g);
+      });
+      it("graph with edge added and removed", () => {
+        const g = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge1())
+          .removeEdge(edge1().address);
+        expectCopyEqual(g);
+      });
+    });
+  });
+
   describe("edgeToString", () => {
     it("works", () => {
       const edge = {
