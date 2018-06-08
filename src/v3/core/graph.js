@@ -304,7 +304,14 @@ export class Graph {
   }
 
   copy(): Graph {
-    throw new Error("copy");
+    const result = new Graph();
+    for (const node of this.nodes()) {
+      result.addNode(node);
+    }
+    for (const edge of this.edges()) {
+      result.addEdge(edge);
+    }
+    return result;
   }
 
   toJSON(): GraphJSON {
