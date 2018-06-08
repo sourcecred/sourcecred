@@ -703,6 +703,100 @@ describe("core/graph", () => {
         });
       });
     });
+
+    describe("equals", () => {
+      const src = NodeAddress.fromParts(["src"]);
+      const dst = NodeAddress.fromParts(["dst"]);
+      const edge1 = () => ({
+        src,
+        dst,
+        address: EdgeAddress.fromParts(["edge"]),
+      });
+      const conflictingEdge = () => ({
+        src: dst,
+        dst: src,
+        address: EdgeAddress.fromParts(["edge"]),
+      });
+      const edge2 = () => ({
+        src: dst,
+        dst: src,
+        address: EdgeAddress.fromParts(["edge", "2"]),
+      });
+      function expectEquality(g1, g2, isEqual: boolean) {
+        expect(g1.equals(g2)).toBe(isEqual);
+        expect(g2.equals(g1)).toBe(isEqual);
+      }
+
+      it("empty graph equals itself", () => {
+        expectEquality(new Graph(), new Graph(), true);
+      });
+      it("empty graph doesn't equal nonempty graph", () => {
+        const g = new Graph().addNode(src);
+        expectEquality(g, new Graph(), false);
+      });
+      it("adding and removing a node doesn't change equality", () => {
+        const g = new Graph().addNode(src).removeNode(src);
+        expectEquality(g, new Graph(), true);
+      });
+      it("adding an edge changes equality", () => {
+        const g1 = new Graph().addNode(src).addNode(dst);
+        const g2 = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge1());
+        expectEquality(g1, g2, false);
+      });
+      it("adding nodes in different order doesn't change equality", () => {
+        const g1 = new Graph().addNode(src).addNode(dst);
+        const g2 = new Graph().addNode(dst).addNode(src);
+        expectEquality(g1, g2, true);
+      });
+      it("graphs with conflicting edges are not equal", () => {
+        const g1 = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge1());
+        const g2 = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(conflictingEdge());
+        expectEquality(g1, g2, false);
+      });
+      it("adding edges in different order doesn't change equality", () => {
+        const g1 = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge1())
+          .addEdge(edge2());
+        const g2 = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge2())
+          .addEdge(edge1());
+        expectEquality(g1, g2, true);
+      });
+      it("adding and removing an edge doesn't change equality", () => {
+        const g1 = new Graph().addNode(src).addNode(dst);
+        const g2 = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge1())
+          .removeEdge(edge1().address);
+        expectEquality(g1, g2, true);
+      });
+      it("throws error on null", () => {
+        // $ExpectFlowError
+        expect(() => new Graph().equals(null)).toThrow("null");
+      });
+      it("throws error on undefined", () => {
+        // $ExpectFlowError
+        expect(() => new Graph().equals(undefined)).toThrow("undefined");
+      });
+      it("throws error on non-graph object", () => {
+        // $ExpectFlowError
+        expect(() => new Graph().equals({})).toThrow("object");
+      });
+    });
   });
 
   describe("edgeToString", () => {
