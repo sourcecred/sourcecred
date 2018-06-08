@@ -1,9 +1,11 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
+import sortBy from "lodash.sortby";
 
 import {makeAddressModule, type AddressModule} from "./address";
 
+import {toCompat, fromCompat, type Compatible} from "../util/compat";
 export opaque type NodeAddressT: string = string;
 export opaque type EdgeAddressT: string = string;
 export const NodeAddress: AddressModule<NodeAddressT> = (makeAddressModule({
@@ -22,6 +24,8 @@ export type Edge = {|
   +src: NodeAddressT,
   +dst: NodeAddressT,
 |};
+
+const COMPAT_INFO = {type: "sourcecred/graph", version: "0.4.0"};
 
 export type Neighbor = {|+node: NodeAddressT, +edge: Edge|};
 
@@ -42,7 +46,18 @@ export type NeighborsOptions = {|
   +edgePrefix: EdgeAddressT,
 |};
 
-export opaque type GraphJSON = any; // TODO
+type AddressJSON = string[]; // Result of calling {Node,Edge}Address.toParts
+type Integer = number;
+type IndexedEdgeJSON = {|
+  +address: AddressJSON,
+  +srcIndex: Integer,
+  +dstIndex: Integer,
+|};
+
+export opaque type GraphJSON = Compatible<{|
+  +nodes: AddressJSON[],
+  +edges: IndexedEdgeJSON[],
+|}>;
 
 type ModificationCount = number;
 
@@ -316,12 +331,38 @@ export class Graph {
   }
 
   toJSON(): GraphJSON {
-    throw new Error("toJSON");
+    const sortedNodes = Array.from(this.nodes()).sort();
+    const nodeToSortedIndex = new Map();
+    sortedNodes.forEach((node, i) => {
+      nodeToSortedIndex.set(node, i);
+    });
+    const sortedEdges = sortBy(Array.from(this.edges()), (x) => x.address);
+    const indexedEdges = sortedEdges.map(({src, dst, address}) => {
+      const srcIndex = nodeToSortedIndex.get(src);
+      const dstIndex = nodeToSortedIndex.get(dst);
+      if (srcIndex == null || dstIndex == null) {
+        throw new Error(`Invariant violation`);
+      }
+      return {srcIndex, dstIndex, address: EdgeAddress.toParts(address)};
+    });
+    const rawJSON = {
+      nodes: sortedNodes.map((x) => NodeAddress.toParts(x)),
+      edges: indexedEdges,
+    };
+    return toCompat(COMPAT_INFO, rawJSON);
   }
 
   static fromJSON(json: GraphJSON): Graph {
-    const _ = json;
-    throw new Error("fromJSON");
+    const {nodes: nodesJSON, edges} = fromCompat(COMPAT_INFO, json);
+    const result = new Graph();
+    const nodes = nodesJSON.map((x) => NodeAddress.fromParts(x));
+    nodes.forEach((n) => result.addNode(n));
+    edges.forEach(({address, srcIndex, dstIndex}) => {
+      const src = nodes[srcIndex];
+      const dst = nodes[dstIndex];
+      result.addEdge({address: EdgeAddress.fromParts(address), src, dst});
+    });
+    return result;
   }
 
   static merge(graphs: Iterable<Graph>): Graph {

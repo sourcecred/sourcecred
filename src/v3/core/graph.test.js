@@ -947,6 +947,96 @@ describe("core/graph", () => {
     });
   });
 
+  describe("toJSON / fromJSON", () => {
+    const src = NodeAddress.fromParts(["src"]);
+    const dst = NodeAddress.fromParts(["dst"]);
+    const edge1 = () => ({
+      src,
+      dst,
+      address: EdgeAddress.fromParts(["edge"]),
+    });
+    const edge2 = () => ({
+      src: dst,
+      dst: src,
+      address: EdgeAddress.fromParts(["edge", "2"]),
+    });
+    it("toJSON matches snapshot", () => {
+      const graph = new Graph()
+        .addNode(src)
+        .addNode(dst)
+        .addEdge(edge1())
+        .addEdge(edge2());
+      expect(graph.toJSON()).toMatchSnapshot();
+    });
+
+    describe("compose to identity", () => {
+      function expectCompose(g) {
+        const json = g.toJSON();
+        const newGraph = Graph.fromJSON(json);
+        const newJSON = newGraph.toJSON();
+        expect(newGraph.equals(g)).toBe(true);
+        expect(newJSON).toEqual(json);
+      }
+      it("for an empty graph", () => {
+        expectCompose(new Graph());
+      });
+      it("for a graph with some nodes", () => {
+        const g = new Graph().addNode(src).addNode(dst);
+        expectCompose(g);
+      });
+      it("for a graph with nodes added and removed", () => {
+        const g = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .removeNode(src);
+        expectCompose(g);
+      });
+      it("for a graph with nodes and edges", () => {
+        const g = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge1())
+          .addEdge(edge2());
+        expectCompose(g);
+      });
+    });
+
+    describe("toJSON representation is canonical", () => {
+      function expectCanonicity(g1, g2) {
+        expect(g1.toJSON()).toEqual(g2.toJSON());
+      }
+      it("for an empty graph", () => {
+        expectCanonicity(new Graph(), new Graph());
+      });
+      it("for graph with nodes added in different order", () => {
+        const g1 = new Graph().addNode(src).addNode(dst);
+        const g2 = new Graph().addNode(dst).addNode(src);
+        expectCanonicity(g1, g2);
+      });
+      it("for a graph with nodes added and removed", () => {
+        const g1 = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .removeNode(src);
+        const g2 = new Graph().addNode(dst);
+        expectCanonicity(g1, g2);
+      });
+      it("for a graph with edges added and removed", () => {
+        const g1 = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge1())
+          .removeEdge(edge1().address)
+          .addEdge(edge2());
+        const g2 = new Graph()
+          .addNode(src)
+          .addNode(dst)
+          .addEdge(edge2());
+        expectCanonicity(g1, g2);
+      });
+    });
+  });
+
   describe("edgeToString", () => {
     it("works", () => {
       const edge = {
