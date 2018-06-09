@@ -847,6 +847,106 @@ describe("core/graph", () => {
     });
   });
 
+  describe("merge", () => {
+    const foo = NodeAddress.fromParts(["foo"]);
+    const bar = NodeAddress.fromParts(["bar"]);
+    const zod = NodeAddress.fromParts(["zod"]);
+    const foofoo = () => ({
+      src: foo,
+      dst: foo,
+      address: EdgeAddress.fromParts(["foofoo"]),
+    });
+    const foobar = () => ({
+      src: foo,
+      dst: bar,
+      address: EdgeAddress.fromParts(["foobar"]),
+    });
+    const zodfoo = () => ({
+      src: zod,
+      dst: foo,
+      address: EdgeAddress.fromParts(["zodfoo"]),
+    });
+    const conflictingZodfoo = () => ({
+      src: zod,
+      dst: zod,
+      address: EdgeAddress.fromParts(["zodfoo"]),
+    });
+    it("yields empty graph on empty input", () => {
+      expect(Graph.merge([]).equals(new Graph())).toBe(true);
+    });
+    it("can be independently mutated from input", () => {
+      const g1 = new Graph();
+      const g2 = Graph.merge([g1]);
+      expect(g1.equals(g2)).toBe(true);
+      g2.addNode(foo);
+      expect(g1.equals(g2)).toBe(false);
+    });
+    it("is identity on a singleton input", () => {
+      const graph = new Graph()
+        .addNode(foo)
+        .addNode(bar)
+        .addEdge(foobar());
+      expect(graph.equals(Graph.merge([graph]))).toBe(true);
+    });
+    it("merges two graphs with no intersection", () => {
+      const g1 = new Graph()
+        .addNode(foo)
+        .addNode(bar)
+        .addEdge(foobar());
+      const g2 = new Graph().addNode(zod);
+      const g3_actual = Graph.merge([g1, g2]);
+      const g3_expected = new Graph()
+        .addNode(foo)
+        .addNode(bar)
+        .addNode(zod)
+        .addEdge(foobar());
+      expect(g3_actual.equals(g3_expected)).toBe(true);
+    });
+    it("merges two graphs with nontrivial intersection", () => {
+      const g1 = new Graph()
+        .addNode(foo)
+        .addNode(bar)
+        .addEdge(foobar())
+        .addEdge(foofoo());
+      const g2 = new Graph()
+        .addNode(foo)
+        .addNode(zod)
+        .addEdge(zodfoo())
+        .addEdge(foofoo());
+      const g3_actual = Graph.merge([g1, g2]);
+      const g3_expected = new Graph()
+        .addNode(foo)
+        .addNode(bar)
+        .addNode(zod)
+        .addEdge(foobar())
+        .addEdge(zodfoo())
+        .addEdge(foofoo());
+      expect(g3_actual.equals(g3_expected)).toBe(true);
+    });
+    it("merges many graphs", () => {
+      const graphs = [];
+      const expected = new Graph();
+      for (let i = 0; i < 10; i++) {
+        const node = NodeAddress.fromParts([String(i)]);
+        expected.addNode(node);
+        graphs.push(new Graph().addNode(node));
+      }
+      const actual = Graph.merge(graphs);
+      expect(actual.equals(expected)).toBe(true);
+    });
+    it("rejects graphs with conflicting edges", () => {
+      const g1 = new Graph()
+        .addNode(foo)
+        .addNode(zod)
+        .addEdge(zodfoo());
+      const g2 = new Graph()
+        .addNode(foo)
+        .addNode(zod)
+        .addEdge(conflictingZodfoo());
+      expect(() => Graph.merge([g1, g2])).toThrow("conflict between new edge");
+    });
+  });
+
   describe("edgeToString", () => {
     it("works", () => {
       const edge = {
