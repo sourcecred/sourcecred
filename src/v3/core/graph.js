@@ -62,30 +62,161 @@ export opaque type GraphJSON = Compatible<{|
 type ModificationCount = number;
 
 export class Graph {
-  // A node `n` is in the graph if `_nodes.has(n)`.
-  //
-  // An edge `e` is in the graph if `_edges.get(e.address)`
-  // is deep-equal to `e`.
-  //
-  // Invariant: For a node `n`, the following are equivalent:
-  //  1. `n` is in the graph;
-  //  2. `_inEdges.has(n)`;
-  //  3. `_outEdges.has(n)`.
-  //
-  // Invariant: If an edge `e` is in the graph, then `e.src` and `e.dst`
-  // are both in the graph.
-  //
-  // Invariant: For an edge `e`, if `e.dst` and `e.src` are in the
-  // graph, the following are equivalent:
-  //  1. `e` is in the graph;
-  //  2. `_inEdges.get(e.dst)` contains `e`;
-  //  3. `_inEdges.get(e.dst)` contains `e` exactly once;
-  //  4. `_outEdges.get(e.src)` contains `e`;
-  //  5. `_outEdges.get(e.src)` contains `e` exactly once.
   _nodes: Set<NodeAddressT>;
   _edges: Map<EdgeAddressT, Edge>;
   _inEdges: Map<NodeAddressT, Edge[]>;
   _outEdges: Map<NodeAddressT, Edge[]>;
+
+  checkInvariants() {
+    // Definition. A node `n` is in the graph if `_nodes.has(n)`.
+    //
+    // Definition. An edge `e` is in the graph if `e` is deep-equal to
+    // `_edges.get(e.address)`.
+    //
+    // Definition. A *logical value* is an equivalence class of ECMAScript
+    // values modulo deep equality (or, from context, an element of such a
+    // class).
+
+    // Invariant 1. For a node `n`, if `n` is in the graph, then
+    // `_inEdges.has(n)` and `_outEdges.has(n)`. The values of
+    // `_inEdges.get(n)` and `_outEdges.get(n)` are arrays of `Edge`s.
+    for (const node of this._nodes) {
+      if (!this._inEdges.has(node)) {
+        throw new Error(`missing in-edges for ${NodeAddress.toString(node)}`);
+      }
+      if (!this._outEdges.has(node)) {
+        throw new Error(`missing out-edges for ${NodeAddress.toString(node)}`);
+      }
+    }
+
+    // Invariant 2. For an edge address `a`, if `_edges.has(a)` and
+    // `_edges.get(a) === e`, then:
+    //  1. `e.address` equals `a`;
+    //  2. `e.src` is in the graph;
+    //  3. `e.dst` is in the graph;
+    //  4. `_inEdges.get(e.dst)` contains `e`; and
+    //  5. `_outEdges.get(e.src)` contains `e`.
+    //
+    // We check 2.1, 2.2, and 2.3 here, and check 2.4 and 2.5 later for
+    // improved performance.
+    for (const [address, edge] of this._edges.entries()) {
+      if (edge.address !== address) {
+        throw new Error(
+          `bad edge address: ${edgeToString(edge)} does not match ${address}`
+        );
+      }
+      if (!this._nodes.has(edge.src)) {
+        throw new Error(`missing src for edge: ${edgeToString(edge)}`);
+      }
+      if (!this._nodes.has(edge.dst)) {
+        throw new Error(`missing dst for edge: ${edgeToString(edge)}`);
+      }
+    }
+
+    // Invariant 3. Suppose that `_inEdges.has(n)` and, let `es` be
+    // `_inEdges.get(n)`. Then
+    //  1. `n` is in the graph;
+    //  2. `es` contains any logical value at most once;
+    //  3. if `es` contains `e`, then `e` is in the graph; and
+    //  4. if `es` contains `e`, then `e.dst === n`.
+    //
+    // Invariant 4. Suppose that `_outEdges.has(n)` and, let `es` be
+    // `_outEdges.get(n)`. Then
+    //  1. `n` is in the graph;
+    //  2. `es` contains any logical value at most once;
+    //  3. if `es` contains `e`, then `e` is in the graph; and
+    //  4. if `es` contains `e`, then `e.src === n`.
+    //
+    // Note that Invariant 3.2 is equivalent to the following:
+    //
+    //     Invariant 3.2*. If `a` is an address, then there is at most
+    //     one index `i` such that `es[i].address` is `a`.
+    //
+    // It is immediate that 3.2* implies 3.2. To see that 3.2 implies
+    // 3.2*, suppose that `i` and `j` are such that `es[i].address` and
+    // `es[j].address` are both `a`. Then, by Invariant 3.3, each of
+    // `es[i]` and `es[j]` is in the graph, so each is deep-equal to
+    // `_edges.get(a)`. Therefore, `es[i]` and `es[j]` are deep-equal to
+    // each other. By 3.2, `es` contains a logical value at most once,
+    // so `i` must be equal to `j`.
+    //
+    // Therefore, it is valid to verify that 3.2*, which we will do. The
+    // same logic of course applies to Invariant 4.2.
+    const inEdgesSeen: Set<EdgeAddressT> = new Set();
+    const outEdgesSeen: Set<EdgeAddressT> = new Set();
+    for (const {seen, map, baseNodeAccessor, kind} of [
+      {
+        seen: inEdgesSeen,
+        map: this._inEdges,
+        baseNodeAccessor: (e) => e.dst,
+        kind: "in-edge",
+      },
+      {
+        seen: outEdgesSeen,
+        map: this._outEdges,
+        baseNodeAccessor: (e) => e.src,
+        kind: "out-edge",
+      },
+    ]) {
+      for (const [base, edges] of map.entries()) {
+        if (!this._nodes.has(base)) {
+          // 3.1/4.1
+          throw new Error(
+            `spurious ${kind}s for ${NodeAddress.toString(base)}`
+          );
+        }
+        for (const edge of edges) {
+          // 3.2/4.2
+          if (seen.has(edge.address)) {
+            throw new Error(`duplicate ${kind}: ${edgeToString(edge)}`);
+          }
+          seen.add(edge.address);
+          const expected = this._edges.get(edge.address);
+          // 3.3/4.3
+          if (!deepEqual(edge, expected)) {
+            if (expected == null) {
+              throw new Error(`spurious ${kind}: ${edgeToString(edge)}`);
+            } else {
+              const vs = `${edgeToString(edge)} vs. ${edgeToString(expected)}`;
+              throw new Error(`bad ${kind}: ${vs}`);
+            }
+          }
+          // 3.4/4.4
+          const expectedBase = baseNodeAccessor(edge);
+          if (base !== baseNodeAccessor(edge)) {
+            throw new Error(
+              `bad ${kind}: ${edgeToString(edge)} should be ` +
+                `should be anchored at ${NodeAddress.toString(expectedBase)}`
+            );
+          }
+        }
+      }
+    }
+
+    // We now return to check 2.4 and 2.5, with the help of the
+    // structures that we have built up in checking Invariants 3 and 4.
+    for (const edge of this._edges.values()) {
+      // That `_inEdges.get(n)` contains `e` for some `n` is sufficient
+      // to show that `_inEdges.get(e.dst)` contains `e`: if `n` were
+      // something other than `e.dst`, then we would have a failure of
+      // invariant 3.4, which would have been caught earlier. Likewise
+      // for `_outEdges`.
+      if (!inEdgesSeen.has(edge.address)) {
+        throw new Error(`missing in-edge: ${edgeToString(edge)}`);
+      }
+      if (!outEdgesSeen.has(edge.address)) {
+        throw new Error(`missing out-edge: ${edgeToString(edge)}`);
+      }
+    }
+  }
+
+  _maybeCheckInvariants() {
+    if (process.env.NODE_ENV === "test") {
+      // TODO(perf): If this method becomes really slow, we can disable
+      // it on specific tests wherein we construct large graphs.
+      this.checkInvariants();
+    }
+  }
 
   // Incremented each time that any change is made to the graph. Used to
   // check for comodification.
@@ -97,12 +228,14 @@ export class Graph {
     this._edges = new Map();
     this._inEdges = new Map();
     this._outEdges = new Map();
+    this._maybeCheckInvariants();
   }
 
   _checkForComodification(since: ModificationCount) {
     // TODO(perf): Consider eliding this in production.
     const now = this._modificationCount;
     if (now === since) {
+      this._maybeCheckInvariants();
       return;
     }
     if (now > since) {
@@ -113,6 +246,7 @@ export class Graph {
         "Invariant violation: expected modification count in the future"
       );
     }
+    this._maybeCheckInvariants();
   }
 
   _markModification() {
@@ -123,6 +257,7 @@ export class Graph {
       );
     }
     this._modificationCount++;
+    this._maybeCheckInvariants();
   }
 
   addNode(a: NodeAddressT): this {
@@ -133,6 +268,7 @@ export class Graph {
       this._outEdges.set(a, []);
     }
     this._markModification();
+    this._maybeCheckInvariants();
     return this;
   }
 
@@ -154,16 +290,21 @@ export class Graph {
     this._outEdges.delete(a);
     this._nodes.delete(a);
     this._markModification();
+    this._maybeCheckInvariants();
     return this;
   }
 
   hasNode(a: NodeAddressT): boolean {
     NodeAddress.assertValid(a);
-    return this._nodes.has(a);
+    const result = this._nodes.has(a);
+    this._maybeCheckInvariants();
+    return result;
   }
 
   nodes(): Iterator<NodeAddressT> {
-    return this._nodesIterator(this._modificationCount);
+    const result = this._nodesIterator(this._modificationCount);
+    this._maybeCheckInvariants();
+    return result;
   }
 
   *_nodesIterator(
@@ -171,9 +312,11 @@ export class Graph {
   ): Iterator<NodeAddressT> {
     for (const node of this._nodes) {
       this._checkForComodification(initialModificationCount);
+      this._maybeCheckInvariants();
       yield node;
     }
     this._checkForComodification(initialModificationCount);
+    this._maybeCheckInvariants();
   }
 
   addEdge(edge: Edge): this {
@@ -212,6 +355,7 @@ export class Graph {
     }
     this._edges.set(edge.address, edge);
     this._markModification();
+    this._maybeCheckInvariants();
     return this;
   }
 
@@ -240,36 +384,47 @@ export class Graph {
       });
     }
     this._markModification();
+    this._maybeCheckInvariants();
     return this;
   }
 
   hasEdge(address: EdgeAddressT): boolean {
     EdgeAddress.assertValid(address);
-    return this._edges.has(address);
+    const result = this._edges.has(address);
+    this._maybeCheckInvariants();
+    return result;
   }
 
   edge(address: EdgeAddressT): ?Edge {
     EdgeAddress.assertValid(address);
-    return this._edges.get(address);
+    const result = this._edges.get(address);
+    this._maybeCheckInvariants();
+    return result;
   }
 
   edges(): Iterator<Edge> {
-    return this._edgesIterator(this._modificationCount);
+    const result = this._edgesIterator(this._modificationCount);
+    this._maybeCheckInvariants();
+    return result;
   }
 
   *_edgesIterator(initialModificationCount: ModificationCount): Iterator<Edge> {
     for (const edge of this._edges.values()) {
       this._checkForComodification(initialModificationCount);
+      this._maybeCheckInvariants();
       yield edge;
     }
     this._checkForComodification(initialModificationCount);
+    this._maybeCheckInvariants();
   }
 
   neighbors(node: NodeAddressT, options: NeighborsOptions): Iterator<Neighbor> {
     if (!this.hasNode(node)) {
       throw new Error(`Node does not exist: ${NodeAddress.toString(node)}`);
     }
-    return this._neighbors(node, options, this._modificationCount);
+    const result = this._neighbors(node, options, this._modificationCount);
+    this._maybeCheckInvariants();
+    return result;
   }
 
   *_neighbors(
@@ -310,24 +465,30 @@ export class Graph {
         const neighborNode = adjacency.direction === "IN" ? edge.src : edge.dst;
         if (nodeFilter(neighborNode) && edgeFilter(edge.address)) {
           this._checkForComodification(initialModificationCount);
+          this._maybeCheckInvariants();
           yield {edge, node: neighborNode};
         }
       }
     }
     this._checkForComodification(initialModificationCount);
+    this._maybeCheckInvariants();
   }
 
   equals(that: Graph): boolean {
     if (!(that instanceof Graph)) {
       throw new Error(`Expected Graph, got ${String(that)}`);
     }
-    return (
-      deepEqual(this._nodes, that._nodes) && deepEqual(this._edges, that._edges)
-    );
+    const result =
+      deepEqual(this._nodes, that._nodes) &&
+      deepEqual(this._edges, that._edges);
+    this._maybeCheckInvariants();
+    return result;
   }
 
   copy(): Graph {
-    return Graph.merge([this]);
+    const result = Graph.merge([this]);
+    this._maybeCheckInvariants();
+    return result;
   }
 
   toJSON(): GraphJSON {
@@ -349,7 +510,9 @@ export class Graph {
       nodes: sortedNodes.map((x) => NodeAddress.toParts(x)),
       edges: indexedEdges,
     };
-    return toCompat(COMPAT_INFO, rawJSON);
+    const result = toCompat(COMPAT_INFO, rawJSON);
+    this._maybeCheckInvariants();
+    return result;
   }
 
   static fromJSON(json: GraphJSON): Graph {
