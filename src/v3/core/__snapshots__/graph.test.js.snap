@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`core/graph toJSON / fromJSON toJSON matches snapshot 1`] = `
+exports[`core/graph toJSON / fromJSON snapshot testing a trivial graph 1`] = `
 Array [
   Object {
     "type": "sourcecred/graph",
@@ -27,6 +27,56 @@ Array [
     "nodes": Array [
       Array [
         "dst",
+      ],
+      Array [
+        "src",
+      ],
+    ],
+  },
+]
+`;
+
+exports[`core/graph toJSON / fromJSON snapshot testing an advanced graph 1`] = `
+Array [
+  Object {
+    "type": "sourcecred/graph",
+    "version": "0.4.0",
+  },
+  Object {
+    "edges": Array [
+      Object {
+        "address": Array [
+          "hom",
+          "1",
+        ],
+        "dstIndex": 0,
+        "srcIndex": 3,
+      },
+      Object {
+        "address": Array [
+          "hom",
+          "2",
+        ],
+        "dstIndex": 0,
+        "srcIndex": 3,
+      },
+      Object {
+        "address": Array [
+          "loop",
+        ],
+        "dstIndex": 2,
+        "srcIndex": 2,
+      },
+    ],
+    "nodes": Array [
+      Array [
+        "dst",
+      ],
+      Array [
+        "isolated",
+      ],
+      Array [
+        "loop",
       ],
       Array [
         "src",
