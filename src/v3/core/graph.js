@@ -312,14 +312,7 @@ export class Graph {
   }
 
   copy(): Graph {
-    const result = new Graph();
-    for (const node of this.nodes()) {
-      result.addNode(node);
-    }
-    for (const edge of this.edges()) {
-      result.addEdge(edge);
-    }
-    return result;
+    return Graph.merge([this]);
   }
 
   toJSON(): GraphJSON {
