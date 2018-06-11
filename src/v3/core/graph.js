@@ -332,8 +332,16 @@ export class Graph {
   }
 
   static merge(graphs: Iterable<Graph>): Graph {
-    const _ = graphs;
-    throw new Error("merge");
+    const result = new Graph();
+    for (const graph of graphs) {
+      for (const node of graph.nodes()) {
+        result.addNode(node);
+      }
+      for (const edge of graph.edges()) {
+        result.addEdge(edge);
+      }
+    }
+    return result;
   }
 }
 
