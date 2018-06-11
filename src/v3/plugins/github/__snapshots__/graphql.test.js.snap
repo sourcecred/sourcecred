@@ -1,0 +1,202 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`graphql #postQueryExhaustive resolves a representative query 1`] = `
+Object {
+  "repository": Object {
+    "id": "opaque-repo",
+    "issues": Object {
+      "nodes": Array [
+        Object {
+          "author": Object {
+            "__typename": "User",
+            "id": "opaque-user-decentralion",
+            "login": "decentralion",
+          },
+          "body": "Like it says, please comment!",
+          "comments": Object {
+            "nodes": Array [
+              Object {
+                "author": Object {
+                  "__typename": "User",
+                  "id": "opaque-user-decentralion",
+                  "login": "decentralion",
+                },
+                "body": "Here: I'll start.",
+                "id": "opaque-issue1comment1",
+                "url": "opaque://issue/1/comment/1",
+              },
+              Object {
+                "author": Object {
+                  "__typename": "User",
+                  "id": "opaque-user-wchargin",
+                  "login": "wchargin",
+                },
+                "body": "Closing due to no fun allowed.",
+                "id": "opaque-issue1comment2",
+                "url": "opaque://issue/1/comment/2",
+              },
+              Object {
+                "author": Object {
+                  "__typename": "User",
+                  "id": "opaque-user-decentralion",
+                  "login": "decentralion",
+                },
+                "body": "That is not very nice.",
+                "id": "opaque-issue1comment3",
+                "url": "opaque://issue/1/comment/3",
+              },
+            ],
+            "pageInfo": Object {
+              "endCursor": "opaque-cursor-issue1comments-v2",
+              "hasNextPage": false,
+            },
+          },
+          "id": "opaque-issue1",
+          "number": 1,
+          "title": "Request for comments",
+        },
+        Object {
+          "author": Object {
+            "__typename": "User",
+            "id": "opaque-user-wchargin",
+            "login": "wchargin",
+          },
+          "body": "You can comment here, too.",
+          "comments": Object {
+            "nodes": Array [
+              Object {
+                "author": Object {
+                  "__typename": "User",
+                  "id": "opaque-user-decentralion",
+                  "login": "decentralion",
+                },
+                "body": "What fun!",
+                "id": "opaque-issue3comment1",
+                "url": "opaque://issue/3/comment/1",
+              },
+              Object {
+                "author": Object {
+                  "__typename": "User",
+                  "id": "opaque-user-decentralion",
+                  "login": "decentralion",
+                },
+                "body": "I will comment on this issue for a second time.",
+                "id": "opaque-issue3comment2",
+                "url": "opaque://issue/1/comment/3",
+              },
+            ],
+            "pageInfo": Object {
+              "endCursor": "opaque-cursor-issue3comments-v2",
+              "hasNextPage": false,
+            },
+          },
+          "id": "opaque-issue3",
+          "number": 2,
+          "title": "Another",
+        },
+        Object {
+          "author": Object {
+            "__typename": "User",
+            "id": "opaque-user-wchargin",
+            "login": "wchargin",
+          },
+          "body": "My mailbox is out of space",
+          "comments": Object {
+            "nodes": Array [
+              Object {
+                "author": Object {
+                  "__typename": "User",
+                  "id": "opaque-user-decentralion",
+                  "login": "decentralion",
+                },
+                "body": "But you posted the last issue",
+                "id": "opaque-issue4comment1",
+                "url": "opaque://issue/4/comment/1",
+              },
+            ],
+            "pageInfo": Object {
+              "endCursor": "opaque-cursor-issue4comments-v2",
+              "hasNextPage": false,
+            },
+          },
+          "id": "opaque-issue4",
+          "number": 4,
+          "title": "Please stop making issues",
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "opaque-cursor-issues-v2",
+        "hasNextPage": false,
+      },
+    },
+    "pullRequests": Object {
+      "nodes": Array [
+        Object {
+          "author": Object {
+            "__typename": "User",
+            "id": "opaque-user-wchargin",
+            "login": "wchargin",
+          },
+          "body": "Surely this deserves much cred.",
+          "comments": Object {
+            "nodes": Array [],
+            "pageInfo": Object {
+              "endCursor": null,
+              "hasNextPage": false,
+            },
+          },
+          "id": "opaque-pr2",
+          "number": 2,
+          "reviews": Object {
+            "nodes": Array [
+              Object {
+                "author": Object {
+                  "__typename": "User",
+                  "id": "opaque-user-decentralion",
+                  "login": "decentralion",
+                },
+                "body": "You actually introduced a new typo instead.",
+                "comments": Object {
+                  "nodes": Array [],
+                  "pageInfo": Object {
+                    "endCursor": null,
+                    "hasNextPage": false,
+                  },
+                },
+                "id": "opaque-pr2review1",
+                "state": "CHANGES_REQUESTED",
+              },
+              Object {
+                "author": Object {
+                  "__typename": "User",
+                  "id": "opaque-user-decentralion",
+                  "login": "decentralion",
+                },
+                "body": "Looks godo to me.",
+                "comments": Object {
+                  "nodes": Array [],
+                  "pageInfo": Object {
+                    "endCursor": null,
+                    "hasNextPage": false,
+                  },
+                },
+                "id": "opaque-pr2review2",
+                "state": "APPROVED",
+              },
+            ],
+            "pageInfo": Object {
+              "endCursor": "opaque-cursor-pr2reviews-v1",
+              "hasNextPage": false,
+            },
+          },
+          "title": "Fix typo in README",
+        },
+      ],
+      "pageInfo": Object {
+        "endCursor": "opaque-cursor-prs-v0",
+        "hasNextPage": false,
+      },
+    },
+  },
+}
+`;

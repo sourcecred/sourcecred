@@ -62,6 +62,9 @@ module.exports = {
     fetchAndPrintGithubRepo: resolveApp(
       "src/v1/plugins/github/bin/fetchAndPrintGithubRepo.js"
     ),
+    fetchAndPrintGithubRepoV3: resolveApp(
+      "src/v3/plugins/github/bin/fetchAndPrintGithubRepo.js"
+    ),
     createExampleRepo: resolveApp(
       "src/v1/plugins/git/bin/createExampleRepo.js"
     ),

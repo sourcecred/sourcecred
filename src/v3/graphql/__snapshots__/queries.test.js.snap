@@ -1,0 +1,1028 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`queries complex object stringification should build the object 1`] = `
+Object {
+  "data": Object {
+    "exampleBoolean": Object {
+      "data": true,
+      "type": "LITERAL",
+    },
+    "exampleEnum": Object {
+      "data": "WORLD",
+      "type": "ENUM",
+    },
+    "exampleList": Object {
+      "data": Array [
+        Object {
+          "data": 12,
+          "type": "LITERAL",
+        },
+        Object {
+          "data": 14,
+          "type": "LITERAL",
+        },
+        Object {
+          "data": 16,
+          "type": "LITERAL",
+        },
+      ],
+      "type": "LIST",
+    },
+    "exampleNull": Object {
+      "data": null,
+      "type": "LITERAL",
+    },
+    "exampleNumber": Object {
+      "data": 123,
+      "type": "LITERAL",
+    },
+    "exampleObject": Object {
+      "data": Object {
+        "roses": Object {
+          "data": "red",
+          "type": "LITERAL",
+        },
+        "violets": Object {
+          "data": "blue",
+          "type": "LITERAL",
+        },
+      },
+      "type": "OBJECT",
+    },
+    "exampleString": Object {
+      "data": "hello",
+      "type": "LITERAL",
+    },
+    "exampleVariable": Object {
+      "data": "widget",
+      "type": "VARIABLE",
+    },
+    "nestedList": Object {
+      "data": Array [
+        Object {
+          "data": Array [
+            Object {
+              "data": "w",
+              "type": "LITERAL",
+            },
+            Object {
+              "data": "x",
+              "type": "LITERAL",
+            },
+          ],
+          "type": "LIST",
+        },
+        Object {
+          "data": Array [
+            Object {
+              "data": "y",
+              "type": "LITERAL",
+            },
+            Object {
+              "data": "z",
+              "type": "LITERAL",
+            },
+          ],
+          "type": "LIST",
+        },
+      ],
+      "type": "LIST",
+    },
+    "nestedObject": Object {
+      "data": Object {
+        "english": Object {
+          "data": Object {
+            "n1": Object {
+              "data": "one",
+              "type": "LITERAL",
+            },
+            "n2": Object {
+              "data": "two",
+              "type": "LITERAL",
+            },
+          },
+          "type": "OBJECT",
+        },
+        "greek": Object {
+          "data": Object {
+            "n1": Object {
+              "data": "ένα",
+              "type": "LITERAL",
+            },
+            "n2": Object {
+              "data": "δύο",
+              "type": "LITERAL",
+            },
+          },
+          "type": "OBJECT",
+        },
+      },
+      "type": "OBJECT",
+    },
+  },
+  "type": "OBJECT",
+}
+`;
+
+exports[`queries complex object stringification should work inline 1`] = `"{ exampleNumber: 123 exampleString: \\"hello\\" exampleBoolean: true exampleNull: null exampleEnum: WORLD exampleVariable: $widget exampleList: [ 12 14 16 ] exampleObject: { roses: \\"red\\" violets: \\"blue\\" } nestedList: [ [ \\"w\\" \\"x\\" ] [ \\"y\\" \\"z\\" ] ] nestedObject: { english: { n1: \\"one\\" n2: \\"two\\" } greek: { n1: \\"ένα\\" n2: \\"δύο\\" } } }"`;
+
+exports[`queries complex object stringification should work multiline 1`] = `
+"{
+  exampleNumber:
+    123
+  exampleString:
+    \\"hello\\"
+  exampleBoolean:
+    true
+  exampleNull:
+    null
+  exampleEnum:
+    WORLD
+  exampleVariable:
+    $widget
+  exampleList:
+    [
+      12
+      14
+      16
+    ]
+  exampleObject:
+    {
+      roses:
+        \\"red\\"
+      violets:
+        \\"blue\\"
+    }
+  nestedList:
+    [
+      [
+        \\"w\\"
+        \\"x\\"
+      ]
+      [
+        \\"y\\"
+        \\"z\\"
+      ]
+    ]
+  nestedObject:
+    {
+      english:
+        {
+          n1:
+            \\"one\\"
+          n2:
+            \\"two\\"
+        }
+      greek:
+        {
+          n1:
+            \\"ένα\\"
+          n2:
+            \\"δύο\\"
+        }
+    }
+}"
+`;
+
+exports[`queries end-to-end-test cases for a query using lots of features should build the query 1`] = `
+Array [
+  Object {
+    "name": "QueryWithParameters",
+    "params": Array [
+      Object {
+        "name": "qp1",
+        "type": "String!",
+      },
+      Object {
+        "name": "qp2",
+        "type": "String!",
+      },
+    ],
+    "selections": Array [
+      Object {
+        "alias": null,
+        "args": Object {
+          "id": Object {
+            "data": 12345,
+            "type": "LITERAL",
+          },
+          "name": Object {
+            "data": "qp1",
+            "type": "VARIABLE",
+          },
+        },
+        "name": "thing",
+        "selections": Array [
+          Object {
+            "alias": null,
+            "args": Object {
+              "tasty": Object {
+                "data": true,
+                "type": "LITERAL",
+              },
+              "type": Object {
+                "data": "APPLE",
+                "type": "ENUM",
+              },
+            },
+            "name": "fruit",
+            "selections": Array [],
+            "type": "FIELD",
+          },
+          Object {
+            "fragmentName": "otherThings",
+            "type": "FRAGMENT_SPREAD",
+          },
+        ],
+        "type": "FIELD",
+      },
+      Object {
+        "alias": null,
+        "args": Object {},
+        "name": "more",
+        "selections": Array [
+          Object {
+            "selections": Array [
+              Object {
+                "alias": null,
+                "args": Object {},
+                "name": "mcguffins",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "quantity",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                ],
+                "type": "FIELD",
+              },
+              Object {
+                "alias": "goo",
+                "args": Object {
+                  "state": Object {
+                    "data": "SLIMY",
+                    "type": "ENUM",
+                  },
+                },
+                "name": "slime",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "availability",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                ],
+                "type": "FIELD",
+              },
+            ],
+            "type": "INLINE_FRAGMENT",
+            "typeCondition": "Widget",
+          },
+          Object {
+            "selections": Array [
+              Object {
+                "alias": null,
+                "args": Object {
+                  "attributes": Object {
+                    "data": Object {
+                      "shaft": Object {
+                        "data": null,
+                        "type": "LITERAL",
+                      },
+                      "teeth": Object {
+                        "data": Array [
+                          Object {
+                            "data": 12,
+                            "type": "LITERAL",
+                          },
+                          Object {
+                            "data": 14,
+                            "type": "LITERAL",
+                          },
+                          Object {
+                            "data": 16,
+                            "type": "LITERAL",
+                          },
+                        ],
+                        "type": "LIST",
+                      },
+                    },
+                    "type": "OBJECT",
+                  },
+                },
+                "name": "cogs",
+                "selections": Array [],
+                "type": "FIELD",
+              },
+            ],
+            "type": "INLINE_FRAGMENT",
+            "typeCondition": "Gizmo",
+          },
+        ],
+        "type": "FIELD",
+      },
+    ],
+    "type": "QUERY",
+  },
+  Object {
+    "name": "QueryWithoutParameters",
+    "params": Array [],
+    "selections": Array [
+      Object {
+        "alias": null,
+        "args": Object {},
+        "name": "rateLimit",
+        "selections": Array [
+          Object {
+            "alias": null,
+            "args": Object {},
+            "name": "remaining",
+            "selections": Array [],
+            "type": "FIELD",
+          },
+        ],
+        "type": "FIELD",
+      },
+    ],
+    "type": "QUERY",
+  },
+  Object {
+    "name": "otherThings",
+    "selections": Array [
+      Object {
+        "alias": null,
+        "args": Object {},
+        "name": "__typename",
+        "selections": Array [],
+        "type": "FIELD",
+      },
+      Object {
+        "alias": null,
+        "args": Object {},
+        "name": "quality",
+        "selections": Array [],
+        "type": "FIELD",
+      },
+    ],
+    "type": "FRAGMENT",
+    "typeCondition": "Thing",
+  },
+]
+`;
+
+exports[`queries end-to-end-test cases for a query using lots of features should stringify as inline 1`] = `"query QueryWithParameters($qp1: String! $qp2: String!) { thing(id: 12345 name: $qp1) { fruit(type: APPLE tasty: true) ...otherThings } more { ... on Widget { mcguffins { quantity } goo: slime(state: SLIMY) { availability } } ... on Gizmo { cogs(attributes: { teeth: [ 12 14 16 ] shaft: null }) } } } query QueryWithoutParameters { rateLimit { remaining } } fragment otherThings on Thing { __typename quality }"`;
+
+exports[`queries end-to-end-test cases for a query using lots of features should stringify as multiline 1`] = `
+"query QueryWithParameters($qp1: String! $qp2: String!) {
+  thing(id: 12345 name: $qp1) {
+    fruit(type: APPLE tasty: true)
+    ...otherThings
+  }
+  more {
+    ... on Widget {
+      mcguffins {
+        quantity
+      }
+      goo: slime(state: SLIMY) {
+        availability
+      }
+    }
+    ... on Gizmo {
+      cogs(attributes: { teeth: [ 12 14 16 ] shaft: null })
+    }
+  }
+}
+query QueryWithoutParameters {
+  rateLimit {
+    remaining
+  }
+}
+fragment otherThings on Thing {
+  __typename
+  quality
+}"
+`;
+
+exports[`queries end-to-end-test cases for a useful query should build the query 1`] = `
+Array [
+  Object {
+    "name": "FetchData",
+    "params": Array [
+      Object {
+        "name": "repoOwner",
+        "type": "String!",
+      },
+      Object {
+        "name": "repoName",
+        "type": "String!",
+      },
+    ],
+    "selections": Array [
+      Object {
+        "alias": null,
+        "args": Object {
+          "name": Object {
+            "data": "repoName",
+            "type": "VARIABLE",
+          },
+          "owner": Object {
+            "data": "repoOwner",
+            "type": "VARIABLE",
+          },
+        },
+        "name": "repository",
+        "selections": Array [
+          Object {
+            "alias": null,
+            "args": Object {
+              "first": Object {
+                "data": 100,
+                "type": "LITERAL",
+              },
+            },
+            "name": "issues",
+            "selections": Array [
+              Object {
+                "alias": null,
+                "args": Object {},
+                "name": "pageInfo",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "hasNextPage",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                ],
+                "type": "FIELD",
+              },
+              Object {
+                "alias": null,
+                "args": Object {},
+                "name": "nodes",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "id",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "title",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "body",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "number",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "author",
+                    "selections": Array [
+                      Object {
+                        "fragmentName": "whoami",
+                        "type": "FRAGMENT_SPREAD",
+                      },
+                    ],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {
+                      "first": Object {
+                        "data": 20,
+                        "type": "LITERAL",
+                      },
+                    },
+                    "name": "comments",
+                    "selections": Array [
+                      Object {
+                        "alias": null,
+                        "args": Object {},
+                        "name": "pageInfo",
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "hasNextPage",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                        ],
+                        "type": "FIELD",
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Object {},
+                        "name": "nodes",
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "id",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "author",
+                            "selections": Array [
+                              Object {
+                                "fragmentName": "whoami",
+                                "type": "FRAGMENT_SPREAD",
+                              },
+                            ],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "body",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "url",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                        ],
+                        "type": "FIELD",
+                      },
+                    ],
+                    "type": "FIELD",
+                  },
+                ],
+                "type": "FIELD",
+              },
+            ],
+            "type": "FIELD",
+          },
+          Object {
+            "alias": null,
+            "args": Object {
+              "first": Object {
+                "data": 100,
+                "type": "LITERAL",
+              },
+            },
+            "name": "pullRequests",
+            "selections": Array [
+              Object {
+                "alias": null,
+                "args": Object {},
+                "name": "pageInfo",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "hasNextPage",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                ],
+                "type": "FIELD",
+              },
+              Object {
+                "alias": null,
+                "args": Object {},
+                "name": "nodes",
+                "selections": Array [
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "id",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "title",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "body",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "number",
+                    "selections": Array [],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {},
+                    "name": "author",
+                    "selections": Array [
+                      Object {
+                        "fragmentName": "whoami",
+                        "type": "FRAGMENT_SPREAD",
+                      },
+                    ],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {
+                      "first": Object {
+                        "data": 20,
+                        "type": "LITERAL",
+                      },
+                    },
+                    "name": "comments",
+                    "selections": Array [
+                      Object {
+                        "alias": null,
+                        "args": Object {},
+                        "name": "pageInfo",
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "hasNextPage",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                        ],
+                        "type": "FIELD",
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Object {},
+                        "name": "nodes",
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "id",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "author",
+                            "selections": Array [
+                              Object {
+                                "fragmentName": "whoami",
+                                "type": "FRAGMENT_SPREAD",
+                              },
+                            ],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "body",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "url",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                        ],
+                        "type": "FIELD",
+                      },
+                    ],
+                    "type": "FIELD",
+                  },
+                  Object {
+                    "alias": null,
+                    "args": Object {
+                      "first": Object {
+                        "data": 10,
+                        "type": "LITERAL",
+                      },
+                    },
+                    "name": "reviews",
+                    "selections": Array [
+                      Object {
+                        "alias": null,
+                        "args": Object {},
+                        "name": "pageInfo",
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "hasNextPage",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                        ],
+                        "type": "FIELD",
+                      },
+                      Object {
+                        "alias": null,
+                        "args": Object {},
+                        "name": "nodes",
+                        "selections": Array [
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "id",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "body",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "author",
+                            "selections": Array [
+                              Object {
+                                "fragmentName": "whoami",
+                                "type": "FRAGMENT_SPREAD",
+                              },
+                            ],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {},
+                            "name": "state",
+                            "selections": Array [],
+                            "type": "FIELD",
+                          },
+                          Object {
+                            "alias": null,
+                            "args": Object {
+                              "first": Object {
+                                "data": 10,
+                                "type": "LITERAL",
+                              },
+                            },
+                            "name": "comments",
+                            "selections": Array [
+                              Object {
+                                "alias": null,
+                                "args": Object {},
+                                "name": "pageInfo",
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": Object {},
+                                    "name": "hasNextPage",
+                                    "selections": Array [],
+                                    "type": "FIELD",
+                                  },
+                                ],
+                                "type": "FIELD",
+                              },
+                              Object {
+                                "alias": null,
+                                "args": Object {},
+                                "name": "nodes",
+                                "selections": Array [
+                                  Object {
+                                    "alias": null,
+                                    "args": Object {},
+                                    "name": "id",
+                                    "selections": Array [],
+                                    "type": "FIELD",
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": Object {},
+                                    "name": "body",
+                                    "selections": Array [],
+                                    "type": "FIELD",
+                                  },
+                                  Object {
+                                    "alias": null,
+                                    "args": Object {},
+                                    "name": "author",
+                                    "selections": Array [
+                                      Object {
+                                        "fragmentName": "whoami",
+                                        "type": "FRAGMENT_SPREAD",
+                                      },
+                                    ],
+                                    "type": "FIELD",
+                                  },
+                                ],
+                                "type": "FIELD",
+                              },
+                            ],
+                            "type": "FIELD",
+                          },
+                        ],
+                        "type": "FIELD",
+                      },
+                    ],
+                    "type": "FIELD",
+                  },
+                ],
+                "type": "FIELD",
+              },
+            ],
+            "type": "FIELD",
+          },
+        ],
+        "type": "FIELD",
+      },
+    ],
+    "type": "QUERY",
+  },
+  Object {
+    "name": "whoami",
+    "selections": Array [
+      Object {
+        "alias": null,
+        "args": Object {},
+        "name": "__typename",
+        "selections": Array [],
+        "type": "FIELD",
+      },
+      Object {
+        "alias": null,
+        "args": Object {},
+        "name": "login",
+        "selections": Array [],
+        "type": "FIELD",
+      },
+      Object {
+        "selections": Array [
+          Object {
+            "alias": null,
+            "args": Object {},
+            "name": "id",
+            "selections": Array [],
+            "type": "FIELD",
+          },
+        ],
+        "type": "INLINE_FRAGMENT",
+        "typeCondition": "User",
+      },
+      Object {
+        "selections": Array [
+          Object {
+            "alias": null,
+            "args": Object {},
+            "name": "id",
+            "selections": Array [],
+            "type": "FIELD",
+          },
+        ],
+        "type": "INLINE_FRAGMENT",
+        "typeCondition": "Organization",
+      },
+      Object {
+        "selections": Array [
+          Object {
+            "alias": null,
+            "args": Object {},
+            "name": "id",
+            "selections": Array [],
+            "type": "FIELD",
+          },
+        ],
+        "type": "INLINE_FRAGMENT",
+        "typeCondition": "Bot",
+      },
+    ],
+    "type": "FRAGMENT",
+    "typeCondition": "Actor",
+  },
+]
+`;
+
+exports[`queries end-to-end-test cases for a useful query should stringify as inline 1`] = `"query FetchData($repoOwner: String! $repoName: String!) { repository(owner: $repoOwner name: $repoName) { issues(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } } } pullRequests(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } reviews(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } state comments(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } } } } } } } } } fragment whoami on Actor { __typename login ... on User { id } ... on Organization { id } ... on Bot { id } }"`;
+
+exports[`queries end-to-end-test cases for a useful query should stringify as multiline 1`] = `
+"query FetchData($repoOwner: String! $repoName: String!) {
+  repository(owner: $repoOwner name: $repoName) {
+    issues(first: 100) {
+      pageInfo {
+        hasNextPage
+      }
+      nodes {
+        id
+        title
+        body
+        number
+        author {
+          ...whoami
+        }
+        comments(first: 20) {
+          pageInfo {
+            hasNextPage
+          }
+          nodes {
+            id
+            author {
+              ...whoami
+            }
+            body
+            url
+          }
+        }
+      }
+    }
+    pullRequests(first: 100) {
+      pageInfo {
+        hasNextPage
+      }
+      nodes {
+        id
+        title
+        body
+        number
+        author {
+          ...whoami
+        }
+        comments(first: 20) {
+          pageInfo {
+            hasNextPage
+          }
+          nodes {
+            id
+            author {
+              ...whoami
+            }
+            body
+            url
+          }
+        }
+        reviews(first: 10) {
+          pageInfo {
+            hasNextPage
+          }
+          nodes {
+            id
+            body
+            author {
+              ...whoami
+            }
+            state
+            comments(first: 10) {
+              pageInfo {
+                hasNextPage
+              }
+              nodes {
+                id
+                body
+                author {
+                  ...whoami
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+fragment whoami on Actor {
+  __typename
+  login
+  ... on User {
+    id
+  }
+  ... on Organization {
+    id
+  }
+  ... on Bot {
+    id
+  }
+}"
+`;
