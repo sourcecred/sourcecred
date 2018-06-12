@@ -83,11 +83,7 @@ const PAGE_SIZE_REVIEW_COMMENTS = 10;
  * the continuation into a query, and not of the continuation itself.
  */
 export type Continuation = {|
-  +enclosingNodeType:
-    | "REPOSITORY"
-    | "ISSUE"
-    | "PULL_REQUEST"
-    | "PULL_REQUEST_REVIEW",
+  +enclosingNodeType: "REPOSITORY" | "ISSUE" | "PULL" | "REVIEW",
   +enclosingNodeId: string,
   +selections: $ReadOnlyArray<Selection>,
   +destinationPath: $ReadOnlyArray<string | number>,
@@ -108,7 +104,7 @@ export type GithubResponseJSON = {|
 export type RepositoryJSON = {|
   +id: string,
   +issues: ConnectionJSON<IssueJSON>,
-  +pullRequests: ConnectionJSON<PullRequestJSON>,
+  +pulls: ConnectionJSON<PullJSON>,
   +url: string,
   +name: string,
   +owner: AuthorJSON,
@@ -136,9 +132,12 @@ export function createQuery(): Body {
             b.field("issues", {first: b.literal(PAGE_SIZE_ISSUES)}, [
               b.fragmentSpread("issues"),
             ]),
-            b.field("pullRequests", {first: b.literal(PAGE_SIZE_PRS)}, [
-              b.fragmentSpread("prs"),
-            ]),
+            b.alias(
+              "pulls",
+              b.field("pullRequests", {first: b.literal(PAGE_SIZE_PRS)}, [
+                b.fragmentSpread("pulls"),
+              ])
+            ),
           ]
         ),
       ]
@@ -192,8 +191,8 @@ export function continuationsFromContinuation(
   const continuationsFromEnclosingType = {
     REPOSITORY: continuationsFromRepository,
     ISSUE: continuationsFromIssue,
-    PULL_REQUEST: continuationsFromPR,
-    PULL_REQUEST_REVIEW: continuationsFromReview,
+    PULL: continuationsFromPR,
+    REVIEW: continuationsFromReview,
   }[source.enclosingNodeType];
   return continuationsFromEnclosingType(
     result,
@@ -227,19 +226,22 @@ function* continuationsFromRepository(
       destinationPath: path,
     };
   }
-  if (result.pullRequests && result.pullRequests.pageInfo.hasNextPage) {
+  if (result.pulls && result.pulls.pageInfo.hasNextPage) {
     yield {
       enclosingNodeType: "REPOSITORY",
       enclosingNodeId: nodeId,
       selections: [
         b.inlineFragment("Repository", [
-          b.field(
-            "pullRequests",
-            {
-              first: b.literal(PAGE_LIMIT),
-              after: b.literal(result.pullRequests.pageInfo.endCursor),
-            },
-            [b.fragmentSpread("prs")]
+          b.alias(
+            "pulls",
+            b.field(
+              "pullRequests",
+              {
+                first: b.literal(PAGE_LIMIT),
+                after: b.literal(result.pulls.pageInfo.endCursor),
+              },
+              [b.fragmentSpread("pulls")]
+            )
           ),
         ]),
       ],
@@ -253,11 +255,11 @@ function* continuationsFromRepository(
       yield* continuationsFromIssue(issue, issue.id, subpath);
     }
   }
-  if (result.pullRequests) {
-    for (let i = 0; i < result.pullRequests.nodes.length; i++) {
-      const pr = result.pullRequests.nodes[i];
-      const subpath = [...path, "pullRequests", "nodes", i];
-      yield* continuationsFromPR(pr, pr.id, subpath);
+  if (result.pulls) {
+    for (let i = 0; i < result.pulls.nodes.length; i++) {
+      const pull = result.pulls.nodes[i];
+      const subpath = [...path, "pulls", "nodes", i];
+      yield* continuationsFromPR(pull, pull.id, subpath);
     }
   }
 }
@@ -297,7 +299,7 @@ function* continuationsFromPR(
   const b = build;
   if (result.comments && result.comments.pageInfo.hasNextPage) {
     yield {
-      enclosingNodeType: "PULL_REQUEST",
+      enclosingNodeType: "PULL",
       enclosingNodeId: nodeId,
       selections: [
         b.inlineFragment("PullRequest", [
@@ -316,7 +318,7 @@ function* continuationsFromPR(
   }
   if (result.reviews && result.reviews.pageInfo.hasNextPage) {
     yield {
-      enclosingNodeType: "PULL_REQUEST",
+      enclosingNodeType: "PULL",
       enclosingNodeId: nodeId,
       selections: [
         b.inlineFragment("PullRequest", [
@@ -350,7 +352,7 @@ function* continuationsFromReview(
   const b = build;
   if (result.comments.pageInfo.hasNextPage) {
     yield {
-      enclosingNodeType: "PULL_REQUEST_REVIEW",
+      enclosingNodeType: "REVIEW",
       enclosingNodeId: nodeId,
       selections: [
         b.inlineFragment("PullRequestReview", [
@@ -694,7 +696,7 @@ function issuesFragment(): FragmentDefinition {
   ]);
 }
 
-export type PullRequestJSON = {|
+export type PullJSON = {|
   +id: string,
   +url: string,
   +title: string,
@@ -704,13 +706,13 @@ export type PullRequestJSON = {|
   +deletions: number,
   +author: NullableAuthorJSON,
   +comments: ConnectionJSON<CommentJSON>,
-  +reviews: ConnectionJSON<PullRequestReviewJSON>,
+  +reviews: ConnectionJSON<ReviewJSON>,
   // If present, oid is the commit SHA of the merged commit.
   +mergeCommit: ?{|+oid: string|},
 |};
-function pullRequestsFragment(): FragmentDefinition {
+function pullsFragment(): FragmentDefinition {
   const b = build;
-  return b.fragment("prs", "PullRequestConnection", [
+  return b.fragment("pulls", "PullRequestConnection", [
     makePageInfo(),
     b.field("nodes", {}, [
       b.field("id"),
@@ -752,20 +754,20 @@ function commentsFragment(): FragmentDefinition {
   ]);
 }
 
-export type PullRequestReviewState =
+export type ReviewState =
   | "CHANGES_REQUESTED"
   | "APPROVED"
   | "COMMENTED"
   | "DISMISSED"
   | "PENDING";
 
-export type PullRequestReviewJSON = {|
+export type ReviewJSON = {|
   +id: string,
   +url: string,
   +body: string,
   +author: NullableAuthorJSON,
-  +state: PullRequestReviewState,
-  +comments: ConnectionJSON<PullRequestReviewCommentJSON>,
+  +state: ReviewState,
+  +comments: ConnectionJSON<ReviewCommentJSON>,
 |};
 function reviewsFragment(): FragmentDefinition {
   const b = build;
@@ -784,7 +786,7 @@ function reviewsFragment(): FragmentDefinition {
   ]);
 }
 
-export type PullRequestReviewCommentJSON = {|
+export type ReviewCommentJSON = {|
   +id: string,
   +url: string,
   +body: string,
@@ -811,7 +813,7 @@ export function createFragments(): FragmentDefinition[] {
   return [
     whoamiFragment(),
     issuesFragment(),
-    pullRequestsFragment(),
+    pullsFragment(),
     commentsFragment(),
     reviewsFragment(),
     reviewCommentsFragment(),

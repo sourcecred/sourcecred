@@ -23,9 +23,9 @@ describe("graphql", () => {
     });
     function makeData(hasNextPageFor: {
       issues: boolean,
-      prs: boolean,
+      pulls: boolean,
       issueComments: boolean,
-      prComments: boolean,
+      pullComments: boolean,
       reviews: boolean,
       reviewComments: boolean,
     }) {
@@ -61,53 +61,53 @@ describe("graphql", () => {
               },
             ],
           },
-          pullRequests: {
+          pulls: {
             pageInfo: {
-              hasNextPage: hasNextPageFor.prs,
-              endCursor: "opaque-cursor-prs",
+              hasNextPage: hasNextPageFor.pulls,
+              endCursor: "opaque-cursor-pulls",
             },
             nodes: [
               {
-                id: "opaque-pr2",
+                id: "opaque-pull2",
                 title: "texdoc exam",
                 body: "What is air?",
                 number: 2,
                 author: makeAuthor("wchargin"),
                 comments: {
                   pageInfo: {
-                    hasNextPage: hasNextPageFor.prComments,
-                    endCursor: "opaque-cursor-pr2comments",
+                    hasNextPage: hasNextPageFor.pullComments,
+                    endCursor: "opaque-cursor-pull2comments",
                   },
                   nodes: [
                     {
-                      id: "opaque-pr2comment1",
+                      id: "opaque-pull2comment1",
                       author: makeAuthor("decentralion"),
                       body: "Why is there air?",
-                      url: "opaque://pr/2/comment/1",
+                      url: "opaque://pull/2/comment/1",
                     },
                   ],
                 },
                 reviews: {
                   pageInfo: {
                     hasNextPage: hasNextPageFor.reviews,
-                    endCursor: "opaque-cursor-pr2reviews",
+                    endCursor: "opaque-cursor-pull2reviews",
                   },
                   nodes: [
                     {
-                      id: "opaque-pr2review1",
+                      id: "opaque-pull2review1",
                       body: "Hmmm...",
                       author: makeAuthor("decentralion"),
                       state: "CHANGES_REQUESTED",
                       comments: {
                         pageInfo: {
                           hasNextPage: hasNextPageFor.reviewComments,
-                          endCursor: "opaque-cursor-pr2review1comments",
+                          endCursor: "opaque-cursor-pull2review1comments",
                         },
                         nodes: [
                           {
-                            id: "opaque-pr2review1comment1",
+                            id: "opaque-pull2review1comment1",
                             body: "What if there were no air?",
-                            url: "opaque://pr/2/review/1/comment/1",
+                            url: "opaque://pull/2/review/1/comment/1",
                             author: makeAuthor("decentralion"),
                           },
                         ],
@@ -141,18 +141,21 @@ describe("graphql", () => {
           ],
           destinationPath: ["repository"],
         },
-        prs: {
+        pulls: {
           enclosingNodeType: "REPOSITORY",
           enclosingNodeId: "opaque-repo",
           selections: [
             b.inlineFragment("Repository", [
-              b.field(
-                "pullRequests",
-                {
-                  first: b.literal(PAGE_LIMIT),
-                  after: b.literal("opaque-cursor-prs"),
-                },
-                [b.fragmentSpread("prs")]
+              b.alias(
+                "pulls",
+                b.field(
+                  "pullRequests",
+                  {
+                    first: b.literal(PAGE_LIMIT),
+                    after: b.literal("opaque-cursor-pulls"),
+                  },
+                  [b.fragmentSpread("pulls")]
+                )
               ),
             ]),
           ],
@@ -175,50 +178,50 @@ describe("graphql", () => {
           ],
           destinationPath: ["repository", "issues", "nodes", 0],
         },
-        prComments: {
-          enclosingNodeType: "PULL_REQUEST",
-          enclosingNodeId: "opaque-pr2",
+        pullComments: {
+          enclosingNodeType: "PULL",
+          enclosingNodeId: "opaque-pull2",
           selections: [
             b.inlineFragment("PullRequest", [
               b.field(
                 "comments",
                 {
                   first: b.literal(PAGE_LIMIT),
-                  after: b.literal("opaque-cursor-pr2comments"),
+                  after: b.literal("opaque-cursor-pull2comments"),
                 },
                 [b.fragmentSpread("comments")]
               ),
             ]),
           ],
-          destinationPath: ["repository", "pullRequests", "nodes", 0],
+          destinationPath: ["repository", "pulls", "nodes", 0],
         },
         reviews: {
-          enclosingNodeType: "PULL_REQUEST",
-          enclosingNodeId: "opaque-pr2",
+          enclosingNodeType: "PULL",
+          enclosingNodeId: "opaque-pull2",
           selections: [
             b.inlineFragment("PullRequest", [
               b.field(
                 "reviews",
                 {
                   first: b.literal(PAGE_LIMIT),
-                  after: b.literal("opaque-cursor-pr2reviews"),
+                  after: b.literal("opaque-cursor-pull2reviews"),
                 },
                 [b.fragmentSpread("reviews")]
               ),
             ]),
           ],
-          destinationPath: ["repository", "pullRequests", "nodes", 0],
+          destinationPath: ["repository", "pulls", "nodes", 0],
         },
         reviewComments: {
-          enclosingNodeType: "PULL_REQUEST_REVIEW",
-          enclosingNodeId: "opaque-pr2review1",
+          enclosingNodeType: "REVIEW",
+          enclosingNodeId: "opaque-pull2review1",
           selections: [
             b.inlineFragment("PullRequestReview", [
               b.field(
                 "comments",
                 {
                   first: b.literal(PAGE_LIMIT),
-                  after: b.literal("opaque-cursor-pr2review1comments"),
+                  after: b.literal("opaque-cursor-pull2review1comments"),
                 },
                 [b.fragmentSpread("reviewComments")]
               ),
@@ -226,7 +229,7 @@ describe("graphql", () => {
           ],
           destinationPath: [
             "repository",
-            "pullRequests",
+            "pulls",
             "nodes",
             0,
             "reviews",
@@ -240,9 +243,9 @@ describe("graphql", () => {
     test("from a top-level result with lots of continuations", () => {
       const data = makeData({
         issues: true,
-        prs: true,
+        pulls: true,
         issueComments: true,
-        prComments: true,
+        pullComments: true,
         reviews: true,
         reviewComments: true,
       });
@@ -251,9 +254,9 @@ describe("graphql", () => {
         const continuations = makeContinuations();
         return [
           continuations.issues,
-          continuations.prs,
+          continuations.pulls,
           continuations.issueComments,
-          continuations.prComments,
+          continuations.pullComments,
           continuations.reviews,
           continuations.reviewComments,
         ];
@@ -270,9 +273,9 @@ describe("graphql", () => {
       // through the whole structure.
       const data = makeData({
         issues: true,
-        prs: false,
+        pulls: false,
         issueComments: false,
-        prComments: true,
+        pullComments: true,
         reviews: false,
         reviewComments: true,
       });
@@ -281,7 +284,7 @@ describe("graphql", () => {
         const continuations = makeContinuations();
         return [
           continuations.issues,
-          continuations.prComments,
+          continuations.pullComments,
           continuations.reviewComments,
         ];
       })();
@@ -738,14 +741,14 @@ describe("graphql", () => {
               },
             ],
           },
-          pullRequests: {
+          pulls: {
             pageInfo: {
               hasNextPage: false,
-              endCursor: "opaque-cursor-prs-v0",
+              endCursor: "opaque-cursor-pulls-v0",
             },
             nodes: [
               {
-                id: "opaque-pr2",
+                id: "opaque-pull2",
                 title: "Fix typo in README",
                 body: "Surely this deserves much cred.",
                 number: 2,
@@ -760,11 +763,11 @@ describe("graphql", () => {
                 reviews: {
                   pageInfo: {
                     hasNextPage: true,
-                    endCursor: "opaque-cursor-pr2reviews-v0",
+                    endCursor: "opaque-cursor-pull2reviews-v0",
                   },
                   nodes: [
                     {
-                      id: "opaque-pr2review1",
+                      id: "opaque-pull2review1",
                       body: "You actually introduced a new typo instead.",
                       author: makeAuthor("decentralion"),
                       state: "CHANGES_REQUESTED",
@@ -841,11 +844,11 @@ describe("graphql", () => {
           reviews: {
             pageInfo: {
               hasNextPage: false,
-              endCursor: "opaque-cursor-pr2reviews-v1",
+              endCursor: "opaque-cursor-pull2reviews-v1",
             },
             nodes: [
               {
-                id: "opaque-pr2review2",
+                id: "opaque-pull2review2",
                 body: "Looks godo to me.",
                 author: makeAuthor("decentralion"),
                 state: "APPROVED",
