@@ -46,7 +46,9 @@ Object {
   "https://github.com/sourcecred/example-github/pull/3": Array [
     "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
   ],
-  "https://github.com/sourcecred/example-github/pull/5": Array [],
+  "https://github.com/sourcecred/example-github/pull/5": Array [
+    "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
+  ],
   "https://github.com/sourcecred/example-github/pull/9": Array [],
 }
 `;
