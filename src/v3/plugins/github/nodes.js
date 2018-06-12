@@ -5,7 +5,7 @@ import {NodeAddress, type NodeAddressT} from "../../core/graph";
 export opaque type RawAddress: NodeAddressT = NodeAddressT;
 
 const GITHUB_PREFIX = NodeAddress.fromParts(["sourcecred", "github"]);
-function githubAddress(...parts: string[]): RawAddress {
+export function _githubAddress(...parts: string[]): RawAddress {
   return NodeAddress.append(GITHUB_PREFIX, ...parts);
 }
 
@@ -141,13 +141,13 @@ export function fromRaw(x: RawAddress): StructuredAddress {
 export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
     case "REPO":
-      return githubAddress("repo", x.owner, x.name);
+      return _githubAddress("repo", x.owner, x.name);
     case "ISSUE":
-      return githubAddress("issue", x.repo.owner, x.repo.name, x.number);
+      return _githubAddress("issue", x.repo.owner, x.repo.name, x.number);
     case "PULL":
-      return githubAddress("pull", x.repo.owner, x.repo.name, x.number);
+      return _githubAddress("pull", x.repo.owner, x.repo.name, x.number);
     case "REVIEW":
-      return githubAddress(
+      return _githubAddress(
         "review",
         x.pull.repo.owner,
         x.pull.repo.name,
@@ -157,7 +157,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
     case "COMMENT":
       switch (x.parent.type) {
         case "ISSUE":
-          return githubAddress(
+          return _githubAddress(
             "comment",
             "issue",
             x.parent.repo.owner,
@@ -166,7 +166,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
             x.fragment
           );
         case "PULL":
-          return githubAddress(
+          return _githubAddress(
             "comment",
             "pull",
             x.parent.repo.owner,
@@ -175,7 +175,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
             x.fragment
           );
         case "REVIEW":
-          return githubAddress(
+          return _githubAddress(
             "comment",
             "review",
             x.parent.pull.repo.owner,
@@ -190,7 +190,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
           throw new Error(`Bad comment parent type: ${x.parent.type}`);
       }
     case "USERLIKE":
-      return githubAddress("userlike", x.login);
+      return _githubAddress("userlike", x.login);
     default:
       // eslint-disable-next-line no-unused-expressions
       (x.type: empty);
