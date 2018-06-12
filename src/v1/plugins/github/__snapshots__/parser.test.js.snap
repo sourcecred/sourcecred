@@ -220,7 +220,7 @@ Array [
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
           "dstIndex": 4,
           "payload": Object {},
-          "srcIndex": 5,
+          "srcIndex": 6,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"MERGED_AS\\"}": Object {
           "dstIndex": 0,
@@ -229,18 +229,23 @@ Array [
           },
           "srcIndex": 3,
         },
-        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
           "dstIndex": 5,
           "payload": Object {},
           "srcIndex": 3,
         },
-        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
           "dstIndex": 6,
           "payload": Object {},
           "srcIndex": 3,
         },
-        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
           "dstIndex": 7,
+          "payload": Object {},
+          "srcIndex": 3,
+        },
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
+          "dstIndex": 8,
           "payload": Object {},
           "srcIndex": 3,
         },
@@ -250,19 +255,24 @@ Array [
           "srcIndex": 2,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
-          "dstIndex": 7,
+          "dstIndex": 8,
           "payload": Object {},
           "srcIndex": 4,
         },
-        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
-          "dstIndex": 7,
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
+          "dstIndex": 8,
           "payload": Object {},
           "srcIndex": 5,
         },
-        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
-          "dstIndex": 7,
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
+          "dstIndex": 8,
           "payload": Object {},
           "srcIndex": 6,
+        },
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
+          "dstIndex": 8,
+          "payload": Object {},
+          "srcIndex": 7,
         },
       },
     ],
@@ -326,6 +336,17 @@ Array [
         "payload": Object {
           "body": "seems a bit capricious",
           "url": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
+          "pluginName": "sourcecred/github-beta",
+          "type": "COMMENT",
+        },
+        "payload": Object {
+          "body": "In retrospect, this was an excellent PR.",
+          "url": "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
         },
       },
       Object {
@@ -1222,7 +1243,7 @@ Array [
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/decentralion\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/9\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
           "dstIndex": 2,
           "payload": Object {},
-          "srcIndex": 27,
+          "srcIndex": 28,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
           "dstIndex": 15,
@@ -1240,7 +1261,7 @@ Array [
           "srcIndex": 8,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/2#issuecomment-385576220\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
-          "dstIndex": 25,
+          "dstIndex": 26,
           "payload": Object {},
           "srcIndex": 9,
         },
@@ -1250,7 +1271,7 @@ Array [
           "srcIndex": 10,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/2#issuecomment-385576273\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
-          "dstIndex": 28,
+          "dstIndex": 29,
           "payload": Object {},
           "srcIndex": 11,
         },
@@ -1275,7 +1296,7 @@ Array [
           "srcIndex": 12,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
-          "dstIndex": 25,
+          "dstIndex": 26,
           "payload": Object {},
           "srcIndex": 12,
         },
@@ -1364,7 +1385,7 @@ Array [
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
           "dstIndex": 24,
           "payload": Object {},
-          "srcIndex": 25,
+          "srcIndex": 26,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/git-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMIT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"MERGED_AS\\"}": Object {
           "dstIndex": 1,
@@ -1373,25 +1394,30 @@ Array [
           },
           "srcIndex": 23,
         },
-        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
           "dstIndex": 25,
           "payload": Object {},
           "srcIndex": 23,
         },
-        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
           "dstIndex": 26,
           "payload": Object {},
           "srcIndex": 23,
         },
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
+          "dstIndex": 27,
+          "payload": Object {},
+          "srcIndex": 23,
+        },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
-          "dstIndex": 28,
+          "dstIndex": 29,
           "payload": Object {},
           "srcIndex": 23,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/9\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"REFERENCES\\"}": Object {
-          "dstIndex": 28,
+          "dstIndex": 29,
           "payload": Object {},
-          "srcIndex": 27,
+          "srcIndex": 28,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/issues/1\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"ISSUE\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
           "dstIndex": 4,
@@ -1434,24 +1460,29 @@ Array [
           "srcIndex": 3,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"REPOSITORY\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/9\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"CONTAINS\\"}": Object {
-          "dstIndex": 27,
+          "dstIndex": 28,
           "payload": Object {},
           "srcIndex": 3,
         },
         "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW_COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
-          "dstIndex": 28,
+          "dstIndex": 29,
           "payload": Object {},
           "srcIndex": 24,
         },
-        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
-          "dstIndex": 28,
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"COMMENT\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
+          "dstIndex": 29,
           "payload": Object {},
           "srcIndex": 25,
         },
-        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
-          "dstIndex": 28,
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
+          "dstIndex": 29,
           "payload": Object {},
           "srcIndex": 26,
+        },
+        "{\\"id\\":\\"[{\\\\\\"id\\\\\\":\\\\\\"https://github.com/wchargin\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"AUTHOR\\\\\\"},{\\\\\\"id\\\\\\":\\\\\\"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038\\\\\\",\\\\\\"pluginName\\\\\\":\\\\\\"sourcecred/github-beta\\\\\\",\\\\\\"type\\\\\\":\\\\\\"PULL_REQUEST_REVIEW\\\\\\"}]\\",\\"pluginName\\":\\"sourcecred/github-beta\\",\\"type\\":\\"AUTHORS\\"}": Object {
+          "dstIndex": 29,
+          "payload": Object {},
+          "srcIndex": 27,
         },
       },
     ],
@@ -1756,6 +1787,17 @@ Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌�
         "payload": Object {
           "body": "seems a bit capricious",
           "url": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+        },
+      },
+      Object {
+        "address": Object {
+          "id": "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
+          "pluginName": "sourcecred/github-beta",
+          "type": "COMMENT",
+        },
+        "payload": Object {
+          "body": "In retrospect, this was an excellent PR.",
+          "url": "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
         },
       },
       Object {

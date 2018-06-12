@@ -321,9 +321,20 @@
                     "body": "@wchargin could you please do the following:\r\n- add a commit comment\r\n- add a review comment requesting some trivial change\r\n- i'll change it\r\n- then approve the pr",
                     "comments": {
                         "nodes": [
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjQzMTc4MDY=",
+                                    "login": "wchargin",
+                                    "url": "https://github.com/wchargin"
+                                },
+                                "body": "In retrospect, this was an excellent PR.",
+                                "id": "MDEyOklzc3VlQ29tbWVudDM5NjQzMDQ2NA==",
+                                "url": "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464"
+                            }
                         ],
                         "pageInfo": {
-                            "endCursor": null,
+                            "endCursor": "Y3Vyc29yOnYyOpHOF6EMgA==",
                             "hasNextPage": false
                         }
                     },
