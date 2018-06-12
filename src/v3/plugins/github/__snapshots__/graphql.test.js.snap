@@ -200,3 +200,128 @@ Object {
   },
 }
 `;
+
+exports[`graphql creates a query 1`] = `
+"query FetchData($repoOwner: String! $repoName: String!) {
+  repository(owner: $repoOwner name: $repoName) {
+    url
+    name
+    owner {
+      ...whoami
+    }
+    id
+    issues(first: 50) {
+      ...issues
+    }
+    pullRequests(first: 50) {
+      ...prs
+    }
+  }
+}
+fragment whoami on Actor {
+  __typename
+  login
+  url
+  ... on User {
+    id
+  }
+  ... on Organization {
+    id
+  }
+  ... on Bot {
+    id
+  }
+}
+fragment issues on IssueConnection {
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    id
+    url
+    title
+    body
+    number
+    author {
+      ...whoami
+    }
+    comments(first: 20) {
+      ...comments
+    }
+  }
+}
+fragment prs on PullRequestConnection {
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    id
+    url
+    title
+    body
+    number
+    mergeCommit {
+      oid
+    }
+    additions
+    deletions
+    author {
+      ...whoami
+    }
+    comments(first: 20) {
+      ...comments
+    }
+    reviews(first: 10) {
+      ...reviews
+    }
+  }
+}
+fragment comments on IssueCommentConnection {
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    id
+    url
+    author {
+      ...whoami
+    }
+    body
+  }
+}
+fragment reviews on PullRequestReviewConnection {
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    id
+    url
+    body
+    author {
+      ...whoami
+    }
+    state
+    comments(first: 10) {
+      ...reviewComments
+    }
+  }
+}
+fragment reviewComments on PullRequestReviewCommentConnection {
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    id
+    url
+    body
+    author {
+      ...whoami
+    }
+  }
+}"
+`;

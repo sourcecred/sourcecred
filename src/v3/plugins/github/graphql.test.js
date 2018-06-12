@@ -1,7 +1,7 @@
 // @flow
 
 import type {Continuation} from "./graphql";
-import {build} from "../../graphql/queries";
+import {build, stringify, multilineLayout} from "../../graphql/queries";
 import {
   PAGE_LIMIT,
   createQuery,
@@ -949,5 +949,11 @@ describe("graphql", () => {
       // shouldn't be any nodes in the snapshot that have more pages.
       expect(result).toMatchSnapshot();
     });
+  });
+
+  it("creates a query", () => {
+    expect(
+      stringify.body(createQuery(), multilineLayout("  "))
+    ).toMatchSnapshot();
   });
 });
