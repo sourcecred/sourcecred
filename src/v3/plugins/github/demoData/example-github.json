@@ -263,7 +263,7 @@
             "login": "sourcecred",
             "url": "https://github.com/sourcecred"
         },
-        "pullRequests": {
+        "pulls": {
             "nodes": [
                 {
                     "additions": 1,

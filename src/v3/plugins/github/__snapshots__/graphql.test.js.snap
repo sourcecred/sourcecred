@@ -129,7 +129,7 @@ Object {
         "hasNextPage": false,
       },
     },
-    "pullRequests": Object {
+    "pulls": Object {
       "nodes": Array [
         Object {
           "author": Object {
@@ -145,7 +145,7 @@ Object {
               "hasNextPage": false,
             },
           },
-          "id": "opaque-pr2",
+          "id": "opaque-pull2",
           "number": 2,
           "reviews": Object {
             "nodes": Array [
@@ -163,7 +163,7 @@ Object {
                     "hasNextPage": false,
                   },
                 },
-                "id": "opaque-pr2review1",
+                "id": "opaque-pull2review1",
                 "state": "CHANGES_REQUESTED",
               },
               Object {
@@ -180,12 +180,12 @@ Object {
                     "hasNextPage": false,
                   },
                 },
-                "id": "opaque-pr2review2",
+                "id": "opaque-pull2review2",
                 "state": "APPROVED",
               },
             ],
             "pageInfo": Object {
-              "endCursor": "opaque-cursor-pr2reviews-v1",
+              "endCursor": "opaque-cursor-pull2reviews-v1",
               "hasNextPage": false,
             },
           },
@@ -193,7 +193,7 @@ Object {
         },
       ],
       "pageInfo": Object {
-        "endCursor": "opaque-cursor-prs-v0",
+        "endCursor": "opaque-cursor-pulls-v0",
         "hasNextPage": false,
       },
     },
@@ -213,8 +213,8 @@ exports[`graphql creates a query 1`] = `
     issues(first: 50) {
       ...issues
     }
-    pullRequests(first: 50) {
-      ...prs
+    pulls: pullRequests(first: 50) {
+      ...pulls
     }
   }
 }
@@ -251,7 +251,7 @@ fragment issues on IssueConnection {
     }
   }
 }
-fragment prs on PullRequestConnection {
+fragment pulls on PullRequestConnection {
   pageInfo {
     hasNextPage
     endCursor
