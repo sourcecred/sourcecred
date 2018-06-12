@@ -2,10 +2,10 @@
 
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 
-export opaque type GithubAddressT: NodeAddressT = NodeAddressT;
+export opaque type RawAddress: NodeAddressT = NodeAddressT;
 
 const GITHUB_PREFIX = NodeAddress.fromParts(["sourcecred", "github"]);
-function githubAddress(...parts: string[]): GithubAddressT {
+function githubAddress(...parts: string[]): RawAddress {
   return NodeAddress.append(GITHUB_PREFIX, ...parts);
 }
 
@@ -47,7 +47,7 @@ export type StructuredAddress =
   | CommentAddress
   | UserlikeAddress;
 
-export function structure(x: GithubAddressT): StructuredAddress {
+export function fromRaw(x: RawAddress): StructuredAddress {
   function fail() {
     return new Error(`Bad address: ${NodeAddress.toString(x)}`);
   }
@@ -138,7 +138,7 @@ export function structure(x: GithubAddressT): StructuredAddress {
   }
 }
 
-export function destructure(x: StructuredAddress): GithubAddressT {
+export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
     case "REPO":
       return githubAddress("repo", x.owner, x.name);

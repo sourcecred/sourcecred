@@ -1,9 +1,9 @@
 // @flow
 
-import {structure, destructure} from "./address";
 import {NodeAddress} from "../../core/graph";
+import {fromRaw, toRaw} from "./nodes";
 
-describe("plugins/github/address", () => {
+describe("plugins/github/nodes", () => {
   const repo = () => ({
     type: "REPO",
     owner: "sourcecred",
@@ -39,21 +39,21 @@ describe("plugins/github/address", () => {
     user,
   };
 
-  describe("Structured -> Raw -> Structured is identity", () => {
+  describe("`fromRaw` after `toRaw` is identity", () => {
     Object.keys(examples).forEach((example) => {
       it(example, () => {
         const instance = examples[example]();
-        expect(structure(destructure(instance))).toEqual(instance);
+        expect(fromRaw(toRaw(instance))).toEqual(instance);
       });
     });
   });
 
-  describe("Raw -> Structured -> Raw is identity", () => {
+  describe("`toRaw` after `fromRaw` is identity", () => {
     Object.keys(examples).forEach((example) => {
       it(example, () => {
         const instance = examples[example]();
-        const raw = destructure(instance);
-        expect(destructure(structure(raw))).toEqual(raw);
+        const raw = toRaw(instance);
+        expect(toRaw(fromRaw(raw))).toEqual(raw);
       });
     });
   });
@@ -62,14 +62,14 @@ describe("plugins/github/address", () => {
     Object.keys(examples).forEach((example) => {
       it(example, () => {
         const instance = examples[example]();
-        const raw = NodeAddress.toParts(destructure(instance));
+        const raw = NodeAddress.toParts(toRaw(instance));
         expect({address: raw, structured: instance}).toMatchSnapshot();
       });
     });
   });
 
   describe("errors on", () => {
-    describe("structure(...) with", () => {
+    describe("fromRaw(...) with", () => {
       function expectBadAddress(name: string, parts: $ReadOnlyArray<string>) {
         it(name, () => {
           const address = NodeAddress.fromParts([
@@ -78,7 +78,7 @@ describe("plugins/github/address", () => {
             ...parts,
           ]);
           // $ExpectFlowError
-          expect(() => structure(address)).toThrow("Bad address");
+          expect(() => fromRaw(address)).toThrow("Bad address");
         });
       }
       function checkBadCases(
@@ -96,15 +96,15 @@ describe("plugins/github/address", () => {
       }
       it("undefined", () => {
         // $ExpectFlowError
-        expect(() => structure(undefined)).toThrow("undefined");
+        expect(() => fromRaw(undefined)).toThrow("undefined");
       });
       it("null", () => {
         // $ExpectFlowError
-        expect(() => structure(null)).toThrow("null");
+        expect(() => fromRaw(null)).toThrow("null");
       });
       it("with bad prefix", () => {
         // $ExpectFlowError
-        expect(() => structure(NodeAddress.fromParts(["foo"]))).toThrow(
+        expect(() => fromRaw(NodeAddress.fromParts(["foo"]))).toThrow(
           "Bad address"
         );
       });
@@ -181,25 +181,23 @@ describe("plugins/github/address", () => {
       });
     });
 
-    describe("destructure(...) with", () => {
+    describe("toRaw(...) with", () => {
       it("null", () => {
         // $ExpectFlowError
-        expect(() => destructure(null)).toThrow("null");
+        expect(() => toRaw(null)).toThrow("null");
       });
       it("undefined", () => {
         // $ExpectFlowError
-        expect(() => destructure(undefined)).toThrow("undefined");
+        expect(() => toRaw(undefined)).toThrow("undefined");
       });
       it("bad type", () => {
         // $ExpectFlowError
-        expect(() => destructure({type: "ICE_CREAM"})).toThrow(
-          "Unexpected type"
-        );
+        expect(() => toRaw({type: "ICE_CREAM"})).toThrow("Unexpected type");
       });
       it("bad comment type", () => {
         expect(() => {
           // $ExpectFlowError
-          destructure({type: "COMMENT", parent: {type: "ICE_CREAM"}});
+          toRaw({type: "COMMENT", parent: {type: "ICE_CREAM"}});
         }).toThrow("Bad comment parent type");
       });
     });

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`plugins/github/address snapshots as expected: issue 1`] = `
+exports[`plugins/github/nodes snapshots as expected: issue 1`] = `
 Object {
   "address": Array [
     "sourcecred",
@@ -22,7 +22,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/address snapshots as expected: issueComment 1`] = `
+exports[`plugins/github/nodes snapshots as expected: issueComment 1`] = `
 Object {
   "address": Array [
     "sourcecred",
@@ -50,7 +50,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/address snapshots as expected: pull 1`] = `
+exports[`plugins/github/nodes snapshots as expected: pull 1`] = `
 Object {
   "address": Array [
     "sourcecred",
@@ -72,7 +72,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/address snapshots as expected: pullComment 1`] = `
+exports[`plugins/github/nodes snapshots as expected: pullComment 1`] = `
 Object {
   "address": Array [
     "sourcecred",
@@ -100,7 +100,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/address snapshots as expected: repo 1`] = `
+exports[`plugins/github/nodes snapshots as expected: repo 1`] = `
 Object {
   "address": Array [
     "sourcecred",
@@ -117,7 +117,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/address snapshots as expected: review 1`] = `
+exports[`plugins/github/nodes snapshots as expected: review 1`] = `
 Object {
   "address": Array [
     "sourcecred",
@@ -144,7 +144,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/address snapshots as expected: reviewComment 1`] = `
+exports[`plugins/github/nodes snapshots as expected: reviewComment 1`] = `
 Object {
   "address": Array [
     "sourcecred",
@@ -177,7 +177,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/address snapshots as expected: user 1`] = `
+exports[`plugins/github/nodes snapshots as expected: user 1`] = `
 Object {
   "address": Array [
     "sourcecred",
