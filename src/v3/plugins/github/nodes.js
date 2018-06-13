@@ -27,12 +27,12 @@ export type PullAddress = {|
 export type ReviewAddress = {|
   +type: "REVIEW",
   +pull: PullAddress,
-  +fragment: string,
+  +id: string,
 |};
 export type CommentAddress = {|
   +type: "COMMENT",
   +parent: IssueAddress | PullAddress | ReviewAddress,
-  +fragment: string,
+  +id: string,
 |};
 export type UserlikeAddress = {|
   +type: "USERLIKE",
@@ -83,10 +83,10 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       if (rest.length !== 4) {
         throw fail();
       }
-      const [owner, name, pullNumber, fragment] = rest;
+      const [owner, name, pullNumber, id] = rest;
       const repo = {type: "REPO", owner, name};
       const pull = {type: "PULL", repo, number: pullNumber};
-      return {type: "REVIEW", pull, fragment};
+      return {type: "REVIEW", pull, id};
     }
     case "comment": {
       if (rest.length < 1) {
@@ -98,29 +98,29 @@ export function fromRaw(x: RawAddress): StructuredAddress {
           if (subrest.length !== 4) {
             throw fail();
           }
-          const [owner, name, issueNumber, fragment] = subrest;
+          const [owner, name, issueNumber, id] = subrest;
           const repo = {type: "REPO", owner, name};
           const issue = {type: "ISSUE", repo, number: issueNumber};
-          return {type: "COMMENT", parent: issue, fragment};
+          return {type: "COMMENT", parent: issue, id};
         }
         case "pull": {
           if (subrest.length !== 4) {
             throw fail();
           }
-          const [owner, name, pullNumber, fragment] = subrest;
+          const [owner, name, pullNumber, id] = subrest;
           const repo = {type: "REPO", owner, name};
           const pull = {type: "PULL", repo, number: pullNumber};
-          return {type: "COMMENT", parent: pull, fragment};
+          return {type: "COMMENT", parent: pull, id};
         }
         case "review": {
           if (subrest.length !== 5) {
             throw fail();
           }
-          const [owner, name, pullNumber, reviewFragment, fragment] = subrest;
+          const [owner, name, pullNumber, reviewFragment, id] = subrest;
           const repo = {type: "REPO", owner, name};
           const pull = {type: "PULL", repo, number: pullNumber};
-          const review = {type: "REVIEW", pull, fragment: reviewFragment};
-          return {type: "COMMENT", parent: review, fragment};
+          const review = {type: "REVIEW", pull, id: reviewFragment};
+          return {type: "COMMENT", parent: review, id};
         }
         default:
           throw fail();
@@ -152,7 +152,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
         x.pull.repo.owner,
         x.pull.repo.name,
         x.pull.number,
-        x.fragment
+        x.id
       );
     case "COMMENT":
       switch (x.parent.type) {
@@ -163,7 +163,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
             x.parent.repo.owner,
             x.parent.repo.name,
             x.parent.number,
-            x.fragment
+            x.id
           );
         case "PULL":
           return githubAddress(
@@ -172,7 +172,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
             x.parent.repo.owner,
             x.parent.repo.name,
             x.parent.number,
-            x.fragment
+            x.id
           );
         case "REVIEW":
           return githubAddress(
@@ -181,8 +181,8 @@ export function toRaw(x: StructuredAddress): RawAddress {
             x.parent.pull.repo.owner,
             x.parent.pull.repo.name,
             x.parent.pull.number,
-            x.parent.fragment,
-            x.fragment
+            x.parent.id,
+            x.id
           );
         default:
           // eslint-disable-next-line no-unused-expressions

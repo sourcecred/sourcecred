@@ -35,7 +35,7 @@ Object {
     "373768703",
   ],
   "structured": Object {
-    "fragment": "373768703",
+    "id": "373768703",
     "parent": Object {
       "number": "2",
       "repo": Object {
@@ -85,7 +85,7 @@ Object {
     "396430464",
   ],
   "structured": Object {
-    "fragment": "396430464",
+    "id": "396430464",
     "parent": Object {
       "number": "5",
       "repo": Object {
@@ -129,7 +129,7 @@ Object {
     "100313899",
   ],
   "structured": Object {
-    "fragment": "100313899",
+    "id": "100313899",
     "pull": Object {
       "number": "5",
       "repo": Object {
@@ -158,9 +158,9 @@ Object {
     "171460198",
   ],
   "structured": Object {
-    "fragment": "171460198",
+    "id": "171460198",
     "parent": Object {
-      "fragment": "100313899",
+      "id": "100313899",
       "pull": Object {
         "number": "5",
         "repo": Object {
