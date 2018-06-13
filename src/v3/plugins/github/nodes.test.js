@@ -11,21 +11,21 @@ describe("plugins/github/nodes", () => {
   });
   const issue = () => ({type: "ISSUE", repo: repo(), number: "2"});
   const pull = () => ({type: "PULL", repo: repo(), number: "5"});
-  const review = () => ({type: "REVIEW", pull: pull(), fragment: "100313899"});
+  const review = () => ({type: "REVIEW", pull: pull(), id: "100313899"});
   const issueComment = () => ({
     type: "COMMENT",
     parent: issue(),
-    fragment: "373768703",
+    id: "373768703",
   });
   const pullComment = () => ({
     type: "COMMENT",
     parent: pull(),
-    fragment: "396430464",
+    id: "396430464",
   });
   const reviewComment = () => ({
     type: "COMMENT",
     parent: review(),
-    fragment: "171460198",
+    id: "171460198",
   });
   const user = () => ({type: "USERLIKE", login: "decentralion"});
   const examples = {
@@ -137,7 +137,7 @@ describe("plugins/github/nodes", () => {
           {name: "no owner", parts: ["review"]},
           {name: "no name", parts: ["owner"]},
           {name: "no number", parts: ["name"]},
-          {name: "no fragment", parts: ["123"]},
+          {name: "no id", parts: ["123"]},
           {name: "extra parts", parts: ["987", "foo"]},
         ]);
       });
@@ -149,7 +149,7 @@ describe("plugins/github/nodes", () => {
             {name: "no owner", parts: ["comment", "issue"]},
             {name: "no name", parts: ["owner"]},
             {name: "no number", parts: ["name"]},
-            {name: "no fragment", parts: ["123"]},
+            {name: "no id", parts: ["123"]},
             {name: "extra parts", parts: ["987", "foo"]},
           ]);
         });
@@ -158,7 +158,7 @@ describe("plugins/github/nodes", () => {
             {name: "no owner", parts: ["comment", "pull"]},
             {name: "no name", parts: ["owner"]},
             {name: "no number", parts: ["name"]},
-            {name: "no fragment", parts: ["123"]},
+            {name: "no id", parts: ["123"]},
             {name: "extra parts", parts: ["987", "foo"]},
           ]);
         });
@@ -167,8 +167,8 @@ describe("plugins/github/nodes", () => {
             {name: "no owner", parts: ["comment", "review"]},
             {name: "no name", parts: ["owner"]},
             {name: "no number", parts: ["name"]},
-            {name: "no review fragment", parts: ["123"]},
-            {name: "no comment fragment", parts: ["987"]},
+            {name: "no review id", parts: ["123"]},
+            {name: "no comment id", parts: ["987"]},
             {name: "extra parts", parts: ["654", "foo"]},
           ]);
         });
