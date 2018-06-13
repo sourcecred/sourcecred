@@ -47,6 +47,49 @@ export type StructuredAddress =
   | CommentAddress
   | UserlikeAddress;
 
+// Each of these types has 0 or more "AUTHORS" edges, each of which
+// leads to a UserlikeAddress.  Note: It is not true that every
+// Authorable has at least one author, as when GitHub accounts are
+// deleted, they leave behind posts without authors.
+export type AuthorableAddress =
+  | IssueAddress
+  | PullAddress
+  | ReviewAddress
+  | CommentAddress;
+
+// Each of these types has text content, which means
+// it may be the source of a reference to a ReferentAddress.
+export type TextContentAddress =
+  | IssueAddress
+  | PullAddress
+  | ReviewAddress
+  | CommentAddress;
+
+// Each of these types may be referred to by something
+// with text content.
+export type ReferentAddress =
+  | RepoAddress
+  | IssueAddress
+  | PullAddress
+  | ReviewAddress
+  | CommentAddress
+  | UserlikeAddress;
+
+// Each of these types is structurally the child of some
+// entity with a ParentAddress.
+export type ChildAddress =
+  | IssueAddress // child of RepoAddress
+  | PullAddress // child of RepoAddress
+  | ReviewAddress // child of PullAddress
+  | CommentAddress; // child of IssueAddress, PullAddress, or ReviewAddress
+
+// Each of these types may have child nodes (see ChildAddress).
+export type ParentAddress =
+  | RepoAddress
+  | IssueAddress
+  | PullAddress
+  | ReviewAddress;
+
 export function fromRaw(x: RawAddress): StructuredAddress {
   function fail() {
     return new Error(`Bad address: ${NodeAddress.toString(x)}`);
