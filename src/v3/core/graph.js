@@ -308,7 +308,7 @@ export class Graph {
   }
 
   nodes(options?: {|+prefix: NodeAddressT|}): Iterator<NodeAddressT> {
-    const prefix = options != null ? options.prefix : NodeAddress.fromParts([]);
+    const prefix = options != null ? options.prefix : NodeAddress.empty;
     if (prefix == null) {
       throw new Error(`Invalid prefix: ${String(prefix)}`);
     }
@@ -418,9 +418,9 @@ export class Graph {
   edges(options?: EdgesOptions): Iterator<Edge> {
     if (options == null) {
       options = {
-        addressPrefix: EdgeAddress.fromParts([]),
-        srcPrefix: NodeAddress.fromParts([]),
-        dstPrefix: NodeAddress.fromParts([]),
+        addressPrefix: EdgeAddress.empty,
+        srcPrefix: NodeAddress.empty,
+        dstPrefix: NodeAddress.empty,
       };
     }
     if (options.addressPrefix == null) {

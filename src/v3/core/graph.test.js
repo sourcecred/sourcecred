@@ -405,7 +405,7 @@ describe("core/graph", () => {
       });
 
       describe("node prefix filtering", () => {
-        const n1 = NodeAddress.fromParts([]);
+        const n1 = NodeAddress.empty;
         const n2 = NodeAddress.fromParts(["foo"]);
         const n3 = NodeAddress.fromParts(["foo", "bar"]);
         const n4 = NodeAddress.fromParts(["zod", "bar"]);
@@ -664,8 +664,8 @@ describe("core/graph", () => {
           expectEdges(
             {
               addressPrefix: EdgeAddress.fromParts(["e", "1"]),
-              srcPrefix: NodeAddress.fromParts([]),
-              dstPrefix: NodeAddress.fromParts([]),
+              srcPrefix: NodeAddress.empty,
+              dstPrefix: NodeAddress.empty,
             },
             [e11, e12]
           );
@@ -673,9 +673,9 @@ describe("core/graph", () => {
         it("finds edges by src prefix", () => {
           expectEdges(
             {
-              addressPrefix: EdgeAddress.fromParts([]),
+              addressPrefix: EdgeAddress.empty,
               srcPrefix: NodeAddress.fromParts(["src", "1"]),
-              dstPrefix: NodeAddress.fromParts([]),
+              dstPrefix: NodeAddress.empty,
             },
             [e11, e12]
           );
@@ -683,8 +683,8 @@ describe("core/graph", () => {
         it("finds edges by dst prefix", () => {
           expectEdges(
             {
-              addressPrefix: EdgeAddress.fromParts([]),
-              srcPrefix: NodeAddress.fromParts([]),
+              addressPrefix: EdgeAddress.empty,
+              srcPrefix: NodeAddress.empty,
               dstPrefix: NodeAddress.fromParts(["dst", "1"]),
             },
             [e11, e21]
@@ -695,7 +695,7 @@ describe("core/graph", () => {
             {
               addressPrefix: EdgeAddress.fromParts(["e", "1"]),
               srcPrefix: NodeAddress.fromParts(["src", "2"]),
-              dstPrefix: NodeAddress.fromParts([]),
+              dstPrefix: NodeAddress.empty,
             },
             []
           );
@@ -703,7 +703,7 @@ describe("core/graph", () => {
         it("yields appropriate filter intersection", () => {
           expectEdges(
             {
-              addressPrefix: EdgeAddress.fromParts([]),
+              addressPrefix: EdgeAddress.empty,
               srcPrefix: NodeAddress.fromParts(["src", "1"]),
               dstPrefix: NodeAddress.fromParts(["dst", "2"]),
             },
@@ -812,8 +812,8 @@ describe("core/graph", () => {
             Array.from(
               g.neighbors(src, {
                 direction: Direction.ANY,
-                nodePrefix: NodeAddress.fromParts([]),
-                edgePrefix: EdgeAddress.fromParts([]),
+                nodePrefix: NodeAddress.empty,
+                edgePrefix: EdgeAddress.empty,
               })
             )
           ).toHaveLength(1);
@@ -919,8 +919,8 @@ describe("core/graph", () => {
           Array.from(
             graph.neighbors(foo, {
               direction: Direction.ANY,
-              nodePrefix: NodeAddress.fromParts([]),
-              edgePrefix: EdgeAddress.fromParts([]),
+              nodePrefix: NodeAddress.empty,
+              edgePrefix: EdgeAddress.empty,
             })
           )
         ).not.toHaveLength(0);
@@ -931,8 +931,8 @@ describe("core/graph", () => {
           isolated,
           {
             direction: Direction.ANY,
-            nodePrefix: NodeAddress.fromParts([]),
-            edgePrefix: EdgeAddress.fromParts([]),
+            nodePrefix: NodeAddress.empty,
+            edgePrefix: EdgeAddress.empty,
           },
           []
         );
@@ -991,7 +991,7 @@ describe("core/graph", () => {
             {
               direction: Direction.ANY,
               nodePrefix: NodeAddress.fromParts(parts),
-              edgePrefix: EdgeAddress.fromParts([]),
+              edgePrefix: EdgeAddress.empty,
             },
             expected
           );
@@ -1020,7 +1020,7 @@ describe("core/graph", () => {
             loop,
             {
               direction: Direction.ANY,
-              nodePrefix: NodeAddress.fromParts([]),
+              nodePrefix: NodeAddress.empty,
               edgePrefix: EdgeAddress.fromParts(parts),
             },
             expected
@@ -1058,8 +1058,8 @@ describe("core/graph", () => {
       describe("errors on", () => {
         const defaultOptions = () => ({
           direction: Direction.ANY,
-          edgePrefix: EdgeAddress.fromParts([]),
-          nodePrefix: NodeAddress.fromParts([]),
+          edgePrefix: EdgeAddress.empty,
+          nodePrefix: NodeAddress.empty,
         });
         function throwsWith(node, options, message) {
           // $ExpectFlowError
@@ -1068,15 +1068,11 @@ describe("core/graph", () => {
         it("invalid address", () => {
           // This is a proxy for testing that NodeAddress.assertValid is called.
           // Thus we don't need to exhaustively test every bad case.
-          throwsWith(
-            EdgeAddress.fromParts([]),
-            defaultOptions(),
-            "NodeAddress"
-          );
+          throwsWith(EdgeAddress.empty, defaultOptions(), "NodeAddress");
         });
         it("absent node", () => {
           throwsWith(
-            NodeAddress.fromParts([]),
+            NodeAddress.empty,
             defaultOptions(),
             "Node does not exist"
           );
