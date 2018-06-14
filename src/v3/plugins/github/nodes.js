@@ -31,7 +31,7 @@ export type ReviewAddress = {|
 |};
 export type CommentAddress = {|
   +type: "COMMENT",
-  +parent: IssueAddress | PullAddress | ReviewAddress,
+  +parent: CommentableAddress,
   +id: string,
 |};
 export type UserlikeAddress = {|
@@ -89,6 +89,12 @@ export type ParentAddress =
   | IssueAddress
   | PullAddress
   | ReviewAddress;
+
+// Each of these types may have Comments as children
+export type CommentableAddress = IssueAddress | PullAddress | ReviewAddress;
+
+// Verify that Commentable is a subtype of Parent
+const _unused_static = (_: CommentableAddress): ParentAddress => _;
 
 export function fromRaw(x: RawAddress): StructuredAddress {
   function fail() {
