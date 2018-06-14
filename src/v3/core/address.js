@@ -19,6 +19,12 @@ export interface AddressModule<Address> {
   assertValidParts(parts: $ReadOnlyArray<string>, what?: string): void;
 
   /**
+   * The empty address (the identity for `append`). Equivalent to
+   * `fromParts([])`.
+   */
+  empty: Address;
+
+  /**
    * Convert an array of address parts to an address. The input must be
    * a non-null array of non-null strings, none of which contains the
    * NUL character. This is the inverse of `toParts`.
@@ -184,6 +190,8 @@ export function makeAddressModule(options: Options): AddressModule<string> {
     return nonce + separator + nullDelimited(parts);
   }
 
+  const empty = fromParts([]);
+
   function toParts(address: Address): string[] {
     assertValid(address);
     const parts = address.split(separator);
@@ -210,6 +218,7 @@ export function makeAddressModule(options: Options): AddressModule<string> {
   const result = {
     assertValid,
     assertValidParts,
+    empty,
     fromParts,
     toParts,
     toString,
