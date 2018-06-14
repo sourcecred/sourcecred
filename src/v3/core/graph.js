@@ -301,19 +301,26 @@ export class Graph {
     return result;
   }
 
-  nodes(): Iterator<NodeAddressT> {
-    const result = this._nodesIterator(this._modificationCount);
+  nodes(options?: {|+prefix: NodeAddressT|}): Iterator<NodeAddressT> {
+    const prefix = options != null ? options.prefix : NodeAddress.fromParts([]);
+    if (prefix == null) {
+      throw new Error(`Invalid prefix: ${String(prefix)}`);
+    }
+    const result = this._nodesIterator(this._modificationCount, prefix);
     this._maybeCheckInvariants();
     return result;
   }
 
   *_nodesIterator(
-    initialModificationCount: ModificationCount
+    initialModificationCount: ModificationCount,
+    prefix: NodeAddressT
   ): Iterator<NodeAddressT> {
     for (const node of this._nodes) {
-      this._checkForComodification(initialModificationCount);
-      this._maybeCheckInvariants();
-      yield node;
+      if (NodeAddress.hasPrefix(node, prefix)) {
+        this._checkForComodification(initialModificationCount);
+        this._maybeCheckInvariants();
+        yield node;
+      }
     }
     this._checkForComodification(initialModificationCount);
     this._maybeCheckInvariants();
