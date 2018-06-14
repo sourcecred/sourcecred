@@ -1,33 +1,50 @@
 // @flow
 
 import {NodeAddress} from "../../core/graph";
+import * as GN from "./nodes";
 import {fromRaw, toRaw} from "./nodes";
 
 describe("plugins/github/nodes", () => {
-  const repo = () => ({
-    type: "REPO",
+  const repo = (): GN.RepoAddress => ({
+    type: GN.REPO_TYPE,
     owner: "sourcecred",
     name: "example-github",
   });
-  const issue = () => ({type: "ISSUE", repo: repo(), number: "2"});
-  const pull = () => ({type: "PULL", repo: repo(), number: "5"});
-  const review = () => ({type: "REVIEW", pull: pull(), id: "100313899"});
-  const issueComment = () => ({
-    type: "COMMENT",
+  const issue = (): GN.IssueAddress => ({
+    type: GN.ISSUE_TYPE,
+    repo: repo(),
+    number: "2",
+  });
+  const pull = (): GN.PullAddress => ({
+    type: GN.PULL_TYPE,
+    repo: repo(),
+    number: "5",
+  });
+  const review = (): GN.ReviewAddress => ({
+    type: GN.REVIEW_TYPE,
+    pull: pull(),
+    id: "100313899",
+  });
+  const issueComment = (): GN.CommentAddress => ({
+    type: GN.COMMENT_TYPE,
     parent: issue(),
     id: "373768703",
   });
-  const pullComment = () => ({
-    type: "COMMENT",
+  const pullComment = (): GN.CommentAddress => ({
+    type: GN.COMMENT_TYPE,
     parent: pull(),
     id: "396430464",
   });
-  const reviewComment = () => ({
-    type: "COMMENT",
+  const reviewComment = (): GN.CommentAddress => ({
+    type: GN.COMMENT_TYPE,
     parent: review(),
     id: "171460198",
   });
-  const user = () => ({type: "USERLIKE", login: "decentralion"});
+  const user = (): GN.UserlikeAddress => ({
+    type: GN.USERLIKE_TYPE,
+    login: "decentralion",
+  });
+
   const examples = {
     repo,
     issue,
@@ -38,6 +55,19 @@ describe("plugins/github/nodes", () => {
     reviewComment,
     user,
   };
+
+  // Incorrect types should be caught statically, either due to being
+  // totally invalid...
+  // $ExpectFlowError
+  const _unused_badRepo: GN.RepoAddress = {
+    type: "REPOSITORY",
+    owner: "foo",
+    name: "bar",
+  };
+  // ...or due to being annotated with the type of a distinct structured
+  // address:
+  // $ExpectFlowError
+  const _unused_badIssue: GN.IssueAddress = {...pull()};
 
   describe("`fromRaw` after `toRaw` is identity", () => {
     Object.keys(examples).forEach((example) => {
