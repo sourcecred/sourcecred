@@ -402,6 +402,39 @@ describe("core/graph", () => {
         });
       });
 
+      describe("node prefix filtering", () => {
+        const n1 = NodeAddress.fromParts([]);
+        const n2 = NodeAddress.fromParts(["foo"]);
+        const n3 = NodeAddress.fromParts(["foo", "bar"]);
+        const n4 = NodeAddress.fromParts(["zod", "bar"]);
+        const graph = () =>
+          new Graph()
+            .addNode(n1)
+            .addNode(n2)
+            .addNode(n3)
+            .addNode(n4);
+        function expectSortedNodes(
+          options: {|+prefix: NodeAddressT|} | void,
+          expected: NodeAddressT[]
+        ) {
+          const actual = graph().nodes(options);
+          expect(Array.from(actual).sort()).toEqual(expected.slice().sort());
+        }
+        it("uses empty prefix when no options object", () => {
+          expectSortedNodes(undefined, [n1, n2, n3, n4]);
+        });
+        it("requires a prefix when options are specified", () => {
+          // $ExpectFlowError
+          expect(() => graph().nodes({})).toThrow("prefix");
+        });
+        it("does a prefix filter", () => {
+          expectSortedNodes({prefix: n2}, [n2, n3]);
+        });
+        it("yields nothing when prefix matches nothing", () => {
+          expectSortedNodes({prefix: NodeAddress.fromParts(["2"])}, []);
+        });
+      });
+
       describe("change the modification count", () => {
         it("on addNode, when a node is added", () => {
           const g = new Graph();
