@@ -154,6 +154,16 @@ describe("core/address", () => {
       });
     });
 
+    describe("empty", () => {
+      const {FooAddress} = makeModules();
+      it("is a valid address", () => {
+        FooAddress.assertValid(FooAddress.empty);
+      });
+      it("has empty parts", () => {
+        expect(FooAddress.toParts(FooAddress.empty)).toEqual([]);
+      });
+    });
+
     describe("fromParts", () => {
       const {FooAddress, BarAddress} = makeModules();
 
