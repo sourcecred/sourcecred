@@ -5,7 +5,7 @@ Object {
   "address": Array [
     "sourcecred",
     "github",
-    "issue",
+    "ISSUE",
     "sourcecred",
     "example-github",
     "2",
@@ -27,8 +27,8 @@ Object {
   "address": Array [
     "sourcecred",
     "github",
-    "comment",
-    "issue",
+    "COMMENT",
+    "ISSUE",
     "sourcecred",
     "example-github",
     "2",
@@ -55,7 +55,7 @@ Object {
   "address": Array [
     "sourcecred",
     "github",
-    "pull",
+    "PULL",
     "sourcecred",
     "example-github",
     "5",
@@ -77,8 +77,8 @@ Object {
   "address": Array [
     "sourcecred",
     "github",
-    "comment",
-    "pull",
+    "COMMENT",
+    "PULL",
     "sourcecred",
     "example-github",
     "5",
@@ -105,7 +105,7 @@ Object {
   "address": Array [
     "sourcecred",
     "github",
-    "repo",
+    "REPO",
     "sourcecred",
     "example-github",
   ],
@@ -122,7 +122,7 @@ Object {
   "address": Array [
     "sourcecred",
     "github",
-    "review",
+    "REVIEW",
     "sourcecred",
     "example-github",
     "5",
@@ -149,8 +149,8 @@ Object {
   "address": Array [
     "sourcecred",
     "github",
-    "comment",
-    "review",
+    "COMMENT",
+    "REVIEW",
     "sourcecred",
     "example-github",
     "5",
@@ -182,7 +182,7 @@ Object {
   "address": Array [
     "sourcecred",
     "github",
-    "userlike",
+    "USERLIKE",
     "decentralion",
   ],
   "structured": Object {

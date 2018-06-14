@@ -121,7 +121,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
   }
   const [_unused_sc, _unused_gh, kind, ...rest] = EdgeAddress.toParts(x);
   switch (kind) {
-    case "authors": {
+    case "AUTHORS": {
       const parts = multiLengthDecode(rest, fail);
       if (parts.length !== 2) {
         throw fail();
@@ -135,7 +135,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       ): any);
       return ({type: "AUTHORS", author, content}: AuthorsAddress);
     }
-    case "merged_as": {
+    case "MERGED_AS": {
       const parts = multiLengthDecode(rest, fail);
       if (parts.length !== 1) {
         throw fail();
@@ -146,7 +146,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       ): any);
       return ({type: "MERGED_AS", pull}: MergedAsAddress);
     }
-    case "has_parent": {
+    case "HAS_PARENT": {
       const parts = multiLengthDecode(rest, fail);
       if (parts.length !== 1) {
         throw fail();
@@ -157,7 +157,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       ): any);
       return ({type: "HAS_PARENT", child}: HasParentAddress);
     }
-    case "references": {
+    case "REFERENCES": {
       const parts = multiLengthDecode(rest, fail);
       if (parts.length !== 2) {
         throw fail();
@@ -180,23 +180,23 @@ export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
     case "AUTHORS":
       return githubEdgeAddress(
-        "authors",
+        "AUTHORS",
         ...lengthEncode(GithubNode.toRaw(x.author)),
         ...lengthEncode(GithubNode.toRaw(x.content))
       );
     case "MERGED_AS":
       return githubEdgeAddress(
-        "merged_as",
+        "MERGED_AS",
         ...lengthEncode(GithubNode.toRaw(x.pull))
       );
     case "HAS_PARENT":
       return githubEdgeAddress(
-        "has_parent",
+        "HAS_PARENT",
         ...lengthEncode(GithubNode.toRaw(x.child))
       );
     case "REFERENCES":
       return githubEdgeAddress(
-        "references",
+        "REFERENCES",
         ...lengthEncode(GithubNode.toRaw(x.referrer)),
         ...lengthEncode(GithubNode.toRaw(x.referent))
       );

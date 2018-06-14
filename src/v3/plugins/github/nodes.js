@@ -99,14 +99,14 @@ export function fromRaw(x: RawAddress): StructuredAddress {
   }
   const [_unused_sc, _unused_gh, kind, ...rest] = NodeAddress.toParts(x);
   switch (kind) {
-    case "repo": {
+    case "REPO": {
       if (rest.length !== 2) {
         throw fail();
       }
       const [owner, name] = rest;
       return {type: "REPO", owner, name};
     }
-    case "issue": {
+    case "ISSUE": {
       if (rest.length !== 3) {
         throw fail();
       }
@@ -114,7 +114,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       const repo = {type: "REPO", owner, name};
       return {type: "ISSUE", repo, number};
     }
-    case "pull": {
+    case "PULL": {
       if (rest.length !== 3) {
         throw fail();
       }
@@ -122,7 +122,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       const repo = {type: "REPO", owner, name};
       return {type: "PULL", repo, number};
     }
-    case "review": {
+    case "REVIEW": {
       if (rest.length !== 4) {
         throw fail();
       }
@@ -131,13 +131,13 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       const pull = {type: "PULL", repo, number: pullNumber};
       return {type: "REVIEW", pull, id};
     }
-    case "comment": {
+    case "COMMENT": {
       if (rest.length < 1) {
         throw fail();
       }
       const [subkind, ...subrest] = rest;
       switch (subkind) {
-        case "issue": {
+        case "ISSUE": {
           if (subrest.length !== 4) {
             throw fail();
           }
@@ -146,7 +146,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
           const issue = {type: "ISSUE", repo, number: issueNumber};
           return {type: "COMMENT", parent: issue, id};
         }
-        case "pull": {
+        case "PULL": {
           if (subrest.length !== 4) {
             throw fail();
           }
@@ -155,7 +155,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
           const pull = {type: "PULL", repo, number: pullNumber};
           return {type: "COMMENT", parent: pull, id};
         }
-        case "review": {
+        case "REVIEW": {
           if (subrest.length !== 5) {
             throw fail();
           }
@@ -169,7 +169,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
           throw fail();
       }
     }
-    case "userlike": {
+    case "USERLIKE": {
       if (rest.length !== 1) {
         throw fail();
       }
@@ -184,14 +184,14 @@ export function fromRaw(x: RawAddress): StructuredAddress {
 export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
     case "REPO":
-      return _githubAddress("repo", x.owner, x.name);
+      return _githubAddress("REPO", x.owner, x.name);
     case "ISSUE":
-      return _githubAddress("issue", x.repo.owner, x.repo.name, x.number);
+      return _githubAddress("ISSUE", x.repo.owner, x.repo.name, x.number);
     case "PULL":
-      return _githubAddress("pull", x.repo.owner, x.repo.name, x.number);
+      return _githubAddress("PULL", x.repo.owner, x.repo.name, x.number);
     case "REVIEW":
       return _githubAddress(
-        "review",
+        "REVIEW",
         x.pull.repo.owner,
         x.pull.repo.name,
         x.pull.number,
@@ -201,8 +201,8 @@ export function toRaw(x: StructuredAddress): RawAddress {
       switch (x.parent.type) {
         case "ISSUE":
           return _githubAddress(
-            "comment",
-            "issue",
+            "COMMENT",
+            "ISSUE",
             x.parent.repo.owner,
             x.parent.repo.name,
             x.parent.number,
@@ -210,8 +210,8 @@ export function toRaw(x: StructuredAddress): RawAddress {
           );
         case "PULL":
           return _githubAddress(
-            "comment",
-            "pull",
+            "COMMENT",
+            "PULL",
             x.parent.repo.owner,
             x.parent.repo.name,
             x.parent.number,
@@ -219,8 +219,8 @@ export function toRaw(x: StructuredAddress): RawAddress {
           );
         case "REVIEW":
           return _githubAddress(
-            "comment",
-            "review",
+            "COMMENT",
+            "REVIEW",
             x.parent.pull.repo.owner,
             x.parent.pull.repo.name,
             x.parent.pull.number,
@@ -233,7 +233,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
           throw new Error(`Bad comment parent type: ${x.parent.type}`);
       }
     case "USERLIKE":
-      return _githubAddress("userlike", x.login);
+      return _githubAddress("USERLIKE", x.login);
     default:
       // eslint-disable-next-line no-unused-expressions
       (x.type: empty);
