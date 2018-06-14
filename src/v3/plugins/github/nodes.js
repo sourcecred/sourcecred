@@ -9,33 +9,53 @@ export function _githubAddress(...parts: string[]): RawAddress {
   return NodeAddress.append(GITHUB_PREFIX, ...parts);
 }
 
+export const REPO_TYPE: "REPO" = "REPO";
+export const ISSUE_TYPE: "ISSUE" = "ISSUE";
+export const PULL_TYPE: "PULL" = "PULL";
+export const REVIEW_TYPE: "REVIEW" = "REVIEW";
+export const COMMENT_TYPE: "COMMENT" = "COMMENT";
+export const USERLIKE_TYPE: "USERLIKE" = "USERLIKE";
+
+export const _Prefix = Object.freeze({
+  base: GITHUB_PREFIX,
+  repo: _githubAddress(REPO_TYPE),
+  issue: _githubAddress(ISSUE_TYPE),
+  pull: _githubAddress(PULL_TYPE),
+  review: _githubAddress(REVIEW_TYPE),
+  comment: _githubAddress(COMMENT_TYPE),
+  userlike: _githubAddress(USERLIKE_TYPE),
+  reviewComment: _githubAddress(COMMENT_TYPE, REVIEW_TYPE),
+  issueComment: _githubAddress(COMMENT_TYPE, ISSUE_TYPE),
+  pullComment: _githubAddress(COMMENT_TYPE, PULL_TYPE),
+});
+
 export type RepoAddress = {|
-  +type: "REPO",
+  +type: typeof REPO_TYPE,
   +owner: string,
   +name: string,
 |};
 export type IssueAddress = {|
-  +type: "ISSUE",
+  +type: typeof ISSUE_TYPE,
   +repo: RepoAddress,
   +number: string,
 |};
 export type PullAddress = {|
-  +type: "PULL",
+  +type: typeof PULL_TYPE,
   +repo: RepoAddress,
   +number: string,
 |};
 export type ReviewAddress = {|
-  +type: "REVIEW",
+  +type: typeof REVIEW_TYPE,
   +pull: PullAddress,
   +id: string,
 |};
 export type CommentAddress = {|
-  +type: "COMMENT",
+  +type: typeof COMMENT_TYPE,
   +parent: CommentableAddress,
   +id: string,
 |};
 export type UserlikeAddress = {|
-  +type: "USERLIKE",
+  +type: typeof USERLIKE_TYPE,
   +login: string,
 |};
 
@@ -105,82 +125,82 @@ export function fromRaw(x: RawAddress): StructuredAddress {
   }
   const [_unused_sc, _unused_gh, kind, ...rest] = NodeAddress.toParts(x);
   switch (kind) {
-    case "REPO": {
+    case REPO_TYPE: {
       if (rest.length !== 2) {
         throw fail();
       }
       const [owner, name] = rest;
-      return {type: "REPO", owner, name};
+      return {type: REPO_TYPE, owner, name};
     }
-    case "ISSUE": {
+    case ISSUE_TYPE: {
       if (rest.length !== 3) {
         throw fail();
       }
       const [owner, name, number] = rest;
-      const repo = {type: "REPO", owner, name};
-      return {type: "ISSUE", repo, number};
+      const repo = {type: REPO_TYPE, owner, name};
+      return {type: ISSUE_TYPE, repo, number};
     }
-    case "PULL": {
+    case PULL_TYPE: {
       if (rest.length !== 3) {
         throw fail();
       }
       const [owner, name, number] = rest;
-      const repo = {type: "REPO", owner, name};
-      return {type: "PULL", repo, number};
+      const repo = {type: REPO_TYPE, owner, name};
+      return {type: PULL_TYPE, repo, number};
     }
-    case "REVIEW": {
+    case REVIEW_TYPE: {
       if (rest.length !== 4) {
         throw fail();
       }
       const [owner, name, pullNumber, id] = rest;
-      const repo = {type: "REPO", owner, name};
-      const pull = {type: "PULL", repo, number: pullNumber};
-      return {type: "REVIEW", pull, id};
+      const repo = {type: REPO_TYPE, owner, name};
+      const pull = {type: PULL_TYPE, repo, number: pullNumber};
+      return {type: REVIEW_TYPE, pull, id};
     }
-    case "COMMENT": {
+    case COMMENT_TYPE: {
       if (rest.length < 1) {
         throw fail();
       }
       const [subkind, ...subrest] = rest;
       switch (subkind) {
-        case "ISSUE": {
+        case ISSUE_TYPE: {
           if (subrest.length !== 4) {
             throw fail();
           }
           const [owner, name, issueNumber, id] = subrest;
-          const repo = {type: "REPO", owner, name};
-          const issue = {type: "ISSUE", repo, number: issueNumber};
-          return {type: "COMMENT", parent: issue, id};
+          const repo = {type: REPO_TYPE, owner, name};
+          const issue = {type: ISSUE_TYPE, repo, number: issueNumber};
+          return {type: COMMENT_TYPE, parent: issue, id};
         }
-        case "PULL": {
+        case PULL_TYPE: {
           if (subrest.length !== 4) {
             throw fail();
           }
           const [owner, name, pullNumber, id] = subrest;
-          const repo = {type: "REPO", owner, name};
-          const pull = {type: "PULL", repo, number: pullNumber};
-          return {type: "COMMENT", parent: pull, id};
+          const repo = {type: REPO_TYPE, owner, name};
+          const pull = {type: PULL_TYPE, repo, number: pullNumber};
+          return {type: COMMENT_TYPE, parent: pull, id};
         }
-        case "REVIEW": {
+        case REVIEW_TYPE: {
           if (subrest.length !== 5) {
             throw fail();
           }
           const [owner, name, pullNumber, reviewFragment, id] = subrest;
-          const repo = {type: "REPO", owner, name};
-          const pull = {type: "PULL", repo, number: pullNumber};
-          const review = {type: "REVIEW", pull, id: reviewFragment};
-          return {type: "COMMENT", parent: review, id};
+          const repo = {type: REPO_TYPE, owner, name};
+          const pull = {type: PULL_TYPE, repo, number: pullNumber};
+          const review = {type: REVIEW_TYPE, pull, id: reviewFragment};
+          return {type: COMMENT_TYPE, parent: review, id};
         }
         default:
           throw fail();
       }
     }
-    case "USERLIKE": {
+    case USERLIKE_TYPE: {
       if (rest.length !== 1) {
         throw fail();
       }
       const [login] = rest;
-      return {type: "USERLIKE", login};
+      return {type: USERLIKE_TYPE, login};
     }
     default:
       throw fail();
@@ -189,44 +209,51 @@ export function fromRaw(x: RawAddress): StructuredAddress {
 
 export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
-    case "REPO":
-      return _githubAddress("REPO", x.owner, x.name);
-    case "ISSUE":
-      return _githubAddress("ISSUE", x.repo.owner, x.repo.name, x.number);
-    case "PULL":
-      return _githubAddress("PULL", x.repo.owner, x.repo.name, x.number);
-    case "REVIEW":
-      return _githubAddress(
-        "REVIEW",
+    case REPO_TYPE:
+      return NodeAddress.append(_Prefix.repo, x.owner, x.name);
+    case ISSUE_TYPE:
+      return NodeAddress.append(
+        _Prefix.issue,
+        x.repo.owner,
+        x.repo.name,
+        x.number
+      );
+    case PULL_TYPE:
+      return NodeAddress.append(
+        _Prefix.pull,
+        x.repo.owner,
+        x.repo.name,
+        x.number
+      );
+    case REVIEW_TYPE:
+      return NodeAddress.append(
+        _Prefix.review,
         x.pull.repo.owner,
         x.pull.repo.name,
         x.pull.number,
         x.id
       );
-    case "COMMENT":
+    case COMMENT_TYPE:
       switch (x.parent.type) {
-        case "ISSUE":
-          return _githubAddress(
-            "COMMENT",
-            "ISSUE",
+        case ISSUE_TYPE:
+          return NodeAddress.append(
+            _Prefix.issueComment,
             x.parent.repo.owner,
             x.parent.repo.name,
             x.parent.number,
             x.id
           );
-        case "PULL":
-          return _githubAddress(
-            "COMMENT",
-            "PULL",
+        case PULL_TYPE:
+          return NodeAddress.append(
+            _Prefix.pullComment,
             x.parent.repo.owner,
             x.parent.repo.name,
             x.parent.number,
             x.id
           );
-        case "REVIEW":
-          return _githubAddress(
-            "COMMENT",
-            "REVIEW",
+        case REVIEW_TYPE:
+          return NodeAddress.append(
+            _Prefix.reviewComment,
             x.parent.pull.repo.owner,
             x.parent.pull.repo.name,
             x.parent.pull.number,
@@ -238,8 +265,8 @@ export function toRaw(x: StructuredAddress): RawAddress {
           (x.parent.type: empty);
           throw new Error(`Bad comment parent type: ${x.parent.type}`);
       }
-    case "USERLIKE":
-      return _githubAddress("USERLIKE", x.login);
+    case USERLIKE_TYPE:
+      return NodeAddress.append(_Prefix.userlike, x.login);
     default:
       // eslint-disable-next-line no-unused-expressions
       (x.type: empty);

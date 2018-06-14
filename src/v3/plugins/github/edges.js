@@ -11,21 +11,39 @@ import * as GithubNode from "./nodes";
 
 export opaque type RawAddress: EdgeAddressT = EdgeAddressT;
 
+export const AUTHORS_TYPE = "AUTHORS";
+export const MERGED_AS_TYPE = "MERGED_AS";
+export const HAS_PARENT_TYPE = "HAS_PARENT";
+export const REFERENCES_TYPE = "REFERENCES";
+
+const GITHUB_PREFIX = EdgeAddress.fromParts(["sourcecred", "github"]);
+function githubEdgeAddress(...parts: string[]): RawAddress {
+  return EdgeAddress.append(GITHUB_PREFIX, ...parts);
+}
+
+export const _Prefix = Object.freeze({
+  base: GITHUB_PREFIX,
+  authors: githubEdgeAddress(AUTHORS_TYPE),
+  mergedAs: githubEdgeAddress(MERGED_AS_TYPE),
+  references: githubEdgeAddress(REFERENCES_TYPE),
+  hasParent: githubEdgeAddress(HAS_PARENT_TYPE),
+});
+
 export type AuthorsAddress = {|
-  +type: "AUTHORS",
+  +type: typeof AUTHORS_TYPE,
   +author: GithubNode.UserlikeAddress,
   +content: GithubNode.AuthorableAddress,
 |};
 export type MergedAsAddress = {|
-  +type: "MERGED_AS",
+  +type: typeof MERGED_AS_TYPE,
   +pull: GithubNode.PullAddress,
 |};
 export type HasParentAddress = {|
-  +type: "HAS_PARENT",
+  +type: typeof HAS_PARENT_TYPE,
   +child: GithubNode.ChildAddress,
 |};
 export type ReferencesAddress = {|
-  +type: "REFERENCES",
+  +type: typeof REFERENCES_TYPE,
   +referrer: GithubNode.TextContentAddress,
   +referent: GithubNode.ReferentAddress,
 |};
@@ -41,7 +59,7 @@ export const createEdge = Object.freeze({
     author: GithubNode.UserlikeAddress,
     content: GithubNode.AuthorableAddress
   ): Edge => ({
-    address: toRaw({type: "AUTHORS", author, content}),
+    address: toRaw({type: AUTHORS_TYPE, author, content}),
     src: GithubNode.toRaw(author),
     dst: GithubNode.toRaw(content),
   }),
@@ -49,7 +67,7 @@ export const createEdge = Object.freeze({
     pull: GithubNode.PullAddress,
     commitAddress: NodeAddressT /* TODO: Make this a Git commit node address. */
   ): Edge => ({
-    address: toRaw({type: "MERGED_AS", pull}),
+    address: toRaw({type: MERGED_AS_TYPE, pull}),
     src: GithubNode.toRaw(pull),
     dst: commitAddress,
   }),
@@ -57,7 +75,7 @@ export const createEdge = Object.freeze({
     child: GithubNode.ChildAddress,
     parent: GithubNode.ParentAddress
   ): Edge => ({
-    address: toRaw({type: "HAS_PARENT", child}),
+    address: toRaw({type: HAS_PARENT_TYPE, child}),
     src: GithubNode.toRaw(child),
     dst: GithubNode.toRaw(parent),
   }),
@@ -65,7 +83,7 @@ export const createEdge = Object.freeze({
     referrer: GithubNode.TextContentAddress,
     referent: GithubNode.ReferentAddress
   ): Edge => ({
-    address: toRaw({type: "REFERENCES", referrer, referent}),
+    address: toRaw({type: REFERENCES_TYPE, referrer, referent}),
     src: GithubNode.toRaw(referrer),
     dst: GithubNode.toRaw(referent),
   }),
@@ -74,10 +92,6 @@ export const createEdge = Object.freeze({
 const NODE_PREFIX_LENGTH = NodeAddress.toParts(GithubNode._githubAddress())
   .length;
 
-const GITHUB_PREFIX = EdgeAddress.fromParts(["sourcecred", "github"]);
-function githubEdgeAddress(...parts: string[]): RawAddress {
-  return EdgeAddress.append(GITHUB_PREFIX, ...parts);
-}
 function lengthEncode(x: GithubNode.RawAddress): $ReadOnlyArray<string> {
   const baseParts = NodeAddress.toParts(x).slice(NODE_PREFIX_LENGTH);
   return [String(baseParts.length), ...baseParts];
@@ -121,7 +135,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
   }
   const [_unused_sc, _unused_gh, kind, ...rest] = EdgeAddress.toParts(x);
   switch (kind) {
-    case "AUTHORS": {
+    case AUTHORS_TYPE: {
       const parts = multiLengthDecode(rest, fail);
       if (parts.length !== 2) {
         throw fail();
@@ -133,9 +147,9 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       const content: GithubNode.AuthorableAddress = (GithubNode.fromRaw(
         GithubNode._githubAddress(...contentParts)
       ): any);
-      return ({type: "AUTHORS", author, content}: AuthorsAddress);
+      return ({type: AUTHORS_TYPE, author, content}: AuthorsAddress);
     }
-    case "MERGED_AS": {
+    case MERGED_AS_TYPE: {
       const parts = multiLengthDecode(rest, fail);
       if (parts.length !== 1) {
         throw fail();
@@ -144,9 +158,9 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       const pull: GithubNode.PullAddress = (GithubNode.fromRaw(
         GithubNode._githubAddress(...pullParts)
       ): any);
-      return ({type: "MERGED_AS", pull}: MergedAsAddress);
+      return ({type: MERGED_AS_TYPE, pull}: MergedAsAddress);
     }
-    case "HAS_PARENT": {
+    case HAS_PARENT_TYPE: {
       const parts = multiLengthDecode(rest, fail);
       if (parts.length !== 1) {
         throw fail();
@@ -155,9 +169,9 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       const child: GithubNode.ChildAddress = (GithubNode.fromRaw(
         GithubNode._githubAddress(...childParts)
       ): any);
-      return ({type: "HAS_PARENT", child}: HasParentAddress);
+      return ({type: HAS_PARENT_TYPE, child}: HasParentAddress);
     }
-    case "REFERENCES": {
+    case REFERENCES_TYPE: {
       const parts = multiLengthDecode(rest, fail);
       if (parts.length !== 2) {
         throw fail();
@@ -169,7 +183,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       const referent: GithubNode.ReferentAddress = (GithubNode.fromRaw(
         GithubNode._githubAddress(...referentParts)
       ): any);
-      return ({type: "REFERENCES", referrer, referent}: ReferencesAddress);
+      return ({type: REFERENCES_TYPE, referrer, referent}: ReferencesAddress);
     }
     default:
       throw fail();
@@ -178,25 +192,25 @@ export function fromRaw(x: RawAddress): StructuredAddress {
 
 export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
-    case "AUTHORS":
-      return githubEdgeAddress(
-        "AUTHORS",
+    case AUTHORS_TYPE:
+      return EdgeAddress.append(
+        _Prefix.authors,
         ...lengthEncode(GithubNode.toRaw(x.author)),
         ...lengthEncode(GithubNode.toRaw(x.content))
       );
-    case "MERGED_AS":
-      return githubEdgeAddress(
-        "MERGED_AS",
+    case MERGED_AS_TYPE:
+      return EdgeAddress.append(
+        _Prefix.mergedAs,
         ...lengthEncode(GithubNode.toRaw(x.pull))
       );
-    case "HAS_PARENT":
-      return githubEdgeAddress(
-        "HAS_PARENT",
+    case HAS_PARENT_TYPE:
+      return EdgeAddress.append(
+        _Prefix.hasParent,
         ...lengthEncode(GithubNode.toRaw(x.child))
       );
-    case "REFERENCES":
-      return githubEdgeAddress(
-        "REFERENCES",
+    case REFERENCES_TYPE:
+      return EdgeAddress.append(
+        _Prefix.references,
         ...lengthEncode(GithubNode.toRaw(x.referrer)),
         ...lengthEncode(GithubNode.toRaw(x.referent))
       );

@@ -2,57 +2,63 @@
 
 import {NodeAddress, EdgeAddress, edgeToString} from "../../core/graph";
 import {createEdge, fromRaw, toRaw} from "./edges";
+import * as GE from "./edges";
+import * as GN from "./nodes";
 
 describe("plugins/github/edges", () => {
   const nodeExamples = {
     repo: () => ({
-      type: "REPO",
+      type: GN.REPO_TYPE,
       owner: "sourcecred",
       name: "example-github",
     }),
-    issue: () => ({type: "ISSUE", repo: nodeExamples.repo(), number: "2"}),
-    pull: () => ({type: "PULL", repo: nodeExamples.repo(), number: "5"}),
+    issue: () => ({
+      type: GN.ISSUE_TYPE,
+      repo: nodeExamples.repo(),
+      number: "2",
+    }),
+    pull: () => ({type: GN.PULL_TYPE, repo: nodeExamples.repo(), number: "5"}),
     review: () => ({
-      type: "REVIEW",
+      type: GN.REVIEW_TYPE,
       pull: nodeExamples.pull(),
       id: "100313899",
     }),
     issueComment: () => ({
-      type: "COMMENT",
+      type: GN.COMMENT_TYPE,
       parent: nodeExamples.issue(),
       id: "373768703",
     }),
     pullComment: () => ({
-      type: "COMMENT",
+      type: GN.COMMENT_TYPE,
       parent: nodeExamples.pull(),
       id: "396430464",
     }),
     reviewComment: () => ({
-      type: "COMMENT",
+      type: GN.COMMENT_TYPE,
       parent: nodeExamples.review(),
       id: "171460198",
     }),
-    user: () => ({type: "USERLIKE", login: "decentralion"}),
+    user: () => ({type: GN.USERLIKE_TYPE, login: "decentralion"}),
   };
 
   const edgeExamples = {
     authors: () => ({
-      type: "AUTHORS",
+      type: GE.AUTHORS_TYPE,
       author: nodeExamples.user(),
       content: nodeExamples.pull(),
     }),
     mergedAs: () => ({
-      type: "MERGED_AS",
+      type: GE.MERGED_AS_TYPE,
       pull: nodeExamples.pull(),
     }),
     hasParent: () => ({
-      type: "HAS_PARENT",
+      type: GE.HAS_PARENT_TYPE,
       child: nodeExamples.reviewComment(),
     }),
     references: () => ({
-      type: "REFERENCES",
+      type: GE.REFERENCES_TYPE,
       referrer: nodeExamples.issue(),
-      referent: {type: "ISSUE", repo: nodeExamples.repo(), number: "1"},
+      referent: {type: GN.ISSUE_TYPE, repo: nodeExamples.repo(), number: "1"},
     }),
   };
 
