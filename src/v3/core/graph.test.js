@@ -3,7 +3,9 @@
 import sortBy from "lodash.sortby";
 
 import {
+  type Edge,
   type EdgeAddressT,
+  type EdgesOptions,
   type Neighbor,
   type NeighborsOptions,
   type NodeAddressT,
@@ -582,6 +584,131 @@ describe("core/graph", () => {
             g._modificationCount++;
             expect(() => iterator.next()).toThrow("Concurrent modification");
           });
+        });
+      });
+
+      describe("edges filtering", () => {
+        const src1 = NodeAddress.fromParts(["src", "1"]);
+        const src2 = NodeAddress.fromParts(["src", "2"]);
+        const dst1 = NodeAddress.fromParts(["dst", "1"]);
+        const dst2 = NodeAddress.fromParts(["dst", "2"]);
+        const e11 = {
+          src: src1,
+          dst: dst1,
+          address: EdgeAddress.fromParts(["e", "1", "1"]),
+        };
+        const e12 = {
+          src: src1,
+          dst: dst2,
+          address: EdgeAddress.fromParts(["e", "1", "2"]),
+        };
+        const e21 = {
+          src: src2,
+          dst: dst1,
+          address: EdgeAddress.fromParts(["e", "2", "1"]),
+        };
+        const e22 = {
+          src: src2,
+          dst: dst2,
+          address: EdgeAddress.fromParts(["e", "2", "2"]),
+        };
+        const graph = () =>
+          [e11, e12, e21, e22].reduce(
+            (g, e) => g.addEdge(e),
+            [src1, src2, dst1, dst2].reduce((g, n) => g.addNode(n), new Graph())
+          );
+        function expectEdges(
+          options: EdgesOptions | void,
+          expected: $ReadOnlyArray<Edge>
+        ) {
+          const sort = (es) => sortBy(es, (e) => e.address);
+          expect(sort(Array.from(graph().edges(options)))).toEqual(
+            sort(expected.slice())
+          );
+        }
+        it("finds all edges when no options are specified", () => {
+          expectEdges(undefined, [e11, e12, e21, e22]);
+        });
+        it("finds all edges when universal filters are specified", () => {
+          expectEdges(
+            {
+              addressPrefix: EdgeAddress.fromParts(["e"]),
+              srcPrefix: NodeAddress.fromParts(["src"]),
+              dstPrefix: NodeAddress.fromParts(["dst"]),
+            },
+            [e11, e12, e21, e22]
+          );
+        });
+        it("requires `addressPrefix` to be present in provided options", () => {
+          expect(() => {
+            graph()
+              // $ExpectFlowError
+              .edges({srcPrefix: src1, dstPrefix: dst1});
+          }).toThrow("Invalid address prefix: undefined");
+        });
+        it("requires `srcPrefix` to be present in provided options", () => {
+          expect(() => {
+            graph()
+              // $ExpectFlowError
+              .edges({addressPrefix: e11, dstPrefix: dst1});
+          }).toThrow("Invalid src prefix: undefined");
+        });
+        it("requires `dstPrefix` to be present in provided options", () => {
+          expect(() => {
+            graph()
+              // $ExpectFlowError
+              .edges({addressPrefix: e11, srcPrefix: dst1});
+          }).toThrow("Invalid dst prefix: undefined");
+        });
+        it("finds edges by address prefix", () => {
+          expectEdges(
+            {
+              addressPrefix: EdgeAddress.fromParts(["e", "1"]),
+              srcPrefix: NodeAddress.fromParts([]),
+              dstPrefix: NodeAddress.fromParts([]),
+            },
+            [e11, e12]
+          );
+        });
+        it("finds edges by src prefix", () => {
+          expectEdges(
+            {
+              addressPrefix: EdgeAddress.fromParts([]),
+              srcPrefix: NodeAddress.fromParts(["src", "1"]),
+              dstPrefix: NodeAddress.fromParts([]),
+            },
+            [e11, e12]
+          );
+        });
+        it("finds edges by dst prefix", () => {
+          expectEdges(
+            {
+              addressPrefix: EdgeAddress.fromParts([]),
+              srcPrefix: NodeAddress.fromParts([]),
+              dstPrefix: NodeAddress.fromParts(["dst", "1"]),
+            },
+            [e11, e21]
+          );
+        });
+        it("yields nothing for disjoint filters", () => {
+          expectEdges(
+            {
+              addressPrefix: EdgeAddress.fromParts(["e", "1"]),
+              srcPrefix: NodeAddress.fromParts(["src", "2"]),
+              dstPrefix: NodeAddress.fromParts([]),
+            },
+            []
+          );
+        });
+        it("yields appropriate filter intersection", () => {
+          expectEdges(
+            {
+              addressPrefix: EdgeAddress.fromParts([]),
+              srcPrefix: NodeAddress.fromParts(["src", "1"]),
+              dstPrefix: NodeAddress.fromParts(["dst", "2"]),
+            },
+            [e12]
+          );
         });
       });
 

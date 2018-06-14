@@ -46,6 +46,12 @@ export type NeighborsOptions = {|
   +edgePrefix: EdgeAddressT,
 |};
 
+export type EdgesOptions = {|
+  +addressPrefix: EdgeAddressT,
+  +srcPrefix: NodeAddressT,
+  +dstPrefix: NodeAddressT,
+|};
+
 type AddressJSON = string[]; // Result of calling {Node,Edge}Address.toParts
 type Integer = number;
 type IndexedEdgeJSON = {|
@@ -409,17 +415,44 @@ export class Graph {
     return result;
   }
 
-  edges(): Iterator<Edge> {
-    const result = this._edgesIterator(this._modificationCount);
+  edges(options?: EdgesOptions): Iterator<Edge> {
+    if (options == null) {
+      options = {
+        addressPrefix: EdgeAddress.fromParts([]),
+        srcPrefix: NodeAddress.fromParts([]),
+        dstPrefix: NodeAddress.fromParts([]),
+      };
+    }
+    if (options.addressPrefix == null) {
+      throw new Error(
+        `Invalid address prefix: ${String(options.addressPrefix)}`
+      );
+    }
+    if (options.srcPrefix == null) {
+      throw new Error(`Invalid src prefix: ${String(options.srcPrefix)}`);
+    }
+    if (options.dstPrefix == null) {
+      throw new Error(`Invalid dst prefix: ${String(options.dstPrefix)}`);
+    }
+    const result = this._edgesIterator(this._modificationCount, options);
     this._maybeCheckInvariants();
     return result;
   }
 
-  *_edgesIterator(initialModificationCount: ModificationCount): Iterator<Edge> {
+  *_edgesIterator(
+    initialModificationCount: ModificationCount,
+    options: EdgesOptions
+  ): Iterator<Edge> {
     for (const edge of this._edges.values()) {
-      this._checkForComodification(initialModificationCount);
-      this._maybeCheckInvariants();
-      yield edge;
+      if (
+        EdgeAddress.hasPrefix(edge.address, options.addressPrefix) &&
+        NodeAddress.hasPrefix(edge.src, options.srcPrefix) &&
+        NodeAddress.hasPrefix(edge.dst, options.dstPrefix)
+      ) {
+        this._checkForComodification(initialModificationCount);
+        this._maybeCheckInvariants();
+        yield edge;
+      }
     }
     this._checkForComodification(initialModificationCount);
     this._maybeCheckInvariants();
