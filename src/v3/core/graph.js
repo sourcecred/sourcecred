@@ -588,3 +588,12 @@ export function edgeToString(edge: Edge): string {
   const dst = NodeAddress.toString(edge.dst);
   return `{address: ${address}, src: ${src}, dst: ${dst}}`;
 }
+
+export function edgeToParts(
+  edge: Edge
+): {|+addressParts: string[], +srcParts: string[], +dstParts: string[]|} {
+  const addressParts = EdgeAddress.toParts(edge.address);
+  const srcParts = NodeAddress.toParts(edge.src);
+  const dstParts = NodeAddress.toParts(edge.dst);
+  return {addressParts, srcParts, dstParts};
+}
