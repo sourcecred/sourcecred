@@ -48,6 +48,13 @@ export type TreeEntryAddress = {|
   +name: string,
 |};
 
+// A tree entry has contents with one of the following types of
+// addresses.
+export type TreeEntryContentsAddress =
+  | BlobAddress
+  | TreeAddress
+  | SubmoduleCommitAddress;
+
 export type StructuredAddress =
   | BlobAddress
   | CommitAddress
