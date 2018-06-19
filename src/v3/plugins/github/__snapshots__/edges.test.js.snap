@@ -1,12 +1,138 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`plugins/github/edges createEdge works for authors edges 1`] = `"{address: EdgeAddress[\\"sourcecred\\",\\"github\\",\\"AUTHORS\\",\\"2\\",\\"USERLIKE\\",\\"decentralion\\",\\"4\\",\\"ISSUE\\",\\"sourcecred\\",\\"example-github\\",\\"2\\"], src: NodeAddress[\\"sourcecred\\",\\"github\\",\\"USERLIKE\\",\\"decentralion\\"], dst: NodeAddress[\\"sourcecred\\",\\"github\\",\\"ISSUE\\",\\"sourcecred\\",\\"example-github\\",\\"2\\"]}"`;
+exports[`plugins/github/edges createEdge works for authors edges 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "github",
+    "AUTHORS",
+    "2",
+    "USERLIKE",
+    "decentralion",
+    "4",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "github",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "github",
+    "USERLIKE",
+    "decentralion",
+  ],
+}
+`;
 
-exports[`plugins/github/edges createEdge works for has-parent edges 1`] = `"{address: EdgeAddress[\\"sourcecred\\",\\"github\\",\\"HAS_PARENT\\",\\"7\\",\\"COMMENT\\",\\"REVIEW\\",\\"sourcecred\\",\\"example-github\\",\\"5\\",\\"100313899\\",\\"171460198\\"], src: NodeAddress[\\"sourcecred\\",\\"github\\",\\"COMMENT\\",\\"REVIEW\\",\\"sourcecred\\",\\"example-github\\",\\"5\\",\\"100313899\\",\\"171460198\\"], dst: NodeAddress[\\"sourcecred\\",\\"github\\",\\"REVIEW\\",\\"sourcecred\\",\\"example-github\\",\\"5\\",\\"100313899\\"]}"`;
+exports[`plugins/github/edges createEdge works for has-parent edges 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "github",
+    "HAS_PARENT",
+    "7",
+    "COMMENT",
+    "REVIEW",
+    "sourcecred",
+    "example-github",
+    "5",
+    "100313899",
+    "171460198",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "github",
+    "REVIEW",
+    "sourcecred",
+    "example-github",
+    "5",
+    "100313899",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "github",
+    "COMMENT",
+    "REVIEW",
+    "sourcecred",
+    "example-github",
+    "5",
+    "100313899",
+    "171460198",
+  ],
+}
+`;
 
-exports[`plugins/github/edges createEdge works for merged-as edges 1`] = `"{address: EdgeAddress[\\"sourcecred\\",\\"github\\",\\"MERGED_AS\\",\\"4\\",\\"PULL\\",\\"sourcecred\\",\\"example-github\\",\\"5\\"], src: NodeAddress[\\"sourcecred\\",\\"github\\",\\"PULL\\",\\"sourcecred\\",\\"example-github\\",\\"5\\"], dst: NodeAddress[\\"git\\",\\"commit\\",\\"123\\"]}"`;
+exports[`plugins/github/edges createEdge works for merged-as edges 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "github",
+    "MERGED_AS",
+    "4",
+    "PULL",
+    "sourcecred",
+    "example-github",
+    "5",
+  ],
+  "dstParts": Array [
+    "git",
+    "commit",
+    "123",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "github",
+    "PULL",
+    "sourcecred",
+    "example-github",
+    "5",
+  ],
+}
+`;
 
-exports[`plugins/github/edges createEdge works for reference edges 1`] = `"{address: EdgeAddress[\\"sourcecred\\",\\"github\\",\\"REFERENCES\\",\\"4\\",\\"ISSUE\\",\\"sourcecred\\",\\"example-github\\",\\"2\\",\\"4\\",\\"PULL\\",\\"sourcecred\\",\\"example-github\\",\\"5\\"], src: NodeAddress[\\"sourcecred\\",\\"github\\",\\"ISSUE\\",\\"sourcecred\\",\\"example-github\\",\\"2\\"], dst: NodeAddress[\\"sourcecred\\",\\"github\\",\\"PULL\\",\\"sourcecred\\",\\"example-github\\",\\"5\\"]}"`;
+exports[`plugins/github/edges createEdge works for reference edges 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "github",
+    "REFERENCES",
+    "4",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+    "4",
+    "PULL",
+    "sourcecred",
+    "example-github",
+    "5",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "github",
+    "PULL",
+    "sourcecred",
+    "example-github",
+    "5",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "github",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+  ],
+}
+`;
 
 exports[`plugins/github/edges snapshots as expected: authors 1`] = `
 Object {
