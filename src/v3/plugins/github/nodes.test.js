@@ -141,14 +141,14 @@ describe("plugins/github/nodes", () => {
       expectBadAddress("no kind", []);
       describe("repository with", () => {
         checkBadCases([
-          {name: "no owner", parts: ["repo"]},
+          {name: "no owner", parts: [GN.REPO_TYPE]},
           {name: "no name", parts: ["owner"]},
           {name: "extra parts", parts: ["name", "foo"]},
         ]);
       });
       describe("issue with", () => {
         checkBadCases([
-          {name: "no owner", parts: ["issue"]},
+          {name: "no owner", parts: [GN.ISSUE_TYPE]},
           {name: "no name", parts: ["owner"]},
           {name: "no number", parts: ["name"]},
           {name: "extra parts", parts: ["123", "foo"]},
@@ -156,7 +156,7 @@ describe("plugins/github/nodes", () => {
       });
       describe("pull request with", () => {
         checkBadCases([
-          {name: "no owner", parts: ["pull"]},
+          {name: "no owner", parts: [GN.PULL_TYPE]},
           {name: "no name", parts: ["owner"]},
           {name: "no number", parts: ["name"]},
           {name: "extra parts", parts: ["123", "foo"]},
@@ -164,7 +164,7 @@ describe("plugins/github/nodes", () => {
       });
       describe("pull request review with", () => {
         checkBadCases([
-          {name: "no owner", parts: ["review"]},
+          {name: "no owner", parts: [GN.REVIEW_TYPE]},
           {name: "no name", parts: ["owner"]},
           {name: "no number", parts: ["name"]},
           {name: "no id", parts: ["123"]},
@@ -172,11 +172,11 @@ describe("plugins/github/nodes", () => {
         ]);
       });
       describe("comment", () => {
-        expectBadAddress("with no subkind", ["comment"]);
-        expectBadAddress("with bad subkind", ["comment", "icecream"]);
+        expectBadAddress("with no subkind", [GN.COMMENT_TYPE]);
+        expectBadAddress("with bad subkind", [GN.COMMENT_TYPE, "ICE_CREAM"]);
         describe("on issue with", () => {
           checkBadCases([
-            {name: "no owner", parts: ["comment", "issue"]},
+            {name: "no owner", parts: [GN.COMMENT_TYPE, GN.ISSUE_TYPE]},
             {name: "no name", parts: ["owner"]},
             {name: "no number", parts: ["name"]},
             {name: "no id", parts: ["123"]},
@@ -185,7 +185,7 @@ describe("plugins/github/nodes", () => {
         });
         describe("on pull request with", () => {
           checkBadCases([
-            {name: "no owner", parts: ["comment", "pull"]},
+            {name: "no owner", parts: [GN.COMMENT_TYPE, GN.PULL_TYPE]},
             {name: "no name", parts: ["owner"]},
             {name: "no number", parts: ["name"]},
             {name: "no id", parts: ["123"]},
@@ -194,7 +194,7 @@ describe("plugins/github/nodes", () => {
         });
         describe("on pull request review with", () => {
           checkBadCases([
-            {name: "no owner", parts: ["comment", "review"]},
+            {name: "no owner", parts: [GN.COMMENT_TYPE, GN.REVIEW_TYPE]},
             {name: "no name", parts: ["owner"]},
             {name: "no number", parts: ["name"]},
             {name: "no review id", parts: ["123"]},
@@ -205,7 +205,7 @@ describe("plugins/github/nodes", () => {
       });
       describe("userlike", () => {
         checkBadCases([
-          {name: "no login", parts: ["userlike"]},
+          {name: "no login", parts: [GN.USERLIKE_TYPE]},
           {name: "extra parts", parts: ["decentra", "lion"]},
         ]);
       });
