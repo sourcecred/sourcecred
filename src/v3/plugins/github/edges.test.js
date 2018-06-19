@@ -1,6 +1,6 @@
 // @flow
 
-import {NodeAddress, EdgeAddress, edgeToString} from "../../core/graph";
+import {NodeAddress, EdgeAddress, edgeToParts} from "../../core/graph";
 import {createEdge, fromRaw, toRaw} from "./edges";
 import * as GE from "./edges";
 import * as GN from "./nodes";
@@ -65,7 +65,7 @@ describe("plugins/github/edges", () => {
   describe("createEdge", () => {
     it("works for authors edges", () => {
       expect(
-        edgeToString(
+        edgeToParts(
           createEdge.authors(nodeExamples.user(), nodeExamples.issue())
         )
       ).toMatchSnapshot();
@@ -73,12 +73,12 @@ describe("plugins/github/edges", () => {
     it("works for merged-as edges", () => {
       const commitAddress = NodeAddress.fromParts(["git", "commit", "123"]);
       expect(
-        edgeToString(createEdge.mergedAs(nodeExamples.pull(), commitAddress))
+        edgeToParts(createEdge.mergedAs(nodeExamples.pull(), commitAddress))
       ).toMatchSnapshot();
     });
     it("works for has-parent edges", () => {
       expect(
-        edgeToString(
+        edgeToParts(
           createEdge.hasParent(
             nodeExamples.reviewComment(),
             nodeExamples.review()
@@ -88,7 +88,7 @@ describe("plugins/github/edges", () => {
     });
     it("works for reference edges", () => {
       expect(
-        edgeToString(
+        edgeToParts(
           createEdge.references(nodeExamples.issue(), nodeExamples.pull())
         )
       ).toMatchSnapshot();
