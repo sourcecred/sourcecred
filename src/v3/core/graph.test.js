@@ -14,6 +14,7 @@ import {
   Graph,
   NodeAddress,
   edgeToString,
+  edgeToParts,
 } from "./graph";
 
 describe("core/graph", () => {
@@ -1465,6 +1466,22 @@ describe("core/graph", () => {
         'dst: NodeAddress["five","six"]' +
         "}";
       expect(edgeToString(edge)).toEqual(expected);
+    });
+  });
+
+  describe("edgeToParts", () => {
+    it("works", () => {
+      const edge = {
+        address: EdgeAddress.fromParts(["one", "two"]),
+        dst: NodeAddress.fromParts(["five", "six"]),
+        src: NodeAddress.fromParts(["three", "four"]),
+      };
+      const expected = {
+        addressParts: ["one", "two"],
+        srcParts: ["three", "four"],
+        dstParts: ["five", "six"],
+      };
+      expect(edgeToParts(edge)).toEqual(expected);
     });
   });
 });
