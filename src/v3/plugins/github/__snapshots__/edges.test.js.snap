@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`plugins/github/edges createEdge works for authors edges 1`] = `
+exports[`plugins/github/edges createEdge works for "authors" 1`] = `
 Object {
   "addressParts": Array [
     "sourcecred",
@@ -32,7 +32,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/edges createEdge works for has-parent edges 1`] = `
+exports[`plugins/github/edges createEdge works for "hasParent" 1`] = `
 Object {
   "addressParts": Array [
     "sourcecred",
@@ -70,7 +70,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/edges createEdge works for merged-as edges 1`] = `
+exports[`plugins/github/edges createEdge works for "mergedAs" 1`] = `
 Object {
   "addressParts": Array [
     "sourcecred",
@@ -98,7 +98,7 @@ Object {
 }
 `;
 
-exports[`plugins/github/edges createEdge works for reference edges 1`] = `
+exports[`plugins/github/edges createEdge works for "references" 1`] = `
 Object {
   "addressParts": Array [
     "sourcecred",
@@ -131,145 +131,5 @@ Object {
     "example-github",
     "2",
   ],
-}
-`;
-
-exports[`plugins/github/edges snapshots as expected: authors 1`] = `
-Object {
-  "address": Array [
-    "sourcecred",
-    "github",
-    "AUTHORS",
-    "2",
-    "USERLIKE",
-    "decentralion",
-    "4",
-    "PULL",
-    "sourcecred",
-    "example-github",
-    "5",
-  ],
-  "structured": Object {
-    "author": Object {
-      "login": "decentralion",
-      "type": "USERLIKE",
-    },
-    "content": Object {
-      "number": "5",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "PULL",
-    },
-    "type": "AUTHORS",
-  },
-}
-`;
-
-exports[`plugins/github/edges snapshots as expected: hasParent 1`] = `
-Object {
-  "address": Array [
-    "sourcecred",
-    "github",
-    "HAS_PARENT",
-    "7",
-    "COMMENT",
-    "REVIEW",
-    "sourcecred",
-    "example-github",
-    "5",
-    "100313899",
-    "171460198",
-  ],
-  "structured": Object {
-    "child": Object {
-      "id": "171460198",
-      "parent": Object {
-        "id": "100313899",
-        "pull": Object {
-          "number": "5",
-          "repo": Object {
-            "name": "example-github",
-            "owner": "sourcecred",
-            "type": "REPO",
-          },
-          "type": "PULL",
-        },
-        "type": "REVIEW",
-      },
-      "type": "COMMENT",
-    },
-    "type": "HAS_PARENT",
-  },
-}
-`;
-
-exports[`plugins/github/edges snapshots as expected: mergedAs 1`] = `
-Object {
-  "address": Array [
-    "sourcecred",
-    "github",
-    "MERGED_AS",
-    "4",
-    "PULL",
-    "sourcecred",
-    "example-github",
-    "5",
-  ],
-  "structured": Object {
-    "pull": Object {
-      "number": "5",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "PULL",
-    },
-    "type": "MERGED_AS",
-  },
-}
-`;
-
-exports[`plugins/github/edges snapshots as expected: references 1`] = `
-Object {
-  "address": Array [
-    "sourcecred",
-    "github",
-    "REFERENCES",
-    "4",
-    "ISSUE",
-    "sourcecred",
-    "example-github",
-    "2",
-    "4",
-    "ISSUE",
-    "sourcecred",
-    "example-github",
-    "1",
-  ],
-  "structured": Object {
-    "referent": Object {
-      "number": "1",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "ISSUE",
-    },
-    "referrer": Object {
-      "number": "2",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "ISSUE",
-    },
-    "type": "REFERENCES",
-  },
 }
 `;
