@@ -68,8 +68,14 @@ module.exports = {
     createExampleRepo: resolveApp(
       "src/v1/plugins/git/bin/createExampleRepo.js"
     ),
+    createExampleRepoV3: resolveApp(
+      "src/v3/plugins/git/bin/createExampleRepo.js"
+    ),
     loadAndPrintGitRepository: resolveApp(
       "src/v1/plugins/git/bin/loadAndPrintRepository.js"
+    ),
+    loadAndPrintGitRepositoryV3: resolveApp(
+      "src/v3/plugins/git/bin/loadAndPrintRepository.js"
     ),
   },
 };

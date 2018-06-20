@@ -87,6 +87,11 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       cmd: ["./src/v1/plugins/git/loadRepositoryTest.sh", "--no-build"],
       deps: ["backend-in-place"],
     },
+    {
+      id: "loadRepositoryTestV3",
+      cmd: ["./src/v3/plugins/git/loadRepositoryTest.sh", "--no-build"],
+      deps: ["backend-in-place"],
+    },
   ];
   switch (mode) {
     case "BASIC":
