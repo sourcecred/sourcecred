@@ -83,8 +83,9 @@ Object {
     "5",
   ],
   "dstParts": Array [
+    "sourcecred",
     "git",
-    "commit",
+    "COMMIT",
     "123",
   ],
   "srcParts": Array [
