@@ -266,7 +266,6 @@ export class Graph {
     // TODO(perf): Consider eliding this in production.
     const now = this._modificationCount;
     if (now === since) {
-      this._maybeCheckInvariants();
       return;
     }
     if (now > since) {
@@ -277,11 +276,11 @@ export class Graph {
         "Invariant violation: expected modification count in the future"
       );
     }
-    this._maybeCheckInvariants();
   }
 
   _markModification() {
-    // TODO(perf): Consider eliding this in production.
+    // TODO(perf): Consider eliding this in production (but not the call
+    // to `this._maybeCheckInvariants`).
     if (this._modificationCount >= Number.MAX_SAFE_INTEGER) {
       throw new Error(
         `Graph cannot be modified more than ${this._modificationCount} times.`
@@ -299,7 +298,6 @@ export class Graph {
       this._outEdges.set(a, []);
     }
     this._markModification();
-    this._maybeCheckInvariants();
     return this;
   }
 
@@ -321,15 +319,12 @@ export class Graph {
     this._outEdges.delete(a);
     this._nodes.delete(a);
     this._markModification();
-    this._maybeCheckInvariants();
     return this;
   }
 
   hasNode(a: NodeAddressT): boolean {
     NodeAddress.assertValid(a);
-    const result = this._nodes.has(a);
-    this._maybeCheckInvariants();
-    return result;
+    return this._nodes.has(a);
   }
 
   nodes(options?: {|+prefix: NodeAddressT|}): Iterator<NodeAddressT> {
@@ -337,9 +332,7 @@ export class Graph {
     if (prefix == null) {
       throw new Error(`Invalid prefix: ${String(prefix)}`);
     }
-    const result = this._nodesIterator(this._modificationCount, prefix);
-    this._maybeCheckInvariants();
-    return result;
+    return this._nodesIterator(this._modificationCount, prefix);
   }
 
   *_nodesIterator(
@@ -349,12 +342,10 @@ export class Graph {
     for (const node of this._nodes) {
       if (NodeAddress.hasPrefix(node, prefix)) {
         this._checkForComodification(initialModificationCount);
-        this._maybeCheckInvariants();
         yield node;
       }
     }
     this._checkForComodification(initialModificationCount);
-    this._maybeCheckInvariants();
   }
 
   addEdge(edge: Edge): this {
@@ -393,7 +384,6 @@ export class Graph {
     }
     this._edges.set(edge.address, edge);
     this._markModification();
-    this._maybeCheckInvariants();
     return this;
   }
 
@@ -422,22 +412,17 @@ export class Graph {
       });
     }
     this._markModification();
-    this._maybeCheckInvariants();
     return this;
   }
 
   hasEdge(address: EdgeAddressT): boolean {
     EdgeAddress.assertValid(address);
-    const result = this._edges.has(address);
-    this._maybeCheckInvariants();
-    return result;
+    return this._edges.has(address);
   }
 
   edge(address: EdgeAddressT): ?Edge {
     EdgeAddress.assertValid(address);
-    const result = this._edges.get(address);
-    this._maybeCheckInvariants();
-    return result;
+    return this._edges.get(address);
   }
 
   edges(options?: EdgesOptions): Iterator<Edge> {
@@ -459,9 +444,7 @@ export class Graph {
     if (options.dstPrefix == null) {
       throw new Error(`Invalid dst prefix: ${String(options.dstPrefix)}`);
     }
-    const result = this._edgesIterator(this._modificationCount, options);
-    this._maybeCheckInvariants();
-    return result;
+    return this._edgesIterator(this._modificationCount, options);
   }
 
   *_edgesIterator(
@@ -475,21 +458,17 @@ export class Graph {
         NodeAddress.hasPrefix(edge.dst, options.dstPrefix)
       ) {
         this._checkForComodification(initialModificationCount);
-        this._maybeCheckInvariants();
         yield edge;
       }
     }
     this._checkForComodification(initialModificationCount);
-    this._maybeCheckInvariants();
   }
 
   neighbors(node: NodeAddressT, options: NeighborsOptions): Iterator<Neighbor> {
     if (!this.hasNode(node)) {
       throw new Error(`Node does not exist: ${NodeAddress.toString(node)}`);
     }
-    const result = this._neighbors(node, options, this._modificationCount);
-    this._maybeCheckInvariants();
-    return result;
+    return this._neighbors(node, options, this._modificationCount);
   }
 
   *_neighbors(
@@ -530,30 +509,24 @@ export class Graph {
         const neighborNode = adjacency.direction === "IN" ? edge.src : edge.dst;
         if (nodeFilter(neighborNode) && edgeFilter(edge.address)) {
           this._checkForComodification(initialModificationCount);
-          this._maybeCheckInvariants();
           yield {edge, node: neighborNode};
         }
       }
     }
     this._checkForComodification(initialModificationCount);
-    this._maybeCheckInvariants();
   }
 
   equals(that: Graph): boolean {
     if (!(that instanceof Graph)) {
       throw new Error(`Expected Graph, got ${String(that)}`);
     }
-    const result =
-      deepEqual(this._nodes, that._nodes) &&
-      deepEqual(this._edges, that._edges);
-    this._maybeCheckInvariants();
-    return result;
+    return (
+      deepEqual(this._nodes, that._nodes) && deepEqual(this._edges, that._edges)
+    );
   }
 
   copy(): Graph {
-    const result = Graph.merge([this]);
-    this._maybeCheckInvariants();
-    return result;
+    return Graph.merge([this]);
   }
 
   toJSON(): GraphJSON {
@@ -575,9 +548,7 @@ export class Graph {
       nodes: sortedNodes.map((x) => NodeAddress.toParts(x)),
       edges: indexedEdges,
     };
-    const result = toCompat(COMPAT_INFO, rawJSON);
-    this._maybeCheckInvariants();
-    return result;
+    return toCompat(COMPAT_INFO, rawJSON);
   }
 
   static fromJSON(json: GraphJSON): Graph {
