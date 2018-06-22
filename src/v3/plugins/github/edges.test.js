@@ -1,9 +1,10 @@
 // @flow
 
-import {type EdgeAddressT, NodeAddress, edgeToParts} from "../../core/graph";
+import {type EdgeAddressT, edgeToParts} from "../../core/graph";
 import {createEdge, fromRaw, toRaw} from "./edges";
 import * as GE from "./edges";
 import * as GN from "./nodes";
+import {COMMIT_TYPE} from "../git/nodes";
 
 describe("plugins/github/edges", () => {
   const nodeExamples = {
@@ -45,8 +46,8 @@ describe("plugins/github/edges", () => {
     authors: () =>
       createEdge.authors(nodeExamples.user(), nodeExamples.issue()),
     mergedAs: () => {
-      const commitAddress = NodeAddress.fromParts(["git", "commit", "123"]);
-      return createEdge.mergedAs(nodeExamples.pull(), commitAddress);
+      const commit = {type: COMMIT_TYPE, hash: "123"};
+      return createEdge.mergedAs(nodeExamples.pull(), commit);
     },
     hasParent: () =>
       createEdge.hasParent(nodeExamples.reviewComment(), nodeExamples.review()),

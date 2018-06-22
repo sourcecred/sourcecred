@@ -3,11 +3,11 @@
 import {
   type Edge,
   type EdgeAddressT,
-  type NodeAddressT,
   EdgeAddress,
   NodeAddress,
 } from "../../core/graph";
 import * as GithubNode from "./nodes";
+import * as GitNode from "../git/nodes";
 
 export opaque type RawAddress: EdgeAddressT = EdgeAddressT;
 
@@ -65,11 +65,11 @@ export const createEdge = Object.freeze({
   }),
   mergedAs: (
     pull: GithubNode.PullAddress,
-    commitAddress: NodeAddressT /* TODO: Make this a Git commit node address. */
+    commit: GitNode.CommitAddress
   ): Edge => ({
     address: toRaw({type: MERGED_AS_TYPE, pull}),
     src: GithubNode.toRaw(pull),
-    dst: commitAddress,
+    dst: GitNode.toRaw(commit),
   }),
   hasParent: (
     child: GithubNode.ChildAddress,
