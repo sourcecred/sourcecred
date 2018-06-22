@@ -182,21 +182,41 @@ describe("core/graph", () => {
           .addNode(dst)
           .addEdge(edge());
 
+      describe("caches results when the graph has not been modified", () => {
+        it("with passing invariants", () => {
+          const g = new Graph().addNode(src);
+          g.checkInvariants(); // good
+          g._inEdges.delete(src); // corrupted, but only by poking at the internals
+          expect(() => g.checkInvariants()).not.toThrow();
+          expect(() => g._checkInvariants()).toThrow();
+        });
+
+        it("with failing invariants", () => {
+          const g = new Graph().addNode(src);
+          g.checkInvariants(); // good
+          g._inEdges.delete(src); // corrupted
+          expect(() => g.addNode(dst)).toThrow();
+          g._inEdges.set(src, []); // fixed, but only by poking at the internals
+          expect(() => g.checkInvariants()).toThrow();
+          expect(() => g._checkInvariants()).not.toThrow();
+        });
+      });
+
       it("is happy with a conformant graph", () => {
         const g = graph();
-        expect(() => g.checkInvariants()).not.toThrow();
+        expect(() => g._checkInvariants()).not.toThrow();
       });
 
       // Invariant 1
       it("detects missing in-edges", () => {
         const g = new Graph().addNode(src);
         g._inEdges.delete(src);
-        expect(() => g.checkInvariants()).toThrow("missing in-edges");
+        expect(() => g._checkInvariants()).toThrow("missing in-edges");
       });
       it("detects missing out-edges", () => {
         const g = new Graph().addNode(src);
         g._outEdges.delete(src);
-        expect(() => g.checkInvariants()).toThrow("missing out-edges");
+        expect(() => g._checkInvariants()).toThrow("missing out-edges");
       });
 
       // Invariant 2.1
@@ -210,7 +230,7 @@ describe("core/graph", () => {
         g._edges.set(edgeAddress, otherEdge());
         g._inEdges.set(dst, [otherEdge()]);
         g._outEdges.set(src, [otherEdge()]);
-        expect(() => g.checkInvariants()).toThrow("bad edge address");
+        expect(() => g._checkInvariants()).toThrow("bad edge address");
       });
       // Invariant 2.2
       it("detects when an edge has missing src", () => {
@@ -218,7 +238,7 @@ describe("core/graph", () => {
         g._nodes.delete(src);
         g._inEdges.delete(src);
         g._outEdges.delete(src);
-        expect(() => g.checkInvariants()).toThrow("missing src");
+        expect(() => g._checkInvariants()).toThrow("missing src");
       });
       // Invariant 2.3
       it("detects when an edge has missing dst", () => {
@@ -226,68 +246,68 @@ describe("core/graph", () => {
         g._nodes.delete(dst);
         g._inEdges.delete(dst);
         g._outEdges.delete(dst);
-        expect(() => g.checkInvariants()).toThrow("missing dst");
+        expect(() => g._checkInvariants()).toThrow("missing dst");
       });
       // Invariant 2.4
       it("detects when an edge is missing in `_inEdges`", () => {
         const g = graph();
         g._inEdges.set(edge().dst, []);
-        expect(() => g.checkInvariants()).toThrow("missing in-edge");
+        expect(() => g._checkInvariants()).toThrow("missing in-edge");
       });
       // Invariant 2.5
       it("detects when an edge is missing in `_outEdges`", () => {
         const g = graph();
         g._outEdges.set(edge().src, []);
-        expect(() => g.checkInvariants()).toThrow("missing out-edge");
+        expect(() => g._checkInvariants()).toThrow("missing out-edge");
       });
 
       // Invariant 3.1
       it("detects spurious in-edges", () => {
         const g = new Graph();
         g._inEdges.set(src, []);
-        expect(() => g.checkInvariants()).toThrow("spurious in-edges");
+        expect(() => g._checkInvariants()).toThrow("spurious in-edges");
       });
       // Invariant 4.1
       it("detects spurious out-edges", () => {
         const g = new Graph();
         g._outEdges.set(src, []);
-        expect(() => g.checkInvariants()).toThrow("spurious out-edges");
+        expect(() => g._checkInvariants()).toThrow("spurious out-edges");
       });
 
       // Invariant 3.2
       it("detects when an edge is duplicated in `_inEdges`", () => {
         const g = graph();
         g._inEdges.set(edge().dst, [edge(), edge()]);
-        expect(() => g.checkInvariants()).toThrow("duplicate in-edge");
+        expect(() => g._checkInvariants()).toThrow("duplicate in-edge");
       });
       // Invariant 4.2
       it("detects when an edge is duplicated in `_outEdges`", () => {
         const g = graph();
         g._outEdges.set(edge().src, [edge(), edge()]);
-        expect(() => g.checkInvariants()).toThrow("duplicate out-edge");
+        expect(() => g._checkInvariants()).toThrow("duplicate out-edge");
       });
 
       // Invariant 3.3 (two failure modes: absent or wrong data)
       it("detects when an edge is spurious in `_inEdges`", () => {
         const g = graph().removeEdge(edge().address);
         g._inEdges.set(edge().dst, [edge()]);
-        expect(() => g.checkInvariants()).toThrow("spurious in-edge");
+        expect(() => g._checkInvariants()).toThrow("spurious in-edge");
       });
       it("detects when an edge has bad `dst` in `_inEdges`", () => {
         const g = graph();
         g._inEdges.set(edge().dst, [{src: dst, dst, address: edgeAddress}]);
-        expect(() => g.checkInvariants()).toThrow(/bad in-edge.*vs\./);
+        expect(() => g._checkInvariants()).toThrow(/bad in-edge.*vs\./);
       });
       // Invariant 4.3 (two failure modes: absent or wrong data)
       it("detects when an edge is spurious in `_outEdges`", () => {
         const g = graph().removeEdge(edge().address);
         g._outEdges.set(edge().src, [edge()]);
-        expect(() => g.checkInvariants()).toThrow("spurious out-edge");
+        expect(() => g._checkInvariants()).toThrow("spurious out-edge");
       });
       it("detects when an edge has bad `src` in `_outEdges`", () => {
         const g = graph();
         g._outEdges.set(edge().src, [{src, dst: src, address: edgeAddress}]);
-        expect(() => g.checkInvariants()).toThrow(/bad out-edge.*vs\./);
+        expect(() => g._checkInvariants()).toThrow(/bad out-edge.*vs\./);
       });
 
       // Invariant 3.4
@@ -295,14 +315,14 @@ describe("core/graph", () => {
         const g = graph();
         g._inEdges.set(edge().dst, []);
         g._inEdges.set(edge().src, [edge()]);
-        expect(() => g.checkInvariants()).toThrow(/bad in-edge.*anchor/);
+        expect(() => g._checkInvariants()).toThrow(/bad in-edge.*anchor/);
       });
       // Invariant 4.4
       it("detects when an edge has bad anchor in `_outEdges`", () => {
         const g = graph();
         g._outEdges.set(edge().src, []);
         g._outEdges.set(edge().dst, [edge()]);
-        expect(() => g.checkInvariants()).toThrow(/bad out-edge.*anchor/);
+        expect(() => g._checkInvariants()).toThrow(/bad out-edge.*anchor/);
       });
     });
 

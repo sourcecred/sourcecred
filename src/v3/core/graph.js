@@ -74,6 +74,25 @@ export class Graph {
   _outEdges: Map<NodeAddressT, Edge[]>;
 
   checkInvariants() {
+    if (this._invariantsLastChecked.when !== this._modificationCount) {
+      let failure: ?string = null;
+      try {
+        this._checkInvariants();
+      } catch (e) {
+        failure = e.message;
+      } finally {
+        this._invariantsLastChecked = {
+          when: this._modificationCount,
+          failure,
+        };
+      }
+    }
+    if (this._invariantsLastChecked.failure != null) {
+      throw new Error(this._invariantsLastChecked.failure);
+    }
+  }
+
+  _checkInvariants() {
     // Definition. A node `n` is in the graph if `_nodes.has(n)`.
     //
     // Definition. An edge `e` is in the graph if `e` is deep-equal to
@@ -225,11 +244,17 @@ export class Graph {
   }
 
   // Incremented each time that any change is made to the graph. Used to
-  // check for comodification.
+  // check for comodification and to avoid needlessly checking
+  // invariants.
   _modificationCount: ModificationCount;
+  _invariantsLastChecked: {|+when: ModificationCount, +failure: ?string|};
 
   constructor(): void {
     this._modificationCount = 0;
+    this._invariantsLastChecked = {
+      when: -1,
+      failure: "Invariants never checked",
+    };
     this._nodes = new Set();
     this._edges = new Map();
     this._inEdges = new Map();
