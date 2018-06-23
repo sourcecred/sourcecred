@@ -7,27 +7,29 @@ describe("plugins/github/relationalView", () => {
   // Sharing this state is OK because it's just a view - no mutation allowed!
   const view = new R.RelationalView(data);
 
-  function assertNotNull<T>(x: ?T): T {
-    if (x == null) {
-      throw new Error(`Assertion fail: ${String(x)} `);
-    }
-    return x;
-  }
   const repos = () => Array.from(view.repos());
   it("there is one repository", () => {
     expect(repos()).toHaveLength(1);
   });
 
-  const repo = () => assertNotNull(repos()[0]);
-  it("repo matches snapshot", () => {
-    expect(repo()).toMatchSnapshot();
+  const repo = () => repos()[0];
+  // Snapshotting the repo would snapshot all of the data,
+  // which is somewhat excessive. Instead, we just check that
+  // it has an expected number of issues and pulls.
+  it("repo address matches snapshot", () => {
+    expect(repo().address).toMatchSnapshot();
   });
-
+  it("repo has issues", () => {
+    expect(repo().issues.length).toMatchSnapshot();
+  });
+  it("repo has pulls", () => {
+    expect(repo().issues.length).toMatchSnapshot();
+  });
   it("repo retrievable by address", () => {
     expect(view.repo(repo().address)).toEqual(repo());
   });
 
-  const issue = () => assertNotNull(view.issue(repo().issues[1]));
+  const issue = () => repo().issues[1];
   it("issue matches snapshot", () => {
     expect(issue()).toMatchSnapshot();
   });
@@ -35,7 +37,7 @@ describe("plugins/github/relationalView", () => {
     expect(view.issue(issue().address)).toEqual(issue());
   });
 
-  const pull = () => assertNotNull(view.pull(repo().pulls[1]));
+  const pull = () => repo().pulls[1];
   it("pull matches snapshot", () => {
     expect(pull()).toMatchSnapshot();
   });
@@ -43,7 +45,7 @@ describe("plugins/github/relationalView", () => {
     expect(view.pull(pull().address)).toEqual(pull());
   });
 
-  const review = () => assertNotNull(view.review(pull().reviews[0]));
+  const review = () => pull().reviews[0];
   it("review matches snapshot", () => {
     expect(review()).toMatchSnapshot();
   });
@@ -51,7 +53,7 @@ describe("plugins/github/relationalView", () => {
     expect(view.review(review().address)).toEqual(review());
   });
 
-  const comment = () => assertNotNull(view.comment(issue().comments[0]));
+  const comment = () => issue().comments[0];
   it("comment matches snapshot", () => {
     expect(comment()).toMatchSnapshot();
   });
@@ -59,12 +61,15 @@ describe("plugins/github/relationalView", () => {
     expect(view.comment(comment().address)).toEqual(comment());
   });
 
-  const userlike = () =>
-    assertNotNull(view.userlike(assertNotNull(issue().nominalAuthor)));
+  const userlike = () => issue().nominalAuthor;
   it("userlike matches snapshot", () => {
     expect(userlike()).toMatchSnapshot();
   });
   it("userlike retrievable by address", () => {
-    expect(view.userlike(userlike().address)).toEqual(userlike());
+    const u = userlike();
+    if (u == null) {
+      throw new Error(`Bad userlike for test case: ${String(u)}`);
+    }
+    expect(view.userlike(u.address)).toEqual(userlike());
   });
 });
