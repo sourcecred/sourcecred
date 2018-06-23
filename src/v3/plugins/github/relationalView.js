@@ -80,22 +80,40 @@ export class RelationalView {
   repos(): Iterator<RepoEntry> {
     return this._repos.values();
   }
-
   repo(address: N.RepoAddress): ?RepoEntry {
     return this._repos.get(N.toRaw(address));
   }
 
+  issues(): Iterator<IssueEntry> {
+    return this._issues.values();
+  }
   issue(address: N.IssueAddress): ?IssueEntry {
     return this._issues.get(N.toRaw(address));
+  }
+
+  pulls(): Iterator<PullEntry> {
+    return this._pulls.values();
   }
   pull(address: N.PullAddress): ?PullEntry {
     return this._pulls.get(N.toRaw(address));
   }
+
+  comments(): Iterator<CommentEntry> {
+    return this._comments.values();
+  }
   comment(address: N.CommentAddress): ?CommentEntry {
     return this._comments.get(N.toRaw(address));
   }
+
+  reviews(): Iterator<ReviewEntry> {
+    return this._reviews.values();
+  }
   review(address: N.ReviewAddress): ?ReviewEntry {
     return this._reviews.get(N.toRaw(address));
+  }
+
+  userlikes(): Iterator<UserlikeEntry> {
+    return this._userlikes.values();
   }
   userlike(address: N.UserlikeAddress): ?UserlikeEntry {
     return this._userlikes.get(N.toRaw(address));
