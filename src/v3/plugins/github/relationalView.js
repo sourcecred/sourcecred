@@ -12,6 +12,7 @@ import {
 } from "./urlIdParse";
 
 export type RepoEntry = {|
+  +type: typeof N.REPO_TYPE,
   +address: N.RepoAddress,
   +url: string,
   +issues: IssueEntry[],
@@ -19,6 +20,7 @@ export type RepoEntry = {|
 |};
 
 export type IssueEntry = {|
+  +type: typeof N.ISSUE_TYPE,
   +address: N.IssueAddress,
   +title: string,
   +body: string,
@@ -28,6 +30,7 @@ export type IssueEntry = {|
 |};
 
 export type PullEntry = {|
+  +type: typeof N.PULL_TYPE,
   +address: N.PullAddress,
   +title: string,
   +body: string,
@@ -39,6 +42,7 @@ export type PullEntry = {|
 |};
 
 export type ReviewEntry = {|
+  +type: typeof N.REVIEW_TYPE,
   +address: N.ReviewAddress,
   +body: string,
   +url: string,
@@ -48,6 +52,7 @@ export type ReviewEntry = {|
 |};
 
 export type CommentEntry = {|
+  +type: typeof N.COMMENT_TYPE,
   +address: N.CommentAddress,
   +body: string,
   +url: string,
@@ -55,9 +60,18 @@ export type CommentEntry = {|
 |};
 
 export type UserlikeEntry = {|
+  +type: typeof N.USERLIKE_TYPE,
   +address: N.UserlikeAddress,
   +url: string,
 |};
+
+export type Entry =
+  | RepoEntry
+  | IssueEntry
+  | PullEntry
+  | ReviewEntry
+  | CommentEntry
+  | UserlikeEntry;
 
 export class RelationalView {
   _repos: Map<N.RawAddress, RepoEntry>;
@@ -130,6 +144,7 @@ export class RelationalView {
       url: json.url,
       issues: json.issues.nodes.map((x) => this._addIssue(address, x)),
       pulls: json.pulls.nodes.map((x) => this._addPull(address, x)),
+      type: N.REPO_TYPE,
     };
     const raw = N.toRaw(address);
     this._repos.set(raw, entry);
@@ -148,6 +163,7 @@ export class RelationalView {
       nominalAuthor: this._addNullableAuthor(json.author),
       body: json.body,
       title: json.title,
+      type: N.ISSUE_TYPE,
     };
     this._issues.set(N.toRaw(address), entry);
     return entry;
@@ -176,6 +192,7 @@ export class RelationalView {
       body: json.body,
       title: json.title,
       mergedAs,
+      type: N.PULL_TYPE,
     };
     this._pulls.set(N.toRaw(address), entry);
     return entry;
@@ -194,6 +211,7 @@ export class RelationalView {
       comments: json.comments.nodes.map((x) => this._addComment(address, x)),
       body: json.body,
       nominalAuthor: this._addNullableAuthor(json.author),
+      type: N.REVIEW_TYPE,
     };
     this._reviews.set(N.toRaw(address), entry);
     return entry;
@@ -223,6 +241,7 @@ export class RelationalView {
       url: json.url,
       nominalAuthor: this._addNullableAuthor(json.author),
       body: json.body,
+      type: N.COMMENT_TYPE,
     };
     this._comments.set(N.toRaw(address), entry);
     return entry;
@@ -236,7 +255,11 @@ export class RelationalView {
         type: N.USERLIKE_TYPE,
         login: json.login,
       };
-      const entry: UserlikeEntry = {address, url: json.url};
+      const entry: UserlikeEntry = {
+        address,
+        url: json.url,
+        type: N.USERLIKE_TYPE,
+      };
       this._userlikes.set(N.toRaw(address), entry);
       return entry;
     }
