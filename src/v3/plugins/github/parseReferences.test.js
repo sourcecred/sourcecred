@@ -1,15 +1,15 @@
 // @flow
 
-import {findReferences} from "./findReferences.js";
+import {parseReferences} from "./parseReferences.js";
 
-describe("findReferences", () => {
+describe("parseReferences", () => {
   it("finds no references when not present", () => {
-    expect(findReferences("foo bar bod boink")).toHaveLength(0);
-    expect(findReferences("")).toHaveLength(0);
+    expect(parseReferences("foo bar bod boink")).toHaveLength(0);
+    expect(parseReferences("")).toHaveLength(0);
   });
 
   it("finds trivial numeric references", () => {
-    expect(findReferences("#1, #2, and #3")).toEqual(["#1", "#2", "#3"]);
+    expect(parseReferences("#1, #2, and #3")).toEqual(["#1", "#2", "#3"]);
   });
 
   it("finds numeric references in a multiline string", () => {
@@ -17,22 +17,22 @@ describe("findReferences", () => {
     This is a multiline string.
     It refers to #1. Oh, and to #2 too.
     (#42 might be included too - who knows?)`;
-    expect(findReferences(example)).toEqual(["#1", "#2", "#42"]);
+    expect(parseReferences(example)).toEqual(["#1", "#2", "#42"]);
   });
 
   it("does not find bad references", () => {
-    expect(findReferences("foo#123 #124bar")).toHaveLength(0);
+    expect(parseReferences("foo#123 #124bar")).toHaveLength(0);
   });
 
   it("does not yet find concise cross-repo links", () => {
     // The link below is valid, when we add cross-repo support we
     // should fix this test case
-    expect(findReferences("sourcecred/sourcecred#12")).toHaveLength(0);
+    expect(parseReferences("sourcecred/sourcecred#12")).toHaveLength(0);
   });
 
   it("finds a trivial url reference", () => {
     expect(
-      findReferences("https://github.com/sourcecred/sourcecred/issues/86")
+      parseReferences("https://github.com/sourcecred/sourcecred/issues/86")
     ).toHaveLength(1);
   });
 
@@ -74,52 +74,52 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
       "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
     ];
 
-    expect(findReferences(example)).toEqual(expected);
+    expect(parseReferences(example)).toEqual(expected);
   });
 
   it("doesn't find urls mangled with word characters", () => {
     expect(
-      findReferences("foohttps://github.com/sourcecred/sourcecred/pull/94")
+      parseReferences("foohttps://github.com/sourcecred/sourcecred/pull/94")
     ).toHaveLength(0);
 
     expect(
-      findReferences("https://github.com/sourcecred/sourcecred/pull/94foo")
+      parseReferences("https://github.com/sourcecred/sourcecred/pull/94foo")
     ).toHaveLength(0);
 
     expect(
-      findReferences("(https://github.com/sourcecred/sourcecred/pull/94)")
+      parseReferences("(https://github.com/sourcecred/sourcecred/pull/94)")
     ).toHaveLength(1);
   });
 
   it("allows but excludes leading and trailing punctuation", () => {
     const base = "https://github.com/sourcecred/sourcecred/pull/94";
-    expect(findReferences(`!${base}`)).toEqual([base]);
-    expect(findReferences(`${base}!`)).toEqual([base]);
-    expect(findReferences(`!${base}!`)).toEqual([base]);
+    expect(parseReferences(`!${base}`)).toEqual([base]);
+    expect(parseReferences(`${base}!`)).toEqual([base]);
+    expect(parseReferences(`!${base}!`)).toEqual([base]);
   });
 
   it("finds username references", () => {
-    expect(findReferences("hello to @wchargin from @decentralion!")).toEqual([
+    expect(parseReferences("hello to @wchargin from @decentralion!")).toEqual([
       "@wchargin",
       "@decentralion",
     ]);
   });
 
   it("finds usernames with hypens and numbers", () => {
-    expect(findReferences("@paddy-hack and @0x00 are valid usernames")).toEqual(
-      ["@paddy-hack", "@0x00"]
-    );
+    expect(
+      parseReferences("@paddy-hack and @0x00 are valid usernames")
+    ).toEqual(["@paddy-hack", "@0x00"]);
   });
 
   it("finds username references by exact url", () => {
-    expect(findReferences("greetings https://github.com/wchargin")).toEqual([
+    expect(parseReferences("greetings https://github.com/wchargin")).toEqual([
       "https://github.com/wchargin",
     ]);
   });
 
   it("finds a mix of reference types", () => {
     expect(
-      findReferences(
+      parseReferences(
         "@wchargin commented on #125, eg https://github.com/sourcecred/sourcecred/pull/125#pullrequestreview-113402856"
       )
     ).toEqual([
