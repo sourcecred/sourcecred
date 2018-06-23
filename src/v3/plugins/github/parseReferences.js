@@ -13,7 +13,7 @@ function findAllMatches(re: RegExp, s: string): any[] {
   return matches;
 }
 
-export function findReferences(body: string): string[] {
+export function parseReferences(body: string): string[] {
   // Note to maintainer: If it becomes necessary to encode references in a
   // richer format, consider implementing the type signature described in
   // https://github.com/sourcecred/sourcecred/pull/130#pullrequestreview-113849998
