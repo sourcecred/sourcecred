@@ -1,58 +1,63 @@
 // @flow
 
-function findAllMatches(re: RegExp, s: string): any[] {
-  // modified from: https://stackoverflow.com/a/6323598
-  let m;
-  const matches = [];
-  do {
-    m = re.exec(s);
-    if (m) {
-      matches.push(m);
+import * as N from "./nodes";
+import * as R from "./relationalView";
+import {parseReferences} from "./parseReferences";
+
+export type GithubReference = {|
+  src: N.TextContentAddress,
+  dst: N.ReferentAddress,
+|};
+
+type TextContentEntry =
+  | R.IssueEntry
+  | R.PullEntry
+  | R.CommentEntry
+  | R.ReviewEntry;
+export function* findReferences(
+  view: R.RelationalView
+): Iterator<GithubReference> {
+  function* allGithubEntities(): Iterator<R.Entry> {
+    yield* view.repos();
+    yield* view.issues();
+    yield* view.pulls();
+    yield* view.reviews();
+    yield* view.comments();
+    yield* view.userlikes();
+  }
+
+  const refToAddress: Map<string, N.StructuredAddress> = new Map();
+  for (const e of allGithubEntities()) {
+    const a = e.address;
+    refToAddress.set(e.url, a);
+    switch (e.type) {
+      case "USERLIKE":
+        refToAddress.set(`@${e.address.login}`, a);
+        break;
+      case "ISSUE":
+        refToAddress.set(`#${e.address.number}`, a);
+        break;
+      case "PULL":
+        refToAddress.set(`#${e.address.number}`, a);
+        break;
+      default:
+        break;
     }
-  } while (m);
-  return matches;
-}
+  }
 
-export function findReferences(body: string): string[] {
-  // Note to maintainer: If it becomes necessary to encode references in a
-  // richer format, consider implementing the type signature described in
-  // https://github.com/sourcecred/sourcecred/pull/130#pullrequestreview-113849998
-  return [
-    ...findNumericReferences(body),
-    ...findGithubUrlReferences(body),
-    ...findUsernameReferences(body),
-  ];
-}
+  function* allTextContentEntries(): Iterator<TextContentEntry> {
+    yield* view.issues();
+    yield* view.pulls();
+    yield* view.reviews();
+    yield* view.comments();
+  }
 
-function findNumericReferences(body: string): string[] {
-  return findAllMatches(/(?:\W|^)(#\d+)(?:\W|$)/g, body).map((x) => x[1]);
-}
-
-function findUsernameReferences(body: string): string[] {
-  return findAllMatches(/(?:\W|^)(@[a-zA-Z0-9-]+)(?:\W|$)/g, body).map(
-    (x) => x[1]
-  );
-}
-
-function findGithubUrlReferences(body: string): string[] {
-  const githubNamePart = /(?:[a-zA-Z0-9_-]+)/.source;
-  const urlRegex = new RegExp(
-    "" +
-      /(?:\W|^)/.source +
-      "(" +
-      /http(?:s)?:\/\/github.com\//.source +
-      githubNamePart +
-      "(?:" +
-      /\//.source +
-      githubNamePart +
-      /\/(?:issues|pull)\//.source +
-      /(?:\d+)/.source +
-      /(?:#(?:issue|issuecomment|pullrequestreview|discussion_r)-?(?:\d+))?/
-        .source +
-      ")?" +
-      ")" +
-      /(?:[^\w/]|$)/.source,
-    "gm"
-  );
-  return findAllMatches(urlRegex, body).map((match) => match[1]);
+  for (const e of allTextContentEntries()) {
+    for (const ref of parseReferences(e.body)) {
+      const refAddress = refToAddress.get(ref);
+      if (refAddress != null) {
+        yield {src: e.address, dst: refAddress};
+      }
+    }
+  }
 }
