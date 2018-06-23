@@ -17,9 +17,14 @@ Object {
   },
   "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-github/issues/6",
   "nominalAuthor": Object {
-    "login": "decentralion",
+    "address": Object {
+      "login": "decentralion",
+      "type": "USERLIKE",
+    },
     "type": "USERLIKE",
+    "url": "https://github.com/decentralion",
   },
+  "type": "COMMENT",
   "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703",
 }
 `;
@@ -38,115 +43,232 @@ Object {
   "body": "This issue references another issue, namely #1",
   "comments": Array [
     Object {
-      "id": "373768703",
-      "parent": Object {
-        "number": "2",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "373768703",
+        "parent": Object {
+          "number": "2",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "ISSUE",
         },
-        "type": "ISSUE",
+        "type": "COMMENT",
+      },
+      "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-github/issues/6",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "decentralion",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/decentralion",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703",
     },
     Object {
-      "id": "373768850",
-      "parent": Object {
-        "number": "2",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "373768850",
+        "parent": Object {
+          "number": "2",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "ISSUE",
         },
-        "type": "ISSUE",
+        "type": "COMMENT",
+      },
+      "body": "We might also reference individual comments directly.
+https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "decentralion",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/decentralion",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768850",
     },
     Object {
-      "id": "385576185",
-      "parent": Object {
-        "number": "2",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "385576185",
+        "parent": Object {
+          "number": "2",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "ISSUE",
         },
-        "type": "ISSUE",
+        "type": "COMMENT",
+      },
+      "body": "Here's a PR by direct url: https://github.com/sourcecred/example-github/pull/5",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "decentralion",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/decentralion",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576185",
     },
     Object {
-      "id": "385576220",
-      "parent": Object {
-        "number": "2",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "385576220",
+        "parent": Object {
+          "number": "2",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "ISSUE",
         },
-        "type": "ISSUE",
+        "type": "COMMENT",
+      },
+      "body": "a PR review by url: https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "decentralion",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/decentralion",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576220",
     },
     Object {
-      "id": "385576248",
-      "parent": Object {
-        "number": "2",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "385576248",
+        "parent": Object {
+          "number": "2",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "ISSUE",
         },
-        "type": "ISSUE",
+        "type": "COMMENT",
+      },
+      "body": "a PR Review Comment by url: https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "decentralion",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/decentralion",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576248",
     },
     Object {
-      "id": "385576273",
-      "parent": Object {
-        "number": "2",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "385576273",
+        "parent": Object {
+          "number": "2",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "ISSUE",
         },
-        "type": "ISSUE",
+        "type": "COMMENT",
+      },
+      "body": "a user by url: https://github.com/wchargin",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "decentralion",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/decentralion",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576273",
     },
     Object {
-      "id": "385576920",
-      "parent": Object {
-        "number": "2",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "385576920",
+        "parent": Object {
+          "number": "2",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "ISSUE",
         },
-        "type": "ISSUE",
+        "type": "COMMENT",
+      },
+      "body": "Here are several references:
+#1 
+#2
+#3 
+
+https://github.com/sourcecred/example-github/pull/5#discussion_r171460198
+https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899
+",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "decentralion",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/decentralion",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
     },
     Object {
-      "id": "385576936",
-      "parent": Object {
-        "number": "2",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "385576936",
+        "parent": Object {
+          "number": "2",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "ISSUE",
         },
-        "type": "ISSUE",
+        "type": "COMMENT",
+      },
+      "body": "This comment has no references.",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "decentralion",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/decentralion",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576936",
     },
   ],
   "nominalAuthor": Object {
-    "login": "decentralion",
+    "address": Object {
+      "login": "decentralion",
+      "type": "USERLIKE",
+    },
     "type": "USERLIKE",
+    "url": "https://github.com/decentralion",
   },
   "title": "A referencing issue.",
+  "type": "ISSUE",
   "url": "https://github.com/sourcecred/example-github/issues/2",
 }
 `;
@@ -169,17 +291,30 @@ Object {
 - then approve the pr",
   "comments": Array [
     Object {
-      "id": "396430464",
-      "parent": Object {
-        "number": "5",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "396430464",
+        "parent": Object {
+          "number": "5",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "PULL",
         },
-        "type": "PULL",
+        "type": "COMMENT",
+      },
+      "body": "In retrospect, this was an excellent PR.",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "wchargin",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/wchargin",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
     },
   ],
   "mergedAs": Object {
@@ -187,137 +322,119 @@ Object {
     "type": "COMMIT",
   },
   "nominalAuthor": Object {
-    "login": "decentralion",
+    "address": Object {
+      "login": "decentralion",
+      "type": "USERLIKE",
+    },
     "type": "USERLIKE",
+    "url": "https://github.com/decentralion",
   },
   "reviews": Array [
     Object {
-      "id": "100313899",
-      "pull": Object {
-        "number": "5",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "100313899",
+        "pull": Object {
+          "number": "5",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "PULL",
         },
-        "type": "PULL",
+        "type": "REVIEW",
       },
+      "body": "hmmm.jpg",
+      "comments": Array [
+        Object {
+          "address": Object {
+            "id": "171460198",
+            "parent": Object {
+              "id": "100313899",
+              "pull": Object {
+                "number": "5",
+                "repo": Object {
+                  "name": "example-github",
+                  "owner": "sourcecred",
+                  "type": "REPO",
+                },
+                "type": "PULL",
+              },
+              "type": "REVIEW",
+            },
+            "type": "COMMENT",
+          },
+          "body": "seems a bit capricious",
+          "nominalAuthor": Object {
+            "address": Object {
+              "login": "wchargin",
+              "type": "USERLIKE",
+            },
+            "type": "USERLIKE",
+            "url": "https://github.com/wchargin",
+          },
+          "type": "COMMENT",
+          "url": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+        },
+      ],
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "wchargin",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/wchargin",
+      },
+      "state": "CHANGES_REQUESTED",
       "type": "REVIEW",
+      "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
     },
     Object {
-      "id": "100314038",
-      "pull": Object {
-        "number": "5",
-        "repo": Object {
-          "name": "example-github",
-          "owner": "sourcecred",
-          "type": "REPO",
+      "address": Object {
+        "id": "100314038",
+        "pull": Object {
+          "number": "5",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "PULL",
         },
-        "type": "PULL",
+        "type": "REVIEW",
       },
+      "body": "I'm sold",
+      "comments": Array [],
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "wchargin",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/wchargin",
+      },
+      "state": "APPROVED",
       "type": "REVIEW",
+      "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038",
     },
   ],
   "title": "This pull request will be more contentious. I can feel it...",
+  "type": "PULL",
   "url": "https://github.com/sourcecred/example-github/pull/5",
 }
 `;
 
-exports[`plugins/github/relationalView repo matches snapshot 1`] = `
+exports[`plugins/github/relationalView repo address matches snapshot 1`] = `
 Object {
-  "address": Object {
-    "name": "example-github",
-    "owner": "sourcecred",
-    "type": "REPO",
-  },
-  "issues": Array [
-    Object {
-      "number": "1",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "ISSUE",
-    },
-    Object {
-      "number": "2",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "ISSUE",
-    },
-    Object {
-      "number": "4",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "ISSUE",
-    },
-    Object {
-      "number": "6",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "ISSUE",
-    },
-    Object {
-      "number": "7",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "ISSUE",
-    },
-    Object {
-      "number": "8",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "ISSUE",
-    },
-  ],
-  "pulls": Array [
-    Object {
-      "number": "3",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "PULL",
-    },
-    Object {
-      "number": "5",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "PULL",
-    },
-    Object {
-      "number": "9",
-      "repo": Object {
-        "name": "example-github",
-        "owner": "sourcecred",
-        "type": "REPO",
-      },
-      "type": "PULL",
-    },
-  ],
-  "url": "https://github.com/sourcecred/example-github",
+  "name": "example-github",
+  "owner": "sourcecred",
+  "type": "REPO",
 }
 `;
+
+exports[`plugins/github/relationalView repo has issues 1`] = `6`;
+
+exports[`plugins/github/relationalView repo has pulls 1`] = `6`;
 
 exports[`plugins/github/relationalView review matches snapshot 1`] = `
 Object {
@@ -337,28 +454,46 @@ Object {
   "body": "hmmm.jpg",
   "comments": Array [
     Object {
-      "id": "171460198",
-      "parent": Object {
-        "id": "100313899",
-        "pull": Object {
-          "number": "5",
-          "repo": Object {
-            "name": "example-github",
-            "owner": "sourcecred",
-            "type": "REPO",
+      "address": Object {
+        "id": "171460198",
+        "parent": Object {
+          "id": "100313899",
+          "pull": Object {
+            "number": "5",
+            "repo": Object {
+              "name": "example-github",
+              "owner": "sourcecred",
+              "type": "REPO",
+            },
+            "type": "PULL",
           },
-          "type": "PULL",
+          "type": "REVIEW",
         },
-        "type": "REVIEW",
+        "type": "COMMENT",
+      },
+      "body": "seems a bit capricious",
+      "nominalAuthor": Object {
+        "address": Object {
+          "login": "wchargin",
+          "type": "USERLIKE",
+        },
+        "type": "USERLIKE",
+        "url": "https://github.com/wchargin",
       },
       "type": "COMMENT",
+      "url": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
     },
   ],
   "nominalAuthor": Object {
-    "login": "wchargin",
+    "address": Object {
+      "login": "wchargin",
+      "type": "USERLIKE",
+    },
     "type": "USERLIKE",
+    "url": "https://github.com/wchargin",
   },
   "state": "CHANGES_REQUESTED",
+  "type": "REVIEW",
   "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
 }
 `;
@@ -369,6 +504,7 @@ Object {
     "login": "decentralion",
     "type": "USERLIKE",
   },
+  "type": "USERLIKE",
   "url": "https://github.com/decentralion",
 }
 `;
