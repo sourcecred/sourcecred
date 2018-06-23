@@ -30,6 +30,11 @@ describe("plugins/github/relationalView", () => {
   });
 
   const issue = () => repo().issues[1];
+  it("issues are retrievable", () => {
+    expect(Array.from(view.issues())).toEqual(
+      expect.arrayContaining([issue()])
+    );
+  });
   it("issue matches snapshot", () => {
     expect(issue()).toMatchSnapshot();
   });
@@ -38,6 +43,9 @@ describe("plugins/github/relationalView", () => {
   });
 
   const pull = () => repo().pulls[1];
+  it("pulls are retrievable", () => {
+    expect(Array.from(view.pulls())).toEqual(expect.arrayContaining([pull()]));
+  });
   it("pull matches snapshot", () => {
     expect(pull()).toMatchSnapshot();
   });
@@ -46,6 +54,11 @@ describe("plugins/github/relationalView", () => {
   });
 
   const review = () => pull().reviews[0];
+  it("reviews are retrievable", () => {
+    expect(Array.from(view.reviews())).toEqual(
+      expect.arrayContaining([review()])
+    );
+  });
   it("review matches snapshot", () => {
     expect(review()).toMatchSnapshot();
   });
@@ -54,6 +67,11 @@ describe("plugins/github/relationalView", () => {
   });
 
   const comment = () => issue().comments[0];
+  it("comments are retrievable", () => {
+    expect(Array.from(view.comments())).toEqual(
+      expect.arrayContaining([comment()])
+    );
+  });
   it("comment matches snapshot", () => {
     expect(comment()).toMatchSnapshot();
   });
@@ -62,6 +80,11 @@ describe("plugins/github/relationalView", () => {
   });
 
   const userlike = () => issue().nominalAuthor;
+  it("userlikes are retrievable", () => {
+    expect(Array.from(view.userlikes())).toEqual(
+      expect.arrayContaining([userlike()])
+    );
+  });
   it("userlike matches snapshot", () => {
     expect(userlike()).toMatchSnapshot();
   });
