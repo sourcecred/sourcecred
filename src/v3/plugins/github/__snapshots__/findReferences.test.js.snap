@@ -1,0 +1,391 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/github/findReferences matches snapshot on exmaple-github data 1`] = `
+Array [
+  Object {
+    "dst": Object {
+      "number": "1",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "ISSUE",
+    },
+    "src": Object {
+      "number": "2",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "ISSUE",
+    },
+  },
+  Object {
+    "dst": Object {
+      "login": "wchargin",
+      "type": "USERLIKE",
+    },
+    "src": Object {
+      "number": "5",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "PULL",
+    },
+  },
+  Object {
+    "dst": Object {
+      "login": "wchargin",
+      "type": "USERLIKE",
+    },
+    "src": Object {
+      "number": "9",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "PULL",
+    },
+  },
+  Object {
+    "dst": Object {
+      "number": "6",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "ISSUE",
+    },
+    "src": Object {
+      "id": "373768703",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "id": "373768538",
+      "parent": Object {
+        "number": "6",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+    "src": Object {
+      "id": "373768850",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "number": "5",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "PULL",
+    },
+    "src": Object {
+      "id": "385576185",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "id": "100313899",
+      "pull": Object {
+        "number": "5",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "PULL",
+      },
+      "type": "REVIEW",
+    },
+    "src": Object {
+      "id": "385576220",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "id": "171460198",
+      "parent": Object {
+        "id": "100313899",
+        "pull": Object {
+          "number": "5",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "PULL",
+        },
+        "type": "REVIEW",
+      },
+      "type": "COMMENT",
+    },
+    "src": Object {
+      "id": "385576248",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "login": "wchargin",
+      "type": "USERLIKE",
+    },
+    "src": Object {
+      "id": "385576273",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "number": "1",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "ISSUE",
+    },
+    "src": Object {
+      "id": "385576920",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "number": "2",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "ISSUE",
+    },
+    "src": Object {
+      "id": "385576920",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "number": "3",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "PULL",
+    },
+    "src": Object {
+      "id": "385576920",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "id": "171460198",
+      "parent": Object {
+        "id": "100313899",
+        "pull": Object {
+          "number": "5",
+          "repo": Object {
+            "name": "example-github",
+            "owner": "sourcecred",
+            "type": "REPO",
+          },
+          "type": "PULL",
+        },
+        "type": "REVIEW",
+      },
+      "type": "COMMENT",
+    },
+    "src": Object {
+      "id": "385576920",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "id": "100313899",
+      "pull": Object {
+        "number": "5",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "PULL",
+      },
+      "type": "REVIEW",
+    },
+    "src": Object {
+      "id": "385576920",
+      "parent": Object {
+        "number": "2",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "number": "2",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "ISSUE",
+    },
+    "src": Object {
+      "id": "385223316",
+      "parent": Object {
+        "number": "6",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "ISSUE",
+      },
+      "type": "COMMENT",
+    },
+  },
+  Object {
+    "dst": Object {
+      "number": "2",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "ISSUE",
+    },
+    "src": Object {
+      "id": "369162222",
+      "parent": Object {
+        "number": "3",
+        "repo": Object {
+          "name": "example-github",
+          "owner": "sourcecred",
+          "type": "REPO",
+        },
+        "type": "PULL",
+      },
+      "type": "COMMENT",
+    },
+  },
+]
+`;
