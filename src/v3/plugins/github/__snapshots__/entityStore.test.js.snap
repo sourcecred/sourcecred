@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/github/entityStore comments entities match snapshot 1`] = `
+Object {
+  "address": Object {
+    "id": "373768703",
+    "parent": Object {
+      "number": "2",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "ISSUE",
+    },
+    "type": "COMMENT",
+  },
+  "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-github/issues/6",
+  "type": "COMMENT",
+  "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703",
+}
+`;
+
+exports[`plugins/github/entityStore comments number of entities matches snapshot 1`] = `14`;
+
+exports[`plugins/github/entityStore issues entities match snapshot 1`] = `
+Object {
+  "address": Object {
+    "number": "1",
+    "repo": Object {
+      "name": "example-github",
+      "owner": "sourcecred",
+      "type": "REPO",
+    },
+    "type": "ISSUE",
+  },
+  "body": "This is just an example issue.",
+  "title": "An example issue.",
+  "type": "ISSUE",
+  "url": "https://github.com/sourcecred/example-github/issues/1",
+}
+`;
+
+exports[`plugins/github/entityStore issues number of entities matches snapshot 1`] = `6`;
+
+exports[`plugins/github/entityStore pulls entities match snapshot 1`] = `
+Object {
+  "address": Object {
+    "number": "3",
+    "repo": Object {
+      "name": "example-github",
+      "owner": "sourcecred",
+      "type": "REPO",
+    },
+    "type": "PULL",
+  },
+  "body": "Oh look, it's a pull request.",
+  "title": "Add README, merge via PR.",
+  "type": "PULL",
+  "url": "https://github.com/sourcecred/example-github/pull/3",
+}
+`;
+
+exports[`plugins/github/entityStore pulls number of entities matches snapshot 1`] = `3`;
+
+exports[`plugins/github/entityStore repos entities match snapshot 1`] = `
+Object {
+  "address": Object {
+    "name": "example-github",
+    "owner": "sourcecred",
+    "type": "REPO",
+  },
+  "type": "REPO",
+  "url": "https://github.com/sourcecred/example-github",
+}
+`;
+
+exports[`plugins/github/entityStore repos number of entities matches snapshot 1`] = `1`;
+
+exports[`plugins/github/entityStore reviews entities match snapshot 1`] = `
+Object {
+  "address": Object {
+    "id": "100313899",
+    "pull": Object {
+      "number": "5",
+      "repo": Object {
+        "name": "example-github",
+        "owner": "sourcecred",
+        "type": "REPO",
+      },
+      "type": "PULL",
+    },
+    "type": "REVIEW",
+  },
+  "body": "hmmm.jpg",
+  "state": "CHANGES_REQUESTED",
+  "type": "REVIEW",
+  "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+}
+`;
+
+exports[`plugins/github/entityStore reviews number of entities matches snapshot 1`] = `2`;
+
+exports[`plugins/github/entityStore userlikes entities match snapshot 1`] = `
+Object {
+  "address": Object {
+    "login": "decentralion",
+    "type": "USERLIKE",
+  },
+  "type": "USERLIKE",
+  "url": "https://github.com/decentralion",
+}
+`;
+
+exports[`plugins/github/entityStore userlikes number of entities matches snapshot 1`] = `2`;
