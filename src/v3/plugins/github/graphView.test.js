@@ -7,10 +7,14 @@ import * as GE from "./edges";
 import * as GN from "./nodes";
 import cloneDeep from "lodash.clonedeep";
 import {COMMIT_TYPE, toRaw as gitToRaw, TREE_TYPE} from "../git/nodes";
+import type {GithubResponseJSON} from "./graphql";
+import {addressify} from "./addressify";
 
 function exampleView() {
-  const data = cloneDeep(require("./demoData/example-github"));
-  const graph = createGraph(data);
+  const data: GithubResponseJSON = cloneDeep(
+    require("./demoData/example-github")
+  );
+  const graph = createGraph(addressify(data));
   return new GraphView(graph);
 }
 
