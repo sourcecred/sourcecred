@@ -30,23 +30,6 @@ Object {
 }
 `;
 
-exports[`plugins/git/nodes snapshots as expected: submoduleCommit 1`] = `
-Object {
-  "address": Array [
-    "sourcecred",
-    "git",
-    "SUBMODULE_COMMIT",
-    "https://github.com/sourcecred/example-git-submodule.git",
-    "29ef158bc982733e2ba429fcf73e2f7562244188",
-  ],
-  "structured": Object {
-    "commitHash": "29ef158bc982733e2ba429fcf73e2f7562244188",
-    "submoduleUrl": "https://github.com/sourcecred/example-git-submodule.git",
-    "type": "SUBMODULE_COMMIT",
-  },
-}
-`;
-
 exports[`plugins/git/nodes snapshots as expected: tree 1`] = `
 Object {
   "address": Array [

@@ -9,7 +9,6 @@ export type Commit = {|
   +hash: Hash,
   +parentHashes: $ReadOnlyArray<Hash>,
   +treeHash: Hash,
-  +submoduleUrls: {[path: string]: string},
 |};
 export type Tree = {|
   +hash: Hash,

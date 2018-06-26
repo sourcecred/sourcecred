@@ -19,11 +19,6 @@ describe("plugins/git/edges", () => {
       type: GN.COMMIT_TYPE,
       hash: "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
     }),
-    submoduleCommit: (): GN.SubmoduleCommitAddress => ({
-      type: GN.SUBMODULE_COMMIT_TYPE,
-      submoduleUrl: "https://github.com/sourcecred/example-git-submodule.git",
-      commitHash: "29ef158bc982733e2ba429fcf73e2f7562244188",
-    }),
     tree: (): GN.TreeAddress => ({
       type: GN.TREE_TYPE,
       hash: "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
