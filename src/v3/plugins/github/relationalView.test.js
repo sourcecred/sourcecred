@@ -1,70 +1,154 @@
 // @flow
 
 import * as R from "./relationalView";
+import * as N from "./nodes";
 
 describe("plugins/github/relationalView", () => {
   const data = require("./demoData/example-github");
   // Sharing this state is OK because it's just a view - no mutation allowed!
   const view = new R.RelationalView(data);
 
-  function assertNotNull<T>(x: ?T): T {
-    if (x == null) {
-      throw new Error(`Assertion fail: ${String(x)} `);
-    }
-    return x;
+  function hasEntities(name, method) {
+    describe(name, () => {
+      const all = Array.from(method());
+      it(`has expected number of ${name}`, () => {
+        expect(all.length).toMatchSnapshot();
+      });
+      it("have expected urls", () => {
+        expect(all.map((x) => x.url())).toMatchSnapshot();
+      });
+    });
   }
-  const repos = () => Array.from(view.repos());
-  it("there is one repository", () => {
-    expect(repos()).toHaveLength(1);
+
+  function has(name, method) {
+    it(`has ${name}`, () => {
+      const element = method();
+      let snapshot;
+      if (element instanceof R.Entity) {
+        // element is an Entity. Entities have pointers to the RelationalView,
+        // and it would pollute our snapshot horribly. Just show the url.
+        snapshot = {url: element.url()};
+      } else {
+        snapshot = element;
+      }
+      expect(snapshot).toMatchSnapshot();
+    });
+  }
+
+  describe("RelationalView", () => {
+    function hasEntityMethods<T: R.Entity<any>>(
+      name,
+      getAll: () => Iterator<T>,
+      get: (x: $Call<$PropertyType<T, "address">>) => ?T
+    ) {
+      describe(`entity: ${name}`, () => {
+        const all = Array.from(getAll());
+        it("has expected number of them", () => {
+          expect(all.length).not.toEqual(0);
+          expect(all.length).toMatchSnapshot();
+        });
+        const one = all[0];
+        it("they are retrievable by address", () => {
+          expect(get(one.address())).toEqual(one);
+        });
+        it("they have expected urls", () => {
+          expect(all.map((x) => x.url())).toMatchSnapshot();
+        });
+      });
+    }
+    hasEntityMethods("repos", () => view.repos(), (x) => view.repo(x));
+    hasEntityMethods("issues", () => view.issues(), (x) => view.issue(x));
+    hasEntityMethods("pulls", () => view.pulls(), (x) => view.pull(x));
+    hasEntityMethods("reviews", () => view.reviews(), (x) => view.review(x));
+    hasEntityMethods("comments", () => view.comments(), (x) => view.comment(x));
+    hasEntityMethods(
+      "userlikes",
+      () => view.userlikes(),
+      (x) => view.userlike(x)
+    );
   });
 
-  const repo = () => assertNotNull(repos()[0]);
-  it("repo matches snapshot", () => {
-    expect(repo()).toMatchSnapshot();
+  const repo = view.repo({
+    type: N.REPO_TYPE,
+    owner: "sourcecred",
+    name: "example-github",
+  });
+  if (repo == null) {
+    throw new Error("Error: sourcecred/example-github must exist!");
+  }
+  describe("Repo", () => {
+    const entity = repo;
+    has("owner", () => entity.owner());
+    has("name", () => entity.name());
+    has("url", () => entity.url());
+    hasEntities("issues", () => entity.issues());
+    hasEntities("pulls", () => entity.pulls());
   });
 
-  it("repo retrievable by address", () => {
-    expect(view.repo(repo().address)).toEqual(repo());
+  const issue = Array.from(repo.issues())[1];
+  describe("Issue", () => {
+    const entity = issue;
+    has("number", () => entity.number());
+    has("body", () => entity.body());
+    has("title", () => entity.title());
+    has("url", () => entity.url());
+    has("parent", () => entity.parent());
+    hasEntities("comments", () => entity.comments());
+    hasEntities("authors", () => entity.authors());
   });
 
-  const issue = () => assertNotNull(view.issue(repo().issues[1]));
-  it("issue matches snapshot", () => {
-    expect(issue()).toMatchSnapshot();
-  });
-  it("issue retrievable by address", () => {
-    expect(view.issue(issue().address)).toEqual(issue());
-  });
-
-  const pull = () => assertNotNull(view.pull(repo().pulls[1]));
-  it("pull matches snapshot", () => {
-    expect(pull()).toMatchSnapshot();
-  });
-  it("pull retrievable by address", () => {
-    expect(view.pull(pull().address)).toEqual(pull());
+  const pull = Array.from(repo.pulls())[1];
+  describe("Pull", () => {
+    const entity = pull;
+    has("number", () => entity.number());
+    has("body", () => entity.body());
+    has("title", () => entity.title());
+    has("url", () => entity.url());
+    has("parent", () => entity.parent());
+    has("mergedAs", () => entity.mergedAs());
+    hasEntities("reviews", () => entity.reviews());
+    hasEntities("comments", () => entity.comments());
+    hasEntities("authors", () => entity.authors());
   });
 
-  const review = () => assertNotNull(view.review(pull().reviews[0]));
-  it("review matches snapshot", () => {
-    expect(review()).toMatchSnapshot();
-  });
-  it("review retrievable by address", () => {
-    expect(view.review(review().address)).toEqual(review());
-  });
-
-  const comment = () => assertNotNull(view.comment(issue().comments[0]));
-  it("comment matches snapshot", () => {
-    expect(comment()).toMatchSnapshot();
-  });
-  it("comment retrievable by address", () => {
-    expect(view.comment(comment().address)).toEqual(comment());
+  const review = Array.from(pull.reviews())[0];
+  describe("Review", () => {
+    const entity = review;
+    has("body", () => entity.body());
+    has("url", () => entity.url());
+    has("state", () => entity.state());
+    has("parent", () => entity.parent());
+    hasEntities("comments", () => entity.comments());
+    hasEntities("authors", () => entity.authors());
   });
 
-  const userlike = () =>
-    assertNotNull(view.userlike(assertNotNull(issue().nominalAuthor)));
-  it("userlike matches snapshot", () => {
-    expect(userlike()).toMatchSnapshot();
+  const comment = Array.from(review.comments())[0];
+  describe("Comment", () => {
+    const entity = comment;
+    has("body", () => entity.body());
+    has("url", () => entity.url());
+    has("parent", () => entity.parent());
+    hasEntities("authors", () => entity.authors());
   });
-  it("userlike retrievable by address", () => {
-    expect(view.userlike(userlike().address)).toEqual(userlike());
+
+  const userlike = Array.from(review.authors())[0];
+  describe("Userlike", () => {
+    const entity = userlike;
+    has("login", () => entity.login());
+    has("url", () => entity.url());
+  });
+
+  describe("comment parent differentiation", () => {
+    function hasCorrectParent(name, parent) {
+      it(name, () => {
+        const comment = Array.from(parent.comments())[0];
+        expect(comment).toEqual(expect.anything());
+        const actualParent = comment.parent();
+        expect(parent.address()).toEqual(actualParent.address());
+      });
+    }
+    hasCorrectParent("issue", issue);
+    hasCorrectParent("pull", pull);
+    hasCorrectParent("review", review);
   });
 });
