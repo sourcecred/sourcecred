@@ -2,11 +2,15 @@
 
 import {createGraph} from "./createGraph";
 import {GraphView} from "./graphView";
+import {addressify} from "./addressify";
+import type {GithubResponseJSON} from "./graphql";
 import cloneDeep from "lodash.clonedeep";
 
 function exampleGraph() {
-  const data = cloneDeep(require("./demoData/example-github"));
-  return createGraph(data);
+  const data: GithubResponseJSON = cloneDeep(
+    require("./demoData/example-github")
+  );
+  return createGraph(addressify(data));
 }
 
 describe("plugins/github/createGraph", () => {
