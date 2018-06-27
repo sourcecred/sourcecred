@@ -12,7 +12,6 @@ export function _gitAddress(...parts: string[]): RawAddress {
 
 export const BLOB_TYPE: "BLOB" = "BLOB";
 export const COMMIT_TYPE: "COMMIT" = "COMMIT";
-export const SUBMODULE_COMMIT_TYPE: "SUBMODULE_COMMIT" = "SUBMODULE_COMMIT";
 export const TREE_TYPE: "TREE" = "TREE";
 export const TREE_ENTRY_TYPE: "TREE_ENTRY" = "TREE_ENTRY";
 
@@ -20,7 +19,6 @@ export const _Prefix = Object.freeze({
   base: GIT_PREFIX,
   blob: _gitAddress(BLOB_TYPE),
   commit: _gitAddress(COMMIT_TYPE),
-  submoduleCommit: _gitAddress(SUBMODULE_COMMIT_TYPE),
   tree: _gitAddress(TREE_TYPE),
   treeEntry: _gitAddress(TREE_ENTRY_TYPE),
 });
@@ -32,11 +30,6 @@ export type BlobAddress = {|
 export type CommitAddress = {|
   +type: typeof COMMIT_TYPE,
   +hash: Hash,
-|};
-export type SubmoduleCommitAddress = {|
-  +type: typeof SUBMODULE_COMMIT_TYPE,
-  +submoduleUrl: string,
-  +commitHash: Hash,
 |};
 export type TreeAddress = {|
   +type: typeof TREE_TYPE,
@@ -52,13 +45,12 @@ export type TreeEntryAddress = {|
 // addresses.
 export type TreeEntryContentsAddress =
   | BlobAddress
-  | TreeAddress
-  | SubmoduleCommitAddress;
+  | CommitAddress
+  | TreeAddress;
 
 export type StructuredAddress =
   | BlobAddress
   | CommitAddress
-  | SubmoduleCommitAddress
   | TreeAddress
   | TreeEntryAddress;
 
@@ -81,11 +73,6 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       if (rest.length !== 1) throw fail();
       const [hash] = rest;
       return {type: COMMIT_TYPE, hash};
-    }
-    case "SUBMODULE_COMMIT": {
-      if (rest.length !== 2) throw fail();
-      const [submoduleUrl, commitHash] = rest;
-      return {type: SUBMODULE_COMMIT_TYPE, submoduleUrl, commitHash};
     }
     case "TREE": {
       if (rest.length !== 1) throw fail();
@@ -110,12 +97,6 @@ export function toRaw(x: StructuredAddress): RawAddress {
       return NodeAddress.append(_Prefix.blob, x.hash);
     case COMMIT_TYPE:
       return NodeAddress.append(_Prefix.commit, x.hash);
-    case SUBMODULE_COMMIT_TYPE:
-      return NodeAddress.append(
-        _Prefix.submoduleCommit,
-        x.submoduleUrl,
-        x.commitHash
-      );
     case TREE_TYPE:
       return NodeAddress.append(_Prefix.tree, x.hash);
     case TREE_ENTRY_TYPE:

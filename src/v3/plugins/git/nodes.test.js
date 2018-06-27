@@ -14,11 +14,6 @@ describe("plugins/git/nodes", () => {
       type: GN.COMMIT_TYPE,
       hash: "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
     }),
-    submoduleCommit: (): GN.SubmoduleCommitAddress => ({
-      type: GN.SUBMODULE_COMMIT_TYPE,
-      submoduleUrl: "https://github.com/sourcecred/example-git-submodule.git",
-      commitHash: "29ef158bc982733e2ba429fcf73e2f7562244188",
-    }),
     tree: (): GN.TreeAddress => ({
       type: GN.TREE_TYPE,
       hash: "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
@@ -127,20 +122,6 @@ describe("plugins/git/nodes", () => {
         GN.TREE_ENTRY_TYPE,
         examples.treeEntry().treeHash,
         examples.treeEntry().name,
-        "wat",
-      ]);
-
-      expectBadAddress("submodule commit with no fields", [
-        GN.SUBMODULE_COMMIT_TYPE,
-      ]);
-      expectBadAddress("submodule commit with only URL", [
-        GN.SUBMODULE_COMMIT_TYPE,
-        examples.submoduleCommit().submoduleUrl,
-      ]);
-      expectBadAddress("submodule commit with extra field", [
-        GN.SUBMODULE_COMMIT_TYPE,
-        examples.submoduleCommit().submoduleUrl,
-        examples.submoduleCommit().commitHash,
         "wat",
       ]);
     });

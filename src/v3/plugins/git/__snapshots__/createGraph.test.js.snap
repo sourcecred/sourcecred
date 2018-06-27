@@ -121,7 +121,7 @@ Array [
           "3dfb84795e07341b05fad3a0d5a55f8304b2d7d8",
           "pygravitydefier",
         ],
-        "dstIndex": 15,
+        "dstIndex": 10,
         "srcIndex": 29,
       },
       Object {
@@ -186,7 +186,7 @@ Array [
           "569e1d383759903134df75230d63c0090196d4cb",
           "pygravitydefier",
         ],
-        "dstIndex": 15,
+        "dstIndex": 10,
         "srcIndex": 34,
       },
       Object {
@@ -303,7 +303,7 @@ Array [
           "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
           "pygravitydefier",
         ],
-        "dstIndex": 14,
+        "dstIndex": 7,
         "srcIndex": 43,
       },
       Object {
@@ -381,7 +381,7 @@ Array [
           "819fc546cea489476ce8dc90785e9ba7753d0a8f",
           "pygravitydefier",
         ],
-        "dstIndex": 14,
+        "dstIndex": 7,
         "srcIndex": 49,
       },
       Object {
@@ -459,7 +459,7 @@ Array [
           "bbf3b8b3d26a4f884b5c022d46851f593d329192",
           "pygravitydefier",
         ],
-        "dstIndex": 14,
+        "dstIndex": 7,
         "srcIndex": 55,
       },
       Object {
@@ -513,8 +513,8 @@ Array [
           "COMMIT",
           "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
         ],
-        "dstIndex": 8,
-        "srcIndex": 7,
+        "dstIndex": 9,
+        "srcIndex": 8,
       },
       Object {
         "address": Array [
@@ -528,8 +528,8 @@ Array [
           "COMMIT",
           "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
         ],
-        "dstIndex": 13,
-        "srcIndex": 8,
+        "dstIndex": 15,
+        "srcIndex": 9,
       },
       Object {
         "address": Array [
@@ -543,8 +543,8 @@ Array [
           "COMMIT",
           "c08ee3a4edea384d5291ffcbf06724a13ed72325",
         ],
-        "dstIndex": 10,
-        "srcIndex": 9,
+        "dstIndex": 12,
+        "srcIndex": 11,
       },
       Object {
         "address": Array [
@@ -558,8 +558,8 @@ Array [
           "COMMIT",
           "c2b51945e7457546912a8ce158ed9d294558d294",
         ],
-        "dstIndex": 11,
-        "srcIndex": 10,
+        "dstIndex": 13,
+        "srcIndex": 12,
       },
       Object {
         "address": Array [
@@ -573,8 +573,8 @@ Array [
           "COMMIT",
           "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
         ],
-        "dstIndex": 9,
-        "srcIndex": 12,
+        "dstIndex": 11,
+        "srcIndex": 14,
       },
       Object {
         "address": Array [
@@ -588,8 +588,8 @@ Array [
           "COMMIT",
           "d160cca97611e9dfed642522ad44408d0292e8ea",
         ],
-        "dstIndex": 12,
-        "srcIndex": 13,
+        "dstIndex": 14,
+        "srcIndex": 15,
       },
       Object {
         "address": Array [
@@ -601,7 +601,7 @@ Array [
           "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
         ],
         "dstIndex": 21,
-        "srcIndex": 7,
+        "srcIndex": 8,
       },
       Object {
         "address": Array [
@@ -613,7 +613,7 @@ Array [
           "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
         ],
         "dstIndex": 23,
-        "srcIndex": 8,
+        "srcIndex": 9,
       },
       Object {
         "address": Array [
@@ -625,7 +625,7 @@ Array [
           "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
         ],
         "dstIndex": 17,
-        "srcIndex": 9,
+        "srcIndex": 11,
       },
       Object {
         "address": Array [
@@ -637,7 +637,7 @@ Array [
           "c08ee3a4edea384d5291ffcbf06724a13ed72325",
         ],
         "dstIndex": 16,
-        "srcIndex": 10,
+        "srcIndex": 12,
       },
       Object {
         "address": Array [
@@ -649,7 +649,7 @@ Array [
           "c2b51945e7457546912a8ce158ed9d294558d294",
         ],
         "dstIndex": 24,
-        "srcIndex": 11,
+        "srcIndex": 13,
       },
       Object {
         "address": Array [
@@ -661,7 +661,7 @@ Array [
           "d160cca97611e9dfed642522ad44408d0292e8ea",
         ],
         "dstIndex": 18,
-        "srcIndex": 12,
+        "srcIndex": 14,
       },
       Object {
         "address": Array [
@@ -673,7 +673,7 @@ Array [
           "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
         ],
         "dstIndex": 22,
-        "srcIndex": 13,
+        "srcIndex": 15,
       },
       Object {
         "address": Array [
@@ -1165,6 +1165,12 @@ Array [
         "sourcecred",
         "git",
         "COMMIT",
+        "29ef158bc982733e2ba429fcf73e2f7562244188",
+      ],
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
         "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
       ],
       Array [
@@ -1172,6 +1178,12 @@ Array [
         "git",
         "COMMIT",
         "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+      ],
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
+        "762c062fbdc7ec198cd693e95d55b374a08ff3e3",
       ],
       Array [
         "sourcecred",
@@ -1202,20 +1214,6 @@ Array [
         "git",
         "COMMIT",
         "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
-      ],
-      Array [
-        "sourcecred",
-        "git",
-        "SUBMODULE_COMMIT",
-        "https://github.com/sourcecred/example-git-submodule.git",
-        "29ef158bc982733e2ba429fcf73e2f7562244188",
-      ],
-      Array [
-        "sourcecred",
-        "git",
-        "SUBMODULE_COMMIT",
-        "https://github.com/sourcecred/example-git-submodule.git",
-        "762c062fbdc7ec198cd693e95d55b374a08ff3e3",
       ],
       Array [
         "sourcecred",

@@ -172,10 +172,7 @@ export class GraphView {
         homs: [
           {srcPrefix: GN._Prefix.treeEntry, dstPrefix: GN._Prefix.blob},
           {srcPrefix: GN._Prefix.treeEntry, dstPrefix: GN._Prefix.tree},
-          {
-            srcPrefix: GN._Prefix.treeEntry,
-            dstPrefix: GN._Prefix.submoduleCommit,
-          },
+          {srcPrefix: GN._Prefix.treeEntry, dstPrefix: GN._Prefix.commit},
         ],
       },
     };

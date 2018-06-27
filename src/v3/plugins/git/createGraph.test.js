@@ -37,13 +37,11 @@ describe("plugins/git/createGraph", () => {
             hash: "commit1",
             parentHashes: [],
             treeHash: beforeTree,
-            submoduleUrls: {},
           },
           commit2: {
             hash: "commit2",
             parentHashes: ["commit1"],
             treeHash: afterTree,
-            submoduleUrls: {},
           },
         },
         trees,

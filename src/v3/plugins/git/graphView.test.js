@@ -4,6 +4,7 @@ import cloneDeep from "lodash.clonedeep";
 
 import {EdgeAddress, Graph, NodeAddress, edgeToString} from "../../core/graph";
 import {createGraph} from "./createGraph";
+import * as exampleRepo from "./demoData/exampleRepo";
 import {GraphView} from "./graphView";
 import type {Repository} from "./types";
 
@@ -32,7 +33,13 @@ describe("plugins/git/graphView", () => {
     });
 
     it("#commits yields all commits", () => {
-      const expectedHashes = Object.keys(makeData().commits);
+      const extraSubmoduleCommits = [
+        exampleRepo.SUBMODULE_COMMIT_1,
+        exampleRepo.SUBMODULE_COMMIT_2,
+      ];
+      const expectedHashes = Object.keys(makeData().commits).concat(
+        extraSubmoduleCommits
+      );
       const actualHashes = Array.from(view.commits()).map((a) => a.hash);
       expectEqualMultisets(actualHashes, expectedHashes);
     });
@@ -104,12 +111,10 @@ describe("plugins/git/graphView", () => {
         const actual = Array.from(
           view.contents(entryByName("pygravitydefier"))
         );
-        const expected: $ReadOnlyArray<GN.SubmoduleCommitAddress> = [
+        const expected: $ReadOnlyArray<GN.CommitAddress> = [
           {
-            type: GN.SUBMODULE_COMMIT_TYPE,
-            submoduleUrl:
-              "https://github.com/sourcecred/example-git-submodule.git",
-            commitHash: "29ef158bc982733e2ba429fcf73e2f7562244188",
+            type: GN.COMMIT_TYPE,
+            hash: "29ef158bc982733e2ba429fcf73e2f7562244188",
           },
         ];
         expect(actual).toEqual(expected);

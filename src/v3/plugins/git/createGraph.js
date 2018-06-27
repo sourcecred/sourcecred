@@ -24,48 +24,13 @@ class GraphCreator {
   }
 
   addRepository(repository: GT.Repository) {
-    const treeAndNameToSubmoduleUrls = this.treeAndNameToSubmoduleUrls(
-      repository
-    );
     for (const treeHash of Object.keys(repository.trees)) {
-      this.addTree(repository.trees[treeHash], treeAndNameToSubmoduleUrls);
+      this.addTree(repository.trees[treeHash]);
     }
     for (const commitHash of Object.keys(repository.commits)) {
       this.addCommit(repository.commits[commitHash]);
     }
     this.addBecomesEdges(repository);
-  }
-
-  treeAndNameToSubmoduleUrls(repository: GT.Repository) {
-    const result: {[tree: GT.Hash]: {[name: string]: string[]}} = {};
-    Object.keys(repository.commits).forEach((commitHash) => {
-      const {treeHash: rootTreeHash, submoduleUrls} = repository.commits[
-        commitHash
-      ];
-      Object.keys(submoduleUrls).forEach((path) => {
-        const parts = path.split("/");
-        const [treePath, name] = [
-          parts.slice(0, parts.length - 1),
-          parts[parts.length - 1],
-        ];
-        let tree = repository.trees[rootTreeHash];
-        for (const pathComponent of treePath) {
-          tree = repository.trees[tree.entries[pathComponent].hash];
-          if (tree == null) {
-            return;
-          }
-        }
-        if (result[tree.hash] == null) {
-          result[tree.hash] = {};
-        }
-        const url = submoduleUrls[path];
-        if (result[tree.hash][name] == null) {
-          result[tree.hash][name] = [];
-        }
-        result[tree.hash][name].push(url);
-      });
-    });
-    return result;
   }
 
   addCommit(commit: GT.Commit) {
@@ -81,7 +46,7 @@ class GraphCreator {
     }
   }
 
-  addTree(tree: GT.Tree, treeAndNameToSubmoduleUrls) {
+  addTree(tree: GT.Tree) {
     const treeNode: GN.TreeAddress = {type: GN.TREE_TYPE, hash: tree.hash};
     this.graph.addNode(GN.toRaw(treeNode));
     for (const name of Object.keys(tree.entries)) {
@@ -93,34 +58,25 @@ class GraphCreator {
       };
       this.graph.addNode(GN.toRaw(entryNode));
       this.graph.addEdge(GE.createEdge.includes(treeNode, entryNode));
-      let targets: GN.TreeEntryContentsAddress[] = [];
+      let target: ?GN.TreeEntryContentsAddress = null;
       switch (entry.type) {
         case "blob":
-          targets.push({type: GN.BLOB_TYPE, hash: entry.hash});
+          target = {type: GN.BLOB_TYPE, hash: entry.hash};
           break;
         case "tree":
-          targets.push({type: GN.TREE_TYPE, hash: entry.hash});
+          target = {type: GN.TREE_TYPE, hash: entry.hash};
           break;
         case "commit":
-          // One entry for each possible URL.
-          const urls = treeAndNameToSubmoduleUrls[tree.hash][name];
-          for (const url of urls) {
-            targets.push({
-              type: GN.SUBMODULE_COMMIT_TYPE,
-              submoduleUrl: url,
-              commitHash: entry.hash,
-            });
-          }
+          // Submodule commit.
+          target = {type: GN.COMMIT_TYPE, hash: entry.hash};
           break;
         default:
           // eslint-disable-next-line no-unused-expressions
           (entry.type: empty);
           throw new Error(String(entry.type));
       }
-      for (const target of targets) {
-        this.graph.addNode(GN.toRaw(target));
-        this.graph.addEdge(GE.createEdge.hasContents(entryNode, target));
-      }
+      this.graph.addNode(GN.toRaw(target));
+      this.graph.addEdge(GE.createEdge.hasContents(entryNode, target));
     }
   }
 

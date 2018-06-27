@@ -43,83 +43,8 @@ function findCommits(git: GitDriver, rootRef: string): Commit[] {
     .filter((line) => line.length > 0)
     .map((line) => {
       const [hash, treeHash, ...parentHashes] = line.trim().split(" ");
-      const submoduleUrls = loadSubmoduleUrls(git, hash);
-      return {hash, parentHashes, treeHash, submoduleUrls};
+      return {hash, parentHashes, treeHash};
     });
-}
-
-const GITMODULES_SUBMODULES_KEY_RE = /^submodule\.(.*)\.(path|url)$/;
-
-function loadSubmoduleUrls(
-  git: GitDriver,
-  commitHash: Hash
-): {[path: string]: string} {
-  const gitmodulesRef = `${commitHash}:.gitmodules`;
-  const gitmodulesBlob: string | null = (() => {
-    try {
-      return git(["rev-parse", "--quiet", "--verify", gitmodulesRef]).trim();
-    } catch (e) {
-      if (e.status === 1) {
-        // No .gitmodules file here.
-        return null;
-      } else {
-        throw e;
-      }
-    }
-  })();
-  if (gitmodulesBlob == null) {
-    // No problem; there just weren't any submodules at this commit.
-    return {};
-  }
-
-  // The output format of the following is `${key}\n${value}\0...`, as
-  // specified in `git help config`'s section about the `-z` option.
-  // The format is safe because keys are strictly validated; see the
-  // function `git_config_parse_key` in `git/git:config.c`.
-  const rawConfig = git(["config", "--blob", gitmodulesBlob, "--list", "-z"]);
-  const configKeyValuePairs = rawConfig
-    .split("\0")
-    .filter((line) => line.length > 0)
-    .map((line) => {
-      const separator = line.indexOf("\n");
-      if (separator < 0) {
-        // Shouldn't happen, according to Git docs. Guard anyway.
-        throw new Error(`Bad .gitmodules line at ${commitHash}: ${line}`);
-      }
-      return {
-        key: line.substring(0, separator),
-        value: line.substring(separator + 1),
-      };
-    });
-
-  const submoduleInfoByKey: {
-    [submoduleKey: string]: {path: string | null, url: string | null},
-  } = {};
-  configKeyValuePairs.forEach(({key, value}) => {
-    const match = key.match(GITMODULES_SUBMODULES_KEY_RE);
-    if (!match) {
-      return;
-    }
-    const [_, submoduleKey, kind] = match;
-    if (submoduleInfoByKey[submoduleKey] == null) {
-      submoduleInfoByKey[submoduleKey] = {path: null, url: null};
-    }
-    if (kind !== "path" && kind !== "url") {
-      throw new Error(`Invariant violation: bad kind: ${kind}`);
-    }
-    submoduleInfoByKey[submoduleKey][kind] = value;
-  });
-
-  const result = {};
-  Object.keys(submoduleInfoByKey).forEach((submoduleKey) => {
-    const {path, url} = submoduleInfoByKey[submoduleKey];
-    if (path != null && url != null) {
-      result[path] = url;
-    } else {
-      console.warn(`Partial submodule at ${commitHash}: ${submoduleKey}`);
-    }
-  });
-  return result;
 }
 
 function findTrees(git: GitDriver, rootTrees: Set<Hash>): Tree[] {
