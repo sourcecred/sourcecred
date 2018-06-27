@@ -151,4 +151,47 @@ describe("plugins/github/relationalView", () => {
     hasCorrectParent("pull", pull);
     hasCorrectParent("review", review);
   });
+
+  describe("reference detection", () => {
+    // create url->url reference maps, for convenient snapshot readability
+    const allReferences: Map<string, Set<string>> = new Map();
+    let nReferences = 0;
+    for (const referrer of view.textContentEntities()) {
+      const references = new Set();
+      allReferences.set(referrer.url(), references);
+      for (const referenced of referrer.references()) {
+        references.add(referenced.url());
+        nReferences++;
+      }
+    }
+
+    it("references match snapshot", () => {
+      const everyReference = [];
+      for (const [referrerUrl, referencedUrls] of allReferences) {
+        for (const referencedUrl of referencedUrls) {
+          everyReference.push({from: referrerUrl, to: referencedUrl});
+        }
+      }
+      expect(everyReference).toMatchSnapshot();
+    });
+
+    it("correspondence between references() and referencedBy()", () => {
+      let nFoundReferences = 0;
+      for (const referent of view.referentEntities()) {
+        for (const referrer of referent.referencedBy()) {
+          nFoundReferences++;
+          const srcUrl = referrer.url();
+          const dstUrl = referent.url();
+          const actualRefsFromSrc = allReferences.get(srcUrl);
+          if (actualRefsFromSrc == null) {
+            throw new Error(`Expected refs for ${srcUrl}`);
+          }
+          if (!actualRefsFromSrc.has(dstUrl)) {
+            throw new Error(`Expected ref from ${srcUrl} to ${dstUrl}`);
+          }
+        }
+      }
+      expect(nFoundReferences).toEqual(nReferences);
+    });
+  });
 });
