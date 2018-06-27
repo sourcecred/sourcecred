@@ -198,13 +198,6 @@ describe("plugins/git/graphView", () => {
             "invariant violation: bad hom: " + edgeToString(badEdge)
           );
         });
-        it("for existence", () => {
-          const g = baseGraph();
-          expect(() => new GraphView(g)).toThrow(
-            "invariant violation: commit should have 1 tree, but has 0: " +
-              NodeAddress.toString(GN.toRaw(commit))
-          );
-        });
         it("for correctness", () => {
           const badEdge = {...otherEdge, src: edge.src};
           const g = baseGraph().addEdge(badEdge);

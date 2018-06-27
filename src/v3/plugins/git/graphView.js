@@ -205,32 +205,27 @@ export class GraphView {
       }
     }
 
-    // Each commits must have a unique and properly named HAS_TREE edge.
+    // Any HAS_TREE edge to a commit must be properly named. This
+    // implies that a commit has at most one such edge. (Normal commits
+    // should have trees, but submodule commits might not.)
     for (const rawNode of this._graph.nodes({prefix: GN._Prefix.commit})) {
-      const treeNeighbors = Array.from(
-        this._graph.neighbors(rawNode, {
-          direction: Direction.OUT,
-          nodePrefix: NodeAddress.empty,
-          edgePrefix: GE._Prefix.hasTree,
-        })
-      );
-      if (treeNeighbors.length !== 1) {
-        throw new Error(
-          "invariant violation: commit should have 1 tree, " +
-            `but has ${treeNeighbors.length}: ${NodeAddress.toString(rawNode)}`
-        );
-      }
-      const rawEdge = treeNeighbors[0].edge;
-      const edge: GE.HasTreeAddress = (GE.fromRaw(
-        (((rawEdge.address: EdgeAddressT): any): GE.RawAddress)
-      ): any);
-      const node: GN.CommitAddress = ((GN.fromRaw(
-        (((rawNode: NodeAddressT): any): GN.RawAddress)
-      ): GN.StructuredAddress): any);
-      if (node.hash !== edge.commit.hash) {
-        throw new Error(
-          `invariant violation: bad HAS_TREE edge: ${edgeToString(rawEdge)}`
-        );
+      for (const neighbor of this._graph.neighbors(rawNode, {
+        direction: Direction.OUT,
+        nodePrefix: NodeAddress.empty,
+        edgePrefix: GE._Prefix.hasTree,
+      })) {
+        const rawEdge = neighbor.edge;
+        const edge: GE.HasTreeAddress = (GE.fromRaw(
+          (((rawEdge.address: EdgeAddressT): any): GE.RawAddress)
+        ): any);
+        const node: GN.CommitAddress = ((GN.fromRaw(
+          (((rawNode: NodeAddressT): any): GN.RawAddress)
+        ): GN.StructuredAddress): any);
+        if (node.hash !== edge.commit.hash) {
+          throw new Error(
+            `invariant violation: bad HAS_TREE edge: ${edgeToString(rawEdge)}`
+          );
+        }
       }
     }
 
