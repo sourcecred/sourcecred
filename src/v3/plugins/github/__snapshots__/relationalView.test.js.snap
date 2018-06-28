@@ -237,3 +237,72 @@ exports[`plugins/github/relationalView Review has url 1`] = `"https://github.com
 exports[`plugins/github/relationalView Userlike has login 1`] = `"wchargin"`;
 
 exports[`plugins/github/relationalView Userlike has url 1`] = `"https://github.com/wchargin"`;
+
+exports[`plugins/github/relationalView reference detection references match snapshot 1`] = `
+Array [
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2",
+    "to": "https://github.com/sourcecred/example-github/issues/1",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/pull/5",
+    "to": "https://github.com/wchargin",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/pull/9",
+    "to": "https://github.com/wchargin",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703",
+    "to": "https://github.com/sourcecred/example-github/issues/6",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768850",
+    "to": "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576185",
+    "to": "https://github.com/sourcecred/example-github/pull/5",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576220",
+    "to": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576248",
+    "to": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576273",
+    "to": "https://github.com/wchargin",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred/example-github/issues/1",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred/example-github/issues/2",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred/example-github/pull/3",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316",
+    "to": "https://github.com/sourcecred/example-github/issues/2",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
+    "to": "https://github.com/sourcecred/example-github/issues/2",
+  },
+]
+`;

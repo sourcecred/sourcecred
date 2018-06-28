@@ -1,6 +1,7 @@
 // @flow
 
 import stringify from "json-stable-stringify";
+import {parseReferences} from "./parseReferences";
 import * as N from "./nodes";
 // Workaround for https://github.com/facebook/flow/issues/6538
 import type {
@@ -28,6 +29,8 @@ export class RelationalView {
   _comments: Map<N.RawAddress, CommentEntry>;
   _reviews: Map<N.RawAddress, ReviewEntry>;
   _userlikes: Map<N.RawAddress, UserlikeEntry>;
+  _mapReferences: Map<N.RawAddress, N.ReferentAddress[]>;
+  _mapReferencedBy: Map<N.RawAddress, N.TextContentAddress[]>;
 
   constructor(data: Q.GithubResponseJSON) {
     this._repos = new Map();
@@ -36,7 +39,10 @@ export class RelationalView {
     this._comments = new Map();
     this._reviews = new Map();
     this._userlikes = new Map();
+    this._mapReferences = new Map();
+    this._mapReferencedBy = new Map();
     this._addRepo(data.repository);
+    this._addReferences();
   }
 
   *repos(): Iterator<Repo> {
@@ -103,6 +109,22 @@ export class RelationalView {
   userlike(address: UserlikeAddress): ?Userlike {
     const entry = this._userlikes.get(N.toRaw(address));
     return entry == null ? entry : new Userlike(this, entry);
+  }
+
+  *referentEntities(): Iterator<ReferentEntity> {
+    yield* this.repos();
+    yield* this.issues();
+    yield* this.pulls();
+    yield* this.reviews();
+    yield* this.comments();
+    yield* this.userlikes();
+  }
+
+  *textContentEntities(): Iterator<TextContentEntity> {
+    yield* this.issues();
+    yield* this.pulls();
+    yield* this.reviews();
+    yield* this.comments();
   }
 
   _addRepo(json: Q.RepositoryJSON) {
@@ -227,6 +249,136 @@ export class RelationalView {
       return address;
     }
   }
+
+  _addReferences() {
+    // refToAddress maps a "referencing string" to the address that string refers to.
+    // There are 3 kinds of valid referencing strings:
+    // - A canonical URL pointing to a GitHub entity, e.g.
+    //   https://github.com/sourcecred/sourcecred/pull/416
+    // - A # followed by a number, such as #416
+    // - An @ followed by a login name, such as @decentralion
+    const refToAddress: Map<string, N.StructuredAddress> = new Map();
+    for (const e: ReferentEntity of this.referentEntities()) {
+      const a = e.address();
+      refToAddress.set(e.url(), a);
+      if (e instanceof Userlike) {
+        refToAddress.set(`@${e.login()}`, a);
+      }
+      if (e instanceof Issue || e instanceof Pull) {
+        refToAddress.set(`#${e.number()}`, a);
+      }
+    }
+    for (const e of this.textContentEntities()) {
+      const srcAddress = e.address();
+      for (const ref of parseReferences(e.body())) {
+        const refAddress = refToAddress.get(ref);
+        if (refAddress != null) {
+          this._addReference(srcAddress, refAddress);
+        }
+      }
+    }
+  }
+
+  _addReference(src: N.TextContentAddress, dst: N.ReferentAddress) {
+    const srcRaw = N.toRaw(src);
+    const referencesForSrc = this._mapReferences.get(srcRaw);
+    if (referencesForSrc == null) {
+      this._mapReferences.set(srcRaw, [dst]);
+    } else {
+      referencesForSrc.push(dst);
+    }
+    const dstRaw = N.toRaw(dst);
+    const referencedByForDst = this._mapReferencedBy.get(dstRaw);
+    if (referencedByForDst == null) {
+      this._mapReferencedBy.set(dstRaw, [src]);
+    } else {
+      referencedByForDst.push(src);
+    }
+  }
+
+  *_referencedBy(e: ReferentEntity): Iterator<TextContentEntity> {
+    const refs = this._mapReferencedBy.get(N.toRaw(e.address()));
+    if (refs == null) {
+      return;
+    } else {
+      for (const address of refs) {
+        let entity: ?TextContentEntity;
+        switch (address.type) {
+          case "ISSUE":
+            entity = this.issue(address);
+            break;
+          case "PULL":
+            entity = this.pull(address);
+            break;
+          case "REVIEW":
+            entity = this.review(address);
+            break;
+          case "COMMENT":
+            entity = this.comment(address);
+            break;
+          default:
+            // eslint-disable-next-line no-unused-expressions
+            (address.type: empty);
+            throw new Error(
+              `Unexpected referrer address type: ${address.type}`
+            );
+        }
+        if (entity == null) {
+          throw new Error(
+            `Invariant error: Reference from non-existent entity: ${stringify(
+              address
+            )}`
+          );
+        }
+        yield entity;
+      }
+    }
+  }
+
+  *_references(e: TextContentEntity): Iterator<ReferentEntity> {
+    const refs = this._mapReferences.get(N.toRaw(e.address()));
+    if (refs == null) {
+      return;
+    } else {
+      for (const address of refs) {
+        let entity: ?ReferentEntity;
+        switch (address.type) {
+          case "REPO":
+            entity = this.repo(address);
+            break;
+          case "ISSUE":
+            entity = this.issue(address);
+            break;
+          case "PULL":
+            entity = this.pull(address);
+            break;
+          case "REVIEW":
+            entity = this.review(address);
+            break;
+          case "COMMENT":
+            entity = this.comment(address);
+            break;
+          case "USERLIKE":
+            entity = this.userlike(address);
+            break;
+          default:
+            // eslint-disable-next-line no-unused-expressions
+            (address.type: empty);
+            throw new Error(
+              `Unexpected referent address type: ${address.type}`
+            );
+        }
+        if (entity == null) {
+          throw new Error(
+            `Invariant error: Reference to non-existent entity: ${stringify(
+              address
+            )}`
+          );
+        }
+        yield entity;
+      }
+    }
+  }
 }
 
 type Entry =
@@ -281,6 +433,9 @@ export class Repo extends Entity<RepoEntry> {
       yield assertExists(pull, address);
     }
   }
+  referencedBy(): Iterator<ReferentEntity> {
+    return this._view._referencedBy(this);
+  }
 }
 
 type IssueEntry = {|
@@ -318,6 +473,12 @@ export class Issue extends Entity<IssueEntry> {
   }
   authors(): Iterator<Userlike> {
     return getAuthors(this._view, this._entry);
+  }
+  references(): Iterator<ReferentEntity> {
+    return this._view._references(this);
+  }
+  referencedBy(): Iterator<TextContentEntity> {
+    return this._view._referencedBy(this);
   }
 }
 
@@ -368,6 +529,12 @@ export class Pull extends Entity<PullEntry> {
   authors(): Iterator<Userlike> {
     return getAuthors(this._view, this._entry);
   }
+  references(): Iterator<ReferentEntity> {
+    return this._view._references(this);
+  }
+  referencedBy(): Iterator<TextContentEntity> {
+    return this._view._referencedBy(this);
+  }
 }
 
 type ReviewEntry = {|
@@ -402,6 +569,12 @@ export class Review extends Entity<ReviewEntry> {
   }
   authors(): Iterator<Userlike> {
     return getAuthors(this._view, this._entry);
+  }
+  references(): Iterator<ReferentEntity> {
+    return this._view._references(this);
+  }
+  referencedBy(): Iterator<TextContentEntity> {
+    return this._view._referencedBy(this);
   }
 }
 
@@ -442,6 +615,12 @@ export class Comment extends Entity<CommentEntry> {
   authors(): Iterator<Userlike> {
     return getAuthors(this._view, this._entry);
   }
+  references(): Iterator<ReferentEntity> {
+    return this._view._references(this);
+  }
+  referencedBy(): Iterator<TextContentEntity> {
+    return this._view._referencedBy(this);
+  }
 }
 
 type UserlikeEntry = {|
@@ -455,6 +634,9 @@ export class Userlike extends Entity<UserlikeEntry> {
   }
   login(): string {
     return this.address().login;
+  }
+  referencedBy(): Iterator<TextContentEntity> {
+    return this._view._referencedBy(this);
   }
 }
 
@@ -477,3 +659,6 @@ function* getAuthors(
     yield assertExists(author, address);
   }
 }
+
+export type TextContentEntity = Issue | Pull | Review | Comment;
+export type ReferentEntity = Repo | Issue | Pull | Review | Comment | Userlike;
