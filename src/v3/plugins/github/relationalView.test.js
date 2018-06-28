@@ -24,7 +24,7 @@ describe("plugins/github/relationalView", () => {
     it(`has ${name}`, () => {
       const element = method();
       let snapshot;
-      if (element instanceof R.Entity) {
+      if (element instanceof R._Entity) {
         // element is an Entity. Entities have pointers to the RelationalView,
         // and it would pollute our snapshot horribly. Just show the url.
         snapshot = {url: element.url()};
@@ -36,7 +36,7 @@ describe("plugins/github/relationalView", () => {
   }
 
   describe("RelationalView", () => {
-    function hasEntityMethods<T: R.Entity<any>>(
+    function hasEntityMethods<T: R._Entity<any>>(
       name,
       getAll: () => Iterator<T>,
       get: (x: $Call<$PropertyType<T, "address">>) => ?T
