@@ -39,6 +39,14 @@ class GraphCreator {
         this.graph.addEdge(createEdge.mergedAs(pull.address(), commit));
       }
     }
+
+    for (const referrer of view.textContentEntities()) {
+      for (const referent of referrer.references()) {
+        this.graph.addEdge(
+          createEdge.references(referrer.address(), referent.address())
+        );
+      }
+    }
   }
 
   addNode(addr: N.StructuredAddress) {
