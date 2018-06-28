@@ -2,11 +2,11 @@
 
 import * as R from "./relationalView";
 import * as N from "./nodes";
+import {exampleRelationalView} from "./example/example";
 
 describe("plugins/github/relationalView", () => {
-  const data = require("./example/example-github");
   // Sharing this state is OK because it's just a view - no mutation allowed!
-  const view = new R.RelationalView(data);
+  const view = exampleRelationalView();
 
   function hasEntities(name, method) {
     describe(name, () => {

@@ -1,18 +1,7 @@
 // @flow
 
-import {createGraph} from "./createGraph";
 import {GraphView} from "./graphView";
-import {RelationalView} from "./relationalView";
-import type {GithubResponseJSON} from "./graphql";
-import cloneDeep from "lodash.clonedeep";
-
-function exampleGraph() {
-  const data: GithubResponseJSON = cloneDeep(
-    require("./example/example-github")
-  );
-  const view = new RelationalView(data);
-  return createGraph(view);
-}
+import {exampleGraph} from "./example/example";
 
 describe("plugins/github/createGraph", () => {
   it("example graph matches snapshot", () => {
@@ -20,8 +9,7 @@ describe("plugins/github/createGraph", () => {
   });
 
   it("passes all GraphView invariants", () => {
-    const graph = exampleGraph();
-    const view = new GraphView(graph);
+    const view = new GraphView(exampleGraph());
     // This test is high leverage. It checks:
     // - that every node starting with a GitHub prefix
     //   - can be structured using fromRaw
