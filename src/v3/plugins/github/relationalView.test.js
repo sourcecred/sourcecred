@@ -138,6 +138,25 @@ describe("plugins/github/relationalView", () => {
     has("url", () => entity.url());
   });
 
+  describe("match", () => {
+    const handlers = {
+      // Return the address so we know it was actually called on the entity,
+      // and a hardcoded string so we know the right function was called.
+      repo: (x: R.Repo) => [x.address(), "REPO"],
+      issue: (x: R.Issue) => [x.address(), "ISSUE"],
+      pull: (x: R.Pull) => [x.address(), "PULL"],
+      review: (x: R.Review) => [x.address(), "REVIEW"],
+      comment: (x: R.Comment) => [x.address(), "COMMENT"],
+      userlike: (x: R.Userlike) => [x.address(), "USERLIKE"],
+    };
+
+    const instances = [repo, issue, pull, review, comment, userlike];
+    for (const instance of instances) {
+      const [actualAddress, functionType] = R.match(handlers, instance);
+      expect(actualAddress.type).toEqual(functionType);
+    }
+  });
+
   describe("comment parent differentiation", () => {
     function hasCorrectParent(name, parent) {
       it(name, () => {

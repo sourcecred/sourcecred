@@ -690,6 +690,36 @@ function* getAuthors(
   }
 }
 
+export type MatchHandlers<T> = {|
+  +repo: (x: Repo) => T,
+  +issue: (x: Issue) => T,
+  +pull: (x: Pull) => T,
+  +review: (x: Review) => T,
+  +comment: (x: Comment) => T,
+  +userlike: (x: Userlike) => T,
+|};
+export function match<T>(handlers: MatchHandlers<T>, x: Entity): T {
+  if (x instanceof Repo) {
+    return handlers.repo(x);
+  }
+  if (x instanceof Issue) {
+    return handlers.issue(x);
+  }
+  if (x instanceof Pull) {
+    return handlers.pull(x);
+  }
+  if (x instanceof Review) {
+    return handlers.review(x);
+  }
+  if (x instanceof Comment) {
+    return handlers.comment(x);
+  }
+  if (x instanceof Userlike) {
+    return handlers.userlike(x);
+  }
+  throw new Error(`Unexpected entity ${x}`);
+}
+
 export type Entity = Repo | Issue | Pull | Review | Comment | Userlike;
 export type AuthoredEntity = Issue | Pull | Review | Comment;
 export type TextContentEntity = Issue | Pull | Review | Comment;
