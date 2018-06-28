@@ -148,7 +148,7 @@ export class RelationalView {
     yield* this.comments();
   }
 
-  *entities(): Iterator<Entity<Entry>> {
+  *entities(): Iterator<Entity> {
     yield* this.repos();
     yield* this.issues();
     yield* this.pulls();
@@ -419,7 +419,7 @@ type Entry =
   | CommentEntry
   | UserlikeEntry;
 
-export class Entity<+T: Entry> {
+export class _Entity<+T: Entry> {
   +_view: RelationalView;
   +_entry: T;
   constructor(view: RelationalView, entry: T) {
@@ -441,7 +441,7 @@ type RepoEntry = {|
   +pulls: PullAddress[],
 |};
 
-export class Repo extends Entity<RepoEntry> {
+export class Repo extends _Entity<RepoEntry> {
   constructor(view: RelationalView, entry: RepoEntry) {
     super(view, entry);
   }
@@ -477,7 +477,7 @@ type IssueEntry = {|
   +nominalAuthor: ?UserlikeAddress,
 |};
 
-export class Issue extends Entity<IssueEntry> {
+export class Issue extends _Entity<IssueEntry> {
   constructor(view: RelationalView, entry: IssueEntry) {
     super(view, entry);
   }
@@ -523,7 +523,7 @@ type PullEntry = {|
   +nominalAuthor: ?UserlikeAddress,
 |};
 
-export class Pull extends Entity<PullEntry> {
+export class Pull extends _Entity<PullEntry> {
   constructor(view: RelationalView, entry: PullEntry) {
     super(view, entry);
   }
@@ -576,7 +576,7 @@ type ReviewEntry = {|
   +nominalAuthor: ?UserlikeAddress,
 |};
 
-export class Review extends Entity<ReviewEntry> {
+export class Review extends _Entity<ReviewEntry> {
   constructor(view: RelationalView, entry: ReviewEntry) {
     super(view, entry);
   }
@@ -615,7 +615,7 @@ type CommentEntry = {|
   +nominalAuthor: ?UserlikeAddress,
 |};
 
-export class Comment extends Entity<CommentEntry> {
+export class Comment extends _Entity<CommentEntry> {
   constructor(view: RelationalView, entry: CommentEntry) {
     super(view, entry);
   }
@@ -658,7 +658,7 @@ type UserlikeEntry = {|
   +url: string,
 |};
 
-export class Userlike extends Entity<UserlikeEntry> {
+export class Userlike extends _Entity<UserlikeEntry> {
   constructor(view: RelationalView, entry: UserlikeEntry) {
     super(view, entry);
   }
@@ -690,6 +690,7 @@ function* getAuthors(
   }
 }
 
+export type Entity = Repo | Issue | Pull | Review | Comment | Userlike;
 export type AuthoredEntity = Issue | Pull | Review | Comment;
 export type TextContentEntity = Issue | Pull | Review | Comment;
 export type ParentEntity = Repo | Issue | Pull | Review;
