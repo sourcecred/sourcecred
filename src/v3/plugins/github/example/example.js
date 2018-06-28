@@ -17,3 +17,21 @@ export function exampleRelationalView(): RelationalView {
 export function exampleGraph(): Graph {
   return createGraph(exampleRelationalView());
 }
+
+export function exampleEntities() {
+  const view = exampleRelationalView();
+  const repo = Array.from(view.repos())[0];
+  const issue = Array.from(repo.issues())[1];
+  const pull = Array.from(repo.pulls())[1];
+  const review = Array.from(pull.reviews())[0];
+  const comment = Array.from(review.comments())[0];
+  const userlike = Array.from(review.authors())[0];
+  return {
+    repo,
+    issue,
+    pull,
+    review,
+    comment,
+    userlike,
+  };
+}
