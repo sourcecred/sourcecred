@@ -3,14 +3,19 @@
 import {Graph, type Edge, EdgeAddress} from "../../core/graph";
 import {createGraph} from "./createGraph";
 import {GraphView} from "./graphView";
+import {RelationalView} from "./relationalView";
 import * as GE from "./edges";
 import * as GN from "./nodes";
 import cloneDeep from "lodash.clonedeep";
 import {COMMIT_TYPE, toRaw as gitToRaw, TREE_TYPE} from "../git/nodes";
+import type {GithubResponseJSON} from "./graphql";
 
 function exampleView() {
-  const data = cloneDeep(require("./demoData/example-github"));
-  const graph = createGraph(data);
+  const data: GithubResponseJSON = cloneDeep(
+    require("./demoData/example-github")
+  );
+  const view = new RelationalView(data);
+  const graph = createGraph(view);
   return new GraphView(graph);
 }
 

@@ -127,6 +127,36 @@ export class RelationalView {
     yield* this.comments();
   }
 
+  *parentEntities(): Iterator<ParentEntity> {
+    yield* this.repos();
+    yield* this.issues();
+    yield* this.pulls();
+    yield* this.reviews();
+  }
+
+  *childEntities(): Iterator<ChildEntity> {
+    yield* this.issues();
+    yield* this.pulls();
+    yield* this.reviews();
+    yield* this.comments();
+  }
+
+  *authoredEntities(): Iterator<AuthoredEntity> {
+    yield* this.issues();
+    yield* this.pulls();
+    yield* this.reviews();
+    yield* this.comments();
+  }
+
+  *entities(): Iterator<Entity<Entry>> {
+    yield* this.repos();
+    yield* this.issues();
+    yield* this.pulls();
+    yield* this.reviews();
+    yield* this.comments();
+    yield* this.userlikes();
+  }
+
   _addRepo(json: Q.RepositoryJSON) {
     const address: RepoAddress = {
       type: N.REPO_TYPE,
@@ -660,5 +690,8 @@ function* getAuthors(
   }
 }
 
+export type AuthoredEntity = Issue | Pull | Review | Comment;
 export type TextContentEntity = Issue | Pull | Review | Comment;
+export type ParentEntity = Repo | Issue | Pull | Review;
+export type ChildEntity = Issue | Pull | Review | Comment;
 export type ReferentEntity = Repo | Issue | Pull | Review | Comment | Userlike;
