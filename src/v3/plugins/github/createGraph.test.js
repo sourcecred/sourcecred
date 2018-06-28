@@ -8,7 +8,7 @@ import cloneDeep from "lodash.clonedeep";
 
 function exampleGraph() {
   const data: GithubResponseJSON = cloneDeep(
-    require("./demoData/example-github")
+    require("./example/example-github")
   );
   const view = new RelationalView(data);
   return createGraph(view);

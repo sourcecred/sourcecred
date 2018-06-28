@@ -11,7 +11,7 @@ import {
 import {GraphView} from "./graphView";
 import type {Hash, Tree} from "./types";
 
-const makeData = () => cloneDeep(require("./demoData/example-git"));
+const makeData = () => cloneDeep(require("./example/example-git"));
 
 describe("plugins/git/createGraph", () => {
   describe("createGraph", () => {
