@@ -5,7 +5,7 @@ import fs from "fs";
 import {
   createExampleRepo,
   createExampleSubmoduleRepo,
-} from "../demoData/exampleRepo";
+} from "../example/exampleRepo";
 
 function parseArgs() {
   const argv = process.argv.slice(2);

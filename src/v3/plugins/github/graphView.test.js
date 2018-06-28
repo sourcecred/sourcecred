@@ -12,7 +12,7 @@ import type {GithubResponseJSON} from "./graphql";
 
 function exampleView() {
   const data: GithubResponseJSON = cloneDeep(
-    require("./demoData/example-github")
+    require("./example/example-github")
   );
   const view = new RelationalView(data);
   const graph = createGraph(view);

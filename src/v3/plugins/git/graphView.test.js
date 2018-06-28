@@ -4,14 +4,14 @@ import cloneDeep from "lodash.clonedeep";
 
 import {EdgeAddress, Graph, NodeAddress, edgeToString} from "../../core/graph";
 import {createGraph} from "./createGraph";
-import * as exampleRepo from "./demoData/exampleRepo";
+import * as exampleRepo from "./example/exampleRepo";
 import {GraphView} from "./graphView";
 import type {Repository} from "./types";
 
 import * as GE from "./edges";
 import * as GN from "./nodes";
 
-const makeData = (): Repository => cloneDeep(require("./demoData/example-git"));
+const makeData = (): Repository => cloneDeep(require("./example/example-git"));
 const makeGraph = () => createGraph(makeData());
 const makeView = () => new GraphView(makeGraph());
 

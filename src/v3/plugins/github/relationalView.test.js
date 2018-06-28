@@ -4,7 +4,7 @@ import * as R from "./relationalView";
 import * as N from "./nodes";
 
 describe("plugins/github/relationalView", () => {
-  const data = require("./demoData/example-github");
+  const data = require("./example/example-github");
   // Sharing this state is OK because it's just a view - no mutation allowed!
   const view = new R.RelationalView(data);
 

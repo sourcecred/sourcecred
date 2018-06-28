@@ -2,7 +2,7 @@
 
 import tmp from "tmp";
 
-import {createExampleRepo} from "./demoData/exampleRepo";
+import {createExampleRepo} from "./example/exampleRepo";
 import {loadRepository} from "./loadRepository";
 
 const cleanups: (() => void)[] = [];
@@ -25,7 +25,7 @@ describe("loadRepository", () => {
     //     src/plugins/git/loadRepositoryTest.sh --updateSnapshot
     // to update the snapshot, then inspect the resulting changes.
     expect(loadRepository(repository.path, "HEAD")).toEqual(
-      require("./demoData/example-git.json")
+      require("./example/example-git.json")
     );
   });
 
