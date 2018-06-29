@@ -151,7 +151,11 @@ describe("core/attribution/markovChain", () => {
         [0.25, 0, 0.75],
         [0.25, 0.75, 0],
       ]);
-      const pi = findStationaryDistribution(chain);
+      const pi = findStationaryDistribution(chain, {
+        maxIterations: 255,
+        convergenceThreshold: 1e-7,
+        verbose: false,
+      });
       expectStationary(chain, pi);
       const expected = new Float64Array([1, 0, 0]);
       expectAllClose(pi, expected);
@@ -169,7 +173,11 @@ describe("core/attribution/markovChain", () => {
         [0.5, 0, 0.25, 0, 0.25],
         [0.5, 0.25, 0, 0.25, 0],
       ]);
-      const pi = findStationaryDistribution(chain);
+      const pi = findStationaryDistribution(chain, {
+        maxIterations: 255,
+        convergenceThreshold: 1e-7,
+        verbose: false,
+      });
       expectStationary(chain, pi);
       const expected = new Float64Array([1 / 3, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
       expectAllClose(pi, expected);
@@ -177,7 +185,11 @@ describe("core/attribution/markovChain", () => {
 
     it("finds the stationary distribution of a periodic chain", () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [1, 0]]);
-      const pi = findStationaryDistribution(chain);
+      const pi = findStationaryDistribution(chain, {
+        maxIterations: 255,
+        convergenceThreshold: 1e-7,
+        verbose: false,
+      });
       expectStationary(chain, pi);
       const expected = new Float64Array([0.5, 0.5]);
       expectAllClose(pi, expected);
@@ -185,7 +197,11 @@ describe("core/attribution/markovChain", () => {
 
     it("returns initial distribution if maxIterations===0", () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [0, 1]]);
-      const pi = findStationaryDistribution(chain, {maxIterations: 0});
+      const pi = findStationaryDistribution(chain, {
+        verbose: false,
+        convergenceThreshold: 1e-7,
+        maxIterations: 0,
+      });
       const expected = new Float64Array([0.5, 0.5]);
       expect(pi).toEqual(expected);
     });

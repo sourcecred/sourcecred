@@ -92,18 +92,12 @@ export function sparseMarkovChainAction(
 
 export function findStationaryDistribution(
   chain: SparseMarkovChain,
-  options?: {|
-    +verbose?: boolean,
-    +convergenceThreshold?: number,
-    +maxIterations?: number,
+  options: {|
+    +verbose: boolean,
+    +convergenceThreshold: number,
+    +maxIterations: number,
   |}
 ): Distribution {
-  const fullOptions = {
-    verbose: false,
-    convergenceThreshold: 1e-7,
-    maxIterations: 255,
-    ...(options || {}),
-  };
   let r0 = uniformDistribution(chain.length);
   function computeDelta(pi0, pi1) {
     let maxDelta = -Infinity;
@@ -117,8 +111,8 @@ export function findStationaryDistribution(
   }
   let iteration = 0;
   while (true) {
-    if (iteration >= fullOptions.maxIterations) {
-      if (fullOptions.verbose) {
+    if (iteration >= options.maxIterations) {
+      if (options.verbose) {
         console.log(`[${iteration}] FAILED to converge`);
       }
       return r0;
@@ -127,11 +121,11 @@ export function findStationaryDistribution(
     const r1 = sparseMarkovChainAction(chain, r0);
     const delta = computeDelta(r0, r1);
     r0 = r1;
-    if (fullOptions.verbose) {
+    if (options.verbose) {
       console.log(`[${iteration}] delta = ${delta}`);
     }
-    if (delta < fullOptions.convergenceThreshold) {
-      if (fullOptions.verbose) {
+    if (delta < options.convergenceThreshold) {
+      if (options.verbose) {
         console.log(`[${iteration}] CONVERGED`);
       }
       return r0;
