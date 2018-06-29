@@ -140,6 +140,36 @@ describe("plugins/github/relationalView", () => {
     has("url", () => entity.url());
   });
 
+  describe("entity", () => {
+    it("works for repo", () => {
+      expect(view.entity(repo.address())).toEqual(repo);
+    });
+    it("works for issue", () => {
+      expect(view.entity(issue.address())).toEqual(issue);
+    });
+    it("works for pull", () => {
+      expect(view.entity(pull.address())).toEqual(pull);
+    });
+    it("works for review", () => {
+      expect(view.entity(review.address())).toEqual(review);
+    });
+    it("works for comment", () => {
+      expect(view.entity(comment.address())).toEqual(comment);
+    });
+    it("works for userlike", () => {
+      expect(view.entity(userlike.address())).toEqual(userlike);
+    });
+    it("returns undefined on nonexistent address", () => {
+      expect(
+        view.entity({type: "REPO", owner: "foo", name: "bar"})
+      ).not.toEqual(expect.anything());
+    });
+    it("errors for bad address type", () => {
+      // $ExpectFlowError
+      expect(() => view.entity({type: "BAD"})).toThrow("address type");
+    });
+  });
+
   describe("match", () => {
     const handlers = {
       // Return the address so we know it was actually called on the entity,
