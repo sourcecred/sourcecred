@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import "./index.css";
 import V1App from "../../v1/app/App";
+import V3App from "../../v3/app/App";
 import registerServiceWorker from "./registerServiceWorker";
 
 const root = document.getElementById("root");
@@ -23,10 +24,14 @@ ReactDOM.render(
         <li>
           <NavLink to="/v1">V1</NavLink>
         </li>
+        <li>
+          <NavLink to="/v3">V3</NavLink>
+        </li>
       </ul>
       <Route exact path="/" render={() => <Redirect to="/v1" />} />
       <hr />
       <Route path="/v1" component={V1App} />
+      <Route path="/v3" component={V3App} />
     </React.Fragment>
   </Router>,
   root
