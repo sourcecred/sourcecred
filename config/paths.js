@@ -59,6 +59,7 @@ module.exports = {
     "commands/start": resolveApp("src/v1/cli/commands/start.js"),
     apiApp: resolveApp("src/v1/app/apiApp.js"),
     sourcecred: resolveApp("src/v1/cli/sourcecred.js"),
+    sourcecredV3: resolveApp("src/v3/cli/sourcecred.js"),
     fetchAndPrintGithubRepo: resolveApp(
       "src/v1/plugins/github/bin/fetchAndPrintGithubRepo.js"
     ),
