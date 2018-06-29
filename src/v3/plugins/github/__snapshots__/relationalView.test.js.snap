@@ -132,7 +132,7 @@ Array [
 ]
 `;
 
-exports[`plugins/github/relationalView RelationalView entity: issues has expected number of them 1`] = `6`;
+exports[`plugins/github/relationalView RelationalView entity: issues has expected number of them 1`] = `7`;
 
 exports[`plugins/github/relationalView RelationalView entity: issues they have expected urls 1`] = `
 Array [
@@ -142,6 +142,7 @@ Array [
   "https://github.com/sourcecred/example-github/issues/6",
   "https://github.com/sourcecred/example-github/issues/7",
   "https://github.com/sourcecred/example-github/issues/8",
+  "https://github.com/sourcecred/example-github/issues/10",
 ]
 `;
 
@@ -187,7 +188,7 @@ exports[`plugins/github/relationalView Repo has owner 1`] = `"sourcecred"`;
 
 exports[`plugins/github/relationalView Repo has url 1`] = `"https://github.com/sourcecred/example-github"`;
 
-exports[`plugins/github/relationalView Repo issues has expected number of issues 1`] = `6`;
+exports[`plugins/github/relationalView Repo issues has expected number of issues 1`] = `7`;
 
 exports[`plugins/github/relationalView Repo issues have expected urls 1`] = `
 Array [
@@ -197,6 +198,7 @@ Array [
   "https://github.com/sourcecred/example-github/issues/6",
   "https://github.com/sourcecred/example-github/issues/7",
   "https://github.com/sourcecred/example-github/issues/8",
+  "https://github.com/sourcecred/example-github/issues/10",
 ]
 `;
 
@@ -247,6 +249,18 @@ Array [
   Object {
     "from": "https://github.com/sourcecred/example-github/issues/2",
     "to": "https://github.com/sourcecred/example-github/issues/1",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/10",
+    "to": "https://github.com/sourcecred/example-github/issues/10",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/10",
+    "to": "https://github.com/sourcecred/example-github/issues/2",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/10",
+    "to": "https://github.com/wchargin",
   },
   Object {
     "from": "https://github.com/sourcecred/example-github/pull/5",
