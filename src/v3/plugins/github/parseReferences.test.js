@@ -9,7 +9,11 @@ describe("parseReferences", () => {
   });
 
   it("finds trivial numeric references", () => {
-    expect(parseReferences("#1, #2, and #3")).toEqual(["#1", "#2", "#3"]);
+    expect(parseReferences("#1, #2, and #3")).toEqual([
+      {refType: "BASIC", ref: "#1"},
+      {refType: "BASIC", ref: "#2"},
+      {refType: "BASIC", ref: "#3"},
+    ]);
   });
 
   it("finds numeric references in a multiline string", () => {
@@ -17,7 +21,11 @@ describe("parseReferences", () => {
     This is a multiline string.
     It refers to #1. Oh, and to #2 too.
     (#42 might be included too - who knows?)`;
-    expect(parseReferences(example)).toEqual(["#1", "#2", "#42"]);
+    expect(parseReferences(example)).toEqual([
+      {refType: "BASIC", ref: "#1"},
+      {refType: "BASIC", ref: "#2"},
+      {refType: "BASIC", ref: "#42"},
+    ]);
   });
 
   it("does not find bad references", () => {
@@ -64,14 +72,44 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
     `;
 
     const expected = [
-      "https://github.com/sourcecred/example-github/issues/1",
-      "https://github.com/sourcecred/example-github/issues/1#issue-300934818",
-      "https://github.com/sourcecred/example-github/pull/3",
-      "https://github.com/sourcecred/example-github/pull/3#issue-171887741",
-      "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442",
-      "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
-      "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
-      "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
+      {
+        refType: "BASIC",
+        ref: "https://github.com/sourcecred/example-github/issues/1",
+      },
+      {
+        refType: "BASIC",
+        ref:
+          "https://github.com/sourcecred/example-github/issues/1#issue-300934818",
+      },
+      {
+        refType: "BASIC",
+        ref: "https://github.com/sourcecred/example-github/pull/3",
+      },
+      {
+        refType: "BASIC",
+        ref:
+          "https://github.com/sourcecred/example-github/pull/3#issue-171887741",
+      },
+      {
+        refType: "BASIC",
+        ref:
+          "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442",
+      },
+      {
+        refType: "BASIC",
+        ref:
+          "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+      },
+      {
+        refType: "BASIC",
+        ref:
+          "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+      },
+      {
+        refType: "BASIC",
+        ref:
+          "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
+      },
     ];
 
     expect(parseReferences(example)).toEqual(expected);
@@ -93,27 +131,36 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
 
   it("allows but excludes leading and trailing punctuation", () => {
     const base = "https://github.com/sourcecred/sourcecred/pull/94";
-    expect(parseReferences(`!${base}`)).toEqual([base]);
-    expect(parseReferences(`${base}!`)).toEqual([base]);
-    expect(parseReferences(`!${base}!`)).toEqual([base]);
+    expect(parseReferences(`!${base}`)).toEqual([
+      {refType: "BASIC", ref: base},
+    ]);
+    expect(parseReferences(`${base}!`)).toEqual([
+      {refType: "BASIC", ref: base},
+    ]);
+    expect(parseReferences(`!${base}!`)).toEqual([
+      {refType: "BASIC", ref: base},
+    ]);
   });
 
   it("finds username references", () => {
     expect(parseReferences("hello to @wchargin from @decentralion!")).toEqual([
-      "@wchargin",
-      "@decentralion",
+      {refType: "BASIC", ref: "@wchargin"},
+      {refType: "BASIC", ref: "@decentralion"},
     ]);
   });
 
   it("finds usernames with hypens and numbers", () => {
     expect(
       parseReferences("@paddy-hack and @0x00 are valid usernames")
-    ).toEqual(["@paddy-hack", "@0x00"]);
+    ).toEqual([
+      {refType: "BASIC", ref: "@paddy-hack"},
+      {refType: "BASIC", ref: "@0x00"},
+    ]);
   });
 
   it("finds username references by exact url", () => {
     expect(parseReferences("greetings https://github.com/wchargin")).toEqual([
-      "https://github.com/wchargin",
+      {refType: "BASIC", ref: "https://github.com/wchargin"},
     ]);
   });
 
@@ -123,9 +170,54 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
         "@wchargin commented on #125, eg https://github.com/sourcecred/sourcecred/pull/125#pullrequestreview-113402856"
       )
     ).toEqual([
-      "#125",
-      "https://github.com/sourcecred/sourcecred/pull/125#pullrequestreview-113402856",
-      "@wchargin",
+      {refType: "BASIC", ref: "#125"},
+      {
+        refType: "BASIC",
+        ref:
+          "https://github.com/sourcecred/sourcecred/pull/125#pullrequestreview-113402856",
+      },
+      {refType: "BASIC", ref: "@wchargin"},
+    ]);
+  });
+
+  it("finds paired with references", () => {
+    // Note that there is *not* also a BASIC ref to @wchargin
+    expect(parseReferences("paired with @wchargin")).toEqual([
+      {refType: "PAIRED_WITH", ref: "@wchargin"},
+    ]);
+  });
+
+  it("paired with allows flexible capitalization and hyphens or colons", () => {
+    const examples = [
+      "paired with @wchargin",
+      "paired-with @wchargin",
+      "paired with: @wchargin",
+      "Paired with @wchargin",
+      "Paired With @wchargin",
+      "Paired With: @wchargin",
+      "Paired-With: @wchargin",
+    ];
+    for (const example of examples) {
+      // Note that there is *not* also a BASIC ref to @wchargin
+      expect(parseReferences(example)).toEqual([
+        {refType: "PAIRED_WITH", ref: "@wchargin"},
+      ]);
+    }
+  });
+
+  it("can find a mixture of paired with and BASIC references", () => {
+    expect(parseReferences("paired with @wchargin, thanks @wchargin")).toEqual([
+      {refType: "PAIRED_WITH", ref: "@wchargin"},
+      {refType: "BASIC", ref: "@wchargin"},
+    ]);
+  });
+
+  it("multiple paired with refs are OK", () => {
+    expect(
+      parseReferences("paired with @wchargin and paired with @decentralion")
+    ).toEqual([
+      {refType: "PAIRED_WITH", ref: "@wchargin"},
+      {refType: "PAIRED_WITH", ref: "@decentralion"},
     ]);
   });
 });

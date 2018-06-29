@@ -1,19 +1,12 @@
 // @flow
 
-function findAllMatches(re: RegExp, s: string): any[] {
-  // modified from: https://stackoverflow.com/a/6323598
-  let m;
-  const matches = [];
-  do {
-    m = re.exec(s);
-    if (m) {
-      matches.push(m);
-    }
-  } while (m);
-  return matches;
-}
+export type ParsedReference = {|
+  // "@user" or "#123" or "https://github.com/owner/name/..."
+  +ref: string,
+  +refType: "BASIC" | "PAIRED_WITH",
+|};
 
-export function parseReferences(body: string): string[] {
+export function parseReferences(body: string): ParsedReference[] {
   // Note to maintainer: If it becomes necessary to encode references in a
   // richer format, consider implementing the type signature described in
   // https://github.com/sourcecred/sourcecred/pull/130#pullrequestreview-113849998
@@ -24,17 +17,33 @@ export function parseReferences(body: string): string[] {
   ];
 }
 
-function findNumericReferences(body: string): string[] {
-  return findAllMatches(/(?:\W|^)(#\d+)(?:\W|$)/g, body).map((x) => x[1]);
+function findNumericReferences(body: string): ParsedReference[] {
+  return findAllMatches(/(?:\W|^)(#\d+)(?:\W|$)/g, body).map((x) => ({
+    refType: "BASIC",
+    ref: x[1],
+  }));
 }
 
-function findUsernameReferences(body: string): string[] {
-  return findAllMatches(/(?:\W|^)(@[a-zA-Z0-9-]+)(?:\W|$)/g, body).map(
-    (x) => x[1]
-  );
+function findUsernameReferences(body: string): ParsedReference[] {
+  const pairedWithRefs = findAllMatches(
+    /(?:\W|^)(?:P|p)aired(?:-| )(?:w|W)ith:? (@[a-zA-Z0-9-]+)(?:\W|$)/g,
+    body
+  ).map((x) => ({ref: x[1], refType: "PAIRED_WITH"}));
+  const basicRefs = findAllMatches(
+    /(?:\W|^)(@[a-zA-Z0-9-]+)(?:\W|$)/g,
+    body
+  ).map((x) => ({ref: x[1], refType: "BASIC"}));
+  for (const {ref} of pairedWithRefs) {
+    const basicRefIndexToRemove = basicRefs.findIndex((x) => x.ref === ref);
+    if (basicRefIndexToRemove === -1) {
+      throw new Error(`Couldn't find BASIC ref for paired with ref: ${ref}`);
+    }
+    basicRefs.splice(basicRefIndexToRemove, 1);
+  }
+  return [...pairedWithRefs, ...basicRefs];
 }
 
-function findGithubUrlReferences(body: string): string[] {
+function findGithubUrlReferences(body: string): ParsedReference[] {
   const githubNamePart = /(?:[a-zA-Z0-9_-]+)/.source;
   const urlRegex = new RegExp(
     "" +
@@ -54,5 +63,21 @@ function findGithubUrlReferences(body: string): string[] {
       /(?:[^\w/]|$)/.source,
     "gm"
   );
-  return findAllMatches(urlRegex, body).map((match) => match[1]);
+  return findAllMatches(urlRegex, body).map((match) => ({
+    refType: "BASIC",
+    ref: match[1],
+  }));
+}
+
+function findAllMatches(re: RegExp, s: string): any[] {
+  // modified from: https://stackoverflow.com/a/6323598
+  let m;
+  const matches = [];
+  do {
+    m = re.exec(s);
+    if (m) {
+      matches.push(m);
+    }
+  } while (m);
+  return matches;
 }

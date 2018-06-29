@@ -224,7 +224,7 @@ export class RelationalView {
       address,
       url: json.url,
       comments: json.comments.nodes.map((x) => this._addComment(address, x)),
-      nominalAuthor: this._addNullableAuthor(json.author),
+      authors: this._addNullableAuthor(json.author),
       body: json.body,
       title: json.title,
     };
@@ -251,7 +251,7 @@ export class RelationalView {
       url: json.url,
       comments: json.comments.nodes.map((x) => this._addComment(address, x)),
       reviews: json.reviews.nodes.map((x) => this._addReview(address, x)),
-      nominalAuthor: this._addNullableAuthor(json.author),
+      authors: this._addNullableAuthor(json.author),
       body: json.body,
       title: json.title,
       mergedAs,
@@ -274,7 +274,7 @@ export class RelationalView {
       state: json.state,
       comments: json.comments.nodes.map((x) => this._addComment(address, x)),
       body: json.body,
-      nominalAuthor: this._addNullableAuthor(json.author),
+      authors: this._addNullableAuthor(json.author),
     };
     this._reviews.set(N.toRaw(address), entry);
     return address;
@@ -302,16 +302,16 @@ export class RelationalView {
     const entry: CommentEntry = {
       address,
       url: json.url,
-      nominalAuthor: this._addNullableAuthor(json.author),
+      authors: this._addNullableAuthor(json.author),
       body: json.body,
     };
     this._comments.set(N.toRaw(address), entry);
     return address;
   }
 
-  _addNullableAuthor(json: Q.NullableAuthorJSON): ?UserlikeAddress {
+  _addNullableAuthor(json: Q.NullableAuthorJSON): UserlikeAddress[] {
     if (json == null) {
-      return null;
+      return [];
     } else {
       const address: UserlikeAddress = {
         type: N.USERLIKE_TYPE,
@@ -319,7 +319,7 @@ export class RelationalView {
       };
       const entry: UserlikeEntry = {address, url: json.url};
       this._userlikes.set(N.toRaw(address), entry);
-      return address;
+      return [address];
     }
   }
 
@@ -346,10 +346,36 @@ export class RelationalView {
     }
     for (const e of this.textContentEntities()) {
       const srcAddress = e.address();
-      for (const ref of parseReferences(e.body())) {
+      for (const {ref, refType} of parseReferences(e.body())) {
         const refAddress = refToAddress.get(ref);
         if (refAddress != null) {
-          this._addReference(srcAddress, refAddress);
+          switch (refType) {
+            case "BASIC":
+              this._addReference(srcAddress, refAddress);
+              break;
+            case "PAIRED_WITH":
+              if (refAddress.type !== N.USERLIKE_TYPE) {
+                throw new Error(
+                  `Invariant error: @-ref did not refer to userlike: ${stringify(
+                    refAddress
+                  )}`
+                );
+              }
+              const userlike = this.userlike(refAddress);
+              if (userlike == null) {
+                throw new Error(
+                  `Invariant error: nonexistent reference: ${stringify(
+                    refAddress
+                  )}`
+                );
+              }
+              this._addExtraAuthor(e, userlike);
+              break;
+            default:
+              // eslint-disable-next-line no-unused-expressions
+              (refType: empty);
+              throw new Error(`Unexpected refType: ${refType}`);
+          }
         }
       }
     }
@@ -370,6 +396,15 @@ export class RelationalView {
     } else {
       referencedByForDst.push(src);
     }
+  }
+
+  _addExtraAuthor(e: AuthoredEntity, extraAuthor: Userlike) {
+    for (const existingAuthor of e.authors()) {
+      if (existingAuthor.login() === extraAuthor.login()) {
+        return; // user can't author the same thing twice
+      }
+    }
+    e._entry.authors.push(extraAuthor.address());
   }
 
   *_referencedBy(e: ReferentEntity): Iterator<TextContentEntity> {
@@ -520,7 +555,7 @@ type IssueEntry = {|
   +body: string,
   +url: string,
   +comments: CommentAddress[],
-  +nominalAuthor: ?UserlikeAddress,
+  +authors: UserlikeAddress[],
 |};
 
 export class Issue extends _Entity<IssueEntry> {
@@ -566,9 +601,9 @@ type PullEntry = {|
   +comments: CommentAddress[],
   +reviews: ReviewAddress[],
   +mergedAs: ?GitNode.CommitAddress,
-  +nominalAuthor: ?UserlikeAddress,
   +additions: number,
   +deletions: number,
+  +authors: UserlikeAddress[],
 |};
 
 export class Pull extends _Entity<PullEntry> {
@@ -627,7 +662,7 @@ type ReviewEntry = {|
   +url: string,
   +comments: CommentAddress[],
   +state: Q.ReviewState,
-  +nominalAuthor: ?UserlikeAddress,
+  +authors: UserlikeAddress[],
 |};
 
 export class Review extends _Entity<ReviewEntry> {
@@ -666,7 +701,7 @@ type CommentEntry = {|
   +address: CommentAddress,
   +body: string,
   +url: string,
-  +nominalAuthor: ?UserlikeAddress,
+  +authors: UserlikeAddress[],
 |};
 
 export class Comment extends _Entity<CommentEntry> {
@@ -737,8 +772,7 @@ function* getAuthors(
   view: RelationalView,
   entry: IssueEntry | PullEntry | ReviewEntry | CommentEntry
 ) {
-  const address = entry.nominalAuthor;
-  if (address != null) {
+  for (const address of entry.authors) {
     const author = view.userlike(address);
     yield assertExists(author, address);
   }
