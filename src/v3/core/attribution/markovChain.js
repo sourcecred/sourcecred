@@ -117,6 +117,12 @@ export function findStationaryDistribution(
   }
   let iteration = 0;
   while (true) {
+    if (iteration >= fullOptions.maxIterations) {
+      if (fullOptions.verbose) {
+        console.log(`[${iteration}] FAILED to converge`);
+      }
+      return r0;
+    }
     iteration++;
     const r1 = sparseMarkovChainAction(chain, r0);
     const delta = computeDelta(r0, r1);
@@ -127,12 +133,6 @@ export function findStationaryDistribution(
     if (delta < fullOptions.convergenceThreshold) {
       if (fullOptions.verbose) {
         console.log(`[${iteration}] CONVERGED`);
-      }
-      return r0;
-    }
-    if (iteration >= fullOptions.maxIterations) {
-      if (fullOptions.verbose) {
-        console.log(`[${iteration}] FAILED to converge`);
       }
       return r0;
     }
