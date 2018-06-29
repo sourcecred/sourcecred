@@ -223,4 +223,13 @@ describe("plugins/github/relationalView", () => {
     // may be fragile
     expect(rv1).toEqual(rv2);
   });
+
+  describe("to/fromJSON", () => {
+    it("to->from->to is identity", () => {
+      const json1 = view.toJSON();
+      const view1 = R.RelationalView.fromJSON(json1);
+      const json2 = view1.toJSON();
+      expect(json1).toEqual(json2);
+    });
+  });
 });
