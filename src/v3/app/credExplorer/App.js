@@ -4,6 +4,7 @@ import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
 import LocalStore from "./LocalStore";
+import {createPluginAdapter as createGithubAdapter} from "../../plugins/github/pluginAdapter";
 
 type Props = {};
 type State = {
@@ -81,7 +82,12 @@ export default class App extends React.Component<Props, State> {
       console.error(`Invalid repository name: ${JSON.stringify(repoName)}`);
       return;
     }
-    console.log(`Would load data for: ${repoOwner}/${repoName}.`);
+    createGithubAdapter(repoOwner, repoName).then((githubAdapter) => {
+      const graph = githubAdapter.graph();
+      const nodeCount = Array.from(graph.nodes()).length;
+      const edgeCount = Array.from(graph.edges()).length;
+      console.log(`Loaded graph: ${nodeCount} nodes, ${edgeCount} edges.`);
+    });
   }
 }
 
