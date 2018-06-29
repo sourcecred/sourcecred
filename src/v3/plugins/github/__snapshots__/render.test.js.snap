@@ -2,11 +2,11 @@
 
 exports[`plugins/github/render descriptions are as expected 1`] = `
 Object {
-  "comment": "comment by @wchargin on review by @wchargin of #5: This pull request will be more contentious. I can feel it...",
+  "comment": "comment by @wchargin on review by @wchargin of #5 (+1/−0): This pull request will be more contentious. I can feel it...",
   "issue": "#2: A referencing issue.",
-  "pull": "#5: This pull request will be more contentious. I can feel it...",
+  "pull": "#5 (+1/−0): This pull request will be more contentious. I can feel it...",
   "repo": "sourcecred/example-github",
-  "review": "review by @wchargin of #5: This pull request will be more contentious. I can feel it...",
+  "review": "review by @wchargin of #5 (+1/−0): This pull request will be more contentious. I can feel it...",
   "userlike": "@wchargin",
 }
 `;

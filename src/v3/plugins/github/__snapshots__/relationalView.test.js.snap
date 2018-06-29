@@ -71,6 +71,8 @@ Array [
 ]
 `;
 
+exports[`plugins/github/relationalView Pull has additions 1`] = `1`;
+
 exports[`plugins/github/relationalView Pull has body 1`] = `
 "@wchargin could you please do the following:
 - add a commit comment
@@ -78,6 +80,8 @@ exports[`plugins/github/relationalView Pull has body 1`] = `
 - i'll change it
 - then approve the pr"
 `;
+
+exports[`plugins/github/relationalView Pull has deletions 1`] = `0`;
 
 exports[`plugins/github/relationalView Pull has mergedAs 1`] = `
 Object {
