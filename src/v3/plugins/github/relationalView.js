@@ -32,7 +32,7 @@ export class RelationalView {
   _mapReferences: Map<N.RawAddress, N.ReferentAddress[]>;
   _mapReferencedBy: Map<N.RawAddress, N.TextContentAddress[]>;
 
-  constructor(data: Q.GithubResponseJSON) {
+  constructor() {
     this._repos = new Map();
     this._issues = new Map();
     this._pulls = new Map();
@@ -41,6 +41,13 @@ export class RelationalView {
     this._userlikes = new Map();
     this._mapReferences = new Map();
     this._mapReferencedBy = new Map();
+  }
+
+  addData(data: Q.GithubResponseJSON) {
+    // Warning: calling `addData` can put the RelationalView in an inconistent
+    // state. for example, if called with {repo: {issues: [1,2,3]}} and then with
+    // {repo: {issues: [4, 5]}}, then calls to repo.issues() will only give back
+    // issues 4 and 5 (although issues 1, 2, and 3 will still be in the view)
     this._addRepo(data.repository);
     this._addReferences();
   }
@@ -281,6 +288,9 @@ export class RelationalView {
   }
 
   _addReferences() {
+    // TODO(perf): _addReferences regenerates all refs from scratch
+    this._mapReferences = new Map();
+    this._mapReferencedBy = new Map();
     // refToAddress maps a "referencing string" to the address that string refers to.
     // There are 3 kinds of valid referencing strings:
     // - A canonical URL pointing to a GitHub entity, e.g.

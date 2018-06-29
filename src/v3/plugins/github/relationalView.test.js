@@ -2,7 +2,7 @@
 
 import * as R from "./relationalView";
 import * as N from "./nodes";
-import {exampleRelationalView} from "./example/example";
+import {exampleData, exampleRelationalView} from "./example/example";
 
 describe("plugins/github/relationalView", () => {
   // Sharing this state is OK because it's just a view - no mutation allowed!
@@ -212,5 +212,15 @@ describe("plugins/github/relationalView", () => {
       }
       expect(nFoundReferences).toEqual(nReferences);
     });
+  });
+
+  it("addData is idempotent", () => {
+    const rv1 = new R.RelationalView();
+    rv1.addData(exampleData());
+    const rv2 = new R.RelationalView();
+    rv2.addData(exampleData());
+    rv2.addData(exampleData());
+    // may be fragile
+    expect(rv1).toEqual(rv2);
   });
 });

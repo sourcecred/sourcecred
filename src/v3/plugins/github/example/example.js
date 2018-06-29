@@ -11,7 +11,9 @@ export function exampleData(): GithubResponseJSON {
 }
 
 export function exampleRelationalView(): RelationalView {
-  return new RelationalView(exampleData());
+  const rv = new RelationalView();
+  rv.addData(exampleData());
+  return rv;
 }
 
 export function exampleGraph(): Graph {
