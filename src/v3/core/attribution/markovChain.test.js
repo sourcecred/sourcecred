@@ -182,5 +182,12 @@ describe("core/attribution/markovChain", () => {
       const expected = new Float64Array([0.5, 0.5]);
       expectAllClose(pi, expected);
     });
+
+    it("returns initial distribution if maxIterations===0", () => {
+      const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [0, 1]]);
+      const pi = findStationaryDistribution(chain, {maxIterations: 0});
+      const expected = new Float64Array([0.5, 0.5]);
+      expect(pi).toEqual(expected);
+    });
   });
 });
