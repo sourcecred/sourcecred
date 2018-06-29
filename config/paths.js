@@ -58,7 +58,7 @@ module.exports = {
     "commands/graph": resolveApp("src/v1/cli/commands/graph.js"),
     "commands/plugin-graph": resolveApp("src/v1/cli/commands/pluginGraph.js"),
     "commands/start": resolveApp("src/v1/cli/commands/start.js"),
-    apiApp: resolveApp("src/v1/app/apiApp.js"),
+    apiApp: resolveApp("src/bridge/app/apiApp.js"),
     //
     sourcecredV3: resolveApp("src/v3/cli/sourcecred.js"),
     "commands/load-plugin-v3": resolveApp("src/v3/cli/commands/loadPlugin.js"),
