@@ -259,15 +259,7 @@ Array [
     "to": "https://github.com/sourcecred/example-github/issues/2",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/10",
-    "to": "https://github.com/wchargin",
-  },
-  Object {
     "from": "https://github.com/sourcecred/example-github/pull/5",
-    "to": "https://github.com/wchargin",
-  },
-  Object {
-    "from": "https://github.com/sourcecred/example-github/pull/9",
     "to": "https://github.com/wchargin",
   },
   Object {

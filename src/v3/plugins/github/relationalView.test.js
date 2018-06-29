@@ -173,6 +173,17 @@ describe("plugins/github/relationalView", () => {
     hasCorrectParent("review", review);
   });
 
+  it("paired with edges", () => {
+    const issue10 = Array.from(view.issues()).find((x) => x.number() === "10");
+    if (issue10 == null) {
+      throw new Error(`Unable to find issue #10`);
+    }
+    expect(Array.from(issue10.authors()).map((x) => x.login())).toEqual([
+      "decentralion",
+      "wchargin",
+    ]);
+  });
+
   describe("reference detection", () => {
     // create url->url reference maps, for convenient snapshot readability
     const allReferences: Map<string, Set<string>> = new Map();
