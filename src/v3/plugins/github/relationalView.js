@@ -1,5 +1,6 @@
 // @flow
 
+import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import stringify from "json-stable-stringify";
 import {parseReferences} from "./parseReferences";
 import * as N from "./nodes";
@@ -21,6 +22,11 @@ import {
   pullCommentUrlToId,
   reviewCommentUrlToId,
 } from "./urlIdParse";
+
+const COMPAT_INFO = {
+  type: "sourcecred/github/relationalView",
+  version: "0.1.0",
+};
 
 export class RelationalView {
   _repos: Map<N.RawAddress, RepoEntry>;
@@ -162,6 +168,34 @@ export class RelationalView {
     yield* this.reviews();
     yield* this.comments();
     yield* this.userlikes();
+  }
+
+  toJSON(): RelationalViewJSON {
+    const rawJSON = {
+      repos: addressMapToObject(this._repos),
+      issues: addressMapToObject(this._issues),
+      pulls: addressMapToObject(this._pulls),
+      reviews: addressMapToObject(this._reviews),
+      comments: addressMapToObject(this._comments),
+      userlikes: addressMapToObject(this._userlikes),
+      references: addressMapToObject(this._mapReferences),
+      referencedBy: addressMapToObject(this._mapReferencedBy),
+    };
+    return toCompat(COMPAT_INFO, rawJSON);
+  }
+
+  static fromJSON(compatJson: RelationalViewJSON): RelationalView {
+    const json = fromCompat(COMPAT_INFO, compatJson);
+    const rv = new RelationalView();
+    rv._repos = objectToAddressMap(json.repos);
+    rv._issues = objectToAddressMap(json.issues);
+    rv._pulls = objectToAddressMap(json.pulls);
+    rv._reviews = objectToAddressMap(json.reviews);
+    rv._comments = objectToAddressMap(json.comments);
+    rv._userlikes = objectToAddressMap(json.userlikes);
+    rv._mapReferences = objectToAddressMap(json.references);
+    rv._mapReferencedBy = objectToAddressMap(json.referencedBy);
+    return rv;
   }
 
   _addRepo(json: Q.RepositoryJSON) {
@@ -736,3 +770,36 @@ export type TextContentEntity = Issue | Pull | Review | Comment;
 export type ParentEntity = Repo | Issue | Pull | Review;
 export type ChildEntity = Issue | Pull | Review | Comment;
 export type ReferentEntity = Repo | Issue | Pull | Review | Comment | Userlike;
+
+function addressMapToObject<T>(
+  x: Map<N.RawAddress, T>
+): AddressEntryMapJSON<T> {
+  const result: {[N.RawAddress]: T} = {};
+  for (const [address, entry] of x.entries()) {
+    result[address] = entry;
+  }
+  return result;
+}
+
+function objectToAddressMap<T>(
+  x: AddressEntryMapJSON<T>
+): Map<N.RawAddress, T> {
+  const result = new Map();
+  for (const key of Object.keys(x)) {
+    const address: N.RawAddress = (key: any);
+    result.set(address, x[address]);
+  }
+  return result;
+}
+
+export opaque type AddressEntryMapJSON<T> = {[N.RawAddress]: T};
+export opaque type RelationalViewJSON = Compatible<{|
+  +repos: AddressEntryMapJSON<RepoEntry>,
+  +issues: AddressEntryMapJSON<IssueEntry>,
+  +pulls: AddressEntryMapJSON<PullEntry>,
+  +reviews: AddressEntryMapJSON<ReviewEntry>,
+  +comments: AddressEntryMapJSON<CommentEntry>,
+  +userlikes: AddressEntryMapJSON<UserlikeEntry>,
+  +references: AddressEntryMapJSON<N.ReferentAddress[]>,
+  +referencedBy: AddressEntryMapJSON<N.TextContentAddress[]>,
+|}>;
