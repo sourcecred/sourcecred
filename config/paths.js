@@ -36,9 +36,9 @@ function getServedPath() {
 module.exports = {
   dotenv: resolveApp(".env"),
   appBuild: resolveApp("build"),
-  appPublic: resolveApp("src/v1/app/public"),
-  appHtml: resolveApp("src/v1/app/public/index.html"),
-  appIndexJs: resolveApp("src/v1/app/index.js"),
+  appPublic: resolveApp("src/bridge/app/public"),
+  appHtml: resolveApp("src/bridge/app/public/index.html"),
+  appIndexJs: resolveApp("src/bridge/app/index.js"),
   appPackageJson: resolveApp("package.json"),
   appSrc: resolveApp("src"),
   yarnLockFile: resolveApp("yarn.lock"),
