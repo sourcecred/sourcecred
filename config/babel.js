@@ -127,15 +127,17 @@ if (env === "test") {
             // Must come before `babel-plugin-transform-regenerator`.
             require.resolve("babel-plugin-transform-es2015-for-of"),
           ]
-        : []),
-      // function* () { yield 42; yield 43; }
-      [
-        require.resolve("babel-plugin-transform-regenerator"),
-        {
-          // Async functions are converted to generators by babel-preset-env
-          async: false,
-        },
-      ],
+        : [
+            // function* () { yield 42; yield 43; }
+            [
+              require.resolve("babel-plugin-transform-regenerator"),
+              {
+                // Async functions are converted to generators by
+                // babel-preset-env
+                async: false,
+              },
+            ],
+          ]),
       // Adds syntax support for import()
       require.resolve("babel-plugin-syntax-dynamic-import"),
     ],
