@@ -124,6 +124,25 @@ export class RelationalView {
     return entry == null ? entry : new Userlike(this, entry);
   }
 
+  entity(address: N.StructuredAddress): ?Entity {
+    switch (address.type) {
+      case "REPO":
+        return this.repo(address);
+      case "ISSUE":
+        return this.issue(address);
+      case "PULL":
+        return this.pull(address);
+      case "REVIEW":
+        return this.review(address);
+      case "COMMENT":
+        return this.comment(address);
+      case "USERLIKE":
+        return this.userlike(address);
+      default:
+        throw new Error(`Unexpected address type: ${(address.type: empty)}`);
+    }
+  }
+
   *referentEntities(): Iterator<ReferentEntity> {
     yield* this.repos();
     yield* this.issues();
