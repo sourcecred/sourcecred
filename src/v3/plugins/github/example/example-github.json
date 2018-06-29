@@ -249,10 +249,31 @@
                     "number": 8,
                     "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
                     "url": "https://github.com/sourcecred/example-github/issues/8"
+                },
+                {
+                    "author": {
+                        "__typename": "User",
+                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                        "login": "decentralion",
+                        "url": "https://github.com/decentralion"
+                    },
+                    "body": "This issue was paired with @wchargin \r\n\r\nIt also attempts to reference itself: #10\r\n\r\nIt also references something twice: #2 #2 ",
+                    "comments": {
+                        "nodes": [
+                        ],
+                        "pageInfo": {
+                            "endCursor": null,
+                            "hasNextPage": false
+                        }
+                    },
+                    "id": "MDU6SXNzdWUzMzcwOTU0NzM=",
+                    "number": 10,
+                    "title": "Paired with multireference",
+                    "url": "https://github.com/sourcecred/example-github/issues/10"
                 }
             ],
             "pageInfo": {
-                "endCursor": "Y3Vyc29yOnYyOpHOEkw5lw==",
+                "endCursor": "Y3Vyc29yOnYyOpHOFBerMQ==",
                 "hasNextPage": false
             }
         },
