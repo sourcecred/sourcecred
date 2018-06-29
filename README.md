@@ -52,7 +52,7 @@ SourceCred aims to be:
 3. **Forkable**
 
    Disputes about cred attribution are inevitable. Maybe a project you care
-   about has a selfish maintainer who wants all the cred for themself :(. Not
+   about has a selfish maintainer who wants all the cred for themselves :(. Not
    to worry—all of the cred data will be stored with the project, so you are
    empowered to solve cred disputes by forking the project.
 
