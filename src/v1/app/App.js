@@ -1,32 +1,31 @@
 // @flow
 
 import React from "react";
-import {BrowserRouter as Router, Route, NavLink} from "react-router-dom";
+import {Route, NavLink, type Match} from "react-router-dom";
 
 import CredExplorer from "./credExplorer/App";
 
-export default class App extends React.Component<{}> {
+export default class App extends React.Component<{match: Match}> {
   render() {
-    const CRED_EXPLORER_ROUTE = "/explorer";
+    const {match} = this.props;
+    const CRED_EXPLORER_ROUTE = match.url + "/explorer";
     return (
-      <Router>
-        <div>
-          <nav>
-            <ul>
-              <li>
-                <NavLink to="/">Home</NavLink>
-              </li>
-              <li>
-                <NavLink to={CRED_EXPLORER_ROUTE}>Cred Explorer</NavLink>
-              </li>
-            </ul>
-          </nav>
+      <div>
+        <nav>
+          <ul>
+            <li>
+              <NavLink to={match.url}>Home</NavLink>
+            </li>
+            <li>
+              <NavLink to={CRED_EXPLORER_ROUTE}>Cred Explorer</NavLink>
+            </li>
+          </ul>
+        </nav>
 
-          <hr />
-          <Route exact path="/" component={Home} />
-          <Route path={CRED_EXPLORER_ROUTE} component={CredExplorer} />
-        </div>
-      </Router>
+        <hr />
+        <Route exact path={match.url} component={Home} />
+        <Route path={CRED_EXPLORER_ROUTE} component={CredExplorer} />
+      </div>
     );
   }
 }
