@@ -255,6 +255,8 @@ export class RelationalView {
       body: json.body,
       title: json.title,
       mergedAs,
+      additions: json.additions,
+      deletions: json.deletions,
     };
     this._pulls.set(N.toRaw(address), entry);
     return address;
@@ -565,6 +567,8 @@ type PullEntry = {|
   +reviews: ReviewAddress[],
   +mergedAs: ?GitNode.CommitAddress,
   +nominalAuthor: ?UserlikeAddress,
+  +additions: number,
+  +deletions: number,
 |};
 
 export class Pull extends _Entity<PullEntry> {
@@ -584,6 +588,12 @@ export class Pull extends _Entity<PullEntry> {
   }
   body(): string {
     return this._entry.body;
+  }
+  additions(): number {
+    return this._entry.additions;
+  }
+  deletions(): number {
+    return this._entry.deletions;
   }
   mergedAs(): ?GitNode.CommitAddress {
     return this._entry.mergedAs;

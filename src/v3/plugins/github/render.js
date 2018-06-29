@@ -14,7 +14,10 @@ export function description(e: R.Entity) {
   const handlers = {
     repo: (x) => `${x.owner()}/${x.name()}`,
     issue: (x) => `#${x.number()}: ${x.title()}`,
-    pull: (x) => `#${x.number()}: ${x.title()}`,
+    pull: (x) => {
+      const diff = `+${x.additions()}/\u2212${x.deletions()}`;
+      return `#${x.number()} (${diff}): ${x.title()}`;
+    },
     review: (x) => `review ${withAuthors(x)}of ${description(x.parent())}`,
     comment: (x) => `comment ${withAuthors(x)}on ${description(x.parent())}`,
     userlike: (x) => `@${x.login()}`,
