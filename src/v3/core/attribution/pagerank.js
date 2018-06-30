@@ -10,6 +10,7 @@ import {
 
 import {findStationaryDistribution} from "./markovChain";
 
+export type {PagerankResult} from "./graphToMarkovChain";
 export type PagerankOptions = {|
   +selfLoopWeight?: number,
   +verbose?: boolean,
