@@ -73,18 +73,8 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       deps: ["check-pretty"],
     },
     {
-      id: "fetchGithubRepoTest",
-      cmd: ["./src/v1/plugins/github/fetchGithubRepoTest.sh", "--no-build"],
-      deps: ["backend-in-place"],
-    },
-    {
       id: "fetchGithubRepoTestV3",
       cmd: ["./src/v3/plugins/github/fetchGithubRepoTest.sh", "--no-build"],
-      deps: ["backend-in-place"],
-    },
-    {
-      id: "loadRepositoryTest",
-      cmd: ["./src/v1/plugins/git/loadRepositoryTest.sh", "--no-build"],
       deps: ["backend-in-place"],
     },
     {
