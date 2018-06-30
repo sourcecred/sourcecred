@@ -361,6 +361,10 @@ export class RelationalView {
       }
       if (e instanceof Issue || e instanceof Pull) {
         refToAddress.set(`#${e.number()}`, a);
+        refToAddress.set(
+          `${e.parent().owner()}/${e.parent().name()}#${e.number()}`,
+          a
+        );
       }
     }
     for (const e of this.textContentEntities()) {

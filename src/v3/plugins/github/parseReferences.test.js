@@ -32,10 +32,18 @@ describe("parseReferences", () => {
     expect(parseReferences("foo#123 #124bar")).toHaveLength(0);
   });
 
-  it("does not yet find concise cross-repo links", () => {
-    // The link below is valid, when we add cross-repo support we
-    // should fix this test case
-    expect(parseReferences("sourcecred/sourcecred#12")).toHaveLength(0);
+  describe("cross-repo links", () => {
+    const repoRef = "sourcecred/sourcecred#12";
+    it("a bare link", () => {
+      expect(parseReferences(repoRef)).toEqual([
+        {refType: "BASIC", ref: repoRef},
+      ]);
+    });
+    it("a link with surrounding context", () => {
+      expect(parseReferences("please see sourcecred/sourcecred#12")).toEqual([
+        {refType: "BASIC", ref: repoRef},
+      ]);
+    });
   });
 
   it("finds a trivial url reference", () => {
