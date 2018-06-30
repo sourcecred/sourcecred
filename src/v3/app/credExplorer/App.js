@@ -5,6 +5,8 @@ import {StyleSheet, css} from "aphrodite/no-important";
 
 import LocalStore from "./LocalStore";
 import {createPluginAdapter as createGithubAdapter} from "../../plugins/github/pluginAdapter";
+import {createPluginAdapter as createGitAdapter} from "../../plugins/git/pluginAdapter";
+import {Graph} from "../../core/graph";
 
 type Props = {};
 type State = {
@@ -82,11 +84,38 @@ export default class App extends React.Component<Props, State> {
       console.error(`Invalid repository name: ${JSON.stringify(repoName)}`);
       return;
     }
-    createGithubAdapter(repoOwner, repoName).then((githubAdapter) => {
-      const graph = githubAdapter.graph();
+
+    const githubGraphPromise = createGithubAdapter(repoOwner, repoName).then(
+      (githubAdapter) => {
+        const graph = githubAdapter.graph();
+        const nodeCount = Array.from(graph.nodes()).length;
+        const edgeCount = Array.from(graph.edges()).length;
+        console.log(
+          `GitHub: Loaded graph: ${nodeCount} nodes, ${edgeCount} edges.`
+        );
+        return graph;
+      }
+    );
+
+    const gitGraphPromise = createGitAdapter(repoOwner, repoName).then(
+      (gitAdapter) => {
+        const graph = gitAdapter.graph();
+        const nodeCount = Array.from(graph.nodes()).length;
+        const edgeCount = Array.from(graph.edges()).length;
+        console.log(
+          `Git: Loaded graph: ${nodeCount} nodes, ${edgeCount} edges.`
+        );
+        return graph;
+      }
+    );
+
+    Promise.all([gitGraphPromise, githubGraphPromise]).then((graphs) => {
+      const graph = Graph.merge(graphs);
       const nodeCount = Array.from(graph.nodes()).length;
       const edgeCount = Array.from(graph.edges()).length;
-      console.log(`Loaded graph: ${nodeCount} nodes, ${edgeCount} edges.`);
+      console.log(
+        `Combined: Loaded graph: ${nodeCount} nodes, ${edgeCount} edges.`
+      );
     });
   }
 }
