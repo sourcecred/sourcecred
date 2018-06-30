@@ -53,31 +53,17 @@ module.exports = {
   // source file, and the key will be the filename of the bundled entry
   // point within the build directory.
   backendEntryPoints: {
-    sourcecred: resolveApp("src/v1/cli/sourcecred.js"),
-    "commands/combine": resolveApp("src/v1/cli/commands/combine.js"),
-    "commands/graph": resolveApp("src/v1/cli/commands/graph.js"),
-    "commands/plugin-graph": resolveApp("src/v1/cli/commands/pluginGraph.js"),
-    "commands/start": resolveApp("src/v1/cli/commands/start.js"),
     apiApp: resolveApp("src/bridge/app/apiApp.js"),
     //
-    sourcecredV3: resolveApp("src/v3/cli/sourcecred.js"),
+    sourcecred: resolveApp("src/v3/cli/sourcecred.js"),
     "commands/load": resolveApp("src/v3/cli/commands/load.js"),
     "commands/start-v3": resolveApp("src/v3/cli/commands/start.js"),
     //
-    fetchAndPrintGithubRepo: resolveApp(
-      "src/v1/plugins/github/bin/fetchAndPrintGithubRepo.js"
-    ),
     fetchAndPrintGithubRepoV3: resolveApp(
       "src/v3/plugins/github/bin/fetchAndPrintGithubRepo.js"
     ),
-    createExampleRepo: resolveApp(
-      "src/v1/plugins/git/bin/createExampleRepo.js"
-    ),
     createExampleRepoV3: resolveApp(
       "src/v3/plugins/git/bin/createExampleRepo.js"
-    ),
-    loadAndPrintGitRepository: resolveApp(
-      "src/v1/plugins/git/bin/loadAndPrintRepository.js"
     ),
     loadAndPrintGitRepositoryV3: resolveApp(
       "src/v3/plugins/git/bin/loadAndPrintRepository.js"
