@@ -1,0 +1,98 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/credExplorer/PagerankTable full rendering filter selector has the correct options 1`] = `
+Array [
+  Object {
+    "style": undefined,
+    "text": "Show all",
+    "valueString": "NodeAddress[]",
+  },
+  Object {
+    "style": Object {
+      "fontWeight": "bold",
+    },
+    "text": "bar",
+    "valueString": "NodeAddress[\\"bar\\"]",
+  },
+  Object {
+    "style": undefined,
+    "text": " alpha",
+    "valueString": "NodeAddress[\\"bar\\",\\"a\\"]",
+  },
+  Object {
+    "style": Object {
+      "fontWeight": "bold",
+    },
+    "text": "foo",
+    "valueString": "NodeAddress[\\"foo\\"]",
+  },
+  Object {
+    "style": undefined,
+    "text": " alpha",
+    "valueString": "NodeAddress[\\"foo\\",\\"a\\"]",
+  },
+  Object {
+    "style": undefined,
+    "text": " beta",
+    "valueString": "NodeAddress[\\"foo\\",\\"b\\"]",
+  },
+  Object {
+    "style": Object {
+      "fontWeight": "bold",
+    },
+    "text": "unused",
+    "valueString": "NodeAddress[\\"unused\\"]",
+  },
+  Object {
+    "style": Object {
+      "fontWeight": "bold",
+    },
+    "text": "xox",
+    "valueString": "NodeAddress[\\"xox\\"]",
+  },
+]
+`;
+
+exports[`app/credExplorer/PagerankTable full rendering tables  subtables have depth-based styling 1`] = `
+Array [
+  Object {
+    "button": Object {
+      "marginLeft": 0,
+      "marginRight": 5,
+    },
+    "row": Object {
+      "backgroundColor": "rgba(0,143.4375,0,0)",
+    },
+  },
+  Object {
+    "button": Object {
+      "marginLeft": 15,
+      "marginRight": 5,
+    },
+    "row": Object {
+      "backgroundColor": "rgba(0,143.4375,0,0.09999999999999998)",
+    },
+  },
+  Object {
+    "button": Object {
+      "marginLeft": 30,
+      "marginRight": 5,
+    },
+    "row": Object {
+      "backgroundColor": "rgba(0,143.4375,0,0.18999999999999995)",
+    },
+  },
+]
+`;
+
+exports[`app/credExplorer/PagerankTable rendering with incomplete props renders expected message when there's no pagerank 1`] = `
+<p>
+  Please run PageRank to see analysis.
+</p>
+`;
+
+exports[`app/credExplorer/PagerankTable rendering with incomplete props renders expected message with null props 1`] = `
+<p>
+  You must load a graph before seeing PageRank analysis.
+</p>
+`;
