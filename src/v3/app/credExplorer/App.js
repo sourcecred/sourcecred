@@ -7,11 +7,21 @@ import LocalStore from "./LocalStore";
 import {createPluginAdapter as createGithubAdapter} from "../../plugins/github/pluginAdapter";
 import {createPluginAdapter as createGitAdapter} from "../../plugins/git/pluginAdapter";
 import {Graph} from "../../core/graph";
+import {pagerank, type PagerankResult} from "../../core/attribution/pagerank";
+import {PagerankTable} from "./PagerankTable";
+import type {PluginAdapter} from "../pluginAdapter";
+
+type GraphWithMetadata = {|
+  +graph: ?Graph,
+  +pagerankResult: ?PagerankResult,
+  adapters: ?$ReadOnlyArray<PluginAdapter>,
+|};
 
 type Props = {};
 type State = {
   repoOwner: string,
   repoName: string,
+  data: GraphWithMetadata,
 };
 
 const REPO_OWNER_KEY = "repoOwner";
@@ -23,6 +33,7 @@ export default class App extends React.Component<Props, State> {
     this.state = {
       repoOwner: "",
       repoName: "",
+      data: {graph: null, pagerankResult: null, adapters: null},
     };
   }
 
@@ -34,12 +45,12 @@ export default class App extends React.Component<Props, State> {
   }
 
   render() {
+    const {graph, adapters, pagerankResult} = this.state.data;
     return (
       <div>
         <header className={css(styles.header)}>
           <h1>Cred Explorer</h1>
         </header>
-        <p>Welcome to the SourceCred Explorer!</p>
         <div>
           <label>
             Repository owner:
@@ -68,6 +79,42 @@ export default class App extends React.Component<Props, State> {
           </label>
           <br />
           <button onClick={() => this.loadData()}>Load data</button>
+          <button
+            disabled={graph == null}
+            onClick={() => {
+              setTimeout(() => {
+                if (graph != null) {
+                  const edgeWeight = (_unused_Edge) => ({
+                    toWeight: 1,
+                    froWeight: 1,
+                  });
+                  const pagerankResult = pagerank(graph, edgeWeight, {
+                    verbose: true,
+                  });
+                  const data = {graph, pagerankResult, adapters};
+                  // In case a new graph was loaded while waiting for PageRank
+                  if (this.state.data.graph === graph) {
+                    this.setState({data});
+                  }
+                }
+              }, 0);
+            }}
+          >
+            Run basic PageRank
+          </button>
+          {graph ? (
+            <p>
+              Graph loaded: {Array.from(graph.nodes()).length} nodes,{" "}
+              {Array.from(graph.edges()).length} edges.
+            </p>
+          ) : (
+            <p>Graph not loaded.</p>
+          )}
+          <PagerankTable
+            graph={graph}
+            pagerankResult={pagerankResult}
+            adapters={adapters}
+          />
         </div>
       </div>
     );
@@ -85,37 +132,23 @@ export default class App extends React.Component<Props, State> {
       return;
     }
 
-    const githubGraphPromise = createGithubAdapter(repoOwner, repoName).then(
-      (githubAdapter) => {
-        const graph = githubAdapter.graph();
-        const nodeCount = Array.from(graph.nodes()).length;
-        const edgeCount = Array.from(graph.edges()).length;
-        console.log(
-          `GitHub: Loaded graph: ${nodeCount} nodes, ${edgeCount} edges.`
-        );
-        return graph;
+    const githubPromise = createGithubAdapter(repoOwner, repoName).then(
+      (adapter) => {
+        const graph = adapter.graph();
+        return {graph, adapter};
       }
     );
 
-    const gitGraphPromise = createGitAdapter(repoOwner, repoName).then(
-      (gitAdapter) => {
-        const graph = gitAdapter.graph();
-        const nodeCount = Array.from(graph.nodes()).length;
-        const edgeCount = Array.from(graph.edges()).length;
-        console.log(
-          `Git: Loaded graph: ${nodeCount} nodes, ${edgeCount} edges.`
-        );
-        return graph;
-      }
-    );
+    const gitPromise = createGitAdapter(repoOwner, repoName).then((adapter) => {
+      const graph = adapter.graph();
+      return {graph, adapter};
+    });
 
-    Promise.all([gitGraphPromise, githubGraphPromise]).then((graphs) => {
-      const graph = Graph.merge(graphs);
-      const nodeCount = Array.from(graph.nodes()).length;
-      const edgeCount = Array.from(graph.edges()).length;
-      console.log(
-        `Combined: Loaded graph: ${nodeCount} nodes, ${edgeCount} edges.`
-      );
+    Promise.all([gitPromise, githubPromise]).then((graphsAndAdapters) => {
+      const graph = Graph.merge(graphsAndAdapters.map((x) => x.graph));
+      const adapters = graphsAndAdapters.map((x) => x.adapter);
+      const data = {graph, adapters, pagerankResult: null};
+      this.setState({data});
     });
   }
 }
