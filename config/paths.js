@@ -36,9 +36,9 @@ function getServedPath() {
 module.exports = {
   dotenv: resolveApp(".env"),
   appBuild: resolveApp("build"),
-  appPublic: resolveApp("src/bridge/app/public"),
-  appHtml: resolveApp("src/bridge/app/public/index.html"),
-  appIndexJs: resolveApp("src/bridge/app/index.js"),
+  appPublic: resolveApp("src/v3/app/public"),
+  appHtml: resolveApp("src/v3/app/public/index.html"),
+  appIndexJs: resolveApp("src/v3/app/index.js"),
   appPackageJson: resolveApp("package.json"),
   appSrc: resolveApp("src"),
   yarnLockFile: resolveApp("yarn.lock"),
@@ -53,7 +53,7 @@ module.exports = {
   // source file, and the key will be the filename of the bundled entry
   // point within the build directory.
   backendEntryPoints: {
-    apiApp: resolveApp("src/bridge/app/apiApp.js"),
+    apiApp: resolveApp("src/v3/app/apiApp.js"),
     //
     sourcecred: resolveApp("src/v3/cli/sourcecred.js"),
     "commands/load": resolveApp("src/v3/cli/commands/load.js"),
