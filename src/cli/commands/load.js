@@ -12,8 +12,7 @@ import {
   sourcecredDirectoryFlag,
 } from "../common";
 
-const execDependencyGraph = require("../../../tools/execDependencyGraph")
-  .default;
+const execDependencyGraph = require("../../tools/execDependencyGraph").default;
 
 export default class PluginGraphCommand extends Command {
   static description = "load data required for SourceCred";

@@ -2,10 +2,12 @@
 
 set -eu
 
-data_file=src/v3/plugins/git/example/example-git.json
+data_file=src//plugins/github/example/example-github.json
 
 usage() {
-  printf 'usage: %s [-u|--updateSnapshot] [--help]\n' "$0"
+  printf 'usage: %s [-u|--updateSnapshot] [--[no-]build] [--help]\n' "$0"
+  printf 'Required environment variables:\n'
+  printf '  GITHUB_TOKEN: A 40-character hex string API token.\n'
   printf 'Flags:\n'
   printf '  -u|--updateSnapshot\n'
   printf '      Update the stored file instead of checking its contents\n'
@@ -17,10 +19,13 @@ usage() {
 }
 
 fetch() {
-  tmpdir="$(mktemp -d)"
-  node bin/createExampleRepoV3.js "${tmpdir}"
-  node bin/loadAndPrintGitRepositoryV3.js "${tmpdir}"
-  rm -rf "${tmpdir}"
+  if [ -z "${GITHUB_TOKEN:-}" ]; then
+    printf >&2 'Please set the GITHUB_TOKEN environment variable\n'
+    printf >&2 'to a 40-character hex string API token from GitHub.\n'
+    return 1
+  fi
+  node bin/fetchAndPrintGithubRepo.js \
+    sourcecred example-github "${GITHUB_TOKEN}"
 }
 
 check() {
@@ -35,6 +40,7 @@ update() {
 }
 
 main() {
+  cd "$(git rev-parse --show-toplevel)"
   UPDATE=
   BUILD=1
   while [ $# -gt 0 ]; do

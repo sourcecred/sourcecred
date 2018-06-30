@@ -5,7 +5,7 @@ import chalk from "chalk";
 import fs from "fs";
 import {choosePort} from "react-dev-utils/WebpackDevServerUtils";
 
-import apiApp from "../../../v3/app/apiApp";
+import apiApp from "../../app/apiApp";
 import {sourcecredDirectoryFlag} from "../common";
 
 const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 4000;

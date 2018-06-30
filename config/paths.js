@@ -36,9 +36,9 @@ function getServedPath() {
 module.exports = {
   dotenv: resolveApp(".env"),
   appBuild: resolveApp("build"),
-  appPublic: resolveApp("src/v3/app/public"),
-  appHtml: resolveApp("src/v3/app/public/index.html"),
-  appIndexJs: resolveApp("src/v3/app/index.js"),
+  appPublic: resolveApp("src/app/public"),
+  appHtml: resolveApp("src/app/public/index.html"),
+  appIndexJs: resolveApp("src/app/index.js"),
   appPackageJson: resolveApp("package.json"),
   appSrc: resolveApp("src"),
   yarnLockFile: resolveApp("yarn.lock"),
@@ -53,20 +53,18 @@ module.exports = {
   // source file, and the key will be the filename of the bundled entry
   // point within the build directory.
   backendEntryPoints: {
-    apiApp: resolveApp("src/v3/app/apiApp.js"),
+    apiApp: resolveApp("src/app/apiApp.js"),
     //
-    sourcecred: resolveApp("src/v3/cli/sourcecred.js"),
-    "commands/load": resolveApp("src/v3/cli/commands/load.js"),
-    "commands/start-v3": resolveApp("src/v3/cli/commands/start.js"),
+    sourcecred: resolveApp("src/cli/sourcecred.js"),
+    "commands/load": resolveApp("src/cli/commands/load.js"),
+    "commands/start": resolveApp("src/cli/commands/start.js"),
     //
-    fetchAndPrintGithubRepoV3: resolveApp(
-      "src/v3/plugins/github/bin/fetchAndPrintGithubRepo.js"
+    fetchAndPrintGithubRepo: resolveApp(
+      "src/plugins/github/bin/fetchAndPrintGithubRepo.js"
     ),
-    createExampleRepoV3: resolveApp(
-      "src/v3/plugins/git/bin/createExampleRepo.js"
-    ),
-    loadAndPrintGitRepositoryV3: resolveApp(
-      "src/v3/plugins/git/bin/loadAndPrintRepository.js"
+    createExampleRepo: resolveApp("src/plugins/git/bin/createExampleRepo.js"),
+    loadAndPrintGitRepository: resolveApp(
+      "src/plugins/git/bin/loadAndPrintRepository.js"
     ),
   },
 };
