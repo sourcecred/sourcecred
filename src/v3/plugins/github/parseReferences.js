@@ -12,9 +12,20 @@ export function parseReferences(body: string): ParsedReference[] {
   // https://github.com/sourcecred/sourcecred/pull/130#pullrequestreview-113849998
   return [
     ...findNumericReferences(body),
+    ...findRepoNumericReferences(body),
     ...findGithubUrlReferences(body),
     ...findUsernameReferences(body),
   ];
+}
+
+function findRepoNumericReferences(body: string): ParsedReference[] {
+  return findAllMatches(
+    /(?:\W|^)([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+#\d+)(?:\W|$)/g,
+    body
+  ).map((x) => ({
+    refType: "BASIC",
+    ref: x[1],
+  }));
 }
 
 function findNumericReferences(body: string): ParsedReference[] {
