@@ -38,6 +38,14 @@ class PluginAdapter implements IPluginAdapter {
   nodePrefix() {
     return N._Prefix.base;
   }
+  nodeTypes() {
+    return [
+      {name: "Blob", prefix: N._Prefix.blob},
+      {name: "Commit", prefix: N._Prefix.commit},
+      {name: "Tree", prefix: N._Prefix.tree},
+      {name: "Tree entry", prefix: N._Prefix.treeEntry},
+    ];
+  }
 }
 
 class Renderer implements IRenderer {

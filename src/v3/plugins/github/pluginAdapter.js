@@ -43,6 +43,16 @@ class PluginAdapter implements IPluginAdapter {
   nodePrefix() {
     return N._Prefix.base;
   }
+  nodeTypes() {
+    return [
+      {name: "Repository", prefix: N._Prefix.repo},
+      {name: "Issue", prefix: N._Prefix.issue},
+      {name: "Pull request", prefix: N._Prefix.pull},
+      {name: "Pull request review", prefix: N._Prefix.review},
+      {name: "Comment", prefix: N._Prefix.comment},
+      {name: "User", prefix: N._Prefix.userlike},
+    ];
+  }
 }
 
 class Renderer implements IRenderer {

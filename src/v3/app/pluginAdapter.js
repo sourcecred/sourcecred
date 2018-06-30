@@ -11,4 +11,8 @@ export interface PluginAdapter {
   graph(): Graph;
   renderer(): Renderer;
   nodePrefix(): NodeAddressT;
+  nodeTypes(): Array<{|
+    +name: string,
+    +prefix: NodeAddressT,
+  |}>;
 }
