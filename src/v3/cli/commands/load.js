@@ -6,10 +6,17 @@ import path from "path";
 
 import {loadGithubData} from "../../plugins/github/loadGithubData";
 import {loadGitData} from "../../plugins/git/loadGitData";
-import {pluginNames, sourcecredDirectoryFlag} from "../common";
+import {
+  pluginNames,
+  nodeMaxOldSpaceSizeFlag,
+  sourcecredDirectoryFlag,
+} from "../common";
+
+const execDependencyGraph = require("../../../tools/execDependencyGraph")
+  .default;
 
 export default class PluginGraphCommand extends Command {
-  static description = "load data required for a single plugin";
+  static description = "load data required for SourceCred";
 
   static args = [
     {
@@ -26,11 +33,12 @@ export default class PluginGraphCommand extends Command {
 
   static flags = {
     plugin: flags.string({
-      description: "plugin whose data to load",
-      required: true,
+      description: "plugin whose data to load (loads all plugins if not set)",
+      required: false,
       options: pluginNames(),
     }),
     "sourcecred-directory": sourcecredDirectoryFlag(),
+    "max-old-space-size": nodeMaxOldSpaceSizeFlag(),
     "github-token": flags.string({
       description:
         "a GitHub API token, as generated at " +
@@ -46,11 +54,55 @@ export default class PluginGraphCommand extends Command {
       flags: {
         "github-token": githubToken,
         "sourcecred-directory": basedir,
+        "max-old-space-size": maxOldSpaceSize,
         plugin,
       },
     } = this.parse(PluginGraphCommand);
-    loadPlugin({basedir, plugin, repoOwner, repoName, githubToken});
+    if (!plugin) {
+      loadAllPlugins({
+        basedir,
+        plugin,
+        repoOwner,
+        repoName,
+        githubToken,
+        maxOldSpaceSize,
+      });
+    } else {
+      loadPlugin({basedir, plugin, repoOwner, repoName, githubToken});
+    }
   }
+}
+
+function loadAllPlugins({repoOwner, repoName, githubToken, maxOldSpaceSize}) {
+  if (githubToken == null) {
+    // TODO: This check should be abstracted so that plugins can
+    // specify their argument dependencies and get nicely
+    // formatted errors.
+    console.error("fatal: No GitHub token specified. Try `--help'.");
+    process.exitCode = 1;
+    return;
+  }
+  const tasks = [
+    ...pluginNames().map((pluginName) => ({
+      id: `load-${pluginName}`,
+      cmd: [
+        "node",
+        `--max_old_space_size=${maxOldSpaceSize}`,
+        "./bin/sourcecred.js",
+        "load",
+        repoOwner,
+        repoName,
+        "--plugin",
+        pluginName,
+        "--github-token",
+        githubToken,
+      ],
+      deps: [],
+    })),
+  ];
+  execDependencyGraph(tasks, {taskPassLabel: "DONE"}).then(({success}) => {
+    process.exitCode = success ? 0 : 1;
+  });
 }
 
 function loadPlugin({basedir, plugin, repoOwner, repoName, githubToken}) {

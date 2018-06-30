@@ -61,7 +61,7 @@ module.exports = {
     apiApp: resolveApp("src/bridge/app/apiApp.js"),
     //
     sourcecredV3: resolveApp("src/v3/cli/sourcecred.js"),
-    "commands/load-plugin-v3": resolveApp("src/v3/cli/commands/loadPlugin.js"),
+    "commands/load": resolveApp("src/v3/cli/commands/load.js"),
     //
     fetchAndPrintGithubRepo: resolveApp(
       "src/v1/plugins/github/bin/fetchAndPrintGithubRepo.js"
