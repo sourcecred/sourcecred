@@ -24,7 +24,7 @@ synchronize() (
     submodule_flag="$1"  # --submodule | --no-submodule
     remote_url="$2"
     tmpdir="$(mktemp -d)"
-    node bin/createExampleRepoV3.js "${submodule_flag}" "${tmpdir}"
+    node bin/createExampleRepo.js "${submodule_flag}" "${tmpdir}"
     (
         cd "${tmpdir}"
         git remote add upstream "${remote_url}"
