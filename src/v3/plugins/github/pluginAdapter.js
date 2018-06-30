@@ -31,6 +31,9 @@ class PluginAdapter implements IPluginAdapter {
     this._view = view;
     this._graph = graph;
   }
+  name() {
+    return "GitHub";
+  }
   graph() {
     return this._graph;
   }

@@ -7,6 +7,7 @@ export interface Renderer {
 }
 
 export interface PluginAdapter {
+  name(): string;
   graph(): Graph;
   renderer(): Renderer;
   nodePrefix(): NodeAddressT;
