@@ -4,9 +4,9 @@ import {flags} from "@oclif/command";
 import os from "os";
 import path from "path";
 
-export type PluginName = "github";
+export type PluginName = "github" | "git";
 export function pluginNames(): PluginName[] {
-  return ["github"];
+  return ["github", "git"];
 }
 
 function defaultStorageDirectory() {

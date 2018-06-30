@@ -5,6 +5,7 @@ import mkdirp from "mkdirp";
 import path from "path";
 
 import {loadGithubData} from "../../plugins/github/loadGithubData";
+import {loadGitData} from "../../plugins/git/loadGitData";
 import {pluginNames, sourcecredDirectoryFlag} from "../common";
 
 export default class PluginGraphCommand extends Command {
@@ -78,6 +79,9 @@ function loadPlugin({basedir, plugin, repoOwner, repoName, githubToken}) {
           outputDirectory,
         });
       }
+      break;
+    case "git":
+      loadGitData({repoOwner, repoName, outputDirectory});
       break;
     default:
       console.error("fatal: Unknown plugin: " + (plugin: empty));
