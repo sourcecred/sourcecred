@@ -17,10 +17,11 @@ describe("parseReferences", () => {
   });
 
   it("finds numeric references in a multiline string", () => {
-    const example = `
-    This is a multiline string.
-    It refers to #1. Oh, and to #2 too.
-    (#42 might be included too - who knows?)`;
+    const example = [
+      "This is a multiline string.",
+      "It refers to #1. Oh, and to #2 too.",
+      "(#42 might be included too - who knows?)",
+    ].join("\n");
     expect(parseReferences(example)).toEqual([
       {refType: "BASIC", ref: "#1"},
       {refType: "BASIC", ref: "#2"},
@@ -30,6 +31,37 @@ describe("parseReferences", () => {
 
   it("does not find bad references", () => {
     expect(parseReferences("foo#123 #124bar")).toHaveLength(0);
+  });
+
+  it("does not find references in inline code", () => {
+    const input = "text like `#1` means issue";
+    expect(parseReferences(input)).toHaveLength(0);
+  });
+
+  it("does not find references in inline code with lots of backticks", () => {
+    // An attempt to evade inline code with regular expressions might
+    // well fail here, because an even number of backticks appears on
+    // each side of the would-be reference.
+    const input = "text like ````#1```` means issue";
+    expect(parseReferences(input)).toHaveLength(0);
+  });
+
+  it("does not find references in indented-block code", () => {
+    const input = "text like\n\n    #1\n\nmeans issue";
+    expect(parseReferences(input)).toHaveLength(0);
+  });
+
+  it("does not find references in fenced-block code", () => {
+    const input = "text like\n\n```\n#1\n```\n\nmeans issue";
+    expect(parseReferences(input)).toHaveLength(0);
+  });
+
+  it("finds references with mixed formatting", () => {
+    const input = "*Paired* with @alphonse, but *reviewed* by @betty.";
+    expect(parseReferences(input)).toEqual([
+      {refType: "PAIRED_WITH", ref: "@alphonse"},
+      {refType: "BASIC", ref: "@betty"},
+    ]);
   });
 
   describe("cross-repo links", () => {
