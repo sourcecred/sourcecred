@@ -2,7 +2,7 @@
 
 import {Node, Parser, XmlRenderer} from "commonmark";
 
-import {deformat, coalesceText} from "./parseMarkdown";
+import {coalesceText, deformat, textBlocks} from "./parseMarkdown";
 
 describe("plugins/github/parseMarkdown", () => {
   function astContents(ast) {
@@ -12,6 +12,45 @@ describe("plugins/github/parseMarkdown", () => {
     // that the Jest diffs are much more readable.
     return new XmlRenderer().render(ast);
   }
+
+  describe("textBlocks", () => {
+    it("works on a full example", () => {
+      const input = [
+        "Hello *dear **world** of* friends",
+        "and everyone else, too.",
+        "",
+        "Some `code` for [you][1]:",
+        "",
+        "```markdown",
+        "# such *meta*",
+        "much wow",
+        "```",
+        "",
+        "[1]: https://example.com/",
+        "",
+        "Here's a list: <!-- it's a secret -->",
+        "  - **important** things",
+        "  - *also **important*** stuff",
+        "  - a*b*c versus `a*b*c`",
+        "",
+        "> idea: ![lightbulb icon] never mind I forgot",
+        "",
+        "[lightbulb icon]: https://example.com/lightbulb.png",
+        "",
+      ].join("\n");
+      const expected = [
+        "Hello dear world of friends and everyone else, too.",
+        "Some ",
+        " for you:",
+        "Here's a list: ",
+        "important things",
+        "also important stuff",
+        "abc versus ",
+        "idea: lightbulb icon never mind I forgot",
+      ];
+      expect(textBlocks(input)).toEqual(expected);
+    });
+  });
 
   describe("coalesceText", () => {
     it("coalesces adjacent text blocks", () => {
