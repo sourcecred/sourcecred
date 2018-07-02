@@ -302,4 +302,62 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
       ]);
     });
   });
+
+  describe("finds references separated by a single space", () => {
+    it("for repo-numeric references", () => {
+      const f = (number: number) => `sourcecred/example-github#${number}`;
+      const input = `${f(1)} ${f(2)} ${f(3)}`;
+      expect(parseReferences(input)).toEqual([
+        {refType: "BASIC", ref: "sourcecred/example-github#1"},
+        {refType: "BASIC", ref: "sourcecred/example-github#2"},
+        {refType: "BASIC", ref: "sourcecred/example-github#3"},
+      ]);
+    });
+    it("for numeric references", () => {
+      const f = (number: number) => `#${number}`;
+      const input = `${f(1)} ${f(2)} ${f(3)}`;
+      expect(parseReferences(input)).toEqual([
+        {refType: "BASIC", ref: "#1"},
+        {refType: "BASIC", ref: "#2"},
+        {refType: "BASIC", ref: "#3"},
+      ]);
+    });
+    it("for username references", () => {
+      const f = (number: number) => `@user${number}`;
+      const input = `${f(1)} ${f(2)} ${f(3)}`;
+      expect(parseReferences(input)).toEqual([
+        {refType: "BASIC", ref: "@user1"},
+        {refType: "BASIC", ref: "@user2"},
+        {refType: "BASIC", ref: "@user3"},
+      ]);
+    });
+    it("for paired-with references", () => {
+      const f = (number: number) => `Paired-with: @user${number}`;
+      const input = `${f(1)} ${f(2)} ${f(3)}`;
+      expect(parseReferences(input)).toEqual([
+        {refType: "PAIRED_WITH", ref: "@user1"},
+        {refType: "PAIRED_WITH", ref: "@user2"},
+        {refType: "PAIRED_WITH", ref: "@user3"},
+      ]);
+    });
+    it("for GitHub URL references", () => {
+      const f = (number: number) =>
+        "https://github.com/sourcecred/example-github/issues/" + number;
+      const input = `${f(1)} ${f(2)} ${f(3)}`;
+      expect(parseReferences(input)).toEqual([
+        {
+          refType: "BASIC",
+          ref: "https://github.com/sourcecred/example-github/issues/1",
+        },
+        {
+          refType: "BASIC",
+          ref: "https://github.com/sourcecred/example-github/issues/2",
+        },
+        {
+          refType: "BASIC",
+          ref: "https://github.com/sourcecred/example-github/issues/3",
+        },
+      ]);
+    });
+  });
 });
