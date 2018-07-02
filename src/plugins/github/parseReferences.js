@@ -20,7 +20,7 @@ export function parseReferences(body: string): ParsedReference[] {
 
 function findRepoNumericReferences(body: string): ParsedReference[] {
   return findAllMatches(
-    /(?:\W|^)([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+#\d+)(?:\W|$)/g,
+    /(?:\W|^)([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+#\d+)(?:\W|$)/gm,
     body
   ).map((x) => ({
     refType: "BASIC",
@@ -29,7 +29,7 @@ function findRepoNumericReferences(body: string): ParsedReference[] {
 }
 
 function findNumericReferences(body: string): ParsedReference[] {
-  return findAllMatches(/(?:\W|^)(#\d+)(?:\W|$)/g, body).map((x) => ({
+  return findAllMatches(/(?:\W|^)(#\d+)(?:\W|$)/gm, body).map((x) => ({
     refType: "BASIC",
     ref: x[1],
   }));
@@ -37,11 +37,11 @@ function findNumericReferences(body: string): ParsedReference[] {
 
 function findUsernameReferences(body: string): ParsedReference[] {
   const pairedWithRefs = findAllMatches(
-    /(?:\W|^)(?:P|p)aired(?:-| )(?:w|W)ith:? (@[a-zA-Z0-9-]+)(?:\W|$)/g,
+    /(?:\W|^)(?:P|p)aired(?:-| )(?:w|W)ith:? (@[a-zA-Z0-9-]+)(?:\W|$)/gm,
     body
   ).map((x) => ({ref: x[1], refType: "PAIRED_WITH"}));
   const basicRefs = findAllMatches(
-    /(?:\W|^)(@[a-zA-Z0-9-]+)(?:\W|$)/g,
+    /(?:\W|^)(@[a-zA-Z0-9-]+)(?:\W|$)/gm,
     body
   ).map((x) => ({ref: x[1], refType: "BASIC"}));
   for (const {ref} of pairedWithRefs) {

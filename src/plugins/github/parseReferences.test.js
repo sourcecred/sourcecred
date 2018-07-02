@@ -228,4 +228,78 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
       {refType: "PAIRED_WITH", ref: "@decentralion"},
     ]);
   });
+
+  describe("finds references at the start of a non-initial line", () => {
+    it("for repo-numeric references", () => {
+      const f = (number: number) => `sourcecred/example-github#${number}`;
+      const input = `${f(1)}\n${f(2)}\n${f(3)}\r\n${f(4)}\r\n${f(5)}`;
+      expect(parseReferences(input)).toEqual([
+        {refType: "BASIC", ref: "sourcecred/example-github#1"},
+        {refType: "BASIC", ref: "sourcecred/example-github#2"},
+        {refType: "BASIC", ref: "sourcecred/example-github#3"},
+        {refType: "BASIC", ref: "sourcecred/example-github#4"},
+        {refType: "BASIC", ref: "sourcecred/example-github#5"},
+      ]);
+    });
+    it("for numeric references", () => {
+      const f = (number: number) => `#${number}`;
+      const input = `${f(1)}\n${f(2)}\n${f(3)}\r\n${f(4)}\r\n${f(5)}`;
+      expect(parseReferences(input)).toEqual([
+        {refType: "BASIC", ref: "#1"},
+        {refType: "BASIC", ref: "#2"},
+        {refType: "BASIC", ref: "#3"},
+        {refType: "BASIC", ref: "#4"},
+        {refType: "BASIC", ref: "#5"},
+      ]);
+    });
+    it("for username references", () => {
+      const f = (number: number) => `@user${number}`;
+      const input = `${f(1)}\n${f(2)}\n${f(3)}\r\n${f(4)}\r\n${f(5)}`;
+      expect(parseReferences(input)).toEqual([
+        {refType: "BASIC", ref: "@user1"},
+        {refType: "BASIC", ref: "@user2"},
+        {refType: "BASIC", ref: "@user3"},
+        {refType: "BASIC", ref: "@user4"},
+        {refType: "BASIC", ref: "@user5"},
+      ]);
+    });
+    it("for paired-with references", () => {
+      const f = (number: number) => `Paired-with: @user${number}`;
+      const input = `${f(1)}\n${f(2)}\n${f(3)}\r\n${f(4)}\r\n${f(5)}`;
+      expect(parseReferences(input)).toEqual([
+        {refType: "PAIRED_WITH", ref: "@user1"},
+        {refType: "PAIRED_WITH", ref: "@user2"},
+        {refType: "PAIRED_WITH", ref: "@user3"},
+        {refType: "PAIRED_WITH", ref: "@user4"},
+        {refType: "PAIRED_WITH", ref: "@user5"},
+      ]);
+    });
+    it("for GitHub URL references", () => {
+      const f = (number: number) =>
+        "https://github.com/sourcecred/example-github/issues/" + number;
+      const input = `${f(1)}\n${f(2)}\n${f(3)}\r\n${f(4)}\r\n${f(5)}`;
+      expect(parseReferences(input)).toEqual([
+        {
+          refType: "BASIC",
+          ref: "https://github.com/sourcecred/example-github/issues/1",
+        },
+        {
+          refType: "BASIC",
+          ref: "https://github.com/sourcecred/example-github/issues/2",
+        },
+        {
+          refType: "BASIC",
+          ref: "https://github.com/sourcecred/example-github/issues/3",
+        },
+        {
+          refType: "BASIC",
+          ref: "https://github.com/sourcecred/example-github/issues/4",
+        },
+        {
+          refType: "BASIC",
+          ref: "https://github.com/sourcecred/example-github/issues/5",
+        },
+      ]);
+    });
+  });
 });
