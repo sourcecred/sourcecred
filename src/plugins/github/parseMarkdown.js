@@ -1,6 +1,44 @@
 // @flow
 
-import {Node} from "commonmark";
+import {Node, Parser} from "commonmark";
+
+/**
+ * Extract maximal contiguous blocks of text from a Markdown string, in
+ * source-appearance order.
+ *
+ * For the purposes of this method, code (of both the inline and block
+ * varieties) is not considered text, and will not be included in the
+ * output at all. HTML contents are similarly excluded.
+ *
+ * Normal text, emphasized/strong text, link text, and image alt text
+ * all count as text and will be included. A block of text is not
+ * required to have the same formatting: e.g., the Markdown document
+ * given by `hello *there* [you](https://example.com)` without the
+ * backticks has one contiguous block of text: `"hello there you"`.
+ *
+ * Softbreaks count as normal text, and render as a single space.
+ * Hardbreaks break a contiguous block of text.
+ *
+ * Block-level elements, such as paragraphs, lists, and block quotes,
+ * break contiguous blocks of text.
+ *
+ * See test cases for examples.
+ */
+export function textBlocks(string: string): string[] {
+  const ast = new Parser().parse(string);
+  deformat(ast);
+  coalesceText(ast);
+  const walker = ast.walker();
+  const results = [];
+  for (let step; (step = walker.next()); ) {
+    const node: Node = step.node;
+    const type: NodeType = node.type;
+    if (type === "text") {
+      results.push(node.literal);
+    }
+  }
+  return results;
+}
 
 // Copied from:
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/bd35c127a6fd869ab2844082ae41047668178b7f/types/commonmark/index.d.ts#L14-L15
