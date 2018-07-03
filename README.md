@@ -3,80 +3,113 @@
 [![Build Status](https://travis-ci.org/sourcecred/sourcecred.svg?branch=master)](https://travis-ci.org/sourcecred/sourcecred)
 [![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
 
-## Vision
+### Vision
 
-Open source software is amazing, and so are the creators and contributors who
-share it. How amazing? It's difficult to tell, since we don't have good tools
-for recognizing those people. Many amazing open-source contributors labor in
-the shadows, going unappreciated for the work they do.
+Open source software is amazing, and so are its creators and maintainers.  How
+amazing? It's difficult to tell, since we don't have good tools for recognizing
+those people. Many amazing open-source contributors labor in the shadows, going
+unappreciated for the work they do.
 
-As the open economy develops, we need to go beyond [commit streaks] and
-follower counts. We need transparent, accurate, and fair tools for recognizing
-and rewarding open collaboration. SourceCred aims to do that.
+SourceCred will empower projects to track contributions and create cred, a
+reputational measure of how valuable each contribution was to the project.
+Algorithmically, contributions will be organized into a [graph], with edges
+representing connections between contributions. Then, a configurable [PageRank]
+algorithm will distill that graph into a cred attribution.
 
-[commit streaks]: https://www.mxsasha.eu/blog/2016/04/01/how-github-contribution-graph-is-harmful/
-
-SourceCred will enable projects to create and track "cred", which is a
-quantitative measure of how much value different contributors added to a
-project. We'll do this by providing a basic data structure—a [cred graph]—into
-which projects can add all kinds of information about the contributions that
-compose it. For example, a software project might include information about
-GitHub pull requests, function declarations and implementations, design
-documents, community support, documentation, and so forth. We'll also provide
-an algorithm ([PageRank]) which will ingest all of this information and produce
-a "cred attribution", which assigns a cred value to each contribution, and thus
-to the people who authored the contributions.
-
-[cred graph]: https://en.wikipedia.org/wiki/Directed_graph
+[graph]: https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)
 [PageRank]: https://en.wikipedia.org/wiki/PageRank
 
-## Principles
+SourceCred is dogfooding itself. People who contributes to SourceCred—by
+writing bug reports, participating in design discussions, or writing pull
+requests—will receive cred in SourceCred.
 
-SourceCred aims to be:
+### Design Goals
 
-1. **Transparent**
+SourceCred development is organized around the following high-level goals.
 
-   If it's to be a legitimate and accepted way of tracking credit in projects,
-   cred attribution can't be a black-box. SourceCred will provide tools that
-   make it easy to dive into the cred attribution, and see exactly why
-   contributions were valued the way they were.
+- *Transparent*
 
-2. **Community-controlled**
+It should be easy to see why cred is attributed as it is, and link a person's
+cred directly to contributions they've made.
 
-   At the end of the day, the community of collaborators in a project will know
-   best which contributions were important and deserve the most cred. No
-   algorithm will do that perfectly on its own. To that end, we'll empower the
-   community to modify the cred attribution, by adding human knowledge into the
-   cred graph.
+- *Community Controlled*
 
-3. **Forkable**
+Each community has the final say on what that community's cred is. We don't
+expect an algorithm to know what's best, so we'll empower communities to use
+algorithmic results as a starting point, and improve results with their
+knowledge.
 
-   Disputes about cred attribution are inevitable. Maybe a project you care
-   about has a selfish maintainer who wants all the cred for themself :(. Not
-   to worry—all of the cred data will be stored with the project, so you are
-   empowered to solve cred disputes by forking the project.
+- *Decentralized*
 
-## Roadmap
-SourceCred is currently in a very early stage. We are working full-time to
-develop a MVP, which will have the following basic features:
+Individual projects and communities will control their own SourceCred
+instances, and own their own data. The SourceCred creators won't have the power
+to control or modify other projects' cred.
 
-- **Create**: The *GitHub Plugin* populates a project's GitHub data into a
-  Contribution Graph. SourceCred uses this seed data to produce an initial,
-  approximate cred attribution.
+- *Forkable*
 
-- **Read**: The *SourceCred Explorer* enables users to examine the cred
-  attribution, and all of the contributions in the graph. This reveals why the
-  algorithm behaved the way that it did.
+Forking is important to open source, and gives people the freedom to vote with
+their feet. SourceCred will support forking, and forks will be able to modify
+their cred independently of the original.
 
-- **Update**: The *Artifact Plugin* allows users to put their own knowledge into
-  the system by adding new "Artifact Nodes" to the graph. An artifact node
-  allows users to draw attention to contributions (or groups of contributions)
-  that are particularly valuable. They can then merge this new information
-  into the project repository, making it canonical.
+- *Flexible & Extensible*
 
-## Community
-Please consider joining [our Discord chat] or posting on [our forum].
+SourceCred is focused on open-source projects for now, but we think it can be a
+general system for building reputation networks. We're organizing around very
+flexible core abstractions, and a plugin architecture for specific domains.
+
+### Current Status
+
+As of July 2018, it's still early days for SourceCred! So far, we've set the
+following foundations:
+
+- the [graph class] is the heart of SourceCred, and we've spent a lot of time
+polishing those APIs 🙂
+- the [GitHub plugin] downloads data from GitHub and imports it into a graph
+- the [Git plugin] clones a Git repository and imports it into a graph
+- our [PageRank implementation] does cred attribution on the graph
+- the [cred explorer] makes the PageRank results transparent
+
+[graph class]: https://github.com/sourcecred/sourcecred/blob/master/src/core/graph.js
+[Git plugin]: https://github.com/sourcecred/sourcecred/tree/master/src/plugins/git
+[GitHub plugin]: https://github.com/sourcecred/sourcecred/tree/master/src/plugins/github
+[PageRank implementation]: https://github.com/sourcecred/sourcecred/blob/master/src/core/attribution/pagerank.js
+[cred explorer]: https://github.com/sourcecred/sourcecred/tree/master/src/app/credExplorer
+
+The PageRank results aren't very good yet - we need to add more configurability
+to get higher quality results. We're working out improvements [in this issue].
+
+[in this issue]: https://github.com/sourcecred/sourcecred/issues/476
+
+### Roadmap
+
+The team is focused right now on building an end-to-end beta that can import
+GitHub repositories and produce a reasonable and configurable cred attribution.
+We hope to have the beta ready by November 2018.
+
+### Running the Prototype
+
+If you'd like to try it out, you can run a local copy of SourceCred using the
+following commands. You need to have [node] and [yarn] installed first. You
+also need to get a [GitHub API access token].
+
+[node]: https://nodejs.org/en/
+[yarn]: https://yarnpkg.com/lang/en/
+[GitHub API access token]: https://github.com/settings/tokens
+
+```
+git clone https://github.com/sourcecred/sourcecred.git
+cd sourcecred
+yarn install
+yarn backend
+node bin/sourcecred.js load REPO_OWNER REPO_NAME --github-token=GH_TOKEN
+yarn start
+# then navigate to localhost:3000 in your browser
+```
+
+### Getting Involved
+
+If you'd like to help out, or you just think SourceCred seems cool and you want
+to learn more, please drop by our [our Discord chat].
 
 [our Discord chat]: https://discord.gg/tsBTgc9
-[our forum]: https://spectrum.chat/sourcecred
 
