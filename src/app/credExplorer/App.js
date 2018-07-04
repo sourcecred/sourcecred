@@ -11,17 +11,19 @@ import {pagerank, type PagerankResult} from "../../core/attribution/pagerank";
 import {PagerankTable} from "./PagerankTable";
 import type {PluginAdapter} from "../pluginAdapter";
 
-type GraphWithMetadata = {|
-  +graph: ?Graph,
-  +pagerankResult: ?PagerankResult,
-  adapters: ?$ReadOnlyArray<PluginAdapter>,
-|};
-
 type Props = {};
 type State = {
   repoOwner: string,
   repoName: string,
-  data: GraphWithMetadata,
+  data: {|
+    graphWithMetadata: ?{|
+      +graph: Graph,
+      +adapters: $ReadOnlyArray<PluginAdapter>,
+      +nodeCount: number,
+      +edgeCount: number,
+    |},
+    +pagerankResult: ?PagerankResult,
+  |},
 };
 
 const REPO_OWNER_KEY = "repoOwner";
@@ -33,7 +35,7 @@ export default class App extends React.Component<Props, State> {
     this.state = {
       repoOwner: "",
       repoName: "",
-      data: {graph: null, pagerankResult: null, adapters: null},
+      data: {graphWithMetadata: null, pagerankResult: null},
     };
   }
 
@@ -45,7 +47,7 @@ export default class App extends React.Component<Props, State> {
   }
 
   render() {
-    const {graph, adapters, pagerankResult} = this.state.data;
+    const {graphWithMetadata, pagerankResult} = this.state.data;
     return (
       <div>
         <header className={css(styles.header)}>
@@ -80,40 +82,48 @@ export default class App extends React.Component<Props, State> {
           <br />
           <button onClick={() => this.loadData()}>Load data</button>
           <button
-            disabled={graph == null}
+            disabled={graphWithMetadata == null}
             onClick={() => {
               setTimeout(() => {
-                if (graph != null) {
-                  const edgeWeight = (_unused_Edge) => ({
-                    toWeight: 1,
-                    froWeight: 1,
-                  });
-                  const pagerankResult = pagerank(graph, edgeWeight, {
-                    verbose: true,
-                  });
-                  const data = {graph, pagerankResult, adapters};
-                  // In case a new graph was loaded while waiting for PageRank
-                  if (this.state.data.graph === graph) {
-                    this.setState({data});
-                  }
+                if (graphWithMetadata == null) {
+                  throw new Error(
+                    "graphWithMetadata: " + String(graphWithMetadata)
+                  );
+                }
+                const {graph} = graphWithMetadata;
+                const edgeWeight = (_unused_Edge) => ({
+                  toWeight: 1,
+                  froWeight: 1,
+                });
+                const pagerankResult = pagerank(graph, edgeWeight, {
+                  verbose: true,
+                });
+                const data = {graphWithMetadata, pagerankResult};
+                // In case a new graph was loaded while waiting for
+                // PageRank.
+                const stomped =
+                  this.state.data.graphWithMetadata &&
+                  this.state.data.graphWithMetadata.graph !== graph;
+                if (!stomped) {
+                  this.setState({data});
                 }
               }, 0);
             }}
           >
             Run basic PageRank
           </button>
-          {graph ? (
+          {graphWithMetadata ? (
             <p>
-              Graph loaded: {Array.from(graph.nodes()).length} nodes,{" "}
-              {Array.from(graph.edges()).length} edges.
+              Graph loaded: {graphWithMetadata.nodeCount} nodes,{" "}
+              {graphWithMetadata.edgeCount} edges.
             </p>
           ) : (
             <p>Graph not loaded.</p>
           )}
           <PagerankTable
-            graph={graph}
+            graph={graphWithMetadata ? graphWithMetadata.graph : null}
+            adapters={graphWithMetadata ? graphWithMetadata.adapters : null}
             pagerankResult={pagerankResult}
-            adapters={adapters}
           />
         </div>
       </div>
@@ -147,7 +157,15 @@ export default class App extends React.Component<Props, State> {
     Promise.all([gitPromise, githubPromise]).then((graphsAndAdapters) => {
       const graph = Graph.merge(graphsAndAdapters.map((x) => x.graph));
       const adapters = graphsAndAdapters.map((x) => x.adapter);
-      const data = {graph, adapters, pagerankResult: null};
+      const data = {
+        graphWithMetadata: {
+          graph,
+          adapters,
+          nodeCount: Array.from(graph.nodes()).length,
+          edgeCount: Array.from(graph.edges()).length,
+        },
+        pagerankResult: null,
+      };
       this.setState({data});
     });
   }
