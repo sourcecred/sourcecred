@@ -5,7 +5,8 @@ import type {
 } from "../../app/pluginAdapter";
 import {Graph} from "../../core/graph";
 import * as N from "./nodes";
-import {description} from "./render";
+import * as E from "./edges";
+import {description, edgeVerb} from "./render";
 
 export async function createPluginAdapter(
   repoOwner: string,
@@ -38,6 +39,9 @@ class PluginAdapter implements IPluginAdapter {
   nodePrefix() {
     return N._Prefix.base;
   }
+  edgePrefix() {
+    return E._Prefix.base;
+  }
   nodeTypes() {
     return [
       {name: "Blob", prefix: N._Prefix.blob},
@@ -54,5 +58,8 @@ class Renderer implements IRenderer {
     // silent failures or cause problems down the road.
     const address = N.fromRaw((node: any));
     return description(address);
+  }
+  edgeVerb(edgeAddress, direction) {
+    return edgeVerb(E.fromRaw((edgeAddress: any)), direction);
   }
 }

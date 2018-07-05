@@ -3,13 +3,14 @@ import React from "react";
 import {mount, shallow} from "enzyme";
 import enzymeToJSON from "enzyme-to-json";
 
-import {PagerankTable, nodeDescription} from "./PagerankTable";
+import {PagerankTable, nodeDescription, neighborVerb} from "./PagerankTable";
 import {pagerank} from "../../core/attribution/pagerank";
 import sortBy from "lodash.sortby";
 
 import {
   Graph,
   type NodeAddressT,
+  Direction,
   NodeAddress,
   EdgeAddress,
 } from "../../core/graph";
@@ -31,14 +32,17 @@ function example() {
   function addEdge(parts, src, dst) {
     const edge = {address: EdgeAddress.fromParts(parts), src, dst};
     graph.addEdge(edge);
+    return edge;
   }
 
-  addEdge(["a"], nodes.fooAlpha, nodes.fooBeta);
-  addEdge(["b"], nodes.fooAlpha, nodes.bar1);
-  addEdge(["c"], nodes.fooAlpha, nodes.xox);
-  addEdge(["d"], nodes.bar1, nodes.bar1);
-  addEdge(["e"], nodes.bar1, nodes.xox);
-  addEdge(["e'"], nodes.bar1, nodes.xox);
+  const edges = {
+    fooA: addEdge(["foo", "a"], nodes.fooAlpha, nodes.fooBeta),
+    fooB: addEdge(["foo", "b"], nodes.fooAlpha, nodes.bar1),
+    fooC: addEdge(["foo", "c"], nodes.fooAlpha, nodes.xox),
+    barD: addEdge(["bar", "d"], nodes.bar1, nodes.bar1),
+    barE: addEdge(["bar", "e"], nodes.bar1, nodes.xox),
+    barF: addEdge(["bar", "f"], nodes.bar1, nodes.xox),
+  };
 
   const adapters = [
     {
@@ -48,8 +52,11 @@ function example() {
       },
       renderer: () => ({
         nodeDescription: (x) => `foo: ${NodeAddress.toString(x)}`,
+        edgeVerb: (_unused_e, direction) =>
+          direction === "FORWARD" ? "foos" : "is fooed by",
       }),
       nodePrefix: () => NodeAddress.fromParts(["foo"]),
+      edgePrefix: () => EdgeAddress.fromParts(["foo"]),
       nodeTypes: () => [
         {name: "alpha", prefix: NodeAddress.fromParts(["foo", "a"])},
         {name: "beta", prefix: NodeAddress.fromParts(["foo", "b"])},
@@ -62,8 +69,11 @@ function example() {
       },
       renderer: () => ({
         nodeDescription: (x) => `bar: ${NodeAddress.toString(x)}`,
+        edgeVerb: (_unused_e, direction) =>
+          direction === "FORWARD" ? "bars" : "is barred by",
       }),
       nodePrefix: () => NodeAddress.fromParts(["bar"]),
+      edgePrefix: () => EdgeAddress.fromParts(["bar"]),
       nodeTypes: () => [
         {name: "alpha", prefix: NodeAddress.fromParts(["bar", "a"])},
       ],
@@ -75,8 +85,10 @@ function example() {
       },
       renderer: () => ({
         nodeDescription: (_unused_arg) => `xox node!`,
+        edgeVerb: (_unused_e, _unused_direction) => `xox'd`,
       }),
       nodePrefix: () => NodeAddress.fromParts(["xox"]),
+      edgePrefix: () => EdgeAddress.fromParts(["xox"]),
       nodeTypes: () => [],
     },
     {
@@ -88,6 +100,7 @@ function example() {
         throw new Error("Impossible!");
       },
       nodePrefix: () => NodeAddress.fromParts(["unused"]),
+      edgePrefix: () => EdgeAddress.fromParts(["unused"]),
       nodeTypes: () => [],
     },
   ];
@@ -97,7 +110,7 @@ function example() {
     froWeight: 1,
   }));
 
-  return {adapters, nodes, graph, pagerankResult};
+  return {adapters, nodes, edges, graph, pagerankResult};
 }
 
 describe("app/credExplorer/PagerankTable", () => {
@@ -165,7 +178,7 @@ describe("app/credExplorer/PagerankTable", () => {
 
   describe("full rendering", () => {
     function exampleRender() {
-      const {nodes, adapters, graph, pagerankResult} = example();
+      const {nodes, edges, adapters, graph, pagerankResult} = example();
       const element = mount(
         <PagerankTable
           pagerankResult={pagerankResult}
@@ -176,20 +189,13 @@ describe("app/credExplorer/PagerankTable", () => {
       verifyNoAdapterWarning();
       const select = element.find("select");
       expect(select).toHaveLength(1);
-      return {nodes, adapters, graph, pagerankResult, element, select};
+      return {nodes, edges, adapters, graph, pagerankResult, element, select};
     }
     it("full render doesn't crash or error", () => {
       example();
     });
 
-    describe("tables ", () => {
-      it("are sorted by score", () => {
-        const {element, graph, pagerankResult} = exampleRender();
-        const rows = element.find("RecursiveTable");
-        expect(rows).toHaveLength(Array.from(graph.nodes()).length);
-        const scores = rows.map((x) => pagerankResult.get(x.prop("address")));
-        expect(scores).toEqual(sortBy(scores).reverse());
-      });
+    describe("tables", () => {
       function expectColumnCorrect(
         element: *,
         name: string,
@@ -206,54 +212,114 @@ describe("app/credExplorer/PagerankTable", () => {
         const actual = tables.map((x) =>
           tdToExpected(x.find("td").at(headerIndex))
         );
-        const expected = tables.map((x) =>
-          addressToExpected(x.prop("address"))
-        );
+        const expected = tables.map((x) => addressToExpected(x.prop("node")));
         expect(actual).toEqual(expected);
       }
-      it("has a node description column", () => {
-        const {element, adapters} = exampleRender();
-        expectColumnCorrect(
-          element,
-          "Node",
-          (td) => td.find("span").text(),
-          (address) => nodeDescription(address, adapters)
-        );
-        verifyNoAdapterWarning();
-      });
-      it("has a log score column", () => {
-        const {element, pagerankResult} = exampleRender();
-        expectColumnCorrect(
-          element,
-          "log(score)",
-          (td) => td.text(),
-          (address) => {
-            const probability = pagerankResult.get(address);
-            if (probability == null) {
-              throw new Error(address);
-            }
-            const modifiedLogScore = Math.log(probability) + 10;
-            return modifiedLogScore.toFixed(2);
-          }
-        );
-      });
-      it("subtables have depth-based styling", () => {
-        const {element} = exampleRender();
-        const getLevel = (level) => {
-          const rt = element.find("RecursiveTable").at(level);
-          const button = rt.find("button").first();
-          return {rt, button};
-        };
-        getLevel(0).button.simulate("click");
-        getLevel(1).button.simulate("click");
-        const f = ({rt, button}) => ({
-          row: rt
-            .find("tr")
-            .first()
-            .prop("style"),
-          button: button.prop("style"),
+      describe("top-level", () => {
+        it("are sorted by score", () => {
+          const {element, graph, pagerankResult} = exampleRender();
+          const rows = element.find("RecursiveTable");
+          expect(rows).toHaveLength(Array.from(graph.nodes()).length);
+          const scores = rows.map((x) => pagerankResult.get(x.prop("node")));
+          expect(scores.every((x) => x != null)).toBe(true);
+          expect(scores).toEqual(sortBy(scores).reverse());
         });
-        expect([0, 1, 2].map((x) => f(getLevel(x)))).toMatchSnapshot();
+        it("has a node description column", () => {
+          const {element, adapters} = exampleRender();
+          expectColumnCorrect(
+            element,
+            "Node",
+            (td) => td.find("span").text(),
+            (address) => nodeDescription(address, adapters)
+          );
+          verifyNoAdapterWarning();
+        });
+        it("has a log score column", () => {
+          const {element, pagerankResult} = exampleRender();
+          expectColumnCorrect(
+            element,
+            "log(score)",
+            (td) => td.text(),
+            (address) => {
+              const probability = pagerankResult.get(address);
+              if (probability == null) {
+                throw new Error(address);
+              }
+              const modifiedLogScore = Math.log(probability) + 10;
+              return modifiedLogScore.toFixed(2);
+            }
+          );
+        });
+      });
+      describe("sub-tables", () => {
+        it("have depth-based styling", () => {
+          const {element} = exampleRender();
+          const getLevel = (level) => {
+            const rt = element.find("RecursiveTable").at(level);
+            const button = rt.find("button").first();
+            return {rt, button};
+          };
+          getLevel(0).button.simulate("click");
+          getLevel(1).button.simulate("click");
+          const f = ({rt, button}) => ({
+            row: rt
+              .find("tr")
+              .first()
+              .prop("style"),
+            button: button.prop("style"),
+          });
+          expect([0, 1, 2].map((x) => f(getLevel(x)))).toMatchSnapshot();
+        });
+        it("display extra information about edges", () => {
+          const {element, nodes, graph, adapters} = exampleRender();
+          const getLevel = (level) => {
+            const rt = element.find("RecursiveTable").at(level);
+            const button = rt.find("button").first();
+            return {rt, button};
+          };
+          getLevel(0).button.simulate("click");
+          const nt = element.find("NeighborsTables");
+          expect(nt).toHaveLength(1);
+          const expectedNeighbors = Array.from(
+            graph.neighbors(nodes.bar1, {
+              direction: Direction.ANY,
+              nodePrefix: NodeAddress.empty,
+              edgePrefix: EdgeAddress.empty,
+            })
+          );
+          expect(nt.prop("neighbors")).toEqual(expectedNeighbors);
+          const subTables = nt.find("RecursiveTable");
+          expect(subTables).toHaveLength(expectedNeighbors.length);
+          const actualEdgeVerbs = subTables.map((x) =>
+            x
+              .find("span")
+              .children()
+              .find("span")
+              .text()
+          );
+          const expectedEdgeVerbs = subTables.map((x) => {
+            const edge = x.prop("edge");
+            const node = x.prop("node");
+            return neighborVerb({edge, node}, adapters);
+          });
+
+          expect(actualEdgeVerbs).toEqual(expectedEdgeVerbs);
+          const actualFullDescriptions = subTables.map((x) =>
+            x
+              .find("span")
+              .first()
+              .text()
+          );
+          const expectedFullDescriptions = subTables.map((x) => {
+            const edge = x.prop("edge");
+            const node = x.prop("node");
+            const nd = nodeDescription(node, adapters);
+            const ev = neighborVerb({node, edge}, adapters);
+            return `${ev} ${nd}`;
+          });
+          expect(actualFullDescriptions).toEqual(expectedFullDescriptions);
+          expect(actualFullDescriptions).toMatchSnapshot();
+        });
       });
       it("button toggles between +/- and adds sub-RecursiveTable", () => {
         const {element} = exampleRender();
@@ -261,15 +327,15 @@ describe("app/credExplorer/PagerankTable", () => {
         const button = rt().find("button");
         expect(button).toEqual(expect.anything());
         expect(button.text()).toEqual("+");
-        expect(rt().find("RecursiveTables")).toHaveLength(0);
+        expect(rt().find("NeighborsTables")).toHaveLength(0);
 
         button.simulate("click");
         expect(button.text()).toEqual("\u2212");
-        expect(rt().find("RecursiveTables")).toHaveLength(1);
+        expect(rt().find("NeighborsTables")).toHaveLength(1);
 
         button.simulate("click");
         expect(button.text()).toEqual("+");
-        expect(rt().find("RecursiveTables")).toHaveLength(0);
+        expect(rt().find("NeighborsTables")).toHaveLength(0);
       });
     });
 
@@ -305,7 +371,7 @@ describe("app/credExplorer/PagerankTable", () => {
         selectFilterByName(select, "\u2003beta");
         const rt = element.find("RecursiveTable");
         expect(rt).toHaveLength(1);
-        expect(rt.prop("address")).toEqual(example().nodes.fooBeta);
+        expect(rt.prop("node")).toEqual(example().nodes.fooBeta);
       });
       it("filter doesn't apply to sub-tables", () => {
         const {select, element} = exampleRender();
@@ -319,7 +385,7 @@ describe("app/credExplorer/PagerankTable", () => {
         const rts = element.find("RecursiveTable");
         expect(rts).toHaveLength(2);
         const subRt = rts.last();
-        expect(subRt.prop("address")).toEqual(example().nodes.fooAlpha);
+        expect(subRt.prop("node")).toEqual(example().nodes.fooAlpha);
       });
     });
   });
