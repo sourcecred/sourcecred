@@ -10,6 +10,8 @@ import {Graph} from "../../core/graph";
 import {pagerank, type PagerankResult} from "../../core/attribution/pagerank";
 import {PagerankTable} from "./PagerankTable";
 import type {PluginAdapter} from "../pluginAdapter";
+import {type EdgeEvaluator} from "../../core/attribution/pagerank";
+import {WeightConfig} from "./WeightConfig";
 
 type Props = {};
 type State = {
@@ -24,6 +26,7 @@ type State = {
     |},
     +pagerankResult: ?PagerankResult,
   |},
+  edgeEvaluator: ?EdgeEvaluator,
 };
 
 const REPO_OWNER_KEY = "repoOwner";
@@ -36,6 +39,7 @@ export default class App extends React.Component<Props, State> {
       repoOwner: "",
       repoName: "",
       data: {graphWithMetadata: null, pagerankResult: null},
+      edgeEvaluator: null,
     };
   }
 
@@ -47,6 +51,7 @@ export default class App extends React.Component<Props, State> {
   }
 
   render() {
+    const {edgeEvaluator} = this.state;
     const {graphWithMetadata, pagerankResult} = this.state.data;
     return (
       <div>
@@ -82,20 +87,14 @@ export default class App extends React.Component<Props, State> {
           <br />
           <button onClick={() => this.loadData()}>Load data</button>
           <button
-            disabled={graphWithMetadata == null}
+            disabled={graphWithMetadata == null || edgeEvaluator == null}
             onClick={() => {
               setTimeout(() => {
-                if (graphWithMetadata == null) {
-                  throw new Error(
-                    "graphWithMetadata: " + String(graphWithMetadata)
-                  );
+                if (graphWithMetadata == null || edgeEvaluator == null) {
+                  throw new Error("Unexpected null value");
                 }
                 const {graph} = graphWithMetadata;
-                const edgeWeight = (_unused_Edge) => ({
-                  toWeight: 1,
-                  froWeight: 1,
-                });
-                const pagerankResult = pagerank(graph, edgeWeight, {
+                const pagerankResult = pagerank(graph, edgeEvaluator, {
                   verbose: true,
                 });
                 const data = {graphWithMetadata, pagerankResult};
@@ -120,6 +119,7 @@ export default class App extends React.Component<Props, State> {
           ) : (
             <p>Graph not loaded.</p>
           )}
+          <WeightConfig onChange={(ee) => this.setState({edgeEvaluator: ee})} />
           <PagerankTable
             graph={graphWithMetadata ? graphWithMetadata.graph : null}
             adapters={graphWithMetadata ? graphWithMetadata.adapters : null}
