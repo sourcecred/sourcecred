@@ -18,6 +18,9 @@ export type PagerankOptions = {|
   +maxIterations?: number,
 |};
 
+export type {EdgeWeight} from "./graphToMarkovChain";
+export type EdgeEvaluator = (Edge) => EdgeWeight;
+
 function defaultOptions(): PagerankOptions {
   return {
     verbose: false,
@@ -29,7 +32,7 @@ function defaultOptions(): PagerankOptions {
 
 export function pagerank(
   graph: Graph,
-  edgeWeight: (Edge) => EdgeWeight,
+  edgeWeight: EdgeEvaluator,
   options?: PagerankOptions
 ): PagerankResult {
   const fullOptions = {
