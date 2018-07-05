@@ -48,7 +48,7 @@ export function nodeDescription(
   }
 }
 
-export class PagerankTable extends React.Component<Props, State> {
+export class PagerankTable extends React.PureComponent<Props, State> {
   constructor() {
     super();
     this.state = {topLevelFilter: NodeAddress.empty};
@@ -152,7 +152,7 @@ type RTProps = {|
   +adapters: $ReadOnlyArray<PluginAdapter>,
 |};
 
-class RecursiveTable extends React.Component<RTProps, RTState> {
+class RecursiveTable extends React.PureComponent<RTProps, RTState> {
   constructor() {
     super();
     this.state = {expanded: false};
@@ -221,7 +221,7 @@ type RecursiveTablesProps = {|
   +adapters: $ReadOnlyArray<PluginAdapter>,
 |};
 
-class RecursiveTables extends React.Component<RecursiveTablesProps> {
+class RecursiveTables extends React.PureComponent<RecursiveTablesProps> {
   render() {
     const {addresses, graph, pagerankResult, depth, adapters} = this.props;
     return addresses
