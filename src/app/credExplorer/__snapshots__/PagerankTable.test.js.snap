@@ -53,7 +53,16 @@ Array [
 ]
 `;
 
-exports[`app/credExplorer/PagerankTable full rendering tables  subtables have depth-based styling 1`] = `
+exports[`app/credExplorer/PagerankTable full rendering tables sub-tables display extra information about edges 1`] = `
+Array [
+  "bars and is barred by bar: NodeAddress[\\"bar\\",\\"a\\",\\"1\\"]",
+  "bars xox node!",
+  "bars xox node!",
+  "is fooed by foo: NodeAddress[\\"foo\\",\\"a\\",\\"1\\"]",
+]
+`;
+
+exports[`app/credExplorer/PagerankTable full rendering tables sub-tables have depth-based styling 1`] = `
 Array [
   Object {
     "button": Object {

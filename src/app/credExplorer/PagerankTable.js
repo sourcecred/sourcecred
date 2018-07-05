@@ -7,8 +7,11 @@ import {
   Graph,
   NodeAddress,
   type NodeAddressT,
+  type Neighbor,
   Direction,
+  type Edge,
   EdgeAddress,
+  type EdgeAddressT,
 } from "../../core/graph";
 import type {PagerankResult} from "../../core/attribution/pagerank";
 import type {PluginAdapter} from "../pluginAdapter";
@@ -45,6 +48,44 @@ export function nodeDescription(
     const result = NodeAddress.toString(address);
     console.error(`Error getting description for ${result}: ${e.message}`);
     return result;
+  }
+}
+
+function edgeVerb(
+  address: EdgeAddressT,
+  direction: "FORWARD" | "BACKWARD",
+  adapters: $ReadOnlyArray<PluginAdapter>
+): string {
+  const adapter = adapters.find((adapter) =>
+    EdgeAddress.hasPrefix(address, adapter.edgePrefix())
+  );
+  if (adapter == null) {
+    const result = EdgeAddress.toString(address);
+    console.warn(`No adapter for ${result}`);
+    return result;
+  }
+
+  try {
+    return adapter.renderer().edgeVerb(address, direction);
+  } catch (e) {
+    const result = EdgeAddress.toString(address);
+    console.error(`Error getting description for ${result}: ${e.message}`);
+    return result;
+  }
+}
+
+export function neighborVerb(
+  {node, edge}: Neighbor,
+  adapters: $ReadOnlyArray<PluginAdapter>
+): string {
+  const forwardVerb = edgeVerb(edge.address, "FORWARD", adapters);
+  const backwardVerb = edgeVerb(edge.address, "BACKWARD", adapters);
+  if (edge.src === edge.dst) {
+    return `${forwardVerb} and ${backwardVerb}`;
+  } else if (edge.dst === node) {
+    return forwardVerb;
+  } else {
+    return backwardVerb;
   }
 }
 
@@ -132,7 +173,7 @@ export class PagerankTable extends React.PureComponent<Props, State> {
           </tr>
         </thead>
         <tbody>
-          <RecursiveTables
+          <NodesTables
             addresses={
               topLevelFilter == null
                 ? Array.from(graph.nodes())
@@ -153,7 +194,9 @@ export class PagerankTable extends React.PureComponent<Props, State> {
 
 type RTState = {expanded: boolean};
 type RTProps = {|
-  +address: NodeAddressT,
+  +node: NodeAddressT,
+  // Present if this RT shows a neighbor (not a top-level node)
+  +edge: ?Edge,
   +graph: Graph,
   +pagerankResult: PagerankResult,
   +depth: number,
@@ -167,13 +210,15 @@ class RecursiveTable extends React.PureComponent<RTProps, RTState> {
   }
 
   render() {
-    const {address, adapters, depth, graph, pagerankResult} = this.props;
+    const {node, edge, adapters, depth, graph, pagerankResult} = this.props;
     const {expanded} = this.state;
-    const probability = pagerankResult.get(address);
+    const probability = pagerankResult.get(node);
     if (probability == null) {
-      throw new Error(`no PageRank value for ${NodeAddress.toString(address)}`);
+      throw new Error(`no PageRank value for ${NodeAddress.toString(node)}`);
     }
     const modifiedLogScore = Math.log(probability) + 10;
+    const edgeVerbString =
+      edge == null ? null : neighborVerb({node, edge}, adapters);
     return [
       <tr
         key="self"
@@ -193,23 +238,35 @@ class RecursiveTable extends React.PureComponent<RTProps, RTState> {
           >
             {expanded ? "\u2212" : "+"}
           </button>
-          <span>{nodeDescription(address, adapters)}</span>
+          <span>
+            {edgeVerbString != null && (
+              <React.Fragment>
+                <span
+                  style={{
+                    display: "inline-block",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    fontSize: "smaller",
+                  }}
+                >
+                  {edgeVerbString}
+                </span>{" "}
+              </React.Fragment>
+            )}
+            {nodeDescription(node, adapters)}
+          </span>
         </td>
         <td style={{textAlign: "right"}}>{modifiedLogScore.toFixed(2)}</td>
       </tr>,
       expanded && (
-        <RecursiveTables
+        <NeighborsTables
           key="children"
-          addresses={Array.from(
-            new Set( // deduplicate same node reached by several edges
-              Array.from(
-                graph.neighbors(address, {
-                  direction: Direction.ANY,
-                  nodePrefix: NodeAddress.empty,
-                  edgePrefix: EdgeAddress.empty,
-                })
-              ).map((neighbor) => neighbor.node)
-            )
+          neighbors={Array.from(
+            graph.neighbors(node, {
+              direction: Direction.ANY,
+              nodePrefix: NodeAddress.empty,
+              edgePrefix: EdgeAddress.empty,
+            })
           )}
           graph={graph}
           pagerankResult={pagerankResult}
@@ -221,7 +278,7 @@ class RecursiveTable extends React.PureComponent<RTProps, RTState> {
   }
 }
 
-type RecursiveTablesProps = {|
+type NodesTablesProps = {|
   +addresses: $ReadOnlyArray<NodeAddressT>,
   +graph: Graph,
   +pagerankResult: PagerankResult,
@@ -229,30 +286,68 @@ type RecursiveTablesProps = {|
   +adapters: $ReadOnlyArray<PluginAdapter>,
 |};
 
-class RecursiveTables extends React.PureComponent<RecursiveTablesProps> {
+class NodesTables extends React.PureComponent<NodesTablesProps> {
   render() {
     const {addresses, graph, pagerankResult, depth, adapters} = this.props;
-    return addresses
-      .slice()
-      .sort((a, b) => {
-        const x = pagerankResult.get(a);
-        const y = pagerankResult.get(b);
-        if (x == null) {
-          throw new Error(`No pagerank result for ${NodeAddress.toString(a)}`);
+    return sortBy(
+      addresses,
+      (x) => {
+        const p = pagerankResult.get(x);
+        if (p == null) {
+          throw new Error(`No pagerank result for ${NodeAddress.toString(x)}`);
         }
-        if (y == null) {
-          throw new Error(`No pagerank result for ${NodeAddress.toString(b)}`);
-        }
-        return y - x;
-      })
+        return -p;
+      },
+      (x) => x
+    )
       .slice(0, MAX_TABLE_ENTRIES)
       .map((address) => (
         <RecursiveTable
           depth={depth}
-          address={address}
+          node={address}
+          edge={null}
           graph={graph}
           pagerankResult={pagerankResult}
           key={address}
+          adapters={adapters}
+        />
+      ));
+  }
+}
+
+type NeighborsTablesProps = {|
+  +neighbors: $ReadOnlyArray<Neighbor>,
+  +graph: Graph,
+  +pagerankResult: PagerankResult,
+  +depth: number,
+  +adapters: $ReadOnlyArray<PluginAdapter>,
+|};
+
+class NeighborsTables extends React.PureComponent<NeighborsTablesProps> {
+  render() {
+    const {neighbors, graph, pagerankResult, depth, adapters} = this.props;
+    return sortBy(
+      neighbors,
+      ({node}) => {
+        const p = pagerankResult.get(node);
+        if (p == null) {
+          throw new Error(
+            `No pagerank result for ${NodeAddress.toString(node)}`
+          );
+        }
+        return -p;
+      },
+      ({edge}) => edge
+    )
+      .slice(0, MAX_TABLE_ENTRIES)
+      .map(({node, edge}) => (
+        <RecursiveTable
+          depth={depth}
+          node={node}
+          edge={edge}
+          graph={graph}
+          pagerankResult={pagerankResult}
+          key={edge.address}
           adapters={adapters}
         />
       ));

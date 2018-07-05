@@ -6,8 +6,9 @@ import type {
 import {type Graph, NodeAddress} from "../../core/graph";
 import {createGraph} from "./createGraph";
 import * as N from "./nodes";
+import * as E from "./edges";
 import {RelationalView} from "./relationalView";
-import {description} from "./render";
+import {description, edgeVerb} from "./render";
 
 export async function createPluginAdapter(
   repoOwner: string,
@@ -43,6 +44,9 @@ class PluginAdapter implements IPluginAdapter {
   nodePrefix() {
     return N._Prefix.base;
   }
+  edgePrefix() {
+    return E._Prefix.base;
+  }
   nodeTypes() {
     return [
       {name: "Repository", prefix: N._Prefix.repo},
@@ -69,5 +73,8 @@ class Renderer implements IRenderer {
       throw new Error(`unknown entity: ${NodeAddress.toString(node)}`);
     }
     return description(entity);
+  }
+  edgeVerb(edgeAddress, direction) {
+    return edgeVerb(E.fromRaw((edgeAddress: any)), direction);
   }
 }
