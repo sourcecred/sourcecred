@@ -1,9 +1,12 @@
 // @flow
 
+import sortBy from "lodash.sortby";
+
 import {EdgeAddress, Graph, NodeAddress} from "../graph";
 import {
   distributionToPagerankResult,
-  graphToOrderedSparseMarkovChain,
+  createContributions,
+  createOrderedSparseMarkovChain,
   normalize,
   normalizeNeighbors,
   permute,
@@ -77,14 +80,96 @@ describe("core/attribution/graphToMarkovChain", () => {
     expect(actual).toEqual(expected);
   });
 
-  describe("graphToOrderedSparseMarkovChain", () => {
+  describe("createContributions", () => {
+    // The tests for `createOrderedSparseMarkovChain` also must invoke
+    // `createContributions`, so we add only light testing separately.
+    it("works on a simple asymmetric chain", () => {
+      const n1 = NodeAddress.fromParts(["n1"]);
+      const n2 = NodeAddress.fromParts(["n2"]);
+      const n3 = NodeAddress.fromParts(["sink"]);
+      const e1 = {src: n1, dst: n2, address: EdgeAddress.fromParts(["e1"])};
+      const e2 = {src: n2, dst: n3, address: EdgeAddress.fromParts(["e2"])};
+      const e3 = {src: n1, dst: n3, address: EdgeAddress.fromParts(["e3"])};
+      const e4 = {src: n3, dst: n3, address: EdgeAddress.fromParts(["e4"])};
+      const g = new Graph()
+        .addNode(n1)
+        .addNode(n2)
+        .addNode(n3)
+        .addEdge(e1)
+        .addEdge(e2)
+        .addEdge(e3)
+        .addEdge(e4);
+      const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
+      const actual = createContributions(g, edgeWeight, 1.0);
+      // Total out-weights (for normalization factors):
+      //   - for `n1`: 2 out, 0 in, 1 synthetic: 12 + 0 + 1 = 13
+      //   - for `n2`: 1 out, 1 in, 1 synthetic: 6 + 3 + 1 = 10
+      //   - for `n3`: 1 out, 3 in, 1 synthetic: 6 + 9 + 1 = 16
+      const expected = new Map()
+        .set(n1, [
+          {contributor: {type: "SYNTHETIC_LOOP"}, weight: 1 / 13},
+          {
+            contributor: {type: "NEIGHBOR", neighbor: {node: n2, edge: e1}},
+            weight: 3 / 10,
+          },
+          {
+            contributor: {type: "NEIGHBOR", neighbor: {node: n3, edge: e3}},
+            weight: 3 / 16,
+          },
+        ])
+        .set(n2, [
+          {contributor: {type: "SYNTHETIC_LOOP"}, weight: 1 / 10},
+          {
+            contributor: {type: "NEIGHBOR", neighbor: {node: n1, edge: e1}},
+            weight: 6 / 13,
+          },
+          {
+            contributor: {type: "NEIGHBOR", neighbor: {node: n3, edge: e2}},
+            weight: 3 / 16,
+          },
+        ])
+        .set(n3, [
+          {contributor: {type: "SYNTHETIC_LOOP"}, weight: 1 / 16},
+          {
+            contributor: {type: "NEIGHBOR", neighbor: {node: n2, edge: e2}},
+            weight: 6 / 10,
+          },
+          {
+            contributor: {type: "NEIGHBOR", neighbor: {node: n1, edge: e3}},
+            weight: 6 / 13,
+          },
+          {
+            contributor: {type: "NEIGHBOR", neighbor: {node: n3, edge: e4}},
+            // this loop, as an out-edge
+            weight: 3 / 16,
+          },
+          {
+            contributor: {type: "NEIGHBOR", neighbor: {node: n3, edge: e4}},
+            // this loop, as an in-edge
+            weight: 6 / 16,
+          },
+        ]);
+      const canonicalize = (map) =>
+        new Map(
+          Array.from(map.entries()).map(([k, v]) => [
+            k,
+            sortBy(v, (x) => JSON.stringify(x)),
+          ])
+        );
+      expect(canonicalize(actual)).toEqual(canonicalize(expected));
+    });
+  });
+
+  describe("createOrderedSparseMarkovChain", () => {
     it("works on a trivial one-node chain with no edge", () => {
       const n = NodeAddress.fromParts(["foo"]);
       const g = new Graph().addNode(n);
       const edgeWeight = (_unused_edge) => {
         throw new Error("Don't even look at me");
       };
-      const osmc = graphToOrderedSparseMarkovChain(g, edgeWeight, 1e-3);
+      const osmc = createOrderedSparseMarkovChain(
+        createContributions(g, edgeWeight, 1e-3)
+      );
       const expected = {
         nodeOrder: [n],
         chain: [
@@ -94,7 +179,7 @@ describe("core/attribution/graphToMarkovChain", () => {
       expect(normalize(osmc)).toEqual(normalize(expected));
     });
 
-    it("works on a simple asymmetric two-node chain", () => {
+    it("works on a simple asymmetric chain", () => {
       const n1 = NodeAddress.fromParts(["n1"]);
       const n2 = NodeAddress.fromParts(["n2"]);
       const n3 = NodeAddress.fromParts(["sink"]);
@@ -111,7 +196,9 @@ describe("core/attribution/graphToMarkovChain", () => {
         .addEdge(e3)
         .addEdge(e4);
       const edgeWeight = () => ({toWeight: 1, froWeight: 0});
-      const osmc = graphToOrderedSparseMarkovChain(g, edgeWeight, 0.0);
+      const osmc = createOrderedSparseMarkovChain(
+        createContributions(g, edgeWeight, 0.0)
+      );
       const expected = {
         nodeOrder: [n1, n2, n3],
         chain: [
@@ -147,7 +234,9 @@ describe("core/attribution/graphToMarkovChain", () => {
         .addEdge(e2)
         .addEdge(e3);
       const edgeWeight = () => ({toWeight: 1, froWeight: 1});
-      const osmc = graphToOrderedSparseMarkovChain(g, edgeWeight, 0.0);
+      const osmc = createOrderedSparseMarkovChain(
+        createContributions(g, edgeWeight, 0.0)
+      );
       const expected = {
         nodeOrder: [n1, n2, n3],
         chain: [
@@ -177,7 +266,9 @@ describe("core/attribution/graphToMarkovChain", () => {
         // arithmetic simple.
         return {toWeight: 4 - epsilon / 2, froWeight: 1 - epsilon / 2};
       }
-      const osmc = graphToOrderedSparseMarkovChain(g, edgeWeight, epsilon);
+      const osmc = createOrderedSparseMarkovChain(
+        createContributions(g, edgeWeight, epsilon)
+      );
       // Edges from `src`:
       //   - to `src` with weight `epsilon`
       //   - to `dst` with weight `4 - epsilon / 2`

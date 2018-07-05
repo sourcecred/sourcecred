@@ -1,12 +1,48 @@
 // @flow
 
-import {type Edge, type Graph, type NodeAddressT, NodeAddress} from "../graph";
+import {
+  type Edge,
+  type Graph,
+  type Neighbor,
+  type NodeAddressT,
+  NodeAddress,
+} from "../graph";
 import type {Distribution, SparseMarkovChain} from "./markovChain";
 
 export type Probability = number;
+export type Contributor =
+  | {|+type: "SYNTHETIC_LOOP"|}
+  | {|+type: "NEIGHBOR", +neighbor: Neighbor|};
+export type Contribution = {|
+  +contributor: Contributor,
+  // This `weight` is a conditional probability: given that you're at
+  // the source of this contribution's contributor, what's the
+  // probability that you travel along this contribution to the target?
+  +weight: Probability,
+|};
+
+export function contributorSource(
+  target: NodeAddressT,
+  contributor: Contributor
+) {
+  switch (contributor.type) {
+    case "SYNTHETIC_LOOP":
+      return target;
+    case "NEIGHBOR":
+      return contributor.neighbor.node;
+    default:
+      throw new Error((contributor.type: empty));
+  }
+}
+
 export type PagerankResult = Map<NodeAddressT, Probability>;
 
-type AddressMapMarkovChain = Map<
+export type NodeToContributions = Map<
+  NodeAddressT,
+  $ReadOnlyArray<Contribution>
+>;
+
+type NodeAddressMarkovChain = Map<
   NodeAddressT,
   /* in-neighbors */ Map<NodeAddressT, Probability>
 >;
@@ -21,63 +57,101 @@ export type EdgeWeight = {|
   +froWeight: number, // weight from dst to src
 |};
 
-function graphToAddressMapMarkovChain(
+export function createContributions(
   graph: Graph,
   edgeWeight: (Edge) => EdgeWeight,
-  selfLoopEdgeWeight: number
-): AddressMapMarkovChain {
-  const inNeighbors: AddressMapMarkovChain = new Map();
+  syntheticLoopWeight: number
+): NodeToContributions {
+  const result = new Map();
   const totalOutWeight: Map<NodeAddressT, number> = new Map();
   for (const node of graph.nodes()) {
-    inNeighbors.set(node, new Map());
+    result.set(node, []);
     totalOutWeight.set(node, 0);
   }
 
-  function moreWeight(src, dst, weight) {
-    const neighbors = inNeighbors.get(dst);
-    if (neighbors == null) {
+  function processContribution(
+    target: NodeAddressT,
+    contribution: Contribution
+  ) {
+    const contributions = result.get(target);
+    if (contributions == null) {
       // Should be impossible based on graph invariants.
-      throw new Error("missing dst: " + NodeAddress.toString(dst));
+      throw new Error("missing target: " + NodeAddress.toString(target));
     }
-    neighbors.set(src, weight + (neighbors.get(src) || 0));
+    (((contributions: $ReadOnlyArray<Contribution>): any): Contribution[]).push(
+      contribution
+    );
 
-    const priorOutWeight = totalOutWeight.get(src);
+    const source = contributorSource(target, contribution.contributor);
+    const priorOutWeight = totalOutWeight.get(source);
     if (priorOutWeight == null) {
       // Should be impossible based on graph invariants.
-      throw new Error("missing src: " + NodeAddress.toString(src));
+      throw new Error("missing source: " + NodeAddress.toString(source));
     }
-    totalOutWeight.set(src, priorOutWeight + weight);
+    totalOutWeight.set(source, priorOutWeight + contribution.weight);
   }
 
   // Add self-loops.
   for (const node of graph.nodes()) {
-    moreWeight(node, node, selfLoopEdgeWeight);
+    processContribution(node, {
+      contributor: {type: "SYNTHETIC_LOOP"},
+      weight: syntheticLoopWeight,
+    });
   }
 
   // Process edges.
   for (const edge of graph.edges()) {
     const {toWeight, froWeight} = edgeWeight(edge);
     const {src, dst} = edge;
-    moreWeight(src, dst, toWeight);
-    moreWeight(dst, src, froWeight);
+    processContribution(dst, {
+      contributor: {type: "NEIGHBOR", neighbor: {node: src, edge}},
+      weight: toWeight,
+    });
+    processContribution(src, {
+      contributor: {type: "NEIGHBOR", neighbor: {node: dst, edge}},
+      weight: froWeight,
+    });
   }
 
   // Normalize in-weights.
-  for (const neighbors of inNeighbors.values()) {
-    for (const [neighbor, weight] of neighbors.entries()) {
-      const normalization = totalOutWeight.get(neighbor);
+  for (const [target, contributions] of result.entries()) {
+    for (const contribution of contributions) {
+      const source = contributorSource(target, contribution.contributor);
+      const normalization = totalOutWeight.get(source);
       if (normalization == null) {
         // Should be impossible.
-        throw new Error("missing node: " + NodeAddress.toString(neighbor));
+        throw new Error("missing node: " + NodeAddress.toString(source));
       }
-      neighbors.set(neighbor, weight / normalization);
+      const newWeight: typeof contribution.weight =
+        contribution.weight / normalization;
+      // (any-cast because property is not writable)
+      (contribution: any).weight = newWeight;
     }
   }
-  return inNeighbors;
+
+  return result;
 }
 
-function addressMapMarkovChainToOrderedSparseMarkovChain(
-  chain: AddressMapMarkovChain
+function createNodeAddressMarkovChain(
+  ntc: NodeToContributions
+): NodeAddressMarkovChain {
+  const result: NodeAddressMarkovChain = new Map();
+  for (const [target, contributions] of ntc.entries()) {
+    const inNeighbors = new Map();
+    result.set(target, inNeighbors);
+    for (const contribution of contributions) {
+      const source = contributorSource(target, contribution.contributor);
+      inNeighbors.set(
+        source,
+        contribution.weight + (inNeighbors.get(source) || 0)
+      );
+    }
+  }
+  return result;
+}
+
+function nodeAddressMarkovChainToOrderedSparseMarkovChain(
+  chain: NodeAddressMarkovChain
 ): OrderedSparseMarkovChain {
   const nodeOrder = Array.from(chain.keys());
   const addressToIndex: Map<NodeAddressT, number> = new Map();
@@ -112,14 +186,11 @@ function addressMapMarkovChainToOrderedSparseMarkovChain(
   };
 }
 
-export function graphToOrderedSparseMarkovChain(
-  graph: Graph,
-  edgeWeight: (Edge) => EdgeWeight,
-  selfLoopEdgeWeight: number
+export function createOrderedSparseMarkovChain(
+  contributions: NodeToContributions
 ): OrderedSparseMarkovChain {
-  return addressMapMarkovChainToOrderedSparseMarkovChain(
-    graphToAddressMapMarkovChain(graph, edgeWeight, selfLoopEdgeWeight)
-  );
+  const chain = createNodeAddressMarkovChain(contributions);
+  return nodeAddressMarkovChainToOrderedSparseMarkovChain(chain);
 }
 
 /**
@@ -147,7 +218,10 @@ export function permute(
     );
     newChain.push({neighbor: newNeighbors, weight});
   }
-  return {nodeOrder: newOrder, chain: newChain};
+  return {
+    nodeOrder: newOrder,
+    chain: newChain,
+  };
 }
 
 /**
