@@ -5,6 +5,8 @@ import {NodeAddress} from "../graph";
 import {advancedGraph} from "../graphTestUtil";
 
 function snapshotPagerankResult(result) {
+  const prTotal = Array.from(result.values()).reduce((a, b) => a + b, 0);
+  expect(prTotal).toBeCloseTo(1.0, 1e-9);
   const partsToProbability = [];
   const sortedKeys = Array.from(result.keys()).sort();
   for (const key of sortedKeys) {

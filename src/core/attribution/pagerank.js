@@ -4,7 +4,8 @@ import {type Edge, Graph} from "../graph";
 import {
   type PagerankResult,
   distributionToPagerankResult,
-  graphToOrderedSparseMarkovChain,
+  createContributions,
+  createOrderedSparseMarkovChain,
   type EdgeWeight,
 } from "./graphToMarkovChain";
 
@@ -39,11 +40,12 @@ export function pagerank(
     ...defaultOptions(),
     ...(options || {}),
   };
-  const osmc = graphToOrderedSparseMarkovChain(
+  const contributions = createContributions(
     graph,
     edgeWeight,
     fullOptions.selfLoopWeight
   );
+  const osmc = createOrderedSparseMarkovChain(contributions);
   const distribution = findStationaryDistribution(osmc.chain, {
     verbose: fullOptions.verbose,
     convergenceThreshold: fullOptions.convergenceThreshold,
