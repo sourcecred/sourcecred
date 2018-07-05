@@ -65,7 +65,13 @@ export class WeightConfig extends React.Component<Props, State> {
   }
   render() {
     return (
-      <div style={{display: "flex", flex: 1}}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+        }}
+      >
         <EdgeConfig
           edgeWeights={this.state.edgeWeights}
           onChange={(ew) => this.setState({edgeWeights: ew}, () => this.fire())}

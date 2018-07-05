@@ -116,7 +116,15 @@ export class PagerankTable extends React.PureComponent<Props, State> {
     }
     const topLevelFilter = this.state.topLevelFilter;
     return (
-      <table style={{borderCollapse: "collapse", marginTop: 10}}>
+      <table
+        style={{
+          borderCollapse: "collapse",
+          marginTop: 10,
+          // If we don't subtract 1px here, then a horizontal scrollbar
+          // appears in Chrome (but not Firefox). I'm not sure why.
+          width: "calc(100% - 1px)",
+        }}
+      >
         <thead>
           <tr>
             <th style={{textAlign: "left"}}>Node</th>

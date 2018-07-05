@@ -54,7 +54,7 @@ export default class App extends React.Component<Props, State> {
     const {edgeEvaluator} = this.state;
     const {graphWithMetadata, pagerankResult} = this.state.data;
     return (
-      <div>
+      <div style={{maxWidth: "66em", margin: "0 auto", padding: "0 10px"}}>
         <header className={css(styles.header)}>
           <h1>Cred Explorer</h1>
         </header>
