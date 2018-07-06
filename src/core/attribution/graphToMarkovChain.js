@@ -1,18 +1,13 @@
 // @flow
 
-import {
-  type Edge,
-  type Graph,
-  type Neighbor,
-  type NodeAddressT,
-  NodeAddress,
-} from "../graph";
+import {type Edge, type Graph, type NodeAddressT, NodeAddress} from "../graph";
 import type {Distribution, SparseMarkovChain} from "./markovChain";
 
 export type Probability = number;
 export type Contributor =
   | {|+type: "SYNTHETIC_LOOP"|}
-  | {|+type: "NEIGHBOR", +neighbor: Neighbor|};
+  | {|+type: "IN_EDGE", +edge: Edge|}
+  | {|+type: "OUT_EDGE", +edge: Edge|};
 export type Contribution = {|
   +contributor: Contributor,
   // This `weight` is a conditional probability: given that you're at
@@ -28,8 +23,10 @@ export function contributorSource(
   switch (contributor.type) {
     case "SYNTHETIC_LOOP":
       return target;
-    case "NEIGHBOR":
-      return contributor.neighbor.node;
+    case "IN_EDGE":
+      return contributor.edge.src;
+    case "OUT_EDGE":
+      return contributor.edge.dst;
     default:
       throw new Error((contributor.type: empty));
   }
@@ -104,11 +101,11 @@ export function createContributions(
     const {toWeight, froWeight} = edgeWeight(edge);
     const {src, dst} = edge;
     processContribution(dst, {
-      contributor: {type: "NEIGHBOR", neighbor: {node: src, edge}},
+      contributor: {type: "IN_EDGE", edge},
       weight: toWeight,
     });
     processContribution(src, {
-      contributor: {type: "NEIGHBOR", neighbor: {node: dst, edge}},
+      contributor: {type: "OUT_EDGE", edge},
       weight: froWeight,
     });
   }
