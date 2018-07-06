@@ -12,6 +12,7 @@ import {
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
 import LocalStore from "./LocalStore";
+import * as MapUtil from "../../util/map";
 
 // Hacks...
 import * as GithubNode from "../../plugins/github/nodes";
@@ -24,40 +25,36 @@ type Props = {
 };
 
 // The key should be an EdgeAddressT, but a Flow bug prevents this.
-type EdgeWeights = {[string]: UserEdgeWeight};
+type EdgeWeights = Map<EdgeAddressT, UserEdgeWeight>;
 type UserEdgeWeight = {|+logWeight: number, +directionality: number|};
 const EDGE_WEIGHTS_KEY = "edgeWeights";
-const defaultEdgeWeights = (): EdgeWeights => ({
-  [(GithubEdge._Prefix.authors: string)]: {logWeight: 0, directionality: 0.5},
-  [(GithubEdge._Prefix.mergedAs: string)]: {logWeight: 0, directionality: 0.5},
-  [(GithubEdge._Prefix.references: string)]: {
-    logWeight: 0,
-    directionality: 0.5,
-  },
-  [(GithubEdge._Prefix.hasParent: string)]: {logWeight: 0, directionality: 0.5},
-  [(GitEdge._Prefix.hasTree: string)]: {logWeight: 0, directionality: 0.5},
-  [(GitEdge._Prefix.hasParent: string)]: {logWeight: 0, directionality: 0.5},
-  [(GitEdge._Prefix.includes: string)]: {logWeight: 0, directionality: 0.5},
-  [(GitEdge._Prefix.becomes: string)]: {logWeight: 0, directionality: 0.5},
-  [(GitEdge._Prefix.hasContents: string)]: {logWeight: 0, directionality: 0.5},
-});
+const defaultEdgeWeights = (): EdgeWeights =>
+  new Map()
+    .set(GithubEdge._Prefix.authors, {logWeight: 0, directionality: 0.5})
+    .set(GithubEdge._Prefix.mergedAs, {logWeight: 0, directionality: 0.5})
+    .set(GithubEdge._Prefix.references, {logWeight: 0, directionality: 0.5})
+    .set(GithubEdge._Prefix.hasParent, {logWeight: 0, directionality: 0.5})
+    .set(GitEdge._Prefix.hasTree, {logWeight: 0, directionality: 0.5})
+    .set(GitEdge._Prefix.hasParent, {logWeight: 0, directionality: 0.5})
+    .set(GitEdge._Prefix.includes, {logWeight: 0, directionality: 0.5})
+    .set(GitEdge._Prefix.becomes, {logWeight: 0, directionality: 0.5})
+    .set(GitEdge._Prefix.hasContents, {logWeight: 0, directionality: 0.5});
 
-// The key should be a NodeAddressT, but a Flow bug prevents this.
-type NodeWeights = {[string]: UserNodeWeight};
+type NodeWeights = Map<NodeAddressT, UserNodeWeight>;
 type UserNodeWeight = number /* in log space */;
 const NODE_WEIGHTS_KEY = "nodeWeights";
-const defaultNodeWeights = (): NodeWeights => ({
-  [(GithubNode._Prefix.repo: string)]: 0,
-  [(GithubNode._Prefix.issue: string)]: 0,
-  [(GithubNode._Prefix.pull: string)]: 0,
-  [(GithubNode._Prefix.review: string)]: 0,
-  [(GithubNode._Prefix.comment: string)]: 0,
-  [(GithubNode._Prefix.userlike: string)]: 0,
-  [(GitNode._Prefix.blob: string)]: 0,
-  [(GitNode._Prefix.commit: string)]: 0,
-  [(GitNode._Prefix.tree: string)]: 0,
-  [(GitNode._Prefix.treeEntry: string)]: 0,
-});
+const defaultNodeWeights = (): NodeWeights =>
+  new Map()
+    .set(GithubNode._Prefix.repo, 0)
+    .set(GithubNode._Prefix.issue, 0)
+    .set(GithubNode._Prefix.pull, 0)
+    .set(GithubNode._Prefix.review, 0)
+    .set(GithubNode._Prefix.comment, 0)
+    .set(GithubNode._Prefix.userlike, 0)
+    .set(GitNode._Prefix.blob, 0)
+    .set(GitNode._Prefix.commit, 0)
+    .set(GitNode._Prefix.tree, 0)
+    .set(GitNode._Prefix.treeEntry, 0);
 
 type State = {
   edgeWeights: EdgeWeights,
@@ -75,10 +72,24 @@ export class WeightConfig extends React.Component<Props, State> {
 
   componentDidMount() {
     this.setState(
-      (state) => ({
-        edgeWeights: LocalStore.get(EDGE_WEIGHTS_KEY, state.edgeWeights),
-        nodeWeights: LocalStore.get(NODE_WEIGHTS_KEY, state.nodeWeights),
-      }),
+      (state) => {
+        function rehydrate<K: string, V>(
+          x: ?{[K]: V},
+          default_: Map<K, V>
+        ): Map<K, V> {
+          return x ? MapUtil.fromObject(x) : default_;
+        }
+        return {
+          edgeWeights: rehydrate(
+            LocalStore.get(EDGE_WEIGHTS_KEY),
+            state.edgeWeights
+          ),
+          nodeWeights: rehydrate(
+            LocalStore.get(NODE_WEIGHTS_KEY),
+            state.nodeWeights
+          ),
+        };
+      },
       () => this.fire()
     );
   }
@@ -106,17 +117,21 @@ export class WeightConfig extends React.Component<Props, State> {
 
   fire() {
     const {edgeWeights, nodeWeights} = this.state;
-    LocalStore.set(EDGE_WEIGHTS_KEY, edgeWeights);
-    LocalStore.set(NODE_WEIGHTS_KEY, nodeWeights);
-    const edgePrefixes = Object.keys(edgeWeights).map((key) => {
-      const {logWeight, directionality} = edgeWeights[key];
-      const prefix: EdgeAddressT = (key: any);
-      return {prefix, weight: 2 ** logWeight, directionality};
-    });
-    const nodePrefixes = Object.keys(nodeWeights).map((key) => ({
-      prefix: ((key: any): NodeAddressT),
-      weight: 2 ** nodeWeights[key],
-    }));
+    LocalStore.set(EDGE_WEIGHTS_KEY, MapUtil.toObject(edgeWeights));
+    LocalStore.set(NODE_WEIGHTS_KEY, MapUtil.toObject(nodeWeights));
+    const edgePrefixes = Array.from(edgeWeights.entries()).map(
+      ([prefix, {logWeight, directionality}]) => ({
+        prefix,
+        weight: 2 ** logWeight,
+        directionality,
+      })
+    );
+    const nodePrefixes = Array.from(nodeWeights.entries()).map(
+      ([prefix, logWeight]) => ({
+        prefix,
+        weight: 2 ** logWeight,
+      })
+    );
     const edgeEvaluator = byNodeType(byEdgeType(edgePrefixes), nodePrefixes);
     this.props.onChange(edgeEvaluator);
   }
@@ -127,57 +142,51 @@ class EdgeConfig extends React.Component<{
   onChange: (EdgeWeights) => void,
 }> {
   weightControls() {
-    return Object.keys(this.props.edgeWeights).map((key) => {
-      const {logWeight} = this.props.edgeWeights[key];
-      return (
-        <label style={{display: "block"}} key={key}>
-          <input
-            type="range"
-            min={-10}
-            max={10}
-            step={0.1}
-            value={logWeight}
-            onChange={(e) => {
-              const value: number = e.target.valueAsNumber;
-              const edgeWeights = {
-                ...this.props.edgeWeights,
-                [key]: {...this.props.edgeWeights[key], logWeight: value},
-              };
-              this.props.onChange(edgeWeights);
-            }}
-          />{" "}
-          {formatNumber(logWeight)}{" "}
-          {JSON.stringify(EdgeAddress.toParts((key: any)))}
-        </label>
-      );
-    });
+    return Array.from(this.props.edgeWeights.entries()).map(([key, datum]) => (
+      <label style={{display: "block"}} key={key}>
+        <input
+          type="range"
+          min={-10}
+          max={10}
+          step={0.1}
+          value={datum.logWeight}
+          onChange={(e) => {
+            const value: number = e.target.valueAsNumber;
+            const edgeWeights = MapUtil.copy(this.props.edgeWeights).set(key, {
+              ...datum,
+              logWeight: value,
+            });
+            this.props.onChange(edgeWeights);
+          }}
+        />{" "}
+        {formatNumber(datum.logWeight)}{" "}
+        {JSON.stringify(EdgeAddress.toParts(key))}
+      </label>
+    ));
   }
 
   directionControls() {
-    return Object.keys(this.props.edgeWeights).map((key) => {
-      const {directionality} = this.props.edgeWeights[key];
-      return (
-        <label style={{display: "block"}} key={key}>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={directionality}
-            onChange={(e) => {
-              const value: number = e.target.valueAsNumber;
-              const edgeWeights = {
-                ...this.props.edgeWeights,
-                [key]: {...this.props.edgeWeights[key], directionality: value},
-              };
-              this.props.onChange(edgeWeights);
-            }}
-          />{" "}
-          {directionality.toFixed(2)}{" "}
-          {JSON.stringify(EdgeAddress.toParts((key: any)))}
-        </label>
-      );
-    });
+    return Array.from(this.props.edgeWeights.entries()).map(([key, datum]) => (
+      <label style={{display: "block"}} key={key}>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={datum.directionality}
+          onChange={(e) => {
+            const value: number = e.target.valueAsNumber;
+            const edgeWeights = MapUtil.copy(this.props.edgeWeights).set(key, {
+              ...datum,
+              directionality: value,
+            });
+            this.props.onChange(edgeWeights);
+          }}
+        />{" "}
+        {datum.directionality.toFixed(2)}{" "}
+        {JSON.stringify(EdgeAddress.toParts(key))}
+      </label>
+    ));
   }
   render() {
     return (
@@ -196,9 +205,8 @@ class NodeConfig extends React.Component<{
   onChange: (NodeWeights) => void,
 }> {
   render() {
-    const controls = Object.keys(this.props.nodeWeights).map((key) => {
-      const currentValue = this.props.nodeWeights[key];
-      return (
+    const controls = Array.from(this.props.nodeWeights.entries()).map(
+      ([key, currentValue]) => (
         <label style={{display: "block"}} key={key}>
           <input
             type="range"
@@ -208,15 +216,18 @@ class NodeConfig extends React.Component<{
             value={currentValue}
             onChange={(e) => {
               const value: number = e.target.valueAsNumber;
-              const nodeWeights = {...this.props.nodeWeights, [key]: value};
+              const nodeWeights = MapUtil.copy(this.props.nodeWeights).set(
+                key,
+                value
+              );
               this.props.onChange(nodeWeights);
             }}
           />{" "}
           {formatNumber(currentValue)}{" "}
-          {JSON.stringify(NodeAddress.toParts((key: any)))}
+          {JSON.stringify(NodeAddress.toParts(key))}
         </label>
-      );
-    });
+      )
+    );
     return (
       <div>
         <h2>Node weights (in log space)</h2>
