@@ -108,44 +108,20 @@ describe("core/attribution/graphToMarkovChain", () => {
       const expected = new Map()
         .set(n1, [
           {contributor: {type: "SYNTHETIC_LOOP"}, weight: 1 / 13},
-          {
-            contributor: {type: "OUT_EDGE", edge: e1},
-            weight: 3 / 10,
-          },
-          {
-            contributor: {type: "OUT_EDGE", edge: e3},
-            weight: 3 / 16,
-          },
+          {contributor: {type: "OUT_EDGE", edge: e1}, weight: 3 / 10},
+          {contributor: {type: "OUT_EDGE", edge: e3}, weight: 3 / 16},
         ])
         .set(n2, [
           {contributor: {type: "SYNTHETIC_LOOP"}, weight: 1 / 10},
-          {
-            contributor: {type: "IN_EDGE", edge: e1},
-            weight: 6 / 13,
-          },
-          {
-            contributor: {type: "OUT_EDGE", edge: e2},
-            weight: 3 / 16,
-          },
+          {contributor: {type: "IN_EDGE", edge: e1}, weight: 6 / 13},
+          {contributor: {type: "OUT_EDGE", edge: e2}, weight: 3 / 16},
         ])
         .set(n3, [
           {contributor: {type: "SYNTHETIC_LOOP"}, weight: 1 / 16},
-          {
-            contributor: {type: "IN_EDGE", edge: e2},
-            weight: 6 / 10,
-          },
-          {
-            contributor: {type: "IN_EDGE", edge: e3},
-            weight: 6 / 13,
-          },
-          {
-            contributor: {type: "IN_EDGE", edge: e4},
-            weight: 6 / 16,
-          },
-          {
-            contributor: {type: "OUT_EDGE", edge: e4},
-            weight: 3 / 16,
-          },
+          {contributor: {type: "IN_EDGE", edge: e2}, weight: 6 / 10},
+          {contributor: {type: "IN_EDGE", edge: e3}, weight: 6 / 13},
+          {contributor: {type: "IN_EDGE", edge: e4}, weight: 6 / 16},
+          {contributor: {type: "OUT_EDGE", edge: e4}, weight: 3 / 16},
         ]);
       const canonicalize = (map) =>
         new Map(
