@@ -2,6 +2,7 @@
 
 import {type Edge, type Graph, type NodeAddressT, NodeAddress} from "../graph";
 import type {Distribution, SparseMarkovChain} from "./markovChain";
+import * as MapUtil from "../../util/map";
 
 export type Probability = number;
 export type Contributor =
@@ -132,10 +133,8 @@ export function createContributions(
 function createNodeAddressMarkovChain(
   ntc: NodeToContributions
 ): NodeAddressMarkovChain {
-  const result: NodeAddressMarkovChain = new Map();
-  for (const [target, contributions] of ntc.entries()) {
+  return MapUtil.mapValues(ntc, (target, contributions) => {
     const inNeighbors = new Map();
-    result.set(target, inNeighbors);
     for (const contribution of contributions) {
       const source = contributorSource(target, contribution.contributor);
       inNeighbors.set(
@@ -143,8 +142,8 @@ function createNodeAddressMarkovChain(
         contribution.weight + (inNeighbors.get(source) || 0)
       );
     }
-  }
-  return result;
+    return inNeighbors;
+  });
 }
 
 function nodeAddressMarkovChainToOrderedSparseMarkovChain(

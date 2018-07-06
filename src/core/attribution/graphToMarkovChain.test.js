@@ -11,6 +11,7 @@ import {
   normalizeNeighbors,
   permute,
 } from "./graphToMarkovChain";
+import * as MapUtil from "../../util/map";
 
 import {advancedGraph} from "../graphTestUtil";
 
@@ -124,12 +125,7 @@ describe("core/attribution/graphToMarkovChain", () => {
           {contributor: {type: "OUT_EDGE", edge: e4}, weight: 3 / 16},
         ]);
       const canonicalize = (map) =>
-        new Map(
-          Array.from(map.entries()).map(([k, v]) => [
-            k,
-            sortBy(v, (x) => JSON.stringify(x)),
-          ])
-        );
+        MapUtil.mapValues(map, (_, v) => sortBy(v, (x) => JSON.stringify(x)));
       expect(canonicalize(actual)).toEqual(canonicalize(expected));
     });
   });

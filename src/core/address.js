@@ -2,6 +2,8 @@
 
 import stringify from "json-stable-stringify";
 
+import * as MapUtil from "../util/map";
+
 export interface AddressModule<Address> {
   /**
    * Assert at runtime that the provided address is actually a valid
@@ -106,20 +108,22 @@ export function makeAddressModule(options: Options): AddressModule<string> {
   }
 
   const nonceWithSeparator = nonce + separator;
-  const otherNoncesWithSeparators = new Map();
-  for (const [otherNonce, otherName] of otherNonces.entries()) {
-    if (otherNonce === nonce) {
-      throw new Error(
-        `primary nonce listed as otherNonce: ${stringify(nonce)}`
-      );
+  const otherNoncesWithSeparators = MapUtil.mapKeys(
+    otherNonces,
+    (otherNonce) => {
+      if (otherNonce === nonce) {
+        throw new Error(
+          `primary nonce listed as otherNonce: ${stringify(nonce)}`
+        );
+      }
+      if (otherNonce.indexOf(separator) !== -1) {
+        throw new Error(
+          `invalid otherNonce (contains NUL): ${stringify(otherNonce)}`
+        );
+      }
+      return otherNonce + separator;
     }
-    if (otherNonce.indexOf(separator) !== -1) {
-      throw new Error(
-        `invalid otherNonce (contains NUL): ${stringify(otherNonce)}`
-      );
-    }
-    otherNoncesWithSeparators.set(otherNonce + separator, otherName);
-  }
+  );
 
   function assertValid(address: Address, what?: string): void {
     // TODO(perf): If this function becomes a bottleneck, consider
