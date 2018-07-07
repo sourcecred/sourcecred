@@ -126,11 +126,10 @@ class EdgeConfig extends React.Component<{
   edgeWeights: EdgeWeights,
   onChange: (EdgeWeights) => void,
 }> {
-  render() {
-    const controls = [];
-    for (const key of Object.keys(this.props.edgeWeights)) {
+  weightControls() {
+    return Object.keys(this.props.edgeWeights).map((key) => {
       const {logWeight} = this.props.edgeWeights[key];
-      controls.push(
+      return (
         <label style={{display: "block"}} key={key}>
           <input
             type="range"
@@ -151,11 +150,42 @@ class EdgeConfig extends React.Component<{
           {JSON.stringify(EdgeAddress.toParts((key: any)))}
         </label>
       );
-    }
+    });
+  }
+
+  directionControls() {
+    return Object.keys(this.props.edgeWeights).map((key) => {
+      const {directionality} = this.props.edgeWeights[key];
+      return (
+        <label style={{display: "block"}} key={key}>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={directionality}
+            onChange={(e) => {
+              const value: number = e.target.valueAsNumber;
+              const edgeWeights = {
+                ...this.props.edgeWeights,
+                [key]: {...this.props.edgeWeights[key], directionality: value},
+              };
+              this.props.onChange(edgeWeights);
+            }}
+          />{" "}
+          {directionality.toFixed(2)}{" "}
+          {JSON.stringify(EdgeAddress.toParts((key: any)))}
+        </label>
+      );
+    });
+  }
+  render() {
     return (
       <div>
         <h2>Edge weights (in log space)</h2>
-        {controls}
+        {this.weightControls()}
+        <h2>Edge directionality</h2>
+        {this.directionControls()}
       </div>
     );
   }
@@ -166,10 +196,9 @@ class NodeConfig extends React.Component<{
   onChange: (NodeWeights) => void,
 }> {
   render() {
-    const controls = [];
-    for (const key of Object.keys(this.props.nodeWeights)) {
+    const controls = Object.keys(this.props.nodeWeights).map((key) => {
       const currentValue = this.props.nodeWeights[key];
-      controls.push(
+      return (
         <label style={{display: "block"}} key={key}>
           <input
             type="range"
@@ -187,7 +216,7 @@ class NodeConfig extends React.Component<{
           {JSON.stringify(NodeAddress.toParts((key: any)))}
         </label>
       );
-    }
+    });
     return (
       <div>
         <h2>Node weights (in log space)</h2>
