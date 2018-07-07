@@ -614,6 +614,25 @@ export function edgeToString(edge: Edge): string {
   return `{address: ${address}, src: ${src}, dst: ${dst}}`;
 }
 
+/**
+ * Convert an edge to an object whose fields are human-readable strings.
+ * This is useful for storing edges in human-readable formats that
+ * should not include NUL characters, such as Jest snapshots.
+ */
+export function edgeToStrings(
+  edge: Edge
+): {|
+  +address: string,
+  +src: string,
+  +dst: string,
+|} {
+  return {
+    address: EdgeAddress.toString(edge.address),
+    src: NodeAddress.toString(edge.src),
+    dst: NodeAddress.toString(edge.dst),
+  };
+}
+
 export function edgeToParts(
   edge: Edge
 ): {|+addressParts: string[], +srcParts: string[], +dstParts: string[]|} {
