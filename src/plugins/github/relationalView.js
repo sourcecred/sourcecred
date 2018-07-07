@@ -15,6 +15,7 @@ import type {
 } from "./nodes";
 import * as Q from "./graphql";
 import * as GitNode from "../git/nodes";
+import * as MapUtil from "../../util/map";
 
 import {
   reviewUrlToId,
@@ -191,14 +192,14 @@ export class RelationalView {
 
   toJSON(): RelationalViewJSON {
     const rawJSON = {
-      repos: addressMapToObject(this._repos),
-      issues: addressMapToObject(this._issues),
-      pulls: addressMapToObject(this._pulls),
-      reviews: addressMapToObject(this._reviews),
-      comments: addressMapToObject(this._comments),
-      userlikes: addressMapToObject(this._userlikes),
-      references: addressMapToObject(this._mapReferences),
-      referencedBy: addressMapToObject(this._mapReferencedBy),
+      repos: MapUtil.toObject(this._repos),
+      issues: MapUtil.toObject(this._issues),
+      pulls: MapUtil.toObject(this._pulls),
+      reviews: MapUtil.toObject(this._reviews),
+      comments: MapUtil.toObject(this._comments),
+      userlikes: MapUtil.toObject(this._userlikes),
+      references: MapUtil.toObject(this._mapReferences),
+      referencedBy: MapUtil.toObject(this._mapReferencedBy),
     };
     return toCompat(COMPAT_INFO, rawJSON);
   }
@@ -206,14 +207,14 @@ export class RelationalView {
   static fromJSON(compatJson: RelationalViewJSON): RelationalView {
     const json = fromCompat(COMPAT_INFO, compatJson);
     const rv = new RelationalView();
-    rv._repos = objectToAddressMap(json.repos);
-    rv._issues = objectToAddressMap(json.issues);
-    rv._pulls = objectToAddressMap(json.pulls);
-    rv._reviews = objectToAddressMap(json.reviews);
-    rv._comments = objectToAddressMap(json.comments);
-    rv._userlikes = objectToAddressMap(json.userlikes);
-    rv._mapReferences = objectToAddressMap(json.references);
-    rv._mapReferencedBy = objectToAddressMap(json.referencedBy);
+    rv._repos = MapUtil.fromObject(json.repos);
+    rv._issues = MapUtil.fromObject(json.issues);
+    rv._pulls = MapUtil.fromObject(json.pulls);
+    rv._reviews = MapUtil.fromObject(json.reviews);
+    rv._comments = MapUtil.fromObject(json.comments);
+    rv._userlikes = MapUtil.fromObject(json.userlikes);
+    rv._mapReferences = MapUtil.fromObject(json.references);
+    rv._mapReferencedBy = MapUtil.fromObject(json.referencedBy);
     return rv;
   }
 
@@ -837,27 +838,6 @@ export type TextContentEntity = Issue | Pull | Review | Comment;
 export type ParentEntity = Repo | Issue | Pull | Review;
 export type ChildEntity = Issue | Pull | Review | Comment;
 export type ReferentEntity = Repo | Issue | Pull | Review | Comment | Userlike;
-
-function addressMapToObject<T>(
-  x: Map<N.RawAddress, T>
-): AddressEntryMapJSON<T> {
-  const result: {[N.RawAddress]: T} = {};
-  for (const [address, entry] of x.entries()) {
-    result[address] = entry;
-  }
-  return result;
-}
-
-function objectToAddressMap<T>(
-  x: AddressEntryMapJSON<T>
-): Map<N.RawAddress, T> {
-  const result = new Map();
-  for (const key of Object.keys(x)) {
-    const address: N.RawAddress = (key: any);
-    result.set(address, x[address]);
-  }
-  return result;
-}
 
 export opaque type AddressEntryMapJSON<T> = {[N.RawAddress]: T};
 export opaque type RelationalViewJSON = Compatible<{|
