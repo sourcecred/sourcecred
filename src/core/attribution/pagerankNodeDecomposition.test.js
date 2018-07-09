@@ -2,7 +2,7 @@
 
 import {EdgeAddress, Graph, NodeAddress, edgeToStrings} from "../graph";
 import {
-  distributionToPagerankResult,
+  distributionToNodeDistribution,
   createContributions,
   createOrderedSparseMarkovChain,
 } from "./graphToMarkovChain";
@@ -134,7 +134,7 @@ describe("core/attribution/contributions", () => {
         convergenceThreshold: 1e-6,
         maxIterations: 255,
       });
-      const pr = distributionToPagerankResult(osmc.nodeOrder, pi);
+      const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
       const result = decompose(pr, contributions);
       expect(formatDecomposition(result)).toMatchSnapshot();
       validateDecomposition(result);
@@ -150,7 +150,7 @@ describe("core/attribution/contributions", () => {
         convergenceThreshold: 1e-6,
         maxIterations: 255,
       });
-      const pr = distributionToPagerankResult(osmc.nodeOrder, pi);
+      const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
       const result = decompose(pr, contributions);
       validateDecomposition(result);
     });

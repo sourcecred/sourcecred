@@ -33,7 +33,7 @@ export function contributorSource(
   }
 }
 
-export type PagerankResult = Map<NodeAddressT, Probability>;
+export type NodeDistribution = Map<NodeAddressT, Probability>;
 
 export type NodeToContributions = Map<
   NodeAddressT,
@@ -251,10 +251,10 @@ export function normalize(
   return normalizeNeighbors(permute(old, old.nodeOrder.slice().sort()));
 }
 
-export function distributionToPagerankResult(
+export function distributionToNodeDistribution(
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
   pi: Distribution
-): PagerankResult {
+): NodeDistribution {
   const result = new Map();
   nodeOrder.forEach((node, i) => {
     const probability = pi[i];

@@ -8,7 +8,7 @@ import {
   type NodeToContributions,
   contributorSource,
 } from "./graphToMarkovChain";
-import type {PagerankResult} from "./pagerank";
+import type {NodeDistribution} from "./pagerank";
 import * as MapUtil from "../../util/map";
 
 export type ScoredContribution = {|
@@ -29,7 +29,7 @@ export type PagerankNodeDecomposition = Map<
 >;
 
 export function decompose(
-  pr: PagerankResult,
+  pr: NodeDistribution,
   contributions: NodeToContributions
 ): PagerankNodeDecomposition {
   return MapUtil.mapValues(contributions, (target, contributions) => {

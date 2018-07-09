@@ -13,13 +13,13 @@ import {
   EdgeAddress,
   type EdgeAddressT,
 } from "../../core/graph";
-import type {PagerankResult} from "../../core/attribution/pagerank";
+import type {NodeDistribution} from "../../core/attribution/pagerank";
 import type {PluginAdapter} from "../pluginAdapter";
 
 const MAX_TABLE_ENTRIES = 100;
 
 type Props = {
-  pagerankResult: ?PagerankResult,
+  pagerankResult: ?NodeDistribution,
   graph: ?Graph,
   adapters: ?$ReadOnlyArray<PluginAdapter>,
 };
@@ -198,7 +198,7 @@ type RTProps = {|
   // Present if this RT shows a neighbor (not a top-level node)
   +edge: ?Edge,
   +graph: Graph,
-  +pagerankResult: PagerankResult,
+  +pagerankResult: NodeDistribution,
   +depth: number,
   +adapters: $ReadOnlyArray<PluginAdapter>,
 |};
@@ -281,7 +281,7 @@ class RecursiveTable extends React.PureComponent<RTProps, RTState> {
 type NodesTablesProps = {|
   +addresses: $ReadOnlyArray<NodeAddressT>,
   +graph: Graph,
-  +pagerankResult: PagerankResult,
+  +pagerankResult: NodeDistribution,
   +depth: number,
   +adapters: $ReadOnlyArray<PluginAdapter>,
 |};
@@ -318,7 +318,7 @@ class NodesTables extends React.PureComponent<NodesTablesProps> {
 type NeighborsTablesProps = {|
   +neighbors: $ReadOnlyArray<Neighbor>,
   +graph: Graph,
-  +pagerankResult: PagerankResult,
+  +pagerankResult: NodeDistribution,
   +depth: number,
   +adapters: $ReadOnlyArray<PluginAdapter>,
 |};

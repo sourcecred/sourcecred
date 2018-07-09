@@ -4,7 +4,7 @@ import sortBy from "lodash.sortby";
 
 import {EdgeAddress, Graph, NodeAddress} from "../graph";
 import {
-  distributionToPagerankResult,
+  distributionToNodeDistribution,
   createContributions,
   createOrderedSparseMarkovChain,
   normalize,
@@ -278,12 +278,12 @@ describe("core/attribution/graphToMarkovChain", () => {
     });
   });
 
-  describe("distributionToPagerankResult", () => {
+  describe("distributionToNodeDistribution", () => {
     it("works", () => {
       const pi = new Float64Array([0.25, 0.75]);
       const n1 = NodeAddress.fromParts(["foo"]);
       const n2 = NodeAddress.fromParts(["bar"]);
-      expect(distributionToPagerankResult([n1, n2], pi)).toEqual(
+      expect(distributionToNodeDistribution([n1, n2], pi)).toEqual(
         new Map().set(n1, 0.25).set(n2, 0.75)
       );
     });

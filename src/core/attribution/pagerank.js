@@ -2,8 +2,8 @@
 
 import {type Edge, Graph} from "../graph";
 import {
-  type PagerankResult,
-  distributionToPagerankResult,
+  type NodeDistribution,
+  distributionToNodeDistribution,
   createContributions,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
@@ -11,7 +11,7 @@ import {
 
 import {findStationaryDistribution} from "./markovChain";
 
-export type {PagerankResult} from "./graphToMarkovChain";
+export type {NodeDistribution} from "./graphToMarkovChain";
 export type PagerankOptions = {|
   +selfLoopWeight?: number,
   +verbose?: boolean,
@@ -35,7 +35,7 @@ export function pagerank(
   graph: Graph,
   edgeWeight: EdgeEvaluator,
   options?: PagerankOptions
-): PagerankResult {
+): NodeDistribution {
   const fullOptions = {
     ...defaultOptions(),
     ...(options || {}),
@@ -51,5 +51,5 @@ export function pagerank(
     convergenceThreshold: fullOptions.convergenceThreshold,
     maxIterations: fullOptions.maxIterations,
   });
-  return distributionToPagerankResult(osmc.nodeOrder, distribution);
+  return distributionToNodeDistribution(osmc.nodeOrder, distribution);
 }
