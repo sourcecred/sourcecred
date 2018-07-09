@@ -13,6 +13,7 @@ import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
 import LocalStore from "./LocalStore";
 import * as MapUtil from "../../util/map";
+import * as NullUtil from "../../util/null";
 
 // Hacks...
 import * as GithubNode from "../../plugins/github/nodes";
@@ -73,19 +74,13 @@ export class WeightConfig extends React.Component<Props, State> {
   componentDidMount() {
     this.setState(
       (state) => {
-        function rehydrate<K: string, V>(
-          x: ?{[K]: V},
-          default_: Map<K, V>
-        ): Map<K, V> {
-          return x ? MapUtil.fromObject(x) : default_;
-        }
         return {
-          edgeWeights: rehydrate(
-            LocalStore.get(EDGE_WEIGHTS_KEY),
+          edgeWeights: NullUtil.orElse(
+            NullUtil.map(LocalStore.get(EDGE_WEIGHTS_KEY), MapUtil.fromObject),
             state.edgeWeights
           ),
-          nodeWeights: rehydrate(
-            LocalStore.get(NODE_WEIGHTS_KEY),
+          nodeWeights: NullUtil.orElse(
+            NullUtil.map(LocalStore.get(NODE_WEIGHTS_KEY), MapUtil.fromObject),
             state.nodeWeights
           ),
         };
