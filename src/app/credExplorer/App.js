@@ -7,11 +7,12 @@ import LocalStore from "./LocalStore";
 import {createPluginAdapter as createGithubAdapter} from "../../plugins/github/pluginAdapter";
 import {createPluginAdapter as createGitAdapter} from "../../plugins/git/pluginAdapter";
 import {Graph} from "../../core/graph";
-import {pagerank, type NodeDistribution} from "../../core/attribution/pagerank";
+import {pagerank} from "../../core/attribution/pagerank";
 import {PagerankTable} from "./PagerankTable";
 import type {PluginAdapter} from "../pluginAdapter";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
+import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNodeDecomposition";
 
 import * as NullUtil from "../../util/null";
 
@@ -26,13 +27,14 @@ type State = {
       +nodeCount: number,
       +edgeCount: number,
     |},
-    +pagerankResult: ?NodeDistribution,
+    +pnd: ?PagerankNodeDecomposition,
   |},
   edgeEvaluator: ?EdgeEvaluator,
 };
 
 const REPO_OWNER_KEY = "repoOwner";
 const REPO_NAME_KEY = "repoName";
+const MAX_ENTRIES_PER_LIST = 100;
 
 export default class App extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -40,7 +42,7 @@ export default class App extends React.Component<Props, State> {
     this.state = {
       repoOwner: "",
       repoName: "",
-      data: {graphWithMetadata: null, pagerankResult: null},
+      data: {graphWithMetadata: null, pnd: null},
       edgeEvaluator: null,
     };
   }
@@ -54,7 +56,7 @@ export default class App extends React.Component<Props, State> {
 
   render() {
     const {edgeEvaluator} = this.state;
-    const {graphWithMetadata, pagerankResult} = this.state.data;
+    const {graphWithMetadata, pnd} = this.state.data;
     return (
       <div style={{maxWidth: "66em", margin: "0 auto", padding: "0 10px"}}>
         <header className={css(styles.header)}>
@@ -96,10 +98,10 @@ export default class App extends React.Component<Props, State> {
                   throw new Error("Unexpected null value");
                 }
                 const {graph} = graphWithMetadata;
-                const pagerankResult = pagerank(graph, edgeEvaluator, {
+                const pnd = pagerank(graph, edgeEvaluator, {
                   verbose: true,
                 });
-                const data = {graphWithMetadata, pagerankResult};
+                const data = {graphWithMetadata, pnd};
                 // In case a new graph was loaded while waiting for
                 // PageRank.
                 const stomped =
@@ -123,9 +125,9 @@ export default class App extends React.Component<Props, State> {
           )}
           <WeightConfig onChange={(ee) => this.setState({edgeEvaluator: ee})} />
           <PagerankTable
-            graph={NullUtil.map(graphWithMetadata, (x) => x.graph)}
             adapters={NullUtil.map(graphWithMetadata, (x) => x.adapters)}
-            pagerankResult={pagerankResult}
+            pnd={pnd}
+            maxEntriesPerList={MAX_ENTRIES_PER_LIST}
           />
         </div>
       </div>
@@ -166,7 +168,7 @@ export default class App extends React.Component<Props, State> {
           nodeCount: Array.from(graph.nodes()).length,
           edgeCount: Array.from(graph.edges()).length,
         },
-        pagerankResult: null,
+        pnd: null,
       };
       this.setState({data});
     });
