@@ -7,7 +7,7 @@ import LocalStore from "./LocalStore";
 import {createPluginAdapter as createGithubAdapter} from "../../plugins/github/pluginAdapter";
 import {createPluginAdapter as createGitAdapter} from "../../plugins/git/pluginAdapter";
 import {Graph} from "../../core/graph";
-import {pagerank, type PagerankResult} from "../../core/attribution/pagerank";
+import {pagerank, type NodeDistribution} from "../../core/attribution/pagerank";
 import {PagerankTable} from "./PagerankTable";
 import type {PluginAdapter} from "../pluginAdapter";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
@@ -24,7 +24,7 @@ type State = {
       +nodeCount: number,
       +edgeCount: number,
     |},
-    +pagerankResult: ?PagerankResult,
+    +pagerankResult: ?NodeDistribution,
   |},
   edgeEvaluator: ?EdgeEvaluator,
 };
