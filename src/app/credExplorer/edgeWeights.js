@@ -8,6 +8,8 @@ import {
 } from "../../core/graph";
 import type {EdgeEvaluator} from "../../core/attribution/pagerank";
 
+import * as NullUtil from "../../util/null";
+
 export function byEdgeType(
   prefixes: $ReadOnlyArray<{|
     +prefix: EdgeAddressT,
@@ -16,13 +18,9 @@ export function byEdgeType(
   |}>
 ): EdgeEvaluator {
   return function evaluator(edge: Edge) {
-    const datum = prefixes.find(({prefix}) =>
-      EdgeAddress.hasPrefix(edge.address, prefix)
+    const {weight, directionality} = NullUtil.get(
+      prefixes.find(({prefix}) => EdgeAddress.hasPrefix(edge.address, prefix))
     );
-    if (datum == null) {
-      throw new Error(EdgeAddress.toString(edge.address));
-    }
-    const {weight, directionality} = datum;
     return {
       toWeight: directionality * weight,
       froWeight: (1 - directionality) * weight,

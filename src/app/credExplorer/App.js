@@ -13,6 +13,8 @@ import type {PluginAdapter} from "../pluginAdapter";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
 
+import * as NullUtil from "../../util/null";
+
 type Props = {};
 type State = {
   repoOwner: string,
@@ -121,8 +123,8 @@ export default class App extends React.Component<Props, State> {
           )}
           <WeightConfig onChange={(ee) => this.setState({edgeEvaluator: ee})} />
           <PagerankTable
-            graph={graphWithMetadata ? graphWithMetadata.graph : null}
-            adapters={graphWithMetadata ? graphWithMetadata.adapters : null}
+            graph={NullUtil.map(graphWithMetadata, (x) => x.graph)}
+            adapters={NullUtil.map(graphWithMetadata, (x) => x.adapters)}
             pagerankResult={pagerankResult}
           />
         </div>

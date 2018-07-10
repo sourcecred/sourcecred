@@ -1,8 +1,9 @@
 // @flow
 
-import {type Edge, type Graph, type NodeAddressT, NodeAddress} from "../graph";
+import {type Edge, type Graph, type NodeAddressT} from "../graph";
 import type {Distribution, SparseMarkovChain} from "./markovChain";
 import * as MapUtil from "../../util/map";
+import * as NullUtil from "../../util/null";
 
 export type Probability = number;
 export type Contributor =
@@ -71,21 +72,12 @@ export function createContributions(
     target: NodeAddressT,
     contribution: Contribution
   ) {
-    const contributions = result.get(target);
-    if (contributions == null) {
-      // Should be impossible based on graph invariants.
-      throw new Error("missing target: " + NodeAddress.toString(target));
-    }
+    const contributions = NullUtil.get(result.get(target));
     (((contributions: $ReadOnlyArray<Contribution>): any): Contribution[]).push(
       contribution
     );
-
     const source = contributorSource(target, contribution.contributor);
-    const priorOutWeight = totalOutWeight.get(source);
-    if (priorOutWeight == null) {
-      // Should be impossible based on graph invariants.
-      throw new Error("missing source: " + NodeAddress.toString(source));
-    }
+    const priorOutWeight = NullUtil.get(totalOutWeight.get(source));
     totalOutWeight.set(source, priorOutWeight + contribution.weight);
   }
 
@@ -115,11 +107,7 @@ export function createContributions(
   for (const [target, contributions] of result.entries()) {
     for (const contribution of contributions) {
       const source = contributorSource(target, contribution.contributor);
-      const normalization = totalOutWeight.get(source);
-      if (normalization == null) {
-        // Should be impossible.
-        throw new Error("missing node: " + NodeAddress.toString(source));
-      }
+      const normalization = NullUtil.get(totalOutWeight.get(source));
       const newWeight: typeof contribution.weight =
         contribution.weight / normalization;
       // (any-cast because property is not writable)
@@ -139,7 +127,7 @@ function createNodeAddressMarkovChain(
       const source = contributorSource(target, contribution.contributor);
       inNeighbors.set(
         source,
-        contribution.weight + (inNeighbors.get(source) || 0)
+        contribution.weight + NullUtil.orElse(inNeighbors.get(source), 0)
       );
     }
     return inNeighbors;
@@ -157,22 +145,14 @@ function nodeAddressMarkovChainToOrderedSparseMarkovChain(
   return {
     nodeOrder,
     chain: nodeOrder.map((dst) => {
-      const theseNeighbors = chain.get(dst);
-      if (theseNeighbors == null) {
-        // Should be impossible.
-        throw new Error("missing key: " + NodeAddress.toString(dst));
-      }
+      const theseNeighbors = NullUtil.get(chain.get(dst));
       const result = {
         neighbor: new Uint32Array(theseNeighbors.size),
         weight: new Float64Array(theseNeighbors.size),
       };
       let i = 0;
       for (const [src, weight] of theseNeighbors.entries()) {
-        const srcIndex = addressToIndex.get(src);
-        if (srcIndex == null) {
-          // Should be impossible.
-          throw new Error("missing neighbor: " + NodeAddress.toString(src));
-        }
+        const srcIndex = NullUtil.get(addressToIndex.get(src));
         result.neighbor[i] = srcIndex;
         result.weight[i] = weight;
         i++;

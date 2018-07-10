@@ -4,8 +4,9 @@ import deepEqual from "lodash.isequal";
 import sortBy from "lodash.sortby";
 
 import {makeAddressModule, type AddressModule} from "./address";
-
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
+import * as NullUtil from "../util/null";
+
 export opaque type NodeAddressT: string = string;
 export opaque type EdgeAddressT: string = string;
 export const NodeAddress: AddressModule<NodeAddressT> = (makeAddressModule({
@@ -383,11 +384,8 @@ export class Graph {
       }
     } else {
       this._edges.set(edge.address, edge);
-      const inEdges = this._inEdges.get(edge.dst);
-      const outEdges = this._outEdges.get(edge.src);
-      if (inEdges == null || outEdges == null) {
-        throw new Error(`Invariant violation on edge ${edgeToString(edge)}`);
-      }
+      const inEdges = NullUtil.get(this._inEdges.get(edge.dst));
+      const outEdges = NullUtil.get(this._outEdges.get(edge.src));
       inEdges.push(edge);
       outEdges.push(edge);
     }
@@ -402,11 +400,8 @@ export class Graph {
     const edge = this._edges.get(address);
     if (edge != null) {
       this._edges.delete(address);
-      const inEdges = this._inEdges.get(edge.dst);
-      const outEdges = this._outEdges.get(edge.src);
-      if (inEdges == null || outEdges == null) {
-        throw new Error(`Invariant violation on ${edgeToString(edge)}`);
-      }
+      const inEdges = NullUtil.get(this._inEdges.get(edge.dst));
+      const outEdges = NullUtil.get(this._outEdges.get(edge.src));
       // TODO(perf): This is linear in the degree of the endpoints of the
       // edge. Consider storing in non-list form (e.g., `_inEdges` and
       // `_outEdges` could be `Map<NodeAddressT, Set<EdgeAddressT>>`).
@@ -502,21 +497,11 @@ export class Graph {
     const direction = options.direction;
     const adjacencies: {edges: Edge[], direction: string}[] = [];
     if (direction === Direction.IN || direction === Direction.ANY) {
-      const inEdges = this._inEdges.get(node);
-      if (inEdges == null) {
-        throw new Error(
-          `Invariant violation: No inEdges for ${NodeAddress.toString(node)}`
-        );
-      }
+      const inEdges = NullUtil.get(this._inEdges.get(node));
       adjacencies.push({edges: inEdges, direction: "IN"});
     }
     if (direction === Direction.OUT || direction === Direction.ANY) {
-      const outEdges = this._outEdges.get(node);
-      if (outEdges == null) {
-        throw new Error(
-          `Invariant violation: No outEdges for ${NodeAddress.toString(node)}`
-        );
-      }
+      const outEdges = NullUtil.get(this._outEdges.get(node));
       adjacencies.push({edges: outEdges, direction: "OUT"});
     }
 
@@ -564,11 +549,8 @@ export class Graph {
     });
     const sortedEdges = sortBy(Array.from(this.edges()), (x) => x.address);
     const indexedEdges = sortedEdges.map(({src, dst, address}) => {
-      const srcIndex = nodeToSortedIndex.get(src);
-      const dstIndex = nodeToSortedIndex.get(dst);
-      if (srcIndex == null || dstIndex == null) {
-        throw new Error(`Invariant violation`);
-      }
+      const srcIndex = NullUtil.get(nodeToSortedIndex.get(src));
+      const dstIndex = NullUtil.get(nodeToSortedIndex.get(dst));
       return {srcIndex, dstIndex, address: EdgeAddress.toParts(address)};
     });
     const rawJSON = {

@@ -6,6 +6,7 @@ import {
   createExampleRepo,
   createExampleSubmoduleRepo,
 } from "../example/exampleRepo";
+import * as NullUtil from "../../../util/null";
 
 function parseArgs() {
   const argv = process.argv.slice(2);
@@ -31,13 +32,9 @@ function parseArgs() {
     }
   }
 
-  if (target == null) {
-    fail();
-    throw new Error("Unreachable"); // for Flow
-  }
   return {
     submodule,
-    target: (target: string),
+    target: NullUtil.get(target),
   };
 }
 
