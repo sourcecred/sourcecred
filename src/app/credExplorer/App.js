@@ -10,7 +10,7 @@ import {Graph} from "../../core/graph";
 import {pagerank, type NodeDistribution} from "../../core/attribution/pagerank";
 import {PagerankTable} from "./PagerankTable";
 import type {PluginAdapter} from "../pluginAdapter";
-import {type EdgeEvaluator} from "../../core/attribution/pagerank";
+import {type EdgeEvaluator} from "../../core/attribution/weights";
 import {WeightConfig} from "./WeightConfig";
 
 import * as NullUtil from "../../util/null";
