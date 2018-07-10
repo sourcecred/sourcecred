@@ -9,8 +9,11 @@ import {
   NodeAddress,
 } from "../../core/graph";
 
-import {type EdgeEvaluator} from "../../core/attribution/pagerank";
-import {byEdgeType, byNodeType} from "./edgeWeights";
+import {edgeByPrefix, nodeByPrefix} from "./edgeWeights";
+import {
+  type EdgeEvaluator,
+  liftNodeEvaluator,
+} from "../../core/attribution/weights";
 import LocalStore from "./LocalStore";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
@@ -127,8 +130,10 @@ export class WeightConfig extends React.Component<Props, State> {
         weight: 2 ** logWeight,
       })
     );
-    const edgeEvaluator = byNodeType(byEdgeType(edgePrefixes), nodePrefixes);
-    this.props.onChange(edgeEvaluator);
+    const nodeEvaluator = nodeByPrefix(nodePrefixes);
+    const edgeEvaluator = edgeByPrefix(edgePrefixes);
+    const composedEvaluator = liftNodeEvaluator(nodeEvaluator, edgeEvaluator);
+    this.props.onChange(composedEvaluator);
   }
 }
 

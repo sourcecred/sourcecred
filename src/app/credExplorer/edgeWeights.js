@@ -6,18 +6,22 @@ import {
   EdgeAddress,
   NodeAddress,
 } from "../../core/graph";
-import type {EdgeEvaluator} from "../../core/attribution/pagerank";
+import type {
+  Weight,
+  NodeEvaluator,
+  EdgeEvaluator,
+} from "../../core/attribution/weights";
 
 import * as NullUtil from "../../util/null";
 
-export function byEdgeType(
+export function edgeByPrefix(
   prefixes: $ReadOnlyArray<{|
     +prefix: EdgeAddressT,
-    +weight: number,
+    +weight: Weight,
     +directionality: number,
   |}>
 ): EdgeEvaluator {
-  return function evaluator(edge: Edge) {
+  return (edge: Edge) => {
     const {weight, directionality} = NullUtil.get(
       prefixes.find(({prefix}) => EdgeAddress.hasPrefix(edge.address, prefix))
     );
@@ -28,27 +32,15 @@ export function byEdgeType(
   };
 }
 
-export function byNodeType(
-  base: EdgeEvaluator,
+export function nodeByPrefix(
   prefixes: $ReadOnlyArray<{|
     +prefix: NodeAddressT,
-    +weight: number,
+    +weight: Weight,
   |}>
-): EdgeEvaluator {
-  return function evaluator(edge: Edge) {
-    const srcDatum = prefixes.find(({prefix}) =>
-      NodeAddress.hasPrefix(edge.src, prefix)
-    );
-    const dstDatum = prefixes.find(({prefix}) =>
-      NodeAddress.hasPrefix(edge.dst, prefix)
-    );
-    if (srcDatum == null || dstDatum == null) {
-      throw new Error(EdgeAddress.toString(edge.address));
-    }
-    const baseResult = base(edge);
-    return {
-      toWeight: dstDatum.weight * baseResult.toWeight,
-      froWeight: srcDatum.weight * baseResult.froWeight,
-    };
-  };
+): NodeEvaluator {
+  return (node) =>
+    NullUtil.orThrow(
+      prefixes.find(({prefix}) => NodeAddress.hasPrefix(node, prefix)),
+      () => NodeAddress.toString(node)
+    ).weight;
 }
