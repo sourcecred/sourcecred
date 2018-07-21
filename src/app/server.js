@@ -5,7 +5,8 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import {match, RouterContext} from "react-router";
 
-import {createRoutes, resolveTitleFromPath} from "./routes";
+import {createRoutes} from "./createRoutes";
+import {resolveTitleFromPath} from "./routeData";
 import dedent from "./dedent";
 
 export default function render(

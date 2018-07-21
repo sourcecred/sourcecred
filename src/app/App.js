@@ -3,7 +3,8 @@
 import React from "react";
 import {Router, browserHistory} from "react-router";
 
-import {createRoutes, resolveTitleFromPath} from "./routes";
+import {createRoutes} from "./createRoutes";
+import {resolveTitleFromPath} from "./routeData";
 
 export default class App extends React.Component<{}> {
   render() {

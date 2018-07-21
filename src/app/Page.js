@@ -3,7 +3,7 @@
 import React, {type Node} from "react";
 import {Link} from "react-router";
 
-import {routeData} from "./routes";
+import {routeData} from "./routeData";
 import * as NullUtil from "../util/null";
 
 export default class Page extends React.Component<{|+children: Node|}> {
