@@ -40,3 +40,19 @@ export function createRoutes() {
     </Route>
   );
 }
+
+function resolveRouteFromPath(path: string): ?RouteDatum {
+  const matches = (candidateRoute) => {
+    const candidatePath = candidateRoute.path;
+    const start = path.substring(0, candidatePath.length);
+    const end = path.substring(candidatePath.length);
+    return start === candidatePath && (end.length === 0 || end === "/");
+  };
+  return routeData.filter(matches)[0] || null;
+}
+
+export function resolveTitleFromPath(path: string): string {
+  const route = resolveRouteFromPath(path);
+  const fallback = "SourceCred";
+  return route ? route.title : fallback;
+}
