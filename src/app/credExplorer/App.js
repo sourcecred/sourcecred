@@ -16,7 +16,7 @@ import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNod
 
 import * as NullUtil from "../../util/null";
 
-type Props = {};
+type Props = {||};
 type State = {
   repoOwner: string,
   repoName: string,
