@@ -32,7 +32,7 @@ export function nodeDescription(
   }
 
   try {
-    return adapter.renderer().nodeDescription(address);
+    return adapter.nodeDescription(address);
   } catch (e) {
     const result = NodeAddress.toString(address);
     console.error(`Error getting description for ${result}: ${e.message}`);
@@ -54,13 +54,15 @@ function edgeVerb(
     return result;
   }
 
-  try {
-    return adapter.renderer().edgeVerb(address, direction);
-  } catch (e) {
+  const edgeType = adapter
+    .edgeTypes()
+    .find(({prefix}) => EdgeAddress.hasPrefix(address, prefix));
+  if (edgeType == null) {
     const result = EdgeAddress.toString(address);
-    console.error(`Error getting description for ${result}: ${e.message}`);
+    console.warn(`No edge type for ${result}`);
     return result;
   }
+  return direction === "FORWARD" ? edgeType.forwardName : edgeType.backwardName;
 }
 
 function scoreDisplay(probability: number) {

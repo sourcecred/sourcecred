@@ -1,14 +1,11 @@
 // @flow
-import type {
-  PluginAdapter as IPluginAdapter,
-  Renderer as IRenderer,
-} from "../../app/pluginAdapter";
+import type {PluginAdapter as IPluginAdapter} from "../../app/pluginAdapter";
 import {type Graph, NodeAddress} from "../../core/graph";
 import {createGraph} from "./createGraph";
 import * as N from "./nodes";
 import * as E from "./edges";
 import {RelationalView} from "./relationalView";
-import {description, edgeVerb} from "./render";
+import {description} from "./render";
 
 export async function createPluginAdapter(
   repoOwner: string,
@@ -35,11 +32,18 @@ class PluginAdapter implements IPluginAdapter {
   name() {
     return "GitHub";
   }
+  nodeDescription(node) {
+    // This cast is unsound, and might throw at runtime, but won't have
+    // silent failures or cause problems down the road.
+    const address = N.fromRaw((node: any));
+    const entity = this._view.entity(address);
+    if (entity == null) {
+      throw new Error(`unknown entity: ${NodeAddress.toString(node)}`);
+    }
+    return description(entity);
+  }
   graph() {
     return this._graph;
-  }
-  renderer() {
-    return new Renderer(this._view);
   }
   nodePrefix() {
     return N._Prefix.base;
@@ -57,24 +61,28 @@ class PluginAdapter implements IPluginAdapter {
       {name: "User", prefix: N._Prefix.userlike},
     ];
   }
-}
-
-class Renderer implements IRenderer {
-  +_view: RelationalView;
-  constructor(view) {
-    this._view = view;
-  }
-  nodeDescription(node) {
-    // This cast is unsound, and might throw at runtime, but won't have
-    // silent failures or cause problems down the road.
-    const address = N.fromRaw((node: any));
-    const entity = this._view.entity(address);
-    if (entity == null) {
-      throw new Error(`unknown entity: ${NodeAddress.toString(node)}`);
-    }
-    return description(entity);
-  }
-  edgeVerb(edgeAddress, direction) {
-    return edgeVerb(E.fromRaw((edgeAddress: any)), direction);
+  edgeTypes() {
+    return [
+      {
+        forwardName: "authors",
+        backwardName: "is authored by",
+        prefix: E._Prefix.authors,
+      },
+      {
+        forwardName: "has parent",
+        backwardName: "has child",
+        prefix: E._Prefix.hasParent,
+      },
+      {
+        forwardName: "merges",
+        backwardName: "is merged by",
+        prefix: E._Prefix.mergedAs,
+      },
+      {
+        forwardName: "references",
+        backwardName: "is referenced by",
+        prefix: E._Prefix.references,
+      },
+    ];
   }
 }
