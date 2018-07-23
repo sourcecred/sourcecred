@@ -61,15 +61,22 @@ function example() {
         throw new Error("unused");
       },
       renderer: () => ({
-        nodeDescription: (x) => `foo: ${NodeAddress.toString(x)}`,
         edgeVerb: (_unused_e, direction) =>
           direction === "FORWARD" ? "foos" : "is fooed by",
       }),
+      nodeDescription: (x) => `foo: ${NodeAddress.toString(x)}`,
       nodePrefix: () => NodeAddress.fromParts(["foo"]),
       edgePrefix: () => EdgeAddress.fromParts(["foo"]),
       nodeTypes: () => [
         {name: "alpha", prefix: NodeAddress.fromParts(["foo", "a"])},
         {name: "beta", prefix: NodeAddress.fromParts(["foo", "b"])},
+      ],
+      edgeTypes: () => [
+        {
+          prefix: EdgeAddress.fromParts(["foo"]),
+          forwardName: "foos",
+          backwardName: "is fooed by",
+        },
       ],
     },
     {
@@ -77,15 +84,18 @@ function example() {
       graph: () => {
         throw new Error("unused");
       },
-      renderer: () => ({
-        nodeDescription: (x) => `bar: ${NodeAddress.toString(x)}`,
-        edgeVerb: (_unused_e, direction) =>
-          direction === "FORWARD" ? "bars" : "is barred by",
-      }),
+      nodeDescription: (x) => `bar: ${NodeAddress.toString(x)}`,
       nodePrefix: () => NodeAddress.fromParts(["bar"]),
       edgePrefix: () => EdgeAddress.fromParts(["bar"]),
       nodeTypes: () => [
         {name: "alpha", prefix: NodeAddress.fromParts(["bar", "a"])},
+      ],
+      edgeTypes: () => [
+        {
+          prefix: EdgeAddress.fromParts(["bar"]),
+          forwardName: "bars",
+          backwardName: "is barred by",
+        },
       ],
     },
     {
@@ -93,25 +103,24 @@ function example() {
       graph: () => {
         throw new Error("unused");
       },
-      renderer: () => ({
-        nodeDescription: (_unused_arg) => `xox node!`,
-        edgeVerb: (_unused_e, _unused_direction) => `xox'd`,
-      }),
+      nodeDescription: (_unused_arg) => `xox node!`,
       nodePrefix: () => NodeAddress.fromParts(["xox"]),
       edgePrefix: () => EdgeAddress.fromParts(["xox"]),
       nodeTypes: () => [],
+      edgeTypes: () => [],
     },
     {
       name: () => "unused",
       graph: () => {
         throw new Error("unused");
       },
-      renderer: () => {
-        throw new Error("Impossible!");
+      nodeDescription: () => {
+        throw new Error("Unused");
       },
       nodePrefix: () => NodeAddress.fromParts(["unused"]),
       edgePrefix: () => EdgeAddress.fromParts(["unused"]),
       nodeTypes: () => [],
+      edgeTypes: () => [],
     },
   ];
 
