@@ -15,11 +15,9 @@ import LocalStore from "./LocalStore";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 
-// Hacks...
-import * as GithubNode from "../../plugins/github/nodes";
-import * as GithubEdge from "../../plugins/github/edges";
-import * as GitNode from "../../plugins/git/nodes";
-import * as GitEdge from "../../plugins/git/edges";
+import type {StaticPluginAdapter} from "../pluginAdapter";
+import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
+import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
 
 type Props = {
   onChange: (EdgeEvaluator) => void,
@@ -27,34 +25,34 @@ type Props = {
 
 type EdgeWeights = Map<EdgeAddressT, UserEdgeWeight>;
 type UserEdgeWeight = {|+logWeight: number, +directionality: number|};
+
+const adapters = (): StaticPluginAdapter[] => {
+  return [new GithubAdapter(), new GitAdapter()];
+};
+
 const EDGE_WEIGHTS_KEY = "edgeWeights";
-const defaultEdgeWeights = (): EdgeWeights =>
-  new Map()
-    .set(GithubEdge._Prefix.authors, {logWeight: 0, directionality: 0.5})
-    .set(GithubEdge._Prefix.mergedAs, {logWeight: 0, directionality: 0.5})
-    .set(GithubEdge._Prefix.references, {logWeight: 0, directionality: 0.5})
-    .set(GithubEdge._Prefix.hasParent, {logWeight: 0, directionality: 0.5})
-    .set(GitEdge._Prefix.hasTree, {logWeight: 0, directionality: 0.5})
-    .set(GitEdge._Prefix.hasParent, {logWeight: 0, directionality: 0.5})
-    .set(GitEdge._Prefix.includes, {logWeight: 0, directionality: 0.5})
-    .set(GitEdge._Prefix.becomes, {logWeight: 0, directionality: 0.5})
-    .set(GitEdge._Prefix.hasContents, {logWeight: 0, directionality: 0.5});
+const defaultEdgeWeights = (): EdgeWeights => {
+  const result = new Map();
+  for (const adapter of adapters()) {
+    for (const {prefix} of adapter.edgeTypes()) {
+      result.set(prefix, {logWeight: 0, directionality: 0.5});
+    }
+  }
+  return result;
+};
 
 type NodeWeights = Map<NodeAddressT, UserNodeWeight>;
 type UserNodeWeight = number /* in log space */;
 const NODE_WEIGHTS_KEY = "nodeWeights";
-const defaultNodeWeights = (): NodeWeights =>
-  new Map()
-    .set(GithubNode._Prefix.repo, 0)
-    .set(GithubNode._Prefix.issue, 0)
-    .set(GithubNode._Prefix.pull, 0)
-    .set(GithubNode._Prefix.review, 0)
-    .set(GithubNode._Prefix.comment, 0)
-    .set(GithubNode._Prefix.userlike, 0)
-    .set(GitNode._Prefix.blob, 0)
-    .set(GitNode._Prefix.commit, 0)
-    .set(GitNode._Prefix.tree, 0)
-    .set(GitNode._Prefix.treeEntry, 0);
+const defaultNodeWeights = (): NodeWeights => {
+  const result = new Map();
+  for (const adapter of adapters()) {
+    for (const {prefix} of adapter.nodeTypes()) {
+      result.set(prefix, 0);
+    }
+  }
+  return result;
+};
 
 type State = {
   edgeWeights: EdgeWeights,
