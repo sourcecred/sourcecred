@@ -164,7 +164,7 @@ module.exports = {
   plugins: [
     new StaticSiteGeneratorPlugin({
       entry: "ssr",
-      paths: /* TODO(@wchargin): Non-hard-coded routes */ ["/", "/explorer"],
+      paths: require(paths.appRouteData).routeData.map(({path}) => path),
       locals: {},
     }),
     // Makes some environment variables available to the JS code, for example:
