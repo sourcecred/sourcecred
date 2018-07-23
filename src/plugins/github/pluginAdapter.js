@@ -1,5 +1,8 @@
 // @flow
-import type {PluginAdapter as IPluginAdapter} from "../../app/pluginAdapter";
+import type {
+  StaticPluginAdapter as IStaticPluginAdapter,
+  DynamicPluginAdapter as IDynamicPluginAdapater,
+} from "../../app/pluginAdapter";
 import {type Graph, NodeAddress} from "../../core/graph";
 import {createGraph} from "./createGraph";
 import * as N from "./nodes";
@@ -7,43 +10,9 @@ import * as E from "./edges";
 import {RelationalView} from "./relationalView";
 import {description} from "./render";
 
-export async function createPluginAdapter(
-  repoOwner: string,
-  repoName: string
-): Promise<IPluginAdapter> {
-  const url = `/api/v1/data/data/${repoOwner}/${repoName}/github/view.json`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    return Promise.reject(response);
-  }
-  const json = await response.json();
-  const view = RelationalView.fromJSON(json);
-  const graph = createGraph(view);
-  return new PluginAdapter(view, graph);
-}
-
-class PluginAdapter implements IPluginAdapter {
-  +_view: RelationalView;
-  +_graph: Graph;
-  constructor(view: RelationalView, graph: Graph) {
-    this._view = view;
-    this._graph = graph;
-  }
+export class StaticPluginAdapter implements IStaticPluginAdapter {
   name() {
     return "GitHub";
-  }
-  nodeDescription(node) {
-    // This cast is unsound, and might throw at runtime, but won't have
-    // silent failures or cause problems down the road.
-    const address = N.fromRaw((node: any));
-    const entity = this._view.entity(address);
-    if (entity == null) {
-      throw new Error(`unknown entity: ${NodeAddress.toString(node)}`);
-    }
-    return description(entity);
-  }
-  graph() {
-    return this._graph;
   }
   nodePrefix() {
     return N._Prefix.base;
@@ -84,5 +53,44 @@ class PluginAdapter implements IPluginAdapter {
         prefix: E._Prefix.references,
       },
     ];
+  }
+  async load(
+    repoOwner: string,
+    repoName: string
+  ): Promise<IDynamicPluginAdapater> {
+    const url = `/api/v1/data/data/${repoOwner}/${repoName}/github/view.json`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
+    const json = await response.json();
+    const view = RelationalView.fromJSON(json);
+    const graph = createGraph(view);
+    return new DynamicPluginAdapter(view, graph);
+  }
+}
+
+class DynamicPluginAdapter implements IDynamicPluginAdapater {
+  +_view: RelationalView;
+  +_graph: Graph;
+  constructor(view: RelationalView, graph: Graph) {
+    this._view = view;
+    this._graph = graph;
+  }
+  nodeDescription(node) {
+    // This cast is unsound, and might throw at runtime, but won't have
+    // silent failures or cause problems down the road.
+    const address = N.fromRaw((node: any));
+    const entity = this._view.entity(address);
+    if (entity == null) {
+      throw new Error(`unknown entity: ${NodeAddress.toString(node)}`);
+    }
+    return description(entity);
+  }
+  graph() {
+    return this._graph;
+  }
+  static() {
+    return new StaticPluginAdapter();
   }
 }

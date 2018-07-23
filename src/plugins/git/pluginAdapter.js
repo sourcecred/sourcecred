@@ -1,46 +1,22 @@
 // @flow
-import type {PluginAdapter as IPluginAdapter} from "../../app/pluginAdapter";
+import type {
+  StaticPluginAdapter as IStaticPluginAdapter,
+  DynamicPluginAdapter as IDynamicPluginAdapter,
+} from "../../app/pluginAdapter";
 import {Graph} from "../../core/graph";
 import * as N from "./nodes";
 import * as E from "./edges";
 import {description} from "./render";
 
-export async function createPluginAdapter(
-  repoOwner: string,
-  repoName: string
-): Promise<IPluginAdapter> {
-  const url = `/api/v1/data/data/${repoOwner}/${repoName}/git/graph.json`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    return Promise.reject(response);
-  }
-  const json = await response.json();
-  const graph = Graph.fromJSON(json);
-  return new PluginAdapter(graph);
-}
-
-class PluginAdapter implements IPluginAdapter {
-  +_graph: Graph;
-  constructor(graph: Graph) {
-    this._graph = graph;
-  }
+export class StaticPluginAdapter implements IStaticPluginAdapter {
   name() {
     return "Git";
-  }
-  graph() {
-    return this._graph;
   }
   nodePrefix() {
     return N._Prefix.base;
   }
   edgePrefix() {
     return E._Prefix.base;
-  }
-  nodeDescription(node) {
-    // This cast is unsound, and might throw at runtime, but won't have
-    // silent failures or cause problems down the road.
-    const address = N.fromRaw((node: any));
-    return description(address);
   }
   nodeTypes() {
     return [
@@ -78,5 +54,37 @@ class PluginAdapter implements IPluginAdapter {
         prefix: E._Prefix.hasContents,
       },
     ];
+  }
+  async load(
+    repoOwner: string,
+    repoName: string
+  ): Promise<IDynamicPluginAdapter> {
+    const url = `/api/v1/data/data/${repoOwner}/${repoName}/git/graph.json`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
+    const json = await response.json();
+    const graph = Graph.fromJSON(json);
+    return new DynamicPluginAdapter(graph);
+  }
+}
+
+class DynamicPluginAdapter implements IDynamicPluginAdapter {
+  +_graph: Graph;
+  constructor(graph: Graph) {
+    this._graph = graph;
+  }
+  graph() {
+    return this._graph;
+  }
+  nodeDescription(node) {
+    // This cast is unsound, and might throw at runtime, but won't have
+    // silent failures or cause problems down the road.
+    const address = N.fromRaw((node: any));
+    return description(address);
+  }
+  static() {
+    return new StaticPluginAdapter();
   }
 }

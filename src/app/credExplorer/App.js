@@ -4,12 +4,12 @@ import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
 import LocalStore from "./LocalStore";
-import {createPluginAdapter as createGithubAdapter} from "../../plugins/github/pluginAdapter";
-import {createPluginAdapter as createGitAdapter} from "../../plugins/git/pluginAdapter";
+import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
+import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
 import {Graph} from "../../core/graph";
 import {pagerank} from "../../core/attribution/pagerank";
 import {PagerankTable} from "./PagerankTable";
-import type {PluginAdapter} from "../pluginAdapter";
+import type {DynamicPluginAdapter} from "../pluginAdapter";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
 import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNodeDecomposition";
@@ -23,7 +23,7 @@ type State = {
   data: {|
     graphWithMetadata: ?{|
       +graph: Graph,
-      +adapters: $ReadOnlyArray<PluginAdapter>,
+      +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
       +nodeCount: number,
       +edgeCount: number,
     |},
@@ -146,17 +146,19 @@ export default class App extends React.Component<Props, State> {
       return;
     }
 
-    const githubPromise = createGithubAdapter(repoOwner, repoName).then(
-      (adapter) => {
+    const githubPromise = new GithubAdapter()
+      .load(repoOwner, repoName)
+      .then((adapter) => {
         const graph = adapter.graph();
         return {graph, adapter};
-      }
-    );
+      });
 
-    const gitPromise = createGitAdapter(repoOwner, repoName).then((adapter) => {
-      const graph = adapter.graph();
-      return {graph, adapter};
-    });
+    const gitPromise = new GitAdapter()
+      .load(repoOwner, repoName)
+      .then((adapter) => {
+        const graph = adapter.graph();
+        return {graph, adapter};
+      });
 
     Promise.all([gitPromise, githubPromise]).then((graphsAndAdapters) => {
       const graph = Graph.merge(graphsAndAdapters.map((x) => x.graph));

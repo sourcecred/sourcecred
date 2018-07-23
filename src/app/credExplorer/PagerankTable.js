@@ -14,16 +14,16 @@ import type {
   ScoredContribution,
 } from "../../core/attribution/pagerankNodeDecomposition";
 import type {Contribution} from "../../core/attribution/graphToMarkovChain";
-import type {PluginAdapter} from "../pluginAdapter";
+import type {DynamicPluginAdapter} from "../pluginAdapter";
 import * as NullUtil from "../../util/null";
 
 // TODO: Factor this out and test it (#465)
 export function nodeDescription(
   address: NodeAddressT,
-  adapters: $ReadOnlyArray<PluginAdapter>
+  adapters: $ReadOnlyArray<DynamicPluginAdapter>
 ): string {
   const adapter = adapters.find((adapter) =>
-    NodeAddress.hasPrefix(address, adapter.nodePrefix())
+    NodeAddress.hasPrefix(address, adapter.static().nodePrefix())
   );
   if (adapter == null) {
     const result = NodeAddress.toString(address);
@@ -43,10 +43,10 @@ export function nodeDescription(
 function edgeVerb(
   address: EdgeAddressT,
   direction: "FORWARD" | "BACKWARD",
-  adapters: $ReadOnlyArray<PluginAdapter>
+  adapters: $ReadOnlyArray<DynamicPluginAdapter>
 ): string {
   const adapter = adapters.find((adapter) =>
-    EdgeAddress.hasPrefix(address, adapter.edgePrefix())
+    EdgeAddress.hasPrefix(address, adapter.static().edgePrefix())
   );
   if (adapter == null) {
     const result = EdgeAddress.toString(address);
@@ -55,6 +55,7 @@ function edgeVerb(
   }
 
   const edgeType = adapter
+    .static()
     .edgeTypes()
     .find(({prefix}) => EdgeAddress.hasPrefix(address, prefix));
   if (edgeType == null) {
@@ -72,13 +73,13 @@ function scoreDisplay(probability: number) {
 
 type SharedProps = {|
   +pnd: PagerankNodeDecomposition,
-  +adapters: $ReadOnlyArray<PluginAdapter>,
+  +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
   +maxEntriesPerList: number,
 |};
 
 type PagerankTableProps = {|
   +pnd: ?PagerankNodeDecomposition,
-  +adapters: ?$ReadOnlyArray<PluginAdapter>,
+  +adapters: ?$ReadOnlyArray<DynamicPluginAdapter>,
   +maxEntriesPerList: number,
 |};
 type PagerankTableState = {|topLevelFilter: NodeAddressT|};
@@ -116,21 +117,24 @@ export class PagerankTable extends React.PureComponent<
       throw new Error("Impossible.");
     }
 
-    function optionGroup(adapter: PluginAdapter) {
+    function optionGroup(adapter: DynamicPluginAdapter) {
       const header = (
         <option
-          key={adapter.nodePrefix()}
-          value={adapter.nodePrefix()}
+          key={adapter.static().nodePrefix()}
+          value={adapter.static().nodePrefix()}
           style={{fontWeight: "bold"}}
         >
-          {adapter.name()}
+          {adapter.static().name()}
         </option>
       );
-      const entries = adapter.nodeTypes().map((type) => (
-        <option key={type.prefix} value={type.prefix}>
-          {"\u2003" + type.name}
-        </option>
-      ));
+      const entries = adapter
+        .static()
+        .nodeTypes()
+        .map((type) => (
+          <option key={type.prefix} value={type.prefix}>
+            {"\u2003" + type.name}
+          </option>
+        ));
       return [header, ...entries];
     }
     return (
@@ -143,7 +147,9 @@ export class PagerankTable extends React.PureComponent<
           }}
         >
           <option value={NodeAddress.empty}>Show all</option>
-          {sortBy(adapters, (a) => a.name()).map(optionGroup)}
+          {sortBy(adapters, (a: DynamicPluginAdapter) => a.static().name()).map(
+            optionGroup
+          )}
         </select>
       </label>
     );
@@ -362,7 +368,7 @@ export class ContributionRow extends React.PureComponent<
 
 export class ContributionView extends React.PureComponent<{|
   +contribution: Contribution,
-  +adapters: $ReadOnlyArray<PluginAdapter>,
+  +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
 |}> {
   render() {
     const {contribution, adapters} = this.props;
