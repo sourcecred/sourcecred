@@ -25,7 +25,6 @@ type Props = {
   onChange: (EdgeEvaluator) => void,
 };
 
-// The key should be an EdgeAddressT, but a Flow bug prevents this.
 type EdgeWeights = Map<EdgeAddressT, UserEdgeWeight>;
 type UserEdgeWeight = {|+logWeight: number, +directionality: number|};
 const EDGE_WEIGHTS_KEY = "edgeWeights";
@@ -60,6 +59,7 @@ const defaultNodeWeights = (): NodeWeights =>
 type State = {
   edgeWeights: EdgeWeights,
   nodeWeights: NodeWeights,
+  expanded: boolean,
 };
 
 export class WeightConfig extends React.Component<Props, State> {
@@ -68,6 +68,7 @@ export class WeightConfig extends React.Component<Props, State> {
     this.state = {
       edgeWeights: defaultEdgeWeights(),
       nodeWeights: defaultNodeWeights(),
+      expanded: false,
     };
   }
 
@@ -90,23 +91,39 @@ export class WeightConfig extends React.Component<Props, State> {
   }
 
   render() {
+    const {expanded} = this.state;
     return (
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-        }}
-      >
-        <EdgeConfig
-          edgeWeights={this.state.edgeWeights}
-          onChange={(ew) => this.setState({edgeWeights: ew}, () => this.fire())}
-        />
-        <NodeConfig
-          nodeWeights={this.state.nodeWeights}
-          onChange={(nw) => this.setState({nodeWeights: nw}, () => this.fire())}
-        />
-      </div>
+      <React.Fragment>
+        <button
+          onClick={() => {
+            this.setState(({expanded}) => ({expanded: !expanded}));
+          }}
+        >
+          {expanded ? "Hide weight configuration" : "Show weight configuration"}
+        </button>
+        {expanded && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-between",
+            }}
+          >
+            <EdgeConfig
+              edgeWeights={this.state.edgeWeights}
+              onChange={(ew) =>
+                this.setState({edgeWeights: ew}, () => this.fire())
+              }
+            />
+            <NodeConfig
+              nodeWeights={this.state.nodeWeights}
+              onChange={(nw) =>
+                this.setState({nodeWeights: nw}, () => this.fire())
+              }
+            />
+          </div>
+        )}
+      </React.Fragment>
     );
   }
 
