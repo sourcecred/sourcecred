@@ -2,16 +2,20 @@
 
 import {type Edge, Graph} from "../graph";
 import {
-  type NodeDistribution,
   distributionToNodeDistribution,
   createContributions,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
 } from "./graphToMarkovChain";
+import {
+  decompose,
+  type PagerankNodeDecomposition,
+} from "./pagerankNodeDecomposition";
 
 import {findStationaryDistribution} from "./markovChain";
 
 export type {NodeDistribution} from "./graphToMarkovChain";
+export type {PagerankNodeDecomposition} from "./pagerankNodeDecomposition";
 export type PagerankOptions = {|
   +selfLoopWeight?: number,
   +verbose?: boolean,
@@ -35,7 +39,7 @@ export function pagerank(
   graph: Graph,
   edgeWeight: EdgeEvaluator,
   options?: PagerankOptions
-): NodeDistribution {
+): PagerankNodeDecomposition {
   const fullOptions = {
     ...defaultOptions(),
     ...(options || {}),
@@ -51,5 +55,6 @@ export function pagerank(
     convergenceThreshold: fullOptions.convergenceThreshold,
     maxIterations: fullOptions.maxIterations,
   });
-  return distributionToNodeDistribution(osmc.nodeOrder, distribution);
+  const pi = distributionToNodeDistribution(osmc.nodeOrder, distribution);
+  return decompose(pi, contributions);
 }
