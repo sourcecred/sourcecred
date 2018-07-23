@@ -56,71 +56,87 @@ function example() {
 
   const adapters = [
     {
-      name: () => "foo",
+      static: () => ({
+        name: () => "foo",
+        nodePrefix: () => NodeAddress.fromParts(["foo"]),
+        edgePrefix: () => EdgeAddress.fromParts(["foo"]),
+        nodeTypes: () => [
+          {name: "alpha", prefix: NodeAddress.fromParts(["foo", "a"])},
+          {name: "beta", prefix: NodeAddress.fromParts(["foo", "b"])},
+        ],
+        edgeTypes: () => [
+          {
+            prefix: EdgeAddress.fromParts(["foo"]),
+            forwardName: "foos",
+            backwardName: "is fooed by",
+          },
+        ],
+        load: (_unused_repoOwner, _unused_repoName) => {
+          throw new Error("unused");
+        },
+      }),
       graph: () => {
         throw new Error("unused");
       },
-      renderer: () => ({
-        edgeVerb: (_unused_e, direction) =>
-          direction === "FORWARD" ? "foos" : "is fooed by",
-      }),
       nodeDescription: (x) => `foo: ${NodeAddress.toString(x)}`,
-      nodePrefix: () => NodeAddress.fromParts(["foo"]),
-      edgePrefix: () => EdgeAddress.fromParts(["foo"]),
-      nodeTypes: () => [
-        {name: "alpha", prefix: NodeAddress.fromParts(["foo", "a"])},
-        {name: "beta", prefix: NodeAddress.fromParts(["foo", "b"])},
-      ],
-      edgeTypes: () => [
-        {
-          prefix: EdgeAddress.fromParts(["foo"]),
-          forwardName: "foos",
-          backwardName: "is fooed by",
-        },
-      ],
     },
     {
-      name: () => "bar",
+      static: () => ({
+        name: () => "bar",
+        nodePrefix: () => NodeAddress.fromParts(["bar"]),
+        edgePrefix: () => EdgeAddress.fromParts(["bar"]),
+        nodeTypes: () => [
+          {name: "alpha", prefix: NodeAddress.fromParts(["bar", "a"])},
+        ],
+        edgeTypes: () => [
+          {
+            prefix: EdgeAddress.fromParts(["bar"]),
+            forwardName: "bars",
+            backwardName: "is barred by",
+          },
+        ],
+        load: (_unused_repoOwner, _unused_repoName) => {
+          throw new Error("unused");
+        },
+      }),
       graph: () => {
         throw new Error("unused");
       },
       nodeDescription: (x) => `bar: ${NodeAddress.toString(x)}`,
-      nodePrefix: () => NodeAddress.fromParts(["bar"]),
-      edgePrefix: () => EdgeAddress.fromParts(["bar"]),
-      nodeTypes: () => [
-        {name: "alpha", prefix: NodeAddress.fromParts(["bar", "a"])},
-      ],
-      edgeTypes: () => [
-        {
-          prefix: EdgeAddress.fromParts(["bar"]),
-          forwardName: "bars",
-          backwardName: "is barred by",
-        },
-      ],
     },
     {
-      name: () => "xox",
+      static: () => ({
+        name: () => "xox",
+        nodePrefix: () => NodeAddress.fromParts(["xox"]),
+        edgePrefix: () => EdgeAddress.fromParts(["xox"]),
+        nodeTypes: () => [],
+        edgeTypes: () => [],
+        load: (_unused_repoOwner, _unused_repoName) => {
+          throw new Error("unused");
+        },
+      }),
       graph: () => {
         throw new Error("unused");
       },
       nodeDescription: (_unused_arg) => `xox node!`,
-      nodePrefix: () => NodeAddress.fromParts(["xox"]),
-      edgePrefix: () => EdgeAddress.fromParts(["xox"]),
-      nodeTypes: () => [],
-      edgeTypes: () => [],
     },
     {
-      name: () => "unused",
+      static: () => ({
+        nodePrefix: () => NodeAddress.fromParts(["unused"]),
+        edgePrefix: () => EdgeAddress.fromParts(["unused"]),
+        nodeTypes: () => [],
+        edgeTypes: () => [],
+        name: () => "unused",
+        load: (_unused_repoOwner, _unused_repoName) => {
+          throw new Error("unused");
+        },
+      }),
       graph: () => {
         throw new Error("unused");
       },
       nodeDescription: () => {
         throw new Error("Unused");
       },
-      nodePrefix: () => NodeAddress.fromParts(["unused"]),
-      edgePrefix: () => EdgeAddress.fromParts(["unused"]),
-      nodeTypes: () => [],
-      edgeTypes: () => [],
     },
   ];
 
