@@ -2,6 +2,8 @@
 
 import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
+import sortBy from "lodash.sortby";
+import deepEqual from "lodash.isequal";
 
 import LocalStore from "./LocalStore";
 import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
@@ -16,10 +18,10 @@ import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNod
 
 import * as NullUtil from "../../util/null";
 
+type Repo = {name: string, owner: string};
 type Props = {||};
 type State = {
-  repoOwner: string,
-  repoName: string,
+  selectedRepo: ?Repo,
   data: {|
     graphWithMetadata: ?{|
       +graph: Graph,
@@ -32,30 +34,136 @@ type State = {
   edgeEvaluator: ?EdgeEvaluator,
 };
 
-const REPO_OWNER_KEY = "repoOwner";
-const REPO_NAME_KEY = "repoName";
 const MAX_ENTRIES_PER_LIST = 100;
+const REPO_REGISTRY_API = "/api/v1/data/repositoryRegistry.json";
+const REPO_KEY = "selectedRepository";
+
+function validateRepo(repo: Repo) {
+  const validRe = /^[A-Za-z0-9_-]+$/;
+  if (!repo.owner.match(validRe)) {
+    throw new Error(`Invalid repository owner: ${JSON.stringify(repo.owner)}`);
+  }
+  if (!repo.name.match(validRe)) {
+    throw new Error(`Invalid repository name: ${JSON.stringify(repo.name)}`);
+  }
+}
+
+function repoStringToRepo(x: string): Repo {
+  const pieces = x.split("/");
+  if (pieces.length !== 2) {
+    throw new Error(`Invalid repo string: ${x}`);
+  }
+
+  const repo = {owner: pieces[0], name: pieces[1]};
+  validateRepo(repo);
+  return repo;
+}
+
+type RepositorySelectorProps = {|+onChange: (x: ?Repo) => void|};
+type RepositorySelectorState = {|
+  selectedRepo: ?Repo,
+  availableRepos: ?$ReadOnlyArray<Repo>,
+  errorOnLoad: boolean,
+|};
+export class RepositorySelector extends React.Component<
+  RepositorySelectorProps,
+  RepositorySelectorState
+> {
+  constructor(props: RepositorySelectorProps) {
+    super(props);
+    this.state = {
+      selectedRepo: null,
+      availableRepos: null,
+      errorOnLoad: false,
+    };
+  }
+
+  componentDidMount() {
+    this.loadAvailableRepos();
+  }
+
+  async loadAvailableRepos() {
+    const response = await fetch(REPO_REGISTRY_API);
+    if (!response.ok) {
+      console.error("Unable to load available repos");
+      this.setState({errorOnLoad: true});
+      return;
+    }
+    const json = await response.json();
+    let availableRepos = Object.keys(json).map(repoStringToRepo);
+    availableRepos = sortBy(availableRepos, (r) => r.owner, (r) => r.name);
+
+    let selectedRepo;
+    const localStoreRepo = LocalStore.get(REPO_KEY, null);
+    if (availableRepos.find((x) => deepEqual(x, localStoreRepo)) !== -1) {
+      selectedRepo = localStoreRepo;
+    }
+    if (availableRepos.length > 0 && selectedRepo == null) {
+      selectedRepo = availableRepos[0];
+    }
+    this.setState({availableRepos, selectedRepo});
+    this.props.onChange(selectedRepo);
+  }
+
+  render() {
+    const {selectedRepo, availableRepos, errorOnLoad} = this.state;
+    if (errorOnLoad) {
+      return <span>{"Error loading available repos"}</span>;
+    }
+    if (availableRepos == null) {
+      return <span>{"Waiting to load available repos"}</span>;
+    }
+    if (availableRepos.length === 0) {
+      return (
+        <span>
+          {"No repos are available. Please see the README for instructions."}
+        </span>
+      );
+    }
+    if (selectedRepo == null) {
+      throw new Error(
+        "Error: expected selectedRepo to be set when availbaleRepos are present"
+      );
+    }
+    return (
+      <label>
+        <span>Please choose a repository to inspect:</span>
+        <select
+          value={`${selectedRepo.owner}/${selectedRepo.name}`}
+          onChange={(e) => {
+            const repoString = e.target.value;
+            const repo = repoStringToRepo(repoString);
+            LocalStore.set(REPO_KEY, repo);
+            this.setState({selectedRepo: repo});
+            this.props.onChange(repo);
+          }}
+        >
+          {availableRepos.map(({owner, name}) => {
+            const repoString = `${owner}/${name}`;
+            return (
+              <option value={repoString} key={repoString}>
+                {repoString}
+              </option>
+            );
+          })}
+        </select>
+      </label>
+    );
+  }
+}
 
 export default class App extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      repoOwner: "",
-      repoName: "",
+      selectedRepo: null,
       data: {graphWithMetadata: null, pnd: null},
       edgeEvaluator: null,
     };
   }
 
-  componentDidMount() {
-    this.setState((state) => ({
-      repoOwner: LocalStore.get(REPO_OWNER_KEY, state.repoOwner),
-      repoName: LocalStore.get(REPO_NAME_KEY, state.repoName),
-    }));
-  }
-
   render() {
-    const {edgeEvaluator} = this.state;
+    const {edgeEvaluator, selectedRepo} = this.state;
     const {graphWithMetadata, pnd} = this.state.data;
     return (
       <div style={{maxWidth: "66em", margin: "0 auto", padding: "0 10px"}}>
@@ -63,33 +171,16 @@ export default class App extends React.Component<Props, State> {
           <h1>Cred Explorer</h1>
         </header>
         <div>
-          <label>
-            Repository owner:
-            <input
-              value={this.state.repoOwner}
-              onChange={(e) => {
-                const value = e.target.value;
-                this.setState({repoOwner: value}, () => {
-                  LocalStore.set(REPO_OWNER_KEY, this.state.repoOwner);
-                });
-              }}
-            />
-          </label>
+          <RepositorySelector
+            onChange={(selectedRepo) => this.setState({selectedRepo})}
+          />
           <br />
-          <label>
-            Repository name:
-            <input
-              value={this.state.repoName}
-              onChange={(e) => {
-                const value = e.target.value;
-                this.setState({repoName: value}, () => {
-                  LocalStore.set(REPO_NAME_KEY, this.state.repoName);
-                });
-              }}
-            />
-          </label>
-          <br />
-          <button onClick={() => this.loadData()}>Load data</button>
+          <button
+            disabled={selectedRepo == null}
+            onClick={() => this.loadData()}
+          >
+            Load data
+          </button>
           <button
             disabled={graphWithMetadata == null || edgeEvaluator == null}
             onClick={() => {
@@ -135,26 +226,20 @@ export default class App extends React.Component<Props, State> {
   }
 
   loadData() {
-    const validRe = /^[A-Za-z0-9_-]+$/;
-    const {repoOwner, repoName} = this.state;
-    if (!repoOwner.match(validRe)) {
-      console.error(`Invalid repository owner: ${JSON.stringify(repoOwner)}`);
-      return;
-    }
-    if (!repoName.match(validRe)) {
-      console.error(`Invalid repository name: ${JSON.stringify(repoName)}`);
-      return;
+    const {selectedRepo} = this.state;
+    if (selectedRepo == null) {
+      throw new Error(`Impossible`);
     }
 
     const githubPromise = new GithubAdapter()
-      .load(repoOwner, repoName)
+      .load(selectedRepo.owner, selectedRepo.name)
       .then((adapter) => {
         const graph = adapter.graph();
         return {graph, adapter};
       });
 
     const gitPromise = new GitAdapter()
-      .load(repoOwner, repoName)
+      .load(selectedRepo.owner, selectedRepo.name)
       .then((adapter) => {
         const graph = adapter.graph();
         return {graph, adapter};
