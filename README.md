@@ -119,14 +119,15 @@ $ node bin/sourcecred.js load ipfs js-ipfs --github-token=YOUR_GH_TOKEN
 ### Contributing
 
 If you would like to contribute to SourceCred:
-* Join our [Discord] and let us know what issue you'd like to work on. We can work
-with you to troubleshoot, and assign you to the relevant issue.
+* Join our [Discord] and let us know what issue you'd like to work on. We can
+guide you through the architecture, and assign you to the relevant issue.
 * Fork the repository.
 * Follow the installation and setup instructions as above.
 
 Once your changes are ready for test and review:
-* `yarn prettify`
+* `yarn prettify`, which runs [prettier] to format your code
 * `yarn travis`
 * Submit your pull request
 
+[prettier]: https://github.com/prettier/prettier
 [Discord]: https://discord.gg/tsBTgc9
