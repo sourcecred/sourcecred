@@ -110,4 +110,14 @@ describe("app/credExplorer/App", () => {
     const data = {graph, adapters, pagerankResult};
     app.setState({data});
   });
+
+  describe("RepositorySelector", () => {
+    it("displays loading text while waiting for registry", () => {});
+    it("displays error text if registry failed to load", () => {});
+    it("displays error text if no repos are available", () => {});
+    it("displays available repos that were loaded", () => {});
+    it("defaults to first available repo", () => {});
+    it("uses repo from LocalStore, if available", () => {});
+    it("uses first available repo, if LocalStore repo not available", () => {});
+  });
 });
