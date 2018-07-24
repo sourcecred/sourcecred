@@ -93,14 +93,13 @@ export default class App extends React.Component<Props, State> {
           <button
             disabled={graphWithMetadata == null || edgeEvaluator == null}
             onClick={() => {
-              setTimeout(() => {
-                if (graphWithMetadata == null || edgeEvaluator == null) {
-                  throw new Error("Unexpected null value");
-                }
-                const {graph} = graphWithMetadata;
-                const pnd = pagerank(graph, edgeEvaluator, {
-                  verbose: true,
-                });
+              if (graphWithMetadata == null || edgeEvaluator == null) {
+                throw new Error("Unexpected null value");
+              }
+              const {graph} = graphWithMetadata;
+              pagerank(graph, edgeEvaluator, {
+                verbose: true,
+              }).then((pnd) => {
                 const data = {graphWithMetadata, pnd};
                 // In case a new graph was loaded while waiting for
                 // PageRank.
@@ -110,7 +109,7 @@ export default class App extends React.Component<Props, State> {
                 if (!stomped) {
                   this.setState({data});
                 }
-              }, 0);
+              });
             }}
           >
             Run basic PageRank

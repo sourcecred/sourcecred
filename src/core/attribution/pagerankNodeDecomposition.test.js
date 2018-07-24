@@ -110,7 +110,7 @@ function validateDecomposition(decomposition) {
 
 describe("core/attribution/contributions", () => {
   describe("decompose", () => {
-    it("has the expected output on a simple asymmetric chain", () => {
+    it("has the expected output on a simple asymmetric chain", async () => {
       const n1 = NodeAddress.fromParts(["n1"]);
       const n2 = NodeAddress.fromParts(["n2"]);
       const n3 = NodeAddress.fromParts(["sink"]);
@@ -129,10 +129,11 @@ describe("core/attribution/contributions", () => {
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
       const contributions = createContributions(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(contributions);
-      const pi = findStationaryDistribution(osmc.chain, {
+      const pi = await findStationaryDistribution(osmc.chain, {
         verbose: false,
         convergenceThreshold: 1e-6,
         maxIterations: 255,
+        yieldAfterMs: 1,
       });
       const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
       const result = decompose(pr, contributions);
@@ -140,15 +141,16 @@ describe("core/attribution/contributions", () => {
       validateDecomposition(result);
     });
 
-    it("is valid on the example graph", () => {
+    it("is valid on the example graph", async () => {
       const g = advancedGraph().graph1();
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
       const contributions = createContributions(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(contributions);
-      const pi = findStationaryDistribution(osmc.chain, {
+      const pi = await findStationaryDistribution(osmc.chain, {
         verbose: false,
         convergenceThreshold: 1e-6,
         maxIterations: 255,
+        yieldAfterMs: 1,
       });
       const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
       const result = decompose(pr, contributions);
