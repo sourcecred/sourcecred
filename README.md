@@ -89,8 +89,10 @@ We hope to have the beta ready by November 2018.
 ### Running the Prototype
 
 If you'd like to try it out, you can run a local copy of SourceCred using the
-following commands. You need to have [node] and [yarn] installed first. You
-also need to get a [GitHub API access token].
+following commands. You need to have [node] and [yarn] installed first. This repo
+ is stable and tested on Node version 8.x.x, and Yarn version 1.7.0.
+You also need to get a [GitHub API access token]. This token does not need any
+specific permissions.
 
 [node]: https://nodejs.org/en/
 [yarn]: https://yarnpkg.com/lang/en/
@@ -102,14 +104,29 @@ cd sourcecred
 yarn install
 yarn backend
 node bin/sourcecred.js load REPO_OWNER REPO_NAME --github-token=GH_TOKEN
+# this loads sourcecred data for a particular repository
 yarn start
 # then navigate to localhost:3000 in your browser
 ```
 
-### Getting Involved
+For example, if you wanted to look at cred for [ipfs/js-ipfs], you could run:
+```
+$ node bin/sourcecred.js load ipfs js-ipfs --github-token=YOUR_GH_TOKEN
+```
 
-If you'd like to help out, or you just think SourceCred seems cool and you want
-to learn more, please drop by our [our Discord chat].
+[ipfs/js-ipfs]: https://github.com/ipfs/js-ipfs
 
-[our Discord chat]: https://discord.gg/tsBTgc9
+### Contributing
 
+If you would like to contribute to SourceCred:
+* Join our [Discord] and let us know what issue you'd like to work on. We can work
+with you to troubleshoot, and assign you to the relevant issue.
+* Fork the repository.
+* Follow the installation and setup instructions as above.
+
+Once your changes are ready for test and review:
+* `yarn prettify`
+* `yarn travis`
+* Submit your pull request
+
+[Discord]: https://discord.gg/tsBTgc9
