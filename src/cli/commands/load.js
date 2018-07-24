@@ -3,6 +3,8 @@
 import {Command, flags} from "@oclif/command";
 import mkdirp from "mkdirp";
 import path from "path";
+import fs from "fs";
+import stringify from "json-stable-stringify";
 
 import {loadGithubData} from "../../plugins/github/loadGithubData";
 import {loadGitData} from "../../plugins/git/loadGitData";
@@ -72,7 +74,13 @@ export default class PluginGraphCommand extends Command {
   }
 }
 
-function loadAllPlugins({repoOwner, repoName, githubToken, maxOldSpaceSize}) {
+function loadAllPlugins({
+  basedir,
+  repoOwner,
+  repoName,
+  githubToken,
+  maxOldSpaceSize,
+}) {
   if (githubToken == null) {
     // TODO: This check should be abstracted so that plugins can
     // specify their argument dependencies and get nicely
@@ -100,6 +108,9 @@ function loadAllPlugins({repoOwner, repoName, githubToken, maxOldSpaceSize}) {
     })),
   ];
   execDependencyGraph(tasks, {taskPassLabel: "DONE"}).then(({success}) => {
+    if (success) {
+      addToRepoRegistry({basedir, repoOwner, repoName});
+    }
     process.exitCode = success ? 0 : 1;
   });
 }
@@ -139,4 +150,23 @@ function loadPlugin({basedir, plugin, repoOwner, repoName, githubToken}) {
       process.exitCode = 1;
       return;
   }
+}
+
+const REPO_REGISTRY_FILE = "repositoryRegistry.json";
+
+function addToRepoRegistry(options) {
+  // TODO: Make this function transactional before loading repositories in
+  // parallel.
+  const {basedir, repoOwner, repoName} = options;
+  const outputFile = path.join(basedir, REPO_REGISTRY_FILE);
+  let registry = null;
+  if (fs.existsSync(outputFile)) {
+    const contents = fs.readFileSync(outputFile);
+    registry = JSON.parse(contents.toString());
+  } else {
+    registry = {};
+  }
+
+  registry[`${repoOwner}/${repoName}`] = true;
+  fs.writeFileSync(outputFile, stringify(registry));
 }
