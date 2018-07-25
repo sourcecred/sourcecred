@@ -4,7 +4,9 @@ import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
 import type {LocalStore} from "../localStore";
+import CheckedLocalStore from "../checkedLocalStore";
 import BrowserLocalStore from "../browserLocalStore";
+
 import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
 import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
 import {Graph} from "../../core/graph";
@@ -22,10 +24,12 @@ const REPO_NAME_KEY = "repoName";
 const MAX_ENTRIES_PER_LIST = 100;
 
 export default class AppPage extends React.Component<{||}> {
-  static _LOCAL_STORE = new BrowserLocalStore({
-    version: "1",
-    keyPrefix: "cred-explorer",
-  });
+  static _LOCAL_STORE = new CheckedLocalStore(
+    new BrowserLocalStore({
+      version: "1",
+      keyPrefix: "cred-explorer",
+    })
+  );
 
   render() {
     return <App localStore={AppPage._LOCAL_STORE} />;
