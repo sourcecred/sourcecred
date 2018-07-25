@@ -73,20 +73,28 @@ export function uniformDistribution(n: number): Distribution {
   return new Float64Array(n).fill(1 / n);
 }
 
-export function sparseMarkovChainAction(
+function sparseMarkovChainActionInto(
   chain: SparseMarkovChain,
-  pi: Distribution
-): Distribution {
-  const result = new Float64Array(pi.length);
+  input: Distribution,
+  output: Distribution
+): void {
   chain.forEach(({neighbor, weight}, dst) => {
     const inDegree = neighbor.length; // (also `weight.length`)
     let probability = 0;
     for (let i = 0; i < inDegree; i++) {
       const src = neighbor[i];
-      probability += pi[src] * weight[i];
+      probability += input[src] * weight[i];
     }
-    result[dst] = probability;
+    output[dst] = probability;
   });
+}
+
+export function sparseMarkovChainAction(
+  chain: SparseMarkovChain,
+  pi: Distribution
+): Distribution {
+  const result = new Float64Array(pi.length);
+  sparseMarkovChainActionInto(chain, pi, result);
   return result;
 }
 
@@ -98,7 +106,8 @@ function* findStationaryDistributionGenerator(
     +maxIterations: number,
   |}
 ): Generator<void, Distribution, void> {
-  let r0 = uniformDistribution(chain.length);
+  let pi = uniformDistribution(chain.length);
+  let scratch = new Float64Array(pi.length);
   function computeDelta(pi0, pi1) {
     let maxDelta = -Infinity;
     // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
@@ -115,12 +124,12 @@ function* findStationaryDistributionGenerator(
       if (options.verbose) {
         console.log(`[${iteration}] FAILED to converge`);
       }
-      return r0;
+      return pi;
     }
     iteration++;
-    const r1 = sparseMarkovChainAction(chain, r0);
-    const delta = computeDelta(r0, r1);
-    r0 = r1;
+    sparseMarkovChainActionInto(chain, pi, scratch);
+    const delta = computeDelta(pi, scratch);
+    [scratch, pi] = [pi, scratch];
     if (options.verbose) {
       console.log(`[${iteration}] delta = ${delta}`);
     }
@@ -128,7 +137,7 @@ function* findStationaryDistributionGenerator(
       if (options.verbose) {
         console.log(`[${iteration}] CONVERGED`);
       }
-      return r0;
+      return pi;
     }
     yield;
   }
