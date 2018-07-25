@@ -1,9 +1,10 @@
 // @flow
 import React from "react";
-import {shallow} from "enzyme";
+import {shallow, mount} from "enzyme";
+import enzymeToJSON from "enzyme-to-json";
 
 import {pagerank} from "../../core/attribution/pagerank";
-import App from "./App";
+import App, {RepositorySelector} from "./App";
 
 import {Graph, NodeAddress, EdgeAddress} from "../../core/graph";
 
@@ -112,10 +113,67 @@ describe("app/credExplorer/App", () => {
   });
 
   describe("RepositorySelector", () => {
-    it("displays loading text while waiting for registry", () => {});
-    it("displays error text if registry failed to load", () => {});
-    it("displays error text if no repos are available", () => {});
-    it("displays available repos that were loaded", () => {});
+    beforeEach(() => {
+      fetch.resetMocks();
+    });
+    function setup() {
+      const result: any = {selectedRepo: null};
+      const onChange = (selectedRepo) => {
+        result.selectedRepo = selectedRepo;
+      };
+      const repositorySelector = shallow(
+        <RepositorySelector onChange={onChange} />
+      );
+      return {repositorySelector, result};
+    }
+
+    it("displays loading text while waiting for registry", () => {
+      const {repositorySelector, result} = setup();
+      expect(result.selectedRepo).toBe(null);
+      expect(repositorySelector.text()).toBe("Waiting to load available repos");
+    });
+    it.skip("displays error text if registry failed to load", () => {
+      //fetch.mockReject(new Error("Something bad"));
+      const {repositorySelector, result} = setup();
+      expect(result.selectedRepo).toBe(null);
+      expect(repositorySelector.text()).toBe("Error loading repos");
+    });
+    it.skip("displays error text if no repos are available", () => {
+      fetch.mockResponseOnce(JSON.stringify({"foo/bar": true}));
+      const promise = fetch("whatever");
+      fetch.mockReturnValueOnce(promise);
+      const {repositorySelector, result} = setup();
+      return promise.then(() => {
+        expect(result.selectedRepo).toBe(null);
+        expect(repositorySelector.state.availableRepos).toHaveLength(0);
+        expect(repositorySelector.text()).toBe(
+          "No repos are available. Please see the README for instructions."
+        );
+      });
+    });
+    it("displays available repos that were loaded", async (done) => {
+      fetch.mockResponseOnce(JSON.stringify({"foo/bar": true}));
+      const promise = fetch("whatever");
+      fetch.mockReturnValueOnce(promise);
+
+      const {repositorySelector, result} = setup();
+
+      await Promise.all([promise]);
+      setImmediate(() => {
+        try {
+          repositorySelector.update();
+          const repo = {owner: "foo", name: "bar"};
+          expect(result.selectedRepo).toEqual(repo);
+          expect(repositorySelector.state().availableRepos).toEqual([repo]);
+          expect(repositorySelector.find("span").text()).toBe(
+            "Please choose a repository to inspect:"
+          );
+          done();
+        } catch (e) {
+          done.fail(e);
+        }
+      });
+    });
     it("defaults to first available repo", () => {});
     it("uses repo from LocalStore, if available", () => {});
     it("uses first available repo, if LocalStore repo not available", () => {});

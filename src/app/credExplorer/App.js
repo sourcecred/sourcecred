@@ -84,8 +84,7 @@ export class RepositorySelector extends React.Component<
 
   async loadAvailableRepos() {
     const response = await fetch(REPO_REGISTRY_API);
-    if (!response.ok) {
-      console.error("Unable to load available repos");
+    if (!response || !response.ok) {
       this.setState({errorOnLoad: true});
       return;
     }
