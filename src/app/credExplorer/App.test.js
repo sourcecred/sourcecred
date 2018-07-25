@@ -2,7 +2,7 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import BrowserLocalStore from "../browserLocalStore";
+import MemoryLocalStore from "../memoryLocalStore";
 import {pagerank} from "../../core/attribution/pagerank";
 import {App} from "./App";
 
@@ -97,14 +97,7 @@ function example() {
 
 describe("app/credExplorer/App", () => {
   function makeLocalStore() {
-    // TODO(@wchargin): This should be an in-memory implementation of
-    // LocalStore, not the browser version. This only works because the
-    // store is not actually needed for the shallow render to complete
-    // successfully.
-    return new BrowserLocalStore({
-      version: "1",
-      keyPrefix: "cred-explorer",
-    });
+    return new MemoryLocalStore();
   }
   it("renders with clean state", () => {
     shallow(<App localStore={makeLocalStore()} />);
