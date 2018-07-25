@@ -3,7 +3,8 @@
 import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
-import LocalStore from "./LocalStore";
+import type {LocalStore} from "../localStore";
+import BrowserLocalStore from "../browserLocalStore";
 import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
 import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
 import {Graph} from "../../core/graph";
@@ -16,7 +17,22 @@ import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNod
 
 import * as NullUtil from "../../util/null";
 
-type Props = {||};
+const REPO_OWNER_KEY = "repoOwner";
+const REPO_NAME_KEY = "repoName";
+const MAX_ENTRIES_PER_LIST = 100;
+
+export default class AppPage extends React.Component<{||}> {
+  static _LOCAL_STORE = new BrowserLocalStore({
+    version: "1",
+    keyPrefix: "cred-explorer",
+  });
+
+  render() {
+    return <App localStore={AppPage._LOCAL_STORE} />;
+  }
+}
+
+type Props = {|+localStore: LocalStore|};
 type State = {
   repoOwner: string,
   repoName: string,
@@ -32,11 +48,7 @@ type State = {
   edgeEvaluator: ?EdgeEvaluator,
 };
 
-const REPO_OWNER_KEY = "repoOwner";
-const REPO_NAME_KEY = "repoName";
-const MAX_ENTRIES_PER_LIST = 100;
-
-export default class App extends React.Component<Props, State> {
+export class App extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -48,13 +60,15 @@ export default class App extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    const {localStore} = this.props;
     this.setState((state) => ({
-      repoOwner: LocalStore.get(REPO_OWNER_KEY, state.repoOwner),
-      repoName: LocalStore.get(REPO_NAME_KEY, state.repoName),
+      repoOwner: localStore.get(REPO_OWNER_KEY, state.repoOwner),
+      repoName: localStore.get(REPO_NAME_KEY, state.repoName),
     }));
   }
 
   render() {
+    const {localStore} = this.props;
     const {edgeEvaluator} = this.state;
     const {graphWithMetadata, pnd} = this.state.data;
     return (
@@ -70,7 +84,7 @@ export default class App extends React.Component<Props, State> {
               onChange={(e) => {
                 const value = e.target.value;
                 this.setState({repoOwner: value}, () => {
-                  LocalStore.set(REPO_OWNER_KEY, this.state.repoOwner);
+                  localStore.set(REPO_OWNER_KEY, this.state.repoOwner);
                 });
               }}
             />
@@ -83,7 +97,7 @@ export default class App extends React.Component<Props, State> {
               onChange={(e) => {
                 const value = e.target.value;
                 this.setState({repoName: value}, () => {
-                  LocalStore.set(REPO_NAME_KEY, this.state.repoName);
+                  localStore.set(REPO_NAME_KEY, this.state.repoName);
                 });
               }}
             />
@@ -122,7 +136,10 @@ export default class App extends React.Component<Props, State> {
           ) : (
             <p>Graph not loaded.</p>
           )}
-          <WeightConfig onChange={(ee) => this.setState({edgeEvaluator: ee})} />
+          <WeightConfig
+            localStore={localStore}
+            onChange={(ee) => this.setState({edgeEvaluator: ee})}
+          />
           <PagerankTable
             adapters={NullUtil.map(graphWithMetadata, (x) => x.adapters)}
             pnd={pnd}
