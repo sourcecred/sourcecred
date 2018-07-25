@@ -145,23 +145,24 @@ describe("core/attribution/markovChain", () => {
   }
 
   describe("findStationaryDistribution", () => {
-    it("finds an all-accumulating stationary distribution", () => {
+    it("finds an all-accumulating stationary distribution", async () => {
       const chain = sparseMarkovChainFromTransitionMatrix([
         [1, 0, 0],
         [0.25, 0, 0.75],
         [0.25, 0.75, 0],
       ]);
-      const pi = findStationaryDistribution(chain, {
+      const pi = await findStationaryDistribution(chain, {
         maxIterations: 255,
         convergenceThreshold: 1e-7,
         verbose: false,
+        yieldAfterMs: 1,
       });
       expectStationary(chain, pi);
       const expected = new Float64Array([1, 0, 0]);
       expectAllClose(pi, expected);
     });
 
-    it("finds a non-degenerate stationary distribution", () => {
+    it("finds a non-degenerate stationary distribution", async () => {
       // Node 0 is the "center"; nodes 1 through 4 are "satellites". A
       // satellite transitions to the center with probability 0.5, or to a
       // cyclically adjacent satellite with probability 0.25 each. The
@@ -173,34 +174,37 @@ describe("core/attribution/markovChain", () => {
         [0.5, 0, 0.25, 0, 0.25],
         [0.5, 0.25, 0, 0.25, 0],
       ]);
-      const pi = findStationaryDistribution(chain, {
+      const pi = await findStationaryDistribution(chain, {
         maxIterations: 255,
         convergenceThreshold: 1e-7,
         verbose: false,
+        yieldAfterMs: 1,
       });
       expectStationary(chain, pi);
       const expected = new Float64Array([1 / 3, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
       expectAllClose(pi, expected);
     });
 
-    it("finds the stationary distribution of a periodic chain", () => {
+    it("finds the stationary distribution of a periodic chain", async () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [1, 0]]);
-      const pi = findStationaryDistribution(chain, {
+      const pi = await findStationaryDistribution(chain, {
         maxIterations: 255,
         convergenceThreshold: 1e-7,
         verbose: false,
+        yieldAfterMs: 1,
       });
       expectStationary(chain, pi);
       const expected = new Float64Array([0.5, 0.5]);
       expectAllClose(pi, expected);
     });
 
-    it("returns initial distribution if maxIterations===0", () => {
+    it("returns initial distribution if maxIterations===0", async () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [0, 1]]);
-      const pi = findStationaryDistribution(chain, {
+      const pi = await findStationaryDistribution(chain, {
         verbose: false,
         convergenceThreshold: 1e-7,
         maxIterations: 0,
+        yieldAfterMs: 1,
       });
       const expected = new Float64Array([0.5, 0.5]);
       expect(pi).toEqual(expected);

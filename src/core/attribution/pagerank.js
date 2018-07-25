@@ -35,11 +35,11 @@ function defaultOptions(): PagerankOptions {
   };
 }
 
-export function pagerank(
+export async function pagerank(
   graph: Graph,
   edgeWeight: EdgeEvaluator,
   options?: PagerankOptions
-): PagerankNodeDecomposition {
+): Promise<PagerankNodeDecomposition> {
   const fullOptions = {
     ...defaultOptions(),
     ...(options || {}),
@@ -50,10 +50,11 @@ export function pagerank(
     fullOptions.selfLoopWeight
   );
   const osmc = createOrderedSparseMarkovChain(contributions);
-  const distribution = findStationaryDistribution(osmc.chain, {
+  const distribution = await findStationaryDistribution(osmc.chain, {
     verbose: fullOptions.verbose,
     convergenceThreshold: fullOptions.convergenceThreshold,
     maxIterations: fullOptions.maxIterations,
+    yieldAfterMs: 30,
   });
   const pi = distributionToNodeDistribution(osmc.nodeOrder, distribution);
   return decompose(pi, contributions);

@@ -90,14 +90,14 @@ export function sparseMarkovChainAction(
   return result;
 }
 
-export function findStationaryDistribution(
+function* findStationaryDistributionGenerator(
   chain: SparseMarkovChain,
   options: {|
     +verbose: boolean,
     +convergenceThreshold: number,
     +maxIterations: number,
   |}
-): Distribution {
+): Generator<void, Distribution, void> {
   let r0 = uniformDistribution(chain.length);
   function computeDelta(pi0, pi1) {
     let maxDelta = -Infinity;
@@ -130,8 +130,44 @@ export function findStationaryDistribution(
       }
       return r0;
     }
+    yield;
   }
   // ESLint knows that this next line is unreachable, but Flow doesn't. :-)
   // eslint-disable-next-line no-unreachable
   throw new Error("Unreachable.");
+}
+
+export function findStationaryDistribution(
+  chain: SparseMarkovChain,
+  options: {|
+    +verbose: boolean,
+    +convergenceThreshold: number,
+    +maxIterations: number,
+    +yieldAfterMs: number,
+  |}
+): Promise<Distribution> {
+  let gen = findStationaryDistributionGenerator(chain, {
+    verbose: options.verbose,
+    convergenceThreshold: options.convergenceThreshold,
+    maxIterations: options.maxIterations,
+  });
+  return new Promise((resolve, _unused_reject) => {
+    const {yieldAfterMs} = options;
+    const tick = () => {
+      const start = Date.now();
+      do {
+        const result = gen.next();
+        if (result.done) {
+          if (result.value == null) {
+            // Should never happen.
+            throw new Error(String(result.value));
+          }
+          resolve(result.value);
+          return;
+        }
+      } while (Date.now() - start < yieldAfterMs);
+      setTimeout(tick, 0);
+    };
+    tick();
+  });
 }
