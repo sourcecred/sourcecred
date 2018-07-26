@@ -1,6 +1,7 @@
 // @flow
 
 import React from "react";
+import { Button } from "semantic-ui-react";
 
 import {
   type EdgeAddressT,
@@ -92,13 +93,15 @@ export class WeightConfig extends React.Component<Props, State> {
     const {expanded} = this.state;
     return (
       <React.Fragment>
-        <button
+        <Button
+          basic
+          color="teal"
           onClick={() => {
             this.setState(({expanded}) => ({expanded: !expanded}));
           }}
         >
           {expanded ? "Hide weight configuration" : "Show weight configuration"}
-        </button>
+        </Button>
         {expanded && (
           <div
             style={{

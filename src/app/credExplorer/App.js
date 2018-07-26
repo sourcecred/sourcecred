@@ -4,6 +4,7 @@ import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 import sortBy from "lodash.sortby";
 import deepEqual from "lodash.isequal";
+import { Button, Dropdown } from 'semantic-ui-react'
 
 import LocalStore from "./LocalStore";
 import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
@@ -15,7 +16,7 @@ import type {DynamicPluginAdapter} from "../pluginAdapter";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
 import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNodeDecomposition";
-
+import styles from '../style/styles';
 import * as NullUtil from "../../util/null";
 
 type Repo = {name: string, owner: string};
@@ -124,10 +125,15 @@ export class RepositorySelector extends React.Component<
         "Error: expected selectedRepo to be set when availbaleRepos are present"
       );
     }
+    const options = availableRepos.map(({owner, name}) => {
+      const repoString = `${owner}/${name}`;
+      return { text: repoString, key: repoString, value: repoString };
+    });
     return (
       <label>
         <span>Please choose a repository to inspect:</span>
-        <select
+        <Dropdown
+          selection
           value={`${selectedRepo.owner}/${selectedRepo.name}`}
           onChange={(e) => {
             const repoString = e.target.value;
@@ -136,16 +142,8 @@ export class RepositorySelector extends React.Component<
             this.setState({selectedRepo: repo});
             this.props.onChange(repo);
           }}
-        >
-          {availableRepos.map(({owner, name}) => {
-            const repoString = `${owner}/${name}`;
-            return (
-              <option value={repoString} key={repoString}>
-                {repoString}
-              </option>
-            );
-          })}
-        </select>
+          options={options}
+        />
       </label>
     );
   }
@@ -165,22 +163,24 @@ export default class App extends React.Component<Props, State> {
     const {edgeEvaluator, selectedRepo} = this.state;
     const {graphWithMetadata, pnd} = this.state.data;
     return (
-      <div style={{maxWidth: "66em", margin: "0 auto", padding: "0 10px"}}>
-        <header className={css(styles.header)}>
-          <h1>Cred Explorer</h1>
-        </header>
+      <div className={css(style.body)}>
+        <h1 className={css(style.header)}>Cred Explorer</h1>
         <div>
           <RepositorySelector
             onChange={(selectedRepo) => this.setState({selectedRepo})}
           />
           <br />
-          <button
+          <Button
+            basic
+            color="teal"
             disabled={selectedRepo == null}
             onClick={() => this.loadData()}
           >
             Load data
-          </button>
-          <button
+          </Button>
+          <Button
+            basic
+            color="teal"
             disabled={graphWithMetadata == null || edgeEvaluator == null}
             onClick={() => {
               setTimeout(() => {
@@ -204,7 +204,7 @@ export default class App extends React.Component<Props, State> {
             }}
           >
             Run basic PageRank
-          </button>
+          </Button>
           {graphWithMetadata ? (
             <p>
               Graph loaded: {graphWithMetadata.nodeCount} nodes,{" "}
@@ -261,8 +261,4 @@ export default class App extends React.Component<Props, State> {
   }
 }
 
-const styles = StyleSheet.create({
-  header: {
-    color: "#090",
-  },
-});
+const style = StyleSheet.create(styles);

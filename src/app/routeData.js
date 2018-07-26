@@ -26,7 +26,7 @@ const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
     path: "/explorer",
     component: () => require("./credExplorer/App").default,
     title: "SourceCred explorer",
-    navTitle: "Explorer",
+    navTitle: "Explore",
   },
 ];
 exports.routeData = routeData;
