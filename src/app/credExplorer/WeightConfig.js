@@ -10,9 +10,9 @@ import {
   NodeAddress,
 } from "../../core/graph";
 
+import type {LocalStore} from "../localStore";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
-import LocalStore from "./LocalStore";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 
@@ -20,9 +20,10 @@ import type {StaticPluginAdapter} from "../pluginAdapter";
 import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
 import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
 
-type Props = {
-  onChange: (EdgeEvaluator) => void,
-};
+type Props = {|
+  +localStore: LocalStore,
+  +onChange: (EdgeEvaluator) => void,
+|};
 
 type EdgeWeights = Map<EdgeAddressT, UserEdgeWeight>;
 type UserEdgeWeight = {|+logWeight: number, +directionality: number|};
@@ -72,15 +73,16 @@ export class WeightConfig extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    const {localStore} = this.props;
     this.setState(
       (state) => {
         return {
           edgeWeights: NullUtil.orElse(
-            NullUtil.map(LocalStore.get(EDGE_WEIGHTS_KEY), MapUtil.fromObject),
+            NullUtil.map(localStore.get(EDGE_WEIGHTS_KEY), MapUtil.fromObject),
             state.edgeWeights
           ),
           nodeWeights: NullUtil.orElse(
-            NullUtil.map(LocalStore.get(NODE_WEIGHTS_KEY), MapUtil.fromObject),
+            NullUtil.map(localStore.get(NODE_WEIGHTS_KEY), MapUtil.fromObject),
             state.nodeWeights
           ),
         };
@@ -129,9 +131,10 @@ export class WeightConfig extends React.Component<Props, State> {
   }
 
   fire() {
+    const {localStore} = this.props;
     const {edgeWeights, nodeWeights} = this.state;
-    LocalStore.set(EDGE_WEIGHTS_KEY, MapUtil.toObject(edgeWeights));
-    LocalStore.set(NODE_WEIGHTS_KEY, MapUtil.toObject(nodeWeights));
+    localStore.set(EDGE_WEIGHTS_KEY, MapUtil.toObject(edgeWeights));
+    localStore.set(NODE_WEIGHTS_KEY, MapUtil.toObject(nodeWeights));
     const edgePrefixes = Array.from(edgeWeights.entries()).map(
       ([prefix, {logWeight, directionality}]) => ({
         prefix,

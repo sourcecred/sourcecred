@@ -3,6 +3,7 @@ import React from "react";
 import {shallow, mount} from "enzyme";
 import enzymeToJSON from "enzyme-to-json";
 
+import MemoryLocalStore from "../memoryLocalStore";
 import {pagerank} from "../../core/attribution/pagerank";
 import App, {RepositorySelector} from "./App";
 
@@ -96,17 +97,20 @@ function example() {
 }
 
 describe("app/credExplorer/App", () => {
+  function makeLocalStore() {
+    return new MemoryLocalStore();
+  }
   it("renders with clean state", () => {
-    shallow(<App />);
+    shallow(<App localStore={makeLocalStore()} />);
   });
   it("renders with graph and adapters set", () => {
-    const app = shallow(<App />);
+    const app = shallow(<App localStore={makeLocalStore()} />);
     const {graph, adapters} = example();
     const data = {graph, adapters, pagerankResult: null};
     app.setState({data});
   });
   it("renders with graph and adapters and pagerankResult", () => {
-    const app = shallow(<App />);
+    const app = shallow(<App localStore={makeLocalStore()} />);
     const {graph, adapters, pagerankResult} = example();
     const data = {graph, adapters, pagerankResult};
     app.setState({data});

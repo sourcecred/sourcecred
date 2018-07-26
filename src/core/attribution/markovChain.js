@@ -73,32 +73,41 @@ export function uniformDistribution(n: number): Distribution {
   return new Float64Array(n).fill(1 / n);
 }
 
-export function sparseMarkovChainAction(
+function sparseMarkovChainActionInto(
   chain: SparseMarkovChain,
-  pi: Distribution
-): Distribution {
-  const result = new Float64Array(pi.length);
+  input: Distribution,
+  output: Distribution
+): void {
   chain.forEach(({neighbor, weight}, dst) => {
     const inDegree = neighbor.length; // (also `weight.length`)
     let probability = 0;
     for (let i = 0; i < inDegree; i++) {
       const src = neighbor[i];
-      probability += pi[src] * weight[i];
+      probability += input[src] * weight[i];
     }
-    result[dst] = probability;
+    output[dst] = probability;
   });
+}
+
+export function sparseMarkovChainAction(
+  chain: SparseMarkovChain,
+  pi: Distribution
+): Distribution {
+  const result = new Float64Array(pi.length);
+  sparseMarkovChainActionInto(chain, pi, result);
   return result;
 }
 
-export function findStationaryDistribution(
+function* findStationaryDistributionGenerator(
   chain: SparseMarkovChain,
   options: {|
     +verbose: boolean,
     +convergenceThreshold: number,
     +maxIterations: number,
   |}
-): Distribution {
-  let r0 = uniformDistribution(chain.length);
+): Generator<void, Distribution, void> {
+  let pi = uniformDistribution(chain.length);
+  let scratch = new Float64Array(pi.length);
   function computeDelta(pi0, pi1) {
     let maxDelta = -Infinity;
     // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
@@ -115,12 +124,12 @@ export function findStationaryDistribution(
       if (options.verbose) {
         console.log(`[${iteration}] FAILED to converge`);
       }
-      return r0;
+      return pi;
     }
     iteration++;
-    const r1 = sparseMarkovChainAction(chain, r0);
-    const delta = computeDelta(r0, r1);
-    r0 = r1;
+    sparseMarkovChainActionInto(chain, pi, scratch);
+    const delta = computeDelta(pi, scratch);
+    [scratch, pi] = [pi, scratch];
     if (options.verbose) {
       console.log(`[${iteration}] delta = ${delta}`);
     }
@@ -128,10 +137,46 @@ export function findStationaryDistribution(
       if (options.verbose) {
         console.log(`[${iteration}] CONVERGED`);
       }
-      return r0;
+      return pi;
     }
+    yield;
   }
   // ESLint knows that this next line is unreachable, but Flow doesn't. :-)
   // eslint-disable-next-line no-unreachable
   throw new Error("Unreachable.");
+}
+
+export function findStationaryDistribution(
+  chain: SparseMarkovChain,
+  options: {|
+    +verbose: boolean,
+    +convergenceThreshold: number,
+    +maxIterations: number,
+    +yieldAfterMs: number,
+  |}
+): Promise<Distribution> {
+  let gen = findStationaryDistributionGenerator(chain, {
+    verbose: options.verbose,
+    convergenceThreshold: options.convergenceThreshold,
+    maxIterations: options.maxIterations,
+  });
+  return new Promise((resolve, _unused_reject) => {
+    const {yieldAfterMs} = options;
+    const tick = () => {
+      const start = Date.now();
+      do {
+        const result = gen.next();
+        if (result.done) {
+          if (result.value == null) {
+            // Should never happen.
+            throw new Error(String(result.value));
+          }
+          resolve(result.value);
+          return;
+        }
+      } while (Date.now() - start < yieldAfterMs);
+      setTimeout(tick, 0);
+    };
+    tick();
+  });
 }

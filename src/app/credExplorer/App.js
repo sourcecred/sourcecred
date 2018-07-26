@@ -6,7 +6,10 @@ import sortBy from "lodash.sortby";
 import deepEqual from "lodash.isequal";
 import { Button, Dropdown } from 'semantic-ui-react'
 
-import LocalStore from "./LocalStore";
+import type {LocalStore} from "../localStore";
+import CheckedLocalStore from "../checkedLocalStore";
+import BrowserLocalStore from "../browserLocalStore";
+
 import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
 import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
 import {Graph} from "../../core/graph";
@@ -16,11 +19,24 @@ import type {DynamicPluginAdapter} from "../pluginAdapter";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
 import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNodeDecomposition";
+import {RepositorySelect, type Repo} from "./RepositorySelect";
 import styles from '../style/styles';
 import * as NullUtil from "../../util/null";
 
-type Repo = {name: string, owner: string};
-type Props = {||};
+export default class AppPage extends React.Component<{||}> {
+  static _LOCAL_STORE = new CheckedLocalStore(
+    new BrowserLocalStore({
+      version: "1",
+      keyPrefix: "cred-explorer",
+    })
+  );
+
+  render() {
+    return <App localStore={AppPage._LOCAL_STORE} />;
+  }
+}
+
+type Props = {|+localStore: LocalStore|};
 type State = {
   selectedRepo: ?Repo,
   data: {|
@@ -149,7 +165,7 @@ export class RepositorySelector extends React.Component<
   }
 }
 
-export default class App extends React.Component<Props, State> {
+export class App extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -160,13 +176,15 @@ export default class App extends React.Component<Props, State> {
   }
 
   render() {
+    const {localStore} = this.props;
     const {edgeEvaluator, selectedRepo} = this.state;
     const {graphWithMetadata, pnd} = this.state.data;
     return (
       <div className={css(style.body)}>
         <h1 className={css(style.header)}>Cred Explorer</h1>
         <div>
-          <RepositorySelector
+          <RepositorySelect
+            localStore={localStore}
             onChange={(selectedRepo) => this.setState({selectedRepo})}
           />
           <br />
@@ -183,14 +201,13 @@ export default class App extends React.Component<Props, State> {
             color="teal"
             disabled={graphWithMetadata == null || edgeEvaluator == null}
             onClick={() => {
-              setTimeout(() => {
-                if (graphWithMetadata == null || edgeEvaluator == null) {
-                  throw new Error("Unexpected null value");
-                }
-                const {graph} = graphWithMetadata;
-                const pnd = pagerank(graph, edgeEvaluator, {
-                  verbose: true,
-                });
+              if (graphWithMetadata == null || edgeEvaluator == null) {
+                throw new Error("Unexpected null value");
+              }
+              const {graph} = graphWithMetadata;
+              pagerank(graph, edgeEvaluator, {
+                verbose: true,
+              }).then((pnd) => {
                 const data = {graphWithMetadata, pnd};
                 // In case a new graph was loaded while waiting for
                 // PageRank.
@@ -200,7 +217,7 @@ export default class App extends React.Component<Props, State> {
                 if (!stomped) {
                   this.setState({data});
                 }
-              }, 0);
+              });
             }}
           >
             Run basic PageRank
@@ -213,7 +230,10 @@ export default class App extends React.Component<Props, State> {
           ) : (
             <p>Graph not loaded.</p>
           )}
-          <WeightConfig onChange={(ee) => this.setState({edgeEvaluator: ee})} />
+          <WeightConfig
+            localStore={localStore}
+            onChange={(ee) => this.setState({edgeEvaluator: ee})}
+          />
           <PagerankTable
             adapters={NullUtil.map(graphWithMetadata, (x) => x.adapters)}
             pnd={pnd}

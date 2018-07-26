@@ -1,5 +1,7 @@
 // @flow
 
+import {LocalStore} from "./localStore";
+
 /*
  * A simple abstraction over 'localStorage' to provide transparent JSON
  * serialization and deserialization.
@@ -7,7 +9,7 @@
  * The implementation is borrowed heavily from Khan Academy's LocalStore
  * module, and also KaVideoPlayer's SafeLocalStore module.
  */
-export default class LocalStore {
+export default class BrowserLocalStore implements LocalStore {
   version: string;
   keyPrefix: string;
 
@@ -23,7 +25,7 @@ export default class LocalStore {
     return [this.keyPrefix, this.version, key].join(":");
   }
 
-  get(key: string, whenUnavailable: any): any {
+  get<T>(key: string, whenUnavailable: T): T {
     if (!this.isEnabled()) {
       return whenUnavailable;
     }
@@ -41,7 +43,7 @@ export default class LocalStore {
     }
   }
 
-  set(key: string, data: any): void {
+  set(key: string, data: mixed): void {
     if (!this.isEnabled()) {
       return;
     }
