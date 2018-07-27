@@ -7,7 +7,7 @@ import {match, RouterContext} from "react-router";
 
 import {createRoutes} from "./createRoutes";
 import {resolveTitleFromPath} from "./routeData";
-import dedent from "./dedent";
+import dedent from "../util/dedent";
 
 export default function render(
   locals: {+path: string, +assets: {[string]: string}},
