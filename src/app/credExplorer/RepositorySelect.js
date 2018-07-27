@@ -89,6 +89,9 @@ function repoStringToRepo(x: string): Repo {
 export async function loadStatus(localStore: LocalStore): Promise<Status> {
   try {
     const response = await fetch(REPO_REGISTRY_API);
+    if (response.status === 404) {
+      return {type: "NO_REPOS"};
+    }
     if (!response.ok) {
       console.error(response);
       return {type: "FAILURE"};

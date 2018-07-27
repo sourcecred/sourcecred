@@ -167,6 +167,13 @@ describe("app/credExplorer/RepositorySelect", () => {
         console.error = jest.fn();
       });
     });
+    it("returns NO_REPOS on fetch 404", () => {
+      fetch.mockResponseOnce("irrelevant", {status: 404});
+      expect.assertions(3);
+      return loadStatus(testLocalStore()).then((status) => {
+        expect(status).toEqual({type: "NO_REPOS"});
+      });
+    });
     it("loads selectedRepo from localStore, if available", () => {
       const repos = [
         {owner: "a", name: "b"},
