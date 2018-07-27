@@ -14,6 +14,14 @@ import {
   sourcecredDirectoryFlag,
 } from "../common";
 
+import {
+  toJSON,
+  fromJSON,
+  addRepo,
+  emptyRegistry,
+  REPO_REGISTRY_FILE,
+} from "../../app/credExplorer/repoRegistry";
+
 const execDependencyGraph = require("../../tools/execDependencyGraph").default;
 
 export default class PluginGraphCommand extends Command {
@@ -152,21 +160,21 @@ function loadPlugin({basedir, plugin, repoOwner, repoName, githubToken}) {
   }
 }
 
-const REPO_REGISTRY_FILE = "repositoryRegistry.json";
-
 function addToRepoRegistry(options) {
   // TODO: Make this function transactional before loading repositories in
   // parallel.
   const {basedir, repoOwner, repoName} = options;
+  const repo = {owner: repoOwner, name: repoName};
   const outputFile = path.join(basedir, REPO_REGISTRY_FILE);
   let registry = null;
   if (fs.existsSync(outputFile)) {
     const contents = fs.readFileSync(outputFile);
-    registry = JSON.parse(contents.toString());
+    const registryJSON = JSON.parse(contents.toString());
+    registry = fromJSON(registryJSON);
   } else {
-    registry = {};
+    registry = emptyRegistry();
   }
+  registry = addRepo(repo, registry);
 
-  registry[`${repoOwner}/${repoName}`] = true;
-  fs.writeFileSync(outputFile, stringify(registry));
+  fs.writeFileSync(outputFile, stringify(toJSON(registry)));
 }

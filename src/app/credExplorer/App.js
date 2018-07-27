@@ -16,7 +16,8 @@ import type {DynamicPluginAdapter} from "../pluginAdapter";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
 import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNodeDecomposition";
-import RepositorySelect, {type Repo} from "./RepositorySelect";
+import RepositorySelect from "./RepositorySelect";
+import type {Repo} from "./repoRegistry";
 
 import * as NullUtil from "../../util/null";
 
