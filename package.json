@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@oclif/command": "^1.4.20",
-    "@oclif/config": "^1.6.17",
-    "@oclif/plugin-help": "^1.2.10",
+    "@oclif/command": "^1.4.36",
+    "@oclif/config": "^1.6.33",
+    "@oclif/plugin-help": "^2.0.5",
     "aphrodite": "^2.1.0",
     "chalk": "1.1.3",
     "commonmark": "^0.28.1",
@@ -122,6 +122,10 @@
       "./config/babel"
     ]
   },
+  "files": [
+    "/bin",
+    "/build"
+  ],
   "oclif": {
     "commands": "./bin/commands",
     "bin": "sourcecred",
