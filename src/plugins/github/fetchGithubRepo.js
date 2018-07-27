@@ -74,7 +74,15 @@ function postQuery({body, variables}, token) {
   })
     .then((x) => x.json())
     .then((x) => {
-      if (x.errors) {
+      if (x.errors || x.data === undefined) {
+        console.error(
+          "GitHub query failed! We're tracking these issues at " +
+            "https://github.com/sourcecred/sourcecred/issues/350.\n" +
+            "If the error is a timeout or abuse rate limit, you can " +
+            "try loading a smaller repo, or trying again in a few minutes.\n" +
+            "The actual failed response can be found below:\n" +
+            "================================================="
+        );
         return Promise.reject(x);
       }
       return Promise.resolve(x.data);
