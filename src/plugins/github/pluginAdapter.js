@@ -22,12 +22,12 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
   }
   nodeTypes() {
     return [
-      {name: "Repository", prefix: N._Prefix.repo},
-      {name: "Issue", prefix: N._Prefix.issue},
-      {name: "Pull request", prefix: N._Prefix.pull},
-      {name: "Pull request review", prefix: N._Prefix.review},
-      {name: "Comment", prefix: N._Prefix.comment},
-      {name: "User", prefix: N._Prefix.userlike},
+      {name: "Repository", prefix: N._Prefix.repo, defaultWeight: 4},
+      {name: "Issue", prefix: N._Prefix.issue, defaultWeight: 2},
+      {name: "Pull request", prefix: N._Prefix.pull, defaultWeight: 4},
+      {name: "Pull request review", prefix: N._Prefix.review, defaultWeight: 1},
+      {name: "Comment", prefix: N._Prefix.comment, defaultWeight: 1},
+      {name: "User", prefix: N._Prefix.userlike, defaultWeight: 1},
     ];
   }
   edgeTypes() {

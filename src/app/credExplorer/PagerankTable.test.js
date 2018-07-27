@@ -3,6 +3,8 @@ import React from "react";
 import {shallow} from "enzyme";
 import enzymeToJSON from "enzyme-to-json";
 
+import type {DynamicPluginAdapter} from "../pluginAdapter";
+
 import {
   PagerankTable,
   NodeRowList,
@@ -54,15 +56,23 @@ async function example() {
     barF: addEdge(["bar", "f"], nodes.bar1, nodes.xox),
   };
 
-  const adapters = [
+  const adapters: DynamicPluginAdapter[] = [
     {
       static: () => ({
         name: () => "foo",
         nodePrefix: () => NodeAddress.fromParts(["foo"]),
         edgePrefix: () => EdgeAddress.fromParts(["foo"]),
         nodeTypes: () => [
-          {name: "alpha", prefix: NodeAddress.fromParts(["foo", "a"])},
-          {name: "beta", prefix: NodeAddress.fromParts(["foo", "b"])},
+          {
+            name: "alpha",
+            prefix: NodeAddress.fromParts(["foo", "a"]),
+            defaultWeight: 1,
+          },
+          {
+            name: "beta",
+            prefix: NodeAddress.fromParts(["foo", "b"]),
+            defaultWeight: 1,
+          },
         ],
         edgeTypes: () => [
           {
@@ -86,7 +96,11 @@ async function example() {
         nodePrefix: () => NodeAddress.fromParts(["bar"]),
         edgePrefix: () => EdgeAddress.fromParts(["bar"]),
         nodeTypes: () => [
-          {name: "alpha", prefix: NodeAddress.fromParts(["bar", "a"])},
+          {
+            name: "alpha",
+            prefix: NodeAddress.fromParts(["bar", "a"]),
+            defaultWeight: 1,
+          },
         ],
         edgeTypes: () => [
           {
