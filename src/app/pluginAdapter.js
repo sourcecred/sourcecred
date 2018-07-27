@@ -9,6 +9,7 @@ export interface StaticPluginAdapter {
   nodeTypes(): Array<{|
     +name: string,
     +prefix: NodeAddressT,
+    +defaultWeight: number,
   |}>;
   edgeTypes(): Array<{|
     +forwardName: string,

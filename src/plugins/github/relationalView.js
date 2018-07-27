@@ -532,7 +532,10 @@ export class _Entity<+T: Entry> {
     this._entry = entry;
   }
   address(): $ElementType<T, "address"> {
-    return this._entry.address;
+    // Relevant Flow bugs:
+    //   - https://github.com/facebook/flow/issues/6648
+    //   - https://github.com/facebook/flow/issues/6649
+    return ((this._entry: T).address: any);
   }
   url(): string {
     return this._entry.url;

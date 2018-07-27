@@ -89,7 +89,11 @@ function repoStringToRepo(x: string): Repo {
 export async function loadStatus(localStore: LocalStore): Promise<Status> {
   try {
     const response = await fetch(REPO_REGISTRY_API);
+    if (response.status === 404) {
+      return {type: "NO_REPOS"};
+    }
     if (!response.ok) {
+      console.error(response);
       return {type: "FAILURE"};
     }
     const json = await response.json();
@@ -105,6 +109,7 @@ export async function loadStatus(localStore: LocalStore): Promise<Status> {
     const sortedRepos = sortBy(availableRepos, (r) => r.owner, (r) => r.name);
     return {type: "VALID", availableRepos: sortedRepos, selectedRepo};
   } catch (e) {
+    console.error(e);
     return {type: "FAILURE"};
   }
 }
@@ -175,7 +180,10 @@ export class PureRepositorySelect extends React.PureComponent<
       case "NO_REPOS":
         return this.renderError("Error: No repositories found.");
       case "FAILURE":
-        return this.renderError("Error: Unable to load repository registry.");
+        return this.renderError(
+          "Error: Unable to load repository registry. " +
+            "See console for details."
+        );
       default:
         throw new Error((status.type: empty));
     }

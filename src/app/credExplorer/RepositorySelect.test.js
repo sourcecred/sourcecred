@@ -20,6 +20,14 @@ require("../testUtil").configureAphrodite();
 describe("app/credExplorer/RepositorySelect", () => {
   beforeEach(() => {
     fetch.resetMocks();
+    // $ExpectFlowError
+    console.error = jest.fn();
+    // $ExpectFlowError
+    console.warn = jest.fn();
+  });
+  afterEach(() => {
+    expect(console.warn).not.toHaveBeenCalled();
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   function mockRegistry(registry: RepoRegistry) {
@@ -50,7 +58,9 @@ describe("app/credExplorer/RepositorySelect", () => {
         <PureRepositorySelect status={{type: "FAILURE"}} onChange={jest.fn()} />
       );
       const span = e.find("span");
-      expect(span.text()).toBe("Error: Unable to load repository registry.");
+      expect(span.text()).toBe(
+        "Error: Unable to load repository registry. See console for details."
+      );
     });
     it("clicking an option triggers the onChange", () => {
       const availableRepos = [
@@ -86,7 +96,7 @@ describe("app/credExplorer/RepositorySelect", () => {
       const result = loadStatus(localStore);
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(fetch).toHaveBeenCalledWith(REPO_REGISTRY_API);
-      expect.assertions(5);
+      expect.assertions(7);
       return result.then((status) => {
         expect(status.type).toBe("VALID");
         if (status.type !== "VALID") {
@@ -113,16 +123,29 @@ describe("app/credExplorer/RepositorySelect", () => {
     });
     it("returns FAILURE on invalid fetch response", () => {
       fetch.mockResponseOnce(JSON.stringify(["hello"]));
-      expect.assertions(1);
+      expect.assertions(4);
       return loadStatus(testLocalStore()).then((status) => {
         expect(status).toEqual({type: "FAILURE"});
+        expect(console.error).toHaveBeenCalledTimes(1);
+        // $ExpectFlowError
+        console.error = jest.fn();
       });
     });
     it("returns FAILURE on fetch failure", () => {
       fetch.mockReject(new Error("some failure"));
-      expect.assertions(1);
+      expect.assertions(4);
       return loadStatus(testLocalStore()).then((status) => {
         expect(status).toEqual({type: "FAILURE"});
+        expect(console.error).toHaveBeenCalledTimes(1);
+        // $ExpectFlowError
+        console.error = jest.fn();
+      });
+    });
+    it("returns NO_REPOS on fetch 404", () => {
+      fetch.mockResponseOnce("irrelevant", {status: 404});
+      expect.assertions(3);
+      return loadStatus(testLocalStore()).then((status) => {
+        expect(status).toEqual({type: "NO_REPOS"});
       });
     });
     it("loads selectedRepo from localStore, if available", () => {
@@ -224,6 +247,7 @@ describe("app/credExplorer/RepositorySelect", () => {
 
   describe("RepositorySelect", () => {
     it("initially renders a LocalStoreRepositorySelect with status LOADING", () => {
+      mockRegistry([{owner: "irrelevant", name: "unused"}]);
       const e = shallow(
         <RepositorySelect onChange={jest.fn()} localStore={testLocalStore()} />
       );
@@ -285,15 +309,19 @@ describe("app/credExplorer/RepositorySelect", () => {
       );
       await waitForUpdate(e);
       expect(onChange).toHaveBeenCalledTimes(0);
+      expect(console.error).toHaveBeenCalledTimes(1);
+      // $ExpectFlowError
+      console.error = jest.fn();
     });
 
     it("child onChange triggers parent onChange", () => {
       const onChange = jest.fn();
+      const repo = {owner: "foo", name: "bar"};
+      mockRegistry([repo]);
       const e = mount(
         <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
       );
       const child = e.find(PureRepositorySelect);
-      const repo = {owner: "foo", name: "bar"};
       child.props().onChange(repo);
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange).toHaveBeenCalledWith(repo);

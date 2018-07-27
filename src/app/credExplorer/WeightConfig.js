@@ -52,8 +52,8 @@ const NODE_WEIGHTS_KEY = "nodeWeights";
 const defaultNodeWeights = (): NodeWeights => {
   const result = new Map();
   for (const adapter of adapters()) {
-    for (const {prefix} of adapter.nodeTypes()) {
-      result.set(prefix, 0);
+    for (const {prefix, defaultWeight} of adapter.nodeTypes()) {
+      result.set(prefix, Math.log2(defaultWeight));
     }
   }
   return result;
