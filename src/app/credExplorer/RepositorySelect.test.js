@@ -20,6 +20,14 @@ require("../testUtil").configureAphrodite();
 describe("app/credExplorer/RepositorySelect", () => {
   beforeEach(() => {
     fetch.resetMocks();
+    // $ExpectFlowError
+    console.error = jest.fn();
+    // $ExpectFlowError
+    console.warn = jest.fn();
+  });
+  afterEach(() => {
+    expect(console.warn).not.toHaveBeenCalled();
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   function mockRegistry(registry: RepoRegistry) {
@@ -112,7 +120,7 @@ describe("app/credExplorer/RepositorySelect", () => {
       const result = loadStatus(localStore);
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(fetch).toHaveBeenCalledWith(REPO_REGISTRY_API);
-      expect.assertions(5);
+      expect.assertions(7);
       return result.then((status) => {
         expect(status.type).toBe("VALID");
         if (status.type !== "VALID") {
@@ -139,14 +147,14 @@ describe("app/credExplorer/RepositorySelect", () => {
     });
     it("returns FAILURE on invalid fetch response", () => {
       fetch.mockResponseOnce(JSON.stringify(["hello"]));
-      expect.assertions(1);
+      expect.assertions(3);
       return loadStatus(testLocalStore()).then((status) => {
         expect(status).toEqual({type: "FAILURE"});
       });
     });
     it("returns FAILURE on fetch failure", () => {
       fetch.mockReject(new Error("some failure"));
-      expect.assertions(1);
+      expect.assertions(3);
       return loadStatus(testLocalStore()).then((status) => {
         expect(status).toEqual({type: "FAILURE"});
       });
