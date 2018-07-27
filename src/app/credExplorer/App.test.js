@@ -2,7 +2,7 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import TestLocalStore from "../memoryLocalStore";
+import testLocalStore from "../testLocalStore";
 import {pagerank} from "../../core/attribution/pagerank";
 import {App} from "./App";
 
@@ -97,16 +97,16 @@ function example() {
 
 describe("app/credExplorer/App", () => {
   it("renders with clean state", () => {
-    shallow(<App localStore={new TestLocalStore()} />);
+    shallow(<App localStore={testLocalStore()} />);
   });
   it("renders with graph and adapters set", () => {
-    const app = shallow(<App localStore={new TestLocalStore()} />);
+    const app = shallow(<App localStore={testLocalStore()} />);
     const {graph, adapters} = example();
     const data = {graph, adapters, pagerankResult: null};
     app.setState({data});
   });
   it("renders with graph and adapters and pagerankResult", () => {
-    const app = shallow(<App localStore={new TestLocalStore()} />);
+    const app = shallow(<App localStore={testLocalStore()} />);
     const {graph, adapters, pagerankResult} = example();
     const data = {graph, adapters, pagerankResult};
     app.setState({data});
