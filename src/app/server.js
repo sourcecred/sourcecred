@@ -7,7 +7,7 @@ import {match, RouterContext} from "react-router";
 
 import {createRoutes} from "./createRoutes";
 import {resolveTitleFromPath} from "./routeData";
-import dedent from "./dedent";
+import dedent from "../util/dedent";
 
 export default function render(
   locals: {+path: string, +assets: {[string]: string}},
@@ -32,7 +32,7 @@ export default function render(
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <title>${resolveTitleFromPath(url)}</title>
-        <style>${require("./index.css")}</style>
+        <style>${require("./style/index.css")}</style>
         <style data-aphrodite>${css.content}</style>
         </head>
         <body style="overflow-y:scroll">

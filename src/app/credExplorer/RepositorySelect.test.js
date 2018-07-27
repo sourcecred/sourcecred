@@ -1,26 +1,34 @@
 // @flow
 import React from "react";
 import {shallow, mount} from "enzyme";
-import enzymeToJSON from "enzyme-to-json";
 
-import MemoryLocalStore from "../memoryLocalStore";
-import * as RepositorySelectModule from "./RepositorySelect";
-import {
-  RepositorySelect,
+import * as NullUtil from "../../util/null";
+import testLocalStore from "../testLocalStore";
+import RepositorySelect, {
   PureRepositorySelect,
-  loadRepositorySelectStatus,
+  LocalStoreRepositorySelect,
+  loadStatus,
+  type Status,
   REPO_KEY,
-  REPO_REGISTRY_API,
 } from "./RepositorySelect";
+
+import {toJSON, type RepoRegistry, REPO_REGISTRY_API} from "./repoRegistry";
 
 require("../testUtil").configureEnzyme();
 require("../testUtil").configureAphrodite();
 
 describe("app/credExplorer/RepositorySelect", () => {
+  beforeEach(() => {
+    fetch.resetMocks();
+  });
+
+  function mockRegistry(registry: RepoRegistry) {
+    fetch.mockResponseOnce(JSON.stringify(toJSON(registry)));
+  }
   describe("PureRepositorySelect", () => {
-    it("renders an empty select while loading", () => {
+    it("doesn't render a select while loading", () => {
       const e = shallow(
-        <PureRepositorySelect state={{type: "LOADING"}} onChange={(s) => {}} />
+        <PureRepositorySelect status={{type: "LOADING"}} onChange={jest.fn()} />
       );
       const span = e.find("span");
       expect(span.text()).toBe("Please choose a repository to inspect:");
@@ -29,82 +37,56 @@ describe("app/credExplorer/RepositorySelect", () => {
     });
     it("renders an error message if no repositories are available", () => {
       const e = shallow(
-        <PureRepositorySelect state={{type: "NO_REPOS"}} onChange={(s) => {}} />
+        <PureRepositorySelect
+          status={{type: "NO_REPOS"}}
+          onChange={jest.fn()}
+        />
       );
       const span = e.find("span");
       expect(span.text()).toBe("Error: No repositories found.");
     });
     it("renders an error message if there was an error while loading", () => {
       const e = shallow(
-        <PureRepositorySelect state={{type: "FAILURE"}} onChange={(s) => {}} />
+        <PureRepositorySelect status={{type: "FAILURE"}} onChange={jest.fn()} />
       );
       const span = e.find("span");
       expect(span.text()).toBe("Error: Unable to load repository registry.");
-    });
-    it("renders a select with all available repos as options", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
-      const selectedRepo = availableRepos[0];
-      const e = shallow(
-        <PureRepositorySelect
-          state={{type: "VALID", availableRepos, selectedRepo}}
-          onChange={(s) => {}}
-        />
-      );
-      const options = e.find("option");
-      expect(options.map((x) => x.text())).toEqual(["foo/bar", "zod/zoink"]);
-    });
-    it("the selectedRepo is selected", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
-      const selectedRepo = availableRepos[0];
-      const e = shallow(
-        <PureRepositorySelect
-          state={{type: "VALID", availableRepos, selectedRepo}}
-          onChange={(s) => {}}
-        />
-      );
-      expect(e.find("select").prop("value")).toBe("foo/bar");
     });
     it("clicking an option triggers the onChange", () => {
       const availableRepos = [
         {owner: "foo", name: "bar"},
         {owner: "zod", name: "zoink"},
       ];
-      let selectedRepo = availableRepos[0];
-      const onChange = (s) => {
-        selectedRepo = s;
-      };
-      const e = shallow(
+      const onChange = jest.fn();
+      const e = mount(
         <PureRepositorySelect
-          state={{type: "VALID", availableRepos, selectedRepo}}
+          status={{
+            type: "VALID",
+            availableRepos,
+            selectedRepo: availableRepos[0],
+          }}
           onChange={onChange}
         />
       );
-      expect(selectedRepo).toEqual(availableRepos[0]);
-      e.find("select").simulate("change", {target: {value: "zod/zoink"}});
-      expect(selectedRepo).toEqual(availableRepos[1]);
+      e.find("div.selection.dropdown").simulate("click");
+      e.find('div[role="option"] span')
+        .filterWhere((x) => x.text() === "zod/zoink")
+        .simulate("click");
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenLastCalledWith(availableRepos[1]);
     });
   });
 
-  describe("loadRepositorySelectStatus", () => {
-    beforeEach(() => {
-      fetch.resetMocks();
-    });
-    function expectSuccessful(
-      fetchReturn,
+  describe("loadStatus", () => {
+    function expectLoadValidStatus(
       localStore,
       expectedAvailableRepos,
       expectedSelectedRepo
     ) {
-      fetch.mockResponseOnce(fetchReturn);
-      const result = loadRepositorySelectStatus(localStore);
+      const result = loadStatus(localStore);
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(fetch).toHaveBeenCalledWith(REPO_REGISTRY_API);
+      expect.assertions(5);
       return result.then((status) => {
         expect(status.type).toBe("VALID");
         if (status.type !== "VALID") {
@@ -115,241 +97,224 @@ describe("app/credExplorer/RepositorySelect", () => {
       });
     }
     it("calls fetch and handles a simple success", () => {
-      const fetchResult = JSON.stringify({"foo/bar": true});
+      mockRegistry([{owner: "foo", name: "bar"}]);
       const repo = {owner: "foo", name: "bar"};
-      return expectSuccessful(
-        fetchResult,
-        new MemoryLocalStore(),
-        [repo],
-        repo
-      );
+      return expectLoadValidStatus(testLocalStore(), [repo], repo);
     });
-    it("returns repos in sorted order, and selects the first repo", () => {
-      const fetchResult = JSON.stringify({
-        "foo/bar": true,
-        "a/z": true,
-        "a/b": true,
-      });
+    it("returns repos in sorted order, and selects the last repo", () => {
       const repos = [
         {owner: "a", name: "b"},
         {owner: "a", name: "z"},
         {owner: "foo", name: "bar"},
       ];
-      return expectSuccessful(
-        fetchResult,
-        new MemoryLocalStore(),
-        repos,
-        repos[0]
-      );
+      const nonSortedRepos = [repos[2], repos[0], repos[1]];
+      mockRegistry(nonSortedRepos);
+      return expectLoadValidStatus(testLocalStore(), repos, repos[1]);
     });
     it("returns FAILURE on invalid fetch response", () => {
       fetch.mockResponseOnce(JSON.stringify(["hello"]));
-      return loadRepositorySelectStatus(new MemoryLocalStore()).then(
-        (renderState) => {
-          expect(renderState).toEqual({type: "FAILURE"});
-        }
-      );
+      expect.assertions(1);
+      return loadStatus(testLocalStore()).then((status) => {
+        expect(status).toEqual({type: "FAILURE"});
+      });
     });
     it("returns FAILURE on fetch failure", () => {
       fetch.mockReject(new Error("some failure"));
-      return loadRepositorySelectStatus(new MemoryLocalStore()).then(
-        (renderState) => {
-          expect(renderState).toEqual({type: "FAILURE"});
-        }
-      );
+      expect.assertions(1);
+      return loadStatus(testLocalStore()).then((status) => {
+        expect(status).toEqual({type: "FAILURE"});
+      });
     });
     it("loads selectedRepo from localStore, if available", () => {
-      const fetchResult = JSON.stringify({
-        "foo/bar": true,
-        "a/z": true,
-        "a/b": true,
-      });
       const repos = [
         {owner: "a", name: "b"},
         {owner: "a", name: "z"},
         {owner: "foo", name: "bar"},
       ];
-      const localStore = new MemoryLocalStore();
+      mockRegistry(repos);
+      const localStore = testLocalStore();
       localStore.set(REPO_KEY, {owner: "a", name: "z"});
-      return expectSuccessful(fetchResult, localStore, repos, repos[1]);
+      return expectLoadValidStatus(localStore, repos, repos[1]);
     });
     it("ignores selectedRepo from localStore, if not available", () => {
-      const fetchResult = JSON.stringify({
-        "foo/bar": true,
-        "a/z": true,
-        "a/b": true,
-      });
       const repos = [
         {owner: "a", name: "b"},
         {owner: "a", name: "z"},
         {owner: "foo", name: "bar"},
       ];
-      const localStore = new MemoryLocalStore();
+      mockRegistry(repos);
+      const localStore = testLocalStore();
       localStore.set(REPO_KEY, {owner: "non", name: "existent"});
-      return expectSuccessful(fetchResult, localStore, repos, repos[0]);
+      return expectLoadValidStatus(localStore, repos, repos[2]);
+    });
+    it("ignores malformed value in localStore", () => {
+      const repos = [
+        {owner: "a", name: "b"},
+        {owner: "a", name: "z"},
+        {owner: "foo", name: "bar"},
+      ];
+      mockRegistry(repos);
+      const localStore = testLocalStore();
+      localStore.set(REPO_KEY, 42);
+      return expectLoadValidStatus(localStore, repos, repos[2]);
+    });
+  });
+
+  describe("LocalStoreRepositorySelect", () => {
+    it("instantiates the child component", () => {
+      const status = {type: "LOADING"};
+      const onChange = jest.fn();
+      const e = shallow(
+        <LocalStoreRepositorySelect
+          onChange={onChange}
+          status={status}
+          localStore={testLocalStore()}
+        >
+          {({status, onChange}) => (
+            <PureRepositorySelect status={status} onChange={onChange} />
+          )}
+        </LocalStoreRepositorySelect>
+      );
+      const child = e.find("PureRepositorySelect");
+      expect(child.props().status).toEqual(status);
+    });
+    it("passes onChange result up to parent", () => {
+      const status = {type: "LOADING"};
+      const onChange = jest.fn();
+      let childOnChange;
+      shallow(
+        <LocalStoreRepositorySelect
+          onChange={onChange}
+          status={status}
+          localStore={testLocalStore()}
+        >
+          {({status, onChange}) => {
+            childOnChange = onChange;
+            return <PureRepositorySelect status={status} onChange={onChange} />;
+          }}
+        </LocalStoreRepositorySelect>
+      );
+      const repo = {owner: "foo", name: "bar"};
+      NullUtil.get(childOnChange)(repo);
+      expect(onChange).toHaveBeenCalledWith(repo);
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    it("stores onChange result in localStore", () => {
+      const status = {type: "LOADING"};
+      const onChange = jest.fn();
+      const localStore = testLocalStore();
+      let childOnChange;
+      shallow(
+        <LocalStoreRepositorySelect
+          onChange={onChange}
+          status={status}
+          localStore={localStore}
+        >
+          {({status, onChange}) => {
+            childOnChange = onChange;
+            return <PureRepositorySelect status={status} onChange={onChange} />;
+          }}
+        </LocalStoreRepositorySelect>
+      );
+      const repo = {owner: "foo", name: "bar"};
+      NullUtil.get(childOnChange)(repo);
+      expect(localStore.get(REPO_KEY)).toEqual(repo);
     });
   });
 
   describe("RepositorySelect", () => {
-    it("renders an empty select while loading", () => {
+    it("initially renders a LocalStoreRepositorySelect with status LOADING", () => {
       const e = shallow(
-        <RepositorySelect
-          onChange={(s) => {}}
-          localStore={new MemoryLocalStore()}
-        />
+        <RepositorySelect onChange={jest.fn()} localStore={testLocalStore()} />
       );
-      const span = e.find("span");
-      expect(span.text()).toBe("Please choose a repository to inspect:");
-      const select = e.find("select");
-      expect(select).toHaveLength(0);
+      const child = e.find(LocalStoreRepositorySelect);
+      const status = child.props().status;
+      const onChange = jest.fn();
+      expect(status).toEqual({type: "LOADING"});
+      const grandChild = child.props().children({status, onChange});
+      expect(grandChild.type).toBe(PureRepositorySelect);
     });
-    it.only("renders an error message if no repositories are available", async (done) => {
-      const promise = Promise.resolve({type: "NO_REPOS"});
-      console.error("setup mock");
-      RepositorySelectModule.loadRepositorySelectStatus = jest.fn(
-        () => promise
-      );
+
+    function waitForUpdate(enzymeWrapper) {
+      return new Promise((resolve) => {
+        setImmediate(() => {
+          enzymeWrapper.update();
+          resolve();
+        });
+      });
+    }
+
+    it("on successful load, sets the status on the child", async () => {
+      const onChange = jest.fn();
+      const selectedRepo = {owner: "foo", name: "bar"};
+      mockRegistry([selectedRepo]);
       const e = shallow(
-        <RepositorySelect
-          onChange={(s) => {}}
-          localStore={new MemoryLocalStore()}
-        />
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
       );
-      console.error("await promise");
-      await promise;
-      console.error("waited");
-      setImmediate(() => {
-        try {
-          e.update();
-          const span = e.find("span");
-          expect(span.text()).toBe("Error: No repositories found.");
-          done();
-        } catch (e) {
-          done.fail(e);
-        }
+      await waitForUpdate(e);
+      const childStatus = e.props().status;
+      const availableRepos = [selectedRepo];
+      expect(childStatus).toEqual({
+        type: "VALID",
+        selectedRepo,
+        availableRepos,
       });
     });
-    it("renders an error message if there was an error while loading", () => {
-      const e = shallow(
-        <PureRepositorySelect state={{type: "FAILURE"}} onChange={(s) => {}} />
-      );
-      const span = e.find("span");
-      expect(span.text()).toBe("Error: Unable to load repository registry.");
-    });
-    it("renders a select with all available repos as options", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
-      const selectedRepo = availableRepos[0];
-      const e = shallow(
-        <PureRepositorySelect
-          state={{type: "VALID", availableRepos, selectedRepo}}
-          onChange={(s) => {}}
-        />
-      );
-      const options = e.find("option");
-      expect(options.map((x) => x.text())).toEqual(["foo/bar", "zod/zoink"]);
-    });
-    it("the selectedRepo is selected", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
-      const selectedRepo = availableRepos[0];
-      const e = shallow(
-        <PureRepositorySelect
-          state={{type: "VALID", availableRepos, selectedRepo}}
-          onChange={(s) => {}}
-        />
-      );
-      expect(e.find("select").prop("value")).toBe("foo/bar");
-    });
-    it("clicking an option triggers the onChange", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
-      let selectedRepo = availableRepos[0];
-      const onChange = (s) => {
-        selectedRepo = s;
+
+    it("on successful load, passes the status to the onChange", async () => {
+      const onChange = jest.fn();
+      const repo = {
+        owner: "foo",
+        name: "bar",
       };
+      mockRegistry([repo]);
       const e = shallow(
-        <PureRepositorySelect
-          state={{type: "VALID", availableRepos, selectedRepo}}
-          onChange={onChange}
-        />
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
       );
-      expect(selectedRepo).toEqual(availableRepos[0]);
-      e.find("select").simulate("change", {target: {value: "zod/zoink"}});
-      expect(selectedRepo).toEqual(availableRepos[1]);
+      await waitForUpdate(e);
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(repo);
     });
-  });
 
-  /**
-  beforeEach(() => {
-    fetch.resetMocks();
-  });
-  function setup() {
-    const result: any = {selectedRepo: null};
-    const onChange = (selectedRepo) => {
-      result.selectedRepo = selectedRepo;
-    };
-    const repositorySelector = shallow(
-      <RepositorySelector onChange={onChange} />
-    );
-    return {repositorySelector, result};
-  }
+    it("on failed load, onChange not called", async () => {
+      const onChange = jest.fn();
+      fetch.mockReject(new Error("something bad"));
 
-  it("displays loading text while waiting for registry", () => {
-    const {repositorySelector, result} = setup();
-    expect(result.selectedRepo).toBe(null);
-    expect(repositorySelector.text()).toBe("Waiting to load available repos");
-  });
-  it.skip("displays error text if registry failed to load", () => {
-    //fetch.mockReject(new Error("Something bad"));
-    const {repositorySelector, result} = setup();
-    expect(result.selectedRepo).toBe(null);
-    expect(repositorySelector.text()).toBe("Error loading repos");
-  });
-  it.skip("displays error text if no repos are available", () => {
-    fetch.mockResponseOnce(JSON.stringify({"foo/bar": true}));
-    const promise = fetch("whatever");
-    fetch.mockReturnValueOnce(promise);
-    const {repositorySelector, result} = setup();
-    return promise.then(() => {
-      expect(result.selectedRepo).toBe(null);
-      expect(repositorySelector.state.availableRepos).toHaveLength(0);
-      expect(repositorySelector.text()).toBe(
-        "No repos are available. Please see the README for instructions."
+      const e = shallow(
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
       );
+      await waitForUpdate(e);
+      expect(onChange).toHaveBeenCalledTimes(0);
     });
-  });
-  it("displays available repos that were loaded", async (done) => {
-    fetch.mockResponseOnce(JSON.stringify({"foo/bar": true}));
-    const promise = fetch("whatever");
-    fetch.mockReturnValueOnce(promise);
 
-    const {repositorySelector, result} = setup();
+    it("child onChange triggers parent onChange", () => {
+      const onChange = jest.fn();
+      const e = mount(
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+      );
+      const child = e.find(PureRepositorySelect);
+      const repo = {owner: "foo", name: "bar"};
+      child.props().onChange(repo);
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(repo);
+    });
 
-    await Promise.all([promise]);
-    setImmediate(() => {
-      try {
-        repositorySelector.update();
-        const repo = {owner: "foo", name: "bar"};
-        expect(result.selectedRepo).toEqual(repo);
-        expect(repositorySelector.state().availableRepos).toEqual([repo]);
-        expect(repositorySelector.find("span").text()).toBe(
-          "Please choose a repository to inspect:"
-        );
-        done();
-      } catch (e) {
-        done.fail(e);
+    it("selecting child option updates top-level state", async () => {
+      const onChange = jest.fn();
+      const repos = [{owner: "foo", name: "bar"}, {owner: "z", name: "a"}];
+      mockRegistry(repos);
+      const e = mount(
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+      );
+      await waitForUpdate(e);
+      const child = e.find(PureRepositorySelect);
+      child.props().onChange(repos[0]);
+      const status: Status = e.state().status;
+      expect(status.type).toEqual("VALID");
+      if (status.type !== "VALID") {
+        throw new Error("Impossible");
       }
+      expect(status.selectedRepo).toEqual(repos[0]);
     });
   });
-  it("defaults to first available repo", () => {});
-  it("uses repo from LocalStore, if available", () => {});
-  it("uses first available repo, if LocalStore repo not available", () => {});
-  */
 });

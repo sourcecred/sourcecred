@@ -2,7 +2,7 @@
 
 import React from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
-import { Button } from 'semantic-ui-react';
+import {Button} from "semantic-ui-react";
 
 import type {LocalStore} from "../localStore";
 import CheckedLocalStore from "../checkedLocalStore";
@@ -17,8 +17,9 @@ import type {DynamicPluginAdapter} from "../pluginAdapter";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
 import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNodeDecomposition";
-import {RepositorySelect, type Repo} from "./RepositorySelect";
-import styles from '../style/styles';
+import RepositorySelect from "./RepositorySelect";
+import type {Repo} from "./repoRegistry";
+import styles from "../style/styles";
 import * as NullUtil from "../../util/null";
 
 export default class AppPage extends React.Component<{||}> {
@@ -52,6 +53,7 @@ type State = {
 const MAX_ENTRIES_PER_LIST = 100;
 
 export class App extends React.Component<Props, State> {
+  portalRoot: ?*;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -62,7 +64,7 @@ export class App extends React.Component<Props, State> {
     this.portalRoot = React.createRef();
   }
 
-  loadData(callbackFn = () => {}) {
+  loadData() {
     const {selectedRepo} = this.state;
     if (selectedRepo == null) {
       throw new Error(`Impossible`);
@@ -82,26 +84,27 @@ export class App extends React.Component<Props, State> {
         return {graph, adapter};
       });
 
-    Promise.all([gitPromise, githubPromise]).then((graphsAndAdapters) => {
-      const graph = Graph.merge(graphsAndAdapters.map((x) => x.graph));
-      const adapters = graphsAndAdapters.map((x) => x.adapter);
-      const data = {
-        graphWithMetadata: {
-          graph,
-          adapters,
-          nodeCount: Array.from(graph.nodes()).length,
-          edgeCount: Array.from(graph.edges()).length,
-        },
-        pnd: null,
-      };
-      this.setState({data});
-    })
-    .then(() => { callbackFn() });
+    Promise.all([gitPromise, githubPromise])
+      .then((graphsAndAdapters) => {
+        const graph = Graph.merge(graphsAndAdapters.map((x) => x.graph));
+        const adapters = graphsAndAdapters.map((x) => x.adapter);
+        const data = {
+          graphWithMetadata: {
+            graph,
+            adapters,
+            nodeCount: Array.from(graph.nodes()).length,
+            edgeCount: Array.from(graph.edges()).length,
+          },
+          pnd: null,
+        };
+        this.setState({data});
+      })
+      .then(() => this.generateDataAfterLoad());
   }
 
   generateDataAfterLoad = () => {
-    const { edgeEvaluator } = this.state;
-    const { graphWithMetadata } = this.state.data;
+    const {edgeEvaluator} = this.state;
+    const {graphWithMetadata} = this.state.data;
     if (graphWithMetadata == null || edgeEvaluator == null) {
       throw new Error("Unexpected null value");
     }
@@ -119,15 +122,15 @@ export class App extends React.Component<Props, State> {
         this.setState({data});
       }
     });
-  }
+  };
 
   handleExploreButtonClick = () => {
-    this.loadData(this.generateDataAfterLoad);
-  }
+    this.loadData();
+  };
 
   render() {
-    const { localStore } = this.props;
-    const { graphWithMetadata, pnd } = this.state.data;
+    const {localStore} = this.props;
+    const {graphWithMetadata, pnd} = this.state.data;
     return (
       <div style={{display: "flex"}}>
         <div className={css(style.body)}>
@@ -137,10 +140,7 @@ export class App extends React.Component<Props, State> {
               localStore={localStore}
               onChange={(selectedRepo) => this.setState({selectedRepo})}
             />
-            <Button
-              color="teal"
-              onClick={this.handleExploreButtonClick}
-            >
+            <Button color="teal" onClick={this.handleExploreButtonClick}>
               Explore
             </Button>
             {graphWithMetadata ? (
@@ -163,7 +163,7 @@ export class App extends React.Component<Props, State> {
             />
           </div>
         </div>
-        <div ref={this.portalRoot}></div>
+        <div ref={this.portalRoot} />
       </div>
     );
   }
