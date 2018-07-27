@@ -1,0 +1,362 @@
+// @flow
+import React from "react";
+import {shallow, mount} from "enzyme";
+
+import * as NullUtil from "../../util/null";
+import testLocalStore from "../testLocalStore";
+import RepositorySelect, {
+  PureRepositorySelect,
+  LocalStoreRepositorySelect,
+  loadStatus,
+  type Status,
+  REPO_KEY,
+  REPO_REGISTRY_API,
+} from "./RepositorySelect";
+
+require("../testUtil").configureEnzyme();
+require("../testUtil").configureAphrodite();
+
+describe("app/credExplorer/RepositorySelect", () => {
+  beforeEach(() => {
+    fetch.resetMocks();
+  });
+  describe("PureRepositorySelect", () => {
+    it("doesn't render a select while loading", () => {
+      const e = shallow(
+        <PureRepositorySelect status={{type: "LOADING"}} onChange={jest.fn()} />
+      );
+      const span = e.find("span");
+      expect(span.text()).toBe("Please choose a repository to inspect:");
+      const select = e.find("select");
+      expect(select).toHaveLength(0);
+    });
+    it("renders an error message if no repositories are available", () => {
+      const e = shallow(
+        <PureRepositorySelect
+          status={{type: "NO_REPOS"}}
+          onChange={jest.fn()}
+        />
+      );
+      const span = e.find("span");
+      expect(span.text()).toBe("Error: No repositories found.");
+    });
+    it("renders an error message if there was an error while loading", () => {
+      const e = shallow(
+        <PureRepositorySelect status={{type: "FAILURE"}} onChange={jest.fn()} />
+      );
+      const span = e.find("span");
+      expect(span.text()).toBe("Error: Unable to load repository registry.");
+    });
+    it("renders a select with all available repos as options", () => {
+      const availableRepos = [
+        {owner: "foo", name: "bar"},
+        {owner: "zod", name: "zoink"},
+      ];
+      const selectedRepo = availableRepos[0];
+      const e = shallow(
+        <PureRepositorySelect
+          status={{type: "VALID", availableRepos, selectedRepo}}
+          onChange={jest.fn()}
+        />
+      );
+      const options = e.find("option");
+      expect(options.map((x) => x.text())).toEqual(["foo/bar", "zod/zoink"]);
+    });
+    it("the selectedRepo is selected", () => {
+      const availableRepos = [
+        {owner: "foo", name: "bar"},
+        {owner: "zod", name: "zoink"},
+      ];
+      const selectedRepo = availableRepos[0];
+      const e = shallow(
+        <PureRepositorySelect
+          status={{type: "VALID", availableRepos, selectedRepo}}
+          onChange={jest.fn()}
+        />
+      );
+      expect(e.find("select").prop("value")).toBe("foo/bar");
+    });
+    it("clicking an option triggers the onChange", () => {
+      const availableRepos = [
+        {owner: "foo", name: "bar"},
+        {owner: "zod", name: "zoink"},
+      ];
+      const onChange = jest.fn();
+      const e = shallow(
+        <PureRepositorySelect
+          status={{
+            type: "VALID",
+            availableRepos,
+            selectedRepo: availableRepos[0],
+          }}
+          onChange={onChange}
+        />
+      );
+      e.find("select").simulate("change", {target: {value: "zod/zoink"}});
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenLastCalledWith(availableRepos[1]);
+    });
+  });
+
+  describe("loadStatus", () => {
+    function expectLoadValidStatus(
+      fetchReturn,
+      localStore,
+      expectedAvailableRepos,
+      expectedSelectedRepo
+    ) {
+      fetch.mockResponseOnce(fetchReturn);
+      const result = loadStatus(localStore);
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(REPO_REGISTRY_API);
+      expect.assertions(5);
+      return result.then((status) => {
+        expect(status.type).toBe("VALID");
+        if (status.type !== "VALID") {
+          throw new Error("Impossible");
+        }
+        expect(status.availableRepos).toEqual(expectedAvailableRepos);
+        expect(status.selectedRepo).toEqual(expectedSelectedRepo);
+      });
+    }
+    it("calls fetch and handles a simple success", () => {
+      const fetchResult = JSON.stringify({"foo/bar": true});
+      const repo = {owner: "foo", name: "bar"};
+      return expectLoadValidStatus(fetchResult, testLocalStore(), [repo], repo);
+    });
+    it("returns repos in sorted order, and selects the first repo", () => {
+      const fetchResult = JSON.stringify({
+        "foo/bar": true,
+        "a/z": true,
+        "a/b": true,
+      });
+      const repos = [
+        {owner: "a", name: "b"},
+        {owner: "a", name: "z"},
+        {owner: "foo", name: "bar"},
+      ];
+      return expectLoadValidStatus(
+        fetchResult,
+        testLocalStore(),
+        repos,
+        repos[0]
+      );
+    });
+    it("returns FAILURE on invalid fetch response", () => {
+      fetch.mockResponseOnce(JSON.stringify(["hello"]));
+      expect.assertions(1);
+      return loadStatus(testLocalStore()).then((status) => {
+        expect(status).toEqual({type: "FAILURE"});
+      });
+    });
+    it("returns FAILURE on fetch failure", () => {
+      fetch.mockReject(new Error("some failure"));
+      expect.assertions(1);
+      return loadStatus(testLocalStore()).then((status) => {
+        expect(status).toEqual({type: "FAILURE"});
+      });
+    });
+    it("loads selectedRepo from localStore, if available", () => {
+      const fetchResult = JSON.stringify({
+        "foo/bar": true,
+        "a/z": true,
+        "a/b": true,
+      });
+      const repos = [
+        {owner: "a", name: "b"},
+        {owner: "a", name: "z"},
+        {owner: "foo", name: "bar"},
+      ];
+      const localStore = testLocalStore();
+      localStore.set(REPO_KEY, {owner: "a", name: "z"});
+      return expectLoadValidStatus(fetchResult, localStore, repos, repos[1]);
+    });
+    it("ignores selectedRepo from localStore, if not available", () => {
+      const fetchResult = JSON.stringify({
+        "foo/bar": true,
+        "a/z": true,
+        "a/b": true,
+      });
+      const repos = [
+        {owner: "a", name: "b"},
+        {owner: "a", name: "z"},
+        {owner: "foo", name: "bar"},
+      ];
+      const localStore = testLocalStore();
+      localStore.set(REPO_KEY, {owner: "non", name: "existent"});
+      return expectLoadValidStatus(fetchResult, localStore, repos, repos[0]);
+    });
+    it("ignores malformed value in localStore", () => {
+      const fetchResult = JSON.stringify({
+        "foo/bar": true,
+        "a/z": true,
+        "a/b": true,
+      });
+      const repos = [
+        {owner: "a", name: "b"},
+        {owner: "a", name: "z"},
+        {owner: "foo", name: "bar"},
+      ];
+      const localStore = testLocalStore();
+      localStore.set(REPO_KEY, 42);
+      return expectLoadValidStatus(fetchResult, localStore, repos, repos[0]);
+    });
+  });
+
+  describe("LocalStoreRepositorySelect", () => {
+    it("instantiates the child component", () => {
+      const status = {type: "LOADING"};
+      const onChange = jest.fn();
+      const e = shallow(
+        <LocalStoreRepositorySelect
+          onChange={onChange}
+          status={status}
+          localStore={testLocalStore()}
+        >
+          {({status, onChange}) => (
+            <PureRepositorySelect status={status} onChange={onChange} />
+          )}
+        </LocalStoreRepositorySelect>
+      );
+      const child = e.find("PureRepositorySelect");
+      expect(child.props().status).toEqual(status);
+    });
+    it("passes onChange result up to parent", () => {
+      const status = {type: "LOADING"};
+      const onChange = jest.fn();
+      let childOnChange;
+      shallow(
+        <LocalStoreRepositorySelect
+          onChange={onChange}
+          status={status}
+          localStore={testLocalStore()}
+        >
+          {({status, onChange}) => {
+            childOnChange = onChange;
+            return <PureRepositorySelect status={status} onChange={onChange} />;
+          }}
+        </LocalStoreRepositorySelect>
+      );
+      const repo = {owner: "foo", name: "bar"};
+      NullUtil.get(childOnChange)(repo);
+      expect(onChange).toHaveBeenCalledWith(repo);
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    it("stores onChange result in localStore", () => {
+      const status = {type: "LOADING"};
+      const onChange = jest.fn();
+      const localStore = testLocalStore();
+      let childOnChange;
+      shallow(
+        <LocalStoreRepositorySelect
+          onChange={onChange}
+          status={status}
+          localStore={localStore}
+        >
+          {({status, onChange}) => {
+            childOnChange = onChange;
+            return <PureRepositorySelect status={status} onChange={onChange} />;
+          }}
+        </LocalStoreRepositorySelect>
+      );
+      const repo = {owner: "foo", name: "bar"};
+      NullUtil.get(childOnChange)(repo);
+      expect(localStore.get(REPO_KEY)).toEqual(repo);
+    });
+  });
+
+  describe("RepositorySelect", () => {
+    it("initially renders a LocalStoreRepositorySelect with status LOADING", () => {
+      const e = shallow(
+        <RepositorySelect onChange={jest.fn()} localStore={testLocalStore()} />
+      );
+      const child = e.find(LocalStoreRepositorySelect);
+      const status = child.props().status;
+      const onChange = jest.fn();
+      expect(status).toEqual({type: "LOADING"});
+      const grandChild = child.props().children({status, onChange});
+      expect(grandChild.type).toBe(PureRepositorySelect);
+    });
+
+    function waitForUpdate(enzymeWrapper) {
+      return new Promise((resolve) => {
+        setImmediate(() => {
+          enzymeWrapper.update();
+          resolve();
+        });
+      });
+    }
+
+    it("on successful load, sets the status on the child", async () => {
+      const onChange = jest.fn();
+      fetch.mockResponseOnce(JSON.stringify({"foo/bar": true}));
+      const e = shallow(
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+      );
+      await waitForUpdate(e);
+      const childStatus = e.props().status;
+      const selectedRepo = {owner: "foo", name: "bar"};
+      const availableRepos = [selectedRepo];
+      expect(childStatus).toEqual({
+        type: "VALID",
+        selectedRepo,
+        availableRepos,
+      });
+    });
+
+    it("on successful load, passes the status to the onChange", async () => {
+      const onChange = jest.fn();
+      fetch.mockResponseOnce(JSON.stringify({"foo/bar": true}));
+      const e = shallow(
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+      );
+      await waitForUpdate(e);
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith({
+        owner: "foo",
+        name: "bar",
+      });
+    });
+
+    it("on failed load, onChange not called", async () => {
+      const onChange = jest.fn();
+      fetch.mockReject(new Error("something bad"));
+
+      const e = shallow(
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+      );
+      await waitForUpdate(e);
+      expect(onChange).toHaveBeenCalledTimes(0);
+    });
+
+    it("child onChange triggers parent onChange", () => {
+      const onChange = jest.fn();
+      const e = mount(
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+      );
+      const child = e.find(PureRepositorySelect);
+      const repo = {owner: "foo", name: "bar"};
+      child.props().onChange(repo);
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(repo);
+    });
+
+    it("selecting child option updates top-level state", async () => {
+      const onChange = jest.fn();
+      fetch.mockResponseOnce(JSON.stringify({"foo/bar": true, "z/a": true}));
+      const e = mount(
+        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+      );
+      await waitForUpdate(e);
+      const child = e.find(PureRepositorySelect);
+      const repo = {owner: "z", name: "a"};
+      child.props().onChange(repo);
+      const status: Status = e.state().status;
+      expect(status.type).toEqual("VALID");
+      if (status.type !== "VALID") {
+        throw new Error("Impossible");
+      }
+      expect(status.selectedRepo).toEqual(repo);
+    });
+  });
+});

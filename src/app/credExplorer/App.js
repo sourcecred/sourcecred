@@ -16,12 +16,9 @@ import type {DynamicPluginAdapter} from "../pluginAdapter";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
 import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNodeDecomposition";
+import RepositorySelect, {type Repo} from "./RepositorySelect";
 
 import * as NullUtil from "../../util/null";
-
-const REPO_OWNER_KEY = "repoOwner";
-const REPO_NAME_KEY = "repoName";
-const MAX_ENTRIES_PER_LIST = 100;
 
 export default class AppPage extends React.Component<{||}> {
   static _LOCAL_STORE = new CheckedLocalStore(
@@ -38,8 +35,7 @@ export default class AppPage extends React.Component<{||}> {
 
 type Props = {|+localStore: LocalStore|};
 type State = {
-  repoOwner: string,
-  repoName: string,
+  selectedRepo: ?Repo,
   data: {|
     graphWithMetadata: ?{|
       +graph: Graph,
@@ -52,28 +48,21 @@ type State = {
   edgeEvaluator: ?EdgeEvaluator,
 };
 
+const MAX_ENTRIES_PER_LIST = 100;
+
 export class App extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      repoOwner: "",
-      repoName: "",
+      selectedRepo: null,
       data: {graphWithMetadata: null, pnd: null},
       edgeEvaluator: null,
     };
   }
 
-  componentDidMount() {
-    const {localStore} = this.props;
-    this.setState((state) => ({
-      repoOwner: localStore.get(REPO_OWNER_KEY, state.repoOwner),
-      repoName: localStore.get(REPO_NAME_KEY, state.repoName),
-    }));
-  }
-
   render() {
     const {localStore} = this.props;
-    const {edgeEvaluator} = this.state;
+    const {edgeEvaluator, selectedRepo} = this.state;
     const {graphWithMetadata, pnd} = this.state.data;
     return (
       <div style={{maxWidth: "66em", margin: "0 auto", padding: "0 10px"}}>
@@ -81,33 +70,17 @@ export class App extends React.Component<Props, State> {
           <h1>Cred Explorer</h1>
         </header>
         <div>
-          <label>
-            Repository owner:
-            <input
-              value={this.state.repoOwner}
-              onChange={(e) => {
-                const value = e.target.value;
-                this.setState({repoOwner: value}, () => {
-                  localStore.set(REPO_OWNER_KEY, this.state.repoOwner);
-                });
-              }}
-            />
-          </label>
+          <RepositorySelect
+            localStore={localStore}
+            onChange={(selectedRepo) => this.setState({selectedRepo})}
+          />
           <br />
-          <label>
-            Repository name:
-            <input
-              value={this.state.repoName}
-              onChange={(e) => {
-                const value = e.target.value;
-                this.setState({repoName: value}, () => {
-                  localStore.set(REPO_NAME_KEY, this.state.repoName);
-                });
-              }}
-            />
-          </label>
-          <br />
-          <button onClick={() => this.loadData()}>Load data</button>
+          <button
+            disabled={selectedRepo == null}
+            onClick={() => this.loadData()}
+          >
+            Load data
+          </button>
           <button
             disabled={graphWithMetadata == null || edgeEvaluator == null}
             onClick={() => {
@@ -155,26 +128,20 @@ export class App extends React.Component<Props, State> {
   }
 
   loadData() {
-    const validRe = /^[A-Za-z0-9_-]+$/;
-    const {repoOwner, repoName} = this.state;
-    if (!repoOwner.match(validRe)) {
-      console.error(`Invalid repository owner: ${JSON.stringify(repoOwner)}`);
-      return;
-    }
-    if (!repoName.match(validRe)) {
-      console.error(`Invalid repository name: ${JSON.stringify(repoName)}`);
-      return;
+    const {selectedRepo} = this.state;
+    if (selectedRepo == null) {
+      throw new Error(`Impossible`);
     }
 
     const githubPromise = new GithubAdapter()
-      .load(repoOwner, repoName)
+      .load(selectedRepo.owner, selectedRepo.name)
       .then((adapter) => {
         const graph = adapter.graph();
         return {graph, adapter};
       });
 
     const gitPromise = new GitAdapter()
-      .load(repoOwner, repoName)
+      .load(selectedRepo.owner, selectedRepo.name)
       .then((adapter) => {
         const graph = adapter.graph();
         return {graph, adapter};
