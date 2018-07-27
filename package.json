@@ -6,7 +6,6 @@
     "@oclif/command": "^1.4.20",
     "@oclif/config": "^1.6.17",
     "@oclif/plugin-help": "^1.2.10",
-    "@tensorflow/tfjs-core": "^0.9.1",
     "aphrodite": "^2.1.0",
     "autoprefixer": "7.1.6",
     "babel-core": "6.26.0",
