@@ -58,7 +58,9 @@ describe("app/credExplorer/RepositorySelect", () => {
         <PureRepositorySelect status={{type: "FAILURE"}} onChange={jest.fn()} />
       );
       const span = e.find("span");
-      expect(span.text()).toBe("Error: Unable to load repository registry.");
+      expect(span.text()).toBe(
+        "Error: Unable to load repository registry. See console for details."
+      );
     });
     it("renders a select with all available repos as options", () => {
       const availableRepos = [
@@ -147,16 +149,22 @@ describe("app/credExplorer/RepositorySelect", () => {
     });
     it("returns FAILURE on invalid fetch response", () => {
       fetch.mockResponseOnce(JSON.stringify(["hello"]));
-      expect.assertions(3);
+      expect.assertions(4);
       return loadStatus(testLocalStore()).then((status) => {
         expect(status).toEqual({type: "FAILURE"});
+        expect(console.error).toHaveBeenCalledTimes(1);
+        // $ExpectFlowError
+        console.error = jest.fn();
       });
     });
     it("returns FAILURE on fetch failure", () => {
       fetch.mockReject(new Error("some failure"));
-      expect.assertions(3);
+      expect.assertions(4);
       return loadStatus(testLocalStore()).then((status) => {
         expect(status).toEqual({type: "FAILURE"});
+        expect(console.error).toHaveBeenCalledTimes(1);
+        // $ExpectFlowError
+        console.error = jest.fn();
       });
     });
     it("loads selectedRepo from localStore, if available", () => {
@@ -258,6 +266,7 @@ describe("app/credExplorer/RepositorySelect", () => {
 
   describe("RepositorySelect", () => {
     it("initially renders a LocalStoreRepositorySelect with status LOADING", () => {
+      mockRegistry([{owner: "irrelevant", name: "unused"}]);
       const e = shallow(
         <RepositorySelect onChange={jest.fn()} localStore={testLocalStore()} />
       );
@@ -319,15 +328,19 @@ describe("app/credExplorer/RepositorySelect", () => {
       );
       await waitForUpdate(e);
       expect(onChange).toHaveBeenCalledTimes(0);
+      expect(console.error).toHaveBeenCalledTimes(1);
+      // $ExpectFlowError
+      console.error = jest.fn();
     });
 
     it("child onChange triggers parent onChange", () => {
       const onChange = jest.fn();
+      const repo = {owner: "foo", name: "bar"};
+      mockRegistry([repo]);
       const e = mount(
         <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
       );
       const child = e.find(PureRepositorySelect);
-      const repo = {owner: "foo", name: "bar"};
       child.props().onChange(repo);
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange).toHaveBeenCalledWith(repo);
