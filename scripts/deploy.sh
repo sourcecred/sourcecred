@@ -77,8 +77,7 @@ build_and_deploy() {
         yarn
         yarn backend
         yarn build
-        node ./bin/sourcecred.js load sourcecred example-github
-        node ./bin/sourcecred.js load sourcecred example-git
+        node ./bin/sourcecred.js load ipfs js-ipfs
         node ./bin/sourcecred.js load sourcecred sourcecred
     )
 
