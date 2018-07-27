@@ -1,7 +1,9 @@
 // @flow
 
 import React from "react";
-import { Button } from "semantic-ui-react";
+import ReactDOM from 'react-dom';
+import { Button, Tab } from "semantic-ui-react";
+import {StyleSheet, css} from "aphrodite/no-important";
 
 import {
   type EdgeAddressT,
@@ -19,7 +21,7 @@ import * as NullUtil from "../../util/null";
 import type {StaticPluginAdapter} from "../pluginAdapter";
 import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
 import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
-
+import styles from '../style/styles';
 type Props = {|
   +localStore: LocalStore,
   +onChange: (EdgeEvaluator) => void,
@@ -70,6 +72,7 @@ export class WeightConfig extends React.Component<Props, State> {
       nodeWeights: defaultNodeWeights(),
       expanded: false,
     };
+    this.weightConfigContainer = React.createRef();
   }
 
   componentDidMount() {
@@ -91,6 +94,35 @@ export class WeightConfig extends React.Component<Props, State> {
     );
   }
 
+  showWeightConfig = () => {
+    const { portalContainerEl } = this.props;
+    const panes = [
+      { menuItem: 'git', render: () => {
+        return (<EdgeConfig
+          edgeWeights={this.state.edgeWeights}
+          onChange={(ew) =>
+            this.setState({edgeWeights: ew}, () => this.fire())
+          }
+        />);
+      }},
+      { menuItem: 'github', render: () => {
+        return (<NodeConfig
+          nodeWeights={this.state.nodeWeights}
+          onChange={(nw) =>
+            this.setState({nodeWeights: nw}, () => this.fire())
+          }
+        />);
+      }}
+    ]
+    const portalEL = (
+      <div className={css(style.drawer)}>
+        <h3>Adjust Weight configuration</h3>
+        <Tab panes={panes} />
+      </div>
+    );
+    return ReactDOM.createPortal(portalEL, portalContainerEl.current);
+  }
+
   render() {
     const {expanded} = this.state;
     return (
@@ -104,28 +136,7 @@ export class WeightConfig extends React.Component<Props, State> {
         >
           {expanded ? "Hide weight configuration" : "Show weight configuration"}
         </Button>
-        {expanded && (
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-            }}
-          >
-            <EdgeConfig
-              edgeWeights={this.state.edgeWeights}
-              onChange={(ew) =>
-                this.setState({edgeWeights: ew}, () => this.fire())
-              }
-            />
-            <NodeConfig
-              nodeWeights={this.state.nodeWeights}
-              onChange={(nw) =>
-                this.setState({nodeWeights: nw}, () => this.fire())
-              }
-            />
-          </div>
-        )}
+        {expanded && this.showWeightConfig()}
       </React.Fragment>
     );
   }
@@ -260,3 +271,5 @@ function formatNumber(n: number) {
   }
   return x.replace("-", "\u2212");
 }
+
+const style = StyleSheet.create(styles);

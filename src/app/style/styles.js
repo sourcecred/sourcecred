@@ -4,7 +4,8 @@ export default {
     fontFamily: "Roboto Condensed"
   },
   body: {
-    padding: "0 100px"
+    padding: "0 100px",
+    flex: "3"
   },
   nav: {
     height: "60px",
@@ -56,5 +57,11 @@ export default {
     ":focus": {
       fill: "#1297A1"
     }
+  },
+  drawer: {
+    flex: "1",
+    backgroundColor: "#d3d3d3",
+    padding: "20px",
+    color: "#ffffff"
   }
 };

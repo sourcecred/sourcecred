@@ -3,7 +3,7 @@
 import React from "react";
 import sortBy from "lodash.sortby";
 import deepEqual from "lodash.isequal";
-
+import { Dropdown } from 'semantic-ui-react';
 import * as NullUtil from "../../util/null";
 import type {LocalStore} from "../localStore";
 
@@ -129,27 +129,30 @@ export class RepositorySelect extends React.Component<
   }
 
   renderSelect(availableRepos: $ReadOnlyArray<Repo>, selectedRepo: ?Repo) {
+    const options = availableRepos.map(({owner, name}) => {
+      const repoString = `${owner}/${name}`;
+      return (
+        {
+          text: repoString,
+          value: repoString,
+          key: repoString
+        }
+      );
+    });
     return (
       <label>
         <span>Please choose a repository to inspect:</span>{" "}
         {selectedRepo != null && (
-          <select
+          <Dropdown
+            selection
             value={`${selectedRepo.owner}/${selectedRepo.name}`}
             onChange={(e) => {
               const repoString = e.target.value;
               const repo = repoStringToRepo(repoString);
               this.onChange(repo);
             }}
-          >
-            {availableRepos.map(({owner, name}) => {
-              const repoString = `${owner}/${name}`;
-              return (
-                <option value={repoString} key={repoString}>
-                  {repoString}
-                </option>
-              );
-            })}
-          </select>
+            options={options}
+          />
         )}
       </label>
     );
@@ -199,7 +202,7 @@ export class PureRepositorySelect extends React.PureComponent<
   }
 
   render() {
-    const {onChange, state} = this.props;
+    const { state } = this.props;
     switch (state.type) {
       case "LOADING":
         // Just show an empty select while we wait.
