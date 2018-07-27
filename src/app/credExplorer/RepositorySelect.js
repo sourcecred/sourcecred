@@ -7,10 +7,8 @@ import deepEqual from "lodash.isequal";
 import * as NullUtil from "../../util/null";
 import type {LocalStore} from "../localStore";
 
-export const REPO_REGISTRY_API = "/api/v1/data/repositoryRegistry.json";
+import {type Repo, fromJSON, REPO_REGISTRY_API} from "./repoRegistry";
 export const REPO_KEY = "selectedRepository";
-
-export type Repo = {|+name: string, +owner: string|};
 
 export type Status =
   | {|+type: "LOADING"|}
@@ -95,17 +93,17 @@ export async function loadStatus(localStore: LocalStore): Promise<Status> {
       return {type: "FAILURE"};
     }
     const json = await response.json();
-    let availableRepos = Object.keys(json).map(repoStringToRepo);
-    availableRepos = sortBy(availableRepos, (r) => r.owner, (r) => r.name);
+    const availableRepos = fromJSON(json);
     if (availableRepos.length === 0) {
       return {type: "NO_REPOS"};
     }
     const localStoreRepo = localStore.get(REPO_KEY, null);
     const selectedRepo = NullUtil.orElse(
       availableRepos.find((x) => deepEqual(x, localStoreRepo)),
-      availableRepos[0]
+      availableRepos[availableRepos.length - 1]
     );
-    return {type: "VALID", availableRepos, selectedRepo};
+    const sortedRepos = sortBy(availableRepos, (r) => r.owner, (r) => r.name);
+    return {type: "VALID", availableRepos: sortedRepos, selectedRepo};
   } catch (e) {
     return {type: "FAILURE"};
   }

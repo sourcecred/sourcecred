@@ -10,8 +10,9 @@ import RepositorySelect, {
   loadStatus,
   type Status,
   REPO_KEY,
-  REPO_REGISTRY_API,
 } from "./RepositorySelect";
+
+import {toJSON, type RepoRegistry, REPO_REGISTRY_API} from "./repoRegistry";
 
 require("../testUtil").configureEnzyme();
 require("../testUtil").configureAphrodite();
@@ -20,6 +21,10 @@ describe("app/credExplorer/RepositorySelect", () => {
   beforeEach(() => {
     fetch.resetMocks();
   });
+
+  function mockRegistry(registry: RepoRegistry) {
+    fetch.mockResponseOnce(JSON.stringify(toJSON(registry)));
+  }
   describe("PureRepositorySelect", () => {
     it("doesn't render a select while loading", () => {
       const e = shallow(
@@ -100,12 +105,10 @@ describe("app/credExplorer/RepositorySelect", () => {
 
   describe("loadStatus", () => {
     function expectLoadValidStatus(
-      fetchReturn,
       localStore,
       expectedAvailableRepos,
       expectedSelectedRepo
     ) {
-      fetch.mockResponseOnce(fetchReturn);
       const result = loadStatus(localStore);
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(fetch).toHaveBeenCalledWith(REPO_REGISTRY_API);
@@ -120,27 +123,19 @@ describe("app/credExplorer/RepositorySelect", () => {
       });
     }
     it("calls fetch and handles a simple success", () => {
-      const fetchResult = JSON.stringify({"foo/bar": true});
+      mockRegistry([{owner: "foo", name: "bar"}]);
       const repo = {owner: "foo", name: "bar"};
-      return expectLoadValidStatus(fetchResult, testLocalStore(), [repo], repo);
+      return expectLoadValidStatus(testLocalStore(), [repo], repo);
     });
-    it("returns repos in sorted order, and selects the first repo", () => {
-      const fetchResult = JSON.stringify({
-        "foo/bar": true,
-        "a/z": true,
-        "a/b": true,
-      });
+    it("returns repos in sorted order, and selects the last repo", () => {
       const repos = [
         {owner: "a", name: "b"},
         {owner: "a", name: "z"},
         {owner: "foo", name: "bar"},
       ];
-      return expectLoadValidStatus(
-        fetchResult,
-        testLocalStore(),
-        repos,
-        repos[0]
-      );
+      const nonSortedRepos = [repos[2], repos[0], repos[1]];
+      mockRegistry(nonSortedRepos);
+      return expectLoadValidStatus(testLocalStore(), repos, repos[1]);
     });
     it("returns FAILURE on invalid fetch response", () => {
       fetch.mockResponseOnce(JSON.stringify(["hello"]));
@@ -157,49 +152,37 @@ describe("app/credExplorer/RepositorySelect", () => {
       });
     });
     it("loads selectedRepo from localStore, if available", () => {
-      const fetchResult = JSON.stringify({
-        "foo/bar": true,
-        "a/z": true,
-        "a/b": true,
-      });
       const repos = [
         {owner: "a", name: "b"},
         {owner: "a", name: "z"},
         {owner: "foo", name: "bar"},
       ];
+      mockRegistry(repos);
       const localStore = testLocalStore();
       localStore.set(REPO_KEY, {owner: "a", name: "z"});
-      return expectLoadValidStatus(fetchResult, localStore, repos, repos[1]);
+      return expectLoadValidStatus(localStore, repos, repos[1]);
     });
     it("ignores selectedRepo from localStore, if not available", () => {
-      const fetchResult = JSON.stringify({
-        "foo/bar": true,
-        "a/z": true,
-        "a/b": true,
-      });
       const repos = [
         {owner: "a", name: "b"},
         {owner: "a", name: "z"},
         {owner: "foo", name: "bar"},
       ];
+      mockRegistry(repos);
       const localStore = testLocalStore();
       localStore.set(REPO_KEY, {owner: "non", name: "existent"});
-      return expectLoadValidStatus(fetchResult, localStore, repos, repos[0]);
+      return expectLoadValidStatus(localStore, repos, repos[2]);
     });
     it("ignores malformed value in localStore", () => {
-      const fetchResult = JSON.stringify({
-        "foo/bar": true,
-        "a/z": true,
-        "a/b": true,
-      });
       const repos = [
         {owner: "a", name: "b"},
         {owner: "a", name: "z"},
         {owner: "foo", name: "bar"},
       ];
+      mockRegistry(repos);
       const localStore = testLocalStore();
       localStore.set(REPO_KEY, 42);
-      return expectLoadValidStatus(fetchResult, localStore, repos, repos[0]);
+      return expectLoadValidStatus(localStore, repos, repos[2]);
     });
   });
 
@@ -289,13 +272,13 @@ describe("app/credExplorer/RepositorySelect", () => {
 
     it("on successful load, sets the status on the child", async () => {
       const onChange = jest.fn();
-      fetch.mockResponseOnce(JSON.stringify({"foo/bar": true}));
+      const selectedRepo = {owner: "foo", name: "bar"};
+      mockRegistry([selectedRepo]);
       const e = shallow(
         <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
       );
       await waitForUpdate(e);
       const childStatus = e.props().status;
-      const selectedRepo = {owner: "foo", name: "bar"};
       const availableRepos = [selectedRepo];
       expect(childStatus).toEqual({
         type: "VALID",
@@ -306,16 +289,17 @@ describe("app/credExplorer/RepositorySelect", () => {
 
     it("on successful load, passes the status to the onChange", async () => {
       const onChange = jest.fn();
-      fetch.mockResponseOnce(JSON.stringify({"foo/bar": true}));
+      const repo = {
+        owner: "foo",
+        name: "bar",
+      };
+      mockRegistry([repo]);
       const e = shallow(
         <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
       );
       await waitForUpdate(e);
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith({
-        owner: "foo",
-        name: "bar",
-      });
+      expect(onChange).toHaveBeenCalledWith(repo);
     });
 
     it("on failed load, onChange not called", async () => {
@@ -343,20 +327,20 @@ describe("app/credExplorer/RepositorySelect", () => {
 
     it("selecting child option updates top-level state", async () => {
       const onChange = jest.fn();
-      fetch.mockResponseOnce(JSON.stringify({"foo/bar": true, "z/a": true}));
+      const repos = [{owner: "foo", name: "bar"}, {owner: "z", name: "a"}];
+      mockRegistry(repos);
       const e = mount(
         <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
       );
       await waitForUpdate(e);
       const child = e.find(PureRepositorySelect);
-      const repo = {owner: "z", name: "a"};
-      child.props().onChange(repo);
+      child.props().onChange(repos[0]);
       const status: Status = e.state().status;
       expect(status.type).toEqual("VALID");
       if (status.type !== "VALID") {
         throw new Error("Impossible");
       }
-      expect(status.selectedRepo).toEqual(repo);
+      expect(status.selectedRepo).toEqual(repos[0]);
     });
   });
 });
