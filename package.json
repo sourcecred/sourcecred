@@ -19,8 +19,8 @@
     "mkdirp": "^0.5.1",
     "object-assign": "4.1.1",
     "promise": "8.0.1",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
     "react-router": "3.2.1",
     "tmp": "^0.0.33",
     "whatwg-fetch": "2.0.3"
