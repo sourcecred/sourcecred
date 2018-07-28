@@ -14,7 +14,7 @@ import {
   sourcecredDirectoryFlag,
 } from "../common";
 
-import {makeRepo} from "../../core/repo";
+import {repoToString, stringToRepo} from "../../core/repo";
 
 import {
   toJSON,
@@ -31,14 +31,9 @@ export default class PluginGraphCommand extends Command {
 
   static args = [
     {
-      name: "repo_owner",
+      name: "repo",
       required: true,
-      description: "owner of the GitHub repository for which to fetch data",
-    },
-    {
-      name: "repo_name",
-      required: true,
-      description: "name of the GitHub repository for which to fetch data",
+      description: "the GitHub repo to load, represented as OWNER/NAME",
     },
   ];
 
@@ -61,7 +56,7 @@ export default class PluginGraphCommand extends Command {
 
   async run() {
     const {
-      args: {repo_owner: owner, repo_name: name},
+      args,
       flags: {
         "github-token": githubToken,
         "sourcecred-directory": basedir,
@@ -69,7 +64,7 @@ export default class PluginGraphCommand extends Command {
         plugin,
       },
     } = this.parse(PluginGraphCommand);
-    const repo = makeRepo(owner, name);
+    const repo = stringToRepo(args.repo);
     if (!plugin) {
       loadAllPlugins({
         basedir,
@@ -101,8 +96,7 @@ function loadAllPlugins({basedir, repo, githubToken, maxOldSpaceSize}) {
         `--max_old_space_size=${maxOldSpaceSize}`,
         "./bin/sourcecred.js",
         "load",
-        repo.owner,
-        repo.name,
+        repoToString(repo),
         "--plugin",
         pluginName,
         "--github-token",
@@ -123,8 +117,7 @@ function loadPlugin({basedir, plugin, repo, githubToken}) {
   const outputDirectory = path.join(
     basedir,
     "data",
-    repo.owner,
-    repo.name,
+    repoToString(repo),
     plugin
   );
   mkdirp.sync(outputDirectory);
