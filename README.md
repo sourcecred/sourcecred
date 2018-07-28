@@ -103,7 +103,8 @@ git clone https://github.com/sourcecred/sourcecred.git
 cd sourcecred
 yarn install
 yarn backend
-node bin/sourcecred.js load REPO_OWNER REPO_NAME --github-token=GH_TOKEN
+export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
+node bin/sourcecred.js load REPO_OWNER REPO_NAME
 # this loads sourcecred data for a particular repository
 yarn start
 # then navigate to localhost:3000 in your browser
@@ -111,8 +112,11 @@ yarn start
 
 For example, if you wanted to look at cred for [ipfs/js-ipfs], you could run:
 ```
-$ node bin/sourcecred.js load ipfs js-ipfs --github-token=YOUR_GH_TOKEN
+$ export SOURCECRED_GITHUB_TOKEN=0000000000000000000000000000000000000000
+$ node bin/sourcecred.js load ipfs js-ipfs
 ```
+
+replacing the big string of zeros with your actual token.
 
 [ipfs/js-ipfs]: https://github.com/ipfs/js-ipfs
 
