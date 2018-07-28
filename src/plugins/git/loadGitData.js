@@ -5,18 +5,15 @@ import path from "path";
 
 import cloneAndLoadRepository from "./cloneAndLoadRepository";
 import {createGraph} from "./createGraph";
+import type {Repo} from "../../core/repo";
 
 export type Options = {|
-  +repoOwner: string,
-  +repoName: string,
+  +repo: Repo,
   +outputDirectory: string,
 |};
 
 export function loadGitData(options: Options): Promise<void> {
-  const repository = cloneAndLoadRepository(
-    options.repoOwner,
-    options.repoName
-  );
+  const repository = cloneAndLoadRepository(options.repo);
   const graph = createGraph(repository);
   const blob = JSON.stringify(graph);
   const outputFilename = path.join(options.outputDirectory, "graph.json");

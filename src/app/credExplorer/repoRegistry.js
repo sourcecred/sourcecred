@@ -5,13 +5,13 @@
 // (src/app/credExplorer/RepositorySelect.js)
 import deepEqual from "lodash.isequal";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
+import type {Repo} from "../../core/repo";
 
 export const REPO_REGISTRY_FILE = "repositoryRegistry.json";
 export const REPO_REGISTRY_API = "/api/v1/data/repositoryRegistry.json";
 
 const REPO_REGISTRY_COMPAT = {type: "REPO_REGISTRY", version: "0.1.0"};
 
-export type Repo = {|+name: string, +owner: string|};
 export type RepoRegistry = $ReadOnlyArray<Repo>;
 export type RepoRegistryJSON = Compatible<RepoRegistry>;
 

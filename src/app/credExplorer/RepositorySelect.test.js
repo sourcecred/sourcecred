@@ -13,6 +13,7 @@ import RepositorySelect, {
 } from "./RepositorySelect";
 
 import {toJSON, type RepoRegistry, REPO_REGISTRY_API} from "./repoRegistry";
+import {makeRepo} from "../../core/repo";
 
 require("../testUtil").configureEnzyme();
 require("../testUtil").configureAphrodite();
@@ -63,10 +64,7 @@ describe("app/credExplorer/RepositorySelect", () => {
       );
     });
     it("renders a select with all available repos as options", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
+      const availableRepos = [makeRepo("foo", "bar"), makeRepo("zod", "zoink")];
       const selectedRepo = availableRepos[0];
       const e = shallow(
         <PureRepositorySelect
@@ -78,10 +76,7 @@ describe("app/credExplorer/RepositorySelect", () => {
       expect(options.map((x) => x.text())).toEqual(["foo/bar", "zod/zoink"]);
     });
     it("the selectedRepo is selected", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
+      const availableRepos = [makeRepo("foo", "bar"), makeRepo("zod", "zoink")];
       const selectedRepo = availableRepos[0];
       const e = shallow(
         <PureRepositorySelect
@@ -92,10 +87,7 @@ describe("app/credExplorer/RepositorySelect", () => {
       expect(e.find("select").prop("value")).toBe("foo/bar");
     });
     it("clicking an option triggers the onChange", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
+      const availableRepos = [makeRepo("foo", "bar"), makeRepo("zod", "zoink")];
       const onChange = jest.fn();
       const e = shallow(
         <PureRepositorySelect
@@ -133,15 +125,15 @@ describe("app/credExplorer/RepositorySelect", () => {
       });
     }
     it("calls fetch and handles a simple success", () => {
-      mockRegistry([{owner: "foo", name: "bar"}]);
-      const repo = {owner: "foo", name: "bar"};
+      const repo = makeRepo("foo", "bar");
+      mockRegistry([repo]);
       return expectLoadValidStatus(testLocalStore(), [repo], repo);
     });
     it("returns repos in sorted order, and selects the last repo", () => {
       const repos = [
-        {owner: "a", name: "b"},
-        {owner: "a", name: "z"},
-        {owner: "foo", name: "bar"},
+        makeRepo("a", "b"),
+        makeRepo("a", "z"),
+        makeRepo("foo", "bar"),
       ];
       const nonSortedRepos = [repos[2], repos[0], repos[1]];
       mockRegistry(nonSortedRepos);
@@ -176,9 +168,9 @@ describe("app/credExplorer/RepositorySelect", () => {
     });
     it("loads selectedRepo from localStore, if available", () => {
       const repos = [
-        {owner: "a", name: "b"},
-        {owner: "a", name: "z"},
-        {owner: "foo", name: "bar"},
+        makeRepo("a", "b"),
+        makeRepo("a", "z"),
+        makeRepo("foo", "bar"),
       ];
       mockRegistry(repos);
       const localStore = testLocalStore();
@@ -187,9 +179,9 @@ describe("app/credExplorer/RepositorySelect", () => {
     });
     it("ignores selectedRepo from localStore, if not available", () => {
       const repos = [
-        {owner: "a", name: "b"},
-        {owner: "a", name: "z"},
-        {owner: "foo", name: "bar"},
+        makeRepo("a", "b"),
+        makeRepo("a", "z"),
+        makeRepo("foo", "bar"),
       ];
       mockRegistry(repos);
       const localStore = testLocalStore();
@@ -198,9 +190,9 @@ describe("app/credExplorer/RepositorySelect", () => {
     });
     it("ignores malformed value in localStore", () => {
       const repos = [
-        {owner: "a", name: "b"},
-        {owner: "a", name: "z"},
-        {owner: "foo", name: "bar"},
+        makeRepo("a", "b"),
+        makeRepo("a", "z"),
+        makeRepo("foo", "bar"),
       ];
       mockRegistry(repos);
       const localStore = testLocalStore();
@@ -273,7 +265,7 @@ describe("app/credExplorer/RepositorySelect", () => {
 
   describe("RepositorySelect", () => {
     it("initially renders a LocalStoreRepositorySelect with status LOADING", () => {
-      mockRegistry([{owner: "irrelevant", name: "unused"}]);
+      mockRegistry([makeRepo("irrelevant", "unused")]);
       const e = shallow(
         <RepositorySelect onChange={jest.fn()} localStore={testLocalStore()} />
       );
@@ -296,7 +288,7 @@ describe("app/credExplorer/RepositorySelect", () => {
 
     it("on successful load, sets the status on the child", async () => {
       const onChange = jest.fn();
-      const selectedRepo = {owner: "foo", name: "bar"};
+      const selectedRepo = makeRepo("foo", "bar");
       mockRegistry([selectedRepo]);
       const e = shallow(
         <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
@@ -313,10 +305,7 @@ describe("app/credExplorer/RepositorySelect", () => {
 
     it("on successful load, passes the status to the onChange", async () => {
       const onChange = jest.fn();
-      const repo = {
-        owner: "foo",
-        name: "bar",
-      };
+      const repo = makeRepo("foo", "bar");
       mockRegistry([repo]);
       const e = shallow(
         <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
@@ -342,7 +331,7 @@ describe("app/credExplorer/RepositorySelect", () => {
 
     it("child onChange triggers parent onChange", () => {
       const onChange = jest.fn();
-      const repo = {owner: "foo", name: "bar"};
+      const repo = makeRepo("foo", "bar");
       mockRegistry([repo]);
       const e = mount(
         <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
@@ -355,7 +344,7 @@ describe("app/credExplorer/RepositorySelect", () => {
 
     it("selecting child option updates top-level state", async () => {
       const onChange = jest.fn();
-      const repos = [{owner: "foo", name: "bar"}, {owner: "z", name: "a"}];
+      const repos = [makeRepo("foo", "bar"), makeRepo("z", "a")];
       mockRegistry(repos);
       const e = mount(
         <RepositorySelect onChange={onChange} localStore={testLocalStore()} />

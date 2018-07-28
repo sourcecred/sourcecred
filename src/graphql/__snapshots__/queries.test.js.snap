@@ -413,11 +413,11 @@ Array [
     "name": "FetchData",
     "params": Array [
       Object {
-        "name": "repoOwner",
+        "name": "owner",
         "type": "String!",
       },
       Object {
-        "name": "repoName",
+        "name": "name",
         "type": "String!",
       },
     ],
@@ -426,11 +426,11 @@ Array [
         "alias": null,
         "args": Object {
           "name": Object {
-            "data": "repoName",
+            "data": "name",
             "type": "VARIABLE",
           },
           "owner": Object {
-            "data": "repoOwner",
+            "data": "owner",
             "type": "VARIABLE",
           },
         },
@@ -926,11 +926,11 @@ Array [
 ]
 `;
 
-exports[`queries end-to-end-test cases for a useful query should stringify as inline 1`] = `"query FetchData($repoOwner: String! $repoName: String!) { repository(owner: $repoOwner name: $repoName) { issues(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } } } pullRequests(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } reviews(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } state comments(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } } } } } } } } } fragment whoami on Actor { __typename login ... on User { id } ... on Organization { id } ... on Bot { id } }"`;
+exports[`queries end-to-end-test cases for a useful query should stringify as inline 1`] = `"query FetchData($owner: String! $name: String!) { repository(owner: $owner name: $name) { issues(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } } } pullRequests(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } reviews(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } state comments(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } } } } } } } } } fragment whoami on Actor { __typename login ... on User { id } ... on Organization { id } ... on Bot { id } }"`;
 
 exports[`queries end-to-end-test cases for a useful query should stringify as multiline 1`] = `
-"query FetchData($repoOwner: String! $repoName: String!) {
-  repository(owner: $repoOwner name: $repoName) {
+"query FetchData($owner: String! $name: String!) {
+  repository(owner: $owner name: $name) {
     issues(first: 100) {
       pageInfo {
         hasNextPage

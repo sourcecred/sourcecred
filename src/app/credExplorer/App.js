@@ -17,7 +17,7 @@ import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
 import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNodeDecomposition";
 import RepositorySelect from "./RepositorySelect";
-import type {Repo} from "./repoRegistry";
+import type {Repo} from "../../core/repo";
 
 import * as NullUtil from "../../util/null";
 
@@ -135,18 +135,16 @@ export class App extends React.Component<Props, State> {
     }
 
     const githubPromise = new GithubAdapter()
-      .load(selectedRepo.owner, selectedRepo.name)
+      .load(selectedRepo)
       .then((adapter) => {
         const graph = adapter.graph();
         return {graph, adapter};
       });
 
-    const gitPromise = new GitAdapter()
-      .load(selectedRepo.owner, selectedRepo.name)
-      .then((adapter) => {
-        const graph = adapter.graph();
-        return {graph, adapter};
-      });
+    const gitPromise = new GitAdapter().load(selectedRepo).then((adapter) => {
+      const graph = adapter.graph();
+      return {graph, adapter};
+    });
 
     Promise.all([gitPromise, githubPromise]).then((graphsAndAdapters) => {
       const graph = Graph.merge(graphsAndAdapters.map((x) => x.graph));
