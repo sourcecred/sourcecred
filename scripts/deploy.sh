@@ -121,8 +121,11 @@ build_and_deploy() {
     printf '\n'
     printf 'Please review the build output now---run:\n'
     printf '    cd "%s" && python -m SimpleHTTPServer\n' "${preview_dir}"
-    printf 'Do you want to deploy? yes/no> '
-    read -r line
+    line=
+    while [ "${line}" != yes ] && [ "${line}" != no ]; do
+        printf 'Do you want to deploy? yes/no> '
+        read -r line
+    done
     if [ "${line}" = yes ]; then
         (
             set -x;
