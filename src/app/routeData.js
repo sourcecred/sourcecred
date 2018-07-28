@@ -34,7 +34,7 @@ const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
       component: () => require("./credExplorer/App").default,
     },
     title: "SourceCred explorer",
-    navTitle: "Explorer",
+    navTitle: "Explore",
   },
   {
     path: "/discord-invite",
