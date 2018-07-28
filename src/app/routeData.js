@@ -36,6 +36,15 @@ const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
     title: "SourceCred explorer",
     navTitle: "Explorer",
   },
+  {
+    path: "/discord-invite",
+    contents: {
+      type: "EXTERNAL_REDIRECT",
+      redirectTo: "https://discord.gg/tsBTgc9",
+    },
+    title: "SourceCred Discord invite",
+    navTitle: null,
+  },
 ];
 exports.routeData = routeData;
 
