@@ -134,21 +134,9 @@ export class App extends React.Component<Props, State> {
       throw new Error(`Impossible`);
     }
 
-    const githubPromise = new GithubAdapter()
-      .load(selectedRepo)
-      .then((adapter) => {
-        const graph = adapter.graph();
-        return {graph, adapter};
-      });
-
-    const gitPromise = new GitAdapter().load(selectedRepo).then((adapter) => {
-      const graph = adapter.graph();
-      return {graph, adapter};
-    });
-
-    Promise.all([gitPromise, githubPromise]).then((graphsAndAdapters) => {
-      const graph = Graph.merge(graphsAndAdapters.map((x) => x.graph));
-      const adapters = graphsAndAdapters.map((x) => x.adapter);
+    const statics = [new GithubAdapter(), new GitAdapter()];
+    Promise.all(statics.map((a) => a.load(selectedRepo))).then((adapters) => {
+      const graph = Graph.merge(adapters.map((x) => x.graph()));
       const data = {
         graphWithMetadata: {
           graph,
