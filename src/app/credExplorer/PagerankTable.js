@@ -67,8 +67,7 @@ function edgeVerb(
 }
 
 function scoreDisplay(probability: number) {
-  const modifiedLogScore = Math.log(probability) + 10;
-  return modifiedLogScore.toFixed(2);
+  return (-1 * Math.log(probability)).toFixed(2);
 }
 
 type SharedProps = {|

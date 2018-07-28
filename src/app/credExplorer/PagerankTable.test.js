@@ -378,7 +378,7 @@ describe("app/credExplorer/PagerankTable", () => {
     it("renders a score column with the node's log-score", async () => {
       const {element, sharedProps, node} = await setup();
       const {score: rawScore} = NullUtil.get(sharedProps.pnd.get(node));
-      const expectedScore = (Math.log(rawScore) + 10).toFixed(2);
+      const expectedScore = (-Math.log(rawScore)).toFixed(2);
       const contributionColumn = COLUMNS().indexOf("Score");
       expect(contributionColumn).not.toEqual(-1);
       expect(
@@ -528,9 +528,7 @@ describe("app/credExplorer/PagerankTable", () => {
     });
     it("renders a score column with the source's log-score", async () => {
       const {element, contribution} = await setup();
-      const expectedScore = (Math.log(contribution.sourceScore) + 10).toFixed(
-        2
-      );
+      const expectedScore = (-Math.log(contribution.sourceScore)).toFixed(2);
       const contributionColumn = COLUMNS().indexOf("Score");
       expect(contributionColumn).not.toEqual(-1);
       expect(
