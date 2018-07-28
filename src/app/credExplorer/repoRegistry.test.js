@@ -8,8 +8,9 @@ import {
   type RepoRegistry,
 } from "./repoRegistry";
 
+import {makeRepo} from "../../core/repo";
+
 describe("app/credExplorer/repoRegistry", () => {
-  const r = (owner, name) => ({owner, name});
   describe("to/fromJSON compose on", () => {
     function checkExample(x: RepoRegistry) {
       expect(fromJSON(toJSON(x))).toEqual(x);
@@ -19,31 +20,31 @@ describe("app/credExplorer/repoRegistry", () => {
       checkExample(emptyRegistry());
     });
     it("nonempty registry", () => {
-      checkExample([r("foo", "bar"), r("zoo", "zod")]);
+      checkExample([makeRepo("foo", "bar"), makeRepo("zoo", "zod")]);
     });
   });
   describe("addRepo", () => {
     it("adds to empty registry", () => {
-      expect(addRepo(r("foo", "bar"), emptyRegistry())).toEqual([
-        r("foo", "bar"),
+      expect(addRepo(makeRepo("foo", "bar"), emptyRegistry())).toEqual([
+        makeRepo("foo", "bar"),
       ]);
     });
     it("adds to nonempty registry", () => {
-      const registry = [r("foo", "bar")];
-      expect(addRepo(r("zoo", "zod"), registry)).toEqual([
-        r("foo", "bar"),
-        r("zoo", "zod"),
+      const registry = [makeRepo("foo", "bar")];
+      expect(addRepo(makeRepo("zoo", "zod"), registry)).toEqual([
+        makeRepo("foo", "bar"),
+        makeRepo("zoo", "zod"),
       ]);
     });
     it("adding repo that is already the last has no effect", () => {
-      const registry = [r("zoo", "zod"), r("foo", "bar")];
-      expect(addRepo(r("foo", "bar"), registry)).toEqual(registry);
+      const registry = [makeRepo("zoo", "zod"), makeRepo("foo", "bar")];
+      expect(addRepo(makeRepo("foo", "bar"), registry)).toEqual(registry);
     });
     it("adding already-existing repo shifts it to the end", () => {
-      const registry = [r("zoo", "zod"), r("foo", "bar")];
-      expect(addRepo(r("zoo", "zod"), registry)).toEqual([
-        r("foo", "bar"),
-        r("zoo", "zod"),
+      const registry = [makeRepo("zoo", "zod"), makeRepo("foo", "bar")];
+      expect(addRepo(makeRepo("zoo", "zod"), registry)).toEqual([
+        makeRepo("foo", "bar"),
+        makeRepo("zoo", "zod"),
       ]);
     });
   });

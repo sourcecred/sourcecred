@@ -81,7 +81,7 @@ async function example() {
             backwardName: "is fooed by",
           },
         ],
-        load: (_unused_repoOwner, _unused_repoName) => {
+        load: (_unused_repo) => {
           throw new Error("unused");
         },
       }),
@@ -109,7 +109,7 @@ async function example() {
             backwardName: "is barred by",
           },
         ],
-        load: (_unused_repoOwner, _unused_repoName) => {
+        load: (_unused_repo) => {
           throw new Error("unused");
         },
       }),
@@ -125,7 +125,7 @@ async function example() {
         edgePrefix: () => EdgeAddress.fromParts(["xox"]),
         nodeTypes: () => [],
         edgeTypes: () => [],
-        load: (_unused_repoOwner, _unused_repoName) => {
+        load: (_unused_repo) => {
           throw new Error("unused");
         },
       }),
@@ -141,7 +141,7 @@ async function example() {
         nodeTypes: () => [],
         edgeTypes: () => [],
         name: () => "unused",
-        load: (_unused_repoOwner, _unused_repoName) => {
+        load: (_unused_repo) => {
           throw new Error("unused");
         },
       }),

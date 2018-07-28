@@ -9,6 +9,7 @@ import * as N from "./nodes";
 import * as E from "./edges";
 import {RelationalView} from "./relationalView";
 import {description} from "./render";
+import type {Repo} from "../../core/repo";
 
 export class StaticPluginAdapter implements IStaticPluginAdapter {
   name() {
@@ -54,11 +55,8 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
       },
     ];
   }
-  async load(
-    repoOwner: string,
-    repoName: string
-  ): Promise<IDynamicPluginAdapater> {
-    const url = `/api/v1/data/data/${repoOwner}/${repoName}/github/view.json`;
+  async load(repo: Repo): Promise<IDynamicPluginAdapater> {
+    const url = `/api/v1/data/data/${repo.owner}/${repo.name}/github/view.json`;
     const response = await fetch(url);
     if (!response.ok) {
       return Promise.reject(response);

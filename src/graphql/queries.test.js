@@ -126,11 +126,11 @@ function usefulQuery(): Body {
   const body: Body = [
     b.query(
       "FetchData",
-      [b.param("repoOwner", "String!"), b.param("repoName", "String!")],
+      [b.param("owner", "String!"), b.param("name", "String!")],
       [
         b.field(
           "repository",
-          {owner: b.variable("repoOwner"), name: b.variable("repoName")},
+          {owner: b.variable("owner"), name: b.variable("name")},
           [
             b.field("issues", {first: b.literal(100)}, [
               makePageInfo(),

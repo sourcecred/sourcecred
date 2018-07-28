@@ -7,6 +7,7 @@ import type {
   QueryDefinition,
 } from "../../graphql/queries";
 import {build} from "../../graphql/queries";
+import type {Repo} from "../../core/repo";
 
 /**
  * This module defines the GraphQL query that we use to access the
@@ -119,11 +120,11 @@ export function createQuery(): Body {
   const body: Body = [
     b.query(
       "FetchData",
-      [b.param("repoOwner", "String!"), b.param("repoName", "String!")],
+      [b.param("owner", "String!"), b.param("name", "String!")],
       [
         b.field(
           "repository",
-          {owner: b.variable("repoOwner"), name: b.variable("repoName")},
+          {owner: b.variable("owner"), name: b.variable("name")},
           [
             b.field("url"),
             b.field("name"),
@@ -378,8 +379,8 @@ function* continuationsFromReview(
  * results. The `postQuery` function may be called multiple times.
  */
 export async function postQueryExhaustive(
-  postQuery: ({body: Body, variables: {[string]: any}}) => Promise<any>,
-  payload: {body: Body, variables: {[string]: any}}
+  postQuery: ({body: Body, variables: {+[string]: any}}) => Promise<any>,
+  payload: {body: Body, variables: {+[string]: any}}
 ) {
   const originalResult = await postQuery(payload);
   return resolveContinuations(
@@ -394,7 +395,7 @@ export async function postQueryExhaustive(
  * resolve the continuations and return the merged results.
  */
 async function resolveContinuations(
-  postQuery: ({body: Body, variables: {[string]: any}}) => Promise<any>,
+  postQuery: ({body: Body, variables: {+[string]: any}}) => Promise<any>,
   originalResult: any,
   continuations: $ReadOnlyArray<Continuation>
 ): Promise<any> {
@@ -820,6 +821,6 @@ export function createFragments(): FragmentDefinition[] {
   ];
 }
 
-export function createVariables(repoOwner: string, repoName: string) {
-  return {repoOwner, repoName};
+export function createVariables(repo: Repo): {+[string]: any} {
+  return repo;
 }

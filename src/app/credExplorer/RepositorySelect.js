@@ -7,7 +7,8 @@ import deepEqual from "lodash.isequal";
 import * as NullUtil from "../../util/null";
 import type {LocalStore} from "../localStore";
 
-import {type Repo, fromJSON, REPO_REGISTRY_API} from "./repoRegistry";
+import {fromJSON, REPO_REGISTRY_API} from "./repoRegistry";
+import {type Repo, stringToRepo, repoToString} from "../../core/repo";
 export const REPO_KEY = "selectedRepository";
 
 export type Status =
@@ -64,26 +65,6 @@ export default class RepositorySelect extends React.Component<Props, State> {
       </LocalStoreRepositorySelect>
     );
   }
-}
-
-function validateRepo(repo: Repo) {
-  const validRe = /^[A-Za-z0-9_-]+$/;
-  if (!repo.owner.match(validRe)) {
-    throw new Error(`Invalid repository owner: ${JSON.stringify(repo.owner)}`);
-  }
-  if (!repo.name.match(validRe)) {
-    throw new Error(`Invalid repository name: ${JSON.stringify(repo.name)}`);
-  }
-}
-
-function repoStringToRepo(x: string): Repo {
-  const pieces = x.split("/");
-  if (pieces.length !== 2) {
-    throw new Error(`Invalid repo string: ${x}`);
-  }
-  const repo = {owner: pieces[0], name: pieces[1]};
-  validateRepo(repo);
-  return repo;
 }
 
 export async function loadStatus(localStore: LocalStore): Promise<Status> {
@@ -147,15 +128,14 @@ export class PureRepositorySelect extends React.PureComponent<
         <span>Please choose a repository to inspect:</span>{" "}
         {selectedRepo != null && (
           <select
-            value={`${selectedRepo.owner}/${selectedRepo.name}`}
+            value={repoToString(selectedRepo)}
             onChange={(e) => {
-              const repoString = e.target.value;
-              const repo = repoStringToRepo(repoString);
+              const repo = stringToRepo(e.target.value);
               this.props.onChange(repo);
             }}
           >
-            {availableRepos.map(({owner, name}) => {
-              const repoString = `${owner}/${name}`;
+            {availableRepos.map((repo) => {
+              const repoString = repoToString(repo);
               return (
                 <option value={repoString} key={repoString}>
                   {repoString}

@@ -14,6 +14,7 @@
 
 import fetchGithubRepo from "../fetchGithubRepo";
 import stringify from "json-stable-stringify";
+import {makeRepo} from "../../../core/repo";
 
 function parseArgs() {
   const argv = process.argv.slice(2);
@@ -24,8 +25,8 @@ function parseArgs() {
   if (argv.length < 2) {
     fail();
   }
-  const [repoOwner, repoName, githubToken, ...rest] = argv;
-  const result = {repoOwner, repoName, githubToken};
+  const [owner, name, githubToken, ...rest] = argv;
+  const result = {owner, name, githubToken};
   if (rest.length > 0) {
     fail();
   }
@@ -34,7 +35,8 @@ function parseArgs() {
 
 function main() {
   const args = parseArgs();
-  fetchGithubRepo(args.repoOwner, args.repoName, args.githubToken)
+  const repo = makeRepo(args.owner, args.name);
+  fetchGithubRepo(repo, args.githubToken)
     .then((data) => {
       console.log(stringify(data, {space: 4}));
     })
