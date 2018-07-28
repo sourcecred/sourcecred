@@ -9,7 +9,9 @@
 /*::
 type RouteDatum = {|
   +path: string,
-  +component: () => React$ComponentType<{||}>,
+  +contents:
+    | {|+type: "PAGE", +component: () => React$ComponentType<{||}>|}
+    | {|+type: "EXTERNAL_REDIRECT", +redirectTo: string|},
   +title: string,
   +navTitle: ?string,
 |};
@@ -18,13 +20,19 @@ type RouteDatum = {|
 const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
   {
     path: "/",
-    component: () => require("./HomePage").default,
+    contents: {
+      type: "PAGE",
+      component: () => require("./HomePage").default,
+    },
     title: "SourceCred",
     navTitle: "Home",
   },
   {
     path: "/explorer",
-    component: () => require("./credExplorer/App").default,
+    contents: {
+      type: "PAGE",
+      component: () => require("./credExplorer/App").default,
+    },
     title: "SourceCred explorer",
     navTitle: "Explorer",
   },
@@ -40,6 +48,7 @@ function resolveRouteFromPath(path /*: string */) /*: ?RouteDatum */ {
   };
   return routeData.filter(matches)[0] || null;
 }
+exports.resolveRouteFromPath = resolveRouteFromPath;
 
 function resolveTitleFromPath(path /*: string */) /*: string */ {
   const route = resolveRouteFromPath(path);
