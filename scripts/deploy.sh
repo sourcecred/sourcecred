@@ -6,6 +6,7 @@ set -eu
 
 : "${DEPLOY_REMOTE:=git@github.com:sourcecred/sourcecred.github.io.git}"
 : "${DEPLOY_BRANCH:=master}"
+: "${DEPLOY_CNAME_URL:=sourcecred.io}"
 
 export GIT_CONFIG_NOSYSTEM=1
 export GIT_ATTR_NOSYSTEM=1
@@ -102,6 +103,13 @@ build_and_deploy() {
     mkdir "${sourcecred_site}/api/"
     mkdir "${sourcecred_site}/api/v1/"
     cp -r "${sourcecred_data}" "${sourcecred_site}/api/v1/data"
+    if [ -n "${DEPLOY_CNAME_URL}" ]; then
+        if [ -e "${sourcecred_site}/CNAME" ]; then
+            printf 'Error: CNAME file would be overwritten!\n' >&2
+            exit 1
+        fi
+        printf '%s' "${DEPLOY_CNAME_URL}" >"${sourcecred_site}/CNAME"
+    fi
     git -C "${sourcecred_site}" add --all .
     git -C "${sourcecred_site}" commit -m "deploy-v1: ${sourcecred_hash}"
     deploy_commit="$(git -C "${sourcecred_site}" rev-parse HEAD)"
