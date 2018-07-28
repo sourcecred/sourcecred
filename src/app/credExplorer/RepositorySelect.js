@@ -3,7 +3,7 @@
 import React, {type Node} from "react";
 import sortBy from "lodash.sortby";
 import deepEqual from "lodash.isequal";
-
+import {Dropdown} from "semantic-ui-react";
 import * as NullUtil from "../../util/null";
 import type {LocalStore} from "../localStore";
 
@@ -142,27 +142,24 @@ export class PureRepositorySelect extends React.PureComponent<
   PureRepositorySelectProps
 > {
   renderSelect(availableRepos: $ReadOnlyArray<Repo>, selectedRepo: ?Repo) {
+    const options = availableRepos.map(({owner, name}) => {
+      const repoString = `${owner}/${name}`;
+      return {value: repoString, key: repoString, text: repoString};
+    });
     return (
       <label>
         <span>Please choose a repository to inspect:</span>{" "}
         {selectedRepo != null && (
-          <select
+          <Dropdown
+            selection
             value={`${selectedRepo.owner}/${selectedRepo.name}`}
             onChange={(e) => {
-              const repoString = e.target.value;
+              const repoString = e.target.textContent;
               const repo = repoStringToRepo(repoString);
               this.props.onChange(repo);
             }}
-          >
-            {availableRepos.map(({owner, name}) => {
-              const repoString = `${owner}/${name}`;
-              return (
-                <option value={repoString} key={repoString}>
-                  {repoString}
-                </option>
-              );
-            })}
-          </select>
+            options={options}
+          />
         )}
       </label>
     );

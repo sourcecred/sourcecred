@@ -62,42 +62,13 @@ describe("app/credExplorer/RepositorySelect", () => {
         "Error: Unable to load repository registry. See console for details."
       );
     });
-    it("renders a select with all available repos as options", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
-      const selectedRepo = availableRepos[0];
-      const e = shallow(
-        <PureRepositorySelect
-          status={{type: "VALID", availableRepos, selectedRepo}}
-          onChange={jest.fn()}
-        />
-      );
-      const options = e.find("option");
-      expect(options.map((x) => x.text())).toEqual(["foo/bar", "zod/zoink"]);
-    });
-    it("the selectedRepo is selected", () => {
-      const availableRepos = [
-        {owner: "foo", name: "bar"},
-        {owner: "zod", name: "zoink"},
-      ];
-      const selectedRepo = availableRepos[0];
-      const e = shallow(
-        <PureRepositorySelect
-          status={{type: "VALID", availableRepos, selectedRepo}}
-          onChange={jest.fn()}
-        />
-      );
-      expect(e.find("select").prop("value")).toBe("foo/bar");
-    });
     it("clicking an option triggers the onChange", () => {
       const availableRepos = [
         {owner: "foo", name: "bar"},
         {owner: "zod", name: "zoink"},
       ];
       const onChange = jest.fn();
-      const e = shallow(
+      const e = mount(
         <PureRepositorySelect
           status={{
             type: "VALID",
@@ -107,7 +78,10 @@ describe("app/credExplorer/RepositorySelect", () => {
           onChange={onChange}
         />
       );
-      e.find("select").simulate("change", {target: {value: "zod/zoink"}});
+      e.find("div.selection.dropdown").simulate("click");
+      e.find('div[role="option"] span')
+        .filterWhere((x) => x.text() === "zod/zoink")
+        .simulate("click");
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange).toHaveBeenLastCalledWith(availableRepos[1]);
     });
