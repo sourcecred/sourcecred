@@ -4,6 +4,7 @@ const express = require("express");
 const os = require("os");
 const path = require("path");
 const webpack = require("webpack");
+const CleanPlugin = require("clean-webpack-plugin");
 const ManifestPlugin = require("webpack-manifest-plugin");
 const SWPrecacheWebpackPlugin = require("sw-precache-webpack-plugin");
 const StaticSiteGeneratorPlugin = require("static-site-generator-webpack-plugin");
@@ -257,6 +258,8 @@ function plugins(mode /*: "development" | "production" */) {
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
   ];
   const prodOnlyPlugins = [
+    // Remove the output directory before starting the build.
+    new CleanPlugin([paths.appBuild], {root: paths.root}),
     // Minify the code.
     new webpack.optimize.UglifyJsPlugin({
       compress: {
