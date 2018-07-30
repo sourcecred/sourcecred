@@ -72,8 +72,8 @@
   "scripts": {
     "prettify": "prettier --write '**/*.js'",
     "check-pretty": "prettier --list-different '**/*.js'",
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
+    "start": "NODE_ENV=development webpack-dev-server --config config/makeWebpackConfig.js",
+    "build": "NODE_ENV=production webpack --config config/makeWebpackConfig.js",
     "backend": "node scripts/backend.js",
     "test": "node scripts/test.js --env=jsdom",
     "ci-test": "CI=1 npm run test",
