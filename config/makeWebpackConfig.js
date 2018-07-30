@@ -21,15 +21,6 @@ const publicUrl = publicPath.slice(0, -1);
 // Get environment variables to inject into our app.
 const env = getClientEnvironment(publicUrl);
 
-// Assert this just to be safe.
-// Development builds of React are slow and not intended for production.
-if (env.stringified["process.env"].NODE_ENV !== '"production"') {
-  throw new Error("Production builds must have NODE_ENV=production.");
-}
-
-// This is the production configuration.
-// It compiles slowly and is focused on producing a fast and minimal bundle.
-// The development configuration is different and lives in a separate file.
 function makeConfig(_unused_mode /*: "production" | "development" */) {
   return {
     // Don't attempt to continue if there are any errors.
@@ -44,6 +35,9 @@ function makeConfig(_unused_mode /*: "production" | "development" */) {
         require.resolve("./polyfills"),
         paths.appServerSideRenderingIndexJs,
       ],
+    },
+    devServer: {
+      inline: false,
     },
     output: {
       // The build folder.
