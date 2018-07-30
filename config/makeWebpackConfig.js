@@ -1,4 +1,4 @@
-// @no-flow
+// @flow
 const path = require("path");
 const webpack = require("webpack");
 const ManifestPlugin = require("webpack-manifest-plugin");
@@ -52,7 +52,21 @@ module.exports = {
     // We inferred the "public path" (such as / or /my-project) from homepage.
     publicPath: publicPath,
     // Point sourcemap entries to original disk location (format as URL on Windows)
-    devtoolModuleFilenameTemplate: (info) =>
+    devtoolModuleFilenameTemplate: (
+      info /*:
+      {|
+        // https://webpack.js.org/configuration/output/#output-devtoolmodulefilenametemplate
+        +absoluteResourcePath: string,
+        +allLoaders: string,
+        +hash: string,
+        +id: string,
+        +loaders: string,
+        +resource: string,
+        +resourcePath: string,
+        +namespace: string,
+      |}
+      */
+    ) =>
       path
         .relative(paths.appSrc, info.absoluteResourcePath)
         .replace(/\\/g, "/"),
@@ -64,10 +78,11 @@ module.exports = {
     // We placed these paths second because we want `node_modules` to "win"
     // if there are any conflicts. This matches Node resolution mechanism.
     // https://github.com/facebookincubator/create-react-app/issues/253
-    modules: ["node_modules", paths.appNodeModules].concat(
-      // It is guaranteed to exist because we tweak it in `env.js`
-      process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
-    ),
+    modules: [
+      "node_modules",
+      paths.appNodeModules,
+      ...(process.env.NODE_PATH || "").split(path.delimiter).filter(Boolean),
+    ],
     // These are the reasonable defaults supported by the Node ecosystem.
     // We also include JSX as a common component filename extension to support
     // some tools, although we do not recommend using it, see:
