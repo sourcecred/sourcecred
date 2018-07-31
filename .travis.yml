@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   - "node"
-script: yarn travis
+script: yarn test
 notifications:
   email:
     recipients:
