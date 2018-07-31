@@ -38,11 +38,9 @@ type Props = {|+localStore: LocalStore|};
 type State = {
   selectedRepo: ?Repo,
   data: {|
-    graphWithMetadata: ?{|
+    graphWithAdapters: ?{|
       +graph: Graph,
       +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
-      +nodeCount: number,
-      +edgeCount: number,
     |},
     +pnd: ?PagerankNodeDecomposition,
   |},
@@ -56,7 +54,7 @@ export class App extends React.Component<Props, State> {
     super(props);
     this.state = {
       selectedRepo: null,
-      data: {graphWithMetadata: null, pnd: null},
+      data: {graphWithAdapters: null, pnd: null},
       edgeEvaluator: null,
     };
   }
@@ -64,7 +62,7 @@ export class App extends React.Component<Props, State> {
   render() {
     const {localStore} = this.props;
     const {edgeEvaluator, selectedRepo} = this.state;
-    const {graphWithMetadata, pnd} = this.state.data;
+    const {graphWithAdapters, pnd} = this.state.data;
     return (
       <div style={{maxWidth: "66em", margin: "0 auto", padding: "0 10px"}}>
         <header className={css(styles.header)}>
@@ -83,21 +81,21 @@ export class App extends React.Component<Props, State> {
             Load data
           </button>
           <button
-            disabled={graphWithMetadata == null || edgeEvaluator == null}
+            disabled={graphWithAdapters == null || edgeEvaluator == null}
             onClick={() => {
-              if (graphWithMetadata == null || edgeEvaluator == null) {
+              if (graphWithAdapters == null || edgeEvaluator == null) {
                 throw new Error("Unexpected null value");
               }
-              const {graph} = graphWithMetadata;
+              const {graph} = graphWithAdapters;
               pagerank(graph, edgeEvaluator, {
                 verbose: true,
               }).then((pnd) => {
-                const data = {graphWithMetadata, pnd};
+                const data = {graphWithAdapters, pnd};
                 // In case a new graph was loaded while waiting for
                 // PageRank.
                 const stomped =
-                  this.state.data.graphWithMetadata &&
-                  this.state.data.graphWithMetadata.graph !== graph;
+                  this.state.data.graphWithAdapters &&
+                  this.state.data.graphWithAdapters.graph !== graph;
                 if (!stomped) {
                   this.setState({data});
                 }
@@ -106,20 +104,13 @@ export class App extends React.Component<Props, State> {
           >
             Run basic PageRank
           </button>
-          {graphWithMetadata ? (
-            <p>
-              Graph loaded: {graphWithMetadata.nodeCount} nodes,{" "}
-              {graphWithMetadata.edgeCount} edges.
-            </p>
-          ) : (
-            <p>Graph not loaded.</p>
-          )}
+          {graphWithAdapters ? <p>Graph loaded.</p> : <p>Graph not loaded.</p>}
           <WeightConfig
             localStore={localStore}
             onChange={(ee) => this.setState({edgeEvaluator: ee})}
           />
           <PagerankTable
-            adapters={NullUtil.map(graphWithMetadata, (x) => x.adapters)}
+            adapters={NullUtil.map(graphWithAdapters, (x) => x.adapters)}
             pnd={pnd}
             maxEntriesPerList={MAX_ENTRIES_PER_LIST}
           />
@@ -138,11 +129,9 @@ export class App extends React.Component<Props, State> {
     Promise.all(statics.map((a) => a.load(selectedRepo))).then((adapters) => {
       const graph = Graph.merge(adapters.map((x) => x.graph()));
       const data = {
-        graphWithMetadata: {
+        graphWithAdapters: {
           graph,
           adapters,
-          nodeCount: Array.from(graph.nodes()).length,
-          edgeCount: Array.from(graph.edges()).length,
         },
         pnd: null,
       };
