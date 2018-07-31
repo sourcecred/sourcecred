@@ -53,8 +53,8 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       deps: [],
     },
     {
-      id: "ci-test",
-      cmd: ["npm", "run", "--silent", "ci-test"],
+      id: "unit",
+      cmd: ["npm", "run", "--silent", "unit"],
       deps: [],
     },
     {

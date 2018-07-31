@@ -129,9 +129,9 @@ guide you through the architecture, and assign you to the relevant issue.
 * Follow the installation and setup instructions as above.
 
 Once your changes are ready for test and review:
-* `yarn prettify`, which runs [prettier] to format your code
-* `yarn travis`
-* Submit your pull request
+  * run `yarn prettify`, which runs [prettier] to format your code
+  * run `yarn test`
+  * submit your pull request
 
 [prettier]: https://github.com/prettier/prettier
 [Discord]: https://discord.gg/tsBTgc9
