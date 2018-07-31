@@ -1,4 +1,7 @@
 // @flow
+const express = require("express");
+/*:: import type {$Application as ExpressApp} from "express"; */
+const os = require("os");
 const path = require("path");
 const webpack = require("webpack");
 const ManifestPlugin = require("webpack-manifest-plugin");
@@ -38,6 +41,16 @@ function makeConfig(mode /*: "production" | "development" */) {
     },
     devServer: {
       inline: false,
+      before: (app /*: ExpressApp */) => {
+        // TODO(@wchargin): De-duplicate this code.
+        app.use(
+          "/api/v1/data",
+          express.static(
+            process.env.SOURCECRED_DIRECTORY ||
+              path.join(os.tmpdir(), "sourcecred")
+          )
+        );
+      },
     },
     output: {
       // The build folder.
