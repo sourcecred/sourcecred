@@ -81,8 +81,10 @@ export default function render(
       <meta name="viewport" content="width=device-width,initial-scale=1" />
       <meta http-equiv="refresh" content="0;url=${redirectTo}" />
       <link rel="shortcut icon" href="/favicon.ico" />
+      <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
       <title>${resolveTitleFromPath(path)}</title>
-      <style>${require("./index.css")}</style>
+      <style>${require("./style/index.css")}</style>
       <style data-aphrodite>${css.content}</style>
       </head>
       <body style="overflow-y:scroll">
