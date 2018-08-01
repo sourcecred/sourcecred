@@ -6,19 +6,15 @@ import type {LocalStore} from "../localStore";
 import CheckedLocalStore from "../checkedLocalStore";
 import BrowserLocalStore from "../browserLocalStore";
 
-import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
-import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
-import {Graph} from "../../core/graph";
-import {pagerank} from "../../core/attribution/pagerank";
 import {PagerankTable} from "./PagerankTable";
-import type {DynamicPluginAdapter} from "../pluginAdapter";
-import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {WeightConfig} from "./WeightConfig";
-import type {PagerankNodeDecomposition} from "../../core/attribution/pagerankNodeDecomposition";
 import RepositorySelect from "./RepositorySelect";
-import type {Repo} from "../../core/repo";
-
-import * as NullUtil from "../../util/null";
+import {
+  createStateTransitionMachine,
+  type AppState,
+  type StateTransitionMachineInterface,
+  initialState,
+} from "./state";
 
 export default class AppPage extends React.Component<{||}> {
   static _LOCAL_STORE = new CheckedLocalStore(
@@ -29,109 +25,139 @@ export default class AppPage extends React.Component<{||}> {
   );
 
   render() {
+    const App = createApp(createStateTransitionMachine);
     return <App localStore={AppPage._LOCAL_STORE} />;
   }
 }
 
 type Props = {|+localStore: LocalStore|};
-type State = {
-  selectedRepo: ?Repo,
-  data: {|
-    graphWithAdapters: ?{|
-      +graph: Graph,
-      +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
-    |},
-    +pnd: ?PagerankNodeDecomposition,
-  |},
-  edgeEvaluator: ?EdgeEvaluator,
-};
+type State = {|
+  appState: AppState,
+|};
 
-const MAX_ENTRIES_PER_LIST = 100;
+export function createApp(
+  createSTM: (
+    getState: () => AppState,
+    setState: (AppState) => void
+  ) => StateTransitionMachineInterface
+) {
+  return class App extends React.Component<Props, State> {
+    stateTransitionMachine: StateTransitionMachineInterface;
 
-export class App extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      selectedRepo: null,
-      data: {graphWithAdapters: null, pnd: null},
-      edgeEvaluator: null,
-    };
-  }
+    constructor(props: Props) {
+      super(props);
+      this.state = {
+        appState: initialState(),
+      };
+      this.stateTransitionMachine = createSTM(
+        () => this.state.appState,
+        (appState) => this.setState({appState})
+      );
+    }
 
-  render() {
-    const {localStore} = this.props;
-    const {edgeEvaluator, selectedRepo} = this.state;
-    const {graphWithAdapters, pnd} = this.state.data;
-    return (
-      <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
-        <div>
+    render() {
+      const {localStore} = this.props;
+      const {appState} = this.state;
+      const subType =
+        appState.type === "INITIALIZED" ? appState.substate.type : null;
+      const loadingState =
+        appState.type === "INITIALIZED" ? appState.substate.loading : null;
+      let pagerankTable;
+      if (
+        appState.type === "INITIALIZED" &&
+        appState.substate.type === "PAGERANK_EVALUATED"
+      ) {
+        const adapters = appState.substate.graphWithAdapters.adapters;
+        const pnd = appState.substate.pagerankNodeDecomposition;
+        pagerankTable = (
+          <PagerankTable
+            adapters={adapters}
+            pnd={pnd}
+            maxEntriesPerList={100}
+          />
+        );
+      }
+      return (
+        <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
           <div style={{marginBottom: 10}}>
             <RepositorySelect
               localStore={localStore}
-              onChange={(selectedRepo) => this.setState({selectedRepo})}
+              onChange={(repo) => this.stateTransitionMachine.setRepo(repo)}
             />
           </div>
           <button
-            disabled={selectedRepo == null}
-            onClick={() => this.loadData()}
+            disabled={subType !== "READY_TO_LOAD_GRAPH"}
+            onClick={() => this.stateTransitionMachine.loadGraph()}
           >
-            Load data
+            Load graph
           </button>
           <button
-            disabled={graphWithAdapters == null || edgeEvaluator == null}
-            onClick={() => {
-              if (graphWithAdapters == null || edgeEvaluator == null) {
-                throw new Error("Unexpected null value");
-              }
-              const {graph} = graphWithAdapters;
-              pagerank(graph, edgeEvaluator, {
-                verbose: true,
-              }).then((pnd) => {
-                const data = {graphWithAdapters, pnd};
-                // In case a new graph was loaded while waiting for
-                // PageRank.
-                const stomped =
-                  this.state.data.graphWithAdapters &&
-                  this.state.data.graphWithAdapters.graph !== graph;
-                if (!stomped) {
-                  this.setState({data});
-                }
-              });
-            }}
+            disabled={
+              !(
+                (subType === "READY_TO_RUN_PAGERANK" ||
+                  subType === "PAGERANK_EVALUATED") &&
+                loadingState !== "LOADING"
+              )
+            }
+            onClick={() => this.stateTransitionMachine.runPagerank()}
           >
             Run PageRank
           </button>
           <WeightConfig
             localStore={localStore}
-            onChange={(ee) => this.setState({edgeEvaluator: ee})}
+            onChange={(ee) => this.stateTransitionMachine.setEdgeEvaluator(ee)}
           />
-          <PagerankTable
-            adapters={NullUtil.map(graphWithAdapters, (x) => x.adapters)}
-            pnd={pnd}
-            maxEntriesPerList={MAX_ENTRIES_PER_LIST}
-          />
+          <LoadingIndicator appState={this.state.appState} />
+          {pagerankTable}
         </div>
-      </div>
+      );
+    }
+  };
+}
+
+export class LoadingIndicator extends React.PureComponent<{|
+  +appState: AppState,
+|}> {
+  render() {
+    return (
+      <span style={{paddingLeft: 10}}>{loadingText(this.props.appState)}</span>
     );
   }
+}
 
-  loadData() {
-    const {selectedRepo} = this.state;
-    if (selectedRepo == null) {
-      throw new Error(`Impossible`);
+export function loadingText(state: AppState) {
+  switch (state.type) {
+    case "UNINITIALIZED": {
+      return "Initializing...";
     }
-
-    const statics = [new GithubAdapter(), new GitAdapter()];
-    Promise.all(statics.map((a) => a.load(selectedRepo))).then((adapters) => {
-      const graph = Graph.merge(adapters.map((x) => x.graph()));
-      const data = {
-        graphWithAdapters: {
-          graph,
-          adapters,
-        },
-        pnd: null,
-      };
-      this.setState({data});
-    });
+    case "INITIALIZED": {
+      switch (state.substate.type) {
+        case "READY_TO_LOAD_GRAPH": {
+          return {
+            LOADING: "Loading graph...",
+            NOT_LOADING: "Ready to load graph",
+            FAILED: "Error while loading graph",
+          }[state.substate.loading];
+        }
+        case "READY_TO_RUN_PAGERANK": {
+          return {
+            LOADING: "Running PageRank...",
+            NOT_LOADING: "Ready to run PageRank",
+            FAILED: "Error while running PageRank",
+          }[state.substate.loading];
+        }
+        case "PAGERANK_EVALUATED": {
+          return {
+            LOADING: "Re-running PageRank...",
+            NOT_LOADING: "",
+            FAILED: "Error while running PageRank",
+          }[state.substate.loading];
+        }
+        default:
+          throw new Error((state.substate.type: empty));
+      }
+    }
+    default:
+      throw new Error((state.type: empty));
   }
 }
