@@ -1,7 +1,6 @@
 // @flow
 
 import React from "react";
-import {StyleSheet, css} from "aphrodite/no-important";
 
 import type {LocalStore} from "../localStore";
 import CheckedLocalStore from "../checkedLocalStore";
@@ -65,15 +64,13 @@ export class App extends React.Component<Props, State> {
     const {graphWithAdapters, pnd} = this.state.data;
     return (
       <div style={{maxWidth: "66em", margin: "0 auto", padding: "0 10px"}}>
-        <header className={css(styles.header)}>
-          <h1>Cred Explorer</h1>
-        </header>
         <div>
-          <RepositorySelect
-            localStore={localStore}
-            onChange={(selectedRepo) => this.setState({selectedRepo})}
-          />
-          <br />
+          <div style={{marginBottom: 10}}>
+            <RepositorySelect
+              localStore={localStore}
+              onChange={(selectedRepo) => this.setState({selectedRepo})}
+            />
+          </div>
           <button
             disabled={selectedRepo == null}
             onClick={() => this.loadData()}
@@ -102,9 +99,8 @@ export class App extends React.Component<Props, State> {
               });
             }}
           >
-            Run basic PageRank
+            Run PageRank
           </button>
-          {graphWithAdapters ? <p>Graph loaded.</p> : <p>Graph not loaded.</p>}
           <WeightConfig
             localStore={localStore}
             onChange={(ee) => this.setState({edgeEvaluator: ee})}
@@ -139,9 +135,3 @@ export class App extends React.Component<Props, State> {
     });
   }
 }
-
-const styles = StyleSheet.create({
-  header: {
-    color: "#090",
-  },
-});

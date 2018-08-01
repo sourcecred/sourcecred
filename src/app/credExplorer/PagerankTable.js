@@ -102,8 +102,7 @@ export class PagerankTable extends React.PureComponent<
       throw new Error("maxEntriesPerList not set");
     }
     return (
-      <div>
-        <h2>PageRank results</h2>
+      <div style={{marginTop: 10}}>
         {this.renderFilterSelect()}
         {this.renderTable()}
       </div>
