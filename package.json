@@ -22,8 +22,6 @@
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-router": "3.2.1",
-    "semantic-ui-css": "^2.3.3",
-    "semantic-ui-react": "^0.82.1",
     "tmp": "^0.0.33",
     "whatwg-fetch": "2.0.3"
   },
