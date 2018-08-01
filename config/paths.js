@@ -37,8 +37,6 @@ module.exports = {
   root: appDirectory,
   dotenv: resolveApp(".env"),
   appBuild: resolveApp("build"),
-  appPublic: resolveApp("src/app/public"),
-  appHtml: resolveApp("src/app/public/index.html"),
   appIndexJs: resolveApp("src/app/index.js"),
   appServerSideRenderingIndexJs: resolveApp("src/app/server.js"),
   appRouteData: resolveApp("src/app/routeData.js"),
