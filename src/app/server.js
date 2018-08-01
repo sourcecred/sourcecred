@@ -46,7 +46,7 @@ export default function render(
           <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
           <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
           <title>${resolveTitleFromPath(path)}</title>
-          <style>${require("./style/index.css")}</style>
+          <style>${require("./index.css")}</style>
           <style data-aphrodite>${css.content}</style>
           </head>
           <body style="overflow-y:scroll">
@@ -84,7 +84,7 @@ export default function render(
       <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
       <title>${resolveTitleFromPath(path)}</title>
-      <style>${require("./style/index.css")}</style>
+      <style>${require("./index.css")}</style>
       <style data-aphrodite>${css.content}</style>
       </head>
       <body style="overflow-y:scroll">

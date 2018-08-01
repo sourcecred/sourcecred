@@ -1,15 +1,15 @@
 // @flow
 import React from "react";
 
-type Props = {
-  className: string,
-  altText: string,
-};
+type Props = {|
+  +className: string,
+  +altText: string,
+|};
 
 export default function TwitterLogo(props: Props) {
   return (
     <svg
-      aria-labelledby="twitterLogoTitle"
+      aria-label={props.altText}
       role="img"
       className={props.className}
       version="1.1"
@@ -18,7 +18,7 @@ export default function TwitterLogo(props: Props) {
       y="0px"
       viewBox="0 0 512 512"
     >
-      <title id="twitterLogoTitle">{props.altText}</title>
+      <title>{props.altText}</title>
       <path
         d="M512,97.209c-18.838,8.354-39.082,14.001-60.329,16.54c21.687-13,38.343-33.585,46.187-58.114
       c-20.299,12.038-42.778,20.779-66.705,25.489c-19.16-20.415-46.461-33.17-76.674-33.17c-58.012,0-105.043,47.029-105.043,105.039

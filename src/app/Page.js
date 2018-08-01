@@ -16,14 +16,7 @@ export default class Page extends React.Component<{|+children: Node|}> {
           <nav className={css(style.nav)}>
             <ul className={css(style.navList)}>
               <li className={css(style.navItem, style.navItemLeft)}>
-                <Link
-                  to="/"
-                  className={css(
-                    style.navLinkTitle,
-                    style.navLink,
-                    style.navLinkHover
-                  )}
-                >
+                <Link to="/" className={css(style.navLinkTitle, style.navLink)}>
                   SourceCred
                 </Link>
               </li>
@@ -33,10 +26,7 @@ export default class Page extends React.Component<{|+children: Node|}> {
                     key={path}
                     className={css(style.navItem, style.navItemRight)}
                   >
-                    <Link
-                      to={path}
-                      className={css(style.navLink, style.navLinkHover)}
-                    >
+                    <Link to={path} className={css(style.navLink)}>
                       {navTitle}
                     </Link>
                   </li>
@@ -49,7 +39,7 @@ export default class Page extends React.Component<{|+children: Node|}> {
                 >
                   <GithubLogo
                     altText="SourceCred Github"
-                    className={css(style.navLogo, style.navLogoHover)}
+                    className={css(style.navLogo)}
                   />
                 </a>
               </li>
@@ -59,8 +49,8 @@ export default class Page extends React.Component<{|+children: Node|}> {
                   href="https://twitter.com/sourcecred"
                 >
                   <TwitterLogo
-                    altText="SourCred Twitter"
-                    className={css(style.navLogo, style.navLogoHover)}
+                    altText="SourceCred Twitter"
+                    className={css(style.navLogo)}
                   />
                 </a>
               </li>
@@ -100,8 +90,6 @@ const style = StyleSheet.create({
     fontFamily: "Roboto Condensed",
     fontSize: 18,
     textDecoration: "none",
-  },
-  navLinkHover: {
     ":hover": {
       color: "#08A27F",
       textDecoration: "underline",
@@ -120,8 +108,6 @@ const style = StyleSheet.create({
     height: 20,
     width: 20,
     fill: "#00848B",
-  },
-  navLogoHover: {
     ":hover": {
       fill: "#08A27F",
     },
