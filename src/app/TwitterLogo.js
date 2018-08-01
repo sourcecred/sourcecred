@@ -1,9 +1,9 @@
 // @flow
-import React from 'react';
+import React from "react";
 
 type Props = {
   className: string,
-  altText: string
+  altText: string,
 };
 
 export default function TwitterLogo(props: Props) {
@@ -30,5 +30,5 @@ export default function TwitterLogo(props: Props) {
       C480.11,136.773,497.918,118.273,512,97.209z"
       />
     </svg>
-  )
+  );
 }

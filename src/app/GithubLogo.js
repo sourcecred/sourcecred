@@ -1,13 +1,13 @@
 // @flow
-import React from 'react';
+import React from "react";
 
 type Props = {
   className: string,
-  altText: string
+  altText: string,
 };
 
 export default function GithubLogo(props: Props) {
-  return(
+  return (
     <svg
       aria-labelledby="ghLogoTitle"
       role="img"
