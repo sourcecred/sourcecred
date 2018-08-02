@@ -7,6 +7,7 @@ import {StyleSheet, css} from "aphrodite/no-important";
 import type {Assets} from "./assets";
 import GithubLogo from "./GithubLogo";
 import TwitterLogo from "./TwitterLogo";
+import DiscordLogo from "./DiscordLogo";
 import {routeData} from "./routeData";
 import * as NullUtil from "../util/null";
 import {VERSION_SHORT, VERSION_FULL} from "./version";
@@ -49,7 +50,7 @@ export default class Page extends React.Component<{|
                   >
                     <GithubLogo
                       altText="SourceCred Github"
-                      className={css(style.navLogo)}
+                      className={css(style.navLogoSmall)}
                     />
                   </a>
                 </li>
@@ -60,7 +61,18 @@ export default class Page extends React.Component<{|
                   >
                     <TwitterLogo
                       altText="SourceCred Twitter"
-                      className={css(style.navLogo)}
+                      className={css(style.navLogoSmall)}
+                    />
+                  </a>
+                </li>
+                <li className={css(style.navItem, style.navItemRightSmall)}>
+                  <a
+                    className={css(style.navLink)}
+                    href="https://discordapp.com/invite/tsBTgc9"
+                  >
+                    <DiscordLogo
+                      altText="Join the SourceCred Discord"
+                      className={css(style.navLogoMedium)}
                     />
                   </a>
                 </li>
@@ -136,8 +148,16 @@ const style = StyleSheet.create({
   navItemRight: {
     marginLeft: 20,
   },
-  navLogo: {
+  navItemRightSmall: {
+    marginLeft: 15,
+  },
+  navLogoSmall: {
     height: 20,
     width: 20,
+  },
+  navLogoMedium: {
+    height: 25,
+    width: 25,
+    transform: "translateY(-1px)",
   },
 });
