@@ -86,6 +86,9 @@ to run them all. This will run:
   - **Unit tests** (`yarn unit`). You can also run `yarn unit --watch`
     to automatically re-run tests when you change a relevant file.
 
+  - **Sharness** (`yarn sharness`). This runs shell-based tests, located
+    in the `sharness/` directory.
+
   - **Prettier** (`check-pretty`). You can simply run `yarn prettify` to
     reformat all files. It can be convenient to set up your editor to
     run `yarn prettier --write CURRENT_FILENAME` whenever you save a

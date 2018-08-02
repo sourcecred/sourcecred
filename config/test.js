@@ -58,6 +58,16 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       deps: [],
     },
     {
+      id: {BASIC: "sharness", FULL: "sharness-full"}[mode],
+      cmd: [
+        "npm",
+        "run",
+        "--silent",
+        {BASIC: "sharness", FULL: "sharness-full"}[mode],
+      ],
+      deps: [],
+    },
+    {
       id: "backend",
       cmd: ["npm", "run", "--silent", "backend", "--", "--dry-run"],
       deps: [],
