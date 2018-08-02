@@ -43,6 +43,8 @@ export default function render(
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width,initial-scale=1" />
           <link rel="shortcut icon" href="/favicon.ico" />
+          <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+          <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
           <title>${resolveTitleFromPath(path)}</title>
           <style>${require("./index.css")}</style>
           <style data-aphrodite>${css.content}</style>
@@ -79,6 +81,8 @@ export default function render(
       <meta name="viewport" content="width=device-width,initial-scale=1" />
       <meta http-equiv="refresh" content="0;url=${redirectTo}" />
       <link rel="shortcut icon" href="/favicon.ico" />
+      <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
       <title>${resolveTitleFromPath(path)}</title>
       <style>${require("./index.css")}</style>
       <style data-aphrodite>${css.content}</style>
