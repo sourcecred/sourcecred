@@ -34,7 +34,7 @@ export default class Page extends React.Component<{|+children: Node|}> {
               )}
               <li className={css(style.navItem, style.navItemRight)}>
                 <a
-                  className={css(style.navLink, style.navLinkHover)}
+                  className={css(style.navLink)}
                   href="https://github.com/sourcecred/sourcecred"
                 >
                   <GithubLogo
@@ -45,7 +45,7 @@ export default class Page extends React.Component<{|+children: Node|}> {
               </li>
               <li className={css(style.navItem, style.navItemRight)}>
                 <a
-                  className={css(style.navLink, style.navLinkHover)}
+                  className={css(style.navLink)}
                   href="https://twitter.com/sourcecred"
                 >
                   <TwitterLogo
@@ -64,14 +64,6 @@ export default class Page extends React.Component<{|+children: Node|}> {
 }
 
 const style = StyleSheet.create({
-  header: {
-    color: "#1297A1",
-    fontFamily: '"Roboto Condensed", sans-serif',
-  },
-  body: {
-    padding: "0 100px",
-    flex: 3,
-  },
   nav: {
     height: 60,
     padding: "20px 100px",
@@ -86,12 +78,14 @@ const style = StyleSheet.create({
     display: "flex",
   },
   navLink: {
-    color: "#00848B",
+    color: "#0872A2",
+    fill: "#0872A2",
     fontFamily: "Roboto Condensed",
     fontSize: 18,
     textDecoration: "none",
     ":hover": {
-      color: "#08A27F",
+      color: "#084598",
+      fill: "#084598",
       textDecoration: "underline",
     },
   },
@@ -101,15 +95,8 @@ const style = StyleSheet.create({
   navItemRight: {
     marginLeft: 20,
   },
-  logoImg: {
-    height: 20,
-  },
   navLogo: {
     height: 20,
     width: 20,
-    fill: "#00848B",
-    ":hover": {
-      fill: "#08A27F",
-    },
   },
 });
