@@ -28,13 +28,13 @@ const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
     navTitle: "Home",
   },
   {
-    path: "/explorer",
+    path: "/prototype",
     contents: {
       type: "PAGE",
       component: () => require("./credExplorer/App").default,
     },
-    title: "SourceCred explorer",
-    navTitle: "Explore",
+    title: "SourceCred prototype",
+    navTitle: "Prototype",
   },
   {
     path: "/discord-invite",
