@@ -122,16 +122,8 @@ replacing the big string of zeros with your actual token.
 
 ### Contributing
 
-If you would like to contribute to SourceCred:
-* Join our [Discord] and let us know what issue you'd like to work on. We can
-guide you through the architecture, and assign you to the relevant issue.
-* Fork the repository.
-* Follow the installation and setup instructions as above.
+We’d love to accept your contributions! Please join our [Discord] to get
+in touch with us, and check out our [contributing guide] to get started.
 
-Once your changes are ready for test and review:
-  * run `yarn prettify`, which runs [prettier] to format your code
-  * run `yarn test`
-  * submit your pull request
-
-[prettier]: https://github.com/prettier/prettier
 [Discord]: https://discord.gg/tsBTgc9
+[contributing guide]: https://github.com/sourcecred/sourcecred/blob/master/CONTRIBUTING.md
