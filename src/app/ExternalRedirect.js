@@ -7,13 +7,13 @@ export default class ExternalRedirect extends React.Component<{|
 |}> {
   render() {
     return (
-      <React.Fragment>
+      <div style={{maxWidth: 900, margin: "0 auto"}}>
         <h1>Redirecting…</h1>
         <p>
           Redirecting to:{" "}
           <a href={this.props.redirectTo}>{this.props.redirectTo}</a>
         </p>
-      </React.Fragment>
+      </div>
     );
   }
 

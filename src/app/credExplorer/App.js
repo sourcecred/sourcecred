@@ -63,7 +63,7 @@ export class App extends React.Component<Props, State> {
     const {edgeEvaluator, selectedRepo} = this.state;
     const {graphWithAdapters, pnd} = this.state.data;
     return (
-      <div style={{maxWidth: "66em", margin: "0 auto", padding: "0 10px"}}>
+      <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
         <div>
           <div style={{marginBottom: 10}}>
             <RepositorySelect
