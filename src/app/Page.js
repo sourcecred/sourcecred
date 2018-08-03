@@ -16,7 +16,7 @@ export default class Page extends React.Component<{|+children: Node|}> {
           <nav className={css(style.nav)}>
             <ul className={css(style.navList)}>
               <li className={css(style.navItem, style.navItemLeft)}>
-                <Link to="/" className={css(style.navLinkTitle, style.navLink)}>
+                <Link to="/" className={css(style.navLink, style.navLinkTitle)}>
                   SourceCred
                 </Link>
               </li>
@@ -67,6 +67,11 @@ const style = StyleSheet.create({
   nav: {
     height: 60,
     padding: "20px 100px",
+    maxWidth: 900,
+    margin: "0 auto",
+  },
+  navLinkTitle: {
+    fontSize: 24,
   },
   navItem: {
     display: "inline-block",
