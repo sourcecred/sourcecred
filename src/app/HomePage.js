@@ -18,7 +18,7 @@ export default class HomePage extends React.Component<{||}> {
       discord: "https://discord.gg/tsBTgc9",
       github: "https://github.com/sourcecred/sourcecred",
       contributionsWelcome:
-        "https://github.com/SourceCred/SourceCred/issues?q=is%3Aissue+is%3Aopen+label%3A%22contributions+welcome%22",
+        "https://github.com/sourcecred/sourcecred/issues?q=is%3Aissue+is%3Aopen+label%3A%22contributions+welcome%22",
       readme: "https://github.com/sourcecred/sourcecred/blob/master/README.md",
     };
     return (
