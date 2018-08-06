@@ -26,6 +26,21 @@ export type Edge = {|
   +dst: NodeAddressT,
 |};
 
+// TODO: We should come up with a clear contract here, and
+// probably defaultWeights should not live in this type.
+// Discussion at #465
+export type EdgeType = {|
+  +forwardName: string,
+  +backwardName: string,
+  +prefix: EdgeAddressT,
+|};
+
+export type NodeType = {|
+  +name: string,
+  +prefix: NodeAddressT,
+  +defaultWeight: number,
+|};
+
 const COMPAT_INFO = {type: "sourcecred/graph", version: "0.4.0"};
 
 export type Neighbor = {|+node: NodeAddressT, +edge: Edge|};

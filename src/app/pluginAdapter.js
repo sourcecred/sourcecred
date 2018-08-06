@@ -1,19 +1,13 @@
 // @flow
 
-import type {Graph, NodeAddressT, EdgeAddressT} from "../core/graph";
+import type {
+  Graph,
+  NodeAddressT,
+  EdgeAddressT,
+  NodeType,
+  EdgeType,
+} from "../core/graph";
 import type {Repo} from "../core/repo";
-
-export type EdgeType = {|
-  +forwardName: string,
-  +backwardName: string,
-  +prefix: EdgeAddressT,
-|};
-
-export type NodeType = {|
-  +name: string,
-  +prefix: NodeAddressT,
-  +defaultWeight: number,
-|};
 
 export interface StaticPluginAdapter {
   name(): string;
