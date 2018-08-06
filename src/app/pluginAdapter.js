@@ -3,20 +3,24 @@
 import type {Graph, NodeAddressT, EdgeAddressT} from "../core/graph";
 import type {Repo} from "../core/repo";
 
+export type EdgeType = {|
+  +forwardName: string,
+  +backwardName: string,
+  +prefix: EdgeAddressT,
+|};
+
+export type NodeType = {|
+  +name: string,
+  +prefix: NodeAddressT,
+  +defaultWeight: number,
+|};
+
 export interface StaticPluginAdapter {
   name(): string;
   nodePrefix(): NodeAddressT;
   edgePrefix(): EdgeAddressT;
-  nodeTypes(): Array<{|
-    +name: string,
-    +prefix: NodeAddressT,
-    +defaultWeight: number,
-  |}>;
-  edgeTypes(): Array<{|
-    +forwardName: string,
-    +backwardName: string,
-    +prefix: EdgeAddressT,
-  |}>;
+  nodeTypes(): NodeType[];
+  edgeTypes(): EdgeType[];
   load(repo: Repo): Promise<DynamicPluginAdapter>;
 }
 
