@@ -3,7 +3,7 @@
 import {type Edge, Graph} from "../graph";
 import {
   distributionToNodeDistribution,
-  createContributions,
+  createConnections,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
 } from "./graphToMarkovChain";
@@ -44,12 +44,12 @@ export async function pagerank(
     ...defaultOptions(),
     ...(options || {}),
   };
-  const contributions = createContributions(
+  const connections = createConnections(
     graph,
     edgeWeight,
     fullOptions.selfLoopWeight
   );
-  const osmc = createOrderedSparseMarkovChain(contributions);
+  const osmc = createOrderedSparseMarkovChain(connections);
   const distribution = await findStationaryDistribution(osmc.chain, {
     verbose: fullOptions.verbose,
     convergenceThreshold: fullOptions.convergenceThreshold,
@@ -57,5 +57,5 @@ export async function pagerank(
     yieldAfterMs: 30,
   });
   const pi = distributionToNodeDistribution(osmc.nodeOrder, distribution);
-  return decompose(pi, contributions);
+  return decompose(pi, connections);
 }

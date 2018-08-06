@@ -6,40 +6,34 @@ import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 
 export type Probability = number;
-export type Contributor =
+export type Adjacency =
   | {|+type: "SYNTHETIC_LOOP"|}
   | {|+type: "IN_EDGE", +edge: Edge|}
   | {|+type: "OUT_EDGE", +edge: Edge|};
-export type Contribution = {|
-  +contributor: Contributor,
+export type Connection = {|
+  +adjacency: Adjacency,
   // This `weight` is a conditional probability: given that you're at
-  // the source of this contribution's contributor, what's the
-  // probability that you travel along this contribution to the target?
+  // the source of this connection's adjacency, what's the
+  // probability that you travel along this connection to the target?
   +weight: Probability,
 |};
 
-export function contributorSource(
-  target: NodeAddressT,
-  contributor: Contributor
-) {
-  switch (contributor.type) {
+export function adjacencySource(target: NodeAddressT, adjacency: Adjacency) {
+  switch (adjacency.type) {
     case "SYNTHETIC_LOOP":
       return target;
     case "IN_EDGE":
-      return contributor.edge.src;
+      return adjacency.edge.src;
     case "OUT_EDGE":
-      return contributor.edge.dst;
+      return adjacency.edge.dst;
     default:
-      throw new Error((contributor.type: empty));
+      throw new Error((adjacency.type: empty));
   }
 }
 
 export type NodeDistribution = Map<NodeAddressT, Probability>;
 
-export type NodeToContributions = Map<
-  NodeAddressT,
-  $ReadOnlyArray<Contribution>
->;
+export type NodeToConnections = Map<NodeAddressT, $ReadOnlyArray<Connection>>;
 
 type NodeAddressMarkovChain = Map<
   NodeAddressT,
@@ -56,11 +50,11 @@ export type EdgeWeight = {|
   +froWeight: number, // weight from dst to src
 |};
 
-export function createContributions(
+export function createConnections(
   graph: Graph,
   edgeWeight: (Edge) => EdgeWeight,
   syntheticLoopWeight: number
-): NodeToContributions {
+): NodeToConnections {
   const result = new Map();
   const totalOutWeight: Map<NodeAddressT, number> = new Map();
   for (const node of graph.nodes()) {
@@ -68,23 +62,20 @@ export function createContributions(
     totalOutWeight.set(node, 0);
   }
 
-  function processContribution(
-    target: NodeAddressT,
-    contribution: Contribution
-  ) {
-    const contributions = NullUtil.get(result.get(target));
-    (((contributions: $ReadOnlyArray<Contribution>): any): Contribution[]).push(
-      contribution
+  function processConnection(target: NodeAddressT, connection: Connection) {
+    const connections = NullUtil.get(result.get(target));
+    (((connections: $ReadOnlyArray<Connection>): any): Connection[]).push(
+      connection
     );
-    const source = contributorSource(target, contribution.contributor);
+    const source = adjacencySource(target, connection.adjacency);
     const priorOutWeight = NullUtil.get(totalOutWeight.get(source));
-    totalOutWeight.set(source, priorOutWeight + contribution.weight);
+    totalOutWeight.set(source, priorOutWeight + connection.weight);
   }
 
   // Add self-loops.
   for (const node of graph.nodes()) {
-    processContribution(node, {
-      contributor: {type: "SYNTHETIC_LOOP"},
+    processConnection(node, {
+      adjacency: {type: "SYNTHETIC_LOOP"},
       weight: syntheticLoopWeight,
     });
   }
@@ -93,25 +84,25 @@ export function createContributions(
   for (const edge of graph.edges()) {
     const {toWeight, froWeight} = edgeWeight(edge);
     const {src, dst} = edge;
-    processContribution(dst, {
-      contributor: {type: "IN_EDGE", edge},
+    processConnection(dst, {
+      adjacency: {type: "IN_EDGE", edge},
       weight: toWeight,
     });
-    processContribution(src, {
-      contributor: {type: "OUT_EDGE", edge},
+    processConnection(src, {
+      adjacency: {type: "OUT_EDGE", edge},
       weight: froWeight,
     });
   }
 
   // Normalize in-weights.
-  for (const [target, contributions] of result.entries()) {
-    for (const contribution of contributions) {
-      const source = contributorSource(target, contribution.contributor);
+  for (const [target, connections] of result.entries()) {
+    for (const connection of connections) {
+      const source = adjacencySource(target, connection.adjacency);
       const normalization = NullUtil.get(totalOutWeight.get(source));
-      const newWeight: typeof contribution.weight =
-        contribution.weight / normalization;
+      const newWeight: typeof connection.weight =
+        connection.weight / normalization;
       // (any-cast because property is not writable)
-      (contribution: any).weight = newWeight;
+      (connection: any).weight = newWeight;
     }
   }
 
@@ -119,15 +110,15 @@ export function createContributions(
 }
 
 function createNodeAddressMarkovChain(
-  ntc: NodeToContributions
+  ntc: NodeToConnections
 ): NodeAddressMarkovChain {
-  return MapUtil.mapValues(ntc, (target, contributions) => {
+  return MapUtil.mapValues(ntc, (target, connections) => {
     const inNeighbors = new Map();
-    for (const contribution of contributions) {
-      const source = contributorSource(target, contribution.contributor);
+    for (const connection of connections) {
+      const source = adjacencySource(target, connection.adjacency);
       inNeighbors.set(
         source,
-        contribution.weight + NullUtil.orElse(inNeighbors.get(source), 0)
+        connection.weight + NullUtil.orElse(inNeighbors.get(source), 0)
       );
     }
     return inNeighbors;
@@ -163,9 +154,9 @@ function nodeAddressMarkovChainToOrderedSparseMarkovChain(
 }
 
 export function createOrderedSparseMarkovChain(
-  contributions: NodeToContributions
+  connections: NodeToConnections
 ): OrderedSparseMarkovChain {
-  const chain = createNodeAddressMarkovChain(contributions);
+  const chain = createNodeAddressMarkovChain(connections);
   return nodeAddressMarkovChainToOrderedSparseMarkovChain(chain);
 }
 
