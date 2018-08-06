@@ -18,6 +18,7 @@ main() {
     cd "${toplevel}"
 
     sourcecred_repo=
+    static_site=
     sourcecred_site=
     preview_dir=
     trap cleanup EXIT
@@ -64,23 +65,20 @@ ensure_clean_working_tree() {
 }
 
 build_and_deploy() {
-    sourcecred_data="$(mktemp -d --suffix ".sourcecred-data")"
-    export SOURCECRED_DIRECTORY="${sourcecred_data}"
-
     sourcecred_repo="$(mktemp -d --suffix ".sourcecred-repo")"
     git clone "${SOURCECRED_REMOTE}" "${sourcecred_repo}"
     sourcecred_hash="$(
         git -C "${sourcecred_repo}" rev-parse --verify "${SOURCECRED_REF}" --
     )"
     git -C "${sourcecred_repo}" checkout --detach "${sourcecred_hash}"
-    (
-        cd "${sourcecred_repo}"
-        yarn
-        yarn backend
-        yarn build
-        node ./bin/sourcecred.js load ipfs/js-ipfs
-        node ./bin/sourcecred.js load sourcecred/sourcecred
-    )
+
+    static_site="$(mktemp -d --suffix ".static-site")"
+    "${sourcecred_repo}/scripts/build_static_site.sh" \
+        --target "${static_site}" \
+        ${DEPLOY_CNAME_URL:+--cname "${DEPLOY_CNAME_URL}"} \
+        --repo ipfs/js-ipfs \
+        --repo sourcecred/sourcecred \
+        ;
 
     sourcecred_site="$(mktemp -d --suffix ".sourcecred-site")"
     git clone "${DEPLOY_REMOTE}" "${sourcecred_site}"
@@ -95,21 +93,10 @@ build_and_deploy() {
     git -C "${sourcecred_site}" checkout --detach "${base_commit}"
     rm "${sourcecred_site}/.git/index"
     git -C "${sourcecred_site}" clean -qfdx
-    # Explode the `build/` directory into the current directory.
-    find "${sourcecred_repo}/build/" -mindepth 1 -maxdepth 1 \
+    # Explode the static site contents into the current directory.
+    find "${static_site}" -mindepth 1 -maxdepth 1 \
         \( -name .git -prune \) -o \
         -exec cp -r -t "${sourcecred_site}" -- {} +
-    # Copy the SourceCred data into the appropriate API route.
-    mkdir "${sourcecred_site}/api/"
-    mkdir "${sourcecred_site}/api/v1/"
-    cp -r "${sourcecred_data}" "${sourcecred_site}/api/v1/data"
-    if [ -n "${DEPLOY_CNAME_URL}" ]; then
-        if [ -e "${sourcecred_site}/CNAME" ]; then
-            printf 'Error: CNAME file would be overwritten!\n' >&2
-            exit 1
-        fi
-        printf '%s' "${DEPLOY_CNAME_URL}" >"${sourcecred_site}/CNAME"
-    fi
     git -C "${sourcecred_site}" add --all .
     git -C "${sourcecred_site}" commit -m "deploy-v1: ${sourcecred_hash}"
     deploy_commit="$(git -C "${sourcecred_site}" rev-parse HEAD)"
@@ -142,11 +129,14 @@ build_and_deploy() {
 }
 
 cleanup() {
-    if [ -d "${sourcecred_site}" ]; then
-        rm -rf "${sourcecred_site}"
-    fi
     if [ -d "${sourcecred_repo}" ]; then
         rm -rf "${sourcecred_repo}"
+    fi
+    if [ -d "${static_site}" ]; then
+        rm -rf "${static_site}"
+    fi
+    if [ -d "${sourcecred_site}" ]; then
+        rm -rf "${sourcecred_site}"
     fi
     if [ -d "${preview_dir}" ]; then
         rm -rf "${preview_dir}"
