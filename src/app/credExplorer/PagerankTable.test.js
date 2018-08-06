@@ -1,7 +1,6 @@
 // @flow
 import React from "react";
 import {shallow} from "enzyme";
-import enzymeToJSON from "enzyme-to-json";
 
 import type {DynamicPluginAdapter} from "../pluginAdapter";
 
@@ -175,32 +174,6 @@ describe("app/credExplorer/PagerankTable", () => {
   });
 
   describe("PagerankTable", () => {
-    it("renders expected message with null props", () => {
-      const element = shallow(
-        <PagerankTable pnd={null} adapters={null} maxEntriesPerList={1} />
-      );
-      expect(enzymeToJSON(element)).toMatchSnapshot();
-    });
-    it("renders expected message with just adapters", async () => {
-      const {adapters} = await example();
-      const element = shallow(
-        <PagerankTable pnd={null} adapters={adapters} maxEntriesPerList={1} />
-      );
-      expect(enzymeToJSON(element)).toMatchSnapshot();
-    });
-    it("throws an error if maxEntriesPerList not set", async () => {
-      const {pnd, adapters} = await example();
-      expect(() =>
-        shallow(
-          <PagerankTable
-            pnd={pnd}
-            adapters={adapters}
-            // $ExpectFlowError
-            maxEntriesPerList={null}
-          />
-        )
-      ).toThrowError("maxEntriesPerList");
-    });
     it("renders thead column order properly", async () => {
       const {pnd, adapters} = await example();
       const element = shallow(

@@ -77,8 +77,8 @@ type SharedProps = {|
 |};
 
 type PagerankTableProps = {|
-  +pnd: ?PagerankNodeDecomposition,
-  +adapters: ?$ReadOnlyArray<DynamicPluginAdapter>,
+  +pnd: PagerankNodeDecomposition,
+  +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
   +maxEntriesPerList: number,
 |};
 type PagerankTableState = {|topLevelFilter: NodeAddressT|};
@@ -92,15 +92,6 @@ export class PagerankTable extends React.PureComponent<
   }
 
   render() {
-    if (this.props.adapters == null) {
-      return <p>You must load a graph before seeing PageRank analysis.</p>;
-    }
-    if (this.props.pnd == null) {
-      return <p>Please run PageRank to see analysis.</p>;
-    }
-    if (this.props.maxEntriesPerList == null) {
-      throw new Error("maxEntriesPerList not set");
-    }
     return (
       <div style={{marginTop: 10}}>
         {this.renderFilterSelect()}

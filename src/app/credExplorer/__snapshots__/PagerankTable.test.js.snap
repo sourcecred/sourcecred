@@ -66,15 +66,3 @@ Array [
   },
 ]
 `;
-
-exports[`app/credExplorer/PagerankTable PagerankTable renders expected message with just adapters 1`] = `
-<p>
-  Please run PageRank to see analysis.
-</p>
-`;
-
-exports[`app/credExplorer/PagerankTable PagerankTable renders expected message with null props 1`] = `
-<p>
-  You must load a graph before seeing PageRank analysis.
-</p>
-`;
