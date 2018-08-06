@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`core/attribution/contributions decompose has the expected output on a simple asymmetric chain 1`] = `
+exports[`core/attribution/connections decompose has the expected output on a simple asymmetric chain 1`] = `
 Map {
   "NodeAddress[\\"n1\\"]" => Object {
     "score": 0.19117656878499834,
-    "scoredContributions": Array [
+    "scoredConnections": Array [
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "edge": Object {
               "address": "EdgeAddress[\\"e3\\"]",
               "dst": "NodeAddress[\\"sink\\"]",
@@ -17,13 +17,13 @@ Map {
           },
           "weight": 0.1875,
         },
-        "contributionScore": 0.1102941261444197,
+        "connectionScore": 0.1102941261444197,
         "source": "NodeAddress[\\"sink\\"]",
         "sourceScore": 0.5882353394369051,
       },
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "edge": Object {
               "address": "EdgeAddress[\\"e1\\"]",
               "dst": "NodeAddress[\\"n2\\"]",
@@ -33,18 +33,18 @@ Map {
           },
           "weight": 0.3,
         },
-        "contributionScore": 0.066176427533429,
+        "connectionScore": 0.066176427533429,
         "source": "NodeAddress[\\"n2\\"]",
         "sourceScore": 0.22058809177809668,
       },
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "type": "SYNTHETIC_LOOP",
           },
           "weight": 0.07692307692307693,
         },
-        "contributionScore": 0.014705889906538334,
+        "connectionScore": 0.014705889906538334,
         "source": "NodeAddress[\\"n1\\"]",
         "sourceScore": 0.19117656878499834,
       },
@@ -52,10 +52,10 @@ Map {
   },
   "NodeAddress[\\"n2\\"]" => Object {
     "score": 0.22058809177809668,
-    "scoredContributions": Array [
+    "scoredConnections": Array [
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "edge": Object {
               "address": "EdgeAddress[\\"e2\\"]",
               "dst": "NodeAddress[\\"sink\\"]",
@@ -65,13 +65,13 @@ Map {
           },
           "weight": 0.1875,
         },
-        "contributionScore": 0.1102941261444197,
+        "connectionScore": 0.1102941261444197,
         "source": "NodeAddress[\\"sink\\"]",
         "sourceScore": 0.5882353394369051,
       },
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "edge": Object {
               "address": "EdgeAddress[\\"e1\\"]",
               "dst": "NodeAddress[\\"n2\\"]",
@@ -81,18 +81,18 @@ Map {
           },
           "weight": 0.46153846153846156,
         },
-        "contributionScore": 0.08823533943923001,
+        "connectionScore": 0.08823533943923001,
         "source": "NodeAddress[\\"n1\\"]",
         "sourceScore": 0.19117656878499834,
       },
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "type": "SYNTHETIC_LOOP",
           },
           "weight": 0.1,
         },
-        "contributionScore": 0.02205880917780967,
+        "connectionScore": 0.02205880917780967,
         "source": "NodeAddress[\\"n2\\"]",
         "sourceScore": 0.22058809177809668,
       },
@@ -100,10 +100,10 @@ Map {
   },
   "NodeAddress[\\"sink\\"]" => Object {
     "score": 0.5882353394369051,
-    "scoredContributions": Array [
+    "scoredConnections": Array [
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "edge": Object {
               "address": "EdgeAddress[\\"e4\\"]",
               "dst": "NodeAddress[\\"sink\\"]",
@@ -113,13 +113,13 @@ Map {
           },
           "weight": 0.375,
         },
-        "contributionScore": 0.2205882522888394,
+        "connectionScore": 0.2205882522888394,
         "source": "NodeAddress[\\"sink\\"]",
         "sourceScore": 0.5882353394369051,
       },
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "edge": Object {
               "address": "EdgeAddress[\\"e2\\"]",
               "dst": "NodeAddress[\\"sink\\"]",
@@ -129,13 +129,13 @@ Map {
           },
           "weight": 0.6,
         },
-        "contributionScore": 0.132352855066858,
+        "connectionScore": 0.132352855066858,
         "source": "NodeAddress[\\"n2\\"]",
         "sourceScore": 0.22058809177809668,
       },
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "edge": Object {
               "address": "EdgeAddress[\\"e4\\"]",
               "dst": "NodeAddress[\\"sink\\"]",
@@ -145,13 +145,13 @@ Map {
           },
           "weight": 0.1875,
         },
-        "contributionScore": 0.1102941261444197,
+        "connectionScore": 0.1102941261444197,
         "source": "NodeAddress[\\"sink\\"]",
         "sourceScore": 0.5882353394369051,
       },
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "edge": Object {
               "address": "EdgeAddress[\\"e3\\"]",
               "dst": "NodeAddress[\\"sink\\"]",
@@ -161,18 +161,18 @@ Map {
           },
           "weight": 0.46153846153846156,
         },
-        "contributionScore": 0.08823533943923001,
+        "connectionScore": 0.08823533943923001,
         "source": "NodeAddress[\\"n1\\"]",
         "sourceScore": 0.19117656878499834,
       },
       Object {
-        "contribution": Object {
-          "contributor": Object {
+        "connection": Object {
+          "adjacency": Object {
             "type": "SYNTHETIC_LOOP",
           },
           "weight": 0.0625,
         },
-        "contributionScore": 0.03676470871480657,
+        "connectionScore": 0.03676470871480657,
         "source": "NodeAddress[\\"sink\\"]",
         "sourceScore": 0.5882353394369051,
       },

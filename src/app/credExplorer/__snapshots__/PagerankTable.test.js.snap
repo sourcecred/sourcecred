@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/credExplorer/PagerankTable ContributionRow has proper depth-based styling 1`] = `
+exports[`app/credExplorer/PagerankTable ConnectionRow has proper depth-based styling 1`] = `
 Object {
   "buttonStyle": Object {
     "marginLeft": 30,

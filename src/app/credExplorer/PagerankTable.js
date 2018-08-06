@@ -11,9 +11,9 @@ import {
 } from "../../core/graph";
 import type {
   PagerankNodeDecomposition,
-  ScoredContribution,
+  ScoredConnection,
 } from "../../core/attribution/pagerankNodeDecomposition";
-import type {Contribution} from "../../core/attribution/graphToMarkovChain";
+import type {Connection} from "../../core/attribution/graphToMarkovChain";
 import type {DynamicPluginAdapter} from "../pluginAdapter";
 import * as NullUtil from "../../util/null";
 
@@ -173,7 +173,7 @@ export class PagerankTable extends React.PureComponent<
         <thead>
           <tr>
             <th style={{textAlign: "left"}}>Description</th>
-            <th style={{textAlign: "right"}}>Contribution</th>
+            <th style={{textAlign: "right"}}>Connection</th>
             <th style={{textAlign: "right"}}>Score</th>
           </tr>
         </thead>
@@ -250,7 +250,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps, RowState> {
           <td style={{textAlign: "right"}}>{scoreDisplay(score)}</td>
         </tr>
         {expanded && (
-          <ContributionRowList
+          <ConnectionRowList
             key="children"
             depth={1}
             node={node}
@@ -262,29 +262,29 @@ export class NodeRow extends React.PureComponent<NodeRowProps, RowState> {
   }
 }
 
-type ContributionRowListProps = {|
+type ConnectionRowListProps = {|
   +depth: number,
   +node: NodeAddressT,
   +sharedProps: SharedProps,
 |};
 
-export class ContributionRowList extends React.PureComponent<
-  ContributionRowListProps
+export class ConnectionRowList extends React.PureComponent<
+  ConnectionRowListProps
 > {
   render() {
     const {depth, node, sharedProps} = this.props;
     const {pnd, maxEntriesPerList} = sharedProps;
-    const {scoredContributions} = NullUtil.get(pnd.get(node));
+    const {scoredConnections} = NullUtil.get(pnd.get(node));
     return (
       <React.Fragment>
-        {scoredContributions
+        {scoredConnections
           .slice(0, maxEntriesPerList)
           .map((sc) => (
-            <ContributionRow
-              key={JSON.stringify(sc.contribution.contributor)}
+            <ConnectionRow
+              key={JSON.stringify(sc.connection.adjacency)}
               depth={depth}
               target={node}
-              scoredContribution={sc}
+              scoredConnection={sc}
               sharedProps={sharedProps}
             />
           ))}
@@ -293,15 +293,15 @@ export class ContributionRowList extends React.PureComponent<
   }
 }
 
-type ContributionRowProps = {|
+type ConnectionRowProps = {|
   +depth: number,
   +target: NodeAddressT,
-  +scoredContribution: ScoredContribution,
+  +scoredConnection: ScoredConnection,
   +sharedProps: SharedProps,
 |};
 
-export class ContributionRow extends React.PureComponent<
-  ContributionRowProps,
+export class ConnectionRow extends React.PureComponent<
+  ConnectionRowProps,
   RowState
 > {
   constructor() {
@@ -313,18 +313,13 @@ export class ContributionRow extends React.PureComponent<
       sharedProps,
       target,
       depth,
-      scoredContribution: {
-        contribution,
-        source,
-        sourceScore,
-        contributionScore,
-      },
+      scoredConnection: {connection, source, sourceScore, connectionScore},
     } = this.props;
     const {pnd, adapters} = sharedProps;
     const {expanded} = this.state;
     const {score: targetScore} = NullUtil.get(pnd.get(target));
-    const contributionProportion = contributionScore / targetScore;
-    const contributionPercent = (contributionProportion * 100).toFixed(2);
+    const connectionProportion = connectionScore / targetScore;
+    const connectionPercent = (connectionProportion * 100).toFixed(2);
 
     return (
       <React.Fragment>
@@ -346,13 +341,13 @@ export class ContributionRow extends React.PureComponent<
             >
               {expanded ? "\u2212" : "+"}
             </button>
-            <ContributionView contribution={contribution} adapters={adapters} />
+            <ConnectionView connection={connection} adapters={adapters} />
           </td>
-          <td style={{textAlign: "right"}}>{contributionPercent}%</td>
+          <td style={{textAlign: "right"}}>{connectionPercent}%</td>
           <td style={{textAlign: "right"}}>{scoreDisplay(sourceScore)}</td>
         </tr>
         {expanded && (
-          <ContributionRowList
+          <ConnectionRowList
             key="children"
             depth={depth + 1}
             node={source}
@@ -364,12 +359,12 @@ export class ContributionRow extends React.PureComponent<
   }
 }
 
-export class ContributionView extends React.PureComponent<{|
-  +contribution: Contribution,
+export class ConnectionView extends React.PureComponent<{|
+  +connection: Connection,
   +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
 |}> {
   render() {
-    const {contribution, adapters} = this.props;
+    const {connection, adapters} = this.props;
     function Badge({children}) {
       return (
         // The outer <span> acts as a strut to ensure that the badge
@@ -387,30 +382,30 @@ export class ContributionView extends React.PureComponent<{|
         </span>
       );
     }
-    const {contributor} = contribution;
-    switch (contributor.type) {
+    const {adjacency} = connection;
+    switch (adjacency.type) {
       case "SYNTHETIC_LOOP":
         return <Badge>synthetic loop</Badge>;
       case "IN_EDGE":
         return (
           <span>
             <Badge>
-              {edgeVerb(contributor.edge.address, "BACKWARD", adapters)}
+              {edgeVerb(adjacency.edge.address, "BACKWARD", adapters)}
             </Badge>{" "}
-            <span>{nodeDescription(contributor.edge.src, adapters)}</span>
+            <span>{nodeDescription(adjacency.edge.src, adapters)}</span>
           </span>
         );
       case "OUT_EDGE":
         return (
           <span>
             <Badge>
-              {edgeVerb(contributor.edge.address, "FORWARD", adapters)}
+              {edgeVerb(adjacency.edge.address, "FORWARD", adapters)}
             </Badge>{" "}
-            <span>{nodeDescription(contributor.edge.dst, adapters)}</span>
+            <span>{nodeDescription(adjacency.edge.dst, adapters)}</span>
           </span>
         );
       default:
-        throw new Error((contributor.type: empty));
+        throw new Error((adjacency.type: empty));
     }
   }
 }

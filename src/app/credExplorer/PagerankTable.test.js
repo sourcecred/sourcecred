@@ -9,13 +9,13 @@ import {
   PagerankTable,
   NodeRowList,
   NodeRow,
-  ContributionRowList,
-  ContributionRow,
-  ContributionView,
+  ConnectionRowList,
+  ConnectionRow,
+  ConnectionView,
 } from "./PagerankTable";
 import {pagerank} from "../../core/attribution/pagerank";
 import sortBy from "lodash.sortby";
-import {type Contribution} from "../../core/attribution/graphToMarkovChain";
+import {type Connection} from "../../core/attribution/graphToMarkovChain";
 import * as NullUtil from "../../util/null";
 
 import {
@@ -27,7 +27,7 @@ import {
 
 require("../testUtil").configureEnzyme();
 
-const COLUMNS = () => ["Description", "Contribution", "Score"];
+const COLUMNS = () => ["Description", "Connection", "Score"];
 
 async function example() {
   const graph = new Graph();
@@ -364,14 +364,14 @@ describe("app/credExplorer/PagerankTable", () => {
           .text()
       ).toEqual(expectedDescription);
     });
-    it("renders an empty contribution column", async () => {
+    it("renders an empty connection column", async () => {
       const {element} = await setup();
-      const contributionColumn = COLUMNS().indexOf("Contribution");
-      expect(contributionColumn).not.toEqual(-1);
+      const connectionColumn = COLUMNS().indexOf("Connection");
+      expect(connectionColumn).not.toEqual(-1);
       expect(
         element
           .find("td")
-          .at(contributionColumn)
+          .at(connectionColumn)
           .text()
       ).toEqual("—");
     });
@@ -379,18 +379,18 @@ describe("app/credExplorer/PagerankTable", () => {
       const {element, sharedProps, node} = await setup();
       const {score: rawScore} = NullUtil.get(sharedProps.pnd.get(node));
       const expectedScore = (-Math.log(rawScore)).toFixed(2);
-      const contributionColumn = COLUMNS().indexOf("Score");
-      expect(contributionColumn).not.toEqual(-1);
+      const connectionColumn = COLUMNS().indexOf("Score");
+      expect(connectionColumn).not.toEqual(-1);
       expect(
         element
           .find("td")
-          .at(contributionColumn)
+          .at(connectionColumn)
           .text()
       ).toEqual(expectedScore);
     });
     it("does not render children by default", async () => {
       const {element} = await setup();
-      expect(element.find("ContributionRowList")).toHaveLength(0);
+      expect(element.find("ConnectionRowList")).toHaveLength(0);
     });
     it('has a working "expand" button', async () => {
       const {element, sharedProps, node} = await setup();
@@ -398,7 +398,7 @@ describe("app/credExplorer/PagerankTable", () => {
 
       element.find("button").simulate("click");
       expect(element.find("button").text()).toEqual("\u2212");
-      const crl = element.find("ContributionRowList");
+      const crl = element.find("ConnectionRowList");
       expect(crl).toHaveLength(1);
       expect(crl.prop("sharedProps")).toEqual(sharedProps);
       expect(crl.prop("depth")).toBe(1);
@@ -406,18 +406,18 @@ describe("app/credExplorer/PagerankTable", () => {
 
       element.find("button").simulate("click");
       expect(element.find("button").text()).toEqual("+");
-      expect(element.find("ContributionRowList")).toHaveLength(0);
+      expect(element.find("ConnectionRowList")).toHaveLength(0);
     });
   });
 
-  describe("ContributionRowList", () => {
+  describe("ConnectionRowList", () => {
     async function setup(maxEntriesPerList: number = 100000) {
       const {adapters, pnd, nodes} = await example();
       const depth = 2;
       const node = nodes.bar1;
       const sharedProps = {adapters, pnd, maxEntriesPerList};
       const component = (
-        <ContributionRowList
+        <ConnectionRowList
           depth={depth}
           node={node}
           sharedProps={sharedProps}
@@ -426,64 +426,60 @@ describe("app/credExplorer/PagerankTable", () => {
       const element = shallow(component);
       return {element, depth, node, sharedProps};
     }
-    it("creates `ContributionRow`s with the right props", async () => {
+    it("creates `ConnectionRow`s with the right props", async () => {
       const {element, depth, node, sharedProps} = await setup();
-      const contributions = NullUtil.get(sharedProps.pnd.get(node))
-        .scoredContributions;
-      const rows = element.find("ContributionRow");
-      expect(rows).toHaveLength(contributions.length);
+      const connections = NullUtil.get(sharedProps.pnd.get(node))
+        .scoredConnections;
+      const rows = element.find("ConnectionRow");
+      expect(rows).toHaveLength(connections.length);
       const rowPropses = rows.map((row) => row.props());
       // Order should be the same as the order in the decomposition.
       expect(rowPropses).toEqual(
-        contributions.map((sc) => ({
+        connections.map((sc) => ({
           depth,
           sharedProps,
           target: node,
-          scoredContribution: sc,
+          scoredConnection: sc,
         }))
       );
     });
     it("limits the number of rows by `maxEntriesPerList`", async () => {
       const maxEntriesPerList = 1;
       const {element, node, sharedProps} = await setup(maxEntriesPerList);
-      const contributions = NullUtil.get(sharedProps.pnd.get(node))
-        .scoredContributions;
-      expect(contributions.length).toBeGreaterThan(maxEntriesPerList);
-      const rows = element.find("ContributionRow");
+      const connections = NullUtil.get(sharedProps.pnd.get(node))
+        .scoredConnections;
+      expect(connections.length).toBeGreaterThan(maxEntriesPerList);
+      const rows = element.find("ConnectionRow");
       expect(rows).toHaveLength(maxEntriesPerList);
-      const rowContributions = rows.map((row) =>
-        row.prop("scoredContribution")
-      );
+      const rowConnections = rows.map((row) => row.prop("scoredConnection"));
       // Should have selected the right nodes.
-      expect(rowContributions).toEqual(
-        contributions.slice(0, maxEntriesPerList)
-      );
+      expect(rowConnections).toEqual(connections.slice(0, maxEntriesPerList));
     });
   });
 
-  describe("ContributionRow", () => {
+  describe("ConnectionRow", () => {
     async function setup() {
       const {pnd, adapters, nodes} = await example();
       const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
       const target = nodes.bar1;
-      const {scoredContributions} = NullUtil.get(pnd.get(target));
-      const alphaContributions = scoredContributions.filter(
+      const {scoredConnections} = NullUtil.get(pnd.get(target));
+      const alphaConnections = scoredConnections.filter(
         (sc) => sc.source === nodes.fooAlpha
       );
-      expect(alphaContributions).toHaveLength(1);
-      const contribution = alphaContributions[0];
-      const {source} = contribution;
+      expect(alphaConnections).toHaveLength(1);
+      const connection = alphaConnections[0];
+      const {source} = connection;
       const depth = 2;
       const component = (
-        <ContributionRow
+        <ConnectionRow
           depth={depth}
           target={target}
-          scoredContribution={contribution}
+          scoredConnection={connection}
           sharedProps={sharedProps}
         />
       );
       const element = shallow(component);
-      return {element, depth, target, source, contribution, sharedProps};
+      return {element, depth, target, source, connection, sharedProps};
     }
     it("renders the right number of columns", async () => {
       expect((await setup()).element.find("td")).toHaveLength(COLUMNS().length);
@@ -496,25 +492,25 @@ describe("app/credExplorer/PagerankTable", () => {
       }).toMatchSnapshot();
     });
     it("renders the source view", async () => {
-      const {element, sharedProps, contribution} = await setup();
+      const {element, sharedProps, connection} = await setup();
       const descriptionColumn = COLUMNS().indexOf("Description");
       expect(descriptionColumn).not.toEqual(-1);
       const view = element
         .find("td")
         .at(descriptionColumn)
-        .find("ContributionView");
+        .find("ConnectionView");
       expect(view).toHaveLength(1);
       expect(view.props()).toEqual({
         adapters: sharedProps.adapters,
-        contribution: contribution.contribution,
+        connection: connection.connection,
       });
     });
-    it("renders the contribution percentage", async () => {
-      const {element, contribution, sharedProps, target} = await setup();
-      const contributionColumn = COLUMNS().indexOf("Contribution");
-      expect(contributionColumn).not.toEqual(-1);
+    it("renders the connection percentage", async () => {
+      const {element, connection, sharedProps, target} = await setup();
+      const connectionColumn = COLUMNS().indexOf("Connection");
+      expect(connectionColumn).not.toEqual(-1);
       const proportion =
-        contribution.contributionScore /
+        connection.connectionScore /
         NullUtil.get(sharedProps.pnd.get(target)).score;
       expect(proportion).toBeGreaterThan(0.0);
       expect(proportion).toBeLessThan(1.0);
@@ -522,25 +518,25 @@ describe("app/credExplorer/PagerankTable", () => {
       expect(
         element
           .find("td")
-          .at(contributionColumn)
+          .at(connectionColumn)
           .text()
       ).toEqual(expectedText);
     });
     it("renders a score column with the source's log-score", async () => {
-      const {element, contribution} = await setup();
-      const expectedScore = (-Math.log(contribution.sourceScore)).toFixed(2);
-      const contributionColumn = COLUMNS().indexOf("Score");
-      expect(contributionColumn).not.toEqual(-1);
+      const {element, connection} = await setup();
+      const expectedScore = (-Math.log(connection.sourceScore)).toFixed(2);
+      const connectionColumn = COLUMNS().indexOf("Score");
+      expect(connectionColumn).not.toEqual(-1);
       expect(
         element
           .find("td")
-          .at(contributionColumn)
+          .at(connectionColumn)
           .text()
       ).toEqual(expectedScore);
     });
     it("does not render children by default", async () => {
       const {element} = await setup();
-      expect(element.find("ContributionRowList")).toHaveLength(0);
+      expect(element.find("ConnectionRowList")).toHaveLength(0);
     });
     it('has a working "expand" button', async () => {
       const {element, depth, sharedProps, source} = await setup();
@@ -548,7 +544,7 @@ describe("app/credExplorer/PagerankTable", () => {
 
       element.find("button").simulate("click");
       expect(element.find("button").text()).toEqual("\u2212");
-      const crl = element.find("ContributionRowList");
+      const crl = element.find("ConnectionRowList");
       expect(crl).toHaveLength(1);
       expect(crl).not.toHaveLength(0);
       expect(crl.prop("sharedProps")).toEqual(sharedProps);
@@ -557,75 +553,75 @@ describe("app/credExplorer/PagerankTable", () => {
 
       element.find("button").simulate("click");
       expect(element.find("button").text()).toEqual("+");
-      expect(element.find("ContributionRowList")).toHaveLength(0);
+      expect(element.find("ConnectionRowList")).toHaveLength(0);
     });
   });
 
-  describe("ContributionView", () => {
+  describe("ConnectionView", () => {
     async function setup() {
       const {pnd, adapters, nodes} = await example();
-      const {scoredContributions} = NullUtil.get(pnd.get(nodes.bar1));
-      const contributions = scoredContributions.map((sc) => sc.contribution);
-      function contributionByType(t) {
+      const {scoredConnections} = NullUtil.get(pnd.get(nodes.bar1));
+      const connections = scoredConnections.map((sc) => sc.connection);
+      function connectionByType(t) {
         return NullUtil.get(
-          contributions.filter((c) => c.contributor.type === t)[0],
-          `Couldn't find contribution for type ${t}`
+          connections.filter((c) => c.adjacency.type === t)[0],
+          `Couldn't find connection for type ${t}`
         );
       }
-      const inContribution = contributionByType("IN_EDGE");
-      const outContribution = contributionByType("OUT_EDGE");
-      const syntheticContribution = contributionByType("SYNTHETIC_LOOP");
-      function cvForContribution(contribution: Contribution) {
+      const inConnection = connectionByType("IN_EDGE");
+      const outConnection = connectionByType("OUT_EDGE");
+      const syntheticConnection = connectionByType("SYNTHETIC_LOOP");
+      function cvForConnection(connection: Connection) {
         return shallow(
-          <ContributionView adapters={adapters} contribution={contribution} />
+          <ConnectionView adapters={adapters} connection={connection} />
         );
       }
       return {
         adapters,
-        contributions,
+        connections,
         pnd,
-        cvForContribution,
-        inContribution,
-        outContribution,
-        syntheticContribution,
+        cvForConnection,
+        inConnection,
+        outConnection,
+        syntheticConnection,
       };
     }
     it("always renders exactly one `Badge`", async () => {
       const {
-        cvForContribution,
-        inContribution,
-        outContribution,
-        syntheticContribution,
+        cvForConnection,
+        inConnection,
+        outConnection,
+        syntheticConnection,
       } = await setup();
-      for (const contribution of [
-        syntheticContribution,
-        inContribution,
-        outContribution,
+      for (const connection of [
+        syntheticConnection,
+        inConnection,
+        outConnection,
       ]) {
-        expect(cvForContribution(contribution).find("Badge")).toHaveLength(1);
+        expect(cvForConnection(connection).find("Badge")).toHaveLength(1);
       }
     });
-    it("for inward contributions, renders a `Badge` and description", async () => {
-      const {cvForContribution, inContribution} = await setup();
-      const view = cvForContribution(inContribution);
+    it("for inward connections, renders a `Badge` and description", async () => {
+      const {cvForConnection, inConnection} = await setup();
+      const view = cvForConnection(inConnection);
       const outerSpan = view.find("span").first();
       const badge = outerSpan.find("Badge");
       const description = outerSpan.children().find("span");
       expect(badge.children().text()).toEqual("is barred by");
       expect(description.text()).toEqual('bar: NodeAddress["bar","a","1"]');
     });
-    it("for outward contributions, renders a `Badge` and description", async () => {
-      const {cvForContribution, outContribution} = await setup();
-      const view = cvForContribution(outContribution);
+    it("for outward connections, renders a `Badge` and description", async () => {
+      const {cvForConnection, outConnection} = await setup();
+      const view = cvForConnection(outConnection);
       const outerSpan = view.find("span").first();
       const badge = outerSpan.find("Badge");
       const description = outerSpan.children().find("span");
       expect(badge.children().text()).toEqual("bars");
       expect(description.text()).toEqual("xox node!");
     });
-    it("for synthetic contributions, renders only a `Badge`", async () => {
-      const {cvForContribution, syntheticContribution} = await setup();
-      const view = cvForContribution(syntheticContribution);
+    it("for synthetic connections, renders only a `Badge`", async () => {
+      const {cvForConnection, syntheticConnection} = await setup();
+      const view = cvForConnection(syntheticConnection);
       expect(view.find("span")).toHaveLength(0);
       expect(
         view

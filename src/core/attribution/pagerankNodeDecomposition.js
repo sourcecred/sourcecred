@@ -4,50 +4,50 @@ import sortBy from "lodash.sortby";
 
 import type {NodeAddressT} from "../graph";
 import {
-  type Contribution,
-  type NodeToContributions,
-  contributorSource,
+  type Connection,
+  type NodeToConnections,
+  adjacencySource,
 } from "./graphToMarkovChain";
 import type {NodeDistribution} from "./pagerank";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 
-export type ScoredContribution = {|
-  +contribution: Contribution,
+export type ScoredConnection = {|
+  +connection: Connection,
   +source: NodeAddressT,
   +sourceScore: number,
-  +contributionScore: number,
+  +connectionScore: number,
 |};
 
 export type PagerankNodeDecomposition = Map<
   NodeAddressT,
   {|
     +score: number,
-    // Contributions are sorted by `contributorScore` descending,
+    // Connections are sorted by `adjacencyScore` descending,
     // breaking ties in a deterministic (but unspecified) order.
-    +scoredContributions: $ReadOnlyArray<ScoredContribution>,
+    +scoredConnections: $ReadOnlyArray<ScoredConnection>,
   |}
 >;
 
 export function decompose(
   pr: NodeDistribution,
-  contributions: NodeToContributions
+  connections: NodeToConnections
 ): PagerankNodeDecomposition {
-  return MapUtil.mapValues(contributions, (target, contributions) => {
+  return MapUtil.mapValues(connections, (target, connections) => {
     const score = NullUtil.get(pr.get(target));
-    const scoredContributions = sortBy(
-      contributions.map(
-        (contribution): ScoredContribution => {
-          const source = contributorSource(target, contribution.contributor);
+    const scoredConnections = sortBy(
+      connections.map(
+        (connection): ScoredConnection => {
+          const source = adjacencySource(target, connection.adjacency);
           const sourceScore = NullUtil.get(pr.get(source));
-          const contributionScore = contribution.weight * sourceScore;
-          return {contribution, source, sourceScore, contributionScore};
+          const connectionScore = connection.weight * sourceScore;
+          return {connection, source, sourceScore, connectionScore};
         }
       ),
-      (x) => -x.contributionScore,
+      (x) => -x.connectionScore,
       // The following should be called rarely and on small objects.
-      (x) => JSON.stringify(x.contribution.contributor)
+      (x) => JSON.stringify(x.connection.adjacency)
     );
-    return {score, scoredContributions};
+    return {score, scoredConnections};
   });
 }

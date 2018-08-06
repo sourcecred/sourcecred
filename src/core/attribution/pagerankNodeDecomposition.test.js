@@ -3,7 +3,7 @@
 import {EdgeAddress, Graph, NodeAddress, edgeToStrings} from "../graph";
 import {
   distributionToNodeDistribution,
-  createContributions,
+  createConnections,
   createOrderedSparseMarkovChain,
 } from "./graphToMarkovChain";
 import {findStationaryDistribution} from "./markovChain";
@@ -17,57 +17,57 @@ import {advancedGraph} from "../graphTestUtil";
  * addresses and edges to strings to avoid NUL characters.
  */
 function formatDecomposition(d) {
-  return MapUtil.mapEntries(d, (key, {score, scoredContributions}) => [
+  return MapUtil.mapEntries(d, (key, {score, scoredConnections}) => [
     NodeAddress.toString(key),
     {
       score,
-      scoredContributions: scoredContributions.map(
-        ({contribution, source, sourceScore, contributionScore}) => ({
-          contribution: {
-            contributor: formatContributor(contribution.contributor),
-            weight: contribution.weight,
+      scoredConnections: scoredConnections.map(
+        ({connection, source, sourceScore, connectionScore}) => ({
+          connection: {
+            adjacency: formatAdjacency(connection.adjacency),
+            weight: connection.weight,
           },
           source: NodeAddress.toString(source),
           sourceScore,
-          contributionScore,
+          connectionScore,
         })
       ),
     },
   ]);
-  function formatContributor(contributor) {
-    switch (contributor.type) {
+  function formatAdjacency(adjacency) {
+    switch (adjacency.type) {
       case "SYNTHETIC_LOOP":
         return {type: "SYNTHETIC_LOOP"};
       case "IN_EDGE":
-        return {type: "IN_EDGE", edge: edgeToStrings(contributor.edge)};
+        return {type: "IN_EDGE", edge: edgeToStrings(adjacency.edge)};
       case "OUT_EDGE":
-        return {type: "OUT_EDGE", edge: edgeToStrings(contributor.edge)};
+        return {type: "OUT_EDGE", edge: edgeToStrings(adjacency.edge)};
       default:
-        throw new Error((contributor.type: empty));
+        throw new Error((adjacency.type: empty));
     }
   }
 }
 
 /**
  * Perform basic sanity checks on a decomposition. This ensures that
- * every node's score is the sum of its contributions' scores, that the
+ * every node's score is the sum of its connections' scores, that the
  * scores of the decomposition sum to 1, and that each node's
- * contributions are listed in non-increasing order of score.
+ * connections are listed in non-increasing order of score.
  */
 function validateDecomposition(decomposition) {
   const epsilon = 1e-6;
 
   // Check that each node's score is the sum of its subscores.
-  for (const [key, {score, scoredContributions}] of decomposition.entries()) {
-    const totalSubscore = scoredContributions
-      .map((sc) => sc.contributionScore)
+  for (const [key, {score, scoredConnections}] of decomposition.entries()) {
+    const totalSubscore = scoredConnections
+      .map((sc) => sc.connectionScore)
       .reduce((a, b) => a + b, 0);
     const delta = totalSubscore - score;
     if (Math.abs(delta) > epsilon) {
       const message = [
         `for node ${NodeAddress.toString(key)}: `,
         `expected total score (${score}) to equal `,
-        `sum of contribution scores (${totalSubscore}) `,
+        `sum of connection scores (${totalSubscore}) `,
         `within ${epsilon}, but the difference is ${delta}`,
       ].join("");
       throw new Error(message);
@@ -89,18 +89,18 @@ function validateDecomposition(decomposition) {
     }
   }
 
-  // Check that each node's contributions are in score-descending order.
-  for (const {scoredContributions} of decomposition.values()) {
-    scoredContributions.forEach((current, index) => {
+  // Check that each node's connections are in score-descending order.
+  for (const {scoredConnections} of decomposition.values()) {
+    scoredConnections.forEach((current, index) => {
       if (index === 0) {
         return;
       }
-      const previous = scoredContributions[index - 1];
-      if (current.contributionScore > previous.contributionScore) {
+      const previous = scoredConnections[index - 1];
+      if (current.connectionScore > previous.connectionScore) {
         const message = [
-          `expected contribution score to be non-increasing, but `,
-          `element at index ${index} has score ${current.contributionScore}, `,
-          `higher than that of its predecessor (${previous.contributionScore})`,
+          `expected connection score to be non-increasing, but `,
+          `element at index ${index} has score ${current.connectionScore}, `,
+          `higher than that of its predecessor (${previous.connectionScore})`,
         ].join("");
         throw new Error(message);
       }
@@ -108,7 +108,7 @@ function validateDecomposition(decomposition) {
   }
 }
 
-describe("core/attribution/contributions", () => {
+describe("core/attribution/connections", () => {
   describe("decompose", () => {
     it("has the expected output on a simple asymmetric chain", async () => {
       const n1 = NodeAddress.fromParts(["n1"]);
@@ -127,8 +127,8 @@ describe("core/attribution/contributions", () => {
         .addEdge(e3)
         .addEdge(e4);
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
-      const contributions = createContributions(g, edgeWeight, 1.0);
-      const osmc = createOrderedSparseMarkovChain(contributions);
+      const connections = createConnections(g, edgeWeight, 1.0);
+      const osmc = createOrderedSparseMarkovChain(connections);
       const pi = await findStationaryDistribution(osmc.chain, {
         verbose: false,
         convergenceThreshold: 1e-6,
@@ -136,7 +136,7 @@ describe("core/attribution/contributions", () => {
         yieldAfterMs: 1,
       });
       const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
-      const result = decompose(pr, contributions);
+      const result = decompose(pr, connections);
       expect(formatDecomposition(result)).toMatchSnapshot();
       validateDecomposition(result);
     });
@@ -144,8 +144,8 @@ describe("core/attribution/contributions", () => {
     it("is valid on the example graph", async () => {
       const g = advancedGraph().graph1();
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
-      const contributions = createContributions(g, edgeWeight, 1.0);
-      const osmc = createOrderedSparseMarkovChain(contributions);
+      const connections = createConnections(g, edgeWeight, 1.0);
+      const osmc = createOrderedSparseMarkovChain(connections);
       const pi = await findStationaryDistribution(osmc.chain, {
         verbose: false,
         convergenceThreshold: 1e-6,
@@ -153,7 +153,7 @@ describe("core/attribution/contributions", () => {
         yieldAfterMs: 1,
       });
       const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
-      const result = decompose(pr, contributions);
+      const result = decompose(pr, connections);
       validateDecomposition(result);
     });
   });
