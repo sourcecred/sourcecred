@@ -14,7 +14,7 @@ import type {
   ScoredConnection,
 } from "../../core/attribution/pagerankNodeDecomposition";
 import type {Connection} from "../../core/attribution/graphToMarkovChain";
-import type {DynamicPluginAdapter} from "../pluginAdapter";
+import type {DynamicPluginAdapter} from "../../core/pluginAdapter";
 import * as NullUtil from "../../util/null";
 
 // TODO: Factor this out and test it (#465)

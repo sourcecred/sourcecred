@@ -12,7 +12,7 @@ import {
   pagerank,
 } from "../../core/attribution/pagerank";
 
-import type {DynamicPluginAdapter} from "../pluginAdapter";
+import type {DynamicPluginAdapter} from "../../core/pluginAdapter";
 import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
 import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
 
