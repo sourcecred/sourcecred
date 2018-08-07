@@ -2,7 +2,7 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import type {DynamicPluginAdapter} from "../../core/pluginAdapter";
+import type {DynamicPluginAdapter} from "../pluginAdapter";
 
 import {
   PagerankTable,

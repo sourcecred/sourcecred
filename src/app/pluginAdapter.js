@@ -1,7 +1,7 @@
 // @flow
 
-import type {Graph, NodeAddressT, EdgeAddressT} from "./graph";
-import type {Repo} from "./repo";
+import type {Graph, NodeAddressT, EdgeAddressT} from "../core/graph";
+import type {Repo} from "../core/repo";
 
 export type EdgeType = {|
   +forwardName: string,
