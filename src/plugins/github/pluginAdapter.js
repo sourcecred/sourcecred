@@ -2,7 +2,7 @@
 import type {
   StaticPluginAdapter as IStaticPluginAdapter,
   DynamicPluginAdapter as IDynamicPluginAdapater,
-} from "../../app/pluginAdapter";
+} from "../../core/pluginAdapter";
 import {type Graph, NodeAddress} from "../../core/graph";
 import {createGraph} from "./createGraph";
 import * as N from "./nodes";

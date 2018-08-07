@@ -15,7 +15,7 @@ import {byEdgeType, byNodeType} from "./edgeWeights";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 
-import type {StaticPluginAdapter} from "../pluginAdapter";
+import type {StaticPluginAdapter} from "../../core/pluginAdapter";
 import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
 import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
 
