@@ -2,7 +2,7 @@
 import type {
   StaticPluginAdapter as IStaticPluginAdapter,
   DynamicPluginAdapter as IDynamicPluginAdapter,
-} from "../../core/pluginAdapter";
+} from "../../app/pluginAdapter";
 import {Graph} from "../../core/graph";
 import * as N from "./nodes";
 import * as E from "./edges";
@@ -64,7 +64,7 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
     }
     const json = await response.json();
     const graph = Graph.fromJSON(json);
-    return (new DynamicPluginAdapter(graph): IDynamicPluginAdapter);
+    return new DynamicPluginAdapter(graph);
   }
 }
 
