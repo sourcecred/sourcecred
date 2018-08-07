@@ -14,23 +14,18 @@ import type {
   ScoredConnection,
 } from "../../core/attribution/pagerankNodeDecomposition";
 import type {Connection} from "../../core/attribution/graphToMarkovChain";
-import type {DynamicPluginAdapter} from "../pluginAdapter";
+import {
+  type DynamicPluginAdapter,
+  dynamicDispatchByNode,
+  dynamicDispatchByEdge,
+} from "../pluginAdapter";
 import * as NullUtil from "../../util/null";
 
-// TODO: Factor this out and test it (#465)
 export function nodeDescription(
   address: NodeAddressT,
   adapters: $ReadOnlyArray<DynamicPluginAdapter>
 ): string {
-  const adapter = adapters.find((adapter) =>
-    NodeAddress.hasPrefix(address, adapter.static().nodePrefix())
-  );
-  if (adapter == null) {
-    const result = NodeAddress.toString(address);
-    console.warn(`No adapter for ${result}`);
-    return result;
-  }
-
+  const adapter = dynamicDispatchByNode(adapters, address);
   try {
     return adapter.nodeDescription(address);
   } catch (e) {
@@ -45,14 +40,7 @@ function edgeVerb(
   direction: "FORWARD" | "BACKWARD",
   adapters: $ReadOnlyArray<DynamicPluginAdapter>
 ): string {
-  const adapter = adapters.find((adapter) =>
-    EdgeAddress.hasPrefix(address, adapter.static().edgePrefix())
-  );
-  if (adapter == null) {
-    const result = EdgeAddress.toString(address);
-    console.warn(`No adapter for ${result}`);
-    return result;
-  }
+  const adapter = dynamicDispatchByEdge(adapters, address);
 
   const edgeType = adapter
     .static()
