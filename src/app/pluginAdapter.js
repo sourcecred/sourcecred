@@ -85,3 +85,27 @@ export function dynamicDispatchByEdge(
     EdgeAddress.hasPrefix(x, a.static().edgePrefix())
   );
 }
+
+export function findNodeType(
+  adapter: StaticPluginAdapter,
+  x: NodeAddressT
+): NodeType {
+  if (!NodeAddress.hasPrefix(x, adapter.nodePrefix())) {
+    throw new Error("Trying to find NodeType from the wrong plugin adapter");
+  }
+  return findUniqueMatch(adapter.nodeTypes(), (t) =>
+    NodeAddress.hasPrefix(x, t.prefix)
+  );
+}
+
+export function findEdgeType(
+  adapter: StaticPluginAdapter,
+  x: EdgeAddressT
+): EdgeType {
+  if (!EdgeAddress.hasPrefix(x, adapter.edgePrefix())) {
+    throw new Error("Trying to find EdgeType from the wrong plugin adapter");
+  }
+  return findUniqueMatch(adapter.edgeTypes(), (t) =>
+    EdgeAddress.hasPrefix(x, t.prefix)
+  );
+}

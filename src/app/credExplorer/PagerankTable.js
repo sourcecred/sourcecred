@@ -6,7 +6,6 @@ import React from "react";
 import {
   type EdgeAddressT,
   type NodeAddressT,
-  EdgeAddress,
   NodeAddress,
 } from "../../core/graph";
 import type {
@@ -18,6 +17,7 @@ import {
   type DynamicPluginAdapter,
   dynamicDispatchByNode,
   dynamicDispatchByEdge,
+  findEdgeType,
 } from "../pluginAdapter";
 import * as NullUtil from "../../util/null";
 
@@ -41,16 +41,7 @@ function edgeVerb(
   adapters: $ReadOnlyArray<DynamicPluginAdapter>
 ): string {
   const adapter = dynamicDispatchByEdge(adapters, address);
-
-  const edgeType = adapter
-    .static()
-    .edgeTypes()
-    .find(({prefix}) => EdgeAddress.hasPrefix(address, prefix));
-  if (edgeType == null) {
-    const result = EdgeAddress.toString(address);
-    console.warn(`No edge type for ${result}`);
-    return result;
-  }
+  const edgeType = findEdgeType(adapter.static(), address);
   return direction === "FORWARD" ? edgeType.forwardName : edgeType.backwardName;
 }
 
