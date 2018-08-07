@@ -1,6 +1,11 @@
 // @flow
 const express = require("express");
-/*:: import type {$Application as ExpressApp} from "express"; */
+/*::
+import type {
+  $Application as ExpressApp,
+  $Response as ExpressResponse,
+} from "express";
+*/
 const os = require("os");
 const path = require("path");
 const webpack = require("webpack");
@@ -43,8 +48,14 @@ function makeConfig(mode /*: "production" | "development" */) {
     devServer: {
       inline: false,
       before: (app /*: ExpressApp */) => {
+        const apiRoot = "/api/v1/data";
+        const rejectCache = (_unused_req, res /*: ExpressResponse */) => {
+          res.status(400).send("Bad Request: Cache unavailable at runtime\n");
+        };
+        app.get(`${apiRoot}/cache`, rejectCache);
+        app.get(`${apiRoot}/cache/*`, rejectCache);
         app.use(
-          "/api/v1/data",
+          apiRoot,
           express.static(
             process.env.SOURCECRED_DIRECTORY ||
               path.join(os.tmpdir(), "sourcecred")
