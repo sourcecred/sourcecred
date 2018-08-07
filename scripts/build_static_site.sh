@@ -113,6 +113,11 @@ build() {
     # must fail.)
     mkdir "${target}/api/"
     mkdir "${target}/api/v1/"
+    # Eliminate the cache, which is only an intermediate target used to
+    # load the actual data. The development server similarly forbids
+    # access to the cache so that the dev and prod environments have the
+    # same semantics.
+    rm -rf "${sourcecred_data}/cache"
     cp -r "${sourcecred_data}" "${target}/api/v1/data"
 
     if [ -n "${cname:-}" ]; then

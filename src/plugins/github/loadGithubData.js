@@ -11,6 +11,7 @@ export type Options = {|
   +token: string,
   +repo: Repo,
   +outputDirectory: string,
+  +cacheDirectory: string,
 |};
 
 export async function loadGithubData(options: Options): Promise<void> {

@@ -114,13 +114,13 @@ function loadAllPlugins({basedir, repo, githubToken, maxOldSpaceSize}) {
 }
 
 function loadPlugin({basedir, plugin, repo, githubToken}) {
-  const outputDirectory = path.join(
-    basedir,
-    "data",
-    repoToString(repo),
-    plugin
-  );
-  mkdirp.sync(outputDirectory);
+  function scopedDirectory(key) {
+    const directory = path.join(basedir, key, repoToString(repo), plugin);
+    mkdirp.sync(directory);
+    return directory;
+  }
+  const outputDirectory = scopedDirectory("data");
+  const cacheDirectory = scopedDirectory("cache");
   switch (plugin) {
     case "github":
       if (githubToken == null) {
@@ -135,11 +135,12 @@ function loadPlugin({basedir, plugin, repo, githubToken}) {
           token: githubToken,
           repo,
           outputDirectory,
+          cacheDirectory,
         });
       }
       break;
     case "git":
-      loadGitData({repo, outputDirectory});
+      loadGitData({repo, outputDirectory, cacheDirectory});
       break;
     default:
       console.error("fatal: Unknown plugin: " + (plugin: empty));
