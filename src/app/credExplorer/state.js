@@ -13,8 +13,8 @@ import {
 } from "../../core/attribution/pagerank";
 
 import type {DynamicPluginAdapter} from "../pluginAdapter";
-import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
-import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
+
+import {defaultStaticAdapters} from "../defaultPlugins";
 
 /*
   This models the UI states of the credExplorer/App as a state machine.
@@ -250,7 +250,7 @@ export type GraphWithAdapters = {|
   +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
 |};
 export function loadGraphWithAdapters(repo: Repo): Promise<GraphWithAdapters> {
-  const statics = [new GitAdapter(), new GithubAdapter()];
+  const statics = defaultStaticAdapters();
   return Promise.all(statics.map((a) => a.load(repo))).then((adapters) => {
     const graph = Graph.merge(adapters.map((x) => x.graph()));
     return {graph, adapters};

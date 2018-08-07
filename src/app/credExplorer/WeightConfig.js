@@ -14,10 +14,7 @@ import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
-
-import type {StaticPluginAdapter} from "../pluginAdapter";
-import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
-import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
+import {defaultStaticAdapters} from "../defaultPlugins";
 
 type Props = {|
   +localStore: LocalStore,
@@ -27,14 +24,10 @@ type Props = {|
 type EdgeWeights = Map<EdgeAddressT, UserEdgeWeight>;
 type UserEdgeWeight = {|+logWeight: number, +directionality: number|};
 
-const adapters = (): StaticPluginAdapter[] => {
-  return [new GithubAdapter(), new GitAdapter()];
-};
-
 const EDGE_WEIGHTS_KEY = "edgeWeights";
 const defaultEdgeWeights = (): EdgeWeights => {
   const result = new Map();
-  for (const adapter of adapters()) {
+  for (const adapter of defaultStaticAdapters()) {
     for (const {prefix} of adapter.edgeTypes()) {
       result.set(prefix, {logWeight: 0, directionality: 0.5});
     }
@@ -47,7 +40,7 @@ type UserNodeWeight = number /* in log space */;
 const NODE_WEIGHTS_KEY = "nodeWeights";
 const defaultNodeWeights = (): NodeWeights => {
   const result = new Map();
-  for (const adapter of adapters()) {
+  for (const adapter of defaultStaticAdapters()) {
     for (const {prefix, defaultWeight} of adapter.nodeTypes()) {
       result.set(prefix, Math.log2(defaultWeight));
     }
