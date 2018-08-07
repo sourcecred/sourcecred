@@ -141,6 +141,10 @@ run_build() {
         test_path_is_dir "${api_dir}" &&
         test_set_prereq "${prereq_name}"
     '
+    test_expect_success "${prereq_name}" \
+        "${prereq_name}: should have no cache" '
+        test_must_fail test_path_is_dir "${api_dir}/cache"
+    '
 }
 
 # test_pages PREREQ_NAME

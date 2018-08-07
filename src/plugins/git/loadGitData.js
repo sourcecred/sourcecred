@@ -10,6 +10,7 @@ import type {Repo} from "../../core/repo";
 export type Options = {|
   +repo: Repo,
   +outputDirectory: string,
+  +cacheDirectory: string,
 |};
 
 export function loadGitData(options: Options): Promise<void> {
