@@ -43,7 +43,6 @@ function makeConfig(mode /*: "production" | "development" */) {
     devServer: {
       inline: false,
       before: (app /*: ExpressApp */) => {
-        // TODO(@wchargin): De-duplicate this code.
         app.use(
           "/api/v1/data",
           express.static(
