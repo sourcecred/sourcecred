@@ -8,7 +8,7 @@ import {
   type NodeToConnections,
   adjacencySource,
 } from "./graphToMarkovChain";
-import type {NodeDistribution} from "./pagerank";
+import type {NodeScore} from "./nodeScore";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 
@@ -30,7 +30,7 @@ export type PagerankNodeDecomposition = Map<
 >;
 
 export function decompose(
-  pr: NodeDistribution,
+  pr: NodeScore,
   connections: NodeToConnections
 ): PagerankNodeDecomposition {
   return MapUtil.mapValues(connections, (target, connections) => {
