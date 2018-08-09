@@ -45,8 +45,8 @@ function edgeVerb(
   return direction === "FORWARD" ? edgeType.forwardName : edgeType.backwardName;
 }
 
-function scoreDisplay(probability: number) {
-  return (-1 * Math.log(probability)).toFixed(2);
+function scoreDisplay(score: number) {
+  return score.toFixed(2);
 }
 
 type SharedProps = {|

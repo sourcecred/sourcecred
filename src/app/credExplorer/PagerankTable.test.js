@@ -348,10 +348,10 @@ describe("app/credExplorer/PagerankTable", () => {
           .text()
       ).toEqual("—");
     });
-    it("renders a score column with the node's log-score", async () => {
+    it("renders a score column with the node's score", async () => {
       const {element, sharedProps, node} = await setup();
-      const {score: rawScore} = NullUtil.get(sharedProps.pnd.get(node));
-      const expectedScore = (-Math.log(rawScore)).toFixed(2);
+      const {score} = NullUtil.get(sharedProps.pnd.get(node));
+      const expectedScore = score.toFixed(2);
       const connectionColumn = COLUMNS().indexOf("Score");
       expect(connectionColumn).not.toEqual(-1);
       expect(
@@ -495,9 +495,9 @@ describe("app/credExplorer/PagerankTable", () => {
           .text()
       ).toEqual(expectedText);
     });
-    it("renders a score column with the source's log-score", async () => {
+    it("renders a score column with the source's score", async () => {
       const {element, connection} = await setup();
-      const expectedScore = (-Math.log(connection.sourceScore)).toFixed(2);
+      const expectedScore = connection.sourceScore.toFixed(2);
       const connectionColumn = COLUMNS().indexOf("Score");
       expect(connectionColumn).not.toEqual(-1);
       expect(
