@@ -1,20 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/credExplorer/PagerankTable ConnectionRow has proper depth-based styling 1`] = `
-Object {
-  "buttonStyle": Object {
-    "marginLeft": 30,
-    "marginRight": 5,
-  },
-  "trStyle": Object {
-    "backgroundColor": "rgba(0,143.4375,0,0.18999999999999995)",
-  },
-}
-`;
+exports[`app/credExplorer/pagerankTable/Table PagerankTable has a filter select with expected label text 1`] = `"Filter by node type: "`;
 
-exports[`app/credExplorer/PagerankTable PagerankTable has a filter select with expected label text 1`] = `"Filter by node type: "`;
-
-exports[`app/credExplorer/PagerankTable PagerankTable has a filter select with expected option groups 1`] = `
+exports[`app/credExplorer/pagerankTable/Table PagerankTable has a filter select with expected option groups 1`] = `
 Array [
   Object {
     "style": undefined,

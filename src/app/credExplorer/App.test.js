@@ -8,7 +8,7 @@ import {makeRepo} from "../../core/repo";
 import testLocalStore from "../testLocalStore";
 
 import RepositorySelect from "./RepositorySelect";
-import {PagerankTable} from "./PagerankTable";
+import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "./WeightConfig";
 import {createApp, LoadingIndicator} from "./App";
 import {initialState} from "./state";
