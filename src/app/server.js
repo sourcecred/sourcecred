@@ -42,7 +42,7 @@ export default function render(
           <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width,initial-scale=1" />
-          <link rel="shortcut icon" href="/favicon.ico" />
+          <link rel="shortcut icon" href="/favicon.png" />
           <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
           <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
           <title>${resolveTitleFromPath(path)}</title>

@@ -36,6 +36,7 @@ function getServedPath() {
 module.exports = {
   root: appDirectory,
   dotenv: resolveApp(".env"),
+  favicon: resolveApp("src/assets/logo/sourcecred_32.png"),
   appBuild: resolveApp("build"),
   appIndexJs: resolveApp("src/app/index.js"),
   appServerSideRenderingIndexJs: resolveApp("src/app/server.js"),
