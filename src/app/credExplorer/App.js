@@ -6,7 +6,7 @@ import type {LocalStore} from "../localStore";
 import CheckedLocalStore from "../checkedLocalStore";
 import BrowserLocalStore from "../browserLocalStore";
 
-import {PagerankTable} from "./PagerankTable";
+import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "./WeightConfig";
 import RepositorySelect from "./RepositorySelect";
 import {
