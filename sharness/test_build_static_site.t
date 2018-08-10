@@ -153,6 +153,12 @@ run_build() {
 # a redirect).
 test_pages() {
     prereq="$1"
+    test_expect_success "${prereq}" "${prereq}: should have a favicon" '
+        test_path_is_file "${output_dir}/favicon.png" &&
+        file -b --mime-type "${output_dir}/favicon.png" >./favicon_filetype &&
+        printf "image/png\n" | test_cmp - ./favicon_filetype &&
+        rm ./favicon_filetype
+    '
     test_expect_success "${prereq}" \
         "${prereq}: should have a home page and a prototype" '
         test_path_is_file "${output_dir}/index.html" &&

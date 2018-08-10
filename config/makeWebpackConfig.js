@@ -10,6 +10,7 @@ const os = require("os");
 const path = require("path");
 const webpack = require("webpack");
 const RemoveBuildDirectoryPlugin = require("./RemoveBuildDirectoryPlugin");
+const CopyPlugin = require("copy-webpack-plugin");
 const ManifestPlugin = require("webpack-manifest-plugin");
 const StaticSiteGeneratorPlugin = require("static-site-generator-webpack-plugin");
 const eslintFormatter = require("react-dev-utils/eslintFormatter");
@@ -218,6 +219,7 @@ function plugins(mode /*: "development" | "production" */) {
       paths: require(paths.appRouteData).routeData.map(({path}) => path),
       locals: {},
     }),
+    new CopyPlugin([{from: paths.favicon, to: "favicon.png"}]),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
     // It is absolutely essential that NODE_ENV was set to production here.
