@@ -5,7 +5,7 @@ import {
   NodeAddress,
   EdgeAddress,
   type NodeAddressT,
-} from "../core/graph";
+} from "../../core/graph";
 import {
   type StaticPluginAdapter,
   type DynamicPluginAdapter,
@@ -17,7 +17,7 @@ import {
   findEdgeType,
 } from "./pluginAdapter";
 
-describe("app/pluginAdapter", () => {
+describe("app/adapters/pluginAdapter", () => {
   function example() {
     const staticFooAdapter: StaticPluginAdapter = {
       name: () => "foo",

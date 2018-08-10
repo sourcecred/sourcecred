@@ -3,7 +3,7 @@
 import sortBy from "lodash.sortby";
 import {NodeAddress, edgeToString} from "../../../core/graph";
 import {NodeTrie, EdgeTrie} from "../../../core/trie";
-import type {NodeType, EdgeType} from "../../pluginAdapter";
+import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
 import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
 
 // Sorted by descending `summary.score`

@@ -6,7 +6,7 @@ import * as NullUtil from "../../../util/null";
 import type {NodeAddressT} from "../../../core/graph";
 import type {Connection} from "../../../core/attribution/graphToMarkovChain";
 import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
-import type {DynamicPluginAdapter} from "../../pluginAdapter";
+import type {DynamicPluginAdapter} from "../../adapters/pluginAdapter";
 
 import {
   edgeVerb,

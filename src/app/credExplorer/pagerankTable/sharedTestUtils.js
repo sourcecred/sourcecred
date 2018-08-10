@@ -2,7 +2,7 @@
 
 import {Graph, NodeAddress, EdgeAddress} from "../../../core/graph";
 
-import type {DynamicPluginAdapter} from "../../pluginAdapter";
+import type {DynamicPluginAdapter} from "../../adapters/pluginAdapter";
 import {pagerank} from "../../../core/attribution/pagerank";
 
 export const COLUMNS = () => ["Description", "Connection", "Score"];
