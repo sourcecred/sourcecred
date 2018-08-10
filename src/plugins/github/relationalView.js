@@ -13,7 +13,16 @@ import type {
   CommentAddress,
   UserlikeAddress,
 } from "./nodes";
-import * as Q from "./graphql";
+import type {
+  GithubResponseJSON,
+  RepositoryJSON,
+  IssueJSON,
+  PullJSON,
+  ReviewJSON,
+  CommentJSON,
+  NullableAuthorJSON,
+  ReviewState,
+} from "./graphql";
 import * as GitNode from "../git/nodes";
 import * as MapUtil from "../../util/map";
 
@@ -50,7 +59,7 @@ export class RelationalView {
     this._mapReferencedBy = new Map();
   }
 
-  addData(data: Q.GithubResponseJSON) {
+  addData(data: GithubResponseJSON) {
     // Warning: calling `addData` can put the RelationalView in an inconistent
     // state. for example, if called with {repo: {issues: [1,2,3]}} and then with
     // {repo: {issues: [4, 5]}}, then calls to repo.issues() will only give back
@@ -218,7 +227,7 @@ export class RelationalView {
     return rv;
   }
 
-  _addRepo(json: Q.RepositoryJSON) {
+  _addRepo(json: RepositoryJSON) {
     const address: RepoAddress = {
       type: N.REPO_TYPE,
       owner: json.owner.login,
@@ -234,7 +243,7 @@ export class RelationalView {
     this._repos.set(raw, entry);
   }
 
-  _addIssue(repo: RepoAddress, json: Q.IssueJSON): IssueAddress {
+  _addIssue(repo: RepoAddress, json: IssueJSON): IssueAddress {
     const address: IssueAddress = {
       type: N.ISSUE_TYPE,
       number: String(json.number),
@@ -252,7 +261,7 @@ export class RelationalView {
     return address;
   }
 
-  _addPull(repo: RepoAddress, json: Q.PullJSON): PullAddress {
+  _addPull(repo: RepoAddress, json: PullJSON): PullAddress {
     const address: PullAddress = {
       type: N.PULL_TYPE,
       number: String(json.number),
@@ -282,7 +291,7 @@ export class RelationalView {
     return address;
   }
 
-  _addReview(pull: PullAddress, json: Q.ReviewJSON): ReviewAddress {
+  _addReview(pull: PullAddress, json: ReviewJSON): ReviewAddress {
     const address: ReviewAddress = {
       type: N.REVIEW_TYPE,
       id: reviewUrlToId(json.url),
@@ -302,7 +311,7 @@ export class RelationalView {
 
   _addComment(
     parent: IssueAddress | PullAddress | ReviewAddress,
-    json: Q.CommentJSON
+    json: CommentJSON
   ): CommentAddress {
     const id = (function() {
       switch (parent.type) {
@@ -329,7 +338,7 @@ export class RelationalView {
     return address;
   }
 
-  _addNullableAuthor(json: Q.NullableAuthorJSON): UserlikeAddress[] {
+  _addNullableAuthor(json: NullableAuthorJSON): UserlikeAddress[] {
     if (json == null) {
       return [];
     } else {
@@ -688,7 +697,7 @@ type ReviewEntry = {|
   +body: string,
   +url: string,
   +comments: CommentAddress[],
-  +state: Q.ReviewState,
+  +state: ReviewState,
   +authors: UserlikeAddress[],
 |};
 
