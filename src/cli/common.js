@@ -9,10 +9,6 @@ export function pluginNames(): PluginName[] {
   return ["github", "git"];
 }
 
-export function defaultPlugins(): PluginName[] {
-  return ["github"];
-}
-
 function defaultStorageDirectory() {
   return path.join(os.tmpdir(), "sourcecred");
 }
