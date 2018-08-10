@@ -9,5 +9,5 @@ const root = document.getElementById("root");
 if (root == null) {
   throw new Error("Unable to find root element!");
 }
-ReactDOM.render(<App />, root);
+ReactDOM.hydrate(<App />, root);
 unregister();
