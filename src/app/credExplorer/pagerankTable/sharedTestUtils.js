@@ -2,6 +2,7 @@
 
 import {Graph, NodeAddress, EdgeAddress} from "../../../core/graph";
 
+import {StaticAdapterSet, DynamicAdapterSet} from "../../adapters/adapterSet";
 import type {DynamicPluginAdapter} from "../../adapters/pluginAdapter";
 import {pagerank} from "../../../core/attribution/pagerank";
 
@@ -34,7 +35,7 @@ export async function example() {
     barF: addEdge(["bar", "f"], nodes.bar1, nodes.xox),
   };
 
-  const adapters: DynamicPluginAdapter[] = [
+  const dynamicAdapters: DynamicPluginAdapter[] = [
     {
       static: () => ({
         name: () => "foo",
@@ -131,6 +132,12 @@ export async function example() {
       },
     },
   ];
+
+  const staticAdapters = dynamicAdapters.map((x) => x.static());
+  const adapters = new DynamicAdapterSet(
+    new StaticAdapterSet(staticAdapters),
+    dynamicAdapters
+  );
 
   const pnd = await pagerank(graph, (_unused_Edge) => ({
     toWeight: 1,

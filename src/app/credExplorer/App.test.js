@@ -6,6 +6,7 @@ import {shallow} from "enzyme";
 import {Graph} from "../../core/graph";
 import {makeRepo} from "../../core/repo";
 import testLocalStore from "../testLocalStore";
+import {DynamicAdapterSet, StaticAdapterSet} from "../adapters/adapterSet";
 
 import RepositorySelect from "./RepositorySelect";
 import {PagerankTable} from "./pagerankTable/Table";
@@ -65,6 +66,7 @@ describe("app/credExplorer/App", () => {
     };
   }
 
+  const emptyAdapters = new DynamicAdapterSet(new StaticAdapterSet([]), []);
   const exampleStates = {
     uninitialized: initialState,
     readyToLoadGraph: (loadingState) => {
@@ -79,7 +81,7 @@ describe("app/credExplorer/App", () => {
         initialized({
           type: "READY_TO_RUN_PAGERANK",
           loading: loadingState,
-          graphWithAdapters: {graph: new Graph(), adapters: []},
+          graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
         });
     },
     pagerankEvaluated: (loadingState) => {
@@ -87,7 +89,7 @@ describe("app/credExplorer/App", () => {
         initialized({
           type: "PAGERANK_EVALUATED",
           loading: loadingState,
-          graphWithAdapters: {graph: new Graph(), adapters: []},
+          graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
           pagerankNodeDecomposition: new Map(),
         });
     },

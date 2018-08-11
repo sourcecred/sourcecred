@@ -12,7 +12,7 @@ import {
   pagerank,
 } from "../../core/attribution/pagerank";
 
-import type {DynamicPluginAdapter} from "../adapters/pluginAdapter";
+import {DynamicAdapterSet} from "../adapters/adapterSet";
 
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 
@@ -247,12 +247,11 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
 
 export type GraphWithAdapters = {|
   +graph: Graph,
-  +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
+  +adapters: DynamicAdapterSet,
 |};
-export function loadGraphWithAdapters(repo: Repo): Promise<GraphWithAdapters> {
-  const statics = defaultStaticAdapters();
-  return Promise.all(statics.map((a) => a.load(repo))).then((adapters) => {
-    const graph = Graph.merge(adapters.map((x) => x.graph()));
-    return {graph, adapters};
-  });
+export async function loadGraphWithAdapters(
+  repo: Repo
+): Promise<GraphWithAdapters> {
+  const adapters = await defaultStaticAdapters().load(repo);
+  return {graph: adapters.graph(), adapters};
 }

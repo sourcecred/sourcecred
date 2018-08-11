@@ -6,20 +6,15 @@ import {
   NodeAddress,
 } from "../../../core/graph";
 
-import type {PagerankNodeDecomposition} from "../../../core/attribution/pagerankNodeDecomposition";
+import {DynamicAdapterSet} from "../../adapters/adapterSet";
 
-import {
-  type DynamicPluginAdapter,
-  dynamicDispatchByNode,
-  dynamicDispatchByEdge,
-  findEdgeType,
-} from "../../adapters/pluginAdapter";
+import type {PagerankNodeDecomposition} from "../../../core/attribution/pagerankNodeDecomposition";
 
 export function nodeDescription(
   address: NodeAddressT,
-  adapters: $ReadOnlyArray<DynamicPluginAdapter>
+  adapters: DynamicAdapterSet
 ): string {
-  const adapter = dynamicDispatchByNode(adapters, address);
+  const adapter = adapters.adapterMatchingNode(address);
   try {
     return adapter.nodeDescription(address);
   } catch (e) {
@@ -32,10 +27,9 @@ export function nodeDescription(
 export function edgeVerb(
   address: EdgeAddressT,
   direction: "FORWARD" | "BACKWARD",
-  adapters: $ReadOnlyArray<DynamicPluginAdapter>
+  adapters: DynamicAdapterSet
 ): string {
-  const adapter = dynamicDispatchByEdge(adapters, address);
-  const edgeType = findEdgeType(adapter.static(), address);
+  const edgeType = adapters.static().typeMatchingEdge(address);
   return direction === "FORWARD" ? edgeType.forwardName : edgeType.backwardName;
 }
 
@@ -45,7 +39,7 @@ export function scoreDisplay(score: number) {
 
 export type SharedProps = {|
   +pnd: PagerankNodeDecomposition,
-  +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
+  +adapters: DynamicAdapterSet,
   +maxEntriesPerList: number,
 |};
 
