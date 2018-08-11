@@ -21,10 +21,30 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
   }
   nodeTypes() {
     return [
-      {name: "Blob", prefix: N._Prefix.blob, defaultWeight: 0.125},
-      {name: "Commit", prefix: N._Prefix.commit, defaultWeight: 2},
-      {name: "Tree", prefix: N._Prefix.tree, defaultWeight: 0.125},
-      {name: "Tree entry", prefix: N._Prefix.treeEntry, defaultWeight: 0.125},
+      {
+        name: "Blob",
+        pluralName: "Blobs",
+        prefix: N._Prefix.blob,
+        defaultWeight: 0.125,
+      },
+      {
+        name: "Commit",
+        pluralName: "Commits",
+        prefix: N._Prefix.commit,
+        defaultWeight: 2,
+      },
+      {
+        name: "Tree",
+        pluralName: "Trees",
+        prefix: N._Prefix.tree,
+        defaultWeight: 0.125,
+      },
+      {
+        name: "Tree entry",
+        pluralName: "Tree entries",
+        prefix: N._Prefix.treeEntry,
+        defaultWeight: 0.125,
+      },
     ];
   }
   edgeTypes() {

@@ -27,15 +27,20 @@ export class FallbackStaticAdapter implements StaticPluginAdapter {
 
   nodeTypes() {
     return [
-      {name: "(unknown node)", prefix: NodeAddress.empty, defaultWeight: 1},
+      {
+        name: "unknown node",
+        pluralName: "unknown nodes",
+        prefix: NodeAddress.empty,
+        defaultWeight: 1,
+      },
     ];
   }
 
   edgeTypes() {
     return [
       {
-        forwardName: "(unknown edge→)",
-        backwardName: "(unknown edge←)",
+        forwardName: "unknown edge→",
+        backwardName: "unknown edge←",
         prefix: EdgeAddress.empty,
       },
     ];
