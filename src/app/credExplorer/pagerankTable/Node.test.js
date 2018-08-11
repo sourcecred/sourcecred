@@ -7,6 +7,7 @@ import * as NullUtil from "../../../util/null";
 
 import {type NodeAddressT, NodeAddress} from "../../../core/graph";
 
+import {ConnectionRowList} from "./Connection";
 import {example, COLUMNS} from "./sharedTestUtils";
 import {NodeRowList, NodeRow} from "./Node";
 
@@ -130,23 +131,34 @@ describe("app/credExplorer/pagerankTable/Node", () => {
     });
     it("does not render children by default", async () => {
       const {element} = await setup();
-      expect(element.find("ConnectionRowList")).toHaveLength(0);
+      expect(element.find(ConnectionRowList)).toHaveLength(0);
     });
     it('has a working "expand" button', async () => {
       const {element, sharedProps, node} = await setup();
       expect(element.find("button").text()).toEqual("+");
+      expect(element.state().expanded).toBe(false);
 
       element.find("button").simulate("click");
       expect(element.find("button").text()).toEqual("\u2212");
-      const crl = element.find("ConnectionRowList");
-      expect(crl).toHaveLength(1);
-      expect(crl.prop("sharedProps")).toEqual(sharedProps);
-      expect(crl.prop("depth")).toBe(1);
-      expect(crl.prop("node")).toBe(node);
+      expect(element.find(ConnectionRowList)).toHaveLength(1);
+      expect(element.state().expanded).toBe(true);
 
       element.find("button").simulate("click");
       expect(element.find("button").text()).toEqual("+");
-      expect(element.find("ConnectionRowList")).toHaveLength(0);
+      expect(element.find(ConnectionRowList)).toHaveLength(0);
+      expect(element.state().expanded).toBe(false);
+    });
+    it("child ConnectionRowList has correct props", async () => {
+      const {element, sharedProps, node} = await setup();
+      element.setState({expanded: true});
+      const crl = element.find(ConnectionRowList);
+      const props = crl.props();
+      expect(props.colorDepth).toBe(1);
+      expect(props.indentDepth).toBe(1);
+      expect(props.sharedProps).toBe(sharedProps);
+      expect(props.node).toBe(node);
+      expect(crl.props().sharedProps).toBe(sharedProps);
+      expect(crl.props().node).toBe(source);
     });
   });
 });

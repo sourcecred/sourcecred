@@ -73,7 +73,8 @@ export class NodeRow extends React.PureComponent<NodeRowProps, RowState> {
         {expanded && (
           <ConnectionRowList
             key="children"
-            depth={1}
+            colorDepth={1}
+            indentDepth={1}
             node={node}
             sharedProps={sharedProps}
           />

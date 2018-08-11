@@ -17,7 +17,8 @@ import {
 } from "./shared";
 
 type ConnectionRowListProps = {|
-  +depth: number,
+  +colorDepth: number,
+  +indentDepth: number,
   +node: NodeAddressT,
   +sharedProps: SharedProps,
 |};
@@ -26,7 +27,7 @@ export class ConnectionRowList extends React.PureComponent<
   ConnectionRowListProps
 > {
   render() {
-    const {depth, node, sharedProps} = this.props;
+    const {colorDepth, indentDepth, node, sharedProps} = this.props;
     const {pnd, maxEntriesPerList} = sharedProps;
     const {scoredConnections} = NullUtil.get(pnd.get(node));
     return (
@@ -36,7 +37,8 @@ export class ConnectionRowList extends React.PureComponent<
           .map((sc) => (
             <ConnectionRow
               key={JSON.stringify(sc.connection.adjacency)}
-              depth={depth}
+              colorDepth={colorDepth}
+              indentDepth={indentDepth}
               target={node}
               scoredConnection={sc}
               sharedProps={sharedProps}
@@ -48,7 +50,8 @@ export class ConnectionRowList extends React.PureComponent<
 }
 
 type ConnectionRowProps = {|
-  +depth: number,
+  +colorDepth: number,
+  +indentDepth: number,
   +target: NodeAddressT,
   +scoredConnection: ScoredConnection,
   +sharedProps: SharedProps,
@@ -66,7 +69,8 @@ export class ConnectionRow extends React.PureComponent<
     const {
       sharedProps,
       target,
-      depth,
+      colorDepth,
+      indentDepth,
       scoredConnection: {connection, source, sourceScore, connectionScore},
     } = this.props;
     const {pnd, adapters} = sharedProps;
@@ -79,13 +83,15 @@ export class ConnectionRow extends React.PureComponent<
       <React.Fragment>
         <tr
           key="self"
-          style={{backgroundColor: `rgba(0,143.4375,0,${1 - 0.9 ** depth})`}}
+          style={{
+            backgroundColor: `rgba(0,143.4375,0,${1 - 0.9 ** colorDepth})`,
+          }}
         >
           <td style={{display: "flex", alignItems: "flex-start"}}>
             <button
               style={{
                 marginRight: 5,
-                marginLeft: 15 * depth,
+                marginLeft: 15 * indentDepth,
               }}
               onClick={() => {
                 this.setState(({expanded}) => ({
@@ -103,7 +109,8 @@ export class ConnectionRow extends React.PureComponent<
         {expanded && (
           <ConnectionRowList
             key="children"
-            depth={depth + 1}
+            colorDepth={colorDepth + 1}
+            indentDepth={indentDepth + 1}
             node={source}
             sharedProps={sharedProps}
           />
