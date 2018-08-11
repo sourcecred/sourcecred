@@ -10,6 +10,7 @@ import {loadGithubData} from "../../plugins/github/loadGithubData";
 import {loadGitData} from "../../plugins/git/loadGitData";
 import {
   pluginNames,
+  defaultPlugins,
   nodeMaxOldSpaceSizeFlag,
   sourcecredDirectoryFlag,
 } from "../common";
@@ -39,7 +40,8 @@ export default class PluginGraphCommand extends Command {
 
   static flags = {
     plugin: flags.string({
-      description: "plugin whose data to load (loads all plugins if not set)",
+      description:
+        "plugin whose data to load (loads default plugins if not set)",
       required: false,
       options: pluginNames(),
     }),
@@ -66,7 +68,7 @@ export default class PluginGraphCommand extends Command {
     } = this.parse(PluginGraphCommand);
     const repo = stringToRepo(args.repo);
     if (!plugin) {
-      loadAllPlugins({
+      loadDefaultPlugins({
         basedir,
         plugin,
         repo,
@@ -79,7 +81,7 @@ export default class PluginGraphCommand extends Command {
   }
 }
 
-function loadAllPlugins({basedir, repo, githubToken, maxOldSpaceSize}) {
+function loadDefaultPlugins({basedir, repo, githubToken, maxOldSpaceSize}) {
   if (githubToken == null) {
     // TODO: This check should be abstracted so that plugins can
     // specify their argument dependencies and get nicely
@@ -89,7 +91,7 @@ function loadAllPlugins({basedir, repo, githubToken, maxOldSpaceSize}) {
     return;
   }
   const tasks = [
-    ...pluginNames().map((pluginName) => ({
+    ...defaultPlugins().map((pluginName) => ({
       id: `load-${pluginName}`,
       cmd: [
         "node",
