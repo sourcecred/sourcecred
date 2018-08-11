@@ -6,7 +6,7 @@ import * as NullUtil from "../../../util/null";
 import type {NodeAddressT} from "../../../core/graph";
 import type {Connection} from "../../../core/attribution/graphToMarkovChain";
 import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
-import type {DynamicPluginAdapter} from "../../adapters/pluginAdapter";
+import {DynamicAdapterSet} from "../../adapters/adapterSet";
 
 import {
   edgeVerb,
@@ -115,7 +115,7 @@ export class ConnectionRow extends React.PureComponent<
 
 export class ConnectionView extends React.PureComponent<{|
   +connection: Connection,
-  +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
+  +adapters: DynamicAdapterSet,
 |}> {
   render() {
     const {connection, adapters} = this.props;

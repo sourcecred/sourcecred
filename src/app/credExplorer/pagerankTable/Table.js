@@ -5,13 +5,15 @@ import sortBy from "lodash.sortby";
 
 import {type NodeAddressT, NodeAddress} from "../../../core/graph";
 import type {PagerankNodeDecomposition} from "../../../core/attribution/pagerankNodeDecomposition";
+import {DynamicAdapterSet} from "../../adapters/adapterSet";
 import type {DynamicPluginAdapter} from "../../adapters/pluginAdapter";
+import {FALLBACK_NAME} from "../../adapters/fallbackAdapter";
 
 import {NodeRowList} from "./Node";
 
 type PagerankTableProps = {|
   +pnd: PagerankNodeDecomposition,
-  +adapters: $ReadOnlyArray<DynamicPluginAdapter>,
+  +adapters: DynamicAdapterSet,
   +maxEntriesPerList: number,
 |};
 type PagerankTableState = {|topLevelFilter: NodeAddressT|};
@@ -69,9 +71,11 @@ export class PagerankTable extends React.PureComponent<
           }}
         >
           <option value={NodeAddress.empty}>Show all</option>
-          {sortBy(adapters, (a: DynamicPluginAdapter) => a.static().name()).map(
-            optionGroup
-          )}
+          {sortBy(adapters.adapters(), (a: DynamicPluginAdapter) =>
+            a.static().name()
+          )
+            .filter((a) => a.static().name() !== FALLBACK_NAME)
+            .map(optionGroup)}
         </select>
       </label>
     );

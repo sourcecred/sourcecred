@@ -10,6 +10,7 @@ import {
 import {Graph} from "../../core/graph";
 import {makeRepo, type Repo} from "../../core/repo";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
+import {StaticAdapterSet, DynamicAdapterSet} from "../adapters/adapterSet";
 import type {
   PagerankNodeDecomposition,
   PagerankOptions,
@@ -66,7 +67,10 @@ describe("app/credExplorer/state", () => {
     return (_unused_Edge) => ({toWeight: 3, froWeight: 4});
   }
   function graphWithAdapters(): GraphWithAdapters {
-    return {graph: new Graph(), adapters: []};
+    return {
+      graph: new Graph(),
+      adapters: new DynamicAdapterSet(new StaticAdapterSet([]), []),
+    };
   }
   function pagerankNodeDecomposition() {
     return new Map();

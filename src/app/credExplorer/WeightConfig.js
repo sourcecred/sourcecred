@@ -27,10 +27,12 @@ type UserEdgeWeight = {|+logWeight: number, +directionality: number|};
 const EDGE_WEIGHTS_KEY = "edgeWeights";
 const defaultEdgeWeights = (): EdgeWeights => {
   const result = new Map();
-  for (const adapter of defaultStaticAdapters()) {
-    for (const {prefix} of adapter.edgeTypes()) {
-      result.set(prefix, {logWeight: 0, directionality: 0.5});
+  for (const {prefix} of defaultStaticAdapters().edgeTypes()) {
+    if (prefix === EdgeAddress.empty) {
+      // We haven't decided how to deal with the FallbackAdapter's fallback type.
+      continue;
     }
+    result.set(prefix, {logWeight: 0, directionality: 0.5});
   }
   return result;
 };
@@ -40,10 +42,12 @@ type UserNodeWeight = number /* in log space */;
 const NODE_WEIGHTS_KEY = "nodeWeights";
 const defaultNodeWeights = (): NodeWeights => {
   const result = new Map();
-  for (const adapter of defaultStaticAdapters()) {
-    for (const {prefix, defaultWeight} of adapter.nodeTypes()) {
-      result.set(prefix, Math.log2(defaultWeight));
+  for (const {prefix, defaultWeight} of defaultStaticAdapters().nodeTypes()) {
+    if (prefix === NodeAddress.empty) {
+      // We haven't decided how to deal with the FallbackAdapter's fallback type.
+      continue;
     }
+    result.set(prefix, Math.log2(defaultWeight));
   }
   return result;
 };
