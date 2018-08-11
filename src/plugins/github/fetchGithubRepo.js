@@ -49,7 +49,14 @@ export default function fetchGithubRepo(
 
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 
-function postQuery({body, variables}, token) {
+async function postQuery({body, variables}, token): Promise<any> {
+  // TODO(#638): Find a more principled way to ingest this parameter.
+  const delayMs: number = parseInt(process.env.GITHUB_DELAY_MS || "0", 10) || 0;
+  await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, delayMs);
+  });
   const payload = {
     query: stringify.body(body, inlineLayout()),
     variables: variables,
