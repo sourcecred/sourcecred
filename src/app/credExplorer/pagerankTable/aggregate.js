@@ -7,6 +7,8 @@ import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
 import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
 
 // Sorted by descending `summary.score`
+export type FlatAggregations = $ReadOnlyArray<FlatAggregation>;
+// Sorted by descending `summary.score`
 export type ConnectionAggregations = $ReadOnlyArray<ConnectionAggregation>;
 
 export type AggregationSummary = {|
@@ -30,6 +32,14 @@ export type ConnectionAggregation = {|
   +summary: AggregationSummary,
   // Sorted by descending `summary.score`
   +nodeAggregations: $ReadOnlyArray<NodeAggregation>,
+|};
+
+export type FlatAggregation = {|
+  +connectionType: ConnectionType,
+  +nodeType: NodeType,
+  +summary: AggregationSummary,
+  // sorted by `scoredConnection.connectionScore`
+  +connections: $ReadOnlyArray<ScoredConnection>,
 |};
 
 export function aggregateByNodeType(
@@ -145,4 +155,32 @@ export function aggregateByConnectionType(
   }
 
   return sortBy(result, (x) => -x.summary.score);
+}
+
+export function flattenAggregation(
+  xs: ConnectionAggregations
+): FlatAggregations {
+  const result = [];
+  for (const {connectionType, nodeAggregations} of xs) {
+    for (const {summary, connections, nodeType} of nodeAggregations) {
+      const flat: FlatAggregation = {
+        summary,
+        connections,
+        nodeType,
+        connectionType,
+      };
+      result.push(flat);
+    }
+  }
+  return sortBy(result, (x) => -x.summary.score);
+}
+
+export function aggregateFlat(
+  xs: $ReadOnlyArray<ScoredConnection>,
+  nodeTypes: $ReadOnlyArray<NodeType>,
+  edgeTypes: $ReadOnlyArray<EdgeType>
+): FlatAggregations {
+  return flattenAggregation(
+    aggregateByConnectionType(xs, nodeTypes, edgeTypes)
+  );
 }

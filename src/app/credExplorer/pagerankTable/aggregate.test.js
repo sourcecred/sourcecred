@@ -1,7 +1,13 @@
 // @flow
 
 import {EdgeAddress, NodeAddress} from "../../../core/graph";
-import {aggregateByNodeType, aggregateByConnectionType} from "./aggregate";
+import * as NullUtil from "../../../util/null";
+import {
+  aggregateByNodeType,
+  aggregateByConnectionType,
+  flattenAggregation,
+  aggregateFlat,
+} from "./aggregate";
 
 describe("app/credExplorer/aggregate", () => {
   function example() {
@@ -338,6 +344,76 @@ describe("app/credExplorer/aggregate", () => {
           lastSeenScore = score;
         }
       }
+    });
+  });
+
+  describe("flattenAggregation", () => {
+    function getFlatAggregations() {
+      const {
+        nodeTypesArray,
+        edgeTypesArray,
+        scoredConnectionsArray,
+      } = example();
+      const byCT = aggregateByConnectionType(
+        scoredConnectionsArray,
+        nodeTypesArray,
+        edgeTypesArray
+      );
+      const flat = flattenAggregation(byCT);
+      return {byCT, flat};
+    }
+    it("works on an empty aggregation", () => {
+      expect(flattenAggregation([])).toEqual([]);
+    });
+    it("returns aggregations in score order", () => {
+      const {flat} = getFlatAggregations();
+      let lastScore = Infinity;
+      for (const agg of flat) {
+        const score = agg.summary.score;
+        expect(lastScore >= score).toBe(true);
+        lastScore = score;
+      }
+    });
+    it("each FlatAggregation corresponds to a nested NodeAggregation", () => {
+      const {flat, byCT} = getFlatAggregations();
+      for (const agg of flat) {
+        const matchingConnectionAggregation = NullUtil.get(
+          byCT.find((x) => x.connectionType === agg.connectionType)
+        );
+        const matchingNodeAggregation = NullUtil.get(
+          matchingConnectionAggregation.nodeAggregations.find(
+            (x) => x.nodeType === agg.nodeType
+          )
+        );
+        expect(agg.summary).toEqual(matchingNodeAggregation.summary);
+        expect(agg.connections).toEqual(matchingNodeAggregation.connections);
+      }
+      let numNodeAggregations = 0;
+      for (const agg of byCT) {
+        numNodeAggregations += agg.nodeAggregations.length;
+      }
+      expect(numNodeAggregations).toEqual(flat.length);
+    });
+  });
+  describe("aggregateFlat", () => {
+    it("is the composition of aggregateByConnectionType and flattenAggregation", () => {
+      const {
+        nodeTypesArray,
+        edgeTypesArray,
+        scoredConnectionsArray,
+      } = example();
+      const byCT = aggregateByConnectionType(
+        scoredConnectionsArray,
+        nodeTypesArray,
+        edgeTypesArray
+      );
+      const flat = flattenAggregation(byCT);
+      const fromScratch = aggregateFlat(
+        scoredConnectionsArray,
+        nodeTypesArray,
+        edgeTypesArray
+      );
+      expect(fromScratch).toEqual(flat);
     });
   });
 });
