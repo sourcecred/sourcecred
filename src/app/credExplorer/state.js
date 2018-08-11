@@ -12,9 +12,9 @@ import {
   pagerank,
 } from "../../core/attribution/pagerank";
 
-import type {DynamicPluginAdapter} from "../pluginAdapter";
+import type {DynamicPluginAdapter} from "../adapters/pluginAdapter";
 
-import {defaultStaticAdapters} from "../defaultPlugins";
+import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 
 /*
   This models the UI states of the credExplorer/App as a state machine.

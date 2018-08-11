@@ -14,7 +14,7 @@ import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
-import {defaultStaticAdapters} from "../defaultPlugins";
+import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 
 type Props = {|
   +localStore: LocalStore,

@@ -13,7 +13,7 @@ import {
   dynamicDispatchByNode,
   dynamicDispatchByEdge,
   findEdgeType,
-} from "../../pluginAdapter";
+} from "../../adapters/pluginAdapter";
 
 export function nodeDescription(
   address: NodeAddressT,

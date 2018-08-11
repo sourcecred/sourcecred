@@ -5,7 +5,7 @@ import sortBy from "lodash.sortby";
 
 import {type NodeAddressT, NodeAddress} from "../../../core/graph";
 import type {PagerankNodeDecomposition} from "../../../core/attribution/pagerankNodeDecomposition";
-import type {DynamicPluginAdapter} from "../../pluginAdapter";
+import type {DynamicPluginAdapter} from "../../adapters/pluginAdapter";
 
 import {NodeRowList} from "./Node";
 

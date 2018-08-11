@@ -6,8 +6,8 @@ import {
   EdgeAddress,
   type NodeAddressT,
   type EdgeAddressT,
-} from "../core/graph";
-import type {Repo} from "../core/repo";
+} from "../../core/graph";
+import type {Repo} from "../../core/repo";
 
 export type EdgeType = {|
   +forwardName: string,
