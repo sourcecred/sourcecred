@@ -1,53 +1,42 @@
 // @flow
 
 import React from "react";
-
-import {
-  type EdgeAddressT,
-  type NodeAddressT,
-  EdgeAddress,
-  NodeAddress,
-} from "../../core/graph";
+import sortBy from "lodash.sortby";
 
 import type {LocalStore} from "../localStore";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
-import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
+import type {NodeType, EdgeType} from "../adapters/pluginAdapter";
 
 type Props = {|
   +localStore: LocalStore,
   +onChange: (EdgeEvaluator) => void,
 |};
 
-type EdgeWeights = Map<EdgeAddressT, UserEdgeWeight>;
-type UserEdgeWeight = {|+logWeight: number, +directionality: number|};
-
+type WeightedEdgeType = {|
+  +type: EdgeType,
+  +logWeight: number,
+  +directionality: number,
+|};
+type EdgeWeights = WeightedEdgeType[];
 const EDGE_WEIGHTS_KEY = "edgeWeights";
 const defaultEdgeWeights = (): EdgeWeights => {
-  const result = new Map();
-  for (const {prefix} of defaultStaticAdapters().edgeTypes()) {
-    if (prefix === EdgeAddress.empty) {
-      // We haven't decided how to deal with the FallbackAdapter's fallback type.
-      continue;
-    }
-    result.set(prefix, {logWeight: 0, directionality: 0.5});
+  const result = [];
+  for (const type of defaultStaticAdapters().edgeTypes()) {
+    result.push({type, logWeight: 0, directionality: 0.5});
   }
   return result;
 };
 
-type NodeWeights = Map<NodeAddressT, UserNodeWeight>;
-type UserNodeWeight = number /* in log space */;
+type NodeWeights = WeightedNodeType[];
+type WeightedNodeType = {|+type: NodeType, +logWeight: number|};
 const NODE_WEIGHTS_KEY = "nodeWeights";
 const defaultNodeWeights = (): NodeWeights => {
-  const result = new Map();
-  for (const {prefix, defaultWeight} of defaultStaticAdapters().nodeTypes()) {
-    if (prefix === NodeAddress.empty) {
-      // We haven't decided how to deal with the FallbackAdapter's fallback type.
-      continue;
-    }
-    result.set(prefix, Math.log2(defaultWeight));
+  const result = [];
+  for (const type of defaultStaticAdapters().nodeTypes()) {
+    result.push({type, logWeight: type.defaultWeight});
   }
   return result;
 };
@@ -74,11 +63,11 @@ export class WeightConfig extends React.Component<Props, State> {
       (state) => {
         return {
           edgeWeights: NullUtil.orElse(
-            NullUtil.map(localStore.get(EDGE_WEIGHTS_KEY), MapUtil.fromObject),
+            localStore.get(EDGE_WEIGHTS_KEY),
             state.edgeWeights
           ),
           nodeWeights: NullUtil.orElse(
-            NullUtil.map(localStore.get(NODE_WEIGHTS_KEY), MapUtil.fromObject),
+            localStore.get(NODE_WEIGHTS_KEY),
             state.nodeWeights
           ),
         };
@@ -127,21 +116,19 @@ export class WeightConfig extends React.Component<Props, State> {
   fire() {
     const {localStore} = this.props;
     const {edgeWeights, nodeWeights} = this.state;
-    localStore.set(EDGE_WEIGHTS_KEY, MapUtil.toObject(edgeWeights));
-    localStore.set(NODE_WEIGHTS_KEY, MapUtil.toObject(nodeWeights));
-    const edgePrefixes = Array.from(edgeWeights.entries()).map(
-      ([prefix, {logWeight, directionality}]) => ({
-        prefix,
+    localStore.set(EDGE_WEIGHTS_KEY, edgeWeights);
+    localStore.set(NODE_WEIGHTS_KEY, nodeWeights);
+    const edgePrefixes = edgeWeights.map(
+      ({type, logWeight, directionality}) => ({
+        prefix: type.prefix,
         weight: 2 ** logWeight,
         directionality,
       })
     );
-    const nodePrefixes = Array.from(nodeWeights.entries()).map(
-      ([prefix, logWeight]) => ({
-        prefix,
-        weight: 2 ** logWeight,
-      })
-    );
+    const nodePrefixes = nodeWeights.map(({type, logWeight}) => ({
+      prefix: type.prefix,
+      weight: 2 ** logWeight,
+    }));
     const edgeEvaluator = byNodeType(byEdgeType(edgePrefixes), nodePrefixes);
     this.props.onChange(edgeEvaluator);
   }
@@ -152,49 +139,55 @@ class EdgeConfig extends React.Component<{
   onChange: (EdgeWeights) => void,
 }> {
   weightControls() {
-    return Array.from(this.props.edgeWeights.entries()).map(([key, datum]) => (
-      <label style={{display: "block"}} key={key}>
+    const sortedWeights = sortBy(
+      this.props.edgeWeights,
+      ({type}) => type.prefix
+    );
+    return sortedWeights.map(({type, directionality, logWeight}) => (
+      <label style={{display: "block"}} key={type.prefix}>
         <input
           type="range"
           min={-10}
           max={10}
           step={0.1}
-          value={datum.logWeight}
+          value={logWeight}
           onChange={(e) => {
             const value: number = e.target.valueAsNumber;
-            const edgeWeights = MapUtil.copy(this.props.edgeWeights).set(key, {
-              ...datum,
-              logWeight: value,
-            });
+            const edgeWeights = this.props.edgeWeights.filter(
+              (x) => x.type.prefix !== type.prefix
+            );
+            edgeWeights.push({type, logWeight: value, directionality});
             this.props.onChange(edgeWeights);
           }}
         />{" "}
-        {formatNumber(datum.logWeight)}{" "}
-        {JSON.stringify(EdgeAddress.toParts(key))}
+        {formatNumber(logWeight)} {`${type.forwardName}/${type.backwardName}`}
       </label>
     ));
   }
 
   directionControls() {
-    return Array.from(this.props.edgeWeights.entries()).map(([key, datum]) => (
-      <label style={{display: "block"}} key={key}>
+    const sortedWeights = sortBy(
+      this.props.edgeWeights,
+      ({type}) => type.prefix
+    );
+    return sortedWeights.map(({type, directionality, logWeight}) => (
+      <label style={{display: "block"}} key={type.prefix}>
         <input
           type="range"
           min={0}
           max={1}
           step={0.01}
-          value={datum.directionality}
+          value={directionality}
           onChange={(e) => {
             const value: number = e.target.valueAsNumber;
-            const edgeWeights = MapUtil.copy(this.props.edgeWeights).set(key, {
-              ...datum,
-              directionality: value,
-            });
+            const edgeWeights = this.props.edgeWeights.filter(
+              (x) => x.type.prefix !== type.prefix
+            );
+            edgeWeights.push({type, directionality: value, logWeight});
             this.props.onChange(edgeWeights);
           }}
         />{" "}
-        {datum.directionality.toFixed(2)}{" "}
-        {JSON.stringify(EdgeAddress.toParts(key))}
+        {directionality.toFixed(2)} {type.forwardName}
       </label>
     ));
   }
@@ -215,29 +208,31 @@ class NodeConfig extends React.Component<{
   onChange: (NodeWeights) => void,
 }> {
   render() {
-    const controls = Array.from(this.props.nodeWeights.entries()).map(
-      ([key, currentValue]) => (
-        <label style={{display: "block"}} key={key}>
-          <input
-            type="range"
-            min={-10}
-            max={10}
-            step={0.1}
-            value={currentValue}
-            onChange={(e) => {
-              const value: number = e.target.valueAsNumber;
-              const nodeWeights = MapUtil.copy(this.props.nodeWeights).set(
-                key,
-                value
-              );
-              this.props.onChange(nodeWeights);
-            }}
-          />{" "}
-          {formatNumber(currentValue)}{" "}
-          {JSON.stringify(NodeAddress.toParts(key))}
-        </label>
-      )
+    const sortedWeights = sortBy(
+      this.props.nodeWeights,
+      ({type}) => type.prefix
     );
+
+    const controls = sortedWeights.map(({type, logWeight}) => (
+      <label style={{display: "block"}} key={type.prefix}>
+        <input
+          type="range"
+          min={-10}
+          max={10}
+          step={0.1}
+          value={logWeight}
+          onChange={(e) => {
+            const value: number = e.target.valueAsNumber;
+            const nodeWeights = this.props.nodeWeights.filter(
+              (x) => x.type.prefix !== type.prefix
+            );
+            nodeWeights.push({type, logWeight: value});
+            this.props.onChange(nodeWeights);
+          }}
+        />{" "}
+        {formatNumber(logWeight)} {type.name}
+      </label>
+    ));
     return (
       <div>
         <h2>Node weights (in log space)</h2>

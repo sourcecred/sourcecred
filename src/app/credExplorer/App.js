@@ -19,7 +19,7 @@ import {
 export default class AppPage extends React.Component<{||}> {
   static _LOCAL_STORE = new CheckedLocalStore(
     new BrowserLocalStore({
-      version: "1",
+      version: "2",
       keyPrefix: "cred-explorer",
     })
   );

@@ -3,12 +3,9 @@ import {
   type Edge,
   type EdgeAddressT,
   type NodeAddressT,
-  EdgeAddress,
-  NodeAddress,
 } from "../../core/graph";
+import {NodeTrie, EdgeTrie} from "../../core/trie";
 import type {EdgeEvaluator} from "../../core/attribution/pagerank";
-
-import * as NullUtil from "../../util/null";
 
 export function byEdgeType(
   prefixes: $ReadOnlyArray<{|
@@ -17,10 +14,15 @@ export function byEdgeType(
     +directionality: number,
   |}>
 ): EdgeEvaluator {
+  const trie = new EdgeTrie();
+  for (const weightedPrefix of prefixes) {
+    trie.add(weightedPrefix.prefix, weightedPrefix);
+  }
   return function evaluator(edge: Edge) {
-    const {weight, directionality} = NullUtil.get(
-      prefixes.find(({prefix}) => EdgeAddress.hasPrefix(edge.address, prefix))
-    );
+    const matchingPrefixes = trie.get(edge.address);
+    const {weight, directionality} = matchingPrefixes[
+      matchingPrefixes.length - 1
+    ];
     return {
       toWeight: directionality * weight,
       froWeight: (1 - directionality) * weight,
@@ -35,16 +37,16 @@ export function byNodeType(
     +weight: number,
   |}>
 ): EdgeEvaluator {
+  const trie = new NodeTrie();
+  for (const weightedPrefix of prefixes) {
+    trie.add(weightedPrefix.prefix, weightedPrefix);
+  }
   return function evaluator(edge: Edge) {
-    const srcDatum = prefixes.find(({prefix}) =>
-      NodeAddress.hasPrefix(edge.src, prefix)
-    );
-    const dstDatum = prefixes.find(({prefix}) =>
-      NodeAddress.hasPrefix(edge.dst, prefix)
-    );
-    if (srcDatum == null || dstDatum == null) {
-      throw new Error(EdgeAddress.toString(edge.address));
-    }
+    const srcPrefixes = trie.get(edge.src);
+    const srcDatum = srcPrefixes[srcPrefixes.length - 1];
+    const dstPrefixes = trie.get(edge.dst);
+    const dstDatum = dstPrefixes[dstPrefixes.length - 1];
+
     const baseResult = base(edge);
     return {
       toWeight: dstDatum.weight * baseResult.toWeight,
