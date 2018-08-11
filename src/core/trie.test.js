@@ -82,6 +82,18 @@ describe("core/trie", () => {
     expect(x.get(fooBarZod)).toEqual([0, 2, 3]);
   });
 
+  it("getLast gets the last available value", () => {
+    const x = new NodeTrie()
+      .add(foo, 2)
+      .add(fooBar, 3)
+      .add(empty, 0);
+    expect(x.getLast(fooBarZod)).toEqual(3);
+  });
+
+  it("getLast throws an error if no value is available", () => {
+    expect(() => new NodeTrie().getLast(foo)).toThrowError("no matching entry");
+  });
+
   it("overwriting a value is illegal", () => {
     expect(() =>
       new NodeTrie()

@@ -207,7 +207,7 @@ describe("app/credExplorer/aggregate", () => {
     it("errors if any connection has no matching type", () => {
       const {scoredConnectionsArray} = example();
       const shouldFail = () => aggregateByNodeType(scoredConnectionsArray, []);
-      expect(shouldFail).toThrowError("No matching NodeType");
+      expect(shouldFail).toThrowError("no matching entry");
     });
     it("sorts the aggregations by total score", () => {
       let lastSeenScore = Infinity;
@@ -324,7 +324,7 @@ describe("app/credExplorer/aggregate", () => {
       const {scoredConnectionsArray, nodeTypesArray} = example();
       const shouldFail = () =>
         aggregateByConnectionType(scoredConnectionsArray, nodeTypesArray, []);
-      expect(shouldFail).toThrowError("No matching EdgeType");
+      expect(shouldFail).toThrowError("no matching entry");
     });
     it("sorts the aggregations by total score", () => {
       let lastSeenScore = Infinity;

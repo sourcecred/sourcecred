@@ -19,10 +19,7 @@ export function byEdgeType(
     trie.add(weightedPrefix.prefix, weightedPrefix);
   }
   return function evaluator(edge: Edge) {
-    const matchingPrefixes = trie.get(edge.address);
-    const {weight, directionality} = matchingPrefixes[
-      matchingPrefixes.length - 1
-    ];
+    const {weight, directionality} = trie.getLast(edge.address);
     return {
       toWeight: directionality * weight,
       froWeight: (1 - directionality) * weight,
@@ -42,10 +39,8 @@ export function byNodeType(
     trie.add(weightedPrefix.prefix, weightedPrefix);
   }
   return function evaluator(edge: Edge) {
-    const srcPrefixes = trie.get(edge.src);
-    const srcDatum = srcPrefixes[srcPrefixes.length - 1];
-    const dstPrefixes = trie.get(edge.dst);
-    const dstDatum = dstPrefixes[dstPrefixes.length - 1];
+    const srcDatum = trie.getLast(edge.src);
+    const dstDatum = trie.getLast(edge.dst);
 
     const baseResult = base(edge);
     return {
