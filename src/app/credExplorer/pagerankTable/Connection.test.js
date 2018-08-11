@@ -6,7 +6,8 @@ import * as NullUtil from "../../../util/null";
 
 import type {Connection} from "../../../core/attribution/graphToMarkovChain";
 import {ConnectionRowList, ConnectionRow, ConnectionView} from "./Connection";
-import {example, COLUMNS} from "./sharedTestUtils";
+import {example} from "./sharedTestUtils";
+import {TableRow} from "./TableRow";
 
 require("../../testUtil").configureEnzyme();
 
@@ -79,93 +80,66 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
         (sc) => sc.source === nodes.fooAlpha
       );
       expect(alphaConnections).toHaveLength(1);
-      const connection = alphaConnections[0];
-      const {source} = connection;
+      const scoredConnection = alphaConnections[0];
       const depth = 2;
       const component = (
         <ConnectionRow
           depth={depth}
           target={target}
-          scoredConnection={connection}
+          scoredConnection={scoredConnection}
           sharedProps={sharedProps}
         />
       );
-      const element = shallow(component);
-      return {element, depth, target, source, connection, sharedProps};
+      const row = shallow(component).find(TableRow);
+      return {row, depth, target, scoredConnection, sharedProps};
     }
-    it("renders the right number of columns", async () => {
-      expect((await setup()).element.find("td")).toHaveLength(COLUMNS().length);
-    });
-    it("has proper depth-based styling", async () => {
-      const {element} = await setup();
-      expect({
-        buttonStyle: element.find("button").prop("style"),
-        trStyle: element.find("tr").prop("style"),
-      }).toMatchSnapshot();
-    });
-    it("renders the source view", async () => {
-      const {element, sharedProps, connection} = await setup();
-      const descriptionColumn = COLUMNS().indexOf("Description");
-      expect(descriptionColumn).not.toEqual(-1);
-      const view = element
-        .find("td")
-        .at(descriptionColumn)
-        .find("ConnectionView");
-      expect(view).toHaveLength(1);
-      expect(view.props()).toEqual({
-        adapters: sharedProps.adapters,
-        connection: connection.connection,
+    describe("instantiates a TableRow", () => {
+      it("with the correct depth", async () => {
+        const {row, depth} = await setup();
+        expect(row.props().depth).toBe(depth);
       });
-    });
-    it("renders the connection percentage", async () => {
-      const {element, connection, sharedProps, target} = await setup();
-      const connectionColumn = COLUMNS().indexOf("Connection");
-      expect(connectionColumn).not.toEqual(-1);
-      const proportion =
-        connection.connectionScore /
-        NullUtil.get(sharedProps.pnd.get(target)).score;
-      expect(proportion).toBeGreaterThan(0.0);
-      expect(proportion).toBeLessThan(1.0);
-      const expectedText = (proportion * 100).toFixed(2) + "%";
-      expect(
-        element
-          .find("td")
-          .at(connectionColumn)
-          .text()
-      ).toEqual(expectedText);
-    });
-    it("renders a score column with the source's score", async () => {
-      const {element, connection} = await setup();
-      const expectedScore = connection.sourceScore.toFixed(2);
-      const connectionColumn = COLUMNS().indexOf("Score");
-      expect(connectionColumn).not.toEqual(-1);
-      expect(
-        element
-          .find("td")
-          .at(connectionColumn)
-          .text()
-      ).toEqual(expectedScore);
-    });
-    it("does not render children by default", async () => {
-      const {element} = await setup();
-      expect(element.find("ConnectionRowList")).toHaveLength(0);
-    });
-    it('has a working "expand" button', async () => {
-      const {element, depth, sharedProps, source} = await setup();
-      expect(element.find("button").text()).toEqual("+");
-
-      element.find("button").simulate("click");
-      expect(element.find("button").text()).toEqual("\u2212");
-      const crl = element.find("ConnectionRowList");
-      expect(crl).toHaveLength(1);
-      expect(crl).not.toHaveLength(0);
-      expect(crl.prop("sharedProps")).toEqual(sharedProps);
-      expect(crl.prop("depth")).toBe(depth + 1);
-      expect(crl.prop("node")).toBe(source);
-
-      element.find("button").simulate("click");
-      expect(element.find("button").text()).toEqual("+");
-      expect(element.find("ConnectionRowList")).toHaveLength(0);
+      it("with the sourceScore", async () => {
+        const {row, scoredConnection} = await setup();
+        expect(row.props().score).toBe(scoredConnection.sourceScore);
+      });
+      it("with the connectionProportion", async () => {
+        const {row, target, scoredConnection, sharedProps} = await setup();
+        const targetScore = NullUtil.get(sharedProps.pnd.get(target)).score;
+        expect(row.props().connectionProportion).toBe(
+          scoredConnection.connectionScore / targetScore
+        );
+      });
+      it("with a ConnectionView as description", async () => {
+        const {row, sharedProps, scoredConnection} = await setup();
+        const {adapters} = sharedProps;
+        const description = row.props().description;
+        const cv = shallow(description).instance();
+        expect(cv).toBeInstanceOf(ConnectionView);
+        expect(cv.props.connection).toEqual(scoredConnection.connection);
+        expect(cv.props.adapters).toEqual(adapters);
+      });
+      describe("with a ConnectionRowList as children", () => {
+        function getChildren(row) {
+          const children = row.props().children;
+          return shallow(children).instance();
+        }
+        it("which is a ConnectionRowList", async () => {
+          const {row} = await setup();
+          expect(getChildren(row)).toBeInstanceOf(ConnectionRowList);
+        });
+        it("which has incremented depth", async () => {
+          const {row, depth} = await setup();
+          expect(getChildren(row).props.depth).toBe(depth + 1);
+        });
+        it("which has the connection source as its node target", async () => {
+          const {row, scoredConnection} = await setup();
+          expect(getChildren(row).props.node).toBe(scoredConnection.source);
+        });
+        it("which has the right sharedProps", async () => {
+          const {row, sharedProps} = await setup();
+          expect(getChildren(row).props.sharedProps).toBe(sharedProps);
+        });
+      });
     });
   });
   describe("ConnectionView", () => {

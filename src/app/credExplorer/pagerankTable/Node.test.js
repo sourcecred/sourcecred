@@ -4,10 +4,13 @@ import React from "react";
 import {shallow} from "enzyme";
 import sortBy from "lodash.sortby";
 import * as NullUtil from "../../../util/null";
+import {TableRow} from "./TableRow";
+import {ConnectionRowList} from "./Connection";
 
 import {type NodeAddressT, NodeAddress} from "../../../core/graph";
 
-import {example, COLUMNS} from "./sharedTestUtils";
+import {nodeDescription} from "./shared";
+import {example} from "./sharedTestUtils";
 import {NodeRowList, NodeRow} from "./Node";
 
 require("../../testUtil").configureEnzyme();
@@ -85,68 +88,51 @@ describe("app/credExplorer/pagerankTable/Node", () => {
       const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
       const node = nodes.bar1;
       const component = <NodeRow node={node} sharedProps={sharedProps} />;
-      const element = shallow(component);
-      return {element, node, sharedProps};
+      const row = shallow(component).find(TableRow);
+      return {row, node, sharedProps};
     }
-    it("renders the right number of columns", async () => {
-      expect((await setup()).element.find("td")).toHaveLength(COLUMNS().length);
-    });
-    it("renders the node description", async () => {
-      const {element} = await setup();
-      const expectedDescription = 'bar: NodeAddress["bar","a","1"]';
-      const descriptionColumn = COLUMNS().indexOf("Description");
-      expect(descriptionColumn).not.toEqual(-1);
-      expect(
-        element
-          .find("td")
-          .at(descriptionColumn)
-          .find("span")
-          .text()
-      ).toEqual(expectedDescription);
-    });
-    it("renders an empty connection column", async () => {
-      const {element} = await setup();
-      const connectionColumn = COLUMNS().indexOf("Connection");
-      expect(connectionColumn).not.toEqual(-1);
-      expect(
-        element
-          .find("td")
-          .at(connectionColumn)
-          .text()
-      ).toEqual("—");
-    });
-    it("renders a score column with the node's score", async () => {
-      const {element, sharedProps, node} = await setup();
-      const {score} = NullUtil.get(sharedProps.pnd.get(node));
-      const expectedScore = score.toFixed(2);
-      const connectionColumn = COLUMNS().indexOf("Score");
-      expect(connectionColumn).not.toEqual(-1);
-      expect(
-        element
-          .find("td")
-          .at(connectionColumn)
-          .text()
-      ).toEqual(expectedScore);
-    });
-    it("does not render children by default", async () => {
-      const {element} = await setup();
-      expect(element.find("ConnectionRowList")).toHaveLength(0);
-    });
-    it('has a working "expand" button', async () => {
-      const {element, sharedProps, node} = await setup();
-      expect(element.find("button").text()).toEqual("+");
-
-      element.find("button").simulate("click");
-      expect(element.find("button").text()).toEqual("\u2212");
-      const crl = element.find("ConnectionRowList");
-      expect(crl).toHaveLength(1);
-      expect(crl.prop("sharedProps")).toEqual(sharedProps);
-      expect(crl.prop("depth")).toBe(1);
-      expect(crl.prop("node")).toBe(node);
-
-      element.find("button").simulate("click");
-      expect(element.find("button").text()).toEqual("+");
-      expect(element.find("ConnectionRowList")).toHaveLength(0);
+    describe("instantiates a TableRow", () => {
+      it("with the correct depth", async () => {
+        const {row} = await setup();
+        expect(row.props().depth).toBe(0);
+      });
+      it("with the node's score", async () => {
+        const {row, node, sharedProps} = await setup();
+        const score = NullUtil.get(sharedProps.pnd.get(node)).score;
+        expect(row.props().score).toBe(score);
+      });
+      it("with no connectionProportion", async () => {
+        const {row} = await setup();
+        expect(row.props().connectionProportion).not.toEqual(expect.anything());
+      });
+      it("with the node description", async () => {
+        const {row, sharedProps, node} = await setup();
+        const {adapters} = sharedProps;
+        const description = shallow(row.props().description);
+        expect(description.text()).toEqual(nodeDescription(node, adapters));
+      });
+      describe("with a ConnectionRowList as children", () => {
+        function getChildren(row) {
+          const children = row.props().children;
+          return shallow(children).instance();
+        }
+        it("which is a ConnectionRowList", async () => {
+          const {row} = await setup();
+          expect(getChildren(row)).toBeInstanceOf(ConnectionRowList);
+        });
+        it("which has depth=1", async () => {
+          const {row} = await setup();
+          expect(getChildren(row).props.depth).toBe(1);
+        });
+        it("which has the node as its node", async () => {
+          const {row, node} = await setup();
+          expect(getChildren(row).props.node).toBe(node);
+        });
+        it("which has the right sharedProps", async () => {
+          const {row, sharedProps} = await setup();
+          expect(getChildren(row).props.sharedProps).toBe(sharedProps);
+        });
+      });
     });
   });
 });

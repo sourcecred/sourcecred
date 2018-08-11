@@ -5,13 +5,9 @@ import sortBy from "lodash.sortby";
 import * as NullUtil from "../../../util/null";
 
 import {type NodeAddressT} from "../../../core/graph";
+import {TableRow} from "./TableRow";
 
-import {
-  nodeDescription,
-  scoreDisplay,
-  type SharedProps,
-  type RowState,
-} from "./shared";
+import {nodeDescription, type SharedProps} from "./shared";
 
 import {ConnectionRowList} from "./Connection";
 
@@ -41,44 +37,21 @@ type NodeRowProps = {|
   +sharedProps: SharedProps,
 |};
 
-export class NodeRow extends React.PureComponent<NodeRowProps, RowState> {
-  constructor() {
-    super();
-    this.state = {expanded: false};
-  }
+export class NodeRow extends React.PureComponent<NodeRowProps> {
   render() {
     const {node, sharedProps} = this.props;
     const {pnd, adapters} = sharedProps;
-    const {expanded} = this.state;
     const {score} = NullUtil.get(pnd.get(node));
+    const description = <span>{nodeDescription(node, adapters)}</span>;
     return (
-      <React.Fragment>
-        <tr key="self">
-          <td style={{display: "flex", alignItems: "flex-start"}}>
-            <button
-              style={{marginRight: 5}}
-              onClick={() => {
-                this.setState(({expanded}) => ({
-                  expanded: !expanded,
-                }));
-              }}
-            >
-              {expanded ? "\u2212" : "+"}
-            </button>
-            <span>{nodeDescription(node, adapters)}</span>
-          </td>
-          <td style={{textAlign: "right"}}>{"—"}</td>
-          <td style={{textAlign: "right"}}>{scoreDisplay(score)}</td>
-        </tr>
-        {expanded && (
-          <ConnectionRowList
-            key="children"
-            depth={1}
-            node={node}
-            sharedProps={sharedProps}
-          />
-        )}
-      </React.Fragment>
+      <TableRow
+        depth={0}
+        description={description}
+        connectionProportion={null}
+        score={score}
+      >
+        <ConnectionRowList depth={1} node={node} sharedProps={sharedProps} />
+      </TableRow>
     );
   }
 }

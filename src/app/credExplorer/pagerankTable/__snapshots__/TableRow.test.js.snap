@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/credExplorer/pagerankTable/TableRow has depth-based color 1`] = `
+Object {
+  "depth": 0,
+  "style": Object {
+    "backgroundColor": "rgba(0,143.4375,0,0)",
+  },
+}
+`;
+
+exports[`app/credExplorer/pagerankTable/TableRow has depth-based color 2`] = `
+Object {
+  "depth": 1,
+  "style": Object {
+    "backgroundColor": "rgba(0,143.4375,0,0.09999999999999998)",
+  },
+}
+`;
+
+exports[`app/credExplorer/pagerankTable/TableRow has depth-based color 3`] = `
+Object {
+  "depth": 2,
+  "style": Object {
+    "backgroundColor": "rgba(0,143.4375,0,0.18999999999999995)",
+  },
+}
+`;
+
+exports[`app/credExplorer/pagerankTable/TableRow has depth-based indentation 1`] = `
+Object {
+  "depth": 0,
+  "style": Object {
+    "marginLeft": 0,
+    "marginRight": 5,
+  },
+}
+`;
+
+exports[`app/credExplorer/pagerankTable/TableRow has depth-based indentation 2`] = `
+Object {
+  "depth": 1,
+  "style": Object {
+    "marginLeft": 15,
+    "marginRight": 5,
+  },
+}
+`;
+
+exports[`app/credExplorer/pagerankTable/TableRow has depth-based indentation 3`] = `
+Object {
+  "depth": 2,
+  "style": Object {
+    "marginLeft": 30,
+    "marginRight": 5,
+  },
+}
+`;

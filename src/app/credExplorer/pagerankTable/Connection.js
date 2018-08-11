@@ -7,14 +7,9 @@ import type {NodeAddressT} from "../../../core/graph";
 import type {Connection} from "../../../core/attribution/graphToMarkovChain";
 import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
 import {DynamicAdapterSet} from "../../adapters/adapterSet";
+import {TableRow} from "./TableRow";
 
-import {
-  edgeVerb,
-  nodeDescription,
-  scoreDisplay,
-  type SharedProps,
-  type RowState,
-} from "./shared";
+import {edgeVerb, nodeDescription, type SharedProps} from "./shared";
 
 type ConnectionRowListProps = {|
   +depth: number,
@@ -54,14 +49,7 @@ type ConnectionRowProps = {|
   +sharedProps: SharedProps,
 |};
 
-export class ConnectionRow extends React.PureComponent<
-  ConnectionRowProps,
-  RowState
-> {
-  constructor() {
-    super();
-    this.state = {expanded: false};
-  }
+export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
   render() {
     const {
       sharedProps,
@@ -70,45 +58,25 @@ export class ConnectionRow extends React.PureComponent<
       scoredConnection: {connection, source, sourceScore, connectionScore},
     } = this.props;
     const {pnd, adapters} = sharedProps;
-    const {expanded} = this.state;
     const {score: targetScore} = NullUtil.get(pnd.get(target));
     const connectionProportion = connectionScore / targetScore;
-    const connectionPercent = (connectionProportion * 100).toFixed(2);
 
+    const connectionView = (
+      <ConnectionView connection={connection} adapters={adapters} />
+    );
     return (
-      <React.Fragment>
-        <tr
-          key="self"
-          style={{backgroundColor: `rgba(0,143.4375,0,${1 - 0.9 ** depth})`}}
-        >
-          <td style={{display: "flex", alignItems: "flex-start"}}>
-            <button
-              style={{
-                marginRight: 5,
-                marginLeft: 15 * depth,
-              }}
-              onClick={() => {
-                this.setState(({expanded}) => ({
-                  expanded: !expanded,
-                }));
-              }}
-            >
-              {expanded ? "\u2212" : "+"}
-            </button>
-            <ConnectionView connection={connection} adapters={adapters} />
-          </td>
-          <td style={{textAlign: "right"}}>{connectionPercent}%</td>
-          <td style={{textAlign: "right"}}>{scoreDisplay(sourceScore)}</td>
-        </tr>
-        {expanded && (
-          <ConnectionRowList
-            key="children"
-            depth={depth + 1}
-            node={source}
-            sharedProps={sharedProps}
-          />
-        )}
-      </React.Fragment>
+      <TableRow
+        depth={depth}
+        description={connectionView}
+        connectionProportion={connectionProportion}
+        score={sourceScore}
+      >
+        <ConnectionRowList
+          depth={depth + 1}
+          node={source}
+          sharedProps={sharedProps}
+        />
+      </TableRow>
     );
   }
 }
