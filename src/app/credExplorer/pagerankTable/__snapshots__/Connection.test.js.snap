@@ -3,11 +3,55 @@
 exports[`app/credExplorer/pagerankTable/Connection ConnectionRow has proper depth-based styling 1`] = `
 Object {
   "buttonStyle": Object {
-    "marginLeft": 30,
+    "marginLeft": 0,
     "marginRight": 5,
   },
+  "colorDepth": 0,
+  "indentDepth": 0,
   "trStyle": Object {
-    "backgroundColor": "rgba(0,143.4375,0,0.18999999999999995)",
+    "backgroundColor": "rgba(0,143.4375,0,0)",
+  },
+}
+`;
+
+exports[`app/credExplorer/pagerankTable/Connection ConnectionRow has proper depth-based styling 2`] = `
+Object {
+  "buttonStyle": Object {
+    "marginLeft": 15,
+    "marginRight": 5,
+  },
+  "colorDepth": 0,
+  "indentDepth": 1,
+  "trStyle": Object {
+    "backgroundColor": "rgba(0,143.4375,0,0)",
+  },
+}
+`;
+
+exports[`app/credExplorer/pagerankTable/Connection ConnectionRow has proper depth-based styling 3`] = `
+Object {
+  "buttonStyle": Object {
+    "marginLeft": 0,
+    "marginRight": 5,
+  },
+  "colorDepth": 1,
+  "indentDepth": 0,
+  "trStyle": Object {
+    "backgroundColor": "rgba(0,143.4375,0,0.09999999999999998)",
+  },
+}
+`;
+
+exports[`app/credExplorer/pagerankTable/Connection ConnectionRow has proper depth-based styling 4`] = `
+Object {
+  "buttonStyle": Object {
+    "marginLeft": 15,
+    "marginRight": 5,
+  },
+  "colorDepth": 1,
+  "indentDepth": 1,
+  "trStyle": Object {
+    "backgroundColor": "rgba(0,143.4375,0,0.09999999999999998)",
   },
 }
 `;

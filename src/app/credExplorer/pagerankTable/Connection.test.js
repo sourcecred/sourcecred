@@ -25,30 +25,38 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
   describe("ConnectionRowList", () => {
     async function setup(maxEntriesPerList: number = 100000) {
       const {adapters, pnd, nodes} = await example();
-      const depth = 2;
       const node = nodes.bar1;
       const sharedProps = {adapters, pnd, maxEntriesPerList};
+      const [colorDepth, indentDepth] = [1, 2];
       const component = (
         <ConnectionRowList
-          depth={depth}
+          colorDepth={colorDepth}
+          indentDepth={indentDepth}
           node={node}
           sharedProps={sharedProps}
         />
       );
       const element = shallow(component);
-      return {element, depth, node, sharedProps};
+      return {element, colorDepth, indentDepth, node, sharedProps};
     }
     it("creates `ConnectionRow`s with the right props", async () => {
-      const {element, depth, node, sharedProps} = await setup();
+      const {
+        element,
+        colorDepth,
+        indentDepth,
+        node,
+        sharedProps,
+      } = await setup();
       const connections = NullUtil.get(sharedProps.pnd.get(node))
         .scoredConnections;
-      const rows = element.find("ConnectionRow");
+      const rows = element.find(ConnectionRow);
       expect(rows).toHaveLength(connections.length);
       const rowPropses = rows.map((row) => row.props());
       // Order should be the same as the order in the decomposition.
       expect(rowPropses).toEqual(
         connections.map((sc) => ({
-          depth,
+          colorDepth,
+          indentDepth,
           sharedProps,
           target: node,
           scoredConnection: sc,
@@ -61,7 +69,7 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
       const connections = NullUtil.get(sharedProps.pnd.get(node))
         .scoredConnections;
       expect(connections.length).toBeGreaterThan(maxEntriesPerList);
-      const rows = element.find("ConnectionRow");
+      const rows = element.find(ConnectionRow);
       expect(rows).toHaveLength(maxEntriesPerList);
       const rowConnections = rows.map((row) => row.prop("scoredConnection"));
       // Should have selected the right nodes.
@@ -81,27 +89,51 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
       expect(alphaConnections).toHaveLength(1);
       const connection = alphaConnections[0];
       const {source} = connection;
-      const depth = 2;
+      const [colorDepth, indentDepth] = [1, 2];
       const component = (
         <ConnectionRow
-          depth={depth}
+          colorDepth={colorDepth}
+          indentDepth={indentDepth}
           target={target}
           scoredConnection={connection}
           sharedProps={sharedProps}
         />
       );
       const element = shallow(component);
-      return {element, depth, target, source, connection, sharedProps};
+      return {
+        element,
+        indentDepth,
+        colorDepth,
+        target,
+        source,
+        connection,
+        sharedProps,
+      };
     }
     it("renders the right number of columns", async () => {
       expect((await setup()).element.find("td")).toHaveLength(COLUMNS().length);
     });
     it("has proper depth-based styling", async () => {
-      const {element} = await setup();
-      expect({
-        buttonStyle: element.find("button").prop("style"),
-        trStyle: element.find("tr").prop("style"),
-      }).toMatchSnapshot();
+      const {target, connection, sharedProps} = await setup();
+      for (const colorDepth of [0, 1]) {
+        for (const indentDepth of [0, 1]) {
+          const element = shallow(
+            <ConnectionRow
+              colorDepth={colorDepth}
+              indentDepth={indentDepth}
+              target={target}
+              scoredConnection={connection}
+              sharedProps={sharedProps}
+            />
+          );
+          expect({
+            buttonStyle: element.find("button").prop("style"),
+            trStyle: element.find("tr").prop("style"),
+            colorDepth,
+            indentDepth,
+          }).toMatchSnapshot();
+        }
+      }
     });
     it("renders the source view", async () => {
       const {element, sharedProps, connection} = await setup();
@@ -110,7 +142,7 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
       const view = element
         .find("td")
         .at(descriptionColumn)
-        .find("ConnectionView");
+        .find(ConnectionView);
       expect(view).toHaveLength(1);
       expect(view.props()).toEqual({
         adapters: sharedProps.adapters,
@@ -148,24 +180,43 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
     });
     it("does not render children by default", async () => {
       const {element} = await setup();
-      expect(element.find("ConnectionRowList")).toHaveLength(0);
+      expect(element.find(ConnectionRowList)).toHaveLength(0);
     });
     it('has a working "expand" button', async () => {
-      const {element, depth, sharedProps, source} = await setup();
+      const {
+        element,
+        colorDepth,
+        indentDepth,
+        sharedProps,
+        source,
+      } = await setup();
       expect(element.find("button").text()).toEqual("+");
+      expect(element.state().expanded).toBe(false);
 
       element.find("button").simulate("click");
       expect(element.find("button").text()).toEqual("\u2212");
-      const crl = element.find("ConnectionRowList");
-      expect(crl).toHaveLength(1);
-      expect(crl).not.toHaveLength(0);
-      expect(crl.prop("sharedProps")).toEqual(sharedProps);
-      expect(crl.prop("depth")).toBe(depth + 1);
-      expect(crl.prop("node")).toBe(source);
+      expect(element.find(ConnectionRowList)).toHaveLength(1);
+      expect(element.state().expanded).toBe(true);
 
       element.find("button").simulate("click");
       expect(element.find("button").text()).toEqual("+");
-      expect(element.find("ConnectionRowList")).toHaveLength(0);
+      expect(element.find(ConnectionRowList)).toHaveLength(0);
+      expect(element.state().expanded).toBe(false);
+    });
+    it("child ConnectionRowList has correct props", async () => {
+      const {
+        element,
+        sharedProps,
+        source,
+        indentDepth,
+        colorDepth,
+      } = await setup();
+      element.setState({expanded: true});
+      const props = element.find(ConnectionRowList).props();
+      expect(props.sharedProps).toBe(sharedProps);
+      expect(props.node).toBe(source);
+      expect(props.colorDepth).toBe(colorDepth + 1);
+      expect(props.indentDepth).toBe(indentDepth + 1);
     });
   });
   describe("ConnectionView", () => {
