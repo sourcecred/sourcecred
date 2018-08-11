@@ -53,43 +53,19 @@ export class StaticAdapterSet {
   }
 
   adapterMatchingNode(x: NodeAddressT): StaticPluginAdapter {
-    const adapters = this._adapterNodeTrie.get(x);
-    if (adapters.length === 0) {
-      throw new Error(
-        "Invariant violation: Fallback adapter matches all nodes"
-      );
-    }
-    return adapters[adapters.length - 1];
+    return this._adapterNodeTrie.getLast(x);
   }
 
   adapterMatchingEdge(x: EdgeAddressT): StaticPluginAdapter {
-    const adapters = this._adapterEdgeTrie.get(x);
-    if (adapters.length === 0) {
-      throw new Error(
-        "Invariant violation: Fallback adapter matches all edges"
-      );
-    }
-    return adapters[adapters.length - 1];
+    return this._adapterEdgeTrie.getLast(x);
   }
 
   typeMatchingNode(x: NodeAddressT): NodeType {
-    const types = this._typeNodeTrie.get(x);
-    if (types.length === 0) {
-      throw new Error(
-        "Invariant violation: Fallback adapter's type matches all nodes"
-      );
-    }
-    return types[types.length - 1];
+    return this._typeNodeTrie.getLast(x);
   }
 
   typeMatchingEdge(x: EdgeAddressT): EdgeType {
-    const types = this._typeEdgeTrie.get(x);
-    if (types.length === 0) {
-      throw new Error(
-        "Invariant violation: Fallback adapter's type matches all edges"
-      );
-    }
-    return types[types.length - 1];
+    return this._typeEdgeTrie.getLast(x);
   }
 
   load(repo: Repo): Promise<DynamicAdapterSet> {
@@ -120,23 +96,11 @@ export class DynamicAdapterSet {
   }
 
   adapterMatchingNode(x: NodeAddressT): DynamicPluginAdapter {
-    const adapters = this._adapterNodeTrie.get(x);
-    if (adapters.length === 0) {
-      throw new Error(
-        "Invariant violation: Fallback adapter matches all nodes"
-      );
-    }
-    return adapters[adapters.length - 1];
+    return this._adapterNodeTrie.getLast(x);
   }
 
   adapterMatchingEdge(x: EdgeAddressT): DynamicPluginAdapter {
-    const adapters = this._adapterEdgeTrie.get(x);
-    if (adapters.length === 0) {
-      throw new Error(
-        "Invariant violation: Fallback adapter matches all edges"
-      );
-    }
-    return adapters[adapters.length - 1];
+    return this._adapterEdgeTrie.getLast(x);
   }
 
   adapters(): $ReadOnlyArray<DynamicPluginAdapter> {

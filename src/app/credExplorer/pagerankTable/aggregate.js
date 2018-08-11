@@ -1,7 +1,6 @@
 // @flow
 
 import sortBy from "lodash.sortby";
-import {NodeAddress, edgeToString} from "../../../core/graph";
 import {NodeTrie, EdgeTrie} from "../../../core/trie";
 import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
 import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
@@ -52,13 +51,7 @@ export function aggregateByNodeType(
   }
   const nodeTypeToConnections = new Map();
   for (const x of xs) {
-    const types = typeTrie.get(x.source);
-    if (types.length === 0) {
-      throw new Error(
-        `No matching NodeType for ${NodeAddress.toString(x.source)}`
-      );
-    }
-    const type = types[types.length - 1];
+    const type = typeTrie.getLast(x.source);
     const connections = nodeTypeToConnections.get(type) || [];
     if (connections.length === 0) {
       nodeTypeToConnections.set(type, connections);
@@ -114,11 +107,7 @@ export function aggregateByConnectionType(
         throw new Error((x.connection.adjacency.type: empty));
     }
     const edge = x.connection.adjacency.edge;
-    const types = typeTrie.get(edge.address);
-    if (types.length === 0) {
-      throw new Error(`No matching EdgeType for edge ${edgeToString(edge)}`);
-    }
-    const type = types[types.length - 1];
+    const type = typeTrie.getLast(edge.address);
     const connections = relevantMap.get(type) || [];
     if (connections.length === 0) {
       relevantMap.set(type, connections);
