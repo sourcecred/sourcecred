@@ -82,13 +82,12 @@ describe("core/trie", () => {
     expect(x.get(fooBarZod)).toEqual([0, 2, 3]);
   });
 
-  it("overwriting a value is illegal", () => {
-    expect(() =>
-      new NodeTrie()
-        .add(foo, 3)
-        .add(empty, 1)
-        .add(foo, 4)
-    ).toThrowError("overwrite");
+  it("when a key has multiple values, they are returned in insertion order", () => {
+    const trie = new NodeTrie()
+      .add(foo, 3)
+      .add(empty, 1)
+      .add(foo, 4);
+    expect(trie.get(fooBarZod)).toEqual([1, 3, 4]);
   });
 
   it("null and undefined are legal values", () => {
