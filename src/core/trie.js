@@ -9,9 +9,7 @@ import {
 } from "./graph";
 import * as NullUtil from "../util/null";
 
-const EMPTY_ENTRY_SYMBOL = Symbol("EMPTY");
-
-type Entry<V> = {|+map: RecursiveMap<V>, value: V | typeof EMPTY_ENTRY_SYMBOL|};
+type Entry<V> = {|+map: RecursiveMap<V>, values: V[]|};
 type RecursiveMap<V> = Map<string, Entry<V>>;
 class BaseTrie<K, V> {
   addressModule: AddressModule<K>;
@@ -22,27 +20,24 @@ class BaseTrie<K, V> {
    */
   constructor(m: AddressModule<K>) {
     this.addressModule = m;
-    this.entry = {value: EMPTY_ENTRY_SYMBOL, map: new Map()};
+    this.entry = {values: [], map: new Map()};
   }
 
   /**
    * Add key `k` to this trie with value `v`. Return `this`.
+   * Note that multiple values may be added for the same key.
+   * They will be returned in insertion order.
    */
   add(k: K, val: V): this {
     const parts = this.addressModule.toParts(k);
     let entry = this.entry;
     for (const part of parts) {
       if (!entry.map.has(part)) {
-        entry.map.set(part, {map: new Map(), value: EMPTY_ENTRY_SYMBOL});
+        entry.map.set(part, {map: new Map(), values: []});
       }
       entry = NullUtil.get(entry.map.get(part));
     }
-    if (entry.value !== EMPTY_ENTRY_SYMBOL) {
-      throw new Error(
-        `Tried to overwrite entry at ${this.addressModule.toString(k)}`
-      );
-    }
-    entry.value = val;
+    entry.values.push(val);
     return this;
   }
 
@@ -56,21 +51,20 @@ class BaseTrie<K, V> {
    * with the empty address and ends with `k` itself. Initialize the
    * result to an empty array. For each prefix `p` in `inits`, if `p`
    * was added to this trie with value `v`, then append `v` to
-   * `result`. Return `result`.
+   * `result`. Note that for any `p`, multiple values may have been
+   * added, in which case they are appended in insertion order.
+   * Return `result`.
    */
   get(k: K): V[] {
     const parts = this.addressModule.toParts(k);
-    const result: V[] = [];
+    let result: V[] = [];
     let entry: Entry<V> = this.entry;
-    // nb: if parts has length `n`, there are `n+1` opportunities to add a
-    // value to the resultant array, which is correct as there may be `n+1`
-    // appropriate values to return: one for each part, and another for the
+    // nb: if parts has length `n`, there are `n+1` opportunities to add values
+    // to the resultant array, which is correct as there may be `n+1` parts
+    // containing appropriate values: one for each part, and another for the
     // empty address.
     for (const part of parts) {
-      if (entry.value !== EMPTY_ENTRY_SYMBOL) {
-        const value: V = (entry.value: any);
-        result.push(value);
-      }
+      result = result.concat(entry.values);
       const tmpEntry = entry.map.get(part);
       if (tmpEntry == null) {
         return result;
@@ -78,10 +72,7 @@ class BaseTrie<K, V> {
         entry = tmpEntry;
       }
     }
-    if (entry.value !== EMPTY_ENTRY_SYMBOL) {
-      const value: V = (entry.value: any);
-      result.push(value);
-    }
+    result = result.concat(entry.values);
     return result;
   }
 }
