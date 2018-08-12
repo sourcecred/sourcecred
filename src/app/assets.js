@@ -40,3 +40,26 @@ export class Assets {
     return normalize(`${this._getRoot()}/${path}`);
   }
 }
+
+/**
+ * Given an absolute path `p`, return a relative path `r` such that a
+ * web page at pathname `p` should use `r` to refer to the root of the
+ * application. The result will only contain components `.` and `..`.
+ *
+ * Examples:
+ *
+ *   - "/foo/" maps to "..";
+ *   - "/foo/bar" also maps to "..";
+ *   - "/foo/bar/" maps to "../..";
+ *   - "/" maps to ".".
+ *
+ * If the argument does not start with "/", an error will be thrown.
+ */
+export function rootFromPath(path: string) {
+  const normalized = normalize(path);
+  if (normalized[0] !== "/") {
+    throw new Error("expected absolute path: " + JSON.stringify(path));
+  }
+  const levels = (normalized.match(/\//g) || []).length;
+  return normalize(new Array(levels - 1).fill("..").join("/"));
+}

@@ -1,6 +1,6 @@
 // @flow
 
-import {Assets} from "./assets";
+import {Assets, rootFromPath} from "./assets";
 
 describe("app/assets", () => {
   describe("Assets", () => {
@@ -158,6 +158,64 @@ describe("app/assets", () => {
         expect(() => assets.resolve("/../foo")).toThrow(
           "path outside site root: /../foo"
         );
+      });
+    });
+  });
+
+  describe("rootFromPath", () => {
+    it("throws on the empty path", () => {
+      expect(() => rootFromPath("")).toThrow('expected absolute path: ""');
+    });
+    it('throws on an implicitly relative path ("wat")', () => {
+      expect(() => rootFromPath("wat")).toThrow(
+        'expected absolute path: "wat"'
+      );
+    });
+    it('throws on an explicitly relative path ("./wat")', () => {
+      expect(() => rootFromPath("./wat")).toThrow(
+        'expected absolute path: "./wat"'
+      );
+    });
+    describe('returns "." for a path at root', () => {
+      it('with no file component ("/")', () => {
+        expect(rootFromPath("/")).toEqual(".");
+      });
+      it('with a file component ("/index.html")', () => {
+        expect(rootFromPath("/index.html")).toEqual(".");
+      });
+      it('with superfluous slashes ("///")', () => {
+        expect(rootFromPath("///")).toEqual(".");
+      });
+      it('with indirection, like "/foo/../"', () => {
+        expect(rootFromPath("/foo/../")).toEqual(".");
+      });
+    });
+    describe('returns ".." for a path one level deep', () => {
+      it('with no file component ("/foo/")', () => {
+        expect(rootFromPath("/foo/")).toEqual("..");
+      });
+      it('with a file component ("/foo/index.html")', () => {
+        expect(rootFromPath("/foo/index.html")).toEqual("..");
+      });
+      it('with superfluous slashes ("//foo//")', () => {
+        expect(rootFromPath("//foo//")).toEqual("..");
+      });
+      it('with indirection, like "/foo/bar/../"', () => {
+        expect(rootFromPath("/foo/bar/../")).toEqual("..");
+      });
+    });
+    describe('returns "../.." for a path two levels deep', () => {
+      it('with no file component ("/foo/bar/")', () => {
+        expect(rootFromPath("/foo/bar/")).toEqual("../..");
+      });
+      it('with a file component ("/foo/bar/index.html")', () => {
+        expect(rootFromPath("/foo/bar/index.html")).toEqual("../..");
+      });
+      it('with superfluous slashes ("//foo//bar//")', () => {
+        expect(rootFromPath("//foo//bar//")).toEqual("../..");
+      });
+      it('with indirection, like "/foo/bar/baz/../"', () => {
+        expect(rootFromPath("/foo/bar/baz/../")).toEqual("../..");
       });
     });
   });
