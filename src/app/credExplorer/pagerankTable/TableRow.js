@@ -15,6 +15,7 @@ type TableRowProps = {|
   +score: number,
   // Children to show when the row is expanded
   +children: ReactNode,
+  +showPadding: boolean,
 |};
 type TableRowState = {|
   expanded: boolean,
@@ -40,18 +41,18 @@ export class TableRow extends React.PureComponent<
       connectionProportion,
       score,
       children,
+      showPadding,
     } = this.props;
     const {expanded} = this.state;
     const percent =
       connectionProportion == null
         ? ""
         : (connectionProportion * 100).toFixed(2) + "%";
+    const backgroundColor = `rgba(0,143.4375,0,${1 - 0.9 ** depth})`;
     return (
       <React.Fragment>
-        <tr
-          key="self"
-          style={{backgroundColor: `rgba(0,143.4375,0,${1 - 0.9 ** depth})`}}
-        >
+        {showPadding && <PaddingRow backgroundColor={backgroundColor} />}
+        <tr key="self" style={{backgroundColor}}>
           <td style={{display: "flex", alignItems: "flex-start"}}>
             <button
               style={{
@@ -72,7 +73,23 @@ export class TableRow extends React.PureComponent<
           <td style={{textAlign: "right"}}>{scoreDisplay(score)}</td>
         </tr>
         {expanded && children}
+        {showPadding && <PaddingRow backgroundColor={backgroundColor} />}
       </React.Fragment>
     );
   }
+}
+
+export function PaddingRow(props: {|+backgroundColor: string|}) {
+  return (
+    <tr
+      style={{
+        height: 12,
+        backgroundColor: props.backgroundColor,
+      }}
+    >
+      <td />
+      <td />
+      <td />
+    </tr>
+  );
 }
