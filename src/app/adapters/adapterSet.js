@@ -20,7 +20,7 @@ export class StaticAdapterSet {
   _typeNodeTrie: NodeTrie<NodeType>;
   _typeEdgeTrie: EdgeTrie<EdgeType>;
 
-  constructor(adapters: $ReadOnlyArray<StaticPluginAdapter>) {
+  constructor(adapters: $ReadOnlyArray<StaticPluginAdapter>): void {
     this._adapters = [new FallbackStaticAdapter(), ...adapters];
     this._adapterNodeTrie = new NodeTrie();
     this._adapterEdgeTrie = new EdgeTrie();
@@ -84,7 +84,7 @@ export class DynamicAdapterSet {
   constructor(
     staticAdapterSet: StaticAdapterSet,
     adapters: $ReadOnlyArray<DynamicPluginAdapter>
-  ) {
+  ): void {
     this._staticAdapterSet = staticAdapterSet;
     this._adapters = adapters;
     this._adapterNodeTrie = new NodeTrie();
