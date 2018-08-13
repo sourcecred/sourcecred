@@ -46,6 +46,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
     return (
       <TableRow
         depth={0}
+        indent={0}
         description={description}
         connectionProportion={null}
         score={score}

@@ -66,6 +66,7 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
     );
     return (
       <TableRow
+        indent={depth}
         depth={depth}
         description={connectionView}
         connectionProportion={connectionProportion}
