@@ -11,6 +11,7 @@
     "commonmark": "^0.28.1",
     "express": "^4.16.3",
     "fs-extra": "3.0.1",
+    "history": "^3.0.0",
     "isomorphic-fetch": "^2.2.1",
     "json-stable-stringify": "^1.0.1",
     "lodash.clonedeep": "^4.5.0",
