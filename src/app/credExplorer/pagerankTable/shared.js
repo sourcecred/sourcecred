@@ -33,16 +33,8 @@ export function edgeVerb(
   return direction === "FORWARD" ? edgeType.forwardName : edgeType.backwardName;
 }
 
-export function scoreDisplay(score: number) {
-  return score.toFixed(2);
-}
-
 export type SharedProps = {|
   +pnd: PagerankNodeDecomposition,
   +adapters: DynamicAdapterSet,
   +maxEntriesPerList: number,
-|};
-
-export type RowState = {|
-  expanded: boolean,
 |};
