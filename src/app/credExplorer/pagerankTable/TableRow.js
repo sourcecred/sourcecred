@@ -48,7 +48,7 @@ export class TableRow extends React.PureComponent<
       connectionProportion == null
         ? ""
         : (connectionProportion * 100).toFixed(2) + "%";
-    const backgroundColor = `rgba(0,143.4375,0,${1 - 0.9 ** depth})`;
+    const backgroundColor = `hsla(150,100%,28%,${1 - 0.9 ** depth})`;
     return (
       <React.Fragment>
         {showPadding && <PaddingRow backgroundColor={backgroundColor} />}
