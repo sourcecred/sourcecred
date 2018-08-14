@@ -30,11 +30,14 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
       const depth = 2;
       const node = nodes.bar1;
       const sharedProps = {adapters, pnd, maxEntriesPerList};
+      const connections = NullUtil.get(sharedProps.pnd.get(node))
+        .scoredConnections;
       const component = (
         <ConnectionRowList
           depth={depth}
           node={node}
           sharedProps={sharedProps}
+          connections={connections}
         />
       );
       const element = shallow(component);
@@ -99,9 +102,9 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
         const {row, depth} = await setup();
         expect(row.props().depth).toBe(depth);
       });
-      it("with indent=1", async () => {
+      it("with indent=2", async () => {
         const {row} = await setup();
-        expect(row.props().indent).toBe(1);
+        expect(row.props().indent).toBe(2);
       });
       it("with showPadding=false", async () => {
         const {row} = await setup();
@@ -132,7 +135,7 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
           const children = row.props().children;
           return shallow(children).instance();
         }
-        it("which is a ConnectionRowList", async () => {
+        it("which is a NodeRow", async () => {
           const {row} = await setup();
           expect(getChildren(row)).toBeInstanceOf(NodeRow);
         });

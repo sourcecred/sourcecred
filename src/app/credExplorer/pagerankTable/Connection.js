@@ -16,18 +16,18 @@ type ConnectionRowListProps = {|
   +depth: number,
   +node: NodeAddressT,
   +sharedProps: SharedProps,
+  +connections: $ReadOnlyArray<ScoredConnection>,
 |};
 
 export class ConnectionRowList extends React.PureComponent<
   ConnectionRowListProps
 > {
   render() {
-    const {depth, node, sharedProps} = this.props;
-    const {pnd, maxEntriesPerList} = sharedProps;
-    const {scoredConnections} = NullUtil.get(pnd.get(node));
+    const {depth, node, sharedProps, connections} = this.props;
+    const {maxEntriesPerList} = sharedProps;
     return (
       <React.Fragment>
-        {scoredConnections
+        {connections
           .slice(0, maxEntriesPerList)
           .map((sc) => (
             <ConnectionRow
@@ -67,7 +67,7 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
     );
     return (
       <TableRow
-        indent={1}
+        indent={2}
         depth={depth}
         description={connectionView}
         connectionProportion={connectionProportion}

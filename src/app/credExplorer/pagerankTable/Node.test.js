@@ -5,7 +5,7 @@ import {shallow} from "enzyme";
 import sortBy from "lodash.sortby";
 import * as NullUtil from "../../../util/null";
 import {TableRow} from "./TableRow";
-import {ConnectionRowList} from "./Connection";
+import {AggregationRowList} from "./Aggregation";
 
 import {type NodeAddressT, NodeAddress} from "../../../core/graph";
 
@@ -128,14 +128,14 @@ describe("app/credExplorer/pagerankTable/Node", () => {
         const description = shallow(row.props().description);
         expect(description.text()).toEqual(nodeDescription(node, adapters));
       });
-      describe("with a ConnectionRowList as children", () => {
+      describe("with a AggregationRowList as children", () => {
         function getChildren(row) {
           const children = row.props().children;
           return shallow(children).instance();
         }
-        it("which is a ConnectionRowList", async () => {
+        it("which is a AggregationRowList", async () => {
           const {row} = await setup();
-          expect(getChildren(row)).toBeInstanceOf(ConnectionRowList);
+          expect(getChildren(row)).toBeInstanceOf(AggregationRowList);
         });
         it("which has the same depth", async () => {
           const {row} = await setup({depth: 13});
