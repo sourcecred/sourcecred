@@ -107,9 +107,9 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
         const {row} = await setup();
         expect(row.props().showPadding).toBe(false);
       });
-      it("with the sourceScore", async () => {
+      it("with the connection score", async () => {
         const {row, scoredConnection} = await setup();
-        expect(row.props().score).toBe(scoredConnection.sourceScore);
+        expect(row.props().score).toBe(scoredConnection.connectionScore);
       });
       it("with the connectionProportion", async () => {
         const {row, target, scoredConnection, sharedProps} = await setup();
