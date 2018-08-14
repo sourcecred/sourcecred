@@ -9,7 +9,7 @@ import {TableRow} from "./TableRow";
 
 import {nodeDescription, type SharedProps} from "./shared";
 
-import {ConnectionRowList} from "./Connection";
+import {AggregationRowList} from "./Aggregation";
 
 type NodeRowListProps = {|
   +nodes: $ReadOnlyArray<NodeAddressT>,
@@ -60,7 +60,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
         connectionProportion={null}
         score={score}
       >
-        <ConnectionRowList
+        <AggregationRowList
           depth={depth}
           node={node}
           sharedProps={sharedProps}
