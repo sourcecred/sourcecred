@@ -28,7 +28,7 @@ const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
     navTitle: "Home",
   },
   {
-    path: "/prototype",
+    path: "/prototype/",
     contents: {
       type: "PAGE",
       component: () => require("./credExplorer/App").default,
@@ -37,7 +37,7 @@ const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
     navTitle: "Prototype",
   },
   {
-    path: "/discord-invite",
+    path: "/discord-invite/",
     contents: {
       type: "EXTERNAL_REDIRECT",
       redirectTo: "https://discord.gg/tsBTgc9",
