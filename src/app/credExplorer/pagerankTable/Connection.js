@@ -8,6 +8,7 @@ import type {Connection} from "../../../core/attribution/graphToMarkovChain";
 import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
 import {DynamicAdapterSet} from "../../adapters/adapterSet";
 import {TableRow} from "./TableRow";
+import {NodeRow} from "./Node";
 
 import {edgeVerb, nodeDescription, type SharedProps} from "./shared";
 
@@ -66,15 +67,16 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
     );
     return (
       <TableRow
-        indent={depth}
+        indent={1}
         depth={depth}
         description={connectionView}
         connectionProportion={connectionProportion}
         showPadding={false}
         score={sourceScore}
       >
-        <ConnectionRowList
+        <NodeRow
           depth={depth + 1}
+          showPadding={true}
           node={source}
           sharedProps={sharedProps}
         />

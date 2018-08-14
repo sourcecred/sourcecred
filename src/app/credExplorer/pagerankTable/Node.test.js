@@ -11,7 +11,7 @@ import {type NodeAddressT, NodeAddress} from "../../../core/graph";
 
 import {nodeDescription} from "./shared";
 import {example} from "./sharedTestUtils";
-import {NodeRowList, NodeRow} from "./Node";
+import {NodeRowList, NodeRow, type NodeRowProps} from "./Node";
 
 require("../../testUtil").configureEnzyme();
 
@@ -55,6 +55,7 @@ describe("app/credExplorer/pagerankTable/Node", () => {
       expect(rowNodes.slice().sort()).toEqual(nodes.slice().sort());
       rows.forEach((row) => {
         expect(row.prop("sharedProps")).toEqual(sharedProps);
+        expect(row.prop("depth")).toEqual(0);
       });
     });
     it("creates up to `maxEntriesPerList` `NodeRow`s", async () => {
@@ -83,18 +84,34 @@ describe("app/credExplorer/pagerankTable/Node", () => {
   });
 
   describe("NodeRow", () => {
-    async function setup() {
+    async function setup(props: $Shape<{...NodeRowProps}>) {
+      props = props || {};
       const {pnd, adapters, nodes} = await example();
       const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
       const node = nodes.bar1;
-      const component = <NodeRow node={node} sharedProps={sharedProps} />;
-      const row = shallow(component).find(TableRow);
+      const component = shallow(
+        <NodeRow
+          node={NullUtil.orElse(props.node, node)}
+          showPadding={NullUtil.orElse(props.showPadding, false)}
+          depth={NullUtil.orElse(props.depth, 0)}
+          sharedProps={NullUtil.orElse(props.sharedProps, sharedProps)}
+        />
+      );
+      const row = component.find(TableRow);
       return {row, node, sharedProps};
     }
     describe("instantiates a TableRow", () => {
       it("with the correct depth", async () => {
-        const {row} = await setup();
-        expect(row.props().depth).toBe(0);
+        const {row: row0} = await setup({depth: 0});
+        expect(row0.props().depth).toBe(0);
+        const {row: row1} = await setup({depth: 1});
+        expect(row1.props().depth).toBe(1);
+      });
+      it("with the correct showPadding", async () => {
+        const {row: row0} = await setup({showPadding: true});
+        expect(row0.props().showPadding).toBe(true);
+        const {row: row1} = await setup({showPadding: false});
+        expect(row1.props().showPadding).toBe(false);
       });
       it("with the node's score", async () => {
         const {row, node, sharedProps} = await setup();
@@ -120,9 +137,10 @@ describe("app/credExplorer/pagerankTable/Node", () => {
           const {row} = await setup();
           expect(getChildren(row)).toBeInstanceOf(ConnectionRowList);
         });
-        it("which has depth=1", async () => {
-          const {row} = await setup();
-          expect(getChildren(row).props.depth).toBe(1);
+        it("which has the same depth", async () => {
+          const {row} = await setup({depth: 13});
+          const crl = getChildren(row);
+          expect(crl.props.depth).toBe(13);
         });
         it("which has the node as its node", async () => {
           const {row, node} = await setup();

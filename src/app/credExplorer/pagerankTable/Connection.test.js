@@ -8,6 +8,7 @@ import type {Connection} from "../../../core/attribution/graphToMarkovChain";
 import {ConnectionRowList, ConnectionRow, ConnectionView} from "./Connection";
 import {example} from "./sharedTestUtils";
 import {TableRow} from "./TableRow";
+import {NodeRow} from "./Node";
 
 require("../../testUtil").configureEnzyme();
 
@@ -98,6 +99,14 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
         const {row, depth} = await setup();
         expect(row.props().depth).toBe(depth);
       });
+      it("with indent=1", async () => {
+        const {row} = await setup();
+        expect(row.props().indent).toBe(1);
+      });
+      it("with showPadding=false", async () => {
+        const {row} = await setup();
+        expect(row.props().showPadding).toBe(false);
+      });
       it("with the sourceScore", async () => {
         const {row, scoredConnection} = await setup();
         expect(row.props().score).toBe(scoredConnection.sourceScore);
@@ -118,18 +127,22 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
         expect(cv.props.connection).toEqual(scoredConnection.connection);
         expect(cv.props.adapters).toEqual(adapters);
       });
-      describe("with a ConnectionRowList as children", () => {
+      describe("with a NodeRow as children", () => {
         function getChildren(row) {
           const children = row.props().children;
           return shallow(children).instance();
         }
         it("which is a ConnectionRowList", async () => {
           const {row} = await setup();
-          expect(getChildren(row)).toBeInstanceOf(ConnectionRowList);
+          expect(getChildren(row)).toBeInstanceOf(NodeRow);
         });
         it("which has incremented depth", async () => {
           const {row, depth} = await setup();
           expect(getChildren(row).props.depth).toBe(depth + 1);
+        });
+        it("which has padding", async () => {
+          const {row} = await setup();
+          expect(getChildren(row).props.showPadding).toBe(true);
         });
         it("which has the connection source as its node target", async () => {
           const {row, scoredConnection} = await setup();
