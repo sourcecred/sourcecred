@@ -1,5 +1,6 @@
 // @flow
 
+import React, {type Node as ReactNode} from "react";
 import {
   type EdgeAddressT,
   type NodeAddressT,
@@ -38,3 +39,21 @@ export type SharedProps = {|
   +adapters: DynamicAdapterSet,
   +maxEntriesPerList: number,
 |};
+
+export function Badge({children}: {children: ReactNode}): ReactNode {
+  return (
+    // The outer <span> acts as a strut to ensure that the badge
+    // takes up a full line height, even though its text is smaller.
+    <span>
+      <span
+        style={{
+          textTransform: "uppercase",
+          fontWeight: 700,
+          fontSize: "smaller",
+        }}
+      >
+        {children}
+      </span>
+    </span>
+  );
+}

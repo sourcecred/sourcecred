@@ -10,7 +10,7 @@ import {DynamicAdapterSet} from "../../adapters/adapterSet";
 import {TableRow} from "./TableRow";
 import {NodeRow} from "./Node";
 
-import {edgeVerb, nodeDescription, type SharedProps} from "./shared";
+import {edgeVerb, nodeDescription, type SharedProps, Badge} from "./shared";
 
 type ConnectionRowListProps = {|
   +depth: number,
@@ -91,23 +91,6 @@ export class ConnectionView extends React.PureComponent<{|
 |}> {
   render() {
     const {connection, adapters} = this.props;
-    function Badge({children}) {
-      return (
-        // The outer <span> acts as a strut to ensure that the badge
-        // takes up a full line height, even though its text is smaller.
-        <span>
-          <span
-            style={{
-              textTransform: "uppercase",
-              fontWeight: 700,
-              fontSize: "smaller",
-            }}
-          >
-            {children}
-          </span>
-        </span>
-      );
-    }
     const {adjacency} = connection;
     switch (adjacency.type) {
       case "SYNTHETIC_LOOP":
