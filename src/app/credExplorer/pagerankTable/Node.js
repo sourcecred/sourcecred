@@ -25,34 +25,46 @@ export class NodeRowList extends React.PureComponent<NodeRowListProps> {
         {sortBy(nodes, (n) => -NullUtil.get(pnd.get(n)).score, (n) => n)
           .slice(0, maxEntriesPerList)
           .map((node) => (
-            <NodeRow node={node} key={node} sharedProps={sharedProps} />
+            <NodeRow
+              showPadding={false}
+              depth={0}
+              node={node}
+              key={node}
+              sharedProps={sharedProps}
+            />
           ))}
       </React.Fragment>
     );
   }
 }
 
-type NodeRowProps = {|
+export type NodeRowProps = {|
+  +depth: number,
   +node: NodeAddressT,
   +sharedProps: SharedProps,
+  +showPadding: boolean,
 |};
 
 export class NodeRow extends React.PureComponent<NodeRowProps> {
   render() {
-    const {node, sharedProps} = this.props;
+    const {depth, node, sharedProps, showPadding} = this.props;
     const {pnd, adapters} = sharedProps;
     const {score} = NullUtil.get(pnd.get(node));
     const description = <span>{nodeDescription(node, adapters)}</span>;
     return (
       <TableRow
-        depth={0}
+        depth={depth}
         indent={0}
+        showPadding={showPadding}
         description={description}
         connectionProportion={null}
         score={score}
-        showPadding={false}
       >
-        <ConnectionRowList depth={1} node={node} sharedProps={sharedProps} />
+        <ConnectionRowList
+          depth={depth}
+          node={node}
+          sharedProps={sharedProps}
+        />
       </TableRow>
     );
   }
