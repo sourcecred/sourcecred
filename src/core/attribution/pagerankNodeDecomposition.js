@@ -15,6 +15,7 @@ import * as NullUtil from "../../util/null";
 export type ScoredConnection = {|
   +connection: Connection,
   +source: NodeAddressT,
+  // TODO(@decentralion): Consider removing this unused field
   +sourceScore: number,
   +connectionScore: number,
 |};
