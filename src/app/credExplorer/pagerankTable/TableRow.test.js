@@ -8,10 +8,11 @@ import {COLUMNS} from "./sharedTestUtils";
 require("../../testUtil").configureEnzyme();
 
 describe("app/credExplorer/pagerankTable/TableRow", () => {
-  function example(depth: number = 3) {
+  function example() {
     return shallow(
       <TableRow
-        depth={depth}
+        depth={1}
+        indent={1}
         description={<span data-test-description={true} />}
         connectionProportion={0.5}
         score={133.7}
@@ -19,22 +20,38 @@ describe("app/credExplorer/pagerankTable/TableRow", () => {
       />
     );
   }
-  it("has depth-based color", () => {
+  it("depth parameter changes the color, but not the indentation", () => {
     for (const depth of [0, 1, 2]) {
-      const el = example(depth);
-      const style = el.find("tr").props().style;
-      expect({depth, style}).toMatchSnapshot();
+      const el = shallow(
+        <TableRow
+          depth={depth}
+          indent={1}
+          description={<span data-test-description={true} />}
+          connectionProportion={0.5}
+          score={133.7}
+          children={<div data-test-children={true} />}
+        />
+      );
+      const trStyle = el.find("tr").props().style;
+      const buttonStyle = el.find("button").props().style;
+      expect({depth, trStyle, buttonStyle}).toMatchSnapshot();
     }
   });
-  it("has depth-based indentation", () => {
-    for (const depth of [0, 1, 2]) {
-      const el = example(depth);
-      const style = el
-        .find("td")
-        .at(0)
-        .find("button")
-        .props().style;
-      expect({depth, style}).toMatchSnapshot();
+  it("indent parameter changes the button indentation", () => {
+    for (const indent of [0, 1, 2]) {
+      const el = shallow(
+        <TableRow
+          depth={3}
+          indent={indent}
+          description={<span data-test-description={true} />}
+          connectionProportion={0.5}
+          score={133.7}
+          children={<div data-test-children={true} />}
+        />
+      );
+      const trStyle = el.find("tr").props().style;
+      const buttonStyle = el.find("button").props().style;
+      expect({indent, trStyle, buttonStyle}).toMatchSnapshot();
     }
   });
   it("expand button toggles symbol based on expansion state", () => {

@@ -3,7 +3,10 @@
 import React, {type Node as ReactNode} from "react";
 
 type TableRowProps = {|
+  // How many layers of nested scope we're in (changes the color)
   +depth: number,
+  // How many steps to indent the row (shifts button right)
+  +indent: number,
   // The node that goes in the Description column
   +description: ReactNode,
   // What proportion should be formatted in the connection column
@@ -32,6 +35,7 @@ export class TableRow extends React.PureComponent<
   render() {
     const {
       depth,
+      indent,
       description,
       connectionProportion,
       score,
@@ -52,7 +56,7 @@ export class TableRow extends React.PureComponent<
             <button
               style={{
                 marginRight: 5,
-                marginLeft: 15 * depth,
+                marginLeft: 15 * indent + 5,
               }}
               onClick={() => {
                 this.setState(({expanded}) => ({
