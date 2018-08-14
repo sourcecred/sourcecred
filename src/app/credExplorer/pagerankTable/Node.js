@@ -50,6 +50,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
         description={description}
         connectionProportion={null}
         score={score}
+        showPadding={false}
       >
         <ConnectionRowList depth={1} node={node} sharedProps={sharedProps} />
       </TableRow>

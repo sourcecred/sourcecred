@@ -70,6 +70,7 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
         depth={depth}
         description={connectionView}
         connectionProportion={connectionProportion}
+        showPadding={false}
         score={sourceScore}
       >
         <ConnectionRowList
