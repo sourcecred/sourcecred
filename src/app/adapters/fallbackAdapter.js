@@ -6,6 +6,7 @@ import {
   type NodeAddressT,
   EdgeAddress,
 } from "../../core/graph";
+import type {Assets} from "../assets";
 import type {Repo} from "../../core/repo";
 
 import type {StaticPluginAdapter, DynamicPluginAdapter} from "./pluginAdapter";
@@ -46,7 +47,7 @@ export class FallbackStaticAdapter implements StaticPluginAdapter {
     ];
   }
 
-  load(_unused_repo: Repo) {
+  load(_unused_assets: Assets, _unused_repo: Repo) {
     return Promise.resolve(new FallbackDynamicAdapter());
   }
 }

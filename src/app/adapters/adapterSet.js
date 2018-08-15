@@ -2,6 +2,7 @@
 
 import {Graph, type NodeAddressT, type EdgeAddressT} from "../../core/graph";
 import {NodeTrie, EdgeTrie} from "../../core/trie";
+import type {Assets} from "../assets";
 import type {Repo} from "../../core/repo";
 
 import type {
@@ -68,8 +69,8 @@ export class StaticAdapterSet {
     return this._typeEdgeTrie.getLast(x);
   }
 
-  load(repo: Repo): Promise<DynamicAdapterSet> {
-    return Promise.all(this._adapters.map((a) => a.load(repo))).then(
+  load(assets: Assets, repo: Repo): Promise<DynamicAdapterSet> {
+    return Promise.all(this._adapters.map((a) => a.load(assets, repo))).then(
       (adapters) => new DynamicAdapterSet(this, adapters)
     );
   }

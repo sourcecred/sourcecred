@@ -1,6 +1,7 @@
 // @flow
 
 import {Graph, type NodeAddressT, type EdgeAddressT} from "../../core/graph";
+import type {Assets} from "../assets";
 import type {Repo} from "../../core/repo";
 
 export type EdgeType = {|
@@ -22,7 +23,7 @@ export interface StaticPluginAdapter {
   edgePrefix(): EdgeAddressT;
   nodeTypes(): NodeType[];
   edgeTypes(): EdgeType[];
-  load(repo: Repo): Promise<DynamicPluginAdapter>;
+  load(assets: Assets, repo: Repo): Promise<DynamicPluginAdapter>;
 }
 
 export interface DynamicPluginAdapter {
