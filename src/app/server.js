@@ -1,12 +1,14 @@
 // @flow
 
 import {StyleSheetServer} from "aphrodite/no-important";
+import createMemoryHistory from "history/lib/createMemoryHistory";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import {match, RouterContext} from "react-router";
 
 import Page from "./Page";
 import {Assets, rootFromPath} from "./assets";
+import createRelativeHistory from "./createRelativeHistory";
 import ExternalRedirect from "./ExternalRedirect";
 import {createRoutes} from "./createRoutes";
 import {resolveRouteFromPath, resolveTitleFromPath} from "./routeData";
@@ -19,6 +21,7 @@ export default function render(
   const path = locals.path;
   const root = rootFromPath(path);
   const assets = new Assets(root);
+  const history = createRelativeHistory(createMemoryHistory(path), "/");
   {
     const route = resolveRouteFromPath(path);
     if (route && route.contents.type === "EXTERNAL_REDIRECT") {
@@ -31,7 +34,7 @@ export default function render(
   function renderStandardRoute() {
     const bundlePath = locals.assets["main"];
     const routes = createRoutes();
-    match({routes, location: path}, (error, redirectLocation, renderProps) => {
+    match({history, routes}, (error, redirectLocation, renderProps) => {
       if (error) {
         callback(error);
       } else if (renderProps) {
@@ -53,7 +56,7 @@ export default function render(
           <style data-aphrodite>${css.content}</style>
           </head>
           <body style="overflow-y:scroll">
-          <div id="root">${html}</div>
+          <div id="root" data-initial-root="${root}">${html}</div>
           <script src="${assets.resolve(bundlePath)}"></script>
           </body>
           </html>

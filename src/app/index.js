@@ -1,14 +1,31 @@
 // @flow
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
+import createBrowserHistory from "history/lib/createBrowserHistory";
+
+import createRelativeHistory from "./createRelativeHistory";
+import normalize from "../util/pathNormalize";
 import App from "./App";
 
-const root = document.getElementById("root");
-if (root == null) {
+import "./index.css";
+
+const target = document.getElementById("root");
+if (target == null) {
   throw new Error("Unable to find root element!");
 }
-ReactDOM.hydrate(<App />, root);
+
+let initialRoot: string = target.dataset.initialRoot;
+if (initialRoot == null) {
+  console.error(
+    `Initial root unset (${initialRoot}): this should not happen! ` +
+      'Falling back to ".".'
+  );
+  initialRoot = ".";
+}
+const basename = normalize(`${window.location.pathname}/${initialRoot}/`);
+const history = createRelativeHistory(createBrowserHistory(), basename);
+
+ReactDOM.hydrate(<App history={history} />, target);
 
 // In Chrome, relative favicon URLs are recomputed at every pushState,
 // although other assets (like the `src` of an `img`) are not. We don't
