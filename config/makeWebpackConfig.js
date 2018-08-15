@@ -18,17 +18,10 @@ const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const paths = require("./paths");
 const getClientEnvironment = require("./env");
 
-// Webpack uses `publicPath` to determine where the app is being served from.
-// It requires a trailing slash, or the file assets will get an incorrect path.
-const publicPath = paths.servedPath;
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
-// `publicUrl` is just like `publicPath`, but we will provide it to our app
-// as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.
-// Omit trailing slash as %PUBLIC_URL%/xyz looks better than %PUBLIC_URL%xyz.
-const publicUrl = publicPath.slice(0, -1);
 // Get environment variables to inject into our app.
-const env = getClientEnvironment(publicUrl);
+const env = getClientEnvironment(/* publicUrl: */ "");
 
 function makeConfig(mode /*: "production" | "development" */) {
   return {
@@ -71,8 +64,6 @@ function makeConfig(mode /*: "production" | "development" */) {
       // We don't currently advertise code splitting but Webpack supports it.
       filename: "static/js/[name].[chunkhash:8].js",
       chunkFilename: "static/js/[name].[chunkhash:8].chunk.js",
-      // We inferred the "public path" (such as / or /my-project) from homepage.
-      publicPath: publicPath,
       // Point sourcemap entries to original disk location (format as URL on Windows)
       devtoolModuleFilenameTemplate: (
         info /*:
