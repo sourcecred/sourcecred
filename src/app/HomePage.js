@@ -4,7 +4,9 @@ import {StyleSheet, css} from "aphrodite/no-important";
 import React, {type Node} from "react";
 import {Link} from "react-router";
 
-export default class HomePage extends React.Component<{||}> {
+import type {Assets} from "./assets";
+
+export default class HomePage extends React.Component<{|+assets: Assets|}> {
   render() {
     const urls = {
       numpyFunding:

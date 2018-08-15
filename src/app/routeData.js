@@ -7,11 +7,18 @@
 // inline syntax.
 
 /*::
+import type {Assets} from "./assets";
 type RouteDatum = {|
   +path: string,
   +contents:
-    | {|+type: "PAGE", +component: () => React$ComponentType<{||}>|}
-    | {|+type: "EXTERNAL_REDIRECT", +redirectTo: string|},
+    | {|
+        +type: "PAGE",
+        +component: () => React$ComponentType<{|+assets: Assets|}>,
+      |}
+    | {|
+        +type: "EXTERNAL_REDIRECT",
+        +redirectTo: string,
+      |},
   +title: string,
   +navTitle: ?string,
 |};

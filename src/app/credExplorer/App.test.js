@@ -5,6 +5,7 @@ import {shallow} from "enzyme";
 
 import {Graph} from "../../core/graph";
 import {makeRepo} from "../../core/repo";
+import {Assets} from "../assets";
 import testLocalStore from "../testLocalStore";
 import {DynamicAdapterSet, StaticAdapterSet} from "../adapters/adapterSet";
 
@@ -35,7 +36,9 @@ describe("app/credExplorer/App", () => {
       };
     }
     const App = createApp(createMockSTM);
-    const el = shallow(<App localStore={localStore} />);
+    const el = shallow(
+      <App assets={new Assets(null)} localStore={localStore} />
+    );
     if (setState == null || getState == null) {
       throw new Error("Initialization problems");
     }

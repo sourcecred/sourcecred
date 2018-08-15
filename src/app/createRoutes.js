@@ -5,22 +5,28 @@ import {IndexRoute, Route} from "react-router";
 
 import Page from "./Page";
 import ExternalRedirect from "./ExternalRedirect";
+import withAssets from "./withAssets";
 import {routeData} from "./routeData";
 
 export function createRoutes() {
   return (
-    <Route path="/" component={Page}>
+    <Route path="/" component={withAssets(Page)}>
       {routeData.map(({path, contents}) => {
         switch (contents.type) {
           case "PAGE":
             if (path === "/") {
-              return <IndexRoute key={path} component={contents.component()} />;
+              return (
+                <IndexRoute
+                  key={path}
+                  component={withAssets(contents.component())}
+                />
+              );
             } else {
               return (
                 <Route
                   key={path}
                   path={path}
-                  component={contents.component()}
+                  component={withAssets(contents.component())}
                 />
               );
             }

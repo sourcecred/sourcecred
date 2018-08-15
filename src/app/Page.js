@@ -3,12 +3,17 @@
 import React, {type Node} from "react";
 import {Link} from "react-router";
 import {StyleSheet, css} from "aphrodite/no-important";
+
+import type {Assets} from "./assets";
 import GithubLogo from "./GithubLogo";
 import TwitterLogo from "./TwitterLogo";
 import {routeData} from "./routeData";
 import * as NullUtil from "../util/null";
 
-export default class Page extends React.Component<{|+children: Node|}> {
+export default class Page extends React.Component<{|
+  +assets: Assets,
+  +children: Node,
+|}> {
   render() {
     return (
       <div>

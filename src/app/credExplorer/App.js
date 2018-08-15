@@ -2,6 +2,7 @@
 
 import React from "react";
 
+import type {Assets} from "../assets";
 import type {LocalStore} from "../localStore";
 import CheckedLocalStore from "../checkedLocalStore";
 import BrowserLocalStore from "../browserLocalStore";
@@ -17,7 +18,7 @@ import {
   initialState,
 } from "./state";
 
-export default class AppPage extends React.Component<{||}> {
+export default class AppPage extends React.Component<{|+assets: Assets|}> {
   static _LOCAL_STORE = new CheckedLocalStore(
     new BrowserLocalStore({
       version: "2",
@@ -27,11 +28,11 @@ export default class AppPage extends React.Component<{||}> {
 
   render() {
     const App = createApp(createStateTransitionMachine);
-    return <App localStore={AppPage._LOCAL_STORE} />;
+    return <App assets={this.props.assets} localStore={AppPage._LOCAL_STORE} />;
   }
 }
 
-type Props = {|+localStore: LocalStore|};
+type Props = {|+assets: Assets, +localStore: LocalStore|};
 type State = {|
   appState: AppState,
 |};
