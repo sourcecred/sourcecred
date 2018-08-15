@@ -43,11 +43,13 @@ export async function example() {
         edgePrefix: () => EdgeAddress.fromParts(["foo"]),
         nodeTypes: () => [
           {
+            pluralName: "alphas",
             name: "alpha",
             prefix: NodeAddress.fromParts(["foo", "a"]),
             defaultWeight: 1,
           },
           {
+            pluralName: "betas",
             name: "beta",
             prefix: NodeAddress.fromParts(["foo", "b"]),
             defaultWeight: 1,
@@ -77,6 +79,7 @@ export async function example() {
         nodeTypes: () => [
           {
             name: "alpha",
+            pluralName: "alphas",
             prefix: NodeAddress.fromParts(["bar", "a"]),
             defaultWeight: 1,
           },

@@ -30,11 +30,13 @@ describe("app/adapters/adapterSet", () => {
       return [
         {
           name: "other1",
+          pluralName: "others1",
           defaultWeight: 0,
           prefix: NodeAddress.fromParts(["other", "1"]),
         },
         {
           name: "other2",
+          pluralName: "others2",
           defaultWeight: 0,
           prefix: NodeAddress.fromParts(["other", "2"]),
         },
@@ -145,14 +147,14 @@ describe("app/adapters/adapterSet", () => {
       const type = sas.typeMatchingNode(
         NodeAddress.fromParts(["wombat", "1", "foo"])
       );
-      expect(type.name).toBe("(unknown node)");
+      expect(type.name).toBe("unknown node");
     });
     it("finds fallback type for unregistered edge", () => {
       const {sas} = example();
       const type = sas.typeMatchingEdge(
         EdgeAddress.fromParts(["wombat", "1", "foo"])
       );
-      expect(type.forwardName).toBe("(unknown edge→)");
+      expect(type.forwardName).toBe("unknown edge→");
     });
     it("loads a dynamicAdapterSet", async () => {
       const {x, sas} = example();

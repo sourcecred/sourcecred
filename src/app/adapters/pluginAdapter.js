@@ -11,6 +11,7 @@ export type EdgeType = {|
 
 export type NodeType = {|
   +name: string,
+  +pluralName: string,
   +prefix: NodeAddressT,
   +defaultWeight: number,
 |};

@@ -18,10 +18,30 @@ describe("app/credExplorer/aggregate", () => {
     };
 
     const nodeTypes = {
-      root: {name: "root", prefix: nodes.root, defaultWeight: 0},
-      zap: {name: "zap", prefix: nodes.zap, defaultWeight: 0},
-      kif: {name: "kif", prefix: nodes.kif, defaultWeight: 0},
-      empty: {name: "empty", prefix: NodeAddress.empty, defaultWeight: 0},
+      root: {
+        name: "root",
+        pluralName: "roots",
+        prefix: nodes.root,
+        defaultWeight: 0,
+      },
+      zap: {
+        name: "zap",
+        pluralName: "zaps",
+        prefix: nodes.zap,
+        defaultWeight: 0,
+      },
+      kif: {
+        name: "kif",
+        pluralName: "kifs",
+        prefix: nodes.kif,
+        defaultWeight: 0,
+      },
+      empty: {
+        name: "empty",
+        pluralName: "empties",
+        prefix: NodeAddress.empty,
+        defaultWeight: 0,
+      },
     };
 
     const nodeTypesArray = [nodeTypes.root, nodeTypes.zap, nodeTypes.kif];
