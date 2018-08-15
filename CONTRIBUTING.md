@@ -119,6 +119,12 @@ to run them all. This will run:
 
 This is the same set of tests that is run on our CI system, Travis.
 
+### Updating CHANGELOG.md
+
+If your patch makes a change that would be visible or interesting to a
+user of SourceCred—for example, fixing a bug—please add a description of
+the change under the `[Unreleased]` heading of `CHANGELOG.md`.
+
 ## When writing commit messages
 
 ### Summary of changes
