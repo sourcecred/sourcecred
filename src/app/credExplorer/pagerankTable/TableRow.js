@@ -70,7 +70,9 @@ export class TableRow extends React.PureComponent<
             {description}
           </td>
           <td style={{textAlign: "right"}}>{percent}</td>
-          <td style={{textAlign: "right"}}>{scoreDisplay(score)}</td>
+          <td style={{textAlign: "right"}}>
+            <span style={{marginRight: 5}}>{scoreDisplay(score)}</span>
+          </td>
         </tr>
         {expanded && children}
         {showPadding && <PaddingRow backgroundColor={backgroundColor} />}
