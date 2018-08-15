@@ -72,7 +72,7 @@ export default function render(
 
   function renderRedirect(redirectTo: string) {
     const component = (
-      <Page>
+      <Page assets={assets}>
         <ExternalRedirect redirectTo={redirectTo} />
       </Page>
     );
