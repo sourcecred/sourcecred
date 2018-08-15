@@ -7,6 +7,7 @@ import {
   aggregateByConnectionType,
   flattenAggregation,
   aggregateFlat,
+  aggregationKey,
 } from "./aggregate";
 
 describe("app/credExplorer/aggregate", () => {
@@ -435,5 +436,18 @@ describe("app/credExplorer/aggregate", () => {
       );
       expect(fromScratch).toEqual(flat);
     });
+  });
+  it("aggregationKey gives unique keys", () => {
+    const set = new Set();
+    const {nodeTypesArray, edgeTypesArray, scoredConnectionsArray} = example();
+    const flat = aggregateFlat(
+      scoredConnectionsArray,
+      nodeTypesArray,
+      edgeTypesArray
+    );
+    for (const aggregation of flat) {
+      set.add(aggregationKey(aggregation));
+    }
+    expect(set.size).toEqual(flat.length);
   });
 });

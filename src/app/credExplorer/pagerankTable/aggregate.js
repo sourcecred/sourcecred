@@ -1,6 +1,7 @@
 // @flow
 
 import sortBy from "lodash.sortby";
+import stringify from "json-stable-stringify";
 import {NodeTrie, EdgeTrie} from "../../../core/trie";
 import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
 import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
@@ -172,4 +173,30 @@ export function aggregateFlat(
   return flattenAggregation(
     aggregateByConnectionType(xs, nodeTypes, edgeTypes)
   );
+}
+
+export function aggregationKey(aggregation: FlatAggregation): string {
+  const result: any = {
+    nodePrefix: aggregation.nodeType.prefix,
+  };
+  switch (aggregation.connectionType.type) {
+    case "SYNTHETIC_LOOP":
+      result.connectionType = {type: "SYNTHETIC_LOOP"};
+      break;
+    case "IN_EDGE":
+      result.connectionType = {
+        type: "IN_EDGE",
+        edgePrefix: aggregation.connectionType.edgeType.prefix,
+      };
+      break;
+    case "OUT_EDGE":
+      result.connectionType = {
+        type: "OUT_EDGE",
+        edgePrefix: aggregation.connectionType.edgeType.prefix,
+      };
+      break;
+    default:
+      throw new Error((aggregation.connectionType.type: empty));
+  }
+  return stringify(result);
 }
