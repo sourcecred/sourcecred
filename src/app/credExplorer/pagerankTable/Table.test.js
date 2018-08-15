@@ -3,7 +3,7 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import {NodeAddress} from "../../../core/graph";
+import {NodeAddress, type NodeAddressT} from "../../../core/graph";
 
 import {PagerankTable} from "./Table";
 import {example, COLUMNS} from "./sharedTestUtils";
@@ -24,7 +24,12 @@ describe("app/credExplorer/pagerankTable/Table", () => {
     it("renders thead column order properly", async () => {
       const {pnd, adapters} = await example();
       const element = shallow(
-        <PagerankTable pnd={pnd} adapters={adapters} maxEntriesPerList={1} />
+        <PagerankTable
+          defaultNodeFilter={null}
+          pnd={pnd}
+          adapters={adapters}
+          maxEntriesPerList={1}
+        />
       );
       const th = element.find("thead th");
       const columnNames = th.map((t) => t.text());
@@ -32,10 +37,15 @@ describe("app/credExplorer/pagerankTable/Table", () => {
     });
 
     describe("has a filter select", () => {
-      async function setup() {
+      async function setup(defaultNodeFilter?: NodeAddressT) {
         const {pnd, adapters} = await example();
         const element = shallow(
-          <PagerankTable pnd={pnd} adapters={adapters} maxEntriesPerList={1} />
+          <PagerankTable
+            defaultNodeFilter={defaultNodeFilter}
+            pnd={pnd}
+            adapters={adapters}
+            maxEntriesPerList={1}
+          />
         );
         const label = element.find("label");
         const options = label.find("option");
@@ -74,6 +84,21 @@ describe("app/credExplorer/pagerankTable/Table", () => {
         );
         expect(actualNodes).not.toHaveLength(0);
       });
+      it("filter defaults to show all if defaultNodeFilter not passed", async () => {
+        const {element} = await setup();
+        expect(element.state().topLevelFilter).toEqual(NodeAddress.empty);
+      });
+      it("filter defaults to defaultNodeFilter if available", async () => {
+        const filter = NodeAddress.fromParts(["foo", "a"]);
+        const {element} = await setup(filter);
+        expect(element.state().topLevelFilter).toEqual(filter);
+      });
+      it("raises an error if defaultNodeFilter doesn't match any node type", async () => {
+        const badFilter = NodeAddress.fromParts(["doesn't", "exist"]);
+        await expect(setup(badFilter)).rejects.toThrow(
+          "invalid defaultNodeFilter"
+        );
+      });
     });
 
     describe("creates a NodeRowList", () => {
@@ -82,6 +107,7 @@ describe("app/credExplorer/pagerankTable/Table", () => {
         const maxEntriesPerList = 1;
         const element = shallow(
           <PagerankTable
+            defaultNodeFilter={null}
             pnd={pnd}
             adapters={adapters}
             maxEntriesPerList={maxEntriesPerList}

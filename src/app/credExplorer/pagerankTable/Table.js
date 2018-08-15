@@ -2,6 +2,7 @@
 
 import React from "react";
 import sortBy from "lodash.sortby";
+import * as NullUtil from "../../../util/null";
 
 import {type NodeAddressT, NodeAddress} from "../../../core/graph";
 import type {PagerankNodeDecomposition} from "../../../core/attribution/pagerankNodeDecomposition";
@@ -15,15 +16,29 @@ type PagerankTableProps = {|
   +pnd: PagerankNodeDecomposition,
   +adapters: DynamicAdapterSet,
   +maxEntriesPerList: number,
+  +defaultNodeFilter: ?NodeAddressT,
 |};
 type PagerankTableState = {|topLevelFilter: NodeAddressT|};
 export class PagerankTable extends React.PureComponent<
   PagerankTableProps,
   PagerankTableState
 > {
-  constructor() {
+  constructor(props: PagerankTableProps): void {
     super();
-    this.state = {topLevelFilter: NodeAddress.empty};
+    const {defaultNodeFilter, adapters} = props;
+    if (defaultNodeFilter != null) {
+      const nodeTypes = adapters.static().nodeTypes();
+      if (!nodeTypes.some((x) => x.prefix === defaultNodeFilter)) {
+        throw new Error(
+          `invalid defaultNodeFilter ${defaultNodeFilter}: doesn't match any type`
+        );
+      }
+    }
+    const topLevelFilter = NullUtil.orElse(
+      props.defaultNodeFilter,
+      NodeAddress.empty
+    );
+    this.state = {topLevelFilter};
   }
 
   render() {

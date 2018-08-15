@@ -9,6 +9,7 @@ import BrowserLocalStore from "../browserLocalStore";
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "./WeightConfig";
 import RepositorySelect from "./RepositorySelect";
+import {_Prefix as GithubPrefix} from "../../plugins/github/nodes";
 import {
   createStateTransitionMachine,
   type AppState,
@@ -71,6 +72,7 @@ export function createApp(
         const pnd = appState.substate.pagerankNodeDecomposition;
         pagerankTable = (
           <PagerankTable
+            defaultNodeFilter={GithubPrefix.userlike}
             adapters={adapters}
             pnd={pnd}
             maxEntriesPerList={100}
