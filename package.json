@@ -41,7 +41,7 @@
     "dotenv": "4.0.0",
     "dotenv-expand": "4.0.1",
     "enzyme": "^3.3.0",
-    "enzyme-adapter-react-16": "^1.1.1",
+    "enzyme-adapter-react-16.3": "^1.0.0",
     "enzyme-to-json": "^3.3.3",
     "eslint": "4.10.0",
     "eslint-config-react-app": "^2.1.0",
