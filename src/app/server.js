@@ -6,6 +6,7 @@ import ReactDOMServer from "react-dom/server";
 import {match, RouterContext} from "react-router";
 
 import Page from "./Page";
+import {Assets, rootFromPath} from "./assets";
 import ExternalRedirect from "./ExternalRedirect";
 import {createRoutes} from "./createRoutes";
 import {resolveRouteFromPath, resolveTitleFromPath} from "./routeData";
@@ -16,6 +17,8 @@ export default function render(
   callback: (error: ?mixed, result?: string) => void
 ): void {
   const path = locals.path;
+  const root = rootFromPath(path);
+  const assets = new Assets(root);
   {
     const route = resolveRouteFromPath(path);
     if (route && route.contents.type === "EXTERNAL_REDIRECT") {
@@ -42,7 +45,7 @@ export default function render(
           <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width,initial-scale=1" />
-          <link rel="shortcut icon" href="/favicon.png" />
+          <link rel="shortcut icon" href="${assets.resolve("/favicon.png")}" />
           <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
           <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
           <title>${resolveTitleFromPath(path)}</title>
@@ -51,7 +54,7 @@ export default function render(
           </head>
           <body style="overflow-y:scroll">
           <div id="root">${html}</div>
-          <script src="${bundlePath}"></script>
+          <script src="${assets.resolve(bundlePath)}"></script>
           </body>
           </html>
         `;
@@ -80,7 +83,7 @@ export default function render(
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1" />
       <meta http-equiv="refresh" content="0;url=${redirectTo}" />
-      <link rel="shortcut icon" href="/favicon.ico" />
+      <link rel="shortcut icon" href="${assets.resolve("favicon.png")}" />
       <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
       <title>${resolveTitleFromPath(path)}</title>
