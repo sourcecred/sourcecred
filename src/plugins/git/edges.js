@@ -140,7 +140,7 @@ function multiLengthDecode(x: $ReadOnlyArray<string>, fail: () => Error) {
 }
 
 export function fromRaw(x: RawAddress): StructuredAddress {
-  function fail() {
+  function fail(_unused_assertion: any) {
     return new Error(`Bad address: ${EdgeAddress.toString(x)}`);
   }
   if (!EdgeAddress.hasPrefix(x, GIT_PREFIX)) {
@@ -201,9 +201,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       return {type: HAS_CONTENTS_TYPE, treeEntry};
     }
     default:
-      // eslint-disable-next-line no-unused-expressions
-      (type: empty);
-      throw fail();
+      throw fail((type: empty));
   }
 }
 
@@ -237,8 +235,6 @@ export function toRaw(x: StructuredAddress): RawAddress {
         ...lengthEncode(GitNode.toRaw(x.treeEntry))
       );
     default:
-      // eslint-disable-next-line no-unused-expressions
-      (x.type: empty);
-      throw new Error(x.type);
+      throw new Error((x.type: empty));
   }
 }

@@ -55,7 +55,7 @@ export type StructuredAddress =
   | TreeEntryAddress;
 
 export function fromRaw(x: RawAddress): StructuredAddress {
-  function fail() {
+  function fail(_unused_assertion: any) {
     return new Error(`Bad address: ${NodeAddress.toString(x)}`);
   }
   if (!NodeAddress.hasPrefix(x, GIT_PREFIX)) {
@@ -85,9 +85,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       return {type: TREE_ENTRY_TYPE, treeHash, name};
     }
     default:
-      // eslint-disable-next-line no-unused-expressions
-      (type: empty);
-      throw fail();
+      throw fail((type: empty));
   }
 }
 
@@ -102,8 +100,6 @@ export function toRaw(x: StructuredAddress): RawAddress {
     case TREE_ENTRY_TYPE:
       return NodeAddress.append(_Prefix.treeEntry, x.treeHash, x.name);
     default:
-      // eslint-disable-next-line no-unused-expressions
-      (x.type: empty);
-      throw new Error(`Unexpected type ${x.type}`);
+      throw new Error(`Unexpected type ${(x.type: empty)}`);
   }
 }

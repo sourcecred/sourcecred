@@ -322,9 +322,9 @@ export class RelationalView {
         case N.REVIEW_TYPE:
           return reviewCommentUrlToId(json.url);
         default:
-          // eslint-disable-next-line no-unused-expressions
-          (parent.type: empty);
-          throw new Error(`Unexpected comment parent type: ${parent.type}`);
+          throw new Error(
+            `Unexpected comment parent type: ${(parent.type: empty)}`
+          );
       }
     })();
     const address: CommentAddress = {type: N.COMMENT_TYPE, id, parent};
@@ -405,9 +405,7 @@ export class RelationalView {
               this._addExtraAuthor(e, userlike);
               break;
             default:
-              // eslint-disable-next-line no-unused-expressions
-              (refType: empty);
-              throw new Error(`Unexpected refType: ${refType}`);
+              throw new Error(`Unexpected refType: ${(refType: empty)}`);
           }
         }
       }
@@ -461,10 +459,8 @@ export class RelationalView {
             entity = this.comment(address);
             break;
           default:
-            // eslint-disable-next-line no-unused-expressions
-            (address.type: empty);
             throw new Error(
-              `Unexpected referrer address type: ${address.type}`
+              `Unexpected referrer address type: ${(address.type: empty)}`
             );
         }
         if (entity == null) {
@@ -506,10 +502,8 @@ export class RelationalView {
             entity = this.userlike(address);
             break;
           default:
-            // eslint-disable-next-line no-unused-expressions
-            (address.type: empty);
             throw new Error(
-              `Unexpected referent address type: ${address.type}`
+              `Unexpected referent address type: ${(address.type: empty)}`
             );
         }
         if (entity == null) {
@@ -758,9 +752,7 @@ export class Comment extends _Entity<CommentEntry> {
         parent = this._view.review(address);
         break;
       default:
-        // eslint-disable-next-line no-unused-expressions
-        (address.type: empty);
-        throw new Error(`Unexpected parent address: ${stringify(address)}`);
+        throw new Error(`Bad parent address type: ${(address.type: empty)}`);
     }
     return assertExists(parent, address);
   }
