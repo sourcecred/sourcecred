@@ -215,8 +215,6 @@ export function toRaw(x: StructuredAddress): RawAddress {
         ...lengthEncode(GithubNode.toRaw(x.referent))
       );
     default:
-      // eslint-disable-next-line no-unused-expressions
-      (x.type: empty);
-      throw new Error(x.type);
+      throw new Error((x.type: empty));
   }
 }

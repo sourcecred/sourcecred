@@ -108,9 +108,7 @@ export function deformat(ast: Node): void {
       case "custom_block":
         break;
       default:
-        // eslint-disable-next-line no-unused-expressions
-        (type: empty);
-        throw new Error("unexpected type: " + type);
+        throw new Error("unexpected type: " + (type: empty));
     }
   }
 }
