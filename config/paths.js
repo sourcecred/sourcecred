@@ -7,31 +7,6 @@ const fs = require("fs");
 const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath);
 
-const envPublicUrl = process.env.PUBLIC_URL;
-
-function ensureSlash(path /*: string */, needsSlash /*: bool */) {
-  const hasSlash = path.endsWith("/");
-  if (hasSlash && !needsSlash) {
-    return path.substr(0, path.length - 1);
-  } else if (!hasSlash && needsSlash) {
-    return `${path}/`;
-  } else {
-    return path;
-  }
-}
-
-const getPublicUrl = () => envPublicUrl || "/";
-
-// We use `PUBLIC_URL` environment variable field to infer "public path" at
-// which the app is served. Defaults to "/"
-// Webpack needs to know it to put the right <script> hrefs into HTML even in
-// single-page apps that may serve index.html for nested URLs like /todos/42.
-// We can't use a relative path in HTML because we don't want to load something
-// like /todos/42/static/js/bundle.7289d.js. We have to know the root.
-function getServedPath() {
-  return ensureSlash(getPublicUrl(), true);
-}
-
 // config after eject: we're in ./config/
 module.exports = {
   root: appDirectory,
@@ -45,8 +20,6 @@ module.exports = {
   appSrc: resolveApp("src"),
   yarnLockFile: resolveApp("yarn.lock"),
   appNodeModules: resolveApp("node_modules"),
-  publicUrl: getPublicUrl(),
-  servedPath: getServedPath(),
 
   backendBuild: resolveApp("bin"),
   // This object should have one key-value pair per entry point. For

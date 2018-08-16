@@ -21,7 +21,7 @@ const getClientEnvironment = require("./env");
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
 // Get environment variables to inject into our app.
-const env = getClientEnvironment(/* publicUrl: */ "");
+const env = getClientEnvironment();
 
 function makeConfig(mode /*: "production" | "development" */) {
   return {
