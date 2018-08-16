@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Introduce a simplified Git plugin that only tracks commits (#685)
 - Rename cred explorer table columns (#680)
 - Display version string in the app's footer
 - Support hosting SourceCred instances at arbitrary gateways, not just

@@ -10,7 +10,7 @@ export function pluginNames(): PluginName[] {
 }
 
 export function defaultPlugins(): PluginName[] {
-  return ["github"];
+  return ["github", "git"];
 }
 
 function defaultStorageDirectory() {
