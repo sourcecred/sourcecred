@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/git/createMinimalGraph createMinimalGraph processes a simple repository 1`] = `
+Array [
+  Object {
+    "type": "sourcecred/graph",
+    "version": "0.4.0",
+  },
+  Object {
+    "edges": Array [
+      Object {
+        "address": Array [
+          "sourcecred",
+          "git",
+          "HAS_PARENT",
+          "2",
+          "COMMIT",
+          "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+          "2",
+          "COMMIT",
+          "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+        ],
+        "dstIndex": 1,
+        "srcIndex": 0,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "git",
+          "HAS_PARENT",
+          "2",
+          "COMMIT",
+          "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+          "2",
+          "COMMIT",
+          "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
+        ],
+        "dstIndex": 6,
+        "srcIndex": 1,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "git",
+          "HAS_PARENT",
+          "2",
+          "COMMIT",
+          "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
+          "2",
+          "COMMIT",
+          "c08ee3a4edea384d5291ffcbf06724a13ed72325",
+        ],
+        "dstIndex": 3,
+        "srcIndex": 2,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "git",
+          "HAS_PARENT",
+          "2",
+          "COMMIT",
+          "c08ee3a4edea384d5291ffcbf06724a13ed72325",
+          "2",
+          "COMMIT",
+          "c2b51945e7457546912a8ce158ed9d294558d294",
+        ],
+        "dstIndex": 4,
+        "srcIndex": 3,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "git",
+          "HAS_PARENT",
+          "2",
+          "COMMIT",
+          "d160cca97611e9dfed642522ad44408d0292e8ea",
+          "2",
+          "COMMIT",
+          "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
+        ],
+        "dstIndex": 2,
+        "srcIndex": 5,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "git",
+          "HAS_PARENT",
+          "2",
+          "COMMIT",
+          "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
+          "2",
+          "COMMIT",
+          "d160cca97611e9dfed642522ad44408d0292e8ea",
+        ],
+        "dstIndex": 5,
+        "srcIndex": 6,
+      },
+    ],
+    "nodes": Array [
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
+        "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+      ],
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
+        "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+      ],
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
+        "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
+      ],
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
+        "c08ee3a4edea384d5291ffcbf06724a13ed72325",
+      ],
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
+        "c2b51945e7457546912a8ce158ed9d294558d294",
+      ],
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
+        "d160cca97611e9dfed642522ad44408d0292e8ea",
+      ],
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
+        "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
+      ],
+    ],
+  },
+]
+`;
