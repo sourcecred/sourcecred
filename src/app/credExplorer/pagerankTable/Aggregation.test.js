@@ -109,9 +109,9 @@ describe("app/credExplorer/pagerankTable/Aggregation", () => {
         const {row} = await setup();
         expect(row.props().showPadding).toBe(false);
       });
-      it("with the aggregation score", async () => {
+      it("with the aggregation score as its cred", async () => {
         const {row, aggregation} = await setup();
-        expect(row.props().score).toBe(aggregation.summary.score);
+        expect(row.props().cred).toBe(aggregation.summary.score);
       });
       it("with the aggregation's contribution proportion", async () => {
         const {row, target, aggregation, sharedProps} = await setup();

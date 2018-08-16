@@ -113,10 +113,10 @@ describe("app/credExplorer/pagerankTable/Node", () => {
         const {row: row1} = await setup({showPadding: false});
         expect(row1.props().showPadding).toBe(false);
       });
-      it("with the node's score", async () => {
+      it("with the node's score as its cred", async () => {
         const {row, node, sharedProps} = await setup();
         const score = NullUtil.get(sharedProps.pnd.get(node)).score;
-        expect(row.props().score).toBe(score);
+        expect(row.props().cred).toBe(score);
       });
       it("with no connectionProportion", async () => {
         const {row} = await setup();

@@ -72,7 +72,7 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
         description={connectionView}
         connectionProportion={connectionProportion}
         showPadding={false}
-        score={connectionScore}
+        cred={connectionScore}
       >
         <NodeRow
           depth={depth + 1}

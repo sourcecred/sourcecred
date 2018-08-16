@@ -6,7 +6,7 @@ import {StaticAdapterSet, DynamicAdapterSet} from "../../adapters/adapterSet";
 import type {DynamicPluginAdapter} from "../../adapters/pluginAdapter";
 import {pagerank} from "../../../core/attribution/pagerank";
 
-export const COLUMNS = () => ["Description", "Connection", "Score"];
+export const COLUMNS = () => ["Description", "", "Cred"];
 
 export async function example() {
   const graph = new Graph();
