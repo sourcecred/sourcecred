@@ -11,6 +11,7 @@ import RepositorySelect, {
   type Status,
   REPO_KEY,
 } from "./RepositorySelect";
+import {Assets} from "../assets";
 
 import {toJSON, type RepoRegistry, REPO_REGISTRY_API} from "./repoRegistry";
 import {makeRepo} from "../../core/repo";
@@ -106,14 +107,15 @@ describe("app/credExplorer/RepositorySelect", () => {
   });
 
   describe("loadStatus", () => {
+    const assets = new Assets("/my/gateway/");
     function expectLoadValidStatus(
       localStore,
       expectedAvailableRepos,
       expectedSelectedRepo
     ) {
-      const result = loadStatus(localStore);
+      const result = loadStatus(assets, localStore);
       expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith(REPO_REGISTRY_API);
+      expect(fetch).toHaveBeenCalledWith("/my/gateway" + REPO_REGISTRY_API);
       expect.assertions(7);
       return result.then((status) => {
         expect(status.type).toBe("VALID");
@@ -142,7 +144,7 @@ describe("app/credExplorer/RepositorySelect", () => {
     it("returns FAILURE on invalid fetch response", () => {
       fetch.mockResponseOnce(JSON.stringify(["hello"]));
       expect.assertions(4);
-      return loadStatus(testLocalStore()).then((status) => {
+      return loadStatus(assets, testLocalStore()).then((status) => {
         expect(status).toEqual({type: "FAILURE"});
         expect(console.error).toHaveBeenCalledTimes(1);
         // $ExpectFlowError
@@ -152,7 +154,7 @@ describe("app/credExplorer/RepositorySelect", () => {
     it("returns FAILURE on fetch failure", () => {
       fetch.mockReject(new Error("some failure"));
       expect.assertions(4);
-      return loadStatus(testLocalStore()).then((status) => {
+      return loadStatus(assets, testLocalStore()).then((status) => {
         expect(status).toEqual({type: "FAILURE"});
         expect(console.error).toHaveBeenCalledTimes(1);
         // $ExpectFlowError
@@ -162,7 +164,7 @@ describe("app/credExplorer/RepositorySelect", () => {
     it("returns NO_REPOS on fetch 404", () => {
       fetch.mockResponseOnce("irrelevant", {status: 404});
       expect.assertions(3);
-      return loadStatus(testLocalStore()).then((status) => {
+      return loadStatus(assets, testLocalStore()).then((status) => {
         expect(status).toEqual({type: "NO_REPOS"});
       });
     });
@@ -264,10 +266,31 @@ describe("app/credExplorer/RepositorySelect", () => {
   });
 
   describe("RepositorySelect", () => {
+    const assets = new Assets("/my/gateway/");
+
+    it("calls `loadStatus` with the proper assets", () => {
+      mockRegistry([makeRepo("irrelevant", "unused")]);
+      shallow(
+        <RepositorySelect
+          assets={assets}
+          onChange={jest.fn()}
+          localStore={testLocalStore()}
+        />
+      );
+      // A bit of overlap with tests for `loadStatus` directly---it'd be
+      // nicer to spy on `loadStatus`, but that's at module top level,
+      // so `RepositorySelect` closes over it directly.
+      expect(fetch).toHaveBeenCalledWith("/my/gateway" + REPO_REGISTRY_API);
+    });
+
     it("initially renders a LocalStoreRepositorySelect with status LOADING", () => {
       mockRegistry([makeRepo("irrelevant", "unused")]);
       const e = shallow(
-        <RepositorySelect onChange={jest.fn()} localStore={testLocalStore()} />
+        <RepositorySelect
+          assets={assets}
+          onChange={jest.fn()}
+          localStore={testLocalStore()}
+        />
       );
       const child = e.find(LocalStoreRepositorySelect);
       const status = child.props().status;
@@ -291,7 +314,11 @@ describe("app/credExplorer/RepositorySelect", () => {
       const selectedRepo = makeRepo("foo", "bar");
       mockRegistry([selectedRepo]);
       const e = shallow(
-        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+        <RepositorySelect
+          assets={assets}
+          onChange={onChange}
+          localStore={testLocalStore()}
+        />
       );
       await waitForUpdate(e);
       const childStatus = e.props().status;
@@ -308,7 +335,11 @@ describe("app/credExplorer/RepositorySelect", () => {
       const repo = makeRepo("foo", "bar");
       mockRegistry([repo]);
       const e = shallow(
-        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+        <RepositorySelect
+          assets={assets}
+          onChange={onChange}
+          localStore={testLocalStore()}
+        />
       );
       await waitForUpdate(e);
       expect(onChange).toHaveBeenCalledTimes(1);
@@ -320,7 +351,11 @@ describe("app/credExplorer/RepositorySelect", () => {
       fetch.mockReject(new Error("something bad"));
 
       const e = shallow(
-        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+        <RepositorySelect
+          assets={assets}
+          onChange={onChange}
+          localStore={testLocalStore()}
+        />
       );
       await waitForUpdate(e);
       expect(onChange).toHaveBeenCalledTimes(0);
@@ -334,7 +369,11 @@ describe("app/credExplorer/RepositorySelect", () => {
       const repo = makeRepo("foo", "bar");
       mockRegistry([repo]);
       const e = mount(
-        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+        <RepositorySelect
+          assets={assets}
+          onChange={onChange}
+          localStore={testLocalStore()}
+        />
       );
       const child = e.find(PureRepositorySelect);
       child.props().onChange(repo);
@@ -347,7 +386,11 @@ describe("app/credExplorer/RepositorySelect", () => {
       const repos = [makeRepo("foo", "bar"), makeRepo("z", "a")];
       mockRegistry(repos);
       const e = mount(
-        <RepositorySelect onChange={onChange} localStore={testLocalStore()} />
+        <RepositorySelect
+          assets={assets}
+          onChange={onChange}
+          localStore={testLocalStore()}
+        />
       );
       await waitForUpdate(e);
       const child = e.find(PureRepositorySelect);

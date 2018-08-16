@@ -84,6 +84,7 @@ export function createApp(
         <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
           <div style={{marginBottom: 10}}>
             <RepositorySelect
+              assets={this.props.assets}
               localStore={localStore}
               onChange={(repo) => this.stateTransitionMachine.setRepo(repo)}
             />

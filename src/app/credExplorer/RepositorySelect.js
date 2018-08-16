@@ -6,6 +6,7 @@ import deepEqual from "lodash.isequal";
 
 import * as NullUtil from "../../util/null";
 import type {LocalStore} from "../localStore";
+import type {Assets} from "../assets";
 
 import {fromJSON, REPO_REGISTRY_API} from "./repoRegistry";
 import {type Repo, stringToRepo, repoToString} from "../../core/repo";
@@ -22,6 +23,7 @@ export type Status =
   | {|+type: "FAILURE"|};
 
 type Props = {|
+  +assets: Assets,
   +onChange: (x: Repo) => void,
   +localStore: LocalStore,
 |};
@@ -35,7 +37,8 @@ export default class RepositorySelect extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    loadStatus(this.props.localStore).then((status) => {
+    const {assets, localStore} = this.props;
+    loadStatus(assets, localStore).then((status) => {
       this.setState({status});
       if (status.type === "VALID") {
         this.props.onChange(status.selectedRepo);
@@ -67,9 +70,12 @@ export default class RepositorySelect extends React.Component<Props, State> {
   }
 }
 
-export async function loadStatus(localStore: LocalStore): Promise<Status> {
+export async function loadStatus(
+  assets: Assets,
+  localStore: LocalStore
+): Promise<Status> {
   try {
-    const response = await fetch(REPO_REGISTRY_API);
+    const response = await fetch(assets.resolve(REPO_REGISTRY_API));
     if (response.status === 404) {
       return {type: "NO_REPOS"};
     }
