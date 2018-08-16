@@ -1,11 +1,16 @@
 // @flow
 
-import {type Environment, parseEnvironment, parseGitState} from "./version";
+import {
+  type Environment,
+  type VersionInfo,
+  formatFull,
+  formatShort,
+  parseEnvironment,
+  parseGitState,
+} from "./version";
 
 describe("app/version", () => {
-  // Like `VersionInfo`, but with some extra properties that will
-  // shortly be added to that type.
-  const version = () => ({
+  const version = (): VersionInfo => ({
     major: 3,
     minor: 13,
     patch: 37,
@@ -104,6 +109,33 @@ describe("app/version", () => {
     });
     it("fails given a non-environment string", () => {
       expect(() => parseEnvironment("wat")).toThrow('environment: "wat"');
+    });
+  });
+
+  describe("formatShort", () => {
+    it("includes the major, minor, and patch versions", () => {
+      expect(formatShort(version())).toContain("3.13.37");
+    });
+    it("does not include the Git hash", () => {
+      expect(formatShort(version())).not.toContain("d0e1");
+    });
+    it("does not include the Node environment", () => {
+      expect(formatShort(version())).not.toContain("-test");
+    });
+  });
+
+  describe("formatFull", () => {
+    it("includes the major, minor, and patch versions", () => {
+      expect(formatFull(version())).toContain("3.13.37");
+    });
+    it("includes the Git hash and timestamp", () => {
+      expect(formatFull(version())).toContain("d0e1a2d3b4e5-20010203-0405");
+    });
+    it("includes the dirty state", () => {
+      expect(formatFull(version())).toContain("-dirty");
+    });
+    it("includes the Node environment", () => {
+      expect(formatFull(version())).toContain("-test");
     });
   });
 });

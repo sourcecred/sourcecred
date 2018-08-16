@@ -1,7 +1,12 @@
 // @flow
+const {spawnSync, execFileSync} = require("child_process");
 const fs = require("fs");
+const stringify = require("json-stable-stringify");
 const path = require("path");
+
 const paths = require("./paths");
+
+/*:: import type {GitState} from "../src/app/version"; */
 
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve("./paths")];
@@ -55,11 +60,69 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
   .map((folder) => path.resolve(appDirectory, folder))
   .join(path.delimiter);
 
+// Get the state of the SourceCred Git repository. This requires that
+// Git be installed. If this fails for you, please install Git.
+//
+// If the dependency on Git becomes a problem, we can consider making
+// this optional. However, note that this computation is performed at
+// build time, so end users of SourceCred as a library or application
+// should not need this dependency.
+function getGitState() /*: GitState */ {
+  const env = {
+    LANG: "C",
+    LC_ALL: "C",
+    TZ: "UTC",
+    GIT_CONFIG_NOSYSTEM: "1",
+    GIT_ATTR_NOSYSTEM: "1",
+  };
+
+  const diffIndex = spawnSync(
+    "git",
+    ["-C", __dirname, "diff-index", "--quiet", "HEAD", "--"],
+    {env}
+  );
+  const dirty = diffIndex.status !== 0;
+  if (diffIndex.status !== 0 && diffIndex.status !== 1) {
+    throw new Error(diffIndex.status + ": " + diffIndex.stderr.toString());
+  }
+
+  const commitHash = execFileSync(
+    "git",
+    ["-C", __dirname, "rev-parse", "--short=12", "--verify", "HEAD"],
+    {env}
+  )
+    .toString()
+    .trim();
+
+  const commitTimestamp = execFileSync(
+    "git",
+    [
+      "-C",
+      __dirname,
+      "show",
+      "--no-patch",
+      "--format=%cd",
+      "--date=format:%Y%m%d-%H%M",
+      commitHash,
+    ],
+    {env}
+  )
+    .toString()
+    .trim();
+
+  return {commitHash, commitTimestamp, dirty};
+}
+
+const SOURCECRED_GIT_STATE = stringify(getGitState());
+process.env.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
+
 function getClientEnvironment() {
   const raw = {};
   // Useful for determining whether we’re running in production mode.
   // Most importantly, it switches React into the correct mode.
   raw.NODE_ENV = process.env.NODE_ENV || "development";
+  // Used by `src/app/version.js`.
+  raw.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
 
   // Stringify all values so we can feed into Webpack's DefinePlugin.
   const stringified = {"process.env": {}};
