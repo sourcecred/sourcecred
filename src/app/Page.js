@@ -9,7 +9,7 @@ import GithubLogo from "./GithubLogo";
 import TwitterLogo from "./TwitterLogo";
 import {routeData} from "./routeData";
 import * as NullUtil from "../util/null";
-import {VERSION} from "./version";
+import {VERSION_SHORT, VERSION_FULL} from "./version";
 
 export default class Page extends React.Component<{|
   +assets: Assets,
@@ -71,7 +71,9 @@ export default class Page extends React.Component<{|
         </div>
         <footer className={css(style.footer)}>
           <div className={css(style.footerWrapper)}>
-            <span className={css(style.footerText)}>{VERSION}</span>
+            <span className={css(style.footerText)}>
+              ({VERSION_FULL}) <strong>{VERSION_SHORT}</strong>
+            </span>
           </div>
         </footer>
       </React.Fragment>

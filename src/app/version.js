@@ -4,6 +4,8 @@ export type VersionInfo = {|
   +major: number,
   +minor: number,
   +patch: number,
+  +gitState: GitState,
+  +environment: Environment,
 |};
 export type GitState = {|
   +commitHash: string,
@@ -38,6 +40,7 @@ export function parseGitState(raw: ?string): GitState {
   }
   return gitState;
 }
+const gitState = parseGitState(process.env.SOURCECRED_GIT_STATE);
 
 /**
  * Parse the given string as an `Environment`, throwing an error if it
@@ -51,15 +54,30 @@ export function parseEnvironment(raw: ?string): Environment {
   }
   return raw;
 }
+const environment = parseEnvironment(process.env.NODE_ENV);
 
-export const VERSION_INFO = Object.freeze({
+export const VERSION_INFO: VersionInfo = Object.freeze({
   major: 0,
   minor: 0,
   patch: 0,
+  gitState,
+  environment,
 });
 
-export function format(info: VersionInfo): string {
+export function formatShort(info: VersionInfo): string {
   return `v${info.major}.${info.minor}.${info.patch}`;
 }
 
-export const VERSION = format(VERSION_INFO);
+export function formatFull(info: VersionInfo): string {
+  const parts = [
+    `v${info.major}.${info.minor}.${info.patch}`,
+    info.gitState.commitHash,
+    info.gitState.commitTimestamp,
+    info.gitState.dirty ? "dirty" : "clean",
+    info.environment,
+  ];
+  return parts.join("-");
+}
+
+export const VERSION_SHORT: string = formatShort(VERSION_INFO);
+export const VERSION_FULL: string = formatFull(VERSION_INFO);
