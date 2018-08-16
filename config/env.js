@@ -55,17 +55,8 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
   .map((folder) => path.resolve(appDirectory, folder))
   .join(path.delimiter);
 
-// Grab NODE_ENV and REACT_APP_* environment variables and prepare them to be
-// injected into the application via DefinePlugin in Webpack configuration.
-const REACT_APP = /^REACT_APP_/i;
-
 function getClientEnvironment() {
   const raw = {};
-  for (const key of Object.keys(process.env)) {
-    if (REACT_APP.test(key)) {
-      raw[key] = process.env[key];
-    }
-  }
   // Useful for determining whether we’re running in production mode.
   // Most importantly, it switches React into the correct mode.
   raw.NODE_ENV = process.env.NODE_ENV || "development";
