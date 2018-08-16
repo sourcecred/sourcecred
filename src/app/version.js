@@ -5,6 +5,52 @@ export type VersionInfo = {|
   +minor: number,
   +patch: number,
 |};
+export type GitState = {|
+  +commitHash: string,
+  +commitTimestamp: string, // YYYYmmdd-HHMM, in commit-local time
+  +dirty: boolean, // does the worktree have unstaged/uncommitted changes?
+|};
+export type Environment = "development" | "production" | "test";
+
+/**
+ * Parse the given string as a `GitState`, throwing an error if it is
+ * not valid. The argument should be the result of calling
+ * `JSON.stringify` with a valid `GitState`. Thus, this is a checked
+ * version of `JSON.parse`.
+ */
+export function parseGitState(raw: ?string): GitState {
+  if (typeof raw !== "string") {
+    throw new Error("gitState: not a string: " + String(raw));
+  }
+  const parsed: mixed = Object.freeze(JSON.parse(raw));
+  if (parsed == null || typeof parsed !== "object") {
+    throw new Error("gitState: not a JSON object: " + String(parsed));
+  }
+  // This intermediate variable helps out Flow's inference...
+  const gitState: Object = parsed;
+  if (
+    typeof gitState.commitHash !== "string" ||
+    typeof gitState.commitTimestamp !== "string" ||
+    typeof gitState.dirty !== "boolean" ||
+    Object.keys(gitState).length !== 3
+  ) {
+    throw new Error("gitState: bad shape: " + JSON.stringify(gitState));
+  }
+  return gitState;
+}
+
+/**
+ * Parse the given string as an `Environment`, throwing an error if it
+ * is not valid. The input should be a valid `Environment`.
+ */
+export function parseEnvironment(raw: ?string): Environment {
+  if (raw !== "development" && raw !== "production" && raw !== "test") {
+    throw new Error(
+      "environment: " + (raw == null ? String(raw) : JSON.stringify(raw))
+    );
+  }
+  return raw;
+}
 
 export const VERSION_INFO = Object.freeze({
   major: 0,
