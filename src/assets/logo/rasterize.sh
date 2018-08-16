@@ -3,7 +3,7 @@ set -eu
 
 main() {
     cd "$(dirname "$0")"
-    for size in 1024 512 256 128 32 64 16; do
+    for size in 1024 512 256 128 64 32 16; do
         rasterize "${size}"
     done
 }
