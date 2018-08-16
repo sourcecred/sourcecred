@@ -4,6 +4,7 @@ import deepEqual from "lodash.isequal";
 
 import * as NullUtil from "../../util/null";
 import {Graph} from "../../core/graph";
+import type {Assets} from "../../app/assets";
 import type {Repo} from "../../core/repo";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {
@@ -78,7 +79,7 @@ export function initialState(): AppState {
 export interface StateTransitionMachineInterface {
   +setRepo: (Repo) => void;
   +setEdgeEvaluator: (EdgeEvaluator) => void;
-  +loadGraph: () => Promise<void>;
+  +loadGraph: (Assets) => Promise<void>;
   +runPagerank: () => Promise<void>;
 }
 /* In production, instantiate via createStateTransitionMachine; the constructor
@@ -88,7 +89,10 @@ export interface StateTransitionMachineInterface {
 export class StateTransitionMachine implements StateTransitionMachineInterface {
   getState: () => AppState;
   setState: (AppState) => void;
-  loadGraphWithAdapters: (repo: Repo) => Promise<GraphWithAdapters>;
+  loadGraphWithAdapters: (
+    assets: Assets,
+    repo: Repo
+  ) => Promise<GraphWithAdapters>;
   pagerank: (
     Graph,
     EdgeEvaluator,
@@ -98,7 +102,10 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   constructor(
     getState: () => AppState,
     setState: (AppState) => void,
-    loadGraphWithAdapters: (repo: Repo) => Promise<GraphWithAdapters>,
+    loadGraphWithAdapters: (
+      assets: Assets,
+      repo: Repo
+    ) => Promise<GraphWithAdapters>,
     pagerank: (
       Graph,
       EdgeEvaluator,
@@ -160,7 +167,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     }
   }
 
-  async loadGraph() {
+  async loadGraph(assets: Assets) {
     const state = this.getState();
     if (
       state.type !== "INITIALIZED" ||
@@ -176,7 +183,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     this.setState(loadingState);
     let newState: ?AppState;
     try {
-      const graphWithAdapters = await this.loadGraphWithAdapters(repo);
+      const graphWithAdapters = await this.loadGraphWithAdapters(assets, repo);
       newState = {
         ...state,
         substate: {
@@ -250,8 +257,9 @@ export type GraphWithAdapters = {|
   +adapters: DynamicAdapterSet,
 |};
 export async function loadGraphWithAdapters(
+  assets: Assets,
   repo: Repo
 ): Promise<GraphWithAdapters> {
-  const adapters = await defaultStaticAdapters().load(repo);
+  const adapters = await defaultStaticAdapters().load(assets, repo);
   return {graph: adapters.graph(), adapters};
 }

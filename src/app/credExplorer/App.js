@@ -91,7 +91,9 @@ export function createApp(
           </div>
           <button
             disabled={subType !== "READY_TO_LOAD_GRAPH"}
-            onClick={() => this.stateTransitionMachine.loadGraph()}
+            onClick={() =>
+              this.stateTransitionMachine.loadGraph(this.props.assets)
+            }
           >
             Load graph
           </button>

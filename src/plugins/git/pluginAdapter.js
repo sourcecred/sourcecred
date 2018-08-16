@@ -7,6 +7,7 @@ import {Graph} from "../../core/graph";
 import * as N from "./nodes";
 import * as E from "./edges";
 import {description} from "./render";
+import type {Assets} from "../../app/assets";
 import type {Repo} from "../../core/repo";
 
 export class StaticPluginAdapter implements IStaticPluginAdapter {
@@ -76,8 +77,10 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
       },
     ];
   }
-  async load(repo: Repo): Promise<IDynamicPluginAdapter> {
-    const url = `/api/v1/data/data/${repo.owner}/${repo.name}/git/graph.json`;
+  async load(assets: Assets, repo: Repo): Promise<IDynamicPluginAdapter> {
+    const url = assets.resolve(
+      `/api/v1/data/data/${repo.owner}/${repo.name}/git/graph.json`
+    );
     const response = await fetch(url);
     if (!response.ok) {
       return Promise.reject(response);

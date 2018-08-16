@@ -9,6 +9,7 @@ import {
 import type {DynamicPluginAdapter} from "./pluginAdapter";
 import {StaticAdapterSet} from "./adapterSet";
 import {FallbackStaticAdapter, FALLBACK_NAME} from "./fallbackAdapter";
+import {Assets} from "../assets";
 import {makeRepo, type Repo} from "../../core/repo";
 
 describe("app/adapters/adapterSet", () => {
@@ -57,8 +58,10 @@ describe("app/adapters/adapterSet", () => {
       ];
     }
 
-    load(_unused_repo: Repo) {
-      return this.loadingMock().then(() => new TestDynamicPluginAdapter());
+    load(assets: Assets, repo: Repo) {
+      return this.loadingMock(assets, repo).then(
+        () => new TestDynamicPluginAdapter()
+      );
     }
   }
 
@@ -159,7 +162,14 @@ describe("app/adapters/adapterSet", () => {
     it("loads a dynamicAdapterSet", async () => {
       const {x, sas} = example();
       x.loadingMock.mockResolvedValue();
-      const das = await sas.load(makeRepo("foo", "bar"));
+      expect(x.loadingMock).toHaveBeenCalledTimes(0);
+      const assets = new Assets("/my/gateway/");
+      const repo = makeRepo("foo", "bar");
+      const das = await sas.load(assets, repo);
+      expect(x.loadingMock).toHaveBeenCalledTimes(1);
+      expect(x.loadingMock.mock.calls[0]).toHaveLength(2);
+      expect(x.loadingMock.mock.calls[0][0]).toBe(assets);
+      expect(x.loadingMock.mock.calls[0][1]).toBe(repo);
       expect(das).toEqual(expect.anything());
     });
   });
@@ -169,7 +179,10 @@ describe("app/adapters/adapterSet", () => {
       const x = new TestStaticPluginAdapter();
       const sas = new StaticAdapterSet([x]);
       x.loadingMock.mockResolvedValue();
-      const das = await sas.load(makeRepo("foo", "bar"));
+      const das = await sas.load(
+        new Assets("/my/gateway/"),
+        makeRepo("foo", "bar")
+      );
       return {x, sas, das};
     }
     it("allows retrieval of the original StaticAdapterSet", async () => {
