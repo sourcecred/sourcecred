@@ -66,7 +66,7 @@ export class AggregationRow extends React.PureComponent<AggregationRowProps> {
         indent={1}
         showPadding={false}
         connectionProportion={connectionProportion}
-        score={score}
+        cred={score}
         description={<AggregationView aggregation={aggregation} />}
       >
         <ConnectionRowList

@@ -15,7 +15,7 @@ describe("app/credExplorer/pagerankTable/TableRow", () => {
         indent={1}
         description={<span data-test-description={true} />}
         connectionProportion={0.5}
-        score={133.7}
+        cred={133.7}
         children={<div data-test-children={true} />}
         showPadding={false}
       />
@@ -30,7 +30,7 @@ describe("app/credExplorer/pagerankTable/TableRow", () => {
           showPadding={false}
           description={<span data-test-description={true} />}
           connectionProportion={0.5}
-          score={133.7}
+          cred={133.7}
           children={<div data-test-children={true} />}
         />
       );
@@ -48,7 +48,7 @@ describe("app/credExplorer/pagerankTable/TableRow", () => {
           showPadding={false}
           description={<span data-test-description={true} />}
           connectionProportion={0.5}
-          score={133.7}
+          cred={133.7}
           children={<div data-test-children={true} />}
         />
       );
@@ -88,7 +88,7 @@ describe("app/credExplorer/pagerankTable/TableRow", () => {
     expect(el.find("td")).toHaveLength(COLUMNS().length);
   });
   it("displays formatted connectionPercentage in the correct column", () => {
-    const index = COLUMNS().indexOf("Connection");
+    const index = COLUMNS().indexOf("");
     expect(index).not.toEqual(-1);
     const td = example()
       .find("td")
@@ -96,15 +96,15 @@ describe("app/credExplorer/pagerankTable/TableRow", () => {
     expect(td.text()).toEqual("50.00%");
   });
   it("displays empty column when connectionProportion not set", () => {
-    const index = COLUMNS().indexOf("Connection");
+    const index = COLUMNS().indexOf("");
     expect(index).not.toEqual(-1);
     const el = example();
     el.setProps({connectionProportion: null});
     const td = el.find("td").at(index);
     expect(td.text()).toEqual("");
   });
-  it("displays formatted score in the correct column", () => {
-    const index = COLUMNS().indexOf("Score");
+  it("displays formatted cred in the correct column", () => {
+    const index = COLUMNS().indexOf("Cred");
     expect(index).not.toEqual(-1);
     const td = example()
       .find("td")
@@ -131,7 +131,7 @@ describe("app/credExplorer/pagerankTable/TableRow", () => {
           indent={1}
           description={<span data-test-description={true} />}
           connectionProportion={0.5}
-          score={133.7}
+          cred={133.7}
           children={<div data-test-children={true} />}
           showPadding={true}
         />

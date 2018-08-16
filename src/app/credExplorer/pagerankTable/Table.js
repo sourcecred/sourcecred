@@ -116,8 +116,8 @@ export class PagerankTable extends React.PureComponent<
         <thead>
           <tr>
             <th style={{textAlign: "left"}}>Description</th>
-            <th style={{textAlign: "right"}}>Connection</th>
-            <th style={{textAlign: "right"}}>Score</th>
+            <th style={{textAlign: "right"}} />
+            <th style={{textAlign: "right"}}>Cred</th>
           </tr>
         </thead>
         <tbody>

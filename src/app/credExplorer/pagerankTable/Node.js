@@ -58,7 +58,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
         showPadding={showPadding}
         description={description}
         connectionProportion={null}
-        score={score}
+        cred={score}
       >
         <AggregationRowList
           depth={depth}

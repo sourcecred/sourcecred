@@ -11,8 +11,8 @@ type TableRowProps = {|
   +description: ReactNode,
   // What proportion should be formatted in the connection column
   +connectionProportion: ?number,
-  // The score to format and display
-  +score: number,
+  // The cred amount to format and display
+  +cred: number,
   // Children to show when the row is expanded
   +children: ReactNode,
   +showPadding: boolean,
@@ -21,8 +21,8 @@ type TableRowState = {|
   expanded: boolean,
 |};
 
-export function scoreDisplay(score: number) {
-  return score.toFixed(2);
+export function credDisplay(cred: number) {
+  return cred.toFixed(2);
 }
 
 export class TableRow extends React.PureComponent<
@@ -39,7 +39,7 @@ export class TableRow extends React.PureComponent<
       indent,
       description,
       connectionProportion,
-      score,
+      cred,
       children,
       showPadding,
     } = this.props;
@@ -71,7 +71,7 @@ export class TableRow extends React.PureComponent<
           </td>
           <td style={{textAlign: "right"}}>{percent}</td>
           <td style={{textAlign: "right"}}>
-            <span style={{marginRight: 5}}>{scoreDisplay(score)}</span>
+            <span style={{marginRight: 5}}>{credDisplay(cred)}</span>
           </td>
         </tr>
         {expanded && children}
