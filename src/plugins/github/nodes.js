@@ -261,15 +261,11 @@ export function toRaw(x: StructuredAddress): RawAddress {
             x.id
           );
         default:
-          // eslint-disable-next-line no-unused-expressions
-          (x.parent.type: empty);
-          throw new Error(`Bad comment parent type: ${x.parent.type}`);
+          throw new Error(`Bad comment parent type: ${(x.parent.type: empty)}`);
       }
     case USERLIKE_TYPE:
       return NodeAddress.append(_Prefix.userlike, x.login);
     default:
-      // eslint-disable-next-line no-unused-expressions
-      (x.type: empty);
-      throw new Error(`Unexpected type ${x.type}`);
+      throw new Error(`Unexpected type ${(x.type: empty)}`);
   }
 }

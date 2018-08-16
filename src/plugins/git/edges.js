@@ -237,8 +237,6 @@ export function toRaw(x: StructuredAddress): RawAddress {
         ...lengthEncode(GitNode.toRaw(x.treeEntry))
       );
     default:
-      // eslint-disable-next-line no-unused-expressions
-      (x.type: empty);
-      throw new Error(x.type);
+      throw new Error((x.type: empty));
   }
 }

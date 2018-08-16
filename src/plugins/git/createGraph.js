@@ -71,9 +71,7 @@ class GraphCreator {
           target = {type: GN.COMMIT_TYPE, hash: entry.hash};
           break;
         default:
-          // eslint-disable-next-line no-unused-expressions
-          (entry.type: empty);
-          throw new Error(String(entry.type));
+          throw new Error(String((entry.type: empty)));
       }
       this.graph.addNode(GN.toRaw(target));
       this.graph.addEdge(GE.createEdge.hasContents(entryNode, target));

@@ -102,8 +102,6 @@ export function toRaw(x: StructuredAddress): RawAddress {
     case TREE_ENTRY_TYPE:
       return NodeAddress.append(_Prefix.treeEntry, x.treeHash, x.name);
     default:
-      // eslint-disable-next-line no-unused-expressions
-      (x.type: empty);
-      throw new Error(`Unexpected type ${x.type}`);
+      throw new Error(`Unexpected type ${(x.type: empty)}`);
   }
 }
