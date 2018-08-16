@@ -60,26 +60,21 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
 const REACT_APP = /^REACT_APP_/i;
 
 function getClientEnvironment() {
-  const raw = Object.keys(process.env)
-    .filter((key) => REACT_APP.test(key))
-    .reduce(
-      (env, key) => {
-        env[key] = process.env[key];
-        return env;
-      },
-      {
-        // Useful for determining whether we’re running in production mode.
-        // Most importantly, it switches React into the correct mode.
-        NODE_ENV: process.env.NODE_ENV || "development",
-      }
-    );
-  // Stringify all values so we can feed into Webpack DefinePlugin
-  const stringified = {
-    "process.env": Object.keys(raw).reduce((env, key) => {
-      env[key] = JSON.stringify(raw[key]);
-      return env;
-    }, {}),
-  };
+  const raw = {};
+  for (const key of Object.keys(process.env)) {
+    if (REACT_APP.test(key)) {
+      raw[key] = process.env[key];
+    }
+  }
+  // Useful for determining whether we’re running in production mode.
+  // Most importantly, it switches React into the correct mode.
+  raw.NODE_ENV = process.env.NODE_ENV || "development";
+
+  // Stringify all values so we can feed into Webpack's DefinePlugin.
+  const stringified = {"process.env": {}};
+  for (const key of Object.keys(raw)) {
+    stringified["process.env"][key] = JSON.stringify(raw[key]);
+  }
 
   return {raw, stringified};
 }
