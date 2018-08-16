@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/deprecated-git/nodes snapshots as expected: blob 1`] = `
+Object {
+  "address": Array [
+    "sourcecred",
+    "git",
+    "BLOB",
+    "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+  ],
+  "structured": Object {
+    "hash": "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+    "type": "BLOB",
+  },
+}
+`;
+
+exports[`plugins/deprecated-git/nodes snapshots as expected: commit 1`] = `
+Object {
+  "address": Array [
+    "sourcecred",
+    "git",
+    "COMMIT",
+    "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+  ],
+  "structured": Object {
+    "hash": "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+    "type": "COMMIT",
+  },
+}
+`;
+
+exports[`plugins/deprecated-git/nodes snapshots as expected: tree 1`] = `
+Object {
+  "address": Array [
+    "sourcecred",
+    "git",
+    "TREE",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+  ],
+  "structured": Object {
+    "hash": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+    "type": "TREE",
+  },
+}
+`;
+
+exports[`plugins/deprecated-git/nodes snapshots as expected: treeEntry 1`] = `
+Object {
+  "address": Array [
+    "sourcecred",
+    "git",
+    "TREE_ENTRY",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+    "science.txt",
+  ],
+  "structured": Object {
+    "name": "science.txt",
+    "treeHash": "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+    "type": "TREE_ENTRY",
+  },
+}
+`;

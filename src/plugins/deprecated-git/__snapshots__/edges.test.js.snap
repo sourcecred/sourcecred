@@ -1,0 +1,140 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/deprecated-git/edges createEdge works for "becomes" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "git",
+    "BECOMES",
+    "3",
+    "TREE_ENTRY",
+    "de07d6d2b2977734cf39d2b9aff4135eefce3eb7",
+    "old_science.txt",
+    "3",
+    "TREE_ENTRY",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+    "science.txt",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "git",
+    "TREE_ENTRY",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+    "science.txt",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "git",
+    "TREE_ENTRY",
+    "de07d6d2b2977734cf39d2b9aff4135eefce3eb7",
+    "old_science.txt",
+  ],
+}
+`;
+
+exports[`plugins/deprecated-git/edges createEdge works for "hasContents" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "git",
+    "HAS_CONTENTS",
+    "3",
+    "TREE_ENTRY",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+    "science.txt",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "git",
+    "BLOB",
+    "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "git",
+    "TREE_ENTRY",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+    "science.txt",
+  ],
+}
+`;
+
+exports[`plugins/deprecated-git/edges createEdge works for "hasParent" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "git",
+    "HAS_PARENT",
+    "2",
+    "COMMIT",
+    "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+    "2",
+    "COMMIT",
+    "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "git",
+    "COMMIT",
+    "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "git",
+    "COMMIT",
+    "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+  ],
+}
+`;
+
+exports[`plugins/deprecated-git/edges createEdge works for "hasTree" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "git",
+    "HAS_TREE",
+    "2",
+    "COMMIT",
+    "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "git",
+    "TREE",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "git",
+    "COMMIT",
+    "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+  ],
+}
+`;
+
+exports[`plugins/deprecated-git/edges createEdge works for "includes" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "git",
+    "INCLUDES",
+    "3",
+    "TREE_ENTRY",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+    "science.txt",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "git",
+    "TREE_ENTRY",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+    "science.txt",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "git",
+    "TREE",
+    "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
+  ],
+}
+`;

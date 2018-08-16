@@ -64,5 +64,8 @@ module.exports = {
     loadAndPrintGitRepository: resolveApp(
       "src/plugins/git/bin/loadAndPrintRepository.js"
     ),
+    loadAndPrintDeprecatedGitRepository: resolveApp(
+      "src/plugins/deprecated-git/bin/loadAndPrintRepository.js"
+    ),
   },
 };
