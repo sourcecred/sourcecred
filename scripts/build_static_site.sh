@@ -45,9 +45,7 @@ parse_args() {
                 fi
                 shift
                 if [ $# -eq 0 ]; then die 'missing value for --target'; fi
-                if ! target="$(readlink -e "$1")"; then
-                    die "target does not exist: $1"
-                fi
+                target="$1"
                 ;;
             --repo)
                 shift
@@ -79,12 +77,16 @@ parse_args() {
     if [ -z "${target}" ]; then
         die 'target directory not specified'
     fi
+    if ! [ -e "${target}" ]; then
+        mkdir -p -- "${target}"
+    fi
     if ! [ -d "${target}" ]; then
         die "target is not a directory: ${target}"
     fi
     if [ "$(command ls -A "${target}" | wc -l)" != 0 ]; then
         die "target directory is nonempty: ${target}"
     fi
+    target="$(readlink -e "${target}")"
 }
 
 build() {
