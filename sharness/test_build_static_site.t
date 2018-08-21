@@ -48,21 +48,17 @@ test_expect_success "should fail with multiple targets" '
     grep -qF -- "--target specified multiple times" err
 '
 
-test_expect_success "should fail with nonexistent targets" '
-    test_must_fail run --target wat 2>err &&
-    grep -qF -- "target does not exist: wat" err
-'
-
-test_expect_success "should fail with nonexistent targets with subcomponents" '
-    # using "readlink -f", this behavior can be different.
-    test_must_fail run --target wat/wat 2>err &&
-    grep -qF -- "target does not exist: wat/wat" err
-'
-
 test_expect_success "should fail with a file as target" '
     printf "important\nstuff" >important_data &&
     test_must_fail run --target important_data 2>err &&
-    grep -qF -- "target is not a directory: ${PWD}/important_data" err &&
+    grep -qF -- "target is not a directory" err &&
+    printf "important\nstuff" | test_cmp - important_data
+'
+
+test_expect_success "should fail with a target under a file" '
+    printf "important\nstuff" >important_data &&
+    test_must_fail run --target important_data/something 2>err &&
+    grep -q -- "cannot create directory.*Not a directory" err &&
     printf "important\nstuff" | test_cmp - important_data
 '
 
@@ -70,7 +66,7 @@ test_expect_success "should fail with a nonempty directory as target" '
     mkdir important_dir &&
     printf "redacted\n" >important_dir/.wallet.dat &&
     test_must_fail run --target important_dir 2>err &&
-    grep -qF -- "target directory is nonempty: ${PWD}/important_dir" err &&
+    grep -qF -- "target directory is nonempty: important_dir" err &&
     printf "redacted\n" | test_cmp - important_dir/.wallet.dat
 '
 
@@ -116,7 +112,7 @@ fi
 run_build() {
     prereq_name="$1"; shift
     description="$1"; shift
-    output_dir="output_${prereq_name}"
+    output_dir="build_output/output_${prereq_name}"
     api_dir="${output_dir}/api/v1/data"
     data_dir="${api_dir}/data"
     for arg in "${output_dir}" "$@"; do
@@ -129,7 +125,6 @@ run_build() {
     flags="--target $output_dir $*"  # checked for sanity above
     test_expect_success EXPENSIVE,HAVE_GITHUB_TOKEN \
         "${prereq_name}: ${description}" '
-        mkdir "${output_dir}" &&
         run '"${flags}"' 2>err &&
         test_must_fail grep -vF \
             -e "Removing build directory: " \
