@@ -5,6 +5,7 @@
  */
 
 import fetch from "isomorphic-fetch";
+import retry from "retry";
 
 import {stringify, inlineLayout} from "../../graphql/queries";
 import {createQuery, createVariables, postQueryExhaustive} from "./graphql";
@@ -49,6 +50,75 @@ export default function fetchGithubRepo(
 
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 
+type GithubResponseError =
+  | {|+type: "FETCH_ERROR", retry: false, error: Error|}
+  | {|+type: "GRAPHQL_ERROR", retry: false, error: mixed|}
+  | {|+type: "GITHUB_INTERNAL_EXECUTION_ERROR", retry: true, error: mixed|}
+  | {|+type: "NO_DATA", retry: true, error: mixed|};
+
+// Fetch against the GitHub API with the provided options, returning a
+// promise that either resolves to the GraphQL result data or rejects
+// to a `GithubResponseError`.
+function tryGithubFetch(fetch, fetchOptions): Promise<any> {
+  return fetch(GITHUB_GRAPHQL_SERVER, fetchOptions).then(
+    (x) =>
+      x.json().then((x) => {
+        if (x.errors) {
+          if (
+            x.errors.length === 1 &&
+            x.errors[0].message.includes("it could be a GitHub bug")
+          ) {
+            return Promise.reject(
+              ({
+                type: "GITHUB_INTERNAL_EXECUTION_ERROR",
+                retry: true,
+                error: x,
+              }: GithubResponseError)
+            );
+          } else {
+            return Promise.reject(
+              ({
+                type: "GRAPHQL_ERROR",
+                retry: false,
+                error: x,
+              }: GithubResponseError)
+            );
+          }
+        }
+        if (x.data === undefined) {
+          // See https://github.com/sourcecred/sourcecred/issues/350.
+          return Promise.reject(
+            ({type: "NO_DATA", retry: true, error: x}: GithubResponseError)
+          );
+        }
+        return Promise.resolve(x.data);
+      }),
+    (e) =>
+      Promise.reject(
+        ({type: "FETCH_ERROR", retry: false, error: e}: GithubResponseError)
+      )
+  );
+}
+
+function retryGithubFetch(fetch, fetchOptions) {
+  return new Promise((resolve, reject) => {
+    const operation = retry.operation();
+    operation.attempt(() => {
+      tryGithubFetch(fetch, fetchOptions)
+        .then((result) => {
+          resolve(result);
+        })
+        .catch((error) => {
+          if (error.retry && operation.retry(true)) {
+            return;
+          } else {
+            reject(error);
+          }
+        });
+    });
+  });
+}
+
 async function postQuery({body, variables}, token): Promise<any> {
   // TODO(#638): Find a more principled way to ingest this parameter.
   const delayMs: number = parseInt(process.env.GITHUB_DELAY_MS || "0", 10) || 0;
@@ -57,20 +127,21 @@ async function postQuery({body, variables}, token): Promise<any> {
       resolve();
     }, delayMs);
   });
-  const payload = {
+  const postBody = JSON.stringify({
     query: stringify.body(body, inlineLayout()),
     variables: variables,
-  };
-  return fetch(GITHUB_GRAPHQL_SERVER, {
+  });
+  const fetchOptions = {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: postBody,
     headers: {
       Authorization: `bearer ${token}`,
     },
-  })
-    .then((x) => x.json())
-    .then((x) => {
-      if (x.errors || x.data === undefined) {
+  };
+  return retryGithubFetch(fetch, fetchOptions).catch((error) => {
+    switch (error.type) {
+      case "GITHUB_INTERNAL_EXECUTION_ERROR":
+      case "NO_DATA":
         console.error(
           "GitHub query failed! We're tracking these issues at " +
             "https://github.com/sourcecred/sourcecred/issues/350.\n" +
@@ -79,10 +150,22 @@ async function postQuery({body, variables}, token): Promise<any> {
             "The actual failed response can be found below:\n" +
             "================================================="
         );
-        return Promise.reject(x);
-      }
-      return Promise.resolve(x.data);
-    });
+        console.error(error.error);
+        break;
+      case "GRAPHQL_ERROR":
+        console.error(
+          "Unexpected GraphQL error; this may be a bug in SourceCred: ",
+          JSON.stringify({postBody: postBody, error: error.error})
+        );
+        break;
+      case "FETCH_ERROR":
+        // Network error; no need for additional commentary.
+        break;
+      default:
+        throw new Error((error.type: empty));
+    }
+    return Promise.reject(error);
+  });
 }
 
 function ensureNoMorePages(result: any, path = []) {
