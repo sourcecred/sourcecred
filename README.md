@@ -16,7 +16,7 @@ For an example of SourceCred in action, you can see SourceCred’s own [prototyp
 
 ## Current Status
 
-We have a [prototype] which can generate a cred attribution based on GitHub interactions (issues, pull requests, comments, references, etc).
+We have a [prototype] that can generate a cred attribution based on GitHub interactions (issues, pull requests, comments, references, etc.).
 We’re working on adding more information to the prototype, such as tracking modifications to individual files, source-code analysis, GitHub reactions, and more.
 
 ### Running the Prototype
