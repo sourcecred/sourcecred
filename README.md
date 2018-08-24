@@ -1,102 +1,38 @@
-## SourceCred
+# [SourceCred](https://sourcecred.io)
 
 [![Build Status](https://travis-ci.org/sourcecred/sourcecred.svg?branch=master)](https://travis-ci.org/sourcecred/sourcecred)
 [![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
 
-### Vision
+SourceCred creates reputation networks for open-source projects.
+Any open-source project can create its own _cred_, which is a reputational metric showing how much credit contributors deserve for helping the project.
+To compute cred, we organize a project’s contributions into a graph, whose edges connect contributions to each other and to contributors.
+We then run PageRank on that graph.
 
-Open source software is amazing, and so are its creators and maintainers.  How
-amazing? It's difficult to tell, since we don't have good tools for recognizing
-those people. Many amazing open-source contributors labor in the shadows, going
-unappreciated for the work they do.
+To learn more about SourceCred’s vision and values, please check out [our website].
+For an example of SourceCred in action, you can see SourceCred’s own [prototype cred attribution][prototype].
 
-SourceCred will empower projects to track contributions and create cred, a
-reputational measure of how valuable each contribution was to the project.
-Algorithmically, contributions will be organized into a [graph], with edges
-representing connections between contributions. Then, a configurable [PageRank]
-algorithm will distill that graph into a cred attribution.
+[our website]: https://sourcecred.io/
+[prototype]: https://sourcecred.io/prototype/
 
-[graph]: https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)
-[PageRank]: https://en.wikipedia.org/wiki/PageRank
+## Current Status
 
-SourceCred is dogfooding itself. People who contributes to SourceCred—by
-writing bug reports, participating in design discussions, or writing pull
-requests—will receive cred in SourceCred.
-
-### Design Goals
-
-SourceCred development is organized around the following high-level goals.
-
-- *Transparent*
-
-It should be easy to see why cred is attributed as it is, and link a person's
-cred directly to contributions they've made.
-
-- *Community Controlled*
-
-Each community has the final say on what that community's cred is. We don't
-expect an algorithm to know what's best, so we'll empower communities to use
-algorithmic results as a starting point, and improve results with their
-knowledge.
-
-- *Decentralized*
-
-Individual projects and communities will control their own SourceCred
-instances, and own their own data. The SourceCred creators won't have the power
-to control or modify other projects' cred.
-
-- *Forkable*
-
-Forking is important to open source, and gives people the freedom to vote with
-their feet. SourceCred will support forking, and forks will be able to modify
-their cred independently of the original.
-
-- *Flexible & Extensible*
-
-SourceCred is focused on open-source projects for now, but we think it can be a
-general system for building reputation networks. We're organizing around very
-flexible core abstractions, and a plugin architecture for specific domains.
-
-### Current Status
-
-As of July 2018, it's still early days for SourceCred! So far, we've set the
-following foundations:
-
-- the [graph class] is the heart of SourceCred, and we've spent a lot of time
-polishing those APIs 🙂
-- the [GitHub plugin] downloads data from GitHub and imports it into a graph
-- the [Git plugin] clones a Git repository and imports it into a graph
-- our [PageRank implementation] does cred attribution on the graph
-- the [cred explorer] makes the PageRank results transparent
-
-[graph class]: https://github.com/sourcecred/sourcecred/blob/master/src/core/graph.js
-[Git plugin]: https://github.com/sourcecred/sourcecred/tree/master/src/plugins/git
-[GitHub plugin]: https://github.com/sourcecred/sourcecred/tree/master/src/plugins/github
-[PageRank implementation]: https://github.com/sourcecred/sourcecred/blob/master/src/core/attribution/pagerank.js
-[cred explorer]: https://github.com/sourcecred/sourcecred/tree/master/src/app/credExplorer
-
-The PageRank results aren't very good yet - we need to add more configurability
-to get higher quality results. We're working out improvements [in this issue].
-
-[in this issue]: https://github.com/sourcecred/sourcecred/issues/476
-
-### Roadmap
-
-The team is focused right now on building an end-to-end beta that can import
-GitHub repositories and produce a reasonable and configurable cred attribution.
-We hope to have the beta ready by November 2018.
+We have a [prototype] that can generate a cred attribution based on GitHub interactions (issues, pull requests, comments, references, etc.).
+We’re working on adding more information to the prototype, such as tracking modifications to individual files, source-code analysis, GitHub reactions, and more.
 
 ### Running the Prototype
 
-If you'd like to try it out, you can run a local copy of SourceCred using the
-following commands. You need to have [node] and [yarn] installed first. This repo
- is stable and tested on Node version 8.x.x, and Yarn version 1.7.0.
-You also need to get a [GitHub API access token]. This token does not need any
-specific permissions.
+If you’d like to try it out, you can run a local copy of SourceCred as follows.
+First, make sure that you have the following dependencies:
 
-[node]: https://nodejs.org/en/
-[yarn]: https://yarnpkg.com/lang/en/
-[GitHub API access token]: https://github.com/settings/tokens
+  - Install [Node] (tested on v8.x.x).
+  - Install [Yarn] (tested on v1.7.0).
+  - Create a [GitHub API token]. No special permissions are required.
+
+[Node]: https://nodejs.org/en/
+[Yarn]: https://yarnpkg.com/lang/en/
+[GitHub API token]: https://github.com/settings/tokens
+
+Then, run the following commands to clone and build SourceCred:
 
 ```
 git clone https://github.com/sourcecred/sourcecred.git
@@ -107,10 +43,11 @@ export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 node bin/sourcecred.js load REPO_OWNER/REPO_NAME
 # this loads sourcecred data for a particular repository
 yarn start
-# then navigate to localhost:3000 in your browser
+# then navigate to localhost:8080 in your browser
 ```
 
 For example, if you wanted to look at cred for [ipfs/js-ipfs], you could run:
+
 ```
 $ export SOURCECRED_GITHUB_TOKEN=0000000000000000000000000000000000000000
 $ node bin/sourcecred.js load ipfs/js-ipfs
@@ -120,10 +57,25 @@ replacing the big string of zeros with your actual token.
 
 [ipfs/js-ipfs]: https://github.com/ipfs/js-ipfs
 
-### Contributing
+## Early Adopters
 
-We’d love to accept your contributions! Please join our [Discord] to get
-in touch with us, and check out our [contributing guide] to get started.
+We’re looking for projects who want to be early adopters of SourceCred!
+If you’re a maintainer of an open-source project and would like to start using SourceCred, please reach out to us on our [Discord].
+
+## Contributing
+
+We’d love to accept your contributions!
+Please join our [Discord] to get in touch with us, and check out our [contributing guide] to get started.
+
+If you’re looking for a place to start, we’ve tagged some issues [Contributions Welcome].
 
 [Discord]: https://discord.gg/tsBTgc9
 [contributing guide]: https://github.com/sourcecred/sourcecred/blob/master/CONTRIBUTING.md
+[Contributions Welcome]: https://github.com/SourceCred/SourceCred/issues?q=is%3Aopen+is%3Aissue+label%3A%22contributions+welcome%22
+
+## Acknowledgements
+
+We’d like to thank [Protocol Labs] for funding and support of SourceCred.
+We’d also like to thank the many open-source communities that produced the software that SourceCred is built on top of, such as Git and Node.
+
+[Protocol Labs]: https://protocol.ai
