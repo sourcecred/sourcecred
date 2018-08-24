@@ -4,7 +4,7 @@
 [![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
 
 SourceCred creates reputation networks for open-source projects.
-Using SourceCred, any open-source project can create its own _cred_, which is a reputational metric showing how much credit contributors deserve for helping the project.
+Any open-source project can create its own _cred_, which is a reputational metric showing how much credit contributors deserve for helping the project.
 To compute cred, we organize a project’s contributions into a graph, whose edges connect contributions to each other and to contributors.
 We then run PageRank on that graph.
 
