@@ -9,17 +9,15 @@ To compute cred, we organize a project’s contributions into a graph, whose edg
 We then run PageRank on that graph.
 
 To learn more about SourceCred’s vision and values, please check out [our website].
-For an example of SourceCred in action, you can see SourceCred’s own [prototype cred attribution].
+For an example of SourceCred in action, you can see SourceCred’s own [prototype cred attribution][prototype].
 
 [our website]: https://sourcecred.io/
-[prototype cred attribution]: https://sourcecred.io/prototype/
+[prototype]: https://sourcecred.io/prototype/
 
 ## Current Status
 
 We have a [prototype] which can generate a cred attribution based on GitHub interactions (issues, pull requests, comments, references, etc).
 We’re working on adding more information to the prototype, such as tracking modifications to individual files, source-code analysis, GitHub reactions, and more.
-
-[prototype]: https://sourcecred.io/prototype/
 
 ### Running the Prototype
 
