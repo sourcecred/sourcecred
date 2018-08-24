@@ -21,15 +21,18 @@ We’re working on adding more information to the prototype, such as tracking mo
 
 ### Running the Prototype
 
-If you’d like to try it out, you can run a local copy of SourceCred using the following commands.
-You need to have [node] and [yarn] installed first.
-This repo is stable and tested on Node version 8.x.x, and Yarn version 1.7.0.
-You also need to get a [GitHub API access token].
-This token does not need any specific permissions.
+If you’d like to try it out, you can run a local copy of SourceCred as follows.
+First, make sure that you have the following dependencies:
 
-[node]: https://nodejs.org/en/
-[yarn]: https://yarnpkg.com/lang/en/
-[GitHub API access token]: https://github.com/settings/tokens
+  - Install [Node] (tested on v8.x.x).
+  - Install [Yarn] (tested on v1.7.0).
+  - Create a [GitHub API token]. No special permissions are required.
+
+[Node]: https://nodejs.org/en/
+[Yarn]: https://yarnpkg.com/lang/en/
+[GitHub API token]: https://github.com/settings/tokens
+
+Then, run the following commands to clone and build SourceCred:
 
 ```
 git clone https://github.com/sourcecred/sourcecred.git
@@ -44,6 +47,7 @@ yarn start
 ```
 
 For example, if you wanted to look at cred for [ipfs/js-ipfs], you could run:
+
 ```
 $ export SOURCECRED_GITHUB_TOKEN=0000000000000000000000000000000000000000
 $ node bin/sourcecred.js load ipfs/js-ipfs
