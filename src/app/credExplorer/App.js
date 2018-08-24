@@ -110,7 +110,6 @@ export function createApp(
             Run PageRank
           </button>
           <WeightConfig
-            localStore={localStore}
             onChange={(ee) => this.stateTransitionMachine.setEdgeEvaluator(ee)}
           />
           <LoadingIndicator appState={this.state.appState} />

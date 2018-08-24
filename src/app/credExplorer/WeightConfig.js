@@ -3,15 +3,12 @@
 import React from "react";
 import sortBy from "lodash.sortby";
 
-import type {LocalStore} from "../localStore";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
-import * as NullUtil from "../../util/null";
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import type {NodeType, EdgeType} from "../adapters/pluginAdapter";
 
 type Props = {|
-  +localStore: LocalStore,
   +onChange: (EdgeEvaluator) => void,
 |};
 
@@ -21,7 +18,6 @@ type WeightedEdgeType = {|
   +directionality: number,
 |};
 type EdgeWeights = WeightedEdgeType[];
-const EDGE_WEIGHTS_KEY = "edgeWeights";
 const defaultEdgeWeights = (): EdgeWeights => {
   const result = [];
   for (const type of defaultStaticAdapters().edgeTypes()) {
@@ -32,7 +28,6 @@ const defaultEdgeWeights = (): EdgeWeights => {
 
 type NodeWeights = WeightedNodeType[];
 type WeightedNodeType = {|+type: NodeType, +logWeight: number|};
-const NODE_WEIGHTS_KEY = "nodeWeights";
 const defaultNodeWeights = (): NodeWeights => {
   const result = [];
   for (const type of defaultStaticAdapters().nodeTypes()) {
@@ -58,22 +53,7 @@ export class WeightConfig extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    const {localStore} = this.props;
-    this.setState(
-      (state) => {
-        return {
-          edgeWeights: NullUtil.orElse(
-            localStore.get(EDGE_WEIGHTS_KEY),
-            state.edgeWeights
-          ),
-          nodeWeights: NullUtil.orElse(
-            localStore.get(NODE_WEIGHTS_KEY),
-            state.nodeWeights
-          ),
-        };
-      },
-      () => this.fire()
-    );
+    this.fire();
   }
 
   render() {
@@ -114,10 +94,7 @@ export class WeightConfig extends React.Component<Props, State> {
   }
 
   fire() {
-    const {localStore} = this.props;
     const {edgeWeights, nodeWeights} = this.state;
-    localStore.set(EDGE_WEIGHTS_KEY, edgeWeights);
-    localStore.set(NODE_WEIGHTS_KEY, nodeWeights);
     const edgePrefixes = edgeWeights.map(
       ({type, logWeight, directionality}) => ({
         prefix: type.prefix,
