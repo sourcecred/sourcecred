@@ -112,6 +112,36 @@ describe("graphql/mirror", () => {
         expect(() => new Mirror(db, schema0)).not.toThrow();
         expect(fs.readFileSync(filename).toJSON()).toEqual(data);
       });
+
+      it("rejects a schema with SQL-unsafe type name", () => {
+        const s = Schema;
+        const schema0 = s.schema({
+          "Non-Word-Characters": s.object({id: s.id()}),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema0)).toThrow(
+          "invalid object type name"
+        );
+      });
+
+      it("rejects a schema with SQL-unsafe field name", () => {
+        const s = Schema;
+        const schema0 = s.schema({
+          A: s.object({id: s.id(), "Non-Word-Characters": s.primitive()}),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema0)).toThrow("invalid field name");
+      });
+
+      it("allows specifying a good schema after rejecting one", () => {
+        const s = Schema;
+        const schema0 = s.schema({
+          A: s.object({id: s.id(), "Non-Word-Characters": s.primitive()}),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema0)).toThrow("invalid field name");
+        expect(() => new Mirror(db, buildGithubSchema())).not.toThrow();
+      });
     });
   });
 
