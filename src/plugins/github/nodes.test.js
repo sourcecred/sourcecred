@@ -42,6 +42,7 @@ describe("plugins/github/nodes", () => {
   });
   const user = (): GN.UserlikeAddress => ({
     type: GN.USERLIKE_TYPE,
+    subtype: "USER",
     login: "decentralion",
   });
 
@@ -205,8 +206,13 @@ describe("plugins/github/nodes", () => {
       });
       describe("userlike", () => {
         checkBadCases([
-          {name: "no login", parts: [GN.USERLIKE_TYPE]},
-          {name: "extra parts", parts: ["decentra", "lion"]},
+          {name: "no subtype", parts: [GN.USERLIKE_TYPE]},
+          {name: "bad subtype", parts: [GN.USERLIKE_TYPE, "FOO"]},
+          {name: "no login", parts: [GN.USERLIKE_TYPE, GN.USER_SUBTYPE]},
+          {
+            name: "extra parts",
+            parts: [GN.USERLIKE_TYPE, GN.USER_SUBTYPE, "decentra", "lion"],
+          },
         ]);
       });
     });

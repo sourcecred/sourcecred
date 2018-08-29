@@ -344,6 +344,8 @@ export class RelationalView {
     } else {
       const address: UserlikeAddress = {
         type: N.USERLIKE_TYPE,
+        // TODO: Detect bots and give them a different subtype (#696)
+        subtype: N.USER_SUBTYPE,
         login: json.login,
       };
       const entry: UserlikeEntry = {address, url: json.url};

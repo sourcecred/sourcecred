@@ -15,6 +15,8 @@ export const PULL_TYPE: "PULL" = "PULL";
 export const REVIEW_TYPE: "REVIEW" = "REVIEW";
 export const COMMENT_TYPE: "COMMENT" = "COMMENT";
 export const USERLIKE_TYPE: "USERLIKE" = "USERLIKE";
+export const USER_SUBTYPE: "USER" = "USER";
+export const BOT_SUBTYPE: "BOT" = "BOT";
 
 export const _Prefix = Object.freeze({
   base: GITHUB_PREFIX,
@@ -24,6 +26,8 @@ export const _Prefix = Object.freeze({
   review: _githubAddress(REVIEW_TYPE),
   comment: _githubAddress(COMMENT_TYPE),
   userlike: _githubAddress(USERLIKE_TYPE),
+  user: _githubAddress(USERLIKE_TYPE, USER_SUBTYPE),
+  bot: _githubAddress(USERLIKE_TYPE, BOT_SUBTYPE),
   reviewComment: _githubAddress(COMMENT_TYPE, REVIEW_TYPE),
   issueComment: _githubAddress(COMMENT_TYPE, ISSUE_TYPE),
   pullComment: _githubAddress(COMMENT_TYPE, PULL_TYPE),
@@ -56,6 +60,7 @@ export type CommentAddress = {|
 |};
 export type UserlikeAddress = {|
   +type: typeof USERLIKE_TYPE,
+  +subtype: typeof USER_SUBTYPE | typeof BOT_SUBTYPE,
   +login: string,
 |};
 
@@ -196,11 +201,14 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       }
     }
     case USERLIKE_TYPE: {
-      if (rest.length !== 1) {
+      if (rest.length !== 2) {
         throw fail();
       }
-      const [login] = rest;
-      return {type: USERLIKE_TYPE, login};
+      const [subtype, login] = rest;
+      if (subtype !== "USER" && subtype !== "BOT") {
+        throw fail();
+      }
+      return {type: USERLIKE_TYPE, subtype, login};
     }
     default:
       throw fail();
@@ -264,7 +272,14 @@ export function toRaw(x: StructuredAddress): RawAddress {
           throw new Error(`Bad comment parent type: ${(x.parent.type: empty)}`);
       }
     case USERLIKE_TYPE:
-      return NodeAddress.append(_Prefix.userlike, x.login);
+      switch (x.subtype) {
+        case "BOT":
+          return NodeAddress.append(_Prefix.bot, x.login);
+        case "USER":
+          return NodeAddress.append(_Prefix.user, x.login);
+        default:
+          throw new Error((x.subtype: empty));
+      }
     default:
       throw new Error(`Unexpected type ${(x.type: empty)}`);
   }

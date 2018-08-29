@@ -183,10 +183,12 @@ Object {
     "sourcecred",
     "github",
     "USERLIKE",
+    "USER",
     "decentralion",
   ],
   "structured": Object {
     "login": "decentralion",
+    "subtype": "USER",
     "type": "USERLIKE",
   },
 }
