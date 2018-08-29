@@ -105,7 +105,9 @@ export function createApp(
                 loadingState !== "LOADING"
               )
             }
-            onClick={() => this.stateTransitionMachine.runPagerank()}
+            onClick={() =>
+              this.stateTransitionMachine.runPagerank(GithubPrefix.userlike)
+            }
           >
             Run PageRank
           </button>

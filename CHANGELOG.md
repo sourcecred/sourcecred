@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Normalize scores so that 1000 cred is split amongst users (#709)
 - Stop persisting weights in local store (#706)
 - Execute GraphQL queries with exponential backoff (#699)
 - Introduce a simplified Git plugin that only tracks commits (#685)
