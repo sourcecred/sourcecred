@@ -129,13 +129,12 @@ describe("app/credExplorer/App", () => {
 
     function testWeightConfig(stateFn) {
       it("creates a working WeightConfig", () => {
-        const {el, setEdgeEvaluator, setState, localStore} = example();
+        const {el, setEdgeEvaluator, setState} = example();
         setState(stateFn());
         const wc = el.find(WeightConfig);
         const ee = createEvaluator();
         wc.props().onChange(ee);
         expect(setEdgeEvaluator).toHaveBeenCalledWith(ee);
-        expect(wc.props().localStore).toBe(localStore);
       });
     }
 
