@@ -39,7 +39,11 @@ describe("plugins/github/edges", () => {
       parent: nodeExamples.review(),
       id: "171460198",
     }),
-    user: () => ({type: GN.USERLIKE_TYPE, login: "decentralion"}),
+    user: () => ({
+      type: GN.USERLIKE_TYPE,
+      subtype: "USER",
+      login: "decentralion",
+    }),
   };
 
   const edgeExamples = {

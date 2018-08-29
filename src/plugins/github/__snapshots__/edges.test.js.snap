@@ -6,8 +6,9 @@ Object {
     "sourcecred",
     "github",
     "AUTHORS",
-    "2",
+    "3",
     "USERLIKE",
+    "USER",
     "decentralion",
     "4",
     "ISSUE",
@@ -27,6 +28,7 @@ Object {
     "sourcecred",
     "github",
     "USERLIKE",
+    "USER",
     "decentralion",
   ],
 }

@@ -11,8 +11,16 @@ function exampleView() {
   return new GraphView(exampleGraph());
 }
 
-const decentralion = {type: "USERLIKE", login: "decentralion"};
-const wchargin = {type: "USERLIKE", login: "wchargin"};
+const decentralion: GN.UserlikeAddress = {
+  type: "USERLIKE",
+  subtype: "USER",
+  login: "decentralion",
+};
+const wchargin: GN.UserlikeAddress = {
+  type: "USERLIKE",
+  subtype: "USER",
+  login: "wchargin",
+};
 
 describe("plugins/github/graphView", () => {
   const view = exampleView();
@@ -141,6 +149,7 @@ describe("plugins/github/graphView", () => {
   describe("invariants", () => {
     const userlike: GN.UserlikeAddress = {
       type: "USERLIKE",
+      subtype: "USER",
       login: "decentralion",
     };
     const repo: GN.RepoAddress = {
@@ -232,7 +241,11 @@ describe("plugins/github/graphView", () => {
           failsForEdge(badEdge);
         });
         it("src must be author in edge address", () => {
-          const otherAuthor = {type: "USERLIKE", login: "wchargin"};
+          const otherAuthor = {
+            type: "USERLIKE",
+            subtype: "USER",
+            login: "wchargin",
+          };
           const authorsEdge = GE.createEdge.authors(otherAuthor, issue);
           (authorsEdge: any).src = GN.toRaw(userlike);
           const g = exampleWithParents().addEdge(authorsEdge);
