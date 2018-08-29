@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support combining multiple repositories into a single graph (#711)
 - Normalize scores so that 1000 cred is split amongst users (#709)
 - Stop persisting weights in local store (#706)
 - Execute GraphQL queries with exponential backoff (#699)

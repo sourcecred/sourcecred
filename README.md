@@ -57,6 +57,16 @@ replacing the big string of zeros with your actual token.
 
 [ipfs/js-ipfs]: https://github.com/ipfs/js-ipfs
 
+You can also combine data from multiple repositories into a single graph.
+To do so, pass multiple repositories to the `load` command, and specify an “output name” for the repository.
+For instance, the invocation
+
+```
+node bin/sourcecred.js load ipfs/js-ipfs ipfs/go-ipfs --output ipfs/meta-ipfs
+```
+
+will create a graph called `ipfs/meta-ipfs` in the cred explorer, containing the combined contents of the js-ipfs and go-ipfs repositories.
+
 ## Early Adopters
 
 We’re looking for projects who want to be early adopters of SourceCred!

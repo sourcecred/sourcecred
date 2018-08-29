@@ -9,15 +9,26 @@ import type {Repo} from "../../core/repo";
 
 export type Options = {|
   +token: string,
-  +repo: Repo,
+  +repos: $ReadOnlyArray<Repo>,
   +outputDirectory: string,
   +cacheDirectory: string,
 |};
 
 export async function loadGithubData(options: Options): Promise<void> {
-  const response = await fetchGithubRepo(options.repo, options.token);
+  // We intentionally fetch repositories sequentially rather than in
+  // parallel, because GitHub asks that we not make concurrent
+  // requests. From <https://archive.is/LlkQp#88%>:
+  //
+  // > Make requests for a single user or client ID serially. Do not make
+  // > make requests for a single user or client ID concurrently.
+  const responses = [];
+  for (const repo of options.repos) {
+    responses.push(await fetchGithubRepo(repo, options.token));
+  }
   const view = new RelationalView();
-  view.addData(response);
+  for (const response of responses) {
+    view.addData(response);
+  }
   const blob = JSON.stringify(view);
   const outputFilename = path.join(options.outputDirectory, "view.json");
   return fs.writeFile(outputFilename, blob);
