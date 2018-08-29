@@ -4,6 +4,7 @@ set -eu
 usage() {
     printf 'usage: build_static_site.sh --target TARGET\n'
     printf '                            [--repo OWNER/NAME [...]]\n'
+    printf '                            [--feedback-url URL]\n'
     printf '                            [--cname DOMAIN]\n'
     printf '                            [-h|--help]\n'
     printf '\n'
@@ -14,6 +15,8 @@ usage() {
     printf '%s\n' '--repo OWNER/NAME'
     printf '\t%s\n' 'a GitHub repository (e.g., torvalds/linux) for which'
     printf '\t%s\n' 'to include example data'
+    printf '%s\n' '--feedback-url URL'
+    printf '\t%s\n' 'link for user feedback, shown on the prototype page'
     printf '%s\n' '--cname DOMAIN'
     printf '\t%s\n' 'configure DNS for a GitHub Pages site to point to'
     printf '\t%s\n' 'the provided custom domain'
