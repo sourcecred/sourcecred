@@ -57,8 +57,14 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
       {
         name: "User",
         pluralName: "Users",
-        prefix: N._Prefix.userlike,
+        prefix: N._Prefix.user,
         defaultWeight: 1,
+      },
+      {
+        name: "Bot",
+        pluralName: "Bots",
+        prefix: N._Prefix.bot,
+        defaultWeight: 0.25,
       },
     ];
   }
