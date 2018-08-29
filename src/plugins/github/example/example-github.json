@@ -196,10 +196,21 @@
                                 "body": "This comment references an #2, which itself references an issue. This comment is thus allows us to test that in-references are not included when requesting a Post's references.",
                                 "id": "MDEyOklzc3VlQ29tbWVudDM4NTIyMzMxNg==",
                                 "url": "https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316"
+                            },
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjQyODE5Mzgy",
+                                    "login": "credbot",
+                                    "url": "https://github.com/credbot"
+                                },
+                                "body": "Hi! I'm a bot! Beep boop beep!!",
+                                "id": "MDEyOklzc3VlQ29tbWVudDQxNzEwNDA0Nw==",
+                                "url": "https://github.com/sourcecred/example-github/issues/6#issuecomment-417104047"
                             }
                         ],
                         "pageInfo": {
-                            "endCursor": "Y3Vyc29yOnYyOpHOFvYKlA==",
+                            "endCursor": "Y3Vyc29yOnYyOpHOGNyArw==",
                             "hasNextPage": false
                         }
                     },
