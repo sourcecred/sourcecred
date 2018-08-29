@@ -3,7 +3,7 @@
 import deepEqual from "lodash.isequal";
 
 import * as NullUtil from "../../util/null";
-import {Graph} from "../../core/graph";
+import {Graph, type NodeAddressT} from "../../core/graph";
 import type {Assets} from "../../app/assets";
 import type {Repo} from "../../core/repo";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
@@ -80,7 +80,7 @@ export interface StateTransitionMachineInterface {
   +setRepo: (Repo) => void;
   +setEdgeEvaluator: (EdgeEvaluator) => void;
   +loadGraph: (Assets) => Promise<void>;
-  +runPagerank: () => Promise<void>;
+  +runPagerank: (NodeAddressT) => Promise<void>;
 }
 /* In production, instantiate via createStateTransitionMachine; the constructor
  * implementation allows specification of the loadGraphWithAdapters and
@@ -201,7 +201,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     }
   }
 
-  async runPagerank() {
+  async runPagerank(totalScoreNodePrefix: NodeAddressT) {
     const state = this.getState();
     if (
       state.type !== "INITIALIZED" ||
@@ -228,6 +228,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
         edgeEvaluator,
         {
           verbose: true,
+          totalScoreNodePrefix: totalScoreNodePrefix,
         }
       );
       const newSubstate = {

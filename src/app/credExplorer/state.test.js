@@ -7,7 +7,7 @@ import {
   type GraphWithAdapters,
 } from "./state";
 
-import {Graph} from "../../core/graph";
+import {Graph, NodeAddress} from "../../core/graph";
 import {Assets} from "../assets";
 import {makeRepo, type Repo} from "../../core/repo";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
@@ -274,7 +274,9 @@ describe("app/credExplorer/state", () => {
       const badStates = [initialState(), readyToLoadGraph()];
       for (const b of badStates) {
         const {stm} = example(b);
-        await expect(stm.runPagerank()).rejects.toThrow("incorrect state");
+        await expect(stm.runPagerank(NodeAddress.empty)).rejects.toThrow(
+          "incorrect state"
+        );
       }
     });
     it("can be run when READY_TO_RUN_PAGERANK or PAGERANK_EVALUATED", async () => {
@@ -283,7 +285,7 @@ describe("app/credExplorer/state", () => {
         const {stm, getState, pagerankMock} = example(g);
         const pnd = pagerankNodeDecomposition();
         pagerankMock.mockResolvedValue(pnd);
-        await stm.runPagerank();
+        await stm.runPagerank(NodeAddress.empty);
         const state = getState();
         const substate = getSubstate(state);
         if (substate.type !== "PAGERANK_EVALUATED") {
@@ -296,8 +298,15 @@ describe("app/credExplorer/state", () => {
     it("immediately sets loading status", () => {
       const {getState, stm} = example(readyToRunPagerank());
       expect(loading(getState())).toBe("NOT_LOADING");
-      stm.runPagerank();
+      stm.runPagerank(NodeAddress.empty);
       expect(loading(getState())).toBe("LOADING");
+    });
+    it("calls pagerank with the totalScoreNodePrefix option", async () => {
+      const {pagerankMock, stm} = example(readyToRunPagerank());
+      const foo = NodeAddress.fromParts(["foo"]);
+      await stm.runPagerank(foo);
+      const args = pagerankMock.mock.calls[0];
+      expect(args[2].totalScoreNodePrefix).toBe(foo);
     });
     it("does not transition if another transition happens first", async () => {
       const {getState, stm, pagerankMock} = example(readyToRunPagerank());
@@ -309,7 +318,7 @@ describe("app/credExplorer/state", () => {
             resolve(graphWithAdapters());
           })
       );
-      await stm.runPagerank();
+      await stm.runPagerank(NodeAddress.empty);
       const state = getState();
       const substate = getSubstate(state);
       expect(loading(state)).toBe("NOT_LOADING");
@@ -322,7 +331,7 @@ describe("app/credExplorer/state", () => {
       // $ExpectFlowError
       console.error = jest.fn();
       pagerankMock.mockRejectedValue(error);
-      await stm.runPagerank();
+      await stm.runPagerank(NodeAddress.empty);
       const state = getState();
       const substate = getSubstate(state);
       expect(loading(state)).toBe("FAILED");
