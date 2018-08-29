@@ -82,6 +82,14 @@ export function createApp(
       }
       return (
         <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
+          <p>
+            <em>
+              This is a prototype. Please{" "}
+              <a href={process.env.SOURCECRED_FEEDBACK_URL}>
+                let us know what you think
+              </a>.
+            </em>
+          </p>
           <div style={{marginBottom: 10}}>
             <RepositorySelect
               assets={this.props.assets}

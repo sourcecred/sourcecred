@@ -34,6 +34,7 @@ main() {
 }
 
 parse_args() {
+    unset SOURCECRED_FEEDBACK_URL
     target=
     cname=
     repos=( )
@@ -51,6 +52,17 @@ parse_args() {
                 shift
                 if [ $# -eq 0 ]; then die 'missing value for --repo'; fi
                 repos+=( "$1" )
+                ;;
+           --feedback-url)
+                shift
+                if [ $# -eq 0 ]; then die 'missing value for --feedback-url'; fi
+                if [ -n "${SOURCECRED_FEEDBACK_URL:-}" ]; then
+                    die '--feedback-url specified multiple times'
+                fi
+                export SOURCECRED_FEEDBACK_URL="$1"
+                if [ -z "${SOURCECRED_FEEDBACK_URL}" ]; then
+                    die 'empty value for --feedback-url'
+                fi
                 ;;
             --cname)
                 shift

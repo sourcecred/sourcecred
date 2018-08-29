@@ -116,6 +116,12 @@ function getGitState() /*: GitState */ {
 const SOURCECRED_GIT_STATE = stringify(getGitState());
 process.env.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
 
+const SOURCECRED_FEEDBACK_URL =
+  process.env.SOURCECRED_FEEDBACK_URL != null
+    ? process.env.SOURCECRED_FEEDBACK_URL
+    : "https://discuss.sourcecred.io/c/cred-feedback/";
+process.env.SOURCECRED_FEEDBACK_URL = SOURCECRED_FEEDBACK_URL;
+
 function getClientEnvironment() {
   const raw = {};
   // Useful for determining whether we’re running in production mode.
@@ -123,6 +129,8 @@ function getClientEnvironment() {
   raw.NODE_ENV = process.env.NODE_ENV || "development";
   // Used by `src/app/version.js`.
   raw.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
+  // Used by `src/app/credExplorer/App.js`.
+  raw.SOURCECRED_FEEDBACK_URL = SOURCECRED_FEEDBACK_URL;
 
   // Stringify all values so we can feed into Webpack's DefinePlugin.
   const stringified = {"process.env": {}};
