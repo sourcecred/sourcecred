@@ -25,6 +25,7 @@ import type {
 } from "./graphql";
 import * as GitNode from "../git/nodes";
 import * as MapUtil from "../../util/map";
+import {botSet} from "./bots";
 
 import {
   reviewUrlToId,
@@ -342,11 +343,12 @@ export class RelationalView {
     if (json == null) {
       return [];
     } else {
+      const login = json.login;
+      const subtype = botSet().has(login) ? N.BOT_SUBTYPE : N.USER_SUBTYPE;
       const address: UserlikeAddress = {
         type: N.USERLIKE_TYPE,
-        // TODO: Detect bots and give them a different subtype (#696)
-        subtype: N.USER_SUBTYPE,
-        login: json.login,
+        subtype,
+        login,
       };
       const entry: UserlikeEntry = {address, url: json.url};
       this._userlikes.set(N.toRaw(address), entry);

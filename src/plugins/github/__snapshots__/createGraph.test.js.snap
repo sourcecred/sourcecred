@@ -15,7 +15,7 @@ Array [
           "AUTHORS",
           "3",
           "USERLIKE",
-          "USER",
+          "BOT",
           "credbot",
           "6",
           "COMMENT",
@@ -1633,7 +1633,7 @@ Array [
         "sourcecred",
         "github",
         "USERLIKE",
-        "USER",
+        "BOT",
         "credbot",
       ],
       Array [
