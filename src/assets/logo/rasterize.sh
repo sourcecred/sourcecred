@@ -4,14 +4,17 @@ set -eu
 main() {
     cd "$(dirname "$0")"
     for size in 1024 512 256 128 64 32 16; do
-        rasterize "${size}"
+        rasterize sourcecred "${size}"
+        rasterize credbot "${size}"
+        rasterize discourse "${size}"
     done
 }
 
-# rasterize SIZE
+# rasterize BASENAME SIZE
 rasterize() {
-    size=$1
-    inkscape -z ./sourcecred.svg -e "./sourcecred_${size}.png" \
+    basename=$1
+    size=$2
+    inkscape -z "./${basename}.svg" -e "./${basename}_${size}.png" \
         -w "${size}" -h "${size}"
 }
 
