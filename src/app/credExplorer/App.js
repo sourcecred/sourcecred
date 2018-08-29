@@ -73,7 +73,7 @@ export function createApp(
         const pnd = appState.substate.pagerankNodeDecomposition;
         pagerankTable = (
           <PagerankTable
-            defaultNodeFilter={GithubPrefix.userlike}
+            defaultNodeFilter={GithubPrefix.user}
             adapters={adapters}
             pnd={pnd}
             maxEntriesPerList={100}
@@ -114,7 +114,7 @@ export function createApp(
               )
             }
             onClick={() =>
-              this.stateTransitionMachine.runPagerank(GithubPrefix.userlike)
+              this.stateTransitionMachine.runPagerank(GithubPrefix.user)
             }
           >
             Run PageRank
