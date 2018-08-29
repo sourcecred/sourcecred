@@ -114,6 +114,15 @@ describe("app/credExplorer/App", () => {
     expect(el.instance().props.localStore).toBe(localStore);
   });
 
+  it("should have a feedback link with a valid URL", () => {
+    const {el} = example();
+    const link = el
+      .find("a")
+      .filterWhere((x) => x.text().includes("let us know what you think"));
+    expect(link).toHaveLength(1);
+    expect(link.prop("href")).toMatch(/https?:\/\//);
+  });
+
   describe("when in state:", () => {
     function testRepositorySelect(stateFn) {
       it("creates a working RepositorySelect", () => {

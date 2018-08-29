@@ -78,6 +78,25 @@ test_expect_success "should fail with missing repo value" '
     printf "redacted\n" | test_cmp - important_dir/.wallet.dat
 '
 
+test_expect_success "should fail with missing feedback-url value" '
+    test_must_fail run --target putative_output --feedback-url 2>err &&
+    grep -qF -- "missing value for --feedback-url" err &&
+    printf "redacted\n" | test_cmp - important_dir/.wallet.dat
+'
+
+test_expect_success "should fail with empty feedback-url" '
+    test_must_fail run --target putative_output --feedback-url "" 2>err &&
+    grep -qF -- "empty value for --feedback-url" err &&
+    printf "redacted\n" | test_cmp - important_dir/.wallet.dat
+'
+
+test_expect_success "should fail with multiple feedback-url values" '
+    test_must_fail run --target putative_output \
+        --feedback-url a.com --feedback-url b.com 2>err &&
+    grep -qF -- "--feedback-url specified multiple times" err &&
+    printf "redacted\n" | test_cmp - important_dir/.wallet.dat
+'
+
 test_expect_success "should fail with missing cname value" '
     test_must_fail run --target putative_output --cname 2>err &&
     grep -qF -- "missing value for --cname" err &&
@@ -140,6 +159,13 @@ run_build() {
         "${prereq_name}: should have no cache" '
         test_must_fail test_path_is_dir "${api_dir}/cache"
     '
+    test_expect_success "${prereq_name}" \
+        "${prereq_name}: should have a bundle" '
+        _js_bundles=( "${output_dir}"/static/js/main.*.js ) &&
+        [ ${#_js_bundles[@]} -eq 1 ] &&
+        js_bundle_path="${_js_bundles[0]}" &&
+        test_path_is_file "${js_bundle_path}"
+    '
 }
 
 # test_pages PREREQ_NAME
@@ -175,6 +201,7 @@ test_pages() {
 run_build TWO_REPOS \
     "should build the site with two repositories and a CNAME" \
     --cname sourcecred.example.com \
+    --feedback-url http://discuss.example.com/feedback/ \
     --repo sourcecred/example-git \
     --repo sourcecred/example-github \
     ;
@@ -198,12 +225,20 @@ test_expect_success TWO_REPOS \
     done
 '
 
+test_expect_success TWO_REPOS \
+    "TWO_REPOS: should include the feedback URL somewhere in the bundle" '
+    grep -qF http://discuss.example.com/feedback/ "${js_bundle_path}"
+'
+
 test_expect_success TWO_REPOS "TWO_REPOS: should have a correct CNAME record" '
     test_path_is_file "${output_dir}/CNAME" &&
     printf "sourcecred.example.com" | test_cmp - "${output_dir}/CNAME"
 '
 
-run_build NO_REPOS \
+# This feedback URL is "pollution" in the source environment and should
+# _not_ be passed down to the actual application.
+SOURCECRED_FEEDBACK_URL=http://wat.com/wat \
+    run_build NO_REPOS \
     "should build the site with no repositories and no CNAME" \
     # no arguments here
 
@@ -222,6 +257,11 @@ test_expect_success NO_REPOS \
             test_must_fail test -f "${data_dir}/${repo}/${file}" || return
         done
     done
+'
+
+test_expect_success NO_REPOS \
+    "NO_REPOS: should not include a feedback URL from a polluted environment" '
+    test_must_fail grep -qF http://wat.com/wat "${js_bundle_path}"
 '
 
 test_expect_success NO_REPOS "NO_REPOS: should have no CNAME record" '
