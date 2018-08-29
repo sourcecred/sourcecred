@@ -30,11 +30,14 @@ const execDependencyGraph = require("../../tools/execDependencyGraph").default;
 export default class PluginGraphCommand extends Command {
   static description = "load data required for SourceCred";
 
+  static strict = false;
+
   static args = [
     {
-      name: "repo",
+      name: "repos",
       required: true,
-      description: "the GitHub repo to load, represented as OWNER/NAME",
+      description:
+        "GitHub repos to load (one per argument), represented as OWNER/NAME",
     },
   ];
 
@@ -44,6 +47,12 @@ export default class PluginGraphCommand extends Command {
         "plugin whose data to load (loads default plugins if not set)",
       required: false,
       options: pluginNames(),
+    }),
+    output: flags.string({
+      description:
+        "the GitHub repo under which to store output; " +
+        "required unless exactly one repository is specified",
+      required: false,
     }),
     "sourcecred-directory": sourcecredDirectoryFlag(),
     "max-old-space-size": nodeMaxOldSpaceSizeFlag(),
@@ -58,30 +67,47 @@ export default class PluginGraphCommand extends Command {
 
   async run() {
     const {
-      args,
+      argv,
       flags: {
+        output: defaultOutput,
         "github-token": githubToken,
         "sourcecred-directory": basedir,
         "max-old-space-size": maxOldSpaceSize,
         plugin,
       },
     } = this.parse(PluginGraphCommand);
-    const repo = stringToRepo(args.repo);
+    const repos = argv.map((s) => stringToRepo(s));
+    const outputRepo = (() => {
+      if (defaultOutput != null) {
+        return stringToRepo(defaultOutput);
+      } else if (repos.length === 1) {
+        return repos[0];
+      } else {
+        throw new Error("output repository not specified");
+      }
+    })();
     if (!plugin) {
       loadDefaultPlugins({
         basedir,
         plugin,
-        repo,
+        outputRepo,
+        repos,
         githubToken,
         maxOldSpaceSize,
       });
     } else {
-      loadPlugin({basedir, plugin, repo, githubToken});
+      loadPlugin({basedir, plugin, outputRepo, repos, githubToken});
     }
   }
 }
 
-function loadDefaultPlugins({basedir, repo, githubToken, maxOldSpaceSize}) {
+function loadDefaultPlugins({
+  basedir,
+  outputRepo,
+  repos,
+  githubToken,
+  maxOldSpaceSize,
+}) {
   if (githubToken == null) {
     // TODO: This check should be abstracted so that plugins can
     // specify their argument dependencies and get nicely
@@ -98,26 +124,28 @@ function loadDefaultPlugins({basedir, repo, githubToken, maxOldSpaceSize}) {
         `--max_old_space_size=${maxOldSpaceSize}`,
         "./bin/sourcecred.js",
         "load",
-        repoToString(repo),
+        ...repos.map((repo) => repoToString(repo)),
         "--plugin",
         pluginName,
         "--github-token",
         githubToken,
+        "--output",
+        repoToString(outputRepo),
       ],
       deps: [],
     })),
   ];
   execDependencyGraph(tasks, {taskPassLabel: "DONE"}).then(({success}) => {
     if (success) {
-      addToRepoRegistry({basedir, repo});
+      addToRepoRegistry({basedir, repo: outputRepo});
     }
     process.exitCode = success ? 0 : 1;
   });
 }
 
-function loadPlugin({basedir, plugin, repo, githubToken}) {
+function loadPlugin({basedir, plugin, outputRepo, repos, githubToken}) {
   function scopedDirectory(key) {
-    const directory = path.join(basedir, key, repoToString(repo), plugin);
+    const directory = path.join(basedir, key, repoToString(outputRepo), plugin);
     mkdirp.sync(directory);
     return directory;
   }
@@ -135,14 +163,14 @@ function loadPlugin({basedir, plugin, repo, githubToken}) {
       } else {
         loadGithubData({
           token: githubToken,
-          repo,
+          repos,
           outputDirectory,
           cacheDirectory,
         });
       }
       break;
     case "git":
-      loadGitData({repo, outputDirectory, cacheDirectory});
+      loadGitData({repos, outputDirectory, cacheDirectory});
       break;
     default:
       console.error("fatal: Unknown plugin: " + (plugin: empty));
