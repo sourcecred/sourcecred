@@ -21,11 +21,21 @@ import {localGit} from "./gitUtils";
  */
 export function loadRepository(
   repositoryPath: string,
-  rootRef: string
+  rootRef: string,
+  mode: "FULL" | "COMMITS_ONLY" = "FULL"
 ): Repository {
   const git = localGit(repositoryPath);
   const commits = findCommits(git, rootRef);
-  const trees = findTrees(git, new Set(commits.map((x) => x.treeHash)));
+  const trees = (() => {
+    switch (mode) {
+      case "FULL":
+        return findTrees(git, new Set(commits.map((x) => x.treeHash)));
+      case "COMMITS_ONLY":
+        return [];
+      default:
+        throw new Error((mode: empty));
+    }
+  })();
   return {commits: objectMap(commits), trees: objectMap(trees)};
 }
 

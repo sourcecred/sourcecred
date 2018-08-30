@@ -29,6 +29,16 @@ describe("loadRepository", () => {
     );
   });
 
+  it("respects commits-only mode", () => {
+    const repository = createExampleRepo(mkdtemp());
+    const full = loadRepository(repository.path, "HEAD");
+    const commitsOnly = loadRepository(repository.path, "HEAD", "COMMITS_ONLY");
+    expect(commitsOnly).toEqual({
+      commits: full.commits,
+      trees: {},
+    });
+  });
+
   it("processes an old commit", () => {
     const repository = createExampleRepo(mkdtemp());
     const whole = loadRepository(repository.path, "HEAD");
