@@ -9,11 +9,14 @@ Any open-source project can create its own _cred_, which is a reputational metri
 To compute cred, we organize a project’s contributions into a graph, whose edges connect contributions to each other and to contributors.
 We then run PageRank on that graph.
 
-To learn more about SourceCred’s vision and values, please check out [our website].
+To learn more about SourceCred’s vision and values, please check out [our website] and our [forum].
+One good forum post to start with is [A Gentle Introduction to Cred].
+
 For an example of SourceCred in action, you can see SourceCred’s own [prototype cred attribution][prototype].
 
 [our website]: https://sourcecred.io/
 [prototype]: https://sourcecred.io/prototype/
+[A Gentle Introduction to Cred]: https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20
 
 ## Current Status
 
