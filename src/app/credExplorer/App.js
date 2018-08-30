@@ -80,15 +80,21 @@ export function createApp(
           />
         );
       }
+      const spacer = () => (
+        <span style={{display: "inline-block", width: 12}} />
+      );
       return (
         <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
-          <p>
-            <em>
-              This is a prototype. Please{" "}
-              <a href={process.env.SOURCECRED_FEEDBACK_URL}>
-                let us know what you think
-              </a>.
-            </em>
+          <p style={{textAlign: "right"}}>
+            <a
+              href={
+                "https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20"
+              }
+            >
+              what is this?
+            </a>
+            {spacer()}
+            <a href={process.env.SOURCECRED_FEEDBACK_URL}>feedback</a>
           </p>
           <div style={{marginBottom: 10}}>
             <RepositorySelect
