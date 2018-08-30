@@ -7,6 +7,8 @@ import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import type {NodeType, EdgeType} from "../adapters/pluginAdapter";
+import {WeightSlider} from "./weights/WeightSlider";
+import {DirectionalitySlider} from "./weights/DirectionalitySlider";
 
 type Props = {|
   +onChange: (EdgeEvaluator) => void,
@@ -120,26 +122,23 @@ class EdgeConfig extends React.Component<{
       this.props.edgeWeights,
       ({type}) => type.prefix
     );
-    return sortedWeights.map(({type, directionality, logWeight}) => (
-      <label style={{display: "block"}} key={type.prefix}>
-        <input
-          type="range"
-          min={-10}
-          max={10}
-          step={0.1}
-          value={logWeight}
-          onChange={(e) => {
-            const value: number = e.target.valueAsNumber;
-            const edgeWeights = this.props.edgeWeights.filter(
-              (x) => x.type.prefix !== type.prefix
-            );
-            edgeWeights.push({type, logWeight: value, directionality});
-            this.props.onChange(edgeWeights);
-          }}
-        />{" "}
-        {formatNumber(logWeight)} {`${type.forwardName}/${type.backwardName}`}
-      </label>
-    ));
+    return sortedWeights.map(({type, directionality, logWeight}) => {
+      const onChange = (value) => {
+        const edgeWeights = this.props.edgeWeights.filter(
+          (x) => x.type.prefix !== type.prefix
+        );
+        edgeWeights.push({type, logWeight: value, directionality});
+        this.props.onChange(edgeWeights);
+      };
+      return (
+        <WeightSlider
+          key={type.prefix}
+          weight={logWeight}
+          name={`${type.forwardName} / ${type.backwardName}`}
+          onChange={onChange}
+        />
+      );
+    });
   }
 
   directionControls() {
@@ -147,26 +146,23 @@ class EdgeConfig extends React.Component<{
       this.props.edgeWeights,
       ({type}) => type.prefix
     );
-    return sortedWeights.map(({type, directionality, logWeight}) => (
-      <label style={{display: "block"}} key={type.prefix}>
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.01}
-          value={directionality}
-          onChange={(e) => {
-            const value: number = e.target.valueAsNumber;
-            const edgeWeights = this.props.edgeWeights.filter(
-              (x) => x.type.prefix !== type.prefix
-            );
-            edgeWeights.push({type, directionality: value, logWeight});
-            this.props.onChange(edgeWeights);
-          }}
-        />{" "}
-        {directionality.toFixed(2)} {type.forwardName}
-      </label>
-    ));
+    return sortedWeights.map(({type, directionality, logWeight}) => {
+      const onChange = (value: number) => {
+        const edgeWeights = this.props.edgeWeights.filter(
+          (x) => x.type.prefix !== type.prefix
+        );
+        edgeWeights.push({type, directionality: value, logWeight});
+        this.props.onChange(edgeWeights);
+      };
+      return (
+        <DirectionalitySlider
+          name={type.forwardName}
+          key={type.prefix}
+          directionality={directionality}
+          onChange={onChange}
+        />
+      );
+    });
   }
   render() {
     return (
@@ -190,26 +186,23 @@ class NodeConfig extends React.Component<{
       ({type}) => type.prefix
     );
 
-    const controls = sortedWeights.map(({type, logWeight}) => (
-      <label style={{display: "block"}} key={type.prefix}>
-        <input
-          type="range"
-          min={-10}
-          max={10}
-          step={0.1}
-          value={logWeight}
-          onChange={(e) => {
-            const value: number = e.target.valueAsNumber;
-            const nodeWeights = this.props.nodeWeights.filter(
-              (x) => x.type.prefix !== type.prefix
-            );
-            nodeWeights.push({type, logWeight: value});
-            this.props.onChange(nodeWeights);
-          }}
-        />{" "}
-        {formatNumber(logWeight)} {type.name}
-      </label>
-    ));
+    const controls = sortedWeights.map(({type, logWeight}) => {
+      const onChange = (value) => {
+        const nodeWeights = this.props.nodeWeights.filter(
+          (x) => x.type.prefix !== type.prefix
+        );
+        nodeWeights.push({type, logWeight: value});
+        this.props.onChange(nodeWeights);
+      };
+      return (
+        <WeightSlider
+          key={type.prefix}
+          weight={logWeight}
+          name={type.name}
+          onChange={onChange}
+        />
+      );
+    });
     return (
       <div>
         <h2>Node weights (in log space)</h2>
@@ -217,12 +210,4 @@ class NodeConfig extends React.Component<{
       </div>
     );
   }
-}
-
-function formatNumber(n: number) {
-  let x = n.toFixed(1);
-  if (!x.startsWith("-")) {
-    x = "+" + x;
-  }
-  return x.replace("-", "\u2212");
 }
