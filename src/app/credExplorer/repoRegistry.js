@@ -1,7 +1,7 @@
 // @flow
 
 // The repoRegistry is written by the CLI load command
-// (src/cli/commands/load.js) and is read by the RepositorySelect component
+// (src/oclif/commands/load.js) and is read by the RepositorySelect component
 // (src/app/credExplorer/RepositorySelect.js)
 import deepEqual from "lodash.isequal";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
