@@ -2,11 +2,12 @@
 
 import React from "react";
 
-export class WeightSlider extends React.Component<{|
+export type Props = {|
   +weight: number,
-  +name: string,
+  +name: React$Node,
   +onChange: (number) => void,
-|}> {
+|};
+export class WeightSlider extends React.Component<Props> {
   render() {
     return (
       <label style={{display: "flex"}}>
