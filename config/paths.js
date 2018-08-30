@@ -29,6 +29,7 @@ module.exports = {
   backendEntryPoints: {
     sourcecred: resolveApp("src/oclif/sourcecred.js"),
     "commands/load": resolveApp("src/oclif/commands/load.js"),
+    cli: resolveApp("src/cli/main.js"),
     //
     fetchAndPrintGithubRepo: resolveApp(
       "src/plugins/github/bin/fetchAndPrintGithubRepo.js"
