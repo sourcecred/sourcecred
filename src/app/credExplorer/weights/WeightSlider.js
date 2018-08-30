@@ -9,28 +9,36 @@ export class WeightSlider extends React.Component<{|
 |}> {
   render() {
     return (
-      <label style={{display: "block"}}>
+      <label style={{display: "flex"}}>
+        <span style={{flexGrow: 1}}>{this.props.name}</span>
         <input
           type="range"
-          min={-10}
-          max={10}
-          step={0.1}
-          value={this.props.weight}
+          min={-5}
+          max={5}
+          step={1}
+          value={Math.log2(this.props.weight)}
           onChange={(e) => {
-            this.props.onChange(e.target.valueAsNumber);
+            const logValue = e.target.valueAsNumber;
+            this.props.onChange(2 ** logValue);
           }}
         />{" "}
-        <span>{formatWeight(this.props.weight)}</span>
-        <span>{this.props.name}</span>
+        <span
+          style={{minWidth: 45, display: "inline-block", textAlign: "right"}}
+        >
+          {formatWeight(this.props.weight)}
+        </span>
       </label>
     );
   }
 }
 
 export function formatWeight(n: number) {
-  let x = n.toFixed(1);
-  if (!x.startsWith("-")) {
-    x = "+" + x;
+  if (n <= 0 || !isFinite(n)) {
+    throw new Error(`Invalid weight: ${n}`);
   }
-  return x.replace("-", "\u2212");
+  if (n >= 1) {
+    return n.toFixed(0) + "×";
+  } else {
+    return `1/${(1 / n).toFixed(0)}×`;
+  }
 }

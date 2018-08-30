@@ -16,16 +16,16 @@ describe("app/credExplorer/weights/WeightSlider", () => {
       );
       return {element, onChange};
     }
-    it("sets slider to the provided weight", () => {
+    it("sets slider to the log of provided weight", () => {
       const {element} = example();
-      expect(element.find("input").props().value).toBe(3);
+      expect(element.find("input").props().value).toBe(Math.log2(3));
     });
     it("prints the provided weight", () => {
       const {element} = example();
       expect(
         element
           .find("span")
-          .at(0)
+          .at(1)
           .text()
       ).toBe(formatWeight(3));
     });
@@ -34,28 +34,31 @@ describe("app/credExplorer/weights/WeightSlider", () => {
       expect(
         element
           .find("span")
-          .at(1)
+          .at(0)
           .text()
       ).toBe("foo");
     });
-    it("changes to the slider trigger the onChange", () => {
+    it("changes to the slider trigger the onChange with exponentiatied value", () => {
       const {element, onChange} = example();
       const input = element.find("input");
       input.simulate("change", {target: {valueAsNumber: 7}});
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith(7);
+      expect(onChange).toHaveBeenCalledWith(2 ** 7);
     });
   });
 
   describe("formatWeight", () => {
-    it("rounds to one decimal", () => {
-      expect(formatWeight(0.123)).toBe("+0.1");
+    it("shows numbers greater than 1 as a integer-rounded multiplier", () => {
+      expect(formatWeight(5.3)).toBe("5×");
     });
-    it("adds a + to 0", () => {
-      expect(formatWeight(0)).toBe("+0.0");
+    it("shows numbers less than 1 (but not 0) as integer-rounded fractions", () => {
+      expect(formatWeight(0.249)).toBe("1/4×");
     });
-    it("adds a minus symbol to negative numbers", () => {
-      expect(formatWeight(-3)).toBe("\u22123.0");
+    it("throws on bad values", () => {
+      const bads = [NaN, Infinity, -Infinity, -3, 0];
+      for (const bad of bads) {
+        expect(() => formatWeight(bad)).toThrowError("Invalid weight");
+      }
     });
   });
 });
