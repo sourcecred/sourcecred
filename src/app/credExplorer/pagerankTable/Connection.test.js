@@ -9,6 +9,7 @@ import {ConnectionRowList, ConnectionRow, ConnectionView} from "./Connection";
 import {example} from "./sharedTestUtils";
 import {TableRow} from "./TableRow";
 import {NodeRow} from "./Node";
+import {factorioNodes} from "../../adapters/demoAdapters";
 
 require("../../testUtil").configureEnzyme();
 
@@ -26,9 +27,9 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
 
   describe("ConnectionRowList", () => {
     async function setup(maxEntriesPerList: number = 100000) {
-      const {adapters, pnd, nodes} = await example();
+      const {adapters, pnd} = await example();
       const depth = 2;
-      const node = nodes.bar1;
+      const node = factorioNodes.inserter1;
       const sharedProps = {adapters, pnd, maxEntriesPerList};
       const connections = NullUtil.get(sharedProps.pnd.get(node))
         .scoredConnections;
@@ -76,15 +77,11 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
 
   describe("ConnectionRow", () => {
     async function setup() {
-      const {pnd, adapters, nodes} = await example();
+      const {pnd, adapters} = await example();
       const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
-      const target = nodes.bar1;
+      const target = factorioNodes.inserter1;
       const {scoredConnections} = NullUtil.get(pnd.get(target));
-      const alphaConnections = scoredConnections.filter(
-        (sc) => sc.source === nodes.fooAlpha
-      );
-      expect(alphaConnections).toHaveLength(1);
-      const scoredConnection = alphaConnections[0];
+      const scoredConnection = scoredConnections[0];
       const depth = 2;
       const component = (
         <ConnectionRow
@@ -160,8 +157,8 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
   });
   describe("ConnectionView", () => {
     async function setup() {
-      const {pnd, adapters, nodes} = await example();
-      const {scoredConnections} = NullUtil.get(pnd.get(nodes.bar1));
+      const {pnd, adapters} = await example();
+      const {scoredConnections} = NullUtil.get(pnd.get(factorioNodes.machine1));
       const connections = scoredConnections.map((sc) => sc.connection);
       function connectionByType(t) {
         return NullUtil.get(
@@ -208,8 +205,10 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
       const outerSpan = view.find("span").first();
       const badge = outerSpan.find("Badge");
       const description = outerSpan.children().find("span");
-      expect(badge.children().text()).toEqual("is barred by");
-      expect(description.text()).toEqual('bar: NodeAddress["bar","a","1"]');
+      expect(badge.children().text()).toEqual("is transported by");
+      expect(description.text()).toEqual(
+        'NodeAddress["factorio","inserter","1"]'
+      );
     });
     it("for outward connections, renders a `Badge` and description", async () => {
       const {cvForConnection, outConnection} = await setup();
@@ -217,8 +216,10 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
       const outerSpan = view.find("span").first();
       const badge = outerSpan.find("Badge");
       const description = outerSpan.children().find("span");
-      expect(badge.children().text()).toEqual("bars");
-      expect(description.text()).toEqual("xox node!");
+      expect(badge.children().text()).toEqual("assembles");
+      expect(description.text()).toEqual(
+        'NodeAddress["factorio","inserter","2"]'
+      );
     });
     it("for synthetic connections, renders only a `Badge`", async () => {
       const {cvForConnection, syntheticConnection} = await setup();

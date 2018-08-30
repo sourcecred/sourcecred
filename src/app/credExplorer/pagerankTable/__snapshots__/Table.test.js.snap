@@ -13,44 +13,18 @@ Array [
     "style": Object {
       "fontWeight": "bold",
     },
-    "text": "bar",
-    "valueString": "NodeAddress[\\"bar\\"]",
+    "text": "Factorio demo adapter",
+    "valueString": "NodeAddress[\\"factorio\\"]",
   },
   Object {
     "style": undefined,
-    "text": " alpha",
-    "valueString": "NodeAddress[\\"bar\\",\\"a\\"]",
-  },
-  Object {
-    "style": Object {
-      "fontWeight": "bold",
-    },
-    "text": "foo",
-    "valueString": "NodeAddress[\\"foo\\"]",
+    "text": " inserter",
+    "valueString": "NodeAddress[\\"factorio\\",\\"inserter\\"]",
   },
   Object {
     "style": undefined,
-    "text": " alpha",
-    "valueString": "NodeAddress[\\"foo\\",\\"a\\"]",
-  },
-  Object {
-    "style": undefined,
-    "text": " beta",
-    "valueString": "NodeAddress[\\"foo\\",\\"b\\"]",
-  },
-  Object {
-    "style": Object {
-      "fontWeight": "bold",
-    },
-    "text": "unused",
-    "valueString": "NodeAddress[\\"unused\\"]",
-  },
-  Object {
-    "style": Object {
-      "fontWeight": "bold",
-    },
-    "text": "xox",
-    "valueString": "NodeAddress[\\"xox\\"]",
+    "text": " machine",
+    "valueString": "NodeAddress[\\"factorio\\",\\"machine\\"]",
   },
 ]
 `;
