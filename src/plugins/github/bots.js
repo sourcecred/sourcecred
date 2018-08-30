@@ -4,6 +4,7 @@
 // rather than depending on this single souce of truth
 export function botSet(): Set<string> {
   return new Set([
+    "codecov",
     "credbot",
     "facebook-github-bot",
     "gitcoinbot",
