@@ -4,6 +4,7 @@ import {execFileSync} from "child_process";
 import fs from "fs";
 import mkdirp from "mkdirp";
 import path from "path";
+import process from "process";
 
 export interface Utils {
   exec: GitDriver;
@@ -35,6 +36,10 @@ export function localGit(repositoryPath: string): GitDriver {
       // Ignore global Git settings, for test isolation.
       GIT_CONFIG_NOSYSTEM: "1",
       GIT_ATTR_NOSYSTEM: "1",
+      // Bring over the SSH configuration so that loading private repos is possible
+      // This post has some useful information on SSH_AUTH_SOCK:
+      // http://blog.joncairns.com/2013/12/understanding-ssh-agent-and-ssh-add/
+      SSH_AUTH_SOCK: process.env.SSH_AUTH_SOCK,
       ...(env || {}),
     };
     const options = {env: fullEnv};
