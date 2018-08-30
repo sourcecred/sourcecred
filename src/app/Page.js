@@ -102,8 +102,7 @@ const style = StyleSheet.create({
     minHeight: `calc(100vh - ${footerHeight}px)`,
   },
   nav: {
-    height: 60,
-    padding: "20px 100px",
+    padding: "20px 50px 0 50px",
     maxWidth: 900,
     margin: "0 auto",
   },
