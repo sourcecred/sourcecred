@@ -1,6 +1,7 @@
 # [SourceCred](https://sourcecred.io)
 
 [![Build Status](https://travis-ci.org/sourcecred/sourcecred.svg?branch=master)](https://travis-ci.org/sourcecred/sourcecred)
+[![Discourse topics](https://img.shields.io/discourse/https/discuss.sourcecred.io/topics.svg)](discuss.sourcecred.io)
 [![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
 
 SourceCred creates reputation networks for open-source projects.
@@ -70,15 +71,18 @@ will create a graph called `ipfs/meta-ipfs` in the cred explorer, containing the
 ## Early Adopters
 
 We’re looking for projects who want to be early adopters of SourceCred!
-If you’re a maintainer of an open-source project and would like to start using SourceCred, please reach out to us on our [Discord].
+If you’re a maintainer of an open-source project and would like to start using SourceCred, please reach out to us on our [Discord] or our [forum].
 
 ## Contributing
 
 We’d love to accept your contributions!
-Please join our [Discord] to get in touch with us, and check out our [contributing guide] to get started.
+You can reach out to us by posting on our [forum], or chatting with us on [Discord].
+We'd be happy to help you get started and show you around the codebase.
+Please also take a look at our [contributing guide].
 
 If you’re looking for a place to start, we’ve tagged some issues [Contributions Welcome].
 
+[forum]: https://discuss.sourcecred.io
 [Discord]: https://discord.gg/tsBTgc9
 [contributing guide]: https://github.com/sourcecred/sourcecred/blob/master/CONTRIBUTING.md
 [Contributions Welcome]: https://github.com/SourceCred/SourceCred/issues?q=is%3Aopen+is%3Aissue+label%3A%22contributions+welcome%22
