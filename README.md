@@ -31,10 +31,15 @@ First, make sure that you have the following dependencies:
   - Install [Node] (tested on v8.x.x).
   - Install [Yarn] (tested on v1.7.0).
   - Create a [GitHub API token]. No special permissions are required.
+  - For macOS users: Ensure that your environment provides GNU
+    coreutils. [See this comment for details about what, how, and
+    why.][macos-gnu]
 
 [Node]: https://nodejs.org/en/
 [Yarn]: https://yarnpkg.com/lang/en/
 [GitHub API token]: https://github.com/settings/tokens
+
+[macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-417202213
 
 Then, run the following commands to clone and build SourceCred:
 
