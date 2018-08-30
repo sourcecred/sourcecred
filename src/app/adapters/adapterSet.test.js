@@ -1,91 +1,22 @@
 // @flow
 
-import {
-  NodeAddress,
-  EdgeAddress,
-  type NodeAddressT,
-  Graph,
-} from "../../core/graph";
-import type {DynamicPluginAdapter} from "./pluginAdapter";
+import {NodeAddress, EdgeAddress, Graph} from "../../core/graph";
+import {FactorioStaticAdapter} from "./demoAdapters";
 import {StaticAdapterSet} from "./adapterSet";
 import {FallbackStaticAdapter, FALLBACK_NAME} from "./fallbackAdapter";
 import {Assets} from "../assets";
-import {makeRepo, type Repo} from "../../core/repo";
+import {makeRepo} from "../../core/repo";
 
 describe("app/adapters/adapterSet", () => {
-  class TestStaticPluginAdapter {
-    loadingMock: Function;
-    constructor() {
-      this.loadingMock = jest.fn();
-    }
-    name() {
-      return "other plugin";
-    }
-    nodePrefix() {
-      return NodeAddress.fromParts(["other"]);
-    }
-    edgePrefix() {
-      return EdgeAddress.fromParts(["other"]);
-    }
-    nodeTypes() {
-      return [
-        {
-          name: "other1",
-          pluralName: "others1",
-          defaultWeight: 0,
-          prefix: NodeAddress.fromParts(["other", "1"]),
-        },
-        {
-          name: "other2",
-          pluralName: "others2",
-          defaultWeight: 0,
-          prefix: NodeAddress.fromParts(["other", "2"]),
-        },
-      ];
-    }
-    edgeTypes() {
-      return [
-        {
-          forwardName: "others_1",
-          backwardName: "othered_by_1",
-          prefix: EdgeAddress.fromParts(["other", "1"]),
-        },
-        {
-          forwardName: "others_2",
-          backwardName: "othered_by_2",
-          prefix: EdgeAddress.fromParts(["other", "2"]),
-        },
-      ];
-    }
-
-    load(assets: Assets, repo: Repo) {
-      return this.loadingMock(assets, repo).then(
-        () => new TestDynamicPluginAdapter()
-      );
-    }
-  }
-
-  class TestDynamicPluginAdapter implements DynamicPluginAdapter {
-    graph() {
-      return new Graph().addNode(NodeAddress.fromParts(["other1", "example"]));
-    }
-    nodeDescription(x: NodeAddressT) {
-      return `Node from the test plugin: ${NodeAddress.toString(x)}`;
-    }
-    static() {
-      return new TestStaticPluginAdapter();
-    }
-  }
-
   describe("StaticAdapterSet", () => {
     function example() {
-      const x = new TestStaticPluginAdapter();
+      const x = new FactorioStaticAdapter();
       const fallback = new FallbackStaticAdapter();
       const sas = new StaticAdapterSet([x]);
       return {x, fallback, sas};
     }
     it("errors if two plugins have the same name", () => {
-      const x = new TestStaticPluginAdapter();
+      const x = new FactorioStaticAdapter();
       const shouldError = () => new StaticAdapterSet([x, x]);
       expect(shouldError).toThrowError("Multiple plugins with name");
     });
@@ -100,24 +31,30 @@ describe("app/adapters/adapterSet", () => {
     it("aggregates NodeTypes across plugins", () => {
       const {sas} = example();
       const nodeTypes = sas.nodeTypes();
-      expect(nodeTypes).toHaveLength(3);
+      const expectedNumNodeTypes =
+        new FactorioStaticAdapter().nodeTypes().length +
+        new FallbackStaticAdapter().nodeTypes().length;
+      expect(nodeTypes).toHaveLength(expectedNumNodeTypes);
     });
     it("aggregates EdgeTypes across plugins", () => {
       const {sas} = example();
       const edgeTypes = sas.edgeTypes();
-      expect(edgeTypes).toHaveLength(3);
+      const expectedNumEdgeTypes =
+        new FactorioStaticAdapter().edgeTypes().length +
+        new FallbackStaticAdapter().edgeTypes().length;
+      expect(edgeTypes).toHaveLength(expectedNumEdgeTypes);
     });
     it("finds adapter matching a node", () => {
       const {x, sas} = example();
       const matching = sas.adapterMatchingNode(
-        NodeAddress.fromParts(["other", "foo"])
+        NodeAddress.fromParts(["factorio", "inserter"])
       );
       expect(matching.name()).toBe(x.name());
     });
     it("finds adapter matching an edge", () => {
       const {x, sas} = example();
       const matching = sas.adapterMatchingEdge(
-        EdgeAddress.fromParts(["other", "foo"])
+        EdgeAddress.fromParts(["factorio", "assembles"])
       );
       expect(matching.name()).toBe(x.name());
     });
@@ -134,16 +71,16 @@ describe("app/adapters/adapterSet", () => {
     it("finds type matching a node", () => {
       const {sas} = example();
       const type = sas.typeMatchingNode(
-        NodeAddress.fromParts(["other", "1", "foo"])
+        NodeAddress.fromParts(["factorio", "inserter", "1", "foo"])
       );
-      expect(type.name).toBe("other1");
+      expect(type.name).toBe("inserter");
     });
     it("finds type matching an edge", () => {
       const {sas} = example();
       const type = sas.typeMatchingEdge(
-        EdgeAddress.fromParts(["other", "1", "foo"])
+        EdgeAddress.fromParts(["factorio", "assembles", "other", "1", "foo"])
       );
-      expect(type.forwardName).toBe("others_1");
+      expect(type.forwardName).toBe("assembles");
     });
     it("finds fallback type for unregistered node", () => {
       const {sas} = example();
@@ -161,6 +98,7 @@ describe("app/adapters/adapterSet", () => {
     });
     it("loads a dynamicAdapterSet", async () => {
       const {x, sas} = example();
+      x.loadingMock = jest.fn();
       x.loadingMock.mockResolvedValue();
       expect(x.loadingMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
@@ -176,9 +114,8 @@ describe("app/adapters/adapterSet", () => {
 
   describe("DynamicAdapterSet", () => {
     async function example() {
-      const x = new TestStaticPluginAdapter();
+      const x = new FactorioStaticAdapter();
       const sas = new StaticAdapterSet([x]);
-      x.loadingMock.mockResolvedValue();
       const das = await sas.load(
         new Assets("/my/gateway/"),
         makeRepo("foo", "bar")
@@ -203,14 +140,14 @@ describe("app/adapters/adapterSet", () => {
     it("finds adapter matching a node", async () => {
       const {x, das} = await example();
       const matching = das.adapterMatchingNode(
-        NodeAddress.fromParts(["other", "foo"])
+        NodeAddress.fromParts(["factorio", "inserter"])
       );
       expect(matching.static().name()).toBe(x.name());
     });
     it("finds adapter matching an edge", async () => {
       const {x, das} = await example();
       const matching = das.adapterMatchingEdge(
-        EdgeAddress.fromParts(["other", "foo"])
+        EdgeAddress.fromParts(["factorio", "assembles"])
       );
       expect(matching.static().name()).toBe(x.name());
     });

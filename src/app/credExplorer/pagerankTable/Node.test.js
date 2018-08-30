@@ -7,11 +7,12 @@ import * as NullUtil from "../../../util/null";
 import {TableRow} from "./TableRow";
 import {AggregationRowList} from "./Aggregation";
 
-import {type NodeAddressT, NodeAddress} from "../../../core/graph";
+import type {NodeAddressT} from "../../../core/graph";
 
 import {nodeDescription} from "./shared";
 import {example} from "./sharedTestUtils";
 import {NodeRowList, NodeRow, type NodeRowProps} from "./Node";
+import {factorioNodes} from "../../adapters/demoAdapters";
 
 require("../../testUtil").configureEnzyme();
 
@@ -32,14 +33,8 @@ describe("app/credExplorer/pagerankTable/Node", () => {
     }
     async function setup(maxEntriesPerList: number = 100000) {
       const {adapters, pnd} = await example();
-      const nodes = sortedByScore(Array.from(pnd.keys()), pnd)
-        .reverse() // ascending order!
-        .filter((x) =>
-          NodeAddress.hasPrefix(x, NodeAddress.fromParts(["foo"]))
-        );
+      const nodes = Array.from(pnd.keys());
       expect(nodes).not.toHaveLength(0);
-      expect(nodes).not.toHaveLength(1);
-      expect(nodes).not.toHaveLength(pnd.size);
       const sharedProps = {adapters, pnd, maxEntriesPerList};
       const component = <NodeRowList sharedProps={sharedProps} nodes={nodes} />;
       const element = shallow(component);
@@ -86,9 +81,9 @@ describe("app/credExplorer/pagerankTable/Node", () => {
   describe("NodeRow", () => {
     async function setup(props: $Shape<{...NodeRowProps}>) {
       props = props || {};
-      const {pnd, adapters, nodes} = await example();
+      const {pnd, adapters} = await example();
       const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
-      const node = nodes.bar1;
+      const node = factorioNodes.inserter1;
       const component = shallow(
         <NodeRow
           node={NullUtil.orElse(props.node, node)}

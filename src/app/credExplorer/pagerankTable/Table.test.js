@@ -70,8 +70,9 @@ describe("app/credExplorer/pagerankTable/Table", () => {
       });
       it("with the ability to filter nodes passed to NodeRowList", async () => {
         const {element, options} = await setup();
-        const option1 = options.at(1);
-        const value = option1.prop("value");
+        const option = options.at(2);
+
+        const value = option.prop("value");
         expect(value).not.toEqual(NodeAddress.empty);
         const previousNodes = element.find("NodeRowList").prop("nodes");
         expect(
@@ -89,7 +90,7 @@ describe("app/credExplorer/pagerankTable/Table", () => {
         expect(element.state().topLevelFilter).toEqual(NodeAddress.empty);
       });
       it("filter defaults to defaultNodeFilter if available", async () => {
-        const filter = NodeAddress.fromParts(["foo", "a"]);
+        const filter = NodeAddress.fromParts(["factorio", "inserter"]);
         const {element} = await setup(filter);
         expect(element.state().topLevelFilter).toEqual(filter);
       });

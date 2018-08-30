@@ -2,6 +2,7 @@
 
 import React from "react";
 import {shallow} from "enzyme";
+
 import * as NullUtil from "../../../util/null";
 import {NodeAddress, EdgeAddress} from "../../../core/graph";
 import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
@@ -15,6 +16,7 @@ import {Badge} from "./shared";
 import {example} from "./sharedTestUtils";
 import {aggregateFlat, type FlatAggregation} from "./aggregate";
 import {TableRow} from "./TableRow";
+import {factorioNodes} from "../../adapters/demoAdapters";
 
 require("../../testUtil").configureEnzyme();
 
@@ -31,8 +33,8 @@ describe("app/credExplorer/pagerankTable/Aggregation", () => {
   });
   describe("AggregationRowList", () => {
     it("instantiates AggregationRows for each aggregation", async () => {
-      const {adapters, pnd, nodes} = await example();
-      const node = nodes.bar1;
+      const {adapters, pnd} = await example();
+      const node = factorioNodes.inserter1;
       const depth = 20;
       const maxEntriesPerList = 50;
       const sharedProps = {adapters, pnd, maxEntriesPerList};
@@ -66,9 +68,9 @@ describe("app/credExplorer/pagerankTable/Aggregation", () => {
 
   describe("AggregationRow", () => {
     async function setup() {
-      const {pnd, adapters, nodes} = await example();
+      const {pnd, adapters} = await example();
       const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
-      const target = nodes.bar1;
+      const target = factorioNodes.inserter1;
       const {scoredConnections} = NullUtil.get(pnd.get(target));
       const aggregations = aggregateFlat(
         scoredConnections,

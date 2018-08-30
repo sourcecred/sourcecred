@@ -11,6 +11,9 @@ import {
 } from "./aggregate";
 
 describe("app/credExplorer/aggregate", () => {
+  // TODO: If making major modifications to these tests, consider switching
+  // from the hand-maintained connections and types, and instead use the demo
+  // adadpters from app/adapters/demoAdapters
   function example() {
     const nodes = {
       root: NodeAddress.fromParts(["root"]),
