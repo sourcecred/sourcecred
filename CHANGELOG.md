@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Improve weight sliders display (#736)
 - Separate bots from users in the UI (#720)
 - Add a feedback link to the prototype (#715)
 - Support combining multiple repositories into a single graph (#711)

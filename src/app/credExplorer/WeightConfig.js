@@ -16,24 +16,24 @@ type Props = {|
 
 type WeightedEdgeType = {|
   +type: EdgeType,
-  +logWeight: number,
+  +weight: number,
   +directionality: number,
 |};
 type EdgeWeights = WeightedEdgeType[];
 const defaultEdgeWeights = (): EdgeWeights => {
   const result = [];
   for (const type of defaultStaticAdapters().edgeTypes()) {
-    result.push({type, logWeight: 0, directionality: 0.5});
+    result.push({type, weight: 1.0, directionality: 0.5});
   }
   return result;
 };
 
 type NodeWeights = WeightedNodeType[];
-type WeightedNodeType = {|+type: NodeType, +logWeight: number|};
+type WeightedNodeType = {|+type: NodeType, +weight: number|};
 const defaultNodeWeights = (): NodeWeights => {
   const result = [];
   for (const type of defaultStaticAdapters().nodeTypes()) {
-    result.push({type, logWeight: type.defaultWeight});
+    result.push({type, weight: type.defaultWeight});
   }
   return result;
 };
@@ -97,16 +97,14 @@ export class WeightConfig extends React.Component<Props, State> {
 
   fire() {
     const {edgeWeights, nodeWeights} = this.state;
-    const edgePrefixes = edgeWeights.map(
-      ({type, logWeight, directionality}) => ({
-        prefix: type.prefix,
-        weight: 2 ** logWeight,
-        directionality,
-      })
-    );
-    const nodePrefixes = nodeWeights.map(({type, logWeight}) => ({
+    const edgePrefixes = edgeWeights.map(({type, weight, directionality}) => ({
       prefix: type.prefix,
-      weight: 2 ** logWeight,
+      weight,
+      directionality,
+    }));
+    const nodePrefixes = nodeWeights.map(({type, weight}) => ({
+      prefix: type.prefix,
+      weight,
     }));
     const edgeEvaluator = byNodeType(byEdgeType(edgePrefixes), nodePrefixes);
     this.props.onChange(edgeEvaluator);
@@ -122,18 +120,18 @@ class EdgeConfig extends React.Component<{
       this.props.edgeWeights,
       ({type}) => type.prefix
     );
-    return sortedWeights.map(({type, directionality, logWeight}) => {
+    return sortedWeights.map(({type, directionality, weight}) => {
       const onChange = (value) => {
         const edgeWeights = this.props.edgeWeights.filter(
           (x) => x.type.prefix !== type.prefix
         );
-        edgeWeights.push({type, logWeight: value, directionality});
+        edgeWeights.push({type, weight: value, directionality});
         this.props.onChange(edgeWeights);
       };
       return (
         <WeightSlider
           key={type.prefix}
-          weight={logWeight}
+          weight={weight}
           name={`${type.forwardName} / ${type.backwardName}`}
           onChange={onChange}
         />
@@ -146,12 +144,12 @@ class EdgeConfig extends React.Component<{
       this.props.edgeWeights,
       ({type}) => type.prefix
     );
-    return sortedWeights.map(({type, directionality, logWeight}) => {
+    return sortedWeights.map(({type, directionality, weight}) => {
       const onChange = (value: number) => {
         const edgeWeights = this.props.edgeWeights.filter(
           (x) => x.type.prefix !== type.prefix
         );
-        edgeWeights.push({type, directionality: value, logWeight});
+        edgeWeights.push({type, directionality: value, weight});
         this.props.onChange(edgeWeights);
       };
       return (
@@ -167,7 +165,7 @@ class EdgeConfig extends React.Component<{
   render() {
     return (
       <div>
-        <h2>Edge weights (in log space)</h2>
+        <h2>Edge weights</h2>
         {this.weightControls()}
         <h2>Edge directionality</h2>
         {this.directionControls()}
@@ -186,18 +184,18 @@ class NodeConfig extends React.Component<{
       ({type}) => type.prefix
     );
 
-    const controls = sortedWeights.map(({type, logWeight}) => {
+    const controls = sortedWeights.map(({type, weight}) => {
       const onChange = (value) => {
         const nodeWeights = this.props.nodeWeights.filter(
           (x) => x.type.prefix !== type.prefix
         );
-        nodeWeights.push({type, logWeight: value});
+        nodeWeights.push({type, weight: value});
         this.props.onChange(nodeWeights);
       };
       return (
         <WeightSlider
           key={type.prefix}
-          weight={logWeight}
+          weight={weight}
           name={type.name}
           onChange={onChange}
         />
@@ -205,7 +203,7 @@ class NodeConfig extends React.Component<{
     });
     return (
       <div>
-        <h2>Node weights (in log space)</h2>
+        <h2>Node weights</h2>
         {controls}
       </div>
     );
