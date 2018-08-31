@@ -1,9 +1,13 @@
 // @no-flow
+
 const webpack = require("webpack");
 const eslintFormatter = require("react-dev-utils/eslintFormatter");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const paths = require("./paths");
 const nodeExternals = require("webpack-node-externals");
+const getClientEnvironment = require("./env");
+
+const env = getClientEnvironment();
 
 // This is the backend configuration. It builds applications that target
 // Node and will not run in a browser.
@@ -70,11 +74,5 @@ module.exports = (outputPath) => ({
       },
     ],
   },
-  plugins: [
-    new webpack.DefinePlugin({
-      "process.env.NODE_ENV": JSON.stringify(
-        process.env.NODE_ENV || "development"
-      ),
-    }),
-  ],
+  plugins: [new webpack.DefinePlugin(env.stringified)],
 });
