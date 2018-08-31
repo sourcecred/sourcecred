@@ -30,6 +30,7 @@ export async function loadGithubData(options: Options): Promise<void> {
   for (const response of responses) {
     view.addData(response);
   }
+  view.compressByRemovingBody();
   const blob: Uint8Array = pako.gzip(JSON.stringify(view));
   const outputFilename = path.join(options.outputDirectory, "view.json.gz");
   return fs.writeFile(outputFilename, blob);
