@@ -65,90 +65,90 @@ describe("parseReferences", () => {
   });
 
   describe("cross-repo links", () => {
-    const repoRef = "sourcecred/sourcecred#12";
+    const repoRef = "sourcecred/example_.repo#12";
     it("a bare link", () => {
       expect(parseReferences(repoRef)).toEqual([
         {refType: "BASIC", ref: repoRef},
       ]);
     });
     it("a link with surrounding context", () => {
-      expect(parseReferences("please see sourcecred/sourcecred#12")).toEqual([
-        {refType: "BASIC", ref: repoRef},
-      ]);
+      expect(parseReferences("please see sourcecred/example_.repo#12")).toEqual(
+        [{refType: "BASIC", ref: repoRef}]
+      );
     });
   });
 
   it("finds a trivial url reference", () => {
     expect(
-      parseReferences("https://github.com/sourcecred/sourcecred/issues/86")
+      parseReferences("https://github.com/sourcecred/example_.repo/issues/86")
     ).toHaveLength(1);
   });
 
   it("finds url references", () => {
     const example = `
     A directly linked issue:
-https://github.com/sourcecred/example-github/issues/1
+https://github.com/sourcecred/exa_mple-git.hub/issues/1
 
     A directly linked issue with fragment:
-https://github.com/sourcecred/example-github/issues/1#issue-300934818
+https://github.com/sourcecred/exa_mple-git.hub/issues/1#issue-300934818
 
     A directly linked pull request:
-https://github.com/sourcecred/example-github/pull/3
+https://github.com/sourcecred/exa_mple-git.hub/pull/3
 
     A directly linked pull request with fragment:
-https://github.com/sourcecred/example-github/pull/3#issue-171887741
+https://github.com/sourcecred/exa_mple-git.hub/pull/3#issue-171887741
 
     A directly linked issue comment:
-https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442
+https://github.com/sourcecred/exa_mple-git.hub/issues/6#issuecomment-373768442
 
     A directly linked pull request review:
-https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899
+https://github.com/sourcecred/exa_mple-git.hub/pull/5#pullrequestreview-100313899
 
     A directly linked pull request review comment:
-https://github.com/sourcecred/example-github/pull/5#discussion_r171460198
+https://github.com/sourcecred/exa_mple-git.hub/pull/5#discussion_r171460198
 
     A directly linked pull request comment:
-https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
+https://github.com/sourcecred/exa_mple-git.hub/pull/3#issuecomment-369162222
     `;
 
     const expected = [
       {
         refType: "BASIC",
-        ref: "https://github.com/sourcecred/example-github/issues/1",
+        ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/1",
       },
       {
         refType: "BASIC",
         ref:
-          "https://github.com/sourcecred/example-github/issues/1#issue-300934818",
+          "https://github.com/sourcecred/exa_mple-git.hub/issues/1#issue-300934818",
       },
       {
         refType: "BASIC",
-        ref: "https://github.com/sourcecred/example-github/pull/3",
-      },
-      {
-        refType: "BASIC",
-        ref:
-          "https://github.com/sourcecred/example-github/pull/3#issue-171887741",
+        ref: "https://github.com/sourcecred/exa_mple-git.hub/pull/3",
       },
       {
         refType: "BASIC",
         ref:
-          "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442",
+          "https://github.com/sourcecred/exa_mple-git.hub/pull/3#issue-171887741",
       },
       {
         refType: "BASIC",
         ref:
-          "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+          "https://github.com/sourcecred/exa_mple-git.hub/issues/6#issuecomment-373768442",
       },
       {
         refType: "BASIC",
         ref:
-          "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+          "https://github.com/sourcecred/exa_mple-git.hub/pull/5#pullrequestreview-100313899",
       },
       {
         refType: "BASIC",
         ref:
-          "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
+          "https://github.com/sourcecred/exa_mple-git.hub/pull/5#discussion_r171460198",
+      },
+      {
+        refType: "BASIC",
+        ref:
+          "https://github.com/sourcecred/exa_mple-git.hub/pull/3#issuecomment-369162222",
       },
     ];
 
@@ -157,20 +157,20 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
 
   it("doesn't find urls mangled with word characters", () => {
     expect(
-      parseReferences("foohttps://github.com/sourcecred/sourcecred/pull/94")
+      parseReferences("foohttps://github.com/sourcecred/example_.repo/pull/94")
     ).toHaveLength(0);
 
     expect(
-      parseReferences("https://github.com/sourcecred/sourcecred/pull/94foo")
+      parseReferences("https://github.com/sourcecred/example_.repo/pull/94foo")
     ).toHaveLength(0);
 
     expect(
-      parseReferences("(https://github.com/sourcecred/sourcecred/pull/94)")
+      parseReferences("(https://github.com/sourcecred/example_.repo/pull/94)")
     ).toHaveLength(1);
   });
 
   it("allows but excludes leading and trailing punctuation", () => {
-    const base = "https://github.com/sourcecred/sourcecred/pull/94";
+    const base = "https://github.com/sourcecred/example_.repo/pull/94";
     expect(parseReferences(`!${base}`)).toEqual([
       {refType: "BASIC", ref: base},
     ]);
@@ -207,14 +207,14 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
   it("finds a mix of reference types", () => {
     expect(
       parseReferences(
-        "@wchargin commented on #125, eg https://github.com/sourcecred/sourcecred/pull/125#pullrequestreview-113402856"
+        "@wchargin commented on #125, eg https://github.com/sourcecred/example_.repo/pull/125#pullrequestreview-113402856"
       )
     ).toEqual([
       {refType: "BASIC", ref: "#125"},
       {
         refType: "BASIC",
         ref:
-          "https://github.com/sourcecred/sourcecred/pull/125#pullrequestreview-113402856",
+          "https://github.com/sourcecred/example_.repo/pull/125#pullrequestreview-113402856",
       },
       {refType: "BASIC", ref: "@wchargin"},
     ]);
@@ -263,14 +263,14 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
 
   describe("finds references at the start of a non-initial line", () => {
     it("for repo-numeric references", () => {
-      const f = (number: number) => `sourcecred/example-github#${number}`;
+      const f = (number: number) => `sourcecred/exa_mple-git.hub#${number}`;
       const input = `${f(1)}\n${f(2)}\n${f(3)}\r\n${f(4)}\r\n${f(5)}`;
       expect(parseReferences(input)).toEqual([
-        {refType: "BASIC", ref: "sourcecred/example-github#1"},
-        {refType: "BASIC", ref: "sourcecred/example-github#2"},
-        {refType: "BASIC", ref: "sourcecred/example-github#3"},
-        {refType: "BASIC", ref: "sourcecred/example-github#4"},
-        {refType: "BASIC", ref: "sourcecred/example-github#5"},
+        {refType: "BASIC", ref: "sourcecred/exa_mple-git.hub#1"},
+        {refType: "BASIC", ref: "sourcecred/exa_mple-git.hub#2"},
+        {refType: "BASIC", ref: "sourcecred/exa_mple-git.hub#3"},
+        {refType: "BASIC", ref: "sourcecred/exa_mple-git.hub#4"},
+        {refType: "BASIC", ref: "sourcecred/exa_mple-git.hub#5"},
       ]);
     });
     it("for numeric references", () => {
@@ -308,28 +308,28 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
     });
     it("for GitHub URL references", () => {
       const f = (number: number) =>
-        "https://github.com/sourcecred/example-github/issues/" + number;
+        "https://github.com/sourcecred/exa_mple-git.hub/issues/" + number;
       const input = `${f(1)}\n${f(2)}\n${f(3)}\r\n${f(4)}\r\n${f(5)}`;
       expect(parseReferences(input)).toEqual([
         {
           refType: "BASIC",
-          ref: "https://github.com/sourcecred/example-github/issues/1",
+          ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/1",
         },
         {
           refType: "BASIC",
-          ref: "https://github.com/sourcecred/example-github/issues/2",
+          ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/2",
         },
         {
           refType: "BASIC",
-          ref: "https://github.com/sourcecred/example-github/issues/3",
+          ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/3",
         },
         {
           refType: "BASIC",
-          ref: "https://github.com/sourcecred/example-github/issues/4",
+          ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/4",
         },
         {
           refType: "BASIC",
-          ref: "https://github.com/sourcecred/example-github/issues/5",
+          ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/5",
         },
       ]);
     });
@@ -337,12 +337,12 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
 
   describe("finds references separated by a single space", () => {
     it("for repo-numeric references", () => {
-      const f = (number: number) => `sourcecred/example-github#${number}`;
+      const f = (number: number) => `sourcecred/exa_mple-git.hub#${number}`;
       const input = `${f(1)} ${f(2)} ${f(3)}`;
       expect(parseReferences(input)).toEqual([
-        {refType: "BASIC", ref: "sourcecred/example-github#1"},
-        {refType: "BASIC", ref: "sourcecred/example-github#2"},
-        {refType: "BASIC", ref: "sourcecred/example-github#3"},
+        {refType: "BASIC", ref: "sourcecred/exa_mple-git.hub#1"},
+        {refType: "BASIC", ref: "sourcecred/exa_mple-git.hub#2"},
+        {refType: "BASIC", ref: "sourcecred/exa_mple-git.hub#3"},
       ]);
     });
     it("for numeric references", () => {
@@ -374,20 +374,20 @@ https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222
     });
     it("for GitHub URL references", () => {
       const f = (number: number) =>
-        "https://github.com/sourcecred/example-github/issues/" + number;
+        "https://github.com/sourcecred/exa_mple-git.hub/issues/" + number;
       const input = `${f(1)} ${f(2)} ${f(3)}`;
       expect(parseReferences(input)).toEqual([
         {
           refType: "BASIC",
-          ref: "https://github.com/sourcecred/example-github/issues/1",
+          ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/1",
         },
         {
           refType: "BASIC",
-          ref: "https://github.com/sourcecred/example-github/issues/2",
+          ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/2",
         },
         {
           refType: "BASIC",
-          ref: "https://github.com/sourcecred/example-github/issues/3",
+          ref: "https://github.com/sourcecred/exa_mple-git.hub/issues/3",
         },
       ]);
     });

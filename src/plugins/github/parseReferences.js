@@ -1,6 +1,7 @@
 // @flow
 
 import {textBlocks} from "./parseMarkdown";
+import {githubOwnerPattern, githubRepoPattern} from "../../core/repo";
 
 export type ParsedReference = {|
   // "@user" or "#123" or "https://github.com/owner/name/..."
@@ -32,10 +33,11 @@ function parseReferencesFromRawString(textBlock: string): ParsedReference[] {
 }
 
 function findRepoNumericReferences(textBlock: string): ParsedReference[] {
-  return findAllMatches(
-    /(?:\W|^)([a-zA-Z0-9-]+\/[a-zA-Z0-9-]+#\d+)(?=\W|$)/gm,
-    textBlock
-  ).map((x) => ({
+  const re = new RegExp(
+    `(?:\\W|^)((?:${githubOwnerPattern})/(?:${githubRepoPattern})#\\d+)(?=\\W|$)`,
+    "gm"
+  );
+  return findAllMatches(re, textBlock).map((x) => ({
     refType: "BASIC",
     ref: x[1],
   }));
@@ -49,12 +51,16 @@ function findNumericReferences(textBlock: string): ParsedReference[] {
 }
 
 function findUsernameReferences(textBlock: string): ParsedReference[] {
+  const pairedWithPattern =
+    "(?:\\W|^)(?:P|p)aired(?:-| )(?:w|W)ith:? " +
+    `(@(?:${githubOwnerPattern}))(?=\\W|$)`;
+  const basicPattern = `(?:\\W|^)(@(?:${githubOwnerPattern}))(?=\\W|$)`;
   const pairedWithRefs = findAllMatches(
-    /(?:\W|^)(?:P|p)aired(?:-| )(?:w|W)ith:? (@[a-zA-Z0-9-]+)(?=\W|$)/gm,
+    new RegExp(pairedWithPattern, "gm"),
     textBlock
   ).map((x) => ({ref: x[1], refType: "PAIRED_WITH"}));
   const basicRefs = findAllMatches(
-    /(?:\W|^)(@[a-zA-Z0-9-]+)(?=\W|$)/gm,
+    new RegExp(basicPattern, "gm"),
     textBlock
   ).map((x) => ({ref: x[1], refType: "BASIC"}));
   for (const {ref} of pairedWithRefs) {
@@ -68,16 +74,15 @@ function findUsernameReferences(textBlock: string): ParsedReference[] {
 }
 
 function findGithubUrlReferences(textBlock: string): ParsedReference[] {
-  const githubNamePart = /(?:[a-zA-Z0-9_-]+)/.source;
   const urlRegex = new RegExp(
     "" +
       /(?:\W|^)/.source +
       "(" +
       /http(?:s)?:\/\/github.com\//.source +
-      githubNamePart +
+      `(?:${githubOwnerPattern})` +
       "(?:" +
       /\//.source +
-      githubNamePart +
+      `(?:${githubRepoPattern})` +
       /\/(?:issues|pull)\//.source +
       /(?:\d+)/.source +
       /(?:#(?:issue|issuecomment|pullrequestreview|discussion_r)-?(?:\d+))?/
