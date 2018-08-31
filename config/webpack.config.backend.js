@@ -74,5 +74,5 @@ module.exports = (outputPath) => ({
       },
     ],
   },
-  plugins: [new webpack.DefinePlugin(env.stringified)],
+  plugins: [new webpack.DefinePlugin(env.individuallyStringified)],
 });

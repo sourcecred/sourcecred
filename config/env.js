@@ -134,11 +134,14 @@ function getClientEnvironment() {
 
   // Stringify all values so we can feed into Webpack's DefinePlugin.
   const stringified = {"process.env": {}};
+  const individuallyStringified = {};
   for (const key of Object.keys(raw)) {
-    stringified["process.env"][key] = JSON.stringify(raw[key]);
+    const value = JSON.stringify(raw[key]);
+    stringified["process.env"][key] = value;
+    individuallyStringified["process.env." + key] = value;
   }
 
-  return {raw, stringified};
+  return {raw, stringified, individuallyStringified};
 }
 
 module.exports = getClientEnvironment;
