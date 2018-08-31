@@ -6,11 +6,12 @@ export opaque type Repo: {|+name: string, +owner: string|} = {|
 |};
 
 export function makeRepo(owner: string, name: string): Repo {
-  const validRe = /^[A-Za-z0-9-.]+$/;
-  if (!owner.match(validRe)) {
+  const validOwner = /^[A-Za-z0-9-]+$/;
+  const validRepo = /^[A-Za-z0-9-._]+$/;
+  if (!owner.match(validOwner)) {
     throw new Error(`Invalid repository owner: ${JSON.stringify(owner)}`);
   }
-  if (!name.match(validRe)) {
+  if (!name.match(validRepo)) {
     throw new Error(`Invalid repository name: ${JSON.stringify(name)}`);
   }
   return {owner, name};

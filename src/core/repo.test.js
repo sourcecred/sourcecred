@@ -14,7 +14,7 @@ describe("core/repo", () => {
       const _unused_name: string = repo.name;
     });
   });
-  describe("makeRepoRepo", () => {
+  describe("makeRepo", () => {
     it("allows a simple repo", () => {
       makeRepo("sourcecred", "sourcecred");
     });
@@ -30,8 +30,14 @@ describe("core/repo", () => {
     it("disallows a repo with no name", () => {
       expect(() => makeRepo("foo", "")).toThrow("Invalid");
     });
-    it("disallows a repo with underscores", () => {
-      expect(() => makeRepo("yep", "something_bad")).toThrow("Invalid");
+    it("disallows an owner with periods", () => {
+      expect(() => makeRepo("fo.o", "bar")).toThrow("Invalid");
+    });
+    it("disallows an owner with underscores", () => {
+      expect(() => makeRepo("fo_o", "bar")).toThrow("Invalid");
+    });
+    it("allows a repo with underscores", () => {
+      makeRepo("foo", "still_good");
     });
   });
   describe("repo<->string", () => {
@@ -45,7 +51,7 @@ describe("core/repo", () => {
       testInvertible("sourcecred", "sourcecred");
     });
     it("works for a complicated case", () => {
-      testInvertible("fooolio", "foo-bar.bar-99");
+      testInvertible("fooolio", "foo-bar.bar-99_x");
     });
   });
 });
