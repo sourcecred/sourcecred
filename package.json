@@ -130,12 +130,5 @@
   "files": [
     "/bin",
     "/build"
-  ],
-  "oclif": {
-    "commands": "./bin/commands",
-    "bin": "sourcecred",
-    "plugins": [
-      "@oclif/plugin-help"
-    ]
-  }
+  ]
 }

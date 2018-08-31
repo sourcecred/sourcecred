@@ -27,9 +27,7 @@ module.exports = {
   // source file, and the key will be the filename of the bundled entry
   // point within the build directory.
   backendEntryPoints: {
-    sourcecred: resolveApp("src/oclif/sourcecred.js"),
-    "commands/load": resolveApp("src/oclif/commands/load.js"),
-    cli: resolveApp("src/cli/main.js"),
+    sourcecred: resolveApp("src/cli/main.js"),
     //
     fetchAndPrintGithubRepo: resolveApp(
       "src/plugins/github/bin/fetchAndPrintGithubRepo.js"
