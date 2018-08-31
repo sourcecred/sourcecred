@@ -5,9 +5,12 @@ export opaque type Repo: {|+name: string, +owner: string|} = {|
   +owner: string,
 |};
 
+export const githubOwnerPattern = "[A-Za-z0-9-]+";
+export const githubRepoPattern = "[A-Za-z0-9-._]+";
+
 export function makeRepo(owner: string, name: string): Repo {
-  const validOwner = /^[A-Za-z0-9-]+$/;
-  const validRepo = /^[A-Za-z0-9-._]+$/;
+  const validOwner = new RegExp(`^${githubOwnerPattern}$`);
+  const validRepo = new RegExp(`^${githubRepoPattern}$`);
   if (!owner.match(validOwner)) {
     throw new Error(`Invalid repository owner: ${JSON.stringify(owner)}`);
   }

@@ -9,13 +9,13 @@ import {
 
 describe("plugins/github/urlToId", () => {
   const issueComment =
-    "https://github.com/example-owner/example-repo0/issues/350#issuecomment-394939349";
+    "https://github.com/example-owner/exa_mple-rep.o0/issues/350#issuecomment-394939349";
   const pullComment =
-    "https://github.com/example-owner/example-repo0/pull/363#issuecomment-395836900";
+    "https://github.com/example-owner/exa_mple-rep.o0/pull/363#issuecomment-395836900";
   const reviewComment =
-    "https://github.com/example-owner/example-repo0/pull/380#discussion_r194816899";
+    "https://github.com/example-owner/exa_mple-rep.o0/pull/380#discussion_r194816899";
   const review =
-    "https://github.com/example-owner/example-repo0/pull/383#pullrequestreview-128199239";
+    "https://github.com/example-owner/exa_mple-rep.o0/pull/383#pullrequestreview-128199239";
 
   describe("works correctly", () => {
     it("for issueComment", () => {
