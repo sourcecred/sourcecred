@@ -19,6 +19,7 @@
     "lodash.sortby": "^4.7.0",
     "mkdirp": "^0.5.1",
     "object-assign": "4.1.1",
+    "pako": "^1.0.6",
     "promise": "8.0.1",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",

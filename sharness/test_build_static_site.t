@@ -219,7 +219,7 @@ test_expect_success TWO_REPOS \
 test_expect_success TWO_REPOS \
     "TWO_REPOS: should have data for the two repositories" '
     for repo in sourcecred/example-git sourcecred/example-github; do
-        for file in github/view.json; do
+        for file in github/view.json.gz; do
             test -s "${data_dir}/${repo}/${file}" || return
         done
     done
@@ -253,7 +253,7 @@ test_expect_success NO_REPOS \
 test_expect_success NO_REPOS \
     "NO_REPOS: should not have repository data" '
     for repo in sourcecred/example-git sourcecred/example-github; do
-        for file in git/graph.json github/view.json; do
+        for file in git/graph.json github/view.json.gz; do
             test_must_fail test -f "${data_dir}/${repo}/${file}" || return
         done
     done

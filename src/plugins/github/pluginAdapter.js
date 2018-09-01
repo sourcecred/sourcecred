@@ -1,4 +1,6 @@
 // @flow
+import pako from "pako";
+
 import type {
   StaticPluginAdapter as IStaticPluginAdapter,
   DynamicPluginAdapter as IDynamicPluginAdapater,
@@ -94,13 +96,15 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
   }
   async load(assets: Assets, repo: Repo): Promise<IDynamicPluginAdapater> {
     const url = assets.resolve(
-      `/api/v1/data/data/${repo.owner}/${repo.name}/github/view.json`
+      `/api/v1/data/data/${repo.owner}/${repo.name}/github/view.json.gz`
     );
     const response = await fetch(url);
     if (!response.ok) {
       return Promise.reject(response);
     }
-    const json = await response.json();
+    const arrayBuffer = await response.arrayBuffer();
+    const blob = new Uint8Array(arrayBuffer);
+    const json = JSON.parse(pako.ungzip(blob, {to: "string"}));
     const view = RelationalView.fromJSON(json);
     const graph = createGraph(view);
     return new DynamicPluginAdapter(view, graph);
