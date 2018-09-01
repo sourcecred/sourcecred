@@ -2,6 +2,7 @@
 
 import fs from "fs-extra";
 import path from "path";
+import pako from "pako";
 
 import fetchGithubRepo from "./fetchGithubRepo";
 import {RelationalView} from "./relationalView";
@@ -29,7 +30,7 @@ export async function loadGithubData(options: Options): Promise<void> {
   for (const response of responses) {
     view.addData(response);
   }
-  const blob = JSON.stringify(view);
-  const outputFilename = path.join(options.outputDirectory, "view.json");
+  const blob: Uint8Array = pako.gzip(JSON.stringify(view));
+  const outputFilename = path.join(options.outputDirectory, "view.json.gz");
   return fs.writeFile(outputFilename, blob);
 }
