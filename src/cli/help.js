@@ -4,6 +4,8 @@
 import type {Command} from "./command";
 import dedent from "../util/dedent";
 
+import {help as loadHelp} from "./load";
+
 const help: Command = async (args, std) => {
   if (args.length === 0) {
     usage(std.out);
@@ -12,6 +14,7 @@ const help: Command = async (args, std) => {
   const command = args[0];
   const subHelps: {[string]: Command} = {
     help: metaHelp,
+    load: loadHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);
@@ -28,6 +31,7 @@ function usage(print: (string) => void): void {
            sourcecred [--version] [--help]
 
     Commands:
+      load      load repository data into SourceCred
       help      show this help message
 
     Use 'sourcecred help COMMAND' for help about an individual command.
