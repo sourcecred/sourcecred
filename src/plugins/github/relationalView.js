@@ -69,6 +69,33 @@ export class RelationalView {
     this._addReferences();
   }
 
+  /**
+   * Mutate the RelationalView, by replacing all of the post bodies with
+   * empty strings. Usage of this method is a convenient hack to save space,
+   * as we don't currently use the bodies after the _addReferences step.
+   */
+  compressByRemovingBody() {
+    for (const [address, post] of this._issues.entries()) {
+      const compressedPost = {...post, body: ""};
+      this._issues.set(address, compressedPost);
+    }
+
+    for (const [address, post] of this._pulls.entries()) {
+      const compressedPost = {...post, body: ""};
+      this._pulls.set(address, compressedPost);
+    }
+
+    for (const [address, post] of this._comments.entries()) {
+      const compressedPost = {...post, body: ""};
+      this._comments.set(address, compressedPost);
+    }
+
+    for (const [address, post] of this._reviews.entries()) {
+      const compressedPost = {...post, body: ""};
+      this._reviews.set(address, compressedPost);
+    }
+  }
+
   *repos(): Iterator<Repo> {
     for (const entry of this._repos.values()) {
       yield new Repo(this, entry);

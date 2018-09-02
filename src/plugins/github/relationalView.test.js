@@ -267,6 +267,39 @@ describe("plugins/github/relationalView", () => {
     expect(rv1).toEqual(rv2);
   });
 
+  describe("compressByRemovingBody", () => {
+    it("doesn't mutate the original entries", () => {
+      const rv = new R.RelationalView();
+      rv.addData(exampleData());
+      const issue0 = Array.from(rv.issues())[0];
+      expect(issue0.body()).not.toEqual("");
+      rv.compressByRemovingBody();
+      expect(issue0.body()).not.toEqual("");
+    });
+    it("removes bodies from all posts", () => {
+      const rv = new R.RelationalView();
+      rv.addData(exampleData());
+      function somePostsHaveBodies() {
+        for (const posts of [
+          rv.issues(),
+          rv.pulls(),
+          rv.comments(),
+          rv.reviews(),
+        ]) {
+          for (const post of posts) {
+            if (post.body() !== "") {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+      expect(somePostsHaveBodies()).toBe(true);
+      rv.compressByRemovingBody();
+      expect(somePostsHaveBodies()).toBe(false);
+    });
+  });
+
   describe("to/fromJSON", () => {
     it("to->from->to is identity", () => {
       const json1 = view.toJSON();
