@@ -343,4 +343,57 @@ describe("app/credExplorer/state", () => {
       expect(console.error).toHaveBeenCalledWith(error);
     });
   });
+
+  describe("loadGraphAndRunPagerank", () => {
+    it("errors if called with uninitialized state", async () => {
+      const {stm} = example(initialState());
+      await expect(
+        stm.loadGraphAndRunPagerank(new Assets("gateway"), NodeAddress.empty)
+      ).rejects.toThrow("incorrect state");
+    });
+    it("when READY_TO_LOAD_GRAPH, loads graph then runs pagerank", async () => {
+      const {stm} = example(readyToLoadGraph());
+      (stm: any).loadGraph = jest.fn();
+      (stm: any).runPagerank = jest.fn();
+      stm.loadGraph.mockResolvedValue(true);
+      const assets = new Assets("/gateway/");
+      const prefix = NodeAddress.fromParts(["bar"]);
+      await stm.loadGraphAndRunPagerank(assets, prefix);
+      expect(stm.loadGraph).toHaveBeenCalledTimes(1);
+      expect(stm.loadGraph).toHaveBeenCalledWith(assets);
+      expect(stm.runPagerank).toHaveBeenCalledTimes(1);
+      expect(stm.runPagerank).toHaveBeenCalledWith(prefix);
+    });
+    it("does not run pagerank if loadGraph did not succeed", async () => {
+      const {stm} = example(readyToLoadGraph());
+      (stm: any).loadGraph = jest.fn();
+      (stm: any).runPagerank = jest.fn();
+      stm.loadGraph.mockResolvedValue(false);
+      const assets = new Assets("/gateway/");
+      const prefix = NodeAddress.fromParts(["bar"]);
+      await stm.loadGraphAndRunPagerank(assets, prefix);
+      expect(stm.loadGraph).toHaveBeenCalledTimes(1);
+      expect(stm.runPagerank).toHaveBeenCalledTimes(0);
+    });
+    it("when READY_TO_RUN_PAGERANK, runs pagerank", async () => {
+      const {stm} = example(readyToRunPagerank());
+      (stm: any).loadGraph = jest.fn();
+      (stm: any).runPagerank = jest.fn();
+      const prefix = NodeAddress.fromParts(["bar"]);
+      await stm.loadGraphAndRunPagerank(new Assets("/gateway/"), prefix);
+      expect(stm.loadGraph).toHaveBeenCalledTimes(0);
+      expect(stm.runPagerank).toHaveBeenCalledTimes(1);
+      expect(stm.runPagerank).toHaveBeenCalledWith(prefix);
+    });
+    it("when PAGERANK_EVALUATED, runs pagerank", async () => {
+      const {stm} = example(pagerankEvaluated());
+      (stm: any).loadGraph = jest.fn();
+      (stm: any).runPagerank = jest.fn();
+      const prefix = NodeAddress.fromParts(["bar"]);
+      await stm.loadGraphAndRunPagerank(new Assets("/gateway/"), prefix);
+      expect(stm.loadGraph).toHaveBeenCalledTimes(0);
+      expect(stm.runPagerank).toHaveBeenCalledTimes(1);
+      expect(stm.runPagerank).toHaveBeenCalledWith(prefix);
+    });
+  });
 });
