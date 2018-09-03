@@ -53,6 +53,7 @@ const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 type GithubResponseError =
   | {|+type: "FETCH_ERROR", retry: false, error: Error|}
   | {|+type: "GRAPHQL_ERROR", retry: false, error: mixed|}
+  | {|+type: "RATE_LIMIT_EXCEEDED", retry: false, error: mixed|}
   | {|+type: "GITHUB_INTERNAL_EXECUTION_ERROR", retry: true, error: mixed|}
   | {|+type: "NO_DATA", retry: true, error: mixed|};
 
@@ -72,6 +73,17 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
               ({
                 type: "GITHUB_INTERNAL_EXECUTION_ERROR",
                 retry: true,
+                error: x,
+              }: GithubResponseError)
+            );
+          } else if (
+            x.errors.length === 1 &&
+            x.errors[0].type === "RATE_LIMITED"
+          ) {
+            return Promise.reject(
+              ({
+                type: "RATE_LIMIT_EXCEEDED",
+                retry: false,
                 error: x,
               }: GithubResponseError)
             );
@@ -131,34 +143,43 @@ async function postQuery({body, variables}, token): Promise<any> {
       Authorization: `bearer ${token}`,
     },
   };
-  return retryGithubFetch(fetch, fetchOptions).catch((error) => {
-    switch (error.type) {
-      case "GITHUB_INTERNAL_EXECUTION_ERROR":
-      case "NO_DATA":
-        console.error(
-          "GitHub query failed! We're tracking these issues at " +
-            "https://github.com/sourcecred/sourcecred/issues/350.\n" +
-            "If the error is a timeout or abuse rate limit, you can " +
-            "try loading a smaller repo, or trying again in a few minutes.\n" +
-            "The actual failed response can be found below:\n" +
-            "================================================="
-        );
-        console.error(error.error);
-        break;
-      case "GRAPHQL_ERROR":
-        console.error(
-          "Unexpected GraphQL error; this may be a bug in SourceCred: ",
-          JSON.stringify({postBody: postBody, error: error.error})
-        );
-        break;
-      case "FETCH_ERROR":
-        // Network error; no need for additional commentary.
-        break;
-      default:
-        throw new Error((error.type: empty));
+  return retryGithubFetch(fetch, fetchOptions).catch(
+    (error: GithubResponseError) => {
+      const type = error.type;
+      switch (type) {
+        case "GITHUB_INTERNAL_EXECUTION_ERROR":
+        case "NO_DATA":
+          console.error(
+            "GitHub query failed! We're tracking these issues at " +
+              "https://github.com/sourcecred/sourcecred/issues/350.\n" +
+              "If the error is a timeout or abuse rate limit, you can " +
+              "try loading a smaller repo, or trying again in a few minutes.\n" +
+              "The actual failed response can be found below:\n" +
+              "================================================="
+          );
+          console.error(error.error);
+          break;
+        case "GRAPHQL_ERROR":
+          console.error(
+            "Unexpected GraphQL error; this may be a bug in SourceCred: ",
+            JSON.stringify({postBody: postBody, error: error.error})
+          );
+          break;
+        case "RATE_LIMIT_EXCEEDED":
+          console.error(
+            "You've exceeded your hourly GitHub rate limit.\n" +
+              "You'll need to wait until it resets."
+          );
+          break;
+        case "FETCH_ERROR":
+          // Network error; no need for additional commentary.
+          break;
+        default:
+          throw new Error((type: empty));
+      }
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
-  });
+  );
 }
 
 function ensureNoMorePages(result: any, path = []) {
