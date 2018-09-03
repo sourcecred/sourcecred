@@ -60,8 +60,6 @@ export function createApp(
     render() {
       const {localStore} = this.props;
       const {appState} = this.state;
-      const subType =
-        appState.type === "INITIALIZED" ? appState.substate.type : null;
       const loadingState =
         appState.type === "INITIALIZED" ? appState.substate.loading : null;
       let pagerankTable;
@@ -104,26 +102,17 @@ export function createApp(
             />
           </div>
           <button
-            disabled={subType !== "READY_TO_LOAD_GRAPH"}
-            onClick={() =>
-              this.stateTransitionMachine.loadGraph(this.props.assets)
-            }
-          >
-            Load graph
-          </button>
-          <button
             disabled={
-              !(
-                (subType === "READY_TO_RUN_PAGERANK" ||
-                  subType === "PAGERANK_EVALUATED") &&
-                loadingState !== "LOADING"
+              appState.type === "UNINITIALIZED" || loadingState === "LOADING"
+            }
+            onClick={() =>
+              this.stateTransitionMachine.loadGraphAndRunPagerank(
+                this.props.assets,
+                GithubPrefix.user
               )
             }
-            onClick={() =>
-              this.stateTransitionMachine.runPagerank(GithubPrefix.user)
-            }
           >
-            Run PageRank
+            Analyze cred
           </button>
           <WeightConfig
             onChange={(ee) => this.stateTransitionMachine.setEdgeEvaluator(ee)}
