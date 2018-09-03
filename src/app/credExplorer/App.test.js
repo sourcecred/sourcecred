@@ -52,6 +52,7 @@ describe("app/credExplorer/App", () => {
       setEdgeEvaluator,
       loadGraph,
       runPagerank,
+      loadGraphAndRunPagerank,
       localStore,
     };
   }
@@ -147,40 +148,21 @@ describe("app/credExplorer/App", () => {
       });
     }
 
-    function testGraphButton(stateFn, {disabled}) {
+    function testAnalyzeCredButton(stateFn, {disabled}) {
       const adjective = disabled ? "disabled" : "working";
-      it(`has a ${adjective} load graph button`, () => {
-        const {el, loadGraph, setState} = example();
+      it(`has a ${adjective} analyze cred button`, () => {
+        const {el, loadGraphAndRunPagerank, setState} = example();
         setState(stateFn());
         el.update();
         const button = el.findWhere(
-          (b) => b.text() === "Load graph" && b.is("button")
+          (b) => b.text() === "Analyze cred" && b.is("button")
         );
         if (disabled) {
           expect(button.props().disabled).toBe(true);
         } else {
           expect(button.props().disabled).toBe(false);
           button.simulate("click");
-          expect(loadGraph).toBeCalledTimes(1);
-        }
-      });
-    }
-
-    function testPagerankButton(stateFn, {disabled}) {
-      const adjective = disabled ? "disabled" : "working";
-      it(`has a ${adjective} run PageRank button`, () => {
-        const {el, runPagerank, setState} = example();
-        setState(stateFn());
-        el.update();
-        const button = el.findWhere(
-          (b) => b.text() === "Run PageRank" && b.is("button")
-        );
-        if (disabled) {
-          expect(button.props().disabled).toBe(true);
-        } else {
-          expect(button.props().disabled).toBe(false);
-          button.simulate("click");
-          expect(runPagerank).toBeCalledTimes(1);
+          expect(loadGraphAndRunPagerank).toBeCalledTimes(1);
         }
       });
     }
@@ -225,21 +207,19 @@ describe("app/credExplorer/App", () => {
     function stateTestSuite(
       suiteName,
       stateFn,
-      {loadGraphDisabled, runPagerankDisabled, hasPagerankTable}
+      {analyzeCredDisabled, hasPagerankTable}
     ) {
       describe(suiteName, () => {
         testWeightConfig(stateFn);
         testRepositorySelect(stateFn);
-        testGraphButton(stateFn, {disabled: loadGraphDisabled});
-        testPagerankButton(stateFn, {disabled: runPagerankDisabled});
+        testAnalyzeCredButton(stateFn, {disabled: analyzeCredDisabled});
         testPagerankTable(stateFn, hasPagerankTable);
         testLoadingIndicator(stateFn);
       });
     }
 
     stateTestSuite("UNINITIALIZED", exampleStates.uninitialized, {
-      loadGraphDisabled: true,
-      runPagerankDisabled: true,
+      analyzeCredDisabled: true,
       hasPagerankTable: false,
     });
     describe("READY_TO_LOAD_GRAPH", () => {
@@ -248,8 +228,7 @@ describe("app/credExplorer/App", () => {
           loadingState,
           exampleStates.readyToLoadGraph(loadingState),
           {
-            loadGraphDisabled: false,
-            runPagerankDisabled: true,
+            analyzeCredDisabled: loadingState === "LOADING",
             hasPagerankTable: false,
           }
         );
@@ -262,8 +241,7 @@ describe("app/credExplorer/App", () => {
           loadingState,
           exampleStates.readyToRunPagerank(loadingState),
           {
-            loadGraphDisabled: true,
-            runPagerankDisabled: loadingState === "LOADING",
+            analyzeCredDisabled: loadingState === "LOADING",
             hasPagerankTable: false,
           }
         );
@@ -276,8 +254,7 @@ describe("app/credExplorer/App", () => {
           loadingState,
           exampleStates.pagerankEvaluated(loadingState),
           {
-            loadGraphDisabled: true,
-            runPagerankDisabled: loadingState === "LOADING",
+            analyzeCredDisabled: loadingState === "LOADING",
             hasPagerankTable: true,
           }
         );

@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Combine "load graph" and "run pagerank" into one button (#759)
 - Store GitHub data compressed at rest, reducing space usage by 6–8× (#750)
 - Improve weight sliders display (#736)
 - Separate bots from users in the UI (#720)
