@@ -134,16 +134,21 @@ run_build() {
     output_dir="build_output/output_${prereq_name}"
     api_dir="${output_dir}/api/v1/data"
     data_dir="${api_dir}/data"
+    unsafe_arg=
     for arg in "${output_dir}" "$@"; do
-        unusual_chars="$(printf '%s' "$arg" | sed -e 's#[A-Za-z0-9/_.-]##g')"
+        unusual_chars="$(printf '%s' "$arg" | sed -e 's#[A-Za-z0-9:/_.-]##g')"
         if [ -n "${unusual_chars}" ]; then
-            printf 'fatal: potentially unsafe argument: %s\n' "${arg}"
-            return
+            unsafe_arg="${arg}"
+            break
         fi
     done
-    flags="--target $output_dir $*"  # checked for sanity above
+    flags="--target $output_dir $*"  # only used if ! [ -n "${unsafe_arg}" ]
     test_expect_success EXPENSIVE,HAVE_GITHUB_TOKEN \
         "${prereq_name}: ${description}" '
+        if [ -n "${unsafe_arg}" ]; then
+            printf >&2 "fatal: potentially unsafe argument: %s\n" "${arg}" &&
+            false
+        fi &&
         run '"${flags}"' 2>err &&
         test_must_fail grep -vF \
             -e "Removing build directory: " \
