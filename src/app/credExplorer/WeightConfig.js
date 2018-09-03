@@ -63,6 +63,7 @@ export class WeightConfig extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <button
+          style={{float: "right"}}
           onClick={() => {
             this.setState(({expanded}) => ({expanded: !expanded}));
           }}
