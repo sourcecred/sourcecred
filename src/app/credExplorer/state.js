@@ -79,7 +79,7 @@ export function initialState(): AppState {
 export interface StateTransitionMachineInterface {
   +setRepo: (Repo) => void;
   +setEdgeEvaluator: (EdgeEvaluator) => void;
-  +loadGraph: (Assets) => Promise<void>;
+  +loadGraph: (Assets) => Promise<boolean>;
   +runPagerank: (NodeAddressT) => Promise<void>;
 }
 /* In production, instantiate via createStateTransitionMachine; the constructor
@@ -167,7 +167,8 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     }
   }
 
-  async loadGraph(assets: Assets) {
+  /** Loads the graph, reports whether it was successful */
+  async loadGraph(assets: Assets): Promise<boolean> {
     const state = this.getState();
     if (
       state.type !== "INITIALIZED" ||
@@ -182,6 +183,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     };
     this.setState(loadingState);
     let newState: ?AppState;
+    let success = true;
     try {
       const graphWithAdapters = await this.loadGraphWithAdapters(assets, repo);
       newState = {
@@ -195,10 +197,13 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     } catch (e) {
       console.error(e);
       newState = {...state, substate: {...substate, loading: "FAILED"}};
+      success = false;
     }
     if (deepEqual(this.getState(), loadingState)) {
       this.setState(newState);
+      return success;
     }
+    return false;
   }
 
   async runPagerank(totalScoreNodePrefix: NodeAddressT) {
