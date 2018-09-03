@@ -33,13 +33,17 @@ export const machineNodeType: NodeType = Object.freeze({
 
 export const assemblesEdgeType: EdgeType = Object.freeze({
   forwardName: "assembles",
+  defaultForwardWeight: 2,
   backwardName: "is assembled by",
+  defaultBackwardWeight: 2 ** -2,
   prefix: EdgeAddress.fromParts(["factorio", "assembles"]),
 });
 
 export const transportsEdgeType: EdgeType = Object.freeze({
   forwardName: "transports",
+  defaultForwardWeight: 1,
   backwardName: "is transported by",
+  defaultBackwardWeight: 2 ** -1,
   prefix: EdgeAddress.fromParts(["factorio", "transports"]),
 });
 

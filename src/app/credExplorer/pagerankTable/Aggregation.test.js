@@ -163,6 +163,8 @@ describe("app/credExplorer/pagerankTable/Aggregation", () => {
     const edgeType: EdgeType = {
       forwardName: "marsellus",
       backwardName: "wallace",
+      defaultForwardWeight: 1,
+      defaultBackwardWeight: 1,
       prefix: EdgeAddress.fromParts(["look", "like"]),
     };
     function aggView(aggregation: FlatAggregation) {

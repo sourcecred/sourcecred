@@ -75,21 +75,29 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
       {
         forwardName: "authors",
         backwardName: "is authored by",
+        defaultForwardWeight: 1 / 2,
+        defaultBackwardWeight: 1,
         prefix: E._Prefix.authors,
       },
       {
         forwardName: "has parent",
         backwardName: "has child",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1 / 4,
         prefix: E._Prefix.hasParent,
       },
       {
         forwardName: "merges",
         backwardName: "is merged by",
+        defaultForwardWeight: 1 / 2,
+        defaultBackwardWeight: 1,
         prefix: E._Prefix.mergedAs,
       },
       {
         forwardName: "references",
         backwardName: "is referenced by",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1 / 16,
         prefix: E._Prefix.references,
       },
     ];

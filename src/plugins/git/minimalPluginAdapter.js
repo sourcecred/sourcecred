@@ -36,6 +36,8 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
         forwardName: "has parent",
         backwardName: "is parent of",
         prefix: E._Prefix.hasParent,
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
       },
     ];
   }
