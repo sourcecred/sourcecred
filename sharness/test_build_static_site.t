@@ -166,10 +166,20 @@ run_build() {
     '
     test_expect_success "${prereq_name}" \
         "${prereq_name}: should have a bundle" '
-        _js_bundles=( "${output_dir}"/static/js/main.*.js ) &&
-        [ ${#_js_bundles[@]} -eq 1 ] &&
-        js_bundle_path="${_js_bundles[0]}" &&
-        test_path_is_file "${js_bundle_path}"
+        js_bundle_path= &&
+        js_bundle_path_glob="${output_dir}"/static/js/main.*.js &&
+        for main_js in ${js_bundle_path_glob}; do
+            if ! [ -e "${main_js}" ]; then
+                printf >&2 "fatal: no main bundle found\n" &&
+                return 1
+            elif [ -n "${js_bundle_path}" ]; then
+                printf >&2 "fatal: multiple main bundles found:\n" &&
+                printf >&2 "    %s\n" ${js_bundle_path_glob} &&
+                return 1
+            else
+                js_bundle_path="${main_js}"
+            fi
+        done
     '
 }
 
