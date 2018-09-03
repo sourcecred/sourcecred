@@ -226,7 +226,8 @@ describe("app/credExplorer/state", () => {
       const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
       const gwa = graphWithAdapters();
       loadGraphMock.mockResolvedValue(gwa);
-      await stm.loadGraph(new Assets("/my/gateway/"));
+      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
+      expect(succeeded).toBe(true);
       const state = getState();
       const substate = getSubstate(state);
       expect(loading(state)).toBe("NOT_LOADING");
@@ -246,7 +247,8 @@ describe("app/credExplorer/state", () => {
             resolve(graphWithAdapters());
           })
       );
-      await stm.loadGraph(new Assets("/my/gateway/"));
+      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
+      expect(succeeded).toBe(false);
       const state = getState();
       const substate = getSubstate(state);
       expect(loading(state)).toBe("NOT_LOADING");
@@ -259,7 +261,8 @@ describe("app/credExplorer/state", () => {
       // $ExpectFlowError
       console.error = jest.fn();
       loadGraphMock.mockRejectedValue(error);
-      await stm.loadGraph(new Assets("/my/gateway/"));
+      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
+      expect(succeeded).toBe(false);
       const state = getState();
       const substate = getSubstate(state);
       expect(loading(state)).toBe("FAILED");
