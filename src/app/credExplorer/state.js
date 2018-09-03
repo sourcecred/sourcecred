@@ -81,6 +81,7 @@ export interface StateTransitionMachineInterface {
   +setEdgeEvaluator: (EdgeEvaluator) => void;
   +loadGraph: (Assets) => Promise<boolean>;
   +runPagerank: (NodeAddressT) => Promise<void>;
+  +loadGraphAndRunPagerank: (Assets, NodeAddressT) => Promise<void>;
 }
 /* In production, instantiate via createStateTransitionMachine; the constructor
  * implementation allows specification of the loadGraphWithAdapters and
@@ -254,6 +255,32 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     }
     if (deepEqual(this.getState(), loadingState)) {
       this.setState(NullUtil.get(newState));
+    }
+  }
+
+  async loadGraphAndRunPagerank(
+    assets: Assets,
+    totalScoreNodePrefix: NodeAddressT
+  ) {
+    const state = this.getState();
+    if (state.type === "UNINITIALIZED") {
+      throw new Error("Tried to load and run from incorrect state");
+    }
+    switch (state.substate.type) {
+      case "READY_TO_LOAD_GRAPH":
+        const loadedGraph = await this.loadGraph(assets);
+        if (loadedGraph) {
+          await this.runPagerank(totalScoreNodePrefix);
+        }
+        break;
+      case "READY_TO_RUN_PAGERANK":
+        await this.runPagerank(totalScoreNodePrefix);
+        break;
+      case "PAGERANK_EVALUATED":
+        await this.runPagerank(totalScoreNodePrefix);
+        break;
+      default:
+        throw new Error((state.substate.type: empty));
     }
   }
 }

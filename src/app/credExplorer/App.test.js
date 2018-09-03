@@ -24,6 +24,7 @@ describe("app/credExplorer/App", () => {
     const setEdgeEvaluator = jest.fn();
     const loadGraph = jest.fn();
     const runPagerank = jest.fn();
+    const loadGraphAndRunPagerank = jest.fn();
     const localStore = testLocalStore();
     function createMockSTM(_getState, _setState) {
       setState = _setState;
@@ -33,6 +34,7 @@ describe("app/credExplorer/App", () => {
         setEdgeEvaluator,
         loadGraph,
         runPagerank,
+        loadGraphAndRunPagerank,
       };
     }
     const App = createApp(createMockSTM);
