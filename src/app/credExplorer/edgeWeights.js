@@ -10,20 +10,16 @@ import type {EdgeEvaluator} from "../../core/attribution/pagerank";
 export function byEdgeType(
   prefixes: $ReadOnlyArray<{|
     +prefix: EdgeAddressT,
-    +weight: number,
-    +directionality: number,
+    +forwardWeight: number,
+    +backwardWeight: number,
   |}>
 ): EdgeEvaluator {
   const trie = new EdgeTrie();
-  for (const weightedPrefix of prefixes) {
-    trie.add(weightedPrefix.prefix, weightedPrefix);
+  for (const {prefix, forwardWeight, backwardWeight} of prefixes) {
+    trie.add(prefix, {toWeight: forwardWeight, froWeight: backwardWeight});
   }
   return function evaluator(edge: Edge) {
-    const {weight, directionality} = trie.getLast(edge.address);
-    return {
-      toWeight: directionality * weight,
-      froWeight: (1 - directionality) * weight,
-    };
+    return trie.getLast(edge.address);
   };
 }
 
@@ -35,17 +31,17 @@ export function byNodeType(
   |}>
 ): EdgeEvaluator {
   const trie = new NodeTrie();
-  for (const weightedPrefix of prefixes) {
-    trie.add(weightedPrefix.prefix, weightedPrefix);
+  for (const {weight, prefix} of prefixes) {
+    trie.add(prefix, weight);
   }
   return function evaluator(edge: Edge) {
-    const srcDatum = trie.getLast(edge.src);
-    const dstDatum = trie.getLast(edge.dst);
+    const srcWeight = trie.getLast(edge.src);
+    const dstWeight = trie.getLast(edge.dst);
 
     const baseResult = base(edge);
     return {
-      toWeight: dstDatum.weight * baseResult.toWeight,
-      froWeight: srcDatum.weight * baseResult.froWeight,
+      toWeight: dstWeight * baseResult.toWeight,
+      froWeight: srcWeight * baseResult.froWeight,
     };
   };
 }

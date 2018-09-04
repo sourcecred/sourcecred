@@ -12,7 +12,7 @@ describe("app/credExplorer/weights/WeightSlider", () => {
     function example() {
       const onChange = jest.fn();
       const element = shallow(
-        <WeightSlider weight={3} name={"foo"} onChange={onChange} />
+        <WeightSlider weight={3} name="foo" onChange={onChange} />
       );
       return {element, onChange};
     }

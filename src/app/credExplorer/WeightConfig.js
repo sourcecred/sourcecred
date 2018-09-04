@@ -6,35 +6,24 @@ import sortBy from "lodash.sortby";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
-import type {EdgeType} from "../adapters/pluginAdapter";
-import {WeightSlider} from "./weights/WeightSlider";
-import {DirectionalitySlider} from "./weights/DirectionalitySlider";
 import {
   NodeTypeConfig,
   defaultWeightedNodeType,
   type WeightedNodeType,
 } from "./weights/NodeTypeConfig";
+import {
+  EdgeTypeConfig,
+  defaultWeightedEdgeType,
+  type WeightedEdgeType,
+} from "./weights/EdgeTypeConfig";
+import {styledVariable} from "./weights/EdgeTypeConfig";
 
 type Props = {|
   +onChange: (EdgeEvaluator) => void,
 |};
 
-type WeightedEdgeType = {|
-  +type: EdgeType,
-  +weight: number,
-  +directionality: number,
-|};
-type EdgeWeights = WeightedEdgeType[];
-const defaultEdgeWeights = (): EdgeWeights => {
-  const result = [];
-  for (const type of defaultStaticAdapters().edgeTypes()) {
-    result.push({type, weight: 1.0, directionality: 0.5});
-  }
-  return result;
-};
-
 type State = {
-  edgeWeights: EdgeWeights,
+  edgeWeights: $ReadOnlyArray<WeightedEdgeType>,
   nodeWeights: $ReadOnlyArray<WeightedNodeType>,
   expanded: boolean,
 };
@@ -43,7 +32,9 @@ export class WeightConfig extends React.Component<Props, State> {
   constructor(props: Props): void {
     super(props);
     this.state = {
-      edgeWeights: defaultEdgeWeights(),
+      edgeWeights: defaultStaticAdapters()
+        .edgeTypes()
+        .map(defaultWeightedEdgeType),
       nodeWeights: defaultStaticAdapters()
         .nodeTypes()
         .map(defaultWeightedNodeType),
@@ -94,11 +85,13 @@ export class WeightConfig extends React.Component<Props, State> {
 
   fire() {
     const {edgeWeights, nodeWeights} = this.state;
-    const edgePrefixes = edgeWeights.map(({type, weight, directionality}) => ({
-      prefix: type.prefix,
-      weight,
-      directionality,
-    }));
+    const edgePrefixes = edgeWeights.map(
+      ({type, forwardWeight, backwardWeight}) => ({
+        prefix: type.prefix,
+        forwardWeight,
+        backwardWeight,
+      })
+    );
     const nodePrefixes = nodeWeights.map(({type, weight}) => ({
       prefix: type.prefix,
       weight,
@@ -109,63 +102,38 @@ export class WeightConfig extends React.Component<Props, State> {
 }
 
 class EdgeConfig extends React.Component<{
-  edgeWeights: EdgeWeights,
-  onChange: (EdgeWeights) => void,
+  edgeWeights: $ReadOnlyArray<WeightedEdgeType>,
+  onChange: ($ReadOnlyArray<WeightedEdgeType>) => void,
 }> {
-  weightControls() {
-    const sortedWeights = sortBy(
-      this.props.edgeWeights,
-      ({type}) => type.prefix
-    );
-    return sortedWeights.map(({type, directionality, weight}) => {
-      const onChange = (value) => {
-        const edgeWeights = this.props.edgeWeights.filter(
-          (x) => x.type.prefix !== type.prefix
+  _renderWeightControls() {
+    return sortBy(this.props.edgeWeights, ({type}) => type.prefix).map(
+      (weightedEdgeType) => {
+        const onChange = (value) => {
+          const edgeWeights = this.props.edgeWeights.filter(
+            (x) => x.type.prefix !== weightedEdgeType.type.prefix
+          );
+          edgeWeights.push(value);
+          this.props.onChange(edgeWeights);
+        };
+        return (
+          <EdgeTypeConfig
+            key={weightedEdgeType.type.prefix}
+            weightedType={weightedEdgeType}
+            onChange={onChange}
+          />
         );
-        edgeWeights.push({type, weight: value, directionality});
-        this.props.onChange(edgeWeights);
-      };
-      return (
-        <WeightSlider
-          key={type.prefix}
-          weight={weight}
-          name={`${type.forwardName} / ${type.backwardName}`}
-          onChange={onChange}
-        />
-      );
-    });
+      }
+    );
   }
 
-  directionControls() {
-    const sortedWeights = sortBy(
-      this.props.edgeWeights,
-      ({type}) => type.prefix
-    );
-    return sortedWeights.map(({type, directionality, weight}) => {
-      const onChange = (value: number) => {
-        const edgeWeights = this.props.edgeWeights.filter(
-          (x) => x.type.prefix !== type.prefix
-        );
-        edgeWeights.push({type, directionality: value, weight});
-        this.props.onChange(edgeWeights);
-      };
-      return (
-        <DirectionalitySlider
-          name={type.forwardName}
-          key={type.prefix}
-          directionality={directionality}
-          onChange={onChange}
-        />
-      );
-    });
-  }
   render() {
     return (
       <div>
         <h2>Edge weights</h2>
-        {this.weightControls()}
-        <h2>Edge directionality</h2>
-        {this.directionControls()}
+        <p>
+          Flow cred from {styledVariable("β")} to {styledVariable("α")} when:
+        </p>
+        {this._renderWeightControls()}
       </div>
     );
   }
