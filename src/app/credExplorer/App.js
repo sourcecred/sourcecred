@@ -9,6 +9,7 @@ import CheckedLocalStore from "../checkedLocalStore";
 import BrowserLocalStore from "../browserLocalStore";
 
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
+import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "./WeightConfig";
 import RepositorySelect from "./RepositorySelect";
@@ -118,6 +119,7 @@ export function createApp(
           </button>
           <WeightConfig
             onChange={(edgeEvaluator) => this.setState({edgeEvaluator})}
+            adapters={defaultStaticAdapters()}
           />
           <LoadingIndicator appState={this.state.appState} />
           {pagerankTable}
