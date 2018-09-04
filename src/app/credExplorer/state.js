@@ -2,7 +2,6 @@
 
 import deepEqual from "lodash.isequal";
 
-import * as NullUtil from "../../util/null";
 import {Graph, type NodeAddressT} from "../../core/graph";
 import type {Assets} from "../../app/assets";
 import type {Repo} from "../../core/repo";
@@ -25,37 +24,32 @@ import {defaultStaticAdapters} from "../adapters/defaultPlugins";
   transitions, including error cases, are thoroughly tested.
  */
 
-export type AppState = Uninitialized | Initialized;
-export type Uninitialized = {|
-  +type: "UNINITIALIZED",
-  edgeEvaluator: ?EdgeEvaluator,
-  repo: ?Repo,
-|};
-export type Initialized = {|
-  +type: "INITIALIZED",
-  +edgeEvaluator: EdgeEvaluator,
-  +repo: Repo,
-  +substate: AppSubstate,
-|};
-
 export type LoadingState = "NOT_LOADING" | "LOADING" | "FAILED";
-export type AppSubstate =
+export type AppState =
+  | Uninitialized
   | ReadyToLoadGraph
   | ReadyToRunPagerank
   | PagerankEvaluated;
+
+export type Uninitialized = {|
+  +type: "UNINITIALIZED",
+|};
 export type ReadyToLoadGraph = {|
   +type: "READY_TO_LOAD_GRAPH",
+  +repo: Repo,
   +loading: LoadingState,
 |};
 export type ReadyToRunPagerank = {|
   +type: "READY_TO_RUN_PAGERANK",
+  +repo: Repo,
   +graphWithAdapters: GraphWithAdapters,
   +loading: LoadingState,
 |};
 export type PagerankEvaluated = {|
   +type: "PAGERANK_EVALUATED",
   +graphWithAdapters: GraphWithAdapters,
-  pagerankNodeDecomposition: PagerankNodeDecomposition,
+  +repo: Repo,
+  +pagerankNodeDecomposition: PagerankNodeDecomposition,
   +loading: LoadingState,
 |};
 
@@ -71,17 +65,20 @@ export function createStateTransitionMachine(
   );
 }
 
-export function initialState(): AppState {
-  return {type: "UNINITIALIZED", repo: null, edgeEvaluator: null};
+export function uninitializedState(): AppState {
+  return {type: "UNINITIALIZED"};
 }
 
 // Exported for testing purposes.
 export interface StateTransitionMachineInterface {
   +setRepo: (Repo) => void;
-  +setEdgeEvaluator: (EdgeEvaluator) => void;
   +loadGraph: (Assets) => Promise<boolean>;
-  +runPagerank: (NodeAddressT) => Promise<void>;
-  +loadGraphAndRunPagerank: (Assets, NodeAddressT) => Promise<void>;
+  +runPagerank: (EdgeEvaluator, NodeAddressT) => Promise<void>;
+  +loadGraphAndRunPagerank: (
+    Assets,
+    EdgeEvaluator,
+    NodeAddressT
+  ) => Promise<void>;
 }
 /* In production, instantiate via createStateTransitionMachine; the constructor
  * implementation allows specification of the loadGraphWithAdapters and
@@ -119,85 +116,37 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     this.pagerank = pagerank;
   }
 
-  _maybeInitialize(state: Uninitialized): AppState {
-    const {repo, edgeEvaluator} = state;
-    if (repo != null && edgeEvaluator != null) {
-      const substate = {type: "READY_TO_LOAD_GRAPH", loading: "NOT_LOADING"};
-      return {type: "INITIALIZED", repo, edgeEvaluator, substate};
-    } else {
-      return state;
-    }
-  }
-
   setRepo(repo: Repo) {
-    const state = this.getState();
-    switch (state.type) {
-      case "UNINITIALIZED": {
-        const newState = this._maybeInitialize({...state, repo});
-        this.setState(newState);
-        break;
-      }
-      case "INITIALIZED": {
-        const substate = {type: "READY_TO_LOAD_GRAPH", loading: "NOT_LOADING"};
-        const newState = {...state, repo, substate};
-        this.setState(newState);
-        break;
-      }
-      default: {
-        throw new Error((state.type: empty));
-      }
-    }
-  }
-
-  setEdgeEvaluator(edgeEvaluator: EdgeEvaluator) {
-    const state = this.getState();
-    switch (state.type) {
-      case "UNINITIALIZED": {
-        const newState = this._maybeInitialize({...state, edgeEvaluator});
-        this.setState(newState);
-        break;
-      }
-      case "INITIALIZED": {
-        const newState = {...state, edgeEvaluator};
-        this.setState(newState);
-        break;
-      }
-      default: {
-        throw new Error((state.type: empty));
-      }
-    }
+    const newState: AppState = {
+      type: "READY_TO_LOAD_GRAPH",
+      repo: repo,
+      loading: "NOT_LOADING",
+    };
+    this.setState(newState);
   }
 
   /** Loads the graph, reports whether it was successful */
   async loadGraph(assets: Assets): Promise<boolean> {
     const state = this.getState();
-    if (
-      state.type !== "INITIALIZED" ||
-      state.substate.type !== "READY_TO_LOAD_GRAPH"
-    ) {
+    if (state.type !== "READY_TO_LOAD_GRAPH") {
       throw new Error("Tried to loadGraph in incorrect state");
     }
-    const {repo, substate} = state;
-    const loadingState = {
-      ...state,
-      substate: {...substate, loading: "LOADING"},
-    };
+    const {repo} = state;
+    const loadingState = {...state, loading: "LOADING"};
     this.setState(loadingState);
     let newState: ?AppState;
     let success = true;
     try {
       const graphWithAdapters = await this.loadGraphWithAdapters(assets, repo);
       newState = {
-        ...state,
-        substate: {
-          type: "READY_TO_RUN_PAGERANK",
-          graphWithAdapters,
-          loading: "NOT_LOADING",
-        },
+        type: "READY_TO_RUN_PAGERANK",
+        graphWithAdapters,
+        repo,
+        loading: "NOT_LOADING",
       };
     } catch (e) {
       console.error(e);
-      newState = {...state, substate: {...substate, loading: "FAILED"}};
+      newState = {...loadingState, loading: "FAILED"};
       success = false;
     }
     if (deepEqual(this.getState(), loadingState)) {
@@ -207,26 +156,24 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     return false;
   }
 
-  async runPagerank(totalScoreNodePrefix: NodeAddressT) {
+  async runPagerank(
+    edgeEvaluator: EdgeEvaluator,
+    totalScoreNodePrefix: NodeAddressT
+  ) {
     const state = this.getState();
     if (
-      state.type !== "INITIALIZED" ||
-      state.substate.type === "READY_TO_LOAD_GRAPH"
+      state.type !== "READY_TO_RUN_PAGERANK" &&
+      state.type !== "PAGERANK_EVALUATED"
     ) {
       throw new Error("Tried to runPagerank in incorrect state");
     }
-    const {edgeEvaluator, substate} = state;
-    // Oh, the things we must do to appease flow
-    const loadingSubstate =
-      substate.type === "PAGERANK_EVALUATED"
-        ? {...substate, loading: "LOADING"}
-        : {...substate, loading: "LOADING"};
-    const loadingState = {
-      ...state,
-      substate: loadingSubstate,
-    };
+    // Flow hack :/
+    const loadingState =
+      state.type === "READY_TO_RUN_PAGERANK"
+        ? {...state, loading: "LOADING"}
+        : {...state, loading: "LOADING"};
     this.setState(loadingState);
-    const graph = substate.graphWithAdapters.graph;
+    const graph = state.graphWithAdapters.graph;
     let newState: ?AppState;
     try {
       const pagerankNodeDecomposition = await this.pagerank(
@@ -237,50 +184,49 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
           totalScoreNodePrefix: totalScoreNodePrefix,
         }
       );
-      const newSubstate = {
+      newState = {
         type: "PAGERANK_EVALUATED",
-        graphWithAdapters: substate.graphWithAdapters,
         pagerankNodeDecomposition,
+        graphWithAdapters: state.graphWithAdapters,
+        repo: state.repo,
         loading: "NOT_LOADING",
       };
-      newState = {...state, substate: newSubstate};
     } catch (e) {
       console.error(e);
-      const failedSubstate =
-        // More flow appeasement
-        substate.type === "PAGERANK_EVALUATED"
-          ? {...substate, loading: "FAILED"}
-          : {...substate, loading: "FAILED"};
-      newState = {...state, substate: failedSubstate};
+      // Flow hack :/
+      newState =
+        state.type === "READY_TO_RUN_PAGERANK"
+          ? {...state, loading: "FAILED"}
+          : {...state, loading: "FAILED"};
     }
     if (deepEqual(this.getState(), loadingState)) {
-      this.setState(NullUtil.get(newState));
+      this.setState(newState);
     }
   }
 
   async loadGraphAndRunPagerank(
     assets: Assets,
+    edgeEvaluator: EdgeEvaluator,
     totalScoreNodePrefix: NodeAddressT
   ) {
     const state = this.getState();
-    if (state.type === "UNINITIALIZED") {
+    const type = state.type;
+    if (type === "UNINITIALIZED") {
       throw new Error("Tried to load and run from incorrect state");
     }
-    switch (state.substate.type) {
+    switch (type) {
       case "READY_TO_LOAD_GRAPH":
         const loadedGraph = await this.loadGraph(assets);
         if (loadedGraph) {
-          await this.runPagerank(totalScoreNodePrefix);
+          await this.runPagerank(edgeEvaluator, totalScoreNodePrefix);
         }
         break;
       case "READY_TO_RUN_PAGERANK":
-        await this.runPagerank(totalScoreNodePrefix);
-        break;
       case "PAGERANK_EVALUATED":
-        await this.runPagerank(totalScoreNodePrefix);
+        await this.runPagerank(edgeEvaluator, totalScoreNodePrefix);
         break;
       default:
-        throw new Error((state.substate.type: empty));
+        throw new Error((type: empty));
     }
   }
 }

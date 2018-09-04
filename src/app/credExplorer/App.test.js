@@ -13,7 +13,8 @@ import RepositorySelect from "./RepositorySelect";
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "./WeightConfig";
 import {createApp, LoadingIndicator} from "./App";
-import {initialState} from "./state";
+import {uninitializedState} from "./state";
+import {_Prefix as GithubPrefix} from "../../plugins/github/nodes";
 
 require("../testUtil").configureEnzyme();
 
@@ -21,7 +22,6 @@ describe("app/credExplorer/App", () => {
   function example() {
     let setState, getState;
     const setRepo = jest.fn();
-    const setEdgeEvaluator = jest.fn();
     const loadGraph = jest.fn();
     const runPagerank = jest.fn();
     const loadGraphAndRunPagerank = jest.fn();
@@ -31,7 +31,6 @@ describe("app/credExplorer/App", () => {
       getState = _getState;
       return {
         setRepo,
-        setEdgeEvaluator,
         loadGraph,
         runPagerank,
         loadGraphAndRunPagerank,
@@ -39,7 +38,7 @@ describe("app/credExplorer/App", () => {
     }
     const App = createApp(createMockSTM);
     const el = shallow(
-      <App assets={new Assets(null)} localStore={localStore} />
+      <App assets={new Assets("/foo/")} localStore={localStore} />
     );
     if (setState == null || getState == null) {
       throw new Error("Initialization problems");
@@ -49,7 +48,6 @@ describe("app/credExplorer/App", () => {
       setState,
       getState,
       setRepo,
-      setEdgeEvaluator,
       loadGraph,
       runPagerank,
       loadGraphAndRunPagerank,
@@ -63,41 +61,32 @@ describe("app/credExplorer/App", () => {
     };
   }
 
-  function initialized(substate) {
-    return {
-      type: "INITIALIZED",
-      repo: makeRepo("foo", "bar"),
-      edgeEvaluator: createEvaluator(),
-      substate,
-    };
-  }
-
   const emptyAdapters = new DynamicAdapterSet(new StaticAdapterSet([]), []);
   const exampleStates = {
-    uninitialized: initialState,
+    uninitialized: uninitializedState,
     readyToLoadGraph: (loadingState) => {
-      return () =>
-        initialized({
-          type: "READY_TO_LOAD_GRAPH",
-          loading: loadingState,
-        });
+      return () => ({
+        type: "READY_TO_LOAD_GRAPH",
+        repo: makeRepo("foo", "bar"),
+        loading: loadingState,
+      });
     },
     readyToRunPagerank: (loadingState) => {
-      return () =>
-        initialized({
-          type: "READY_TO_RUN_PAGERANK",
-          loading: loadingState,
-          graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
-        });
+      return () => ({
+        type: "READY_TO_RUN_PAGERANK",
+        repo: makeRepo("foo", "bar"),
+        loading: loadingState,
+        graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
+      });
     },
     pagerankEvaluated: (loadingState) => {
-      return () =>
-        initialized({
-          type: "PAGERANK_EVALUATED",
-          loading: loadingState,
-          graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
-          pagerankNodeDecomposition: new Map(),
-        });
+      return () => ({
+        type: "PAGERANK_EVALUATED",
+        repo: makeRepo("foo", "bar"),
+        loading: loadingState,
+        graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
+        pagerankNodeDecomposition: new Map(),
+      });
     },
   };
 
@@ -107,8 +96,8 @@ describe("app/credExplorer/App", () => {
   });
   it("setState is wired properly", () => {
     const {setState, el} = example();
-    expect(initialState()).not.toBe(initialState()); // sanity check
-    const newState = initialState();
+    expect(uninitializedState()).not.toBe(uninitializedState()); // sanity check
+    const newState = uninitializedState();
     setState(newState);
     expect(el.state().appState).toBe(newState);
   });
@@ -139,12 +128,12 @@ describe("app/credExplorer/App", () => {
 
     function testWeightConfig(stateFn) {
       it("creates a working WeightConfig", () => {
-        const {el, setEdgeEvaluator, setState} = example();
+        const {el, setState} = example();
         setState(stateFn());
         const wc = el.find(WeightConfig);
         const ee = createEvaluator();
         wc.props().onChange(ee);
-        expect(setEdgeEvaluator).toHaveBeenCalledWith(ee);
+        expect(el.state().edgeEvaluator).toBe(ee);
       });
     }
 
@@ -153,6 +142,8 @@ describe("app/credExplorer/App", () => {
       it(`has a ${adjective} analyze cred button`, () => {
         const {el, loadGraphAndRunPagerank, setState} = example();
         setState(stateFn());
+        const edgeEvaluator = createEvaluator();
+        el.setState({edgeEvaluator});
         el.update();
         const button = el.findWhere(
           (b) => b.text() === "Analyze cred" && b.is("button")
@@ -163,8 +154,24 @@ describe("app/credExplorer/App", () => {
           expect(button.props().disabled).toBe(false);
           button.simulate("click");
           expect(loadGraphAndRunPagerank).toBeCalledTimes(1);
+          expect(loadGraphAndRunPagerank).toBeCalledWith(
+            el.instance().props.assets,
+            edgeEvaluator,
+            GithubPrefix.user
+          );
         }
       });
+      if (!disabled) {
+        it("...unless the EdgeEvaluator is not available", () => {
+          const {el, setState} = example();
+          setState(stateFn());
+          el.update();
+          const button = el.findWhere(
+            (b) => b.text() === "Analyze cred" && b.is("button")
+          );
+          expect(button.props().disabled).toBe(true);
+        });
+      }
     }
 
     function testPagerankTable(stateFn, present: boolean) {
@@ -177,14 +184,11 @@ describe("app/credExplorer/App", () => {
         const prt = el.find(PagerankTable);
         if (present) {
           expect(prt).toHaveLength(1);
-          if (
-            state.type !== "INITIALIZED" ||
-            state.substate.type !== "PAGERANK_EVALUATED"
-          ) {
+          if (state.type !== "PAGERANK_EVALUATED") {
             throw new Error("This test case is impossible to satisfy");
           }
-          const adapters = state.substate.graphWithAdapters.adapters;
-          const pnd = state.substate.pagerankNodeDecomposition;
+          const adapters = state.graphWithAdapters.adapters;
+          const pnd = state.pagerankNodeDecomposition;
           expect(prt.props().adapters).toBe(adapters);
           expect(prt.props().pnd).toBe(pnd);
         } else {
