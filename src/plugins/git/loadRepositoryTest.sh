@@ -14,12 +14,17 @@ usage() {
   printf '      Default is --build.\n'
   printf '  --help\n'
   printf '      Show this message\n'
+  printf '\n'
+  printf 'Environment variables:'
+  printf '  SOURCECRED_BIN\n'
+  printf '      When using --no-build, directory containing the SourceCred\n'
+  printf '      executables (output of "yarn backend"). Default is ./bin.\n'
 }
 
 fetch() {
   tmpdir="$(mktemp -d)"
-  node bin/createExampleRepo.js "${tmpdir}"
-  node bin/loadAndPrintGitRepository.js "${tmpdir}"
+  node "${SOURCECRED_BIN:-./bin}/createExampleRepo.js" "${tmpdir}"
+  node "${SOURCECRED_BIN:-./bin}/loadAndPrintGitRepository.js" "${tmpdir}"
   rm -rf "${tmpdir}"
 }
 
@@ -35,6 +40,10 @@ update() {
 }
 
 main() {
+  if [ -n "${SOURCECRED_BIN:-}" ]; then
+    SOURCECRED_BIN="$(readlink -f "${SOURCECRED_BIN}")"
+  fi
+  cd "$(git rev-parse --show-toplevel)"
   UPDATE=
   BUILD=1
   while [ $# -gt 0 ]; do
@@ -54,7 +63,10 @@ main() {
     shift
   done
   if [ -n "${BUILD}" ]; then
+    unset SOURCECRED_BIN
     yarn backend
+  else
+    export NODE_PATH=./node_modules"${NODE_PATH:+:${NODE_PATH}}"
   fi
   if [ -n "${UPDATE}" ]; then
     update
