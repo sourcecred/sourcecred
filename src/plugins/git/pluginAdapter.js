@@ -53,26 +53,36 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
       {
         forwardName: "has tree",
         backwardName: "owned by",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
         prefix: E._Prefix.hasTree,
       },
       {
         forwardName: "has parent",
         backwardName: "is parent of",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
         prefix: E._Prefix.hasParent,
       },
       {
         forwardName: "includes",
         backwardName: "is included by",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
         prefix: E._Prefix.includes,
       },
       {
         forwardName: "evolves to",
         backwardName: "evolves from",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
         prefix: E._Prefix.becomes,
       },
       {
         forwardName: "has contents",
         backwardName: "is contents of",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
         prefix: E._Prefix.hasContents,
       },
     ];

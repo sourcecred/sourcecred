@@ -42,6 +42,8 @@ export class FallbackStaticAdapter implements StaticPluginAdapter {
       {
         forwardName: "unknown edge→",
         backwardName: "unknown edge←",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
         prefix: EdgeAddress.empty,
       },
     ];

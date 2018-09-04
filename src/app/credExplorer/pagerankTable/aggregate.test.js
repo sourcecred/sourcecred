@@ -54,16 +54,22 @@ describe("app/credExplorer/aggregate", () => {
       foo: {
         forwardName: "foos",
         backwardName: "foo'd by",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
         prefix: EdgeAddress.fromParts(["foo"]),
       },
       bar: {
         forwardName: "bars",
         backwardName: "bar'd by",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
         prefix: EdgeAddress.fromParts(["bar"]),
       },
       empty: {
         forwardName: "empty",
         backwardName: "emptied-by",
+        defaultForwardWeight: 1,
+        defaultBackwardWeight: 1,
         prefix: EdgeAddress.empty,
       },
     };

@@ -7,6 +7,8 @@ import type {Repo} from "../../core/repo";
 export type EdgeType = {|
   +forwardName: string,
   +backwardName: string,
+  +defaultForwardWeight: number,
+  +defaultBackwardWeight: number,
   +prefix: EdgeAddressT,
 |};
 

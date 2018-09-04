@@ -15,10 +15,10 @@ require("../../testUtil").configureEnzyme();
 
 describe("app/credExplorer/weights/EdgeTypeConfig", () => {
   describe("defaultWeightedEdgeType", () => {
-    it("sets default weights to 1, 1", () => {
+    it("sets default weights as specified in the type", () => {
       const wet = defaultWeightedEdgeType(assemblesEdgeType);
-      expect(wet.forwardWeight).toEqual(1);
-      expect(wet.backwardWeight).toEqual(1);
+      expect(wet.forwardWeight).toEqual(wet.type.defaultForwardWeight);
+      expect(wet.backwardWeight).toEqual(wet.type.defaultBackwardWeight);
     });
   });
   describe("EdgeTypeConfig", () => {

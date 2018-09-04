@@ -13,8 +13,8 @@ export type WeightedEdgeType = {|
 export function defaultWeightedEdgeType(type: EdgeType): WeightedEdgeType {
   return {
     type,
-    forwardWeight: 1,
-    backwardWeight: 1,
+    forwardWeight: type.defaultForwardWeight,
+    backwardWeight: type.defaultBackwardWeight,
   };
 }
 
