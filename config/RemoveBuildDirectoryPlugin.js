@@ -1,8 +1,7 @@
 // @flow
 
-const fs = require("fs");
+const fs = require("fs-extra");
 const path = require("path");
-const rimraf = require("rimraf");
 
 // Note: the following type-import just resolves to `any`.
 /*:: import type {Compiler} from "webpack"; */
@@ -32,8 +31,8 @@ module.exports = class RemoveBuildDirectoryPlugin {
             outputPath
         );
       }
-      console.warn("Removing build directory: " + outputPath);
-      rimraf.sync(outputPath);
+      console.warn("Removing contents of build directory: " + outputPath);
+      fs.emptyDirSync(outputPath);
     });
   }
 };
