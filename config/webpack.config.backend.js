@@ -1,4 +1,4 @@
-// @no-flow
+// @flow
 
 const webpack = require("webpack");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
