@@ -3,6 +3,7 @@
 const webpack = require("webpack");
 const eslintFormatter = require("react-dev-utils/eslintFormatter");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
+const RemoveBuildDirectoryPlugin = require("./RemoveBuildDirectoryPlugin");
 const paths = require("./paths");
 const nodeExternals = require("webpack-node-externals");
 const getClientEnvironment = require("./env");
@@ -74,5 +75,8 @@ module.exports = (outputPath) => ({
       },
     ],
   },
-  plugins: [new webpack.DefinePlugin(env.individuallyStringified)],
+  plugins: [
+    new RemoveBuildDirectoryPlugin(),
+    new webpack.DefinePlugin(env.individuallyStringified),
+  ],
 });
