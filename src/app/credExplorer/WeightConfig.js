@@ -6,9 +6,14 @@ import sortBy from "lodash.sortby";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {byEdgeType, byNodeType} from "./edgeWeights";
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
-import type {NodeType, EdgeType} from "../adapters/pluginAdapter";
+import type {EdgeType} from "../adapters/pluginAdapter";
 import {WeightSlider} from "./weights/WeightSlider";
 import {DirectionalitySlider} from "./weights/DirectionalitySlider";
+import {
+  NodeTypeConfig,
+  defaultWeightedNodeType,
+  type WeightedNodeType,
+} from "./weights/NodeTypeConfig";
 
 type Props = {|
   +onChange: (EdgeEvaluator) => void,
@@ -28,19 +33,9 @@ const defaultEdgeWeights = (): EdgeWeights => {
   return result;
 };
 
-type NodeWeights = WeightedNodeType[];
-type WeightedNodeType = {|+type: NodeType, +weight: number|};
-const defaultNodeWeights = (): NodeWeights => {
-  const result = [];
-  for (const type of defaultStaticAdapters().nodeTypes()) {
-    result.push({type, weight: type.defaultWeight});
-  }
-  return result;
-};
-
 type State = {
   edgeWeights: EdgeWeights,
-  nodeWeights: NodeWeights,
+  nodeWeights: $ReadOnlyArray<WeightedNodeType>,
   expanded: boolean,
 };
 
@@ -49,7 +44,9 @@ export class WeightConfig extends React.Component<Props, State> {
     super(props);
     this.state = {
       edgeWeights: defaultEdgeWeights(),
-      nodeWeights: defaultNodeWeights(),
+      nodeWeights: defaultStaticAdapters()
+        .nodeTypes()
+        .map(defaultWeightedNodeType),
       expanded: false,
     };
   }
@@ -175,36 +172,30 @@ class EdgeConfig extends React.Component<{
 }
 
 class NodeConfig extends React.Component<{
-  nodeWeights: NodeWeights,
-  onChange: (NodeWeights) => void,
+  nodeWeights: $ReadOnlyArray<WeightedNodeType>,
+  onChange: ($ReadOnlyArray<WeightedNodeType>) => void,
 }> {
-  render() {
-    const sortedWeights = sortBy(
-      this.props.nodeWeights,
-      ({type}) => type.prefix
-    );
-
-    const controls = sortedWeights.map(({type, weight}) => {
-      const onChange = (value) => {
-        const nodeWeights = this.props.nodeWeights.filter(
-          (x) => x.type.prefix !== type.prefix
+  _renderControls() {
+    return sortBy(this.props.nodeWeights, ({type}) => type.prefix).map(
+      (weightedType) => {
+        const onChange = (newType) => {
+          const nodeWeights = this.props.nodeWeights.filter(
+            (x) => x.type.prefix !== weightedType.type.prefix
+          );
+          nodeWeights.push(newType);
+          this.props.onChange(nodeWeights);
+        };
+        return (
+          <NodeTypeConfig weightedType={weightedType} onChange={onChange} />
         );
-        nodeWeights.push({type, weight: value});
-        this.props.onChange(nodeWeights);
-      };
-      return (
-        <WeightSlider
-          key={type.prefix}
-          weight={weight}
-          name={type.name}
-          onChange={onChange}
-        />
-      );
-    });
+      }
+    );
+  }
+  render() {
     return (
       <div>
         <h2>Node weights</h2>
-        {controls}
+        {this._renderControls()}
       </div>
     );
   }
