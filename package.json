@@ -72,7 +72,7 @@
     "check-pretty": "prettier --list-different '**/*.js'",
     "start": "NODE_ENV=development webpack-dev-server --config config/webpack.config.web.js",
     "build": "NODE_ENV=production webpack --config config/webpack.config.web.js",
-    "backend": "node scripts/backend.js",
+    "backend": "NODE_ENV=development webpack --config config/webpack.config.backend.js",
     "test": "node ./config/test.js",
     "unit": "BABEL_ENV=test NODE_ENV=test jest --env=jsdom",
     "sharness": "make -sC ./sharness prove PROVE_OPTS=-f TEST_OPTS='--chain-lint'",
