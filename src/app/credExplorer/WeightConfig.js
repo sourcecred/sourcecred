@@ -3,7 +3,7 @@
 import React from "react";
 
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
-import {byEdgeType, byNodeType} from "./edgeWeights";
+import {weightsToEdgeEvaluator} from "./weights/weightsToEdgeEvaluator";
 import type {StaticAdapterSet} from "../adapters/adapterSet";
 import {
   type WeightedTypes,
@@ -104,18 +104,8 @@ export class WeightConfig extends React.Component<Props, State> {
       edgeWeights = edgeWeights.concat(newEdgeWeights);
     }
 
-    const edgePrefixes = edgeWeights.map(
-      ({type, forwardWeight, backwardWeight}) => ({
-        prefix: type.prefix,
-        forwardWeight,
-        backwardWeight,
-      })
-    );
-    const nodePrefixes = nodeWeights.map(({type, weight}) => ({
-      prefix: type.prefix,
-      weight,
-    }));
-    const edgeEvaluator = byNodeType(byEdgeType(edgePrefixes), nodePrefixes);
+    const weights = {nodes: nodeWeights, edges: edgeWeights};
+    const edgeEvaluator = weightsToEdgeEvaluator(weights);
     this.props.onChange(edgeEvaluator);
   }
 }
