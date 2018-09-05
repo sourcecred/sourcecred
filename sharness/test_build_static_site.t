@@ -152,7 +152,7 @@ run_build() {
         run '"${flags}"' 2>err &&
         test_must_fail grep -vF \
             -e "Removing contents of build directory: " \
-            -e "warn: running `yarn backend`" \
+            -e "warn: running \`yarn backend\`" \
             -e "warn: if this offends you" \
             -e "info: loading repository" \
             err &&
