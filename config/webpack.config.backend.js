@@ -11,7 +11,7 @@ const env = getClientEnvironment();
 
 // This is the backend configuration. It builds applications that target
 // Node and will not run in a browser.
-module.exports = (outputPath) => ({
+module.exports = {
   // Don't attempt to continue if there are any errors.
   bail: true,
   // Target Node instead of the browser.
@@ -19,7 +19,7 @@ module.exports = (outputPath) => ({
   entry: paths.backendEntryPoints,
   externals: [nodeExternals()],
   output: {
-    path: outputPath,
+    path: paths.backendBuild,
     // Generated JS file names (with nested folders).
     // There will be one main bundle, and one file per asynchronous chunk.
     // We don't currently advertise code splitting but Webpack supports it.
@@ -62,4 +62,4 @@ module.exports = (outputPath) => ({
     new RemoveBuildDirectoryPlugin(),
     new webpack.DefinePlugin(env.individuallyStringified),
   ],
-});
+};
