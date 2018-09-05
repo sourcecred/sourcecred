@@ -12,10 +12,9 @@ import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
 
+import execDependencyGraph from "../tools/execDependencyGraph";
 import {loadGithubData} from "../plugins/github/loadGithubData";
 import {loadGitData} from "../plugins/git/loadGitData";
-
-const execDependencyGraph = require("../tools/execDependencyGraph").default;
 
 function usage(print: (string) => void): void {
   print(

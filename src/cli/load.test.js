@@ -10,9 +10,7 @@ import load, {help} from "./load";
 import * as RepoRegistry from "../app/credExplorer/repoRegistry";
 import {stringToRepo} from "../core/repo";
 
-jest.mock("../tools/execDependencyGraph", () => ({
-  default: jest.fn(),
-}));
+jest.mock("../tools/execDependencyGraph", () => jest.fn());
 jest.mock("../plugins/github/loadGithubData", () => ({
   loadGithubData: jest.fn(),
 }));
@@ -21,8 +19,7 @@ jest.mock("../plugins/git/loadGitData", () => ({
 }));
 
 type JestMockFn = $Call<typeof jest.fn>;
-const execDependencyGraph: JestMockFn = (require("../tools/execDependencyGraph")
-  .default: any);
+const execDependencyGraph: JestMockFn = (require("../tools/execDependencyGraph"): any);
 const loadGithubData: JestMockFn = (require("../plugins/github/loadGithubData")
   .loadGithubData: any);
 const loadGitData: JestMockFn = (require("../plugins/git/loadGitData")
