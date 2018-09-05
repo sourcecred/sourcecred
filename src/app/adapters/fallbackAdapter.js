@@ -13,6 +13,21 @@ import type {StaticPluginAdapter, DynamicPluginAdapter} from "./pluginAdapter";
 
 export const FALLBACK_NAME = "FALLBACK_ADAPTER";
 
+export const fallbackNodeType = Object.freeze({
+  name: "node",
+  pluralName: "nodes",
+  prefix: NodeAddress.empty,
+  defaultWeight: 1,
+});
+
+export const fallbackEdgeType = Object.freeze({
+  forwardName: "forward edge",
+  backwardName: "backward edge",
+  defaultForwardWeight: 1,
+  defaultBackwardWeight: 1,
+  prefix: EdgeAddress.empty,
+});
+
 export class FallbackStaticAdapter implements StaticPluginAdapter {
   name() {
     return FALLBACK_NAME;
@@ -27,26 +42,11 @@ export class FallbackStaticAdapter implements StaticPluginAdapter {
   }
 
   nodeTypes() {
-    return [
-      {
-        name: "unknown node",
-        pluralName: "unknown nodes",
-        prefix: NodeAddress.empty,
-        defaultWeight: 1,
-      },
-    ];
+    return [fallbackNodeType];
   }
 
   edgeTypes() {
-    return [
-      {
-        forwardName: "unknown edge→",
-        backwardName: "unknown edge←",
-        defaultForwardWeight: 1,
-        defaultBackwardWeight: 1,
-        prefix: EdgeAddress.empty,
-      },
-    ];
+    return [fallbackEdgeType];
   }
 
   load(_unused_assets: Assets, _unused_repo: Repo) {

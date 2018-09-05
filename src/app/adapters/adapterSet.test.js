@@ -3,7 +3,12 @@
 import {NodeAddress, EdgeAddress, Graph} from "../../core/graph";
 import {FactorioStaticAdapter} from "./demoAdapters";
 import {StaticAdapterSet} from "./adapterSet";
-import {FallbackStaticAdapter, FALLBACK_NAME} from "./fallbackAdapter";
+import {
+  FallbackStaticAdapter,
+  FALLBACK_NAME,
+  fallbackNodeType,
+  fallbackEdgeType,
+} from "./fallbackAdapter";
 import {Assets} from "../assets";
 import {makeRepo} from "../../core/repo";
 
@@ -87,14 +92,14 @@ describe("app/adapters/adapterSet", () => {
       const type = sas.typeMatchingNode(
         NodeAddress.fromParts(["wombat", "1", "foo"])
       );
-      expect(type.name).toBe("unknown node");
+      expect(type).toBe(fallbackNodeType);
     });
     it("finds fallback type for unregistered edge", () => {
       const {sas} = example();
       const type = sas.typeMatchingEdge(
         EdgeAddress.fromParts(["wombat", "1", "foo"])
       );
-      expect(type.forwardName).toBe("unknown edge→");
+      expect(type).toBe(fallbackEdgeType);
     });
     it("loads a dynamicAdapterSet", async () => {
       const {x, sas} = example();
