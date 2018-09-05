@@ -48,7 +48,7 @@ const defaultOptions = {
   overallFailLabel: "FAILURE",
 };
 
-exports.default = async function execDependencyGraph(
+module.exports = async function execDependencyGraph(
   tasks /*: $ReadOnlyArray<Task> */,
   options /*:: ?: RunOptions */
 ) /*: Promise<OverallResult> */ {
