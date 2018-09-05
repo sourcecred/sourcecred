@@ -1,7 +1,6 @@
 // @no-flow
 
 const webpack = require("webpack");
-const eslintFormatter = require("react-dev-utils/eslintFormatter");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const RemoveBuildDirectoryPlugin = require("./RemoveBuildDirectoryPlugin");
 const paths = require("./paths");
@@ -42,22 +41,6 @@ module.exports = (outputPath) => ({
   module: {
     strictExportPresence: true,
     rules: [
-      // First, run the linter.
-      // It's important to do this before Babel processes the JS.
-      {
-        test: /\.(js|jsx|mjs)$/,
-        enforce: "pre",
-        use: [
-          {
-            options: {
-              formatter: eslintFormatter,
-              eslintPath: require.resolve("eslint"),
-            },
-            loader: require.resolve("eslint-loader"),
-          },
-        ],
-        include: paths.appSrc,
-      },
       {
         // "oneOf" will traverse all following loaders until one will
         // match the requirements. If no loader matches, it will fail.
