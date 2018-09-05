@@ -9,7 +9,6 @@ import CheckedLocalStore from "../checkedLocalStore";
 import BrowserLocalStore from "../browserLocalStore";
 
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
-import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "./WeightConfig";
 import RepositorySelect from "./RepositorySelect";
@@ -20,6 +19,8 @@ import {
   type StateTransitionMachineInterface,
   uninitializedState,
 } from "./state";
+import {StaticAdapterSet} from "../adapters/adapterSet";
+import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 
 export default class AppPage extends React.Component<{|+assets: Assets|}> {
   static _LOCAL_STORE = new CheckedLocalStore(
@@ -31,11 +32,21 @@ export default class AppPage extends React.Component<{|+assets: Assets|}> {
 
   render() {
     const App = createApp(createStateTransitionMachine);
-    return <App assets={this.props.assets} localStore={AppPage._LOCAL_STORE} />;
+    return (
+      <App
+        assets={this.props.assets}
+        adapters={defaultStaticAdapters()}
+        localStore={AppPage._LOCAL_STORE}
+      />
+    );
   }
 }
 
-type Props = {|+assets: Assets, +localStore: LocalStore|};
+type Props = {|
+  +assets: Assets,
+  +localStore: LocalStore,
+  +adapters: StaticAdapterSet,
+|};
 type State = {|
   appState: AppState,
   edgeEvaluator: ?EdgeEvaluator,
@@ -110,6 +121,7 @@ export function createApp(
             onClick={() =>
               this.stateTransitionMachine.loadGraphAndRunPagerank(
                 this.props.assets,
+                this.props.adapters,
                 NullUtil.get(this.state.edgeEvaluator),
                 GithubPrefix.user
               )
@@ -119,7 +131,7 @@ export function createApp(
           </button>
           <WeightConfig
             onChange={(edgeEvaluator) => this.setState({edgeEvaluator})}
-            adapters={defaultStaticAdapters()}
+            adapters={this.props.adapters}
           />
           <LoadingIndicator appState={this.state.appState} />
           {pagerankTable}

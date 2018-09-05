@@ -12,9 +12,7 @@ import {
   pagerank,
 } from "../../core/attribution/pagerank";
 
-import {DynamicAdapterSet} from "../adapters/adapterSet";
-
-import {defaultStaticAdapters} from "../adapters/defaultPlugins";
+import {StaticAdapterSet, DynamicAdapterSet} from "../adapters/adapterSet";
 
 /*
   This models the UI states of the credExplorer/App as a state machine.
@@ -72,10 +70,11 @@ export function uninitializedState(): AppState {
 // Exported for testing purposes.
 export interface StateTransitionMachineInterface {
   +setRepo: (Repo) => void;
-  +loadGraph: (Assets) => Promise<boolean>;
+  +loadGraph: (Assets, StaticAdapterSet) => Promise<boolean>;
   +runPagerank: (EdgeEvaluator, NodeAddressT) => Promise<void>;
   +loadGraphAndRunPagerank: (
     Assets,
+    StaticAdapterSet,
     EdgeEvaluator,
     NodeAddressT
   ) => Promise<void>;
@@ -89,6 +88,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   setState: (AppState) => void;
   loadGraphWithAdapters: (
     assets: Assets,
+    adapters: StaticAdapterSet,
     repo: Repo
   ) => Promise<GraphWithAdapters>;
   pagerank: (
@@ -102,6 +102,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     setState: (AppState) => void,
     loadGraphWithAdapters: (
       assets: Assets,
+      adapters: StaticAdapterSet,
       repo: Repo
     ) => Promise<GraphWithAdapters>,
     pagerank: (
@@ -126,7 +127,10 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   }
 
   /** Loads the graph, reports whether it was successful */
-  async loadGraph(assets: Assets): Promise<boolean> {
+  async loadGraph(
+    assets: Assets,
+    adapters: StaticAdapterSet
+  ): Promise<boolean> {
     const state = this.getState();
     if (state.type !== "READY_TO_LOAD_GRAPH") {
       throw new Error("Tried to loadGraph in incorrect state");
@@ -137,7 +141,11 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     let newState: ?AppState;
     let success = true;
     try {
-      const graphWithAdapters = await this.loadGraphWithAdapters(assets, repo);
+      const graphWithAdapters = await this.loadGraphWithAdapters(
+        assets,
+        adapters,
+        repo
+      );
       newState = {
         type: "READY_TO_RUN_PAGERANK",
         graphWithAdapters,
@@ -206,6 +214,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
 
   async loadGraphAndRunPagerank(
     assets: Assets,
+    adapters: StaticAdapterSet,
     edgeEvaluator: EdgeEvaluator,
     totalScoreNodePrefix: NodeAddressT
   ) {
@@ -216,7 +225,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     }
     switch (type) {
       case "READY_TO_LOAD_GRAPH":
-        const loadedGraph = await this.loadGraph(assets);
+        const loadedGraph = await this.loadGraph(assets, adapters);
         if (loadedGraph) {
           await this.runPagerank(edgeEvaluator, totalScoreNodePrefix);
         }
@@ -237,8 +246,9 @@ export type GraphWithAdapters = {|
 |};
 export async function loadGraphWithAdapters(
   assets: Assets,
+  adapters: StaticAdapterSet,
   repo: Repo
 ): Promise<GraphWithAdapters> {
-  const adapters = await defaultStaticAdapters().load(assets, repo);
-  return {graph: adapters.graph(), adapters};
+  const dynamicAdapters = await adapters.load(assets, repo);
+  return {graph: dynamicAdapters.graph(), adapters: dynamicAdapters};
 }
