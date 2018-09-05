@@ -17,16 +17,6 @@ import {factorioNodes} from "../../adapters/demoAdapters";
 require("../../testUtil").configureEnzyme();
 
 describe("app/credExplorer/pagerankTable/Node", () => {
-  beforeEach(() => {
-    // $ExpectFlowError
-    console.error = jest.fn();
-    // $ExpectFlowError
-    console.warn = jest.fn();
-  });
-  afterEach(() => {
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.error).not.toHaveBeenCalled();
-  });
   describe("NodeRowList", () => {
     function sortedByScore(nodes: $ReadOnlyArray<NodeAddressT>, pnd) {
       return sortBy(nodes, (node) => -NullUtil.get(pnd.get(node)).score);

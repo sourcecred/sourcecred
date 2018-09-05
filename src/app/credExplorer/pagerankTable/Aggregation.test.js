@@ -21,16 +21,6 @@ import {factorioNodes} from "../../adapters/demoAdapters";
 require("../../testUtil").configureEnzyme();
 
 describe("app/credExplorer/pagerankTable/Aggregation", () => {
-  beforeEach(() => {
-    // $ExpectFlowError
-    console.error = jest.fn();
-    // $ExpectFlowError
-    console.warn = jest.fn();
-  });
-  afterEach(() => {
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.error).not.toHaveBeenCalled();
-  });
   describe("AggregationRowList", () => {
     it("instantiates AggregationRows for each aggregation", async () => {
       const {adapters, pnd} = await example();

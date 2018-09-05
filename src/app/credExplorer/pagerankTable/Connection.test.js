@@ -14,17 +14,6 @@ import {factorioNodes} from "../../adapters/demoAdapters";
 require("../../testUtil").configureEnzyme();
 
 describe("app/credExplorer/pagerankTable/Connection", () => {
-  beforeEach(() => {
-    // $ExpectFlowError
-    console.error = jest.fn();
-    // $ExpectFlowError
-    console.warn = jest.fn();
-  });
-  afterEach(() => {
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.error).not.toHaveBeenCalled();
-  });
-
   describe("ConnectionRowList", () => {
     async function setup(maxEntriesPerList: number = 100000) {
       const {adapters, pnd} = await example();
