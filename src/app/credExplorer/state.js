@@ -13,6 +13,8 @@ import {
 } from "../../core/attribution/pagerank";
 
 import {StaticAdapterSet, DynamicAdapterSet} from "../adapters/adapterSet";
+import type {WeightedTypes} from "./weights/weights";
+import {weightsToEdgeEvaluator} from "./weights/weightsToEdgeEvaluator";
 
 /*
   This models the UI states of the credExplorer/App as a state machine.
@@ -71,11 +73,11 @@ export function uninitializedState(): AppState {
 export interface StateTransitionMachineInterface {
   +setRepo: (Repo) => void;
   +loadGraph: (Assets, StaticAdapterSet) => Promise<boolean>;
-  +runPagerank: (EdgeEvaluator, NodeAddressT) => Promise<void>;
+  +runPagerank: (WeightedTypes, NodeAddressT) => Promise<void>;
   +loadGraphAndRunPagerank: (
     Assets,
     StaticAdapterSet,
-    EdgeEvaluator,
+    WeightedTypes,
     NodeAddressT
   ) => Promise<void>;
 }
@@ -165,7 +167,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   }
 
   async runPagerank(
-    edgeEvaluator: EdgeEvaluator,
+    weightedTypes: WeightedTypes,
     totalScoreNodePrefix: NodeAddressT
   ) {
     const state = this.getState();
@@ -186,7 +188,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     try {
       const pagerankNodeDecomposition = await this.pagerank(
         graph,
-        edgeEvaluator,
+        weightsToEdgeEvaluator(weightedTypes),
         {
           verbose: true,
           totalScoreNodePrefix: totalScoreNodePrefix,
@@ -215,7 +217,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   async loadGraphAndRunPagerank(
     assets: Assets,
     adapters: StaticAdapterSet,
-    edgeEvaluator: EdgeEvaluator,
+    weightedTypes: WeightedTypes,
     totalScoreNodePrefix: NodeAddressT
   ) {
     const state = this.getState();
@@ -227,12 +229,12 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
       case "READY_TO_LOAD_GRAPH":
         const loadedGraph = await this.loadGraph(assets, adapters);
         if (loadedGraph) {
-          await this.runPagerank(edgeEvaluator, totalScoreNodePrefix);
+          await this.runPagerank(weightedTypes, totalScoreNodePrefix);
         }
         break;
       case "READY_TO_RUN_PAGERANK":
       case "PAGERANK_EVALUATED":
-        await this.runPagerank(edgeEvaluator, totalScoreNodePrefix);
+        await this.runPagerank(weightedTypes, totalScoreNodePrefix);
         break;
       default:
         throw new Error((type: empty));

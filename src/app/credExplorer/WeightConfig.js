@@ -3,8 +3,6 @@
 import React from "react";
 import * as NullUtil from "../../util/null";
 
-import {type EdgeEvaluator} from "../../core/attribution/pagerank";
-import {weightsToEdgeEvaluator} from "./weights/weightsToEdgeEvaluator";
 import type {StaticPluginAdapter} from "../adapters/pluginAdapter";
 import type {StaticAdapterSet} from "../adapters/adapterSet";
 import {
@@ -17,7 +15,7 @@ import {FALLBACK_NAME} from "../adapters/fallbackAdapter";
 
 type Props = {|
   +adapters: StaticAdapterSet,
-  +onChange: (EdgeEvaluator) => void,
+  +onChange: (WeightedTypes) => void,
 |};
 
 type State = {
@@ -94,7 +92,6 @@ export class WeightConfig extends React.Component<Props, State> {
           )
         )
     );
-    const edgeEvaluator = weightsToEdgeEvaluator(weights);
-    this.props.onChange(edgeEvaluator);
+    this.props.onChange(weights);
   }
 }
