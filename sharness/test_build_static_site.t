@@ -152,8 +152,6 @@ run_build() {
         run '"${flags}"' 2>err &&
         test_must_fail grep -vF \
             -e "Removing contents of build directory: " \
-            -e "warn: running \`yarn backend\`" \
-            -e "warn: if this offends you" \
             -e "info: loading repository" \
             err &&
         test_path_is_dir "${output_dir}" &&
@@ -215,6 +213,7 @@ test_pages() {
 
 run_build TWO_REPOS \
     "should build the site with two repositories and a CNAME" \
+    --no-backend \
     --cname sourcecred.example.com \
     --feedback-url http://discuss.example.com/feedback/ \
     --repo sourcecred/example-git \
@@ -255,6 +254,7 @@ test_expect_success TWO_REPOS "TWO_REPOS: should have a correct CNAME record" '
 SOURCECRED_FEEDBACK_URL=http://wat.com/wat \
     run_build NO_REPOS \
     "should build the site with no repositories and no CNAME" \
+    --no-backend \
     # no arguments here
 
 test_pages NO_REPOS

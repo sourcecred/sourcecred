@@ -6,6 +6,7 @@ usage() {
     printf '                            [--repo OWNER/NAME [...]]\n'
     printf '                            [--feedback-url URL]\n'
     printf '                            [--cname DOMAIN]\n'
+    printf '                            [--no-backend]\n'
     printf '                            [-h|--help]\n'
     printf '\n'
     printf 'Build the static SourceCred website, including example data.\n'
@@ -20,8 +21,18 @@ usage() {
     printf '%s\n' '--cname DOMAIN'
     printf '\t%s\n' 'configure DNS for a GitHub Pages site to point to'
     printf '\t%s\n' 'the provided custom domain'
+    printf '%s\n' '--no-backend'
+    printf '\t%s\n' 'do not run "yarn backend"; see also the SOURCECRED_BIN'
+    printf '\t%s\n' 'environment variable'
     printf '%s\n' '-h|--help'
     printf '\t%s\n' 'show this message'
+    printf '\n'
+    printf 'Environment variables:\n'
+    printf '\n'
+    printf '%s\n' 'SOURCECRED_BIN'
+    printf '\t%s\n' 'When using --no-backend, directory containing the'
+    printf '\t%s\n' 'SourceCred executables (output of "yarn backend").'
+    printf '\t%s\n' 'Default is ./bin. Ignored without --no-backend.'
 }
 
 main() {
@@ -31,6 +42,7 @@ main() {
     cd "${toplevel}"
 
     sourcecred_data=
+    sourcecred_bin=
     trap cleanup EXIT
 
     build
@@ -38,6 +50,7 @@ main() {
 
 parse_args() {
     unset SOURCECRED_FEEDBACK_URL
+    BACKEND=1
     target=
     cname=
     repos=( )
@@ -78,6 +91,9 @@ parse_args() {
                     die 'empty value for --cname'
                 fi
                 ;;
+            --no-backend)
+                BACKEND=0
+                ;;
             -h|--help)
                 usage
                 exit 0
@@ -102,24 +118,26 @@ parse_args() {
         die "target directory is nonempty: ${target}"
     fi
     target="$(readlink -e "${target}")"
+    : "${SOURCECRED_BIN:=./bin}"
 }
 
 build() {
     sourcecred_data="$(mktemp -d --suffix ".sourcecred-data")"
     export SOURCECRED_DIRECTORY="${sourcecred_data}"
 
-    yarn
-    # shellcheck disable=SC2016
-    printf >&2 'warn: running `yarn backend`, overwriting `bin/` in your repo\n'
-    printf >&2 'warn: if this offends you, please see: %s\n' \
-        'https://github.com/sourcecred/sourcecred/issues/580'
-    yarn backend
-    yarn build --output-path "${target}"
+    if [ "${BACKEND}" -ne 0 ]; then
+        sourcecred_bin="$(mktemp -d --suffix ".sourcecred-bin")"
+        export SOURCECRED_BIN="${sourcecred_bin}"
+        yarn
+        yarn -s backend --output-path "${SOURCECRED_BIN}"
+    fi
+    yarn -s build --output-path "${target}"
 
     if [ "${#repos[@]}" -ne 0 ]; then
         for repo in "${repos[@]}"; do
             printf >&2 'info: loading repository: %s\n' "${repo}"
-            node ./bin/sourcecred.js load "${repo}"
+            NODE_PATH="./node_modules${NODE_PATH:+:${NODE_PATH}}" \
+                node "${SOURCECRED_BIN:-./bin}/sourcecred.js" load "${repo}"
         done
     fi
 
@@ -147,7 +165,8 @@ build() {
 }
 
 cleanup() {
-    if [ -d "${sourcecred_data}" ]; then rm -rf "${sourcecred_data}"; fi
+    if [ -d "${sourcecred_data:-}" ]; then rm -rf "${sourcecred_data}"; fi
+    if [ -d "${sourcecred_bin:-}" ]; then rm -rf "${sourcecred_bin}"; fi
 }
 
 die() {

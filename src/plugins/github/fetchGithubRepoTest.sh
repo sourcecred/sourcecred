@@ -16,6 +16,11 @@ usage() {
   printf '      Default is --build.\n'
   printf '  --help\n'
   printf '      Show this message\n'
+  printf '\n'
+  printf 'Environment variables:'
+  printf '  SOURCECRED_BIN\n'
+  printf '      When using --no-build, directory containing the SourceCred\n'
+  printf '      executables (output of "yarn backend"). Default is ./bin.\n'
 }
 
 fetch() {
@@ -24,7 +29,7 @@ fetch() {
     printf >&2 'to a 40-character hex string API token from GitHub.\n'
     return 1
   fi
-  node bin/fetchAndPrintGithubRepo.js \
+  node "${SOURCECRED_BIN:-./bin}/fetchAndPrintGithubRepo.js" \
     sourcecred example-github "${GITHUB_TOKEN}"
 }
 
@@ -40,6 +45,9 @@ update() {
 }
 
 main() {
+  if [ -n "${SOURCECRED_BIN:-}" ]; then
+    SOURCECRED_BIN="$(readlink -f "${SOURCECRED_BIN}")"
+  fi
   cd "$(git rev-parse --show-toplevel)"
   UPDATE=
   BUILD=1
@@ -60,7 +68,10 @@ main() {
     shift
   done
   if [ -n "${BUILD}" ]; then
+    unset SOURCECRED_BIN
     yarn backend
+  else
+    export NODE_PATH="./node_modules${NODE_PATH:+:${NODE_PATH}}"
   fi
   if [ -n "${UPDATE}" ]; then
     update

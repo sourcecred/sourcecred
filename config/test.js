@@ -18,6 +18,18 @@ function main() {
 }
 
 function makeTasks(mode /*: "BASIC" | "FULL" */) {
+  const backendOutput = tmp.dirSync({
+    unsafeCleanup: true,
+    prefix: "sourcecred-test-",
+  }).name;
+  console.log("tmpdir for backend output: " + backendOutput);
+
+  function withSourcecredBinEnv(
+    invocation /*: $ReadOnlyArray<string> */
+  ) /*: string[] */ {
+    return ["env", "SOURCECRED_BIN=" + backendOutput, ...invocation];
+  }
+
   const basicTasks = [
     {
       id: "ensure-flow-typing",
@@ -60,16 +72,6 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       deps: [],
     },
     {
-      id: {BASIC: "sharness", FULL: "sharness-full"}[mode],
-      cmd: [
-        "npm",
-        "run",
-        "--silent",
-        {BASIC: "sharness", FULL: "sharness-full"}[mode],
-      ],
-      deps: [],
-    },
-    {
       id: "backend",
       cmd: [
         "npm",
@@ -78,32 +80,37 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
         "backend",
         "--",
         "--output-path",
-        tmp.dirSync({
-          unsafeCleanup: true,
-          prefix: "sourcecred-backend-dry-run-",
-        }).name,
+        backendOutput,
       ],
       deps: [],
+    },
+    {
+      id: {BASIC: "sharness", FULL: "sharness-full"}[mode],
+      cmd: withSourcecredBinEnv([
+        "npm",
+        "run",
+        "--silent",
+        {BASIC: "sharness", FULL: "sharness-full"}[mode],
+      ]),
+      deps: ["backend"],
     },
   ];
   const extraTasks = [
     {
-      id: "backend-in-place",
-      cmd: ["npm", "run", "--silent", "backend"],
-      // This task depends on `check-pretty` in order to work around a
-      // race condition in Prettier:
-      // https://github.com/prettier/prettier/issues/4468
-      deps: ["check-pretty"],
-    },
-    {
       id: "fetchGithubRepoTest",
-      cmd: ["./src/plugins/github/fetchGithubRepoTest.sh", "--no-build"],
-      deps: ["backend-in-place"],
+      cmd: withSourcecredBinEnv([
+        "./src/plugins/github/fetchGithubRepoTest.sh",
+        "--no-build",
+      ]),
+      deps: ["backend"],
     },
     {
       id: "loadRepositoryTest",
-      cmd: ["./src/plugins/git/loadRepositoryTest.sh", "--no-build"],
-      deps: ["backend-in-place"],
+      cmd: withSourcecredBinEnv([
+        "./src/plugins/git/loadRepositoryTest.sh",
+        "--no-build",
+      ]),
+      deps: ["backend"],
     },
   ];
   switch (mode) {
