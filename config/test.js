@@ -1,5 +1,7 @@
 // @flow
 
+const tmp = require("tmp");
+
 const execDependencyGraph = require("../src/tools/execDependencyGraph");
 
 main();
@@ -69,7 +71,18 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
     },
     {
       id: "backend",
-      cmd: ["npm", "run", "--silent", "backend", "--", "--dry-run"],
+      cmd: [
+        "npm",
+        "run",
+        "--silent",
+        "backend",
+        "--",
+        "--output-path",
+        tmp.dirSync({
+          unsafeCleanup: true,
+          prefix: "sourcecred-backend-dry-run-",
+        }).name,
+      ],
       deps: [],
     },
   ];
