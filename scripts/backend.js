@@ -44,9 +44,6 @@ const outputPath = process.argv.some((s) => s === "--dry-run" || s === "-n")
 // This lets us display how much they changed later.
 measureFileSizesBeforeBuild(outputPath)
   .then((previousFileSizes) => {
-    // Remove all content but keep the directory so that
-    // if you're in it, you don't end up in Trash
-    fs.emptyDirSync(outputPath);
     // Start the webpack build
     return build(previousFileSizes);
   })
