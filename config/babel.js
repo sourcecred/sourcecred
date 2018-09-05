@@ -113,8 +113,6 @@ if (env === "test") {
               },
           // Disable polyfill transforms
           useBuiltIns: false,
-          // Do not transform modules to CJS
-          modules: false,
         },
       ],
       // JSX, Flow
