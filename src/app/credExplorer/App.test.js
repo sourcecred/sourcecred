@@ -38,7 +38,11 @@ describe("app/credExplorer/App", () => {
     }
     const App = createApp(createMockSTM);
     const el = shallow(
-      <App assets={new Assets("/foo/")} localStore={localStore} />
+      <App
+        assets={new Assets("/foo/")}
+        adapters={new StaticAdapterSet([])}
+        localStore={localStore}
+      />
     );
     if (setState == null || getState == null) {
       throw new Error("Initialization problems");
@@ -156,6 +160,7 @@ describe("app/credExplorer/App", () => {
           expect(loadGraphAndRunPagerank).toBeCalledTimes(1);
           expect(loadGraphAndRunPagerank).toBeCalledWith(
             el.instance().props.assets,
+            el.instance().props.adapters,
             edgeEvaluator,
             GithubPrefix.user
           );

@@ -26,6 +26,7 @@ describe("app/credExplorer/state", () => {
     };
     const loadGraphMock: (
       assets: Assets,
+      adapters: StaticAdapterSet,
       repo: Repo
     ) => Promise<GraphWithAdapters> = jest.fn();
     const pagerankMock: (
@@ -136,25 +137,28 @@ describe("app/credExplorer/state", () => {
       ];
       for (const b of badStates) {
         const {stm} = example(b);
-        await expect(stm.loadGraph(new Assets("/my/gateway/"))).rejects.toThrow(
-          "incorrect state"
-        );
+        await expect(
+          stm.loadGraph(new Assets("/my/gateway/"), new StaticAdapterSet([]))
+        ).rejects.toThrow("incorrect state");
       }
     });
     it("passes along the adapters and repo", () => {
       const {stm, loadGraphMock} = example(readyToLoadGraph());
       expect(loadGraphMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
-      stm.loadGraph(assets);
+      const adapters = new StaticAdapterSet([]);
+      stm.loadGraph(assets, adapters);
       expect(loadGraphMock).toHaveBeenCalledTimes(1);
-      expect(loadGraphMock.mock.calls[0]).toHaveLength(2);
-      expect(loadGraphMock.mock.calls[0][0]).toBe(assets);
-      expect(loadGraphMock.mock.calls[0][1]).toEqual(makeRepo("foo", "bar"));
+      expect(loadGraphMock).toHaveBeenCalledWith(
+        assets,
+        adapters,
+        makeRepo("foo", "bar")
+      );
     });
     it("immediately sets loading status", () => {
       const {getState, stm} = example(readyToLoadGraph());
       expect(loading(getState())).toBe("NOT_LOADING");
-      stm.loadGraph(new Assets("/my/gateway/"));
+      stm.loadGraph(new Assets("/my/gateway/"), new StaticAdapterSet([]));
       expect(loading(getState())).toBe("LOADING");
       expect(getState().type).toBe("READY_TO_LOAD_GRAPH");
     });
@@ -162,7 +166,10 @@ describe("app/credExplorer/state", () => {
       const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
       const gwa = graphWithAdapters();
       loadGraphMock.mockResolvedValue(gwa);
-      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
+      const succeeded = await stm.loadGraph(
+        new Assets("/my/gateway/"),
+        new StaticAdapterSet([])
+      );
       expect(succeeded).toBe(true);
       const state = getState();
       expect(loading(state)).toBe("NOT_LOADING");
@@ -182,7 +189,10 @@ describe("app/credExplorer/state", () => {
             resolve(graphWithAdapters());
           })
       );
-      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
+      const succeeded = await stm.loadGraph(
+        new Assets("/my/gateway/"),
+        new StaticAdapterSet([])
+      );
       expect(succeeded).toBe(false);
       const state = getState();
       expect(loading(state)).toBe("NOT_LOADING");
@@ -195,7 +205,10 @@ describe("app/credExplorer/state", () => {
       // $ExpectFlowError
       console.error = jest.fn();
       loadGraphMock.mockRejectedValue(error);
-      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
+      const succeeded = await stm.loadGraph(
+        new Assets("/my/gateway/"),
+        new StaticAdapterSet([])
+      );
       expect(succeeded).toBe(false);
       const state = getState();
       expect(loading(state)).toBe("FAILED");
@@ -282,6 +295,7 @@ describe("app/credExplorer/state", () => {
       await expect(
         stm.loadGraphAndRunPagerank(
           new Assets("gateway"),
+          new StaticAdapterSet([]),
           edgeEvaluator(),
           NodeAddress.empty
         )
@@ -293,11 +307,12 @@ describe("app/credExplorer/state", () => {
       (stm: any).runPagerank = jest.fn();
       stm.loadGraph.mockResolvedValue(true);
       const assets = new Assets("/gateway/");
+      const adapters = new StaticAdapterSet([]);
       const prefix = NodeAddress.fromParts(["bar"]);
       const ee = edgeEvaluator();
-      await stm.loadGraphAndRunPagerank(assets, ee, prefix);
+      await stm.loadGraphAndRunPagerank(assets, adapters, ee, prefix);
       expect(stm.loadGraph).toHaveBeenCalledTimes(1);
-      expect(stm.loadGraph).toHaveBeenCalledWith(assets);
+      expect(stm.loadGraph).toHaveBeenCalledWith(assets, adapters);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
       expect(stm.runPagerank).toHaveBeenCalledWith(ee, prefix);
     });
@@ -307,8 +322,14 @@ describe("app/credExplorer/state", () => {
       (stm: any).runPagerank = jest.fn();
       stm.loadGraph.mockResolvedValue(false);
       const assets = new Assets("/gateway/");
+      const adapters = new StaticAdapterSet([]);
       const prefix = NodeAddress.fromParts(["bar"]);
-      await stm.loadGraphAndRunPagerank(assets, edgeEvaluator(), prefix);
+      await stm.loadGraphAndRunPagerank(
+        assets,
+        adapters,
+        edgeEvaluator(),
+        prefix
+      );
       expect(stm.loadGraph).toHaveBeenCalledTimes(1);
       expect(stm.runPagerank).toHaveBeenCalledTimes(0);
     });
@@ -318,7 +339,12 @@ describe("app/credExplorer/state", () => {
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
       const ee = edgeEvaluator();
-      await stm.loadGraphAndRunPagerank(new Assets("/gateway/"), ee, prefix);
+      await stm.loadGraphAndRunPagerank(
+        new Assets("/gateway/"),
+        new StaticAdapterSet([]),
+        ee,
+        prefix
+      );
       expect(stm.loadGraph).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
       expect(stm.runPagerank).toHaveBeenCalledWith(ee, prefix);
@@ -329,7 +355,12 @@ describe("app/credExplorer/state", () => {
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
       const ee = edgeEvaluator();
-      await stm.loadGraphAndRunPagerank(new Assets("/gateway/"), ee, prefix);
+      await stm.loadGraphAndRunPagerank(
+        new Assets("/gateway/"),
+        new StaticAdapterSet([]),
+        ee,
+        prefix
+      );
       expect(stm.loadGraph).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
       expect(stm.runPagerank).toHaveBeenCalledWith(ee, prefix);
