@@ -10,16 +10,6 @@ import {example, COLUMNS} from "./sharedTestUtils";
 
 require("../../testUtil").configureEnzyme();
 describe("app/credExplorer/pagerankTable/Table", () => {
-  beforeEach(() => {
-    // $ExpectFlowError
-    console.error = jest.fn();
-    // $ExpectFlowError
-    console.warn = jest.fn();
-  });
-  afterEach(() => {
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.error).not.toHaveBeenCalled();
-  });
   describe("PagerankTable", () => {
     it("renders thead column order properly", async () => {
       const {pnd, adapters} = await example();

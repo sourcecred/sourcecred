@@ -12,17 +12,6 @@ import createRelativeHistory from "./createRelativeHistory";
 require("./testUtil").configureEnzyme();
 
 describe("app/createRelativeHistory", () => {
-  beforeEach(() => {
-    // $ExpectFlowError
-    console.error = jest.fn();
-    // $ExpectFlowError
-    console.warn = jest.fn();
-  });
-  afterEach(() => {
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.error).not.toHaveBeenCalled();
-  });
-
   function createHistory(basename, path) {
     const memoryHistory = createMemoryHistory(path);
     const relativeHistory = createRelativeHistory(memoryHistory, basename);

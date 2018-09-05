@@ -22,14 +22,6 @@ require("../testUtil").configureAphrodite();
 describe("app/credExplorer/RepositorySelect", () => {
   beforeEach(() => {
     fetch.resetMocks();
-    // $ExpectFlowError
-    console.error = jest.fn();
-    // $ExpectFlowError
-    console.warn = jest.fn();
-  });
-  afterEach(() => {
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.error).not.toHaveBeenCalled();
   });
 
   function mockRegistry(registry: RepoRegistry) {
