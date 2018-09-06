@@ -55,8 +55,10 @@ describe("src/app/credExplorer/weights/PluginWeightConfig", () => {
       const newWeightedType = {...nodes[0], weight: 707};
       const newNodes = [newWeightedType, ...nodes.slice(1)];
       const expected = {
-        nodes: newNodes,
-        edges: adapter.edgeTypes().map(defaultWeightedEdgeType),
+        nodes: new Map(newNodes.map((x) => [x.type.prefix, x])),
+        edges: new Map(
+          adapter.edgeTypes().map((x) => [x.prefix, defaultWeightedEdgeType(x)])
+        ),
       };
       ntc.props().onChange(newWeightedType);
       expect(onChange).toHaveBeenCalledTimes(2);
@@ -69,8 +71,10 @@ describe("src/app/credExplorer/weights/PluginWeightConfig", () => {
       const newWeightedType = {...edges[0], weight: 707};
       const newEdges = [newWeightedType, ...edges.slice(1)];
       const expected = {
-        nodes: adapter.nodeTypes().map(defaultWeightedNodeType),
-        edges: newEdges,
+        nodes: new Map(
+          adapter.nodeTypes().map((x) => [x.prefix, defaultWeightedNodeType(x)])
+        ),
+        edges: new Map(newEdges.map((x) => [x.type.prefix, x])),
       };
       ntc.props().onChange(newWeightedType);
       expect(onChange).toHaveBeenCalledTimes(2);

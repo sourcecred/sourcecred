@@ -1,7 +1,7 @@
 // @flow
 
 import React from "react";
-import deepEqual from "lodash.isequal";
+import * as MapUtil from "../../../util/map";
 import {NodeTypeConfig} from "./NodeTypeConfig";
 import {EdgeTypeConfig} from "./EdgeTypeConfig";
 import {StaticPluginAdapter} from "../../adapters/pluginAdapter";
@@ -37,45 +37,53 @@ export class PluginWeightConfig extends React.Component<Props, State> {
   }
 
   _renderNodeWeightControls() {
-    return this.state.weights.nodes.map((wnt: WeightedNodeType) => {
-      const onChange = (newType: WeightedNodeType) => {
-        const index = this.state.weights.nodes.findIndex((x) =>
-          deepEqual(x.type, wnt.type)
+    return Array.from(this.state.weights.nodes.values()).map(
+      (wnt: WeightedNodeType) => {
+        const onChange = (newType: WeightedNodeType) => {
+          this.setState(
+            (state) => {
+              const newNodes = MapUtil.copy(state.weights.nodes);
+              newNodes.set(newType.type.prefix, newType);
+              const weights = {...state.weights, nodes: newNodes};
+              return {weights};
+            },
+            () => this.fire()
+          );
+        };
+        return (
+          <NodeTypeConfig
+            key={wnt.type.prefix}
+            weightedType={wnt}
+            onChange={onChange}
+          />
         );
-        const newNodes = this.state.weights.nodes.slice();
-        newNodes[index] = newType;
-        const weights = {nodes: newNodes, edges: this.state.weights.edges};
-        this.setState({weights}, () => this.fire());
-      };
-      return (
-        <NodeTypeConfig
-          key={wnt.type.prefix}
-          weightedType={wnt}
-          onChange={onChange}
-        />
-      );
-    });
+      }
+    );
   }
 
   _renderEdgeWeightControls() {
-    return this.state.weights.edges.map((wnt: WeightedEdgeType) => {
-      const onChange = (newType: WeightedEdgeType) => {
-        const index = this.state.weights.edges.findIndex((x) =>
-          deepEqual(x.type, wnt.type)
+    return Array.from(this.state.weights.edges.values()).map(
+      (wnt: WeightedEdgeType) => {
+        const onChange = (newType: WeightedEdgeType) => {
+          this.setState(
+            (state) => {
+              const newEdges = MapUtil.copy(state.weights.edges);
+              newEdges.set(newType.type.prefix, newType);
+              const weights = {...state.weights, edges: newEdges};
+              return {weights};
+            },
+            () => this.fire()
+          );
+        };
+        return (
+          <EdgeTypeConfig
+            key={wnt.type.prefix}
+            weightedType={wnt}
+            onChange={onChange}
+          />
         );
-        const newEdges = this.state.weights.edges.slice();
-        newEdges[index] = newType;
-        const weights = {nodes: this.state.weights.nodes, edges: newEdges};
-        this.setState({weights}, () => this.fire());
-      };
-      return (
-        <EdgeTypeConfig
-          key={wnt.type.prefix}
-          weightedType={wnt}
-          onChange={onChange}
-        />
-      );
-    });
+      }
+    );
   }
 
   render() {

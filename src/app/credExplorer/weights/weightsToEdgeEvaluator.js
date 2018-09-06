@@ -7,11 +7,11 @@ import {NodeTrie, EdgeTrie} from "../../../core/trie";
 
 export function weightsToEdgeEvaluator(weights: WeightedTypes): EdgeEvaluator {
   const nodeTrie = new NodeTrie();
-  for (const {type, weight} of weights.nodes) {
+  for (const {type, weight} of weights.nodes.values()) {
     nodeTrie.add(type.prefix, weight);
   }
   const edgeTrie = new EdgeTrie();
-  for (const {type, forwardWeight, backwardWeight} of weights.edges) {
+  for (const {type, forwardWeight, backwardWeight} of weights.edges.values()) {
     edgeTrie.add(type.prefix, {forwardWeight, backwardWeight});
   }
 
