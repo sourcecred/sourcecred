@@ -1,7 +1,7 @@
 // @flow
 
 import type {Edge} from "../../../core/graph";
-import type {WeightedTypes} from "./PluginWeightConfig";
+import type {WeightedTypes} from "./weights";
 import type {EdgeEvaluator} from "../../../core/attribution/pagerank";
 import {NodeTrie, EdgeTrie} from "../../../core/trie";
 

@@ -2,16 +2,7 @@
 
 import React from "react";
 import {WeightSlider} from "./WeightSlider";
-import {type NodeType} from "../../adapters/pluginAdapter";
-
-export type WeightedNodeType = {|+type: NodeType, +weight: number|};
-
-export function defaultWeightedNodeType(type: NodeType): WeightedNodeType {
-  return {
-    type,
-    weight: type.defaultWeight,
-  };
-}
+import type {WeightedNodeType} from "./weights";
 
 export class NodeTypeConfig extends React.Component<{
   +weightedType: WeightedNodeType,

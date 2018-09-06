@@ -2,21 +2,8 @@
 
 import React from "react";
 import {WeightSlider, type Props as WeightSliderProps} from "./WeightSlider";
-import {type EdgeType} from "../../adapters/pluginAdapter";
 
-export type WeightedEdgeType = {|
-  +type: EdgeType,
-  +forwardWeight: number,
-  +backwardWeight: number,
-|};
-
-export function defaultWeightedEdgeType(type: EdgeType): WeightedEdgeType {
-  return {
-    type,
-    forwardWeight: type.defaultForwardWeight,
-    backwardWeight: type.defaultBackwardWeight,
-  };
-}
+import type {WeightedEdgeType} from "./weights";
 
 export class EdgeTypeConfig extends React.Component<{
   +weightedType: WeightedEdgeType,

@@ -2,23 +2,17 @@
 
 import React from "react";
 import deepEqual from "lodash.isequal";
-import {
-  NodeTypeConfig,
-  defaultWeightedNodeType,
-  type WeightedNodeType,
-} from "./NodeTypeConfig";
-import {
-  EdgeTypeConfig,
-  defaultWeightedEdgeType,
-  type WeightedEdgeType,
-} from "./EdgeTypeConfig";
+import {NodeTypeConfig} from "./NodeTypeConfig";
+import {EdgeTypeConfig} from "./EdgeTypeConfig";
 import {StaticPluginAdapter} from "../../adapters/pluginAdapter";
 import {styledVariable} from "./EdgeTypeConfig";
-
-export type WeightedTypes = {|
-  +nodes: $ReadOnlyArray<WeightedNodeType>,
-  +edges: $ReadOnlyArray<WeightedEdgeType>,
-|};
+import {
+  type WeightedTypes,
+  type WeightedEdgeType,
+  type WeightedNodeType,
+  defaultWeightedNodeType,
+  defaultWeightedEdgeType,
+} from "./weights";
 
 export type Props = {|
   +adapter: StaticPluginAdapter,
