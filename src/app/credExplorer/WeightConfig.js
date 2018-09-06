@@ -1,22 +1,18 @@
 // @flow
 
 import React from "react";
+import * as NullUtil from "../../util/null";
 
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {weightsToEdgeEvaluator} from "./weights/weightsToEdgeEvaluator";
+import type {StaticPluginAdapter} from "../adapters/pluginAdapter";
 import type {StaticAdapterSet} from "../adapters/adapterSet";
 import {
   type WeightedTypes,
-  PluginWeightConfig,
-} from "./weights/PluginWeightConfig";
-import {
-  type WeightedNodeType,
-  defaultWeightedNodeType,
-} from "./weights/NodeTypeConfig";
-import {
-  type WeightedEdgeType,
-  defaultWeightedEdgeType,
-} from "./weights/EdgeTypeConfig";
+  defaultWeightsForAdapter,
+  combineWeights,
+} from "./weights/weights";
+import {PluginWeightConfig} from "./weights/PluginWeightConfig";
 import {FALLBACK_NAME} from "../adapters/fallbackAdapter";
 
 type Props = {|
@@ -88,23 +84,16 @@ export class WeightConfig extends React.Component<Props, State> {
   }
 
   fire() {
-    let nodeWeights: WeightedNodeType[] = [];
-    let edgeWeights: WeightedEdgeType[] = [];
-    for (const adapter of this.props.adapters.adapters()) {
-      const weights = this.state.pluginNameToWeights.get(adapter.name());
-      const newNodeWeights =
-        weights == null
-          ? adapter.nodeTypes().map(defaultWeightedNodeType)
-          : weights.nodes;
-      const newEdgeWeights =
-        weights == null
-          ? adapter.edgeTypes().map(defaultWeightedEdgeType)
-          : weights.edges;
-      nodeWeights = nodeWeights.concat(newNodeWeights);
-      edgeWeights = edgeWeights.concat(newEdgeWeights);
-    }
-
-    const weights = {nodes: nodeWeights, edges: edgeWeights};
+    const weights = combineWeights(
+      this.props.adapters
+        .adapters()
+        .map((adapter: StaticPluginAdapter) =>
+          NullUtil.orElse(
+            this.state.pluginNameToWeights.get(adapter.name()),
+            defaultWeightsForAdapter(adapter)
+          )
+        )
+    );
     const edgeEvaluator = weightsToEdgeEvaluator(weights);
     this.props.onChange(edgeEvaluator);
   }

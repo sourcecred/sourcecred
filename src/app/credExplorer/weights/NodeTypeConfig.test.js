@@ -4,18 +4,12 @@ import React from "react";
 import {shallow} from "enzyme";
 
 import {WeightSlider} from "./WeightSlider";
-import {defaultWeightedNodeType, NodeTypeConfig} from "./NodeTypeConfig";
+import {NodeTypeConfig} from "./NodeTypeConfig";
 import {inserterNodeType} from "../../adapters/demoAdapters";
 
 require("../../testUtil").configureEnzyme();
 
 describe("app/credExplorer/weights/NodeTypeConfig", () => {
-  describe("defaultWeightedNodeType", () => {
-    it("sets default weight as specified in type", () => {
-      const wnt = defaultWeightedNodeType(inserterNodeType);
-      expect(wnt.weight).toEqual(wnt.type.defaultWeight);
-    });
-  });
   describe("NodeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();

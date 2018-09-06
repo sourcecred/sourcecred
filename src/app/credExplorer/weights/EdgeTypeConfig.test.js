@@ -4,23 +4,12 @@ import React from "react";
 import {shallow} from "enzyme";
 
 import {WeightSlider} from "./WeightSlider";
-import {
-  defaultWeightedEdgeType,
-  EdgeTypeConfig,
-  EdgeWeightSlider,
-} from "./EdgeTypeConfig";
+import {EdgeTypeConfig, EdgeWeightSlider} from "./EdgeTypeConfig";
 import {assemblesEdgeType} from "../../adapters/demoAdapters";
 
 require("../../testUtil").configureEnzyme();
 
 describe("app/credExplorer/weights/EdgeTypeConfig", () => {
-  describe("defaultWeightedEdgeType", () => {
-    it("sets default weights as specified in the type", () => {
-      const wet = defaultWeightedEdgeType(assemblesEdgeType);
-      expect(wet.forwardWeight).toEqual(wet.type.defaultForwardWeight);
-      expect(wet.backwardWeight).toEqual(wet.type.defaultBackwardWeight);
-    });
-  });
   describe("EdgeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();

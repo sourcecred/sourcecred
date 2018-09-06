@@ -4,8 +4,13 @@ import React from "react";
 import {shallow} from "enzyme";
 import {PluginWeightConfig} from "./PluginWeightConfig";
 import {FactorioStaticAdapter} from "../../adapters/demoAdapters";
-import {NodeTypeConfig, defaultWeightedNodeType} from "./NodeTypeConfig";
-import {EdgeTypeConfig, defaultWeightedEdgeType} from "./EdgeTypeConfig";
+import {NodeTypeConfig} from "./NodeTypeConfig";
+import {EdgeTypeConfig} from "./EdgeTypeConfig";
+import {
+  defaultWeightsForAdapter,
+  defaultWeightedNodeType,
+  defaultWeightedEdgeType,
+} from "./weights";
 
 require("../../testUtil").configureEnzyme();
 
@@ -21,10 +26,7 @@ describe("src/app/credExplorer/weights/PluginWeightConfig", () => {
     }
     it("fires plugin's default weights on mount", () => {
       const {onChange, adapter} = example();
-      const expected = {
-        nodes: adapter.nodeTypes().map(defaultWeightedNodeType),
-        edges: adapter.edgeTypes().map(defaultWeightedEdgeType),
-      };
+      const expected = defaultWeightsForAdapter(adapter);
       expect(onChange).toHaveBeenCalledWith(expected);
     });
     it("renders a NodeTypeConfig for each node type", () => {
