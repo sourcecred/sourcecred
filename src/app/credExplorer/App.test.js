@@ -8,6 +8,8 @@ import {makeRepo} from "../../core/repo";
 import {Assets} from "../assets";
 import testLocalStore from "../testLocalStore";
 import {DynamicAdapterSet, StaticAdapterSet} from "../adapters/adapterSet";
+import {FactorioStaticAdapter} from "../adapters/demoAdapters";
+import {defaultWeightsForAdapter} from "./weights/weights";
 
 import RepositorySelect from "./RepositorySelect";
 import {PagerankTable} from "./pagerankTable/Table";
@@ -56,12 +58,6 @@ describe("app/credExplorer/App", () => {
       runPagerank,
       loadGraphAndRunPagerank,
       localStore,
-    };
-  }
-
-  function createEvaluator() {
-    return function(_unused_edge) {
-      return {toWeight: 1, froWeight: 1};
     };
   }
 
@@ -135,9 +131,10 @@ describe("app/credExplorer/App", () => {
         const {el, setState} = example();
         setState(stateFn());
         const wc = el.find(WeightConfig);
-        const ee = createEvaluator();
-        wc.props().onChange(ee);
-        expect(el.state().edgeEvaluator).toBe(ee);
+        const wt = defaultWeightsForAdapter(new FactorioStaticAdapter());
+        wc.props().onChange(wt);
+        expect(el.state().weightedTypes).toBe(wt);
+        expect(wc.props().adapters).toBe(el.instance().props.adapters);
       });
     }
 
@@ -146,8 +143,6 @@ describe("app/credExplorer/App", () => {
       it(`has a ${adjective} analyze cred button`, () => {
         const {el, loadGraphAndRunPagerank, setState} = example();
         setState(stateFn());
-        const edgeEvaluator = createEvaluator();
-        el.setState({edgeEvaluator});
         el.update();
         const button = el.findWhere(
           (b) => b.text() === "Analyze cred" && b.is("button")
@@ -161,22 +156,11 @@ describe("app/credExplorer/App", () => {
           expect(loadGraphAndRunPagerank).toBeCalledWith(
             el.instance().props.assets,
             el.instance().props.adapters,
-            edgeEvaluator,
+            el.instance().state.weightedTypes,
             GithubPrefix.user
           );
         }
       });
-      if (!disabled) {
-        it("...unless the EdgeEvaluator is not available", () => {
-          const {el, setState} = example();
-          setState(stateFn());
-          el.update();
-          const button = el.findWhere(
-            (b) => b.text() === "Analyze cred" && b.is("button")
-          );
-          expect(button.props().disabled).toBe(true);
-        });
-      }
     }
 
     function testPagerankTable(stateFn, present: boolean) {

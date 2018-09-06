@@ -2,15 +2,18 @@
 
 import React from "react";
 
-import * as NullUtil from "../../util/null";
 import type {Assets} from "../assets";
 import type {LocalStore} from "../localStore";
 import CheckedLocalStore from "../checkedLocalStore";
 import BrowserLocalStore from "../browserLocalStore";
 
-import {type EdgeEvaluator} from "../../core/attribution/pagerank";
+import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "./WeightConfig";
+import {
+  type WeightedTypes,
+  defaultWeightsForAdapterSet,
+} from "./weights/weights";
 import RepositorySelect from "./RepositorySelect";
 import {_Prefix as GithubPrefix} from "../../plugins/github/nodes";
 import {
@@ -20,7 +23,6 @@ import {
   uninitializedState,
 } from "./state";
 import {StaticAdapterSet} from "../adapters/adapterSet";
-import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 
 export default class AppPage extends React.Component<{|+assets: Assets|}> {
   static _LOCAL_STORE = new CheckedLocalStore(
@@ -49,7 +51,7 @@ type Props = {|
 |};
 type State = {|
   appState: AppState,
-  edgeEvaluator: ?EdgeEvaluator,
+  weightedTypes: WeightedTypes,
 |};
 
 export function createApp(
@@ -65,7 +67,7 @@ export function createApp(
       super(props);
       this.state = {
         appState: uninitializedState(),
-        edgeEvaluator: null,
+        weightedTypes: defaultWeightsForAdapterSet(props.adapters),
       };
       this.stateTransitionMachine = createSTM(
         () => this.state.appState,
@@ -115,14 +117,13 @@ export function createApp(
           <button
             disabled={
               appState.type === "UNINITIALIZED" ||
-              appState.loading === "LOADING" ||
-              this.state.edgeEvaluator == null
+              appState.loading === "LOADING"
             }
             onClick={() =>
               this.stateTransitionMachine.loadGraphAndRunPagerank(
                 this.props.assets,
                 this.props.adapters,
-                NullUtil.get(this.state.edgeEvaluator),
+                this.state.weightedTypes,
                 GithubPrefix.user
               )
             }
@@ -130,7 +131,7 @@ export function createApp(
             Analyze cred
           </button>
           <WeightConfig
-            onChange={(edgeEvaluator) => this.setState({edgeEvaluator})}
+            onChange={(weightedTypes) => this.setState({weightedTypes})}
             adapters={this.props.adapters}
           />
           <LoadingIndicator appState={this.state.appState} />

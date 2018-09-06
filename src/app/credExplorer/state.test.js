@@ -11,11 +11,16 @@ import {Graph, NodeAddress} from "../../core/graph";
 import {Assets} from "../assets";
 import {makeRepo, type Repo} from "../../core/repo";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
+import {
+  type WeightedTypes,
+  defaultWeightsForAdapterSet,
+} from "./weights/weights";
 import {StaticAdapterSet, DynamicAdapterSet} from "../adapters/adapterSet";
 import type {
   PagerankNodeDecomposition,
   PagerankOptions,
 } from "../../core/attribution/pagerank";
+import {staticAdapterSet} from "../adapters/demoAdapters";
 
 describe("app/credExplorer/state", () => {
   function example(startingState: AppState) {
@@ -66,8 +71,8 @@ describe("app/credExplorer/state", () => {
       loading: "NOT_LOADING",
     };
   }
-  function edgeEvaluator(): EdgeEvaluator {
-    return (_unused_Edge) => ({toWeight: 3, froWeight: 4});
+  function weightedTypes(): WeightedTypes {
+    return defaultWeightsForAdapterSet(staticAdapterSet());
   }
   function graphWithAdapters(): GraphWithAdapters {
     return {
@@ -224,7 +229,7 @@ describe("app/credExplorer/state", () => {
       for (const b of badStates) {
         const {stm} = example(b);
         await expect(
-          stm.runPagerank(edgeEvaluator(), NodeAddress.empty)
+          stm.runPagerank(weightedTypes(), NodeAddress.empty)
         ).rejects.toThrow("incorrect state");
       }
     });
@@ -234,7 +239,7 @@ describe("app/credExplorer/state", () => {
         const {stm, getState, pagerankMock} = example(g);
         const pnd = pagerankNodeDecomposition();
         pagerankMock.mockResolvedValue(pnd);
-        await stm.runPagerank(edgeEvaluator(), NodeAddress.empty);
+        await stm.runPagerank(weightedTypes(), NodeAddress.empty);
         const state = getState();
         if (state.type !== "PAGERANK_EVALUATED") {
           throw new Error("Impossible");
@@ -246,16 +251,14 @@ describe("app/credExplorer/state", () => {
     it("immediately sets loading status", () => {
       const {getState, stm} = example(readyToRunPagerank());
       expect(loading(getState())).toBe("NOT_LOADING");
-      stm.runPagerank(edgeEvaluator(), NodeAddress.empty);
+      stm.runPagerank(weightedTypes(), NodeAddress.empty);
       expect(loading(getState())).toBe("LOADING");
     });
     it("calls pagerank with the totalScoreNodePrefix option", async () => {
       const {pagerankMock, stm} = example(readyToRunPagerank());
       const foo = NodeAddress.fromParts(["foo"]);
-      const ee = edgeEvaluator();
-      await stm.runPagerank(ee, foo);
+      await stm.runPagerank(weightedTypes(), foo);
       const args = pagerankMock.mock.calls[0];
-      expect(args[1]).toBe(ee);
       expect(args[2].totalScoreNodePrefix).toBe(foo);
     });
     it("does not transition if a repo change happens first", async () => {
@@ -268,7 +271,7 @@ describe("app/credExplorer/state", () => {
             resolve(graphWithAdapters());
           })
       );
-      await stm.runPagerank(edgeEvaluator(), NodeAddress.empty);
+      await stm.runPagerank(weightedTypes(), NodeAddress.empty);
       const state = getState();
       expect(loading(state)).toBe("NOT_LOADING");
       expect(state.type).toBe("READY_TO_LOAD_GRAPH");
@@ -280,7 +283,7 @@ describe("app/credExplorer/state", () => {
       // $ExpectFlowError
       console.error = jest.fn();
       pagerankMock.mockRejectedValue(error);
-      await stm.runPagerank(edgeEvaluator(), NodeAddress.empty);
+      await stm.runPagerank(weightedTypes(), NodeAddress.empty);
       const state = getState();
       expect(loading(state)).toBe("FAILED");
       expect(state.type).toBe("READY_TO_RUN_PAGERANK");
@@ -296,7 +299,7 @@ describe("app/credExplorer/state", () => {
         stm.loadGraphAndRunPagerank(
           new Assets("gateway"),
           new StaticAdapterSet([]),
-          edgeEvaluator(),
+          weightedTypes(),
           NodeAddress.empty
         )
       ).rejects.toThrow("incorrect state");
@@ -309,12 +312,12 @@ describe("app/credExplorer/state", () => {
       const assets = new Assets("/gateway/");
       const adapters = new StaticAdapterSet([]);
       const prefix = NodeAddress.fromParts(["bar"]);
-      const ee = edgeEvaluator();
-      await stm.loadGraphAndRunPagerank(assets, adapters, ee, prefix);
+      const wt = weightedTypes();
+      await stm.loadGraphAndRunPagerank(assets, adapters, wt, prefix);
       expect(stm.loadGraph).toHaveBeenCalledTimes(1);
       expect(stm.loadGraph).toHaveBeenCalledWith(assets, adapters);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
-      expect(stm.runPagerank).toHaveBeenCalledWith(ee, prefix);
+      expect(stm.runPagerank).toHaveBeenCalledWith(wt, prefix);
     });
     it("does not run pagerank if loadGraph did not succeed", async () => {
       const {stm} = example(readyToLoadGraph());
@@ -327,7 +330,7 @@ describe("app/credExplorer/state", () => {
       await stm.loadGraphAndRunPagerank(
         assets,
         adapters,
-        edgeEvaluator(),
+        weightedTypes(),
         prefix
       );
       expect(stm.loadGraph).toHaveBeenCalledTimes(1);
@@ -338,32 +341,32 @@ describe("app/credExplorer/state", () => {
       (stm: any).loadGraph = jest.fn();
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
-      const ee = edgeEvaluator();
+      const wt = weightedTypes();
       await stm.loadGraphAndRunPagerank(
         new Assets("/gateway/"),
         new StaticAdapterSet([]),
-        ee,
+        wt,
         prefix
       );
       expect(stm.loadGraph).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
-      expect(stm.runPagerank).toHaveBeenCalledWith(ee, prefix);
+      expect(stm.runPagerank).toHaveBeenCalledWith(wt, prefix);
     });
     it("when PAGERANK_EVALUATED, runs pagerank", async () => {
       const {stm} = example(pagerankEvaluated());
       (stm: any).loadGraph = jest.fn();
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
-      const ee = edgeEvaluator();
+      const wt = weightedTypes();
       await stm.loadGraphAndRunPagerank(
         new Assets("/gateway/"),
         new StaticAdapterSet([]),
-        ee,
+        wt,
         prefix
       );
       expect(stm.loadGraph).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
-      expect(stm.runPagerank).toHaveBeenCalledWith(ee, prefix);
+      expect(stm.runPagerank).toHaveBeenCalledWith(wt, prefix);
     });
   });
 });
