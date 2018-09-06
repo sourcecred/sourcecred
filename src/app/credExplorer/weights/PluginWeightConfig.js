@@ -10,26 +10,26 @@ import {
   type WeightedTypes,
   type WeightedEdgeType,
   type WeightedNodeType,
-  defaultWeightedNodeType,
-  defaultWeightedEdgeType,
+  defaultWeightsForAdapter,
 } from "./weights";
 
 export type Props = {|
   +adapter: StaticPluginAdapter,
   +onChange: (WeightedTypes) => void,
 |};
-export type State = {|nodes: WeightedNodeType[], edges: WeightedEdgeType[]|};
+export type State = {|
+  weights: WeightedTypes,
+|};
 
 export class PluginWeightConfig extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const nodes = this.props.adapter.nodeTypes().map(defaultWeightedNodeType);
-    const edges = this.props.adapter.edgeTypes().map(defaultWeightedEdgeType);
-    this.state = {nodes, edges};
+    const weights = defaultWeightsForAdapter(this.props.adapter);
+    this.state = {weights};
   }
 
   fire() {
-    this.props.onChange({nodes: this.state.nodes, edges: this.state.edges});
+    this.props.onChange(this.state.weights);
   }
 
   componentDidMount() {
@@ -37,14 +37,15 @@ export class PluginWeightConfig extends React.Component<Props, State> {
   }
 
   _renderNodeWeightControls() {
-    return this.state.nodes.map((wnt: WeightedNodeType) => {
+    return this.state.weights.nodes.map((wnt: WeightedNodeType) => {
       const onChange = (newType: WeightedNodeType) => {
-        const index = this.state.nodes.findIndex((x) =>
+        const index = this.state.weights.nodes.findIndex((x) =>
           deepEqual(x.type, wnt.type)
         );
-        const newNodes = this.state.nodes.slice();
+        const newNodes = this.state.weights.nodes.slice();
         newNodes[index] = newType;
-        this.setState({nodes: newNodes}, () => this.fire());
+        const weights = {nodes: newNodes, edges: this.state.weights.edges};
+        this.setState({weights}, () => this.fire());
       };
       return (
         <NodeTypeConfig
@@ -57,14 +58,15 @@ export class PluginWeightConfig extends React.Component<Props, State> {
   }
 
   _renderEdgeWeightControls() {
-    return this.state.edges.map((wnt: WeightedEdgeType) => {
+    return this.state.weights.edges.map((wnt: WeightedEdgeType) => {
       const onChange = (newType: WeightedEdgeType) => {
-        const index = this.state.edges.findIndex((x) =>
+        const index = this.state.weights.edges.findIndex((x) =>
           deepEqual(x.type, wnt.type)
         );
-        const newEdges = this.state.edges.slice();
+        const newEdges = this.state.weights.edges.slice();
         newEdges[index] = newType;
-        this.setState({edges: newEdges}, () => this.fire());
+        const weights = {nodes: this.state.weights.nodes, edges: newEdges};
+        this.setState({weights}, () => this.fire());
       };
       return (
         <EdgeTypeConfig
