@@ -1,6 +1,7 @@
 // @flow
 
 import React from "react";
+import deepEqual from "lodash.isequal";
 import * as MapUtil from "../../../util/map";
 import {NodeTypeConfig} from "./NodeTypeConfig";
 import {EdgeTypeConfig} from "./EdgeTypeConfig";
@@ -10,45 +11,27 @@ import {
   type WeightedTypes,
   type WeightedEdgeType,
   type WeightedNodeType,
-  defaultWeightsForAdapter,
 } from "./weights";
 
 export type Props = {|
   +adapter: StaticPluginAdapter,
   +onChange: (WeightedTypes) => void,
-|};
-export type State = {|
-  weights: WeightedTypes,
+  +weightedTypes: WeightedTypes,
 |};
 
-export class PluginWeightConfig extends React.Component<Props, State> {
+export class PluginWeightConfig extends React.Component<Props> {
   constructor(props: Props) {
     super(props);
-    const weights = defaultWeightsForAdapter(this.props.adapter);
-    this.state = {weights};
-  }
-
-  fire() {
-    this.props.onChange(this.state.weights);
-  }
-
-  componentDidMount() {
-    this.fire();
   }
 
   _renderNodeWeightControls() {
-    return Array.from(this.state.weights.nodes.values()).map(
+    return Array.from(this.props.weightedTypes.nodes.values()).map(
       (wnt: WeightedNodeType) => {
         const onChange = (newType: WeightedNodeType) => {
-          this.setState(
-            (state) => {
-              const newNodes = MapUtil.copy(state.weights.nodes);
-              newNodes.set(newType.type.prefix, newType);
-              const weights = {...state.weights, nodes: newNodes};
-              return {weights};
-            },
-            () => this.fire()
-          );
+          const newNodes = MapUtil.copy(this.props.weightedTypes.nodes);
+          newNodes.set(newType.type.prefix, newType);
+          const weights = {...this.props.weightedTypes, nodes: newNodes};
+          this.props.onChange(weights);
         };
         return (
           <NodeTypeConfig
@@ -62,18 +45,13 @@ export class PluginWeightConfig extends React.Component<Props, State> {
   }
 
   _renderEdgeWeightControls() {
-    return Array.from(this.state.weights.edges.values()).map(
+    return Array.from(this.props.weightedTypes.edges.values()).map(
       (wnt: WeightedEdgeType) => {
         const onChange = (newType: WeightedEdgeType) => {
-          this.setState(
-            (state) => {
-              const newEdges = MapUtil.copy(state.weights.edges);
-              newEdges.set(newType.type.prefix, newType);
-              const weights = {...state.weights, edges: newEdges};
-              return {weights};
-            },
-            () => this.fire()
-          );
+          const newEdges = MapUtil.copy(this.props.weightedTypes.edges);
+          newEdges.set(newType.type.prefix, newType);
+          const weights = {...this.props.weightedTypes, edges: newEdges};
+          this.props.onChange(weights);
         };
         return (
           <EdgeTypeConfig
@@ -86,7 +64,25 @@ export class PluginWeightConfig extends React.Component<Props, State> {
     );
   }
 
+  _validateWeightedTypesWithAdapter() {
+    const expectedNodePrefixes = new Set(
+      this.props.adapter.nodeTypes().map((x) => x.prefix)
+    );
+    const actualNodePrefixes = new Set(this.props.weightedTypes.nodes.keys());
+    if (!deepEqual(expectedNodePrefixes, actualNodePrefixes)) {
+      throw new Error("weightedTypes has wrong node prefixes for adapter");
+    }
+    const expectedEdgePrefixes = new Set(
+      this.props.adapter.edgeTypes().map((x) => x.prefix)
+    );
+    const actualEdgePrefixes = new Set(this.props.weightedTypes.edges.keys());
+    if (!deepEqual(expectedEdgePrefixes, actualEdgePrefixes)) {
+      throw new Error("weightedTypes has wrong edge prefixes for adapter");
+    }
+  }
+
   render() {
+    this._validateWeightedTypesWithAdapter();
     return (
       <div>
         <h3>{this.props.adapter.name()}</h3>
