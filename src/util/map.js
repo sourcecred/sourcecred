@@ -122,3 +122,27 @@ export function mapEntries<K, V, InK, InV>(
   }
   return result;
 }
+
+/**
+ * Merge maps without mutating the arguments.
+ *
+ * Merges multiple maps, returning a new map which has every key from
+ * the source maps, with their corresponding values. None of the inputs
+ * are mutated. In the event that multiple maps have the same key, an
+ * error will be thrown.
+ */
+export function merge<K, V>(
+  maps: $ReadOnlyArray<Map<$Subtype<K>, $Subtype<V>>>
+): Map<K, V> {
+  const result = new Map();
+  let updates = 0;
+  for (const map of maps) {
+    for (const [key, value] of map.entries()) {
+      result.set(key, value);
+      if (result.size !== ++updates) {
+        throw new Error(`Maps have duplicate key: ${String(key)}`);
+      }
+    }
+  }
+  return result;
+}
