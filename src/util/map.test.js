@@ -245,4 +245,53 @@ describe("util/map", () => {
       expect(output).toEqual(new Map().set(11, "wat").set(12, "wat"));
     });
   });
+  describe("merge", () => {
+    it("combines two simple maps", () => {
+      const a = new Map().set("a", 1);
+      const b = new Map().set("b", 2);
+      const c = new Map().set("c", 3);
+      expect(MapUtil.merge([a, b, c])).toEqual(
+        new Map()
+          .set("a", 1)
+          .set("b", 2)
+          .set("c", 3)
+      );
+    });
+    it("treats empty map as an identity", () => {
+      const m = new Map().set("a", 11).set("b", 22);
+      expect(MapUtil.merge([new Map(), m, new Map()])).toEqual(m);
+    });
+    it("errors if there are any duplicate keys", () => {
+      const a = new Map().set("a", null);
+      expect(() => MapUtil.merge([a, a])).toThrowError("duplicate key");
+    });
+    it("handles null and undefined appropriately", () => {
+      const a = new Map().set(undefined, undefined);
+      const b = new Map().set(null, null);
+      expect(MapUtil.merge([a, b])).toEqual(
+        new Map().set(undefined, undefined).set(null, null)
+      );
+    });
+    it("merge works on empty list", () => {
+      expect(MapUtil.merge([])).toEqual(new Map());
+    });
+    it("allows upcasting the type parameters", () => {
+      const numberMap: Map<number, number> = new Map().set(1, 2);
+      const stringMap: Map<string, string> = new Map().set("one", "two");
+      type NS = number | string;
+      const _unused_polyMap: Map<NS, NS> = MapUtil.merge([
+        numberMap,
+        stringMap,
+      ]);
+    });
+    it("produces expected type errors", () => {
+      const numberMap: Map<number, number> = new Map().set(1, 2);
+      const stringMap: Map<string, string> = new Map().set("one", "two");
+      // $ExpectFlowError
+      const _unused_badMap: Map<string, number> = MapUtil.merge([
+        numberMap,
+        stringMap,
+      ]);
+    });
+  });
 });
