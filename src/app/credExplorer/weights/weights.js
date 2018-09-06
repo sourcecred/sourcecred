@@ -1,6 +1,7 @@
 // @flow
 
-import {NodeAddress, EdgeAddress} from "../../../core/graph";
+import * as MapUtil from "../../../util/map";
+import {type NodeAddressT, type EdgeAddressT} from "../../../core/graph";
 import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
 import type {StaticPluginAdapter} from "../../adapters/pluginAdapter";
 import type {StaticAdapterSet} from "../../adapters/adapterSet";
@@ -14,8 +15,9 @@ export type WeightedEdgeType = {|
 |};
 
 export type WeightedTypes = {|
-  +nodes: $ReadOnlyArray<WeightedNodeType>,
-  +edges: $ReadOnlyArray<WeightedEdgeType>,
+  // Map from the weighted type's prefix to the type
+  +nodes: Map<NodeAddressT, WeightedNodeType>,
+  +edges: Map<EdgeAddressT, WeightedEdgeType>,
 |};
 
 export function defaultWeightedNodeType(type: NodeType): WeightedNodeType {
@@ -37,34 +39,22 @@ export function defaultWeightsForAdapter(
   adapter: StaticPluginAdapter
 ): WeightedTypes {
   return {
-    nodes: adapter.nodeTypes().map(defaultWeightedNodeType),
-    edges: adapter.edgeTypes().map(defaultWeightedEdgeType),
+    nodes: new Map(
+      adapter.nodeTypes().map((x) => [x.prefix, defaultWeightedNodeType(x)])
+    ),
+    edges: new Map(
+      adapter.edgeTypes().map((x) => [x.prefix, defaultWeightedEdgeType(x)])
+    ),
   };
 }
 
 export function combineWeights(
   ws: $ReadOnlyArray<WeightedTypes>
 ): WeightedTypes {
-  const seenPrefixes = new Set();
-  const nodes = [].concat(...ws.map((x) => x.nodes));
-  for (const {
-    type: {prefix},
-  } of nodes) {
-    if (seenPrefixes.has(prefix)) {
-      throw new Error(`Duplicate prefix: ${NodeAddress.toString(prefix)}`);
-    }
-    seenPrefixes.add(prefix);
-  }
-  const edges = [].concat(...ws.map((x) => x.edges));
-  for (const {
-    type: {prefix},
-  } of edges) {
-    if (seenPrefixes.has(prefix)) {
-      throw new Error(`Duplicate prefix: ${EdgeAddress.toString(prefix)}`);
-    }
-    seenPrefixes.add(prefix);
-  }
-  return {nodes, edges};
+  return {
+    nodes: MapUtil.merge(ws.map((x) => x.nodes)),
+    edges: MapUtil.merge(ws.map((x) => x.edges)),
+  };
 }
 
 export function defaultWeightsForAdapterSet(

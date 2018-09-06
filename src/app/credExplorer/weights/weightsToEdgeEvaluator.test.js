@@ -38,6 +38,7 @@ describe("app/credExplorer/weights/weightsToEdgeEvaluator", () => {
         {weight: NullUtil.orElse(machine, 1), type: machineNodeType},
         {weight: NullUtil.orElse(baseNode, 1), type: fallbackNodeType},
       ];
+      const nodesMap = new Map(nodes.map((x) => [x.type.prefix, x]));
       const edges = [
         {
           forwardWeight: NullUtil.orElse(assemblesForward, 1),
@@ -50,7 +51,8 @@ describe("app/credExplorer/weights/weightsToEdgeEvaluator", () => {
           type: fallbackEdgeType,
         },
       ];
-      return {nodes, edges};
+      const edgesMap = new Map(edges.map((x) => [x.type.prefix, x]));
+      return {nodes: nodesMap, edges: edgesMap};
     }
     function exampleEdgeWeights(weightArgs: WeightArgs) {
       const ws = weights(weightArgs);
