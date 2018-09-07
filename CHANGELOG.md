@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+<!-- Please add new entries to the _top_ of this section. -->
+
+## [0.1.0]
 - Organize weight config by plugin (#773)
 - Configure edge forward/backward weights separately (#749)
 - Combine "load graph" and "run pagerank" into one button (#759)
@@ -19,5 +22,4 @@
   the root of a domain (#643)
 - Aggregate over connection types in the cred explorer (#502)
 - Start tracking changes in `CHANGELOG.md`
-<!-- Please add new entries to the _top_ of this section. -->
 
