@@ -1,13 +1,13 @@
 // @flow
 
 import React from "react";
-import * as NullUtil from "../../util/null";
-import * as MapUtil from "../../util/map";
+import * as NullUtil from "../../../util/null";
+import * as MapUtil from "../../../util/map";
 
-import type {StaticAdapterSet} from "../adapters/adapterSet";
-import type {WeightedTypes} from "./weights/weights";
-import {PluginWeightConfig} from "./weights/PluginWeightConfig";
-import {FALLBACK_NAME} from "../adapters/fallbackAdapter";
+import type {StaticAdapterSet} from "../../adapters/adapterSet";
+import type {WeightedTypes} from "./weights";
+import {PluginWeightConfig} from "./PluginWeightConfig";
+import {FALLBACK_NAME} from "../../adapters/fallbackAdapter";
 
 type Props = {|
   +adapters: StaticAdapterSet,

@@ -13,7 +13,7 @@ import {defaultWeightsForAdapter} from "./weights/weights";
 
 import RepositorySelect from "./RepositorySelect";
 import {PagerankTable} from "./pagerankTable/Table";
-import {WeightConfig} from "./WeightConfig";
+import {WeightConfig} from "./weights/WeightConfig";
 import {createApp, LoadingIndicator} from "./App";
 import {uninitializedState} from "./state";
 import {_Prefix as GithubPrefix} from "../../plugins/github/nodes";

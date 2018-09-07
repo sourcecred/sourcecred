@@ -9,7 +9,7 @@ import BrowserLocalStore from "../browserLocalStore";
 
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import {PagerankTable} from "./pagerankTable/Table";
-import {WeightConfig} from "./WeightConfig";
+import {WeightConfig} from "./weights/WeightConfig";
 import {
   type WeightedTypes,
   defaultWeightsForAdapterSet,
