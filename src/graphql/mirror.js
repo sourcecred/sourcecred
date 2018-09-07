@@ -353,6 +353,58 @@ export class Mirror {
       addConnection.run({id, fieldname});
     }
   }
+
+  /**
+   * Find objects and connections that are not known to be up-to-date.
+   *
+   * An object is up-to-date if its own data has been loaded at least as
+   * recently as the provided date.
+   *
+   * A connection is up-to-date if it has been fetched at least as
+   * recently as the provided date, and at the time of fetching there
+   * were no more pages.
+   */
+  _findOutdated(since: Date): QueryPlan {
+    const db = this._db;
+    return _inTransaction(db, () => {
+      const objects: $PropertyType<QueryPlan, "objects"> = db
+        .prepare(
+          dedent`\
+            SELECT typename AS typename, id AS id
+            FROM objects
+            LEFT OUTER JOIN updates ON objects.last_update = updates.rowid
+            WHERE objects.last_update IS NULL
+            OR updates.time_epoch_millis < :timeEpochMillisThreshold
+          `
+        )
+        .all({timeEpochMillisThreshold: +since});
+      const connections: $PropertyType<QueryPlan, "connections"> = db
+        .prepare(
+          dedent`\
+            SELECT
+                connections.object_id AS objectId,
+                connections.fieldname AS fieldname,
+                connections.last_update IS NULL AS neverUpdated,
+                connections.end_cursor AS endCursor
+            FROM connections
+            LEFT OUTER JOIN updates ON connections.last_update = updates.rowid
+            WHERE connections.has_next_page
+            OR connections.last_update IS NULL
+            OR updates.time_epoch_millis < :timeEpochMillisThreshold
+          `
+        )
+        .all({timeEpochMillisThreshold: +since})
+        .map((entry) => {
+          const result = {...entry};
+          if (result.neverUpdated) {
+            result.endCursor = undefined; // as opposed to `null`
+          }
+          delete result.neverUpdated;
+          return result;
+        });
+      return {objects, connections};
+    });
+  }
 }
 
 /**
@@ -448,6 +500,29 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
 }
 
 type UpdateId = number;
+
+/**
+ * A set of objects and connections that should be updated.
+ */
+type QueryPlan = {|
+  +objects: $ReadOnlyArray<{|
+    +typename: Schema.Typename,
+    +id: Schema.ObjectId,
+  |}>,
+  +connections: $ReadOnlyArray<{|
+    +objectId: Schema.ObjectId,
+    +fieldname: Schema.Fieldname,
+    +endCursor: EndCursor | void, // `undefined` if never fetched
+  |}>,
+|};
+
+/**
+ * An `endCursor` of a GraphQL `pageInfo` object, denoting where the
+ * cursor should continue reading the next page. This is `null` when the
+ * cursor is at the beginning of the connection (i.e., when the
+ * connection is empty, or when `first: 0` is provided).
+ */
+type EndCursor = string | null;
 
 /**
  * Execute a function inside a database transaction.
