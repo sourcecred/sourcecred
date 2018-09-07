@@ -9,7 +9,6 @@ import BrowserLocalStore from "../browserLocalStore";
 
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import {PagerankTable} from "./pagerankTable/Table";
-import {WeightConfig} from "./weights/WeightConfig";
 import {
   type WeightedTypes,
   defaultWeightsForAdapterSet,
@@ -86,6 +85,10 @@ export function createApp(
           <PagerankTable
             defaultNodeFilter={GithubPrefix.user}
             adapters={adapters}
+            weightedTypes={this.state.weightedTypes}
+            onWeightedTypesChange={(weightedTypes) =>
+              this.setState({weightedTypes})
+            }
             pnd={pnd}
             maxEntriesPerList={100}
           />
@@ -130,11 +133,6 @@ export function createApp(
           >
             Analyze cred
           </button>
-          <WeightConfig
-            onChange={(weightedTypes) => this.setState({weightedTypes})}
-            weightedTypes={this.state.weightedTypes}
-            adapters={this.props.adapters}
-          />
           <LoadingIndicator appState={this.state.appState} />
           {pagerankTable}
         </div>

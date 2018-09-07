@@ -15,40 +15,23 @@ type Props = {|
   +onChange: (WeightedTypes) => void,
 |};
 
-type State = {|
-  expanded: boolean,
-|};
-
-export class WeightConfig extends React.Component<Props, State> {
+export class WeightConfig extends React.Component<Props> {
   constructor(props: Props): void {
     super(props);
-    this.state = {
-      expanded: false,
-    };
   }
 
   render() {
-    const {expanded} = this.state;
     return (
       <React.Fragment>
-        <button
-          onClick={() => {
-            this.setState(({expanded}) => ({expanded: !expanded}));
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
           }}
         >
-          {expanded ? "Hide weight configuration" : "Show weight configuration"}
-        </button>
-        {expanded && (
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-            }}
-          >
-            {this._renderPluginWeightConfigs()}
-          </div>
-        )}
+          {this._renderPluginWeightConfigs()}
+        </div>
       </React.Fragment>
     );
   }

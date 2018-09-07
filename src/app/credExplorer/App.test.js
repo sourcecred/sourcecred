@@ -13,7 +13,6 @@ import {defaultWeightsForAdapter} from "./weights/weights";
 
 import RepositorySelect from "./RepositorySelect";
 import {PagerankTable} from "./pagerankTable/Table";
-import {WeightConfig} from "./weights/WeightConfig";
 import {createApp, LoadingIndicator} from "./App";
 import {uninitializedState} from "./state";
 import {_Prefix as GithubPrefix} from "../../plugins/github/nodes";
@@ -126,18 +125,6 @@ describe("app/credExplorer/App", () => {
       });
     }
 
-    function testWeightConfig(stateFn) {
-      it("creates a working WeightConfig", () => {
-        const {el, setState} = example();
-        setState(stateFn());
-        const wc = el.find(WeightConfig);
-        const wt = defaultWeightsForAdapter(new FactorioStaticAdapter());
-        wc.props().onChange(wt);
-        expect(el.state().weightedTypes).toBe(wt);
-        expect(wc.props().adapters).toBe(el.instance().props.adapters);
-      });
-    }
-
     function testAnalyzeCredButton(stateFn, {disabled}) {
       const adjective = disabled ? "disabled" : "working";
       it(`has a ${adjective} analyze cred button`, () => {
@@ -178,8 +165,16 @@ describe("app/credExplorer/App", () => {
           }
           const adapters = state.graphWithAdapters.adapters;
           const pnd = state.pagerankNodeDecomposition;
+          const weightedTypes = el.instance().state.weightedTypes;
           expect(prt.props().adapters).toBe(adapters);
           expect(prt.props().pnd).toBe(pnd);
+          expect(prt.props().weightedTypes).toBe(weightedTypes);
+          const prtWeightedTypesChange = prt.props().onWeightedTypesChange;
+          const newTypes = defaultWeightsForAdapter(
+            new FactorioStaticAdapter()
+          );
+          prtWeightedTypesChange(newTypes);
+          expect(el.instance().state.weightedTypes).toBe(newTypes);
         } else {
           expect(prt).toHaveLength(0);
         }
@@ -203,7 +198,6 @@ describe("app/credExplorer/App", () => {
       {analyzeCredDisabled, hasPagerankTable}
     ) {
       describe(suiteName, () => {
-        testWeightConfig(stateFn);
         testRepositorySelect(stateFn);
         testAnalyzeCredButton(stateFn, {disabled: analyzeCredDisabled});
         testPagerankTable(stateFn, hasPagerankTable);

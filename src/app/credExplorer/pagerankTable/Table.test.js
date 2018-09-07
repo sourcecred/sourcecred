@@ -7,42 +7,87 @@ import {NodeAddress, type NodeAddressT} from "../../../core/graph";
 
 import {PagerankTable} from "./Table";
 import {example, COLUMNS} from "./sharedTestUtils";
+import {NodeRowList} from "./Node";
+import {WeightConfig} from "../weights/WeightConfig";
+import {defaultWeightsForAdapter} from "../weights/weights";
+import {FactorioStaticAdapter} from "../../adapters/demoAdapters";
 
 require("../../testUtil").configureEnzyme();
 describe("app/credExplorer/pagerankTable/Table", () => {
   describe("PagerankTable", () => {
-    it("renders thead column order properly", async () => {
-      const {pnd, adapters} = await example();
+    async function setup(defaultNodeFilter?: NodeAddressT) {
+      const {pnd, adapters, weightedTypes} = await example();
+      const onWeightedTypesChange = jest.fn();
+      const maxEntriesPerList = 321;
       const element = shallow(
         <PagerankTable
-          defaultNodeFilter={null}
+          defaultNodeFilter={defaultNodeFilter}
+          weightedTypes={weightedTypes}
+          onWeightedTypesChange={onWeightedTypesChange}
           pnd={pnd}
           adapters={adapters}
-          maxEntriesPerList={1}
+          maxEntriesPerList={maxEntriesPerList}
         />
       );
+      return {pnd, adapters, element, maxEntriesPerList, onWeightedTypesChange};
+    }
+    it("renders thead column order properly", async () => {
+      const {element} = await setup();
       const th = element.find("thead th");
       const columnNames = th.map((t) => t.text());
       expect(columnNames).toEqual(COLUMNS());
     });
 
-    describe("has a filter select", () => {
-      async function setup(defaultNodeFilter?: NodeAddressT) {
-        const {pnd, adapters} = await example();
-        const element = shallow(
-          <PagerankTable
-            defaultNodeFilter={defaultNodeFilter}
-            pnd={pnd}
-            adapters={adapters}
-            maxEntriesPerList={1}
-          />
-        );
-        const label = element.find("label");
-        const options = label.find("option");
-        return {pnd, adapters, element, label, options};
+    describe("has a WeightConfig", () => {
+      function findButton(element) {
+        const button = element
+          .findWhere(
+            (x) =>
+              x.text() === "Show weight configuration" ||
+              x.text() === "Hide weight configuration"
+          )
+          .find("button");
+        expect(button).toHaveLength(1);
+        return button;
       }
+      it("which is not present by default", async () => {
+        const {element} = await setup();
+        expect(element.find(WeightConfig)).toHaveLength(0);
+        const button = findButton(element);
+        expect(button.text()).toEqual("Show weight configuration");
+      });
+      it("which is present when the WeightConfig button is pushed", async () => {
+        const {element, onWeightedTypesChange} = await setup();
+        let button = findButton(element);
+        expect(button.text()).toEqual("Show weight configuration");
+        button.simulate("click");
+        button = findButton(element);
+        expect(button.text()).toEqual("Hide weight configuration");
+        expect(button).toHaveLength(1); // Its text changed
+        const wc = element.find(WeightConfig);
+        expect(wc).toHaveLength(1);
+        expect(wc.props().weightedTypes).toBe(
+          element.instance().props.weightedTypes
+        );
+        const wt = defaultWeightsForAdapter(new FactorioStaticAdapter());
+        wc.props().onChange(wt);
+        expect(onWeightedTypesChange).toHaveBeenCalledWith(wt);
+        expect(onWeightedTypesChange).toHaveBeenCalledTimes(1);
+      });
+      it("which is hidden when the WeightConfig button is pushed twice", async () => {
+        const {element} = await setup();
+        findButton(element).simulate("click");
+        findButton(element).simulate("click");
+        let button = findButton(element);
+        expect(button.text()).toEqual("Show weight configuration");
+        expect(element.find(WeightConfig)).toHaveLength(0);
+      });
+    });
+
+    describe("has a filter select", () => {
       it("with expected label text", async () => {
-        const {label} = await setup();
+        const {element} = await setup();
+        const label = element.find("label");
         const filterText = label
           .find("span")
           .first()
@@ -50,7 +95,9 @@ describe("app/credExplorer/pagerankTable/Table", () => {
         expect(filterText).toMatchSnapshot();
       });
       it("with expected option groups", async () => {
-        const {options} = await setup();
+        const {element} = await setup();
+        const label = element.find("label");
+        const options = label.find("option");
         const optionsJSON = options.map((o) => ({
           valueString: NodeAddress.toString(o.prop("value")),
           style: o.prop("style"),
@@ -59,7 +106,9 @@ describe("app/credExplorer/pagerankTable/Table", () => {
         expect(optionsJSON).toMatchSnapshot();
       });
       it("with the ability to filter nodes passed to NodeRowList", async () => {
-        const {element, options} = await setup();
+        const {element} = await setup();
+        const label = element.find("label");
+        const options = label.find("option");
         const option = options.at(2);
 
         const value = option.prop("value");
@@ -93,29 +142,17 @@ describe("app/credExplorer/pagerankTable/Table", () => {
     });
 
     describe("creates a NodeRowList", () => {
-      async function setup() {
-        const {adapters, pnd} = await example();
-        const maxEntriesPerList = 1;
-        const element = shallow(
-          <PagerankTable
-            defaultNodeFilter={null}
-            pnd={pnd}
-            adapters={adapters}
-            maxEntriesPerList={maxEntriesPerList}
-          />
-        );
-        const nrl = element.find("NodeRowList");
-        return {adapters, pnd, element, nrl, maxEntriesPerList};
-      }
       it("with the correct SharedProps", async () => {
-        const {nrl, adapters, pnd, maxEntriesPerList} = await setup();
+        const {element, adapters, pnd, maxEntriesPerList} = await setup();
+        const nrl = element.find(NodeRowList);
         const expectedSharedProps = {adapters, pnd, maxEntriesPerList};
-        expect(nrl.prop("sharedProps")).toEqual(expectedSharedProps);
+        expect(nrl.props().sharedProps).toEqual(expectedSharedProps);
       });
       it("including all nodes by default", async () => {
-        const {nrl, pnd} = await setup();
+        const {element, pnd} = await setup();
+        const nrl = element.find(NodeRowList);
         const expectedNodes = Array.from(pnd.keys());
-        expect(nrl.prop("nodes")).toEqual(expectedNodes);
+        expect(nrl.props().nodes).toEqual(expectedNodes);
       });
     });
   });
