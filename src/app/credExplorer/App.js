@@ -132,6 +132,7 @@ export function createApp(
           </button>
           <WeightConfig
             onChange={(weightedTypes) => this.setState({weightedTypes})}
+            weightedTypes={this.state.weightedTypes}
             adapters={this.props.adapters}
           />
           <LoadingIndicator appState={this.state.appState} />

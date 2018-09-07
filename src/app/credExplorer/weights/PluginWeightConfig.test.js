@@ -3,32 +3,41 @@
 import React from "react";
 import {shallow} from "enzyme";
 import {PluginWeightConfig} from "./PluginWeightConfig";
-import {FactorioStaticAdapter} from "../../adapters/demoAdapters";
+import {
+  FactorioStaticAdapter,
+  inserterNodeType,
+  assemblesEdgeType,
+} from "../../adapters/demoAdapters";
+import {
+  fallbackNodeType,
+  fallbackEdgeType,
+} from "../../adapters/fallbackAdapter";
 import {NodeTypeConfig} from "./NodeTypeConfig";
 import {EdgeTypeConfig} from "./EdgeTypeConfig";
 import {
   defaultWeightsForAdapter,
   defaultWeightedNodeType,
   defaultWeightedEdgeType,
+  type WeightedTypes,
 } from "./weights";
 
 require("../../testUtil").configureEnzyme();
 
-describe("src/app/credExplorer/weights/PluginWeightConfig", () => {
+describe("app/credExplorer/weights/PluginWeightConfig", () => {
   describe("PluginWeightConfig", () => {
     function example() {
       const onChange = jest.fn();
       const adapter = new FactorioStaticAdapter();
+      const types = defaultWeightsForAdapter(adapter);
       const el = shallow(
-        <PluginWeightConfig adapter={adapter} onChange={onChange} />
+        <PluginWeightConfig
+          weightedTypes={types}
+          adapter={adapter}
+          onChange={onChange}
+        />
       );
       return {el, onChange, adapter};
     }
-    it("fires plugin's default weights on mount", () => {
-      const {onChange, adapter} = example();
-      const expected = defaultWeightsForAdapter(adapter);
-      expect(onChange).toHaveBeenCalledWith(expected);
-    });
     it("renders a NodeTypeConfig for each node type", () => {
       const {el, adapter} = example();
       const ntc = el.find(NodeTypeConfig);
@@ -61,8 +70,8 @@ describe("src/app/credExplorer/weights/PluginWeightConfig", () => {
         ),
       };
       ntc.props().onChange(newWeightedType);
-      expect(onChange).toHaveBeenCalledTimes(2);
-      expect(onChange.mock.calls[1][0]).toEqual(expected);
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(expected);
     });
     it("EdgeTypeConfig onChange wired properly", () => {
       const {el, adapter, onChange} = example();
@@ -77,8 +86,48 @@ describe("src/app/credExplorer/weights/PluginWeightConfig", () => {
         edges: new Map(newEdges.map((x) => [x.type.prefix, x])),
       };
       ntc.props().onChange(newWeightedType);
-      expect(onChange).toHaveBeenCalledTimes(2);
-      expect(onChange.mock.calls[1][0]).toEqual(expected);
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(expected);
+    });
+    describe("errors if", () => {
+      function checkError(weightedTypes: WeightedTypes) {
+        expect(() =>
+          shallow(
+            <PluginWeightConfig
+              adapter={new FactorioStaticAdapter()}
+              weightedTypes={weightedTypes}
+              onChange={jest.fn()}
+            />
+          )
+        ).toThrowError("prefixes for adapter");
+      }
+      it("missing edge prefix in weighted types", () => {
+        const badTypes = defaultWeightsForAdapter(new FactorioStaticAdapter());
+        badTypes.nodes.delete(inserterNodeType.prefix);
+        checkError(badTypes);
+      });
+      it("missing node prefix in weighted types", () => {
+        const badTypes = defaultWeightsForAdapter(new FactorioStaticAdapter());
+        badTypes.edges.delete(assemblesEdgeType.prefix);
+        checkError(badTypes);
+      });
+      it("extra node prefix in weighted types", () => {
+        const badTypes = defaultWeightsForAdapter(new FactorioStaticAdapter());
+        badTypes.nodes.set(fallbackNodeType.prefix, {
+          weight: 5,
+          type: fallbackNodeType,
+        });
+        checkError(badTypes);
+      });
+      it("extra edge prefix in weighted types", () => {
+        const badTypes = defaultWeightsForAdapter(new FactorioStaticAdapter());
+        badTypes.edges.set(fallbackEdgeType.prefix, {
+          forwardWeight: 5,
+          backwardWeight: 3,
+          type: fallbackEdgeType,
+        });
+        checkError(badTypes);
+      });
     });
   });
 });
