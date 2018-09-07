@@ -3,7 +3,7 @@
 import type {Body} from "./queries";
 import {build, stringify, multilineLayout, inlineLayout} from "./queries";
 
-describe("queries", () => {
+describe("graphql/queries", () => {
   describe("end-to-end-test cases", () => {
     const testCases = {
       "a query using lots of features": featurefulQuery,

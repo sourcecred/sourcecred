@@ -15,7 +15,7 @@ import {
 } from "./graphql";
 import {makeRepo} from "../../core/repo";
 
-describe("graphql", () => {
+describe("plugins/github/graphql", () => {
   describe("creates continuations", () => {
     const makeAuthor = (name) => ({
       __typename: "User",

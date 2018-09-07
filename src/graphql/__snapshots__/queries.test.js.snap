@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`queries complex object stringification should build the object 1`] = `
+exports[`graphql/queries complex object stringification should build the object 1`] = `
 Object {
   "data": Object {
     "exampleBoolean": Object {
@@ -124,9 +124,9 @@ Object {
 }
 `;
 
-exports[`queries complex object stringification should work inline 1`] = `"{ exampleNumber: 123 exampleString: \\"hello\\" exampleBoolean: true exampleNull: null exampleEnum: WORLD exampleVariable: $widget exampleList: [ 12 14 16 ] exampleObject: { roses: \\"red\\" violets: \\"blue\\" } nestedList: [ [ \\"w\\" \\"x\\" ] [ \\"y\\" \\"z\\" ] ] nestedObject: { english: { n1: \\"one\\" n2: \\"two\\" } greek: { n1: \\"ένα\\" n2: \\"δύο\\" } } }"`;
+exports[`graphql/queries complex object stringification should work inline 1`] = `"{ exampleNumber: 123 exampleString: \\"hello\\" exampleBoolean: true exampleNull: null exampleEnum: WORLD exampleVariable: $widget exampleList: [ 12 14 16 ] exampleObject: { roses: \\"red\\" violets: \\"blue\\" } nestedList: [ [ \\"w\\" \\"x\\" ] [ \\"y\\" \\"z\\" ] ] nestedObject: { english: { n1: \\"one\\" n2: \\"two\\" } greek: { n1: \\"ένα\\" n2: \\"δύο\\" } } }"`;
 
-exports[`queries complex object stringification should work multiline 1`] = `
+exports[`graphql/queries complex object stringification should work multiline 1`] = `
 "{
   exampleNumber:
     123
@@ -184,7 +184,7 @@ exports[`queries complex object stringification should work multiline 1`] = `
 }"
 `;
 
-exports[`queries end-to-end-test cases for a query using lots of features should build the query 1`] = `
+exports[`graphql/queries end-to-end-test cases for a query using lots of features should build the query 1`] = `
 Array [
   Object {
     "name": "QueryWithParameters",
@@ -374,9 +374,9 @@ Array [
 ]
 `;
 
-exports[`queries end-to-end-test cases for a query using lots of features should stringify as inline 1`] = `"query QueryWithParameters($qp1: String! $qp2: String!) { thing(id: 12345 name: $qp1) { fruit(type: APPLE tasty: true) ...otherThings } more { ... on Widget { mcguffins { quantity } goo: slime(state: SLIMY) { availability } } ... on Gizmo { cogs(attributes: { teeth: [ 12 14 16 ] shaft: null }) } } } query QueryWithoutParameters { rateLimit { remaining } } fragment otherThings on Thing { __typename quality }"`;
+exports[`graphql/queries end-to-end-test cases for a query using lots of features should stringify as inline 1`] = `"query QueryWithParameters($qp1: String! $qp2: String!) { thing(id: 12345 name: $qp1) { fruit(type: APPLE tasty: true) ...otherThings } more { ... on Widget { mcguffins { quantity } goo: slime(state: SLIMY) { availability } } ... on Gizmo { cogs(attributes: { teeth: [ 12 14 16 ] shaft: null }) } } } query QueryWithoutParameters { rateLimit { remaining } } fragment otherThings on Thing { __typename quality }"`;
 
-exports[`queries end-to-end-test cases for a query using lots of features should stringify as multiline 1`] = `
+exports[`graphql/queries end-to-end-test cases for a query using lots of features should stringify as multiline 1`] = `
 "query QueryWithParameters($qp1: String! $qp2: String!) {
   thing(id: 12345 name: $qp1) {
     fruit(type: APPLE tasty: true)
@@ -407,7 +407,7 @@ fragment otherThings on Thing {
 }"
 `;
 
-exports[`queries end-to-end-test cases for a useful query should build the query 1`] = `
+exports[`graphql/queries end-to-end-test cases for a useful query should build the query 1`] = `
 Array [
   Object {
     "name": "FetchData",
@@ -926,9 +926,9 @@ Array [
 ]
 `;
 
-exports[`queries end-to-end-test cases for a useful query should stringify as inline 1`] = `"query FetchData($owner: String! $name: String!) { repository(owner: $owner name: $name) { issues(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } } } pullRequests(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } reviews(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } state comments(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } } } } } } } } } fragment whoami on Actor { __typename login ... on User { id } ... on Organization { id } ... on Bot { id } }"`;
+exports[`graphql/queries end-to-end-test cases for a useful query should stringify as inline 1`] = `"query FetchData($owner: String! $name: String!) { repository(owner: $owner name: $name) { issues(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } } } pullRequests(first: 100) { pageInfo { hasNextPage } nodes { id title body number author { ...whoami } comments(first: 20) { pageInfo { hasNextPage } nodes { id author { ...whoami } body url } } reviews(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } state comments(first: 10) { pageInfo { hasNextPage } nodes { id body author { ...whoami } } } } } } } } } fragment whoami on Actor { __typename login ... on User { id } ... on Organization { id } ... on Bot { id } }"`;
 
-exports[`queries end-to-end-test cases for a useful query should stringify as multiline 1`] = `
+exports[`graphql/queries end-to-end-test cases for a useful query should stringify as multiline 1`] = `
 "query FetchData($owner: String! $name: String!) {
   repository(owner: $owner name: $name) {
     issues(first: 100) {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`createExampleRepo is deterministic 1`] = `
+exports[`plugins/git/example/exampleRepo createExampleRepo is deterministic 1`] = `
 Array [
   "c2b51945e7457546912a8ce158ed9d294558d294",
   "c08ee3a4edea384d5291ffcbf06724a13ed72325",
@@ -12,7 +12,7 @@ Array [
 ]
 `;
 
-exports[`createExampleSubmoduleRepo is deterministic 1`] = `
+exports[`plugins/git/example/exampleRepo createExampleSubmoduleRepo is deterministic 1`] = `
 Array [
   "762c062fbdc7ec198cd693e95d55b374a08ff3e3",
   "29ef158bc982733e2ba429fcf73e2f7562244188",

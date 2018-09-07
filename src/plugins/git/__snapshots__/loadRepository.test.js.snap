@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`loadRepository processes an old commit 1`] = `
+exports[`plugins/git/loadRepository processes an old commit 1`] = `
 Object {
   "commits": Set {
     "c08ee3a4edea384d5291ffcbf06724a13ed72325",

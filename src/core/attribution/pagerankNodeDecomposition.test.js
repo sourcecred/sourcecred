@@ -108,7 +108,7 @@ function validateDecomposition(decomposition) {
   }
 }
 
-describe("core/attribution/connections", () => {
+describe("core/attribution/pagerankNodeDecomposition", () => {
   describe("decompose", () => {
     it("has the expected output on a simple asymmetric chain", async () => {
       const n1 = NodeAddress.fromParts(["n1"]);
