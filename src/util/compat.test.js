@@ -3,7 +3,7 @@
 import {toCompat, fromCompat} from "./compat";
 import type {Compatible} from "./compat";
 
-describe("compat utilities", () => {
+describe("util/compat", () => {
   type FooV1 = {foo: number};
   type FooV2 = {bar: {foo: number}};
   const type = "Foo Plugin's Experiment";

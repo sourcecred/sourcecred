@@ -7,7 +7,7 @@ import {
   reviewUrlToId,
 } from "./urlIdParse";
 
-describe("plugins/github/urlToId", () => {
+describe("plugins/github/urlIdParse", () => {
   const issueComment =
     "https://github.com/example-owner/exa_mple-rep.o0/issues/350#issuecomment-394939349";
   const pullComment =

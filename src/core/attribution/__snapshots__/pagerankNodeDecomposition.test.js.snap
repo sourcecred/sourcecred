@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`core/attribution/connections decompose has the expected output on a simple asymmetric chain 1`] = `
+exports[`core/attribution/pagerankNodeDecomposition decompose has the expected output on a simple asymmetric chain 1`] = `
 Map {
   "NodeAddress[\\"n1\\"]" => Object {
     "score": 0.19117656878499834,

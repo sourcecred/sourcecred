@@ -10,7 +10,7 @@ import {
   aggregationKey,
 } from "./aggregate";
 
-describe("app/credExplorer/aggregate", () => {
+describe("app/credExplorer/pagerankTable/aggregate", () => {
   // TODO: If making major modifications to these tests, consider switching
   // from the hand-maintained connections and types, and instead use the demo
   // adadpters from app/adapters/demoAdapters

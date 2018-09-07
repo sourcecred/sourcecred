@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`graphql #postQueryExhaustive resolves a representative query 1`] = `
+exports[`plugins/github/graphql #postQueryExhaustive resolves a representative query 1`] = `
 Object {
   "repository": Object {
     "id": "opaque-repo",
@@ -201,7 +201,7 @@ Object {
 }
 `;
 
-exports[`graphql creates a query 1`] = `
+exports[`plugins/github/graphql creates a query 1`] = `
 "query FetchData($owner: String! $name: String!) {
   repository(owner: $owner name: $name) {
     url

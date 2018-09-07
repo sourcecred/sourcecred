@@ -18,7 +18,7 @@ function mkdtemp() {
   return result.name;
 }
 
-describe("loadRepository", () => {
+describe("plugins/git/loadRepository", () => {
   it("loads from HEAD", () => {
     const repository = createExampleRepo(mkdtemp());
     // In case of failure, run

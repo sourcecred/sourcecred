@@ -2,7 +2,7 @@
 
 import {parseReferences} from "./parseReferences.js";
 
-describe("parseReferences", () => {
+describe("plugins/github/parseReferences", () => {
   it("finds no references when not present", () => {
     expect(parseReferences("foo bar bod boink")).toHaveLength(0);
     expect(parseReferences("")).toHaveLength(0);

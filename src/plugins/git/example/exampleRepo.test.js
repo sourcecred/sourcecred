@@ -22,21 +22,23 @@ function mkdtemp() {
   return result.name;
 }
 
-describe("createExampleRepo", () => {
-  it("is deterministic", () => {
-    expect(createExampleRepo(mkdtemp()).commits).toMatchSnapshot();
-  });
-});
-
-describe("createExampleSubmoduleRepo", () => {
-  it("is deterministic", () => {
-    expect(createExampleSubmoduleRepo(mkdtemp()).commits).toMatchSnapshot();
+describe("plugins/git/example/exampleRepo", () => {
+  describe("createExampleRepo", () => {
+    it("is deterministic", () => {
+      expect(createExampleRepo(mkdtemp()).commits).toMatchSnapshot();
+    });
   });
 
-  it("includes all the SHAs that it should", () => {
-    const commits = createExampleSubmoduleRepo(mkdtemp()).commits;
-    expect(commits).toEqual(
-      expect.arrayContaining([SUBMODULE_COMMIT_1, SUBMODULE_COMMIT_2])
-    );
+  describe("createExampleSubmoduleRepo", () => {
+    it("is deterministic", () => {
+      expect(createExampleSubmoduleRepo(mkdtemp()).commits).toMatchSnapshot();
+    });
+
+    it("includes all the SHAs that it should", () => {
+      const commits = createExampleSubmoduleRepo(mkdtemp()).commits;
+      expect(commits).toEqual(
+        expect.arrayContaining([SUBMODULE_COMMIT_1, SUBMODULE_COMMIT_2])
+      );
+    });
   });
 });
