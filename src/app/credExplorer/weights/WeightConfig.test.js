@@ -31,8 +31,6 @@ describe("app/credExplorer/weights/WeightConfig", () => {
           onChange={onChange}
         />
       );
-      // TODO(@decentralion): WeightConfig stops expanding itself
-      el.setState({expanded: true});
       return {el, adapters, types, onChange};
     }
     it("creates a PluginWeightConfig for every non-fallback adapter", () => {

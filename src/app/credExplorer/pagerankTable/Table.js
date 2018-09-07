@@ -9,16 +9,23 @@ import type {PagerankNodeDecomposition} from "../../../core/attribution/pagerank
 import {DynamicAdapterSet} from "../../adapters/adapterSet";
 import type {DynamicPluginAdapter} from "../../adapters/pluginAdapter";
 import {FALLBACK_NAME} from "../../adapters/fallbackAdapter";
+import {type WeightedTypes} from "../weights/weights";
+import {WeightConfig} from "../weights/WeightConfig";
 
 import {NodeRowList} from "./Node";
 
 type PagerankTableProps = {|
   +pnd: PagerankNodeDecomposition,
   +adapters: DynamicAdapterSet,
+  +weightedTypes: WeightedTypes,
+  +onWeightedTypesChange: (WeightedTypes) => void,
   +maxEntriesPerList: number,
   +defaultNodeFilter: ?NodeAddressT,
 |};
-type PagerankTableState = {|topLevelFilter: NodeAddressT|};
+type PagerankTableState = {|
+  topLevelFilter: NodeAddressT,
+  showWeightConfig: boolean,
+|};
 export class PagerankTable extends React.PureComponent<
   PagerankTableProps,
   PagerankTableState
@@ -38,13 +45,42 @@ export class PagerankTable extends React.PureComponent<
       props.defaultNodeFilter,
       NodeAddress.empty
     );
-    this.state = {topLevelFilter};
+    this.state = {topLevelFilter, showWeightConfig: false};
+  }
+
+  renderConfigurationRow() {
+    const {showWeightConfig} = this.state;
+    return (
+      <div style={{display: "flex"}}>
+        {this.renderFilterSelect()}
+        <span style={{flexGrow: 1}} />
+        <button
+          onClick={() => {
+            this.setState(({showWeightConfig}) => ({
+              showWeightConfig: !showWeightConfig,
+            }));
+          }}
+        >
+          {showWeightConfig
+            ? "Hide weight configuration"
+            : "Show weight configuration"}
+        </button>
+      </div>
+    );
   }
 
   render() {
+    const {showWeightConfig} = this.state;
     return (
       <div style={{marginTop: 10}}>
-        {this.renderFilterSelect()}
+        {this.renderConfigurationRow()}
+        {showWeightConfig && (
+          <WeightConfig
+            adapters={this.props.adapters.static()}
+            weightedTypes={this.props.weightedTypes}
+            onChange={(wt) => this.props.onWeightedTypesChange(wt)}
+          />
+        )}
         {this.renderTable()}
       </div>
     );
