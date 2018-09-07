@@ -2,22 +2,19 @@
 
 import React from "react";
 import {shallow} from "enzyme";
-import {PluginWeightConfig} from "./weights/PluginWeightConfig";
+import {PluginWeightConfig} from "./PluginWeightConfig";
 import {
   staticAdapterSet,
   inserterNodeType,
   FactorioStaticAdapter,
-} from "../adapters/demoAdapters";
-import {FALLBACK_NAME} from "../adapters/fallbackAdapter";
-import {
-  defaultWeightsForAdapterSet,
-  defaultWeightsForAdapter,
-} from "./weights/weights";
+} from "../../adapters/demoAdapters";
+import {FALLBACK_NAME} from "../../adapters/fallbackAdapter";
+import {defaultWeightsForAdapterSet, defaultWeightsForAdapter} from "./weights";
 import {WeightConfig} from "./WeightConfig";
 
-require("../testUtil").configureEnzyme();
+require("../../testUtil").configureEnzyme();
 
-describe("app/credExplorer/WeightConfig", () => {
+describe("app/credExplorer/weights/WeightConfig", () => {
   describe("WeightConfig", () => {
     function example() {
       const onChange = jest.fn();
