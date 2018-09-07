@@ -2,6 +2,7 @@
 
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
+import * as MapUtil from "../../../util/map";
 import {NodeTrie, EdgeTrie} from "../../../core/trie";
 import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
 import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
@@ -53,11 +54,7 @@ export function aggregateByNodeType(
   const nodeTypeToConnections = new Map();
   for (const x of xs) {
     const type = typeTrie.getLast(x.source);
-    const connections = nodeTypeToConnections.get(type) || [];
-    if (connections.length === 0) {
-      nodeTypeToConnections.set(type, connections);
-    }
-    connections.push(x);
+    MapUtil.pushValue(nodeTypeToConnections, type, x);
   }
   const aggregations: NodeAggregation[] = [];
   for (const [
@@ -109,11 +106,7 @@ export function aggregateByConnectionType(
     }
     const edge = x.connection.adjacency.edge;
     const type = typeTrie.getLast(edge.address);
-    const connections = relevantMap.get(type) || [];
-    if (connections.length === 0) {
-      relevantMap.set(type, connections);
-    }
-    connections.push(x);
+    MapUtil.pushValue(relevantMap, type, x);
   }
 
   function createAggregation(
