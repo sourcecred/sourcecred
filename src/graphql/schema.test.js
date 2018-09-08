@@ -3,9 +3,9 @@
 import * as Schema from "./schema";
 
 describe("graphql/schema", () => {
-  function buildGithubSchema(): Schema.Schema {
+  function buildGithubTypes(): {[Schema.Typename]: Schema.NodeType} {
     const s = Schema;
-    return s.schema({
+    return {
       Repository: s.object({
         id: s.id(),
         url: s.primitive(),
@@ -40,16 +40,62 @@ describe("graphql/schema", () => {
         url: s.primitive(),
         login: s.primitive(),
       }),
-    });
+    };
+  }
+  function buildGithubSchema(): Schema.Schema {
+    return Schema.schema(buildGithubTypes());
   }
 
-  it("builds a representative schema", () => {
-    const githubSchema = buildGithubSchema();
-    expect(typeof githubSchema).toBe("object");
-  });
-  it("passes through serialization unscathed", () => {
-    const schema = buildGithubSchema();
-    expect(JSON.parse(JSON.stringify(schema))).toEqual(schema);
+  describe("schema", () => {
+    it("builds a representative schema", () => {
+      const githubSchema = buildGithubSchema();
+      expect(typeof githubSchema).toBe("object");
+    });
+    it("is deep-equal to but deep-distinct from its input", () => {
+      const githubTypes = buildGithubTypes();
+      const schema = Schema.schema(githubTypes);
+      expect(githubTypes).toEqual(schema);
+      expect(githubTypes).not.toBe(schema);
+      expect(githubTypes.Repository).not.toBe(schema.Repository);
+      {
+        const a = githubTypes.Repository;
+        const b = schema.Repository;
+        if (a.type !== "OBJECT") throw new Error("githubTypes: " + a.type);
+        if (b.type !== "OBJECT") throw new Error("schema: " + b.type);
+        expect(a.fields).not.toBe(b.fields);
+      }
+      {
+        const a = githubTypes.Actor;
+        const b = schema.Actor;
+        if (a.type !== "UNION") throw new Error("githubTypes: " + a.type);
+        if (b.type !== "UNION") throw new Error("schema: " + b.type);
+        expect(a.clauses).not.toBe(b.clauses);
+      }
+    });
+    it("passes through serialization unscathed", () => {
+      const schema = buildGithubSchema();
+      expect(JSON.parse(JSON.stringify(schema))).toEqual(schema);
+    });
+    it("disallows unions with unknown clauses", () => {
+      const s = Schema;
+      const types = {
+        U: s.union(["Wat"]),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'union has unknown clause: "U"/"Wat"'
+      );
+    });
+    it("disallows unions with non-object clauses", () => {
+      const s = Schema;
+      const types = {
+        O: s.object({id: s.id()}),
+        U1: s.union(["O"]),
+        U2: s.union(["U1"]),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'union has non-object type clause: "U2"/"U1"'
+      );
+    });
   });
 
   describe("object", () => {

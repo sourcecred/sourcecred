@@ -46,7 +46,39 @@ export type FieldType =
 const ID_FIELD_NAME = "id";
 
 export function schema(types: {[Typename]: NodeType}): Schema {
-  return {...types};
+  const result = {};
+  for (const typename of Object.keys(types)) {
+    const type = types[typename];
+    switch (type.type) {
+      case "OBJECT":
+        result[typename] = {type: "OBJECT", fields: {...type.fields}};
+        break;
+      case "UNION":
+        for (const clause of Object.keys(type.clauses)) {
+          const clauseType = types[clause];
+          if (clauseType == null) {
+            throw new Error(
+              `union has unknown clause: "${typename}"/"${clause}"`
+            );
+          }
+          if (clauseType.type !== "OBJECT") {
+            // The GraphQL spec doesn't permit unions of interfaces or
+            // other unions (or primitives). This is nice, because it
+            // means that we don't have to worry about ill-founded
+            // unions.
+            throw new Error(
+              `union has non-object type clause: "${typename}"/"${clause}"`
+            );
+          }
+        }
+        result[typename] = {type: "UNION", clauses: {...type.clauses}};
+        break;
+      // istanbul ignore next
+      default:
+        throw new Error((type.type: empty));
+    }
+  }
+  return result;
 }
 
 export function object(fields: {[Fieldname]: FieldType}): NodeType {
