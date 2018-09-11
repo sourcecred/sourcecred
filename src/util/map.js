@@ -146,3 +146,19 @@ export function merge<K, V>(
   }
   return result;
 }
+
+/**
+ * Given a map whose values are arrays, push an element onto the array
+ * corresponding to the given key. If the key is not in the map, first
+ * insert it with value a new empty array.
+ *
+ * If the key is already in the map, its value will be mutated, not
+ * replaced.
+ */
+export function pushValue<K, V>(map: Map<K, V[]>, key: K, value: V): void {
+  let arr = map.get(key);
+  if (arr == null) {
+    map.set(key, (arr = []));
+  }
+  arr.push(value);
+}

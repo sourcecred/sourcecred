@@ -294,4 +294,27 @@ describe("util/map", () => {
       ]);
     });
   });
+  describe("pushValue", () => {
+    it("works when the map has no matching key", () => {
+      const map = new Map();
+      MapUtil.pushValue(map, "foo", 3);
+      expect(map).toEqual(new Map().set("foo", [3]));
+    });
+    it("works when the map has a matching key", () => {
+      const map = new Map().set("foo", [3]);
+      MapUtil.pushValue(map, "foo", 4);
+      expect(map).toEqual(new Map().set("foo", [3, 4]));
+    });
+    it("works when the map already has an empty array", () => {
+      const map = new Map().set("foo", []);
+      MapUtil.pushValue(map, "foo", 1);
+      expect(map).toEqual(new Map().set("foo", [1]));
+    });
+    it("preserves array identity", () => {
+      const arr = [];
+      const map = new Map().set("foo", arr);
+      MapUtil.pushValue(map, "foo", 1);
+      expect(map.get("foo")).toBe(arr);
+    });
+  });
 });
