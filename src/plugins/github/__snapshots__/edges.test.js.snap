@@ -72,6 +72,46 @@ Object {
 }
 `;
 
+exports[`plugins/github/edges createEdge works for "mentionsAuthor" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "github",
+    "MENTIONS_AUTHOR",
+    "4",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+    "4",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+    "3",
+    "USERLIKE",
+    "USER",
+    "decentralion",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "github",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "github",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+  ],
+}
+`;
+
 exports[`plugins/github/edges createEdge works for "mergedAs" 1`] = `
 Object {
   "addressParts": Array [

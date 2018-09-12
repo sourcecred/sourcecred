@@ -100,6 +100,14 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
         defaultBackwardWeight: 1 / 16,
         prefix: E._Prefix.references,
       },
+      {
+        forwardName: "mentions author of",
+        backwardName: "has author mentioned by",
+        defaultForwardWeight: 1,
+        // TODO(#811): Probably change this to 0
+        defaultBackwardWeight: 1 / 32,
+        prefix: E._Prefix.mentionsAuthor,
+      },
     ];
   }
   async load(assets: Assets, repo: Repo): Promise<IDynamicPluginAdapater> {
