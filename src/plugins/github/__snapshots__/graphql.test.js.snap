@@ -216,6 +216,16 @@ exports[`plugins/github/graphql creates a query 1`] = `
     pulls: pullRequests(first: 50) {
       ...pulls
     }
+    defaultBranchRef {
+      target {
+        __typename
+        ... on Commit {
+          history(first: 100) {
+            ...commitHistory
+          }
+        }
+      }
+    }
   }
 }
 fragment whoami on Actor {
@@ -322,6 +332,15 @@ fragment reviewComments on PullRequestReviewCommentConnection {
     author {
       ...whoami
     }
+  }
+}
+fragment commitHistory on CommitHistoryConnection {
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    ...commit
   }
 }
 fragment commit on Commit {

@@ -40,8 +40,9 @@ import type {Repo} from "../../core/repo";
  * tune the page sizes of various entities to keep them comfortably
  * within the global capacity.
  *
- * We use the `PAGE_LIMIT` field for the top-level page size in
- * continuations.
+ * For the top-level page size in continuations, we use either
+ * `PAGE_LIMIT` or the field-specific page size (in the case of
+ * commit history).
  *
  * [1]: https://developer.github.com/v4/guides/resource-limitations/#node-limit
  */
@@ -51,6 +52,7 @@ const PAGE_SIZE_PRS = 50;
 const PAGE_SIZE_COMMENTS = 20;
 const PAGE_SIZE_REVIEWS = 10;
 const PAGE_SIZE_REVIEW_COMMENTS = 10;
+const PAGE_SIZE_COMMIT_HISTORY = 100;
 
 /**
  * What's in a continuation? If we want to fetch more comments for the
@@ -109,7 +111,15 @@ export type RepositoryJSON = {|
   +url: string,
   +name: string,
   +owner: AuthorJSON,
+  +defaultBranchRef: ?RefJSON,
 |};
+
+export type RefJSON = {|+target: GitObjectJSON|};
+export type GitObjectJSON =
+  | {|+__typename: "COMMIT", +history: ConnectionJSON<CommitJSON>|}
+  | {|+__typename: "TREE"|}
+  | {|+__typename: "BLOB"|}
+  | {|+__typename: "TAG"|};
 
 /**
  * The top-level GitHub query to request data about a repository.
@@ -139,6 +149,18 @@ export function createQuery(): Body {
                 b.fragmentSpread("pulls"),
               ])
             ),
+            b.field("defaultBranchRef", {}, [
+              b.field("target", {}, [
+                b.field("__typename"),
+                b.inlineFragment("Commit", [
+                  b.field(
+                    "history",
+                    {first: b.literal(PAGE_SIZE_COMMIT_HISTORY)},
+                    [b.fragmentSpread("commitHistory")]
+                  ),
+                ]),
+              ]),
+            ]),
           ]
         ),
       ]
@@ -244,6 +266,37 @@ function* continuationsFromRepository(
               [b.fragmentSpread("pulls")]
             )
           ),
+        ]),
+      ],
+      destinationPath: path,
+    };
+  }
+  if (
+    result.defaultBranchRef &&
+    result.defaultBranchRef.target.history.pageInfo.hasNextPage
+  ) {
+    yield {
+      enclosingNodeType: "REPOSITORY",
+      enclosingNodeId: nodeId,
+      selections: [
+        b.inlineFragment("Repository", [
+          b.field("defaultBranchRef", {}, [
+            b.field("target", {}, [
+              b.field("__typename"),
+              b.inlineFragment("Commit", [
+                b.field(
+                  "history",
+                  {
+                    first: b.literal(PAGE_SIZE_COMMIT_HISTORY),
+                    after: b.literal(
+                      result.defaultBranchRef.target.history.pageInfo.endCursor
+                    ),
+                  },
+                  [b.fragmentSpread("commitHistory")]
+                ),
+              ]),
+            ]),
+          ]),
         ]),
       ],
       destinationPath: path,
@@ -822,6 +875,14 @@ function commitFragment(): FragmentDefinition {
   ]);
 }
 
+function commitHistoryFragment(): FragmentDefinition {
+  const b = build;
+  return b.fragment("commitHistory", "CommitHistoryConnection", [
+    makePageInfo(),
+    b.field("nodes", {}, [b.fragmentSpread("commit")]),
+  ]);
+}
+
 /**
  * These fragments are used to construct the root query, and also to
  * fetch more pages of specific entity types.
@@ -834,6 +895,7 @@ export function createFragments(): FragmentDefinition[] {
     commentsFragment(),
     reviewsFragment(),
     reviewCommentsFragment(),
+    commitHistoryFragment(),
     commitFragment(),
   ];
 }
