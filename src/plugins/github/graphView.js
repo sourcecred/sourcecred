@@ -233,6 +233,14 @@ export class GraphView {
         srcAccessor: (x) => GN.toRaw((x: any).author),
         dstAccessor: (x) => GN.toRaw((x: any).content),
       },
+      [GE.MENTIONS_AUTHOR_TYPE]: {
+        homs: homProduct(
+          [GN._Prefix.issue, GN._Prefix.pull, GN._Prefix.comment],
+          [GN._Prefix.issue, GN._Prefix.pull, GN._Prefix.comment]
+        ),
+        srcAccessor: (x) => GN.toRaw((x: any).reference.src),
+        dstAccessor: (x) => GN.toRaw((x: any).reference.dst),
+      },
     };
 
     for (const edge of this._graph.edges({

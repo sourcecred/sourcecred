@@ -8,6 +8,7 @@ import {
 } from "../../core/graph";
 import * as GithubNode from "./nodes";
 import * as GitNode from "../git/nodes";
+import type {MentionsAuthorReference} from "./heuristics/mentionsAuthorReference";
 
 export opaque type RawAddress: EdgeAddressT = EdgeAddressT;
 
@@ -15,6 +16,7 @@ export const AUTHORS_TYPE = "AUTHORS";
 export const MERGED_AS_TYPE = "MERGED_AS";
 export const HAS_PARENT_TYPE = "HAS_PARENT";
 export const REFERENCES_TYPE = "REFERENCES";
+export const MENTIONS_AUTHOR_TYPE = "MENTIONS_AUTHOR";
 
 const GITHUB_PREFIX = EdgeAddress.fromParts(["sourcecred", "github"]);
 function githubEdgeAddress(...parts: string[]): RawAddress {
@@ -27,6 +29,7 @@ export const _Prefix = Object.freeze({
   mergedAs: githubEdgeAddress(MERGED_AS_TYPE),
   references: githubEdgeAddress(REFERENCES_TYPE),
   hasParent: githubEdgeAddress(HAS_PARENT_TYPE),
+  mentionsAuthor: githubEdgeAddress(MENTIONS_AUTHOR_TYPE),
 });
 
 export type AuthorsAddress = {|
@@ -47,12 +50,17 @@ export type ReferencesAddress = {|
   +referrer: GithubNode.TextContentAddress,
   +referent: GithubNode.ReferentAddress,
 |};
+export type MentionsAuthorAddress = {|
+  +type: typeof MENTIONS_AUTHOR_TYPE,
+  +reference: MentionsAuthorReference,
+|};
 
 export type StructuredAddress =
   | AuthorsAddress
   | MergedAsAddress
   | HasParentAddress
-  | ReferencesAddress;
+  | ReferencesAddress
+  | MentionsAuthorAddress;
 
 export const createEdge = Object.freeze({
   authors: (
@@ -86,6 +94,11 @@ export const createEdge = Object.freeze({
     address: toRaw({type: REFERENCES_TYPE, referrer, referent}),
     src: GithubNode.toRaw(referrer),
     dst: GithubNode.toRaw(referent),
+  }),
+  mentionsAuthor: (reference: MentionsAuthorReference): Edge => ({
+    address: toRaw({type: MENTIONS_AUTHOR_TYPE, reference}),
+    src: GithubNode.toRaw(reference.src),
+    dst: GithubNode.toRaw(reference.dst),
   }),
 });
 
@@ -185,6 +198,24 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       ): any);
       return ({type: REFERENCES_TYPE, referrer, referent}: ReferencesAddress);
     }
+    case MENTIONS_AUTHOR_TYPE: {
+      const parts = multiLengthDecode(rest, fail);
+      if (parts.length !== 3) {
+        throw fail();
+      }
+      const [srcParts, dstParts, whoParts] = parts;
+      const src: GithubNode.TextContentAddress = (GithubNode.fromRaw(
+        GithubNode._githubAddress(...srcParts)
+      ): any);
+      const dst: GithubNode.TextContentAddress = (GithubNode.fromRaw(
+        GithubNode._githubAddress(...dstParts)
+      ): any);
+      const who: GithubNode.UserlikeAddress = (GithubNode.fromRaw(
+        GithubNode._githubAddress(...whoParts)
+      ): any);
+      const reference = {src, dst, who};
+      return {type: MENTIONS_AUTHOR_TYPE, reference};
+    }
     default:
       throw fail();
   }
@@ -213,6 +244,13 @@ export function toRaw(x: StructuredAddress): RawAddress {
         _Prefix.references,
         ...lengthEncode(GithubNode.toRaw(x.referrer)),
         ...lengthEncode(GithubNode.toRaw(x.referent))
+      );
+    case MENTIONS_AUTHOR_TYPE:
+      return EdgeAddress.append(
+        _Prefix.mentionsAuthor,
+        ...lengthEncode(GithubNode.toRaw(x.reference.src)),
+        ...lengthEncode(GithubNode.toRaw(x.reference.dst)),
+        ...lengthEncode(GithubNode.toRaw(x.reference.who))
       );
     default:
       throw new Error((x.type: empty));
