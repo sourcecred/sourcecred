@@ -281,10 +281,65 @@
                     "number": 10,
                     "title": "Paired with multireference",
                     "url": "https://github.com/sourcecred/example-github/issues/10"
+                },
+                {
+                    "author": {
+                        "__typename": "User",
+                        "id": "MDQ6VXNlcjQzMTc4MDY=",
+                        "login": "wchargin",
+                        "url": "https://github.com/wchargin"
+                    },
+                    "body": "@wchargin-ghost002, show yourself.",
+                    "comments": {
+                        "nodes": [
+                            {
+                                "author": null,
+                                "body": "Hello. :ghost: ",
+                                "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMTg3Mg==",
+                                "url": "https://github.com/sourcecred/example-github/issues/11#issuecomment-420811872"
+                            },
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjQzMTc4MDY=",
+                                    "login": "wchargin",
+                                    "url": "https://github.com/wchargin"
+                                },
+                                "body": "[Here is a screenshot of the thread at this point, prior to account deletion.](https://user-images.githubusercontent.com/4317806/45455614-8c4fe600-b69c-11e8-902e-aec65d7403e6.png)\r\n\r\nThe user has GraphQL ID `MDQ6VXNlcjQzMjIyMTkw` and database ID `43222190`.\r\n\r\nThe previous comment has GraphQL ID `MDEyOklzc3VlQ29tbWVudDQyMDgxMTg3Mg==` and database `420811872`.\r\n",
+                                "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMzAxMw==",
+                                "url": "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813013"
+                            },
+                            {
+                                "author": null,
+                                "body": "My time in this life draws to a close. :wave: ",
+                                "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMzIwNg==",
+                                "url": "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206"
+                            },
+                            {
+                                "author": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                },
+                                "body": ":skull: :ghost:\r\nRIP",
+                                "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMzYyMQ==",
+                                "url": "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813621"
+                            }
+                        ],
+                        "pageInfo": {
+                            "endCursor": "Y3Vyc29yOnYyOpHOGRUbNQ==",
+                            "hasNextPage": false
+                        }
+                    },
+                    "id": "MDU6SXNzdWUzNTk2Njc4Mjk=",
+                    "number": 11,
+                    "title": "An issue with a comment from a deleted user",
+                    "url": "https://github.com/sourcecred/example-github/issues/11"
                 }
             ],
             "pageInfo": {
-                "endCursor": "Y3Vyc29yOnYyOpHOFBerMQ==",
+                "endCursor": "Y3Vyc29yOnYyOpHOFXAYdQ==",
                 "hasNextPage": false
             }
         },
