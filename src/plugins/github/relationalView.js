@@ -4,6 +4,8 @@ import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import stringify from "json-stable-stringify";
 import {parseReferences} from "./parseReferences";
 import * as N from "./nodes";
+import dedent from "../../util/dedent";
+
 // Workaround for https://github.com/facebook/flow/issues/6538
 import type {
   RepoAddress,
@@ -288,6 +290,24 @@ export class RelationalView {
     };
     const raw = N.toRaw(address);
     this._repos.set(raw, entry);
+    this._addCommitHistory(json);
+  }
+
+  _addCommitHistory(json: RepositoryJSON) {
+    if (json.defaultBranchRef != null) {
+      const target = json.defaultBranchRef.target;
+      if (target.__typename === "Commit") {
+        target.history.nodes.forEach((commit) => this._addCommit(commit));
+      } else {
+        throw new Error(
+          dedent`\
+            Your repo doesn't have a commit as its defaultBranchRef's target. \
+            Please file a bug reproducing this error. \
+            https://github.com/sourcecred/sourcecred/issues\
+          `
+        );
+      }
+    }
   }
 
   _addIssue(repo: RepoAddress, json: IssueJSON): IssueAddress {
