@@ -102,12 +102,9 @@ export const createEdge = Object.freeze({
   }),
 });
 
-const NODE_PREFIX_LENGTH = NodeAddress.toParts(GithubNode._githubAddress())
-  .length;
-
 function lengthEncode(x: GithubNode.RawAddress): $ReadOnlyArray<string> {
-  const baseParts = NodeAddress.toParts(x).slice(NODE_PREFIX_LENGTH);
-  return [String(baseParts.length), ...baseParts];
+  const parts = NodeAddress.toParts(x);
+  return [String(parts.length), ...parts];
 }
 function lengthDecode(
   x: $ReadOnlyArray<string>,
@@ -155,10 +152,10 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       }
       const [authorParts, contentParts] = parts;
       const author: GithubNode.UserlikeAddress = (GithubNode.fromRaw(
-        GithubNode._githubAddress(...authorParts)
+        (NodeAddress.fromParts(authorParts): any)
       ): any);
       const content: GithubNode.AuthorableAddress = (GithubNode.fromRaw(
-        GithubNode._githubAddress(...contentParts)
+        (NodeAddress.fromParts(contentParts): any)
       ): any);
       return ({type: AUTHORS_TYPE, author, content}: AuthorsAddress);
     }
@@ -169,7 +166,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       }
       const [pullParts] = parts;
       const pull: GithubNode.PullAddress = (GithubNode.fromRaw(
-        GithubNode._githubAddress(...pullParts)
+        (NodeAddress.fromParts(pullParts): any)
       ): any);
       return ({type: MERGED_AS_TYPE, pull}: MergedAsAddress);
     }
@@ -180,7 +177,7 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       }
       const [childParts] = parts;
       const child: GithubNode.ChildAddress = (GithubNode.fromRaw(
-        GithubNode._githubAddress(...childParts)
+        (NodeAddress.fromParts(childParts): any)
       ): any);
       return ({type: HAS_PARENT_TYPE, child}: HasParentAddress);
     }
@@ -191,10 +188,10 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       }
       const [referrerParts, referentParts] = parts;
       const referrer: GithubNode.TextContentAddress = (GithubNode.fromRaw(
-        GithubNode._githubAddress(...referrerParts)
+        (NodeAddress.fromParts(referrerParts): any)
       ): any);
       const referent: GithubNode.ReferentAddress = (GithubNode.fromRaw(
-        GithubNode._githubAddress(...referentParts)
+        (NodeAddress.fromParts(referentParts): any)
       ): any);
       return ({type: REFERENCES_TYPE, referrer, referent}: ReferencesAddress);
     }
@@ -205,13 +202,13 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       }
       const [srcParts, dstParts, whoParts] = parts;
       const src: GithubNode.TextContentAddress = (GithubNode.fromRaw(
-        GithubNode._githubAddress(...srcParts)
+        (NodeAddress.fromParts(srcParts): any)
       ): any);
       const dst: GithubNode.TextContentAddress = (GithubNode.fromRaw(
-        GithubNode._githubAddress(...dstParts)
+        (NodeAddress.fromParts(dstParts): any)
       ): any);
       const who: GithubNode.UserlikeAddress = (GithubNode.fromRaw(
-        GithubNode._githubAddress(...whoParts)
+        (NodeAddress.fromParts(whoParts): any)
       ): any);
       const reference = {src, dst, who};
       return {type: MENTIONS_AUTHOR_TYPE, reference};
