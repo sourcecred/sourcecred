@@ -61,6 +61,7 @@ describe("plugins/github/relationalView", () => {
     hasEntityMethods("pulls", () => view.pulls(), (x) => view.pull(x));
     hasEntityMethods("reviews", () => view.reviews(), (x) => view.review(x));
     hasEntityMethods("comments", () => view.comments(), (x) => view.comment(x));
+    hasEntityMethods("commits", () => view.commits(), (x) => view.commit(x));
     hasEntityMethods(
       "userlikes",
       () => view.userlikes(),
@@ -133,6 +134,13 @@ describe("plugins/github/relationalView", () => {
     hasEntities("authors", () => entity.authors());
   });
 
+  const commit = Array.from(view.commits())[0];
+  describe("Commit", () => {
+    const entity = commit;
+    has("url", () => entity.url());
+    hasEntities("authors", () => entity.authors());
+  });
+
   const userlike = Array.from(review.authors())[0];
   describe("Userlike", () => {
     const entity = userlike;
@@ -155,6 +163,9 @@ describe("plugins/github/relationalView", () => {
     });
     it("works for comment", () => {
       expect(view.entity(comment.address())).toEqual(comment);
+    });
+    it("works for commit", () => {
+      expect(view.entity(commit.address())).toEqual(commit);
     });
     it("works for userlike", () => {
       expect(view.entity(userlike.address())).toEqual(userlike);
@@ -179,10 +190,11 @@ describe("plugins/github/relationalView", () => {
       pull: (x: R.Pull) => [x.address(), "PULL"],
       review: (x: R.Review) => [x.address(), "REVIEW"],
       comment: (x: R.Comment) => [x.address(), "COMMENT"],
+      commit: (x: R.Commit) => [x.address(), "COMMIT"],
       userlike: (x: R.Userlike) => [x.address(), "USERLIKE"],
     };
 
-    const instances = [repo, issue, pull, review, comment, userlike];
+    const instances = [repo, issue, pull, review, comment, commit, userlike];
     for (const instance of instances) {
       const [actualAddress, functionType] = R.match(handlers, instance);
       expect(actualAddress.type).toEqual(functionType);

@@ -18,6 +18,16 @@ Object {
 
 exports[`plugins/github/relationalView Comment has url 1`] = `"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"`;
 
+exports[`plugins/github/relationalView Commit authors has expected number of authors 1`] = `1`;
+
+exports[`plugins/github/relationalView Commit authors have expected urls 1`] = `
+Array [
+  "https://github.com/decentralion",
+]
+`;
+
+exports[`plugins/github/relationalView Commit has url 1`] = `"https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"`;
+
 exports[`plugins/github/relationalView Issue authors has expected number of authors 1`] = `1`;
 
 exports[`plugins/github/relationalView Issue authors have expected urls 1`] = `
@@ -134,6 +144,15 @@ Array [
   "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
   "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
   "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+]
+`;
+
+exports[`plugins/github/relationalView RelationalView entity: commits has expected number of them 1`] = `2`;
+
+exports[`plugins/github/relationalView RelationalView entity: commits they have expected urls 1`] = `
+Array [
+  "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+  "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
 ]
 `;
 

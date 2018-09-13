@@ -82,7 +82,8 @@ export type AuthorableAddress =
   | IssueAddress
   | PullAddress
   | ReviewAddress
-  | CommentAddress;
+  | CommentAddress
+  | GitNode.CommitAddress;
 
 // Each of these types has text content, which means
 // it may be the source of a reference to a ReferentAddress.

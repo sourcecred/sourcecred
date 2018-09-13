@@ -20,6 +20,11 @@ export function description(e: R.Entity) {
     },
     review: (x) => `review ${withAuthors(x)}of ${description(x.parent())}`,
     comment: (x) => `comment ${withAuthors(x)}on ${description(x.parent())}`,
+    // The commit type is included for completeness's sake and to
+    // satisfy the typechecker, but won't ever be seen in the frontend
+    // because the commit has a Git plugin prefix and will therefore by
+    // handled by the git plugin adapter
+    commit: (x) => `commit ${x.address().hash}`,
     userlike: (x) => `@${x.login()}`,
   };
   return R.match(handlers, e);

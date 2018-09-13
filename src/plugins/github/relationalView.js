@@ -20,6 +20,7 @@ import type {
   PullJSON,
   ReviewJSON,
   CommentJSON,
+  CommitJSON,
   NullableAuthorJSON,
   ReviewState,
 } from "./graphql";
@@ -36,7 +37,7 @@ import {
 
 const COMPAT_INFO = {
   type: "sourcecred/github/relationalView",
-  version: "0.1.0",
+  version: "0.2.0",
 };
 
 export class RelationalView {
@@ -44,6 +45,7 @@ export class RelationalView {
   _issues: Map<N.RawAddress, IssueEntry>;
   _pulls: Map<N.RawAddress, PullEntry>;
   _comments: Map<N.RawAddress, CommentEntry>;
+  _commits: Map<N.RawAddress, CommitEntry>;
   _reviews: Map<N.RawAddress, ReviewEntry>;
   _userlikes: Map<N.RawAddress, UserlikeEntry>;
   _mapReferences: Map<N.RawAddress, N.ReferentAddress[]>;
@@ -54,6 +56,7 @@ export class RelationalView {
     this._issues = new Map();
     this._pulls = new Map();
     this._comments = new Map();
+    this._commits = new Map();
     this._reviews = new Map();
     this._userlikes = new Map();
     this._mapReferences = new Map();
@@ -140,6 +143,17 @@ export class RelationalView {
     return entry == null ? entry : new Comment(this, entry);
   }
 
+  *commits(): Iterator<Commit> {
+    for (const entry of this._commits.values()) {
+      yield new Commit(this, entry);
+    }
+  }
+
+  commit(address: GitNode.CommitAddress): ?Commit {
+    const entry = this._commits.get(N.toRaw(address));
+    return entry == null ? entry : new Commit(this, entry);
+  }
+
   *reviews(): Iterator<Review> {
     for (const entry of this._reviews.values()) {
       yield new Review(this, entry);
@@ -177,7 +191,7 @@ export class RelationalView {
       case "USERLIKE":
         return this.userlike(address);
       case "COMMIT":
-        return null;
+        return this.commit(address);
       default:
         throw new Error(`Unexpected address type: ${(address.type: empty)}`);
     }
@@ -226,6 +240,7 @@ export class RelationalView {
     yield* this.pulls();
     yield* this.reviews();
     yield* this.comments();
+    yield* this.commits();
     yield* this.userlikes();
   }
 
@@ -236,6 +251,7 @@ export class RelationalView {
       pulls: MapUtil.toObject(this._pulls),
       reviews: MapUtil.toObject(this._reviews),
       comments: MapUtil.toObject(this._comments),
+      commits: MapUtil.toObject(this._commits),
       userlikes: MapUtil.toObject(this._userlikes),
       references: MapUtil.toObject(this._mapReferences),
       referencedBy: MapUtil.toObject(this._mapReferencedBy),
@@ -251,6 +267,7 @@ export class RelationalView {
     rv._pulls = MapUtil.fromObject(json.pulls);
     rv._reviews = MapUtil.fromObject(json.reviews);
     rv._comments = MapUtil.fromObject(json.comments);
+    rv._commits = MapUtil.fromObject(json.commits);
     rv._userlikes = MapUtil.fromObject(json.userlikes);
     rv._mapReferences = MapUtil.fromObject(json.references);
     rv._mapReferencedBy = MapUtil.fromObject(json.referencedBy);
@@ -291,19 +308,29 @@ export class RelationalView {
     return address;
   }
 
+  _addCommit(json: CommitJSON): GitNode.CommitAddress {
+    const address = {type: GitNode.COMMIT_TYPE, hash: json.oid};
+    const authors =
+      json.author == null ? [] : this._addNullableAuthor(json.author.user);
+    const entry: CommitEntry = {
+      address,
+      url: json.url,
+      authors,
+    };
+    this._commits.set(N.toRaw(address), entry);
+    return address;
+  }
+
   _addPull(repo: RepoAddress, json: PullJSON): PullAddress {
     const address: PullAddress = {
       type: N.PULL_TYPE,
       number: String(json.number),
       repo,
     };
+    // TODO(@decentralion): Rewrite so that pulls actually have
+    // the commit attached (not just oid)
     const mergedAs =
-      json.mergeCommit == null
-        ? null
-        : {
-            type: GitNode.COMMIT_TYPE,
-            hash: json.mergeCommit.oid,
-          };
+      json.mergeCommit == null ? null : this._addCommit(json.mergeCommit);
 
     const entry: PullEntry = {
       address,
@@ -558,6 +585,7 @@ type Entry =
   | PullEntry
   | ReviewEntry
   | CommentEntry
+  | CommitEntry
   | UserlikeEntry;
 
 export class _Entity<+T: Entry> {
@@ -803,6 +831,21 @@ export class Comment extends _Entity<CommentEntry> {
   }
 }
 
+type CommitEntry = {|
+  +address: GitNode.CommitAddress,
+  +url: string,
+  +authors: UserlikeAddress[],
+|};
+
+export class Commit extends _Entity<CommitEntry> {
+  constructor(view: RelationalView, entry: CommitEntry) {
+    super(view, entry);
+  }
+  authors(): Iterator<Userlike> {
+    return getAuthors(this._view, this._entry);
+  }
+}
+
 type UserlikeEntry = {|
   +address: UserlikeAddress,
   +url: string,
@@ -831,7 +874,7 @@ function assertExists<T>(item: ?T, address: N.StructuredAddress): T {
 
 function* getAuthors(
   view: RelationalView,
-  entry: IssueEntry | PullEntry | ReviewEntry | CommentEntry
+  entry: IssueEntry | PullEntry | ReviewEntry | CommentEntry | CommitEntry
 ) {
   for (const address of entry.authors) {
     const author = view.userlike(address);
@@ -845,6 +888,7 @@ export type MatchHandlers<T> = {|
   +pull: (x: Pull) => T,
   +review: (x: Review) => T,
   +comment: (x: Comment) => T,
+  +commit: (x: Commit) => T,
   +userlike: (x: Userlike) => T,
 |};
 export function match<T>(handlers: MatchHandlers<T>, x: Entity): T {
@@ -863,14 +907,17 @@ export function match<T>(handlers: MatchHandlers<T>, x: Entity): T {
   if (x instanceof Comment) {
     return handlers.comment(x);
   }
+  if (x instanceof Commit) {
+    return handlers.commit(x);
+  }
   if (x instanceof Userlike) {
     return handlers.userlike(x);
   }
   throw new Error(`Unexpected entity ${x}`);
 }
 
-export type Entity = Repo | Issue | Pull | Review | Comment | Userlike;
-export type AuthoredEntity = Issue | Pull | Review | Comment;
+export type Entity = Repo | Issue | Pull | Review | Comment | Commit | Userlike;
+export type AuthoredEntity = Issue | Pull | Review | Comment | Commit;
 export type TextContentEntity = Issue | Pull | Review | Comment;
 export type ParentEntity = Repo | Issue | Pull | Review;
 export type ChildEntity = Issue | Pull | Review | Comment;
@@ -883,6 +930,7 @@ export opaque type RelationalViewJSON = Compatible<{|
   +pulls: AddressEntryMapJSON<PullEntry>,
   +reviews: AddressEntryMapJSON<ReviewEntry>,
   +comments: AddressEntryMapJSON<CommentEntry>,
+  +commits: AddressEntryMapJSON<CommitEntry>,
   +userlikes: AddressEntryMapJSON<UserlikeEntry>,
   +references: AddressEntryMapJSON<N.ReferentAddress[]>,
   +referencedBy: AddressEntryMapJSON<N.TextContentAddress[]>,

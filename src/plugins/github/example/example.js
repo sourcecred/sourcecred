@@ -27,6 +27,7 @@ export function exampleEntities() {
   const pull = Array.from(repo.pulls())[1];
   const review = Array.from(pull.reviews())[0];
   const comment = Array.from(review.comments())[0];
+  const commit = Array.from(view.commits())[0];
   const userlike = Array.from(review.authors())[0];
   return {
     repo,
@@ -34,6 +35,7 @@ export function exampleEntities() {
     pull,
     review,
     comment,
+    commit,
     userlike,
   };
 }
