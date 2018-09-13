@@ -91,7 +91,8 @@ export type TextContentAddress =
   | IssueAddress
   | PullAddress
   | ReviewAddress
-  | CommentAddress;
+  | CommentAddress
+  | GitNode.CommitAddress;
 
 // Each of these types may be referred to by something
 // with text content.

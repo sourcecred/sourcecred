@@ -208,6 +208,7 @@ export class GraphView {
             GN.Prefix.pull,
             GN.Prefix.review,
             GN.Prefix.comment,
+            GitNode.Prefix.commit,
           ],
           [
             GN.Prefix.repo,
