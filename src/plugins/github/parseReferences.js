@@ -29,6 +29,7 @@ function parseReferencesFromRawString(textBlock: string): ParsedReference[] {
     ...findRepoNumericReferences(textBlock),
     ...findGithubUrlReferences(textBlock),
     ...findUsernameReferences(textBlock),
+    ...findCommitReferences(textBlock),
   ];
 }
 
@@ -96,6 +97,47 @@ function findGithubUrlReferences(textBlock: string): ParsedReference[] {
     refType: "BASIC",
     ref: match[1],
   }));
+}
+
+function findCommitReferences(textBlock: string): ParsedReference[] {
+  const hashReferences = findAllMatches(
+    /(?:\W|^)([a-fA-F0-9]{40,})(?=\W|$)/gm,
+    textBlock
+  ).map((x) => ({
+    refType: "BASIC",
+    ref: x[1].toLowerCase(),
+  }));
+  const commitUrlRegex = new RegExp(
+    "" +
+      /(?:\W|^)/.source +
+      "(" +
+      /https?:\/\/github.com\//.source +
+      `(?:${githubOwnerPattern})` +
+      /\//.source +
+      `(?:${githubRepoPattern})` +
+      /\/commit\/([a-fA-F0-9]{40,})/.source +
+      ")" +
+      /(?=[^\w/]|$)/.source,
+    "gm"
+  );
+  const urlsAndHashes = findAllMatches(commitUrlRegex, textBlock).map((x) => ({
+    url: x[1].toLowerCase(),
+    hash: x[2].toLowerCase(),
+  }));
+  // Every urlReference will also generate a hash reference (because the
+  // url contains the hash).  So we manually remove the duplicates.
+  for (const {url, hash} of urlsAndHashes) {
+    const idxToRemove = hashReferences.findIndex(({ref}) => ref === hash);
+    if (idxToRemove === -1) {
+      throw new Error(`No matching hash for url reference: ${url}`);
+    }
+    hashReferences.splice(idxToRemove, 1);
+  }
+  const urlReferences = urlsAndHashes.map((x) => ({
+    refType: "BASIC",
+    ref: x.url,
+  }));
+  return [...hashReferences, ...urlReferences];
 }
 
 function findAllMatches(re: RegExp, s: string): any[] {

@@ -109,6 +109,9 @@ https://github.com/sourcecred/exa_mple-git.hub/pull/5#discussion_r171460198
 
     A directly linked pull request comment:
 https://github.com/sourcecred/exa_mple-git.hub/pull/3#issuecomment-369162222
+
+    A directly linked commit:
+https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34
     `;
 
     const expected = [
@@ -150,6 +153,11 @@ https://github.com/sourcecred/exa_mple-git.hub/pull/3#issuecomment-369162222
         ref:
           "https://github.com/sourcecred/exa_mple-git.hub/pull/3#issuecomment-369162222",
       },
+      {
+        refType: "BASIC",
+        ref:
+          "https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+      },
     ];
 
     expect(parseReferences(example)).toEqual(expected);
@@ -180,6 +188,56 @@ https://github.com/sourcecred/exa_mple-git.hub/pull/3#issuecomment-369162222
     expect(parseReferences(`!${base}!`)).toEqual([
       {refType: "BASIC", ref: base},
     ]);
+  });
+
+  describe("commit references", () => {
+    const commitHash = "6bd1b4c0b719c22c688a74863be07a699b7b9b34";
+    const urlPrefix = "https://github.com/sourcecred/example-github/commit/";
+    it("are valid if they are 40-chars long and all hex", () => {
+      expect(parseReferences(commitHash)).toEqual([
+        {refType: "BASIC", ref: commitHash},
+      ]);
+    });
+    it("are canonicalized to lower-case capitalization", () => {
+      const capitalizedHash = "6BD1B4C0B719C22C688A74863be07a699b7b9b34";
+      const capitalizedUrl = `${urlPrefix}${capitalizedHash}`;
+      expect(parseReferences(capitalizedHash)).toEqual([
+        {refType: "BASIC", ref: commitHash},
+      ]);
+      expect(parseReferences(capitalizedUrl)).toEqual([
+        {refType: "BASIC", ref: `${urlPrefix}${commitHash}`},
+      ]);
+    });
+    it("are valid even if they have surrounding text", () => {
+      expect(parseReferences(`hello ${commitHash} world`)).toEqual([
+        {refType: "BASIC", ref: commitHash},
+      ]);
+    });
+    it("are not valid if fewer than 40 chars long", () => {
+      expect(parseReferences(`bad: ${commitHash.slice(0, 38)}`)).toHaveLength(
+        0
+      );
+    });
+    it("are valid if they are 64 characters long", () => {
+      const hash64 =
+        "0000000000000000000000000000000000000000000000000000000000000000";
+      expect(parseReferences(hash64)).toEqual([
+        {ref: hash64, refType: "BASIC"},
+      ]);
+    });
+    it("are not valid if contain non-hex characters", () => {
+      expect(
+        parseReferences("6bd1b4c0b719c22c688a74863be07a699b7b9b3X")
+      ).toHaveLength(0);
+    });
+    it("if there is a ref to the url and hash, they are both found once", () => {
+      const commitUrl = `https://github.com/sourcecred/example-github/commit/${commitHash}`;
+      const text = `${commitHash} ${commitUrl}`;
+      const result = parseReferences(text);
+      const hashRef = {refType: "BASIC", ref: commitHash};
+      const urlRef = {refType: "BASIC", ref: commitUrl};
+      expect(result).toEqual([hashRef, urlRef]);
+    });
   });
 
   it("finds username references", () => {
