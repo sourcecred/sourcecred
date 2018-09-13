@@ -51,7 +51,7 @@ export class RelationalView {
   _mapReferences: Map<N.RawAddress, N.ReferentAddress[]>;
   _mapReferencedBy: Map<N.RawAddress, N.TextContentAddress[]>;
 
-  constructor() {
+  constructor(): void {
     this._repos = new Map();
     this._issues = new Map();
     this._pulls = new Map();
