@@ -26,6 +26,12 @@ Array [
 ]
 `;
 
+exports[`plugins/github/relationalView Commit has message 1`] = `
+"Merge pull request #3 from sourcecred/add-readme
+
+Add README, merge via PR."
+`;
+
 exports[`plugins/github/relationalView Commit has url 1`] = `"https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"`;
 
 exports[`plugins/github/relationalView Issue authors has expected number of authors 1`] = `1`;

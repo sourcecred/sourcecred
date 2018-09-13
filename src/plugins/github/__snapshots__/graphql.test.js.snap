@@ -347,6 +347,7 @@ fragment commit on Commit {
   id
   url
   oid
+  message
   author {
     user {
       ...whoami

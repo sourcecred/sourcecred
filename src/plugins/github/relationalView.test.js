@@ -138,6 +138,7 @@ describe("plugins/github/relationalView", () => {
   describe("Commit", () => {
     const entity = commit;
     has("url", () => entity.url());
+    has("message", () => entity.message());
     hasEntities("authors", () => entity.authors());
   });
 
@@ -309,6 +310,21 @@ describe("plugins/github/relationalView", () => {
       expect(somePostsHaveBodies()).toBe(true);
       rv.compressByRemovingBody();
       expect(somePostsHaveBodies()).toBe(false);
+    });
+    it("removes messages from all commits", () => {
+      const rv = new R.RelationalView();
+      rv.addData(exampleData());
+      function someCommitsHaveMessages() {
+        for (const commit of rv.commits()) {
+          if (commit.message() !== "") {
+            return true;
+          }
+        }
+        return false;
+      }
+      expect(someCommitsHaveMessages()).toBe(true);
+      rv.compressByRemovingBody();
+      expect(someCommitsHaveMessages()).toBe(false);
     });
   });
 
