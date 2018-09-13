@@ -1,5 +1,91 @@
 {
     "repository": {
+        "defaultBranchRef": {
+            "target": {
+                "__typename": "Commit",
+                "history": {
+                    "nodes": [
+                        {
+                            "author": {
+                                "user": null
+                            },
+                            "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZiZDFiNGMwYjcxOWMyMmM2ODhhNzQ4NjNiZTA3YTY5OWI3YjliMzQ=",
+                            "oid": "6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+                            "url": "https://github.com/sourcecred/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34"
+                        },
+                        {
+                            "author": {
+                                "user": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjQyODE5Mzgy",
+                                    "login": "credbot",
+                                    "url": "https://github.com/credbot"
+                                }
+                            },
+                            "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmM0MzBiZDc0NDU1MTA1Zjc3MjE1ZWNlNTE5NDUwOTRjZWVlZTZjODY=",
+                            "oid": "c430bd74455105f77215ece51945094ceeee6c86",
+                            "url": "https://github.com/sourcecred/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86"
+                        },
+                        {
+                            "author": {
+                                "user": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                }
+                            },
+                            "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
+                            "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+                            "url": "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6"
+                        },
+                        {
+                            "author": {
+                                "user": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                }
+                            },
+                            "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
+                            "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+                            "url": "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
+                        },
+                        {
+                            "author": {
+                                "user": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                }
+                            },
+                            "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
+                            "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+                            "url": "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d"
+                        },
+                        {
+                            "author": {
+                                "user": {
+                                    "__typename": "User",
+                                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                    "login": "decentralion",
+                                    "url": "https://github.com/decentralion"
+                                }
+                            },
+                            "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+                            "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
+                            "url": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780"
+                        }
+                    ],
+                    "pageInfo": {
+                        "endCursor": "6bd1b4c0b719c22c688a74863be07a699b7b9b34 5",
+                        "hasNextPage": false
+                    }
+                }
+            }
+        },
         "id": "MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=",
         "issues": {
             "nodes": [
