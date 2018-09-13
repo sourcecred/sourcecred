@@ -383,7 +383,17 @@
                     "deletions": 0,
                     "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
                     "mergeCommit": {
-                        "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
+                        "author": {
+                            "user": {
+                                "__typename": "User",
+                                "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                "login": "decentralion",
+                                "url": "https://github.com/decentralion"
+                            }
+                        },
+                        "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
+                        "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+                        "url": "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
                     },
                     "number": 3,
                     "reviews": {
@@ -428,7 +438,17 @@
                     "deletions": 0,
                     "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
                     "mergeCommit": {
-                        "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6"
+                        "author": {
+                            "user": {
+                                "__typename": "User",
+                                "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                "login": "decentralion",
+                                "url": "https://github.com/decentralion"
+                            }
+                        },
+                        "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
+                        "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+                        "url": "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6"
                     },
                     "number": 5,
                     "reviews": {
