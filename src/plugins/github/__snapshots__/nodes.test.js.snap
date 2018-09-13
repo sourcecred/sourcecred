@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`plugins/github/nodes snapshots as expected: commit 1`] = `
+Object {
+  "address": Array [
+    "sourcecred",
+    "git",
+    "COMMIT",
+    "0000000000000000000000000000000000000000",
+  ],
+  "structured": Object {
+    "hash": "0000000000000000000000000000000000000000",
+    "type": "COMMIT",
+  },
+}
+`;
+
 exports[`plugins/github/nodes snapshots as expected: issue 1`] = `
 Object {
   "address": Array [

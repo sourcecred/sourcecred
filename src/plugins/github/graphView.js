@@ -6,7 +6,7 @@ import deepEqual from "lodash.isequal";
 import * as GN from "./nodes";
 import * as GE from "./edges";
 
-import {Prefix as _GitPrefix} from "../git/nodes";
+import * as GitNode from "../git/nodes";
 
 import {
   Graph,
@@ -143,6 +143,7 @@ export class GraphView {
       [GN.COMMENT_TYPE]: (x) => x.parent,
       [GN.REVIEW_TYPE]: (x) => x.pull,
       [GN.USERLIKE_TYPE]: null,
+      [GitNode.COMMIT_TYPE]: null,
     };
     for (const node of this._graph.nodes({prefix: GN.Prefix.base})) {
       const structuredNode = GN.fromRaw((node: any));
@@ -195,7 +196,7 @@ export class GraphView {
         homs: [
           {
             srcPrefix: GN.Prefix.pull,
-            dstPrefix: _GitPrefix.commit,
+            dstPrefix: GitNode.Prefix.commit,
           },
         ],
         srcAccessor: (x) => GN.toRaw((x: any).pull),
