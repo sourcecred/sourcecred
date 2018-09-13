@@ -15,7 +15,7 @@ export const COMMIT_TYPE: "COMMIT" = "COMMIT";
 export const TREE_TYPE: "TREE" = "TREE";
 export const TREE_ENTRY_TYPE: "TREE_ENTRY" = "TREE_ENTRY";
 
-export const _Prefix = Object.freeze({
+export const Prefix = Object.freeze({
   base: GIT_PREFIX,
   blob: _gitAddress(BLOB_TYPE),
   commit: _gitAddress(COMMIT_TYPE),
@@ -94,13 +94,13 @@ export function fromRaw(x: RawAddress): StructuredAddress {
 export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
     case BLOB_TYPE:
-      return NodeAddress.append(_Prefix.blob, x.hash);
+      return NodeAddress.append(Prefix.blob, x.hash);
     case COMMIT_TYPE:
-      return NodeAddress.append(_Prefix.commit, x.hash);
+      return NodeAddress.append(Prefix.commit, x.hash);
     case TREE_TYPE:
-      return NodeAddress.append(_Prefix.tree, x.hash);
+      return NodeAddress.append(Prefix.tree, x.hash);
     case TREE_ENTRY_TYPE:
-      return NodeAddress.append(_Prefix.treeEntry, x.treeHash, x.name);
+      return NodeAddress.append(Prefix.treeEntry, x.treeHash, x.name);
     default:
       throw new Error(`Unexpected type ${(x.type: empty)}`);
   }

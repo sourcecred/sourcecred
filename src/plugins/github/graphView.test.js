@@ -315,7 +315,7 @@ describe("plugins/github/graphView", () => {
           const otherParent = {
             src: GN.toRaw(issue),
             dst: GN.toRaw(otherRepo),
-            address: EdgeAddress.append(GE._Prefix.hasParent, "foobar"),
+            address: EdgeAddress.append(GE.Prefix.hasParent, "foobar"),
           };
           g.addEdge(otherParent);
           expect(() => new GraphView(g)).toThrow("Parent invariant");

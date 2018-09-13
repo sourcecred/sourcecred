@@ -4,8 +4,8 @@ import cloneDeep from "lodash.clonedeep";
 
 import {createMinimalGraph} from "./createMinimalGraph";
 import {GraphView} from "./graphView";
-import {_Prefix as NodePrefix} from "./nodes";
-import {_Prefix as EdgePrefix} from "./edges";
+import {Prefix as NodePrefix} from "./nodes";
+import {Prefix as EdgePrefix} from "./edges";
 import {NodeAddress, EdgeAddress} from "../../core/graph";
 
 const makeData = () => cloneDeep(require("./example/example-git"));

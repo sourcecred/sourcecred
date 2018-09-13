@@ -23,7 +23,7 @@ function githubEdgeAddress(...parts: string[]): RawAddress {
   return EdgeAddress.append(GITHUB_PREFIX, ...parts);
 }
 
-export const _Prefix = Object.freeze({
+export const Prefix = Object.freeze({
   base: GITHUB_PREFIX,
   authors: githubEdgeAddress(AUTHORS_TYPE),
   mergedAs: githubEdgeAddress(MERGED_AS_TYPE),
@@ -225,29 +225,29 @@ export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
     case AUTHORS_TYPE:
       return EdgeAddress.append(
-        _Prefix.authors,
+        Prefix.authors,
         ...lengthEncode(GithubNode.toRaw(x.author)),
         ...lengthEncode(GithubNode.toRaw(x.content))
       );
     case MERGED_AS_TYPE:
       return EdgeAddress.append(
-        _Prefix.mergedAs,
+        Prefix.mergedAs,
         ...lengthEncode(GithubNode.toRaw(x.pull))
       );
     case HAS_PARENT_TYPE:
       return EdgeAddress.append(
-        _Prefix.hasParent,
+        Prefix.hasParent,
         ...lengthEncode(GithubNode.toRaw(x.child))
       );
     case REFERENCES_TYPE:
       return EdgeAddress.append(
-        _Prefix.references,
+        Prefix.references,
         ...lengthEncode(GithubNode.toRaw(x.referrer)),
         ...lengthEncode(GithubNode.toRaw(x.referent))
       );
     case MENTIONS_AUTHOR_TYPE:
       return EdgeAddress.append(
-        _Prefix.mentionsAuthor,
+        Prefix.mentionsAuthor,
         ...lengthEncode(GithubNode.toRaw(x.reference.src)),
         ...lengthEncode(GithubNode.toRaw(x.reference.dst)),
         ...lengthEncode(GithubNode.toRaw(x.reference.who))

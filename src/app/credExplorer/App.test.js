@@ -15,7 +15,7 @@ import RepositorySelect from "./RepositorySelect";
 import {PagerankTable} from "./pagerankTable/Table";
 import {createApp, LoadingIndicator} from "./App";
 import {uninitializedState} from "./state";
-import {_Prefix as GithubPrefix} from "../../plugins/github/nodes";
+import {Prefix as GithubPrefix} from "../../plugins/github/nodes";
 
 require("../testUtil").configureEnzyme();
 

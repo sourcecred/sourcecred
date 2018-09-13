@@ -6,7 +6,7 @@ import deepEqual from "lodash.isequal";
 import * as GN from "./nodes";
 import * as GE from "./edges";
 
-import {_Prefix as _GitPrefix} from "../git/nodes";
+import {Prefix as _GitPrefix} from "../git/nodes";
 
 import {
   Graph,
@@ -45,7 +45,7 @@ export class GraphView {
     node: GN.StructuredAddress,
     options: NeighborsOptions
   ): Iterator<T> {
-    if (!NodeAddress.hasPrefix(options.nodePrefix, GN._Prefix.base)) {
+    if (!NodeAddress.hasPrefix(options.nodePrefix, GN.Prefix.base)) {
       throw new Error(`_neighbors must filter to GitHub nodes`);
     }
     const rawNode = GN.toRaw(node);
@@ -62,38 +62,38 @@ export class GraphView {
   ): Iterator<T> {
     const options = {
       nodePrefix,
-      edgePrefix: GE._Prefix.hasParent,
+      edgePrefix: GE.Prefix.hasParent,
       direction: Direction.IN,
     };
     return this._neighbors(node, options);
   }
 
   repos(): Iterator<GN.RepoAddress> {
-    return this._nodes(GN._Prefix.repo);
+    return this._nodes(GN.Prefix.repo);
   }
 
   issues(repo: GN.RepoAddress): Iterator<GN.IssueAddress> {
-    return this._children(repo, GN._Prefix.issue);
+    return this._children(repo, GN.Prefix.issue);
   }
 
   pulls(repo: GN.RepoAddress): Iterator<GN.PullAddress> {
-    return this._children(repo, GN._Prefix.pull);
+    return this._children(repo, GN.Prefix.pull);
   }
 
   comments(commentable: GN.CommentableAddress): Iterator<GN.CommentAddress> {
-    return this._children(commentable, GN._Prefix.comment);
+    return this._children(commentable, GN.Prefix.comment);
   }
 
   reviews(pull: GN.PullAddress): Iterator<GN.ReviewAddress> {
-    return this._children(pull, GN._Prefix.review);
+    return this._children(pull, GN.Prefix.review);
   }
 
   // TODO(@wchrgin) figure out how to overload this fn signature
   parent(child: GN.ChildAddress): GN.ParentAddress {
     const options = {
       direction: Direction.OUT,
-      edgePrefix: GE._Prefix.hasParent,
-      nodePrefix: GN._Prefix.base,
+      edgePrefix: GE.Prefix.hasParent,
+      nodePrefix: GN.Prefix.base,
     };
     const parents: GN.ParentAddress[] = Array.from(
       this._neighbors(child, options)
@@ -109,8 +109,8 @@ export class GraphView {
   authors(content: GN.AuthorableAddress): Iterator<GN.UserlikeAddress> {
     const options = {
       direction: Direction.IN,
-      edgePrefix: GE._Prefix.authors,
-      nodePrefix: GN._Prefix.userlike,
+      edgePrefix: GE.Prefix.authors,
+      nodePrefix: GN.Prefix.userlike,
     };
     return this._neighbors(content, options);
   }
@@ -144,7 +144,7 @@ export class GraphView {
       [GN.REVIEW_TYPE]: (x) => x.pull,
       [GN.USERLIKE_TYPE]: null,
     };
-    for (const node of this._graph.nodes({prefix: GN._Prefix.base})) {
+    for (const node of this._graph.nodes({prefix: GN.Prefix.base})) {
       const structuredNode = GN.fromRaw((node: any));
       const type = structuredNode.type;
       const parentAccessor = nodeTypeToParentAccessor[type];
@@ -182,19 +182,19 @@ export class GraphView {
     const edgeTypeToInvariants: {[type: string]: EdgeInvariant} = {
       [GE.HAS_PARENT_TYPE]: {
         homs: [
-          {srcPrefix: GN._Prefix.issue, dstPrefix: GN._Prefix.repo},
-          {srcPrefix: GN._Prefix.pull, dstPrefix: GN._Prefix.repo},
-          {srcPrefix: GN._Prefix.review, dstPrefix: GN._Prefix.pull},
-          {srcPrefix: GN._Prefix.reviewComment, dstPrefix: GN._Prefix.review},
-          {srcPrefix: GN._Prefix.issueComment, dstPrefix: GN._Prefix.issue},
-          {srcPrefix: GN._Prefix.pullComment, dstPrefix: GN._Prefix.pull},
+          {srcPrefix: GN.Prefix.issue, dstPrefix: GN.Prefix.repo},
+          {srcPrefix: GN.Prefix.pull, dstPrefix: GN.Prefix.repo},
+          {srcPrefix: GN.Prefix.review, dstPrefix: GN.Prefix.pull},
+          {srcPrefix: GN.Prefix.reviewComment, dstPrefix: GN.Prefix.review},
+          {srcPrefix: GN.Prefix.issueComment, dstPrefix: GN.Prefix.issue},
+          {srcPrefix: GN.Prefix.pullComment, dstPrefix: GN.Prefix.pull},
         ],
         srcAccessor: (x) => GN.toRaw((x: any).child),
       },
       [GE.MERGED_AS_TYPE]: {
         homs: [
           {
-            srcPrefix: GN._Prefix.pull,
+            srcPrefix: GN.Prefix.pull,
             dstPrefix: _GitPrefix.commit,
           },
         ],
@@ -203,18 +203,18 @@ export class GraphView {
       [GE.REFERENCES_TYPE]: {
         homs: homProduct(
           [
-            GN._Prefix.issue,
-            GN._Prefix.pull,
-            GN._Prefix.review,
-            GN._Prefix.comment,
+            GN.Prefix.issue,
+            GN.Prefix.pull,
+            GN.Prefix.review,
+            GN.Prefix.comment,
           ],
           [
-            GN._Prefix.repo,
-            GN._Prefix.issue,
-            GN._Prefix.pull,
-            GN._Prefix.review,
-            GN._Prefix.comment,
-            GN._Prefix.userlike,
+            GN.Prefix.repo,
+            GN.Prefix.issue,
+            GN.Prefix.pull,
+            GN.Prefix.review,
+            GN.Prefix.comment,
+            GN.Prefix.userlike,
           ]
         ),
         srcAccessor: (x) => GN.toRaw((x: any).referrer),
@@ -222,21 +222,16 @@ export class GraphView {
       },
       [GE.AUTHORS_TYPE]: {
         homs: homProduct(
-          [GN._Prefix.userlike],
-          [
-            GN._Prefix.issue,
-            GN._Prefix.review,
-            GN._Prefix.pull,
-            GN._Prefix.comment,
-          ]
+          [GN.Prefix.userlike],
+          [GN.Prefix.issue, GN.Prefix.review, GN.Prefix.pull, GN.Prefix.comment]
         ),
         srcAccessor: (x) => GN.toRaw((x: any).author),
         dstAccessor: (x) => GN.toRaw((x: any).content),
       },
       [GE.MENTIONS_AUTHOR_TYPE]: {
         homs: homProduct(
-          [GN._Prefix.issue, GN._Prefix.pull, GN._Prefix.comment],
-          [GN._Prefix.issue, GN._Prefix.pull, GN._Prefix.comment]
+          [GN.Prefix.issue, GN.Prefix.pull, GN.Prefix.comment],
+          [GN.Prefix.issue, GN.Prefix.pull, GN.Prefix.comment]
         ),
         srcAccessor: (x) => GN.toRaw((x: any).reference.src),
         dstAccessor: (x) => GN.toRaw((x: any).reference.dst),
@@ -244,7 +239,7 @@ export class GraphView {
     };
 
     for (const edge of this._graph.edges({
-      addressPrefix: GE._Prefix.base,
+      addressPrefix: GE.Prefix.base,
       srcPrefix: NodeAddress.empty,
       dstPrefix: NodeAddress.empty,
     })) {

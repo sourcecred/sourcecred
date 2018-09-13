@@ -14,7 +14,7 @@ import {
   defaultWeightsForAdapterSet,
 } from "./weights/weights";
 import RepositorySelect from "./RepositorySelect";
-import {_Prefix as GithubPrefix} from "../../plugins/github/nodes";
+import {Prefix as GithubPrefix} from "../../plugins/github/nodes";
 import {
   createStateTransitionMachine,
   type AppState,

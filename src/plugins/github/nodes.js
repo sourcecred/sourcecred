@@ -18,7 +18,7 @@ export const USERLIKE_TYPE: "USERLIKE" = "USERLIKE";
 export const USER_SUBTYPE: "USER" = "USER";
 export const BOT_SUBTYPE: "BOT" = "BOT";
 
-export const _Prefix = Object.freeze({
+export const Prefix = Object.freeze({
   base: GITHUB_PREFIX,
   repo: _githubAddress(REPO_TYPE),
   issue: _githubAddress(ISSUE_TYPE),
@@ -218,24 +218,24 @@ export function fromRaw(x: RawAddress): StructuredAddress {
 export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
     case REPO_TYPE:
-      return NodeAddress.append(_Prefix.repo, x.owner, x.name);
+      return NodeAddress.append(Prefix.repo, x.owner, x.name);
     case ISSUE_TYPE:
       return NodeAddress.append(
-        _Prefix.issue,
+        Prefix.issue,
         x.repo.owner,
         x.repo.name,
         x.number
       );
     case PULL_TYPE:
       return NodeAddress.append(
-        _Prefix.pull,
+        Prefix.pull,
         x.repo.owner,
         x.repo.name,
         x.number
       );
     case REVIEW_TYPE:
       return NodeAddress.append(
-        _Prefix.review,
+        Prefix.review,
         x.pull.repo.owner,
         x.pull.repo.name,
         x.pull.number,
@@ -245,7 +245,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
       switch (x.parent.type) {
         case ISSUE_TYPE:
           return NodeAddress.append(
-            _Prefix.issueComment,
+            Prefix.issueComment,
             x.parent.repo.owner,
             x.parent.repo.name,
             x.parent.number,
@@ -253,7 +253,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
           );
         case PULL_TYPE:
           return NodeAddress.append(
-            _Prefix.pullComment,
+            Prefix.pullComment,
             x.parent.repo.owner,
             x.parent.repo.name,
             x.parent.number,
@@ -261,7 +261,7 @@ export function toRaw(x: StructuredAddress): RawAddress {
           );
         case REVIEW_TYPE:
           return NodeAddress.append(
-            _Prefix.reviewComment,
+            Prefix.reviewComment,
             x.parent.pull.repo.owner,
             x.parent.pull.repo.name,
             x.parent.pull.number,
@@ -274,9 +274,9 @@ export function toRaw(x: StructuredAddress): RawAddress {
     case USERLIKE_TYPE:
       switch (x.subtype) {
         case "BOT":
-          return NodeAddress.append(_Prefix.bot, x.login);
+          return NodeAddress.append(Prefix.bot, x.login);
         case "USER":
-          return NodeAddress.append(_Prefix.user, x.login);
+          return NodeAddress.append(Prefix.user, x.login);
         default:
           throw new Error((x.subtype: empty));
       }

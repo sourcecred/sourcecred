@@ -15,17 +15,17 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
     return "Git";
   }
   nodePrefix() {
-    return N._Prefix.base;
+    return N.Prefix.base;
   }
   edgePrefix() {
-    return E._Prefix.base;
+    return E.Prefix.base;
   }
   nodeTypes() {
     return [
       {
         name: "Commit",
         pluralName: "Commits",
-        prefix: N._Prefix.commit,
+        prefix: N.Prefix.commit,
         defaultWeight: 2,
       },
     ];
@@ -35,7 +35,7 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
       {
         forwardName: "has parent",
         backwardName: "is parent of",
-        prefix: E._Prefix.hasParent,
+        prefix: E.Prefix.hasParent,
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
       },

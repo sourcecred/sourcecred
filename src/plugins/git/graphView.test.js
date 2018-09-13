@@ -160,7 +160,7 @@ describe("plugins/git/graphView", () => {
         const c1: GN.CommitAddress = {type: GN.COMMIT_TYPE, hash: "c1"};
         const c2: GN.CommitAddress = {type: GN.COMMIT_TYPE, hash: "c2"};
         const edge = {
-          address: EdgeAddress.append(GE._Prefix.base, "wat"),
+          address: EdgeAddress.append(GE.Prefix.base, "wat"),
           src: GN.toRaw(c1),
           dst: GN.toRaw(c2),
         };
