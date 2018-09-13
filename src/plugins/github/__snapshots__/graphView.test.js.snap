@@ -30,7 +30,7 @@ Object {
 
 exports[`plugins/github/graphView issues /#2 number of comments matches snapshot 1`] = `8`;
 
-exports[`plugins/github/graphView issues number of issues matches snapshot 1`] = `8`;
+exports[`plugins/github/graphView issues number of issues matches snapshot 1`] = `10`;
 
 exports[`plugins/github/graphView pulls /#5 /comment #1 matches snapshot 1`] = `
 Object {

@@ -428,10 +428,52 @@
                     "number": 11,
                     "title": "An issue with a comment from a deleted user",
                     "url": "https://github.com/sourcecred/example-github/issues/11"
+                },
+                {
+                    "author": {
+                        "__typename": "User",
+                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                        "login": "decentralion",
+                        "url": "https://github.com/decentralion"
+                    },
+                    "body": "By url: https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780\r\n\r\nBy hash: ecc889dc94cf6da17ae6eab5bb7b7155f577519d\r\n\r\nHash from another repo: 3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f (example-git in this case)",
+                    "comments": {
+                        "nodes": [
+                        ],
+                        "pageInfo": {
+                            "endCursor": null,
+                            "hasNextPage": false
+                        }
+                    },
+                    "id": "MDU6SXNzdWUzNjAwOTExMDc=",
+                    "number": 12,
+                    "title": "An issue with commit references",
+                    "url": "https://github.com/sourcecred/example-github/issues/12"
+                },
+                {
+                    "author": {
+                        "__typename": "User",
+                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                        "login": "decentralion",
+                        "url": "https://github.com/decentralion"
+                    },
+                    "body": "I'm reacting to this with every emoji.",
+                    "comments": {
+                        "nodes": [
+                        ],
+                        "pageInfo": {
+                            "endCursor": null,
+                            "hasNextPage": false
+                        }
+                    },
+                    "id": "MDU6SXNzdWUzNjAwOTEzMTQ=",
+                    "number": 13,
+                    "title": "An issue with reactions",
+                    "url": "https://github.com/sourcecred/example-github/issues/13"
                 }
             ],
             "pageInfo": {
-                "endCursor": "Y3Vyc29yOnYyOpHOFXAYdQ==",
+                "endCursor": "Y3Vyc29yOnYyOpHOFXaOsg==",
                 "hasNextPage": false
             }
         },
