@@ -351,5 +351,21 @@ Array [
     "from": "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
     "to": "https://github.com/sourcecred/example-github/issues/2",
   },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+    "to": "https://github.com/sourcecred/example-github/pull/3",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+    "to": "https://github.com/sourcecred/example-github/pull/5",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+    "to": "https://github.com/wchargin",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86",
+    "to": "https://github.com/wchargin",
+  },
 ]
 `;

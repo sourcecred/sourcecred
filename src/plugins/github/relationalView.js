@@ -219,6 +219,7 @@ export class RelationalView {
     yield* this.pulls();
     yield* this.reviews();
     yield* this.comments();
+    yield* this.commits();
   }
 
   *parentEntities(): Iterator<ParentEntity> {
@@ -465,7 +466,8 @@ export class RelationalView {
     }
     for (const e of this.textContentEntities()) {
       const srcAddress = e.address();
-      for (const {ref, refType} of parseReferences(e.body())) {
+      const body = e instanceof Commit ? e.message() : e.body();
+      for (const {ref, refType} of parseReferences(body)) {
         const refAddress = refToAddress.get(ref);
         if (refAddress != null) {
           switch (refType) {
@@ -543,6 +545,9 @@ export class RelationalView {
             break;
           case "COMMENT":
             entity = this.comment(address);
+            break;
+          case "COMMIT":
+            entity = this.commit(address);
             break;
           default:
             throw new Error(
@@ -661,7 +666,7 @@ export class Repo extends _Entity<RepoEntry> {
       yield assertExists(pull, address);
     }
   }
-  referencedBy(): Iterator<ReferentEntity> {
+  referencedBy(): Iterator<TextContentEntity> {
     return this._view._referencedBy(this);
   }
 }
@@ -874,6 +879,9 @@ export class Commit extends _Entity<CommitEntry> {
   message(): string {
     return this._entry.message;
   }
+  references(): Iterator<ReferentEntity> {
+    return this._view._references(this);
+  }
 }
 
 type UserlikeEntry = {|
@@ -948,7 +956,7 @@ export function match<T>(handlers: MatchHandlers<T>, x: Entity): T {
 
 export type Entity = Repo | Issue | Pull | Review | Comment | Commit | Userlike;
 export type AuthoredEntity = Issue | Pull | Review | Comment | Commit;
-export type TextContentEntity = Issue | Pull | Review | Comment;
+export type TextContentEntity = Issue | Pull | Review | Comment | Commit;
 export type ParentEntity = Repo | Issue | Pull | Review;
 export type ChildEntity = Issue | Pull | Review | Comment;
 export type ReferentEntity = Repo | Issue | Pull | Review | Comment | Userlike;
