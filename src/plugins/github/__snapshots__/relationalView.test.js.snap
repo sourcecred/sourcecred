@@ -147,12 +147,16 @@ Array [
 ]
 `;
 
-exports[`plugins/github/relationalView RelationalView entity: commits has expected number of them 1`] = `2`;
+exports[`plugins/github/relationalView RelationalView entity: commits has expected number of them 1`] = `6`;
 
 exports[`plugins/github/relationalView RelationalView entity: commits they have expected urls 1`] = `
 Array [
   "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
   "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+  "https://github.com/sourcecred/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+  "https://github.com/sourcecred/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86",
+  "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+  "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
 ]
 `;
 
