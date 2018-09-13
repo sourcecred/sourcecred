@@ -6,6 +6,7 @@ import tmp from "tmp";
 
 import dedent from "../util/dedent";
 import * as Schema from "./schema";
+import * as Queries from "./queries";
 import {_buildSchemaInfo, _inTransaction, Mirror} from "./mirror";
 
 describe("graphql/mirror", () => {
@@ -478,6 +479,400 @@ describe("graphql/mirror", () => {
           ],
         };
         expect(actual).toEqual(expected);
+      });
+    });
+
+    describe("_getEndCursor", () => {
+      it("fails when the object does not exist", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._getEndCursor("foo/bar#1", "comments");
+        }).toThrow('No such connection: "foo/bar#1"."comments"');
+      });
+      it("fails when the object has no such connection", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Repository", id: "foo/bar#1"});
+        expect(() => {
+          mirror._getEndCursor("foo/bar#1", "comments");
+        }).toThrow('No such connection: "foo/bar#1"."comments"');
+      });
+      it("returns `undefined` for a never-fetched connection", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Issue", id: "foo/bar#1"});
+        expect(mirror._getEndCursor("foo/bar#1", "comments")).toBe(undefined);
+      });
+      it("returns a `null` cursor", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Issue", id: "foo/bar#1"});
+        const updateId = mirror._createUpdate(new Date(123));
+        db.prepare(
+          dedent`\
+            UPDATE connections
+            SET
+                last_update = :updateId,
+                total_count = 0,
+                has_next_page = 0,
+                end_cursor = NULL
+            WHERE object_id = :objectId AND fieldname = :fieldname
+          `
+        ).run({updateId, objectId: "foo/bar#1", fieldname: "comments"});
+        expect(mirror._getEndCursor("foo/bar#1", "comments")).toBe(null);
+      });
+      it("returns a non-`null` cursor", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Issue", id: "foo/bar#1"});
+        const updateId = mirror._createUpdate(new Date(123));
+        db.prepare(
+          dedent`\
+            UPDATE connections
+            SET
+              last_update = :updateId,
+              total_count = 1,
+              end_cursor = :endCursor,
+              has_next_page = 0
+            WHERE object_id = :objectId AND fieldname = :fieldname
+          `
+        ).run({
+          updateId,
+          endCursor: "c29tZS1jdXJzb3I=",
+          objectId: "foo/bar#1",
+          fieldname: "comments",
+        });
+        expect(mirror._getEndCursor("foo/bar#1", "comments")).toBe(
+          "c29tZS1jdXJzb3I="
+        );
+      });
+    });
+
+    describe("_queryConnection", () => {
+      it("creates a query when no cursor is specified", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const pageLimit = 23;
+        const endCursor = undefined;
+        const actual = mirror._queryConnection("comments", endCursor, 23);
+        const b = Queries.build;
+        expect(actual).toEqual([
+          b.field("comments", {first: b.literal(pageLimit)}, [
+            b.field("totalCount"),
+            b.field("pageInfo", {}, [
+              b.field("endCursor"),
+              b.field("hasNextPage"),
+            ]),
+            b.field("nodes", {}, [b.field("__typename"), b.field("id")]),
+          ]),
+        ]);
+      });
+      it("creates a query with a `null` end cursor", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const pageLimit = 23;
+        const endCursor = null;
+        const actual = mirror._queryConnection("comments", endCursor, 23);
+        const b = Queries.build;
+        expect(actual).toEqual([
+          b.field(
+            "comments",
+            {first: b.literal(pageLimit), after: b.literal(null)},
+            [
+              b.field("totalCount"),
+              b.field("pageInfo", {}, [
+                b.field("endCursor"),
+                b.field("hasNextPage"),
+              ]),
+              b.field("nodes", {}, [b.field("__typename"), b.field("id")]),
+            ]
+          ),
+        ]);
+      });
+      it("creates a query with a non-`null` end cursor", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const pageLimit = 23;
+        const endCursor = "c29tZS1jdXJzb3I=";
+        const actual = mirror._queryConnection("comments", endCursor, 23);
+        const b = Queries.build;
+        expect(actual).toEqual([
+          b.field(
+            "comments",
+            {first: b.literal(pageLimit), after: b.literal(endCursor)},
+            [
+              b.field("totalCount"),
+              b.field("pageInfo", {}, [
+                b.field("endCursor"),
+                b.field("hasNextPage"),
+              ]),
+              b.field("nodes", {}, [b.field("__typename"), b.field("id")]),
+            ]
+          ),
+        ]);
+      });
+      it("snapshot test for actual GitHub queries", () => {
+        // This test emits as a snapshot a valid query against GitHub's
+        // GraphQL API. You can copy-and-paste the snapshot into
+        // <https://developer.github.com/v4/explorer/> to run it. The
+        // resulting IDs in `initialQuery` and `updateQuery` should
+        // concatenate to match those in `expectedIds`. In particular,
+        // the following JQ program should output `true` when passed the
+        // query result from GitHub:
+        //
+        //     jq '.data |
+        //         ([.initialQuery, .updateQuery] | map(.issues.nodes[].id))
+        //         == [.expectedIds.issues.nodes[].id]
+        //     '
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const exampleGithubRepoId = "MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=";
+        const pageLimit = 2;
+        const b = Queries.build;
+        const initialQuery = mirror._queryConnection(
+          "issues",
+          undefined,
+          pageLimit
+        );
+        const expectedEndCursor = "Y3Vyc29yOnYyOpHOEe_nRA==";
+        const updateQuery = mirror._queryConnection(
+          "issues",
+          expectedEndCursor,
+          pageLimit
+        );
+        const query = b.query(
+          "TestQuery",
+          [],
+          [
+            b.alias(
+              "initialQuery",
+              b.field("node", {id: b.literal(exampleGithubRepoId)}, [
+                b.inlineFragment("Repository", initialQuery),
+              ])
+            ),
+            b.alias(
+              "updateQuery",
+              b.field("node", {id: b.literal(exampleGithubRepoId)}, [
+                b.inlineFragment("Repository", updateQuery),
+              ])
+            ),
+            b.alias(
+              "expectedIds",
+              b.field("node", {id: b.literal(exampleGithubRepoId)}, [
+                b.inlineFragment("Repository", [
+                  b.field("issues", {first: b.literal(pageLimit * 2)}, [
+                    b.field("nodes", {}, [b.field("id")]),
+                  ]),
+                ]),
+              ])
+            ),
+          ]
+        );
+        const format = (body: Queries.Body): string =>
+          Queries.stringify.body(body, Queries.multilineLayout("  "));
+        expect(format([query])).toMatchSnapshot();
+      });
+    });
+
+    describe("_updateConnection", () => {
+      const createResponse = (options: {
+        totalCount: number,
+        endCursor: string | null,
+        hasNextPage: boolean,
+        comments: $ReadOnlyArray<number | null>,
+      }) => ({
+        totalCount: options.totalCount,
+        pageInfo: {
+          hasNextPage: options.hasNextPage,
+          endCursor: options.endCursor,
+        },
+        nodes: options.comments.map(
+          (n) =>
+            n === null ? null : {__typename: "IssueComment", id: `comment:${n}`}
+        ),
+      });
+      const createEmptyResponse = () =>
+        createResponse({
+          totalCount: 0,
+          endCursor: null,
+          hasNextPage: false,
+          comments: [],
+        });
+
+      it("fails when the object does not exist", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        expect(() => {
+          mirror._updateConnection(
+            updateId,
+            "foo/bar#1",
+            "comments",
+            createEmptyResponse()
+          );
+        }).toThrow('No such connection: "foo/bar#1"."comments"');
+      });
+      it("fails when the object has no such connection", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "Repository", id: "foo/bar#1"});
+        expect(() => {
+          mirror._updateConnection(
+            updateId,
+            "foo/bar#1",
+            "comments",
+            createEmptyResponse()
+          );
+        }).toThrow('No such connection: "foo/bar#1"."comments"');
+      });
+      it("fails when there is no update with the given ID", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = 777;
+        mirror.registerObject({typename: "Issue", id: "foo/bar#1"});
+        expect(() => {
+          mirror._updateConnection(
+            updateId,
+            "foo/bar#1",
+            "comments",
+            createEmptyResponse()
+          );
+        }).toThrow("FOREIGN KEY constraint failed");
+      });
+      it("properly updates under various circumstances", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Issue", id: "foo/bar#1"});
+        const connectionId: number = db
+          .prepare(
+            dedent`\
+              SELECT rowid FROM connections
+              WHERE object_id = :objectId AND fieldname = :fieldname
+            `
+          )
+          .pluck()
+          .get({objectId: "foo/bar#1", fieldname: "comments"});
+
+        const getEntries = (): $ReadOnlyArray<{|
+          +idx: number,
+          +child_id: Schema.ObjectId,
+        |}> =>
+          db
+            .prepare(
+              dedent`\
+                SELECT idx, child_id FROM connection_entries
+                WHERE connection_id = ?
+                ORDER BY idx ASC
+              `
+            )
+            .all(connectionId);
+        const getConnectionInfo = (): {|
+          +last_update: number | null,
+          +total_count: number | null,
+          +end_cursor: string | null,
+          +has_next_page: 0 | 1 | null,
+        |} =>
+          db
+            .prepare(
+              dedent`\
+                SELECT last_update, total_count, end_cursor, has_next_page
+                FROM connections
+                WHERE rowid = ?
+              `
+            )
+            .get(connectionId);
+
+        expect(getConnectionInfo()).toEqual({
+          last_update: null,
+          total_count: null,
+          end_cursor: null,
+          has_next_page: null,
+        });
+        expect(getEntries()).toEqual([]);
+
+        const firstUpdate = mirror._createUpdate(new Date(123));
+        mirror._updateConnection(
+          firstUpdate,
+          "foo/bar#1",
+          "comments",
+          createResponse({
+            totalCount: 4,
+            endCursor: "uno",
+            hasNextPage: true,
+            comments: [101, 102],
+          })
+        );
+        expect(getEntries()).toEqual([
+          {idx: 1, child_id: "comment:101"},
+          {idx: 2, child_id: "comment:102"},
+        ]);
+        expect(getConnectionInfo()).toEqual({
+          last_update: firstUpdate,
+          total_count: 4,
+          end_cursor: "uno",
+          has_next_page: +true,
+        });
+
+        const secondUpdate = mirror._createUpdate(new Date(234));
+        mirror._updateConnection(
+          secondUpdate,
+          "foo/bar#1",
+          "comments",
+          createResponse({
+            totalCount: 5,
+            endCursor: "dos",
+            hasNextPage: false,
+            comments: [55, null, 54],
+          })
+        );
+        expect(getEntries()).toEqual([
+          {idx: 1, child_id: "comment:101"},
+          {idx: 2, child_id: "comment:102"},
+          {idx: 3, child_id: "comment:55"},
+          {idx: 4, child_id: null},
+          {idx: 5, child_id: "comment:54"},
+        ]);
+        expect(getConnectionInfo()).toEqual({
+          last_update: secondUpdate,
+          total_count: 5,
+          end_cursor: "dos",
+          has_next_page: +false,
+        });
+
+        const thirdUpdate = mirror._createUpdate(new Date(345));
+        db.prepare(
+          dedent`\
+            DELETE FROM connection_entries
+            WHERE connection_id = :connectionId AND idx = :idx
+          `
+        ).run({connectionId, idx: 3});
+        mirror._updateConnection(
+          thirdUpdate,
+          "foo/bar#1",
+          "comments",
+          createResponse({
+            totalCount: 6,
+            endCursor: "tres",
+            hasNextPage: false,
+            comments: [888, 889],
+          })
+        );
+        expect(getEntries()).toEqual([
+          {idx: 1, child_id: "comment:101"},
+          {idx: 2, child_id: "comment:102"},
+          {idx: 4, child_id: null},
+          {idx: 5, child_id: "comment:54"},
+          {idx: 6, child_id: "comment:888"},
+          {idx: 7, child_id: "comment:889"},
+        ]);
+        expect(getConnectionInfo()).toEqual({
+          last_update: thirdUpdate,
+          total_count: 6,
+          end_cursor: "tres",
+          has_next_page: +false,
+        });
       });
     });
   });
