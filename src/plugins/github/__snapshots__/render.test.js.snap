@@ -3,6 +3,7 @@
 exports[`plugins/github/render descriptions are as expected 1`] = `
 Object {
   "comment": "comment by @wchargin on review by @wchargin of #5 (+1/−0): This pull request will be more contentious. I can feel it...",
+  "commit": "commit 0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
   "issue": "#2: A referencing issue.",
   "pull": "#5 (+1/−0): This pull request will be more contentious. I can feel it...",
   "repo": "sourcecred/example-github",

@@ -58,7 +58,7 @@ class GraphCreator {
     this.graph.addNode(N.toRaw(addr));
   }
 
-  addAuthors(entity: R.Issue | R.Pull | R.Comment | R.Review) {
+  addAuthors(entity: R.AuthoredEntity) {
     for (const author of entity.authors()) {
       this.graph.addEdge(
         createEdge.authors(author.address(), entity.address())
