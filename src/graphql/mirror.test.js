@@ -173,6 +173,46 @@ describe("graphql/mirror", () => {
         expect(() => new Mirror(db, buildGithubSchema())).not.toThrow();
       });
     });
+
+    describe("_createUpdate", () => {
+      it("creates an update with the proper timestamp", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+
+        const date = new Date(0);
+        // This is equivalent to `new Date(12345)`, just more explicit
+        // about the units---we should be explicit at least once in
+        // update-related test code.
+        date.setUTCMilliseconds(12345);
+
+        mirror._createUpdate(date);
+        expect(+date).toBe(12345); // please don't mutate the date...
+        expect(
+          db
+            .prepare("SELECT time_epoch_millis FROM updates")
+            .pluck()
+            .all()
+        ).toEqual([12345]);
+      });
+      it("returns distinct results regardless of timestamps", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const date0 = new Date(0);
+        const date1 = new Date(1);
+        const uid1 = mirror._createUpdate(date0);
+        const uid2 = mirror._createUpdate(date0);
+        const uid3 = mirror._createUpdate(date1);
+        expect(uid1).not.toEqual(uid2);
+        expect(uid2).not.toEqual(uid3);
+        expect(uid3).not.toEqual(uid1);
+        expect(
+          db
+            .prepare("SELECT COUNT(1) FROM updates")
+            .pluck()
+            .get()
+        ).toEqual(3);
+      });
+    });
   });
 
   describe("_buildSchemaInfo", () => {
