@@ -121,6 +121,8 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
             url: "https://github.com/my-owner/my-repo/pulls/3",
             number: 3,
             body: "Self referentially yours: @steven",
+            title: "a pull request, just because",
+            mergeCommit: null,
             additions: 0,
             deletions: 0,
             comments: connection([]),
@@ -136,6 +138,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
           login: "my-owner",
           url: "https://github.com/my-owner",
         },
+        defaultBranchRef: null,
       },
     };
     view.addData(data);
