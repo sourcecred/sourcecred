@@ -25,7 +25,7 @@ export class GraphView {
     node: GN.StructuredAddress,
     options: NeighborsOptions
   ): Iterator<T> {
-    if (!NodeAddress.hasPrefix(options.nodePrefix, GN._Prefix.base)) {
+    if (!NodeAddress.hasPrefix(options.nodePrefix, GN.Prefix.base)) {
       throw new Error(`_neighbors must filter to Git nodes`);
     }
     const rawNode: GN.RawAddress = GN.toRaw(node);
@@ -51,7 +51,7 @@ export class GraphView {
   }
 
   *_commits(): Iterator<GN.CommitAddress> {
-    for (const node of this._graph.nodes({prefix: GN._Prefix.commit})) {
+    for (const node of this._graph.nodes({prefix: GN.Prefix.commit})) {
       const rawAddress: GN.RawAddress = ((node: NodeAddressT): any);
       const commit: GN.CommitAddress = (GN.fromRaw(rawAddress): any);
       this._maybeCheckInvariants();
@@ -64,8 +64,8 @@ export class GraphView {
     const result: GN.TreeAddress = Array.from(
       this._neighbors(commit, {
         direction: Direction.OUT,
-        nodePrefix: GN._Prefix.tree,
-        edgePrefix: GE._Prefix.hasTree,
+        nodePrefix: GN.Prefix.tree,
+        edgePrefix: GE.Prefix.hasTree,
       })
     )[0];
     this._maybeCheckInvariants();
@@ -75,8 +75,8 @@ export class GraphView {
   parents(commit: GN.CommitAddress): Iterator<GN.CommitAddress> {
     const result: Iterator<GN.CommitAddress> = this._neighbors(commit, {
       direction: Direction.OUT,
-      nodePrefix: GN._Prefix.commit,
-      edgePrefix: GE._Prefix.hasParent,
+      nodePrefix: GN.Prefix.commit,
+      edgePrefix: GE.Prefix.hasParent,
     });
     this._maybeCheckInvariants();
     return result;
@@ -85,8 +85,8 @@ export class GraphView {
   entries(tree: GN.TreeAddress): Iterator<GN.TreeEntryAddress> {
     const result: Iterator<GN.TreeEntryAddress> = this._neighbors(tree, {
       direction: Direction.OUT,
-      nodePrefix: GN._Prefix.treeEntry,
-      edgePrefix: GE._Prefix.includes,
+      nodePrefix: GN.Prefix.treeEntry,
+      edgePrefix: GE.Prefix.includes,
     });
     this._maybeCheckInvariants();
     return result;
@@ -97,8 +97,8 @@ export class GraphView {
       entry,
       {
         direction: Direction.OUT,
-        nodePrefix: GN._Prefix.base, // multiple kinds
-        edgePrefix: GE._Prefix.hasContents,
+        nodePrefix: GN.Prefix.base, // multiple kinds
+        edgePrefix: GE.Prefix.hasContents,
       }
     );
     this._maybeCheckInvariants();
@@ -108,8 +108,8 @@ export class GraphView {
   evolvesTo(entry: GN.TreeEntryAddress): Iterator<GN.TreeEntryAddress> {
     const result: Iterator<GN.TreeEntryAddress> = this._neighbors(entry, {
       direction: Direction.OUT,
-      nodePrefix: GN._Prefix.treeEntry,
-      edgePrefix: GE._Prefix.becomes,
+      nodePrefix: GN.Prefix.treeEntry,
+      edgePrefix: GE.Prefix.becomes,
     });
     this._maybeCheckInvariants();
     return result;
@@ -118,8 +118,8 @@ export class GraphView {
   evolvesFrom(entry: GN.TreeEntryAddress): Iterator<GN.TreeEntryAddress> {
     const result: Iterator<GN.TreeEntryAddress> = this._neighbors(entry, {
       direction: Direction.IN,
-      nodePrefix: GN._Prefix.treeEntry,
-      edgePrefix: GE._Prefix.becomes,
+      nodePrefix: GN.Prefix.treeEntry,
+      edgePrefix: GE.Prefix.becomes,
     });
     this._maybeCheckInvariants();
     return result;
@@ -135,7 +135,7 @@ export class GraphView {
 
   checkInvariants() {
     // All Git nodes and edges must have valid Git addresses.
-    for (const node of this._graph.nodes({prefix: GN._Prefix.base})) {
+    for (const node of this._graph.nodes({prefix: GN.Prefix.base})) {
       GN.fromRaw((((node: NodeAddressT): any): GN.RawAddress));
     }
     // (Edges are checked down below.)
@@ -150,35 +150,35 @@ export class GraphView {
     |};
     const edgeInvariants = {
       [GE.HAS_TREE_TYPE]: {
-        prefix: GE._Prefix.hasTree,
-        homs: [{srcPrefix: GN._Prefix.commit, dstPrefix: GN._Prefix.tree}],
+        prefix: GE.Prefix.hasTree,
+        homs: [{srcPrefix: GN.Prefix.commit, dstPrefix: GN.Prefix.tree}],
       },
       [GE.HAS_PARENT_TYPE]: {
-        prefix: GE._Prefix.hasParent,
-        homs: [{srcPrefix: GN._Prefix.commit, dstPrefix: GN._Prefix.commit}],
+        prefix: GE.Prefix.hasParent,
+        homs: [{srcPrefix: GN.Prefix.commit, dstPrefix: GN.Prefix.commit}],
       },
       [GE.INCLUDES_TYPE]: {
-        prefix: GE._Prefix.includes,
-        homs: [{srcPrefix: GN._Prefix.tree, dstPrefix: GN._Prefix.treeEntry}],
+        prefix: GE.Prefix.includes,
+        homs: [{srcPrefix: GN.Prefix.tree, dstPrefix: GN.Prefix.treeEntry}],
       },
       [GE.BECOMES_TYPE]: {
-        prefix: GE._Prefix.becomes,
+        prefix: GE.Prefix.becomes,
         homs: [
-          {srcPrefix: GN._Prefix.treeEntry, dstPrefix: GN._Prefix.treeEntry},
+          {srcPrefix: GN.Prefix.treeEntry, dstPrefix: GN.Prefix.treeEntry},
         ],
       },
       [GE.HAS_CONTENTS_TYPE]: {
-        prefix: GE._Prefix.hasContents,
+        prefix: GE.Prefix.hasContents,
         homs: [
-          {srcPrefix: GN._Prefix.treeEntry, dstPrefix: GN._Prefix.blob},
-          {srcPrefix: GN._Prefix.treeEntry, dstPrefix: GN._Prefix.tree},
-          {srcPrefix: GN._Prefix.treeEntry, dstPrefix: GN._Prefix.commit},
+          {srcPrefix: GN.Prefix.treeEntry, dstPrefix: GN.Prefix.blob},
+          {srcPrefix: GN.Prefix.treeEntry, dstPrefix: GN.Prefix.tree},
+          {srcPrefix: GN.Prefix.treeEntry, dstPrefix: GN.Prefix.commit},
         ],
       },
     };
 
     for (const edge of this._graph.edges({
-      addressPrefix: GE._Prefix.base,
+      addressPrefix: GE.Prefix.base,
       srcPrefix: NodeAddress.empty,
       dstPrefix: NodeAddress.empty,
     })) {
@@ -205,11 +205,11 @@ export class GraphView {
     // Any HAS_TREE edge to a commit must be properly named. This
     // implies that a commit has at most one such edge. (Normal commits
     // should have trees, but submodule commits might not.)
-    for (const rawNode of this._graph.nodes({prefix: GN._Prefix.commit})) {
+    for (const rawNode of this._graph.nodes({prefix: GN.Prefix.commit})) {
       for (const neighbor of this._graph.neighbors(rawNode, {
         direction: Direction.OUT,
         nodePrefix: NodeAddress.empty,
-        edgePrefix: GE._Prefix.hasTree,
+        edgePrefix: GE.Prefix.hasTree,
       })) {
         const rawEdge = neighbor.edge;
         const edge: GE.HasTreeAddress = (GE.fromRaw(
@@ -228,7 +228,7 @@ export class GraphView {
 
     // All HAS_PARENT edges must map between between the correct commits.
     for (const edge of this._graph.edges({
-      addressPrefix: GE._Prefix.hasParent,
+      addressPrefix: GE.Prefix.hasParent,
       srcPrefix: NodeAddress.empty,
       dstPrefix: NodeAddress.empty,
     })) {
@@ -247,12 +247,12 @@ export class GraphView {
     }
 
     // Each tree entry must have a unique and properly named INCLUDES edge.
-    for (const rawNode of this._graph.nodes({prefix: GN._Prefix.treeEntry})) {
+    for (const rawNode of this._graph.nodes({prefix: GN.Prefix.treeEntry})) {
       const treeNeighbors = Array.from(
         this._graph.neighbors(rawNode, {
           direction: Direction.IN,
           nodePrefix: NodeAddress.empty,
-          edgePrefix: GE._Prefix.includes,
+          edgePrefix: GE.Prefix.includes,
         })
       );
       if (treeNeighbors.length !== 1) {
@@ -278,7 +278,7 @@ export class GraphView {
 
     // All BECOMES edges must map between between the correct tree entries.
     for (const edge of this._graph.edges({
-      addressPrefix: GE._Prefix.becomes,
+      addressPrefix: GE.Prefix.becomes,
       srcPrefix: NodeAddress.empty,
       dstPrefix: NodeAddress.empty,
     })) {
@@ -298,7 +298,7 @@ export class GraphView {
 
     // All HAS_CONTENTS edges must be properly named.
     for (const edge of this._graph.edges({
-      addressPrefix: GE._Prefix.hasContents,
+      addressPrefix: GE.Prefix.hasContents,
       srcPrefix: NodeAddress.empty,
       dstPrefix: NodeAddress.empty,
     })) {

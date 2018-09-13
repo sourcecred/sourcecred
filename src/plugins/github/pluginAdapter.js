@@ -19,53 +19,53 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
     return "GitHub";
   }
   nodePrefix() {
-    return N._Prefix.base;
+    return N.Prefix.base;
   }
   edgePrefix() {
-    return E._Prefix.base;
+    return E.Prefix.base;
   }
   nodeTypes() {
     return [
       {
         name: "Repository",
         pluralName: "Repositories",
-        prefix: N._Prefix.repo,
+        prefix: N.Prefix.repo,
         defaultWeight: 4,
       },
       {
         name: "Issue",
         pluralName: "Issues",
-        prefix: N._Prefix.issue,
+        prefix: N.Prefix.issue,
         defaultWeight: 2,
       },
       {
         name: "Pull request",
         pluralName: "Pull requests",
-        prefix: N._Prefix.pull,
+        prefix: N.Prefix.pull,
         defaultWeight: 4,
       },
       {
         name: "Pull request review",
         pluralName: "Pull request reviews",
-        prefix: N._Prefix.review,
+        prefix: N.Prefix.review,
         defaultWeight: 1,
       },
       {
         name: "Comment",
         pluralName: "Comments",
-        prefix: N._Prefix.comment,
+        prefix: N.Prefix.comment,
         defaultWeight: 1,
       },
       {
         name: "User",
         pluralName: "Users",
-        prefix: N._Prefix.user,
+        prefix: N.Prefix.user,
         defaultWeight: 1,
       },
       {
         name: "Bot",
         pluralName: "Bots",
-        prefix: N._Prefix.bot,
+        prefix: N.Prefix.bot,
         defaultWeight: 0.25,
       },
     ];
@@ -77,28 +77,28 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
         backwardName: "is authored by",
         defaultForwardWeight: 1 / 2,
         defaultBackwardWeight: 1,
-        prefix: E._Prefix.authors,
+        prefix: E.Prefix.authors,
       },
       {
         forwardName: "has parent",
         backwardName: "has child",
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1 / 4,
-        prefix: E._Prefix.hasParent,
+        prefix: E.Prefix.hasParent,
       },
       {
         forwardName: "merges",
         backwardName: "is merged by",
         defaultForwardWeight: 1 / 2,
         defaultBackwardWeight: 1,
-        prefix: E._Prefix.mergedAs,
+        prefix: E.Prefix.mergedAs,
       },
       {
         forwardName: "references",
         backwardName: "is referenced by",
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1 / 16,
-        prefix: E._Prefix.references,
+        prefix: E.Prefix.references,
       },
       {
         forwardName: "mentions author of",
@@ -106,7 +106,7 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
         defaultForwardWeight: 1,
         // TODO(#811): Probably change this to 0
         defaultBackwardWeight: 1 / 32,
-        prefix: E._Prefix.mentionsAuthor,
+        prefix: E.Prefix.mentionsAuthor,
       },
     ];
   }

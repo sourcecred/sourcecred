@@ -15,35 +15,35 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
     return "Git";
   }
   nodePrefix() {
-    return N._Prefix.base;
+    return N.Prefix.base;
   }
   edgePrefix() {
-    return E._Prefix.base;
+    return E.Prefix.base;
   }
   nodeTypes() {
     return [
       {
         name: "Blob",
         pluralName: "Blobs",
-        prefix: N._Prefix.blob,
+        prefix: N.Prefix.blob,
         defaultWeight: 0.125,
       },
       {
         name: "Commit",
         pluralName: "Commits",
-        prefix: N._Prefix.commit,
+        prefix: N.Prefix.commit,
         defaultWeight: 2,
       },
       {
         name: "Tree",
         pluralName: "Trees",
-        prefix: N._Prefix.tree,
+        prefix: N.Prefix.tree,
         defaultWeight: 0.125,
       },
       {
         name: "Tree entry",
         pluralName: "Tree entries",
-        prefix: N._Prefix.treeEntry,
+        prefix: N.Prefix.treeEntry,
         defaultWeight: 0.125,
       },
     ];
@@ -55,35 +55,35 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
         backwardName: "owned by",
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
-        prefix: E._Prefix.hasTree,
+        prefix: E.Prefix.hasTree,
       },
       {
         forwardName: "has parent",
         backwardName: "is parent of",
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
-        prefix: E._Prefix.hasParent,
+        prefix: E.Prefix.hasParent,
       },
       {
         forwardName: "includes",
         backwardName: "is included by",
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
-        prefix: E._Prefix.includes,
+        prefix: E.Prefix.includes,
       },
       {
         forwardName: "evolves to",
         backwardName: "evolves from",
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
-        prefix: E._Prefix.becomes,
+        prefix: E.Prefix.becomes,
       },
       {
         forwardName: "has contents",
         backwardName: "is contents of",
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
-        prefix: E._Prefix.hasContents,
+        prefix: E.Prefix.hasContents,
       },
     ];
   }

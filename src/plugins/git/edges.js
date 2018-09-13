@@ -21,7 +21,7 @@ function gitEdgeAddress(...parts: string[]): RawAddress {
   return EdgeAddress.append(GIT_PREFIX, ...parts);
 }
 
-export const _Prefix = Object.freeze({
+export const Prefix = Object.freeze({
   base: GIT_PREFIX,
   hasTree: gitEdgeAddress(HAS_TREE_TYPE),
   hasParent: gitEdgeAddress(HAS_PARENT_TYPE),
@@ -211,29 +211,29 @@ export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
     case HAS_TREE_TYPE:
       return EdgeAddress.append(
-        _Prefix.hasTree,
+        Prefix.hasTree,
         ...lengthEncode(GitNode.toRaw(x.commit))
       );
     case HAS_PARENT_TYPE:
       return EdgeAddress.append(
-        _Prefix.hasParent,
+        Prefix.hasParent,
         ...lengthEncode(GitNode.toRaw(x.child)),
         ...lengthEncode(GitNode.toRaw(x.parent))
       );
     case INCLUDES_TYPE:
       return EdgeAddress.append(
-        _Prefix.includes,
+        Prefix.includes,
         ...lengthEncode(GitNode.toRaw(x.treeEntry))
       );
     case BECOMES_TYPE:
       return EdgeAddress.append(
-        _Prefix.becomes,
+        Prefix.becomes,
         ...lengthEncode(GitNode.toRaw(x.was)),
         ...lengthEncode(GitNode.toRaw(x.becomes))
       );
     case HAS_CONTENTS_TYPE:
       return EdgeAddress.append(
-        _Prefix.hasContents,
+        Prefix.hasContents,
         ...lengthEncode(GitNode.toRaw(x.treeEntry))
       );
     default:
