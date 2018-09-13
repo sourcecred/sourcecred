@@ -234,6 +234,7 @@ export class RelationalView {
     yield* this.pulls();
     yield* this.reviews();
     yield* this.comments();
+    yield* this.commits();
   }
 
   *entities(): Iterator<Entity> {

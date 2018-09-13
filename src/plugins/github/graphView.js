@@ -164,8 +164,8 @@ export class GraphView {
       +dstPrefix: NodeAddressT,
     |};
     function homProduct(
-      srcPrefixes: GN.RawAddress[],
-      dstPrefixes: GN.RawAddress[]
+      srcPrefixes: NodeAddressT[],
+      dstPrefixes: NodeAddressT[]
     ): Hom[] {
       const result = [];
       for (const srcPrefix of srcPrefixes) {
@@ -224,7 +224,13 @@ export class GraphView {
       [GE.AUTHORS_TYPE]: {
         homs: homProduct(
           [GN.Prefix.userlike],
-          [GN.Prefix.issue, GN.Prefix.review, GN.Prefix.pull, GN.Prefix.comment]
+          [
+            GN.Prefix.issue,
+            GN.Prefix.review,
+            GN.Prefix.pull,
+            GN.Prefix.comment,
+            GitNode.Prefix.commit,
+          ]
         ),
         srcAccessor: (x) => GN.toRaw((x: any).author),
         dstAccessor: (x) => GN.toRaw((x: any).content),
