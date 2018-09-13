@@ -708,8 +708,7 @@ export type PullJSON = {|
   +author: NullableAuthorJSON,
   +comments: ConnectionJSON<CommentJSON>,
   +reviews: ConnectionJSON<ReviewJSON>,
-  // If present, oid is the commit SHA of the merged commit.
-  +mergeCommit: ?{|+oid: string|},
+  +mergeCommit: ?CommitJSON,
 |};
 function pullsFragment(): FragmentDefinition {
   const b = build;
@@ -721,7 +720,7 @@ function pullsFragment(): FragmentDefinition {
       b.field("title"),
       b.field("body"),
       b.field("number"),
-      b.field("mergeCommit", {}, [b.field("oid")]),
+      b.field("mergeCommit", {}, [b.fragmentSpread("commit")]),
       b.field("additions"),
       b.field("deletions"),
       makeAuthor(),
@@ -806,6 +805,23 @@ function reviewCommentsFragment(): FragmentDefinition {
   ]);
 }
 
+export type CommitJSON = {|
+  +id: string,
+  +url: string,
+  +oid: string, // the hash
+  +author: ?{|+user: NullableAuthorJSON|},
+|};
+
+function commitFragment(): FragmentDefinition {
+  const b = build;
+  return b.fragment("commit", "Commit", [
+    b.field("id"),
+    b.field("url"),
+    b.field("oid"),
+    b.field("author", {}, [b.field("user", {}, [b.fragmentSpread("whoami")])]),
+  ]);
+}
+
 /**
  * These fragments are used to construct the root query, and also to
  * fetch more pages of specific entity types.
@@ -818,6 +834,7 @@ export function createFragments(): FragmentDefinition[] {
     commentsFragment(),
     reviewsFragment(),
     reviewCommentsFragment(),
+    commitFragment(),
   ];
 }
 

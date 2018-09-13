@@ -263,7 +263,7 @@ fragment pulls on PullRequestConnection {
     body
     number
     mergeCommit {
-      oid
+      ...commit
     }
     additions
     deletions
@@ -320,6 +320,16 @@ fragment reviewComments on PullRequestReviewCommentConnection {
     url
     body
     author {
+      ...whoami
+    }
+  }
+}
+fragment commit on Commit {
+  id
+  url
+  oid
+  author {
+    user {
       ...whoami
     }
   }
