@@ -176,6 +176,8 @@ export class RelationalView {
         return this.comment(address);
       case "USERLIKE":
         return this.userlike(address);
+      case "COMMIT":
+        return null;
       default:
         throw new Error(`Unexpected address type: ${(address.type: empty)}`);
     }
@@ -393,7 +395,7 @@ export class RelationalView {
     //   https://github.com/sourcecred/sourcecred/pull/416
     // - A # followed by a number, such as #416
     // - An @ followed by a login name, such as @decentralion
-    const refToAddress: Map<string, N.StructuredAddress> = new Map();
+    const refToAddress: Map<string, N.ReferentAddress> = new Map();
     for (const e: ReferentEntity of this.referentEntities()) {
       const a = e.address();
       refToAddress.set(e.url(), a);

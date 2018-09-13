@@ -1,6 +1,7 @@
 // @flow
 
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
+import * as GitNode from "../git/nodes";
 
 export opaque type RawAddress: NodeAddressT = NodeAddressT;
 
@@ -70,7 +71,8 @@ export type StructuredAddress =
   | PullAddress
   | ReviewAddress
   | CommentAddress
-  | UserlikeAddress;
+  | UserlikeAddress
+  | GitNode.CommitAddress;
 
 // Each of these types has 0 or more "AUTHORS" edges, each of which
 // leads to a UserlikeAddress.  Note: It is not true that every
@@ -124,6 +126,14 @@ const _unused_static = (_: CommentableAddress): ParentAddress => _;
 export function fromRaw(x: RawAddress): StructuredAddress {
   function fail() {
     return new Error(`Bad address: ${NodeAddress.toString(x)}`);
+  }
+  if (NodeAddress.hasPrefix(x, GitNode.Prefix.base)) {
+    const structured: GitNode.StructuredAddress = GitNode.fromRaw((x: any));
+    if (structured.type === GitNode.COMMIT_TYPE) {
+      return (structured: GitNode.CommitAddress);
+    } else {
+      throw fail();
+    }
   }
   if (!NodeAddress.hasPrefix(x, GITHUB_PREFIX)) {
     throw fail();
@@ -280,6 +290,8 @@ export function toRaw(x: StructuredAddress): RawAddress {
         default:
           throw new Error((x.subtype: empty));
       }
+    case GitNode.COMMIT_TYPE:
+      return GitNode.toRaw(x);
     default:
       throw new Error(`Unexpected type ${(x.type: empty)}`);
   }
