@@ -111,7 +111,7 @@ Array [
 ]
 `;
 
-exports[`plugins/github/relationalView RelationalView entity: comments has expected number of them 1`] = `15`;
+exports[`plugins/github/relationalView RelationalView entity: comments has expected number of them 1`] = `19`;
 
 exports[`plugins/github/relationalView RelationalView entity: comments they have expected urls 1`] = `
 Array [
@@ -127,13 +127,17 @@ Array [
   "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
   "https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316",
   "https://github.com/sourcecred/example-github/issues/6#issuecomment-417104047",
+  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420811872",
+  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813013",
+  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206",
+  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813621",
   "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
   "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
   "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
 ]
 `;
 
-exports[`plugins/github/relationalView RelationalView entity: issues has expected number of them 1`] = `7`;
+exports[`plugins/github/relationalView RelationalView entity: issues has expected number of them 1`] = `8`;
 
 exports[`plugins/github/relationalView RelationalView entity: issues they have expected urls 1`] = `
 Array [
@@ -144,6 +148,7 @@ Array [
   "https://github.com/sourcecred/example-github/issues/7",
   "https://github.com/sourcecred/example-github/issues/8",
   "https://github.com/sourcecred/example-github/issues/10",
+  "https://github.com/sourcecred/example-github/issues/11",
 ]
 `;
 
@@ -190,7 +195,7 @@ exports[`plugins/github/relationalView Repo has owner 1`] = `"sourcecred"`;
 
 exports[`plugins/github/relationalView Repo has url 1`] = `"https://github.com/sourcecred/example-github"`;
 
-exports[`plugins/github/relationalView Repo issues has expected number of issues 1`] = `7`;
+exports[`plugins/github/relationalView Repo issues has expected number of issues 1`] = `8`;
 
 exports[`plugins/github/relationalView Repo issues have expected urls 1`] = `
 Array [
@@ -201,6 +206,7 @@ Array [
   "https://github.com/sourcecred/example-github/issues/7",
   "https://github.com/sourcecred/example-github/issues/8",
   "https://github.com/sourcecred/example-github/issues/10",
+  "https://github.com/sourcecred/example-github/issues/11",
 ]
 `;
 
