@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Add `MentionsAuthor` edges to the graph (#808)
 <!-- Please add new entries to the _top_ of this section. -->
 
 ## [0.1.0]
