@@ -327,8 +327,6 @@ export class RelationalView {
       number: String(json.number),
       repo,
     };
-    // TODO(@decentralion): Rewrite so that pulls actually have
-    // the commit attached (not just oid)
     const mergedAs =
       json.mergeCommit == null ? null : this._addCommit(json.mergeCommit);
 

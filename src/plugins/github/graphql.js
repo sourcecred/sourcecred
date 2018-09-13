@@ -116,10 +116,10 @@ export type RepositoryJSON = {|
 
 export type RefJSON = {|+target: GitObjectJSON|};
 export type GitObjectJSON =
-  | {|+__typename: "COMMIT", +history: ConnectionJSON<CommitJSON>|}
-  | {|+__typename: "TREE"|}
-  | {|+__typename: "BLOB"|}
-  | {|+__typename: "TAG"|};
+  | {|+__typename: "Commit", +history: ConnectionJSON<CommitJSON>|}
+  | {|+__typename: "Tree"|}
+  | {|+__typename: "Blob"|}
+  | {|+__typename: "Tag"|};
 
 /**
  * The top-level GitHub query to request data about a repository.
