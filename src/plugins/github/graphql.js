@@ -863,6 +863,7 @@ export type CommitJSON = {|
   +url: string,
   +oid: string, // the hash
   +author: ?{|+user: NullableAuthorJSON|},
+  +message: string,
 |};
 
 function commitFragment(): FragmentDefinition {
@@ -871,6 +872,7 @@ function commitFragment(): FragmentDefinition {
     b.field("id"),
     b.field("url"),
     b.field("oid"),
+    b.field("message"),
     b.field("author", {}, [b.field("user", {}, [b.fragmentSpread("whoami")])]),
   ]);
 }

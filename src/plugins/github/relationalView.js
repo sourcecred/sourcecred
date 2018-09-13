@@ -78,6 +78,7 @@ export class RelationalView {
    * Mutate the RelationalView, by replacing all of the post bodies with
    * empty strings. Usage of this method is a convenient hack to save space,
    * as we don't currently use the bodies after the _addReferences step.
+   * Also removes commit messages.
    */
   compressByRemovingBody() {
     for (const [address, post] of this._issues.entries()) {
@@ -98,6 +99,11 @@ export class RelationalView {
     for (const [address, post] of this._reviews.entries()) {
       const compressedPost = {...post, body: ""};
       this._reviews.set(address, compressedPost);
+    }
+
+    for (const [address, post] of this._commits.entries()) {
+      const compressedPost = {...post, message: ""};
+      this._commits.set(address, compressedPost);
     }
   }
 
@@ -336,6 +342,7 @@ export class RelationalView {
       address,
       url: json.url,
       authors,
+      message: json.message,
     };
     this._commits.set(N.toRaw(address), entry);
     return address;
@@ -853,6 +860,7 @@ type CommitEntry = {|
   +address: GitNode.CommitAddress,
   +url: string,
   +authors: UserlikeAddress[],
+  +message: string,
 |};
 
 export class Commit extends _Entity<CommitEntry> {
@@ -861,6 +869,9 @@ export class Commit extends _Entity<CommitEntry> {
   }
   authors(): Iterator<Userlike> {
     return getAuthors(this._view, this._entry);
+  }
+  message(): string {
+    return this._entry.message;
   }
 }
 
