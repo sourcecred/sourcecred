@@ -69,6 +69,7 @@ export class Mirror {
    * the corresponding table.
    *
    * In more detail:
+   *
    *   - The `connections` table has a row for each `(id, fieldname)`
    *     pair, where `fieldname` is the name of a connection field on the
    *     object with the given ID. This stores metadata about the
@@ -76,12 +77,24 @@ export class Mirror {
    *     does not store the actual entries in the connection (the nodes
    *     that the connection points to); `connection_entries` stores
    *     these.
+   *
    *   - The `links` table has a row for each `(id, fieldname)` pair,
    *     where `fieldname` is the name of a link field on the object
    *     with the given ID. This simply points to the referenced object.
+   *
    *   - For each type `T`, the `primitives_T` table has one row for
    *     each object of type `T`, storing the primitive data of the
    *     object.
+   *
+   *     All values are stored as stringified JSON values: so, for
+   *     instance, the JSON value `null` is represented as the SQL
+   *     string 'null', _not_ SQL NULL, while the JSON string "null" is
+   *     represented as the SQL string '"null"'. This is primarily to
+   *     accommodate storing booleans: SQLite encodes `true` and `false`
+   *     as `1` and `0`, but we need to be able to distinguish between
+   *     these respective values. There are other ways to do this more
+   *     efficiently in both space and time (see discussion on #883 for
+   *     some options).
    *
    * We refer to node and primitive data together as "own data", because
    * this is the data that can be queried uniformly for all elements of
@@ -704,6 +717,230 @@ export class Mirror {
       addEntry.run({connectionId, idx, childId});
     }
   }
+
+  /**
+   * Create a GraphQL selection set required to fetch the own-data
+   * (primitives and node references) of an object, but not its
+   * connection entries. The result depends only on the (concrete) type
+   * of the object, not its ID.
+   *
+   * The provided typename must correspond to an object type, not a
+   * union type; otherwise, an error will be thrown.
+   *
+   * The resulting GraphQL can be embedded into the context of any node
+   * with the provided typename. For instance, if there are issues with
+   * IDs "#1" and "#2", then `_queryOwnData("Issue")` emits GraphQL
+   * that may replace the `?` in any of the following queries:
+   *
+   *     repository(owner: "foo", name: "bar") {
+   *       issues(first: 1) { ? }
+   *     }
+   *     nodes(ids: ["#1", "#2") { ... on Issue { ? } }
+   *     node(id: "#1") { ... on Issue { ? } }
+   *
+   * The result of this query has type `E`, where `E` is the element
+   * type of `OwnDataUpdateResult`. That is, it is an object with shape
+   * that depends on the provided typename: the name of each ID or
+   * primitive field is a key mapping to a primitive value, and the name
+   * of each node field is a key mapping to a `NodeFieldResult`.
+   * Additionally, the attribute "__typename" maps to the node's
+   * typename.
+   *
+   * This function is pure: it does not interact with the database.
+   */
+  _queryOwnData(typename: Schema.Typename): Queries.Selection[] {
+    const type = this._schema[typename];
+    if (type == null) {
+      throw new Error(`No such type: ${JSON.stringify(typename)}`);
+    }
+    if (type.type !== "OBJECT") {
+      throw new Error(
+        `Not an object type: ${JSON.stringify(typename)} (${type.type})`
+      );
+    }
+    const b = Queries.build;
+    return [
+      b.field("__typename"),
+      ...Object.keys(type.fields)
+        .map((fieldname) => {
+          const field = type.fields[fieldname];
+          switch (field.type) {
+            case "ID":
+              return b.field(fieldname);
+            case "PRIMITIVE":
+              return b.field(fieldname);
+            case "NODE":
+              return b.field(
+                fieldname,
+                {},
+                this._queryShallow(field.elementType)
+              );
+            case "CONNECTION":
+              // Not handled by this function.
+              return null;
+            // istanbul ignore next
+            default:
+              throw new Error((field.type: empty));
+          }
+        })
+        .filter(Boolean),
+    ];
+  }
+
+  /**
+   * Ingest own-data (primitive and link) updates for many objects of a
+   * fixed concrete type. Every object in the input list must have the
+   * same `__typename` attribute, which must be the name of a valid
+   * object type.
+   *
+   * See: `_queryOwnData`.
+   */
+  _updateOwnData(updateId: UpdateId, queryResult: OwnDataUpdateResult): void {
+    _inTransaction(this._db, () => {
+      this._nontransactionallyUpdateOwnData(updateId, queryResult);
+    });
+  }
+
+  /**
+   * As `_updateOwnData`, but do not enter any transactions. Other
+   * methods may call this method as a subroutine in a larger
+   * transaction.
+   */
+  _nontransactionallyUpdateOwnData(
+    updateId: UpdateId,
+    queryResult: OwnDataUpdateResult
+  ): void {
+    if (queryResult.length === 0) {
+      return;
+    }
+    const typename = queryResult[0].__typename;
+    if (this._schema[typename] == null) {
+      throw new Error("Unknown type: " + JSON.stringify(typename));
+    }
+    if (this._schema[typename].type !== "OBJECT") {
+      throw new Error(
+        "Cannot update data for non-object type: " +
+          `${JSON.stringify(typename)} (${this._schema[typename].type})`
+      );
+    }
+
+    const db = this._db;
+    const objectType = this._schemaInfo.objectTypes[typename];
+
+    // First, make sure that all objects for which we're given own data
+    // actually exist and have the correct typename.
+    {
+      const doesObjectExist = db
+        .prepare("SELECT COUNT(1) FROM objects WHERE id = ?")
+        .pluck();
+      for (const entry of queryResult) {
+        if (!doesObjectExist.get(entry.id)) {
+          throw new Error(
+            "Cannot update data for nonexistent node: " +
+              JSON.stringify(entry.id)
+          );
+        }
+        if (entry.__typename !== typename) {
+          const s = JSON.stringify;
+          throw new Error(
+            "Result set has inconsistent typenames: " +
+              `${s(typename)} vs. ${s(entry.__typename)}`
+          );
+        }
+      }
+    }
+
+    // Set each node's `lastUpdate` time.
+    {
+      const setLastUpdate: (objectId: Schema.ObjectId) => void = (() => {
+        const stmt = db.prepare(
+          dedent`\
+            UPDATE objects SET last_update = :updateId
+            WHERE id = :objectId
+          `
+        );
+        const update = _makeSingleUpdateFunction(stmt);
+        return (objectId) => update({objectId, updateId});
+      })();
+      for (const entry of queryResult) {
+        setLastUpdate(entry.id);
+      }
+    }
+
+    // Update each node's primitive data.
+    {
+      const updatePrimitives: ({|
+        +id: Schema.ObjectId,
+        +[primitiveFieldName: Schema.Fieldname]: string,
+      |}) => void = (() => {
+        if (objectType.primitiveFieldNames.length === 0) {
+          return () => {};
+        }
+        const tableName = _primitivesTableName(typename);
+        const updates = objectType.primitiveFieldNames
+          .map((f) => `"${f}" = :${f}`)
+          .join(", ");
+        const stmt = db.prepare(
+          `UPDATE ${tableName} SET ${updates} WHERE id = :id`
+        );
+        return _makeSingleUpdateFunction(stmt);
+      })();
+      for (const entry of queryResult) {
+        const primitives: {|
+          +id: Schema.ObjectId,
+          [primitiveFieldName: Schema.Fieldname]: string,
+        |} = {id: entry.id};
+        for (const fieldname of objectType.primitiveFieldNames) {
+          const value: PrimitiveResult | NodeFieldResult = entry[fieldname];
+          const primitive: PrimitiveResult = (value: any);
+          if (primitive === undefined) {
+            const s = JSON.stringify;
+            throw new Error(
+              `Missing primitive ${s(fieldname)} on ${s(entry.id)} ` +
+                `of type ${s(typename)} (got ${(primitive: empty)})`
+            );
+          }
+          primitives[fieldname] = JSON.stringify(primitive);
+        }
+        updatePrimitives(primitives);
+      }
+    }
+
+    // Update each node's links.
+    {
+      const updateLink: ({|
+        +parentId: string,
+        +fieldname: string,
+        +childId: string | null,
+      |}) => void = (() => {
+        const stmt = db.prepare(
+          dedent`\
+            UPDATE links SET child_id = :childId
+            WHERE parent_id = :parentId AND fieldname = :fieldname
+          `
+        );
+        return _makeSingleUpdateFunction(stmt);
+      })();
+      for (const entry of queryResult) {
+        for (const fieldname of objectType.linkFieldNames) {
+          const value: PrimitiveResult | NodeFieldResult = entry[fieldname];
+          const link: NodeFieldResult = (value: any);
+          if (link === undefined) {
+            const s = JSON.stringify;
+            throw new Error(
+              `Missing node reference ${s(fieldname)} on ${s(entry.id)} ` +
+                `of type ${s(typename)} (got ${(link: empty)})`
+            );
+          }
+          const childId = this._nontransactionallyRegisterNodeFieldResult(link);
+          const parentId = entry.id;
+          updateLink({parentId, fieldname, childId});
+        }
+      }
+    }
+
+    // Last-updates, primitives, and links all updated: we're done.
+  }
 }
 
 /**
@@ -823,6 +1060,7 @@ type QueryPlan = {|
  */
 type EndCursor = string | null;
 
+type PrimitiveResult = string | number | boolean | null;
 type NodeFieldResult = {|
   +__typename: Schema.Typename,
   +id: Schema.ObjectId,
@@ -832,6 +1070,21 @@ type ConnectionFieldResult = {|
   +pageInfo: {|+hasNextPage: boolean, +endCursor: string | null|},
   +nodes: $ReadOnlyArray<NodeFieldResult>,
 |};
+
+/**
+ * Result describing own-data for many nodes of a given type. Whether a
+ * value is a `PrimitiveResult` or a `NodeFieldResult` is determined by
+ * the schema.
+ *
+ * This type would be exact but for facebook/flow#2977, et al.
+ */
+type OwnDataUpdateResult = $ReadOnlyArray<{
+  +__typename: Schema.Typename, // the same for all entries
+  +id: Schema.ObjectId,
+  +[nonConnectionFieldname: Schema.Fieldname]:
+    | PrimitiveResult
+    | NodeFieldResult,
+}>;
 
 /**
  * Execute a function inside a database transaction.

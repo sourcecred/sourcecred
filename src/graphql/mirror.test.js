@@ -1065,6 +1065,315 @@ describe("graphql/mirror", () => {
         });
       });
     });
+
+    describe("_queryOwnData", () => {
+      it("fails given a nonexistent typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._queryOwnData("Wat");
+        }).toThrow('No such type: "Wat"');
+      });
+      it("fails given a non-OBJECT type", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._queryOwnData("Actor");
+        }).toThrow('Not an object type: "Actor" (UNION)');
+      });
+      it("generates a query with ID, primitives, and nodes only", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const query = mirror._queryOwnData("Issue");
+        const b = Queries.build;
+        // Note: The actual selections could permissibly be permuted
+        // with respect to these expected selections, causing a spurious
+        // failure. If that happens, we can choose make the test more
+        // robust.
+        expect(query).toEqual([
+          b.field("__typename"),
+          b.field("id"),
+          b.field("url"),
+          b.field("author", {}, [
+            b.field("__typename"),
+            b.inlineFragment("User", [b.field("id")]),
+            b.inlineFragment("Bot", [b.field("id")]),
+            b.inlineFragment("Organization", [b.field("id")]),
+          ]),
+          b.field("repository", {}, [b.field("__typename"), b.field("id")]),
+          b.field("title"),
+          // no `comments`
+          // no `timeline`
+        ]);
+      });
+    });
+
+    describe("_updateOwnData", () => {
+      it("fails given a nonexistent typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        expect(() => {
+          mirror._updateOwnData(updateId, [{__typename: "Wat", id: "wot"}]);
+        }).toThrow('Unknown type: "Wat"');
+      });
+      it("fails given a non-object typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        expect(() => {
+          mirror._updateOwnData(updateId, [{__typename: "Actor", id: "wut"}]);
+        }).toThrow('Cannot update data for non-object type: "Actor" (UNION)');
+      });
+      it("fails given a nonexistent object with a link to itself", () => {
+        // A naive implementation might register the link targets as
+        // objects before verifying that the target object actually
+        // exists. This test would catch such an implementation.
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Issue",
+              id: "issue:#1",
+              url: "url://issue/1",
+              author: {__typename: "User", id: "alice"},
+              parent: {__typename: "Issue", id: "issue:#1"},
+              title: "hello",
+            },
+          ]);
+        }).toThrow('Cannot update data for nonexistent node: "issue:#1"');
+      });
+      it("fails given a nonexistent object referenced in another node", () => {
+        // A naive implementation might fail here similar to above.
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        const updateId = mirror._createUpdate(new Date(123));
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Issue",
+              id: "issue:#1",
+              url: "url://issue/1",
+              author: {__typename: "User", id: "alice"},
+              repository: {__typename: "Issue", id: "issue:#2"},
+              title: "hello",
+            },
+            {
+              __typename: "Issue",
+              id: "issue:#2",
+              url: "url://issue/2",
+              author: {__typename: "User", id: "alice"},
+              repository: null,
+              title: "wat",
+            },
+          ]);
+        }).toThrow('Cannot update data for nonexistent node: "issue:#2"');
+      });
+      it("fails given a result set with inconsistent typenames", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        mirror.registerObject({typename: "User", id: "user:alice"});
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Repository",
+              id: "repo:foo/bar",
+              url: "url://repo/foo/bar",
+            },
+            {
+              __typename: "User",
+              id: "user:alice",
+              url: "url://user/alice",
+              login: "alice",
+            },
+          ]);
+        }).toThrow(
+          'Result set has inconsistent typenames: "Repository" vs. "User"'
+        );
+      });
+      it("fails if the input is missing any primitive fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "IssueComment", id: "comment:#1"});
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "IssueComment",
+              id: "comment:#1",
+              author: null,
+              // body omitted
+            },
+          ]);
+        }).toThrow(
+          'Missing primitive "body" on "comment:#1" of type "IssueComment" ' +
+            "(got undefined)"
+        );
+      });
+      it("fails if the input is missing any link fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "IssueComment", id: "comment:#1"});
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "IssueComment",
+              id: "comment:#1",
+              body: "somebody",
+              // author omitted
+            },
+          ]);
+        }).toThrow(
+          'Missing node reference "author" on "comment:#1" of type "IssueComment" ' +
+            "(got undefined)"
+        );
+      });
+      it("properly stores normal data", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        mirror.registerObject({typename: "Issue", id: "issue:#2"});
+        mirror.registerObject({typename: "Issue", id: "issue:#3"});
+        mirror.registerObject({typename: "User", id: "alice"});
+        const updateId = mirror._createUpdate(new Date(123));
+
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Issue",
+            id: "issue:#1",
+            url: "url://issue/1",
+            author: {__typename: "User", id: "alice"},
+            repository: {__typename: "Repository", id: "repo:foo/bar"},
+            title: 13.75,
+          },
+          {
+            __typename: "Issue",
+            id: "issue:#2",
+            url: null,
+            author: {__typename: "User", id: "bob"}, // must be added
+            repository: null,
+            title: false,
+          },
+        ]);
+        expect(
+          db
+            .prepare("SELECT id FROM objects WHERE typename = 'User'")
+            .pluck()
+            .all()
+            .sort()
+        ).toEqual(["alice", "bob"].sort());
+        expect(
+          db.prepare("SELECT * FROM primitives_Issue ORDER BY id ASC").all()
+        ).toEqual([
+          {id: "issue:#1", url: '"url://issue/1"', title: "13.75"},
+          {id: "issue:#2", url: "null", title: "false"},
+          {id: "issue:#3", url: null, title: null},
+        ]);
+      });
+      it("properly handles input of a type with no primitives", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        mirror.registerObject({typename: "LockedEvent", id: "uno"});
+        mirror.registerObject({typename: "LockedEvent", id: "dos"});
+        const updateId = mirror._createUpdate(new Date(123));
+
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "LockedEvent",
+            id: "uno",
+            actor: null,
+          },
+          {
+            __typename: "LockedEvent",
+            id: "dos",
+            actor: {__typename: "User", id: "user:alice"},
+          },
+        ]);
+        expect(
+          db
+            .prepare("SELECT * FROM primitives_LockedEvent ORDER BY id ASC")
+            .all()
+        ).toEqual([{id: "dos"}, {id: "uno"}]);
+        expect(
+          db
+            .prepare("SELECT * FROM links ORDER BY parent_id ASC")
+            .all()
+            .filter((x) => x.parent_id === "uno" || x.parent_id === "dos")
+        ).toEqual([
+          {
+            parent_id: "dos",
+            fieldname: "actor",
+            child_id: "user:alice",
+            rowid: expect.anything(),
+          },
+          {
+            parent_id: "uno",
+            fieldname: "actor",
+            child_id: null,
+            rowid: expect.anything(),
+          },
+        ]);
+      });
+      it("does nothing on an empty input", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const getState = () => ({
+          updates: db.prepare("SELECT * FROM updates ORDER BY rowid").all(),
+          objects: db.prepare("SELECT * FROM objects ORDER BY id").all(),
+          links: db
+            .prepare("SELECT * FROM links ORDER BY parent_id, fieldname")
+            .all(),
+          connections: db
+            .prepare("SELECT * FROM connections ORDER BY object_id, fieldname")
+            .all(),
+          connectionEntries: db
+            .prepare(
+              "SELECT * FROM connection_entries ORDER BY connection_id, idx"
+            )
+            .all(),
+        });
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        const updateId = mirror._createUpdate(new Date(123));
+        const pre = getState();
+        mirror._updateOwnData(updateId, []);
+        const post = getState();
+        expect(post).toEqual(pre);
+      });
+      it("snapshot test for actual GitHub queries", () => {
+        // This test emits as a snapshot a valid query against GitHub's
+        // GraphQL API. You can copy-and-paste the snapshot into
+        // <https://developer.github.com/v4/explorer/> to run it. The
+        // resulting should contain valid data about a GitHub issue.
+        // Note that the "Issue" type contains all types of fields: ID,
+        // primitive, node reference to object, and node reference to
+        // union.
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const exampleIssueId = "MDU6SXNzdWUzNDg1NDA0NjE=";
+        const b = Queries.build;
+        const query = b.query(
+          "TestQuery",
+          [],
+          [
+            b.field("node", {id: b.literal(exampleIssueId)}, [
+              b.inlineFragment("Issue", mirror._queryOwnData("Issue")),
+            ]),
+          ]
+        );
+        const format = (body: Queries.Body): string =>
+          Queries.stringify.body(body, Queries.multilineLayout("  "));
+        expect(format([query])).toMatchSnapshot();
+      });
+    });
   });
 
   describe("_buildSchemaInfo", () => {
