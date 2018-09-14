@@ -1559,7 +1559,7 @@ Array [
           "example-github",
           "3",
         ],
-        "dstIndex": 33,
+        "dstIndex": 35,
         "srcIndex": 0,
       },
       Object {
@@ -1579,7 +1579,7 @@ Array [
           "USER",
           "wchargin",
         ],
-        "dstIndex": 41,
+        "dstIndex": 43,
         "srcIndex": 1,
       },
       Object {
@@ -1600,7 +1600,7 @@ Array [
           "example-github",
           "5",
         ],
-        "dstIndex": 34,
+        "dstIndex": 36,
         "srcIndex": 2,
       },
       Object {
@@ -1620,7 +1620,7 @@ Array [
           "USER",
           "wchargin",
         ],
-        "dstIndex": 41,
+        "dstIndex": 43,
         "srcIndex": 3,
       },
       Object {
