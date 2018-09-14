@@ -217,6 +217,7 @@ export class GraphView {
             GN.Prefix.review,
             GN.Prefix.comment,
             GN.Prefix.userlike,
+            GitNode.Prefix.commit,
           ]
         ),
         srcAccessor: (x) => GN.toRaw((x: any).referrer),

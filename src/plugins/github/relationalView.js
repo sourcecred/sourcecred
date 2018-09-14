@@ -211,6 +211,7 @@ export class RelationalView {
     yield* this.pulls();
     yield* this.reviews();
     yield* this.comments();
+    yield* this.commits();
     yield* this.userlikes();
   }
 
@@ -463,6 +464,9 @@ export class RelationalView {
           a
         );
       }
+      if (e instanceof Commit) {
+        refToAddress.set(e.address().hash, a);
+      }
     }
     for (const e of this.textContentEntities()) {
       const srcAddress = e.address();
@@ -588,6 +592,9 @@ export class RelationalView {
             break;
           case "COMMENT":
             entity = this.comment(address);
+            break;
+          case "COMMIT":
+            entity = this.commit(address);
             break;
           case "USERLIKE":
             entity = this.userlike(address);
@@ -882,6 +889,9 @@ export class Commit extends _Entity<CommitEntry> {
   references(): Iterator<ReferentEntity> {
     return this._view._references(this);
   }
+  referencedBy(): Iterator<TextContentEntity> {
+    return this._view._referencedBy(this);
+  }
 }
 
 type UserlikeEntry = {|
@@ -959,7 +969,14 @@ export type AuthoredEntity = Issue | Pull | Review | Comment | Commit;
 export type TextContentEntity = Issue | Pull | Review | Comment | Commit;
 export type ParentEntity = Repo | Issue | Pull | Review;
 export type ChildEntity = Issue | Pull | Review | Comment;
-export type ReferentEntity = Repo | Issue | Pull | Review | Comment | Userlike;
+export type ReferentEntity =
+  | Repo
+  | Issue
+  | Pull
+  | Review
+  | Comment
+  | Commit
+  | Userlike;
 
 export opaque type AddressEntryMapJSON<T> = {[N.RawAddress]: T};
 export opaque type RelationalViewJSON = Compatible<{|
