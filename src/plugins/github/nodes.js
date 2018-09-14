@@ -102,6 +102,7 @@ export type ReferentAddress =
   | PullAddress
   | ReviewAddress
   | CommentAddress
+  | GitNode.CommitAddress
   | UserlikeAddress;
 
 // Each of these types is structurally the child of some

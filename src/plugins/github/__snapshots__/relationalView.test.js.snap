@@ -300,6 +300,14 @@ Array [
     "to": "https://github.com/sourcecred/example-github/issues/2",
   },
   Object {
+    "from": "https://github.com/sourcecred/example-github/issues/12",
+    "to": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+  },
+  Object {
+    "from": "https://github.com/sourcecred/example-github/issues/12",
+    "to": "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+  },
+  Object {
     "from": "https://github.com/sourcecred/example-github/pull/5",
     "to": "https://github.com/wchargin",
   },

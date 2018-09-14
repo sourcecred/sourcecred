@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Detect references to commits (#833)
 - Detect references in commit messages (#829)
 - Add commit authorship to the graph (#826)
 - Add `MentionsAuthor` edges to the graph (#808)
