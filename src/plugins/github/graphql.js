@@ -50,9 +50,10 @@ export const PAGE_LIMIT = 50;
 const PAGE_SIZE_ISSUES = 50;
 const PAGE_SIZE_PRS = 50;
 const PAGE_SIZE_COMMENTS = 20;
-const PAGE_SIZE_REVIEWS = 10;
+const PAGE_SIZE_REVIEWS = 5;
 const PAGE_SIZE_REVIEW_COMMENTS = 10;
 const PAGE_SIZE_COMMIT_HISTORY = 100;
+const PAGE_SIZE_REACTIONS = 5;
 
 /**
  * What's in a continuation? If we want to fetch more comments for the
@@ -86,7 +87,7 @@ const PAGE_SIZE_COMMIT_HISTORY = 100;
  * the continuation into a query, and not of the continuation itself.
  */
 export type Continuation = {|
-  +enclosingNodeType: "REPOSITORY" | "ISSUE" | "PULL" | "REVIEW",
+  +enclosingNodeType: "REPOSITORY" | "ISSUE" | "PULL" | "REVIEW" | "COMMENT",
   +enclosingNodeId: string,
   +selections: $ReadOnlyArray<Selection>,
   +destinationPath: $ReadOnlyArray<string | number>,
@@ -216,6 +217,7 @@ export function continuationsFromContinuation(
     ISSUE: continuationsFromIssue,
     PULL: continuationsFromPR,
     REVIEW: continuationsFromReview,
+    COMMENT: continuationsFromComment,
   }[source.enclosingNodeType];
   return continuationsFromEnclosingType(
     result,
@@ -324,7 +326,7 @@ function* continuationsFromIssue(
   path: $ReadOnlyArray<string | number>
 ): Iterator<Continuation> {
   const b = build;
-  if (result.comments.pageInfo.hasNextPage) {
+  if (result.comments && result.comments.pageInfo.hasNextPage) {
     yield {
       enclosingNodeType: "ISSUE",
       enclosingNodeId: nodeId,
@@ -342,6 +344,32 @@ function* continuationsFromIssue(
       ],
       destinationPath: path,
     };
+  }
+  if (result.reactions && result.reactions.pageInfo.hasNextPage) {
+    yield {
+      enclosingNodeType: "ISSUE",
+      enclosingNodeId: nodeId,
+      selections: [
+        b.inlineFragment("Issue", [
+          b.field(
+            "reactions",
+            {
+              first: b.literal(PAGE_LIMIT),
+              after: b.literal(result.reactions.pageInfo.endCursor),
+            },
+            [b.fragmentSpread("reactions")]
+          ),
+        ]),
+      ],
+      destinationPath: path,
+    };
+  }
+  if (result.comments) {
+    for (let i = 0; i < result.comments.nodes.length; i++) {
+      const comment = result.comments.nodes[i];
+      const subpath = [...path, "comments", "nodes", i];
+      yield* continuationsFromComment(comment, comment.id, subpath);
+    }
   }
 }
 
@@ -364,6 +392,25 @@ function* continuationsFromPR(
               after: b.literal(result.comments.pageInfo.endCursor),
             },
             [b.fragmentSpread("comments")]
+          ),
+        ]),
+      ],
+      destinationPath: path,
+    };
+  }
+  if (result.reactions && result.reactions.pageInfo.hasNextPage) {
+    yield {
+      enclosingNodeType: "PULL",
+      enclosingNodeId: nodeId,
+      selections: [
+        b.inlineFragment("PullRequest", [
+          b.field(
+            "reactions",
+            {
+              first: b.literal(PAGE_LIMIT),
+              after: b.literal(result.reactions.pageInfo.endCursor),
+            },
+            [b.fragmentSpread("reactions")]
           ),
         ]),
       ],
@@ -396,6 +443,13 @@ function* continuationsFromPR(
       yield* continuationsFromReview(issue, issue.id, subpath);
     }
   }
+  if (result.comments) {
+    for (let i = 0; i < result.comments.nodes.length; i++) {
+      const comment = result.comments.nodes[i];
+      const subpath = [...path, "comments", "nodes", i];
+      yield* continuationsFromComment(comment, comment.id, subpath);
+    }
+  }
 }
 
 function* continuationsFromReview(
@@ -417,6 +471,33 @@ function* continuationsFromReview(
               after: b.literal(result.comments.pageInfo.endCursor),
             },
             [b.fragmentSpread("reviewComments")]
+          ),
+        ]),
+      ],
+      destinationPath: path,
+    };
+  }
+}
+
+function* continuationsFromComment(
+  result: any,
+  nodeId: string,
+  path: $ReadOnlyArray<string | number>
+): Iterator<Continuation> {
+  const b = build;
+  if (result.reactions && result.reactions.pageInfo.hasNextPage) {
+    yield {
+      enclosingNodeType: "COMMENT",
+      enclosingNodeId: nodeId,
+      selections: [
+        b.inlineFragment("IssueComment", [
+          b.field(
+            "reactions",
+            {
+              first: b.literal(PAGE_LIMIT),
+              after: b.literal(result.reactions.pageInfo.endCursor),
+            },
+            [b.fragmentSpread("reactions")]
           ),
         ]),
       ],
@@ -730,6 +811,7 @@ export type IssueJSON = {|
   +number: number,
   +author: NullableAuthorJSON,
   +comments: ConnectionJSON<CommentJSON>,
+  +reactions: ConnectionJSON<ReactionJSON>,
 |};
 
 function issuesFragment(): FragmentDefinition {
@@ -745,6 +827,9 @@ function issuesFragment(): FragmentDefinition {
       makeAuthor(),
       b.field("comments", {first: b.literal(PAGE_SIZE_COMMENTS)}, [
         b.fragmentSpread("comments"),
+      ]),
+      b.field("reactions", {first: b.literal(PAGE_SIZE_REACTIONS)}, [
+        b.fragmentSpread("reactions"),
       ]),
     ]),
   ]);
@@ -762,6 +847,7 @@ export type PullJSON = {|
   +comments: ConnectionJSON<CommentJSON>,
   +reviews: ConnectionJSON<ReviewJSON>,
   +mergeCommit: ?CommitJSON,
+  +reactions: ConnectionJSON<ReactionJSON>,
 |};
 function pullsFragment(): FragmentDefinition {
   const b = build;
@@ -783,6 +869,9 @@ function pullsFragment(): FragmentDefinition {
       b.field("reviews", {first: b.literal(PAGE_SIZE_REVIEWS)}, [
         b.fragmentSpread("reviews"),
       ]),
+      b.field("reactions", {first: b.literal(PAGE_SIZE_REACTIONS)}, [
+        b.fragmentSpread("reactions"),
+      ]),
     ]),
   ]);
 }
@@ -792,6 +881,7 @@ export type CommentJSON = {|
   +url: string,
   +body: string,
   +author: NullableAuthorJSON,
+  +reactions: ConnectionJSON<ReactionJSON>,
 |};
 function commentsFragment(): FragmentDefinition {
   const b = build;
@@ -803,6 +893,9 @@ function commentsFragment(): FragmentDefinition {
       b.field("url"),
       makeAuthor(),
       b.field("body"),
+      b.field("reactions", {first: b.literal(PAGE_SIZE_REACTIONS)}, [
+        b.fragmentSpread("reactions"),
+      ]),
     ]),
   ]);
 }
@@ -821,6 +914,7 @@ export type ReviewJSON = {|
   +author: NullableAuthorJSON,
   +state: ReviewState,
   +comments: ConnectionJSON<ReviewCommentJSON>,
+  +reactions: ConnectionJSON<ReactionJSON>,
 |};
 function reviewsFragment(): FragmentDefinition {
   const b = build;
@@ -844,6 +938,7 @@ export type ReviewCommentJSON = {|
   +url: string,
   +body: string,
   +author: NullableAuthorJSON,
+  +reactions: ConnectionJSON<ReactionJSON>,
 |};
 function reviewCommentsFragment(): FragmentDefinition {
   const b = build;
@@ -854,6 +949,9 @@ function reviewCommentsFragment(): FragmentDefinition {
       b.field("url"),
       b.field("body"),
       makeAuthor(),
+      b.field("reactions", {first: b.literal(PAGE_SIZE_REACTIONS)}, [
+        b.fragmentSpread("reactions"),
+      ]),
     ]),
   ]);
 }
@@ -885,6 +983,48 @@ function commitHistoryFragment(): FragmentDefinition {
   ]);
 }
 
+export const Reactions: {|
+  +THUMBS_UP: "THUMBS_UP",
+  +THUMBS_DOWN: "THUMBS_DOWN",
+  +LAUGH: "LAUGH",
+  +CONFUSED: "CONFUSED",
+  +HEART: "HEART",
+  +HOORAY: "HOORAY",
+|} = Object.freeze({
+  THUMBS_UP: "THUMBS_UP",
+  THUMBS_DOWN: "THUMBS_DOWN",
+  LAUGH: "LAUGH",
+  CONFUSED: "CONFUSED",
+  HEART: "HEART",
+  HOORAY: "HOORAY",
+});
+
+export type ReactionContent =
+  | typeof Reactions.THUMBS_UP
+  | typeof Reactions.THUMBS_DOWN
+  | typeof Reactions.LAUGH
+  | typeof Reactions.CONFUSED
+  | typeof Reactions.HEART
+  | typeof Reactions.HOORAY;
+
+export type ReactionJSON = {|
+  +id: string,
+  +content: ReactionContent,
+  +user: NullableAuthorJSON,
+|};
+
+function reactionsFragment(): FragmentDefinition {
+  const b = build;
+  return b.fragment("reactions", "ReactionConnection", [
+    makePageInfo(),
+    b.field("nodes", {}, [
+      b.field("id"),
+      b.field("content"),
+      b.field("user", {}, [b.fragmentSpread("whoami")]),
+    ]),
+  ]);
+}
+
 /**
  * These fragments are used to construct the root query, and also to
  * fetch more pages of specific entity types.
@@ -899,6 +1039,7 @@ export function createFragments(): FragmentDefinition[] {
     reviewCommentsFragment(),
     commitHistoryFragment(),
     commitFragment(),
+    reactionsFragment(),
   ];
 }
 

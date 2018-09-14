@@ -259,6 +259,9 @@ fragment issues on IssueConnection {
     comments(first: 20) {
       ...comments
     }
+    reactions(first: 5) {
+      ...reactions
+    }
   }
 }
 fragment pulls on PullRequestConnection {
@@ -283,8 +286,11 @@ fragment pulls on PullRequestConnection {
     comments(first: 20) {
       ...comments
     }
-    reviews(first: 10) {
+    reviews(first: 5) {
       ...reviews
+    }
+    reactions(first: 5) {
+      ...reactions
     }
   }
 }
@@ -300,6 +306,9 @@ fragment comments on IssueCommentConnection {
       ...whoami
     }
     body
+    reactions(first: 5) {
+      ...reactions
+    }
   }
 }
 fragment reviews on PullRequestReviewConnection {
@@ -332,6 +341,9 @@ fragment reviewComments on PullRequestReviewCommentConnection {
     author {
       ...whoami
     }
+    reactions(first: 5) {
+      ...reactions
+    }
   }
 }
 fragment commitHistory on CommitHistoryConnection {
@@ -349,6 +361,19 @@ fragment commit on Commit {
   oid
   message
   author {
+    user {
+      ...whoami
+    }
+  }
+}
+fragment reactions on ReactionConnection {
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    id
+    content
     user {
       ...whoami
     }
