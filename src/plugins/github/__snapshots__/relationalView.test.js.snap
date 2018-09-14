@@ -16,6 +16,8 @@ Object {
 }
 `;
 
+exports[`plugins/github/relationalView Comment has reactions 1`] = `Array []`;
+
 exports[`plugins/github/relationalView Comment has url 1`] = `"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"`;
 
 exports[`plugins/github/relationalView Commit authors has expected number of authors 1`] = `1`;
@@ -67,6 +69,8 @@ Object {
 }
 `;
 
+exports[`plugins/github/relationalView Issue has reactions 1`] = `Array []`;
+
 exports[`plugins/github/relationalView Issue has title 1`] = `"A referencing issue."`;
 
 exports[`plugins/github/relationalView Issue has url 1`] = `"https://github.com/sourcecred/example-github/issues/2"`;
@@ -113,6 +117,8 @@ Object {
   "url": "https://github.com/sourcecred/example-github",
 }
 `;
+
+exports[`plugins/github/relationalView Pull has reactions 1`] = `Array []`;
 
 exports[`plugins/github/relationalView Pull has title 1`] = `"This pull request will be more contentious. I can feel it..."`;
 
@@ -284,6 +290,159 @@ exports[`plugins/github/relationalView Review has url 1`] = `"https://github.com
 exports[`plugins/github/relationalView Userlike has login 1`] = `"wchargin"`;
 
 exports[`plugins/github/relationalView Userlike has url 1`] = `"https://github.com/wchargin"`;
+
+exports[`plugins/github/relationalView reaction detection set of all reactions matches snapshot 1`] = `
+Object {
+  "https://github.com/sourcecred/example-github/issues/1": Array [
+    Object {
+      "content": "LAUGH",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "HEART",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+  ],
+  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206": Array [
+    Object {
+      "content": "THUMBS_UP",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "THUMBS_DOWN",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "LAUGH",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "HOORAY",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+  ],
+  "https://github.com/sourcecred/example-github/issues/12": Array [
+    Object {
+      "content": "THUMBS_UP",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+  ],
+  "https://github.com/sourcecred/example-github/issues/13": Array [
+    Object {
+      "content": "THUMBS_UP",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "THUMBS_DOWN",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "LAUGH",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "HOORAY",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "CONFUSED",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "HEART",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+  ],
+  "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464": Array [
+    Object {
+      "content": "HEART",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "CONFUSED",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+  ],
+  "https://github.com/sourcecred/example-github/pull/9": Array [
+    Object {
+      "content": "HEART",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "THUMBS_UP",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+  ],
+}
+`;
 
 exports[`plugins/github/relationalView reference detection references match snapshot 1`] = `
 Array [

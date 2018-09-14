@@ -685,6 +685,7 @@ describe("plugins/github/graphql", () => {
       );
       const result = requiredFragments(query);
       expect(result.map((fd) => fd.name).sort()).toEqual([
+        "reactions",
         "reviewComments",
         "reviews",
         "whoami",

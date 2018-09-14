@@ -3,6 +3,7 @@
 import * as R from "./relationalView";
 import * as N from "./nodes";
 import {exampleData, exampleRelationalView} from "./example/example";
+import * as MapUtil from "../../util/map";
 
 describe("plugins/github/relationalView", () => {
   // Sharing this state is OK because it's just a view - no mutation allowed!
@@ -96,6 +97,7 @@ describe("plugins/github/relationalView", () => {
     has("parent", () => entity.parent());
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
+    has("reactions", () => entity.reactions());
   });
 
   const pull = Array.from(repo.pulls())[1];
@@ -112,6 +114,7 @@ describe("plugins/github/relationalView", () => {
     hasEntities("reviews", () => entity.reviews());
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
+    has("reactions", () => entity.reactions());
   });
 
   const review = Array.from(pull.reviews())[0];
@@ -132,6 +135,7 @@ describe("plugins/github/relationalView", () => {
     has("url", () => entity.url());
     has("parent", () => entity.parent());
     hasEntities("authors", () => entity.authors());
+    has("reactions", () => entity.reactions());
   });
 
   const commit = Array.from(view.commits())[0];
@@ -267,6 +271,21 @@ describe("plugins/github/relationalView", () => {
         }
       }
       expect(nFoundReferences).toEqual(nReferences);
+    });
+  });
+
+  describe("reaction detection", () => {
+    it("set of all reactions matches snapshot", () => {
+      const view = new R.RelationalView();
+      view.addData(exampleData());
+      const urlToReactions = new Map();
+      for (const reactable of view.reactableEntities()) {
+        const url = reactable.url();
+        for (const reactionRecord of reactable.reactions()) {
+          MapUtil.pushValue(urlToReactions, url, reactionRecord);
+        }
+      }
+      expect(MapUtil.toObject(urlToReactions)).toMatchSnapshot();
     });
   });
 
