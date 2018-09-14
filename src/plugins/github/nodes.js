@@ -120,6 +120,9 @@ export type ParentAddress =
   | PullAddress
   | ReviewAddress;
 
+// GitHub allows you to react to these types
+export type ReactableAddress = IssueAddress | PullAddress | CommentAddress;
+
 // Each of these types may have Comments as children
 export type CommentableAddress = IssueAddress | PullAddress | ReviewAddress;
 
