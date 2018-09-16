@@ -8,6 +8,7 @@ import dedent from "../util/dedent";
 import * as Schema from "./schema";
 import * as Queries from "./queries";
 import {
+  _FIELD_PREFIXES,
   _buildSchemaInfo,
   _inTransaction,
   _makeSingleUpdateFunction,
@@ -519,6 +520,428 @@ describe("graphql/mirror", () => {
           ],
         };
         expect(actual).toEqual(expected);
+      });
+    });
+
+    describe("_queryFromPlan", () => {
+      it("errors if connections for an object have distinct typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          objects: [],
+          connections: [
+            {
+              objectTypename: "Issue",
+              objectId: "hmmm",
+              fieldname: "comments",
+              endCursor: null,
+            },
+            {
+              objectTypename: "Repository",
+              objectId: "hmmm",
+              fieldname: "issues",
+              endCursor: null,
+            },
+          ],
+        };
+        expect(() => {
+          mirror._queryFromPlan(plan, {
+            connectionLimit: 5,
+            connectionPageSize: 23,
+          });
+        }).toThrow(
+          'Query plan has inconsistent typenames for object "hmmm": ' +
+            '"Issue" vs. "Repository"'
+        );
+      });
+      it("creates a good query", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          objects: [
+            {typename: "Issue", id: "i#1"},
+            {typename: "Repository", id: "repo#2"},
+            {typename: "Issue", id: "i#3"},
+          ],
+          connections: [
+            {
+              objectTypename: "Issue",
+              objectId: "i#1",
+              fieldname: "comments",
+              endCursor: null,
+            },
+            {
+              objectTypename: "Issue",
+              objectId: "i#4",
+              fieldname: "comments",
+              endCursor: null,
+            },
+            {
+              objectTypename: "Issue",
+              objectId: "i#1",
+              fieldname: "timeline",
+              endCursor: undefined,
+            },
+            {
+              objectTypename: "Issue",
+              objectId: "i#4",
+              fieldname: "timeline",
+              endCursor: "cursor#998",
+            },
+            {
+              objectTypename: "Repository",
+              objectId: "repo#5",
+              fieldname: "issues",
+              endCursor: "cursor#998",
+            },
+            // cut off below this point due to the page limit
+            {
+              objectTypename: "Repository",
+              objectId: "repo#5",
+              fieldname: "pulls",
+              endCursor: "cursor#997",
+            },
+            {
+              objectTypename: "Repository",
+              objectId: "repo#6",
+              fieldname: "issues",
+              endCursor: "cursor#996",
+            },
+          ],
+        };
+        const actual = mirror._queryFromPlan(plan, {
+          connectionLimit: 5,
+          connectionPageSize: 23,
+        });
+        const b = Queries.build;
+        expect(actual).toEqual([
+          b.alias(
+            "owndata_Issue",
+            b.field(
+              "nodes",
+              {ids: b.list([b.literal("i#1"), b.literal("i#3")])},
+              [b.inlineFragment("Issue", mirror._queryOwnData("Issue"))]
+            )
+          ),
+          b.alias(
+            "owndata_Repository",
+            b.field("nodes", {ids: b.list([b.literal("repo#2")])}, [
+              b.inlineFragment(
+                "Repository",
+                mirror._queryOwnData("Repository")
+              ),
+            ])
+          ),
+          b.alias(
+            "node_0",
+            b.field("node", {id: b.literal("i#1")}, [
+              b.field("id"),
+              b.inlineFragment("Issue", [
+                ...mirror._queryConnection("Issue", "comments", null, 23),
+                ...mirror._queryConnection("Issue", "timeline", undefined, 23),
+              ]),
+            ])
+          ),
+          b.alias(
+            "node_1",
+            b.field("node", {id: b.literal("i#4")}, [
+              b.field("id"),
+              b.inlineFragment("Issue", [
+                ...mirror._queryConnection("Issue", "comments", null, 23),
+                ...mirror._queryConnection(
+                  "Issue",
+                  "timeline",
+                  "cursor#998",
+                  23
+                ),
+              ]),
+            ])
+          ),
+          b.alias(
+            "node_2",
+            b.field("node", {id: b.literal("repo#5")}, [
+              b.field("id"),
+              b.inlineFragment("Repository", [
+                ...mirror._queryConnection(
+                  "Repository",
+                  "issues",
+                  "cursor#998",
+                  23
+                ),
+              ]),
+            ])
+          ),
+        ]);
+      });
+    });
+
+    describe("_updateData", () => {
+      it("throws if given a key with invalid prefix", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        const result = {wat_0: {id: "wot"}};
+        expect(() => {
+          mirror._nontransactionallyUpdateData(updateId, result);
+        }).toThrow('Bad key in query result: "wat_0"');
+      });
+
+      // We test the happy path lightly, because it just delegates to
+      // other methods, which are themselves tested. This test is
+      // sufficient to effect full coverage.
+      it("processes a reasonable input correctly", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        mirror.registerObject({typename: "Issue", id: "issue:#2"});
+        const result = {
+          owndata_0: [
+            {
+              __typename: "Repository",
+              id: "repo:foo/bar",
+              url: "url://foo/bar",
+            },
+          ],
+          owndata_1: [
+            {
+              __typename: "Issue",
+              id: "issue:#1",
+              url: "url://foo/bar/issue/1",
+              title: "something wicked",
+              repository: {
+                __typename: "Repository",
+                id: "repo:foo/bar",
+              },
+              author: {
+                __typename: "User",
+                id: "user:alice",
+              },
+            },
+            {
+              __typename: "Issue",
+              id: "issue:#2",
+              url: "url://foo/bar/issue/2",
+              title: "this way comes",
+              repository: {
+                __typename: "Repository",
+                id: "repo:foo/bar",
+              },
+              author: {
+                __typename: "User",
+                id: "user:alice",
+              },
+            },
+          ],
+          node_0: {
+            id: "repo:foo/bar",
+            issues: {
+              totalCount: 2,
+              pageInfo: {
+                hasNextPage: true,
+                endCursor: "cursor:repo:foo/bar.issues@0",
+              },
+              nodes: [{__typename: "Issue", id: "issue:#1"}],
+            },
+          },
+          node_1: {
+            id: "issue:#1",
+            comments: {
+              totalCount: 1,
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: "cursor:issue:#1.comments@0",
+              },
+              nodes: [{__typename: "IssueComment", id: "comment:#1.1"}],
+            },
+            timeline: {
+              totalCount: 1,
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: "cursor:issue:#1.timeline@0",
+              },
+              nodes: [{__typename: "ClosedEvent", id: "issue:#1!closed#0"}],
+            },
+          },
+        };
+        mirror._updateData(updateId, result);
+
+        // Check that the right objects are in the database.
+        expect(
+          db.prepare("SELECT * FROM objects ORDER BY id ASC").all()
+        ).toEqual([
+          {typename: "IssueComment", id: "comment:#1.1", last_update: null},
+          {typename: "Issue", id: "issue:#1", last_update: updateId},
+          {typename: "ClosedEvent", id: "issue:#1!closed#0", last_update: null},
+          {typename: "Issue", id: "issue:#2", last_update: updateId},
+          {typename: "Repository", id: "repo:foo/bar", last_update: updateId},
+          {typename: "User", id: "user:alice", last_update: null},
+        ]);
+
+        // Check that some objects have the right primitives.
+        // (These poke at the internals of the storage format a bit.)
+        expect(
+          db
+            .prepare("SELECT * FROM primitives_Repository ORDER BY id ASC")
+            .all()
+        ).toEqual([{id: "repo:foo/bar", url: JSON.stringify("url://foo/bar")}]);
+        expect(
+          db.prepare("SELECT * FROM primitives_Issue ORDER BY id ASC").all()
+        ).toEqual([
+          {
+            id: "issue:#1",
+            url: JSON.stringify("url://foo/bar/issue/1"),
+            title: JSON.stringify("something wicked"),
+          },
+          {
+            id: "issue:#2",
+            url: JSON.stringify("url://foo/bar/issue/2"),
+            title: JSON.stringify("this way comes"),
+          },
+        ]);
+        expect(
+          db.prepare("SELECT * FROM primitives_User ORDER BY id ASC").all()
+        ).toEqual([{id: "user:alice", login: null, url: null}]);
+        expect(
+          db
+            .prepare("SELECT * FROM primitives_ClosedEvent ORDER BY id ASC")
+            .all()
+        ).toEqual([{id: "issue:#1!closed#0"}]);
+
+        // Check that some links are correct.
+        expect(
+          db
+            .prepare(
+              "SELECT * FROM links WHERE parent_id LIKE 'issue:%' " +
+                "ORDER BY parent_id, fieldname"
+            )
+            .all()
+        ).toEqual([
+          {
+            parent_id: "issue:#1",
+            fieldname: "author",
+            child_id: "user:alice",
+            rowid: expect.anything(),
+          },
+          {
+            parent_id: "issue:#1",
+            fieldname: "repository",
+            child_id: "repo:foo/bar",
+            rowid: expect.anything(),
+          },
+          {
+            parent_id: "issue:#1!closed#0",
+            fieldname: "actor",
+            child_id: null,
+            rowid: expect.anything(),
+          },
+          {
+            parent_id: "issue:#2",
+            fieldname: "author",
+            child_id: "user:alice",
+            rowid: expect.anything(),
+          },
+          {
+            parent_id: "issue:#2",
+            fieldname: "repository",
+            child_id: "repo:foo/bar",
+            rowid: expect.anything(),
+          },
+        ]);
+
+        // Check that the connection metadata are correct.
+        expect(
+          db
+            .prepare("SELECT * FROM connections ORDER BY object_id, fieldname")
+            .all()
+        ).toEqual([
+          // Issue #1 had both comments and timeline fetched.
+          {
+            object_id: "issue:#1",
+            fieldname: "comments",
+            last_update: updateId,
+            has_next_page: +false,
+            end_cursor: "cursor:issue:#1.comments@0",
+            total_count: 1,
+            rowid: expect.anything(),
+          },
+          {
+            object_id: "issue:#1",
+            fieldname: "timeline",
+            last_update: updateId,
+            has_next_page: +false,
+            end_cursor: "cursor:issue:#1.timeline@0",
+            total_count: 1,
+            rowid: expect.anything(),
+          },
+          // Issue #2 had no connections fetched.
+          {
+            object_id: "issue:#2",
+            fieldname: "comments",
+            last_update: null,
+            has_next_page: null,
+            end_cursor: null,
+            total_count: null,
+            rowid: expect.anything(),
+          },
+          {
+            object_id: "issue:#2",
+            fieldname: "timeline",
+            last_update: null,
+            has_next_page: null,
+            end_cursor: null,
+            total_count: null,
+            rowid: expect.anything(),
+          },
+          // The repository had one issue fetched.
+          {
+            object_id: "repo:foo/bar",
+            fieldname: "issues",
+            last_update: updateId,
+            has_next_page: +true,
+            end_cursor: "cursor:repo:foo/bar.issues@0",
+            total_count: 2,
+            rowid: expect.anything(),
+          },
+        ]);
+
+        // Check that the connection entries are correct.
+        expect(
+          db
+            .prepare(
+              dedent`\
+                SELECT
+                    connections.object_id AS objectId,
+                    connections.fieldname AS fieldname,
+                    connection_entries.idx AS idx,
+                    connection_entries.child_id AS childId
+                FROM connections JOIN connection_entries
+                ON connection_entries.connection_id = connections.rowid
+                ORDER BY objectId, fieldname, idx
+              `
+            )
+            .all()
+        ).toEqual([
+          {
+            objectId: "issue:#1",
+            fieldname: "comments",
+            idx: 1,
+            childId: "comment:#1.1",
+          },
+          {
+            objectId: "issue:#1",
+            fieldname: "timeline",
+            idx: 1,
+            childId: "issue:#1!closed#0",
+          },
+          {
+            objectId: "repo:foo/bar",
+            fieldname: "issues",
+            idx: 1,
+            childId: "issue:#1",
+          },
+        ]);
       });
     });
 
@@ -2207,6 +2630,20 @@ describe("graphql/mirror", () => {
       expect(result.unionTypes["Actor"].clauses.slice().sort()).toEqual(
         ["User", "Bot", "Organization"].sort()
       );
+    });
+  });
+
+  describe("_FIELD_PREFIXES", () => {
+    it("has the identity prefix relation", () => {
+      for (const k1 of Object.keys(_FIELD_PREFIXES)) {
+        for (const k2 of Object.keys(_FIELD_PREFIXES)) {
+          expect({k1, k2, isPrefix: k1.startsWith(k2)}).toEqual({
+            k1,
+            k2,
+            isPrefix: k1 === k2,
+          });
+        }
+      }
     });
   });
 
