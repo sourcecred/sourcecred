@@ -5,6 +5,7 @@ import {createEdge, fromRaw, toRaw} from "./edges";
 import * as GE from "./edges";
 import * as GN from "./nodes";
 import {COMMIT_TYPE} from "../git/nodes";
+import {Reactions} from "./graphql";
 
 describe("plugins/github/edges", () => {
   const nodeExamples = {
@@ -63,6 +64,24 @@ describe("plugins/github/edges", () => {
         dst: nodeExamples.issue(),
         who: nodeExamples.user(),
       }),
+    reactsHeart: () =>
+      createEdge.reacts(
+        Reactions.HEART,
+        nodeExamples.user(),
+        nodeExamples.pull()
+      ),
+    reactsThumbsUp: () =>
+      createEdge.reacts(
+        Reactions.THUMBS_UP,
+        nodeExamples.user(),
+        nodeExamples.issue()
+      ),
+    reactsHooray: () =>
+      createEdge.reacts(
+        Reactions.HOORAY,
+        nodeExamples.user(),
+        nodeExamples.issueComment()
+      ),
   };
 
   describe("createEdge", () => {

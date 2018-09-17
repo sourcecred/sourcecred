@@ -9,6 +9,8 @@ import {
 import * as GithubNode from "./nodes";
 import * as GitNode from "../git/nodes";
 import type {MentionsAuthorReference} from "./heuristics/mentionsAuthorReference";
+// TODO(@decentralion): Opportunity to reduce bundle size (tree shaking?)
+import {Reactions, type ReactionContent} from "./graphql";
 
 export opaque type RawAddress: EdgeAddressT = EdgeAddressT;
 
@@ -17,6 +19,7 @@ export const MERGED_AS_TYPE = "MERGED_AS";
 export const HAS_PARENT_TYPE = "HAS_PARENT";
 export const REFERENCES_TYPE = "REFERENCES";
 export const MENTIONS_AUTHOR_TYPE = "MENTIONS_AUTHOR";
+export const REACTS_TYPE = "REACTS";
 
 const GITHUB_PREFIX = EdgeAddress.fromParts(["sourcecred", "github"]);
 function githubEdgeAddress(...parts: string[]): RawAddress {
@@ -30,6 +33,10 @@ export const Prefix = Object.freeze({
   references: githubEdgeAddress(REFERENCES_TYPE),
   hasParent: githubEdgeAddress(HAS_PARENT_TYPE),
   mentionsAuthor: githubEdgeAddress(MENTIONS_AUTHOR_TYPE),
+  reacts: githubEdgeAddress(REACTS_TYPE),
+  reactsThumbsUp: githubEdgeAddress(REACTS_TYPE, Reactions.THUMBS_UP),
+  reactsHeart: githubEdgeAddress(REACTS_TYPE, Reactions.HEART),
+  reactsHooray: githubEdgeAddress(REACTS_TYPE, Reactions.HOORAY),
 });
 
 export type AuthorsAddress = {|
@@ -54,13 +61,20 @@ export type MentionsAuthorAddress = {|
   +type: typeof MENTIONS_AUTHOR_TYPE,
   +reference: MentionsAuthorReference,
 |};
+export type ReactsAddress = {|
+  +type: typeof REACTS_TYPE,
+  +reactionType: ReactionContent,
+  +user: GithubNode.UserlikeAddress,
+  +reactable: GithubNode.ReactableAddress,
+|};
 
 export type StructuredAddress =
   | AuthorsAddress
   | MergedAsAddress
   | HasParentAddress
   | ReferencesAddress
-  | MentionsAuthorAddress;
+  | MentionsAuthorAddress
+  | ReactsAddress;
 
 export const createEdge = Object.freeze({
   authors: (
@@ -99,6 +113,20 @@ export const createEdge = Object.freeze({
     address: toRaw({type: MENTIONS_AUTHOR_TYPE, reference}),
     src: GithubNode.toRaw(reference.src),
     dst: GithubNode.toRaw(reference.dst),
+  }),
+  reacts: (
+    reactionType: ReactionContent,
+    user: GithubNode.UserlikeAddress,
+    reactable: GithubNode.ReactableAddress
+  ): Edge => ({
+    address: toRaw({
+      type: REACTS_TYPE,
+      user,
+      reactionType,
+      reactable,
+    }),
+    src: GithubNode.toRaw(user),
+    dst: GithubNode.toRaw(reactable),
   }),
 });
 
@@ -213,6 +241,25 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       const reference = {src, dst, who};
       return {type: MENTIONS_AUTHOR_TYPE, reference};
     }
+    case REACTS_TYPE: {
+      const [rawReactionType, ...rest2] = rest;
+      const reactionType = Reactions[rawReactionType];
+      if (reactionType == null) {
+        throw fail();
+      }
+      const parts = multiLengthDecode(rest2, fail);
+      if (parts.length !== 2) {
+        throw fail();
+      }
+      const [userParts, reactableParts] = parts;
+      const user: GithubNode.UserlikeAddress = (GithubNode.fromRaw(
+        (NodeAddress.fromParts(userParts): any)
+      ): any);
+      const reactable: GithubNode.ReactableAddress = (GithubNode.fromRaw(
+        (NodeAddress.fromParts(reactableParts): any)
+      ): any);
+      return {type: REACTS_TYPE, reactionType, user, reactable};
+    }
     default:
       throw fail();
   }
@@ -248,6 +295,13 @@ export function toRaw(x: StructuredAddress): RawAddress {
         ...lengthEncode(GithubNode.toRaw(x.reference.src)),
         ...lengthEncode(GithubNode.toRaw(x.reference.dst)),
         ...lengthEncode(GithubNode.toRaw(x.reference.who))
+      );
+    case REACTS_TYPE:
+      return EdgeAddress.append(
+        Prefix.reacts,
+        x.reactionType,
+        ...lengthEncode(GithubNode.toRaw(x.user)),
+        ...lengthEncode(GithubNode.toRaw(x.reactable))
       );
     default:
       throw new Error((x.type: empty));

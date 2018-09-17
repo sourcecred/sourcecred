@@ -155,6 +155,127 @@ Object {
 }
 `;
 
+exports[`plugins/github/edges createEdge works for "reactsHeart" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "github",
+    "REACTS",
+    "HEART",
+    "5",
+    "sourcecred",
+    "github",
+    "USERLIKE",
+    "USER",
+    "decentralion",
+    "6",
+    "sourcecred",
+    "github",
+    "PULL",
+    "sourcecred",
+    "example-github",
+    "5",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "github",
+    "PULL",
+    "sourcecred",
+    "example-github",
+    "5",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "github",
+    "USERLIKE",
+    "USER",
+    "decentralion",
+  ],
+}
+`;
+
+exports[`plugins/github/edges createEdge works for "reactsHooray" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "github",
+    "REACTS",
+    "HOORAY",
+    "5",
+    "sourcecred",
+    "github",
+    "USERLIKE",
+    "USER",
+    "decentralion",
+    "8",
+    "sourcecred",
+    "github",
+    "COMMENT",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+    "373768703",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "github",
+    "COMMENT",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+    "373768703",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "github",
+    "USERLIKE",
+    "USER",
+    "decentralion",
+  ],
+}
+`;
+
+exports[`plugins/github/edges createEdge works for "reactsThumbsUp" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "github",
+    "REACTS",
+    "THUMBS_UP",
+    "5",
+    "sourcecred",
+    "github",
+    "USERLIKE",
+    "USER",
+    "decentralion",
+    "6",
+    "sourcecred",
+    "github",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "github",
+    "ISSUE",
+    "sourcecred",
+    "example-github",
+    "2",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "github",
+    "USERLIKE",
+    "USER",
+    "decentralion",
+  ],
+}
+`;
+
 exports[`plugins/github/edges createEdge works for "references" 1`] = `
 Object {
   "addressParts": Array [
