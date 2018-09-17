@@ -16,7 +16,6 @@ module.exports = {
     "no-useless-constructor": ["off"],
     // TODO(@decentralion): Enable this rule.
     //    "flowtype/no-mutable-array": [2],
-    // TODO(@decentralion): Enable this rule.
-    //    "flowtype/require-exact-type": [2, "always"],
+    "flowtype/require-exact-type": [2, "always"],
   },
 };

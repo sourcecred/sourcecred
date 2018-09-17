@@ -4,8 +4,8 @@ import {toCompat, fromCompat} from "./compat";
 import type {Compatible} from "./compat";
 
 describe("util/compat", () => {
-  type FooV1 = {foo: number};
-  type FooV2 = {bar: {foo: number}};
+  type FooV1 = {|foo: number|};
+  type FooV2 = {|bar: {|foo: number|}|};
   const type = "Foo Plugin's Experiment";
   const v1 = "v1";
   const v2 = "v2";

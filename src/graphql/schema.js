@@ -31,7 +31,7 @@ export type ObjectId = string;
 //     represented as `PRIMITIVE`s (except for `ID`s).
 //   - Connections are supported as object fields, but arbitrary lists
 //     are not.
-export type Schema = {+[Typename]: NodeType};
+export type Schema = {|+[Typename]: NodeType|};
 export type NodeType =
   | {|+type: "OBJECT", +fields: {|+[Fieldname]: FieldType|}|}
   | {|+type: "UNION", +clauses: {|+[Typename]: true|}|};
@@ -46,7 +46,7 @@ export type FieldType =
 const ID_FIELD_NAME = "id";
 
 export function schema(types: {[Typename]: NodeType}): Schema {
-  const result = {};
+  const result: {|[Typename]: NodeType|} = ({}: any);
   for (const typename of Object.keys(types)) {
     const type = types[typename];
     switch (type.type) {
