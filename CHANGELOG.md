@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Add GitHub reactions to the graph (#846)
 - Detect references to commits (#833)
 - Detect references in commit messages (#829)
 - Add commit authorship to the graph (#826)

@@ -108,6 +108,30 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
         defaultBackwardWeight: 1 / 32,
         prefix: E.Prefix.mentionsAuthor,
       },
+      {
+        forwardName: "reacted ❤️ to",
+        backwardName: "got ❤️ from",
+        defaultForwardWeight: 2,
+        // TODO(#811): Probably change this to 0
+        defaultBackwardWeight: 1 / 32,
+        prefix: E.Prefix.reactsHeart,
+      },
+      {
+        forwardName: "reacted 👍 to",
+        backwardName: "got 👍 from",
+        defaultForwardWeight: 1,
+        // TODO(#811): Probably change this to 0
+        defaultBackwardWeight: 1 / 32,
+        prefix: E.Prefix.reactsThumbsUp,
+      },
+      {
+        forwardName: "reacted 🎉 to",
+        backwardName: "got 🎉 from",
+        defaultForwardWeight: 4,
+        // TODO(#811): Probably change this to 0
+        defaultBackwardWeight: 1 / 32,
+        prefix: E.Prefix.reactsHooray,
+      },
     ];
   }
   async load(assets: Assets, repo: Repo): Promise<IDynamicPluginAdapater> {
