@@ -53,7 +53,7 @@ declare type bettersqlite3$Database$RegisterOptions = {
 // now, `number` is a good approximation.
 declare type bettersqlite3$BoundValue = number | string | Buffer | null;
 declare type bettersqlite3$BindingDictionary = {
-  [string]: bettersqlite3$BoundValue
+  +[string]: bettersqlite3$BoundValue
 };
 
 declare class bettersqlite3$Statement {
