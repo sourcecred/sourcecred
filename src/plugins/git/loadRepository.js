@@ -25,6 +25,16 @@ export function loadRepository(
   mode: "FULL" | "COMMITS_ONLY" = "FULL"
 ): Repository {
   const git = localGit(repositoryPath);
+  try {
+    // If the repository is empty, HEAD will not exist. We check HEAD
+    // rather than the provided `rootRef` because, in the case where the
+    // repository is non-empty but the provided `rootRef` does not
+    // exist, we still want to fail.
+    git(["rev-parse", "--verify", "HEAD"]);
+  } catch (e) {
+    // No data in the repository.
+    return {commits: {}, trees: {}};
+  }
   const commits = findCommits(git, rootRef);
   const trees = (() => {
     switch (mode) {

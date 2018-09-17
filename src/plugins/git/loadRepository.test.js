@@ -3,6 +3,7 @@
 import tmp from "tmp";
 
 import {createExampleRepo} from "./example/exampleRepo";
+import {localGit} from "./gitUtils";
 import {loadRepository} from "./loadRepository";
 
 const cleanups: (() => void)[] = [];
@@ -57,5 +58,23 @@ describe("plugins/git/loadRepository", () => {
       commits: new Set(Object.keys(part.commits)),
       trees: new Set(Object.keys(part.trees)),
     }).toMatchSnapshot();
+  });
+
+  it("fails when given a non-existent root ref", () => {
+    const repository = createExampleRepo(mkdtemp());
+    const invalidHash = "0".repeat(40);
+    expect(() => {
+      loadRepository(repository.path, invalidHash);
+    }).toThrow("fatal: bad object 0000000000000000000000000000000000000000");
+  });
+
+  it("handles an empty repository properly", () => {
+    const repositoryPath = mkdtemp();
+    const git = localGit(repositoryPath);
+    git(["init"]);
+    expect(loadRepository(repositoryPath, "HEAD")).toEqual({
+      commits: {},
+      trees: {},
+    });
   });
 });
