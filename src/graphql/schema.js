@@ -33,8 +33,8 @@ export type ObjectId = string;
 //     are not.
 export type Schema = {+[Typename]: NodeType};
 export type NodeType =
-  | {|+type: "OBJECT", +fields: {+[Fieldname]: FieldType}|}
-  | {|+type: "UNION", +clauses: {+[Typename]: true}|};
+  | {|+type: "OBJECT", +fields: {|+[Fieldname]: FieldType|}|}
+  | {|+type: "UNION", +clauses: {|+[Typename]: true|}|};
 export type FieldType =
   | {|+type: "ID"|}
   | {|+type: "PRIMITIVE"|}
@@ -101,7 +101,7 @@ export function object(fields: {[Fieldname]: FieldType}): NodeType {
 }
 
 export function union(clauses: $ReadOnlyArray<Typename>): NodeType {
-  const clausesMap = {};
+  const clausesMap: {|[Typename]: true|} = ({}: any);
   for (const clause of clauses) {
     if (clausesMap[clause] != null) {
       throw new Error(`duplicate union clause: "${clause}"`);
