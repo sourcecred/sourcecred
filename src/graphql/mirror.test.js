@@ -5,7 +5,7 @@ import fs from "fs";
 import tmp from "tmp";
 
 import * as Schema from "./schema";
-import {_inTransaction, Mirror} from "./mirror";
+import {_buildSchemaInfo, _inTransaction, Mirror} from "./mirror";
 
 describe("graphql/mirror", () => {
   function buildGithubSchema(): Schema.Schema {
@@ -172,6 +172,41 @@ describe("graphql/mirror", () => {
         expect(() => new Mirror(db, schema0)).toThrow("invalid field name");
         expect(() => new Mirror(db, buildGithubSchema())).not.toThrow();
       });
+    });
+  });
+
+  describe("_buildSchemaInfo", () => {
+    it("processes object types properly", () => {
+      const result = _buildSchemaInfo(buildGithubSchema());
+      expect(Object.keys(result.objectTypes).sort()).toEqual(
+        [
+          "Repository",
+          "Issue",
+          "IssueComment",
+          "User",
+          "Bot",
+          "Organization",
+        ].sort()
+      );
+      expect(result.objectTypes["Issue"].fields).toEqual(
+        (buildGithubSchema().Issue: any).fields
+      );
+      expect(
+        result.objectTypes["Issue"].primitiveFieldNames.slice().sort()
+      ).toEqual(["url", "title"].sort());
+      expect(result.objectTypes["Issue"].linkFieldNames.slice().sort()).toEqual(
+        ["author", "parent"].sort()
+      );
+      expect(
+        result.objectTypes["Issue"].connectionFieldNames.slice().sort()
+      ).toEqual(["comments"].sort());
+    });
+    it("processes union types correctly", () => {
+      const result = _buildSchemaInfo(buildGithubSchema());
+      expect(Object.keys(result.unionTypes).sort()).toEqual(["Actor"].sort());
+      expect(result.unionTypes["Actor"].clauses.slice().sort()).toEqual(
+        ["User", "Bot", "Organization"].sort()
+      );
     });
   });
 
