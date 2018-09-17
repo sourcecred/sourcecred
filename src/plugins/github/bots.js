@@ -14,6 +14,7 @@ export function botSet(): Set<string> {
     "metamaskbot",
     "nodejs-github-bot",
     "stickler-ci",
+    "tensorflow-gardener",
     "tensorflow-jenkins",
     "tensorflowbutler",
   ]);
