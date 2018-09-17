@@ -6,6 +6,8 @@ import * as N from "./nodes";
 import * as R from "./relationalView";
 import {createEdge} from "./edges";
 import {findMentionsAuthorReferences} from "./heuristics/mentionsAuthorReference";
+// TODO(@decentralion): Opportunity to reduce bundle size
+import {Reactions} from "./graphql";
 
 export function createGraph(view: R.RelationalView): Graph {
   const creator = new GraphCreator();
@@ -46,6 +48,21 @@ class GraphCreator {
         this.graph.addEdge(
           createEdge.references(referrer.address(), referent.address())
         );
+      }
+    }
+
+    for (const reactable of view.reactableEntities()) {
+      for (const {content, user} of reactable.reactions()) {
+        // We only support unambiguously positive reactions for now
+        if (
+          content === Reactions.THUMBS_UP ||
+          content === Reactions.HEART ||
+          content === Reactions.HOORAY
+        ) {
+          this.graph.addEdge(
+            createEdge.reacts(content, user, reactable.address())
+          );
+        }
       }
     }
 

@@ -339,6 +339,14 @@ describe("plugins/github/graphView", () => {
           expect(() => new GraphView(g)).toThrow("Invariant: Expected src");
         });
       });
+      describe("reactions edges", () => {
+        it("must have a supported type", () => {
+          const unsupported = ["THUMBS_DOWN", "LAUGH", "CONFUSED"];
+          for (const u of unsupported) {
+            failsForEdge(GE.createEdge.reacts(u, userlike, issue));
+          }
+        });
+      });
     });
 
     it("are properly re-entrant", () => {

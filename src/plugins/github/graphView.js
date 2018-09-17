@@ -7,6 +7,8 @@ import * as GN from "./nodes";
 import * as GE from "./edges";
 
 import * as GitNode from "../git/nodes";
+// TODO(@decentralion): Opportunity to reduce bundle size
+import {Reactions} from "./graphql";
 
 import {
   Graph,
@@ -245,6 +247,14 @@ export class GraphView {
         srcAccessor: (x) => GN.toRaw((x: any).reference.src),
         dstAccessor: (x) => GN.toRaw((x: any).reference.dst),
       },
+      [GE.REACTS_TYPE]: {
+        homs: homProduct(
+          [GN.Prefix.userlike],
+          [GN.Prefix.issue, GN.Prefix.pull, GN.Prefix.comment]
+        ),
+        srcAccessor: (x) => GN.toRaw((x: any).user),
+        dstAccessor: (x) => GN.toRaw((x: any).reactable),
+      },
     };
 
     for (const edge of this._graph.edges({
@@ -296,6 +306,27 @@ export class GraphView {
           )} with edge ${edgeToString(
             edge
           )} did not satisfy src/dst prefix requirements`
+        );
+      }
+    }
+
+    for (const reactionEdge of this._graph.edges({
+      addressPrefix: GE.Prefix.reacts,
+      srcPrefix: NodeAddress.empty,
+      dstPrefix: NodeAddress.empty,
+    })) {
+      const address: GE.RawAddress = (reactionEdge.address: any);
+      const reactsAddress: GE.ReactsAddress = (GE.fromRaw(address): any);
+      const {reactionType} = reactsAddress;
+      if (
+        reactionType !== Reactions.THUMBS_UP &&
+        reactionType !== Reactions.HEART &&
+        reactionType !== Reactions.HOORAY
+      ) {
+        throw new Error(
+          `Invariant: Edge ${stringify(
+            reactsAddress
+          )} has unspported reactionType`
         );
       }
     }
