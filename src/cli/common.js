@@ -8,7 +8,7 @@ import * as NullUtil from "../util/null";
 
 export type PluginName = "git" | "github";
 
-export function defaultPlugins(): PluginName[] {
+export function defaultPlugins(): $ReadOnlyArray<PluginName> {
   return ["git", "github"];
 }
 

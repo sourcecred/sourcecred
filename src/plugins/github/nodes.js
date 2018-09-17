@@ -6,7 +6,7 @@ import * as GitNode from "../git/nodes";
 export opaque type RawAddress: NodeAddressT = NodeAddressT;
 
 const GITHUB_PREFIX = NodeAddress.fromParts(["sourcecred", "github"]);
-export function _githubAddress(...parts: string[]): RawAddress {
+export function _githubAddress(...parts: $ReadOnlyArray<string>): RawAddress {
   return NodeAddress.append(GITHUB_PREFIX, ...parts);
 }
 

@@ -596,7 +596,7 @@ async function resolveContinuations(
  */
 export function requiredFragments(
   query: QueryDefinition
-): FragmentDefinition[] {
+): $ReadOnlyArray<FragmentDefinition> {
   const fragmentsByName = {};
   createFragments().forEach((fd) => {
     fragmentsByName[fd.name] = fd;
@@ -684,7 +684,10 @@ export function merge<T>(
   function isObject(x) {
     return !Array.isArray(x) && typeof x === "object" && x != null;
   }
-  function checkKey(key: string | number, destination: Object | Array<any>) {
+  function checkKey(
+    key: string | number,
+    destination: Object | $ReadOnlyArray<any>
+  ) {
     if (!(key in destination)) {
       const keyText = JSON.stringify(key);
       const destinationText = JSON.stringify(destination);
@@ -1029,7 +1032,7 @@ function reactionsFragment(): FragmentDefinition {
  * These fragments are used to construct the root query, and also to
  * fetch more pages of specific entity types.
  */
-export function createFragments(): FragmentDefinition[] {
+export function createFragments(): $ReadOnlyArray<FragmentDefinition> {
   return [
     whoamiFragment(),
     issuesFragment(),

@@ -12,10 +12,16 @@ export interface Utils {
   deterministicCommit(message: string): void;
 }
 
-export type GitDriver = (args: string[], env?: {[string]: string}) => string;
+export type GitDriver = (
+  args: $ReadOnlyArray<string>,
+  env?: {[string]: string}
+) => string;
 
 export function localGit(repositoryPath: string): GitDriver {
-  return function git(args: string[], env?: {[string]: string}): string {
+  return function git(
+    args: $ReadOnlyArray<string>,
+    env?: {[string]: string}
+  ): string {
     // We standardize the environment variables shown to Git, using
     // Git's test suite [1] as inspiration. It is particularly important
     // that `GIT_DIR` be unset from the parent process environment.

@@ -64,6 +64,7 @@ export function createConnections(
 
   function processConnection(target: NodeAddressT, connection: Connection) {
     const connections = NullUtil.get(result.get(target));
+    // eslint-disable-next-line flowtype/no-mutable-array
     (((connections: $ReadOnlyArray<Connection>): any): Connection[]).push(
       connection
     );

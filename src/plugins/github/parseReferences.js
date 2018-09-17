@@ -15,7 +15,7 @@ export type ParsedReference = {|
  * (across softbreaks), and exclude references that occur within code
  * blocks.
  */
-export function parseReferences(body: string): ParsedReference[] {
+export function parseReferences(body: string): $ReadOnlyArray<ParsedReference> {
   // Note to maintainer: If it becomes necessary to encode references in a
   // richer format, consider implementing the type signature described in
   // https://github.com/sourcecred/sourcecred/pull/130#pullrequestreview-113849998
@@ -23,7 +23,9 @@ export function parseReferences(body: string): ParsedReference[] {
   return [].concat.apply([], blocks.map(parseReferencesFromRawString));
 }
 
-function parseReferencesFromRawString(textBlock: string): ParsedReference[] {
+function parseReferencesFromRawString(
+  textBlock: string
+): $ReadOnlyArray<ParsedReference> {
   return [
     ...findNumericReferences(textBlock),
     ...findRepoNumericReferences(textBlock),
@@ -33,7 +35,9 @@ function parseReferencesFromRawString(textBlock: string): ParsedReference[] {
   ];
 }
 
-function findRepoNumericReferences(textBlock: string): ParsedReference[] {
+function findRepoNumericReferences(
+  textBlock: string
+): $ReadOnlyArray<ParsedReference> {
   const re = new RegExp(
     `(?:\\W|^)((?:${githubOwnerPattern})/(?:${githubRepoPattern})#\\d+)(?=\\W|$)`,
     "gm"
@@ -44,14 +48,18 @@ function findRepoNumericReferences(textBlock: string): ParsedReference[] {
   }));
 }
 
-function findNumericReferences(textBlock: string): ParsedReference[] {
+function findNumericReferences(
+  textBlock: string
+): $ReadOnlyArray<ParsedReference> {
   return findAllMatches(/(?:\W|^)(#\d+)(?=\W|$)/gm, textBlock).map((x) => ({
     refType: "BASIC",
     ref: x[1],
   }));
 }
 
-function findUsernameReferences(textBlock: string): ParsedReference[] {
+function findUsernameReferences(
+  textBlock: string
+): $ReadOnlyArray<ParsedReference> {
   const pairedWithPattern =
     "(?:\\W|^)(?:P|p)aired(?:-| )(?:w|W)ith:? " +
     `(@(?:${githubOwnerPattern}))(?=\\W|$)`;
@@ -74,7 +82,9 @@ function findUsernameReferences(textBlock: string): ParsedReference[] {
   return [...pairedWithRefs, ...basicRefs];
 }
 
-function findGithubUrlReferences(textBlock: string): ParsedReference[] {
+function findGithubUrlReferences(
+  textBlock: string
+): $ReadOnlyArray<ParsedReference> {
   const urlRegex = new RegExp(
     "" +
       /(?:\W|^)/.source +
@@ -99,7 +109,9 @@ function findGithubUrlReferences(textBlock: string): ParsedReference[] {
   }));
 }
 
-function findCommitReferences(textBlock: string): ParsedReference[] {
+function findCommitReferences(
+  textBlock: string
+): $ReadOnlyArray<ParsedReference> {
   const hashReferences = findAllMatches(
     /(?:\W|^)([a-fA-F0-9]{40,})(?=\W|$)/gm,
     textBlock
@@ -140,7 +152,7 @@ function findCommitReferences(textBlock: string): ParsedReference[] {
   return [...hashReferences, ...urlReferences];
 }
 
-function findAllMatches(re: RegExp, s: string): any[] {
+function findAllMatches(re: RegExp, s: string): $ReadOnlyArray<any> {
   // modified from: https://stackoverflow.com/a/6323598
   let m;
   const matches = [];

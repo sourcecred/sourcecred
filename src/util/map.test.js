@@ -180,8 +180,9 @@ describe("util/map", () => {
     });
     it("allows mapping to a different value type", () => {
       const input: Map<number, string> = new Map().set(1, "one").set(2, "two");
-      const output: Map<number, string[]> = MapUtil.mapValues(input, (_, s) =>
-        s.split("")
+      const output: Map<number, $ReadOnlyArray<string>> = MapUtil.mapValues(
+        input,
+        (_, s) => s.split("")
       );
       expect(input).toEqual(new Map().set(1, "one").set(2, "two"));
       expect(output).toEqual(

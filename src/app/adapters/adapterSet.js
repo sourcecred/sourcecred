@@ -45,11 +45,11 @@ export class StaticAdapterSet {
     return this._adapters;
   }
 
-  nodeTypes(): NodeType[] {
+  nodeTypes(): $ReadOnlyArray<NodeType> {
     return [].concat(...this._adapters.map((x) => x.nodeTypes()));
   }
 
-  edgeTypes(): EdgeType[] {
+  edgeTypes(): $ReadOnlyArray<EdgeType> {
     return [].concat(...this._adapters.map((x) => x.edgeTypes()));
   }
 

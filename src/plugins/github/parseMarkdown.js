@@ -24,7 +24,7 @@ import {Node, Parser} from "commonmark";
  *
  * See test cases for examples.
  */
-export function textBlocks(string: string): string[] {
+export function textBlocks(string: string): $ReadOnlyArray<string> {
   const ast = new Parser().parse(string);
   deformat(ast);
   coalesceText(ast);

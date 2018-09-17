@@ -30,7 +30,7 @@ describe("plugins/git/createGraph", () => {
       beforeTree: Hash,
       afterTree: Hash,
       trees: {[Hash]: Tree}
-    ): BecomesEdge[] {
+    ): $ReadOnlyArray<BecomesEdge> {
       const repo = {
         commits: {
           commit1: {

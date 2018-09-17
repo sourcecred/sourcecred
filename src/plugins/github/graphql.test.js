@@ -251,7 +251,7 @@ describe("plugins/github/graphql", () => {
         reviewComments: true,
       });
       const result = Array.from(continuationsFromQuery(data));
-      const expectedContinuations: Continuation[] = (() => {
+      const expectedContinuations: $ReadOnlyArray<Continuation> = (() => {
         const continuations = makeContinuations();
         return [
           continuations.issues,
@@ -281,7 +281,7 @@ describe("plugins/github/graphql", () => {
         reviewComments: true,
       });
       const result = Array.from(continuationsFromQuery(data));
-      const expectedContinuations: Continuation[] = (() => {
+      const expectedContinuations: $ReadOnlyArray<Continuation> = (() => {
         const continuations = makeContinuations();
         return [
           continuations.issues,

@@ -22,7 +22,7 @@ export const MENTIONS_AUTHOR_TYPE = "MENTIONS_AUTHOR";
 export const REACTS_TYPE = "REACTS";
 
 const GITHUB_PREFIX = EdgeAddress.fromParts(["sourcecred", "github"]);
-function githubEdgeAddress(...parts: string[]): RawAddress {
+function githubEdgeAddress(...parts: $ReadOnlyArray<string>): RawAddress {
   return EdgeAddress.append(GITHUB_PREFIX, ...parts);
 }
 
