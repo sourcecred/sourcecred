@@ -25,6 +25,8 @@ import type {
   CommitJSON,
   NullableAuthorJSON,
   ReviewState,
+  ReactionJSON,
+  ReactionContent,
 } from "./graphql";
 import * as GitNode from "../git/nodes";
 import * as MapUtil from "../../util/map";
@@ -255,6 +257,12 @@ export class RelationalView {
     yield* this.userlikes();
   }
 
+  *reactableEntities(): Iterator<ReactableEntity> {
+    yield* this.issues();
+    yield* this.pulls();
+    yield* this.comments();
+  }
+
   toJSON(): RelationalViewJSON {
     const rawJSON = {
       repos: MapUtil.toObject(this._repos),
@@ -332,6 +340,7 @@ export class RelationalView {
       authors: this._addNullableAuthor(json.author),
       body: json.body,
       title: json.title,
+      reactions: json.reactions.nodes.map((x) => this._addReaction(x)),
     };
     this._issues.set(N.toRaw(address), entry);
     return address;
@@ -371,6 +380,7 @@ export class RelationalView {
       mergedAs,
       additions: json.additions,
       deletions: json.deletions,
+      reactions: json.reactions.nodes.map((x) => this._addReaction(x)),
     };
     this._pulls.set(N.toRaw(address), entry);
     return address;
@@ -418,9 +428,20 @@ export class RelationalView {
       url: json.url,
       authors: this._addNullableAuthor(json.author),
       body: json.body,
+      reactions: json.reactions.nodes.map((x) => this._addReaction(x)),
     };
     this._comments.set(N.toRaw(address), entry);
     return address;
+  }
+
+  _addReaction(json: ReactionJSON): ReactionRecord {
+    const authorAddresses = this._addNullableAuthor(json.user);
+    if (authorAddresses.length !== 1) {
+      throw new Error(
+        `Invariant violation: Reaction with id ${json.id} did not have 1 author`
+      );
+    }
+    return {content: json.content, user: authorAddresses[0]};
   }
 
   _addNullableAuthor(json: NullableAuthorJSON): UserlikeAddress[] {
@@ -617,6 +638,11 @@ export class RelationalView {
   }
 }
 
+type ReactionRecord = {|
+  +content: ReactionContent,
+  +user: UserlikeAddress,
+|};
+
 type Entry =
   | RepoEntry
   | IssueEntry
@@ -685,6 +711,7 @@ type IssueEntry = {|
   +url: string,
   +comments: CommentAddress[],
   +authors: UserlikeAddress[],
+  +reactions: ReactionRecord[],
 |};
 
 export class Issue extends _Entity<IssueEntry> {
@@ -720,6 +747,9 @@ export class Issue extends _Entity<IssueEntry> {
   referencedBy(): Iterator<TextContentEntity> {
     return this._view._referencedBy(this);
   }
+  reactions(): $ReadOnlyArray<ReactionRecord> {
+    return this._entry.reactions;
+  }
 }
 
 type PullEntry = {|
@@ -733,6 +763,7 @@ type PullEntry = {|
   +additions: number,
   +deletions: number,
   +authors: UserlikeAddress[],
+  +reactions: ReactionRecord[],
 |};
 
 export class Pull extends _Entity<PullEntry> {
@@ -783,6 +814,9 @@ export class Pull extends _Entity<PullEntry> {
   referencedBy(): Iterator<TextContentEntity> {
     return this._view._referencedBy(this);
   }
+  reactions(): $ReadOnlyArray<ReactionRecord> {
+    return this._entry.reactions;
+  }
 }
 
 type ReviewEntry = {|
@@ -831,6 +865,7 @@ type CommentEntry = {|
   +body: string,
   +url: string,
   +authors: UserlikeAddress[],
+  +reactions: ReactionRecord[],
 |};
 
 export class Comment extends _Entity<CommentEntry> {
@@ -866,6 +901,9 @@ export class Comment extends _Entity<CommentEntry> {
   }
   referencedBy(): Iterator<TextContentEntity> {
     return this._view._referencedBy(this);
+  }
+  reactions(): $ReadOnlyArray<ReactionRecord> {
+    return this._entry.reactions;
   }
 }
 
@@ -977,6 +1015,7 @@ export type ReferentEntity =
   | Comment
   | Commit
   | Userlike;
+export type ReactableEntity = Issue | Pull | Comment;
 
 export opaque type AddressEntryMapJSON<T> = {[N.RawAddress]: T};
 export opaque type RelationalViewJSON = Compatible<{|
