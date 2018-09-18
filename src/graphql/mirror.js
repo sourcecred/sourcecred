@@ -40,34 +40,61 @@ export class Mirror {
    * Embed the GraphQL schema into the database, initializing it for use
    * as a mirror.
    *
-   * We store the data for an object across three tables, depending on
-   * the field type:
-   *
-   *   - Connections are stored in the `connections `table.
-   *   - Node references are stored in the `links` table.
-   *   - Primitive data is stored in a type-specific data table.
-   *
-   * We refer to node and primitive data together as "own data", because
-   * this is the data that can be queried uniformly for all elements of
-   * a type; querying connection data, in contrast, requires the
-   * object-specific end cursor.
-   *
-   * The aforementioned tables are each keyed by object ID. An object's
-   * metadata appears in the `objects` table, including the object's
-   * typename and the last update for the object's own-data. Each
-   * connection has its own last update value, because connections can
-   * be updated independently of each other and of own-data.
-   *
-   * Note that any object in the database should have entries in the
-   * `connections` and `links` table even if the node has never been
-   * updated.
-   *
    * This method should only be invoked once, at construction time.
    *
    * If the database has already been initialized with the same schema
    * and version, no action is taken and no error is thrown. If the
    * database has been initialized with a different schema or version,
    * the database is left unchanged, and an error is thrown.
+   *
+   * A discussion of the database structure follows.
+   *
+   * ---
+   *
+   * Objects have three kinds of fields: connections, links, and
+   * primitives (plus an ID, which we ignore for now). The database has
+   * a single `connections` table for all objects, and also a single
+   * `links` table for all objects. For primitives, each GraphQL data
+   * type has its own table, and each object of that type has a row in
+   * the corresponding table.
+   *
+   * In more detail:
+   *   - The `connections` table has a row for each `(id, fieldname)`
+   *     pair, where `fieldname` is the name of a connection field on the
+   *     object with the given ID. This stores metadata about the
+   *     connection: its total count, when it was last updated, etc. It
+   *     does not store the actual entries in the connection (the nodes
+   *     that the connection points to); `connection_entries` stores
+   *     these.
+   *   - The `links` table has a row for each `(id, fieldname)` pair,
+   *     where `fieldname` is the name of a link field on the object
+   *     with the given ID. This simply points to the referenced object.
+   *   - For each type `T`, the `primitives_T` table has one row for
+   *     each object of type `T`, storing the primitive data of the
+   *     object.
+   *
+   * We refer to node and primitive data together as "own data", because
+   * this is the data that can be queried uniformly for all elements of
+   * a type; querying connection data, by contrast, requires the
+   * object-specific end cursor.
+   *
+   * All aforementioned tables are keyed by object ID. Each object also
+   * appears once in the `objects` table, which relates its ID,
+   * typename, and last own-data update. Each connection has its own
+   * last-update value, because connections can be updated independently
+   * of each other and of own-data.
+   *
+   * Note that any object in the database should have entries in the
+   * `connections` and `links` table for all relevant fields, even if
+   * the node has never been updated. This is for convenience of
+   * implementation: it means that the first fetch for a node is the
+   * same as subsequent fetches (a SQL `UPDATE` instead of first
+   * requiring an existence check).
+   *
+   * Finally, a table `meta` is used to store metadata about the mirror
+   * itself. This is used to make sure that the mirror is not loaded
+   * with an incompatible version of the code or schema. It is never
+   * updated after it is first set.
    */
   _initialize() {
     // The following version number must be updated if there is any
