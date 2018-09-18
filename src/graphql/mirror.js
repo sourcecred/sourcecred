@@ -223,56 +223,27 @@ export class Mirror {
       }
 
       // Then, create primitive-data tables, which depend on the schema.
-      const schema = this._schema;
-      for (const typename of Object.keys(schema)) {
-        const nodeType = schema[typename];
-        switch (nodeType.type) {
-          case "UNION":
-            // Unions exist at the type level only; they have no physical
-            // representation.
-            break;
-          case "OBJECT": {
-            if (!isSqlSafe(typename)) {
-              throw new Error(
-                "invalid object type name: " + JSON.stringify(typename)
-              );
-            }
-            const primitiveFieldNames: Schema.Fieldname[] = [];
-            for (const fieldname of Object.keys(nodeType.fields)) {
-              const field = nodeType.fields[fieldname];
-              switch (field.type) {
-                case "ID": // handled separately
-                  break;
-                case "NODE": // goes in `links` table
-                  break;
-                case "CONNECTION": // goes in `connections` table
-                  break;
-                case "PRIMITIVE":
-                  if (!isSqlSafe(fieldname)) {
-                    throw new Error(
-                      "invalid field name: " + JSON.stringify(fieldname)
-                    );
-                  }
-                  primitiveFieldNames.push(fieldname);
-                  break;
-                // istanbul ignore next
-                default:
-                  throw new Error((field.type: empty));
-              }
-            }
-            const tableName = primitivesTableName(typename);
-            const tableSpec = [
-              "id TEXT NOT NULL PRIMARY KEY",
-              ...primitiveFieldNames.map((fieldname) => `"${fieldname}"`),
-              "FOREIGN KEY(id) REFERENCES objects(id)",
-            ].join(", ");
-            db.prepare(`CREATE TABLE ${tableName} (${tableSpec})`).run();
-            break;
-          }
-          // istanbul ignore next
-          default:
-            throw new Error((nodeType.type: empty));
+      // We only create tables for object types, as union types have no
+      // physical representation; they exist only at the type level.
+      for (const typename of Object.keys(this._schemaInfo.objectTypes)) {
+        const type = this._schemaInfo.objectTypes[typename];
+        if (!isSqlSafe(typename)) {
+          throw new Error(
+            "invalid object type name: " + JSON.stringify(typename)
+          );
         }
+        for (const fieldname of type.primitiveFieldNames) {
+          if (!isSqlSafe(fieldname)) {
+            throw new Error("invalid field name: " + JSON.stringify(fieldname));
+          }
+        }
+        const tableName = primitivesTableName(typename);
+        const tableSpec = [
+          "id TEXT NOT NULL PRIMARY KEY",
+          ...type.primitiveFieldNames.map((fieldname) => `"${fieldname}"`),
+          "FOREIGN KEY(id) REFERENCES objects(id)",
+        ].join(", ");
+        db.prepare(`CREATE TABLE ${tableName} (${tableSpec})`).run();
       }
     });
   }
