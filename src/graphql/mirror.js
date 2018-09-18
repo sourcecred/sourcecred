@@ -204,7 +204,7 @@ export class Mirror {
               rowid INTEGER PRIMARY KEY,
               connection_id INTEGER NOT NULL,
               idx INTEGER NOT NULL,  -- impose an ordering
-              child_id TEXT NOT NULL,
+              child_id TEXT,
               UNIQUE(connection_id, idx),
               FOREIGN KEY(connection_id) REFERENCES connections(rowid),
               FOREIGN KEY(child_id) REFERENCES objects(id)
