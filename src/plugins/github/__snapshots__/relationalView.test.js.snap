@@ -16,7 +16,106 @@ Object {
 }
 `;
 
-exports[`plugins/github/relationalView Comment has reactions 1`] = `Array []`;
+exports[`plugins/github/relationalView Comment has reactions 1`] = `
+Array [
+  Object {
+    "content": "THUMBS_UP",
+    "user": Object {
+      "login": "wchargin",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "THUMBS_DOWN",
+    "user": Object {
+      "login": "wchargin",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "THUMBS_UP",
+    "user": Object {
+      "login": "decentralion",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "LAUGH",
+    "user": Object {
+      "login": "wchargin",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "THUMBS_DOWN",
+    "user": Object {
+      "login": "decentralion",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "HOORAY",
+    "user": Object {
+      "login": "wchargin",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "LAUGH",
+    "user": Object {
+      "login": "decentralion",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "CONFUSED",
+    "user": Object {
+      "login": "wchargin",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "HOORAY",
+    "user": Object {
+      "login": "decentralion",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "HEART",
+    "user": Object {
+      "login": "wchargin",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "CONFUSED",
+    "user": Object {
+      "login": "decentralion",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+  Object {
+    "content": "HEART",
+    "user": Object {
+      "login": "decentralion",
+      "subtype": "USER",
+      "type": "USERLIKE",
+    },
+  },
+]
+`;
 
 exports[`plugins/github/relationalView Comment has url 1`] = `"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"`;
 
@@ -384,6 +483,104 @@ Object {
       "content": "HOORAY",
       "user": Object {
         "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "CONFUSED",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "HEART",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+  ],
+  "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198": Array [
+    Object {
+      "content": "THUMBS_UP",
+      "user": Object {
+        "login": "wchargin",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "THUMBS_DOWN",
+      "user": Object {
+        "login": "wchargin",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "THUMBS_UP",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "LAUGH",
+      "user": Object {
+        "login": "wchargin",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "THUMBS_DOWN",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "HOORAY",
+      "user": Object {
+        "login": "wchargin",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "LAUGH",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "CONFUSED",
+      "user": Object {
+        "login": "wchargin",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "HOORAY",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "HEART",
+      "user": Object {
+        "login": "wchargin",
         "subtype": "USER",
         "type": "USERLIKE",
       },
