@@ -68,6 +68,34 @@ describe("graphql/mirror", () => {
         );
       });
 
+      it("creates the right set of tables", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        new Mirror(db, schema);
+        const tables = db
+          .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
+          .pluck()
+          .all();
+        expect(tables.sort()).toEqual(
+          [
+            // Structural tables
+            "meta",
+            "updates",
+            "objects",
+            "links",
+            "connections",
+            "connection_entries",
+            // Primitive data tables per OBJECT type (no UNIONs)
+            "primitives_Repository",
+            "primitives_Issue",
+            "primitives_IssueComment",
+            "primitives_User",
+            "primitives_Bot",
+            "primitives_Organization",
+          ].sort()
+        );
+      });
+
       it("is idempotent", () => {
         // We use an on-disk database file here so that we can dump the
         // contents to ensure that the database is physically unchanged.
@@ -111,6 +139,38 @@ describe("graphql/mirror", () => {
 
         expect(() => new Mirror(db, schema0)).not.toThrow();
         expect(fs.readFileSync(filename).toJSON()).toEqual(data);
+      });
+
+      it("rejects a schema with SQL-unsafe type name", () => {
+        const s = Schema;
+        const schema0 = s.schema({
+          "Non-Word-Characters": s.object({id: s.id()}),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema0)).toThrow(
+          'invalid object type name: "Non-Word-Characters"'
+        );
+      });
+
+      it("rejects a schema with SQL-unsafe field name", () => {
+        const s = Schema;
+        const schema0 = s.schema({
+          A: s.object({id: s.id(), "Non-Word-Characters": s.primitive()}),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema0)).toThrow(
+          'invalid field name: "Non-Word-Characters"'
+        );
+      });
+
+      it("allows specifying a good schema after rejecting one", () => {
+        const s = Schema;
+        const schema0 = s.schema({
+          A: s.object({id: s.id(), "Non-Word-Characters": s.primitive()}),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema0)).toThrow("invalid field name");
+        expect(() => new Mirror(db, buildGithubSchema())).not.toThrow();
       });
     });
   });
