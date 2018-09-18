@@ -68,6 +68,34 @@ describe("graphql/mirror", () => {
         );
       });
 
+      it("creates the right set of tables", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        new Mirror(db, schema);
+        const tables = db
+          .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
+          .pluck()
+          .all();
+        expect(tables.sort()).toEqual(
+          [
+            // Structural tables
+            "meta",
+            "updates",
+            "objects",
+            "links",
+            "connections",
+            "connection_entries",
+            // Primitive data tables per OBJECT type (no UNIONs)
+            "primitives_Repository",
+            "primitives_Issue",
+            "primitives_IssueComment",
+            "primitives_User",
+            "primitives_Bot",
+            "primitives_Organization",
+          ].sort()
+        );
+      });
+
       it("is idempotent", () => {
         // We use an on-disk database file here so that we can dump the
         // contents to ensure that the database is physically unchanged.
