@@ -85,11 +85,12 @@ export class Mirror {
    * of each other and of own-data.
    *
    * Note that any object in the database should have entries in the
-   * `connections` and `links` table for all relevant fields, even if
-   * the node has never been updated. This is for convenience of
-   * implementation: it means that the first fetch for a node is the
-   * same as subsequent fetches (a SQL `UPDATE` instead of first
-   * requiring an existence check).
+   * `connections` and `links` table for all relevant fields, as well as
+   * an entry in the relevant primitives table, even if the node has
+   * never been updated. This is for convenience of implementation: it
+   * means that the first fetch for a node is the same as subsequent
+   * fetches (a SQL `UPDATE` instead of first requiring an existence
+   * check).
    *
    * Finally, a table `meta` is used to store metadata about the mirror
    * itself. This is used to make sure that the mirror is not loaded
