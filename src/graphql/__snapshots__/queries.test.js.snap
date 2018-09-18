@@ -322,6 +322,26 @@ Array [
             "type": "INLINE_FRAGMENT",
             "typeCondition": "Gizmo",
           },
+          Object {
+            "selections": Array [
+              Object {
+                "alias": null,
+                "args": Object {},
+                "name": "__typename",
+                "selections": Array [],
+                "type": "FIELD",
+              },
+              Object {
+                "alias": null,
+                "args": Object {},
+                "name": "id",
+                "selections": Array [],
+                "type": "FIELD",
+              },
+            ],
+            "type": "INLINE_FRAGMENT",
+            "typeCondition": null,
+          },
         ],
         "type": "FIELD",
       },
@@ -374,7 +394,7 @@ Array [
 ]
 `;
 
-exports[`graphql/queries end-to-end-test cases for a query using lots of features should stringify as inline 1`] = `"query QueryWithParameters($qp1: String! $qp2: String!) { thing(id: 12345 name: $qp1) { fruit(type: APPLE tasty: true) ...otherThings } more { ... on Widget { mcguffins { quantity } goo: slime(state: SLIMY) { availability } } ... on Gizmo { cogs(attributes: { teeth: [ 12 14 16 ] shaft: null }) } } } query QueryWithoutParameters { rateLimit { remaining } } fragment otherThings on Thing { __typename quality }"`;
+exports[`graphql/queries end-to-end-test cases for a query using lots of features should stringify as inline 1`] = `"query QueryWithParameters($qp1: String! $qp2: String!) { thing(id: 12345 name: $qp1) { fruit(type: APPLE tasty: true) ...otherThings } more { ... on Widget { mcguffins { quantity } goo: slime(state: SLIMY) { availability } } ... on Gizmo { cogs(attributes: { teeth: [ 12 14 16 ] shaft: null }) } ... { __typename id } } } query QueryWithoutParameters { rateLimit { remaining } } fragment otherThings on Thing { __typename quality }"`;
 
 exports[`graphql/queries end-to-end-test cases for a query using lots of features should stringify as multiline 1`] = `
 "query QueryWithParameters($qp1: String! $qp2: String!) {
@@ -393,6 +413,10 @@ exports[`graphql/queries end-to-end-test cases for a query using lots of feature
     }
     ... on Gizmo {
       cogs(attributes: { teeth: [ 12 14 16 ] shaft: null })
+    }
+    ... {
+      __typename
+      id
     }
   }
 }
