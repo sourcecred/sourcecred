@@ -12,6 +12,7 @@ import * as Schema from "./schema";
 export class Mirror {
   +_db: Database;
   +_schema: Schema.Schema;
+  +_schemaInfo: SchemaInfo;
 
   /**
    * Create a GraphQL mirror using the given database connection and
@@ -33,6 +34,7 @@ export class Mirror {
     if (schema == null) throw new Error("schema: " + String(schema));
     this._db = db;
     this._schema = schema;
+    this._schemaInfo = _buildSchemaInfo(this._schema);
     this._initialize();
   }
 
@@ -274,6 +276,98 @@ export class Mirror {
       }
     });
   }
+}
+
+/**
+ * Decomposition of a schema, grouping types by their kind (object vs.
+ * union) and object fields by their kind (primitive vs. link vs.
+ * connection).
+ *
+ * All arrays contain elements in arbitrary order.
+ */
+type SchemaInfo = {|
+  +objectTypes: {|
+    +[Schema.Typename]: {|
+      +fields: {|+[Schema.Fieldname]: Schema.FieldType|},
+      +primitiveFieldNames: $ReadOnlyArray<Schema.Fieldname>,
+      +linkFieldNames: $ReadOnlyArray<Schema.Fieldname>,
+      +connectionFieldNames: $ReadOnlyArray<Schema.Fieldname>,
+      // There is always exactly one ID field, so it needs no
+      // special representation. (It's still included in the `fields`
+      // dictionary, though.)
+    |},
+  |},
+  +unionTypes: {|
+    +[Schema.Fieldname]: {|
+      +clauses: $ReadOnlyArray<Schema.Typename>,
+    |},
+  |},
+|};
+
+export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
+  const result = {
+    objectTypes: (({}: any): {|
+      [Schema.Typename]: {|
+        +fields: {|+[Schema.Fieldname]: Schema.FieldType|},
+        +primitiveFieldNames: Array<Schema.Fieldname>,
+        +linkFieldNames: Array<Schema.Fieldname>,
+        +connectionFieldNames: Array<Schema.Fieldname>,
+      |},
+    |}),
+    unionTypes: (({}: any): {|
+      [Schema.Fieldname]: {|
+        +clauses: $ReadOnlyArray<Schema.Typename>,
+      |},
+    |}),
+  };
+  for (const typename of Object.keys(schema)) {
+    const type = schema[typename];
+    switch (type.type) {
+      case "OBJECT": {
+        const entry: {|
+          +fields: {|+[Schema.Fieldname]: Schema.FieldType|},
+          +primitiveFieldNames: Array<Schema.Fieldname>,
+          +linkFieldNames: Array<Schema.Fieldname>,
+          +connectionFieldNames: Array<Schema.Fieldname>,
+        |} = {
+          fields: type.fields,
+          primitiveFieldNames: [],
+          linkFieldNames: [],
+          connectionFieldNames: [],
+        };
+        result.objectTypes[typename] = entry;
+        for (const fieldname of Object.keys(type.fields)) {
+          const field = type.fields[fieldname];
+          switch (field.type) {
+            case "ID":
+              break;
+            case "PRIMITIVE":
+              entry.primitiveFieldNames.push(fieldname);
+              break;
+            case "NODE":
+              entry.linkFieldNames.push(fieldname);
+              break;
+            case "CONNECTION":
+              entry.connectionFieldNames.push(fieldname);
+              break;
+            // istanbul ignore next
+            default:
+              throw new Error((field.type: empty));
+          }
+        }
+        break;
+      }
+      case "UNION": {
+        const entry = {clauses: Object.keys(type.clauses)};
+        result.unionTypes[typename] = entry;
+        break;
+      }
+      // istanbul ignore next
+      default:
+        throw new Error((type.type: empty));
+    }
+  }
+  return result;
 }
 
 /**
