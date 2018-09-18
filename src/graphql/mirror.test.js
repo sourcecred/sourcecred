@@ -120,7 +120,7 @@ describe("graphql/mirror", () => {
         });
         const db = new Database(":memory:");
         expect(() => new Mirror(db, schema0)).toThrow(
-          "invalid object type name"
+          'invalid object type name: "Non-Word-Characters"'
         );
       });
 
@@ -130,7 +130,9 @@ describe("graphql/mirror", () => {
           A: s.object({id: s.id(), "Non-Word-Characters": s.primitive()}),
         });
         const db = new Database(":memory:");
-        expect(() => new Mirror(db, schema0)).toThrow("invalid field name");
+        expect(() => new Mirror(db, schema0)).toThrow(
+          'invalid field name: "Non-Word-Characters"'
+        );
       });
 
       it("allows specifying a good schema after rejecting one", () => {

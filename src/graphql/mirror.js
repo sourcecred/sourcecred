@@ -230,7 +230,9 @@ export class Mirror {
             break;
           case "OBJECT": {
             if (!isSqlSafe(typename)) {
-              throw new Error("invalid object type name: " + typename);
+              throw new Error(
+                "invalid object type name: " + JSON.stringify(typename)
+              );
             }
             const primitiveFieldNames: Schema.Fieldname[] = [];
             for (const fieldname of Object.keys(nodeType.fields)) {
@@ -244,7 +246,9 @@ export class Mirror {
                   break;
                 case "PRIMITIVE":
                   if (!isSqlSafe(fieldname)) {
-                    throw new Error("invalid field name: " + fieldname);
+                    throw new Error(
+                      "invalid field name: " + JSON.stringify(fieldname)
+                    );
                   }
                   primitiveFieldNames.push(fieldname);
                   break;
@@ -253,7 +257,7 @@ export class Mirror {
                   throw new Error((field.type: empty));
               }
             }
-            const tableName = `"data_${typename}"`;
+            const tableName = primitivesTableName(typename);
             const tableSpec = [
               "id TEXT NOT NULL PRIMARY KEY",
               ...primitiveFieldNames.map((fieldname) => `"${fieldname}"`),
@@ -322,6 +326,25 @@ export function _inTransaction<R>(db: Database, fn: () => R): R {
  * For instance, the function will return `true` if passed "col", but
  * will return `false` if passed "'); DROP TABLE objects; --".
  */
-function isSqlSafe(token) {
+function isSqlSafe(token: string) {
   return !token.match(/[^A-Za-z0-9_]/);
+}
+
+/**
+ * Get the name of the table used to store primitive data for objects of
+ * the given type, which should be SQL-safe lest an error be thrown.
+ *
+ * Note that the resulting string is double-quoted.
+ */
+function primitivesTableName(typename: Schema.Typename) {
+  // istanbul ignore if
+  if (!isSqlSafe(typename)) {
+    // This shouldn't be reachable---we should have caught it earlier.
+    // But checking it anyway is cheap.
+    throw new Error(
+      "Invariant violation: invalid object type name " +
+        JSON.stringify(typename)
+    );
+  }
+  return `"primitives_${typename}"`;
 }
