@@ -188,6 +188,7 @@ function ensureNoMorePages(result: any, path = []) {
   }
   if (result.pageInfo) {
     if (result.pageInfo.hasNextPage) {
+      console.error(result);
       throw new Error(`More pages at: ${path.join()}`);
     }
   }

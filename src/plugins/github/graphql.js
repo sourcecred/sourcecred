@@ -87,7 +87,13 @@ const PAGE_SIZE_REACTIONS = 5;
  * the continuation into a query, and not of the continuation itself.
  */
 export type Continuation = {|
-  +enclosingNodeType: "REPOSITORY" | "ISSUE" | "PULL" | "REVIEW" | "COMMENT",
+  +enclosingNodeType:
+    | "REPOSITORY"
+    | "ISSUE"
+    | "PULL"
+    | "REVIEW"
+    | "ISSUE_COMMENT"
+    | "REVIEW_COMMENT",
   +enclosingNodeId: string,
   +selections: $ReadOnlyArray<Selection>,
   +destinationPath: $ReadOnlyArray<string | number>,
@@ -217,7 +223,8 @@ export function continuationsFromContinuation(
     ISSUE: continuationsFromIssue,
     PULL: continuationsFromPR,
     REVIEW: continuationsFromReview,
-    COMMENT: continuationsFromComment,
+    ISSUE_COMMENT: continuationsFromIssueComment,
+    REVIEW_COMMENT: continuationsFromReviewComment,
   }[source.enclosingNodeType];
   return continuationsFromEnclosingType(
     result,
@@ -368,7 +375,7 @@ function* continuationsFromIssue(
     for (let i = 0; i < result.comments.nodes.length; i++) {
       const comment = result.comments.nodes[i];
       const subpath = [...path, "comments", "nodes", i];
-      yield* continuationsFromComment(comment, comment.id, subpath);
+      yield* continuationsFromIssueComment(comment, comment.id, subpath);
     }
   }
 }
@@ -447,7 +454,7 @@ function* continuationsFromPR(
     for (let i = 0; i < result.comments.nodes.length; i++) {
       const comment = result.comments.nodes[i];
       const subpath = [...path, "comments", "nodes", i];
-      yield* continuationsFromComment(comment, comment.id, subpath);
+      yield* continuationsFromIssueComment(comment, comment.id, subpath);
     }
   }
 }
@@ -477,9 +484,17 @@ function* continuationsFromReview(
       destinationPath: path,
     };
   }
+  if (result.comments) {
+    for (let i = 0; i < result.comments.nodes.length; i++) {
+      const comment = result.comments.nodes[i];
+      const subpath = [...path, "comments", "nodes", i];
+      yield* continuationsFromReviewComment(comment, comment.id, subpath);
+    }
+  }
 }
 
-function* continuationsFromComment(
+// Pull Request comments are also issue comments.
+function* continuationsFromIssueComment(
   result: any,
   nodeId: string,
   path: $ReadOnlyArray<string | number>
@@ -487,10 +502,37 @@ function* continuationsFromComment(
   const b = build;
   if (result.reactions && result.reactions.pageInfo.hasNextPage) {
     yield {
-      enclosingNodeType: "COMMENT",
+      enclosingNodeType: "ISSUE_COMMENT",
       enclosingNodeId: nodeId,
       selections: [
         b.inlineFragment("IssueComment", [
+          b.field(
+            "reactions",
+            {
+              first: b.literal(PAGE_LIMIT),
+              after: b.literal(result.reactions.pageInfo.endCursor),
+            },
+            [b.fragmentSpread("reactions")]
+          ),
+        ]),
+      ],
+      destinationPath: path,
+    };
+  }
+}
+
+function* continuationsFromReviewComment(
+  result: any,
+  nodeId: string,
+  path: $ReadOnlyArray<string | number>
+): Iterator<Continuation> {
+  const b = build;
+  if (result.reactions && result.reactions.pageInfo.hasNextPage) {
+    yield {
+      enclosingNodeType: "REVIEW_COMMENT",
+      enclosingNodeId: nodeId,
+      selections: [
+        b.inlineFragment("PullRequestReviewComment", [
           b.field(
             "reactions",
             {
