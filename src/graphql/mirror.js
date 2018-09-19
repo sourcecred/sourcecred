@@ -237,7 +237,7 @@ export class Mirror {
             throw new Error("invalid field name: " + JSON.stringify(fieldname));
           }
         }
-        const tableName = primitivesTableName(typename);
+        const tableName = _primitivesTableName(typename);
         const tableSpec = [
           "id TEXT NOT NULL PRIMARY KEY",
           ...type.primitiveFieldNames.map((fieldname) => `"${fieldname}"`),
@@ -402,7 +402,7 @@ function isSqlSafe(token: string) {
  *
  * Note that the resulting string is double-quoted.
  */
-function primitivesTableName(typename: Schema.Typename) {
+function _primitivesTableName(typename: Schema.Typename) {
   // istanbul ignore if
   if (!isSqlSafe(typename)) {
     // This shouldn't be reachable---we should have caught it earlier.
