@@ -103,6 +103,7 @@ function featurefulQuery(): Body {
               }),
             }),
           ]),
+          b.inlineFragment(null, [b.field("__typename"), b.field("id")]),
         ]),
       ]
     ),

@@ -259,8 +259,9 @@ export const stringify = {
         return stringify.queryDefinition(definition, ls);
       case "FRAGMENT":
         return stringify.fragmentDefinition(definition, ls);
+      // istanbul ignore next: unreachable per Flow
       default:
-        throw new Error(`Unknown definition type: ${definition.type}`);
+        throw new Error(`Unknown definition type: ${(definition.type: empty)}`);
     }
   },
 
@@ -314,8 +315,9 @@ export const stringify = {
         return stringify.fragmentSpread(selection, ls);
       case "INLINE_FRAGMENT":
         return stringify.inlineFragment(selection, ls);
+      // istanbul ignore next: unreachable per Flow
       default:
-        throw new Error(`Unknown selection type: ${selection.type}`);
+        throw new Error(`Unknown selection type: ${(selection.type: empty)}`);
     }
   },
 
@@ -382,8 +384,9 @@ export const stringify = {
         return stringify.listValue(value, ls);
       case "OBJECT":
         return stringify.objectValue(value, ls);
+      // istanbul ignore next: unreachable per Flow
       default:
-        throw new Error(`Unknown value type: ${value.type}`);
+        throw new Error(`Unknown value type: ${(value.type: empty)}`);
     }
   },
 
