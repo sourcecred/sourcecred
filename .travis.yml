@@ -5,6 +5,6 @@ script: yarn test
 notifications:
   email:
     recipients:
-      wchargin+travis-sourcecred@gmail.com
-      decentralion+travis-sourcecred@dandelion.io
+      - wchargin+travis-sourcecred@gmail.com
+      - decentralion+travis-sourcecred@dandelion.io
     on_failure: always
