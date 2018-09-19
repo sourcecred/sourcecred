@@ -1,13 +1,164 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`plugins/github/render descriptions are as expected 1`] = `
-Object {
-  "comment": "comment by @wchargin on review by @wchargin of #5 (+1/−0): This pull request will be more contentious. I can feel it...",
-  "commit": "commit 0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
-  "issue": "#2: A referencing issue.",
-  "pull": "#5 (+1/−0): This pull request will be more contentious. I can feel it...",
-  "repo": "sourcecred/example-github",
-  "review": "review by @wchargin of #5 (+1/−0): This pull request will be more contentious. I can feel it...",
-  "userlike": "@wchargin",
-}
+exports[`plugins/github/render renders the right description for a comment 1`] = `
+<span>
+  <a
+    href="https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"
+    rel="nofollow noopener"
+    target="_blank"
+  >
+    comment
+  </a>
+   on 
+  <span>
+    <a
+      href="https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899"
+      rel="nofollow noopener"
+      target="_blank"
+    >
+      review
+    </a>
+     on 
+    <span>
+      <a
+        href="https://github.com/sourcecred/example-github/pull/5"
+        rel="nofollow noopener"
+        target="_blank"
+      >
+        #5
+      </a>
+       
+      <span>
+        (
+        <span
+          style="color:green"
+        >
+          +1
+        </span>
+        /
+        <span
+          style="color:red"
+        >
+          −0
+        </span>
+        )
+      </span>
+      : This pull request will be more contentious. I can feel it...
+    </span>
+  </span>
+</span>
+`;
+
+exports[`plugins/github/render renders the right description for a commit 1`] = `
+<span>
+  Commit 
+  <a
+    href="https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
+    rel="nofollow noopener"
+    target="_blank"
+  >
+    0a22334
+  </a>
+</span>
+`;
+
+exports[`plugins/github/render renders the right description for a issue 1`] = `
+<span>
+  <a
+    href="https://github.com/sourcecred/example-github/issues/2"
+    rel="nofollow noopener"
+    target="_blank"
+  >
+    #2
+  </a>
+  : A referencing issue.
+</span>
+`;
+
+exports[`plugins/github/render renders the right description for a pull 1`] = `
+<span>
+  <a
+    href="https://github.com/sourcecred/example-github/pull/5"
+    rel="nofollow noopener"
+    target="_blank"
+  >
+    #5
+  </a>
+   
+  <span>
+    (
+    <span
+      style="color:green"
+    >
+      +1
+    </span>
+    /
+    <span
+      style="color:red"
+    >
+      −0
+    </span>
+    )
+  </span>
+  : This pull request will be more contentious. I can feel it...
+</span>
+`;
+
+exports[`plugins/github/render renders the right description for a repo 1`] = `
+<a
+  href="https://github.com/sourcecred/example-github"
+  rel="nofollow noopener"
+  target="_blank"
+>
+  sourcecred/example-github
+</a>
+`;
+
+exports[`plugins/github/render renders the right description for a review 1`] = `
+<span>
+  <a
+    href="https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899"
+    rel="nofollow noopener"
+    target="_blank"
+  >
+    review
+  </a>
+   on 
+  <span>
+    <a
+      href="https://github.com/sourcecred/example-github/pull/5"
+      rel="nofollow noopener"
+      target="_blank"
+    >
+      #5
+    </a>
+     
+    <span>
+      (
+      <span
+        style="color:green"
+      >
+        +1
+      </span>
+      /
+      <span
+        style="color:red"
+      >
+        −0
+      </span>
+      )
+    </span>
+    : This pull request will be more contentious. I can feel it...
+  </span>
+</span>
+`;
+
+exports[`plugins/github/render renders the right description for a userlike 1`] = `
+<a
+  href="https://github.com/wchargin"
+  rel="nofollow noopener"
+  target="_blank"
+>
+  @wchargin
+</a>
 `;

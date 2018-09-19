@@ -1,16 +1,19 @@
 // @flow
 
+import {render} from "enzyme";
 import {exampleEntities} from "./example/example";
 import {description} from "./render";
+import enzymeToJSON from "enzyme-to-json";
+
+require("../../app/testUtil").configureEnzyme();
 
 describe("plugins/github/render", () => {
-  it("descriptions are as expected", () => {
-    const examples = exampleEntities();
-    const withDescriptions = {};
-    for (const name of Object.keys(exampleEntities())) {
+  const examples = exampleEntities();
+  for (const name of Object.keys(examples)) {
+    it(`renders the right description for a ${name}`, () => {
       const entity = examples[name];
-      withDescriptions[name] = description(entity);
-    }
-    expect(withDescriptions).toMatchSnapshot();
-  });
+      const renderedEntity = render(description(entity));
+      expect(enzymeToJSON(renderedEntity)).toMatchSnapshot();
+    });
+  }
 });
