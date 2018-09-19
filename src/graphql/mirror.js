@@ -4,6 +4,7 @@ import type Database, {BindingDictionary, Statement} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 
 import dedent from "../util/dedent";
+import * as NullUtil from "../util/null";
 import * as Schema from "./schema";
 import * as Queries from "./queries";
 
@@ -944,6 +945,269 @@ export class Mirror {
     }
 
     // Last-updates, primitives, and links all updated: we're done.
+  }
+
+  /**
+   * Extract a structured object and all of its transitive dependencies
+   * from the database.
+   *
+   * The result is an object whose keys are fieldnames, and whose values
+   * are:
+   *
+   *   - for the ID field: the object ID;
+   *   - for primitive fields: the corresponding primitive value;
+   *   - for node reference fields: a reference to the corresponding
+   *     extracted object, which may be `null`;
+   *   - for connection fields: an in-order array of the corresponding
+   *     extracted objects, each of which may be `null`.
+   *
+   * For instance, the result of `extract("issue:1")` might be:
+   *
+   *     {
+   *       id: "issue:1172",
+   *       title: "bug: holding <Space> causes CPU to overheat",
+   *       body: "We should fix this immediately.",
+   *       author: {
+   *         id: "user:admin",
+   *         login: "admin",
+   *       },
+   *       comments: [
+   *         {
+   *           body: "I depend on this behavior; please do not change it.",
+   *           author: {
+   *             id: "user:longtimeuser4",
+   *             login: "longtimeuser4",
+   *           },
+   *         },
+   *         {
+   *           body: "That's horrifying.",
+   *           author: {
+   *             id: "user:admin",
+   *             login: "admin",
+   *           },
+   *         },
+   *       ],
+   *     }
+   *
+   * The returned structure may be circular.
+   *
+   * If a node appears more than one time in the result---for instance,
+   * the "user:admin" node above---all instances will refer to the same
+   * object. However, objects are distinct across calls to `extract`, so
+   * it is safe to deeply mutate the result of this function.
+   *
+   * The provided object ID must correspond to a known object, or an
+   * error will be thrown. Furthermore, all transitive dependencies of
+   * the object must have been at least partially loaded at some point,
+   * or an error will be thrown.
+   */
+  extract(rootId: Schema.ObjectId): mixed {
+    const db = this._db;
+    return _inTransaction(db, () => {
+      // We'll compute the transitive dependencies and store them into a
+      // temporary table. To do so, we first find a free table name.
+      const temporaryTableName: string = _nontransactionallyFindUnusedTableName(
+        db,
+        "tmp_transitive_dependencies_"
+      );
+      db.prepare(
+        `CREATE TEMPORARY TABLE ${temporaryTableName} ` +
+          "(id TEXT NOT NULL PRIMARY KEY, typename TEXT NOT NULL)"
+      ).run();
+
+      try {
+        db.prepare(
+          dedent`\
+            WITH RECURSIVE
+            direct_dependencies (parent_id, child_id) AS (
+                SELECT parent_id, child_id FROM links
+                WHERE child_id IS NOT NULL
+                UNION
+                SELECT DISTINCT
+                    connections.object_id AS parent_id,
+                    connection_entries.child_id AS child_id
+                FROM connections JOIN connection_entries
+                ON connections.rowid = connection_entries.connection_id
+                WHERE child_id IS NOT NULL
+            ),
+            transitive_dependencies (id) AS (
+                VALUES (:rootId) UNION
+                SELECT direct_dependencies.child_id
+                FROM transitive_dependencies JOIN direct_dependencies
+                ON transitive_dependencies.id = direct_dependencies.parent_id
+            )
+            INSERT INTO ${temporaryTableName} (id, typename)
+            SELECT objects.id AS id, objects.typename AS typename
+            FROM objects JOIN transitive_dependencies
+            ON objects.id = transitive_dependencies.id
+          `
+        ).run({rootId});
+        const typenames: $ReadOnlyArray<Schema.Typename> = db
+          .prepare(`SELECT DISTINCT typename FROM ${temporaryTableName}`)
+          .pluck()
+          .all();
+
+        // Check to make sure all required objects and connections have
+        // been updated at least once.
+        {
+          const neverUpdatedEntry: void | {|
+            +id: Schema.ObjectId,
+            +fieldname: null | Schema.Fieldname,
+          |} = db
+            .prepare(
+              dedent`\
+                SELECT objects.id AS id, NULL as fieldname
+                FROM ${temporaryTableName}
+                JOIN objects USING (id)
+                WHERE objects.last_update IS NULL
+                UNION ALL
+                SELECT objects.id AS id, connections.fieldname AS fieldname
+                FROM ${temporaryTableName}
+                JOIN objects
+                    USING (id)
+                LEFT OUTER JOIN connections
+                    ON objects.id = connections.object_id
+                WHERE
+                    connections.rowid IS NOT NULL
+                    AND connections.last_update IS NULL
+              `
+            )
+            .get();
+          if (neverUpdatedEntry !== undefined) {
+            const entry = neverUpdatedEntry;
+            const s = JSON.stringify;
+            const missingData: string =
+              entry.fieldname == null
+                ? "own data"
+                : `${s(entry.fieldname)} connection`;
+            throw new Error(
+              `${s(rootId)} transitively depends on ${s(entry.id)}, ` +
+                `but that object's ${missingData} has never been fetched`
+            );
+          }
+        }
+
+        // Constructing the result set inherently requires mutation,
+        // because the object graph can have cycles. We start by
+        // creating a record for each object, with just that object's
+        // primitive data. Then, we link in node references and
+        // connection entries.
+        const allObjects: Map<Schema.ObjectId, Object> = new Map();
+        for (const typename of typenames) {
+          const objectType = this._schemaInfo.objectTypes[typename];
+          // istanbul ignore if: should not be possible using the
+          // publicly accessible APIs
+          if (objectType == null) {
+            throw new Error(
+              `Corruption: unknown object type ${JSON.stringify(typename)}`
+            );
+          }
+          const primitivesTableName = _primitivesTableName(typename);
+          const selections = [
+            `${primitivesTableName}.id AS id`,
+            ...objectType.primitiveFieldNames.map(
+              (fieldname) =>
+                `${primitivesTableName}."${fieldname}" AS "${fieldname}"`
+            ),
+          ].join(", ");
+          const rows: $ReadOnlyArray<{|
+            +id: Schema.ObjectId,
+            +[Schema.Fieldname]: string,
+          |}> = db
+            .prepare(
+              dedent`\
+                SELECT ${selections}
+                FROM ${temporaryTableName} JOIN ${primitivesTableName}
+                USING (id)
+              `
+            )
+            .all();
+          for (const row of rows) {
+            const object = {};
+            object.id = row.id;
+            for (const key of Object.keys(row)) {
+              if (key === "id") continue;
+              object[key] = JSON.parse(row[key]);
+            }
+            allObjects.set(object.id, object);
+          }
+        }
+
+        // Add links.
+        {
+          const getLinks = db.prepare(
+            dedent`\
+              SELECT
+                parent_id AS parentId,
+                fieldname AS fieldname,
+                child_id AS childId
+              FROM ${temporaryTableName} JOIN links
+              ON ${temporaryTableName}.id = links.parent_id
+            `
+          );
+          for (const link: {|
+            +parentId: Schema.ObjectId,
+            +fieldname: Schema.Fieldname,
+            +childId: Schema.ObjectId | null,
+          |} of getLinks.iterate()) {
+            const parent = NullUtil.get(allObjects.get(link.parentId));
+            const child =
+              link.childId == null
+                ? null
+                : NullUtil.get(allObjects.get(link.childId));
+            parent[link.fieldname] = child;
+          }
+        }
+
+        // Add connections.
+        {
+          const getConnectionData = db.prepare(
+            dedent`\
+              SELECT
+                  objects.id AS parentId,
+                  connections.fieldname AS fieldname,
+                  connection_entries.connection_id IS NOT NULL AS hasContents,
+                  connection_entries.child_id AS childId
+              FROM ${temporaryTableName}
+              JOIN objects
+                  USING (id)
+              JOIN connections
+                  ON objects.id = connections.object_id
+              LEFT OUTER JOIN connection_entries
+                  ON connections.rowid = connection_entries.connection_id
+              ORDER BY
+                  objects.id, connections.fieldname, connection_entries.idx ASC
+            `
+          );
+          for (const datum: {|
+            +parentId: Schema.ObjectId,
+            +fieldname: Schema.Fieldname,
+            +hasContents: 0 | 1,
+            +childId: Schema.ObjectId | null,
+          |} of getConnectionData.iterate()) {
+            const parent = NullUtil.get(allObjects.get(datum.parentId));
+            if (parent[datum.fieldname] === undefined) {
+              parent[datum.fieldname] = [];
+            }
+            if (datum.hasContents) {
+              const child =
+                datum.childId == null
+                  ? null
+                  : NullUtil.get(allObjects.get(datum.childId));
+              parent[datum.fieldname].push(child);
+            }
+          }
+        }
+
+        const result = allObjects.get(rootId);
+        if (result === undefined) {
+          throw new Error("No such object: " + JSON.stringify(rootId));
+        }
+        return result;
+      } finally {
+        this._db.prepare(`DROP TABLE ${temporaryTableName}`).run();
+      }
+    });
   }
 }
 

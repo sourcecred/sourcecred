@@ -1378,6 +1378,757 @@ describe("graphql/mirror", () => {
         expect(format([query])).toMatchSnapshot();
       });
     });
+
+    describe("extract", () => {
+      // A schema with some useful edge cases.
+      function buildTestSchema(): Schema.Schema {
+        const s = Schema;
+        return s.schema({
+          Caveman: s.object({
+            id: s.id(),
+            only: s.primitive(),
+            primitives: s.primitive(),
+          }),
+          Feline: s.object({
+            id: s.id(),
+            only: s.node("Feline"),
+            lynx: s.node("Feline"),
+          }),
+          Socket: s.object({
+            id: s.id(),
+            only: s.connection("Socket"),
+            connections: s.connection("Socket"),
+          }),
+          Empty: s.object({
+            id: s.id(),
+          }),
+        });
+      }
+      type Caveman = {|
+        +id: string,
+        +only: mixed,
+        +primitives: mixed,
+      |};
+      type Feline = {|
+        +id: string,
+        +only: null | Feline,
+        +lynx: null | Feline,
+      |};
+      type Socket = {|
+        +id: string,
+        +only: $ReadOnlyArray<null | Socket>,
+        +connections: $ReadOnlyArray<null | Socket>,
+      |};
+
+      it("fails if the provided object does not exist", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        expect(() => {
+          mirror.extract("wat");
+        }).toThrow('No such object: "wat"');
+      });
+
+      it("fails if the provided object is missing own-data", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Caveman", id: "brog"});
+        expect(() => {
+          mirror.extract("brog");
+        }).toThrow(
+          '"brog" transitively depends on "brog", ' +
+            "but that object's own data has never been fetched"
+        );
+      });
+
+      it("fails if the provided object is missing connection data", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Socket", id: "localhost"});
+        mirror.registerObject({typename: "Socket", id: "loopback"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Socket", id: "localhost"},
+          {__typename: "Socket", id: "loopback"},
+        ]);
+
+        mirror._updateConnection(updateId, "localhost", "connections", {
+          totalCount: 0,
+          pageInfo: {hasNextPage: false, endCursor: null},
+          nodes: [],
+        });
+        expect(() => {
+          mirror.extract("localhost");
+        }).toThrow(
+          '"localhost" transitively depends on "localhost", ' +
+            'but that object\'s "only" connection has never been fetched'
+        );
+
+        mirror._updateConnection(updateId, "loopback", "only", {
+          totalCount: 0,
+          pageInfo: {hasNextPage: false, endCursor: null},
+          nodes: [],
+        });
+        expect(() => {
+          mirror.extract("loopback");
+        }).toThrow(
+          '"loopback" transitively depends on "loopback", ' +
+            'but that object\'s "connections" connection has never been fetched'
+        );
+      });
+
+      it("fails if a transitive dependency is missing own-data", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Feline", id: "alpha"});
+        mirror.registerObject({typename: "Feline", id: "beta"});
+        mirror.registerObject({typename: "Feline", id: "gamma"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Feline",
+            id: "alpha",
+            only: null,
+            lynx: {__typename: "Feline", id: "beta"},
+          },
+          {
+            __typename: "Feline",
+            id: "beta",
+            only: null,
+            lynx: {__typename: "Feline", id: "gamma"},
+          },
+        ]);
+        expect(() => {
+          mirror.extract("alpha");
+        }).toThrow(
+          '"alpha" transitively depends on "gamma", ' +
+            "but that object's own data has never been fetched"
+        );
+      });
+
+      it("fails if a transitive dependency is missing connection data", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Socket", id: "localhost:8080"});
+        mirror.registerObject({typename: "Socket", id: "localhost:7070"});
+        mirror.registerObject({typename: "Socket", id: "localhost:6060"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Socket", id: "localhost:8080"},
+          {__typename: "Socket", id: "localhost:7070"},
+          {__typename: "Socket", id: "localhost:6060"},
+        ]);
+        const updateConnection = (
+          objectId: Schema.ObjectId,
+          fieldname: Schema.Fieldname,
+          ids: $ReadOnlyArray<Schema.ObjectId>
+        ) => {
+          mirror._updateConnection(updateId, objectId, fieldname, {
+            totalCount: ids.length,
+            pageInfo: {hasNextPage: false, endCursor: String(ids.length)},
+            nodes: ids.map((id) => ({__typename: "Socket", id})),
+          });
+        };
+        updateConnection("localhost:8080", "only", []);
+        updateConnection("localhost:7070", "only", []);
+        updateConnection("localhost:6060", "only", []);
+        updateConnection("localhost:8080", "connections", ["localhost:7070"]);
+        updateConnection("localhost:7070", "connections", ["localhost:6060"]);
+        expect(() => {
+          mirror.extract("localhost:8080");
+        }).toThrow(
+          '"localhost:8080" transitively depends on "localhost:6060", ' +
+            'but that object\'s "connections" connection has never been fetched'
+        );
+      });
+
+      it("handles objects that only have primitive fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Caveman", id: "brog"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "brog", only: "ugg", primitives: "ook"},
+        ]);
+        const result: Caveman = (mirror.extract("brog"): any);
+        expect(result).toEqual({
+          id: "brog",
+          only: "ugg",
+          primitives: "ook",
+        });
+      });
+
+      it("handles objects that only have link fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Feline", id: "alpha"});
+        mirror.registerObject({typename: "Feline", id: "beta"});
+        mirror.registerObject({typename: "Feline", id: "gamma"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Feline",
+            id: "alpha",
+            only: null,
+            lynx: {__typename: "Feline", id: "beta"},
+          },
+          {
+            __typename: "Feline",
+            id: "beta",
+            only: null,
+            lynx: {__typename: "Feline", id: "gamma"},
+          },
+          {
+            __typename: "Feline",
+            id: "gamma",
+            only: null,
+            lynx: null,
+          },
+        ]);
+        const result = mirror.extract("alpha");
+        expect(result).toEqual({
+          id: "alpha",
+          only: null,
+          lynx: {
+            id: "beta",
+            only: null,
+            lynx: {
+              id: "gamma",
+              only: null,
+              lynx: null,
+            },
+          },
+        });
+      });
+
+      it("handles objects that only have connection fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Socket", id: "localhost:8080"});
+        mirror.registerObject({typename: "Socket", id: "localhost:7070"});
+        mirror.registerObject({typename: "Socket", id: "localhost:6060"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Socket", id: "localhost:8080"},
+          {__typename: "Socket", id: "localhost:7070"},
+          {__typename: "Socket", id: "localhost:6060"},
+        ]);
+        const updateConnection = (
+          objectId: Schema.ObjectId,
+          fieldname: Schema.Fieldname,
+          ids: $ReadOnlyArray<Schema.ObjectId>
+        ) => {
+          mirror._updateConnection(updateId, objectId, fieldname, {
+            totalCount: ids.length,
+            pageInfo: {hasNextPage: false, endCursor: String(ids.length)},
+            nodes: ids.map((id) => ({__typename: "Socket", id})),
+          });
+        };
+        updateConnection("localhost:8080", "only", []);
+        updateConnection("localhost:7070", "only", []);
+        updateConnection("localhost:6060", "only", []);
+        updateConnection("localhost:8080", "connections", ["localhost:7070"]);
+        updateConnection("localhost:7070", "connections", [
+          "localhost:6060",
+          "localhost:6060",
+        ]);
+        updateConnection("localhost:6060", "connections", []);
+        const result = mirror.extract("localhost:8080");
+        expect(result).toEqual({
+          id: "localhost:8080",
+          only: [],
+          connections: [
+            {
+              id: "localhost:7070",
+              only: [],
+              connections: [
+                {id: "localhost:6060", only: [], connections: []},
+                {id: "localhost:6060", only: [], connections: []},
+              ],
+            },
+          ],
+        });
+      });
+
+      it("handles objects with no fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Empty", id: "mt"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [{__typename: "Empty", id: "mt"}]);
+        const result = mirror.extract("mt");
+        expect(result).toEqual({id: "mt"});
+      });
+
+      it("handles boolean primitives", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Caveman", id: "brog"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "brog", only: false, primitives: true},
+        ]);
+        expect(mirror.extract("brog")).toEqual({
+          id: "brog",
+          only: false,
+          primitives: true,
+        });
+      });
+
+      it("handles null primitives", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Caveman", id: "brog"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "brog", only: null, primitives: null},
+        ]);
+        expect(mirror.extract("brog")).toEqual({
+          id: "brog",
+          only: null,
+          primitives: null,
+        });
+      });
+
+      it("handles numeric primitives", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Caveman", id: "brog"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "brog", only: 123, primitives: 987},
+        ]);
+        expect(mirror.extract("brog")).toEqual({
+          id: "brog",
+          only: 123,
+          primitives: 987,
+        });
+      });
+
+      it("handles cyclic link structures", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Feline", id: "alpha"});
+        mirror.registerObject({typename: "Feline", id: "beta"});
+        mirror.registerObject({typename: "Feline", id: "gamma"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Feline",
+            id: "alpha",
+            only: null,
+            lynx: {__typename: "Feline", id: "beta"},
+          },
+          {
+            __typename: "Feline",
+            id: "beta",
+            only: {__typename: "Feline", id: "beta"},
+            lynx: {__typename: "Feline", id: "gamma"},
+          },
+          {
+            __typename: "Feline",
+            id: "gamma",
+            only: {__typename: "Feline", id: "beta"},
+            lynx: null,
+          },
+        ]);
+        const result: Feline = (mirror.extract("alpha"): any);
+        expect(result).toEqual({
+          id: "alpha",
+          only: null,
+          lynx: {
+            id: "beta",
+            only: result.lynx,
+            lynx: {
+              id: "gamma",
+              only: result.lynx,
+              lynx: null,
+            },
+          },
+        });
+        expect((result: any).lynx.only).toBe(result.lynx);
+        expect((result: any).lynx.lynx.only).toBe(result.lynx);
+      });
+
+      it("handles cyclic connection structures", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Socket", id: "localhost:8080"});
+        mirror.registerObject({typename: "Socket", id: "localhost:7070"});
+        mirror.registerObject({typename: "Socket", id: "localhost:6060"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Socket", id: "localhost:8080"},
+          {__typename: "Socket", id: "localhost:7070"},
+          {__typename: "Socket", id: "localhost:6060"},
+        ]);
+        const updateConnection = (
+          objectId: Schema.ObjectId,
+          fieldname: Schema.Fieldname,
+          ids: $ReadOnlyArray<Schema.ObjectId>
+        ) => {
+          mirror._updateConnection(updateId, objectId, fieldname, {
+            totalCount: ids.length,
+            pageInfo: {hasNextPage: false, endCursor: String(ids.length)},
+            nodes: ids.map((id) => ({__typename: "Socket", id})),
+          });
+        };
+        updateConnection("localhost:8080", "only", []);
+        updateConnection("localhost:7070", "only", []);
+        updateConnection("localhost:6060", "only", []);
+        updateConnection("localhost:8080", "connections", ["localhost:7070"]);
+        updateConnection("localhost:7070", "connections", [
+          "localhost:8080",
+          "localhost:7070",
+          "localhost:6060",
+        ]);
+        updateConnection("localhost:6060", "connections", ["localhost:7070"]);
+        const result: Socket = (mirror.extract("localhost:8080"): any);
+        expect(result).toEqual({
+          id: "localhost:8080",
+          only: [],
+          connections: [
+            {
+              id: "localhost:7070",
+              only: [],
+              connections: [
+                result,
+                result.connections[0],
+                {
+                  id: "localhost:6060",
+                  only: [],
+                  connections: [result.connections[0]],
+                },
+              ],
+            },
+          ],
+        });
+        const s8080: Socket = result;
+        const s7070: Socket = ((s8080.connections[0]: Socket | null): any);
+        const s6060: Socket = ((s7070.connections[2]: Socket | null): any);
+        expect(s7070.connections[0]).toBe(s8080);
+        expect(s7070.connections[1]).toBe(s7070);
+        expect(s7070.connections[2]).toBe(s6060);
+        expect(s6060.connections[0]).toBe(s7070);
+      });
+
+      it("handles connections with null and repeated values", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Socket", id: "localhost"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Socket", id: "localhost"},
+        ]);
+        mirror._updateConnection(updateId, "localhost", "only", {
+          totalCount: 0,
+          pageInfo: {hasNextPage: false, endCursor: null},
+          nodes: [],
+        });
+        mirror._updateConnection(updateId, "localhost", "connections", {
+          totalCount: 6,
+          pageInfo: {hasNextPage: false, endCursor: "#6"},
+          nodes: [
+            null,
+            {__typename: "Socket", id: "localhost"},
+            null,
+            {__typename: "Socket", id: "localhost"},
+            {__typename: "Socket", id: "localhost"},
+            null,
+          ],
+        });
+        const result: Socket = (mirror.extract("localhost"): any);
+        expect(result).toEqual({
+          id: "localhost",
+          only: [],
+          connections: [null, result, null, result, result, null],
+        });
+        expect(result.connections[1]).toBe(result);
+        expect(result.connections[3]).toBe(result);
+        expect(result.connections[4]).toBe(result);
+      });
+
+      it("handles a representative normal case", () => {
+        // In this test case, we have:
+        //
+        //   - objects that are not relevant
+        //   - object types with no relevant instances
+        //   - object types with no instances at all
+        //   - relevant objects that are not direct dependencies
+        //   - relevant objects with cyclic links and connections
+        //   - relevant objects with only primitive fields
+        //   - relevant objects with empty connections
+        //   - relevant objects with links pointing to `null`
+        //   - relevant objects with links of union type
+        //
+        // (An object is "relevant" if it is a transitive dependency of
+        // the root.)
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+
+        const objects = {
+          repo: () => ({typename: "Repository", id: "repo:foo/bar"}),
+          issue1: () => ({typename: "Issue", id: "issue:#1"}),
+          issue2: () => ({typename: "Issue", id: "issue:#2"}),
+          issue3: () => ({typename: "Issue", id: "issue:#3"}),
+          alice: () => ({typename: "User", id: "user:alice"}),
+          bob: () => ({typename: "User", id: "user:bob"}),
+          ethereal: () => ({typename: "User", id: "user:ethereal"}),
+          nobody: () => ({typename: "User", id: "user:nobody"}),
+          noboty: () => ({typename: "Bot", id: "bot:noboty"}),
+          comment1: () => ({typename: "IssueComment", id: "comment:#2.1"}),
+          comment2: () => ({typename: "IssueComment", id: "comment:#2.2"}),
+          closedEvent: () => ({
+            typename: "ClosedEvent",
+            id: "issue:#2!closed#0",
+          }),
+        };
+        const asNode = ({typename, id}) => ({__typename: typename, id});
+
+        const update1 = mirror._createUpdate(new Date(123));
+        const update2 = mirror._createUpdate(new Date(234));
+        const update3 = mirror._createUpdate(new Date(345));
+
+        const emptyConnection = () => ({
+          totalCount: 0,
+          pageInfo: {
+            endCursor: null,
+            hasNextPage: false,
+          },
+          nodes: [],
+        });
+
+        // Update #1: Own data for the repository and issues #1 and #2
+        // and their authors. Connection data for issue #1 as a child of
+        // the repository, but not issue #2. No comments on any issue.
+        mirror.registerObject(objects.repo());
+        mirror.registerObject(objects.issue1());
+        mirror.registerObject(objects.issue2());
+        mirror.registerObject(objects.alice());
+        mirror.registerObject(objects.ethereal());
+        mirror._updateOwnData(update1, [
+          {
+            ...asNode(objects.repo()),
+            url: "url://foo/bar",
+          },
+        ]);
+        mirror._updateOwnData(update1, [
+          {
+            ...asNode(objects.issue1()),
+            url: "url://issue/1",
+            author: asNode(objects.alice()),
+            repository: asNode(objects.repo()),
+            title: "this project looks dead; let's make some issues",
+          },
+          {
+            ...asNode(objects.issue2()),
+            url: "url://issue/2",
+            author: asNode(objects.ethereal()),
+            repository: asNode(objects.repo()),
+            title: "by the time you read this, I will have deleted my account",
+          },
+          // issue:#3 remains unloaded
+        ]);
+        mirror._updateOwnData(update1, [
+          {
+            ...asNode(objects.alice()),
+            url: "url://alice",
+            login: "alice",
+          },
+          {
+            ...asNode(objects.ethereal()),
+            login: "ethereal",
+            url: "url://ethereal",
+          },
+          // "nobody" and "noboty" remain unloaded
+        ]);
+        mirror._updateConnection(update1, objects.repo().id, "issues", {
+          totalCount: 2,
+          pageInfo: {
+            endCursor: "cursor:repo:foo/bar.issues@update1",
+            hasNextPage: true,
+          },
+          nodes: [asNode(objects.issue1())],
+        });
+        mirror._updateConnection(
+          update1,
+          objects.issue1().id,
+          "comments",
+          emptyConnection()
+        );
+        mirror._updateConnection(
+          update1,
+          objects.issue1().id,
+          "timeline",
+          emptyConnection()
+        );
+        mirror._updateConnection(
+          update1,
+          objects.issue2().id,
+          "comments",
+          emptyConnection()
+        );
+        mirror._updateConnection(
+          update1,
+          objects.issue2().id,
+          "timeline",
+          emptyConnection()
+        );
+
+        // Update #2: Issue #2 author changes to `null`. Alice posts a
+        // comment on issue #2 and closes it. Issue #2 is loaded as a
+        // child of the repository.
+        mirror.registerObject(objects.comment1());
+        mirror._updateOwnData(update2, [
+          {
+            ...asNode(objects.issue2()),
+            url: "url://issue/2",
+            author: null,
+            repository: asNode(objects.repo()),
+            title: "by the time you read this, I will have deleted my account",
+          },
+          // issue:#3 remains unloaded
+        ]);
+        mirror._updateOwnData(update2, [
+          {
+            ...asNode(objects.comment1()),
+            body: "cya",
+            author: asNode(objects.alice()),
+          },
+        ]);
+        mirror._updateConnection(update2, objects.repo().id, "issues", {
+          totalCount: 2,
+          pageInfo: {
+            endCursor: "cursor:repo:foo/bar.issues@update2",
+            hasNextPage: true,
+          },
+          nodes: [asNode(objects.issue2())],
+        });
+        mirror._updateConnection(update2, objects.issue2().id, "comments", {
+          totalCount: 1,
+          pageInfo: {
+            endCursor: "cursor:issue:#2.comments@update2",
+            hasNextPage: false,
+          },
+          nodes: [asNode(objects.comment1())],
+        });
+        mirror._updateConnection(update2, objects.issue2().id, "timeline", {
+          totalCount: 1,
+          pageInfo: {
+            endCursor: "cursor:issue:#2.timeline@update2",
+            hasNextPage: false,
+          },
+          nodes: [asNode(objects.closedEvent())],
+        });
+
+        // Update #3: Bob comments on issue #2. An issue #3 is created
+        // but not yet added to the repository connection. The details
+        // for the closed event are fetched.
+        mirror.registerObject(objects.bob());
+        mirror.registerObject(objects.comment2());
+        mirror.registerObject(objects.issue3());
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.bob()),
+            url: "url://bob",
+            login: "bob",
+          },
+        ]);
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.comment2()),
+            body: "alas, I did not know them well",
+            author: asNode(objects.bob()),
+          },
+        ]);
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.issue3()),
+            url: "url://issue/3",
+            author: asNode(objects.bob()),
+            repository: asNode(objects.repo()),
+            title: "duly responding to the call for spurious issues",
+          },
+        ]);
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.closedEvent()),
+            actor: asNode(objects.alice()),
+          },
+        ]);
+        mirror._updateConnection(update3, objects.issue2().id, "comments", {
+          totalCount: 2,
+          pageInfo: {
+            endCursor: "cursor:issue:#2.comments@update3",
+            hasNextPage: false,
+          },
+          nodes: [asNode(objects.comment2())],
+        });
+
+        // The following entities are never referenced...
+        mirror.registerObject(objects.nobody());
+        mirror.registerObject(objects.noboty());
+        mirror.registerObject(objects.issue3());
+
+        const result = mirror.extract("repo:foo/bar");
+        expect(result).toEqual({
+          id: "repo:foo/bar",
+          url: "url://foo/bar",
+          issues: [
+            {
+              id: "issue:#1",
+              url: "url://issue/1",
+              author: {
+                id: "user:alice",
+                url: "url://alice",
+                login: "alice",
+              },
+              repository: result, // circular
+              title: "this project looks dead; let's make some issues",
+              comments: [],
+              timeline: [],
+            },
+            {
+              id: "issue:#2",
+              url: "url://issue/2",
+              author: null,
+              repository: result, // circular
+              title:
+                "by the time you read this, I will have deleted my account",
+              comments: [
+                {
+                  id: "comment:#2.1",
+                  body: "cya",
+                  author: {
+                    id: "user:alice",
+                    url: "url://alice",
+                    login: "alice",
+                  },
+                },
+                {
+                  id: "comment:#2.2",
+                  body: "alas, I did not know them well",
+                  author: {
+                    id: "user:bob",
+                    url: "url://bob",
+                    login: "bob",
+                  },
+                },
+              ],
+              timeline: [
+                {
+                  id: "issue:#2!closed#0",
+                  actor: {
+                    id: "user:alice",
+                    url: "url://alice",
+                    login: "alice",
+                  },
+                },
+              ],
+            },
+          ],
+        });
+      });
+    });
   });
 
   describe("_buildSchemaInfo", () => {
