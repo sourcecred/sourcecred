@@ -78,13 +78,11 @@ declare class bettersqlite3$Statement {
     namedParams: bettersqlite3$BindingDictionary,
     ...params: bettersqlite3$BoundValue[]
   ): any[];
-  each(params: any, cb: (row: any) => void): void;
-  each(cb: (row: any) => void): void;
-  each(...params: bettersqlite3$BoundValue[]): void;
-  each(
+  iterate(...params: bettersqlite3$BoundValue[]): Iterator<any>;
+  iterate(
     namedParams: bettersqlite3$BindingDictionary,
     ...params: bettersqlite3$BoundValue[]
-  ): void;
+  ): Iterator<any>;
   pluck(toggleState?: boolean): this;
   bind(...params: bettersqlite3$BoundValue[]): this;
   bind(
