@@ -47,11 +47,14 @@ function objectMap<T: {+hash: Hash}>(ts: $ReadOnlyArray<T>): {[Hash]: T} {
 }
 
 function findCommits(git: GitDriver, rootRef: string): Commit[] {
-  return git(["log", "--oneline", "--pretty=%H %P", rootRef])
+  return git(["log", "--format=%H %h %P|%s", rootRef])
     .split("\n")
     .filter((line) => line.length > 0)
     .map((line) => {
-      const [hash, ...parentHashes] = line.trim().split(" ");
-      return {hash, parentHashes};
+      const pipeLocation = line.indexOf("|");
+      const first = line.slice(0, pipeLocation).trim();
+      const summary = line.slice(pipeLocation + 1);
+      const [hash, shortHash, ...parentHashes] = first.split(" ");
+      return {hash, shortHash, summary, parentHashes};
     });
 }

@@ -10,10 +10,14 @@ describe("plugins/git/mergeRepository", () => {
       commits: {
         commit1: {
           hash: "commit1",
+          shortHash: "commit1",
+          summary: "a commit",
           parentHashes: [],
         },
         commit2: {
           hash: "commit2",
+          shortHash: "commit2",
+          summary: "another commit",
           parentHashes: ["commit1"],
         },
       },
@@ -22,10 +26,14 @@ describe("plugins/git/mergeRepository", () => {
       commits: {
         commit1: {
           hash: "commit1",
+          shortHash: "commit1",
+          summary: "a commit",
           parentHashes: [],
         },
         commit3: {
           hash: "commit3",
+          shortHash: "commit3",
+          summary: "a third commit",
           parentHashes: ["commit1"],
         },
       },
@@ -56,6 +64,8 @@ describe("plugins/git/mergeRepository", () => {
         commits: {
           commit1: {
             hash: "commit1",
+            shortHash: "commit1",
+            summary: "a conflicting commit",
             parentHashes: ["commit0"],
           },
         },

@@ -97,6 +97,9 @@ export function createExampleRepo(intoDirectory: string): RepositoryInfo {
   git.exec(["rm", "TODOS.txt"]);
   commit("Clean up TODOS");
 
+  git.writeAndStage("src/whatever.py", "import json\nprint('hello world')\n");
+  commit("  This | has leading whitespace.");
+
   return {path: repositoryPath, commits};
 }
 
