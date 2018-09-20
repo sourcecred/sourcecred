@@ -78,18 +78,13 @@ describe("plugins/git/graphView", () => {
         const c3: GN.CommitAddress = {type: GN.COMMIT_TYPE, hash: "c3"};
         const e2 = GE.createEdge.hasParent(c1, c2);
         const e3 = GE.createEdge.hasParent(c1, c3);
-        const tree: GN.TreeAddress = {type: GN.TREE_TYPE, hash: "t1"};
         const foreignNode = NodeAddress.fromParts(["who", "are", "you"]);
         const baseGraph = () =>
           new Graph()
             .addNode(foreignNode)
             .addNode(GN.toRaw(c1))
             .addNode(GN.toRaw(c2))
-            .addNode(GN.toRaw(c3))
-            .addNode(GN.toRaw(tree))
-            .addEdge(GE.createEdge.hasTree(c1, tree))
-            .addEdge(GE.createEdge.hasTree(c2, tree))
-            .addEdge(GE.createEdge.hasTree(c3, tree));
+            .addNode(GN.toRaw(c3));
         it("for proper src", () => {
           const badEdge = {...e2, src: foreignNode};
           const g = baseGraph().addEdge(badEdge);

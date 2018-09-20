@@ -50,10 +50,6 @@ describe("plugins/github/nodes", () => {
     type: GitNode.COMMIT_TYPE,
     hash: "0000000000000000000000000000000000000000",
   });
-  const tree = (): GitNode.TreeAddress => ({
-    type: GitNode.TREE_TYPE,
-    hash: "0000000000000000000000000000000000000000",
-  });
 
   const examples = {
     repo,
@@ -150,10 +146,6 @@ describe("plugins/github/nodes", () => {
         );
       });
       expectBadAddress("no kind", []);
-      expectBadAddress(
-        "Git node that isn't a commit",
-        NodeAddress.toParts(GitNode.toRaw(tree()))
-      );
       describe("repository with", () => {
         checkBadCases([
           {name: "no owner", parts: [GN.REPO_TYPE]},
@@ -249,12 +241,6 @@ describe("plugins/github/nodes", () => {
           // $ExpectFlowError
           toRaw({type: "COMMENT", parent: {type: "ICE_CREAM"}});
         }).toThrow("Bad comment parent type");
-      });
-      it("a git address that isn't a commit", () => {
-        expect(() => {
-          // $ExpectFlowError
-          toRaw(tree());
-        }).toThrow("Unexpected type");
       });
     });
   });

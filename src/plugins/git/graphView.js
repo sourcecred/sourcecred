@@ -60,66 +60,11 @@ export class GraphView {
     this._maybeCheckInvariants();
   }
 
-  tree(commit: GN.CommitAddress): GN.TreeAddress {
-    const result: GN.TreeAddress = Array.from(
-      this._neighbors(commit, {
-        direction: Direction.OUT,
-        nodePrefix: GN.Prefix.tree,
-        edgePrefix: GE.Prefix.hasTree,
-      })
-    )[0];
-    this._maybeCheckInvariants();
-    return result;
-  }
-
   parents(commit: GN.CommitAddress): Iterator<GN.CommitAddress> {
     const result: Iterator<GN.CommitAddress> = this._neighbors(commit, {
       direction: Direction.OUT,
       nodePrefix: GN.Prefix.commit,
       edgePrefix: GE.Prefix.hasParent,
-    });
-    this._maybeCheckInvariants();
-    return result;
-  }
-
-  entries(tree: GN.TreeAddress): Iterator<GN.TreeEntryAddress> {
-    const result: Iterator<GN.TreeEntryAddress> = this._neighbors(tree, {
-      direction: Direction.OUT,
-      nodePrefix: GN.Prefix.treeEntry,
-      edgePrefix: GE.Prefix.includes,
-    });
-    this._maybeCheckInvariants();
-    return result;
-  }
-
-  contents(entry: GN.TreeEntryAddress): Iterator<GN.TreeEntryContentsAddress> {
-    const result: Iterator<GN.TreeEntryContentsAddress> = this._neighbors(
-      entry,
-      {
-        direction: Direction.OUT,
-        nodePrefix: GN.Prefix.base, // multiple kinds
-        edgePrefix: GE.Prefix.hasContents,
-      }
-    );
-    this._maybeCheckInvariants();
-    return result;
-  }
-
-  evolvesTo(entry: GN.TreeEntryAddress): Iterator<GN.TreeEntryAddress> {
-    const result: Iterator<GN.TreeEntryAddress> = this._neighbors(entry, {
-      direction: Direction.OUT,
-      nodePrefix: GN.Prefix.treeEntry,
-      edgePrefix: GE.Prefix.becomes,
-    });
-    this._maybeCheckInvariants();
-    return result;
-  }
-
-  evolvesFrom(entry: GN.TreeEntryAddress): Iterator<GN.TreeEntryAddress> {
-    const result: Iterator<GN.TreeEntryAddress> = this._neighbors(entry, {
-      direction: Direction.IN,
-      nodePrefix: GN.Prefix.treeEntry,
-      edgePrefix: GE.Prefix.becomes,
     });
     this._maybeCheckInvariants();
     return result;
@@ -149,31 +94,9 @@ export class GraphView {
       |}>,
     |};
     const edgeInvariants = {
-      [GE.HAS_TREE_TYPE]: {
-        prefix: GE.Prefix.hasTree,
-        homs: [{srcPrefix: GN.Prefix.commit, dstPrefix: GN.Prefix.tree}],
-      },
       [GE.HAS_PARENT_TYPE]: {
         prefix: GE.Prefix.hasParent,
         homs: [{srcPrefix: GN.Prefix.commit, dstPrefix: GN.Prefix.commit}],
-      },
-      [GE.INCLUDES_TYPE]: {
-        prefix: GE.Prefix.includes,
-        homs: [{srcPrefix: GN.Prefix.tree, dstPrefix: GN.Prefix.treeEntry}],
-      },
-      [GE.BECOMES_TYPE]: {
-        prefix: GE.Prefix.becomes,
-        homs: [
-          {srcPrefix: GN.Prefix.treeEntry, dstPrefix: GN.Prefix.treeEntry},
-        ],
-      },
-      [GE.HAS_CONTENTS_TYPE]: {
-        prefix: GE.Prefix.hasContents,
-        homs: [
-          {srcPrefix: GN.Prefix.treeEntry, dstPrefix: GN.Prefix.blob},
-          {srcPrefix: GN.Prefix.treeEntry, dstPrefix: GN.Prefix.tree},
-          {srcPrefix: GN.Prefix.treeEntry, dstPrefix: GN.Prefix.commit},
-        ],
       },
     };
 
@@ -202,30 +125,6 @@ export class GraphView {
       }
     }
 
-    // Any HAS_TREE edge to a commit must be properly named. This
-    // implies that a commit has at most one such edge. (Normal commits
-    // should have trees, but submodule commits might not.)
-    for (const rawNode of this._graph.nodes({prefix: GN.Prefix.commit})) {
-      for (const neighbor of this._graph.neighbors(rawNode, {
-        direction: Direction.OUT,
-        nodePrefix: NodeAddress.empty,
-        edgePrefix: GE.Prefix.hasTree,
-      })) {
-        const rawEdge = neighbor.edge;
-        const edge: GE.HasTreeAddress = (GE.fromRaw(
-          (((rawEdge.address: EdgeAddressT): any): GE.RawAddress)
-        ): any);
-        const node: GN.CommitAddress = ((GN.fromRaw(
-          (((rawNode: NodeAddressT): any): GN.RawAddress)
-        ): GN.StructuredAddress): any);
-        if (node.hash !== edge.commit.hash) {
-          throw new Error(
-            `invariant violation: bad HAS_TREE edge: ${edgeToString(rawEdge)}`
-          );
-        }
-      }
-    }
-
     // All HAS_PARENT edges must map between between the correct commits.
     for (const edge of this._graph.edges({
       addressPrefix: GE.Prefix.hasParent,
@@ -242,76 +141,6 @@ export class GraphView {
       if (edge.address !== expectedEdge.address) {
         throw new Error(
           `invariant violation: bad HAS_PARENT edge: ${edgeToString(edge)}`
-        );
-      }
-    }
-
-    // Each tree entry must have a unique and properly named INCLUDES edge.
-    for (const rawNode of this._graph.nodes({prefix: GN.Prefix.treeEntry})) {
-      const treeNeighbors = Array.from(
-        this._graph.neighbors(rawNode, {
-          direction: Direction.IN,
-          nodePrefix: NodeAddress.empty,
-          edgePrefix: GE.Prefix.includes,
-        })
-      );
-      if (treeNeighbors.length !== 1) {
-        throw new Error(
-          "invariant violation: tree entry should have 1 inclusion, " +
-            `but has ${treeNeighbors.length}: ${NodeAddress.toString(rawNode)}`
-        );
-      }
-      const edge = treeNeighbors[0].edge;
-      const tree: GN.TreeAddress = ((GN.fromRaw(
-        (((edge.src: NodeAddressT): any): GN.RawAddress)
-      ): GN.StructuredAddress): any);
-      const treeEntry: GN.TreeEntryAddress = ((GN.fromRaw(
-        (((edge.dst: NodeAddressT): any): GN.RawAddress)
-      ): GN.StructuredAddress): any);
-      const expectedEdge = GE.createEdge.includes(tree, treeEntry);
-      if (edge.address !== expectedEdge.address) {
-        throw new Error(
-          `invariant violation: bad INCLUDES edge: ${edgeToString(edge)}`
-        );
-      }
-    }
-
-    // All BECOMES edges must map between between the correct tree entries.
-    for (const edge of this._graph.edges({
-      addressPrefix: GE.Prefix.becomes,
-      srcPrefix: NodeAddress.empty,
-      dstPrefix: NodeAddress.empty,
-    })) {
-      const src: GN.TreeEntryAddress = ((GN.fromRaw(
-        (((edge.src: NodeAddressT): any): GN.RawAddress)
-      ): GN.StructuredAddress): any);
-      const dst: GN.TreeEntryAddress = ((GN.fromRaw(
-        (((edge.dst: NodeAddressT): any): GN.RawAddress)
-      ): GN.StructuredAddress): any);
-      const expectedEdge = GE.createEdge.becomes(src, dst);
-      if (edge.address !== expectedEdge.address) {
-        throw new Error(
-          `invariant violation: bad BECOMES edge: ${edgeToString(edge)}`
-        );
-      }
-    }
-
-    // All HAS_CONTENTS edges must be properly named.
-    for (const edge of this._graph.edges({
-      addressPrefix: GE.Prefix.hasContents,
-      srcPrefix: NodeAddress.empty,
-      dstPrefix: NodeAddress.empty,
-    })) {
-      const src: GN.TreeEntryAddress = ((GN.fromRaw(
-        (((edge.src: NodeAddressT): any): GN.RawAddress)
-      ): GN.StructuredAddress): any);
-      const dst: GN.TreeEntryContentsAddress = ((GN.fromRaw(
-        (((edge.dst: NodeAddressT): any): GN.RawAddress)
-      ): GN.StructuredAddress): any);
-      const expectedEdge = GE.createEdge.hasContents(src, dst);
-      if (edge.address !== expectedEdge.address) {
-        throw new Error(
-          `invariant violation: bad HAS_CONTENTS edge: ${edgeToString(edge)}`
         );
       }
     }

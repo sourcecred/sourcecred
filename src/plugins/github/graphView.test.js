@@ -4,7 +4,7 @@ import {Graph, type Edge, EdgeAddress} from "../../core/graph";
 import {GraphView} from "./graphView";
 import * as GE from "./edges";
 import * as GN from "./nodes";
-import {COMMIT_TYPE, toRaw as gitToRaw, TREE_TYPE} from "../git/nodes";
+import {COMMIT_TYPE, toRaw as gitToRaw} from "../git/nodes";
 import {exampleGraph} from "./example/example";
 
 function exampleView() {
@@ -263,12 +263,6 @@ describe("plugins/github/graphView", () => {
         it("src must be a pull", () => {
           // $ExpectFlowError
           const badEdge = GE.createEdge.mergedAs(issue, commit);
-          failsForEdge(badEdge);
-        });
-        it("dst must be commit address", () => {
-          const tree = {type: TREE_TYPE, hash: "hash"};
-          // $ExpectFlowError
-          const badEdge = GE.createEdge.mergedAs(pull, tree);
           failsForEdge(badEdge);
         });
         it("src must be pull in edge address", () => {
