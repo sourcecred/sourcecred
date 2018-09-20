@@ -41,12 +41,13 @@ declare type bettersqlite3$Database$RegisterOptions = {
   +safeIntegers?: boolean
 };
 
-// For functions that accept bound parameters, we permit an optional
-// binding dictionary, followed by zero or more bound values. In
-// reality, better-sqlite3 is more flexible than this: the binding
-// dictionary can go anywhere among the arguments. We can't express this
-// type, though, and it is strange to use both named and numbered
-// parameters at all, so we accept this concession.
+// Functions that accept bound parameters take positional parameters,
+// named parameters (passed as an object), or a combination of the two.
+// The named parameters can be placed anywhere in the argument list, but
+// must appear at most once. We can't express this constraint, so we
+// permit any argument to be either a simple value or a dictionary of
+// values. In the case that a user provides multiple binding
+// dictionaries, better-sqlite3 will fail fast with a TypeError.
 //
 // Also note that better-sqlite3 permits binding `Integer.IntLike` from
 // npm/integer, not just `number`, but we don't have those typedefs. For
@@ -55,6 +56,9 @@ declare type bettersqlite3$BoundValue = number | string | Buffer | null;
 declare type bettersqlite3$BindingDictionary = {
   +[string]: bettersqlite3$BoundValue
 };
+declare type bettersqlite3$BoundParameter =
+  | bettersqlite3$BoundValue
+  | bettersqlite3$BindingDictionary;
 
 declare class bettersqlite3$Statement {
   +memory: boolean;
@@ -63,32 +67,12 @@ declare class bettersqlite3$Statement {
   +open: boolean;
   +inTransaction: boolean;
 
-  run(...params: bettersqlite3$BoundValue[]): bettersqlite3$RunResult;
-  run(
-    namedParams: bettersqlite3$BindingDictionary,
-    ...params: bettersqlite3$BoundValue[]
-  ): bettersqlite3$RunResult;
-  get(...params: bettersqlite3$BoundValue[]): any;
-  get(
-    namedParams: bettersqlite3$BindingDictionary,
-    ...params: bettersqlite3$BoundValue[]
-  ): any;
-  all(...params: bettersqlite3$BoundValue[]): any[];
-  all(
-    namedParams: bettersqlite3$BindingDictionary,
-    ...params: bettersqlite3$BoundValue[]
-  ): any[];
-  iterate(...params: bettersqlite3$BoundValue[]): Iterator<any>;
-  iterate(
-    namedParams: bettersqlite3$BindingDictionary,
-    ...params: bettersqlite3$BoundValue[]
-  ): Iterator<any>;
+  run(...params: bettersqlite3$BoundParameter[]): bettersqlite3$RunResult;
+  get(...params: bettersqlite3$BoundParameter[]): any;
+  all(...params: bettersqlite3$BoundParameter[]): any[];
+  iterate(...params: bettersqlite3$BoundParameter[]): Iterator<any>;
   pluck(toggleState?: boolean): this;
-  bind(...params: bettersqlite3$BoundValue[]): this;
-  bind(
-    namedParams: bettersqlite3$BindingDictionary,
-    ...params: bettersqlite3$BoundValue[]
-  ): this;
+  bind(...params: bettersqlite3$BoundParameter[]): this;
   safeIntegers(toggleState?: boolean): this;
 }
 
@@ -98,15 +82,7 @@ declare class bettersqlite3$Transaction {
 
   constructor(db: bettersqlite3$Database, sources: string[]): void;
   run(...params: any[]): bettersqlite3$RunResult;
-  run(
-    namedParams: bettersqlite3$BindingDictionary,
-    ...params: bettersqlite3$BoundValue[]
-  ): bettersqlite3$RunResult;
   bind(...params: any[]): this;
-  bind(
-    namedParams: bettersqlite3$BindingDictionary,
-    ...params: bettersqlite3$BoundValue[]
-  ): this;
   safeIntegers(toggleState?: boolean): this;
 }
 
@@ -128,7 +104,8 @@ declare module "better-sqlite3" {
   declare export type Database$ConstructorOptions = bettersqlite3$Database$ConstructorOptions;
   declare export type Database$RegisterOptions = bettersqlite3$Database$RegisterOptions;
   declare export type BoundValue = bettersqlite3$BoundValue;
-  declare export type BidningDictionary = bettersqlite3$BindingDictionary;
+  declare export type BindingDictionary = bettersqlite3$BindingDictionary;
+  declare export type BoundParameter = bettersqlite3$BoundParameter;
   declare export type Statement = bettersqlite3$Statement;
   declare export type Transaction = bettersqlite3$Transaction;
   declare export type RunResult = bettersqlite3$RunResult;
