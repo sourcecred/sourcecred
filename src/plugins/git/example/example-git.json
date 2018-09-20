@@ -4,41 +4,63 @@
             "hash": "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
             "parentHashes": [
                 "69c5aad50eec8f2a0a07c988c3b283a6490eb45b"
-            ]
+            ],
+            "shortHash": "3715ddf",
+            "summary": "Clean up TODOS"
         },
         "69c5aad50eec8f2a0a07c988c3b283a6490eb45b": {
             "hash": "69c5aad50eec8f2a0a07c988c3b283a6490eb45b",
             "parentHashes": [
                 "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc"
-            ]
+            ],
+            "shortHash": "69c5aad",
+            "summary": "Solve quantum gravity"
         },
         "8d287c3bfbf8455ef30187bf5153ffc1b6eef268": {
             "hash": "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
             "parentHashes": [
                 "c08ee3a4edea384d5291ffcbf06724a13ed72325"
-            ]
+            ],
+            "shortHash": "8d287c3",
+            "summary": "Add gravity defiance module"
         },
         "c08ee3a4edea384d5291ffcbf06724a13ed72325": {
             "hash": "c08ee3a4edea384d5291ffcbf06724a13ed72325",
             "parentHashes": [
                 "c2b51945e7457546912a8ce158ed9d294558d294"
-            ]
+            ],
+            "shortHash": "c08ee3a",
+            "summary": "Add repository description"
         },
         "c2b51945e7457546912a8ce158ed9d294558d294": {
             "hash": "c2b51945e7457546912a8ce158ed9d294558d294",
-            "parentHashes": []
+            "parentHashes": [],
+            "shortHash": "c2b5194",
+            "summary": "Initial commit"
+        },
+        "c90f6424017f787bbbaf22e4082a01355546f7e3": {
+            "hash": "c90f6424017f787bbbaf22e4082a01355546f7e3",
+            "parentHashes": [
+                "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f"
+            ],
+            "shortHash": "c90f642",
+            "summary": "  This | has leading whitespace."
         },
         "d160cca97611e9dfed642522ad44408d0292e8ea": {
             "hash": "d160cca97611e9dfed642522ad44408d0292e8ea",
             "parentHashes": [
                 "8d287c3bfbf8455ef30187bf5153ffc1b6eef268"
-            ]
+            ],
+            "shortHash": "d160cca",
+            "summary": "Discover gravity"
         },
         "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc": {
             "hash": "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
             "parentHashes": [
                 "d160cca97611e9dfed642522ad44408d0292e8ea"
-            ]
+            ],
+            "shortHash": "e8b7a8f",
+            "summary": "Pull quantum gravity defiance from upstream"
         }
     }
 }

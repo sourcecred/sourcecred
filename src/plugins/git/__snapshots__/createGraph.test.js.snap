@@ -35,7 +35,7 @@ Array [
           "COMMIT",
           "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc",
         ],
-        "dstIndex": 6,
+        "dstIndex": 7,
         "srcIndex": 1,
       },
       Object {
@@ -75,13 +75,28 @@ Array [
           "HAS_PARENT",
           "2",
           "COMMIT",
+          "c90f6424017f787bbbaf22e4082a01355546f7e3",
+          "2",
+          "COMMIT",
+          "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
+        ],
+        "dstIndex": 0,
+        "srcIndex": 5,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "git",
+          "HAS_PARENT",
+          "2",
+          "COMMIT",
           "d160cca97611e9dfed642522ad44408d0292e8ea",
           "2",
           "COMMIT",
           "8d287c3bfbf8455ef30187bf5153ffc1b6eef268",
         ],
         "dstIndex": 2,
-        "srcIndex": 5,
+        "srcIndex": 6,
       },
       Object {
         "address": Array [
@@ -95,8 +110,8 @@ Array [
           "COMMIT",
           "d160cca97611e9dfed642522ad44408d0292e8ea",
         ],
-        "dstIndex": 5,
-        "srcIndex": 6,
+        "dstIndex": 6,
+        "srcIndex": 7,
       },
     ],
     "nodes": Array [
@@ -129,6 +144,12 @@ Array [
         "git",
         "COMMIT",
         "c2b51945e7457546912a8ce158ed9d294558d294",
+      ],
+      Array [
+        "sourcecred",
+        "git",
+        "COMMIT",
+        "c90f6424017f787bbbaf22e4082a01355546f7e3",
       ],
       Array [
         "sourcecred",
