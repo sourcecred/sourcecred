@@ -10,7 +10,7 @@
  *   - the two layout strategies `multilineLayout` and `inlineLayout`
  */
 
-export type Body = Definition[];
+export type Body = $ReadOnlyArray<Definition>;
 
 export type Definition = QueryDefinition | FragmentDefinition;
 
@@ -21,8 +21,8 @@ export type GraphQLType = string;
 export type QueryDefinition = {|
   +type: "QUERY",
   +name: string,
-  +params: Parameter[],
-  +selections: Selection[],
+  +params: $ReadOnlyArray<Parameter>,
+  +selections: $ReadOnlyArray<Selection>,
 |};
 export type Parameter = {|+name: string, +type: GraphQLType|};
 
@@ -30,7 +30,7 @@ export type FragmentDefinition = {|
   +type: "FRAGMENT",
   +name: string,
   +typeCondition: GraphQLType,
-  +selections: Selection[],
+  +selections: $ReadOnlyArray<Selection>,
 |};
 
 export type Selection = Field | FragmentSpread | InlineFragment;
@@ -39,7 +39,7 @@ export type Field = {|
   +alias: ?string,
   +name: string,
   +args: Arguments,
-  +selections: Selection[],
+  +selections: $ReadOnlyArray<Selection>,
 |};
 export type FragmentSpread = {|
   +type: "FRAGMENT_SPREAD",
@@ -48,7 +48,7 @@ export type FragmentSpread = {|
 export type InlineFragment = {|
   +type: "INLINE_FRAGMENT",
   +typeCondition: ?GraphQLType,
-  +selections: Selection[],
+  +selections: $ReadOnlyArray<Selection>,
 |};
 
 export type Arguments = {[string]: Value};
@@ -64,14 +64,14 @@ export type LiteralValue = {|
   +data: number | string | boolean | null,
 |};
 export type EnumValue = {|+type: "ENUM", +data: string|};
-export type ListValue = {|+type: "LIST", +data: Value[]|};
+export type ListValue = {|+type: "LIST", +data: $ReadOnlyArray<Value>|};
 export type ObjectValue = {|+type: "OBJECT", +data: {[string]: Value}|};
 
 export const build = {
   query(
     name: string,
-    params: Parameter[],
-    selections: Selection[]
+    params: $ReadOnlyArray<Parameter>,
+    selections: $ReadOnlyArray<Selection>
   ): QueryDefinition {
     return {
       type: "QUERY",
@@ -88,7 +88,7 @@ export const build = {
   fragment(
     name: string,
     typeCondition: GraphQLType,
-    selections: Selection[]
+    selections: $ReadOnlyArray<Selection>
   ): FragmentDefinition {
     return {
       type: "FRAGMENT",
@@ -98,7 +98,11 @@ export const build = {
     };
   },
 
-  field(name: string, args: ?Arguments, selections: ?(Selection[])): Field {
+  field(
+    name: string,
+    args: ?Arguments,
+    selections: ?$ReadOnlyArray<Selection>
+  ): Field {
     return {
       type: "FIELD",
       alias: null,
@@ -127,7 +131,7 @@ export const build = {
 
   inlineFragment(
     typeCondition: ?GraphQLType,
-    selections: Selection[]
+    selections: $ReadOnlyArray<Selection>
   ): InlineFragment {
     return {
       type: "INLINE_FRAGMENT",
@@ -157,7 +161,7 @@ export const build = {
     };
   },
 
-  list(data: Value[]): ListValue {
+  list(data: $ReadOnlyArray<Value>): ListValue {
     return {
       type: "LIST",
       data: data,
@@ -181,7 +185,7 @@ export interface LayoutStrategy {
 
   // Join groups of tokens. The elements should be the results of calls
   // to `atom` (or other `join`s).
-  join(lines: string[]): string;
+  join(lines: $ReadOnlyArray<string>): string;
 
   // Get a strategy for the next level of nesting. For instance, if this
   // object lays out its result over multiple lines, then this method
@@ -202,7 +206,7 @@ export function multilineLayout(tab: string): LayoutStrategy {
           .join("");
         return indentation + line;
       },
-      join: (xs: string[]) => xs.join("\n"),
+      join: (xs: $ReadOnlyArray<string>) => xs.join("\n"),
       next: () => strategy(indentLevel + 1),
     };
   }
@@ -226,7 +230,7 @@ export function inlineLayout(): LayoutStrategy {
  * with a formatter.
  */
 function formatList<T>(
-  values: T[],
+  values: $ReadOnlyArray<T>,
   subformatter: (value: T, ls: LayoutStrategy) => string,
   ls: LayoutStrategy
 ): string {

@@ -53,7 +53,7 @@ export type EdgesOptions = {|
   +dstPrefix: NodeAddressT,
 |};
 
-type AddressJSON = string[]; // Result of calling {Node,Edge}Address.toParts
+type AddressJSON = $ReadOnlyArray<string>; // Result of calling {Node,Edge}Address.toParts
 type Integer = number;
 type IndexedEdgeJSON = {|
   +address: AddressJSON,
@@ -62,8 +62,8 @@ type IndexedEdgeJSON = {|
 |};
 
 export opaque type GraphJSON = Compatible<{|
-  +nodes: AddressJSON[],
-  +edges: IndexedEdgeJSON[],
+  +nodes: $ReadOnlyArray<AddressJSON>,
+  +edges: $ReadOnlyArray<IndexedEdgeJSON>,
 |}>;
 
 type ModificationCount = number;
@@ -71,7 +71,9 @@ type ModificationCount = number;
 export class Graph {
   _nodes: Set<NodeAddressT>;
   _edges: Map<EdgeAddressT, Edge>;
+  // eslint-disable-next-line flowtype/no-mutable-array
   _inEdges: Map<NodeAddressT, Edge[]>;
+  // eslint-disable-next-line flowtype/no-mutable-array
   _outEdges: Map<NodeAddressT, Edge[]>;
 
   checkInvariants() {
@@ -495,7 +497,7 @@ export class Graph {
     const nodeFilter = (n) => NodeAddress.hasPrefix(n, options.nodePrefix);
     const edgeFilter = (e) => EdgeAddress.hasPrefix(e, options.edgePrefix);
     const direction = options.direction;
-    const adjacencies: {edges: Edge[], direction: string}[] = [];
+    const adjacencies: {edges: $ReadOnlyArray<Edge>, direction: string}[] = [];
     if (direction === Direction.IN || direction === Direction.ANY) {
       const inEdges = NullUtil.get(this._inEdges.get(node));
       adjacencies.push({edges: inEdges, direction: "IN"});
@@ -617,7 +619,11 @@ export function edgeToStrings(
 
 export function edgeToParts(
   edge: Edge
-): {|+addressParts: string[], +srcParts: string[], +dstParts: string[]|} {
+): {|
+  +addressParts: $ReadOnlyArray<string>,
+  +srcParts: $ReadOnlyArray<string>,
+  +dstParts: $ReadOnlyArray<string>,
+|} {
   const addressParts = EdgeAddress.toParts(edge.address);
   const srcParts = NodeAddress.toParts(edge.src);
   const dstParts = NodeAddress.toParts(edge.dst);

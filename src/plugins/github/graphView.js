@@ -97,7 +97,7 @@ export class GraphView {
       edgePrefix: GE.Prefix.hasParent,
       nodePrefix: GN.Prefix.base,
     };
-    const parents: GN.ParentAddress[] = Array.from(
+    const parents: $ReadOnlyArray<GN.ParentAddress> = Array.from(
       this._neighbors(child, options)
     );
     if (parents.length !== 1) {
@@ -166,9 +166,9 @@ export class GraphView {
       +dstPrefix: NodeAddressT,
     |};
     function homProduct(
-      srcPrefixes: NodeAddressT[],
-      dstPrefixes: NodeAddressT[]
-    ): Hom[] {
+      srcPrefixes: $ReadOnlyArray<NodeAddressT>,
+      dstPrefixes: $ReadOnlyArray<NodeAddressT>
+    ): $ReadOnlyArray<Hom> {
       const result = [];
       for (const srcPrefix of srcPrefixes) {
         for (const dstPrefix of dstPrefixes) {
@@ -178,7 +178,7 @@ export class GraphView {
       return result;
     }
     type EdgeInvariant = {|
-      +homs: Hom[],
+      +homs: $ReadOnlyArray<Hom>,
       +srcAccessor?: (GE.StructuredAddress) => NodeAddressT,
       +dstAccessor?: (GE.StructuredAddress) => NodeAddressT,
     |};

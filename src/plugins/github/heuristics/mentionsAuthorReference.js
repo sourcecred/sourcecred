@@ -80,6 +80,7 @@ function createThread(root: RV.Issue | RV.Pull): Thread {
           (((userlikeToPostsReferencingThem: Map<
             N.RawAddress,
             $ReadOnlyArray<number>
+            // eslint-disable-next-line flowtype/no-mutable-array
           >): any): Map<N.RawAddress, number[]>),
           referencedAddress,
           posts.length - 1

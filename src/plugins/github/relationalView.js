@@ -52,7 +52,9 @@ export class RelationalView {
   _commits: Map<N.RawAddress, CommitEntry>;
   _reviews: Map<N.RawAddress, ReviewEntry>;
   _userlikes: Map<N.RawAddress, UserlikeEntry>;
+  // eslint-disable-next-line flowtype/no-mutable-array
   _mapReferences: Map<N.RawAddress, N.ReferentAddress[]>;
+  // eslint-disable-next-line flowtype/no-mutable-array
   _mapReferencedBy: Map<N.RawAddress, N.TextContentAddress[]>;
 
   constructor(): void {
@@ -444,7 +446,9 @@ export class RelationalView {
     return {content: json.content, user: authorAddresses[0]};
   }
 
-  _addNullableAuthor(json: NullableAuthorJSON): UserlikeAddress[] {
+  _addNullableAuthor(
+    json: NullableAuthorJSON
+  ): $ReadOnlyArray<UserlikeAddress> {
     if (json == null) {
       return [];
     } else {
@@ -548,7 +552,11 @@ export class RelationalView {
         return; // user can't author the same thing twice
       }
     }
-    e._entry.authors.push(extraAuthor.address());
+    // eslint-disable-next-line flowtype/no-mutable-array
+    const entryAuthors: UserlikeAddress[] = ((e._entry.authors: $ReadOnlyArray<
+      UserlikeAddress
+    >): any);
+    entryAuthors.push(extraAuthor.address());
   }
 
   *_referencedBy(e: ReferentEntity): Iterator<TextContentEntity> {
@@ -673,8 +681,8 @@ export class _Entity<+T: Entry> {
 type RepoEntry = {|
   +address: RepoAddress,
   +url: string,
-  +issues: IssueAddress[],
-  +pulls: PullAddress[],
+  +issues: $ReadOnlyArray<IssueAddress>,
+  +pulls: $ReadOnlyArray<PullAddress>,
 |};
 
 export class Repo extends _Entity<RepoEntry> {
@@ -709,9 +717,9 @@ type IssueEntry = {|
   +title: string,
   +body: string,
   +url: string,
-  +comments: CommentAddress[],
-  +authors: UserlikeAddress[],
-  +reactions: ReactionRecord[],
+  +comments: $ReadOnlyArray<CommentAddress>,
+  +authors: $ReadOnlyArray<UserlikeAddress>,
+  +reactions: $ReadOnlyArray<ReactionRecord>,
 |};
 
 export class Issue extends _Entity<IssueEntry> {
@@ -757,13 +765,13 @@ type PullEntry = {|
   +title: string,
   +body: string,
   +url: string,
-  +comments: CommentAddress[],
-  +reviews: ReviewAddress[],
+  +comments: $ReadOnlyArray<CommentAddress>,
+  +reviews: $ReadOnlyArray<ReviewAddress>,
   +mergedAs: ?GitNode.CommitAddress,
   +additions: number,
   +deletions: number,
-  +authors: UserlikeAddress[],
-  +reactions: ReactionRecord[],
+  +authors: $ReadOnlyArray<UserlikeAddress>,
+  +reactions: $ReadOnlyArray<ReactionRecord>,
 |};
 
 export class Pull extends _Entity<PullEntry> {
@@ -823,9 +831,9 @@ type ReviewEntry = {|
   +address: ReviewAddress,
   +body: string,
   +url: string,
-  +comments: CommentAddress[],
+  +comments: $ReadOnlyArray<CommentAddress>,
   +state: ReviewState,
-  +authors: UserlikeAddress[],
+  +authors: $ReadOnlyArray<UserlikeAddress>,
 |};
 
 export class Review extends _Entity<ReviewEntry> {
@@ -864,8 +872,8 @@ type CommentEntry = {|
   +address: CommentAddress,
   +body: string,
   +url: string,
-  +authors: UserlikeAddress[],
-  +reactions: ReactionRecord[],
+  +authors: $ReadOnlyArray<UserlikeAddress>,
+  +reactions: $ReadOnlyArray<ReactionRecord>,
 |};
 
 export class Comment extends _Entity<CommentEntry> {
@@ -910,7 +918,7 @@ export class Comment extends _Entity<CommentEntry> {
 type CommitEntry = {|
   +address: GitNode.CommitAddress,
   +url: string,
-  +authors: UserlikeAddress[],
+  +authors: $ReadOnlyArray<UserlikeAddress>,
   +message: string,
 |};
 
@@ -1026,6 +1034,6 @@ export opaque type RelationalViewJSON = Compatible<{|
   +comments: AddressEntryMapJSON<CommentEntry>,
   +commits: AddressEntryMapJSON<CommitEntry>,
   +userlikes: AddressEntryMapJSON<UserlikeEntry>,
-  +references: AddressEntryMapJSON<N.ReferentAddress[]>,
-  +referencedBy: AddressEntryMapJSON<N.TextContentAddress[]>,
+  +references: AddressEntryMapJSON<$ReadOnlyArray<N.ReferentAddress>>,
+  +referencedBy: AddressEntryMapJSON<$ReadOnlyArray<N.TextContentAddress>>,
 |}>;

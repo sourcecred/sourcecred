@@ -59,7 +59,7 @@ export function aggregateByNodeType(
   const aggregations: NodeAggregation[] = [];
   for (const [
     nodeType: NodeType,
-    connections: ScoredConnection[],
+    connections: $ReadOnlyArray<ScoredConnection>,
   ] of nodeTypeToConnections) {
     const connectionScores = connections.map((x) => x.connectionScore);
     const aggregation = {
@@ -75,6 +75,7 @@ export function aggregateByNodeType(
   return sortBy(aggregations, (x) => -x.summary.score);
 }
 
+// eslint-disable-next-line flowtype/no-mutable-array
 type EdgeTypeToConnection = Map<EdgeType, ScoredConnection[]>;
 export function aggregateByConnectionType(
   xs: $ReadOnlyArray<ScoredConnection>,

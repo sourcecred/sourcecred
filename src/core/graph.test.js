@@ -341,7 +341,7 @@ describe("core/graph", () => {
             .addNode(n4);
         function expectSortedNodes(
           options: {|+prefix: NodeAddressT|} | void,
-          expected: NodeAddressT[]
+          expected: $ReadOnlyArray<NodeAddressT>
         ) {
           const actual = graph().nodes(options);
           expect(Array.from(actual).sort()).toEqual(expected.slice().sort());
@@ -828,7 +828,7 @@ describe("core/graph", () => {
       function expectNeighbors(
         node: NodeAddressT,
         options: NeighborsOptions,
-        expected: Neighbor[]
+        expected: $ReadOnlyArray<Neighbor>
       ) {
         const g = quiver();
         const actual = Array.from(g.neighbors(node, options));

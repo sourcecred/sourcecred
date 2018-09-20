@@ -24,8 +24,8 @@ export interface StaticPluginAdapter {
   name(): string;
   nodePrefix(): NodeAddressT;
   edgePrefix(): EdgeAddressT;
-  nodeTypes(): NodeType[];
-  edgeTypes(): EdgeType[];
+  nodeTypes(): $ReadOnlyArray<NodeType>;
+  edgeTypes(): $ReadOnlyArray<EdgeType>;
   load(assets: Assets, repo: Repo): Promise<DynamicPluginAdapter>;
 }
 

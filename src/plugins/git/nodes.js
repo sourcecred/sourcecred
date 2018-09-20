@@ -6,7 +6,7 @@ import type {Hash} from "./types";
 export opaque type RawAddress: NodeAddressT = NodeAddressT;
 
 const GIT_PREFIX = NodeAddress.fromParts(["sourcecred", "git"]);
-export function _gitAddress(...parts: string[]): RawAddress {
+export function _gitAddress(...parts: $ReadOnlyArray<string>): RawAddress {
   return NodeAddress.append(GIT_PREFIX, ...parts);
 }
 

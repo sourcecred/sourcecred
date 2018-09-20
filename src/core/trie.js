@@ -58,7 +58,7 @@ class BaseTrie<K, V> {
    * was added to this trie with value `v`, then append `v` to
    * `result`. Return `result`.
    */
-  get(k: K): V[] {
+  get(k: K): $ReadOnlyArray<V> {
     const parts = this.addressModule.toParts(k);
     const result: V[] = [];
     let entry: Entry<V> = this.entry;

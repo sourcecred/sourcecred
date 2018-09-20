@@ -37,7 +37,7 @@ export interface AddressModule<Address> {
    * Convert an address to the array of parts that it represents. This
    * is the inverse of `fromParts`.
    */
-  toParts(address: Address): string[];
+  toParts(address: Address): $ReadOnlyArray<string>;
 
   /**
    * Pretty-print an address. The result will be human-readable and
@@ -54,7 +54,7 @@ export interface AddressModule<Address> {
    *
    * but may be more efficient.
    */
-  append(address: Address, ...components: string[]): Address;
+  append(address: Address, ...components: $ReadOnlyArray<string>): Address;
 
   /**
    * Test whether the given address has the given prefix. This function
@@ -196,7 +196,7 @@ export function makeAddressModule(options: Options): AddressModule<string> {
 
   const empty = fromParts([]);
 
-  function toParts(address: Address): string[] {
+  function toParts(address: Address): $ReadOnlyArray<string> {
     assertValid(address);
     const parts = address.split(separator);
     return parts.slice(1, parts.length - 1);
@@ -207,7 +207,7 @@ export function makeAddressModule(options: Options): AddressModule<string> {
     return `${name}${stringify(parts)}`;
   }
 
-  function append(address: Address, ...parts: string[]): Address {
+  function append(address: Address, ...parts: $ReadOnlyArray<string>): Address {
     assertValid(address);
     assertValidParts(parts);
     return address + nullDelimited(parts);

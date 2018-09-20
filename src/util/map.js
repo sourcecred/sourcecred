@@ -24,7 +24,9 @@ export function fromObject<K, V, InK: K & string, InV: V>(object: {
   [InK]: InV,
 }): Map<K, V> {
   const result = new Map();
-  const keys = (((Object.keys(object): string[]): any): InK[]);
+  const keys = (((Object.keys(object): $ReadOnlyArray<
+    string
+  >): any): $ReadOnlyArray<InK>);
   for (const key of keys) {
     result.set(key, object[key]);
   }
@@ -155,6 +157,7 @@ export function merge<K, V>(
  * If the key is already in the map, its value will be mutated, not
  * replaced.
  */
+// eslint-disable-next-line flowtype/no-mutable-array
 export function pushValue<K, V>(map: Map<K, V[]>, key: K, value: V): void {
   let arr = map.get(key);
   if (arr == null) {

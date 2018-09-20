@@ -57,7 +57,7 @@ function objectMap<T: {+hash: Hash}>(ts: $ReadOnlyArray<T>): {[Hash]: T} {
   return result;
 }
 
-function findCommits(git: GitDriver, rootRef: string): Commit[] {
+function findCommits(git: GitDriver, rootRef: string): $ReadOnlyArray<Commit> {
   return git(["log", "--oneline", "--pretty=%H %T %P", rootRef])
     .split("\n")
     .filter((line) => line.length > 0)
@@ -67,7 +67,7 @@ function findCommits(git: GitDriver, rootRef: string): Commit[] {
     });
 }
 
-function findTrees(git: GitDriver, rootTrees: Set<Hash>): Tree[] {
+function findTrees(git: GitDriver, rootTrees: Set<Hash>): $ReadOnlyArray<Tree> {
   const result: Tree[] = [];
   const visited: Set<Hash> = new Set();
   const frontier: Set<Hash> = new Set(rootTrees);

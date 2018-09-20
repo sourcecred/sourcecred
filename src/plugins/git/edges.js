@@ -17,7 +17,7 @@ export const BECOMES_TYPE: "BECOMES" = "BECOMES";
 export const HAS_CONTENTS_TYPE: "HAS_CONTENTS" = "HAS_CONTENTS";
 
 const GIT_PREFIX = EdgeAddress.fromParts(["sourcecred", "git"]);
-function gitEdgeAddress(...parts: string[]): RawAddress {
+function gitEdgeAddress(...parts: $ReadOnlyArray<string>): RawAddress {
   return EdgeAddress.append(GIT_PREFIX, ...parts);
 }
 
