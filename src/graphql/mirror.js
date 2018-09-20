@@ -5,9 +5,17 @@ import stringify from "json-stable-stringify";
 
 import dedent from "../util/dedent";
 import * as Schema from "./schema";
+import * as Queries from "./queries";
 
 /**
  * A local mirror of a subset of a GraphQL database.
+ */
+/*
+ * NOTE(perf): The implementation of this class is not particularly
+ * optimized. In particular, when we interact with SQLite, we compile
+ * our prepared statements many times over the lifespan of an
+ * instance. It may be beneficial to precompile them at instance
+ * construction time.
  */
 export class Mirror {
   +_db: Database;
@@ -405,6 +413,228 @@ export class Mirror {
       return {objects, connections};
     });
   }
+
+  /**
+   * Create a GraphQL selection set required to identify the typename
+   * and ID for an object. This is the minimal information required to
+   * register an object in our database, so we query this information
+   * whenever we find a reference to an object that we want to traverse
+   * later.
+   *
+   * The resulting GraphQL should be embedded in any node context. For
+   * instance, it might replace the `?` in any of the following queries:
+   *
+   *     repository(owner: "foo", name: "bar") { ? }
+   *
+   *     repository(owner: "foo", name: "bar") {
+   *       issues(first: 1) {
+   *         nodes { ? }
+   *       }
+   *     }
+   *
+   *     nodes(ids: ["baz", "quux"]) { ? }
+   *
+   * The result of this query has type `NodeFieldResult`.
+   */
+  _queryShallow(): Queries.Selection[] {
+    const b = Queries.build;
+    return [b.field("__typename"), b.field("id")];
+  }
+
+  /**
+   * Get the current value of the end cursor on a connection, or
+   * `undefined` if the object has never been fetched. If no object by
+   * the given ID is known, or the object does not have a connection of
+   * the given name, then an error is thrown.
+   *
+   * Note that `null` is a valid end cursor and is distinct from
+   * `undefined`.
+   */
+  _getEndCursor(
+    objectId: Schema.ObjectId,
+    fieldname: Schema.Fieldname
+  ): EndCursor | void {
+    const result: {|
+      +initialized: 0 | 1,
+      +endCursor: string | null,
+    |} | void = this._db
+      .prepare(
+        dedent`\
+          SELECT
+              last_update IS NOT NULL AS initialized,
+              end_cursor AS endCursor
+          FROM connections
+          WHERE object_id = :objectId AND fieldname = :fieldname
+        `
+      )
+      // No need to worry about corruption in the form of multiple
+      // matches: there is a UNIQUE(object_id, fieldname) constraint.
+      .get({objectId, fieldname});
+    if (result === undefined) {
+      const s = JSON.stringify;
+      throw new Error(`No such connection: ${s(objectId)}.${s(fieldname)}`);
+    }
+    return result.initialized ? result.endCursor : undefined;
+  }
+
+  /**
+   * Create a GraphQL selection set to fetch elements from a collection.
+   * If the connection has been queried before and you wish to fetch new
+   * elements, use an appropriate end cursor. Use `undefined` otherwise.
+   * Note that `null` is a valid end cursor and is distinct from
+   * `undefined`. Note that these semantics are compatible with the
+   * return value of `_getEndCursor`.
+   *
+   * If an end cursor for a particular node's connection was specified,
+   * then the resulting GraphQL should be embedded in the context of
+   * that node. For instance, if repository "foo/bar" has ID "baz" and
+   * an end cursor of "c000" on its "issues" connection, then the
+   * GraphQL emitted by `_queryConnection("issues", "c000")` might
+   * replace the `?` in the following query:
+   *
+   *     node(id: "baz") { ? }
+   *
+   * If no end cursor was specified, then the resulting GraphQL may be
+   * embedded in the context of _any_ node with a connection of the
+   * appropriate fieldname. For instance, `_queryConnection("issues")`
+   * emits GraphQL that may replace the `?` in either of the following
+   * queries:
+   *
+   *     node(id: "baz") { ? }  # where "baz" is a repository ID
+   *     repository(owner: "foo", name: "bar") { ? }
+   *
+   * Note, however, that this query will fetch nodes from the _start_ of
+   * the connection. It would be wrong to append these results onto an
+   * connection for which we have already fetched data.
+   *
+   * The result of this query has type `ConnectionFieldResult`.
+   *
+   * This function is pure: it does not interact with the database.
+   *
+   * See: `_getEndCursor`.
+   * See: `_updateConnection`.
+   */
+  _queryConnection(
+    fieldname: Schema.Fieldname,
+    endCursor: EndCursor | void,
+    connectionPageSize: number
+  ): Queries.Selection[] {
+    const b = Queries.build;
+    const connectionArguments: Queries.Arguments = {
+      first: b.literal(connectionPageSize),
+    };
+    if (endCursor !== undefined) {
+      connectionArguments.after = b.literal(endCursor);
+    }
+    return [
+      b.field(fieldname, connectionArguments, [
+        b.field("totalCount"),
+        b.field("pageInfo", {}, [b.field("endCursor"), b.field("hasNextPage")]),
+        b.field("nodes", {}, this._queryShallow()),
+      ]),
+    ];
+  }
+
+  /**
+   * Ingest new entries in a connection on an existing object.
+   *
+   * The connection's last update will be set to the given value, which
+   * must be an existing update lest an error be thrown.
+   *
+   * If the object does not exist or does not have a connection by the
+   * given name, an error will be thrown.
+   *
+   * See: `_queryConnection`.
+   * See: `_createUpdate`.
+   */
+  _updateConnection(
+    updateId: UpdateId,
+    objectId: Schema.ObjectId,
+    fieldname: Schema.Fieldname,
+    queryResult: ConnectionFieldResult
+  ): void {
+    _inTransaction(this._db, () => {
+      this._nontransactionallyUpdateConnection(
+        updateId,
+        objectId,
+        fieldname,
+        queryResult
+      );
+    });
+  }
+
+  /**
+   * As `_updateConnection`, but do not enter any transactions. Other
+   * methods may call this method as a subroutine in a larger
+   * transaction.
+   */
+  _nontransactionallyUpdateConnection(
+    updateId: UpdateId,
+    objectId: Schema.ObjectId,
+    fieldname: Schema.Fieldname,
+    queryResult: ConnectionFieldResult
+  ): void {
+    const db = this._db;
+    const connectionId: number = this._db
+      .prepare(
+        dedent`\
+          SELECT rowid FROM connections
+          WHERE object_id = :objectId AND fieldname = :fieldname
+        `
+      )
+      .pluck()
+      .get({objectId, fieldname});
+    // There is a UNIQUE(object_id, fieldname) constraint, so we don't
+    // have to worry about pollution due to duplicates. But it's
+    // possible that no such connection exists, indicating that the
+    // object has not been registered. This is an error.
+    if (connectionId === undefined) {
+      const s = JSON.stringify;
+      throw new Error(`No such connection: ${s(objectId)}.${s(fieldname)}`);
+    }
+    db.prepare(
+      dedent`\
+          UPDATE connections
+          SET
+              last_update = :updateId,
+              total_count = :totalCount,
+              has_next_page = :hasNextPage,
+              end_cursor = :endCursor
+          WHERE rowid = :connectionId
+        `
+    ).run({
+      updateId,
+      totalCount: queryResult.totalCount,
+      hasNextPage: +queryResult.pageInfo.hasNextPage,
+      endCursor: queryResult.pageInfo.endCursor,
+      connectionId,
+    });
+    let nextIndex: number = db
+      .prepare(
+        dedent`\
+          SELECT IFNULL(MAX(idx), 0) + 1 FROM connection_entries
+          WHERE connection_id = :connectionId
+        `
+      )
+      .pluck()
+      .get({connectionId});
+    const addEntry = db.prepare(
+      dedent`\
+        INSERT INTO connection_entries (connection_id, idx, child_id)
+        VALUES (:connectionId, :idx, :childId)
+      `
+    );
+    for (const node of queryResult.nodes) {
+      let childId = null;
+      if (node != null) {
+        const childObject = {typename: node.__typename, id: node.id};
+        this._nontransactionallyRegisterObject(childObject);
+        childId = childObject.id;
+      }
+      const idx = nextIndex++;
+      addEntry.run({connectionId, idx, childId});
+    }
+  }
 }
 
 /**
@@ -523,6 +753,16 @@ type QueryPlan = {|
  * connection is empty, or when `first: 0` is provided).
  */
 type EndCursor = string | null;
+
+type NodeFieldResult = {|
+  +__typename: Schema.Typename,
+  +id: Schema.ObjectId,
+|} | null;
+type ConnectionFieldResult = {|
+  +totalCount: number,
+  +pageInfo: {|+hasNextPage: boolean, +endCursor: string | null|},
+  +nodes: $ReadOnlyArray<NodeFieldResult>,
+|};
 
 /**
  * Execute a function inside a database transaction.

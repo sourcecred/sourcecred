@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`graphql/mirror Mirror _queryConnection snapshot test for actual GitHub queries 1`] = `
+"query TestQuery {
+  initialQuery: node(id: \\"MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=\\") {
+    ... on Repository {
+      issues(first: 2) {
+        totalCount
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        nodes {
+          __typename
+          id
+        }
+      }
+    }
+  }
+  updateQuery: node(id: \\"MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=\\") {
+    ... on Repository {
+      issues(first: 2 after: \\"Y3Vyc29yOnYyOpHOEe_nRA==\\") {
+        totalCount
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        nodes {
+          __typename
+          id
+        }
+      }
+    }
+  }
+  expectedIds: node(id: \\"MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=\\") {
+    ... on Repository {
+      issues(first: 4) {
+        nodes {
+          id
+        }
+      }
+    }
+  }
+}"
+`;
