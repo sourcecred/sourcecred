@@ -51,7 +51,10 @@ export type InlineFragment = {|
   +selections: Selection[],
 |};
 
-export type Arguments = {[string]: Value};
+// The next line should be exact, but flow's support isn't great
+// and doing so is a miserable change
+// eslint-disable-next-line flowtype/require-exact-type
+export type Arguments = {+[string]: Value};
 export type Value =
   | VariableValue
   | LiteralValue
@@ -238,7 +241,7 @@ function formatList<T>(
  * join the keys and their corresponding results with a formatter.
  */
 function formatObject<T>(
-  object: {[string]: T},
+  object: {+[string]: T},
   subformatter: (value: T, ls: LayoutStrategy) => string,
   ls: LayoutStrategy
 ): string {
