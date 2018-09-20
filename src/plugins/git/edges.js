@@ -23,52 +23,18 @@ function gitEdgeAddress(...parts: string[]): RawAddress {
 
 export const Prefix = Object.freeze({
   base: GIT_PREFIX,
-  hasTree: gitEdgeAddress(HAS_TREE_TYPE),
   hasParent: gitEdgeAddress(HAS_PARENT_TYPE),
-  includes: gitEdgeAddress(INCLUDES_TYPE),
-  becomes: gitEdgeAddress(BECOMES_TYPE),
-  hasContents: gitEdgeAddress(HAS_CONTENTS_TYPE),
 });
 
-export type HasTreeAddress = {|
-  type: typeof HAS_TREE_TYPE,
-  commit: GitNode.CommitAddress,
-|};
 export type HasParentAddress = {|
   type: typeof HAS_PARENT_TYPE,
   child: GitNode.CommitAddress,
   parent: GitNode.CommitAddress,
 |};
-export type IncludesAddress = {|
-  type: typeof INCLUDES_TYPE,
-  treeEntry: GitNode.TreeEntryAddress,
-|};
-export type BecomesAddress = {|
-  type: typeof BECOMES_TYPE,
-  was: GitNode.TreeEntryAddress,
-  becomes: GitNode.TreeEntryAddress,
-|};
-export type HasContentsAddress = {|
-  type: typeof HAS_CONTENTS_TYPE,
-  treeEntry: GitNode.TreeEntryAddress,
-|};
 
-export type StructuredAddress =
-  | HasTreeAddress
-  | HasParentAddress
-  | IncludesAddress
-  | BecomesAddress
-  | HasContentsAddress;
+export type StructuredAddress = HasParentAddress;
 
 export const createEdge = Object.freeze({
-  hasTree: (
-    commit: GitNode.CommitAddress,
-    tree: GitNode.TreeAddress
-  ): Edge => ({
-    address: toRaw({type: HAS_TREE_TYPE, commit}),
-    src: GitNode.toRaw(commit),
-    dst: GitNode.toRaw(tree),
-  }),
   hasParent: (
     child: GitNode.CommitAddress,
     parent: GitNode.CommitAddress
@@ -76,30 +42,6 @@ export const createEdge = Object.freeze({
     address: toRaw({type: HAS_PARENT_TYPE, child, parent}),
     src: GitNode.toRaw(child),
     dst: GitNode.toRaw(parent),
-  }),
-  includes: (
-    tree: GitNode.TreeAddress,
-    treeEntry: GitNode.TreeEntryAddress
-  ): Edge => ({
-    address: toRaw({type: INCLUDES_TYPE, treeEntry}),
-    src: GitNode.toRaw(tree),
-    dst: GitNode.toRaw(treeEntry),
-  }),
-  becomes: (
-    was: GitNode.TreeEntryAddress,
-    becomes: GitNode.TreeEntryAddress
-  ): Edge => ({
-    address: toRaw({type: BECOMES_TYPE, was, becomes}),
-    src: GitNode.toRaw(was),
-    dst: GitNode.toRaw(becomes),
-  }),
-  hasContents: (
-    treeEntry: GitNode.TreeEntryAddress,
-    contents: GitNode.TreeEntryContentsAddress
-  ): Edge => ({
-    address: toRaw({type: HAS_CONTENTS_TYPE, treeEntry}),
-    src: GitNode.toRaw(treeEntry),
-    dst: GitNode.toRaw(contents),
   }),
 });
 
@@ -149,15 +91,6 @@ export function fromRaw(x: RawAddress): StructuredAddress {
   const [_unused_sc, _unused_git, _type, ...rest] = EdgeAddress.toParts(x);
   const type: $ElementType<StructuredAddress, "type"> = (_type: any);
   switch (type) {
-    case "HAS_TREE": {
-      const parts = multiLengthDecode(rest, fail);
-      if (parts.length !== 1) throw fail();
-      const [commitParts] = parts;
-      const commit: GitNode.CommitAddress = (GitNode.fromRaw(
-        GitNode._gitAddress(...commitParts)
-      ): any);
-      return {type: HAS_TREE_TYPE, commit};
-    }
     case "HAS_PARENT": {
       const parts = multiLengthDecode(rest, fail);
       if (parts.length !== 2) throw fail();
@@ -170,36 +103,6 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       ): any);
       return {type: HAS_PARENT_TYPE, child, parent};
     }
-    case "INCLUDES": {
-      const parts = multiLengthDecode(rest, fail);
-      if (parts.length !== 1) throw fail();
-      const [treeEntryParts] = parts;
-      const treeEntry: GitNode.TreeEntryAddress = (GitNode.fromRaw(
-        GitNode._gitAddress(...treeEntryParts)
-      ): any);
-      return {type: INCLUDES_TYPE, treeEntry};
-    }
-    case "BECOMES": {
-      const parts = multiLengthDecode(rest, fail);
-      if (parts.length !== 2) throw fail();
-      const [wasParts, becomesParts] = parts;
-      const was: GitNode.TreeEntryAddress = (GitNode.fromRaw(
-        GitNode._gitAddress(...wasParts)
-      ): any);
-      const becomes: GitNode.TreeEntryAddress = (GitNode.fromRaw(
-        GitNode._gitAddress(...becomesParts)
-      ): any);
-      return {type: BECOMES_TYPE, was, becomes};
-    }
-    case "HAS_CONTENTS": {
-      const parts = multiLengthDecode(rest, fail);
-      if (parts.length !== 1) throw fail();
-      const [treeEntryParts] = parts;
-      const treeEntry: GitNode.TreeEntryAddress = (GitNode.fromRaw(
-        GitNode._gitAddress(...treeEntryParts)
-      ): any);
-      return {type: HAS_CONTENTS_TYPE, treeEntry};
-    }
     default:
       // eslint-disable-next-line no-unused-expressions
       (type: empty);
@@ -209,32 +112,11 @@ export function fromRaw(x: RawAddress): StructuredAddress {
 
 export function toRaw(x: StructuredAddress): RawAddress {
   switch (x.type) {
-    case HAS_TREE_TYPE:
-      return EdgeAddress.append(
-        Prefix.hasTree,
-        ...lengthEncode(GitNode.toRaw(x.commit))
-      );
     case HAS_PARENT_TYPE:
       return EdgeAddress.append(
         Prefix.hasParent,
         ...lengthEncode(GitNode.toRaw(x.child)),
         ...lengthEncode(GitNode.toRaw(x.parent))
-      );
-    case INCLUDES_TYPE:
-      return EdgeAddress.append(
-        Prefix.includes,
-        ...lengthEncode(GitNode.toRaw(x.treeEntry))
-      );
-    case BECOMES_TYPE:
-      return EdgeAddress.append(
-        Prefix.becomes,
-        ...lengthEncode(GitNode.toRaw(x.was)),
-        ...lengthEncode(GitNode.toRaw(x.becomes))
-      );
-    case HAS_CONTENTS_TYPE:
-      return EdgeAddress.append(
-        Prefix.hasContents,
-        ...lengthEncode(GitNode.toRaw(x.treeEntry))
       );
     default:
       throw new Error((x.type: empty));

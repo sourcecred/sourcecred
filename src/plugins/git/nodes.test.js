@@ -6,36 +6,18 @@ import {fromRaw, toRaw} from "./nodes";
 
 describe("plugins/git/nodes", () => {
   const examples = {
-    blob: (): GN.BlobAddress => ({
-      type: GN.BLOB_TYPE,
-      hash: "f1f2514ca6d7a6a1a0511957021b1995bf9ace1c",
-    }),
     commit: (): GN.CommitAddress => ({
       type: GN.COMMIT_TYPE,
       hash: "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",
     }),
-    tree: (): GN.TreeAddress => ({
-      type: GN.TREE_TYPE,
-      hash: "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
-    }),
-    treeEntry: (): GN.TreeEntryAddress => ({
-      type: GN.TREE_ENTRY_TYPE,
-      treeHash: "7be3ecfee5314ffa9b2d93fc4377792b2d6d70ed",
-      name: "science.txt",
-    }),
   };
 
-  // Incorrect types should be caught statically, either due to being
-  // totally invalid...
+  // Incorrect types should be caught statically
   // $ExpectFlowError
   const _unused_badTree: GN.RepoAddress = {
     type: "TREEEEE",
     hash: "browns",
   };
-  // ...or due to being annotated with the type of a distinct structured
-  // address:
-  // $ExpectFlowError
-  const _unused_badCommit: GN.CommitAddress = {...examples.tree()};
 
   describe("`fromRaw` after `toRaw` is identity", () => {
     Object.keys(examples).forEach((example) => {
@@ -92,37 +74,11 @@ describe("plugins/git/nodes", () => {
       expectBadAddress("no type", []);
       expectBadAddress("bad type", ["wat"]);
 
-      expectBadAddress("blob with no hash", [GN.BLOB_TYPE]);
-      expectBadAddress("blob with extra field", [
-        GN.BLOB_TYPE,
-        examples.blob().hash,
-        examples.blob().hash,
-      ]);
-
       expectBadAddress("commit with no hash", [GN.COMMIT_TYPE]);
       expectBadAddress("commit with extra field", [
         GN.COMMIT_TYPE,
         examples.commit().hash,
         examples.commit().hash,
-      ]);
-
-      expectBadAddress("tree with no hash", [GN.TREE_TYPE]);
-      expectBadAddress("tree with extra field", [
-        GN.TREE_TYPE,
-        examples.tree().hash,
-        examples.tree().hash,
-      ]);
-
-      expectBadAddress("tree entry with no fields", [GN.TREE_ENTRY_TYPE]);
-      expectBadAddress("tree entry with only tree hash", [
-        GN.TREE_ENTRY_TYPE,
-        examples.treeEntry().treeHash,
-      ]);
-      expectBadAddress("tree entry with extra field", [
-        GN.TREE_ENTRY_TYPE,
-        examples.treeEntry().treeHash,
-        examples.treeEntry().name,
-        "wat",
       ]);
     });
 
