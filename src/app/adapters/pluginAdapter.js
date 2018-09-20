@@ -1,5 +1,6 @@
 // @flow
 
+import {type Node as ReactNode} from "react";
 import {Graph, type NodeAddressT, type EdgeAddressT} from "../../core/graph";
 import type {Assets} from "../assets";
 import type {Repo} from "../../core/repo";
@@ -30,6 +31,6 @@ export interface StaticPluginAdapter {
 
 export interface DynamicPluginAdapter {
   graph(): Graph;
-  nodeDescription(NodeAddressT): string;
+  nodeDescription(NodeAddressT): ReactNode;
   static (): StaticPluginAdapter;
 }

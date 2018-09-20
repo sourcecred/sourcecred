@@ -14,7 +14,7 @@ import type {PagerankNodeDecomposition} from "../../../core/attribution/pagerank
 export function nodeDescription(
   address: NodeAddressT,
   adapters: DynamicAdapterSet
-): string {
+): ReactNode {
   const adapter = adapters.adapterMatchingNode(address);
   try {
     return adapter.nodeDescription(address);
