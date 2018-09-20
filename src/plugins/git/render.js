@@ -1,19 +1,23 @@
 // @flow
 
 import * as N from "./nodes";
+import type {Repository} from "./types";
 
-export function description(address: N.StructuredAddress) {
+export function description(
+  address: N.StructuredAddress,
+  repository: Repository
+) {
   switch (address.type) {
-    case "COMMIT":
-      return `commit ${address.hash}`;
-    case "TREE":
-      return `tree ${address.hash}`;
-    case "BLOB":
-      return `blob ${address.hash}`;
-    case "TREE_ENTRY":
-      return `entry ${JSON.stringify(address.name)} in tree ${
-        address.treeHash
-      }`;
+    case "COMMIT": {
+      const hash = address.hash;
+      const commit = repository.commits[hash];
+      if (commit == null) {
+        console.error(`Unable to find data for commit ${hash}`);
+        return hash;
+      }
+      const {shortHash, summary} = commit;
+      return `${shortHash}: ${summary}`;
+    }
     default:
       throw new Error(`unknown type: ${(address.type: empty)}`);
   }

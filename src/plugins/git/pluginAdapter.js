@@ -9,6 +9,7 @@ import * as E from "./edges";
 import {description} from "./render";
 import type {Assets} from "../../app/assets";
 import type {Repo} from "../../core/repo";
+import type {Repository} from "./types";
 
 export class StaticPluginAdapter implements IStaticPluginAdapter {
   name() {
@@ -42,23 +43,38 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
     ];
   }
   async load(assets: Assets, repo: Repo): Promise<IDynamicPluginAdapter> {
-    const url = assets.resolve(
-      `/api/v1/data/data/${repo.owner}/${repo.name}/git/graph.json`
-    );
-    const response = await fetch(url);
-    if (!response.ok) {
-      return Promise.reject(response);
+    const baseUrl = `/api/v1/data/data/${repo.owner}/${repo.name}/git/`;
+    async function loadGraph() {
+      const url = assets.resolve(baseUrl + "graph.json");
+      const response = await fetch(url);
+      if (!response.ok) {
+        return Promise.reject(response);
+      }
+      const json = await response.json();
+      return Graph.fromJSON(json);
     }
-    const json = await response.json();
-    const graph = Graph.fromJSON(json);
-    return new DynamicPluginAdapter(graph);
+    async function loadRepository(): Promise<Repository> {
+      const url = assets.resolve(baseUrl + "repository.json");
+      const response = await fetch(url);
+      if (!response.ok) {
+        return Promise.reject(response);
+      }
+      return await response.json();
+    }
+    const [graph, repository] = await Promise.all([
+      loadGraph(),
+      loadRepository(),
+    ]);
+    return new DynamicPluginAdapter(graph, repository);
   }
 }
 
 class DynamicPluginAdapter implements IDynamicPluginAdapter {
   +_graph: Graph;
-  constructor(graph: Graph) {
+  +_repository: Repository;
+  constructor(graph: Graph, repository: Repository) {
     this._graph = graph;
+    this._repository = repository;
   }
   graph() {
     return this._graph;
@@ -67,7 +83,7 @@ class DynamicPluginAdapter implements IDynamicPluginAdapter {
     // This cast is unsound, and might throw at runtime, but won't have
     // silent failures or cause problems down the road.
     const address = N.fromRaw((node: any));
-    return description(address);
+    return description(address, this._repository);
   }
   static() {
     return new StaticPluginAdapter();

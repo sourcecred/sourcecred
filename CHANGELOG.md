@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Display short hash + summary for commits (#879)
 - Hyperlink to GitHub entities (#860)
 - Add GitHub reactions to the graph (#846)
 - Detect references to commits (#833)
