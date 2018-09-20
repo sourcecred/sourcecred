@@ -23,8 +23,11 @@ usage() {
 
 fetch() {
   tmpdir="$(mktemp -d)"
-  node "${SOURCECRED_BIN:-./bin}/createExampleRepo.js" "${tmpdir}"
-  node "${SOURCECRED_BIN:-./bin}/loadAndPrintGitRepository.js" "${tmpdir}"
+  SOURCECRED_DIRECTORY="${tmpdir}" \
+    node "${SOURCECRED_BIN:-./bin}/sourcecred.js" \
+    load --plugin git \
+    sourcecred/example-git
+  python -m json.tool "${tmpdir}"/data/sourcecred/example-git/git/repository.json
   rm -rf "${tmpdir}"
 }
 
