@@ -5,28 +5,16 @@ import {mergeRepository} from "./mergeRepository";
 
 describe("plugins/git/mergeRepository", () => {
   describe("mergeRepository", () => {
-    const empty: Repository = Object.freeze({commits: {}, trees: {}});
+    const empty: Repository = Object.freeze({commits: {}});
     const repository1: Repository = Object.freeze({
       commits: {
         commit1: {
           hash: "commit1",
           parentHashes: [],
-          treeHash: "tree1",
         },
         commit2: {
           hash: "commit2",
           parentHashes: ["commit1"],
-          treeHash: "tree2",
-        },
-      },
-      trees: {
-        tree1: {
-          hash: "tree1",
-          entries: {},
-        },
-        tree2: {
-          hash: "tree2",
-          entries: {},
         },
       },
     });
@@ -35,22 +23,10 @@ describe("plugins/git/mergeRepository", () => {
         commit1: {
           hash: "commit1",
           parentHashes: [],
-          treeHash: "tree1",
         },
         commit3: {
           hash: "commit3",
           parentHashes: ["commit1"],
-          treeHash: "tree3",
-        },
-      },
-      trees: {
-        tree1: {
-          hash: "tree1",
-          entries: {},
-        },
-        tree3: {
-          hash: "tree3",
-          entries: {},
         },
       },
     });
@@ -67,12 +43,9 @@ describe("plugins/git/mergeRepository", () => {
       const merged = mergeRepository([empty, repository1, empty]);
       expect(merged).toEqual(repository1);
     });
-    it("merged contains every hash and tree for every constituent repository", () => {
+    it("merged contains every commit for every constituent repository", () => {
       const merged = mergeRepository([repository1, repository2]);
-      for (const {trees, commits} of [repository1, repository2]) {
-        for (const treeHash in trees) {
-          expect(merged.trees[treeHash]).toEqual(trees[treeHash]);
-        }
+      for (const {commits} of [repository1, repository2]) {
         for (const commitHash in commits) {
           expect(merged.commits[commitHash]).toEqual(commits[commitHash]);
         }
@@ -83,40 +56,13 @@ describe("plugins/git/mergeRepository", () => {
         commits: {
           commit1: {
             hash: "commit1",
-            parentHashes: [],
-            treeHash: "tree2",
-          },
-        },
-        trees: {
-          tree2: {
-            hash: "tree2",
-            entries: {},
+            parentHashes: ["commit0"],
           },
         },
       });
       expect(() =>
         mergeRepository([repository1, conflictingRepository])
       ).toThrowError("Conflict between commits");
-    });
-    it("throws an error if merging a repository with conflicting trees", () => {
-      const conflictingRepository: Repository = Object.freeze({
-        commits: {
-          commit1: {
-            hash: "commit1",
-            parentHashes: [],
-            treeHash: "tree1",
-          },
-        },
-        trees: {
-          tree1: {
-            hash: "tree1",
-            entries: {blob: {type: "blob", name: "blob", hash: "blob"}},
-          },
-        },
-      });
-      expect(() =>
-        mergeRepository([repository1, conflictingRepository])
-      ).toThrowError("Conflict between trees");
     });
   });
 });
