@@ -23,67 +23,21 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
   nodeTypes() {
     return [
       {
-        name: "Blob",
-        pluralName: "Blobs",
-        prefix: N.Prefix.blob,
-        defaultWeight: 0.125,
-      },
-      {
         name: "Commit",
         pluralName: "Commits",
         prefix: N.Prefix.commit,
         defaultWeight: 2,
-      },
-      {
-        name: "Tree",
-        pluralName: "Trees",
-        prefix: N.Prefix.tree,
-        defaultWeight: 0.125,
-      },
-      {
-        name: "Tree entry",
-        pluralName: "Tree entries",
-        prefix: N.Prefix.treeEntry,
-        defaultWeight: 0.125,
       },
     ];
   }
   edgeTypes() {
     return [
       {
-        forwardName: "has tree",
-        backwardName: "owned by",
-        defaultForwardWeight: 1,
-        defaultBackwardWeight: 1,
-        prefix: E.Prefix.hasTree,
-      },
-      {
         forwardName: "has parent",
         backwardName: "is parent of",
-        defaultForwardWeight: 1,
-        defaultBackwardWeight: 1,
         prefix: E.Prefix.hasParent,
-      },
-      {
-        forwardName: "includes",
-        backwardName: "is included by",
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
-        prefix: E.Prefix.includes,
-      },
-      {
-        forwardName: "evolves to",
-        backwardName: "evolves from",
-        defaultForwardWeight: 1,
-        defaultBackwardWeight: 1,
-        prefix: E.Prefix.becomes,
-      },
-      {
-        forwardName: "has contents",
-        backwardName: "is contents of",
-        defaultForwardWeight: 1,
-        defaultBackwardWeight: 1,
-        prefix: E.Prefix.hasContents,
       },
     ];
   }

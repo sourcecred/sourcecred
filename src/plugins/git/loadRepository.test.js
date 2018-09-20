@@ -30,16 +30,6 @@ describe("plugins/git/loadRepository", () => {
     );
   });
 
-  it("respects commits-only mode", () => {
-    const repository = createExampleRepo(mkdtemp());
-    const full = loadRepository(repository.path, "HEAD");
-    const commitsOnly = loadRepository(repository.path, "HEAD", "COMMITS_ONLY");
-    expect(commitsOnly).toEqual({
-      commits: full.commits,
-      trees: {},
-    });
-  });
-
   it("processes an old commit", () => {
     const repository = createExampleRepo(mkdtemp());
     const whole = loadRepository(repository.path, "HEAD");
@@ -49,14 +39,10 @@ describe("plugins/git/loadRepository", () => {
     Object.keys(part.commits).forEach((hash) => {
       expect(part.commits[hash]).toEqual(whole.commits[hash]);
     });
-    Object.keys(part.trees).forEach((hash) => {
-      expect(part.trees[hash]).toEqual(whole.trees[hash]);
-    });
 
     // ...and that it's the right subset.
     expect({
       commits: new Set(Object.keys(part.commits)),
-      trees: new Set(Object.keys(part.trees)),
     }).toMatchSnapshot();
   });
 
@@ -74,7 +60,6 @@ describe("plugins/git/loadRepository", () => {
     git(["init"]);
     expect(loadRepository(repositoryPath, "HEAD")).toEqual({
       commits: {},
-      trees: {},
     });
   });
 });
