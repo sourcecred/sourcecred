@@ -2,6 +2,7 @@
 
 import tmp from "tmp";
 
+import {makeRepoId, repoIdToString} from "../../core/repoId";
 import {createExampleRepo} from "./example/exampleRepo";
 import {localGit} from "./gitUtils";
 import {loadRepository} from "./loadRepository";
@@ -25,15 +26,38 @@ describe("plugins/git/loadRepository", () => {
     // In case of failure, run
     //     src/plugins/git/loadRepositoryTest.sh --updateSnapshot
     // to update the snapshot, then inspect the resulting changes.
-    expect(loadRepository(repository.path, "HEAD")).toEqual(
-      require("./example/example-git.json")
-    );
+    expect(
+      loadRepository(
+        repository.path,
+        "HEAD",
+        makeRepoId("sourcecred", "example-git")
+      )
+    ).toEqual(require("./example/example-git.json"));
+  });
+
+  it("sets the right repoId for every commit", () => {
+    const gitRepository = createExampleRepo(mkdtemp());
+    const repoId = makeRepoId("sourcecred", "example-git");
+    const repository = loadRepository(gitRepository.path, "HEAD", repoId);
+    for (const commitHash of Object.keys(repository.commits)) {
+      expect(Object.keys(repository.commitToRepoId[commitHash])).toEqual([
+        repoIdToString(repoId),
+      ]);
+    }
   });
 
   it("processes an old commit", () => {
     const repository = createExampleRepo(mkdtemp());
-    const whole = loadRepository(repository.path, "HEAD");
-    const part = loadRepository(repository.path, repository.commits[1]);
+    const whole = loadRepository(
+      repository.path,
+      "HEAD",
+      makeRepoId("sourcecred", "example-git")
+    );
+    const part = loadRepository(
+      repository.path,
+      repository.commits[1],
+      makeRepoId("sourcecred", "example-git")
+    );
 
     // Check that `part` is a subset of `whole`...
     Object.keys(part.commits).forEach((hash) => {
@@ -50,7 +74,11 @@ describe("plugins/git/loadRepository", () => {
     const repository = createExampleRepo(mkdtemp());
     const invalidHash = "0".repeat(40);
     expect(() => {
-      loadRepository(repository.path, invalidHash);
+      loadRepository(
+        repository.path,
+        invalidHash,
+        makeRepoId("sourcecred", "example-git")
+      );
     }).toThrow("fatal: bad object 0000000000000000000000000000000000000000");
   });
 
@@ -58,8 +86,15 @@ describe("plugins/git/loadRepository", () => {
     const repositoryPath = mkdtemp();
     const git = localGit(repositoryPath);
     git(["init"]);
-    expect(loadRepository(repositoryPath, "HEAD")).toEqual({
+    expect(
+      loadRepository(
+        repositoryPath,
+        "HEAD",
+        makeRepoId("sourcecred", "example-git")
+      )
+    ).toEqual({
       commits: {},
+      commitToRepoId: {},
     });
   });
 });

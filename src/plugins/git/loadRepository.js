@@ -9,9 +9,15 @@
  */
 // @flow
 
+import * as MapUtil from "../../util/map";
 import type {GitDriver} from "./gitUtils";
-import type {Repository, Hash, Commit} from "./types";
+import type {Repository, Commit} from "./types";
 import {localGit} from "./gitUtils";
+import {
+  repoIdToString,
+  type RepoId,
+  type RepoIdString,
+} from "../../core/repoId";
 
 /**
  * Load a Git repository from disk into memory. The `rootRef` should be
@@ -21,7 +27,8 @@ import {localGit} from "./gitUtils";
  */
 export function loadRepository(
   repositoryPath: string,
-  rootRef: string
+  rootRef: string,
+  repoId: RepoId
 ): Repository {
   const git = localGit(repositoryPath);
   try {
@@ -32,18 +39,18 @@ export function loadRepository(
     git(["rev-parse", "--verify", "HEAD"]);
   } catch (e) {
     // No data in the repository.
-    return {commits: {}};
+    return {commits: {}, commitToRepoId: {}};
   }
-  const commits = findCommits(git, rootRef);
-  return {commits: objectMap(commits)};
-}
-
-function objectMap<T: {+hash: Hash}>(ts: $ReadOnlyArray<T>): {[Hash]: T} {
-  const result = {};
-  ts.forEach((t) => {
-    result[t.hash] = t;
+  const rawCommits = findCommits(git, rootRef);
+  const commits = MapUtil.toObject(new Map(rawCommits.map((x) => [x.hash, x])));
+  const repoIdString = repoIdToString(repoId);
+  const repoIdStringSet: () => {[RepoIdString]: true} = () => ({
+    [((repoIdString: RepoIdString): any)]: true,
   });
-  return result;
+  const commitToRepoId = MapUtil.toObject(
+    new Map(rawCommits.map(({hash}) => [hash, repoIdStringSet()]))
+  );
+  return {commits, commitToRepoId};
 }
 
 function findCommits(git: GitDriver, rootRef: string): Commit[] {

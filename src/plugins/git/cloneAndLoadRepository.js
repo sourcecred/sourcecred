@@ -20,7 +20,7 @@ export default function cloneAndLoadRepository(repoId: RepoId): Repository {
   const tmpdir = tmp.dirSync({unsafeCleanup: true});
   const git = localGit(tmpdir.name);
   git(["clone", cloneUrl, ".", "--quiet"]);
-  const result = loadRepository(tmpdir.name, "HEAD");
+  const result = loadRepository(tmpdir.name, "HEAD", repoId);
   tmpdir.removeCallback();
   return result;
 }
