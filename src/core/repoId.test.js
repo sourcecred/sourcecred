@@ -5,6 +5,7 @@ import {
   stringToRepoId,
   repoIdToString,
   type RepoId,
+  type RepoIdString,
 } from "./repoId";
 
 describe("core/repoId", () => {
@@ -20,6 +21,12 @@ describe("core/repoId", () => {
       const repoId: RepoId = makeRepoId("foo", "bar");
       const _unused_owner: string = repoId.owner;
       const _unused_name: string = repoId.name;
+    });
+  });
+  describe("RepoIdString type", () => {
+    it("manually constructing a RepoIdString is illegal", () => {
+      // $ExpectFlowError
+      const _unused_repoIdString: RepoIdString = "foobar";
     });
   });
   describe("makeRepoId", () => {
