@@ -10,9 +10,30 @@ import * as Queries from "./queries";
 import {_buildSchemaInfo, _inTransaction, Mirror} from "./mirror";
 
 describe("graphql/mirror", () => {
+  function issueTimelineItemClauses() {
+    return [
+      "Commit",
+      "IssueComment",
+      "CrossReferencedEvent",
+      "ClosedEvent",
+      "ReopenedEvent",
+      "SubscribedEvent",
+      "UnsubscribedEvent",
+      "ReferencedEvent",
+      "AssignedEvent",
+      "UnassignedEvent",
+      "LabeledEvent",
+      "UnlabeledEvent",
+      "MilestonedEvent",
+      "DemilestonedEvent",
+      "RenamedTitleEvent",
+      "LockedEvent",
+      "UnlockedEvent",
+    ];
+  }
   function buildGithubSchema(): Schema.Schema {
     const s = Schema;
-    return s.schema({
+    const types: {[Schema.Typename]: Schema.NodeType} = {
       Repository: s.object({
         id: s.id(),
         url: s.primitive(),
@@ -25,12 +46,14 @@ describe("graphql/mirror", () => {
         repository: s.node("Repository"),
         title: s.primitive(),
         comments: s.connection("IssueComment"),
+        timeline: s.connection("IssueTimelineItem"),
       }),
       IssueComment: s.object({
         id: s.id(),
         body: s.primitive(),
         author: s.node("Actor"),
       }),
+      IssueTimelineItem: s.union(issueTimelineItemClauses()),
       Actor: s.union(["User", "Bot", "Organization"]), // actually an interface
       User: s.object({
         id: s.id(),
@@ -47,7 +70,13 @@ describe("graphql/mirror", () => {
         url: s.primitive(),
         login: s.primitive(),
       }),
-    });
+    };
+    for (const clause of issueTimelineItemClauses()) {
+      if (types[clause] == null) {
+        types[clause] = s.object({id: s.id(), actor: s.node("Actor")});
+      }
+    }
+    return s.schema(types);
   }
 
   describe("Mirror", () => {
@@ -79,22 +108,25 @@ describe("graphql/mirror", () => {
           .pluck()
           .all();
         expect(tables.sort()).toEqual(
-          [
-            // Structural tables
-            "meta",
-            "updates",
-            "objects",
-            "links",
-            "connections",
-            "connection_entries",
-            // Primitive data tables per OBJECT type (no UNIONs)
-            "primitives_Repository",
-            "primitives_Issue",
-            "primitives_IssueComment",
-            "primitives_User",
-            "primitives_Bot",
-            "primitives_Organization",
-          ].sort()
+          Array.from(
+            new Set([
+              // Structural tables
+              "meta",
+              "updates",
+              "objects",
+              "links",
+              "connections",
+              "connection_entries",
+              // Primitive data tables per OBJECT type (no UNIONs)
+              "primitives_Repository",
+              "primitives_Issue",
+              "primitives_IssueComment",
+              "primitives_User",
+              "primitives_Bot",
+              "primitives_Organization",
+              ...issueTimelineItemClauses().map((x) => `primitives_${x}`),
+            ])
+          ).sort()
         );
       });
 
@@ -240,7 +272,7 @@ describe("graphql/mirror", () => {
             )
             .pluck()
             .all(issueId)
-        ).toEqual(["comments"]);
+        ).toEqual(["comments", "timeline"].sort());
         expect(
           db
             .prepare(
@@ -445,6 +477,19 @@ describe("graphql/mirror", () => {
           hasNextPage: +false,
           endCursor: "cursor:issue4.comments",
         });
+        for (const n of [1, 2, 3, 4]) {
+          // The "timeline" connection doesn't provide any extra useful
+          // info; just mark them all updated.
+          const objectId = `issue:ab/cd#${n}`;
+          setConnectionData({
+            objectId,
+            fieldname: "timeline",
+            update: lateUpdate.id,
+            totalCount: 0,
+            hasNextPage: +false,
+            endCursor: "cursor:whatever",
+          });
+        }
 
         const actual = mirror._findOutdated(new Date(midUpdate.time));
         const expected = {
@@ -479,6 +524,36 @@ describe("graphql/mirror", () => {
           ],
         };
         expect(actual).toEqual(expected);
+      });
+    });
+
+    describe("_queryShallow", () => {
+      it("fails when given a nonexistent type", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._queryShallow("Wat");
+        }).toThrow('No such type: "Wat"');
+      });
+      it("handles an object type", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const b = Queries.build;
+        expect(mirror._queryShallow("Issue")).toEqual([
+          b.field("__typename"),
+          b.field("id"),
+        ]);
+      });
+      it("handles a union type", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const b = Queries.build;
+        expect(mirror._queryShallow("Actor")).toEqual([
+          b.field("__typename"),
+          b.inlineFragment("User", [b.field("id")]),
+          b.inlineFragment("Bot", [b.field("id")]),
+          b.inlineFragment("Organization", [b.field("id")]),
+        ]);
       });
     });
 
@@ -550,12 +625,47 @@ describe("graphql/mirror", () => {
     });
 
     describe("_queryConnection", () => {
+      it("fails when given a nonexistent type", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._queryConnection("Wat", "wot", undefined, 23);
+        }).toThrow('No such type: "Wat"');
+      });
+      it("fails when given a non-object type", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._queryConnection("Actor", "issues", undefined, 23);
+        }).toThrow(
+          'Cannot query connection on non-object type "Actor" (UNION)'
+        );
+      });
+      it("fails when given a nonexistent field name", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._queryConnection("Issue", "mcguffins", undefined, 23);
+        }).toThrow('Object type "Issue" has no field "mcguffins"');
+      });
+      it("fails when given a non-connection field name", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._queryConnection("Issue", "author", undefined, 23);
+        }).toThrow('Cannot query non-connection field "Issue"."author" (NODE)');
+      });
       it("creates a query when no cursor is specified", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const pageLimit = 23;
         const endCursor = undefined;
-        const actual = mirror._queryConnection("comments", endCursor, 23);
+        const actual = mirror._queryConnection(
+          "Issue",
+          "comments",
+          endCursor,
+          23
+        );
         const b = Queries.build;
         expect(actual).toEqual([
           b.field("comments", {first: b.literal(pageLimit)}, [
@@ -573,7 +683,12 @@ describe("graphql/mirror", () => {
         const mirror = new Mirror(db, buildGithubSchema());
         const pageLimit = 23;
         const endCursor = null;
-        const actual = mirror._queryConnection("comments", endCursor, 23);
+        const actual = mirror._queryConnection(
+          "Issue",
+          "comments",
+          endCursor,
+          23
+        );
         const b = Queries.build;
         expect(actual).toEqual([
           b.field(
@@ -595,7 +710,12 @@ describe("graphql/mirror", () => {
         const mirror = new Mirror(db, buildGithubSchema());
         const pageLimit = 23;
         const endCursor = "c29tZS1jdXJzb3I=";
-        const actual = mirror._queryConnection("comments", endCursor, 23);
+        const actual = mirror._queryConnection(
+          "Issue",
+          "comments",
+          endCursor,
+          23
+        );
         const b = Queries.build;
         expect(actual).toEqual([
           b.field(
@@ -614,51 +734,64 @@ describe("graphql/mirror", () => {
       });
       it("snapshot test for actual GitHub queries", () => {
         // This test emits as a snapshot a valid query against GitHub's
-        // GraphQL API. You can copy-and-paste the snapshot into
-        // <https://developer.github.com/v4/explorer/> to run it. The
-        // resulting IDs in `initialQuery` and `updateQuery` should
-        // concatenate to match those in `expectedIds`. In particular,
-        // the following JQ program should output `true` when passed the
-        // query result from GitHub:
+        // GraphQL API. You should be able to copy-and-paste the
+        // snapshot into <https://developer.github.com/v4/explorer/> to
+        // run it.* The resulting IDs in `initialQuery` and
+        // `updateQuery` should concatenate to match those in
+        // `expectedIds`. In particular, the following JQ program should
+        // output `true` when passed the query result from GitHub:
         //
-        //     jq '.data |
-        //         ([.initialQuery, .updateQuery] | map(.issues.nodes[].id))
-        //         == [.expectedIds.issues.nodes[].id]
+        //     jq '
+        //       .data |
+        //       (([.objectInitial, .objectUpdate] | map(.issues.nodes[].id))
+        //         == [.objectExpectedIds.issues.nodes[].id])
+        //       and
+        //       (([.unionInitial, .unionUpdate] | map(.timeline.nodes[].id))
+        //         == [.unionExpectedIds.timeline.nodes[].id])
         //     '
+        //
+        // * This may not actually work, because the query text is
+        // somewhat large (a few kilobytes), and sometimes GitHub's
+        // GraphiQL explorer chokes on such endpoints. Posting directly
+        // to the input with curl(1) works. You could also temporarily
+        // change the `multilineLayout` to an `inlineLayout` to shave
+        // off some bytes and possibly appease the GraphiQL gods.
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
-        const exampleGithubRepoId = "MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=";
-        const pageLimit = 2;
         const b = Queries.build;
-        const initialQuery = mirror._queryConnection(
-          "issues",
-          undefined,
-          pageLimit
-        );
-        const expectedEndCursor = "Y3Vyc29yOnYyOpHOEe_nRA==";
-        const updateQuery = mirror._queryConnection(
-          "issues",
-          expectedEndCursor,
-          pageLimit
-        );
-        const query = b.query(
-          "TestQuery",
-          [],
-          [
+
+        // Queries for a connection whose declared type is an object.
+        function objectConnectionQuery(): Queries.Selection[] {
+          const exampleGithubRepoId = "MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=";
+          const pageLimit = 2;
+          const initialQuery = mirror._queryConnection(
+            "Repository",
+            "issues",
+            undefined,
+            pageLimit
+          );
+          const expectedEndCursor = "Y3Vyc29yOnYyOpHOEe_nRA==";
+          const updateQuery = mirror._queryConnection(
+            "Repository",
+            "issues",
+            expectedEndCursor,
+            pageLimit
+          );
+          return [
             b.alias(
-              "initialQuery",
+              "objectInitial",
               b.field("node", {id: b.literal(exampleGithubRepoId)}, [
                 b.inlineFragment("Repository", initialQuery),
               ])
             ),
             b.alias(
-              "updateQuery",
+              "objectUpdate",
               b.field("node", {id: b.literal(exampleGithubRepoId)}, [
                 b.inlineFragment("Repository", updateQuery),
               ])
             ),
             b.alias(
-              "expectedIds",
+              "objectExpectedIds",
               b.field("node", {id: b.literal(exampleGithubRepoId)}, [
                 b.inlineFragment("Repository", [
                   b.field("issues", {first: b.literal(pageLimit * 2)}, [
@@ -667,7 +800,73 @@ describe("graphql/mirror", () => {
                 ]),
               ])
             ),
-          ]
+          ];
+        }
+
+        // Queries for a connection whose declared type is a union.
+        function unionConnectionQuery(): Queries.Selection[] {
+          // Almost all GitHub connections return OBJECTs for nodes, but
+          // a very few return UNIONs:
+          //
+          //   - `IssueTimelineConnection`,
+          //   - `PullRequestTimelineConnection`, and
+          //   - `SearchResultItemConnection`.
+          //
+          // Of these, `SearchResultItemConnection` does not adhere to
+          // the same interface as the rest of the connections (it does
+          // not have a `totalCount` field), so it will not work with
+          // our system. But the two timeline connections are actually
+          // important---they let us see who assigns labels---so we test
+          // one of them.
+          const exampleIssueId = "MDU6SXNzdWUzMDA5MzQ4MTg=";
+          const pageLimit = 1;
+          const initialQuery = mirror._queryConnection(
+            "Issue",
+            "timeline",
+            undefined,
+            pageLimit
+          );
+          const expectedEndCursor = "MQ==";
+          const updateQuery = mirror._queryConnection(
+            "Issue",
+            "timeline",
+            expectedEndCursor,
+            pageLimit
+          );
+          return [
+            b.alias(
+              "unionInitial",
+              b.field("node", {id: b.literal(exampleIssueId)}, [
+                b.inlineFragment("Issue", initialQuery),
+              ])
+            ),
+            b.alias(
+              "unionUpdate",
+              b.field("node", {id: b.literal(exampleIssueId)}, [
+                b.inlineFragment("Issue", updateQuery),
+              ])
+            ),
+            b.alias(
+              "unionExpectedIds",
+              b.field("node", {id: b.literal(exampleIssueId)}, [
+                b.inlineFragment("Issue", [
+                  b.field("timeline", {first: b.literal(pageLimit * 2)}, [
+                    b.field("nodes", {}, [
+                      ...issueTimelineItemClauses().map((clause) =>
+                        b.inlineFragment(clause, [b.field("id")])
+                      ),
+                    ]),
+                  ]),
+                ]),
+              ])
+            ),
+          ];
+        }
+
+        const query = b.query(
+          "TestQuery",
+          [],
+          [...objectConnectionQuery(), ...unionConnectionQuery()]
         );
         const format = (body: Queries.Body): string =>
           Queries.stringify.body(body, Queries.multilineLayout("  "));
@@ -881,14 +1080,17 @@ describe("graphql/mirror", () => {
     it("processes object types properly", () => {
       const result = _buildSchemaInfo(buildGithubSchema());
       expect(Object.keys(result.objectTypes).sort()).toEqual(
-        [
-          "Repository",
-          "Issue",
-          "IssueComment",
-          "User",
-          "Bot",
-          "Organization",
-        ].sort()
+        Array.from(
+          new Set([
+            "Repository",
+            "Issue",
+            "IssueComment",
+            "User",
+            "Bot",
+            "Organization",
+            ...issueTimelineItemClauses(),
+          ])
+        ).sort()
       );
       expect(result.objectTypes["Issue"].fields).toEqual(
         (buildGithubSchema().Issue: any).fields
@@ -901,11 +1103,13 @@ describe("graphql/mirror", () => {
       );
       expect(
         result.objectTypes["Issue"].connectionFieldNames.slice().sort()
-      ).toEqual(["comments"].sort());
+      ).toEqual(["comments", "timeline"].sort());
     });
     it("processes union types correctly", () => {
       const result = _buildSchemaInfo(buildGithubSchema());
-      expect(Object.keys(result.unionTypes).sort()).toEqual(["Actor"].sort());
+      expect(Object.keys(result.unionTypes).sort()).toEqual(
+        ["Actor", "IssueTimelineItem"].sort()
+      );
       expect(result.unionTypes["Actor"].clauses.slice().sort()).toEqual(
         ["User", "Bot", "Organization"].sort()
       );
