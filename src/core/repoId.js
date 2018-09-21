@@ -10,6 +10,8 @@ export opaque type RepoId: {|
   +owner: string,
 |};
 
+export opaque type RepoIdString: string = string;
+
 export const githubOwnerPattern = "[A-Za-z0-9-]+";
 export const githubRepoPattern = "[A-Za-z0-9-._]+";
 
@@ -33,6 +35,6 @@ export function stringToRepoId(x: string): RepoId {
   return makeRepoId(pieces[0], pieces[1]);
 }
 
-export function repoIdToString(x: RepoId): string {
+export function repoIdToString(x: RepoId): RepoIdString {
   return `${x.owner}/${x.name}`;
 }
