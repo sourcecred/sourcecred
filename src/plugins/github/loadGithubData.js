@@ -6,11 +6,11 @@ import pako from "pako";
 
 import fetchGithubRepo from "./fetchGithubRepo";
 import {RelationalView} from "./relationalView";
-import type {Repo} from "../../core/repo";
+import type {RepoId} from "../../core/repoId";
 
 export type Options = {|
   +token: string,
-  +repos: $ReadOnlyArray<Repo>,
+  +repoIds: $ReadOnlyArray<RepoId>,
   +outputDirectory: string,
   +cacheDirectory: string,
 |};
@@ -23,8 +23,8 @@ export async function loadGithubData(options: Options): Promise<void> {
   // > Make requests for a single user or client ID serially. Do not make
   // > make requests for a single user or client ID concurrently.
   const responses = [];
-  for (const repo of options.repos) {
-    responses.push(await fetchGithubRepo(repo, options.token));
+  for (const repoId of options.repoIds) {
+    responses.push(await fetchGithubRepo(repoId, options.token));
   }
   const view = new RelationalView();
   for (const response of responses) {

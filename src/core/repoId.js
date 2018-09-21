@@ -1,6 +1,11 @@
 // @flow
 
-export opaque type Repo: {|+name: string, +owner: string|} = {|
+// Right now all RepoIds are assumed to refer to GitHub repos.
+// In the future, we may support other identifiers.
+export opaque type RepoId: {|
+  +name: string,
+  +owner: string,
+|} = {|
   +name: string,
   +owner: string,
 |};
@@ -8,7 +13,7 @@ export opaque type Repo: {|+name: string, +owner: string|} = {|
 export const githubOwnerPattern = "[A-Za-z0-9-]+";
 export const githubRepoPattern = "[A-Za-z0-9-._]+";
 
-export function makeRepo(owner: string, name: string): Repo {
+export function makeRepoId(owner: string, name: string): RepoId {
   const validOwner = new RegExp(`^${githubOwnerPattern}$`);
   const validRepo = new RegExp(`^${githubRepoPattern}$`);
   if (!owner.match(validOwner)) {
@@ -20,14 +25,14 @@ export function makeRepo(owner: string, name: string): Repo {
   return {owner, name};
 }
 
-export function stringToRepo(x: string): Repo {
+export function stringToRepoId(x: string): RepoId {
   const pieces = x.split("/");
   if (pieces.length !== 2) {
     throw new Error(`Invalid repo string: ${x}`);
   }
-  return makeRepo(pieces[0], pieces[1]);
+  return makeRepoId(pieces[0], pieces[1]);
 }
 
-export function repoToString(x: Repo): string {
+export function repoIdToString(x: RepoId): string {
   return `${x.owner}/${x.name}`;
 }

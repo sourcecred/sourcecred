@@ -1,7 +1,7 @@
 // @flow
 
 import {textBlocks} from "./parseMarkdown";
-import {githubOwnerPattern, githubRepoPattern} from "../../core/repo";
+import {githubOwnerPattern, githubRepoPattern} from "../../core/repoId";
 
 export type ParsedReference = {|
   // "@user" or "#123" or "https://github.com/owner/name/..."

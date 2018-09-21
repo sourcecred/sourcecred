@@ -9,12 +9,16 @@ import RepositorySelect, {
   LocalStoreRepositorySelect,
   loadStatus,
   type Status,
-  REPO_KEY,
+  REPO_ID_KEY,
 } from "./RepositorySelect";
 import {Assets} from "../assets";
 
-import {toJSON, type RepoRegistry, REPO_REGISTRY_API} from "./repoRegistry";
-import {makeRepo} from "../../core/repo";
+import {
+  toJSON,
+  type RepoIdRegistry,
+  REPO_ID_REGISTRY_API,
+} from "./repoIdRegistry";
+import {makeRepoId} from "../../core/repoId";
 
 require("../testUtil").configureEnzyme();
 require("../testUtil").configureAphrodite();
@@ -24,7 +28,7 @@ describe("app/credExplorer/RepositorySelect", () => {
     fetch.resetMocks();
   });
 
-  function mockRegistry(registry: RepoRegistry) {
+  function mockRegistry(registry: RepoIdRegistry) {
     fetch.mockResponseOnce(JSON.stringify(toJSON(registry)));
   }
   describe("PureRepositorySelect", () => {
@@ -56,45 +60,54 @@ describe("app/credExplorer/RepositorySelect", () => {
         "Error: Unable to load repository registry. See console for details."
       );
     });
-    it("renders a select with all available repos as options", () => {
-      const availableRepos = [makeRepo("foo", "bar"), makeRepo("zod", "zoink")];
-      const selectedRepo = availableRepos[0];
+    it("renders a select with all available repoIds as options", () => {
+      const availableRepoIds = [
+        makeRepoId("foo", "bar"),
+        makeRepoId("zod", "zoink"),
+      ];
+      const selectedRepoId = availableRepoIds[0];
       const e = shallow(
         <PureRepositorySelect
-          status={{type: "VALID", availableRepos, selectedRepo}}
+          status={{type: "VALID", availableRepoIds, selectedRepoId}}
           onChange={jest.fn()}
         />
       );
       const options = e.find("option");
       expect(options.map((x) => x.text())).toEqual(["foo/bar", "zod/zoink"]);
     });
-    it("the selectedRepo is selected", () => {
-      const availableRepos = [makeRepo("foo", "bar"), makeRepo("zod", "zoink")];
-      const selectedRepo = availableRepos[0];
+    it("the selectedRepoId is selected", () => {
+      const availableRepoIds = [
+        makeRepoId("foo", "bar"),
+        makeRepoId("zod", "zoink"),
+      ];
+      const selectedRepoId = availableRepoIds[0];
       const e = shallow(
         <PureRepositorySelect
-          status={{type: "VALID", availableRepos, selectedRepo}}
+          status={{type: "VALID", availableRepoIds, selectedRepoId}}
           onChange={jest.fn()}
         />
       );
       expect(e.find("select").prop("value")).toBe("foo/bar");
     });
     it("clicking an option triggers the onChange", () => {
-      const availableRepos = [makeRepo("foo", "bar"), makeRepo("zod", "zoink")];
+      const availableRepoIds = [
+        makeRepoId("foo", "bar"),
+        makeRepoId("zod", "zoink"),
+      ];
       const onChange = jest.fn();
       const e = shallow(
         <PureRepositorySelect
           status={{
             type: "VALID",
-            availableRepos,
-            selectedRepo: availableRepos[0],
+            availableRepoIds,
+            selectedRepoId: availableRepoIds[0],
           }}
           onChange={onChange}
         />
       );
       e.find("select").simulate("change", {target: {value: "zod/zoink"}});
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenLastCalledWith(availableRepos[1]);
+      expect(onChange).toHaveBeenLastCalledWith(availableRepoIds[1]);
     });
   });
 
@@ -102,36 +115,36 @@ describe("app/credExplorer/RepositorySelect", () => {
     const assets = new Assets("/my/gateway/");
     function expectLoadValidStatus(
       localStore,
-      expectedAvailableRepos,
-      expectedSelectedRepo
+      expectedAvailableRepoIds,
+      expectedSelectedRepoId
     ) {
       const result = loadStatus(assets, localStore);
       expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith("/my/gateway" + REPO_REGISTRY_API);
+      expect(fetch).toHaveBeenCalledWith("/my/gateway" + REPO_ID_REGISTRY_API);
       expect.assertions(7);
       return result.then((status) => {
         expect(status.type).toBe("VALID");
         if (status.type !== "VALID") {
           throw new Error("Impossible");
         }
-        expect(status.availableRepos).toEqual(expectedAvailableRepos);
-        expect(status.selectedRepo).toEqual(expectedSelectedRepo);
+        expect(status.availableRepoIds).toEqual(expectedAvailableRepoIds);
+        expect(status.selectedRepoId).toEqual(expectedSelectedRepoId);
       });
     }
     it("calls fetch and handles a simple success", () => {
-      const repo = makeRepo("foo", "bar");
-      mockRegistry([repo]);
-      return expectLoadValidStatus(testLocalStore(), [repo], repo);
+      const repoId = makeRepoId("foo", "bar");
+      mockRegistry([repoId]);
+      return expectLoadValidStatus(testLocalStore(), [repoId], repoId);
     });
-    it("returns repos in sorted order, and selects the last repo", () => {
-      const repos = [
-        makeRepo("a", "b"),
-        makeRepo("a", "z"),
-        makeRepo("foo", "bar"),
+    it("returns repoIds in sorted order, and selects the last repoId", () => {
+      const repoIds = [
+        makeRepoId("a", "b"),
+        makeRepoId("a", "z"),
+        makeRepoId("foo", "bar"),
       ];
-      const nonSortedRepos = [repos[2], repos[0], repos[1]];
-      mockRegistry(nonSortedRepos);
-      return expectLoadValidStatus(testLocalStore(), repos, repos[1]);
+      const nonSortedRepoIds = [repoIds[2], repoIds[0], repoIds[1]];
+      mockRegistry(nonSortedRepoIds);
+      return expectLoadValidStatus(testLocalStore(), repoIds, repoIds[1]);
     });
     it("returns FAILURE on invalid fetch response", () => {
       fetch.mockResponseOnce(JSON.stringify(["hello"]));
@@ -160,38 +173,38 @@ describe("app/credExplorer/RepositorySelect", () => {
         expect(status).toEqual({type: "NO_REPOS"});
       });
     });
-    it("loads selectedRepo from localStore, if available", () => {
-      const repos = [
-        makeRepo("a", "b"),
-        makeRepo("a", "z"),
-        makeRepo("foo", "bar"),
+    it("loads selectedRepoId from localStore, if available", () => {
+      const repoIds = [
+        makeRepoId("a", "b"),
+        makeRepoId("a", "z"),
+        makeRepoId("foo", "bar"),
       ];
-      mockRegistry(repos);
+      mockRegistry(repoIds);
       const localStore = testLocalStore();
-      localStore.set(REPO_KEY, {owner: "a", name: "z"});
-      return expectLoadValidStatus(localStore, repos, repos[1]);
+      localStore.set(REPO_ID_KEY, {owner: "a", name: "z"});
+      return expectLoadValidStatus(localStore, repoIds, repoIds[1]);
     });
-    it("ignores selectedRepo from localStore, if not available", () => {
-      const repos = [
-        makeRepo("a", "b"),
-        makeRepo("a", "z"),
-        makeRepo("foo", "bar"),
+    it("ignores selectedRepoId from localStore, if not available", () => {
+      const repoIds = [
+        makeRepoId("a", "b"),
+        makeRepoId("a", "z"),
+        makeRepoId("foo", "bar"),
       ];
-      mockRegistry(repos);
+      mockRegistry(repoIds);
       const localStore = testLocalStore();
-      localStore.set(REPO_KEY, {owner: "non", name: "existent"});
-      return expectLoadValidStatus(localStore, repos, repos[2]);
+      localStore.set(REPO_ID_KEY, {owner: "non", name: "existent"});
+      return expectLoadValidStatus(localStore, repoIds, repoIds[2]);
     });
     it("ignores malformed value in localStore", () => {
-      const repos = [
-        makeRepo("a", "b"),
-        makeRepo("a", "z"),
-        makeRepo("foo", "bar"),
+      const repoIds = [
+        makeRepoId("a", "b"),
+        makeRepoId("a", "z"),
+        makeRepoId("foo", "bar"),
       ];
-      mockRegistry(repos);
+      mockRegistry(repoIds);
       const localStore = testLocalStore();
-      localStore.set(REPO_KEY, 42);
-      return expectLoadValidStatus(localStore, repos, repos[2]);
+      localStore.set(REPO_ID_KEY, 42);
+      return expectLoadValidStatus(localStore, repoIds, repoIds[2]);
     });
   });
 
@@ -229,9 +242,9 @@ describe("app/credExplorer/RepositorySelect", () => {
           }}
         </LocalStoreRepositorySelect>
       );
-      const repo = {owner: "foo", name: "bar"};
-      NullUtil.get(childOnChange)(repo);
-      expect(onChange).toHaveBeenCalledWith(repo);
+      const repoId = {owner: "foo", name: "bar"};
+      NullUtil.get(childOnChange)(repoId);
+      expect(onChange).toHaveBeenCalledWith(repoId);
       expect(onChange).toHaveBeenCalledTimes(1);
     });
     it("stores onChange result in localStore", () => {
@@ -251,9 +264,9 @@ describe("app/credExplorer/RepositorySelect", () => {
           }}
         </LocalStoreRepositorySelect>
       );
-      const repo = {owner: "foo", name: "bar"};
-      NullUtil.get(childOnChange)(repo);
-      expect(localStore.get(REPO_KEY)).toEqual(repo);
+      const repoId = {owner: "foo", name: "bar"};
+      NullUtil.get(childOnChange)(repoId);
+      expect(localStore.get(REPO_ID_KEY)).toEqual(repoId);
     });
   });
 
@@ -261,7 +274,7 @@ describe("app/credExplorer/RepositorySelect", () => {
     const assets = new Assets("/my/gateway/");
 
     it("calls `loadStatus` with the proper assets", () => {
-      mockRegistry([makeRepo("irrelevant", "unused")]);
+      mockRegistry([makeRepoId("irrelevant", "unused")]);
       shallow(
         <RepositorySelect
           assets={assets}
@@ -272,11 +285,11 @@ describe("app/credExplorer/RepositorySelect", () => {
       // A bit of overlap with tests for `loadStatus` directly---it'd be
       // nicer to spy on `loadStatus`, but that's at module top level,
       // so `RepositorySelect` closes over it directly.
-      expect(fetch).toHaveBeenCalledWith("/my/gateway" + REPO_REGISTRY_API);
+      expect(fetch).toHaveBeenCalledWith("/my/gateway" + REPO_ID_REGISTRY_API);
     });
 
     it("initially renders a LocalStoreRepositorySelect with status LOADING", () => {
-      mockRegistry([makeRepo("irrelevant", "unused")]);
+      mockRegistry([makeRepoId("irrelevant", "unused")]);
       const e = shallow(
         <RepositorySelect
           assets={assets}
@@ -303,8 +316,8 @@ describe("app/credExplorer/RepositorySelect", () => {
 
     it("on successful load, sets the status on the child", async () => {
       const onChange = jest.fn();
-      const selectedRepo = makeRepo("foo", "bar");
-      mockRegistry([selectedRepo]);
+      const selectedRepoId = makeRepoId("foo", "bar");
+      mockRegistry([selectedRepoId]);
       const e = shallow(
         <RepositorySelect
           assets={assets}
@@ -314,18 +327,18 @@ describe("app/credExplorer/RepositorySelect", () => {
       );
       await waitForUpdate(e);
       const childStatus = e.props().status;
-      const availableRepos = [selectedRepo];
+      const availableRepoIds = [selectedRepoId];
       expect(childStatus).toEqual({
         type: "VALID",
-        selectedRepo,
-        availableRepos,
+        selectedRepoId,
+        availableRepoIds,
       });
     });
 
     it("on successful load, passes the status to the onChange", async () => {
       const onChange = jest.fn();
-      const repo = makeRepo("foo", "bar");
-      mockRegistry([repo]);
+      const repoId = makeRepoId("foo", "bar");
+      mockRegistry([repoId]);
       const e = shallow(
         <RepositorySelect
           assets={assets}
@@ -335,7 +348,7 @@ describe("app/credExplorer/RepositorySelect", () => {
       );
       await waitForUpdate(e);
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith(repo);
+      expect(onChange).toHaveBeenCalledWith(repoId);
     });
 
     it("on failed load, onChange not called", async () => {
@@ -358,8 +371,8 @@ describe("app/credExplorer/RepositorySelect", () => {
 
     it("child onChange triggers parent onChange", () => {
       const onChange = jest.fn();
-      const repo = makeRepo("foo", "bar");
-      mockRegistry([repo]);
+      const repoId = makeRepoId("foo", "bar");
+      mockRegistry([repoId]);
       const e = mount(
         <RepositorySelect
           assets={assets}
@@ -368,15 +381,15 @@ describe("app/credExplorer/RepositorySelect", () => {
         />
       );
       const child = e.find(PureRepositorySelect);
-      child.props().onChange(repo);
+      child.props().onChange(repoId);
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith(repo);
+      expect(onChange).toHaveBeenCalledWith(repoId);
     });
 
     it("selecting child option updates top-level state", async () => {
       const onChange = jest.fn();
-      const repos = [makeRepo("foo", "bar"), makeRepo("z", "a")];
-      mockRegistry(repos);
+      const repoIds = [makeRepoId("foo", "bar"), makeRepoId("z", "a")];
+      mockRegistry(repoIds);
       const e = mount(
         <RepositorySelect
           assets={assets}
@@ -386,13 +399,13 @@ describe("app/credExplorer/RepositorySelect", () => {
       );
       await waitForUpdate(e);
       const child = e.find(PureRepositorySelect);
-      child.props().onChange(repos[0]);
+      child.props().onChange(repoIds[0]);
       const status: Status = e.state().status;
       expect(status.type).toEqual("VALID");
       if (status.type !== "VALID") {
         throw new Error("Impossible");
       }
-      expect(status.selectedRepo).toEqual(repos[0]);
+      expect(status.selectedRepoId).toEqual(repoIds[0]);
     });
   });
 });

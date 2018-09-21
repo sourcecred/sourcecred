@@ -4,7 +4,7 @@ import deepEqual from "lodash.isequal";
 
 import {Graph, type NodeAddressT} from "../../core/graph";
 import type {Assets} from "../../app/assets";
-import type {Repo} from "../../core/repo";
+import type {RepoId} from "../../core/repoId";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {
   type PagerankNodeDecomposition,
@@ -36,19 +36,19 @@ export type Uninitialized = {|
 |};
 export type ReadyToLoadGraph = {|
   +type: "READY_TO_LOAD_GRAPH",
-  +repo: Repo,
+  +repoId: RepoId,
   +loading: LoadingState,
 |};
 export type ReadyToRunPagerank = {|
   +type: "READY_TO_RUN_PAGERANK",
-  +repo: Repo,
+  +repoId: RepoId,
   +graphWithAdapters: GraphWithAdapters,
   +loading: LoadingState,
 |};
 export type PagerankEvaluated = {|
   +type: "PAGERANK_EVALUATED",
   +graphWithAdapters: GraphWithAdapters,
-  +repo: Repo,
+  +repoId: RepoId,
   +pagerankNodeDecomposition: PagerankNodeDecomposition,
   +loading: LoadingState,
 |};
@@ -71,7 +71,7 @@ export function uninitializedState(): AppState {
 
 // Exported for testing purposes.
 export interface StateTransitionMachineInterface {
-  +setRepo: (Repo) => void;
+  +setRepoId: (RepoId) => void;
   +loadGraph: (Assets, StaticAdapterSet) => Promise<boolean>;
   +runPagerank: (WeightedTypes, NodeAddressT) => Promise<void>;
   +loadGraphAndRunPagerank: (
@@ -91,7 +91,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   loadGraphWithAdapters: (
     assets: Assets,
     adapters: StaticAdapterSet,
-    repo: Repo
+    repoId: RepoId
   ) => Promise<GraphWithAdapters>;
   pagerank: (
     Graph,
@@ -105,7 +105,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     loadGraphWithAdapters: (
       assets: Assets,
       adapters: StaticAdapterSet,
-      repo: Repo
+      repoId: RepoId
     ) => Promise<GraphWithAdapters>,
     pagerank: (
       Graph,
@@ -119,10 +119,10 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     this.pagerank = pagerank;
   }
 
-  setRepo(repo: Repo) {
+  setRepoId(repoId: RepoId) {
     const newState: AppState = {
       type: "READY_TO_LOAD_GRAPH",
-      repo: repo,
+      repoId: repoId,
       loading: "NOT_LOADING",
     };
     this.setState(newState);
@@ -137,7 +137,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     if (state.type !== "READY_TO_LOAD_GRAPH") {
       throw new Error("Tried to loadGraph in incorrect state");
     }
-    const {repo} = state;
+    const {repoId} = state;
     const loadingState = {...state, loading: "LOADING"};
     this.setState(loadingState);
     let newState: ?AppState;
@@ -146,12 +146,12 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
       const graphWithAdapters = await this.loadGraphWithAdapters(
         assets,
         adapters,
-        repo
+        repoId
       );
       newState = {
         type: "READY_TO_RUN_PAGERANK",
         graphWithAdapters,
-        repo,
+        repoId,
         loading: "NOT_LOADING",
       };
     } catch (e) {
@@ -198,7 +198,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
         type: "PAGERANK_EVALUATED",
         pagerankNodeDecomposition,
         graphWithAdapters: state.graphWithAdapters,
-        repo: state.repo,
+        repoId: state.repoId,
         loading: "NOT_LOADING",
       };
     } catch (e) {
@@ -249,8 +249,8 @@ export type GraphWithAdapters = {|
 export async function loadGraphWithAdapters(
   assets: Assets,
   adapters: StaticAdapterSet,
-  repo: Repo
+  repoId: RepoId
 ): Promise<GraphWithAdapters> {
-  const dynamicAdapters = await adapters.load(assets, repo);
+  const dynamicAdapters = await adapters.load(assets, repoId);
   return {graph: dynamicAdapters.graph(), adapters: dynamicAdapters};
 }

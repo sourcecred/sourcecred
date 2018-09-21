@@ -3,7 +3,7 @@
 import {type Node as ReactNode} from "react";
 import {Graph, type NodeAddressT, type EdgeAddressT} from "../../core/graph";
 import type {Assets} from "../assets";
-import type {Repo} from "../../core/repo";
+import type {RepoId} from "../../core/repoId";
 
 export type EdgeType = {|
   +forwardName: string,
@@ -26,7 +26,7 @@ export interface StaticPluginAdapter {
   edgePrefix(): EdgeAddressT;
   nodeTypes(): NodeType[];
   edgeTypes(): EdgeType[];
-  load(assets: Assets, repo: Repo): Promise<DynamicPluginAdapter>;
+  load(assets: Assets, repoId: RepoId): Promise<DynamicPluginAdapter>;
 }
 
 export interface DynamicPluginAdapter {

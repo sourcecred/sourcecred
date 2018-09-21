@@ -13,7 +13,7 @@ import {
   postQueryExhaustive,
   requiredFragments,
 } from "./graphql";
-import {makeRepo} from "../../core/repo";
+import {makeRepoId} from "../../core/repoId";
 
 describe("plugins/github/graphql", () => {
   describe("creates continuations", () => {
@@ -946,7 +946,7 @@ describe("plugins/github/graphql", () => {
 
       const result = await postQueryExhaustive(postQuery, {
         body: createQuery(),
-        variables: createVariables(makeRepo("sourcecred", "discussion")),
+        variables: createVariables(makeRepoId("sourcecred", "discussion")),
       });
       expect(postQuery).toHaveBeenCalledTimes(3);
 

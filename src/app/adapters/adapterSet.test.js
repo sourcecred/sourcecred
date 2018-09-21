@@ -10,7 +10,7 @@ import {
   fallbackEdgeType,
 } from "./fallbackAdapter";
 import {Assets} from "../assets";
-import {makeRepo} from "../../core/repo";
+import {makeRepoId} from "../../core/repoId";
 
 describe("app/adapters/adapterSet", () => {
   describe("StaticAdapterSet", () => {
@@ -107,12 +107,12 @@ describe("app/adapters/adapterSet", () => {
       x.loadingMock.mockResolvedValue();
       expect(x.loadingMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
-      const repo = makeRepo("foo", "bar");
-      const das = await sas.load(assets, repo);
+      const repoId = makeRepoId("foo", "bar");
+      const das = await sas.load(assets, repoId);
       expect(x.loadingMock).toHaveBeenCalledTimes(1);
       expect(x.loadingMock.mock.calls[0]).toHaveLength(2);
       expect(x.loadingMock.mock.calls[0][0]).toBe(assets);
-      expect(x.loadingMock.mock.calls[0][1]).toBe(repo);
+      expect(x.loadingMock.mock.calls[0][1]).toBe(repoId);
       expect(das).toEqual(expect.anything());
     });
   });
@@ -123,7 +123,7 @@ describe("app/adapters/adapterSet", () => {
       const sas = new StaticAdapterSet([x]);
       const das = await sas.load(
         new Assets("/my/gateway/"),
-        makeRepo("foo", "bar")
+        makeRepoId("foo", "bar")
       );
       return {x, sas, das};
     }

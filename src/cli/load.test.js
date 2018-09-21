@@ -7,8 +7,8 @@ import tmp from "tmp";
 import {run} from "./testUtil";
 import load, {help} from "./load";
 
-import * as RepoRegistry from "../app/credExplorer/repoRegistry";
-import {stringToRepo} from "../core/repo";
+import * as RepoIdRegistry from "../app/credExplorer/repoIdRegistry";
+import {stringToRepoId} from "../core/repoId";
 
 jest.mock("../tools/execDependencyGraph", () => jest.fn());
 jest.mock("../plugins/github/loadGithubData", () => ({
@@ -75,7 +75,7 @@ describe("cli/load", () => {
     });
 
     describe("for multiple repositories", () => {
-      it("fails when no output is specified for two repos", async () => {
+      it("fails when no output is specified for two repoIds", async () => {
         expect(
           await run(load, ["foo/bar", "foo/baz", "--plugin", "git"])
         ).toEqual({
@@ -87,7 +87,7 @@ describe("cli/load", () => {
           ],
         });
       });
-      it("fails when no output is specified for zero repos", async () => {
+      it("fails when no output is specified for zero repoIds", async () => {
         expect(await run(load, ["--plugin", "git"])).toEqual({
           exitCode: 1,
           stdout: [],
@@ -204,7 +204,7 @@ describe("cli/load", () => {
           expect(execDependencyGraph).not.toHaveBeenCalled();
           expect(loadGitData).toHaveBeenCalledTimes(1);
           expect(loadGitData).toHaveBeenCalledWith({
-            repos: [stringToRepo("foo/bar")],
+            repoIds: [stringToRepoId("foo/bar")],
             outputDirectory: path.join(
               sourcecredDirectory,
               "data",
@@ -253,7 +253,7 @@ describe("cli/load", () => {
         expect(execDependencyGraph).not.toHaveBeenCalled();
         expect(loadGitData).toHaveBeenCalledTimes(1);
         expect(loadGitData).toHaveBeenCalledWith({
-          repos: [stringToRepo("foo/bar"), stringToRepo("foo/baz")],
+          repoIds: [stringToRepoId("foo/bar"), stringToRepoId("foo/baz")],
           outputDirectory: path.join(
             sourcecredDirectory,
             "data",
@@ -285,7 +285,7 @@ describe("cli/load", () => {
           expect(loadGithubData).toHaveBeenCalledTimes(1);
           expect(loadGithubData).toHaveBeenCalledWith({
             token: fakeGithubToken,
-            repos: [stringToRepo("foo/bar")],
+            repoIds: [stringToRepoId("foo/bar")],
             outputDirectory: path.join(
               sourcecredDirectory,
               "data",
@@ -425,21 +425,21 @@ describe("cli/load", () => {
         await run(load, ["foo/bar", "foo/baz", "--output", "foo/combined"]);
         const blob = fs
           .readFileSync(
-            path.join(sourcecredDirectory, RepoRegistry.REPO_REGISTRY_FILE)
+            path.join(sourcecredDirectory, RepoIdRegistry.REPO_ID_REGISTRY_FILE)
           )
           .toString();
-        const registry = RepoRegistry.fromJSON(JSON.parse(blob));
-        expect(registry).toEqual([stringToRepo("foo/combined")]);
+        const registry = RepoIdRegistry.fromJSON(JSON.parse(blob));
+        expect(registry).toEqual([stringToRepoId("foo/combined")]);
       });
 
       it("appends to an existing registry", async () => {
         const sourcecredDirectory = newSourcecredDirectory();
         fs.writeFileSync(
-          path.join(sourcecredDirectory, RepoRegistry.REPO_REGISTRY_FILE),
+          path.join(sourcecredDirectory, RepoIdRegistry.REPO_ID_REGISTRY_FILE),
           JSON.stringify(
-            RepoRegistry.toJSON([
-              stringToRepo("previous/one"),
-              stringToRepo("previous/two"),
+            RepoIdRegistry.toJSON([
+              stringToRepoId("previous/one"),
+              stringToRepoId("previous/two"),
             ])
           )
         );
@@ -447,14 +447,14 @@ describe("cli/load", () => {
         await run(load, ["foo/bar", "foo/baz", "--output", "foo/combined"]);
         const blob = fs
           .readFileSync(
-            path.join(sourcecredDirectory, RepoRegistry.REPO_REGISTRY_FILE)
+            path.join(sourcecredDirectory, RepoIdRegistry.REPO_ID_REGISTRY_FILE)
           )
           .toString();
-        const registry = RepoRegistry.fromJSON(JSON.parse(blob));
+        const registry = RepoIdRegistry.fromJSON(JSON.parse(blob));
         expect(registry).toEqual([
-          stringToRepo("previous/one"),
-          stringToRepo("previous/two"),
-          stringToRepo("foo/combined"),
+          stringToRepoId("previous/one"),
+          stringToRepoId("previous/two"),
+          stringToRepoId("foo/combined"),
         ]);
       });
     });

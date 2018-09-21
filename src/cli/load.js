@@ -6,8 +6,8 @@ import stringify from "json-stable-stringify";
 import mkdirp from "mkdirp";
 import path from "path";
 
-import * as RepoRegistry from "../app/credExplorer/repoRegistry";
-import {repoToString, stringToRepo, type Repo} from "../core/repo";
+import * as RepoIdRegistry from "../app/credExplorer/repoIdRegistry";
+import {repoIdToString, stringToRepoId, type RepoId} from "../core/repoId";
 import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
@@ -19,20 +19,20 @@ import {loadGitData} from "../plugins/git/loadGitData";
 function usage(print: (string) => void): void {
   print(
     dedent`\
-    usage: sourcecred load [REPO...] [--output REPO]
+    usage: sourcecred load [REPO_ID...] [--output REPO_ID]
                            [--plugin PLUGIN]
                            [--help]
 
     Load a repository's data into SourceCred.
 
-    Each REPO refers to a GitHub repository in the form OWNER/NAME: for
+    Each REPO_ID refers to a GitHub repository in the form OWNER/NAME: for
     example, torvalds/linux.
 
     Arguments:
-        REPO...
+        REPO_ID...
             Repositories for which to load data.
 
-        --output REPO
+        --output REPO_ID
             Store the data under the name of this repository. When
             loading multiple repositories, this can be the name of an
             aggregate repository. For instance, if loading data for
@@ -78,8 +78,8 @@ function die(std, message) {
 }
 
 const load: Command = async (args, std) => {
-  const repos = [];
-  let explicitOutput: Repo | null = null;
+  const repoIds = [];
+  let explicitOutput: RepoId | null = null;
   let plugin: Common.PluginName | null = null;
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -92,7 +92,7 @@ const load: Command = async (args, std) => {
           return die(std, "'--output' given multiple times");
         if (++i >= args.length)
           return die(std, "'--output' given without value");
-        explicitOutput = stringToRepo(args[i]);
+        explicitOutput = stringToRepoId(args[i]);
         break;
       }
       case "--plugin": {
@@ -107,29 +107,29 @@ const load: Command = async (args, std) => {
       }
       default: {
         // Should be a repository.
-        repos.push(stringToRepo(args[i]));
+        repoIds.push(stringToRepoId(args[i]));
         break;
       }
     }
   }
 
-  let output: Repo;
+  let output: RepoId;
   if (explicitOutput != null) {
     output = explicitOutput;
-  } else if (repos.length === 1) {
-    output = repos[0];
+  } else if (repoIds.length === 1) {
+    output = repoIds[0];
   } else {
     return die(std, "output repository not specified");
   }
 
   if (plugin == null) {
-    return loadDefaultPlugins({std, output, repos});
+    return loadDefaultPlugins({std, output, repoIds});
   } else {
-    return loadPlugin({std, output, repos, plugin});
+    return loadPlugin({std, output, repoIds, plugin});
   }
 };
 
-const loadDefaultPlugins = async ({std, output, repos}) => {
+const loadDefaultPlugins = async ({std, output, repoIds}) => {
   if (Common.githubToken() == null) {
     // TODO(#638): This check should be abstracted so that plugins can
     // specify their argument dependencies and get nicely formatted
@@ -145,9 +145,9 @@ const loadDefaultPlugins = async ({std, output, repos}) => {
         "--max_old_space_size=8192",
         process.argv[1],
         "load",
-        ...repos.map((repo) => repoToString(repo)),
+        ...repoIds.map((repoId) => repoIdToString(repoId)),
         "--output",
-        repoToString(output),
+        repoIdToString(output),
         "--plugin",
         pluginName,
       ],
@@ -157,17 +157,17 @@ const loadDefaultPlugins = async ({std, output, repos}) => {
 
   const {success} = await execDependencyGraph(tasks, {taskPassLabel: "DONE"});
   if (success) {
-    addToRepoRegistry(output);
+    addToRepoIdRegistry(output);
   }
   return success ? 0 : 1;
 };
 
-const loadPlugin = async ({std, output, repos, plugin}) => {
+const loadPlugin = async ({std, output, repoIds, plugin}) => {
   function scopedDirectory(key) {
     const directory = path.join(
       Common.sourcecredDirectory(),
       key,
-      repoToString(output),
+      repoIdToString(output),
       plugin
     );
     mkdirp.sync(directory);
@@ -184,11 +184,11 @@ const loadPlugin = async ({std, output, repos, plugin}) => {
         // formatted errors.
         return die(std, "no GitHub token specified");
       }
-      await loadGithubData({token, repos, outputDirectory, cacheDirectory});
+      await loadGithubData({token, repoIds, outputDirectory, cacheDirectory});
       return 0;
     }
     case "git":
-      await loadGitData({repos, outputDirectory, cacheDirectory});
+      await loadGitData({repoIds, outputDirectory, cacheDirectory});
       return 0;
     // Unlike the previous check, which was validating user input and
     // was reachable, this really should not occur.
@@ -198,24 +198,24 @@ const loadPlugin = async ({std, output, repos, plugin}) => {
   }
 };
 
-function addToRepoRegistry(repo) {
+function addToRepoIdRegistry(repoId) {
   // TODO: Make this function transactional before loading repositories in
   // parallel.
   const outputFile = path.join(
     Common.sourcecredDirectory(),
-    RepoRegistry.REPO_REGISTRY_FILE
+    RepoIdRegistry.REPO_ID_REGISTRY_FILE
   );
   let registry = null;
   if (fs.existsSync(outputFile)) {
     const contents = fs.readFileSync(outputFile);
     const registryJSON = JSON.parse(contents.toString());
-    registry = RepoRegistry.fromJSON(registryJSON);
+    registry = RepoIdRegistry.fromJSON(registryJSON);
   } else {
-    registry = RepoRegistry.emptyRegistry();
+    registry = RepoIdRegistry.emptyRegistry();
   }
-  registry = RepoRegistry.addRepo(repo, registry);
+  registry = RepoIdRegistry.addRepoId(repoId, registry);
 
-  fs.writeFileSync(outputFile, stringify(RepoRegistry.toJSON(registry)));
+  fs.writeFileSync(outputFile, stringify(RepoIdRegistry.toJSON(registry)));
 }
 
 export const help: Command = async (args, std) => {

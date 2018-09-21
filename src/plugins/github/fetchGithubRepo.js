@@ -10,12 +10,12 @@ import retry from "retry";
 import {stringify, inlineLayout} from "../../graphql/queries";
 import {createQuery, createVariables, postQueryExhaustive} from "./graphql";
 import type {GithubResponseJSON} from "./graphql";
-import type {Repo} from "../../core/repo";
+import type {RepoId} from "../../core/repoId";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
  *
- * @param {Repo} repo
+ * @param {RepoId} repoId
  *    the GitHub repository to be scraped
  * @param {String} token
  *    authentication token to be used for the GitHub API; generate a
@@ -26,7 +26,7 @@ import type {Repo} from "../../core/repo";
  *    later
  */
 export default function fetchGithubRepo(
-  repo: Repo,
+  repoId: RepoId,
   token: string
 ): Promise<GithubResponseJSON> {
   token = String(token);
@@ -37,7 +37,7 @@ export default function fetchGithubRepo(
   }
 
   const body = createQuery();
-  const variables = createVariables(repo);
+  const variables = createVariables(repoId);
   const payload = {body, variables};
   return postQueryExhaustive(
     (somePayload) => postQuery(somePayload, token),

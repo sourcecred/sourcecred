@@ -15,7 +15,7 @@ import type {
 } from "./pluginAdapter";
 
 import {StaticAdapterSet} from "./adapterSet";
-import {makeRepo, type Repo} from "../../core/repo";
+import {makeRepoId, type RepoId} from "../../core/repoId";
 
 export const inserterNodeType: NodeType = Object.freeze({
   name: "inserter",
@@ -64,9 +64,9 @@ export class FactorioStaticAdapter implements StaticPluginAdapter {
   edgeTypes() {
     return [assemblesEdgeType, transportsEdgeType];
   }
-  async load(assets: Assets, repo: Repo): Promise<DynamicPluginAdapter> {
+  async load(assets: Assets, repoId: RepoId): Promise<DynamicPluginAdapter> {
     if (this.loadingMock) {
-      return this.loadingMock(assets, repo).then(
+      return this.loadingMock(assets, repoId).then(
         () => new FactorioDynamicAdapter()
       );
     }
@@ -128,6 +128,6 @@ export function staticAdapterSet() {
 export async function dynamicAdapterSet() {
   return await staticAdapterSet().load(
     new Assets("/gateway/"),
-    makeRepo("foo", "bar")
+    makeRepoId("foo", "bar")
   );
 }
