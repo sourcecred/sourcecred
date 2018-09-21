@@ -2,7 +2,7 @@
 
 exports[`graphql/mirror Mirror _queryConnection snapshot test for actual GitHub queries 1`] = `
 "query TestQuery {
-  initialQuery: node(id: \\"MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=\\") {
+  objectInitial: node(id: \\"MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=\\") {
     ... on Repository {
       issues(first: 2) {
         totalCount
@@ -17,7 +17,7 @@ exports[`graphql/mirror Mirror _queryConnection snapshot test for actual GitHub 
       }
     }
   }
-  updateQuery: node(id: \\"MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=\\") {
+  objectUpdate: node(id: \\"MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=\\") {
     ... on Repository {
       issues(first: 2 after: \\"Y3Vyc29yOnYyOpHOEe_nRA==\\") {
         totalCount
@@ -32,11 +32,200 @@ exports[`graphql/mirror Mirror _queryConnection snapshot test for actual GitHub 
       }
     }
   }
-  expectedIds: node(id: \\"MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=\\") {
+  objectExpectedIds: node(id: \\"MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=\\") {
     ... on Repository {
       issues(first: 4) {
         nodes {
           id
+        }
+      }
+    }
+  }
+  unionInitial: node(id: \\"MDU6SXNzdWUzMDA5MzQ4MTg=\\") {
+    ... on Issue {
+      timeline(first: 1) {
+        totalCount
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        nodes {
+          __typename
+          ... on Commit {
+            id
+          }
+          ... on IssueComment {
+            id
+          }
+          ... on CrossReferencedEvent {
+            id
+          }
+          ... on ClosedEvent {
+            id
+          }
+          ... on ReopenedEvent {
+            id
+          }
+          ... on SubscribedEvent {
+            id
+          }
+          ... on UnsubscribedEvent {
+            id
+          }
+          ... on ReferencedEvent {
+            id
+          }
+          ... on AssignedEvent {
+            id
+          }
+          ... on UnassignedEvent {
+            id
+          }
+          ... on LabeledEvent {
+            id
+          }
+          ... on UnlabeledEvent {
+            id
+          }
+          ... on MilestonedEvent {
+            id
+          }
+          ... on DemilestonedEvent {
+            id
+          }
+          ... on RenamedTitleEvent {
+            id
+          }
+          ... on LockedEvent {
+            id
+          }
+          ... on UnlockedEvent {
+            id
+          }
+        }
+      }
+    }
+  }
+  unionUpdate: node(id: \\"MDU6SXNzdWUzMDA5MzQ4MTg=\\") {
+    ... on Issue {
+      timeline(first: 1 after: \\"MQ==\\") {
+        totalCount
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        nodes {
+          __typename
+          ... on Commit {
+            id
+          }
+          ... on IssueComment {
+            id
+          }
+          ... on CrossReferencedEvent {
+            id
+          }
+          ... on ClosedEvent {
+            id
+          }
+          ... on ReopenedEvent {
+            id
+          }
+          ... on SubscribedEvent {
+            id
+          }
+          ... on UnsubscribedEvent {
+            id
+          }
+          ... on ReferencedEvent {
+            id
+          }
+          ... on AssignedEvent {
+            id
+          }
+          ... on UnassignedEvent {
+            id
+          }
+          ... on LabeledEvent {
+            id
+          }
+          ... on UnlabeledEvent {
+            id
+          }
+          ... on MilestonedEvent {
+            id
+          }
+          ... on DemilestonedEvent {
+            id
+          }
+          ... on RenamedTitleEvent {
+            id
+          }
+          ... on LockedEvent {
+            id
+          }
+          ... on UnlockedEvent {
+            id
+          }
+        }
+      }
+    }
+  }
+  unionExpectedIds: node(id: \\"MDU6SXNzdWUzMDA5MzQ4MTg=\\") {
+    ... on Issue {
+      timeline(first: 2) {
+        nodes {
+          ... on Commit {
+            id
+          }
+          ... on IssueComment {
+            id
+          }
+          ... on CrossReferencedEvent {
+            id
+          }
+          ... on ClosedEvent {
+            id
+          }
+          ... on ReopenedEvent {
+            id
+          }
+          ... on SubscribedEvent {
+            id
+          }
+          ... on UnsubscribedEvent {
+            id
+          }
+          ... on ReferencedEvent {
+            id
+          }
+          ... on AssignedEvent {
+            id
+          }
+          ... on UnassignedEvent {
+            id
+          }
+          ... on LabeledEvent {
+            id
+          }
+          ... on UnlabeledEvent {
+            id
+          }
+          ... on MilestonedEvent {
+            id
+          }
+          ... on DemilestonedEvent {
+            id
+          }
+          ... on RenamedTitleEvent {
+            id
+          }
+          ... on LockedEvent {
+            id
+          }
+          ... on UnlockedEvent {
+            id
+          }
         }
       }
     }

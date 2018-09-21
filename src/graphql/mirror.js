@@ -416,15 +416,15 @@ export class Mirror {
 
   /**
    * Create a GraphQL selection set required to identify the typename
-   * and ID for an object. This is the minimal information required to
-   * register an object in our database, so we query this information
+   * and ID for an object of the given declared type, which may be
+   * either an object type or a union type. This is the minimal
    * whenever we find a reference to an object that we want to traverse
    * later.
    *
-   * The resulting GraphQL should be embedded in any node context. For
-   * instance, it might replace the `?` in any of the following queries:
-   *
-   *     repository(owner: "foo", name: "bar") { ? }
+   * The resulting GraphQL should be embedded in the context of any node
+   * of the provided type. For instance, `_queryShallow("Issue")`
+   * returns a selection set that might replace the `?` in any of the
+   * following queries:
    *
    *     repository(owner: "foo", name: "bar") {
    *       issues(first: 1) {
@@ -432,13 +432,34 @@ export class Mirror {
    *       }
    *     }
    *
-   *     nodes(ids: ["baz", "quux"]) { ? }
+   *     nodes(ids: ["issue#1", "issue#2"]) { ? }
    *
    * The result of this query has type `NodeFieldResult`.
+   *
+   * This function is pure: it does not interact with the database.
    */
-  _queryShallow(): Queries.Selection[] {
+  _queryShallow(typename: Schema.Typename): Queries.Selection[] {
+    const type = this._schema[typename];
+    if (type == null) {
+      // Should not be reachable via APIs.
+      throw new Error("No such type: " + JSON.stringify(typename));
+    }
     const b = Queries.build;
-    return [b.field("__typename"), b.field("id")];
+    switch (type.type) {
+      case "OBJECT":
+        return [b.field("__typename"), b.field("id")];
+      case "UNION":
+        return [
+          b.field("__typename"),
+          ...this._schemaInfo.unionTypes[typename].clauses.map(
+            (clause: Schema.Typename) =>
+              b.inlineFragment(clause, [b.field("id")])
+          ),
+        ];
+      // istanbul ignore next
+      default:
+        throw new Error((type.type: empty));
+    }
   }
 
   /**
@@ -478,7 +499,10 @@ export class Mirror {
   }
 
   /**
-   * Create a GraphQL selection set to fetch elements from a collection.
+   * Create a GraphQL selection set to fetch elements from a collection,
+   * specified by its enclosing object type and the connection field
+   * name (for instance, "Repository" and "issues").
+   *
    * If the connection has been queried before and you wish to fetch new
    * elements, use an appropriate end cursor. Use `undefined` otherwise.
    * Note that `null` is a valid end cursor and is distinct from
@@ -515,10 +539,35 @@ export class Mirror {
    * See: `_updateConnection`.
    */
   _queryConnection(
+    typename: Schema.Typename,
     fieldname: Schema.Fieldname,
     endCursor: EndCursor | void,
     connectionPageSize: number
   ): Queries.Selection[] {
+    if (this._schema[typename] == null) {
+      throw new Error("No such type: " + JSON.stringify(typename));
+    }
+    if (this._schema[typename].type !== "OBJECT") {
+      const s = JSON.stringify;
+      throw new Error(
+        `Cannot query connection on non-object type ${s(typename)} ` +
+          `(${this._schema[typename].type})`
+      );
+    }
+    const field = this._schemaInfo.objectTypes[typename].fields[fieldname];
+    if (field == null) {
+      const s = JSON.stringify;
+      throw new Error(
+        `Object type ${s(typename)} has no field ${s(fieldname)}`
+      );
+    }
+    if (field.type !== "CONNECTION") {
+      const s = JSON.stringify;
+      throw new Error(
+        `Cannot query non-connection field ${s(typename)}.${s(fieldname)} ` +
+          `(${field.type})`
+      );
+    }
     const b = Queries.build;
     const connectionArguments: Queries.Arguments = {
       first: b.literal(connectionPageSize),
@@ -530,7 +579,7 @@ export class Mirror {
       b.field(fieldname, connectionArguments, [
         b.field("totalCount"),
         b.field("pageInfo", {}, [b.field("endCursor"), b.field("hasNextPage")]),
-        b.field("nodes", {}, this._queryShallow()),
+        b.field("nodes", {}, this._queryShallow(field.elementType)),
       ]),
     ];
   }
