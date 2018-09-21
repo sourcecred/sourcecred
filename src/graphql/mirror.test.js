@@ -22,7 +22,7 @@ describe("graphql/mirror", () => {
         id: s.id(),
         url: s.primitive(),
         author: s.node("Actor"),
-        parent: s.node("Repository"),
+        repository: s.node("Repository"),
         title: s.primitive(),
         comments: s.connection("IssueComment"),
       }),
@@ -249,7 +249,7 @@ describe("graphql/mirror", () => {
             )
             .pluck()
             .all(issueId)
-        ).toEqual(["author", "parent"].sort());
+        ).toEqual(["author", "repository"].sort());
         expect(
           db.prepare("SELECT * FROM primitives_Issue WHERE id = ?").all(issueId)
         ).toEqual([
@@ -897,7 +897,7 @@ describe("graphql/mirror", () => {
         result.objectTypes["Issue"].primitiveFieldNames.slice().sort()
       ).toEqual(["url", "title"].sort());
       expect(result.objectTypes["Issue"].linkFieldNames.slice().sort()).toEqual(
-        ["author", "parent"].sort()
+        ["author", "repository"].sort()
       );
       expect(
         result.objectTypes["Issue"].connectionFieldNames.slice().sort()
