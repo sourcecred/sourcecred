@@ -8,23 +8,23 @@ import * as NullUtil from "../../util/null";
 import type {LocalStore} from "../localStore";
 import type {Assets} from "../assets";
 
-import {fromJSON, REPO_REGISTRY_API} from "./repoRegistry";
-import {type Repo, stringToRepo, repoToString} from "../../core/repo";
-export const REPO_KEY = "selectedRepository";
+import {fromJSON, REPO_ID_REGISTRY_API} from "./repoIdRegistry";
+import {type RepoId, stringToRepoId, repoIdToString} from "../../core/repoId";
+export const REPO_ID_KEY = "selectedRepository";
 
 export type Status =
   | {|+type: "LOADING"|}
   | {|
       +type: "VALID",
-      +availableRepos: $ReadOnlyArray<Repo>,
-      +selectedRepo: Repo,
+      +availableRepoIds: $ReadOnlyArray<RepoId>,
+      +selectedRepoId: RepoId,
     |}
   | {|+type: "NO_REPOS"|}
   | {|+type: "FAILURE"|};
 
 type Props = {|
   +assets: Assets,
-  +onChange: (x: Repo) => void,
+  +onChange: (x: RepoId) => void,
   +localStore: LocalStore,
 |};
 type State = {|status: Status|};
@@ -41,24 +41,24 @@ export default class RepositorySelect extends React.Component<Props, State> {
     loadStatus(assets, localStore).then((status) => {
       this.setState({status});
       if (status.type === "VALID") {
-        this.props.onChange(status.selectedRepo);
+        this.props.onChange(status.selectedRepoId);
       }
     });
   }
 
-  onChange(selectedRepo: Repo) {
+  onChange(selectedRepoId: RepoId) {
     const status = this.state.status;
     if (status.type === "VALID") {
-      const newStatus = {...status, selectedRepo};
+      const newStatus = {...status, selectedRepoId};
       this.setState({status: newStatus});
     }
-    this.props.onChange(selectedRepo);
+    this.props.onChange(selectedRepoId);
   }
 
   render() {
     return (
       <LocalStoreRepositorySelect
-        onChange={(selectedRepo) => this.onChange(selectedRepo)}
+        onChange={(selectedRepoId) => this.onChange(selectedRepoId)}
         status={this.state.status}
         localStore={this.props.localStore}
       >
@@ -75,7 +75,7 @@ export async function loadStatus(
   localStore: LocalStore
 ): Promise<Status> {
   try {
-    const response = await fetch(assets.resolve(REPO_REGISTRY_API));
+    const response = await fetch(assets.resolve(REPO_ID_REGISTRY_API));
     if (response.status === 404) {
       return {type: "NO_REPOS"};
     }
@@ -84,17 +84,21 @@ export async function loadStatus(
       return {type: "FAILURE"};
     }
     const json = await response.json();
-    const availableRepos = fromJSON(json);
-    if (availableRepos.length === 0) {
+    const availableRepoIds = fromJSON(json);
+    if (availableRepoIds.length === 0) {
       return {type: "NO_REPOS"};
     }
-    const localStoreRepo = localStore.get(REPO_KEY, null);
-    const selectedRepo = NullUtil.orElse(
-      availableRepos.find((x) => deepEqual(x, localStoreRepo)),
-      availableRepos[availableRepos.length - 1]
+    const localStoreRepoId = localStore.get(REPO_ID_KEY, null);
+    const selectedRepoId = NullUtil.orElse(
+      availableRepoIds.find((x) => deepEqual(x, localStoreRepoId)),
+      availableRepoIds[availableRepoIds.length - 1]
     );
-    const sortedRepos = sortBy(availableRepos, (r) => r.owner, (r) => r.name);
-    return {type: "VALID", availableRepos: sortedRepos, selectedRepo};
+    const sortedRepoIds = sortBy(
+      availableRepoIds,
+      (r) => r.owner,
+      (r) => r.name
+    );
+    return {type: "VALID", availableRepoIds: sortedRepoIds, selectedRepoId};
   } catch (e) {
     console.error(e);
     return {type: "FAILURE"};
@@ -103,48 +107,51 @@ export async function loadStatus(
 
 export class LocalStoreRepositorySelect extends React.Component<{|
   +status: Status,
-  +onChange: (repo: Repo) => void,
+  +onChange: (repoId: RepoId) => void,
   +localStore: LocalStore,
   +children: ({
     status: Status,
-    onChange: (selectedRepo: Repo) => void,
+    onChange: (selectedRepoId: RepoId) => void,
   }) => Node,
 |}> {
   render() {
     return this.props.children({
       status: this.props.status,
-      onChange: (repo) => {
-        this.props.onChange(repo);
-        this.props.localStore.set(REPO_KEY, repo);
+      onChange: (repoId) => {
+        this.props.onChange(repoId);
+        this.props.localStore.set(REPO_ID_KEY, repoId);
       },
     });
   }
 }
 
 type PureRepositorySelectProps = {|
-  +onChange: (x: Repo) => void,
+  +onChange: (x: RepoId) => void,
   +status: Status,
 |};
 export class PureRepositorySelect extends React.PureComponent<
   PureRepositorySelectProps
 > {
-  renderSelect(availableRepos: $ReadOnlyArray<Repo>, selectedRepo: ?Repo) {
+  renderSelect(
+    availableRepoIds: $ReadOnlyArray<RepoId>,
+    selectedRepoId: ?RepoId
+  ) {
     return (
       <label>
         <span>Please choose a repository to inspect:</span>{" "}
-        {selectedRepo != null && (
+        {selectedRepoId != null && (
           <select
-            value={repoToString(selectedRepo)}
+            value={repoIdToString(selectedRepoId)}
             onChange={(e) => {
-              const repo = stringToRepo(e.target.value);
-              this.props.onChange(repo);
+              const repoId = stringToRepoId(e.target.value);
+              this.props.onChange(repoId);
             }}
           >
-            {availableRepos.map((repo) => {
-              const repoString = repoToString(repo);
+            {availableRepoIds.map((repoId) => {
+              const repoIdString = repoIdToString(repoId);
               return (
-                <option value={repoString} key={repoString}>
-                  {repoString}
+                <option value={repoIdString} key={repoIdString}>
+                  {repoIdString}
                 </option>
               );
             })}
@@ -165,7 +172,10 @@ export class PureRepositorySelect extends React.PureComponent<
         // Just show an empty select while we wait.
         return this.renderSelect([], null);
       case "VALID":
-        return this.renderSelect(status.availableRepos, status.selectedRepo);
+        return this.renderSelect(
+          status.availableRepoIds,
+          status.selectedRepoId
+        );
       case "NO_REPOS":
         return this.renderError("Error: No repositories found.");
       case "FAILURE":

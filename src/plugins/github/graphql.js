@@ -7,7 +7,7 @@ import type {
   QueryDefinition,
 } from "../../graphql/queries";
 import {build} from "../../graphql/queries";
-import type {Repo} from "../../core/repo";
+import type {RepoId} from "../../core/repoId";
 
 /**
  * This module defines the GraphQL query that we use to access the
@@ -1085,6 +1085,6 @@ export function createFragments(): FragmentDefinition[] {
   ];
 }
 
-export function createVariables(repo: Repo): {+[string]: any} {
-  return repo;
+export function createVariables(repoId: RepoId): {+[string]: any} {
+  return repoId;
 }

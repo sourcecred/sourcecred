@@ -114,7 +114,9 @@ export function createApp(
             <RepositorySelect
               assets={this.props.assets}
               localStore={localStore}
-              onChange={(repo) => this.stateTransitionMachine.setRepo(repo)}
+              onChange={(repoId) =>
+                this.stateTransitionMachine.setRepoId(repoId)
+              }
             />
           </div>
           <button

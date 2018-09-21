@@ -9,7 +9,7 @@ import {
 
 import {Graph, NodeAddress} from "../../core/graph";
 import {Assets} from "../assets";
-import {makeRepo, type Repo} from "../../core/repo";
+import {makeRepoId, type RepoId} from "../../core/repoId";
 import {type EdgeEvaluator} from "../../core/attribution/pagerank";
 import {
   type WeightedTypes,
@@ -32,7 +32,7 @@ describe("app/credExplorer/state", () => {
     const loadGraphMock: (
       assets: Assets,
       adapters: StaticAdapterSet,
-      repo: Repo
+      repoId: RepoId
     ) => Promise<GraphWithAdapters> = jest.fn();
     const pagerankMock: (
       Graph,
@@ -50,14 +50,14 @@ describe("app/credExplorer/state", () => {
   function readyToLoadGraph(): AppState {
     return {
       type: "READY_TO_LOAD_GRAPH",
-      repo: makeRepo("foo", "bar"),
+      repoId: makeRepoId("foo", "bar"),
       loading: "NOT_LOADING",
     };
   }
   function readyToRunPagerank(): AppState {
     return {
       type: "READY_TO_RUN_PAGERANK",
-      repo: makeRepo("foo", "bar"),
+      repoId: makeRepoId("foo", "bar"),
       loading: "NOT_LOADING",
       graphWithAdapters: graphWithAdapters(),
     };
@@ -65,7 +65,7 @@ describe("app/credExplorer/state", () => {
   function pagerankEvaluated(): AppState {
     return {
       type: "PAGERANK_EVALUATED",
-      repo: makeRepo("foo", "bar"),
+      repoId: makeRepoId("foo", "bar"),
       graphWithAdapters: graphWithAdapters(),
       pagerankNodeDecomposition: pagerankNodeDecomposition(),
       loading: "NOT_LOADING",
@@ -89,47 +89,47 @@ describe("app/credExplorer/state", () => {
     }
     return state.loading;
   }
-  function getRepo(state: AppState) {
+  function getRepoId(state: AppState) {
     if (state.type === "UNINITIALIZED") {
-      throw new Error("Tried to get invalid repo");
+      throw new Error("Tried to get invalid repoId");
     }
-    return state.repo;
+    return state.repoId;
   }
 
-  describe("setRepo", () => {
+  describe("setRepoId", () => {
     describe("in UNINITIALIZED", () => {
       it("transitions to READY_TO_LOAD_GRAPH", () => {
         const {getState, stm} = example(uninitializedState());
-        const repo = makeRepo("foo", "bar");
-        stm.setRepo(repo);
+        const repoId = makeRepoId("foo", "bar");
+        stm.setRepoId(repoId);
         const state = getState();
         expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-        expect(getRepo(state)).toEqual(repo);
+        expect(getRepoId(state)).toEqual(repoId);
       });
     });
-    it("stays in READY_TO_LOAD_GRAPH with new repo", () => {
+    it("stays in READY_TO_LOAD_GRAPH with new repoId", () => {
       const {getState, stm} = example(readyToLoadGraph());
-      const repo = makeRepo("zoink", "zod");
-      stm.setRepo(repo);
+      const repoId = makeRepoId("zoink", "zod");
+      stm.setRepoId(repoId);
       const state = getState();
       expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepo(state)).toEqual(repo);
+      expect(getRepoId(state)).toEqual(repoId);
     });
-    it("transitions READY_TO_RUN_PAGERANK to READY_TO_LOAD_GRAPH with new repo", () => {
+    it("transitions READY_TO_RUN_PAGERANK to READY_TO_LOAD_GRAPH with new repoId", () => {
       const {getState, stm} = example(readyToRunPagerank());
-      const repo = makeRepo("zoink", "zod");
-      stm.setRepo(repo);
+      const repoId = makeRepoId("zoink", "zod");
+      stm.setRepoId(repoId);
       const state = getState();
       expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepo(state)).toEqual(repo);
+      expect(getRepoId(state)).toEqual(repoId);
     });
-    it("transitions PAGERANK_EVALUATED to READY_TO_LOAD_GRAPH with new repo", () => {
+    it("transitions PAGERANK_EVALUATED to READY_TO_LOAD_GRAPH with new repoId", () => {
       const {getState, stm} = example(pagerankEvaluated());
-      const repo = makeRepo("zoink", "zod");
-      stm.setRepo(repo);
+      const repoId = makeRepoId("zoink", "zod");
+      stm.setRepoId(repoId);
       const state = getState();
       expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepo(state)).toEqual(repo);
+      expect(getRepoId(state)).toEqual(repoId);
     });
   });
 
@@ -147,7 +147,7 @@ describe("app/credExplorer/state", () => {
         ).rejects.toThrow("incorrect state");
       }
     });
-    it("passes along the adapters and repo", () => {
+    it("passes along the adapters and repoId", () => {
       const {stm, loadGraphMock} = example(readyToLoadGraph());
       expect(loadGraphMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
@@ -157,7 +157,7 @@ describe("app/credExplorer/state", () => {
       expect(loadGraphMock).toHaveBeenCalledWith(
         assets,
         adapters,
-        makeRepo("foo", "bar")
+        makeRepoId("foo", "bar")
       );
     });
     it("immediately sets loading status", () => {
@@ -184,13 +184,13 @@ describe("app/credExplorer/state", () => {
       }
       expect(state.graphWithAdapters).toBe(gwa);
     });
-    it("does not transition if repo transition happens first", async () => {
+    it("does not transition if repoId transition happens first", async () => {
       const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
-      const swappedRepo = makeRepo("too", "fast");
+      const swappedRepoId = makeRepoId("too", "fast");
       loadGraphMock.mockImplementation(
         () =>
           new Promise((resolve) => {
-            stm.setRepo(swappedRepo);
+            stm.setRepoId(swappedRepoId);
             resolve(graphWithAdapters());
           })
       );
@@ -202,7 +202,7 @@ describe("app/credExplorer/state", () => {
       const state = getState();
       expect(loading(state)).toBe("NOT_LOADING");
       expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepo(state)).toEqual(swappedRepo);
+      expect(getRepoId(state)).toEqual(swappedRepoId);
     });
     it("sets loading state FAILED on reject", async () => {
       const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
@@ -261,13 +261,13 @@ describe("app/credExplorer/state", () => {
       const args = pagerankMock.mock.calls[0];
       expect(args[2].totalScoreNodePrefix).toBe(foo);
     });
-    it("does not transition if a repo change happens first", async () => {
+    it("does not transition if a repoId change happens first", async () => {
       const {getState, stm, pagerankMock} = example(readyToRunPagerank());
-      const swappedRepo = makeRepo("too", "fast");
+      const swappedRepoId = makeRepoId("too", "fast");
       pagerankMock.mockImplementation(
         () =>
           new Promise((resolve) => {
-            stm.setRepo(swappedRepo);
+            stm.setRepoId(swappedRepoId);
             resolve(graphWithAdapters());
           })
       );
@@ -275,7 +275,7 @@ describe("app/credExplorer/state", () => {
       const state = getState();
       expect(loading(state)).toBe("NOT_LOADING");
       expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepo(state)).toBe(swappedRepo);
+      expect(getRepoId(state)).toBe(swappedRepoId);
     });
     it("sets loading state FAILED on reject", async () => {
       const {getState, stm, pagerankMock} = example(readyToRunPagerank());

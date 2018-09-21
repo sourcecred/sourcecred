@@ -4,7 +4,7 @@ import React from "react";
 import {shallow} from "enzyme";
 
 import {Graph} from "../../core/graph";
-import {makeRepo} from "../../core/repo";
+import {makeRepoId} from "../../core/repoId";
 import {Assets} from "../assets";
 import testLocalStore from "../testLocalStore";
 import {DynamicAdapterSet, StaticAdapterSet} from "../adapters/adapterSet";
@@ -22,7 +22,7 @@ require("../testUtil").configureEnzyme();
 describe("app/credExplorer/App", () => {
   function example() {
     let setState, getState;
-    const setRepo = jest.fn();
+    const setRepoId = jest.fn();
     const loadGraph = jest.fn();
     const runPagerank = jest.fn();
     const loadGraphAndRunPagerank = jest.fn();
@@ -31,7 +31,7 @@ describe("app/credExplorer/App", () => {
       setState = _setState;
       getState = _getState;
       return {
-        setRepo,
+        setRepoId,
         loadGraph,
         runPagerank,
         loadGraphAndRunPagerank,
@@ -52,7 +52,7 @@ describe("app/credExplorer/App", () => {
       el,
       setState,
       getState,
-      setRepo,
+      setRepoId,
       loadGraph,
       runPagerank,
       loadGraphAndRunPagerank,
@@ -66,14 +66,14 @@ describe("app/credExplorer/App", () => {
     readyToLoadGraph: (loadingState) => {
       return () => ({
         type: "READY_TO_LOAD_GRAPH",
-        repo: makeRepo("foo", "bar"),
+        repoId: makeRepoId("foo", "bar"),
         loading: loadingState,
       });
     },
     readyToRunPagerank: (loadingState) => {
       return () => ({
         type: "READY_TO_RUN_PAGERANK",
-        repo: makeRepo("foo", "bar"),
+        repoId: makeRepoId("foo", "bar"),
         loading: loadingState,
         graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
       });
@@ -81,7 +81,7 @@ describe("app/credExplorer/App", () => {
     pagerankEvaluated: (loadingState) => {
       return () => ({
         type: "PAGERANK_EVALUATED",
-        repo: makeRepo("foo", "bar"),
+        repoId: makeRepoId("foo", "bar"),
         loading: loadingState,
         graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
         pagerankNodeDecomposition: new Map(),
@@ -115,12 +115,12 @@ describe("app/credExplorer/App", () => {
   describe("when in state:", () => {
     function testRepositorySelect(stateFn) {
       it("creates a working RepositorySelect", () => {
-        const {el, setRepo, setState, localStore} = example();
+        const {el, setRepoId, setState, localStore} = example();
         setState(stateFn());
         const rs = el.find(RepositorySelect);
-        const newRepo = makeRepo("zoo", "zod");
-        rs.props().onChange(newRepo);
-        expect(setRepo).toHaveBeenCalledWith(newRepo);
+        const newRepoId = makeRepoId("zoo", "zod");
+        rs.props().onChange(newRepoId);
+        expect(setRepoId).toHaveBeenCalledWith(newRepoId);
         expect(rs.props().localStore).toBe(localStore);
       });
     }

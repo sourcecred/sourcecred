@@ -12,7 +12,7 @@ import * as E from "./edges";
 import {RelationalView} from "./relationalView";
 import {description} from "./render";
 import type {Assets} from "../../app/assets";
-import type {Repo} from "../../core/repo";
+import type {RepoId} from "../../core/repoId";
 
 export class StaticPluginAdapter implements IStaticPluginAdapter {
   name() {
@@ -134,9 +134,9 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
       },
     ];
   }
-  async load(assets: Assets, repo: Repo): Promise<IDynamicPluginAdapater> {
+  async load(assets: Assets, repoId: RepoId): Promise<IDynamicPluginAdapater> {
     const url = assets.resolve(
-      `/api/v1/data/data/${repo.owner}/${repo.name}/github/view.json.gz`
+      `/api/v1/data/data/${repoId.owner}/${repoId.name}/github/view.json.gz`
     );
     const response = await fetch(url);
     if (!response.ok) {
