@@ -363,6 +363,31 @@ export class Mirror {
   }
 
   /**
+   * Register an object corresponding to the provided `NodeFieldResult`,
+   * if any, returning the object's ID. If the provided value is `null`,
+   * no action is taken, no error is thrown, and `null` is returned.
+   *
+   * As with `registerObject`, an error is thrown if an object by the
+   * given ID already exists with a different typename.
+   *
+   * This method does not begin or end any transactions. Other methods
+   * may call this method as a subroutine in a larger transaction.
+   *
+   * See: `registerObject`.
+   */
+  _nontransactionallyRegisterNodeFieldResult(
+    result: NodeFieldResult
+  ): Schema.ObjectId | null {
+    if (result == null) {
+      return null;
+    } else {
+      const object = {typename: result.__typename, id: result.id};
+      this._nontransactionallyRegisterObject(object);
+      return object.id;
+    }
+  }
+
+  /**
    * Find objects and connections that are not known to be up-to-date.
    *
    * An object is up-to-date if its own data has been loaded at least as
@@ -674,12 +699,7 @@ export class Mirror {
       `
     );
     for (const node of queryResult.nodes) {
-      let childId = null;
-      if (node != null) {
-        const childObject = {typename: node.__typename, id: node.id};
-        this._nontransactionallyRegisterObject(childObject);
-        childId = childObject.id;
-      }
+      const childId = this._nontransactionallyRegisterNodeFieldResult(node);
       const idx = nextIndex++;
       addEntry.run({connectionId, idx, childId});
     }
