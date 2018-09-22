@@ -1,11 +1,14 @@
 //@flow
 
+import {makeRepoId, repoIdToString, type RepoIdString} from "../../core/repoId";
 import type {Repository} from "./types";
 import {mergeRepository} from "./mergeRepository";
 
 describe("plugins/git/mergeRepository", () => {
   describe("mergeRepository", () => {
-    const empty: Repository = Object.freeze({commits: {}});
+    const empty: Repository = Object.freeze({commits: {}, commitToRepoId: {}});
+    const repoId1 = repoIdToString(makeRepoId("repo", "1"));
+    const repoId2 = repoIdToString(makeRepoId("repo", "2"));
     const repository1: Repository = Object.freeze({
       commits: {
         commit1: {
@@ -20,6 +23,10 @@ describe("plugins/git/mergeRepository", () => {
           summary: "another commit",
           parentHashes: ["commit1"],
         },
+      },
+      commitToRepoId: {
+        commit1: {[((repoId1: RepoIdString): any)]: true},
+        commit2: {[((repoId1: RepoIdString): any)]: true},
       },
     });
     const repository2: Repository = Object.freeze({
@@ -36,6 +43,10 @@ describe("plugins/git/mergeRepository", () => {
           summary: "a third commit",
           parentHashes: ["commit1"],
         },
+      },
+      commitToRepoId: {
+        commit1: {[((repoId2: RepoIdString): any)]: true},
+        commit3: {[((repoId2: RepoIdString): any)]: true},
       },
     });
 
@@ -59,6 +70,20 @@ describe("plugins/git/mergeRepository", () => {
         }
       }
     });
+    it("commitToRepoId tracks every repository containing each commit", () => {
+      const merged = mergeRepository([repository1, repository2]);
+      expect(merged.commitToRepoId).toEqual({
+        commit1: {
+          [((repoId2: RepoIdString): any)]: true,
+          [((repoId1: RepoIdString): any)]: true,
+        },
+        commit2: {[((repoId1: RepoIdString): any)]: true},
+        commit3: {[((repoId2: RepoIdString): any)]: true},
+      });
+    });
+    it("merging a repo with itself returns that repo", () => {
+      expect(mergeRepository([repository1, repository1])).toEqual(repository1);
+    });
     it("throws an error if merging a repository with conflicting commits", () => {
       const conflictingRepository: Repository = Object.freeze({
         commits: {
@@ -67,6 +92,11 @@ describe("plugins/git/mergeRepository", () => {
             shortHash: "commit1",
             summary: "a conflicting commit",
             parentHashes: ["commit0"],
+          },
+        },
+        commitToRepoId: {
+          commit1: {
+            [((repoId1: RepoIdString): any)]: true,
           },
         },
       });

@@ -1,4 +1,30 @@
 {
+    "commitToRepoId": {
+        "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f": {
+            "sourcecred/example-git": true
+        },
+        "69c5aad50eec8f2a0a07c988c3b283a6490eb45b": {
+            "sourcecred/example-git": true
+        },
+        "8d287c3bfbf8455ef30187bf5153ffc1b6eef268": {
+            "sourcecred/example-git": true
+        },
+        "c08ee3a4edea384d5291ffcbf06724a13ed72325": {
+            "sourcecred/example-git": true
+        },
+        "c2b51945e7457546912a8ce158ed9d294558d294": {
+            "sourcecred/example-git": true
+        },
+        "c90f6424017f787bbbaf22e4082a01355546f7e3": {
+            "sourcecred/example-git": true
+        },
+        "d160cca97611e9dfed642522ad44408d0292e8ea": {
+            "sourcecred/example-git": true
+        },
+        "e8b7a8f19701cd5a25e4a097d513ead60e5f8bcc": {
+            "sourcecred/example-git": true
+        }
+    },
     "commits": {
         "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f": {
             "hash": "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f",

@@ -6,18 +6,23 @@ import type {Repository} from "./types";
 export function mergeRepository(
   repositories: $ReadOnlyArray<Repository>
 ): Repository {
-  const newRepository = {commits: {}};
-  for (const {commits} of repositories) {
+  const newCommits = {};
+  const newCommitToRepoId = {};
+  for (const {commits, commitToRepoId} of repositories) {
     for (const commitHash of Object.keys(commits)) {
-      const existingCommit = newRepository.commits[commitHash];
+      const existingCommit = newCommits[commitHash];
       if (
         existingCommit != null &&
         !deepEqual(existingCommit, commits[commitHash])
       ) {
         throw new Error(`Conflict between commits at ${commitHash}`);
       }
-      newRepository.commits[commitHash] = commits[commitHash];
+      newCommits[commitHash] = commits[commitHash];
+      const newRepos = commitToRepoId[commitHash];
+      const existingRepos = newCommitToRepoId[commitHash] || {};
+      const combinedRepoIdsForCommit = {...newRepos, ...existingRepos};
+      newCommitToRepoId[commitHash] = combinedRepoIdsForCommit;
     }
   }
-  return newRepository;
+  return {commits: newCommits, commitToRepoId: newCommitToRepoId};
 }

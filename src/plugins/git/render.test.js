@@ -1,5 +1,6 @@
 // @flow
 
+import {makeRepoId} from "../../core/repoId";
 import * as GN from "./nodes";
 import {description} from "./render";
 import type {Repository} from "./types";
@@ -18,6 +19,9 @@ describe("plugins/git/render", () => {
         summary: "This is an example commit",
         parentHashes: [],
       },
+    },
+    commitToRepoId: {
+      [exampleHash]: {[(makeRepoId("sourcecred", "example-git"): any)]: true},
     },
   });
 
