@@ -61,11 +61,9 @@ declare type bettersqlite3$BoundParameter =
   | bettersqlite3$BindingDictionary;
 
 declare class bettersqlite3$Statement {
-  +memory: boolean;
-  +readonly: boolean;
-  +name: string;
-  +open: boolean;
-  +inTransaction: boolean;
+  +database: bettersqlite3$Database;
+  +source: string;
+  +returnsData: boolean;
 
   run(...params: bettersqlite3$BoundParameter[]): bettersqlite3$RunResult;
   get(...params: bettersqlite3$BoundParameter[]): any;
