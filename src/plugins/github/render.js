@@ -75,7 +75,6 @@ function userlike(x: R.Userlike) {
 // because the commit has a Git plugin prefix and will therefore by
 // handled by the git plugin adapter
 function commit(x: R.Commit) {
-  // TODO(@wchargin): Ensure this hash is unambiguous
   const shortHash = x.address().hash.slice(0, 7);
   return (
     <span>
