@@ -3,6 +3,7 @@
 exports[`plugins/github/render renders the right description for a comment 1`] = `
 <span>
   <a
+    class="link_1cmobhd"
     href="https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"
     rel="nofollow noopener"
     target="_blank"
@@ -12,6 +13,7 @@ exports[`plugins/github/render renders the right description for a comment 1`] =
    on 
   <span>
     <a
+      class="link_1cmobhd"
       href="https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899"
       rel="nofollow noopener"
       target="_blank"
@@ -21,6 +23,7 @@ exports[`plugins/github/render renders the right description for a comment 1`] =
      on 
     <span>
       <a
+        class="link_1cmobhd"
         href="https://github.com/sourcecred/example-github/pull/5"
         rel="nofollow noopener"
         target="_blank"
@@ -53,6 +56,7 @@ exports[`plugins/github/render renders the right description for a commit 1`] = 
 <span>
   Commit 
   <a
+    class="link_1cmobhd"
     href="https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
     rel="nofollow noopener"
     target="_blank"
@@ -65,6 +69,7 @@ exports[`plugins/github/render renders the right description for a commit 1`] = 
 exports[`plugins/github/render renders the right description for a issue 1`] = `
 <span>
   <a
+    class="link_1cmobhd"
     href="https://github.com/sourcecred/example-github/issues/2"
     rel="nofollow noopener"
     target="_blank"
@@ -78,6 +83,7 @@ exports[`plugins/github/render renders the right description for a issue 1`] = `
 exports[`plugins/github/render renders the right description for a pull 1`] = `
 <span>
   <a
+    class="link_1cmobhd"
     href="https://github.com/sourcecred/example-github/pull/5"
     rel="nofollow noopener"
     target="_blank"
@@ -106,6 +112,7 @@ exports[`plugins/github/render renders the right description for a pull 1`] = `
 
 exports[`plugins/github/render renders the right description for a repo 1`] = `
 <a
+  class="link_1cmobhd"
   href="https://github.com/sourcecred/example-github"
   rel="nofollow noopener"
   target="_blank"
@@ -117,6 +124,7 @@ exports[`plugins/github/render renders the right description for a repo 1`] = `
 exports[`plugins/github/render renders the right description for a review 1`] = `
 <span>
   <a
+    class="link_1cmobhd"
     href="https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899"
     rel="nofollow noopener"
     target="_blank"
@@ -126,6 +134,7 @@ exports[`plugins/github/render renders the right description for a review 1`] = 
    on 
   <span>
     <a
+      class="link_1cmobhd"
       href="https://github.com/sourcecred/example-github/pull/5"
       rel="nofollow noopener"
       target="_blank"
@@ -155,6 +164,7 @@ exports[`plugins/github/render renders the right description for a review 1`] = 
 
 exports[`plugins/github/render renders the right description for a userlike 1`] = `
 <a
+  class="link_1cmobhd"
   href="https://github.com/wchargin"
   rel="nofollow noopener"
   target="_blank"
