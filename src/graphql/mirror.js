@@ -964,24 +964,30 @@ export class Mirror {
    * For instance, the result of `extract("issue:1")` might be:
    *
    *     {
+   *       __typename: "Issue",
    *       id: "issue:1172",
    *       title: "bug: holding <Space> causes CPU to overheat",
    *       body: "We should fix this immediately.",
    *       author: {
+   *         __typename: "User",
    *         id: "user:admin",
    *         login: "admin",
    *       },
    *       comments: [
    *         {
+   *           __typename: "IssueComment",
    *           body: "I depend on this behavior; please do not change it.",
    *           author: {
+   *             __typename: "User",
    *             id: "user:longtimeuser4",
    *             login: "longtimeuser4",
    *           },
    *         },
    *         {
+   *           __typename: "IssueComment",
    *           body: "That's horrifying.",
    *           author: {
+   *             __typename: "User",
    *             id: "user:admin",
    *             login: "admin",
    *           },
@@ -1090,8 +1096,8 @@ export class Mirror {
         // Constructing the result set inherently requires mutation,
         // because the object graph can have cycles. We start by
         // creating a record for each object, with just that object's
-        // primitive data. Then, we link in node references and
-        // connection entries.
+        // primitive data and typename. Then, we link in node references
+        // and connection entries.
         const allObjects: Map<Schema.ObjectId, Object> = new Map();
         for (const typename of typenames) {
           const objectType = this._schemaInfo.objectTypes[typename];
@@ -1125,6 +1131,7 @@ export class Mirror {
           for (const row of rows) {
             const object = {};
             object.id = row.id;
+            object.__typename = typename;
             for (const key of Object.keys(row)) {
               if (key === "id") continue;
               object[key] = JSON.parse(row[key]);

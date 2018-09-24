@@ -1405,16 +1405,19 @@ describe("graphql/mirror", () => {
         });
       }
       type Caveman = {|
+        +__typename: "Caveman",
         +id: string,
         +only: mixed,
         +primitives: mixed,
       |};
       type Feline = {|
+        +__typename: "Feline",
         +id: string,
         +only: null | Feline,
         +lynx: null | Feline,
       |};
       type Socket = {|
+        +__typename: "Socket",
         +id: string,
         +only: $ReadOnlyArray<null | Socket>,
         +connections: $ReadOnlyArray<null | Socket>,
@@ -1551,6 +1554,7 @@ describe("graphql/mirror", () => {
         ]);
         const result: Caveman = (mirror.extract("brog"): any);
         expect(result).toEqual({
+          __typename: "Caveman",
           id: "brog",
           only: "ugg",
           primitives: "ook",
@@ -1586,12 +1590,15 @@ describe("graphql/mirror", () => {
         ]);
         const result = mirror.extract("alpha");
         expect(result).toEqual({
+          __typename: "Feline",
           id: "alpha",
           only: null,
           lynx: {
+            __typename: "Feline",
             id: "beta",
             only: null,
             lynx: {
+              __typename: "Feline",
               id: "gamma",
               only: null,
               lynx: null,
@@ -1634,15 +1641,27 @@ describe("graphql/mirror", () => {
         updateConnection("localhost:6060", "connections", []);
         const result = mirror.extract("localhost:8080");
         expect(result).toEqual({
+          __typename: "Socket",
           id: "localhost:8080",
           only: [],
           connections: [
             {
+              __typename: "Socket",
               id: "localhost:7070",
               only: [],
               connections: [
-                {id: "localhost:6060", only: [], connections: []},
-                {id: "localhost:6060", only: [], connections: []},
+                {
+                  __typename: "Socket",
+                  id: "localhost:6060",
+                  only: [],
+                  connections: [],
+                },
+                {
+                  __typename: "Socket",
+                  id: "localhost:6060",
+                  only: [],
+                  connections: [],
+                },
               ],
             },
           ],
@@ -1656,7 +1675,7 @@ describe("graphql/mirror", () => {
         const updateId = mirror._createUpdate(new Date(123));
         mirror._updateOwnData(updateId, [{__typename: "Empty", id: "mt"}]);
         const result = mirror.extract("mt");
-        expect(result).toEqual({id: "mt"});
+        expect(result).toEqual({__typename: "Empty", id: "mt"});
       });
 
       it("handles boolean primitives", () => {
@@ -1668,6 +1687,7 @@ describe("graphql/mirror", () => {
           {__typename: "Caveman", id: "brog", only: false, primitives: true},
         ]);
         expect(mirror.extract("brog")).toEqual({
+          __typename: "Caveman",
           id: "brog",
           only: false,
           primitives: true,
@@ -1683,6 +1703,7 @@ describe("graphql/mirror", () => {
           {__typename: "Caveman", id: "brog", only: null, primitives: null},
         ]);
         expect(mirror.extract("brog")).toEqual({
+          __typename: "Caveman",
           id: "brog",
           only: null,
           primitives: null,
@@ -1698,6 +1719,7 @@ describe("graphql/mirror", () => {
           {__typename: "Caveman", id: "brog", only: 123, primitives: 987},
         ]);
         expect(mirror.extract("brog")).toEqual({
+          __typename: "Caveman",
           id: "brog",
           only: 123,
           primitives: 987,
@@ -1733,12 +1755,15 @@ describe("graphql/mirror", () => {
         ]);
         const result: Feline = (mirror.extract("alpha"): any);
         expect(result).toEqual({
+          __typename: "Feline",
           id: "alpha",
           only: null,
           lynx: {
+            __typename: "Feline",
             id: "beta",
             only: result.lynx,
             lynx: {
+              __typename: "Feline",
               id: "gamma",
               only: result.lynx,
               lynx: null,
@@ -1784,16 +1809,19 @@ describe("graphql/mirror", () => {
         updateConnection("localhost:6060", "connections", ["localhost:7070"]);
         const result: Socket = (mirror.extract("localhost:8080"): any);
         expect(result).toEqual({
+          __typename: "Socket",
           id: "localhost:8080",
           only: [],
           connections: [
             {
+              __typename: "Socket",
               id: "localhost:7070",
               only: [],
               connections: [
                 result,
                 result.connections[0],
                 {
+                  __typename: "Socket",
                   id: "localhost:6060",
                   only: [],
                   connections: [result.connections[0]],
@@ -1838,6 +1866,7 @@ describe("graphql/mirror", () => {
         });
         const result: Socket = (mirror.extract("localhost"): any);
         expect(result).toEqual({
+          __typename: "Socket",
           id: "localhost",
           only: [],
           connections: [null, result, null, result, result, null],
@@ -2071,13 +2100,16 @@ describe("graphql/mirror", () => {
 
         const result = mirror.extract("repo:foo/bar");
         expect(result).toEqual({
+          __typename: "Repository",
           id: "repo:foo/bar",
           url: "url://foo/bar",
           issues: [
             {
+              __typename: "Issue",
               id: "issue:#1",
               url: "url://issue/1",
               author: {
+                __typename: "User",
                 id: "user:alice",
                 url: "url://alice",
                 login: "alice",
@@ -2088,6 +2120,7 @@ describe("graphql/mirror", () => {
               timeline: [],
             },
             {
+              __typename: "Issue",
               id: "issue:#2",
               url: "url://issue/2",
               author: null,
@@ -2096,18 +2129,22 @@ describe("graphql/mirror", () => {
                 "by the time you read this, I will have deleted my account",
               comments: [
                 {
+                  __typename: "IssueComment",
                   id: "comment:#2.1",
                   body: "cya",
                   author: {
+                    __typename: "User",
                     id: "user:alice",
                     url: "url://alice",
                     login: "alice",
                   },
                 },
                 {
+                  __typename: "IssueComment",
                   id: "comment:#2.2",
                   body: "alas, I did not know them well",
                   author: {
+                    __typename: "User",
                     id: "user:bob",
                     url: "url://bob",
                     login: "bob",
@@ -2116,8 +2153,10 @@ describe("graphql/mirror", () => {
               ],
               timeline: [
                 {
+                  __typename: "ClosedEvent",
                   id: "issue:#2!closed#0",
                   actor: {
+                    __typename: "User",
                     id: "user:alice",
                     url: "url://alice",
                     login: "alice",
