@@ -1,6 +1,6 @@
 // @flow
 
-import type Database from "better-sqlite3";
+import type Database, {BindingDictionary, Statement} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 
 import dedent from "../util/dedent";
@@ -885,4 +885,55 @@ function _primitivesTableName(typename: Schema.Typename) {
     );
   }
   return `"primitives_${typename}"`;
+}
+
+/**
+ * Convert a prepared statement into a JS function that executes that
+ * statement and asserts that it makes exactly one change to the
+ * database.
+ *
+ * The prepared statement must use only named parameters, not positional
+ * parameters.
+ *
+ * The prepared statement must not return data (e.g., INSERT and UPDATE
+ * are okay; SELECT is not).
+ *
+ * The statement is not executed inside an additional transaction, so in
+ * the case that the assertion fails, the effects of the statement are
+ * not rolled back by this function.
+ *
+ * This is useful when the statement is like `UPDATE ... WHERE id = ?`
+ * and it is assumed that `id` is a primary key for a record already
+ * exists---if either existence or uniqueness fails, this method will
+ * raise an error quickly instead of leading to a corrupt state.
+ *
+ * For example, this code...
+ *
+ *     const setName: ({|+userId: string, +newName: string|}) => void =
+ *       _makeSingleUpdateFunction(
+ *         "UPDATE users SET name = :newName WHERE id = :userId"
+ *       );
+ *     setName({userId: "user:foo", newName: "The Magnificent Foo"});
+ *
+ * ...will update `user:foo`'s name, or throw an error if there is no
+ * such user or if multiple users have this ID.
+ */
+export function _makeSingleUpdateFunction<Args: BindingDictionary>(
+  stmt: Statement
+): (Args) => void {
+  if (stmt.returnsData) {
+    throw new Error(
+      "Cannot create update function for statement that returns data: " +
+        stmt.source
+    );
+  }
+  return (args: Args) => {
+    const result = stmt.run(args);
+    if (result.changes !== 1) {
+      throw new Error(
+        "Bad change count: " +
+          JSON.stringify({source: stmt.source, args, changes: result.changes})
+      );
+    }
+  };
 }

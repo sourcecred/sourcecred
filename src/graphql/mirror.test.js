@@ -7,7 +7,12 @@ import tmp from "tmp";
 import dedent from "../util/dedent";
 import * as Schema from "./schema";
 import * as Queries from "./queries";
-import {_buildSchemaInfo, _inTransaction, Mirror} from "./mirror";
+import {
+  _buildSchemaInfo,
+  _inTransaction,
+  _makeSingleUpdateFunction,
+  Mirror,
+} from "./mirror";
 
 describe("graphql/mirror", () => {
   function issueTimelineItemClauses() {
@@ -402,24 +407,8 @@ describe("graphql/mirror", () => {
         const midUpdate = createUpdate(456);
         const lateUpdate = createUpdate(789);
 
-        const makeUpdateFunction = (updateSql) => {
-          const stmt = db.prepare(updateSql);
-          return (...bindings) => {
-            const result = stmt.run(...bindings);
-            // Make sure that we actually updated something. (This can
-            // trigger if, for instance, you copy-paste some updates for
-            // a new object, but never actually register that object
-            // with the DB.)
-            expect({updateSql, bindings, result}).toEqual({
-              updateSql,
-              bindings,
-              result: expect.objectContaining({changes: 1}),
-            });
-          };
-        };
-
-        const setObjectData = makeUpdateFunction(
-          "UPDATE objects SET last_update = :update WHERE id = :id"
+        const setObjectData = _makeSingleUpdateFunction(
+          db.prepare("UPDATE objects SET last_update = :update WHERE id = :id")
         );
         setObjectData({id: "repo:ab/cd", update: earlyUpdate.id});
         setObjectData({id: "issue:ab/cd#1", update: lateUpdate.id});
@@ -427,15 +416,17 @@ describe("graphql/mirror", () => {
         setObjectData({id: "issue:ab/cd#3", update: null});
         setObjectData({id: "issue:ab/cd#4", update: midUpdate.id});
 
-        const setConnectionData = makeUpdateFunction(
-          dedent`\
-            UPDATE connections SET
-                last_update = :update,
-                total_count = :totalCount,
-                has_next_page = :hasNextPage,
-                end_cursor = :endCursor
-            WHERE object_id = :objectId AND fieldname = :fieldname
-          `
+        const setConnectionData = _makeSingleUpdateFunction(
+          db.prepare(
+            dedent`\
+              UPDATE connections SET
+                  last_update = :update,
+                  total_count = :totalCount,
+                  has_next_page = :hasNextPage,
+                  end_cursor = :endCursor
+              WHERE object_id = :objectId AND fieldname = :fieldname
+            `
+          )
         );
         setConnectionData({
           objectId: "repo:ab/cd",
@@ -1224,6 +1215,74 @@ describe("graphql/mirror", () => {
       db.prepare("BEGIN").run();
       expect(() => _inTransaction(db, () => {})).toThrow(
         "already in transaction"
+      );
+    });
+  });
+
+  describe("_makeSingleUpdateFunction", () => {
+    function createTestDb() {
+      const db = new Database(":memory:");
+      db.prepare("CREATE TABLE tab (id, value)").run();
+      db.prepare("INSERT INTO tab (id, value) VALUES (1, 'hello')").run();
+      db.prepare("INSERT INTO tab (id, value) VALUES (2, 'world')").run();
+      db.prepare("INSERT INTO tab (id, value) VALUES (2, 'dlrow')").run();
+      return db;
+    }
+    it("refuses to process a statement that returns data", () => {
+      const db = new Database(":memory:");
+      const stmt = db.prepare("SELECT 1");
+      expect(() => {
+        _makeSingleUpdateFunction(stmt);
+      }).toThrow(
+        "Cannot create update function for statement that returns data: " +
+          "SELECT 1"
+      );
+    });
+    it("creates a function that executes its statement", () => {
+      const db = createTestDb();
+      const fn = _makeSingleUpdateFunction(
+        db.prepare("UPDATE tab SET value = :value WHERE id = :id")
+      );
+      fn({id: 1, value: "goodbye"});
+      const rows = db
+        .prepare("SELECT id AS id, value AS value FROM tab ORDER BY rowid ASC")
+        .all();
+      expect(rows).toEqual([
+        {id: 1, value: "goodbye"},
+        {id: 2, value: "world"},
+        {id: 2, value: "dlrow"},
+      ]);
+    });
+    it("throws if there are no updates", () => {
+      const db = createTestDb();
+      const fn = _makeSingleUpdateFunction(
+        db.prepare("UPDATE tab SET value = :value WHERE id = :id")
+      );
+      expect(() => {
+        fn({id: 3, value: "wat"});
+      }).toThrow(
+        "Bad change count: " +
+          JSON.stringify({
+            source: "UPDATE tab SET value = :value WHERE id = :id",
+            args: {id: 3, value: "wat"},
+            changes: 0,
+          })
+      );
+    });
+    it("throws if there are multiple updates", () => {
+      const db = createTestDb();
+      const fn = _makeSingleUpdateFunction(
+        db.prepare("UPDATE tab SET value = :value WHERE id = :id")
+      );
+      expect(() => {
+        fn({id: 2, value: "wot"});
+      }).toThrow(
+        "Bad change count: " +
+          JSON.stringify({
+            source: "UPDATE tab SET value = :value WHERE id = :id",
+            args: {id: 2, value: "wot"},
+            changes: 2,
+          })
       );
     });
   });
