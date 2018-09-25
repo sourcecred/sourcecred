@@ -232,3 +232,32 @@ exports[`graphql/mirror Mirror _queryConnection snapshot test for actual GitHub 
   }
 }"
 `;
+
+exports[`graphql/mirror Mirror _updateOwnData snapshot test for actual GitHub queries 1`] = `
+"query TestQuery {
+  node(id: \\"MDU6SXNzdWUzNDg1NDA0NjE=\\") {
+    ... on Issue {
+      __typename
+      id
+      url
+      author {
+        __typename
+        ... on User {
+          id
+        }
+        ... on Bot {
+          id
+        }
+        ... on Organization {
+          id
+        }
+      }
+      repository {
+        __typename
+        id
+      }
+      title
+    }
+  }
+}"
+`;
