@@ -958,6 +958,149 @@ describe("graphql/mirror", () => {
       });
     });
 
+    describe("update", () => {
+      it("delegates and updates the database", async () => {
+        const spyFindOutdated = jest.spyOn(Mirror.prototype, "_findOutdated");
+        const spyQueryFromPlan = jest.spyOn(Mirror.prototype, "_queryFromPlan");
+        const spyCreateUpdate = jest.spyOn(Mirror.prototype, "_createUpdate");
+        const spies = [spyFindOutdated, spyQueryFromPlan, spyCreateUpdate];
+
+        const postQuery = jest.fn();
+        const now = jest
+          .fn()
+          .mockImplementationOnce(() => new Date(456))
+          .mockImplementationOnce(() => new Date(789));
+
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        postQuery.mockImplementationOnce(() =>
+          Promise.resolve({
+            owndata_0: [
+              {
+                __typename: "Repository",
+                id: "repo:foo/bar",
+                url: "url://foo/bar",
+              },
+            ],
+            node_0: {
+              id: "repo:foo/bar",
+              issues: {
+                totalCount: 1,
+                pageInfo: {hasNextPage: false, endCursor: "cursor:repo@1"},
+                nodes: [{__typename: "Issue", id: "issue:#1"}],
+              },
+            },
+          })
+        );
+        postQuery.mockImplementationOnce(() =>
+          Promise.resolve({
+            owndata_0: [
+              {
+                __typename: "Issue",
+                id: "issue:#1",
+                url: "url://foo/bar/1",
+                author: null,
+                title: "check it out",
+                repository: {__typename: "Repository", id: "repo:foo/bar"},
+              },
+            ],
+            node_0: {
+              id: "issue:#1",
+              comments: {
+                totalCount: 0,
+                pageInfo: {hasNextPage: false, endCursor: "cursor:issue@2"},
+                nodes: [],
+              },
+              timeline: {
+                totalCount: 0,
+                pageInfo: {hasNextPage: false, endCursor: "cursor:issue@3"},
+                nodes: [],
+              },
+            },
+          })
+        );
+        postQuery.mockImplementationOnce(() =>
+          Promise.reject("Should not get here.")
+        );
+
+        await mirror.update(postQuery, {
+          nodesOfTypeLimit: 2,
+          nodesLimit: 3,
+          connectionLimit: 4,
+          connectionPageSize: 5,
+          since: new Date(123),
+          now: now,
+        });
+
+        // We should have invoked `_findOutdated` three times, each
+        // asking for any out-of-date entries since the fixed start
+        // date. The last result will be empty.
+        expect(spyFindOutdated).toHaveBeenCalledTimes(3);
+        expect(spyFindOutdated.mock.calls[0]).toEqual([new Date(123)]);
+        expect(spyFindOutdated.mock.calls[1]).toEqual([new Date(123)]);
+        expect(spyFindOutdated.mock.calls[2]).toEqual([new Date(123)]);
+        expect(spyFindOutdated.mock.results[0].value).not.toEqual(
+          spyFindOutdated.mock.results[1].value
+        );
+        expect(spyFindOutdated.mock.results[2].value).toEqual({
+          objects: [],
+          connections: [],
+        });
+
+        // We should have constructed two query plans, with the same
+        // options each time.
+        expect(spyQueryFromPlan).toHaveBeenCalledTimes(2);
+        expect(spyQueryFromPlan.mock.calls[0]).toEqual([
+          spyFindOutdated.mock.results[0].value,
+          {
+            nodesOfTypeLimit: 2,
+            nodesLimit: 3,
+            connectionLimit: 4,
+            connectionPageSize: 5,
+          },
+        ]);
+        expect(spyQueryFromPlan.mock.calls[1]).toEqual([
+          spyFindOutdated.mock.results[1].value,
+          {
+            nodesOfTypeLimit: 2,
+            nodesLimit: 3,
+            connectionLimit: 4,
+            connectionPageSize: 5,
+          },
+        ]);
+
+        // We should have created two updates with sequential dates.
+        expect(spyCreateUpdate).toHaveBeenCalledTimes(2);
+        expect(spyCreateUpdate.mock.calls[0]).toEqual([new Date(456)]);
+        expect(spyCreateUpdate.mock.calls[1]).toEqual([new Date(789)]);
+
+        // We should now be able to extract the right data.
+        const result = mirror.extract("repo:foo/bar");
+        expect(result).toEqual({
+          __typename: "Repository",
+          id: "repo:foo/bar",
+          url: "url://foo/bar",
+          issues: [
+            {
+              __typename: "Issue",
+              id: "issue:#1",
+              url: "url://foo/bar/1",
+              author: null,
+              repository: result, // circular
+              title: "check it out",
+              comments: [],
+              timeline: [],
+            },
+          ],
+        });
+
+        for (const spy of spies) {
+          spy.mockRestore();
+        }
+      });
+    });
+
     describe("_queryShallow", () => {
       it("fails when given a nonexistent type", () => {
         const db = new Database(":memory:");

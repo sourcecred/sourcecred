@@ -11,6 +11,15 @@ import * as Queries from "./queries";
 
 /**
  * A local mirror of a subset of a GraphQL database.
+ *
+ * Clients should interact with this module as follows:
+ *
+ *   - Invoke the constructor to acquire a `Mirror` instance.
+ *   - Invoke `registerObject` to register a root object of interest.
+ *   - Invoke `update` to update all transitive dependencies.
+ *   - Invoke `extract` to retrieve the data in structured form.
+ *
+ * See the relevant methods for documentation.
  */
 /*
  * NOTE(perf): The implementation of this class is not particularly
@@ -634,6 +643,91 @@ export class Mirror {
         );
       }
     }
+  }
+
+  /**
+   * Perform one step of the update loop: find outdated entities, fetch
+   * their updates, and feed the results back into the database.
+   *
+   * Returns a promise that resolves to `true` if any changes were made.
+   */
+  async _updateStep(
+    postQuery: ({+body: Queries.Body, +variables: {+[string]: any}}) => Promise<
+      any
+    >,
+    options: {|
+      +nodesLimit: number,
+      +nodesOfTypeLimit: number,
+      +connectionPageSize: number,
+      +connectionLimit: number,
+      +since: Date,
+      +now: () => Date,
+    |}
+  ): Promise<boolean> {
+    const queryPlan = this._findOutdated(options.since);
+    if (queryPlan.objects.length === 0 && queryPlan.connections.length === 0) {
+      return Promise.resolve(false);
+    }
+    const querySelections = this._queryFromPlan(queryPlan, {
+      nodesLimit: options.nodesLimit,
+      nodesOfTypeLimit: options.nodesOfTypeLimit,
+      connectionPageSize: options.connectionPageSize,
+      connectionLimit: options.connectionLimit,
+    });
+    const body = [Queries.build.query("MirrorUpdate", [], querySelections)];
+    const result: UpdateResult = await postQuery({body, variables: {}});
+    _inTransaction(this._db, () => {
+      const updateId = this._createUpdate(options.now());
+      this._nontransactionallyUpdateData(updateId, result);
+    });
+    return Promise.resolve(true);
+  }
+
+  /**
+   * Update this mirror with new information from a remote GraphQL
+   * server.
+   *
+   * The `postQuery` function should post a GraphQL query to the remote
+   * server and return the `data` contents of its response, rejecting if
+   * there are any errors. (Note that this requirement may change
+   * backward-incompatibly in future versions of this module, in the
+   * case that we wish to handle deletions without regenerating all
+   * data.)
+   *
+   * The options are as follows:
+   *
+   *   - `since`: Fetch all data that is not known to be up-to-date as
+   *     of the provided time. For instance, to fetch all objects more
+   *     than a day old, use `new Date(new Date() - 86400e3)`.
+   *
+   *   - `now`: Function to yield the current date, which will be used
+   *     as the modification time for any objects or connections updated
+   *     in this process. Should probably be `() => new Date()`.
+   *
+   *   - `connectionPageSize`: Maximum number of entries to fetch in any
+   *     given connection. Some providers have a hard limit of 100 on
+   *     this value.
+   *
+   *   - `connectionLimit`: Maximum number of connections to fetch in a
+   *     single query.
+   *
+   * See: `registerObject`.
+   * See: `extract`.
+   */
+  async update(
+    postQuery: ({+body: Queries.Body, +variables: {+[string]: any}}) => Promise<
+      any
+    >,
+    options: {|
+      +nodesLimit: number,
+      +nodesOfTypeLimit: number,
+      +connectionPageSize: number,
+      +connectionLimit: number,
+      +since: Date,
+      +now: () => Date,
+    |}
+  ): Promise<void> {
+    while (await this._updateStep(postQuery, options));
   }
 
   /**

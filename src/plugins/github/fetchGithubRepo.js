@@ -7,7 +7,7 @@
 import fetch from "isomorphic-fetch";
 import retry from "retry";
 
-import {stringify, inlineLayout} from "../../graphql/queries";
+import {stringify, inlineLayout, type Body} from "../../graphql/queries";
 import {createQuery, createVariables, postQueryExhaustive} from "./graphql";
 import type {GithubResponseJSON} from "./graphql";
 import type {RepoId} from "../../core/repoId";
@@ -131,7 +131,10 @@ function retryGithubFetch(fetch, fetchOptions) {
   });
 }
 
-async function postQuery({body, variables}, token): Promise<any> {
+export async function postQuery(
+  {body, variables}: {+body: Body, +variables: mixed},
+  token: string
+): Promise<any> {
   const postBody = JSON.stringify({
     query: stringify.body(body, inlineLayout()),
     variables: variables,
