@@ -494,18 +494,21 @@ describe("graphql/mirror", () => {
           connections: [
             {
               // loaded before cutoff
+              objectTypename: "Repository",
               objectId: "repo:ab/cd",
               fieldname: "issues",
               endCursor: "cursor:repo.issues",
             },
             {
               // never loaded
+              objectTypename: "Issue",
               objectId: "issue:ab/cd#1",
               fieldname: "comments",
               endCursor: undefined,
             },
             {
               // loaded, but has more data available
+              objectTypename: "Issue",
               objectId: "issue:ab/cd#2",
               fieldname: "comments",
               endCursor: null,

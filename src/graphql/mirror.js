@@ -428,12 +428,16 @@ export class Mirror {
         .prepare(
           dedent`\
             SELECT
+                objects.typename AS objectTypename,
                 connections.object_id AS objectId,
                 connections.fieldname AS fieldname,
                 connections.last_update IS NULL AS neverUpdated,
                 connections.end_cursor AS endCursor
             FROM connections
-            LEFT OUTER JOIN updates ON connections.last_update = updates.rowid
+            LEFT OUTER JOIN updates
+                ON connections.last_update = updates.rowid
+            JOIN objects
+                ON connections.object_id = objects.id
             WHERE connections.has_next_page
             OR connections.last_update IS NULL
             OR updates.time_epoch_millis < :timeEpochMillisThreshold
@@ -1046,6 +1050,7 @@ type QueryPlan = {|
     +id: Schema.ObjectId,
   |}>,
   +connections: $ReadOnlyArray<{|
+    +objectTypename: Schema.Typename,
     +objectId: Schema.ObjectId,
     +fieldname: Schema.Fieldname,
     +endCursor: EndCursor | void, // `undefined` if never fetched
