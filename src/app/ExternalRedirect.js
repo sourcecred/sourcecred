@@ -2,6 +2,8 @@
 
 import React from "react";
 
+import Link from "./Link";
+
 export default class ExternalRedirect extends React.Component<{|
   +redirectTo: string,
 |}> {
@@ -11,7 +13,7 @@ export default class ExternalRedirect extends React.Component<{|
         <h1>Redirecting…</h1>
         <p>
           Redirecting to:{" "}
-          <a href={this.props.redirectTo}>{this.props.redirectTo}</a>
+          <Link href={this.props.redirectTo}>{this.props.redirectTo}</Link>
         </p>
       </div>
     );

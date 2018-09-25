@@ -5,6 +5,7 @@ import {exampleEntities} from "./example/example";
 import {description} from "./render";
 import enzymeToJSON from "enzyme-to-json";
 
+require("../../app/testUtil").configureAphrodite();
 require("../../app/testUtil").configureEnzyme();
 
 describe("plugins/github/render", () => {

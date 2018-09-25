@@ -6,6 +6,7 @@ import type {Assets} from "../assets";
 import type {LocalStore} from "../localStore";
 import CheckedLocalStore from "../checkedLocalStore";
 import BrowserLocalStore from "../browserLocalStore";
+import Link from "../Link";
 
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import {PagerankTable} from "./pagerankTable/Table";
@@ -100,15 +101,13 @@ export function createApp(
       return (
         <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
           <p style={{textAlign: "right"}}>
-            <a
-              href={
-                "https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20"
-              }
-            >
+            <Link href="https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20">
               what is this?
-            </a>
+            </Link>
             {spacer()}
-            <a href={process.env.SOURCECRED_FEEDBACK_URL}>feedback</a>
+            <Link href={process.env.SOURCECRED_FEEDBACK_URL || ""}>
+              feedback
+            </Link>
           </p>
           <div style={{marginBottom: 10}}>
             <RepositorySelect

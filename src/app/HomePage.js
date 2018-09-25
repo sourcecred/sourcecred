@@ -1,10 +1,9 @@
 // @flow
 
-import {StyleSheet, css} from "aphrodite/no-important";
-import React, {type Node} from "react";
-import {Link} from "react-router";
+import React from "react";
 
 import type {Assets} from "./assets";
+import Link from "./Link";
 
 export default class HomePage extends React.Component<{|+assets: Assets|}> {
   render() {
@@ -44,12 +43,13 @@ export default class HomePage extends React.Component<{|+assets: Assets|}> {
         <p>
           Despite all the value provided by open-source projects, many are
           chronically underfunded. For example, NumPy{" "}
-          <A href={urls.numpyFunding}>received no funding at all until 2017</A>,
-          and{" "}
-          <A href={urls.opensslFunding}>
+          <Link href={urls.numpyFunding}>
+            received no funding at all until 2017
+          </Link>, and{" "}
+          <Link href={urls.opensslFunding}>
             a world where OpenSSL was funded might have been a world without
             Heartbleed
-          </A>.
+          </Link>.
         </p>
 
         <p>
@@ -115,12 +115,14 @@ export default class HomePage extends React.Component<{|+assets: Assets|}> {
         <h2>How cred works</h2>
         <p>
           Cred is computed by first creating a contribution{" "}
-          <A href={urls.graph}>graph</A>
+          <Link href={urls.graph}>graph</Link>
           , which contains every contribution to the project and the relations
           among them. For example, GitHub issues, Git commits, and individual
           files and functions can be included in the graph. Then, SourceCred
-          runs a modified version of <A href={urls.pagerank}>PageRank</A> on
-          that graph to produce a cred attribution. The attribution is highly
+          runs a modified version of <Link href={urls.pagerank}>
+            PageRank
+          </Link>{" "}
+          on that graph to produce a cred attribution. The attribution is highly
           configurable; project maintainers can add new heuristics and adjust
           weights.
         </p>
@@ -145,13 +147,11 @@ export default class HomePage extends React.Component<{|+assets: Assets|}> {
         <h2>Roadmap</h2>
         <p>
           SourceCred is under active development.{" "}
-          <Link className={css(styles.link)} to="/prototype">
-            We have a prototype
-          </Link>{" "}
-          that ingests data from Git and GitHub, computes cred, and allows the
-          user to explore and experiment on the results. We have a long way to
-          go to realize SourceCred’s full vision, but the prototype can already
-          surface some interesting insights!
+          <Link to="/prototype">We have a prototype</Link> that ingests data
+          from Git and GitHub, computes cred, and allows the user to explore and
+          experiment on the results. We have a long way to go to realize
+          SourceCred’s full vision, but the prototype can already surface some
+          interesting insights!
         </p>
 
         <p>
@@ -165,7 +165,7 @@ export default class HomePage extends React.Component<{|+assets: Assets|}> {
         <p>
           In the longer term, we will continue to add signal to cred
           attribution. For example, we plan to parse the{" "}
-          <A href={urls.ast}>AST</A> of a project’s code so that we can
+          <Link href={urls.ast}>AST</Link> of a project’s code so that we can
           attribute cred at the level of individual functions, and create a
           “spotlight” mechanic that will let contributors flow more cred to
           their peers’ important contributions. As SourceCred improves, we have
@@ -179,28 +179,21 @@ export default class HomePage extends React.Component<{|+assets: Assets|}> {
           decentralized. We don’t think communities should have to give their
           data to us, or entrust us with control over their cred. The lead
           developers are grateful to be supported by{" "}
-          <A href={urls.protocolLabs}>Protocol Labs</A>.
+          <Link href={urls.protocolLabs}>Protocol Labs</Link>.
         </p>
 
         <p>
           If you think this vision is exciting, we’d love for you to get
-          involved! You can join our <A href={urls.discord}>Discord</A> and
-          check out our <A href={urls.github}>GitHub</A>—many of our issues are
-          marked <A href={urls.contributionsWelcome}>contributions welcome</A>.
+          involved! You can join our <Link href={urls.discord}>Discord</Link>{" "}
+          and check out our <Link href={urls.github}>GitHub</Link>—many of our
+          issues are marked{" "}
+          <Link href={urls.contributionsWelcome}>contributions welcome</Link>.
           If you want to try running SourceCred on open-source projects you care
-          about, check out <A href={urls.readme}>our README</A>.
+          about, check out <Link href={urls.readme}>our README</Link>.
         </p>
       </div>
     );
   }
-}
-
-function A(props: {|+href: string, +children: Node|}) {
-  return (
-    <a className={css(styles.link)} href={props.href}>
-      {props.children}
-    </a>
-  );
 }
 
 function Dt(props) {
@@ -210,15 +203,3 @@ function Dt(props) {
 function Dd(props) {
   return <dd style={{marginBottom: 15}}>{props.children}</dd>;
 }
-
-const styles = StyleSheet.create({
-  link: {
-    // TODO(@wchargin): Create a `<Link>` component to share these
-    // styles, abstracting over router-links (`to`) and external links
-    // (`href`).
-    color: "#0872A2",
-    ":visited": {
-      color: "#084598",
-    },
-  },
-});

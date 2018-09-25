@@ -1,10 +1,10 @@
 // @flow
 
 import React, {type Node} from "react";
-import {Link} from "react-router";
 import {StyleSheet, css} from "aphrodite/no-important";
 
 import type {Assets} from "./assets";
+import Link from "./Link";
 import GithubLogo from "./GithubLogo";
 import TwitterLogo from "./TwitterLogo";
 import DiscordLogo from "./DiscordLogo";
@@ -24,10 +24,7 @@ export default class Page extends React.Component<{|
             <nav className={css(style.nav)}>
               <ul className={css(style.navList)}>
                 <li className={css(style.navItem, style.navItemLeft)}>
-                  <Link
-                    to="/"
-                    className={css(style.navLink, style.navLinkTitle)}
-                  >
+                  <Link to="/" styles={[style.navLink, style.navLinkTitle]}>
                     SourceCred
                   </Link>
                 </li>
@@ -37,44 +34,44 @@ export default class Page extends React.Component<{|
                       key={path}
                       className={css(style.navItem, style.navItemRight)}
                     >
-                      <Link to={path} className={css(style.navLink)}>
+                      <Link to={path} styles={[style.navLink]}>
                         {navTitle}
                       </Link>
                     </li>
                   ))
                 )}
                 <li className={css(style.navItem, style.navItemRight)}>
-                  <a
-                    className={css(style.navLink)}
+                  <Link
+                    styles={[style.navLink]}
                     href="https://github.com/sourcecred/sourcecred"
                   >
                     <GithubLogo
                       altText="SourceCred Github"
                       className={css(style.navLogoSmall)}
                     />
-                  </a>
+                  </Link>
                 </li>
                 <li className={css(style.navItem, style.navItemRight)}>
-                  <a
-                    className={css(style.navLink)}
+                  <Link
+                    styles={[style.navLink]}
                     href="https://twitter.com/sourcecred"
                   >
                     <TwitterLogo
                       altText="SourceCred Twitter"
                       className={css(style.navLogoSmall)}
                     />
-                  </a>
+                  </Link>
                 </li>
                 <li className={css(style.navItem, style.navItemRightSmall)}>
-                  <a
-                    className={css(style.navLink)}
+                  <Link
+                    styles={[style.navLink]}
                     href="https://discordapp.com/invite/tsBTgc9"
                   >
                     <DiscordLogo
                       altText="Join the SourceCred Discord"
                       className={css(style.navLogoMedium)}
                     />
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </nav>
@@ -131,14 +128,10 @@ const style = StyleSheet.create({
     display: "flex",
   },
   navLink: {
-    color: "#0872A2",
-    fill: "#0872A2",
     fontFamily: "Roboto Condensed",
     fontSize: 18,
     textDecoration: "none",
     ":hover": {
-      color: "#084598",
-      fill: "#084598",
       textDecoration: "underline",
     },
   },

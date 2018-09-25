@@ -3,11 +3,13 @@
 import React, {type Node as ReactNode} from "react";
 import * as R from "./relationalView";
 
+import Link from "../../app/Link";
+
 function EntityUrl(props) {
   return (
-    <a href={props.entity.url()} target="_blank" rel="nofollow noopener">
+    <Link href={props.entity.url()} target="_blank" rel="nofollow noopener">
       {props.children}
-    </a>
+    </Link>
   );
 }
 
