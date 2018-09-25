@@ -4,6 +4,8 @@ import React, {Component} from "react";
 import {Link as RouterLink} from "react-router";
 import {StyleSheet, css} from "aphrodite/no-important";
 
+import Colors from "./Colors";
+
 /**
  * A styled link component for both client-side router links and normal
  * external links.
@@ -47,12 +49,12 @@ const colorAttributes = (color) => ({
 });
 const styles = StyleSheet.create({
   link: {
-    ...colorAttributes("#0872A2"),
+    ...colorAttributes(Colors.brand.medium),
     ":visited": {
-      ...colorAttributes("#3A066A"),
+      ...colorAttributes(Colors.brand.dark),
     },
     ":active": {
-      ...colorAttributes("#FF3201"),
+      ...colorAttributes(Colors.accent.medium),
     },
   },
 });
