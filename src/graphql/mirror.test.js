@@ -11,6 +11,7 @@ import {
   _buildSchemaInfo,
   _inTransaction,
   _makeSingleUpdateFunction,
+  _nontransactionallyFindUnusedTableName,
   Mirror,
 } from "./mirror";
 
@@ -1597,5 +1598,74 @@ describe("graphql/mirror", () => {
           })
       );
     });
+  });
+
+  describe("_nontransactionallyFindUnusedTableName", () => {
+    it("throws if the name is not SQL-safe", () => {
+      const db = new Database(":memory:");
+      expect(() => {
+        _nontransactionallyFindUnusedTableName(db, "w a t");
+      }).toThrow('Unsafe table name prefix: "w a t"');
+    });
+    it("does not actually create any tables or indices", () => {
+      const db = new Database(":memory:");
+      db.prepare("CREATE TABLE tab (col)").run();
+      db.prepare("CREATE INDEX idx ON tab (col)").run();
+      const getMaster = db.prepare(
+        dedent`
+          SELECT
+              type, name, tbl_name, rootpage, sql
+          FROM sqlite_master
+          ORDER BY
+              type, name, tbl_name, rootpage, sql
+        `
+      );
+      const pre = getMaster.all();
+      expect(pre).toHaveLength(2); // one table, one index
+      _nontransactionallyFindUnusedTableName(db, "hello");
+      const post = getMaster.all();
+      expect(post).toEqual(pre);
+    });
+    it("behaves when there are no conflicts", () => {
+      const db = new Database(":memory:");
+      db.prepare("CREATE TABLE three (col)").run();
+      expect(_nontransactionallyFindUnusedTableName(db, "two_")).toEqual(
+        "two_1"
+      );
+    });
+    it("behaves when there are table-name conflicts", () => {
+      const db = new Database(":memory:");
+      db.prepare("CREATE TABLE two_1 (col)").run();
+      expect(_nontransactionallyFindUnusedTableName(db, "two_")).toEqual(
+        "two_2"
+      );
+    });
+    it("behaves when there are index-name conflicts", () => {
+      const db = new Database(":memory:");
+      db.prepare("CREATE TABLE tab (col)").run();
+      db.prepare("CREATE INDEX idx_1 ON tab (col)").run();
+      expect(_nontransactionallyFindUnusedTableName(db, "idx_")).toEqual(
+        "idx_2"
+      );
+    });
+    it("behaves when there are discontinuities", () => {
+      const db = new Database(":memory:");
+      db.prepare("CREATE TABLE two_1 (col)").run();
+      db.prepare("CREATE TABLE two_3 (col)").run();
+      expect(_nontransactionallyFindUnusedTableName(db, "two_")).toEqual(
+        // It would also be fine for this to return `two_2`.
+        "two_4"
+      );
+    });
+    it("behaves in the face of lexicographical discontinuities", () => {
+      const db = new Database(":memory:");
+      for (let i = 1; i <= 10; i++) {
+        db.prepare(`CREATE TABLE two_${i} (col)`).run();
+      }
+      expect(_nontransactionallyFindUnusedTableName(db, "two_")).toEqual(
+        "two_11"
+      );
+    });
+    //
   });
 });
