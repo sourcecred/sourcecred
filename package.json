@@ -75,7 +75,7 @@
     "flow": "flow",
     "lint": "eslint src config --max-warnings 0"
   },
-  "license": "MIT",
+  "license": "MIT + Apache-2",
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,mjs}"

@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Relicense from MIT to MIT + Apache-2 (#812)
 - Display short hash + summary for commits (#879)
 - Hyperlink to GitHub entities (#860)
 - Add GitHub reactions to the graph (#846)

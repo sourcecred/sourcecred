@@ -95,6 +95,13 @@ If you’re looking for a place to start, we’ve tagged some issues [Contributi
 [contributing guide]: https://github.com/sourcecred/sourcecred/blob/master/CONTRIBUTING.md
 [Contributions Welcome]: https://github.com/SourceCred/SourceCred/issues?q=is%3Aopen+is%3Aissue+label%3A%22contributions+welcome%22
 
+## License
+
+SourceCred is dual-licensed under Apache 2.0 and MIT terms:
+
+  * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>)
+  * MIT License ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
+
 ## Acknowledgements
 
 We’d like to thank [Protocol Labs] for funding and support of SourceCred.
