@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`plugins/git/render commit snapshots as expected 1`] = `"3715ddf: This is an example commit"`;

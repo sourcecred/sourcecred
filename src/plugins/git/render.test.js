@@ -1,40 +1,132 @@
 // @flow
 
-import {makeRepoId} from "../../core/repoId";
-import * as GN from "./nodes";
+import * as N from "./nodes";
+import {shallow} from "enzyme";
 import {description} from "./render";
-import type {Repository} from "./types";
+import {type RepoId, repoIdToString, makeRepoId} from "../../core/repoId";
+import type {Repository, Hash, Commit} from "./types";
+import type {GitGateway, URL} from "./gitGateway";
+import Link from "../../app/Link";
+
+require("../../app/testUtil").configureEnzyme();
 
 describe("plugins/git/render", () => {
-  const exampleHash = "3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f";
-  const exampleCommit: GN.CommitAddress = Object.freeze({
-    type: GN.COMMIT_TYPE,
-    hash: exampleHash,
-  });
+  const repoId1 = makeRepoId("example-owner", "1");
+  const repoId2 = makeRepoId("example-owner", "2");
+  const singleRepoCommit = {
+    hash: "singleRepoCommit",
+    shortHash: "singleRepo",
+    summary: "A simple example commit",
+    parentHashes: [],
+  };
+  const twoRepoCommit = {
+    hash: "twoRepoCommit",
+    shortHash: "twoRepo",
+    summary: "Two repos claim dominion over this commit",
+    parentHashes: [],
+  };
+  const noRepoCommit = {
+    hash: "noRepoCommit",
+    shortHash: "noRepo",
+    summary: "commitToRepoId has no memory of this commit ",
+    parentHashes: [],
+  };
+  const zeroRepoCommit = {
+    hash: "zeroRepoCommit",
+    shortHash: "zeroRepo",
+    summary: "This commit has exactly zero repoIds matching",
+    parentHashes: [],
+  };
+  const unregisteredCommit = {
+    hash: "unregisteredCommit",
+    shortHash: "unregistered",
+    summary: "This commit isn't in the Repository",
+    parentHashes: [],
+  };
   const exampleRepository: Repository = Object.freeze({
     commits: {
-      [exampleHash]: {
-        hash: exampleHash,
-        shortHash: exampleHash.slice(0, 7),
-        summary: "This is an example commit",
-        parentHashes: [],
-      },
+      zeroRepoCommit,
+      singleRepoCommit,
+      twoRepoCommit,
+      noRepoCommit,
     },
     commitToRepoId: {
-      [exampleHash]: {[(makeRepoId("sourcecred", "example-git"): any)]: true},
+      zeroRepoCommit: {},
+      singleRepoCommit: {[(repoIdToString(repoId1): any)]: true},
+      twoRepoCommit: {
+        [(repoIdToString(repoId1): any)]: true,
+        [(repoIdToString(repoId2): any)]: true,
+      },
     },
   });
 
-  it("commit snapshots as expected", () => {
-    expect(description(exampleCommit, exampleRepository)).toMatchSnapshot();
+  const exampleGitGateway: GitGateway = Object.freeze({
+    commitUrl(repo: RepoId, hash: Hash): URL {
+      return repoIdToString(repo) + "/" + hash;
+    },
+  });
+
+  function renderExample(commit: Commit) {
+    const commitAddress = {type: N.COMMIT_TYPE, hash: commit.hash};
+    return shallow(
+      description(commitAddress, exampleRepository, exampleGitGateway)
+    );
+  }
+
+  it("handles a commit in exactly one repo", () => {
+    const el = renderExample(singleRepoCommit);
+    const link = el.find(Link);
+    const expectedUrl = exampleGitGateway.commitUrl(
+      repoId1,
+      singleRepoCommit.hash
+    );
+    expect(link.props().href).toEqual(expectedUrl);
+    expect(link.props().children).toEqual(singleRepoCommit.shortHash);
+    expect(el.text()).toContain(singleRepoCommit.summary);
+  });
+
+  it("links to a single commit if it is in multiple repos", () => {
+    const el = renderExample(twoRepoCommit);
+    const link = el.find(Link);
+    const expectedUrl = exampleGitGateway.commitUrl(
+      repoId1,
+      twoRepoCommit.hash
+    );
+    expect(link.props().href).toEqual(expectedUrl);
+    expect(link.props().children).toEqual(twoRepoCommit.shortHash);
+    expect(el.text()).toContain(twoRepoCommit.summary);
+  });
+
+  it("logs an error for a commit without any RepoIds", () => {
+    // noRepoCommit: It has no entry in the repo tracker
+    // zeroRepoCommit: it has an empty entry in the repo tracker
+    // (behavior should be the same)
+    for (const commit of [noRepoCommit, zeroRepoCommit]) {
+      const el = renderExample(commit);
+
+      expect(console.error).toHaveBeenCalledWith(
+        `Unable to find repoIds for commit ${commit.hash}`
+      );
+      // $ExpectFlowError
+      console.error = jest.fn();
+
+      expect(el.find(Link)).toHaveLength(0);
+      expect(el.find("code").text()).toEqual(commit.shortHash);
+      expect(el.text()).toContain(commit.summary);
+    }
   });
   it("logs an error for a commit not in the repository", () => {
-    const badCommit = {type: GN.COMMIT_TYPE, hash: "1234"};
+    const el = renderExample(unregisteredCommit);
+    expect(console.error).toHaveBeenCalledWith(
+      `Unable to find data for commit ${unregisteredCommit.hash}`
+    );
     // $ExpectFlowError
     console.error = jest.fn();
-    expect(description(badCommit, exampleRepository)).toBe("1234");
-    expect(console.error).toHaveBeenCalledWith(
-      "Unable to find data for commit 1234"
-    );
+
+    expect(el.find(Link)).toHaveLength(0);
+    // Has the full hash, b.c. short hash couldn't be found
+    expect(el.find("code").text()).toEqual(unregisteredCommit.hash);
+    // No summary, as the data wasnt available
+    expect(el.text()).not.toContain(unregisteredCommit.summary);
   });
 });

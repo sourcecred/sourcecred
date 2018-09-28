@@ -154,7 +154,7 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
 class DynamicPluginAdapter implements IDynamicPluginAdapater {
   +_view: RelationalView;
   +_graph: Graph;
-  constructor(view: RelationalView, graph: Graph) {
+  constructor(view: RelationalView, graph: Graph): void {
     this._view = view;
     this._graph = graph;
   }
