@@ -4,6 +4,7 @@ import type Database, {BindingDictionary, Statement} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 
 import dedent from "../util/dedent";
+import * as MapUtil from "../util/map";
 import * as NullUtil from "../util/null";
 import * as Schema from "./schema";
 import * as Queries from "./queries";
@@ -455,6 +456,164 @@ export class Mirror {
         });
       return {objects, connections};
     });
+  }
+
+  /**
+   * Create a GraphQL selection set to fetch data corresponding to the
+   * given query plan.
+   *
+   * The resulting GraphQL should be embedded into a top-level query.
+   *
+   * The result of this query is an `UpdateResult`.
+   *
+   * This function is pure: it does not interact with the database.
+   */
+  _queryFromPlan(
+    queryPlan: QueryPlan,
+    options: {|
+      +connectionLimit: number,
+      +connectionPageSize: number,
+    |}
+  ): Queries.Selection[] {
+    // Group objects by type, so that we only have to specify each
+    // type's fieldset once.
+    const objectsByType: Map<Schema.Typename, Schema.ObjectId[]> = new Map();
+    for (const object of queryPlan.objects) {
+      MapUtil.pushValue(objectsByType, object.typename, object.id);
+    }
+
+    // Group connections by object, so that we only have to fetch the
+    // node once.
+    const connectionsByObject: Map<
+      Schema.ObjectId,
+      {|
+        +typename: Schema.Typename,
+        +connections: Array<{|
+          +fieldname: Schema.Fieldname,
+          +endCursor: EndCursor | void,
+        |}>,
+      |}
+    > = new Map();
+    for (const connection of queryPlan.connections.slice(
+      0,
+      options.connectionLimit
+    )) {
+      let existing = connectionsByObject.get(connection.objectId);
+      if (existing == null) {
+        existing = {typename: connection.objectTypename, connections: []};
+        connectionsByObject.set(connection.objectId, existing);
+      } else {
+        if (connection.objectTypename !== existing.typename) {
+          const s = JSON.stringify;
+          throw new Error(
+            `Query plan has inconsistent typenames for ` +
+              `object ${s(connection.objectId)}: ` +
+              `${s(existing.typename)} vs. ${s(connection.objectTypename)}`
+          );
+        }
+      }
+      existing.connections.push({
+        fieldname: connection.fieldname,
+        endCursor: connection.endCursor,
+      });
+    }
+
+    const b = Queries.build;
+
+    // Each top-level field corresponds to either an object type
+    // (fetching own data for objects of that type) or a particular node
+    // (updating connections on that node). We alias each such field,
+    // which is necessary to ensure that their names are all unique. The
+    // names chosen are sufficient to identify which _kind_ of query the
+    // field corresponds to (type's own data vs node's connections), but
+    // do not need to identify the particular type or node in question.
+    // This is because all descendant selections are self-describing:
+    // they include the ID of any relevant objects.
+    return [].concat(
+      Array.from(objectsByType.entries()).map(([typename, ids]) => {
+        const name = `${_FIELD_PREFIXES.OWN_DATA}${typename}`;
+        return b.alias(
+          name,
+          b.field("nodes", {ids: b.list(ids.map((id) => b.literal(id)))}, [
+            b.inlineFragment(typename, this._queryOwnData(typename)),
+          ])
+        );
+      }),
+      Array.from(connectionsByObject.entries()).map(
+        ([id, {typename, connections}], i) => {
+          const name = `${_FIELD_PREFIXES.NODE_CONNECTIONS}${i}`;
+          return b.alias(
+            name,
+            b.field("node", {id: b.literal(id)}, [
+              b.field("id"),
+              b.inlineFragment(
+                typename,
+                [].concat(
+                  ...connections.map(({fieldname, endCursor}) =>
+                    this._queryConnection(
+                      typename,
+                      fieldname,
+                      endCursor,
+                      options.connectionPageSize
+                    )
+                  )
+                )
+              ),
+            ])
+          );
+        }
+      )
+    );
+  }
+
+  /**
+   * Ingest data given by an `UpdateResult`. This is porcelain over
+   * `_updateConnection` and `_updateOwnData`.
+   *
+   * See: `_findOutdated`.
+   * See: `_queryFromPlan`.
+   */
+  _updateData(updateId: UpdateId, queryResult: UpdateResult): void {
+    _inTransaction(this._db, () => {
+      this._nontransactionallyUpdateData(updateId, queryResult);
+    });
+  }
+
+  /**
+   * As `_updateData`, but do not enter any transactions. Other methods
+   * may call this method as a subroutine in a larger transaction.
+   */
+  _nontransactionallyUpdateData(
+    updateId: UpdateId,
+    queryResult: UpdateResult
+  ): void {
+    for (const topLevelKey of Object.keys(queryResult)) {
+      if (topLevelKey.startsWith(_FIELD_PREFIXES.OWN_DATA)) {
+        const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
+          queryResult[topLevelKey];
+        const updateRecord: OwnDataUpdateResult = (rawValue: any);
+        this._nontransactionallyUpdateOwnData(updateId, updateRecord);
+      } else if (topLevelKey.startsWith(_FIELD_PREFIXES.NODE_CONNECTIONS)) {
+        const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
+          queryResult[topLevelKey];
+        const updateRecord: NodeConnectionsUpdateResult = (rawValue: any);
+        for (const fieldname of Object.keys(updateRecord)) {
+          if (fieldname === "id") {
+            continue;
+          }
+          this._nontransactionallyUpdateConnection(
+            updateId,
+            updateRecord.id,
+            fieldname,
+            updateRecord[fieldname]
+          );
+        }
+      } else {
+        throw new Error(
+          "Bad key in query result: " + JSON.stringify(topLevelKey)
+        );
+      }
+    }
   }
 
   /**
@@ -1361,6 +1520,46 @@ type OwnDataUpdateResult = $ReadOnlyArray<{
     | PrimitiveResult
     | NodeFieldResult,
 }>;
+
+/**
+ * Result describing new elements for connections on a single node.
+ *
+ * This type would be exact but for facebook/flow#2977, et al.
+ */
+type NodeConnectionsUpdateResult = {
+  +id: Schema.ObjectId,
+  +[connectionFieldname: Schema.Fieldname]: ConnectionFieldResult,
+};
+
+/**
+ * Result describing both own-data updates and connection updates. Each
+ * key's prefix determines what type of results the corresponding value
+ * represents (see constants below). No field prefix is a prefix of
+ * another, so this characterization is complete.
+ *
+ * This type would be exact but for facebook/flow#2977, et al.
+ *
+ * See: `_FIELD_PREFIXES`.
+ */
+type UpdateResult = {
+  // The prefix of each key determines what type of results the value
+  // represents. See constants below.
+  +[string]: OwnDataUpdateResult | NodeConnectionsUpdateResult,
+};
+
+export const _FIELD_PREFIXES = Object.freeze({
+  /**
+   * A key of an `UpdateResult` has this prefix if and only if the
+   * corresponding value represents `OwnDataUpdateResult`s.
+   */
+  OWN_DATA: "owndata_",
+
+  /**
+   * A key of an `UpdateResult` has this prefix if and only if the
+   * corresponding value represents `NodeConnectionsUpdateResult`s.
+   */
+  NODE_CONNECTIONS: "node_",
+});
 
 /**
  * Execute a function inside a database transaction.
