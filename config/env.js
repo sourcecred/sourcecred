@@ -69,11 +69,12 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
 // should not need this dependency.
 function getGitState() /*: GitState */ {
   const env = {
+    GIT_ATTR_NOSYSTEM: "1",
+    GIT_CONFIG_NOSYSTEM: "1",
     LANG: "C",
     LC_ALL: "C",
+    PATH: process.env.PATH,
     TZ: "UTC",
-    GIT_CONFIG_NOSYSTEM: "1",
-    GIT_ATTR_NOSYSTEM: "1",
   };
 
   const diffIndex = spawnSync(
