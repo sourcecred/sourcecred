@@ -1,32 +1,57 @@
 # JavaScript Node CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
+# See https://circleci.com/docs/2.0/config-intro/#section=configuration for spec
 #
-version: 2
-jobs:
-  build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/node:8.12.0
+version: 2.1
 
+executors:
+  sourcecred_node:
+    docker:
+      - image: circleci/node:8.12.0
     working_directory: ~/repo
 
+commands:
+  set_up_node_modules:
+    description: "load node_modules, updating and storing back into cache if necessary"
     steps:
-      - checkout
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fall back to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run: yarn install
-
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # run tests!
+jobs:
+  test:
+    executor: sourcecred_node
+    steps:
+      - checkout
+      - set_up_node_modules
       - run: yarn test
+  test_full:
+    executor: sourcecred_node
+    steps:
+      - checkout
+      - set_up_node_modules
+      - run: yarn test --full
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - test
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 22 * * *"  # 22:00 UTC
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - test_full
