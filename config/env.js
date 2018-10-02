@@ -95,7 +95,7 @@ function getGitState() /*: GitState */ {
     .toString()
     .trim();
 
-  const commitTimestamp = execFileSync(
+  const iso8601Timestamp = execFileSync(
     "git",
     [
       "-C",
@@ -103,13 +103,25 @@ function getGitState() /*: GitState */ {
       "show",
       "--no-patch",
       "--format=%cd",
-      "--date=format:%Y%m%d-%H%M",
+      "--date=iso8601",
       commitHash,
     ],
     {env}
   )
     .toString()
     .trim();
+  const commitDate = new Date(iso8601Timestamp);
+  function zeroPad(number /*: number */, length /*: number */) /*: string */ {
+    return String(number).padStart(length, "0");
+  }
+  const commitTimestamp = [
+    zeroPad(commitDate.getFullYear(), 4),
+    zeroPad(commitDate.getMonth(), 2),
+    zeroPad(commitDate.getDay(), 2),
+    "-",
+    zeroPad(commitDate.getHours(), 2),
+    zeroPad(commitDate.getMinutes(), 2),
+  ].join("");
 
   return {commitHash, commitTimestamp, dirty};
 }
