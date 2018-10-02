@@ -50,6 +50,54 @@ describe("plugins/github/parseMarkdown", () => {
       ];
       expect(textBlocks(input)).toEqual(expected);
     });
+
+    it("includes text inside of non-code HTML elements", () => {
+      const input = "My <strong>#1</strong> pal";
+      expect(textBlocks(input)).toEqual(["My #1 pal"]);
+    });
+
+    it('strips HTML "code" elements', () => {
+      const input = "My <code>#1</code> pal";
+      expect(textBlocks(input)).toEqual(["My  pal"]);
+    });
+
+    it('strips subtrees rooted at HTML "code" elements', () => {
+      const input = "My <code>#1 <strong>*and* #2</strong></code> pals";
+      expect(textBlocks(input)).toEqual(["My  pals"]);
+    });
+
+    it('strips "code" elements within "code" elements', () => {
+      const input = "see <code>#1 and <code>#2</code> okay</code>";
+      expect(textBlocks(input)).toEqual(["see "]);
+    });
+
+    it('handles comments and CDATA within "code" elements', () => {
+      // These are "html_inline" nodes, but are not HTML elements. They
+      // may contain closing-tag sequences, but these do not actually
+      // close a tag.
+      const input = [
+        "note",
+        "<code>alpha ",
+        "<!-- bravo </code> charlie --> ",
+        "<![CDATA[delta </code> echo]]> ",
+        "foxtrot</code> ",
+        "well",
+      ].join("");
+      expect(textBlocks(input)).toEqual(["note well"]);
+    });
+
+    it('strips HTML "pre" blocks and subtrees', () => {
+      // "pre" is not handled specially; all blocks are skipped.
+      const input =
+        "Hello\n\n<pre>some pre-formatted <code>code</code></pre>\n\nworld";
+      expect(textBlocks(input)).toEqual(["Hello", "world"]);
+    });
+
+    it('strips non-"pre" blocks and subtrees', () => {
+      const input =
+        "Hello\n\n<div>some pre-formatted <code>code</code></div>\n\nworld";
+      expect(textBlocks(input)).toEqual(["Hello", "world"]);
+    });
   });
 
   describe("coalesceText", () => {
@@ -134,7 +182,7 @@ describe("plugins/github/parseMarkdown", () => {
           "",
           "[1]: https://example.com/",
           "",
-          "Here's a list: <!-- it's a secret -->",
+          "Here's a list:<!-- it's a secret -->",
           "  - **important** things",
           "  - *also **important*** stuff",
           "  - a*b*c versus `a*b*c`",
@@ -157,7 +205,7 @@ describe("plugins/github/parseMarkdown", () => {
           "much wow",
           "```",
           "",
-          "Here's a list: <!-- it's a secret -->",
+          "Here's a list:",
           "  - important things",
           "  - also important stuff",
           "  - abc versus `a*b*c`",

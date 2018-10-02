@@ -38,6 +38,16 @@ describe("plugins/github/parseReferences", () => {
     expect(parseReferences(input)).toHaveLength(0);
   });
 
+  it("finds references in normal HTML elements", () => {
+    const input = "see <em>#1, #2, and #3</em> for context";
+    expect(parseReferences(input)).toHaveLength(3);
+  });
+
+  it('does not find references in HTML "code" elements', () => {
+    const input = "see <code>#1, #2, and #3</code> for context";
+    expect(parseReferences(input)).toHaveLength(0);
+  });
+
   it("does not find references in inline code with lots of backticks", () => {
     // An attempt to evade inline code with regular expressions might
     // well fail here, because an even number of backticks appears on
