@@ -471,15 +471,35 @@ export class Mirror {
   _queryFromPlan(
     queryPlan: QueryPlan,
     options: {|
+      // When fetching own-data for nodes of a given type, how many
+      // nodes may we fetch at once?
+      +nodesOfTypeLimit: number,
+      // For how many nodes may we fetch own-data at once, across all
+      // types?
+      +nodesLimit: number,
+      // How many connections may we fetch at top level?
       +connectionLimit: number,
+      // When fetching entries in a connection, how many entities may we
+      // request at once? (What is the `first` argument?)
       +connectionPageSize: number,
     |}
   ): Queries.Selection[] {
-    // Group objects by type, so that we only have to specify each
-    // type's fieldset once.
+    // Group objects by type, so that we have to specify each type's
+    // fieldset fewer times (only once per `nodesOfTypeLimit` nodes
+    // instead of for every node).
     const objectsByType: Map<Schema.Typename, Schema.ObjectId[]> = new Map();
-    for (const object of queryPlan.objects) {
+    for (const object of queryPlan.objects.slice(0, options.nodesLimit)) {
       MapUtil.pushValue(objectsByType, object.typename, object.id);
+    }
+    const paginatedObjectsByType: Array<{|
+      +typename: Schema.Typename,
+      +ids: $ReadOnlyArray<Schema.ObjectId>,
+    |}> = [];
+    for (const [typename, allIds] of objectsByType.entries()) {
+      for (let i = 0; i < allIds.length; i += options.nodesOfTypeLimit) {
+        const ids = allIds.slice(i, i + options.nodesOfTypeLimit);
+        paginatedObjectsByType.push({typename, ids});
+      }
     }
 
     // Group connections by object, so that we only have to fetch the
@@ -530,8 +550,8 @@ export class Mirror {
     // This is because all descendant selections are self-describing:
     // they include the ID of any relevant objects.
     return [].concat(
-      Array.from(objectsByType.entries()).map(([typename, ids]) => {
-        const name = `${_FIELD_PREFIXES.OWN_DATA}${typename}`;
+      paginatedObjectsByType.map(({typename, ids}, i) => {
+        const name = `${_FIELD_PREFIXES.OWN_DATA}${i}`;
         return b.alias(
           name,
           b.field("nodes", {ids: b.list(ids.map((id) => b.literal(id)))}, [
