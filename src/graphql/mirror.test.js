@@ -546,6 +546,8 @@ describe("graphql/mirror", () => {
         };
         expect(() => {
           mirror._queryFromPlan(plan, {
+            nodesLimit: 10,
+            nodesOfTypeLimit: 5,
             connectionLimit: 5,
             connectionPageSize: 23,
           });
@@ -562,6 +564,9 @@ describe("graphql/mirror", () => {
             {typename: "Issue", id: "i#1"},
             {typename: "Repository", id: "repo#2"},
             {typename: "Issue", id: "i#3"},
+            {typename: "Issue", id: "i#4"}, // will be on another page
+            // cut off below this point due to the page limit
+            {typename: "Issue", id: "i#5"},
           ],
           connections: [
             {
@@ -610,13 +615,15 @@ describe("graphql/mirror", () => {
           ],
         };
         const actual = mirror._queryFromPlan(plan, {
+          nodesLimit: 4,
+          nodesOfTypeLimit: 2,
           connectionLimit: 5,
           connectionPageSize: 23,
         });
         const b = Queries.build;
         expect(actual).toEqual([
           b.alias(
-            "owndata_Issue",
+            "owndata_0",
             b.field(
               "nodes",
               {ids: b.list([b.literal("i#1"), b.literal("i#3")])},
@@ -624,7 +631,13 @@ describe("graphql/mirror", () => {
             )
           ),
           b.alias(
-            "owndata_Repository",
+            "owndata_1",
+            b.field("nodes", {ids: b.list([b.literal("i#4")])}, [
+              b.inlineFragment("Issue", mirror._queryOwnData("Issue")),
+            ])
+          ),
+          b.alias(
+            "owndata_2",
             b.field("nodes", {ids: b.list([b.literal("repo#2")])}, [
               b.inlineFragment(
                 "Repository",
