@@ -1,6 +1,7 @@
 // @flow
 
 import {Node, Parser} from "commonmark";
+import {OPENTAG, CLOSETAG} from "commonmark/lib/common";
 
 /**
  * Extract maximal contiguous blocks of text from a Markdown string, in
@@ -66,9 +67,35 @@ type NodeType =
 
 export function deformat(ast: Node): void {
   const walker = ast.walker();
+  // We ignore the contents of HTML "code" elements and their subtrees.
+  // This variable tracks how deep we are in such a tree. It is 0 if we
+  // are not in such a tree, 1 if we are in a "code" element, 2 if we
+  // are in an element inside a "code" element, etc.
+  let htmlDepth: number = 0;
+  const reOpenCodeTag = /^<code(?:$|[ >])/i;
+  const reOpenTag = new RegExp(`^(?:${OPENTAG})`);
+  const reCloseTag = new RegExp(`^(?:${CLOSETAG})`);
+
   for (let step; (step = walker.next()); ) {
     const node: Node = step.node;
     const type: NodeType = node.type;
+    if (htmlDepth > 0) {
+      if (type === "html_inline") {
+        if (reOpenTag.test(node.literal)) {
+          htmlDepth++;
+        } else if (reCloseTag.test(node.literal)) {
+          htmlDepth--;
+        }
+      }
+      // The AST walker gets into a broken state if you unlink a node
+      // that has children before those children have been visited. We
+      // only unlink when leaving a node, or when entering a node that
+      // has no children.
+      if (!step.entering || node.firstChild == null) {
+        node.unlink();
+        continue;
+      }
+    }
     switch (type) {
       case "text":
         break;
@@ -94,6 +121,11 @@ export function deformat(ast: Node): void {
         }
         break;
       case "html_inline":
+        if (reOpenCodeTag.test(node.literal)) {
+          htmlDepth++; // should have been 0 previously
+        }
+        node.unlink();
+        break;
       case "code":
       case "document":
       case "paragraph":
