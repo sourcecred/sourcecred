@@ -45,6 +45,14 @@ describe("src/app/Link", () => {
     expect(typeof element.prop("className")).toBe("string");
   });
 
+  it("fails if neither `to` nor `href` is provided", () => {
+    // $ExpectFlowError
+    const component = <Link>uhhhhh</Link>;
+    expect(() => {
+      shallow(component);
+    }).toThrow("Must specify either 'to' or 'href'.");
+  });
+
   it("has deterministic className", () => {
     const e1 = shallow(<Link href="#" />);
     const e2 = shallow(<Link href="#" />);
@@ -55,6 +63,7 @@ describe("src/app/Link", () => {
     const e1 = shallow(<Link href="#" />);
     const e2 = shallow(<Link href="#" styles={[styles.x]} />);
     expect(e2.prop("className")).not.toEqual(e1.prop("className"));
+    expect(e2.props()).not.toHaveProperty("styles");
   });
 
   it("forwards class name", () => {

@@ -30,16 +30,23 @@ type LinkProps = $ReadOnly<{
 }>;
 export default class Link extends Component<LinkProps> {
   render() {
-    const linkClass = css(styles.link, this.props.styles);
+    const {styles: customStyles, children, ...rest} = this.props;
+    const linkClass = css(styles.link, customStyles);
     const className = this.props.className
       ? `${linkClass} ${this.props.className}`
       : linkClass;
-    const Tag = "to" in this.props ? RouterLink : "a";
-    return (
-      <Tag {...this.props} className={className}>
-        {this.props.children}
+    const make = (Tag) => (
+      <Tag {...rest} className={className}>
+        {children}
       </Tag>
     );
+    if ("to" in this.props) {
+      return make(RouterLink);
+    } else if ("href" in this.props) {
+      return make("a");
+    } else {
+      throw new Error("Must specify either 'to' or 'href'.");
+    }
   }
 }
 
