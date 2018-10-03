@@ -1,6 +1,6 @@
 # [SourceCred](https://sourcecred.io)
 
-[![Build Status](https://travis-ci.org/sourcecred/sourcecred.svg?branch=master)](https://travis-ci.org/sourcecred/sourcecred)
+[![Build Status](https://circleci.com/gh/sourcecred/sourcecred.svg?style=svg)](https://circleci.com/gh/sourcecred/sourcecred)
 [![Discourse topics](https://img.shields.io/discourse/https/discuss.sourcecred.io/topics.svg)](discuss.sourcecred.io)
 [![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
 
