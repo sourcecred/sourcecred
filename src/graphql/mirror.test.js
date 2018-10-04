@@ -60,6 +60,14 @@ describe("graphql/mirror", () => {
         body: s.primitive(),
         author: s.node("Actor"),
       }),
+      Commit: s.object({
+        id: s.id(),
+        oid: s.primitive(),
+        author: /* GitActor */ s.nested({
+          date: s.primitive(),
+          user: s.node("User"),
+        }),
+      }),
       IssueTimelineItem: s.union(issueTimelineItemClauses()),
       Actor: s.union(["User", "Bot", "Organization"]), // actually an interface
       User: s.object({
@@ -193,7 +201,7 @@ describe("graphql/mirror", () => {
         );
       });
 
-      it("rejects a schema with SQL-unsafe field name", () => {
+      it("rejects a schema with SQL-unsafe primitive field name", () => {
         const s = Schema;
         const schema0 = s.schema({
           A: s.object({id: s.id(), "Non-Word-Characters": s.primitive()}),
@@ -201,6 +209,31 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         expect(() => new Mirror(db, schema0)).toThrow(
           'invalid field name: "Non-Word-Characters"'
+        );
+      });
+
+      it("rejects a schema with SQL-unsafe nested field name", () => {
+        const s = Schema;
+        const schema0 = s.schema({
+          A: s.object({id: s.id(), "Non-Word-Characters": s.nested({})}),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema0)).toThrow(
+          'invalid field name: "Non-Word-Characters"'
+        );
+      });
+
+      it("rejects a schema with SQL-unsafe nested primitive field name", () => {
+        const s = Schema;
+        const schema0 = s.schema({
+          A: s.object({
+            id: s.id(),
+            problem: s.nested({"Non-Word-Characters": s.primitive()}),
+          }),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema0)).toThrow(
+          'invalid field name: "Non-Word-Characters" under "problem"'
         );
       });
 
@@ -1689,6 +1722,21 @@ describe("graphql/mirror", () => {
           // no `timeline`
         ]);
       });
+      it("includes nested primitives and nodes", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const query = mirror._queryOwnData("Commit");
+        const b = Queries.build;
+        expect(query).toEqual([
+          b.field("__typename"),
+          b.field("id"),
+          b.field("oid"),
+          b.field("author", {}, [
+            b.field("date"),
+            b.field("user", {}, [b.field("__typename"), b.field("id")]),
+          ]),
+        ]);
+      });
     });
 
     describe("_updateOwnData", () => {
@@ -1817,6 +1865,69 @@ describe("graphql/mirror", () => {
             "(got undefined)"
         );
       });
+      it("fails if the input is missing any nested fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "Commit", id: "commit:oid"});
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Commit",
+              id: "commit:oid",
+              oid: "yes",
+              // author omitted
+            },
+          ]);
+        }).toThrow(
+          'Missing nested field "author" on "commit:oid" of type "Commit" ' +
+            "(got undefined)"
+        );
+      });
+      it("fails if the input is missing any nested primitive fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "Commit", id: "commit:oid"});
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Commit",
+              id: "commit:oid",
+              oid: "yes",
+              author: {
+                // date omitted
+                user: {__typename: "User", id: "user:alice"},
+              },
+            },
+          ]);
+        }).toThrow(
+          'Missing nested field "author"."date" on "commit:oid" ' +
+            'of type "Commit" (got undefined)'
+        );
+      });
+      it("fails if the input is missing any nested link fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "Commit", id: "commit:oid"});
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Commit",
+              id: "commit:oid",
+              oid: "yes",
+              author: {
+                date: "today",
+                // user omitted
+              },
+            },
+          ]);
+        }).toThrow(
+          'Missing nested field "author"."user" on "commit:oid" ' +
+            'of type "Commit" (got undefined)'
+        );
+      });
       it("properly stores normal data", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
@@ -1859,6 +1970,123 @@ describe("graphql/mirror", () => {
           {id: "issue:#2", url: "null", title: "false"},
           {id: "issue:#3", url: null, title: null},
         ]);
+      });
+      it("stores data with non-`null` nested fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "Commit", id: "commit:oid"});
+        mirror.registerObject({typename: "Commit", id: "commit:zzz"});
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Commit",
+            id: "commit:oid",
+            oid: "yes",
+            author: {
+              date: "today",
+              user: {__typename: "User", id: "user:alice"},
+            },
+          },
+          {
+            __typename: "Commit",
+            id: "commit:zzz",
+            oid: "zzz",
+            author: {
+              date: null,
+              user: null,
+            },
+          },
+        ]);
+        expect(
+          db.prepare("SELECT * FROM primitives_Commit ORDER BY id ASC").all()
+        ).toEqual([
+          {
+            id: "commit:oid",
+            oid: '"yes"',
+            author: +true,
+            "author.date": '"today"',
+          },
+          {
+            id: "commit:zzz",
+            oid: '"zzz"',
+            author: +true,
+            "author.date": "null",
+          },
+        ]);
+        expect(
+          db.prepare("SELECT * FROM links ORDER BY parent_id ASC").all()
+        ).toEqual([
+          {
+            rowid: expect.anything(),
+            parent_id: "commit:oid",
+            fieldname: "author.user",
+            child_id: "user:alice",
+          },
+          {
+            rowid: expect.anything(),
+            parent_id: "commit:zzz",
+            fieldname: "author.user",
+            child_id: null,
+          },
+        ]);
+        expect(
+          db
+            .prepare("SELECT COUNT(1) FROM objects WHERE id = 'user:alice'")
+            .pluck()
+            .get()
+        ).toEqual(1);
+      });
+      it("stores data with `null` nested fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const update1 = mirror._createUpdate(new Date(123));
+        const update2 = mirror._createUpdate(new Date(456));
+        mirror.registerObject({typename: "Commit", id: "commit:oid"});
+        mirror._updateOwnData(update1, [
+          {
+            __typename: "Commit",
+            id: "commit:oid",
+            oid: "yes",
+            author: {
+              date: "today",
+              user: {__typename: "User", id: "user:alice"},
+            },
+          },
+        ]);
+        mirror._updateOwnData(update2, [
+          {
+            __typename: "Commit",
+            id: "commit:oid",
+            oid: "mmm",
+            author: null,
+          },
+        ]);
+        expect(
+          db.prepare("SELECT * FROM primitives_Commit ORDER BY id ASC").all()
+        ).toEqual([
+          {
+            id: "commit:oid",
+            oid: '"mmm"',
+            author: +false,
+            "author.date": "null",
+          },
+        ]);
+        expect(
+          db.prepare("SELECT * FROM links ORDER BY parent_id ASC").all()
+        ).toEqual([
+          {
+            rowid: expect.anything(),
+            parent_id: "commit:oid",
+            fieldname: "author.user",
+            child_id: null,
+          },
+        ]);
+        expect(
+          db
+            .prepare("SELECT COUNT(1) FROM objects WHERE id = 'user:alice'")
+            .pluck()
+            .get()
+        ).toEqual(1);
       });
       it("properly handles input of a type with no primitives", () => {
         const db = new Database(":memory:");
@@ -1942,14 +2170,25 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const exampleIssueId = "MDU6SXNzdWUzNDg1NDA0NjE=";
+        const exampleCommitId =
+          "MDY6Q29tbWl0MTIwMTQ1NTcwOjU1OTUwZjUzNTQ1NTEwOWJhNDhhYmYyYjk3N2U2NmFhMWNjMzVlNjk=";
         const b = Queries.build;
         const query = b.query(
-          "TestQuery",
+          "TestUpdate",
           [],
           [
-            b.field("node", {id: b.literal(exampleIssueId)}, [
-              b.inlineFragment("Issue", mirror._queryOwnData("Issue")),
-            ]),
+            b.alias(
+              "issue",
+              b.field("node", {id: b.literal(exampleIssueId)}, [
+                b.inlineFragment("Issue", mirror._queryOwnData("Issue")),
+              ])
+            ),
+            b.alias(
+              "commit",
+              b.field("node", {id: b.literal(exampleCommitId)}, [
+                b.inlineFragment("Commit", mirror._queryOwnData("Commit")),
+              ])
+            ),
           ]
         );
         const format = (body: Queries.Body): string =>
@@ -1978,6 +2217,14 @@ describe("graphql/mirror", () => {
             only: s.connection("Socket"),
             connections: s.connection("Socket"),
           }),
+          Nest: s.object({
+            id: s.id(),
+            nest: s.nested({
+              egg: s.primitive(),
+              cat: s.node("Feline"),
+              absent: s.node("Empty"),
+            }),
+          }),
           Empty: s.object({
             id: s.id(),
           }),
@@ -2000,6 +2247,19 @@ describe("graphql/mirror", () => {
         +id: string,
         +only: $ReadOnlyArray<null | Socket>,
         +connections: $ReadOnlyArray<null | Socket>,
+      |};
+      type Nest = {|
+        +__typename: "Nest",
+        +id: string,
+        +nest: {|
+          +egg: mixed,
+          +cat: null | Feline,
+          +empty: null | Empty,
+        |},
+      |};
+      type Empty = {|
+        +__typename: "Empty",
+        +id: string,
       |};
 
       it("fails if the provided object does not exist", () => {
@@ -2305,6 +2565,48 @@ describe("graphql/mirror", () => {
         });
       });
 
+      it("handles nested objects", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Nest", id: "eyrie"});
+        mirror.registerObject({typename: "Feline", id: "meow"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Nest",
+            id: "eyrie",
+            nest: {
+              egg: "nog",
+              cat: {__typename: "Feline", id: "meow"},
+              absent: null,
+            },
+          },
+        ]);
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Feline",
+            id: "meow",
+            only: {__typename: "Feline", id: "meow"},
+            lynx: null,
+          },
+        ]);
+        const result: Nest = (mirror.extract("eyrie"): any);
+        expect(result).toEqual({
+          __typename: "Nest",
+          id: "eyrie",
+          nest: {
+            egg: "nog",
+            cat: {
+              __typename: "Feline",
+              id: "meow",
+              only: result.nest.cat,
+              lynx: null,
+            },
+            absent: null,
+          },
+        });
+      });
+
       it("handles cyclic link structures", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildTestSchema());
@@ -2467,6 +2769,8 @@ describe("graphql/mirror", () => {
         //   - relevant objects with empty connections
         //   - relevant objects with links pointing to `null`
         //   - relevant objects with links of union type
+        //   - relevant objects with non-`null` nested fields
+        //   - relevant objects with `null` nested fields
         //
         // (An object is "relevant" if it is a transitive dependency of
         // the root.)
@@ -2489,8 +2793,16 @@ describe("graphql/mirror", () => {
             typename: "ClosedEvent",
             id: "issue:#2!closed#0",
           }),
+          commit1: () => ({typename: "Commit", id: "commit:oid"}),
+          commit2: () => ({typename: "Commit", id: "commit:zzz"}),
         };
-        const asNode = ({typename, id}) => ({__typename: typename, id});
+        const asNode = ({
+          typename,
+          id,
+        }): {|+__typename: Schema.Typename, +id: Schema.ObjectId|} => ({
+          __typename: typename,
+          id,
+        });
 
         const update1 = mirror._createUpdate(new Date(123));
         const update2 = mirror._createUpdate(new Date(234));
@@ -2584,7 +2896,8 @@ describe("graphql/mirror", () => {
 
         // Update #2: Issue #2 author changes to `null`. Alice posts a
         // comment on issue #2 and closes it. Issue #2 is loaded as a
-        // child of the repository.
+        // child of the repository. Alice adds a commit to issue #1, and
+        // an anonymous user also adds a commit to issue #1.
         mirror.registerObject(objects.comment1());
         mirror._updateOwnData(update2, [
           {
@@ -2619,6 +2932,14 @@ describe("graphql/mirror", () => {
           },
           nodes: [asNode(objects.comment1())],
         });
+        mirror._updateConnection(update2, objects.issue1().id, "timeline", {
+          totalCount: 2,
+          pageInfo: {
+            endCursor: "cursor:issue:#1.timeline@update2",
+            hasNextPage: false,
+          },
+          nodes: [asNode(objects.commit1()), asNode(objects.commit2())],
+        });
         mirror._updateConnection(update2, objects.issue2().id, "timeline", {
           totalCount: 1,
           pageInfo: {
@@ -2630,10 +2951,30 @@ describe("graphql/mirror", () => {
 
         // Update #3: Bob comments on issue #2. An issue #3 is created
         // but not yet added to the repository connection. The details
-        // for the closed event are fetched.
+        // for the commits and the closed event are fetched.
         mirror.registerObject(objects.bob());
         mirror.registerObject(objects.comment2());
         mirror.registerObject(objects.issue3());
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.commit1()),
+            oid: "yes",
+            author: {
+              date: "today",
+              user: {
+                __typename: "User",
+                id: "user:alice",
+              },
+            },
+          },
+        ]);
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.commit2()),
+            oid: "hmm",
+            author: null,
+          },
+        ]);
         mirror._updateOwnData(update3, [
           {
             ...asNode(objects.bob()),
@@ -2696,7 +3037,28 @@ describe("graphql/mirror", () => {
               repository: result, // circular
               title: "this project looks dead; let's make some issues",
               comments: [],
-              timeline: [],
+              timeline: [
+                {
+                  __typename: "Commit",
+                  id: "commit:oid",
+                  oid: "yes",
+                  author: {
+                    date: "today",
+                    user: {
+                      __typename: "User",
+                      id: "user:alice",
+                      url: "url://alice",
+                      login: "alice",
+                    },
+                  },
+                },
+                {
+                  __typename: "Commit",
+                  id: "commit:zzz",
+                  oid: "hmm",
+                  author: null,
+                },
+              ],
             },
             {
               __typename: "Issue",
@@ -2751,19 +3113,7 @@ describe("graphql/mirror", () => {
 
   describe("_buildSchemaInfo", () => {
     it("processes object types properly", () => {
-      const s = Schema;
-      const schema = {
-        ...buildGithubSchema(),
-        Commit: s.object({
-          id: s.id(),
-          oid: s.primitive(),
-          author: /* GitActor */ s.nested({
-            date: s.primitive(),
-            user: s.node("User"),
-          }),
-        }),
-      };
-      const result = _buildSchemaInfo(schema);
+      const result = _buildSchemaInfo(buildGithubSchema());
       expect(Object.keys(result.objectTypes).sort()).toEqual(
         Array.from(
           new Set([

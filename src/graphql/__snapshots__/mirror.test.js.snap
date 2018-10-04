@@ -234,8 +234,8 @@ exports[`graphql/mirror Mirror _queryConnection snapshot test for actual GitHub 
 `;
 
 exports[`graphql/mirror Mirror _updateOwnData snapshot test for actual GitHub queries 1`] = `
-"query TestQuery {
-  node(id: \\"MDU6SXNzdWUzNDg1NDA0NjE=\\") {
+"query TestUpdate {
+  issue: node(id: \\"MDU6SXNzdWUzNDg1NDA0NjE=\\") {
     ... on Issue {
       __typename
       id
@@ -257,6 +257,20 @@ exports[`graphql/mirror Mirror _updateOwnData snapshot test for actual GitHub qu
         id
       }
       title
+    }
+  }
+  commit: node(id: \\"MDY6Q29tbWl0MTIwMTQ1NTcwOjU1OTUwZjUzNTQ1NTEwOWJhNDhhYmYyYjk3N2U2NmFhMWNjMzVlNjk=\\") {
+    ... on Commit {
+      __typename
+      id
+      oid
+      author {
+        date
+        user {
+          __typename
+          id
+        }
+      }
     }
   }
 }"
