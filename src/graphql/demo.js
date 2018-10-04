@@ -158,8 +158,10 @@ function schema(): Schema.Schema {
       url: s.primitive(),
       oid: s.primitive(),
       message: s.primitive(),
-      // author omitted for now: GitActor has no `id`; see:
-      // https://github.com/sourcecred/sourcecred/issues/622#issuecomment-425220132
+      author: /* GitActor */ s.nested({
+        date: s.primitive(),
+        user: s.node("User"),
+      }),
     }),
     Tag: s.object({
       id: s.id(),

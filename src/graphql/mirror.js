@@ -112,6 +112,21 @@ export class Mirror {
    * a type; querying connection data, by contrast, requires the
    * object-specific end cursor.
    *
+   * Nested fields merit additional explanation. The nested field itself
+   * exists on the primitives table with SQL value either NULL, 0, or 1
+   * (as SQL integers, not strings). As with all other primitives,
+   * `NULL` indicates that the value has never been fetched. If the
+   * value has been fetched, it is 0 if the nested field itself was
+   * `null` on the GraphQL result, or 1 if it was present. This field
+   * lets us distinguish "author: null" from "author: {user: null}".
+   *
+   * The "eggs" of a nested field are treated as normal primitive or
+   * link values, whose fieldname is the nested fieldname and egg
+   * fieldname joined by a period. So, if object type `Foo` has nested
+   * field `bar: Schema.nested({baz: Schema.primitive()})`, then the
+   * `primitives_Foo` table will include a column "bar.baz". Likewise, a
+   * row in the `links` table might have fieldname 'quux.zod'.
+   *
    * All aforementioned tables are keyed by object ID. Each object also
    * appears once in the `objects` table, which relates its ID,
    * typename, and last own-data update. Each connection has its own
@@ -138,7 +153,7 @@ export class Mirror {
     // interpreted. If you've made a change and you're not sure whether
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
-    const blob = stringify({version: "MIRROR_v1", schema: this._schema});
+    const blob = stringify({version: "MIRROR_v2", schema: this._schema});
     const db = this._db;
     _inTransaction(db, () => {
       // We store the metadata in a singleton table `meta`, whose unique row
@@ -269,12 +284,36 @@ export class Mirror {
             throw new Error("invalid field name: " + JSON.stringify(fieldname));
           }
         }
+        for (const fieldname of type.nestedFieldNames) {
+          if (!isSqlSafe(fieldname)) {
+            throw new Error("invalid field name: " + JSON.stringify(fieldname));
+          }
+          const children = type.nestedFields[fieldname].primitives;
+          for (const childFieldname of Object.keys(children)) {
+            if (!isSqlSafe(childFieldname)) {
+              throw new Error(
+                "invalid field name: " +
+                  JSON.stringify(childFieldname) +
+                  " under " +
+                  JSON.stringify(fieldname)
+              );
+            }
+          }
+        }
         const tableName = _primitivesTableName(typename);
-        const tableSpec = [
-          "id TEXT NOT NULL PRIMARY KEY",
-          ...type.primitiveFieldNames.map((fieldname) => `"${fieldname}"`),
-          "FOREIGN KEY(id) REFERENCES objects(id)",
-        ].join(", ");
+        const tableSpec = []
+          .concat(
+            ["id TEXT NOT NULL PRIMARY KEY"],
+            type.primitiveFieldNames.map((fieldname) => `"${fieldname}"`),
+            type.nestedFieldNames.map((fieldname) => `"${fieldname}"`),
+            ...type.nestedFieldNames.map((f1) =>
+              Object.keys(type.nestedFields[f1].primitives).map(
+                (f2) => `"${f1}.${f2}"`
+              )
+            ),
+            ["FOREIGN KEY(id) REFERENCES objects(id)"]
+          )
+          .join(", ");
         db.prepare(`CREATE TABLE ${tableName} (${tableSpec})`).run();
       }
     });
@@ -380,6 +419,13 @@ export class Mirror {
     const objectType = this._schemaInfo.objectTypes[typename];
     for (const fieldname of objectType.linkFieldNames) {
       addLink.run({id, fieldname});
+    }
+    for (const parentFieldname of objectType.nestedFieldNames) {
+      const children = objectType.nestedFields[parentFieldname].nodes;
+      for (const childFieldname of Object.keys(children)) {
+        const fieldname = `${parentFieldname}.${childFieldname}`;
+        addLink.run({id, fieldname});
+      }
     }
     for (const fieldname of objectType.connectionFieldNames) {
       addConnection.run({id, fieldname});
@@ -1057,7 +1103,26 @@ export class Mirror {
               // Not handled by this function.
               return null;
             case "NESTED":
-              throw new Error("Nested fields not supported.");
+              return b.field(
+                fieldname,
+                {},
+                Object.keys(field.eggs).map((childFieldname) => {
+                  const childField = field.eggs[childFieldname];
+                  switch (childField.type) {
+                    case "PRIMITIVE":
+                      return b.field(childFieldname);
+                    case "NODE":
+                      return b.field(
+                        childFieldname,
+                        {},
+                        this._queryShallow(childField.elementType)
+                      );
+                    // istanbul ignore next
+                    default:
+                      throw new Error((childField.type: empty));
+                  }
+                })
+              );
             // istanbul ignore next
             default:
               throw new Error((field.type: empty));
@@ -1148,30 +1213,69 @@ export class Mirror {
     }
 
     // Update each node's primitive data.
+    //
+    // (This typedef would be in the following block statement but for
+    // facebook/flow#6961.)
+    declare opaque type ParameterName: string;
     {
+      const parameterNameFor = {
+        topLevelField(fieldname: Schema.Fieldname): ParameterName {
+          return ((["t", fieldname].join("_"): string): any);
+        },
+        nestedField(
+          nestFieldname: Schema.Fieldname,
+          eggFieldname: Schema.Fieldname
+        ): ParameterName {
+          return (([
+            "n",
+            String(nestFieldname.length),
+            nestFieldname,
+            eggFieldname,
+          ].join("_"): string): any);
+        },
+      };
       const updatePrimitives: ({|
         +id: Schema.ObjectId,
-        +[primitiveFieldName: Schema.Fieldname]: string,
+        // These keys can be top-level primitive fields or the primitive
+        // children of a nested field. The values are the JSON encodings
+        // of the values received from the GraphQL response. For a
+        // nested field, the value is `0` or `1` as the nested field is
+        // `null` or not. (See docs on `_initialize` for more details.)
+        +[parameterName: ParameterName]: string | 0 | 1,
       |}) => void = (() => {
-        if (objectType.primitiveFieldNames.length === 0) {
+        const updates: $ReadOnlyArray<string> = [].concat(
+          objectType.primitiveFieldNames.map(
+            (f) => `"${f}" = :${parameterNameFor.topLevelField(f)}`
+          ),
+          objectType.nestedFieldNames.map(
+            (f) => `"${f}" = :${parameterNameFor.topLevelField(f)}`
+          ),
+          ...objectType.nestedFieldNames.map((f1) =>
+            Object.keys(objectType.nestedFields[f1].primitives).map(
+              (f2) => `"${f1}.${f2}" = :${parameterNameFor.nestedField(f1, f2)}`
+            )
+          )
+        );
+        if (updates.length === 0) {
           return () => {};
         }
         const tableName = _primitivesTableName(typename);
-        const updates = objectType.primitiveFieldNames
-          .map((f) => `"${f}" = :${f}`)
-          .join(", ");
         const stmt = db.prepare(
-          `UPDATE ${tableName} SET ${updates} WHERE id = :id`
+          `UPDATE ${tableName} SET ${updates.join(", ")} WHERE id = :id`
         );
         return _makeSingleUpdateFunction(stmt);
       })();
+
       for (const entry of queryResult) {
         const primitives: {|
           +id: Schema.ObjectId,
-          [primitiveFieldName: Schema.Fieldname]: string,
+          [ParameterName]: string | 0 | 1,
         |} = {id: entry.id};
+
+        // Add top-level primitives.
         for (const fieldname of objectType.primitiveFieldNames) {
-          const value: PrimitiveResult | NodeFieldResult = entry[fieldname];
+          const value: PrimitiveResult | NodeFieldResult | NestedFieldResult =
+            entry[fieldname];
           const primitive: PrimitiveResult = (value: any);
           if (primitive === undefined) {
             const s = JSON.stringify;
@@ -1180,8 +1284,49 @@ export class Mirror {
                 `of type ${s(typename)} (got ${(primitive: empty)})`
             );
           }
-          primitives[fieldname] = JSON.stringify(primitive);
+          primitives[
+            parameterNameFor.topLevelField(fieldname)
+          ] = JSON.stringify(primitive);
         }
+
+        // Add nested primitives.
+        for (const nestFieldname of objectType.nestedFieldNames) {
+          const nestValue:
+            | PrimitiveResult
+            | NodeFieldResult
+            | NestedFieldResult =
+            entry[nestFieldname];
+          const topLevelNested: NestedFieldResult = (nestValue: any);
+          if (topLevelNested === undefined) {
+            const s = JSON.stringify;
+            throw new Error(
+              `Missing nested field ` +
+                `${s(nestFieldname)} on ${s(entry.id)} ` +
+                `of type ${s(typename)} (got ${(topLevelNested: empty)})`
+            );
+          }
+          primitives[parameterNameFor.topLevelField(nestFieldname)] =
+            topLevelNested == null ? 0 : 1;
+          const eggFields = objectType.nestedFields[nestFieldname].primitives;
+          for (const eggFieldname of Object.keys(eggFields)) {
+            const eggValue: PrimitiveResult | NodeFieldResult =
+              topLevelNested == null ? null : topLevelNested[eggFieldname];
+            const primitive: PrimitiveResult = (eggValue: any);
+            if (primitive === undefined) {
+              const s = JSON.stringify;
+              throw new Error(
+                `Missing nested field ` +
+                  `${s(nestFieldname)}.${s(eggFieldname)} ` +
+                  `on ${s(entry.id)} ` +
+                  `of type ${s(typename)} (got ${(primitive: empty)})`
+              );
+            }
+            primitives[
+              parameterNameFor.nestedField(nestFieldname, eggFieldname)
+            ] = JSON.stringify(primitive);
+          }
+        }
+
         updatePrimitives(primitives);
       }
     }
@@ -1201,9 +1346,12 @@ export class Mirror {
         );
         return _makeSingleUpdateFunction(stmt);
       })();
+
       for (const entry of queryResult) {
+        // Add top-level links.
         for (const fieldname of objectType.linkFieldNames) {
-          const value: PrimitiveResult | NodeFieldResult = entry[fieldname];
+          const value: PrimitiveResult | NodeFieldResult | NestedFieldResult =
+            entry[fieldname];
           const link: NodeFieldResult = (value: any);
           if (link === undefined) {
             const s = JSON.stringify;
@@ -1215,6 +1363,39 @@ export class Mirror {
           const childId = this._nontransactionallyRegisterNodeFieldResult(link);
           const parentId = entry.id;
           updateLink({parentId, fieldname, childId});
+        }
+
+        // Add nested links.
+        for (const nestFieldname of objectType.nestedFieldNames) {
+          const nestValue:
+            | PrimitiveResult
+            | NodeFieldResult
+            | NestedFieldResult =
+            entry[nestFieldname];
+          const topLevelNested: NestedFieldResult = (nestValue: any);
+          // No need for an extra safety check that this is present: we
+          // handled that while covering primitive fields.
+          const childFields = objectType.nestedFields[nestFieldname].nodes;
+          for (const childFieldname of Object.keys(childFields)) {
+            const childValue: PrimitiveResult | NodeFieldResult =
+              topLevelNested == null ? null : topLevelNested[childFieldname];
+            const link: NodeFieldResult = (childValue: any);
+            if (link === undefined) {
+              const s = JSON.stringify;
+              throw new Error(
+                `Missing nested field ` +
+                  `${s(nestFieldname)}.${s(childFieldname)} ` +
+                  `on ${s(entry.id)} ` +
+                  `of type ${s(typename)} (got ${(link: empty)})`
+              );
+            }
+            const childId = this._nontransactionallyRegisterNodeFieldResult(
+              link
+            );
+            const fieldname = `${nestFieldname}.${childFieldname}`;
+            const parentId = entry.id;
+            updateLink({parentId, fieldname, childId});
+          }
         }
       }
     }
@@ -1229,12 +1410,16 @@ export class Mirror {
    * The result is an object whose keys are fieldnames, and whose values
    * are:
    *
-   *   - for the ID field: the object ID;
+   *   - for "__typename": the object's GraphQL typename;
+   *   - for "id": the object's GraphQL ID;
    *   - for primitive fields: the corresponding primitive value;
    *   - for node reference fields: a reference to the corresponding
    *     extracted object, which may be `null`;
    *   - for connection fields: an in-order array of the corresponding
-   *     extracted objects, each of which may be `null`.
+   *     extracted objects, each of which may be `null`;
+   *   - for nested fields: an object with primitive and node reference
+   *     fields in the same form as above (note: nested objects do not
+   *     automatically have a "__typename" field).
    *
    * For instance, the result of `extract("issue:1")` might be:
    *
@@ -1268,7 +1453,25 @@ export class Mirror {
    *           },
    *         },
    *       ],
+   *       timeline: [
+   *         {
+   *           __typename: "Commit",
+   *           messageHeadline: "reinstate CPU warmer (fixes #1172)",
+   *           author: {
+   *             date: "2001-02-03T04:05:06-07:00",
+   *             user: {
+   *               __typename: "User",
+   *               id: "user:admin",
+   *               login: "admin",
+   *             }
+   *           }
+   *         }
+   *       ],
    *     }
+   *
+   * (Here, "title" is a primitive, the "author" field on an issue is a
+   * node reference, "comments" is a connection, and the "author" field
+   * on a commit is a nested object.)
    *
    * The returned structure may be circular.
    *
@@ -1384,20 +1587,29 @@ export class Mirror {
             );
           }
           const primitivesTableName = _primitivesTableName(typename);
-          const selections = [
-            `${primitivesTableName}.id AS id`,
-            ...objectType.primitiveFieldNames.map(
+          const selections: $ReadOnlyArray<string> = [].concat(
+            [`${primitivesTableName}.id AS id`],
+            objectType.primitiveFieldNames.map(
               (fieldname) =>
                 `${primitivesTableName}."${fieldname}" AS "${fieldname}"`
             ),
-          ].join(", ");
+            objectType.nestedFieldNames.map(
+              (fieldname) =>
+                `${primitivesTableName}."${fieldname}" AS "${fieldname}"`
+            ),
+            ...objectType.nestedFieldNames.map((f1) =>
+              Object.keys(objectType.nestedFields[f1].primitives).map(
+                (f2) => `${primitivesTableName}."${f1}.${f2}" AS "${f1}.${f2}"`
+              )
+            )
+          );
           const rows: $ReadOnlyArray<{|
             +id: Schema.ObjectId,
-            +[Schema.Fieldname]: string,
+            +[Schema.Fieldname]: string | 0 | 1,
           |}> = db
             .prepare(
               dedent`\
-                SELECT ${selections}
+                SELECT ${selections.join(", ")}
                 FROM ${temporaryTableName} JOIN ${primitivesTableName}
                 USING (id)
               `
@@ -1407,9 +1619,50 @@ export class Mirror {
             const object = {};
             object.id = row.id;
             object.__typename = typename;
+            for (const fieldname of objectType.nestedFieldNames) {
+              const isPresent: string | 0 | 1 = row[fieldname];
+              // istanbul ignore if: should not be reachable
+              if (isPresent !== 0 && isPresent !== 1) {
+                const s = JSON.stringify;
+                const id = object.id;
+                throw new Error(
+                  `Corruption: nested field ${s(fieldname)} on ${s(id)} ` +
+                    `set to ${String(isPresent)}`
+                );
+              }
+              if (isPresent) {
+                // We'll add primitives and links onto this object.
+                object[fieldname] = {};
+              } else {
+                object[fieldname] = null;
+              }
+            }
             for (const key of Object.keys(row)) {
               if (key === "id") continue;
-              object[key] = JSON.parse(row[key]);
+              const rawValue = row[key];
+              if (rawValue === 0 || rawValue === 1) {
+                // Name of a nested field; already processed.
+                continue;
+              }
+              const value = JSON.parse(rawValue);
+              const parts = key.split(".");
+              switch (parts.length) {
+                case 1:
+                  object[key] = value;
+                  break;
+                case 2: {
+                  const [nestName, eggName] = parts;
+                  if (object[nestName] !== null) {
+                    object[nestName][eggName] = value;
+                  }
+                  break;
+                }
+                // istanbul ignore next: should not be possible
+                default:
+                  throw new Error(
+                    `Corruption: bad field name: ${JSON.stringify(key)}`
+                  );
+              }
             }
             allObjects.set(object.id, object);
           }
@@ -1437,7 +1690,25 @@ export class Mirror {
               link.childId == null
                 ? null
                 : NullUtil.get(allObjects.get(link.childId));
-            parent[link.fieldname] = child;
+            const {fieldname} = link;
+            const parts = fieldname.split(".");
+            switch (parts.length) {
+              case 1:
+                parent[fieldname] = child;
+                break;
+              case 2: {
+                const [nestName, eggName] = parts;
+                if (parent[nestName] !== null) {
+                  parent[nestName][eggName] = child;
+                }
+                break;
+              }
+              // istanbul ignore next: should not be possible
+              default:
+                throw new Error(
+                  `Corruption: bad link name: ${JSON.stringify(fieldname)}`
+                );
+            }
           }
         }
 
@@ -1676,6 +1947,9 @@ type ConnectionFieldResult = {|
   +pageInfo: {|+hasNextPage: boolean, +endCursor: string | null|},
   +nodes: $ReadOnlyArray<NodeFieldResult>,
 |};
+type NestedFieldResult = {
+  +[Schema.Fieldname]: PrimitiveResult | NodeFieldResult,
+} | null;
 
 /**
  * Result describing own-data for many nodes of a given type. Whether a
@@ -1689,7 +1963,8 @@ type OwnDataUpdateResult = $ReadOnlyArray<{
   +id: Schema.ObjectId,
   +[nonConnectionFieldname: Schema.Fieldname]:
     | PrimitiveResult
-    | NodeFieldResult,
+    | NodeFieldResult
+    | NestedFieldResult,
 }>;
 
 /**
