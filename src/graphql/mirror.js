@@ -1056,6 +1056,8 @@ export class Mirror {
             case "CONNECTION":
               // Not handled by this function.
               return null;
+            case "NESTED":
+              throw new Error("Nested fields not supported.");
             // istanbul ignore next
             default:
               throw new Error((field.type: empty));
@@ -1563,6 +1565,8 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
             case "CONNECTION":
               entry.connectionFieldNames.push(fieldname);
               break;
+            case "NESTED":
+              throw new Error("Nested fields not supported.");
             // istanbul ignore next
             default:
               throw new Error((field.type: empty));
