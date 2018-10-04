@@ -2751,7 +2751,19 @@ describe("graphql/mirror", () => {
 
   describe("_buildSchemaInfo", () => {
     it("processes object types properly", () => {
-      const result = _buildSchemaInfo(buildGithubSchema());
+      const s = Schema;
+      const schema = {
+        ...buildGithubSchema(),
+        Commit: s.object({
+          id: s.id(),
+          oid: s.primitive(),
+          author: /* GitActor */ s.nested({
+            date: s.primitive(),
+            user: s.node("User"),
+          }),
+        }),
+      };
+      const result = _buildSchemaInfo(schema);
       expect(Object.keys(result.objectTypes).sort()).toEqual(
         Array.from(
           new Set([
@@ -2777,6 +2789,14 @@ describe("graphql/mirror", () => {
       expect(
         result.objectTypes["Issue"].connectionFieldNames.slice().sort()
       ).toEqual(["comments", "timeline"].sort());
+      expect(result.objectTypes["Issue"].nestedFieldNames).toEqual([]);
+      expect(result.objectTypes["Commit"].nestedFieldNames).toEqual(["author"]);
+      expect(result.objectTypes["Commit"].nestedFields).toEqual({
+        author: {
+          primitives: {date: Schema.primitive()},
+          nodes: {user: Schema.node("User")},
+        },
+      });
     });
     it("processes union types correctly", () => {
       const result = _buildSchemaInfo(buildGithubSchema());
