@@ -117,7 +117,7 @@ to run them all. This will run:
     can take advantage of this to insert a quick hack and make sure that
     you remember to remove it later.
 
-This is the same set of tests that is run on our CI system, Travis.
+This is the same set of tests that is run on our CI system, CircleCI.
 
 ### Updating CHANGELOG.md
 
