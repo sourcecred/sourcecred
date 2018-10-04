@@ -1504,9 +1504,20 @@ type SchemaInfo = {|
   +objectTypes: {|
     +[Schema.Typename]: {|
       +fields: {|+[Schema.Fieldname]: Schema.FieldType|},
+      +nestedFields: {|
+        +[Schema.Fieldname]: {|
+          +primitives: {|
+            +[Schema.Fieldname]: Schema.PrimitiveFieldType,
+          |},
+          +nodes: {|
+            +[Schema.Fieldname]: Schema.NodeFieldType,
+          |},
+        |},
+      |},
       +primitiveFieldNames: $ReadOnlyArray<Schema.Fieldname>,
       +linkFieldNames: $ReadOnlyArray<Schema.Fieldname>,
       +connectionFieldNames: $ReadOnlyArray<Schema.Fieldname>,
+      +nestedFieldNames: $ReadOnlyArray<Schema.Fieldname>,
       // There is always exactly one ID field, so it needs no
       // special representation. (It's still included in the `fields`
       // dictionary, though.)
@@ -1524,9 +1535,20 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
     objectTypes: (({}: any): {|
       [Schema.Typename]: {|
         +fields: {|+[Schema.Fieldname]: Schema.FieldType|},
+        +nestedFields: {|
+          [Schema.Fieldname]: {|
+            +primitives: {|
+              [Schema.Fieldname]: Schema.PrimitiveFieldType,
+            |},
+            +nodes: {|
+              [Schema.Fieldname]: Schema.NodeFieldType,
+            |},
+          |},
+        |},
         +primitiveFieldNames: Array<Schema.Fieldname>,
         +linkFieldNames: Array<Schema.Fieldname>,
         +connectionFieldNames: Array<Schema.Fieldname>,
+        +nestedFieldNames: Array<Schema.Fieldname>,
       |},
     |}),
     unionTypes: (({}: any): {|
@@ -1541,14 +1563,24 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
       case "OBJECT": {
         const entry: {|
           +fields: {|+[Schema.Fieldname]: Schema.FieldType|},
+          +nestedFields: $PropertyType<
+            $ElementType<
+              $PropertyType<typeof result, "objectTypes">,
+              Schema.Fieldname
+            >,
+            "nestedFields"
+          >,
           +primitiveFieldNames: Array<Schema.Fieldname>,
           +linkFieldNames: Array<Schema.Fieldname>,
           +connectionFieldNames: Array<Schema.Fieldname>,
+          +nestedFieldNames: Array<Schema.Fieldname>,
         |} = {
           fields: type.fields,
+          nestedFields: ({}: any),
           primitiveFieldNames: [],
           linkFieldNames: [],
           connectionFieldNames: [],
+          nestedFieldNames: [],
         };
         result.objectTypes[typename] = entry;
         for (const fieldname of Object.keys(type.fields)) {
@@ -1565,8 +1597,29 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
             case "CONNECTION":
               entry.connectionFieldNames.push(fieldname);
               break;
-            case "NESTED":
-              throw new Error("Nested fields not supported.");
+            case "NESTED": {
+              entry.nestedFieldNames.push(fieldname);
+              const nestedFieldData: $ElementType<
+                $PropertyType<typeof entry, "nestedFields">,
+                Schema.Fieldname
+              > = {primitives: ({}: any), nodes: ({}: any)};
+              for (const eggFieldname of Object.keys(field.eggs)) {
+                const eggField = field.eggs[eggFieldname];
+                switch (eggField.type) {
+                  case "PRIMITIVE":
+                    nestedFieldData.primitives[eggFieldname] = eggField;
+                    break;
+                  case "NODE":
+                    nestedFieldData.nodes[eggFieldname] = eggField;
+                    break;
+                  // istanbul ignore next
+                  default:
+                    throw new Error((eggField.type: empty));
+                }
+              }
+              entry.nestedFields[fieldname] = nestedFieldData;
+              break;
+            }
             // istanbul ignore next
             default:
               throw new Error((field.type: empty));
