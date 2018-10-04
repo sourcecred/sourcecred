@@ -7,11 +7,7 @@ const execDependencyGraph = require("../src/tools/execDependencyGraph");
 main();
 
 function main() {
-  const mode =
-    process.env["TRAVIS_EVENT_TYPE"] === "cron" ||
-    process.argv.includes("--full")
-      ? "FULL"
-      : "BASIC";
+  const mode = process.argv.includes("--full") ? "FULL" : "BASIC";
   execDependencyGraph(makeTasks(mode)).then(({success}) => {
     process.exitCode = success ? 0 : 1;
   });
