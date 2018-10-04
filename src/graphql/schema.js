@@ -31,15 +31,41 @@ export type ObjectId = string;
 //     represented as `PRIMITIVE`s (except for `ID`s).
 //   - Connections are supported as object fields, but arbitrary lists
 //     are not.
+//
+// To accommodate schemata where some object types do not have IDs,
+// objects may have "nested" fields of primitive or node-reference type.
+// These may be nested to depth exactly 1. Suppose that `Foo` is an
+// object type that includes `bar: Bar!`, but `Bar` is an object type
+// without an `id`. Then `Bar` may not be a first-class type, but `Foo`
+// may pull properties off of it using
+//
+//     bar: nested({x: primitive(), y: node("Baz")});
+//
+// The property "bar" in the above example is called a _nested_
+// property, and its fields "x" and "y" are called _eggs_. (The nest
+// contains the eggs.)
 export type Schema = {+[Typename]: NodeType};
 export type NodeType =
   | {|+type: "OBJECT", +fields: {|+[Fieldname]: FieldType|}|}
   | {|+type: "UNION", +clauses: {|+[Typename]: true|}|};
+
 export type FieldType =
-  | {|+type: "ID"|}
-  | {|+type: "PRIMITIVE"|}
-  | {|+type: "NODE", +elementType: Typename|}
-  | {|+type: "CONNECTION", +elementType: Typename|};
+  | IdFieldType
+  | PrimitiveFieldType
+  | NodeFieldType
+  | ConnectionFieldType
+  | NestedFieldType;
+export type IdFieldType = {|+type: "ID"|};
+export type PrimitiveFieldType = {|+type: "PRIMITIVE"|};
+export type NodeFieldType = {|+type: "NODE", +elementType: Typename|};
+export type ConnectionFieldType = {|
+  +type: "CONNECTION",
+  +elementType: Typename,
+|};
+export type NestedFieldType = {|
+  +type: "NESTED",
+  +eggs: {+[Fieldname]: PrimitiveFieldType | NodeFieldType},
+|};
 
 // Every object must have exactly one `id` field, and it must have this
 // name.
@@ -111,18 +137,24 @@ export function union(clauses: $ReadOnlyArray<Typename>): NodeType {
   return {type: "UNION", clauses: clausesMap};
 }
 
-export function id(): FieldType {
+export function id(): IdFieldType {
   return {type: "ID"};
 }
 
-export function primitive(): FieldType {
+export function primitive(): PrimitiveFieldType {
   return {type: "PRIMITIVE"};
 }
 
-export function node(elementType: Typename): FieldType {
+export function node(elementType: Typename): NodeFieldType {
   return {type: "NODE", elementType};
 }
 
-export function connection(elementType: Typename): FieldType {
+export function connection(elementType: Typename): ConnectionFieldType {
   return {type: "CONNECTION", elementType};
+}
+
+export function nested(eggs: {
+  +[Fieldname]: PrimitiveFieldType | NodeFieldType,
+}): NestedFieldType {
+  return {type: "NESTED", eggs: {...eggs}};
 }

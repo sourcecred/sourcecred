@@ -19,6 +19,14 @@ describe("graphql/schema", () => {
         title: s.primitive(),
         comments: s.connection("IssueComment"),
       }),
+      Commit: s.object({
+        id: s.id(),
+        oid: s.primitive(),
+        author: /* GitActor */ s.nested({
+          date: s.primitive(),
+          user: s.node("User"),
+        }),
+      }),
       IssueComment: s.object({
         id: s.id(),
         body: s.primitive(),
