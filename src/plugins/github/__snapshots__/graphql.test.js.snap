@@ -361,6 +361,7 @@ fragment commit on Commit {
   oid
   message
   author {
+    date
     user {
       ...whoami
     }
