@@ -4,13 +4,18 @@
  * docstring of the default export for more details.
  */
 
+import Database from "better-sqlite3";
 import fetch from "isomorphic-fetch";
+import path from "path";
 import retry from "retry";
 
+import {type RepoId, repoIdToString} from "../../core/repoId";
+import {Mirror} from "../../graphql/mirror";
+import * as Queries from "../../graphql/queries";
 import {stringify, inlineLayout, type Body} from "../../graphql/queries";
-import {createQuery, createVariables, postQueryExhaustive} from "./graphql";
-import type {GithubResponseJSON} from "./graphql";
-import type {RepoId} from "../../core/repoId";
+import * as Schema from "../../graphql/schema";
+import schema from "./schema";
+import type {Repository} from "./graphqlTypes";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -25,27 +30,49 @@ import type {RepoId} from "../../core/repoId";
  *    scraped from the repository, with data format to be specified
  *    later
  */
-export default function fetchGithubRepo(
+export default async function fetchGithubRepo(
   repoId: RepoId,
-  token: string
-): Promise<GithubResponseJSON> {
-  token = String(token);
+  options: {|+token: string, +cacheDirectory: string|}
+): Promise<Repository> {
+  const {token, cacheDirectory} = options;
 
   const validToken = /^[A-Fa-f0-9]{40}$/;
   if (!validToken.test(token)) {
     throw new Error(`Invalid token: ${token}`);
   }
+  const postQueryWithToken = (payload) => postQuery(payload, token);
 
-  const body = createQuery();
-  const variables = createVariables(repoId);
-  const payload = {body, variables};
-  return postQueryExhaustive(
-    (somePayload) => postQuery(somePayload, token),
-    payload
-  ).then((x: GithubResponseJSON) => {
-    ensureNoMorePages(x);
-    return x;
+  const resolvedId: Schema.ObjectId = await resolveRepositoryGraphqlId(
+    postQueryWithToken,
+    repoId
+  );
+
+  // Key the cache file against the GraphQL ID, but make sure that the
+  // name is valid and uniquely identifying even on case-insensitive
+  // filesystems (HFS, HFS+, APFS, NTFS) or filesystems preventing
+  // equals signs in file names.
+  const dbFilename = `mirror_${Buffer.from(resolvedId).toString("hex")}.db`;
+  const db = new Database(path.join(cacheDirectory, dbFilename));
+  const mirror = new Mirror(db, schema());
+  mirror.registerObject({typename: "Repository", id: resolvedId});
+
+  // These are arbitrary tuning parameters.
+  // TODO(#638): Design a configuration system for plugins.
+  const ttlSeconds = 86400;
+  const nodesLimit = 100;
+  const connectionLimit = 100;
+
+  await mirror.update(postQueryWithToken, {
+    since: new Date(Date.now() - ttlSeconds * 1000),
+    now: () => new Date(),
+    // These properties are arbitrary tuning parameters.
+    nodesLimit,
+    connectionLimit,
+    // These values are the maxima allowed by GitHub.
+    nodesOfTypeLimit: 100,
+    connectionPageSize: 100,
   });
+  return ((mirror.extract(resolvedId): any): Repository);
 }
 
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
@@ -185,23 +212,35 @@ export async function postQuery(
   );
 }
 
-function ensureNoMorePages(result: any, path = []) {
-  if (result == null) {
-    return;
+async function resolveRepositoryGraphqlId(
+  postQuery: ({+body: Body, +variables: mixed}) => Promise<any>,
+  repoId: RepoId
+): Promise<Schema.ObjectId> {
+  const b = Queries.build;
+  const payload = {
+    body: [
+      b.query(
+        "ResolveRepositoryId",
+        [b.param("owner", "String!"), b.param("name", "String!")],
+        [
+          b.field(
+            "repository",
+            {owner: b.variable("owner"), name: b.variable("name")},
+            [b.field("id")]
+          ),
+        ]
+      ),
+    ],
+    variables: {owner: repoId.owner, name: repoId.name},
+  };
+  const data: {|+repository: null | {|+id: string|}|} = await postQuery(
+    payload
+  );
+  if (data.repository == null) {
+    throw new Error(
+      `No such repository: ${repoIdToString(repoId)} ` +
+        `(response data: ${JSON.stringify(data)})`
+    );
   }
-  if (result.pageInfo) {
-    if (result.pageInfo.hasNextPage) {
-      console.error(result);
-      throw new Error(`More pages at: ${path.join()}`);
-    }
-  }
-  if (Array.isArray(result)) {
-    result.forEach((item, i) => {
-      ensureNoMorePages(item, [...path, i]);
-    });
-  } else if (typeof result === "object") {
-    Object.keys(result).forEach((k) => {
-      ensureNoMorePages(result[k], [...path, k]);
-    });
-  }
+  return data.repository.id;
 }

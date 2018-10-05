@@ -12,8 +12,10 @@
  * from https://github.com/settings/tokens/new.
  */
 
-import fetchGithubRepo from "../fetchGithubRepo";
 import stringify from "json-stable-stringify";
+import tmp from "tmp";
+
+import fetchGithubRepo from "../fetchGithubRepo";
 import {makeRepoId} from "../../../core/repoId";
 
 function parseArgs() {
@@ -36,7 +38,8 @@ function parseArgs() {
 function main() {
   const args = parseArgs();
   const repoId = makeRepoId(args.owner, args.name);
-  fetchGithubRepo(repoId, args.githubToken)
+  const options = {token: args.githubToken, cacheDirectory: tmp.dirSync().name};
+  fetchGithubRepo(repoId, options)
     .then((data) => {
       console.log(stringify(data, {space: 4}));
     })

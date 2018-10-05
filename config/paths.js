@@ -29,9 +29,6 @@ module.exports = {
   backendEntryPoints: {
     sourcecred: resolveApp("src/cli/main.js"),
     //
-    testContinuations: resolveApp(
-      "src/plugins/github/bin/testContinuations.js"
-    ),
     generateGithubGraphqlFlowTypes: resolveApp(
       "src/plugins/github/bin/generateGraphqlFlowTypes.js"
     ),
