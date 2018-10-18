@@ -355,6 +355,15 @@ fragment commitHistory on CommitHistoryConnection {
     ...commit
   }
 }
+fragment commitParents on CommitConnection {
+  pageInfo {
+    hasNextPage
+    endCursor
+  }
+  nodes {
+    oid
+  }
+}
 fragment commit on Commit {
   id
   url
@@ -365,6 +374,9 @@ fragment commit on Commit {
     user {
       ...whoami
     }
+  }
+  parents(first: 5) {
+    ...commitParents
   }
 }
 fragment reactions on ReactionConnection {
