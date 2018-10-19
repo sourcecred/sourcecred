@@ -21,6 +21,12 @@ module.exports = {
   bail: true,
   // Target Node instead of the browser.
   target: "node",
+  node: {
+    // Don't munge `__dirname` and `__filename`.
+    // https://github.com/webpack/webpack/issues/1599#issuecomment-186841345
+    __dirname: false,
+    __filename: false,
+  },
   entry: paths.backendEntryPoints,
   externals: [nodeExternals()],
   output: {
