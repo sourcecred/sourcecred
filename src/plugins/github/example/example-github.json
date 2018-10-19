@@ -13,6 +13,17 @@
                             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZiZDFiNGMwYjcxOWMyMmM2ODhhNzQ4NjNiZTA3YTY5OWI3YjliMzQ=",
                             "message": "A commit from someone with no GitHub account\n\nSummary:\nThis is a commit to master by a user with email at `example.com`, which\nshould not be linked to any GitHub account.\n\nGenerated with:\n\n    git -c user.name='Mysterious Stranger' \\\n        -c user.email='mysterious-stranger@example.com' \\\n        commit -S\n\nActually committed and signed by William Chargin <wchargin@gmail.com>.\nVerify public key at either of:\n  - <https://github.com/wchargin.gpg>\n  - <https://wchargin.github.io/> (click link to \"My PGP key\")",
                             "oid": "6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+                            "parents": {
+                                "nodes": [
+                                    {
+                                        "oid": "c430bd74455105f77215ece51945094ceeee6c86"
+                                    }
+                                ],
+                                "pageInfo": {
+                                    "endCursor": "MQ==",
+                                    "hasNextPage": false
+                                }
+                            },
                             "url": "https://github.com/sourcecred/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34"
                         },
                         {
@@ -28,6 +39,17 @@
                             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmM0MzBiZDc0NDU1MTA1Zjc3MjE1ZWNlNTE5NDUwOTRjZWVlZTZjODY=",
                             "message": "Hello from credbot!\n\nSummary:\nThis is a commit to master under the name and email of credbot, who has\nno other contributions to the repository. This is intended to test that\nwe can still pull the correct GitHub user off of the commit.\n\nGenerated with:\n\n    git -c user.name='credbot' \\\n        -c user.email='42819382+credbot@users.noreply.github.com' \\\n        commit\n\nActually committed and signed by William Chargin <wchargin@gmail.com>.\nVerify public key at either of:\n  - <https://github.com/wchargin.gpg>\n  - <https://wchargin.github.io/> (click link to \"My PGP key\")",
                             "oid": "c430bd74455105f77215ece51945094ceeee6c86",
+                            "parents": {
+                                "nodes": [
+                                    {
+                                        "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6"
+                                    }
+                                ],
+                                "pageInfo": {
+                                    "endCursor": "MQ==",
+                                    "hasNextPage": false
+                                }
+                            },
                             "url": "https://github.com/sourcecred/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86"
                         },
                         {
@@ -43,6 +65,17 @@
                             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
                             "message": "This pull request will be more contentious. I can feel it... (#5)\n\n* This pull request will be more contentious. I can feel it...\r\n\r\n* Address wchargin's unreasonable complaints",
                             "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+                            "parents": {
+                                "nodes": [
+                                    {
+                                        "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
+                                    }
+                                ],
+                                "pageInfo": {
+                                    "endCursor": "MQ==",
+                                    "hasNextPage": false
+                                }
+                            },
                             "url": "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6"
                         },
                         {
@@ -58,6 +91,20 @@
                             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
                             "message": "Merge pull request #3 from sourcecred/add-readme\n\nAdd README, merge via PR.",
                             "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+                            "parents": {
+                                "nodes": [
+                                    {
+                                        "oid": "ec91adb718a6045b492303f00d8e8beb957dc780"
+                                    },
+                                    {
+                                        "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d"
+                                    }
+                                ],
+                                "pageInfo": {
+                                    "endCursor": "Mg==",
+                                    "hasNextPage": false
+                                }
+                            },
                             "url": "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
                         },
                         {
@@ -73,6 +120,17 @@
                             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
                             "message": "Add README, merge via PR.",
                             "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+                            "parents": {
+                                "nodes": [
+                                    {
+                                        "oid": "ec91adb718a6045b492303f00d8e8beb957dc780"
+                                    }
+                                ],
+                                "pageInfo": {
+                                    "endCursor": "MQ==",
+                                    "hasNextPage": false
+                                }
+                            },
                             "url": "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d"
                         },
                         {
@@ -88,6 +146,14 @@
                             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
                             "message": "Commit without pull request.",
                             "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
+                            "parents": {
+                                "nodes": [
+                                ],
+                                "pageInfo": {
+                                    "endCursor": null,
+                                    "hasNextPage": false
+                                }
+                            },
                             "url": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780"
                         }
                     ],
@@ -881,6 +947,20 @@
                         "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
                         "message": "Merge pull request #3 from sourcecred/add-readme\n\nAdd README, merge via PR.",
                         "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+                        "parents": {
+                            "nodes": [
+                                {
+                                    "oid": "ec91adb718a6045b492303f00d8e8beb957dc780"
+                                },
+                                {
+                                    "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d"
+                                }
+                            ],
+                            "pageInfo": {
+                                "endCursor": "Mg==",
+                                "hasNextPage": false
+                            }
+                        },
                         "url": "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
                     },
                     "number": 3,
@@ -974,6 +1054,17 @@
                         "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
                         "message": "This pull request will be more contentious. I can feel it... (#5)\n\n* This pull request will be more contentious. I can feel it...\r\n\r\n* Address wchargin's unreasonable complaints",
                         "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+                        "parents": {
+                            "nodes": [
+                                {
+                                    "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a"
+                                }
+                            ],
+                            "pageInfo": {
+                                "endCursor": "MQ==",
+                                "hasNextPage": false
+                            }
+                        },
                         "url": "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6"
                     },
                     "number": 5,

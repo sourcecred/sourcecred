@@ -53,6 +53,7 @@ const PAGE_SIZE_COMMENTS = 20;
 const PAGE_SIZE_REVIEWS = 5;
 const PAGE_SIZE_REVIEW_COMMENTS = 10;
 const PAGE_SIZE_COMMIT_HISTORY = 100;
+const PAGE_SIZE_COMMIT_PARENTS = 5;
 const PAGE_SIZE_REACTIONS = 5;
 
 /**
@@ -89,6 +90,7 @@ const PAGE_SIZE_REACTIONS = 5;
 export type Continuation = {|
   +enclosingNodeType:
     | "REPOSITORY"
+    | "COMMIT"
     | "ISSUE"
     | "PULL"
     | "REVIEW"
@@ -220,6 +222,7 @@ export function continuationsFromContinuation(
 ): Iterator<Continuation> {
   const continuationsFromEnclosingType = {
     REPOSITORY: continuationsFromRepository,
+    COMMIT: continuationsFromCommit,
     ISSUE: continuationsFromIssue,
     PULL: continuationsFromPR,
     REVIEW: continuationsFromReview,
@@ -324,6 +327,54 @@ function* continuationsFromRepository(
       const subpath = [...path, "pulls", "nodes", i];
       yield* continuationsFromPR(pull, pull.id, subpath);
     }
+  }
+  if (result.defaultBranchRef) {
+    const topLevelCommit = result.defaultBranchRef.target;
+    {
+      const commit = topLevelCommit;
+      const subpath = [...path, "defaultBranchRef", "target"];
+      yield* continuationsFromCommit(commit, commit.id, subpath);
+    }
+    const pastCommits = topLevelCommit.history.nodes;
+    for (let i = 0; i < pastCommits.length; i++) {
+      const commit = pastCommits[i];
+      const subpath = [
+        ...path,
+        "defaultBranchRef",
+        "target",
+        "history",
+        "nodes",
+        i,
+      ];
+      yield* continuationsFromCommit(commit, commit.id, subpath);
+    }
+  }
+}
+
+function* continuationsFromCommit(
+  result: any,
+  nodeId: string,
+  path: $ReadOnlyArray<string | number>
+) {
+  const b = build;
+  if (result.parents && result.parents.pageInfo.hasNextPage) {
+    yield {
+      enclosingNodeType: "COMMIT",
+      enclosingNodeId: nodeId,
+      selections: [
+        b.inlineFragment("Commit", [
+          b.field(
+            "parents",
+            {
+              first: b.literal(PAGE_LIMIT),
+              after: b.literal(result.parents.pageInfo.endCursor),
+            },
+            [b.fragmentSpread("commitParents")]
+          ),
+        ]),
+      ],
+      destinationPath: path,
+    };
   }
 }
 
@@ -442,6 +493,11 @@ function* continuationsFromPR(
       ],
       destinationPath: path,
     };
+  }
+  if (result.mergeCommit) {
+    const commit = result.mergeCommit;
+    const subpath = [...path, "mergeCommit"];
+    yield* continuationsFromCommit(commit, commit.id, subpath);
   }
   if (result.reviews) {
     for (let i = 0; i < result.reviews.nodes.length; i++) {
@@ -1007,6 +1063,7 @@ export type CommitJSON = {|
     +user: NullableAuthorJSON,
   |},
   +message: string,
+  +parents: ConnectionJSON<{|+oid: string|}>,
 |};
 
 function commitFragment(): FragmentDefinition {
@@ -1020,6 +1077,9 @@ function commitFragment(): FragmentDefinition {
       b.field("date"),
       b.field("user", {}, [b.fragmentSpread("whoami")]),
     ]),
+    b.field("parents", {first: b.literal(PAGE_SIZE_COMMIT_PARENTS)}, [
+      b.fragmentSpread("commitParents"),
+    ]),
   ]);
 }
 
@@ -1028,6 +1088,14 @@ function commitHistoryFragment(): FragmentDefinition {
   return b.fragment("commitHistory", "CommitHistoryConnection", [
     makePageInfo(),
     b.field("nodes", {}, [b.fragmentSpread("commit")]),
+  ]);
+}
+
+function commitParentsFragment(): FragmentDefinition {
+  const b = build;
+  return b.fragment("commitParents", "CommitConnection", [
+    makePageInfo(),
+    b.field("nodes", {}, [b.field("oid")]),
   ]);
 }
 
@@ -1086,6 +1154,7 @@ export function createFragments(): FragmentDefinition[] {
     reviewsFragment(),
     reviewCommentsFragment(),
     commitHistoryFragment(),
+    commitParentsFragment(),
     commitFragment(),
     reactionsFragment(),
   ];
