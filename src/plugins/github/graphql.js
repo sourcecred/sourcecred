@@ -119,16 +119,21 @@ export type RepositoryJSON = {|
   +pulls: ConnectionJSON<PullJSON>,
   +url: string,
   +name: string,
-  +owner: AuthorJSON,
+  +owner: UserJSON | OrganizationJSON,
   +defaultBranchRef: ?RefJSON,
 |};
 
-export type RefJSON = {|+target: GitObjectJSON|};
+export type RefJSON = {|+id: string, +target: GitObjectJSON|};
 export type GitObjectJSON =
-  | {|+__typename: "Commit", +history: ConnectionJSON<CommitJSON>|}
-  | {|+__typename: "Tree"|}
-  | {|+__typename: "Blob"|}
-  | {|+__typename: "Tag"|};
+  | {|
+      +__typename: "Commit",
+      +id: string,
+      +oid: string,
+      +history: ConnectionJSON<CommitJSON>,
+    |}
+  | {|+__typename: "Tree", +id: string, +oid: string|}
+  | {|+__typename: "Blob", +id: string, +oid: string|}
+  | {|+__typename: "Tag", +id: string, +oid: string|};
 
 /**
  * The top-level GitHub query to request data about a repository.
@@ -159,6 +164,7 @@ export function createQuery(): Body {
               ])
             ),
             b.field("defaultBranchRef", {}, [
+              b.field("id"),
               b.field("target", {}, [
                 b.field("__typename"),
                 b.inlineFragment("Commit", [
@@ -168,6 +174,9 @@ export function createQuery(): Body {
                     [b.fragmentSpread("commitHistory")]
                   ),
                 ]),
+                b.inlineFragment("Blob", [b.field("id"), b.field("oid")]),
+                b.inlineFragment("Tag", [b.field("id"), b.field("oid")]),
+                b.inlineFragment("Tree", [b.field("id"), b.field("oid")]),
               ]),
             ]),
           ]
@@ -871,12 +880,26 @@ function mergeDirect<T>(destination: T, source: any): T {
 // Therefore, NullableAuthorJSON is preferred to AuthorJSON
 // for most actual usage.
 export type NullableAuthorJSON = AuthorJSON | null;
-export type AuthorJSON = {|
-  +__typename: "User" | "Bot" | "Organization",
+export type AuthorJSON = UserJSON | BotJSON | OrganizationJSON;
+export type UserJSON = {|
+  +__typename: "User",
   +id: string,
   +login: string,
   +url: string,
 |};
+export type BotJSON = {|
+  +__typename: "Bot",
+  +id: string,
+  +login: string,
+  +url: string,
+|};
+export type OrganizationJSON = {|
+  +__typename: "Organization",
+  +id: string,
+  +login: string,
+  +url: string,
+|};
+
 function makePageInfo() {
   const b = build;
   return b.field("pageInfo", {}, [
@@ -1012,7 +1035,6 @@ export type ReviewJSON = {|
   +author: NullableAuthorJSON,
   +state: ReviewState,
   +comments: ConnectionJSON<ReviewCommentJSON>,
-  +reactions: ConnectionJSON<ReactionJSON>,
 |};
 function reviewsFragment(): FragmentDefinition {
   const b = build;
@@ -1058,9 +1080,9 @@ export type CommitJSON = {|
   +id: string,
   +url: string,
   +oid: string, // the hash
-  +author: ?{|
+  +author: null | {|
     +date: /* ISO 8601 */ string,
-    +user: NullableAuthorJSON,
+    +user: null | UserJSON,
   |},
   +message: string,
   +parents: ConnectionJSON<{|+oid: string|}>,
@@ -1126,7 +1148,7 @@ export type ReactionContent =
 export type ReactionJSON = {|
   +id: string,
   +content: ReactionContent,
-  +user: NullableAuthorJSON,
+  +user: null | UserJSON,
 |};
 
 function reactionsFragment(): FragmentDefinition {
