@@ -1,0 +1,1192 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/github/translateContinuations translateContinuations works on the example data 1`] = `
+Object {
+  "result": Object {
+    "__typename": "Repository",
+    "defaultBranchRef": Object {
+      "__typename": "Ref",
+      "id": "MDM6UmVmMTIzMjU1MDA2Om1hc3Rlcg==",
+      "target": Object {
+        "__typename": "Commit",
+        "author": Object {
+          "date": "2018-09-12T19:48:21-07:00",
+          "user": null,
+        },
+        "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZiZDFiNGMwYjcxOWMyMmM2ODhhNzQ4NjNiZTA3YTY5OWI3YjliMzQ=",
+        "message": "A commit from someone with no GitHub account
+
+Summary:
+This is a commit to master by a user with email at \`example.com\`, which
+should not be linked to any GitHub account.
+
+Generated with:
+
+    git -c user.name='Mysterious Stranger' \\\\
+        -c user.email='mysterious-stranger@example.com' \\\\
+        commit -S
+
+Actually committed and signed by William Chargin <wchargin@gmail.com>.
+Verify public key at either of:
+  - <https://github.com/wchargin.gpg>
+  - <https://wchargin.github.io/> (click link to \\"My PGP key\\")",
+        "oid": "6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+        "parents": Array [
+          Object {
+            "__typename": "Commit",
+            "author": Object {
+              "date": "2018-09-12T14:43:54-07:00",
+              "user": Object {
+                "__typename": "User",
+                "id": "MDQ6VXNlcjQyODE5Mzgy",
+                "login": "credbot",
+                "url": "https://github.com/credbot",
+              },
+            },
+            "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmM0MzBiZDc0NDU1MTA1Zjc3MjE1ZWNlNTE5NDUwOTRjZWVlZTZjODY=",
+            "message": "Hello from credbot!
+
+Summary:
+This is a commit to master under the name and email of credbot, who has
+no other contributions to the repository. This is intended to test that
+we can still pull the correct GitHub user off of the commit.
+
+Generated with:
+
+    git -c user.name='credbot' \\\\
+        -c user.email='42819382+credbot@users.noreply.github.com' \\\\
+        commit
+
+Actually committed and signed by William Chargin <wchargin@gmail.com>.
+Verify public key at either of:
+  - <https://github.com/wchargin.gpg>
+  - <https://wchargin.github.io/> (click link to \\"My PGP key\\")",
+            "oid": "c430bd74455105f77215ece51945094ceeee6c86",
+            "parents": Array [
+              Object {
+                "__typename": "Commit",
+                "author": Object {
+                  "date": "2018-02-28T20:25:54-08:00",
+                  "user": Object {
+                    "__typename": "User",
+                    "id": "MDQ6VXNlcjE0MDAwMjM=",
+                    "login": "decentralion",
+                    "url": "https://github.com/decentralion",
+                  },
+                },
+                "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
+                "message": "This pull request will be more contentious. I can feel it... (#5)
+
+* This pull request will be more contentious. I can feel it...
+
+* Address wchargin's unreasonable complaints",
+                "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+                "parents": Array [
+                  Object {
+                    "__typename": "Commit",
+                    "author": Object {
+                      "date": "2018-02-28T00:43:47-08:00",
+                      "user": Object {
+                        "__typename": "User",
+                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                        "login": "decentralion",
+                        "url": "https://github.com/decentralion",
+                      },
+                    },
+                    "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
+                    "message": "Merge pull request #3 from sourcecred/add-readme
+
+Add README, merge via PR.",
+                    "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+                    "parents": Array [
+                      Object {
+                        "__typename": "Commit",
+                        "author": Object {
+                          "date": "2018-02-28T00:41:11-08:00",
+                          "user": Object {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion",
+                          },
+                        },
+                        "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+                        "message": "Commit without pull request.",
+                        "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
+                        "parents": Array [],
+                        "url": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+                      },
+                      Object {
+                        "__typename": "Commit",
+                        "author": Object {
+                          "date": "2018-02-28T00:42:09-08:00",
+                          "user": Object {
+                            "__typename": "User",
+                            "id": "MDQ6VXNlcjE0MDAwMjM=",
+                            "login": "decentralion",
+                            "url": "https://github.com/decentralion",
+                          },
+                        },
+                        "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
+                        "message": "Add README, merge via PR.",
+                        "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+                        "parents": Array [
+                          Object {
+                            "__typename": "Commit",
+                            "author": Object {
+                              "date": "2018-02-28T00:41:11-08:00",
+                              "user": Object {
+                                "__typename": "User",
+                                "id": "MDQ6VXNlcjE0MDAwMjM=",
+                                "login": "decentralion",
+                                "url": "https://github.com/decentralion",
+                              },
+                            },
+                            "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+                            "message": "Commit without pull request.",
+                            "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
+                            "parents": Array [],
+                            "url": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+                          },
+                        ],
+                        "url": "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+                      },
+                    ],
+                    "url": "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+                  },
+                ],
+                "url": "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+              },
+            ],
+            "url": "https://github.com/sourcecred/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86",
+          },
+        ],
+        "url": "https://github.com/sourcecred/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+      },
+    },
+    "id": "MDEwOlJlcG9zaXRvcnkxMjMyNTUwMDY=",
+    "issues": Array [
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "This is just an example issue.",
+        "comments": Array [],
+        "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
+        "number": 1,
+        "reactions": Array [
+          Object {
+            "__typename": "Reaction",
+            "content": "LAUGH",
+            "id": "MDg6UmVhY3Rpb24yOTQwMjEwNw==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+          Object {
+            "__typename": "Reaction",
+            "content": "HEART",
+            "id": "MDg6UmVhY3Rpb24yOTQwMjEwOQ==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+        ],
+        "title": "An example issue.",
+        "url": "https://github.com/sourcecred/example-github/issues/1",
+      },
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "This issue references another issue, namely #1",
+        "comments": Array [
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-github/issues/6",
+            "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "We might also reference individual comments directly.
+https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
+            "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768850",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "Here's a PR by direct url: https://github.com/sourcecred/example-github/pull/5",
+            "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjE4NQ==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576185",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "a PR review by url: https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+            "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjIyMA==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576220",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "a PR Review Comment by url: https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+            "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjI0OA==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576248",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "a user by url: https://github.com/wchargin",
+            "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjI3Mw==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576273",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "Here are several references:
+#1 
+#2
+#3 
+
+https://github.com/sourcecred/example-github/pull/5#discussion_r171460198
+https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899
+",
+            "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjkyMA==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "This comment has no references.",
+            "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjkzNg==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576936",
+          },
+        ],
+        "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+        "number": 2,
+        "reactions": Array [],
+        "title": "A referencing issue.",
+        "url": "https://github.com/sourcecred/example-github/issues/2",
+      },
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "Alas, its life as an open issue had only just begun.",
+        "comments": Array [],
+        "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
+        "number": 4,
+        "reactions": Array [],
+        "title": "A closed pull request",
+        "url": "https://github.com/sourcecred/example-github/issues/4",
+      },
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "This issue shall shortly have a few comments.",
+        "comments": Array [
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "A wild COMMENT appeared!",
+            "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODQ0Mg==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "And the maintainer said, \\"Let there be comments!\\"",
+            "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODUzOA==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "This comment references an #2, which itself references an issue. This comment is thus allows us to test that in-references are not included when requesting a Post's references.",
+            "id": "MDEyOklzc3VlQ29tbWVudDM4NTIyMzMxNg==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjQyODE5Mzgy",
+              "login": "credbot",
+              "url": "https://github.com/credbot",
+            },
+            "body": "Hi! I'm a bot! Beep boop beep!!",
+            "id": "MDEyOklzc3VlQ29tbWVudDQxNzEwNDA0Nw==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/6#issuecomment-417104047",
+          },
+        ],
+        "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
+        "number": 6,
+        "reactions": Array [],
+        "title": "An issue with comments",
+        "url": "https://github.com/sourcecred/example-github/issues/6",
+      },
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "Deal with this, naive string display algorithms!!!!!",
+        "comments": Array [],
+        "id": "MDU6SXNzdWUzMDY5ODM1NTI=",
+        "number": 7,
+        "reactions": Array [],
+        "title": "An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
+        "url": "https://github.com/sourcecred/example-github/issues/7",
+      },
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️
+Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+        "comments": Array [],
+        "id": "MDU6SXNzdWUzMDY5ODUzNjc=",
+        "number": 8,
+        "reactions": Array [],
+        "title": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+        "url": "https://github.com/sourcecred/example-github/issues/8",
+      },
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "This issue was paired with @wchargin 
+
+It also attempts to reference itself: #10
+
+It also references something twice: #2 #2 ",
+        "comments": Array [],
+        "id": "MDU6SXNzdWUzMzcwOTU0NzM=",
+        "number": 10,
+        "reactions": Array [],
+        "title": "Paired with multireference",
+        "url": "https://github.com/sourcecred/example-github/issues/10",
+      },
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjQzMTc4MDY=",
+          "login": "wchargin",
+          "url": "https://github.com/wchargin",
+        },
+        "body": "@wchargin-ghost002, show yourself.",
+        "comments": Array [
+          Object {
+            "__typename": "IssueComment",
+            "author": null,
+            "body": "Hello. :ghost: ",
+            "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMTg3Mg==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/11#issuecomment-420811872",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjQzMTc4MDY=",
+              "login": "wchargin",
+              "url": "https://github.com/wchargin",
+            },
+            "body": "[Here is a screenshot of the thread at this point, prior to account deletion.](https://user-images.githubusercontent.com/4317806/45455614-8c4fe600-b69c-11e8-902e-aec65d7403e6.png)
+
+The user has GraphQL ID \`MDQ6VXNlcjQzMjIyMTkw\` and database ID \`43222190\`.
+
+The previous comment has GraphQL ID \`MDEyOklzc3VlQ29tbWVudDQyMDgxMTg3Mg==\` and database \`420811872\`.
+",
+            "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMzAxMw==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813013",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": null,
+            "body": "My time in this life draws to a close. :wave: ",
+            "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMzIwNg==",
+            "reactions": Array [
+              Object {
+                "__typename": "Reaction",
+                "content": "THUMBS_UP",
+                "id": "MDg6UmVhY3Rpb24yOTQ1MDk5Nw==",
+                "user": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjE0MDAwMjM=",
+                  "login": "decentralion",
+                  "url": "https://github.com/decentralion",
+                },
+              },
+              Object {
+                "__typename": "Reaction",
+                "content": "THUMBS_DOWN",
+                "id": "MDg6UmVhY3Rpb24yOTQ1MTAwMQ==",
+                "user": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjE0MDAwMjM=",
+                  "login": "decentralion",
+                  "url": "https://github.com/decentralion",
+                },
+              },
+              Object {
+                "__typename": "Reaction",
+                "content": "LAUGH",
+                "id": "MDg6UmVhY3Rpb24yOTQ1MTAwMw==",
+                "user": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjE0MDAwMjM=",
+                  "login": "decentralion",
+                  "url": "https://github.com/decentralion",
+                },
+              },
+              Object {
+                "__typename": "Reaction",
+                "content": "HOORAY",
+                "id": "MDg6UmVhY3Rpb24yOTQ1MTAwOA==",
+                "user": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjE0MDAwMjM=",
+                  "login": "decentralion",
+                  "url": "https://github.com/decentralion",
+                },
+              },
+            ],
+            "url": "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206",
+          },
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": ":skull: :ghost:
+RIP",
+            "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMzYyMQ==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813621",
+          },
+        ],
+        "id": "MDU6SXNzdWUzNTk2Njc4Mjk=",
+        "number": 11,
+        "reactions": Array [],
+        "title": "An issue with a comment from a deleted user",
+        "url": "https://github.com/sourcecred/example-github/issues/11",
+      },
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "By url: https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780
+
+By hash: ecc889dc94cf6da17ae6eab5bb7b7155f577519d
+
+Hash from another repo: 3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f (example-git in this case)",
+        "comments": Array [],
+        "id": "MDU6SXNzdWUzNjAwOTExMDc=",
+        "number": 12,
+        "reactions": Array [
+          Object {
+            "__typename": "Reaction",
+            "content": "THUMBS_UP",
+            "id": "MDg6UmVhY3Rpb24yOTQwMjEwMw==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+        ],
+        "title": "An issue with commit references",
+        "url": "https://github.com/sourcecred/example-github/issues/12",
+      },
+      Object {
+        "__typename": "Issue",
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "I'm reacting to this with every emoji.",
+        "comments": Array [],
+        "id": "MDU6SXNzdWUzNjAwOTEzMTQ=",
+        "number": 13,
+        "reactions": Array [
+          Object {
+            "__typename": "Reaction",
+            "content": "THUMBS_UP",
+            "id": "MDg6UmVhY3Rpb24yOTQwMjEzNA==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+          Object {
+            "__typename": "Reaction",
+            "content": "THUMBS_DOWN",
+            "id": "MDg6UmVhY3Rpb24yOTQwMjEzOQ==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+          Object {
+            "__typename": "Reaction",
+            "content": "LAUGH",
+            "id": "MDg6UmVhY3Rpb24yOTQwMjE0MA==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+          Object {
+            "__typename": "Reaction",
+            "content": "HOORAY",
+            "id": "MDg6UmVhY3Rpb24yOTQwMjE0MQ==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+          Object {
+            "__typename": "Reaction",
+            "content": "CONFUSED",
+            "id": "MDg6UmVhY3Rpb24yOTQwMjE0NQ==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+          Object {
+            "__typename": "Reaction",
+            "content": "HEART",
+            "id": "MDg6UmVhY3Rpb24yOTQwMjE0OA==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+        ],
+        "title": "An issue with reactions",
+        "url": "https://github.com/sourcecred/example-github/issues/13",
+      },
+    ],
+    "name": "example-github",
+    "owner": Object {
+      "__typename": "Organization",
+      "id": "MDEyOk9yZ2FuaXphdGlvbjM1NzExNjY3",
+      "login": "sourcecred",
+      "url": "https://github.com/sourcecred",
+    },
+    "pullRequests": Array [
+      Object {
+        "__typename": "PullRequest",
+        "additions": 1,
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "Oh look, it's a pull request.",
+        "comments": Array [
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+            "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
+            "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
+            "reactions": Array [],
+            "url": "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
+          },
+        ],
+        "deletions": 0,
+        "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
+        "mergeCommit": Object {
+          "__typename": "Commit",
+          "author": Object {
+            "date": "2018-02-28T00:43:47-08:00",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+          "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
+          "message": "Merge pull request #3 from sourcecred/add-readme
+
+Add README, merge via PR.",
+          "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+          "parents": Array [
+            Object {
+              "__typename": "Commit",
+              "author": Object {
+                "date": "2018-02-28T00:41:11-08:00",
+                "user": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjE0MDAwMjM=",
+                  "login": "decentralion",
+                  "url": "https://github.com/decentralion",
+                },
+              },
+              "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+              "message": "Commit without pull request.",
+              "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
+              "parents": Array [],
+              "url": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+            },
+            Object {
+              "__typename": "Commit",
+              "author": Object {
+                "date": "2018-02-28T00:42:09-08:00",
+                "user": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjE0MDAwMjM=",
+                  "login": "decentralion",
+                  "url": "https://github.com/decentralion",
+                },
+              },
+              "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
+              "message": "Add README, merge via PR.",
+              "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+              "parents": Array [
+                Object {
+                  "__typename": "Commit",
+                  "author": Object {
+                    "date": "2018-02-28T00:41:11-08:00",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjE0MDAwMjM=",
+                      "login": "decentralion",
+                      "url": "https://github.com/decentralion",
+                    },
+                  },
+                  "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+                  "message": "Commit without pull request.",
+                  "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
+                  "parents": Array [],
+                  "url": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+                },
+              ],
+              "url": "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+            },
+          ],
+          "url": "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+        },
+        "number": 3,
+        "reactions": Array [],
+        "reviews": Array [],
+        "title": "Add README, merge via PR.",
+        "url": "https://github.com/sourcecred/example-github/pull/3",
+      },
+      Object {
+        "__typename": "PullRequest",
+        "additions": 1,
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "@wchargin could you please do the following:
+- add a commit comment
+- add a review comment requesting some trivial change
+- i'll change it
+- then approve the pr",
+        "comments": Array [
+          Object {
+            "__typename": "IssueComment",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjQzMTc4MDY=",
+              "login": "wchargin",
+              "url": "https://github.com/wchargin",
+            },
+            "body": "In retrospect, this was an excellent PR.",
+            "id": "MDEyOklzc3VlQ29tbWVudDM5NjQzMDQ2NA==",
+            "reactions": Array [
+              Object {
+                "__typename": "Reaction",
+                "content": "HEART",
+                "id": "MDg6UmVhY3Rpb24yOTQ1MTA1Mw==",
+                "user": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjE0MDAwMjM=",
+                  "login": "decentralion",
+                  "url": "https://github.com/decentralion",
+                },
+              },
+              Object {
+                "__typename": "Reaction",
+                "content": "CONFUSED",
+                "id": "MDg6UmVhY3Rpb24yOTQ1MTA1NQ==",
+                "user": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjE0MDAwMjM=",
+                  "login": "decentralion",
+                  "url": "https://github.com/decentralion",
+                },
+              },
+            ],
+            "url": "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
+          },
+        ],
+        "deletions": 0,
+        "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
+        "mergeCommit": Object {
+          "__typename": "Commit",
+          "author": Object {
+            "date": "2018-02-28T20:25:54-08:00",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+          "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
+          "message": "This pull request will be more contentious. I can feel it... (#5)
+
+* This pull request will be more contentious. I can feel it...
+
+* Address wchargin's unreasonable complaints",
+          "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+          "parents": Array [
+            Object {
+              "__typename": "Commit",
+              "author": Object {
+                "date": "2018-02-28T00:43:47-08:00",
+                "user": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjE0MDAwMjM=",
+                  "login": "decentralion",
+                  "url": "https://github.com/decentralion",
+                },
+              },
+              "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
+              "message": "Merge pull request #3 from sourcecred/add-readme
+
+Add README, merge via PR.",
+              "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+              "parents": Array [
+                Object {
+                  "__typename": "Commit",
+                  "author": Object {
+                    "date": "2018-02-28T00:41:11-08:00",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjE0MDAwMjM=",
+                      "login": "decentralion",
+                      "url": "https://github.com/decentralion",
+                    },
+                  },
+                  "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+                  "message": "Commit without pull request.",
+                  "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
+                  "parents": Array [],
+                  "url": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+                },
+                Object {
+                  "__typename": "Commit",
+                  "author": Object {
+                    "date": "2018-02-28T00:42:09-08:00",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjE0MDAwMjM=",
+                      "login": "decentralion",
+                      "url": "https://github.com/decentralion",
+                    },
+                  },
+                  "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
+                  "message": "Add README, merge via PR.",
+                  "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+                  "parents": Array [
+                    Object {
+                      "__typename": "Commit",
+                      "author": Object {
+                        "date": "2018-02-28T00:41:11-08:00",
+                        "user": Object {
+                          "__typename": "User",
+                          "id": "MDQ6VXNlcjE0MDAwMjM=",
+                          "login": "decentralion",
+                          "url": "https://github.com/decentralion",
+                        },
+                      },
+                      "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+                      "message": "Commit without pull request.",
+                      "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
+                      "parents": Array [],
+                      "url": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+                    },
+                  ],
+                  "url": "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+                },
+              ],
+              "url": "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+            },
+          ],
+          "url": "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+        },
+        "number": 5,
+        "reactions": Array [],
+        "reviews": Array [
+          Object {
+            "__typename": "PullRequestReview",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjQzMTc4MDY=",
+              "login": "wchargin",
+              "url": "https://github.com/wchargin",
+            },
+            "body": "hmmm.jpg",
+            "comments": Array [
+              Object {
+                "__typename": "PullRequestReviewComment",
+                "author": Object {
+                  "__typename": "User",
+                  "id": "MDQ6VXNlcjQzMTc4MDY=",
+                  "login": "wchargin",
+                  "url": "https://github.com/wchargin",
+                },
+                "body": "seems a bit capricious",
+                "id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==",
+                "reactions": Array [
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "THUMBS_UP",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI1MQ==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjQzMTc4MDY=",
+                      "login": "wchargin",
+                      "url": "https://github.com/wchargin",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "THUMBS_DOWN",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI1NA==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjQzMTc4MDY=",
+                      "login": "wchargin",
+                      "url": "https://github.com/wchargin",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "THUMBS_UP",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI1NQ==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjE0MDAwMjM=",
+                      "login": "decentralion",
+                      "url": "https://github.com/decentralion",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "LAUGH",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI1Nw==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjQzMTc4MDY=",
+                      "login": "wchargin",
+                      "url": "https://github.com/wchargin",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "THUMBS_DOWN",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI1OA==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjE0MDAwMjM=",
+                      "login": "decentralion",
+                      "url": "https://github.com/decentralion",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "HOORAY",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI1OQ==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjQzMTc4MDY=",
+                      "login": "wchargin",
+                      "url": "https://github.com/wchargin",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "LAUGH",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI2MQ==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjE0MDAwMjM=",
+                      "login": "decentralion",
+                      "url": "https://github.com/decentralion",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "CONFUSED",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI2NQ==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjQzMTc4MDY=",
+                      "login": "wchargin",
+                      "url": "https://github.com/wchargin",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "HOORAY",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI2Ng==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjE0MDAwMjM=",
+                      "login": "decentralion",
+                      "url": "https://github.com/decentralion",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "HEART",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI2OA==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjQzMTc4MDY=",
+                      "login": "wchargin",
+                      "url": "https://github.com/wchargin",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "CONFUSED",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI2OQ==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjE0MDAwMjM=",
+                      "login": "decentralion",
+                      "url": "https://github.com/decentralion",
+                    },
+                  },
+                  Object {
+                    "__typename": "Reaction",
+                    "content": "HEART",
+                    "id": "MDg6UmVhY3Rpb24yOTU5NTI3NA==",
+                    "user": Object {
+                      "__typename": "User",
+                      "id": "MDQ6VXNlcjE0MDAwMjM=",
+                      "login": "decentralion",
+                      "url": "https://github.com/decentralion",
+                    },
+                  },
+                ],
+                "url": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+              },
+            ],
+            "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5",
+            "state": "CHANGES_REQUESTED",
+            "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+          },
+          Object {
+            "__typename": "PullRequestReview",
+            "author": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjQzMTc4MDY=",
+              "login": "wchargin",
+              "url": "https://github.com/wchargin",
+            },
+            "body": "I'm sold",
+            "comments": Array [],
+            "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4",
+            "state": "APPROVED",
+            "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038",
+          },
+        ],
+        "title": "This pull request will be more contentious. I can feel it...",
+        "url": "https://github.com/sourcecred/example-github/pull/5",
+      },
+      Object {
+        "__typename": "PullRequest",
+        "additions": 3,
+        "author": Object {
+          "__typename": "User",
+          "id": "MDQ6VXNlcjE0MDAwMjM=",
+          "login": "decentralion",
+          "url": "https://github.com/decentralion",
+        },
+        "body": "Nominally paired with @wchargin",
+        "comments": Array [],
+        "deletions": 0,
+        "id": "MDExOlB1bGxSZXF1ZXN0MTg1ODA2MTU3",
+        "mergeCommit": null,
+        "number": 9,
+        "reactions": Array [
+          Object {
+            "__typename": "Reaction",
+            "content": "HEART",
+            "id": "MDg6UmVhY3Rpb24yOTQ1MTAxMg==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+          Object {
+            "__typename": "Reaction",
+            "content": "THUMBS_UP",
+            "id": "MDg6UmVhY3Rpb24yOTQ1MTAxNA==",
+            "user": Object {
+              "__typename": "User",
+              "id": "MDQ6VXNlcjE0MDAwMjM=",
+              "login": "decentralion",
+              "url": "https://github.com/decentralion",
+            },
+          },
+        ],
+        "reviews": Array [],
+        "title": "An unmerged pull request",
+        "url": "https://github.com/sourcecred/example-github/pull/9",
+      },
+    ],
+    "url": "https://github.com/sourcecred/example-github",
+  },
+  "warnings": Array [],
+}
+`;
