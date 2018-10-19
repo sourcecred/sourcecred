@@ -808,6 +808,15 @@ export class Mirror {
     }
     const b = Queries.build;
     switch (type.type) {
+      case "SCALAR":
+        throw new Error(
+          "Cannot create selections for scalar type: " +
+            JSON.stringify(typename)
+        );
+      case "ENUM":
+        throw new Error(
+          "Cannot create selections for enum type: " + JSON.stringify(typename)
+        );
       case "OBJECT":
         return [b.field("__typename"), b.field("id")];
       case "UNION":
@@ -1831,6 +1840,12 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
   for (const typename of Object.keys(schema)) {
     const type = schema[typename];
     switch (type.type) {
+      case "SCALAR":
+        // Nothing to do.
+        break;
+      case "ENUM":
+        // Nothing to do.
+        break;
       case "OBJECT": {
         const entry: {|
           +fields: {|+[Schema.Fieldname]: Schema.FieldType|},

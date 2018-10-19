@@ -32,6 +32,9 @@ export type ObjectId = string;
 //   - Connections are supported as object fields, but arbitrary lists
 //     are not.
 //
+// Primitive and enum fields on an object type may optionally be
+// annotated with their representations.
+//
 // To accommodate schemata where some object types do not have IDs,
 // objects may have "nested" fields of primitive or node-reference type.
 // These may be nested to depth exactly 1. Suppose that `Foo` is an
@@ -46,6 +49,8 @@ export type ObjectId = string;
 // contains the eggs.)
 export type Schema = {+[Typename]: NodeType};
 export type NodeType =
+  | {|+type: "SCALAR", +representation: "string" | "number" | "boolean"|}
+  | {|+type: "ENUM", +values: {|+[string]: true|}|}
   | {|+type: "OBJECT", +fields: {|+[Fieldname]: FieldType|}|}
   | {|+type: "UNION", +clauses: {|+[Typename]: true|}|};
 
@@ -56,7 +61,14 @@ export type FieldType =
   | ConnectionFieldType
   | NestedFieldType;
 export type IdFieldType = {|+type: "ID"|};
-export type PrimitiveFieldType = {|+type: "PRIMITIVE"|};
+export type PrimitiveFieldType = {|
+  +type: "PRIMITIVE",
+  +annotation: null | PrimitiveTypeAnnotation,
+|};
+export type PrimitiveTypeAnnotation = {|
+  +nonNull: boolean,
+  +elementType: Typename,
+|};
 export type NodeFieldType = {|+type: "NODE", +elementType: Typename|};
 export type ConnectionFieldType = {|
   +type: "CONNECTION",
@@ -76,7 +88,89 @@ export function schema(types: {[Typename]: NodeType}): Schema {
   for (const typename of Object.keys(types)) {
     const type = types[typename];
     switch (type.type) {
+      case "SCALAR":
+        result[typename] = {
+          type: "SCALAR",
+          representation: type.representation,
+        };
+        break;
+      case "ENUM":
+        result[typename] = {type: "ENUM", values: {...type.values}};
+        break;
       case "OBJECT":
+        for (const fieldname of Object.keys(type.fields)) {
+          const field = type.fields[fieldname];
+          function assertKind(path, elementTypename, validKinds) {
+            const self = `field ${path
+              .map((x) => JSON.stringify(x))
+              .join("/")}`;
+            const elementType = types[elementTypename];
+            if (elementType == null) {
+              throw new Error(`${self} has unknown type: "${elementTypename}"`);
+            }
+            if (!validKinds.includes(elementType.type)) {
+              throw new Error(
+                `${self} has invalid type "${elementTypename}" ` +
+                  `of kind "${elementType.type}"`
+              );
+            }
+          }
+          switch (field.type) {
+            case "ID":
+              // Nothing to check.
+              break;
+            case "PRIMITIVE":
+              if (field.annotation != null) {
+                assertKind(
+                  [typename, fieldname],
+                  field.annotation.elementType,
+                  ["SCALAR", "ENUM"]
+                );
+              }
+              break;
+            case "NODE":
+              assertKind([typename, fieldname], field.elementType, [
+                "OBJECT",
+                "UNION",
+              ]);
+              break;
+            case "CONNECTION":
+              assertKind([typename, fieldname], field.elementType, [
+                "OBJECT",
+                "UNION",
+              ]);
+              break;
+            case "NESTED":
+              for (const eggName of Object.keys(field.eggs)) {
+                const egg = field.eggs[eggName];
+                switch (egg.type) {
+                  case "PRIMITIVE":
+                    if (egg.annotation != null) {
+                      assertKind(
+                        [typename, fieldname, eggName],
+                        egg.annotation.elementType,
+                        ["SCALAR", "ENUM"]
+                      );
+                    }
+                    break;
+                  case "NODE":
+                    assertKind(
+                      [typename, fieldname, eggName],
+                      egg.elementType,
+                      ["OBJECT", "UNION"]
+                    );
+                    break;
+                  // istanbul ignore next: unreachable per Flow
+                  default:
+                    throw new Error((egg.type: empty));
+                }
+              }
+              break;
+            // istanbul ignore next: unreachable per Flow
+            default:
+              throw new Error((field.type: empty));
+          }
+        }
         result[typename] = {type: "OBJECT", fields: {...type.fields}};
         break;
       case "UNION":
@@ -106,6 +200,21 @@ export function schema(types: {[Typename]: NodeType}): Schema {
   }
   return result;
 }
+
+export function scalar(
+  representation: "string" | "number" | "boolean"
+): NodeType {
+  return {type: "SCALAR", representation};
+}
+
+function enum_(values: $ReadOnlyArray<string>): NodeType {
+  const valuesObject: {|[string]: true|} = ({}: any);
+  for (const v of values) {
+    valuesObject[v] = true;
+  }
+  return {type: "ENUM", values: valuesObject};
+}
+export {enum_ as enum};
 
 export function object(fields: {[Fieldname]: FieldType}): NodeType {
   for (const fieldname of Object.keys(fields)) {
@@ -141,8 +250,10 @@ export function id(): IdFieldType {
   return {type: "ID"};
 }
 
-export function primitive(): PrimitiveFieldType {
-  return {type: "PRIMITIVE"};
+export function primitive(
+  annotation?: PrimitiveTypeAnnotation
+): PrimitiveFieldType {
+  return {type: "PRIMITIVE", annotation: annotation || null};
 }
 
 export function node(elementType: Typename): NodeFieldType {
@@ -151,6 +262,14 @@ export function node(elementType: Typename): NodeFieldType {
 
 export function connection(elementType: Typename): ConnectionFieldType {
   return {type: "CONNECTION", elementType};
+}
+
+export function nonNull(elementType: Typename): PrimitiveTypeAnnotation {
+  return {nonNull: true, elementType};
+}
+
+export function nullable(elementType: Typename): PrimitiveTypeAnnotation {
+  return {nonNull: false, elementType};
 }
 
 export function nested(eggs: {
