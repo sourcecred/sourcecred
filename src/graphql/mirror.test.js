@@ -41,6 +41,16 @@ describe("graphql/mirror", () => {
   function buildGithubSchema(): Schema.Schema {
     const s = Schema;
     const types: {[Schema.Typename]: Schema.NodeType} = {
+      URI: s.scalar("string"),
+      Date: s.scalar("string"),
+      ReactionContent: s.enum([
+        "THUMBS_UP",
+        "THUMBS_DOWN",
+        "LAUGH",
+        "HOORAY",
+        "CONFUSED",
+        "HEART",
+      ]),
       Repository: s.object({
         id: s.id(),
         url: s.primitive(),
@@ -48,7 +58,7 @@ describe("graphql/mirror", () => {
       }),
       Issue: s.object({
         id: s.id(),
-        url: s.primitive(),
+        url: s.primitive(s.nonNull("URI")),
         author: s.node("Actor"),
         repository: s.node("Repository"),
         title: s.primitive(),
@@ -64,7 +74,7 @@ describe("graphql/mirror", () => {
         id: s.id(),
         oid: s.primitive(),
         author: /* GitActor */ s.nested({
-          date: s.primitive(),
+          date: s.primitive(s.nonNull("Date")),
           user: s.node("User"),
         }),
       }),
@@ -1141,6 +1151,20 @@ describe("graphql/mirror", () => {
         expect(() => {
           mirror._queryShallow("Wat");
         }).toThrow('No such type: "Wat"');
+      });
+      it("fails when given a scalar type", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._queryShallow("Date");
+        }).toThrow('Cannot create selections for scalar type: "Date"');
+      });
+      it("fails when given an enum type", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(() => {
+          mirror._queryShallow("ReactionContent");
+        }).toThrow('Cannot create selections for enum type: "ReactionContent"');
       });
       it("handles an object type", () => {
         const db = new Database(":memory:");
@@ -3143,7 +3167,7 @@ describe("graphql/mirror", () => {
       expect(result.objectTypes["Commit"].nestedFieldNames).toEqual(["author"]);
       expect(result.objectTypes["Commit"].nestedFields).toEqual({
         author: {
-          primitives: {date: Schema.primitive()},
+          primitives: {date: Schema.primitive(Schema.nonNull("Date"))},
           nodes: {user: Schema.node("User")},
         },
       });

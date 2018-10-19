@@ -6,6 +6,8 @@ describe("graphql/schema", () => {
   function buildGithubTypes(): {[Schema.Typename]: Schema.NodeType} {
     const s = Schema;
     return {
+      DateTime: s.scalar("string"),
+      Color: s.enum(["RED", "GREEN", "BLUE"]),
       Repository: s.object({
         id: s.id(),
         url: s.primitive(),
@@ -23,7 +25,7 @@ describe("graphql/schema", () => {
         id: s.id(),
         oid: s.primitive(),
         author: /* GitActor */ s.nested({
-          date: s.primitive(),
+          date: s.primitive(s.nonNull("DateTime")),
           user: s.node("User"),
         }),
       }),
@@ -47,6 +49,15 @@ describe("graphql/schema", () => {
         id: s.id(),
         url: s.primitive(),
         login: s.primitive(),
+      }),
+      ColorPalette: s.object({
+        id: s.id(),
+        currentColor: s.primitive(s.nonNull("Color")),
+        favoriteColor: s.primitive(s.nullable("Color")),
+        nested: s.nested({
+          exists: s.primitive(),
+          forall: s.primitive(s.nonNull("Color")),
+        }),
       }),
     };
   }
@@ -84,6 +95,160 @@ describe("graphql/schema", () => {
       const schema = buildGithubSchema();
       expect(JSON.parse(JSON.stringify(schema))).toEqual(schema);
     });
+    it("disallows objects with primitives of unknown type", () => {
+      const s = Schema;
+      const types = {
+        O: s.object({id: s.id(), foo: s.primitive(s.nonNull("Wat"))}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has unknown type: "Wat"'
+      );
+    });
+    it("disallows objects with primitives of object type", () => {
+      const s = Schema;
+      const types = {
+        O: s.object({id: s.id(), foo: s.primitive(s.nonNull("O"))}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has invalid type "O" of kind "OBJECT"'
+      );
+    });
+    it("disallows objects with primitives of union type", () => {
+      const s = Schema;
+      const types = {
+        U: s.union(["O"]),
+        O: s.object({id: s.id(), foo: s.primitive(s.nonNull("U"))}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has invalid type "U" of kind "UNION"'
+      );
+    });
+    it("disallows objects with node fields of unknown type", () => {
+      const s = Schema;
+      const types = {
+        O: s.object({id: s.id(), foo: s.node("Wat")}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has unknown type: "Wat"'
+      );
+    });
+    it("disallows objects with node fields of scalar type", () => {
+      const s = Schema;
+      const types = {
+        DateTime: s.scalar("string"),
+        O: s.object({id: s.id(), foo: s.node("DateTime")}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has invalid type "DateTime" of kind "SCALAR"'
+      );
+    });
+    it("disallows objects with node fields of enum type", () => {
+      const s = Schema;
+      const types = {
+        Color: s.enum(["RED", "GREEN", "BLUE"]),
+        O: s.object({id: s.id(), foo: s.node("Color")}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has invalid type "Color" of kind "ENUM"'
+      );
+    });
+    it("disallows objects with connection fields of unknown type", () => {
+      const s = Schema;
+      const types = {
+        O: s.object({id: s.id(), foo: s.connection("Wat")}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has unknown type: "Wat"'
+      );
+    });
+    it("disallows objects with connection fields of scalar type", () => {
+      const s = Schema;
+      const types = {
+        DateTime: s.scalar("string"),
+        O: s.object({id: s.id(), foo: s.connection("DateTime")}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has invalid type "DateTime" of kind "SCALAR"'
+      );
+    });
+    it("disallows objects with connection fields of enum type", () => {
+      const s = Schema;
+      const types = {
+        Color: s.enum(["RED", "GREEN", "BLUE"]),
+        O: s.object({id: s.id(), foo: s.connection("Color")}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has invalid type "Color" of kind "ENUM"'
+      );
+    });
+
+    it("disallows objects with egg primitives of unknown type", () => {
+      const s = Schema;
+      const types = {
+        O: s.object({
+          id: s.id(),
+          foo: s.nested({bar: s.primitive(s.nonNull("Wat"))}),
+        }),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo"/"bar" has unknown type: "Wat"'
+      );
+    });
+    it("disallows objects with egg primitives of object type", () => {
+      const s = Schema;
+      const types = {
+        O: s.object({
+          id: s.id(),
+          foo: s.nested({bar: s.primitive(s.nonNull("O"))}),
+        }),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo"/"bar" has invalid type "O" of kind "OBJECT"'
+      );
+    });
+    it("disallows objects with egg primitives of union type", () => {
+      const s = Schema;
+      const types = {
+        U: s.union(["O"]),
+        O: s.object({
+          id: s.id(),
+          foo: s.nested({bar: s.primitive(s.nonNull("U"))}),
+        }),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo"/"bar" has invalid type "U" of kind "UNION"'
+      );
+    });
+    it("disallows objects with egg node fields of unknown type", () => {
+      const s = Schema;
+      const types = {
+        O: s.object({id: s.id(), foo: s.nested({bar: s.node("Wat")})}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo"/"bar" has unknown type: "Wat"'
+      );
+    });
+    it("disallows objects with egg node fields of scalar type", () => {
+      const s = Schema;
+      const types = {
+        DateTime: s.scalar("string"),
+        O: s.object({id: s.id(), foo: s.nested({bar: s.node("DateTime")})}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo"/"bar" has invalid type "DateTime" of kind "SCALAR"'
+      );
+    });
+    it("disallows objects with egg node fields of enum type", () => {
+      const s = Schema;
+      const types = {
+        Color: s.enum(["RED", "GREEN", "BLUE"]),
+        O: s.object({id: s.id(), foo: s.nested({bar: s.node("Color")})}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo"/"bar" has invalid type "Color" of kind "ENUM"'
+      );
+    });
+
     it("disallows unions with unknown clauses", () => {
       const s = Schema;
       const types = {
