@@ -16,7 +16,7 @@ describe("plugins/github/relationalView", () => {
         expect(all.length).toMatchSnapshot();
       });
       it("have expected urls", () => {
-        expect(all.map((x) => x.url())).toMatchSnapshot();
+        expect(all.map((x) => x.url()).sort()).toMatchSnapshot();
       });
     });
   }
@@ -53,7 +53,7 @@ describe("plugins/github/relationalView", () => {
           expect(get(one.address())).toEqual(one);
         });
         it("they have expected urls", () => {
-          expect(all.map((x) => x.url())).toMatchSnapshot();
+          expect(all.map((x) => x.url()).sort()).toMatchSnapshot();
         });
       });
     }
