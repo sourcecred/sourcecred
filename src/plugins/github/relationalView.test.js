@@ -355,4 +355,29 @@ describe("plugins/github/relationalView", () => {
       expect(json1).toEqual(json2);
     });
   });
+
+  describe("expectAllNonNull", () => {
+    it("returns non-null elements unscathed, with no warnings", () => {
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+      jest.spyOn(console, "error").mockImplementation(() => {});
+
+      const o = {__typename: "X", id: "x", xs: [1, 2]};
+      expect(R.expectAllNonNull(o, "xs", o.xs)).toEqual([1, 2]);
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
+    });
+
+    it("filters out nulls, issuing a warning", () => {
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+      jest.spyOn(console, "error").mockImplementation(() => {});
+
+      const o = {__typename: "X", id: "x", xs: [1, null, 3, null]};
+      expect(R.expectAllNonNull(o, "xs", o.xs)).toEqual([1, 3]);
+      expect(console.warn).toHaveBeenCalledTimes(2);
+      expect(console.warn).toHaveBeenCalledWith(
+        "X[x].xs: unexpected null value"
+      );
+      expect(console.error).not.toHaveBeenCalled();
+    });
+  });
 });

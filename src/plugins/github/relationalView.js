@@ -15,22 +15,14 @@ import type {
   CommentAddress,
   UserlikeAddress,
 } from "./nodes";
-import type {
-  GithubResponseJSON,
-  RepositoryJSON,
-  IssueJSON,
-  PullJSON,
-  ReviewJSON,
-  CommentJSON,
-  CommitJSON,
-  NullableAuthorJSON,
-  ReviewState,
-  ReactionJSON,
-  ReactionContent,
-} from "./graphql";
+import * as T from "./graphqlTypes";
+import type {GithubResponseJSON} from "./graphql";
 import * as GitNode from "../git/nodes";
 import * as MapUtil from "../../util/map";
+import * as NullUtil from "../../util/null";
 import {botSet} from "./bots";
+
+import translateContinuations from "./translateContinuations";
 
 import {
   reviewUrlToId,
@@ -72,7 +64,15 @@ export class RelationalView {
     // state. for example, if called with {repo: {issues: [1,2,3]}} and then with
     // {repo: {issues: [4, 5]}}, then calls to repo.issues() will only give back
     // issues 4 and 5 (although issues 1, 2, and 3 will still be in the view)
-    this._addRepo(data.repository);
+    const {result: repository, warnings} = translateContinuations(data);
+    for (const warning of warnings) {
+      console.warn(stringify(warning));
+    }
+    this.addRepository(repository);
+  }
+
+  addRepository(repository: T.Repository): void {
+    this._addRepo(repository);
     this._addReferences();
   }
 
@@ -293,29 +293,33 @@ export class RelationalView {
     return rv;
   }
 
-  _addRepo(json: RepositoryJSON) {
+  _addRepo(json: T.Repository) {
     const address: RepoAddress = {
       type: N.REPO_TYPE,
-      owner: json.owner.login,
+      owner: NullUtil.get(json.owner).login,
       name: json.name,
     };
     const entry: RepoEntry = {
       address,
       url: json.url,
-      issues: json.issues.nodes.map((x) => this._addIssue(address, x)),
-      pulls: json.pulls.nodes.map((x) => this._addPull(address, x)),
+      issues: expectAllNonNull(json, "issues", json.issues).map((x) =>
+        this._addIssue(address, x)
+      ),
+      pulls: expectAllNonNull(json, "pullRequests", json.pullRequests).map(
+        (x) => this._addPull(address, x)
+      ),
     };
     const raw = N.toRaw(address);
     this._repos.set(raw, entry);
     this._addCommitHistory(json);
   }
 
-  _addCommitHistory(json: RepositoryJSON) {
+  _addCommitHistory(json: T.Repository) {
     if (json.defaultBranchRef != null) {
       const target = json.defaultBranchRef.target;
-      if (target.__typename === "Commit") {
-        target.history.nodes.forEach((commit) => this._addCommit(commit));
-      } else {
+      if (target != null && target.__typename === "Commit") {
+        this._addCommit(target);
+      } else if (target != null) {
         throw new Error(
           dedent`\
             Your repo doesn't have a commit as its defaultBranchRef's target. \
@@ -327,7 +331,7 @@ export class RelationalView {
     }
   }
 
-  _addIssue(repo: RepoAddress, json: IssueJSON): IssueAddress {
+  _addIssue(repo: RepoAddress, json: T.Issue): IssueAddress {
     const address: IssueAddress = {
       type: N.ISSUE_TYPE,
       number: String(json.number),
@@ -336,18 +340,53 @@ export class RelationalView {
     const entry: IssueEntry = {
       address,
       url: json.url,
-      comments: json.comments.nodes.map((x) => this._addComment(address, x)),
+      comments: expectAllNonNull(json, "comments", json.comments).map((x) =>
+        this._addComment(address, x)
+      ),
       authors: this._addNullableAuthor(json.author),
       body: json.body,
       title: json.title,
-      reactions: json.reactions.nodes.map((x) => this._addReaction(x)),
+      reactions: expectAllNonNull(json, "reactions", json.reactions).map((x) =>
+        this._addReaction(x)
+      ),
     };
     this._issues.set(N.toRaw(address), entry);
     return address;
   }
 
-  _addCommit(json: CommitJSON): GitNode.CommitAddress {
+  _addCommit(json: T.Commit): GitNode.CommitAddress {
     const address = {type: GitNode.COMMIT_TYPE, hash: json.oid};
+    const rawAddress = N.toRaw(address);
+    // This fast-return is critical, because a single commit may appear
+    // many times in the repository.
+    //
+    // For example, a repository with 1000 commits, each of which was
+    // created by merging a pull request, will include 1001 structural
+    // references to the root commit (one via the HEAD ref, and one
+    // along a parent-chain from each pull request), so the number of
+    // occurrences of commits can easily be quadratic in the number of
+    // actual commits.
+    //
+    // Furthermore, it can be exponential: consider merge commits like
+    //
+    //     HEAD
+    //     / \
+    //    1A 1B
+    //    | X |
+    //    2A 2B
+    //    | X |
+    //    3A 3B
+    //     \ /
+    //     root
+    //
+    // where each merge commit has two parents. The root commit is
+    // reachable along about 2^(n/2) paths.
+    //
+    // This check ensures that we process each commit edge only once.
+    if (this._commits.has(rawAddress)) {
+      return address;
+    }
+
     const authors =
       json.author == null ? [] : this._addNullableAuthor(json.author.user);
     const entry: CommitEntry = {
@@ -357,10 +396,15 @@ export class RelationalView {
       message: json.message,
     };
     this._commits.set(N.toRaw(address), entry);
+    for (const parent of json.parents) {
+      if (parent != null) {
+        this._addCommit(parent);
+      }
+    }
     return address;
   }
 
-  _addPull(repo: RepoAddress, json: PullJSON): PullAddress {
+  _addPull(repo: RepoAddress, json: T.PullRequest): PullAddress {
     const address: PullAddress = {
       type: N.PULL_TYPE,
       number: String(json.number),
@@ -372,21 +416,27 @@ export class RelationalView {
     const entry: PullEntry = {
       address,
       url: json.url,
-      comments: json.comments.nodes.map((x) => this._addComment(address, x)),
-      reviews: json.reviews.nodes.map((x) => this._addReview(address, x)),
+      comments: expectAllNonNull(json, "comments", json.comments).map((x) =>
+        this._addComment(address, x)
+      ),
+      reviews: expectAllNonNull(json, "reviews", json.reviews).map((x) =>
+        this._addReview(address, x)
+      ),
       authors: this._addNullableAuthor(json.author),
       body: json.body,
       title: json.title,
       mergedAs,
       additions: json.additions,
       deletions: json.deletions,
-      reactions: json.reactions.nodes.map((x) => this._addReaction(x)),
+      reactions: expectAllNonNull(json, "reactions", json.reactions).map((x) =>
+        this._addReaction(x)
+      ),
     };
     this._pulls.set(N.toRaw(address), entry);
     return address;
   }
 
-  _addReview(pull: PullAddress, json: ReviewJSON): ReviewAddress {
+  _addReview(pull: PullAddress, json: T.PullRequestReview): ReviewAddress {
     const address: ReviewAddress = {
       type: N.REVIEW_TYPE,
       id: reviewUrlToId(json.url),
@@ -396,7 +446,9 @@ export class RelationalView {
       address,
       url: json.url,
       state: json.state,
-      comments: json.comments.nodes.map((x) => this._addComment(address, x)),
+      comments: expectAllNonNull(json, "comments", json.comments).map((x) =>
+        this._addComment(address, x)
+      ),
       body: json.body,
       authors: this._addNullableAuthor(json.author),
     };
@@ -406,7 +458,7 @@ export class RelationalView {
 
   _addComment(
     parent: IssueAddress | PullAddress | ReviewAddress,
-    json: CommentJSON
+    json: T.IssueComment | T.PullRequestReviewComment
   ): CommentAddress {
     const id = (function() {
       switch (parent.type) {
@@ -428,13 +480,15 @@ export class RelationalView {
       url: json.url,
       authors: this._addNullableAuthor(json.author),
       body: json.body,
-      reactions: json.reactions.nodes.map((x) => this._addReaction(x)),
+      reactions: expectAllNonNull(json, "reactions", json.reactions).map((x) =>
+        this._addReaction(x)
+      ),
     };
     this._comments.set(N.toRaw(address), entry);
     return address;
   }
 
-  _addReaction(json: ReactionJSON): ReactionRecord {
+  _addReaction(json: T.Reaction): ReactionRecord {
     const authorAddresses = this._addNullableAuthor(json.user);
     if (authorAddresses.length !== 1) {
       throw new Error(
@@ -444,7 +498,7 @@ export class RelationalView {
     return {content: json.content, user: authorAddresses[0]};
   }
 
-  _addNullableAuthor(json: NullableAuthorJSON): UserlikeAddress[] {
+  _addNullableAuthor(json: null | T.Actor): UserlikeAddress[] {
     if (json == null) {
       return [];
     } else {
@@ -639,7 +693,7 @@ export class RelationalView {
 }
 
 type ReactionRecord = {|
-  +content: ReactionContent,
+  +content: T.ReactionContent,
   +user: UserlikeAddress,
 |};
 
@@ -824,7 +878,7 @@ type ReviewEntry = {|
   +body: string,
   +url: string,
   +comments: CommentAddress[],
-  +state: ReviewState,
+  +state: T.PullRequestReviewState,
   +authors: UserlikeAddress[],
 |};
 
@@ -1000,6 +1054,33 @@ export function match<T>(handlers: MatchHandlers<T>, x: Entity): T {
     return handlers.userlike(x);
   }
   throw new Error(`Unexpected entity ${x}`);
+}
+
+/**
+ * Invoke this function when the GitHub GraphQL schema docs indicate
+ * that a connection provides a list of _nullable_ nodes, but we expect
+ * them all to always be non-null.
+ *
+ * This will drop any `null` elements from the provided list, issuing a
+ * warning to stderr if `null`s are found.
+ */
+export function expectAllNonNull<T>(
+  context: {+__typename: string, +id: string},
+  fieldname: string,
+  xs: $ReadOnlyArray<null | T>
+): Array<T> {
+  const result = [];
+  for (const x of xs) {
+    if (x !== null) {
+      result.push(x);
+    } else {
+      console.warn(
+        `${context.__typename}[${context.id}].${fieldname}: ` +
+          "unexpected null value"
+      );
+    }
+  }
+  return result;
 }
 
 export type Entity = Repo | Issue | Pull | Review | Comment | Commit | Userlike;
