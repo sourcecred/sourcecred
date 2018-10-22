@@ -217,12 +217,25 @@ exports[`plugins/github/graphql creates a query 1`] = `
       ...pulls
     }
     defaultBranchRef {
+      id
       target {
         __typename
         ... on Commit {
           history(first: 100) {
             ...commitHistory
           }
+        }
+        ... on Blob {
+          id
+          oid
+        }
+        ... on Tag {
+          id
+          oid
+        }
+        ... on Tree {
+          id
+          oid
         }
       }
     }
