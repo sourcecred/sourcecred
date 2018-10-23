@@ -236,6 +236,10 @@ exports[`plugins/github/relationalView RelationalView entity: comments has expec
 
 exports[`plugins/github/relationalView RelationalView entity: comments they have expected urls 1`] = `
 Array [
+  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420811872",
+  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813013",
+  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206",
+  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813621",
   "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703",
   "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768850",
   "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576185",
@@ -248,13 +252,9 @@ Array [
   "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
   "https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316",
   "https://github.com/sourcecred/example-github/issues/6#issuecomment-417104047",
-  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420811872",
-  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813013",
-  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206",
-  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813621",
   "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
-  "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
   "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+  "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
 ]
 `;
 
@@ -263,11 +263,11 @@ exports[`plugins/github/relationalView RelationalView entity: commits has expect
 exports[`plugins/github/relationalView RelationalView entity: commits they have expected urls 1`] = `
 Array [
   "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
-  "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
   "https://github.com/sourcecred/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+  "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
   "https://github.com/sourcecred/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86",
-  "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
   "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+  "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
 ]
 `;
 
@@ -276,15 +276,15 @@ exports[`plugins/github/relationalView RelationalView entity: issues has expecte
 exports[`plugins/github/relationalView RelationalView entity: issues they have expected urls 1`] = `
 Array [
   "https://github.com/sourcecred/example-github/issues/1",
+  "https://github.com/sourcecred/example-github/issues/10",
+  "https://github.com/sourcecred/example-github/issues/11",
+  "https://github.com/sourcecred/example-github/issues/12",
+  "https://github.com/sourcecred/example-github/issues/13",
   "https://github.com/sourcecred/example-github/issues/2",
   "https://github.com/sourcecred/example-github/issues/4",
   "https://github.com/sourcecred/example-github/issues/6",
   "https://github.com/sourcecred/example-github/issues/7",
   "https://github.com/sourcecred/example-github/issues/8",
-  "https://github.com/sourcecred/example-github/issues/10",
-  "https://github.com/sourcecred/example-github/issues/11",
-  "https://github.com/sourcecred/example-github/issues/12",
-  "https://github.com/sourcecred/example-github/issues/13",
 ]
 `;
 
@@ -319,8 +319,8 @@ exports[`plugins/github/relationalView RelationalView entity: userlikes has expe
 
 exports[`plugins/github/relationalView RelationalView entity: userlikes they have expected urls 1`] = `
 Array [
-  "https://github.com/decentralion",
   "https://github.com/credbot",
+  "https://github.com/decentralion",
   "https://github.com/wchargin",
 ]
 `;
@@ -336,15 +336,15 @@ exports[`plugins/github/relationalView Repo issues has expected number of issues
 exports[`plugins/github/relationalView Repo issues have expected urls 1`] = `
 Array [
   "https://github.com/sourcecred/example-github/issues/1",
+  "https://github.com/sourcecred/example-github/issues/10",
+  "https://github.com/sourcecred/example-github/issues/11",
+  "https://github.com/sourcecred/example-github/issues/12",
+  "https://github.com/sourcecred/example-github/issues/13",
   "https://github.com/sourcecred/example-github/issues/2",
   "https://github.com/sourcecred/example-github/issues/4",
   "https://github.com/sourcecred/example-github/issues/6",
   "https://github.com/sourcecred/example-github/issues/7",
   "https://github.com/sourcecred/example-github/issues/8",
-  "https://github.com/sourcecred/example-github/issues/10",
-  "https://github.com/sourcecred/example-github/issues/11",
-  "https://github.com/sourcecred/example-github/issues/12",
-  "https://github.com/sourcecred/example-github/issues/13",
 ]
 `;
 
