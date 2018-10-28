@@ -1,15 +1,9 @@
 // @flow
 
-import {exampleData} from "./example/example";
-
 import translateContinuations from "./translateContinuations";
 
 describe("plugins/github/translateContinuations", () => {
   describe("translateContinuations", () => {
-    it("works on the example data", () => {
-      expect(translateContinuations(exampleData())).toMatchSnapshot();
-    });
-
     it("raises a warning if the defaultBranchRef is not a commit", () => {
       const exampleData = {
         repository: {

@@ -1,18 +1,18 @@
 // @flow
 
 import {RelationalView} from "../relationalView";
-import type {GithubResponseJSON} from "../graphql";
+import type {Repository} from "../graphqlTypes";
 import {Graph} from "../../../core/graph";
 import cloneDeep from "lodash.clonedeep";
 import {createGraph} from "../createGraph";
 
-export function exampleData(): GithubResponseJSON {
+export function exampleRepository(): Repository {
   return cloneDeep(require("./example-github"));
 }
 
 export function exampleRelationalView(): RelationalView {
   const rv = new RelationalView();
-  rv.addData(exampleData());
+  rv.addRepository(exampleRepository());
   return rv;
 }
 

@@ -24,11 +24,16 @@ export async function loadGithubData(options: Options): Promise<void> {
   // > make requests for a single user or client ID concurrently.
   const responses = [];
   for (const repoId of options.repoIds) {
-    responses.push(await fetchGithubRepo(repoId, options.token));
+    responses.push(
+      await fetchGithubRepo(repoId, {
+        token: options.token,
+        cacheDirectory: options.cacheDirectory,
+      })
+    );
   }
   const view = new RelationalView();
   for (const response of responses) {
-    view.addData(response);
+    view.addRepository(response);
   }
   view.compressByRemovingBody();
   const blob: Uint8Array = pako.gzip(JSON.stringify(view));

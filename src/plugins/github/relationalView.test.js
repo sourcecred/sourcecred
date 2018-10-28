@@ -2,7 +2,7 @@
 
 import * as R from "./relationalView";
 import * as N from "./nodes";
-import {exampleData, exampleRelationalView} from "./example/example";
+import {exampleRepository, exampleRelationalView} from "./example/example";
 import * as MapUtil from "../../util/map";
 
 describe("plugins/github/relationalView", () => {
@@ -276,8 +276,7 @@ describe("plugins/github/relationalView", () => {
 
   describe("reaction detection", () => {
     it("set of all reactions matches snapshot", () => {
-      const view = new R.RelationalView();
-      view.addData(exampleData());
+      const view = exampleRelationalView();
       const urlToReactions = new Map();
       for (const reactable of view.reactableEntities()) {
         const url = reactable.url();
@@ -289,28 +288,26 @@ describe("plugins/github/relationalView", () => {
     });
   });
 
-  it("addData is idempotent", () => {
+  it("addRepository is idempotent", () => {
     const rv1 = new R.RelationalView();
-    rv1.addData(exampleData());
+    rv1.addRepository(exampleRepository());
     const rv2 = new R.RelationalView();
-    rv2.addData(exampleData());
-    rv2.addData(exampleData());
+    rv2.addRepository(exampleRepository());
+    rv2.addRepository(exampleRepository());
     // may be fragile
     expect(rv1).toEqual(rv2);
   });
 
   describe("compressByRemovingBody", () => {
     it("doesn't mutate the original entries", () => {
-      const rv = new R.RelationalView();
-      rv.addData(exampleData());
+      const rv = exampleRelationalView();
       const issue0 = Array.from(rv.issues())[0];
       expect(issue0.body()).not.toEqual("");
       rv.compressByRemovingBody();
       expect(issue0.body()).not.toEqual("");
     });
     it("removes bodies from all posts", () => {
-      const rv = new R.RelationalView();
-      rv.addData(exampleData());
+      const rv = exampleRelationalView();
       function somePostsHaveBodies() {
         for (const posts of [
           rv.issues(),
@@ -331,8 +328,7 @@ describe("plugins/github/relationalView", () => {
       expect(somePostsHaveBodies()).toBe(false);
     });
     it("removes messages from all commits", () => {
-      const rv = new R.RelationalView();
-      rv.addData(exampleData());
+      const rv = exampleRelationalView();
       function someCommitsHaveMessages() {
         for (const commit of rv.commits()) {
           if (commit.message() !== "") {
