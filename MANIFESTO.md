@@ -38,7 +38,7 @@ GitHub and Git, and enables communities to add more contributions that might
 otherwise be missed. It is totally open-source, and invites configuration and
 moderation by every community that uses it.
 
-SourceCred is still in early stages; you can play with a prototype [here](prototype).
+SourceCred is still in early stages; you can play with a prototype [here][prototype].
 Our foundation is set, but there's still a lot of work to do! If you find this vision
 inspiring, we'd love to have you involved. Please drop by our [Discord], say hello on our
 [forums], or check out our [GitHub].
