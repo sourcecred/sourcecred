@@ -51,7 +51,7 @@ inspiring, we'd love to have you involved. Please drop by our [Discord], say hel
 SourceCred is being created by [Protocol Labs]. The project is fully
 open-source, and always will be. We're proud to be working alongside other
 visionary groups focused on empowering open-source, including [Open Collective],
-[GitCoin] and [Open Source Coin](OSCoin).
+[GitCoin] and [Open Source Coin][OSCoin].
 
 [Open Collective]: https://opencollective.com/
 [GitCoin]: https://gitcoin.co/
