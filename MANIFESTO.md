@@ -53,6 +53,7 @@ open-source, and always will be. We're proud to be working alongside other
 visionary groups focused on empowering open-source, including [Open Collective],
 [GitCoin] and [Open Source Coin][OSCoin].
 
+[Protocol Labs]: https://protocol.ai/
 [Open Collective]: https://opencollective.com/
 [GitCoin]: https://gitcoin.co/
 [OSCoin]: http://oscoin.io/
