@@ -3,11 +3,11 @@
 The open-source movement is inspiring. It's amazing that some of our best
 technology is developed in the open, and made freely available to everyone.
 
-Despite this, open-source sees chronically underinvestment, because we lack
+Despite this, open-source sees chronic underinvestment, because we lack
 systems that reward people who contribute to the open-source commons. We
-believe people can and should be paid for their open-source labors of love, and
-want to make open-source truly sustainable by compensating open-source
-maintainers and contributors.
+believe that people can and should be paid for their open-source labors of
+love, and want to make open-source truly sustainable by compensating
+open-source maintainers and contributors.
 
 We believe that recent developments, especially the advent of cryptonetworks,
 create such an opportunity. We imagine a world where any open-source project
@@ -32,7 +32,7 @@ soul.
 
 SourceCred is that system. It operates by discovering every contribution to a
 project, organizing them into a network based on how they depend on each other,
-and then gives every contribution a score based on the importance of the
+and then giving every contribution a score based on the importance of the
 contributions that are connected to it. It starts by finding contributions in
 GitHub and Git, and enables communities to add more contributions that might
 otherwise be missed. It is totally open-source, and invites configuration and
