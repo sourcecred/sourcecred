@@ -4,7 +4,7 @@ import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 import * as MapUtil from "../../../util/map";
 import {NodeTrie, EdgeTrie} from "../../../core/trie";
-import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
+import type {EdgeType, NodeType} from "../../../analysis/types";
 import type {ScoredConnection} from "../../../analysis/pagerankNodeDecomposition";
 
 // Sorted by descending `summary.score`

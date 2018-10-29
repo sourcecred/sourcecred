@@ -2,7 +2,7 @@
 
 import * as MapUtil from "../../../util/map";
 import {type NodeAddressT, type EdgeAddressT} from "../../../core/graph";
-import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
+import type {EdgeType, NodeType} from "../../../analysis/types";
 import type {StaticPluginAdapter} from "../../adapters/pluginAdapter";
 import type {StaticAdapterSet} from "../../adapters/adapterSet";
 

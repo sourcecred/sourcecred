@@ -5,12 +5,8 @@ import {NodeTrie, EdgeTrie} from "../../core/trie";
 import type {Assets} from "../assets";
 import type {RepoId} from "../../core/repoId";
 
-import type {
-  StaticPluginAdapter,
-  DynamicPluginAdapter,
-  NodeType,
-  EdgeType,
-} from "./pluginAdapter";
+import type {StaticPluginAdapter, DynamicPluginAdapter} from "./pluginAdapter";
+import type {EdgeType, NodeType} from "../../analysis/types";
 
 import {FallbackStaticAdapter} from "./fallbackAdapter";
 

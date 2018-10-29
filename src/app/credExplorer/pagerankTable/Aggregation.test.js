@@ -5,7 +5,7 @@ import {shallow} from "enzyme";
 
 import * as NullUtil from "../../../util/null";
 import {NodeAddress, EdgeAddress} from "../../../core/graph";
-import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
+import type {EdgeType, NodeType} from "../../../analysis/types";
 import {
   AggregationRowList,
   AggregationRow,
