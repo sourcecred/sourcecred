@@ -7,6 +7,7 @@ import {VERSION_SHORT} from "../app/version";
 
 import help from "./help";
 import load from "./load";
+import analyze from "./analyze";
 
 const sourcecred: Command = async (args, std) => {
   if (args.length === 0) {
@@ -22,6 +23,8 @@ const sourcecred: Command = async (args, std) => {
       return help(args.slice(1), std);
     case "load":
       return load(args.slice(1), std);
+    case "analyze":
+      return analyze(args.slice(1), std);
     default:
       std.err("fatal: unknown command: " + JSON.stringify(args[0]));
       std.err("fatal: run 'sourcecred help' for commands and usage");

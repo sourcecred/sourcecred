@@ -13,6 +13,7 @@ function mockCommand(name) {
 
 jest.mock("./help", () => mockCommand("help"));
 jest.mock("./load", () => mockCommand("load"));
+jest.mock("./analyze", () => mockCommand("analyze"));
 
 describe("cli/sourcecred", () => {
   it("fails with usage when invoked with no arguments", async () => {
@@ -52,6 +53,14 @@ describe("cli/sourcecred", () => {
       exitCode: 2,
       stdout: ['out(load): ["foo/bar","foo/baz"]'],
       stderr: ["err(load)"],
+    });
+  });
+
+  it("responds to 'analyze'", async () => {
+    expect(await run(sourcecred, ["analyze", "foo/bar", "foo/baz"])).toEqual({
+      exitCode: 2,
+      stdout: ['out(analyze): ["foo/bar","foo/baz"]'],
+      stderr: ["err(analyze)"],
     });
   });
 
