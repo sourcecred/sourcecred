@@ -5,7 +5,7 @@ import sortBy from "lodash.sortby";
 import * as NullUtil from "../../../util/null";
 
 import {type NodeAddressT, NodeAddress} from "../../../core/graph";
-import type {PagerankNodeDecomposition} from "../../../core/attribution/pagerankNodeDecomposition";
+import type {PagerankNodeDecomposition} from "../../../analysis/pagerankNodeDecomposition";
 import {DynamicAdapterSet} from "../../adapters/adapterSet";
 import type {DynamicPluginAdapter} from "../../adapters/pluginAdapter";
 import {FALLBACK_NAME} from "../../adapters/fallbackAdapter";

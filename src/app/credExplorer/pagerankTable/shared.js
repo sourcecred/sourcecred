@@ -9,7 +9,7 @@ import {
 
 import {DynamicAdapterSet} from "../../adapters/adapterSet";
 
-import type {PagerankNodeDecomposition} from "../../../core/attribution/pagerankNodeDecomposition";
+import type {PagerankNodeDecomposition} from "../../../analysis/pagerankNodeDecomposition";
 
 export function nodeDescription(
   address: NodeAddressT,

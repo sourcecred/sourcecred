@@ -1,8 +1,9 @@
 // @flow
 
-import {NodeAddress} from "../graph";
+import {NodeAddress} from "../core/graph";
 import {scoreByMaximumProbability, scoreByConstantTotal} from "./nodeScore";
-describe("core/attribution/nodeScore", () => {
+
+describe("analysis/nodeScore", () => {
   const foo = NodeAddress.fromParts(["foo"]);
   const bar = NodeAddress.fromParts(["bar"]);
   const zod = NodeAddress.fromParts(["zod"]);

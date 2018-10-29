@@ -5,12 +5,12 @@ import deepEqual from "lodash.isequal";
 import {Graph, type NodeAddressT} from "../../core/graph";
 import type {Assets} from "../../app/assets";
 import type {RepoId} from "../../core/repoId";
-import {type EdgeEvaluator} from "../../core/attribution/pagerank";
+import {type EdgeEvaluator} from "../../analysis/pagerank";
 import {
   type PagerankNodeDecomposition,
   type PagerankOptions,
   pagerank,
-} from "../../core/attribution/pagerank";
+} from "../../analysis/pagerank";
 
 import {StaticAdapterSet, DynamicAdapterSet} from "../adapters/adapterSet";
 import type {WeightedTypes} from "./weights/weights";

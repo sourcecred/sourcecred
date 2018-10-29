@@ -1,16 +1,16 @@
 // @flow
 
-import {EdgeAddress, Graph, NodeAddress, edgeToStrings} from "../graph";
+import {EdgeAddress, Graph, NodeAddress, edgeToStrings} from "../core/graph";
 import {
   distributionToNodeDistribution,
   createConnections,
   createOrderedSparseMarkovChain,
-} from "./graphToMarkovChain";
-import {findStationaryDistribution} from "./markovChain";
+} from "../core/attribution/graphToMarkovChain";
+import {findStationaryDistribution} from "../core/attribution/markovChain";
 import {decompose} from "./pagerankNodeDecomposition";
-import * as MapUtil from "../../util/map";
+import * as MapUtil from "../util/map";
 
-import {advancedGraph} from "../graphTestUtil";
+import {advancedGraph} from "../core/graphTestUtil";
 
 /**
  * Format a decomposition to be shown in a snapshot. This converts
@@ -108,7 +108,7 @@ function validateDecomposition(decomposition) {
   }
 }
 
-describe("core/attribution/pagerankNodeDecomposition", () => {
+describe("analysis/pagerankNodeDecomposition", () => {
   describe("decompose", () => {
     it("has the expected output on a simple asymmetric chain", async () => {
       const n1 = NodeAddress.fromParts(["n1"]);

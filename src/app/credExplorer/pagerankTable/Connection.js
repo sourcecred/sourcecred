@@ -5,7 +5,7 @@ import * as NullUtil from "../../../util/null";
 
 import type {NodeAddressT} from "../../../core/graph";
 import type {Connection} from "../../../core/attribution/graphToMarkovChain";
-import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
+import type {ScoredConnection} from "../../../analysis/pagerankNodeDecomposition";
 import {DynamicAdapterSet} from "../../adapters/adapterSet";
 import {TableRow} from "./TableRow";
 import {NodeRow} from "./Node";

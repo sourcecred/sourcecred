@@ -2,15 +2,15 @@
 
 import sortBy from "lodash.sortby";
 
-import type {NodeAddressT} from "../graph";
+import type {NodeAddressT} from "../core/graph";
 import {
   type Connection,
   type NodeToConnections,
   adjacencySource,
-} from "./graphToMarkovChain";
+} from "../core/attribution/graphToMarkovChain";
 import type {NodeScore} from "./nodeScore";
-import * as MapUtil from "../../util/map";
-import * as NullUtil from "../../util/null";
+import * as MapUtil from "../util/map";
+import * as NullUtil from "../util/null";
 
 export type ScoredConnection = {|
   +connection: Connection,

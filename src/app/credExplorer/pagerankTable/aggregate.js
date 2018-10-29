@@ -5,7 +5,7 @@ import stringify from "json-stable-stringify";
 import * as MapUtil from "../../../util/map";
 import {NodeTrie, EdgeTrie} from "../../../core/trie";
 import type {NodeType, EdgeType} from "../../adapters/pluginAdapter";
-import type {ScoredConnection} from "../../../core/attribution/pagerankNodeDecomposition";
+import type {ScoredConnection} from "../../../analysis/pagerankNodeDecomposition";
 
 // Sorted by descending `summary.score`
 export type FlatAggregations = $ReadOnlyArray<FlatAggregation>;
