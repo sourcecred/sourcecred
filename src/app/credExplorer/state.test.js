@@ -10,7 +10,7 @@ import {
 import {Graph, NodeAddress} from "../../core/graph";
 import {Assets} from "../assets";
 import {makeRepoId, type RepoId} from "../../core/repoId";
-import {type EdgeEvaluator} from "../../core/attribution/pagerank";
+import {type EdgeEvaluator} from "../../analysis/pagerank";
 import {
   type WeightedTypes,
   defaultWeightsForAdapterSet,
@@ -19,7 +19,7 @@ import {StaticAdapterSet, DynamicAdapterSet} from "../adapters/adapterSet";
 import type {
   PagerankNodeDecomposition,
   PagerankOptions,
-} from "../../core/attribution/pagerank";
+} from "../../analysis/pagerank";
 import {staticAdapterSet} from "../adapters/demoAdapters";
 
 describe("app/credExplorer/state", () => {

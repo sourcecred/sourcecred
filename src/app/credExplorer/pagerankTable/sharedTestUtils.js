@@ -1,7 +1,7 @@
 // @flow
 
 import {dynamicAdapterSet} from "../../adapters/demoAdapters";
-import {pagerank} from "../../../core/attribution/pagerank";
+import {pagerank} from "../../../analysis/pagerank";
 import {defaultWeightsForAdapterSet} from "../weights/weights";
 
 export const COLUMNS = () => ["Description", "", "Cred"];
