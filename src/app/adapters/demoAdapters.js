@@ -7,12 +7,8 @@ import {
   type NodeAddressT,
   EdgeAddress,
 } from "../../core/graph";
-import type {
-  StaticPluginAdapter,
-  DynamicPluginAdapter,
-  EdgeType,
-  NodeType,
-} from "./pluginAdapter";
+import type {StaticPluginAdapter, DynamicPluginAdapter} from "./pluginAdapter";
+import type {EdgeType, NodeType} from "../../analysis/types";
 
 import {StaticAdapterSet} from "./adapterSet";
 import {makeRepoId, type RepoId} from "../../core/repoId";

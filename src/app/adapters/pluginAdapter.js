@@ -4,21 +4,7 @@ import {type Node as ReactNode} from "react";
 import {Graph, type NodeAddressT, type EdgeAddressT} from "../../core/graph";
 import type {Assets} from "../assets";
 import type {RepoId} from "../../core/repoId";
-
-export type EdgeType = {|
-  +forwardName: string,
-  +backwardName: string,
-  +defaultForwardWeight: number,
-  +defaultBackwardWeight: number,
-  +prefix: EdgeAddressT,
-|};
-
-export type NodeType = {|
-  +name: string,
-  +pluralName: string,
-  +prefix: NodeAddressT,
-  +defaultWeight: number,
-|};
+import type {EdgeType, NodeType} from "../../analysis/types";
 
 export interface StaticPluginAdapter {
   name(): string;
