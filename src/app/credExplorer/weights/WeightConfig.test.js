@@ -38,11 +38,12 @@ describe("app/credExplorer/weights/WeightConfig", () => {
       const pwcs = el.find(PluginWeightConfig);
       expect(pwcs).toHaveLength(adapters.adapters().length - 1);
       for (const adapter of adapters.adapters()) {
-        if (adapter.name() === FALLBACK_NAME) {
+        if (adapter.declaration().name === FALLBACK_NAME) {
           continue;
         }
         const pwc = pwcs.findWhere(
-          (x) => x.props().adapter.name() === adapter.name()
+          (x) =>
+            x.props().adapter.declaration().name === adapter.declaration().name
         );
         expect(pwc).toHaveLength(1);
       }
@@ -52,7 +53,9 @@ describe("app/credExplorer/weights/WeightConfig", () => {
       const pwc = el
         .find(PluginWeightConfig)
         .findWhere(
-          (x) => x.props().adapter.name() === new FactorioStaticAdapter().name()
+          (x) =>
+            x.props().adapter.declaration().name ===
+            new FactorioStaticAdapter().declaration().name
         );
       expect(pwc).toHaveLength(1);
       const expectedTypes = defaultWeightsForAdapter(
@@ -84,7 +87,9 @@ describe("app/credExplorer/weights/WeightConfig", () => {
       const factorioConfig = el
         .find(PluginWeightConfig)
         .findWhere(
-          (x) => x.props().adapter.name() === new FactorioStaticAdapter().name()
+          (x) =>
+            x.props().adapter.declaration().name ===
+            new FactorioStaticAdapter().declaration().name
         );
       factorioConfig.props().onChange(newFactorioWeights);
       expect(onChange).toHaveBeenCalledTimes(1);

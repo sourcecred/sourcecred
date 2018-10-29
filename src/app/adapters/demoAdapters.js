@@ -9,6 +9,7 @@ import {
 } from "../../core/graph";
 import type {StaticPluginAdapter, DynamicPluginAdapter} from "./pluginAdapter";
 import type {EdgeType, NodeType} from "../../analysis/types";
+import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 
 import {StaticAdapterSet} from "./adapterSet";
 import {makeRepoId, type RepoId} from "../../core/repoId";
@@ -43,22 +44,18 @@ export const transportsEdgeType: EdgeType = Object.freeze({
   prefix: EdgeAddress.fromParts(["factorio", "transports"]),
 });
 
+export const declaration: PluginDeclaration = Object.freeze({
+  name: "Factorio demo adapter",
+  nodePrefix: NodeAddress.fromParts(["factorio"]),
+  nodeTypes: [inserterNodeType, machineNodeType],
+  edgePrefix: EdgeAddress.fromParts(["factorio"]),
+  edgeTypes: [assemblesEdgeType, transportsEdgeType],
+});
+
 export class FactorioStaticAdapter implements StaticPluginAdapter {
   loadingMock: Function;
-  name() {
-    return "Factorio demo adapter";
-  }
-  nodePrefix() {
-    return NodeAddress.fromParts(["factorio"]);
-  }
-  nodeTypes() {
-    return [inserterNodeType, machineNodeType];
-  }
-  edgePrefix() {
-    return EdgeAddress.fromParts(["factorio"]);
-  }
-  edgeTypes() {
-    return [assemblesEdgeType, transportsEdgeType];
+  declaration() {
+    return declaration;
   }
   async load(assets: Assets, repoId: RepoId): Promise<DynamicPluginAdapter> {
     if (this.loadingMock) {

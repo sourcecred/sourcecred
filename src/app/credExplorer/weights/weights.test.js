@@ -35,10 +35,14 @@ describe("app/credExplorer/weights/weights", () => {
       const adapter = new FactorioStaticAdapter();
       const expected = {
         nodes: new Map(
-          adapter.nodeTypes().map((x) => [x.prefix, defaultWeightedNodeType(x)])
+          adapter
+            .declaration()
+            .nodeTypes.map((x) => [x.prefix, defaultWeightedNodeType(x)])
         ),
         edges: new Map(
-          adapter.edgeTypes().map((x) => [x.prefix, defaultWeightedEdgeType(x)])
+          adapter
+            .declaration()
+            .edgeTypes.map((x) => [x.prefix, defaultWeightedEdgeType(x)])
         ),
       };
       expect(defaultWeightsForAdapter(adapter)).toEqual(expected);
