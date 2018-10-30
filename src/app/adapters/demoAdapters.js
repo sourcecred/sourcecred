@@ -7,7 +7,7 @@ import {
   type NodeAddressT,
   EdgeAddress,
 } from "../../core/graph";
-import type {StaticPluginAdapter, DynamicPluginAdapter} from "./pluginAdapter";
+import type {StaticAppAdapter, DynamicAppAdapter} from "./appAdapter";
 import type {EdgeType, NodeType} from "../../analysis/types";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 
@@ -52,12 +52,12 @@ export const declaration: PluginDeclaration = Object.freeze({
   edgeTypes: [assemblesEdgeType, transportsEdgeType],
 });
 
-export class FactorioStaticAdapter implements StaticPluginAdapter {
+export class FactorioStaticAdapter implements StaticAppAdapter {
   loadingMock: Function;
   declaration() {
     return declaration;
   }
-  async load(assets: Assets, repoId: RepoId): Promise<DynamicPluginAdapter> {
+  async load(assets: Assets, repoId: RepoId): Promise<DynamicAppAdapter> {
     if (this.loadingMock) {
       return this.loadingMock(assets, repoId).then(
         () => new FactorioDynamicAdapter()
@@ -102,7 +102,7 @@ export function factorioGraph() {
     .addEdge(factorioEdges.assembles1);
 }
 
-export class FactorioDynamicAdapter implements DynamicPluginAdapter {
+export class FactorioDynamicAdapter implements DynamicAppAdapter {
   graph() {
     return factorioGraph();
   }
