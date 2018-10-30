@@ -58,7 +58,7 @@ const environment = parseEnvironment(process.env.NODE_ENV);
 
 export const VERSION_INFO: VersionInfo = Object.freeze({
   major: 0,
-  minor: 1,
+  minor: 2,
   patch: 0,
   gitState,
   environment,
