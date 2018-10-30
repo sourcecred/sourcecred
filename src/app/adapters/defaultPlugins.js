@@ -1,8 +1,8 @@
 // @flow
 
 import {StaticAdapterSet} from "./adapterSet";
-import {StaticPluginAdapter as GithubAdapter} from "../../plugins/github/pluginAdapter";
-import {StaticPluginAdapter as GitAdapter} from "../../plugins/git/pluginAdapter";
+import {StaticAppAdapter as GithubAdapter} from "../../plugins/github/appAdapter";
+import {StaticAppAdapter as GitAdapter} from "../../plugins/git/appAdapter";
 import {GithubGitGateway} from "../../plugins/github/githubGitGateway";
 
 export function defaultStaticAdapters(): StaticAdapterSet {

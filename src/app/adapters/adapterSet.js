@@ -5,19 +5,19 @@ import {NodeTrie, EdgeTrie} from "../../core/trie";
 import type {Assets} from "../assets";
 import type {RepoId} from "../../core/repoId";
 
-import type {StaticPluginAdapter, DynamicPluginAdapter} from "./pluginAdapter";
+import type {StaticAppAdapter, DynamicAppAdapter} from "./appAdapter";
 import type {EdgeType, NodeType} from "../../analysis/types";
 
 import {FallbackStaticAdapter} from "./fallbackAdapter";
 
 export class StaticAdapterSet {
-  _adapters: $ReadOnlyArray<StaticPluginAdapter>;
-  _adapterNodeTrie: NodeTrie<StaticPluginAdapter>;
-  _adapterEdgeTrie: EdgeTrie<StaticPluginAdapter>;
+  _adapters: $ReadOnlyArray<StaticAppAdapter>;
+  _adapterNodeTrie: NodeTrie<StaticAppAdapter>;
+  _adapterEdgeTrie: EdgeTrie<StaticAppAdapter>;
   _typeNodeTrie: NodeTrie<NodeType>;
   _typeEdgeTrie: EdgeTrie<EdgeType>;
 
-  constructor(adapters: $ReadOnlyArray<StaticPluginAdapter>): void {
+  constructor(adapters: $ReadOnlyArray<StaticAppAdapter>): void {
     this._adapters = [new FallbackStaticAdapter(), ...adapters];
     this._adapterNodeTrie = new NodeTrie();
     this._adapterEdgeTrie = new EdgeTrie();
@@ -37,7 +37,7 @@ export class StaticAdapterSet {
     this.edgeTypes().forEach((t) => this._typeEdgeTrie.add(t.prefix, t));
   }
 
-  adapters(): $ReadOnlyArray<StaticPluginAdapter> {
+  adapters(): $ReadOnlyArray<StaticAppAdapter> {
     return this._adapters;
   }
 
@@ -49,11 +49,11 @@ export class StaticAdapterSet {
     return [].concat(...this._adapters.map((x) => x.declaration().edgeTypes));
   }
 
-  adapterMatchingNode(x: NodeAddressT): StaticPluginAdapter {
+  adapterMatchingNode(x: NodeAddressT): StaticAppAdapter {
     return this._adapterNodeTrie.getLast(x);
   }
 
-  adapterMatchingEdge(x: EdgeAddressT): StaticPluginAdapter {
+  adapterMatchingEdge(x: EdgeAddressT): StaticAppAdapter {
     return this._adapterEdgeTrie.getLast(x);
   }
 
@@ -73,14 +73,14 @@ export class StaticAdapterSet {
 }
 
 export class DynamicAdapterSet {
-  _adapters: $ReadOnlyArray<DynamicPluginAdapter>;
+  _adapters: $ReadOnlyArray<DynamicAppAdapter>;
   _staticAdapterSet: StaticAdapterSet;
-  _adapterNodeTrie: NodeTrie<DynamicPluginAdapter>;
-  _adapterEdgeTrie: EdgeTrie<DynamicPluginAdapter>;
+  _adapterNodeTrie: NodeTrie<DynamicAppAdapter>;
+  _adapterEdgeTrie: EdgeTrie<DynamicAppAdapter>;
 
   constructor(
     staticAdapterSet: StaticAdapterSet,
-    adapters: $ReadOnlyArray<DynamicPluginAdapter>
+    adapters: $ReadOnlyArray<DynamicAppAdapter>
   ): void {
     this._staticAdapterSet = staticAdapterSet;
     this._adapters = adapters;
@@ -92,15 +92,15 @@ export class DynamicAdapterSet {
     });
   }
 
-  adapterMatchingNode(x: NodeAddressT): DynamicPluginAdapter {
+  adapterMatchingNode(x: NodeAddressT): DynamicAppAdapter {
     return this._adapterNodeTrie.getLast(x);
   }
 
-  adapterMatchingEdge(x: EdgeAddressT): DynamicPluginAdapter {
+  adapterMatchingEdge(x: EdgeAddressT): DynamicAppAdapter {
     return this._adapterEdgeTrie.getLast(x);
   }
 
-  adapters(): $ReadOnlyArray<DynamicPluginAdapter> {
+  adapters(): $ReadOnlyArray<DynamicAppAdapter> {
     return this._adapters;
   }
 

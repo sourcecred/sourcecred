@@ -3,7 +3,7 @@
 import * as MapUtil from "../../../util/map";
 import {type NodeAddressT, type EdgeAddressT} from "../../../core/graph";
 import type {EdgeType, NodeType} from "../../../analysis/types";
-import type {StaticPluginAdapter} from "../../adapters/pluginAdapter";
+import type {StaticAppAdapter} from "../../adapters/appAdapter";
 import type {StaticAdapterSet} from "../../adapters/adapterSet";
 
 export type WeightedNodeType = {|+type: NodeType, +weight: number|};
@@ -36,7 +36,7 @@ export function defaultWeightedEdgeType(type: EdgeType): WeightedEdgeType {
 }
 
 export function defaultWeightsForAdapter(
-  adapter: StaticPluginAdapter
+  adapter: StaticAppAdapter
 ): WeightedTypes {
   return {
     nodes: new Map(

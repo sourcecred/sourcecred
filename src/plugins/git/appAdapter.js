@@ -1,8 +1,8 @@
 // @flow
 import type {
-  StaticPluginAdapter as IStaticPluginAdapter,
-  DynamicPluginAdapter as IDynamicPluginAdapter,
-} from "../../app/adapters/pluginAdapter";
+  StaticAppAdapter as IStaticAppAdapter,
+  DynamicAppAdapter as IDynamicAppAdapter,
+} from "../../app/adapters/appAdapter";
 import {Graph} from "../../core/graph";
 import * as N from "./nodes";
 import {description} from "./render";
@@ -13,7 +13,7 @@ import type {GitGateway} from "./gitGateway";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {declaration} from "./declaration";
 
-export class StaticPluginAdapter implements IStaticPluginAdapter {
+export class StaticAppAdapter implements IStaticAppAdapter {
   _gitGateway: GitGateway;
 
   constructor(gg: GitGateway): void {
@@ -22,7 +22,7 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
   declaration(): PluginDeclaration {
     return declaration;
   }
-  async load(assets: Assets, repoId: RepoId): Promise<IDynamicPluginAdapter> {
+  async load(assets: Assets, repoId: RepoId): Promise<IDynamicAppAdapter> {
     const baseUrl = `/api/v1/data/data/${repoId.owner}/${repoId.name}/git/`;
     async function loadGraph() {
       const url = assets.resolve(baseUrl + "graph.json");
@@ -45,11 +45,11 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
       loadGraph(),
       loadRepository(),
     ]);
-    return new DynamicPluginAdapter(this._gitGateway, graph, repository);
+    return new DynamicAppAdapter(this._gitGateway, graph, repository);
   }
 }
 
-class DynamicPluginAdapter implements IDynamicPluginAdapter {
+class DynamicAppAdapter implements IDynamicAppAdapter {
   +_graph: Graph;
   +_repository: Repository;
   +_gitGateway: GitGateway;
@@ -72,6 +72,6 @@ class DynamicPluginAdapter implements IDynamicPluginAdapter {
     return description(address, this._repository, this._gitGateway);
   }
   static() {
-    return new StaticPluginAdapter(this._gitGateway);
+    return new StaticAppAdapter(this._gitGateway);
   }
 }

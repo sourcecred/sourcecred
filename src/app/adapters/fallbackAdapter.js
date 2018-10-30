@@ -9,7 +9,7 @@ import {
 import type {Assets} from "../assets";
 import type {RepoId} from "../../core/repoId";
 
-import type {StaticPluginAdapter, DynamicPluginAdapter} from "./pluginAdapter";
+import type {StaticAppAdapter, DynamicAppAdapter} from "./appAdapter";
 
 export const FALLBACK_NAME = "FALLBACK_ADAPTER";
 
@@ -36,7 +36,7 @@ export const fallbackDeclaration = Object.freeze({
   edgeTypes: [fallbackEdgeType],
 });
 
-export class FallbackStaticAdapter implements StaticPluginAdapter {
+export class FallbackStaticAdapter implements StaticAppAdapter {
   declaration() {
     return fallbackDeclaration;
   }
@@ -46,7 +46,7 @@ export class FallbackStaticAdapter implements StaticPluginAdapter {
   }
 }
 
-export class FallbackDynamicAdapter implements DynamicPluginAdapter {
+export class FallbackDynamicAdapter implements DynamicAppAdapter {
   graph() {
     return new Graph();
   }

@@ -6,13 +6,13 @@ import type {Assets} from "../assets";
 import type {RepoId} from "../../core/repoId";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 
-export interface StaticPluginAdapter {
+export interface StaticAppAdapter {
   declaration(): PluginDeclaration;
-  load(assets: Assets, repoId: RepoId): Promise<DynamicPluginAdapter>;
+  load(assets: Assets, repoId: RepoId): Promise<DynamicAppAdapter>;
 }
 
-export interface DynamicPluginAdapter {
+export interface DynamicAppAdapter {
   graph(): Graph;
   nodeDescription(NodeAddressT): ReactNode;
-  static (): StaticPluginAdapter;
+  static (): StaticAppAdapter;
 }
