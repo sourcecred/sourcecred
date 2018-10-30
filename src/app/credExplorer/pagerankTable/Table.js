@@ -95,17 +95,17 @@ export class PagerankTable extends React.PureComponent<
     function optionGroup(adapter: DynamicPluginAdapter) {
       const header = (
         <option
-          key={adapter.static().nodePrefix()}
-          value={adapter.static().nodePrefix()}
+          key={adapter.static().declaration().nodePrefix}
+          value={adapter.static().declaration().nodePrefix}
           style={{fontWeight: "bold"}}
         >
-          {adapter.static().name()}
+          {adapter.static().declaration().name}
         </option>
       );
       const entries = adapter
         .static()
-        .nodeTypes()
-        .map((type) => (
+        .declaration()
+        .nodeTypes.map((type) => (
           <option key={type.prefix} value={type.prefix}>
             {"\u2003" + type.name}
           </option>
@@ -122,10 +122,11 @@ export class PagerankTable extends React.PureComponent<
           }}
         >
           <option value={NodeAddress.empty}>Show all</option>
-          {sortBy(adapters.adapters(), (a: DynamicPluginAdapter) =>
-            a.static().name()
+          {sortBy(
+            adapters.adapters(),
+            (a: DynamicPluginAdapter) => a.static().declaration().name
           )
-            .filter((a) => a.static().name() !== FALLBACK_NAME)
+            .filter((a) => a.static().declaration().name !== FALLBACK_NAME)
             .map(optionGroup)}
         </select>
       </label>

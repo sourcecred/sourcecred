@@ -25,13 +25,13 @@ export class StaticAdapterSet {
     this._typeEdgeTrie = new EdgeTrie();
     const usedPluginNames = new Set();
     this._adapters.forEach((a) => {
-      const name = a.name();
+      const name = a.declaration().name;
       if (usedPluginNames.has(name)) {
         throw new Error(`Multiple plugins with name "${name}"`);
       }
       usedPluginNames.add(name);
-      this._adapterNodeTrie.add(a.nodePrefix(), a);
-      this._adapterEdgeTrie.add(a.edgePrefix(), a);
+      this._adapterNodeTrie.add(a.declaration().nodePrefix, a);
+      this._adapterEdgeTrie.add(a.declaration().edgePrefix, a);
     });
     this.nodeTypes().forEach((t) => this._typeNodeTrie.add(t.prefix, t));
     this.edgeTypes().forEach((t) => this._typeEdgeTrie.add(t.prefix, t));
@@ -42,11 +42,11 @@ export class StaticAdapterSet {
   }
 
   nodeTypes(): NodeType[] {
-    return [].concat(...this._adapters.map((x) => x.nodeTypes()));
+    return [].concat(...this._adapters.map((x) => x.declaration().nodeTypes));
   }
 
   edgeTypes(): EdgeType[] {
-    return [].concat(...this._adapters.map((x) => x.edgeTypes()));
+    return [].concat(...this._adapters.map((x) => x.declaration().edgeTypes));
   }
 
   adapterMatchingNode(x: NodeAddressT): StaticPluginAdapter {
@@ -87,8 +87,8 @@ export class DynamicAdapterSet {
     this._adapterNodeTrie = new NodeTrie();
     this._adapterEdgeTrie = new EdgeTrie();
     this._adapters.forEach((a) => {
-      this._adapterNodeTrie.add(a.static().nodePrefix(), a);
-      this._adapterEdgeTrie.add(a.static().edgePrefix(), a);
+      this._adapterNodeTrie.add(a.static().declaration().nodePrefix, a);
+      this._adapterEdgeTrie.add(a.static().declaration().edgePrefix, a);
     });
   }
 

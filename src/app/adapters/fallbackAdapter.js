@@ -28,25 +28,17 @@ export const fallbackEdgeType = Object.freeze({
   prefix: EdgeAddress.empty,
 });
 
+export const fallbackDeclaration = Object.freeze({
+  name: FALLBACK_NAME,
+  nodePrefix: NodeAddress.empty,
+  edgePrefix: EdgeAddress.empty,
+  nodeTypes: [fallbackNodeType],
+  edgeTypes: [fallbackEdgeType],
+});
+
 export class FallbackStaticAdapter implements StaticPluginAdapter {
-  name() {
-    return FALLBACK_NAME;
-  }
-
-  nodePrefix() {
-    return NodeAddress.empty;
-  }
-
-  edgePrefix() {
-    return EdgeAddress.empty;
-  }
-
-  nodeTypes() {
-    return [fallbackNodeType];
-  }
-
-  edgeTypes() {
-    return [fallbackEdgeType];
+  declaration() {
+    return fallbackDeclaration;
   }
 
   load(_unused_assets: Assets, _unused_repoId: RepoId) {

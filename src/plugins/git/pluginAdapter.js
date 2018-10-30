@@ -5,12 +5,13 @@ import type {
 } from "../../app/adapters/pluginAdapter";
 import {Graph} from "../../core/graph";
 import * as N from "./nodes";
-import * as E from "./edges";
 import {description} from "./render";
 import type {Assets} from "../../app/assets";
 import type {RepoId} from "../../core/repoId";
 import type {Repository} from "./types";
 import type {GitGateway} from "./gitGateway";
+import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
+import {declaration} from "./declaration";
 
 export class StaticPluginAdapter implements IStaticPluginAdapter {
   _gitGateway: GitGateway;
@@ -18,35 +19,8 @@ export class StaticPluginAdapter implements IStaticPluginAdapter {
   constructor(gg: GitGateway): void {
     this._gitGateway = gg;
   }
-  name() {
-    return "Git";
-  }
-  nodePrefix() {
-    return N.Prefix.base;
-  }
-  edgePrefix() {
-    return E.Prefix.base;
-  }
-  nodeTypes() {
-    return [
-      {
-        name: "Commit",
-        pluralName: "Commits",
-        prefix: N.Prefix.commit,
-        defaultWeight: 2,
-      },
-    ];
-  }
-  edgeTypes() {
-    return [
-      {
-        forwardName: "has parent",
-        backwardName: "is parent of",
-        prefix: E.Prefix.hasParent,
-        defaultForwardWeight: 1,
-        defaultBackwardWeight: 1,
-      },
-    ];
+  declaration(): PluginDeclaration {
+    return declaration;
   }
   async load(assets: Assets, repoId: RepoId): Promise<IDynamicPluginAdapter> {
     const baseUrl = `/api/v1/data/data/${repoId.owner}/${repoId.name}/git/`;

@@ -39,7 +39,7 @@ export class WeightConfig extends React.Component<Props> {
   _renderPluginWeightConfigs() {
     return this.props.adapters
       .adapters()
-      .filter((x) => x.name() !== FALLBACK_NAME)
+      .filter((x) => x.declaration().name !== FALLBACK_NAME)
       .map((adapter) => {
         const onChange = (weightedTypes) => {
           const newWeightedTypes = {
@@ -58,13 +58,13 @@ export class WeightConfig extends React.Component<Props> {
           nodes: new Map(),
           edges: new Map(),
         };
-        for (const {prefix} of adapter.nodeTypes()) {
+        for (const {prefix} of adapter.declaration().nodeTypes) {
           pluginScopedWeightedTypes.nodes.set(
             prefix,
             NullUtil.get(this.props.weightedTypes.nodes.get(prefix))
           );
         }
-        for (const {prefix} of adapter.edgeTypes()) {
+        for (const {prefix} of adapter.declaration().edgeTypes) {
           pluginScopedWeightedTypes.edges.set(
             prefix,
             NullUtil.get(this.props.weightedTypes.edges.get(prefix))
@@ -72,7 +72,7 @@ export class WeightConfig extends React.Component<Props> {
         }
         return (
           <PluginWeightConfig
-            key={adapter.name()}
+            key={adapter.declaration().name}
             adapter={adapter}
             onChange={onChange}
             weightedTypes={pluginScopedWeightedTypes}

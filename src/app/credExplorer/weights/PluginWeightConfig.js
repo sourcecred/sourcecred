@@ -66,14 +66,14 @@ export class PluginWeightConfig extends React.Component<Props> {
 
   _validateWeightedTypesWithAdapter() {
     const expectedNodePrefixes = new Set(
-      this.props.adapter.nodeTypes().map((x) => x.prefix)
+      this.props.adapter.declaration().nodeTypes.map((x) => x.prefix)
     );
     const actualNodePrefixes = new Set(this.props.weightedTypes.nodes.keys());
     if (!deepEqual(expectedNodePrefixes, actualNodePrefixes)) {
       throw new Error("weightedTypes has wrong node prefixes for adapter");
     }
     const expectedEdgePrefixes = new Set(
-      this.props.adapter.edgeTypes().map((x) => x.prefix)
+      this.props.adapter.declaration().edgeTypes.map((x) => x.prefix)
     );
     const actualEdgePrefixes = new Set(this.props.weightedTypes.edges.keys());
     if (!deepEqual(expectedEdgePrefixes, actualEdgePrefixes)) {
@@ -85,7 +85,7 @@ export class PluginWeightConfig extends React.Component<Props> {
     this._validateWeightedTypesWithAdapter();
     return (
       <div>
-        <h3>{this.props.adapter.name()}</h3>
+        <h3>{this.props.adapter.declaration().name}</h3>
         <h4 style={{marginBottom: "0.3em"}}>Node weights</h4>
         {this._renderNodeWeightControls()}
         <h4 style={{marginBottom: "0.3em"}}>Edge weights</h4>

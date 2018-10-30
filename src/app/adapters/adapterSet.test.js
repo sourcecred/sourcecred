@@ -27,26 +27,26 @@ describe("app/adapters/adapterSet", () => {
     });
     it("always includes the fallback plugin", () => {
       const {sas} = example();
-      expect(sas.adapters()[0].name()).toBe(FALLBACK_NAME);
+      expect(sas.adapters()[0].declaration().name).toBe(FALLBACK_NAME);
     });
     it("includes the manually provided plugin adapters", () => {
       const {x, sas} = example();
-      expect(sas.adapters()[1].name()).toBe(x.name());
+      expect(sas.adapters()[1].declaration().name).toBe(x.declaration().name);
     });
     it("aggregates NodeTypes across plugins", () => {
       const {sas} = example();
       const nodeTypes = sas.nodeTypes();
       const expectedNumNodeTypes =
-        new FactorioStaticAdapter().nodeTypes().length +
-        new FallbackStaticAdapter().nodeTypes().length;
+        new FactorioStaticAdapter().declaration().nodeTypes.length +
+        new FallbackStaticAdapter().declaration().nodeTypes.length;
       expect(nodeTypes).toHaveLength(expectedNumNodeTypes);
     });
     it("aggregates EdgeTypes across plugins", () => {
       const {sas} = example();
       const edgeTypes = sas.edgeTypes();
       const expectedNumEdgeTypes =
-        new FactorioStaticAdapter().edgeTypes().length +
-        new FallbackStaticAdapter().edgeTypes().length;
+        new FactorioStaticAdapter().declaration().edgeTypes.length +
+        new FallbackStaticAdapter().declaration().edgeTypes.length;
       expect(edgeTypes).toHaveLength(expectedNumEdgeTypes);
     });
     it("finds adapter matching a node", () => {
@@ -54,24 +54,24 @@ describe("app/adapters/adapterSet", () => {
       const matching = sas.adapterMatchingNode(
         NodeAddress.fromParts(["factorio", "inserter"])
       );
-      expect(matching.name()).toBe(x.name());
+      expect(matching.declaration().name).toBe(x.declaration().name);
     });
     it("finds adapter matching an edge", () => {
       const {x, sas} = example();
       const matching = sas.adapterMatchingEdge(
         EdgeAddress.fromParts(["factorio", "assembles"])
       );
-      expect(matching.name()).toBe(x.name());
+      expect(matching.declaration().name).toBe(x.declaration().name);
     });
     it("finds fallback adapter for unregistered node", () => {
       const {sas} = example();
       const adapter = sas.adapterMatchingNode(NodeAddress.fromParts(["weird"]));
-      expect(adapter.name()).toBe(FALLBACK_NAME);
+      expect(adapter.declaration().name).toBe(FALLBACK_NAME);
     });
     it("finds fallback adapter for unregistered edge", () => {
       const {sas} = example();
       const adapter = sas.adapterMatchingEdge(EdgeAddress.fromParts(["weird"]));
-      expect(adapter.name()).toBe(FALLBACK_NAME);
+      expect(adapter.declaration().name).toBe(FALLBACK_NAME);
     });
     it("finds type matching a node", () => {
       const {sas} = example();
@@ -133,8 +133,8 @@ describe("app/adapters/adapterSet", () => {
     });
     it("allows accessing the dynamic adapters", async () => {
       const {sas, das} = await example();
-      expect(das.adapters().map((a) => a.static().name())).toEqual(
-        sas.adapters().map((a) => a.name())
+      expect(das.adapters().map((a) => a.static().declaration().name)).toEqual(
+        sas.adapters().map((a) => a.declaration().name)
       );
     });
     it("allows retrieval of the aggregated graph", async () => {
@@ -147,24 +147,24 @@ describe("app/adapters/adapterSet", () => {
       const matching = das.adapterMatchingNode(
         NodeAddress.fromParts(["factorio", "inserter"])
       );
-      expect(matching.static().name()).toBe(x.name());
+      expect(matching.static().declaration().name).toBe(x.declaration().name);
     });
     it("finds adapter matching an edge", async () => {
       const {x, das} = await example();
       const matching = das.adapterMatchingEdge(
         EdgeAddress.fromParts(["factorio", "assembles"])
       );
-      expect(matching.static().name()).toBe(x.name());
+      expect(matching.static().declaration().name).toBe(x.declaration().name);
     });
     it("finds fallback adapter for unregistered node", async () => {
       const {das} = await example();
       const adapter = das.adapterMatchingNode(NodeAddress.fromParts(["weird"]));
-      expect(adapter.static().name()).toBe(FALLBACK_NAME);
+      expect(adapter.static().declaration().name).toBe(FALLBACK_NAME);
     });
     it("finds fallback adapter for unregistered edge", async () => {
       const {das} = await example();
       const adapter = das.adapterMatchingEdge(EdgeAddress.fromParts(["weird"]));
-      expect(adapter.static().name()).toBe(FALLBACK_NAME);
+      expect(adapter.static().declaration().name).toBe(FALLBACK_NAME);
     });
   });
 });
