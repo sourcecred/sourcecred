@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Cache GitHub data, allowing for incremental and resumable loading (#622)
 - Hyperlink Git commits to GitHub (#887)
 - Relicense from MIT to MIT + Apache-2 (#812)
 - Display short hash + summary for commits (#879)
