@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+<!-- Please add new entries to the _top_ of this section. -->
+
+## [0.2.0]
 - Cache GitHub data, allowing for incremental and resumable loading (#622)
 - Hyperlink Git commits to GitHub (#887)
 - Relicense from MIT to MIT + Apache-2 (#812)
@@ -11,7 +14,6 @@
 - Detect references in commit messages (#829)
 - Add commit authorship to the graph (#826)
 - Add `MentionsAuthor` edges to the graph (#808)
-<!-- Please add new entries to the _top_ of this section. -->
 
 ## [0.1.0]
 - Organize weight config by plugin (#773)
