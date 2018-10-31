@@ -9,8 +9,10 @@ import {
 import * as GithubNode from "./nodes";
 import * as GitNode from "../git/nodes";
 import type {MentionsAuthorReference} from "./heuristics/mentionsAuthorReference";
-// TODO(@decentralion): Opportunity to reduce bundle size (tree shaking?)
-import {Reactions, type ReactionContent} from "./graphql";
+import {
+  type ReactionContent,
+  ReactionContent$Values as Reactions,
+} from "./graphqlTypes";
 
 export opaque type RawAddress: EdgeAddressT = EdgeAddressT;
 

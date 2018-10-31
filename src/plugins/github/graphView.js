@@ -7,8 +7,7 @@ import * as GN from "./nodes";
 import * as GE from "./edges";
 
 import * as GitNode from "../git/nodes";
-// TODO(@decentralion): Opportunity to reduce bundle size
-import {Reactions} from "./graphql";
+import {ReactionContent$Values as Reactions} from "./graphqlTypes";
 
 import {
   Graph,
