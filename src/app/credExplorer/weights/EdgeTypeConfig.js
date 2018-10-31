@@ -3,7 +3,7 @@
 import React from "react";
 import {WeightSlider, type Props as WeightSliderProps} from "./WeightSlider";
 
-import type {WeightedEdgeType} from "./weights";
+import type {WeightedEdgeType} from "../../../analysis/weights";
 
 export class EdgeTypeConfig extends React.Component<{
   +weightedType: WeightedEdgeType,

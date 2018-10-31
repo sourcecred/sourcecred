@@ -15,11 +15,11 @@ import {
 import {NodeTypeConfig} from "./NodeTypeConfig";
 import {EdgeTypeConfig} from "./EdgeTypeConfig";
 import {
-  defaultWeightsForAdapter,
+  type WeightedTypes,
   defaultWeightedNodeType,
   defaultWeightedEdgeType,
-  type WeightedTypes,
-} from "./weights";
+} from "../../../analysis/weights";
+import {defaultWeightsForAdapter} from "./weights";
 
 require("../../testUtil").configureEnzyme();
 

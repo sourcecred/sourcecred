@@ -13,7 +13,7 @@ import {
 } from "../../analysis/pagerank";
 
 import {StaticAdapterSet, DynamicAdapterSet} from "../adapters/adapterSet";
-import type {WeightedTypes} from "./weights/weights";
+import type {WeightedTypes} from "../../analysis/weights";
 import {weightsToEdgeEvaluator} from "./weights/weightsToEdgeEvaluator";
 
 /*

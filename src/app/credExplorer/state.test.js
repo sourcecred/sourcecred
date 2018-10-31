@@ -11,10 +11,8 @@ import {Graph, NodeAddress} from "../../core/graph";
 import {Assets} from "../assets";
 import {makeRepoId, type RepoId} from "../../core/repoId";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
-import {
-  type WeightedTypes,
-  defaultWeightsForAdapterSet,
-} from "./weights/weights";
+import type {WeightedTypes} from "../../analysis/weights";
+import {defaultWeightsForAdapterSet} from "./weights/weights";
 import {StaticAdapterSet, DynamicAdapterSet} from "../adapters/adapterSet";
 import type {
   PagerankNodeDecomposition,

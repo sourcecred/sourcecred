@@ -7,11 +7,11 @@ import {NodeTypeConfig} from "./NodeTypeConfig";
 import {EdgeTypeConfig} from "./EdgeTypeConfig";
 import {StaticAppAdapter} from "../../adapters/appAdapter";
 import {styledVariable} from "./EdgeTypeConfig";
-import {
-  type WeightedTypes,
-  type WeightedEdgeType,
-  type WeightedNodeType,
-} from "./weights";
+import type {
+  WeightedTypes,
+  WeightedEdgeType,
+  WeightedNodeType,
+} from "../../../analysis/weights";
 
 export type Props = {|
   +adapter: StaticAppAdapter,

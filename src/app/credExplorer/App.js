@@ -10,10 +10,8 @@ import Link from "../Link";
 
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import {PagerankTable} from "./pagerankTable/Table";
-import {
-  type WeightedTypes,
-  defaultWeightsForAdapterSet,
-} from "./weights/weights";
+import type {WeightedTypes} from "../../analysis/weights";
+import {defaultWeightsForAdapterSet} from "./weights/weights";
 import RepositorySelect from "./RepositorySelect";
 import {Prefix as GithubPrefix} from "../../plugins/github/nodes";
 import {
