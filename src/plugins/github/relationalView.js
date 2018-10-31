@@ -16,13 +16,10 @@ import type {
   UserlikeAddress,
 } from "./nodes";
 import * as T from "./graphqlTypes";
-import type {GithubResponseJSON} from "./graphql";
 import * as GitNode from "../git/nodes";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 import {botSet} from "./bots";
-
-import translateContinuations from "./translateContinuations";
 
 import {
   reviewUrlToId,
@@ -59,19 +56,12 @@ export class RelationalView {
     this._mapReferencedBy = new Map();
   }
 
-  addData(data: GithubResponseJSON) {
-    // Warning: calling `addData` can put the RelationalView in an inconistent
-    // state. for example, if called with {repo: {issues: [1,2,3]}} and then with
-    // {repo: {issues: [4, 5]}}, then calls to repo.issues() will only give back
-    // issues 4 and 5 (although issues 1, 2, and 3 will still be in the view)
-    const {result: repository, warnings} = translateContinuations(data);
-    for (const warning of warnings) {
-      console.warn(stringify(warning));
-    }
-    this.addRepository(repository);
-  }
-
   addRepository(repository: T.Repository): void {
+    // Warning: calling `addRepository` can put the RelationalView in an
+    // inconsistent state. for example, if called with a repo with
+    // issues [#1, #2, #3] and then with a repo with issues [#4, #5],
+    // then calls to `repo.issues()` will only give back issues 4 and 5
+    // (although issues 1, 2, and 3 will still be in the view).
     this._addRepo(repository);
     this._addReferences();
   }
