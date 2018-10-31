@@ -58,7 +58,7 @@ export default async function fetchGithubRepo(
 
   // These are arbitrary tuning parameters.
   // TODO(#638): Design a configuration system for plugins.
-  const ttlSeconds = 86400;
+  const ttlSeconds = 60 * 60 * 24 * 7;
   const nodesLimit = 100;
   const connectionLimit = 100;
 
