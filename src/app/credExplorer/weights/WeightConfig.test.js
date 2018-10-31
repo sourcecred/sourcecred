@@ -4,10 +4,10 @@ import React from "react";
 import {shallow} from "enzyme";
 import {PluginWeightConfig} from "./PluginWeightConfig";
 import {
-  staticAdapterSet,
-  inserterNodeType,
   FactorioStaticAdapter,
-} from "../../adapters/demoAdapters";
+  staticAdapterSet,
+} from "../../../plugins/demo/appAdapter";
+import {inserterNodeType} from "../../../plugins/demo/declaration";
 import {FALLBACK_NAME} from "../../adapters/fallbackAdapter";
 import {defaultWeightsForAdapterSet, defaultWeightsForAdapter} from "./weights";
 import {WeightConfig} from "./WeightConfig";

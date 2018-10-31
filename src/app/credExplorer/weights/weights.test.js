@@ -12,9 +12,11 @@ import {
   machineNodeType,
   assemblesEdgeType,
   transportsEdgeType,
+} from "../../../plugins/demo/declaration";
+import {
   FactorioStaticAdapter,
   staticAdapterSet,
-} from "../../adapters/demoAdapters";
+} from "../../../plugins/demo/appAdapter";
 
 describe("app/credExplorer/weights/weights", () => {
   describe("defaultWeightedNodeType", () => {

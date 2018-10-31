@@ -5,7 +5,7 @@ import {shallow} from "enzyme";
 
 import {WeightSlider} from "./WeightSlider";
 import {NodeTypeConfig} from "./NodeTypeConfig";
-import {inserterNodeType} from "../../adapters/demoAdapters";
+import {inserterNodeType} from "../../../plugins/demo/declaration";
 
 require("../../testUtil").configureEnzyme();
 

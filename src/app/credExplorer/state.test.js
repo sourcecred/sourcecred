@@ -20,7 +20,7 @@ import type {
   PagerankNodeDecomposition,
   PagerankOptions,
 } from "../../analysis/pagerank";
-import {staticAdapterSet} from "../adapters/demoAdapters";
+import {staticAdapterSet} from "../../plugins/demo/appAdapter";
 
 describe("app/credExplorer/state", () => {
   function example(startingState: AppState) {
