@@ -116,8 +116,8 @@ function getGitState() /*: GitState */ {
   }
   const commitTimestamp = [
     zeroPad(commitDate.getFullYear(), 4),
-    zeroPad(commitDate.getMonth(), 2),
-    zeroPad(commitDate.getDay(), 2),
+    zeroPad(commitDate.getMonth() + 1, 2),
+    zeroPad(commitDate.getDate(), 2),
     "-",
     zeroPad(commitDate.getHours(), 2),
     zeroPad(commitDate.getMinutes(), 2),
