@@ -110,6 +110,20 @@ export type PullRequestReviewState =
   | "DISMISSED"
   | "PENDING";
 
+export const PullRequestReviewState$Values: {|
+  +APPROVED: "APPROVED",
+  +CHANGES_REQUESTED: "CHANGES_REQUESTED",
+  +COMMENTED: "COMMENTED",
+  +DISMISSED: "DISMISSED",
+  +PENDING: "PENDING",
+|} = Object.freeze({
+  APPROVED: "APPROVED",
+  CHANGES_REQUESTED: "CHANGES_REQUESTED",
+  COMMENTED: "COMMENTED",
+  DISMISSED: "DISMISSED",
+  PENDING: "PENDING",
+});
+
 export type Reaction = {|
   +__typename: "Reaction",
   +content: ReactionContent,
@@ -124,6 +138,22 @@ export type ReactionContent =
   | "LAUGH"
   | "THUMBS_DOWN"
   | "THUMBS_UP";
+
+export const ReactionContent$Values: {|
+  +CONFUSED: "CONFUSED",
+  +HEART: "HEART",
+  +HOORAY: "HOORAY",
+  +LAUGH: "LAUGH",
+  +THUMBS_DOWN: "THUMBS_DOWN",
+  +THUMBS_UP: "THUMBS_UP",
+|} = Object.freeze({
+  CONFUSED: "CONFUSED",
+  HEART: "HEART",
+  HOORAY: "HOORAY",
+  LAUGH: "LAUGH",
+  THUMBS_DOWN: "THUMBS_DOWN",
+  THUMBS_UP: "THUMBS_UP",
+});
 
 export type Ref = {|
   +__typename: "Ref",

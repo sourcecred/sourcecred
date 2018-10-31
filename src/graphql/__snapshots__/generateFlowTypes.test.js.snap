@@ -9,11 +9,19 @@ export type Actor = Human | TalentedChimpanzee;
 
 export type Color = \\"BLUE\\" | \\"GREEN\\" | \\"RED\\";
 
+export const Color$Values: {|
+  +BLUE: \\"BLUE\\",
+  +GREEN: \\"GREEN\\",
+  +RED: \\"RED\\",
+|} = Object.freeze({ BLUE: \\"BLUE\\", GREEN: \\"GREEN\\", RED: \\"RED\\" });
+
 export type DateTime = string;
 
 export type Dollars = number;
 
 export type EmptyEnum = empty;
+
+export const EmptyEnum$Values: {||} = Object.freeze({});
 
 export type EmptyUnion = empty;
 
