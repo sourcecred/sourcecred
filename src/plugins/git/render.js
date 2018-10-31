@@ -17,7 +17,6 @@ export function description(
       const hash = address.hash;
       const commit = repository.commits[hash];
       if (commit == null) {
-        console.error(`Unable to find data for commit ${hash}`);
         return <code>{hash}</code>;
       }
       // This `any`-cast courtesy of facebook/flow#6927.

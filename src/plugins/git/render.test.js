@@ -115,14 +115,13 @@ describe("plugins/git/render", () => {
       expect(el.text()).toContain(commit.summary);
     }
   });
-  it("logs an error for a commit not in the repository", () => {
+  it("renders just the hash for a commit not in the repository", () => {
+    // This can happen if, for instance, the GitHub plugin picks up a
+    // commit object that was not known to the Git plugin. (Via, say, a
+    // pull request that was merged but not into master, or a reference
+    // to a commit in a different repository.)
+    //
     const el = renderExample(unregisteredCommit);
-    expect(console.error).toHaveBeenCalledWith(
-      `Unable to find data for commit ${unregisteredCommit.hash}`
-    );
-    // $ExpectFlowError
-    console.error = jest.fn();
-
     expect(el.find(Link)).toHaveLength(0);
     // Has the full hash, b.c. short hash couldn't be found
     expect(el.find("code").text()).toEqual(unregisteredCommit.hash);
