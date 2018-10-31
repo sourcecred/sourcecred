@@ -9,8 +9,8 @@ import {
   inserterNodeType,
   machineNodeType,
   assemblesEdgeType,
-  factorioEdges,
-} from "../../adapters/demoAdapters";
+} from "../../../plugins/demo/declaration";
+import {edges as factorioEdges} from "../../../plugins/demo/graph";
 import {weightsToEdgeEvaluator} from "./weightsToEdgeEvaluator";
 
 describe("app/credExplorer/weights/weightsToEdgeEvaluator", () => {

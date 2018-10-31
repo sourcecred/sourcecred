@@ -9,7 +9,7 @@ import {ConnectionRowList, ConnectionRow, ConnectionView} from "./Connection";
 import {example} from "./sharedTestUtils";
 import {TableRow} from "./TableRow";
 import {NodeRow} from "./Node";
-import {factorioNodes} from "../../adapters/demoAdapters";
+import {nodes as factorioNodes} from "../../../plugins/demo/graph";
 
 require("../../testUtil").configureEnzyme();
 
@@ -196,7 +196,7 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
       const description = outerSpan.children().find("span");
       expect(badge.children().text()).toEqual("is transported by");
       expect(description.text()).toEqual(
-        'NodeAddress["factorio","inserter","1"]'
+        '[factorio]: NodeAddress["factorio","inserter","1"]'
       );
     });
     it("for outward connections, renders a `Badge` and description", async () => {
@@ -207,7 +207,7 @@ describe("app/credExplorer/pagerankTable/Connection", () => {
       const description = outerSpan.children().find("span");
       expect(badge.children().text()).toEqual("assembles");
       expect(description.text()).toEqual(
-        'NodeAddress["factorio","inserter","2"]'
+        '[factorio]: NodeAddress["factorio","inserter","2"]'
       );
     });
     it("for synthetic connections, renders only a `Badge`", async () => {

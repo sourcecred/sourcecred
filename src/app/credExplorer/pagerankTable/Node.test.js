@@ -12,7 +12,7 @@ import type {NodeAddressT} from "../../../core/graph";
 import {nodeDescription} from "./shared";
 import {example} from "./sharedTestUtils";
 import {NodeRowList, NodeRow, type NodeRowProps} from "./Node";
-import {factorioNodes} from "../../adapters/demoAdapters";
+import {nodes as factorioNodes} from "../../../plugins/demo/graph";
 
 require("../../testUtil").configureEnzyme();
 

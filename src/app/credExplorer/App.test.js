@@ -8,7 +8,7 @@ import {makeRepoId} from "../../core/repoId";
 import {Assets} from "../assets";
 import testLocalStore from "../testLocalStore";
 import {DynamicAdapterSet, StaticAdapterSet} from "../adapters/adapterSet";
-import {FactorioStaticAdapter} from "../adapters/demoAdapters";
+import {FactorioStaticAdapter} from "../../plugins/demo/appAdapter";
 import {defaultWeightsForAdapter} from "./weights/weights";
 
 import RepositorySelect from "./RepositorySelect";

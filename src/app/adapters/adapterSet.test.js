@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress, EdgeAddress, Graph} from "../../core/graph";
-import {FactorioStaticAdapter} from "./demoAdapters";
+import {FactorioStaticAdapter} from "../../plugins/demo/appAdapter";
 import {StaticAdapterSet} from "./adapterSet";
 import {
   FallbackStaticAdapter,
@@ -103,8 +103,7 @@ describe("app/adapters/adapterSet", () => {
     });
     it("loads a dynamicAdapterSet", async () => {
       const {x, sas} = example();
-      x.loadingMock = jest.fn();
-      x.loadingMock.mockResolvedValue();
+      x.loadingMock = jest.fn().mockResolvedValue();
       expect(x.loadingMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
       const repoId = makeRepoId("foo", "bar");

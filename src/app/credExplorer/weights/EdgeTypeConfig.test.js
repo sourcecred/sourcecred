@@ -5,7 +5,7 @@ import {shallow} from "enzyme";
 
 import {WeightSlider} from "./WeightSlider";
 import {EdgeTypeConfig, EdgeWeightSlider} from "./EdgeTypeConfig";
-import {assemblesEdgeType} from "../../adapters/demoAdapters";
+import {assemblesEdgeType} from "../../../plugins/demo/declaration";
 
 require("../../testUtil").configureEnzyme();
 

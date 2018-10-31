@@ -4,10 +4,10 @@ import React from "react";
 import {shallow} from "enzyme";
 import {PluginWeightConfig} from "./PluginWeightConfig";
 import {
-  FactorioStaticAdapter,
   inserterNodeType,
   assemblesEdgeType,
-} from "../../adapters/demoAdapters";
+} from "../../../plugins/demo/declaration";
+import {FactorioStaticAdapter} from "../../../plugins/demo/appAdapter";
 import {
   fallbackNodeType,
   fallbackEdgeType,
