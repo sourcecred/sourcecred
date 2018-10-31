@@ -6,8 +6,7 @@ import * as N from "./nodes";
 import * as R from "./relationalView";
 import {createEdge} from "./edges";
 import {findMentionsAuthorReferences} from "./heuristics/mentionsAuthorReference";
-// TODO(@decentralion): Opportunity to reduce bundle size
-import {Reactions} from "./graphql";
+import {ReactionContent$Values as Reactions} from "./graphqlTypes";
 
 export function createGraph(view: R.RelationalView): Graph {
   const creator = new GraphCreator();

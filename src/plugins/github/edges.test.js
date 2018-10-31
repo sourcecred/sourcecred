@@ -5,7 +5,7 @@ import {createEdge, fromRaw, toRaw} from "./edges";
 import * as GE from "./edges";
 import * as GN from "./nodes";
 import {COMMIT_TYPE} from "../git/nodes";
-import {Reactions} from "./graphql";
+import {ReactionContent$Values as Reactions} from "./graphqlTypes";
 
 describe("plugins/github/edges", () => {
   const nodeExamples = {
