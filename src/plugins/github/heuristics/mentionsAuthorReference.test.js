@@ -137,6 +137,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
           reviews: [],
         },
       ],
+      releases: [],
       url: "https://github.com/my-owner/my-repo",
       name: "my-repo",
       owner: {

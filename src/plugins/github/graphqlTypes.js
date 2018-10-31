@@ -161,6 +161,17 @@ export type Ref = {|
   +target: null | GitObject,
 |};
 
+export type Release = {|
+  +__typename: "Release",
+  +author: null | User,
+  +createdAt: DateTime,
+  +description: null | String,
+  +id: string,
+  +name: null | String,
+  +tag: null | Ref,
+  +url: URI,
+|};
+
 export type Repository = {|
   +__typename: "Repository",
   +defaultBranchRef: null | Ref,
@@ -169,6 +180,7 @@ export type Repository = {|
   +name: String,
   +owner: null | RepositoryOwner,
   +pullRequests: $ReadOnlyArray<null | PullRequest>,
+  +releases: $ReadOnlyArray<null | Release>,
   +url: URI,
 |};
 

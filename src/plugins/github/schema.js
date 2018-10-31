@@ -34,6 +34,7 @@ export default function schema(): Schema.Schema {
       issues: s.connection("Issue"),
       pullRequests: s.connection("PullRequest"),
       defaultBranchRef: s.node("Ref"),
+      releases: s.connection("Release"),
     }),
     Issue: s.object({
       id: s.id(),
@@ -85,6 +86,21 @@ export default function schema(): Schema.Schema {
       id: s.id(),
       content: s.primitive(s.nonNull("ReactionContent")),
       user: s.node("User"),
+    }),
+    Release: s.object({
+      id: s.id(),
+      url: s.primitive(s.nonNull("URI")),
+      name: s.primitive(s.nullable("String")),
+      description: s.primitive(s.nullable("String")),
+      // Note: GitHub has `createdAt` (non-null), `publishedAt`
+      // (nullable), and `updatedAt` (non-null). The documentation is
+      // lacking, but it looks like `createdAt` is the creation time of
+      // the Git tag (according to, e.g., `git show v0.1.0`), whereas
+      // `publishedAt` is the time when the user published the GitHub
+      // release, which may be null if the release is not published.
+      createdAt: s.primitive(s.nonNull("DateTime")),
+      tag: s.node("Ref"),
+      author: s.node("User"),
     }),
     Ref: s.object({
       id: s.id(),
