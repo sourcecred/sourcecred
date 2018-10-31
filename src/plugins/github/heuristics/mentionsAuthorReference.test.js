@@ -2,7 +2,7 @@
 
 import * as RV from "../relationalView";
 import * as N from "../nodes";
-import type {ConnectionJSON} from "../graphql";
+import type {Repository} from "../graphqlTypes";
 import deepEqual from "lodash.isequal";
 
 import {findMentionsAuthorReferences} from "./mentionsAuthorReference";
@@ -10,15 +10,6 @@ import {findMentionsAuthorReferences} from "./mentionsAuthorReference";
 describe("plugins/github/heuristics/mentionsAuthorReference", () => {
   function exampleRelationalView(): RV.RelationalView {
     const view = new RV.RelationalView();
-    function connection<T>(nodes: $ReadOnlyArray<T>): ConnectionJSON<T> {
-      return {
-        nodes,
-        pageInfo: {
-          endCursor: "cursor:ignored",
-          hasNextPage: false,
-        },
-      };
-    }
 
     const authors = {
       steven: () => ({
@@ -61,95 +52,102 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
       return `${issueUrl(issueNumber)}#issuecomment-${commentNumber}`;
     }
 
-    const data = {
-      repository: {
-        id: "repo:my-repo",
-        issues: connection([
-          {
-            id: "issue:1",
-            url: issueUrl(1),
-            number: 1,
-            title: "calling into the void",
-            body: "hi @amethyst",
-            author: authors.steven(),
-            comments: connection([]),
-            reactions: connection([]),
-          },
-          {
-            id: "issue:2",
-            number: 2,
-            url: issueUrl(2),
-            title: "an issue with many types of references",
-            body: "it is me, @steven\n\nPaired with: @pearl",
-            author: authors.steven(),
-            reactions: connection([]),
-            comments: connection([
-              {
-                id: "comment:2_1",
-                url: issueCommentUrl(2, 1),
-                body: "parry parry thrust @pearl\nparry parry thrust @steven",
-                author: authors.holo(),
-                reactions: connection([]),
-              },
-              {
-                id: "comment:2_2",
-                url: issueCommentUrl(2, 2),
-                body: "@holo-pearl: stop!",
-                author: authors.steven(),
-                reactions: connection([]),
-              },
-              {
-                id: "comment:2_3",
-                url: issueCommentUrl(2, 3),
-                body: "@amethyst @garnet why aren't you helping",
-                author: authors.pearl(),
-                reactions: connection([]),
-              },
-              {
-                id: "comment:2_4",
-                url: issueCommentUrl(2, 4),
-                body: "@amethyst! come quickly, @amethyst!",
-                author: authors.garnet(),
-                reactions: connection([]),
-              },
-              {
-                id: "comment:2_5",
-                url: issueCommentUrl(2, 5),
-                body: "i am busy fighting @boomerang-blade guy",
-                author: authors.amethyst(),
-                reactions: connection([]),
-              },
-            ]),
-          },
-        ]),
-        pulls: connection([
-          {
-            id: "pull:3",
-            url: "https://github.com/my-owner/my-repo/pulls/3",
-            number: 3,
-            body: "Self referentially yours: @steven",
-            title: "a pull request, just because",
-            mergeCommit: null,
-            additions: 0,
-            deletions: 0,
-            reactions: connection([]),
-            comments: connection([]),
-            author: authors.steven(),
-            reviews: connection([]),
-          },
-        ]),
-        url: "https://github.com/my-owner/my-repo",
-        name: "my-repo",
-        owner: {
-          __typename: "Organization",
-          id: "org:my-owner",
-          login: "my-owner",
-          url: "https://github.com/my-owner",
+    const repository: Repository = {
+      __typename: "Repository",
+      id: "repo:my-repo",
+      issues: [
+        {
+          __typename: "Issue",
+          id: "issue:1",
+          url: issueUrl(1),
+          number: 1,
+          title: "calling into the void",
+          body: "hi @amethyst",
+          author: authors.steven(),
+          comments: [],
+          reactions: [],
         },
-        defaultBranchRef: null,
+        {
+          __typename: "Issue",
+          id: "issue:2",
+          number: 2,
+          url: issueUrl(2),
+          title: "an issue with many types of references",
+          body: "it is me, @steven\n\nPaired with: @pearl",
+          author: authors.steven(),
+          reactions: [],
+          comments: [
+            {
+              __typename: "IssueComment",
+              id: "comment:2_1",
+              url: issueCommentUrl(2, 1),
+              body: "parry parry thrust @pearl\nparry parry thrust @steven",
+              author: authors.holo(),
+              reactions: [],
+            },
+            {
+              __typename: "IssueComment",
+              id: "comment:2_2",
+              url: issueCommentUrl(2, 2),
+              body: "@holo-pearl: stop!",
+              author: authors.steven(),
+              reactions: [],
+            },
+            {
+              __typename: "IssueComment",
+              id: "comment:2_3",
+              url: issueCommentUrl(2, 3),
+              body: "@amethyst @garnet why aren't you helping",
+              author: authors.pearl(),
+              reactions: [],
+            },
+            {
+              __typename: "IssueComment",
+              id: "comment:2_4",
+              url: issueCommentUrl(2, 4),
+              body: "@amethyst! come quickly, @amethyst!",
+              author: authors.garnet(),
+              reactions: [],
+            },
+            {
+              __typename: "IssueComment",
+              id: "comment:2_5",
+              url: issueCommentUrl(2, 5),
+              body: "i am busy fighting @boomerang-blade guy",
+              author: authors.amethyst(),
+              reactions: [],
+            },
+          ],
+        },
+      ],
+      pullRequests: [
+        {
+          __typename: "PullRequest",
+          id: "pull:3",
+          url: "https://github.com/my-owner/my-repo/pulls/3",
+          number: 3,
+          body: "Self referentially yours: @steven",
+          title: "a pull request, just because",
+          mergeCommit: null,
+          additions: 0,
+          deletions: 0,
+          reactions: [],
+          comments: [],
+          author: authors.steven(),
+          reviews: [],
+        },
+      ],
+      url: "https://github.com/my-owner/my-repo",
+      name: "my-repo",
+      owner: {
+        __typename: "Organization",
+        id: "org:my-owner",
+        login: "my-owner",
+        url: "https://github.com/my-owner",
       },
+      defaultBranchRef: null,
     };
-    view.addData(data);
+    view.addRepository(repository);
     return view;
   }
 
