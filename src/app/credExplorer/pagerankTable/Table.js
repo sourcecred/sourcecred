@@ -9,7 +9,7 @@ import type {PagerankNodeDecomposition} from "../../../analysis/pagerankNodeDeco
 import {DynamicAdapterSet} from "../../adapters/adapterSet";
 import type {DynamicAppAdapter} from "../../adapters/appAdapter";
 import {FALLBACK_NAME} from "../../adapters/fallbackAdapter";
-import {type WeightedTypes} from "../weights/weights";
+import type {WeightedTypes} from "../../../analysis/weights";
 import {WeightConfig} from "../weights/WeightConfig";
 
 import {NodeRowList} from "./Node";
