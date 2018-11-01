@@ -14,7 +14,7 @@ import {
 
 import {StaticAdapterSet, DynamicAdapterSet} from "../adapters/adapterSet";
 import type {WeightedTypes} from "../../analysis/weights";
-import {weightsToEdgeEvaluator} from "./weights/weightsToEdgeEvaluator";
+import {weightsToEdgeEvaluator} from "../../analysis/weightsToEdgeEvaluator";
 
 /*
   This models the UI states of the credExplorer/App as a state machine.
