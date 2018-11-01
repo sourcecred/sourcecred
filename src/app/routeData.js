@@ -38,7 +38,7 @@ const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
     path: "/prototype/",
     contents: {
       type: "PAGE",
-      component: () => require("./credExplorer/App").default,
+      component: () => require("../explorer/App").default,
     },
     title: "SourceCred prototype",
     navTitle: "Prototype",

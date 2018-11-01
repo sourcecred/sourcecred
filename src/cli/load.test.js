@@ -7,7 +7,7 @@ import tmp from "tmp";
 import {run} from "./testUtil";
 import load, {help} from "./load";
 
-import * as RepoIdRegistry from "../app/credExplorer/repoIdRegistry";
+import * as RepoIdRegistry from "../explorer/repoIdRegistry";
 import {stringToRepoId} from "../core/repoId";
 
 jest.mock("../tools/execDependencyGraph", () => jest.fn());

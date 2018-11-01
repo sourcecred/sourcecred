@@ -2,7 +2,7 @@
 import type {
   StaticAppAdapter as IStaticAppAdapter,
   DynamicAppAdapter as IDynamicAppAdapter,
-} from "../../app/adapters/appAdapter";
+} from "../../explorer/adapters/appAdapter";
 import {Graph} from "../../core/graph";
 import * as N from "./nodes";
 import {description} from "./render";
