@@ -7,10 +7,23 @@ const execDependencyGraph = require("../src/tools/execDependencyGraph");
 main();
 
 function main() {
-  const mode = process.argv.includes("--full") ? "FULL" : "BASIC";
-  execDependencyGraph(makeTasks(mode)).then(({success}) => {
+  const options = parseArgs();
+  execDependencyGraph(makeTasks(options.mode)).then(({success}) => {
     process.exitCode = success ? 0 : 1;
   });
+}
+
+function parseArgs() {
+  const options = {mode: "BASIC"};
+  const args = process.argv.slice(2);
+  for (const arg of args) {
+    if (arg === "--full") {
+      options.mode = "FULL";
+    } else {
+      throw new Error("unknown argument: " + JSON.stringify(arg));
+    }
+  }
+  return options;
 }
 
 function makeTasks(mode /*: "BASIC" | "FULL" */) {
