@@ -221,8 +221,9 @@ function plugins(mode /*: "development" | "production" */) {
   const basePlugins = [
     new StaticSiteGeneratorPlugin({
       entry: "ssr",
-      // $ExpectFlowError(dynamic require)
-      paths: require(paths.appRouteData).routeData.map(({path}) => path),
+      paths: require("../src/homepage/routeData").routeData.map(
+        ({path}) => path
+      ),
       locals: {},
     }),
     new CopyPlugin([{from: paths.favicon, to: "favicon.png"}]),
