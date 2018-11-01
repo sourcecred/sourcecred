@@ -7,6 +7,7 @@ const path = require("path");
 const paths = require("./paths");
 
 /*:: import type {GitState} from "../src/core/version"; */
+/*:: import type {RepoIdRegistry} from "../src/explorer/repoIdRegistry"; */
 
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve("./paths")];
@@ -135,15 +136,19 @@ const SOURCECRED_FEEDBACK_URL =
     : "https://discuss.sourcecred.io/c/cred-feedback/";
 process.env.SOURCECRED_FEEDBACK_URL = SOURCECRED_FEEDBACK_URL;
 
-function getClientEnvironment() {
+function getClientEnvironment(
+  repoRegistryContents /*: RepoIdRegistry | null */
+) {
   const raw = {};
   // Useful for determining whether we’re running in production mode.
   // Most importantly, it switches React into the correct mode.
   raw.NODE_ENV = process.env.NODE_ENV || "development";
-  // Used by `src/app/version.js`.
+  // Used by `src/core/version.js`.
   raw.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
-  // Used by `src/app/credExplorer/App.js`.
+  // Used by `src/explorer/App.js`.
   raw.SOURCECRED_FEEDBACK_URL = SOURCECRED_FEEDBACK_URL;
+  // Optional. Used by `src/homepage/routeData.js`
+  raw.REPO_REGISTRY = stringify(repoRegistryContents);
 
   // Stringify all values so we can feed into Webpack's DefinePlugin.
   const stringified = {"process.env": {}};

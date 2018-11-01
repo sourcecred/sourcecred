@@ -5,7 +5,9 @@ import type {
   $Application as ExpressApp,
   $Response as ExpressResponse,
 } from "express";
+import type {RepoIdRegistry} from "../src/explorer/repoIdRegistry";
 */
+const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const webpack = require("webpack");
@@ -19,8 +21,39 @@ const getClientEnvironment = require("./env");
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
+
+function loadRepoRegistry() /*: RepoIdRegistry */ {
+  const env = process.env.SOURCECRED_DIRECTORY;
+  // TODO(#945): de-duplicate finding the directory with src/cli/common.js
+  const defaultDirectory = path.join(os.tmpdir(), "sourcecred");
+  const scDirectory = env != null ? env : defaultDirectory;
+  // TODO(@dandelion): Remove hacks around compat usage here
+  // TODO(@dandelion): Import rather than hardcode the registry file name
+  const registryFile = path.join(scDirectory, "repositoryRegistry.json");
+
+  let jsonString;
+  try {
+    jsonString = fs.readFileSync(registryFile).toString();
+  } catch (e) {
+    if (e.code === "ENOENT") {
+      jsonString = JSON.stringify([
+        {version: "0.1.0", type: "REPO_ID_REGISTRY"},
+        [],
+      ]);
+    } else {
+      throw e;
+    }
+  }
+  const json = JSON.parse(jsonString);
+  const compat = json[0];
+  if (compat.version !== "0.1.0" || compat.type !== "REPO_ID_REGISTRY") {
+    throw new Error("Compat mismatch");
+  }
+  return json[1];
+}
+
 // Get environment variables to inject into our app.
-const env = getClientEnvironment();
+const env = getClientEnvironment(loadRepoRegistry());
 
 function makeConfig(mode /*: "production" | "development" */) {
   return {

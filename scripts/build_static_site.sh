@@ -131,7 +131,6 @@ build() {
         yarn
         yarn -s backend --output-path "${SOURCECRED_BIN}"
     fi
-    yarn -s build --output-path "${target}"
 
     if [ "${#repos[@]}" -ne 0 ]; then
         for repo in "${repos[@]}"; do
@@ -140,6 +139,8 @@ build() {
                 node "${SOURCECRED_BIN:-./bin}/sourcecred.js" load "${repo}"
         done
     fi
+
+    yarn -s build --output-path "${target}"
 
     # Copy the SourceCred data into the appropriate API route. Using
     # `mkdir` here will fail in the case where an `api/` folder exists,
