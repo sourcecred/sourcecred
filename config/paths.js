@@ -15,7 +15,6 @@ module.exports = {
   appBuild: resolveApp("build"),
   appIndexJs: resolveApp("src/homepage/index.js"),
   appServerSideRenderingIndexJs: resolveApp("src/homepage/server.js"),
-  appRouteData: resolveApp("src/homepage/routeData.js"),
   appPackageJson: resolveApp("package.json"),
   appSrc: resolveApp("src"),
   yarnLockFile: resolveApp("yarn.lock"),
