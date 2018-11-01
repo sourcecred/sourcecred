@@ -8,7 +8,6 @@ import CheckedLocalStore from "../webutil/checkedLocalStore";
 import BrowserLocalStore from "../webutil/browserLocalStore";
 import Link from "../webutil/Link";
 
-import {defaultStaticAdapters} from "./adapters/defaultPlugins";
 import {PagerankTable} from "./pagerankTable/Table";
 import type {WeightedTypes} from "../analysis/weights";
 import {defaultWeightsForAdapterSet} from "./weights/weights";
@@ -22,7 +21,10 @@ import {
 } from "./state";
 import {StaticAdapterSet} from "./adapters/adapterSet";
 
-export default class AppPage extends React.Component<{|+assets: Assets|}> {
+export class AppPage extends React.Component<{|
+  +assets: Assets,
+  +adapters: StaticAdapterSet,
+|}> {
   static _LOCAL_STORE = new CheckedLocalStore(
     new BrowserLocalStore({
       version: "2",
@@ -35,7 +37,7 @@ export default class AppPage extends React.Component<{|+assets: Assets|}> {
     return (
       <App
         assets={this.props.assets}
-        adapters={defaultStaticAdapters()}
+        adapters={this.props.adapters}
         localStore={AppPage._LOCAL_STORE}
       />
     );
