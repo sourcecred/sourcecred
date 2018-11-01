@@ -1,19 +1,16 @@
 // @flow
 
-import * as NullUtil from "../../../util/null";
-import {
-  fallbackNodeType,
-  fallbackEdgeType,
-} from "../../../analysis/fallbackDeclaration";
+import * as NullUtil from "../util/null";
+import {fallbackNodeType, fallbackEdgeType} from "./fallbackDeclaration";
 import {
   inserterNodeType,
   machineNodeType,
   assemblesEdgeType,
-} from "../../../plugins/demo/declaration";
-import {edges as factorioEdges} from "../../../plugins/demo/graph";
+} from "../plugins/demo/declaration";
+import {edges as factorioEdges} from "../plugins/demo/graph";
 import {weightsToEdgeEvaluator} from "./weightsToEdgeEvaluator";
 
-describe("app/credExplorer/weights/weightsToEdgeEvaluator", () => {
+describe("analysis/weightsToEdgeEvaluator", () => {
   describe("weightsToEdgeEvaluator", () => {
     type WeightArgs = {|
       +assemblesForward?: number,
