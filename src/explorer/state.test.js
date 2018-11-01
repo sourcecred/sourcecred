@@ -2,7 +2,6 @@
 
 import {
   StateTransitionMachine,
-  uninitializedState,
   type AppState,
   type GraphWithAdapters,
 } from "./state";
@@ -82,62 +81,12 @@ describe("explorer/state", () => {
     return new Map();
   }
   function loading(state: AppState) {
-    if (state.type === "UNINITIALIZED") {
-      throw new Error("Tried to get invalid loading");
-    }
     return state.loading;
   }
-  function getRepoId(state: AppState) {
-    if (state.type === "UNINITIALIZED") {
-      throw new Error("Tried to get invalid repoId");
-    }
-    return state.repoId;
-  }
-
-  describe("setRepoId", () => {
-    describe("in UNINITIALIZED", () => {
-      it("transitions to READY_TO_LOAD_GRAPH", () => {
-        const {getState, stm} = example(uninitializedState());
-        const repoId = makeRepoId("foo", "bar");
-        stm.setRepoId(repoId);
-        const state = getState();
-        expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-        expect(getRepoId(state)).toEqual(repoId);
-      });
-    });
-    it("stays in READY_TO_LOAD_GRAPH with new repoId", () => {
-      const {getState, stm} = example(readyToLoadGraph());
-      const repoId = makeRepoId("zoink", "zod");
-      stm.setRepoId(repoId);
-      const state = getState();
-      expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepoId(state)).toEqual(repoId);
-    });
-    it("transitions READY_TO_RUN_PAGERANK to READY_TO_LOAD_GRAPH with new repoId", () => {
-      const {getState, stm} = example(readyToRunPagerank());
-      const repoId = makeRepoId("zoink", "zod");
-      stm.setRepoId(repoId);
-      const state = getState();
-      expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepoId(state)).toEqual(repoId);
-    });
-    it("transitions PAGERANK_EVALUATED to READY_TO_LOAD_GRAPH with new repoId", () => {
-      const {getState, stm} = example(pagerankEvaluated());
-      const repoId = makeRepoId("zoink", "zod");
-      stm.setRepoId(repoId);
-      const state = getState();
-      expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepoId(state)).toEqual(repoId);
-    });
-  });
 
   describe("loadGraph", () => {
     it("can only be called when READY_TO_LOAD_GRAPH", async () => {
-      const badStates = [
-        uninitializedState(),
-        readyToRunPagerank(),
-        pagerankEvaluated(),
-      ];
+      const badStates = [readyToRunPagerank(), pagerankEvaluated()];
       for (const b of badStates) {
         const {stm} = example(b);
         await expect(
@@ -182,26 +131,6 @@ describe("explorer/state", () => {
       }
       expect(state.graphWithAdapters).toBe(gwa);
     });
-    it("does not transition if repoId transition happens first", async () => {
-      const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
-      const swappedRepoId = makeRepoId("too", "fast");
-      loadGraphMock.mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            stm.setRepoId(swappedRepoId);
-            resolve(graphWithAdapters());
-          })
-      );
-      const succeeded = await stm.loadGraph(
-        new Assets("/my/gateway/"),
-        new StaticAdapterSet([])
-      );
-      expect(succeeded).toBe(false);
-      const state = getState();
-      expect(loading(state)).toBe("NOT_LOADING");
-      expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepoId(state)).toEqual(swappedRepoId);
-    });
     it("sets loading state FAILED on reject", async () => {
       const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
       const error = new Error("Oh no!");
@@ -223,13 +152,11 @@ describe("explorer/state", () => {
 
   describe("runPagerank", () => {
     it("can only be called when READY_TO_RUN_PAGERANK or PAGERANK_EVALUATED", async () => {
-      const badStates = [uninitializedState(), readyToLoadGraph()];
-      for (const b of badStates) {
-        const {stm} = example(b);
-        await expect(
-          stm.runPagerank(weightedTypes(), NodeAddress.empty)
-        ).rejects.toThrow("incorrect state");
-      }
+      const badState = readyToLoadGraph();
+      const {stm} = example(badState);
+      await expect(
+        stm.runPagerank(weightedTypes(), NodeAddress.empty)
+      ).rejects.toThrow("incorrect state");
     });
     it("can be run when READY_TO_RUN_PAGERANK or PAGERANK_EVALUATED", async () => {
       const goodStates = [readyToRunPagerank(), pagerankEvaluated()];
@@ -259,22 +186,6 @@ describe("explorer/state", () => {
       const args = pagerankMock.mock.calls[0];
       expect(args[2].totalScoreNodePrefix).toBe(foo);
     });
-    it("does not transition if a repoId change happens first", async () => {
-      const {getState, stm, pagerankMock} = example(readyToRunPagerank());
-      const swappedRepoId = makeRepoId("too", "fast");
-      pagerankMock.mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            stm.setRepoId(swappedRepoId);
-            resolve(graphWithAdapters());
-          })
-      );
-      await stm.runPagerank(weightedTypes(), NodeAddress.empty);
-      const state = getState();
-      expect(loading(state)).toBe("NOT_LOADING");
-      expect(state.type).toBe("READY_TO_LOAD_GRAPH");
-      expect(getRepoId(state)).toBe(swappedRepoId);
-    });
     it("sets loading state FAILED on reject", async () => {
       const {getState, stm, pagerankMock} = example(readyToRunPagerank());
       const error = new Error("Oh no!");
@@ -291,17 +202,6 @@ describe("explorer/state", () => {
   });
 
   describe("loadGraphAndRunPagerank", () => {
-    it("errors if called with uninitialized state", async () => {
-      const {stm} = example(uninitializedState());
-      await expect(
-        stm.loadGraphAndRunPagerank(
-          new Assets("gateway"),
-          new StaticAdapterSet([]),
-          weightedTypes(),
-          NodeAddress.empty
-        )
-      ).rejects.toThrow("incorrect state");
-    });
     it("when READY_TO_LOAD_GRAPH, loads graph then runs pagerank", async () => {
       const {stm} = example(readyToLoadGraph());
       (stm: any).loadGraph = jest.fn();

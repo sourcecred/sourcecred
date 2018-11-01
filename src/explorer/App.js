@@ -7,23 +7,24 @@ import type {LocalStore} from "../webutil/localStore";
 import CheckedLocalStore from "../webutil/checkedLocalStore";
 import BrowserLocalStore from "../webutil/browserLocalStore";
 import Link from "../webutil/Link";
+import type {RepoId} from "../core/repoId";
 
 import {PagerankTable} from "./pagerankTable/Table";
 import type {WeightedTypes} from "../analysis/weights";
 import {defaultWeightsForAdapterSet} from "./weights/weights";
-import RepositorySelect from "./RepositorySelect";
 import {Prefix as GithubPrefix} from "../plugins/github/nodes";
 import {
   createStateTransitionMachine,
   type AppState,
   type StateTransitionMachineInterface,
-  uninitializedState,
+  initialState,
 } from "./state";
 import {StaticAdapterSet} from "./adapters/adapterSet";
 
 export class AppPage extends React.Component<{|
   +assets: Assets,
   +adapters: StaticAdapterSet,
+  +repoId: RepoId,
 |}> {
   static _LOCAL_STORE = new CheckedLocalStore(
     new BrowserLocalStore({
@@ -36,6 +37,7 @@ export class AppPage extends React.Component<{|
     const App = createApp(createStateTransitionMachine);
     return (
       <App
+        repoId={this.props.repoId}
         assets={this.props.assets}
         adapters={this.props.adapters}
         localStore={AppPage._LOCAL_STORE}
@@ -48,6 +50,7 @@ type Props = {|
   +assets: Assets,
   +localStore: LocalStore,
   +adapters: StaticAdapterSet,
+  +repoId: RepoId,
 |};
 type State = {|
   appState: AppState,
@@ -66,7 +69,7 @@ export function createApp(
     constructor(props: Props) {
       super(props);
       this.state = {
-        appState: uninitializedState(),
+        appState: initialState(this.props.repoId),
         weightedTypes: defaultWeightsForAdapterSet(props.adapters),
       };
       this.stateTransitionMachine = createSTM(
@@ -76,7 +79,6 @@ export function createApp(
     }
 
     render() {
-      const {localStore} = this.props;
       const {appState} = this.state;
       let pagerankTable;
       if (appState.type === "PAGERANK_EVALUATED") {
@@ -109,15 +111,6 @@ export function createApp(
               feedback
             </Link>
           </p>
-          <div style={{marginBottom: 10}}>
-            <RepositorySelect
-              assets={this.props.assets}
-              localStore={localStore}
-              onChange={(repoId) =>
-                this.stateTransitionMachine.setRepoId(repoId)
-              }
-            />
-          </div>
           <button
             disabled={
               appState.type === "UNINITIALIZED" ||
@@ -154,9 +147,6 @@ export class LoadingIndicator extends React.PureComponent<{|
 
 export function loadingText(state: AppState) {
   switch (state.type) {
-    case "UNINITIALIZED": {
-      return "Initializing...";
-    }
     case "READY_TO_LOAD_GRAPH": {
       return {
         LOADING: "Loading graph...",
