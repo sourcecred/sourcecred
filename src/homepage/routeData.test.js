@@ -2,7 +2,7 @@
 
 import {routeData} from "./routeData";
 
-describe("app/routeData", () => {
+describe("homepage/routeData", () => {
   /*
    * React Router doesn't support relative paths. I'm not sure exactly
    * what a path without a leading slash would do; it's asking for

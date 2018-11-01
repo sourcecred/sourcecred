@@ -6,7 +6,7 @@ const path = require("path");
 
 const paths = require("./paths");
 
-/*:: import type {GitState} from "../src/app/version"; */
+/*:: import type {GitState} from "../src/homepage/version"; */
 
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve("./paths")];
