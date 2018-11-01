@@ -11,7 +11,7 @@ import {FactorioStaticAdapter} from "../../../plugins/demo/appAdapter";
 import {
   fallbackNodeType,
   fallbackEdgeType,
-} from "../../adapters/fallbackAdapter";
+} from "../../../analysis/fallbackDeclaration";
 import {NodeTypeConfig} from "./NodeTypeConfig";
 import {EdgeTypeConfig} from "./EdgeTypeConfig";
 import {
