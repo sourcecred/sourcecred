@@ -5,8 +5,8 @@ import {declaration} from "./declaration";
 import type {
   StaticAppAdapter,
   DynamicAppAdapter,
-} from "../../app/adapters/appAdapter";
-import {StaticAdapterSet} from "../../app/adapters/adapterSet";
+} from "../../explorer/adapters/appAdapter";
+import {StaticAdapterSet} from "../../explorer/adapters/adapterSet";
 import {Assets} from "../../webutil/assets";
 import {type RepoId, makeRepoId} from "../../core/repoId";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
@@ -17,7 +17,7 @@ export class FactorioStaticAdapter implements StaticAppAdapter {
   declaration(): PluginDeclaration {
     return declaration;
   }
-  async load(assets: Assets, repoId: RepoId): Promise<FactorioDynamicAdapter> {
+  async load(assets: Assets, repoId: RepoId) {
     const result: FactorioDynamicAdapter = new FactorioDynamicAdapter();
     if (this.loadingMock) {
       return this.loadingMock(assets, repoId).then(() => result);
@@ -33,7 +33,7 @@ export class FactorioDynamicAdapter implements DynamicAppAdapter {
   nodeDescription(x: NodeAddressT) {
     return `[factorio]: ${NodeAddress.toString(x)}`;
   }
-  static() {
+  static(): FactorioStaticAdapter {
     return new FactorioStaticAdapter();
   }
 }

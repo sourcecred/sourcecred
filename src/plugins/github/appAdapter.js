@@ -4,7 +4,7 @@ import pako from "pako";
 import type {
   StaticAppAdapter as IStaticAppAdapter,
   DynamicAppAdapter as IDynamicAppAdapter,
-} from "../../app/adapters/appAdapter";
+} from "../../explorer/adapters/appAdapter";
 import {type Graph, NodeAddress} from "../../core/graph";
 import {createGraph} from "./createGraph";
 import * as N from "./nodes";
