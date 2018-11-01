@@ -21,6 +21,11 @@ import {
 } from "./state";
 import {StaticAdapterSet} from "./adapters/adapterSet";
 
+const credOverviewUrl =
+  "https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20";
+const feedbackUrl =
+  "https://docs.google.com/forms/d/e/1FAIpQLSdwxqFJNQIVS3EqISJ0EUcr1aixARDVA51DMURWSYgORFPHcQ/viewform";
+
 export class AppPage extends React.Component<{|
   +assets: Assets,
   +adapters: StaticAdapterSet,
@@ -103,13 +108,9 @@ export function createApp(
       return (
         <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
           <p style={{textAlign: "right"}}>
-            <Link href="https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20">
-              what is this?
-            </Link>
+            <Link href={credOverviewUrl}>what is this?</Link>
             {spacer()}
-            <Link href={process.env.SOURCECRED_FEEDBACK_URL || ""}>
-              feedback
-            </Link>
+            <Link href={feedbackUrl}>feedback</Link>
           </p>
           <button
             disabled={
