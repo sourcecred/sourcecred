@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Create one page per project, rather than having a selector (#988)
 <!-- Please add new entries to the _top_ of this section. -->
 
 ## [0.2.0]
