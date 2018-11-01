@@ -14,8 +14,9 @@ import {Mirror} from "../../graphql/mirror";
 import * as Queries from "../../graphql/queries";
 import {stringify, inlineLayout, type Body} from "../../graphql/queries";
 import * as Schema from "../../graphql/schema";
-import schema from "./schema";
+import {BLACKLISTED_IDS} from "./blacklistedObjectIds";
 import type {Repository} from "./graphqlTypes";
+import schema from "./schema";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -53,7 +54,7 @@ export default async function fetchGithubRepo(
   // equals signs in file names.
   const dbFilename = `mirror_${Buffer.from(resolvedId).toString("hex")}.db`;
   const db = new Database(path.join(cacheDirectory, dbFilename));
-  const mirror = new Mirror(db, schema());
+  const mirror = new Mirror(db, schema(), {blacklistedIds: BLACKLISTED_IDS});
   mirror.registerObject({typename: "Repository", id: resolvedId});
 
   // These are arbitrary tuning parameters.
