@@ -11,7 +11,7 @@ import TwitterLogo from "./TwitterLogo";
 import DiscordLogo from "./DiscordLogo";
 import {routeData} from "./routeData";
 import * as NullUtil from "../util/null";
-import {VERSION_SHORT, VERSION_FULL} from "./version";
+import {VERSION_SHORT, VERSION_FULL} from "../core/version";
 
 export default class Page extends React.Component<{|
   +assets: Assets,
