@@ -5,8 +5,8 @@ import sortBy from "lodash.sortby";
 import deepEqual from "lodash.isequal";
 
 import * as NullUtil from "../../util/null";
-import type {LocalStore} from "../localStore";
-import type {Assets} from "../assets";
+import type {LocalStore} from "../../webutil/localStore";
+import type {Assets} from "../../webutil/assets";
 
 import {fromJSON, REPO_ID_REGISTRY_API} from "./repoIdRegistry";
 import {type RepoId, stringToRepoId, repoIdToString} from "../../core/repoId";

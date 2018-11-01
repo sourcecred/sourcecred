@@ -5,7 +5,7 @@ import {shallow} from "enzyme";
 import {TableRow, PaddingRow} from "./TableRow";
 
 import {COLUMNS} from "./sharedTestUtils";
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/pagerankTable/TableRow", () => {
   function example() {

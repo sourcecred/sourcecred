@@ -1,7 +1,7 @@
 // @flow
 
 import React from "react";
-import Link from "../../app/Link";
+import Link from "../../webutil/Link";
 import * as N from "./nodes";
 import type {Repository} from "./types";
 import {type RepoIdString, stringToRepoId} from "../../core/repoId";

@@ -7,8 +7,8 @@ import ReactDOMServer from "react-dom/server";
 import {match, RouterContext} from "react-router";
 
 import Page from "./Page";
-import {Assets, rootFromPath} from "./assets";
-import createRelativeHistory from "./createRelativeHistory";
+import {Assets, rootFromPath} from "../webutil/assets";
+import createRelativeHistory from "../webutil/createRelativeHistory";
 import ExternalRedirect from "./ExternalRedirect";
 import {createRoutes} from "./createRoutes";
 import {resolveRouteFromPath, resolveTitleFromPath} from "./routeData";

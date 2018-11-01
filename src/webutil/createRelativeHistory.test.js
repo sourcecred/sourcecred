@@ -11,7 +11,7 @@ import createRelativeHistory from "./createRelativeHistory";
 
 require("./testUtil").configureEnzyme();
 
-describe("app/createRelativeHistory", () => {
+describe("webutil/createRelativeHistory", () => {
   function createHistory(basename, path) {
     const memoryHistory = createMemoryHistory(path);
     const relativeHistory = createRelativeHistory(memoryHistory, basename);

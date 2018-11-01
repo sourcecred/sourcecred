@@ -3,7 +3,7 @@
 import {LocalStore} from "./localStore";
 import CheckedLocalStore from "./checkedLocalStore";
 
-describe("src/app/checkedLocalStore", () => {
+describe("webutil/checkedLocalStore", () => {
   function makeBase(): LocalStore {
     return {
       get: jest.fn(),

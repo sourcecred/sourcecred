@@ -18,7 +18,7 @@ import {aggregateFlat, type FlatAggregation} from "./aggregate";
 import {TableRow} from "./TableRow";
 import {nodes as factorioNodes} from "../../../plugins/demo/graph";
 
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/pagerankTable/Aggregation", () => {
   describe("AggregationRowList", () => {

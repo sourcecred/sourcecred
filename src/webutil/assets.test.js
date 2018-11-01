@@ -2,7 +2,7 @@
 
 import {Assets, rootFromPath} from "./assets";
 
-describe("app/assets", () => {
+describe("webutil/assets", () => {
   describe("Assets", () => {
     describe("with an unknown root path (null)", () => {
       it("can be constructed", () => {

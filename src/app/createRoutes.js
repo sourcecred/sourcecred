@@ -5,7 +5,7 @@ import {IndexRoute, Route} from "react-router";
 
 import Page from "./Page";
 import ExternalRedirect from "./ExternalRedirect";
-import withAssets from "./withAssets";
+import withAssets from "../webutil/withAssets";
 import {routeData} from "./routeData";
 
 export function createRoutes() {

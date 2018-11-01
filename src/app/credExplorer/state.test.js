@@ -8,7 +8,7 @@ import {
 } from "./state";
 
 import {Graph, NodeAddress} from "../../core/graph";
-import {Assets} from "../assets";
+import {Assets} from "../../webutil/assets";
 import {makeRepoId, type RepoId} from "../../core/repoId";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
 import type {WeightedTypes} from "../../analysis/weights";

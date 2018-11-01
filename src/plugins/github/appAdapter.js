@@ -10,7 +10,7 @@ import {createGraph} from "./createGraph";
 import * as N from "./nodes";
 import {RelationalView} from "./relationalView";
 import {description} from "./render";
-import type {Assets} from "../../app/assets";
+import type {Assets} from "../../webutil/assets";
 import type {RepoId} from "../../core/repoId";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {declaration} from "./declaration";

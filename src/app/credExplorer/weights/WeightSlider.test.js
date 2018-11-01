@@ -5,7 +5,7 @@ import {shallow} from "enzyme";
 
 import {WeightSlider, formatWeight} from "./WeightSlider";
 
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/weights/WeightSlider", () => {
   describe("WeightSlider", () => {

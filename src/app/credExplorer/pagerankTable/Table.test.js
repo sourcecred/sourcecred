@@ -12,7 +12,7 @@ import {WeightConfig} from "../weights/WeightConfig";
 import {defaultWeightsForAdapter} from "../weights/weights";
 import {FactorioStaticAdapter} from "../../../plugins/demo/appAdapter";
 
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 describe("app/credExplorer/pagerankTable/Table", () => {
   describe("PagerankTable", () => {
     async function setup(defaultNodeFilter?: NodeAddressT) {

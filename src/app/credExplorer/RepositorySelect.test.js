@@ -3,7 +3,7 @@ import React from "react";
 import {shallow, mount} from "enzyme";
 
 import * as NullUtil from "../../util/null";
-import testLocalStore from "../testLocalStore";
+import testLocalStore from "../../webutil/testLocalStore";
 import RepositorySelect, {
   PureRepositorySelect,
   LocalStoreRepositorySelect,
@@ -11,7 +11,7 @@ import RepositorySelect, {
   type Status,
   REPO_ID_KEY,
 } from "./RepositorySelect";
-import {Assets} from "../assets";
+import {Assets} from "../../webutil/assets";
 
 import {
   toJSON,
@@ -20,8 +20,8 @@ import {
 } from "./repoIdRegistry";
 import {makeRepoId} from "../../core/repoId";
 
-require("../testUtil").configureEnzyme();
-require("../testUtil").configureAphrodite();
+require("../../webutil/testUtil").configureEnzyme();
+require("../../webutil/testUtil").configureAphrodite();
 
 describe("app/credExplorer/RepositorySelect", () => {
   beforeEach(() => {

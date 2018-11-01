@@ -9,7 +9,7 @@ import {
   fallbackNodeType,
   fallbackEdgeType,
 } from "../../analysis/fallbackDeclaration";
-import {Assets} from "../assets";
+import {Assets} from "../../webutil/assets";
 import {makeRepoId} from "../../core/repoId";
 
 describe("app/adapters/adapterSet", () => {

@@ -6,7 +6,7 @@ import type {
 import {Graph} from "../../core/graph";
 import * as N from "./nodes";
 import {description} from "./render";
-import type {Assets} from "../../app/assets";
+import type {Assets} from "../../webutil/assets";
 import type {RepoId} from "../../core/repoId";
 import type {Repository} from "./types";
 import type {GitGateway} from "./gitGateway";
