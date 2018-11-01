@@ -9,7 +9,7 @@ import {
   parseGitState,
 } from "./version";
 
-describe("homepage/version", () => {
+describe("core/version", () => {
   const version = (): VersionInfo => ({
     major: 3,
     minor: 13,

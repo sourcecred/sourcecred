@@ -3,7 +3,7 @@
 
 import type {Command} from "./command";
 
-import {VERSION_SHORT} from "../homepage/version";
+import {VERSION_SHORT} from "../core/version";
 
 import help from "./help";
 import load from "./load";
