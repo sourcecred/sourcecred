@@ -14,6 +14,9 @@ import {createRoutes} from "./createRoutes";
 import {resolveRouteFromPath, resolveTitleFromPath} from "./routeData";
 import dedent from "../util/dedent";
 
+// Side effect for testing purposes
+console.log(`REPO_REGISTRY: ${process.env.REPO_REGISTRY || "bad"}`);
+
 export default function render(
   locals: {+path: string, +assets: {[string]: string}},
   callback: (error: ?mixed, result?: string) => void

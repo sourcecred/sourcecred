@@ -12,7 +12,7 @@ const paths = require("./paths");
 const nodeExternals = require("webpack-node-externals");
 const getClientEnvironment = require("./env");
 
-const env = getClientEnvironment();
+const env = getClientEnvironment(null);
 
 // This is the backend configuration. It builds applications that target
 // Node and will not run in a browser.
