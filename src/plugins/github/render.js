@@ -3,7 +3,7 @@
 import React, {type Node as ReactNode} from "react";
 import * as R from "./relationalView";
 
-import Link from "../../app/Link";
+import Link from "../../webutil/Link";
 
 function EntityUrl(props) {
   return (

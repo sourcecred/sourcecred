@@ -2,7 +2,7 @@
 
 import MemoryLocalStore from "./memoryLocalStore";
 
-describe("src/app/memoryLocalStore", () => {
+describe("webutil/memoryLocalStore", () => {
   it("stores simple values", () => {
     const ls = new MemoryLocalStore();
     ls.set("one", 1);

@@ -7,7 +7,7 @@ import {WeightSlider} from "./WeightSlider";
 import {EdgeTypeConfig, EdgeWeightSlider} from "./EdgeTypeConfig";
 import {assemblesEdgeType} from "../../../plugins/demo/declaration";
 
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/weights/EdgeTypeConfig", () => {
   describe("EdgeTypeConfig", () => {

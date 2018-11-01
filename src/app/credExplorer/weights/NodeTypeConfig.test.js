@@ -7,7 +7,7 @@ import {WeightSlider} from "./WeightSlider";
 import {NodeTypeConfig} from "./NodeTypeConfig";
 import {inserterNodeType} from "../../../plugins/demo/declaration";
 
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/weights/NodeTypeConfig", () => {
   describe("NodeTypeConfig", () => {

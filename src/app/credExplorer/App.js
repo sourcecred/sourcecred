@@ -2,11 +2,11 @@
 
 import React from "react";
 
-import type {Assets} from "../assets";
-import type {LocalStore} from "../localStore";
-import CheckedLocalStore from "../checkedLocalStore";
-import BrowserLocalStore from "../browserLocalStore";
-import Link from "../Link";
+import type {Assets} from "../../webutil/assets";
+import type {LocalStore} from "../../webutil/localStore";
+import CheckedLocalStore from "../../webutil/checkedLocalStore";
+import BrowserLocalStore from "../../webutil/browserLocalStore";
+import Link from "../../webutil/Link";
 
 import {defaultStaticAdapters} from "../adapters/defaultPlugins";
 import {PagerankTable} from "./pagerankTable/Table";

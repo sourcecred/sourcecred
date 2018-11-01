@@ -14,7 +14,7 @@ import {example} from "./sharedTestUtils";
 import {NodeRowList, NodeRow, type NodeRowProps} from "./Node";
 import {nodes as factorioNodes} from "../../../plugins/demo/graph";
 
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/pagerankTable/Node", () => {
   describe("NodeRowList", () => {

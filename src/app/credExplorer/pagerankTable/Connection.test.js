@@ -11,7 +11,7 @@ import {TableRow} from "./TableRow";
 import {NodeRow} from "./Node";
 import {nodes as factorioNodes} from "../../../plugins/demo/graph";
 
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/pagerankTable/Connection", () => {
   describe("ConnectionRowList", () => {

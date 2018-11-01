@@ -21,7 +21,7 @@ import {
 } from "../../../analysis/weights";
 import {defaultWeightsForAdapter} from "./weights";
 
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/weights/PluginWeightConfig", () => {
   describe("PluginWeightConfig", () => {

@@ -5,8 +5,8 @@ import {shallow} from "enzyme";
 
 import {Graph} from "../../core/graph";
 import {makeRepoId} from "../../core/repoId";
-import {Assets} from "../assets";
-import testLocalStore from "../testLocalStore";
+import {Assets} from "../../webutil/assets";
+import testLocalStore from "../../webutil/testLocalStore";
 import {DynamicAdapterSet, StaticAdapterSet} from "../adapters/adapterSet";
 import {FactorioStaticAdapter} from "../../plugins/demo/appAdapter";
 import {defaultWeightsForAdapter} from "./weights/weights";
@@ -17,7 +17,7 @@ import {createApp, LoadingIndicator} from "./App";
 import {uninitializedState} from "./state";
 import {Prefix as GithubPrefix} from "../../plugins/github/nodes";
 
-require("../testUtil").configureEnzyme();
+require("../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/App", () => {
   function example() {

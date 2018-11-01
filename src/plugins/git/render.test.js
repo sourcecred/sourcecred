@@ -6,9 +6,9 @@ import {description} from "./render";
 import {type RepoId, repoIdToString, makeRepoId} from "../../core/repoId";
 import type {Repository, Hash, Commit} from "./types";
 import type {GitGateway, URL} from "./gitGateway";
-import Link from "../../app/Link";
+import Link from "../../webutil/Link";
 
-require("../../app/testUtil").configureEnzyme();
+require("../../webutil/testUtil").configureEnzyme();
 
 describe("plugins/git/render", () => {
   const repoId1 = makeRepoId("example-owner", "1");

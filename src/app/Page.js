@@ -3,9 +3,9 @@
 import React, {type Node} from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
-import type {Assets} from "./assets";
-import Colors from "./Colors";
-import Link from "./Link";
+import type {Assets} from "../webutil/assets";
+import Colors from "../webutil/Colors";
+import Link from "../webutil/Link";
 import GithubLogo from "./GithubLogo";
 import TwitterLogo from "./TwitterLogo";
 import DiscordLogo from "./DiscordLogo";

@@ -2,8 +2,8 @@
 
 import React from "react";
 
-import type {Assets} from "./assets";
-import Link from "./Link";
+import type {Assets} from "../webutil/assets";
+import Link from "../webutil/Link";
 
 export default class HomePage extends React.Component<{|+assets: Assets|}> {
   render() {

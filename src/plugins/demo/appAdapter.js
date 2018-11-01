@@ -7,7 +7,7 @@ import type {
   DynamicAppAdapter,
 } from "../../app/adapters/appAdapter";
 import {StaticAdapterSet} from "../../app/adapters/adapterSet";
-import {Assets} from "../../app/assets";
+import {Assets} from "../../webutil/assets";
 import {type RepoId, makeRepoId} from "../../core/repoId";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 import {graph} from "./graph";

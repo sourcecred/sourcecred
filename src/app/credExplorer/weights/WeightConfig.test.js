@@ -12,7 +12,7 @@ import {FALLBACK_NAME} from "../../../analysis/fallbackDeclaration";
 import {defaultWeightsForAdapterSet, defaultWeightsForAdapter} from "./weights";
 import {WeightConfig} from "./WeightConfig";
 
-require("../../testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
 describe("app/credExplorer/weights/WeightConfig", () => {
   describe("WeightConfig", () => {

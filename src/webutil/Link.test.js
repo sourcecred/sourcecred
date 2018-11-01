@@ -9,7 +9,7 @@ import Link from "./Link";
 require("./testUtil").configureAphrodite();
 require("./testUtil").configureEnzyme();
 
-describe("src/app/Link", () => {
+describe("webutil/Link", () => {
   const styles = StyleSheet.create({
     x: {fontWeight: "bold"},
   });

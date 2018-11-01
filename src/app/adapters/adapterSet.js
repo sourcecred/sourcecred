@@ -2,7 +2,7 @@
 
 import {Graph, type NodeAddressT, type EdgeAddressT} from "../../core/graph";
 import {NodeTrie, EdgeTrie} from "../../core/trie";
-import type {Assets} from "../assets";
+import type {Assets} from "../../webutil/assets";
 import type {RepoId} from "../../core/repoId";
 
 import type {StaticAppAdapter, DynamicAppAdapter} from "./appAdapter";

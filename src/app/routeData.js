@@ -7,7 +7,7 @@
 // inline syntax.
 
 /*::
-import type {Assets} from "./assets";
+import type {Assets} from "../webutil/assets";
 type RouteDatum = {|
   +path: string,
   +contents:

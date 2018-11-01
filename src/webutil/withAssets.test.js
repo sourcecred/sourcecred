@@ -12,7 +12,7 @@ import createRelativeHistory from "./createRelativeHistory";
 
 require("./testUtil").configureEnzyme();
 
-describe("app/withAssets", () => {
+describe("webutil/withAssets", () => {
   function createHistory(basename, path) {
     const memoryHistory = createMemoryHistory(path);
     const relativeHistory = createRelativeHistory(memoryHistory, basename);

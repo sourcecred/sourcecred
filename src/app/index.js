@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import createBrowserHistory from "history/lib/createBrowserHistory";
 
-import createRelativeHistory from "./createRelativeHistory";
+import createRelativeHistory from "../webutil/createRelativeHistory";
 import normalize from "../util/pathNormalize";
 import App from "./App";
 

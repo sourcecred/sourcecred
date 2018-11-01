@@ -3,7 +3,7 @@
 import deepEqual from "lodash.isequal";
 
 import {Graph, type NodeAddressT} from "../../core/graph";
-import type {Assets} from "../../app/assets";
+import type {Assets} from "../../webutil/assets";
 import type {RepoId} from "../../core/repoId";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
 import {

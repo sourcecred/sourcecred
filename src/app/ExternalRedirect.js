@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import Link from "./Link";
+import Link from "../webutil/Link";
 
 export default class ExternalRedirect extends React.Component<{|
   +redirectTo: string,
