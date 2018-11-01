@@ -3,12 +3,12 @@
 import {NodeAddress, EdgeAddress, Graph} from "../../core/graph";
 import {FactorioStaticAdapter} from "../../plugins/demo/appAdapter";
 import {StaticAdapterSet} from "./adapterSet";
+import {FallbackStaticAdapter} from "./fallbackAdapter";
 import {
-  FallbackStaticAdapter,
   FALLBACK_NAME,
   fallbackNodeType,
   fallbackEdgeType,
-} from "./fallbackAdapter";
+} from "../../analysis/fallbackDeclaration";
 import {Assets} from "../assets";
 import {makeRepoId} from "../../core/repoId";
 

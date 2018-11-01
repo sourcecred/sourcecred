@@ -8,7 +8,7 @@ import {type NodeAddressT, NodeAddress} from "../../../core/graph";
 import type {PagerankNodeDecomposition} from "../../../analysis/pagerankNodeDecomposition";
 import {DynamicAdapterSet} from "../../adapters/adapterSet";
 import type {DynamicAppAdapter} from "../../adapters/appAdapter";
-import {FALLBACK_NAME} from "../../adapters/fallbackAdapter";
+import {FALLBACK_NAME} from "../../../analysis/fallbackDeclaration";
 import type {WeightedTypes} from "../../../analysis/weights";
 import {WeightConfig} from "../weights/WeightConfig";
 

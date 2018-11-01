@@ -4,7 +4,7 @@ import * as NullUtil from "../../../util/null";
 import {
   fallbackNodeType,
   fallbackEdgeType,
-} from "../../adapters/fallbackAdapter";
+} from "../../../analysis/fallbackDeclaration";
 import {
   inserterNodeType,
   machineNodeType,

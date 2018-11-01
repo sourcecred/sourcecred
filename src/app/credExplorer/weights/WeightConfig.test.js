@@ -8,7 +8,7 @@ import {
   staticAdapterSet,
 } from "../../../plugins/demo/appAdapter";
 import {inserterNodeType} from "../../../plugins/demo/declaration";
-import {FALLBACK_NAME} from "../../adapters/fallbackAdapter";
+import {FALLBACK_NAME} from "../../../analysis/fallbackDeclaration";
 import {defaultWeightsForAdapterSet, defaultWeightsForAdapter} from "./weights";
 import {WeightConfig} from "./WeightConfig";
 

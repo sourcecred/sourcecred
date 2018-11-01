@@ -1,40 +1,13 @@
 // @flow
 
-import {
-  Graph,
-  NodeAddress,
-  type NodeAddressT,
-  EdgeAddress,
-} from "../../core/graph";
-import type {Assets} from "../assets";
-import type {RepoId} from "../../core/repoId";
-
-import type {StaticAppAdapter, DynamicAppAdapter} from "./appAdapter";
-
-export const FALLBACK_NAME = "FALLBACK_ADAPTER";
-
-export const fallbackNodeType = Object.freeze({
-  name: "node",
-  pluralName: "nodes",
-  prefix: NodeAddress.empty,
-  defaultWeight: 1,
-});
-
-export const fallbackEdgeType = Object.freeze({
-  forwardName: "forward edge",
-  backwardName: "backward edge",
-  defaultForwardWeight: 1,
-  defaultBackwardWeight: 1,
-  prefix: EdgeAddress.empty,
-});
-
-export const fallbackDeclaration = Object.freeze({
-  name: FALLBACK_NAME,
-  nodePrefix: NodeAddress.empty,
-  edgePrefix: EdgeAddress.empty,
-  nodeTypes: [fallbackNodeType],
-  edgeTypes: [fallbackEdgeType],
-});
+import {fallbackDeclaration} from "../../analysis/fallbackDeclaration";
+import type {
+  StaticAppAdapter,
+  DynamicAppAdapter,
+} from "../../app/adapters/appAdapter";
+import {Assets} from "../../app/assets";
+import {type RepoId} from "../../core/repoId";
+import {Graph, NodeAddress, type NodeAddressT} from "../../core/graph";
 
 export class FallbackStaticAdapter implements StaticAppAdapter {
   declaration() {
@@ -52,7 +25,7 @@ export class FallbackDynamicAdapter implements DynamicAppAdapter {
   }
 
   nodeDescription(x: NodeAddressT) {
-    return NodeAddress.toString(x);
+    return `[fallback]: ${NodeAddress.toString(x)}`;
   }
 
   static() {
