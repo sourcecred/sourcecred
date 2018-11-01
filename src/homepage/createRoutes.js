@@ -3,14 +3,18 @@
 import React from "react";
 import {IndexRoute, Route} from "react-router";
 
-import Page from "./Page";
-import ExternalRedirect from "./ExternalRedirect";
 import withAssets from "../webutil/withAssets";
-import {routeData} from "./routeData";
+import ExternalRedirect from "./ExternalRedirect";
+import Page from "./Page";
+import type {RouteData} from "./routeData";
 
-export function createRoutes() {
+export function createRoutes(routeData: RouteData) {
+  const PageWithAssets = withAssets(Page);
+  const PageWithRoutes = (props) => (
+    <PageWithAssets routeData={routeData} {...props} />
+  );
   return (
-    <Route path="/" component={withAssets(Page)}>
+    <Route path="/" component={PageWithRoutes}>
       {routeData.map(({path, contents}) => {
         switch (contents.type) {
           case "PAGE":

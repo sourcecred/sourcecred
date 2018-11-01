@@ -9,12 +9,13 @@ import Link from "../webutil/Link";
 import GithubLogo from "./GithubLogo";
 import TwitterLogo from "./TwitterLogo";
 import DiscordLogo from "./DiscordLogo";
-import {routeData} from "./routeData";
+import type {RouteData} from "./routeData";
 import * as NullUtil from "../util/null";
 import {VERSION_SHORT, VERSION_FULL} from "../core/version";
 
 export default class Page extends React.Component<{|
   +assets: Assets,
+  +routeData: RouteData,
   +children: Node,
 |}> {
   render() {
@@ -29,7 +30,7 @@ export default class Page extends React.Component<{|
                     SourceCred
                   </Link>
                 </li>
-                {routeData.map(({navTitle, path}) =>
+                {this.props.routeData.map(({navTitle, path}) =>
                   NullUtil.map(navTitle, (navTitle) => (
                     <li
                       key={path}
