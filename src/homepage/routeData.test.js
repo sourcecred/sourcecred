@@ -1,15 +1,23 @@
 // @flow
 
-import {routeData} from "./routeData";
+import {stringToRepoId} from "../core/repoId";
+import {makeRouteData} from "./routeData";
 
 describe("homepage/routeData", () => {
+  function routeData() {
+    return makeRouteData([
+      stringToRepoId("sourcecred/example-github"),
+      stringToRepoId("sourcecred/sourcecred"),
+    ]);
+  }
+
   /*
    * React Router doesn't support relative paths. I'm not sure exactly
    * what a path without a leading slash would do; it's asking for
    * trouble. If we need them, we can reconsider this test.
    */
   it("every path has a leading slash", () => {
-    for (const route of routeData) {
+    for (const route of routeData()) {
       if (!route.path.startsWith("/")) {
         expect(route.path).toEqual("/" + route.path);
       }
@@ -35,7 +43,7 @@ describe("homepage/routeData", () => {
    * handled by a different pipeline (e.g., `copy-webpack-plugin`).
    */
   it("every path has a trailing slash", () => {
-    for (const route of routeData) {
+    for (const route of routeData()) {
       if (!route.path.endsWith("/")) {
         expect(route.path).toEqual(route.path + "/");
       }

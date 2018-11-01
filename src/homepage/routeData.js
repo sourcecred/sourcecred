@@ -8,6 +8,8 @@
 
 /*::
 import type {Assets} from "../webutil/assets";
+import type {RepoIdRegistry} from "../explorer/repoIdRegistry";
+
 type RouteDatum = {|
   +path: string,
   +contents:
@@ -22,49 +24,64 @@ type RouteDatum = {|
   +title: string,
   +navTitle: ?string,
 |};
+export type RouteData = $ReadOnlyArray<RouteDatum>;
 */
 
-const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
-  {
-    path: "/",
-    contents: {
-      type: "PAGE",
-      component: () => require("./HomePage").default,
+function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
+  return [
+    {
+      path: "/",
+      contents: {
+        type: "PAGE",
+        component: () => require("./HomePage").default,
+      },
+      title: "SourceCred",
+      navTitle: "Home",
     },
-    title: "SourceCred",
-    navTitle: "Home",
-  },
-  {
-    path: "/prototypes/",
-    contents: {
-      type: "PAGE",
-      component: () => require("./PrototypesPage").default([]),
+    {
+      path: "/prototypes/",
+      contents: {
+        type: "PAGE",
+        component: () => require("./PrototypesPage").default(registry),
+      },
+      title: "SourceCred prototypes",
+      navTitle: null, // for now
     },
-    title: "SourceCred prototypes",
-    navTitle: null, // for now
-  },
-  {
-    path: "/prototype/",
-    contents: {
-      type: "PAGE",
-      component: () => require("./homepageExplorer").default,
+    ...registry.map((repo) => ({
+      path: `/prototypes/${repo.owner}/${repo.name}/`,
+      contents: {
+        type: "PAGE",
+        component: () => require("./ProjectPage").default(repo),
+      },
+      title: `${repo.owner}/${repo.name} • SourceCred`,
+      navTitle: null,
+    })),
+    {
+      path: "/prototype/",
+      contents: {
+        type: "PAGE",
+        component: () => require("./homepageExplorer").default,
+      },
+      title: "SourceCred prototype",
+      navTitle: "Prototype",
     },
-    title: "SourceCred prototype",
-    navTitle: "Prototype",
-  },
-  {
-    path: "/discord-invite/",
-    contents: {
-      type: "EXTERNAL_REDIRECT",
-      redirectTo: "https://discord.gg/tsBTgc9",
+    {
+      path: "/discord-invite/",
+      contents: {
+        type: "EXTERNAL_REDIRECT",
+        redirectTo: "https://discord.gg/tsBTgc9",
+      },
+      title: "SourceCred Discord invite",
+      navTitle: null,
     },
-    title: "SourceCred Discord invite",
-    navTitle: null,
-  },
-];
-exports.routeData = routeData;
+  ];
+}
+exports.makeRouteData = makeRouteData;
 
-function resolveRouteFromPath(path /*: string */) /*: ?RouteDatum */ {
+function resolveRouteFromPath(
+  routeData /*: RouteData */,
+  path /*: string */
+) /*: ?RouteDatum */ {
   const matches = (candidateRoute) => {
     const candidatePath = candidateRoute.path;
     const start = path.substring(0, candidatePath.length);
@@ -75,8 +92,11 @@ function resolveRouteFromPath(path /*: string */) /*: ?RouteDatum */ {
 }
 exports.resolveRouteFromPath = resolveRouteFromPath;
 
-function resolveTitleFromPath(path /*: string */) /*: string */ {
-  const route = resolveRouteFromPath(path);
+function resolveTitleFromPath(
+  routeData /*: RouteData */,
+  path /*: string */
+) /*: string */ {
+  const route = resolveRouteFromPath(routeData, path);
   const fallback = "SourceCred";
   return route ? route.title : fallback;
 }

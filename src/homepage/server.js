@@ -6,16 +6,20 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import {match, RouterContext} from "react-router";
 
-import Page from "./Page";
+import dedent from "../util/dedent";
 import {Assets, rootFromPath} from "../webutil/assets";
 import createRelativeHistory from "../webutil/createRelativeHistory";
 import ExternalRedirect from "./ExternalRedirect";
+import Page from "./Page";
+import createRouteDataFromEnvironment from "./createRouteDataFromEnvironment";
 import {createRoutes} from "./createRoutes";
 import {resolveRouteFromPath, resolveTitleFromPath} from "./routeData";
-import dedent from "../util/dedent";
 
 // Side effect for testing purposes
 console.log(`REPO_REGISTRY: ${process.env.REPO_REGISTRY || "bad"}`);
+
+// NOTE: This is a side-effect at module load time.
+const routeData = createRouteDataFromEnvironment();
 
 export default function render(
   locals: {+path: string, +assets: {[string]: string}},
@@ -26,7 +30,7 @@ export default function render(
   const assets = new Assets(root);
   const history = createRelativeHistory(createMemoryHistory(path), "/");
   {
-    const route = resolveRouteFromPath(path);
+    const route = resolveRouteFromPath(routeData, path);
     if (route && route.contents.type === "EXTERNAL_REDIRECT") {
       return renderRedirect(route.contents.redirectTo);
     } else {
@@ -36,7 +40,7 @@ export default function render(
 
   function renderStandardRoute() {
     const bundlePath = locals.assets["main"];
-    const routes = createRoutes();
+    const routes = createRoutes(routeData);
     match({history, routes}, (error, redirectLocation, renderProps) => {
       if (error) {
         callback(error);
@@ -54,7 +58,7 @@ export default function render(
           <link rel="shortcut icon" href="${assets.resolve("/favicon.png")}" />
           <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
           <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
-          <title>${resolveTitleFromPath(path)}</title>
+          <title>${resolveTitleFromPath(routeData, path)}</title>
           <style>${require("./index.css")}</style>
           <style data-aphrodite>${css.content}</style>
           </head>
@@ -75,7 +79,7 @@ export default function render(
 
   function renderRedirect(redirectTo: string) {
     const component = (
-      <Page assets={assets}>
+      <Page routeData={routeData} assets={assets}>
         <ExternalRedirect redirectTo={redirectTo} />
       </Page>
     );
@@ -92,7 +96,7 @@ export default function render(
       <link rel="shortcut icon" href="${assets.resolve("favicon.png")}" />
       <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
-      <title>${resolveTitleFromPath(path)}</title>
+      <title>${resolveTitleFromPath(routeData, path)}</title>
       <style>${require("./index.css")}</style>
       <style data-aphrodite>${css.content}</style>
       </head>

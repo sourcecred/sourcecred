@@ -51,9 +51,10 @@ function loadRepoRegistry() /*: RepoIdRegistry */ {
   }
   return json[1];
 }
+const repoRegistry = loadRepoRegistry();
 
 // Get environment variables to inject into our app.
-const env = getClientEnvironment(loadRepoRegistry());
+const env = getClientEnvironment(repoRegistry);
 
 function makeConfig(mode /*: "production" | "development" */) {
   return {
@@ -221,9 +222,9 @@ function plugins(mode /*: "development" | "production" */) {
   const basePlugins = [
     new StaticSiteGeneratorPlugin({
       entry: "ssr",
-      paths: require("../src/homepage/routeData").routeData.map(
-        ({path}) => path
-      ),
+      paths: require("../src/homepage/routeData")
+        .makeRouteData(repoRegistry)
+        .map(({path}) => path),
       locals: {},
     }),
     new CopyPlugin([{from: paths.favicon, to: "favicon.png"}]),
