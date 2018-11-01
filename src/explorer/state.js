@@ -26,14 +26,10 @@ import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
 
 export type LoadingState = "NOT_LOADING" | "LOADING" | "FAILED";
 export type AppState =
-  | Uninitialized
   | ReadyToLoadGraph
   | ReadyToRunPagerank
   | PagerankEvaluated;
 
-export type Uninitialized = {|
-  +type: "UNINITIALIZED",
-|};
 export type ReadyToLoadGraph = {|
   +type: "READY_TO_LOAD_GRAPH",
   +repoId: RepoId,
@@ -53,6 +49,10 @@ export type PagerankEvaluated = {|
   +loading: LoadingState,
 |};
 
+export function initialState(repoId: RepoId): ReadyToLoadGraph {
+  return {type: "READY_TO_LOAD_GRAPH", repoId, loading: "NOT_LOADING"};
+}
+
 export function createStateTransitionMachine(
   getState: () => AppState,
   setState: (AppState) => void
@@ -65,13 +65,8 @@ export function createStateTransitionMachine(
   );
 }
 
-export function uninitializedState(): AppState {
-  return {type: "UNINITIALIZED"};
-}
-
 // Exported for testing purposes.
 export interface StateTransitionMachineInterface {
-  +setRepoId: (RepoId) => void;
   +loadGraph: (Assets, StaticAdapterSet) => Promise<boolean>;
   +runPagerank: (WeightedTypes, NodeAddressT) => Promise<void>;
   +loadGraphAndRunPagerank: (
@@ -117,15 +112,6 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     this.setState = setState;
     this.loadGraphWithAdapters = loadGraphWithAdapters;
     this.pagerank = pagerank;
-  }
-
-  setRepoId(repoId: RepoId) {
-    const newState: AppState = {
-      type: "READY_TO_LOAD_GRAPH",
-      repoId: repoId,
-      loading: "NOT_LOADING",
-    };
-    this.setState(newState);
   }
 
   /** Loads the graph, reports whether it was successful */
@@ -222,9 +208,6 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   ) {
     const state = this.getState();
     const type = state.type;
-    if (type === "UNINITIALIZED") {
-      throw new Error("Tried to load and run from incorrect state");
-    }
     switch (type) {
       case "READY_TO_LOAD_GRAPH":
         const loadedGraph = await this.loadGraph(assets, adapters);

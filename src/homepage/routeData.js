@@ -39,13 +39,13 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       navTitle: "Home",
     },
     {
-      path: "/prototypes/",
+      path: "/prototype/",
       contents: {
         type: "PAGE",
         component: () => require("./PrototypesPage").default(registry),
       },
-      title: "SourceCred prototypes",
-      navTitle: null, // for now
+      title: "SourceCred prototype",
+      navTitle: "Prototype",
     },
     ...registry.map((repo) => ({
       path: `/prototypes/${repo.owner}/${repo.name}/`,
@@ -56,15 +56,6 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       title: `${repo.owner}/${repo.name} • SourceCred`,
       navTitle: null,
     })),
-    {
-      path: "/prototype/",
-      contents: {
-        type: "PAGE",
-        component: () => require("./homepageExplorer").default,
-      },
-      title: "SourceCred prototype",
-      navTitle: "Prototype",
-    },
     {
       path: "/discord-invite/",
       contents: {

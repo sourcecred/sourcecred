@@ -11,10 +11,8 @@ import {DynamicAdapterSet, StaticAdapterSet} from "./adapters/adapterSet";
 import {FactorioStaticAdapter} from "../plugins/demo/appAdapter";
 import {defaultWeightsForAdapter} from "./weights/weights";
 
-import RepositorySelect from "./RepositorySelect";
 import {PagerankTable} from "./pagerankTable/Table";
 import {createApp, LoadingIndicator} from "./App";
-import {uninitializedState} from "./state";
 import {Prefix as GithubPrefix} from "../plugins/github/nodes";
 
 require("../webutil/testUtil").configureEnzyme();
@@ -22,7 +20,6 @@ require("../webutil/testUtil").configureEnzyme();
 describe("explorer/App", () => {
   function example() {
     let setState, getState;
-    const setRepoId = jest.fn();
     const loadGraph = jest.fn();
     const runPagerank = jest.fn();
     const loadGraphAndRunPagerank = jest.fn();
@@ -31,7 +28,6 @@ describe("explorer/App", () => {
       setState = _setState;
       getState = _getState;
       return {
-        setRepoId,
         loadGraph,
         runPagerank,
         loadGraphAndRunPagerank,
@@ -43,6 +39,7 @@ describe("explorer/App", () => {
         assets={new Assets("/foo/")}
         adapters={new StaticAdapterSet([])}
         localStore={localStore}
+        repoId={makeRepoId("foo", "bar")}
       />
     );
     if (setState == null || getState == null) {
@@ -52,7 +49,6 @@ describe("explorer/App", () => {
       el,
       setState,
       getState,
-      setRepoId,
       loadGraph,
       runPagerank,
       loadGraphAndRunPagerank,
@@ -62,7 +58,6 @@ describe("explorer/App", () => {
 
   const emptyAdapters = new DynamicAdapterSet(new StaticAdapterSet([]), []);
   const exampleStates = {
-    uninitialized: uninitializedState,
     readyToLoadGraph: (loadingState) => {
       return () => ({
         type: "READY_TO_LOAD_GRAPH",
@@ -95,8 +90,7 @@ describe("explorer/App", () => {
   });
   it("setState is wired properly", () => {
     const {setState, el} = example();
-    expect(uninitializedState()).not.toBe(uninitializedState()); // sanity check
-    const newState = uninitializedState();
+    const newState = exampleStates.readyToLoadGraph("LOADING")();
     setState(newState);
     expect(el.state().appState).toBe(newState);
   });
@@ -118,18 +112,6 @@ describe("explorer/App", () => {
   });
 
   describe("when in state:", () => {
-    function testRepositorySelect(stateFn) {
-      it("creates a working RepositorySelect", () => {
-        const {el, setRepoId, setState, localStore} = example();
-        setState(stateFn());
-        const rs = el.find(RepositorySelect);
-        const newRepoId = makeRepoId("zoo", "zod");
-        rs.props().onChange(newRepoId);
-        expect(setRepoId).toHaveBeenCalledWith(newRepoId);
-        expect(rs.props().localStore).toBe(localStore);
-      });
-    }
-
     function testAnalyzeCredButton(stateFn, {disabled}) {
       const adjective = disabled ? "disabled" : "working";
       it(`has a ${adjective} analyze cred button`, () => {
@@ -203,17 +185,12 @@ describe("explorer/App", () => {
       {analyzeCredDisabled, hasPagerankTable}
     ) {
       describe(suiteName, () => {
-        testRepositorySelect(stateFn);
         testAnalyzeCredButton(stateFn, {disabled: analyzeCredDisabled});
         testPagerankTable(stateFn, hasPagerankTable);
         testLoadingIndicator(stateFn);
       });
     }
 
-    stateTestSuite("UNINITIALIZED", exampleStates.uninitialized, {
-      analyzeCredDisabled: true,
-      hasPagerankTable: false,
-    });
     describe("READY_TO_LOAD_GRAPH", () => {
       for (const loadingState of ["LOADING", "NOT_LOADING", "FAILED"]) {
         stateTestSuite(
@@ -262,11 +239,6 @@ describe("explorer/App", () => {
           expect(el.text()).toEqual(expectedText);
         });
       }
-      testStatusText(
-        "initializing",
-        exampleStates.uninitialized,
-        "Initializing..."
-      );
       testStatusText(
         "ready to load graph",
         exampleStates.readyToLoadGraph("NOT_LOADING"),
