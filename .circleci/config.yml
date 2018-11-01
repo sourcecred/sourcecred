@@ -45,6 +45,11 @@ workflows:
   commit:
     jobs:
       - test
+      - test_full:
+          filters:
+            branches:
+              only:
+                - master
   nightly:
     triggers:
       - schedule:
