@@ -187,17 +187,26 @@ describe("graphql/mirror", () => {
         const data = fs.readFileSync(filename).toJSON();
 
         expect(() => new Mirror(db, schema1)).toThrow(
-          "incompatible schema or version"
+          "incompatible schema, options, or version"
         );
         expect(fs.readFileSync(filename).toJSON()).toEqual(data);
 
         expect(() => new Mirror(db, schema1)).toThrow(
-          "incompatible schema or version"
+          "incompatible schema, options, or version"
         );
         expect(fs.readFileSync(filename).toJSON()).toEqual(data);
 
         expect(() => new Mirror(db, schema0)).not.toThrow();
         expect(fs.readFileSync(filename).toJSON()).toEqual(data);
+      });
+
+      it("rejects when the set of blacklisted IDs has changed", () => {
+        const db = new Database(":memory:");
+        const schema = Schema.schema({A: Schema.object({id: Schema.id()})});
+        new Mirror(db, schema, {blacklistedIds: []});
+        expect(() => {
+          new Mirror(db, schema, {blacklistedIds: ["ominous"]});
+        }).toThrow("incompatible schema, options, or version");
       });
 
       it("rejects a schema with SQL-unsafe type name", () => {
@@ -1571,6 +1580,64 @@ describe("graphql/mirror", () => {
           );
         }).toThrow("FOREIGN KEY constraint failed");
       });
+      it("omits connection entries corresponding to blacklisted IDs", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema(), {
+          blacklistedIds: ["ominous"],
+        });
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "Repository", id: "repo"});
+        mirror._updateConnection(updateId, "repo", "issues", {
+          totalCount: 3,
+          nodes: [
+            {
+              __typename: "Issue",
+              id: "normal",
+            },
+            {
+              __typename: "Issue",
+              id: "ominous",
+            },
+            {
+              __typename: "Issue",
+              id: "pristine",
+            },
+          ],
+          pageInfo: {
+            hasNextPage: false,
+            endCursor: "cursor",
+          },
+        });
+        expect(
+          db
+            .prepare(
+              "SELECT * FROM connection_entries ORDER BY connection_id, idx"
+            )
+            .all()
+        ).toEqual([
+          {
+            rowid: expect.anything(),
+            connection_id: expect.anything(),
+            idx: 1,
+            child_id: "normal",
+          },
+          {
+            rowid: expect.anything(),
+            connection_id: expect.anything(),
+            idx: 2,
+            child_id: null,
+          },
+          {
+            rowid: expect.anything(),
+            connection_id: expect.anything(),
+            idx: 3,
+            child_id: "pristine",
+          },
+        ]);
+        expect(() => {
+          mirror.extract("ominous");
+        }).toThrow('No such object: "ominous"');
+      });
       it("properly updates under various circumstances", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
@@ -2182,6 +2249,52 @@ describe("graphql/mirror", () => {
         mirror._updateOwnData(updateId, []);
         const post = getState();
         expect(post).toEqual(pre);
+      });
+      it("omits node references corresponding to blacklisted IDs", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema(), {
+          blacklistedIds: ["ominous"],
+        });
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "IssueComment", id: "comment"});
+        mirror.registerObject({typename: "Commit", id: "commit"});
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "IssueComment",
+            id: "comment",
+            body: "hmm",
+            author: {__typename: "User", id: "ominous"},
+          },
+        ]);
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Commit",
+            id: "commit",
+            oid: "deadbeef",
+            author: {
+              date: "today",
+              user: {__typename: "User", id: "ominous"},
+            },
+          },
+        ]);
+        expect(mirror.extract("comment")).toEqual({
+          __typename: "IssueComment",
+          id: "comment",
+          body: "hmm",
+          author: null,
+        });
+        expect(mirror.extract("commit")).toEqual({
+          __typename: "Commit",
+          id: "commit",
+          oid: "deadbeef",
+          author: {
+            date: "today",
+            user: null,
+          },
+        });
+        expect(() => {
+          mirror.extract("ominous");
+        }).toThrow('No such object: "ominous"');
       });
       it("snapshot test for actual GitHub queries", () => {
         // This test emits as a snapshot a valid query against GitHub's

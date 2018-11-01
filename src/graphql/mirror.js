@@ -32,6 +32,7 @@ export class Mirror {
   +_db: Database;
   +_schema: Schema.Schema;
   +_schemaInfo: SchemaInfo;
+  +_blacklistedIds: {|+[Schema.ObjectId]: true|};
 
   /**
    * Create a GraphQL mirror using the given database connection and
@@ -39,21 +40,41 @@ export class Mirror {
    *
    * The connection must be to a database that either (a) is empty and
    * unused, or (b) has been previously used for a GraphQL mirror with
-   * an identical GraphQL schema. The database attached to the
-   * connection must not be modified by any other clients. In other
-   * words, passing a connection to this constructor entails transferring
-   * ownership of the attached database to this module.
+   * an identical GraphQL schema and options. The database attached to
+   * the connection must not be modified by any other clients. In other
+   * words, passing a connection to this constructor entails
+   * transferring ownership of the attached database to this module.
    *
    * If the database attached to the connection has been used with an
    * incompatible GraphQL schema or an outdated version of this module,
    * an error will be thrown and the database will remain unmodified.
+   *
+   * If a list of blacklisted IDs is provided, then any object with
+   * matching ID will be treated as `null` when it appears as the target
+   * of a node reference, nested node reference, or connection entry.
+   * This can be used to work around bugs in remote schemas.
    */
-  constructor(db: Database, schema: Schema.Schema): void {
+  constructor(
+    db: Database,
+    schema: Schema.Schema,
+    options?: {|+blacklistedIds?: $ReadOnlyArray<Schema.ObjectId>|}
+  ): void {
     if (db == null) throw new Error("db: " + String(db));
     if (schema == null) throw new Error("schema: " + String(schema));
+    const fullOptions = {
+      ...{blacklistedIds: []},
+      ...(options || {}),
+    };
     this._db = db;
     this._schema = schema;
     this._schemaInfo = _buildSchemaInfo(this._schema);
+    this._blacklistedIds = (() => {
+      const result: {|[Schema.ObjectId]: true|} = ({}: any);
+      for (const id of fullOptions.blacklistedIds) {
+        result[id] = true;
+      }
+      return result;
+    })();
     this._initialize();
   }
 
@@ -153,23 +174,29 @@ export class Mirror {
     // interpreted. If you've made a change and you're not sure whether
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
-    const blob = stringify({version: "MIRROR_v2", schema: this._schema});
+    const blob = stringify({
+      version: "MIRROR_v3",
+      schema: this._schema,
+      options: {
+        blacklistedIds: this._blacklistedIds,
+      },
+    });
     const db = this._db;
     _inTransaction(db, () => {
       // We store the metadata in a singleton table `meta`, whose unique row
       // has primary key `0`. Only the first ever insert will succeed; we
-      // are locked into the first schema.
+      // are locked into the first config.
       db.prepare(
         dedent`\
           CREATE TABLE IF NOT EXISTS meta (
               zero INTEGER PRIMARY KEY,
-              schema TEXT NOT NULL
+              config TEXT NOT NULL
           )
         `
       ).run();
 
       const existingBlob: string | void = db
-        .prepare("SELECT schema FROM meta")
+        .prepare("SELECT config FROM meta")
         .pluck()
         .get();
       if (existingBlob === blob) {
@@ -177,10 +204,11 @@ export class Mirror {
         return;
       } else if (existingBlob !== undefined) {
         throw new Error(
-          "Database already populated with incompatible schema or version"
+          "Database already populated with " +
+            "incompatible schema, options, or version"
         );
       }
-      db.prepare("INSERT INTO meta (zero, schema) VALUES (0, ?)").run(blob);
+      db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(blob);
 
       // First, create those tables that are independent of the schema.
       const structuralTables = [
@@ -449,6 +477,8 @@ export class Mirror {
     result: NodeFieldResult
   ): Schema.ObjectId | null {
     if (result == null) {
+      return null;
+    } else if (this._blacklistedIds[result.id]) {
       return null;
     } else {
       const object = {typename: result.__typename, id: result.id};
