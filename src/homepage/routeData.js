@@ -35,6 +35,15 @@ const routeData /*: $ReadOnlyArray<RouteDatum> */ = [
     navTitle: "Home",
   },
   {
+    path: "/prototypes/",
+    contents: {
+      type: "PAGE",
+      component: () => require("./PrototypesPage").default([]),
+    },
+    title: "SourceCred prototypes",
+    navTitle: null, // for now
+  },
+  {
     path: "/prototype/",
     contents: {
       type: "PAGE",
