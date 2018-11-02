@@ -11,6 +11,7 @@ import {
 import type {NodeScore} from "./nodeScore";
 import * as MapUtil from "../util/map";
 import * as NullUtil from "../util/null";
+import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
 export type ScoredConnection = {|
   +connection: Connection,
@@ -18,15 +19,35 @@ export type ScoredConnection = {|
   +connectionScore: number,
 |};
 
-export type PagerankNodeDecomposition = Map<
-  NodeAddressT,
-  {|
-    +score: number,
-    // Connections are sorted by `adjacencyScore` descending,
-    // breaking ties in a deterministic (but unspecified) order.
-    +scoredConnections: $ReadOnlyArray<ScoredConnection>,
-  |}
->;
+export type DecomposedNode = {|
+  +score: number,
+  // Connections are sorted by `adjacencyScore` descending,
+  // breaking ties in a deterministic (but unspecified) order.
+  +scoredConnections: $ReadOnlyArray<ScoredConnection>,
+|};
+
+export type PagerankNodeDecomposition = Map<NodeAddressT, DecomposedNode>;
+
+export opaque type PagerankNodeDecompositionJSON = Compatible<{|
+  [NodeAddressT]: DecomposedNode,
+|}>;
+
+const COMPAT_INFO = {
+  type: "sourcecred/pagerankNodeDecomposition",
+  version: "0.1.0",
+};
+
+export function toJSON(
+  x: PagerankNodeDecomposition
+): PagerankNodeDecompositionJSON {
+  return toCompat(COMPAT_INFO, MapUtil.toObject(x));
+}
+
+export function fromJSON(
+  x: PagerankNodeDecompositionJSON
+): PagerankNodeDecomposition {
+  return MapUtil.fromObject(fromCompat(COMPAT_INFO, x));
+}
 
 export function decompose(
   pr: NodeScore,

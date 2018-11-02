@@ -7,7 +7,7 @@ import {
   createOrderedSparseMarkovChain,
 } from "../core/attribution/graphToMarkovChain";
 import {findStationaryDistribution} from "../core/attribution/markovChain";
-import {decompose} from "./pagerankNodeDecomposition";
+import {decompose, toJSON, fromJSON} from "./pagerankNodeDecomposition";
 import * as MapUtil from "../util/map";
 
 import {advancedGraph} from "../core/graphTestUtil";
@@ -108,6 +108,36 @@ function validateDecomposition(decomposition) {
 }
 
 describe("analysis/pagerankNodeDecomposition", () => {
+  async function examplePND() {
+    const g = advancedGraph().graph1();
+    const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
+    const connections = createConnections(g, edgeWeight, 1.0);
+    const osmc = createOrderedSparseMarkovChain(connections);
+    const pi = await findStationaryDistribution(osmc.chain, {
+      verbose: false,
+      convergenceThreshold: 1e-6,
+      maxIterations: 255,
+      yieldAfterMs: 1,
+    });
+    const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
+    return decompose(pr, connections);
+  }
+
+  describe("to/fromJSON", () => {
+    it("to->from is identity", async () => {
+      const pnd1 = await examplePND();
+      const pnd2 = fromJSON(toJSON(pnd1));
+      expect(pnd1).toEqual(pnd2);
+    });
+
+    it("to->from->to is identity", async () => {
+      const pnd = await examplePND();
+      const pndJSON1 = toJSON(pnd);
+      const pndJSON2 = toJSON(fromJSON(pndJSON1));
+      expect(pndJSON1).toEqual(pndJSON2);
+    });
+  });
+
   describe("decompose", () => {
     it("has the expected output on a simple asymmetric chain", async () => {
       const n1 = NodeAddress.fromParts(["n1"]);
@@ -141,18 +171,7 @@ describe("analysis/pagerankNodeDecomposition", () => {
     });
 
     it("is valid on the example graph", async () => {
-      const g = advancedGraph().graph1();
-      const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
-      const connections = createConnections(g, edgeWeight, 1.0);
-      const osmc = createOrderedSparseMarkovChain(connections);
-      const pi = await findStationaryDistribution(osmc.chain, {
-        verbose: false,
-        convergenceThreshold: 1e-6,
-        maxIterations: 255,
-        yieldAfterMs: 1,
-      });
-      const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
-      const result = decompose(pr, connections);
+      const result = await examplePND();
       validateDecomposition(result);
     });
   });
