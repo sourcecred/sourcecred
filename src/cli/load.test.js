@@ -429,7 +429,10 @@ describe("cli/load", () => {
           )
           .toString();
         const registry = RepoIdRegistry.fromJSON(JSON.parse(blob));
-        expect(registry).toEqual([stringToRepoId("foo/combined")]);
+        const expected: RepoIdRegistry.RepoIdRegistry = [
+          {repoId: stringToRepoId("foo/combined")},
+        ];
+        expect(registry).toEqual(expected);
       });
 
       it("appends to an existing registry", async () => {
@@ -438,8 +441,8 @@ describe("cli/load", () => {
           path.join(sourcecredDirectory, RepoIdRegistry.REPO_ID_REGISTRY_FILE),
           JSON.stringify(
             RepoIdRegistry.toJSON([
-              stringToRepoId("previous/one"),
-              stringToRepoId("previous/two"),
+              {repoId: stringToRepoId("previous/one")},
+              {repoId: stringToRepoId("previous/two")},
             ])
           )
         );
@@ -451,11 +454,12 @@ describe("cli/load", () => {
           )
           .toString();
         const registry = RepoIdRegistry.fromJSON(JSON.parse(blob));
-        expect(registry).toEqual([
-          stringToRepoId("previous/one"),
-          stringToRepoId("previous/two"),
-          stringToRepoId("foo/combined"),
-        ]);
+        const expected: RepoIdRegistry.RepoIdRegistry = [
+          {repoId: stringToRepoId("previous/one")},
+          {repoId: stringToRepoId("previous/two")},
+          {repoId: stringToRepoId("foo/combined")},
+        ];
+        expect(registry).toEqual(expected);
       });
     });
   });

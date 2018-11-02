@@ -213,7 +213,7 @@ test_expect_success TWO_REPOS \
 test_expect_success TWO_REPOS \
     "TWO_REPOS: should have a repo registry loaded into env" '
     grep -F "REPO_REGISTRY" out &&
-    grep -xF "REPO_REGISTRY: [{\"name\":\"example-git\",\"owner\":\"sourcecred\"},{\"name\":\"example-github\",\"owner\":\"sourcecred\"}]" out
+    grep -xF "REPO_REGISTRY: [{\"repoId\":{\"name\":\"example-git\",\"owner\":\"sourcecred\"}},{\"repoId\":{\"name\":\"example-github\",\"owner\":\"sourcecred\"}}]" out
 '
 
 test_expect_success TWO_REPOS \

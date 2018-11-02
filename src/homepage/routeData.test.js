@@ -6,8 +6,8 @@ import {makeRouteData} from "./routeData";
 describe("homepage/routeData", () => {
   function routeData() {
     return makeRouteData([
-      stringToRepoId("sourcecred/example-github"),
-      stringToRepoId("sourcecred/sourcecred"),
+      {repoId: stringToRepoId("sourcecred/example-github")},
+      {repoId: stringToRepoId("sourcecred/sourcecred")},
     ]);
   }
 
