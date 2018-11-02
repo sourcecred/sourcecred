@@ -17,6 +17,14 @@ describe("util/map", () => {
       const output: {[Fruit]: string} = MapUtil.toObject(input);
       expect(output).toEqual({APPLE: "good", ORANGE: "also good"});
     });
+    it("can return an exact object", () => {
+      const _: {|[string]: number|} = MapUtil.toObject(new Map().set("a", 1));
+    });
+    it("can return an inexact object", () => {
+      // This should be free: exact objects are subtypes of their
+      // inexact counterparts.
+      const _: {[string]: number} = MapUtil.toObject(new Map().set("a", 1));
+    });
     it("statically rejects a map with keys not a subtype of string", () => {
       const input: Map<number, string> = new Map()
         .set(12, "not okay")
@@ -52,6 +60,16 @@ describe("util/map", () => {
       expect(output).toEqual(
         new Map().set("APPLE", "good").set("ORANGE", "also good")
       );
+    });
+    it("can accept an inexact object", () => {
+      const o: {[string]: number} = {a: 1};
+      const _: Map<string, number> = MapUtil.fromObject(o);
+    });
+    it("can accept an exact object", () => {
+      // This should be free: exact objects are subtypes of their
+      // inexact counterparts.
+      const o: {|[string]: number|} = ({a: 1}: any);
+      const _: Map<string, number> = MapUtil.fromObject(o);
     });
     it("statically rejects a map with keys not a subtype of string", () => {
       const input: {[number]: string} = {};
