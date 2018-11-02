@@ -33,6 +33,7 @@ export default function schema(): Schema.Schema {
       owner: s.node("RepositoryOwner"),
       issues: s.connection("Issue"),
       pullRequests: s.connection("PullRequest"),
+      labels: s.connection("Label"),
       defaultBranchRef: s.node("Ref"),
     }),
     Issue: s.object({
@@ -44,6 +45,7 @@ export default function schema(): Schema.Schema {
       author: s.node("Actor"),
       comments: s.connection("IssueComment"),
       reactions: s.connection("Reaction"),
+      labels: s.connection("Label"),
     }),
     PullRequest: s.object({
       id: s.id(),
@@ -58,6 +60,15 @@ export default function schema(): Schema.Schema {
       comments: s.connection("IssueComment"), // yes, PRs have IssueComments
       reviews: s.connection("PullRequestReview"),
       reactions: s.connection("Reaction"),
+      labels: s.connection("Label"),
+    }),
+    Label: s.object({
+      id: s.id(),
+      url: s.primitive(s.nonNull("URI")),
+      name: s.primitive(s.nonNull("String")),
+      description: s.primitive(s.nullable("String")),
+      color: s.primitive(s.nonNull("String")),
+      createdAt: s.primitive(s.nullable("DateTime")),
     }),
     IssueComment: s.object({
       id: s.id(),

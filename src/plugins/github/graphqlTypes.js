@@ -46,6 +46,7 @@ export type Issue = {|
   +body: String,
   +comments: $ReadOnlyArray<null | IssueComment>,
   +id: string,
+  +labels: $ReadOnlyArray<null | Label>,
   +number: Int,
   +reactions: $ReadOnlyArray<null | Reaction>,
   +title: String,
@@ -58,6 +59,16 @@ export type IssueComment = {|
   +body: String,
   +id: string,
   +reactions: $ReadOnlyArray<null | Reaction>,
+  +url: URI,
+|};
+
+export type Label = {|
+  +__typename: "Label",
+  +color: String,
+  +createdAt: null | DateTime,
+  +description: null | String,
+  +id: string,
+  +name: String,
   +url: URI,
 |};
 
@@ -76,6 +87,7 @@ export type PullRequest = {|
   +comments: $ReadOnlyArray<null | IssueComment>,
   +deletions: Int,
   +id: string,
+  +labels: $ReadOnlyArray<null | Label>,
   +mergeCommit: null | Commit,
   +number: Int,
   +reactions: $ReadOnlyArray<null | Reaction>,
@@ -166,6 +178,7 @@ export type Repository = {|
   +defaultBranchRef: null | Ref,
   +id: string,
   +issues: $ReadOnlyArray<null | Issue>,
+  +labels: $ReadOnlyArray<null | Label>,
   +name: String,
   +owner: null | RepositoryOwner,
   +pullRequests: $ReadOnlyArray<null | PullRequest>,

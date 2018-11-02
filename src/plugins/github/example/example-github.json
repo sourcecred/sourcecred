@@ -139,6 +139,17 @@
             "comments": [
             ],
             "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
+            "labels": [
+                {
+                    "__typename": "Label",
+                    "color": "7057ff",
+                    "createdAt": "2018-02-28T08:37:14Z",
+                    "description": "Good for newcomers",
+                    "id": "MDU6TGFiZWw4NTEyMzgxMzE=",
+                    "name": "good first issue",
+                    "url": "https://github.com/sourcecred/example-github/labels/good%20first%20issue"
+                }
+            ],
             "number": 1,
             "reactions": [
                 {
@@ -291,6 +302,8 @@
                 }
             ],
             "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
+            "labels": [
+            ],
             "number": 2,
             "reactions": [
             ],
@@ -309,6 +322,8 @@
             "comments": [
             ],
             "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
+            "labels": [
+            ],
             "number": 4,
             "reactions": [
             ],
@@ -383,6 +398,8 @@
                 }
             ],
             "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
+            "labels": [
+            ],
             "number": 6,
             "reactions": [
             ],
@@ -401,6 +418,26 @@
             "comments": [
             ],
             "id": "MDU6SXNzdWUzMDY5ODM1NTI=",
+            "labels": [
+                {
+                    "__typename": "Label",
+                    "color": "e4e669",
+                    "createdAt": "2018-02-28T08:37:14Z",
+                    "description": "This doesn't seem right",
+                    "id": "MDU6TGFiZWw4NTEyMzgxMzM=",
+                    "name": "invalid",
+                    "url": "https://github.com/sourcecred/example-github/labels/invalid"
+                },
+                {
+                    "__typename": "Label",
+                    "color": "d876e3",
+                    "createdAt": "2018-02-28T08:37:14Z",
+                    "description": "Further information is requested",
+                    "id": "MDU6TGFiZWw4NTEyMzgxMzQ=",
+                    "name": "question",
+                    "url": "https://github.com/sourcecred/example-github/labels/question"
+                }
+            ],
             "number": 7,
             "reactions": [
             ],
@@ -419,6 +456,8 @@
             "comments": [
             ],
             "id": "MDU6SXNzdWUzMDY5ODUzNjc=",
+            "labels": [
+            ],
             "number": 8,
             "reactions": [
             ],
@@ -437,6 +476,8 @@
             "comments": [
             ],
             "id": "MDU6SXNzdWUzMzcwOTU0NzM=",
+            "labels": [
+            ],
             "number": 10,
             "reactions": [
             ],
@@ -545,6 +586,17 @@
                 }
             ],
             "id": "MDU6SXNzdWUzNTk2Njc4Mjk=",
+            "labels": [
+                {
+                    "__typename": "Label",
+                    "color": "a2eeef",
+                    "createdAt": "2018-02-28T08:37:14Z",
+                    "description": "New feature or request",
+                    "id": "MDU6TGFiZWw4NTEyMzgxMjY=",
+                    "name": "enhancement",
+                    "url": "https://github.com/sourcecred/example-github/labels/enhancement"
+                }
+            ],
             "number": 11,
             "reactions": [
             ],
@@ -563,6 +615,8 @@
             "comments": [
             ],
             "id": "MDU6SXNzdWUzNjAwOTExMDc=",
+            "labels": [
+            ],
             "number": 12,
             "reactions": [
                 {
@@ -592,6 +646,8 @@
             "comments": [
             ],
             "id": "MDU6SXNzdWUzNjAwOTEzMTQ=",
+            "labels": [
+            ],
             "number": 13,
             "reactions": [
                 {
@@ -665,6 +721,80 @@
             "url": "https://github.com/sourcecred/example-github/issues/13"
         }
     ],
+    "labels": [
+        {
+            "__typename": "Label",
+            "color": "d73a4a",
+            "createdAt": "2018-02-28T08:37:14Z",
+            "description": "Something isn't working",
+            "id": "MDU6TGFiZWw4NTEyMzgxMjI=",
+            "name": "bug",
+            "url": "https://github.com/sourcecred/example-github/labels/bug"
+        },
+        {
+            "__typename": "Label",
+            "color": "cfd3d7",
+            "createdAt": "2018-02-28T08:37:14Z",
+            "description": "This issue or pull request already exists",
+            "id": "MDU6TGFiZWw4NTEyMzgxMjQ=",
+            "name": "duplicate",
+            "url": "https://github.com/sourcecred/example-github/labels/duplicate"
+        },
+        {
+            "__typename": "Label",
+            "color": "a2eeef",
+            "createdAt": "2018-02-28T08:37:14Z",
+            "description": "New feature or request",
+            "id": "MDU6TGFiZWw4NTEyMzgxMjY=",
+            "name": "enhancement",
+            "url": "https://github.com/sourcecred/example-github/labels/enhancement"
+        },
+        {
+            "__typename": "Label",
+            "color": "008672",
+            "createdAt": "2018-02-28T08:37:14Z",
+            "description": "Extra attention is needed",
+            "id": "MDU6TGFiZWw4NTEyMzgxMjg=",
+            "name": "help wanted",
+            "url": "https://github.com/sourcecred/example-github/labels/help%20wanted"
+        },
+        {
+            "__typename": "Label",
+            "color": "7057ff",
+            "createdAt": "2018-02-28T08:37:14Z",
+            "description": "Good for newcomers",
+            "id": "MDU6TGFiZWw4NTEyMzgxMzE=",
+            "name": "good first issue",
+            "url": "https://github.com/sourcecred/example-github/labels/good%20first%20issue"
+        },
+        {
+            "__typename": "Label",
+            "color": "e4e669",
+            "createdAt": "2018-02-28T08:37:14Z",
+            "description": "This doesn't seem right",
+            "id": "MDU6TGFiZWw4NTEyMzgxMzM=",
+            "name": "invalid",
+            "url": "https://github.com/sourcecred/example-github/labels/invalid"
+        },
+        {
+            "__typename": "Label",
+            "color": "d876e3",
+            "createdAt": "2018-02-28T08:37:14Z",
+            "description": "Further information is requested",
+            "id": "MDU6TGFiZWw4NTEyMzgxMzQ=",
+            "name": "question",
+            "url": "https://github.com/sourcecred/example-github/labels/question"
+        },
+        {
+            "__typename": "Label",
+            "color": "ffffff",
+            "createdAt": "2018-02-28T08:37:14Z",
+            "description": "This will not be worked on",
+            "id": "MDU6TGFiZWw4NTEyMzgxMzU=",
+            "name": "wontfix",
+            "url": "https://github.com/sourcecred/example-github/labels/wontfix"
+        }
+    ],
     "name": "example-github",
     "owner": {
         "__typename": "Organization",
@@ -701,6 +831,8 @@
             ],
             "deletions": 0,
             "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
+            "labels": [
+            ],
             "mergeCommit": {
                 "__typename": "Commit",
                 "author": {
@@ -831,6 +963,8 @@
             ],
             "deletions": 0,
             "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
+            "labels": [
+            ],
             "mergeCommit": {
                 "__typename": "Commit",
                 "author": {
@@ -1119,6 +1253,8 @@
             ],
             "deletions": 0,
             "id": "MDExOlB1bGxSZXF1ZXN0MTg1ODA2MTU3",
+            "labels": [
+            ],
             "mergeCommit": null,
             "number": 9,
             "reactions": [

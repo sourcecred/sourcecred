@@ -66,6 +66,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
           author: authors.steven(),
           comments: [],
           reactions: [],
+          labels: [],
         },
         {
           __typename: "Issue",
@@ -76,6 +77,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
           body: "it is me, @steven\n\nPaired with: @pearl",
           author: authors.steven(),
           reactions: [],
+          labels: [],
           comments: [
             {
               __typename: "IssueComment",
@@ -135,8 +137,10 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
           comments: [],
           author: authors.steven(),
           reviews: [],
+          labels: [],
         },
       ],
+      labels: [],
       url: "https://github.com/my-owner/my-repo",
       name: "my-repo",
       owner: {
