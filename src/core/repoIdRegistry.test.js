@@ -10,7 +10,7 @@ import {
 
 import {makeRepoId} from "../core/repoId";
 
-describe("explorer/repoIdRegistry", () => {
+describe("core/repoIdRegistry", () => {
   describe("fromJSON compose on", () => {
     function checkExample(x: RepoIdRegistry) {
       expect(fromJSON(toJSON(x))).toEqual(x);

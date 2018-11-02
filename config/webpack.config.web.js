@@ -5,7 +5,7 @@ import type {
   $Application as ExpressApp,
   $Response as ExpressResponse,
 } from "express";
-import type {RepoIdRegistry} from "../src/explorer/repoIdRegistry";
+import type {RepoIdRegistry} from "../src/core/repoIdRegistry";
 */
 const fs = require("fs");
 const os = require("os");

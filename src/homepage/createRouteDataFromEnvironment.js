@@ -1,6 +1,6 @@
 // @flow
 
-import type {RepoIdRegistry} from "../explorer/repoIdRegistry";
+import type {RepoIdRegistry} from "../core/repoIdRegistry";
 import {type RouteData, makeRouteData} from "./routeData";
 
 export default function createRouteDataFromEnvironment(): RouteData {

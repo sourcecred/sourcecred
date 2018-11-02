@@ -6,7 +6,7 @@ import stringify from "json-stable-stringify";
 import mkdirp from "mkdirp";
 import path from "path";
 
-import * as RepoIdRegistry from "../explorer/repoIdRegistry";
+import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {repoIdToString, stringToRepoId, type RepoId} from "../core/repoId";
 import dedent from "../util/dedent";
 import type {Command} from "./command";
