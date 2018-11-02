@@ -19,7 +19,6 @@ Map {
         },
         "connectionScore": 0.1102941261444197,
         "source": "NodeAddress[\\"sink\\"]",
-        "sourceScore": 0.5882353394369051,
       },
       Object {
         "connection": Object {
@@ -35,7 +34,6 @@ Map {
         },
         "connectionScore": 0.066176427533429,
         "source": "NodeAddress[\\"n2\\"]",
-        "sourceScore": 0.22058809177809668,
       },
       Object {
         "connection": Object {
@@ -46,7 +44,6 @@ Map {
         },
         "connectionScore": 0.014705889906538334,
         "source": "NodeAddress[\\"n1\\"]",
-        "sourceScore": 0.19117656878499834,
       },
     ],
   },
@@ -67,7 +64,6 @@ Map {
         },
         "connectionScore": 0.1102941261444197,
         "source": "NodeAddress[\\"sink\\"]",
-        "sourceScore": 0.5882353394369051,
       },
       Object {
         "connection": Object {
@@ -83,7 +79,6 @@ Map {
         },
         "connectionScore": 0.08823533943923001,
         "source": "NodeAddress[\\"n1\\"]",
-        "sourceScore": 0.19117656878499834,
       },
       Object {
         "connection": Object {
@@ -94,7 +89,6 @@ Map {
         },
         "connectionScore": 0.02205880917780967,
         "source": "NodeAddress[\\"n2\\"]",
-        "sourceScore": 0.22058809177809668,
       },
     ],
   },
@@ -115,7 +109,6 @@ Map {
         },
         "connectionScore": 0.2205882522888394,
         "source": "NodeAddress[\\"sink\\"]",
-        "sourceScore": 0.5882353394369051,
       },
       Object {
         "connection": Object {
@@ -131,7 +124,6 @@ Map {
         },
         "connectionScore": 0.132352855066858,
         "source": "NodeAddress[\\"n2\\"]",
-        "sourceScore": 0.22058809177809668,
       },
       Object {
         "connection": Object {
@@ -147,7 +139,6 @@ Map {
         },
         "connectionScore": 0.1102941261444197,
         "source": "NodeAddress[\\"sink\\"]",
-        "sourceScore": 0.5882353394369051,
       },
       Object {
         "connection": Object {
@@ -163,7 +154,6 @@ Map {
         },
         "connectionScore": 0.08823533943923001,
         "source": "NodeAddress[\\"n1\\"]",
-        "sourceScore": 0.19117656878499834,
       },
       Object {
         "connection": Object {
@@ -174,7 +164,6 @@ Map {
         },
         "connectionScore": 0.03676470871480657,
         "source": "NodeAddress[\\"sink\\"]",
-        "sourceScore": 0.5882353394369051,
       },
     ],
   },

@@ -22,13 +22,12 @@ function formatDecomposition(d) {
     {
       score,
       scoredConnections: scoredConnections.map(
-        ({connection, source, sourceScore, connectionScore}) => ({
+        ({connection, source, connectionScore}) => ({
           connection: {
             adjacency: formatAdjacency(connection.adjacency),
             weight: connection.weight,
           },
           source: NodeAddress.toString(source),
-          sourceScore,
           connectionScore,
         })
       ),

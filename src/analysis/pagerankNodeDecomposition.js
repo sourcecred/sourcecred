@@ -15,8 +15,6 @@ import * as NullUtil from "../util/null";
 export type ScoredConnection = {|
   +connection: Connection,
   +source: NodeAddressT,
-  // TODO(@decentralion): Consider removing this unused field
-  +sourceScore: number,
   +connectionScore: number,
 |};
 
@@ -42,7 +40,7 @@ export function decompose(
           const source = adjacencySource(target, connection.adjacency);
           const sourceScore = NullUtil.get(pr.get(source));
           const connectionScore = connection.weight * sourceScore;
-          return {connection, source, sourceScore, connectionScore};
+          return {connection, source, connectionScore};
         }
       ),
       (x) => -x.connectionScore,

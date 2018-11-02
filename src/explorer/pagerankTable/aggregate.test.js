@@ -117,31 +117,26 @@ describe("explorer/pagerankTable/aggregate", () => {
       loop5: {
         connection: connections.loop5,
         source: nodes.root,
-        sourceScore: 0.2,
         connectionScore: 5,
       },
       rfz4: {
         connection: connections.rfz4,
         source: nodes.zap,
-        sourceScore: 0.2,
         connectionScore: 4,
       },
       kfr3: {
         connection: connections.kfr3,
         source: nodes.kif,
-        sourceScore: 0.2,
         connectionScore: 3,
       },
       rbk2: {
         connection: connections.rbk2,
         source: nodes.kif,
-        sourceScore: 0.2,
         connectionScore: 2,
       },
       rfk1: {
         connection: connections.rfk1,
         source: nodes.kif,
-        sourceScore: 0.2,
         connectionScore: 1,
       },
     };
