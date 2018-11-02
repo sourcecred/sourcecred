@@ -7,8 +7,8 @@
  */
 export function toObject<K: string, V, InK: K, InV: V>(
   map: Map<InK, InV>
-): {[K]: V} {
-  const result = {};
+): {|[K]: V|} {
+  const result: {|[K]: V|} = ({}: any);
   for (const [k, v] of map.entries()) {
     result[k] = v;
   }
