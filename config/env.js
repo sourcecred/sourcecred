@@ -7,7 +7,7 @@ const path = require("path");
 const paths = require("./paths");
 
 /*:: import type {GitState} from "../src/core/version"; */
-/*:: import type {RepoIdRegistry} from "../src/explorer/repoIdRegistry"; */
+/*:: import type {RepoIdRegistry} from "../src/core/repoIdRegistry"; */
 
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve("./paths")];

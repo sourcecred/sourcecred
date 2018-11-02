@@ -3,7 +3,7 @@
 import stringify from "json-stable-stringify";
 import React, {type ComponentType} from "react";
 
-import type {RepoIdRegistry} from "../explorer/repoIdRegistry";
+import type {RepoIdRegistry} from "../core/repoIdRegistry";
 import Link from "../webutil/Link";
 import type {Assets} from "../webutil/assets";
 
