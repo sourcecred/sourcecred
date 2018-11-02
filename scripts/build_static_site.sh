@@ -4,7 +4,6 @@ set -eu
 usage() {
     printf 'usage: build_static_site.sh --target TARGET\n'
     printf '                            [--repo OWNER/NAME [...]]\n'
-    printf '                            [--feedback-url URL]\n'
     printf '                            [--cname DOMAIN]\n'
     printf '                            [--no-backend]\n'
     printf '                            [-h|--help]\n'
@@ -16,8 +15,6 @@ usage() {
     printf '%s\n' '--repo OWNER/NAME'
     printf '\t%s\n' 'a GitHub repository (e.g., torvalds/linux) for which'
     printf '\t%s\n' 'to include example data'
-    printf '%s\n' '--feedback-url URL'
-    printf '\t%s\n' 'link for user feedback, shown on the prototype page'
     printf '%s\n' '--cname DOMAIN'
     printf '\t%s\n' 'configure DNS for a GitHub Pages site to point to'
     printf '\t%s\n' 'the provided custom domain'
@@ -49,7 +46,6 @@ main() {
 }
 
 parse_args() {
-    unset SOURCECRED_FEEDBACK_URL
     BACKEND=1
     target=
     cname=
@@ -68,17 +64,6 @@ parse_args() {
                 shift
                 if [ $# -eq 0 ]; then die 'missing value for --repo'; fi
                 repos+=( "$1" )
-                ;;
-           --feedback-url)
-                shift
-                if [ $# -eq 0 ]; then die 'missing value for --feedback-url'; fi
-                if [ -n "${SOURCECRED_FEEDBACK_URL:-}" ]; then
-                    die '--feedback-url specified multiple times'
-                fi
-                export SOURCECRED_FEEDBACK_URL="$1"
-                if [ -z "${SOURCECRED_FEEDBACK_URL}" ]; then
-                    die 'empty value for --feedback-url'
-                fi
                 ;;
             --cname)
                 shift
