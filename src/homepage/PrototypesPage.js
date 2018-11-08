@@ -17,9 +17,9 @@ export default function makePrototypesPage(
           style={{
             maxWidth: 900,
             margin: "0 auto",
-            marginBottom: 200,
             padding: "0 10px",
             lineHeight: 1.5,
+            height: "100%",
           }}
         >
           <p>Select a project:</p>
