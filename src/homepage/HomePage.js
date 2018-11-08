@@ -147,7 +147,7 @@ export default class HomePage extends React.Component<{|+assets: Assets|}> {
         <h2>Roadmap</h2>
         <p>
           SourceCred is under active development.{" "}
-          <Link to="/prototype">We have a prototype</Link> that ingests data
+          <Link to="/prototype/">We have a prototype</Link> that ingests data
           from Git and GitHub, computes cred, and allows the user to explore and
           experiment on the results. We have a long way to go to realize
           SourceCred’s full vision, but the prototype can already surface some
