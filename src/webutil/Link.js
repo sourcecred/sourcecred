@@ -41,6 +41,10 @@ export default class Link extends Component<LinkProps> {
       </Tag>
     );
     if ("to" in this.props) {
+      if (!this.props.to.endsWith("/")) {
+        // All our routes have trailing slashes. This must be an error.
+        throw new Error("'to' prop must specify route with trailing slash.");
+      }
       return make(RouterLink);
     } else if ("href" in this.props) {
       return make("a");
