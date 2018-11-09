@@ -56,7 +56,7 @@ const repoRegistry = loadRepoRegistry();
 // Get environment variables to inject into our app.
 const env = getClientEnvironment(repoRegistry);
 
-function makeConfig(mode /*: "production" | "development" */) {
+function makeConfig(mode /*: "production" | "development" */) /*: mixed */ {
   return {
     // Don't attempt to continue if there are any errors.
     bail: true,

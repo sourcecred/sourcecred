@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import * as NullUtil from "../../util/null";
 import * as MapUtil from "../../util/map";
 
@@ -36,7 +36,7 @@ export class WeightConfig extends React.Component<Props> {
     );
   }
 
-  _renderPluginWeightConfigs() {
+  _renderPluginWeightConfigs(): ReactNode {
     return this.props.adapters
       .adapters()
       .filter((x) => x.declaration().name !== FALLBACK_NAME)
