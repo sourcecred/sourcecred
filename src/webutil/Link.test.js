@@ -18,7 +18,7 @@ describe("webutil/Link", () => {
   void [
     // Must specify either `href` or `to`
     <Link href="https://example.com/">click me</Link>,
-    <Link to="/prototype">click me, too</Link>,
+    <Link to="/prototype/">click me, too</Link>,
     // $ExpectFlowError
     <Link>missing to/href</Link>,
 
@@ -38,9 +38,9 @@ describe("webutil/Link", () => {
   });
 
   it("renders a styled router link", () => {
-    const element = shallow(<Link to="/prototype">check it out</Link>);
+    const element = shallow(<Link to="/prototype/">check it out</Link>);
     expect(element.type()).toEqual(RouterLink);
-    expect(element.prop("to")).toEqual("/prototype");
+    expect(element.prop("to")).toEqual("/prototype/");
     expect(element.children().text()).toEqual("check it out");
     expect(typeof element.prop("className")).toBe("string");
   });
@@ -51,6 +51,20 @@ describe("webutil/Link", () => {
     expect(() => {
       shallow(component);
     }).toThrow("Must specify either 'to' or 'href'.");
+  });
+
+  it("fails if router link omits a trailing slash", () => {
+    const component = <Link to="/foo" />;
+    expect(() => {
+      shallow(component);
+    }).toThrow("'to' prop must specify route with trailing slash.");
+  });
+
+  it("permits external link to omit a trailing slash", () => {
+    const component = <Link href="/foo" />;
+    expect(() => {
+      shallow(component);
+    }).not.toThrow();
   });
 
   it("has deterministic className", () => {
