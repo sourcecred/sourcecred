@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import deepEqual from "lodash.isequal";
 import * as MapUtil from "../../util/map";
 import {NodeTypeConfig} from "./NodeTypeConfig";
@@ -24,7 +24,7 @@ export class PluginWeightConfig extends React.Component<Props> {
     super(props);
   }
 
-  _renderNodeWeightControls() {
+  _renderNodeWeightControls(): ReactNode {
     return Array.from(this.props.weightedTypes.nodes.values()).map(
       (wnt: WeightedNodeType) => {
         const onChange = (newType: WeightedNodeType) => {
@@ -44,7 +44,7 @@ export class PluginWeightConfig extends React.Component<Props> {
     );
   }
 
-  _renderEdgeWeightControls() {
+  _renderEdgeWeightControls(): ReactNode {
     return Array.from(this.props.weightedTypes.edges.values()).map(
       (wnt: WeightedEdgeType) => {
         const onChange = (newType: WeightedEdgeType) => {
