@@ -10,9 +10,12 @@ import type {RepoId} from "../core/repoId";
 export const REPO_ID_REGISTRY_FILE = "repositoryRegistry.json";
 export const REPO_ID_REGISTRY_API = "/api/v1/data/repositoryRegistry.json";
 
-const REPO_ID_REGISTRY_COMPAT = {type: "REPO_ID_REGISTRY", version: "0.1.0"};
+const REPO_ID_REGISTRY_COMPAT = {type: "REPO_ID_REGISTRY", version: "0.2.0"};
 
-export type RepoIdRegistry = $ReadOnlyArray<RepoId>;
+export type RegistryEntry = {|
+  +repoId: RepoId,
+|};
+export type RepoIdRegistry = $ReadOnlyArray<RegistryEntry>;
 export type RepoIdRegistryJSON = Compatible<RepoIdRegistry>;
 
 export function toJSON(r: RepoIdRegistry): RepoIdRegistryJSON {
@@ -23,8 +26,16 @@ export function fromJSON(j: RepoIdRegistryJSON): RepoIdRegistry {
   return fromCompat(REPO_ID_REGISTRY_COMPAT, j);
 }
 
-export function addRepoId(r: RepoId, reg: RepoIdRegistry): RepoIdRegistry {
-  return [...reg.filter((x) => !deepEqual(x, r)), r];
+export function addRepoId(
+  registry: RepoIdRegistry,
+  entry: RegistryEntry
+): RepoIdRegistry {
+  return [
+    ...registry.filter(
+      (x: RegistryEntry) => !deepEqual(x.repoId, entry.repoId)
+    ),
+    entry,
+  ];
 }
 
 export function emptyRegistry(): RepoIdRegistry {

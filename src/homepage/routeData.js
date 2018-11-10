@@ -47,13 +47,13 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       title: "SourceCred prototype",
       navTitle: "Prototype",
     },
-    ...registry.map((repo) => ({
-      path: `/prototypes/${repo.owner}/${repo.name}/`,
+    ...registry.map((entry) => ({
+      path: `/prototypes/${entry.repoId.owner}/${entry.repoId.name}/`,
       contents: {
         type: "PAGE",
-        component: () => require("./ProjectPage").default(repo),
+        component: () => require("./ProjectPage").default(entry.repoId),
       },
-      title: `${repo.owner}/${repo.name} • SourceCred`,
+      title: `${entry.repoId.owner}/${entry.repoId.name} • SourceCred`,
       navTitle: null,
     })),
     {

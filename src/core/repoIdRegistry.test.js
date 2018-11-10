@@ -20,31 +20,42 @@ describe("core/repoIdRegistry", () => {
       checkExample(emptyRegistry());
     });
     it("nonempty registry", () => {
-      checkExample([makeRepoId("foo", "bar"), makeRepoId("zoo", "zod")]);
+      checkExample([
+        {repoId: makeRepoId("foo", "bar")},
+        {repoId: makeRepoId("zoo", "zod")},
+      ]);
     });
   });
   describe("addRepoId", () => {
     it("adds to empty registry", () => {
-      expect(addRepoId(makeRepoId("foo", "bar"), emptyRegistry())).toEqual([
-        makeRepoId("foo", "bar"),
-      ]);
+      expect(
+        addRepoId(emptyRegistry(), {repoId: makeRepoId("foo", "bar")})
+      ).toEqual([{repoId: makeRepoId("foo", "bar")}]);
     });
     it("adds to nonempty registry", () => {
-      const registry = [makeRepoId("foo", "bar")];
-      expect(addRepoId(makeRepoId("zoo", "zod"), registry)).toEqual([
-        makeRepoId("foo", "bar"),
-        makeRepoId("zoo", "zod"),
+      const registry = [{repoId: makeRepoId("foo", "bar")}];
+      expect(addRepoId(registry, {repoId: makeRepoId("zoo", "zod")})).toEqual([
+        {repoId: makeRepoId("foo", "bar")},
+        {repoId: makeRepoId("zoo", "zod")},
       ]);
     });
     it("adding repoId that is already the last has no effect", () => {
-      const registry = [makeRepoId("zoo", "zod"), makeRepoId("foo", "bar")];
-      expect(addRepoId(makeRepoId("foo", "bar"), registry)).toEqual(registry);
+      const registry = [
+        {repoId: makeRepoId("zoo", "zod")},
+        {repoId: makeRepoId("foo", "bar")},
+      ];
+      expect(addRepoId(registry, {repoId: makeRepoId("foo", "bar")})).toEqual(
+        registry
+      );
     });
     it("adding already-existing repoId shifts it to the end", () => {
-      const registry = [makeRepoId("zoo", "zod"), makeRepoId("foo", "bar")];
-      expect(addRepoId(makeRepoId("zoo", "zod"), registry)).toEqual([
-        makeRepoId("foo", "bar"),
-        makeRepoId("zoo", "zod"),
+      const registry = [
+        {repoId: makeRepoId("zoo", "zod")},
+        {repoId: makeRepoId("foo", "bar")},
+      ];
+      expect(addRepoId(registry, {repoId: makeRepoId("zoo", "zod")})).toEqual([
+        {repoId: makeRepoId("foo", "bar")},
+        {repoId: makeRepoId("zoo", "zod")},
       ]);
     });
   });

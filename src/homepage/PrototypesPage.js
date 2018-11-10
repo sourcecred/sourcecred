@@ -26,8 +26,8 @@ export default function makePrototypesPage(
           <ul>
             {registry.map((x) => (
               <li key={stringify(x)}>
-                <Link to={`/prototypes/${x.owner}/${x.name}/`}>
-                  {`${x.owner}/${x.name}`}
+                <Link to={`/prototypes/${x.repoId.owner}/${x.repoId.name}/`}>
+                  {`${x.repoId.owner}/${x.repoId.name}`}
                 </Link>
               </li>
             ))}

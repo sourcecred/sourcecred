@@ -213,7 +213,7 @@ function addToRepoIdRegistry(repoId) {
   } else {
     registry = RepoIdRegistry.emptyRegistry();
   }
-  registry = RepoIdRegistry.addRepoId(repoId, registry);
+  registry = RepoIdRegistry.addRepoId(registry, {repoId});
 
   fs.writeFileSync(outputFile, stringify(RepoIdRegistry.toJSON(registry)));
 }

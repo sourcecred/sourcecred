@@ -37,7 +37,7 @@ function loadRepoRegistry() /*: RepoIdRegistry */ {
   } catch (e) {
     if (e.code === "ENOENT") {
       jsonString = JSON.stringify([
-        {version: "0.1.0", type: "REPO_ID_REGISTRY"},
+        {version: "0.2.0", type: "REPO_ID_REGISTRY"},
         [],
       ]);
     } else {
@@ -46,7 +46,7 @@ function loadRepoRegistry() /*: RepoIdRegistry */ {
   }
   const json = JSON.parse(jsonString);
   const compat = json[0];
-  if (compat.version !== "0.1.0" || compat.type !== "REPO_ID_REGISTRY") {
+  if (compat.version !== "0.2.0" || compat.type !== "REPO_ID_REGISTRY") {
     throw new Error("Compat mismatch");
   }
   return json[1];
