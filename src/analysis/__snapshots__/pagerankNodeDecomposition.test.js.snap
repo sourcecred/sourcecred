@@ -169,3 +169,173 @@ Map {
   },
 }
 `;
+
+exports[`analysis/pagerankNodeDecomposition scoredConnections has the expected output on a simple asymmetric chain 1`] = `
+Map {
+  "NodeAddress[\\"n1\\"]" => Object {
+    "score": 0.19117656878499834,
+    "scoredConnections": Array [
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "edge": Object {
+              "address": "EdgeAddress[\\"e3\\"]",
+              "dst": "NodeAddress[\\"sink\\"]",
+              "src": "NodeAddress[\\"n1\\"]",
+            },
+            "type": "OUT_EDGE",
+          },
+          "weight": 0.1875,
+        },
+        "connectionScore": 0.1102941261444197,
+        "source": "NodeAddress[\\"sink\\"]",
+      },
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "edge": Object {
+              "address": "EdgeAddress[\\"e1\\"]",
+              "dst": "NodeAddress[\\"n2\\"]",
+              "src": "NodeAddress[\\"n1\\"]",
+            },
+            "type": "OUT_EDGE",
+          },
+          "weight": 0.3,
+        },
+        "connectionScore": 0.066176427533429,
+        "source": "NodeAddress[\\"n2\\"]",
+      },
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "type": "SYNTHETIC_LOOP",
+          },
+          "weight": 0.07692307692307693,
+        },
+        "connectionScore": 0.014705889906538334,
+        "source": "NodeAddress[\\"n1\\"]",
+      },
+    ],
+  },
+  "NodeAddress[\\"n2\\"]" => Object {
+    "score": 0.22058809177809668,
+    "scoredConnections": Array [
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "edge": Object {
+              "address": "EdgeAddress[\\"e2\\"]",
+              "dst": "NodeAddress[\\"sink\\"]",
+              "src": "NodeAddress[\\"n2\\"]",
+            },
+            "type": "OUT_EDGE",
+          },
+          "weight": 0.1875,
+        },
+        "connectionScore": 0.1102941261444197,
+        "source": "NodeAddress[\\"sink\\"]",
+      },
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "edge": Object {
+              "address": "EdgeAddress[\\"e1\\"]",
+              "dst": "NodeAddress[\\"n2\\"]",
+              "src": "NodeAddress[\\"n1\\"]",
+            },
+            "type": "IN_EDGE",
+          },
+          "weight": 0.46153846153846156,
+        },
+        "connectionScore": 0.08823533943923001,
+        "source": "NodeAddress[\\"n1\\"]",
+      },
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "type": "SYNTHETIC_LOOP",
+          },
+          "weight": 0.1,
+        },
+        "connectionScore": 0.02205880917780967,
+        "source": "NodeAddress[\\"n2\\"]",
+      },
+    ],
+  },
+  "NodeAddress[\\"sink\\"]" => Object {
+    "score": 0.5882353394369051,
+    "scoredConnections": Array [
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "edge": Object {
+              "address": "EdgeAddress[\\"e4\\"]",
+              "dst": "NodeAddress[\\"sink\\"]",
+              "src": "NodeAddress[\\"sink\\"]",
+            },
+            "type": "IN_EDGE",
+          },
+          "weight": 0.375,
+        },
+        "connectionScore": 0.2205882522888394,
+        "source": "NodeAddress[\\"sink\\"]",
+      },
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "edge": Object {
+              "address": "EdgeAddress[\\"e2\\"]",
+              "dst": "NodeAddress[\\"sink\\"]",
+              "src": "NodeAddress[\\"n2\\"]",
+            },
+            "type": "IN_EDGE",
+          },
+          "weight": 0.6,
+        },
+        "connectionScore": 0.132352855066858,
+        "source": "NodeAddress[\\"n2\\"]",
+      },
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "edge": Object {
+              "address": "EdgeAddress[\\"e4\\"]",
+              "dst": "NodeAddress[\\"sink\\"]",
+              "src": "NodeAddress[\\"sink\\"]",
+            },
+            "type": "OUT_EDGE",
+          },
+          "weight": 0.1875,
+        },
+        "connectionScore": 0.1102941261444197,
+        "source": "NodeAddress[\\"sink\\"]",
+      },
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "edge": Object {
+              "address": "EdgeAddress[\\"e3\\"]",
+              "dst": "NodeAddress[\\"sink\\"]",
+              "src": "NodeAddress[\\"n1\\"]",
+            },
+            "type": "IN_EDGE",
+          },
+          "weight": 0.46153846153846156,
+        },
+        "connectionScore": 0.08823533943923001,
+        "source": "NodeAddress[\\"n1\\"]",
+      },
+      Object {
+        "connection": Object {
+          "adjacency": Object {
+            "type": "SYNTHETIC_LOOP",
+          },
+          "weight": 0.0625,
+        },
+        "connectionScore": 0.03676470871480657,
+        "source": "NodeAddress[\\"sink\\"]",
+      },
+    ],
+  },
+}
+`;

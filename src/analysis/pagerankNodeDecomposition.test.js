@@ -1,15 +1,27 @@
 // @flow
 
-import {EdgeAddress, Graph, NodeAddress, edgeToStrings} from "../core/graph";
+import {
+  EdgeAddress,
+  Graph,
+  NodeAddress,
+  edgeToStrings,
+  type NodeAddressT,
+} from "../core/graph";
 import {
   distributionToNodeDistribution,
   createConnections,
   createOrderedSparseMarkovChain,
   createWeightedGraph,
+  type WeightedGraph,
 } from "../core/attribution/graphToMarkovChain";
 import {findStationaryDistribution} from "../core/attribution/markovChain";
-import {decompose} from "./pagerankNodeDecomposition";
+import {
+  scoredConnections,
+  decompose,
+  type PagerankNodeDecomposition,
+} from "./pagerankNodeDecomposition";
 import * as MapUtil from "../util/map";
+import * as NullUtil from "../util/null";
 
 import {advancedGraph} from "../core/graphTestUtil";
 
@@ -17,7 +29,7 @@ import {advancedGraph} from "../core/graphTestUtil";
  * Format a decomposition to be shown in a snapshot. This converts
  * addresses and edges to strings to avoid NUL characters.
  */
-function formatDecomposition(d) {
+function formatDecomposition(d: PagerankNodeDecomposition) {
   return MapUtil.mapEntries(d, (key, {score, scoredConnections}) => [
     NodeAddress.toString(key),
     {
@@ -54,7 +66,7 @@ function formatDecomposition(d) {
  * scores of the decomposition sum to 1, and that each node's
  * connections are listed in non-increasing order of score.
  */
-function validateDecomposition(decomposition) {
+function validateDecomposition(decomposition: PagerankNodeDecomposition) {
   const epsilon = 1e-6;
 
   // Check that each node's score is the sum of its subscores.
@@ -157,6 +169,72 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
       const result = decompose(pr, connections);
       validateDecomposition(result);
+    });
+  });
+
+  describe("scoredConnections", () => {
+    function combineDecomposition(
+      wg: WeightedGraph,
+      scores: Map<NodeAddressT, number>
+    ): PagerankNodeDecomposition {
+      const result: PagerankNodeDecomposition = new Map();
+      for (const n of wg.graph.nodes()) {
+        const entry = {
+          score: NullUtil.get(scores.get(n)),
+          scoredConnections: scoredConnections(wg, scores, n),
+        };
+        result.set(n, entry);
+      }
+      return result;
+    }
+
+    it("has the expected output on a simple asymmetric chain", async () => {
+      const n1 = NodeAddress.fromParts(["n1"]);
+      const n2 = NodeAddress.fromParts(["n2"]);
+      const n3 = NodeAddress.fromParts(["sink"]);
+      const e1 = {src: n1, dst: n2, address: EdgeAddress.fromParts(["e1"])};
+      const e2 = {src: n2, dst: n3, address: EdgeAddress.fromParts(["e2"])};
+      const e3 = {src: n1, dst: n3, address: EdgeAddress.fromParts(["e3"])};
+      const e4 = {src: n3, dst: n3, address: EdgeAddress.fromParts(["e4"])};
+      const g = new Graph()
+        .addNode(n1)
+        .addNode(n2)
+        .addNode(n3)
+        .addEdge(e1)
+        .addEdge(e2)
+        .addEdge(e3)
+        .addEdge(e4);
+      const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
+      const wg = createWeightedGraph(g, edgeWeight, 1.0);
+      const connections = createConnections(wg);
+      const osmc = createOrderedSparseMarkovChain(connections);
+      const pi = await findStationaryDistribution(osmc.chain, {
+        verbose: false,
+        convergenceThreshold: 1e-6,
+        maxIterations: 255,
+        yieldAfterMs: 1,
+      });
+      const scores = distributionToNodeDistribution(osmc.nodeOrder, pi);
+      const decomposition = combineDecomposition(wg, scores);
+      expect(formatDecomposition(decomposition)).toMatchSnapshot();
+      validateDecomposition(decomposition);
+    });
+
+    it("is valid on the example graph", async () => {
+      const g = advancedGraph().graph1();
+      const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
+      const wg = createWeightedGraph(g, edgeWeight, 1.0);
+      const connections = createConnections(wg);
+      const osmc = createOrderedSparseMarkovChain(connections);
+      const pi = await findStationaryDistribution(osmc.chain, {
+        verbose: false,
+        convergenceThreshold: 1e-6,
+        maxIterations: 255,
+        yieldAfterMs: 1,
+      });
+      const scores = distributionToNodeDistribution(osmc.nodeOrder, pi);
+      const decomposition = combineDecomposition(wg, scores);
+      validateDecomposition(decomposition);
     });
   });
 });
