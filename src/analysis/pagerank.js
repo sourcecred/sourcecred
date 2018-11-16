@@ -6,6 +6,7 @@ import {
   createConnections,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
+  createWeightedGraph,
 } from "../core/attribution/graphToMarkovChain";
 import {
   decompose,
@@ -52,11 +53,12 @@ export async function pagerank(
     ...defaultOptions(),
     ...(options || {}),
   };
-  const connections = createConnections(
+  const weightedGraph = createWeightedGraph(
     graph,
     edgeWeight,
     fullOptions.selfLoopWeight
   );
+  const connections = createConnections(weightedGraph);
   const osmc = createOrderedSparseMarkovChain(connections);
   const distribution = await findStationaryDistribution(osmc.chain, {
     verbose: fullOptions.verbose,

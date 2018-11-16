@@ -109,61 +109,42 @@ export function createWeightedGraph(
   };
 }
 
-// TODO(#1004, @decentralion): Refactor this function to use WeightedGraph
-export function createConnections(
-  graph: Graph,
-  edgeWeight: (Edge) => EdgeWeight,
-  syntheticLoopWeight: number
-): NodeToConnections {
+export function createConnections(wg: WeightedGraph): NodeToConnections {
   const result = new Map();
-  const totalOutWeight: Map<NodeAddressT, number> = new Map();
-  for (const node of graph.nodes()) {
+  for (const node of wg.graph.nodes()) {
     result.set(node, []);
-    totalOutWeight.set(node, 0);
   }
 
-  function processConnection(target: NodeAddressT, connection: Connection) {
+  function addConnection(
+    target: NodeAddressT,
+    adjacency: Adjacency,
+    weight: number
+  ) {
+    const source = adjacencySource(target, adjacency);
+    const sourceWeight = NullUtil.get(wg.nodeTotalOutWeights.get(source));
+    const connection = {
+      adjacency,
+      weight: weight / sourceWeight,
+    };
     const connections = NullUtil.get(result.get(target));
     (((connections: $ReadOnlyArray<Connection>): any): Connection[]).push(
       connection
     );
-    const source = adjacencySource(target, connection.adjacency);
-    const priorOutWeight = NullUtil.get(totalOutWeight.get(source));
-    totalOutWeight.set(source, priorOutWeight + connection.weight);
   }
 
   // Add self-loops.
-  for (const node of graph.nodes()) {
-    processConnection(node, {
-      adjacency: {type: "SYNTHETIC_LOOP"},
-      weight: syntheticLoopWeight,
-    });
+  for (const node of wg.graph.nodes()) {
+    addConnection(node, {type: "SYNTHETIC_LOOP"}, wg.syntheticLoopWeight);
   }
 
   // Process edges.
-  for (const edge of graph.edges()) {
-    const {toWeight, froWeight} = edgeWeight(edge);
+  for (const edge of wg.graph.edges()) {
+    const {toWeight, froWeight} = NullUtil.get(
+      wg.edgeWeights.get(edge.address)
+    );
     const {src, dst} = edge;
-    processConnection(dst, {
-      adjacency: {type: "IN_EDGE", edge},
-      weight: toWeight,
-    });
-    processConnection(src, {
-      adjacency: {type: "OUT_EDGE", edge},
-      weight: froWeight,
-    });
-  }
-
-  // Normalize in-weights.
-  for (const [target, connections] of result.entries()) {
-    for (const connection of connections) {
-      const source = adjacencySource(target, connection.adjacency);
-      const normalization = NullUtil.get(totalOutWeight.get(source));
-      const newWeight: typeof connection.weight =
-        connection.weight / normalization;
-      // (any-cast because property is not writable)
-      (connection: any).weight = newWeight;
-    }
+    addConnection(dst, {type: "IN_EDGE", edge}, toWeight);
+    addConnection(src, {type: "OUT_EDGE", edge}, froWeight);
   }
 
   return result;

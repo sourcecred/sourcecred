@@ -165,7 +165,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         .addEdge(e3)
         .addEdge(e4);
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
-      const actual = createConnections(g, edgeWeight, 1.0);
+      const actual = createConnections(createWeightedGraph(g, edgeWeight, 1.0));
       // Total out-weights (for normalization factors):
       //   - for `n1`: 2 out, 0 in, 1 synthetic: 12 + 0 + 1 = 13
       //   - for `n2`: 1 out, 1 in, 1 synthetic: 6 + 3 + 1 = 10
@@ -202,7 +202,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         throw new Error("Don't even look at me");
       };
       const osmc = createOrderedSparseMarkovChain(
-        createConnections(g, edgeWeight, 1e-3)
+        createConnections(createWeightedGraph(g, edgeWeight, 1e-3))
       );
       const expected = {
         nodeOrder: [n],
@@ -231,7 +231,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         .addEdge(e4);
       const edgeWeight = () => ({toWeight: 1, froWeight: 0});
       const osmc = createOrderedSparseMarkovChain(
-        createConnections(g, edgeWeight, 0.0)
+        createConnections(createWeightedGraph(g, edgeWeight, 0.0))
       );
       const expected = {
         nodeOrder: [n1, n2, n3],
@@ -269,7 +269,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         .addEdge(e3);
       const edgeWeight = () => ({toWeight: 1, froWeight: 1});
       const osmc = createOrderedSparseMarkovChain(
-        createConnections(g, edgeWeight, 0.0)
+        createConnections(createWeightedGraph(g, edgeWeight, 0.0))
       );
       const expected = {
         nodeOrder: [n1, n2, n3],
@@ -301,7 +301,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         return {toWeight: 4 - epsilon / 2, froWeight: 1 - epsilon / 2};
       }
       const osmc = createOrderedSparseMarkovChain(
-        createConnections(g, edgeWeight, epsilon)
+        createConnections(createWeightedGraph(g, edgeWeight, epsilon))
       );
       // Edges from `src`:
       //   - to `src` with weight `epsilon`

@@ -5,6 +5,7 @@ import {
   distributionToNodeDistribution,
   createConnections,
   createOrderedSparseMarkovChain,
+  createWeightedGraph,
 } from "../core/attribution/graphToMarkovChain";
 import {findStationaryDistribution} from "../core/attribution/markovChain";
 import {decompose} from "./pagerankNodeDecomposition";
@@ -126,7 +127,8 @@ describe("analysis/pagerankNodeDecomposition", () => {
         .addEdge(e3)
         .addEdge(e4);
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
-      const connections = createConnections(g, edgeWeight, 1.0);
+      const weightedGraph = createWeightedGraph(g, edgeWeight, 1.0);
+      const connections = createConnections(weightedGraph);
       const osmc = createOrderedSparseMarkovChain(connections);
       const pi = await findStationaryDistribution(osmc.chain, {
         verbose: false,
@@ -143,7 +145,8 @@ describe("analysis/pagerankNodeDecomposition", () => {
     it("is valid on the example graph", async () => {
       const g = advancedGraph().graph1();
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
-      const connections = createConnections(g, edgeWeight, 1.0);
+      const weightedGraph = createWeightedGraph(g, edgeWeight, 1.0);
+      const connections = createConnections(weightedGraph);
       const osmc = createOrderedSparseMarkovChain(connections);
       const pi = await findStationaryDistribution(osmc.chain, {
         verbose: false,
