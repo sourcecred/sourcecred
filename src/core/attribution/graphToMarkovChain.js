@@ -5,6 +5,9 @@ import {
   type Graph,
   type NodeAddressT,
   type EdgeAddressT,
+  Direction,
+  NodeAddress,
+  EdgeAddress,
 } from "../graph";
 import type {Distribution, SparseMarkovChain} from "./markovChain";
 import * as MapUtil from "../../util/map";
@@ -148,6 +151,53 @@ export function createConnections(wg: WeightedGraph): NodeToConnections {
   }
 
   return result;
+}
+
+/**
+ * For a single node, find all incoming connections.
+ *
+ * `singleNodeConnections(wg, node)` is the same (modulo ordering) as
+ * `createConnections(wg).get(node)`.
+ *
+ * If you only need the connections for a particular node, then using
+ * singleNodeConnections is much more efficient.
+ */
+export function singleNodeConnections(
+  wg: WeightedGraph,
+  target: NodeAddressT
+): Connection[] {
+  const connections = [];
+  function addConnection(
+    target: NodeAddressT,
+    adjacency: Adjacency,
+    weight: number
+  ) {
+    const source = adjacencySource(target, adjacency);
+    const sourceWeight = NullUtil.get(wg.nodeTotalOutWeights.get(source));
+    const connection = {adjacency, weight: weight / sourceWeight};
+    connections.push(connection);
+  }
+
+  addConnection(target, {type: "SYNTHETIC_LOOP"}, wg.syntheticLoopWeight);
+  const neighborsOptions = {
+    direction: Direction.ANY,
+    nodePrefix: NodeAddress.empty,
+    edgePrefix: EdgeAddress.empty,
+  };
+  for (const {edge} of wg.graph.neighbors(target, neighborsOptions)) {
+    const {toWeight, froWeight} = NullUtil.get(
+      wg.edgeWeights.get(edge.address)
+    );
+    const {src, dst} = edge;
+    if (src === target) {
+      addConnection(target, {type: "OUT_EDGE", edge}, froWeight);
+    }
+    if (dst === target) {
+      addConnection(target, {type: "IN_EDGE", edge}, toWeight);
+    }
+  }
+
+  return connections;
 }
 
 function createNodeAddressMarkovChain(

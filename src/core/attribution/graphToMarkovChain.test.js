@@ -11,6 +11,7 @@ import {
   normalizeNeighbors,
   permute,
   createWeightedGraph,
+  singleNodeConnections,
 } from "./graphToMarkovChain";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
@@ -191,6 +192,89 @@ describe("core/attribution/graphToMarkovChain", () => {
       const canonicalize = (map) =>
         MapUtil.mapValues(map, (_, v) => sortBy(v, (x) => JSON.stringify(x)));
       expect(canonicalize(actual)).toEqual(canonicalize(expected));
+    });
+  });
+
+  describe("singleNodeConnections", () => {
+    it("is consistent with the results from createConnections", () => {
+      const g = advancedGraph().graph2();
+      const edgeEvaluator = ({src, dst, address}) => ({
+        toWeight: src.length + address.length,
+        froWeight: dst.length + address.length,
+      });
+      const wg = createWeightedGraph(g, edgeEvaluator, 0.001);
+      const allConnections = createConnections(wg);
+      for (const node of g.nodes()) {
+        const canonicalize = (array) => sortBy(array, (x) => JSON.stringify(x));
+        const expected = canonicalize(allConnections.get(node));
+        const actual = canonicalize(singleNodeConnections(wg, node));
+        expect(actual).toEqual(expected);
+      }
+    });
+    it("correctly normalizes connections based on their source", () => {
+      const g = new Graph();
+      const selfLoopWeight = 1;
+
+      const xOutWeight = 3;
+      const x = NodeAddress.fromParts(["x"]);
+      g.addNode(x);
+
+      const yOutWeight = 10;
+      const y = NodeAddress.fromParts(["y"]);
+      g.addNode(y);
+
+      const zOutWeight = 20;
+      const z = NodeAddress.fromParts(["z"]);
+      g.addNode(z);
+
+      const xy = {address: EdgeAddress.fromParts(["xy"]), src: x, dst: y};
+      g.addEdge(xy);
+      const zx = {address: EdgeAddress.fromParts(["zx"]), src: z, dst: x};
+      g.addEdge(zx);
+
+      const yy = {address: EdgeAddress.fromParts(["yy"]), src: y, dst: y};
+      g.addEdge(yy);
+      const zy = {address: EdgeAddress.fromParts(["zy"]), src: z, dst: y};
+      g.addEdge(zy);
+
+      const weights = {
+        [(xy.address: any)]: {toWeight: 1, froWeight: 1},
+        [(zx.address: any)]: {toWeight: 3, froWeight: 1},
+        [(yy.address: any)]: {toWeight: 4, froWeight: 4},
+        [(zy.address: any)]: {toWeight: 16, froWeight: 0},
+      };
+
+      function evaluator({address}) {
+        return weights[(address: any)];
+      }
+
+      const wg = createWeightedGraph(g, evaluator, selfLoopWeight);
+      // Check that our test case is setup correctly
+      expect(wg.nodeTotalOutWeights.get(x)).toBe(xOutWeight);
+      expect(wg.nodeTotalOutWeights.get(y)).toBe(yOutWeight);
+      expect(wg.nodeTotalOutWeights.get(z)).toBe(zOutWeight);
+
+      const selfLoopExpectedConnection = {
+        adjacency: {type: "SYNTHETIC_LOOP"},
+        weight: selfLoopWeight / xOutWeight,
+      };
+      const xyExpectedConnection = {
+        adjacency: {type: "OUT_EDGE", edge: xy},
+        weight: 1 / yOutWeight,
+      };
+      const zxExpectedConnection = {
+        adjacency: {type: "IN_EDGE", edge: zx},
+        weight: 3 / zOutWeight,
+      };
+      const expectedConnections = [
+        selfLoopExpectedConnection,
+        xyExpectedConnection,
+        zxExpectedConnection,
+      ];
+      const canonicalize = (array) => sortBy(array, (x) => JSON.stringify(x));
+      expect(canonicalize(singleNodeConnections(wg, x))).toEqual(
+        canonicalize(expectedConnections)
+      );
     });
   });
 
