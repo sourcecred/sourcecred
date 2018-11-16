@@ -552,8 +552,14 @@ export class Graph {
     options: NeighborsOptions,
     initialModificationCount: ModificationCount
   ): Iterator<Neighbor> {
-    const nodeFilter = (n) => NodeAddress.hasPrefix(n, options.nodePrefix);
-    const edgeFilter = (e) => EdgeAddress.hasPrefix(e, options.edgePrefix);
+    const nodeFilter =
+      options.nodePrefix === NodeAddress.empty
+        ? (_) => true
+        : (n) => NodeAddress.hasPrefix(n, options.nodePrefix);
+    const edgeFilter =
+      options.edgePrefix === EdgeAddress.empty
+        ? (_) => true
+        : (n) => EdgeAddress.hasPrefix(n, options.edgePrefix);
     const direction = options.direction;
     const adjacencies: {edges: Edge[], direction: string}[] = [];
     if (direction === Direction.IN || direction === Direction.ANY) {
