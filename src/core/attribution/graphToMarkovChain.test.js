@@ -2,7 +2,7 @@
 
 import sortBy from "lodash.sortby";
 
-import {EdgeAddress, Graph, NodeAddress} from "../graph";
+import {EdgeAddress, Graph, NodeAddress, Direction} from "../graph";
 import {
   distributionToNodeDistribution,
   createConnections,
@@ -10,8 +10,10 @@ import {
   normalize,
   normalizeNeighbors,
   permute,
+  createWeightedGraph,
 } from "./graphToMarkovChain";
 import * as MapUtil from "../../util/map";
+import * as NullUtil from "../../util/null";
 
 import {advancedGraph} from "../graphTestUtil";
 
@@ -79,6 +81,68 @@ describe("core/attribution/graphToMarkovChain", () => {
       ],
     };
     expect(actual).toEqual(expected);
+  });
+
+  describe("createWeightedGraph", () => {
+    // I made this slightly convoluted evaluator to reduce the liklihood
+    // that tests pass accidentally :)
+    const edgeEvaluator = ({src, dst, address}) => ({
+      toWeight: src.length + address.length,
+      froWeight: dst.length + address.length,
+    });
+    it("keeps a pointer to the same graph", () => {
+      const g = advancedGraph().graph2();
+      const wg = createWeightedGraph(g, edgeEvaluator, 0.01);
+      expect(wg.graph).toBe(g);
+    });
+    it("creates a 1-1 mapping between edge addresses and weights", () => {
+      const g = advancedGraph().graph2();
+      const wg = createWeightedGraph(g, edgeEvaluator, 0.01);
+      let nEdges = 0;
+      for (const e of g.edges()) {
+        nEdges++;
+        const w = edgeEvaluator(e);
+        expect(w).toEqual(wg.edgeWeights.get(e.address));
+      }
+      expect(nEdges).toEqual(wg.edgeWeights.size);
+    });
+    it("passes through the self loop weight", () => {
+      const selfLoopWeight = 0.0707;
+      const wg = createWeightedGraph(
+        advancedGraph().graph2(),
+        edgeEvaluator,
+        selfLoopWeight
+      );
+      expect(selfLoopWeight).toEqual(wg.syntheticLoopWeight);
+    });
+    it("correctly computes nodeTotalWeights", () => {
+      const selfLoopWeight = 0.0707;
+      const wg = createWeightedGraph(
+        advancedGraph().graph2(),
+        edgeEvaluator,
+        selfLoopWeight
+      );
+      for (const node of wg.graph.nodes()) {
+        let outWeight = selfLoopWeight;
+        const options = {
+          direction: Direction.ANY,
+          nodePrefix: NodeAddress.empty,
+          edgePrefix: EdgeAddress.empty,
+        };
+        for (const {edge} of wg.graph.neighbors(node, options)) {
+          const {toWeight, froWeight} = NullUtil.get(
+            wg.edgeWeights.get(edge.address)
+          );
+          if (edge.src === node) {
+            outWeight += toWeight;
+          }
+          if (edge.dst === node) {
+            outWeight += froWeight;
+          }
+        }
+        expect(wg.nodeTotalOutWeights.get(node)).toEqual(outWeight);
+      }
+    });
   });
 
   describe("createConnections", () => {

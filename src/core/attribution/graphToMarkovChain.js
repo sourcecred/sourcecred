@@ -1,6 +1,11 @@
 // @flow
 
-import {type Edge, type Graph, type NodeAddressT} from "../graph";
+import {
+  type Edge,
+  type Graph,
+  type NodeAddressT,
+  type EdgeAddressT,
+} from "../graph";
 import type {Distribution, SparseMarkovChain} from "./markovChain";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
@@ -50,6 +55,61 @@ export type EdgeWeight = {|
   +froWeight: number, // weight from dst to src
 |};
 
+/*
+ * WeightedGraph is a data structure that contains the information
+ * we need to run PageRank on a graph.
+ *
+ * Every edge is associated with an un-normalized EdgeWeight, where by
+ * "un-normalized" we mean the edge weights out of any given node need not sum
+ * to 1. To make normalizing the graph convenient, we also store the total out
+ * weight for every node.
+ *
+ * The graph as a whole has a syntheticLoopWeight, which is a tuning parameter
+ * that is necessary so that even isolated nodes have at least one
+ * out-connection. (Every node is given a synthetic loop, pointing back to
+ * itself, with this weight.)
+ *
+ * While it is not verified at the type level, it is required that a weighted
+ * graph have a bijective mapping between edge weights in the `edgeWeights`
+ * map, and edge addresses in the graph. Similarly, there must be a bijective
+ * mapping between the nodes in the graph and the nodeTotalOutWeights.
+ */
+export type WeightedGraph = {|
+  +graph: Graph,
+  +edgeWeights: Map<EdgeAddressT, EdgeWeight>,
+  +nodeTotalOutWeights: Map<NodeAddressT, number>,
+  +syntheticLoopWeight: number,
+|};
+
+export function createWeightedGraph(
+  graph: Graph,
+  edgeEvaluator: (Edge) => EdgeWeight,
+  syntheticLoopWeight: number
+): WeightedGraph {
+  const edgeWeights = new Map();
+  const nodeTotalOutWeights = new Map();
+  for (const n of graph.nodes()) {
+    nodeTotalOutWeights.set(n, syntheticLoopWeight);
+  }
+  for (const e of graph.edges()) {
+    const weights = edgeEvaluator(e);
+    const newSrcOutWeight =
+      NullUtil.get(nodeTotalOutWeights.get(e.src)) + weights.toWeight;
+    nodeTotalOutWeights.set(e.src, newSrcOutWeight);
+    const newDstOutWeight =
+      NullUtil.get(nodeTotalOutWeights.get(e.dst)) + weights.froWeight;
+    nodeTotalOutWeights.set(e.dst, newDstOutWeight);
+    edgeWeights.set(e.address, weights);
+  }
+  return {
+    graph,
+    edgeWeights,
+    nodeTotalOutWeights,
+    syntheticLoopWeight,
+  };
+}
+
+// TODO(#1004, @decentralion): Refactor this function to use WeightedGraph
 export function createConnections(
   graph: Graph,
   edgeWeight: (Edge) => EdgeWeight,
