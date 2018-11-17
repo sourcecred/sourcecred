@@ -44,8 +44,19 @@ export function decompose(
         }
       ),
       (x) => -x.connectionScore,
-      // The following should be called rarely and on small objects.
-      (x) => JSON.stringify(x.connection.adjacency)
+      (x) => x.connection.adjacency.type,
+      (x) => {
+        switch (x.connection.adjacency.type) {
+          case "IN_EDGE":
+            return x.connection.adjacency.edge.address;
+          case "OUT_EDGE":
+            return x.connection.adjacency.edge.address;
+          case "SYNTHETIC_LOOP":
+            return "";
+          default:
+            throw new Error((x.connection.adjacency.type: empty));
+        }
+      }
     );
     return {score, scoredConnections};
   });
