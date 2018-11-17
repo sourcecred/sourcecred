@@ -68,7 +68,24 @@ export opaque type GraphJSON = Compatible<{|
 
 type ModificationCount = number;
 
-export class Graph {
+// For clients that need to be able to read the state of a graph,
+// without ever mutating it.
+export interface ReadOnlyGraph {
+  hasNode(a: NodeAddressT): boolean;
+  nodes(options?: {|+prefix: NodeAddressT|}): Iterator<NodeAddressT>;
+  hasEdge(address: EdgeAddressT): boolean;
+  edge(address: EdgeAddressT): ?Edge;
+  edges(options?: EdgesOptions): Iterator<Edge>;
+  neighbors(node: NodeAddressT, options: NeighborsOptions): Iterator<Neighbor>;
+  // TODO(@decentralion): Consider adding `equals` to this interface
+  // (caveat: Need to consider how this works if the other Graph is a
+  // different implementation)
+  // TODO(@decentralion): Consider adding `toJSON` to this interface
+  // (caveat: need to consider how this works if the other Graph has a
+  // richer JSON representation)
+}
+
+export class Graph implements ReadOnlyGraph {
   _nodes: Set<NodeAddressT>;
   _edges: Map<EdgeAddressT, Edge>;
   _inEdges: Map<NodeAddressT, Edge[]>;
