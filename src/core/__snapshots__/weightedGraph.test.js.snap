@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`core/weightedGraph to/from JSON snapshots on a simple graph 1`] = `
+Array [
+  Object {
+    "type": "sourcecred/weightedGraph",
+    "version": "0.1.0",
+  },
+  Object {
+    "graph": Array [
+      Object {
+        "type": "sourcecred/graph",
+        "version": "0.4.0",
+      },
+      Object {
+        "edges": Array [
+          Object {
+            "address": Array [
+              "edge",
+            ],
+            "dstIndex": 0,
+            "srcIndex": 1,
+          },
+        ],
+        "nodes": Array [
+          Array [
+            "dst",
+          ],
+          Array [
+            "src",
+          ],
+        ],
+      },
+    ],
+    "sortedEdgeWeights": Array [
+      Object {
+        "froWeight": 4,
+        "toWeight": 3,
+      },
+    ],
+    "syntheticLoopWeight": 1,
+  },
+]
+`;
