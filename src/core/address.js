@@ -126,9 +126,11 @@ export function makeAddressModule(options: Options): AddressModule<string> {
   );
 
   function assertValid(address: Address, what?: string): void {
-    // TODO(perf): If this function becomes a bottleneck, consider
-    // omitting it entirely in production. If this is undesirable, a
-    // number of micro-optimizations can be made.
+    // istanbul ignore if
+    if (process.env.NODE_ENV !== "test") {
+      // Catching invalid addresses in test code should be sufficient
+      return;
+    }
     const prefix = what == null ? "" : `${what}: `;
     if (address == null) {
       throw new Error(prefix + `expected ${name}, got: ${String(address)}`);
@@ -160,9 +162,11 @@ export function makeAddressModule(options: Options): AddressModule<string> {
     parts: $ReadOnlyArray<string>,
     what?: string
   ): void {
-    // TODO(perf): If this function becomes a bottleneck, consider
-    // omitting it entirely in production. If this is undesirable, a
-    // number of micro-optimizations can be made.
+    // istanbul ignore if
+    if (process.env.NODE_ENV !== "test") {
+      // Catching invalid parts in test code should be sufficient
+      return;
+    }
     const prefix = what == null ? "" : `${what}: `;
     if (parts == null) {
       throw new Error(
