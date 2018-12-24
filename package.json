@@ -71,7 +71,7 @@
     "unit": "BABEL_ENV=test NODE_ENV=test jest --env=jsdom",
     "sharness": "make -sC ./sharness prove PROVE_OPTS=-f TEST_OPTS='--chain-lint'",
     "sharness-full": "make -sC ./sharness prove PROVE_OPTS=-vf TEST_OPTS='-v --chain-lint --long'",
-    "coverage": "npm run unit -- --coverage",
+    "coverage": "yarn run unit --coverage",
     "flow": "flow",
     "lint": "eslint src config --max-warnings 0"
   },

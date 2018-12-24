@@ -54,40 +54,31 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
     },
     {
       id: "check-pretty",
-      cmd: ["npm", "run", "--silent", "check-pretty"],
+      cmd: ["yarn", "run", "--silent", "check-pretty"],
       deps: [],
     },
     {
       id: "lint",
-      cmd: ["npm", "run", "--silent", "lint"],
+      cmd: ["yarn", "run", "--silent", "lint"],
       deps: [],
     },
     {
       id: "flow",
-      cmd: [
-        "npm",
-        "run",
-        "--silent",
-        "flow",
-        "--",
-        "--quiet",
-        "--max-warnings=0",
-      ],
+      cmd: ["yarn", "run", "--silent", "flow", "--quiet", "--max-warnings=0"],
       deps: [],
     },
     {
       id: "unit",
-      cmd: ["npm", "run", "--silent", "unit", "--", "--ci", "--maxWorkers=4"],
+      cmd: ["yarn", "run", "--silent", "unit", "--ci", "--maxWorkers=4"],
       deps: [],
     },
     {
       id: "backend",
       cmd: [
-        "npm",
+        "yarn",
         "run",
         "--silent",
         "backend",
-        "--",
         "--output-path",
         backendOutput,
       ],
@@ -96,7 +87,7 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
     {
       id: {BASIC: "sharness", FULL: "sharness-full"}[mode],
       cmd: withSourcecredBinEnv([
-        "npm",
+        "yarn",
         "run",
         "--silent",
         {BASIC: "sharness", FULL: "sharness-full"}[mode],
