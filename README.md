@@ -1,31 +1,31 @@
 # [SourceCred](https://sourcecred.io)
 
 [![Build Status](https://circleci.com/gh/sourcecred/sourcecred.svg?style=svg)](https://circleci.com/gh/sourcecred/sourcecred)
-[![Discourse topics](https://img.shields.io/discourse/https/discuss.sourcecred.io/topics.svg)](discuss.sourcecred.io)
 [![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
 
-SourceCred creates reputation networks for open-source projects.
-Any open-source project can create its own _cred_, which is a reputational metric showing how much credit contributors deserve for helping the project.
-To compute cred, we organize a project’s contributions into a graph, whose edges connect contributions to each other and to contributors.
-We then run PageRank on that graph.
+SourceCred is a tool for quantifying the value that people have contributed to
+open-source projects. It assigns a quantitative score called 'cred' to every
+contribution, based on how that contribution was depended on or referenced by
+other work in the project. We believe that creating such a metric is a vital
+step towards making open-source sustainable, and to paying open-source
+contributors. You can read more about [our mission], or check out the
+[SourceCred prototype].
 
-To learn more about SourceCred’s vision and values, please check out [our website] and our [forum].
-One good forum post to start with is [A Gentle Introduction to Cred].
+[our mission]: https://github.com/sourcecred/mission/blob/master/overview.md
+[SourceCred prototype]: https://sourcecred.io/prototype
 
-For an example of SourceCred in action, you can see SourceCred’s own [prototype cred attribution][prototype].
+This repository contains the SourceCred codebase. For a guided tour of the
+codebase, check out our [code walkthrough on YouTube]. You can also find our
+project planning and goal setting in the [sourcecred/mission] repository.
 
-[our website]: https://sourcecred.io/
-[prototype]: https://sourcecred.io/prototype/
-[A Gentle Introduction to Cred]: https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20
-
-## Current Status
-
-We have a [prototype] that can generate a cred attribution based on GitHub interactions (issues, pull requests, comments, references, etc.).
-We’re working on adding more information to the prototype, such as tracking modifications to individual files, source-code analysis, GitHub reactions, and more.
+[code walkthrough on YouTube]: https://www.youtube.com/watch?v=pt8KawL24wU
+[sourcecred/mission]: https://github.com/sourcecred/mission
 
 ### Running the Prototype
 
-If you’d like to try it out, you can run a local copy of SourceCred as follows.
+You can run SourceCred out on any GitHub repository!
+To run a local copy, just follow these steps.
+
 First, make sure that you have the following dependencies:
 
   - Install [Node] (tested on v8.x.x).
@@ -74,25 +74,29 @@ For instance, the invocation
 node bin/sourcecred.js load ipfs/js-ipfs ipfs/go-ipfs --output ipfs/meta-ipfs
 ```
 
-will create a graph called `ipfs/meta-ipfs` in the cred explorer, containing the combined contents of the js-ipfs and go-ipfs repositories.
+will create a graph called `ipfs/meta-ipfs` in the cred explorer, containing
+the combined contents of the js-ipfs and go-ipfs repositories.
 
 ## Early Adopters
 
 We’re looking for projects who want to be early adopters of SourceCred!
-If you’re a maintainer of an open-source project and would like to start using SourceCred, please reach out to us on our [Discord] or our [forum].
+
+If you’re a maintainer of an open-source project and would like to start using
+SourceCred, please reach out to us on our [Discord].
 
 ## Contributing
 
 We’d love to accept your contributions!
-You can reach out to us by posting on our [forum], or chatting with us on [Discord].
+You can reach out to us by visting our [Discord].
 We'd be happy to help you get started and show you around the codebase.
-Please also take a look at our [contributing guide].
+Please also take a look at our [contributing guide], and our [guided tour] of
+the codebase.
 
 If you’re looking for a place to start, we’ve tagged some issues [Contributions Welcome].
 
-[forum]: https://discuss.sourcecred.io
 [Discord]: https://discord.gg/tsBTgc9
 [contributing guide]: https://github.com/sourcecred/sourcecred/blob/master/CONTRIBUTING.md
+[guided tour]: https://www.youtube.com/watch?v=pt8KawL24wU
 [Contributions Welcome]: https://github.com/SourceCred/SourceCred/issues?q=is%3Aopen+is%3Aissue+label%3A%22contributions+welcome%22
 
 ## License
