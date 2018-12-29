@@ -7,6 +7,80 @@ import {makeAddressModule, type AddressModule} from "./address";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import * as NullUtil from "../util/null";
 
+/**
+ * This module contains the Graph, which is one of the most fundamental pieces
+ * of SourceCred. SourceCred uses this graph to model all of the contributions
+ * that make up a project, and the relationships between those contributions.
+ *
+ * The Graph serves a simple function: it keeps track of which Nodes exist, and
+ * what Edges join those nodes to each other. Nodes and Edges are both identified
+ * by Addresses; specifically, `NodeAddressT`s and `EdgeAddressT`s.
+ *
+ * In both cases, addresses are modeled as arrays of strings. For example,
+ * you might want to give an address to your favorite node. You can do so as
+ * follows:
+ *
+ * const myAddress: NodeAddressT = NodeAddress.fromParts(["my", "favorite"])
+ *
+ * Edge Addresses are quite similar, except you use the EdgeAddress module.
+ *
+ * We model addresses as arrays of strings so that plugins can apply
+ * hierarchical namespacing for the address. In general, for any address, the
+ * first piece should be the name of the organization that owns the plugin, and
+ * the second piece should be the name of the plugin. Pieces thereafter are
+ * namespaced by the plugin's internal logic. For example, SourceCred has a
+ * Git plugin, and that plugin produces addresses like
+ * ["sourcecred", "git", "commit", "9cba0e9e212a287ce26e8d7c2d273e1025c9f9bf"].
+ *
+ * This enables "prefix matching" for finding only certain types of nodes. For
+ * example, if we wanted to find every Git commit in the graph, we
+ * could use the following code:
+ *
+ * const commitPrefix = NodeAddress.fromParts(["sourcecred", "git", "commit"])
+ * const commitNodes = `graph.nodes({prefix: commitPrefix})`
+ *
+ * Under the hood, addresses are represented as strings. Basically, we
+ * concatenate the pieces of the address together with the null seperator, and
+ * prepend a nonce ("E" or "N") to distinguish node and edge addresses. So the
+ * address for the node with pieces ["my", "favorite"] would be
+ * "N\0my\0favorite". Representing addreses as strings means that we can use
+ * them as keys for maps. To see the implementation, and the full address model
+ * API, check out src/core/address.js.
+ *
+ * In the case of a node, the address is all the graph knows about. If you have
+ * any other metadata you want to store about the node—like its commit message
+ * or its favorite color—you can store that in another database. The Graph is
+ * just a graph, not a key value store.
+ *
+ * Edges need a little more data, since the graph needs to know what nodes the
+ * edge connects. Each edge is an object with `src` and `dst` fields which are
+ * both NodeAddressT, and an address which is EdgeAddressT.
+ * Here's a toy example:
+ *
+ * const pr = NodeAddress.fromParts(["pull_request", "1"])
+ * const me = NodeAddress.fromParts(["user", "decentralion"])
+ * const authored = EdgeAddress.fromParts(["authored", "pull_request", "1"])
+ * const edge = {src: me, dst: pr, address: authored}
+ *
+ * Creating a graph is as simple as invoking the constructor and adding nodes and edges:
+ *
+ * const g = new Graph()
+ * g.addNode(pr);
+ * g.addNode(me);
+ * g.addEdge(edge);
+ *
+ * Graph has a number of accessor methods:
+ * - `hasNode` to check if a node is in the Graph
+ * - `nodes` to iterate over every node
+ * - `hasEdge` to check if an edge address is in the Graph
+ * - `edge` to retrieve an edge by its address
+ * - `edges` to query over every node
+ * - `neighbors` to find all the edges and nodes adjacent to a node
+ *    (also supports filtering by direction, by node prefix, or edge prefix)
+ *
+ * The Graph also has a few other convenience methods, like toJSON/fromJSON
+ * for serialization, and `Graph.merge` for combining multiple graphs.
+ */
 export opaque type NodeAddressT: string = string;
 export opaque type EdgeAddressT: string = string;
 export const NodeAddress: AddressModule<NodeAddressT> = (makeAddressModule({
@@ -20,6 +94,9 @@ export const EdgeAddress: AddressModule<EdgeAddressT> = (makeAddressModule({
   otherNonces: new Map().set("N", "NodeAddress"),
 }): AddressModule<string>);
 
+/**
+ * Represents an individual Edge in the Graph.
+ */
 export type Edge = {|
   +address: EdgeAddressT,
   +src: NodeAddressT,
@@ -122,6 +199,11 @@ export class Graph {
     this._maybeCheckInvariants();
   }
 
+  /**
+   * Adds a new NodeAddressT to the Graph.
+   *
+   * Adding the same node multiple times is safe.
+   */
   addNode(a: NodeAddressT): this {
     NodeAddress.assertValid(a);
     if (!this._nodes.has(a)) {
@@ -134,6 +216,15 @@ export class Graph {
     return this;
   }
 
+  /**
+   * Remove a NodeAddressT from the Graph.
+   *
+   * If the node is incident to any edges, those edges must be removed
+   * before removing the node. Attempting to remove a node that is incident
+   * to some edges will throw an error.
+   *
+   * Attempting to remove a node that is not in the graph is safe.
+   */
   removeNode(a: NodeAddressT): this {
     NodeAddress.assertValid(a);
     const existingInEdges = this._inEdges.get(a) || [];
@@ -156,6 +247,9 @@ export class Graph {
     return this;
   }
 
+  /**
+   * Test whether a given NodeAddressT is present in the Graph.
+   */
   hasNode(a: NodeAddressT): boolean {
     NodeAddress.assertValid(a);
     const result = this._nodes.has(a);
@@ -163,6 +257,13 @@ export class Graph {
     return result;
   }
 
+  /**
+   * Returns an interator over all of the NodeAddressTs in the Graph.
+   *
+   * Optionally, the caller can provide a node prefix as a NodeAddressT. If
+   * provided, the iterator will only contain NodeAdressTs matching that
+   * prefix.
+   */
   nodes(options?: {|+prefix: NodeAddressT|}): Iterator<NodeAddressT> {
     const prefix = options != null ? options.prefix : NodeAddress.empty;
     if (prefix == null) {
@@ -188,6 +289,15 @@ export class Graph {
     this._maybeCheckInvariants();
   }
 
+  /**
+   * Add an Edge to the graph.
+   *
+   * The src and dst of the edge must already be in the graph. Attempting
+   * to add an edge whose src or dst are not in the graph will result in an
+   * error being thrown.
+   *
+   * Adding the same edge multiple times is safe.
+   */
   addEdge(edge: Edge): this {
     NodeAddress.assertValid(edge.src, "edge.src");
     NodeAddress.assertValid(edge.dst, "edge.dst");
@@ -225,6 +335,12 @@ export class Graph {
     return this;
   }
 
+  /**
+   * Remove the edge matching a given EdgeAddressT from the graph.
+   *
+   * Calling removeEdge on an address that does not correspond to any edge in
+   * the graph is safe.
+   */
   removeEdge(address: EdgeAddressT): this {
     EdgeAddress.assertValid(address);
     const edge = this._edges.get(address);
@@ -251,6 +367,9 @@ export class Graph {
     return this;
   }
 
+  /**
+   * Checks whether any edge matches the given EdgeAddressT.
+   */
   hasEdge(address: EdgeAddressT): boolean {
     EdgeAddress.assertValid(address);
     const result = this._edges.has(address);
@@ -258,6 +377,10 @@ export class Graph {
     return result;
   }
 
+  /**
+   * Returns the Edge matching a given EdgeAddressT, if such an edge exists, or
+   * null otherwise.
+   */
   edge(address: EdgeAddressT): ?Edge {
     EdgeAddress.assertValid(address);
     const result = this._edges.get(address);
@@ -265,6 +388,22 @@ export class Graph {
     return result;
   }
 
+  /**
+   * Returns an iterator over every Edge in the Graph.
+   *
+   * The caller may pass optional arguments to filter by the
+   * address prefixes for the edge address, the edge src, or the edge dst.
+   *
+   * For example, suppose you have address prefixes AUTHORS_EDGE and
+   * USER_NODE, and want to find every edge that represents authorship
+   * by a user. Then you could call:
+   *
+   * graph.edges({
+   *  addressPrefix: AUTHORS_EDGE,
+   *  srcPrefix: USER_NODE,
+   *  dstPrefix: NodeAddress.empty,
+   * });
+   */
   edges(options?: EdgesOptions): Iterator<Edge> {
     if (options == null) {
       options = {
@@ -308,6 +447,27 @@ export class Graph {
     this._maybeCheckInvariants();
   }
 
+  /**
+   * Finds all of the neighbors of a chosen node.
+   *
+   * A `neighbor` is an object {node: NodeAddressT, edge: Edge} that represents
+   * one incident connection to the chosen node.
+   *
+   * Callers to `neighbors` must provide `NeighborsOptions` as follows:
+   *
+   * - direction: one of Direction.IN, direction.OUT, or Direction.ANY.
+   *   If IN, then it will find nodes where the chosen node is the dst.
+   *   If OUT, then it will find nodes where the chosen node is the src.
+   *   If ANY, then it will find nodes whether the chosen node is src or dst.
+   *
+   * - nodePrefix: A NodeAddressT to use as a prefix filter for the adjacent node.
+   *   If you want all nodes, use `NodeAddress`.empty.
+   *
+   * - edgePrefix: An EdgeAddressT to use as a prefix filter for the edge.
+   *   If you want all edges, use `EdgeAddress`.empty.
+   *
+   * Calling `neighbors` on a node that is not present in the graph is an error.
+   */
   neighbors(node: NodeAddressT, options: NeighborsOptions): Iterator<Neighbor> {
     if (!this.hasNode(node)) {
       throw new Error(`Node does not exist: ${NodeAddress.toString(node)}`);
@@ -354,6 +514,14 @@ export class Graph {
     this._maybeCheckInvariants();
   }
 
+  /**
+   * Checks whether this Graph is equal to another Graph.
+   *
+   * Two Graphs are considered equal if they have identical sets of nodes
+   * and edges.
+   *
+   * Runs in O(n + e) where n is the number of nodes and e is the number of edges.
+   */
   equals(that: Graph): boolean {
     if (!(that instanceof Graph)) {
       throw new Error(`Expected Graph, got ${String(that)}`);
@@ -365,12 +533,29 @@ export class Graph {
     return result;
   }
 
+  /**
+   * Produce a copy of a Graph.
+   *
+   * The copy is equal to the original, but distinct, so that they may be
+   * modified independently.
+   */
   copy(): Graph {
     const result = Graph.merge([this]);
     this._maybeCheckInvariants();
     return result;
   }
 
+  /**
+   * Serialize a Graph into JSON.
+   *
+   * We store the nodes in sorted order. This allows us to serialize the edges
+   * in an indexed representation, where each edge has an address and then
+   * represents its src and dst by sorted node indices.
+   *
+   * This greatly reduces the size of the representation, and means that this
+   * method runs in O(n log n + e) where n is the number of nodes and e is the
+   * number of edges.
+   */
   toJSON(): GraphJSON {
     const sortedNodes = Array.from(this.nodes()).sort();
     const nodeToSortedIndex = new Map();
@@ -392,6 +577,9 @@ export class Graph {
     return result;
   }
 
+  /**
+   * Deserializes a GraphJSON into a new Graph.
+   */
   static fromJSON(json: GraphJSON): Graph {
     const {nodes: nodesJSON, edges} = fromCompat(COMPAT_INFO, json);
     const result = new Graph();
@@ -405,6 +593,18 @@ export class Graph {
     return result;
   }
 
+  /**
+   * Allows merging multiple graphs.
+   *
+   * Example usage:
+   * const g1 = new Graph().addNode(a).addNode(b).addEdge(x);
+   * const g2 = new Graph().addNode(c);
+   * const g3 = Graph.merge([g1, g2]);
+   *
+   * The new Graph will contain the union of all the nodes and edges in each of
+   * the merged graphs. It is a separate instance and may be mutated
+   * independently.
+   */
   static merge(graphs: Iterable<Graph>): Graph {
     const result = new Graph();
     for (const graph of graphs) {
@@ -589,6 +789,9 @@ export class Graph {
   }
 }
 
+/**
+ * Conert an edge into a human readable string.
+ */
 export function edgeToString(edge: Edge): string {
   const address = EdgeAddress.toString(edge.address);
   const src = NodeAddress.toString(edge.src);
