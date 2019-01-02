@@ -48,7 +48,7 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       navTitle: "Prototype",
     },
     ...registry.map((entry) => ({
-      path: `/prototypes/${entry.repoId.owner}/${entry.repoId.name}/`,
+      path: `/prototype/${entry.repoId.owner}/${entry.repoId.name}/`,
       contents: {
         type: "PAGE",
         component: () => require("./ProjectPage").default(entry.repoId),
