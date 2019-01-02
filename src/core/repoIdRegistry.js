@@ -14,6 +14,7 @@ const REPO_ID_REGISTRY_COMPAT = {type: "REPO_ID_REGISTRY", version: "0.2.0"};
 
 export type RegistryEntry = {|
   +repoId: RepoId,
+  +timestamp: Date,
 |};
 export type RepoIdRegistry = $ReadOnlyArray<RegistryEntry>;
 export type RepoIdRegistryJSON = Compatible<RepoIdRegistry>;

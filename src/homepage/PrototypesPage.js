@@ -29,6 +29,7 @@ export default function makePrototypesPage(
                 <Link to={`/prototypes/${x.repoId.owner}/${x.repoId.name}/`}>
                   {`${x.repoId.owner}/${x.repoId.name}`}
                 </Link>
+                <span>{` last updated on ${x.timestamp.toString()}`}</span>
               </li>
             ))}
           </ul>

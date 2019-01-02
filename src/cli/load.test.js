@@ -18,6 +18,8 @@ jest.mock("../plugins/git/loadGitData", () => ({
   loadGitData: jest.fn(),
 }));
 
+export const fakeTimestamp = new Date();
+
 type JestMockFn = $Call<typeof jest.fn>;
 const execDependencyGraph: JestMockFn = (require("../tools/execDependencyGraph"): any);
 const loadGithubData: JestMockFn = (require("../plugins/github/loadGithubData")
@@ -430,7 +432,7 @@ describe("cli/load", () => {
           .toString();
         const registry = RepoIdRegistry.fromJSON(JSON.parse(blob));
         const expected: RepoIdRegistry.RepoIdRegistry = [
-          {repoId: stringToRepoId("foo/combined")},
+          {repoId: stringToRepoId("foo/combined"), timestamp: fakeTimestamp},
         ];
         expect(registry).toEqual(expected);
       });
@@ -441,8 +443,14 @@ describe("cli/load", () => {
           path.join(sourcecredDirectory, RepoIdRegistry.REPO_ID_REGISTRY_FILE),
           JSON.stringify(
             RepoIdRegistry.toJSON([
-              {repoId: stringToRepoId("previous/one")},
-              {repoId: stringToRepoId("previous/two")},
+              {
+                repoId: stringToRepoId("previous/one"),
+                timestamp: fakeTimestamp,
+              },
+              {
+                repoId: stringToRepoId("previous/two"),
+                timestamp: fakeTimestamp,
+              },
             ])
           )
         );
@@ -455,9 +463,9 @@ describe("cli/load", () => {
           .toString();
         const registry = RepoIdRegistry.fromJSON(JSON.parse(blob));
         const expected: RepoIdRegistry.RepoIdRegistry = [
-          {repoId: stringToRepoId("previous/one")},
-          {repoId: stringToRepoId("previous/two")},
-          {repoId: stringToRepoId("foo/combined")},
+          {repoId: stringToRepoId("previous/one"), timestamp: fakeTimestamp},
+          {repoId: stringToRepoId("previous/two"), timestamp: fakeTimestamp},
+          {repoId: stringToRepoId("foo/combined"), timestamp: fakeTimestamp},
         ];
         expect(registry).toEqual(expected);
       });
