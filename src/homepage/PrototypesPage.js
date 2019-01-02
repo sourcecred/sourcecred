@@ -10,6 +10,20 @@ import type {Assets} from "../webutil/assets";
 export default function makePrototypesPage(
   registry: RepoIdRegistry
 ): ComponentType<{|+assets: Assets|}> {
+  const listRegistry = (
+    <ul>
+      {registry.map((x) => (
+        <li key={stringify(x)}>
+          <Link to={`/prototypes/${x.repoId.owner}/${x.repoId.name}/`}>
+            {`${x.repoId.owner}/${x.repoId.name}`}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+  const displayWarning = (
+      <p>You haven't loaded any data into the registry yet!</p>
+  );
   return class PrototypesPage extends React.Component<{|+assets: Assets|}> {
     render() {
       return (
@@ -23,15 +37,7 @@ export default function makePrototypesPage(
           }}
         >
           <p>Select a project:</p>
-          <ul>
-            {registry.map((x) => (
-              <li key={stringify(x)}>
-                <Link to={`/prototypes/${x.repoId.owner}/${x.repoId.name}/`}>
-                  {`${x.repoId.owner}/${x.repoId.name}`}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {registry.length !== 0 ? listRegistry : displayWarning}
         </div>
       );
     }
