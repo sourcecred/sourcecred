@@ -12,7 +12,7 @@ import {FactorioStaticAdapter} from "../plugins/demo/appAdapter";
 import {defaultWeightsForAdapter} from "./weights/weights";
 
 import {PagerankTable} from "./pagerankTable/Table";
-import {createApp, LoadingIndicator} from "./App";
+import {createApp, LoadingIndicator, ProjectDetail} from "./App";
 import {Prefix as GithubPrefix} from "../plugins/github/nodes";
 
 require("../webutil/testUtil").configureEnzyme();
@@ -109,6 +109,22 @@ describe("explorer/App", () => {
     );
     expect(link).toHaveLength(1);
     expect(link.prop("href")).toMatch(/https?:\/\//);
+  });
+
+  it("instantiates a ProjectDetail component with correct props", () => {
+    const {el} = example();
+    const projectDetail = el.find(ProjectDetail);
+    const correctProps = {repoId: makeRepoId("foo", "bar")};
+    expect(projectDetail.props()).toEqual(correctProps);
+  });
+
+  it("ProjectDetail component renders repoId correctly", () => {
+    const repoId = makeRepoId("foo", "bar");
+    const projectDetail = shallow(<ProjectDetail repoId={repoId} />);
+    const title = projectDetail.findWhere(
+      (p) => p.is("p") && p.text() === "foo/bar"
+    );
+    expect(title).toHaveLength(1);
   });
 
   describe("when in state:", () => {
