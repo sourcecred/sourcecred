@@ -8,7 +8,10 @@ main();
 
 function main() {
   const options = parseArgs();
-  execDependencyGraph(makeTasks(options.mode)).then(({success}) => {
+  const printVerboseResults = options.mode === "FULL";
+  const runOptions = {printVerboseResults};
+  const tasks = makeTasks(options.mode);
+  execDependencyGraph(tasks, runOptions).then(({success}) => {
     process.exitCode = success ? 0 : 1;
   });
 }
