@@ -81,6 +81,11 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       deps: [],
     },
     {
+      id: "check-gnu-coreutils",
+      cmd: ["./scripts/check-gnu-coreutils.sh"],
+      deps: [],
+    },
+    {
       id: "backend",
       cmd: [
         "npm",
@@ -101,7 +106,7 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
         "--silent",
         {BASIC: "sharness", FULL: "sharness-full"}[mode],
       ]),
-      deps: ["backend"],
+      deps: ["backend", "check-gnu-coreutils"],
     },
   ];
   const extraTasks = [
