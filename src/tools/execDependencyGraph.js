@@ -37,6 +37,9 @@ type RunOptions = {|
   +taskLaunchLabel?: string,
   +overallPassLabel?: string,
   +overallFailLabel?: string,
+  // Determines whether we print the contents of stdout and stderr for
+  // all tasks (printVerboseResults === true) or just for failing tasks.
+  +printVerboseResults?: boolean,
 |};
 */
 
@@ -46,6 +49,7 @@ const defaultOptions = {
   taskLaunchLabel: " GO ",
   overallPassLabel: "SUCCESS",
   overallFailLabel: "FAILURE",
+  printVerboseResults: false,
 };
 
 module.exports = async function execDependencyGraph(
@@ -179,10 +183,12 @@ module.exports = async function execDependencyGraph(
     });
   }
 
-  printSection("Full results");
-  for (const task of tasks) {
-    const result = completedTasks.get(task.id);
-    displayResult(task.id, result, "FULL");
+  if (fullOptions.printVerboseResults) {
+    printSection("Full results");
+    for (const task of tasks) {
+      const result = completedTasks.get(task.id);
+      displayResult(task.id, result, "FULL");
+    }
   }
 
   printSection("Overview");
