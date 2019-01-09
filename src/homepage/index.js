@@ -8,8 +8,6 @@ import createRelativeHistory from "../webutil/createRelativeHistory";
 import App from "./App";
 import createRouteDataFromEnvironment from "./createRouteDataFromEnvironment";
 
-import "./index.css";
-
 const target = document.getElementById("root");
 if (target == null) {
   throw new Error("Unable to find root element!");
