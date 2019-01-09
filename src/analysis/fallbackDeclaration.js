@@ -13,6 +13,8 @@ export const fallbackNodeType: NodeType = Object.freeze({
   pluralName: "nodes",
   prefix: NodeAddress.empty,
   defaultWeight: 1,
+  description:
+    "The fallback NodeType for nodes which don't have any other type",
 });
 
 export const fallbackEdgeType: EdgeType = Object.freeze({

@@ -1,14 +1,16 @@
 // @flow
 
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
+import type {NodeType} from "../../analysis/types";
 import * as N from "./nodes";
 import * as E from "./edges";
 
-const commitNodeType = Object.freeze({
+const commitNodeType: NodeType = Object.freeze({
   name: "Commit",
   pluralName: "Commits",
   prefix: N.Prefix.commit,
   defaultWeight: 2,
+  description: "This a NodeType representing a git commit",
 });
 
 const hasParentEdgeType = Object.freeze({

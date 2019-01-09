@@ -15,4 +15,7 @@ export type NodeType = {|
   +pluralName: string,
   +prefix: NodeAddressT,
   +defaultWeight: number,
+  // The '+description' property should be a several word description that makes
+  // it clear to a user what each NodeType does
+  +description: string,
 |};

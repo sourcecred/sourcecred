@@ -11,6 +11,7 @@ export const inserterNodeType: NodeType = Object.freeze({
   pluralName: "inserters",
   prefix: NodeAddress.fromParts(["factorio", "inserter"]),
   defaultWeight: 1,
+  description: "Nodes for Factorio inserter objects in demo plugin",
 });
 
 export const machineNodeType: NodeType = Object.freeze({
@@ -18,6 +19,7 @@ export const machineNodeType: NodeType = Object.freeze({
   pluralName: "machines",
   prefix: NodeAddress.fromParts(["factorio", "machine"]),
   defaultWeight: 2,
+  description: "Nodes for Factorio inserter objects in demo plugin",
 });
 
 export const assemblesEdgeType: EdgeType = Object.freeze({
