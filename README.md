@@ -51,6 +51,7 @@ yarn backend
 export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 node bin/sourcecred.js load REPO_OWNER/REPO_NAME
 # this loads sourcecred data for a particular repository
+# it can take a few mins to run and will exit when finished
 yarn start
 # then navigate to localhost:8080 in your browser
 ```
