@@ -149,7 +149,7 @@ describe("explorer/pagerankTable/Aggregation", () => {
       pluralName: "whatDoth",
       defaultWeight: 1,
       prefix: NodeAddress.empty,
-      description: "Lucy In The Sky With Diamonds",
+      description: "NodeType for the AggregationView",
     };
     const edgeType: EdgeType = {
       forwardName: "marsellus",

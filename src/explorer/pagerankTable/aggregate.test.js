@@ -16,40 +16,40 @@ describe("explorer/pagerankTable/aggregate", () => {
   // from the hand-maintained connections and types, and instead use the demo
   // adadpters from app/adapters/demoAdapters
   function example() {
-    const nodes: {[string]: NodeAddressT} = {
+    const nodes: {+[string]: NodeAddressT} = {
       root: NodeAddress.fromParts(["root"]),
       zap: NodeAddress.fromParts(["zap"]),
       kif: NodeAddress.fromParts(["kif"]),
     };
 
-    const nodeTypes: {[string]: NodeType} = {
+    const nodeTypes: {+[string]: NodeType} = {
       root: {
         name: "root",
         pluralName: "roots",
         prefix: nodes.root,
         defaultWeight: 0,
-        description: "This NodeType corresponds to one node with address root",
+        description: "NodeType for the address named 'root'",
       },
       zap: {
         name: "zap",
         pluralName: "zaps",
         prefix: nodes.zap,
         defaultWeight: 0,
-        description: "This NodeType corresponds to one node with address zap",
+        description: "NodeType for the address named 'zap'",
       },
       kif: {
         name: "kif",
         pluralName: "kifs",
         prefix: nodes.kif,
         defaultWeight: 0,
-        description: "This NodeType corresponds to one node with address kif",
+        description: "NodeType for the address named 'kif'",
       },
       empty: {
         name: "empty",
         pluralName: "empties",
         prefix: NodeAddress.empty,
         defaultWeight: 0,
-        description: "This NodeType matches every node",
+        description: "NodeType for an empty address. This matches every node",
       },
     };
 
