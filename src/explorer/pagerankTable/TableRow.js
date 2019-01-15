@@ -1,6 +1,7 @@
 // @flow
 
 import React, {type Node as ReactNode} from "react";
+import {StyleSheet, css} from "aphrodite/no-important";
 
 type TableRowProps = {|
   // How many layers of nested scope we're in (changes the color)
@@ -49,10 +50,20 @@ export class TableRow extends React.PureComponent<
         ? ""
         : (connectionProportion * 100).toFixed(2) + "%";
     const backgroundColor = `hsla(150,100%,28%,${1 - 0.9 ** depth})`;
+    const makeGradient = (color) =>
+      `linear-gradient(to top, ${color}, ${color})`;
+    const normalBackground = makeGradient(backgroundColor);
+    const highlightBackground = makeGradient("#D8E1E8");
+    const backgroundImage = `${normalBackground}, ${highlightBackground}`;
+
     return (
       <React.Fragment>
         {showPadding && <PaddingRow backgroundColor={backgroundColor} />}
-        <tr key="self" style={{backgroundColor}}>
+        <tr
+          key="self"
+          style={{backgroundImage}}
+          className={css(styles.hoverHighlight)}
+        >
           <td style={{display: "flex", alignItems: "flex-start"}}>
             <button
               style={{
@@ -95,3 +106,21 @@ export function PaddingRow(props: {|+backgroundColor: string|}) {
     </tr>
   );
 }
+
+const styles = StyleSheet.create({
+  /* To apply 'hoverHighlight', provide a backgroundImage containing two <image>
+ * data types (eg linear gradients). The first backgroundImage will be
+ * the default background. The second backgroundImage will be applied on top
+ * of the first background when the user hovers or tabs over the element.
+ */
+
+  hoverHighlight: {
+    backgroundSize: "100% 100%, 0 0",
+    ":hover": {
+      backgroundSize: "100% 100%, 100% 100%",
+    },
+    ":focus-within": {
+      backgroundSize: "100% 100%, 100% 100%",
+    },
+  },
+});

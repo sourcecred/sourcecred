@@ -6,6 +6,7 @@ import {TableRow, PaddingRow} from "./TableRow";
 
 import {COLUMNS} from "./sharedTestUtils";
 require("../../webutil/testUtil").configureEnzyme();
+require("../../webutil/testUtil").configureAphrodite();
 
 describe("explorer/pagerankTable/TableRow", () => {
   function example() {
@@ -34,9 +35,11 @@ describe("explorer/pagerankTable/TableRow", () => {
           children={<div data-test-children={true} />}
         />
       );
-      const trStyle = el.find("tr").props().style;
+      const tr = el.find("tr");
+      const trStyle = tr.props().style;
+      const trClassName = tr.props().className;
       const buttonStyle = el.find("button").props().style;
-      expect({depth, trStyle, buttonStyle}).toMatchSnapshot();
+      expect({depth, trStyle, trClassName, buttonStyle}).toMatchSnapshot();
     }
   });
   it("indent parameter changes the button indentation", () => {
@@ -52,9 +55,11 @@ describe("explorer/pagerankTable/TableRow", () => {
           children={<div data-test-children={true} />}
         />
       );
-      const trStyle = el.find("tr").props().style;
+      const tr = el.find("tr");
+      const trStyle = tr.props().style;
+      const trClassName = tr.props().className;
       const buttonStyle = el.find("button").props().style;
-      expect({indent, trStyle, buttonStyle}).toMatchSnapshot();
+      expect({indent, trStyle, trClassName, buttonStyle}).toMatchSnapshot();
     }
   });
   it("expand button toggles symbol based on expansion state", () => {
@@ -165,8 +170,9 @@ describe("explorer/pagerankTable/TableRow", () => {
       const el = paddingExample();
       const pr = el.find(PaddingRow).at(0);
       const tr = el.find("tr");
-      expect(pr.props().backgroundColor).toEqual(
-        tr.props().style.backgroundColor
+      const prBackgroundColor = pr.props().backgroundColor;
+      expect(tr.props().style.backgroundImage).toEqual(
+        `linear-gradient(to top, ${prBackgroundColor}, ${prBackgroundColor}), linear-gradient(to top, #D8E1E8, #D8E1E8)`
       );
     });
     it("padding rows properly set the background color", () => {
