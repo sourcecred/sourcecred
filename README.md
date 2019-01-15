@@ -89,12 +89,12 @@ You can reach out to us by posting on our [forum], or chatting with us on [Disco
 We'd be happy to help you get started and show you around the codebase.
 Please also take a look at our [contributing guide].
 
-If you’re looking for a place to start, we’ve tagged some issues [Contributions Welcome].
+If you’re looking for a place to start, we’ve tagged some [good first issues].
 
 [forum]: https://discuss.sourcecred.io
 [Discord]: https://discord.gg/tsBTgc9
 [contributing guide]: https://github.com/sourcecred/sourcecred/blob/master/CONTRIBUTING.md
-[Contributions Welcome]: https://github.com/SourceCred/SourceCred/issues?q=is%3Aopen+is%3Aissue+label%3A%22contributions+welcome%22
+[good first issues]: https://github.com/sourcecred/sourcecred/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22
 
 ## License
 
