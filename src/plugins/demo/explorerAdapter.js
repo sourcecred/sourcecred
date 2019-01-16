@@ -3,16 +3,16 @@
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {declaration} from "./declaration";
 import type {
-  StaticAppAdapter,
-  DynamicAppAdapter,
-} from "../../explorer/adapters/appAdapter";
-import {StaticAdapterSet} from "../../explorer/adapters/adapterSet";
+  StaticExplorerAdapter,
+  DynamicExplorerAdapter,
+} from "../../explorer/adapters/explorerAdapter";
+import {StaticExplorerAdapterSet} from "../../explorer/adapters/explorerAdapterSet";
 import {Assets} from "../../webutil/assets";
 import {type RepoId, makeRepoId} from "../../core/repoId";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 import {graph} from "./graph";
 
-export class FactorioStaticAdapter implements StaticAppAdapter {
+export class FactorioStaticAdapter implements StaticExplorerAdapter {
   loadingMock: (assets: Assets, repoId: RepoId) => Promise<mixed>;
   declaration(): PluginDeclaration {
     return declaration;
@@ -26,7 +26,7 @@ export class FactorioStaticAdapter implements StaticAppAdapter {
   }
 }
 
-export class FactorioDynamicAdapter implements DynamicAppAdapter {
+export class FactorioDynamicAdapter implements DynamicExplorerAdapter {
   graph() {
     return graph();
   }
@@ -38,12 +38,12 @@ export class FactorioDynamicAdapter implements DynamicAppAdapter {
   }
 }
 
-export function staticAdapterSet() {
-  return new StaticAdapterSet([new FactorioStaticAdapter()]);
+export function staticExplorerAdapterSet() {
+  return new StaticExplorerAdapterSet([new FactorioStaticAdapter()]);
 }
 
-export async function dynamicAdapterSet() {
-  return await staticAdapterSet().load(
+export async function dynamicExplorerAdapterSet() {
+  return await staticExplorerAdapterSet().load(
     new Assets("/gateway/"),
     makeRepoId("foo", "bar")
   );

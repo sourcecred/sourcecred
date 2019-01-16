@@ -10,7 +10,7 @@ import {example, COLUMNS} from "./sharedTestUtils";
 import {NodeRowList} from "./Node";
 import {WeightConfig} from "../weights/WeightConfig";
 import {defaultWeightsForAdapter} from "../weights/weights";
-import {FactorioStaticAdapter} from "../../plugins/demo/appAdapter";
+import {FactorioStaticAdapter} from "../../plugins/demo/explorerAdapter";
 
 require("../../webutil/testUtil").configureEnzyme();
 describe("explorer/pagerankTable/Table", () => {

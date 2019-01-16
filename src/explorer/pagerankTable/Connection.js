@@ -6,7 +6,7 @@ import * as NullUtil from "../../util/null";
 import type {NodeAddressT} from "../../core/graph";
 import type {Connection} from "../../core/attribution/graphToMarkovChain";
 import type {ScoredConnection} from "../../analysis/pagerankNodeDecomposition";
-import {DynamicAdapterSet} from "../adapters/adapterSet";
+import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 import {TableRow} from "./TableRow";
 import {NodeRow} from "./Node";
 
@@ -87,7 +87,7 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
 
 export class ConnectionView extends React.PureComponent<{|
   +connection: Connection,
-  +adapters: DynamicAdapterSet,
+  +adapters: DynamicExplorerAdapterSet,
 |}> {
   render() {
     const {connection, adapters} = this.props;

@@ -7,7 +7,7 @@ import {
   inserterNodeType,
   assemblesEdgeType,
 } from "../../plugins/demo/declaration";
-import {FactorioStaticAdapter} from "../../plugins/demo/appAdapter";
+import {FactorioStaticAdapter} from "../../plugins/demo/explorerAdapter";
 import {
   fallbackNodeType,
   fallbackEdgeType,

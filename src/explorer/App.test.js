@@ -7,8 +7,11 @@ import {Graph} from "../core/graph";
 import {makeRepoId} from "../core/repoId";
 import {Assets} from "../webutil/assets";
 import testLocalStore from "../webutil/testLocalStore";
-import {DynamicAdapterSet, StaticAdapterSet} from "./adapters/adapterSet";
-import {FactorioStaticAdapter} from "../plugins/demo/appAdapter";
+import {
+  DynamicExplorerAdapterSet,
+  StaticExplorerAdapterSet,
+} from "./adapters/explorerAdapterSet";
+import {FactorioStaticAdapter} from "../plugins/demo/explorerAdapter";
 import {defaultWeightsForAdapter} from "./weights/weights";
 
 import {PagerankTable} from "./pagerankTable/Table";
@@ -37,7 +40,7 @@ describe("explorer/App", () => {
     const el = shallow(
       <App
         assets={new Assets("/foo/")}
-        adapters={new StaticAdapterSet([])}
+        adapters={new StaticExplorerAdapterSet([])}
         localStore={localStore}
         repoId={makeRepoId("foo", "bar")}
       />
@@ -56,7 +59,10 @@ describe("explorer/App", () => {
     };
   }
 
-  const emptyAdapters = new DynamicAdapterSet(new StaticAdapterSet([]), []);
+  const emptyAdapters = new DynamicExplorerAdapterSet(
+    new StaticExplorerAdapterSet([]),
+    []
+  );
   const exampleStates = {
     readyToLoadGraph: (loadingState) => {
       return () => ({

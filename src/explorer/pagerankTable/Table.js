@@ -6,8 +6,8 @@ import * as NullUtil from "../../util/null";
 
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import type {PagerankNodeDecomposition} from "../../analysis/pagerankNodeDecomposition";
-import {DynamicAdapterSet} from "../adapters/adapterSet";
-import type {DynamicAppAdapter} from "../adapters/appAdapter";
+import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
+import type {DynamicExplorerAdapter} from "../adapters/explorerAdapter";
 import {FALLBACK_NAME} from "../../analysis/fallbackDeclaration";
 import type {WeightedTypes} from "../../analysis/weights";
 import {WeightConfig} from "../weights/WeightConfig";
@@ -16,7 +16,7 @@ import {NodeRowList} from "./Node";
 
 type PagerankTableProps = {|
   +pnd: PagerankNodeDecomposition,
-  +adapters: DynamicAdapterSet,
+  +adapters: DynamicExplorerAdapterSet,
   +weightedTypes: WeightedTypes,
   +onWeightedTypesChange: (WeightedTypes) => void,
   +maxEntriesPerList: number,
@@ -92,7 +92,7 @@ export class PagerankTable extends React.PureComponent<
       throw new Error("Impossible.");
     }
 
-    function optionGroup(adapter: DynamicAppAdapter) {
+    function optionGroup(adapter: DynamicExplorerAdapter) {
       const header = (
         <option
           key={adapter.static().declaration().nodePrefix}
@@ -124,7 +124,7 @@ export class PagerankTable extends React.PureComponent<
           <option value={NodeAddress.empty}>Show all</option>
           {sortBy(
             adapters.adapters(),
-            (a: DynamicAppAdapter) => a.static().declaration().name
+            (a: DynamicExplorerAdapter) => a.static().declaration().name
           )
             .filter((a) => a.static().declaration().name !== FALLBACK_NAME)
             .map(optionGroup)}

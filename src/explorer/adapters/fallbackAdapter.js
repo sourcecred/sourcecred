@@ -1,12 +1,15 @@
 // @flow
 
 import {fallbackDeclaration} from "../../analysis/fallbackDeclaration";
-import type {StaticAppAdapter, DynamicAppAdapter} from "./appAdapter";
+import type {
+  StaticExplorerAdapter,
+  DynamicExplorerAdapter,
+} from "./explorerAdapter";
 import {Assets} from "../../webutil/assets";
 import {type RepoId} from "../../core/repoId";
 import {Graph, NodeAddress, type NodeAddressT} from "../../core/graph";
 
-export class FallbackStaticAdapter implements StaticAppAdapter {
+export class FallbackStaticAdapter implements StaticExplorerAdapter {
   declaration() {
     return fallbackDeclaration;
   }
@@ -16,7 +19,7 @@ export class FallbackStaticAdapter implements StaticAppAdapter {
   }
 }
 
-export class FallbackDynamicAdapter implements DynamicAppAdapter {
+export class FallbackDynamicAdapter implements DynamicExplorerAdapter {
   graph() {
     return new Graph();
   }

@@ -2,12 +2,12 @@
 
 import {pagerank} from "../../analysis/pagerank";
 import {defaultWeightsForAdapterSet} from "../weights/weights";
-import {dynamicAdapterSet} from "../../plugins/demo/appAdapter";
+import {dynamicExplorerAdapterSet} from "../../plugins/demo/explorerAdapter";
 
 export const COLUMNS = () => ["Description", "", "Cred"];
 
 export async function example() {
-  const adapters = await dynamicAdapterSet();
+  const adapters = await dynamicExplorerAdapterSet();
   const weightedTypes = defaultWeightsForAdapterSet(adapters.static());
   const graph = adapters.graph();
   const pnd = await pagerank(graph, (_unused_Edge) => ({

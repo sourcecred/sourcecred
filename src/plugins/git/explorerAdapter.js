@@ -1,8 +1,8 @@
 // @flow
 import type {
-  StaticAppAdapter as IStaticAppAdapter,
-  DynamicAppAdapter as IDynamicAppAdapter,
-} from "../../explorer/adapters/appAdapter";
+  StaticExplorerAdapter as IStaticExplorerAdapter,
+  DynamicExplorerAdapter as IDynamicExplorerAdapter,
+} from "../../explorer/adapters/explorerAdapter";
 import {Graph} from "../../core/graph";
 import * as N from "./nodes";
 import {description} from "./render";
@@ -13,7 +13,7 @@ import type {GitGateway} from "./gitGateway";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {declaration} from "./declaration";
 
-export class StaticAppAdapter implements IStaticAppAdapter {
+export class StaticExplorerAdapter implements IStaticExplorerAdapter {
   _gitGateway: GitGateway;
 
   constructor(gg: GitGateway): void {
@@ -22,7 +22,7 @@ export class StaticAppAdapter implements IStaticAppAdapter {
   declaration(): PluginDeclaration {
     return declaration;
   }
-  async load(assets: Assets, repoId: RepoId): Promise<IDynamicAppAdapter> {
+  async load(assets: Assets, repoId: RepoId): Promise<IDynamicExplorerAdapter> {
     const baseUrl = `/api/v1/data/data/${repoId.owner}/${repoId.name}/git/`;
     async function loadGraph() {
       const url = assets.resolve(baseUrl + "graph.json");
@@ -45,11 +45,11 @@ export class StaticAppAdapter implements IStaticAppAdapter {
       loadGraph(),
       loadRepository(),
     ]);
-    return new DynamicAppAdapter(this._gitGateway, graph, repository);
+    return new DynamicExplorerAdapter(this._gitGateway, graph, repository);
   }
 }
 
-class DynamicAppAdapter implements IDynamicAppAdapter {
+class DynamicExplorerAdapter implements IDynamicExplorerAdapter {
   +_graph: Graph;
   +_repository: Repository;
   +_gitGateway: GitGateway;
@@ -72,6 +72,6 @@ class DynamicAppAdapter implements IDynamicAppAdapter {
     return description(address, this._repository, this._gitGateway);
   }
   static() {
-    return new StaticAppAdapter(this._gitGateway);
+    return new StaticExplorerAdapter(this._gitGateway);
   }
 }

@@ -5,8 +5,8 @@ import {shallow} from "enzyme";
 import {PluginWeightConfig} from "./PluginWeightConfig";
 import {
   FactorioStaticAdapter,
-  staticAdapterSet,
-} from "../../plugins/demo/appAdapter";
+  staticExplorerAdapterSet,
+} from "../../plugins/demo/explorerAdapter";
 import {inserterNodeType} from "../../plugins/demo/declaration";
 import {FALLBACK_NAME} from "../../analysis/fallbackDeclaration";
 import {defaultWeightsForAdapterSet, defaultWeightsForAdapter} from "./weights";
@@ -18,7 +18,7 @@ describe("explorer/weights/WeightConfig", () => {
   describe("WeightConfig", () => {
     function example() {
       const onChange = jest.fn();
-      const adapters = staticAdapterSet();
+      const adapters = staticExplorerAdapterSet();
       const types = defaultWeightsForAdapterSet(adapters);
       types.nodes.set(inserterNodeType.prefix, {
         weight: 707,
@@ -76,7 +76,7 @@ describe("explorer/weights/WeightConfig", () => {
         type: inserterNodeType,
       });
       const expectedFullWeights = defaultWeightsForAdapterSet(
-        staticAdapterSet()
+        staticExplorerAdapterSet()
       );
       expectedFullWeights.nodes.set(inserterNodeType.prefix, {
         weight: 955,

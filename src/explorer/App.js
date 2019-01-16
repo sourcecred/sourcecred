@@ -19,7 +19,7 @@ import {
   type StateTransitionMachineInterface,
   initialState,
 } from "./state";
-import {StaticAdapterSet} from "./adapters/adapterSet";
+import {StaticExplorerAdapterSet} from "./adapters/explorerAdapterSet";
 
 const credOverviewUrl =
   "https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20";
@@ -28,7 +28,7 @@ const feedbackUrl =
 
 export class AppPage extends React.Component<{|
   +assets: Assets,
-  +adapters: StaticAdapterSet,
+  +adapters: StaticExplorerAdapterSet,
   +repoId: RepoId,
 |}> {
   static _LOCAL_STORE = new CheckedLocalStore(
@@ -54,7 +54,7 @@ export class AppPage extends React.Component<{|
 type Props = {|
   +assets: Assets,
   +localStore: LocalStore,
-  +adapters: StaticAdapterSet,
+  +adapters: StaticExplorerAdapterSet,
   +repoId: RepoId,
 |};
 type State = {|

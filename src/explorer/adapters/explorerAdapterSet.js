@@ -5,19 +5,22 @@ import {NodeTrie, EdgeTrie} from "../../core/trie";
 import type {Assets} from "../../webutil/assets";
 import type {RepoId} from "../../core/repoId";
 
-import type {StaticAppAdapter, DynamicAppAdapter} from "./appAdapter";
+import type {
+  StaticExplorerAdapter,
+  DynamicExplorerAdapter,
+} from "./explorerAdapter";
 import type {EdgeType, NodeType} from "../../analysis/types";
 
 import {FallbackStaticAdapter} from "./fallbackAdapter";
 
-export class StaticAdapterSet {
-  _adapters: $ReadOnlyArray<StaticAppAdapter>;
-  _adapterNodeTrie: NodeTrie<StaticAppAdapter>;
-  _adapterEdgeTrie: EdgeTrie<StaticAppAdapter>;
+export class StaticExplorerAdapterSet {
+  _adapters: $ReadOnlyArray<StaticExplorerAdapter>;
+  _adapterNodeTrie: NodeTrie<StaticExplorerAdapter>;
+  _adapterEdgeTrie: EdgeTrie<StaticExplorerAdapter>;
   _typeNodeTrie: NodeTrie<NodeType>;
   _typeEdgeTrie: EdgeTrie<EdgeType>;
 
-  constructor(adapters: $ReadOnlyArray<StaticAppAdapter>): void {
+  constructor(adapters: $ReadOnlyArray<StaticExplorerAdapter>): void {
     this._adapters = [new FallbackStaticAdapter(), ...adapters];
     this._adapterNodeTrie = new NodeTrie();
     this._adapterEdgeTrie = new EdgeTrie();
@@ -37,7 +40,7 @@ export class StaticAdapterSet {
     this.edgeTypes().forEach((t) => this._typeEdgeTrie.add(t.prefix, t));
   }
 
-  adapters(): $ReadOnlyArray<StaticAppAdapter> {
+  adapters(): $ReadOnlyArray<StaticExplorerAdapter> {
     return this._adapters;
   }
 
@@ -49,11 +52,11 @@ export class StaticAdapterSet {
     return [].concat(...this._adapters.map((x) => x.declaration().edgeTypes));
   }
 
-  adapterMatchingNode(x: NodeAddressT): StaticAppAdapter {
+  adapterMatchingNode(x: NodeAddressT): StaticExplorerAdapter {
     return this._adapterNodeTrie.getLast(x);
   }
 
-  adapterMatchingEdge(x: EdgeAddressT): StaticAppAdapter {
+  adapterMatchingEdge(x: EdgeAddressT): StaticExplorerAdapter {
     return this._adapterEdgeTrie.getLast(x);
   }
 
@@ -65,24 +68,24 @@ export class StaticAdapterSet {
     return this._typeEdgeTrie.getLast(x);
   }
 
-  load(assets: Assets, repoId: RepoId): Promise<DynamicAdapterSet> {
+  load(assets: Assets, repoId: RepoId): Promise<DynamicExplorerAdapterSet> {
     return Promise.all(this._adapters.map((a) => a.load(assets, repoId))).then(
-      (adapters) => new DynamicAdapterSet(this, adapters)
+      (adapters) => new DynamicExplorerAdapterSet(this, adapters)
     );
   }
 }
 
-export class DynamicAdapterSet {
-  _adapters: $ReadOnlyArray<DynamicAppAdapter>;
-  _staticAdapterSet: StaticAdapterSet;
-  _adapterNodeTrie: NodeTrie<DynamicAppAdapter>;
-  _adapterEdgeTrie: EdgeTrie<DynamicAppAdapter>;
+export class DynamicExplorerAdapterSet {
+  _adapters: $ReadOnlyArray<DynamicExplorerAdapter>;
+  _staticExplorerAdapterSet: StaticExplorerAdapterSet;
+  _adapterNodeTrie: NodeTrie<DynamicExplorerAdapter>;
+  _adapterEdgeTrie: EdgeTrie<DynamicExplorerAdapter>;
 
   constructor(
-    staticAdapterSet: StaticAdapterSet,
-    adapters: $ReadOnlyArray<DynamicAppAdapter>
+    staticExplorerAdapterSet: StaticExplorerAdapterSet,
+    adapters: $ReadOnlyArray<DynamicExplorerAdapter>
   ): void {
-    this._staticAdapterSet = staticAdapterSet;
+    this._staticExplorerAdapterSet = staticExplorerAdapterSet;
     this._adapters = adapters;
     this._adapterNodeTrie = new NodeTrie();
     this._adapterEdgeTrie = new EdgeTrie();
@@ -92,15 +95,15 @@ export class DynamicAdapterSet {
     });
   }
 
-  adapterMatchingNode(x: NodeAddressT): DynamicAppAdapter {
+  adapterMatchingNode(x: NodeAddressT): DynamicExplorerAdapter {
     return this._adapterNodeTrie.getLast(x);
   }
 
-  adapterMatchingEdge(x: EdgeAddressT): DynamicAppAdapter {
+  adapterMatchingEdge(x: EdgeAddressT): DynamicExplorerAdapter {
     return this._adapterEdgeTrie.getLast(x);
   }
 
-  adapters(): $ReadOnlyArray<DynamicAppAdapter> {
+  adapters(): $ReadOnlyArray<DynamicExplorerAdapter> {
     return this._adapters;
   }
 
@@ -109,6 +112,6 @@ export class DynamicAdapterSet {
   }
 
   static() {
-    return this._staticAdapterSet;
+    return this._staticExplorerAdapterSet;
   }
 }

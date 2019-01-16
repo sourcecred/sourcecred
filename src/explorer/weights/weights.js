@@ -5,17 +5,17 @@ import {
   combineWeights,
   defaultWeightsForDeclaration,
 } from "../../analysis/weights";
-import type {StaticAppAdapter} from "../adapters/appAdapter";
-import type {StaticAdapterSet} from "../adapters/adapterSet";
+import type {StaticExplorerAdapter} from "../adapters/explorerAdapter";
+import type {StaticExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 
 export function defaultWeightsForAdapter(
-  adapter: StaticAppAdapter
+  adapter: StaticExplorerAdapter
 ): WeightedTypes {
   return defaultWeightsForDeclaration(adapter.declaration());
 }
 
 export function defaultWeightsForAdapterSet(
-  adapters: StaticAdapterSet
+  adapters: StaticExplorerAdapterSet
 ): WeightedTypes {
   return combineWeights(adapters.adapters().map(defaultWeightsForAdapter));
 }
