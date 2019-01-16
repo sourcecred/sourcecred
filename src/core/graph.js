@@ -62,12 +62,38 @@ import * as NullUtil from "../util/null";
  * its own address, which is an `EdgeAddressT`.
  * Here's a toy example:
  *
- * const pr = NodeAddress.fromParts(["pull_request", "1"]);
- * const me = NodeAddress.fromParts(["user", "decentralion"]);
- * const authored = EdgeAddress.fromParts(["authored", "pull_request", "1"]);
- * const edge = {src: me, dst: pr, address: authored};
+ * const pr = NodeAddress.fromParts(["PULL_REQUEST", "1"]);
+ * const me = NodeAddress.fromParts(["USER", "decentralion"]);
+ * const edgeParts = ["AUTHORS", "USER", "decentralion", "PULL_REQUEST", "1"];
+ * const authorsAddress = EdgeAddress.fromParts(edgeParts);
+ * const authorsEdge = {src: me, dst: pr, address: authorsAddress};
  *
- * Creating a graph is as simple as invoking the constructor and adding nodes and edges:
+ * Each edge is directed, in the sense that it goes from the `src` node to the
+ * `dst` node. For example, the "AUTHORS" edge in the example above goes from
+ * the authoring user (@decentralion) to the authored pull request (PR #1).
+ * When doing cred analysis, we actually treat each edge as a pair of edges:
+ * a "forward" edge that flows cred from the source to the destination,
+ * and a "backward" edge that flows cred from the destination back to the source.
+ * In the example above, the forward edge flows cred from a user to a
+ * post they authored, and the backwards edge flows cred from a post to the
+ * user that authored it.
+ *
+ * The directionality is important because we may want to set different weights
+ * on the different directions. In the example above, we'd likely want a higher
+ * weight on the backward edge (you get cred for authoring important posts) but a
+ * low weight on the forward edge (posts should not get much cred for being
+ * authored by important people).
+ *
+ * As a convention, we name edges as verbs or verb phrases, so that the `src` is
+ * the subject of the verb, and the `dst` is the object. For example:
+ * - author (src) AUTHORS post (dst)
+ * - referrer (src) REFERENCES referent (dst)
+ * - commit (src) HAS_PARENT parentCommit (dst)
+ *
+ * This way, just from reading the name of an edge, you can infer which node
+ * should be the src and which node should be the dst.
+ *
+ * Once you have your nodes and edges, creating a graph is simple:
  *
  * const g = new Graph();
  * g.addNode(pr);
