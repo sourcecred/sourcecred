@@ -7,6 +7,17 @@
  */
 export type Distribution = Float64Array;
 
+export type StationaryDistributionResult = {|
+  // The final distribution after attempting to find the stationary distribution
+  // of the Markov chain.
+  +distribution: Distribution,
+  // How many steps were taken in this convergence attempt.
+  +nIterations: number,
+  // The maximum delta between entries in the distribution as of the final
+  // markov chain step. If no steps were taken, convergenceDelta will be NaN.
+  +convergenceDelta: number,
+|};
+
 /**
  * A representation of a sparse transition matrix that is convenient for
  * computations on Markov chains.
@@ -102,12 +113,16 @@ function* findStationaryDistributionGenerator(
   chain: SparseMarkovChain,
   options: {|
     +verbose: boolean,
+    // A distribution is considered stationary if the action of the Markov
+    // chain on the distribution does not change any component by more than
+    // `convergenceThreshold` in absolute value.
     +convergenceThreshold: number,
+    // We will run maxIterations markov chain steps at most.
     +maxIterations: number,
   |}
-): Generator<void, Distribution, void> {
-  let pi = uniformDistribution(chain.length);
-  let scratch = new Float64Array(pi.length);
+): Generator<void, StationaryDistributionResult, void> {
+  let distribution = uniformDistribution(chain.length);
+  let scratch = new Float64Array(distribution.length);
   function computeDelta(pi0, pi1) {
     let maxDelta = -Infinity;
     // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
@@ -118,26 +133,27 @@ function* findStationaryDistributionGenerator(
     });
     return maxDelta;
   }
-  let iteration = 0;
+  let nIterations = 0;
+  let convergenceDelta = NaN;
   while (true) {
-    if (iteration >= options.maxIterations) {
+    if (nIterations >= options.maxIterations) {
       if (options.verbose) {
-        console.log(`[${iteration}] FAILED to converge`);
+        console.log(`[${nIterations}] FAILED to converge`);
       }
-      return pi;
+      return {distribution, nIterations, convergenceDelta};
     }
-    iteration++;
-    sparseMarkovChainActionInto(chain, pi, scratch);
-    const delta = computeDelta(pi, scratch);
-    [scratch, pi] = [pi, scratch];
+    nIterations++;
+    sparseMarkovChainActionInto(chain, distribution, scratch);
+    convergenceDelta = computeDelta(distribution, scratch);
+    [scratch, distribution] = [distribution, scratch];
     if (options.verbose) {
-      console.log(`[${iteration}] delta = ${delta}`);
+      console.log(`[${nIterations}] delta = ${convergenceDelta}`);
     }
-    if (delta < options.convergenceThreshold) {
+    if (convergenceDelta < options.convergenceThreshold) {
       if (options.verbose) {
-        console.log(`[${iteration}] CONVERGED`);
+        console.log(`[${nIterations}] CONVERGED`);
       }
-      return pi;
+      return {distribution, nIterations, convergenceDelta};
     }
     yield;
   }
@@ -154,7 +170,7 @@ export function findStationaryDistribution(
     +maxIterations: number,
     +yieldAfterMs: number,
   |}
-): Promise<Distribution> {
+): Promise<StationaryDistributionResult> {
   let gen = findStationaryDistributionGenerator(chain, {
     verbose: options.verbose,
     convergenceThreshold: options.convergenceThreshold,
