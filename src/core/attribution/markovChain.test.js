@@ -151,15 +151,26 @@ describe("core/attribution/markovChain", () => {
         [0.25, 0, 0.75],
         [0.25, 0.75, 0],
       ]);
-      const pi = await findStationaryDistribution(chain, {
+      const result = await findStationaryDistribution(chain, {
         maxIterations: 255,
         convergenceThreshold: 1e-7,
         verbose: false,
         yieldAfterMs: 1,
       });
-      expectStationary(chain, pi);
+      expect(result.convergenceDelta).toBeLessThanOrEqual(1e-7);
+      expect(result.nIterations).toBeLessThanOrEqual(255);
+
+      // This should be wholly deterministic, so having an inline snapshot
+      // should not produce test flakes.
+      // This value should not be updated without a good reason (i.e. we
+      // realized that our convergence semantics were wrong)
+      expect(result.convergenceDelta).toMatchInlineSnapshot(
+        `9.438694270613723e-8`
+      );
+      expect(result.nIterations).toMatchInlineSnapshot(`51`);
+      expectStationary(chain, result.distribution);
       const expected = new Float64Array([1, 0, 0]);
-      expectAllClose(pi, expected);
+      expectAllClose(result.distribution, expected);
     });
 
     it("finds a non-degenerate stationary distribution", async () => {
@@ -174,40 +185,61 @@ describe("core/attribution/markovChain", () => {
         [0.5, 0, 0.25, 0, 0.25],
         [0.5, 0.25, 0, 0.25, 0],
       ]);
-      const pi = await findStationaryDistribution(chain, {
+      const result = await findStationaryDistribution(chain, {
         maxIterations: 255,
         convergenceThreshold: 1e-7,
         verbose: false,
         yieldAfterMs: 1,
       });
-      expectStationary(chain, pi);
+
+      expect(result.convergenceDelta).toBeLessThanOrEqual(1e-7);
+      expect(result.nIterations).toBeLessThanOrEqual(255);
+
+      // This should be wholly deterministic, so having an inline snapshot
+      // should not produce test flakes.
+      // This value should not be updated without a good reason (i.e. we
+      // realized that our convergence semantics were wrong)
+      expect(result.convergenceDelta).toMatchInlineSnapshot(
+        `9.536743161842054e-8`
+      );
+      expect(result.nIterations).toMatchInlineSnapshot(`22`);
+
+      expectStationary(chain, result.distribution);
       const expected = new Float64Array([1 / 3, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
-      expectAllClose(pi, expected);
+      expectAllClose(result.distribution, expected);
     });
 
     it("finds the stationary distribution of a periodic chain", async () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [1, 0]]);
-      const pi = await findStationaryDistribution(chain, {
+      const result = await findStationaryDistribution(chain, {
         maxIterations: 255,
         convergenceThreshold: 1e-7,
         verbose: false,
         yieldAfterMs: 1,
       });
-      expectStationary(chain, pi);
+
+      expect(result.convergenceDelta).toEqual(0);
+      expect(result.nIterations).toEqual(1);
+
+      expectStationary(chain, result.distribution);
       const expected = new Float64Array([0.5, 0.5]);
-      expectAllClose(pi, expected);
+      expectAllClose(result.distribution, expected);
     });
 
     it("returns initial distribution if maxIterations===0", async () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [0, 1]]);
-      const pi = await findStationaryDistribution(chain, {
+      const result = await findStationaryDistribution(chain, {
         verbose: false,
         convergenceThreshold: 1e-7,
         maxIterations: 0,
         yieldAfterMs: 1,
       });
+
+      expect(result.convergenceDelta).toBe(NaN);
+      expect(result.nIterations).toEqual(0);
+
       const expected = new Float64Array([0.5, 0.5]);
-      expect(pi).toEqual(expected);
+      expect(result.distribution).toEqual(expected);
     });
   });
 });
