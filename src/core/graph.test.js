@@ -74,6 +74,29 @@ describe("core/graph", () => {
       }).toThrow("modification count in the future");
     });
 
+    describe("modification count retrieval", () => {
+      it("modification count starts at 0", () => {
+        const g = new Graph();
+        expect(g.modificationCount()).toEqual(0);
+      });
+      it("modification count increases after any potential modification", () => {
+        const g = new Graph();
+        expect(g.modificationCount()).toEqual(0);
+        g.addNode(NodeAddress.empty);
+        expect(g.modificationCount()).toEqual(1);
+        g.addNode(NodeAddress.empty);
+        expect(g.modificationCount()).toEqual(2);
+      });
+      it("graphs can be equal despite unequal modification count", () => {
+        const g1 = new Graph()
+          .addNode(NodeAddress.empty)
+          .removeNode(NodeAddress.empty);
+        const g2 = new Graph();
+        expect(g1.equals(g2)).toEqual(true);
+        expect(g1.modificationCount()).not.toEqual(g2.modificationCount());
+      });
+    });
+
     describe("automated invariant checking", () => {
       const src = NodeAddress.fromParts(["src"]);
       const dst = NodeAddress.fromParts(["dst"]);
