@@ -78,8 +78,11 @@ export function sparseMarkovChainFromTransitionMatrix(
 }
 
 export function uniformDistribution(n: number): Distribution {
-  if (isNaN(n) || !isFinite(n) || n !== Math.floor(n) || n <= 0) {
-    throw new Error("expected positive integer, but got: " + n);
+  if (n === 0) {
+    return new Float64Array(0);
+  }
+  if (isNaN(n) || !isFinite(n) || n !== Math.floor(n) || n < 0) {
+    throw new Error("expected nonnegative integer, but got: " + n);
   }
   return new Float64Array(n).fill(1 / n);
 }
@@ -134,6 +137,9 @@ function* findStationaryDistributionGenerator(
   }
   let nIterations = 0;
   let convergenceDelta = NaN;
+  if (chain.length === 0) {
+    return {distribution, nIterations, convergenceDelta};
+  }
   while (true) {
     if (nIterations >= options.maxIterations) {
       if (options.verbose) {

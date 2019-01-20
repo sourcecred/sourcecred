@@ -94,16 +94,29 @@ describe("core/attribution/markovChain", () => {
       const pi = uniformDistribution(4);
       expect(pi).toEqual(new Float64Array([0.25, 0.25, 0.25, 0.25]));
     });
-    [0, -1, Infinity, NaN, 3.5, '"beluga"', null, undefined].forEach((bad) => {
+    it("returns an empty array for domain of size 0", () => {
+      const pi = uniformDistribution(0);
+      // This is not really a distribution at all, but returning
+      // an empty array leads to "least-bad" semantics when dealing with,
+      // e.g., an empty graph
+      expect(pi).toEqual(new Float64Array([]));
+    });
+    [-1, Infinity, NaN, 3.5, '"beluga"', null, undefined].forEach((bad) => {
       it(`fails when given domain ${String(bad)}`, () => {
         expect(() => uniformDistribution((bad: any))).toThrow(
-          "positive integer"
+          "nonnegative integer"
         );
       });
     });
   });
 
   describe("sparseMarkovChainAction", () => {
+    it("acts properly on an empty chain", () => {
+      const chain = sparseMarkovChainFromTransitionMatrix([]);
+      const pi0 = new Float64Array([]);
+      const pi1 = sparseMarkovChainAction(chain, pi0);
+      expect(pi1).toEqual(pi0);
+    });
     it("acts properly on a nontrivial chain", () => {
       // Note: this test case uses only real numbers that are exactly
       // representable as floating point numbers.
@@ -145,6 +158,18 @@ describe("core/attribution/markovChain", () => {
   }
 
   describe("findStationaryDistribution", () => {
+    it("correctly handles an empty chain", async () => {
+      const chain = sparseMarkovChainFromTransitionMatrix([]);
+      const result = await findStationaryDistribution(chain, {
+        maxIterations: 255,
+        convergenceThreshold: 1e-7,
+        verbose: false,
+        yieldAfterMs: 1,
+      });
+      expect(result.convergenceDelta).toEqual(NaN);
+      expect(result.nIterations).toEqual(0);
+      expect(result.distribution).toEqual(new Float64Array(0));
+    });
     it("finds an all-accumulating stationary distribution", async () => {
       const chain = sparseMarkovChainFromTransitionMatrix([
         [1, 0, 0],

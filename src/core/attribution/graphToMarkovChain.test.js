@@ -128,9 +128,31 @@ describe("core/attribution/graphToMarkovChain", () => {
         MapUtil.mapValues(map, (_, v) => sortBy(v, (x) => JSON.stringify(x)));
       expect(canonicalize(actual)).toEqual(canonicalize(expected));
     });
+
+    it("works on an empty graph", () => {
+      const connections = createConnections(
+        new Graph(),
+        () => ({toWeight: 1, froWeight: 0}),
+        0.01
+      );
+      expect(connections).toEqual(new Map());
+    });
   });
 
   describe("createOrderedSparseMarkovChain", () => {
+    it("works on an empty graph", () => {
+      const edgeWeight = (_unused_edge) => {
+        throw new Error("Don't even look at me");
+      };
+      const osmc = createOrderedSparseMarkovChain(
+        createConnections(new Graph(), edgeWeight, 1e-3)
+      );
+      const expected = {
+        nodeOrder: [],
+        chain: [],
+      };
+      expect(osmc).toEqual(expected);
+    });
     it("works on a trivial one-node chain with no edge", () => {
       const n = NodeAddress.fromParts(["foo"]);
       const g = new Graph().addNode(n);
