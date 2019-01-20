@@ -5,7 +5,7 @@ import deepEqual from "lodash.isequal";
 import * as MapUtil from "../../util/map";
 import {NodeTypeConfig} from "./NodeTypeConfig";
 import {EdgeTypeConfig} from "./EdgeTypeConfig";
-import {StaticAppAdapter} from "../adapters/appAdapter";
+import {StaticExplorerAdapter} from "../adapters/explorerAdapter";
 import {styledVariable} from "./EdgeTypeConfig";
 import type {
   WeightedTypes,
@@ -14,7 +14,7 @@ import type {
 } from "../../analysis/weights";
 
 export type Props = {|
-  +adapter: StaticAppAdapter,
+  +adapter: StaticExplorerAdapter,
   +onChange: (WeightedTypes) => void,
   +weightedTypes: WeightedTypes,
 |};

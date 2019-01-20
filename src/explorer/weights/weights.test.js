@@ -8,8 +8,8 @@ import {
 import {declaration} from "../../plugins/demo/declaration";
 import {
   FactorioStaticAdapter,
-  staticAdapterSet,
-} from "../../plugins/demo/appAdapter";
+  staticExplorerAdapterSet,
+} from "../../plugins/demo/explorerAdapter";
 
 describe("explorer/weights/weights", () => {
   describe("defaultWeightsForAdapter", () => {
@@ -22,9 +22,9 @@ describe("explorer/weights/weights", () => {
 
   describe("defaultWeightsForAdapterSet", () => {
     it("works on a demo adapter set", () => {
-      expect(defaultWeightsForAdapterSet(staticAdapterSet())).toEqual(
+      expect(defaultWeightsForAdapterSet(staticExplorerAdapterSet())).toEqual(
         combineWeights(
-          staticAdapterSet()
+          staticExplorerAdapterSet()
             .adapters()
             .map(defaultWeightsForAdapter)
         )

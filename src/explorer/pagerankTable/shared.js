@@ -7,13 +7,13 @@ import {
   NodeAddress,
 } from "../../core/graph";
 
-import {DynamicAdapterSet} from "../adapters/adapterSet";
+import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 
 import type {PagerankNodeDecomposition} from "../../analysis/pagerankNodeDecomposition";
 
 export function nodeDescription(
   address: NodeAddressT,
-  adapters: DynamicAdapterSet
+  adapters: DynamicExplorerAdapterSet
 ): ReactNode {
   const adapter = adapters.adapterMatchingNode(address);
   try {
@@ -28,7 +28,7 @@ export function nodeDescription(
 export function edgeVerb(
   address: EdgeAddressT,
   direction: "FORWARD" | "BACKWARD",
-  adapters: DynamicAdapterSet
+  adapters: DynamicExplorerAdapterSet
 ): string {
   const edgeType = adapters.static().typeMatchingEdge(address);
   return direction === "FORWARD" ? edgeType.forwardName : edgeType.backwardName;
@@ -36,7 +36,7 @@ export function edgeVerb(
 
 export type SharedProps = {|
   +pnd: PagerankNodeDecomposition,
-  +adapters: DynamicAdapterSet,
+  +adapters: DynamicExplorerAdapterSet,
   +maxEntriesPerList: number,
 |};
 

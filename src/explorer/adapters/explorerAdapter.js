@@ -6,13 +6,13 @@ import type {Assets} from "../../webutil/assets";
 import type {RepoId} from "../../core/repoId";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 
-export interface StaticAppAdapter {
+export interface StaticExplorerAdapter {
   declaration(): PluginDeclaration;
-  load(assets: Assets, repoId: RepoId): Promise<DynamicAppAdapter>;
+  load(assets: Assets, repoId: RepoId): Promise<DynamicExplorerAdapter>;
 }
 
-export interface DynamicAppAdapter {
+export interface DynamicExplorerAdapter {
   graph(): Graph;
   nodeDescription(NodeAddressT): ReactNode;
-  static (): StaticAppAdapter;
+  static (): StaticExplorerAdapter;
 }

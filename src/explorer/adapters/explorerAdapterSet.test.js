@@ -1,8 +1,8 @@
 // @flow
 
 import {NodeAddress, EdgeAddress, Graph} from "../../core/graph";
-import {FactorioStaticAdapter} from "../../plugins/demo/appAdapter";
-import {StaticAdapterSet} from "./adapterSet";
+import {FactorioStaticAdapter} from "../../plugins/demo/explorerAdapter";
+import {StaticExplorerAdapterSet} from "./explorerAdapterSet";
 import {FallbackStaticAdapter} from "./fallbackAdapter";
 import {
   FALLBACK_NAME,
@@ -12,17 +12,17 @@ import {
 import {Assets} from "../../webutil/assets";
 import {makeRepoId} from "../../core/repoId";
 
-describe("explorer/adapters/adapterSet", () => {
-  describe("StaticAdapterSet", () => {
+describe("explorer/adapters/explorerAdapterSet", () => {
+  describe("StaticExplorerAdapterSet", () => {
     function example() {
       const x = new FactorioStaticAdapter();
       const fallback = new FallbackStaticAdapter();
-      const sas = new StaticAdapterSet([x]);
+      const sas = new StaticExplorerAdapterSet([x]);
       return {x, fallback, sas};
     }
     it("errors if two plugins have the same name", () => {
       const x = new FactorioStaticAdapter();
-      const shouldError = () => new StaticAdapterSet([x, x]);
+      const shouldError = () => new StaticExplorerAdapterSet([x, x]);
       expect(shouldError).toThrowError("Multiple plugins with name");
     });
     it("always includes the fallback plugin", () => {
@@ -101,7 +101,7 @@ describe("explorer/adapters/adapterSet", () => {
       );
       expect(type).toBe(fallbackEdgeType);
     });
-    it("loads a dynamicAdapterSet", async () => {
+    it("loads a dynamicExplorerAdapterSet", async () => {
       const {x, sas} = example();
       x.loadingMock = jest.fn().mockResolvedValue();
       expect(x.loadingMock).toHaveBeenCalledTimes(0);
@@ -116,17 +116,17 @@ describe("explorer/adapters/adapterSet", () => {
     });
   });
 
-  describe("DynamicAdapterSet", () => {
+  describe("DynamicExplorerAdapterSet", () => {
     async function example() {
       const x = new FactorioStaticAdapter();
-      const sas = new StaticAdapterSet([x]);
+      const sas = new StaticExplorerAdapterSet([x]);
       const das = await sas.load(
         new Assets("/my/gateway/"),
         makeRepoId("foo", "bar")
       );
       return {x, sas, das};
     }
-    it("allows retrieval of the original StaticAdapterSet", async () => {
+    it("allows retrieval of the original StaticExplorerAdapterSet", async () => {
       const {sas, das} = await example();
       expect(das.static()).toBe(sas);
     });

@@ -12,7 +12,10 @@ import {
   pagerank,
 } from "../analysis/pagerank";
 
-import {StaticAdapterSet, DynamicAdapterSet} from "./adapters/adapterSet";
+import {
+  StaticExplorerAdapterSet,
+  DynamicExplorerAdapterSet,
+} from "./adapters/explorerAdapterSet";
 import type {WeightedTypes} from "../analysis/weights";
 import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
 
@@ -67,11 +70,11 @@ export function createStateTransitionMachine(
 
 // Exported for testing purposes.
 export interface StateTransitionMachineInterface {
-  +loadGraph: (Assets, StaticAdapterSet) => Promise<boolean>;
+  +loadGraph: (Assets, StaticExplorerAdapterSet) => Promise<boolean>;
   +runPagerank: (WeightedTypes, NodeAddressT) => Promise<void>;
   +loadGraphAndRunPagerank: (
     Assets,
-    StaticAdapterSet,
+    StaticExplorerAdapterSet,
     WeightedTypes,
     NodeAddressT
   ) => Promise<void>;
@@ -85,7 +88,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   setState: (AppState) => void;
   loadGraphWithAdapters: (
     assets: Assets,
-    adapters: StaticAdapterSet,
+    adapters: StaticExplorerAdapterSet,
     repoId: RepoId
   ) => Promise<GraphWithAdapters>;
   pagerank: (
@@ -99,7 +102,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     setState: (AppState) => void,
     loadGraphWithAdapters: (
       assets: Assets,
-      adapters: StaticAdapterSet,
+      adapters: StaticExplorerAdapterSet,
       repoId: RepoId
     ) => Promise<GraphWithAdapters>,
     pagerank: (
@@ -117,7 +120,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   /** Loads the graph, reports whether it was successful */
   async loadGraph(
     assets: Assets,
-    adapters: StaticAdapterSet
+    adapters: StaticExplorerAdapterSet
   ): Promise<boolean> {
     const state = this.getState();
     if (state.type !== "READY_TO_LOAD_GRAPH") {
@@ -202,7 +205,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
 
   async loadGraphAndRunPagerank(
     assets: Assets,
-    adapters: StaticAdapterSet,
+    adapters: StaticExplorerAdapterSet,
     weightedTypes: WeightedTypes,
     totalScoreNodePrefix: NodeAddressT
   ) {
@@ -227,11 +230,11 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
 
 export type GraphWithAdapters = {|
   +graph: Graph,
-  +adapters: DynamicAdapterSet,
+  +adapters: DynamicExplorerAdapterSet,
 |};
 export async function loadGraphWithAdapters(
   assets: Assets,
-  adapters: StaticAdapterSet,
+  adapters: StaticExplorerAdapterSet,
   repoId: RepoId
 ): Promise<GraphWithAdapters> {
   const dynamicAdapters = await adapters.load(assets, repoId);
