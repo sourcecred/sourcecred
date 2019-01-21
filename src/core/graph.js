@@ -148,7 +148,7 @@ export opaque type GraphJSON = Compatible<{|
   +edges: IndexedEdgeJSON[],
 |}>;
 
-type ModificationCount = number;
+export type ModificationCount = number;
 
 export class Graph {
   _nodes: Set<NodeAddressT>;
@@ -202,6 +202,26 @@ export class Graph {
     }
     this._modificationCount++;
     this._maybeCheckInvariants();
+  }
+
+  /**
+   * Returns how many times the graph has been modified.
+   *
+   * This value is exposed so that users of Graph can cache computations over
+   * the graph with confidence, knowing that they will be able to check the
+   * modification count to know when their cache is potentially invalid.
+   *
+   * This value may increase any time the graph is potentially modified, even
+   * if no modification actually occurs; for example, if a client calls
+   * `addNode`, the modification count may increase even if the added node was
+   * already present in the graph.
+   *
+   * This value is not serialized, and is ignored when checking equality, i.e.
+   * two graphs may be semantically equal even when they have different
+   * modification counts.
+   */
+  modificationCount(): ModificationCount {
+    return this._modificationCount;
   }
 
   /**
