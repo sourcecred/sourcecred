@@ -25,6 +25,8 @@ export default function schema(): Schema.Schema {
       "HOORAY",
       "CONFUSED",
       "HEART",
+      "ROCKET",
+      "EYES",
     ]),
     Repository: s.object({
       id: s.id(),

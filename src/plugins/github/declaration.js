@@ -131,6 +131,15 @@ const reactsHoorayEdgeType = Object.freeze({
   prefix: E.Prefix.reactsHooray,
 });
 
+const reactsRocketEdgeType = Object.freeze({
+  forwardName: "reacted 🚀 to",
+  backwardName: "got 🚀 from",
+  defaultForwardWeight: 1,
+  // TODO(#811): Probably change this to 0
+  defaultBackwardWeight: 1 / 32,
+  prefix: E.Prefix.reactsRocket,
+});
+
 const edgeTypes = Object.freeze([
   authorsEdgeType,
   hasParentEdgeType,
@@ -140,6 +149,7 @@ const edgeTypes = Object.freeze([
   reactsThumbsUpEdgeType,
   reactsHeartEdgeType,
   reactsHoorayEdgeType,
+  reactsRocketEdgeType,
 ]);
 
 export const declaration: PluginDeclaration = Object.freeze({

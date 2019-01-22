@@ -133,24 +133,30 @@ export type Reaction = {|
 
 export type ReactionContent =
   | "CONFUSED"
+  | "EYES"
   | "HEART"
   | "HOORAY"
   | "LAUGH"
+  | "ROCKET"
   | "THUMBS_DOWN"
   | "THUMBS_UP";
 
 export const ReactionContent$Values: {|
   +CONFUSED: "CONFUSED",
+  +EYES: "EYES",
   +HEART: "HEART",
   +HOORAY: "HOORAY",
   +LAUGH: "LAUGH",
+  +ROCKET: "ROCKET",
   +THUMBS_DOWN: "THUMBS_DOWN",
   +THUMBS_UP: "THUMBS_UP",
 |} = Object.freeze({
   CONFUSED: "CONFUSED",
+  EYES: "EYES",
   HEART: "HEART",
   HOORAY: "HOORAY",
   LAUGH: "LAUGH",
+  ROCKET: "ROCKET",
   THUMBS_DOWN: "THUMBS_DOWN",
   THUMBS_UP: "THUMBS_UP",
 });
