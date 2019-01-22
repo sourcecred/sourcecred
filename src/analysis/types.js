@@ -66,6 +66,9 @@ export type NodeType = {|
   // normal importance", and the weights scale linearly from there (i.e. 2
   // means twice as important).
   +defaultWeight: number,
+  // The `description` property should be a human-readable string that makes
+  // it clear to a user what each NodeType does
+  +description: string,
 |};
 
 /**

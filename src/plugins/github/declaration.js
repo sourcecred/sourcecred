@@ -9,6 +9,7 @@ const repoNodeType = Object.freeze({
   pluralName: "Repositories",
   prefix: N.Prefix.repo,
   defaultWeight: 4,
+  description: "NodeType for a GitHub repository",
 });
 
 const issueNodeType = Object.freeze({
@@ -16,6 +17,7 @@ const issueNodeType = Object.freeze({
   pluralName: "Issues",
   prefix: N.Prefix.issue,
   defaultWeight: 2,
+  description: "NodeType for a GitHub issue",
 });
 
 const pullNodeType = Object.freeze({
@@ -23,6 +25,7 @@ const pullNodeType = Object.freeze({
   pluralName: "Pull requests",
   prefix: N.Prefix.pull,
   defaultWeight: 4,
+  description: "NodeType for a GitHub pull request",
 });
 
 const reviewNodeType = Object.freeze({
@@ -30,6 +33,7 @@ const reviewNodeType = Object.freeze({
   pluralName: "Pull request reviews",
   prefix: N.Prefix.review,
   defaultWeight: 1,
+  description: "NodeType for a GitHub code review",
 });
 
 const commentNodeType = Object.freeze({
@@ -37,6 +41,7 @@ const commentNodeType = Object.freeze({
   pluralName: "Comments",
   prefix: N.Prefix.comment,
   defaultWeight: 1,
+  description: "NodeType for a GitHub comment",
 });
 
 const userNodeType = Object.freeze({
@@ -44,6 +49,7 @@ const userNodeType = Object.freeze({
   pluralName: "Users",
   prefix: N.Prefix.user,
   defaultWeight: 1,
+  description: "NodeType for a GitHub user",
 });
 
 const botNodeType = Object.freeze({
@@ -51,6 +57,7 @@ const botNodeType = Object.freeze({
   pluralName: "Bots",
   prefix: N.Prefix.bot,
   defaultWeight: 0.25,
+  description: "NodeType for a GitHub bot account",
 });
 
 const nodeTypes = Object.freeze([

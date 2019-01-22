@@ -1,6 +1,6 @@
 // @flow
 
-import {EdgeAddress, NodeAddress} from "../../core/graph";
+import {EdgeAddress, NodeAddress, type NodeAddressT} from "../../core/graph";
 import * as NullUtil from "../../util/null";
 import {
   aggregateByNodeType,
@@ -9,42 +9,51 @@ import {
   aggregateFlat,
   aggregationKey,
 } from "./aggregate";
+import type {NodeType} from "../../analysis/types";
 
 describe("explorer/pagerankTable/aggregate", () => {
   // TODO: If making major modifications to these tests, consider switching
   // from the hand-maintained connections and types, and instead use the demo
   // adadpters from app/adapters/demoAdapters
   function example() {
-    const nodes = {
+    const nodes: {+[string]: NodeAddressT} = {
       root: NodeAddress.fromParts(["root"]),
       zap: NodeAddress.fromParts(["zap"]),
       kif: NodeAddress.fromParts(["kif"]),
     };
 
-    const nodeTypes = {
+    const nodeTypes: {+[string]: NodeType} = {
       root: {
         name: "root",
         pluralName: "roots",
         prefix: nodes.root,
         defaultWeight: 0,
+        description:
+          "This NodeType corresponds to the node with the address named `root`",
       },
       zap: {
         name: "zap",
         pluralName: "zaps",
         prefix: nodes.zap,
         defaultWeight: 0,
+        description:
+          "This NodeType corresponds to the node with the address named `zap`",
       },
       kif: {
         name: "kif",
         pluralName: "kifs",
         prefix: nodes.kif,
         defaultWeight: 0,
+        description:
+          "This NodeType corresponds to the node with the address named `kif`",
       },
       empty: {
         name: "empty",
         pluralName: "empties",
         prefix: NodeAddress.empty,
         defaultWeight: 0,
+        description:
+          "This NodeType is for an empty address, which matches every node",
       },
     };
 

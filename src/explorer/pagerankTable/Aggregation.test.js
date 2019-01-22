@@ -149,6 +149,7 @@ describe("explorer/pagerankTable/Aggregation", () => {
       pluralName: "whatDoth",
       defaultWeight: 1,
       prefix: NodeAddress.empty,
+      description: "An example NodeType for testing purposes",
     };
     const edgeType: EdgeType = {
       forwardName: "marsellus",
