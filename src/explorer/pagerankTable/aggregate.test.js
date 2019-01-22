@@ -28,28 +28,32 @@ describe("explorer/pagerankTable/aggregate", () => {
         pluralName: "roots",
         prefix: nodes.root,
         defaultWeight: 0,
-        description: "NodeType for the address named 'root'",
+        description:
+          "This NodeType corresponds to the node with the address named `root`",
       },
       zap: {
         name: "zap",
         pluralName: "zaps",
         prefix: nodes.zap,
         defaultWeight: 0,
-        description: "NodeType for the address named 'zap'",
+        description:
+          "This NodeType corresponds to the node with the address named `zap`",
       },
       kif: {
         name: "kif",
         pluralName: "kifs",
         prefix: nodes.kif,
         defaultWeight: 0,
-        description: "NodeType for the address named 'kif'",
+        description:
+          "This NodeType corresponds to the node with the address named `kif`",
       },
       empty: {
         name: "empty",
         pluralName: "empties",
         prefix: NodeAddress.empty,
         defaultWeight: 0,
-        description: "NodeType for an empty address. This matches every node",
+        description:
+          "This NodeType is for an empty address, which matches every node",
       },
     };
 

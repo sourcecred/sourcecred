@@ -10,7 +10,7 @@ const commitNodeType: NodeType = Object.freeze({
   pluralName: "Commits",
   prefix: N.Prefix.commit,
   defaultWeight: 2,
-  description: "NodeType for representing a git commit",
+  description: "NodeType representing a git commit",
 });
 
 const hasParentEdgeType = Object.freeze({
