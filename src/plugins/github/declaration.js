@@ -76,6 +76,7 @@ const authorsEdgeType = Object.freeze({
   defaultForwardWeight: 1 / 2,
   defaultBackwardWeight: 1,
   prefix: E.Prefix.authors,
+  description: "TODO: Add a description for this EdgeType",
 });
 
 const hasParentEdgeType = Object.freeze({
@@ -84,6 +85,7 @@ const hasParentEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 1 / 4,
   prefix: E.Prefix.hasParent,
+  description: "TODO: Add a description for this EdgeType",
 });
 
 const mergedAsEdgeType = Object.freeze({
@@ -92,6 +94,7 @@ const mergedAsEdgeType = Object.freeze({
   defaultForwardWeight: 1 / 2,
   defaultBackwardWeight: 1,
   prefix: E.Prefix.mergedAs,
+  description: "TODO: Add a description for this EdgeType",
 });
 
 const referencesEdgeType = Object.freeze({
@@ -100,6 +103,7 @@ const referencesEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 1 / 16,
   prefix: E.Prefix.references,
+  description: "TODO: Add a description for this EdgeType",
 });
 
 const mentionsAuthorEdgeType = Object.freeze({
@@ -109,6 +113,7 @@ const mentionsAuthorEdgeType = Object.freeze({
   // TODO(#811): Probably change this to 0
   defaultBackwardWeight: 1 / 32,
   prefix: E.Prefix.mentionsAuthor,
+  description: "TODO: Add a description for this EdgeType",
 });
 
 const reactsHeartEdgeType = Object.freeze({
@@ -118,6 +123,7 @@ const reactsHeartEdgeType = Object.freeze({
   // TODO(#811): Probably change this to 0
   defaultBackwardWeight: 1 / 32,
   prefix: E.Prefix.reactsHeart,
+  description: "TODO: Add a description for this EdgeType",
 });
 
 const reactsThumbsUpEdgeType = Object.freeze({
@@ -127,6 +133,7 @@ const reactsThumbsUpEdgeType = Object.freeze({
   // TODO(#811): Probably change this to 0
   defaultBackwardWeight: 1 / 32,
   prefix: E.Prefix.reactsThumbsUp,
+  description: "TODO: Add a description for this EdgeType",
 });
 
 const reactsHoorayEdgeType = Object.freeze({
@@ -136,6 +143,7 @@ const reactsHoorayEdgeType = Object.freeze({
   // TODO(#811): Probably change this to 0
   defaultBackwardWeight: 1 / 32,
   prefix: E.Prefix.reactsHooray,
+  description: "TODO: Add a description for this EdgeType",
 });
 
 const edgeTypes = Object.freeze([
