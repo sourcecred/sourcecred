@@ -56,7 +56,8 @@ class GraphCreator {
         if (
           content === Reactions.THUMBS_UP ||
           content === Reactions.HEART ||
-          content === Reactions.HOORAY
+          content === Reactions.HOORAY ||
+          content === Reactions.ROCKET
         ) {
           this.graph.addEdge(
             createEdge.reacts(content, user, reactable.address())

@@ -320,7 +320,8 @@ export class GraphView {
       if (
         reactionType !== Reactions.THUMBS_UP &&
         reactionType !== Reactions.HEART &&
-        reactionType !== Reactions.HOORAY
+        reactionType !== Reactions.HOORAY &&
+        reactionType !== Reactions.ROCKET
       ) {
         throw new Error(
           `Invariant: Edge ${stringify(

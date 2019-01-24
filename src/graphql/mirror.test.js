@@ -50,6 +50,8 @@ describe("graphql/mirror", () => {
         "HOORAY",
         "CONFUSED",
         "HEART",
+        "ROCKET",
+        "EYES",
       ]),
       Repository: s.object({
         id: s.id(),

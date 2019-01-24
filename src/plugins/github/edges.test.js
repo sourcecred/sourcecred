@@ -82,6 +82,12 @@ describe("plugins/github/edges", () => {
         nodeExamples.user(),
         nodeExamples.issueComment()
       ),
+    reactsRocket: () =>
+      createEdge.reacts(
+        Reactions.ROCKET,
+        nodeExamples.user(),
+        nodeExamples.pullComment()
+      ),
   };
 
   describe("createEdge", () => {

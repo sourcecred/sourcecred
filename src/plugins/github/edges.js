@@ -39,6 +39,7 @@ export const Prefix = Object.freeze({
   reactsThumbsUp: githubEdgeAddress(REACTS_TYPE, Reactions.THUMBS_UP),
   reactsHeart: githubEdgeAddress(REACTS_TYPE, Reactions.HEART),
   reactsHooray: githubEdgeAddress(REACTS_TYPE, Reactions.HOORAY),
+  reactsRocket: githubEdgeAddress(REACTS_TYPE, Reactions.ROCKET),
 });
 
 export type AuthorsAddress = {|

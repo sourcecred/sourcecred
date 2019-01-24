@@ -237,6 +237,49 @@ Object {
 }
 `;
 
+exports[`plugins/github/edges createEdge works for "reactsRocket" 1`] = `
+Object {
+  "addressParts": Array [
+    "sourcecred",
+    "github",
+    "REACTS",
+    "ROCKET",
+    "5",
+    "sourcecred",
+    "github",
+    "USERLIKE",
+    "USER",
+    "decentralion",
+    "8",
+    "sourcecred",
+    "github",
+    "COMMENT",
+    "PULL",
+    "sourcecred",
+    "example-github",
+    "5",
+    "396430464",
+  ],
+  "dstParts": Array [
+    "sourcecred",
+    "github",
+    "COMMENT",
+    "PULL",
+    "sourcecred",
+    "example-github",
+    "5",
+    "396430464",
+  ],
+  "srcParts": Array [
+    "sourcecred",
+    "github",
+    "USERLIKE",
+    "USER",
+    "decentralion",
+  ],
+}
+`;
+
 exports[`plugins/github/edges createEdge works for "reactsThumbsUp" 1`] = `
 Object {
   "addressParts": Array [
