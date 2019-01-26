@@ -106,6 +106,8 @@ SourceCred is dual-licensed under Apache 2.0 and MIT terms:
 ## Acknowledgements
 
 We’d like to thank [Protocol Labs] for funding and support of SourceCred.
-We’d also like to thank the many open-source communities that produced the software that SourceCred is built on top of, such as Git and Node.
+We’d also like to thank the many open-source communities that produced the software that SourceCred is built on top of, such as [Git] and [Node].
 
 [Protocol Labs]: https://protocol.ai
+[Git]: https://github.com/git/git
+[Node]: https://github.com/nodejs/node
