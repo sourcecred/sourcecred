@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Add support for 🚀 and 👀 reaction types (#1068)
 - Create one page per project, rather than having a selector (#988)
 <!-- Please add new entries to the _top_ of this section. -->
 
@@ -35,4 +36,3 @@
   the root of a domain (#643)
 - Aggregate over connection types in the cred explorer (#502)
 - Start tracking changes in `CHANGELOG.md`
-
