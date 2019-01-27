@@ -659,6 +659,28 @@
                         "login": "decentralion",
                         "url": "https://github.com/decentralion"
                     }
+                },
+                {
+                    "__typename": "Reaction",
+                    "content": "ROCKET",
+                    "id": "MDg6UmVhY3Rpb24zNTc5ODQzNQ==",
+                    "user": {
+                        "__typename": "User",
+                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                        "login": "decentralion",
+                        "url": "https://github.com/decentralion"
+                    }
+                },
+                {
+                    "__typename": "Reaction",
+                    "content": "EYES",
+                    "id": "MDg6UmVhY3Rpb24zNTc5ODQ0Mg==",
+                    "user": {
+                        "__typename": "User",
+                        "id": "MDQ6VXNlcjE0MDAwMjM=",
+                        "login": "decentralion",
+                        "url": "https://github.com/decentralion"
+                    }
                 }
             ],
             "title": "An issue with reactions",
