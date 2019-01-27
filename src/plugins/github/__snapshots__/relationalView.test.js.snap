@@ -503,6 +503,22 @@ Object {
         "type": "USERLIKE",
       },
     },
+    Object {
+      "content": "ROCKET",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
+    Object {
+      "content": "EYES",
+      "user": Object {
+        "login": "decentralion",
+        "subtype": "USER",
+        "type": "USERLIKE",
+      },
+    },
   ],
   "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198": Array [
     Object {
