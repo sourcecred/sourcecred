@@ -13,7 +13,6 @@ export class NodeTypeConfig extends React.Component<{
       <WeightSlider
         name={this.props.weightedType.type.name}
         weight={this.props.weightedType.weight}
-        description={this.props.weightedType.type.description}
         onChange={(weight) => {
           this.props.onChange({
             ...this.props.weightedType,

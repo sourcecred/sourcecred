@@ -6,12 +6,11 @@ export type Props = {|
   +weight: number,
   +name: React$Node,
   +onChange: (number) => void,
-  +description: string,
 |};
 export class WeightSlider extends React.Component<Props> {
   render() {
     return (
-      <label style={{display: "flex"}} title={this.props.description}>
+      <label style={{display: "flex"}}>
         <span style={{flexGrow: 1}}>{this.props.name}</span>
         <input
           type="range"
