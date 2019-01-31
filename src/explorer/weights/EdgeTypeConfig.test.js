@@ -54,7 +54,12 @@ describe("explorer/weights/EdgeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();
       const element = shallow(
-        <EdgeWeightSlider weight={3} name="foo" onChange={onChange} />
+        <EdgeWeightSlider
+          weight={3}
+          name="foo"
+          description="Description for test slider"
+          onChange={onChange}
+        />
       );
       const weightSlider = element.find(WeightSlider);
       return {element, onChange, weightSlider};
