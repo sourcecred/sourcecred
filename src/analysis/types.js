@@ -96,7 +96,4 @@ export type EdgeType = {|
   // of this EdgeType. A given edge `e` is a member of the type `t` if
   // `EdgeAddress.hasPrefix(e.address, t.prefix) == true`
   +prefix: EdgeAddressT,
-  // The `description` property should be a human-readable string that makes
-  // it clear to a user what each EdgeType does
-  +description: string,
 |};

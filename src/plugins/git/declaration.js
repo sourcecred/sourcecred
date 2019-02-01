@@ -19,7 +19,6 @@ const hasParentEdgeType = Object.freeze({
   prefix: E.Prefix.hasParent,
   defaultForwardWeight: 1,
   defaultBackwardWeight: 1,
-  description: "TODO: Add a description for this EdgeType",
 });
 
 const nodeTypes = Object.freeze([commitNodeType]);

@@ -23,8 +23,6 @@ export const fallbackEdgeType: EdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 1,
   prefix: EdgeAddress.empty,
-  description:
-    "The fallback EdgeType for edges which don't have any other type",
 });
 
 export const fallbackDeclaration: PluginDeclaration = Object.freeze({
