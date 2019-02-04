@@ -152,6 +152,24 @@ describe("graphql/schema", () => {
         'field "O"/"foo" has invalid type "Color" of kind "ENUM"'
       );
     });
+    it("disallows objects with node fields of unfaithful type", () => {
+      const s = Schema;
+
+      expect(() => {
+        s.node("Color", s.unfaithful(["Color", "Color"]));
+      }).toThrowError("duplicate unfaithful typename Color");
+      const types2 = {
+        Color: s.object({id: s.id()}),
+        Q: s.object({
+          id: s.id(),
+          bar: s.node("Color", s.unfaithful(["Color"])),
+        }),
+        O: s.object({id: s.id(), foo: s.node("Color", s.unfaithful(["Tree"]))}),
+      };
+      expect(() => Schema.schema(types2)).toThrowError(
+        'field "O"/"foo" has invalid actualTypename Tree in its unfaithful fidelity'
+      );
+    });
     it("disallows objects with connection fields of unknown type", () => {
       const s = Schema;
       const types = {

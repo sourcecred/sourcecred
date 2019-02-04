@@ -1133,6 +1133,11 @@ export class Mirror {
             case "PRIMITIVE":
               return b.field(fieldname);
             case "NODE":
+              if (field.fidelity.type === "UNFAITHFUL") {
+                throw new Error(
+                  "Handling unfaithful fields is not yet implemented"
+                );
+              }
               return b.field(
                 fieldname,
                 {},
@@ -1151,6 +1156,11 @@ export class Mirror {
                     case "PRIMITIVE":
                       return b.field(childFieldname);
                     case "NODE":
+                      if (field.fidelity.type === "UNFAITHFUL") {
+                        throw new Error(
+                          "Handling unfaithful fields is not yet implemented"
+                        );
+                      }
                       return b.field(
                         childFieldname,
                         {},
@@ -1908,6 +1918,11 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
               entry.primitiveFieldNames.push(fieldname);
               break;
             case "NODE":
+              if (field.fidelity.type === "UNFAITHFUL") {
+                throw new Error(
+                  "Handling unfaithful fields is not yet implemented"
+                );
+              }
               entry.linkFieldNames.push(fieldname);
               break;
             case "CONNECTION":
@@ -1926,6 +1941,11 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
                     nestedFieldData.primitives[eggFieldname] = eggField;
                     break;
                   case "NODE":
+                    if (eggField.fidelity.type === "UNFAITHFUL") {
+                      throw new Error(
+                        "Handling unfaithful fields is not yet implemented"
+                      );
+                    }
                     nestedFieldData.nodes[eggFieldname] = eggField;
                     break;
                   // istanbul ignore next

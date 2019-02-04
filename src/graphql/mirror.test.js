@@ -105,6 +105,78 @@ describe("graphql/mirror", () => {
     }
     return s.schema(types);
   }
+  function buildGithubSchemaUnfaithful(): Schema.Schema {
+    const s = Schema;
+    const types: {[Schema.Typename]: Schema.NodeType} = {
+      URI: s.scalar("string"),
+      Date: s.scalar("string"),
+      ReactionContent: s.enum([
+        "THUMBS_UP",
+        "THUMBS_DOWN",
+        "LAUGH",
+        "HOORAY",
+        "CONFUSED",
+        "HEART",
+        "ROCKET",
+        "EYES",
+      ]),
+      Repository: s.object({
+        id: s.id(),
+        url: s.primitive(),
+        issues: s.connection("Issue"),
+      }),
+      Issue: s.object({
+        id: s.id(),
+        url: s.primitive(s.nonNull("URI")),
+        author: s.node("Actor", s.unfaithful(["User", "Organization"])),
+        repository: s.node("Repository"),
+        title: s.primitive(),
+        comments: s.connection("IssueComment"),
+        timeline: s.connection("IssueTimelineItem"),
+      }),
+      Reaction: s.object({
+        id: s.id(),
+        content: s.primitive(s.nonNull("ReactionContent")),
+        user: s.node("User", s.unfaithful(["User", "Organization"])),
+      }),
+      IssueComment: s.object({
+        id: s.id(),
+        body: s.primitive(),
+        author: s.node("Actor"),
+      }),
+      Commit: s.object({
+        id: s.id(),
+        oid: s.primitive(),
+        author: /* GitActor */ s.nested({
+          date: s.primitive(s.nonNull("Date")),
+          user: s.node("User", s.unfaithful(["User"])),
+        }),
+      }),
+      IssueTimelineItem: s.union(issueTimelineItemClauses()),
+      Actor: s.union(["User", "Bot", "Organization"]), // actually an interface
+      User: s.object({
+        id: s.id(),
+        url: s.primitive(),
+        login: s.primitive(),
+      }),
+      Bot: s.object({
+        id: s.id(),
+        url: s.primitive(),
+        login: s.primitive(),
+      }),
+      Organization: s.object({
+        id: s.id(),
+        url: s.primitive(),
+        login: s.primitive(),
+      }),
+    };
+    for (const clause of issueTimelineItemClauses()) {
+      if (types[clause] == null) {
+        types[clause] = s.object({id: s.id(), actor: s.node("Actor")});
+      }
+    }
+    return s.schema(types);
+  }
 
   describe("Mirror", () => {
     describe("constructor", () => {
@@ -266,6 +338,44 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         expect(() => new Mirror(db, schema0)).toThrow("invalid field name");
         expect(() => new Mirror(db, buildGithubSchema())).not.toThrow();
+      });
+      it("rejects a schema with unfaithful fidelities", () => {
+        const s = Schema;
+        const schema0 = s.schema({
+          A: s.object({
+            id: s.id(),
+            unfaithful: s.node("A", s.unfaithful(["A"])),
+          }),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema0)).toThrow(
+          "Handling unfaithful fields is not yet implemented"
+        );
+
+        const schema1 = s.schema({
+          Date: s.scalar("string"),
+          User: s.object({
+            id: s.id(),
+            url: s.primitive(),
+          }),
+          Human: s.object({
+            id: s.id(),
+            person: s.nested({
+              date: s.primitive(s.nonNull("Date")),
+              admin: s.node("User", s.unfaithful(["User"])),
+            }),
+          }),
+        });
+        const db2 = new Database(":memory:");
+        expect(() => new Mirror(db2, schema1)).toThrow(
+          "Handling unfaithful fields is not yet implemented"
+        );
+
+        const unfaithfulGithubSchema = buildGithubSchemaUnfaithful();
+        const db3 = new Database(":memory:");
+        expect(() => new Mirror(db3, unfaithfulGithubSchema)).toThrow(
+          "Handling unfaithful fields is not yet implemented"
+        );
       });
     });
 
