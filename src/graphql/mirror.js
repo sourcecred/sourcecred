@@ -175,7 +175,7 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
-      version: "MIRROR_v3",
+      version: "MIRROR_v4",
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,
@@ -231,8 +231,9 @@ export class Mirror {
         dedent`\
           CREATE TABLE objects (
               id TEXT NOT NULL PRIMARY KEY,
-              typename TEXT NOT NULL,
+              typename TEXT,
               last_update INTEGER,
+              CHECK((last_update IS NOT NULL) <= (typename IS NOT NULL)),
               FOREIGN KEY(last_update) REFERENCES updates(rowid)
           )
         `,
