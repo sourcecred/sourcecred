@@ -814,6 +814,7 @@ describe("graphql/mirror", () => {
           mirror._queryFromPlan(plan, {
             nodesLimit: 10,
             nodesOfTypeLimit: 5,
+            typenamesLimit: 6,
             connectionLimit: 5,
             connectionPageSize: 23,
           });
@@ -822,6 +823,167 @@ describe("graphql/mirror", () => {
             '"Issue" vs. "Repository"'
         );
       });
+      it("skips objects will null typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          objects: [
+            {id: "user:id02", typename: "User"},
+            {id: "user:id04", typename: "User"},
+            {id: "user:id06", typename: "User"},
+          ],
+          connections: [],
+          typenames: [
+            {id: "typename:id01"},
+            {id: "typename:id02"},
+            {id: "typename:id03"},
+            {id: "typename:id04"},
+            {id: "typename:id05"},
+            {id: "typename:id06"},
+          ],
+        };
+        const actual = mirror._queryFromPlan(plan, {
+          nodesLimit: 4,
+          nodesOfTypeLimit: 2,
+          typenamesLimit: 3,
+          connectionLimit: 5,
+          connectionPageSize: 23,
+        });
+        const b = Queries.build;
+
+        expect(actual).toEqual([
+          b.alias(
+            "owndata_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  // only two entries for nodesOfTypeLimit
+                  b.literal("user:id02"),
+                  b.literal("user:id04"),
+                ]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "owndata_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("user:id06")]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "typename_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  b.literal("typename:id01"),
+                  b.literal("typename:id02"),
+                  b.literal("typename:id03"),
+                ]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+          b.alias(
+            "typename_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("typename:id04")]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+        ]);
+      });
+      it("Creates a good query with typenames in the queryPlan", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          objects: [
+            {id: "user:id01", typename: "User"},
+            {id: "user:id02", typename: "User"},
+            {id: "user:id03", typename: "User"},
+            {id: "user:id04", typename: "User"},
+            {id: "user:id05", typename: "User"},
+          ],
+          connections: [],
+          typenames: [
+            {id: "typename:id01"},
+            {id: "typename:id02"},
+            {id: "typename:id03"},
+            {id: "typename:id04"},
+            {id: "typename:id05"},
+            {id: "typename:id06"},
+          ],
+        };
+        const actual = mirror._queryFromPlan(plan, {
+          nodesLimit: 4,
+          nodesOfTypeLimit: 2,
+          typenamesLimit: 3,
+          connectionLimit: 5,
+          connectionPageSize: 23,
+        });
+        const b = Queries.build;
+
+        expect(actual).toEqual([
+          b.alias(
+            "owndata_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  // only two entries for nodesOfTypeLimit
+                  b.literal("user:id01"),
+                  b.literal("user:id02"),
+                ]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "owndata_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("user:id03"), b.literal("user:id04")]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "typename_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  b.literal("typename:id01"),
+                  b.literal("typename:id02"),
+                  b.literal("typename:id03"),
+                ]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+          b.alias(
+            "typename_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("typename:id04")]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+        ]);
+      });
+
       it("creates a good query", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
@@ -884,6 +1046,7 @@ describe("graphql/mirror", () => {
         const actual = mirror._queryFromPlan(plan, {
           nodesLimit: 4,
           nodesOfTypeLimit: 2,
+          typenamesLimit: 9,
           connectionLimit: 5,
           connectionPageSize: 23,
         });
@@ -965,10 +1128,11 @@ describe("graphql/mirror", () => {
           mirror._queryFromPlan(plan, {
             nodesLimit: 10,
             nodesOfTypeLimit: 5,
+            typenamesLimit: 200,
             connectionLimit: 5,
             connectionPageSize: 23,
           });
-        }).toThrow("Unfaithful typenames not yet implemented");
+        }).not.toThrow();
       });
     });
 
@@ -1338,6 +1502,7 @@ describe("graphql/mirror", () => {
           nodesOfTypeLimit: 2,
           nodesLimit: 3,
           connectionLimit: 4,
+          typenamesLimit: 9,
           connectionPageSize: 5,
           since: new Date(123),
           now: now,
@@ -1367,6 +1532,7 @@ describe("graphql/mirror", () => {
           {
             nodesOfTypeLimit: 2,
             nodesLimit: 3,
+            typenamesLimit: 9,
             connectionLimit: 4,
             connectionPageSize: 5,
           },
@@ -1376,6 +1542,7 @@ describe("graphql/mirror", () => {
           {
             nodesOfTypeLimit: 2,
             nodesLimit: 3,
+            typenamesLimit: 9,
             connectionLimit: 4,
             connectionPageSize: 5,
           },
