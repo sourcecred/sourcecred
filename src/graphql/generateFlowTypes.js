@@ -48,18 +48,12 @@ export default function generateFlowTypes(
     }
   }
   function formatNodeField(field: NodeFieldType): string {
-    if (field.fidelity.type === "UNFAITHFUL") {
-      throw new Error("Unfaithful Fidelity not yet supported");
-    }
     return "null | " + field.elementType;
   }
   function formatConnectionField(field: ConnectionFieldType): string {
     return `$ReadOnlyArray<null | ${field.elementType}>`;
   }
   function formatNestedField(field: NestedFieldType): string {
-    if (field.fidelity.type === "UNFAITHFUL") {
-      throw new Error("Unfaithful Fidelity not yet supported");
-    }
     const eggs = [];
     for (const eggName of Object.keys(field.eggs).sort()) {
       eggs.push({eggName, rhs: formatField(field.eggs[eggName])});
