@@ -142,5 +142,44 @@ describe("graphql/generateFlowTypes", () => {
       });
       expect(run(s1)).toEqual(run(s2));
     });
+
+    it("throws on unfaithful node", () => {
+      const s = Schema;
+      const schema = s.schema({
+        Actor: s.union(["Human", "TalentedChimpanzee"]),
+        Human: s.object({
+          id: s.id(),
+          oldPainter: s.node("Actor", s.unfaithful(["Actor"])),
+        }),
+        TalentedChimpanzee: s.object({
+          id: s.id(),
+        }),
+      });
+      expect(() => run(schema)).toThrow(
+        "Unfaithful Fidelity not yet supported"
+      );
+    });
+
+    it("throws on unfaithful nested node", () => {
+      const s = Schema;
+      const schema = s.schema({
+        PaintJob: s.object({
+          id: s.id(),
+          details: s.nested({
+            oldPainter: s.node("Actor", s.unfaithful(["oldPainter"])),
+          }),
+        }),
+        Actor: s.union(["Human", "TalentedChimpanzee"]),
+        Human: s.object({
+          id: s.id(),
+        }),
+        TalentedChimpanzee: s.object({
+          id: s.id(),
+        }),
+      });
+      expect(() => run(schema)).toThrow(
+        "Unfaithful Fidelity not yet supported"
+      );
+    });
   });
 });

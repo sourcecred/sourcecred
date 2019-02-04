@@ -327,4 +327,63 @@ describe("graphql/schema", () => {
       expect(s.union(["One", "Two"])).toEqual(s.union(["Two", "One"]));
     });
   });
+
+  describe("unfaithful", () => {
+    const s = Schema;
+    it("permits empty unfaithful actualTypenames", () => {
+      s.node("x", s.unfaithful([]));
+    });
+    it("forbids duplicate unfaithful types", () => {
+      expect(() => {
+        s.node("Color", s.unfaithful(["Color", "Color"]));
+      }).toThrowError('duplicate unfaithful typename "Color"');
+    });
+    it("forbids unknown unfaithful types", () => {
+      const types = {
+        Color: s.object({id: s.id()}),
+        Q: s.object({
+          id: s.id(),
+          bar: s.node("Color", s.unfaithful(["Color"])),
+        }),
+        O: s.object({id: s.id(), foo: s.node("Color", s.unfaithful(["Tree"]))}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'field "O"/"foo" has invalid actualTypename "Tree" in its unfaithful fidelity'
+      );
+    });
+    it("is invariant with respect to typename order", () => {
+      const n1 = s.object({
+        id: s.id(),
+        x: s.primitive(),
+        y: s.node("Y", s.unfaithful(["Y", "X"])),
+      });
+      const n2 = s.object({
+        id: s.id(),
+        x: s.primitive(),
+        y: s.node("Y", s.unfaithful(["X", "Y"])),
+      });
+      expect(n1).toEqual(n2);
+    });
+    it("builds a schema with reasonable unfaithful types", () => {
+      const types: {[Schema.Typename]: Schema.NodeType} = {
+        Reaction: s.object({
+          id: s.id(),
+          content: s.primitive(s.nonNull("ReactionContent")),
+          user: s.node("User", s.unfaithful(["User", "Organization"])),
+        }),
+        Organization: s.object({
+          id: s.id(),
+          url: s.primitive(),
+          login: s.primitive(),
+        }),
+        User: s.object({
+          id: s.id(),
+          url: s.primitive(),
+          login: s.primitive(),
+        }),
+        ReactionContent: s.enum(["THUMBS_UP", "THUMBS_DOWN"]),
+      };
+      s.schema(types);
+    });
+  });
 });

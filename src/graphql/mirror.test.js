@@ -38,7 +38,12 @@ describe("graphql/mirror", () => {
       "UnlockedEvent",
     ];
   }
-  function buildGithubSchema(): Schema.Schema {
+
+  function buildGithubSchema(
+    fidelity: (
+      $ReadOnlyArray<Schema.Typename>
+    ) => Schema.Fidelity = Schema.faithful
+  ): Schema.Schema {
     const s = Schema;
     const types: {[Schema.Typename]: Schema.NodeType} = {
       URI: s.scalar("string"),
@@ -61,11 +66,16 @@ describe("graphql/mirror", () => {
       Issue: s.object({
         id: s.id(),
         url: s.primitive(s.nonNull("URI")),
-        author: s.node("Actor"),
+        author: s.node("Actor", fidelity(["User", "Organization"])),
         repository: s.node("Repository"),
         title: s.primitive(),
         comments: s.connection("IssueComment"),
         timeline: s.connection("IssueTimelineItem"),
+      }),
+      Reaction: s.object({
+        id: s.id(),
+        content: s.primitive(s.nonNull("ReactionContent")),
+        user: s.node("User", fidelity(["User", "Organization"])),
       }),
       IssueComment: s.object({
         id: s.id(),
@@ -104,6 +114,10 @@ describe("graphql/mirror", () => {
       }
     }
     return s.schema(types);
+  }
+
+  function buildGithubSchemaUnfaithful(): Schema.Schema {
+    return buildGithubSchema(Schema.unfaithful);
   }
 
   describe("Mirror", () => {
@@ -151,6 +165,7 @@ describe("graphql/mirror", () => {
               "primitives_User",
               "primitives_Bot",
               "primitives_Organization",
+              "primitives_Reaction",
               ...issueTimelineItemClauses().map((x) => `primitives_${x}`),
             ])
           ).sort()
@@ -266,6 +281,47 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         expect(() => new Mirror(db, schema0)).toThrow("invalid field name");
         expect(() => new Mirror(db, buildGithubSchema())).not.toThrow();
+      });
+      it("rejects a schema with unfaithful top-level fields", () => {
+        const s = Schema;
+        const schema = s.schema({
+          A: s.object({
+            id: s.id(),
+            unfaithful: s.node("A", s.unfaithful(["A"])),
+          }),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema)).toThrow(
+          "Handling unfaithful fields is not yet implemented"
+        );
+      });
+      it("rejects a schema with unfaithful nested fields", () => {
+        const s = Schema;
+        const schema = s.schema({
+          Date: s.scalar("string"),
+          User: s.object({
+            id: s.id(),
+            url: s.primitive(),
+          }),
+          Human: s.object({
+            id: s.id(),
+            person: s.nested({
+              date: s.primitive(s.nonNull("Date")),
+              admin: s.node("User", s.unfaithful(["User"])),
+            }),
+          }),
+        });
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, schema)).toThrow(
+          "Handling unfaithful fields is not yet implemented"
+        );
+      });
+      it("rejects a real-world unfaithful schema", () => {
+        const unfaithfulGithubSchema = buildGithubSchemaUnfaithful();
+        const db = new Database(":memory:");
+        expect(() => new Mirror(db, unfaithfulGithubSchema)).toThrow(
+          "Handling unfaithful fields is not yet implemented"
+        );
       });
     });
 
@@ -3262,6 +3318,7 @@ describe("graphql/mirror", () => {
             "User",
             "Bot",
             "Organization",
+            "Reaction",
             ...issueTimelineItemClauses(),
           ])
         ).sort()
