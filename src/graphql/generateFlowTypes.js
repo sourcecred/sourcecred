@@ -57,9 +57,6 @@ export default function generateFlowTypes(
     return `$ReadOnlyArray<null | ${field.elementType}>`;
   }
   function formatNestedField(field: NestedFieldType): string {
-    if (field.fidelity.type === "UNFAITHFUL") {
-      throw new Error("Unfaithful Fidelity not yet supported");
-    }
     const eggs = [];
     for (const eggName of Object.keys(field.eggs).sort()) {
       eggs.push({eggName, rhs: formatField(field.eggs[eggName])});
