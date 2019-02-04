@@ -698,12 +698,18 @@ export class Mirror {
   ): void {
     for (const topLevelKey of Object.keys(queryResult)) {
       if (topLevelKey.startsWith(_FIELD_PREFIXES.OWN_DATA)) {
-        const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
+        const rawValue:
+          | OwnDataUpdateResult
+          | NodeConnectionsUpdateResult
+          | TypenameUpdateResult =
           queryResult[topLevelKey];
         const updateRecord: OwnDataUpdateResult = (rawValue: any);
         this._nontransactionallyUpdateOwnData(updateId, updateRecord);
       } else if (topLevelKey.startsWith(_FIELD_PREFIXES.NODE_CONNECTIONS)) {
-        const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
+        const rawValue:
+          | OwnDataUpdateResult
+          | NodeConnectionsUpdateResult
+          | TypenameUpdateResult =
           queryResult[topLevelKey];
         const updateRecord: NodeConnectionsUpdateResult = (rawValue: any);
         for (const fieldname of Object.keys(updateRecord)) {
@@ -717,6 +723,8 @@ export class Mirror {
             updateRecord[fieldname]
           );
         }
+      } else if (topLevelKey.startsWith(_FIELD_PREFIXES.TYPENAME_UPDATE)) {
+        throw new Error("Unfaithful Typenames not yet implemented");
       } else {
         throw new Error(
           "Bad key in query result: " + JSON.stringify(topLevelKey)
@@ -2030,7 +2038,7 @@ type NestedFieldResult = {
  *
  * This type would be exact but for facebook/flow#2977, et al.
  */
-type OwnDataUpdateResult = $ReadOnlyArray<{
+export type OwnDataUpdateResult = $ReadOnlyArray<{
   +__typename: Schema.Typename, // the same for all entries
   +id: Schema.ObjectId,
   +[nonConnectionFieldname: Schema.Fieldname]:
@@ -2044,10 +2052,18 @@ type OwnDataUpdateResult = $ReadOnlyArray<{
  *
  * This type would be exact but for facebook/flow#2977, et al.
  */
-type NodeConnectionsUpdateResult = {
+export type NodeConnectionsUpdateResult = {
   +id: Schema.ObjectId,
   +[connectionFieldname: Schema.Fieldname]: ConnectionFieldResult,
 };
+
+/*
+  Result describing a now faithful fidelity type. See (#998)
+ */
+export type TypenameUpdateResult = $ReadOnlyArray<{
+  +id: Schema.ObjectId,
+  +__typename: Schema.Typename,
+}>;
 
 /**
  * Result describing both own-data updates and connection updates. Each
@@ -2062,7 +2078,10 @@ type NodeConnectionsUpdateResult = {
 type UpdateResult = {
   // The prefix of each key determines what type of results the value
   // represents. See constants below.
-  +[string]: OwnDataUpdateResult | NodeConnectionsUpdateResult,
+  +[string]:
+    | OwnDataUpdateResult
+    | NodeConnectionsUpdateResult
+    | TypenameUpdateResult,
 };
 
 export const _FIELD_PREFIXES = Object.freeze({
@@ -2077,6 +2096,12 @@ export const _FIELD_PREFIXES = Object.freeze({
    * corresponding value represents `NodeConnectionsUpdateResult`s.
    */
   NODE_CONNECTIONS: "node_",
+
+  /**
+   * A key of an a 'UpdateResult' has the prefix if and only if the
+   * corresponding value represents 'TypenameUpdateResult's
+   */
+  TYPENAME_UPDATE: "typename_",
 });
 
 /**
