@@ -62,6 +62,7 @@ export default async function fetchGithubRepo(
   const ttlSeconds = 60 * 60 * 24 * 7;
   const nodesLimit = 100;
   const connectionLimit = 100;
+  const typenamesLimit = 100;
 
   await mirror.update(postQueryWithToken, {
     since: new Date(Date.now() - ttlSeconds * 1000),
@@ -69,6 +70,7 @@ export default async function fetchGithubRepo(
     // These properties are arbitrary tuning parameters.
     nodesLimit,
     connectionLimit,
+    typenamesLimit,
     // These values are the maxima allowed by GitHub.
     nodesOfTypeLimit: 100,
     connectionPageSize: 100,

@@ -575,20 +575,44 @@ export class Mirror {
       +nodesLimit: number,
       // How many connections may we fetch at top level?
       +connectionLimit: number,
+      // How many nodes of unfaithful types may we fetch?
+      +typenamesLimit: number,
       // When fetching entries in a connection, how many entities may we
       // request at once? (What is the `first` argument?)
       +connectionPageSize: number,
     |}
   ): Queries.Selection[] {
-    if (queryPlan.typenames && queryPlan.typenames.length) {
-      throw new Error("Unfaithful typenames not yet implemented");
+    const nullTypenameObjects: $ReadOnlyArray<{|
+      +id: Schema.ObjectId,
+    |}> = queryPlan.typenames.slice(0, options.nodesLimit);
+
+    const paginatedNullTypenameObjects: Array<
+      $ReadOnlyArray<{|
+        +id: Schema.ObjectId,
+      |}>
+    > = [];
+
+    for (
+      let i = 0;
+      i < nullTypenameObjects.length;
+      i += options.typenamesLimit
+    ) {
+      const idsPage = nullTypenameObjects.slice(i, i + options.typenamesLimit);
+      paginatedNullTypenameObjects.push(idsPage);
     }
+
     // Group objects by type, so that we have to specify each type's
     // fieldset fewer times (only once per `nodesOfTypeLimit` nodes
     // instead of for every node).
     const objectsByType: Map<Schema.Typename, Schema.ObjectId[]> = new Map();
-    for (const object of queryPlan.objects.slice(0, options.nodesLimit)) {
-      MapUtil.pushValue(objectsByType, object.typename, object.id);
+    const nullFiltered = queryPlan.objects.filter((object) => {
+      return object.typename;
+    });
+    for (const object of nullFiltered.slice(0, options.nodesLimit)) {
+      // istanbul ignore next
+      if (object.typename !== null) {
+        MapUtil.pushValue(objectsByType, object.typename, object.id);
+      }
     }
     const paginatedObjectsByType: Array<{|
       +typename: Schema.Typename,
@@ -638,7 +662,6 @@ export class Mirror {
     }
 
     const b = Queries.build;
-
     // Each top-level field corresponds to either an object type
     // (fetching own data for objects of that type) or a particular node
     // (updating connections on that node). We alias each such field,
@@ -681,7 +704,18 @@ export class Mirror {
             ])
           );
         }
-      )
+      ),
+      paginatedNullTypenameObjects.map((ids, i) => {
+        const name = `${_FIELD_PREFIXES.TYPENAME_UPDATE}${i}`;
+        return b.alias(
+          name,
+          b.field(
+            "nodes",
+            {ids: b.list(ids.map((o) => b.literal(o.id)))},
+            this._queryTypename()
+          )
+        );
+      })
     );
   }
 
@@ -756,6 +790,7 @@ export class Mirror {
     options: {|
       +nodesLimit: number,
       +nodesOfTypeLimit: number,
+      +typenamesLimit: number,
       +connectionPageSize: number,
       +connectionLimit: number,
       +since: Date,
@@ -767,6 +802,7 @@ export class Mirror {
       return Promise.resolve(false);
     }
     const querySelections = this._queryFromPlan(queryPlan, {
+      typenamesLimit: options.typenamesLimit,
       nodesLimit: options.nodesLimit,
       nodesOfTypeLimit: options.nodesOfTypeLimit,
       connectionPageSize: options.connectionPageSize,
@@ -820,6 +856,7 @@ export class Mirror {
       +nodesLimit: number,
       +nodesOfTypeLimit: number,
       +connectionPageSize: number,
+      +typenamesLimit: number,
       +connectionLimit: number,
       +since: Date,
       +now: () => Date,
@@ -919,6 +956,30 @@ export class Mirror {
       throw new Error(`No such connection: ${s(objectId)}.${s(fieldname)}`);
     }
     return result.initialized ? result.endCursor : undefined;
+  }
+
+  /*
+    Create a GraphQL selection set to fetch elements with
+    unfaithful typenames. This selection set will return array of
+    objects `__typename`, `id`, and top level primitive fields
+   */
+  _queryTypename(): Queries.Selection[] {
+    const b = Queries.build;
+    const selections = [
+      b.field("__typename"),
+      ...this._schemaInfo.unionTypes["Actor"].clauses.map(
+        (clause: Schema.Typename) =>
+          b.inlineFragment(
+            clause,
+            Object.keys(this._schemaInfo.objectTypes[clause].fields).map(
+              (field) => {
+                return b.field(field);
+              }
+            )
+          )
+      ),
+    ];
+    return selections;
   }
 
   /**
@@ -2005,7 +2066,7 @@ type UpdateId = number;
  */
 type QueryPlan = {|
   +objects: $ReadOnlyArray<{|
-    +typename: Schema.Typename,
+    +typename: Schema.Typename | null,
     +id: Schema.ObjectId,
   |}>,
   +connections: $ReadOnlyArray<{|
