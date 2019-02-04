@@ -188,19 +188,16 @@ describe("graphql/mirror", () => {
         const schema = buildGithubSchema();
         expect(() => new Mirror(db, schema)).not.toThrow();
       });
-
       it("fails if the database connection is `null`", () => {
         // $ExpectFlowError
         expect(() => new Mirror(null, buildGithubSchema())).toThrow("db: null");
       });
-
       it("fails if the schema is `null`", () => {
         // $ExpectFlowError
         expect(() => new Mirror(new Database(":memory:"), null)).toThrow(
           "schema: null"
         );
       });
-
       it("creates the right set of tables", () => {
         const db = new Database(":memory:");
         const schema = buildGithubSchema();
@@ -231,7 +228,6 @@ describe("graphql/mirror", () => {
           ).sort()
         );
       });
-
       it("is idempotent", () => {
         // We use an on-disk database file here so that we can dump the
         // contents to ensure that the database is physically unchanged.
@@ -250,7 +246,6 @@ describe("graphql/mirror", () => {
 
         expect(data0).toEqual(data1);
       });
-
       it("rejects a different schema without changing the database", () => {
         const s = Schema;
         const schema0 = s.schema({A: s.object({id: s.id()})});
@@ -276,7 +271,6 @@ describe("graphql/mirror", () => {
         expect(() => new Mirror(db, schema0)).not.toThrow();
         expect(fs.readFileSync(filename).toJSON()).toEqual(data);
       });
-
       it("rejects when the set of blacklisted IDs has changed", () => {
         const db = new Database(":memory:");
         const schema = Schema.schema({A: Schema.object({id: Schema.id()})});
@@ -285,7 +279,6 @@ describe("graphql/mirror", () => {
           new Mirror(db, schema, {blacklistedIds: ["ominous"]});
         }).toThrow("incompatible schema, options, or version");
       });
-
       it("rejects a schema with SQL-unsafe type name", () => {
         const s = Schema;
         const schema0 = s.schema({
@@ -296,7 +289,6 @@ describe("graphql/mirror", () => {
           'invalid object type name: "Non-Word-Characters"'
         );
       });
-
       it("rejects a schema with SQL-unsafe primitive field name", () => {
         const s = Schema;
         const schema0 = s.schema({
@@ -307,7 +299,6 @@ describe("graphql/mirror", () => {
           'invalid field name: "Non-Word-Characters"'
         );
       });
-
       it("rejects a schema with SQL-unsafe nested field name", () => {
         const s = Schema;
         const schema0 = s.schema({
@@ -318,7 +309,6 @@ describe("graphql/mirror", () => {
           'invalid field name: "Non-Word-Characters"'
         );
       });
-
       it("rejects a schema with SQL-unsafe nested primitive field name", () => {
         const s = Schema;
         const schema0 = s.schema({
@@ -332,7 +322,6 @@ describe("graphql/mirror", () => {
           'invalid field name: "Non-Word-Characters" under "problem"'
         );
       });
-
       it("allows specifying a good schema after rejecting one", () => {
         const s = Schema;
         const schema0 = s.schema({
@@ -342,7 +331,7 @@ describe("graphql/mirror", () => {
         expect(() => new Mirror(db, schema0)).toThrow("invalid field name");
         expect(() => new Mirror(db, buildGithubSchema())).not.toThrow();
       });
-      it("rejects a schema with unfaithful fidelities", () => {
+      it("accepts a schema with unfaithful fidelities", () => {
         const s = Schema;
         const schema0 = s.schema({
           A: s.object({
@@ -351,7 +340,7 @@ describe("graphql/mirror", () => {
           }),
         });
         const db = new Database(":memory:");
-        expect(() => new Mirror(db, schema0)).toThrow(
+        expect(() => new Mirror(db, schema0)).not.toThrow(
           "Handling unfaithful fields is not yet implemented"
         );
 
@@ -370,13 +359,13 @@ describe("graphql/mirror", () => {
           }),
         });
         const db2 = new Database(":memory:");
-        expect(() => new Mirror(db2, schema1)).toThrow(
+        expect(() => new Mirror(db2, schema1)).not.toThrow(
           "Handling unfaithful fields is not yet implemented"
         );
 
         const unfaithfulGithubSchema = buildGithubSchemaUnfaithful();
         const db3 = new Database(":memory:");
-        expect(() => new Mirror(db3, unfaithfulGithubSchema)).toThrow(
+        expect(() => new Mirror(db3, unfaithfulGithubSchema)).not.toThrow(
           "Handling unfaithful fields is not yet implemented"
         );
       });
@@ -517,17 +506,19 @@ describe("graphql/mirror", () => {
           last_update: updateId,
         });
       });
-      it("rejects if an existing object's typename were to change", () => {
+      it("doesn't change an existing objects typename", () => {
         const db = new Database(":memory:");
         const schema = buildGithubSchema();
         const mirror = new Mirror(db, schema);
         mirror.registerObject({typename: "Issue", id: "my-favorite-id"});
-        expect(() => {
-          mirror.registerObject({typename: "User", id: "my-favorite-id"});
-        }).toThrow(
-          'Inconsistent type for ID "my-favorite-id": ' +
-            'expected "Issue", got "User"'
-        );
+        mirror.registerObject({typename: "User", id: "my-favorite-id"});
+        expect(
+          db.prepare("SELECT * FROM objects WHERE id = ?").get("my-favorite-id")
+        ).toEqual({
+          typename: "Issue",
+          id: "my-favorite-id",
+          last_update: null,
+        });
       });
       it("rejects an unknown type", () => {
         const db = new Database(":memory:");
@@ -554,6 +545,165 @@ describe("graphql/mirror", () => {
         ).toThrow('Cannot add object of non-object type: "Actor" (UNION)');
         expect(db.prepare("SELECT * FROM objects").all()).toHaveLength(0);
         expect(db.prepare("SELECT * FROM connections").all()).toHaveLength(0);
+      });
+    });
+
+    describe("_registerTypename", () => {
+      it("accepts non-null types", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchemaUnfaithful();
+        const mirror = new Mirror(db, schema);
+
+        mirror._registerTypename({
+          id: "id01",
+          typename: "User",
+        });
+
+        expect(db.prepare("SELECT * FROM objects").all()).toHaveLength(1);
+        expect(
+          db.prepare("SELECT typename FROM objects WHERE id = ?").all("id01")
+        ).toEqual([{typename: "User"}]);
+
+        mirror._registerTypename({
+          id: "id02",
+          typename: "Organization",
+        });
+
+        expect(db.prepare("SELECT * FROM objects").all()).toHaveLength(2);
+        expect(
+          db.prepare("SELECT typename FROM objects WHERE id = ?").all("id02")
+        ).toEqual([{typename: "Organization"}]);
+      });
+      it("accepts null types", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchemaUnfaithful();
+        const mirror = new Mirror(db, schema);
+
+        mirror._registerTypename({
+          id: "id01",
+          typename: null,
+        });
+
+        expect(db.prepare("SELECT * FROM objects").all()).toHaveLength(1);
+        expect(
+          db.prepare("SELECT typename FROM objects WHERE id = ?").all("id01")
+        ).toEqual([{typename: null}]);
+
+        mirror._registerTypename({
+          id: "id02",
+          typename: null,
+        });
+
+        expect(db.prepare("SELECT * FROM objects").all()).toHaveLength(2);
+        expect(
+          db.prepare("SELECT typename FROM objects WHERE id = ?").all("id02")
+        ).toEqual([{typename: null}]);
+      });
+      it("doesn't touch an existing typename given a different type", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchemaUnfaithful();
+        const mirror = new Mirror(db, schema);
+
+        const updateId = mirror._createUpdate(new Date(123));
+        const objectId = "id01";
+
+        mirror.registerObject({
+          id: objectId,
+          typename: "User",
+        });
+
+        expect(db.prepare("SELECT * FROM objects").all()).toHaveLength(1);
+        expect(
+          db.prepare("SELECT typename FROM objects WHERE id = ?").all(objectId)
+        ).toEqual([{typename: "User"}]);
+
+        db.prepare(
+          "UPDATE objects SET last_update = :updateId WHERE id = :objectId"
+        ).run({updateId, objectId});
+
+        mirror._registerTypename({
+          id: objectId,
+          typename: "User",
+        });
+
+        expect(
+          db.prepare("SELECT * FROM objects WHERE id = ?").get(objectId)
+        ).toEqual({
+          typename: "User",
+          id: objectId,
+          last_update: updateId,
+        });
+      });
+    });
+
+    describe("_registerTypename", () => {
+      it("accepts non-null types", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchemaUnfaithful();
+        const mirror = new Mirror(db, schema);
+
+        mirror._registerTypename({
+          id: "id01",
+          typename: "User",
+        });
+
+        expect(db.prepare("SELECT * FROM objects").all()).toHaveLength(1);
+        expect(
+          db.prepare("SELECT typename FROM objects WHERE id = ?").all("id01")
+        ).toEqual([{typename: "User"}]);
+
+        mirror._registerTypename({
+          id: "id01",
+          typename: null,
+        });
+
+        expect(
+          db.prepare("SELECT typename FROM objects WHERE id = ?").all("id01")
+        ).toEqual([{typename: "User"}]);
+
+        mirror._registerTypename({
+          id: "id01",
+          typename: "Organization",
+        });
+
+        expect(
+          db.prepare("SELECT typename FROM objects WHERE id = ?").all("id01")
+        ).toEqual([{typename: "User"}]);
+      });
+      it("doesn't touch an existing typename given a different type", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchemaUnfaithful();
+        const mirror = new Mirror(db, schema);
+
+        const updateId = mirror._createUpdate(new Date(123));
+        const objectId = "id01";
+
+        mirror.registerObject({
+          id: objectId,
+          typename: "User",
+        });
+
+        expect(db.prepare("SELECT * FROM objects").all()).toHaveLength(1);
+        expect(
+          db.prepare("SELECT typename FROM objects WHERE id = ?").all(objectId)
+        ).toEqual([{typename: "User"}]);
+
+        db.prepare(
+          "UPDATE objects SET last_update = :updateId WHERE id = :objectId"
+        ).run({updateId, objectId});
+
+        mirror._registerTypename({
+          id: objectId,
+          typename: "User",
+        });
+
+        expect(
+          db.prepare("SELECT * FROM objects WHERE id = ?").get(objectId)
+        ).toEqual({
+          typename: "User",
+          id: objectId,
+          last_update: updateId,
+        });
       });
     });
 
@@ -814,6 +964,7 @@ describe("graphql/mirror", () => {
           mirror._queryFromPlan(plan, {
             nodesLimit: 10,
             nodesOfTypeLimit: 5,
+            typenamesLimit: 6,
             connectionLimit: 5,
             connectionPageSize: 23,
           });
@@ -821,6 +972,247 @@ describe("graphql/mirror", () => {
           'Query plan has inconsistent typenames for object "hmmm": ' +
             '"Issue" vs. "Repository"'
         );
+      });
+      it("skips objects will null typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          objects: [
+            {id: "user:id02", typename: "User"},
+            {id: "user:id04", typename: "User"},
+            {id: "user:id06", typename: "User"},
+          ],
+          connections: [],
+          typenames: [
+            {id: "typename:id01"},
+            {id: "typename:id02"},
+            {id: "typename:id03"},
+            {id: "typename:id04"},
+            {id: "typename:id05"},
+            {id: "typename:id06"},
+          ],
+        };
+        const actual = mirror._queryFromPlan(plan, {
+          nodesLimit: 4,
+          nodesOfTypeLimit: 2,
+          typenamesLimit: 3,
+          connectionLimit: 5,
+          connectionPageSize: 23,
+        });
+        const b = Queries.build;
+
+        expect(actual).toEqual([
+          b.alias(
+            "owndata_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  // only two entries for nodesOfTypeLimit
+                  b.literal("user:id02"),
+                  b.literal("user:id04"),
+                ]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "owndata_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("user:id06")]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "typename_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  b.literal("typename:id01"),
+                  b.literal("typename:id02"),
+                  b.literal("typename:id03"),
+                ]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+          b.alias(
+            "typename_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("typename:id04")]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+        ]);
+      });
+      it("Creates a good query with typenames in the queryPlan", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          objects: [
+            {id: "user:id01", typename: "User"},
+            {id: "user:id02", typename: "User"},
+            {id: "user:id03", typename: "User"},
+            {id: "user:id04", typename: "User"},
+            {id: "user:id05", typename: "User"},
+          ],
+          connections: [],
+          typenames: [
+            {id: "typename:id01"},
+            {id: "typename:id02"},
+            {id: "typename:id03"},
+            {id: "typename:id04"},
+            {id: "typename:id05"},
+            {id: "typename:id06"},
+          ],
+        };
+        const actual = mirror._queryFromPlan(plan, {
+          nodesLimit: 4,
+          nodesOfTypeLimit: 2,
+          typenamesLimit: 3,
+          connectionLimit: 5,
+          connectionPageSize: 23,
+        });
+        const b = Queries.build;
+
+        expect(actual).toEqual([
+          b.alias(
+            "owndata_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  // only two entries for nodesOfTypeLimit
+                  b.literal("user:id01"),
+                  b.literal("user:id02"),
+                ]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "owndata_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("user:id03"), b.literal("user:id04")]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "typename_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  b.literal("typename:id01"),
+                  b.literal("typename:id02"),
+                  b.literal("typename:id03"),
+                ]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+          b.alias(
+            "typename_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("typename:id04")]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+        ]);
+      });
+      it("Creates a good query with typenames in the queryPlan", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          objects: [
+            {id: "user:id01", typename: "User"},
+            {id: "user:id02", typename: "User"},
+            {id: "user:id03", typename: "User"},
+            {id: "user:id04", typename: "User"},
+            {id: "user:id05", typename: "User"},
+          ],
+          connections: [],
+          typenames: [
+            {id: "typename:id01"},
+            {id: "typename:id02"},
+            {id: "typename:id03"},
+            {id: "typename:id04"},
+            {id: "typename:id05"},
+            {id: "typename:id06"},
+          ],
+        };
+        const actual = mirror._queryFromPlan(plan, {
+          nodesLimit: 4,
+          nodesOfTypeLimit: 2,
+          typenamesLimit: 3,
+          connectionLimit: 5,
+          connectionPageSize: 23,
+        });
+        const b = Queries.build;
+
+        expect(actual).toEqual([
+          b.alias(
+            "owndata_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  // only two entries for nodesOfTypeLimit
+                  b.literal("user:id01"),
+                  b.literal("user:id02"),
+                ]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "owndata_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("user:id03"), b.literal("user:id04")]),
+              },
+              [b.inlineFragment("User", mirror._queryOwnData("User"))]
+            )
+          ),
+          b.alias(
+            "typename_0",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([
+                  b.literal("typename:id01"),
+                  b.literal("typename:id02"),
+                  b.literal("typename:id03"),
+                ]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+          b.alias(
+            "typename_1",
+            b.field(
+              "nodes",
+              {
+                ids: b.list([b.literal("typename:id04")]),
+              },
+              mirror._queryTypename()
+            )
+          ),
+        ]);
       });
       it("creates a good query", () => {
         const db = new Database(":memory:");
@@ -884,6 +1276,7 @@ describe("graphql/mirror", () => {
         const actual = mirror._queryFromPlan(plan, {
           nodesLimit: 4,
           nodesOfTypeLimit: 2,
+          typenamesLimit: 9,
           connectionLimit: 5,
           connectionPageSize: 23,
         });
@@ -965,10 +1358,11 @@ describe("graphql/mirror", () => {
           mirror._queryFromPlan(plan, {
             nodesLimit: 10,
             nodesOfTypeLimit: 5,
+            typenamesLimit: 200,
             connectionLimit: 5,
             connectionPageSize: 23,
           });
-        }).toThrow("Unfaithful typenames not yet implemented");
+        }).not.toThrow();
       });
     });
 
@@ -982,14 +1376,14 @@ describe("graphql/mirror", () => {
           mirror._nontransactionallyUpdateData(updateId, result);
         }).toThrow('Bad key in query result: "wat_0"');
       });
-      it("throws if given a key with a typename update prefix", () => {
+      it("handles a key with a typename update prefix", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const updateId = mirror._createUpdate(new Date(123));
         const result = {typename_0: {id: "woot"}};
         expect(() => {
           mirror._nontransactionallyUpdateData(updateId, result);
-        }).toThrow("Unfaithful Typenames not yet implemented");
+        }).not.toThrow("Unfaithful Typenames not yet implemented");
       });
 
       // We test the happy path lightly, because it just delegates to
@@ -1086,9 +1480,6 @@ describe("graphql/mirror", () => {
           },
         };
         mirror._updateData(updateId, node1);
-
-        const typename1: {+[string]: TypenameUpdateResult} = {};
-        mirror._updateData(updateId, typename1);
 
         // Check that the right objects are in the database.
         expect(
@@ -1266,6 +1657,45 @@ describe("graphql/mirror", () => {
           },
         ]);
       });
+      it("processes a reasonable input correctly with typenames", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        mirror.registerObject({typename: "Issue", id: "issue:#2"});
+        mirror._registerTypename({typename: null, id: "user:#3"});
+
+        const typename0: {+[string]: TypenameUpdateResult} = {
+          typename_0: [
+            {
+              id: "user:#1",
+              __typename: "User",
+              login: "Bagel",
+              url: "www.com",
+            },
+            {
+              id: "user:#2",
+              __typename: "User",
+              login: "Waffle",
+              url: "www.org",
+            },
+          ],
+        };
+        mirror._updateData(updateId, typename0);
+
+        // Check that the right objects are in the database.
+        expect(
+          db.prepare("SELECT * FROM objects ORDER BY id ASC").all()
+        ).toEqual([
+          {typename: "Issue", id: "issue:#1", last_update: null},
+          {typename: "Issue", id: "issue:#2", last_update: null},
+          {typename: "Repository", id: "repo:foo/bar", last_update: null},
+          {typename: "User", id: "user:#1", last_update: null},
+          {typename: "User", id: "user:#2", last_update: null},
+          {typename: null, id: "user:#3", last_update: null},
+        ]);
+      });
     });
 
     describe("update", () => {
@@ -1338,6 +1768,7 @@ describe("graphql/mirror", () => {
           nodesOfTypeLimit: 2,
           nodesLimit: 3,
           connectionLimit: 4,
+          typenamesLimit: 9,
           connectionPageSize: 5,
           since: new Date(123),
           now: now,
@@ -1367,6 +1798,7 @@ describe("graphql/mirror", () => {
           {
             nodesOfTypeLimit: 2,
             nodesLimit: 3,
+            typenamesLimit: 9,
             connectionLimit: 4,
             connectionPageSize: 5,
           },
@@ -1376,6 +1808,7 @@ describe("graphql/mirror", () => {
           {
             nodesOfTypeLimit: 2,
             nodesLimit: 3,
+            typenamesLimit: 9,
             connectionLimit: 4,
             connectionPageSize: 5,
           },
@@ -1485,14 +1918,14 @@ describe("graphql/mirror", () => {
         const updateId = mirror._createUpdate(new Date(123));
         db.prepare(
           dedent`\
-            UPDATE connections
-            SET
-                last_update = :updateId,
-                total_count = 0,
-                has_next_page = 0,
-                end_cursor = NULL
-            WHERE object_id = :objectId AND fieldname = :fieldname
-          `
+          UPDATE connections
+          SET
+              last_update = :updateId,
+              total_count = 0,
+              has_next_page = 0,
+              end_cursor = NULL
+          WHERE object_id = :objectId AND fieldname = :fieldname
+        `
         ).run({updateId, objectId: "foo/bar#1", fieldname: "comments"});
         expect(mirror._getEndCursor("foo/bar#1", "comments")).toBe(null);
       });
@@ -1503,14 +1936,14 @@ describe("graphql/mirror", () => {
         const updateId = mirror._createUpdate(new Date(123));
         db.prepare(
           dedent`\
-            UPDATE connections
-            SET
-              last_update = :updateId,
-              total_count = 1,
-              end_cursor = :endCursor,
-              has_next_page = 0
-            WHERE object_id = :objectId AND fieldname = :fieldname
-          `
+          UPDATE connections
+          SET
+            last_update = :updateId,
+            total_count = 1,
+            end_cursor = :endCursor,
+            has_next_page = 0
+          WHERE object_id = :objectId AND fieldname = :fieldname
+        `
         ).run({
           updateId,
           endCursor: "c29tZS1jdXJzb3I=",
@@ -1904,9 +2337,9 @@ describe("graphql/mirror", () => {
         const connectionId: number = db
           .prepare(
             dedent`\
-              SELECT rowid FROM connections
-              WHERE object_id = :objectId AND fieldname = :fieldname
-            `
+            SELECT rowid FROM connections
+            WHERE object_id = :objectId AND fieldname = :fieldname
+          `
           )
           .pluck()
           .get({objectId: "foo/bar#1", fieldname: "comments"});
@@ -1918,10 +2351,10 @@ describe("graphql/mirror", () => {
           db
             .prepare(
               dedent`\
-                SELECT idx, child_id FROM connection_entries
-                WHERE connection_id = ?
-                ORDER BY idx ASC
-              `
+              SELECT idx, child_id FROM connection_entries
+              WHERE connection_id = ?
+              ORDER BY idx ASC
+            `
             )
             .all(connectionId);
         const getConnectionInfo = (): {|
@@ -1933,10 +2366,10 @@ describe("graphql/mirror", () => {
           db
             .prepare(
               dedent`\
-                SELECT last_update, total_count, end_cursor, has_next_page
-                FROM connections
-                WHERE rowid = ?
-              `
+              SELECT last_update, total_count, end_cursor, has_next_page
+              FROM connections
+              WHERE rowid = ?
+            `
             )
             .get(connectionId);
 
@@ -2000,9 +2433,9 @@ describe("graphql/mirror", () => {
         const thirdUpdate = mirror._createUpdate(new Date(345));
         db.prepare(
           dedent`\
-            DELETE FROM connection_entries
-            WHERE connection_id = :connectionId AND idx = :idx
-          `
+          DELETE FROM connection_entries
+          WHERE connection_id = :connectionId AND idx = :idx
+        `
         ).run({connectionId, idx: 3});
         mirror._updateConnection(
           thirdUpdate,
@@ -2086,6 +2519,264 @@ describe("graphql/mirror", () => {
             b.field("user", {}, [b.field("__typename"), b.field("id")]),
           ]),
         ]);
+      });
+      it("queries an unfaithful typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchemaUnfaithful());
+        const query = mirror._queryOwnData("Issue");
+        const b = Queries.build;
+        expect(query).toEqual([
+          b.field("__typename"),
+          b.field("id"),
+          b.field("url"),
+          b.field("author", {}, [
+            b.field("__typename"),
+            b.inlineFragment("User", [b.field("id")]),
+            b.inlineFragment("Bot", [b.field("id")]),
+            b.inlineFragment("Organization", [b.field("id")]),
+          ]),
+          b.field("repository", {}, [b.field("__typename"), b.field("id")]),
+          b.field("title"),
+        ]);
+      });
+    });
+
+    describe("_hasUnfaithfulTypename", () => {
+      it("returns true given an unfaithful typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchemaUnfaithful());
+        expect(mirror._hasUnfaithfulTypename("Issue")).toEqual(true);
+        expect(mirror._hasUnfaithfulTypename("Issue")).toEqual(true);
+      });
+      it("returns false given a faithful typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchemaUnfaithful());
+        expect(mirror._hasUnfaithfulTypename("IssueComment")).toEqual(false);
+      });
+    });
+
+    describe("_getTypename", () => {
+      it("fails given a nonexistent id", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({
+          typename: "Organization",
+          id: "ID01",
+        });
+        expect(() => {
+          mirror._getTypename("ID02");
+        }).toThrow('No such object "ID02"');
+      });
+      it("succeeds in retrieving an objects typename from the database", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({
+          typename: "Organization",
+          id: "ID01",
+        });
+        expect(mirror._getTypename("ID01")).toBe("Organization");
+      });
+      it("succeeds in retrieving an objects null typename from the database", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror._registerTypename({
+          typename: null,
+          id: "ID01",
+        });
+        expect(mirror._getTypename("ID01")).toBe(null);
+      });
+    });
+
+    describe("_updateTypename", () => {
+      it("fails given a nonexistent id", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({
+          typename: "Organization",
+          id: "ID01",
+        });
+        mirror._updateTypename(updateId, [
+          {
+            id: "ID02",
+            __typename: "User",
+            url: "www.xoogle.com",
+            login: "X00gler",
+          },
+        ]);
+        expect(mirror._getTypename("ID01")).toBe("Organization");
+        expect(mirror._getTypename("ID02")).toBe("User");
+        expect(() => {
+          mirror._getTypename("ID03");
+        }).toThrow('No such object "ID03"');
+      });
+      it("succeeds in changing an objects typename in the database", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror.registerObject({
+          typename: "Organization",
+          id: "ID01",
+        });
+        mirror._updateTypename(updateId, [
+          {
+            id: "ID01",
+            __typename: "User",
+            url: "www.xoogle.com",
+            login: "X00gler",
+          },
+        ]);
+        expect(mirror._getTypename("ID01")).toBe("User");
+      });
+      it("properly stores normal data", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchemaUnfaithful());
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        mirror.registerObject({typename: "Issue", id: "issue:#2"});
+        mirror.registerObject({typename: "Issue", id: "issue:#3"});
+        mirror.registerObject({typename: "User", id: "alice"});
+        mirror.registerObject({typename: "Organization", id: "lola"});
+        mirror.registerObject({typename: "Reaction", id: "thumbs"});
+        const updateId = mirror._createUpdate(new Date(123));
+
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Issue",
+            id: "issue:#1",
+            url: "url://issue/1",
+            author: {__typename: "User", id: "alice"},
+            repository: {__typename: "Repository", id: "repo:foo/bar"},
+            title: 13.75,
+          },
+          {
+            __typename: "Issue",
+            id: "issue:#2",
+            url: null,
+            author: {__typename: "User", id: "bob"}, // must be added
+            repository: null,
+            title: false,
+          },
+        ]);
+        expect(
+          db
+            .prepare("SELECT id FROM objects WHERE typename = 'User'")
+            .pluck()
+            .all()
+            .sort()
+        ).toEqual(["alice"].sort());
+        expect(mirror._getTypename("bob")).toBe(null);
+        expect(
+          db.prepare("SELECT * FROM primitives_Issue ORDER BY id ASC").all()
+        ).toEqual([
+          {id: "issue:#1", url: '"url://issue/1"', title: "13.75"},
+          {id: "issue:#2", url: "null", title: "false"},
+          {id: "issue:#3", url: null, title: null},
+        ]);
+
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Reaction",
+            id: "thumbs",
+            content: "THUMBS_UP",
+            user: {
+              __typename: "User",
+              id: "lola",
+              login: "l0l4",
+              url: "lo.la",
+            },
+          },
+        ]);
+        expect(mirror._getTypename("lola")).toBe("Organization");
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Reaction",
+            id: "thumbs",
+            content: "ROCKET",
+            user: {
+              __typename: "User",
+              id: "lola",
+              login: "l0l4",
+              url: "lo.la",
+            },
+          },
+        ]);
+        expect(mirror._getTypename("lola")).toBe("Organization");
+      });
+      it("handles a null queryResult", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateTypename(updateId, []);
+      });
+      it("fails if the input is missing any primitive fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchemaUnfaithful());
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        mirror.registerObject({typename: "Issue", id: "issue:#2"});
+        mirror.registerObject({typename: "Issue", id: "issue:#3"});
+        mirror.registerObject({typename: "User", id: "alice"});
+        // mirror.registerObject({typename: "Organization", id: "lola"});
+        mirror.registerObject({typename: "Reaction", id: "thumbs"});
+        const updateId = mirror._createUpdate(new Date(123));
+
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Issue",
+            id: "issue:#1",
+            url: "url://issue/1",
+            author: {__typename: "User", id: "alice"},
+            repository: {__typename: "Repository", id: "repo:foo/bar"},
+            title: 13.75,
+          },
+          {
+            __typename: "Issue",
+            id: "issue:#2",
+            url: null,
+            author: {__typename: "User", id: "bob"}, // must be added
+            repository: null,
+            title: false,
+          },
+        ]);
+        expect(
+          db
+            .prepare("SELECT id FROM objects WHERE typename = 'User'")
+            .pluck()
+            .all()
+            .sort()
+        ).toEqual(["alice"].sort());
+        expect(mirror._getTypename("bob")).toBe(null);
+        expect(
+          db.prepare("SELECT * FROM primitives_Issue ORDER BY id ASC").all()
+        ).toEqual([
+          {id: "issue:#1", url: '"url://issue/1"', title: "13.75"},
+          {id: "issue:#2", url: "null", title: "false"},
+          {id: "issue:#3", url: null, title: null},
+        ]);
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Reaction",
+            id: "thumbs",
+            content: "ROCKET",
+            user: {
+              __typename: "User",
+              id: "lola",
+            },
+          },
+        ]);
+
+        expect(() => {
+          mirror._updateTypename(updateId, [
+            {
+              __typename: "User",
+              id: "lola",
+            },
+          ]);
+        }).toThrow(
+          'Missing primitive "url" on "lola" of type "User" ' +
+            "(got undefined)"
+        );
       });
     });
 
@@ -2591,6 +3282,164 @@ describe("graphql/mirror", () => {
           Queries.stringify.body(body, Queries.multilineLayout("  "));
         expect(format([query])).toMatchSnapshot();
       });
+
+      it("Doesn't update the typename of an unfaithful type", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchemaUnfaithful());
+        mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        mirror.registerObject({typename: "Issue", id: "issue:#2"});
+        mirror.registerObject({typename: "Issue", id: "issue:#3"});
+        mirror.registerObject({typename: "User", id: "alice"});
+        mirror.registerObject({typename: "User", id: "u1099"});
+        mirror.registerObject({typename: "IssueComment", id: "comments:#1.1"});
+        const updateId = mirror._createUpdate(new Date(123));
+
+        const aliceUser = {
+          __typename: "User",
+          id: "alice",
+          login: "wonderland",
+          url: "www.alice.com",
+        };
+        mirror._updateOwnData(updateId, [aliceUser]);
+
+        const Repo = {
+          __typename: "Repository",
+          id: "repo:foo/bar",
+          url: "www.puppies.com",
+        };
+        mirror._updateOwnData(updateId, [Repo]);
+
+        // We then create an issue in the repository
+        const Issue = {
+          __typename: "Issue",
+          id: "issue:#1",
+          url: "url://issue/1",
+          author: {__typename: "User", id: "alice"},
+          repository: {__typename: "Repository", id: "repo:foo/bar"},
+          title: 13.75,
+        };
+        mirror._updateOwnData(updateId, [Issue]);
+        mirror._updateConnection(updateId, Repo.id, "issues", {
+          totalCount: 1,
+          pageInfo: {hasNextPage: false, endCursor: "1"},
+          nodes: [{__typename: Issue.__typename, id: Issue.id}],
+        });
+        mirror._updateConnection(updateId, Issue.id, "timeline", {
+          totalCount: 0,
+          pageInfo: {
+            endCursor: null,
+            hasNextPage: false,
+          },
+          nodes: [],
+        });
+
+        // We create a comment in that issue
+        const IssueComment = {
+          __typename: "IssueComment",
+          id: "comments:#1.1",
+          body: "cya",
+          author: {
+            id: "alice",
+            __typename: "User",
+          },
+        };
+        mirror._updateOwnData(updateId, [IssueComment]);
+        mirror._updateConnection(updateId, Issue.id, "comments", {
+          totalCount: 1,
+          pageInfo: {hasNextPage: false, endCursor: "1"},
+          nodes: [{__typename: IssueComment.__typename, id: IssueComment.id}],
+        });
+
+        const aliceResult = mirror.extract(aliceUser.id);
+        expect(aliceResult).toEqual(aliceUser);
+
+        const aliceUser2 = {
+          __typename: "User",
+          id: "alice",
+          login: "wondahland",
+          url: "www.wondahland.com",
+        };
+        mirror._updateOwnData(updateId, [aliceUser2]);
+        const aliceResult2 = mirror.extract("alice");
+        expect(aliceResult2).toEqual(aliceUser2);
+
+        const IssueComment2 = {
+          __typename: "IssueComment",
+          id: "comments:#1.1",
+          body: "cya",
+          author: {
+            id: "alice",
+            __typename: "Organization",
+          },
+        };
+        mirror._updateOwnData(updateId, [IssueComment2]);
+        const aliceResult3 = mirror.extract("alice");
+        expect(aliceResult3).toEqual(aliceUser2);
+
+        const aliceUser3 = {
+          __typename: "Organization",
+          id: "alice",
+          url: "www.wondahland.com",
+          login: "wondahland",
+        };
+        mirror._updateTypename(updateId, [aliceUser3]);
+        const aliceResult4 = mirror.extract("alice");
+        expect(aliceResult4).toEqual(aliceUser3);
+
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Issue",
+              id: "issue:#1",
+              url: "www",
+              title: "title",
+              author: {
+                __typename: "Organization",
+                id: "alice",
+                login: "wonder",
+              },
+              repository: {__typename: "User", id: "repo:foo/bar"},
+            },
+          ]);
+        }).not.toThrow(
+          'Inconsistent type for ID "repo:foo/bar": expected "Repository", got "User"'
+        );
+
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Issue",
+              id: "issue:#1",
+              url: "www",
+              title: "title",
+              author: {__typename: "User", id: "alice", login: "wonderful"},
+              repository: {__typename: "User", id: "repo:foo/bar"},
+            },
+          ]);
+        }).not.toThrow(
+          'Inconsistent type for ID "repo:foo/bar": expected "Repository", got "User"'
+        );
+
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Issue",
+            id: "issue:#1",
+            url: "www",
+            title: "title",
+            author: {__typename: "Organization", id: "alice", login: "wonder"},
+            repository: {__typename: "Repository", id: "repo:foo/bar"},
+          },
+        ]);
+
+        const aliceOrg = mirror.extract("alice");
+        expect(aliceOrg).toEqual({
+          __typename: "Organization",
+          id: "alice",
+          login: "wondahland",
+          url: "www.wondahland.com",
+        });
+      });
     });
 
     describe("extract", () => {
@@ -2626,6 +3475,7 @@ describe("graphql/mirror", () => {
           }),
         });
       }
+
       type Caveman = {|
         +__typename: "Caveman",
         +id: string,
@@ -3505,6 +4355,842 @@ describe("graphql/mirror", () => {
         });
       });
     });
+    describe("extract2", () => {
+      // A schema with some useful edge cases.
+      function buildTestSchema(): Schema.Schema {
+        const s = Schema;
+        return s.schema({
+          Caveman: s.object({
+            id: s.id(),
+            only: s.primitive(),
+            primitives: s.primitive(),
+          }),
+          Feline: s.object({
+            id: s.id(),
+            owner: s.node("Caveman", s.unfaithful(["Caveman", "Pack"])),
+            lynx: s.node("Feline"),
+          }),
+          Socket: s.object({
+            id: s.id(),
+            only: s.connection("Socket"),
+            connections: s.connection("Socket"),
+          }),
+          Nest: s.object({
+            id: s.id(),
+            nest: s.nested({
+              egg: s.primitive(),
+              cat: s.node("Feline", s.unfaithful(["Feline", "Caveman"])),
+              absent: s.node("Empty"),
+            }),
+          }),
+          Empty: s.object({
+            id: s.id(),
+          }),
+          Pack: s.object({
+            id: s.id(),
+            cat: s.node("Feline"),
+          }),
+        });
+      }
+
+      type Caveman = {|
+        +__typename: "Caveman",
+        +id: string,
+        +only: mixed,
+        +primitives: mixed,
+      |};
+      type Feline = {|
+        +__typename: "Feline",
+        +id: string,
+        +owner: "Caveman",
+        +lynx: null | Feline,
+      |};
+      type Socket = {|
+        +__typename: "Socket",
+        +id: string,
+        +only: $ReadOnlyArray<null | Socket>,
+        +connections: $ReadOnlyArray<null | Socket>,
+      |};
+      type Nest = {|
+        +__typename: "Nest",
+        +id: string,
+        +nest: {|
+          +egg: mixed,
+          +cat: null | Feline,
+          +empty: null | Empty,
+        |},
+      |};
+      type Empty = {|
+        +__typename: "Empty",
+        +id: string,
+      |};
+
+      it("handles objects that only have primitive fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Caveman", id: "brog"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "brog", only: "ugg", primitives: "ook"},
+        ]);
+        mirror._updateOwnData(updateId, [
+          {__typename: "Empty", id: "brog", only: "ugg", primitives: "ook"},
+        ]);
+        const result: Caveman = (mirror.extract("brog"): any);
+        expect(result).toEqual({
+          __typename: "Caveman",
+          id: "brog",
+          only: "ugg",
+          primitives: "ook",
+        });
+      });
+      it("handles objects that only have link fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Feline", id: "alpha"});
+        mirror.registerObject({typename: "Feline", id: "beta"});
+        mirror.registerObject({typename: "Feline", id: "gamma"});
+        mirror.registerObject({typename: "Feline", id: "delta"});
+        mirror.registerObject({typename: "Caveman", id: "aen"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "aen", only: "ugg", primitives: "ook"},
+        ]);
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Feline",
+            id: "alpha",
+            owner: {__typename: "Caveman", id: "aen"},
+            lynx: {__typename: "Feline", id: "beta"},
+          },
+          {
+            __typename: "Feline",
+            id: "beta",
+            owner: {__typename: "Caveman", id: "aen"},
+            lynx: {__typename: "Feline", id: "gamma"},
+          },
+          {
+            __typename: "Feline",
+            id: "gamma",
+            owner: {__typename: "Pack", id: "aen"},
+            lynx: null,
+          },
+        ]);
+        const result = mirror.extract("alpha");
+        expect(result).toEqual({
+          __typename: "Feline",
+          id: "alpha",
+          owner: {
+            __typename: "Caveman",
+            id: "aen",
+            only: "ugg",
+            primitives: "ook",
+          },
+          lynx: {
+            __typename: "Feline",
+            id: "beta",
+            owner: {
+              __typename: "Caveman",
+              id: "aen",
+              only: "ugg",
+              primitives: "ook",
+            },
+            lynx: {
+              __typename: "Feline",
+              id: "gamma",
+              owner: {
+                __typename: "Caveman",
+                id: "aen",
+                only: "ugg",
+                primitives: "ook",
+              },
+              lynx: null,
+            },
+          },
+        });
+      });
+      it("handles objects that only have connection fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Socket", id: "localhost:8080"});
+        mirror.registerObject({typename: "Socket", id: "localhost:7070"});
+        mirror.registerObject({typename: "Socket", id: "localhost:6060"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Socket", id: "localhost:8080"},
+          {__typename: "Socket", id: "localhost:7070"},
+          {__typename: "Socket", id: "localhost:6060"},
+        ]);
+        const updateConnection = (
+          objectId: Schema.ObjectId,
+          fieldname: Schema.Fieldname,
+          ids: $ReadOnlyArray<Schema.ObjectId>
+        ) => {
+          mirror._updateConnection(updateId, objectId, fieldname, {
+            totalCount: ids.length,
+            pageInfo: {hasNextPage: false, endCursor: String(ids.length)},
+            nodes: ids.map((id) => ({__typename: "Socket", id})),
+          });
+        };
+        updateConnection("localhost:8080", "only", []);
+        updateConnection("localhost:7070", "only", []);
+        updateConnection("localhost:6060", "only", []);
+        updateConnection("localhost:8080", "connections", ["localhost:7070"]);
+        updateConnection("localhost:7070", "connections", [
+          "localhost:6060",
+          "localhost:6060",
+        ]);
+        updateConnection("localhost:6060", "connections", []);
+        const result = mirror.extract("localhost:8080");
+        expect(result).toEqual({
+          __typename: "Socket",
+          id: "localhost:8080",
+          only: [],
+          connections: [
+            {
+              __typename: "Socket",
+              id: "localhost:7070",
+              only: [],
+              connections: [
+                {
+                  __typename: "Socket",
+                  id: "localhost:6060",
+                  only: [],
+                  connections: [],
+                },
+                {
+                  __typename: "Socket",
+                  id: "localhost:6060",
+                  only: [],
+                  connections: [],
+                },
+              ],
+            },
+          ],
+        });
+      });
+      it("handles objects with no fields", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Empty", id: "mt"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [{__typename: "Empty", id: "mt"}]);
+        const result = mirror.extract("mt");
+        expect(result).toEqual({__typename: "Empty", id: "mt"});
+      });
+      it("handles boolean primitives", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Caveman", id: "brog"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "brog", only: false, primitives: true},
+        ]);
+        expect(mirror.extract("brog")).toEqual({
+          __typename: "Caveman",
+          id: "brog",
+          only: false,
+          primitives: true,
+        });
+      });
+      it("handles null primitives", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Caveman", id: "brog"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "brog", only: null, primitives: null},
+        ]);
+        expect(mirror.extract("brog")).toEqual({
+          __typename: "Caveman",
+          id: "brog",
+          only: null,
+          primitives: null,
+        });
+      });
+      it("handles numeric primitives", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Caveman", id: "brog"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "brog", only: 123, primitives: 987},
+        ]);
+        expect(mirror.extract("brog")).toEqual({
+          __typename: "Caveman",
+          id: "brog",
+          only: 123,
+          primitives: 987,
+        });
+      });
+      it("handles nested objects", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Nest", id: "eyrie"});
+        mirror.registerObject({typename: "Feline", id: "meow"});
+        mirror.registerObject({typename: "Caveman", id: "aen"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Caveman", id: "aen", only: "ugg", primitives: "ook"},
+        ]);
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Nest",
+            id: "eyrie",
+            nest: {
+              egg: "nog",
+              cat: {__typename: "Caveman", id: "meow"},
+              absent: null,
+            },
+          },
+        ]);
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Feline",
+            id: "meow",
+            owner: {
+              __typename: "Caveman",
+              id: "aen",
+              only: "ugg",
+              primitives: "ook",
+            },
+            lynx: null,
+          },
+        ]);
+        const meow: Nest = (mirror.extract("meow"): any);
+        expect(meow).toEqual({
+          id: "meow",
+          __typename: "Feline",
+          owner: {
+            id: "aen",
+            __typename: "Caveman",
+            only: "ugg",
+            primitives: "ook",
+          },
+          lynx: null,
+        });
+
+        const result: Nest = (mirror.extract("eyrie"): any);
+        expect(result).toEqual({
+          __typename: "Nest",
+          id: "eyrie",
+          nest: {
+            egg: "nog",
+            cat: {
+              __typename: "Feline",
+              id: "meow",
+              owner: {
+                __typename: "Caveman",
+                id: "aen",
+                only: "ugg",
+                primitives: "ook",
+              },
+              lynx: null,
+            },
+            absent: null,
+          },
+        });
+
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Nest",
+            id: "eyrie",
+            nest: {
+              egg: "nog",
+              cat: {__typename: "Feline", id: "meow"},
+              absent: null,
+            },
+          },
+        ]);
+        const result2: Nest = (mirror.extract("eyrie"): any);
+        expect(result2).toEqual({
+          __typename: "Nest",
+          id: "eyrie",
+          nest: {
+            egg: "nog",
+            cat: {
+              __typename: "Feline",
+              id: "meow",
+              lynx: null,
+              owner: {
+                __typename: "Caveman",
+                id: "aen",
+                only: "ugg",
+                primitives: "ook",
+              },
+            },
+            absent: null,
+          },
+        });
+
+        const meow2: Nest = (mirror.extract("meow"): any);
+        expect(meow2).toEqual({
+          id: "meow",
+          __typename: "Feline",
+          owner: {
+            id: "aen",
+            __typename: "Caveman",
+            only: "ugg",
+            primitives: "ook",
+          },
+          lynx: null,
+        });
+      });
+
+      it("handles cyclic connection structures", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Socket", id: "localhost:8080"});
+        mirror.registerObject({typename: "Socket", id: "localhost:7070"});
+        mirror.registerObject({typename: "Socket", id: "localhost:6060"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Socket", id: "localhost:8080"},
+          {__typename: "Socket", id: "localhost:7070"},
+          {__typename: "Socket", id: "localhost:6060"},
+        ]);
+        const updateConnection = (
+          objectId: Schema.ObjectId,
+          fieldname: Schema.Fieldname,
+          ids: $ReadOnlyArray<Schema.ObjectId>
+        ) => {
+          mirror._updateConnection(updateId, objectId, fieldname, {
+            totalCount: ids.length,
+            pageInfo: {hasNextPage: false, endCursor: String(ids.length)},
+            nodes: ids.map((id) => ({__typename: "Socket", id})),
+          });
+        };
+        updateConnection("localhost:8080", "only", []);
+        updateConnection("localhost:7070", "only", []);
+        updateConnection("localhost:6060", "only", []);
+        updateConnection("localhost:8080", "connections", ["localhost:7070"]);
+        updateConnection("localhost:7070", "connections", [
+          "localhost:8080",
+          "localhost:7070",
+          "localhost:6060",
+        ]);
+        updateConnection("localhost:6060", "connections", ["localhost:7070"]);
+        const result: Socket = (mirror.extract("localhost:8080"): any);
+        expect(result).toEqual({
+          __typename: "Socket",
+          id: "localhost:8080",
+          only: [],
+          connections: [
+            {
+              __typename: "Socket",
+              id: "localhost:7070",
+              only: [],
+              connections: [
+                result,
+                result.connections[0],
+                {
+                  __typename: "Socket",
+                  id: "localhost:6060",
+                  only: [],
+                  connections: [result.connections[0]],
+                },
+              ],
+            },
+          ],
+        });
+        const s8080: Socket = result;
+        const s7070: Socket = ((s8080.connections[0]: Socket | null): any);
+        const s6060: Socket = ((s7070.connections[2]: Socket | null): any);
+        expect(s7070.connections[0]).toBe(s8080);
+        expect(s7070.connections[1]).toBe(s7070);
+        expect(s7070.connections[2]).toBe(s6060);
+        expect(s6060.connections[0]).toBe(s7070);
+      });
+
+      it("handles connections with null and repeated values", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildTestSchema());
+        mirror.registerObject({typename: "Socket", id: "localhost"});
+        const updateId = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(updateId, [
+          {__typename: "Socket", id: "localhost"},
+        ]);
+        mirror._updateConnection(updateId, "localhost", "only", {
+          totalCount: 0,
+          pageInfo: {hasNextPage: false, endCursor: null},
+          nodes: [],
+        });
+        mirror._updateConnection(updateId, "localhost", "connections", {
+          totalCount: 6,
+          pageInfo: {hasNextPage: false, endCursor: "#6"},
+          nodes: [
+            null,
+            {__typename: "Socket", id: "localhost"},
+            null,
+            {__typename: "Socket", id: "localhost"},
+            {__typename: "Socket", id: "localhost"},
+            null,
+          ],
+        });
+        const result: Socket = (mirror.extract("localhost"): any);
+        expect(result).toEqual({
+          __typename: "Socket",
+          id: "localhost",
+          only: [],
+          connections: [null, result, null, result, result, null],
+        });
+        expect(result.connections[1]).toBe(result);
+        expect(result.connections[3]).toBe(result);
+        expect(result.connections[4]).toBe(result);
+      });
+
+      it("handles a representative normal case", () => {
+        // In this test case, we have:
+        //
+        //   - objects that are not relevant
+        //   - object types with no relevant instances
+        //   - object types with no instances at all
+        //   - relevant objects that are not direct dependencies
+        //   - relevant objects with cyclic links and connections
+        //   - relevant objects with only primitive fields
+        //   - relevant objects with empty connections
+        //   - relevant objects with links pointing to `null`
+        //   - relevant objects with links of union type
+        //   - relevant objects with non-`null` nested fields
+        //   - relevant objects with `null` nested fields
+        //
+        // (An object is "relevant" if it is a transitive dependency of
+        // the root.)
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+
+        const objects = {
+          repo: () => ({typename: "Repository", id: "repo:foo/bar"}),
+          issue1: () => ({typename: "Issue", id: "issue:#1"}),
+          issue2: () => ({typename: "Issue", id: "issue:#2"}),
+          issue3: () => ({typename: "Issue", id: "issue:#3"}),
+          alice: () => ({typename: "User", id: "user:alice"}),
+          bob: () => ({typename: "User", id: "user:bob"}),
+          ethereal: () => ({typename: "User", id: "user:ethereal"}),
+          nobody: () => ({typename: "User", id: "user:nobody"}),
+          noboty: () => ({typename: "Bot", id: "bot:noboty"}),
+          comment1: () => ({typename: "IssueComment", id: "comment:#2.1"}),
+          comment2: () => ({typename: "IssueComment", id: "comment:#2.2"}),
+          closedEvent: () => ({
+            typename: "ClosedEvent",
+            id: "issue:#2!closed#0",
+          }),
+          commit1: () => ({typename: "Commit", id: "commit:oid"}),
+          commit2: () => ({typename: "Commit", id: "commit:zzz"}),
+        };
+        const asNode = ({
+          typename,
+          id,
+        }): {|+__typename: Schema.Typename, +id: Schema.ObjectId|} => ({
+          __typename: typename,
+          id,
+        });
+
+        const update1 = mirror._createUpdate(new Date(123));
+        const update2 = mirror._createUpdate(new Date(234));
+        const update3 = mirror._createUpdate(new Date(345));
+
+        const emptyConnection = () => ({
+          totalCount: 0,
+          pageInfo: {
+            endCursor: null,
+            hasNextPage: false,
+          },
+          nodes: [],
+        });
+
+        // Update #1: Own data for the repository and issues #1 and #2
+        // and their authors. Connection data for issue #1 as a child of
+        // the repository, but not issue #2. No comments on any issue.
+        mirror.registerObject(objects.repo());
+        mirror.registerObject(objects.issue1());
+        mirror.registerObject(objects.issue2());
+        mirror.registerObject(objects.alice());
+        mirror.registerObject(objects.ethereal());
+        mirror._updateOwnData(update1, [
+          {
+            ...asNode(objects.repo()),
+            url: "url://foo/bar",
+          },
+        ]);
+        mirror._updateOwnData(update1, [
+          {
+            ...asNode(objects.issue1()),
+            url: "url://issue/1",
+            author: asNode(objects.alice()),
+            repository: asNode(objects.repo()),
+            title: "this project looks dead; let's make some issues",
+          },
+          {
+            ...asNode(objects.issue2()),
+            url: "url://issue/2",
+            author: asNode(objects.ethereal()),
+            repository: asNode(objects.repo()),
+            title: "by the time you read this, I will have deleted my account",
+          },
+          // issue:#3 remains unloaded
+        ]);
+        mirror._updateOwnData(update1, [
+          {
+            ...asNode(objects.alice()),
+            url: "url://alice",
+            login: "alice",
+          },
+          {
+            ...asNode(objects.ethereal()),
+            login: "ethereal",
+            url: "url://ethereal",
+          },
+          // "nobody" and "noboty" remain unloaded
+        ]);
+        mirror._updateConnection(update1, objects.repo().id, "issues", {
+          totalCount: 2,
+          pageInfo: {
+            endCursor: "cursor:repo:foo/bar.issues@update1",
+            hasNextPage: true,
+          },
+          nodes: [asNode(objects.issue1())],
+        });
+        mirror._updateConnection(
+          update1,
+          objects.issue1().id,
+          "comments",
+          emptyConnection()
+        );
+        mirror._updateConnection(
+          update1,
+          objects.issue1().id,
+          "timeline",
+          emptyConnection()
+        );
+        mirror._updateConnection(
+          update1,
+          objects.issue2().id,
+          "comments",
+          emptyConnection()
+        );
+        mirror._updateConnection(
+          update1,
+          objects.issue2().id,
+          "timeline",
+          emptyConnection()
+        );
+
+        // Update #2: Issue #2 author changes to `null`. Alice posts a
+        // comment on issue #2 and closes it. Issue #2 is loaded as a
+        // child of the repository. Alice adds a commit to issue #1, and
+        // an anonymous user also adds a commit to issue #1.
+        mirror.registerObject(objects.comment1());
+        mirror._updateOwnData(update2, [
+          {
+            ...asNode(objects.issue2()),
+            url: "url://issue/2",
+            author: null,
+            repository: asNode(objects.repo()),
+            title: "by the time you read this, I will have deleted my account",
+          },
+          // issue:#3 remains unloaded
+        ]);
+        mirror._updateOwnData(update2, [
+          {
+            ...asNode(objects.comment1()),
+            body: "cya",
+            author: asNode(objects.alice()),
+          },
+        ]);
+        mirror._updateConnection(update2, objects.repo().id, "issues", {
+          totalCount: 2,
+          pageInfo: {
+            endCursor: "cursor:repo:foo/bar.issues@update2",
+            hasNextPage: true,
+          },
+          nodes: [asNode(objects.issue2())],
+        });
+        mirror._updateConnection(update2, objects.issue2().id, "comments", {
+          totalCount: 1,
+          pageInfo: {
+            endCursor: "cursor:issue:#2.comments@update2",
+            hasNextPage: false,
+          },
+          nodes: [asNode(objects.comment1())],
+        });
+        mirror._updateConnection(update2, objects.issue1().id, "timeline", {
+          totalCount: 2,
+          pageInfo: {
+            endCursor: "cursor:issue:#1.timeline@update2",
+            hasNextPage: false,
+          },
+          nodes: [asNode(objects.commit1()), asNode(objects.commit2())],
+        });
+        mirror._updateConnection(update2, objects.issue2().id, "timeline", {
+          totalCount: 1,
+          pageInfo: {
+            endCursor: "cursor:issue:#2.timeline@update2",
+            hasNextPage: false,
+          },
+          nodes: [asNode(objects.closedEvent())],
+        });
+
+        // Update #3: Bob comments on issue #2. An issue #3 is created
+        // but not yet added to the repository connection. The details
+        // for the commits and the closed event are fetched.
+        mirror.registerObject(objects.bob());
+        mirror.registerObject(objects.comment2());
+        mirror.registerObject(objects.issue3());
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.commit1()),
+            oid: "yes",
+            author: {
+              date: "today",
+              user: {
+                __typename: "User",
+                id: "user:alice",
+              },
+            },
+          },
+        ]);
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.commit2()),
+            oid: "hmm",
+            author: null,
+          },
+        ]);
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.bob()),
+            url: "url://bob",
+            login: "bob",
+          },
+        ]);
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.comment2()),
+            body: "alas, I did not know them well",
+            author: asNode(objects.bob()),
+          },
+        ]);
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.issue3()),
+            url: "url://issue/3",
+            author: asNode(objects.bob()),
+            repository: asNode(objects.repo()),
+            title: "duly responding to the call for spurious issues",
+          },
+        ]);
+        mirror._updateOwnData(update3, [
+          {
+            ...asNode(objects.closedEvent()),
+            actor: asNode(objects.alice()),
+          },
+        ]);
+        mirror._updateConnection(update3, objects.issue2().id, "comments", {
+          totalCount: 2,
+          pageInfo: {
+            endCursor: "cursor:issue:#2.comments@update3",
+            hasNextPage: false,
+          },
+          nodes: [asNode(objects.comment2())],
+        });
+
+        // The following entities are never referenced...
+        mirror.registerObject(objects.nobody());
+        mirror.registerObject(objects.noboty());
+        mirror.registerObject(objects.issue3());
+
+        const result = mirror.extract("repo:foo/bar");
+        expect(result).toEqual({
+          __typename: "Repository",
+          id: "repo:foo/bar",
+          url: "url://foo/bar",
+          issues: [
+            {
+              __typename: "Issue",
+              id: "issue:#1",
+              url: "url://issue/1",
+              author: {
+                __typename: "User",
+                id: "user:alice",
+                url: "url://alice",
+                login: "alice",
+              },
+              repository: result, // circular
+              title: "this project looks dead; let's make some issues",
+              comments: [],
+              timeline: [
+                {
+                  __typename: "Commit",
+                  id: "commit:oid",
+                  oid: "yes",
+                  author: {
+                    date: "today",
+                    user: {
+                      __typename: "User",
+                      id: "user:alice",
+                      url: "url://alice",
+                      login: "alice",
+                    },
+                  },
+                },
+                {
+                  __typename: "Commit",
+                  id: "commit:zzz",
+                  oid: "hmm",
+                  author: null,
+                },
+              ],
+            },
+            {
+              __typename: "Issue",
+              id: "issue:#2",
+              url: "url://issue/2",
+              author: null,
+              repository: result, // circular
+              title:
+                "by the time you read this, I will have deleted my account",
+              comments: [
+                {
+                  __typename: "IssueComment",
+                  id: "comment:#2.1",
+                  body: "cya",
+                  author: {
+                    __typename: "User",
+                    id: "user:alice",
+                    url: "url://alice",
+                    login: "alice",
+                  },
+                },
+                {
+                  __typename: "IssueComment",
+                  id: "comment:#2.2",
+                  body: "alas, I did not know them well",
+                  author: {
+                    __typename: "User",
+                    id: "user:bob",
+                    url: "url://bob",
+                    login: "bob",
+                  },
+                },
+              ],
+              timeline: [
+                {
+                  __typename: "ClosedEvent",
+                  id: "issue:#2!closed#0",
+                  actor: {
+                    __typename: "User",
+                    id: "user:alice",
+                    url: "url://alice",
+                    login: "alice",
+                  },
+                },
+              ],
+            },
+          ],
+        });
+      });
+    });
   });
 
   describe("_buildSchemaInfo", () => {
@@ -3815,6 +5501,5 @@ describe("graphql/mirror", () => {
         "two_11"
       );
     });
-    //
   });
 });
