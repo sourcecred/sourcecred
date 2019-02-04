@@ -13,6 +13,9 @@ import {
   _inTransaction,
   _makeSingleUpdateFunction,
   _nontransactionallyFindUnusedTableName,
+  type OwnDataUpdateResult,
+  type NodeConnectionsUpdateResult,
+  type TypenameUpdateResult,
   Mirror,
 } from "./mirror";
 
@@ -882,6 +885,15 @@ describe("graphql/mirror", () => {
           mirror._nontransactionallyUpdateData(updateId, result);
         }).toThrow('Bad key in query result: "wat_0"');
       });
+      it("throws if given a key with a typename update prefix", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        const result = {typename_0: {id: "woot"}};
+        expect(() => {
+          mirror._nontransactionallyUpdateData(updateId, result);
+        }).toThrow("Unfaithful Typenames not yet implemented");
+      });
 
       // We test the happy path lightly, because it just delegates to
       // other methods, which are themselves tested. This test is
@@ -893,7 +905,9 @@ describe("graphql/mirror", () => {
         mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
         mirror.registerObject({typename: "Issue", id: "issue:#1"});
         mirror.registerObject({typename: "Issue", id: "issue:#2"});
-        const result = {
+
+        // The format of this test has been reformatted due to facebook/Flow #2892
+        const owndata0: {+[string]: OwnDataUpdateResult} = {
           owndata_0: [
             {
               __typename: "Repository",
@@ -901,6 +915,10 @@ describe("graphql/mirror", () => {
               url: "url://foo/bar",
             },
           ],
+        };
+        mirror._updateData(updateId, owndata0);
+
+        const owndata1: {+[string]: OwnDataUpdateResult} = {
           owndata_1: [
             {
               __typename: "Issue",
@@ -931,6 +949,10 @@ describe("graphql/mirror", () => {
               },
             },
           ],
+        };
+        mirror._updateData(updateId, owndata1);
+
+        const node0: {+[string]: NodeConnectionsUpdateResult} = {
           node_0: {
             id: "repo:foo/bar",
             issues: {
@@ -942,6 +964,10 @@ describe("graphql/mirror", () => {
               nodes: [{__typename: "Issue", id: "issue:#1"}],
             },
           },
+        };
+        mirror._updateData(updateId, node0);
+
+        const node1: {+[string]: NodeConnectionsUpdateResult} = {
           node_1: {
             id: "issue:#1",
             comments: {
@@ -962,7 +988,10 @@ describe("graphql/mirror", () => {
             },
           },
         };
-        mirror._updateData(updateId, result);
+        mirror._updateData(updateId, node1);
+
+        const typename1: {+[string]: TypenameUpdateResult} = {};
+        mirror._updateData(updateId, typename1);
 
         // Check that the right objects are in the database.
         expect(
