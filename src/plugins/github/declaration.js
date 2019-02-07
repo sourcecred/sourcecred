@@ -153,6 +153,7 @@ const reactsRocketEdgeType = Object.freeze({
   // TODO(#811): Probably change this to 0
   defaultBackwardWeight: 1 / 32,
   prefix: E.Prefix.reactsRocket,
+  description: "TODO: Add a description for this EdgeType",
 });
 
 const edgeTypes = Object.freeze([
