@@ -3,6 +3,7 @@
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import * as N from "./nodes";
 import * as E from "./edges";
+import dedent from "../../util/dedent";
 
 const repoNodeType = Object.freeze({
   name: "Repository",
@@ -76,7 +77,10 @@ const authorsEdgeType = Object.freeze({
   defaultForwardWeight: 1 / 2,
   defaultBackwardWeight: 1,
   prefix: E.Prefix.authors,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    An authors edge connects a GitHub userlike account to a post\
+    that they authored. Examples of posts include issues, pull requests, and comments.
+  `,
 });
 
 const hasParentEdgeType = Object.freeze({
@@ -85,7 +89,11 @@ const hasParentEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 1 / 4,
   prefix: E.Prefix.hasParent,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    A hasParent edge connects a GitHub entity to its child entities.
+    For example, a Repository has Issues and Pull Requests as children, and a
+    Pull Request has comments and reviews as children.
+  `,
 });
 
 const mergedAsEdgeType = Object.freeze({
@@ -94,7 +102,10 @@ const mergedAsEdgeType = Object.freeze({
   defaultForwardWeight: 1 / 2,
   defaultBackwardWeight: 1,
   prefix: E.Prefix.mergedAs,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    A mergedAs edge connects a GitHub pull request to the commit that it merges,
+    assuming that the pull request has merged.
+  `,
 });
 
 const referencesEdgeType = Object.freeze({
@@ -103,7 +114,12 @@ const referencesEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.references,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    A references edge connects a GitHub post to a GitHub entity that it
+    references. For example, if you write a GitHub issue comment that says
+    "thanks @username for pull #1337", it will create references edges to both
+    the user @username, and to pull #1337 in the same repository.
+  `,
 });
 
 const mentionsAuthorEdgeType = Object.freeze({
@@ -112,7 +128,14 @@ const mentionsAuthorEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.mentionsAuthor,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    When a post in a particular thread mentions a particular user, that post
+    will have a \`MentionsAuthorEdge\` connecting it to any posts written by the
+    mentioned user. The intuition is that if a post is mentioning an author by name,
+    their contributions in that thread are probably particularly valuable.
+
+    This is an experimental feature and may be removed in a future version of SourceCred.
+  `,
 });
 
 const reactsHeartEdgeType = Object.freeze({
@@ -121,7 +144,9 @@ const reactsHeartEdgeType = Object.freeze({
   defaultForwardWeight: 2,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsHeart,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    A reactsHeart edge connects users to posts that they gave a ❤️ reaction to.
+  `,
 });
 
 const reactsThumbsUpEdgeType = Object.freeze({
@@ -130,7 +155,9 @@ const reactsThumbsUpEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsThumbsUp,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    A reactsThumbsUp edge connects users to posts that they gave a 👍 reaction to.
+  `,
 });
 
 const reactsHoorayEdgeType = Object.freeze({
@@ -139,7 +166,9 @@ const reactsHoorayEdgeType = Object.freeze({
   defaultForwardWeight: 4,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsHooray,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    A reactsHooray edge connects users to posts that they gave a 🎉 reaction to.
+  `,
 });
 
 const reactsRocketEdgeType = Object.freeze({
@@ -148,7 +177,9 @@ const reactsRocketEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsRocket,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    A reactsRocket edge connects users to posts that they gave a 🚀 reaction to.
+  `,
 });
 
 const edgeTypes = Object.freeze([

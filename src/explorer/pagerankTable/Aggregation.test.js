@@ -157,7 +157,7 @@ describe("explorer/pagerankTable/Aggregation", () => {
       defaultForwardWeight: 1,
       defaultBackwardWeight: 1,
       prefix: EdgeAddress.fromParts(["look", "like"]),
-      description: "TODO: Add a description for this EdgeType",
+      description: "An example EdgeType for testing purposes",
     };
     function aggView(aggregation: FlatAggregation) {
       const el = shallow(<AggregationView aggregation={aggregation} />);

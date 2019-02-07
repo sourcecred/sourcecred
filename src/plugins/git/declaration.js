@@ -19,7 +19,8 @@ const hasParentEdgeType = Object.freeze({
   prefix: E.Prefix.hasParent,
   defaultForwardWeight: 1,
   defaultBackwardWeight: 1,
-  description: "TODO: Add a description for this EdgeType",
+  description:
+    "A Git hasParent edge connects a Git commit to its parent commit(s).",
 });
 
 const nodeTypes = Object.freeze([commitNodeType]);
