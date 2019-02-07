@@ -3,7 +3,14 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import {WeightSlider, formatWeight, WEIGHT_SLIDER_MIN} from "./WeightSlider";
+import {
+  WeightSlider,
+  formatWeight,
+  MIN_SLIDER,
+  MAX_SLIDER,
+  sliderToWeight,
+  weightToSlider,
+} from "./WeightSlider";
 
 require("../../webutil/testUtil").configureEnzyme();
 
@@ -24,12 +31,12 @@ describe("explorer/weights/WeightSlider", () => {
       const element = shallow(
         <WeightSlider weight={0} name="foo" onChange={jest.fn()} />
       );
-      expect(element.find("input").props().value).toBe(WEIGHT_SLIDER_MIN);
+      expect(element.find("input").props().value).toBe(MIN_SLIDER);
     });
     it("sets weight to zero when the slider value equals the minimum value", () => {
       const {element, onChange} = example();
       const input = element.find("input");
-      input.simulate("change", {target: {valueAsNumber: WEIGHT_SLIDER_MIN}});
+      input.simulate("change", {target: {valueAsNumber: MIN_SLIDER}});
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange).toHaveBeenCalledWith(0);
     });
@@ -54,12 +61,50 @@ describe("explorer/weights/WeightSlider", () => {
     it("changes to the slider trigger the onChange with exponentiatied value", () => {
       const {element, onChange} = example();
       const input = element.find("input");
-      input.simulate("change", {target: {valueAsNumber: 7}});
+      input.simulate("change", {target: {valueAsNumber: 3}});
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith(2 ** 7);
+      expect(onChange).toHaveBeenCalledWith(2 ** 3);
     });
   });
 
+  describe("weight<-> slider conversions", () => {
+    it("slider->weight->slider is identity", () => {
+      const legalSliderPositions = [MIN_SLIDER, 0, MAX_SLIDER];
+      for (const sliderPosition of legalSliderPositions) {
+        const weight = sliderToWeight(sliderPosition);
+        const position_ = weightToSlider(weight);
+        expect(sliderPosition).toEqual(position_);
+      }
+    });
+    it("weight->slider->weight is identity", () => {
+      const legalWeights = [0, 1, 2 ** MAX_SLIDER];
+      for (const weight of legalWeights) {
+        const position = weightToSlider(weight);
+        const weight_ = sliderToWeight(position);
+        expect(weight).toEqual(weight_);
+      }
+    });
+    it("weightToSlider errors on weights out of range", () => {
+      const illegalValues = [-1, 2 ** MAX_SLIDER + 1];
+      for (const illegalValue of illegalValues) {
+        expect(() => weightToSlider(illegalValue)).toThrowError(
+          "Weight out of range"
+        );
+      }
+    });
+    it("sliderToWeight errors on slider position out of range", () => {
+      const illegalValues = [MIN_SLIDER - 1, MAX_SLIDER + 1];
+      for (const illegalValue of illegalValues) {
+        expect(() => sliderToWeight(illegalValue)).toThrowError(
+          "Slider position out of range"
+        );
+      }
+    });
+    it("sliderToWeight and weightToSlider error on NaN", () => {
+      expect(() => sliderToWeight(NaN)).toThrowError("illegal value: NaN");
+      expect(() => weightToSlider(NaN)).toThrowError("illegal value: NaN");
+    });
+  });
   describe("formatWeight", () => {
     it("shows numbers greater than 1 as a integer-rounded multiplier", () => {
       expect(formatWeight(5.3)).toBe("5×");
