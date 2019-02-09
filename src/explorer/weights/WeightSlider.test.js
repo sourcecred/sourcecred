@@ -10,47 +10,43 @@ import {
   MAX_SLIDER,
   sliderToWeight,
   weightToSlider,
+  type Weight,
 } from "./WeightSlider";
 
 require("../../webutil/testUtil").configureEnzyme();
 
 describe("explorer/weights/WeightSlider", () => {
   describe("WeightSlider", () => {
-    function example() {
+    function example(weight: Weight) {
       const onChange = jest.fn();
       const element = shallow(
-        <WeightSlider weight={3} name="foo" onChange={onChange} />
+        <WeightSlider weight={weight} name="foo" onChange={onChange} />
       );
       return {element, onChange};
     }
-    it("sets slider to the log of provided weight", () => {
-      const {element} = example();
-      expect(element.find("input").props().value).toBe(Math.log2(3));
-    });
-    it("sets slider value to the minimum value when the provided weight equals zero", () => {
-      const element = shallow(
-        <WeightSlider weight={0} name="foo" onChange={jest.fn()} />
-      );
-      expect(element.find("input").props().value).toBe(MIN_SLIDER);
-    });
-    it("sets weight to zero when the slider value equals the minimum value", () => {
-      const {element, onChange} = example();
-      const input = element.find("input");
-      input.simulate("change", {target: {valueAsNumber: MIN_SLIDER}});
-      expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith(0);
+    // These are all valid weights, but not all of them correspond to a valid
+    // slider position.
+    const exampleWeights = [0, 2 ** -10, 0.25, 0.33, 1, 20];
+    it("sets the slider as corresponds to the current weight", () => {
+      for (const w of exampleWeights) {
+        const expectedSlider = weightToSlider(w);
+        const {element} = example(w);
+        expect(element.find("input").props().value).toBe(expectedSlider);
+      }
     });
     it("prints the provided weight", () => {
-      const {element} = example();
-      expect(
-        element
-          .find("span")
-          .at(1)
-          .text()
-      ).toBe(formatWeight(3));
+      for (const w of exampleWeights) {
+        const {element} = example(w);
+        expect(
+          element
+            .find("span")
+            .at(1)
+            .text()
+        ).toBe(formatWeight(w));
+      }
     });
     it("displays the provided name", () => {
-      const {element} = example();
+      const {element} = example(0);
       expect(
         element
           .find("span")
@@ -58,12 +54,26 @@ describe("explorer/weights/WeightSlider", () => {
           .text()
       ).toBe("foo");
     });
-    it("changes to the slider trigger the onChange with exponentiatied value", () => {
-      const {element, onChange} = example();
+    it("changes to the slider trigger the onChange with the corresponding weight", () => {
+      const sliderVals = [MIN_SLIDER, 0, MAX_SLIDER];
+      for (const sliderVal of sliderVals) {
+        const {element, onChange} = example(0);
+        const input = element.find("input");
+        input.simulate("change", {target: {valueAsNumber: sliderVal}});
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(onChange).toHaveBeenCalledWith(sliderToWeight(sliderVal));
+      }
+    });
+    it("the weight and slider position may be inconsistent", () => {
+      // If the weight does not correspond to an integer slider value, then
+      // changing the slider to its current position can change the weight.
+      // See the docstring on `weightToSlider` for justification.
+      const imperfectWeight = 1 / 3;
+      const {element, onChange} = example(imperfectWeight);
       const input = element.find("input");
-      input.simulate("change", {target: {valueAsNumber: 3}});
-      expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith(2 ** 3);
+      const elementSliderValue = input.props().value;
+      input.simulate("change", {target: {valueAsNumber: elementSliderValue}});
+      expect(onChange).not.toHaveBeenCalledWith(imperfectWeight);
     });
   });
 
@@ -76,33 +86,49 @@ describe("explorer/weights/WeightSlider", () => {
         expect(sliderPosition).toEqual(position_);
       }
     });
-    it("weight->slider->weight is identity", () => {
-      const legalWeights = [0, 1, 2 ** MAX_SLIDER];
-      for (const weight of legalWeights) {
-        const position = weightToSlider(weight);
-        const weight_ = sliderToWeight(position);
-        expect(weight).toEqual(weight_);
+    it("weightToSlider truncates when out of range", () => {
+      const tinyWeight = sliderToWeight(MIN_SLIDER) / 2;
+      expect(weightToSlider(tinyWeight)).toEqual(MIN_SLIDER);
+
+      const giantWeight = sliderToWeight(MAX_SLIDER) * 2;
+      expect(weightToSlider(giantWeight)).toEqual(MAX_SLIDER);
+    });
+    it("weightToSlider errors on invalid weights", () => {
+      const invalid = [NaN, Infinity, -Infinity, -1];
+      for (const v of invalid) {
+        expect(() => weightToSlider(v)).toThrowError("illegal weight");
       }
     });
-    it("weightToSlider errors on weights out of range", () => {
-      const illegalValues = [-1, 2 ** MAX_SLIDER + 1];
-      for (const illegalValue of illegalValues) {
-        expect(() => weightToSlider(illegalValue)).toThrowError(
-          "Weight out of range"
-        );
+    it("weightToSlider rounds to closest corresponding slider value", () => {
+      const nonIntegerSliders = [-0.3, 0.3, 0.9];
+      for (const nonIntegerSlider of nonIntegerSliders) {
+        const w = 2 ** nonIntegerSlider;
+        expect(weightToSlider(w)).toEqual(Math.round(nonIntegerSlider));
       }
     });
     it("sliderToWeight errors on slider position out of range", () => {
-      const illegalValues = [MIN_SLIDER - 1, MAX_SLIDER + 1];
+      const illegalValues = [
+        -Infinity,
+        MIN_SLIDER - 1,
+        MAX_SLIDER + 1,
+        Infinity,
+      ];
       for (const illegalValue of illegalValues) {
         expect(() => sliderToWeight(illegalValue)).toThrowError(
           "Slider position out of range"
         );
       }
     });
-    it("sliderToWeight and weightToSlider error on NaN", () => {
+    it("sliderToWeight errors on non-integer values", () => {
+      const nonIntegers = [-0.3, 0.3, 0.9];
+      for (const nonInteger of nonIntegers) {
+        expect(() => sliderToWeight(nonInteger)).toThrowError(
+          "slider position not integer"
+        );
+      }
+    });
+    it("sliderToWeight errors on NaN", () => {
       expect(() => sliderToWeight(NaN)).toThrowError("illegal value: NaN");
-      expect(() => weightToSlider(NaN)).toThrowError("illegal value: NaN");
     });
   });
   describe("formatWeight", () => {
