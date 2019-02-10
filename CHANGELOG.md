@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Enable setting type weights to 0 in the UI (#1005)
 - Add support for 🚀 and 👀 reaction types (#1068)
 - Create one page per project, rather than having a selector (#988)
 <!-- Please add new entries to the _top_ of this section. -->
