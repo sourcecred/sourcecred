@@ -96,7 +96,7 @@ export class WeightSlider extends React.Component<Props> {
  * having the application error.
  */
 export function weightToSlider(weight: Weight): SliderPosition {
-  if (isNaN(weight) || !isFinite(weight) || weight < 0) {
+  if (!isFinite(weight) || weight < 0) {
     throw new Error(`illegal weight: ${weight}`);
   }
   const tentativePosition = Math.log2(weight);
