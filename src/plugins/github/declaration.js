@@ -101,7 +101,7 @@ const referencesEdgeType = Object.freeze({
   forwardName: "references",
   backwardName: "is referenced by",
   defaultForwardWeight: 1,
-  defaultBackwardWeight: 1 / 16,
+  defaultBackwardWeight: 0,
   prefix: E.Prefix.references,
   description: "TODO: Add a description for this EdgeType",
 });
