@@ -4,7 +4,6 @@ import {execFileSync} from "child_process";
 import fs from "fs";
 import mkdirp from "mkdirp";
 import path from "path";
-import process from "process";
 
 export interface Utils {
   exec: GitDriver;
