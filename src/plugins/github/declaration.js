@@ -78,8 +78,9 @@ const authorsEdgeType = Object.freeze({
   defaultBackwardWeight: 1,
   prefix: E.Prefix.authors,
   description: dedent`\
-    An authors edge connects a GitHub userlike account to a post\
-    that they authored. Examples of posts include issues, pull requests, and comments.
+    Connects a GitHub account to a post that they authored.
+
+    Examples of posts include issues, pull requests, and comments.
   `,
 });
 
@@ -90,7 +91,8 @@ const hasParentEdgeType = Object.freeze({
   defaultBackwardWeight: 1 / 4,
   prefix: E.Prefix.hasParent,
   description: dedent`\
-    A hasParent edge connects a GitHub entity to its child entities.
+    Connects a GitHub entity to its child posts.
+
     For example, a Repository has Issues and Pull Requests as children, and a
     Pull Request has comments and reviews as children.
   `,
@@ -103,8 +105,7 @@ const mergedAsEdgeType = Object.freeze({
   defaultBackwardWeight: 1,
   prefix: E.Prefix.mergedAs,
   description: dedent`\
-    A mergedAs edge connects a GitHub pull request to the commit that it merges,
-    assuming that the pull request has merged.
+    Connects a GitHub pull request to the Git commit that it merges.
   `,
 });
 
@@ -115,10 +116,11 @@ const referencesEdgeType = Object.freeze({
   defaultBackwardWeight: 0,
   prefix: E.Prefix.references,
   description: dedent`\
-    A references edge connects a GitHub post to a GitHub entity that it
-    references. For example, if you write a GitHub issue comment that says
-    "thanks @username for pull #1337", it will create references edges to both
-    the user @username, and to pull #1337 in the same repository.
+    Connects a GitHub post to an entity that it references.
+
+    For example, if you write a GitHub issue comment that says "thanks
+    @username for pull #1337", it will create references edges to both the user
+    @username, and to pull #1337 in the same repository.
   `,
 });
 
@@ -129,9 +131,10 @@ const mentionsAuthorEdgeType = Object.freeze({
   defaultBackwardWeight: 0,
   prefix: E.Prefix.mentionsAuthor,
   description: dedent`\
-    When a post in a particular thread mentions a particular user, that post
-    will have a \`MentionsAuthorEdge\` connecting it to any posts written by the
-    mentioned user. The intuition is that if a post is mentioning an author by name,
+    Connects a post which mentions a user to posts in the same thread that
+    were authored by the mentioned user.
+
+    The intuition is that if a post is mentioning an author by name,
     their contributions in that thread are probably particularly valuable.
 
     This is an experimental feature and may be removed in a future version of SourceCred.
@@ -145,7 +148,7 @@ const reactsHeartEdgeType = Object.freeze({
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsHeart,
   description: dedent`\
-    A reactsHeart edge connects users to posts that they gave a ❤️ reaction to.
+    Connects users to posts to which they gave a ❤️ reaction.
   `,
 });
 
@@ -156,7 +159,7 @@ const reactsThumbsUpEdgeType = Object.freeze({
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsThumbsUp,
   description: dedent`\
-    A reactsThumbsUp edge connects users to posts that they gave a 👍 reaction to.
+    Connects users to posts to which they gave a 👍 reaction.
   `,
 });
 
@@ -167,7 +170,7 @@ const reactsHoorayEdgeType = Object.freeze({
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsHooray,
   description: dedent`\
-    A reactsHooray edge connects users to posts that they gave a 🎉 reaction to.
+    Connects users to posts to which they gave a 🎉 reaction.
   `,
 });
 
@@ -178,7 +181,7 @@ const reactsRocketEdgeType = Object.freeze({
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsRocket,
   description: dedent`\
-    A reactsRocket edge connects users to posts that they gave a 🚀 reaction to.
+    Connects users to posts to which they gave a 🚀 reaction.
   `,
 });
 
