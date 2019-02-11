@@ -16,7 +16,7 @@ import type {RepoId} from "../../core/repoId";
  *   the parsed Repository from the cloned repo
  */
 export default function cloneAndLoadRepository(repoId: RepoId): Repository {
-  const cloneUrl = `https://github.com/${repoId.owner}/${repoId.name}.git`;
+  const cloneUrl = `git@github.com:${repoId.owner}/${repoId.name}.git`;
   const tmpdir = tmp.dirSync({unsafeCleanup: true});
   const git = localGit(tmpdir.name);
   git(["clone", cloneUrl, ".", "--quiet"]);
