@@ -6,6 +6,8 @@ import {
   sparseMarkovChainAction,
   sparseMarkovChainFromTransitionMatrix,
   uniformDistribution,
+  computeDelta,
+  type StationaryDistributionResult,
 } from "./markovChain";
 
 describe("core/attribution/markovChain", () => {
@@ -145,6 +147,11 @@ describe("core/attribution/markovChain", () => {
   }
 
   describe("findStationaryDistribution", () => {
+    function validateConvegenceDelta(chain, d: StationaryDistributionResult) {
+      const nextPi = sparseMarkovChainAction(chain, d.pi);
+      expect(d.convergenceDelta).toEqual(computeDelta(d.pi, nextPi));
+    }
+
     it("finds an all-accumulating stationary distribution", async () => {
       const chain = sparseMarkovChainFromTransitionMatrix([
         [1, 0, 0],
@@ -158,11 +165,11 @@ describe("core/attribution/markovChain", () => {
         yieldAfterMs: 1,
       });
       expect(result.convergenceDelta).toBeLessThanOrEqual(1e-7);
-      expect(result.nIterations).toBeLessThanOrEqual(255);
+      validateConvegenceDelta(chain, result);
 
-      expectStationary(chain, result.distribution);
+      expectStationary(chain, result.pi);
       const expected = new Float64Array([1, 0, 0]);
-      expectAllClose(result.distribution, expected);
+      expectAllClose(result.pi, expected);
     });
 
     it("finds a non-degenerate stationary distribution", async () => {
@@ -185,11 +192,11 @@ describe("core/attribution/markovChain", () => {
       });
 
       expect(result.convergenceDelta).toBeLessThanOrEqual(1e-7);
-      expect(result.nIterations).toBeLessThanOrEqual(255);
+      validateConvegenceDelta(chain, result);
 
-      expectStationary(chain, result.distribution);
+      expectStationary(chain, result.pi);
       const expected = new Float64Array([1 / 3, 1 / 6, 1 / 6, 1 / 6, 1 / 6]);
-      expectAllClose(result.distribution, expected);
+      expectAllClose(result.pi, expected);
     });
 
     it("finds the stationary distribution of a periodic chain", async () => {
@@ -202,11 +209,11 @@ describe("core/attribution/markovChain", () => {
       });
 
       expect(result.convergenceDelta).toEqual(0);
-      expect(result.nIterations).toEqual(1);
+      validateConvegenceDelta(chain, result);
 
-      expectStationary(chain, result.distribution);
+      expectStationary(chain, result.pi);
       const expected = new Float64Array([0.5, 0.5]);
-      expectAllClose(result.distribution, expected);
+      expectAllClose(result.pi, expected);
     });
 
     it("returns initial distribution if maxIterations===0", async () => {
@@ -217,12 +224,9 @@ describe("core/attribution/markovChain", () => {
         maxIterations: 0,
         yieldAfterMs: 1,
       });
-
-      expect(result.convergenceDelta).toBe(NaN);
-      expect(result.nIterations).toEqual(0);
-
       const expected = new Float64Array([0.5, 0.5]);
-      expect(result.distribution).toEqual(expected);
+      expect(result.pi).toEqual(expected);
+      validateConvegenceDelta(chain, result);
     });
   });
 });

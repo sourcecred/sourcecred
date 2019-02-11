@@ -139,7 +139,7 @@ describe("analysis/pagerankNodeDecomposition", () => {
       });
       const pr = distributionToNodeDistribution(
         osmc.nodeOrder,
-        distributionResult.distribution
+        distributionResult.pi
       );
       const decomposition = decompose(pr, connections);
       expect(formatDecomposition(decomposition)).toMatchSnapshot();
@@ -159,7 +159,7 @@ describe("analysis/pagerankNodeDecomposition", () => {
       });
       const pr = distributionToNodeDistribution(
         osmc.nodeOrder,
-        distributionResult.distribution
+        distributionResult.pi
       );
       const decomposition = decompose(pr, connections);
       validateDecomposition(decomposition);

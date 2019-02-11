@@ -66,7 +66,7 @@ export async function pagerank(
   });
   const pi = distributionToNodeDistribution(
     osmc.nodeOrder,
-    distributionResult.distribution
+    distributionResult.pi
   );
   const scores = scoreByConstantTotal(
     pi,

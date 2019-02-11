@@ -3,7 +3,7 @@
 exports[`analysis/pagerankNodeDecomposition decompose has the expected output on a simple asymmetric chain 1`] = `
 Map {
   "NodeAddress[\\"n1\\"]" => Object {
-    "score": 0.19117656878499834,
+    "score": 0.19117611352146152,
     "scoredConnections": Array [
       Object {
         "connection": Object {
@@ -17,7 +17,7 @@ Map {
           },
           "weight": 0.1875,
         },
-        "connectionScore": 0.1102941261444197,
+        "connectionScore": 0.11029408674138254,
         "source": "NodeAddress[\\"sink\\"]",
       },
       Object {
@@ -32,7 +32,7 @@ Map {
           },
           "weight": 0.3,
         },
-        "connectionScore": 0.066176427533429,
+        "connectionScore": 0.06617662715734954,
         "source": "NodeAddress[\\"n2\\"]",
       },
       Object {
@@ -42,13 +42,13 @@ Map {
           },
           "weight": 0.07692307692307693,
         },
-        "connectionScore": 0.014705889906538334,
+        "connectionScore": 0.014705854886266271,
         "source": "NodeAddress[\\"n1\\"]",
       },
     ],
   },
   "NodeAddress[\\"n2\\"]" => Object {
-    "score": 0.22058809177809668,
+    "score": 0.22058875719116514,
     "scoredConnections": Array [
       Object {
         "connection": Object {
@@ -62,7 +62,7 @@ Map {
           },
           "weight": 0.1875,
         },
-        "connectionScore": 0.1102941261444197,
+        "connectionScore": 0.11029408674138254,
         "source": "NodeAddress[\\"sink\\"]",
       },
       Object {
@@ -77,7 +77,7 @@ Map {
           },
           "weight": 0.46153846153846156,
         },
-        "connectionScore": 0.08823533943923001,
+        "connectionScore": 0.08823512931759762,
         "source": "NodeAddress[\\"n1\\"]",
       },
       Object {
@@ -87,13 +87,13 @@ Map {
           },
           "weight": 0.1,
         },
-        "connectionScore": 0.02205880917780967,
+        "connectionScore": 0.022058875719116515,
         "source": "NodeAddress[\\"n2\\"]",
       },
     ],
   },
   "NodeAddress[\\"sink\\"]" => Object {
-    "score": 0.5882353394369051,
+    "score": 0.5882351292873735,
     "scoredConnections": Array [
       Object {
         "connection": Object {
@@ -107,7 +107,7 @@ Map {
           },
           "weight": 0.375,
         },
-        "connectionScore": 0.2205882522888394,
+        "connectionScore": 0.22058817348276508,
         "source": "NodeAddress[\\"sink\\"]",
       },
       Object {
@@ -122,7 +122,7 @@ Map {
           },
           "weight": 0.6,
         },
-        "connectionScore": 0.132352855066858,
+        "connectionScore": 0.13235325431469908,
         "source": "NodeAddress[\\"n2\\"]",
       },
       Object {
@@ -137,7 +137,7 @@ Map {
           },
           "weight": 0.1875,
         },
-        "connectionScore": 0.1102941261444197,
+        "connectionScore": 0.11029408674138254,
         "source": "NodeAddress[\\"sink\\"]",
       },
       Object {
@@ -152,7 +152,7 @@ Map {
           },
           "weight": 0.46153846153846156,
         },
-        "connectionScore": 0.08823533943923001,
+        "connectionScore": 0.08823512931759762,
         "source": "NodeAddress[\\"n1\\"]",
       },
       Object {
@@ -162,7 +162,7 @@ Map {
           },
           "weight": 0.0625,
         },
-        "connectionScore": 0.03676470871480657,
+        "connectionScore": 0.036764695580460846,
         "source": "NodeAddress[\\"sink\\"]",
       },
     ],

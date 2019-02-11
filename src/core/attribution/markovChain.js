@@ -10,11 +10,18 @@ export type Distribution = Float64Array;
 export type StationaryDistributionResult = {|
   // The final distribution after attempting to find the stationary distribution
   // of the Markov chain.
-  +distribution: Distribution,
-  // How many steps were taken in this convergence attempt.
-  +nIterations: number,
-  // The maximum delta between entries in the distribution as of the final
-  // markov chain step. If no steps were taken, convergenceDelta will be NaN.
+  +pi: Distribution,
+
+  // Reports how close the returned distribution is to being converged.
+  //
+  // If the convergenceDelta is near zero, then the distribution is well-converged
+  // (stationary).
+  //
+  // Specifically: let `x` be the distribution being returned, and let `x'` be the
+  // distribution after one additional Markov action, i.e.
+  // `x' = sparseMarkovChainAction(chain, x)`
+  // Then the convergence delta is the maximum difference in absolute value between components
+  // in `x` and `x'`.
   +convergenceDelta: number,
 |};
 
@@ -109,6 +116,17 @@ export function sparseMarkovChainAction(
   return result;
 }
 
+export function computeDelta(pi0: Distribution, pi1: Distribution) {
+  let maxDelta = -Infinity;
+  // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
+  // same (i.e., there has been no permutation).
+  pi0.forEach((x, i) => {
+    const delta = Math.abs(x - pi1[i]);
+    maxDelta = Math.max(delta, maxDelta);
+  });
+  return maxDelta;
+}
+
 function* findStationaryDistributionGenerator(
   chain: SparseMarkovChain,
   options: {|
@@ -121,31 +139,28 @@ function* findStationaryDistributionGenerator(
     +maxIterations: number,
   |}
 ): Generator<void, StationaryDistributionResult, void> {
-  let distribution = uniformDistribution(chain.length);
-  let scratch = new Float64Array(distribution.length);
-  function computeDelta(pi0, pi1) {
-    let maxDelta = -Infinity;
-    // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
-    // same (i.e., there has been no permutation).
-    pi0.forEach((x, i) => {
-      const delta = Math.abs(x - pi1[i]);
-      maxDelta = Math.max(delta, maxDelta);
-    });
-    return maxDelta;
-  }
+  let pi = uniformDistribution(chain.length);
+  let scratch = new Float64Array(pi.length);
+
   let nIterations = 0;
-  let convergenceDelta = NaN;
   while (true) {
     if (nIterations >= options.maxIterations) {
       if (options.verbose) {
         console.log(`[${nIterations}] FAILED to converge`);
       }
-      return {distribution, nIterations, convergenceDelta};
+      // We need to do one more step so that we can compute the empirical convergence
+      // delta for the returned distribution.
+      sparseMarkovChainActionInto(chain, pi, scratch);
+      const convergenceDelta = computeDelta(pi, scratch);
+      return {pi, convergenceDelta};
     }
     nIterations++;
-    sparseMarkovChainActionInto(chain, distribution, scratch);
-    convergenceDelta = computeDelta(distribution, scratch);
-    [scratch, distribution] = [distribution, scratch];
+    sparseMarkovChainActionInto(chain, pi, scratch);
+    // We compute the convergenceDelta between 'scratch' (the newest distribution)
+    // and 'pi' (the distribution from the previous step). If the delta is below threshold,
+    // then the distribution from the last step and we return it (not scratch).
+    // Otherwise, we assign scratch to distribution and try again.
+    const convergenceDelta = computeDelta(pi, scratch);
     if (options.verbose) {
       console.log(`[${nIterations}] delta = ${convergenceDelta}`);
     }
@@ -153,8 +168,9 @@ function* findStationaryDistributionGenerator(
       if (options.verbose) {
         console.log(`[${nIterations}] CONVERGED`);
       }
-      return {distribution, nIterations, convergenceDelta};
+      return {pi, convergenceDelta};
     }
+    [scratch, pi] = [pi, scratch];
     yield;
   }
   // ESLint knows that this next line is unreachable, but Flow doesn't. :-)
