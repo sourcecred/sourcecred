@@ -80,23 +80,45 @@ export type EdgeType = {|
   // means. For example, for the GitHub REFERENCES edge type, the forwardName
   // is "references"
   +forwardName: string,
+
   // A brief descriptive name of what the "backward" direction of the edge
   // means. For example, for the GitHub REFERENCES edge type, the backwardName
   // is "referenced by"
   +backwardName: string,
+
   // The default weight for the forward direction of this edge.
   // We use `1` as a default value ("of normal importance").
   // The weights have linear importance, i.e. 2 is twice as important as 1.
   +defaultForwardWeight: number,
+
   // The default weight for the backward direction of this edge.
   // We use `1` as a default value ("of normal importance").
   // The weights have linear importance, i.e. 2 is twice as important as 1.
   +defaultBackwardWeight: number,
+
   // The address that will be used to test whether an edge is a member
   // of this EdgeType. A given edge `e` is a member of the type `t` if
   // `EdgeAddress.hasPrefix(e.address, t.prefix) == true`
   +prefix: EdgeAddressT,
+
   // The `description` property should be a human-readable string that makes
-  // it clear to a user what each EdgeType does
+  // it clear to a user what each EdgeType does.
+  //
+  // By convention, the first line of the description should be a sentence
+  // beginning with the word "Connects", which describes what kinds of nodes
+  // the edge connects and why. Optionally, you may provide examples and additional
+  // context after one blank link. Here is an example (for the "Merged As" edge).
+  //
+  // ```js
+  // const mergedAsDescription = dedent`\
+  //  Connects a GitHub pull request to the Git commit it merged.
+  //
+  //  A pull request can have either one or zero Merged As edges, depending on
+  //  whether or not it was ever merged.
+  //  `
+  // ```
+  //
+  // (Note the use of the `util/dedent.js` makes it easier to write multi-lined
+  // strings with clean formatting.)
   +description: string,
 |};
