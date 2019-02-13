@@ -91,7 +91,7 @@ const hasParentEdgeType = Object.freeze({
   defaultBackwardWeight: 1 / 4,
   prefix: E.Prefix.hasParent,
   description: dedent`\
-    Connects a GitHub entity to its child posts.
+    Connects a GitHub entity to its child entities.
 
     For example, a Repository has Issues and Pull Requests as children, and a
     Pull Request has comments and reviews as children.
@@ -131,7 +131,7 @@ const mentionsAuthorEdgeType = Object.freeze({
   defaultBackwardWeight: 0,
   prefix: E.Prefix.mentionsAuthor,
   description: dedent`\
-    Connects a post which mentions a user to posts in the same thread that
+    Connects a post that mentions a user to posts in the same thread that
     were authored by the mentioned user.
 
     The intuition is that if a post is mentioning an author by name,
