@@ -3,6 +3,7 @@
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import * as N from "./nodes";
 import * as E from "./edges";
+import dedent from "../../util/dedent";
 
 const repoNodeType = Object.freeze({
   name: "Repository",
@@ -76,7 +77,11 @@ const authorsEdgeType = Object.freeze({
   defaultForwardWeight: 1 / 2,
   defaultBackwardWeight: 1,
   prefix: E.Prefix.authors,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    Connects a GitHub account to a post that they authored.
+
+    Examples of posts include issues, pull requests, and comments.
+  `,
 });
 
 const hasParentEdgeType = Object.freeze({
@@ -85,7 +90,12 @@ const hasParentEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 1 / 4,
   prefix: E.Prefix.hasParent,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    Connects a GitHub entity to its child entities.
+
+    For example, a Repository has Issues and Pull Requests as children, and a
+    Pull Request has comments and reviews as children.
+  `,
 });
 
 const mergedAsEdgeType = Object.freeze({
@@ -94,7 +104,9 @@ const mergedAsEdgeType = Object.freeze({
   defaultForwardWeight: 1 / 2,
   defaultBackwardWeight: 1,
   prefix: E.Prefix.mergedAs,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    Connects a GitHub pull request to the Git commit that it merges.
+  `,
 });
 
 const referencesEdgeType = Object.freeze({
@@ -103,7 +115,13 @@ const referencesEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.references,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    Connects a GitHub post to an entity that it references.
+
+    For example, if you write a GitHub issue comment that says "thanks
+    @username for pull #1337", it will create references edges to both the user
+    @username, and to pull #1337 in the same repository.
+  `,
 });
 
 const mentionsAuthorEdgeType = Object.freeze({
@@ -112,7 +130,15 @@ const mentionsAuthorEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.mentionsAuthor,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    Connects a post that mentions a user to posts in the same thread that
+    were authored by the mentioned user.
+
+    The intuition is that if a post is mentioning an author by name,
+    their contributions in that thread are probably particularly valuable.
+
+    This is an experimental feature and may be removed in a future version of SourceCred.
+  `,
 });
 
 const reactsHeartEdgeType = Object.freeze({
@@ -121,7 +147,9 @@ const reactsHeartEdgeType = Object.freeze({
   defaultForwardWeight: 2,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsHeart,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    Connects users to posts to which they gave a ❤️ reaction.
+  `,
 });
 
 const reactsThumbsUpEdgeType = Object.freeze({
@@ -130,7 +158,9 @@ const reactsThumbsUpEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsThumbsUp,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    Connects users to posts to which they gave a 👍 reaction.
+  `,
 });
 
 const reactsHoorayEdgeType = Object.freeze({
@@ -139,7 +169,9 @@ const reactsHoorayEdgeType = Object.freeze({
   defaultForwardWeight: 4,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsHooray,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    Connects users to posts to which they gave a 🎉 reaction.
+  `,
 });
 
 const reactsRocketEdgeType = Object.freeze({
@@ -148,7 +180,9 @@ const reactsRocketEdgeType = Object.freeze({
   defaultForwardWeight: 1,
   defaultBackwardWeight: 0,
   prefix: E.Prefix.reactsRocket,
-  description: "TODO: Add a description for this EdgeType",
+  description: dedent`\
+    Connects users to posts to which they gave a 🚀 reaction.
+  `,
 });
 
 const edgeTypes = Object.freeze([

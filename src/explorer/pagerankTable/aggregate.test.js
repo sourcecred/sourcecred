@@ -66,7 +66,7 @@ describe("explorer/pagerankTable/aggregate", () => {
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
         prefix: EdgeAddress.fromParts(["foo"]),
-        description: "TODO: Add a description for this EdgeType",
+        description: "Connects example foo edges.",
       },
       bar: {
         forwardName: "bars",
@@ -74,7 +74,7 @@ describe("explorer/pagerankTable/aggregate", () => {
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
         prefix: EdgeAddress.fromParts(["bar"]),
-        description: "TODO: Add a description for this EdgeType",
+        description: "Connects example bar edges.",
       },
       empty: {
         forwardName: "empty",
@@ -82,7 +82,7 @@ describe("explorer/pagerankTable/aggregate", () => {
         defaultForwardWeight: 1,
         defaultBackwardWeight: 1,
         prefix: EdgeAddress.empty,
-        description: "TODO: Add a description for this EdgeType",
+        description: "Connects arbitrary edges.",
       },
     };
     const edgeTypesArray = [edgeTypes.foo, edgeTypes.bar];
