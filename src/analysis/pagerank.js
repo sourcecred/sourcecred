@@ -58,13 +58,16 @@ export async function pagerank(
     fullOptions.selfLoopWeight
   );
   const osmc = createOrderedSparseMarkovChain(connections);
-  const distribution = await findStationaryDistribution(osmc.chain, {
+  const distributionResult = await findStationaryDistribution(osmc.chain, {
     verbose: fullOptions.verbose,
     convergenceThreshold: fullOptions.convergenceThreshold,
     maxIterations: fullOptions.maxIterations,
     yieldAfterMs: 30,
   });
-  const pi = distributionToNodeDistribution(osmc.nodeOrder, distribution);
+  const pi = distributionToNodeDistribution(
+    osmc.nodeOrder,
+    distributionResult.pi
+  );
   const scores = scoreByConstantTotal(
     pi,
     fullOptions.totalScore,

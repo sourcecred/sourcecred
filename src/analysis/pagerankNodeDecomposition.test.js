@@ -7,7 +7,10 @@ import {
   createOrderedSparseMarkovChain,
 } from "../core/attribution/graphToMarkovChain";
 import {findStationaryDistribution} from "../core/attribution/markovChain";
-import {decompose} from "./pagerankNodeDecomposition";
+import {
+  decompose,
+  type PagerankNodeDecomposition,
+} from "./pagerankNodeDecomposition";
 import * as MapUtil from "../util/map";
 
 import {advancedGraph} from "../core/graphTestUtil";
@@ -16,7 +19,7 @@ import {advancedGraph} from "../core/graphTestUtil";
  * Format a decomposition to be shown in a snapshot. This converts
  * addresses and edges to strings to avoid NUL characters.
  */
-function formatDecomposition(d) {
+function formatDecomposition(d: PagerankNodeDecomposition) {
   return MapUtil.mapEntries(d, (key, {score, scoredConnections}) => [
     NodeAddress.toString(key),
     {
@@ -128,16 +131,19 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
       const connections = createConnections(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(connections);
-      const pi = await findStationaryDistribution(osmc.chain, {
+      const distributionResult = await findStationaryDistribution(osmc.chain, {
         verbose: false,
         convergenceThreshold: 1e-6,
         maxIterations: 255,
         yieldAfterMs: 1,
       });
-      const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
-      const result = decompose(pr, connections);
-      expect(formatDecomposition(result)).toMatchSnapshot();
-      validateDecomposition(result);
+      const pr = distributionToNodeDistribution(
+        osmc.nodeOrder,
+        distributionResult.pi
+      );
+      const decomposition = decompose(pr, connections);
+      expect(formatDecomposition(decomposition)).toMatchSnapshot();
+      validateDecomposition(decomposition);
     });
 
     it("is valid on the example graph", async () => {
@@ -145,15 +151,18 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
       const connections = createConnections(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(connections);
-      const pi = await findStationaryDistribution(osmc.chain, {
+      const distributionResult = await findStationaryDistribution(osmc.chain, {
         verbose: false,
         convergenceThreshold: 1e-6,
         maxIterations: 255,
         yieldAfterMs: 1,
       });
-      const pr = distributionToNodeDistribution(osmc.nodeOrder, pi);
-      const result = decompose(pr, connections);
-      validateDecomposition(result);
+      const pr = distributionToNodeDistribution(
+        osmc.nodeOrder,
+        distributionResult.pi
+      );
+      const decomposition = decompose(pr, connections);
+      validateDecomposition(decomposition);
     });
   });
 });
