@@ -116,6 +116,12 @@ export function sparseMarkovChainAction(
   return result;
 }
 
+/**
+ * Compute the maximum difference (in absolute value) between components in two
+ * distributions.
+ *
+ * Equivalent to $\norm{pi0 - pi1}_\infty$.
+ */
 export function computeDelta(pi0: Distribution, pi1: Distribution) {
   let maxDelta = -Infinity;
   // Here, we assume that `pi0.nodeOrder` and `pi1.nodeOrder` are the
@@ -156,10 +162,11 @@ function* findStationaryDistributionGenerator(
     }
     nIterations++;
     sparseMarkovChainActionInto(chain, pi, scratch);
-    // We compute the convergenceDelta between 'scratch' (the newest distribution)
-    // and 'pi' (the distribution from the previous step). If the delta is below threshold,
-    // then the distribution from the last step and we return it (not scratch).
-    // Otherwise, we assign scratch to distribution and try again.
+    // We compute the convergenceDelta between 'scratch' (the newest
+    // distribution) and 'pi' (the distribution from the previous step). If the
+    // delta is below threshold, then the distribution from the last step was
+    // already converged and we return it (not scratch). Otherwise, we assign
+    // `scratch` to `distribution` and try again.
     const convergenceDelta = computeDelta(pi, scratch);
     if (options.verbose) {
       console.log(`[${nIterations}] delta = ${convergenceDelta}`);
