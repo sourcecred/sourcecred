@@ -16,6 +16,8 @@ import {
   edgeToString,
   edgeToStrings,
   edgeToParts,
+  sortedEdgeAddressesFromJSON,
+  sortedNodeAddressesFromJSON,
 } from "./graph";
 import {advancedGraph} from "./graphTestUtil";
 
@@ -1445,5 +1447,22 @@ describe("core/graph", () => {
       };
       expect(edgeToParts(edge)).toEqual(expected);
     });
+  });
+
+  it("sortedEdgeAddressesFromJSON", () => {
+    const json = advancedGraph()
+      .graph1()
+      .toJSON();
+    const sortedEdgeAddresses = sortedEdgeAddressesFromJSON(json);
+    const expected = sortedEdgeAddresses.slice().sort();
+    expect(sortedEdgeAddresses).toEqual(expected);
+  });
+  it("sortedNodeAddressesFromJSON", () => {
+    const json = advancedGraph()
+      .graph1()
+      .toJSON();
+    const sortedNodeAddresses = sortedNodeAddressesFromJSON(json);
+    const expected = sortedNodeAddresses.slice().sort();
+    expect(sortedNodeAddresses).toEqual(expected);
   });
 });

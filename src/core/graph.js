@@ -904,3 +904,35 @@ export function edgeToParts(
   const dstParts = NodeAddress.toParts(edge.dst);
   return {addressParts, srcParts, dstParts};
 }
+
+/*
+ * When JSON-serialized, the graph has all of the edges in sorted
+ * order. This makes it possible to compactly represent metadata
+ * associated with every edge without needing to duplicate the
+ * (lengthy) edge addresses.
+ * This method makes it possible for consumers of Graph to package
+ * metadata in the same way, without needing to manually re-sort the
+ * edges.
+ */
+export function sortedEdgeAddressesFromJSON(
+  json: GraphJSON
+): $ReadOnlyArray<EdgeAddressT> {
+  const {edges} = fromCompat(COMPAT_INFO, json);
+  return edges.map((x) => EdgeAddress.fromParts(x.address));
+}
+
+/*
+ * When JSON-serialized, the graph has all of the nodes in sorted
+ * order. This makes it possible to compactly represent metadata
+ * associated with every node without needing to duplicate the
+ * (lengthy) node addresses.
+ * This method makes it possible for consumers of Graph to package
+ * metadata in the same way, without needing to manually re-sort the
+ * nodes.
+ */
+export function sortedNodeAddressesFromJSON(
+  json: GraphJSON
+): $ReadOnlyArray<NodeAddressT> {
+  const {nodes} = fromCompat(COMPAT_INFO, json);
+  return nodes.map((x) => NodeAddress.fromParts(x));
+}
