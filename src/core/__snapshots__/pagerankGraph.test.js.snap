@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`core/pagerankGraph to/from JSON matches expected snapshot 1`] = `
+Array [
+  Object {
+    "type": "sourcecred/pagerankGraph",
+    "version": "0.1.0",
+  },
+  Object {
+    "froWeights": Array [
+      0,
+      0,
+      0,
+    ],
+    "graphJSON": Array [
+      Object {
+        "type": "sourcecred/graph",
+        "version": "0.4.0",
+      },
+      Object {
+        "edges": Array [
+          Object {
+            "address": Array [
+              "hom",
+              "1",
+            ],
+            "dstIndex": 0,
+            "srcIndex": 3,
+          },
+          Object {
+            "address": Array [
+              "hom",
+              "2",
+            ],
+            "dstIndex": 0,
+            "srcIndex": 3,
+          },
+          Object {
+            "address": Array [
+              "loop",
+            ],
+            "dstIndex": 2,
+            "srcIndex": 2,
+          },
+        ],
+        "nodes": Array [
+          Array [
+            "dst",
+          ],
+          Array [
+            "isolated",
+          ],
+          Array [
+            "loop",
+          ],
+          Array [
+            "src",
+          ],
+        ],
+      },
+    ],
+    "scores": Array [
+      0.25,
+      0.25,
+      0.25,
+      0.25,
+    ],
+    "syntheticLoopWeight": 0.001,
+    "toWeights": Array [
+      1,
+      1,
+      1,
+    ],
+  },
+]
+`;

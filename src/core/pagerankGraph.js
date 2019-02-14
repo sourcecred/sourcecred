@@ -2,7 +2,16 @@
 
 import deepEqual from "lodash.isequal";
 
-import {Graph, type Edge, type NodeAddressT, type EdgeAddressT} from "./graph";
+import {toCompat, fromCompat, type Compatible} from "../util/compat";
+import {
+  Graph,
+  type Edge,
+  type NodeAddressT,
+  type EdgeAddressT,
+  type GraphJSON,
+  sortedEdgeAddressesFromJSON,
+  sortedNodeAddressesFromJSON,
+} from "./graph";
 import {
   distributionToNodeDistribution,
   createConnections,
@@ -25,6 +34,14 @@ export type WeightedEdge = {|
   +weight: EdgeWeight,
 |};
 
+export opaque type PagerankGraphJSON = Compatible<{|
+  +graphJSON: GraphJSON,
+  +scores: $ReadOnlyArray<number>,
+  +toWeights: $ReadOnlyArray<number>,
+  +froWeights: $ReadOnlyArray<number>,
+  +syntheticLoopWeight: number,
+|}>;
+
 /**
  * Options to control how PageRank runs and when it stops
  */
@@ -45,6 +62,8 @@ export type PagerankConvergenceReport = {|
 |};
 
 export const DEFAULT_SYNTHETIC_LOOP_WEIGHT = 1e-3;
+
+const COMPAT_INFO = {type: "sourcecred/pagerankGraph", version: "0.1.0"};
 
 /**
  * PagerankGraph is a wrapper over the Graph class, which adds
@@ -294,6 +313,85 @@ export class PagerankGraph {
       deepEqual(this._edgeWeights, that._edgeWeights) &&
       this._syntheticLoopWeight === that._syntheticLoopWeight
     );
+  }
+
+  /**
+   * Serialize this graph into a PagerankJSON object.
+   *
+   * Returns a plain JavaScript object.
+   *
+   * For space efficency, we store the node scores as an array of numbers in
+   * node-address-sorted order, and we store the edge weights as two arrays of
+   * numbers in edge-address-sorted-order.
+   */
+  toJSON(): PagerankGraphJSON {
+    this._verifyGraphNotModified();
+
+    const graphJSON = this.graph().toJSON();
+    const nodes = sortedNodeAddressesFromJSON(graphJSON);
+    const scores = new Array(nodes.length);
+    for (let i = 0; i < nodes.length; i++) {
+      scores[i] = NullUtil.get(this._scores.get(nodes[i]));
+    }
+
+    const edgeAddresses = sortedEdgeAddressesFromJSON(graphJSON);
+    const toWeights: number[] = new Array(edgeAddresses.length);
+    const froWeights: number[] = new Array(edgeAddresses.length);
+    for (let i = 0; i < edgeAddresses.length; i++) {
+      const address = edgeAddresses[i];
+      const {toWeight, froWeight} = NullUtil.get(
+        this._edgeWeights.get(address)
+      );
+      toWeights[i] = toWeight;
+      froWeights[i] = froWeight;
+    }
+
+    const rawJSON = {
+      graphJSON,
+      scores,
+      toWeights,
+      froWeights,
+      syntheticLoopWeight: this.syntheticLoopWeight(),
+    };
+
+    return toCompat(COMPAT_INFO, rawJSON);
+  }
+
+  static fromJSON(json: PagerankGraphJSON): PagerankGraph {
+    const {
+      toWeights,
+      froWeights,
+      scores,
+      graphJSON,
+      syntheticLoopWeight,
+    } = fromCompat(COMPAT_INFO, json);
+    const graph = Graph.fromJSON(graphJSON);
+
+    const nodes = sortedNodeAddressesFromJSON(graphJSON);
+    const scoreMap: Map<NodeAddressT, number> = new Map();
+    for (let i = 0; i < nodes.length; i++) {
+      scoreMap.set(nodes[i], scores[i]);
+    }
+
+    const edges = sortedEdgeAddressesFromJSON(graphJSON);
+    const edgeWeights: Map<EdgeAddressT, EdgeWeight> = new Map();
+    for (let i = 0; i < edges.length; i++) {
+      const toWeight = toWeights[i];
+      const froWeight = froWeights[i];
+      edgeWeights.set(edges[i], {toWeight, froWeight});
+    }
+
+    function evaluator(e: Edge): EdgeWeight {
+      return NullUtil.get(edgeWeights.get(e.address));
+    }
+
+    const prg = new PagerankGraph(graph, evaluator, syntheticLoopWeight);
+    // TODO(#1020): It's a little hacky to force the scores in like this;
+    // consider adding an optional constructor argument to allow manually
+    // setting the scores at construction time, if we ever find a use case
+    // that needs it.
+    prg._scores = scoreMap;
+    return prg;
   }
 
   _verifyGraphNotModified() {
