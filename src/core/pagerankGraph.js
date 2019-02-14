@@ -95,9 +95,13 @@ export class PagerankGraph {
 
   /**
    * Constructs a new PagerankGraph.
+   *
+   * Note that constructing a PagerankGraph around an empty graph is illegal,
+   * as it is impossible to define a probability distribution over zero
+   * nodes.
    */
   constructor(
-    // The Graph backing this PagerankGraph
+    // The Graph backing this PagerankGraph. Must not be empty.
     graph: Graph,
     // Provides the initial EdgeWeight for every edge
     edgeEvaluator: EdgeEvaluator,
@@ -106,6 +110,9 @@ export class PagerankGraph {
     // DEFAULT_SYNTHETIC_LOOP_WEIGHT.
     syntheticLoopWeight: ?number
   ): void {
+    if (graph.equals(new Graph())) {
+      throw new Error("Cannot construct PagerankGraph with empty graph.");
+    }
     this._graph = graph;
     this._graphModificationCount = graph.modificationCount();
     this._syntheticLoopWeight = NullUtil.orElse(
@@ -241,10 +248,6 @@ export class PagerankGraph {
     options: PagerankConvergenceOptions
   ): Promise<PagerankConvergenceReport> {
     this._verifyGraphNotModified();
-    if (this._graph.equals(new Graph())) {
-      throw new Error("Cannot call runPagerank on empty graph.");
-    }
-
     const edgeEvaluator = (x: Edge) =>
       NullUtil.get(this._edgeWeights.get(x.address));
     const connections = createConnections(

@@ -8,10 +8,25 @@ import * as NullUtil from "../util/null";
 
 describe("core/pagerankGraph", () => {
   const defaultEvaluator = (_unused_edge) => ({toWeight: 1, froWeight: 0});
+  const nonEmptyGraph = () =>
+    new Graph().addNode(NodeAddress.fromParts(["hi"]));
+
+  it("cannot construct PagerankGraph with empty Graph", () => {
+    const eg1 = new Graph();
+    const eg2 = new Graph()
+      .addNode(NodeAddress.empty)
+      .removeNode(NodeAddress.empty);
+    expect(() => new PagerankGraph(eg1, defaultEvaluator)).toThrowError(
+      "empty graph"
+    );
+    expect(() => new PagerankGraph(eg2, defaultEvaluator)).toThrowError(
+      "empty graph"
+    );
+  });
 
   describe("node / nodes", () => {
     it("node returns null for node not in the graph", () => {
-      const g = new Graph();
+      const g = nonEmptyGraph();
       const pg = new PagerankGraph(g, defaultEvaluator);
       expect(pg.node(NodeAddress.empty)).toEqual(null);
     });
@@ -32,7 +47,7 @@ describe("core/pagerankGraph", () => {
       }
     });
     it("node and nodes both throw an error if underlying graph is modified", () => {
-      const pg = new PagerankGraph(new Graph(), defaultEvaluator);
+      const pg = new PagerankGraph(nonEmptyGraph(), defaultEvaluator);
       pg.graph().addNode(NodeAddress.empty);
       expect(() => pg.nodes()).toThrowError(
         "underlying Graph has been modified"
@@ -72,12 +87,12 @@ describe("core/pagerankGraph", () => {
     });
 
     it("edge returns null for address not in the graph", () => {
-      const pg = new PagerankGraph(new Graph(), defaultEvaluator);
+      const pg = new PagerankGraph(nonEmptyGraph(), defaultEvaluator);
       expect(pg.edge(EdgeAddress.empty)).toEqual(null);
     });
 
     it("edge and edges both throw an error if underlying graph is modified", () => {
-      const pg = new PagerankGraph(new Graph(), defaultEvaluator);
+      const pg = new PagerankGraph(nonEmptyGraph(), defaultEvaluator);
       pg.graph().addNode(NodeAddress.empty);
       expect(() => pg.edges()).toThrowError(
         "underlying Graph has been modified"
@@ -158,14 +173,6 @@ describe("core/pagerankGraph", () => {
       });
       expect(results.convergenceDelta).toBeLessThan(convergenceThreshold);
       checkProbabilityDistribution(pg);
-    });
-    it("throws an error for an empty graph", () => {
-      const pg = new PagerankGraph(new Graph(), defaultEvaluator);
-      const toFail = pg.runPagerank({
-        maxIterations: 10,
-        convergenceThreshold: 0.01,
-      });
-      expect(toFail).rejects.toThrow("empty graph");
     });
   });
 });
