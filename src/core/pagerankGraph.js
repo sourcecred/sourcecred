@@ -169,7 +169,7 @@ export class PagerankGraph {
   /**
    * Provides node and score for every node in the underlying graph.
    *
-   * TODO: Allow optional filtering, as in Graph.nodes.
+   * TODO(#1020): Allow optional filtering, as in Graph.nodes.
    */
   nodes(): Iterator<ScoredNode> {
     this._verifyGraphNotModified();
@@ -179,7 +179,7 @@ export class PagerankGraph {
   /**
    * Retrieve a node from the graph, along with its score.
    *
-   * TODO: Allow optional filtering, as in Graph.node.
+   * TODO(#1020): Allow optional filtering, as in Graph.node.
    */
   node(x: NodeAddressT): ?ScoredNode {
     this._verifyGraphNotModified();
@@ -194,7 +194,7 @@ export class PagerankGraph {
   /**
    * Provides edge and weight for every edge in the underlying graph.
    *
-   * TODO: Allow optional filtering, as in Graph.edges.
+   * TODO(#1020): Allow optional filtering, as in Graph.edges.
    */
   edges(): Iterator<WeightedEdge> {
     this._verifyGraphNotModified();
@@ -211,7 +211,7 @@ export class PagerankGraph {
   /**
    * Provides the edge and weight for a particular edge, if present.
    *
-   * TODO: Allow optional filtering, as in Graph.edge.
+   * TODO(#1020): Allow optional filtering, as in Graph.edge.
    */
   edge(a: EdgeAddressT): ?WeightedEdge {
     this._verifyGraphNotModified();
@@ -240,7 +240,7 @@ export class PagerankGraph {
    * individual delta in a node's score between the present and previous
    * iteration is less than or equal to `options.convergenceThreshold`.
    *
-   * TODO: Make `runPagerank` use the current nodes' scores as a
+   * TODO(#1020): Make `runPagerank` use the current nodes' scores as a
    * starting point for computation, rather than re-generating from
    * scratch every time `runPagerank` is called.
    */
