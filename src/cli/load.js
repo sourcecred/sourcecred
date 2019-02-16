@@ -7,7 +7,12 @@ import mkdirp from "mkdirp";
 import path from "path";
 
 import * as RepoIdRegistry from "../core/repoIdRegistry";
-import {repoIdToString, stringToRepoId, type RepoId} from "../core/repoId";
+import {
+  repoIdToString,
+  stringToRepoId,
+  makeRepoId,
+  type RepoId,
+} from "../core/repoId";
 import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
@@ -15,6 +20,7 @@ import * as Common from "./common";
 import execDependencyGraph from "../tools/execDependencyGraph";
 import {loadGithubData} from "../plugins/github/loadGithubData";
 import {loadGitData} from "../plugins/git/loadGitData";
+import {fetchReposForOrg} from "../plugins/github/fetchReposForOrg";
 
 function usage(print: (string) => void): void {
   print(
@@ -78,9 +84,10 @@ function die(std, message) {
 }
 
 const load: Command = async (args, std) => {
-  const repoIds = [];
+  let repoIds = [];
   let explicitOutput: RepoId | null = null;
   let plugin: Common.PluginName | null = null;
+  let organization: string | null = null;
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
       case "--help": {
@@ -105,12 +112,37 @@ const load: Command = async (args, std) => {
         plugin = arg;
         break;
       }
+      case "--organization": {
+        if (organization != null)
+          return die(std, "'--organization' given multiple times");
+        if (++i >= args.length)
+          return die(std, "--organization' given without value");
+        organization = args[i];
+        break;
+      }
       default: {
         // Should be a repository.
         repoIds.push(stringToRepoId(args[i]));
         break;
       }
     }
+  }
+
+  if (organization != null) {
+    if (repoIds.length > 0) {
+      die(std, "'--organization' cannot be used in conjunction with repoIds");
+    }
+    if (explicitOutput == null) {
+      explicitOutput = makeRepoId(organization, "combined");
+    }
+    const token = Common.githubToken();
+    if (token == null) {
+      // TODO(#638): This check should be abstracted so that plugins can
+      // specify their argument dependencies and get nicely formatted
+      // errors.
+      return die(std, "no GitHub token specified");
+    }
+    repoIds = await fetchReposForOrg(organization, token);
   }
 
   let output: RepoId;
