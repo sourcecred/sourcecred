@@ -36,7 +36,13 @@ export type WeightedEdge = {|
 
 export opaque type PagerankGraphJSON = Compatible<{|
   +graphJSON: GraphJSON,
+  // Score for every node, ordered by the sorted node address.
   +scores: $ReadOnlyArray<number>,
+  // Weights for every edge, ordered by sorted edge address.
+  // We could save the EdgeWeights directly rather than having separate
+  // arrays for toWeights and froWeights, but this would lead to an inflated
+  // JSON representation because we would be needlessly duplicating the keys
+  // "toWeight" and "froWeight" themselves.
   +toWeights: $ReadOnlyArray<number>,
   +froWeights: $ReadOnlyArray<number>,
   +syntheticLoopWeight: number,
@@ -329,22 +335,16 @@ export class PagerankGraph {
 
     const graphJSON = this.graph().toJSON();
     const nodes = sortedNodeAddressesFromJSON(graphJSON);
-    const scores = new Array(nodes.length);
-    for (let i = 0; i < nodes.length; i++) {
-      scores[i] = NullUtil.get(this._scores.get(nodes[i]));
-    }
+    const scores: number[] = nodes.map((x) =>
+      NullUtil.get(this._scores.get(x))
+    );
 
     const edgeAddresses = sortedEdgeAddressesFromJSON(graphJSON);
-    const toWeights: number[] = new Array(edgeAddresses.length);
-    const froWeights: number[] = new Array(edgeAddresses.length);
-    for (let i = 0; i < edgeAddresses.length; i++) {
-      const address = edgeAddresses[i];
-      const {toWeight, froWeight} = NullUtil.get(
-        this._edgeWeights.get(address)
-      );
-      toWeights[i] = toWeight;
-      froWeights[i] = froWeight;
-    }
+    const edgeWeights: EdgeWeight[] = edgeAddresses.map((x) =>
+      NullUtil.get(this._edgeWeights.get(x))
+    );
+    const toWeights: number[] = edgeWeights.map((x) => x.toWeight);
+    const froWeights: number[] = edgeWeights.map((x) => x.froWeight);
 
     const rawJSON = {
       graphJSON,
