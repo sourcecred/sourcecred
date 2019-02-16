@@ -11,6 +11,11 @@ describe("core/pagerankGraph", () => {
   const nonEmptyGraph = () =>
     new Graph().addNode(NodeAddress.fromParts(["hi"]));
 
+  function examplePagerankGraph() {
+    const g = advancedGraph().graph1();
+    return new PagerankGraph(g, defaultEvaluator);
+  }
+
   it("cannot construct PagerankGraph with empty Graph", () => {
     const eg1 = new Graph();
     const eg2 = new Graph()
@@ -126,11 +131,6 @@ describe("core/pagerankGraph", () => {
       expect(total).toBeCloseTo(1);
     }
 
-    function examplePagerankGraph() {
-      const g = advancedGraph().graph1();
-      return new PagerankGraph(g, defaultEvaluator);
-    }
-
     it("promise rejects if the graph was modified", async () => {
       const pg = examplePagerankGraph();
       pg.graph().addNode(NodeAddress.empty);
@@ -173,6 +173,60 @@ describe("core/pagerankGraph", () => {
       });
       expect(results.convergenceDelta).toBeLessThan(convergenceThreshold);
       checkProbabilityDistribution(pg);
+    });
+  });
+
+  describe("equals", () => {
+    it("PagerankGraph is equal to itself", () => {
+      const pg = examplePagerankGraph();
+      expect(pg.equals(pg)).toBe(true);
+    });
+    it("two identicalPagerankGraphs are equal", () => {
+      const pg1 = examplePagerankGraph();
+      const pg2 = examplePagerankGraph();
+      expect(pg1.equals(pg2)).toBe(true);
+    });
+    it("unequal syntheticLoopWeight => unequal", () => {
+      const pg1 = new PagerankGraph(nonEmptyGraph(), defaultEvaluator, 0.1);
+      const pg2 = new PagerankGraph(nonEmptyGraph(), defaultEvaluator, 0.2);
+      expect(pg1.equals(pg2)).toBe(false);
+    });
+    it("unequal graph => unequal", () => {
+      const pg1 = new PagerankGraph(nonEmptyGraph(), defaultEvaluator, 0.1);
+      const g2 = nonEmptyGraph().addNode(NodeAddress.empty);
+      const pg2 = new PagerankGraph(g2, defaultEvaluator, 0.1);
+      expect(pg1.equals(pg2)).toBe(false);
+    });
+    it("unequal scores => unequal", async () => {
+      const pg1 = examplePagerankGraph();
+      const pg2 = examplePagerankGraph();
+      await pg1.runPagerank({maxIterations: 2, convergenceThreshold: 0.001});
+      expect(pg1.equals(pg2)).toBe(false);
+    });
+    it("unequal edge weights => unequal", () => {
+      const evaluator1 = (_unused_edge) => ({toWeight: 1, froWeight: 1});
+      const evaluator2 = (_unused_edge) => ({toWeight: 0, froWeight: 1});
+      const pg1 = new PagerankGraph(advancedGraph().graph1(), evaluator1);
+      const pg2 = new PagerankGraph(advancedGraph().graph1(), evaluator2);
+      expect(pg1.equals(pg2)).toBe(false);
+    });
+    it("different modification history => still equal", () => {
+      // advancedGraph.graph1 and graph2 are identical except for their
+      // construction history
+      const pg1 = new PagerankGraph(advancedGraph().graph1(), defaultEvaluator);
+      const pg2 = new PagerankGraph(advancedGraph().graph2(), defaultEvaluator);
+      expect(pg1.equals(pg2)).toBe(true);
+    });
+    it("throws an error if comparing PagerankGraph to non-PagerankGraph", () => {
+      const pg = examplePagerankGraph();
+      const g = new Graph();
+      // $ExpectFlowError
+      expect(() => pg.equals(g)).toThrowError("Expected PagerankGraph");
+    });
+    it("throws an error if the underlying graph is modified", () => {
+      const pg = examplePagerankGraph();
+      pg.graph().addNode(NodeAddress.fromParts(["modification"]));
+      expect(() => pg.equals(pg)).toThrowError("has been modified");
     });
   });
 });

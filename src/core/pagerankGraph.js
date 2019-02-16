@@ -1,5 +1,7 @@
 // @flow
 
+import deepEqual from "lodash.isequal";
+
 import {Graph, type Edge, type NodeAddressT, type EdgeAddressT} from "./graph";
 import {
   distributionToNodeDistribution,
@@ -269,6 +271,29 @@ export class PagerankGraph {
     return {
       convergenceDelta: distributionResult.convergenceDelta,
     };
+  }
+
+  /**
+   * Returns whether another PagerankGraph is equal to this one.
+   *
+   * PagerankGraphs are considered equal if they have the same nodes with
+   * the same scores, and the same edges with the same weights, and the same
+   * syntheticLoopWeight.
+   *
+   * The modification history of the underlying Graph is irrelevant to
+   * equality.
+   */
+  equals(that: PagerankGraph): boolean {
+    if (!(that instanceof PagerankGraph)) {
+      throw new Error(`Expected PagerankGraph, got ${String(that)}`);
+    }
+    this._verifyGraphNotModified();
+    return (
+      this.graph().equals(that.graph()) &&
+      deepEqual(this._scores, that._scores) &&
+      deepEqual(this._edgeWeights, that._edgeWeights) &&
+      this._syntheticLoopWeight === that._syntheticLoopWeight
+    );
   }
 
   _verifyGraphNotModified() {
