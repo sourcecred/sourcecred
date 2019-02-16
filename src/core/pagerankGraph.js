@@ -2,7 +2,16 @@
 
 import deepEqual from "lodash.isequal";
 
-import {Graph, type Edge, type NodeAddressT, type EdgeAddressT} from "./graph";
+import {toCompat, fromCompat, type Compatible} from "../util/compat";
+import {
+  Graph,
+  type Edge,
+  type NodeAddressT,
+  type EdgeAddressT,
+  type GraphJSON,
+  sortedEdgeAddressesFromJSON,
+  sortedNodeAddressesFromJSON,
+} from "./graph";
 import {
   distributionToNodeDistribution,
   createConnections,
@@ -25,6 +34,20 @@ export type WeightedEdge = {|
   +weight: EdgeWeight,
 |};
 
+export opaque type PagerankGraphJSON = Compatible<{|
+  +graphJSON: GraphJSON,
+  // Score for every node, ordered by the sorted node address.
+  +scores: $ReadOnlyArray<number>,
+  // Weights for every edge, ordered by sorted edge address.
+  // We could save the EdgeWeights directly rather than having separate
+  // arrays for toWeights and froWeights, but this would lead to an inflated
+  // JSON representation because we would be needlessly duplicating the keys
+  // "toWeight" and "froWeight" themselves.
+  +toWeights: $ReadOnlyArray<number>,
+  +froWeights: $ReadOnlyArray<number>,
+  +syntheticLoopWeight: number,
+|}>;
+
 /**
  * Options to control how PageRank runs and when it stops
  */
@@ -45,6 +68,8 @@ export type PagerankConvergenceReport = {|
 |};
 
 export const DEFAULT_SYNTHETIC_LOOP_WEIGHT = 1e-3;
+
+const COMPAT_INFO = {type: "sourcecred/pagerankGraph", version: "0.1.0"};
 
 /**
  * PagerankGraph is a wrapper over the Graph class, which adds
@@ -294,6 +319,79 @@ export class PagerankGraph {
       deepEqual(this._edgeWeights, that._edgeWeights) &&
       this._syntheticLoopWeight === that._syntheticLoopWeight
     );
+  }
+
+  /**
+   * Serialize this graph into a PagerankJSON object.
+   *
+   * Returns a plain JavaScript object.
+   *
+   * For space efficency, we store the node scores as an array of numbers in
+   * node-address-sorted order, and we store the edge weights as two arrays of
+   * numbers in edge-address-sorted-order.
+   */
+  toJSON(): PagerankGraphJSON {
+    this._verifyGraphNotModified();
+
+    const graphJSON = this.graph().toJSON();
+    const nodes = sortedNodeAddressesFromJSON(graphJSON);
+    const scores: number[] = nodes.map((x) =>
+      NullUtil.get(this._scores.get(x))
+    );
+
+    const edgeAddresses = sortedEdgeAddressesFromJSON(graphJSON);
+    const edgeWeights: EdgeWeight[] = edgeAddresses.map((x) =>
+      NullUtil.get(this._edgeWeights.get(x))
+    );
+    const toWeights: number[] = edgeWeights.map((x) => x.toWeight);
+    const froWeights: number[] = edgeWeights.map((x) => x.froWeight);
+
+    const rawJSON = {
+      graphJSON,
+      scores,
+      toWeights,
+      froWeights,
+      syntheticLoopWeight: this.syntheticLoopWeight(),
+    };
+
+    return toCompat(COMPAT_INFO, rawJSON);
+  }
+
+  static fromJSON(json: PagerankGraphJSON): PagerankGraph {
+    const {
+      toWeights,
+      froWeights,
+      scores,
+      graphJSON,
+      syntheticLoopWeight,
+    } = fromCompat(COMPAT_INFO, json);
+    const graph = Graph.fromJSON(graphJSON);
+
+    const nodes = sortedNodeAddressesFromJSON(graphJSON);
+    const scoreMap: Map<NodeAddressT, number> = new Map();
+    for (let i = 0; i < nodes.length; i++) {
+      scoreMap.set(nodes[i], scores[i]);
+    }
+
+    const edges = sortedEdgeAddressesFromJSON(graphJSON);
+    const edgeWeights: Map<EdgeAddressT, EdgeWeight> = new Map();
+    for (let i = 0; i < edges.length; i++) {
+      const toWeight = toWeights[i];
+      const froWeight = froWeights[i];
+      edgeWeights.set(edges[i], {toWeight, froWeight});
+    }
+
+    function evaluator(e: Edge): EdgeWeight {
+      return NullUtil.get(edgeWeights.get(e.address));
+    }
+
+    const prg = new PagerankGraph(graph, evaluator, syntheticLoopWeight);
+    // TODO(#1020): It's a little hacky to force the scores in like this;
+    // consider adding an optional constructor argument to allow manually
+    // setting the scores at construction time, if we ever find a use case
+    // that needs it.
+    prg._scores = scoreMap;
+    return prg;
   }
 
   _verifyGraphNotModified() {

@@ -229,4 +229,33 @@ describe("core/pagerankGraph", () => {
       expect(() => pg.equals(pg)).toThrowError("has been modified");
     });
   });
+
+  describe("to/from JSON", () => {
+    it("to->fro is identity", async () => {
+      const pg = examplePagerankGraph();
+      await pg.runPagerank({maxIterations: 1, convergenceThreshold: 0.01});
+      const pgJSON = pg.toJSON();
+      const pg_ = PagerankGraph.fromJSON(pgJSON);
+      expect(pg.equals(pg_)).toBe(true);
+    });
+    it("fro->to is identity", async () => {
+      const pg = examplePagerankGraph();
+      await pg.runPagerank({maxIterations: 1, convergenceThreshold: 0.01});
+      const pgJSON = pg.toJSON();
+      const pg_ = PagerankGraph.fromJSON(pgJSON);
+      const pgJSON_ = pg_.toJSON();
+      expect(pgJSON).toEqual(pgJSON_);
+    });
+    it("is canonical with respect to the graph's history", async () => {
+      const pg1 = new PagerankGraph(advancedGraph().graph1(), defaultEvaluator);
+      const pg2 = new PagerankGraph(advancedGraph().graph2(), defaultEvaluator);
+      const pg1JSON = pg1.toJSON();
+      const pg2JSON = pg2.toJSON();
+      expect(pg1JSON).toEqual(pg2JSON);
+    });
+    it("matches expected snapshot", () => {
+      const pgJSON = examplePagerankGraph().toJSON();
+      expect(pgJSON).toMatchSnapshot();
+    });
+  });
 });
