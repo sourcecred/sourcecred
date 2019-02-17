@@ -186,8 +186,8 @@ export class PagerankGraph {
     return this._syntheticLoopWeight;
   }
 
-  *_nodesIterator(): Iterator<ScoredNode> {
-    for (const node of this._graph.nodes()) {
+  *_nodesIterator(options?: {|+prefix: NodeAddressT|}): Iterator<ScoredNode> {
+    for (const node of this._graph.nodes(options)) {
       const score = NullUtil.get(this._scores.get(node));
       yield {node, score};
     }
@@ -196,11 +196,13 @@ export class PagerankGraph {
   /**
    * Provides node and score for every node in the underlying graph.
    *
-   * TODO(#1020): Allow optional filtering, as in Graph.nodes.
+   * Optionally, provide a node prefix to return an iterator containing
+   * only node/score objects whose nodes match the provided node prefix.
+   * See Graph.nodes and Address.hasPrefix for details.
    */
-  nodes(): Iterator<ScoredNode> {
+  nodes(options?: {|+prefix: NodeAddressT|}): Iterator<ScoredNode> {
     this._verifyGraphNotModified();
-    return this._nodesIterator();
+    return this._nodesIterator(options);
   }
 
   /**
