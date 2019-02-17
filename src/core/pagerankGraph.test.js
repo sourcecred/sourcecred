@@ -9,7 +9,7 @@ import {
   type Edge,
   type EdgesOptions,
 } from "./graph";
-import {PagerankGraph} from "./pagerankGraph";
+import {PagerankGraph, Direction} from "./pagerankGraph";
 import {advancedGraph} from "./graphTestUtil";
 import * as NullUtil from "../util/null";
 
@@ -345,6 +345,121 @@ describe("core/pagerankGraph", () => {
             .edges({addressPrefix: e11, srcPrefix: dst1});
         }).toThrow("Invalid dst prefix: undefined");
       });
+    });
+  });
+
+  describe("neighbors", () => {
+    const allNeighbors = () => ({
+      direction: Direction.ANY,
+      nodePrefix: NodeAddress.empty,
+      edgePrefix: EdgeAddress.empty,
+    });
+    it("is an error to call neighbors after modifying the underlying graph", () => {
+      const pg = examplePagerankGraph();
+      pg.graph().addNode(NodeAddress.fromParts(["foomfazzle"]));
+      expect(() =>
+        pg.neighbors(NodeAddress.fromParts(["src"]), allNeighbors())
+      ).toThrowError("has been modified");
+    });
+    it("it is an error to call neighbors on a non-existent node", () => {
+      const pg = examplePagerankGraph();
+      expect(() =>
+        pg.neighbors(NodeAddress.fromParts(["foomfazzle"]), allNeighbors())
+      ).toThrowError("non-existent node");
+    });
+    it("neighbors returns results consistent with Graph.neighbors", () => {
+      const directions = [Direction.IN, Direction.ANY, Direction.OUT];
+      const nodePrefixes = [
+        NodeAddress.empty,
+        NodeAddress.fromParts(["src"]),
+        NodeAddress.fromParts(["nonexistent"]),
+      ];
+      const edgePrefixes = [
+        EdgeAddress.empty,
+        EdgeAddress.fromParts(["hom"]),
+        EdgeAddress.fromParts(["nonexistent"]),
+      ];
+      const targets = [
+        NodeAddress.fromParts(["src"]),
+        NodeAddress.fromParts(["loop"]),
+      ];
+
+      const graph = advancedGraph().graph1();
+      const pagerankGraph = new PagerankGraph(graph, defaultEvaluator);
+      for (const direction of directions) {
+        for (const nodePrefix of nodePrefixes) {
+          for (const edgePrefix of edgePrefixes) {
+            for (const target of targets) {
+              const options = {direction, nodePrefix, edgePrefix};
+              const prgNeighbors = Array.from(
+                pagerankGraph.neighbors(target, options)
+              );
+              const gNeighbors = Array.from(graph.neighbors(target, options));
+              const reducedPrgNeighbors = prgNeighbors.map((s) => ({
+                node: s.scoredNode.node,
+                edge: s.weightedEdge.edge,
+              }));
+              expect(gNeighbors).toEqual(reducedPrgNeighbors);
+            }
+          }
+        }
+      }
+    });
+  });
+
+  describe("score decomposition", () => {
+    const allNeighbors = () => ({
+      direction: Direction.ANY,
+      nodePrefix: NodeAddress.empty,
+      edgePrefix: EdgeAddress.empty,
+    });
+    it("neighbor's scored contributions are computed correctly", async () => {
+      const pg = await convergedPagerankGraph();
+      for (const {node: target} of pg.nodes()) {
+        for (const {
+          scoredNode,
+          weightedEdge,
+          scoreContribution,
+        } of pg.neighbors(target, allNeighbors())) {
+          let rawWeight = 0;
+          if (weightedEdge.edge.dst === target) {
+            rawWeight += weightedEdge.weight.toWeight;
+          }
+          if (weightedEdge.edge.src === target) {
+            rawWeight += weightedEdge.weight.froWeight;
+          }
+          const normalizedWeight =
+            rawWeight / pg.totalOutWeight(scoredNode.node);
+          expect(scoreContribution).toEqual(
+            scoredNode.score * normalizedWeight
+          );
+        }
+      }
+    });
+    it("synthetic score contributions are computed correctly", async () => {
+      const pg = await convergedPagerankGraph();
+      for (const {node, score} of pg.nodes()) {
+        expect(pg.syntheticLoopScoreContribution(node)).toEqual(
+          (score * pg.syntheticLoopWeight()) / pg.totalOutWeight(node)
+        );
+      }
+    });
+    it("neighbors score contributions + synthetic score contribution == node score", async () => {
+      // Note: I've verified that test fails if we don't properly handle loop
+      // neighbors (need to add the edge toWeight and froWeight if the neighbor
+      // is a loop).
+      const pg = await convergedPagerankGraph();
+      for (const {node, score} of pg.nodes()) {
+        // We need to include the score that came from the synthetic loop edge
+        // (should be near zero for non-isolated nodes)
+        let summedScoreContributions: number = pg.syntheticLoopScoreContribution(
+          node
+        );
+        for (const scoredNeighbor of pg.neighbors(node, allNeighbors())) {
+          summedScoreContributions += scoredNeighbor.scoreContribution;
+        }
+        expect(summedScoreContributions).toBeCloseTo(score);
+      }
     });
   });
 
