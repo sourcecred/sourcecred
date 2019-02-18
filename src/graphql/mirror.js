@@ -397,11 +397,8 @@ export class Mirror {
       // Already registered; nothing to do.
       return;
     } else if (existingTypename !== undefined) {
-      const s = JSON.stringify;
-      throw new Error(
-        `Inconsistent type for ID ${s(id)}: ` +
-          `expected ${s(existingTypename)}, got ${s(typename)}`
-      );
+      this._nontransactionallyRegisterTypename({id: id, typename: null});
+      return;
     }
 
     if (this._schema[typename] == null) {
@@ -507,7 +504,8 @@ export class Mirror {
             SELECT typename AS typename, id AS id
             FROM objects
             LEFT OUTER JOIN updates ON objects.last_update = updates.rowid
-            WHERE objects.last_update IS NULL
+            WHERE objects.typename IS NOT NULL 
+            AND objects.last_update IS NULL
             OR updates.time_epoch_millis < :timeEpochMillisThreshold
           `
         )
@@ -540,7 +538,15 @@ export class Mirror {
           delete result.neverUpdated;
           return result;
         });
-      const typenames: $PropertyType<QueryPlan, "typenames"> = [];
+      const typenames: $PropertyType<QueryPlan, "typenames"> = db
+        .prepare(
+          dedent`\
+            SELECT id
+            FROM objects
+            WHERE objects.typename IS NULL
+          `
+        )
+        .all();
       return {objects, connections, typenames};
     });
   }
@@ -566,20 +572,44 @@ export class Mirror {
       +nodesLimit: number,
       // How many connections may we fetch at top level?
       +connectionLimit: number,
+      // How many nodes of unfaithful types may we fetch?
+      +typenamesLimit: number,
       // When fetching entries in a connection, how many entities may we
       // request at once? (What is the `first` argument?)
       +connectionPageSize: number,
     |}
   ): Queries.Selection[] {
-    if (queryPlan.typenames && queryPlan.typenames.length) {
-      throw new Error("Unfaithful typenames not yet implemented");
+    const nullTypenameObjects: $ReadOnlyArray<{|
+      +id: Schema.ObjectId,
+    |}> = queryPlan.typenames.slice(0, options.nodesLimit);
+
+    const paginatedNullTypenameObjects: Array<
+      $ReadOnlyArray<{|
+        +id: Schema.ObjectId,
+      |}>
+    > = [];
+
+    for (
+      let i = 0;
+      i < nullTypenameObjects.length;
+      i += options.typenamesLimit
+    ) {
+      const idsPage = nullTypenameObjects.slice(i, i + options.typenamesLimit);
+      paginatedNullTypenameObjects.push(idsPage);
     }
+
     // Group objects by type, so that we have to specify each type's
     // fieldset fewer times (only once per `nodesOfTypeLimit` nodes
     // instead of for every node).
     const objectsByType: Map<Schema.Typename, Schema.ObjectId[]> = new Map();
-    for (const object of queryPlan.objects.slice(0, options.nodesLimit)) {
-      MapUtil.pushValue(objectsByType, object.typename, object.id);
+    const nullFiltered = queryPlan.objects.filter((object) => {
+      return object.typename;
+    });
+    for (const object of nullFiltered.slice(0, options.nodesLimit)) {
+      // istanbul ignore next
+      if (object.typename !== null) {
+        MapUtil.pushValue(objectsByType, object.typename, object.id);
+      }
     }
     const paginatedObjectsByType: Array<{|
       +typename: Schema.Typename,
@@ -629,7 +659,6 @@ export class Mirror {
     }
 
     const b = Queries.build;
-
     // Each top-level field corresponds to either an object type
     // (fetching own data for objects of that type) or a particular node
     // (updating connections on that node). We alias each such field,
@@ -672,7 +701,18 @@ export class Mirror {
             ])
           );
         }
-      )
+      ),
+      paginatedNullTypenameObjects.map((ids, i) => {
+        const name = `${_FIELD_PREFIXES.TYPENAME_UPDATE}${i}`;
+        return b.alias(
+          name,
+          b.field(
+            "nodes",
+            {ids: b.list(ids.map((o) => b.literal(o.id)))},
+            this._queryTypename()
+          )
+        );
+      })
     );
   }
 
@@ -725,7 +765,13 @@ export class Mirror {
           );
         }
       } else if (topLevelKey.startsWith(_FIELD_PREFIXES.TYPENAME_UPDATE)) {
-        throw new Error("Unfaithful Typenames not yet implemented");
+        const rawValue:
+          | OwnDataUpdateResult
+          | NodeConnectionsUpdateResult
+          | TypenameUpdateResult =
+          queryResult[topLevelKey];
+        const updateRecord: TypenameUpdateResult = (rawValue: any);
+        this._nontransactionallyUpdateTypename(updateId, updateRecord);
       } else {
         throw new Error(
           "Bad key in query result: " + JSON.stringify(topLevelKey)
@@ -747,6 +793,7 @@ export class Mirror {
     options: {|
       +nodesLimit: number,
       +nodesOfTypeLimit: number,
+      +typenamesLimit: number,
       +connectionPageSize: number,
       +connectionLimit: number,
       +since: Date,
@@ -758,6 +805,7 @@ export class Mirror {
       return Promise.resolve(false);
     }
     const querySelections = this._queryFromPlan(queryPlan, {
+      typenamesLimit: options.typenamesLimit,
       nodesLimit: options.nodesLimit,
       nodesOfTypeLimit: options.nodesOfTypeLimit,
       connectionPageSize: options.connectionPageSize,
@@ -811,6 +859,7 @@ export class Mirror {
       +nodesLimit: number,
       +nodesOfTypeLimit: number,
       +connectionPageSize: number,
+      +typenamesLimit: number,
       +connectionLimit: number,
       +since: Date,
       +now: () => Date,
@@ -912,6 +961,237 @@ export class Mirror {
     return result.initialized ? result.endCursor : undefined;
   }
 
+  _getTypename(objectId: Schema.ObjectId): Schema.Typename | void {
+    const resultId: {|
+      +id: Schema.ObjectId,
+    |} | void = this._db
+      .prepare(
+        dedent`
+          SELECT id 
+          FROM objects
+          WHERE id = :objectId
+        `
+      )
+      .get({objectId});
+    if (resultId === undefined) {
+      const s = JSON.stringify;
+      throw new Error(`No such object ${s(objectId)}`);
+    }
+    const typename: {
+      +typename: Schema.Typename | void,
+    } = this._db
+      .prepare(
+        dedent`\
+          SELECT typename
+          FROM objects
+          WHERE id = :objectId
+        `
+      )
+      .get({objectId});
+    return typename.typename;
+  }
+
+  _hasUnfaithfulTypename(typename: Schema.Typename): boolean {
+    const objectType = this._schemaInfo.objectTypes[typename];
+    for (const field in objectType.fields) {
+      const objectField = objectType.fields[field];
+      if (objectField.fidelity) {
+        if (objectField.fidelity.type === "UNFAITHFUL") {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /*
+    Create a GraphQL selection set to fetch elements with
+    unfaithful typenames. This selection set will return array of
+    objects `__typename`, `id`, and top level primitive fields
+   */
+  _queryTypename(): Queries.Selection[] {
+    const b = Queries.build;
+    const selections = [
+      b.field("__typename"),
+      ...this._schemaInfo.unionTypes["Actor"].clauses.map(
+        (clause: Schema.Typename) =>
+          b.inlineFragment(
+            clause,
+            Object.keys(this._schemaInfo.objectTypes[clause].fields).map(
+              (field) => {
+                return b.field(field);
+              }
+            )
+          )
+      ),
+    ];
+    return selections;
+  }
+
+  _updateTypename(updateId: UpdateId, queryResult: TypenameUpdateResult): void {
+    _inTransaction(this._db, () => {
+      this._nontransactionallyUpdateTypename(updateId, queryResult);
+    });
+  }
+
+  // This should only be called from _updateData, as it has
+  // a TypenameUpdateResult of canonical typenames.
+  // The possible objects this can update:
+  //     - An object that doesn't exists but is unfaithful
+  //     - An object that already exists and is unfaithful
+  // In either case, the typename from this update should
+  // Override any existing current typename.
+  // If this affects an object that is created from this,
+  // It's `last_update` will be null.
+  // If this affects an object that alreacy exists, this creates
+  // and sets a new `last_update`
+  _nontransactionallyUpdateTypename(
+    updateId: UpdateId,
+    queryResult: TypenameUpdateResult
+  ): void {
+    if (queryResult.length === 0) {
+      return;
+    }
+    const db = this._db;
+    const typename = queryResult[0].__typename;
+    const objectType = this._schemaInfo.objectTypes[typename];
+
+    for (const object of queryResult) {
+      const objectId: Schema.ObjectId = object.id;
+      const connectionId: Schema.ObjectId = this._db
+        .prepare(
+          dedent`\
+          SELECT id AS connectionId
+          FROM objects
+          WHERE id = :objectId
+        `
+        )
+        .pluck()
+        .get({objectId});
+
+      // If the object doesn't exist, register it
+      if (!connectionId) {
+        this._nontransactionallyRegisterTypename({
+          id: objectId,
+          typename: typename,
+        });
+      } else {
+        // Otherwise update its typename and last_update
+        const updateTypename = _makeSingleUpdateFunction(
+          db.prepare(
+            dedent`\
+            UPDATE objects
+            SET
+                last_update = :updateId,
+                typename = :typename
+            WHERE id = :objectId
+            `
+          )
+        );
+        updateTypename({
+          updateId: updateId,
+          typename: typename,
+          objectId: objectId,
+        });
+      }
+
+      this._db
+        .prepare(
+          dedent`\
+          INSERT INTO ${_primitivesTableName(typename)} (id)
+          VALUES (?)
+        `
+        )
+        .run(objectId);
+    }
+
+    declare opaque type ParameterName: string;
+    {
+      const parameterNameFor = {
+        topLevelField(fieldname: Schema.Fieldname): ParameterName {
+          return ((["t", fieldname].join("_"): string): any);
+        },
+      };
+      const updatePrimitives: ({|
+        +id: Schema.ObjectId,
+        +[parameterName: ParameterName]: string | 0 | 1,
+      |}) => void = (() => {
+        const updates: $ReadOnlyArray<string> = [].concat(
+          objectType.primitiveFieldNames.map(
+            (f) => `"${f}" = :${parameterNameFor.topLevelField(f)}`
+          )
+        );
+
+        const tableName = _primitivesTableName(typename);
+        const stmt = db.prepare(
+          `UPDATE ${tableName} SET ${updates.join(", ")} WHERE id = :id`
+        );
+        return _makeSingleUpdateFunction(stmt);
+      })();
+
+      for (const entry of queryResult) {
+        const primitives: {|
+          +id: Schema.ObjectId,
+          [ParameterName]: string | 0 | 1,
+        |} = {id: entry.id};
+
+        // Add top-level primitives.
+        for (const fieldname of objectType.primitiveFieldNames) {
+          const value: PrimitiveResult | NodeFieldResult | NestedFieldResult =
+            entry[fieldname];
+          const primitive: PrimitiveResult = (value: any);
+          if (primitive === undefined) {
+            const s = JSON.stringify;
+            throw new Error(
+              `Missing primitive ${s(fieldname)} on ${s(entry.id)} ` +
+                `of type ${s(typename)} (got ${(primitive: empty)})`
+            );
+          }
+          primitives[
+            parameterNameFor.topLevelField(fieldname)
+          ] = JSON.stringify(primitive);
+        }
+        updatePrimitives(primitives);
+      }
+    }
+  }
+
+  _registerTypename(object: {|
+    +typename: Schema.Typename | null,
+    +id: Schema.ObjectId,
+  |}): void {
+    _inTransaction(this._db, () => {
+      this._nontransactionallyRegisterTypename(object);
+    });
+  }
+
+  _nontransactionallyRegisterTypename(object: {|
+    +typename: Schema.Typename | null,
+    +id: Schema.ObjectId,
+  |}): Schema.Typename | null {
+    const id: Schema.ObjectId | null = object.id;
+    const typename: Schema.Typename | null = object.typename;
+    const db = this._db;
+
+    const existingId = db
+      .prepare("SELECT id FROM objects WHERE id = :id")
+      .pluck()
+      .get({id});
+
+    if (existingId === id) {
+      return id;
+    } else {
+      this._db
+        .prepare(
+          dedent`\
+          INSERT INTO objects (id, last_update, typename)
+          VALUES (:id, NULL, :typename)
+        `
+        )
+        .run({id, typename});
+      return id;
+    }
+  }
   /**
    * Create a GraphQL selection set to fetch elements from a collection,
    * specified by its enclosing object type and the connection field
@@ -1146,11 +1426,6 @@ export class Mirror {
             case "PRIMITIVE":
               return b.field(fieldname);
             case "NODE":
-              if (field.fidelity.type === "UNFAITHFUL") {
-                throw new Error(
-                  "Handling unfaithful fields is not yet implemented"
-                );
-              }
               return b.field(
                 fieldname,
                 {},
@@ -1169,11 +1444,6 @@ export class Mirror {
                     case "PRIMITIVE":
                       return b.field(childFieldname);
                     case "NODE":
-                      if (field.fidelity.type === "UNFAITHFUL") {
-                        throw new Error(
-                          "Handling unfaithful fields is not yet implemented"
-                        );
-                      }
                       return b.field(
                         childFieldname,
                         {},
@@ -1234,6 +1504,30 @@ export class Mirror {
     const db = this._db;
     const objectType = this._schemaInfo.objectTypes[typename];
 
+    let unfaithfulFields = new Set();
+    for (const field in objectType.fields) {
+      const objectField = objectType.fields[field];
+      if (objectField.fidelity) {
+        if (objectField.fidelity.type === "UNFAITHFUL") {
+          unfaithfulFields.add(field);
+        }
+      }
+      if (objectField.type === "NESTED") {
+        for (const childField in objectField) {
+          for (const childFieldValue in objectField[childField]) {
+            if (objectField[childField][childFieldValue].fidelity) {
+              if (
+                objectField[childField][childFieldValue].fidelity.type ===
+                "UNFAITHFUL"
+              ) {
+                unfaithfulFields.add(childFieldValue);
+              }
+            }
+          }
+        }
+      }
+    }
+
     // First, make sure that all objects for which we're given own data
     // actually exist and have the correct typename.
     {
@@ -1244,7 +1538,9 @@ export class Mirror {
         if (!doesObjectExist.get(entry.id)) {
           throw new Error(
             "Cannot update data for nonexistent node: " +
-              JSON.stringify(entry.id)
+              JSON.stringify(entry.id) +
+              "entry : " +
+              JSON.stringify(entry)
           );
         }
         if (entry.__typename !== typename) {
@@ -1422,8 +1718,15 @@ export class Mirror {
                 `of type ${s(typename)} (got ${(link: empty)})`
             );
           }
-          const childId = this._nontransactionallyRegisterNodeFieldResult(link);
           const parentId = entry.id;
+          const childId: Schema.ObjectId | null = !link
+            ? null
+            : unfaithfulFields.has(fieldname)
+              ? this._nontransactionallyRegisterTypename({
+                  id: link.id,
+                  typename: null,
+                })
+              : this._nontransactionallyRegisterNodeFieldResult(link);
           updateLink({parentId, fieldname, childId});
         }
 
@@ -1451,11 +1754,16 @@ export class Mirror {
                   `of type ${s(typename)} (got ${(link: empty)})`
               );
             }
-            const childId = this._nontransactionallyRegisterNodeFieldResult(
-              link
-            );
-            const fieldname = `${nestFieldname}.${childFieldname}`;
             const parentId = entry.id;
+            const childId: Schema.ObjectId | null = !link
+              ? null
+              : unfaithfulFields.has(childFieldname)
+                ? this._nontransactionallyRegisterTypename({
+                    id: link.id,
+                    typename: null,
+                  })
+                : this._nontransactionallyRegisterNodeFieldResult(link);
+            const fieldname = `${nestFieldname}.${childFieldname}`;
             updateLink({parentId, fieldname, childId});
           }
         }
@@ -1592,7 +1900,6 @@ export class Mirror {
           .prepare(`SELECT DISTINCT typename FROM ${temporaryTableName}`)
           .pluck()
           .all();
-
         // Check to make sure all required objects and connections have
         // been updated at least once.
         {
@@ -1931,11 +2238,6 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
               entry.primitiveFieldNames.push(fieldname);
               break;
             case "NODE":
-              if (field.fidelity.type === "UNFAITHFUL") {
-                throw new Error(
-                  "Handling unfaithful fields is not yet implemented"
-                );
-              }
               entry.linkFieldNames.push(fieldname);
               break;
             case "CONNECTION":
@@ -1954,11 +2256,6 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
                     nestedFieldData.primitives[eggFieldname] = eggField;
                     break;
                   case "NODE":
-                    if (eggField.fidelity.type === "UNFAITHFUL") {
-                      throw new Error(
-                        "Handling unfaithful fields is not yet implemented"
-                      );
-                    }
                     nestedFieldData.nodes[eggFieldname] = eggField;
                     break;
                   // istanbul ignore next
@@ -1996,7 +2293,7 @@ type UpdateId = number;
  */
 type QueryPlan = {|
   +objects: $ReadOnlyArray<{|
-    +typename: Schema.Typename,
+    +typename: Schema.Typename | null,
     +id: Schema.ObjectId,
   |}>,
   +connections: $ReadOnlyArray<{|
@@ -2076,7 +2373,7 @@ export type TypenameUpdateResult = $ReadOnlyArray<{
  *
  * See: `_FIELD_PREFIXES`.
  */
-type UpdateResult = {
+export type UpdateResult = {
   // The prefix of each key determines what type of results the value
   // represents. See constants below.
   +[string]:
