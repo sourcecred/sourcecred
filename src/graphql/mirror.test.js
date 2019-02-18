@@ -682,6 +682,7 @@ describe("graphql/mirror", () => {
             // issue:ab/cd#3.comments was loaded after the cutoff
             // issue:ab/cd#4.comments was loaded exactly at the cutoff
           ],
+          typenames: [],
         };
         expect(actual).toEqual(expected);
       });
@@ -707,6 +708,7 @@ describe("graphql/mirror", () => {
               endCursor: null,
             },
           ],
+          typenames: [],
         };
         expect(() => {
           mirror._queryFromPlan(plan, {
@@ -777,6 +779,7 @@ describe("graphql/mirror", () => {
               endCursor: "cursor#996",
             },
           ],
+          typenames: [],
         };
         const actual = mirror._queryFromPlan(plan, {
           nodesLimit: 4,
@@ -849,6 +852,23 @@ describe("graphql/mirror", () => {
             ])
           ),
         ]);
+      });
+      it("rejects non-null typenames", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          objects: [],
+          connections: [],
+          typenames: [{id: "fail"}],
+        };
+        expect(() => {
+          mirror._queryFromPlan(plan, {
+            nodesLimit: 10,
+            nodesOfTypeLimit: 5,
+            connectionLimit: 5,
+            connectionPageSize: 23,
+          });
+        }).toThrow("Unfaithful typenames not yet implemented");
       });
     });
 
@@ -1210,6 +1230,7 @@ describe("graphql/mirror", () => {
         expect(spyFindOutdated.mock.results[2].value).toEqual({
           objects: [],
           connections: [],
+          typenames: [],
         });
 
         // We should have constructed two query plans, with the same
