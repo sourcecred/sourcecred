@@ -507,7 +507,8 @@ export class Mirror {
             SELECT typename AS typename, id AS id
             FROM objects
             LEFT OUTER JOIN updates ON objects.last_update = updates.rowid
-            WHERE objects.last_update IS NULL
+            WHERE objects.typename IS NOT NULL 
+            AND objects.last_update IS NULL
             OR updates.time_epoch_millis < :timeEpochMillisThreshold
           `
         )
@@ -540,7 +541,15 @@ export class Mirror {
           delete result.neverUpdated;
           return result;
         });
-      const typenames: $PropertyType<QueryPlan, "typenames"> = [];
+      const typenames: $PropertyType<QueryPlan, "typenames"> = db
+        .prepare(
+          dedent`\
+            SELECT id
+            FROM objects
+            WHERE objects.typename IS NULL
+          `
+        )
+        .all();
       return {objects, connections, typenames};
     });
   }

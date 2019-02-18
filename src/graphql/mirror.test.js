@@ -689,6 +689,103 @@ describe("graphql/mirror", () => {
         };
         expect(actual).toEqual(expected);
       });
+      it("finds objects with null typenames", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const createUpdate = (epochTimeMillis) => ({
+          time: epochTimeMillis,
+          id: mirror._createUpdate(new Date(epochTimeMillis)),
+        });
+
+        const earlyUpdate = createUpdate(new Date(556));
+        const midUpdate = createUpdate(456);
+
+        const setUpdate = _makeSingleUpdateFunction(
+          db.prepare("UPDATE objects SET last_update = :update WHERE id = :id")
+        );
+        const setNullTypename = _makeSingleUpdateFunction(
+          db.prepare(
+            "UPDATE objects SET typename = :typename, last_update = NULL WHERE id = :id"
+          )
+        );
+
+        mirror.registerObject({typename: "Repository", id: "repo:ab/cd"});
+
+        // check `repo:ab/cd`, having a null last_update.
+        // It should appear in both the objects and connections
+        const actual = mirror._findOutdated(new Date(midUpdate.time));
+        const expected = {
+          objects: [{typename: "Repository", id: "repo:ab/cd"}],
+          connections: [
+            {
+              objectTypename: "Repository",
+              objectId: "repo:ab/cd",
+              fieldname: "issues",
+              endCursor: undefined,
+            },
+          ],
+          typenames: [],
+        };
+        expect(actual).toEqual(expected);
+
+        // Check `repo:ab/cd`, setting its last_update
+        // Since the last_update is set, it should only appear
+        // in connections
+        setUpdate({id: "repo:ab/cd", update: earlyUpdate.id});
+        const actual2 = mirror._findOutdated(new Date(midUpdate.time));
+        const expected2 = {
+          objects: [],
+          connections: [
+            {
+              objectTypename: "Repository",
+              objectId: "repo:ab/cd",
+              fieldname: "issues",
+              endCursor: undefined,
+            },
+          ],
+          typenames: [],
+        };
+        expect(actual2).toEqual(expected2);
+
+        // Check `repo:ab/cd`, setting its typename to null
+        // It thus has a null typename and non-null last_update
+        // It should only appear in connections and typenames
+        setNullTypename({id: "repo:ab/cd", typename: null});
+        const actual3 = mirror._findOutdated(new Date(midUpdate.time));
+        const expected3 = {
+          objects: [],
+          connections: [
+            {
+              objectTypename: null,
+              objectId: "repo:ab/cd",
+              fieldname: "issues",
+              endCursor: undefined,
+            },
+          ],
+          typenames: [{id: "repo:ab/cd"}],
+        };
+        expect(actual3).toEqual(expected3);
+
+        // Check `repo:ab/cd`, with both last_update and typename being null
+        // It should appear in objects, connections and typenames
+        setNullTypename({id: "repo:ab/cd", typename: null});
+        setUpdate({id: "repo:ab/cd", update: null});
+        const actual4 = mirror._findOutdated(new Date(midUpdate.time));
+        const expected4 = {
+          objects: [],
+          connections: [
+            {
+              objectTypename: null,
+              objectId: "repo:ab/cd",
+              fieldname: "issues",
+              endCursor: undefined,
+            },
+          ],
+          typenames: [{id: "repo:ab/cd"}],
+        };
+        expect(actual4).toEqual(expected4);
+      });
     });
 
     describe("_queryFromPlan", () => {
