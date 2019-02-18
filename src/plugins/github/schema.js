@@ -86,7 +86,7 @@ export default function schema(): Schema.Schema {
     Reaction: s.object({
       id: s.id(),
       content: s.primitive(s.nonNull("ReactionContent")),
-      user: s.node("User"),
+      user: s.node("User", s.unfaithful(["User", "Organization"])),
     }),
     Ref: s.object({
       id: s.id(),

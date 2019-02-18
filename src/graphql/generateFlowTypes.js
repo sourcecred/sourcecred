@@ -48,9 +48,6 @@ export default function generateFlowTypes(
     }
   }
   function formatNodeField(field: NodeFieldType): string {
-    if (field.fidelity.type === "UNFAITHFUL") {
-      throw new Error("Unfaithful Fidelity not yet supported");
-    }
     return "null | " + field.elementType;
   }
   function formatConnectionField(field: ConnectionFieldType): string {
