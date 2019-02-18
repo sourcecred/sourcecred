@@ -539,7 +539,8 @@ export class Mirror {
           delete result.neverUpdated;
           return result;
         });
-      return {objects, connections};
+      const typenames: $PropertyType<QueryPlan, "typenames"> = [];
+      return {objects, connections, typenames};
     });
   }
 
@@ -569,6 +570,9 @@ export class Mirror {
       +connectionPageSize: number,
     |}
   ): Queries.Selection[] {
+    if (queryPlan.typenames && queryPlan.typenames.length) {
+      throw new Error("Unfaithful typenames not yet implemented");
+    }
     // Group objects by type, so that we have to specify each type's
     // fieldset fewer times (only once per `nodesOfTypeLimit` nodes
     // instead of for every node).
@@ -1991,6 +1995,9 @@ type QueryPlan = {|
     +objectId: Schema.ObjectId,
     +fieldname: Schema.Fieldname,
     +endCursor: EndCursor | void, // `undefined` if never fetched
+  |}>,
+  +typenames: $ReadOnlyArray<{|
+    +id: Schema.ObjectId,
   |}>,
 |};
 
