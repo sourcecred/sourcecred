@@ -381,6 +381,9 @@ describe("core/graph", () => {
         it("does a prefix filter", () => {
           expectSortedNodes({prefix: n2}, [n2, n3]);
         });
+        it("empty prefix matches all nodes", () => {
+          expectSortedNodes({prefix: NodeAddress.empty}, [n1, n2, n3, n4]);
+        });
         it("yields nothing when prefix matches nothing", () => {
           expectSortedNodes({prefix: NodeAddress.fromParts(["2"])}, []);
         });
