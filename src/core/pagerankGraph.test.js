@@ -17,9 +17,14 @@ describe("core/pagerankGraph", () => {
   const nonEmptyGraph = () =>
     new Graph().addNode(NodeAddress.fromParts(["hi"]));
 
-  function examplePagerankGraph() {
+  function examplePagerankGraph(): PagerankGraph {
     const g = advancedGraph().graph1();
     return new PagerankGraph(g, defaultEvaluator);
+  }
+  async function convergedPagerankGraph(): Promise<PagerankGraph> {
+    const pg = examplePagerankGraph();
+    await pg.runPagerank({maxIterations: 100, convergenceThreshold: 1e-4});
+    return pg;
   }
 
   it("cannot construct PagerankGraph with empty Graph", () => {
@@ -50,9 +55,7 @@ describe("core/pagerankGraph", () => {
       expect(new Set(graphNodes)).toEqual(new Set(pgNodes));
     });
     it("node and nodes both return consistent scores", async () => {
-      const g = advancedGraph().graph1();
-      const pg = new PagerankGraph(g, defaultEvaluator);
-      await pg.runPagerank({maxIterations: 1, convergenceThreshold: 0.001});
+      const pg = await convergedPagerankGraph();
       for (const {node, score} of pg.nodes()) {
         expect(score).toEqual(NullUtil.get(pg.node(node)).score);
       }
@@ -289,15 +292,13 @@ describe("core/pagerankGraph", () => {
 
   describe("to/from JSON", () => {
     it("to->fro is identity", async () => {
-      const pg = examplePagerankGraph();
-      await pg.runPagerank({maxIterations: 1, convergenceThreshold: 0.01});
+      const pg = await convergedPagerankGraph();
       const pgJSON = pg.toJSON();
       const pg_ = PagerankGraph.fromJSON(pgJSON);
       expect(pg.equals(pg_)).toBe(true);
     });
     it("fro->to is identity", async () => {
-      const pg = examplePagerankGraph();
-      await pg.runPagerank({maxIterations: 1, convergenceThreshold: 0.01});
+      const pg = await convergedPagerankGraph();
       const pgJSON = pg.toJSON();
       const pg_ = PagerankGraph.fromJSON(pgJSON);
       const pgJSON_ = pg_.toJSON();
