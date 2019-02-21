@@ -45,7 +45,7 @@ const commentNodeType = Object.freeze({
   description: "NodeType for a GitHub comment",
 });
 
-const userNodeType = Object.freeze({
+export const userNodeType = Object.freeze({
   name: "User",
   pluralName: "Users",
   prefix: N.Prefix.user,

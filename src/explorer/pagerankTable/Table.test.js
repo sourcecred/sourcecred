@@ -3,7 +3,7 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import {NodeAddress, type NodeAddressT} from "../../core/graph";
+import {NodeAddress} from "../../core/graph";
 
 import {PagerankTable} from "./Table";
 import {example, COLUMNS} from "./sharedTestUtils";
@@ -11,17 +11,19 @@ import {NodeRowList} from "./Node";
 import {WeightConfig} from "../weights/WeightConfig";
 import {defaultWeightsForAdapter} from "../weights/weights";
 import {FactorioStaticAdapter} from "../../plugins/demo/explorerAdapter";
+import {type NodeType} from "../../analysis/types";
+import {fallbackNodeType} from "../../analysis/fallbackDeclaration";
 
 require("../../webutil/testUtil").configureEnzyme();
 describe("explorer/pagerankTable/Table", () => {
   describe("PagerankTable", () => {
-    async function setup(defaultNodeFilter?: NodeAddressT) {
+    async function setup(defaultNodeType?: NodeType) {
       const {pnd, adapters, weightedTypes} = await example();
       const onWeightedTypesChange = jest.fn();
       const maxEntriesPerList = 321;
       const element = shallow(
         <PagerankTable
-          defaultNodeFilter={defaultNodeFilter}
+          defaultNodeType={defaultNodeType}
           weightedTypes={weightedTypes}
           onWeightedTypesChange={onWeightedTypesChange}
           pnd={pnd}
@@ -124,20 +126,20 @@ describe("explorer/pagerankTable/Table", () => {
         );
         expect(actualNodes).not.toHaveLength(0);
       });
-      it("filter defaults to show all if defaultNodeFilter not passed", async () => {
+      it("filter defaults to show all if defaultNodeType not passed", async () => {
         const {element} = await setup();
-        expect(element.state().topLevelFilter).toEqual(NodeAddress.empty);
+        expect(element.state().selectedNodeType).toEqual(fallbackNodeType);
       });
-      it("filter defaults to defaultNodeFilter if available", async () => {
-        const filter = NodeAddress.fromParts(["factorio", "inserter"]);
-        const {element} = await setup(filter);
-        expect(element.state().topLevelFilter).toEqual(filter);
-      });
-      it("raises an error if defaultNodeFilter doesn't match any node type", async () => {
-        const badFilter = NodeAddress.fromParts(["doesn't", "exist"]);
-        await expect(setup(badFilter)).rejects.toThrow(
-          "invalid defaultNodeFilter"
-        );
+      it("selectedNodeType defaults to defaultNodeType if available", async () => {
+        const nodeType: NodeType = {
+          name: "testNodeType",
+          pluralName: "testNodeTypes",
+          prefix: NodeAddress.empty,
+          defaultWeight: 1,
+          description: "test type",
+        };
+        const {element} = await setup(nodeType);
+        expect(element.state().selectedNodeType).toEqual(nodeType);
       });
     });
 
