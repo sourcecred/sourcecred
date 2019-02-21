@@ -457,25 +457,10 @@ export class Graph {
    * undefined.
    */
   edges(options?: EdgesOptions): Iterator<Edge> {
-    if (options == null) {
-      options = {
-        addressPrefix: EdgeAddress.empty,
-        srcPrefix: NodeAddress.empty,
-        dstPrefix: NodeAddress.empty,
-      };
-    }
-    if (options.addressPrefix == null) {
-      throw new Error(
-        `Invalid address prefix: ${String(options.addressPrefix)}`
-      );
-    }
-    if (options.srcPrefix == null) {
-      throw new Error(`Invalid src prefix: ${String(options.srcPrefix)}`);
-    }
-    if (options.dstPrefix == null) {
-      throw new Error(`Invalid dst prefix: ${String(options.dstPrefix)}`);
-    }
-    const result = this._edgesIterator(this._modificationCount, options);
+    const result = this._edgesIterator(
+      this._modificationCount,
+      validateEdgeOptions(options)
+    );
     this._maybeCheckInvariants();
     return result;
   }
@@ -935,4 +920,24 @@ export function sortedNodeAddressesFromJSON(
 ): $ReadOnlyArray<NodeAddressT> {
   const {nodes} = fromCompat(COMPAT_INFO, json);
   return nodes.map((x) => NodeAddress.fromParts(x));
+}
+
+function validateEdgeOptions(options?: EdgesOptions) {
+  if (options == null) {
+    return {
+      addressPrefix: EdgeAddress.empty,
+      srcPrefix: NodeAddress.empty,
+      dstPrefix: NodeAddress.empty,
+    };
+  }
+  if (options.addressPrefix == null) {
+    throw new Error(`Invalid address prefix: ${String(options.addressPrefix)}`);
+  }
+  if (options.srcPrefix == null) {
+    throw new Error(`Invalid src prefix: ${String(options.srcPrefix)}`);
+  }
+  if (options.dstPrefix == null) {
+    throw new Error(`Invalid dst prefix: ${String(options.dstPrefix)}`);
+  }
+  return options;
 }
