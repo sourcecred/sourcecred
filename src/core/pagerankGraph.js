@@ -186,8 +186,8 @@ export class PagerankGraph {
     return this._syntheticLoopWeight;
   }
 
-  *_nodesIterator(options?: {|+prefix: NodeAddressT|}): Iterator<ScoredNode> {
-    for (const node of this._graph.nodes(options)) {
+  *_nodesIterator(iterator: Iterator<NodeAddressT>): Iterator<ScoredNode> {
+    for (const node of iterator) {
       const score = NullUtil.get(this._scores.get(node));
       yield {node, score};
     }
@@ -202,7 +202,8 @@ export class PagerankGraph {
    */
   nodes(options?: {|+prefix: NodeAddressT|}): Iterator<ScoredNode> {
     this._verifyGraphNotModified();
-    return this._nodesIterator(options);
+    const iterator = this._graph.nodes(options);
+    return this._nodesIterator(iterator);
   }
 
   /**
