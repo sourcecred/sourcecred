@@ -7,6 +7,7 @@ import {
   EdgeAddress,
   type NodeAddressT,
   type Edge,
+  type EdgesOptions,
 } from "./graph";
 import {PagerankGraph} from "./pagerankGraph";
 import {advancedGraph} from "./graphTestUtil";
@@ -227,6 +228,123 @@ describe("core/pagerankGraph", () => {
       const eg = examplePagerankGraph();
       const eg_ = PagerankGraph.fromJSON(eg.toJSON());
       verifyOutWeights(eg_);
+    });
+  });
+
+  describe("edge filtering", () => {
+    const src1 = NodeAddress.fromParts(["src", "1"]);
+    const src2 = NodeAddress.fromParts(["src", "2"]);
+    const dst1 = NodeAddress.fromParts(["dst", "1"]);
+    const dst2 = NodeAddress.fromParts(["dst", "2"]);
+    const e11 = {
+      src: src1,
+      dst: dst1,
+      address: EdgeAddress.fromParts(["e", "1", "1"]),
+    };
+    const e12 = {
+      src: src1,
+      dst: dst2,
+      address: EdgeAddress.fromParts(["e", "1", "2"]),
+    };
+    const e21 = {
+      src: src2,
+      dst: dst1,
+      address: EdgeAddress.fromParts(["e", "2", "1"]),
+    };
+    const e22 = {
+      src: src2,
+      dst: dst2,
+      address: EdgeAddress.fromParts(["e", "2", "2"]),
+    };
+    const graph = () => {
+      const g = new Graph();
+      [src1, src2, dst1, dst2].forEach((n) => g.addNode(n));
+      [e11, e12, e21, e22].forEach((e) => g.addEdge(e));
+      return g;
+    };
+    const pagerankGraph = () => new PagerankGraph(graph(), defaultEvaluator);
+
+    function expectConsistentEdges(options: EdgesOptions | void) {
+      const pagerankGraphEdges = Array.from(pagerankGraph().edges(options));
+      pagerankGraphEdges.forEach((e) => {
+        expect(e.weight.froWeight).toBe(0);
+        expect(e.weight.toWeight).toBe(1);
+      });
+      const graphEdges = Array.from(graph().edges(options));
+      expect(pagerankGraphEdges.map((e) => e.edge)).toEqual(graphEdges);
+    }
+
+    describe("edge filter matches graph edge filter", () => {
+      it("finds all edges when no options are specified", () => {
+        expectConsistentEdges(undefined);
+      });
+      it("finds all edges when all-inclusive filters are specified", () => {
+        expectConsistentEdges({
+          addressPrefix: EdgeAddress.fromParts(["e"]),
+          srcPrefix: NodeAddress.fromParts(["src"]),
+          dstPrefix: NodeAddress.fromParts(["dst"]),
+        });
+      });
+      it("finds edges by address prefix", () => {
+        expectConsistentEdges({
+          addressPrefix: EdgeAddress.fromParts(["e", "1"]),
+          srcPrefix: NodeAddress.empty,
+          dstPrefix: NodeAddress.empty,
+        });
+      });
+      it("finds edges by src prefix", () => {
+        expectConsistentEdges({
+          addressPrefix: EdgeAddress.empty,
+          srcPrefix: NodeAddress.fromParts(["src", "1"]),
+          dstPrefix: NodeAddress.empty,
+        });
+      });
+      it("finds edges by dst prefix", () => {
+        expectConsistentEdges({
+          addressPrefix: EdgeAddress.empty,
+          srcPrefix: NodeAddress.empty,
+          dstPrefix: NodeAddress.fromParts(["dst", "1"]),
+        });
+      });
+      it("yields nothing for disjoint filters", () => {
+        expectConsistentEdges({
+          addressPrefix: EdgeAddress.fromParts(["e", "1"]),
+          srcPrefix: NodeAddress.fromParts(["src", "2"]),
+          dstPrefix: NodeAddress.empty,
+        });
+      });
+      it("yields appropriate filter intersection", () => {
+        expectConsistentEdges({
+          addressPrefix: EdgeAddress.empty,
+          srcPrefix: NodeAddress.fromParts(["src", "1"]),
+          dstPrefix: NodeAddress.fromParts(["dst", "2"]),
+        });
+      });
+    });
+
+    describe("edge filter options", () => {
+      it("requires `addressPrefix` to be present in provided options", () => {
+        expect(() => {
+          pagerankGraph()
+            // $ExpectFlowError
+            .edges({srcPrefix: src1, dstPrefix: dst1});
+        }).toThrow("Invalid address prefix: undefined");
+      });
+      it("requires `srcPrefix` to be present in provided options", () => {
+        expect(() => {
+          pagerankGraph()
+            // $ExpectFlowError
+            .edges({addressPrefix: e11, dstPrefix: dst1});
+        }).toThrow("Invalid src prefix: undefined");
+      });
+
+      it("requires `dstPrefix` to be present in provided options", () => {
+        expect(() => {
+          pagerankGraph()
+            // $ExpectFlowError
+            .edges({addressPrefix: e11, srcPrefix: dst1});
+        }).toThrow("Invalid dst prefix: undefined");
+      });
     });
   });
 
