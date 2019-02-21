@@ -20,6 +20,7 @@ import {
   initialState,
 } from "./state";
 import {StaticExplorerAdapterSet} from "./adapters/explorerAdapterSet";
+import {userNodeType} from "../plugins/github/declaration";
 
 const credOverviewUrl =
   "https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20";
@@ -91,7 +92,7 @@ export function createApp(
         const pnd = appState.pagerankNodeDecomposition;
         pagerankTable = (
           <PagerankTable
-            defaultNodeFilter={GithubPrefix.user}
+            defaultNodeType={userNodeType}
             adapters={adapters}
             weightedTypes={this.state.weightedTypes}
             onWeightedTypesChange={(weightedTypes) =>

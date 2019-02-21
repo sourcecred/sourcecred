@@ -4,15 +4,16 @@ import React from "react";
 import sortBy from "lodash.sortby";
 import * as NullUtil from "../../util/null";
 
-import {type NodeAddressT, NodeAddress} from "../../core/graph";
+import {NodeAddress} from "../../core/graph";
 import type {PagerankNodeDecomposition} from "../../analysis/pagerankNodeDecomposition";
 import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 import type {DynamicExplorerAdapter} from "../adapters/explorerAdapter";
 import {FALLBACK_NAME} from "../../analysis/fallbackDeclaration";
 import type {WeightedTypes} from "../../analysis/weights";
 import {WeightConfig} from "../weights/WeightConfig";
-
 import {NodeRowList} from "./Node";
+import {type NodeType} from "../../analysis/types";
+import {fallbackNodeType} from "../../analysis/fallbackDeclaration";
 
 type PagerankTableProps = {|
   +pnd: PagerankNodeDecomposition,
@@ -20,10 +21,10 @@ type PagerankTableProps = {|
   +weightedTypes: WeightedTypes,
   +onWeightedTypesChange: (WeightedTypes) => void,
   +maxEntriesPerList: number,
-  +defaultNodeFilter: ?NodeAddressT,
+  +defaultNodeType: ?NodeType,
 |};
 type PagerankTableState = {|
-  topLevelFilter: NodeAddressT,
+  selectedNodeType: NodeType,
   showWeightConfig: boolean,
 |};
 export class PagerankTable extends React.PureComponent<
@@ -32,20 +33,11 @@ export class PagerankTable extends React.PureComponent<
 > {
   constructor(props: PagerankTableProps): void {
     super();
-    const {defaultNodeFilter, adapters} = props;
-    if (defaultNodeFilter != null) {
-      const nodeTypes = adapters.static().nodeTypes();
-      if (!nodeTypes.some((x) => x.prefix === defaultNodeFilter)) {
-        throw new Error(
-          `invalid defaultNodeFilter ${defaultNodeFilter}: doesn't match any type`
-        );
-      }
-    }
-    const topLevelFilter = NullUtil.orElse(
-      props.defaultNodeFilter,
-      NodeAddress.empty
+    const selectedNodeType = NullUtil.orElse(
+      props.defaultNodeType,
+      fallbackNodeType
     );
-    this.state = {topLevelFilter, showWeightConfig: false};
+    this.state = {selectedNodeType, showWeightConfig: false};
   }
 
   renderConfigurationRow() {
@@ -116,9 +108,11 @@ export class PagerankTable extends React.PureComponent<
       <label>
         <span>Filter by node type: </span>
         <select
-          value={this.state.topLevelFilter}
+          value={this.state.selectedNodeType.prefix}
           onChange={(e) => {
-            this.setState({topLevelFilter: e.target.value});
+            const nodePrefix = e.target.value;
+            const nodeType = adapters.static().typeMatchingNode(nodePrefix);
+            this.setState({selectedNodeType: nodeType});
           }}
         >
           <option value={NodeAddress.empty}>Show all</option>
@@ -138,7 +132,7 @@ export class PagerankTable extends React.PureComponent<
     if (pnd == null || adapters == null || maxEntriesPerList == null) {
       throw new Error("Impossible.");
     }
-    const topLevelFilter = this.state.topLevelFilter;
+    const selectedNodeTypePrefix = this.state.selectedNodeType.prefix;
     const sharedProps = {pnd, adapters, maxEntriesPerList};
     return (
       <table
@@ -161,7 +155,7 @@ export class PagerankTable extends React.PureComponent<
           <NodeRowList
             sharedProps={sharedProps}
             nodes={Array.from(pnd.keys()).filter((node) =>
-              NodeAddress.hasPrefix(node, topLevelFilter)
+              NodeAddress.hasPrefix(node, selectedNodeTypePrefix)
             )}
           />
         </tbody>
