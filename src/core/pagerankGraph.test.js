@@ -119,7 +119,7 @@ describe("core/pagerankGraph", () => {
     it("requires a prefix when options are specified", () => {
       const pg = new PagerankGraph(nonEmptyGraph(), defaultEvaluator);
       // $ExpectFlowError
-      expect(() => Array.from(pg.nodes({}))).toThrow("prefix");
+      expect(() => pg.nodes({})).toThrow("prefix");
     });
   });
 
