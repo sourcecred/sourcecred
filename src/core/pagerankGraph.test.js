@@ -17,9 +17,11 @@ describe("core/pagerankGraph", () => {
   const nonEmptyGraph = () =>
     new Graph().addNode(NodeAddress.fromParts(["hi"]));
 
-  function examplePagerankGraph(): PagerankGraph {
+  function examplePagerankGraph(
+    edgeEvaluator = defaultEvaluator
+  ): PagerankGraph {
     const g = advancedGraph().graph1();
-    return new PagerankGraph(g, defaultEvaluator);
+    return new PagerankGraph(g, edgeEvaluator);
   }
   async function convergedPagerankGraph(): Promise<PagerankGraph> {
     const pg = examplePagerankGraph();
@@ -165,6 +167,66 @@ describe("core/pagerankGraph", () => {
       expect(() => pg.edge(EdgeAddress.empty)).toThrowError(
         "underlying Graph has been modified"
       );
+    });
+  });
+
+  describe("totalOutWeight", () => {
+    it("errors on a modified graph", () => {
+      const eg = examplePagerankGraph();
+      eg.graph().addNode(NodeAddress.fromParts(["bad", "node"]));
+      expect(() =>
+        eg.totalOutWeight(NodeAddress.fromParts(["bad", "node"]))
+      ).toThrowError("has been modified");
+    });
+    it("errors on nonexistent node", () => {
+      const eg = examplePagerankGraph();
+      expect(() =>
+        eg.totalOutWeight(NodeAddress.fromParts(["nonexistent"]))
+      ).toThrowError("non-existent node");
+    });
+    function verifyOutWeights(pg: PagerankGraph) {
+      const outWeight: Map<NodeAddressT, number> = new Map();
+      for (const node of pg.graph().nodes()) {
+        outWeight.set(node, pg.syntheticLoopWeight());
+      }
+      const addOutWeight = (node: NodeAddressT, weight: number) => {
+        const previousWeight = NullUtil.get(outWeight.get(node));
+        const newWeight = previousWeight + weight;
+        outWeight.set(node, newWeight);
+      };
+      for (const {edge, weight} of pg.edges()) {
+        addOutWeight(edge.src, weight.toWeight);
+        addOutWeight(edge.dst, weight.froWeight);
+      }
+      for (const node of pg.graph().nodes()) {
+        expect(pg.totalOutWeight(node)).toEqual(outWeight.get(node));
+      }
+    }
+    it("computes outWeight correctly on the example graph", () => {
+      const edgeEvaluator = (_unused_edge) => ({toWeight: 1, froWeight: 2});
+      const eg = examplePagerankGraph(edgeEvaluator);
+      verifyOutWeights(eg);
+    });
+    it("outWeight is always the syntheticLoopWeight when edges have no weight", () => {
+      const zeroEvaluator = (_unused_edge) => ({toWeight: 0, froWeight: 0});
+      const syntheticLoopWeight = 0.1337;
+      const pg = new PagerankGraph(
+        advancedGraph().graph1(),
+        zeroEvaluator,
+        syntheticLoopWeight
+      );
+      for (const {node} of pg.nodes()) {
+        expect(pg.totalOutWeight(node)).toEqual(syntheticLoopWeight);
+      }
+    });
+    it("outWeight is computed correctly after JSON deserialization", () => {
+      // I added this test because the outWeight map is a cache that is computed
+      // once, in the constructor, and since the JSON deserialization invokes
+      // the constructor and then hacks variables around a bit, I want to ensure the
+      // outWeight cache is still generated properly.
+      const eg = examplePagerankGraph();
+      const eg_ = PagerankGraph.fromJSON(eg.toJSON());
+      verifyOutWeights(eg_);
     });
   });
 

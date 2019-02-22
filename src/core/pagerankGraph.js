@@ -11,6 +11,7 @@ import {
   type GraphJSON,
   sortedEdgeAddressesFromJSON,
   sortedNodeAddressesFromJSON,
+  NodeAddress,
 } from "./graph";
 import {
   distributionToNodeDistribution,
@@ -119,6 +120,8 @@ export class PagerankGraph {
   // when this PageRankGraph is in an invalid state (due to changes
   // to the graph backing it).
   _graphModificationCount: number;
+  // Sum of all outWeights for a node, including the synthetic weight
+  _totalOutWeight: Map<NodeAddressT, number>;
 
   /**
    * Constructs a new PagerankGraph.
@@ -152,14 +155,24 @@ export class PagerankGraph {
 
     // Initialize scores to the uniform distribution over every node
     this._scores = new Map();
+    this._totalOutWeight = new Map();
     const graphNodes = Array.from(this._graph.nodes());
     for (const node of graphNodes) {
       this._scores.set(node, 1 / graphNodes.length);
+      this._totalOutWeight.set(node, this._syntheticLoopWeight);
     }
 
     this._edgeWeights = new Map();
+    const addOutWeight = (node: NodeAddressT, weight: number) => {
+      const previousWeight = NullUtil.get(this._totalOutWeight.get(node));
+      const newWeight = previousWeight + weight;
+      this._totalOutWeight.set(node, newWeight);
+    };
     for (const edge of this._graph.edges()) {
-      this._edgeWeights.set(edge.address, edgeEvaluator(edge));
+      const weights = edgeEvaluator(edge);
+      this._edgeWeights.set(edge.address, weights);
+      addOutWeight(edge.src, weights.toWeight);
+      addOutWeight(edge.dst, weights.froWeight);
     }
   }
 
@@ -251,6 +264,27 @@ export class PagerankGraph {
       return {edge, weight};
     }
     return null;
+  }
+
+  /**
+   * Provides the total out weight for a node, i.e. every edge weight pointed
+   * away from the node, plus the syntheticLoopWeight.
+   *
+   * The total out weight is needed to interpret the actual significance of any
+   * particular edge's weight, as edge weights are normalized by the totalOutWeight
+   * so that the normalized weights going out of a node always sum to 1.
+   */
+  totalOutWeight(node: NodeAddressT): number {
+    this._verifyGraphNotModified();
+    const weight = this._totalOutWeight.get(node);
+    if (weight == null) {
+      throw new Error(
+        `Tried to get outWeight for non-existent node ${NodeAddress.toString(
+          node
+        )}`
+      );
+    }
+    return weight;
   }
 
   /**
