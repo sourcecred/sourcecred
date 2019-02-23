@@ -10,10 +10,10 @@ suggesting it. Then, we can discuss the feature to make sure that
 everyone is on board.
 
 If you’re interested in helping but don’t know where to start, consider
-looking at open issues. [Issues marked **contributions-welcome**][cw]
+looking at open issues. [Issues marked **good first issue**][gfi]
 may be especially accessible to newcomers.
 
-[cw]: https://github.com/sourcecred/sourcecred/issues?q=is%3Aissue+label%3A"contributions+welcome"
+[gfi]: https://github.com/sourcecred/sourcecred/issues?q=is%3Aissue+label%3A"good+first+issue"
 
 If you find an issue that you’re interested in addressing, consider
 adding a comment to that effect. This way, we can let you know if the
