@@ -16,6 +16,7 @@ jest.mock("./load", () => mockCommand("load"));
 jest.mock("./analyze", () => mockCommand("analyze"));
 jest.mock("./exportGraph", () => mockCommand("export-graph"));
 jest.mock("./pagerank", () => mockCommand("pagerank"));
+jest.mock("./clear", () => mockCommand("clear"));
 
 describe("cli/sourcecred", () => {
   it("fails with usage when invoked with no arguments", async () => {
@@ -81,6 +82,14 @@ describe("cli/sourcecred", () => {
       exitCode: 2,
       stdout: ['out(pagerank): ["foo/bar","foo/baz"]'],
       stderr: ["err(pagerank)"],
+    });
+  });
+
+  it("responds to 'clear --all'", async () => {
+    expect(await run(sourcecred, ["clear", "--all"])).toEqual({
+      exitCode: 1,
+      stdout: ['out(clear): ["--all"]'],
+      stderr: ["err(clear)"],
     });
   });
 

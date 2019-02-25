@@ -10,6 +10,7 @@ import load from "./load";
 import analyze from "./analyze";
 import exportGraph from "./exportGraph";
 import pagerank from "./pagerank";
+import clear from "./clear";
 
 const sourcecred: Command = async (args, std) => {
   if (args.length === 0) {
@@ -27,6 +28,8 @@ const sourcecred: Command = async (args, std) => {
       return load(args.slice(1), std);
     case "analyze":
       return analyze(args.slice(1), std);
+    case "clear":
+      return clear(args.slice(1), std);
     case "export-graph":
       return exportGraph(args.slice(1), std);
     case "pagerank":
