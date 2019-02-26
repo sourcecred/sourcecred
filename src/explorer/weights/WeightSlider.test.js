@@ -20,7 +20,7 @@ describe("explorer/weights/WeightSlider", () => {
     function example(weight: Weight) {
       const onChange = jest.fn();
       const element = shallow(
-        <WeightSlider weight={weight} name="foo" onChange={onChange} />
+        <WeightSlider weight={weight} name="foo" onChange={onChange} description="A test description" />
       );
       return {element, onChange};
     }
