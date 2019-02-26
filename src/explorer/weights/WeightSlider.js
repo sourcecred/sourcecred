@@ -28,7 +28,7 @@ export type Props = {|
   +name: React$Node,
   // Callback invoked with the new weight after the user adjusts the slider.
   +onChange: (Weight) => void,
-  +description: string
+  +description: string,
 |};
 
 /**
