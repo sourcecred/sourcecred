@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Add the `export-graph` command (#1110)
 - Enable loading private repositories (#1085)
 - Enable setting type weights to 0 in the UI (#1005)
 - Add support for 🚀 and 👀 reaction types (#1068)

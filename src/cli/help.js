@@ -18,8 +18,7 @@ const help: Command = async (args, std) => {
     help: metaHelp,
     load: loadHelp,
     analyze: analyzeHelp,
-    // eslint-disable-next-line no-useless-computed-key
-    ["export-graph"]: exportGraphHelp,
+    "export-graph": exportGraphHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);

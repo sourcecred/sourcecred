@@ -8,6 +8,7 @@ import {repoIdToString, stringToRepoId, type RepoId} from "../core/repoId";
 import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
+import stringify from "json-stable-stringify";
 
 import type {IAnalysisAdapter} from "../analysis/analysisAdapter";
 import {AnalysisAdapter as GithubAnalysisAdapter} from "../plugins/github/analysisAdapter";
@@ -16,9 +17,7 @@ import {AnalysisAdapter as GitAnalysisAdapter} from "../plugins/git/analysisAdap
 function usage(print: (string) => void): void {
   print(
     dedent`\
-    usage: sourcecred export-graph REPO_ID
-                           [--plugin PLUGIN]
-                           [--help]
+    usage: sourcecred export-graph REPO_ID [--help]
 
     Print a combined SourceCred graph for a given REPO_ID.
     Data must already be loaded for the given REPO_ID, using
@@ -55,7 +54,7 @@ function die(std, message) {
 export function makeExportGraph(
   adapters: $ReadOnlyArray<IAnalysisAdapter>
 ): Command {
-  const exportGraph: Command = async (args, std) => {
+  return async function exportGraph(args, std) {
     let repoId: RepoId | null = null;
     if (adapters.length === 0) {
       std.err("fatal: no plugins available");
@@ -69,7 +68,8 @@ export function makeExportGraph(
           return 0;
         }
         default: {
-          if (repoId != null) return die(std, "multiple repoIds provided");
+          if (repoId != null)
+            return die(std, "multiple repository IDs provided");
           // Should be a repository.
           repoId = stringToRepoId(args[i]);
           break;
@@ -78,41 +78,37 @@ export function makeExportGraph(
     }
 
     if (repoId == null) {
-      return die(std, "no repoId provided");
+      return die(std, "no repository ID provided");
     }
 
     const directory = Common.sourcecredDirectory();
     const registry = RepoIdRegistry.getRegistry(directory);
     if (RepoIdRegistry.getEntry(registry, repoId) == null) {
       const repoIdStr = repoIdToString(repoId);
-      std.err(`fatal: repoId ${repoIdStr} not loaded`);
-      std.err(`try running \`sourcecred load ${repoIdStr}\` first.`);
+      std.err(`fatal: repository ID ${repoIdStr} not loaded`);
+      std.err(`Try running \`sourcecred load ${repoIdStr}\` first.`);
       return 1;
     }
-
-    function promiseForAdapter(adapter: IAnalysisAdapter): Promise<Graph> {
-      const loadPromise = adapter.load(directory, NullUtil.get(repoId));
-      return new Promise((resolve, reject) => {
-        loadPromise
-          .then(resolve)
-          .catch((e) =>
-            reject(`plugin "${adapter.declaration().name}" errored: ${e}`)
-          );
-      });
+    async function graphForAdapter(adapter: IAnalysisAdapter): Promise<Graph> {
+      try {
+        return await adapter.load(directory, NullUtil.get(repoId));
+      } catch (e) {
+        throw new Error(
+          `plugin "${adapter.declaration().name}" errored: ${e.message}`
+        );
+      }
     }
     let graphs: Graph[];
     try {
-      graphs = await Promise.all(adapters.map(promiseForAdapter));
+      graphs = await Promise.all(adapters.map(graphForAdapter));
     } catch (e) {
-      return die(std, e);
+      return die(std, e.message);
     }
     const graph = Graph.merge(graphs);
     const graphJSON = graph.toJSON();
-    std.out(JSON.stringify(graphJSON));
+    std.out(stringify(graphJSON));
     return 0;
   };
-
-  return exportGraph;
 }
 
 const defaultAdapters = [new GithubAnalysisAdapter(), new GitAnalysisAdapter()];
