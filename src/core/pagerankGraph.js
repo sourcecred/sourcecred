@@ -6,6 +6,7 @@ import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import {
   Graph,
   type Edge,
+  type EdgesOptions,
   type NodeAddressT,
   type EdgeAddressT,
   type GraphJSON,
@@ -237,15 +238,18 @@ export class PagerankGraph {
   /**
    * Provides edge and weight for every edge in the underlying graph.
    *
-   * TODO(#1020): Allow optional filtering, as in Graph.edges.
+   * Optionally, provide an EdgesOptions parameter to return an
+   * iterator containing edges matching the EdgesOptions prefix
+   * filter parameters. See Graph.edges for details.
    */
-  edges(): Iterator<WeightedEdge> {
+  edges(options?: EdgesOptions): Iterator<WeightedEdge> {
     this._verifyGraphNotModified();
-    return this._edgesIterator();
+    const iterator = this._graph.edges(options);
+    return this._edgesIterator(iterator);
   }
 
-  *_edgesIterator(): Iterator<WeightedEdge> {
-    for (const edge of this._graph.edges()) {
+  *_edgesIterator(iterator: Iterator<Edge>): Iterator<WeightedEdge> {
+    for (const edge of iterator) {
       const weight = NullUtil.get(this._edgeWeights.get(edge.address));
       yield {edge, weight};
     }
