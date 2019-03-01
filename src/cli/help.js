@@ -6,6 +6,7 @@ import dedent from "../util/dedent";
 
 import {help as loadHelp} from "./load";
 import {help as analyzeHelp} from "./analyze";
+import {help as exportGraphHelp} from "./exportGraph";
 
 const help: Command = async (args, std) => {
   if (args.length === 0) {
@@ -17,6 +18,7 @@ const help: Command = async (args, std) => {
     help: metaHelp,
     load: loadHelp,
     analyze: analyzeHelp,
+    "export-graph": exportGraphHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);
@@ -27,15 +29,18 @@ const help: Command = async (args, std) => {
 };
 
 function usage(print: (string) => void): void {
+  // TODO: Make the usage function pull its list of commands
+  // from the sub-helps, to ensure that it is comprehensive
   print(
     dedent`\
     usage: sourcecred COMMAND [ARGS...]
            sourcecred [--version] [--help]
 
     Commands:
-      load      load repository data into SourceCred
-      analyze   analyze cred for a loaded repository
-      help      show this help message
+      load          load repository data into SourceCred
+      analyze       analyze cred for a loaded repository
+      export-graph  print a raw SourceCred graph
+      help          show this help message
 
     Use 'sourcecred help COMMAND' for help about an individual command.
     `.trimRight()

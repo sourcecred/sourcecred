@@ -14,6 +14,7 @@ function mockCommand(name) {
 jest.mock("./help", () => mockCommand("help"));
 jest.mock("./load", () => mockCommand("load"));
 jest.mock("./analyze", () => mockCommand("analyze"));
+jest.mock("./exportGraph", () => mockCommand("export-graph"));
 
 describe("cli/sourcecred", () => {
   it("fails with usage when invoked with no arguments", async () => {
@@ -61,6 +62,16 @@ describe("cli/sourcecred", () => {
       exitCode: 2,
       stdout: ['out(analyze): ["foo/bar","foo/baz"]'],
       stderr: ["err(analyze)"],
+    });
+  });
+
+  it("responds to 'export-graph'", async () => {
+    expect(
+      await run(sourcecred, ["export-graph", "foo/bar", "foo/baz"])
+    ).toEqual({
+      exitCode: 2,
+      stdout: ['out(export-graph): ["foo/bar","foo/baz"]'],
+      stderr: ["err(export-graph)"],
     });
   });
 
