@@ -1,8 +1,6 @@
 // @flow
 // Implementation of `sourcecred load`.
 
-import fs from "fs";
-import stringify from "json-stable-stringify";
 import mkdirp from "mkdirp";
 import path from "path";
 
@@ -201,21 +199,9 @@ const loadPlugin = async ({std, output, repoIds, plugin}) => {
 function addToRepoIdRegistry(repoId) {
   // TODO: Make this function transactional before loading repositories in
   // parallel.
-  const outputFile = path.join(
-    Common.sourcecredDirectory(),
-    RepoIdRegistry.REPO_ID_REGISTRY_FILE
-  );
-  let registry = null;
-  if (fs.existsSync(outputFile)) {
-    const contents = fs.readFileSync(outputFile);
-    const registryJSON = JSON.parse(contents.toString());
-    registry = RepoIdRegistry.fromJSON(registryJSON);
-  } else {
-    registry = RepoIdRegistry.emptyRegistry();
-  }
-  registry = RepoIdRegistry.addRepoId(registry, {repoId});
-
-  fs.writeFileSync(outputFile, stringify(RepoIdRegistry.toJSON(registry)));
+  const oldRegistry = RepoIdRegistry.getRegistry(Common.sourcecredDirectory());
+  const newRegistry = RepoIdRegistry.addEntry(oldRegistry, {repoId});
+  RepoIdRegistry.writeRegistry(newRegistry, Common.sourcecredDirectory());
 }
 
 export const help: Command = async (args, std) => {
