@@ -50,12 +50,7 @@ export function getEntry(
   registry: RepoIdRegistry,
   repoId: RepoId
 ): RegistryEntry | typeof undefined {
-  for (const entry of registry) {
-    if (deepEqual(entry.repoId, repoId)) {
-      return entry;
-    }
-  }
-  return undefined;
+  return registry.find((entry) => deepEqual(entry.repoId, repoId));
 }
 
 /**

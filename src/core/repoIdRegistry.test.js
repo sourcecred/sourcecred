@@ -86,6 +86,10 @@ describe("core/repoIdRegistry", () => {
   });
 
   describe("{get,write}Registry", () => {
+    const repoId = () => makeRepoId("foo", "bar");
+    const entry = () => ({repoId: repoId()});
+    const registry = () => addEntry(emptyRegistry(), entry());
+
     it("getRegistry returns empty registry if nothing present", () => {
       const dirname = tmp.dirSync().name;
       expect(getRegistry(dirname)).toEqual(emptyRegistry());
@@ -93,18 +97,15 @@ describe("core/repoIdRegistry", () => {
 
     it("writeRegistry writes a repoIdRegistry to the directory", () => {
       const dirname = tmp.dirSync().name;
-      const repoId = makeRepoId("foo", "bar");
-      const entry = {repoId};
-      const registry = addEntry(emptyRegistry(), entry);
       const registryFile = path.join(dirname, REPO_ID_REGISTRY_FILE);
 
       expect(fs.existsSync(registryFile)).toBe(false);
-      writeRegistry(registry, dirname);
+      writeRegistry(registry(), dirname);
       expect(fs.existsSync(registryFile)).toBe(true);
 
       const contents = fs.readFileSync(registryFile);
       const registryJSON = JSON.parse(contents.toString());
-      expect(toJSON(registry)).toEqual(registryJSON);
+      expect(toJSON(registry())).toEqual(registryJSON);
     });
 
     it("getRegistry returns the registry written by writeRegistry", () => {
