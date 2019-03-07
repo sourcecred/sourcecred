@@ -6,6 +6,7 @@ import dedent from "../util/dedent";
 
 import {help as loadHelp} from "./load";
 import {help as analyzeHelp} from "./analyze";
+import {help as pagerankHelp} from "./pagerank";
 import {help as exportGraphHelp} from "./exportGraph";
 
 const help: Command = async (args, std) => {
@@ -18,6 +19,7 @@ const help: Command = async (args, std) => {
     help: metaHelp,
     load: loadHelp,
     analyze: analyzeHelp,
+    pagerank: pagerankHelp,
     "export-graph": exportGraphHelp,
   };
   if (subHelps[command] !== undefined) {
@@ -40,6 +42,7 @@ function usage(print: (string) => void): void {
       load          load repository data into SourceCred
       analyze       analyze cred for a loaded repository
       export-graph  print a raw SourceCred graph
+      pagerank      recompute cred scores
       help          show this help message
 
     Use 'sourcecred help COMMAND' for help about an individual command.
