@@ -7,10 +7,9 @@
 - Enable setting type weights to 0 in the UI (#1005)
 - Add support for 🚀 and 👀 reaction types (#1068)
 - Create one page per project, rather than having a selector (#988)
-  <!-- Please add new entries to the _top_ of this section. -->
+ <!-- Please add new entries to the _top_ of this section. -->
 
 ## [0.2.0]
-
 - Cache GitHub data, allowing for incremental and resumable loading (#622)
 - Hyperlink Git commits to GitHub (#887)
 - Relicense from MIT to MIT + Apache-2 (#812)
@@ -23,7 +22,6 @@
 - Add `MentionsAuthor` edges to the graph (#808)
 
 ## [0.1.0]
-
 - Organize weight config by plugin (#773)
 - Configure edge forward/backward weights separately (#749)
 - Combine "load graph" and "run pagerank" into one button (#759)
