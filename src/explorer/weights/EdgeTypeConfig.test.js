@@ -35,6 +35,12 @@ describe("explorer/weights/EdgeTypeConfig", () => {
       expect(backwardSlider.props().name).toBe(assemblesEdgeType.forwardName);
       expect(backwardSlider.props().weight).toBe(wet.backwardWeight);
     });
+    it("has a description", () => {
+      const {backwardSlider} = example();
+      expect(backwardSlider.props().description).toBe(
+        assemblesEdgeType.description
+      );
+    });
     it("forward weight slider onChange works", () => {
       const {wet, forwardSlider, onChange} = example();
       forwardSlider.props().onChange(9);
@@ -54,7 +60,12 @@ describe("explorer/weights/EdgeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();
       const element = shallow(
-        <EdgeWeightSlider weight={3} name="foo" onChange={onChange} />
+        <EdgeWeightSlider
+          weight={3}
+          name="foo"
+          description="Description for test slider"
+          onChange={onChange}
+        />
       );
       const weightSlider = element.find(WeightSlider);
       return {element, onChange, weightSlider};

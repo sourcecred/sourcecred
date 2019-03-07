@@ -28,6 +28,10 @@ describe("explorer/weights/NodeTypeConfig", () => {
       expect(slider.props().name).toBe(wnt.type.name);
       expect(slider.props().weight).toBe(wnt.weight);
     });
+    it("has a description", () => {
+      const {wnt, slider} = example();
+      expect(slider.props().description).toBe(wnt.type.description);
+    });
     it("weight slider onChange works", () => {
       const {wnt, slider, onChange} = example();
       slider.props().onChange(9);

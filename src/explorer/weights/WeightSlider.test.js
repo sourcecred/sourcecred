@@ -20,7 +20,12 @@ describe("explorer/weights/WeightSlider", () => {
     function example(weight: Weight) {
       const onChange = jest.fn();
       const element = shallow(
-        <WeightSlider weight={weight} name="foo" onChange={onChange} />
+        <WeightSlider
+          weight={weight}
+          name="foo"
+          onChange={onChange}
+          description="A test description"
+        />
       );
       return {element, onChange};
     }
@@ -63,6 +68,15 @@ describe("explorer/weights/WeightSlider", () => {
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange).toHaveBeenCalledWith(sliderToWeight(sliderVal));
       }
+    });
+    it("has a description tooltip", () => {
+      const {element} = example(0);
+      expect(
+        element
+          .find("label")
+          .at(0)
+          .prop("title")
+      ).toBe("A test description");
     });
     it("the weight and slider position may be inconsistent", () => {
       // If the weight does not correspond to an integer slider value, then

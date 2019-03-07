@@ -28,6 +28,7 @@ export type Props = {|
   +name: React$Node,
   // Callback invoked with the new weight after the user adjusts the slider.
   +onChange: (Weight) => void,
+  +description: string,
 |};
 
 /**
@@ -54,7 +55,7 @@ export type Props = {|
 export class WeightSlider extends React.Component<Props> {
   render() {
     return (
-      <label style={{display: "flex"}}>
+      <label style={{display: "flex"}} title={this.props.description}>
         <span style={{flexGrow: 1}}>{this.props.name}</span>
         <input
           type="range"
