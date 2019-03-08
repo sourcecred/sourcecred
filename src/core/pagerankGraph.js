@@ -70,6 +70,8 @@ export type PagerankConvergenceReport = {|
 |};
 
 export const DEFAULT_SYNTHETIC_LOOP_WEIGHT = 1e-3;
+export const DEFAULT_MAX_ITERATIONS = 255;
+export const DEFAULT_CONVERGENCE_THRESHOLD = 1e-7;
 
 const COMPAT_INFO = {type: "sourcecred/pagerankGraph", version: "0.1.0"};
 
