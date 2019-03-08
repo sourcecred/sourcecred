@@ -13,6 +13,7 @@ import {
   sortedEdgeAddressesFromJSON,
   sortedNodeAddressesFromJSON,
   NodeAddress,
+  type NeighborsOptions,
 } from "./graph";
 import {
   distributionToNodeDistribution,
@@ -23,6 +24,8 @@ import {
 import {findStationaryDistribution} from "../core/attribution/markovChain";
 import * as NullUtil from "../util/null";
 
+export {Direction} from "./graph";
+export type {DirectionT, NeighborsOptions} from "./graph";
 export type {EdgeWeight} from "./attribution/graphToMarkovChain";
 export type EdgeEvaluator = (Edge) => EdgeWeight;
 
@@ -34,6 +37,16 @@ export type ScoredNode = {|
 export type WeightedEdge = {|
   +edge: Edge,
   +weight: EdgeWeight,
+|};
+
+export type ScoredNeighbor = {|
+  // The neighbor node, with its score
+  +scoredNode: ScoredNode,
+  // The edge connecting the target to its neighbor node, with its weight
+  +weightedEdge: WeightedEdge,
+  // How much score (in absolute terms) was provided to the target by
+  // the neighbor node through this weightedEdge
+  +scoreContribution: number,
 |};
 
 export opaque type PagerankGraphJSON = Compatible<{|
@@ -291,6 +304,88 @@ export class PagerankGraph {
       );
     }
     return weight;
+  }
+
+  /**
+   * Provides the Neighbors to a target node, along with how those
+   * neighbors contributed to the node's score.
+   *
+   * See the docs on `Graph.neighbors` for the semantics of what a `Neighbor`
+   * is. This call augments the Neighbors from graph, so that for each neighbor
+   * we also have the neighbor node's score, the EdgeWeight for the edge, and a
+   * scoreContribution, which shows how much score was contributed to the
+   * target node from that Neighbor.
+   *
+   * When the PagerankGraph is well-converged, it will be the case that a
+   * node's score is equal to the score contribution from each neighbor plus
+   * the synthetic loop's score contribution.
+   *
+   * When the PagerankGraph is not well-converged, the score contributions are
+   * meaningless.
+   */
+  neighbors(
+    target: NodeAddressT,
+    options: NeighborsOptions
+  ): Iterator<ScoredNeighbor> {
+    this._verifyGraphNotModified();
+    if (!this.graph().hasNode(target)) {
+      throw new Error(
+        `Tried to find neighbors of non-existent node ${NodeAddress.toString(
+          target
+        )}`
+      );
+    }
+    return this._neighborsIterator(target, options);
+  }
+
+  *_neighborsIterator(
+    target: NodeAddressT,
+    options: NeighborsOptions
+  ): Iterator<ScoredNeighbor> {
+    const graphNeighbors = this.graph().neighbors(target, options);
+    for (const {node, edge} of graphNeighbors) {
+      const scoredNode = NullUtil.get(this.node(node));
+      const weightedEdge = NullUtil.get(this.edge(edge.address));
+      // We compute how much of target's score is attributable to the neighbor.
+      // First, we find out how much edge weight there was from node to target,
+      // based on whether it was an IN-edge or OUT-edge or loop.
+      let relevantEdgeWeight = 0;
+      if (edge.src === target) {
+        relevantEdgeWeight += weightedEdge.weight.froWeight;
+      }
+      if (edge.dst === target) {
+        relevantEdgeWeight += weightedEdge.weight.toWeight;
+      }
+      // We normalize this edge weight by the total outWeight for `node`.
+      const normalizedEdgeWeight =
+        relevantEdgeWeight / this.totalOutWeight(node);
+
+      // Then we directly compute the score contribution
+      const scoreContribution = scoredNode.score * normalizedEdgeWeight;
+      yield {scoredNode, weightedEdge, scoreContribution};
+    }
+  }
+
+  /**
+   * Returns how much of a node's score came from its synthetic loop.
+   * For most nodes, this should be near zero. However, if the node has no
+   * outgoing edge edge weight (e.g. it is isolated), then this value
+   * may be larger.
+   *
+   * The results of syntheticLoopScoreContribution are not meaningful if the
+   * PagerankGraph is not converged.
+   */
+  syntheticLoopScoreContribution(node: NodeAddressT): number {
+    this._verifyGraphNotModified();
+    const scoredNode = this.node(node);
+    if (scoredNode == null) {
+      throw new Error(
+        "Cannot get syntheticLoopScoreContribution for non-existent node"
+      );
+    }
+    return (
+      (scoredNode.score * this._syntheticLoopWeight) / this.totalOutWeight(node)
+    );
   }
 
   /**
