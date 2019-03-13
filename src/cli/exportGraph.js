@@ -1,16 +1,13 @@
 // @flow
 // Implementation of `sourcecred export-graph`.
 
-import {Graph} from "../core/graph";
-import * as NullUtil from "../util/null";
-import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {repoIdToString, stringToRepoId, type RepoId} from "../core/repoId";
 import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
 import stringify from "json-stable-stringify";
+import {loadGraph, type LoadGraphResult} from "../analysis/loadGraph";
 
-import type {IAnalysisAdapter} from "../analysis/analysisAdapter";
 import {AnalysisAdapter as GithubAnalysisAdapter} from "../plugins/github/analysisAdapter";
 import {AnalysisAdapter as GitAnalysisAdapter} from "../plugins/git/analysisAdapter";
 
@@ -52,15 +49,10 @@ function die(std, message) {
 }
 
 export function makeExportGraph(
-  adapters: $ReadOnlyArray<IAnalysisAdapter>
+  loader: (RepoId) => Promise<LoadGraphResult>
 ): Command {
   return async function exportGraph(args, std) {
     let repoId: RepoId | null = null;
-    if (adapters.length === 0) {
-      std.err("fatal: no plugins available");
-      std.err("fatal: this is likely a build error");
-      return 1;
-    }
     for (let i = 0; i < args.length; i++) {
       switch (args[i]) {
         case "--help": {
@@ -81,39 +73,40 @@ export function makeExportGraph(
       return die(std, "no repository ID provided");
     }
 
-    const directory = Common.sourcecredDirectory();
-    const registry = RepoIdRegistry.getRegistry(directory);
-    if (RepoIdRegistry.getEntry(registry, repoId) == null) {
-      const repoIdStr = repoIdToString(repoId);
-      std.err(`fatal: repository ID ${repoIdStr} not loaded`);
-      std.err(`Try running \`sourcecred load ${repoIdStr}\` first.`);
-      return 1;
-    }
-    async function graphForAdapter(adapter: IAnalysisAdapter): Promise<Graph> {
-      try {
-        return await adapter.load(directory, NullUtil.get(repoId));
-      } catch (e) {
-        throw new Error(
-          `plugin "${adapter.declaration().name}" errored: ${e.message}`
+    const result: LoadGraphResult = await loader(repoId);
+    switch (result.status) {
+      case "REPO_NOT_LOADED": {
+        const repoIdStr = repoIdToString(repoId);
+        std.err(`fatal: repository ID ${repoIdStr} not loaded`);
+        std.err(`Try running \`sourcecred load ${repoIdStr}\` first.`);
+        return 1;
+      }
+      case "PLUGIN_FAILURE": {
+        std.err(
+          `fatal: plugin "${result.pluginName}" errored: ${
+            result.error.message
+          }`
         );
+        return 1;
+      }
+      case "SUCCESS": {
+        const graphJSON = result.graph.toJSON();
+        std.out(stringify(graphJSON));
+        return 0;
+      }
+      // istanbul ignore next: unreachable per Flow
+      default: {
+        std.err(`Unexpected status: ${(result.status: empty)}`);
+        return 1;
       }
     }
-    let graphs: Graph[];
-    try {
-      graphs = await Promise.all(adapters.map(graphForAdapter));
-    } catch (e) {
-      return die(std, e.message);
-    }
-    const graph = Graph.merge(graphs);
-    const graphJSON = graph.toJSON();
-    std.out(stringify(graphJSON));
-    return 0;
   };
 }
 
 const defaultAdapters = [new GithubAnalysisAdapter(), new GitAnalysisAdapter()];
-
-export const exportGraph = makeExportGraph(defaultAdapters);
+const defaultLoadGraph = (r: RepoId) =>
+  loadGraph(Common.sourcecredDirectory(), defaultAdapters, r);
+export const exportGraph = makeExportGraph(defaultLoadGraph);
 
 export const help: Command = async (args, std) => {
   if (args.length === 0) {
