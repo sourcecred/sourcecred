@@ -34,6 +34,9 @@ module.exports = {
     fetchAndPrintGithubRepo: resolveApp(
       "src/plugins/github/bin/fetchAndPrintGithubRepo.js"
     ),
+    fetchAndPrintGithubOrg: resolveApp(
+      "src/plugins/github/bin/fetchAndPrintGithubOrg.js"
+    ),
     createExampleRepo: resolveApp("src/plugins/git/bin/createExampleRepo.js"),
   },
 };
