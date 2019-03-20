@@ -113,6 +113,14 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       deps: ["backend"],
     },
     {
+      id: "fetchGithubOrgTest",
+      cmd: withSourcecredBinEnv([
+        "./src/plugins/github/fetchGithubOrgTest.sh",
+        "--no-build",
+      ]),
+      deps: ["backend"],
+    },
+    {
       id: "loadRepositoryTest",
       cmd: withSourcecredBinEnv([
         "./src/plugins/git/loadRepositoryTest.sh",
