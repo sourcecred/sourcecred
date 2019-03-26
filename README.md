@@ -1,7 +1,7 @@
 # [SourceCred](https://sourcecred.io)
 
 [![Build Status](https://circleci.com/gh/sourcecred/sourcecred.svg?style=svg)](https://circleci.com/gh/sourcecred/sourcecred)
-[![Discourse topics](https://img.shields.io/discourse/https/discuss.sourcecred.io/topics.svg)](https://discourse.sourcecred.io)
+[![Discourse topics](https://img.shields.io/discourse/https/discourse.sourcecred.io/topics.svg)](https://discourse.sourcecred.io)
 [![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
 
 SourceCred creates reputation networks for open-source projects.
