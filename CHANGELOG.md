@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Add the `pagerank` command (#1114)
 - Add description tooltips for node and edge types in the weight configuration UI (#1081)
 - Add the `export-graph` command (#1110)
 - Enable loading private repositories (#1085)
