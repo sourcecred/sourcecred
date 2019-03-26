@@ -23,7 +23,7 @@ import {StaticExplorerAdapterSet} from "./adapters/explorerAdapterSet";
 import {userNodeType} from "../plugins/github/declaration";
 
 const credOverviewUrl =
-  "https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20";
+  "https://discourse.sourcecred.io/t/a-gentle-introduction-to-cred/20";
 const feedbackUrl =
   "https://docs.google.com/forms/d/e/1FAIpQLSdwxqFJNQIVS3EqISJ0EUcr1aixARDVA51DMURWSYgORFPHcQ/viewform";
 
