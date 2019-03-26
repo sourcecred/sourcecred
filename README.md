@@ -16,7 +16,7 @@ For an example of SourceCred in action, you can see SourceCred’s own [prototyp
 
 [our website]: https://sourcecred.io/
 [prototype]: https://sourcecred.io/prototype/
-[A Gentle Introduction to Cred]: https://discuss.sourcecred.io/t/a-gentle-introduction-to-cred/20
+[A Gentle Introduction to Cred]: https://discourse.sourcecred.io/t/a-gentle-introduction-to-cred/20
 
 ## Current Status
 
