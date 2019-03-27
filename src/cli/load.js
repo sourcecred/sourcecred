@@ -4,6 +4,8 @@
 import mkdirp from "mkdirp";
 import path from "path";
 
+import * as NullUtil from "../util/null";
+
 import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {repoIdToString, stringToRepoId, type RepoId} from "../core/repoId";
 import dedent from "../util/dedent";
@@ -75,66 +77,94 @@ function die(std, message) {
   return 1;
 }
 
-const load: Command = async (args, std) => {
-  const repoIds = [];
-  let explicitOutput: RepoId | null = null;
-  let plugin: Common.PluginName | null = null;
-  for (let i = 0; i < args.length; i++) {
-    switch (args[i]) {
-      case "--help": {
-        usage(std.out);
-        return 0;
-      }
-      case "--output": {
-        if (explicitOutput != null)
-          return die(std, "'--output' given multiple times");
-        if (++i >= args.length)
-          return die(std, "'--output' given without value");
-        explicitOutput = stringToRepoId(args[i]);
-        break;
-      }
-      case "--plugin": {
-        if (plugin != null) return die(std, "'--plugin' given multiple times");
-        if (++i >= args.length)
-          return die(std, "'--plugin' given without value");
-        const arg = args[i];
-        if (arg !== "git" && arg !== "github")
-          return die(std, "unknown plugin: " + JSON.stringify(arg));
-        plugin = arg;
-        break;
-      }
-      default: {
-        // Should be a repository.
-        repoIds.push(stringToRepoId(args[i]));
-        break;
+export type LoadOptions = {|
+  +output: RepoId,
+  +repoIds: $ReadOnlyArray<RepoId>,
+|};
+
+export function makeLoadCommand(
+  loadIndividualPlugin: (Common.PluginName, LoadOptions) => Promise<void>,
+  loadDefaultPlugins: (LoadOptions) => Promise<void>
+): Command {
+  return async function load(args, std) {
+    if (Common.githubToken() == null) {
+      // TODO(#638): This check should be abstracted so that plugins can
+      // specify their argument dependencies and get nicely formatted
+      // errors.
+      // For simplicity, for now while we are always using GitHub, we just
+      // check for the GitHub token upfront for all load commands.
+      return die(std, "no GitHub token specified");
+    }
+
+    const repoIds: RepoId[] = [];
+    let explicitOutput: RepoId | null = null;
+    let plugin: Common.PluginName | null = null;
+
+    for (let i = 0; i < args.length; i++) {
+      switch (args[i]) {
+        case "--help": {
+          usage(std.out);
+          return 0;
+        }
+        case "--output": {
+          if (explicitOutput != null)
+            return die(std, "'--output' given multiple times");
+          if (++i >= args.length)
+            return die(std, "'--output' given without value");
+          explicitOutput = stringToRepoId(args[i]);
+          break;
+        }
+        case "--plugin": {
+          if (plugin != null)
+            return die(std, "'--plugin' given multiple times");
+          if (++i >= args.length)
+            return die(std, "'--plugin' given without value");
+          const arg = args[i];
+          if (arg !== "git" && arg !== "github")
+            return die(std, "unknown plugin: " + JSON.stringify(arg));
+          plugin = arg;
+          break;
+        }
+        default: {
+          // Should be a repository.
+          repoIds.push(stringToRepoId(args[i]));
+          break;
+        }
       }
     }
-  }
 
-  let output: RepoId;
-  if (explicitOutput != null) {
-    output = explicitOutput;
-  } else if (repoIds.length === 1) {
-    output = repoIds[0];
-  } else {
-    return die(std, "output repository not specified");
-  }
+    let output: RepoId;
+    if (explicitOutput != null) {
+      output = explicitOutput;
+    } else if (repoIds.length === 1) {
+      output = repoIds[0];
+    } else {
+      return die(std, "output repository not specified");
+    }
 
-  if (plugin == null) {
-    return loadDefaultPlugins({std, output, repoIds});
-  } else {
-    return loadPlugin({std, output, repoIds, plugin});
-  }
-};
+    const options: LoadOptions = {output, repoIds: repoIds};
 
-const loadDefaultPlugins = async ({std, output, repoIds}) => {
-  if (Common.githubToken() == null) {
-    // TODO(#638): This check should be abstracted so that plugins can
-    // specify their argument dependencies and get nicely formatted
-    // errors.
-    return die(std, "no GitHub token specified");
-  }
+    if (plugin == null) {
+      try {
+        await loadDefaultPlugins(options);
+        return 0;
+      } catch (e) {
+        std.err(e.message);
+        return 1;
+      }
+    } else {
+      try {
+        await loadIndividualPlugin(plugin, options);
+        return 0;
+      } catch (e) {
+        std.err(e.message);
+        return 1;
+      }
+    }
+  };
+}
 
+export const loadDefaultPlugins = async (options: LoadOptions) => {
   const tasks = [
     ...Common.defaultPlugins().map((pluginName) => ({
       id: `load-${pluginName}`,
@@ -143,9 +173,9 @@ const loadDefaultPlugins = async ({std, output, repoIds}) => {
         "--max_old_space_size=8192",
         process.argv[1],
         "load",
-        ...repoIds.map((repoId) => repoIdToString(repoId)),
+        ...options.repoIds.map((repoId) => repoIdToString(repoId)),
         "--output",
-        repoIdToString(output),
+        repoIdToString(options.output),
         "--plugin",
         pluginName,
       ],
@@ -155,12 +185,18 @@ const loadDefaultPlugins = async ({std, output, repoIds}) => {
 
   const {success} = await execDependencyGraph(tasks, {taskPassLabel: "DONE"});
   if (success) {
-    addToRepoIdRegistry(output);
+    addToRepoIdRegistry(options.output);
+    return;
+  } else {
+    throw new Error("Load tasks failed.");
   }
-  return success ? 0 : 1;
 };
 
-const loadPlugin = async ({std, output, repoIds, plugin}) => {
+export const loadIndividualPlugin = async (
+  plugin: Common.PluginName,
+  options: LoadOptions
+) => {
+  const {output, repoIds} = options;
   function scopedDirectory(key) {
     const directory = path.join(
       Common.sourcecredDirectory(),
@@ -175,24 +211,18 @@ const loadPlugin = async ({std, output, repoIds, plugin}) => {
   const cacheDirectory = scopedDirectory("cache");
   switch (plugin) {
     case "github": {
-      const token = Common.githubToken();
-      if (token == null) {
-        // TODO(#638): This check should be abstracted so that plugins
-        // can specify their argument dependencies and get nicely
-        // formatted errors.
-        return die(std, "no GitHub token specified");
-      }
+      const token = NullUtil.get(Common.githubToken());
       await loadGithubData({token, repoIds, outputDirectory, cacheDirectory});
-      return 0;
+      return;
     }
     case "git":
       await loadGitData({repoIds, outputDirectory, cacheDirectory});
-      return 0;
+      return;
     // Unlike the previous check, which was validating user input and
     // was reachable, this really should not occur.
     // istanbul ignore next
     default:
-      return die(std, "unknown plugin: " + JSON.stringify((plugin: empty)));
+      throw new Error("unknown plugin: " + JSON.stringify((plugin: empty)));
   }
 };
 
@@ -213,5 +243,7 @@ export const help: Command = async (args, std) => {
     return 1;
   }
 };
+
+const load = makeLoadCommand(loadIndividualPlugin, loadDefaultPlugins);
 
 export default load;
