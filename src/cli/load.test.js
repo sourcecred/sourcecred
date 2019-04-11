@@ -464,18 +464,18 @@ describe("cli/load", () => {
     const fooBaz = makeRepoId("foo", "baz");
 
     it("creates a load sub-task per plugin", async () => {
-      execDependencyGraph.mockResolvedValueOnce({success: true});
+      execDependencyGraph.mockResolvedValue({success: true});
       await loadDefaultPlugins({
         output: fooCombined,
         repoIds: [fooBar, fooBaz],
       });
-      expect(execDependencyGraph).toHaveBeenCalledTimes(1);
-      const tasks = execDependencyGraph.mock.calls[0][0];
-      expect(tasks).toHaveLength(["git", "github"].length);
-      expect(tasks.map((task) => task.id)).toEqual(
+      expect(execDependencyGraph).toHaveBeenCalledTimes(2);
+      const loadTasks = execDependencyGraph.mock.calls[0][0];
+      expect(loadTasks).toHaveLength(["git", "github"].length);
+      expect(loadTasks.map((task) => task.id)).toEqual(
         expect.arrayContaining(["load-git", "load-github"])
       );
-      for (const task of tasks) {
+      for (const task of loadTasks) {
         expect(task.cmd).toEqual([
           expect.stringMatching(/\bnode\b/),
           expect.stringMatching(/--max_old_space_size=/),
@@ -491,12 +491,35 @@ describe("cli/load", () => {
       }
     });
 
+    it("creates a pagerank task after load is successful", async () => {
+      execDependencyGraph.mockResolvedValue({success: true});
+      await loadDefaultPlugins({
+        output: fooCombined,
+        repoIds: [fooBar, fooBaz],
+      });
+      expect(execDependencyGraph).toHaveBeenCalledTimes(2);
+      const pagerankTasks = execDependencyGraph.mock.calls[1][0];
+      expect(pagerankTasks).toHaveLength(1);
+      const task = pagerankTasks[0];
+      expect(task).toEqual({
+        id: "run-pagerank",
+        deps: [],
+        cmd: [
+          expect.stringMatching(/\bnode\b/),
+          expect.stringMatching(/--max_old_space_size=/),
+          process.argv[1],
+          "pagerank",
+          "foo/combined",
+        ],
+      });
+    });
+
     it("updates RepoIdRegistry on success", async () => {
       const directory = newSourcecredDirectory();
       expect(RepoIdRegistry.getRegistry(directory)).toEqual(
         RepoIdRegistry.emptyRegistry()
       );
-      execDependencyGraph.mockResolvedValueOnce({success: true});
+      execDependencyGraph.mockResolvedValue({success: true});
       await loadDefaultPlugins({
         output: fooCombined,
         repoIds: [fooBar, fooBaz],
@@ -510,7 +533,7 @@ describe("cli/load", () => {
       expect(RepoIdRegistry.getRegistry(directory)).toEqual(expectedRegistry);
     });
 
-    it("throws an error on execDependencyGraph failure", async () => {
+    it("throws an load error on first execDependencyGraph failure", async () => {
       execDependencyGraph.mockResolvedValueOnce({success: false});
       const result = loadDefaultPlugins({
         output: fooCombined,
@@ -518,6 +541,17 @@ describe("cli/load", () => {
       });
 
       expect(result).rejects.toThrow("Load tasks failed.");
+    });
+
+    it("throws an pagerank error on second execDependencyGraph failure", async () => {
+      execDependencyGraph.mockResolvedValueOnce({success: true});
+      execDependencyGraph.mockResolvedValueOnce({success: false});
+      const result = loadDefaultPlugins({
+        output: fooCombined,
+        repoIds: [fooBar, fooBaz],
+      });
+
+      expect(result).rejects.toThrow("Pagerank task failed.");
     });
   });
 });
