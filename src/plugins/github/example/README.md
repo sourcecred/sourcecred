@@ -9,12 +9,12 @@ the GitHub api query changes. To regenerate the demo data, run the following
 command:
 
 ```shell
-$ GITHUB_TOKEN="your_token_here" src/plugins/github/fetchGithubRepoTest.sh -u
+$ SOURCECRED_GITHUB_TOKEN="your_token_here" src/plugins/github/fetchGithubRepoTest.sh -u
 ```
 
 You can also just verify that the data is up-to-date by running:
 ```shell
-$ GITHUB_TOKEN="your_token_here" src/plugins/github/fetchGithubRepoTest.sh
+$ SOURCECRED_GITHUB_TOKEN="your_token_here" src/plugins/github/fetchGithubRepoTest.sh
 ```
 
 There is a known issue where GitHub's end cursor output depends on your current

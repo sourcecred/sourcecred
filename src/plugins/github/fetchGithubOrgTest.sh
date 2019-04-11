@@ -7,7 +7,7 @@ data_file=src/plugins/github/example/organizations.snapshot
 usage() {
   printf 'usage: %s [-u|--updateSnapshot] [--[no-]build] [--help]\n' "$0"
   printf 'Required environment variables:\n'
-  printf '  GITHUB_TOKEN: A 40-character hex string API token.\n'
+  printf '  SOURCECRED_GITHUB_TOKEN: A 40-character hex string API token.\n'
   printf 'Flags:\n'
   printf '  -u|--updateSnapshot\n'
   printf '      Update the stored file instead of checking its contents\n'
@@ -24,8 +24,8 @@ usage() {
 }
 
 fetch() {
-  if [ -z "${GITHUB_TOKEN:-}" ]; then
-    printf >&2 'Please set the GITHUB_TOKEN environment variable\n'
+  if [ -z "${SOURCECRED_GITHUB_TOKEN:-}" ]; then
+    printf >&2 'Please set the SOURCECRED_GITHUB_TOKEN environment variable\n'
     printf >&2 'to a 40-character hex string API token from GitHub.\n'
     return 1
   fi
@@ -33,15 +33,15 @@ fetch() {
   PAGE_SIZE=1
   echo "# results for org: sourcecred-test-organization"
   node "${SOURCECRED_BIN:-./bin}/fetchAndPrintGithubOrg.js" \
-    sourcecred-test-organization "${GITHUB_TOKEN}" "${PAGE_SIZE}"
+    sourcecred-test-organization "${SOURCECRED_GITHUB_TOKEN}" "${PAGE_SIZE}"
   echo
   echo "# results for org: sourcecred-empty-organization"
   node "${SOURCECRED_BIN:-./bin}/fetchAndPrintGithubOrg.js" \
-    sourcecred-empty-organization "${GITHUB_TOKEN}" "${PAGE_SIZE}"
+    sourcecred-empty-organization "${SOURCECRED_GITHUB_TOKEN}" "${PAGE_SIZE}"
   echo
   echo "# results for org: sourcecred-nonexistent-organization"
   node "${SOURCECRED_BIN:-./bin}/fetchAndPrintGithubOrg.js" \
-    sourcecred-nonexistent-organization "${GITHUB_TOKEN}" "${PAGE_SIZE}"
+    sourcecred-nonexistent-organization "${SOURCECRED_GITHUB_TOKEN}" "${PAGE_SIZE}"
 }
 
 check() {
