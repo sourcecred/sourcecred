@@ -165,31 +165,58 @@ export function makeLoadCommand(
 }
 
 export const loadDefaultPlugins = async (options: LoadOptions) => {
+  const sourcecredCommand = (args) => [
+    process.execPath,
+    "--max_old_space_size=8192",
+    process.argv[1],
+    ...args,
+  ];
   const tasks = [
     ...Common.defaultPlugins().map((pluginName) => ({
       id: `load-${pluginName}`,
-      cmd: [
-        process.execPath,
-        "--max_old_space_size=8192",
-        process.argv[1],
+      cmd: sourcecredCommand([
         "load",
         ...options.repoIds.map((repoId) => repoIdToString(repoId)),
         "--output",
         repoIdToString(options.output),
         "--plugin",
         pluginName,
-      ],
+      ]),
       deps: [],
     })),
   ];
 
-  const {success} = await execDependencyGraph(tasks, {taskPassLabel: "DONE"});
-  if (success) {
-    addToRepoIdRegistry(options.output);
-    return;
-  } else {
+  const {success: loadSuccess} = await execDependencyGraph(tasks, {
+    taskPassLabel: "DONE",
+  });
+  if (!loadSuccess) {
     throw new Error("Load tasks failed.");
   }
+  addToRepoIdRegistry(options.output);
+  // HACK: Logically, we should have the PagerankTask be included in the
+  // first execDependencyGraph run, depending on the other tasks completing.
+  //
+  // However, running pagerank depends on loading the graph
+  // (analysis/loadGraph), which depends on the relevant repo being present
+  // in the RepoIdRegistry. And it is only in the RepoIdRegistry after the
+  // call to execDependencyGraph has been successful.
+  //
+  // As a simple hack, we just call execDependencyGraph again with the
+  // pagerank command after the first one has been successful. This does have
+  // the awkward effect that CLI users will see two blocks of "task: SUCCESS"
+  // information from execDependencyGraph.
+  const pagerankTask = {
+    id: "run-pagerank",
+    cmd: sourcecredCommand(["pagerank", repoIdToString(options.output)]),
+    deps: [],
+  };
+  const {success: pagerankSuccess} = await execDependencyGraph([pagerankTask], {
+    taskPassLabel: "DONE",
+  });
+  if (!pagerankSuccess) {
+    throw new Error("Pagerank task failed.");
+  }
+  return;
 };
 
 export const loadIndividualPlugin = async (
