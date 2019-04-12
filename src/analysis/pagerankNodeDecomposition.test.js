@@ -6,7 +6,10 @@ import {
   createConnections,
   createOrderedSparseMarkovChain,
 } from "../core/attribution/graphToMarkovChain";
-import {findStationaryDistribution} from "../core/attribution/markovChain";
+import {
+  findStationaryDistribution,
+  uniformDistribution,
+} from "../core/attribution/markovChain";
 import {
   decompose,
   type PagerankNodeDecomposition,
@@ -131,12 +134,21 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
       const connections = createConnections(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(connections);
-      const distributionResult = await findStationaryDistribution(osmc.chain, {
-        verbose: false,
-        convergenceThreshold: 1e-6,
-        maxIterations: 255,
-        yieldAfterMs: 1,
-      });
+      const alpha = 0;
+      const seed = uniformDistribution(osmc.chain.length);
+      const initialDistribution = uniformDistribution(osmc.chain.length);
+      const distributionResult = await findStationaryDistribution(
+        osmc.chain,
+        seed,
+        alpha,
+        initialDistribution,
+        {
+          verbose: false,
+          convergenceThreshold: 1e-6,
+          maxIterations: 255,
+          yieldAfterMs: 1,
+        }
+      );
       const pr = distributionToNodeDistribution(
         osmc.nodeOrder,
         distributionResult.pi
@@ -151,12 +163,21 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
       const connections = createConnections(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(connections);
-      const distributionResult = await findStationaryDistribution(osmc.chain, {
-        verbose: false,
-        convergenceThreshold: 1e-6,
-        maxIterations: 255,
-        yieldAfterMs: 1,
-      });
+      const alpha = 0;
+      const seed = uniformDistribution(osmc.chain.length);
+      const initialDistribution = uniformDistribution(osmc.chain.length);
+      const distributionResult = await findStationaryDistribution(
+        osmc.chain,
+        seed,
+        alpha,
+        initialDistribution,
+        {
+          verbose: false,
+          convergenceThreshold: 1e-6,
+          maxIterations: 255,
+          yieldAfterMs: 1,
+        }
+      );
       const pr = distributionToNodeDistribution(
         osmc.nodeOrder,
         distributionResult.pi
