@@ -137,14 +137,17 @@ function sparseMarkovChainActionInto(
   });
 }
 
-export function sparseMarkovChainAction(
-  chain: SparseMarkovChain,
-  seed: Distribution,
-  alpha: number,
-  pi: Distribution
-): Distribution {
-  const result = new Float64Array(pi.length);
-  sparseMarkovChainActionInto(chain, seed, alpha, pi, result);
+export type PagerankParams = {|
+  +chain: SparseMarkovChain,
+  +seed: Distribution,
+  +alpha: number,
+  +pi0: Distribution,
+|};
+
+export function sparseMarkovChainAction(params: PagerankParams): Distribution {
+  const {chain, seed, alpha, pi0} = params;
+  const result = new Float64Array(pi0.length);
+  sparseMarkovChainActionInto(chain, seed, alpha, pi0, result);
   return result;
 }
 
@@ -166,10 +169,7 @@ export function computeDelta(pi0: Distribution, pi1: Distribution) {
 }
 
 function* findStationaryDistributionGenerator(
-  chain: SparseMarkovChain,
-  seed: Distribution,
-  alpha: number,
-  initialDistribution: Distribution,
+  params: PagerankParams,
   options: {|
     +verbose: boolean,
     // A distribution is considered stationary if the action of the Markov
@@ -180,7 +180,8 @@ function* findStationaryDistributionGenerator(
     +maxIterations: number,
   |}
 ): Generator<void, StationaryDistributionResult, void> {
-  let pi = initialDistribution;
+  const {chain, seed, alpha, pi0} = params;
+  let pi = pi0;
   let scratch = new Float64Array(pi.length);
 
   let nIterations = 0;
@@ -221,10 +222,7 @@ function* findStationaryDistributionGenerator(
 }
 
 export function findStationaryDistribution(
-  chain: SparseMarkovChain,
-  seed: Distribution,
-  alpha: number,
-  initialDistribution: Distribution,
+  pagerankParams: PagerankParams,
   options: {|
     +verbose: boolean,
     +convergenceThreshold: number,
@@ -232,11 +230,14 @@ export function findStationaryDistribution(
     +yieldAfterMs: number,
   |}
 ): Promise<StationaryDistributionResult> {
+  const {chain, seed, alpha, pi0} = pagerankParams;
   let gen = findStationaryDistributionGenerator(
-    chain,
-    seed,
-    alpha,
-    initialDistribution,
+    {
+      chain,
+      seed,
+      alpha,
+      pi0,
+    },
     {
       verbose: options.verbose,
       convergenceThreshold: options.convergenceThreshold,

@@ -426,12 +426,14 @@ export class PagerankGraph {
     const osmc = createOrderedSparseMarkovChain(connections);
     const alpha = 0;
     const seed = uniformDistribution(osmc.chain.length);
-    const initialDistribution = uniformDistribution(osmc.chain.length);
+    const pi0 = uniformDistribution(osmc.chain.length);
     const distributionResult = await findStationaryDistribution(
-      osmc.chain,
-      seed,
-      alpha,
-      initialDistribution,
+      {
+        chain: osmc.chain,
+        seed,
+        alpha,
+        pi0,
+      },
       {
         verbose: false,
         convergenceThreshold: options.convergenceThreshold,

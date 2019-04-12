@@ -138,10 +138,12 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const seed = uniformDistribution(osmc.chain.length);
       const initialDistribution = uniformDistribution(osmc.chain.length);
       const distributionResult = await findStationaryDistribution(
-        osmc.chain,
-        seed,
-        alpha,
-        initialDistribution,
+        {
+          chain: osmc.chain,
+          seed,
+          alpha,
+          pi0: initialDistribution,
+        },
         {
           verbose: false,
           convergenceThreshold: 1e-6,
@@ -163,14 +165,13 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
       const connections = createConnections(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(connections);
-      const alpha = 0;
-      const seed = uniformDistribution(osmc.chain.length);
-      const initialDistribution = uniformDistribution(osmc.chain.length);
       const distributionResult = await findStationaryDistribution(
-        osmc.chain,
-        seed,
-        alpha,
-        initialDistribution,
+        {
+          chain: osmc.chain,
+          seed: uniformDistribution(osmc.chain.length),
+          alpha: 0,
+          pi0: uniformDistribution(osmc.chain.length),
+        },
         {
           verbose: false,
           convergenceThreshold: 1e-6,

@@ -130,7 +130,7 @@ describe("core/attribution/markovChain", () => {
       const alpha = 0;
       const seed = uniformDistribution(chain.length);
       const pi0 = new Float64Array([0.125, 0.375, 0.625]);
-      const pi1 = sparseMarkovChainAction(chain, seed, alpha, pi0);
+      const pi1 = sparseMarkovChainAction({chain, seed, alpha, pi0});
       // The expected value is given by `pi0 * A`, where `A` is the
       // transition matrix. In Octave:
       // >> A = [ 1 0 0; 0.25 0 0.75 ; 0.25 0.75 0 ];
@@ -154,7 +154,7 @@ describe("core/attribution/markovChain", () => {
       const alpha = 0.5;
       const seed = indicatorDistribution(chain.length, 0);
       const pi0 = new Float64Array([0.6, 0.2, 0.2]);
-      const pi1 = sparseMarkovChainAction(chain, seed, alpha, pi0);
+      const pi1 = sparseMarkovChainAction({chain, seed, alpha, pi0});
       // The expected value is given by `(1-alpha)*pi0 * A + alpha*seed`,
       // where `A` is the transition matrix. In python3:
       // >> A = np.matrix([[ 1, 0, 0], [0.25, 0, 0.75], [0.25, 0.75, 0 ]])
@@ -187,9 +187,9 @@ describe("core/attribution/markovChain", () => {
     chain: SparseMarkovChain,
     seed: Distribution,
     alpha: number,
-    pi: Distribution
+    pi0: Distribution
   ): void {
-    expectAllClose(sparseMarkovChainAction(chain, seed, alpha, pi), pi);
+    expectAllClose(sparseMarkovChainAction({chain, seed, alpha, pi0}), pi0);
   }
 
   describe("findStationaryDistribution", () => {
@@ -199,7 +199,7 @@ describe("core/attribution/markovChain", () => {
       alpha: number,
       d: StationaryDistributionResult
     ) {
-      const nextPi = sparseMarkovChainAction(chain, seed, alpha, d.pi);
+      const nextPi = sparseMarkovChainAction({chain, seed, alpha, pi0: d.pi});
       expect(d.convergenceDelta).toEqual(computeDelta(d.pi, nextPi));
     }
 
@@ -209,14 +209,14 @@ describe("core/attribution/markovChain", () => {
         [0.25, 0, 0.75],
         [0.25, 0.75, 0],
       ]);
-      const alpha = 0;
-      const seed = uniformDistribution(chain.length);
-      const initialDistribution = uniformDistribution(chain.length);
+      const uniform = uniformDistribution(chain.length);
       const result: StationaryDistributionResult = await findStationaryDistribution(
-        chain,
-        seed,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed: uniform,
+          alpha: 0,
+          pi0: uniform,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -225,9 +225,9 @@ describe("core/attribution/markovChain", () => {
         }
       );
       expect(result.convergenceDelta).toBeLessThanOrEqual(1e-7);
-      validateConvegenceDelta(chain, seed, alpha, result);
+      validateConvegenceDelta(chain, uniform, 0, result);
 
-      expectStationary(chain, seed, alpha, result.pi);
+      expectStationary(chain, uniform, 0, result.pi);
       const expected = new Float64Array([1, 0, 0]);
       expectAllClose(result.pi, expected);
     });
@@ -246,12 +246,13 @@ describe("core/attribution/markovChain", () => {
       ]);
       const alpha = 0;
       const seed = uniformDistribution(chain.length);
-      const initialDistribution = uniformDistribution(chain.length);
       const result = await findStationaryDistribution(
-        chain,
-        seed,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed,
+          alpha,
+          pi0: uniformDistribution(chain.length),
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -286,10 +287,12 @@ describe("core/attribution/markovChain", () => {
       const initialDistribution2 = indicatorDistribution(chain.length, 1);
 
       const result1 = await findStationaryDistribution(
-        chain,
-        seed,
-        alpha,
-        initialDistribution1,
+        {
+          chain,
+          seed,
+          alpha,
+          pi0: initialDistribution1,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -299,10 +302,12 @@ describe("core/attribution/markovChain", () => {
       );
 
       const result2 = await findStationaryDistribution(
-        chain,
-        seed,
-        alpha,
-        initialDistribution2,
+        {
+          chain,
+          seed,
+          alpha,
+          pi0: initialDistribution2,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -328,12 +333,14 @@ describe("core/attribution/markovChain", () => {
       ]);
       const alpha = 0.1;
       const seed = indicatorDistribution(chain.length, 0);
-      const initialDistribution = uniformDistribution(chain.length);
+      const pi0 = uniformDistribution(chain.length);
       const result = await findStationaryDistribution(
-        chain,
-        seed,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed,
+          alpha,
+          pi0,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -404,12 +411,14 @@ describe("core/attribution/markovChain", () => {
         0.15517241,
       ]);
 
-      const initialDistribution = expected;
+      const pi0 = expected;
       const result = await findStationaryDistribution(
-        chain,
-        seed,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed,
+          alpha,
+          pi0,
+        },
         {
           maxIterations: 0,
           convergenceThreshold: 1e-7,
@@ -429,12 +438,14 @@ describe("core/attribution/markovChain", () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [1, 0]]);
       const alpha = 0;
       const seed = uniformDistribution(chain.length);
-      const initialDistribution = uniformDistribution(chain.length);
+      const pi0 = uniformDistribution(chain.length);
       const result = await findStationaryDistribution(
-        chain,
-        seed,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed,
+          alpha,
+          pi0,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -455,12 +466,14 @@ describe("core/attribution/markovChain", () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [0, 1]]);
       const alpha = 0;
       const seed = uniformDistribution(chain.length);
-      const initialDistribution = uniformDistribution(chain.length);
+      const pi0 = uniformDistribution(chain.length);
       const result = await findStationaryDistribution(
-        chain,
-        seed,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed,
+          alpha,
+          pi0,
+        },
         {
           verbose: false,
           convergenceThreshold: 1e-7,
@@ -482,13 +495,15 @@ describe("core/attribution/markovChain", () => {
       const seed1 = indicatorDistribution(chain.length, 0);
       const seed2 = indicatorDistribution(chain.length, 1);
       const seedUniform = uniformDistribution(chain.length);
-      const initialDistribution = uniformDistribution(chain.length);
+      const pi0 = uniformDistribution(chain.length);
 
       const result1 = await findStationaryDistribution(
-        chain,
-        seed1,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed: seed1,
+          alpha,
+          pi0,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -498,10 +513,12 @@ describe("core/attribution/markovChain", () => {
       );
 
       const result2 = await findStationaryDistribution(
-        chain,
-        seed2,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed: seed2,
+          alpha,
+          pi0,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -510,10 +527,12 @@ describe("core/attribution/markovChain", () => {
         }
       );
       const resultUniform = await findStationaryDistribution(
-        chain,
-        seedUniform,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed: seedUniform,
+          alpha,
+          pi0,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -560,13 +579,15 @@ describe("core/attribution/markovChain", () => {
       const alpha = 0;
       const seed1 = indicatorDistribution(chain.length, 0);
       const seed2 = indicatorDistribution(chain.length, 1);
-      const initialDistribution = uniformDistribution(chain.length);
+      const pi0 = uniformDistribution(chain.length);
 
       const result1 = await findStationaryDistribution(
-        chain,
-        seed1,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed: seed1,
+          alpha,
+          pi0,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -575,10 +596,12 @@ describe("core/attribution/markovChain", () => {
         }
       );
       const result2 = await findStationaryDistribution(
-        chain,
-        seed2,
-        alpha,
-        initialDistribution,
+        {
+          chain,
+          seed: seed2,
+          alpha,
+          pi0,
+        },
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
@@ -596,13 +619,10 @@ describe("core/attribution/markovChain", () => {
       ]);
       const alpha = 1;
       const seed = indicatorDistribution(chain.length, 0);
-      const initialDistribution = uniformDistribution(chain.length);
+      const pi0 = uniformDistribution(chain.length);
 
       const result = await findStationaryDistribution(
-        chain,
-        seed,
-        alpha,
-        initialDistribution,
+        {chain, seed, alpha, pi0},
         {
           maxIterations: 255,
           convergenceThreshold: 1e-7,
