@@ -16,7 +16,16 @@ export type Distribution = Float64Array;
  * have different PagerankParams, but often have the same PagerankOptions.
  */
 export type PagerankParams = {|
+  // The Markov Chain to run PageRank on.
   +chain: SparseMarkovChain,
+  // The initial distribution to start from.
+  +pi0: Distribution,
+  // The seed vector that PageRank 'teleports' back to.
+  +seed: Distribution,
+  // The probability of teleporting back to the seed vector.
+  // If alpha=0, then the seed vector is irrelevant.
+  // If alpha=1, then it trivially converges to the seed vector.
+  +alpha: number,
 |};
 
 /**
@@ -121,17 +130,47 @@ export function uniformDistribution(n: number): Distribution {
   return new Float64Array(n).fill(1 / n);
 }
 
+/**
+ * Distribution that is 1 at the indicator value and 0 elsewhere.
+ */
+export function indicatorDistribution(
+  size: number,
+  indicator: number
+): Distribution {
+  if (!isFinite(size) || size !== Math.floor(size) || size <= 0) {
+    throw new Error("size: expected positive integer, but got: " + size);
+  }
+  if (
+    !isFinite(indicator) ||
+    indicator !== Math.floor(indicator) ||
+    indicator < 0
+  ) {
+    throw new Error(
+      "indicator: expected nonnegative integer, got: " + indicator
+    );
+  }
+  if (indicator >= size) {
+    throw new Error("indicator out of range");
+  }
+  const distribution = new Float64Array(size).fill(0);
+  distribution[indicator] = 1;
+
+  return distribution;
+}
+
 function sparseMarkovChainActionInto(
   chain: SparseMarkovChain,
+  seed: Distribution,
+  alpha: number,
   input: Distribution,
   output: Distribution
 ): void {
   chain.forEach(({neighbor, weight}, dst) => {
     const inDegree = neighbor.length; // (also `weight.length`)
-    let probability = 0;
+    let probability = alpha * seed[dst];
     for (let i = 0; i < inDegree; i++) {
       const src = neighbor[i];
-      probability += input[src] * weight[i];
+      probability += (1 - alpha) * input[src] * weight[i];
     }
     output[dst] = probability;
   });
@@ -139,10 +178,12 @@ function sparseMarkovChainActionInto(
 
 export function sparseMarkovChainAction(
   chain: SparseMarkovChain,
+  seed: Distribution,
+  alpha: number,
   pi: Distribution
 ): Distribution {
   const result = new Float64Array(pi.length);
-  sparseMarkovChainActionInto(chain, pi, result);
+  sparseMarkovChainActionInto(chain, seed, alpha, pi, result);
   return result;
 }
 
@@ -175,8 +216,9 @@ function* findStationaryDistributionGenerator(
     +maxIterations: number,
   |}
 ): Generator<void, StationaryDistributionResult, void> {
-  const {chain} = params;
-  let pi = uniformDistribution(chain.length);
+  const {chain, pi0, seed, alpha} = params;
+  // STOPSHIP verify no mutation
+  let pi = pi0;
   let scratch = new Float64Array(pi.length);
 
   let nIterations = 0;
@@ -187,12 +229,12 @@ function* findStationaryDistributionGenerator(
       }
       // We need to do one more step so that we can compute the empirical convergence
       // delta for the returned distribution.
-      sparseMarkovChainActionInto(chain, pi, scratch);
+      sparseMarkovChainActionInto(chain, seed, alpha, pi, scratch);
       const convergenceDelta = computeDelta(pi, scratch);
       return {pi, convergenceDelta};
     }
     nIterations++;
-    sparseMarkovChainActionInto(chain, pi, scratch);
+    sparseMarkovChainActionInto(chain, seed, alpha, pi, scratch);
     // We compute the convergenceDelta between 'scratch' (the newest
     // distribution) and 'pi' (the distribution from the previous step). If the
     // delta is below threshold, then the distribution from the last step was
