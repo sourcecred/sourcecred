@@ -78,6 +78,8 @@ build_and_deploy() {
         ${DEPLOY_CNAME_URL:+--cname "${DEPLOY_CNAME_URL}"} \
         --repo ipfs/js-ipfs \
         --repo sourcecred/sourcecred \
+        --repo sourcecred/research \
+        --repo sourcecred/pm \
         ;
 
     sourcecred_site="$(mktemp -d --suffix ".sourcecred-site")"
