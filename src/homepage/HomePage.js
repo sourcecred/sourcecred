@@ -4,6 +4,7 @@ import React from "react";
 
 import type {Assets} from "../webutil/assets";
 import Link from "../webutil/Link";
+import {StyleSheet, css} from "aphrodite/no-important";
 
 export default class HomePage extends React.Component<{|+assets: Assets|}> {
   render() {
@@ -23,16 +24,7 @@ export default class HomePage extends React.Component<{|+assets: Assets|}> {
       readme: "https://github.com/sourcecred/sourcecred/blob/master/README.md",
     };
     return (
-      <div
-        style={{
-          maxWidth: 900,
-          margin: "0 auto",
-          marginBottom: 200,
-          padding: "0 10px",
-          lineHeight: 1.5,
-          fontSize: 20,
-        }}
-      >
+      <div className={css(styles.container)}>
         <h1>SourceCred vision</h1>
         <p>
           <strong>The open-source movement is amazing. </strong>
@@ -203,3 +195,14 @@ function Dt(props) {
 function Dd(props) {
   return <dd style={{marginBottom: 15}}>{props.children}</dd>;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: 900,
+    margin: "0 auto",
+    marginBottom: 200,
+    padding: "0 10px",
+    lineHeight: 1.5,
+    fontSize: 20,
+  },
+});
