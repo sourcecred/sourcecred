@@ -130,34 +130,6 @@ export function uniformDistribution(n: number): Distribution {
   return new Float64Array(n).fill(1 / n);
 }
 
-/**
- * Distribution that is 1 at the indicator value and 0 elsewhere.
- */
-export function indicatorDistribution(
-  size: number,
-  indicator: number
-): Distribution {
-  if (!isFinite(size) || size !== Math.floor(size) || size <= 0) {
-    throw new Error("size: expected positive integer, but got: " + size);
-  }
-  if (
-    !isFinite(indicator) ||
-    indicator !== Math.floor(indicator) ||
-    indicator < 0
-  ) {
-    throw new Error(
-      "indicator: expected nonnegative integer, got: " + indicator
-    );
-  }
-  if (indicator >= size) {
-    throw new Error("indicator out of range");
-  }
-  const distribution = new Float64Array(size).fill(0);
-  distribution[indicator] = 1;
-
-  return distribution;
-}
-
 function sparseMarkovChainActionInto(
   chain: SparseMarkovChain,
   seed: Distribution,
@@ -217,8 +189,7 @@ function* findStationaryDistributionGenerator(
   |}
 ): Generator<void, StationaryDistributionResult, void> {
   const {chain, pi0, seed, alpha} = params;
-  // STOPSHIP verify no mutation
-  let pi = pi0;
+  let pi = new Float64Array(pi0);
   let scratch = new Float64Array(pi.length);
 
   let nIterations = 0;

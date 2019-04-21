@@ -68,8 +68,6 @@ export async function pagerank(
     fullOptions.selfLoopWeight
   );
   const osmc = createOrderedSparseMarkovChain(connections);
-  const alpha = 0;
-  const uniform = uniformDistribution(osmc.chain.length);
   const params: PagerankParams = {
     chain: osmc.chain,
     alpha: 0,
