@@ -7,6 +7,36 @@
  */
 export type Distribution = Float64Array;
 
+/**
+ * The data inputs to running PageRank.
+ *
+ * We keep these separate from the PagerankOptions below,
+ * because we expect that within a given context, every call to
+ * findStationaryDistribution (or other Pagerank functions) will
+ * have different PagerankParams, but often have the same PagerankOptions.
+ */
+export type PagerankParams = {|
+  +chain: SparseMarkovChain,
+|};
+
+/**
+ * PagerankOptions allows the user to tweak PageRank's behavior, especially around
+ * convergence.
+ */
+export type PagerankOptions = {|
+  // Causes runtime information to get logged to console.
+  +verbose: boolean,
+  // A distribution is considered stationary if the action of the Markov
+  // chain on the distribution does not change any component by more than
+  // `convergenceThreshold` in absolute value.
+  +convergenceThreshold: number,
+  // We will run maxIterations markov chain steps at most.
+  +maxIterations: number,
+  // To prevent locking the rest of the application, PageRank will yield control
+  // after this many miliseconds, allowing UI updates, etc.
+  +yieldAfterMs: number,
+|};
+
 export type StationaryDistributionResult = {|
   // The final distribution after attempting to find the stationary distribution
   // of the Markov chain.
@@ -134,7 +164,7 @@ export function computeDelta(pi0: Distribution, pi1: Distribution) {
 }
 
 function* findStationaryDistributionGenerator(
-  chain: SparseMarkovChain,
+  params: PagerankParams,
   options: {|
     +verbose: boolean,
     // A distribution is considered stationary if the action of the Markov
@@ -145,6 +175,7 @@ function* findStationaryDistributionGenerator(
     +maxIterations: number,
   |}
 ): Generator<void, StationaryDistributionResult, void> {
+  const {chain} = params;
   let pi = uniformDistribution(chain.length);
   let scratch = new Float64Array(pi.length);
 
@@ -186,15 +217,10 @@ function* findStationaryDistributionGenerator(
 }
 
 export function findStationaryDistribution(
-  chain: SparseMarkovChain,
-  options: {|
-    +verbose: boolean,
-    +convergenceThreshold: number,
-    +maxIterations: number,
-    +yieldAfterMs: number,
-  |}
+  params: PagerankParams,
+  options: PagerankOptions
 ): Promise<StationaryDistributionResult> {
-  let gen = findStationaryDistributionGenerator(chain, {
+  let gen = findStationaryDistributionGenerator(params, {
     verbose: options.verbose,
     convergenceThreshold: options.convergenceThreshold,
     maxIterations: options.maxIterations,

@@ -6,7 +6,10 @@ import {
   createConnections,
   createOrderedSparseMarkovChain,
 } from "../core/attribution/graphToMarkovChain";
-import {findStationaryDistribution} from "../core/attribution/markovChain";
+import {
+  findStationaryDistribution,
+  type PagerankParams,
+} from "../core/attribution/markovChain";
 import {
   decompose,
   type PagerankNodeDecomposition,
@@ -131,7 +134,8 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
       const connections = createConnections(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(connections);
-      const distributionResult = await findStationaryDistribution(osmc.chain, {
+      const params: PagerankParams = {chain: osmc.chain};
+      const distributionResult = await findStationaryDistribution(params, {
         verbose: false,
         convergenceThreshold: 1e-6,
         maxIterations: 255,
@@ -151,7 +155,8 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
       const connections = createConnections(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(connections);
-      const distributionResult = await findStationaryDistribution(osmc.chain, {
+      const params: PagerankParams = {chain: osmc.chain};
+      const distributionResult = await findStationaryDistribution(params, {
         verbose: false,
         convergenceThreshold: 1e-6,
         maxIterations: 255,

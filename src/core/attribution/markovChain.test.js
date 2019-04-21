@@ -8,6 +8,7 @@ import {
   uniformDistribution,
   computeDelta,
   type StationaryDistributionResult,
+  type PagerankParams,
 } from "./markovChain";
 
 describe("core/attribution/markovChain", () => {
@@ -158,7 +159,8 @@ describe("core/attribution/markovChain", () => {
         [0.25, 0, 0.75],
         [0.25, 0.75, 0],
       ]);
-      const result = await findStationaryDistribution(chain, {
+      const params: PagerankParams = {chain};
+      const result = await findStationaryDistribution(params, {
         maxIterations: 255,
         convergenceThreshold: 1e-7,
         verbose: false,
@@ -184,7 +186,8 @@ describe("core/attribution/markovChain", () => {
         [0.5, 0, 0.25, 0, 0.25],
         [0.5, 0.25, 0, 0.25, 0],
       ]);
-      const result = await findStationaryDistribution(chain, {
+      const params: PagerankParams = {chain};
+      const result = await findStationaryDistribution(params, {
         maxIterations: 255,
         convergenceThreshold: 1e-7,
         verbose: false,
@@ -201,7 +204,8 @@ describe("core/attribution/markovChain", () => {
 
     it("finds the stationary distribution of a periodic chain", async () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [1, 0]]);
-      const result = await findStationaryDistribution(chain, {
+      const params: PagerankParams = {chain};
+      const result = await findStationaryDistribution(params, {
         maxIterations: 255,
         convergenceThreshold: 1e-7,
         verbose: false,
@@ -218,7 +222,8 @@ describe("core/attribution/markovChain", () => {
 
     it("returns initial distribution if maxIterations===0", async () => {
       const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [0, 1]]);
-      const result = await findStationaryDistribution(chain, {
+      const params: PagerankParams = {chain};
+      const result = await findStationaryDistribution(params, {
         verbose: false,
         convergenceThreshold: 1e-7,
         maxIterations: 0,
