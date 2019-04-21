@@ -19,7 +19,11 @@ import {
 
 import {scoreByConstantTotal} from "./nodeScore";
 
-import {findStationaryDistribution} from "../core/attribution/markovChain";
+import {
+  findStationaryDistribution,
+  type PagerankParams,
+  type PagerankOptions as CorePagerankOptions,
+} from "../core/attribution/markovChain";
 
 export type {NodeDistribution} from "../core/attribution/graphToMarkovChain";
 export type {PagerankNodeDecomposition} from "./pagerankNodeDecomposition";
@@ -63,12 +67,17 @@ export async function pagerank(
     fullOptions.selfLoopWeight
   );
   const osmc = createOrderedSparseMarkovChain(connections);
-  const distributionResult = await findStationaryDistribution(osmc.chain, {
+  const params: PagerankParams = {chain: osmc.chain};
+  const coreOptions: CorePagerankOptions = {
     verbose: fullOptions.verbose,
     convergenceThreshold: fullOptions.convergenceThreshold,
     maxIterations: fullOptions.maxIterations,
     yieldAfterMs: 30,
-  });
+  };
+  const distributionResult = await findStationaryDistribution(
+    params,
+    coreOptions
+  );
   const pi = distributionToNodeDistribution(
     osmc.nodeOrder,
     distributionResult.pi

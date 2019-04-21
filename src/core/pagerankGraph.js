@@ -21,7 +21,11 @@ import {
   createOrderedSparseMarkovChain,
   type EdgeWeight,
 } from "./attribution/graphToMarkovChain";
-import {findStationaryDistribution} from "../core/attribution/markovChain";
+import {
+  findStationaryDistribution,
+  type PagerankParams,
+  type PagerankOptions,
+} from "../core/attribution/markovChain";
 import * as NullUtil from "../util/null";
 
 export {Direction} from "./graph";
@@ -421,12 +425,17 @@ export class PagerankGraph {
       this._syntheticLoopWeight
     );
     const osmc = createOrderedSparseMarkovChain(connections);
-    const distributionResult = await findStationaryDistribution(osmc.chain, {
+    const params: PagerankParams = {chain: osmc.chain};
+    const coreOptions: PagerankOptions = {
       verbose: false,
       convergenceThreshold: options.convergenceThreshold,
       maxIterations: options.maxIterations,
       yieldAfterMs: 30,
-    });
+    };
+    const distributionResult = await findStationaryDistribution(
+      params,
+      coreOptions
+    );
     this._scores = distributionToNodeDistribution(
       osmc.nodeOrder,
       distributionResult.pi
