@@ -9,7 +9,12 @@ import {
   type Edge,
   type EdgesOptions,
 } from "./graph";
-import {PagerankGraph, Direction} from "./pagerankGraph";
+import {
+  PagerankGraph,
+  Direction,
+  DEFAULT_MAX_ITERATIONS,
+  DEFAULT_CONVERGENCE_THRESHOLD,
+} from "./pagerankGraph";
 import {advancedGraph} from "./graphTestUtil";
 import * as NullUtil from "../util/null";
 
@@ -485,6 +490,20 @@ describe("core/pagerankGraph", () => {
       }
       expect(total).toBeCloseTo(1);
     }
+
+    it("runs PageRank with default options if not specified", () => {
+      const pg1 = examplePagerankGraph();
+      const pg2 = examplePagerankGraph();
+      const pg3 = examplePagerankGraph();
+      pg1.runPagerank();
+      pg2.runPagerank({});
+      pg3.runPagerank({
+        maxIterations: DEFAULT_MAX_ITERATIONS,
+        convergenceThreshold: DEFAULT_CONVERGENCE_THRESHOLD,
+      });
+      expect(pg1.equals(pg2)).toBe(true);
+      expect(pg1.equals(pg3)).toBe(true);
+    });
 
     it("promise rejects if the graph was modified", async () => {
       const pg = examplePagerankGraph();
