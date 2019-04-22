@@ -301,19 +301,6 @@ describe("core/attribution/markovChain", () => {
       validateConvergenceDelta(chain, seed, alpha, result);
 
       expectStationary(chain, seed, alpha, result.pi);
-      // determine the correct stationary distribtution via linear algebra
-      // from python3:
-      // >> A = np.array([[0, 0.25, 0.25, 0.25, 0.25],
-      //  [0.5, 0, 0.25, 0, 0.25],
-      //  [0.5, 0.25, 0, 0.25, 0],
-      //  [0.5, 0, 0.25, 0, 0.25],
-      //  [0.5, 0.25, 0, 0.25, 0]])
-      // >> seed = np.array([1, 0, 0, 0, 0])
-      // >> n = len(seed)
-      // >> alpha = .1
-      // >> piStar = alpha * seed * np.linalg.inv(np.eye(n) -(1-alpha)*A)
-      // >> print(piStar)
-
       const expected = new Float64Array([
         22 / 58,
         9 / 58,
