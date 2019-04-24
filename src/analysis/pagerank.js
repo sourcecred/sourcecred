@@ -23,6 +23,7 @@ import {
   findStationaryDistribution,
   type PagerankParams,
   type PagerankOptions as CorePagerankOptions,
+  uniformDistribution,
 } from "../core/attribution/markovChain";
 
 export type {NodeDistribution} from "../core/attribution/graphToMarkovChain";
@@ -67,7 +68,12 @@ export async function pagerank(
     fullOptions.selfLoopWeight
   );
   const osmc = createOrderedSparseMarkovChain(connections);
-  const params: PagerankParams = {chain: osmc.chain};
+  const params: PagerankParams = {
+    chain: osmc.chain,
+    alpha: 0,
+    pi0: uniformDistribution(osmc.chain.length),
+    seed: uniformDistribution(osmc.chain.length),
+  };
   const coreOptions: CorePagerankOptions = {
     verbose: fullOptions.verbose,
     convergenceThreshold: fullOptions.convergenceThreshold,
