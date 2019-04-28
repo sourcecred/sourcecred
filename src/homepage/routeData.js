@@ -47,6 +47,15 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       title: "SourceCred prototype",
       navTitle: "Prototype",
     },
+    {
+      path: "/odyssey-graphviz/",
+      contents: {
+        type: "PAGE",
+        component: () => require("./OdysseyGraphPrototype").default,
+      },
+      title: "Odyssey Graph Visualizer",
+      navTitle: null,
+    },
     ...registry.map((entry) => ({
       path: `/prototype/${entry.repoId.owner}/${entry.repoId.name}/`,
       contents: {
