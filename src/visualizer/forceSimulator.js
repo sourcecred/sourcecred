@@ -29,7 +29,7 @@ export class ForceSimulator {
       .force("x", d3.forceX())
       .force("y", d3.forceY())
       .alphaTarget(0.02)
-      .alphaMin(0.01)
+      .alphaMin(0.1)
       .on("tick", () => this._doTick());
     this.onTick = onTick;
   }

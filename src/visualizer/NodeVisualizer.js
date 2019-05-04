@@ -11,6 +11,11 @@ const INTERPOLATE_HIGH = "#90FF03";
 const MAX_SIZE_PIXELS = 200;
 const HALO_COLOR = "#90FF03";
 
+const BACKGROUND_COLOR = "#313131";
+
+const FONT_SIZE = 14;
+const TEXT_VERTICAL_OFFSET_PIXELS = 5.5;
+
 export type NodeVisualizerData = {|
   +address: NodeAddressT,
   +type: string,
@@ -32,9 +37,10 @@ export class NodeVisualizer extends React.Component<Props> {
     this.d3Node = d3.select(ReactDOM.findDOMNode(this));
     this.d3Node
       .select("circle")
-      .attr("fill", INTERPOLATE_LOW)
       .attr("r", 0)
+      .attr("fill", this.color())
       .on("click", this.props.onClick);
+    this.d3Node.select("text").attr("font-size", FONT_SIZE);
   }
 
   updatePoint() {
@@ -42,21 +48,37 @@ export class NodeVisualizer extends React.Component<Props> {
       .select("circle")
       .attr("cx", this.props.point.x)
       .attr("cy", this.props.point.y);
+    this.d3Node
+      .select("text")
+      .attr("x", this.props.point.x + this.radius() + 5)
+      .attr("y", this.props.point.y + TEXT_VERTICAL_OFFSET_PIXELS);
+  }
+
+  color() {
+    const scoreRatio = this.props.node.score / this.props.maxScore;
+    const color = d3.interpolate(INTERPOLATE_LOW, INTERPOLATE_HIGH)(scoreRatio);
+    return color;
+  }
+
+  radius() {
+    const scoreRatio = this.props.node.score / this.props.maxScore;
+    const color = d3.interpolate(INTERPOLATE_LOW, INTERPOLATE_HIGH)(scoreRatio);
+    const radius = Math.sqrt(scoreRatio) * 20 + 3;
+    return radius;
   }
 
   updateScore() {
-    const scoreRatio = this.props.node.score / this.props.maxScore;
-    const radius = Math.sqrt(scoreRatio) * 20 + 3;
     this.d3Node
       .select("circle")
       .transition()
       .ease(d3.easeQuad)
-      .duration(1000)
-      .attr(
-        "fill",
-        d3.interpolate(INTERPOLATE_LOW, INTERPOLATE_HIGH)(scoreRatio)
-      )
-      .attr("r", radius);
+      .duration(2000)
+      .attr("fill", this.color())
+      .attr("r", this.radius());
+    this.d3Node
+      .select("text")
+      .text(Math.floor(this.props.node.score * 1000))
+      .attr("fill", this.color());
   }
 
   componentDidUpdate(prevProps: Props) {
