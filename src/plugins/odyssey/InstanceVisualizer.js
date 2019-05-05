@@ -4,7 +4,7 @@ import React from "react";
 import {OdysseyInstance} from "./instance";
 import {
   GraphVisualizer,
-  type NodeVisualizerData,
+  type DescribedNode,
 } from "../../visualizer/GraphVisualizer";
 import {type NodeAddressT, type Edge} from "../../core/graph";
 import {PagerankGraph} from "../../core/pagerankGraph";
@@ -16,7 +16,7 @@ export type Props = {|
 
 export type State = {|
   pagerankGraph: PagerankGraph,
-  nodes: $ReadOnlyArray<NodeVisualizerData>,
+  nodes: $ReadOnlyArray<DescribedNode>,
   edges: $ReadOnlyArray<Edge>,
   selectedNode: NodeAddressT | null,
 |};
@@ -51,14 +51,14 @@ function computeNodesAndEdges(
   instance: OdysseyInstance,
   pagerankGraph: PagerankGraph
 ) {
-  const nodes: $ReadOnlyArray<NodeVisualizerData> = Array.from(
-    instance.nodes()
-  ).map(({nodeTypeIdentifier, address, description}) => ({
-    address,
-    type: nodeTypeIdentifier,
-    score: NullUtil.get(pagerankGraph.node(address)).score,
-    description,
-  }));
+  const nodes: $ReadOnlyArray<DescribedNode> = Array.from(instance.nodes()).map(
+    ({nodeTypeIdentifier, address, description}) => ({
+      address,
+      type: nodeTypeIdentifier,
+      score: NullUtil.get(pagerankGraph.node(address)).score,
+      description,
+    })
+  );
   const edges: $ReadOnlyArray<Edge> = Array.from(instance.graph().edges());
   return {nodes, edges};
 }

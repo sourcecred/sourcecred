@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 
 import {type Edge, type NodeAddressT, type EdgeAddressT} from "../core/graph";
 
-import {type NodeVisualizerData, NodeVisualizer} from "./NodeVisualizer";
+import {type NodeVisualizerDatum, NodeVisualizer} from "./NodeVisualizer";
 import {EdgeVisualizer} from "./EdgeVisualizer";
 
 import * as d3 from "d3";
@@ -13,20 +13,24 @@ import * as d3 from "d3";
 import * as NullUtil from "../util/null";
 import {type Point, point} from "./point";
 import {ForceSimulator} from "./forceSimulator";
+import {BACKGROUND_COLOR} from "./constants";
+import {Tooltips} from "./tooltips";
+import type {DescribedNode} from "./describedNode";
 
-export type {NodeVisualizerData};
-
-const BACKGROUND_COLOR = "#313131";
-const HALO_COLOR = "#90FF03";
+export type {DescribedNode};
 
 export type Props = {|
-  +nodes: $ReadOnlyArray<NodeVisualizerData>,
+  +nodes: $ReadOnlyArray<DescribedNode>,
   +edges: $ReadOnlyArray<Edge>,
 |};
 
 export type State = {|
   pointMap: Map<NodeAddressT, Point>,
   selectedNode: NodeAddressT | null,
+  hoveredNode: NodeAddressT | null,
+  // x and y size of the graph visualizer
+  // Used for tooltip alignment, etc
+  containerSize: Point,
 |};
 
 /**
@@ -72,7 +76,12 @@ export class GraphVisualizer extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.state = {pointMap: new Map(), selectedNode: null};
+    this.state = {
+      pointMap: new Map(),
+      selectedNode: null,
+      hoveredNode: null,
+      containerSize: {x: 0, y: 0},
+    };
   }
 
   componentDidMount() {
@@ -85,26 +94,41 @@ export class GraphVisualizer extends React.Component<Props, State> {
     );
     const d3Node = d3.select(ReactDOM.findDOMNode(this));
     const rect = d3Node.node().getBoundingClientRect();
+    this.state.containerSize = {x: rect.width, y: rect.height};
     d3Node
       .select(".container")
       .attr("transform", `translate(${rect.width / 2}, ${rect.height / 2})`);
   }
 
   render() {
-    const getPoint: (NodeAddressT) => Point = (address: NodeAddressT) => {
+    const getPosition: (NodeAddressT) => Point = (address: NodeAddressT) => {
       const defaultPoint: Point = ({x: 0, y: 0}: any);
       const retrievedPoint: ?Point = this.state.pointMap.get(address);
       return NullUtil.orElse(retrievedPoint, defaultPoint);
     };
     const maxScore = d3.max(this.props.nodes, (n) => n.score);
     const Nodes = this.props.nodes.map((n) => {
+      const datum = {
+        node: n,
+        position: getPosition(n.address),
+        scoreRatio: n.score / maxScore,
+      };
       return (
         <NodeVisualizer
-          node={n}
+          datum={datum}
           key={n.address}
-          point={getPoint(n.address)}
-          maxScore={maxScore}
-          onClick={() => this.setState({selectedNode: n.address})}
+          onClick={() => {
+            console.log("selected: " + n.address);
+            this.setState({selectedNode: n.address});
+          }}
+          mouseOver={() => {
+            console.log("hovered: " + n.address);
+            this.setState({hoveredNode: n.address});
+          }}
+          mouseOff={() => {
+            console.log("unhovered");
+            this.setState({hoveredNode: null});
+          }}
         />
       );
     });
@@ -113,25 +137,43 @@ export class GraphVisualizer extends React.Component<Props, State> {
       return (
         <EdgeVisualizer
           key={address}
-          srcPoint={getPoint(src)}
-          dstPoint={getPoint(dst)}
+          srcPoint={getPosition(src)}
+          dstPoint={getPosition(dst)}
         />
       );
     });
 
+    const tooltips = () => {
+      if (this.state.hoveredNode == null) {
+        return null;
+      }
+      const node = NullUtil.get(
+        this.props.nodes.find((x) => x.address === this.state.hoveredNode)
+      );
+      const position = getPosition(node.address);
+      const scoreRatio = node.score / maxScore;
+      const datum = {position, scoreRatio, node};
+      return (
+        <Tooltips datum={datum} containerSize={this.state.containerSize} />
+      );
+    };
+
     return (
-      <svg
-        style={{
-          backgroundColor: BACKGROUND_COLOR,
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <g className="container">
-          <g className="edges">{Edges}</g>
-          <g className="nodes">{Nodes}</g>
-        </g>
-      </svg>
+      <div style={{width: "100%", height: "100%"}}>
+        <svg
+          style={{
+            backgroundColor: BACKGROUND_COLOR,
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <g className="container">
+            <g className="edges">{Edges}</g>
+            <g className="nodes">{Nodes}</g>
+          </g>
+        </svg>
+        {tooltips()}
+      </div>
     );
   }
 }

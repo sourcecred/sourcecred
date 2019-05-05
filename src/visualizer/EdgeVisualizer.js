@@ -4,8 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import * as d3 from "d3";
 import type {Point} from "./point";
-
-const EDGE_COLOR = "#111111";
+import {EDGE_COLOR, EDGE_OPACITY} from "./constants";
 
 export class EdgeVisualizer extends React.Component<{|
   +srcPoint: Point,
@@ -21,7 +20,8 @@ export class EdgeVisualizer extends React.Component<{|
   update() {
     this.d3Node
       .select("line")
-      .attr("stroke", "steelblue")
+      .attr("stroke", EDGE_COLOR)
+      .attr("opacity", EDGE_OPACITY)
       .attr("x1", this.props.srcPoint.x)
       .attr("y1", this.props.srcPoint.y)
       .attr("x2", this.props.dstPoint.x)
