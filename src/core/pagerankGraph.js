@@ -20,6 +20,7 @@ import {
   createConnections,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
+  weightedDistribution,
 } from "./attribution/graphToMarkovChain";
 import {
   findStationaryDistribution,
@@ -75,10 +76,30 @@ export type PagerankOptions = {|
   // Maximum number of iterations before we give up on PageRank Convergence
   // Defaults to DEFAULT_MAX_ITERATIONS if not provided.
   +maxIterations?: number,
+
   // PageRank will stop running once the diff between the previous iteration
   // and the latest is less than this threshold.
   // Defaults to DEFAULT_CONVERGENCE_THRESHOLD if not provided.
   +convergenceThreshold?: number,
+
+  // Specifies a seed vector for PageRank "teleportation".
+  // At every step, some proportion `alpha` of the weight will
+  // teleport to the seed.
+  //
+  // The seed is specified as a map from node addresses to weights.
+  // The resultant seed will be a proper distribution over all the graph's available
+  // nodes, with each node's weight proportional to its weight in the seed. In the case
+  // that the total weight in the seed is 0 (e.g. an empty map was passed), then the
+  // seed vector will be a uniform distribution.
+  //
+  // Specifying any negative, NaN, or infinite weights is an error.
+  // Specifying weights for nodes that are not in the graph is also an error.
+  +seed?: Map<NodeAddressT, number>,
+
+  // Specifies the probability with which score 'teleports' to the seed vector.
+  // If alpha=0, then the teleportation never happens. If alpha=1, then PageRank
+  // always converges to precisely the seed vector. Defaults to DEFAULT_ALPHA.
+  +alpha?: number,
 |};
 
 export type PagerankConvergenceReport = {|
@@ -92,11 +113,17 @@ export type PagerankConvergenceReport = {|
 export const DEFAULT_SYNTHETIC_LOOP_WEIGHT = 1e-3;
 export const DEFAULT_MAX_ITERATIONS = 255;
 export const DEFAULT_CONVERGENCE_THRESHOLD = 1e-7;
+// TODO(@decentralion): Change default alpha to be a small non-zero value
+// once we choose an appropriate value.
+export const DEFAULT_ALPHA = 0;
+export const DEFAULT_SEED: () => Map<NodeAddressT, number> = () => new Map();
 
 function defaultOptions(): PagerankOptions {
   return {
     maxIterations: DEFAULT_MAX_ITERATIONS,
     convergenceThreshold: DEFAULT_CONVERGENCE_THRESHOLD,
+    alpha: DEFAULT_ALPHA,
+    seed: DEFAULT_SEED(),
   };
 }
 
@@ -441,8 +468,8 @@ export class PagerankGraph {
     const osmc = createOrderedSparseMarkovChain(connections);
     const params: PagerankParams = {
       chain: osmc.chain,
-      alpha: 0,
-      seed: uniformDistribution(osmc.chain.length),
+      alpha: fullOptions.alpha,
+      seed: weightedDistribution(osmc.nodeOrder, fullOptions.seed),
       pi0: uniformDistribution(osmc.chain.length),
     };
     const coreOptions: CorePagerankOptions = {

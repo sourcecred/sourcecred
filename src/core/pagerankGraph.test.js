@@ -14,6 +14,8 @@ import {
   Direction,
   DEFAULT_MAX_ITERATIONS,
   DEFAULT_CONVERGENCE_THRESHOLD,
+  DEFAULT_ALPHA,
+  DEFAULT_SEED,
 } from "./pagerankGraph";
 import {advancedGraph} from "./graphTestUtil";
 import * as NullUtil from "../util/null";
@@ -500,9 +502,36 @@ describe("core/pagerankGraph", () => {
       pg3.runPagerank({
         maxIterations: DEFAULT_MAX_ITERATIONS,
         convergenceThreshold: DEFAULT_CONVERGENCE_THRESHOLD,
+        alpha: DEFAULT_ALPHA,
+        seed: DEFAULT_SEED(),
       });
       expect(pg1.equals(pg2)).toBe(true);
       expect(pg1.equals(pg3)).toBe(true);
+    });
+
+    describe("alpha and seed parameters", () => {
+      // The logic for seeded PageRank (and for generating the seed distribution via weights)
+      // are both thoroughly unit-tested. Therefore, these tests only sanity check that the
+      // parameters are getting consumed properly based on easily tested properties.
+      it("seed is irrelevant if alpha is 0", async () => {
+        const pg1 = examplePagerankGraph();
+        const pg2 = examplePagerankGraph();
+        const {nodes} = advancedGraph();
+        const seed1 = new Map().set(nodes.src(), 1);
+        const seed2 = new Map().set(nodes.dst(), 1);
+        await pg1.runPagerank({seed: seed1, alpha: 0});
+        await pg2.runPagerank({seed: seed2, alpha: 0});
+        expect(pg1.equals(pg2)).toBe(true);
+      });
+
+      it("seed is returned directly if alpha is 1", async () => {
+        const pg = examplePagerankGraph();
+        const src = advancedGraph().nodes.src;
+        const seed = new Map().set(src(), 1);
+        await pg.runPagerank({seed, alpha: 1});
+        const score = NullUtil.get(pg.node(src())).score;
+        expect(score).toBe(1);
+      });
     });
 
     it("promise rejects if the graph was modified", async () => {
