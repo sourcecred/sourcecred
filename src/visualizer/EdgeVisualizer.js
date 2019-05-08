@@ -3,7 +3,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import * as d3 from "d3";
-import type {Point} from "./point";
+import type {Point} from "./types";
 import {EDGE_COLOR, EDGE_OPACITY} from "./constants";
 
 export class EdgeVisualizer extends React.Component<{|

@@ -4,12 +4,11 @@ import React from "react";
 import type {Assets} from "../webutil/assets";
 import {Tooltips} from "./tooltips";
 import {NodeAddress} from "../core/graph";
-import {type NodeVisualizerDatum} from "./NodeVisualizer";
-import type {Point} from "./point";
+import type {Point, VizNode} from "./types";
 
-const CONTAINER_SIZE = {x: 800, y: 800};
+const CONTAINER_SIZE = {width: 800, height: 800};
 const MAX_SCORE = 1000;
-const datums: NodeVisualizerDatum[] = [];
+const datums: VizNode[] = [];
 function addDatum(
   description: string,
   type: string,
@@ -17,8 +16,8 @@ function addDatum(
   position: Point
 ) {
   const translatedPosition = {
-    x: position.x - CONTAINER_SIZE.x / 2,
-    y: position.y - CONTAINER_SIZE.y / 2,
+    x: position.x - CONTAINER_SIZE.width / 2,
+    y: position.y - CONTAINER_SIZE.height / 2,
   };
   const address = NodeAddress.fromParts([String(datums.length)]);
   const node = {address, description, type, score};
@@ -31,11 +30,11 @@ function addDatum(
 }
 
 addDatum("top-left corner", "NODE", 100, {x: 0, y: 0});
-addDatum("top-right corner", "NODE", 100, {x: CONTAINER_SIZE.x, y: 0});
-addDatum("bottom-left corner", "NODE", 100, {x: 0, y: CONTAINER_SIZE.y});
+addDatum("top-right corner", "NODE", 100, {x: CONTAINER_SIZE.width, y: 0});
+addDatum("bottom-left corner", "NODE", 100, {x: 0, y: CONTAINER_SIZE.height});
 addDatum("bottom-right corner", "NODE", 100, {
-  x: CONTAINER_SIZE.x,
-  y: CONTAINER_SIZE.y,
+  x: CONTAINER_SIZE.width,
+  y: CONTAINER_SIZE.height,
 });
 addDatum("super-long-single-word-description", "NODE", 100, {x: 100, y: 100});
 addDatum(
@@ -54,8 +53,8 @@ export default class TooltipsTestWrapper extends React.Component<{|
       <div
         style={{
           backgroundColor: "aliceblue",
-          width: CONTAINER_SIZE.x + "px",
-          height: CONTAINER_SIZE.y + "px",
+          width: CONTAINER_SIZE.width + "px",
+          height: CONTAINER_SIZE.height + "px",
           margin: "50px",
           padding: "50px",
         }}

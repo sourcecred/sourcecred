@@ -1,27 +1,17 @@
 // @flow
 
 import React from "react";
-import ReactDOM from "react-dom";
-
-import {type Edge, type NodeAddressT, type EdgeAddressT} from "../core/graph";
-
-import {type NodeVisualizerDatum, NodeVisualizer} from "./NodeVisualizer";
-import {EdgeVisualizer} from "./EdgeVisualizer";
-
-import * as d3 from "d3";
-
 import * as NullUtil from "../util/null";
-import {type Point, point} from "./point";
-import {ForceSimulator} from "./forceSimulator";
-import {BACKGROUND_COLOR} from "./constants";
-import {Tooltips} from "./tooltips";
-import type {DescribedNode} from "./describedNode";
 
-export type {DescribedNode};
+import type {Edge, NodeAddressT} from "../core/graph";
+import type {VizNode, Size, Point} from "./types";
+import {BACKGROUND_COLOR} from "./constants";
 
 export type Props = {|
-  +nodes: $ReadOnlyArray<DescribedNode>,
+  +nodes: $ReadOnlyArray<VizNode>,
   +edges: $ReadOnlyArray<Edge>,
+  +showTooltipsFor: Set<NodeAddressT>,
+  +size: Size,
 |};
 
 export type State = {|
@@ -30,8 +20,11 @@ export type State = {|
   hoveredNode: NodeAddressT | null,
   // x and y size of the graph visualizer
   // Used for tooltip alignment, etc
-  containerSize: Point,
+  containerSize: Size,
 |};
+
+import {NodeVisualizer} from "./NodeVisualizer";
+import {EdgeVisualizer} from "./EdgeVisualizer";
 
 /**
  * A Graph Visualizer which straddles the boundary between React and D3.
@@ -71,95 +64,37 @@ export type State = {|
  * [3]: https://stackoverflow.com/questions/23530716/react-how-much-can-i-manipulate-the-dom-react-has-rendered/23572967#23572967
  * [4]: https://medium.com/@tibotiber/react-d3-js-balancing-performance-developer-experience-4da35f912484
  */
-export class GraphVisualizer extends React.Component<Props, State> {
-  simulation: ForceSimulator;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      pointMap: new Map(),
-      selectedNode: null,
-      hoveredNode: null,
-      containerSize: {x: 0, y: 0},
-    };
-  }
-
-  componentDidMount() {
-    this.simulation = new ForceSimulator((pointMap: Map<NodeAddressT, Point>) =>
-      this.setState({pointMap})
-    );
-    this.simulation.updateGraph(
-      this.props.nodes.map((x) => x.address),
-      this.props.edges
-    );
-    const d3Node = d3.select(ReactDOM.findDOMNode(this));
-    const rect = d3Node.node().getBoundingClientRect();
-    this.state.containerSize = {x: rect.width, y: rect.height};
-    d3Node
-      .select(".container")
-      .attr("transform", `translate(${rect.width / 2}, ${rect.height / 2})`);
-  }
-
+export class GraphVisualizer extends React.Component<Props> {
   render() {
-    const getPosition: (NodeAddressT) => Point = (address: NodeAddressT) => {
-      const defaultPoint: Point = ({x: 0, y: 0}: any);
-      const retrievedPoint: ?Point = this.state.pointMap.get(address);
-      return NullUtil.orElse(retrievedPoint, defaultPoint);
+    const NodeVisualizers = this.props.nodes.map((n) => (
+      <NodeVisualizer
+        datum={n}
+        key={n.node.address}
+        onClick={function() {}}
+        mouseOver={function() {}}
+        mouseOff={function() {}}
+      />
+    ));
+    const pointFor = (address) => {
+      const matchingNode = NullUtil.get(
+        this.props.nodes.find((x) => x.node.address === address)
+      );
+      return matchingNode.position;
     };
-    const maxScore = d3.max(this.props.nodes, (n) => n.score);
-    const Nodes = this.props.nodes.map((n) => {
-      const datum = {
-        node: n,
-        position: getPosition(n.address),
-        scoreRatio: n.score / maxScore,
-      };
-      return (
-        <NodeVisualizer
-          datum={datum}
-          key={n.address}
-          onClick={() => {
-            console.log("selected: " + n.address);
-            this.setState({selectedNode: n.address});
-          }}
-          mouseOver={() => {
-            console.log("hovered: " + n.address);
-            this.setState({hoveredNode: n.address});
-          }}
-          mouseOff={() => {
-            console.log("unhovered");
-            this.setState({hoveredNode: null});
-          }}
-        />
-      );
-    });
-
-    const Edges = this.props.edges.map(({src, dst, address}) => {
-      return (
-        <EdgeVisualizer
-          key={address}
-          srcPoint={getPosition(src)}
-          dstPoint={getPosition(dst)}
-        />
-      );
-    });
-
-    const tooltips = () => {
-      if (this.state.hoveredNode == null) {
-        return null;
-      }
-      const node = NullUtil.get(
-        this.props.nodes.find((x) => x.address === this.state.hoveredNode)
-      );
-      const position = getPosition(node.address);
-      const scoreRatio = node.score / maxScore;
-      const datum = {position, scoreRatio, node};
-      return (
-        <Tooltips datum={datum} containerSize={this.state.containerSize} />
-      );
-    };
-
+    const EdgeVisualizers = this.props.edges.map(({src, dst, address}) => (
+      <EdgeVisualizer
+        key={address}
+        srcPoint={pointFor(src)}
+        dstPoint={pointFor(dst)}
+      />
+    ));
     return (
-      <div style={{width: "100%", height: "100%"}}>
+      <div
+        style={{
+          width: this.props.size.width + "px",
+          height: this.props.size.height + "px",
+        }}
+      >
         <svg
           style={{
             backgroundColor: BACKGROUND_COLOR,
@@ -168,11 +103,10 @@ export class GraphVisualizer extends React.Component<Props, State> {
           }}
         >
           <g className="container">
-            <g className="edges">{Edges}</g>
-            <g className="nodes">{Nodes}</g>
+            <g className="edges">{EdgeVisualizers}</g>
+            <g className="nodes">{NodeVisualizers}</g>
           </g>
         </svg>
-        {tooltips()}
       </div>
     );
   }

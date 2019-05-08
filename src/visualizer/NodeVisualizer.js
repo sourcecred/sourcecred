@@ -4,8 +4,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import * as d3 from "d3";
 import {type NodeAddressT} from "../core/graph";
-import {type Point} from "./point";
-import type {DescribedNode} from "./describedNode";
+import {type Point} from "./types";
+import type {VizNode, DescribedNode} from "./types";
 
 import {radius, color, type ScoreRatio} from "./constants";
 
@@ -15,14 +15,8 @@ const ANNOTATION_FONT_SIZE = 14;
 const TEXT_VERTICAL_OFFSET_PIXELS = 5.5;
 const TEXT_HORIZONTAL_OFFSET_PIXELS = 5.5;
 
-export type NodeVisualizerDatum = {|
-  +node: DescribedNode,
-  +position: Point,
-  +scoreRatio: number,
-|};
-
 export type Props = {|
-  +datum: NodeVisualizerDatum,
+  +datum: VizNode,
   +onClick: () => void,
   +mouseOver: () => void,
   +mouseOff: () => void,

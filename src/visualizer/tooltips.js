@@ -4,16 +4,15 @@ import React from "react";
 import * as d3 from "d3";
 import {StyleSheet, css} from "aphrodite/no-important";
 
-import type {Point} from "./point";
-import type {NodeVisualizerDatum} from "./NodeVisualizer";
+import type {Point, VizNode, Size} from "./types";
 import {color, BACKGROUND_COLOR} from "./constants";
 
 const TOOLTIP_HORIZONTAL_OFFSET = 25;
 const MAX_WIDTH = 200;
 
 export type Props = {|
-  +datum: NodeVisualizerDatum,
-  +containerSize: Point,
+  +datum: VizNode,
+  +containerSize: Size,
 |};
 
 /**
@@ -62,23 +61,22 @@ export type Props = {|
 export class Tooltips extends React.Component<Props> {
   render() {
     const datum = this.props.datum;
-    const containerWidth = this.props.containerSize.x;
+    const {width} = this.props.containerSize;
     // Translate coordinate spaces (since the graphviz sets
     // 0,0 as the center of the svg)
-    const offsetX = datum.position.x + containerWidth / 2;
+    const offsetX = datum.position.x + width / 2;
     const xPosition = {};
-    if (offsetX + TOOLTIP_HORIZONTAL_OFFSET + MAX_WIDTH < containerWidth) {
+    if (offsetX + TOOLTIP_HORIZONTAL_OFFSET + MAX_WIDTH < width) {
       // We don't risk the tooltip falling off the right side of the visualization
       // So we position it to the right of the datum
       xPosition["left"] = offsetX + TOOLTIP_HORIZONTAL_OFFSET + "px";
     } else {
       // The tooltip risks falling off the right side, so put it
       // on the left side instead.
-      xPosition["right"] =
-        containerWidth - offsetX + TOOLTIP_HORIZONTAL_OFFSET + "px";
+      xPosition["right"] = width - offsetX + TOOLTIP_HORIZONTAL_OFFSET + "px";
     }
     // Just align the top of the tooltip with the datum
-    const top = datum.position.y + this.props.containerSize.y / 2 + "px";
+    const top = datum.position.y + this.props.containerSize.height / 2 + "px";
     const nodeColor = color(datum.scoreRatio);
     const displayScore = Math.floor(datum.node.score * 1000);
     return (

@@ -2,7 +2,7 @@
 
 import * as d3 from "d3";
 import type {Edge, NodeAddressT} from "../core/graph";
-import {type Point, point} from "./point";
+import {type Point} from "./types";
 
 export class ForceSimulator {
   simulation: any;
@@ -52,7 +52,7 @@ export class ForceSimulator {
     const pointMap = new Map();
     this.simulation
       .nodes()
-      .forEach(({address, x, y}) => pointMap.set(address, point(x, y)));
+      .forEach(({address, x, y}) => pointMap.set(address, {x, y}));
     this.onTick(pointMap);
   }
 }

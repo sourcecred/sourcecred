@@ -1,10 +1,2 @@
 // @flow
-
-export type Point = {|
-  +x: number,
-  +y: number,
-|};
-
-export function point(x: number, y: number): Point {
-  return {x, y};
-}
+// STOPSHIP: remove this file
