@@ -56,6 +56,15 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       title: "Odyssey Graph Visualizer",
       navTitle: null,
     },
+    {
+      path: "/test-tooltips",
+      contents: {
+        type: "PAGE",
+        component: () => require("../visualizer/tooltipsTest").default,
+      },
+      title: "Tooltips Test Suite",
+      navTitle: null,
+    },
     ...registry.map((entry) => ({
       path: `/prototype/${entry.repoId.owner}/${entry.repoId.name}/`,
       contents: {

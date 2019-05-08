@@ -57,6 +57,8 @@ export type Props = {|
  *
  * [containing block]: https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block
  */
+// STOPSHIP: Rename this file Tooltips
+// STOPSHIP: Add a test plan
 export class Tooltips extends React.Component<Props> {
   render() {
     const datum = this.props.datum;
@@ -80,26 +82,30 @@ export class Tooltips extends React.Component<Props> {
     const nodeColor = color(datum.scoreRatio);
     const displayScore = Math.floor(datum.node.score * 1000);
     return (
+      /*
       <div
         className={css(styles.tooltipsContainer)}
-        style={{top: `-${this.props.containerSize.y}px`}}
+        style={{
+          top: `-${this.props.containerSize.y}px`,
+          width: this.props.containerSize.x + "px",
+          height: this.props.containerSize.y + "px",
+        }}
       >
-        <div
-          className={css(styles.tooltips)}
-          style={{
-            top,
-            color: nodeColor,
-            borderColor: nodeColor,
-            ...xPosition,
-          }}
-        >
-          <div className={css(styles.description)}>
-            {datum.node.description}
-          </div>
-          <div className={css(styles.type)}>{datum.node.type}</div>
-          <div className={css(styles.score)}>{displayScore}</div>
-        </div>
+      */
+      <div
+        className={css(styles.tooltips)}
+        style={{
+          top,
+          color: nodeColor,
+          borderColor: nodeColor,
+          ...xPosition,
+        }}
+      >
+        <div className={css(styles.description)}>{datum.node.description}</div>
+        <div className={css(styles.type)}>{datum.node.type}</div>
+        <div className={css(styles.score)}>{displayScore}</div>
       </div>
+      //      </div>
     );
   }
 }
