@@ -48,15 +48,6 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       navTitle: "Prototype",
     },
     {
-      path: "/odyssey-graphviz/",
-      contents: {
-        type: "PAGE",
-        component: () => require("./OdysseyGraphPrototype").default,
-      },
-      title: "Odyssey Graph Visualizer",
-      navTitle: null,
-    },
-    {
       path: "/test-tooltips/",
       contents: {
         type: "PAGE",

@@ -79,7 +79,7 @@ export class GraphVisualizer extends React.Component<Props, State> {
       pointMap: new Map(),
       selectedNode: null,
       hoveredNode: null,
-      size: {width: 800, height: 800},
+      size: {width: 1400, height: 960},
     };
   }
 
@@ -87,13 +87,6 @@ export class GraphVisualizer extends React.Component<Props, State> {
     this.simulation = new ForceSimulator((pointMap: Map<NodeAddressT, Point>) =>
       this.setState({pointMap})
     );
-    this.simulation.updateGraph(
-      this.props.nodes.map((x) => x.address),
-      this.props.edges
-    );
-  }
-
-  componentDidUpdate() {
     this.simulation.updateGraph(
       this.props.nodes.map((x) => x.address),
       this.props.edges

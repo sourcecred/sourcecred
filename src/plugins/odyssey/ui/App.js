@@ -3,52 +3,24 @@ import React, {Component} from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
 import {Header} from "./Header";
+import {type Node, GraphVisualizer} from "../../../visualizer/GraphVisualizer";
+import {type Edge} from "../../../core/graph";
 
-type AppProps = {||};
-type AppState = {||};
-
-type Entity = {|
-  +name: string,
-  +score: number,
+export type SidebarDeclaration = {|
+  +type: string,
+  +title: string,
+|};
+export type Props = {|
+  nodes: $ReadOnlyArray<Node>,
+  edges: $ReadOnlyArray<Edge>,
+  sidebarDeclarations: $ReadOnlyArray<SidebarDeclaration>,
 |};
 
-const exampleValues: $ReadOnlyArray<Entity> = [
-  {name: "Implementation", score: 1002},
-  {name: "Research", score: 1001},
-  {name: "Ethics", score: 1000},
-  {name: "Learning", score: 999},
-  {name: "Something With A Long Name, Really Quite Long", score: 999},
-  {name: "@1", score: 998},
-  {name: "@2", score: 998},
-  {name: "@3", score: 998},
-  {name: "@4", score: 998},
-  {name: "@5", score: 998},
-  {name: "@6", score: 998},
-];
-
-const examplePeople: $ReadOnlyArray<Entity> = [
-  {name: "@decentralion", score: 1002},
-  {name: "@wchargin", score: 1001},
-  {name: "@mzargham", score: 1000},
-  {name: "@brianlitwin", score: 999},
-  {name: "@anthrocypher", score: 998},
-  {name: "@brutalfluffy", score: 998},
-  {name: "@1", score: 998},
-  {name: "@2", score: 998},
-  {name: "@3", score: 998},
-  {name: "@4", score: 998},
-  {name: "@5", score: 998},
-  {name: "@6", score: 998},
-  {name: "@7", score: 998},
-  {name: "@8", score: 998},
-  {name: "@9", score: 998},
-];
-
-class App extends Component<AppProps, AppState> {
-  scoreList(title: string, entities: $ReadOnlyArray<Entity>) {
-    const entries = entities.map(({name, score}) => (
-      <div key={name} className={css(styles.entityRow)}>
-        <div className={css(styles.entityName)}>{name}</div>
+export class OdysseyApp extends Component<Props> {
+  scoreList(title: string, entities: $ReadOnlyArray<Node>) {
+    const entries = entities.map(({description, score, address}) => (
+      <div key={address} className={css(styles.entityRow)}>
+        <div className={css(styles.entityName)}>{description}</div>
         <div className={css(styles.entityScore)}>{score.toFixed(0)} ¤</div>
       </div>
     ));
@@ -60,6 +32,11 @@ class App extends Component<AppProps, AppState> {
     );
   }
 
+  sidebarFor(sd: SidebarDeclaration) {
+    const nodes = this.props.nodes.filter((n) => n.type === sd.type);
+    return this.scoreList(sd.title, nodes);
+  }
+
   render() {
     return (
       <div className={css(styles.app)}>
@@ -67,11 +44,15 @@ class App extends Component<AppProps, AppState> {
 
         <div className={css(styles.nonHeader)}>
           <div className={css(styles.scoreListsContainer)}>
-            {this.scoreList("Our Values", exampleValues)}
-            {this.scoreList("Our People", examplePeople)}
+            {this.props.sidebarDeclarations.map((d) => this.sidebarFor(d))}
           </div>
 
-          <div className={css(styles.chartContainer)}>Chart to go here.</div>
+          <div className={css(styles.chartContainer)}>
+            <GraphVisualizer
+              nodes={this.props.nodes}
+              edges={this.props.edges}
+            />
+          </div>
         </div>
       </div>
     );
@@ -145,9 +126,6 @@ const styles = StyleSheet.create({
 
   chartContainer: {
     width: "100%",
-    padding: "42px",
     display: "flex",
   },
 });
-
-export default App;

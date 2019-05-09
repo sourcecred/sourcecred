@@ -2,6 +2,7 @@
 
 import React from "react";
 import {OdysseyInstance} from "./instance";
+import {OdysseyApp} from "./ui/App";
 import {GraphVisualizer, type Node} from "../../visualizer/GraphVisualizer";
 import {type NodeAddressT, type Edge} from "../../core/graph";
 import {PagerankGraph} from "../../core/pagerankGraph";
@@ -38,8 +39,16 @@ export class OdysseyInstanceVisualizer extends React.Component<Props, State> {
   }
 
   render() {
+    const sidebars = [
+      {type: "PERSON", title: "People"},
+      {type: "VALUE", title: "Values"},
+    ];
     return (
-      <GraphVisualizer nodes={this.state.nodes} edges={this.state.edges} />
+      <OdysseyApp
+        sidebarDeclarations={sidebars}
+        nodes={this.state.nodes}
+        edges={this.state.edges}
+      />
     );
   }
 }
@@ -50,7 +59,7 @@ function computeNodesAndEdges(
 ) {
   const rawNodes = Array.from(instance.nodes());
   const scores = rawNodes.map(
-    ({address}) => NullUtil.get(pagerankGraph.node(address)).score
+    ({address}) => NullUtil.get(pagerankGraph.node(address)).score * 1000
   );
   const maxScore = Math.max(...scores);
   const nodes: $ReadOnlyArray<Node> = rawNodes.map(
