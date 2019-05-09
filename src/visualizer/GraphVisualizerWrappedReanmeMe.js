@@ -96,6 +96,13 @@ export class GraphVisualizerWrappedRenameMe extends React.Component<
     );
   }
 
+  componentDidUpdate() {
+    this.simulation.updateGraph(
+      this.props.nodes.map((x) => x.address),
+      this.props.edges
+    );
+  }
+
   render() {
     const maxScore = d3.max(this.props.nodes, (n) => n.score);
     const getPosition: (NodeAddressT) => Point = (address: NodeAddressT) => {

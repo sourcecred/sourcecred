@@ -3,6 +3,7 @@
 import * as d3 from "d3";
 import type {Edge, NodeAddressT} from "../core/graph";
 import {type Point} from "./types";
+import {radius} from "./constants";
 
 export class ForceSimulator {
   simulation: any;
@@ -18,14 +19,12 @@ export class ForceSimulator {
       .forceSimulation()
       .force("charge", d3.forceManyBody().strength(-380))
       .force("link", this.linkForce)
-      /*
       .force(
         "collide",
         d3.forceCollide().radius((d) => {
           return 5;
         })
       )
-      */
       .force("x", d3.forceX())
       .force("y", d3.forceY())
       .alphaTarget(0.02)
@@ -46,6 +45,7 @@ export class ForceSimulator {
     }));
     this.linkForce.links(links);
     this.simulation.nodes(addrNodes);
+    this.simulation.restart();
   }
 
   _doTick() {

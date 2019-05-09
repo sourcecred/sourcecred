@@ -17,7 +17,6 @@ const TEXT_HORIZONTAL_OFFSET_PIXELS = 5.5;
 
 export type Props = {|
   +datum: VizNode,
-  +onClick: () => void,
   +mouseOver: () => void,
   +mouseOff: () => void,
 |};
@@ -31,7 +30,6 @@ export class NodeVisualizer extends React.Component<Props> {
       .select("circle")
       .attr("r", 0)
       .attr("fill", color(this.props.datum.scoreRatio))
-      .on("click", this.props.onClick)
       .on("mouseover", this.props.mouseOver)
       .on("mouseout", this.props.mouseOff);
     this.d3Node.select("text").attr("font-size", ANNOTATION_FONT_SIZE);

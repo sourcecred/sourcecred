@@ -48,12 +48,12 @@ export type Props = {|
  * but since we don't know the actual width of the tooltip in advance,
  * that would lead to the tooltip being unpredictably far away from the datum.
  * So we need to move the right edge of the tooltip instead.
+ *
  * To ensure that works properly, we need to be able to position the tooltip
  * absolutely, and we need that absolute positioning to be relative to the
- * chart as a whole (rather than the entire window). So we put the tooltips
- * inside of a container div which has relative positioning, so as to get
- * the intended [containing block]. It's a little complicated and messy,
- * but it works.
+ * chart as a whole (rather than the entire window). So the tooltips must be
+ * contained within a container div which has relative positioning, so as to
+ * get the intended [containing block]. It's a little messy, but it works.
  *
  * [containing block]: https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block
  */

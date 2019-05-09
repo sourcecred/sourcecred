@@ -64,7 +64,6 @@ export class GraphVisualizer extends React.Component<Props> {
       <NodeVisualizer
         datum={n}
         key={n.node.address}
-        onClick={function() {}}
         mouseOver={() => this.props.onHover(n.node.address)}
         mouseOff={() => this.props.offHover()}
       />
@@ -111,6 +110,7 @@ export class GraphVisualizer extends React.Component<Props> {
           </g>
         </svg>
         <div
+          className="tooltips-container"
           style={{position: "relative", top: `-${this.props.size.height}px`}}
         >
           {tooltips}
