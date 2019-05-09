@@ -6,21 +6,15 @@ import * as NullUtil from "../util/null";
 import type {Edge, NodeAddressT} from "../core/graph";
 import type {VizNode, Size, Point} from "./types";
 import {BACKGROUND_COLOR} from "./constants";
+import {Tooltips} from "./tooltips";
 
 export type Props = {|
   +nodes: $ReadOnlyArray<VizNode>,
   +edges: $ReadOnlyArray<Edge>,
-  +showTooltipsFor: Set<NodeAddressT>,
+  +showTooltipsFor: $ReadOnlyArray<NodeAddressT>,
   +size: Size,
-|};
-
-export type State = {|
-  pointMap: Map<NodeAddressT, Point>,
-  selectedNode: NodeAddressT | null,
-  hoveredNode: NodeAddressT | null,
-  // x and y size of the graph visualizer
-  // Used for tooltip alignment, etc
-  containerSize: Size,
+  +onHover: (a: NodeAddressT) => void,
+  +offHover: () => void,
 |};
 
 import {NodeVisualizer} from "./NodeVisualizer";
@@ -71,23 +65,28 @@ export class GraphVisualizer extends React.Component<Props> {
         datum={n}
         key={n.node.address}
         onClick={function() {}}
-        mouseOver={function() {}}
-        mouseOff={function() {}}
+        mouseOver={() => this.props.onHover(n.node.address)}
+        mouseOff={() => this.props.offHover()}
       />
     ));
-    const pointFor = (address) => {
-      const matchingNode = NullUtil.get(
+    const matchingNode = (address) => {
+      return NullUtil.get(
         this.props.nodes.find((x) => x.node.address === address)
       );
-      return matchingNode.position;
     };
     const EdgeVisualizers = this.props.edges.map(({src, dst, address}) => (
       <EdgeVisualizer
         key={address}
-        srcPoint={pointFor(src)}
-        dstPoint={pointFor(dst)}
+        srcPoint={matchingNode(src).position}
+        dstPoint={matchingNode(dst).position}
       />
     ));
+    const tooltips = this.props.showTooltipsFor.map((addr) => {
+      const node = matchingNode(addr);
+      return (
+        <Tooltips key={addr} datum={node} containerSize={this.props.size} />
+      );
+    });
     return (
       <div
         style={{
@@ -102,11 +101,20 @@ export class GraphVisualizer extends React.Component<Props> {
             height: "100%",
           }}
         >
-          <g className="container">
+          <g
+            className="container"
+            transform={`translate(${this.props.size.width / 2}, ${this.props
+              .size.height / 2})`}
+          >
             <g className="edges">{EdgeVisualizers}</g>
             <g className="nodes">{NodeVisualizers}</g>
           </g>
         </svg>
+        <div
+          style={{position: "relative", top: `-${this.props.size.height}px`}}
+        >
+          {tooltips}
+        </div>
       </div>
     );
   }

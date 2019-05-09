@@ -35,6 +35,8 @@ export class NodeVisualizer extends React.Component<Props> {
       .on("mouseover", this.props.mouseOver)
       .on("mouseout", this.props.mouseOff);
     this.d3Node.select("text").attr("font-size", ANNOTATION_FONT_SIZE);
+    this.updatePosition();
+    this.updateScore();
   }
 
   updatePosition() {
@@ -63,7 +65,7 @@ export class NodeVisualizer extends React.Component<Props> {
       .attr("r", radius(this.props.datum.scoreRatio));
     this.d3Node
       .select("text")
-      .text(Math.floor(this.props.datum.node.score * 1000))
+      .text(Math.floor(this.props.datum.node.score))
       .attr("fill", color(this.props.datum.scoreRatio));
   }
 

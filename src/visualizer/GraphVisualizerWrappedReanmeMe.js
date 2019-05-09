@@ -5,8 +5,7 @@ import ReactDOM from "react-dom";
 
 import {type Edge, type NodeAddressT, type EdgeAddressT} from "../core/graph";
 
-import {NodeVisualizer} from "./NodeVisualizer";
-import {EdgeVisualizer} from "./EdgeVisualizer";
+import {GraphVisualizer} from "./GraphVisualizer";
 
 import * as d3 from "d3";
 
@@ -30,7 +29,7 @@ export type State = {|
   hoveredNode: NodeAddressT | null,
   // x and y size of the graph visualizer
   // Used for tooltip alignment, etc
-  containerSize: Size,
+  size: Size,
 |};
 
 /**
@@ -83,7 +82,7 @@ export class GraphVisualizerWrappedRenameMe extends React.Component<
       pointMap: new Map(),
       selectedNode: null,
       hoveredNode: null,
-      containerSize: {width: 0, height: 0},
+      size: {width: 800, height: 800},
     };
   }
 
@@ -95,88 +94,38 @@ export class GraphVisualizerWrappedRenameMe extends React.Component<
       this.props.nodes.map((x) => x.address),
       this.props.edges
     );
-    const d3Node = d3.select(ReactDOM.findDOMNode(this));
-    const rect = d3Node.node().getBoundingClientRect();
-    this.state.containerSize = {width: rect.width, height: rect.height};
-    d3Node
-      .select(".container")
-      .attr("transform", `translate(${rect.width / 2}, ${rect.height / 2})`);
   }
 
   render() {
+    const maxScore = d3.max(this.props.nodes, (n) => n.score);
     const getPosition: (NodeAddressT) => Point = (address: NodeAddressT) => {
       const defaultPoint: Point = ({x: 0, y: 0}: any);
       const retrievedPoint: ?Point = this.state.pointMap.get(address);
       return NullUtil.orElse(retrievedPoint, defaultPoint);
     };
-    const maxScore = d3.max(this.props.nodes, (n) => n.score);
-    const Nodes = this.props.nodes.map((n) => {
-      const datum = {
-        node: n,
-        position: getPosition(n.address),
-        scoreRatio: n.score / maxScore,
-      };
-      return (
-        <NodeVisualizer
-          datum={datum}
-          key={n.address}
-          onClick={() => {
-            console.log("selected: " + n.address);
-            this.setState({selectedNode: n.address});
-          }}
-          mouseOver={() => {
-            console.log("hovered: " + n.address);
-            this.setState({hoveredNode: n.address});
-          }}
-          mouseOff={() => {
-            console.log("unhovered");
-            this.setState({hoveredNode: null});
-          }}
-        />
-      );
+    const viznodes: $ReadOnlyArray<VizNode> = this.props.nodes.map((n) => {
+      const scoreRatio = n.score / maxScore;
+      const position = getPosition(n.address);
+      return {node: n, position, scoreRatio};
     });
-
-    const Edges = this.props.edges.map(({src, dst, address}) => {
-      return (
-        <EdgeVisualizer
-          key={address}
-          srcPoint={getPosition(src)}
-          dstPoint={getPosition(dst)}
-        />
-      );
-    });
-
-    const tooltips = () => {
-      if (this.state.hoveredNode == null) {
-        return null;
-      }
-      const node = NullUtil.get(
-        this.props.nodes.find((x) => x.address === this.state.hoveredNode)
-      );
-      const position = getPosition(node.address);
-      const scoreRatio = node.score / maxScore;
-      const datum = {position, scoreRatio, node};
-      return (
-        <Tooltips datum={datum} containerSize={this.state.containerSize} />
-      );
+    const onHover = (a: NodeAddressT) => {
+      console.log(a);
+      this.setState({hoveredNode: a});
     };
-
+    const offHover = () => {
+      this.setState({hoveredNode: null});
+    };
+    const tooltipsFor =
+      this.state.hoveredNode != null ? [this.state.hoveredNode] : [];
     return (
-      <div style={{width: "100%", height: "100%"}}>
-        <svg
-          style={{
-            backgroundColor: BACKGROUND_COLOR,
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <g className="container">
-            <g className="edges">{Edges}</g>
-            <g className="nodes">{Nodes}</g>
-          </g>
-        </svg>
-        {tooltips()}
-      </div>
+      <GraphVisualizer
+        nodes={viznodes}
+        edges={this.props.edges}
+        showTooltipsFor={tooltipsFor}
+        size={this.state.size}
+        onHover={onHover}
+        offHover={offHover}
+      />
     );
   }
 }

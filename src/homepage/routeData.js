@@ -57,7 +57,7 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       navTitle: null,
     },
     {
-      path: "/test-tooltips",
+      path: "/test-tooltips/",
       contents: {
         type: "PAGE",
         component: () => require("../visualizer/tooltipsTest").default,

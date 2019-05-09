@@ -9,6 +9,7 @@ import {color, BACKGROUND_COLOR} from "./constants";
 
 const TOOLTIP_HORIZONTAL_OFFSET = 25;
 const MAX_WIDTH = 200;
+const VERTICAL_SAFETY_MARGIN = 150;
 
 export type Props = {|
   +datum: VizNode,
@@ -61,7 +62,7 @@ export type Props = {|
 export class Tooltips extends React.Component<Props> {
   render() {
     const datum = this.props.datum;
-    const {width} = this.props.containerSize;
+    const {width, height} = this.props.containerSize;
     // Translate coordinate spaces (since the graphviz sets
     // 0,0 as the center of the svg)
     const offsetX = datum.position.x + width / 2;
@@ -75,44 +76,34 @@ export class Tooltips extends React.Component<Props> {
       // on the left side instead.
       xPosition["right"] = width - offsetX + TOOLTIP_HORIZONTAL_OFFSET + "px";
     }
-    // Just align the top of the tooltip with the datum
-    const top = datum.position.y + this.props.containerSize.height / 2 + "px";
+    const yPosition = {};
+    const offsetY = datum.position.y + height / 2;
+    if (offsetY + VERTICAL_SAFETY_MARGIN > height) {
+      yPosition["bottom"] = -offsetY + "px";
+    } else {
+      yPosition["top"] = offsetY + "px";
+    }
     const nodeColor = color(datum.scoreRatio);
-    const displayScore = Math.floor(datum.node.score * 1000);
+    const displayScore = Math.floor(datum.node.score);
     return (
-      /*
-      <div
-        className={css(styles.tooltipsContainer)}
-        style={{
-          top: `-${this.props.containerSize.y}px`,
-          width: this.props.containerSize.x + "px",
-          height: this.props.containerSize.y + "px",
-        }}
-      >
-      */
       <div
         className={css(styles.tooltips)}
         style={{
-          top,
           color: nodeColor,
           borderColor: nodeColor,
           ...xPosition,
+          ...yPosition,
         }}
       >
         <div className={css(styles.description)}>{datum.node.description}</div>
         <div className={css(styles.type)}>{datum.node.type}</div>
         <div className={css(styles.score)}>{displayScore}</div>
       </div>
-      //      </div>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  tooltipsContainer: {
-    position: "relative",
-    display: "block",
-  },
   tooltips: {
     position: "absolute",
     border: "2px solid",
@@ -124,5 +115,8 @@ const styles = StyleSheet.create({
   },
   score: {},
   type: {fontSize: "0.7em"},
-  description: {fontSize: "1.2em"},
+  description: {
+    fontSize: "1.2em",
+    overflowWrap: "break-word",
+  },
 });
