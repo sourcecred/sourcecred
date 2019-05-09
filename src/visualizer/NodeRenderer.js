@@ -21,7 +21,7 @@ export type Props = {|
   +mouseOff: () => void,
 |};
 
-export class NodeVisualizer extends React.Component<Props> {
+export class NodeRenderer extends React.Component<Props> {
   d3Node: any;
 
   componentDidMount() {

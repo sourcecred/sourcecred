@@ -1,24 +1,36 @@
 // @flow
 
 import React from "react";
-import * as NullUtil from "../util/null";
+import ReactDOM from "react-dom";
 
-import type {Edge, NodeAddressT} from "../core/graph";
-import type {PositionedNode, Size, Point} from "./types";
+import {type Edge, type NodeAddressT, type EdgeAddressT} from "../core/graph";
+
+import {GraphRenderer} from "./GraphRenderer";
+
+import * as d3 from "d3";
+
+import * as NullUtil from "../util/null";
+import {type Point} from "./types";
+import {ForceSimulator} from "./forceSimulator";
 import {BACKGROUND_COLOR} from "./constants";
 import {Tooltips} from "./tooltips";
+import type {Node, PositionedNode, Size} from "./types";
+
+export type {Node};
 
 export type Props = {|
-  +nodes: $ReadOnlyArray<PositionedNode>,
+  +nodes: $ReadOnlyArray<Node>,
   +edges: $ReadOnlyArray<Edge>,
-  +showTooltipsFor: $ReadOnlyArray<NodeAddressT>,
-  +size: Size,
-  +onHover: (a: NodeAddressT) => void,
-  +offHover: () => void,
 |};
 
-import {NodeVisualizer} from "./NodeVisualizer";
-import {EdgeVisualizer} from "./EdgeVisualizer";
+export type State = {|
+  pointMap: Map<NodeAddressT, Point>,
+  selectedNode: NodeAddressT | null,
+  hoveredNode: NodeAddressT | null,
+  // x and y size of the graph visualizer
+  // Used for tooltip alignment, etc
+  size: Size,
+|};
 
 /**
  * A Graph Visualizer which straddles the boundary between React and D3.
@@ -58,64 +70,64 @@ import {EdgeVisualizer} from "./EdgeVisualizer";
  * [3]: https://stackoverflow.com/questions/23530716/react-how-much-can-i-manipulate-the-dom-react-has-rendered/23572967#23572967
  * [4]: https://medium.com/@tibotiber/react-d3-js-balancing-performance-developer-experience-4da35f912484
  */
-export class GraphVisualizer extends React.Component<Props> {
-  render() {
-    const NodeVisualizers = this.props.nodes.map((n) => (
-      <NodeVisualizer
-        positionedNode={n}
-        key={n.node.address}
-        mouseOver={() => this.props.onHover(n.node.address)}
-        mouseOff={() => this.props.offHover()}
-      />
-    ));
-    const matchingNode = (address) => {
-      return NullUtil.get(
-        this.props.nodes.find((x) => x.node.address === address)
-      );
+export class GraphVisualizer extends React.Component<Props, State> {
+  simulation: ForceSimulator;
+
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      pointMap: new Map(),
+      selectedNode: null,
+      hoveredNode: null,
+      size: {width: 800, height: 800},
     };
-    const EdgeVisualizers = this.props.edges.map(({src, dst, address}) => (
-      <EdgeVisualizer
-        key={address}
-        srcPoint={matchingNode(src).position}
-        dstPoint={matchingNode(dst).position}
-      />
-    ));
-    const tooltips = this.props.showTooltipsFor.map((addr) => {
-      const node = matchingNode(addr);
-      return (
-        <Tooltips key={addr} datum={node} containerSize={this.props.size} />
-      );
+  }
+
+  componentDidMount() {
+    this.simulation = new ForceSimulator((pointMap: Map<NodeAddressT, Point>) =>
+      this.setState({pointMap})
+    );
+    this.simulation.updateGraph(
+      this.props.nodes.map((x) => x.address),
+      this.props.edges
+    );
+  }
+
+  componentDidUpdate() {
+    this.simulation.updateGraph(
+      this.props.nodes.map((x) => x.address),
+      this.props.edges
+    );
+  }
+
+  render() {
+    const getPosition: (NodeAddressT) => Point = (address: NodeAddressT) => {
+      const defaultPoint: Point = ({x: 0, y: 0}: any);
+      const retrievedPoint: ?Point = this.state.pointMap.get(address);
+      return NullUtil.orElse(retrievedPoint, defaultPoint);
+    };
+    const positionedNodes: $ReadOnlyArray<
+      PositionedNode
+    > = this.props.nodes.map((n) => {
+      return {node: n, position: getPosition(n.address)};
     });
+    const onHover = (a: NodeAddressT) => {
+      this.setState({hoveredNode: a});
+    };
+    const offHover = () => {
+      this.setState({hoveredNode: null});
+    };
+    const tooltipsFor =
+      this.state.hoveredNode != null ? [this.state.hoveredNode] : [];
     return (
-      <div
-        style={{
-          width: this.props.size.width + "px",
-          height: this.props.size.height + "px",
-        }}
-      >
-        <svg
-          style={{
-            backgroundColor: BACKGROUND_COLOR,
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <g
-            className="container"
-            transform={`translate(${this.props.size.width / 2}, ${this.props
-              .size.height / 2})`}
-          >
-            <g className="edges">{EdgeVisualizers}</g>
-            <g className="nodes">{NodeVisualizers}</g>
-          </g>
-        </svg>
-        <div
-          className="tooltips-container"
-          style={{position: "relative", top: `-${this.props.size.height}px`}}
-        >
-          {tooltips}
-        </div>
-      </div>
+      <GraphRenderer
+        nodes={positionedNodes}
+        edges={this.props.edges}
+        showTooltipsFor={tooltipsFor}
+        size={this.state.size}
+        onHover={onHover}
+        offHover={offHover}
+      />
     );
   }
 }

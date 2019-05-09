@@ -5,8 +5,8 @@ import type {Assets} from "../webutil/assets";
 import {Tooltips} from "./tooltips";
 import {NodeAddress, type Edge, EdgeAddress} from "../core/graph";
 import type {Point, PositionedNode, Size, Node} from "./types";
+import {GraphRenderer} from "./GraphRenderer";
 import {GraphVisualizer} from "./GraphVisualizer";
-import {GraphVisualizerWrappedRenameMe} from "./GraphVisualizerWrappedReanmeMe";
 
 const CONTAINER_SIZE = {width: 1000, height: 800};
 const MAX_SCORE = 1000;
@@ -111,7 +111,7 @@ class TooltipsTestCase extends React.Component<{}> {
         }}
       >
         <h1>Tooltips Positioning Test </h1>
-        <GraphVisualizer
+        <GraphRenderer
           nodes={this.positionedNodes}
           edges={this.edges}
           size={CONTAINER_SIZE}
@@ -202,7 +202,7 @@ export class GraphModificationTestCase extends React.Component<
         <button onClick={() => this.addNode()}>Add Node</button>
         <button onClick={() => this.addEdge()}>Add Edge</button>
         <h1>Graph Modification Test</h1>
-        <GraphVisualizerWrappedRenameMe
+        <GraphVisualizer
           nodes={this.state.positionedNodes}
           edges={this.state.edges}
         />

@@ -2,10 +2,7 @@
 
 import React from "react";
 import {OdysseyInstance} from "./instance";
-import {
-  GraphVisualizerWrappedRenameMe,
-  type Node,
-} from "../../visualizer/GraphVisualizerWrappedReanmeMe";
+import {GraphVisualizer, type Node} from "../../visualizer/GraphVisualizer";
 import {type NodeAddressT, type Edge} from "../../core/graph";
 import {PagerankGraph} from "../../core/pagerankGraph";
 import * as NullUtil from "../../util/null";
@@ -42,10 +39,7 @@ export class OdysseyInstanceVisualizer extends React.Component<Props, State> {
 
   render() {
     return (
-      <GraphVisualizerWrappedRenameMe
-        nodes={this.state.nodes}
-        edges={this.state.edges}
-      />
+      <GraphVisualizer nodes={this.state.nodes} edges={this.state.edges} />
     );
   }
 }
