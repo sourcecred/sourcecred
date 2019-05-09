@@ -4,12 +4,12 @@ import React from "react";
 import * as NullUtil from "../util/null";
 
 import type {Edge, NodeAddressT} from "../core/graph";
-import type {VizNode, Size, Point} from "./types";
+import type {PositionedNode, Size, Point} from "./types";
 import {BACKGROUND_COLOR} from "./constants";
 import {Tooltips} from "./tooltips";
 
 export type Props = {|
-  +nodes: $ReadOnlyArray<VizNode>,
+  +nodes: $ReadOnlyArray<PositionedNode>,
   +edges: $ReadOnlyArray<Edge>,
   +showTooltipsFor: $ReadOnlyArray<NodeAddressT>,
   +size: Size,
@@ -62,7 +62,7 @@ export class GraphVisualizer extends React.Component<Props> {
   render() {
     const NodeVisualizers = this.props.nodes.map((n) => (
       <NodeVisualizer
-        datum={n}
+        positionedNode={n}
         key={n.node.address}
         mouseOver={() => this.props.onHover(n.node.address)}
         mouseOff={() => this.props.offHover()}

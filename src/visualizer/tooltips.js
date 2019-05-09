@@ -4,7 +4,7 @@ import React from "react";
 import * as d3 from "d3";
 import {StyleSheet, css} from "aphrodite/no-important";
 
-import type {Point, VizNode, Size} from "./types";
+import type {Point, PositionedNode, Size} from "./types";
 import {color, BACKGROUND_COLOR} from "./constants";
 
 const TOOLTIP_HORIZONTAL_OFFSET = 25;
@@ -12,7 +12,7 @@ const MAX_WIDTH = 200;
 const VERTICAL_SAFETY_MARGIN = 150;
 
 export type Props = {|
-  +datum: VizNode,
+  +datum: PositionedNode,
   +containerSize: Size,
 |};
 
@@ -83,7 +83,7 @@ export class Tooltips extends React.Component<Props> {
     } else {
       yPosition["top"] = offsetY + "px";
     }
-    const nodeColor = color(datum.scoreRatio);
+    const nodeColor = color(datum.node.scoreRatio);
     const displayScore = Math.floor(datum.node.score);
     return (
       <div

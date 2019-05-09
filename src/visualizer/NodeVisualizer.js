@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 import * as d3 from "d3";
 import {type NodeAddressT} from "../core/graph";
 import {type Point} from "./types";
-import type {VizNode, DescribedNode} from "./types";
+import type {PositionedNode, Node} from "./types";
 
 import {radius, color, type ScoreRatio} from "./constants";
 
@@ -16,7 +16,7 @@ const TEXT_VERTICAL_OFFSET_PIXELS = 5.5;
 const TEXT_HORIZONTAL_OFFSET_PIXELS = 5.5;
 
 export type Props = {|
-  +datum: VizNode,
+  +positionedNode: PositionedNode,
   +mouseOver: () => void,
   +mouseOff: () => void,
 |};
@@ -29,7 +29,7 @@ export class NodeVisualizer extends React.Component<Props> {
     this.d3Node
       .select("circle")
       .attr("r", 0)
-      .attr("fill", color(this.props.datum.scoreRatio))
+      .attr("fill", color(this.props.positionedNode.node.scoreRatio))
       .on("mouseover", this.props.mouseOver)
       .on("mouseout", this.props.mouseOff);
     this.d3Node.select("text").attr("font-size", ANNOTATION_FONT_SIZE);
@@ -40,17 +40,20 @@ export class NodeVisualizer extends React.Component<Props> {
   updatePosition() {
     this.d3Node
       .select("circle")
-      .attr("cx", this.props.datum.position.x)
-      .attr("cy", this.props.datum.position.y);
+      .attr("cx", this.props.positionedNode.position.x)
+      .attr("cy", this.props.positionedNode.position.y);
     this.d3Node
       .select("text")
       .attr(
         "x",
-        this.props.datum.position.x +
-          radius(this.props.datum.scoreRatio) +
+        this.props.positionedNode.position.x +
+          radius(this.props.positionedNode.node.scoreRatio) +
           TEXT_HORIZONTAL_OFFSET_PIXELS
       )
-      .attr("y", this.props.datum.position.y + TEXT_VERTICAL_OFFSET_PIXELS);
+      .attr(
+        "y",
+        this.props.positionedNode.position.y + TEXT_VERTICAL_OFFSET_PIXELS
+      );
   }
 
   updateScore() {
@@ -59,24 +62,26 @@ export class NodeVisualizer extends React.Component<Props> {
       .transition()
       .ease(d3.easeQuad)
       .duration(2000)
-      .attr("fill", color(this.props.datum.scoreRatio))
-      .attr("r", radius(this.props.datum.scoreRatio));
+      .attr("fill", color(this.props.positionedNode.node.scoreRatio))
+      .attr("r", radius(this.props.positionedNode.node.scoreRatio));
     this.d3Node
       .select("text")
-      .text(Math.floor(this.props.datum.node.score))
-      .attr("fill", color(this.props.datum.scoreRatio));
+      .text(Math.floor(this.props.positionedNode.node.score))
+      .attr("fill", color(this.props.positionedNode.node.scoreRatio));
   }
 
   componentDidUpdate(prevProps: Props) {
+    const {positionedNode} = prevProps;
+    const {node, position} = positionedNode;
     if (
-      prevProps.datum.node.score !== this.props.datum.node.score ||
-      prevProps.datum.scoreRatio !== this.props.datum.scoreRatio
+      node.score !== this.props.positionedNode.node.score ||
+      node.scoreRatio !== this.props.positionedNode.node.scoreRatio
     ) {
       this.updateScore();
     }
     if (
-      prevProps.datum.position.x !== this.props.datum.position.x ||
-      prevProps.datum.position.y !== this.props.datum.position.y
+      position.x !== this.props.positionedNode.position.x ||
+      position.y !== this.props.positionedNode.position.y
     ) {
       this.updatePosition();
     }

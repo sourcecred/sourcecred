@@ -18,23 +18,22 @@ export type Size = {|
 // The "self-contained" information about a node, including its address, a
 // string identifier of its type, its score, and a description of the node
 // itself
-export type DescribedNode = {|
+export type Node = {|
   +address: NodeAddressT,
+  // Short string describing the type of the node.
   +type: string,
+  // Score of the node.
   +score: number,
+  // Score of the node as a fraction of the maximum score.
+  // Allows scaling the nodes (in size, color) consistently.
+  +scoreRatio: number,
+  // Human-readable description of the node. Plain text for now;
+  // markdown may be supported later. Ideally, should not
+  // be more than a sentance long.
   +description: string,
 |};
 
-// The "visualizer-ready" version of a node. In addition to containing
-// the described node, it has a position in space, and it has a score ratio.
-// The score ratio makes it possible to interpret the score consistently
-// (is 100 a big score or a small score?).
-export type VizNode = {|
-  +node: DescribedNode,
+export type PositionedNode = {|
+  +node: Node,
   +position: Point,
-  // Represents this node's score as a fraction of the maximum score. Whether
-  // the application is a local max (i.e. the maximum score of any node in
-  // view) or a global max (of all nodes in the graph, whether or not they are
-  // in view) is not specified by the type.
-  +scoreRatio: number,
 |};

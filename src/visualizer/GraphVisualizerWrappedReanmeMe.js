@@ -14,12 +14,12 @@ import {type Point} from "./types";
 import {ForceSimulator} from "./forceSimulator";
 import {BACKGROUND_COLOR} from "./constants";
 import {Tooltips} from "./tooltips";
-import type {DescribedNode, VizNode, Size} from "./types";
+import type {Node, PositionedNode, Size} from "./types";
 
-export type {DescribedNode};
+export type {Node};
 
 export type Props = {|
-  +nodes: $ReadOnlyArray<DescribedNode>,
+  +nodes: $ReadOnlyArray<Node>,
   +edges: $ReadOnlyArray<Edge>,
 |};
 
@@ -104,19 +104,17 @@ export class GraphVisualizerWrappedRenameMe extends React.Component<
   }
 
   render() {
-    const maxScore = d3.max(this.props.nodes, (n) => n.score);
     const getPosition: (NodeAddressT) => Point = (address: NodeAddressT) => {
       const defaultPoint: Point = ({x: 0, y: 0}: any);
       const retrievedPoint: ?Point = this.state.pointMap.get(address);
       return NullUtil.orElse(retrievedPoint, defaultPoint);
     };
-    const viznodes: $ReadOnlyArray<VizNode> = this.props.nodes.map((n) => {
-      const scoreRatio = n.score / maxScore;
-      const position = getPosition(n.address);
-      return {node: n, position, scoreRatio};
+    const positionedNodes: $ReadOnlyArray<
+      PositionedNode
+    > = this.props.nodes.map((n) => {
+      return {node: n, position: getPosition(n.address)};
     });
     const onHover = (a: NodeAddressT) => {
-      console.log(a);
       this.setState({hoveredNode: a});
     };
     const offHover = () => {
@@ -126,7 +124,7 @@ export class GraphVisualizerWrappedRenameMe extends React.Component<
       this.state.hoveredNode != null ? [this.state.hoveredNode] : [];
     return (
       <GraphVisualizer
-        nodes={viznodes}
+        nodes={positionedNodes}
         edges={this.props.edges}
         showTooltipsFor={tooltipsFor}
         size={this.state.size}
