@@ -7,7 +7,13 @@ import {type NodeAddressT} from "../core/graph";
 import {type Point} from "./types";
 import type {PositionedNode, Node} from "./types";
 
-import {radius, color, type ScoreRatio} from "./constants";
+import {
+  TRANSITION_DURATION,
+  radius,
+  color,
+  type ScoreRatio,
+  INTERPOLATE_LOW,
+} from "./constants";
 
 const BACKGROUND_COLOR = "#313131";
 
@@ -29,10 +35,14 @@ export class NodeRenderer extends React.Component<Props> {
     this.d3Node
       .select("circle")
       .attr("r", 0)
-      .attr("fill", color(this.props.positionedNode.node.scoreRatio))
+      .attr("fill", INTERPOLATE_LOW)
       .on("mouseover", this.props.mouseOver)
       .on("mouseout", this.props.mouseOff);
-    this.d3Node.select("text").attr("font-size", ANNOTATION_FONT_SIZE);
+    this.d3Node
+      .select("text")
+      .attr("opacity", 0)
+      .attr("font-size", ANNOTATION_FONT_SIZE)
+      .attr("fill", INTERPOLATE_LOW);
     this.updatePosition();
     this.updateScore();
   }
@@ -61,13 +71,17 @@ export class NodeRenderer extends React.Component<Props> {
       .select("circle")
       .transition()
       .ease(d3.easeQuad)
-      .duration(2000)
+      .duration(TRANSITION_DURATION)
       .attr("fill", color(this.props.positionedNode.node.scoreRatio))
       .attr("r", radius(this.props.positionedNode.node.scoreRatio));
     this.d3Node
       .select("text")
       .text(Math.floor(this.props.positionedNode.node.score))
-      .attr("fill", color(this.props.positionedNode.node.scoreRatio));
+      .transition()
+      .ease(d3.easeQuad)
+      .duration(TRANSITION_DURATION)
+      .attr("fill", color(this.props.positionedNode.node.scoreRatio))
+      .attr("opacity", 1);
   }
 
   componentDidUpdate(prevProps: Props) {

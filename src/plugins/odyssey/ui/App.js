@@ -5,6 +5,7 @@ import {StyleSheet, css} from "aphrodite/no-important";
 import {Header} from "./Header";
 import {type Node, GraphVisualizer} from "../../../visualizer/GraphVisualizer";
 import {type Edge} from "../../../core/graph";
+import {color} from "../../../visualizer/constants";
 
 export type SidebarDeclaration = {|
   +type: string,
@@ -18,12 +19,19 @@ export type Props = {|
 
 export class OdysseyApp extends Component<Props> {
   scoreList(title: string, entities: $ReadOnlyArray<Node>) {
-    const entries = entities.map(({description, score, address}) => (
-      <div key={address} className={css(styles.entityRow)}>
-        <div className={css(styles.entityName)}>{description}</div>
-        <div className={css(styles.entityScore)}>{score.toFixed(0)} ¤</div>
-      </div>
-    ));
+    const entries = entities.map(
+      ({description, score, address, scoreRatio}) => (
+        <div key={address} className={css(styles.entityRow)}>
+          <div className={css(styles.entityName)}>{description}</div>
+          <div
+            className={css(styles.entityScore)}
+            style={{color: color(scoreRatio)}}
+          >
+            {score.toFixed(0)} ¤
+          </div>
+        </div>
+      )
+    );
     return (
       <div className={css(styles.scoreList)}>
         <h1 className={css(styles.scoreListTitle)}>{title}</h1>
@@ -103,7 +111,6 @@ const styles = StyleSheet.create({
   },
 
   entityScore: {
-    color: "#EDAD47",
     fontWeight: "600",
     flexShrink: 0,
     paddingLeft: "5px",

@@ -11,7 +11,7 @@ import * as d3 from "d3";
 
 import * as NullUtil from "../util/null";
 import {type Point} from "./types";
-import {ForceSimulator} from "./forceSimulator";
+import {ForceSimulation} from "./forceSimulator";
 import {BACKGROUND_COLOR} from "./constants";
 import {Tooltips} from "./tooltips";
 import type {Node, PositionedNode, Size} from "./types";
@@ -24,12 +24,11 @@ export type Props = {|
 |};
 
 export type State = {|
-  pointMap: Map<NodeAddressT, Point>,
-  selectedNode: NodeAddressT | null,
-  hoveredNode: NodeAddressT | null,
+  +positionedNodes: $ReadOnlyArray<PositionedNode>,
   // x and y size of the graph visualizer
   // Used for tooltip alignment, etc
   size: Size,
+  hoveredNode: NodeAddressT | null,
 |};
 
 /**
@@ -71,39 +70,37 @@ export type State = {|
  * [4]: https://medium.com/@tibotiber/react-d3-js-balancing-performance-developer-experience-4da35f912484
  */
 export class GraphVisualizer extends React.Component<Props, State> {
-  simulation: ForceSimulator;
+  simulation: ForceSimulation;
 
   constructor(props: Props) {
     super(props);
+    const onTick = () => {
+      this.setState({positionedNodes: this.simulation.positionedNodes()});
+    };
+    this.simulation = new ForceSimulation(onTick);
+    this.simulation.setNodes(this.props.nodes).setEdges(this.props.edges);
+    this.simulation.simulation.tick(10);
     this.state = {
-      pointMap: new Map(),
-      selectedNode: null,
-      hoveredNode: null,
+      positionedNodes: this.simulation.positionedNodes(),
       size: {width: 1400, height: 960},
+      hoveredNode: null,
     };
   }
 
   componentDidMount() {
-    this.simulation = new ForceSimulator((pointMap: Map<NodeAddressT, Point>) =>
-      this.setState({pointMap})
-    );
-    this.simulation.updateGraph(
-      this.props.nodes.map((x) => x.address),
-      this.props.edges
-    );
+    this.simulation.simulation.restart();
+  }
+
+  componentDidUpdate() {
+    this.simulation.setNodes(this.props.nodes).setEdges(this.props.edges);
+  }
+
+  refreshSimulation() {
+    this.simulation.setNodes(this.props.nodes).setEdges(this.props.edges);
+    this.simulation.simulation.alpha(1).restart();
   }
 
   render() {
-    const getPosition: (NodeAddressT) => Point = (address: NodeAddressT) => {
-      const defaultPoint: Point = ({x: 0, y: 0}: any);
-      const retrievedPoint: ?Point = this.state.pointMap.get(address);
-      return NullUtil.orElse(retrievedPoint, defaultPoint);
-    };
-    const positionedNodes: $ReadOnlyArray<
-      PositionedNode
-    > = this.props.nodes.map((n) => {
-      return {node: n, position: getPosition(n.address)};
-    });
     const onHover = (a: NodeAddressT) => {
       this.setState({hoveredNode: a});
     };
@@ -114,7 +111,7 @@ export class GraphVisualizer extends React.Component<Props, State> {
       this.state.hoveredNode != null ? [this.state.hoveredNode] : [];
     return (
       <GraphRenderer
-        nodes={positionedNodes}
+        nodes={this.state.positionedNodes}
         edges={this.props.edges}
         showTooltipsFor={tooltipsFor}
         size={this.state.size}

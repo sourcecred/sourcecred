@@ -9,59 +9,6 @@ import {radius} from "./constants";
 const FORCE_LINK_DISTANCE = 120;
 const FORCE_MANY_BODY_STRENGTH = -380;
 
-export class ForceSimulator {
-  simulation: any;
-  linkForce: any;
-  onTick: (Map<NodeAddressT, Point>) => void;
-
-  constructor(onTick: (Map<NodeAddressT, Point>) => void) {
-    this.linkForce = d3
-      .forceLink()
-      .id((d) => d.address)
-      .distance(FORCE_LINK_DISTANCE);
-    this.simulation = d3
-      .forceSimulation()
-      .stop() // Assume manual control of the simulation.
-      .force("charge", d3.forceManyBody().strength(FORCE_MANY_BODY_STRENGTH))
-      .force("link", this.linkForce)
-      .force(
-        "collide",
-        d3.forceCollide().radius((d) => {
-          return 5;
-        })
-      )
-      .force("x", d3.forceX())
-      .force("y", d3.forceY())
-      .alphaTarget(0.02)
-      .alphaMin(0.1)
-      .on("tick", () => this._doTick());
-    this.onTick = onTick;
-  }
-
-  updateGraph(
-    nodes: $ReadOnlyArray<NodeAddressT>,
-    edges: $ReadOnlyArray<Edge>
-  ) {
-    const addrNodes = nodes.map((address) => ({address}));
-    const links = edges.map(({address, src, dst}) => ({
-      source: addrNodes.find(({address}) => address === src),
-      target: addrNodes.find(({address}) => address === dst),
-      address,
-    }));
-    this.linkForce.links(links);
-    this.simulation.nodes(addrNodes);
-    this.simulation.restart();
-  }
-
-  _doTick() {
-    const pointMap = new Map();
-    this.simulation
-      .nodes()
-      .forEach(({address, x, y}) => pointMap.set(address, {x, y}));
-    this.onTick(pointMap);
-  }
-}
-
 type ForceNode = {|
   x: number,
   y: number,
@@ -80,17 +27,20 @@ export class ForceSimulation {
   simulation: any; // d3.forceSimulation()
   linkForce: any; // d3.forceLink()
 
-  onTick: () => void;
-
-  constructor(onTick: () => void) {
-    this.onTick = onTick;
+  constructor(onTick?: () => void, onEnd?: () => void) {
+    this.addressToForceNode = new Map();
     this.linkForce = d3.forceLink().distance(FORCE_LINK_DISTANCE);
     this.simulation = d3
       .forceSimulation()
-      .force("charge", d3.forceManyBody().strength(-380))
+      .stop()
+      .force("charge", d3.forceManyBody().strength(FORCE_MANY_BODY_STRENGTH))
       .force("link", this.linkForce)
       .force("x", d3.forceX())
-      .force("y", d3.forceY());
+      .force("y", d3.forceY())
+      .alphaTarget(0.1)
+      .alphaMin(0.1)
+      .on("tick", onTick)
+      .on("end", onEnd);
   }
 
   setNodes(nodes: $ReadOnlyArray<Node>): this {
@@ -126,6 +76,4 @@ export class ForceSimulation {
       return {node, position};
     });
   }
-
-  restart() {}
 }

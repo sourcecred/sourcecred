@@ -4,7 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import * as d3 from "d3";
 import type {Point} from "./types";
-import {EDGE_COLOR, EDGE_OPACITY} from "./constants";
+import {TRANSITION_DURATION, EDGE_COLOR, EDGE_OPACITY} from "./constants";
 
 export class EdgeRenderer extends React.Component<{|
   +srcPoint: Point,
@@ -14,6 +14,12 @@ export class EdgeRenderer extends React.Component<{|
 
   componentDidMount() {
     this.d3Node = d3.select(ReactDOM.findDOMNode(this));
+    this.d3Node
+      .select("line")
+      .attr("opacity", 0)
+      .transition()
+      .duration(TRANSITION_DURATION)
+      .attr("opacity", EDGE_OPACITY);
     this.update();
   }
 
@@ -21,7 +27,6 @@ export class EdgeRenderer extends React.Component<{|
     this.d3Node
       .select("line")
       .attr("stroke", EDGE_COLOR)
-      .attr("opacity", EDGE_OPACITY)
       .attr("x1", this.props.srcPoint.x)
       .attr("y1", this.props.srcPoint.y)
       .attr("x2", this.props.dstPoint.x)

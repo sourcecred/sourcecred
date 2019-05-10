@@ -8,10 +8,11 @@ export const HALO_COLOR = "#90FF03";
 export const EDGE_COLOR = "steelblue";
 export const EDGE_OPACITY = 0.6;
 
-const INTERPOLATE_LOW = "#00ABE1";
+export const INTERPOLATE_LOW = "#00ABE1";
 const INTERPOLATE_HIGH = "#90FF03";
 const MAX_RADIUS_PIXELS = 20;
 const MIN_RADIUS_PIXELS = 3;
+export const TRANSITION_DURATION = 3000;
 
 /*
  * Represents a particular score as a fraction of the maximum score in scope.
