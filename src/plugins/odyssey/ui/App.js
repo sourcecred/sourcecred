@@ -7,7 +7,7 @@ import {Header} from "./Header";
 import {type Node, GraphVisualizer} from "../../../visualizer/GraphVisualizer";
 import type {Size} from "../../../visualizer/types";
 import {type Edge} from "../../../core/graph";
-import {color} from "../../../visualizer/constants";
+import {color, BACKGROUND_COLOR} from "../../../visualizer/constants";
 
 export type SidebarDeclaration = {|
   +type: string,
@@ -159,5 +159,6 @@ const styles = StyleSheet.create({
   chartContainer: {
     width: "100%",
     display: "flex",
+    backgroundColor: BACKGROUND_COLOR,
   },
 });
