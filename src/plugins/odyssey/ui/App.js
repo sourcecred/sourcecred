@@ -1,9 +1,11 @@
 // @flow
+
 import React, {Component} from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
 
 import {Header} from "./Header";
 import {type Node, GraphVisualizer} from "../../../visualizer/GraphVisualizer";
+import type {Size} from "../../../visualizer/types";
 import {type Edge} from "../../../core/graph";
 import {color} from "../../../visualizer/constants";
 
@@ -12,12 +14,19 @@ export type SidebarDeclaration = {|
   +title: string,
 |};
 export type Props = {|
-  nodes: $ReadOnlyArray<Node>,
-  edges: $ReadOnlyArray<Edge>,
-  sidebarDeclarations: $ReadOnlyArray<SidebarDeclaration>,
+  +nodes: $ReadOnlyArray<Node>,
+  +edges: $ReadOnlyArray<Edge>,
+  +sidebarDeclarations: $ReadOnlyArray<SidebarDeclaration>,
 |};
 
-export class OdysseyApp extends Component<Props> {
+export type State = {|
+  visualizerSize: Size,
+|};
+
+export class OdysseyApp extends Component<Props, State> {
+  visualizerContainer: ?HTMLDivElement;
+  state = {visualizerSize: {width: 0, height: 0}};
+
   scoreList(title: string, entities: $ReadOnlyArray<Node>) {
     const entries = entities.map(
       ({description, score, address, scoreRatio}) => (
@@ -45,6 +54,18 @@ export class OdysseyApp extends Component<Props> {
     return this.scoreList(sd.title, nodes);
   }
 
+  componentDidMount() {
+    // The if-null check is to re-assure flow; we know that it must be be
+    // rendered since the component has mounted.
+    if (this.visualizerContainer != null) {
+      const width = this.visualizerContainer.offsetWidth;
+      const height = this.visualizerContainer.offsetHeight;
+      this.setState({
+        visualizerSize: {width, height},
+      });
+    }
+  }
+
   render() {
     return (
       <div className={css(styles.app)}>
@@ -55,10 +76,14 @@ export class OdysseyApp extends Component<Props> {
             {this.props.sidebarDeclarations.map((d) => this.sidebarFor(d))}
           </div>
 
-          <div className={css(styles.chartContainer)}>
+          <div
+            ref={(div) => (this.visualizerContainer = div)}
+            className={css(styles.chartContainer)}
+          >
             <GraphVisualizer
               nodes={this.props.nodes}
               edges={this.props.edges}
+              size={this.state.visualizerSize}
             />
           </div>
         </div>

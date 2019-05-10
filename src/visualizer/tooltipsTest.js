@@ -205,6 +205,7 @@ export class GraphModificationTestCase extends React.Component<
         <GraphVisualizer
           nodes={this.state.positionedNodes}
           edges={this.state.edges}
+          size={{width: 800, height: 800}}
         />
       </div>
     );

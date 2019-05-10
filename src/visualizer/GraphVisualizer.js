@@ -21,13 +21,13 @@ export type {Node};
 export type Props = {|
   +nodes: $ReadOnlyArray<Node>,
   +edges: $ReadOnlyArray<Edge>,
+  +size: Size,
 |};
 
 export type State = {|
   +positionedNodes: $ReadOnlyArray<PositionedNode>,
   // x and y size of the graph visualizer
   // Used for tooltip alignment, etc
-  size: Size,
   hoveredNode: NodeAddressT | null,
 |};
 
@@ -82,7 +82,6 @@ export class GraphVisualizer extends React.Component<Props, State> {
     this.simulation.simulation.tick(10);
     this.state = {
       positionedNodes: this.simulation.positionedNodes(),
-      size: {width: 1400, height: 960},
       hoveredNode: null,
     };
   }
@@ -114,7 +113,7 @@ export class GraphVisualizer extends React.Component<Props, State> {
         nodes={this.state.positionedNodes}
         edges={this.props.edges}
         showTooltipsFor={tooltipsFor}
-        size={this.state.size}
+        size={this.props.size}
         onHover={onHover}
         offHover={offHover}
       />
