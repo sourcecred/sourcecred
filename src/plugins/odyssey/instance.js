@@ -37,6 +37,7 @@ export type Node = {|
 
 const COMPAT_INFO = {type: "sourcecred/odyssey/instance", version: "0.1.0"};
 export type InstanceJSON = Compatible<{|
+  +name: string,
   +graphJSON: GraphJSON,
   +sortedDescriptions: $ReadOnlyArray<string>,
   +count: number,
@@ -63,14 +64,23 @@ export class OdysseyInstance {
   _graph: Graph;
   _descriptions: Map<NodeAddressT, string>;
   _count: number;
+  _name: string;
 
   /**
    * Construct an Odyssey Instance.
    */
-  constructor() {
+  constructor(name: string) {
+    this._name = name;
     this._graph = new Graph();
     this._descriptions = new Map();
     this._count = 0;
+  }
+
+  /**
+   * Get the name of the instance.
+   */
+  name(): string {
+    return this._name;
   }
 
   /**
@@ -174,6 +184,7 @@ export class OdysseyInstance {
       NullUtil.get(this._descriptions.get(a))
     );
     return toCompat(COMPAT_INFO, {
+      name: this._name,
       graphJSON,
       sortedDescriptions,
       count: this._count,
@@ -181,8 +192,11 @@ export class OdysseyInstance {
   }
 
   static fromJSON(j: InstanceJSON): OdysseyInstance {
-    const {graphJSON, sortedDescriptions, count} = fromCompat(COMPAT_INFO, j);
-    const instance = new OdysseyInstance();
+    const {name, graphJSON, sortedDescriptions, count} = fromCompat(
+      COMPAT_INFO,
+      j
+    );
+    const instance = new OdysseyInstance(name);
     instance._graph = Graph.fromJSON(graphJSON);
     instance._count = count;
     const descriptions = new Map();
