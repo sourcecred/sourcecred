@@ -7,7 +7,7 @@ import {OdysseyInstance, type Node} from "./instance";
  */
 export function hackathonExample(): OdysseyInstance {
   // Define the types of nodes allowed in our instance
-  const instance = new OdysseyInstance();
+  const instance = new OdysseyInstance("Odyssey Hackathon");
 
   // define our values for the hackathon
   const logistics = instance.addNode("VALUE", "logistics");

@@ -48,6 +48,7 @@ export class OdysseyInstanceVisualizer extends React.Component<Props, State> {
         sidebarDeclarations={sidebars}
         nodes={this.state.nodes}
         edges={this.state.edges}
+        instanceName={this.props.instance.name()}
       />
     );
   }

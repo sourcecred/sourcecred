@@ -4,13 +4,15 @@ import {StyleSheet, css} from "aphrodite/no-important";
 
 import LogoIcon from "./img/logo.svg";
 
-export type Props = {||};
+export type Props = {|+instanceName: string|};
 export class Header extends Component<Props> {
   render() {
     return (
       <div className={css(styles.header)}>
         <div className={css(styles.titleBlock)}>
-          <div className={css(styles.projectName)}>Project Name Here</div>
+          <div className={css(styles.projectName)}>
+            {this.props.instanceName}
+          </div>
           <div className={css(styles.logo)}>
             <span>SourceCred</span>
             <LogoIcon />

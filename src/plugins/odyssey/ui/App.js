@@ -2,6 +2,7 @@
 
 import React, {Component} from "react";
 import {StyleSheet, css} from "aphrodite/no-important";
+import sortBy from "lodash.sortby";
 
 import {Header} from "./Header";
 import {type Node, GraphVisualizer} from "../../../visualizer/GraphVisualizer";
@@ -14,6 +15,7 @@ export type SidebarDeclaration = {|
   +title: string,
 |};
 export type Props = {|
+  +instanceName: string,
   +nodes: $ReadOnlyArray<Node>,
   +edges: $ReadOnlyArray<Edge>,
   +sidebarDeclarations: $ReadOnlyArray<SidebarDeclaration>,
@@ -28,7 +30,7 @@ export class OdysseyApp extends Component<Props, State> {
   state = {visualizerSize: {width: 0, height: 0}};
 
   scoreList(title: string, entities: $ReadOnlyArray<Node>) {
-    const entries = entities.map(
+    const entries = sortBy(entities, (x) => -x.score).map(
       ({description, score, address, scoreRatio}) => (
         <div key={address} className={css(styles.entityRow)}>
           <div className={css(styles.entityName)}>{description}</div>
@@ -69,7 +71,7 @@ export class OdysseyApp extends Component<Props, State> {
   render() {
     return (
       <div className={css(styles.app)}>
-        <Header />
+        <Header instanceName={this.props.instanceName} />
 
         <div className={css(styles.nonHeader)}>
           <div className={css(styles.scoreListsContainer)}>
