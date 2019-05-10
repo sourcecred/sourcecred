@@ -40,8 +40,9 @@ export class OdysseyInstanceVisualizer extends React.Component<Props, State> {
 
   render() {
     const sidebars = [
-      {type: "PERSON", title: "People"},
       {type: "VALUE", title: "Values"},
+      {type: "PERSON", title: "People"},
+      {type: "ARTIFACT", title: "Artifacts"},
     ];
     return (
       <OdysseyApp
