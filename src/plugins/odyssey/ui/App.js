@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingTop: "80px",
     overflow: "hidden",
+    flexGrow: 1,
   },
 
   chartContainer: {
