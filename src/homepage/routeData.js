@@ -74,6 +74,18 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       title: "SourceCred Discord invite",
       navTitle: null,
     },
+
+    // Routes for component inspection tests below
+    {
+      path: "/test/NodeRenderer/",
+      contents: {
+        type: "PAGE",
+        component: () =>
+          require("../visualizer/NodeRendererInspectionTest").default,
+      },
+      title: "Node Renderer Inspection Test",
+      navTitle: null,
+    },
   ];
 }
 exports.makeRouteData = makeRouteData;
