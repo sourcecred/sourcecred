@@ -8,6 +8,7 @@ import {help as loadHelp} from "./load";
 import {help as analyzeHelp} from "./analyze";
 import {help as pagerankHelp} from "./pagerank";
 import {help as exportGraphHelp} from "./exportGraph";
+import {help as clearHelp} from "./clear";
 
 const help: Command = async (args, std) => {
   if (args.length === 0) {
@@ -20,6 +21,7 @@ const help: Command = async (args, std) => {
     load: loadHelp,
     analyze: analyzeHelp,
     pagerank: pagerankHelp,
+    clear: clearHelp,
     "export-graph": exportGraphHelp,
   };
   if (subHelps[command] !== undefined) {
@@ -43,6 +45,7 @@ function usage(print: (string) => void): void {
       analyze       analyze cred for a loaded repository
       export-graph  print a raw SourceCred graph
       pagerank      recompute cred scores
+      clear         clear SoucrceCred data
       help          show this help message
 
     Use 'sourcecred help COMMAND' for help about an individual command.

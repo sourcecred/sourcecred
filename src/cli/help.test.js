@@ -55,6 +55,16 @@ describe("cli/help", () => {
     });
   });
 
+  it("prints help about 'sourcecred clear'", async () => {
+    expect(await run(help, ["clear"])).toEqual({
+      exitCode: 0,
+      stdout: expect.arrayContaining([
+        expect.stringMatching(/^usage: sourcecred clear/),
+      ]),
+      stderr: [],
+    });
+  });
+
   it("fails when given an unknown command", async () => {
     expect(await run(help, ["wat"])).toEqual({
       exitCode: 1,

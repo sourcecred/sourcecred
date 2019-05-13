@@ -1,7 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
 - Add the `pagerank` command (#1114)
+- Add the `clear` command (#1111)
 - Add description tooltips for node and edge types in the weight configuration UI (#1081)
 - Add the `export-graph` command (#1110)
 - Enable loading private repositories (#1085)
@@ -11,6 +13,7 @@
 <!-- Please add new entries to the _top_ of this section. -->
 
 ## [0.2.0]
+
 - Cache GitHub data, allowing for incremental and resumable loading (#622)
 - Hyperlink Git commits to GitHub (#887)
 - Relicense from MIT to MIT + Apache-2 (#812)
@@ -23,6 +26,7 @@
 - Add `MentionsAuthor` edges to the graph (#808)
 
 ## [0.1.0]
+
 - Organize weight config by plugin (#773)
 - Configure edge forward/backward weights separately (#749)
 - Combine "load graph" and "run pagerank" into one button (#759)
