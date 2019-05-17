@@ -75,8 +75,8 @@ describe("core/pagerankGraph", () => {
       expect(e1.equals(e2)).toBe(false);
       await e1.runPagerank();
       await e2.runPagerank();
-      for (const {node, score} of e1.nodes()) {
-        const otherScore = NullUtil.get(e2.node(node)).score;
+      for (const {address, score} of e1.nodes()) {
+        const otherScore = NullUtil.get(e2.node(address)).score;
         expect(otherScore).toBeCloseTo(score);
       }
     });
