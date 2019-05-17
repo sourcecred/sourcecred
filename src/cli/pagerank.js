@@ -20,6 +20,7 @@ import {loadGraph, type LoadGraphResult} from "../analysis/loadGraph";
 
 import {
   type WeightedTypes,
+  type ManualWeights,
   combineWeights,
   defaultWeightsForDeclaration,
 } from "../analysis/weights";
@@ -144,10 +145,11 @@ export function makePagerankCommand(
 }
 
 export async function runPagerank(
-  weights: WeightedTypes,
+  typeWeights: WeightedTypes,
+  manualWeights: ManualWeights,
   graph: Graph
 ): Promise<PagerankGraph> {
-  const evaluator = weightsToEdgeEvaluator(weights);
+  const evaluator = weightsToEdgeEvaluator(typeWeights, manualWeights);
   const pagerankGraph = new PagerankGraph(
     graph,
     evaluator,
@@ -187,7 +189,8 @@ export const defaultAdapters = () => [
 const defaultLoader = (r: RepoId) =>
   loadGraph(Common.sourcecredDirectory(), defaultAdapters(), r);
 export const defaultWeights = () => weightsForAdapters(defaultAdapters());
-export const defaultPagerank = (g: Graph) => runPagerank(defaultWeights(), g);
+export const defaultPagerank = (g: Graph) =>
+  runPagerank(defaultWeights(), new Map(), g);
 export const defaultSaver = (r: RepoId, pg: PagerankGraph) =>
   savePagerankGraph(Common.sourcecredDirectory(), r, pg);
 

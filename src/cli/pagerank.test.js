@@ -230,11 +230,17 @@ describe("cli/pagerank", () => {
         fallbackWeightedTypes,
       ]);
 
+      const manualWeights = new Map();
+      manualWeights.set(advancedGraph().nodes.src(), 4);
       const graph = advancedGraph().graph1();
-      const actualPagerankGraph = await runPagerank(weightedTypes, graph);
+      const actualPagerankGraph = await runPagerank(
+        weightedTypes,
+        manualWeights,
+        graph
+      );
       const expectedPagerankGraph = new PagerankGraph(
         graph,
-        weightsToEdgeEvaluator(weightedTypes),
+        weightsToEdgeEvaluator(weightedTypes, manualWeights),
         DEFAULT_SYNTHETIC_LOOP_WEIGHT
       );
       await expectedPagerankGraph.runPagerank({
