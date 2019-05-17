@@ -6,6 +6,7 @@ import * as NullUtil from "../../util/null";
 
 import {type NodeAddressT} from "../../core/graph";
 import {TableRow} from "./TableRow";
+import {WeightSlider} from "../weights/WeightSlider";
 
 import {nodeDescription, type SharedProps} from "./shared";
 
@@ -48,8 +49,19 @@ export type NodeRowProps = {|
 export class NodeRow extends React.PureComponent<NodeRowProps> {
   render() {
     const {depth, node, sharedProps, showPadding} = this.props;
-    const {pnd, adapters} = sharedProps;
+    const {pnd, adapters, onManualWeightsChange, manualWeights} = sharedProps;
     const {score} = NullUtil.get(pnd.get(node));
+    const weight = NullUtil.orElse(manualWeights.get(node), 1);
+    const _unused_slider = (
+      <WeightSlider
+        name={""}
+        description={""}
+        weight={weight}
+        onChange={(x) => {
+          onManualWeightsChange(node, x);
+        }}
+      />
+    );
     const description = <span>{nodeDescription(node, adapters)}</span>;
     return (
       <TableRow

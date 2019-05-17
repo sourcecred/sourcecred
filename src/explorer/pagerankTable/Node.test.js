@@ -21,11 +21,11 @@ describe("explorer/pagerankTable/Node", () => {
     function sortedByScore(nodes: $ReadOnlyArray<NodeAddressT>, pnd) {
       return sortBy(nodes, (node) => -NullUtil.get(pnd.get(node)).score);
     }
-    async function setup(maxEntriesPerList: number = 100000) {
-      const {adapters, pnd} = await example();
+    async function setup(maxEntriesPerList: number = 123) {
+      const {adapters, pnd, sharedProps: changeEntries} = await example();
+      const sharedProps = {...changeEntries, maxEntriesPerList};
       const nodes = Array.from(pnd.keys());
       expect(nodes).not.toHaveLength(0);
-      const sharedProps = {adapters, pnd, maxEntriesPerList};
       const component = <NodeRowList sharedProps={sharedProps} nodes={nodes} />;
       const element = shallow(component);
       return {element, adapters, sharedProps, nodes};
@@ -71,8 +71,7 @@ describe("explorer/pagerankTable/Node", () => {
   describe("NodeRow", () => {
     async function setup(props: $Shape<{...NodeRowProps}>) {
       props = props || {};
-      const {pnd, adapters} = await example();
-      const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
+      const {sharedProps} = await example();
       const node = factorioNodes.inserter1;
       const component = shallow(
         <NodeRow

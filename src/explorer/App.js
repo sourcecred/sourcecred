@@ -8,6 +8,7 @@ import CheckedLocalStore from "../webutil/checkedLocalStore";
 import BrowserLocalStore from "../webutil/browserLocalStore";
 import Link from "../webutil/Link";
 import type {RepoId} from "../core/repoId";
+import {type NodeAddressT} from "../core/graph";
 
 import {PagerankTable} from "./pagerankTable/Table";
 import type {WeightedTypes} from "../analysis/weights";
@@ -61,6 +62,7 @@ type Props = {|
 type State = {|
   appState: AppState,
   weightedTypes: WeightedTypes,
+  manualWeights: Map<NodeAddressT, number>,
 |};
 
 export function createApp(
@@ -77,6 +79,7 @@ export function createApp(
       this.state = {
         appState: initialState(this.props.repoId),
         weightedTypes: defaultWeightsForAdapterSet(props.adapters),
+        manualWeights: new Map(),
       };
       this.stateTransitionMachine = createSTM(
         () => this.state.appState,
@@ -97,6 +100,13 @@ export function createApp(
             weightedTypes={this.state.weightedTypes}
             onWeightedTypesChange={(weightedTypes) =>
               this.setState({weightedTypes})
+            }
+            manualWeights={this.state.manualWeights}
+            onManualWeightsChange={(addr: NodeAddressT, weight: number) =>
+              this.setState(({manualWeights}) => {
+                manualWeights.set(addr, weight);
+                return {manualWeights};
+              })
             }
             pnd={pnd}
             maxEntriesPerList={100}

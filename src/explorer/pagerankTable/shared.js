@@ -38,6 +38,8 @@ export type SharedProps = {|
   +pnd: PagerankNodeDecomposition,
   +adapters: DynamicExplorerAdapterSet,
   +maxEntriesPerList: number,
+  +manualWeights: Map<NodeAddressT, number>,
+  +onManualWeightsChange: (NodeAddressT, number) => void,
 |};
 
 export function Badge({children}: {children: ReactNode}): ReactNode {

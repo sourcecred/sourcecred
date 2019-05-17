@@ -23,11 +23,9 @@ require("../../webutil/testUtil").configureEnzyme();
 describe("explorer/pagerankTable/Aggregation", () => {
   describe("AggregationRowList", () => {
     it("instantiates AggregationRows for each aggregation", async () => {
-      const {adapters, pnd} = await example();
+      const {adapters, pnd, sharedProps} = await example();
       const node = factorioNodes.inserter1;
       const depth = 20;
-      const maxEntriesPerList = 50;
-      const sharedProps = {adapters, pnd, maxEntriesPerList};
       const connections = NullUtil.get(pnd.get(node)).scoredConnections;
       const aggregations = aggregateFlat(
         connections,
@@ -58,8 +56,7 @@ describe("explorer/pagerankTable/Aggregation", () => {
 
   describe("AggregationRow", () => {
     async function setup() {
-      const {pnd, adapters} = await example();
-      const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
+      const {pnd, adapters, sharedProps} = await example();
       const target = factorioNodes.inserter1;
       const {scoredConnections} = NullUtil.get(pnd.get(target));
       const aggregations = aggregateFlat(

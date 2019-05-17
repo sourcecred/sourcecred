@@ -4,7 +4,7 @@ import React from "react";
 import sortBy from "lodash.sortby";
 import * as NullUtil from "../../util/null";
 
-import {NodeAddress} from "../../core/graph";
+import {NodeAddress, type NodeAddressT} from "../../core/graph";
 import type {PagerankNodeDecomposition} from "../../analysis/pagerankNodeDecomposition";
 import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 import type {DynamicExplorerAdapter} from "../adapters/explorerAdapter";
@@ -22,6 +22,8 @@ type PagerankTableProps = {|
   +onWeightedTypesChange: (WeightedTypes) => void,
   +maxEntriesPerList: number,
   +defaultNodeType: ?NodeType,
+  +manualWeights: Map<NodeAddressT, number>,
+  +onManualWeightsChange: (NodeAddressT, number) => void,
 |};
 type PagerankTableState = {|
   selectedNodeType: NodeType,
@@ -128,12 +130,24 @@ export class PagerankTable extends React.PureComponent<
   }
 
   renderTable() {
-    const {pnd, adapters, maxEntriesPerList} = this.props;
+    const {
+      pnd,
+      adapters,
+      maxEntriesPerList,
+      manualWeights,
+      onManualWeightsChange,
+    } = this.props;
     if (pnd == null || adapters == null || maxEntriesPerList == null) {
       throw new Error("Impossible.");
     }
     const selectedNodeTypePrefix = this.state.selectedNodeType.prefix;
-    const sharedProps = {pnd, adapters, maxEntriesPerList};
+    const sharedProps = {
+      pnd,
+      adapters,
+      maxEntriesPerList,
+      manualWeights,
+      onManualWeightsChange,
+    };
     return (
       <table
         style={{
