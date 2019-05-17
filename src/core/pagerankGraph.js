@@ -212,14 +212,23 @@ export class PagerankGraph {
 
     // Initialize scores to the uniform distribution over every node
     this._scores = new Map();
-    this._totalOutWeight = new Map();
     const graphNodes = Array.from(this._graph.nodes());
     for (const node of graphNodes) {
       this._scores.set(node, 1 / graphNodes.length);
+    }
+    this.setEdgeEvaluator(edgeEvaluator);
+  }
+
+  /**
+   * Changes all of the PagerankGraph's edge weights
+   * by applying the new EdgeEvaluator.
+   */
+  setEdgeEvaluator(edgeEvaluator: EdgeEvaluator): this {
+    this._totalOutWeight = new Map();
+    this._edgeWeights = new Map();
+    for (const node of this._graph.nodes()) {
       this._totalOutWeight.set(node, this._syntheticLoopWeight);
     }
-
-    this._edgeWeights = new Map();
     const addOutWeight = (node: NodeAddressT, weight: number) => {
       const previousWeight = NullUtil.get(this._totalOutWeight.get(node));
       const newWeight = previousWeight + weight;
@@ -231,6 +240,7 @@ export class PagerankGraph {
       addOutWeight(edge.src, weights.toWeight);
       addOutWeight(edge.dst, weights.froWeight);
     }
+    return this;
   }
 
   /**

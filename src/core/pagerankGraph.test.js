@@ -50,6 +50,38 @@ describe("core/pagerankGraph", () => {
     );
   });
 
+  describe("setEdgeEvaluator", () => {
+    it("is idempotent", () => {
+      const e1 = examplePagerankGraph(defaultEvaluator);
+      const e2 = examplePagerankGraph(defaultEvaluator);
+      e2.setEdgeEvaluator(defaultEvaluator);
+      expect(e1.equals(e2)).toBe(true);
+    });
+    it("graphs with changed edge weights are not equal", () => {
+      const e1 = examplePagerankGraph();
+      const e2 = examplePagerankGraph();
+      e2.setEdgeEvaluator(() => ({toWeight: 3, froWeight: 9}));
+      expect(e1.equals(e2)).toBe(false);
+    });
+    it("graphs are distinct but with identical scores if evaluators are the same modulo multiplication", async () => {
+      // Think of this test as a bit more of an "e2e sanity check", verifying
+      // a few properties at once.
+      // We start with two example graphs with edge evaluators that are the same, except the scores
+      // are different by a scalar multiple of 3.
+      // So we know the scores should all turn out the same, but the graphs will be different,
+      // because the edge weights are nominally distinct.
+      const e1 = examplePagerankGraph(() => ({toWeight: 3, froWeight: 6}));
+      const e2 = examplePagerankGraph(() => ({toWeight: 1, froWeight: 2}));
+      expect(e1.equals(e2)).toBe(false);
+      await e1.runPagerank();
+      await e2.runPagerank();
+      for (const {node, score} of e1.nodes()) {
+        const otherScore = NullUtil.get(e2.node(node)).score;
+        expect(otherScore).toBeCloseTo(score);
+      }
+    });
+  });
+
   describe("node / nodes", () => {
     it("node returns null for node not in the graph", () => {
       const g = nonEmptyGraph();
