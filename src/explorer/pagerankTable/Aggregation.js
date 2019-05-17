@@ -59,13 +59,14 @@ export class AggregationRow extends React.PureComponent<AggregationRowProps> {
     const score = aggregation.summary.score;
     const {score: targetScore} = NullUtil.get(pnd.get(target));
     const connectionProportion = score / targetScore;
+    const connectionPercent = (connectionProportion * 100).toFixed(2) + "%";
 
     return (
       <TableRow
         depth={depth}
         indent={1}
         showPadding={false}
-        connectionProportion={connectionProportion}
+        multiuseColumn={connectionPercent}
         cred={score}
         description={<AggregationView aggregation={aggregation} />}
       >

@@ -52,7 +52,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
     const {pnd, adapters, onManualWeightsChange, manualWeights} = sharedProps;
     const {score} = NullUtil.get(pnd.get(node));
     const weight = NullUtil.orElse(manualWeights.get(node), 1);
-    const _unused_slider = (
+    const slider = (
       <WeightSlider
         name={""}
         description={""}
@@ -69,7 +69,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
         indent={0}
         showPadding={showPadding}
         description={description}
-        connectionProportion={null}
+        multiuseColumn={slider}
         cred={score}
       >
         <AggregationRowList

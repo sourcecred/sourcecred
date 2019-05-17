@@ -102,12 +102,12 @@ describe("explorer/pagerankTable/Aggregation", () => {
         const {row, aggregation} = await setup();
         expect(row.props().cred).toBe(aggregation.summary.score);
       });
-      it("with the aggregation's contribution proportion", async () => {
+      it("with the aggregation's score contribution as a %", async () => {
         const {row, target, aggregation, sharedProps} = await setup();
         const targetScore = NullUtil.get(sharedProps.pnd.get(target)).score;
-        expect(row.props().connectionProportion).toBe(
-          aggregation.summary.score / targetScore
-        );
+        const expectedPercent =
+          ((aggregation.summary.score * 100) / targetScore).toFixed(2) + "%";
+        expect(row.props().multiuseColumn).toBe(expectedPercent);
       });
       it("with a AggregationView as description", async () => {
         const {row, aggregation} = await setup();

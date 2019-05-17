@@ -61,6 +61,7 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
     const {pnd, adapters} = sharedProps;
     const {score: targetScore} = NullUtil.get(pnd.get(target));
     const connectionProportion = connectionScore / targetScore;
+    const connectionPercent = (connectionProportion * 100).toFixed(2) + "%";
 
     const connectionView = (
       <ConnectionView connection={connection} adapters={adapters} />
@@ -70,7 +71,7 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
         indent={2}
         depth={depth}
         description={connectionView}
-        connectionProportion={connectionProportion}
+        multiuseColumn={connectionPercent}
         showPadding={false}
         cred={connectionScore}
       >

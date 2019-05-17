@@ -102,9 +102,10 @@ describe("explorer/pagerankTable/Connection", () => {
       it("with the connectionProportion", async () => {
         const {row, target, scoredConnection, sharedProps} = await setup();
         const targetScore = NullUtil.get(sharedProps.pnd.get(target)).score;
-        expect(row.props().connectionProportion).toBe(
-          scoredConnection.connectionScore / targetScore
-        );
+        const expectedPercent =
+          ((scoredConnection.connectionScore * 100) / targetScore).toFixed(2) +
+          "%";
+        expect(row.props().multiuseColumn).toBe(expectedPercent);
       });
       it("with a ConnectionView as description", async () => {
         const {row, sharedProps, scoredConnection} = await setup();

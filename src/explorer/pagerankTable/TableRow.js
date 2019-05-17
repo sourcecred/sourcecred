@@ -10,8 +10,10 @@ type TableRowProps = {|
   +indent: number,
   // The node that goes in the Description column
   +description: ReactNode,
-  // What proportion should be formatted in the connection column
-  +connectionProportion: ?number,
+
+  // The content for the "multiuse column"
+  // Could be a weight slider or a cred proportion depending on context.
+  +multiuseColumn: ReactNode,
   // The cred amount to format and display
   +cred: number,
   // Children to show when the row is expanded
@@ -39,16 +41,12 @@ export class TableRow extends React.PureComponent<
       depth,
       indent,
       description,
-      connectionProportion,
       cred,
       children,
       showPadding,
+      multiuseColumn,
     } = this.props;
     const {expanded} = this.state;
-    const percent =
-      connectionProportion == null
-        ? ""
-        : (connectionProportion * 100).toFixed(2) + "%";
     const backgroundColor = `hsla(150,100%,28%,${1 - 0.9 ** depth})`;
     const makeGradient = (color) =>
       `linear-gradient(to top, ${color}, ${color})`;
@@ -80,7 +78,7 @@ export class TableRow extends React.PureComponent<
             </button>
             {description}
           </td>
-          <td style={{textAlign: "right"}}>{percent}</td>
+          <td style={{textAlign: "right"}}>{multiuseColumn}</td>
           <td style={{textAlign: "right"}}>
             <span style={{marginRight: 5}}>{credDisplay(cred)}</span>
           </td>
