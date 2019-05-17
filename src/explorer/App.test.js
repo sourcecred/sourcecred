@@ -153,6 +153,7 @@ describe("explorer/App", () => {
             el.instance().props.assets,
             el.instance().props.adapters,
             el.instance().state.weightedTypes,
+            el.instance().state.manualWeights,
             GithubPrefix.user
           );
         }

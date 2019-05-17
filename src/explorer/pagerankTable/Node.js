@@ -6,7 +6,13 @@ import * as NullUtil from "../../util/null";
 
 import {type NodeAddressT} from "../../core/graph";
 import {TableRow} from "./TableRow";
-import {WeightSlider} from "../weights/WeightSlider";
+import {
+  MIN_SLIDER,
+  MAX_SLIDER,
+  formatWeight,
+  sliderToWeight,
+  weightToSlider,
+} from "../weights/WeightSlider";
 
 import {nodeDescription, type SharedProps} from "./shared";
 
@@ -53,14 +59,20 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
     const {score} = NullUtil.get(pnd.get(node));
     const weight = NullUtil.orElse(manualWeights.get(node), 1);
     const slider = (
-      <WeightSlider
-        name={""}
-        description={""}
-        weight={weight}
-        onChange={(x) => {
-          onManualWeightsChange(node, x);
-        }}
-      />
+      <label>
+        <span style={{minWidth: 45}}>{formatWeight(weight)}</span>
+        <input
+          type="range"
+          min={MIN_SLIDER}
+          max={MAX_SLIDER}
+          step={1}
+          value={weightToSlider(weight)}
+          onChange={(e) => {
+            const weight = sliderToWeight(e.target.valueAsNumber);
+            onManualWeightsChange(node, weight);
+          }}
+        />
+      </label>
     );
     const description = <span>{nodeDescription(node, adapters)}</span>;
     return (

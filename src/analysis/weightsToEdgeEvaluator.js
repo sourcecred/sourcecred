@@ -5,7 +5,10 @@ import type {WeightedTypes} from "./weights";
 import type {EdgeEvaluator} from "./pagerank";
 import {NodeTrie, EdgeTrie} from "../core/trie";
 
-export function weightsToEdgeEvaluator(weights: WeightedTypes): EdgeEvaluator {
+export function weightsToEdgeEvaluator(
+  weights: WeightedTypes,
+  _unused_arg: any
+): EdgeEvaluator {
   const nodeTrie = new NodeTrie();
   for (const {type, weight} of weights.nodes.values()) {
     nodeTrie.add(type.prefix, weight);

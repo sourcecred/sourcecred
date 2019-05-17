@@ -134,6 +134,7 @@ export function createApp(
                 this.props.assets,
                 this.props.adapters,
                 this.state.weightedTypes,
+                this.state.manualWeights,
                 GithubPrefix.user
               )
             }
