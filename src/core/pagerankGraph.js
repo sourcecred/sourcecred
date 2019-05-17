@@ -36,7 +36,7 @@ export type {EdgeWeight} from "./attribution/graphToMarkovChain";
 export type EdgeEvaluator = (Edge) => EdgeWeight;
 
 export type ScoredNode = {|
-  +node: NodeAddressT,
+  +address: NodeAddressT,
   +score: number,
 |};
 
@@ -259,7 +259,7 @@ export class PagerankGraph {
   *_nodesIterator(iterator: Iterator<NodeAddressT>): Iterator<ScoredNode> {
     for (const node of iterator) {
       const score = NullUtil.get(this._scores.get(node));
-      yield {node, score};
+      yield {address: node, score};
     }
   }
 
@@ -287,7 +287,7 @@ export class PagerankGraph {
     if (score == null) {
       return null;
     } else {
-      return {node: x, score};
+      return {address: x, score};
     }
   }
 

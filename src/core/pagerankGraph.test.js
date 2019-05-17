@@ -60,14 +60,14 @@ describe("core/pagerankGraph", () => {
       const g = advancedGraph().graph1();
       const pg = new PagerankGraph(g, defaultEvaluator);
       const graphNodes = Array.from(g.nodes());
-      const pgNodes = Array.from(pg.nodes()).map((x) => x.node);
+      const pgNodes = Array.from(pg.nodes()).map((x) => x.address);
       expect(graphNodes.length).toEqual(pgNodes.length);
       expect(new Set(graphNodes)).toEqual(new Set(pgNodes));
     });
     it("node and nodes both return consistent scores", async () => {
       const pg = await convergedPagerankGraph();
-      for (const {node, score} of pg.nodes()) {
-        expect(score).toEqual(NullUtil.get(pg.node(node)).score);
+      for (const {address, score} of pg.nodes()) {
+        expect(score).toEqual(NullUtil.get(pg.node(address)).score);
       }
     });
     it("node and nodes both throw an error if underlying graph is modified", () => {
@@ -103,7 +103,7 @@ describe("core/pagerankGraph", () => {
 
       pagerankGraphNodes.forEach(
         (pgNode, i) =>
-          expect(pgNode.node).toEqual(graphNodes[i]) &&
+          expect(pgNode.address).toEqual(graphNodes[i]) &&
           expect(pgNode.score).toBe(0.25)
       );
     }
@@ -223,8 +223,8 @@ describe("core/pagerankGraph", () => {
         zeroEvaluator,
         syntheticLoopWeight
       );
-      for (const {node} of pg.nodes()) {
-        expect(pg.totalOutWeight(node)).toEqual(syntheticLoopWeight);
+      for (const {address} of pg.nodes()) {
+        expect(pg.totalOutWeight(address)).toEqual(syntheticLoopWeight);
       }
     });
     it("outWeight is computed correctly after JSON deserialization", () => {
@@ -403,7 +403,7 @@ describe("core/pagerankGraph", () => {
               );
               const gNeighbors = Array.from(graph.neighbors(target, options));
               const reducedPrgNeighbors = prgNeighbors.map((s) => ({
-                node: s.scoredNode.node,
+                node: s.scoredNode.address,
                 edge: s.weightedEdge.edge,
               }));
               expect(gNeighbors).toEqual(reducedPrgNeighbors);
@@ -422,7 +422,7 @@ describe("core/pagerankGraph", () => {
     });
     it("neighbor's scored contributions are computed correctly", async () => {
       const pg = await convergedPagerankGraph();
-      for (const {node: target} of pg.nodes()) {
+      for (const {address: target} of pg.nodes()) {
         for (const {
           scoredNode,
           weightedEdge,
@@ -436,7 +436,7 @@ describe("core/pagerankGraph", () => {
             rawWeight += weightedEdge.weight.froWeight;
           }
           const normalizedWeight =
-            rawWeight / pg.totalOutWeight(scoredNode.node);
+            rawWeight / pg.totalOutWeight(scoredNode.address);
           expect(scoreContribution).toEqual(
             scoredNode.score * normalizedWeight
           );
@@ -445,9 +445,9 @@ describe("core/pagerankGraph", () => {
     });
     it("synthetic score contributions are computed correctly", async () => {
       const pg = await convergedPagerankGraph();
-      for (const {node, score} of pg.nodes()) {
-        expect(pg.syntheticLoopScoreContribution(node)).toEqual(
-          (score * pg.syntheticLoopWeight()) / pg.totalOutWeight(node)
+      for (const {address, score} of pg.nodes()) {
+        expect(pg.syntheticLoopScoreContribution(address)).toEqual(
+          (score * pg.syntheticLoopWeight()) / pg.totalOutWeight(address)
         );
       }
     });
@@ -456,13 +456,13 @@ describe("core/pagerankGraph", () => {
       // neighbors (need to add the edge toWeight and froWeight if the neighbor
       // is a loop).
       const pg = await convergedPagerankGraph();
-      for (const {node, score} of pg.nodes()) {
+      for (const {address, score} of pg.nodes()) {
         // We need to include the score that came from the synthetic loop edge
         // (should be near zero for non-isolated nodes)
         let summedScoreContributions: number = pg.syntheticLoopScoreContribution(
-          node
+          address
         );
-        for (const scoredNeighbor of pg.neighbors(node, allNeighbors())) {
+        for (const scoredNeighbor of pg.neighbors(address, allNeighbors())) {
           summedScoreContributions += scoredNeighbor.scoreContribution;
         }
         expect(summedScoreContributions).toBeCloseTo(score);
