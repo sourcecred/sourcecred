@@ -52,6 +52,8 @@ export type PagerankEvaluated = {|
   +loading: LoadingState,
 |};
 
+type ManualWeights = Map<NodeAddressT, number>;
+
 export function initialState(repoId: RepoId): ReadyToLoadGraph {
   return {type: "READY_TO_LOAD_GRAPH", repoId, loading: "NOT_LOADING"};
 }
@@ -71,11 +73,12 @@ export function createStateTransitionMachine(
 // Exported for testing purposes.
 export interface StateTransitionMachineInterface {
   +loadGraph: (Assets, StaticExplorerAdapterSet) => Promise<boolean>;
-  +runPagerank: (WeightedTypes, NodeAddressT) => Promise<void>;
+  +runPagerank: (WeightedTypes, ManualWeights, NodeAddressT) => Promise<void>;
   +loadGraphAndRunPagerank: (
     Assets,
     StaticExplorerAdapterSet,
     WeightedTypes,
+    ManualWeights,
     NodeAddressT
   ) => Promise<void>;
 }
@@ -157,6 +160,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
 
   async runPagerank(
     weightedTypes: WeightedTypes,
+    manualWeights: ManualWeights,
     totalScoreNodePrefix: NodeAddressT
   ) {
     const state = this.getState();
@@ -177,7 +181,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     try {
       const pagerankNodeDecomposition = await this.pagerank(
         graph,
-        weightsToEdgeEvaluator(weightedTypes),
+        weightsToEdgeEvaluator(weightedTypes, manualWeights),
         {
           verbose: true,
           totalScoreNodePrefix: totalScoreNodePrefix,
@@ -207,6 +211,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     assets: Assets,
     adapters: StaticExplorerAdapterSet,
     weightedTypes: WeightedTypes,
+    manualWeights: ManualWeights,
     totalScoreNodePrefix: NodeAddressT
   ) {
     const state = this.getState();
@@ -215,12 +220,20 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
       case "READY_TO_LOAD_GRAPH":
         const loadedGraph = await this.loadGraph(assets, adapters);
         if (loadedGraph) {
-          await this.runPagerank(weightedTypes, totalScoreNodePrefix);
+          await this.runPagerank(
+            weightedTypes,
+            manualWeights,
+            totalScoreNodePrefix
+          );
         }
         break;
       case "READY_TO_RUN_PAGERANK":
       case "PAGERANK_EVALUATED":
-        await this.runPagerank(weightedTypes, totalScoreNodePrefix);
+        await this.runPagerank(
+          weightedTypes,
+          manualWeights,
+          totalScoreNodePrefix
+        );
         break;
       default:
         throw new Error((type: empty));

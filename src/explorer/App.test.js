@@ -3,7 +3,7 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import {Graph} from "../core/graph";
+import {Graph, NodeAddress} from "../core/graph";
 import {makeRepoId} from "../core/repoId";
 import {Assets} from "../webutil/assets";
 import testLocalStore from "../webutil/testLocalStore";
@@ -153,6 +153,7 @@ describe("explorer/App", () => {
             el.instance().props.assets,
             el.instance().props.adapters,
             el.instance().state.weightedTypes,
+            el.instance().state.manualWeights,
             GithubPrefix.user
           );
         }
@@ -184,6 +185,10 @@ describe("explorer/App", () => {
           );
           prtWeightedTypesChange(newTypes);
           expect(el.instance().state.weightedTypes).toBe(newTypes);
+          const prtManualWeightsChange = prt.props().onManualWeightsChange;
+          const node = NodeAddress.fromParts(["foo"]);
+          prtManualWeightsChange(node, 32);
+          expect(el.instance().state.manualWeights.get(node)).toEqual(32);
         } else {
           expect(prt).toHaveLength(0);
         }

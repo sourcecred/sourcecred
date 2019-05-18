@@ -15,11 +15,11 @@ require("../../webutil/testUtil").configureEnzyme();
 
 describe("explorer/pagerankTable/Connection", () => {
   describe("ConnectionRowList", () => {
-    async function setup(maxEntriesPerList: number = 100000) {
-      const {adapters, pnd} = await example();
+    async function setup(maxEntriesPerList: number = 123) {
+      let {sharedProps} = await example();
+      sharedProps = {...sharedProps, maxEntriesPerList};
       const depth = 2;
       const node = factorioNodes.inserter1;
-      const sharedProps = {adapters, pnd, maxEntriesPerList};
       const connections = NullUtil.get(sharedProps.pnd.get(node))
         .scoredConnections;
       const component = (
@@ -66,8 +66,7 @@ describe("explorer/pagerankTable/Connection", () => {
 
   describe("ConnectionRow", () => {
     async function setup() {
-      const {pnd, adapters} = await example();
-      const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
+      const {pnd, sharedProps} = await example();
       const target = factorioNodes.inserter1;
       const {scoredConnections} = NullUtil.get(pnd.get(target));
       const scoredConnection = scoredConnections[0];
@@ -100,12 +99,13 @@ describe("explorer/pagerankTable/Connection", () => {
         const {row, scoredConnection} = await setup();
         expect(row.props().cred).toBe(scoredConnection.connectionScore);
       });
-      it("with the connectionProportion", async () => {
+      it("with the connectionProportion in the multiuseColumn", async () => {
         const {row, target, scoredConnection, sharedProps} = await setup();
         const targetScore = NullUtil.get(sharedProps.pnd.get(target)).score;
-        expect(row.props().connectionProportion).toBe(
-          scoredConnection.connectionScore / targetScore
-        );
+        const expectedPercent =
+          ((scoredConnection.connectionScore * 100) / targetScore).toFixed(2) +
+          "%";
+        expect(row.props().multiuseColumn).toBe(expectedPercent);
       });
       it("with a ConnectionView as description", async () => {
         const {row, sharedProps, scoredConnection} = await setup();

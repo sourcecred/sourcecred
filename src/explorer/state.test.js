@@ -167,7 +167,7 @@ describe("explorer/state", () => {
       const badState = readyToLoadGraph();
       const {stm} = example(badState);
       await expect(
-        stm.runPagerank(weightedTypes(), NodeAddress.empty)
+        stm.runPagerank(weightedTypes(), new Map(), NodeAddress.empty)
       ).rejects.toThrow("incorrect state");
     });
     it("can be run when READY_TO_RUN_PAGERANK or PAGERANK_EVALUATED", async () => {
@@ -176,7 +176,7 @@ describe("explorer/state", () => {
         const {stm, getState, pagerankMock} = example(g);
         const pnd = pagerankNodeDecomposition();
         pagerankMock.mockResolvedValue(pnd);
-        await stm.runPagerank(weightedTypes(), NodeAddress.empty);
+        await stm.runPagerank(weightedTypes(), new Map(), NodeAddress.empty);
         const state = getState();
         if (state.type !== "PAGERANK_EVALUATED") {
           throw new Error("Impossible");
@@ -188,13 +188,13 @@ describe("explorer/state", () => {
     it("immediately sets loading status", () => {
       const {getState, stm} = example(readyToRunPagerank());
       expect(loading(getState())).toBe("NOT_LOADING");
-      stm.runPagerank(weightedTypes(), NodeAddress.empty);
+      stm.runPagerank(weightedTypes(), new Map(), NodeAddress.empty);
       expect(loading(getState())).toBe("LOADING");
     });
     it("calls pagerank with the totalScoreNodePrefix option", async () => {
       const {pagerankMock, stm} = example(readyToRunPagerank());
       const foo = NodeAddress.fromParts(["foo"]);
-      await stm.runPagerank(weightedTypes(), foo);
+      await stm.runPagerank(weightedTypes(), new Map(), foo);
       const args = pagerankMock.mock.calls[0];
       expect(args[2].totalScoreNodePrefix).toBe(foo);
     });
@@ -204,7 +204,7 @@ describe("explorer/state", () => {
       // $ExpectFlowError
       console.error = jest.fn();
       pagerankMock.mockRejectedValue(error);
-      await stm.runPagerank(weightedTypes(), NodeAddress.empty);
+      await stm.runPagerank(weightedTypes(), new Map(), NodeAddress.empty);
       const state = getState();
       expect(loading(state)).toBe("FAILED");
       expect(state.type).toBe("READY_TO_RUN_PAGERANK");
@@ -222,12 +222,19 @@ describe("explorer/state", () => {
       const assets = new Assets("/gateway/");
       const adapters = new StaticExplorerAdapterSet([]);
       const prefix = NodeAddress.fromParts(["bar"]);
+      const manualWeights = new Map();
       const wt = weightedTypes();
-      await stm.loadGraphAndRunPagerank(assets, adapters, wt, prefix);
+      await stm.loadGraphAndRunPagerank(
+        assets,
+        adapters,
+        wt,
+        manualWeights,
+        prefix
+      );
       expect(stm.loadGraph).toHaveBeenCalledTimes(1);
       expect(stm.loadGraph).toHaveBeenCalledWith(assets, adapters);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
-      expect(stm.runPagerank).toHaveBeenCalledWith(wt, prefix);
+      expect(stm.runPagerank).toHaveBeenCalledWith(wt, manualWeights, prefix);
     });
     it("does not run pagerank if loadGraph did not succeed", async () => {
       const {stm} = example(readyToLoadGraph());
@@ -241,6 +248,7 @@ describe("explorer/state", () => {
         assets,
         adapters,
         weightedTypes(),
+        new Map(),
         prefix
       );
       expect(stm.loadGraph).toHaveBeenCalledTimes(1);
@@ -252,15 +260,17 @@ describe("explorer/state", () => {
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
       const wt = weightedTypes();
+      const manualWeights = new Map();
       await stm.loadGraphAndRunPagerank(
         new Assets("/gateway/"),
         new StaticExplorerAdapterSet([]),
         wt,
+        manualWeights,
         prefix
       );
       expect(stm.loadGraph).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
-      expect(stm.runPagerank).toHaveBeenCalledWith(wt, prefix);
+      expect(stm.runPagerank).toHaveBeenCalledWith(wt, manualWeights, prefix);
     });
     it("when PAGERANK_EVALUATED, runs pagerank", async () => {
       const {stm} = example(pagerankEvaluated());
@@ -268,15 +278,17 @@ describe("explorer/state", () => {
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
       const wt = weightedTypes();
+      const manualWeights = new Map();
       await stm.loadGraphAndRunPagerank(
         new Assets("/gateway/"),
         new StaticExplorerAdapterSet([]),
         wt,
+        manualWeights,
         prefix
       );
       expect(stm.loadGraph).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
-      expect(stm.runPagerank).toHaveBeenCalledWith(wt, prefix);
+      expect(stm.runPagerank).toHaveBeenCalledWith(wt, manualWeights, prefix);
     });
   });
 });

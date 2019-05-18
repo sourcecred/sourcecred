@@ -15,7 +15,7 @@ describe("explorer/pagerankTable/TableRow", () => {
         depth={1}
         indent={1}
         description={<span data-test-description={true} />}
-        connectionProportion={0.5}
+        multiuseColumn={"50.00%"}
         cred={133.7}
         children={<div data-test-children={true} />}
         showPadding={false}
@@ -30,7 +30,7 @@ describe("explorer/pagerankTable/TableRow", () => {
           indent={1}
           showPadding={false}
           description={<span data-test-description={true} />}
-          connectionProportion={0.5}
+          multiuseColumn={"50.00%"}
           cred={133.7}
           children={<div data-test-children={true} />}
         />
@@ -50,7 +50,7 @@ describe("explorer/pagerankTable/TableRow", () => {
           indent={indent}
           showPadding={false}
           description={<span data-test-description={true} />}
-          connectionProportion={0.5}
+          multiuseColumn={"50.00%"}
           cred={133.7}
           children={<div data-test-children={true} />}
         />
@@ -92,7 +92,7 @@ describe("explorer/pagerankTable/TableRow", () => {
     const el = example();
     expect(el.find("td")).toHaveLength(COLUMNS().length);
   });
-  it("displays formatted connectionPercentage in the correct column", () => {
+  it("can display literal text in the multiuseColumn", () => {
     const index = COLUMNS().indexOf("");
     expect(index).not.toEqual(-1);
     const td = example()
@@ -100,13 +100,14 @@ describe("explorer/pagerankTable/TableRow", () => {
       .at(index);
     expect(td.text()).toEqual("50.00%");
   });
-  it("displays empty column when connectionProportion not set", () => {
+  it("displays general react nodes in the multiuseColumn", () => {
     const index = COLUMNS().indexOf("");
     expect(index).not.toEqual(-1);
     const el = example();
-    el.setProps({connectionProportion: null});
+    const multiuseColumn = <span data-test-multiuse={true} />;
+    el.setProps({multiuseColumn});
     const td = el.find("td").at(index);
-    expect(td.text()).toEqual("");
+    expect(td.find({"data-test-multiuse": true})).toHaveLength(1);
   });
   it("displays formatted cred in the correct column", () => {
     const index = COLUMNS().indexOf("Cred");
@@ -135,7 +136,7 @@ describe("explorer/pagerankTable/TableRow", () => {
           depth={2}
           indent={1}
           description={<span data-test-description={true} />}
-          connectionProportion={0.5}
+          multiuseColumn={"50.00%"}
           cred={133.7}
           children={<div data-test-children={true} />}
           showPadding={true}

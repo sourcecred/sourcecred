@@ -19,6 +19,8 @@ export type WeightedTypes = {|
   +edges: Map<EdgeAddressT, WeightedEdgeType>,
 |};
 
+export type ManualWeights = Map<NodeAddressT, number>;
+
 export function defaultWeightedNodeType(type: NodeType): WeightedNodeType {
   return {
     type,

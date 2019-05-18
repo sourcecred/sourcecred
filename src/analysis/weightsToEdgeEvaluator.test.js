@@ -7,7 +7,11 @@ import {
   machineNodeType,
   assemblesEdgeType,
 } from "../plugins/demo/declaration";
-import {edges as factorioEdges} from "../plugins/demo/graph";
+import {
+  edges as factorioEdges,
+  nodes as factorioNodes,
+} from "../plugins/demo/graph";
+import type {ManualWeights} from "./weights";
 import {weightsToEdgeEvaluator} from "./weightsToEdgeEvaluator";
 
 describe("analysis/weightsToEdgeEvaluator", () => {
@@ -20,6 +24,7 @@ describe("analysis/weightsToEdgeEvaluator", () => {
       +inserter?: number,
       +machine?: number,
       +baseNode?: number,
+      +manualWeights?: ManualWeights,
     |};
     function weights({
       assemblesForward,
@@ -53,7 +58,8 @@ describe("analysis/weightsToEdgeEvaluator", () => {
     }
     function exampleEdgeWeights(weightArgs: WeightArgs) {
       const ws = weights(weightArgs);
-      const ee = weightsToEdgeEvaluator(ws);
+      const manualWeights = weightArgs.manualWeights || new Map();
+      const ee = weightsToEdgeEvaluator(ws, manualWeights);
       // src is a machine, dst is an inserter, edge type is assembles
       return ee(factorioEdges.assembles1);
     }
@@ -90,6 +96,23 @@ describe("analysis/weightsToEdgeEvaluator", () => {
           assemblesBackward: 5,
         })
       ).toEqual({toWeight: 8, froWeight: 15});
+    });
+    it("manualWeight and nodeTypeWeight both multiply the weight", () => {
+      const manualWeights = new Map();
+      manualWeights.set(factorioNodes.inserter2, 2);
+      // Putting a weight of 2 on the inserter node type as a whole or on the the
+      // particular insterter node will have the same effect
+      expect(exampleEdgeWeights({inserter: 2})).toEqual(
+        exampleEdgeWeights({manualWeights})
+      );
+    });
+    it("manualWeight and nodeTypeWeight compose multiplicatively", () => {
+      const manualWeights = new Map();
+      manualWeights.set(factorioNodes.inserter2, 2);
+      expect(exampleEdgeWeights({inserter: 3, manualWeights})).toEqual({
+        toWeight: 6,
+        froWeight: 1,
+      });
     });
   });
 });

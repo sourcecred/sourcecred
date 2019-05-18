@@ -6,6 +6,12 @@ import sortBy from "lodash.sortby";
 import * as NullUtil from "../../util/null";
 import {TableRow} from "./TableRow";
 import {AggregationRowList} from "./Aggregation";
+import {
+  MIN_SLIDER,
+  MAX_SLIDER,
+  sliderToWeight,
+  weightToSlider,
+} from "../weights/WeightSlider";
 
 import type {NodeAddressT} from "../../core/graph";
 
@@ -21,11 +27,11 @@ describe("explorer/pagerankTable/Node", () => {
     function sortedByScore(nodes: $ReadOnlyArray<NodeAddressT>, pnd) {
       return sortBy(nodes, (node) => -NullUtil.get(pnd.get(node)).score);
     }
-    async function setup(maxEntriesPerList: number = 100000) {
-      const {adapters, pnd} = await example();
+    async function setup(maxEntriesPerList: number = 123) {
+      const {adapters, pnd, sharedProps: changeEntries} = await example();
+      const sharedProps = {...changeEntries, maxEntriesPerList};
       const nodes = Array.from(pnd.keys());
       expect(nodes).not.toHaveLength(0);
-      const sharedProps = {adapters, pnd, maxEntriesPerList};
       const component = <NodeRowList sharedProps={sharedProps} nodes={nodes} />;
       const element = shallow(component);
       return {element, adapters, sharedProps, nodes};
@@ -71,15 +77,17 @@ describe("explorer/pagerankTable/Node", () => {
   describe("NodeRow", () => {
     async function setup(props: $Shape<{...NodeRowProps}>) {
       props = props || {};
-      const {pnd, adapters} = await example();
-      const sharedProps = {adapters, pnd, maxEntriesPerList: 123};
+      let {sharedProps} = await example();
+      if (props.sharedProps !== null) {
+        sharedProps = {...sharedProps, ...props.sharedProps};
+      }
       const node = factorioNodes.inserter1;
       const component = shallow(
         <NodeRow
           node={NullUtil.orElse(props.node, node)}
           showPadding={NullUtil.orElse(props.showPadding, false)}
           depth={NullUtil.orElse(props.depth, 0)}
-          sharedProps={NullUtil.orElse(props.sharedProps, sharedProps)}
+          sharedProps={sharedProps}
         />
       );
       const row = component.find(TableRow);
@@ -103,9 +111,58 @@ describe("explorer/pagerankTable/Node", () => {
         const score = NullUtil.get(sharedProps.pnd.get(node)).score;
         expect(row.props().cred).toBe(score);
       });
-      it("with no connectionProportion", async () => {
-        const {row} = await setup();
-        expect(row.props().connectionProportion).not.toEqual(expect.anything());
+      describe("with a weight slider", () => {
+        async function setupSlider(initialWeight: number = 0) {
+          const node = factorioNodes.inserter1;
+          const manualWeights = new Map([[node, initialWeight]]);
+          const partialSharedProps: any = {manualWeights};
+          const {row, sharedProps} = await setup({
+            sharedProps: partialSharedProps,
+          });
+          const multiuseColumn = shallow(row.props().multiuseColumn);
+          const label = multiuseColumn.find("label");
+          const input = label.find("input");
+          const span = label.find("span");
+          const {onManualWeightsChange} = sharedProps;
+          return {
+            onManualWeightsChange,
+            manualWeights,
+            input,
+            span,
+            node,
+            label,
+          };
+        }
+        it("which consists of a range input and span within a label", async () => {
+          const {label, input, span} = await setupSlider();
+          expect(label).toHaveLength(1);
+          expect(input).toHaveLength(1);
+          expect(input.props().type).toEqual("range");
+          expect(span).toHaveLength(1);
+        });
+        it("whose onChange triggers onManualWeightsChange", async () => {
+          const {node, input, onManualWeightsChange} = await setupSlider();
+          expect(onManualWeightsChange).toHaveBeenCalledTimes(0);
+          input.simulate("change", {target: {valueAsNumber: MIN_SLIDER}});
+          expect(onManualWeightsChange).toHaveBeenLastCalledWith(
+            node,
+            sliderToWeight(MIN_SLIDER)
+          );
+          input.simulate("change", {target: {valueAsNumber: MAX_SLIDER}});
+          expect(onManualWeightsChange).toHaveBeenLastCalledWith(
+            node,
+            sliderToWeight(MAX_SLIDER)
+          );
+          expect(onManualWeightsChange).toHaveBeenCalledTimes(2);
+        });
+        it("which encodes the weight in slider position", async () => {
+          const {input} = await setupSlider(4);
+          expect(input.props().value).toEqual(weightToSlider(4));
+        });
+        it("which prints the weight in text format", async () => {
+          const {span} = await setupSlider(4);
+          expect(span.text()).toEqual("4×");
+        });
       });
       it("with the node description", async () => {
         const {row, sharedProps, node} = await setup();

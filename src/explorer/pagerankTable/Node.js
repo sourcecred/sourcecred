@@ -6,6 +6,13 @@ import * as NullUtil from "../../util/null";
 
 import {type NodeAddressT} from "../../core/graph";
 import {TableRow} from "./TableRow";
+import {
+  MIN_SLIDER,
+  MAX_SLIDER,
+  formatWeight,
+  sliderToWeight,
+  weightToSlider,
+} from "../weights/WeightSlider";
 
 import {nodeDescription, type SharedProps} from "./shared";
 
@@ -48,8 +55,25 @@ export type NodeRowProps = {|
 export class NodeRow extends React.PureComponent<NodeRowProps> {
   render() {
     const {depth, node, sharedProps, showPadding} = this.props;
-    const {pnd, adapters} = sharedProps;
+    const {pnd, adapters, onManualWeightsChange, manualWeights} = sharedProps;
     const {score} = NullUtil.get(pnd.get(node));
+    const weight = NullUtil.orElse(manualWeights.get(node), 1);
+    const slider = (
+      <label>
+        <span>{formatWeight(weight)}</span>
+        <input
+          type="range"
+          min={MIN_SLIDER}
+          max={MAX_SLIDER}
+          step={1}
+          value={weightToSlider(weight)}
+          onChange={(e) => {
+            const weight = sliderToWeight(e.target.valueAsNumber);
+            onManualWeightsChange(node, weight);
+          }}
+        />
+      </label>
+    );
     const description = <span>{nodeDescription(node, adapters)}</span>;
     return (
       <TableRow
@@ -57,7 +81,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
         indent={0}
         showPadding={showPadding}
         description={description}
-        connectionProportion={null}
+        multiuseColumn={slider}
         cred={score}
       >
         <AggregationRowList

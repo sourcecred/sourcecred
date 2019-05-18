@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Allow tweaking weights on a per-node basis (#1143)
 - Add the `pagerank` command (#1114)
 - Add the `clear` command (#1111)
 - Add description tooltips for node and edge types in the weight configuration UI (#1081)
