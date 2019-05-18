@@ -60,7 +60,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
     const weight = NullUtil.orElse(manualWeights.get(node), 1);
     const slider = (
       <label>
-        <span style={{minWidth: 45}}>{formatWeight(weight)}</span>
+        <span>{formatWeight(weight)}</span>
         <input
           type="range"
           min={MIN_SLIDER}
