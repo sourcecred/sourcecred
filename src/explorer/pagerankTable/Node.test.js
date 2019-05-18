@@ -133,10 +133,11 @@ describe("explorer/pagerankTable/Node", () => {
             label,
           };
         }
-        it("has the basic components", async () => {
+        it("which consists of a range input and span within a label", async () => {
           const {label, input, span} = await setupSlider();
           expect(label).toHaveLength(1);
           expect(input).toHaveLength(1);
+          expect(input.props().type).toEqual("range");
           expect(span).toHaveLength(1);
         });
         it("whose onChange triggers onManualWeightsChange", async () => {
