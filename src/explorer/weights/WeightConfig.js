@@ -7,7 +7,6 @@ import * as MapUtil from "../../util/map";
 import type {StaticExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 import type {WeightedTypes} from "../../analysis/weights";
 import {PluginWeightConfig} from "./PluginWeightConfig";
-import {FALLBACK_NAME} from "../../analysis/fallbackDeclaration";
 
 type Props = {|
   +adapters: StaticExplorerAdapterSet,
@@ -37,47 +36,44 @@ export class WeightConfig extends React.Component<Props> {
   }
 
   _renderPluginWeightConfigs(): ReactNode {
-    return this.props.adapters
-      .adapters()
-      .filter((x) => x.declaration().name !== FALLBACK_NAME)
-      .map((adapter) => {
-        const onChange = (weightedTypes) => {
-          const newWeightedTypes = {
-            nodes: MapUtil.copy(this.props.weightedTypes.nodes),
-            edges: MapUtil.copy(this.props.weightedTypes.edges),
-          };
-          for (const [key, val] of weightedTypes.nodes.entries()) {
-            newWeightedTypes.nodes.set(key, val);
-          }
-          for (const [key, val] of weightedTypes.edges.entries()) {
-            newWeightedTypes.edges.set(key, val);
-          }
-          this.props.onChange(newWeightedTypes);
+    return this.props.adapters.adapters().map((adapter) => {
+      const onChange = (weightedTypes) => {
+        const newWeightedTypes = {
+          nodes: MapUtil.copy(this.props.weightedTypes.nodes),
+          edges: MapUtil.copy(this.props.weightedTypes.edges),
         };
-        const pluginScopedWeightedTypes = {
-          nodes: new Map(),
-          edges: new Map(),
-        };
-        for (const {prefix} of adapter.declaration().nodeTypes) {
-          pluginScopedWeightedTypes.nodes.set(
-            prefix,
-            NullUtil.get(this.props.weightedTypes.nodes.get(prefix))
-          );
+        for (const [key, val] of weightedTypes.nodes.entries()) {
+          newWeightedTypes.nodes.set(key, val);
         }
-        for (const {prefix} of adapter.declaration().edgeTypes) {
-          pluginScopedWeightedTypes.edges.set(
-            prefix,
-            NullUtil.get(this.props.weightedTypes.edges.get(prefix))
-          );
+        for (const [key, val] of weightedTypes.edges.entries()) {
+          newWeightedTypes.edges.set(key, val);
         }
-        return (
-          <PluginWeightConfig
-            key={adapter.declaration().name}
-            adapter={adapter}
-            onChange={onChange}
-            weightedTypes={pluginScopedWeightedTypes}
-          />
+        this.props.onChange(newWeightedTypes);
+      };
+      const pluginScopedWeightedTypes = {
+        nodes: new Map(),
+        edges: new Map(),
+      };
+      for (const {prefix} of adapter.declaration().nodeTypes) {
+        pluginScopedWeightedTypes.nodes.set(
+          prefix,
+          NullUtil.get(this.props.weightedTypes.nodes.get(prefix))
         );
-      });
+      }
+      for (const {prefix} of adapter.declaration().edgeTypes) {
+        pluginScopedWeightedTypes.edges.set(
+          prefix,
+          NullUtil.get(this.props.weightedTypes.edges.get(prefix))
+        );
+      }
+      return (
+        <PluginWeightConfig
+          key={adapter.declaration().name}
+          adapter={adapter}
+          onChange={onChange}
+          weightedTypes={pluginScopedWeightedTypes}
+        />
+      );
+    });
   }
 }

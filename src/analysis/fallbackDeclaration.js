@@ -2,11 +2,7 @@
 
 import {NodeAddress, EdgeAddress} from "../core/graph";
 
-import type {PluginDeclaration} from "./pluginDeclaration";
-
 import type {EdgeType, NodeType} from "./types";
-
-export const FALLBACK_NAME = "FALLBACK_ADAPTER";
 
 export const fallbackNodeType: NodeType = Object.freeze({
   name: "node",
@@ -24,12 +20,4 @@ export const fallbackEdgeType: EdgeType = Object.freeze({
   prefix: EdgeAddress.empty,
   description:
     "The fallback EdgeType for edges which don't have any other type",
-});
-
-export const fallbackDeclaration: PluginDeclaration = Object.freeze({
-  name: FALLBACK_NAME,
-  nodePrefix: NodeAddress.empty,
-  edgePrefix: EdgeAddress.empty,
-  nodeTypes: Object.freeze([fallbackNodeType]),
-  edgeTypes: Object.freeze([fallbackEdgeType]),
 });

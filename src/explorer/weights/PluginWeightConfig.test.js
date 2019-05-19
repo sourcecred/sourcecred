@@ -8,10 +8,6 @@ import {
   assemblesEdgeType,
 } from "../../plugins/demo/declaration";
 import {FactorioStaticAdapter} from "../../plugins/demo/explorerAdapter";
-import {
-  fallbackNodeType,
-  fallbackEdgeType,
-} from "../../analysis/fallbackDeclaration";
 import {NodeTypeConfig} from "./NodeTypeConfig";
 import {EdgeTypeConfig} from "./EdgeTypeConfig";
 import {
@@ -117,22 +113,6 @@ describe("explorer/weights/PluginWeightConfig", () => {
       it("missing node prefix in weighted types", () => {
         const badTypes = defaultWeightsForAdapter(new FactorioStaticAdapter());
         badTypes.edges.delete(assemblesEdgeType.prefix);
-        checkError(badTypes);
-      });
-      it("extra node prefix in weighted types", () => {
-        const badTypes = defaultWeightsForAdapter(new FactorioStaticAdapter());
-        badTypes.nodes.set(fallbackNodeType.prefix, {
-          weight: 5,
-          type: fallbackNodeType,
-        });
-        checkError(badTypes);
-      });
-      it("extra edge prefix in weighted types", () => {
-        const badTypes = defaultWeightsForAdapter(new FactorioStaticAdapter());
-        badTypes.edges.set(fallbackEdgeType.prefix, {
-          weight: {forwards: 5, backwards: 3},
-          type: fallbackEdgeType,
-        });
         checkError(badTypes);
       });
     });

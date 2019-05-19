@@ -8,8 +8,10 @@ import {
   flattenAggregation,
   aggregateFlat,
   aggregationKey,
+  fallbackEdgeType,
+  fallbackNodeType,
 } from "./aggregate";
-import type {NodeType} from "../../analysis/types";
+import {type NodeType} from "../../analysis/types";
 
 describe("explorer/pagerankTable/aggregate", () => {
   // TODO: If making major modifications to these tests, consider switching
@@ -238,10 +240,11 @@ describe("explorer/pagerankTable/aggregate", () => {
       const aggregations = aggregateByNodeType([], nodeTypesArray);
       expect(aggregations).toHaveLength(0);
     });
-    it("errors if any connection has no matching type", () => {
+    it("uses fallbackNodeType if necessary", () => {
       const {scoredConnectionsArray} = example();
-      const shouldFail = () => aggregateByNodeType(scoredConnectionsArray, []);
-      expect(shouldFail).toThrowError("no matching entry");
+      const aggregations = aggregateByNodeType(scoredConnectionsArray, []);
+      expect(aggregations).toHaveLength(1);
+      expect(aggregations[0].nodeType).toEqual(fallbackNodeType);
     });
     it("sorts the aggregations by total score", () => {
       let lastSeenScore = Infinity;
@@ -354,11 +357,20 @@ describe("explorer/pagerankTable/aggregate", () => {
       );
       expect(aggregations).toHaveLength(0);
     });
-    it("errors if any connection has no matching type", () => {
+    it("aggregates with fallback edge type for connections with no type", () => {
       const {scoredConnectionsArray, nodeTypesArray} = example();
-      const shouldFail = () =>
-        aggregateByConnectionType(scoredConnectionsArray, nodeTypesArray, []);
-      expect(shouldFail).toThrowError("no matching entry");
+      const aggregations = aggregateByConnectionType(
+        scoredConnectionsArray,
+        nodeTypesArray,
+        []
+      );
+      expect(aggregations).toHaveLength(3);
+      for (const {connectionType} of aggregations) {
+        if (connectionType.type === "SYNTHETIC_LOOP") {
+          continue;
+        }
+        expect(connectionType.edgeType).toBe(fallbackEdgeType);
+      }
     });
     it("sorts the aggregations by total score", () => {
       let lastSeenScore = Infinity;

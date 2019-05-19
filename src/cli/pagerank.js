@@ -28,7 +28,6 @@ import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
 import type {IAnalysisAdapter} from "../analysis/analysisAdapter";
 import {AnalysisAdapter as GithubAnalysisAdapter} from "../plugins/github/analysisAdapter";
 import {AnalysisAdapter as GitAnalysisAdapter} from "../plugins/git/analysisAdapter";
-import {FallbackAdapter} from "../analysis/fallbackAdapter";
 
 function usage(print: (string) => void): void {
   print(
@@ -184,7 +183,6 @@ function weightsForAdapters(
 export const defaultAdapters = () => [
   new GithubAnalysisAdapter(),
   new GitAnalysisAdapter(),
-  new FallbackAdapter(),
 ];
 const defaultLoader = (r: RepoId) =>
   loadGraph(Common.sourcecredDirectory(), defaultAdapters(), r);

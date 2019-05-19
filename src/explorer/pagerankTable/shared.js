@@ -16,6 +16,9 @@ export function nodeDescription(
   adapters: DynamicExplorerAdapterSet
 ): ReactNode {
   const adapter = adapters.adapterMatchingNode(address);
+  if (adapter == null) {
+    return NodeAddress.toString(address);
+  }
   try {
     return adapter.nodeDescription(address);
   } catch (e) {

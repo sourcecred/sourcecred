@@ -90,8 +90,8 @@ describe("core/trie", () => {
     expect(x.getLast(fooBarZod)).toEqual(3);
   });
 
-  it("getLast throws an error if no value is available", () => {
-    expect(() => new NodeTrie().getLast(foo)).toThrowError("no matching entry");
+  it("getLast returns undefined if no value is available", () => {
+    expect(new NodeTrie().getLast(foo)).toEqual(undefined);
   });
 
   it("overwriting a value is illegal", () => {
