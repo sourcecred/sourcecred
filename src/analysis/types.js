@@ -1,6 +1,7 @@
 // @flow
 
 import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
+import {type EdgeWeight} from "./weights";
 
 /**
  * This module defines `NodeType`s and `EdgeType`s, both of which are
@@ -86,15 +87,10 @@ export type EdgeType = {|
   // is "referenced by"
   +backwardName: string,
 
-  // The default weight for the forward direction of this edge.
+  // The default forwards and backwards weights for this edge.
   // We use `1` as a default value ("of normal importance").
   // The weights have linear importance, i.e. 2 is twice as important as 1.
-  +defaultForwardWeight: number,
-
-  // The default weight for the backward direction of this edge.
-  // We use `1` as a default value ("of normal importance").
-  // The weights have linear importance, i.e. 2 is twice as important as 1.
-  +defaultBackwardWeight: number,
+  +defaultWeight: EdgeWeight,
 
   // The address that will be used to test whether an edge is a member
   // of this EdgeType. A given edge `e` is a member of the type `t` if

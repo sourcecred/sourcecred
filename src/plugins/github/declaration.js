@@ -74,8 +74,7 @@ const nodeTypes = Object.freeze([
 const authorsEdgeType = Object.freeze({
   forwardName: "authors",
   backwardName: "is authored by",
-  defaultForwardWeight: 1 / 2,
-  defaultBackwardWeight: 1,
+  defaultWeight: {forwards: 1 / 2, backwards: 1},
   prefix: E.Prefix.authors,
   description: dedent`\
     Connects a GitHub account to a post that they authored.
@@ -87,8 +86,7 @@ const authorsEdgeType = Object.freeze({
 const hasParentEdgeType = Object.freeze({
   forwardName: "has parent",
   backwardName: "has child",
-  defaultForwardWeight: 1,
-  defaultBackwardWeight: 1 / 4,
+  defaultWeight: {forwards: 1, backwards: 1 / 4},
   prefix: E.Prefix.hasParent,
   description: dedent`\
     Connects a GitHub entity to its child entities.
@@ -101,8 +99,7 @@ const hasParentEdgeType = Object.freeze({
 const mergedAsEdgeType = Object.freeze({
   forwardName: "merges",
   backwardName: "is merged by",
-  defaultForwardWeight: 1 / 2,
-  defaultBackwardWeight: 1,
+  defaultWeight: {forwards: 1 / 2, backwards: 1},
   prefix: E.Prefix.mergedAs,
   description: dedent`\
     Connects a GitHub pull request to the Git commit that it merges.
@@ -112,8 +109,7 @@ const mergedAsEdgeType = Object.freeze({
 const referencesEdgeType = Object.freeze({
   forwardName: "references",
   backwardName: "is referenced by",
-  defaultForwardWeight: 1,
-  defaultBackwardWeight: 0,
+  defaultWeight: {forwards: 1, backwards: 0},
   prefix: E.Prefix.references,
   description: dedent`\
     Connects a GitHub post to an entity that it references.
@@ -127,8 +123,7 @@ const referencesEdgeType = Object.freeze({
 const mentionsAuthorEdgeType = Object.freeze({
   forwardName: "mentions author of",
   backwardName: "has author mentioned by",
-  defaultForwardWeight: 1,
-  defaultBackwardWeight: 0,
+  defaultWeight: {forwards: 1, backwards: 0},
   prefix: E.Prefix.mentionsAuthor,
   description: dedent`\
     Connects a post that mentions a user to posts in the same thread that
@@ -144,8 +139,7 @@ const mentionsAuthorEdgeType = Object.freeze({
 const reactsHeartEdgeType = Object.freeze({
   forwardName: "reacted ❤️ to",
   backwardName: "got ❤️ from",
-  defaultForwardWeight: 2,
-  defaultBackwardWeight: 0,
+  defaultWeight: {forwards: 2, backwards: 0},
   prefix: E.Prefix.reactsHeart,
   description: dedent`\
     Connects users to posts to which they gave a ❤️ reaction.
@@ -155,8 +149,7 @@ const reactsHeartEdgeType = Object.freeze({
 const reactsThumbsUpEdgeType = Object.freeze({
   forwardName: "reacted 👍 to",
   backwardName: "got 👍 from",
-  defaultForwardWeight: 1,
-  defaultBackwardWeight: 0,
+  defaultWeight: {forwards: 1, backwards: 0},
   prefix: E.Prefix.reactsThumbsUp,
   description: dedent`\
     Connects users to posts to which they gave a 👍 reaction.
@@ -166,8 +159,7 @@ const reactsThumbsUpEdgeType = Object.freeze({
 const reactsHoorayEdgeType = Object.freeze({
   forwardName: "reacted 🎉 to",
   backwardName: "got 🎉 from",
-  defaultForwardWeight: 4,
-  defaultBackwardWeight: 0,
+  defaultWeight: {forwards: 4, backwards: 0},
   prefix: E.Prefix.reactsHooray,
   description: dedent`\
     Connects users to posts to which they gave a 🎉 reaction.
@@ -177,8 +169,7 @@ const reactsHoorayEdgeType = Object.freeze({
 const reactsRocketEdgeType = Object.freeze({
   forwardName: "reacted 🚀 to",
   backwardName: "got 🚀 from",
-  defaultForwardWeight: 1,
-  defaultBackwardWeight: 0,
+  defaultWeight: {forwards: 1, backwards: 0},
   prefix: E.Prefix.reactsRocket,
   description: dedent`\
     Connects users to posts to which they gave a 🚀 reaction.

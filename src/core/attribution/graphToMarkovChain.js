@@ -97,6 +97,8 @@ export type OrderedSparseMarkovChain = {|
   +chain: SparseMarkovChain,
 |};
 
+// TODO(@decentralion): Rename these fields to `forwards` and `backwards` to
+// deduplicate with the EdgeWeight type defined by analysis/weights
 export type EdgeWeight = {|
   +toWeight: number, // weight from src to dst
   +froWeight: number, // weight from dst to src

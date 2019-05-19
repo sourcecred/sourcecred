@@ -10,27 +10,30 @@ export class EdgeTypeConfig extends React.Component<{
   +onChange: (WeightedEdgeType) => void,
 }> {
   render() {
+    const {weight, type} = this.props.weightedType;
+    const {forwards, backwards} = weight;
+    const {forwardName, backwardName, description} = type;
     return (
       <div>
         <EdgeWeightSlider
-          name={this.props.weightedType.type.backwardName}
-          weight={this.props.weightedType.forwardWeight}
-          description={this.props.weightedType.type.description}
-          onChange={(forwardWeight) => {
+          name={backwardName}
+          weight={forwards}
+          description={description}
+          onChange={(newForwards) => {
             this.props.onChange({
-              ...this.props.weightedType,
-              forwardWeight,
+              type,
+              weight: {forwards: newForwards, backwards},
             });
           }}
         />
         <EdgeWeightSlider
-          name={this.props.weightedType.type.forwardName}
-          weight={this.props.weightedType.backwardWeight}
-          description={this.props.weightedType.type.description}
-          onChange={(backwardWeight) => {
+          name={forwardName}
+          weight={backwards}
+          description={description}
+          onChange={(newBackwards) => {
             this.props.onChange({
-              ...this.props.weightedType,
-              backwardWeight,
+              type,
+              weight: {forwards, backwards: newBackwards},
             });
           }}
         />

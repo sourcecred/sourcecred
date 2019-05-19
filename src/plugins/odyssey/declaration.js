@@ -64,8 +64,7 @@ const dependsOnEdgeType = Object.freeze({
   forwardName: "depends on",
   backwardName: "is depended on by",
   prefix: EdgeAddress.append(EDGE_PREFIX, "DEPENDS_ON"),
-  defaultForwardWeight: 1,
-  defaultBackwardWeight: 0,
+  defaultWeight: {forwards: 1, backwards: 0},
   description: "Generic edge for flowing credit in the Odyssey plugin",
 });
 

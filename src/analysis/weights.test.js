@@ -24,8 +24,8 @@ describe("analysis/weights", () => {
   describe("defaultWeightedEdgeType", () => {
     it("sets default weights as specified in the type", () => {
       const wet = defaultWeightedEdgeType(assemblesEdgeType);
-      expect(wet.forwardWeight).toEqual(wet.type.defaultForwardWeight);
-      expect(wet.backwardWeight).toEqual(wet.type.defaultBackwardWeight);
+      expect(wet.weight.forwards).toEqual(wet.type.defaultWeight.forwards);
+      expect(wet.weight.backwards).toEqual(wet.type.defaultWeight.backwards);
     });
   });
   describe("defaultWeightsForDeclaration", () => {

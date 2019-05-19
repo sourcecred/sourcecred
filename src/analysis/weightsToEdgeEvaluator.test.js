@@ -43,13 +43,17 @@ describe("analysis/weightsToEdgeEvaluator", () => {
       const nodesMap = new Map(nodes.map((x) => [x.type.prefix, x]));
       const edges = [
         {
-          forwardWeight: NullUtil.orElse(assemblesForward, 1),
-          backwardWeight: NullUtil.orElse(assemblesBackward, 1),
+          weight: {
+            forwards: NullUtil.orElse(assemblesForward, 1),
+            backwards: NullUtil.orElse(assemblesBackward, 1),
+          },
           type: assemblesEdgeType,
         },
         {
-          forwardWeight: NullUtil.orElse(baseForward, 1),
-          backwardWeight: NullUtil.orElse(baseBackward, 1),
+          weight: {
+            forwards: NullUtil.orElse(baseForward, 1),
+            backwards: NullUtil.orElse(baseBackward, 1),
+          },
           type: fallbackEdgeType,
         },
       ];
