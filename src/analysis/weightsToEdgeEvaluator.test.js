@@ -1,7 +1,6 @@
 // @flow
 
 import * as NullUtil from "../util/null";
-import {fallbackNodeType, fallbackEdgeType} from "./fallbackDeclaration";
 import {
   inserterNodeType,
   machineNodeType,
@@ -29,16 +28,12 @@ describe("analysis/weightsToEdgeEvaluator", () => {
     function weights({
       assemblesForward,
       assemblesBackward,
-      baseForward,
-      baseBackward,
       inserter,
       machine,
-      baseNode,
     }: WeightArgs) {
       const nodes = [
         {weight: NullUtil.orElse(inserter, 1), type: inserterNodeType},
         {weight: NullUtil.orElse(machine, 1), type: machineNodeType},
-        {weight: NullUtil.orElse(baseNode, 1), type: fallbackNodeType},
       ];
       const nodesMap = new Map(nodes.map((x) => [x.type.prefix, x]));
       const edges = [
@@ -48,13 +43,6 @@ describe("analysis/weightsToEdgeEvaluator", () => {
             backwards: NullUtil.orElse(assemblesBackward, 1),
           },
           type: assemblesEdgeType,
-        },
-        {
-          weight: {
-            forwards: NullUtil.orElse(baseForward, 1),
-            backwards: NullUtil.orElse(baseBackward, 1),
-          },
-          type: fallbackEdgeType,
         },
       ];
       const edgesMap = new Map(edges.map((x) => [x.type.prefix, x]));

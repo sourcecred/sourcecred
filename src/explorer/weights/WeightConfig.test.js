@@ -8,7 +8,6 @@ import {
   staticExplorerAdapterSet,
 } from "../../plugins/demo/explorerAdapter";
 import {inserterNodeType} from "../../plugins/demo/declaration";
-import {FALLBACK_NAME} from "../../analysis/fallbackDeclaration";
 import {defaultWeightsForAdapterSet, defaultWeightsForAdapter} from "./weights";
 import {WeightConfig} from "./WeightConfig";
 
@@ -33,21 +32,6 @@ describe("explorer/weights/WeightConfig", () => {
       );
       return {el, adapters, types, onChange};
     }
-    it("creates a PluginWeightConfig for every non-fallback adapter", () => {
-      const {el, adapters} = example();
-      const pwcs = el.find(PluginWeightConfig);
-      expect(pwcs).toHaveLength(adapters.adapters().length - 1);
-      for (const adapter of adapters.adapters()) {
-        if (adapter.declaration().name === FALLBACK_NAME) {
-          continue;
-        }
-        const pwc = pwcs.findWhere(
-          (x) =>
-            x.props().adapter.declaration().name === adapter.declaration().name
-        );
-        expect(pwc).toHaveLength(1);
-      }
-    });
     it("sets the PluginWeightConfig weights properly", () => {
       const {el} = example();
       const pwc = el

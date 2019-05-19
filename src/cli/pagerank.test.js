@@ -25,11 +25,7 @@ import {
   DEFAULT_MAX_ITERATIONS,
 } from "../core/pagerankGraph";
 import type {NodeType, EdgeType} from "../analysis/types";
-import {fallbackDeclaration} from "../analysis/fallbackDeclaration";
-import {
-  defaultWeightsForDeclaration,
-  combineWeights,
-} from "../analysis/weights";
+import {defaultWeightsForDeclaration} from "../analysis/weights";
 
 import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
 
@@ -221,16 +217,7 @@ describe("cli/pagerank", () => {
         edgeTypes: [edgeType],
       };
 
-      const exampleWeightedTypes = defaultWeightsForDeclaration(
-        exampleDeclaration
-      );
-      const fallbackWeightedTypes = defaultWeightsForDeclaration(
-        fallbackDeclaration
-      );
-      const weightedTypes = combineWeights([
-        exampleWeightedTypes,
-        fallbackWeightedTypes,
-      ]);
+      const weightedTypes = defaultWeightsForDeclaration(exampleDeclaration);
 
       const manualWeights = new Map();
       manualWeights.set(advancedGraph().nodes.src(), 4);

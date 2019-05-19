@@ -3,8 +3,10 @@
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 import * as MapUtil from "../../util/map";
+import * as NullUtil from "../../util/null";
 import {NodeTrie, EdgeTrie} from "../../core/trie";
-import type {EdgeType, NodeType} from "../../analysis/types";
+import {NodeAddress, EdgeAddress} from "../../core/graph";
+import {type EdgeType, type NodeType} from "../../analysis/types";
 import type {ScoredConnection} from "../../analysis/pagerankNodeDecomposition";
 
 // Sorted by descending `summary.score`
@@ -43,6 +45,22 @@ export type FlatAggregation = {|
   +connections: $ReadOnlyArray<ScoredConnection>,
 |};
 
+export const fallbackNodeType: NodeType = Object.freeze({
+  name: "node",
+  pluralName: "nodes",
+  prefix: NodeAddress.empty,
+  defaultWeight: 1,
+  description: "",
+});
+
+export const fallbackEdgeType: EdgeType = Object.freeze({
+  forwardName: "has edge to",
+  backwardName: "has edge from",
+  defaultWeight: Object.freeze({forwards: 1, backwards: 1}),
+  prefix: EdgeAddress.empty,
+  description: "",
+});
+
 export function aggregateByNodeType(
   xs: $ReadOnlyArray<ScoredConnection>,
   nodeTypes: $ReadOnlyArray<NodeType>
@@ -53,7 +71,7 @@ export function aggregateByNodeType(
   }
   const nodeTypeToConnections = new Map();
   for (const x of xs) {
-    const type = typeTrie.getLast(x.source);
+    const type = NullUtil.orElse(typeTrie.getLast(x.source), fallbackNodeType);
     MapUtil.pushValue(nodeTypeToConnections, type, x);
   }
   const aggregations: NodeAggregation[] = [];
@@ -105,7 +123,10 @@ export function aggregateByConnectionType(
         throw new Error((x.connection.adjacency.type: empty));
     }
     const edge = x.connection.adjacency.edge;
-    const type = typeTrie.getLast(edge.address);
+    const type = NullUtil.orElse(
+      typeTrie.getLast(edge.address),
+      fallbackEdgeType
+    );
     MapUtil.pushValue(relevantMap, type, x);
   }
 

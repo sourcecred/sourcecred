@@ -1,4 +1,15 @@
 // @flow
+/**
+ * This module is deprecated; logic for aggregating over different plugins,
+ * and matching adapters for a particular  or edge, should live at the
+ * core plugin level, not at the level of particular adapters. Otherwise,
+ * we will find ourselves re-implementing the same logic repetitiously for
+ * every new adapter.
+ *
+ * If considering adding new dependencies on this file or adding new features,
+ * please consider simply re-writing it to live in the analysis module and
+ * be paramterized over the adapter choice.
+ */
 
 import {Graph, type NodeAddressT, type EdgeAddressT} from "../../core/graph";
 import {NodeTrie, EdgeTrie} from "../../core/trie";
@@ -11,8 +22,6 @@ import type {
 } from "./explorerAdapter";
 import type {EdgeType, NodeType} from "../../analysis/types";
 
-import {FallbackStaticAdapter} from "./fallbackAdapter";
-
 export class StaticExplorerAdapterSet {
   _adapters: $ReadOnlyArray<StaticExplorerAdapter>;
   _adapterNodeTrie: NodeTrie<StaticExplorerAdapter>;
@@ -21,7 +30,7 @@ export class StaticExplorerAdapterSet {
   _typeEdgeTrie: EdgeTrie<EdgeType>;
 
   constructor(adapters: $ReadOnlyArray<StaticExplorerAdapter>): void {
-    this._adapters = [new FallbackStaticAdapter(), ...adapters];
+    this._adapters = adapters;
     this._adapterNodeTrie = new NodeTrie();
     this._adapterEdgeTrie = new EdgeTrie();
     this._typeNodeTrie = new NodeTrie();
@@ -52,19 +61,19 @@ export class StaticExplorerAdapterSet {
     return [].concat(...this._adapters.map((x) => x.declaration().edgeTypes));
   }
 
-  adapterMatchingNode(x: NodeAddressT): StaticExplorerAdapter {
+  adapterMatchingNode(x: NodeAddressT): ?StaticExplorerAdapter {
     return this._adapterNodeTrie.getLast(x);
   }
 
-  adapterMatchingEdge(x: EdgeAddressT): StaticExplorerAdapter {
+  adapterMatchingEdge(x: EdgeAddressT): ?StaticExplorerAdapter {
     return this._adapterEdgeTrie.getLast(x);
   }
 
-  typeMatchingNode(x: NodeAddressT): NodeType {
+  typeMatchingNode(x: NodeAddressT): ?NodeType {
     return this._typeNodeTrie.getLast(x);
   }
 
-  typeMatchingEdge(x: EdgeAddressT): EdgeType {
+  typeMatchingEdge(x: EdgeAddressT): ?EdgeType {
     return this._typeEdgeTrie.getLast(x);
   }
 
@@ -95,11 +104,11 @@ export class DynamicExplorerAdapterSet {
     });
   }
 
-  adapterMatchingNode(x: NodeAddressT): DynamicExplorerAdapter {
+  adapterMatchingNode(x: NodeAddressT): ?DynamicExplorerAdapter {
     return this._adapterNodeTrie.getLast(x);
   }
 
-  adapterMatchingEdge(x: EdgeAddressT): DynamicExplorerAdapter {
+  adapterMatchingEdge(x: EdgeAddressT): ?DynamicExplorerAdapter {
     return this._adapterEdgeTrie.getLast(x);
   }
 

@@ -2,18 +2,15 @@
 
 import React from "react";
 import sortBy from "lodash.sortby";
-import * as NullUtil from "../../util/null";
 
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 import type {PagerankNodeDecomposition} from "../../analysis/pagerankNodeDecomposition";
 import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 import type {DynamicExplorerAdapter} from "../adapters/explorerAdapter";
-import {FALLBACK_NAME} from "../../analysis/fallbackDeclaration";
 import type {WeightedTypes} from "../../analysis/weights";
 import {WeightConfig} from "../weights/WeightConfig";
 import {NodeRowList} from "./Node";
 import {type NodeType} from "../../analysis/types";
-import {fallbackNodeType} from "../../analysis/fallbackDeclaration";
 
 type PagerankTableProps = {|
   +pnd: PagerankNodeDecomposition,
@@ -26,7 +23,7 @@ type PagerankTableProps = {|
   +onManualWeightsChange: (NodeAddressT, number) => void,
 |};
 type PagerankTableState = {|
-  selectedNodeType: NodeType,
+  selectedNodeTypePrefix: NodeAddressT,
   showWeightConfig: boolean,
 |};
 export class PagerankTable extends React.PureComponent<
@@ -35,11 +32,13 @@ export class PagerankTable extends React.PureComponent<
 > {
   constructor(props: PagerankTableProps): void {
     super();
-    const selectedNodeType = NullUtil.orElse(
-      props.defaultNodeType,
-      fallbackNodeType
-    );
-    this.state = {selectedNodeType, showWeightConfig: false};
+    const {defaultNodeType} = props;
+    const selectedNodeTypePrefix =
+      defaultNodeType != null ? defaultNodeType.prefix : NodeAddress.empty;
+    this.state = {
+      selectedNodeTypePrefix,
+      showWeightConfig: false,
+    };
   }
 
   renderConfigurationRow() {
@@ -110,20 +109,16 @@ export class PagerankTable extends React.PureComponent<
       <label>
         <span>Filter by node type: </span>
         <select
-          value={this.state.selectedNodeType.prefix}
-          onChange={(e) => {
-            const nodePrefix = e.target.value;
-            const nodeType = adapters.static().typeMatchingNode(nodePrefix);
-            this.setState({selectedNodeType: nodeType});
-          }}
+          value={this.state.selectedNodeTypePrefix}
+          onChange={(e) =>
+            this.setState({selectedNodeTypePrefix: e.target.value})
+          }
         >
           <option value={NodeAddress.empty}>Show all</option>
           {sortBy(
             adapters.adapters(),
             (a: DynamicExplorerAdapter) => a.static().declaration().name
-          )
-            .filter((a) => a.static().declaration().name !== FALLBACK_NAME)
-            .map(optionGroup)}
+          ).map(optionGroup)}
         </select>
       </label>
     );
@@ -140,7 +135,6 @@ export class PagerankTable extends React.PureComponent<
     if (pnd == null || adapters == null || maxEntriesPerList == null) {
       throw new Error("Impossible.");
     }
-    const selectedNodeTypePrefix = this.state.selectedNodeType.prefix;
     const sharedProps = {
       pnd,
       adapters,
@@ -169,7 +163,7 @@ export class PagerankTable extends React.PureComponent<
           <NodeRowList
             sharedProps={sharedProps}
             nodes={Array.from(pnd.keys()).filter((node) =>
-              NodeAddress.hasPrefix(node, selectedNodeTypePrefix)
+              NodeAddress.hasPrefix(node, this.state.selectedNodeTypePrefix)
             )}
           />
         </tbody>

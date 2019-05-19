@@ -12,7 +12,6 @@ import {WeightConfig} from "../weights/WeightConfig";
 import {defaultWeightsForAdapter} from "../weights/weights";
 import {FactorioStaticAdapter} from "../../plugins/demo/explorerAdapter";
 import {type NodeType} from "../../analysis/types";
-import {fallbackNodeType} from "../../analysis/fallbackDeclaration";
 
 require("../../webutil/testUtil").configureEnzyme();
 describe("explorer/pagerankTable/Table", () => {
@@ -146,18 +145,20 @@ describe("explorer/pagerankTable/Table", () => {
       });
       it("filter defaults to show all if defaultNodeType not passed", async () => {
         const {element} = await setup();
-        expect(element.state().selectedNodeType).toEqual(fallbackNodeType);
+        expect(element.state().selectedNodeTypePrefix).toEqual(
+          NodeAddress.empty
+        );
       });
-      it("selectedNodeType defaults to defaultNodeType if available", async () => {
+      it("selectedNodeTypePrefix defaults to provided NodeType, if available", async () => {
         const nodeType: NodeType = {
           name: "testNodeType",
           pluralName: "testNodeTypes",
-          prefix: NodeAddress.empty,
+          prefix: NodeAddress.fromParts(["foo"]),
           defaultWeight: 1,
           description: "test type",
         };
         const {element} = await setup(nodeType);
-        expect(element.state().selectedNodeType).toEqual(nodeType);
+        expect(element.state().selectedNodeTypePrefix).toEqual(nodeType.prefix);
       });
     });
 

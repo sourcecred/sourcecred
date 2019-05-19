@@ -87,13 +87,10 @@ class BaseTrie<K, V> {
 
   /**
    * Get the last stored value `v` in the path to key `k`.
-   * Throws an error if no value is available.
+   * Returns undefined if no value is available.
    */
-  getLast(k: K): V {
+  getLast(k: K): ?V {
     const path = this.get(k);
-    if (path.length === 0) {
-      throw new Error("Tried to getLast, but no matching entry existed");
-    }
     return path[path.length - 1];
   }
 }
