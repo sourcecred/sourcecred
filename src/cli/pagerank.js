@@ -18,14 +18,10 @@ import * as Common from "./common";
 import stringify from "json-stable-stringify";
 import {loadGraph, type LoadGraphResult} from "../analysis/loadGraph";
 
-import {
-  type WeightedTypes,
-  type ManualWeights,
-  combineWeights,
-  defaultWeightsForDeclaration,
-} from "../analysis/weights";
+import {type Weights, defaultWeights} from "../analysis/weights";
+import {type NodeAndEdgeTypes} from "../analysis/types";
+import {combineTypes} from "../analysis/pluginDeclaration";
 import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
-import type {IAnalysisAdapter} from "../analysis/analysisAdapter";
 import {AnalysisAdapter as GithubAnalysisAdapter} from "../plugins/github/analysisAdapter";
 import {AnalysisAdapter as GitAnalysisAdapter} from "../plugins/git/analysisAdapter";
 
@@ -144,11 +140,11 @@ export function makePagerankCommand(
 }
 
 export async function runPagerank(
-  typeWeights: WeightedTypes,
-  manualWeights: ManualWeights,
-  graph: Graph
+  weights: Weights,
+  graph: Graph,
+  types: NodeAndEdgeTypes
 ): Promise<PagerankGraph> {
-  const evaluator = weightsToEdgeEvaluator(typeWeights, manualWeights);
+  const evaluator = weightsToEdgeEvaluator(weights, types);
   const pagerankGraph = new PagerankGraph(
     graph,
     evaluator,
@@ -173,22 +169,17 @@ export async function savePagerankGraph(
   await fs.writeFile(pgFile, stringify(pgJSON));
 }
 
-function weightsForAdapters(
-  adapters: $ReadOnlyArray<IAnalysisAdapter>
-): WeightedTypes {
-  const declarations = adapters.map((a) => a.declaration());
-  return combineWeights(declarations.map(defaultWeightsForDeclaration));
-}
-
 export const defaultAdapters = () => [
   new GithubAnalysisAdapter(),
   new GitAnalysisAdapter(),
 ];
+
+const declarations = () => defaultAdapters().map((x) => x.declaration());
+
 const defaultLoader = (r: RepoId) =>
   loadGraph(Common.sourcecredDirectory(), defaultAdapters(), r);
-export const defaultWeights = () => weightsForAdapters(defaultAdapters());
 export const defaultPagerank = (g: Graph) =>
-  runPagerank(defaultWeights(), new Map(), g);
+  runPagerank(defaultWeights(), g, combineTypes(declarations()));
 export const defaultSaver = (r: RepoId, pg: PagerankGraph) =>
   savePagerankGraph(Common.sourcecredDirectory(), r, pg);
 

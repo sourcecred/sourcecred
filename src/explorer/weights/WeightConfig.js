@@ -1,22 +1,84 @@
 // @flow
 
-import React, {type Node as ReactNode} from "react";
+import React from "react";
 import * as NullUtil from "../../util/null";
-import * as MapUtil from "../../util/map";
 
-import type {StaticExplorerAdapterSet} from "../adapters/explorerAdapterSet";
-import type {WeightedTypes} from "../../analysis/weights";
-import {PluginWeightConfig} from "./PluginWeightConfig";
+import {type NodeAddressT, type EdgeAddressT} from "../../core/graph";
+import {type EdgeWeight, type NodeWeight} from "../../analysis/weights";
+import {type NodeType, type EdgeType} from "../../analysis/types";
+import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
+import {NodeTypeConfig} from "./NodeTypeConfig";
+import {EdgeTypeConfig, styledVariable} from "./EdgeTypeConfig";
 
 type Props = {|
-  +adapters: StaticExplorerAdapterSet,
-  +weightedTypes: WeightedTypes,
-  +onChange: (WeightedTypes) => void,
+  +declarations: $ReadOnlyArray<PluginDeclaration>,
+  // Map from NodeType prefix to weight.
+  +nodeTypeWeights: Map<NodeAddressT, NodeWeight>,
+  // Map from EdgeType prefix to weight.
+  +edgeTypeWeights: Map<EdgeAddressT, EdgeWeight>,
+  +onNodeWeightChange: (NodeAddressT, number) => void,
+  +onEdgeWeightChange: (EdgeAddressT, EdgeWeight) => void,
 |};
 
+/**
+ * A React component that lets users set Type-level weights.
+ *
+ * The WeightConfig component renders a slider for every Node and Edge type
+ * within the array of declarations it's been provided. The sliders are
+ * organized by plugin at the top level, and then by whether they represent
+ * node or edge types at the level beneath.
+ *
+ * Each slider displays the weight associated in the `nodeTypeWeights` or
+ * `edgeTypeWeights` maps provided in props. When the user changes the weight,
+ * `onNodeWeightChange` or `onEdgeWeightChange` is called with the new weight.
+ */
 export class WeightConfig extends React.Component<Props> {
-  constructor(props: Props): void {
-    super(props);
+  _nodeConfig(type: NodeType) {
+    const {prefix, defaultWeight} = type;
+    const {onNodeWeightChange, nodeTypeWeights} = this.props;
+    const weight = NullUtil.orElse(nodeTypeWeights.get(prefix), defaultWeight);
+    const onChange = (weight) => onNodeWeightChange(prefix, weight);
+    return (
+      <NodeTypeConfig
+        key={prefix}
+        type={type}
+        weight={weight}
+        onChange={onChange}
+      />
+    );
+  }
+
+  _edgeConfig(type: EdgeType) {
+    const {prefix, defaultWeight} = type;
+    const {onEdgeWeightChange, edgeTypeWeights} = this.props;
+    const weight = NullUtil.orElse(edgeTypeWeights.get(prefix), defaultWeight);
+    const onChange = (weight) => onEdgeWeightChange(prefix, weight);
+    return (
+      <EdgeTypeConfig
+        key={prefix}
+        type={type}
+        weight={weight}
+        onChange={onChange}
+      />
+    );
+  }
+
+  _renderPlugin(declaration: PluginDeclaration) {
+    const {name, nodeTypes, edgeTypes} = declaration;
+    const nodeConfigs = nodeTypes.map((t) => this._nodeConfig(t));
+    const edgeConfigs = edgeTypes.map((t) => this._edgeConfig(t));
+    return (
+      <div key={name}>
+        <h3>{name}</h3>
+        <h4 style={{marginBottom: "0.3em"}}>Node weights</h4>
+        {nodeConfigs}
+        <h4 style={{marginBottom: "0.3em"}}>Edge weights</h4>
+        <p style={{marginBottom: "0.6em", marginTop: "0.6em"}}>
+          Flow cred from {styledVariable("β")} to {styledVariable("α")} when:
+        </p>
+        {edgeConfigs}
+      </div>
+    );
   }
 
   render() {
@@ -29,51 +91,9 @@ export class WeightConfig extends React.Component<Props> {
             justifyContent: "space-between",
           }}
         >
-          {this._renderPluginWeightConfigs()}
+          {this.props.declarations.map((x) => this._renderPlugin(x))}
         </div>
       </React.Fragment>
     );
-  }
-
-  _renderPluginWeightConfigs(): ReactNode {
-    return this.props.adapters.adapters().map((adapter) => {
-      const onChange = (weightedTypes) => {
-        const newWeightedTypes = {
-          nodes: MapUtil.copy(this.props.weightedTypes.nodes),
-          edges: MapUtil.copy(this.props.weightedTypes.edges),
-        };
-        for (const [key, val] of weightedTypes.nodes.entries()) {
-          newWeightedTypes.nodes.set(key, val);
-        }
-        for (const [key, val] of weightedTypes.edges.entries()) {
-          newWeightedTypes.edges.set(key, val);
-        }
-        this.props.onChange(newWeightedTypes);
-      };
-      const pluginScopedWeightedTypes = {
-        nodes: new Map(),
-        edges: new Map(),
-      };
-      for (const {prefix} of adapter.declaration().nodeTypes) {
-        pluginScopedWeightedTypes.nodes.set(
-          prefix,
-          NullUtil.get(this.props.weightedTypes.nodes.get(prefix))
-        );
-      }
-      for (const {prefix} of adapter.declaration().edgeTypes) {
-        pluginScopedWeightedTypes.edges.set(
-          prefix,
-          NullUtil.get(this.props.weightedTypes.edges.get(prefix))
-        );
-      }
-      return (
-        <PluginWeightConfig
-          key={adapter.declaration().name}
-          adapter={adapter}
-          onChange={onChange}
-          weightedTypes={pluginScopedWeightedTypes}
-        />
-      );
-    });
   }
 }

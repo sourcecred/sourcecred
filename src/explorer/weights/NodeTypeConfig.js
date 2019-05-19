@@ -2,24 +2,21 @@
 
 import React from "react";
 import {WeightSlider} from "./WeightSlider";
-import type {WeightedNodeType} from "../../analysis/weights";
+import type {NodeType} from "../../analysis/types";
+import type {NodeWeight} from "../../analysis/weights";
 
 export class NodeTypeConfig extends React.Component<{
-  +weightedType: WeightedNodeType,
-  +onChange: (WeightedNodeType) => void,
+  +weight: NodeWeight,
+  +type: NodeType,
+  +onChange: (NodeWeight) => void,
 }> {
   render() {
     return (
       <WeightSlider
-        name={this.props.weightedType.type.name}
-        weight={this.props.weightedType.weight}
-        description={this.props.weightedType.type.description}
-        onChange={(weight) => {
-          this.props.onChange({
-            ...this.props.weightedType,
-            weight,
-          });
-        }}
+        name={this.props.type.name}
+        weight={this.props.weight}
+        description={this.props.type.description}
+        onChange={(weight) => this.props.onChange(weight)}
       />
     );
   }

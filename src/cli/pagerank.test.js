@@ -5,15 +5,12 @@ import path from "path";
 import fs from "fs-extra";
 
 import {run} from "./testUtil";
-import * as NullUtil from "../util/null";
 import {
   help,
   makePagerankCommand,
   savePagerankGraph,
   runPagerank,
-  defaultWeights,
   defaultPagerank,
-  defaultAdapters,
   defaultSaver,
 } from "./pagerank";
 import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
@@ -24,8 +21,8 @@ import {
   DEFAULT_CONVERGENCE_THRESHOLD,
   DEFAULT_MAX_ITERATIONS,
 } from "../core/pagerankGraph";
-import type {NodeType, EdgeType} from "../analysis/types";
-import {defaultWeightsForDeclaration} from "../analysis/weights";
+import {type NodeType, type EdgeType} from "../analysis/types";
+import {defaultWeights} from "../analysis/weights";
 
 import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
 
@@ -209,27 +206,20 @@ describe("cli/pagerank", () => {
         prefix: EdgeAddress.fromParts(["hom"]),
         description: "an example edge type",
       };
-      const exampleDeclaration = {
-        name: "example",
-        nodePrefix: NodeAddress.fromParts(["src"]),
-        edgePrefix: EdgeAddress.fromParts(["hom"]),
+      const types = {
         nodeTypes: [nodeType],
         edgeTypes: [edgeType],
       };
 
-      const weightedTypes = defaultWeightsForDeclaration(exampleDeclaration);
-
-      const manualWeights = new Map();
-      manualWeights.set(advancedGraph().nodes.src(), 4);
       const graph = advancedGraph().graph1();
       const actualPagerankGraph = await runPagerank(
-        weightedTypes,
-        manualWeights,
-        graph
+        defaultWeights(),
+        graph,
+        types
       );
       const expectedPagerankGraph = new PagerankGraph(
         graph,
-        weightsToEdgeEvaluator(weightedTypes, manualWeights),
+        weightsToEdgeEvaluator(defaultWeights(), types),
         DEFAULT_SYNTHETIC_LOOP_WEIGHT
       );
       await expectedPagerankGraph.runPagerank({
@@ -246,22 +236,6 @@ describe("cli/pagerank", () => {
       });
       await defaultPagerank(graph);
     });
-  });
-  it("default weights contain every node and edge type from adapters", () => {
-    const ws = defaultWeights();
-    for (const adapter of defaultAdapters()) {
-      const declaration = adapter.declaration();
-      for (const nodeType of declaration.nodeTypes) {
-        const weightedNodeType = NullUtil.get(ws.nodes.get(nodeType.prefix));
-        expect(weightedNodeType.weight).toEqual(nodeType.defaultWeight);
-        expect(weightedNodeType.type).toEqual(nodeType);
-      }
-      for (const edgeType of declaration.edgeTypes) {
-        const {weight, type} = NullUtil.get(ws.edges.get(edgeType.prefix));
-        expect(weight).toEqual(edgeType.defaultWeight);
-        expect(type).toEqual(edgeType);
-      }
-    }
   });
   it("defaultSaver saves to sourcecred directory", async () => {
     const dirname = tmp.dirSync().name;

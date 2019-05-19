@@ -11,8 +11,8 @@ import type {RepoId} from "../core/repoId";
 import {type NodeAddressT} from "../core/graph";
 
 import {PagerankTable} from "./pagerankTable/Table";
-import type {WeightedTypes} from "../analysis/weights";
-import {defaultWeightsForAdapterSet} from "./weights/weights";
+import {WeightConfig} from "./weights/WeightConfig";
+import {type Weights, defaultWeights} from "../analysis/weights";
 import {Prefix as GithubPrefix} from "../plugins/github/nodes";
 import {
   createStateTransitionMachine,
@@ -61,8 +61,7 @@ type Props = {|
 |};
 type State = {|
   appState: AppState,
-  weightedTypes: WeightedTypes,
-  manualWeights: Map<NodeAddressT, number>,
+  weights: Weights,
 |};
 
 export function createApp(
@@ -78,8 +77,7 @@ export function createApp(
       super(props);
       this.state = {
         appState: initialState(this.props.repoId),
-        weightedTypes: defaultWeightsForAdapterSet(props.adapters),
-        manualWeights: new Map(),
+        weights: defaultWeights(),
       };
       this.stateTransitionMachine = createSTM(
         () => this.state.appState,
@@ -89,6 +87,27 @@ export function createApp(
 
     render() {
       const {appState} = this.state;
+      const weightConfig = (
+        <WeightConfig
+          declarations={this.props.adapters
+            .adapters()
+            .map((a) => a.declaration())}
+          nodeTypeWeights={this.state.weights.nodeTypeWeights}
+          edgeTypeWeights={this.state.weights.edgeTypeWeights}
+          onNodeWeightChange={(prefix, weight) => {
+            this.setState(({weights}) => {
+              weights.nodeTypeWeights.set(prefix, weight);
+              return {weights};
+            });
+          }}
+          onEdgeWeightChange={(prefix, weight) => {
+            this.setState(({weights}) => {
+              weights.edgeTypeWeights.set(prefix, weight);
+              return {weights};
+            });
+          }}
+        />
+      );
       let pagerankTable;
       if (appState.type === "PAGERANK_EVALUATED") {
         const adapters = appState.graphWithAdapters.adapters;
@@ -97,15 +116,12 @@ export function createApp(
           <PagerankTable
             defaultNodeType={userNodeType}
             adapters={adapters}
-            weightedTypes={this.state.weightedTypes}
-            onWeightedTypesChange={(weightedTypes) =>
-              this.setState({weightedTypes})
-            }
-            manualWeights={this.state.manualWeights}
+            weightConfig={weightConfig}
+            manualWeights={this.state.weights.nodeManualWeights}
             onManualWeightsChange={(addr: NodeAddressT, weight: number) =>
-              this.setState(({manualWeights}) => {
-                manualWeights.set(addr, weight);
-                return {manualWeights};
+              this.setState(({weights}) => {
+                weights.nodeManualWeights.set(addr, weight);
+                return {weights};
               })
             }
             pnd={pnd}
@@ -133,8 +149,8 @@ export function createApp(
               this.stateTransitionMachine.loadGraphAndRunPagerank(
                 this.props.assets,
                 this.props.adapters,
-                this.state.weightedTypes,
-                this.state.manualWeights,
+                this.state.weights,
+                this.props.adapters.combinedTypes(),
                 GithubPrefix.user
               )
             }

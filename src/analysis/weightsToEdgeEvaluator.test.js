@@ -1,110 +1,91 @@
 // @flow
 
-import * as NullUtil from "../util/null";
-import {
-  inserterNodeType,
-  machineNodeType,
-  assemblesEdgeType,
-} from "../plugins/demo/declaration";
-import {
-  edges as factorioEdges,
-  nodes as factorioNodes,
-} from "../plugins/demo/graph";
-import type {ManualWeights} from "./weights";
+import {NodeAddress, EdgeAddress} from "../core/graph";
+import {type Weights, defaultWeights} from "./weights";
 import {weightsToEdgeEvaluator} from "./weightsToEdgeEvaluator";
 
 describe("analysis/weightsToEdgeEvaluator", () => {
-  describe("weightsToEdgeEvaluator", () => {
-    type WeightArgs = {|
-      +assemblesForward?: number,
-      +assemblesBackward?: number,
-      +baseForward?: number,
-      +baseBackward?: number,
-      +inserter?: number,
-      +machine?: number,
-      +baseNode?: number,
-      +manualWeights?: ManualWeights,
-    |};
-    function weights({
-      assemblesForward,
-      assemblesBackward,
-      inserter,
-      machine,
-    }: WeightArgs) {
-      const nodes = [
-        {weight: NullUtil.orElse(inserter, 1), type: inserterNodeType},
-        {weight: NullUtil.orElse(machine, 1), type: machineNodeType},
-      ];
-      const nodesMap = new Map(nodes.map((x) => [x.type.prefix, x]));
-      const edges = [
-        {
-          weight: {
-            forwards: NullUtil.orElse(assemblesForward, 1),
-            backwards: NullUtil.orElse(assemblesBackward, 1),
-          },
-          type: assemblesEdgeType,
-        },
-      ];
-      const edgesMap = new Map(edges.map((x) => [x.type.prefix, x]));
-      return {nodes: nodesMap, edges: edgesMap};
-    }
-    function exampleEdgeWeights(weightArgs: WeightArgs) {
-      const ws = weights(weightArgs);
-      const manualWeights = weightArgs.manualWeights || new Map();
-      const ee = weightsToEdgeEvaluator(ws, manualWeights);
-      // src is a machine, dst is an inserter, edge type is assembles
-      return ee(factorioEdges.assembles1);
-    }
-    it("toWeight is affected by the edge's forwardWeight", () => {
-      expect(exampleEdgeWeights({assemblesForward: 2}).toWeight).toEqual(2);
+  const src = NodeAddress.fromParts(["src"]);
+  const dst = NodeAddress.fromParts(["dst"]);
+  const edge = {src, dst, address: EdgeAddress.fromParts(["edge"])};
+
+  const fallbackNodeType = Object.freeze({
+    name: "",
+    pluralName: "",
+    prefix: NodeAddress.empty,
+    defaultWeight: 1,
+    description: "",
+  });
+
+  const srcNodeType = Object.freeze({
+    name: "",
+    pluralName: "",
+    prefix: src,
+    defaultWeight: 2,
+    description: "",
+  });
+
+  const fallbackEdgeType = Object.freeze({
+    forwardName: "",
+    backwardName: "",
+    defaultWeight: Object.freeze({forwards: 1, backwards: 1}),
+    prefix: EdgeAddress.empty,
+    description: "",
+  });
+
+  function evaluateEdge(weights: Weights) {
+    const evaluator = weightsToEdgeEvaluator(weights, {
+      nodeTypes: [fallbackNodeType, srcNodeType],
+      edgeTypes: [fallbackEdgeType],
     });
-    it("froWeight is affected by the edge's backwardWeight", () => {
-      expect(exampleEdgeWeights({assemblesBackward: 3}).froWeight).toEqual(3);
+    return evaluator(edge);
+  }
+
+  it("applies default weights when none are specified", () => {
+    expect(evaluateEdge(defaultWeights())).toEqual({toWeight: 1, froWeight: 2});
+  });
+
+  it("only matches the most specific node types", () => {
+    const weights = defaultWeights();
+    weights.nodeTypeWeights.set(NodeAddress.empty, 99);
+    expect(evaluateEdge(weights)).toEqual({toWeight: 99, froWeight: 2});
+  });
+
+  it("takes manually specified edge type weights into account", () => {
+    const weights = defaultWeights();
+    // Note that here we grab the fallout edge type. This also verifies that
+    // we are doing prefix matching on the types (rather than exact matching).
+    weights.edgeTypeWeights.set(EdgeAddress.empty, {
+      forwards: 6,
+      backwards: 12,
     });
-    it("toWeight is affected by the dst's weight", () => {
-      expect(exampleEdgeWeights({inserter: 4}).toWeight).toEqual(4);
+    expect(evaluateEdge(weights)).toEqual({toWeight: 6, froWeight: 24});
+  });
+
+  it("takes manually specified per-node weights into account", () => {
+    const weights = defaultWeights();
+    weights.nodeManualWeights.set(src, 10);
+    expect(evaluateEdge(weights)).toEqual({toWeight: 1, froWeight: 20});
+  });
+
+  it("uses 1 as a default weight for unmatched nodes and edges", () => {
+    const evaluator = weightsToEdgeEvaluator(defaultWeights(), {
+      nodeTypes: [],
+      edgeTypes: [],
     });
-    it("froWeight is affected by the src's weight", () => {
-      expect(exampleEdgeWeights({machine: 5}).froWeight).toEqual(5);
+    expect(evaluator(edge)).toEqual({toWeight: 1, froWeight: 1});
+  });
+
+  it("ignores extra weights if they do not apply", () => {
+    const withoutExtraWeights = evaluateEdge(defaultWeights());
+    const extraWeights = defaultWeights();
+    extraWeights.nodeManualWeights.set(NodeAddress.fromParts(["foo"]), 99);
+    extraWeights.nodeTypeWeights.set(NodeAddress.fromParts(["foo"]), 99);
+    extraWeights.edgeTypeWeights.set(EdgeAddress.fromParts(["foo"]), {
+      forwards: 14,
+      backwards: 19,
     });
-    it("only the closest-matching node prefix is considered", () => {
-      expect(exampleEdgeWeights({baseNode: 6})).toEqual({
-        toWeight: 1,
-        froWeight: 1,
-      });
-    });
-    it("only the closest-matching edge prefix is considered", () => {
-      expect(exampleEdgeWeights({baseBackward: 7})).toEqual({
-        toWeight: 1,
-        froWeight: 1,
-      });
-    });
-    it("node and edge weights compose via multiplication", () => {
-      expect(
-        exampleEdgeWeights({
-          inserter: 2,
-          machine: 3,
-          assemblesForward: 4,
-          assemblesBackward: 5,
-        })
-      ).toEqual({toWeight: 8, froWeight: 15});
-    });
-    it("manualWeight and nodeTypeWeight both multiply the weight", () => {
-      const manualWeights = new Map();
-      manualWeights.set(factorioNodes.inserter2, 2);
-      // Putting a weight of 2 on the inserter node type as a whole or on the the
-      // particular insterter node will have the same effect
-      expect(exampleEdgeWeights({inserter: 2})).toEqual(
-        exampleEdgeWeights({manualWeights})
-      );
-    });
-    it("manualWeight and nodeTypeWeight compose multiplicatively", () => {
-      const manualWeights = new Map();
-      manualWeights.set(factorioNodes.inserter2, 2);
-      expect(exampleEdgeWeights({inserter: 3, manualWeights})).toEqual({
-        toWeight: 6,
-        froWeight: 1,
-      });
-    });
+    const withExtraWeights = evaluateEdge(extraWeights);
+    expect(withoutExtraWeights).toEqual(withExtraWeights);
   });
 });

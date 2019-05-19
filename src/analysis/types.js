@@ -118,3 +118,8 @@ export type EdgeType = {|
   // strings with clean formatting.)
   +description: string,
 |};
+
+export type NodeAndEdgeTypes = {|
+  +nodeTypes: NodeType[],
+  +edgeTypes: EdgeType[],
+|};

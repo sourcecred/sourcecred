@@ -13,31 +13,28 @@ describe("explorer/weights/NodeTypeConfig", () => {
   describe("NodeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();
-      const wnt = {
-        type: inserterNodeType,
-        weight: 0.125,
-      };
+      const type = inserterNodeType;
+      const weight = 0.125;
       const element = shallow(
-        <NodeTypeConfig onChange={onChange} weightedType={wnt} />
+        <NodeTypeConfig onChange={onChange} weight={weight} type={type} />
       );
       const slider = element.find(WeightSlider);
-      return {onChange, wnt, slider};
+      return {onChange, weight, type, slider};
     }
     it("sets up the weight slider", () => {
-      const {wnt, slider} = example();
-      expect(slider.props().name).toBe(wnt.type.name);
-      expect(slider.props().weight).toBe(wnt.weight);
+      const {weight, type, slider} = example();
+      expect(slider.props().name).toBe(type.name);
+      expect(slider.props().weight).toBe(weight);
     });
     it("has a description", () => {
-      const {wnt, slider} = example();
-      expect(slider.props().description).toBe(wnt.type.description);
+      const {type, slider} = example();
+      expect(slider.props().description).toBe(type.description);
     });
     it("weight slider onChange works", () => {
-      const {wnt, slider, onChange} = example();
+      const {slider, onChange} = example();
       slider.props().onChange(9);
-      const updated = {...wnt, weight: 9};
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange.mock.calls[0][0]).toEqual(updated);
+      expect(onChange.mock.calls[0][0]).toEqual(9);
     });
   });
 });
