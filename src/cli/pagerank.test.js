@@ -206,8 +206,10 @@ describe("cli/pagerank", () => {
       const edgeType: EdgeType = {
         forwardName: "bars",
         backwardName: "barred by",
-        defaultForwardWeight: 5,
-        defaultBackwardWeight: 3,
+        defaultWeight: {
+          forwards: 5,
+          backwards: 3,
+        },
         prefix: EdgeAddress.fromParts(["hom"]),
         description: "an example edge type",
       };
@@ -268,14 +270,9 @@ describe("cli/pagerank", () => {
         expect(weightedNodeType.type).toEqual(nodeType);
       }
       for (const edgeType of declaration.edgeTypes) {
-        const weightedEdgeType = NullUtil.get(ws.edges.get(edgeType.prefix));
-        expect(weightedEdgeType.forwardWeight).toEqual(
-          edgeType.defaultForwardWeight
-        );
-        expect(weightedEdgeType.backwardWeight).toEqual(
-          edgeType.defaultBackwardWeight
-        );
-        expect(weightedEdgeType.type).toEqual(edgeType);
+        const {weight, type} = NullUtil.get(ws.edges.get(edgeType.prefix));
+        expect(weight).toEqual(edgeType.defaultWeight);
+        expect(type).toEqual(edgeType);
       }
     }
   });

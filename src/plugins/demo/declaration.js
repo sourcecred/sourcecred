@@ -24,18 +24,16 @@ export const machineNodeType: NodeType = Object.freeze({
 
 export const assemblesEdgeType: EdgeType = Object.freeze({
   forwardName: "assembles",
-  defaultForwardWeight: 2,
   backwardName: "is assembled by",
-  defaultBackwardWeight: 2 ** -2,
+  defaultWeight: {forwards: 2, backwards: 2 ** -2},
   prefix: EdgeAddress.fromParts(["factorio", "assembles"]),
   description: "Connects assembly machines to products they assemble.",
 });
 
 export const transportsEdgeType: EdgeType = Object.freeze({
   forwardName: "transports",
-  defaultForwardWeight: 1,
   backwardName: "is transported by",
-  defaultBackwardWeight: 2 ** -1,
+  defaultWeight: {forwards: 2, backwards: 2 ** -1},
   prefix: EdgeAddress.fromParts(["factorio", "transports"]),
   description: "Connects transporter belts to objects they transport.",
 });

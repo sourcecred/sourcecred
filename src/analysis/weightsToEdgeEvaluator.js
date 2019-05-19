@@ -15,8 +15,8 @@ export function weightsToEdgeEvaluator(
     nodeTrie.add(type.prefix, weight);
   }
   const edgeTrie = new EdgeTrie();
-  for (const {type, forwardWeight, backwardWeight} of weights.edges.values()) {
-    edgeTrie.add(type.prefix, {forwardWeight, backwardWeight});
+  for (const {type, weight} of weights.edges.values()) {
+    edgeTrie.add(type.prefix, weight);
   }
 
   function nodeWeight(n: NodeAddressT): number {
@@ -28,10 +28,10 @@ export function weightsToEdgeEvaluator(
   return function evaluator(edge: Edge) {
     const srcWeight = nodeWeight(edge.src);
     const dstWeight = nodeWeight(edge.dst);
-    const {forwardWeight, backwardWeight} = edgeTrie.getLast(edge.address);
+    const {forwards, backwards} = edgeTrie.getLast(edge.address);
     return {
-      toWeight: dstWeight * forwardWeight,
-      froWeight: srcWeight * backwardWeight,
+      toWeight: dstWeight * forwards,
+      froWeight: srcWeight * backwards,
     };
   };
 }

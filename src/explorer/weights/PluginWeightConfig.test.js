@@ -130,8 +130,7 @@ describe("explorer/weights/PluginWeightConfig", () => {
       it("extra edge prefix in weighted types", () => {
         const badTypes = defaultWeightsForAdapter(new FactorioStaticAdapter());
         badTypes.edges.set(fallbackEdgeType.prefix, {
-          forwardWeight: 5,
-          backwardWeight: 3,
+          weight: {forwards: 5, backwards: 3},
           type: fallbackEdgeType,
         });
         checkError(badTypes);

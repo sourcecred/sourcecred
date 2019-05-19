@@ -20,8 +20,7 @@ export const fallbackNodeType: NodeType = Object.freeze({
 export const fallbackEdgeType: EdgeType = Object.freeze({
   forwardName: "points to",
   backwardName: "is pointed to by",
-  defaultForwardWeight: 1,
-  defaultBackwardWeight: 1,
+  defaultWeight: {forwards: 1, backwards: 1},
   prefix: EdgeAddress.empty,
   description:
     "The fallback EdgeType for edges which don't have any other type",

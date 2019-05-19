@@ -151,8 +151,7 @@ describe("explorer/pagerankTable/Aggregation", () => {
     const edgeType: EdgeType = {
       forwardName: "marsellus",
       backwardName: "wallace",
-      defaultForwardWeight: 1,
-      defaultBackwardWeight: 1,
+      defaultWeight: {forwards: 1, backwards: 1},
       prefix: EdgeAddress.fromParts(["look", "like"]),
       description: "Connects example nodes for testing purposes.",
     };

@@ -17,8 +17,7 @@ const hasParentEdgeType = Object.freeze({
   forwardName: "has parent",
   backwardName: "is parent of",
   prefix: E.Prefix.hasParent,
-  defaultForwardWeight: 1,
-  defaultBackwardWeight: 1,
+  defaultWeight: {forwards: 1, backwards: 1},
   description: "Connects a Git commit to its parent commit(s).",
 });
 
