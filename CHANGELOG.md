@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Allow the user to save or upload weight settings (#1150)
 - Allow tweaking weights on a per-node basis (#1143)
 - Add the `pagerank` command (#1114)
 - Add the `clear` command (#1111)

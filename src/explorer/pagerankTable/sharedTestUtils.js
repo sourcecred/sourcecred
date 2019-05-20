@@ -20,6 +20,7 @@ export async function example() {
   const manualWeights: Map<NodeAddressT, number> = new Map();
   const onManualWeightsChange: (NodeAddressT, number) => void = jest.fn();
   const weightConfig: any = <div data-test-weight-config={true} />;
+  const weightFileManager: any = <div data-test-weight-file-manager={true} />;
 
   const sharedProps: SharedProps = {
     adapters,
@@ -37,5 +38,6 @@ export async function example() {
     manualWeights,
     onManualWeightsChange,
     weightConfig,
+    weightFileManager,
   };
 }
