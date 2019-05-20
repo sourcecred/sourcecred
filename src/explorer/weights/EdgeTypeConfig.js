@@ -3,14 +3,16 @@
 import React from "react";
 import {WeightSlider, type Props as WeightSliderProps} from "./WeightSlider";
 
-import type {WeightedEdgeType} from "../../analysis/weights";
+import type {EdgeType} from "../../analysis/types";
+import type {EdgeWeight} from "../../analysis/weights";
 
 export class EdgeTypeConfig extends React.Component<{
-  +weightedType: WeightedEdgeType,
-  +onChange: (WeightedEdgeType) => void,
+  +weight: EdgeWeight,
+  +type: EdgeType,
+  +onChange: (EdgeWeight) => void,
 }> {
   render() {
-    const {weight, type} = this.props.weightedType;
+    const {weight, type} = this.props;
     const {forwards, backwards} = weight;
     const {forwardName, backwardName, description} = type;
     return (
@@ -20,10 +22,7 @@ export class EdgeTypeConfig extends React.Component<{
           weight={forwards}
           description={description}
           onChange={(newForwards) => {
-            this.props.onChange({
-              type,
-              weight: {forwards: newForwards, backwards},
-            });
+            this.props.onChange({forwards: newForwards, backwards});
           }}
         />
         <EdgeWeightSlider
@@ -32,8 +31,8 @@ export class EdgeTypeConfig extends React.Component<{
           description={description}
           onChange={(newBackwards) => {
             this.props.onChange({
-              type,
-              weight: {forwards, backwards: newBackwards},
+              forwards,
+              backwards: newBackwards,
             });
           }}
         />

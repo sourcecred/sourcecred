@@ -9,8 +9,6 @@ import {PagerankTable} from "./Table";
 import {example, COLUMNS} from "./sharedTestUtils";
 import {NodeRowList} from "./Node";
 import {WeightConfig} from "../weights/WeightConfig";
-import {defaultWeightsForAdapter} from "../weights/weights";
-import {FactorioStaticAdapter} from "../../plugins/demo/explorerAdapter";
 import {type NodeType} from "../../analysis/types";
 
 require("../../webutil/testUtil").configureEnzyme();
@@ -20,18 +18,16 @@ describe("explorer/pagerankTable/Table", () => {
       const {
         pnd,
         adapters,
-        weightedTypes,
         sharedProps,
         manualWeights,
         onManualWeightsChange,
-        onWeightedTypesChange,
+        weightConfig,
         maxEntriesPerList,
       } = await example();
       const element = shallow(
         <PagerankTable
           defaultNodeType={defaultNodeType}
-          weightedTypes={weightedTypes}
-          onWeightedTypesChange={onWeightedTypesChange}
+          weightConfig={weightConfig}
           pnd={pnd}
           adapters={adapters}
           maxEntriesPerList={maxEntriesPerList}
@@ -44,7 +40,7 @@ describe("explorer/pagerankTable/Table", () => {
         adapters,
         element,
         maxEntriesPerList,
-        onWeightedTypesChange,
+        weightConfig,
         onManualWeightsChange,
         manualWeights,
         sharedProps,
@@ -76,22 +72,14 @@ describe("explorer/pagerankTable/Table", () => {
         expect(button.text()).toEqual("Show weight configuration");
       });
       it("which is present when the WeightConfig button is pushed", async () => {
-        const {element, onWeightedTypesChange} = await setup();
+        const {element} = await setup();
         let button = findButton(element);
         expect(button.text()).toEqual("Show weight configuration");
         button.simulate("click");
         button = findButton(element);
         expect(button.text()).toEqual("Hide weight configuration");
         expect(button).toHaveLength(1); // Its text changed
-        const wc = element.find(WeightConfig);
-        expect(wc).toHaveLength(1);
-        expect(wc.props().weightedTypes).toBe(
-          element.instance().props.weightedTypes
-        );
-        const wt = defaultWeightsForAdapter(new FactorioStaticAdapter());
-        wc.props().onChange(wt);
-        expect(onWeightedTypesChange).toHaveBeenCalledWith(wt);
-        expect(onWeightedTypesChange).toHaveBeenCalledTimes(1);
+        expect(element.find({"data-test-weight-config": true})).toHaveLength(1);
       });
       it("which is hidden when the WeightConfig button is pushed twice", async () => {
         const {element} = await setup();
@@ -99,7 +87,7 @@ describe("explorer/pagerankTable/Table", () => {
         findButton(element).simulate("click");
         let button = findButton(element);
         expect(button.text()).toEqual("Show weight configuration");
-        expect(element.find(WeightConfig)).toHaveLength(0);
+        expect(element.find({"data-test-weight-config": true})).toHaveLength(0);
       });
     });
 

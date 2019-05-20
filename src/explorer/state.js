@@ -6,6 +6,7 @@ import {Graph, type NodeAddressT} from "../core/graph";
 import type {Assets} from "../webutil/assets";
 import type {RepoId} from "../core/repoId";
 import {type EdgeEvaluator} from "../analysis/pagerank";
+import type {NodeAndEdgeTypes} from "../analysis/types";
 import {
   type PagerankNodeDecomposition,
   type PagerankOptions,
@@ -16,7 +17,7 @@ import {
   StaticExplorerAdapterSet,
   DynamicExplorerAdapterSet,
 } from "./adapters/explorerAdapterSet";
-import type {WeightedTypes} from "../analysis/weights";
+import type {Weights} from "../analysis/weights";
 import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
 
 /*
@@ -52,8 +53,6 @@ export type PagerankEvaluated = {|
   +loading: LoadingState,
 |};
 
-type ManualWeights = Map<NodeAddressT, number>;
-
 export function initialState(repoId: RepoId): ReadyToLoadGraph {
   return {type: "READY_TO_LOAD_GRAPH", repoId, loading: "NOT_LOADING"};
 }
@@ -73,12 +72,12 @@ export function createStateTransitionMachine(
 // Exported for testing purposes.
 export interface StateTransitionMachineInterface {
   +loadGraph: (Assets, StaticExplorerAdapterSet) => Promise<boolean>;
-  +runPagerank: (WeightedTypes, ManualWeights, NodeAddressT) => Promise<void>;
+  +runPagerank: (Weights, NodeAndEdgeTypes, NodeAddressT) => Promise<void>;
   +loadGraphAndRunPagerank: (
     Assets,
     StaticExplorerAdapterSet,
-    WeightedTypes,
-    ManualWeights,
+    Weights,
+    NodeAndEdgeTypes,
     NodeAddressT
   ) => Promise<void>;
 }
@@ -159,8 +158,8 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   }
 
   async runPagerank(
-    weightedTypes: WeightedTypes,
-    manualWeights: ManualWeights,
+    weights: Weights,
+    types: NodeAndEdgeTypes,
     totalScoreNodePrefix: NodeAddressT
   ) {
     const state = this.getState();
@@ -181,7 +180,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     try {
       const pagerankNodeDecomposition = await this.pagerank(
         graph,
-        weightsToEdgeEvaluator(weightedTypes, manualWeights),
+        weightsToEdgeEvaluator(weights, types),
         {
           verbose: true,
           totalScoreNodePrefix: totalScoreNodePrefix,
@@ -210,8 +209,8 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   async loadGraphAndRunPagerank(
     assets: Assets,
     adapters: StaticExplorerAdapterSet,
-    weightedTypes: WeightedTypes,
-    manualWeights: ManualWeights,
+    weights: Weights,
+    types: NodeAndEdgeTypes,
     totalScoreNodePrefix: NodeAddressT
   ) {
     const state = this.getState();
@@ -220,20 +219,12 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
       case "READY_TO_LOAD_GRAPH":
         const loadedGraph = await this.loadGraph(assets, adapters);
         if (loadedGraph) {
-          await this.runPagerank(
-            weightedTypes,
-            manualWeights,
-            totalScoreNodePrefix
-          );
+          await this.runPagerank(weights, types, totalScoreNodePrefix);
         }
         break;
       case "READY_TO_RUN_PAGERANK":
       case "PAGERANK_EVALUATED":
-        await this.runPagerank(
-          weightedTypes,
-          manualWeights,
-          totalScoreNodePrefix
-        );
+        await this.runPagerank(weights, types, totalScoreNodePrefix);
         break;
       default:
         throw new Error((type: empty));

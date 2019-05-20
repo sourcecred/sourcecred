@@ -3,24 +3,22 @@
 import React from "react";
 import sortBy from "lodash.sortby";
 
+import {WeightConfig} from "../weights/WeightConfig";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 import type {PagerankNodeDecomposition} from "../../analysis/pagerankNodeDecomposition";
 import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 import type {DynamicExplorerAdapter} from "../adapters/explorerAdapter";
-import type {WeightedTypes} from "../../analysis/weights";
-import {WeightConfig} from "../weights/WeightConfig";
 import {NodeRowList} from "./Node";
 import {type NodeType} from "../../analysis/types";
 
 type PagerankTableProps = {|
   +pnd: PagerankNodeDecomposition,
   +adapters: DynamicExplorerAdapterSet,
-  +weightedTypes: WeightedTypes,
-  +onWeightedTypesChange: (WeightedTypes) => void,
   +maxEntriesPerList: number,
   +defaultNodeType: ?NodeType,
   +manualWeights: Map<NodeAddressT, number>,
   +onManualWeightsChange: (NodeAddressT, number) => void,
+  +weightConfig: React$Element<typeof WeightConfig>,
 |};
 type PagerankTableState = {|
   selectedNodeTypePrefix: NodeAddressT,
@@ -67,13 +65,7 @@ export class PagerankTable extends React.PureComponent<
     return (
       <div style={{marginTop: 10}}>
         {this.renderConfigurationRow()}
-        {showWeightConfig && (
-          <WeightConfig
-            adapters={this.props.adapters.static()}
-            weightedTypes={this.props.weightedTypes}
-            onChange={(wt) => this.props.onWeightedTypesChange(wt)}
-          />
-        )}
+        {showWeightConfig && this.props.weightConfig}
         {this.renderTable()}
       </div>
     );

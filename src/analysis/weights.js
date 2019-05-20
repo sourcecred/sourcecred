@@ -1,9 +1,6 @@
 // @flow
 
-import * as MapUtil from "../util/map";
 import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
-import type {EdgeType, NodeType} from "./types";
-import type {PluginDeclaration} from "./pluginDeclaration";
 
 /**
  * Represents the weight for a particular Node (or NodeType).
@@ -20,53 +17,31 @@ export type NodeWeight = number;
  */
 export type EdgeWeight = {|+forwards: number, +backwards: number|};
 
-export type WeightedNodeType = {|+type: NodeType, +weight: NodeWeight|};
-
-export type WeightedEdgeType = {|
-  +type: EdgeType,
-  +weight: EdgeWeight,
+/**
+ * Represents the user-chosen weights for Node and Edge types, as well as for
+ * individual nodes.
+ *
+ * Only user / project choices are stored here. If a weight is not present for
+ * a particular type or node, then a default weight is used.
+ */
+export type Weights = {|
+  // Maps from the NodeType's prefix to the weight.
+  +nodeTypeWeights: Map<NodeAddressT, NodeWeight>,
+  // Maps from the EdgeType's prefix to the weight.
+  +edgeTypeWeights: Map<EdgeAddressT, EdgeWeight>,
+  // Maps from the node's address to the weight.
+  +nodeManualWeights: Map<NodeAddressT, NodeWeight>,
 |};
 
-export type WeightedTypes = {|
-  // Map from the weighted type's prefix to the type
-  +nodes: Map<NodeAddressT, WeightedNodeType>,
-  +edges: Map<EdgeAddressT, WeightedEdgeType>,
-|};
-
-export type ManualWeights = Map<NodeAddressT, number>;
-
-export function defaultWeightedNodeType(type: NodeType): WeightedNodeType {
+/**
+ * Creates default (i.e. empty) weights.
+ *
+ * When the weights are empty, defaults will be used for every type and node.
+ */
+export function defaultWeights(): Weights {
   return {
-    type,
-    weight: type.defaultWeight,
-  };
-}
-
-export function defaultWeightedEdgeType(type: EdgeType): WeightedEdgeType {
-  return {
-    type,
-    weight: type.defaultWeight,
-  };
-}
-
-export function defaultWeightsForDeclaration(
-  declaration: PluginDeclaration
-): WeightedTypes {
-  return {
-    nodes: new Map(
-      declaration.nodeTypes.map((x) => [x.prefix, defaultWeightedNodeType(x)])
-    ),
-    edges: new Map(
-      declaration.edgeTypes.map((x) => [x.prefix, defaultWeightedEdgeType(x)])
-    ),
-  };
-}
-
-export function combineWeights(
-  ws: $ReadOnlyArray<WeightedTypes>
-): WeightedTypes {
-  return {
-    nodes: MapUtil.merge(ws.map((x) => x.nodes)),
-    edges: MapUtil.merge(ws.map((x) => x.edges)),
+    nodeTypeWeights: new Map(),
+    edgeTypeWeights: new Map(),
+    nodeManualWeights: new Map(),
   };
 }

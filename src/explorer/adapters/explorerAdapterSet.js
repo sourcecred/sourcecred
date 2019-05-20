@@ -13,6 +13,8 @@
 
 import {Graph, type NodeAddressT, type EdgeAddressT} from "../../core/graph";
 import {NodeTrie, EdgeTrie} from "../../core/trie";
+import type {NodeAndEdgeTypes} from "../../analysis/types";
+import {combineTypes} from "../../analysis/pluginDeclaration";
 import type {Assets} from "../../webutil/assets";
 import type {RepoId} from "../../core/repoId";
 
@@ -53,6 +55,12 @@ export class StaticExplorerAdapterSet {
     return this._adapters;
   }
 
+  combinedTypes(): NodeAndEdgeTypes {
+    return combineTypes(this._adapters.map((x) => x.declaration()));
+  }
+
+  // TODO(@decentralion): Remove the next two methods
+  // (Although really I want to remove this whole class.)
   nodeTypes(): NodeType[] {
     return [].concat(...this._adapters.map((x) => x.declaration().nodeTypes));
   }

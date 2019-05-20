@@ -1,9 +1,9 @@
 // @flow
 
+import React from "react";
+
 import {type NodeAddressT} from "../../core/graph";
 import {pagerank} from "../../analysis/pagerank";
-import type {WeightedTypes} from "../../analysis/weights";
-import {defaultWeightsForAdapterSet} from "../weights/weights";
 import {dynamicExplorerAdapterSet} from "../../plugins/demo/explorerAdapter";
 import type {SharedProps} from "./shared";
 
@@ -11,7 +11,6 @@ export const COLUMNS = () => ["Description", "", "Cred"];
 
 export async function example() {
   const adapters = await dynamicExplorerAdapterSet();
-  const weightedTypes = defaultWeightsForAdapterSet(adapters.static());
   const graph = adapters.graph();
   const pnd = await pagerank(graph, (_unused_Edge) => ({
     toWeight: 1,
@@ -20,7 +19,7 @@ export async function example() {
   const maxEntriesPerList = 123;
   const manualWeights: Map<NodeAddressT, number> = new Map();
   const onManualWeightsChange: (NodeAddressT, number) => void = jest.fn();
-  const onWeightedTypesChange: (WeightedTypes) => void = jest.fn();
+  const weightConfig: any = <div data-test-weight-config={true} />;
 
   const sharedProps: SharedProps = {
     adapters,
@@ -33,11 +32,10 @@ export async function example() {
   return {
     adapters,
     pnd,
-    weightedTypes,
     maxEntriesPerList,
     sharedProps,
     manualWeights,
     onManualWeightsChange,
-    onWeightedTypesChange,
+    weightConfig,
   };
 }

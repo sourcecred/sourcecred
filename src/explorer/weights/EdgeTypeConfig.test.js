@@ -13,26 +13,24 @@ describe("explorer/weights/EdgeTypeConfig", () => {
   describe("EdgeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();
-      const wet = {
-        type: assemblesEdgeType,
-        weight: {forwards: 1, backwards: 0.5},
-      };
+      const type = assemblesEdgeType;
+      const weight = {forwards: 1, backwards: 0.5};
       const element = shallow(
-        <EdgeTypeConfig onChange={onChange} weightedType={wet} />
+        <EdgeTypeConfig onChange={onChange} type={type} weight={weight} />
       );
       const forwardSlider = element.find(EdgeWeightSlider).at(0);
       const backwardSlider = element.find(EdgeWeightSlider).at(1);
-      return {onChange, wet, forwardSlider, backwardSlider};
+      return {onChange, weight, type, forwardSlider, backwardSlider};
     }
     it("sets up the forward weight slider", () => {
-      const {wet, forwardSlider} = example();
-      expect(forwardSlider.props().name).toBe(assemblesEdgeType.backwardName);
-      expect(forwardSlider.props().weight).toBe(wet.weight.forwards);
+      const {weight, type, forwardSlider} = example();
+      expect(forwardSlider.props().name).toBe(type.backwardName);
+      expect(forwardSlider.props().weight).toBe(weight.forwards);
     });
     it("sets up the backward weight slider", () => {
-      const {wet, backwardSlider} = example();
-      expect(backwardSlider.props().name).toBe(assemblesEdgeType.forwardName);
-      expect(backwardSlider.props().weight).toBe(wet.weight.backwards);
+      const {weight, type, backwardSlider} = example();
+      expect(backwardSlider.props().name).toBe(type.forwardName);
+      expect(backwardSlider.props().weight).toBe(weight.backwards);
     });
     it("has a description", () => {
       const {backwardSlider} = example();
@@ -41,18 +39,16 @@ describe("explorer/weights/EdgeTypeConfig", () => {
       );
     });
     it("forward weight slider onChange works", () => {
-      const {wet, forwardSlider, onChange} = example();
+      const {weight, forwardSlider, onChange} = example();
       forwardSlider.props().onChange(9);
-      const weight = {...wet.weight, forwards: 9};
-      const updated = {...wet, weight};
+      const updated = {backwards: weight.backwards, forwards: 9};
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange.mock.calls[0][0]).toEqual(updated);
     });
     it("backward weight slider onChange works", () => {
-      const {wet, backwardSlider, onChange} = example();
+      const {weight, backwardSlider, onChange} = example();
       backwardSlider.props().onChange(9);
-      const weight = {...wet.weight, backwards: 9};
-      const updated = {...wet, weight};
+      const updated = {forwards: weight.forwards, backwards: 9};
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange.mock.calls[0][0]).toEqual(updated);
     });

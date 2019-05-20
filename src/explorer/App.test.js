@@ -3,7 +3,7 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import {Graph, NodeAddress} from "../core/graph";
+import {Graph} from "../core/graph";
 import {makeRepoId} from "../core/repoId";
 import {Assets} from "../webutil/assets";
 import testLocalStore from "../webutil/testLocalStore";
@@ -11,12 +11,9 @@ import {
   DynamicExplorerAdapterSet,
   StaticExplorerAdapterSet,
 } from "./adapters/explorerAdapterSet";
-import {FactorioStaticAdapter} from "../plugins/demo/explorerAdapter";
-import {defaultWeightsForAdapter} from "./weights/weights";
 
 import {PagerankTable} from "./pagerankTable/Table";
 import {createApp, LoadingIndicator, ProjectDetail} from "./App";
-import {Prefix as GithubPrefix} from "../plugins/github/nodes";
 
 require("../webutil/testUtil").configureEnzyme();
 
@@ -149,13 +146,6 @@ describe("explorer/App", () => {
           expect(button.props().disabled).toBe(false);
           button.simulate("click");
           expect(loadGraphAndRunPagerank).toBeCalledTimes(1);
-          expect(loadGraphAndRunPagerank).toBeCalledWith(
-            el.instance().props.assets,
-            el.instance().props.adapters,
-            el.instance().state.weightedTypes,
-            el.instance().state.manualWeights,
-            GithubPrefix.user
-          );
         }
       });
     }
@@ -168,30 +158,7 @@ describe("explorer/App", () => {
         setState(state);
         el.update();
         const prt = el.find(PagerankTable);
-        if (present) {
-          expect(prt).toHaveLength(1);
-          if (state.type !== "PAGERANK_EVALUATED") {
-            throw new Error("This test case is impossible to satisfy");
-          }
-          const adapters = state.graphWithAdapters.adapters;
-          const pnd = state.pagerankNodeDecomposition;
-          const weightedTypes = el.instance().state.weightedTypes;
-          expect(prt.props().adapters).toBe(adapters);
-          expect(prt.props().pnd).toBe(pnd);
-          expect(prt.props().weightedTypes).toBe(weightedTypes);
-          const prtWeightedTypesChange = prt.props().onWeightedTypesChange;
-          const newTypes = defaultWeightsForAdapter(
-            new FactorioStaticAdapter()
-          );
-          prtWeightedTypesChange(newTypes);
-          expect(el.instance().state.weightedTypes).toBe(newTypes);
-          const prtManualWeightsChange = prt.props().onManualWeightsChange;
-          const node = NodeAddress.fromParts(["foo"]);
-          prtManualWeightsChange(node, 32);
-          expect(el.instance().state.manualWeights.get(node)).toEqual(32);
-        } else {
-          expect(prt).toHaveLength(0);
-        }
+        expect(prt).toHaveLength(present ? 1 : 0);
       });
     }
 
