@@ -1,6 +1,8 @@
 // @flow
 
+import * as MapUtil from "../util/map";
 import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
+import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
 /**
  * Represents the weight for a particular Node (or NodeType).
@@ -43,5 +45,32 @@ export function defaultWeights(): Weights {
     nodeTypeWeights: new Map(),
     edgeTypeWeights: new Map(),
     nodeManualWeights: new Map(),
+  };
+}
+
+export type WeightsJSON = Compatible<{|
+  +nodeTypeWeights: {[NodeAddressT]: NodeWeight},
+  +edgeTypeWeights: {[EdgeAddressT]: EdgeWeight},
+  +nodeManualWeights: {[NodeAddressT]: NodeWeight},
+|}>;
+const COMPAT_INFO = {type: "sourcecred/weights", version: "0.1.0"};
+
+export function toJSON(weights: Weights): WeightsJSON {
+  return toCompat(COMPAT_INFO, {
+    nodeTypeWeights: MapUtil.toObject(weights.nodeTypeWeights),
+    edgeTypeWeights: MapUtil.toObject(weights.edgeTypeWeights),
+    nodeManualWeights: MapUtil.toObject(weights.nodeManualWeights),
+  });
+}
+
+export function fromJSON(json: WeightsJSON): Weights {
+  const {nodeTypeWeights, edgeTypeWeights, nodeManualWeights} = fromCompat(
+    COMPAT_INFO,
+    json
+  );
+  return {
+    nodeTypeWeights: MapUtil.fromObject(nodeTypeWeights),
+    edgeTypeWeights: MapUtil.fromObject(edgeTypeWeights),
+    nodeManualWeights: MapUtil.fromObject(nodeManualWeights),
   };
 }
