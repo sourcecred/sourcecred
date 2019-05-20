@@ -44,20 +44,14 @@ export type RouteData = $ReadOnlyArray<RouteDatum>;
  *
  * [#1148]: https://github.com/sourcecred/sourcecred/issues/1148
  */
-function inspectionTestFor(filePath /*: string */) /*: RouteDatum */ {
-  if (filePath.endsWith(".js")) {
-    throw new Error("Strip the .js off the inspection test file path");
-  }
+function inspectionTestFor(name, component) /*: RouteDatum */ {
   return {
-    path: "/test/" + filePath + "/",
+    path: "/test/" + name + "/",
     contents: {
       type: "PAGE",
-      component: () => {
-        // $ExpectFlowError
-        return require("../" + filePath);
-      },
+      component: component,
     },
-    title: "Inspection test for: " + filePath,
+    title: "Inspection test for: " + name,
     navTitle: null,
   };
 }
@@ -110,7 +104,10 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       navTitle: null,
     },
     // Inspection Tests Below //
-    //inspectionTestFor("util/FileUploaderInspectionTest"),
+    inspectionTestFor(
+      "FileUploader",
+      () => require("../util/FileUploaderInspectionTest").default
+    ),
   ];
 }
 exports.makeRouteData = makeRouteData;
