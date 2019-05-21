@@ -2,6 +2,7 @@
 
 import React from "react";
 import Markdown from "react-markdown";
+import {MdFileUpload} from "react-icons/md";
 
 import dedent from "./dedent";
 import stringify from "json-stable-stringify";
@@ -36,7 +37,9 @@ export default class FileUploaderInspectionTest extends React.Component<
       `}
         />
         <h2>The File Uploader</h2>
-        <FileUploader onUpload={onUpload} title="FileUploader" />
+        <FileUploader onUpload={onUpload} title="FileUploader">
+          <MdFileUpload />
+        </FileUploader>
         <h2>The Uploaded File</h2>
         {this.state.json ? (
           <pre style={{backgroundColor: "#efefef"}}>{displayContents}</pre>

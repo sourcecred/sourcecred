@@ -1,11 +1,11 @@
 // @flow
 
-import React from "react";
-import {MdFileUpload} from "react-icons/md";
+import React, {type Node} from "react";
 
 export type Props = {|
-  +onUpload: (mixed) => void,
+  +onUpload: (any) => void,
   +title: string,
+  +children: Node,
 |};
 
 /**
@@ -36,7 +36,7 @@ export class FileUploader extends React.Component<Props> {
       // over the UI, but ensures that it is still accessible via the keyboard.
       // https://snook.ca/archives/html_and_css/hiding-content-for-accessibility
       <label title={this.props.title}>
-        <MdFileUpload />
+        {this.props.children}
         <input
           type="file"
           accept=".json"

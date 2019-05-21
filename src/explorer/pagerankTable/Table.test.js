@@ -22,12 +22,14 @@ describe("explorer/pagerankTable/Table", () => {
         manualWeights,
         onManualWeightsChange,
         weightConfig,
+        weightFileManager,
         maxEntriesPerList,
       } = await example();
       const element = shallow(
         <PagerankTable
           defaultNodeType={defaultNodeType}
           weightConfig={weightConfig}
+          weightFileManager={weightFileManager}
           pnd={pnd}
           adapters={adapters}
           maxEntriesPerList={maxEntriesPerList}

@@ -12,6 +12,7 @@ import {type NodeAddressT} from "../core/graph";
 
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "./weights/WeightConfig";
+import {WeightsFileManager} from "./weights/WeightsFileManager";
 import {type Weights, defaultWeights} from "../analysis/weights";
 import {Prefix as GithubPrefix} from "../plugins/github/nodes";
 import {
@@ -108,6 +109,14 @@ export function createApp(
           }}
         />
       );
+      const weightFileManager = (
+        <WeightsFileManager
+          weights={this.state.weights}
+          onWeightsChange={(weights: Weights) => {
+            this.setState({weights});
+          }}
+        />
+      );
       let pagerankTable;
       if (appState.type === "PAGERANK_EVALUATED") {
         const adapters = appState.graphWithAdapters.adapters;
@@ -117,6 +126,7 @@ export function createApp(
             defaultNodeType={userNodeType}
             adapters={adapters}
             weightConfig={weightConfig}
+            weightFileManager={weightFileManager}
             manualWeights={this.state.weights.nodeManualWeights}
             onManualWeightsChange={(addr: NodeAddressT, weight: number) =>
               this.setState(({weights}) => {

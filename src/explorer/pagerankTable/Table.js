@@ -4,6 +4,7 @@ import React from "react";
 import sortBy from "lodash.sortby";
 
 import {WeightConfig} from "../weights/WeightConfig";
+import {WeightsFileManager} from "../weights/WeightsFileManager";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 import type {PagerankNodeDecomposition} from "../../analysis/pagerankNodeDecomposition";
 import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
@@ -19,6 +20,7 @@ type PagerankTableProps = {|
   +manualWeights: Map<NodeAddressT, number>,
   +onManualWeightsChange: (NodeAddressT, number) => void,
   +weightConfig: React$Element<typeof WeightConfig>,
+  +weightFileManager: React$Element<typeof WeightsFileManager>,
 |};
 type PagerankTableState = {|
   selectedNodeTypePrefix: NodeAddressT,
@@ -45,6 +47,7 @@ export class PagerankTable extends React.PureComponent<
       <div style={{display: "flex"}}>
         {this.renderFilterSelect()}
         <span style={{flexGrow: 1}} />
+        {this.props.weightFileManager}
         <button
           onClick={() => {
             this.setState(({showWeightConfig}) => ({
