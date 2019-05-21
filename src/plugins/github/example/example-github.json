@@ -1,5 +1,6 @@
 {
     "__typename": "Repository",
+    "createdAt": "2018-02-28T08:37:14Z",
     "defaultBranchRef": {
         "__typename": "Ref",
         "id": "MDM6UmVmMTIzMjU1MDA2Om1hc3Rlcg==",
@@ -138,6 +139,7 @@
             "body": "This is just an example issue.",
             "comments": [
             ],
+            "createdAt": "2018-02-28T08:38:08Z",
             "id": "MDU6SXNzdWUzMDA5MzQ4MTg=",
             "number": 1,
             "reactions": [
@@ -186,6 +188,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "It should also be possible to reference by exact url: https://github.com/sourcecred/example-github/issues/6",
+                    "createdAt": "2018-03-16T16:28:13Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODcwMw==",
                     "reactions": [
                     ],
@@ -200,6 +203,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "We might also reference individual comments directly.\r\nhttps://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
+                    "createdAt": "2018-03-16T16:28:45Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODg1MA==",
                     "reactions": [
                     ],
@@ -214,6 +218,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "Here's a PR by direct url: https://github.com/sourcecred/example-github/pull/5",
+                    "createdAt": "2018-05-01T01:25:09Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjE4NQ==",
                     "reactions": [
                     ],
@@ -228,6 +233,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "a PR review by url: https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+                    "createdAt": "2018-05-01T01:25:25Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjIyMA==",
                     "reactions": [
                     ],
@@ -242,6 +248,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "a PR Review Comment by url: https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+                    "createdAt": "2018-05-01T01:25:39Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjI0OA==",
                     "reactions": [
                     ],
@@ -256,6 +263,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "a user by url: https://github.com/wchargin",
+                    "createdAt": "2018-05-01T01:25:51Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjI3Mw==",
                     "reactions": [
                     ],
@@ -270,6 +278,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "Here are several references:\r\n#1 \r\n#2\r\n#3 \r\n\r\nhttps://github.com/sourcecred/example-github/pull/5#discussion_r171460198\r\nhttps://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899\r\n",
+                    "createdAt": "2018-05-01T01:30:31Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjkyMA==",
                     "reactions": [
                     ],
@@ -284,12 +293,14 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "This comment has no references.",
+                    "createdAt": "2018-05-01T01:30:38Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM4NTU3NjkzNg==",
                     "reactions": [
                     ],
                     "url": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576936"
                 }
             ],
+            "createdAt": "2018-02-28T08:38:49Z",
             "id": "MDU6SXNzdWUzMDA5MzQ5ODA=",
             "number": 2,
             "reactions": [
@@ -308,6 +319,7 @@
             "body": "Alas, its life as an open issue had only just begun.",
             "comments": [
             ],
+            "createdAt": "2018-02-28T08:44:14Z",
             "id": "MDU6SXNzdWUzMDA5MzYzNzQ=",
             "number": 4,
             "reactions": [
@@ -334,6 +346,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "A wild COMMENT appeared!",
+                    "createdAt": "2018-03-16T16:27:22Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODQ0Mg==",
                     "reactions": [
                     ],
@@ -348,6 +361,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "And the maintainer said, \"Let there be comments!\"",
+                    "createdAt": "2018-03-16T16:27:41Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM3Mzc2ODUzOA==",
                     "reactions": [
                     ],
@@ -362,6 +376,7 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "This comment references an #2, which itself references an issue. This comment is thus allows us to test that in-references are not included when requesting a Post's references.",
+                    "createdAt": "2018-04-29T03:41:47Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM4NTIyMzMxNg==",
                     "reactions": [
                     ],
@@ -376,12 +391,14 @@
                         "url": "https://github.com/credbot"
                     },
                     "body": "Hi! I'm a bot! Beep boop beep!!",
+                    "createdAt": "2018-08-29T20:59:50Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDQxNzEwNDA0Nw==",
                     "reactions": [
                     ],
                     "url": "https://github.com/sourcecred/example-github/issues/6#issuecomment-417104047"
                 }
             ],
+            "createdAt": "2018-03-16T16:27:04Z",
             "id": "MDU6SXNzdWUzMDU5OTM3NzM=",
             "number": 6,
             "reactions": [
@@ -400,6 +417,7 @@
             "body": "Deal with this, naive string display algorithms!!!!!",
             "comments": [
             ],
+            "createdAt": "2018-03-20T18:19:09Z",
             "id": "MDU6SXNzdWUzMDY5ODM1NTI=",
             "number": 7,
             "reactions": [
@@ -418,6 +436,7 @@
             "body": "Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️\r\nIssue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
             "comments": [
             ],
+            "createdAt": "2018-03-20T18:24:03Z",
             "id": "MDU6SXNzdWUzMDY5ODUzNjc=",
             "number": 8,
             "reactions": [
@@ -436,6 +455,7 @@
             "body": "This issue was paired with @wchargin \r\n\r\nIt also attempts to reference itself: #10\r\n\r\nIt also references something twice: #2 #2 ",
             "comments": [
             ],
+            "createdAt": "2018-06-29T18:30:21Z",
             "id": "MDU6SXNzdWUzMzcwOTU0NzM=",
             "number": 10,
             "reactions": [
@@ -457,6 +477,7 @@
                     "__typename": "IssueComment",
                     "author": null,
                     "body": "Hello. :ghost: ",
+                    "createdAt": "2018-09-12T21:59:05Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMTg3Mg==",
                     "reactions": [
                     ],
@@ -471,6 +492,7 @@
                         "url": "https://github.com/wchargin"
                     },
                     "body": "[Here is a screenshot of the thread at this point, prior to account deletion.](https://user-images.githubusercontent.com/4317806/45455614-8c4fe600-b69c-11e8-902e-aec65d7403e6.png)\r\n\r\nThe user has GraphQL ID `MDQ6VXNlcjQzMjIyMTkw` and database ID `43222190`.\r\n\r\nThe previous comment has GraphQL ID `MDEyOklzc3VlQ29tbWVudDQyMDgxMTg3Mg==` and database `420811872`.\r\n",
+                    "createdAt": "2018-09-12T22:03:33Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMzAxMw==",
                     "reactions": [
                     ],
@@ -480,6 +502,7 @@
                     "__typename": "IssueComment",
                     "author": null,
                     "body": "My time in this life draws to a close. :wave: ",
+                    "createdAt": "2018-09-12T22:04:18Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMzIwNg==",
                     "reactions": [
                         {
@@ -538,12 +561,14 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": ":skull: :ghost:\r\nRIP",
+                    "createdAt": "2018-09-12T22:06:05Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDQyMDgxMzYyMQ==",
                     "reactions": [
                     ],
                     "url": "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813621"
                 }
             ],
+            "createdAt": "2018-09-12T21:57:59Z",
             "id": "MDU6SXNzdWUzNTk2Njc4Mjk=",
             "number": 11,
             "reactions": [
@@ -562,6 +587,7 @@
             "body": "By url: https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780\r\n\r\nBy hash: ecc889dc94cf6da17ae6eab5bb7b7155f577519d\r\n\r\nHash from another repo: 3715ddfb8d4c4fd2a6f6af75488c82f84c92ec2f (example-git in this case)",
             "comments": [
             ],
+            "createdAt": "2018-09-13T22:34:46Z",
             "id": "MDU6SXNzdWUzNjAwOTExMDc=",
             "number": 12,
             "reactions": [
@@ -591,6 +617,7 @@
             "body": "I'm reacting to this with every emoji.",
             "comments": [
             ],
+            "createdAt": "2018-09-13T22:35:37Z",
             "id": "MDU6SXNzdWUzNjAwOTEzMTQ=",
             "number": 13,
             "reactions": [
@@ -715,12 +742,14 @@
                         "url": "https://github.com/decentralion"
                     },
                     "body": "It seems apropos to reference something from a pull request comment... eg: #2 ",
+                    "createdAt": "2018-02-28T08:43:40Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM2OTE2MjIyMg==",
                     "reactions": [
                     ],
                     "url": "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222"
                 }
             ],
+            "createdAt": "2018-02-28T08:43:19Z",
             "deletions": 0,
             "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg3NzQx",
             "mergeCommit": {
@@ -823,6 +852,7 @@
                         "url": "https://github.com/wchargin"
                     },
                     "body": "In retrospect, this was an excellent PR.",
+                    "createdAt": "2018-06-12T00:46:20Z",
                     "id": "MDEyOklzc3VlQ29tbWVudDM5NjQzMDQ2NA==",
                     "reactions": [
                         {
@@ -851,6 +881,7 @@
                     "url": "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464"
                 }
             ],
+            "createdAt": "2018-02-28T08:47:16Z",
             "deletions": 0,
             "id": "MDExOlB1bGxSZXF1ZXN0MTcxODg4NTIy",
             "mergeCommit": {
@@ -966,6 +997,7 @@
                                 "url": "https://github.com/wchargin"
                             },
                             "body": "seems a bit capricious",
+                            "createdAt": "2018-03-01T04:23:30Z",
                             "id": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDE3MTQ2MDE5OA==",
                             "reactions": [
                                 {
@@ -1104,6 +1136,7 @@
                             "url": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"
                         }
                     ],
+                    "createdAt": "2018-03-01T04:23:30Z",
                     "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzEzODk5",
                     "state": "CHANGES_REQUESTED",
                     "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899"
@@ -1119,6 +1152,7 @@
                     "body": "I'm sold",
                     "comments": [
                     ],
+                    "createdAt": "2018-03-01T04:24:56Z",
                     "id": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3MTAwMzE0MDM4",
                     "state": "APPROVED",
                     "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038"
@@ -1139,6 +1173,7 @@
             "body": "Nominally paired with @wchargin",
             "comments": [
             ],
+            "createdAt": "2018-05-03T18:53:15Z",
             "deletions": 0,
             "id": "MDExOlB1bGxSZXF1ZXN0MTg1ODA2MTU3",
             "mergeCommit": null,

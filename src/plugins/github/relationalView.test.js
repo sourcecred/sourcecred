@@ -83,6 +83,7 @@ describe("plugins/github/relationalView", () => {
     has("owner", () => entity.owner());
     has("name", () => entity.name());
     has("url", () => entity.url());
+    has("createdAt", () => entity.createdAt());
     hasEntities("issues", () => entity.issues());
     hasEntities("pulls", () => entity.pulls());
   });
@@ -95,6 +96,7 @@ describe("plugins/github/relationalView", () => {
     has("title", () => entity.title());
     has("url", () => entity.url());
     has("parent", () => entity.parent());
+    has("createdAt", () => entity.createdAt());
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
     has("reactions", () => entity.reactions());
@@ -115,6 +117,7 @@ describe("plugins/github/relationalView", () => {
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
     has("reactions", () => entity.reactions());
+    has("createdAt", () => entity.createdAt());
   });
 
   const review = Array.from(pull.reviews())[0];
@@ -126,6 +129,7 @@ describe("plugins/github/relationalView", () => {
     has("parent", () => entity.parent());
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
+    has("createdAt", () => entity.createdAt());
   });
 
   const comment = Array.from(review.comments())[0];
@@ -136,6 +140,7 @@ describe("plugins/github/relationalView", () => {
     has("parent", () => entity.parent());
     hasEntities("authors", () => entity.authors());
     has("reactions", () => entity.reactions());
+    has("createdAt", () => entity.createdAt());
   });
 
   const commit = Array.from(view.commits())[0];

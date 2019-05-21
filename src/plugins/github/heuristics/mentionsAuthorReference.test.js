@@ -55,6 +55,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
     const repository: Repository = {
       __typename: "Repository",
       id: "repo:my-repo",
+      createdAt: "2019-05-20T22:52:07Z",
       issues: [
         {
           __typename: "Issue",
@@ -66,6 +67,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
           author: authors.steven(),
           comments: [],
           reactions: [],
+          createdAt: "2019-05-20T22:52:07Z",
         },
         {
           __typename: "Issue",
@@ -76,6 +78,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
           body: "it is me, @steven\n\nPaired with: @pearl",
           author: authors.steven(),
           reactions: [],
+          createdAt: "2019-05-20T22:52:07Z",
           comments: [
             {
               __typename: "IssueComment",
@@ -84,6 +87,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
               body: "parry parry thrust @pearl\nparry parry thrust @steven",
               author: authors.holo(),
               reactions: [],
+              createdAt: "2019-05-20T22:52:07Z",
             },
             {
               __typename: "IssueComment",
@@ -92,6 +96,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
               body: "@holo-pearl: stop!",
               author: authors.steven(),
               reactions: [],
+              createdAt: "2019-05-20T22:52:07Z",
             },
             {
               __typename: "IssueComment",
@@ -100,6 +105,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
               body: "@amethyst @garnet why aren't you helping",
               author: authors.pearl(),
               reactions: [],
+              createdAt: "2019-05-20T22:52:07Z",
             },
             {
               __typename: "IssueComment",
@@ -108,6 +114,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
               body: "@amethyst! come quickly, @amethyst!",
               author: authors.garnet(),
               reactions: [],
+              createdAt: "2019-05-20T22:52:07Z",
             },
             {
               __typename: "IssueComment",
@@ -116,6 +123,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
               body: "i am busy fighting @boomerang-blade guy",
               author: authors.amethyst(),
               reactions: [],
+              createdAt: "2019-05-20T22:52:07Z",
             },
           ],
         },
@@ -135,6 +143,7 @@ describe("plugins/github/heuristics/mentionsAuthorReference", () => {
           comments: [],
           author: authors.steven(),
           reviews: [],
+          createdAt: "2019-05-20T22:52:07Z",
         },
       ],
       url: "https://github.com/my-owner/my-repo",
