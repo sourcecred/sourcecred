@@ -36,6 +36,7 @@ export default function schema(): Schema.Schema {
       issues: s.connection("Issue"),
       pullRequests: s.connection("PullRequest"),
       defaultBranchRef: s.node("Ref"),
+      createdAt: s.primitive(s.nonNull("DateTime")),
     }),
     Issue: s.object({
       id: s.id(),
@@ -46,6 +47,7 @@ export default function schema(): Schema.Schema {
       author: s.node("Actor"),
       comments: s.connection("IssueComment"),
       reactions: s.connection("Reaction"),
+      createdAt: s.primitive(s.nonNull("DateTime")),
     }),
     PullRequest: s.object({
       id: s.id(),
@@ -60,6 +62,7 @@ export default function schema(): Schema.Schema {
       comments: s.connection("IssueComment"), // yes, PRs have IssueComments
       reviews: s.connection("PullRequestReview"),
       reactions: s.connection("Reaction"),
+      createdAt: s.primitive(s.nonNull("DateTime")),
     }),
     IssueComment: s.object({
       id: s.id(),
@@ -67,6 +70,7 @@ export default function schema(): Schema.Schema {
       body: s.primitive(s.nonNull("String")),
       author: s.node("Actor"),
       reactions: s.connection("Reaction"),
+      createdAt: s.primitive(s.nonNull("DateTime")),
     }),
     PullRequestReview: s.object({
       id: s.id(),
@@ -75,6 +79,7 @@ export default function schema(): Schema.Schema {
       author: s.node("Actor"),
       state: s.primitive(s.nonNull("PullRequestReviewState")),
       comments: s.connection("PullRequestReviewComment"),
+      createdAt: s.primitive(s.nonNull("DateTime")),
     }),
     PullRequestReviewComment: s.object({
       id: s.id(),
@@ -82,6 +87,7 @@ export default function schema(): Schema.Schema {
       body: s.primitive(s.nonNull("String")),
       author: s.node("Actor"),
       reactions: s.connection("Reaction"),
+      createdAt: s.primitive(s.nonNull("DateTime")),
     }),
     Reaction: s.object({
       id: s.id(),

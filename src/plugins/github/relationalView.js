@@ -28,6 +28,8 @@ import {
   reviewCommentUrlToId,
 } from "./urlIdParse";
 
+export type MsSinceEpoch = number;
+
 const COMPAT_INFO = {
   type: "sourcecred/github/relationalView",
   version: "0.2.0",
@@ -298,6 +300,7 @@ export class RelationalView {
       pulls: expectAllNonNull(json, "pullRequests", json.pullRequests).map(
         (x) => this._addPull(address, x)
       ),
+      createdAt: +new Date(json.createdAt),
     };
     const raw = N.toRaw(address);
     this._repos.set(raw, entry);
@@ -339,6 +342,7 @@ export class RelationalView {
       reactions: expectAllNonNull(json, "reactions", json.reactions).map((x) =>
         this._addReaction(x)
       ),
+      createdAt: +new Date(json.createdAt),
     };
     this._issues.set(N.toRaw(address), entry);
     return address;
@@ -421,6 +425,7 @@ export class RelationalView {
       reactions: expectAllNonNull(json, "reactions", json.reactions).map((x) =>
         this._addReaction(x)
       ),
+      createdAt: +new Date(json.createdAt),
     };
     this._pulls.set(N.toRaw(address), entry);
     return address;
@@ -441,6 +446,7 @@ export class RelationalView {
       ),
       body: json.body,
       authors: this._addNullableAuthor(json.author),
+      createdAt: +new Date(json.createdAt),
     };
     this._reviews.set(N.toRaw(address), entry);
     return address;
@@ -473,6 +479,7 @@ export class RelationalView {
       reactions: expectAllNonNull(json, "reactions", json.reactions).map((x) =>
         this._addReaction(x)
       ),
+      createdAt: +new Date(json.createdAt),
     };
     this._comments.set(N.toRaw(address), entry);
     return address;
@@ -719,6 +726,7 @@ type RepoEntry = {|
   +url: string,
   +issues: IssueAddress[],
   +pulls: PullAddress[],
+  +createdAt: MsSinceEpoch,
 |};
 
 export class Repo extends _Entity<RepoEntry> {
@@ -746,6 +754,9 @@ export class Repo extends _Entity<RepoEntry> {
   referencedBy(): Iterator<TextContentEntity> {
     return this._view._referencedBy(this);
   }
+  createdAt(): MsSinceEpoch {
+    return this._entry.createdAt;
+  }
 }
 
 type IssueEntry = {|
@@ -756,6 +767,7 @@ type IssueEntry = {|
   +comments: CommentAddress[],
   +authors: UserlikeAddress[],
   +reactions: ReactionRecord[],
+  +createdAt: MsSinceEpoch,
 |};
 
 export class Issue extends _Entity<IssueEntry> {
@@ -775,6 +787,9 @@ export class Issue extends _Entity<IssueEntry> {
   }
   body(): string {
     return this._entry.body;
+  }
+  createdAt(): MsSinceEpoch {
+    return this._entry.createdAt;
   }
   *comments(): Iterator<Comment> {
     for (const address of this._entry.comments) {
@@ -808,6 +823,7 @@ type PullEntry = {|
   +deletions: number,
   +authors: UserlikeAddress[],
   +reactions: ReactionRecord[],
+  +createdAt: MsSinceEpoch,
 |};
 
 export class Pull extends _Entity<PullEntry> {
@@ -836,6 +852,9 @@ export class Pull extends _Entity<PullEntry> {
   }
   mergedAs(): ?GitNode.CommitAddress {
     return this._entry.mergedAs;
+  }
+  createdAt(): MsSinceEpoch {
+    return this._entry.createdAt;
   }
   *reviews(): Iterator<Review> {
     for (const address of this._entry.reviews) {
@@ -870,6 +889,7 @@ type ReviewEntry = {|
   +comments: CommentAddress[],
   +state: T.PullRequestReviewState,
   +authors: UserlikeAddress[],
+  +createdAt: MsSinceEpoch,
 |};
 
 export class Review extends _Entity<ReviewEntry> {
@@ -896,6 +916,9 @@ export class Review extends _Entity<ReviewEntry> {
   authors(): Iterator<Userlike> {
     return getAuthors(this._view, this._entry);
   }
+  createdAt(): MsSinceEpoch {
+    return this._entry.createdAt;
+  }
   references(): Iterator<ReferentEntity> {
     return this._view._references(this);
   }
@@ -910,6 +933,7 @@ type CommentEntry = {|
   +url: string,
   +authors: UserlikeAddress[],
   +reactions: ReactionRecord[],
+  +createdAt: MsSinceEpoch,
 |};
 
 export class Comment extends _Entity<CommentEntry> {
@@ -936,6 +960,9 @@ export class Comment extends _Entity<CommentEntry> {
   }
   body(): string {
     return this._entry.body;
+  }
+  createdAt(): MsSinceEpoch {
+    return this._entry.createdAt;
   }
   authors(): Iterator<Userlike> {
     return getAuthors(this._view, this._entry);
