@@ -54,14 +54,15 @@ export function loadRepository(
 }
 
 function findCommits(git: GitDriver, rootRef: string): Commit[] {
-  return git(["log", "--format=%H %h %P|%s", rootRef])
+  return git(["log", "--format=%H %h %at %P|%s", rootRef])
     .split("\n")
     .filter((line) => line.length > 0)
     .map((line) => {
       const pipeLocation = line.indexOf("|");
       const first = line.slice(0, pipeLocation).trim();
       const summary = line.slice(pipeLocation + 1);
-      const [hash, shortHash, ...parentHashes] = first.split(" ");
-      return {hash, shortHash, summary, parentHashes};
+      const [hash, shortHash, authorDate, ...parentHashes] = first.split(" ");
+      const createdAt = +authorDate * 1000;
+      return {hash, shortHash, createdAt, summary, parentHashes};
     });
 }
