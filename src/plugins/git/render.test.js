@@ -17,30 +17,35 @@ describe("plugins/git/render", () => {
     hash: "singleRepoCommit",
     shortHash: "singleRepo",
     summary: "A simple example commit",
+    createdAt: 123456789,
     parentHashes: [],
   };
   const twoRepoCommit = {
     hash: "twoRepoCommit",
     shortHash: "twoRepo",
     summary: "Two repos claim dominion over this commit",
+    createdAt: 123456789,
     parentHashes: [],
   };
   const noRepoCommit = {
     hash: "noRepoCommit",
     shortHash: "noRepo",
     summary: "commitToRepoId has no memory of this commit ",
+    createdAt: 123456789,
     parentHashes: [],
   };
   const zeroRepoCommit = {
     hash: "zeroRepoCommit",
     shortHash: "zeroRepo",
     summary: "This commit has exactly zero repoIds matching",
+    createdAt: 123456789,
     parentHashes: [],
   };
   const unregisteredCommit = {
     hash: "unregisteredCommit",
     shortHash: "unregistered",
     summary: "This commit isn't in the Repository",
+    createdAt: 123456789,
     parentHashes: [],
   };
   const exampleRepository: Repository = Object.freeze({
