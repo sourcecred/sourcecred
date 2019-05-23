@@ -21,7 +21,7 @@
  * lightly.
  */
 
-import {Graph} from "../core/graph";
+import {Graph, type NodeAddressT} from "../core/graph";
 import type {RepoId} from "../core/repoId";
 import type {PluginDeclaration} from "./pluginDeclaration";
 
@@ -37,6 +37,7 @@ export interface IBackendAdapterLoader {
   load(sourcecredDirectory: string, repoId: RepoId): Promise<IAnalysisAdapter>;
 }
 
+export type MsSinceEpoch = number;
 /**
  * Provides data needed for cred analysis for an individual plugin.
  *
@@ -45,4 +46,17 @@ export interface IBackendAdapterLoader {
 export interface IAnalysisAdapter {
   declaration(): PluginDeclaration;
   graph(): Graph;
+  /**
+   * Provides a timestamp of when the node was created.
+   *
+   * The creation time is for the object the node represents, rather than the
+   * time the node was added to the graph. E.g. a commit authored in 2001 has a
+   * createdAt timestamp for a date in 2001.
+   *
+   * createdAt may be null if the node doesn't have a creation time available,
+   * or is "timeless". A "timeless" node is one that we want to treat as
+   * always existing for purposes of cred analysis. (E.g. we may want to
+   * consider user identities timeless.)
+   */
+  createdAt(n: NodeAddressT): MsSinceEpoch | null;
 }

@@ -3,7 +3,12 @@
 import tmp from "tmp";
 import path from "path";
 
-import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
+import {
+  Graph,
+  type NodeAddressT,
+  NodeAddress,
+  EdgeAddress,
+} from "../core/graph";
 import type {
   IBackendAdapterLoader,
   IAnalysisAdapter,
@@ -59,6 +64,9 @@ class MockAdapter implements IAnalysisAdapter {
   }
   repoId() {
     return makeRepoId("foo", "bar");
+  }
+  createdAt(_unused_node: NodeAddressT): number | null {
+    return null;
   }
   declaration() {
     return declaration(this._name);

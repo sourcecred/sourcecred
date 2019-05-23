@@ -1,6 +1,6 @@
 // @flow
 
-import {Graph} from "../../core/graph";
+import {Graph, type NodeAddressT} from "../../core/graph";
 import type {RepoId} from "../../core/repoId";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {
@@ -28,7 +28,9 @@ export class AnalysisAdapter implements IAnalysisAdapter {
   declaration(): PluginDeclaration {
     return declaration;
   }
-
+  createdAt(_unused_node: NodeAddressT): number | null {
+    return null;
+  }
   graph(): Graph {
     return graph();
   }

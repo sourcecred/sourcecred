@@ -1,6 +1,7 @@
 // @flow
 
 import type {RepoId} from "../../core/repoId";
+import {type NodeAddressT} from "../../core/graph";
 import type {
   IBackendAdapterLoader,
   IAnalysisAdapter,
@@ -27,7 +28,10 @@ export class AnalysisAdapter implements IAnalysisAdapter {
   declaration() {
     return declaration;
   }
-
+  // TODO(@decentralion): Add real creation times to the data model
+  createdAt(_unused_node: NodeAddressT): null {
+    return null;
+  }
   graph() {
     return hackathonExample().graph();
   }
