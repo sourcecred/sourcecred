@@ -8,8 +8,8 @@ import * as Common from "./common";
 import stringify from "json-stable-stringify";
 import {loadGraph, type LoadGraphResult} from "../analysis/loadGraph";
 
-import {AnalysisAdapter as GithubAnalysisAdapter} from "../plugins/github/analysisAdapter";
-import {AnalysisAdapter as GitAnalysisAdapter} from "../plugins/git/analysisAdapter";
+import {BackendAdapterLoader as GithubAdapterLoader} from "../plugins/github/analysisAdapter";
+import {BackendAdapterLoader as GitAdapterLoader} from "../plugins/git/analysisAdapter";
 
 function usage(print: (string) => void): void {
   print(
@@ -103,9 +103,9 @@ export function makeExportGraph(
   };
 }
 
-const defaultAdapters = [new GithubAnalysisAdapter(), new GitAnalysisAdapter()];
+const defaultLoaders = [new GithubAdapterLoader(), new GitAdapterLoader()];
 const defaultLoadGraph = (r: RepoId) =>
-  loadGraph(Common.sourcecredDirectory(), defaultAdapters, r);
+  loadGraph(Common.sourcecredDirectory(), defaultLoaders, r);
 export const exportGraph = makeExportGraph(defaultLoadGraph);
 
 export const help: Command = async (args, std) => {

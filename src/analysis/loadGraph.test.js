@@ -3,13 +3,29 @@
 import tmp from "tmp";
 import path from "path";
 
-import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
-import type {IAnalysisAdapter} from "../analysis/analysisAdapter";
+import {
+  Graph,
+  type NodeAddressT,
+  NodeAddress,
+  EdgeAddress,
+} from "../core/graph";
+import type {
+  IBackendAdapterLoader,
+  IAnalysisAdapter,
+} from "../analysis/analysisAdapter";
 import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {makeRepoId, type RepoId} from "../core/repoId";
 import {loadGraph} from "./loadGraph";
 
-class MockAnalysisAdapter implements IAnalysisAdapter {
+const declaration = (name) => ({
+  name,
+  nodePrefix: NodeAddress.empty,
+  edgePrefix: EdgeAddress.empty,
+  nodeTypes: Object.freeze([]),
+  edgeTypes: Object.freeze([]),
+});
+
+class MockStaticAdapter implements IBackendAdapterLoader {
   _resolutionGraph: ?Graph;
   _name: string;
 
@@ -24,24 +40,39 @@ class MockAnalysisAdapter implements IAnalysisAdapter {
   }
 
   declaration() {
-    return {
-      name: this._name,
-      nodePrefix: NodeAddress.empty,
-      edgePrefix: EdgeAddress.empty,
-      nodeTypes: [],
-      edgeTypes: [],
-    };
+    return declaration(this._name);
   }
 
   async load(
     _unused_sourcecredDirectory: string,
     _unused_repoId: RepoId
-  ): Promise<Graph> {
+  ): Promise<MockAdapter> {
     if (this._resolutionGraph != null) {
-      return this._resolutionGraph;
+      return new MockAdapter(this._name, this._resolutionGraph);
     } else {
-      throw new Error("MockAnalysisAdapterRejects");
+      throw new Error("MockStaticAdapterRejects");
     }
+  }
+}
+
+class MockAdapter implements IAnalysisAdapter {
+  _name: string;
+  _resolutionGraph: Graph;
+  constructor(name: string, resolutionGraph: Graph) {
+    this._name = name;
+    this._resolutionGraph = resolutionGraph;
+  }
+  repoId() {
+    return makeRepoId("foo", "bar");
+  }
+  createdAt(_unused_node: NodeAddressT): number | null {
+    return null;
+  }
+  declaration() {
+    return declaration(this._name);
+  }
+  graph() {
+    return this._resolutionGraph;
   }
 }
 
@@ -60,7 +91,7 @@ describe("analysis/loadGraph", () => {
       const dirname = tmp.dirSync().name;
       const result = await loadGraph(
         dirname,
-        [new MockAnalysisAdapter("foo")],
+        [new MockStaticAdapter("foo")],
         makeRepoId("foo", "bar")
       );
       expect(result).toEqual({status: "REPO_NOT_LOADED"});
@@ -69,7 +100,7 @@ describe("analysis/loadGraph", () => {
       const dirname = path.join(tmp.dirSync().name, "nonexistent");
       const result = await loadGraph(
         dirname,
-        [new MockAnalysisAdapter("foo")],
+        [new MockStaticAdapter("foo")],
         makeRepoId("foo", "bar")
       );
       expect(result).toEqual({status: "REPO_NOT_LOADED"});
@@ -78,7 +109,7 @@ describe("analysis/loadGraph", () => {
       const dirname = setUpRegistryWithId(makeRepoId("zod", "zoink"));
       const result = await loadGraph(
         dirname,
-        [new MockAnalysisAdapter("foo")],
+        [new MockStaticAdapter("foo")],
         makeRepoId("foo", "bar")
       );
       expect(result).toEqual({status: "REPO_NOT_LOADED"});
@@ -86,8 +117,8 @@ describe("analysis/loadGraph", () => {
     it("returns status:SUCCESS with merged graph on success", async () => {
       const g1 = new Graph().addNode(NodeAddress.fromParts(["g1"]));
       const g2 = new Graph().addNode(NodeAddress.fromParts(["g2"]));
-      const m1 = new MockAnalysisAdapter("foo", g1);
-      const m2 = new MockAnalysisAdapter("bar", g2);
+      const m1 = new MockStaticAdapter("foo", g1);
+      const m2 = new MockStaticAdapter("bar", g2);
       const mergedGraph = Graph.merge([g1, g2]);
       const dir = setUpRegistryWithId(makeRepoId("foo", "bar"));
       const result = await loadGraph(dir, [m1, m2], makeRepoId("foo", "bar"));
@@ -107,14 +138,14 @@ describe("analysis/loadGraph", () => {
       expect(result.graph.equals(new Graph())).toBe(true);
     });
     it("returns a status:PLUGIN_FAILURE if the plugin errors", async () => {
-      const mockAdapter = new MockAnalysisAdapter("bar");
+      const mockAdapter = new MockStaticAdapter("bar");
       const repoId = makeRepoId("foo", "bar");
       const dir = setUpRegistryWithId(repoId);
       const result = await loadGraph(dir, [mockAdapter], repoId);
       expect(result).toEqual({
         status: "PLUGIN_FAILURE",
         pluginName: "bar",
-        error: new Error("MockAnalysisAdapterRejects"),
+        error: new Error("MockStaticAdapterRejects"),
       });
     });
   });
