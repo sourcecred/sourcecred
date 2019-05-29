@@ -26,7 +26,6 @@ import {
   findStationaryDistribution,
   type PagerankParams,
   type PagerankOptions as CorePagerankOptions,
-  uniformDistribution,
 } from "../core/attribution/markovChain";
 import * as NullUtil from "../util/null";
 
@@ -456,9 +455,13 @@ export class PagerankGraph {
    * individual delta in a node's score between the present and previous
    * iteration is less than or equal to `options.convergenceThreshold`.
    *
-   * TODO(#1020): Make `runPagerank` use the current nodes' scores as a
-   * starting point for computation, rather than re-generating from
-   * scratch every time `runPagerank` is called.
+   * Note that if runPagerank is called multiple times on the same
+   * PagerankGraph, it will re-use the last stationary distribution as the
+   * starting point for running PageRank again. In general, this will result in
+   * improved performance, and it will not usually affect the outcome from
+   * PageRank. However, in certain circumstances, it could result in different
+   * outputs. For example, if there are isolated nodes and no seed vector, then
+   * the initial distribution may matter.
    */
   async runPagerank(
     options?: PagerankOptions
@@ -476,11 +479,15 @@ export class PagerankGraph {
       this._syntheticLoopWeight
     );
     const osmc = createOrderedSparseMarkovChain(connections);
+    const pi0 = new Float64Array(osmc.chain.length);
+    osmc.nodeOrder.forEach(
+      (n: NodeAddressT, i) => (pi0[i] = NullUtil.get(this.node(n)).score)
+    );
     const params: PagerankParams = {
       chain: osmc.chain,
       alpha: fullOptions.alpha,
       seed: weightedDistribution(osmc.nodeOrder, fullOptions.seed),
-      pi0: uniformDistribution(osmc.chain.length),
+      pi0,
     };
     const coreOptions: CorePagerankOptions = {
       verbose: false,
