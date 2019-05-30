@@ -6,15 +6,23 @@ import path from "path";
 
 import * as NullUtil from "../util/null";
 
+import stringify from "json-stable-stringify";
 import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {repoIdToString, stringToRepoId, type RepoId} from "../core/repoId";
 import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
+import {loadGraph, type LoadGraphResult} from "../analysis/loadGraph";
+import {type IBackendAdapterLoader} from "../analysis/analysisAdapter";
+import {
+  createTimestampMap,
+  writeTimestampMap,
+} from "../analysis/temporal/timestampMap";
 
 import execDependencyGraph from "../tools/execDependencyGraph";
 import {loadGithubData} from "../plugins/github/loadGithubData";
 import {loadGitData} from "../plugins/git/loadGitData";
+import {defaultAdapterLoaders} from "./pagerank";
 
 function usage(print: (string) => void): void {
   print(
@@ -193,6 +201,7 @@ export const loadDefaultPlugins = async (options: LoadOptions) => {
     throw new Error("Load tasks failed.");
   }
   addToRepoIdRegistry(options.output);
+  saveTimestamps(defaultAdapterLoaders(), options.output);
   // HACK: Logically, we should have the PagerankTask be included in the
   // first execDependencyGraph run, depending on the other tasks completing.
   //
@@ -259,6 +268,28 @@ function addToRepoIdRegistry(repoId) {
   const oldRegistry = RepoIdRegistry.getRegistry(Common.sourcecredDirectory());
   const newRegistry = RepoIdRegistry.addEntry(oldRegistry, {repoId});
   RepoIdRegistry.writeRegistry(newRegistry, Common.sourcecredDirectory());
+}
+
+async function saveTimestamps(
+  adapterLoaders: $ReadOnlyArray<IBackendAdapterLoader>,
+  repoId: RepoId
+) {
+  const loadGraphResult: LoadGraphResult = await loadGraph(
+    Common.sourcecredDirectory(),
+    adapterLoaders,
+    repoId
+  );
+  if (loadGraphResult.status !== "SUCCESS") {
+    throw new Error(`Unable to load graph: ${stringify(loadGraphResult)}`);
+  }
+  const {graph} = loadGraphResult;
+  // We load all the adapters twice (once in loadGraph, once here).
+  // Could de-duplicate, but it's marginal overhead compared to loading the data.
+  const adapters = await Promise.all(
+    adapterLoaders.map((a) => a.load(Common.sourcecredDirectory(), repoId))
+  );
+  const timestampMap = createTimestampMap(graph.nodes(), adapters);
+  writeTimestampMap(timestampMap, Common.sourcecredDirectory(), repoId);
 }
 
 export const help: Command = async (args, std) => {

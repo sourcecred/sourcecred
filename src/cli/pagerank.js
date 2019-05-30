@@ -169,6 +169,8 @@ export async function savePagerankGraph(
   await fs.writeFile(pgFile, stringify(pgJSON));
 }
 
+// TODO(#1120): This should be canonicalized somewhere more appropriate,
+// e.g. in src/plugins/defaultPlugins.js
 export const defaultAdapterLoaders = () => [
   new GithubAdapterLoader(),
   new GitAdapterLoader(),
