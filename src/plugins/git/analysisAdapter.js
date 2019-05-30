@@ -8,6 +8,7 @@ import type {
   IBackendAdapterLoader,
   MsSinceEpoch,
 } from "../../analysis/analysisAdapter";
+import {createGraph} from "./createGraph";
 import {type RepoId, repoIdToString} from "../../core/repoId";
 import {declaration} from "./declaration";
 import {type Repository} from "./types";
@@ -33,11 +34,8 @@ export class BackendAdapterLoader implements IBackendAdapterLoader {
       const rawData = await fs.readFile(filepath);
       return JSON.parse(rawData.toString());
     }
-    const [graphJson, repository] = await Promise.all([
-      loadJson("graph.json"),
-      loadJson("repository.json"),
-    ]);
-    const graph = Graph.fromJSON(graphJson);
+    const repository = await loadJson("repository.json")
+    const graph = createGraph(repository);
     return new AnalysisAdapter(graph, repository);
   }
 }

@@ -18,14 +18,10 @@ export type Options = {|
 export function loadGitData(options: Options): Promise<void> {
   const repositories = options.repoIds.map((r) => cloneAndLoadRepository(r));
   const repository = mergeRepository(repositories);
-  const graph = createGraph(repository);
   function writeToFile(filename, serializable) {
     const blob = stringify(serializable);
     const filePath = path.join(options.outputDirectory, filename);
     return fs.writeFile(filePath, blob);
   }
-  return Promise.all([
-    writeToFile("repository.json", repository),
-    writeToFile("graph.json", graph),
-  ]).then(() => undefined);
+  return writeToFile("repository.json", repository)
 }
