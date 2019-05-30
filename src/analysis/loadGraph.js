@@ -5,7 +5,7 @@ import * as NullUtil from "../util/null";
 import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {type RepoId} from "../core/repoId";
 
-import type {IAnalysisAdapter} from "./analysisAdapter";
+import type {IBackendAdapterLoader} from "./analysisAdapter";
 
 /**
  * Module for loading a graph from a SOURCECRED_DIRECTORY.
@@ -30,7 +30,7 @@ type GraphOrError =
  */
 export async function loadGraph(
   sourcecredDirectory: string,
-  adapters: $ReadOnlyArray<IAnalysisAdapter>,
+  adapters: $ReadOnlyArray<IBackendAdapterLoader>,
   repoId: RepoId
 ): Promise<LoadGraphResult> {
   const registry = RepoIdRegistry.getRegistry(sourcecredDirectory);
@@ -38,13 +38,14 @@ export async function loadGraph(
     return {status: "REPO_NOT_LOADED"};
   }
   async function graphForAdapter(
-    adapter: IAnalysisAdapter
+    adapter: IBackendAdapterLoader
   ): Promise<GraphOrError> {
     try {
-      const graph = await adapter.load(
+      const dynamicAdapter = await adapter.load(
         sourcecredDirectory,
         NullUtil.get(repoId)
       );
+      const graph = dynamicAdapter.graph();
       return {type: "GRAPH", graph};
     } catch (e) {
       return {type: "ERROR", pluginName: adapter.declaration().name, error: e};

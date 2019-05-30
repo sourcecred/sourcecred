@@ -609,6 +609,22 @@ describe("core/pagerankGraph", () => {
       expect(results.convergenceDelta).toBeLessThan(convergenceThreshold);
       checkProbabilityDistribution(pg);
     });
+    it("re-uses existing scores as a starting point", async () => {
+      const pg = examplePagerankGraph();
+      const convergenceThreshold = 0.001;
+      const results1 = await pg.runPagerank({
+        maxIterations: 170,
+        convergenceThreshold,
+      });
+      expect(results1.convergenceDelta).toBeLessThan(convergenceThreshold);
+      // It should still converge without any iterations, because it uses the
+      // final distribution as a starting point
+      const results2 = await pg.runPagerank({
+        maxIterations: 0,
+        convergenceThreshold,
+      });
+      expect(results2.convergenceDelta).toEqual(results1.convergenceDelta);
+    });
   });
 
   describe("equals", () => {

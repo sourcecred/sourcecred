@@ -7,6 +7,10 @@
 # shellcheck disable=SC2034,SC2016,SC1004
 :
 
+# If this test is failing, it probably means you need to update snapshots.
+# You can do so by setting your SOURCECRED_GITHUB_TOKEN (see README) and then
+# running scripts/update_snapshots.sh.
+
 test_description='test snapshot integrity for sourcecred load'
 
 export GIT_CONFIG_NOSYSTEM=1

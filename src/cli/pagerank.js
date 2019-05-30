@@ -22,8 +22,8 @@ import {type Weights, defaultWeights} from "../analysis/weights";
 import {type NodeAndEdgeTypes} from "../analysis/types";
 import {combineTypes} from "../analysis/pluginDeclaration";
 import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
-import {AnalysisAdapter as GithubAnalysisAdapter} from "../plugins/github/analysisAdapter";
-import {AnalysisAdapter as GitAnalysisAdapter} from "../plugins/git/analysisAdapter";
+import {BackendAdapterLoader as GithubAdapterLoader} from "../plugins/github/analysisAdapter";
+import {BackendAdapterLoader as GitAdapterLoader} from "../plugins/git/analysisAdapter";
 
 function usage(print: (string) => void): void {
   print(
@@ -169,15 +169,17 @@ export async function savePagerankGraph(
   await fs.writeFile(pgFile, stringify(pgJSON));
 }
 
-export const defaultAdapters = () => [
-  new GithubAnalysisAdapter(),
-  new GitAnalysisAdapter(),
+// TODO(#1120): This should be canonicalized somewhere more appropriate,
+// e.g. in src/plugins/defaultPlugins.js
+export const defaultAdapterLoaders = () => [
+  new GithubAdapterLoader(),
+  new GitAdapterLoader(),
 ];
 
-const declarations = () => defaultAdapters().map((x) => x.declaration());
+const declarations = () => defaultAdapterLoaders().map((x) => x.declaration());
 
 const defaultLoader = (r: RepoId) =>
-  loadGraph(Common.sourcecredDirectory(), defaultAdapters(), r);
+  loadGraph(Common.sourcecredDirectory(), defaultAdapterLoaders(), r);
 export const defaultPagerank = (g: Graph) =>
   runPagerank(defaultWeights(), g, combineTypes(declarations()));
 export const defaultSaver = (r: RepoId, pg: PagerankGraph) =>
