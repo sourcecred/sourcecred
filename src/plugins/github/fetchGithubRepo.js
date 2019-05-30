@@ -83,6 +83,7 @@ type GithubResponseError =
   | {|+type: "GRAPHQL_ERROR", retry: false, error: mixed|}
   | {|+type: "RATE_LIMIT_EXCEEDED", retry: false, error: mixed|}
   | {|+type: "GITHUB_INTERNAL_EXECUTION_ERROR", retry: true, error: mixed|}
+  | {|+type: "BAD_CREDENTIALS", retry: false, error: mixed|}
   | {|+type: "NO_DATA", retry: true, error: mixed|};
 
 // Fetch against the GitHub API with the provided options, returning a
@@ -126,10 +127,20 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
           }
         }
         if (x.data === undefined) {
-          // See https://github.com/sourcecred/sourcecred/issues/350.
-          return Promise.reject(
-            ({type: "NO_DATA", retry: true, error: x}: GithubResponseError)
-          );
+          if (x.message && x.message.includes("Bad credentials")) {
+            return Promise.reject(
+              ({
+                type: "BAD_CREDENTIALS",
+                retry: false,
+                error: x,
+              }: GithubResponseError)
+            );
+          } else {
+            // See https://github.com/sourcecred/sourcecred/issues/350
+            return Promise.reject(
+              ({type: "NO_DATA", retry: true, error: x}: GithubResponseError)
+            );
+          }
         }
         return Promise.resolve(x.data);
       }),
@@ -204,6 +215,11 @@ export async function postQuery(
           break;
         case "FETCH_ERROR":
           // Network error; no need for additional commentary.
+          break;
+        case "BAD_CREDENTIALS":
+          console.error(
+            "An invalid token was supplied ($SOURCECRED_GITHUB_TOKEN). This is mostly likely caused by supplying a revoked token."
+          );
           break;
         default:
           throw new Error((type: empty));
