@@ -127,7 +127,6 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
           }
         }
         if (x.data === undefined) {
-          // See https://github.com/sourcecred/sourcecred/issues/350
           if (x.message && x.message.includes("Bad credentials")) {
             return Promise.reject(
               ({
@@ -137,6 +136,7 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
               }: GithubResponseError)
             );
           } else {
+            // See https://github.com/sourcecred/sourcecred/issues/350
             return Promise.reject(
               ({type: "NO_DATA", retry: true, error: x}: GithubResponseError)
             );
