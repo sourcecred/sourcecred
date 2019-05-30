@@ -25,15 +25,6 @@ export class StaticExplorerAdapter implements IStaticExplorerAdapter {
   }
   async load(assets: Assets, repoId: RepoId): Promise<IDynamicExplorerAdapter> {
     const baseUrl = `/api/v1/data/data/${repoId.owner}/${repoId.name}/git/`;
-    // async function loadGraph() {
-    //   const url = assets.resolve(baseUrl + "graph.json");
-    //   const response = await fetch(url);
-    //   if (!response.ok) {
-    //     return Promise.reject(response);
-    //   }
-    //   const json = await response.json();
-    //   return Graph.fromJSON(json);
-    // }
     async function loadRepository(): Promise<Repository> {
       const url = assets.resolve(baseUrl + "repository.json");
       const response = await fetch(url);
