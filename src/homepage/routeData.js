@@ -85,6 +85,15 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       title: `${entry.repoId.owner}/${entry.repoId.name} • SourceCred`,
       navTitle: null,
     })),
+    ...registry.map((entry) => ({
+      path: `/timeline/${entry.repoId.owner}/${entry.repoId.name}/`,
+      contents: {
+        type: "PAGE",
+        component: () => require("./TimelinePage").default(entry.repoId),
+      },
+      title: `${entry.repoId.owner}/${entry.repoId.name} • Timeline`,
+      navTitle: null,
+    })),
     {
       path: "/discord-invite/",
       contents: {
@@ -98,6 +107,10 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
     inspectionTestFor(
       "FileUploader",
       () => require("../util/FileUploaderInspectionTest").default
+    ),
+    inspectionTestFor(
+      "TimelineCredView",
+      () => require("../explorer/TimelineCredViewInspectionTest").default
     ),
   ];
 }
