@@ -6,7 +6,6 @@ import stringify from "json-stable-stringify";
 
 import type {RepoId} from "../../core/repoId";
 import cloneAndLoadRepository from "./cloneAndLoadRepository";
-import {createGraph} from "./createGraph";
 import {mergeRepository} from "./mergeRepository";
 
 export type Options = {|
