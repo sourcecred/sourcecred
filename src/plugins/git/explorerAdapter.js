@@ -33,11 +33,9 @@ export class StaticExplorerAdapter implements IStaticExplorerAdapter {
       }
       return await response.json();
     }
-    const [graph, repository] = await Promise.all([
-      loadGraph(),
-      loadRepository(),
-      createGraph()
-    ]);
+    
+    const repository = await loadRepository()
+    const graph = createGraph(repository)
     return new DynamicExplorerAdapter(this._gitGateway, graph, repository);
   }
 }
