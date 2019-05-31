@@ -59,7 +59,7 @@ export class AnalysisAdapter implements IAnalysisAdapter {
     // hotspot. If so, implement a do-not-modify flag and set it (for safety)
     return this._graph.copy();
   }
-  createdAt(n: NodeAddressT): MsSinceEpoch {
+  createdAt(n: NodeAddressT): MsSinceEpoch | null {
     // Coerce the NodeAddressT into a Git plugin 'RawAddress'.
     // If this coercion is false (i.e. the AnalysisAdapter was passed a non-Git NodeAddress)
     // then this will throw a runtime error.
@@ -69,7 +69,10 @@ export class AnalysisAdapter implements IAnalysisAdapter {
         const hash = addr.hash;
         const commit = this._repository.commits[hash];
         if (commit == null) {
-          throw new Error(`Can't find commit for hash: ${hash}`);
+          // Possibly this commit was merged to a non-master branch.
+          // It's a little hacky to return null. See #1163 for alternative
+          // solutions.
+          return null;
         }
         return commit.createdAt;
       default:

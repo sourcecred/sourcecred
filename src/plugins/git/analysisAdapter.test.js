@@ -52,12 +52,12 @@ describe("plugins/git/analysisAdapter", () => {
         const actualCreatedAt = aa.createdAt(commitAddr);
         expect(actualCreatedAt).toEqual(1519807427000);
       });
-      it("throws an error for an absent commit hash", async () => {
+      it("returns null for an absent commit hash", async () => {
+        // This is a little hacky. See #1163 for discussion.
+        // https://github.com/sourcecred/sourcecred/issues/1163
         const aa = await loadAnalysisAdapter();
         const commitAddr = toRaw({type: "COMMIT", hash: "1234"});
-        expect(() => aa.createdAt(commitAddr)).toThrowError(
-          "Can't find commit"
-        );
+        expect(aa.createdAt(commitAddr)).toEqual(null);
       });
       it("throws an error for an invalid NodeAddress", async () => {
         const aa = await loadAnalysisAdapter();
