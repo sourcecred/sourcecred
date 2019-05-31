@@ -124,7 +124,8 @@ This is the same set of tests that is run on our CI system, CircleCI.
 If your patch makes a change that would be visible or interesting to a
 user of SourceCred—for example, fixing a bug—please add a description of
 the change under the `[Unreleased]` heading of `CHANGELOG.md`. Your new
-change should be the first entry in the section. The format of your entry should be: ```<description of change> (#<PR number>)```.
+change should be the first entry in the section. The format of your
+entry should be: ```<description of change> (#<PR number>)```.
 
 ## When writing commit messages
 
