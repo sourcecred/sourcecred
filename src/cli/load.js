@@ -4,8 +4,6 @@
 import mkdirp from "mkdirp";
 import path from "path";
 
-import * as NullUtil from "../util/null";
-
 import stringify from "json-stable-stringify";
 import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {repoIdToString, stringToRepoId, type RepoId} from "../core/repoId";
@@ -264,7 +262,10 @@ export const loadIndividualPlugin = async (
   const cacheDirectory = scopedDirectory("cache");
   switch (plugin) {
     case "github": {
-      const token = NullUtil.get(Common.githubToken());
+      const token = Common.githubToken();
+      if (token == null) {
+        throw new Error("no SOURCECRED_GITHUB_TOKEN set");
+      }
       await loadGithubData({token, repoIds, outputDirectory, cacheDirectory});
       return;
     }

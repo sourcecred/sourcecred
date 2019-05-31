@@ -436,13 +436,16 @@ describe("cli/load", () => {
               });
             });
 
-            it("fails if a token is not provided", async () => {
+            it("fails if a token is not provided", () => {
+              expect.assertions(1);
               delete process.env.SOURCECRED_GITHUB_TOKEN;
               const result = loadIndividualPlugin("github", {
                 repoIds: [fooBar],
                 output: fooBar,
               });
-              expect(result).rejects.toThrow("no SOURCECRED_GITHUB_TOKEN set");
+              return expect(result).rejects.toThrow(
+                "no SOURCECRED_GITHUB_TOKEN set"
+              );
             });
 
             it("fails if `loadGithubData` rejects", async () => {
