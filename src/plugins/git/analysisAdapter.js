@@ -34,7 +34,7 @@ export class BackendAdapterLoader implements IBackendAdapterLoader {
       const rawData = await fs.readFile(filepath);
       return JSON.parse(rawData.toString());
     }
-    const repository = await loadJson("repository.json")
+    const repository = await loadJson("repository.json");
     const graph = createGraph(repository);
     return new AnalysisAdapter(graph, repository);
   }

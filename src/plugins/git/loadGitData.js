@@ -22,5 +22,5 @@ export function loadGitData(options: Options): Promise<void> {
     const filePath = path.join(options.outputDirectory, filename);
     return fs.writeFile(filePath, blob);
   }
-  return writeToFile("repository.json", repository)
+  return writeToFile("repository.json", repository);
 }
