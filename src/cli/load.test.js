@@ -6,13 +6,14 @@ import tmp from "tmp";
 import {run} from "./testUtil";
 import {
   makeLoadCommand,
-  loadDefaultPlugins,
+  makeLoadDefaultPlugins,
   loadIndividualPlugin,
   help,
 } from "./load";
 
 import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {makeRepoId} from "../core/repoId";
+import {defaultAdapterLoaders} from "./pagerank";
 
 jest.mock("../tools/execDependencyGraph", () => jest.fn());
 jest.mock("../plugins/github/loadGithubData", () => ({
@@ -462,6 +463,7 @@ describe("cli/load", () => {
     const fooCombined = makeRepoId("foo", "combined");
     const fooBar = makeRepoId("foo", "bar");
     const fooBaz = makeRepoId("foo", "baz");
+    const loadDefaultPlugins = makeLoadDefaultPlugins(jest.fn());
 
     it("creates a load sub-task per plugin", async () => {
       execDependencyGraph.mockResolvedValue({success: true});
@@ -531,6 +533,21 @@ describe("cli/load", () => {
         }
       );
       expect(RepoIdRegistry.getRegistry(directory)).toEqual(expectedRegistry);
+    });
+
+    it("calls saveTimestamps on success", async () => {
+      const saveTimestamps = jest.fn();
+      const loadDefaultPlugins = makeLoadDefaultPlugins(saveTimestamps);
+      execDependencyGraph.mockResolvedValue({success: true});
+      await loadDefaultPlugins({
+        output: fooCombined,
+        repoIds: [fooBar, fooBaz],
+      });
+      expect(saveTimestamps).toHaveBeenCalledTimes(1);
+      expect(saveTimestamps).toHaveBeenCalledWith(
+        defaultAdapterLoaders(),
+        fooCombined
+      );
     });
 
     it("throws an load error on first execDependencyGraph failure", async () => {
