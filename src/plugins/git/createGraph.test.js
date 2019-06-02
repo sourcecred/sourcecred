@@ -3,7 +3,6 @@
 import cloneDeep from "lodash.clonedeep";
 
 import {createGraph} from "./createGraph";
-import {GraphView} from "./graphView";
 import {Prefix as NodePrefix} from "./nodes";
 import {Prefix as EdgePrefix} from "./edges";
 import {NodeAddress, EdgeAddress} from "../../core/graph";
@@ -14,11 +13,6 @@ describe("plugins/git/createGraph", () => {
   describe("createGraph", () => {
     it("processes a simple repository", () => {
       expect(createGraph(makeData())).toMatchSnapshot();
-    });
-
-    it("satisfies the GraphView invariants", () => {
-      const graph = createGraph(makeData());
-      expect(() => new GraphView(graph)).not.toThrow();
     });
 
     it("only has commit nodes and has_parent edges", () => {
