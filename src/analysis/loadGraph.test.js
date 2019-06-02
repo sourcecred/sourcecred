@@ -74,6 +74,9 @@ class MockAdapter implements IAnalysisAdapter {
   graph() {
     return this._resolutionGraph;
   }
+  description(_unused_node): string | null {
+    return null;
+  }
 }
 
 describe("analysis/loadGraph", () => {

@@ -538,16 +538,16 @@ describe("cli/load", () => {
       expect(RepoIdRegistry.getRegistry(directory)).toEqual(expectedRegistry);
     });
 
-    it("calls saveTimestamps on success", async () => {
-      const saveTimestamps = jest.fn();
-      const loadDefaultPlugins = makeLoadDefaultPlugins(saveTimestamps);
+    it("calls saveMetadata on success", async () => {
+      const saveMetadata = jest.fn();
+      const loadDefaultPlugins = makeLoadDefaultPlugins(saveMetadata);
       execDependencyGraph.mockResolvedValue({success: true});
       await loadDefaultPlugins({
         output: fooCombined,
         repoIds: [fooBar, fooBaz],
       });
-      expect(saveTimestamps).toHaveBeenCalledTimes(1);
-      expect(saveTimestamps).toHaveBeenCalledWith(
+      expect(saveMetadata).toHaveBeenCalledTimes(1);
+      expect(saveMetadata).toHaveBeenCalledWith(
         defaultAdapterLoaders(),
         fooCombined
       );
