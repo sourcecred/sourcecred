@@ -1,5 +1,12 @@
 // @flow
 
+/**
+ * Exports descriptions (as React nodes) for every GitHub entity.
+ *
+ * I intend to deprecate this module in favor of the markdown descriptons on
+ * the AnalysisAdapter.
+ */
+
 import React, {type Node as ReactNode} from "react";
 import * as R from "./relationalView";
 

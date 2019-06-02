@@ -59,4 +59,10 @@ export interface IAnalysisAdapter {
    * consider user identities timeless.)
    */
   createdAt(n: NodeAddressT): MsSinceEpoch | null;
+  /**
+   * A one-line description of the node.
+   *
+   * Markdown is supported (hyperlinks are good).
+   */
+  description(n: NodeAddressT): string | null;
 }

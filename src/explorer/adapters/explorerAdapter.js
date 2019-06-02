@@ -13,6 +13,9 @@ export interface StaticExplorerAdapter {
 
 export interface DynamicExplorerAdapter {
   graph(): Graph;
+  // Gives the description as a ReactNode.
+  // I intend to deprecate this in favor of the Markdown descriptions defined
+  // on the AnalysisAdapter.
   nodeDescription(NodeAddressT): ReactNode;
   static (): StaticExplorerAdapter;
 }

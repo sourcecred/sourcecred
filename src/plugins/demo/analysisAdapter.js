@@ -34,4 +34,7 @@ export class AnalysisAdapter implements IAnalysisAdapter {
   graph(): Graph {
     return graph();
   }
+  description(_unused_node: NodeAddressT): string | null {
+    return null;
+  }
 }

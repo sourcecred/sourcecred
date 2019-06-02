@@ -16,6 +16,7 @@ import {createGraph} from "./createGraph";
 import {createdAt} from "./createdAt";
 import {fromRaw} from "./nodes";
 import {type NodeAddressT} from "../../core/graph";
+import {description} from "./description";
 
 export class BackendAdapterLoader implements IBackendAdapterLoader {
   declaration() {
@@ -57,5 +58,13 @@ export class AnalysisAdapter implements IAnalysisAdapter {
   }
   graph() {
     return createGraph(this._view);
+  }
+  description(n: NodeAddressT): string | null {
+    const addr = fromRaw((n: any));
+    const entity = this._view.entity(addr);
+    if (entity == null) {
+      return null;
+    }
+    return description(entity);
   }
 }

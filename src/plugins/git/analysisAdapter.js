@@ -12,6 +12,8 @@ import {type RepoId, repoIdToString} from "../../core/repoId";
 import {declaration} from "./declaration";
 import {type Repository} from "./types";
 import {type StructuredAddress, fromRaw} from "./nodes";
+import {description} from "./description";
+import {GithubGitGateway} from "../github/githubGitGateway";
 
 export class BackendAdapterLoader implements IBackendAdapterLoader {
   declaration() {
@@ -45,6 +47,7 @@ export class BackendAdapterLoader implements IBackendAdapterLoader {
 export class AnalysisAdapter implements IAnalysisAdapter {
   _graph: Graph;
   _repository: Repository;
+
   constructor(graph: Graph, repository: Repository) {
     this._graph = graph;
     this._repository = repository;
@@ -78,5 +81,11 @@ export class AnalysisAdapter implements IAnalysisAdapter {
       default:
         throw new Error(`Unexpected type: ${(addr.type: empty)}`);
     }
+  }
+  description(n: NodeAddressT): string | null {
+    const addr: StructuredAddress = fromRaw((n: any));
+    // TODO: When supporting Git providers other than GitHub, update this code
+    // path to use the right Gateway.
+    return description(addr, this._repository, new GithubGitGateway());
   }
 }

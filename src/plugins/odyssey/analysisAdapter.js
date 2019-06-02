@@ -35,4 +35,8 @@ export class AnalysisAdapter implements IAnalysisAdapter {
   graph() {
     return hackathonExample().graph();
   }
+  description(_unused_node: NodeAddressT): string | null {
+    // Not yet implemented.
+    return null;
+  }
 }

@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/github/description renders the right description for a comment 1`] = `"[comment](https://github.com/sourcecred/example-github/pull/5#discussion_r171460198) on [review](https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
+
+exports[`plugins/github/description renders the right description for a commit 1`] = `"[0a22334](https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a)"`;
+
+exports[`plugins/github/description renders the right description for a issue 1`] = `"[#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue."`;
+
+exports[`plugins/github/description renders the right description for a pull 1`] = `"[#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
+
+exports[`plugins/github/description renders the right description for a repo 1`] = `"[sourcecred/example-github](https://github.com/sourcecred/example-github)"`;
+
+exports[`plugins/github/description renders the right description for a review 1`] = `"[review](https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
+
+exports[`plugins/github/description renders the right description for a userlike 1`] = `"[@wchargin](https://github.com/wchargin)"`;

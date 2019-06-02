@@ -1,18 +1,13 @@
 // @flow
 
-/**
- * Exports descriptions (as React nodes) for every Git entity.
- *
- * I intend to deprecate this module in favor of the markdown descriptons on
- * the AnalysisAdapter.
- */
-import React from "react";
-import Link from "../../webutil/Link";
 import * as N from "./nodes";
 import type {Repository} from "./types";
 import {type RepoIdString, stringToRepoId} from "../../core/repoId";
 import type {GitGateway} from "./gitGateway";
 
+/**
+ * Oneline markdown description as required by AnalysisAdapter.
+ */
 export function description(
   address: N.StructuredAddress,
   repository: Repository,
@@ -23,7 +18,7 @@ export function description(
       const hash = address.hash;
       const commit = repository.commits[hash];
       if (commit == null) {
-        return <code>{hash}</code>;
+        return hash;
       }
       // This `any`-cast courtesy of facebook/flow#6927.
       const repoIdStrings: $ReadOnlyArray<RepoIdString> = (Object.keys(
@@ -33,30 +28,13 @@ export function description(
         console.error(`Unable to find repoIds for commit ${hash}`);
         // TODO(@wchargin): This shortHash is unambiguous for a single repo,
         // but might be ambiguous across many repositories. Consider disambiguating
-        return (
-          <span>
-            <code>{commit.shortHash}</code>: {commit.summary}
-          </span>
-        );
+        return `${commit.shortHash}: ${commit.summary}`;
       }
       const repoId = stringToRepoId(repoIdStrings[0]);
       const url = gateway.commitUrl(repoId, commit.hash);
-      const hyperlinkedHash = hyperlink(url, commit.shortHash);
-      return (
-        <span>
-          <code>{hyperlinkedHash}</code>: {commit.summary}
-        </span>
-      );
+      return `[${commit.shortHash}](${url}): ${commit.summary}`;
     }
     default:
       throw new Error(`unknown type: ${(address.type: empty)}`);
   }
-}
-
-function hyperlink(url, text) {
-  return (
-    <Link href={url} target="_blank" rel="nofollow noopener">
-      {text}
-    </Link>
-  );
 }
