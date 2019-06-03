@@ -22,6 +22,11 @@ export const HAS_PARENT_TYPE = "HAS_PARENT";
 export const REFERENCES_TYPE = "REFERENCES";
 export const MENTIONS_AUTHOR_TYPE = "MENTIONS_AUTHOR";
 export const REACTS_TYPE = "REACTS";
+// GitHub tracks its own notion of a commit, which has a particular
+// database id, is scoped to a particular repository, and has a canonical url
+// on GitHub. The CORRESPONDS_TO_COMMIT_TYPE edges connect the GitHub commits
+// to the corresponding Git commit.
+export const CORRESPONDS_TO_COMMIT_TYPE = "CORRESPONDS_TO_COMMIT_TYPE";
 
 const GITHUB_PREFIX = EdgeAddress.fromParts(["sourcecred", "github"]);
 function githubEdgeAddress(...parts: string[]): RawAddress {
@@ -40,6 +45,7 @@ export const Prefix = Object.freeze({
   reactsHeart: githubEdgeAddress(REACTS_TYPE, Reactions.HEART),
   reactsHooray: githubEdgeAddress(REACTS_TYPE, Reactions.HOORAY),
   reactsRocket: githubEdgeAddress(REACTS_TYPE, Reactions.ROCKET),
+  correspondsToCommit: githubEdgeAddress(CORRESPONDS_TO_COMMIT_TYPE),
 });
 
 export type AuthorsAddress = {|
@@ -70,6 +76,10 @@ export type ReactsAddress = {|
   +user: GithubNode.UserlikeAddress,
   +reactable: GithubNode.ReactableAddress,
 |};
+export type CorrespondsToCommitAddress = {|
+  +type: typeof CORRESPONDS_TO_COMMIT_TYPE,
+  +githubCommit: GithubNode.CommitAddress,
+|};
 
 export type StructuredAddress =
   | AuthorsAddress
@@ -77,7 +87,8 @@ export type StructuredAddress =
   | HasParentAddress
   | ReferencesAddress
   | MentionsAuthorAddress
-  | ReactsAddress;
+  | ReactsAddress
+  | CorrespondsToCommitAddress;
 
 export const createEdge = Object.freeze({
   authors: (
@@ -90,11 +101,19 @@ export const createEdge = Object.freeze({
   }),
   mergedAs: (
     pull: GithubNode.PullAddress,
-    commit: GitNode.CommitAddress
+    commit: GithubNode.CommitAddress
   ): Edge => ({
     address: toRaw({type: MERGED_AS_TYPE, pull}),
     src: GithubNode.toRaw(pull),
-    dst: GitNode.toRaw(commit),
+    dst: GithubNode.toRaw(commit),
+  }),
+  correspondsToCommit: (
+    githubCommit: GithubNode.CommitAddress,
+    gitCommit: GitNode.CommitAddress
+  ): Edge => ({
+    address: toRaw({type: CORRESPONDS_TO_COMMIT_TYPE, githubCommit}),
+    src: GithubNode.toRaw(githubCommit),
+    dst: GitNode.toRaw(gitCommit),
   }),
   hasParent: (
     child: GithubNode.ChildAddress,
@@ -305,6 +324,11 @@ export function toRaw(x: StructuredAddress): RawAddress {
         x.reactionType,
         ...lengthEncode(GithubNode.toRaw(x.user)),
         ...lengthEncode(GithubNode.toRaw(x.reactable))
+      );
+    case CORRESPONDS_TO_COMMIT_TYPE:
+      return EdgeAddress.append(
+        Prefix.correspondsToCommit,
+        ...lengthEncode(GithubNode.toRaw(x.githubCommit))
       );
     default:
       throw new Error((x.type: empty));

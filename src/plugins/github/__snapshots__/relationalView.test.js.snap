@@ -210,7 +210,7 @@ exports[`plugins/github/relationalView Pull has deletions 1`] = `0`;
 
 exports[`plugins/github/relationalView Pull has mergedAs 1`] = `
 Object {
-  "hash": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+  "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
   "type": "COMMIT",
 }
 `;

@@ -54,7 +54,6 @@ exports[`plugins/github/render renders the right description for a comment 1`] =
 
 exports[`plugins/github/render renders the right description for a commit 1`] = `
 <span>
-  Commit 
   <a
     class="link_1cmobhd"
     href="https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"

@@ -37,9 +37,20 @@ class GraphCreator {
     for (const pull of view.pulls()) {
       const commit = pull.mergedAs();
       if (commit != null) {
-        this.graph.addNode(GitNode.toRaw(commit));
         this.graph.addEdge(createEdge.mergedAs(pull.address(), commit));
       }
+    }
+
+    for (const commit of view.commits()) {
+      const gitCommitAddress: GitNode.CommitAddress = {
+        type: GitNode.COMMIT_TYPE,
+        hash: commit.hash(),
+      };
+      const gitCommit = GitNode.toRaw(gitCommitAddress);
+      this.graph.addNode(gitCommit);
+      this.graph.addEdge(
+        createEdge.correspondsToCommit(commit.address(), gitCommitAddress)
+      );
     }
 
     for (const referrer of view.textContentEntities()) {

@@ -4,12 +4,12 @@ exports[`plugins/github/nodes snapshots as expected: commit 1`] = `
 Object {
   "address": Array [
     "sourcecred",
-    "git",
+    "github",
     "COMMIT",
-    "0000000000000000000000000000000000000000",
+    "12345",
   ],
   "structured": Object {
-    "hash": "0000000000000000000000000000000000000000",
+    "id": "12345",
     "type": "COMMIT",
   },
 }

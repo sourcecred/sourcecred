@@ -13,10 +13,10 @@ import type {
   PullAddress,
   ReviewAddress,
   CommentAddress,
+  CommitAddress,
   UserlikeAddress,
 } from "./nodes";
 import * as T from "./graphqlTypes";
-import * as GitNode from "../git/nodes";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 import {botSet} from "./bots";
@@ -32,7 +32,7 @@ export type MsSinceEpoch = number;
 
 const COMPAT_INFO = {
   type: "sourcecred/github/relationalView",
-  version: "0.2.0",
+  version: "0.3.0",
 };
 
 export class RelationalView {
@@ -151,7 +151,7 @@ export class RelationalView {
     }
   }
 
-  commit(address: GitNode.CommitAddress): ?Commit {
+  commit(address: CommitAddress): ?Commit {
     const entry = this._commits.get(N.toRaw(address));
     return entry == null ? entry : new Commit(this, entry);
   }
@@ -348,8 +348,8 @@ export class RelationalView {
     return address;
   }
 
-  _addCommit(json: T.Commit): GitNode.CommitAddress {
-    const address = {type: GitNode.COMMIT_TYPE, hash: json.oid};
+  _addCommit(json: T.Commit): CommitAddress {
+    const address = {type: N.COMMIT_TYPE, id: json.id};
     const rawAddress = N.toRaw(address);
     // This fast-return is critical, because a single commit may appear
     // many times in the repository.
@@ -388,6 +388,7 @@ export class RelationalView {
       url: json.url,
       authors,
       message: json.message,
+      hash: json.oid,
     };
     this._commits.set(N.toRaw(address), entry);
     for (const parent of json.parents) {
@@ -537,7 +538,7 @@ export class RelationalView {
         );
       }
       if (e instanceof Commit) {
-        refToAddress.set(e.address().hash, a);
+        refToAddress.set(e.hash(), a);
       }
     }
     for (const e of this.textContentEntities()) {
@@ -818,7 +819,7 @@ type PullEntry = {|
   +url: string,
   +comments: CommentAddress[],
   +reviews: ReviewAddress[],
-  +mergedAs: ?GitNode.CommitAddress,
+  +mergedAs: ?CommitAddress,
   +additions: number,
   +deletions: number,
   +authors: UserlikeAddress[],
@@ -850,7 +851,7 @@ export class Pull extends _Entity<PullEntry> {
   deletions(): number {
     return this._entry.deletions;
   }
-  mergedAs(): ?GitNode.CommitAddress {
+  mergedAs(): ?CommitAddress {
     return this._entry.mergedAs;
   }
   createdAt(): MsSinceEpoch {
@@ -979,8 +980,9 @@ export class Comment extends _Entity<CommentEntry> {
 }
 
 type CommitEntry = {|
-  +address: GitNode.CommitAddress,
+  +address: CommitAddress,
   +url: string,
+  +hash: string,
   +authors: UserlikeAddress[],
   +message: string,
 |};
@@ -1000,6 +1002,9 @@ export class Commit extends _Entity<CommitEntry> {
   }
   referencedBy(): Iterator<TextContentEntity> {
     return this._view._referencedBy(this);
+  }
+  hash(): string {
+    return this._entry.hash;
   }
 }
 

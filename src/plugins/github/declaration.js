@@ -45,6 +45,15 @@ const commentNodeType = Object.freeze({
   description: "NodeType for a GitHub comment",
 });
 
+const commitNodeType = Object.freeze({
+  name: "Commit",
+  pluralName: "Commits",
+  prefix: N.Prefix.commit,
+  defaultWeight: 1,
+  description:
+    "Represents a particular Git commit on GitHub, i.e. scoped to a particular repository",
+});
+
 export const userNodeType = Object.freeze({
   name: "User",
   pluralName: "Users",
@@ -67,6 +76,7 @@ const nodeTypes = Object.freeze([
   pullNodeType,
   reviewNodeType,
   commentNodeType,
+  commitNodeType,
   userNodeType,
   botNodeType,
 ]);
@@ -176,6 +186,16 @@ const reactsRocketEdgeType = Object.freeze({
   `,
 });
 
+const correspondsToCommitEdgeType = Object.freeze({
+  forwardName: "corresponds to Git commit",
+  backwardName: "merged on GitHub as",
+  defaultWeight: {forwards: 1, backwards: 1},
+  prefix: E.Prefix.correspondsToCommit,
+  description: dedent`\
+    Connects a commit on GitHub to the corresponding raw Git commit.
+  `,
+});
+
 const edgeTypes = Object.freeze([
   authorsEdgeType,
   hasParentEdgeType,
@@ -186,6 +206,7 @@ const edgeTypes = Object.freeze([
   reactsHeartEdgeType,
   reactsHoorayEdgeType,
   reactsRocketEdgeType,
+  correspondsToCommitEdgeType,
 ]);
 
 export const declaration: PluginDeclaration = Object.freeze({

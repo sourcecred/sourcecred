@@ -1,7 +1,6 @@
 // @flow
 
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
-import * as GitNode from "../git/nodes";
 
 export opaque type RawAddress: NodeAddressT = NodeAddressT;
 
@@ -15,6 +14,7 @@ export const ISSUE_TYPE: "ISSUE" = "ISSUE";
 export const PULL_TYPE: "PULL" = "PULL";
 export const REVIEW_TYPE: "REVIEW" = "REVIEW";
 export const COMMENT_TYPE: "COMMENT" = "COMMENT";
+export const COMMIT_TYPE: "COMMIT" = "COMMIT";
 export const USERLIKE_TYPE: "USERLIKE" = "USERLIKE";
 export const USER_SUBTYPE: "USER" = "USER";
 export const BOT_SUBTYPE: "BOT" = "BOT";
@@ -26,6 +26,7 @@ export const Prefix = Object.freeze({
   pull: _githubAddress(PULL_TYPE),
   review: _githubAddress(REVIEW_TYPE),
   comment: _githubAddress(COMMENT_TYPE),
+  commit: _githubAddress(COMMIT_TYPE),
   userlike: _githubAddress(USERLIKE_TYPE),
   user: _githubAddress(USERLIKE_TYPE, USER_SUBTYPE),
   bot: _githubAddress(USERLIKE_TYPE, BOT_SUBTYPE),
@@ -59,6 +60,10 @@ export type CommentAddress = {|
   +parent: CommentableAddress,
   +id: string,
 |};
+export type CommitAddress = {|
+  +type: typeof COMMIT_TYPE,
+  +id: string,
+|};
 export type UserlikeAddress = {|
   +type: typeof USERLIKE_TYPE,
   +subtype: typeof USER_SUBTYPE | typeof BOT_SUBTYPE,
@@ -71,8 +76,8 @@ export type StructuredAddress =
   | PullAddress
   | ReviewAddress
   | CommentAddress
-  | UserlikeAddress
-  | GitNode.CommitAddress;
+  | CommitAddress
+  | UserlikeAddress;
 
 // Each of these types has 0 or more "AUTHORS" edges, each of which
 // leads to a UserlikeAddress.  Note: It is not true that every
@@ -83,7 +88,7 @@ export type AuthorableAddress =
   | PullAddress
   | ReviewAddress
   | CommentAddress
-  | GitNode.CommitAddress;
+  | CommitAddress;
 
 // Each of these types has text content, which means
 // it may be the source of a reference to a ReferentAddress.
@@ -92,7 +97,7 @@ export type TextContentAddress =
   | PullAddress
   | ReviewAddress
   | CommentAddress
-  | GitNode.CommitAddress;
+  | CommitAddress;
 
 // Each of these types may be referred to by something
 // with text content.
@@ -102,7 +107,7 @@ export type ReferentAddress =
   | PullAddress
   | ReviewAddress
   | CommentAddress
-  | GitNode.CommitAddress
+  | CommitAddress
   | UserlikeAddress;
 
 // Each of these types is structurally the child of some
@@ -132,14 +137,6 @@ const _unused_static = (_: CommentableAddress): ParentAddress => _;
 export function fromRaw(x: RawAddress): StructuredAddress {
   function fail() {
     return new Error(`Bad address: ${NodeAddress.toString(x)}`);
-  }
-  if (NodeAddress.hasPrefix(x, GitNode.Prefix.base)) {
-    const structured: GitNode.StructuredAddress = GitNode.fromRaw((x: any));
-    if (structured.type === GitNode.COMMIT_TYPE) {
-      return (structured: GitNode.CommitAddress);
-    } else {
-      throw fail();
-    }
   }
   if (!NodeAddress.hasPrefix(x, GITHUB_PREFIX)) {
     throw fail();
@@ -215,6 +212,13 @@ export function fromRaw(x: RawAddress): StructuredAddress {
         default:
           throw fail();
       }
+    }
+    case COMMIT_TYPE: {
+      if (rest.length !== 1) {
+        throw fail();
+      }
+      const [id] = rest;
+      return {type: COMMIT_TYPE, id};
     }
     case USERLIKE_TYPE: {
       if (rest.length !== 2) {
@@ -296,8 +300,8 @@ export function toRaw(x: StructuredAddress): RawAddress {
         default:
           throw new Error((x.subtype: empty));
       }
-    case GitNode.COMMIT_TYPE:
-      return GitNode.toRaw(x);
+    case COMMIT_TYPE:
+      return NodeAddress.append(Prefix.commit, x.id);
     default:
       throw new Error(`Unexpected type ${(x.type: empty)}`);
   }
