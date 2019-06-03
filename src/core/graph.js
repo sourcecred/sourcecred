@@ -153,8 +153,9 @@ export type ModificationCount = number;
 export class Graph {
   _nodes: Set<NodeAddressT>;
   _edges: Map<EdgeAddressT, Edge>;
-  _inEdges: Map<NodeAddressT, Edge[]>;
-  _outEdges: Map<NodeAddressT, Edge[]>;
+  // Map every node address present in the graph to its inEdges (edges for
+  // which it is a dst) and outEdges (edges for which it is a src)
+  _incidentEdges: Map<NodeAddressT, {|+inEdges: Edge[], +outEdges: Edge[]|}>;
 
   // Incremented each time that any change is made to the graph. Used to
   // check for comodification and to avoid needlessly checking
@@ -170,8 +171,7 @@ export class Graph {
     };
     this._nodes = new Set();
     this._edges = new Map();
-    this._inEdges = new Map();
-    this._outEdges = new Map();
+    this._incidentEdges = new Map();
     this._maybeCheckInvariants();
   }
 
@@ -236,8 +236,7 @@ export class Graph {
     NodeAddress.assertValid(a);
     if (!this._nodes.has(a)) {
       this._nodes.add(a);
-      this._inEdges.set(a, []);
-      this._outEdges.set(a, []);
+      this._incidentEdges.set(a, {inEdges: [], outEdges: []});
     }
     this._markModification();
     this._maybeCheckInvariants();
@@ -258,9 +257,11 @@ export class Graph {
    */
   removeNode(a: NodeAddressT): this {
     NodeAddress.assertValid(a);
-    const existingInEdges = this._inEdges.get(a) || [];
-    const existingOutEdges = this._outEdges.get(a) || [];
-    const existingEdges = existingInEdges.concat(existingOutEdges);
+    const {inEdges, outEdges} = this._incidentEdges.get(a) || {
+      inEdges: [],
+      outEdges: [],
+    };
+    const existingEdges = inEdges.concat(outEdges);
     if (existingEdges.length > 0) {
       const strAddress = NodeAddress.toString(a);
       const strExampleEdge = edgeToString(existingEdges[0]);
@@ -270,8 +271,7 @@ export class Graph {
         } edge(s), e.g.: ${strExampleEdge}`
       );
     }
-    this._inEdges.delete(a);
-    this._outEdges.delete(a);
+    this._incidentEdges.delete(a);
     this._nodes.delete(a);
     this._markModification();
     this._maybeCheckInvariants();
@@ -367,8 +367,8 @@ export class Graph {
       }
     } else {
       this._edges.set(edge.address, edge);
-      const inEdges = NullUtil.get(this._inEdges.get(edge.dst));
-      const outEdges = NullUtil.get(this._outEdges.get(edge.src));
+      const {inEdges} = NullUtil.get(this._incidentEdges.get(edge.dst));
+      const {outEdges} = NullUtil.get(this._incidentEdges.get(edge.src));
       inEdges.push(edge);
       outEdges.push(edge);
     }
@@ -391,11 +391,11 @@ export class Graph {
     const edge = this._edges.get(address);
     if (edge != null) {
       this._edges.delete(address);
-      const inEdges = NullUtil.get(this._inEdges.get(edge.dst));
-      const outEdges = NullUtil.get(this._outEdges.get(edge.src));
+      const {inEdges} = NullUtil.get(this._incidentEdges.get(edge.dst));
+      const {outEdges} = NullUtil.get(this._incidentEdges.get(edge.src));
       // TODO(perf): This is linear in the degree of the endpoints of the
-      // edge. Consider storing in non-list form (e.g., `_inEdges` and
-      // `_outEdges` could be `Map<NodeAddressT, Set<EdgeAddressT>>`).
+      // edge. Consider storing in non-list form (e.g., `inEdges` and
+      // `outEdges` fields in `_incidentEdges` could be `Set<EdgeAddressT>`).
       [inEdges, outEdges].forEach((edges) => {
         const index = edges.findIndex((edge) => edge.address === address);
         if (index === -1) {
@@ -557,11 +557,11 @@ export class Graph {
     const direction = options.direction;
     const adjacencies: {edges: Edge[], direction: string}[] = [];
     if (direction === Direction.IN || direction === Direction.ANY) {
-      const inEdges = NullUtil.get(this._inEdges.get(node));
+      const {inEdges} = NullUtil.get(this._incidentEdges.get(node));
       adjacencies.push({edges: inEdges, direction: "IN"});
     }
     if (direction === Direction.OUT || direction === Direction.ANY) {
-      const outEdges = NullUtil.get(this._outEdges.get(node));
+      const {outEdges} = NullUtil.get(this._incidentEdges.get(node));
       adjacencies.push({edges: outEdges, direction: "OUT"});
     }
 
@@ -724,14 +724,14 @@ export class Graph {
     // class).
 
     // Invariant 1. For a node `n`, if `n` is in the graph, then
-    // `_inEdges.has(n)` and `_outEdges.has(n)`. The values of
-    // `_inEdges.get(n)` and `_outEdges.get(n)` are arrays of `Edge`s.
+    // `_incidentEdges.has(n)`. The value of `_incidentEdges.get(n)`
+    // is an object with two fields: `inEdges` and `outEdges`, both of which are
+    // arrays of `Edge`s
     for (const node of this._nodes) {
-      if (!this._inEdges.has(node)) {
-        throw new Error(`missing in-edges for ${NodeAddress.toString(node)}`);
-      }
-      if (!this._outEdges.has(node)) {
-        throw new Error(`missing out-edges for ${NodeAddress.toString(node)}`);
+      if (!this._incidentEdges.has(node)) {
+        throw new Error(
+          `missing incident-edges for ${NodeAddress.toString(node)}`
+        );
       }
     }
 
@@ -759,66 +759,71 @@ export class Graph {
       }
     }
 
-    // Invariant 3. Suppose that `_inEdges.has(n)` and, let `es` be
-    // `_inEdges.get(n)`. Then
-    //  1. `n` is in the graph;
-    //  2. `es` contains any logical value at most once;
-    //  3. if `es` contains `e`, then `e` is in the graph; and
-    //  4. if `es` contains `e`, then `e.dst === n`.
+    // Temporary Invariant
+    // Suppose that `_incidentEdges.has(n)`. Then `n` is in the graph.
+    // The {inEdges, outEdges} => incidentEdges refactor necessitated pulling
+    // this invariant out of invariants 3 and 4. However, the purpose of this
+    // refactor is actually to remove this invariant. So, there is no need to
+    // re-enumerate the invariants as this one will disappear shortly.
+    for (const addr of this._incidentEdges.keys()) {
+      if (!this._nodes.has(addr)) {
+        throw new Error(`spurious incident-edges`);
+      }
+    }
+
+    // Invariant 3. Suppose that `_incidentEdges.has(n)` and, let `es` be
+    // `_incidentEdges.get(n).inEdges`. Then
+    //  1. `es` contains any logical value at most once;
+    //  2. if `es` contains `e`, then `e` is in the graph; and
+    //  3. if `es` contains `e`, then `e.dst === n`.
     //
-    // Invariant 4. Suppose that `_outEdges.has(n)` and, let `es` be
-    // `_outEdges.get(n)`. Then
-    //  1. `n` is in the graph;
-    //  2. `es` contains any logical value at most once;
-    //  3. if `es` contains `e`, then `e` is in the graph; and
-    //  4. if `es` contains `e`, then `e.src === n`.
+    // Invariant 4. Suppose that `_incidentEdges.has(n)` and, let `es` be
+    // `_incidentEdges.get(n).outEdges`. Then
+    //  1. `es` contains any logical value at most once;
+    //  2. if `es` contains `e`, then `e` is in the graph; and
+    //  3. if `es` contains `e`, then `e.src === n`.
     //
-    // Note that Invariant 3.2 is equivalent to the following:
+    // Note that Invariant 3.1 is equivalent to the following:
     //
-    //     Invariant 3.2*. If `a` is an address, then there is at most
+    //     Invariant 3.1*. If `a` is an address, then there is at most
     //     one index `i` such that `es[i].address` is `a`.
     //
-    // It is immediate that 3.2* implies 3.2. To see that 3.2 implies
-    // 3.2*, suppose that `i` and `j` are such that `es[i].address` and
-    // `es[j].address` are both `a`. Then, by Invariant 3.3, each of
+    // It is immediate that 3.1* implies 3.1. To see that 3.1 implies
+    // 3.1*, suppose that `i` and `j` are such that `es[i].address` and
+    // `es[j].address` are both `a`. Then, by Invariant 3.2, each of
     // `es[i]` and `es[j]` is in the graph, so each is deep-equal to
     // `_edges.get(a)`. Therefore, `es[i]` and `es[j]` are deep-equal to
-    // each other. By 3.2, `es` contains a logical value at most once,
+    // each other. By 3.1, `es` contains a logical value at most once,
     // so `i` must be equal to `j`.
     //
-    // Therefore, it is valid to verify that 3.2*, which we will do. The
-    // same logic of course applies to Invariant 4.2.
+    // Therefore, it is valid to verify that 3.1*, which we will do. The
+    // same logic of course applies to Invariant 4.1.
     const inEdgesSeen: Set<EdgeAddressT> = new Set();
     const outEdgesSeen: Set<EdgeAddressT> = new Set();
-    for (const {seen, map, baseNodeAccessor, kind} of [
+    const incidentEntries = Array.from(this._incidentEdges.entries());
+    for (const {seen, entries, baseNodeAccessor, kind} of [
       {
         seen: inEdgesSeen,
-        map: this._inEdges,
+        entries: incidentEntries.map(([a, {inEdges}]) => [a, inEdges]),
         baseNodeAccessor: (e) => e.dst,
         kind: "in-edge",
       },
       {
         seen: outEdgesSeen,
-        map: this._outEdges,
+        entries: incidentEntries.map(([a, {outEdges}]) => [a, outEdges]),
         baseNodeAccessor: (e) => e.src,
         kind: "out-edge",
       },
     ]) {
-      for (const [base, edges] of map.entries()) {
-        if (!this._nodes.has(base)) {
-          // 3.1/4.1
-          throw new Error(
-            `spurious ${kind}s for ${NodeAddress.toString(base)}`
-          );
-        }
+      for (const [base, edges] of entries) {
         for (const edge of edges) {
-          // 3.2/4.2
+          // 3.1/4.1
           if (seen.has(edge.address)) {
             throw new Error(`duplicate ${kind}: ${edgeToString(edge)}`);
           }
           seen.add(edge.address);
           const expected = this._edges.get(edge.address);
-          // 3.3/4.3
+          // 3.2/4.2
           if (!deepEqual(edge, expected)) {
             if (expected == null) {
               throw new Error(`spurious ${kind}: ${edgeToString(edge)}`);
@@ -827,7 +832,7 @@ export class Graph {
               throw new Error(`bad ${kind}: ${vs}`);
             }
           }
-          // 3.4/4.4
+          // 3.3/4.3
           const expectedBase = baseNodeAccessor(edge);
           if (base !== baseNodeAccessor(edge)) {
             throw new Error(
@@ -842,11 +847,11 @@ export class Graph {
     // We now return to check 2.4 and 2.5, with the help of the
     // structures that we have built up in checking Invariants 3 and 4.
     for (const edge of this._edges.values()) {
-      // That `_inEdges.get(n)` contains `e` for some `n` is sufficient
-      // to show that `_inEdges.get(e.dst)` contains `e`: if `n` were
-      // something other than `e.dst`, then we would have a failure of
-      // invariant 3.4, which would have been caught earlier. Likewise
-      // for `_outEdges`.
+      // That `_incidentEdges.get(n).inEdges` contains `e` for some `n` is
+      // sufficient to show that `_incidentEdges.get(e.dst).inEdges` contains
+      // `e`: if `n` were something other than `e.dst`, then we would have a
+      // failure of invariant 3.3, which would have been caught earlier.
+      // Likewise for outEdges.
       if (!inEdgesSeen.has(edge.address)) {
         throw new Error(`missing in-edge: ${edgeToString(edge)}`);
       }
