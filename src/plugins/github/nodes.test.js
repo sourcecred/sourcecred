@@ -3,7 +3,6 @@
 import {NodeAddress} from "../../core/graph";
 import * as GN from "./nodes";
 import {fromRaw, toRaw} from "./nodes";
-import * as GitNode from "../git/nodes";
 
 describe("plugins/github/nodes", () => {
   const repo = (): GN.RepoAddress => ({
@@ -46,9 +45,9 @@ describe("plugins/github/nodes", () => {
     subtype: "USER",
     login: "decentralion",
   });
-  const commit = (): GitNode.CommitAddress => ({
-    type: GitNode.COMMIT_TYPE,
-    hash: "0000000000000000000000000000000000000000",
+  const commit = (): GN.CommitAddress => ({
+    type: GN.COMMIT_TYPE,
+    id: "12345",
   });
 
   const examples = {

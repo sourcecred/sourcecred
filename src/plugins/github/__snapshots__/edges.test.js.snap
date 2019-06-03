@@ -140,7 +140,7 @@ Object {
   ],
   "dstParts": Array [
     "sourcecred",
-    "git",
+    "github",
     "COMMIT",
     "123",
   ],

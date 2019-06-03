@@ -21,12 +21,12 @@ Array [
           "credbot",
           "4",
           "sourcecred",
-          "git",
+          "github",
           "COMMIT",
-          "c430bd74455105f77215ece51945094ceeee6c86",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmM0MzBiZDc0NDU1MTA1Zjc3MjE1ZWNlNTE5NDUwOTRjZWVlZTZjODY=",
         ],
-        "dstIndex": 3,
-        "srcIndex": 41,
+        "dstIndex": 28,
+        "srcIndex": 47,
       },
       Object {
         "address": Array [
@@ -50,7 +50,7 @@ Array [
           "417104047",
         ],
         "dstIndex": 21,
-        "srcIndex": 41,
+        "srcIndex": 47,
       },
       Object {
         "address": Array [
@@ -65,12 +65,12 @@ Array [
           "decentralion",
           "4",
           "sourcecred",
-          "git",
+          "github",
           "COMMIT",
-          "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
         ],
-        "dstIndex": 0,
-        "srcIndex": 42,
+        "dstIndex": 25,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -85,12 +85,12 @@ Array [
           "decentralion",
           "4",
           "sourcecred",
-          "git",
+          "github",
           "COMMIT",
-          "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
         ],
-        "dstIndex": 2,
-        "srcIndex": 42,
+        "dstIndex": 27,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -105,12 +105,12 @@ Array [
           "decentralion",
           "4",
           "sourcecred",
-          "git",
+          "github",
           "COMMIT",
-          "ec91adb718a6045b492303f00d8e8beb957dc780",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
         ],
-        "dstIndex": 4,
-        "srcIndex": 42,
+        "dstIndex": 29,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -125,12 +125,12 @@ Array [
           "decentralion",
           "4",
           "sourcecred",
-          "git",
+          "github",
           "COMMIT",
-          "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
         ],
-        "dstIndex": 5,
-        "srcIndex": 42,
+        "dstIndex": 30,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -151,8 +151,8 @@ Array [
           "example-github",
           "1",
         ],
-        "dstIndex": 25,
-        "srcIndex": 42,
+        "dstIndex": 31,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -173,8 +173,8 @@ Array [
           "example-github",
           "10",
         ],
-        "dstIndex": 26,
-        "srcIndex": 42,
+        "dstIndex": 32,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -195,8 +195,8 @@ Array [
           "example-github",
           "12",
         ],
-        "dstIndex": 28,
-        "srcIndex": 42,
+        "dstIndex": 34,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -217,8 +217,8 @@ Array [
           "example-github",
           "13",
         ],
-        "dstIndex": 29,
-        "srcIndex": 42,
+        "dstIndex": 35,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -239,8 +239,8 @@ Array [
           "example-github",
           "2",
         ],
-        "dstIndex": 30,
-        "srcIndex": 42,
+        "dstIndex": 36,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -261,8 +261,8 @@ Array [
           "example-github",
           "4",
         ],
-        "dstIndex": 31,
-        "srcIndex": 42,
+        "dstIndex": 37,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -283,8 +283,8 @@ Array [
           "example-github",
           "6",
         ],
-        "dstIndex": 32,
-        "srcIndex": 42,
+        "dstIndex": 38,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -305,8 +305,8 @@ Array [
           "example-github",
           "7",
         ],
-        "dstIndex": 33,
-        "srcIndex": 42,
+        "dstIndex": 39,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -327,8 +327,8 @@ Array [
           "example-github",
           "8",
         ],
-        "dstIndex": 34,
-        "srcIndex": 42,
+        "dstIndex": 40,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -349,8 +349,8 @@ Array [
           "example-github",
           "3",
         ],
-        "dstIndex": 35,
-        "srcIndex": 42,
+        "dstIndex": 41,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -371,8 +371,8 @@ Array [
           "example-github",
           "5",
         ],
-        "dstIndex": 36,
-        "srcIndex": 42,
+        "dstIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -393,8 +393,8 @@ Array [
           "example-github",
           "9",
         ],
-        "dstIndex": 37,
-        "srcIndex": 42,
+        "dstIndex": 43,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -418,7 +418,7 @@ Array [
           "420813621",
         ],
         "dstIndex": 9,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -442,7 +442,7 @@ Array [
           "373768703",
         ],
         "dstIndex": 10,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -466,7 +466,7 @@ Array [
           "373768850",
         ],
         "dstIndex": 11,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -490,7 +490,7 @@ Array [
           "385576185",
         ],
         "dstIndex": 12,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -514,7 +514,7 @@ Array [
           "385576220",
         ],
         "dstIndex": 13,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -538,7 +538,7 @@ Array [
           "385576248",
         ],
         "dstIndex": 14,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -562,7 +562,7 @@ Array [
           "385576273",
         ],
         "dstIndex": 15,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -586,7 +586,7 @@ Array [
           "385576920",
         ],
         "dstIndex": 16,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -610,7 +610,7 @@ Array [
           "385576936",
         ],
         "dstIndex": 17,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -634,7 +634,7 @@ Array [
           "373768442",
         ],
         "dstIndex": 18,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -658,7 +658,7 @@ Array [
           "373768538",
         ],
         "dstIndex": 19,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -682,7 +682,7 @@ Array [
           "385223316",
         ],
         "dstIndex": 20,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -706,7 +706,7 @@ Array [
           "369162222",
         ],
         "dstIndex": 22,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -727,8 +727,8 @@ Array [
           "example-github",
           "10",
         ],
-        "dstIndex": 26,
-        "srcIndex": 43,
+        "dstIndex": 32,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -749,8 +749,8 @@ Array [
           "example-github",
           "11",
         ],
-        "dstIndex": 27,
-        "srcIndex": 43,
+        "dstIndex": 33,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -771,8 +771,8 @@ Array [
           "example-github",
           "9",
         ],
-        "dstIndex": 37,
-        "srcIndex": 43,
+        "dstIndex": 43,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -794,8 +794,8 @@ Array [
           "5",
           "100313899",
         ],
-        "dstIndex": 39,
-        "srcIndex": 43,
+        "dstIndex": 45,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -817,8 +817,8 @@ Array [
           "5",
           "100314038",
         ],
-        "dstIndex": 40,
-        "srcIndex": 43,
+        "dstIndex": 46,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -842,7 +842,7 @@ Array [
           "420813013",
         ],
         "dstIndex": 7,
-        "srcIndex": 43,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -866,7 +866,7 @@ Array [
           "396430464",
         ],
         "dstIndex": 23,
-        "srcIndex": 43,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -891,7 +891,91 @@ Array [
           "171460198",
         ],
         "dstIndex": 24,
-        "srcIndex": 43,
+        "srcIndex": 49,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "github",
+          "CORRESPONDS_TO_COMMIT_TYPE",
+          "4",
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
+        ],
+        "dstIndex": 0,
+        "srcIndex": 25,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "github",
+          "CORRESPONDS_TO_COMMIT_TYPE",
+          "4",
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjZiZDFiNGMwYjcxOWMyMmM2ODhhNzQ4NjNiZTA3YTY5OWI3YjliMzQ=",
+        ],
+        "dstIndex": 1,
+        "srcIndex": 26,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "github",
+          "CORRESPONDS_TO_COMMIT_TYPE",
+          "4",
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
+        ],
+        "dstIndex": 2,
+        "srcIndex": 27,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "github",
+          "CORRESPONDS_TO_COMMIT_TYPE",
+          "4",
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmM0MzBiZDc0NDU1MTA1Zjc3MjE1ZWNlNTE5NDUwOTRjZWVlZTZjODY=",
+        ],
+        "dstIndex": 3,
+        "srcIndex": 28,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "github",
+          "CORRESPONDS_TO_COMMIT_TYPE",
+          "4",
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+        ],
+        "dstIndex": 4,
+        "srcIndex": 29,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "github",
+          "CORRESPONDS_TO_COMMIT_TYPE",
+          "4",
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
+        ],
+        "dstIndex": 5,
+        "srcIndex": 30,
       },
       Object {
         "address": Array [
@@ -906,8 +990,8 @@ Array [
           "example-github",
           "1",
         ],
-        "dstIndex": 38,
-        "srcIndex": 25,
+        "dstIndex": 44,
+        "srcIndex": 31,
       },
       Object {
         "address": Array [
@@ -922,8 +1006,8 @@ Array [
           "example-github",
           "10",
         ],
-        "dstIndex": 38,
-        "srcIndex": 26,
+        "dstIndex": 44,
+        "srcIndex": 32,
       },
       Object {
         "address": Array [
@@ -938,8 +1022,8 @@ Array [
           "example-github",
           "11",
         ],
-        "dstIndex": 38,
-        "srcIndex": 27,
+        "dstIndex": 44,
+        "srcIndex": 33,
       },
       Object {
         "address": Array [
@@ -954,8 +1038,8 @@ Array [
           "example-github",
           "12",
         ],
-        "dstIndex": 38,
-        "srcIndex": 28,
+        "dstIndex": 44,
+        "srcIndex": 34,
       },
       Object {
         "address": Array [
@@ -970,8 +1054,8 @@ Array [
           "example-github",
           "13",
         ],
-        "dstIndex": 38,
-        "srcIndex": 29,
+        "dstIndex": 44,
+        "srcIndex": 35,
       },
       Object {
         "address": Array [
@@ -986,8 +1070,8 @@ Array [
           "example-github",
           "2",
         ],
-        "dstIndex": 38,
-        "srcIndex": 30,
+        "dstIndex": 44,
+        "srcIndex": 36,
       },
       Object {
         "address": Array [
@@ -1002,8 +1086,8 @@ Array [
           "example-github",
           "4",
         ],
-        "dstIndex": 38,
-        "srcIndex": 31,
+        "dstIndex": 44,
+        "srcIndex": 37,
       },
       Object {
         "address": Array [
@@ -1018,8 +1102,8 @@ Array [
           "example-github",
           "6",
         ],
-        "dstIndex": 38,
-        "srcIndex": 32,
+        "dstIndex": 44,
+        "srcIndex": 38,
       },
       Object {
         "address": Array [
@@ -1034,8 +1118,8 @@ Array [
           "example-github",
           "7",
         ],
-        "dstIndex": 38,
-        "srcIndex": 33,
+        "dstIndex": 44,
+        "srcIndex": 39,
       },
       Object {
         "address": Array [
@@ -1050,8 +1134,8 @@ Array [
           "example-github",
           "8",
         ],
-        "dstIndex": 38,
-        "srcIndex": 34,
+        "dstIndex": 44,
+        "srcIndex": 40,
       },
       Object {
         "address": Array [
@@ -1066,8 +1150,8 @@ Array [
           "example-github",
           "3",
         ],
-        "dstIndex": 38,
-        "srcIndex": 35,
+        "dstIndex": 44,
+        "srcIndex": 41,
       },
       Object {
         "address": Array [
@@ -1082,8 +1166,8 @@ Array [
           "example-github",
           "5",
         ],
-        "dstIndex": 38,
-        "srcIndex": 36,
+        "dstIndex": 44,
+        "srcIndex": 42,
       },
       Object {
         "address": Array [
@@ -1098,8 +1182,8 @@ Array [
           "example-github",
           "9",
         ],
-        "dstIndex": 38,
-        "srcIndex": 37,
+        "dstIndex": 44,
+        "srcIndex": 43,
       },
       Object {
         "address": Array [
@@ -1115,8 +1199,8 @@ Array [
           "5",
           "100313899",
         ],
-        "dstIndex": 36,
-        "srcIndex": 39,
+        "dstIndex": 42,
+        "srcIndex": 45,
       },
       Object {
         "address": Array [
@@ -1132,8 +1216,8 @@ Array [
           "5",
           "100314038",
         ],
-        "dstIndex": 36,
-        "srcIndex": 40,
+        "dstIndex": 42,
+        "srcIndex": 46,
       },
       Object {
         "address": Array [
@@ -1150,7 +1234,7 @@ Array [
           "11",
           "420811872",
         ],
-        "dstIndex": 27,
+        "dstIndex": 33,
         "srcIndex": 6,
       },
       Object {
@@ -1168,7 +1252,7 @@ Array [
           "11",
           "420813013",
         ],
-        "dstIndex": 27,
+        "dstIndex": 33,
         "srcIndex": 7,
       },
       Object {
@@ -1186,7 +1270,7 @@ Array [
           "11",
           "420813206",
         ],
-        "dstIndex": 27,
+        "dstIndex": 33,
         "srcIndex": 8,
       },
       Object {
@@ -1204,7 +1288,7 @@ Array [
           "11",
           "420813621",
         ],
-        "dstIndex": 27,
+        "dstIndex": 33,
         "srcIndex": 9,
       },
       Object {
@@ -1222,7 +1306,7 @@ Array [
           "2",
           "373768703",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 10,
       },
       Object {
@@ -1240,7 +1324,7 @@ Array [
           "2",
           "373768850",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 11,
       },
       Object {
@@ -1258,7 +1342,7 @@ Array [
           "2",
           "385576185",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 12,
       },
       Object {
@@ -1276,7 +1360,7 @@ Array [
           "2",
           "385576220",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 13,
       },
       Object {
@@ -1294,7 +1378,7 @@ Array [
           "2",
           "385576248",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 14,
       },
       Object {
@@ -1312,7 +1396,7 @@ Array [
           "2",
           "385576273",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 15,
       },
       Object {
@@ -1330,7 +1414,7 @@ Array [
           "2",
           "385576920",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 16,
       },
       Object {
@@ -1348,7 +1432,7 @@ Array [
           "2",
           "385576936",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 17,
       },
       Object {
@@ -1366,7 +1450,7 @@ Array [
           "6",
           "373768442",
         ],
-        "dstIndex": 32,
+        "dstIndex": 38,
         "srcIndex": 18,
       },
       Object {
@@ -1384,7 +1468,7 @@ Array [
           "6",
           "373768538",
         ],
-        "dstIndex": 32,
+        "dstIndex": 38,
         "srcIndex": 19,
       },
       Object {
@@ -1402,7 +1486,7 @@ Array [
           "6",
           "385223316",
         ],
-        "dstIndex": 32,
+        "dstIndex": 38,
         "srcIndex": 20,
       },
       Object {
@@ -1420,7 +1504,7 @@ Array [
           "6",
           "417104047",
         ],
-        "dstIndex": 32,
+        "dstIndex": 38,
         "srcIndex": 21,
       },
       Object {
@@ -1438,7 +1522,7 @@ Array [
           "3",
           "369162222",
         ],
-        "dstIndex": 35,
+        "dstIndex": 41,
         "srcIndex": 22,
       },
       Object {
@@ -1456,7 +1540,7 @@ Array [
           "5",
           "396430464",
         ],
-        "dstIndex": 36,
+        "dstIndex": 42,
         "srcIndex": 23,
       },
       Object {
@@ -1475,7 +1559,7 @@ Array [
           "100313899",
           "171460198",
         ],
-        "dstIndex": 39,
+        "dstIndex": 45,
         "srcIndex": 24,
       },
       Object {
@@ -1507,7 +1591,7 @@ Array [
           "wchargin",
         ],
         "dstIndex": 23,
-        "srcIndex": 36,
+        "srcIndex": 42,
       },
       Object {
         "address": Array [
@@ -1522,8 +1606,8 @@ Array [
           "example-github",
           "3",
         ],
-        "dstIndex": 0,
-        "srcIndex": 35,
+        "dstIndex": 25,
+        "srcIndex": 41,
       },
       Object {
         "address": Array [
@@ -1538,8 +1622,8 @@ Array [
           "example-github",
           "5",
         ],
-        "dstIndex": 2,
-        "srcIndex": 36,
+        "dstIndex": 27,
+        "srcIndex": 42,
       },
       Object {
         "address": Array [
@@ -1561,8 +1645,8 @@ Array [
           "example-github",
           "1",
         ],
-        "dstIndex": 25,
-        "srcIndex": 42,
+        "dstIndex": 31,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1584,8 +1668,8 @@ Array [
           "example-github",
           "13",
         ],
-        "dstIndex": 29,
-        "srcIndex": 42,
+        "dstIndex": 35,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1607,8 +1691,8 @@ Array [
           "example-github",
           "9",
         ],
-        "dstIndex": 37,
-        "srcIndex": 42,
+        "dstIndex": 43,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1633,7 +1717,7 @@ Array [
           "396430464",
         ],
         "dstIndex": 23,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1659,7 +1743,7 @@ Array [
           "171460198",
         ],
         "dstIndex": 24,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1685,7 +1769,7 @@ Array [
           "171460198",
         ],
         "dstIndex": 24,
-        "srcIndex": 43,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -1707,8 +1791,8 @@ Array [
           "example-github",
           "13",
         ],
-        "dstIndex": 29,
-        "srcIndex": 42,
+        "dstIndex": 35,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1733,7 +1817,7 @@ Array [
           "420813206",
         ],
         "dstIndex": 8,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1759,7 +1843,7 @@ Array [
           "171460198",
         ],
         "dstIndex": 24,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1785,7 +1869,7 @@ Array [
           "171460198",
         ],
         "dstIndex": 24,
-        "srcIndex": 43,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -1807,8 +1891,8 @@ Array [
           "example-github",
           "13",
         ],
-        "dstIndex": 29,
-        "srcIndex": 42,
+        "dstIndex": 35,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1830,8 +1914,8 @@ Array [
           "example-github",
           "12",
         ],
-        "dstIndex": 28,
-        "srcIndex": 42,
+        "dstIndex": 34,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1853,8 +1937,8 @@ Array [
           "example-github",
           "13",
         ],
-        "dstIndex": 29,
-        "srcIndex": 42,
+        "dstIndex": 35,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1876,8 +1960,8 @@ Array [
           "example-github",
           "9",
         ],
-        "dstIndex": 37,
-        "srcIndex": 42,
+        "dstIndex": 43,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1902,7 +1986,7 @@ Array [
           "420813206",
         ],
         "dstIndex": 8,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1928,7 +2012,7 @@ Array [
           "171460198",
         ],
         "dstIndex": 24,
-        "srcIndex": 42,
+        "srcIndex": 48,
       },
       Object {
         "address": Array [
@@ -1954,7 +2038,7 @@ Array [
           "171460198",
         ],
         "dstIndex": 24,
-        "srcIndex": 43,
+        "srcIndex": 49,
       },
       Object {
         "address": Array [
@@ -1963,9 +2047,9 @@ Array [
           "REFERENCES",
           "4",
           "sourcecred",
-          "git",
+          "github",
           "COMMIT",
-          "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
           "6",
           "sourcecred",
           "github",
@@ -1974,8 +2058,8 @@ Array [
           "example-github",
           "3",
         ],
-        "dstIndex": 35,
-        "srcIndex": 0,
+        "dstIndex": 41,
+        "srcIndex": 25,
       },
       Object {
         "address": Array [
@@ -1984,9 +2068,9 @@ Array [
           "REFERENCES",
           "4",
           "sourcecred",
-          "git",
+          "github",
           "COMMIT",
-          "6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjZiZDFiNGMwYjcxOWMyMmM2ODhhNzQ4NjNiZTA3YTY5OWI3YjliMzQ=",
           "5",
           "sourcecred",
           "github",
@@ -1994,8 +2078,8 @@ Array [
           "USER",
           "wchargin",
         ],
-        "dstIndex": 43,
-        "srcIndex": 1,
+        "dstIndex": 49,
+        "srcIndex": 26,
       },
       Object {
         "address": Array [
@@ -2004,9 +2088,9 @@ Array [
           "REFERENCES",
           "4",
           "sourcecred",
-          "git",
+          "github",
           "COMMIT",
-          "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
           "6",
           "sourcecred",
           "github",
@@ -2015,8 +2099,8 @@ Array [
           "example-github",
           "5",
         ],
-        "dstIndex": 36,
-        "srcIndex": 2,
+        "dstIndex": 42,
+        "srcIndex": 27,
       },
       Object {
         "address": Array [
@@ -2025,9 +2109,9 @@ Array [
           "REFERENCES",
           "4",
           "sourcecred",
-          "git",
+          "github",
           "COMMIT",
-          "c430bd74455105f77215ece51945094ceeee6c86",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmM0MzBiZDc0NDU1MTA1Zjc3MjE1ZWNlNTE5NDUwOTRjZWVlZTZjODY=",
           "5",
           "sourcecred",
           "github",
@@ -2035,8 +2119,8 @@ Array [
           "USER",
           "wchargin",
         ],
-        "dstIndex": 43,
-        "srcIndex": 3,
+        "dstIndex": 49,
+        "srcIndex": 28,
       },
       Object {
         "address": Array [
@@ -2058,8 +2142,8 @@ Array [
           "example-github",
           "10",
         ],
-        "dstIndex": 26,
-        "srcIndex": 26,
+        "dstIndex": 32,
+        "srcIndex": 32,
       },
       Object {
         "address": Array [
@@ -2081,50 +2165,50 @@ Array [
           "example-github",
           "2",
         ],
+        "dstIndex": 36,
+        "srcIndex": 32,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "github",
+          "REFERENCES",
+          "6",
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred",
+          "example-github",
+          "12",
+          "4",
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+        ],
+        "dstIndex": 29,
+        "srcIndex": 34,
+      },
+      Object {
+        "address": Array [
+          "sourcecred",
+          "github",
+          "REFERENCES",
+          "6",
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred",
+          "example-github",
+          "12",
+          "4",
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
+        ],
         "dstIndex": 30,
-        "srcIndex": 26,
-      },
-      Object {
-        "address": Array [
-          "sourcecred",
-          "github",
-          "REFERENCES",
-          "6",
-          "sourcecred",
-          "github",
-          "ISSUE",
-          "sourcecred",
-          "example-github",
-          "12",
-          "4",
-          "sourcecred",
-          "git",
-          "COMMIT",
-          "ec91adb718a6045b492303f00d8e8beb957dc780",
-        ],
-        "dstIndex": 4,
-        "srcIndex": 28,
-      },
-      Object {
-        "address": Array [
-          "sourcecred",
-          "github",
-          "REFERENCES",
-          "6",
-          "sourcecred",
-          "github",
-          "ISSUE",
-          "sourcecred",
-          "example-github",
-          "12",
-          "4",
-          "sourcecred",
-          "git",
-          "COMMIT",
-          "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
-        ],
-        "dstIndex": 5,
-        "srcIndex": 28,
+        "srcIndex": 34,
       },
       Object {
         "address": Array [
@@ -2146,8 +2230,8 @@ Array [
           "example-github",
           "1",
         ],
-        "dstIndex": 25,
-        "srcIndex": 30,
+        "dstIndex": 31,
+        "srcIndex": 36,
       },
       Object {
         "address": Array [
@@ -2168,8 +2252,8 @@ Array [
           "USER",
           "wchargin",
         ],
-        "dstIndex": 43,
-        "srcIndex": 36,
+        "dstIndex": 49,
+        "srcIndex": 42,
       },
       Object {
         "address": Array [
@@ -2193,7 +2277,7 @@ Array [
           "example-github",
           "6",
         ],
-        "dstIndex": 32,
+        "dstIndex": 38,
         "srcIndex": 10,
       },
       Object {
@@ -2245,7 +2329,7 @@ Array [
           "example-github",
           "5",
         ],
-        "dstIndex": 36,
+        "dstIndex": 42,
         "srcIndex": 12,
       },
       Object {
@@ -2271,7 +2355,7 @@ Array [
           "5",
           "100313899",
         ],
-        "dstIndex": 39,
+        "dstIndex": 45,
         "srcIndex": 13,
       },
       Object {
@@ -2323,7 +2407,7 @@ Array [
           "USER",
           "wchargin",
         ],
-        "dstIndex": 43,
+        "dstIndex": 49,
         "srcIndex": 15,
       },
       Object {
@@ -2348,7 +2432,7 @@ Array [
           "example-github",
           "1",
         ],
-        "dstIndex": 25,
+        "dstIndex": 31,
         "srcIndex": 16,
       },
       Object {
@@ -2373,7 +2457,7 @@ Array [
           "example-github",
           "2",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 16,
       },
       Object {
@@ -2398,7 +2482,7 @@ Array [
           "example-github",
           "3",
         ],
-        "dstIndex": 35,
+        "dstIndex": 41,
         "srcIndex": 16,
       },
       Object {
@@ -2424,7 +2508,7 @@ Array [
           "5",
           "100313899",
         ],
-        "dstIndex": 39,
+        "dstIndex": 45,
         "srcIndex": 16,
       },
       Object {
@@ -2477,7 +2561,7 @@ Array [
           "example-github",
           "2",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 20,
       },
       Object {
@@ -2502,7 +2586,7 @@ Array [
           "example-github",
           "2",
         ],
-        "dstIndex": 30,
+        "dstIndex": 36,
         "srcIndex": 22,
       },
     ],
@@ -2733,6 +2817,42 @@ Array [
         "5",
         "100313899",
         "171460198",
+      ],
+      Array [
+        "sourcecred",
+        "github",
+        "COMMIT",
+        "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
+      ],
+      Array [
+        "sourcecred",
+        "github",
+        "COMMIT",
+        "MDY6Q29tbWl0MTIzMjU1MDA2OjZiZDFiNGMwYjcxOWMyMmM2ODhhNzQ4NjNiZTA3YTY5OWI3YjliMzQ=",
+      ],
+      Array [
+        "sourcecred",
+        "github",
+        "COMMIT",
+        "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
+      ],
+      Array [
+        "sourcecred",
+        "github",
+        "COMMIT",
+        "MDY6Q29tbWl0MTIzMjU1MDA2OmM0MzBiZDc0NDU1MTA1Zjc3MjE1ZWNlNTE5NDUwOTRjZWVlZTZjODY=",
+      ],
+      Array [
+        "sourcecred",
+        "github",
+        "COMMIT",
+        "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
+      ],
+      Array [
+        "sourcecred",
+        "github",
+        "COMMIT",
+        "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
       ],
       Array [
         "sourcecred",

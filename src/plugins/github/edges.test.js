@@ -51,7 +51,7 @@ describe("plugins/github/edges", () => {
     authors: () =>
       createEdge.authors(nodeExamples.user(), nodeExamples.issue()),
     mergedAs: () => {
-      const commit = {type: COMMIT_TYPE, hash: "123"};
+      const commit = {type: COMMIT_TYPE, id: "123"};
       return createEdge.mergedAs(nodeExamples.pull(), commit);
     },
     hasParent: () =>
