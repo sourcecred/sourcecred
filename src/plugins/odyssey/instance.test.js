@@ -29,7 +29,7 @@ describe("plugins/odyssey/instance", () => {
     const {instance, me} = exampleInstance();
     const graph = instance.graph();
     const nodes = Array.from(graph.nodes());
-    const edges = Array.from(graph.edges());
+    const edges = Array.from(graph.edges({showDangling: true}));
     expect(nodes).toHaveLength(5);
     expect(edges).toHaveLength(5);
     const myNeighbors = graph.neighbors(me.address, {
@@ -77,13 +77,6 @@ describe("plugins/odyssey/instance", () => {
     expect(Array.from(instance.nodes("CONTRIBUTION"))).toEqual([contribution]);
     // $ExpectFlowError
     expect(Array.from(instance.nodes("NONEXISTENT"))).toEqual([]);
-  });
-  it("errors if adding edge between Nodes that don't exist", () => {
-    const {me, you} = exampleInstance();
-    const i = new OdysseyInstance();
-    expect(() => i.addEdge("DEPENDS_ON", me, you)).toThrowError(
-      "Missing src on edge:"
-    );
   });
   describe("equality", () => {
     it("empty instance isHistoricallyIdentical empty instance", () => {

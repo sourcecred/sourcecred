@@ -155,11 +155,27 @@ describe("core/graph", () => {
         expect(() => g._checkInvariants()).not.toThrow();
       });
 
-      // Invariant 1
-      it("detects missing incident edges", () => {
+      // Invariant 1.1
+      it("detects missing incident edges corresponding to a node", () => {
         const g = new Graph().addNode(src);
         g._incidentEdges.delete(src.address);
         expect(() => g._checkInvariants()).toThrow("missing incident-edges");
+      });
+
+      // Invariant 1.2
+      it("detects missing incident edges corresponding to a dangling edge", () => {
+        const g = new Graph().addEdge(edge);
+        g._incidentEdges.delete(src.address);
+        expect(() => g._checkInvariants()).toThrow("missing incident-edges");
+      });
+
+      // Invariant 1.3
+      it("detects extra incident edges not corresponding to anything", () => {
+        const g = new Graph().addNode(src);
+        g._incidentEdges.set(dst.address, {inEdges: [], outEdges: []});
+        expect(() => g._checkInvariants()).toThrow(
+          "extra addresses in incident-edges"
+        );
       });
 
       // Invariant 2.1
@@ -173,39 +189,18 @@ describe("core/graph", () => {
         expect(() => g._checkInvariants()).toThrow("bad edge address");
       });
       // Invariant 2.2
-      it("detects when an edge has missing src", () => {
-        const g = graph();
-        g._nodes.delete(src.address);
-        g._incidentEdges.delete(src.address);
-        expect(() => g._checkInvariants()).toThrow("missing src");
-      });
-      // Invariant 2.3
-      it("detects when an edge has missing dst", () => {
-        const g = graph();
-        g._nodes.delete(dst.address);
-        g._incidentEdges.delete(dst.address);
-        expect(() => g._checkInvariants()).toThrow("missing dst");
-      });
-      // Invariant 2.4
       it("detects when an edge is missing in `_inEdges`", () => {
         const g = graph();
         // $ExpectFlowError
         g._incidentEdges.get(edge.dst).inEdges = [];
         expect(() => g._checkInvariants()).toThrow("missing in-edge");
       });
-      // Invariant 2.5
+      // Invariant 2.3
       it("detects when an edge is missing in `_outEdges`", () => {
         const g = graph();
         // $ExpectFlowError
         g._incidentEdges.get(edge.src).outEdges = [];
         expect(() => g._checkInvariants()).toThrow("missing out-edge");
-      });
-
-      // Temporary invariant
-      it("detects spurious incident-edges", () => {
-        const g = new Graph();
-        g._incidentEdges.set(src.address, {inEdges: [], outEdges: []});
-        expect(() => g._checkInvariants()).toThrow("spurious incident-edges");
       });
 
       // Invariant 3.1
@@ -299,23 +294,6 @@ describe("core/graph", () => {
             expect(() => new Graph().addNode(n).toThrow("got EdgeAddress"));
           });
         });
-        describe("remove a node that is some edge's", () => {
-          const graph = () =>
-            new Graph()
-              .addNode(src)
-              .addNode(dst)
-              .addEdge(edge);
-          it("src", () => {
-            expect(() => graph().removeNode(src.address)).toThrow(
-              "Attempted to remove"
-            );
-          });
-          it("dst", () => {
-            expect(() => graph().removeNode(dst.address)).toThrow(
-              "Attempted to remove"
-            );
-          });
-        });
 
         it("distinct nodes with the same address", () => {
           const g = new Graph();
@@ -354,6 +332,29 @@ describe("core/graph", () => {
           expect(graph.hasNode(src.address)).toBe(true);
           expect(Array.from(graph.nodes())).toEqual([src]);
           expect(graph.node(src.address)).toEqual(src);
+        });
+        it("a graph with a node reference", () => {
+          // The dangling edge creates a node reference.
+          // This reference should not be discoverable via
+          // any of the node methods.
+          const graph = new Graph().addEdge(edge);
+          expect(graph.hasNode(src.address)).toBe(false);
+          expect(graph.hasNode(dst.address)).toBe(false);
+          expect(Array.from(graph.nodes())).toEqual([]);
+          expect(graph.node(src.address)).toEqual(undefined);
+          expect(graph.node(dst.address)).toEqual(undefined);
+        });
+        it("a graph with a node node that downgrades to a reference", () => {
+          const graph = new Graph()
+            .addNode(src)
+            .addNode(dst)
+            .addEdge(edge)
+            .removeNode(src.address);
+          expect(graph.hasNode(src.address)).toBe(false);
+          expect(graph.hasNode(dst.address)).toBe(true);
+          expect(Array.from(graph.nodes())).toEqual([dst]);
+          expect(graph.node(src.address)).toEqual(undefined);
+          expect(graph.node(dst.address)).toEqual(dst);
         });
         it("a graph with the same node added twice", () => {
           const graph = new Graph().addNode(src).addNode(src);
@@ -457,7 +458,6 @@ describe("core/graph", () => {
     });
 
     describe("edge methods", () => {
-      const edgeArray = (g: Graph) => Array.from(g.edges());
       describe("error on", () => {
         const p = Graph.prototype;
         const edgeAddrMethods = [p.removeEdge, p.hasEdge, p.edge];
@@ -477,19 +477,6 @@ describe("core/graph", () => {
         });
 
         describe("addEdge edge validation", () => {
-          describe("throws on absent", () => {
-            it("src", () => {
-              expect(() => new Graph().addNode(dst).addEdge(edge)).toThrow(
-                "Missing src"
-              );
-            });
-            it("dst", () => {
-              expect(() => new Graph().addNode(src).addEdge(edge)).toThrow(
-                "Missing dst"
-              );
-            });
-          });
-
           it("throws on conflicting edge", () => {
             const e1 = {
               src: src.address,
@@ -563,13 +550,13 @@ describe("core/graph", () => {
               src: NodeAddress.fromParts(["node"]),
               dst: NodeAddress.fromParts(["node"]),
             });
-            const iterator = g.edges();
+            const iterator = g.edges({showDangling: true});
             g._modificationCount++;
             expect(() => iterator.next()).toThrow("Concurrent modification");
           });
           it("at exhaustion", () => {
             const g = new Graph();
-            const iterator = g.edges();
+            const iterator = g.edges({showDangling: true});
             g._modificationCount++;
             expect(() => iterator.next()).toThrow("Concurrent modification");
           });
@@ -601,13 +588,18 @@ describe("core/graph", () => {
           dst: dst2.address,
           address: EdgeAddress.fromParts(["e", "2", "2"]),
         };
+        const eDangling = {
+          src: src2.address,
+          dst: NodeAddress.empty,
+          address: EdgeAddress.fromParts(["e", "2", "NaN"]),
+        };
         const graph = () =>
-          [e11, e12, e21, e22].reduce(
+          [e11, e12, e21, e22, eDangling].reduce(
             (g, e) => g.addEdge(e),
             [src1, src2, dst1, dst2].reduce((g, n) => g.addNode(n), new Graph())
           );
         function expectEdges(
-          options: EdgesOptions | void,
+          options: EdgesOptions,
           expected: $ReadOnlyArray<Edge>
         ) {
           const sort = (es) => sortBy(es, (e) => e.address);
@@ -615,46 +607,28 @@ describe("core/graph", () => {
             sort(expected.slice())
           );
         }
-        it("finds all edges when no options are specified", () => {
-          expectEdges(undefined, [e11, e12, e21, e22]);
+        it("finds all edges when only showDangling:true is provided", () => {
+          expectEdges({showDangling: true}, [e11, e12, e21, e22, eDangling]);
+        });
+        it("finds all non-dangling edges when only showDangling:false is provided", () => {
+          expectEdges({showDangling: false}, [e11, e12, e21, e22]);
         });
         it("finds all edges when universal filters are specified", () => {
           expectEdges(
             {
+              showDangling: true,
               addressPrefix: EdgeAddress.fromParts(["e"]),
               srcPrefix: NodeAddress.fromParts(["src"]),
-              dstPrefix: NodeAddress.fromParts(["dst"]),
+              dstPrefix: NodeAddress.empty,
             },
-            [e11, e12, e21, e22]
+            [e11, e12, e21, e22, eDangling]
           );
-        });
-        it("requires `addressPrefix` to be present in provided options", () => {
-          expect(() => {
-            graph()
-              // $ExpectFlowError
-              .edges({srcPrefix: src1, dstPrefix: dst1});
-          }).toThrow("Invalid address prefix: undefined");
-        });
-        it("requires `srcPrefix` to be present in provided options", () => {
-          expect(() => {
-            graph()
-              // $ExpectFlowError
-              .edges({addressPrefix: e11, dstPrefix: dst1});
-          }).toThrow("Invalid src prefix: undefined");
-        });
-        it("requires `dstPrefix` to be present in provided options", () => {
-          expect(() => {
-            graph()
-              // $ExpectFlowError
-              .edges({addressPrefix: e11, srcPrefix: dst1});
-          }).toThrow("Invalid dst prefix: undefined");
         });
         it("finds edges by address prefix", () => {
           expectEdges(
             {
+              showDangling: true,
               addressPrefix: EdgeAddress.fromParts(["e", "1"]),
-              srcPrefix: NodeAddress.empty,
-              dstPrefix: NodeAddress.empty,
             },
             [e11, e12]
           );
@@ -662,9 +636,8 @@ describe("core/graph", () => {
         it("finds edges by src prefix", () => {
           expectEdges(
             {
-              addressPrefix: EdgeAddress.empty,
+              showDangling: true,
               srcPrefix: NodeAddress.fromParts(["src", "1"]),
-              dstPrefix: NodeAddress.empty,
             },
             [e11, e12]
           );
@@ -672,8 +645,7 @@ describe("core/graph", () => {
         it("finds edges by dst prefix", () => {
           expectEdges(
             {
-              addressPrefix: EdgeAddress.empty,
-              srcPrefix: NodeAddress.empty,
+              showDangling: true,
               dstPrefix: NodeAddress.fromParts(["dst", "1"]),
             },
             [e11, e21]
@@ -682,6 +654,7 @@ describe("core/graph", () => {
         it("yields nothing for disjoint filters", () => {
           expectEdges(
             {
+              showDangling: true,
               addressPrefix: EdgeAddress.fromParts(["e", "1"]),
               srcPrefix: NodeAddress.fromParts(["src", "2"]),
               dstPrefix: NodeAddress.empty,
@@ -689,14 +662,32 @@ describe("core/graph", () => {
             []
           );
         });
-        it("yields appropriate filter intersection", () => {
+        it("yields appropriate filter intersection for srcPrefix and dstPrefix", () => {
           expectEdges(
             {
-              addressPrefix: EdgeAddress.empty,
-              srcPrefix: NodeAddress.fromParts(["src", "1"]),
+              showDangling: true,
+              srcPrefix: NodeAddress.fromParts(["src", "2"]),
               dstPrefix: NodeAddress.fromParts(["dst", "2"]),
             },
-            [e12]
+            [e22]
+          );
+        });
+        it("yields appropriate filter intersection with showDangling: false", () => {
+          expectEdges(
+            {
+              showDangling: false,
+              srcPrefix: NodeAddress.fromParts(["src", "2"]),
+            },
+            [e21, e22]
+          );
+        });
+        it("yields appropriate filter intersection with showDangling: true", () => {
+          expectEdges(
+            {
+              showDangling: true,
+              srcPrefix: NodeAddress.fromParts(["src", "2"]),
+            },
+            [e21, e22, eDangling]
           );
         });
       });
@@ -710,7 +701,11 @@ describe("core/graph", () => {
             expect(new Graph().edge(edge.address)).toBe(undefined);
           });
           it("`edges` is empty", () => {
-            expect(edgeArray(new Graph())).toHaveLength(0);
+            const edges = Array.from(new Graph().edges({showDangling: true}));
+            expect(edges).toHaveLength(0);
+          });
+          it("`isDanglingEdge` is undefined", () => {
+            expect(new Graph().isDanglingEdge(edge.address)).toBe(undefined);
           });
         });
 
@@ -727,8 +722,12 @@ describe("core/graph", () => {
             expect(graph().edge(edge.address)).toEqual(edge);
           });
           it("`edges` contains the edge", () => {
-            const edgeArray = (g: Graph) => Array.from(g.edges());
+            const edgeArray = (g: Graph) =>
+              Array.from(g.edges({showDangling: true}));
             expect(edgeArray(graph())).toEqual([edge]);
+          });
+          it("`isDanglingEdge` is false", () => {
+            expect(graph().isDanglingEdge(edge.address)).toBe(false);
           });
         });
 
@@ -745,8 +744,12 @@ describe("core/graph", () => {
           it("`edge` returns undefined", () => {
             expect(graph().edge(edge.address)).toBe(undefined);
           });
+          it("`isDanglingEdge` returns undefined", () => {
+            expect(graph().isDanglingEdge(edge.address)).toBe(undefined);
+          });
           it("`edges` is empty", () => {
-            expect(edgeArray(graph())).toHaveLength(0);
+            const edges = Array.from(graph().edges({showDangling: true}));
+            expect(edges).toHaveLength(0);
           });
           it("nodes were not removed", () => {
             expect(graph().hasNode(src.address)).toBe(true);
@@ -777,7 +780,42 @@ describe("core/graph", () => {
             expect(quiver().edge(e2)).toEqual(edge2);
           });
           it("both edges are retrievable from `edges`", () => {
-            expect(edgeArray(quiver()).sort()).toEqual([edge1, edge2].sort());
+            const edges = Array.from(quiver().edges({showDangling: true}));
+            expect(edges).toEqual([edge1, edge2]);
+          });
+        });
+
+        describe("with dangling edges", () => {
+          it("in the case where an edge was always dangling", () => {
+            const g = new Graph().addEdge(edge);
+            expect(g.hasEdge(edge.address)).toBe(true);
+            expect(Array.from(g.edges({showDangling: true}))).toEqual([edge]);
+            expect(Array.from(g.edges({showDangling: false}))).toEqual([]);
+            expect(g.edge(edge.address)).toEqual(edge);
+            expect(g.isDanglingEdge(edge.address)).toBe(true);
+          });
+          it("in the case where an edge became dangling after being added", () => {
+            const g = new Graph()
+              .addNode(src)
+              .addNode(dst)
+              .addEdge(edge)
+              .removeNode(src.address);
+            expect(g.hasEdge(edge.address)).toBe(true);
+            expect(Array.from(g.edges({showDangling: true}))).toEqual([edge]);
+            expect(Array.from(g.edges({showDangling: false}))).toEqual([]);
+            expect(g.edge(edge.address)).toEqual(edge);
+            expect(g.isDanglingEdge(edge.address)).toBe(true);
+          });
+          it("in the case where an edge ceased being dangling after being added", () => {
+            const g = new Graph()
+              .addEdge(edge)
+              .addNode(src)
+              .addNode(dst);
+            expect(g.hasEdge(edge.address)).toBe(true);
+            expect(Array.from(g.edges({showDangling: true}))).toEqual([edge]);
+            expect(Array.from(g.edges({showDangling: false}))).toEqual([edge]);
+            expect(g.edge(edge.address)).toEqual(edge);
+            expect(g.isDanglingEdge(edge.address)).toBe(false);
           });
         });
       });
@@ -789,7 +827,7 @@ describe("core/graph", () => {
             .addNode(dst)
             .addEdge(edge)
             .addEdge(edge);
-          expect(edgeArray(g)).toEqual([edge]);
+          expect(Array.from(g.edges({showDangling: true}))).toEqual([edge]);
           expect(
             Array.from(
               g.neighbors(src.address, {
@@ -807,7 +845,7 @@ describe("core/graph", () => {
             .addEdge(edge)
             .removeEdge(edge.address)
             .removeEdge(edge.address);
-          expect(edgeArray(g)).toHaveLength(0);
+          expect(Array.from(g.edges({showDangling: true}))).toHaveLength(0);
         });
       });
     });
@@ -844,6 +882,10 @@ describe("core/graph", () => {
       const foo = partsNode(["foo", "suffix"]);
       const loop = partsNode(["loop"]);
       const isolated = partsNode(["isolated"]);
+      // halfIsolated is the src of one edge, but that edge
+      // is a dangling edge (its dst is not in the graph).
+      // It's included so we can verify it has no neighbors.
+      const halfIsolated = partsNode(["halfIsolated"]);
 
       const foo_loop = {
         src: foo.address,
@@ -865,15 +907,22 @@ describe("core/graph", () => {
         dst: foo.address,
         address: EdgeAddress.fromParts(["repeated", "foo"]),
       };
+      const dangling = {
+        src: halfIsolated.address,
+        dst: NodeAddress.fromParts(["nonexistent"]),
+        address: EdgeAddress.fromParts(["dangling"]),
+      };
       function quiver() {
         return new Graph()
           .addNode(foo)
           .addNode(loop)
           .addNode(isolated)
+          .addNode(halfIsolated)
           .addEdge(foo_loop)
           .addEdge(loop_foo)
           .addEdge(loop_loop)
-          .addEdge(repeated_loop_foo);
+          .addEdge(repeated_loop_foo)
+          .addEdge(dangling);
       }
 
       function expectNeighbors(
@@ -904,6 +953,19 @@ describe("core/graph", () => {
       it("isolated node has no neighbors", () => {
         expectNeighbors(
           isolated.address,
+          {
+            direction: Direction.ANY,
+            nodePrefix: NodeAddress.empty,
+            edgePrefix: EdgeAddress.empty,
+          },
+          []
+        );
+      });
+
+      it("half-isoalted node has no neighbors", () => {
+        // Verifies that dangling edges are not included in neighbors.
+        expectNeighbors(
+          halfIsolated.address,
           {
             direction: Direction.ANY,
             nodePrefix: NodeAddress.empty,
@@ -1285,6 +1347,16 @@ describe("core/graph", () => {
       expect(graph1().equals(graph3)).toBe(true);
       expect(graph2().equals(graph3)).toBe(true);
     });
+    it("merges a dangling edge with its src and dst", () => {
+      const g1 = new Graph().addEdge(edge);
+      const g2 = new Graph().addNode(src).addNode(dst);
+      const expected = new Graph()
+        .addNode(src)
+        .addNode(dst)
+        .addEdge(edge);
+      const merged = Graph.merge([g1, g2]);
+      expect(merged.equals(expected)).toBe(true);
+    });
     it("rejects graphs with conflicting edges", () => {
       const g1 = new Graph()
         .addNode(foo)
@@ -1308,6 +1380,10 @@ describe("core/graph", () => {
           .addEdge(differentAddressEdge);
         expect(graph.toJSON()).toMatchSnapshot();
       });
+      it("a graph with a dangling edge", () => {
+        const graph = new Graph().addEdge(edge);
+        expect(graph.toJSON()).toMatchSnapshot();
+      });
       it("an advanced graph", () => {
         const graph = advancedGraph().graph1();
         expect(graph.toJSON()).toMatchSnapshot();
@@ -1329,11 +1405,19 @@ describe("core/graph", () => {
         const g = new Graph().addNode(src).addNode(dst);
         expectCompose(g);
       });
+      it("for a graph with a dangling edge", () => {
+        const g = new Graph().addEdge(edge);
+        expectCompose(g);
+      });
       it("for a graph with nodes added and removed", () => {
         const g = new Graph()
           .addNode(src)
           .addNode(dst)
           .removeNode(src.address);
+        expectCompose(g);
+      });
+      it("a graph with a dangling edge added and removed", () => {
+        const g = new Graph().addEdge(edge).removeEdge(edge.address);
         expectCompose(g);
       });
       it("for a graph with nodes and edges", () => {

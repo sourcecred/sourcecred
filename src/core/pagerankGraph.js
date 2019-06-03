@@ -7,7 +7,6 @@ import {
   Graph,
   type Node,
   type Edge,
-  type EdgesOptions,
   type NodeAddressT,
   type EdgeAddressT,
   type GraphJSON,
@@ -43,6 +42,12 @@ export type ScoredNode = {|
 export type WeightedEdge = {|
   +edge: Edge,
   +weight: EdgeWeight,
+|};
+
+export type PagerankGraphEdgesOptions = {|
+  +addressPrefix?: EdgeAddressT,
+  +srcPrefix?: NodeAddressT,
+  +dstPrefix?: NodeAddressT,
 |};
 
 export type ScoredNeighbor = {|
@@ -234,7 +239,7 @@ export class PagerankGraph {
       const newWeight = previousWeight + weight;
       this._totalOutWeight.set(address, newWeight);
     };
-    for (const edge of this._graph.edges()) {
+    for (const edge of this._graph.edges({showDangling: false})) {
       const weights = edgeEvaluator(edge);
       this._edgeWeights.set(edge.address, weights);
       addOutWeight(edge.src, weights.toWeight);
@@ -308,10 +313,24 @@ export class PagerankGraph {
    * Optionally, provide an EdgesOptions parameter to return an
    * iterator containing edges matching the EdgesOptions prefix
    * filter parameters. See Graph.edges for details.
+   *
+   * In contrast to Graph.edges, dangling edges will never be included,
+   * as we do not assign weights to danging edges.
    */
-  edges(options?: EdgesOptions): Iterator<WeightedEdge> {
+  edges(options?: PagerankGraphEdgesOptions): Iterator<WeightedEdge> {
     this._verifyGraphNotModified();
-    const iterator = this._graph.edges(options);
+    const graphOptions = {
+      showDangling: false,
+      addressPrefix: undefined,
+      srcPrefix: undefined,
+      dstPrefix: undefined,
+    };
+    if (options != null) {
+      graphOptions.addressPrefix = options.addressPrefix;
+      graphOptions.srcPrefix = options.srcPrefix;
+      graphOptions.dstPrefix = options.dstPrefix;
+    }
+    const iterator = this._graph.edges(graphOptions);
     return this._edgesIterator(iterator);
   }
 
@@ -330,7 +349,7 @@ export class PagerankGraph {
   edge(a: EdgeAddressT): ?WeightedEdge {
     this._verifyGraphNotModified();
     const edge = this._graph.edge(a);
-    if (edge != null) {
+    if (edge != null && this._graph.isDanglingEdge(a) === false) {
       const weight = NullUtil.get(this._edgeWeights.get(edge.address));
       return {edge, weight};
     }
@@ -546,12 +565,16 @@ export class PagerankGraph {
     this._verifyGraphNotModified();
 
     const graphJSON = this.graph().toJSON();
-    const nodes = sortedNodeAddressesFromJSON(graphJSON);
+    const nodes = sortedNodeAddressesFromJSON(graphJSON).filter((x) =>
+      this.graph().hasNode(x)
+    );
     const scores: number[] = nodes.map((x) =>
       NullUtil.get(this._scores.get(x))
     );
 
-    const edgeAddresses = sortedEdgeAddressesFromJSON(graphJSON);
+    const edgeAddresses = sortedEdgeAddressesFromJSON(graphJSON).filter(
+      (a) => this.graph().isDanglingEdge(a) === false
+    );
     const edgeWeights: EdgeWeight[] = edgeAddresses.map((x) =>
       NullUtil.get(this._edgeWeights.get(x))
     );
@@ -579,18 +602,22 @@ export class PagerankGraph {
     } = fromCompat(COMPAT_INFO, json);
     const graph = Graph.fromJSON(graphJSON);
 
-    const nodes = sortedNodeAddressesFromJSON(graphJSON);
+    const nodes = sortedNodeAddressesFromJSON(graphJSON).filter((x) =>
+      graph.hasNode(x)
+    );
     const scoreMap: Map<NodeAddressT, number> = new Map();
     for (let i = 0; i < nodes.length; i++) {
       scoreMap.set(nodes[i], scores[i]);
     }
 
-    const edges = sortedEdgeAddressesFromJSON(graphJSON);
+    const edgeAddresses = sortedEdgeAddressesFromJSON(graphJSON).filter(
+      (x) => graph.isDanglingEdge(x) === false
+    );
     const edgeWeights: Map<EdgeAddressT, EdgeWeight> = new Map();
-    for (let i = 0; i < edges.length; i++) {
+    for (let i = 0; i < edgeAddresses.length; i++) {
       const toWeight = toWeights[i];
       const froWeight = froWeights[i];
-      edgeWeights.set(edges[i], {toWeight, froWeight});
+      edgeWeights.set(edgeAddresses[i], {toWeight, froWeight});
     }
 
     function evaluator(e: Edge): EdgeWeight {

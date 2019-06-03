@@ -63,6 +63,16 @@ import * as NullUtil from "../util/null";
  * edge respectively, and both fields contain `NodeAddressT`s. The edge also
  * has its own address, which is an `EdgeAddressT`.
  *
+ * Graphs are allowed to contain Edges whose `src` or `dst` are not present.
+ * Such edges are called 'Dangling Edges'. An edge may convert from dangling to
+ * non-dangling (if it is added before its src or dst), and it may convert from
+ * non-dangling to dangling (if its src or dst are removed).
+ *
+ * Supporting dangling edges is important, because it means that we can require
+ * metadata be present for a Node (e.g. its creation timestamp), and still
+ * allow graph creators that do not know a node's metadata to create references
+ * to it. (Of course, they still need to know the node's address).
+ *
  * Here's a toy example of creating a graph:
  *
  * ```js
@@ -83,6 +93,7 @@ import * as NullUtil from "../util/null";
  * - `hasNode` to check if a node is in the Graph
  * - `nodes` to iterate over the nodes in the graph
  * - `hasEdge` to check if an edge address is in the Graph
+ * - `isDanglingEdge` to check if an edge is dangling
  * - `edge` to retrieve an edge by its address
  * - `edges` to iterate over the edges in the graph
  * - `neighbors` to find all the edges and nodes adjacent to a node
@@ -122,7 +133,7 @@ export type Edge = {|
   +dst: NodeAddressT,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/graph", version: "0.4.0"};
+const COMPAT_INFO = {type: "sourcecred/graph", version: "0.5.0"};
 
 export type Neighbor = {|+node: Node, +edge: Edge|};
 
@@ -144,13 +155,17 @@ export type NeighborsOptions = {|
 |};
 
 export type EdgesOptions = {|
-  +addressPrefix: EdgeAddressT,
-  +srcPrefix: NodeAddressT,
-  +dstPrefix: NodeAddressT,
+  +showDangling: boolean,
+  +addressPrefix?: EdgeAddressT,
+  +srcPrefix?: NodeAddressT,
+  +dstPrefix?: NodeAddressT,
 |};
 
 type AddressJSON = string[]; // Result of calling {Node,Edge}Address.toParts
 type Integer = number;
+type IndexedNodeJSON = {|
+  +index: Integer,
+|};
 type IndexedEdgeJSON = {|
   +address: AddressJSON,
   +srcIndex: Integer,
@@ -158,7 +173,8 @@ type IndexedEdgeJSON = {|
 |};
 
 export opaque type GraphJSON = Compatible<{|
-  +nodes: AddressJSON[],
+  +sortedNodeAddresses: AddressJSON[],
+  +nodes: IndexedNodeJSON[],
   +edges: IndexedEdgeJSON[],
 |}>;
 
@@ -219,6 +235,39 @@ export class Graph {
   }
 
   /**
+   * A node is 'referenced' if it is either present in the graph, or is the
+   * src or dst of some edge.
+   * Referenced nodes always have an entry in this._incidentEdges (regardless
+   * of whether they are incident to any edges).
+   * This method ensures that a given node address has a reference.
+   */
+  _reference(n: NodeAddressT) {
+    if (!this._incidentEdges.has(n)) {
+      this._incidentEdges.set(n, {inEdges: [], outEdges: []});
+    }
+  }
+
+  /**
+   * A node stops being referenced as soon as it is both not in the graph, and is
+   * not incident to any edge. This method must be called after any operation which
+   * might cause a node address to no longer be referenced, so that the node can
+   * be unreferenced if appropriate.
+   */
+  _unreference(n: NodeAddressT) {
+    const incidence = this._incidentEdges.get(n);
+    if (incidence != null) {
+      const {inEdges, outEdges} = incidence;
+      if (
+        !this._nodes.has(n) &&
+        inEdges.length === 0 &&
+        outEdges.length === 0
+      ) {
+        this._incidentEdges.delete(n);
+      }
+    }
+  }
+
+  /**
    * Returns how many times the graph has been modified.
    *
    * This value is exposed so that users of Graph can cache computations over
@@ -249,10 +298,10 @@ export class Graph {
   addNode(node: Node): this {
     const {address} = node;
     NodeAddress.assertValid(address);
+    this._reference(address);
     const existingNode = this._nodes.get(address);
     if (existingNode == null) {
       this._nodes.set(address, node);
-      this._incidentEdges.set(address, {inEdges: [], outEdges: []});
     } else {
       if (!deepEqual(node, existingNode)) {
         const strNode = nodeToString(node);
@@ -273,37 +322,26 @@ export class Graph {
    * If the node does not exist in the graph, no action is taken and no error
    * is thrown. (This operation is idempotent.)
    *
-   * If the node is incident to any edges, those edges must be removed
-   * before removing the node. Attempting to remove a node that is incident
-   * to some edges will throw an error.
+   * Removing a node which is incident to some edges is allowed; such edges will
+   * become dangling edges. See the discussion of 'Dangling Edges' in the module docstring
+   * for details.
    *
    * Returns `this` for chaining.
    */
   removeNode(a: NodeAddressT): this {
     NodeAddress.assertValid(a);
-    const {inEdges, outEdges} = this._incidentEdges.get(a) || {
-      inEdges: [],
-      outEdges: [],
-    };
-    const existingEdges = inEdges.concat(outEdges);
-    if (existingEdges.length > 0) {
-      const strAddress = NodeAddress.toString(a);
-      const strExampleEdge = edgeToString(existingEdges[0]);
-      throw new Error(
-        `Attempted to remove ${strAddress}, which is incident to ${
-          existingEdges.length
-        } edge(s), e.g.: ${strExampleEdge}`
-      );
-    }
-    this._incidentEdges.delete(a);
     this._nodes.delete(a);
+    this._unreference(a);
     this._markModification();
     this._maybeCheckInvariants();
     return this;
   }
 
   /**
-   * Test whether a given node is present in the graph.
+   * Test whether there exists a Node corresponding to the given NodeAddress.
+   *
+   * This will return false for nodes which are referenced by some edge, but not
+   * actually present in the graph.
    */
   hasNode(a: NodeAddressT): boolean {
     NodeAddress.assertValid(a);
@@ -364,8 +402,8 @@ export class Graph {
   /**
    * Add an edge to the graph.
    *
-   * It is an error to add an edge whose source and destination nodes
-   * are not already present in the graph.
+   * It is permitted to add an edge if its src or dst are not in the graph. See
+   * the discussion of 'Dangling Edges' in the module docstring for semantics.
    *
    * It is an error to add an edge if a distinct edge with the same address
    * already exists in the graph (i.e., if the source or destination are
@@ -381,12 +419,8 @@ export class Graph {
     NodeAddress.assertValid(edge.dst, "edge.dst");
     EdgeAddress.assertValid(edge.address, "edge.address");
 
-    const srcMissing = !this._nodes.has(edge.src);
-    const dstMissing = !this._nodes.has(edge.dst);
-    if (srcMissing || dstMissing) {
-      const missingThing = srcMissing ? "src" : "dst";
-      throw new Error(`Missing ${missingThing} on edge: ${edgeToString(edge)}`);
-    }
+    this._reference(edge.src);
+    this._reference(edge.dst);
     const existingEdge = this._edges.get(edge.address);
     if (existingEdge != null) {
       if (
@@ -441,6 +475,8 @@ export class Graph {
         }
         edges.splice(index, 1);
       });
+      this._unreference(edge.src);
+      this._unreference(edge.dst);
     }
     this._markModification();
     this._maybeCheckInvariants();
@@ -453,6 +489,27 @@ export class Graph {
   hasEdge(address: EdgeAddressT): boolean {
     EdgeAddress.assertValid(address);
     const result = this._edges.has(address);
+    this._maybeCheckInvariants();
+    return result;
+  }
+
+  /**
+   * Test whether there is a dangling edge at the given address.
+   *
+   * Returns true if the edge is present, and is dangling.
+   * Returns false if the edge is present, and is not dangling.
+   * Returns undefined if the edge is not present.
+   *
+   * See the module docstring for more details on dangling edges.
+   */
+  isDanglingEdge(address: EdgeAddressT): boolean | typeof undefined {
+    EdgeAddress.assertValid(address);
+    const edge = this.edge(address);
+    let result: boolean | typeof undefined;
+    if (edge != null) {
+      const {src, dst} = edge;
+      result = !this.hasNode(src) || !this.hasNode(dst);
+    }
     this._maybeCheckInvariants();
     return result;
   }
@@ -472,58 +529,65 @@ export class Graph {
    * Returns an iterator over edges in the graph, optionally filtered by edge
    * address prefix, source address prefix, and/or destination address prefix.
    *
-   * The caller may pass optional arguments to filter by the
-   * address prefixes for the edge address, the edge src, or the edge dst.
+   * The caller must pass an options object with a boolean field `showDangling`,
+   * which determines whether dangling edges will be included in the results.
+   * The caller may also pass fields `addressPrefix`, `srcPrefix`, and `dstPrefix`
+   * to perform prefix-based address filtering of edges that are returned.
+   * (See the module docstring for more context on dangling edges.)
    *
    * Suppose that you want to find every edge that represents authorship by a
    * user. If all authorship edges have the `AUTHORS_EDGE_PREFIX` prefix, and
    * all user nodes have the `USER_NODE_PREFIX` prefix, then you could call:
    *
    * graph.edges({
+   *  showDangling: true,  // or false, irrelevant for this example
    *  addressPrefix: AUTHORS_EDGE_PREFIX,
    *  srcPrefix: USER_NODE_PREFIX,
-   *  dstPrefix: NodeAddress.empty,
    * });
    *
-   * Note that `NodeAddress.empty` is a prefix of every node address.
+   * In this example, as `dstPrefix` was left unset, it will default to
+   * `NodeAddress.empty`, which is a prefix of every node address.
    *
    * Clients must not modify the graph during iteration. If they do so, an
    * error may be thrown at the iteration call site. The iteration order is
    * undefined.
    */
-  edges(options?: EdgesOptions): Iterator<Edge> {
+  edges(options: EdgesOptions): Iterator<Edge> {
     if (options == null) {
-      options = {
-        addressPrefix: EdgeAddress.empty,
-        srcPrefix: NodeAddress.empty,
-        dstPrefix: NodeAddress.empty,
-      };
+      throw new Error("Options are required for Graph.edges");
     }
-    if (options.addressPrefix == null) {
-      throw new Error(
-        `Invalid address prefix: ${String(options.addressPrefix)}`
-      );
-    }
-    if (options.srcPrefix == null) {
-      throw new Error(`Invalid src prefix: ${String(options.srcPrefix)}`);
-    }
-    if (options.dstPrefix == null) {
-      throw new Error(`Invalid dst prefix: ${String(options.dstPrefix)}`);
-    }
-    const result = this._edgesIterator(this._modificationCount, options);
+    const {showDangling} = options;
+    const addressPrefix = NullUtil.orElse(
+      options.addressPrefix,
+      EdgeAddress.empty
+    );
+    const srcPrefix = NullUtil.orElse(options.srcPrefix, NodeAddress.empty);
+    const dstPrefix = NullUtil.orElse(options.dstPrefix, NodeAddress.empty);
+
+    const result = this._edgesIterator(
+      this._modificationCount,
+      showDangling,
+      addressPrefix,
+      srcPrefix,
+      dstPrefix
+    );
     this._maybeCheckInvariants();
     return result;
   }
 
   *_edgesIterator(
     initialModificationCount: ModificationCount,
-    options: EdgesOptions
+    showDangling: boolean,
+    addressPrefix: EdgeAddressT,
+    srcPrefix: NodeAddressT,
+    dstPrefix: NodeAddressT
   ): Iterator<Edge> {
     for (const edge of this._edges.values()) {
       if (
-        EdgeAddress.hasPrefix(edge.address, options.addressPrefix) &&
-        NodeAddress.hasPrefix(edge.src, options.srcPrefix) &&
-        NodeAddress.hasPrefix(edge.dst, options.dstPrefix)
+        (showDangling || this.isDanglingEdge(edge.address) === false) &&
+        EdgeAddress.hasPrefix(edge.address, addressPrefix) &&
+        NodeAddress.hasPrefix(edge.src, srcPrefix) &&
+        NodeAddress.hasPrefix(edge.dst, dstPrefix)
       ) {
         this._checkForComodification(initialModificationCount);
         this._maybeCheckInvariants();
@@ -544,9 +608,9 @@ export class Graph {
    * convenience, a `Neighbor` is thus an object that includes both the edge
    * and the adjacent node.
    *
-   * Every edge incident to the root corresponds to exactly one neighbor, but
-   * note that multiple neighbors may have the same `node` in the case that
-   * there are multiple edges with the same source and destination.
+   * Every non-dangling edge incident to the root corresponds to exactly one
+   * neighbor, but note that multiple neighbors may have the same `node` in the
+   * case that there are multiple edges with the same source and destination.
    *
    * Callers to `neighbors` must provide `NeighborsOptions` as follows:
    *
@@ -568,6 +632,9 @@ export class Graph {
    * If the root node has an edge for which it is both the source and the
    * destination (a loop edge), there will be one `Neighbor` with the root node
    * and the loop edge.
+   *
+   * No `Neighbors` will be created for dangling edges, as such edges do not
+   * correspond to any Node in the graph.
    *
    * Clients must not modify the graph during iteration. If they do so, an
    * error may be thrown at the iteration call site. The iteration order is
@@ -664,22 +731,33 @@ export class Graph {
    * the number of edges.
    */
   toJSON(): GraphJSON {
-    const sortedNodeAddresses = Array.from(this.nodes())
-      .map((x) => x.address)
-      .sort();
-    const nodeToSortedIndex = new Map();
+    const sortedNodeAddresses = Array.from(this._incidentEdges.keys()).sort();
+    const nodeAddressToSortedIndex = new Map();
     sortedNodeAddresses.forEach((address, i) => {
-      nodeToSortedIndex.set(address, i);
+      nodeAddressToSortedIndex.set(address, i);
     });
-    const sortedEdges = sortBy(Array.from(this.edges()), (x) => x.address);
-    const indexedEdges = sortedEdges.map(({src, dst, address}) => {
-      const srcIndex = NullUtil.get(nodeToSortedIndex.get(src));
-      const dstIndex = NullUtil.get(nodeToSortedIndex.get(dst));
-      return {srcIndex, dstIndex, address: EdgeAddress.toParts(address)};
+    const sortedEdges = sortBy(
+      Array.from(this.edges({showDangling: true})),
+      (x) => x.address
+    );
+    const indexedEdges: IndexedEdgeJSON[] = sortedEdges.map(
+      ({src, dst, address}) => {
+        const srcIndex = NullUtil.get(nodeAddressToSortedIndex.get(src));
+        const dstIndex = NullUtil.get(nodeAddressToSortedIndex.get(dst));
+        return {srcIndex, dstIndex, address: EdgeAddress.toParts(address)};
+      }
+    );
+    const sortedNodes = sortBy(Array.from(this.nodes()), (x) => x.address);
+    const indexedNodes: IndexedNodeJSON[] = sortedNodes.map(({address}) => {
+      const index = NullUtil.get(nodeAddressToSortedIndex.get(address));
+      return {index};
     });
     const rawJSON = {
-      nodes: sortedNodeAddresses.map((x) => NodeAddress.toParts(x)),
+      sortedNodeAddresses: sortedNodeAddresses.map((x) =>
+        NodeAddress.toParts(x)
+      ),
       edges: indexedEdges,
+      nodes: indexedNodes,
     };
     const result = toCompat(COMPAT_INFO, rawJSON);
     this._maybeCheckInvariants();
@@ -690,21 +768,26 @@ export class Graph {
    * Deserializes a GraphJSON into a new Graph.
    */
   static fromJSON(compatJson: GraphJSON): Graph {
-    const json = fromCompat(COMPAT_INFO, compatJson);
-    const nodesJSON: AddressJSON[] = json.nodes;
-    const edgesJSON: IndexedEdgeJSON[] = json.edges;
+    const {
+      nodes: nodesJSON,
+      edges: edgesJSON,
+      sortedNodeAddresses: sortedNodeAddressesJSON,
+    } = fromCompat(COMPAT_INFO, compatJson);
+    const sortedNodeAddresses = sortedNodeAddressesJSON.map(
+      NodeAddress.fromParts
+    );
     const result = new Graph();
-    const nodes: Node[] = nodesJSON.map((x) => ({
-      address: NodeAddress.fromParts(x),
-    }));
-    nodes.forEach((n) => result.addNode(n));
+    nodesJSON.forEach((j: IndexedNodeJSON) => {
+      const n: Node = {address: sortedNodeAddresses[j.index]};
+      result.addNode(n);
+    });
     edgesJSON.forEach(({address, srcIndex, dstIndex}) => {
-      const src = nodes[srcIndex];
-      const dst = nodes[dstIndex];
+      const src = sortedNodeAddresses[srcIndex];
+      const dst = sortedNodeAddresses[dstIndex];
       result.addEdge({
         address: EdgeAddress.fromParts(address),
-        src: src.address,
-        dst: dst.address,
+        src: src,
+        dst: dst,
       });
     });
     return result;
@@ -738,7 +821,7 @@ export class Graph {
       for (const node of graph.nodes()) {
         result.addNode(node);
       }
-      for (const edge of graph.edges()) {
+      for (const edge of graph.edges({showDangling: true})) {
         result.addEdge(edge);
       }
     }
@@ -774,51 +857,63 @@ export class Graph {
     // values modulo deep equality (or, from context, an element of such a
     // class).
 
-    // Invariant 1. For a node `n`, if `n` is in the graph, then
-    // `_incidentEdges.has(n)`. The value of `_incidentEdges.get(n)`
-    // is an object with two fields: `inEdges` and `outEdges`, both of which are
-    // arrays of `Edge`s
-    for (const node of this._nodes.values()) {
-      if (!this._incidentEdges.has(node.address)) {
+    // Invariant 1. A node address `n` is 'referenced' if `_incidentEdges.has(n)`.
+    // 1.1 If a node is in the graph, then it is referenced.
+    // 1.2 If a node has any incident edge, then it is referenced.
+    // 1.3 If a node is not in the graph and does not have incident edges, then
+    // it is not referenced.
+    const referencedNodesEncountered = new Set();
+    // 1.1
+    for (const {address} of this._nodes.values()) {
+      if (!this._incidentEdges.has(address)) {
         throw new Error(
-          `missing incident-edges for ${NodeAddress.toString(node.address)}`
+          `missing incident-edges for ${NodeAddress.toString(address)}`
         );
       }
+      referencedNodesEncountered.add(address);
+    }
+    // 1.2
+    for (const edge of this._edges.values()) {
+      if (!this._incidentEdges.has(edge.src)) {
+        throw new Error(
+          `missing incident-edges for src of: ${edgeToString(edge)}`
+        );
+      }
+      referencedNodesEncountered.add(edge.src);
+      if (!this._incidentEdges.has(edge.dst)) {
+        throw new Error(
+          `missing incident-edges for dst of: ${edgeToString(edge)}`
+        );
+      }
+      referencedNodesEncountered.add(edge.dst);
+    }
+    // Check 1.3 by implication: for every address in
+    // referencedNodesEncountered, we've explicitly checked that it is present
+    // in _incidentEdges.
+    //
+    // Therefore, if the number of keys in _incidentEdges differs from the
+    // number of elements in referencedNodesEncountered, it must be because
+    // some elements in _incidentEdges were not present in
+    // referencedNodesEncountered, which means that they did not correspond to
+    // a node in the graph and did not have incident edges.
+    const numIncidentEntries = Array.from(this._incidentEdges.keys()).length;
+    if (numIncidentEntries !== referencedNodesEncountered.size) {
+      throw new Error("extra addresses in incident-edges");
     }
 
     // Invariant 2. For an edge address `a`, if `_edges.has(a)` and
     // `_edges.get(a) === e`, then:
     //  1. `e.address` equals `a`;
-    //  2. `e.src` is in the graph;
-    //  3. `e.dst` is in the graph;
-    //  4. `_inEdges.get(e.dst)` contains `e`; and
-    //  5. `_outEdges.get(e.src)` contains `e`.
+    //  2. `_inEdges.get(e.dst)` contains `e`; and
+    //  3. `_outEdges.get(e.src)` contains `e`.
     //
-    // We check 2.1, 2.2, and 2.3 here, and check 2.4 and 2.5 later for
+    // We check 2.1 here, and check 2.2 and 2.3 later for
     // improved performance.
     for (const [address, edge] of this._edges.entries()) {
       if (edge.address !== address) {
         throw new Error(
           `bad edge address: ${edgeToString(edge)} does not match ${address}`
         );
-      }
-      if (!this._nodes.has(edge.src)) {
-        throw new Error(`missing src for edge: ${edgeToString(edge)}`);
-      }
-      if (!this._nodes.has(edge.dst)) {
-        throw new Error(`missing dst for edge: ${edgeToString(edge)}`);
-      }
-    }
-
-    // Temporary Invariant
-    // Suppose that `_incidentEdges.has(n)`. Then `n` is in the graph.
-    // The {inEdges, outEdges} => incidentEdges refactor necessitated pulling
-    // this invariant out of invariants 3 and 4. However, the purpose of this
-    // refactor is actually to remove this invariant. So, there is no need to
-    // re-enumerate the invariants as this one will disappear shortly.
-    for (const addr of this._incidentEdges.keys()) {
-      if (!this._nodes.has(addr)) {
-        throw new Error(`spurious incident-edges`);
       }
     }
 
@@ -895,7 +990,7 @@ export class Graph {
       }
     }
 
-    // We now return to check 2.4 and 2.5, with the help of the
+    // We now return to check 2.2 and 2.3, with the help of the
     // structures that we have built up in checking Invariants 3 and 4.
     for (const edge of this._edges.values()) {
       // That `_incidentEdges.get(n).inEdges` contains `e` for some `n` is
@@ -999,6 +1094,6 @@ export function sortedEdgeAddressesFromJSON(
 export function sortedNodeAddressesFromJSON(
   json: GraphJSON
 ): $ReadOnlyArray<NodeAddressT> {
-  const nodes: AddressJSON[] = fromCompat(COMPAT_INFO, json).nodes;
-  return nodes.map((x) => NodeAddress.fromParts(x));
+  const {sortedNodeAddresses} = fromCompat(COMPAT_INFO, json);
+  return sortedNodeAddresses.map((x) => NodeAddress.fromParts(x));
 }

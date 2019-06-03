@@ -1,10 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`core/graph toJSON / fromJSON snapshot testing a graph with a dangling edge 1`] = `
+Array [
+  Object {
+    "type": "sourcecred/graph",
+    "version": "0.5.0",
+  },
+  Object {
+    "edges": Array [
+      Object {
+        "address": Array [
+          "edge",
+        ],
+        "dstIndex": 0,
+        "srcIndex": 1,
+      },
+    ],
+    "nodes": Array [],
+    "sortedNodeAddresses": Array [
+      Array [
+        "dst",
+      ],
+      Array [
+        "src",
+      ],
+    ],
+  },
+]
+`;
+
 exports[`core/graph toJSON / fromJSON snapshot testing a trivial graph 1`] = `
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.4.0",
+    "version": "0.5.0",
   },
   Object {
     "edges": Array [
@@ -24,6 +53,14 @@ Array [
       },
     ],
     "nodes": Array [
+      Object {
+        "index": 0,
+      },
+      Object {
+        "index": 1,
+      },
+    ],
+    "sortedNodeAddresses": Array [
       Array [
         "dst",
       ],
@@ -39,17 +76,33 @@ exports[`core/graph toJSON / fromJSON snapshot testing an advanced graph 1`] = `
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.4.0",
+    "version": "0.5.0",
   },
   Object {
     "edges": Array [
+      Object {
+        "address": Array [
+          "full",
+          "dangling",
+        ],
+        "dstIndex": 4,
+        "srcIndex": 4,
+      },
+      Object {
+        "address": Array [
+          "half",
+          "dangling",
+        ],
+        "dstIndex": 4,
+        "srcIndex": 1,
+      },
       Object {
         "address": Array [
           "hom",
           "1",
         ],
         "dstIndex": 0,
-        "srcIndex": 3,
+        "srcIndex": 5,
       },
       Object {
         "address": Array [
@@ -57,25 +110,48 @@ Array [
           "2",
         ],
         "dstIndex": 0,
-        "srcIndex": 3,
+        "srcIndex": 5,
       },
       Object {
         "address": Array [
           "loop",
         ],
-        "dstIndex": 2,
-        "srcIndex": 2,
+        "dstIndex": 3,
+        "srcIndex": 3,
       },
     ],
     "nodes": Array [
+      Object {
+        "index": 0,
+      },
+      Object {
+        "index": 1,
+      },
+      Object {
+        "index": 2,
+      },
+      Object {
+        "index": 3,
+      },
+      Object {
+        "index": 5,
+      },
+    ],
+    "sortedNodeAddresses": Array [
       Array [
         "dst",
+      ],
+      Array [
+        "halfIsolated",
       ],
       Array [
         "isolated",
       ],
       Array [
         "loop",
+      ],
+      Array [
+        "phantom",
       ],
       Array [
         "src",

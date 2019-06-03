@@ -135,7 +135,7 @@ export function createConnections(
   }
 
   // Process edges.
-  for (const edge of graph.edges()) {
+  for (const edge of graph.edges({showDangling: false})) {
     const {toWeight, froWeight} = edgeWeight(edge);
     const {src, dst} = edge;
     processConnection(dst, {

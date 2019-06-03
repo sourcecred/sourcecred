@@ -56,6 +56,20 @@ export function advancedGraph() {
     dst: loop.address,
     address: EdgeAddress.fromParts(["loop"]),
   });
+
+  const halfIsolated = node("halfIsolated");
+  const phantomNode = node("phantom");
+  const halfDanglingEdge = Object.freeze({
+    src: halfIsolated.address,
+    dst: phantomNode.address,
+    address: EdgeAddress.fromParts(["half", "dangling"]),
+  });
+  const fullDanglingEdge = Object.freeze({
+    src: phantomNode.address,
+    dst: phantomNode.address,
+    address: EdgeAddress.fromParts(["full", "dangling"]),
+  });
+
   const isolated = node("isolated");
   const graph1 = () =>
     new Graph()
@@ -65,13 +79,15 @@ export function advancedGraph() {
       .addNode(isolated)
       .addEdge(hom1)
       .addEdge(hom2)
-      .addEdge(loop_loop);
+      .addEdge(loop_loop)
+      .addNode(halfIsolated)
+      .addEdge(halfDanglingEdge)
+      .addEdge(fullDanglingEdge);
 
   // graph2 is logically equivalent to graph1, but is constructed with very
   // different history.
   // Use this to check that logically equivalent graphs are treated
   // equivalently, regardless of their history.
-  const phantomNode = node("phantom");
   const phantomEdge1 = Object.freeze({
     src: src.address,
     dst: phantomNode.address,
@@ -96,33 +112,63 @@ export function advancedGraph() {
       // N: [phantomNode, src], E: [phantomEdge1]
       .addNode(isolated)
       // N: [phantomNode, src, isolated], E: [phantomEdge1]
+      .addNode(halfIsolated)
+      // N: [phantomNode, src, isolated, halfIsolated]
+      // E: [phantomEdge1]
+      .addEdge(halfDanglingEdge)
+      // N: [phantomNode, src, isolated, halfIsolated]
+      // E: [phantomEdge1, halfDanglingEdge]
+      .addEdge(fullDanglingEdge)
+      // N: [phantomNode, src, isolated, halfIsolated]
+      // E: [phantomEdge1, halfDanglingEdge, fullDanglingEdge]
       .removeEdge(phantomEdge1.address)
-      // N: [phantomNode, src, isolated], E: []
+      // N: [phantomNode, src, isolated, halfIsolated]
+      // E: [halfDanglingEdge, fullDanglingEdge]
       .addNode(dst)
-      // N: [phantomNode, src, isolated, dst], E: []
+      // N: [phantomNode, src, isolated, halfIsolated, dst]
+      // E: [halfDanglingEdge, fullDanglingEdge]
       .addEdge(hom1)
-      // N: [phantomNode, src, isolated, dst], E: [hom1]
+      // N: [phantomNode, src, isolated, halfIsolated, dst]
+      // E: [halfDanglingEdge, fullDanglingEdge, hom1]
       .addEdge(phantomEdge2)
-      // N: [phantomNode, src, isolated, dst], E: [hom1, phantomEdge2]
+      // N: [phantomNode, src, isolated, halfIsolated, dst]
+      // E: [halfDanglingEdge, fullDanglingEdge, hom1, phantomEdge2]
       .addEdge(hom2)
-      // N: [phantomNode, src, isolated, dst], E: [hom1, phantomEdge2, hom2]
+      // N: [phantomNode, src, isolated, halfIsolated, dst]
+      // E: [halfDanglingEdge, fullDanglingEdge, hom1, phantomEdge2, hom2]
       .removeEdge(hom1.address)
-      // N: [phantomNode, src, isolated, dst], E: [phantomEdge2, hom2]
+      // N: [phantomNode, src, isolated, halfIsolated, dst]
+      // E: [halfDanglingEdge, fullDanglingEdge, phantomEdge2, hom2]
       .removeNode(phantomNode.address)
-      // N: [src, isolated, dst], E: [phantomEdge2, hom2]
+      // N: [src, isolated, halfIsolated, dst]
+      // E: [halfDanglingEdge, fullDanglingEdge, phantomEdge2, hom2]
       .removeEdge(phantomEdge2.address)
-      // N: [src, isolated, dst], E: [hom2]
+      // N: [src, isolated, halfIsolated, dst]
+      // E: [halfDanglingEdge, fullDanglingEdge, hom2]
       .removeNode(isolated.address)
-      // N: [src, dst], E: [hom2]
+      // N: [src, halfIsolated, dst]
+      // E: [halfDanglingEdge, fullDanglingEdge, hom2]
       .addNode(isolated)
-      // N: [src, dst, isolated], E: [hom2]
+      // N: [src, halfIsolated, dst, isolated]
+      // E: [halfDanglingEdge, fullDanglingEdge, hom2]
       .addNode(loop)
-      // N: [src, dst, isolated, loop], E: [hom2]
+      // N: [src, halfIsolated, dst, isolated, loop]
+      // E: [halfDanglingEdge, fullDanglingEdge, hom2]
       .addEdge(loop_loop)
-      // N: [src, dst, isolated, loop], E: [hom2, loop_loop]
+      // N: [src, halfIsolated, dst, isolated, loop]
+      // E: [halfDanglingEdge, fullDanglingEdge, hom2, loop_loop]
       .addEdge(hom1);
-  // N: [src, dst, isolated, loop], E: [hom2, loop_loop, hom1]
-  const nodes = {src, dst, loop, isolated, phantomNode};
-  const edges = {hom1, hom2, loop_loop, phantomEdge1, phantomEdge2};
+  //     N: [src, halfIsolated, dst, isolated, loop]
+  //     E: [halfDanglingEdge, fullDanglingEdge, hom2, loop_loop, hom1]
+  const nodes = {src, dst, loop, isolated, phantomNode, halfIsolated};
+  const edges = {
+    hom1,
+    hom2,
+    loop_loop,
+    phantomEdge1,
+    phantomEdge2,
+    halfDanglingEdge,
+    fullDanglingEdge,
+  };
   return {nodes, edges, graph1, graph2};
 }

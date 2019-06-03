@@ -4,7 +4,7 @@ exports[`plugins/git/createGraph createGraph processes a simple repository 1`] =
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.4.0",
+    "version": "0.5.0",
   },
   Object {
     "edges": Array [
@@ -115,6 +115,32 @@ Array [
       },
     ],
     "nodes": Array [
+      Object {
+        "index": 0,
+      },
+      Object {
+        "index": 1,
+      },
+      Object {
+        "index": 2,
+      },
+      Object {
+        "index": 3,
+      },
+      Object {
+        "index": 4,
+      },
+      Object {
+        "index": 5,
+      },
+      Object {
+        "index": 6,
+      },
+      Object {
+        "index": 7,
+      },
+    ],
+    "sortedNodeAddresses": Array [
       Array [
         "sourcecred",
         "git",

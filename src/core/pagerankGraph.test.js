@@ -16,6 +16,7 @@ import {
   DEFAULT_CONVERGENCE_THRESHOLD,
   DEFAULT_ALPHA,
   DEFAULT_SEED,
+  type PagerankGraphEdgesOptions,
 } from "./pagerankGraph";
 import {advancedGraph, node, partsNode} from "./graphTestUtil";
 import * as NullUtil from "../util/null";
@@ -162,10 +163,10 @@ describe("core/pagerankGraph", () => {
   });
 
   describe("edge/edges", () => {
-    it("edges returns the same edges as are in the graph", () => {
+    it("edges returns the non-dangling edges in the base graph", () => {
       const g = advancedGraph().graph1();
       const pg = new PagerankGraph(g, defaultEvaluator);
-      const graphEdges = Array.from(g.edges());
+      const graphEdges = Array.from(g.edges({showDangling: false}));
       const pgEdges = Array.from(pg.edges()).map((x) => x.edge);
       expect(graphEdges.length).toEqual(pgEdges.length);
       const addressAccessor = (x: Edge) => x.address;
@@ -192,6 +193,12 @@ describe("core/pagerankGraph", () => {
     it("edge returns null for address not in the graph", () => {
       const pg = new PagerankGraph(nonEmptyGraph(), defaultEvaluator);
       expect(pg.edge(EdgeAddress.empty)).toEqual(null);
+    });
+
+    it("edge returns null for dangling edge", () => {
+      const {graph1, edges} = advancedGraph();
+      const pg = new PagerankGraph(graph1(), defaultEvaluator);
+      expect(pg.edge(edges.halfDanglingEdge.address)).toEqual(null);
     });
 
     it("edge and edges both throw an error if underlying graph is modified", () => {
@@ -301,13 +308,17 @@ describe("core/pagerankGraph", () => {
     };
     const pagerankGraph = () => new PagerankGraph(graph(), defaultEvaluator);
 
-    function expectConsistentEdges(options: EdgesOptions | void) {
+    function expectConsistentEdges(options: PagerankGraphEdgesOptions | void) {
       const pagerankGraphEdges = Array.from(pagerankGraph().edges(options));
       pagerankGraphEdges.forEach((e) => {
         expect(e.weight.froWeight).toBe(0);
         expect(e.weight.toWeight).toBe(1);
       });
-      const graphEdges = Array.from(graph().edges(options));
+      // $ExpectFlowError
+      const graphOptions: EdgesOptions = (options = null
+        ? {showDangling: false}
+        : {...options, showDangling: false});
+      const graphEdges = Array.from(graph().edges(graphOptions));
       expect(pagerankGraphEdges.map((e) => e.edge)).toEqual(graphEdges);
     }
 
@@ -325,21 +336,15 @@ describe("core/pagerankGraph", () => {
       it("finds edges by address prefix", () => {
         expectConsistentEdges({
           addressPrefix: EdgeAddress.fromParts(["e", "1"]),
-          srcPrefix: NodeAddress.empty,
-          dstPrefix: NodeAddress.empty,
         });
       });
       it("finds edges by src prefix", () => {
         expectConsistentEdges({
-          addressPrefix: EdgeAddress.empty,
           srcPrefix: NodeAddress.fromParts(["src", "1"]),
-          dstPrefix: NodeAddress.empty,
         });
       });
       it("finds edges by dst prefix", () => {
         expectConsistentEdges({
-          addressPrefix: EdgeAddress.empty,
-          srcPrefix: NodeAddress.empty,
           dstPrefix: NodeAddress.fromParts(["dst", "1"]),
         });
       });
@@ -347,40 +352,13 @@ describe("core/pagerankGraph", () => {
         expectConsistentEdges({
           addressPrefix: EdgeAddress.fromParts(["e", "1"]),
           srcPrefix: NodeAddress.fromParts(["src", "2"]),
-          dstPrefix: NodeAddress.empty,
         });
       });
       it("yields appropriate filter intersection", () => {
         expectConsistentEdges({
-          addressPrefix: EdgeAddress.empty,
           srcPrefix: NodeAddress.fromParts(["src", "1"]),
           dstPrefix: NodeAddress.fromParts(["dst", "2"]),
         });
-      });
-    });
-
-    describe("edge filter options", () => {
-      it("requires `addressPrefix` to be present in provided options", () => {
-        expect(() => {
-          pagerankGraph()
-            // $ExpectFlowError
-            .edges({srcPrefix: src1, dstPrefix: dst1});
-        }).toThrow("Invalid address prefix: undefined");
-      });
-      it("requires `srcPrefix` to be present in provided options", () => {
-        expect(() => {
-          pagerankGraph()
-            // $ExpectFlowError
-            .edges({addressPrefix: e11, dstPrefix: dst1});
-        }).toThrow("Invalid src prefix: undefined");
-      });
-
-      it("requires `dstPrefix` to be present in provided options", () => {
-        expect(() => {
-          pagerankGraph()
-            // $ExpectFlowError
-            .edges({addressPrefix: e11, srcPrefix: dst1});
-        }).toThrow("Invalid dst prefix: undefined");
       });
     });
   });
