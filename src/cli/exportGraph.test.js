@@ -2,7 +2,8 @@
 
 import {run} from "./testUtil";
 import {help, makeExportGraph} from "./exportGraph";
-import {Graph, NodeAddress} from "../core/graph";
+import {Graph} from "../core/graph";
+import {node} from "../core/graphTestUtil";
 import stringify from "json-stable-stringify";
 
 import {makeRepoId} from "../core/repoId";
@@ -61,7 +62,8 @@ describe("cli/exportGraph", () => {
     });
 
     it("on load success, prints the stringified graph to stdout", async () => {
-      const graph = new Graph().addNode(NodeAddress.empty);
+      const n = node("n");
+      const graph = new Graph().addNode(n);
       const loadGraphResult = {status: "SUCCESS", graph};
       const exportGraph = makeExportGraph(
         (_unused_repoId) => new Promise((resolve) => resolve(loadGraphResult))

@@ -1,6 +1,6 @@
 // @flow
 
-import {OdysseyInstance, type Node} from "./instance";
+import {OdysseyInstance, type OdysseyNode} from "./instance";
 
 /**
  * An example Odyssey instance, based on work at the Odyssey Hackathon.
@@ -53,8 +53,8 @@ export function hackathonExample(): OdysseyInstance {
 
   function addContribution(
     description: string,
-    authors: Node[],
-    impacted: Node[]
+    authors: OdysseyNode[],
+    impacted: OdysseyNode[]
   ) {
     const contrib = instance.addNode("CONTRIBUTION", description);
     for (const author of authors) {

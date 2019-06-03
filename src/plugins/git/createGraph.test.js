@@ -17,8 +17,8 @@ describe("plugins/git/createGraph", () => {
 
     it("only has commit nodes and has_parent edges", () => {
       const graph = createGraph(makeData());
-      for (const n of graph.nodes()) {
-        if (!NodeAddress.hasPrefix(n, NodePrefix.commit)) {
+      for (const {address} of graph.nodes()) {
+        if (!NodeAddress.hasPrefix(address, NodePrefix.commit)) {
           throw new Error("Found non-commit node");
         }
       }

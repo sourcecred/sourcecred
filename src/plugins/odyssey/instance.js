@@ -29,7 +29,7 @@ import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 
 import * as NullUtil from "../../util/null";
 
-export type Node = {|
+export type OdysseyNode = {|
   +nodeTypeIdentifier: OdysseyNodeTypeIdentifier,
   +address: NodeAddressT,
   +description: string,
@@ -82,7 +82,7 @@ export class OdysseyInstance {
   addNode(
     typeIdentifier: OdysseyNodeTypeIdentifier,
     description: string
-  ): Node {
+  ): OdysseyNode {
     if (!isOdysseyNodeTypeIdentifier(typeIdentifier)) {
       throw new Error(
         `Tried to add node with invalid type identifier: ${typeIdentifier}`
@@ -93,7 +93,8 @@ export class OdysseyInstance {
       typeIdentifier,
       String(this._count)
     );
-    this._graph.addNode(address);
+    const node = {address};
+    this._graph.addNode(node);
     this._count++;
     this._descriptions.set(address, description);
     return NullUtil.get(this.node(address));
@@ -102,7 +103,7 @@ export class OdysseyInstance {
   /**
    * Retrieve the Node corresponding to a given node address, if it exists.
    */
-  node(address: NodeAddressT): ?Node {
+  node(address: NodeAddressT): ?OdysseyNode {
     if (!this._graph.hasNode(address)) {
       return null;
     }
@@ -124,7 +125,7 @@ export class OdysseyInstance {
    *
    * Optionally filter to only nodes of a chosen type.
    */
-  nodes(typeIdentifier?: OdysseyNodeTypeIdentifier): Iterator<Node> {
+  nodes(typeIdentifier?: OdysseyNodeTypeIdentifier): Iterator<OdysseyNode> {
     const prefix =
       typeIdentifier == null
         ? NODE_PREFIX
@@ -132,9 +133,9 @@ export class OdysseyInstance {
     return this._nodesIterator(prefix);
   }
 
-  *_nodesIterator(prefix: NodeAddressT): Iterator<Node> {
-    for (const a of this._graph.nodes({prefix})) {
-      yield NullUtil.get(this.node(a));
+  *_nodesIterator(prefix: NodeAddressT): Iterator<OdysseyNode> {
+    for (const {address} of this._graph.nodes({prefix})) {
+      yield NullUtil.get(this.node(address));
     }
   }
 
@@ -144,8 +145,8 @@ export class OdysseyInstance {
   // TODO(@decentralion): Add support for edge types (also configured on a per-instance basis).
   addEdge(
     type: OdysseyEdgeTypeIdentifier,
-    src: Node,
-    dst: Node
+    src: OdysseyNode,
+    dst: OdysseyNode
   ): OdysseyInstance {
     if (!isOdysseyEdgeTypeIdentifier(type)) {
       throw new Error(`Invalid Odyssey edge type identifier: ${type}`);

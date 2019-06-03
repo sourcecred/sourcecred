@@ -17,7 +17,7 @@ import {
 } from "./pagerankNodeDecomposition";
 import * as MapUtil from "../util/map";
 
-import {advancedGraph} from "../core/graphTestUtil";
+import {advancedGraph, node} from "../core/graphTestUtil";
 
 /**
  * Format a decomposition to be shown in a snapshot. This converts
@@ -117,13 +117,29 @@ function validateDecomposition(decomposition) {
 describe("analysis/pagerankNodeDecomposition", () => {
   describe("decompose", () => {
     it("has the expected output on a simple asymmetric chain", async () => {
-      const n1 = NodeAddress.fromParts(["n1"]);
-      const n2 = NodeAddress.fromParts(["n2"]);
-      const n3 = NodeAddress.fromParts(["sink"]);
-      const e1 = {src: n1, dst: n2, address: EdgeAddress.fromParts(["e1"])};
-      const e2 = {src: n2, dst: n3, address: EdgeAddress.fromParts(["e2"])};
-      const e3 = {src: n1, dst: n3, address: EdgeAddress.fromParts(["e3"])};
-      const e4 = {src: n3, dst: n3, address: EdgeAddress.fromParts(["e4"])};
+      const n1 = node("n1");
+      const n2 = node("n2");
+      const n3 = node("sink");
+      const e1 = {
+        src: n1.address,
+        dst: n2.address,
+        address: EdgeAddress.fromParts(["e1"]),
+      };
+      const e2 = {
+        src: n2.address,
+        dst: n3.address,
+        address: EdgeAddress.fromParts(["e2"]),
+      };
+      const e3 = {
+        src: n1.address,
+        dst: n3.address,
+        address: EdgeAddress.fromParts(["e3"]),
+      };
+      const e4 = {
+        src: n3.address,
+        dst: n3.address,
+        address: EdgeAddress.fromParts(["e4"]),
+      };
       const g = new Graph()
         .addNode(n1)
         .addNode(n2)

@@ -14,7 +14,7 @@ import {
   defaultSaver,
 } from "./pagerank";
 import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
-import {advancedGraph} from "../core/graphTestUtil";
+import {node, advancedGraph} from "../core/graphTestUtil";
 import {
   PagerankGraph,
   DEFAULT_SYNTHETIC_LOOP_WEIGHT,
@@ -29,6 +29,7 @@ import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
 import {makeRepoId, repoIdToString} from "../core/repoId";
 
 describe("cli/pagerank", () => {
+  const n = node("n");
   describe("'help' command", () => {
     it("prints usage when given no arguments", async () => {
       expect(await run(help, [])).toEqual({
@@ -127,7 +128,7 @@ describe("cli/pagerank", () => {
     });
 
     describe("on successful load", () => {
-      const graph = () => new Graph().addNode(NodeAddress.empty);
+      const graph = () => new Graph().addNode(n);
       const graphResult = () => ({status: "SUCCESS", graph: graph()});
       const loader = (_unused_repoId) =>
         new Promise((resolve) => resolve(graphResult()));
@@ -169,7 +170,7 @@ describe("cli/pagerank", () => {
 
   describe("savePagerankGraph", () => {
     it("saves the PagerankGraphJSON to the right filepath", async () => {
-      const graph = new Graph().addNode(NodeAddress.empty);
+      const graph = new Graph().addNode(n);
       const evaluator = (_unused_edge) => ({toWeight: 1, froWeight: 2});
       const prg = new PagerankGraph(graph, evaluator);
       const dirname = tmp.dirSync().name;
@@ -229,10 +230,10 @@ describe("cli/pagerank", () => {
       expect(actualPagerankGraph.equals(expectedPagerankGraph)).toBe(true);
     });
     it("default pageRank is robust to nodes that are not owned by any plugin", async () => {
-      const graph = new Graph().addNode(NodeAddress.empty).addEdge({
+      const graph = new Graph().addNode(n).addEdge({
         address: EdgeAddress.empty,
-        src: NodeAddress.empty,
-        dst: NodeAddress.empty,
+        src: n.address,
+        dst: n.address,
       });
       await defaultPagerank(graph);
     });
@@ -241,10 +242,10 @@ describe("cli/pagerank", () => {
     const dirname = tmp.dirSync().name;
     process.env.SOURCECRED_DIRECTORY = dirname;
     const repoId = makeRepoId("foo", "bar");
-    const prg = new PagerankGraph(
-      new Graph().addNode(NodeAddress.empty),
-      (_unused_edge) => ({toWeight: 1, froWeight: 2})
-    );
+    const prg = new PagerankGraph(new Graph().addNode(n), (_unused_edge) => ({
+      toWeight: 1,
+      froWeight: 2,
+    }));
     await defaultSaver(repoId, prg);
     const expectedPath = path.join(
       dirname,

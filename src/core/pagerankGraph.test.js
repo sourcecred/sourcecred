@@ -17,13 +17,12 @@ import {
   DEFAULT_ALPHA,
   DEFAULT_SEED,
 } from "./pagerankGraph";
-import {advancedGraph} from "./graphTestUtil";
+import {advancedGraph, node, partsNode} from "./graphTestUtil";
 import * as NullUtil from "../util/null";
 
 describe("core/pagerankGraph", () => {
   const defaultEvaluator = (_unused_edge) => ({toWeight: 1, froWeight: 0});
-  const nonEmptyGraph = () =>
-    new Graph().addNode(NodeAddress.fromParts(["hi"]));
+  const nonEmptyGraph = () => new Graph().addNode(node("hi"));
 
   function examplePagerankGraph(
     edgeEvaluator = defaultEvaluator
@@ -39,9 +38,7 @@ describe("core/pagerankGraph", () => {
 
   it("cannot construct PagerankGraph with empty Graph", () => {
     const eg1 = new Graph();
-    const eg2 = new Graph()
-      .addNode(NodeAddress.empty)
-      .removeNode(NodeAddress.empty);
+    const eg2 = new Graph().addNode(node("hi")).removeNode(node("hi").address);
     expect(() => new PagerankGraph(eg1, defaultEvaluator)).toThrowError(
       "empty graph"
     );
@@ -75,8 +72,8 @@ describe("core/pagerankGraph", () => {
       expect(e1.equals(e2)).toBe(false);
       await e1.runPagerank();
       await e2.runPagerank();
-      for (const {address, score} of e1.nodes()) {
-        const otherScore = NullUtil.get(e2.node(address)).score;
+      for (const {node, score} of e1.nodes()) {
+        const otherScore = NullUtil.get(e2.node(node.address)).score;
         expect(otherScore).toBeCloseTo(score);
       }
     });
@@ -92,19 +89,18 @@ describe("core/pagerankGraph", () => {
       const g = advancedGraph().graph1();
       const pg = new PagerankGraph(g, defaultEvaluator);
       const graphNodes = Array.from(g.nodes());
-      const pgNodes = Array.from(pg.nodes()).map((x) => x.address);
-      expect(graphNodes.length).toEqual(pgNodes.length);
-      expect(new Set(graphNodes)).toEqual(new Set(pgNodes));
+      const pgNodes = Array.from(pg.nodes()).map((x) => x.node);
+      expect(graphNodes).toEqual(pgNodes);
     });
     it("node and nodes both return consistent scores", async () => {
       const pg = await convergedPagerankGraph();
-      for (const {address, score} of pg.nodes()) {
-        expect(score).toEqual(NullUtil.get(pg.node(address)).score);
+      for (const {node, score} of pg.nodes()) {
+        expect(score).toEqual(NullUtil.get(pg.node(node.address)).score);
       }
     });
     it("node and nodes both throw an error if underlying graph is modified", () => {
       const pg = new PagerankGraph(nonEmptyGraph(), defaultEvaluator);
-      pg.graph().addNode(NodeAddress.empty);
+      pg.graph().addNode(node("foo"));
       expect(() => pg.nodes()).toThrowError(
         "underlying Graph has been modified"
       );
@@ -115,10 +111,10 @@ describe("core/pagerankGraph", () => {
   });
 
   describe("node prefix filter matches graph filter", () => {
-    const n1 = NodeAddress.empty;
-    const n2 = NodeAddress.fromParts(["foo"]);
-    const n3 = NodeAddress.fromParts(["foo", "bar"]);
-    const n4 = NodeAddress.fromParts(["zod", "bar"]);
+    const n1 = partsNode([]);
+    const n2 = partsNode(["foo"]);
+    const n3 = partsNode(["foo", "bar"]);
+    const n4 = partsNode(["zod", "bar"]);
     const g = () =>
       new Graph()
         .addNode(n1)
@@ -135,7 +131,7 @@ describe("core/pagerankGraph", () => {
 
       pagerankGraphNodes.forEach(
         (pgNode, i) =>
-          expect(pgNode.address).toEqual(graphNodes[i]) &&
+          expect(pgNode.node).toEqual(graphNodes[i]) &&
           expect(pgNode.score).toBe(0.25)
       );
     }
@@ -145,7 +141,7 @@ describe("core/pagerankGraph", () => {
     });
 
     it("with prefix filter", () => {
-      expectPagerankGraphToEqualGraph({prefix: n2});
+      expectPagerankGraphToEqualGraph({prefix: n2.address});
     });
 
     it("with empty prefix", () => {
@@ -200,7 +196,7 @@ describe("core/pagerankGraph", () => {
 
     it("edge and edges both throw an error if underlying graph is modified", () => {
       const pg = new PagerankGraph(nonEmptyGraph(), defaultEvaluator);
-      pg.graph().addNode(NodeAddress.empty);
+      pg.graph().addNode(node("foo"));
       expect(() => pg.edges()).toThrowError(
         "underlying Graph has been modified"
       );
@@ -213,9 +209,9 @@ describe("core/pagerankGraph", () => {
   describe("totalOutWeight", () => {
     it("errors on a modified graph", () => {
       const eg = examplePagerankGraph();
-      eg.graph().addNode(NodeAddress.fromParts(["bad", "node"]));
+      eg.graph().addNode(partsNode(["bad", "node"]));
       expect(() =>
-        eg.totalOutWeight(NodeAddress.fromParts(["bad", "node"]))
+        eg.totalOutWeight(partsNode(["bad", "node"]).address)
       ).toThrowError("has been modified");
     });
     it("errors on nonexistent node", () => {
@@ -227,7 +223,7 @@ describe("core/pagerankGraph", () => {
     function verifyOutWeights(pg: PagerankGraph) {
       const outWeight: Map<NodeAddressT, number> = new Map();
       for (const node of pg.graph().nodes()) {
-        outWeight.set(node, pg.syntheticLoopWeight());
+        outWeight.set(node.address, pg.syntheticLoopWeight());
       }
       const addOutWeight = (node: NodeAddressT, weight: number) => {
         const previousWeight = NullUtil.get(outWeight.get(node));
@@ -239,7 +235,9 @@ describe("core/pagerankGraph", () => {
         addOutWeight(edge.dst, weight.froWeight);
       }
       for (const node of pg.graph().nodes()) {
-        expect(pg.totalOutWeight(node)).toEqual(outWeight.get(node));
+        expect(pg.totalOutWeight(node.address)).toEqual(
+          outWeight.get(node.address)
+        );
       }
     }
     it("computes outWeight correctly on the example graph", () => {
@@ -255,8 +253,8 @@ describe("core/pagerankGraph", () => {
         zeroEvaluator,
         syntheticLoopWeight
       );
-      for (const {address} of pg.nodes()) {
-        expect(pg.totalOutWeight(address)).toEqual(syntheticLoopWeight);
+      for (const {node} of pg.nodes()) {
+        expect(pg.totalOutWeight(node.address)).toEqual(syntheticLoopWeight);
       }
     });
     it("outWeight is computed correctly after JSON deserialization", () => {
@@ -271,28 +269,28 @@ describe("core/pagerankGraph", () => {
   });
 
   describe("edge filtering", () => {
-    const src1 = NodeAddress.fromParts(["src", "1"]);
-    const src2 = NodeAddress.fromParts(["src", "2"]);
-    const dst1 = NodeAddress.fromParts(["dst", "1"]);
-    const dst2 = NodeAddress.fromParts(["dst", "2"]);
+    const src1 = partsNode(["src", "1"]);
+    const src2 = partsNode(["src", "2"]);
+    const dst1 = partsNode(["dst", "1"]);
+    const dst2 = partsNode(["dst", "2"]);
     const e11 = {
-      src: src1,
-      dst: dst1,
+      src: src1.address,
+      dst: dst1.address,
       address: EdgeAddress.fromParts(["e", "1", "1"]),
     };
     const e12 = {
-      src: src1,
-      dst: dst2,
+      src: src1.address,
+      dst: dst2.address,
       address: EdgeAddress.fromParts(["e", "1", "2"]),
     };
     const e21 = {
-      src: src2,
-      dst: dst1,
+      src: src2.address,
+      dst: dst1.address,
       address: EdgeAddress.fromParts(["e", "2", "1"]),
     };
     const e22 = {
-      src: src2,
-      dst: dst2,
+      src: src2.address,
+      dst: dst2.address,
       address: EdgeAddress.fromParts(["e", "2", "2"]),
     };
     const graph = () => {
@@ -395,7 +393,7 @@ describe("core/pagerankGraph", () => {
     });
     it("is an error to call neighbors after modifying the underlying graph", () => {
       const pg = examplePagerankGraph();
-      pg.graph().addNode(NodeAddress.fromParts(["foomfazzle"]));
+      pg.graph().addNode(partsNode(["foomfazzle"]));
       expect(() =>
         pg.neighbors(NodeAddress.fromParts(["src"]), allNeighbors())
       ).toThrowError("has been modified");
@@ -435,7 +433,7 @@ describe("core/pagerankGraph", () => {
               );
               const gNeighbors = Array.from(graph.neighbors(target, options));
               const reducedPrgNeighbors = prgNeighbors.map((s) => ({
-                node: s.scoredNode.address,
+                node: s.scoredNode.node,
                 edge: s.weightedEdge.edge,
               }));
               expect(gNeighbors).toEqual(reducedPrgNeighbors);
@@ -454,7 +452,8 @@ describe("core/pagerankGraph", () => {
     });
     it("neighbor's scored contributions are computed correctly", async () => {
       const pg = await convergedPagerankGraph();
-      for (const {address: target} of pg.nodes()) {
+      for (const {node} of pg.nodes()) {
+        const target = node.address;
         for (const {
           scoredNode,
           weightedEdge,
@@ -468,7 +467,7 @@ describe("core/pagerankGraph", () => {
             rawWeight += weightedEdge.weight.froWeight;
           }
           const normalizedWeight =
-            rawWeight / pg.totalOutWeight(scoredNode.address);
+            rawWeight / pg.totalOutWeight(scoredNode.node.address);
           expect(scoreContribution).toEqual(
             scoredNode.score * normalizedWeight
           );
@@ -477,7 +476,8 @@ describe("core/pagerankGraph", () => {
     });
     it("synthetic score contributions are computed correctly", async () => {
       const pg = await convergedPagerankGraph();
-      for (const {address, score} of pg.nodes()) {
+      for (const {node, score} of pg.nodes()) {
+        const address = node.address;
         expect(pg.syntheticLoopScoreContribution(address)).toEqual(
           (score * pg.syntheticLoopWeight()) / pg.totalOutWeight(address)
         );
@@ -488,13 +488,16 @@ describe("core/pagerankGraph", () => {
       // neighbors (need to add the edge toWeight and froWeight if the neighbor
       // is a loop).
       const pg = await convergedPagerankGraph();
-      for (const {address, score} of pg.nodes()) {
+      for (const {node, score} of pg.nodes()) {
         // We need to include the score that came from the synthetic loop edge
         // (should be near zero for non-isolated nodes)
         let summedScoreContributions: number = pg.syntheticLoopScoreContribution(
-          address
+          node.address
         );
-        for (const scoredNeighbor of pg.neighbors(address, allNeighbors())) {
+        for (const scoredNeighbor of pg.neighbors(
+          node.address,
+          allNeighbors()
+        )) {
           summedScoreContributions += scoredNeighbor.scoreContribution;
         }
         expect(summedScoreContributions).toBeCloseTo(score);
@@ -549,8 +552,8 @@ describe("core/pagerankGraph", () => {
         const pg1 = examplePagerankGraph();
         const pg2 = examplePagerankGraph();
         const {nodes} = advancedGraph();
-        const seed1 = new Map().set(nodes.src(), 1);
-        const seed2 = new Map().set(nodes.dst(), 1);
+        const seed1 = new Map().set(nodes.src.address, 1);
+        const seed2 = new Map().set(nodes.dst.address, 1);
         await pg1.runPagerank({seed: seed1, alpha: 0});
         await pg2.runPagerank({seed: seed2, alpha: 0});
         expect(pg1.equals(pg2)).toBe(true);
@@ -559,16 +562,16 @@ describe("core/pagerankGraph", () => {
       it("seed is returned directly if alpha is 1", async () => {
         const pg = examplePagerankGraph();
         const src = advancedGraph().nodes.src;
-        const seed = new Map().set(src(), 1);
+        const seed = new Map().set(src.address, 1);
         await pg.runPagerank({seed, alpha: 1});
-        const score = NullUtil.get(pg.node(src())).score;
+        const score = NullUtil.get(pg.node(src.address)).score;
         expect(score).toBe(1);
       });
     });
 
     it("promise rejects if the graph was modified", async () => {
       const pg = examplePagerankGraph();
-      pg.graph().addNode(NodeAddress.empty);
+      pg.graph().addNode(node("foo"));
       expect(
         pg.runPagerank({maxIterations: 1, convergenceThreshold: 1})
       ).rejects.toThrow("underlying Graph has been modified");
@@ -644,7 +647,7 @@ describe("core/pagerankGraph", () => {
     });
     it("unequal graph => unequal", () => {
       const pg1 = new PagerankGraph(nonEmptyGraph(), defaultEvaluator, 0.1);
-      const g2 = nonEmptyGraph().addNode(NodeAddress.empty);
+      const g2 = nonEmptyGraph().addNode(node("foo"));
       const pg2 = new PagerankGraph(g2, defaultEvaluator, 0.1);
       expect(pg1.equals(pg2)).toBe(false);
     });
@@ -676,7 +679,7 @@ describe("core/pagerankGraph", () => {
     });
     it("throws an error if the underlying graph is modified", () => {
       const pg = examplePagerankGraph();
-      pg.graph().addNode(NodeAddress.fromParts(["modification"]));
+      pg.graph().addNode(partsNode(["modification"]));
       expect(() => pg.equals(pg)).toThrowError("has been modified");
     });
   });

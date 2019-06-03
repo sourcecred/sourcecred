@@ -314,7 +314,8 @@ export async function saveTimestamps(
   const adapters = await Promise.all(
     adapterLoaders.map((a) => a.load(Common.sourcecredDirectory(), repoId))
   );
-  const timestampMap = createTimestampMap(graph.nodes(), adapters);
+  const nodeAddresses = Array.from(graph.nodes()).map((n) => n.address);
+  const timestampMap = createTimestampMap(nodeAddresses, adapters);
   writeTimestampMap(timestampMap, Common.sourcecredDirectory(), repoId);
 }
 

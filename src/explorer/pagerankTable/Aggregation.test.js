@@ -24,7 +24,7 @@ describe("explorer/pagerankTable/Aggregation", () => {
   describe("AggregationRowList", () => {
     it("instantiates AggregationRows for each aggregation", async () => {
       const {adapters, pnd, sharedProps} = await example();
-      const node = factorioNodes.inserter1;
+      const node = factorioNodes.inserter1.address;
       const depth = 20;
       const connections = NullUtil.get(pnd.get(node)).scoredConnections;
       const aggregations = aggregateFlat(
@@ -57,7 +57,7 @@ describe("explorer/pagerankTable/Aggregation", () => {
   describe("AggregationRow", () => {
     async function setup() {
       const {pnd, adapters, sharedProps} = await example();
-      const target = factorioNodes.inserter1;
+      const target = factorioNodes.inserter1.address;
       const {scoredConnections} = NullUtil.get(pnd.get(target));
       const aggregations = aggregateFlat(
         scoredConnections,
