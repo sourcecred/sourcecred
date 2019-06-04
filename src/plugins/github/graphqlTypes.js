@@ -133,6 +133,7 @@ export const PullRequestReviewState$Values: {|
 export type Reaction = {|
   +__typename: "Reaction",
   +content: ReactionContent,
+  +createdAt: DateTime,
   +id: string,
   +user: null | User,
 |};
