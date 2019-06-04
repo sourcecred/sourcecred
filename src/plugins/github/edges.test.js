@@ -58,12 +58,6 @@ describe("plugins/github/edges", () => {
       createEdge.hasParent(nodeExamples.reviewComment(), nodeExamples.review()),
     references: () =>
       createEdge.references(nodeExamples.issue(), nodeExamples.pull()),
-    mentionsAuthor: () =>
-      createEdge.mentionsAuthor({
-        src: nodeExamples.issue(),
-        dst: nodeExamples.issue(),
-        who: nodeExamples.user(),
-      }),
     reactsHeart: () =>
       createEdge.reacts(
         Reactions.HEART,

@@ -130,22 +130,6 @@ const referencesEdgeType = Object.freeze({
   `,
 });
 
-const mentionsAuthorEdgeType = Object.freeze({
-  forwardName: "mentions author of",
-  backwardName: "has author mentioned by",
-  defaultWeight: {forwards: 1, backwards: 0},
-  prefix: E.Prefix.mentionsAuthor,
-  description: dedent`\
-    Connects a post that mentions a user to posts in the same thread that
-    were authored by the mentioned user.
-
-    The intuition is that if a post is mentioning an author by name,
-    their contributions in that thread are probably particularly valuable.
-
-    This is an experimental feature and may be removed in a future version of SourceCred.
-  `,
-});
-
 const reactsHeartEdgeType = Object.freeze({
   forwardName: "reacted ❤️ to",
   backwardName: "got ❤️ from",
@@ -201,7 +185,6 @@ const edgeTypes = Object.freeze([
   hasParentEdgeType,
   mergedAsEdgeType,
   referencesEdgeType,
-  mentionsAuthorEdgeType,
   reactsThumbsUpEdgeType,
   reactsHeartEdgeType,
   reactsHoorayEdgeType,

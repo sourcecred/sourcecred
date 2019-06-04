@@ -8,7 +8,6 @@ import {
 } from "../../core/graph";
 import * as GithubNode from "./nodes";
 import * as GitNode from "../git/nodes";
-import type {MentionsAuthorReference} from "./heuristics/mentionsAuthorReference";
 import {
   type ReactionContent,
   ReactionContent$Values as Reactions,
@@ -20,7 +19,6 @@ export const AUTHORS_TYPE = "AUTHORS";
 export const MERGED_AS_TYPE = "MERGED_AS";
 export const HAS_PARENT_TYPE = "HAS_PARENT";
 export const REFERENCES_TYPE = "REFERENCES";
-export const MENTIONS_AUTHOR_TYPE = "MENTIONS_AUTHOR";
 export const REACTS_TYPE = "REACTS";
 // GitHub tracks its own notion of a commit, which has a particular
 // database id, is scoped to a particular repository, and has a canonical url
@@ -39,7 +37,6 @@ export const Prefix = Object.freeze({
   mergedAs: githubEdgeAddress(MERGED_AS_TYPE),
   references: githubEdgeAddress(REFERENCES_TYPE),
   hasParent: githubEdgeAddress(HAS_PARENT_TYPE),
-  mentionsAuthor: githubEdgeAddress(MENTIONS_AUTHOR_TYPE),
   reacts: githubEdgeAddress(REACTS_TYPE),
   reactsThumbsUp: githubEdgeAddress(REACTS_TYPE, Reactions.THUMBS_UP),
   reactsHeart: githubEdgeAddress(REACTS_TYPE, Reactions.HEART),
@@ -66,10 +63,6 @@ export type ReferencesAddress = {|
   +referrer: GithubNode.TextContentAddress,
   +referent: GithubNode.ReferentAddress,
 |};
-export type MentionsAuthorAddress = {|
-  +type: typeof MENTIONS_AUTHOR_TYPE,
-  +reference: MentionsAuthorReference,
-|};
 export type ReactsAddress = {|
   +type: typeof REACTS_TYPE,
   +reactionType: ReactionContent,
@@ -86,7 +79,6 @@ export type StructuredAddress =
   | MergedAsAddress
   | HasParentAddress
   | ReferencesAddress
-  | MentionsAuthorAddress
   | ReactsAddress
   | CorrespondsToCommitAddress;
 
@@ -130,11 +122,6 @@ export const createEdge = Object.freeze({
     address: toRaw({type: REFERENCES_TYPE, referrer, referent}),
     src: GithubNode.toRaw(referrer),
     dst: GithubNode.toRaw(referent),
-  }),
-  mentionsAuthor: (reference: MentionsAuthorReference): Edge => ({
-    address: toRaw({type: MENTIONS_AUTHOR_TYPE, reference}),
-    src: GithubNode.toRaw(reference.src),
-    dst: GithubNode.toRaw(reference.dst),
   }),
   reacts: (
     reactionType: ReactionContent,
@@ -245,24 +232,6 @@ export function fromRaw(x: RawAddress): StructuredAddress {
       ): any);
       return ({type: REFERENCES_TYPE, referrer, referent}: ReferencesAddress);
     }
-    case MENTIONS_AUTHOR_TYPE: {
-      const parts = multiLengthDecode(rest, fail);
-      if (parts.length !== 3) {
-        throw fail();
-      }
-      const [srcParts, dstParts, whoParts] = parts;
-      const src: GithubNode.TextContentAddress = (GithubNode.fromRaw(
-        (NodeAddress.fromParts(srcParts): any)
-      ): any);
-      const dst: GithubNode.TextContentAddress = (GithubNode.fromRaw(
-        (NodeAddress.fromParts(dstParts): any)
-      ): any);
-      const who: GithubNode.UserlikeAddress = (GithubNode.fromRaw(
-        (NodeAddress.fromParts(whoParts): any)
-      ): any);
-      const reference = {src, dst, who};
-      return {type: MENTIONS_AUTHOR_TYPE, reference};
-    }
     case REACTS_TYPE: {
       const [rawReactionType, ...rest2] = rest;
       const reactionType = Reactions[rawReactionType];
@@ -310,13 +279,6 @@ export function toRaw(x: StructuredAddress): RawAddress {
         Prefix.references,
         ...lengthEncode(GithubNode.toRaw(x.referrer)),
         ...lengthEncode(GithubNode.toRaw(x.referent))
-      );
-    case MENTIONS_AUTHOR_TYPE:
-      return EdgeAddress.append(
-        Prefix.mentionsAuthor,
-        ...lengthEncode(GithubNode.toRaw(x.reference.src)),
-        ...lengthEncode(GithubNode.toRaw(x.reference.dst)),
-        ...lengthEncode(GithubNode.toRaw(x.reference.who))
       );
     case REACTS_TYPE:
       return EdgeAddress.append(
