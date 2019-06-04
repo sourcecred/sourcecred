@@ -5,7 +5,6 @@ import * as GitNode from "../git/nodes";
 import * as N from "./nodes";
 import * as R from "./relationalView";
 import {createEdge} from "./edges";
-import {findMentionsAuthorReferences} from "./heuristics/mentionsAuthorReference";
 import {ReactionContent$Values as Reactions} from "./graphqlTypes";
 
 export function createGraph(view: R.RelationalView): Graph {
@@ -75,10 +74,6 @@ class GraphCreator {
           );
         }
       }
-    }
-
-    for (const mentionsAuthorReference of findMentionsAuthorReferences(view)) {
-      this.graph.addEdge(createEdge.mentionsAuthor(mentionsAuthorReference));
     }
   }
 
