@@ -10,8 +10,6 @@ Array [
 
 exports[`plugins/github/relationalView Comment has body 1`] = `"seems a bit capricious"`;
 
-exports[`plugins/github/relationalView Comment has createdAt 1`] = `1519878210000`;
-
 exports[`plugins/github/relationalView Comment has parent 1`] = `
 Object {
   "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
@@ -119,6 +117,8 @@ Array [
 ]
 `;
 
+exports[`plugins/github/relationalView Comment has timestampMs 1`] = `1519878210000`;
+
 exports[`plugins/github/relationalView Comment has url 1`] = `"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"`;
 
 exports[`plugins/github/relationalView Commit authors has expected number of authors 1`] = `1`;
@@ -134,6 +134,8 @@ exports[`plugins/github/relationalView Commit has message 1`] = `
 
 Add README, merge via PR."
 `;
+
+exports[`plugins/github/relationalView Commit has timestampMs 1`] = `1519807427000`;
 
 exports[`plugins/github/relationalView Commit has url 1`] = `"https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"`;
 
@@ -162,8 +164,6 @@ Array [
 
 exports[`plugins/github/relationalView Issue has body 1`] = `"This issue references another issue, namely #1"`;
 
-exports[`plugins/github/relationalView Issue has createdAt 1`] = `1519807129000`;
-
 exports[`plugins/github/relationalView Issue has number 1`] = `"2"`;
 
 exports[`plugins/github/relationalView Issue has parent 1`] = `
@@ -173,6 +173,8 @@ Object {
 `;
 
 exports[`plugins/github/relationalView Issue has reactions 1`] = `Array []`;
+
+exports[`plugins/github/relationalView Issue has timestampMs 1`] = `1519807129000`;
 
 exports[`plugins/github/relationalView Issue has title 1`] = `"A referencing issue."`;
 
@@ -204,8 +206,6 @@ exports[`plugins/github/relationalView Pull has body 1`] = `
 - then approve the pr"
 `;
 
-exports[`plugins/github/relationalView Pull has createdAt 1`] = `1519807636000`;
-
 exports[`plugins/github/relationalView Pull has deletions 1`] = `0`;
 
 exports[`plugins/github/relationalView Pull has mergedAs 1`] = `
@@ -224,6 +224,8 @@ Object {
 `;
 
 exports[`plugins/github/relationalView Pull has reactions 1`] = `Array []`;
+
+exports[`plugins/github/relationalView Pull has timestampMs 1`] = `1519807636000`;
 
 exports[`plugins/github/relationalView Pull has title 1`] = `"This pull request will be more contentious. I can feel it..."`;
 
@@ -331,11 +333,11 @@ Array [
 ]
 `;
 
-exports[`plugins/github/relationalView Repo has createdAt 1`] = `1519807034000`;
-
 exports[`plugins/github/relationalView Repo has name 1`] = `"example-github"`;
 
 exports[`plugins/github/relationalView Repo has owner 1`] = `"sourcecred"`;
+
+exports[`plugins/github/relationalView Repo has timestampMs 1`] = `1519807034000`;
 
 exports[`plugins/github/relationalView Repo has url 1`] = `"https://github.com/sourcecred/example-github"`;
 
@@ -384,8 +386,6 @@ Array [
 
 exports[`plugins/github/relationalView Review has body 1`] = `"hmmm.jpg"`;
 
-exports[`plugins/github/relationalView Review has createdAt 1`] = `1519878210000`;
-
 exports[`plugins/github/relationalView Review has parent 1`] = `
 Object {
   "url": "https://github.com/sourcecred/example-github/pull/5",
@@ -394,9 +394,13 @@ Object {
 
 exports[`plugins/github/relationalView Review has state 1`] = `"CHANGES_REQUESTED"`;
 
+exports[`plugins/github/relationalView Review has timestampMs 1`] = `1519878210000`;
+
 exports[`plugins/github/relationalView Review has url 1`] = `"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899"`;
 
 exports[`plugins/github/relationalView Userlike has login 1`] = `"wchargin"`;
+
+exports[`plugins/github/relationalView Userlike has timestampMs 1`] = `null`;
 
 exports[`plugins/github/relationalView Userlike has url 1`] = `"https://github.com/wchargin"`;
 
