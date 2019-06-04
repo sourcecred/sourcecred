@@ -84,6 +84,7 @@ describe("plugins/github/relationalView", () => {
     has("name", () => entity.name());
     has("url", () => entity.url());
     has("timestampMs", () => entity.timestampMs());
+    has("description", () => entity.description());
     hasEntities("issues", () => entity.issues());
     hasEntities("pulls", () => entity.pulls());
   });
@@ -97,6 +98,7 @@ describe("plugins/github/relationalView", () => {
     has("url", () => entity.url());
     has("parent", () => entity.parent());
     has("timestampMs", () => entity.timestampMs());
+    has("description", () => entity.description());
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
     has("reactions", () => entity.reactions());
@@ -118,6 +120,7 @@ describe("plugins/github/relationalView", () => {
     hasEntities("authors", () => entity.authors());
     has("reactions", () => entity.reactions());
     has("timestampMs", () => entity.timestampMs());
+    has("description", () => entity.description());
   });
 
   const review = Array.from(pull.reviews())[0];
@@ -130,6 +133,7 @@ describe("plugins/github/relationalView", () => {
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
     has("timestampMs", () => entity.timestampMs());
+    has("description", () => entity.description());
   });
 
   const comment = Array.from(review.comments())[0];
@@ -141,6 +145,7 @@ describe("plugins/github/relationalView", () => {
     hasEntities("authors", () => entity.authors());
     has("reactions", () => entity.reactions());
     has("timestampMs", () => entity.timestampMs());
+    has("description", () => entity.description());
   });
 
   const commit = Array.from(view.commits())[0];
@@ -150,6 +155,7 @@ describe("plugins/github/relationalView", () => {
     has("message", () => entity.message());
     hasEntities("authors", () => entity.authors());
     has("timestampMs", () => entity.timestampMs());
+    has("description", () => entity.description());
   });
 
   const userlike = Array.from(review.authors())[0];
@@ -158,6 +164,7 @@ describe("plugins/github/relationalView", () => {
     has("login", () => entity.login());
     has("url", () => entity.url());
     has("timestampMs", () => entity.timestampMs());
+    has("description", () => entity.description());
   });
 
   describe("entity", () => {
