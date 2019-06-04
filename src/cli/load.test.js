@@ -474,7 +474,7 @@ describe("cli/load", () => {
         output: fooCombined,
         repoIds: [fooBar, fooBaz],
       });
-      expect(execDependencyGraph).toHaveBeenCalledTimes(2);
+      expect(execDependencyGraph).toHaveBeenCalledTimes(1);
       const loadTasks = execDependencyGraph.mock.calls[0][0];
       expect(loadTasks).toHaveLength(["git", "github"].length);
       expect(loadTasks.map((task) => task.id)).toEqual(
@@ -496,29 +496,6 @@ describe("cli/load", () => {
       }
     });
 
-    it("creates a pagerank task after load is successful", async () => {
-      execDependencyGraph.mockResolvedValue({success: true});
-      await loadDefaultPlugins({
-        output: fooCombined,
-        repoIds: [fooBar, fooBaz],
-      });
-      expect(execDependencyGraph).toHaveBeenCalledTimes(2);
-      const pagerankTasks = execDependencyGraph.mock.calls[1][0];
-      expect(pagerankTasks).toHaveLength(1);
-      const task = pagerankTasks[0];
-      expect(task).toEqual({
-        id: "run-pagerank",
-        deps: [],
-        cmd: [
-          expect.stringMatching(/\bnode\b/),
-          expect.stringMatching(/--max_old_space_size=/),
-          process.argv[1],
-          "pagerank",
-          "foo/combined",
-        ],
-      });
-    });
-
     it("updates RepoIdRegistry on success", async () => {
       const directory = newSourcecredDirectory();
       expect(RepoIdRegistry.getRegistry(directory)).toEqual(
@@ -538,16 +515,16 @@ describe("cli/load", () => {
       expect(RepoIdRegistry.getRegistry(directory)).toEqual(expectedRegistry);
     });
 
-    it("calls saveTimestamps on success", async () => {
-      const saveTimestamps = jest.fn();
-      const loadDefaultPlugins = makeLoadDefaultPlugins(saveTimestamps);
+    it("calls saveGraph on success", async () => {
+      const saveGraph = jest.fn();
+      const loadDefaultPlugins = makeLoadDefaultPlugins(saveGraph);
       execDependencyGraph.mockResolvedValue({success: true});
       await loadDefaultPlugins({
         output: fooCombined,
         repoIds: [fooBar, fooBaz],
       });
-      expect(saveTimestamps).toHaveBeenCalledTimes(1);
-      expect(saveTimestamps).toHaveBeenCalledWith(
+      expect(saveGraph).toHaveBeenCalledTimes(1);
+      expect(saveGraph).toHaveBeenCalledWith(
         defaultAdapterLoaders(),
         fooCombined
       );
@@ -561,17 +538,6 @@ describe("cli/load", () => {
       });
 
       expect(result).rejects.toThrow("Load tasks failed.");
-    });
-
-    it("throws an pagerank error on second execDependencyGraph failure", async () => {
-      execDependencyGraph.mockResolvedValueOnce({success: true});
-      execDependencyGraph.mockResolvedValueOnce({success: false});
-      const result = loadDefaultPlugins({
-        output: fooCombined,
-        repoIds: [fooBar, fooBaz],
-      });
-
-      expect(result).rejects.toThrow("Pagerank task failed.");
     });
   });
 });
