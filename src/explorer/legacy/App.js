@@ -142,6 +142,7 @@ export function createApp(
       const spacer = () => (
         <span style={{display: "inline-block", width: 12}} />
       );
+      const {owner, name} = this.props.repoId;
       return (
         <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
           <p style={{textAlign: "right"}}>
@@ -149,6 +150,11 @@ export function createApp(
             {spacer()}
             <Link href={feedbackUrl}>feedback</Link>
           </p>
+          <h2>SourceCred Legacy Mode</h2>
+          <p>
+            Back to <a href={`/timeline/${owner}/${name}/`}>timeline mode</a>
+          </p>
+
           <ProjectDetail repoId={this.props.repoId} />
           <button
             disabled={
