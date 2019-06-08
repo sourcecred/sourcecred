@@ -16,12 +16,14 @@ import {
   type NeighborsOptions,
 } from "./graph";
 import {
-  distributionToNodeDistribution,
   createConnections,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
-  weightedDistribution,
 } from "./attribution/graphToMarkovChain";
+import {
+  distributionToNodeDistribution,
+  weightedDistribution,
+} from "./attribution/nodeDistribution";
 import {
   findStationaryDistribution,
   type PagerankParams,

@@ -23,10 +23,10 @@ import {
   findStationaryDistribution,
   type PagerankParams,
   type PagerankOptions as CorePagerankOptions,
-  uniformDistribution,
 } from "../core/attribution/markovChain";
+import {uniformDistribution} from "../core/attribution/distribution";
 
-export type {NodeDistribution} from "../core/attribution/graphToMarkovChain";
+export type {NodeDistribution} from "../core/attribution/nodeDistribution";
 export type {PagerankNodeDecomposition} from "./pagerankNodeDecomposition";
 export type PagerankOptions = {|
   +selfLoopWeight?: number,
