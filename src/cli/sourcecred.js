@@ -8,7 +8,6 @@ import {VERSION_SHORT} from "../core/version";
 import help from "./help";
 import load from "./load";
 import analyze from "./analyze";
-import exportGraph from "./exportGraph";
 import pagerank from "./pagerank";
 import clear from "./clear";
 
@@ -30,8 +29,6 @@ const sourcecred: Command = async (args, std) => {
       return analyze(args.slice(1), std);
     case "clear":
       return clear(args.slice(1), std);
-    case "export-graph":
-      return exportGraph(args.slice(1), std);
     case "pagerank":
       return pagerank(args.slice(1), std);
     default:
