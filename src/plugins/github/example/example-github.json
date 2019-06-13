@@ -10,6 +10,7 @@
                 "date": "2018-09-12T19:48:21-07:00",
                 "user": null
             },
+            "authoredDate": "2018-09-13T02:48:21Z",
             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZiZDFiNGMwYjcxOWMyMmM2ODhhNzQ4NjNiZTA3YTY5OWI3YjliMzQ=",
             "message": "A commit from someone with no GitHub account\n\nSummary:\nThis is a commit to master by a user with email at `example.com`, which\nshould not be linked to any GitHub account.\n\nGenerated with:\n\n    git -c user.name='Mysterious Stranger' \\\n        -c user.email='mysterious-stranger@example.com' \\\n        commit -S\n\nActually committed and signed by William Chargin <wchargin@gmail.com>.\nVerify public key at either of:\n  - <https://github.com/wchargin.gpg>\n  - <https://wchargin.github.io/> (click link to \"My PGP key\")",
             "oid": "6bd1b4c0b719c22c688a74863be07a699b7b9b34",
@@ -25,6 +26,7 @@
                             "url": "https://github.com/credbot"
                         }
                     },
+                    "authoredDate": "2018-09-12T21:43:54Z",
                     "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmM0MzBiZDc0NDU1MTA1Zjc3MjE1ZWNlNTE5NDUwOTRjZWVlZTZjODY=",
                     "message": "Hello from credbot!\n\nSummary:\nThis is a commit to master under the name and email of credbot, who has\nno other contributions to the repository. This is intended to test that\nwe can still pull the correct GitHub user off of the commit.\n\nGenerated with:\n\n    git -c user.name='credbot' \\\n        -c user.email='42819382+credbot@users.noreply.github.com' \\\n        commit\n\nActually committed and signed by William Chargin <wchargin@gmail.com>.\nVerify public key at either of:\n  - <https://github.com/wchargin.gpg>\n  - <https://wchargin.github.io/> (click link to \"My PGP key\")",
                     "oid": "c430bd74455105f77215ece51945094ceeee6c86",
@@ -40,6 +42,7 @@
                                     "url": "https://github.com/decentralion"
                                 }
                             },
+                            "authoredDate": "2018-03-01T04:25:54Z",
                             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
                             "message": "This pull request will be more contentious. I can feel it... (#5)\n\n* This pull request will be more contentious. I can feel it...\r\n\r\n* Address wchargin's unreasonable complaints",
                             "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
@@ -55,6 +58,7 @@
                                             "url": "https://github.com/decentralion"
                                         }
                                     },
+                                    "authoredDate": "2018-02-28T08:43:47Z",
                                     "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
                                     "message": "Merge pull request #3 from sourcecred/add-readme\n\nAdd README, merge via PR.",
                                     "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
@@ -70,6 +74,7 @@
                                                     "url": "https://github.com/decentralion"
                                                 }
                                             },
+                                            "authoredDate": "2018-02-28T08:41:11Z",
                                             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
                                             "message": "Commit without pull request.",
                                             "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
@@ -88,6 +93,7 @@
                                                     "url": "https://github.com/decentralion"
                                                 }
                                             },
+                                            "authoredDate": "2018-02-28T08:42:09Z",
                                             "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
                                             "message": "Add README, merge via PR.",
                                             "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
@@ -103,6 +109,7 @@
                                                             "url": "https://github.com/decentralion"
                                                         }
                                                     },
+                                                    "authoredDate": "2018-02-28T08:41:11Z",
                                                     "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
                                                     "message": "Commit without pull request.",
                                                     "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
@@ -763,6 +770,7 @@
                         "url": "https://github.com/decentralion"
                     }
                 },
+                "authoredDate": "2018-02-28T08:43:47Z",
                 "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
                 "message": "Merge pull request #3 from sourcecred/add-readme\n\nAdd README, merge via PR.",
                 "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
@@ -778,6 +786,7 @@
                                 "url": "https://github.com/decentralion"
                             }
                         },
+                        "authoredDate": "2018-02-28T08:41:11Z",
                         "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
                         "message": "Commit without pull request.",
                         "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
@@ -796,6 +805,7 @@
                                 "url": "https://github.com/decentralion"
                             }
                         },
+                        "authoredDate": "2018-02-28T08:42:09Z",
                         "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
                         "message": "Add README, merge via PR.",
                         "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
@@ -811,6 +821,7 @@
                                         "url": "https://github.com/decentralion"
                                     }
                                 },
+                                "authoredDate": "2018-02-28T08:41:11Z",
                                 "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
                                 "message": "Commit without pull request.",
                                 "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
@@ -895,6 +906,7 @@
                         "url": "https://github.com/decentralion"
                     }
                 },
+                "authoredDate": "2018-03-01T04:25:54Z",
                 "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY=",
                 "message": "This pull request will be more contentious. I can feel it... (#5)\n\n* This pull request will be more contentious. I can feel it...\r\n\r\n* Address wchargin's unreasonable complaints",
                 "oid": "6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
@@ -910,6 +922,7 @@
                                 "url": "https://github.com/decentralion"
                             }
                         },
+                        "authoredDate": "2018-02-28T08:43:47Z",
                         "id": "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=",
                         "message": "Merge pull request #3 from sourcecred/add-readme\n\nAdd README, merge via PR.",
                         "oid": "0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
@@ -925,6 +938,7 @@
                                         "url": "https://github.com/decentralion"
                                     }
                                 },
+                                "authoredDate": "2018-02-28T08:41:11Z",
                                 "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
                                 "message": "Commit without pull request.",
                                 "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",
@@ -943,6 +957,7 @@
                                         "url": "https://github.com/decentralion"
                                     }
                                 },
+                                "authoredDate": "2018-02-28T08:42:09Z",
                                 "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ=",
                                 "message": "Add README, merge via PR.",
                                 "oid": "ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
@@ -958,6 +973,7 @@
                                                 "url": "https://github.com/decentralion"
                                             }
                                         },
+                                        "authoredDate": "2018-02-28T08:41:11Z",
                                         "id": "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA=",
                                         "message": "Commit without pull request.",
                                         "oid": "ec91adb718a6045b492303f00d8e8beb957dc780",

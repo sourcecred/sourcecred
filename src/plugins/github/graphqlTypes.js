@@ -23,6 +23,7 @@ export type Commit = {|
     +date: null | GitTimestamp,
     +user: null | User,
   |},
+  +authoredDate: GitTimestamp,
   +id: string,
   +message: String,
   +oid: GitObjectID,
