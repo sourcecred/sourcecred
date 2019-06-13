@@ -296,7 +296,7 @@ export class PagerankGraph {
     this._verifyGraphNotModified();
     const score = this._scores.get(x);
     if (score == null) {
-      return null;
+      return undefined;
     } else {
       return {address: x, score};
     }
@@ -334,7 +334,7 @@ export class PagerankGraph {
       const weight = NullUtil.get(this._edgeWeights.get(edge.address));
       return {edge, weight};
     }
-    return null;
+    return undefined;
   }
 
   /**
