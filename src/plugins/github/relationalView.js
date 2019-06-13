@@ -492,7 +492,8 @@ export class RelationalView {
         `Invariant violation: Reaction with id ${json.id} did not have 1 author`
       );
     }
-    return {content: json.content, user: authorAddresses[0]};
+    const timestampMs = +new Date(json.createdAt);
+    return {content: json.content, user: authorAddresses[0], timestampMs};
   }
 
   _addNullableAuthor(json: null | T.Actor): UserlikeAddress[] {
@@ -692,6 +693,7 @@ export class RelationalView {
 type ReactionRecord = {|
   +content: T.ReactionContent,
   +user: UserlikeAddress,
+  +timestampMs: number,
 |};
 
 type Entry =

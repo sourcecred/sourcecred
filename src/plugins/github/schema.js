@@ -93,6 +93,7 @@ export default function schema(): Schema.Schema {
       id: s.id(),
       content: s.primitive(s.nonNull("ReactionContent")),
       user: s.node("User"),
+      createdAt: s.primitive(s.nonNull("DateTime")),
     }),
     Ref: s.object({
       id: s.id(),

@@ -20,6 +20,7 @@ exports[`plugins/github/relationalView Comment has reactions 1`] = `
 Array [
   Object {
     "content": "THUMBS_UP",
+    "timestampMs": 1537294753000,
     "user": Object {
       "login": "wchargin",
       "subtype": "USER",
@@ -28,6 +29,7 @@ Array [
   },
   Object {
     "content": "THUMBS_DOWN",
+    "timestampMs": 1537294755000,
     "user": Object {
       "login": "wchargin",
       "subtype": "USER",
@@ -36,6 +38,7 @@ Array [
   },
   Object {
     "content": "THUMBS_UP",
+    "timestampMs": 1537294756000,
     "user": Object {
       "login": "decentralion",
       "subtype": "USER",
@@ -44,6 +47,7 @@ Array [
   },
   Object {
     "content": "LAUGH",
+    "timestampMs": 1537294757000,
     "user": Object {
       "login": "wchargin",
       "subtype": "USER",
@@ -52,6 +56,7 @@ Array [
   },
   Object {
     "content": "THUMBS_DOWN",
+    "timestampMs": 1537294757000,
     "user": Object {
       "login": "decentralion",
       "subtype": "USER",
@@ -60,6 +65,7 @@ Array [
   },
   Object {
     "content": "HOORAY",
+    "timestampMs": 1537294758000,
     "user": Object {
       "login": "wchargin",
       "subtype": "USER",
@@ -68,6 +74,7 @@ Array [
   },
   Object {
     "content": "LAUGH",
+    "timestampMs": 1537294759000,
     "user": Object {
       "login": "decentralion",
       "subtype": "USER",
@@ -76,6 +83,7 @@ Array [
   },
   Object {
     "content": "CONFUSED",
+    "timestampMs": 1537294760000,
     "user": Object {
       "login": "wchargin",
       "subtype": "USER",
@@ -84,6 +92,7 @@ Array [
   },
   Object {
     "content": "HOORAY",
+    "timestampMs": 1537294761000,
     "user": Object {
       "login": "decentralion",
       "subtype": "USER",
@@ -92,6 +101,7 @@ Array [
   },
   Object {
     "content": "HEART",
+    "timestampMs": 1537294762000,
     "user": Object {
       "login": "wchargin",
       "subtype": "USER",
@@ -100,6 +110,7 @@ Array [
   },
   Object {
     "content": "CONFUSED",
+    "timestampMs": 1537294762000,
     "user": Object {
       "login": "decentralion",
       "subtype": "USER",
@@ -108,6 +119,7 @@ Array [
   },
   Object {
     "content": "HEART",
+    "timestampMs": 1537294764000,
     "user": Object {
       "login": "decentralion",
       "subtype": "USER",
@@ -409,6 +421,7 @@ Object {
   "https://github.com/sourcecred/example-github/issues/1": Array [
     Object {
       "content": "LAUGH",
+      "timestampMs": 1536878099000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -417,6 +430,7 @@ Object {
     },
     Object {
       "content": "HEART",
+      "timestampMs": 1536878100000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -427,6 +441,7 @@ Object {
   "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206": Array [
     Object {
       "content": "THUMBS_UP",
+      "timestampMs": 1536952413000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -435,6 +450,7 @@ Object {
     },
     Object {
       "content": "THUMBS_DOWN",
+      "timestampMs": 1536952415000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -443,6 +459,7 @@ Object {
     },
     Object {
       "content": "LAUGH",
+      "timestampMs": 1536952417000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -451,6 +468,7 @@ Object {
     },
     Object {
       "content": "HOORAY",
+      "timestampMs": 1536952420000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -461,6 +479,7 @@ Object {
   "https://github.com/sourcecred/example-github/issues/12": Array [
     Object {
       "content": "THUMBS_UP",
+      "timestampMs": 1536878091000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -471,6 +490,7 @@ Object {
   "https://github.com/sourcecred/example-github/issues/13": Array [
     Object {
       "content": "THUMBS_UP",
+      "timestampMs": 1536878140000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -479,6 +499,7 @@ Object {
     },
     Object {
       "content": "THUMBS_DOWN",
+      "timestampMs": 1536878142000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -487,6 +508,7 @@ Object {
     },
     Object {
       "content": "LAUGH",
+      "timestampMs": 1536878143000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -495,6 +517,7 @@ Object {
     },
     Object {
       "content": "HOORAY",
+      "timestampMs": 1536878144000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -503,6 +526,7 @@ Object {
     },
     Object {
       "content": "CONFUSED",
+      "timestampMs": 1536878147000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -511,6 +535,7 @@ Object {
     },
     Object {
       "content": "HEART",
+      "timestampMs": 1536878149000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -519,6 +544,7 @@ Object {
     },
     Object {
       "content": "ROCKET",
+      "timestampMs": 1548353975000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -527,6 +553,7 @@ Object {
     },
     Object {
       "content": "EYES",
+      "timestampMs": 1548353977000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -537,6 +564,7 @@ Object {
   "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198": Array [
     Object {
       "content": "THUMBS_UP",
+      "timestampMs": 1537294753000,
       "user": Object {
         "login": "wchargin",
         "subtype": "USER",
@@ -545,6 +573,7 @@ Object {
     },
     Object {
       "content": "THUMBS_DOWN",
+      "timestampMs": 1537294755000,
       "user": Object {
         "login": "wchargin",
         "subtype": "USER",
@@ -553,6 +582,7 @@ Object {
     },
     Object {
       "content": "THUMBS_UP",
+      "timestampMs": 1537294756000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -561,6 +591,7 @@ Object {
     },
     Object {
       "content": "LAUGH",
+      "timestampMs": 1537294757000,
       "user": Object {
         "login": "wchargin",
         "subtype": "USER",
@@ -569,6 +600,7 @@ Object {
     },
     Object {
       "content": "THUMBS_DOWN",
+      "timestampMs": 1537294757000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -577,6 +609,7 @@ Object {
     },
     Object {
       "content": "HOORAY",
+      "timestampMs": 1537294758000,
       "user": Object {
         "login": "wchargin",
         "subtype": "USER",
@@ -585,6 +618,7 @@ Object {
     },
     Object {
       "content": "LAUGH",
+      "timestampMs": 1537294759000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -593,6 +627,7 @@ Object {
     },
     Object {
       "content": "CONFUSED",
+      "timestampMs": 1537294760000,
       "user": Object {
         "login": "wchargin",
         "subtype": "USER",
@@ -601,6 +636,7 @@ Object {
     },
     Object {
       "content": "HOORAY",
+      "timestampMs": 1537294761000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -609,6 +645,7 @@ Object {
     },
     Object {
       "content": "HEART",
+      "timestampMs": 1537294762000,
       "user": Object {
         "login": "wchargin",
         "subtype": "USER",
@@ -617,6 +654,7 @@ Object {
     },
     Object {
       "content": "CONFUSED",
+      "timestampMs": 1537294762000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -625,6 +663,7 @@ Object {
     },
     Object {
       "content": "HEART",
+      "timestampMs": 1537294764000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -635,6 +674,7 @@ Object {
   "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464": Array [
     Object {
       "content": "HEART",
+      "timestampMs": 1536952482000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -643,6 +683,7 @@ Object {
     },
     Object {
       "content": "CONFUSED",
+      "timestampMs": 1536952484000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -653,6 +694,7 @@ Object {
   "https://github.com/sourcecred/example-github/pull/9": Array [
     Object {
       "content": "HEART",
+      "timestampMs": 1536952427000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
@@ -661,6 +703,7 @@ Object {
     },
     Object {
       "content": "THUMBS_UP",
+      "timestampMs": 1536952428000,
       "user": Object {
         "login": "decentralion",
         "subtype": "USER",
