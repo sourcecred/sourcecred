@@ -108,24 +108,6 @@ describe("core/attribution/markovChain", () => {
     });
   });
 
-  describe("uniformDistribution", () => {
-    it("computes the uniform distribution with domain of size 1", () => {
-      const pi = uniformDistribution(1);
-      expect(pi).toEqual(new Float64Array([1]));
-    });
-    it("computes the uniform distribution with domain of size 4", () => {
-      const pi = uniformDistribution(4);
-      expect(pi).toEqual(new Float64Array([0.25, 0.25, 0.25, 0.25]));
-    });
-    [0, -1, Infinity, NaN, 3.5, '"beluga"', null, undefined].forEach((bad) => {
-      it(`fails when given domain ${String(bad)}`, () => {
-        expect(() => uniformDistribution((bad: any))).toThrow(
-          "positive integer"
-        );
-      });
-    });
-  });
-
   describe("sparseMarkovChainAction", () => {
     it("acts properly on a nontrivial chain", () => {
       // Note: this test case uses only real numbers that are exactly
