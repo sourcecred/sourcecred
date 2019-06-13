@@ -10,6 +10,8 @@ Array [
 
 exports[`plugins/github/relationalView Comment has body 1`] = `"seems a bit capricious"`;
 
+exports[`plugins/github/relationalView Comment has description 1`] = `"[comment](https://github.com/sourcecred/example-github/pull/5#discussion_r171460198) on [review](https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
+
 exports[`plugins/github/relationalView Comment has parent 1`] = `
 Object {
   "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
@@ -141,6 +143,8 @@ Array [
 ]
 `;
 
+exports[`plugins/github/relationalView Commit has description 1`] = `"[0a22334](https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a): Merge pull request #3 from sourcecred/add-readme"`;
+
 exports[`plugins/github/relationalView Commit has message 1`] = `
 "Merge pull request #3 from sourcecred/add-readme
 
@@ -175,6 +179,8 @@ Array [
 `;
 
 exports[`plugins/github/relationalView Issue has body 1`] = `"This issue references another issue, namely #1"`;
+
+exports[`plugins/github/relationalView Issue has description 1`] = `"[#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue."`;
 
 exports[`plugins/github/relationalView Issue has number 1`] = `"2"`;
 
@@ -219,6 +225,8 @@ exports[`plugins/github/relationalView Pull has body 1`] = `
 `;
 
 exports[`plugins/github/relationalView Pull has deletions 1`] = `0`;
+
+exports[`plugins/github/relationalView Pull has description 1`] = `"[#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
 
 exports[`plugins/github/relationalView Pull has mergedAs 1`] = `
 Object {
@@ -345,6 +353,8 @@ Array [
 ]
 `;
 
+exports[`plugins/github/relationalView Repo has description 1`] = `"[sourcecred/example-github](https://github.com/sourcecred/example-github)"`;
+
 exports[`plugins/github/relationalView Repo has name 1`] = `"example-github"`;
 
 exports[`plugins/github/relationalView Repo has owner 1`] = `"sourcecred"`;
@@ -398,6 +408,8 @@ Array [
 
 exports[`plugins/github/relationalView Review has body 1`] = `"hmmm.jpg"`;
 
+exports[`plugins/github/relationalView Review has description 1`] = `"[review](https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
+
 exports[`plugins/github/relationalView Review has parent 1`] = `
 Object {
   "url": "https://github.com/sourcecred/example-github/pull/5",
@@ -409,6 +421,8 @@ exports[`plugins/github/relationalView Review has state 1`] = `"CHANGES_REQUESTE
 exports[`plugins/github/relationalView Review has timestampMs 1`] = `1519878210000`;
 
 exports[`plugins/github/relationalView Review has url 1`] = `"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899"`;
+
+exports[`plugins/github/relationalView Userlike has description 1`] = `"[@wchargin](https://github.com/wchargin)"`;
 
 exports[`plugins/github/relationalView Userlike has login 1`] = `"wchargin"`;
 

@@ -724,6 +724,9 @@ export class _Entity<+T: Entry> {
   timestampMs(): number | null {
     throw new Error("Not implemented.");
   }
+  description(): string {
+    throw new Error("Not implemented.");
+  }
 }
 
 type RepoEntry = {|
@@ -762,6 +765,9 @@ export class Repo extends _Entity<RepoEntry> {
   timestampMs(): number {
     return this._entry.timestampMs;
   }
+  description(): string {
+    return `[${this.owner()}/${this.name()}](${this.url()})`;
+  }
 }
 
 type IssueEntry = {|
@@ -795,6 +801,9 @@ export class Issue extends _Entity<IssueEntry> {
   }
   timestampMs(): number {
     return this._entry.timestampMs;
+  }
+  description(): string {
+    return `[#${this.number()}](${this.url()}): ${this.title()}`;
   }
   *comments(): Iterator<Comment> {
     for (const address of this._entry.comments) {
@@ -861,6 +870,9 @@ export class Pull extends _Entity<PullEntry> {
   timestampMs(): number {
     return this._entry.timestampMs;
   }
+  description(): string {
+    return `[#${this.number()}](${this.url()}): ${this.title()}`;
+  }
   *reviews(): Iterator<Review> {
     for (const address of this._entry.reviews) {
       const review = this._view.review(address);
@@ -924,6 +936,9 @@ export class Review extends _Entity<ReviewEntry> {
   timestampMs(): number {
     return this._entry.timestampMs;
   }
+  description(): string {
+    return `[review](${this.url()}) on ${this.parent().description()}`;
+  }
   references(): Iterator<ReferentEntity> {
     return this._view._references(this);
   }
@@ -968,6 +983,9 @@ export class Comment extends _Entity<CommentEntry> {
   }
   timestampMs(): number {
     return this._entry.timestampMs;
+  }
+  description(): string {
+    return `[comment](${this.url()}) on ${this.parent().description()}`;
   }
   authors(): Iterator<Userlike> {
     return getAuthors(this._view, this._entry);
@@ -1014,6 +1032,11 @@ export class Commit extends _Entity<CommitEntry> {
   timestampMs(): number {
     return this._entry.timestampMs;
   }
+  description(): string {
+    const shortHash = this.hash().slice(0, 7);
+    const headline = this.message().split("\n")[0];
+    return `[${shortHash}](${this.url()}): ${headline}`;
+  }
 }
 
 type UserlikeEntry = {|
@@ -1033,6 +1056,9 @@ export class Userlike extends _Entity<UserlikeEntry> {
   }
   timestampMs(): null {
     return null;
+  }
+  description(): string {
+    return `[@${this.login()}](${this.url()})`;
   }
 }
 
