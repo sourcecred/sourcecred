@@ -12,16 +12,14 @@
  * In general, every plugin will provide an AnalysisAdapter, and the analysis
  * data pipeline will aggregate results across all plugins' adapters.
  *
- * TODO(@decentralion): As the AnalysisAdapter evolves, consider whether it
- * would make sense to simply move the data the AnalysisAdapter provides
- * directly into the core Graph. Note that doing so would require considerable
- * changes to the Graph APIs, including having Node be a rich data type rather
- * than just an address, and allowing edges to Nodes which do not exist in the
- * graph. Due to the complexity, such a refactor should not be undertaken
- * lightly.
+ * At the moment, the AnalysisAdapter only exists to provide the graph(), which
+ * is immediately consumed by `sourcecred load` and used to aggregate into one
+ * all-encompasing graph. Consider whether we should just have the plugins save
+ * their graph to a consistent location on load, thus removing the need for an
+ * AnalysisAdapter.
  */
 
-import {Graph, type NodeAddressT} from "../core/graph";
+import {Graph} from "../core/graph";
 import type {RepoId} from "../core/repoId";
 import type {PluginDeclaration} from "./pluginDeclaration";
 
@@ -37,7 +35,6 @@ export interface IBackendAdapterLoader {
   load(sourcecredDirectory: string, repoId: RepoId): Promise<IAnalysisAdapter>;
 }
 
-export type MsSinceEpoch = number;
 /**
  * Provides data needed for cred analysis for an individual plugin.
  *
@@ -58,5 +55,4 @@ export interface IAnalysisAdapter {
    * always existing for purposes of cred analysis. (E.g. we may want to
    * consider user identities timeless.)
    */
-  createdAt(n: NodeAddressT): MsSinceEpoch | null;
 }
