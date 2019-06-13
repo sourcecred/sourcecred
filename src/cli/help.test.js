@@ -45,16 +45,6 @@ describe("cli/help", () => {
     });
   });
 
-  it("prints help about 'sourcecred export-graph'", async () => {
-    expect(await run(help, ["export-graph"])).toEqual({
-      exitCode: 0,
-      stdout: expect.arrayContaining([
-        expect.stringMatching(/^usage: sourcecred export-graph/),
-      ]),
-      stderr: [],
-    });
-  });
-
   it("prints help about 'sourcecred clear'", async () => {
     expect(await run(help, ["clear"])).toEqual({
       exitCode: 0,

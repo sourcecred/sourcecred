@@ -7,7 +7,6 @@ import dedent from "../util/dedent";
 import {help as loadHelp} from "./load";
 import {help as analyzeHelp} from "./analyze";
 import {help as pagerankHelp} from "./pagerank";
-import {help as exportGraphHelp} from "./exportGraph";
 import {help as clearHelp} from "./clear";
 
 const help: Command = async (args, std) => {
@@ -22,7 +21,6 @@ const help: Command = async (args, std) => {
     analyze: analyzeHelp,
     pagerank: pagerankHelp,
     clear: clearHelp,
-    "export-graph": exportGraphHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);
@@ -43,7 +41,6 @@ function usage(print: (string) => void): void {
     Commands:
       load          load repository data into SourceCred
       analyze       analyze cred for a loaded repository
-      export-graph  print a raw SourceCred graph
       pagerank      recompute cred scores
       clear         clear SoucrceCred data
       help          show this help message
