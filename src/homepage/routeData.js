@@ -86,15 +86,6 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       navTitle: null,
     })),
     {
-      path: "/odyssey/",
-      contents: {
-        type: "PAGE",
-        component: () => require("./OdysseyPage").default,
-      },
-      title: "Odyssey Prototype",
-      navTitle: null,
-    },
-    {
       path: "/discord-invite/",
       contents: {
         type: "EXTERNAL_REDIRECT",
