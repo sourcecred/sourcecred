@@ -1,12 +1,15 @@
 // @flow
 
-import type {Distribution, SparseMarkovChain} from "./markovChain";
 import {
+  type Distribution,
+  uniformDistribution,
+  computeDelta,
+} from "./distribution";
+import {
+  type SparseMarkovChain,
   findStationaryDistribution,
   sparseMarkovChainAction,
   sparseMarkovChainFromTransitionMatrix,
-  uniformDistribution,
-  computeDelta,
   type StationaryDistributionResult,
   type PagerankParams,
 } from "./markovChain";

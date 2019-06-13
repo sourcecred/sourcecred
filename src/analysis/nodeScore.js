@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress, type NodeAddressT} from "../core/graph";
-import type {NodeDistribution} from "../core/attribution/graphToMarkovChain";
+import type {NodeDistribution} from "../core/attribution/nodeDistribution";
 
 export type NodeScore = Map<NodeAddressT, number>;
 

@@ -9,8 +9,8 @@ import {
 import {
   findStationaryDistribution,
   type PagerankParams,
-  uniformDistribution,
 } from "../core/attribution/markovChain";
+import {uniformDistribution} from "../core/attribution/distribution";
 import {
   decompose,
   type PagerankNodeDecomposition,

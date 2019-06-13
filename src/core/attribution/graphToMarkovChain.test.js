@@ -4,14 +4,16 @@ import sortBy from "lodash.sortby";
 
 import {Graph, NodeAddress} from "../graph";
 import {
-  distributionToNodeDistribution,
   createConnections,
   createOrderedSparseMarkovChain,
   normalize,
   normalizeNeighbors,
   permute,
-  weightedDistribution,
 } from "./graphToMarkovChain";
+import {
+  distributionToNodeDistribution,
+  weightedDistribution,
+} from "./nodeDistribution";
 import * as MapUtil from "../../util/map";
 
 import {node, advancedGraph, edge} from "../graphTestUtil";
