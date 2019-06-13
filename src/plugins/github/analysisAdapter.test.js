@@ -8,8 +8,6 @@ import {stringToRepoId} from "../../core/repoId";
 import {declaration} from "./declaration";
 import {RelationalView} from "./relationalView";
 import {createGraph} from "./createGraph";
-import {NodeAddress} from "../../core/graph";
-import {toRaw} from "./nodes";
 
 describe("plugins/github/analysisAdapter", () => {
   it("the loader provides the declaration", () => {
@@ -51,33 +49,6 @@ describe("plugins/github/analysisAdapter", () => {
     it("provides the declaration", async () => {
       const aa = await loadAnalysisAdapter();
       expect(aa.declaration()).toEqual(declaration);
-    });
-    describe("has a createdAt method which", () => {
-      it("provides createdAt times", async () => {
-        const aa = await loadAnalysisAdapter();
-        const addr = toRaw({
-          type: "ISSUE",
-          repo: {type: "REPO", owner: "sourcecred", name: "example-github"},
-          number: "1",
-        });
-        const actualCreatedAt = aa.createdAt(addr);
-        expect(actualCreatedAt).toMatchInlineSnapshot(`1519807088000`);
-      });
-      it("throws an error for an absent entity", async () => {
-        const aa = await loadAnalysisAdapter();
-        const addr = toRaw({
-          type: "ISSUE",
-          repo: {type: "REPO", owner: "sourcecred", name: "example-github"},
-          number: "1001",
-        });
-        expect(() => aa.createdAt(addr)).toThrowError("No entity matching");
-      });
-      it("throws an error for an invalid NodeAddress", async () => {
-        const aa = await loadAnalysisAdapter();
-        expect(() => aa.createdAt(NodeAddress.empty)).toThrowError(
-          "Bad address"
-        );
-      });
     });
   });
 });
