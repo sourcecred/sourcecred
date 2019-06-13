@@ -19,7 +19,7 @@ describe("explorer/pagerankTable/Connection", () => {
       let {sharedProps} = await example();
       sharedProps = {...sharedProps, maxEntriesPerList};
       const depth = 2;
-      const node = factorioNodes.inserter1;
+      const node = factorioNodes.inserter1.address;
       const connections = NullUtil.get(sharedProps.pnd.get(node))
         .scoredConnections;
       const component = (
@@ -67,7 +67,7 @@ describe("explorer/pagerankTable/Connection", () => {
   describe("ConnectionRow", () => {
     async function setup() {
       const {pnd, sharedProps} = await example();
-      const target = factorioNodes.inserter1;
+      const target = factorioNodes.inserter1.address;
       const {scoredConnections} = NullUtil.get(pnd.get(target));
       const scoredConnection = scoredConnections[0];
       const depth = 2;
@@ -147,7 +147,9 @@ describe("explorer/pagerankTable/Connection", () => {
   describe("ConnectionView", () => {
     async function setup() {
       const {pnd, adapters} = await example();
-      const {scoredConnections} = NullUtil.get(pnd.get(factorioNodes.machine1));
+      const {scoredConnections} = NullUtil.get(
+        pnd.get(factorioNodes.machine1.address)
+      );
       const connections = scoredConnections.map((sc) => sc.connection);
       function connectionByType(t) {
         return NullUtil.get(

@@ -1,22 +1,24 @@
 // @flow
 
-import {
-  EdgeAddress,
-  Graph,
-  NodeAddress,
-  type NodeAddressT,
-  type Edge,
-} from "./graph";
+import {EdgeAddress, Graph, NodeAddress, type Node, type Edge} from "./graph";
 
 /**
- * Create a new NodeAddressT from an array of string address parts.
+ * Create a new Node from an array of string address parts.
  *
- * Note: This is included as a preliminary clean-up method so that it will be easy to
- * switch Graph nodes from being represented by a NodeAddressT to a rich Node object.
- * In a followon commit, this method will create a Node instead of a NodeAddressT.
+ * Fields on the node will be set with dummy values.
+ * Test code should endeavor to use this whenever the code
+ * is not testing how specific fields are handled; that way, adding
+ * new fields will not require updating unrelated test code across
+ * the codebase.
+ *
+ * The returned node is frozen; as such, it is safe to re-use this exact
+ * object across test cases. If any non-primitive field is added to Node,
+ * please ensure this function freezes that field explicitly.
  */
-export function partsNode(parts: string[]): NodeAddressT {
-  return NodeAddress.fromParts(parts);
+export function partsNode(parts: string[]): Node {
+  return Object.freeze({
+    address: NodeAddress.fromParts(parts),
+  });
 }
 
 /**
@@ -24,7 +26,7 @@ export function partsNode(parts: string[]): NodeAddressT {
  *
  * The same considerations as partsNode apply.
  */
-export function node(name: string): NodeAddressT {
+export function node(name: string): Node {
   return partsNode([name]);
 }
 
@@ -35,15 +37,11 @@ export function node(name: string): NodeAddressT {
  *
  * The returned edge is frozen, so it is safe to use across test cases.
  */
-export function partsEdge(
-  parts: string[],
-  src: NodeAddressT,
-  dst: NodeAddressT
-): Edge {
+export function partsEdge(parts: string[], src: Node, dst: Node): Edge {
   return Object.freeze({
     address: EdgeAddress.fromParts(parts),
-    src,
-    dst,
+    src: src.address,
+    dst: dst.address,
   });
 }
 
@@ -52,7 +50,7 @@ export function partsEdge(
  *
  * The same considerations as partsEdge apply.
  */
-export function edge(name: string, src: NodeAddressT, dst: NodeAddressT): Edge {
+export function edge(name: string, src: Node, dst: Node): Edge {
   return partsEdge([name], src, dst);
 }
 
@@ -117,11 +115,11 @@ export function advancedGraph() {
       // N: [phantomNode, src, isolated, dst], E: [hom1, phantomEdge2, hom2]
       .removeEdge(hom1.address)
       // N: [phantomNode, src, isolated, dst], E: [phantomEdge2, hom2]
-      .removeNode(phantomNode)
+      .removeNode(phantomNode.address)
       // N: [src, isolated, dst], E: [phantomEdge2, hom2]
       .removeEdge(phantomEdge2.address)
       // N: [src, isolated, dst], E: [hom2]
-      .removeNode(isolated)
+      .removeNode(isolated.address)
       // N: [src, dst], E: [hom2]
       .addNode(isolated)
       // N: [src, dst, isolated], E: [hom2]

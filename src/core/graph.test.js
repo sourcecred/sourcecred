@@ -3,6 +3,7 @@
 import sortBy from "lodash.sortby";
 
 import {
+  type Node,
   type Edge,
   type EdgeAddressT,
   type EdgesOptions,
@@ -13,6 +14,7 @@ import {
   EdgeAddress,
   Graph,
   NodeAddress,
+  nodeToString,
   edgeToString,
   edgeToStrings,
   edgeToParts,
@@ -41,8 +43,8 @@ describe("core/graph", () => {
       .addNode(dst)
       .addEdge(simpleEdge);
 
-  function sortNodes(nodes: NodeAddressT[]): NodeAddressT[] {
-    return sortBy(nodes, (x) => x);
+  function sortNodes(nodes: Node[]): Node[] {
+    return sortBy(nodes, (x) => x.address);
   }
 
   describe("Direction values", () => {
@@ -106,7 +108,9 @@ describe("core/graph", () => {
         expect(g.modificationCount()).toEqual(2);
       });
       it("graphs can be equal despite unequal modification count", () => {
-        const g1 = new Graph().addNode(node("one")).removeNode(node("one"));
+        const g1 = new Graph()
+          .addNode(node("one"))
+          .removeNode(node("one").address);
         const g2 = new Graph();
         expect(g1.equals(g2)).toEqual(true);
         expect(g1.modificationCount()).not.toEqual(g2.modificationCount());
@@ -118,7 +122,7 @@ describe("core/graph", () => {
         it("with passing invariants", () => {
           const g = new Graph().addNode(src);
           g.checkInvariants(); // good
-          g._incidentEdges.delete(src); // corrupted, but only by poking at the internals
+          g._incidentEdges.delete(src.address); // corrupted, but only by poking at the internals
           expect(() => g.checkInvariants()).not.toThrow();
           expect(() => g._checkInvariants()).toThrow();
         });
@@ -126,9 +130,9 @@ describe("core/graph", () => {
         it("with failing invariants", () => {
           const g = new Graph().addNode(src);
           g.checkInvariants(); // good
-          g._incidentEdges.delete(src); // corrupted
+          g._incidentEdges.delete(src.address); // corrupted
           expect(() => g.addNode(dst)).toThrow();
-          g._incidentEdges.set(src, {inEdges: [], outEdges: []}); // fixed, but only by poking at the internals
+          g._incidentEdges.set(src.address, {inEdges: [], outEdges: []}); // fixed, but only by poking at the internals
           expect(() => g.checkInvariants()).toThrow();
           expect(() => g._checkInvariants()).not.toThrow();
         });
@@ -139,10 +143,17 @@ describe("core/graph", () => {
         expect(() => g._checkInvariants()).not.toThrow();
       });
 
-      // Invariant 1
+      // Invariant 1.1
+      it("detects a node filed under incorrect address", () => {
+        const g = new Graph().addNode(src);
+        g._nodes.delete(src.address);
+        g._nodes.set(dst.address, src);
+        expect(() => g._checkInvariants()).toThrow("bad node address");
+      });
+      // Invariant 1.2
       it("detects missing incident edges", () => {
         const g = new Graph().addNode(src);
-        g._incidentEdges.delete(src);
+        g._incidentEdges.delete(src.address);
         expect(() => g._checkInvariants()).toThrow("missing incident-edges");
       });
 
@@ -151,23 +162,23 @@ describe("core/graph", () => {
         const g = simpleGraph();
         g._edges.set(simpleEdge.address, differentAddressEdge);
         // $ExpectFlowError
-        g._incidentEdges.get(dst).inEdges = [differentAddressEdge];
+        g._incidentEdges.get(dst.address).inEdges = [differentAddressEdge];
         // $ExpectFlowError
-        g._incidentEdges.get(src).outEdges = [differentAddressEdge];
+        g._incidentEdges.get(src.address).outEdges = [differentAddressEdge];
         expect(() => g._checkInvariants()).toThrow("bad edge address");
       });
       // Invariant 2.2
       it("detects when an edge has missing src", () => {
         const g = simpleGraph();
-        g._nodes.delete(src);
-        g._incidentEdges.delete(src);
+        g._nodes.delete(src.address);
+        g._incidentEdges.delete(src.address);
         expect(() => g._checkInvariants()).toThrow("missing src");
       });
       // Invariant 2.3
       it("detects when an edge has missing dst", () => {
         const g = simpleGraph();
-        g._nodes.delete(dst);
-        g._incidentEdges.delete(dst);
+        g._nodes.delete(dst.address);
+        g._incidentEdges.delete(dst.address);
         expect(() => g._checkInvariants()).toThrow("missing dst");
       });
       // Invariant 2.4
@@ -188,7 +199,7 @@ describe("core/graph", () => {
       // Temporary invariant
       it("detects spurious incident-edges", () => {
         const g = new Graph();
-        g._incidentEdges.set(src, {inEdges: [], outEdges: []});
+        g._incidentEdges.set(src.address, {inEdges: [], outEdges: []});
         expect(() => g._checkInvariants()).toThrow("spurious incident-edges");
       });
 
@@ -221,7 +232,7 @@ describe("core/graph", () => {
         const g = simpleGraph();
         // $ExpectFlowError
         g._incidentEdges.get(simpleEdge.dst).inEdges = [
-          {src: dst, dst: dst, address: simpleEdge.address},
+          {src: dst.address, dst: dst.address, address: simpleEdge.address},
         ];
         expect(() => g._checkInvariants()).toThrow(/bad in-edge.*vs\./);
       });
@@ -236,7 +247,7 @@ describe("core/graph", () => {
         const g = simpleGraph();
         // $ExpectFlowError
         g._incidentEdges.get(simpleEdge.src).outEdges = [
-          {src: src, dst: src, address: simpleEdge.address},
+          {src: src.address, dst: src.address, address: simpleEdge.address},
         ];
         expect(() => g._checkInvariants()).toThrow(/bad out-edge.*vs\./);
       });
@@ -264,7 +275,7 @@ describe("core/graph", () => {
     describe("node methods", () => {
       describe("error on", () => {
         const p = Graph.prototype;
-        const nodeMethods = [p.addNode, p.removeNode, p.hasNode];
+        const nodeMethods = [p.node, p.removeNode, p.hasNode];
         describe("null/undefined", () => {
           nodeMethods.forEach(graphRejectsNulls);
         });
@@ -278,22 +289,35 @@ describe("core/graph", () => {
           }
           nodeMethods.forEach(rejectsEdgeAddress);
           it("addNode rejects EdgeAddress", () => {
-            const n = EdgeAddress.fromParts(["foo"]);
+            const n = {
+              ...node("foo"),
+              address: EdgeAddress.fromParts(["foo"]),
+            };
             // $ExpectFlowError
             expect(() => new Graph().addNode(n).toThrow("got EdgeAddress"));
           });
         });
         describe("remove a node that is some edge's", () => {
           it("src", () => {
-            expect(() => simpleGraph().removeNode(src)).toThrow(
+            expect(() => simpleGraph().removeNode(src.address)).toThrow(
               "Attempted to remove"
             );
           });
           it("dst", () => {
-            expect(() => simpleGraph().removeNode(dst)).toThrow(
+            expect(() => simpleGraph().removeNode(dst.address)).toThrow(
               "Attempted to remove"
             );
           });
+        });
+
+        it("distinct nodes with the same address", () => {
+          const g = new Graph();
+          const n1 = node("foo");
+          const n2 = {...n1, boink: "zod"};
+          // $ExpectFlowError
+          expect(() => g.addNode(n1).addNode(n2)).toThrow(
+            "conflict between new node"
+          );
         });
 
         describe("concurrent modification in `nodes`", () => {
@@ -315,42 +339,49 @@ describe("core/graph", () => {
       describe("work on", () => {
         it("a graph with no nodes", () => {
           const graph = new Graph();
-          expect(graph.hasNode(src)).toBe(false);
+          expect(graph.hasNode(src.address)).toBe(false);
           expect(Array.from(graph.nodes())).toHaveLength(0);
         });
         it("a graph with a node added", () => {
           const graph = new Graph().addNode(src);
-          expect(graph.hasNode(src)).toBe(true);
+          expect(graph.hasNode(src.address)).toBe(true);
           expect(Array.from(graph.nodes())).toEqual([src]);
+          expect(graph.node(src.address)).toEqual(src);
         });
         it("a graph with the same node added twice", () => {
           const graph = new Graph().addNode(src).addNode(src);
-          expect(graph.hasNode(src)).toBe(true);
+          expect(graph.hasNode(src.address)).toBe(true);
           expect(Array.from(graph.nodes())).toEqual([src]);
+          expect(graph.node(src.address)).toEqual(src);
         });
         it("a graph with an absent node removed", () => {
-          const graph = new Graph().removeNode(src);
-          expect(graph.hasNode(src)).toBe(false);
+          const graph = new Graph().removeNode(src.address);
+          expect(graph.hasNode(src.address)).toBe(false);
           expect(Array.from(graph.nodes())).toHaveLength(0);
+          expect(graph.node(src.address)).toEqual(undefined);
         });
         it("a graph with an added node removed", () => {
-          const graph = new Graph().addNode(src).removeNode(src);
-          expect(graph.hasNode(src)).toBe(false);
+          const graph = new Graph().addNode(src).removeNode(src.address);
+          expect(graph.hasNode(src.address)).toBe(false);
           expect(Array.from(graph.nodes())).toHaveLength(0);
+          expect(graph.node(src.address)).toEqual(undefined);
         });
         it("a graph with an added node removed twice", () => {
           const graph = new Graph()
             .addNode(src)
-            .removeNode(src)
-            .removeNode(src);
-          expect(graph.hasNode(src)).toBe(false);
+            .removeNode(src.address)
+            .removeNode(src.address);
+          expect(graph.hasNode(src.address)).toBe(false);
           expect(Array.from(graph.nodes())).toHaveLength(0);
+          expect(graph.node(src.address)).toEqual(undefined);
         });
         it("a graph with two nodes", () => {
           const graph = new Graph().addNode(src).addNode(dst);
-          expect(graph.hasNode(src)).toBe(true);
-          expect(graph.hasNode(dst)).toBe(true);
+          expect(graph.hasNode(src.address)).toBe(true);
+          expect(graph.hasNode(dst.address)).toBe(true);
           expect(Array.from(graph.nodes())).toEqual([src, dst]);
+          expect(graph.node(src.address)).toEqual(src);
+          expect(graph.node(dst.address)).toEqual(dst);
         });
       });
 
@@ -367,7 +398,7 @@ describe("core/graph", () => {
             .addNode(n4);
         function expectEqualNodes(
           options: {|+prefix: NodeAddressT|} | void,
-          expected: NodeAddressT[]
+          expected: Node[]
         ) {
           const actual = sortNodes(Array.from(prefixGraph().nodes(options)));
           expect(actual).toEqual(sortNodes(expected));
@@ -377,16 +408,16 @@ describe("core/graph", () => {
         });
         it("requires a prefix when options are specified", () => {
           // $ExpectFlowError
-          expect(() => prefixGraph().nodes({})).toThrow("prefix");
+          expect(() => simpleGraph().nodes({})).toThrow("prefix");
         });
         it("does a prefix filter", () => {
-          expectEqualNodes({prefix: n2}, [n2, n3]);
+          expectEqualNodes({prefix: n2.address}, [n2, n3]);
         });
         it("empty prefix matches all nodes", () => {
           expectEqualNodes({prefix: NodeAddress.empty}, [n1, n2, n3, n4]);
         });
         it("yields nothing when prefix matches nothing", () => {
-          expectEqualNodes({prefix: NodeAddress.fromParts(["nope"])}, []);
+          expectEqualNodes({prefix: NodeAddress.fromParts(["2"])}, []);
         });
       });
 
@@ -406,7 +437,7 @@ describe("core/graph", () => {
         it("on removeNode, when a node is removed", () => {
           const g = new Graph().addNode(src);
           const before = g._modificationCount;
-          g.removeNode(src);
+          g.removeNode(src.address);
           expect(g._modificationCount).not.toEqual(before);
         });
         it("on removeNode, even when the node does not exist", () => {
@@ -674,8 +705,8 @@ describe("core/graph", () => {
             expect(edgeArray(removedGraph())).toHaveLength(0);
           });
           it("nodes were not removed", () => {
-            expect(removedGraph().hasNode(src)).toBe(true);
-            expect(removedGraph().hasNode(dst)).toBe(true);
+            expect(removedGraph().hasNode(src.address)).toBe(true);
+            expect(removedGraph().hasNode(dst.address)).toBe(true);
             expect(Array.from(removedGraph().nodes())).toHaveLength(2);
           });
         });
@@ -711,7 +742,7 @@ describe("core/graph", () => {
           expect(edgeArray(g)).toEqual([simpleEdge]);
           expect(
             Array.from(
-              g.neighbors(src, {
+              g.neighbors(src.address, {
                 direction: Direction.ANY,
                 nodePrefix: NodeAddress.empty,
                 edgePrefix: EdgeAddress.empty,
@@ -792,7 +823,7 @@ describe("core/graph", () => {
         const graph = quiver().addNode(foo);
         expect(
           Array.from(
-            graph.neighbors(foo, {
+            graph.neighbors(foo.address, {
               direction: Direction.ANY,
               nodePrefix: NodeAddress.empty,
               edgePrefix: EdgeAddress.empty,
@@ -803,7 +834,7 @@ describe("core/graph", () => {
 
       it("isolated node has no neighbors", () => {
         expectNeighbors(
-          isolated,
+          isolated.address,
           {
             direction: Direction.ANY,
             nodePrefix: NodeAddress.empty,
@@ -819,7 +850,7 @@ describe("core/graph", () => {
           nodePrefix: NodeAddress.fromParts(nodeParts),
           edgePrefix: EdgeAddress.fromParts(edgeParts),
         };
-        expectNeighbors(loop, options, expected);
+        expectNeighbors(loop.address, options, expected);
       }
 
       describe("direction filtering", () => {
@@ -862,7 +893,7 @@ describe("core/graph", () => {
       describe("node prefix filtering", () => {
         function nodeExpectNeighbors(parts, expected) {
           expectNeighbors(
-            loop,
+            loop.address,
             {
               direction: Direction.ANY,
               nodePrefix: NodeAddress.fromParts(parts),
@@ -892,7 +923,7 @@ describe("core/graph", () => {
       describe("edge prefix filtering", () => {
         function edgeExpectNeighbors(parts, expected) {
           expectNeighbors(
-            loop,
+            loop.address,
             {
               direction: Direction.ANY,
               nodePrefix: NodeAddress.empty,
@@ -920,7 +951,7 @@ describe("core/graph", () => {
 
       it("works for node and edge filter combined", () => {
         expectNeighbors(
-          loop,
+          loop.address,
           {
             direction: Direction.ANY,
             nodePrefix: NodeAddress.fromParts(["foo"]),
@@ -955,13 +986,13 @@ describe("core/graph", () => {
         describe("concurrent modification", () => {
           it("while in the middle of iteration", () => {
             const g = quiver();
-            const iterator = g.neighbors(loop, defaultOptions());
+            const iterator = g.neighbors(loop.address, defaultOptions());
             g._modificationCount++;
             expect(() => iterator.next()).toThrow("Concurrent modification");
           });
           it("at exhaustion", () => {
             const g = quiver();
-            const iterator = g.neighbors(isolated, defaultOptions());
+            const iterator = g.neighbors(isolated.address, defaultOptions());
             g._modificationCount++;
             expect(() => iterator.next()).toThrow("Concurrent modification");
           });
@@ -983,7 +1014,7 @@ describe("core/graph", () => {
         expectEquality(g, new Graph(), false);
       });
       it("adding and removing a node doesn't change equality", () => {
-        const g = new Graph().addNode(src).removeNode(src);
+        const g = new Graph().addNode(src).removeNode(src.address);
         expectEquality(g, new Graph(), true);
       });
       it("adding an edge changes equality", () => {
@@ -1071,7 +1102,7 @@ describe("core/graph", () => {
         expectCopyEqual(new Graph());
       });
       it("graph with node added and removed", () => {
-        const g = new Graph().addNode(src).removeNode(src);
+        const g = new Graph().addNode(src).removeNode(src.address);
         expectCopyEqual(g);
       });
       it("graph with an edge", () => {
@@ -1217,7 +1248,7 @@ describe("core/graph", () => {
         const g = new Graph()
           .addNode(src)
           .addNode(dst)
-          .removeNode(src);
+          .removeNode(src.address);
         expectCompose(g);
       });
       it("for a graph with nodes and edges", () => {
@@ -1250,7 +1281,7 @@ describe("core/graph", () => {
         const g1 = new Graph()
           .addNode(src)
           .addNode(dst)
-          .removeNode(src);
+          .removeNode(src.address);
         const g2 = new Graph().addNode(dst);
         expectCanonicity(g1, g2);
       });
@@ -1288,6 +1319,15 @@ describe("core/graph", () => {
         'dst: NodeAddress["five","six"]' +
         "}";
       expect(edgeToString(edge)).toEqual(expected);
+    });
+  });
+
+  describe("nodeToString", () => {
+    it("works", () => {
+      const string = nodeToString(node("foo"));
+      expect(string).toMatchInlineSnapshot(
+        `"{address: NodeAddress[\\"foo\\"]}"`
+      );
     });
   });
 

@@ -81,7 +81,7 @@ describe("explorer/pagerankTable/Node", () => {
       if (props.sharedProps !== null) {
         sharedProps = {...sharedProps, ...props.sharedProps};
       }
-      const node = factorioNodes.inserter1;
+      const node = factorioNodes.inserter1.address;
       const component = shallow(
         <NodeRow
           node={NullUtil.orElse(props.node, node)}
@@ -113,7 +113,7 @@ describe("explorer/pagerankTable/Node", () => {
       });
       describe("with a weight slider", () => {
         async function setupSlider(initialWeight: number = 0) {
-          const node = factorioNodes.inserter1;
+          const node = factorioNodes.inserter1.address;
           const manualWeights = new Map([[node, initialWeight]]);
           const partialSharedProps: any = {manualWeights};
           const {row, sharedProps} = await setup({

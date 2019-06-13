@@ -20,7 +20,7 @@ class GraphCreator {
   }
 
   addNode(a: GN.StructuredAddress) {
-    this.graph.addNode(GN.toRaw(a));
+    this.graph.addNode({address: GN.toRaw(a)});
   }
 
   addRepository(repository: GT.Repository) {
@@ -31,10 +31,10 @@ class GraphCreator {
 
   addCommit(commit: GT.Commit) {
     const node: GN.CommitAddress = {type: GN.COMMIT_TYPE, hash: commit.hash};
-    this.graph.addNode(GN.toRaw(node));
+    this.graph.addNode({address: GN.toRaw(node)});
     for (const parentHash of commit.parentHashes) {
       const parent: GN.CommitAddress = {type: GN.COMMIT_TYPE, hash: parentHash};
-      this.graph.addNode(GN.toRaw(parent));
+      this.graph.addNode({address: GN.toRaw(parent)});
       this.graph.addEdge(GE.createEdge.hasParent(node, parent));
     }
   }
