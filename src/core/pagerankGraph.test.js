@@ -80,10 +80,10 @@ describe("core/pagerankGraph", () => {
   });
 
   describe("node / nodes", () => {
-    it("node returns null for node not in the graph", () => {
+    it("node returns undefined for node not in the graph", () => {
       const g = nonEmptyGraph();
       const pg = new PagerankGraph(g, defaultEvaluator);
-      expect(pg.node(NodeAddress.empty)).toEqual(null);
+      expect(pg.node(NodeAddress.empty)).toBe(undefined);
     });
     it("nodes yields the same nodes as are in the graph", () => {
       const g = advancedGraph().graph1();
@@ -189,9 +189,9 @@ describe("core/pagerankGraph", () => {
       }
     });
 
-    it("edge returns null for address not in the graph", () => {
+    it("edge returns undefined for address not in the graph", () => {
       const pg = new PagerankGraph(nonEmptyGraph(), defaultEvaluator);
-      expect(pg.edge(EdgeAddress.empty)).toEqual(null);
+      expect(pg.edge(EdgeAddress.empty)).toBe(undefined);
     });
 
     it("edge and edges both throw an error if underlying graph is modified", () => {
