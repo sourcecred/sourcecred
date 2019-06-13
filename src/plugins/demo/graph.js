@@ -1,30 +1,31 @@
 // @flow
 
-import {Graph, NodeAddress, EdgeAddress} from "../../core/graph";
+import {Graph} from "../../core/graph";
+import {partsNode, partsEdge} from "../../core/graphTestUtil";
 
 export const nodes = Object.freeze({
-  inserter1: NodeAddress.fromParts(["factorio", "inserter", "1"]),
-  machine1: NodeAddress.fromParts(["factorio", "machine", "1"]),
-  inserter2: NodeAddress.fromParts(["factorio", "inserter", "2"]),
-  machine2: NodeAddress.fromParts(["factorio", "machine", "2"]),
+  inserter1: partsNode(["factorio", "inserter", "1"]),
+  machine1: partsNode(["factorio", "machine", "1"]),
+  inserter2: partsNode(["factorio", "inserter", "2"]),
+  machine2: partsNode(["factorio", "machine", "2"]),
 });
 
 export const edges = Object.freeze({
-  transports1: Object.freeze({
-    src: nodes.inserter1,
-    dst: nodes.machine1,
-    address: EdgeAddress.fromParts(["factorio", "transports", "1"]),
-  }),
-  assembles1: Object.freeze({
-    src: nodes.machine1,
-    dst: nodes.inserter2,
-    address: EdgeAddress.fromParts(["factorio", "assembles", "1"]),
-  }),
-  transports2: Object.freeze({
-    src: nodes.inserter2,
-    dst: nodes.machine2,
-    address: EdgeAddress.fromParts(["factorio", "assembles", "2"]),
-  }),
+  transports1: partsEdge(
+    ["factorio", "transports", "1"],
+    nodes.inserter1,
+    nodes.machine1
+  ),
+  transports2: partsEdge(
+    ["factorio", "transports", "2"],
+    nodes.inserter2,
+    nodes.machine2
+  ),
+  assembles1: partsEdge(
+    ["factorio", "assembles", "1"],
+    nodes.machine1,
+    nodes.inserter2
+  ),
 });
 
 export function graph() {

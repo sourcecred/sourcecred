@@ -16,6 +16,7 @@ import type {
 import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {makeRepoId, type RepoId} from "../core/repoId";
 import {loadGraph} from "./loadGraph";
+import {node} from "../core/graphTestUtil";
 
 const declaration = (name) => ({
   name,
@@ -115,8 +116,8 @@ describe("analysis/loadGraph", () => {
       expect(result).toEqual({status: "REPO_NOT_LOADED"});
     });
     it("returns status:SUCCESS with merged graph on success", async () => {
-      const g1 = new Graph().addNode(NodeAddress.fromParts(["g1"]));
-      const g2 = new Graph().addNode(NodeAddress.fromParts(["g2"]));
+      const g1 = new Graph().addNode(node("n1"));
+      const g2 = new Graph().addNode(node("n2"));
       const m1 = new MockStaticAdapter("foo", g1);
       const m2 = new MockStaticAdapter("bar", g2);
       const mergedGraph = Graph.merge([g1, g2]);
