@@ -17,11 +17,10 @@ Array [
       },
       Object {
         "address": Array [
-          "edge",
-          "2",
+          "wat",
         ],
-        "dstIndex": 1,
-        "srcIndex": 0,
+        "dstIndex": 0,
+        "srcIndex": 1,
       },
     ],
     "nodes": Array [

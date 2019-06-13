@@ -1,6 +1,6 @@
 // @flow
 
-import {EdgeAddress, Graph, NodeAddress, edgeToStrings} from "../core/graph";
+import {Graph, NodeAddress, edgeToStrings} from "../core/graph";
 import {
   distributionToNodeDistribution,
   createConnections,
@@ -17,7 +17,7 @@ import {
 } from "./pagerankNodeDecomposition";
 import * as MapUtil from "../util/map";
 
-import {advancedGraph} from "../core/graphTestUtil";
+import {advancedGraph, node, edge} from "../core/graphTestUtil";
 
 /**
  * Format a decomposition to be shown in a snapshot. This converts
@@ -117,13 +117,13 @@ function validateDecomposition(decomposition) {
 describe("analysis/pagerankNodeDecomposition", () => {
   describe("decompose", () => {
     it("has the expected output on a simple asymmetric chain", async () => {
-      const n1 = NodeAddress.fromParts(["n1"]);
-      const n2 = NodeAddress.fromParts(["n2"]);
-      const n3 = NodeAddress.fromParts(["sink"]);
-      const e1 = {src: n1, dst: n2, address: EdgeAddress.fromParts(["e1"])};
-      const e2 = {src: n2, dst: n3, address: EdgeAddress.fromParts(["e2"])};
-      const e3 = {src: n1, dst: n3, address: EdgeAddress.fromParts(["e3"])};
-      const e4 = {src: n3, dst: n3, address: EdgeAddress.fromParts(["e4"])};
+      const n1 = node("n1");
+      const n2 = node("n2");
+      const n3 = node("sink");
+      const e1 = edge("e1", n1, n2);
+      const e2 = edge("e2", n2, n3);
+      const e3 = edge("e3", n1, n3);
+      const e4 = edge("e4", n3, n3);
       const g = new Graph()
         .addNode(n1)
         .addNode(n2)

@@ -2,7 +2,7 @@
 
 import sortBy from "lodash.sortby";
 
-import {EdgeAddress, Graph, NodeAddress} from "../graph";
+import {Graph, NodeAddress} from "../graph";
 import {
   distributionToNodeDistribution,
   createConnections,
@@ -14,13 +14,13 @@ import {
 } from "./graphToMarkovChain";
 import * as MapUtil from "../../util/map";
 
-import {advancedGraph} from "../graphTestUtil";
+import {node, advancedGraph, edge} from "../graphTestUtil";
 
 describe("core/attribution/graphToMarkovChain", () => {
+  const n1 = node("n1");
+  const n2 = node("n2");
+  const n3 = node("n3");
   describe("permute", () => {
-    const n1 = NodeAddress.fromParts(["n1"]);
-    const n2 = NodeAddress.fromParts(["n2"]);
-    const n3 = NodeAddress.fromParts(["n3"]);
     // This chain isn't a proper stochastic chain, but that's okay:
     // the actual values aren't relevant.
     const old = {
@@ -51,9 +51,6 @@ describe("core/attribution/graphToMarkovChain", () => {
   });
 
   describe("normalizeNeighbors", () => {
-    const n1 = NodeAddress.fromParts(["n1"]);
-    const n2 = NodeAddress.fromParts(["n2"]);
-    const n3 = NodeAddress.fromParts(["n3"]);
     // This chain isn't a proper stochastic chain, but that's okay:
     // the actual values aren't relevant.
     const old = {
@@ -86,13 +83,11 @@ describe("core/attribution/graphToMarkovChain", () => {
     // The tests for `createOrderedSparseMarkovChain` also must invoke
     // `createConnections`, so we add only light testing separately.
     it("works on a simple asymmetric chain", () => {
-      const n1 = NodeAddress.fromParts(["n1"]);
-      const n2 = NodeAddress.fromParts(["n2"]);
-      const n3 = NodeAddress.fromParts(["sink"]);
-      const e1 = {src: n1, dst: n2, address: EdgeAddress.fromParts(["e1"])};
-      const e2 = {src: n2, dst: n3, address: EdgeAddress.fromParts(["e2"])};
-      const e3 = {src: n1, dst: n3, address: EdgeAddress.fromParts(["e3"])};
-      const e4 = {src: n3, dst: n3, address: EdgeAddress.fromParts(["e4"])};
+      const e1 = edge("e1", n1, n2);
+      const e2 = edge("e2", n2, n3);
+      const e3 = edge("e3", n1, n3);
+      const e4 = edge("e4", n3, n3);
+
       const g = new Graph()
         .addNode(n1)
         .addNode(n2)
@@ -133,8 +128,7 @@ describe("core/attribution/graphToMarkovChain", () => {
 
   describe("createOrderedSparseMarkovChain", () => {
     it("works on a trivial one-node chain with no edge", () => {
-      const n = NodeAddress.fromParts(["foo"]);
-      const g = new Graph().addNode(n);
+      const g = new Graph().addNode(n1);
       const edgeWeight = (_unused_edge) => {
         throw new Error("Don't even look at me");
       };
@@ -142,7 +136,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         createConnections(g, edgeWeight, 1e-3)
       );
       const expected = {
-        nodeOrder: [n],
+        nodeOrder: [n1],
         chain: [
           {neighbor: new Uint32Array([0]), weight: new Float64Array([1.0])},
         ],
@@ -151,13 +145,11 @@ describe("core/attribution/graphToMarkovChain", () => {
     });
 
     it("works on a simple asymmetric chain", () => {
-      const n1 = NodeAddress.fromParts(["n1"]);
-      const n2 = NodeAddress.fromParts(["n2"]);
-      const n3 = NodeAddress.fromParts(["sink"]);
-      const e1 = {src: n1, dst: n2, address: EdgeAddress.fromParts(["e1"])};
-      const e2 = {src: n2, dst: n3, address: EdgeAddress.fromParts(["e2"])};
-      const e3 = {src: n1, dst: n3, address: EdgeAddress.fromParts(["e3"])};
-      const e4 = {src: n3, dst: n3, address: EdgeAddress.fromParts(["e4"])};
+      const e1 = edge("e1", n1, n2);
+      const e2 = edge("e2", n2, n3);
+      const e3 = edge("e3", n1, n3);
+      const e4 = edge("e4", n3, n3);
+
       const g = new Graph()
         .addNode(n1)
         .addNode(n2)
@@ -191,12 +183,9 @@ describe("core/attribution/graphToMarkovChain", () => {
     });
 
     it("works on a symmetric K_3", () => {
-      const n1 = NodeAddress.fromParts(["n1"]);
-      const n2 = NodeAddress.fromParts(["n2"]);
-      const n3 = NodeAddress.fromParts(["n3"]);
-      const e1 = {src: n1, dst: n2, address: EdgeAddress.fromParts(["e1"])};
-      const e2 = {src: n2, dst: n3, address: EdgeAddress.fromParts(["e2"])};
-      const e3 = {src: n3, dst: n1, address: EdgeAddress.fromParts(["e3"])};
+      const e1 = edge("e1", n1, n2);
+      const e2 = edge("e2", n2, n3);
+      const e3 = edge("e3", n3, n1);
       const g = new Graph()
         .addNode(n1)
         .addNode(n2)
@@ -257,10 +246,10 @@ describe("core/attribution/graphToMarkovChain", () => {
       //   - dst: `epsilon / 2` from dst, `(8 - epsilon) / 8` from src
       const expected = {
         nodeOrder: [
-          ag.nodes.src(),
-          ag.nodes.dst(),
-          ag.nodes.loop(),
-          ag.nodes.isolated(),
+          ag.nodes.src,
+          ag.nodes.dst,
+          ag.nodes.loop,
+          ag.nodes.isolated,
         ],
         chain: [
           {
@@ -282,8 +271,6 @@ describe("core/attribution/graphToMarkovChain", () => {
   describe("distributionToNodeDistribution", () => {
     it("works", () => {
       const pi = new Float64Array([0.25, 0.75]);
-      const n1 = NodeAddress.fromParts(["foo"]);
-      const n2 = NodeAddress.fromParts(["bar"]);
       expect(distributionToNodeDistribution([n1, n2], pi)).toEqual(
         new Map().set(n1, 0.25).set(n2, 0.75)
       );

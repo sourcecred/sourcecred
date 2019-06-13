@@ -14,7 +14,7 @@ import {
   defaultSaver,
 } from "./pagerank";
 import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
-import {advancedGraph} from "../core/graphTestUtil";
+import {node, edge, advancedGraph} from "../core/graphTestUtil";
 import {
   PagerankGraph,
   DEFAULT_SYNTHETIC_LOOP_WEIGHT,
@@ -127,7 +127,7 @@ describe("cli/pagerank", () => {
     });
 
     describe("on successful load", () => {
-      const graph = () => new Graph().addNode(NodeAddress.empty);
+      const graph = () => new Graph().addNode(node("n"));
       const graphResult = () => ({status: "SUCCESS", graph: graph()});
       const loader = (_unused_repoId) =>
         new Promise((resolve) => resolve(graphResult()));
@@ -169,7 +169,7 @@ describe("cli/pagerank", () => {
 
   describe("savePagerankGraph", () => {
     it("saves the PagerankGraphJSON to the right filepath", async () => {
-      const graph = new Graph().addNode(NodeAddress.empty);
+      const graph = new Graph().addNode(node("n"));
       const evaluator = (_unused_edge) => ({toWeight: 1, froWeight: 2});
       const prg = new PagerankGraph(graph, evaluator);
       const dirname = tmp.dirSync().name;
@@ -229,11 +229,9 @@ describe("cli/pagerank", () => {
       expect(actualPagerankGraph.equals(expectedPagerankGraph)).toBe(true);
     });
     it("default pageRank is robust to nodes that are not owned by any plugin", async () => {
-      const graph = new Graph().addNode(NodeAddress.empty).addEdge({
-        address: EdgeAddress.empty,
-        src: NodeAddress.empty,
-        dst: NodeAddress.empty,
-      });
+      const n = node("n");
+      const e = edge("no-plugin", n, n);
+      const graph = new Graph().addNode(n).addEdge(e);
       await defaultPagerank(graph);
     });
   });
@@ -242,8 +240,11 @@ describe("cli/pagerank", () => {
     process.env.SOURCECRED_DIRECTORY = dirname;
     const repoId = makeRepoId("foo", "bar");
     const prg = new PagerankGraph(
-      new Graph().addNode(NodeAddress.empty),
-      (_unused_edge) => ({toWeight: 1, froWeight: 2})
+      new Graph().addNode(node("n")),
+      (_unused_edge) => ({
+        toWeight: 1,
+        froWeight: 2,
+      })
     );
     await defaultSaver(repoId, prg);
     const expectedPath = path.join(
