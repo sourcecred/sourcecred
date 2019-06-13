@@ -83,7 +83,7 @@ describe("plugins/github/relationalView", () => {
     has("owner", () => entity.owner());
     has("name", () => entity.name());
     has("url", () => entity.url());
-    has("createdAt", () => entity.createdAt());
+    has("timestampMs", () => entity.timestampMs());
     hasEntities("issues", () => entity.issues());
     hasEntities("pulls", () => entity.pulls());
   });
@@ -96,7 +96,7 @@ describe("plugins/github/relationalView", () => {
     has("title", () => entity.title());
     has("url", () => entity.url());
     has("parent", () => entity.parent());
-    has("createdAt", () => entity.createdAt());
+    has("timestampMs", () => entity.timestampMs());
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
     has("reactions", () => entity.reactions());
@@ -117,7 +117,7 @@ describe("plugins/github/relationalView", () => {
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
     has("reactions", () => entity.reactions());
-    has("createdAt", () => entity.createdAt());
+    has("timestampMs", () => entity.timestampMs());
   });
 
   const review = Array.from(pull.reviews())[0];
@@ -129,7 +129,7 @@ describe("plugins/github/relationalView", () => {
     has("parent", () => entity.parent());
     hasEntities("comments", () => entity.comments());
     hasEntities("authors", () => entity.authors());
-    has("createdAt", () => entity.createdAt());
+    has("timestampMs", () => entity.timestampMs());
   });
 
   const comment = Array.from(review.comments())[0];
@@ -140,7 +140,7 @@ describe("plugins/github/relationalView", () => {
     has("parent", () => entity.parent());
     hasEntities("authors", () => entity.authors());
     has("reactions", () => entity.reactions());
-    has("createdAt", () => entity.createdAt());
+    has("timestampMs", () => entity.timestampMs());
   });
 
   const commit = Array.from(view.commits())[0];
@@ -149,6 +149,7 @@ describe("plugins/github/relationalView", () => {
     has("url", () => entity.url());
     has("message", () => entity.message());
     hasEntities("authors", () => entity.authors());
+    has("timestampMs", () => entity.timestampMs());
   });
 
   const userlike = Array.from(review.authors())[0];
@@ -156,6 +157,7 @@ describe("plugins/github/relationalView", () => {
     const entity = userlike;
     has("login", () => entity.login());
     has("url", () => entity.url());
+    has("timestampMs", () => entity.timestampMs());
   });
 
   describe("entity", () => {
