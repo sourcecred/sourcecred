@@ -117,6 +117,10 @@ export default function schema(): Schema.Schema {
         user: s.node("User"),
       }),
       parents: s.connection("Commit"),
+      // In contrast to the author.date, this is both nonNull and is
+      // specifically the authoredDate. Docs for author.date suggest that
+      // field might be the commiter date instead.
+      authoredDate: s.primitive(s.nonNull("GitTimestamp")),
     }),
     Tag: s.object({
       id: s.id(),
