@@ -59,8 +59,8 @@ export function createConnections(
   const result = new Map();
   const totalOutWeight: Map<NodeAddressT, number> = new Map();
   for (const node of graph.nodes()) {
-    result.set(node, []);
-    totalOutWeight.set(node, 0);
+    result.set(node.address, []);
+    totalOutWeight.set(node.address, 0);
   }
 
   function processConnection(target: NodeAddressT, connection: Connection) {
@@ -75,7 +75,7 @@ export function createConnections(
 
   // Add self-loops.
   for (const node of graph.nodes()) {
-    processConnection(node, {
+    processConnection(node.address, {
       adjacency: {type: "SYNTHETIC_LOOP"},
       weight: syntheticLoopWeight,
     });

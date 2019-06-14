@@ -22,7 +22,7 @@ describe("core/attribution/graphToMarkovChain", () => {
     // This chain isn't a proper stochastic chain, but that's okay:
     // the actual values aren't relevant.
     const old = {
-      nodeOrder: [n1, n2, n3],
+      nodeOrder: [n1.address, n2.address, n3.address],
       chain: [
         {
           neighbor: new Uint32Array([0, 1]),
@@ -32,10 +32,10 @@ describe("core/attribution/graphToMarkovChain", () => {
         {neighbor: new Uint32Array([]), weight: new Float64Array([])},
       ],
     };
-    const newOrder = [n2, n3, n1];
+    const newOrder = [n2.address, n3.address, n1.address];
     const actual = permute(old, newOrder);
     const expected = {
-      nodeOrder: [n2, n3, n1],
+      nodeOrder: [n2.address, n3.address, n1.address],
       chain: [
         {neighbor: new Uint32Array([1]), weight: new Float64Array([0.9])},
         {neighbor: new Uint32Array([]), weight: new Float64Array([])},
@@ -52,7 +52,7 @@ describe("core/attribution/graphToMarkovChain", () => {
     // This chain isn't a proper stochastic chain, but that's okay:
     // the actual values aren't relevant.
     const old = {
-      nodeOrder: [n2, n3, n1],
+      nodeOrder: [n2.address, n3.address, n1.address],
       chain: [
         {neighbor: new Uint32Array([1]), weight: new Float64Array([0.9])},
         {neighbor: new Uint32Array([]), weight: new Float64Array([])},
@@ -64,7 +64,7 @@ describe("core/attribution/graphToMarkovChain", () => {
     };
     const actual = normalizeNeighbors(old);
     const expected = {
-      nodeOrder: [n2, n3, n1],
+      nodeOrder: [n2.address, n3.address, n1.address],
       chain: [
         {neighbor: new Uint32Array([1]), weight: new Float64Array([0.9])},
         {neighbor: new Uint32Array([]), weight: new Float64Array([])},
@@ -101,17 +101,17 @@ describe("core/attribution/graphToMarkovChain", () => {
       //   - for `n2`: 1 out, 1 in, 1 synthetic: 6 + 3 + 1 = 10
       //   - for `n3`: 1 out, 3 in, 1 synthetic: 6 + 9 + 1 = 16
       const expected = new Map()
-        .set(n1, [
+        .set(n1.address, [
           {adjacency: {type: "SYNTHETIC_LOOP"}, weight: 1 / 13},
           {adjacency: {type: "OUT_EDGE", edge: e1}, weight: 3 / 10},
           {adjacency: {type: "OUT_EDGE", edge: e3}, weight: 3 / 16},
         ])
-        .set(n2, [
+        .set(n2.address, [
           {adjacency: {type: "SYNTHETIC_LOOP"}, weight: 1 / 10},
           {adjacency: {type: "IN_EDGE", edge: e1}, weight: 6 / 13},
           {adjacency: {type: "OUT_EDGE", edge: e2}, weight: 3 / 16},
         ])
-        .set(n3, [
+        .set(n3.address, [
           {adjacency: {type: "SYNTHETIC_LOOP"}, weight: 1 / 16},
           {adjacency: {type: "IN_EDGE", edge: e2}, weight: 6 / 10},
           {adjacency: {type: "IN_EDGE", edge: e3}, weight: 6 / 13},
@@ -134,7 +134,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         createConnections(g, edgeWeight, 1e-3)
       );
       const expected = {
-        nodeOrder: [n1],
+        nodeOrder: [n1.address],
         chain: [
           {neighbor: new Uint32Array([0]), weight: new Float64Array([1.0])},
         ],
@@ -161,7 +161,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         createConnections(g, edgeWeight, 0.0)
       );
       const expected = {
-        nodeOrder: [n1, n2, n3],
+        nodeOrder: [n1.address, n2.address, n3.address],
         chain: [
           {
             neighbor: new Uint32Array([0, 1, 2]),
@@ -196,7 +196,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         createConnections(g, edgeWeight, 0.0)
       );
       const expected = {
-        nodeOrder: [n1, n2, n3],
+        nodeOrder: [n1.address, n2.address, n3.address],
         chain: [
           {
             neighbor: new Uint32Array([0, 1, 2]),
@@ -244,10 +244,10 @@ describe("core/attribution/graphToMarkovChain", () => {
       //   - dst: `epsilon / 2` from dst, `(8 - epsilon) / 8` from src
       const expected = {
         nodeOrder: [
-          ag.nodes.src,
-          ag.nodes.dst,
-          ag.nodes.loop,
-          ag.nodes.isolated,
+          ag.nodes.src.address,
+          ag.nodes.dst.address,
+          ag.nodes.loop.address,
+          ag.nodes.isolated.address,
         ],
         chain: [
           {

@@ -50,32 +50,38 @@ import * as NullUtil from "../util/null";
  * const commitPrefix = NodeAddress.fromParts(["sourcecred", "git", "commit"]);
  * const commitNodes = graph.nodes({prefix: commitPrefix});
  *
- * In the case of a node, the address is all the graph knows about. If you have
- * any other metadata you want to store about the node—like its commit message
- * or its favorite color—you can store that in another database. The Graph is
- * just a graph, not a key value store.
+ * The graph represents nodes as the `Node` data type, which includes an
+ * address (NodeAddressT) as well as a few other fields that are needed for
+ * calculating and displaying cred. The Graph is intended to be a lightweight
+ * data structure, so only data directly needed for cred analysis is included.
+ * If there's other data you want to store (e.g. the full text of posts that
+ * are tracked in the graph), you can use the node address as a key for a
+ * separate database.
  *
- * Edges need a little more data, since the graph needs to know what nodes the
- * edge connects. Each edge is an object with `src` and `dst` fields. These
- * fields represent the "source" of the edge and the "destination" of the edge
- * respectively, and both fields contain `NodeAddressT`s. The edge also has
- * its own address, which is an `EdgeAddressT`.
- * Here's a toy example:
+ * Edges are represented by `Edge` objects. They have `src` and `dst` fields.
+ * These fields represent the "source" of the edge and the "destination" of the
+ * edge respectively, and both fields contain `NodeAddressT`s. The edge also
+ * has its own address, which is an `EdgeAddressT`.
  *
- * const pr = NodeAddress.fromParts(["pull_request", "1"]);
- * const me = NodeAddress.fromParts(["user", "decentralion"]);
- * const authored = EdgeAddress.fromParts(["authored", "pull_request", "1"]);
- * const edge = {src: me, dst: pr, address: authored};
+ * Here's a toy example of creating a graph:
  *
- * Creating a graph is as simple as invoking the constructor and adding nodes and edges:
+ * ```js
+ * const prAddress = NodeAddress.fromParts(["pull_request", "1"]);
+ * const pr: Node = {address: prAddress}
+ * const myAddress = NodeAddress.fromParts(["user", "decentralion"]);
+ * const me: Node = {addess: myAddress}
+ * const authoredAddress = EdgeAddress.fromParts(["authored", "pull_request", "1"]);
+ * const edge = {src: me, dst: pr, address: authoredAddress};
  *
  * const g = new Graph();
  * g.addNode(pr);
  * g.addNode(me);
  * g.addEdge(edge);
+ * ```
  *
  * Graph has a number of accessor methods:
- * - `hasNode` to check if a node is in the Graph
+ * - `hasNode` to check if a node address is in the Graph
+ * - `node` to retrieve a node by its address
  * - `nodes` to iterate over the nodes in the graph
  * - `hasEdge` to check if an edge address is in the Graph
  * - `edge` to retrieve an edge by its address
@@ -100,6 +106,13 @@ export const EdgeAddress: AddressModule<EdgeAddressT> = (makeAddressModule({
 }): AddressModule<string>);
 
 /**
+ * Represents a node in the graph.
+ */
+export type Node = {|
+  +address: NodeAddressT,
+|};
+
+/**
  * An edge between two nodes.
  */
 export type Edge = {|
@@ -110,7 +123,7 @@ export type Edge = {|
 
 const COMPAT_INFO = {type: "sourcecred/graph", version: "0.4.0"};
 
-export type Neighbor = {|+node: NodeAddressT, +edge: Edge|};
+export type Neighbor = {|+node: Node, +edge: Edge|};
 
 export opaque type DirectionT = Symbol;
 export const Direction: {|
@@ -151,7 +164,7 @@ export opaque type GraphJSON = Compatible<{|
 export type ModificationCount = number;
 
 export class Graph {
-  _nodes: Set<NodeAddressT>;
+  _nodes: Map<NodeAddressT, Node>;
   _edges: Map<EdgeAddressT, Edge>;
   // Map every node address present in the graph to its inEdges (edges for
   // which it is a dst) and outEdges (edges for which it is a src)
@@ -169,7 +182,7 @@ export class Graph {
       when: -1,
       failure: "Invariants never checked",
     };
-    this._nodes = new Set();
+    this._nodes = new Map();
     this._edges = new Map();
     this._incidentEdges = new Map();
     this._maybeCheckInvariants();
@@ -232,11 +245,21 @@ export class Graph {
    *
    * Returns `this` for chaining.
    */
-  addNode(a: NodeAddressT): this {
-    NodeAddress.assertValid(a);
-    if (!this._nodes.has(a)) {
-      this._nodes.add(a);
-      this._incidentEdges.set(a, {inEdges: [], outEdges: []});
+  addNode(node: Node): this {
+    const {address} = node;
+    NodeAddress.assertValid(address);
+    const existingNode = this._nodes.get(address);
+    if (existingNode == null) {
+      this._nodes.set(address, node);
+      this._incidentEdges.set(address, {inEdges: [], outEdges: []});
+    } else {
+      if (!deepEqual(node, existingNode)) {
+        const strNode = nodeToString(node);
+        const strExisting = nodeToString(existingNode);
+        throw new Error(
+          `conflict between new node ${strNode} and existing ${strExisting}`
+        );
+      }
     }
     this._markModification();
     this._maybeCheckInvariants();
@@ -289,6 +312,17 @@ export class Graph {
   }
 
   /**
+   * Returns the Node matching a given NodeAddressT, if such a node exists,
+   * or undefined otherwise.
+   */
+  node(address: NodeAddressT): ?Node {
+    NodeAddress.assertValid(address);
+    const result = this._nodes.get(address);
+    this._maybeCheckInvariants();
+    return result;
+  }
+
+  /**
    * Returns an iterator over all of the nodes in the graph.
    *
    * Optionally, the caller can provide a node prefix. If
@@ -301,7 +335,7 @@ export class Graph {
    *
    * [1]: https://github.com/sourcecred/sourcecred/blob/7c7fa2d83d4fd5ba38efb2b2f4e0244235ac1312/src/core/address.js#L74
    */
-  nodes(options?: {|+prefix: NodeAddressT|}): Iterator<NodeAddressT> {
+  nodes(options?: {|+prefix: NodeAddressT|}): Iterator<Node> {
     const prefix = options != null ? options.prefix : NodeAddress.empty;
     if (prefix == null) {
       throw new Error(`Invalid prefix: ${String(prefix)}`);
@@ -314,9 +348,9 @@ export class Graph {
   *_nodesIterator(
     initialModificationCount: ModificationCount,
     prefix: NodeAddressT
-  ): Iterator<NodeAddressT> {
-    for (const node of this._nodes) {
-      if (NodeAddress.hasPrefix(node, prefix)) {
+  ): Iterator<Node> {
+    for (const node of this._nodes.values()) {
+      if (NodeAddress.hasPrefix(node.address, prefix)) {
         this._checkForComodification(initialModificationCount);
         this._maybeCheckInvariants();
         yield node;
@@ -572,8 +606,14 @@ export class Graph {
             continue; // don't yield loop edges twice.
           }
         }
-        const neighborNode = adjacency.direction === "IN" ? edge.src : edge.dst;
-        if (nodeFilter(neighborNode) && edgeFilter(edge.address)) {
+        const neighborNodeAddress =
+          adjacency.direction === "IN" ? edge.src : edge.dst;
+        const neighborNode = this.node(neighborNodeAddress);
+        if (
+          nodeFilter(neighborNodeAddress) &&
+          edgeFilter(edge.address) &&
+          neighborNode != null
+        ) {
           this._checkForComodification(initialModificationCount);
           this._maybeCheckInvariants();
           yield {edge, node: neighborNode};
@@ -623,10 +663,12 @@ export class Graph {
    * the number of edges.
    */
   toJSON(): GraphJSON {
-    const sortedNodes = Array.from(this.nodes()).sort();
+    const sortedNodeAddresses = Array.from(this.nodes())
+      .map((x) => x.address)
+      .sort();
     const nodeToSortedIndex = new Map();
-    sortedNodes.forEach((node, i) => {
-      nodeToSortedIndex.set(node, i);
+    sortedNodeAddresses.forEach((address, i) => {
+      nodeToSortedIndex.set(address, i);
     });
     const sortedEdges = sortBy(Array.from(this.edges()), (x) => x.address);
     const indexedEdges = sortedEdges.map(({src, dst, address}) => {
@@ -635,7 +677,7 @@ export class Graph {
       return {srcIndex, dstIndex, address: EdgeAddress.toParts(address)};
     });
     const rawJSON = {
-      nodes: sortedNodes.map((x) => NodeAddress.toParts(x)),
+      nodes: sortedNodeAddresses.map((x) => NodeAddress.toParts(x)),
       edges: indexedEdges,
     };
     const result = toCompat(COMPAT_INFO, rawJSON);
@@ -646,15 +688,23 @@ export class Graph {
   /**
    * Deserializes a GraphJSON into a new Graph.
    */
-  static fromJSON(json: GraphJSON): Graph {
-    const {nodes: nodesJSON, edges} = fromCompat(COMPAT_INFO, json);
+  static fromJSON(compatJson: GraphJSON): Graph {
+    const json = fromCompat(COMPAT_INFO, compatJson);
+    const nodesJSON: AddressJSON[] = json.nodes;
+    const edgesJSON: IndexedEdgeJSON[] = json.edges;
     const result = new Graph();
-    const nodes = nodesJSON.map((x) => NodeAddress.fromParts(x));
+    const nodes: Node[] = nodesJSON.map((x) => ({
+      address: NodeAddress.fromParts(x),
+    }));
     nodes.forEach((n) => result.addNode(n));
-    edges.forEach(({address, srcIndex, dstIndex}) => {
+    edgesJSON.forEach(({address, srcIndex, dstIndex}) => {
       const src = nodes[srcIndex];
       const dst = nodes[dstIndex];
-      result.addEdge({address: EdgeAddress.fromParts(address), src, dst});
+      result.addEdge({
+        address: EdgeAddress.fromParts(address),
+        src: src.address,
+        dst: dst.address,
+      });
     });
     return result;
   }
@@ -714,7 +764,8 @@ export class Graph {
   }
 
   _checkInvariants() {
-    // Definition. A node `n` is in the graph if `_nodes.has(n)`.
+    // Definition. A node `n` is in the graph if `n` is deep-equal to
+    // `_nodes.get(n.address)`.
     //
     // Definition. An edge `e` is in the graph if `e` is deep-equal to
     // `_edges.get(e.address)`.
@@ -723,14 +774,20 @@ export class Graph {
     // values modulo deep equality (or, from context, an element of such a
     // class).
 
-    // Invariant 1. For a node `n`, if `n` is in the graph, then
-    // `_incidentEdges.has(n)`. The value of `_incidentEdges.get(n)`
-    // is an object with two fields: `inEdges` and `outEdges`, both of which are
-    // arrays of `Edge`s
-    for (const node of this._nodes) {
-      if (!this._incidentEdges.has(node)) {
+    // Invariant 1. For a node address `a`, if `_nodes.has(a)` and
+    // `_nodes.get(a) === n`, then:
+    // 1. `n.address` equals `a`;
+    // 2. `_incidentEdges.has(n)`;
+    for (const [address, node] of this._nodes) {
+      if (node.address !== address) {
         throw new Error(
-          `missing incident-edges for ${NodeAddress.toString(node)}`
+          `bad node address: ${nodeToString(node)} does not match ${address}`
+        );
+      }
+
+      if (!this._incidentEdges.has(address)) {
+        throw new Error(
+          `missing incident-edges for ${NodeAddress.toString(address)}`
         );
       }
     }
@@ -740,8 +797,8 @@ export class Graph {
     //  1. `e.address` equals `a`;
     //  2. `e.src` is in the graph;
     //  3. `e.dst` is in the graph;
-    //  4. `_inEdges.get(e.dst)` contains `e`; and
-    //  5. `_outEdges.get(e.src)` contains `e`.
+    //  4. `_incidentEdges.get(e.dst).inEdges` contains `e`; and
+    //  5. `_incidentEdges.get(e.src).outEdges` contains `e`.
     //
     // We check 2.1, 2.2, and 2.3 here, and check 2.4 and 2.5 later for
     // improved performance.
@@ -868,6 +925,16 @@ export class Graph {
       this.checkInvariants();
     }
   }
+}
+
+/**
+ * Convert a node into a human readable string.
+ *
+ * The precise behavior is an implementation detail and subject to change.
+ */
+export function nodeToString(node: Node): string {
+  const address = NodeAddress.toString(node.address);
+  return `{address: ${address}}`;
 }
 
 /**

@@ -46,7 +46,7 @@ class GraphCreator {
         hash: commit.hash(),
       };
       const gitCommit = GitNode.toRaw(gitCommitAddress);
-      this.graph.addNode(gitCommit);
+      this.graph.addNode({address: gitCommit});
       this.graph.addEdge(
         createEdge.correspondsToCommit(commit.address(), gitCommitAddress)
       );
@@ -78,7 +78,7 @@ class GraphCreator {
   }
 
   addNode(addr: N.StructuredAddress) {
-    this.graph.addNode(N.toRaw(addr));
+    this.graph.addNode({address: N.toRaw(addr)});
   }
 
   addAuthors(entity: R.AuthoredEntity) {

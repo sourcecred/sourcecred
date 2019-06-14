@@ -5,6 +5,7 @@ import deepEqual from "lodash.isequal";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import {
   Graph,
+  type Node,
   type Edge,
   type EdgesOptions,
   type NodeAddressT,
@@ -37,7 +38,7 @@ export type {EdgeWeight} from "./attribution/graphToMarkovChain";
 export type EdgeEvaluator = (Edge) => EdgeWeight;
 
 export type ScoredNode = {|
-  +address: NodeAddressT,
+  +node: Node,
   +score: number,
 |};
 
@@ -215,7 +216,7 @@ export class PagerankGraph {
     this._scores = new Map();
     const graphNodes = Array.from(this._graph.nodes());
     for (const node of graphNodes) {
-      this._scores.set(node, 1 / graphNodes.length);
+      this._scores.set(node.address, 1 / graphNodes.length);
     }
     this.setEdgeEvaluator(edgeEvaluator);
   }
@@ -228,7 +229,7 @@ export class PagerankGraph {
     this._totalOutWeight = new Map();
     this._edgeWeights = new Map();
     for (const node of this._graph.nodes()) {
-      this._totalOutWeight.set(node, this._syntheticLoopWeight);
+      this._totalOutWeight.set(node.address, this._syntheticLoopWeight);
     }
     const addOutWeight = (node: NodeAddressT, weight: number) => {
       const previousWeight = NullUtil.get(this._totalOutWeight.get(node));
@@ -267,10 +268,10 @@ export class PagerankGraph {
     return this._syntheticLoopWeight;
   }
 
-  *_nodesIterator(iterator: Iterator<NodeAddressT>): Iterator<ScoredNode> {
+  *_nodesIterator(iterator: Iterator<Node>): Iterator<ScoredNode> {
     for (const node of iterator) {
-      const score = NullUtil.get(this._scores.get(node));
-      yield {address: node, score};
+      const score = NullUtil.get(this._scores.get(node.address));
+      yield {node, score};
     }
   }
 
@@ -298,7 +299,8 @@ export class PagerankGraph {
     if (score == null) {
       return undefined;
     } else {
-      return {address: x, score};
+      const node = NullUtil.get(this._graph.node(x));
+      return {node, score};
     }
   }
 
@@ -396,7 +398,7 @@ export class PagerankGraph {
   ): Iterator<ScoredNeighbor> {
     const graphNeighbors = this.graph().neighbors(target, options);
     for (const {node, edge} of graphNeighbors) {
-      const scoredNode = NullUtil.get(this.node(node));
+      const scoredNode = NullUtil.get(this.node(node.address));
       const weightedEdge = NullUtil.get(this.edge(edge.address));
       // We compute how much of target's score is attributable to the neighbor.
       // First, we find out how much edge weight there was from node to target,
@@ -410,7 +412,7 @@ export class PagerankGraph {
       }
       // We normalize this edge weight by the total outWeight for `node`.
       const normalizedEdgeWeight =
-        relevantEdgeWeight / this.totalOutWeight(node);
+        relevantEdgeWeight / this.totalOutWeight(node.address);
 
       // Then we directly compute the score contribution
       const scoreContribution = scoredNode.score * normalizedEdgeWeight;
