@@ -17,4 +17,10 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = Object.freeze([
   "MDg6UmVhY3Rpb24yMTY3ODkyNQ==",
   "MDg6UmVhY3Rpb240NDMwMzQ1",
   "MDg6UmVhY3Rpb24xMDI4MzQxOA==",
+  // Now org used to be a user (@nueko)
+  "MDEyOk9yZ2FuaXphdGlvbjIxMzQ5NTM=",
+  // Problematic interactions they did as a user: Thumbs up reactions.
+  "MDg6UmVhY3Rpb24xNTUyODc3OQ==", // https://github.com/quasarframework/quasar/issues/1064
+  "MDg6UmVhY3Rpb24xNjA5NDYyOQ==", // https://github.com/quasarframework/quasar/issues/1123#issuecomment-343846259
+  "MDg6UmVhY3Rpb24xNjIxNTMzNQ==", // https://github.com/quasarframework/quasar/pull/1128#issuecomment-344605228
 ]);
