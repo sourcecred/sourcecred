@@ -22,7 +22,7 @@ describe("plugins/git/createGraph", () => {
           throw new Error("Found non-commit node");
         }
       }
-      for (const {address} of graph.edges()) {
+      for (const {address} of graph.edges({showDangling: true})) {
         if (!EdgeAddress.hasPrefix(address, EdgePrefix.hasParent)) {
           throw new Error("Found non-has-parent edge");
         }

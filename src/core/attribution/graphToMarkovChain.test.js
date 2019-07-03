@@ -2,7 +2,7 @@
 
 import sortBy from "lodash.sortby";
 
-import {Graph} from "../graph";
+import {Graph, EdgeAddress} from "../graph";
 import {
   createConnections,
   createOrderedSparseMarkovChain,
@@ -142,6 +142,28 @@ describe("core/attribution/graphToMarkovChain", () => {
       expect(normalize(osmc)).toEqual(normalize(expected));
     });
 
+    it("ignores dangling edges", () => {
+      const e1 = {
+        src: n1.address,
+        dst: n2.address,
+        address: EdgeAddress.fromParts(["e1"]),
+      };
+      const g = new Graph().addNode(n1).addEdge(e1);
+      const edgeWeight = (_unused_edge) => {
+        throw new Error("Don't even look at me");
+      };
+      const osmc = createOrderedSparseMarkovChain(
+        createConnections(g, edgeWeight, 1e-3)
+      );
+      const expected = {
+        nodeOrder: [n1.address],
+        chain: [
+          {neighbor: new Uint32Array([0]), weight: new Float64Array([1.0])},
+        ],
+      };
+      expect(normalize(osmc)).toEqual(normalize(expected));
+    });
+
     it("works on a simple asymmetric chain", () => {
       const e1 = edge("e1", n1, n2);
       const e2 = edge("e2", n2, n3);
@@ -248,6 +270,7 @@ describe("core/attribution/graphToMarkovChain", () => {
           ag.nodes.dst.address,
           ag.nodes.loop.address,
           ag.nodes.isolated.address,
+          ag.nodes.halfIsolated.address,
         ],
         chain: [
           {
@@ -260,6 +283,7 @@ describe("core/attribution/graphToMarkovChain", () => {
           },
           {neighbor: new Uint32Array([2]), weight: new Float64Array([1])},
           {neighbor: new Uint32Array([3]), weight: new Float64Array([1])},
+          {neighbor: new Uint32Array([4]), weight: new Float64Array([1])},
         ],
       };
       expect(normalize(osmc)).toEqual(normalize(expected));
