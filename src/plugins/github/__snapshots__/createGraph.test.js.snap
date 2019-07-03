@@ -2561,24 +2561,6 @@ Array [
     ],
     "nodes": Array [
       Object {
-        "index": 0,
-      },
-      Object {
-        "index": 1,
-      },
-      Object {
-        "index": 2,
-      },
-      Object {
-        "index": 3,
-      },
-      Object {
-        "index": 4,
-      },
-      Object {
-        "index": 5,
-      },
-      Object {
         "index": 6,
       },
       Object {
