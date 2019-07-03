@@ -34,7 +34,6 @@ class GraphCreator {
     this.graph.addNode({address: GN.toRaw(node)});
     for (const parentHash of commit.parentHashes) {
       const parent: GN.CommitAddress = {type: GN.COMMIT_TYPE, hash: parentHash};
-      this.graph.addNode({address: GN.toRaw(parent)});
       this.graph.addEdge(GE.createEdge.hasParent(node, parent));
     }
   }

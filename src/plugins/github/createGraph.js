@@ -45,8 +45,6 @@ class GraphCreator {
         type: GitNode.COMMIT_TYPE,
         hash: commit.hash(),
       };
-      const gitCommit = GitNode.toRaw(gitCommitAddress);
-      this.graph.addNode({address: gitCommit});
       this.graph.addEdge(
         createEdge.correspondsToCommit(commit.address(), gitCommitAddress)
       );
