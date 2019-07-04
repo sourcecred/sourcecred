@@ -32,10 +32,12 @@ class GraphCreator {
     };
     const address = GN.toRaw(structuredAddress);
     const description = commit.hash;
-    this.graph.addNode({address, description});
+    this.graph.addNode({address, description, timestampMs: commit.createdAt});
     for (const parentHash of commit.parentHashes) {
       const parent: GN.CommitAddress = {type: GN.COMMIT_TYPE, hash: parentHash};
-      this.graph.addEdge(GE.createEdge.hasParent(structuredAddress, parent));
+      this.graph.addEdge(
+        GE.createEdge.hasParent(structuredAddress, parent, commit.createdAt)
+      );
     }
   }
 }

@@ -15,7 +15,7 @@ Array [
     "graphJSON": Array [
       Object {
         "type": "sourcecred/graph",
-        "version": "0.6.0",
+        "version": "0.8.0",
       },
       Object {
         "edges": Array [
@@ -25,6 +25,7 @@ Array [
             ],
             "dstIndex": 4,
             "srcIndex": 4,
+            "timestampMs": 0,
           },
           Object {
             "address": Array [
@@ -32,6 +33,7 @@ Array [
             ],
             "dstIndex": 4,
             "srcIndex": 1,
+            "timestampMs": 0,
           },
           Object {
             "address": Array [
@@ -40,6 +42,7 @@ Array [
             ],
             "dstIndex": 0,
             "srcIndex": 5,
+            "timestampMs": 0,
           },
           Object {
             "address": Array [
@@ -48,6 +51,7 @@ Array [
             ],
             "dstIndex": 0,
             "srcIndex": 5,
+            "timestampMs": 0,
           },
           Object {
             "address": Array [
@@ -55,28 +59,34 @@ Array [
             ],
             "dstIndex": 3,
             "srcIndex": 3,
+            "timestampMs": 0,
           },
         ],
         "nodes": Array [
           Object {
             "description": "dst",
             "index": 0,
+            "timestampMs": null,
           },
           Object {
             "description": "halfIsolated",
             "index": 1,
+            "timestampMs": null,
           },
           Object {
             "description": "isolated",
             "index": 2,
+            "timestampMs": null,
           },
           Object {
             "description": "loop",
             "index": 3,
+            "timestampMs": null,
           },
           Object {
             "description": "src",
             "index": 5,
+            "timestampMs": null,
           },
         ],
         "sortedNodeAddresses": Array [

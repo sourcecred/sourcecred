@@ -19,6 +19,7 @@ export function partsNode(parts: string[]): Node {
   return Object.freeze({
     address: NodeAddress.fromParts(parts),
     description: parts.toString(),
+    timestampMs: null,
   });
 }
 
@@ -43,6 +44,7 @@ export function partsEdge(parts: string[], src: Node, dst: Node): Edge {
     address: EdgeAddress.fromParts(parts),
     src: src.address,
     dst: dst.address,
+    timestampMs: 0,
   });
 }
 

@@ -37,11 +37,13 @@ export type StructuredAddress = HasParentAddress;
 export const createEdge = Object.freeze({
   hasParent: (
     child: GitNode.CommitAddress,
-    parent: GitNode.CommitAddress
+    parent: GitNode.CommitAddress,
+    timestampMs: number
   ): Edge => ({
     address: toRaw({type: HAS_PARENT_TYPE, child, parent}),
     src: GitNode.toRaw(child),
     dst: GitNode.toRaw(parent),
+    timestampMs,
   }),
 });
 

@@ -7,7 +7,12 @@ import {weightsToEdgeEvaluator} from "./weightsToEdgeEvaluator";
 describe("analysis/weightsToEdgeEvaluator", () => {
   const src = NodeAddress.fromParts(["src"]);
   const dst = NodeAddress.fromParts(["dst"]);
-  const edge = {src, dst, address: EdgeAddress.fromParts(["edge"])};
+  const edge = {
+    src,
+    dst,
+    address: EdgeAddress.fromParts(["edge"]),
+    timestampMs: 0,
+  };
 
   const fallbackNodeType = Object.freeze({
     name: "",

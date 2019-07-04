@@ -1,5 +1,6 @@
 // @flow
 
+import * as NullUtil from "../../util/null";
 import {Graph} from "../../core/graph";
 import * as GitNode from "../git/nodes";
 import * as N from "./nodes";
@@ -23,7 +24,11 @@ class GraphCreator {
   addData(view: R.RelationalView) {
     for (const entity of view.entities()) {
       const address = N.toRaw(entity.address());
-      this.graph.addNode({address, description: entity.description()});
+      this.graph.addNode({
+        address,
+        description: entity.description(),
+        timestampMs: entity.timestampMs(),
+      });
     }
 
     for (const child of view.childEntities()) {
@@ -37,7 +42,10 @@ class GraphCreator {
     for (const pull of view.pulls()) {
       const commit = pull.mergedAs();
       if (commit != null) {
-        this.graph.addEdge(createEdge.mergedAs(pull.address(), commit));
+        const commitTimestamp = NullUtil.get(view.commit(commit)).timestampMs();
+        this.graph.addEdge(
+          createEdge.mergedAs(pull.address(), commit, commitTimestamp)
+        );
       }
     }
 
@@ -47,20 +55,28 @@ class GraphCreator {
         hash: commit.hash(),
       };
       this.graph.addEdge(
-        createEdge.correspondsToCommit(commit.address(), gitCommitAddress)
+        createEdge.correspondsToCommit(
+          commit.address(),
+          gitCommitAddress,
+          commit.timestampMs()
+        )
       );
     }
 
     for (const referrer of view.textContentEntities()) {
       for (const referent of referrer.references()) {
         this.graph.addEdge(
-          createEdge.references(referrer.address(), referent.address())
+          createEdge.references(
+            referrer.address(),
+            referent.address(),
+            referrer.timestampMs()
+          )
         );
       }
     }
 
     for (const reactable of view.reactableEntities()) {
-      for (const {content, user} of reactable.reactions()) {
+      for (const {content, user, timestampMs} of reactable.reactions()) {
         // We only support unambiguously positive reactions for now
         if (
           content === Reactions.THUMBS_UP ||
@@ -69,7 +85,7 @@ class GraphCreator {
           content === Reactions.ROCKET
         ) {
           this.graph.addEdge(
-            createEdge.reacts(content, user, reactable.address())
+            createEdge.reacts(content, user, reactable.address(), timestampMs)
           );
         }
       }
@@ -79,14 +95,22 @@ class GraphCreator {
   addAuthors(entity: R.AuthoredEntity) {
     for (const author of entity.authors()) {
       this.graph.addEdge(
-        createEdge.authors(author.address(), entity.address())
+        createEdge.authors(
+          author.address(),
+          entity.address(),
+          entity.timestampMs()
+        )
       );
     }
   }
 
   addHasParent(child: R.Issue | R.Pull | R.Comment | R.Review) {
     this.graph.addEdge(
-      createEdge.hasParent(child.address(), child.parent().address())
+      createEdge.hasParent(
+        child.address(),
+        child.parent().address(),
+        child.timestampMs()
+      )
     );
   }
 }

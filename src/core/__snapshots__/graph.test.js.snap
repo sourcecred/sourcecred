@@ -4,7 +4,7 @@ exports[`core/graph toJSON / fromJSON snapshot testing a graph with a dangling e
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.6.0",
+    "version": "0.8.0",
   },
   Object {
     "edges": Array [
@@ -14,6 +14,7 @@ Array [
         ],
         "dstIndex": 0,
         "srcIndex": 1,
+        "timestampMs": 0,
       },
     ],
     "nodes": Array [],
@@ -33,7 +34,7 @@ exports[`core/graph toJSON / fromJSON snapshot testing a trivial graph 1`] = `
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.6.0",
+    "version": "0.8.0",
   },
   Object {
     "edges": Array [
@@ -43,6 +44,7 @@ Array [
         ],
         "dstIndex": 0,
         "srcIndex": 1,
+        "timestampMs": 0,
       },
       Object {
         "address": Array [
@@ -50,16 +52,19 @@ Array [
         ],
         "dstIndex": 0,
         "srcIndex": 1,
+        "timestampMs": 0,
       },
     ],
     "nodes": Array [
       Object {
         "description": "dst",
         "index": 0,
+        "timestampMs": null,
       },
       Object {
         "description": "src",
         "index": 1,
+        "timestampMs": null,
       },
     ],
     "sortedNodeAddresses": Array [
@@ -78,7 +83,7 @@ exports[`core/graph toJSON / fromJSON snapshot testing an advanced graph 1`] = `
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.6.0",
+    "version": "0.8.0",
   },
   Object {
     "edges": Array [
@@ -88,6 +93,7 @@ Array [
         ],
         "dstIndex": 4,
         "srcIndex": 4,
+        "timestampMs": 0,
       },
       Object {
         "address": Array [
@@ -95,6 +101,7 @@ Array [
         ],
         "dstIndex": 4,
         "srcIndex": 1,
+        "timestampMs": 0,
       },
       Object {
         "address": Array [
@@ -103,6 +110,7 @@ Array [
         ],
         "dstIndex": 0,
         "srcIndex": 5,
+        "timestampMs": 0,
       },
       Object {
         "address": Array [
@@ -111,6 +119,7 @@ Array [
         ],
         "dstIndex": 0,
         "srcIndex": 5,
+        "timestampMs": 0,
       },
       Object {
         "address": Array [
@@ -118,28 +127,34 @@ Array [
         ],
         "dstIndex": 3,
         "srcIndex": 3,
+        "timestampMs": 0,
       },
     ],
     "nodes": Array [
       Object {
         "description": "dst",
         "index": 0,
+        "timestampMs": null,
       },
       Object {
         "description": "halfIsolated",
         "index": 1,
+        "timestampMs": null,
       },
       Object {
         "description": "isolated",
         "index": 2,
+        "timestampMs": null,
       },
       Object {
         "description": "loop",
         "index": 3,
+        "timestampMs": null,
       },
       Object {
         "description": "src",
         "index": 5,
+        "timestampMs": null,
       },
     ],
     "sortedNodeAddresses": Array [
