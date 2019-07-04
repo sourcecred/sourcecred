@@ -728,9 +728,10 @@ export class Mirror {
    * Returns a promise that resolves to `true` if any changes were made.
    */
   async _updateStep(
-    postQuery: ({+body: Queries.Body, +variables: {+[string]: any}}) => Promise<
-      any
-    >,
+    postQuery: ({
+      +body: Queries.Body,
+      +variables: {+[string]: any},
+    }) => Promise<any>,
     options: {|
       +nodesLimit: number,
       +nodesOfTypeLimit: number,
@@ -791,9 +792,10 @@ export class Mirror {
    * See: `extract`.
    */
   async update(
-    postQuery: ({+body: Queries.Body, +variables: {+[string]: any}}) => Promise<
-      any
-    >,
+    postQuery: ({
+      +body: Queries.Body,
+      +variables: {+[string]: any},
+    }) => Promise<any>,
     options: {|
       +nodesLimit: number,
       +nodesOfTypeLimit: number,
@@ -1333,8 +1335,7 @@ export class Mirror {
           const nestValue:
             | PrimitiveResult
             | NodeFieldResult
-            | NestedFieldResult =
-            entry[nestFieldname];
+            | NestedFieldResult = entry[nestFieldname];
           const topLevelNested: NestedFieldResult = (nestValue: any);
           if (topLevelNested === undefined) {
             const s = JSON.stringify;
@@ -1409,8 +1410,7 @@ export class Mirror {
           const nestValue:
             | PrimitiveResult
             | NodeFieldResult
-            | NestedFieldResult =
-            entry[nestFieldname];
+            | NestedFieldResult = entry[nestFieldname];
           const topLevelNested: NestedFieldResult = (nestValue: any);
           // No need for an extra safety check that this is present: we
           // handled that while covering primitive fields.

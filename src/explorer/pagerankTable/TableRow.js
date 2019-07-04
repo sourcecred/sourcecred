@@ -107,10 +107,10 @@ export function PaddingRow(props: {|+backgroundColor: string|}) {
 
 const styles = StyleSheet.create({
   /* To apply 'hoverHighlight', provide a backgroundImage containing two <image>
- * data types (eg linear gradients). The first backgroundImage will be
- * the default background. The second backgroundImage will be applied on top
- * of the first background when the user hovers or tabs over the element.
- */
+   * data types (eg linear gradients). The first backgroundImage will be
+   * the default background. The second backgroundImage will be applied on top
+   * of the first background when the user hovers or tabs over the element.
+   */
 
   hoverHighlight: {
     backgroundSize: "100% 100%, 0 0",

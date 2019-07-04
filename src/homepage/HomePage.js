@@ -37,11 +37,13 @@ export default class HomePage extends React.Component<{|+assets: Assets|}> {
           chronically underfunded. For example, NumPy{" "}
           <Link href={urls.numpyFunding}>
             received no funding at all until 2017
-          </Link>, and{" "}
+          </Link>
+          , and{" "}
           <Link href={urls.opensslFunding}>
             a world where OpenSSL was funded might have been a world without
             Heartbleed
-          </Link>.
+          </Link>
+          .
         </p>
 
         <p>
@@ -107,16 +109,13 @@ export default class HomePage extends React.Component<{|+assets: Assets|}> {
         <h2>How cred works</h2>
         <p>
           Cred is computed by first creating a contribution{" "}
-          <Link href={urls.graph}>graph</Link>
-          , which contains every contribution to the project and the relations
-          among them. For example, GitHub issues, Git commits, and individual
-          files and functions can be included in the graph. Then, SourceCred
-          runs a modified version of <Link href={urls.pagerank}>
-            PageRank
-          </Link>{" "}
-          on that graph to produce a cred attribution. The attribution is highly
-          configurable; project maintainers can add new heuristics and adjust
-          weights.
+          <Link href={urls.graph}>graph</Link>, which contains every
+          contribution to the project and the relations among them. For example,
+          GitHub issues, Git commits, and individual files and functions can be
+          included in the graph. Then, SourceCred runs a modified version of{" "}
+          <Link href={urls.pagerank}>PageRank</Link> on that graph to produce a
+          cred attribution. The attribution is highly configurable; project
+          maintainers can add new heuristics and adjust weights.
         </p>
 
         <p>

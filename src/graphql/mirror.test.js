@@ -1529,9 +1529,8 @@ describe("graphql/mirror", () => {
           hasNextPage: options.hasNextPage,
           endCursor: options.endCursor,
         },
-        nodes: options.comments.map(
-          (n) =>
-            n === null ? null : {__typename: "IssueComment", id: `comment:${n}`}
+        nodes: options.comments.map((n) =>
+          n === null ? null : {__typename: "IssueComment", id: `comment:${n}`}
         ),
       });
       const createEmptyResponse = () =>

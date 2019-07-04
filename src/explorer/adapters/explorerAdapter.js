@@ -14,5 +14,5 @@ export interface StaticExplorerAdapter {
 export interface DynamicExplorerAdapter {
   graph(): Graph;
   nodeDescription(NodeAddressT): ReactNode;
-  static (): StaticExplorerAdapter;
+  static(): StaticExplorerAdapter;
 }

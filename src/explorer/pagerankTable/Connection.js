@@ -19,25 +19,21 @@ type ConnectionRowListProps = {|
   +connections: $ReadOnlyArray<ScoredConnection>,
 |};
 
-export class ConnectionRowList extends React.PureComponent<
-  ConnectionRowListProps
-> {
+export class ConnectionRowList extends React.PureComponent<ConnectionRowListProps> {
   render() {
     const {depth, node, sharedProps, connections} = this.props;
     const {maxEntriesPerList} = sharedProps;
     return (
       <React.Fragment>
-        {connections
-          .slice(0, maxEntriesPerList)
-          .map((sc) => (
-            <ConnectionRow
-              key={JSON.stringify(sc.connection.adjacency)}
-              depth={depth}
-              target={node}
-              scoredConnection={sc}
-              sharedProps={sharedProps}
-            />
-          ))}
+        {connections.slice(0, maxEntriesPerList).map((sc) => (
+          <ConnectionRow
+            key={JSON.stringify(sc.connection.adjacency)}
+            depth={depth}
+            target={node}
+            scoredConnection={sc}
+            sharedProps={sharedProps}
+          />
+        ))}
       </React.Fragment>
     );
   }
