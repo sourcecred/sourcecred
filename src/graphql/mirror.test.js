@@ -280,7 +280,8 @@ describe("graphql/mirror", () => {
         // update-related test code.
         date.setUTCMilliseconds(12345);
 
-        mirror._createUpdate(date);
+        const rowId = mirror._createUpdate(date);
+        expect(rowId).toEqual(1);
         expect(+date).toBe(12345); // please don't mutate the date...
         expect(
           db

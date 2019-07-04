@@ -63,7 +63,7 @@ declare type bettersqlite3$BoundParameter =
 declare class bettersqlite3$Statement {
   +database: bettersqlite3$Database;
   +source: string;
-  +returnsData: boolean;
+  +reader: boolean;
 
   run(...params: bettersqlite3$BoundParameter[]): bettersqlite3$RunResult;
   get(...params: bettersqlite3$BoundParameter[]): any;
@@ -89,7 +89,7 @@ declare interface bettersqlite3$RunResult {
   // TODO: This is actually `Integer.IntLike` from npm/integer, but we
   // don't have those typedefs. For now, `number` is a good
   // approximation.
-  lastInsertROWID: number;
+  lastInsertRowid: number;
 }
 
 declare class bettersqlite3$SqliteError extends Error {
