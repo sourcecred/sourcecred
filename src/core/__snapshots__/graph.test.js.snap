@@ -4,7 +4,7 @@ exports[`core/graph toJSON / fromJSON snapshot testing a graph with a dangling e
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.5.0",
+    "version": "0.6.0",
   },
   Object {
     "edges": Array [
@@ -33,7 +33,7 @@ exports[`core/graph toJSON / fromJSON snapshot testing a trivial graph 1`] = `
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.5.0",
+    "version": "0.6.0",
   },
   Object {
     "edges": Array [
@@ -54,9 +54,11 @@ Array [
     ],
     "nodes": Array [
       Object {
+        "description": "dst",
         "index": 0,
       },
       Object {
+        "description": "src",
         "index": 1,
       },
     ],
@@ -76,7 +78,7 @@ exports[`core/graph toJSON / fromJSON snapshot testing an advanced graph 1`] = `
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.5.0",
+    "version": "0.6.0",
   },
   Object {
     "edges": Array [
@@ -120,18 +122,23 @@ Array [
     ],
     "nodes": Array [
       Object {
+        "description": "dst",
         "index": 0,
       },
       Object {
+        "description": "halfIsolated",
         "index": 1,
       },
       Object {
+        "description": "isolated",
         "index": 2,
       },
       Object {
+        "description": "loop",
         "index": 3,
       },
       Object {
+        "description": "src",
         "index": 5,
       },
     ],

@@ -77,9 +77,11 @@ import * as NullUtil from "../util/null";
  *
  * ```js
  * const prAddress = NodeAddress.fromParts(["pull_request", "1"]);
- * const pr: Node = {address: prAddress}
+ * const prDescription = "My Fancy Pull Request"
+ * const pr: Node = {address: prAddress, description: prDescription}
  * const myAddress = NodeAddress.fromParts(["user", "decentralion"]);
- * const me: Node = {addess: myAddress}
+ * const myDescription = "@decentralion"
+ * const me: Node = {addess: myAddress, description: myDescription}
  * const authoredAddress = EdgeAddress.fromParts(["authored", "pull_request", "1"]);
  * const edge = {src: me, dst: pr, address: authoredAddress};
  *
@@ -121,6 +123,9 @@ export const EdgeAddress: AddressModule<EdgeAddressT> = (makeAddressModule({
  */
 export type Node = {|
   +address: NodeAddressT,
+  // Brief (ideally oneline) description for the node.
+  // Markdown is supported.
+  +description: string,
 |};
 
 /**
@@ -132,7 +137,7 @@ export type Edge = {|
   +dst: NodeAddressT,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/graph", version: "0.5.0"};
+const COMPAT_INFO = {type: "sourcecred/graph", version: "0.6.0"};
 
 export type Neighbor = {|+node: Node, +edge: Edge|};
 
@@ -170,6 +175,7 @@ type AddressJSON = string[]; // Result of calling {Node,Edge}Address.toParts
 type Integer = number;
 type IndexedNodeJSON = {|
   +index: Integer,
+  +description: string,
 |};
 type IndexedEdgeJSON = {|
   +address: AddressJSON,
@@ -757,10 +763,12 @@ export class Graph {
       }
     );
     const sortedNodes = sortBy(Array.from(this.nodes()), (x) => x.address);
-    const indexedNodes: IndexedNodeJSON[] = sortedNodes.map(({address}) => {
-      const index = NullUtil.get(nodeAddressToSortedIndex.get(address));
-      return {index};
-    });
+    const indexedNodes: IndexedNodeJSON[] = sortedNodes.map(
+      ({address, description}) => {
+        const index = NullUtil.get(nodeAddressToSortedIndex.get(address));
+        return {index, description};
+      }
+    );
     const rawJSON = {
       sortedNodeAddresses: sortedNodeAddresses.map((x) =>
         NodeAddress.toParts(x)
@@ -787,7 +795,10 @@ export class Graph {
     );
     const result = new Graph();
     nodesJSON.forEach((j: IndexedNodeJSON) => {
-      const n: Node = {address: sortedNodeAddresses[j.index]};
+      const n: Node = {
+        address: sortedNodeAddresses[j.index],
+        description: j.description,
+      };
       result.addNode(n);
     });
     edgesJSON.forEach(({address, srcIndex, dstIndex}) => {
