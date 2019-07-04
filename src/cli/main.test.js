@@ -5,30 +5,32 @@ import sourcecred from "./sourcecred";
 
 jest.mock("./sourcecred");
 
+const sourcecredMock: JestMockFn<any, any> = sourcecred;
+jest.spyOn(console, "log").mockImplementation(() => {});
+jest.spyOn(console, "error").mockImplementation(() => {});
+const logMock: JestMockFn<any, void> = console.log;
+const errorMock: JestMockFn<any, void> = console.error;
+
 describe("cli/main", () => {
-  beforeAll(() => {
-    jest.spyOn(console, "log").mockImplementation(() => {});
-    jest.spyOn(console, "error").mockImplementation(() => {});
-  });
   beforeEach(() => {
-    sourcecred.mockReset();
-    jest.spyOn(console, "log").mockClear();
-    jest.spyOn(console, "error").mockClear();
+    sourcecredMock.mockReset();
+    logMock.mockClear();
+    errorMock.mockClear();
   });
 
   it("forwards the exit code", async () => {
     process.argv = ["node", "sourcecred", "help"];
-    sourcecred.mockResolvedValueOnce(22);
+    sourcecredMock.mockResolvedValueOnce(22);
     await main();
     expect(process.exitCode).toBe(22);
   });
 
   it("forwards arguments", async () => {
     process.argv = ["node", "sourcecred", "help", "me"];
-    sourcecred.mockResolvedValueOnce(0);
+    sourcecredMock.mockResolvedValueOnce(0);
     await main();
-    expect(sourcecred).toHaveBeenCalledTimes(1);
-    expect(sourcecred).toHaveBeenCalledWith(["help", "me"], {
+    expect(sourcecredMock).toHaveBeenCalledTimes(1);
+    expect(sourcecredMock).toHaveBeenCalledWith(["help", "me"], {
       out: expect.any(Function),
       err: expect.any(Function),
     });
@@ -39,21 +41,21 @@ describe("cli/main", () => {
     process.argv = ["node", "sourcecred", "help"];
     jest.spyOn(console, "log").mockImplementation(() => {});
     jest.spyOn(console, "error").mockImplementation(() => {});
-    sourcecred.mockImplementation(async (args, std) => {
+    sourcecredMock.mockImplementation(async (args, std) => {
       std.out("out and away");
       std.err("err, what?");
       return 0;
     });
     await main();
-    expect(console.log.mock.calls).toEqual([["out and away"]]);
-    expect(console.error.mock.calls).toEqual([["err, what?"]]);
+    expect(logMock.mock.calls).toEqual([["out and away"]]);
+    expect(errorMock.mock.calls).toEqual([["err, what?"]]);
     expect(process.exitCode).toBe(0);
   });
 
   it("captures an error", async () => {
     process.argv = ["node", "sourcecred", "wat"];
     jest.spyOn(console, "error").mockImplementation(() => {});
-    sourcecred.mockImplementationOnce(() => {
+    sourcecredMock.mockImplementationOnce(() => {
       throw new Error("wat");
     });
     await main();
@@ -66,7 +68,7 @@ describe("cli/main", () => {
   it("captures a rejection", async () => {
     process.argv = ["node", "sourcecred", "wat"];
     jest.spyOn(console, "error").mockImplementation(() => {});
-    sourcecred.mockRejectedValueOnce("wat?");
+    sourcecredMock.mockRejectedValueOnce("wat?");
     await main();
     expect(console.log).not.toHaveBeenCalled();
     expect(console.error).toHaveBeenCalledWith('"wat?"');

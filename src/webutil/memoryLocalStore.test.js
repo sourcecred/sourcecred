@@ -21,6 +21,12 @@ describe("webutil/memoryLocalStore", () => {
     expect(ls.get("one")).toBe(null);
   });
 
+  it("throws an error on undefined", () => {
+    const ls = new MemoryLocalStore();
+    const f = () => ls.set("one", undefined);
+    expect(f).toThrowError("undefined");
+  });
+
   it("overwrites values", () => {
     const ls = new MemoryLocalStore();
     ls.set("questions", 5);

@@ -73,14 +73,20 @@ describe("util/null", () => {
       expect(fn).not.toHaveBeenCalled();
     }
     it("throws the provided message on `null`", () => {
-      const fn: () => string = jest.fn().mockReturnValueOnce("uh oh");
+      const fn: JestMockFn<
+        $ReadOnlyArray<void>,
+        string
+      > = jest.fn().mockReturnValueOnce("uh oh");
       expect(() => (NullUtil.orThrow((null: ?number), fn): number)).toThrow(
         /^uh oh$/
       );
       expect(fn.mock.calls).toEqual([[]]);
     });
     it("throws a custom error on `undefined`", () => {
-      const fn: () => string = jest.fn().mockReturnValueOnce("oh dear");
+      const fn: JestMockFn<
+        $ReadOnlyArray<void>,
+        string
+      > = jest.fn().mockReturnValueOnce("oh dear");
       expect(
         () => (NullUtil.orThrow((undefined: ?number), fn): number)
       ).toThrow(/^oh dear$/);

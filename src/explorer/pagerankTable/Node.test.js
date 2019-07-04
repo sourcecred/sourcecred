@@ -75,7 +75,7 @@ describe("explorer/pagerankTable/Node", () => {
   });
 
   describe("NodeRow", () => {
-    async function setup(props: $Shape<{...NodeRowProps}>) {
+    async function setup(props: $Shape<{...NodeRowProps}> | void) {
       props = props || {};
       let {sharedProps} = await example();
       if (props.sharedProps !== null) {

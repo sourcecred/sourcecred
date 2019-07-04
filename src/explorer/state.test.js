@@ -27,16 +27,15 @@ describe("explorer/state", () => {
     const setState = (appState) => {
       stateContainer.appState = appState;
     };
-    const loadGraphMock: (
-      assets: Assets,
-      adapters: StaticExplorerAdapterSet,
-      repoId: RepoId
-    ) => Promise<GraphWithAdapters> = jest.fn();
-    const pagerankMock: (
-      Graph,
-      EdgeEvaluator,
-      PagerankOptions
-    ) => Promise<PagerankNodeDecomposition> = jest.fn();
+    const loadGraphMock: JestMockFn<
+      [Assets, StaticExplorerAdapterSet, RepoId],
+      Promise<GraphWithAdapters>
+    > = jest.fn();
+
+    const pagerankMock: JestMockFn<
+      [Graph, EdgeEvaluator, PagerankOptions],
+      Promise<PagerankNodeDecomposition>
+    > = jest.fn();
     const stm = new StateTransitionMachine(
       getState,
       setState,
@@ -127,7 +126,7 @@ describe("explorer/state", () => {
     it("transitions to READY_TO_RUN_PAGERANK on success", async () => {
       const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
       const gwa = graphWithAdapters();
-      loadGraphMock.mockResolvedValue(gwa);
+      loadGraphMock.mockReturnValue(Promise.resolve(gwa));
       const succeeded = await stm.loadGraph(
         new Assets("/my/gateway/"),
         new StaticExplorerAdapterSet([])
@@ -146,7 +145,7 @@ describe("explorer/state", () => {
       const error = new Error("Oh no!");
       // $ExpectFlowError
       console.error = jest.fn();
-      loadGraphMock.mockRejectedValue(error);
+      loadGraphMock.mockReturnValue(Promise.reject(error));
       const succeeded = await stm.loadGraph(
         new Assets("/my/gateway/"),
         new StaticExplorerAdapterSet([])
@@ -173,7 +172,7 @@ describe("explorer/state", () => {
       for (const g of goodStates) {
         const {stm, getState, pagerankMock} = example(g);
         const pnd = pagerankNodeDecomposition();
-        pagerankMock.mockResolvedValue(pnd);
+        pagerankMock.mockReturnValue(Promise.resolve(pnd));
         await stm.runPagerank(
           defaultWeights(),
           defaultTypes(),
@@ -205,7 +204,7 @@ describe("explorer/state", () => {
       const error = new Error("Oh no!");
       // $ExpectFlowError
       console.error = jest.fn();
-      pagerankMock.mockRejectedValue(error);
+      pagerankMock.mockReturnValue(Promise.reject(error));
       await stm.runPagerank(
         defaultWeights(),
         defaultTypes(),

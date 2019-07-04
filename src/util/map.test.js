@@ -293,15 +293,6 @@ describe("util/map", () => {
     it("merge works on empty list", () => {
       expect(MapUtil.merge([])).toEqual(new Map());
     });
-    it("allows upcasting the type parameters", () => {
-      const numberMap: Map<number, number> = new Map().set(1, 2);
-      const stringMap: Map<string, string> = new Map().set("one", "two");
-      type NS = number | string;
-      const _unused_polyMap: Map<NS, NS> = MapUtil.merge([
-        numberMap,
-        stringMap,
-      ]);
-    });
     it("produces expected type errors", () => {
       const numberMap: Map<number, number> = new Map().set(1, 2);
       const stringMap: Map<string, string> = new Map().set("one", "two");

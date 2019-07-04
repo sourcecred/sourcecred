@@ -51,11 +51,12 @@ const plugins = [
 var env = process.env.BABEL_ENV || process.env.NODE_ENV;
 var backend = process.env.SOURCECRED_BACKEND === "true";
 if (env !== "development" && env !== "test" && env !== "production") {
+  const stringified = env === undefined ? "undefined" : JSON.stringify(env);
   throw new Error(
     "Using `babel-preset-react-app` requires that you specify `NODE_ENV` or " +
       '`BABEL_ENV` environment variables. Valid values are "development", ' +
       '"test", and "production". Instead, received: ' +
-      JSON.stringify(env) +
+      stringified +
       "."
   );
 }
