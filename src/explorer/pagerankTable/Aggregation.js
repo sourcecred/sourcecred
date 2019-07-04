@@ -17,9 +17,7 @@ type AggregationRowListProps = {|
   +sharedProps: SharedProps,
 |};
 
-export class AggregationRowList extends React.PureComponent<
-  AggregationRowListProps
-> {
+export class AggregationRowList extends React.PureComponent<AggregationRowListProps> {
   render() {
     const {depth, node, sharedProps} = this.props;
     const {pnd, adapters} = sharedProps;

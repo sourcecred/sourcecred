@@ -35,14 +35,12 @@ export function decompose(
   return MapUtil.mapValues(connections, (target, connections) => {
     const score = NullUtil.get(pr.get(target));
     const scoredConnections = sortBy(
-      connections.map(
-        (connection): ScoredConnection => {
-          const source = adjacencySource(target, connection.adjacency);
-          const sourceScore = NullUtil.get(pr.get(source));
-          const connectionScore = connection.weight * sourceScore;
-          return {connection, source, connectionScore};
-        }
-      ),
+      connections.map((connection): ScoredConnection => {
+        const source = adjacencySource(target, connection.adjacency);
+        const sourceScore = NullUtil.get(pr.get(source));
+        const connectionScore = connection.weight * sourceScore;
+        return {connection, source, connectionScore};
+      }),
       (x) => -x.connectionScore,
       (x) => x.connection.adjacency.type,
       (x) => {

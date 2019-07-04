@@ -192,10 +192,12 @@ module.exports = async function execDependencyGraph(
   }
 
   printSection("Overview");
-  const failedTasks = tasks.map((t) => t.id).filter((id) => {
-    const result = completedTasks.get(id);
-    return !result || !result.success;
-  });
+  const failedTasks = tasks
+    .map((t) => t.id)
+    .filter((id) => {
+      const result = completedTasks.get(id);
+      return !result || !result.success;
+    });
   if (failedTasks.length > 0) {
     console.log("Failed tasks:");
     failedTasks.forEach((line) => {

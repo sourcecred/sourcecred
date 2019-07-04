@@ -119,9 +119,7 @@ export function makePagerankCommand(
       }
       case "PLUGIN_FAILURE": {
         std.err(
-          `fatal: plugin "${result.pluginName}" errored: ${
-            result.error.message
-          }`
+          `fatal: plugin "${result.pluginName}" errored: ${result.error.message}`
         );
         return 1;
       }

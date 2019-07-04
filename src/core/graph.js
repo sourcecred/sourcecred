@@ -1082,9 +1082,7 @@ export function edgeToString(edge: Edge): string {
   const address = EdgeAddress.toString(edge.address);
   const src = NodeAddress.toString(edge.src);
   const dst = NodeAddress.toString(edge.dst);
-  return `{address: ${address}, src: ${src}, dst: ${dst}, timestampMs: ${
-    edge.timestampMs
-  }}`;
+  return `{address: ${address}, src: ${src}, dst: ${dst}, timestampMs: ${edge.timestampMs}}`;
 }
 
 /**
