@@ -354,7 +354,7 @@ export class Mirror {
   _createUpdate(updateTimestamp: Date): UpdateId {
     return this._db
       .prepare("INSERT INTO updates (time_epoch_millis) VALUES (?)")
-      .run(+updateTimestamp).lastInsertROWID;
+      .run(+updateTimestamp).lastInsertRowid;
   }
 
   /**
@@ -2160,7 +2160,7 @@ function _primitivesTableName(typename: Schema.Typename) {
 export function _makeSingleUpdateFunction<Args: BindingDictionary>(
   stmt: Statement
 ): (Args) => void {
-  if (stmt.returnsData) {
+  if (stmt.reader) {
     throw new Error(
       "Cannot create update function for statement that returns data: " +
         stmt.source
