@@ -66,7 +66,6 @@ describe("core/graph", () => {
     function graphRejectsNulls(f) {
       [null, undefined].forEach((bad) => {
         it(`${f.name} errors on ${String(bad)}`, () => {
-          // $ExpectFlowError
           expect(() => f.call(new Graph(), bad)).toThrow(String(bad));
         });
       });
@@ -277,7 +276,6 @@ describe("core/graph", () => {
           function rejectsEdgeAddress(f) {
             it(`${f.name} rejects EdgeAddress`, () => {
               const e = EdgeAddress.fromParts(["foo"]);
-              // $ExpectFlowError
               expect(() => f.call(new Graph(), e)).toThrow("got EdgeAddress");
             });
           }
@@ -466,7 +464,6 @@ describe("core/graph", () => {
           function rejectsNodeAddress(f) {
             it(`${f.name} rejects NodeAddress`, () => {
               const e = NodeAddress.fromParts(["foo"]);
-              // $ExpectFlowError
               expect(() => f.call(new Graph(), e)).toThrow("got NodeAddress");
             });
           }

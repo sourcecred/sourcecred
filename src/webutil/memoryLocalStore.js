@@ -20,7 +20,11 @@ export default class MemoryLocalStore implements LocalStore {
   }
 
   set(key: string, data: mixed): void {
-    this._data.set(key, JSON.stringify(data));
+    const stringified = JSON.stringify(data);
+    if (stringified === undefined) {
+      throw new Error("tried to serialize undefined");
+    }
+    this._data.set(key, stringified);
   }
 
   del(key: string): void {

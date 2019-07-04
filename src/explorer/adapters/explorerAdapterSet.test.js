@@ -97,15 +97,16 @@ describe("explorer/adapters/explorerAdapterSet", () => {
     });
     it("loads a dynamicExplorerAdapterSet", async () => {
       const {x, sas} = example();
-      x.loadingMock = jest.fn().mockResolvedValue();
+      const loadingMock = jest.fn().mockResolvedValue();
+      x.loadingMock = loadingMock;
       expect(x.loadingMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
       const repoId = makeRepoId("foo", "bar");
       const das = await sas.load(assets, repoId);
-      expect(x.loadingMock).toHaveBeenCalledTimes(1);
-      expect(x.loadingMock.mock.calls[0]).toHaveLength(2);
-      expect(x.loadingMock.mock.calls[0][0]).toBe(assets);
-      expect(x.loadingMock.mock.calls[0][1]).toBe(repoId);
+      expect(loadingMock).toHaveBeenCalledTimes(1);
+      expect(loadingMock.mock.calls[0]).toHaveLength(2);
+      expect(loadingMock.mock.calls[0][0]).toBe(assets);
+      expect(loadingMock.mock.calls[0][1]).toBe(repoId);
       expect(das).toEqual(expect.anything());
     });
   });

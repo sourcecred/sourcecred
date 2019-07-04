@@ -413,25 +413,39 @@ describe("webutil/createRelativeHistory", () => {
         it("warns on overflow", () => {
           const {relativeHistory} = createFivePageHistory();
           relativeHistory.goBack();
-          expect(console.error).not.toHaveBeenCalled();
+          // Setup by configureEnzyme()
+          const errorMock: JestMockFn<
+            $ReadOnlyArray<void>,
+            void
+          > = (console.error: any);
+          expect(errorMock).not.toHaveBeenCalled();
           relativeHistory.go(2);
-          expect(console.error).toHaveBeenCalledTimes(1);
-          expect(console.error.mock.calls[0][0]).toMatch(
+          expect(errorMock).toHaveBeenCalledTimes(1);
+          expect(errorMock.mock.calls[0][0]).toMatch(
             /Warning:.*there is not enough history/
           );
+          // Reset console.error to a clean mock to satisfy afterEach check from
+          // configureEnzyme()
           // $ExpectFlowError
           console.error = jest.fn();
         });
 
         it("warns on underflow", () => {
           const {relativeHistory} = createFivePageHistory();
+          // Setup by configureEnzyme()
+          const errorMock: JestMockFn<
+            $ReadOnlyArray<void>,
+            void
+          > = (console.error: any);
           relativeHistory.go(-4);
-          expect(console.error).not.toHaveBeenCalled();
+          expect(errorMock).not.toHaveBeenCalled();
           relativeHistory.go(-2);
-          expect(console.error).toHaveBeenCalledTimes(1);
-          expect(console.error.mock.calls[0][0]).toMatch(
+          expect(errorMock).toHaveBeenCalledTimes(1);
+          expect(errorMock.mock.calls[0][0]).toMatch(
             /Warning:.*there is not enough history/
           );
+          // Reset console.error to a clean mock to satisfy afterEach check from
+          // configureEnzyme()
           // $ExpectFlowError
           console.error = jest.fn();
         });

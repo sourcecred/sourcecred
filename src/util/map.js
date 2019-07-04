@@ -131,9 +131,7 @@ export function mapEntries<K, V, InK, InV>(
  * are mutated. In the event that multiple maps have the same key, an
  * error will be thrown.
  */
-export function merge<K, V>(
-  maps: $ReadOnlyArray<Map<$Subtype<K>, $Subtype<V>>>
-): Map<K, V> {
+export function merge<K, V>(maps: $ReadOnlyArray<Map<K, V>>): Map<K, V> {
   const result = new Map();
   let updates = 0;
   for (const map of maps) {
