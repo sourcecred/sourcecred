@@ -486,6 +486,29 @@ describe("core/graph", () => {
             );
           });
 
+          it("throws on conflicting edge timestamp", () => {
+            const address = EdgeAddress.fromParts(["foo"]);
+            const e1 = {
+              address,
+              src: src.address,
+              dst: dst.address,
+              timestampMs: 0,
+            };
+            const e2 = {
+              address,
+              src: src.address,
+              dst: dst.address,
+              timestampMs: 1,
+            };
+            const graph = new Graph()
+              .addNode(src)
+              .addNode(dst)
+              .addEdge(e1);
+            expect(() => graph.addEdge(e2)).toThrow(
+              "conflict between new edge"
+            );
+          });
+
           describe("throws on edge with", () => {
             const n = NodeAddress.fromParts(["foo"]);
             const e = EdgeAddress.fromParts(["bar"]);
@@ -1416,12 +1439,14 @@ describe("core/graph", () => {
         address: EdgeAddress.fromParts(["one", "two"]),
         dst: NodeAddress.fromParts(["five", "six"]),
         src: NodeAddress.fromParts(["three", "four"]),
+        timestampMs: 0,
       };
       const expected =
         "{" +
         'address: EdgeAddress["one","two"], ' +
         'src: NodeAddress["three","four"], ' +
-        'dst: NodeAddress["five","six"]' +
+        'dst: NodeAddress["five","six"], ' +
+        "timestampMs: 0" +
         "}";
       expect(edgeToString(edge)).toEqual(expected);
     });
@@ -1442,11 +1467,13 @@ describe("core/graph", () => {
         address: EdgeAddress.fromParts(["one", "two"]),
         dst: NodeAddress.fromParts(["five", "six"]),
         src: NodeAddress.fromParts(["three", "four"]),
+        timestampMs: 0,
       };
       const expected = {
         address: 'EdgeAddress["one","two"]',
         src: 'NodeAddress["three","four"]',
         dst: 'NodeAddress["five","six"]',
+        timestampMs: 0,
       };
       expect(edgeToStrings(edge)).toEqual(expected);
     });
@@ -1458,11 +1485,13 @@ describe("core/graph", () => {
         address: EdgeAddress.fromParts(["one", "two"]),
         dst: NodeAddress.fromParts(["five", "six"]),
         src: NodeAddress.fromParts(["three", "four"]),
+        timestampMs: 0,
       };
       const expected = {
         addressParts: ["one", "two"],
         srcParts: ["three", "four"],
         dstParts: ["five", "six"],
+        timestampMs: 0,
       };
       expect(edgeToParts(edge)).toEqual(expected);
     });

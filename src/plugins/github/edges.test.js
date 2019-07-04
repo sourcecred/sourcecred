@@ -49,38 +49,46 @@ describe("plugins/github/edges", () => {
 
   const edgeExamples = {
     authors: () =>
-      createEdge.authors(nodeExamples.user(), nodeExamples.issue()),
+      createEdge.authors(nodeExamples.user(), nodeExamples.issue(), 102),
     mergedAs: () => {
       const commit = {type: COMMIT_TYPE, id: "123"};
-      return createEdge.mergedAs(nodeExamples.pull(), commit);
+      return createEdge.mergedAs(nodeExamples.pull(), commit, 102);
     },
     hasParent: () =>
-      createEdge.hasParent(nodeExamples.reviewComment(), nodeExamples.review()),
+      createEdge.hasParent(
+        nodeExamples.reviewComment(),
+        nodeExamples.review(),
+        102
+      ),
     references: () =>
-      createEdge.references(nodeExamples.issue(), nodeExamples.pull()),
+      createEdge.references(nodeExamples.issue(), nodeExamples.pull(), 102),
     reactsHeart: () =>
       createEdge.reacts(
         Reactions.HEART,
         nodeExamples.user(),
-        nodeExamples.pull()
+        nodeExamples.pull(),
+        102
       ),
     reactsThumbsUp: () =>
       createEdge.reacts(
         Reactions.THUMBS_UP,
         nodeExamples.user(),
-        nodeExamples.issue()
+        nodeExamples.issue(),
+        102
       ),
     reactsHooray: () =>
       createEdge.reacts(
         Reactions.HOORAY,
         nodeExamples.user(),
-        nodeExamples.issueComment()
+        nodeExamples.issueComment(),
+        102
       ),
     reactsRocket: () =>
       createEdge.reacts(
         Reactions.ROCKET,
         nodeExamples.user(),
-        nodeExamples.pullComment()
+        nodeExamples.pullComment(),
+        102
       ),
   };
 

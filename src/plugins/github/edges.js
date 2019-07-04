@@ -85,48 +85,59 @@ export type StructuredAddress =
 export const createEdge = Object.freeze({
   authors: (
     author: GithubNode.UserlikeAddress,
-    content: GithubNode.AuthorableAddress
+    content: GithubNode.AuthorableAddress,
+    timestampMs: number
   ): Edge => ({
     address: toRaw({type: AUTHORS_TYPE, author, content}),
     src: GithubNode.toRaw(author),
     dst: GithubNode.toRaw(content),
+    timestampMs,
   }),
   mergedAs: (
     pull: GithubNode.PullAddress,
-    commit: GithubNode.CommitAddress
+    commit: GithubNode.CommitAddress,
+    timestampMs: number
   ): Edge => ({
     address: toRaw({type: MERGED_AS_TYPE, pull}),
     src: GithubNode.toRaw(pull),
     dst: GithubNode.toRaw(commit),
+    timestampMs,
   }),
   correspondsToCommit: (
     githubCommit: GithubNode.CommitAddress,
-    gitCommit: GitNode.CommitAddress
+    gitCommit: GitNode.CommitAddress,
+    timestampMs: number
   ): Edge => ({
     address: toRaw({type: CORRESPONDS_TO_COMMIT_TYPE, githubCommit}),
     src: GithubNode.toRaw(githubCommit),
     dst: GitNode.toRaw(gitCommit),
+    timestampMs,
   }),
   hasParent: (
     child: GithubNode.ChildAddress,
-    parent: GithubNode.ParentAddress
+    parent: GithubNode.ParentAddress,
+    timestampMs: number
   ): Edge => ({
     address: toRaw({type: HAS_PARENT_TYPE, child}),
     src: GithubNode.toRaw(child),
     dst: GithubNode.toRaw(parent),
+    timestampMs,
   }),
   references: (
     referrer: GithubNode.TextContentAddress,
-    referent: GithubNode.ReferentAddress
+    referent: GithubNode.ReferentAddress,
+    timestampMs: number
   ): Edge => ({
     address: toRaw({type: REFERENCES_TYPE, referrer, referent}),
     src: GithubNode.toRaw(referrer),
     dst: GithubNode.toRaw(referent),
+    timestampMs,
   }),
   reacts: (
     reactionType: ReactionContent,
     user: GithubNode.UserlikeAddress,
-    reactable: GithubNode.ReactableAddress
+    reactable: GithubNode.ReactableAddress,
+    timestampMs: number
   ): Edge => ({
     address: toRaw({
       type: REACTS_TYPE,
@@ -136,6 +147,7 @@ export const createEdge = Object.freeze({
     }),
     src: GithubNode.toRaw(user),
     dst: GithubNode.toRaw(reactable),
+    timestampMs,
   }),
 });
 

@@ -147,6 +147,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         src: n1.address,
         dst: n2.address,
         address: EdgeAddress.fromParts(["e1"]),
+        timestampMs: 0,
       };
       const g = new Graph().addNode(n1).addEdge(e1);
       const edgeWeight = (_unused_edge) => {

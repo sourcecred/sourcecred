@@ -19,7 +19,11 @@ describe("plugins/git/edges", () => {
 
   const edgeExamples = {
     hasParent: () =>
-      createEdge.hasParent(nodeExamples.commit(), nodeExamples.parentCommit()),
+      createEdge.hasParent(
+        nodeExamples.commit(),
+        nodeExamples.parentCommit(),
+        102
+      ),
   };
 
   describe("createEdge", () => {

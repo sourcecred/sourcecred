@@ -91,21 +91,25 @@ describe("explorer/pagerankTable/aggregate", () => {
         src: nodes.root,
         dst: nodes.zap,
         address: EdgeAddress.fromParts(["foo", "1"]),
+        timestampMs: 0,
       },
       rfk1: {
         src: nodes.root,
         dst: nodes.kif,
         address: EdgeAddress.fromParts(["foo", "2"]),
+        timestampMs: 0,
       },
       kfr3: {
         src: nodes.kif,
         dst: nodes.root,
         address: EdgeAddress.fromParts(["foo", "3"]),
+        timestampMs: 0,
       },
       rbk2: {
         src: nodes.root,
         dst: nodes.kif,
         address: EdgeAddress.fromParts(["bar", "1"]),
+        timestampMs: 0,
       },
     };
 
