@@ -22,7 +22,8 @@ class GraphCreator {
 
   addData(view: R.RelationalView) {
     for (const entity of view.entities()) {
-      this.addNode(entity.address());
+      const address = N.toRaw(entity.address());
+      this.graph.addNode({address, description: entity.description()});
     }
 
     for (const child of view.childEntities()) {
@@ -73,10 +74,6 @@ class GraphCreator {
         }
       }
     }
-  }
-
-  addNode(addr: N.StructuredAddress) {
-    this.graph.addNode({address: N.toRaw(addr)});
   }
 
   addAuthors(entity: R.AuthoredEntity) {

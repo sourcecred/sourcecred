@@ -15,7 +15,7 @@ Array [
     "graphJSON": Array [
       Object {
         "type": "sourcecred/graph",
-        "version": "0.5.0",
+        "version": "0.6.0",
       },
       Object {
         "edges": Array [
@@ -59,18 +59,23 @@ Array [
         ],
         "nodes": Array [
           Object {
+            "description": "dst",
             "index": 0,
           },
           Object {
+            "description": "halfIsolated",
             "index": 1,
           },
           Object {
+            "description": "isolated",
             "index": 2,
           },
           Object {
+            "description": "loop",
             "index": 3,
           },
           Object {
+            "description": "src",
             "index": 5,
           },
         ],

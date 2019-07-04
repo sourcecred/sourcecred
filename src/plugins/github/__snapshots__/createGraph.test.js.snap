@@ -4,7 +4,7 @@ exports[`plugins/github/createGraph example graph matches snapshot 1`] = `
 Array [
   Object {
     "type": "sourcecred/graph",
-    "version": "0.5.0",
+    "version": "0.6.0",
   },
   Object {
     "edges": Array [
@@ -2561,135 +2561,179 @@ Array [
     ],
     "nodes": Array [
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/11#issuecomment-420811872) on [#11](https://github.com/sourcecred/example-github/issues/11): An issue with a comment from a deleted user",
         "index": 6,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/11#issuecomment-420813013) on [#11](https://github.com/sourcecred/example-github/issues/11): An issue with a comment from a deleted user",
         "index": 7,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206) on [#11](https://github.com/sourcecred/example-github/issues/11): An issue with a comment from a deleted user",
         "index": 8,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/11#issuecomment-420813621) on [#11](https://github.com/sourcecred/example-github/issues/11): An issue with a comment from a deleted user",
         "index": 9,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703) on [#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue.",
         "index": 10,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/2#issuecomment-373768850) on [#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue.",
         "index": 11,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/2#issuecomment-385576185) on [#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue.",
         "index": 12,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/2#issuecomment-385576220) on [#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue.",
         "index": 13,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/2#issuecomment-385576248) on [#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue.",
         "index": 14,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/2#issuecomment-385576273) on [#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue.",
         "index": 15,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920) on [#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue.",
         "index": 16,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/2#issuecomment-385576936) on [#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue.",
         "index": 17,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442) on [#6](https://github.com/sourcecred/example-github/issues/6): An issue with comments",
         "index": 18,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538) on [#6](https://github.com/sourcecred/example-github/issues/6): An issue with comments",
         "index": 19,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316) on [#6](https://github.com/sourcecred/example-github/issues/6): An issue with comments",
         "index": 20,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/issues/6#issuecomment-417104047) on [#6](https://github.com/sourcecred/example-github/issues/6): An issue with comments",
         "index": 21,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222) on [#3](https://github.com/sourcecred/example-github/pull/3): Add README, merge via PR.",
         "index": 22,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it...",
         "index": 23,
       },
       Object {
+        "description": "[comment](https://github.com/sourcecred/example-github/pull/5#discussion_r171460198) on [review](https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it...",
         "index": 24,
       },
       Object {
+        "description": "[0a22334](https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a): Merge pull request #3 from sourcecred/add-readme",
         "index": 25,
       },
       Object {
+        "description": "[6bd1b4c](https://github.com/sourcecred/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34): A commit from someone with no GitHub account",
         "index": 26,
       },
       Object {
+        "description": "[6d5b3aa](https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6): This pull request will be more contentious. I can feel it... (#5)",
         "index": 27,
       },
       Object {
+        "description": "[c430bd7](https://github.com/sourcecred/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86): Hello from credbot!",
         "index": 28,
       },
       Object {
+        "description": "[ec91adb](https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780): Commit without pull request.",
         "index": 29,
       },
       Object {
+        "description": "[ecc889d](https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d): Add README, merge via PR.",
         "index": 30,
       },
       Object {
+        "description": "[#1](https://github.com/sourcecred/example-github/issues/1): An example issue.",
         "index": 31,
       },
       Object {
+        "description": "[#10](https://github.com/sourcecred/example-github/issues/10): Paired with multireference",
         "index": 32,
       },
       Object {
+        "description": "[#11](https://github.com/sourcecred/example-github/issues/11): An issue with a comment from a deleted user",
         "index": 33,
       },
       Object {
+        "description": "[#12](https://github.com/sourcecred/example-github/issues/12): An issue with commit references",
         "index": 34,
       },
       Object {
+        "description": "[#13](https://github.com/sourcecred/example-github/issues/13): An issue with reactions",
         "index": 35,
       },
       Object {
+        "description": "[#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue.",
         "index": 36,
       },
       Object {
+        "description": "[#4](https://github.com/sourcecred/example-github/issues/4): A closed pull request",
         "index": 37,
       },
       Object {
+        "description": "[#6](https://github.com/sourcecred/example-github/issues/6): An issue with comments",
         "index": 38,
       },
       Object {
+        "description": "[#7](https://github.com/sourcecred/example-github/issues/7): An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
         "index": 39,
       },
       Object {
+        "description": "[#8](https://github.com/sourcecred/example-github/issues/8): Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
         "index": 40,
       },
       Object {
+        "description": "[#3](https://github.com/sourcecred/example-github/pull/3): Add README, merge via PR.",
         "index": 41,
       },
       Object {
+        "description": "[#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it...",
         "index": 42,
       },
       Object {
+        "description": "[#9](https://github.com/sourcecred/example-github/pull/9): An unmerged pull request",
         "index": 43,
       },
       Object {
+        "description": "[sourcecred/example-github](https://github.com/sourcecred/example-github)",
         "index": 44,
       },
       Object {
+        "description": "[review](https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it...",
         "index": 45,
       },
       Object {
+        "description": "[review](https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it...",
         "index": 46,
       },
       Object {
+        "description": "[@credbot](https://github.com/credbot)",
         "index": 47,
       },
       Object {
+        "description": "[@decentralion](https://github.com/decentralion)",
         "index": 48,
       },
       Object {
+        "description": "[@wchargin](https://github.com/wchargin)",
         "index": 49,
       },
     ],
