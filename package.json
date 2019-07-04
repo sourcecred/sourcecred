@@ -53,7 +53,7 @@
     "eslint-plugin-react": "7.4.0",
     "file-loader": "1.1.5",
     "flow-bin": "^0.86.0",
-    "jest": "^23.6.0",
+    "jest": "^24.8.0",
     "jest-fetch-mock": "^1.6.5",
     "prettier": "^1.13.4",
     "raf": "3.4.0",
