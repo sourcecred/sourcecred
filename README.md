@@ -2,7 +2,8 @@
 
 [![Build Status](https://circleci.com/gh/sourcecred/sourcecred.svg?style=svg)](https://circleci.com/gh/sourcecred/sourcecred)
 [![Discourse topics](https://img.shields.io/discourse/https/discourse.sourcecred.io/topics.svg)](https://discourse.sourcecred.io)
-[![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9) [![Greenkeeper badge](https://badges.greenkeeper.io/sourcecred/sourcecred.svg)](https://greenkeeper.io/)
+[![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
+[![Greenkeeper badge](https://badges.greenkeeper.io/sourcecred/sourcecred.svg)](https://greenkeeper.io/)
 
 SourceCred creates reputation networks for open-source projects.
 Any open-source project can create its own _cred_, which is a reputational metric showing how much credit contributors deserve for helping the project.
@@ -91,7 +92,7 @@ Please also take a look at our [contributing guide].
 
 If you’re looking for a place to start, we’ve tagged some [good first issues].
 
-[forum]: https://discourse.sourcecred.io/ 
+[forum]: https://discourse.sourcecred.io/
 [Discord]: https://discord.gg/tsBTgc9
 [contributing guide]: https://github.com/sourcecred/sourcecred/blob/master/CONTRIBUTING.md
 [good first issues]: https://github.com/sourcecred/sourcecred/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22
