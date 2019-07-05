@@ -34,5 +34,5 @@ ReactDOM.hydrate(<App routeData={routeData} history={history} />, target);
 for (const el of document.querySelectorAll('link[rel="shortcut icon"]')) {
   const link: HTMLLinkElement = (el: any);
   // (Appearances aside, this is not a no-op.)
-  link.href = link.href;
+  link.href = link.href; // eslint-disable-line no-self-assign
 }

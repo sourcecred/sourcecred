@@ -44,7 +44,7 @@ export default class FileUploaderInspectionTest extends React.Component<
         {this.state.json ? (
           <pre style={{backgroundColor: "#efefef"}}>{displayContents}</pre>
         ) : (
-          <p>"No JSON uploaded."</p>
+          <p>{"No JSON uploaded."}</p>
         )}
       </div>
     );

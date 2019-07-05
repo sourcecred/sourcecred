@@ -17,9 +17,10 @@ describe("explorer/pagerankTable/TableRow", () => {
         description={<span data-test-description={true} />}
         multiuseColumn={"50.00%"}
         cred={133.7}
-        children={<div data-test-children={true} />}
         showPadding={false}
-      />
+      >
+        <div data-test-children={true} />{" "}
+      </TableRow>
     );
   }
   it("depth parameter changes the color, but not the indentation", () => {
@@ -32,8 +33,9 @@ describe("explorer/pagerankTable/TableRow", () => {
           description={<span data-test-description={true} />}
           multiuseColumn={"50.00%"}
           cred={133.7}
-          children={<div data-test-children={true} />}
-        />
+        >
+          <div data-test-children={true} />
+        </TableRow>
       );
       const tr = el.find("tr");
       const trStyle = tr.props().style;
@@ -52,8 +54,9 @@ describe("explorer/pagerankTable/TableRow", () => {
           description={<span data-test-description={true} />}
           multiuseColumn={"50.00%"}
           cred={133.7}
-          children={<div data-test-children={true} />}
-        />
+        >
+          <div data-test-children={true} />
+        </TableRow>
       );
       const tr = el.find("tr");
       const trStyle = tr.props().style;
@@ -138,9 +141,10 @@ describe("explorer/pagerankTable/TableRow", () => {
           description={<span data-test-description={true} />}
           multiuseColumn={"50.00%"}
           cred={133.7}
-          children={<div data-test-children={true} />}
           showPadding={true}
-        />
+        >
+          <div data-test-children={true} />
+        </TableRow>
       );
     }
     it("has two identical padding rows", () => {

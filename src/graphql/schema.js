@@ -84,6 +84,19 @@ export type NestedFieldType = {|
 const ID_FIELD_NAME = "id";
 
 export function schema(types: {[Typename]: NodeType}): Schema {
+  function assertKind(path, elementTypename, validKinds) {
+    const self = `field ${path.map((x) => JSON.stringify(x)).join("/")}`;
+    const elementType = types[elementTypename];
+    if (elementType == null) {
+      throw new Error(`${self} has unknown type: "${elementTypename}"`);
+    }
+    if (!validKinds.includes(elementType.type)) {
+      throw new Error(
+        `${self} has invalid type "${elementTypename}" ` +
+          `of kind "${elementType.type}"`
+      );
+    }
+  }
   const result = {};
   for (const typename of Object.keys(types)) {
     const type = types[typename];
@@ -100,21 +113,6 @@ export function schema(types: {[Typename]: NodeType}): Schema {
       case "OBJECT":
         for (const fieldname of Object.keys(type.fields)) {
           const field = type.fields[fieldname];
-          function assertKind(path, elementTypename, validKinds) {
-            const self = `field ${path
-              .map((x) => JSON.stringify(x))
-              .join("/")}`;
-            const elementType = types[elementTypename];
-            if (elementType == null) {
-              throw new Error(`${self} has unknown type: "${elementTypename}"`);
-            }
-            if (!validKinds.includes(elementType.type)) {
-              throw new Error(
-                `${self} has invalid type "${elementTypename}" ` +
-                  `of kind "${elementType.type}"`
-              );
-            }
-          }
           switch (field.type) {
             case "ID":
               // Nothing to check.
