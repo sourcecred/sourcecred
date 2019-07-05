@@ -16,6 +16,7 @@ describe("webutil/Link", () => {
 
   // Static type checks
   void [
+    /* eslint-disable react/jsx-key */
     // Must specify either `href` or `to`
     <Link href="https://example.com/">click me</Link>,
     <Link to="/prototype/">click me, too</Link>,
@@ -27,6 +28,7 @@ describe("webutil/Link", () => {
 
     // May specify extra properties
     <Link href="#" onClick={() => void alert("hi")} tabIndex={3} />,
+    /* eslint-enable react/jsx-key */
   ];
 
   it("renders a styled external link", () => {

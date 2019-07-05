@@ -43,7 +43,7 @@ export default class CheckedLocalStore implements LocalStore {
       if (deepEqual(data, JSON.parse(JSON.stringify(data)))) {
         return;
       }
-    } catch (_) {}
+    } catch (_) {} // eslint-disable-line no-empty
     throw new Error(`bad value: ${data}`);
   }
 }

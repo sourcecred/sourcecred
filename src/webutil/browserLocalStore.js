@@ -49,12 +49,7 @@ export default class BrowserLocalStore implements LocalStore {
     }
     const stringified = JSON.stringify(data);
 
-    try {
-      window.localStorage[this.cacheKey(key)] = stringified;
-    } catch (e) {
-      // Probably went over the storage limit... that's not good.
-      throw e;
-    }
+    window.localStorage[this.cacheKey(key)] = stringified;
   }
 
   /*

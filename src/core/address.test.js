@@ -55,7 +55,7 @@ describe("core/address", () => {
       const {FooAddress} = makeModules();
       expect(() => {
         // $ExpectFlowError
-        FooAddress.assertValid = FooAddress.assertValid;
+        FooAddress.assertValid = FooAddress.assertValid; // eslint-disable-line no-self-assign
       }).toThrow(/read.only property/);
     });
 
