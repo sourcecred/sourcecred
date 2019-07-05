@@ -2,7 +2,7 @@
 
 [![Build Status](https://circleci.com/gh/sourcecred/sourcecred.svg?style=svg)](https://circleci.com/gh/sourcecred/sourcecred)
 [![Discourse topics](https://img.shields.io/discourse/https/discourse.sourcecred.io/topics.svg)](https://discourse.sourcecred.io)
-[![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
+[![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9) [![Greenkeeper badge](https://badges.greenkeeper.io/sourcecred/sourcecred.svg)](https://greenkeeper.io/)
 
 SourceCred creates reputation networks for open-source projects.
 Any open-source project can create its own _cred_, which is a reputational metric showing how much credit contributors deserve for helping the project.
