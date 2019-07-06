@@ -29,7 +29,7 @@ We’re working on adding more information to the prototype, such as tracking mo
 If you’d like to try it out, you can run a local copy of SourceCred as follows.
 First, make sure that you have the following dependencies:
 
-  - Install [Node] (tested on v8.x.x).
+  - Install [Node] (tested on v12.x.x and v10.x.x).
   - Install [Yarn] (tested on v1.7.0).
   - Create a [GitHub API token]. No special permissions are required.
   - For macOS users: Ensure that your environment provides GNU
