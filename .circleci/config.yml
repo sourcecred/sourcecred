@@ -6,9 +6,13 @@
 version: 2.1
 
 executors:
-  sourcecred_node:
+  node10:
     docker:
-      - image: circleci/node:8.12.0
+      - image: circleci/node:10
+    working_directory: ~/repo
+  node12:
+    docker:
+      - image: circleci/node:12
     working_directory: ~/repo
 
 commands:
@@ -28,13 +32,19 @@ commands:
 
 jobs:
   test:
-    executor: sourcecred_node
+    executor: node12
     steps:
       - checkout
       - set_up_node_modules
       - run: yarn test
   test_full:
-    executor: sourcecred_node
+    executor: node12
+    steps:
+      - checkout
+      - set_up_node_modules
+      - run: yarn test --full
+  test_full_10:
+    executor: node10
     steps:
       - checkout
       - set_up_node_modules
@@ -50,6 +60,11 @@ workflows:
             branches:
               only:
                 - master
+      - test_full_10:
+          filters:
+            branches:
+              only:
+                - master
   nightly:
     triggers:
       - schedule:
@@ -60,3 +75,4 @@ workflows:
                 - master
     jobs:
       - test_full
+      - test_full_10
