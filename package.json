@@ -7,6 +7,8 @@
     "better-sqlite3": "^5.4.0",
     "chalk": "2.4.2",
     "commonmark": "^0.29.0",
+    "d3-array": "^2.2.0",
+    "d3-time": "^1.0.11",
     "express": "^4.16.3",
     "fs-extra": "8.1.0",
     "history": "^3.0.0",
