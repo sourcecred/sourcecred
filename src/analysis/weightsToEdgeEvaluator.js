@@ -1,11 +1,10 @@
 // @flow
 
-import * as NullUtil from "../util/null";
-import type {Edge, NodeAddressT} from "../core/graph";
+import type {Edge} from "../core/graph";
 import type {NodeAndEdgeTypes} from "./types";
 import type {Weights} from "./weights";
 import type {EdgeEvaluator} from "./pagerank";
-import {NodeTrie, EdgeTrie} from "../core/trie";
+import {nodeWeightEvaluator, edgeWeightEvaluator} from "./weightEvaluator";
 
 /**
  * Given the weight choices and the node and edge types, produces an edge
@@ -22,37 +21,23 @@ import {NodeTrie, EdgeTrie} from "../core/trie";
  *
  * The node and edge types are required so that we know what the default weights
  * are for types whose weights are not manually specified.
+ *
+ * NOTE: This method is deprecated. Going forward, we should use node weights
+ * as a direct input of their own (e.g. as a seed vector and for determining
+ * cred weighting) rather than as a component of the edge weight. This method
+ * will be removed when the 'legacy cred' UI is removed.
  */
 export function weightsToEdgeEvaluator(
   weights: Weights,
   types: NodeAndEdgeTypes
 ): EdgeEvaluator {
-  const {nodeTypeWeights, edgeTypeWeights, nodeManualWeights} = weights;
-  const nodeTrie = new NodeTrie();
-  for (const {prefix, defaultWeight} of types.nodeTypes) {
-    const weight = NullUtil.orElse(nodeTypeWeights.get(prefix), defaultWeight);
-    nodeTrie.add(prefix, weight);
-  }
-  const edgeTrie = new EdgeTrie();
-  for (const {prefix, defaultWeight} of types.edgeTypes) {
-    const weight = NullUtil.orElse(edgeTypeWeights.get(prefix), defaultWeight);
-    edgeTrie.add(prefix, weight);
-  }
-
-  function nodeWeight(n: NodeAddressT): number {
-    const typeWeight = NullUtil.orElse(nodeTrie.getLast(n), 1);
-    const manualWeight = NullUtil.orElse(nodeManualWeights.get(n), 1);
-    return typeWeight * manualWeight;
-  }
+  const nodeWeight = nodeWeightEvaluator(types.nodeTypes, weights);
+  const edgeWeight = edgeWeightEvaluator(types.edgeTypes, weights);
 
   return function evaluator(edge: Edge) {
     const srcWeight = nodeWeight(edge.src);
     const dstWeight = nodeWeight(edge.dst);
-    const edgeWeight = NullUtil.orElse(edgeTrie.getLast(edge.address), {
-      forwards: 1,
-      backwards: 1,
-    });
-    const {forwards, backwards} = edgeWeight;
+    const {forwards, backwards} = edgeWeight(edge.address);
     return {
       forwards: dstWeight * forwards,
       backwards: srcWeight * backwards,
