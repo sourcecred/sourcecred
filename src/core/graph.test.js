@@ -18,8 +18,6 @@ import {
   edgeToString,
   edgeToStrings,
   edgeToParts,
-  sortedEdgeAddressesFromJSON,
-  sortedNodeAddressesFromJSON,
 } from "./graph";
 import {advancedGraph, node, partsNode, edge, partsEdge} from "./graphTestUtil";
 
@@ -382,9 +380,27 @@ describe("core/graph", () => {
           const graph = new Graph().addNode(src).addNode(dst);
           expect(graph.hasNode(src.address)).toBe(true);
           expect(graph.hasNode(dst.address)).toBe(true);
-          expect(Array.from(graph.nodes())).toEqual([src, dst]);
+          expect(Array.from(graph.nodes())).toEqual([dst, src]);
           expect(graph.node(src.address)).toEqual(src);
           expect(graph.node(dst.address)).toEqual(dst);
+        });
+      });
+
+      describe("node ordering", () => {
+        const nodes = (g) => Array.from(g.nodes());
+        const sorted = (g) => sortBy(nodes(g), (x) => x.address);
+        it("returns nodes in sorted order, after a sequence of additions and removals", () => {
+          const g1 = advancedGraph().graph1();
+          const g2 = advancedGraph().graph2();
+          expect(sorted(g1)).toEqual(nodes(g1));
+          expect(nodes(g1)).toEqual(nodes(g2));
+        });
+        it("returns nodes in sorted order, after deserialization", () => {
+          const roundTrip = (g) => Graph.fromJSON(g.toJSON());
+          const g1 = roundTrip(advancedGraph().graph1());
+          const g2 = roundTrip(advancedGraph().graph2());
+          expect(sorted(g1)).toEqual(nodes(g1));
+          expect(nodes(g1)).toEqual(nodes(g2));
         });
       });
 
@@ -565,6 +581,24 @@ describe("core/graph", () => {
             g._modificationCount++;
             expect(() => iterator.next()).toThrow("Concurrent modification");
           });
+        });
+      });
+
+      describe("edge ordering", () => {
+        const edges = (g) => Array.from(g.edges({showDangling: true}));
+        const sorted = (g) => sortBy(edges(g), (x) => x.address);
+        it("returns edges in sorted order, after a sequence of additions and removals", () => {
+          const g1 = advancedGraph().graph1();
+          const g2 = advancedGraph().graph2();
+          expect(sorted(g1)).toEqual(edges(g1));
+          expect(edges(g1)).toEqual(edges(g2));
+        });
+        it("returns edges in sorted order, after deserialization", () => {
+          const roundTrip = (g) => Graph.fromJSON(g.toJSON());
+          const g1 = roundTrip(advancedGraph().graph1());
+          const g2 = roundTrip(advancedGraph().graph2());
+          expect(sorted(g1)).toEqual(edges(g1));
+          expect(edges(g1)).toEqual(edges(g2));
         });
       });
 
@@ -1492,22 +1526,5 @@ describe("core/graph", () => {
       };
       expect(edgeToParts(edge)).toEqual(expected);
     });
-  });
-
-  it("sortedEdgeAddressesFromJSON", () => {
-    const json = advancedGraph()
-      .graph1()
-      .toJSON();
-    const sortedEdgeAddresses = sortedEdgeAddressesFromJSON(json);
-    const expected = sortedEdgeAddresses.slice().sort();
-    expect(sortedEdgeAddresses).toEqual(expected);
-  });
-  it("sortedNodeAddressesFromJSON", () => {
-    const json = advancedGraph()
-      .graph1()
-      .toJSON();
-    const sortedNodeAddresses = sortedNodeAddressesFromJSON(json);
-    const expected = sortedNodeAddresses.slice().sort();
-    expect(sortedNodeAddresses).toEqual(expected);
   });
 });
