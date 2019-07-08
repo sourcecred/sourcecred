@@ -31,7 +31,7 @@ First, make sure that you have the following dependencies:
   - Install [Node] (tested on v8.x.x).
   - Install [Yarn] (tested on v1.7.0).
   - Create a [GitHub API token]. No special permissions are required.
-  - Ensure that you have an SSH key (```id_rsa```) for ```git``` to use. On unix-like systems, this is usually stored in ```~/.ssh/```. If you do not, you can generate one by following these [instructions](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
+  - Ensure that you have an SSH key (`id_rsa`) for `git` to use. On unix-like systems, this is usually stored in `~/.ssh/`. If you do not, you can generate one by following these [instructions](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
   - For macOS users: Ensure that your environment provides GNU
     coreutils. [See this comment for details about what, how, and
     why.][macos-gnu]
@@ -45,29 +45,29 @@ First, make sure that you have the following dependencies:
 Then, run the following commands to clone and build SourceCred:
 
 ```Bash
-$ git clone https://github.com/sourcecred/sourcecred.git
-$ cd sourcecred
-$ yarn install
-$ yarn backend
-$ export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
-$ node bin/sourcecred.js load REPO_OWNER/REPO_NAME
+git clone https://github.com/sourcecred/sourcecred.git
+cd sourcecred
+yarn install
+yarn backend
+export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
+node bin/sourcecred.js load REPO_OWNER/REPO_NAME
 ```
 
 Loading a repo can take a few minutes. When it is finished, it will exit. Next, we can start sourcecred:
 
 ```Bash
-$ yarn start
+yarn start
 ```
 
-Finally, we can navigate a browser window to ```localhost:8080``` to view generated data.
+Finally, we can navigate a browser window to `localhost:8080` to view generated data.
 
 #### Examples
 
 If you wanted to look at cred for [ipfs/js-ipfs], you could run:
 
 ```Bash
-$ export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
-$ node bin/sourcecred.js load ipfs/js-ipfs
+export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
+node bin/sourcecred.js load ipfs/js-ipfs
 ```
 
 [ipfs/js-ipfs]: https://github.com/ipfs/js-ipfs
@@ -77,7 +77,7 @@ To do so, pass multiple repositories to the `load` command, and specify an “ou
 For instance, the invocation
 
 ```Bash
-$ node bin/sourcecred.js load ipfs/js-ipfs ipfs/go-ipfs --output ipfs/meta-ipfs
+node bin/sourcecred.js load ipfs/js-ipfs ipfs/go-ipfs --output ipfs/meta-ipfs
 ```
 
 will create a graph called `ipfs/meta-ipfs` in the cred explorer, containing the combined contents of the js-ipfs and go-ipfs repositories.
