@@ -1,7 +1,6 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
-import sortBy from "lodash.sortby";
 
 import {makeAddressModule, type AddressModule} from "./address";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
@@ -201,6 +200,14 @@ export opaque type GraphJSON = Compatible<{|
 
 export type ModificationCount = number;
 
+// Internal-only type used to cache the sorted node and edge address order.
+// The modification count is used as the cache key.
+type CachedOrder = {|
+  +nodeOrder: $ReadOnlyArray<NodeAddressT>,
+  +edgeOrder: $ReadOnlyArray<EdgeAddressT>,
+  +modificationCount: number,
+|};
+
 export class Graph {
   _nodes: Map<NodeAddressT, Node>;
   _edges: Map<EdgeAddressT, Edge>;
@@ -212,6 +219,7 @@ export class Graph {
   // check for comodification and to avoid needlessly checking
   // invariants.
   _modificationCount: ModificationCount;
+  _cachedOrder: CachedOrder;
   _invariantsLastChecked: {|+when: ModificationCount, +failure: ?string|};
 
   constructor(): void {
@@ -219,6 +227,11 @@ export class Graph {
     this._invariantsLastChecked = {
       when: -1,
       failure: "Invariants never checked",
+    };
+    this._cachedOrder = {
+      nodeOrder: [],
+      edgeOrder: [],
+      modificationCount: 0,
     };
     this._nodes = new Map();
     this._edges = new Map();
@@ -288,6 +301,16 @@ export class Graph {
         this._incidentEdges.delete(n);
       }
     }
+  }
+
+  _getOrder(): CachedOrder {
+    const modificationCount = this._modificationCount;
+    if (this._cachedOrder.modificationCount !== modificationCount) {
+      const edgeOrder = Array.from(this._edges.keys()).sort();
+      const nodeOrder = Array.from(this._nodes.keys()).sort();
+      this._cachedOrder = {nodeOrder, edgeOrder, modificationCount};
+    }
+    return this._cachedOrder;
   }
 
   /**
@@ -392,8 +415,9 @@ export class Graph {
    * prefix. See semantics of [Address.hasPrefix][1] for details.
    *
    * Clients must not modify the graph during iteration. If they do so, an
-   * error may be thrown at the iteration call site. The iteration order is
-   * undefined.
+   * error may be thrown at the iteration call site.
+   *
+   * Nodes are yielded in address-sorted order.
    *
    * [1]: https://github.com/sourcecred/sourcecred/blob/7c7fa2d83d4fd5ba38efb2b2f4e0244235ac1312/src/core/address.js#L74
    */
@@ -411,8 +435,9 @@ export class Graph {
     initialModificationCount: ModificationCount,
     prefix: NodeAddressT
   ): Iterator<Node> {
-    for (const node of this._nodes.values()) {
-      if (NodeAddress.hasPrefix(node.address, prefix)) {
+    for (const address of this._getOrder().nodeOrder) {
+      if (NodeAddress.hasPrefix(address, prefix)) {
+        const node = NullUtil.get(this._nodes.get(address));
         this._checkForComodification(initialModificationCount);
         this._maybeCheckInvariants();
         yield node;
@@ -573,8 +598,9 @@ export class Graph {
    * `NodeAddress.empty`, which is a prefix of every node address.
    *
    * Clients must not modify the graph during iteration. If they do so, an
-   * error may be thrown at the iteration call site. The iteration order is
-   * undefined.
+   * error may be thrown at the iteration call site.
+   *
+   * The edges are yielded in sorted address order.
    */
   edges(options: EdgesOptions): Iterator<Edge> {
     if (options == null) {
@@ -606,7 +632,8 @@ export class Graph {
     srcPrefix: NodeAddressT,
     dstPrefix: NodeAddressT
   ): Iterator<Edge> {
-    for (const edge of this._edges.values()) {
+    for (const address of this._getOrder().edgeOrder) {
+      const edge = NullUtil.get(this._edges.get(address));
       if (
         (showDangling || this.isDanglingEdge(edge.address) === false) &&
         EdgeAddress.hasPrefix(edge.address, addressPrefix) &&
@@ -750,20 +777,17 @@ export class Graph {
 
   /**
    * Serialize a Graph into a plain JavaScript object.
-   *
-   * Runs in time `O(n log n + e)`, where `n` is the number of nodes and `e` is
-   * the number of edges.
    */
   toJSON(): GraphJSON {
+    // Unlike Array.from(this.nodes()).map((x) => x.address), this will include
+    // node references. Including node references is necessary so that we can
+    // index edges' src and dst consistently, even for dangling edges.
     const sortedNodeAddresses = Array.from(this._incidentEdges.keys()).sort();
     const nodeAddressToSortedIndex = new Map();
     sortedNodeAddresses.forEach((address, i) => {
       nodeAddressToSortedIndex.set(address, i);
     });
-    const sortedEdges = sortBy(
-      Array.from(this.edges({showDangling: true})),
-      (x) => x.address
-    );
+    const sortedEdges = Array.from(this.edges({showDangling: true}));
     const indexedEdges: IndexedEdgeJSON[] = sortedEdges.map(
       ({src, dst, address, timestampMs}) => {
         const srcIndex = NullUtil.get(nodeAddressToSortedIndex.get(src));
@@ -776,7 +800,7 @@ export class Graph {
         };
       }
     );
-    const sortedNodes = sortBy(Array.from(this.nodes()), (x) => x.address);
+    const sortedNodes = Array.from(this.nodes());
     const indexedNodes: IndexedNodeJSON[] = sortedNodes.map(
       ({address, description, timestampMs}) => {
         const index = NullUtil.get(nodeAddressToSortedIndex.get(address));
@@ -1119,36 +1143,4 @@ export function edgeToParts(
   const dstParts = NodeAddress.toParts(edge.dst);
   const timestampMs = edge.timestampMs;
   return {addressParts, srcParts, dstParts, timestampMs};
-}
-
-/*
- * When JSON-serialized, the graph has all of the edges in sorted
- * order. This makes it possible to compactly represent metadata
- * associated with every edge without needing to duplicate the
- * (lengthy) edge addresses.
- * This method makes it possible for consumers of Graph to package
- * metadata in the same way, without needing to manually re-sort the
- * edges.
- */
-export function sortedEdgeAddressesFromJSON(
-  json: GraphJSON
-): $ReadOnlyArray<EdgeAddressT> {
-  const {edges} = fromCompat(COMPAT_INFO, json);
-  return edges.map((x) => EdgeAddress.fromParts(x.address));
-}
-
-/*
- * When JSON-serialized, the graph has all of the nodes in sorted
- * order. This makes it possible to compactly represent metadata
- * associated with every node without needing to duplicate the
- * (lengthy) node addresses.
- * This method makes it possible for consumers of Graph to package
- * metadata in the same way, without needing to manually re-sort the
- * nodes.
- */
-export function sortedNodeAddressesFromJSON(
-  json: GraphJSON
-): $ReadOnlyArray<NodeAddressT> {
-  const {sortedNodeAddresses} = fromCompat(COMPAT_INFO, json);
-  return sortedNodeAddresses.map((x) => NodeAddress.fromParts(x));
 }

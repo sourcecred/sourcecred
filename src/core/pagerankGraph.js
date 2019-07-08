@@ -10,8 +10,6 @@ import {
   type NodeAddressT,
   type EdgeAddressT,
   type GraphJSON,
-  sortedEdgeAddressesFromJSON,
-  sortedNodeAddressesFromJSON,
   NodeAddress,
   type NeighborsOptions,
 } from "./graph";
@@ -567,19 +565,9 @@ export class PagerankGraph {
     this._verifyGraphNotModified();
 
     const graphJSON = this.graph().toJSON();
-    const nodes = sortedNodeAddressesFromJSON(graphJSON).filter((x) =>
-      this.graph().hasNode(x)
-    );
-    const scores: number[] = nodes.map((x) =>
-      NullUtil.get(this._scores.get(x))
-    );
+    const scores = Array.from(this.nodes()).map((x) => x.score);
 
-    const edgeAddresses = sortedEdgeAddressesFromJSON(graphJSON).filter(
-      (a) => this.graph().isDanglingEdge(a) === false
-    );
-    const edgeWeights: EdgeWeight[] = edgeAddresses.map((x) =>
-      NullUtil.get(this._edgeWeights.get(x))
-    );
+    const edgeWeights = Array.from(this.edges()).map((x) => x.weight);
     const toWeights: number[] = edgeWeights.map((x) => x.toWeight);
     const froWeights: number[] = edgeWeights.map((x) => x.froWeight);
 
@@ -604,16 +592,14 @@ export class PagerankGraph {
     } = fromCompat(COMPAT_INFO, json);
     const graph = Graph.fromJSON(graphJSON);
 
-    const nodeAddresses = sortedNodeAddressesFromJSON(graphJSON).filter((x) =>
-      graph.hasNode(x)
-    );
+    const nodeAddresses = Array.from(graph.nodes()).map((x) => x.address);
     const scoreMap: Map<NodeAddressT, number> = new Map();
     for (let i = 0; i < nodeAddresses.length; i++) {
       scoreMap.set(nodeAddresses[i], scores[i]);
     }
 
-    const edgeAddresses = sortedEdgeAddressesFromJSON(graphJSON).filter(
-      (x) => graph.isDanglingEdge(x) === false
+    const edgeAddresses = Array.from(graph.edges({showDangling: false})).map(
+      (x) => x.address
     );
     const edgeWeights: Map<EdgeAddressT, EdgeWeight> = new Map();
     for (let i = 0; i < edgeAddresses.length; i++) {
