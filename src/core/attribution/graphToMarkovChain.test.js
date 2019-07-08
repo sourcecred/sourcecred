@@ -290,4 +290,26 @@ describe("core/attribution/graphToMarkovChain", () => {
       expect(normalize(osmc)).toEqual(normalize(expected));
     });
   });
+
+  describe("graph -> OrderedSparseMarkovChain", () => {
+    it("always uses the graph canoncial ordering", () => {
+      const ag = advancedGraph();
+      const g1 = ag.graph1();
+      const g2 = ag.graph2();
+      function graphToOrder(g) {
+        const connections = createConnections(
+          g,
+          (_) => ({toWeight: 1, froWeight: 1}),
+          0.01
+        );
+        const osmc = createOrderedSparseMarkovChain(connections);
+        return osmc.nodeOrder;
+      }
+      const o1 = graphToOrder(g1);
+      const o2 = graphToOrder(g2);
+      const expected = Array.from(g1.nodes()).map((x) => x.address);
+      expect(o1).toEqual(expected);
+      expect(o2).toEqual(expected);
+    });
+  });
 });
