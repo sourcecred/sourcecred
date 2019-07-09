@@ -94,7 +94,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         .addEdge(e2)
         .addEdge(e3)
         .addEdge(e4);
-      const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
+      const edgeWeight = () => ({forwards: 6.0, backwards: 3.0});
       const actual = createConnections(g, edgeWeight, 1.0);
       // Total out-weights (for normalization factors):
       //   - for `n1`: 2 out, 0 in, 1 synthetic: 12 + 0 + 1 = 13
@@ -179,7 +179,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         .addEdge(e2)
         .addEdge(e3)
         .addEdge(e4);
-      const edgeWeight = () => ({toWeight: 1, froWeight: 0});
+      const edgeWeight = () => ({forwards: 1, backwards: 0});
       const osmc = createOrderedSparseMarkovChain(
         createConnections(g, edgeWeight, 0.0)
       );
@@ -214,7 +214,7 @@ describe("core/attribution/graphToMarkovChain", () => {
         .addEdge(e1)
         .addEdge(e2)
         .addEdge(e3);
-      const edgeWeight = () => ({toWeight: 1, froWeight: 1});
+      const edgeWeight = () => ({forwards: 1, backwards: 1});
       const osmc = createOrderedSparseMarkovChain(
         createConnections(g, edgeWeight, 0.0)
       );
@@ -245,7 +245,7 @@ describe("core/attribution/graphToMarkovChain", () => {
       function edgeWeight() {
         // These values are technically arbitrary, but make the
         // arithmetic simple.
-        return {toWeight: 4 - epsilon / 2, froWeight: 1 - epsilon / 2};
+        return {forwards: 4 - epsilon / 2, backwards: 1 - epsilon / 2};
       }
       const osmc = createOrderedSparseMarkovChain(
         createConnections(g, edgeWeight, epsilon)
@@ -299,7 +299,7 @@ describe("core/attribution/graphToMarkovChain", () => {
       function graphToOrder(g) {
         const connections = createConnections(
           g,
-          (_) => ({toWeight: 1, froWeight: 1}),
+          (_) => ({forwards: 1, backwards: 1}),
           0.01
         );
         const osmc = createOrderedSparseMarkovChain(connections);

@@ -132,7 +132,7 @@ describe("analysis/pagerankNodeDecomposition", () => {
         .addEdge(e2)
         .addEdge(e3)
         .addEdge(e4);
-      const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
+      const edgeWeight = () => ({forwards: 6.0, backwards: 3.0});
       const connections = createConnections(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(connections);
       const params: PagerankParams = {
@@ -158,7 +158,7 @@ describe("analysis/pagerankNodeDecomposition", () => {
 
     it("is valid on the example graph", async () => {
       const g = advancedGraph().graph1();
-      const edgeWeight = () => ({toWeight: 6.0, froWeight: 3.0});
+      const edgeWeight = () => ({forwards: 6.0, backwards: 3.0});
       const connections = createConnections(g, edgeWeight, 1.0);
       const osmc = createOrderedSparseMarkovChain(connections);
       const params: PagerankParams = {

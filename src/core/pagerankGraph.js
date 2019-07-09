@@ -65,12 +65,12 @@ export opaque type PagerankGraphJSON = Compatible<{|
   // Score for every node, ordered by the sorted node address.
   +scores: $ReadOnlyArray<number>,
   // Weights for every edge, ordered by sorted edge address.
-  // We could save the EdgeWeights directly rather than having separate
-  // arrays for toWeights and froWeights, but this would lead to an inflated
-  // JSON representation because we would be needlessly duplicating the keys
-  // "toWeight" and "froWeight" themselves.
-  +toWeights: $ReadOnlyArray<number>,
-  +froWeights: $ReadOnlyArray<number>,
+  // We could save the EdgeWeights directly rather than having separate arrays
+  // for forwardsWeights and backwardsWeights, but this would lead to an
+  // inflated JSON representation because we would be needlessly duplicating
+  // the keys "forwards" and "backwards" themselves.
+  +forwardsWeights: $ReadOnlyArray<number>,
+  +backwardsWeights: $ReadOnlyArray<number>,
   +syntheticLoopWeight: number,
 |}>;
 
@@ -132,7 +132,7 @@ function defaultOptions(): PagerankOptions {
   };
 }
 
-const COMPAT_INFO = {type: "sourcecred/pagerankGraph", version: "0.1.0"};
+const COMPAT_INFO = {type: "sourcecred/pagerankGraph", version: "0.2.0"};
 
 /**
  * PagerankGraph is a wrapper over the Graph class, which adds
@@ -149,9 +149,9 @@ const COMPAT_INFO = {type: "sourcecred/pagerankGraph", version: "0.1.0"};
  * [PageRank]: https://en.wikipedia.org/wiki/PageRank
  *
  * Every edge in the Graph is assigned an `EdgeWeight`, which includes a
- * `toWeight` (weight from the `src` to the `dst`) and a `froWeight`
- * (weight from the `dst` back to the `src`). Both `toWeight` and
- * `froWeight` must be nonnegative numbers. The weights influence how
+ * `forwards` (weight from the `src` to the `dst`) and a `backwards`
+ * (weight from the `dst` back to the `src`). Both `forwards` and
+ * `backwards` must be nonnegative numbers. The weights influence how
  * score flows from node to node. For example, if the node `root` is
  * connected to `a` with a weight of `1` and to `b` with a weight of `2`,
  * then `b` will recieve twice as much score from `root` as `a` does.
@@ -242,8 +242,8 @@ export class PagerankGraph {
     for (const edge of this._graph.edges({showDangling: false})) {
       const weights = edgeEvaluator(edge);
       this._edgeWeights.set(edge.address, weights);
-      addOutWeight(edge.src, weights.toWeight);
-      addOutWeight(edge.dst, weights.froWeight);
+      addOutWeight(edge.src, weights.forwards);
+      addOutWeight(edge.dst, weights.backwards);
     }
     return this;
   }
@@ -422,10 +422,10 @@ export class PagerankGraph {
       // based on whether it was an IN-edge or OUT-edge or loop.
       let relevantEdgeWeight = 0;
       if (edge.src === target) {
-        relevantEdgeWeight += weightedEdge.weight.froWeight;
+        relevantEdgeWeight += weightedEdge.weight.backwards;
       }
       if (edge.dst === target) {
-        relevantEdgeWeight += weightedEdge.weight.toWeight;
+        relevantEdgeWeight += weightedEdge.weight.forwards;
       }
       // We normalize this edge weight by the total outWeight for `node`.
       const normalizedEdgeWeight =
@@ -568,14 +568,14 @@ export class PagerankGraph {
     const scores = Array.from(this.nodes()).map((x) => x.score);
 
     const edgeWeights = Array.from(this.edges()).map((x) => x.weight);
-    const toWeights: number[] = edgeWeights.map((x) => x.toWeight);
-    const froWeights: number[] = edgeWeights.map((x) => x.froWeight);
+    const forwardsWeights: number[] = edgeWeights.map((x) => x.forwards);
+    const backwardsWeights: number[] = edgeWeights.map((x) => x.backwards);
 
     const rawJSON = {
       graphJSON,
       scores,
-      toWeights,
-      froWeights,
+      forwardsWeights,
+      backwardsWeights,
       syntheticLoopWeight: this.syntheticLoopWeight(),
     };
 
@@ -584,8 +584,8 @@ export class PagerankGraph {
 
   static fromJSON(json: PagerankGraphJSON): PagerankGraph {
     const {
-      toWeights,
-      froWeights,
+      forwardsWeights,
+      backwardsWeights,
       scores,
       graphJSON,
       syntheticLoopWeight,
@@ -603,9 +603,9 @@ export class PagerankGraph {
     );
     const edgeWeights: Map<EdgeAddressT, EdgeWeight> = new Map();
     for (let i = 0; i < edgeAddresses.length; i++) {
-      const toWeight = toWeights[i];
-      const froWeight = froWeights[i];
-      edgeWeights.set(edgeAddresses[i], {toWeight, froWeight});
+      const forwards = forwardsWeights[i];
+      const backwards = backwardsWeights[i];
+      edgeWeights.set(edgeAddresses[i], {forwards, backwards});
     }
 
     function evaluator(e: Edge): EdgeWeight {

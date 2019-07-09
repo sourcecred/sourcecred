@@ -13,8 +13,8 @@ export async function example() {
   const adapters = await dynamicExplorerAdapterSet();
   const graph = adapters.graph();
   const pnd = await pagerank(graph, (_unused_Edge) => ({
-    toWeight: 1,
-    froWeight: 1,
+    forwards: 1,
+    backwards: 1,
   }));
   const maxEntriesPerList = 123;
   const manualWeights: Map<NodeAddressT, number> = new Map();

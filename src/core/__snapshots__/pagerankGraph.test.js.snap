@@ -4,13 +4,18 @@ exports[`core/pagerankGraph to/from JSON matches expected snapshot 1`] = `
 Array [
   Object {
     "type": "sourcecred/pagerankGraph",
-    "version": "0.1.0",
+    "version": "0.2.0",
   },
   Object {
-    "froWeights": Array [
+    "backwardsWeights": Array [
       0,
       0,
       0,
+    ],
+    "forwardsWeights": Array [
+      1,
+      1,
+      1,
     ],
     "graphJSON": Array [
       Object {
@@ -119,11 +124,6 @@ Array [
       0.2,
     ],
     "syntheticLoopWeight": 0.001,
-    "toWeights": Array [
-      1,
-      1,
-      1,
-    ],
   },
 ]
 `;
