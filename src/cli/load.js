@@ -47,7 +47,7 @@ function usage(print: (string) => void): void {
 
         --plugin PLUGIN
             Plugin for which to load data. Valid options are 'git' and
-            'github'. If not specified, data for all plugins will be
+            'github'. If not specified, data for all default plugins will be
             loaded.
 
         --help
@@ -188,7 +188,7 @@ export const makeLoadDefaultPlugins = (saveGraph: SaveGraph) => {
       ...args,
     ];
     const tasks = [
-      ...Common.defaultPlugins().map((pluginName) => ({
+      ...Common.defaultPlugins.map((pluginName) => ({
         id: `load-${pluginName}`,
         cmd: sourcecredCommand([
           "load",

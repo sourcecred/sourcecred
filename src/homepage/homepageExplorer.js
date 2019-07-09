@@ -5,16 +5,11 @@ import React from "react";
 import type {Assets} from "../webutil/assets";
 import {StaticExplorerAdapterSet} from "../explorer/adapters/explorerAdapterSet";
 import {StaticExplorerAdapter as GithubAdapter} from "../plugins/github/explorerAdapter";
-import {StaticExplorerAdapter as GitAdapter} from "../plugins/git/explorerAdapter";
-import {GithubGitGateway} from "../plugins/github/githubGitGateway";
 import {AppPage} from "../explorer/App";
 import type {RepoId} from "../core/repoId";
 
 function homepageStaticAdapters(): StaticExplorerAdapterSet {
-  return new StaticExplorerAdapterSet([
-    new GithubAdapter(),
-    new GitAdapter(new GithubGitGateway()),
-  ]);
+  return new StaticExplorerAdapterSet([new GithubAdapter()]);
 }
 
 export default class HomepageExplorer extends React.Component<{|

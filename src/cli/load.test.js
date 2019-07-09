@@ -4,6 +4,7 @@ import path from "path";
 import tmp from "tmp";
 
 import {run} from "./testUtil";
+import {defaultPlugins} from "./common";
 import {
   makeLoadCommand,
   makeLoadDefaultPlugins,
@@ -476,9 +477,9 @@ describe("cli/load", () => {
       });
       expect(execDependencyGraph).toHaveBeenCalledTimes(1);
       const loadTasks = execDependencyGraph.mock.calls[0][0];
-      expect(loadTasks).toHaveLength(["git", "github"].length);
+      expect(loadTasks).toHaveLength(defaultPlugins.length);
       expect(loadTasks.map((task) => task.id)).toEqual(
-        expect.arrayContaining(["load-git", "load-github"])
+        expect.arrayContaining(defaultPlugins.map((x) => `load-${x}`))
       );
       for (const task of loadTasks) {
         expect(task.cmd).toEqual([

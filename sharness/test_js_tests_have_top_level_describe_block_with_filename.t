@@ -22,7 +22,7 @@ test_expect_success "setup" '
 # Happily, doing so would be highly questionable anyway.
 while read -r filename; do
     test_expect_success SETUP "test file: ${filename}" '
-        grep "^describe(" -- "${root}/src/${filename}" >describes &&
+        grep "^describe\(\.skip\)\?(" -- "${root}/src/${filename}" >describes &&
         grep -F -- "${filename%.test.js}" describes
     '
 done <test_files

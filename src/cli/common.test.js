@@ -17,8 +17,8 @@ describe("cli/common", () => {
   });
 
   describe("defaultPlugins", () => {
-    it("gives an array including the Git plugin name", () => {
-      expect(defaultPlugins()).toEqual(expect.arrayContaining(["git"]));
+    it("is an array including the GitHub plugin name", () => {
+      expect(defaultPlugins).toEqual(expect.arrayContaining(["github"]));
     });
   });
 

@@ -23,7 +23,6 @@ import {type NodeAndEdgeTypes} from "../analysis/types";
 import {combineTypes} from "../analysis/pluginDeclaration";
 import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
 import {BackendAdapterLoader as GithubAdapterLoader} from "../plugins/github/analysisAdapter";
-import {BackendAdapterLoader as GitAdapterLoader} from "../plugins/git/analysisAdapter";
 
 function usage(print: (string) => void): void {
   print(
@@ -169,10 +168,7 @@ export async function savePagerankGraph(
 
 // TODO(#1120): This should be canonicalized somewhere more appropriate,
 // e.g. in src/plugins/defaultPlugins.js
-export const defaultAdapterLoaders = () => [
-  new GithubAdapterLoader(),
-  new GitAdapterLoader(),
-];
+export const defaultAdapterLoaders = () => [new GithubAdapterLoader()];
 
 const declarations = () => defaultAdapterLoaders().map((x) => x.declaration());
 
