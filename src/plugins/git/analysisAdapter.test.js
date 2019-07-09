@@ -7,7 +7,13 @@ import {stringToRepoId} from "../../core/repoId";
 import {declaration} from "./declaration";
 import {Graph} from "../../core/graph";
 
-describe("plugins/git/analysisAdapter", () => {
+// This test is skipped because the Git plugin is currently disabled, but the
+// tests depend on data being loaded in the `sourcecred load` snapshot. I
+// elected to disable the test rather than update it because I consider the
+// AnalysisAdapters deprecated now that the Graph natively contains
+// descriptions and timestamps. Rather than having an AnalysisAdapter, we
+// should just use the graph file directly.
+describe.skip("plugins/git/analysisAdapter", () => {
   const sourcecredDirectory = path.join(
     "sharness",
     "__snapshots__",

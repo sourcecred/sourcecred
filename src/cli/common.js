@@ -8,9 +8,7 @@ import * as NullUtil from "../util/null";
 
 export type PluginName = "git" | "github";
 
-export function defaultPlugins(): PluginName[] {
-  return ["git", "github"];
-}
+export const defaultPlugins: PluginName[] = Object.freeze(["github"]);
 
 export function defaultSourcecredDirectory() {
   return path.join(os.tmpdir(), "sourcecred");
