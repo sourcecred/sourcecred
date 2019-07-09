@@ -32,7 +32,6 @@ First, make sure that you have the following dependencies:
   - Install [Node] (tested on v12.x.x and v10.x.x).
   - Install [Yarn] (tested on v1.7.0).
   - Create a [GitHub API token]. No special permissions are required.
-  - Ensure that you have an SSH key (`id_rsa`) for `git` to use. On unix-like systems, this is usually stored in `~/.ssh/`. If you do not, you can generate one by following these [instructions](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
   - For macOS users: Ensure that your environment provides GNU
     coreutils. [See this comment for details about what, how, and
     why.][macos-gnu]
