@@ -47,13 +47,13 @@ describe("analysis/weightsToEdgeEvaluator", () => {
   }
 
   it("applies default weights when none are specified", () => {
-    expect(evaluateEdge(defaultWeights())).toEqual({toWeight: 1, froWeight: 2});
+    expect(evaluateEdge(defaultWeights())).toEqual({forwards: 1, backwards: 2});
   });
 
   it("only matches the most specific node types", () => {
     const weights = defaultWeights();
     weights.nodeTypeWeights.set(NodeAddress.empty, 99);
-    expect(evaluateEdge(weights)).toEqual({toWeight: 99, froWeight: 2});
+    expect(evaluateEdge(weights)).toEqual({forwards: 99, backwards: 2});
   });
 
   it("takes manually specified edge type weights into account", () => {
@@ -64,13 +64,13 @@ describe("analysis/weightsToEdgeEvaluator", () => {
       forwards: 6,
       backwards: 12,
     });
-    expect(evaluateEdge(weights)).toEqual({toWeight: 6, froWeight: 24});
+    expect(evaluateEdge(weights)).toEqual({forwards: 6, backwards: 24});
   });
 
   it("takes manually specified per-node weights into account", () => {
     const weights = defaultWeights();
     weights.nodeManualWeights.set(src, 10);
-    expect(evaluateEdge(weights)).toEqual({toWeight: 1, froWeight: 20});
+    expect(evaluateEdge(weights)).toEqual({forwards: 1, backwards: 20});
   });
 
   it("uses 1 as a default weight for unmatched nodes and edges", () => {
@@ -78,7 +78,7 @@ describe("analysis/weightsToEdgeEvaluator", () => {
       nodeTypes: [],
       edgeTypes: [],
     });
-    expect(evaluator(edge)).toEqual({toWeight: 1, froWeight: 1});
+    expect(evaluator(edge)).toEqual({forwards: 1, backwards: 1});
   });
 
   it("ignores extra weights if they do not apply", () => {

@@ -11,10 +11,10 @@ import {NodeTrie, EdgeTrie} from "../core/trie";
  * Given the weight choices and the node and edge types, produces an edge
  * evaluator.
  *
- * The edge evaluator will give a toWeight and froWeight to every edge in the
- * graph according to the provided weights. When multiple weights apply (e.g. a
- * nodeType weight, an edgeType weight, and a manual nodeWeight all affecting
- * the same edge), they are composed multiplicatively.
+ * The edge evaluator will give a forwards and backwards weight to every edge
+ * in the graph according to the provided weights. When multiple weights apply
+ * (e.g. a nodeType weight, an edgeType weight, and a manual nodeWeight all
+ * affecting the same edge), they are composed multiplicatively.
  *
  * When multiple node or edge types may match a given node or edge, only
  * weights for the most specific type are considered (i.e. the type with the
@@ -54,8 +54,8 @@ export function weightsToEdgeEvaluator(
     });
     const {forwards, backwards} = edgeWeight;
     return {
-      toWeight: dstWeight * forwards,
-      froWeight: srcWeight * backwards,
+      forwards: dstWeight * forwards,
+      backwards: srcWeight * backwards,
     };
   };
 }

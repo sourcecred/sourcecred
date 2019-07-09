@@ -44,11 +44,9 @@ export type OrderedSparseMarkovChain = {|
   +chain: SparseMarkovChain,
 |};
 
-// TODO(@decentralion): Rename these fields to `forwards` and `backwards` to
-// deduplicate with the EdgeWeight type defined by analysis/weights
 export type EdgeWeight = {|
-  +toWeight: number, // weight from src to dst
-  +froWeight: number, // weight from dst to src
+  +forwards: number, // weight from src to dst
+  +backwards: number, // weight from dst to src
 |};
 
 export function createConnections(
@@ -83,15 +81,15 @@ export function createConnections(
 
   // Process edges.
   for (const edge of graph.edges({showDangling: false})) {
-    const {toWeight, froWeight} = edgeWeight(edge);
+    const {forwards, backwards} = edgeWeight(edge);
     const {src, dst} = edge;
     processConnection(dst, {
       adjacency: {type: "IN_EDGE", edge},
-      weight: toWeight,
+      weight: forwards,
     });
     processConnection(src, {
       adjacency: {type: "OUT_EDGE", edge},
-      weight: froWeight,
+      weight: backwards,
     });
   }
 

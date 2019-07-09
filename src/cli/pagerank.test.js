@@ -131,7 +131,7 @@ describe("cli/pagerank", () => {
       const graphResult = () => ({status: "SUCCESS", graph: graph()});
       const loader = (_unused_repoId) =>
         new Promise((resolve) => resolve(graphResult()));
-      const evaluator = (_unused_edge) => ({toWeight: 1, froWeight: 1});
+      const evaluator = (_unused_edge) => ({forwards: 1, backwards: 1});
       const pagerankGraph = () => new PagerankGraph(graph(), evaluator, 0.001);
       const mockPagerankRunner = (_unused_graph) =>
         new Promise((resolve) => resolve(pagerankGraph()));
@@ -170,7 +170,7 @@ describe("cli/pagerank", () => {
   describe("savePagerankGraph", () => {
     it("saves the PagerankGraphJSON to the right filepath", async () => {
       const graph = new Graph().addNode(node("n"));
-      const evaluator = (_unused_edge) => ({toWeight: 1, froWeight: 2});
+      const evaluator = (_unused_edge) => ({forwards: 1, backwards: 2});
       const prg = new PagerankGraph(graph, evaluator);
       const dirname = tmp.dirSync().name;
       const repoId = makeRepoId("foo", "bar");
@@ -242,8 +242,8 @@ describe("cli/pagerank", () => {
     const prg = new PagerankGraph(
       new Graph().addNode(node("n")),
       (_unused_edge) => ({
-        toWeight: 1,
-        froWeight: 2,
+        forwards: 1,
+        backwards: 2,
       })
     );
     await defaultSaver(repoId, prg);

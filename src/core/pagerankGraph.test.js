@@ -22,7 +22,7 @@ import {advancedGraph, node, partsNode, partsEdge} from "./graphTestUtil";
 import * as NullUtil from "../util/null";
 
 describe("core/pagerankGraph", () => {
-  const defaultEvaluator = (_unused_edge) => ({toWeight: 1, froWeight: 0});
+  const defaultEvaluator = (_unused_edge) => ({forwards: 1, backwards: 0});
   const nonEmptyGraph = () => new Graph().addNode(node("hi"));
 
   function examplePagerankGraph(
@@ -58,7 +58,7 @@ describe("core/pagerankGraph", () => {
     it("graphs with changed edge weights are not equal", () => {
       const e1 = examplePagerankGraph();
       const e2 = examplePagerankGraph();
-      e2.setEdgeEvaluator(() => ({toWeight: 3, froWeight: 9}));
+      e2.setEdgeEvaluator(() => ({forwards: 3, backwards: 9}));
       expect(e1.equals(e2)).toBe(false);
     });
     it("graphs are distinct but with identical scores if evaluators are the same modulo multiplication", async () => {
@@ -68,8 +68,8 @@ describe("core/pagerankGraph", () => {
       // are different by a scalar multiple of 3.
       // So we know the scores should all turn out the same, but the graphs will be different,
       // because the edge weights are nominally distinct.
-      const e1 = examplePagerankGraph(() => ({toWeight: 3, froWeight: 6}));
-      const e2 = examplePagerankGraph(() => ({toWeight: 1, froWeight: 2}));
+      const e1 = examplePagerankGraph(() => ({forwards: 3, backwards: 6}));
+      const e2 = examplePagerankGraph(() => ({forwards: 1, backwards: 2}));
       expect(e1.equals(e2)).toBe(false);
       await e1.runPagerank();
       await e2.runPagerank();
@@ -178,8 +178,8 @@ describe("core/pagerankGraph", () => {
     it("edge/edges both correctly return the edge weights", () => {
       const edgeEvaluator = ({address, src, dst}) => {
         return {
-          toWeight: address.length + src.length,
-          froWeight: address.length + dst.length,
+          forwards: address.length + src.length,
+          backwards: address.length + dst.length,
         };
       };
       const g = advancedGraph().graph1();
@@ -239,8 +239,8 @@ describe("core/pagerankGraph", () => {
         outWeight.set(node, newWeight);
       };
       for (const {edge, weight} of pg.edges()) {
-        addOutWeight(edge.src, weight.toWeight);
-        addOutWeight(edge.dst, weight.froWeight);
+        addOutWeight(edge.src, weight.forwards);
+        addOutWeight(edge.dst, weight.backwards);
       }
       for (const node of pg.graph().nodes()) {
         expect(pg.totalOutWeight(node.address)).toEqual(
@@ -249,12 +249,12 @@ describe("core/pagerankGraph", () => {
       }
     }
     it("computes outWeight correctly on the example graph", () => {
-      const edgeEvaluator = (_unused_edge) => ({toWeight: 1, froWeight: 2});
+      const edgeEvaluator = (_unused_edge) => ({forwards: 1, backwards: 2});
       const eg = examplePagerankGraph(edgeEvaluator);
       verifyOutWeights(eg);
     });
     it("outWeight is always the syntheticLoopWeight when edges have no weight", () => {
-      const zeroEvaluator = (_unused_edge) => ({toWeight: 0, froWeight: 0});
+      const zeroEvaluator = (_unused_edge) => ({forwards: 0, backwards: 0});
       const syntheticLoopWeight = 0.1337;
       const pg = new PagerankGraph(
         advancedGraph().graph1(),
@@ -296,8 +296,8 @@ describe("core/pagerankGraph", () => {
     function expectConsistentEdges(options: PagerankGraphEdgesOptions | void) {
       const pagerankGraphEdges = Array.from(pagerankGraph().edges(options));
       pagerankGraphEdges.forEach((e) => {
-        expect(e.weight.froWeight).toBe(0);
-        expect(e.weight.toWeight).toBe(1);
+        expect(e.weight.backwards).toBe(0);
+        expect(e.weight.forwards).toBe(1);
       });
       const graphOptions: EdgesOptions =
         options == null
@@ -424,10 +424,10 @@ describe("core/pagerankGraph", () => {
         } of pg.neighbors(target, allNeighbors())) {
           let rawWeight = 0;
           if (weightedEdge.edge.dst === target) {
-            rawWeight += weightedEdge.weight.toWeight;
+            rawWeight += weightedEdge.weight.forwards;
           }
           if (weightedEdge.edge.src === target) {
-            rawWeight += weightedEdge.weight.froWeight;
+            rawWeight += weightedEdge.weight.backwards;
           }
           const normalizedWeight =
             rawWeight / pg.totalOutWeight(scoredNode.node.address);
@@ -448,7 +448,7 @@ describe("core/pagerankGraph", () => {
     });
     it("neighbors score contributions + synthetic score contribution == node score", async () => {
       // Note: I've verified that test fails if we don't properly handle loop
-      // neighbors (need to add the edge toWeight and froWeight if the neighbor
+      // neighbors (need to add the edge forwards and backwards if the neighbor
       // is a loop).
       const pg = await convergedPagerankGraph();
       for (const {node, score} of pg.nodes()) {
@@ -621,8 +621,8 @@ describe("core/pagerankGraph", () => {
       expect(pg1.equals(pg2)).toBe(false);
     });
     it("unequal edge weights => unequal", () => {
-      const evaluator1 = (_unused_edge) => ({toWeight: 1, froWeight: 1});
-      const evaluator2 = (_unused_edge) => ({toWeight: 0, froWeight: 1});
+      const evaluator1 = (_unused_edge) => ({forwards: 1, backwards: 1});
+      const evaluator2 = (_unused_edge) => ({forwards: 0, backwards: 1});
       const pg1 = new PagerankGraph(advancedGraph().graph1(), evaluator1);
       const pg2 = new PagerankGraph(advancedGraph().graph1(), evaluator2);
       expect(pg1.equals(pg2)).toBe(false);
