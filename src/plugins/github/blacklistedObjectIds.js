@@ -11,6 +11,8 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = Object.freeze([
   "MDEyOk9yZ2FuaXphdGlvbjEyNDE3MDI0",
   // In this case, the bot used to be a user (@greenkeeper)
   "MDM6Qm90MjMwNDAwNzY=",
+  // @dependabot also gives incosistent results (user vs bot)
+  "MDM6Qm90NDk2OTkzMzM=",
   // These are the offending reactions.
   "MDg6UmVhY3Rpb24yMTY3ODkyNQ==",
   "MDg6UmVhY3Rpb240NDMwMzQ1",
