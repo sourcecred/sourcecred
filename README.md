@@ -38,6 +38,8 @@ First, make sure that you have the following dependencies:
 
 [Node]: https://nodejs.org/en/
 [Yarn]: https://yarnpkg.com/lang/en/
+[GitHub API token]: https://github.com/settings/tokens
+
 [macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-417202213
 
 Then, run the following commands to clone and build SourceCred:
