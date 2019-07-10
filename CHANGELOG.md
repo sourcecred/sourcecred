@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Calculate Timeline Cred, and save it on `sourcecred load` (#1212)
 - Fail quicker and with information when using invalid GH token (#1161)
 - Allow the user to save or upload weight settings (#1150)
 - Allow tweaking weights on a per-node basis (#1143)
