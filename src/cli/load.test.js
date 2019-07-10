@@ -3,6 +3,7 @@
 import path from "path";
 import tmp from "tmp";
 
+import {Graph} from "../core/graph";
 import {run} from "./testUtil";
 import {defaultPlugins} from "./common";
 import {
@@ -467,7 +468,7 @@ describe("cli/load", () => {
     const fooCombined = makeRepoId("foo", "combined");
     const fooBar = makeRepoId("foo", "bar");
     const fooBaz = makeRepoId("foo", "baz");
-    const loadDefaultPlugins = makeLoadDefaultPlugins(jest.fn());
+    const loadDefaultPlugins = makeLoadDefaultPlugins(jest.fn(), jest.fn());
 
     it("creates a load sub-task per plugin", async () => {
       execDependencyGraph.mockResolvedValue({success: true});
@@ -518,7 +519,7 @@ describe("cli/load", () => {
 
     it("calls saveGraph on success", async () => {
       const saveGraph = jest.fn();
-      const loadDefaultPlugins = makeLoadDefaultPlugins(saveGraph);
+      const loadDefaultPlugins = makeLoadDefaultPlugins(saveGraph, jest.fn());
       execDependencyGraph.mockResolvedValue({success: true});
       await loadDefaultPlugins({
         output: fooCombined,
@@ -529,6 +530,21 @@ describe("cli/load", () => {
         defaultAdapterLoaders(),
         fooCombined
       );
+    });
+
+    it("calls saveCred with the output of saveGraph", async () => {
+      // $ExpectFlowError
+      const graph: Graph = "pretend_graph";
+      const saveGraph = jest.fn().mockResolvedValue(graph);
+      const saveCred = jest.fn();
+      const loadDefaultPlugins = makeLoadDefaultPlugins(saveGraph, saveCred);
+      execDependencyGraph.mockResolvedValue({success: true});
+      await loadDefaultPlugins({
+        output: fooCombined,
+        repoIds: [fooBar, fooBaz],
+      });
+      expect(saveCred).toHaveBeenCalledTimes(1);
+      expect(saveCred).toHaveBeenCalledWith(graph, fooCombined);
     });
 
     it("throws an load error on first execDependencyGraph failure", async () => {
