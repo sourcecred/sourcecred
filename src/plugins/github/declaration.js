@@ -5,7 +5,7 @@ import * as N from "./nodes";
 import * as E from "./edges";
 import dedent from "../../util/dedent";
 
-const repoNodeType = Object.freeze({
+export const repoNodeType = Object.freeze({
   name: "Repository",
   pluralName: "Repositories",
   prefix: N.Prefix.repo,
