@@ -73,4 +73,5 @@ module.exports = {
     new RemoveBuildDirectoryPlugin(),
     new webpack.DefinePlugin(env.individuallyStringified),
   ],
+  mode: process.env.NODE_ENV,
 };
