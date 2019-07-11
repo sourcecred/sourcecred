@@ -5,10 +5,10 @@ import {shallow} from "enzyme";
 import {TableRow, PaddingRow} from "./TableRow";
 
 import {COLUMNS} from "./sharedTestUtils";
-require("../../webutil/testUtil").configureEnzyme();
-require("../../webutil/testUtil").configureAphrodite();
+require("../../../webutil/testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureAphrodite();
 
-describe("explorer/pagerankTable/TableRow", () => {
+describe("explorer/legacy/pagerankTable/TableRow", () => {
   function example() {
     return shallow(
       <TableRow

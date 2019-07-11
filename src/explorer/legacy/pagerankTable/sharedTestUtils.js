@@ -2,9 +2,9 @@
 
 import React from "react";
 
-import {type NodeAddressT} from "../../core/graph";
-import {pagerank} from "../../analysis/pagerank";
-import {dynamicExplorerAdapterSet} from "../../plugins/demo/explorerAdapter";
+import {type NodeAddressT} from "../../../core/graph";
+import {pagerank} from "../../../analysis/pagerank";
+import {dynamicExplorerAdapterSet} from "../../../plugins/demo/explorerAdapter";
 import type {SharedProps} from "./shared";
 
 export const COLUMNS = () => ["Description", "", "Cred"];

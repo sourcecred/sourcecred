@@ -1,7 +1,7 @@
 // @flow
 
-import {EdgeAddress, NodeAddress, type NodeAddressT} from "../../core/graph";
-import * as NullUtil from "../../util/null";
+import {EdgeAddress, NodeAddress, type NodeAddressT} from "../../../core/graph";
+import * as NullUtil from "../../../util/null";
 import {
   aggregateByNodeType,
   aggregateByConnectionType,
@@ -11,9 +11,9 @@ import {
   fallbackEdgeType,
   fallbackNodeType,
 } from "./aggregate";
-import {type NodeType} from "../../analysis/types";
+import {type NodeType} from "../../../analysis/types";
 
-describe("explorer/pagerankTable/aggregate", () => {
+describe("explorer/legacy/pagerankTable/aggregate", () => {
   // TODO: If making major modifications to these tests, consider switching
   // from the hand-maintained connections and types, and instead use the demo
   // adadpters from app/adapters/demoAdapters

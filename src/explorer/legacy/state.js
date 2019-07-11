@@ -2,23 +2,23 @@
 
 import deepEqual from "lodash.isequal";
 
-import {Graph, type NodeAddressT} from "../core/graph";
-import type {Assets} from "../webutil/assets";
-import type {RepoId} from "../core/repoId";
-import {type EdgeEvaluator} from "../analysis/pagerank";
-import type {NodeAndEdgeTypes} from "../analysis/types";
+import {Graph, type NodeAddressT} from "../../core/graph";
+import type {Assets} from "../../webutil/assets";
+import type {RepoId} from "../../core/repoId";
+import {type EdgeEvaluator} from "../../analysis/pagerank";
+import type {NodeAndEdgeTypes} from "../../analysis/types";
 import {
   type PagerankNodeDecomposition,
   type PagerankOptions,
   pagerank,
-} from "../analysis/pagerank";
+} from "../../analysis/pagerank";
 
 import {
   StaticExplorerAdapterSet,
   DynamicExplorerAdapterSet,
 } from "./adapters/explorerAdapterSet";
-import type {Weights} from "../analysis/weights";
-import {weightsToEdgeEvaluator} from "../analysis/weightsToEdgeEvaluator";
+import type {Weights} from "../../analysis/weights";
+import {weightsToEdgeEvaluator} from "../../analysis/weightsToEdgeEvaluator";
 
 /*
   This models the UI states of the credExplorer/App as a state machine.

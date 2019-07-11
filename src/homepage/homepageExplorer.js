@@ -3,9 +3,9 @@
 import React from "react";
 
 import type {Assets} from "../webutil/assets";
-import {StaticExplorerAdapterSet} from "../explorer/adapters/explorerAdapterSet";
+import {StaticExplorerAdapterSet} from "../explorer/legacy/adapters/explorerAdapterSet";
 import {StaticExplorerAdapter as GithubAdapter} from "../plugins/github/explorerAdapter";
-import {AppPage} from "../explorer/App";
+import {AppPage} from "../explorer/legacy/App";
 import type {RepoId} from "../core/repoId";
 
 function homepageStaticAdapters(): StaticExplorerAdapterSet {

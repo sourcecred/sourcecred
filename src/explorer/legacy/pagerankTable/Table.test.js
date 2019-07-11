@@ -3,16 +3,16 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import {NodeAddress} from "../../core/graph";
+import {NodeAddress} from "../../../core/graph";
 
 import {PagerankTable} from "./Table";
 import {example, COLUMNS} from "./sharedTestUtils";
 import {NodeRowList} from "./Node";
-import {WeightConfig} from "../weights/WeightConfig";
-import {type NodeType} from "../../analysis/types";
+import {WeightConfig} from "../../weights/WeightConfig";
+import {type NodeType} from "../../../analysis/types";
 
-require("../../webutil/testUtil").configureEnzyme();
-describe("explorer/pagerankTable/Table", () => {
+require("../../../webutil/testUtil").configureEnzyme();
+describe("explorer/legacy/pagerankTable/Table", () => {
   describe("PagerankTable", () => {
     async function setup(defaultNodeType?: NodeType) {
       const {

@@ -3,10 +3,10 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import {Graph} from "../core/graph";
-import {makeRepoId} from "../core/repoId";
-import {Assets} from "../webutil/assets";
-import testLocalStore from "../webutil/testLocalStore";
+import {Graph} from "../../core/graph";
+import {makeRepoId} from "../../core/repoId";
+import {Assets} from "../../webutil/assets";
+import testLocalStore from "../../webutil/testLocalStore";
 import {
   DynamicExplorerAdapterSet,
   StaticExplorerAdapterSet,
@@ -15,9 +15,9 @@ import {
 import {PagerankTable} from "./pagerankTable/Table";
 import {createApp, LoadingIndicator, ProjectDetail} from "./App";
 
-require("../webutil/testUtil").configureEnzyme();
+require("../../webutil/testUtil").configureEnzyme();
 
-describe("explorer/App", () => {
+describe("explorer/legacy/App", () => {
   function example() {
     let setState, getState;
     const loadGraph = jest.fn();

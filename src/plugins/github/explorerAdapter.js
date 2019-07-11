@@ -4,7 +4,7 @@ import pako from "pako";
 import type {
   StaticExplorerAdapter as IStaticExplorerAdapter,
   DynamicExplorerAdapter as IDynamicExplorerAdapter,
-} from "../../explorer/adapters/explorerAdapter";
+} from "../../explorer/legacy/adapters/explorerAdapter";
 import {type Graph, NodeAddress} from "../../core/graph";
 import {createGraph} from "./createGraph";
 import * as N from "./nodes";

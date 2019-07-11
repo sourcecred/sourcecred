@@ -2,7 +2,7 @@
 import type {
   StaticExplorerAdapter as IStaticExplorerAdapter,
   DynamicExplorerAdapter as IDynamicExplorerAdapter,
-} from "../../explorer/adapters/explorerAdapter";
+} from "../../explorer/legacy/adapters/explorerAdapter";
 import {Graph} from "../../core/graph";
 import * as N from "./nodes";
 import {description} from "./render";

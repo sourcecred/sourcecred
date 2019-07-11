@@ -2,12 +2,12 @@
 
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
-import * as MapUtil from "../../util/map";
-import * as NullUtil from "../../util/null";
-import {NodeTrie, EdgeTrie} from "../../core/trie";
-import {NodeAddress, EdgeAddress} from "../../core/graph";
-import {type EdgeType, type NodeType} from "../../analysis/types";
-import type {ScoredConnection} from "../../analysis/pagerankNodeDecomposition";
+import * as MapUtil from "../../../util/map";
+import * as NullUtil from "../../../util/null";
+import {NodeTrie, EdgeTrie} from "../../../core/trie";
+import {NodeAddress, EdgeAddress} from "../../../core/graph";
+import {type EdgeType, type NodeType} from "../../../analysis/types";
+import type {ScoredConnection} from "../../../analysis/pagerankNodeDecomposition";
 
 // Sorted by descending `summary.score`
 export type FlatAggregations = $ReadOnlyArray<FlatAggregation>;

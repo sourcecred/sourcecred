@@ -5,11 +5,11 @@ import {
   type EdgeAddressT,
   type NodeAddressT,
   NodeAddress,
-} from "../../core/graph";
+} from "../../../core/graph";
 
 import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 
-import type {PagerankNodeDecomposition} from "../../analysis/pagerankNodeDecomposition";
+import type {PagerankNodeDecomposition} from "../../../analysis/pagerankNodeDecomposition";
 
 export function nodeDescription(
   address: NodeAddressT,

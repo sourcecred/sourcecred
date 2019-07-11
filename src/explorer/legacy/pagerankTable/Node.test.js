@@ -3,7 +3,7 @@
 import React from "react";
 import {shallow} from "enzyme";
 import sortBy from "lodash.sortby";
-import * as NullUtil from "../../util/null";
+import * as NullUtil from "../../../util/null";
 import {TableRow} from "./TableRow";
 import {AggregationRowList} from "./Aggregation";
 import {
@@ -11,18 +11,18 @@ import {
   MAX_SLIDER,
   sliderToWeight,
   weightToSlider,
-} from "../weights/WeightSlider";
+} from "../../weights/WeightSlider";
 
-import type {NodeAddressT} from "../../core/graph";
+import type {NodeAddressT} from "../../../core/graph";
 
 import {nodeDescription} from "./shared";
 import {example} from "./sharedTestUtils";
 import {NodeRowList, NodeRow, type NodeRowProps} from "./Node";
-import {nodes as factorioNodes} from "../../plugins/demo/graph";
+import {nodes as factorioNodes} from "../../../plugins/demo/graph";
 
-require("../../webutil/testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
-describe("explorer/pagerankTable/Node", () => {
+describe("explorer/legacy/pagerankTable/Node", () => {
   describe("NodeRowList", () => {
     function sortedByScore(nodes: $ReadOnlyArray<NodeAddressT>, pnd) {
       return sortBy(nodes, (node) => -NullUtil.get(pnd.get(node)).score);

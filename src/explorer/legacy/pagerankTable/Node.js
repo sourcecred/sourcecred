@@ -2,9 +2,9 @@
 
 import React from "react";
 import sortBy from "lodash.sortby";
-import * as NullUtil from "../../util/null";
+import * as NullUtil from "../../../util/null";
 
-import {type NodeAddressT} from "../../core/graph";
+import {type NodeAddressT} from "../../../core/graph";
 import {TableRow} from "./TableRow";
 import {
   MIN_SLIDER,
@@ -12,7 +12,7 @@ import {
   formatWeight,
   sliderToWeight,
   weightToSlider,
-} from "../weights/WeightSlider";
+} from "../../weights/WeightSlider";
 
 import {nodeDescription, type SharedProps} from "./shared";
 
