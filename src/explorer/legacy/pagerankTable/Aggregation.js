@@ -1,9 +1,9 @@
 // @flow
 
 import React from "react";
-import * as NullUtil from "../../util/null";
+import * as NullUtil from "../../../util/null";
 
-import type {NodeAddressT} from "../../core/graph";
+import type {NodeAddressT} from "../../../core/graph";
 import {ConnectionRowList} from "./Connection";
 
 import {aggregateFlat, type FlatAggregation, aggregationKey} from "./aggregate";

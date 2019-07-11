@@ -1,13 +1,13 @@
 // @flow
 
-import {NodeAddress, EdgeAddress, Graph} from "../../core/graph";
-import {FactorioStaticAdapter} from "../../plugins/demo/explorerAdapter";
+import {NodeAddress, EdgeAddress, Graph} from "../../../core/graph";
+import {FactorioStaticAdapter} from "../../../plugins/demo/explorerAdapter";
 import {StaticExplorerAdapterSet} from "./explorerAdapterSet";
-import {Assets} from "../../webutil/assets";
-import {makeRepoId} from "../../core/repoId";
-import * as NullUtil from "../../util/null";
+import {Assets} from "../../../webutil/assets";
+import {makeRepoId} from "../../../core/repoId";
+import * as NullUtil from "../../../util/null";
 
-describe("explorer/adapters/explorerAdapterSet", () => {
+describe("explorer/legacy/adapters/explorerAdapterSet", () => {
   describe("StaticExplorerAdapterSet", () => {
     function example() {
       const x = new FactorioStaticAdapter();

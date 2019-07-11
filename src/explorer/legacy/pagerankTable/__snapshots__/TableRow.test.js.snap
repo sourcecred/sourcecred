@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`explorer/pagerankTable/TableRow depth parameter changes the color, but not the indentation 1`] = `
+exports[`explorer/legacy/pagerankTable/TableRow depth parameter changes the color, but not the indentation 1`] = `
 Object {
   "buttonStyle": Object {
     "marginLeft": 20,
@@ -14,7 +14,7 @@ Object {
 }
 `;
 
-exports[`explorer/pagerankTable/TableRow depth parameter changes the color, but not the indentation 2`] = `
+exports[`explorer/legacy/pagerankTable/TableRow depth parameter changes the color, but not the indentation 2`] = `
 Object {
   "buttonStyle": Object {
     "marginLeft": 20,
@@ -28,7 +28,7 @@ Object {
 }
 `;
 
-exports[`explorer/pagerankTable/TableRow depth parameter changes the color, but not the indentation 3`] = `
+exports[`explorer/legacy/pagerankTable/TableRow depth parameter changes the color, but not the indentation 3`] = `
 Object {
   "buttonStyle": Object {
     "marginLeft": 20,
@@ -42,7 +42,7 @@ Object {
 }
 `;
 
-exports[`explorer/pagerankTable/TableRow indent parameter changes the button indentation 1`] = `
+exports[`explorer/legacy/pagerankTable/TableRow indent parameter changes the button indentation 1`] = `
 Object {
   "buttonStyle": Object {
     "marginLeft": 5,
@@ -56,7 +56,7 @@ Object {
 }
 `;
 
-exports[`explorer/pagerankTable/TableRow indent parameter changes the button indentation 2`] = `
+exports[`explorer/legacy/pagerankTable/TableRow indent parameter changes the button indentation 2`] = `
 Object {
   "buttonStyle": Object {
     "marginLeft": 20,
@@ -70,7 +70,7 @@ Object {
 }
 `;
 
-exports[`explorer/pagerankTable/TableRow indent parameter changes the button indentation 3`] = `
+exports[`explorer/legacy/pagerankTable/TableRow indent parameter changes the button indentation 3`] = `
 Object {
   "buttonStyle": Object {
     "marginLeft": 35,

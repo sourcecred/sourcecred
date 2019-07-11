@@ -5,8 +5,8 @@ import {declaration} from "./declaration";
 import type {
   StaticExplorerAdapter,
   DynamicExplorerAdapter,
-} from "../../explorer/adapters/explorerAdapter";
-import {StaticExplorerAdapterSet} from "../../explorer/adapters/explorerAdapterSet";
+} from "../../explorer/legacy/adapters/explorerAdapter";
+import {StaticExplorerAdapterSet} from "../../explorer/legacy/adapters/explorerAdapterSet";
 import {Assets} from "../../webutil/assets";
 import {type RepoId, makeRepoId} from "../../core/repoId";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";

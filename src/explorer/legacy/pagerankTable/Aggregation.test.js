@@ -3,9 +3,9 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import * as NullUtil from "../../util/null";
-import {NodeAddress, EdgeAddress} from "../../core/graph";
-import type {EdgeType, NodeType} from "../../analysis/types";
+import * as NullUtil from "../../../util/null";
+import {NodeAddress, EdgeAddress} from "../../../core/graph";
+import type {EdgeType, NodeType} from "../../../analysis/types";
 import {
   AggregationRowList,
   AggregationRow,
@@ -16,11 +16,11 @@ import {Badge} from "./shared";
 import {example} from "./sharedTestUtils";
 import {aggregateFlat, type FlatAggregation} from "./aggregate";
 import {TableRow} from "./TableRow";
-import {nodes as factorioNodes} from "../../plugins/demo/graph";
+import {nodes as factorioNodes} from "../../../plugins/demo/graph";
 
-require("../../webutil/testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
-describe("explorer/pagerankTable/Aggregation", () => {
+describe("explorer/legacy/pagerankTable/Aggregation", () => {
   describe("AggregationRowList", () => {
     it("instantiates AggregationRows for each aggregation", async () => {
       const {adapters, pnd, sharedProps} = await example();

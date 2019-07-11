@@ -2,19 +2,19 @@
 
 import React from "react";
 
-import type {Assets} from "../webutil/assets";
-import type {LocalStore} from "../webutil/localStore";
-import CheckedLocalStore from "../webutil/checkedLocalStore";
-import BrowserLocalStore from "../webutil/browserLocalStore";
-import Link from "../webutil/Link";
-import type {RepoId} from "../core/repoId";
-import {type NodeAddressT} from "../core/graph";
+import type {Assets} from "../../webutil/assets";
+import type {LocalStore} from "../../webutil/localStore";
+import CheckedLocalStore from "../../webutil/checkedLocalStore";
+import BrowserLocalStore from "../../webutil/browserLocalStore";
+import Link from "../../webutil/Link";
+import type {RepoId} from "../../core/repoId";
+import {type NodeAddressT} from "../../core/graph";
 
 import {PagerankTable} from "./pagerankTable/Table";
-import {WeightConfig} from "./weights/WeightConfig";
-import {WeightsFileManager} from "./weights/WeightsFileManager";
-import {type Weights, defaultWeights} from "../analysis/weights";
-import {Prefix as GithubPrefix} from "../plugins/github/nodes";
+import {WeightConfig} from "../weights/WeightConfig";
+import {WeightsFileManager} from "../weights/WeightsFileManager";
+import {type Weights, defaultWeights} from "../../analysis/weights";
+import {Prefix as GithubPrefix} from "../../plugins/github/nodes";
 import {
   createStateTransitionMachine,
   type AppState,
@@ -22,7 +22,7 @@ import {
   initialState,
 } from "./state";
 import {StaticExplorerAdapterSet} from "./adapters/explorerAdapterSet";
-import {userNodeType} from "../plugins/github/declaration";
+import {userNodeType} from "../../plugins/github/declaration";
 
 const credOverviewUrl =
   "https://discourse.sourcecred.io/t/a-gentle-introduction-to-cred/20";

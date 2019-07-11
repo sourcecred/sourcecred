@@ -3,14 +3,14 @@
 import React from "react";
 import sortBy from "lodash.sortby";
 
-import {WeightConfig} from "../weights/WeightConfig";
-import {WeightsFileManager} from "../weights/WeightsFileManager";
-import {NodeAddress, type NodeAddressT} from "../../core/graph";
-import type {PagerankNodeDecomposition} from "../../analysis/pagerankNodeDecomposition";
+import {WeightConfig} from "../../weights/WeightConfig";
+import {WeightsFileManager} from "../../weights/WeightsFileManager";
+import {NodeAddress, type NodeAddressT} from "../../../core/graph";
+import type {PagerankNodeDecomposition} from "../../../analysis/pagerankNodeDecomposition";
 import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 import type {DynamicExplorerAdapter} from "../adapters/explorerAdapter";
 import {NodeRowList} from "./Node";
-import {type NodeType} from "../../analysis/types";
+import {type NodeType} from "../../../analysis/types";
 
 type PagerankTableProps = {|
   +pnd: PagerankNodeDecomposition,

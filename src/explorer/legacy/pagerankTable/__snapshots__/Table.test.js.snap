@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`explorer/pagerankTable/Table PagerankTable has a filter select with expected label text 1`] = `"Filter by node type: "`;
+exports[`explorer/legacy/pagerankTable/Table PagerankTable has a filter select with expected label text 1`] = `"Filter by node type: "`;
 
-exports[`explorer/pagerankTable/Table PagerankTable has a filter select with expected option groups 1`] = `
+exports[`explorer/legacy/pagerankTable/Table PagerankTable has a filter select with expected option groups 1`] = `
 Array [
   Object {
     "style": undefined,

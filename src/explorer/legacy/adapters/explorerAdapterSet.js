@@ -11,18 +11,18 @@
  * be paramterized over the adapter choice.
  */
 
-import {Graph, type NodeAddressT, type EdgeAddressT} from "../../core/graph";
-import {NodeTrie, EdgeTrie} from "../../core/trie";
-import type {NodeAndEdgeTypes} from "../../analysis/types";
-import {combineTypes} from "../../analysis/pluginDeclaration";
-import type {Assets} from "../../webutil/assets";
-import type {RepoId} from "../../core/repoId";
+import {Graph, type NodeAddressT, type EdgeAddressT} from "../../../core/graph";
+import {NodeTrie, EdgeTrie} from "../../../core/trie";
+import type {NodeAndEdgeTypes} from "../../../analysis/types";
+import {combineTypes} from "../../../analysis/pluginDeclaration";
+import type {Assets} from "../../../webutil/assets";
+import type {RepoId} from "../../../core/repoId";
 
 import type {
   StaticExplorerAdapter,
   DynamicExplorerAdapter,
 } from "./explorerAdapter";
-import type {EdgeType, NodeType} from "../../analysis/types";
+import type {EdgeType, NodeType} from "../../../analysis/types";
 
 export class StaticExplorerAdapterSet {
   _adapters: $ReadOnlyArray<StaticExplorerAdapter>;

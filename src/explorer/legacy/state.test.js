@@ -6,11 +6,11 @@ import {
   type GraphWithAdapters,
 } from "./state";
 
-import {Graph, NodeAddress} from "../core/graph";
-import {Assets} from "../webutil/assets";
-import {makeRepoId, type RepoId} from "../core/repoId";
-import {type EdgeEvaluator} from "../analysis/pagerank";
-import {defaultWeights} from "../analysis/weights";
+import {Graph, NodeAddress} from "../../core/graph";
+import {Assets} from "../../webutil/assets";
+import {makeRepoId, type RepoId} from "../../core/repoId";
+import {type EdgeEvaluator} from "../../analysis/pagerank";
+import {defaultWeights} from "../../analysis/weights";
 import {
   StaticExplorerAdapterSet,
   DynamicExplorerAdapterSet,
@@ -18,9 +18,9 @@ import {
 import type {
   PagerankNodeDecomposition,
   PagerankOptions,
-} from "../analysis/pagerank";
+} from "../../analysis/pagerank";
 
-describe("explorer/state", () => {
+describe("explorer/legacy/state", () => {
   function example(startingState: AppState) {
     const stateContainer = {appState: startingState};
     const getState = () => stateContainer.appState;

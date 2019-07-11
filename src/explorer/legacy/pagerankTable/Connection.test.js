@@ -2,18 +2,18 @@
 
 import React from "react";
 import {shallow} from "enzyme";
-import * as NullUtil from "../../util/null";
+import * as NullUtil from "../../../util/null";
 
-import type {Connection} from "../../core/attribution/graphToMarkovChain";
+import type {Connection} from "../../../core/attribution/graphToMarkovChain";
 import {ConnectionRowList, ConnectionRow, ConnectionView} from "./Connection";
 import {example} from "./sharedTestUtils";
 import {TableRow} from "./TableRow";
 import {NodeRow} from "./Node";
-import {nodes as factorioNodes} from "../../plugins/demo/graph";
+import {nodes as factorioNodes} from "../../../plugins/demo/graph";
 
-require("../../webutil/testUtil").configureEnzyme();
+require("../../../webutil/testUtil").configureEnzyme();
 
-describe("explorer/pagerankTable/Connection", () => {
+describe("explorer/legacy/pagerankTable/Connection", () => {
   describe("ConnectionRowList", () => {
     async function setup(maxEntriesPerList: number = 123) {
       let {sharedProps} = await example();
