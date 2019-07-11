@@ -2,8 +2,13 @@
 
 ## [Unreleased]
 
+<!-- Please add new entries to the _top_ of this section. -->
+
+## [0.3.0]
+
 - Display Timeline Cred in the UI (#1216)
 - Calculate Timeline Cred, and save it on `sourcecred load` (#1212)
+- Temporarily disable the Git plugin (#1210)
 - Officially support node 10 and node 12 (#1205)
 - Fail quicker and with information when using invalid GH token (#1161)
 - Allow the user to save or upload weight settings (#1150)
@@ -16,7 +21,6 @@
 - Enable setting type weights to 0 in the UI (#1005)
 - Add support for 🚀 and 👀 reaction types (#1068)
 - Create one page per project, rather than having a selector (#988)
-<!-- Please add new entries to the _top_ of this section. -->
 
 ## [0.2.0]
 
