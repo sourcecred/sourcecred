@@ -33,13 +33,14 @@
     "whatwg-fetch": "2.0.3"
   },
   "devDependencies": {
-    "babel-core": "6.26.3",
-    "babel-eslint": "10.0.2",
-    "babel-jest": "20.0.3",
-    "babel-loader": "7.1.2",
-    "babel-plugin-transform-es2015-for-of": "^6.23.0",
-    "babel-preset-react-app": "^3.1.1",
-    "babel-runtime": "6.26.0",
+    "@babel/core": "^7.5.4",
+    "@babel/plugin-proposal-class-properties": "^7.5.0",
+    "@babel/preset-env": "^7.5.4",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-eslint": "^10.0.2",
+    "babel-jest": "^24.8.0",
+    "babel-loader": "^8.0.6",
     "copy-webpack-plugin": "^4.5.2",
     "css-loader": "0.28.7",
     "dotenv": "8.0.0",
@@ -68,9 +69,6 @@
   },
   "greenkeeper": {
     "ignore": [
-      "babel-jest",
-      "babel-loader",
-      "babel-preset-react-app",
       "copy-webpack-plugin",
       "css-loader",
       "file-loader",
@@ -132,11 +130,6 @@
       "web.jsx",
       "jsx",
       "node"
-    ]
-  },
-  "babel": {
-    "presets": [
-      "./config/babel"
     ]
   },
   "files": [
