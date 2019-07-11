@@ -134,6 +134,7 @@ run_build() {
         test_must_fail grep -vF \
             -e "Removing contents of build directory: " \
             -e "info: loading repository" \
+            -e "DeprecationWarning: Tapable.plugin is deprecated." \
             err &&
         test_path_is_dir "${output_dir}" &&
         test_path_is_dir "${api_dir}" &&
