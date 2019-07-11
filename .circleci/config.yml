@@ -60,11 +60,13 @@ workflows:
             branches:
               only:
                 - master
+                - ci-test
       - test_full_10:
           filters:
             branches:
               only:
                 - master
+                - ci-test
   nightly:
     triggers:
       - schedule:
