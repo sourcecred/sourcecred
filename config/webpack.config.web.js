@@ -118,6 +118,7 @@ function makeConfig(mode /*: "production" | "development" */) /*: mixed */ {
           .replace(/\\/g, "/"),
       // We need to use a UMD module to build the static site.
       libraryTarget: "umd",
+      globalObject: "this",
     },
     resolve: {
       // This allows you to set a fallback for where Webpack should look for modules.
@@ -220,6 +221,7 @@ function makeConfig(mode /*: "production" | "development" */) /*: mixed */ {
       tls: "empty",
       child_process: "empty",
     },
+    mode,
   };
 }
 
