@@ -48,6 +48,14 @@ export function defaultWeights(): Weights {
   };
 }
 
+export function copy(w: Weights): Weights {
+  return {
+    nodeTypeWeights: new Map(w.nodeTypeWeights),
+    edgeTypeWeights: new Map(w.edgeTypeWeights),
+    nodeManualWeights: new Map(w.nodeManualWeights),
+  };
+}
+
 export type WeightsJSON = Compatible<{|
   +nodeTypeWeights: {[NodeAddressT]: NodeWeight},
   +edgeTypeWeights: {[EdgeAddressT]: EdgeWeight},
