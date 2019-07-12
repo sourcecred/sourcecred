@@ -101,7 +101,11 @@ describe("cli/load", () => {
         stderr: [],
       });
       const repoId = makeRepoId("foo", "bar");
-      const expectedOptions = {repoIds: [repoId], output: repoId};
+      const expectedOptions = {
+        repoIds: [repoId],
+        output: repoId,
+        weightsPath: null,
+      };
       expect(loadDefaultPlugins).toHaveBeenCalledWith(expectedOptions);
     });
 
@@ -114,7 +118,11 @@ describe("cli/load", () => {
         stderr: [],
       });
       const repoId = makeRepoId("foo", "bar");
-      const expectedOptions = {repoIds: [repoId], output: repoId};
+      const expectedOptions = {
+        repoIds: [repoId],
+        output: repoId,
+        weightsPath: null,
+      };
       expect(loadIndividualPlugin).toHaveBeenCalledWith("git", expectedOptions);
     });
 
@@ -297,17 +305,21 @@ describe("cli/load", () => {
           successCase({
             name: "with a single repository",
             args: ["foo/bar"],
-            loadOptions: {output: fooBar, repoIds: [fooBar]},
+            loadOptions: {output: fooBar, repoIds: [fooBar], weightsPath: null},
           });
           successCase({
             name: "with a multiple repositories",
             args: ["foo/bar", "bar/zod", "--output", "bar/zod"],
-            loadOptions: {output: barZod, repoIds: [fooBar, barZod]},
+            loadOptions: {
+              output: barZod,
+              repoIds: [fooBar, barZod],
+              weightsPath: null,
+            },
           });
           successCase({
             name: "with zero repositories",
             args: ["--output", "bar/zod"],
-            loadOptions: {output: barZod, repoIds: []},
+            loadOptions: {output: barZod, repoIds: [], weightsPath: null},
           });
         });
 
@@ -544,7 +556,7 @@ describe("cli/load", () => {
         repoIds: [fooBar, fooBaz],
       });
       expect(saveCred).toHaveBeenCalledTimes(1);
-      expect(saveCred).toHaveBeenCalledWith(graph, fooCombined);
+      expect(saveCred).toHaveBeenCalledWith(graph, fooCombined, null);
     });
 
     it("throws an load error on first execDependencyGraph failure", async () => {
@@ -552,6 +564,7 @@ describe("cli/load", () => {
       const result = loadDefaultPlugins({
         output: fooCombined,
         repoIds: [fooBar, fooBaz],
+        weightsPath: null,
       });
 
       expect(result).rejects.toThrow("Load tasks failed.");
