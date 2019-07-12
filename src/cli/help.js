@@ -7,6 +7,7 @@ import dedent from "../util/dedent";
 import {help as loadHelp} from "./load";
 import {help as analyzeHelp} from "./analyze";
 import {help as pagerankHelp} from "./pagerank";
+import {help as scoresHelp} from "./scores";
 import {help as clearHelp} from "./clear";
 
 const help: Command = async (args, std) => {
@@ -19,6 +20,7 @@ const help: Command = async (args, std) => {
     help: metaHelp,
     load: loadHelp,
     analyze: analyzeHelp,
+    scores: scoresHelp,
     pagerank: pagerankHelp,
     clear: clearHelp,
   };
