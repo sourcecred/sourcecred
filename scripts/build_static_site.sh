@@ -108,9 +108,16 @@ parse_args() {
 
 build() {
     sourcecred_data="$(mktemp -d --suffix ".sourcecred-data")"
-    # Give sourcecred access to the full cache. This will greatly speed
-    # up site builds on repos that have already been loaded.
-    ln -s "${SOURCECRED_DIRECTORY}/cache" "${sourcecred_data}/cache"
+
+    if [ -n "${SOURCECRED_DIRECTORY:-}" ]; then
+        # If $SOURCECRED_DIRECTORY is available, then give sourcecred access to
+        # the cache. This will greatly speed up site builds on repos that have
+        # already been loaded.
+        # Note this speedup will only apply if the SOURCECRED_DIRECTORY has been
+        # explicitly set.
+        ln -s "${SOURCECRED_DIRECTORY}/cache" "${sourcecred_data}/cache"
+    fi
+
     export SOURCECRED_DIRECTORY="${sourcecred_data}"
 
     if [ "${BACKEND}" -ne 0 ]; then
