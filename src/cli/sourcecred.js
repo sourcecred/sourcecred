@@ -9,6 +9,7 @@ import help from "./help";
 import load from "./load";
 import analyze from "./analyze";
 import pagerank from "./pagerank";
+import scores from "./scores";
 import clear from "./clear";
 
 const sourcecred: Command = async (args, std) => {
@@ -31,6 +32,8 @@ const sourcecred: Command = async (args, std) => {
       return clear(args.slice(1), std);
     case "pagerank":
       return pagerank(args.slice(1), std);
+    case "scores":
+      return scores(args.slice(1), std);
     default:
       std.err("fatal: unknown command: " + JSON.stringify(args[0]));
       std.err("fatal: run 'sourcecred help' for commands and usage");
