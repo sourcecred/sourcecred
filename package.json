@@ -124,12 +124,12 @@
     },
     "moduleFileExtensions": [
       "web.js",
-      "mjs",
       "js",
       "json",
       "web.jsx",
       "jsx",
-      "node"
+      "node",
+      "mjs"
     ]
   },
   "files": [
