@@ -17,7 +17,6 @@ describe("explorer/legacy/pagerankTable/Table", () => {
     async function setup(defaultNodeType?: NodeType) {
       const {
         pnd,
-        adapters,
         sharedProps,
         manualWeights,
         onManualWeightsChange,
@@ -31,7 +30,8 @@ describe("explorer/legacy/pagerankTable/Table", () => {
           weightConfig={weightConfig}
           weightFileManager={weightFileManager}
           pnd={pnd}
-          adapters={adapters}
+          graph={sharedProps.graph}
+          declarations={sharedProps.declarations}
           maxEntriesPerList={maxEntriesPerList}
           manualWeights={manualWeights}
           onManualWeightsChange={onManualWeightsChange}
@@ -39,7 +39,6 @@ describe("explorer/legacy/pagerankTable/Table", () => {
       );
       return {
         pnd,
-        adapters,
         element,
         maxEntriesPerList,
         weightConfig,

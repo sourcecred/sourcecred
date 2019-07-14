@@ -55,7 +55,7 @@ export type NodeRowProps = {|
 export class NodeRow extends React.PureComponent<NodeRowProps> {
   render() {
     const {depth, node, sharedProps, showPadding} = this.props;
-    const {pnd, adapters, onManualWeightsChange, manualWeights} = sharedProps;
+    const {pnd, graph, onManualWeightsChange, manualWeights} = sharedProps;
     const {score} = NullUtil.get(pnd.get(node));
     const weight = NullUtil.orElse(manualWeights.get(node), 1);
     const slider = (
@@ -74,7 +74,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
         />
       </label>
     );
-    const description = <span>{nodeDescription(node, adapters)}</span>;
+    const description = <span>{nodeDescription(node, graph)}</span>;
     return (
       <TableRow
         depth={depth}

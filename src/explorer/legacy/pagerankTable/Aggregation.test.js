@@ -6,6 +6,7 @@ import {shallow} from "enzyme";
 import * as NullUtil from "../../../util/null";
 import {NodeAddress, EdgeAddress} from "../../../core/graph";
 import type {EdgeType, NodeType} from "../../../analysis/types";
+import {combineTypes} from "../../../analysis/pluginDeclaration";
 import {
   AggregationRowList,
   AggregationRow,
@@ -23,14 +24,15 @@ require("../../../webutil/testUtil").configureEnzyme();
 describe("explorer/legacy/pagerankTable/Aggregation", () => {
   describe("AggregationRowList", () => {
     it("instantiates AggregationRows for each aggregation", async () => {
-      const {adapters, pnd, sharedProps} = await example();
+      const {pnd, sharedProps} = await example();
       const node = factorioNodes.inserter1.address;
       const depth = 20;
       const connections = NullUtil.get(pnd.get(node)).scoredConnections;
+      const types = combineTypes(sharedProps.declarations);
       const aggregations = aggregateFlat(
         connections,
-        adapters.static().nodeTypes(),
-        adapters.static().edgeTypes()
+        types.nodeTypes,
+        types.edgeTypes
       );
       const el = shallow(
         <AggregationRowList
@@ -56,13 +58,14 @@ describe("explorer/legacy/pagerankTable/Aggregation", () => {
 
   describe("AggregationRow", () => {
     async function setup() {
-      const {pnd, adapters, sharedProps} = await example();
+      const {pnd, sharedProps} = await example();
       const target = factorioNodes.inserter1.address;
       const {scoredConnections} = NullUtil.get(pnd.get(target));
+      const types = combineTypes(sharedProps.declarations);
       const aggregations = aggregateFlat(
         scoredConnections,
-        adapters.static().nodeTypes(),
-        adapters.static().edgeTypes()
+        types.nodeTypes,
+        types.edgeTypes
       );
       const aggregation = aggregations[0];
       const depth = 23;

@@ -7,16 +7,13 @@ import type {Assets} from "../../webutil/assets";
 import type {RepoId} from "../../core/repoId";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
 import type {NodeAndEdgeTypes} from "../../analysis/types";
+import {defaultLoader} from "../TimelineApp";
 import {
   type PagerankNodeDecomposition,
   type PagerankOptions,
   pagerank,
 } from "../../analysis/pagerank";
 
-import {
-  StaticExplorerAdapterSet,
-  DynamicExplorerAdapterSet,
-} from "./adapters/explorerAdapterSet";
 import type {Weights} from "../../analysis/weights";
 import {weightsToEdgeEvaluator} from "../../analysis/weightsToEdgeEvaluator";
 
@@ -42,12 +39,12 @@ export type ReadyToLoadGraph = {|
 export type ReadyToRunPagerank = {|
   +type: "READY_TO_RUN_PAGERANK",
   +repoId: RepoId,
-  +graphWithAdapters: GraphWithAdapters,
+  +graph: Graph,
   +loading: LoadingState,
 |};
 export type PagerankEvaluated = {|
   +type: "PAGERANK_EVALUATED",
-  +graphWithAdapters: GraphWithAdapters,
+  +graph: Graph,
   +repoId: RepoId,
   +pagerankNodeDecomposition: PagerankNodeDecomposition,
   +loading: LoadingState,
@@ -61,38 +58,28 @@ export function createStateTransitionMachine(
   getState: () => AppState,
   setState: (AppState) => void
 ): StateTransitionMachine {
-  return new StateTransitionMachine(
-    getState,
-    setState,
-    loadGraphWithAdapters,
-    pagerank
-  );
+  return new StateTransitionMachine(getState, setState, doLoadGraph, pagerank);
 }
 
 // Exported for testing purposes.
 export interface StateTransitionMachineInterface {
-  +loadGraph: (Assets, StaticExplorerAdapterSet) => Promise<boolean>;
+  +loadGraph: (Assets) => Promise<boolean>;
   +runPagerank: (Weights, NodeAndEdgeTypes, NodeAddressT) => Promise<void>;
   +loadGraphAndRunPagerank: (
     Assets,
-    StaticExplorerAdapterSet,
     Weights,
     NodeAndEdgeTypes,
     NodeAddressT
   ) => Promise<void>;
 }
 /* In production, instantiate via createStateTransitionMachine; the constructor
- * implementation allows specification of the loadGraphWithAdapters and
+ * implementation allows specification of the loadGraph and
  * pagerank functions for DI/testing purposes.
  **/
 export class StateTransitionMachine implements StateTransitionMachineInterface {
   getState: () => AppState;
   setState: (AppState) => void;
-  loadGraphWithAdapters: (
-    assets: Assets,
-    adapters: StaticExplorerAdapterSet,
-    repoId: RepoId
-  ) => Promise<GraphWithAdapters>;
+  doLoadGraph: (assets: Assets, repoId: RepoId) => Promise<Graph>;
   pagerank: (
     Graph,
     EdgeEvaluator,
@@ -102,11 +89,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   constructor(
     getState: () => AppState,
     setState: (AppState) => void,
-    loadGraphWithAdapters: (
-      assets: Assets,
-      adapters: StaticExplorerAdapterSet,
-      repoId: RepoId
-    ) => Promise<GraphWithAdapters>,
+    doLoadGraph: (assets: Assets, repoId: RepoId) => Promise<Graph>,
     pagerank: (
       Graph,
       EdgeEvaluator,
@@ -115,15 +98,12 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   ) {
     this.getState = getState;
     this.setState = setState;
-    this.loadGraphWithAdapters = loadGraphWithAdapters;
+    this.doLoadGraph = doLoadGraph;
     this.pagerank = pagerank;
   }
 
   /** Loads the graph, reports whether it was successful */
-  async loadGraph(
-    assets: Assets,
-    adapters: StaticExplorerAdapterSet
-  ): Promise<boolean> {
+  async loadGraph(assets: Assets): Promise<boolean> {
     const state = this.getState();
     if (state.type !== "READY_TO_LOAD_GRAPH") {
       throw new Error("Tried to loadGraph in incorrect state");
@@ -134,14 +114,10 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     let newState: ?AppState;
     let success = true;
     try {
-      const graphWithAdapters = await this.loadGraphWithAdapters(
-        assets,
-        adapters,
-        repoId
-      );
+      const graph = await this.doLoadGraph(assets, repoId);
       newState = {
         type: "READY_TO_RUN_PAGERANK",
-        graphWithAdapters,
+        graph,
         repoId,
         loading: "NOT_LOADING",
       };
@@ -175,7 +151,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
         ? {...state, loading: "LOADING"}
         : {...state, loading: "LOADING"};
     this.setState(loadingState);
-    const graph = state.graphWithAdapters.graph;
+    const graph = state.graph;
     let newState: ?AppState;
     try {
       const pagerankNodeDecomposition = await this.pagerank(
@@ -189,7 +165,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
       newState = {
         type: "PAGERANK_EVALUATED",
         pagerankNodeDecomposition,
-        graphWithAdapters: state.graphWithAdapters,
+        graph: state.graph,
         repoId: state.repoId,
         loading: "NOT_LOADING",
       };
@@ -208,7 +184,6 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
 
   async loadGraphAndRunPagerank(
     assets: Assets,
-    adapters: StaticExplorerAdapterSet,
     weights: Weights,
     types: NodeAndEdgeTypes,
     totalScoreNodePrefix: NodeAddressT
@@ -217,7 +192,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     const type = state.type;
     switch (type) {
       case "READY_TO_LOAD_GRAPH":
-        const loadedGraph = await this.loadGraph(assets, adapters);
+        const loadedGraph = await this.loadGraph(assets);
         if (loadedGraph) {
           await this.runPagerank(weights, types, totalScoreNodePrefix);
         }
@@ -232,15 +207,13 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   }
 }
 
-export type GraphWithAdapters = {|
-  +graph: Graph,
-  +adapters: DynamicExplorerAdapterSet,
-|};
-export async function loadGraphWithAdapters(
+export async function doLoadGraph(
   assets: Assets,
-  adapters: StaticExplorerAdapterSet,
   repoId: RepoId
-): Promise<GraphWithAdapters> {
-  const dynamicAdapters = await adapters.load(assets, repoId);
-  return {graph: dynamicAdapters.graph(), adapters: dynamicAdapters};
+): Promise<Graph> {
+  const loadResult = await defaultLoader(assets, repoId);
+  if (loadResult.type !== "SUCCESS") {
+    throw new Error(loadResult);
+  }
+  return loadResult.timelineCred.graph();
 }
