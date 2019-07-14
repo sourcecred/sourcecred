@@ -15,7 +15,6 @@ import {
 
 import type {NodeAddressT} from "../../../core/graph";
 
-import {nodeDescription} from "./shared";
 import {example} from "./sharedTestUtils";
 import {NodeRowList, NodeRow, type NodeRowProps} from "./Node";
 import {nodes as factorioNodes} from "../../../plugins/demo/graph";
@@ -28,13 +27,13 @@ describe("explorer/legacy/pagerankTable/Node", () => {
       return sortBy(nodes, (node) => -NullUtil.get(pnd.get(node)).score);
     }
     async function setup(maxEntriesPerList: number = 123) {
-      const {adapters, pnd, sharedProps: changeEntries} = await example();
+      const {pnd, sharedProps: changeEntries} = await example();
       const sharedProps = {...changeEntries, maxEntriesPerList};
       const nodes = Array.from(pnd.keys());
       expect(nodes).not.toHaveLength(0);
       const component = <NodeRowList sharedProps={sharedProps} nodes={nodes} />;
       const element = shallow(component);
-      return {element, adapters, sharedProps, nodes};
+      return {element, sharedProps, nodes};
     }
     it("creates `NodeRow`s with the right props", async () => {
       const {element, nodes, sharedProps} = await setup();
@@ -163,12 +162,6 @@ describe("explorer/legacy/pagerankTable/Node", () => {
           const {span} = await setupSlider(4);
           expect(span.text()).toEqual("4×");
         });
-      });
-      it("with the node description", async () => {
-        const {row, sharedProps, node} = await setup();
-        const {adapters} = sharedProps;
-        const description = shallow(row.props().description);
-        expect(description.text()).toEqual(nodeDescription(node, adapters));
       });
       describe("with a AggregationRowList as children", () => {
         function getChildren(row) {

@@ -5,16 +5,16 @@ import sortBy from "lodash.sortby";
 
 import {WeightConfig} from "../../weights/WeightConfig";
 import {WeightsFileManager} from "../../weights/WeightsFileManager";
-import {NodeAddress, type NodeAddressT} from "../../../core/graph";
+import {Graph, NodeAddress, type NodeAddressT} from "../../../core/graph";
 import type {PagerankNodeDecomposition} from "../../../analysis/pagerankNodeDecomposition";
-import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
-import type {DynamicExplorerAdapter} from "../adapters/explorerAdapter";
 import {NodeRowList} from "./Node";
 import {type NodeType} from "../../../analysis/types";
+import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 
 type PagerankTableProps = {|
   +pnd: PagerankNodeDecomposition,
-  +adapters: DynamicExplorerAdapterSet,
+  +declarations: $ReadOnlyArray<PluginDeclaration>,
+  +graph: Graph,
   +maxEntriesPerList: number,
   +defaultNodeType: ?NodeType,
   +manualWeights: Map<NodeAddressT, number>,
@@ -75,29 +75,26 @@ export class PagerankTable extends React.PureComponent<
   }
 
   renderFilterSelect() {
-    const {pnd, adapters} = this.props;
-    if (pnd == null || adapters == null) {
+    const {pnd, declarations} = this.props;
+    if (pnd == null || declarations == null) {
       throw new Error("Impossible.");
     }
 
-    function optionGroup(adapter: DynamicExplorerAdapter) {
+    function optionGroup(declaration: PluginDeclaration) {
       const header = (
         <option
-          key={adapter.static().declaration().nodePrefix}
-          value={adapter.static().declaration().nodePrefix}
+          key={declaration.nodePrefix}
+          value={declaration.nodePrefix}
           style={{fontWeight: "bold"}}
         >
-          {adapter.static().declaration().name}
+          {declaration.name}
         </option>
       );
-      const entries = adapter
-        .static()
-        .declaration()
-        .nodeTypes.map((type) => (
-          <option key={type.prefix} value={type.prefix}>
-            {"\u2003" + type.name}
-          </option>
-        ));
+      const entries = declaration.nodeTypes.map((type) => (
+        <option key={type.prefix} value={type.prefix}>
+          {"\u2003" + type.name}
+        </option>
+      ));
       return [header, ...entries];
     }
     return (
@@ -110,10 +107,9 @@ export class PagerankTable extends React.PureComponent<
           }
         >
           <option value={NodeAddress.empty}>Show all</option>
-          {sortBy(
-            adapters.adapters(),
-            (a: DynamicExplorerAdapter) => a.static().declaration().name
-          ).map(optionGroup)}
+          {sortBy(declarations, (d: PluginDeclaration) => d.name).map(
+            optionGroup
+          )}
         </select>
       </label>
     );
@@ -122,20 +118,22 @@ export class PagerankTable extends React.PureComponent<
   renderTable() {
     const {
       pnd,
-      adapters,
+      declarations,
       maxEntriesPerList,
       manualWeights,
       onManualWeightsChange,
+      graph,
     } = this.props;
-    if (pnd == null || adapters == null || maxEntriesPerList == null) {
+    if (pnd == null || declarations == null || maxEntriesPerList == null) {
       throw new Error("Impossible.");
     }
     const sharedProps = {
       pnd,
-      adapters,
+      declarations,
       maxEntriesPerList,
       manualWeights,
       onManualWeightsChange,
+      graph,
     };
     return (
       <table

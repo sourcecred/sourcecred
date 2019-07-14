@@ -1,45 +1,51 @@
 // @flow
 
 import React, {type Node as ReactNode} from "react";
+import Markdown from "react-markdown";
 import {
+  Graph,
   type EdgeAddressT,
   type NodeAddressT,
-  NodeAddress,
+  EdgeAddress,
 } from "../../../core/graph";
-
-import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
+import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 
 import type {PagerankNodeDecomposition} from "../../../analysis/pagerankNodeDecomposition";
 
 export function nodeDescription(
   address: NodeAddressT,
-  adapters: DynamicExplorerAdapterSet
+  graph: Graph
 ): ReactNode {
-  const adapter = adapters.adapterMatchingNode(address);
-  if (adapter == null) {
-    return NodeAddress.toString(address);
+  const node = graph.node(address);
+  if (node == null) {
+    throw new Error(`No node for ${address}`);
   }
-  try {
-    return adapter.nodeDescription(address);
-  } catch (e) {
-    const result = NodeAddress.toString(address);
-    console.error(`Error getting description for ${result}: ${e.message}`);
-    return result;
-  }
+  return <Markdown renderers={{paragraph: "span"}} source={node.description} />;
 }
 
 export function edgeVerb(
   address: EdgeAddressT,
   direction: "FORWARD" | "BACKWARD",
-  adapters: DynamicExplorerAdapterSet
+  declarations: $ReadOnlyArray<PluginDeclaration>
 ): string {
-  const edgeType = adapters.static().typeMatchingEdge(address);
+  function getType() {
+    for (const {edgeTypes} of declarations) {
+      for (const edgeType of edgeTypes) {
+        if (EdgeAddress.hasPrefix(address, edgeType.prefix)) {
+          return edgeType;
+        }
+      }
+    }
+    throw Error(`No matching type for ${address}`);
+  }
+  const edgeType = getType();
   return direction === "FORWARD" ? edgeType.forwardName : edgeType.backwardName;
 }
 
 export type SharedProps = {|
   +pnd: PagerankNodeDecomposition,
-  +adapters: DynamicExplorerAdapterSet,
+  +graph: Graph,
+  +declarations: $ReadOnlyArray<PluginDeclaration>,
   +maxEntriesPerList: number,
   +manualWeights: Map<NodeAddressT, number>,
   +onManualWeightsChange: (NodeAddressT, number) => void,

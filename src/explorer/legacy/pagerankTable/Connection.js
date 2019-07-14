@@ -3,14 +3,14 @@
 import React from "react";
 import * as NullUtil from "../../../util/null";
 
-import type {NodeAddressT} from "../../../core/graph";
+import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
+import {type NodeAddressT, Graph} from "../../../core/graph";
 import type {Connection} from "../../../core/attribution/graphToMarkovChain";
 import type {ScoredConnection} from "../../../analysis/pagerankNodeDecomposition";
-import {DynamicExplorerAdapterSet} from "../adapters/explorerAdapterSet";
 import {TableRow} from "./TableRow";
 import {NodeRow} from "./Node";
 
-import {edgeVerb, nodeDescription, type SharedProps, Badge} from "./shared";
+import {nodeDescription, edgeVerb, type SharedProps, Badge} from "./shared";
 
 type ConnectionRowListProps = {|
   +depth: number,
@@ -54,13 +54,17 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
       depth,
       scoredConnection: {connection, source, connectionScore},
     } = this.props;
-    const {pnd, adapters} = sharedProps;
+    const {pnd, declarations, graph} = sharedProps;
     const {score: targetScore} = NullUtil.get(pnd.get(target));
     const connectionProportion = connectionScore / targetScore;
     const connectionPercent = (connectionProportion * 100).toFixed(2) + "%";
 
     const connectionView = (
-      <ConnectionView connection={connection} adapters={adapters} />
+      <ConnectionView
+        connection={connection}
+        declarations={declarations}
+        graph={graph}
+      />
     );
     return (
       <TableRow
@@ -84,10 +88,11 @@ export class ConnectionRow extends React.PureComponent<ConnectionRowProps> {
 
 export class ConnectionView extends React.PureComponent<{|
   +connection: Connection,
-  +adapters: DynamicExplorerAdapterSet,
+  +declarations: $ReadOnlyArray<PluginDeclaration>,
+  +graph: Graph,
 |}> {
   render() {
-    const {connection, adapters} = this.props;
+    const {connection, declarations, graph} = this.props;
     const {adjacency} = connection;
     switch (adjacency.type) {
       case "SYNTHETIC_LOOP":
@@ -96,18 +101,18 @@ export class ConnectionView extends React.PureComponent<{|
         return (
           <span>
             <Badge>
-              {edgeVerb(adjacency.edge.address, "BACKWARD", adapters)}
+              {edgeVerb(adjacency.edge.address, "BACKWARD", declarations)}
             </Badge>{" "}
-            <span>{nodeDescription(adjacency.edge.src, adapters)}</span>
+            <span>{nodeDescription(adjacency.edge.src, graph)}</span>
           </span>
         );
       case "OUT_EDGE":
         return (
           <span>
             <Badge>
-              {edgeVerb(adjacency.edge.address, "FORWARD", adapters)}
+              {edgeVerb(adjacency.edge.address, "FORWARD", declarations)}
             </Badge>{" "}
-            <span>{nodeDescription(adjacency.edge.dst, adapters)}</span>
+            <span>{nodeDescription(adjacency.edge.dst, graph)}</span>
           </span>
         );
       default:

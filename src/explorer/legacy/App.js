@@ -9,6 +9,7 @@ import BrowserLocalStore from "../../webutil/browserLocalStore";
 import Link from "../../webutil/Link";
 import type {RepoId} from "../../core/repoId";
 import {type NodeAddressT} from "../../core/graph";
+import {declaration as githubDeclaration} from "../../plugins/github/declaration";
 
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "../weights/WeightConfig";
@@ -21,7 +22,6 @@ import {
   type StateTransitionMachineInterface,
   initialState,
 } from "./state";
-import {StaticExplorerAdapterSet} from "./adapters/explorerAdapterSet";
 import {userNodeType} from "../../plugins/github/declaration";
 
 const credOverviewUrl =
@@ -31,7 +31,6 @@ const feedbackUrl =
 
 export class AppPage extends React.Component<{|
   +assets: Assets,
-  +adapters: StaticExplorerAdapterSet,
   +repoId: RepoId,
 |}> {
   static _LOCAL_STORE = new CheckedLocalStore(
@@ -47,7 +46,6 @@ export class AppPage extends React.Component<{|
       <App
         repoId={this.props.repoId}
         assets={this.props.assets}
-        adapters={this.props.adapters}
         localStore={AppPage._LOCAL_STORE}
       />
     );
@@ -57,7 +55,6 @@ export class AppPage extends React.Component<{|
 type Props = {|
   +assets: Assets,
   +localStore: LocalStore,
-  +adapters: StaticExplorerAdapterSet,
   +repoId: RepoId,
 |};
 type State = {|
@@ -90,9 +87,7 @@ export function createApp(
       const {appState} = this.state;
       const weightConfig = (
         <WeightConfig
-          declarations={this.props.adapters
-            .adapters()
-            .map((a) => a.declaration())}
+          declarations={[githubDeclaration]}
           nodeTypeWeights={this.state.weights.nodeTypeWeights}
           edgeTypeWeights={this.state.weights.edgeTypeWeights}
           onNodeWeightChange={(prefix, weight) => {
@@ -119,15 +114,15 @@ export function createApp(
       );
       let pagerankTable;
       if (appState.type === "PAGERANK_EVALUATED") {
-        const adapters = appState.graphWithAdapters.adapters;
         const pnd = appState.pagerankNodeDecomposition;
         pagerankTable = (
           <PagerankTable
             defaultNodeType={userNodeType}
-            adapters={adapters}
             weightConfig={weightConfig}
             weightFileManager={weightFileManager}
             manualWeights={this.state.weights.nodeManualWeights}
+            declarations={[githubDeclaration]}
+            graph={appState.graph}
             onManualWeightsChange={(addr: NodeAddressT, weight: number) =>
               this.setState(({weights}) => {
                 weights.nodeManualWeights.set(addr, weight);
@@ -164,9 +159,11 @@ export function createApp(
             onClick={() =>
               this.stateTransitionMachine.loadGraphAndRunPagerank(
                 this.props.assets,
-                this.props.adapters,
                 this.state.weights,
-                this.props.adapters.combinedTypes(),
+                {
+                  nodeTypes: githubDeclaration.nodeTypes.slice(),
+                  edgeTypes: githubDeclaration.edgeTypes.slice(),
+                },
                 GithubPrefix.user
               )
             }

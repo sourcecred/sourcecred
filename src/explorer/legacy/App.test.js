@@ -7,10 +7,6 @@ import {Graph} from "../../core/graph";
 import {makeRepoId} from "../../core/repoId";
 import {Assets} from "../../webutil/assets";
 import testLocalStore from "../../webutil/testLocalStore";
-import {
-  DynamicExplorerAdapterSet,
-  StaticExplorerAdapterSet,
-} from "./adapters/explorerAdapterSet";
 
 import {PagerankTable} from "./pagerankTable/Table";
 import {createApp, LoadingIndicator, ProjectDetail} from "./App";
@@ -37,7 +33,6 @@ describe("explorer/legacy/App", () => {
     const el = shallow(
       <App
         assets={new Assets("/foo/")}
-        adapters={new StaticExplorerAdapterSet([])}
         localStore={localStore}
         repoId={makeRepoId("foo", "bar")}
       />
@@ -56,10 +51,6 @@ describe("explorer/legacy/App", () => {
     };
   }
 
-  const emptyAdapters = new DynamicExplorerAdapterSet(
-    new StaticExplorerAdapterSet([]),
-    []
-  );
   const exampleStates = {
     readyToLoadGraph: (loadingState) => {
       return () => ({
@@ -73,7 +64,7 @@ describe("explorer/legacy/App", () => {
         type: "READY_TO_RUN_PAGERANK",
         repoId: makeRepoId("foo", "bar"),
         loading: loadingState,
-        graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
+        graph: new Graph(),
       });
     },
     pagerankEvaluated: (loadingState) => {
@@ -81,7 +72,7 @@ describe("explorer/legacy/App", () => {
         type: "PAGERANK_EVALUATED",
         repoId: makeRepoId("foo", "bar"),
         loading: loadingState,
-        graphWithAdapters: {graph: new Graph(), adapters: emptyAdapters},
+        graph: new Graph(),
         pagerankNodeDecomposition: new Map(),
       });
     },

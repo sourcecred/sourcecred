@@ -1,20 +1,12 @@
 // @flow
 
-import {
-  StateTransitionMachine,
-  type AppState,
-  type GraphWithAdapters,
-} from "./state";
+import {StateTransitionMachine, type AppState} from "./state";
 
 import {Graph, NodeAddress} from "../../core/graph";
 import {Assets} from "../../webutil/assets";
 import {makeRepoId, type RepoId} from "../../core/repoId";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
 import {defaultWeights} from "../../analysis/weights";
-import {
-  StaticExplorerAdapterSet,
-  DynamicExplorerAdapterSet,
-} from "./adapters/explorerAdapterSet";
 import type {
   PagerankNodeDecomposition,
   PagerankOptions,
@@ -28,8 +20,8 @@ describe("explorer/legacy/state", () => {
       stateContainer.appState = appState;
     };
     const loadGraphMock: JestMockFn<
-      [Assets, StaticExplorerAdapterSet, RepoId],
-      Promise<GraphWithAdapters>
+      [Assets, RepoId],
+      Promise<Graph>
     > = jest.fn();
 
     const pagerankMock: JestMockFn<
@@ -56,25 +48,16 @@ describe("explorer/legacy/state", () => {
       type: "READY_TO_RUN_PAGERANK",
       repoId: makeRepoId("foo", "bar"),
       loading: "NOT_LOADING",
-      graphWithAdapters: graphWithAdapters(),
+      graph: new Graph(),
     };
   }
   function pagerankEvaluated(): AppState {
     return {
       type: "PAGERANK_EVALUATED",
       repoId: makeRepoId("foo", "bar"),
-      graphWithAdapters: graphWithAdapters(),
+      graph: new Graph(),
       pagerankNodeDecomposition: pagerankNodeDecomposition(),
       loading: "NOT_LOADING",
-    };
-  }
-  function graphWithAdapters(): GraphWithAdapters {
-    return {
-      graph: new Graph(),
-      adapters: new DynamicExplorerAdapterSet(
-        new StaticExplorerAdapterSet([]),
-        []
-      ),
     };
   }
   function pagerankNodeDecomposition() {
@@ -92,45 +75,34 @@ describe("explorer/legacy/state", () => {
       const badStates = [readyToRunPagerank(), pagerankEvaluated()];
       for (const b of badStates) {
         const {stm} = example(b);
-        await expect(
-          stm.loadGraph(
-            new Assets("/my/gateway/"),
-            new StaticExplorerAdapterSet([])
-          )
-        ).rejects.toThrow("incorrect state");
+        await expect(stm.loadGraph(new Assets("/my/gateway/"))).rejects.toThrow(
+          "incorrect state"
+        );
       }
     });
-    it("passes along the adapters and repoId", () => {
+    it("passes along the repoId", () => {
       const {stm, loadGraphMock} = example(readyToLoadGraph());
       expect(loadGraphMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
-      const adapters = new StaticExplorerAdapterSet([]);
-      stm.loadGraph(assets, adapters);
+      stm.loadGraph(assets);
       expect(loadGraphMock).toHaveBeenCalledTimes(1);
       expect(loadGraphMock).toHaveBeenCalledWith(
         assets,
-        adapters,
         makeRepoId("foo", "bar")
       );
     });
     it("immediately sets loading status", () => {
       const {getState, stm} = example(readyToLoadGraph());
       expect(loading(getState())).toBe("NOT_LOADING");
-      stm.loadGraph(
-        new Assets("/my/gateway/"),
-        new StaticExplorerAdapterSet([])
-      );
+      stm.loadGraph(new Assets("/my/gateway/"));
       expect(loading(getState())).toBe("LOADING");
       expect(getState().type).toBe("READY_TO_LOAD_GRAPH");
     });
     it("transitions to READY_TO_RUN_PAGERANK on success", async () => {
       const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
-      const gwa = graphWithAdapters();
-      loadGraphMock.mockReturnValue(Promise.resolve(gwa));
-      const succeeded = await stm.loadGraph(
-        new Assets("/my/gateway/"),
-        new StaticExplorerAdapterSet([])
-      );
+      const graph = new Graph();
+      loadGraphMock.mockReturnValue(Promise.resolve(graph));
+      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
       expect(succeeded).toBe(true);
       const state = getState();
       expect(loading(state)).toBe("NOT_LOADING");
@@ -138,7 +110,7 @@ describe("explorer/legacy/state", () => {
       if (state.type !== "READY_TO_RUN_PAGERANK") {
         throw new Error("Impossible");
       }
-      expect(state.graphWithAdapters).toBe(gwa);
+      expect(state.graph).toBe(graph);
     });
     it("sets loading state FAILED on reject", async () => {
       const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
@@ -146,10 +118,7 @@ describe("explorer/legacy/state", () => {
       // $ExpectFlowError
       console.error = jest.fn();
       loadGraphMock.mockReturnValue(Promise.reject(error));
-      const succeeded = await stm.loadGraph(
-        new Assets("/my/gateway/"),
-        new StaticExplorerAdapterSet([])
-      );
+      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
       expect(succeeded).toBe(false);
       const state = getState();
       expect(loading(state)).toBe("FAILED");
@@ -225,13 +194,12 @@ describe("explorer/legacy/state", () => {
       (stm: any).runPagerank = jest.fn();
       stm.loadGraph.mockResolvedValue(true);
       const assets = new Assets("/gateway/");
-      const adapters = new StaticExplorerAdapterSet([]);
       const prefix = NodeAddress.fromParts(["bar"]);
       const types = defaultTypes();
       const wt = defaultWeights();
-      await stm.loadGraphAndRunPagerank(assets, adapters, wt, types, prefix);
+      await stm.loadGraphAndRunPagerank(assets, wt, types, prefix);
       expect(stm.loadGraph).toHaveBeenCalledTimes(1);
-      expect(stm.loadGraph).toHaveBeenCalledWith(assets, adapters);
+      expect(stm.loadGraph).toHaveBeenCalledWith(assets);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
       expect(stm.runPagerank).toHaveBeenCalledWith(wt, types, prefix);
     });
@@ -241,11 +209,9 @@ describe("explorer/legacy/state", () => {
       (stm: any).runPagerank = jest.fn();
       stm.loadGraph.mockResolvedValue(false);
       const assets = new Assets("/gateway/");
-      const adapters = new StaticExplorerAdapterSet([]);
       const prefix = NodeAddress.fromParts(["bar"]);
       await stm.loadGraphAndRunPagerank(
         assets,
-        adapters,
         defaultWeights(),
         defaultTypes(),
         prefix
@@ -262,7 +228,6 @@ describe("explorer/legacy/state", () => {
       const types = defaultTypes();
       await stm.loadGraphAndRunPagerank(
         new Assets("/gateway/"),
-        new StaticExplorerAdapterSet([]),
         wt,
         types,
         prefix
@@ -280,7 +245,6 @@ describe("explorer/legacy/state", () => {
       const types = defaultTypes();
       await stm.loadGraphAndRunPagerank(
         new Assets("/gateway/"),
-        new StaticExplorerAdapterSet([]),
         wt,
         types,
         prefix

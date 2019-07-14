@@ -4,14 +4,15 @@ import React from "react";
 
 import {type NodeAddressT} from "../../../core/graph";
 import {pagerank} from "../../../analysis/pagerank";
-import {dynamicExplorerAdapterSet} from "../../../plugins/demo/explorerAdapter";
+import {graph as demoGraph} from "../../../plugins/demo/graph";
+import {declaration as demoDeclaration} from "../../../plugins/demo/declaration";
 import type {SharedProps} from "./shared";
 
 export const COLUMNS = () => ["Description", "", "Cred"];
 
 export async function example() {
-  const adapters = await dynamicExplorerAdapterSet();
-  const graph = adapters.graph();
+  const graph = demoGraph();
+  const declarations = [demoDeclaration];
   const pnd = await pagerank(graph, (_unused_Edge) => ({
     forwards: 1,
     backwards: 1,
@@ -23,7 +24,8 @@ export async function example() {
   const weightFileManager: any = <div data-test-weight-file-manager={true} />;
 
   const sharedProps: SharedProps = {
-    adapters,
+    graph,
+    declarations,
     pnd,
     maxEntriesPerList,
     manualWeights,
@@ -31,7 +33,6 @@ export async function example() {
   };
 
   return {
-    adapters,
     pnd,
     maxEntriesPerList,
     sharedProps,

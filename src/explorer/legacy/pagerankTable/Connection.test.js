@@ -108,13 +108,11 @@ describe("explorer/legacy/pagerankTable/Connection", () => {
         expect(row.props().multiuseColumn).toBe(expectedPercent);
       });
       it("with a ConnectionView as description", async () => {
-        const {row, sharedProps, scoredConnection} = await setup();
-        const {adapters} = sharedProps;
+        const {row, scoredConnection} = await setup();
         const description = row.props().description;
         const cv = shallow(description).instance();
         expect(cv).toBeInstanceOf(ConnectionView);
         expect(cv.props.connection).toEqual(scoredConnection.connection);
-        expect(cv.props.adapters).toEqual(adapters);
       });
       describe("with a NodeRow as children", () => {
         function getChildren(row) {
@@ -146,7 +144,7 @@ describe("explorer/legacy/pagerankTable/Connection", () => {
   });
   describe("ConnectionView", () => {
     async function setup() {
-      const {pnd, adapters} = await example();
+      const {pnd, sharedProps} = await example();
       const {scoredConnections} = NullUtil.get(
         pnd.get(factorioNodes.machine1.address)
       );
@@ -162,11 +160,14 @@ describe("explorer/legacy/pagerankTable/Connection", () => {
       const syntheticConnection = connectionByType("SYNTHETIC_LOOP");
       function cvForConnection(connection: Connection) {
         return shallow(
-          <ConnectionView adapters={adapters} connection={connection} />
+          <ConnectionView
+            graph={sharedProps.graph}
+            declarations={sharedProps.declarations}
+            connection={connection}
+          />
         );
       }
       return {
-        adapters,
         connections,
         pnd,
         cvForConnection,
@@ -195,22 +196,14 @@ describe("explorer/legacy/pagerankTable/Connection", () => {
       const view = cvForConnection(inConnection);
       const outerSpan = view.find("span").first();
       const badge = outerSpan.find("Badge");
-      const description = outerSpan.children().find("span");
       expect(badge.children().text()).toEqual("is transported by");
-      expect(description.text()).toEqual(
-        '[factorio]: NodeAddress["factorio","inserter","1"]'
-      );
     });
     it("for outward connections, renders a `Badge` and description", async () => {
       const {cvForConnection, outConnection} = await setup();
       const view = cvForConnection(outConnection);
       const outerSpan = view.find("span").first();
       const badge = outerSpan.find("Badge");
-      const description = outerSpan.children().find("span");
       expect(badge.children().text()).toEqual("assembles");
-      expect(description.text()).toEqual(
-        '[factorio]: NodeAddress["factorio","inserter","2"]'
-      );
     });
     it("for synthetic connections, renders only a `Badge`", async () => {
       const {cvForConnection, syntheticConnection} = await setup();

@@ -20,13 +20,11 @@ type AggregationRowListProps = {|
 export class AggregationRowList extends React.PureComponent<AggregationRowListProps> {
   render() {
     const {depth, node, sharedProps} = this.props;
-    const {pnd, adapters} = sharedProps;
+    const {pnd, declarations} = sharedProps;
+    const nodeTypes = [].concat(...declarations.map((x) => x.nodeTypes));
+    const edgeTypes = [].concat(...declarations.map((x) => x.edgeTypes));
     const {scoredConnections} = NullUtil.get(pnd.get(node));
-    const aggregations = aggregateFlat(
-      scoredConnections,
-      adapters.static().nodeTypes(),
-      adapters.static().edgeTypes()
-    );
+    const aggregations = aggregateFlat(scoredConnections, nodeTypes, edgeTypes);
     return (
       <React.Fragment>
         {aggregations.map((agg) => (
