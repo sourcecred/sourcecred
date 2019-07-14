@@ -7,7 +7,7 @@
 # shellcheck disable=SC2034,SC2016,SC1004
 :
 
-test_description='tests for scripts/build_static_site.sh'
+test_description='tests for cli/scores.js'
 
 export GIT_CONFIG_NOSYSTEM=1
 export GIT_ATTR_NOSYSTEM=1
@@ -19,6 +19,7 @@ test_expect_success "environment and Node linking setup" '
     toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)" &&
     snapshot_directory="${toplevel}/sharness/__snapshots__/" &&
     SOURCECRED_DIRECTORY="${snapshot_directory}/example-github-load" &&
+    export SOURCECRED_DIRECTORY &&
     snapshot_file="${snapshot_directory}/example-github-scores.json" &&
     if [ -z "${SOURCECRED_BIN}" ]; then
         printf >&2 "warn: missing environment variable SOURCECRED_BIN\n" &&
@@ -30,39 +31,50 @@ test_expect_success "environment and Node linking setup" '
 '
 
 run() (
-  set -eu
-  rm -f out err
-  node "${SOURCECRED_BIN}"/sourcecred.js "$@" >out 2>err
+    set -eu
+    rm -f out err
+    code=0
+    node "${SOURCECRED_BIN}"/sourcecred.js "$@" >out 2>err || code=$?
+    if [ "${code}" -ne 0  ]; then
+        printf '%s failed with %d\n' "sourcecred $*"
+        printf 'stdout:\n'
+        cat out
+        printf 'stderr:\n'
+        cat err
+    fi
 )
 
-test_expect_success SETUP, \
-  "should print help message when called without scores" '
-  test_must_fail run scores &&
+# Use this instead of `run` when we are expecting sourcecred to return a
+# non-zero exit code
+run_without_validation() (
+    set -eu
+    rm -f out err
+    node "${SOURCECRED_BIN}"/sourcecred.js "$@" >out 2>err
+)
+
+test_expect_success SETUP  "should print help message when called without args" '
+    test_must_fail run_without_validation scores &&
     grep -q "no repository ID provided" err &&
     grep -q "sourcecred help scores" err
 '
 
-test_expect_success SETUP, \
-  "help should print usage info" '
-  run help scores &&
+test_expect_success SETUP  "help should print usage info" '
+    run help scores &&
     grep -q "usage: sourcecred scores REPO_ID" out
 '
 
-test_expect_success SETUP, \
-  "--help should print usage info" '
-  run scores --help &&
+test_expect_success SETUP "--help should print usage info" '
+    run scores --help &&
     grep -q "usage: sourcecred scores REPO_ID" out
 '
 
-test_expect_success SETUP, \
-  "should fail for multiple repos" '
-  test_must_fail run scores sourcecred/sourcecred torvalds/linux &&
+test_expect_success SETUP "should fail for multiple repos" '
+    test_must_fail run_without_validation scores sourcecred/sourcecred torvalds/linux &&
     grep -q "fatal: multiple repository IDs provided" err
 '
 
-test_expect_success SETUP, \
-  "should fail for unloaded repo" '
-  test_must_fail run scores torvalds/linux &&
+test_expect_success SETUP "should fail for unloaded repo" '
+    test_must_fail run_without_validation scores torvalds/linux &&
     grep -q "fatal: repository ID torvalds/linux not loaded" err
 '
 
@@ -70,16 +82,14 @@ if [ -n "${UPDATE_SNAPSHOT}" ]; then
     test_set_prereq UPDATE_SNAPSHOT
 fi
 
-test_expect_success SETUP,UPDATE_SNAPSHOT \
-    "should update the snapshot" '
+test_expect_success SETUP,UPDATE_SNAPSHOT  "should update the snapshot" '
     run scores sourcecred/example-github &&
-    mv out ${snapshot_file}
+    mv out "${snapshot_file}"
 '
 
-test_expect_success SETUP \
-    "should be identical to the snapshot" '
+test_expect_success SETUP  "should be identical to the snapshot" '
     run scores sourcecred/example-github &&
-    diff -q out ${snapshot_file}
+    diff -u out ${snapshot_file}
 '
 
 test_done
