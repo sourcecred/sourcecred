@@ -28,6 +28,7 @@ function usage(print: (string) => void): void {
   print(
     dedent`\
     usage: sourcecred load [REPO_ID...] [--output REPO_ID]
+                           [--weights WEIGHTS_FILE]
                            [--plugin PLUGIN]
                            [--help]
 
