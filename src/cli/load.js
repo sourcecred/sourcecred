@@ -16,7 +16,7 @@ import {Graph} from "../core/graph";
 import {loadGraph, type LoadGraphResult} from "../analysis/loadGraph";
 import {type IBackendAdapterLoader} from "../analysis/analysisAdapter";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
-import {defaultWeights} from "../analysis/weights";
+import {defaultWeights, fromJSON as weightsFromJSON} from "../analysis/weights";
 
 import execDependencyGraph from "../tools/execDependencyGraph";
 import {loadGithubData} from "../plugins/github/loadGithubData";
@@ -28,6 +28,7 @@ function usage(print: (string) => void): void {
   print(
     dedent`\
     usage: sourcecred load [REPO_ID...] [--output REPO_ID]
+                           [--weights WEIGHTS_FILE]
                            [--plugin PLUGIN]
                            [--help]
 
@@ -54,6 +55,10 @@ function usage(print: (string) => void): void {
             Plugin for which to load data. Valid options are 'git' and
             'github'. If not specified, data for all default plugins will be
             loaded.
+
+        --weights WEIGHTS_FILE
+            Path to a json file which contains a weights configuration.
+            This will be used instead of the default weights and persisted.
 
         --help
             Show this help message and exit, as 'sourcecred help load'.
@@ -88,6 +93,7 @@ function die(std, message) {
 export type LoadOptions = {|
   +output: RepoId,
   +repoIds: $ReadOnlyArray<RepoId>,
+  +weightsPath?: string,
 |};
 
 export function makeLoadCommand(
@@ -107,6 +113,7 @@ export function makeLoadCommand(
     const repoIds: RepoId[] = [];
     let explicitOutput: RepoId | null = null;
     let plugin: Common.PluginName | null = null;
+    let weightsPath: ?string;
 
     for (let i = 0; i < args.length; i++) {
       switch (args[i]) {
@@ -120,6 +127,14 @@ export function makeLoadCommand(
           if (++i >= args.length)
             return die(std, "'--output' given without value");
           explicitOutput = stringToRepoId(args[i]);
+          break;
+        }
+        case "--weights": {
+          if (weightsPath != undefined)
+            return die(std, "'--weights' given multiple times");
+          if (++i >= args.length)
+            return die(std, "'--weights' given without value");
+          weightsPath = args[i];
           break;
         }
         case "--plugin": {
@@ -150,7 +165,7 @@ export function makeLoadCommand(
       return die(std, "output repository not specified");
     }
 
-    const options: LoadOptions = {output, repoIds: repoIds};
+    const options: LoadOptions = {output, repoIds: repoIds, weightsPath};
 
     if (plugin == null) {
       try {
@@ -177,7 +192,11 @@ export type SaveGraph = (
   RepoId
 ) => Promise<Graph>;
 
-export type SaveCred = (Graph, RepoId) => Promise<void>;
+export type SaveCred = (
+  graph: Graph,
+  repoId: RepoId,
+  weightsPath?: string
+) => Promise<void>;
 
 /**
  * A wrapper around the default plugin loader.
@@ -220,22 +239,42 @@ export const makeLoadDefaultPlugins = (
     }
     addToRepoIdRegistry(options.output);
     const graph = await saveGraph(defaultAdapterLoaders(), options.output);
-    await saveCred(graph, options.output);
+    await saveCred(graph, options.output, options.weightsPath);
     return;
   };
 };
 
-export const saveCred = async (graph: Graph, repoId: RepoId) => {
+const loadWeightOverrides = async (path: string) => {
+  if (!(await fs.exists(path))) {
+    throw new Error("Could not find the weights file");
+  }
+
+  const raw = await fs.readFile(path, "utf-8");
+  return weightsFromJSON(JSON.parse(raw));
+};
+
+export const saveCred = async (
+  graph: Graph,
+  repoId: RepoId,
+  weightsPath?: string
+) => {
   const id = "compute-cred";
   console.time(id);
   // Imitate the task labels from execDependencyGraph for visual consistency
   console.log(chalk.bgBlue.bold.white("  GO  ") + ` ${id}`);
+
+  // Get the weights if applicable.
+  let weights = defaultWeights();
+  if (weightsPath) {
+    weights = await loadWeightOverrides(weightsPath);
+  }
+
   const cred = await TimelineCred.compute(
     graph,
     {
       alpha: 0.05,
       intervalDecay: 0.5,
-      weights: defaultWeights(),
+      weights,
     },
     DEFAULT_CRED_CONFIG
   );

@@ -3,6 +3,7 @@ set -eu
 
 usage() {
     printf 'usage: build_static_site.sh --target TARGET\n'
+    printf '                            [--weights WEIGHTS_FILE]\n'
     printf '                            [--repo OWNER/NAME [...]]\n'
     printf '                            [--cname DOMAIN]\n'
     printf '                            [--no-backend]\n'
@@ -12,6 +13,9 @@ usage() {
     printf '\n'
     printf '%s\n' '--target TARGET'
     printf '\t%s\n' 'an empty directory into which to build the site'
+    printf '%s\n' '--weights WEIGHTS_FILE'
+    printf '\t%s\n' 'path to a json file which contains a weights configuration.'
+    printf '\t%s\n' 'This will be used instead of the default weights and persisted.'
     printf '%s\n' '--repo OWNER/NAME'
     printf '\t%s\n' 'a GitHub repository (e.g., torvalds/linux) for which'
     printf '\t%s\n' 'to include example data'
@@ -49,6 +53,7 @@ parse_args() {
     BACKEND=1
     target=
     cname=
+    weights=
     repos=( )
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -59,6 +64,14 @@ parse_args() {
                 shift
                 if [ $# -eq 0 ]; then die 'missing value for --target'; fi
                 target="$1"
+                ;;
+            --weights)
+                if [ -n "${weights}" ]; then
+                    die '--weights specified multiple times'
+                fi
+                shift
+                if [ $# -eq 0 ]; then die 'missing value for --weights'; fi
+                weights="$1"
                 ;;
             --repo)
                 shift
@@ -128,10 +141,14 @@ build() {
     fi
 
     if [ "${#repos[@]}" -ne 0 ]; then
+        local weightsStr=""
+        if [ -n "${weights}" ]; then
+            weightsStr="--weights ${weights}"
+        fi
         for repo in "${repos[@]}"; do
             printf >&2 'info: loading repository: %s\n' "${repo}"
             NODE_PATH="./node_modules${NODE_PATH:+:${NODE_PATH}}" \
-                node "${SOURCECRED_BIN:-./bin}/sourcecred.js" load "${repo}"
+                node "${SOURCECRED_BIN:-./bin}/sourcecred.js" load "${repo}" $weightsStr
         done
     fi
 

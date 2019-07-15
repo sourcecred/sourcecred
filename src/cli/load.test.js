@@ -544,7 +544,27 @@ describe("cli/load", () => {
         repoIds: [fooBar, fooBaz],
       });
       expect(saveCred).toHaveBeenCalledTimes(1);
-      expect(saveCred).toHaveBeenCalledWith(graph, fooCombined);
+      expect(saveCred).toHaveBeenCalledWith(graph, fooCombined, undefined);
+    });
+
+    it("calls saveCred with the weight path if set in the options", async () => {
+      // $ExpectFlowError
+      const graph: Graph = "pretend_graph";
+      const saveGraph = jest.fn().mockResolvedValue(graph);
+      const saveCred = jest.fn();
+      const loadDefaultPlugins = makeLoadDefaultPlugins(saveGraph, saveCred);
+      execDependencyGraph.mockResolvedValue({success: true});
+      await loadDefaultPlugins({
+        output: fooCombined,
+        repoIds: [fooBar, fooBaz],
+        weightsPath: "./my-weights.json",
+      });
+      expect(saveCred).toHaveBeenCalledTimes(1);
+      expect(saveCred).toHaveBeenCalledWith(
+        graph,
+        fooCombined,
+        "./my-weights.json"
+      );
     });
 
     it("throws an load error on first execDependencyGraph failure", async () => {

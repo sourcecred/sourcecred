@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 <!-- Please add new entries to the _top_ of this section. -->
+- Add `--weights` to `sourcecred load` to provide weight overrides (#1224).
 
 ## [0.3.0]
 
