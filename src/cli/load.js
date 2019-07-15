@@ -92,7 +92,7 @@ function die(std, message) {
 export type LoadOptions = {|
   +output: RepoId,
   +repoIds: $ReadOnlyArray<RepoId>,
-  +weightsPath?: string | null,
+  +weightsPath?: string,
 |};
 
 export function makeLoadCommand(
@@ -112,7 +112,7 @@ export function makeLoadCommand(
     const repoIds: RepoId[] = [];
     let explicitOutput: RepoId | null = null;
     let plugin: Common.PluginName | null = null;
-    let weightsPath: string | null = null;
+    let weightsPath: ?string;
 
     for (let i = 0; i < args.length; i++) {
       switch (args[i]) {
@@ -129,7 +129,7 @@ export function makeLoadCommand(
           break;
         }
         case "--weights": {
-          if (weightsPath != null)
+          if (weightsPath != undefined)
             return die(std, "'--weights' given multiple times");
           if (++i >= args.length)
             return die(std, "'--weights' given without value");
@@ -191,7 +191,11 @@ export type SaveGraph = (
   RepoId
 ) => Promise<Graph>;
 
-export type SaveCred = (Graph, RepoId, string | null) => Promise<void>;
+export type SaveCred = (
+  graph: Graph,
+  repoId: RepoId,
+  weightsPath?: string
+) => Promise<void>;
 
 /**
  * A wrapper around the default plugin loader.
@@ -234,7 +238,7 @@ export const makeLoadDefaultPlugins = (
     }
     addToRepoIdRegistry(options.output);
     const graph = await saveGraph(defaultAdapterLoaders(), options.output);
-    await saveCred(graph, options.output, options.weightsPath || null);
+    await saveCred(graph, options.output, options.weightsPath);
     return;
   };
 };
@@ -251,7 +255,7 @@ const loadWeightOverrides = async (path: string) => {
 export const saveCred = async (
   graph: Graph,
   repoId: RepoId,
-  weightsPath: string | null
+  weightsPath?: string
 ) => {
   const id = "compute-cred";
   console.time(id);

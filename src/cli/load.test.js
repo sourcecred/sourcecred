@@ -104,7 +104,6 @@ describe("cli/load", () => {
       const expectedOptions = {
         repoIds: [repoId],
         output: repoId,
-        weightsPath: null,
       };
       expect(loadDefaultPlugins).toHaveBeenCalledWith(expectedOptions);
     });
@@ -121,7 +120,6 @@ describe("cli/load", () => {
       const expectedOptions = {
         repoIds: [repoId],
         output: repoId,
-        weightsPath: null,
       };
       expect(loadIndividualPlugin).toHaveBeenCalledWith("git", expectedOptions);
     });
@@ -305,7 +303,7 @@ describe("cli/load", () => {
           successCase({
             name: "with a single repository",
             args: ["foo/bar"],
-            loadOptions: {output: fooBar, repoIds: [fooBar], weightsPath: null},
+            loadOptions: {output: fooBar, repoIds: [fooBar]},
           });
           successCase({
             name: "with a multiple repositories",
@@ -313,13 +311,12 @@ describe("cli/load", () => {
             loadOptions: {
               output: barZod,
               repoIds: [fooBar, barZod],
-              weightsPath: null,
             },
           });
           successCase({
             name: "with zero repositories",
             args: ["--output", "bar/zod"],
-            loadOptions: {output: barZod, repoIds: [], weightsPath: null},
+            loadOptions: {output: barZod, repoIds: []},
           });
         });
 
@@ -556,7 +553,7 @@ describe("cli/load", () => {
         repoIds: [fooBar, fooBaz],
       });
       expect(saveCred).toHaveBeenCalledTimes(1);
-      expect(saveCred).toHaveBeenCalledWith(graph, fooCombined, null);
+      expect(saveCred).toHaveBeenCalledWith(graph, fooCombined, undefined);
     });
 
     it("throws an load error on first execDependencyGraph failure", async () => {
@@ -564,7 +561,6 @@ describe("cli/load", () => {
       const result = loadDefaultPlugins({
         output: fooCombined,
         repoIds: [fooBar, fooBaz],
-        weightsPath: null,
       });
 
       expect(result).rejects.toThrow("Load tasks failed.");
