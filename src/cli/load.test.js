@@ -101,10 +101,7 @@ describe("cli/load", () => {
         stderr: [],
       });
       const repoId = makeRepoId("foo", "bar");
-      const expectedOptions = {
-        repoIds: [repoId],
-        output: repoId,
-      };
+      const expectedOptions = {repoIds: [repoId], output: repoId};
       expect(loadDefaultPlugins).toHaveBeenCalledWith(expectedOptions);
     });
 
@@ -117,10 +114,7 @@ describe("cli/load", () => {
         stderr: [],
       });
       const repoId = makeRepoId("foo", "bar");
-      const expectedOptions = {
-        repoIds: [repoId],
-        output: repoId,
-      };
+      const expectedOptions = {repoIds: [repoId], output: repoId};
       expect(loadIndividualPlugin).toHaveBeenCalledWith("git", expectedOptions);
     });
 
@@ -308,10 +302,7 @@ describe("cli/load", () => {
           successCase({
             name: "with a multiple repositories",
             args: ["foo/bar", "bar/zod", "--output", "bar/zod"],
-            loadOptions: {
-              output: barZod,
-              repoIds: [fooBar, barZod],
-            },
+            loadOptions: {output: barZod, repoIds: [fooBar, barZod]},
           });
           successCase({
             name: "with zero repositories",
