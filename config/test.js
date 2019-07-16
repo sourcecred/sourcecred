@@ -10,18 +10,20 @@ function main() {
   const options = parseArgs();
   const printVerboseResults = options.mode === "FULL";
   const runOptions = {printVerboseResults};
-  const tasks = makeTasks(options.mode);
+  const tasks = makeTasks(options.mode, options.limitMemoryUsage);
   execDependencyGraph(tasks, runOptions).then(({success}) => {
     process.exitCode = success ? 0 : 1;
   });
 }
 
 function parseArgs() {
-  const options = {mode: "BASIC"};
+  const options = {mode: "BASIC", limitMemoryUsage: false};
   const args = process.argv.slice(2);
   for (const arg of args) {
     if (arg === "--full") {
       options.mode = "FULL";
+    } else if (arg === "--ci") {
+      options.limitMemoryUsage = true;
     } else {
       throw new Error("unknown argument: " + JSON.stringify(arg));
     }
@@ -29,7 +31,10 @@ function parseArgs() {
   return options;
 }
 
-function makeTasks(mode /*: "BASIC" | "FULL" */) {
+function makeTasks(
+  mode /*: "BASIC" | "FULL" */,
+  limitMemoryUsage /*: boolean */
+) {
   const backendOutput = tmp.dirSync({
     unsafeCleanup: true,
     prefix: "sourcecred-test-",
@@ -72,7 +77,7 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
     },
     {
       id: "unit",
-      cmd: ["yarn", "run", "--silent", "unit", "--ci", "--maxWorkers=4"],
+      cmd: ["yarn", "run", "--silent", "unit", "--ci"],
       deps: [],
     },
     {
@@ -129,12 +134,30 @@ function makeTasks(mode /*: "BASIC" | "FULL" */) {
       deps: ["backend"],
     },
   ];
-  switch (mode) {
-    case "BASIC":
-      return basicTasks;
-    case "FULL":
-      return [].concat(basicTasks, extraTasks);
-    default:
-      /*:: (mode: empty); */ throw new Error(mode);
+  const tasks = (function() {
+    switch (mode) {
+      case "BASIC":
+        return basicTasks;
+      case "FULL":
+        return [].concat(basicTasks, extraTasks);
+      default:
+        /*:: (mode: empty); */ throw new Error(mode);
+    }
+  })();
+  if (limitMemoryUsage) {
+    // We've had issues with our tests flakily failing in CI, due to apparent
+    // memory issues. I've found that if we both limit the maxWorkers to 2, and
+    // ensure that nothing else runs at the same time as jest, then it stops
+    // flakily failing.
+    tasks.forEach((task) => {
+      if (task.id === "unit") {
+        task.cmd.push("--maxWorkers=2");
+      } else {
+        // Ensure that everything else depends on unit tests, so unit tests
+        // will run first and run alone.
+        task.deps.push("unit");
+      }
+    });
   }
+  return tasks;
 }

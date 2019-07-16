@@ -36,19 +36,19 @@ jobs:
     steps:
       - checkout
       - set_up_node_modules
-      - run: yarn test
+      - run: yarn test --ci
   test_full:
     executor: node12
     steps:
       - checkout
       - set_up_node_modules
-      - run: yarn test --full
+      - run: yarn test --full --ci
   test_full_10:
     executor: node10
     steps:
       - checkout
       - set_up_node_modules
-      - run: yarn test --full
+      - run: yarn test --full --ci
 
 workflows:
   version: 2
@@ -60,13 +60,13 @@ workflows:
             branches:
               only:
                 - master
-                - ci-test
+                - /ci-.*/
       - test_full_10:
           filters:
             branches:
               only:
                 - master
-                - ci-test
+                - /ci-.*/
   nightly:
     triggers:
       - schedule:
