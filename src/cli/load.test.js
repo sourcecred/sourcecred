@@ -21,16 +21,11 @@ jest.mock("../tools/execDependencyGraph", () => jest.fn());
 jest.mock("../plugins/github/loadGithubData", () => ({
   loadGithubData: jest.fn(),
 }));
-jest.mock("../plugins/git/loadGitData", () => ({
-  loadGitData: jest.fn(),
-}));
 
 type JestMockFn = $Call<typeof jest.fn>;
 const execDependencyGraph: JestMockFn = (require("../tools/execDependencyGraph"): any);
 const loadGithubData: JestMockFn = (require("../plugins/github/loadGithubData")
   .loadGithubData: any);
-const loadGitData: JestMockFn = (require("../plugins/git/loadGitData")
-  .loadGitData: any);
 
 describe("cli/load", () => {
   beforeEach(() => {
@@ -338,76 +333,7 @@ describe("cli/load", () => {
         });
 
         describe("loadIndividualPlugin", () => {
-          const fooCombined = makeRepoId("foo", "combined");
           const fooBar = makeRepoId("foo", "bar");
-          const fooBaz = makeRepoId("foo", "baz");
-
-          describe("for the Git plugin", () => {
-            it("correctly loads data", async () => {
-              const sourcecredDirectory = newSourcecredDirectory();
-              loadGitData.mockResolvedValueOnce(undefined);
-              await loadIndividualPlugin("git", {
-                repoIds: [fooBar],
-                output: fooBar,
-              });
-
-              expect(execDependencyGraph).not.toHaveBeenCalled();
-              expect(loadGitData).toHaveBeenCalledTimes(1);
-              expect(loadGitData).toHaveBeenCalledWith({
-                repoIds: [fooBar],
-                outputDirectory: path.join(
-                  sourcecredDirectory,
-                  "data",
-                  "foo",
-                  "bar",
-                  "git"
-                ),
-                cacheDirectory: path.join(
-                  sourcecredDirectory,
-                  "cache",
-                  "foo",
-                  "bar",
-                  "git"
-                ),
-              });
-            });
-
-            it("rejects if `loadGitData` rejects", async () => {
-              loadGitData.mockRejectedValueOnce(Error("please install Git"));
-              const attempt = loadIndividualPlugin("git", {
-                repoIds: [fooBar],
-                output: fooBar,
-              });
-              expect(attempt).rejects.toThrow("please install Git");
-            });
-          });
-
-          it("succeeds for multiple repositories", async () => {
-            const sourcecredDirectory = newSourcecredDirectory();
-            loadGitData.mockResolvedValueOnce(undefined);
-            const options = {repoIds: [fooBar, fooBaz], output: fooCombined};
-            await loadIndividualPlugin("git", options);
-
-            expect(execDependencyGraph).not.toHaveBeenCalled();
-            expect(loadGitData).toHaveBeenCalledTimes(1);
-            expect(loadGitData).toHaveBeenCalledWith({
-              repoIds: [fooBar, fooBaz],
-              outputDirectory: path.join(
-                sourcecredDirectory,
-                "data",
-                "foo",
-                "combined",
-                "git"
-              ),
-              cacheDirectory: path.join(
-                sourcecredDirectory,
-                "cache",
-                "foo",
-                "combined",
-                "git"
-              ),
-            });
-          });
 
           describe("for the GitHub plugin", () => {
             it("correctly loads data", async () => {

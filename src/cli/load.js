@@ -19,7 +19,6 @@ import {defaultWeights, fromJSON as weightsFromJSON} from "../analysis/weights";
 
 import execDependencyGraph from "../tools/execDependencyGraph";
 import {loadGithubData} from "../plugins/github/loadGithubData";
-import {loadGitData} from "../plugins/git/loadGitData";
 import {defaultAdapterLoaders} from "./pagerank";
 import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
 
@@ -317,8 +316,7 @@ export const loadIndividualPlugin = async (
       return;
     }
     case "git":
-      await loadGitData({repoIds, outputDirectory, cacheDirectory});
-      return;
+      throw new Error("Loading the git plugin is currently unsupported.");
     // Unlike the previous check, which was validating user input and
     // was reachable, this really should not occur.
     // istanbul ignore next
