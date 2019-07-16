@@ -12,7 +12,7 @@ function mockCommand(name) {
 }
 
 jest.mock("./help", () => mockCommand("help"));
-jest.mock("./deprecated_load", () => mockCommand("load"));
+jest.mock("./load", () => mockCommand("load"));
 jest.mock("./analyze", () => mockCommand("analyze"));
 jest.mock("./pagerank", () => mockCommand("pagerank"));
 jest.mock("./clear", () => mockCommand("clear"));

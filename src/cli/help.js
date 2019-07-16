@@ -4,7 +4,7 @@
 import type {Command} from "./command";
 import dedent from "../util/dedent";
 
-import {help as loadHelp} from "./deprecated_load";
+import {help as loadHelp} from "./load";
 import {help as analyzeHelp} from "./analyze";
 import {help as pagerankHelp} from "./pagerank";
 import {help as scoresHelp} from "./scores";

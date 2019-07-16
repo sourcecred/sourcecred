@@ -1,13 +1,12 @@
 // @flow
 
-import {stringToRepoId} from "../core/repoId";
 import {makeRouteData} from "./routeData";
 
 describe("homepage/routeData", () => {
   function routeData() {
     return makeRouteData([
-      {repoId: stringToRepoId("sourcecred/example-github")},
-      {repoId: stringToRepoId("sourcecred/sourcecred")},
+      "sourcecred/example-github",
+      "sourcecred/sourcecred",
     ]);
   }
 

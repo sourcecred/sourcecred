@@ -72,9 +72,9 @@ test_expect_success "should fail with a nonempty directory as target" '
 
 mkdir putative_output
 
-test_expect_success "should fail with missing repo value" '
-    test_must_fail run --target putative_output --repo 2>err &&
-    grep -qF -- "missing value for --repo" err &&
+test_expect_success "should fail with missing project value" '
+    test_must_fail run --target putative_output --project 2>err &&
+    grep -qF -- "missing value for --project" err &&
     printf "redacted\n" | test_cmp - important_dir/.wallet.dat
 '
 
@@ -98,8 +98,8 @@ test_expect_success "should fail with multiple cname values" '
 '
 
 #
-# Now, actually generate output in two cases: one with repositories, and
-# one with no repositories. We can only do this if we have a token.
+# Now, actually generate output in two cases: one with projects, and
+# one with no projects. We can only do this if we have a token.
 
 if [ -n "${SOURCECRED_GITHUB_TOKEN:-}" ]; then
     test_set_prereq HAVE_GITHUB_TOKEN
@@ -114,7 +114,6 @@ run_build() {
     description="$1"; shift
     output_dir="build_output/output_${prereq_name}"
     api_dir="${output_dir}/api/v1/data"
-    data_dir="${api_dir}/data"
     unsafe_arg=
     for arg in "${output_dir}" "$@"; do
         unusual_chars="$(printf '%s' "$arg" | sed -e 's#[A-Za-z0-9:/_.-]##g')"
@@ -133,7 +132,7 @@ run_build() {
         run '"${flags}"' >out 2>err &&
         test_must_fail grep -vF \
             -e "Removing contents of build directory: " \
-            -e "info: loading repository" \
+            -e "info: loading project" \
             -e "DeprecationWarning: Tapable.plugin is deprecated." \
             err &&
         test_path_is_dir "${output_dir}" &&
@@ -193,63 +192,50 @@ test_pages() {
     '
 }
 
-run_build TWO_REPOS \
-    "should build the site with two repositories and a CNAME" \
+run_build TWO_PROJECTS \
+    "should build the site with two projects and a CNAME" \
     --no-backend \
     --cname sourcecred.example.com \
-    --repo sourcecred/example-git \
-    --repo sourcecred/example-github \
+    --project sourcecred/example-git \
+    --project sourcecred/example-github \
     ;
 
-test_pages TWO_REPOS
+test_pages TWO_PROJECTS
 
-test_expect_success TWO_REPOS \
-    "TWO_REPOS: should have a registry with two repositories" '
-    registry_file="${api_dir}/repositoryRegistry.json" &&
-    test_path_is_file "${registry_file}" &&
-    grep -oF "\"name\":" "${registry_file}" | wc -l >actual_count &&
-    printf "2\n" | test_cmp - actual_count
+test_expect_success TWO_PROJECTS \
+    "TWO_PROJECTS: should have project ids loaded into env" '
+    grep -F "PROJECT_IDS" out &&
+    grep -xF "PROJECT_IDS: [\"sourcecred/example-git\",\"sourcecred/example-github\"]" out
 '
 
-test_expect_success TWO_REPOS \
-    "TWO_REPOS: should have a repo registry loaded into env" '
-    grep -F "REPO_REGISTRY" out &&
-    grep -xF "REPO_REGISTRY: [{\"repoId\":{\"name\":\"example-git\",\"owner\":\"sourcecred\"}},{\"repoId\":{\"name\":\"example-github\",\"owner\":\"sourcecred\"}}]" out
-'
-
-test_expect_success TWO_REPOS \
-    "TWO_REPOS: should have data for the two repositories" '
-    for repo in sourcecred/example-git sourcecred/example-github; do
-        for file in github/view.json.gz; do
-            test -s "${data_dir}/${repo}/${file}" || return
-        done
+test_expect_success TWO_PROJECTS \
+    "TWO_PROJECTS: should have data for the two projects" '
+    # encoded ids for sourcecred/example-git and sourcecred/example-github
+    for id in c291cmNlY3JlZC9leGFtcGxlLWdpdA c291cmNlY3JlZC9leGFtcGxlLWdpdGh1Yg; do
+        test -s "${api_dir}/projects/${id}/cred.json" &&
+        test -s "${api_dir}/projects/${id}/graph.json" ||
+        return
     done
 '
 
-test_expect_success TWO_REPOS "TWO_REPOS: should have a correct CNAME record" '
+test_expect_success TWO_PROJECTS "TWO_PROJECTS: should have a correct CNAME record" '
     test_path_is_file "${output_dir}/CNAME" &&
     printf "sourcecred.example.com" | test_cmp - "${output_dir}/CNAME"
 '
 
-test_pages NO_REPOS
+test_pages NO_PROJECTS
 
-test_expect_success NO_REPOS \
-    "NO_REPOS: should not have a repository registry" '
-    registry_file="${api_dir}/repositoryRegistry.json" &&
-    test_must_fail test -e "${registry_file}"
-'
-
-test_expect_success NO_REPOS \
-    "NO_REPOS: should have empty repo registry loaded into env" '
-    grep -F "REPO_REGISTRY" out &&
-    grep -xF "REPO_REGISTRY: []" out
+test_expect_success NO_PROJECTS \
+    "NO_REPOS: should have empty list of project ids loaded into env" '
+    grep -F "PROJECT_IDS" out &&
+    grep -xF "PROJECT_IDS: []" out
 '
 
 test_expect_success NO_REPOS \
     "NO_REPOS: should not have repository data" '
-    for repo in sourcecred/example-git sourcecred/example-github; do
-        for file in git/graph.json github/view.json.gz; do
-            test_must_fail test -f "${data_dir}/${repo}/${file}" || return
+    for id in c291cmNlY3JlZC9leGFtcGxlLWdpdA== c291cmNlY3JlZC9leGFtcGxlLWdpdGh1Yg==; do
+        for file in graph.json cred.json; do
+            test_must_fail test -f "${api_dir}/projects/${id}/${file}" || return
         done
     done
 '

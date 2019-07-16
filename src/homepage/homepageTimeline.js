@@ -4,17 +4,16 @@ import React from "react";
 
 import type {Assets} from "../webutil/assets";
 import {TimelineApp, defaultLoader} from "../explorer/TimelineApp";
-import type {RepoId} from "../core/repoId";
 
 export default class TimelineExplorer extends React.Component<{|
   +assets: Assets,
-  +repoId: RepoId,
+  +projectId: string,
 |}> {
   render() {
     return (
       <TimelineApp
         assets={this.props.assets}
-        repoId={this.props.repoId}
+        projectId={this.props.projectId}
         loader={defaultLoader}
       />
     );

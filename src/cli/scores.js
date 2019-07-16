@@ -4,8 +4,6 @@
 import {toCompat, type Compatible} from "../util/compat";
 import path from "path";
 import fs from "fs-extra";
-import * as RepoIdRegistry from "../core/repoIdRegistry";
-import {repoIdToString, stringToRepoId, type RepoId} from "../core/repoId";
 import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
@@ -18,25 +16,25 @@ import {
 import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
 import {userNodeType} from "../plugins/github/declaration";
 import * as GN from "../plugins/github/nodes";
+import {directoryForProjectId} from "../core/project_io";
 
 const COMPAT_INFO = {type: "sourcecred/cli/scores", version: "0.1.0"};
 
 function usage(print: (string) => void): void {
   print(
     dedent`\
-    usage: sourcecred scores REPO_ID [--help]
+    usage: sourcecred scores PROJECT_ID [--help]
 
-    Print the SourceCred user scores for a given REPO_ID.
-    Data must already be loaded for the given REPO_ID, using
-    'sourcecred load REPO_ID'
+    Print the SourceCred user scores for a given PROJECT_ID.
+    Data must already be loaded for the given PROJECT_ID, using
+    'sourcecred load PROJECT_ID'
 
-    REPO_ID refers to a GitHub repository in the form OWNER/NAME: for
-    example, torvalds/linux. The REPO_ID may be a "combined" repo as
-    created by the --output flag to sourcecred load.
+    PROJECT_ID refers to a project, as loaded by the \`load\` command.
+    Run \`sourcecred load --help\` for details.
 
     Arguments:
-        REPO_ID
-            Already-loaded repository for which to load data.
+        PROJECT_ID
+            Already-loaded project for which to load data.
 
         --help
             Show this help message and exit, as 'sourcecred help scores'.
@@ -70,7 +68,7 @@ export type ScoreOutput = Compatible<{|
 |}>;
 
 export const scores: Command = async (args, std) => {
-  let repoId: RepoId | null = null;
+  let projectId: string | null = null;
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
       case "--help": {
@@ -78,33 +76,28 @@ export const scores: Command = async (args, std) => {
         return 0;
       }
       default: {
-        if (repoId != null) return die(std, "multiple repository IDs provided");
-        // Should be a repository.
-        repoId = stringToRepoId(args[i]);
+        if (projectId != null) return die(std, "multiple project IDs provided");
+        projectId = args[i];
         break;
       }
     }
   }
 
-  if (repoId == null) {
-    return die(std, "no repository ID provided");
+  if (projectId == null) {
+    return die(std, "no project ID provided");
   }
 
-  const directory = Common.sourcecredDirectory();
-  const registry = RepoIdRegistry.getRegistry(directory);
-  if (RepoIdRegistry.getEntry(registry, repoId) == null) {
-    const repoIdStr = repoIdToString(repoId);
-    std.err(`fatal: repository ID ${repoIdStr} not loaded`);
-    std.err(`Try running \`sourcecred load ${repoIdStr}\` first.`);
+  const projectDirectory = directoryForProjectId(
+    projectId,
+    Common.sourcecredDirectory()
+  );
+  const credFile = path.join(projectDirectory, "cred.json");
+  if (!fs.existsSync(credFile)) {
+    std.err(`fatal: project ${projectId} not loaded`);
+    std.err(`Try running \`sourcecred load ${projectId}\` first.`);
     return 1;
   }
 
-  const credFile = path.join(
-    Common.sourcecredDirectory(),
-    "data",
-    repoIdToString(repoId),
-    "cred.json"
-  );
   const credBlob = await fs.readFile(credFile);
   const credJSON = JSON.parse(credBlob.toString());
   const timelineCred = TimelineCred.fromJSON(credJSON, DEFAULT_CRED_CONFIG);

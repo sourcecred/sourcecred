@@ -9,7 +9,8 @@ import {declaration} from "./declaration";
 import {RelationalView} from "./relationalView";
 import {createGraph} from "./createGraph";
 
-describe("plugins/github/analysisAdapter", () => {
+// This file is deprecated, and will be removed shortly.
+describe.skip("plugins/github/analysisAdapter", () => {
   it("the loader provides the declaration", () => {
     const loader = new BackendAdapterLoader();
     expect(loader.declaration()).toEqual(declaration);

@@ -2,19 +2,19 @@
 
 import React from "react";
 import type {Assets} from "../webutil/assets";
-import type {RepoId} from "../core/repoId";
 import {TimelineExplorer} from "./TimelineExplorer";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";
 import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
+import {encodeProjectId, type ProjectId} from "../core/project";
 
 export type Props = {|
   +assets: Assets,
-  +repoId: RepoId,
+  +projectId: string,
   +loader: Loader,
 |};
 
-export type Loader = (assets: Assets, repoId: RepoId) => Promise<LoadResult>;
+export type Loader = (assets: Assets, projectId: string) => Promise<LoadResult>;
 
 export type LoadResult = Loading | LoadSuccess | LoadError;
 export type Loading = {|+type: "LOADING"|};
@@ -37,7 +37,7 @@ export class TimelineApp extends React.Component<Props, State> {
   async load() {
     const loadResult = await this.props.loader(
       this.props.assets,
-      this.props.repoId
+      this.props.projectId
     );
     this.setState({loadResult});
   }
@@ -68,7 +68,7 @@ export class TimelineApp extends React.Component<Props, State> {
         return (
           <TimelineExplorer
             initialTimelineCred={timelineCred}
-            repoId={this.props.repoId}
+            projectId={this.props.projectId}
             declarations={[githubDeclaration]}
           />
         );
@@ -81,12 +81,12 @@ export class TimelineApp extends React.Component<Props, State> {
 
 export async function defaultLoader(
   assets: Assets,
-  repoId: RepoId
+  projectId: ProjectId
 ): Promise<LoadResult> {
   async function fetchCred(): Promise<TimelineCred> {
-    const url = assets.resolve(
-      `api/v1/data/data/${repoId.owner}/${repoId.name}/cred.json`
-    );
+    console.error(">>>DEFAULTLOADER");
+    const encodedId = encodeProjectId(projectId);
+    const url = assets.resolve(`api/v1/data/projects/${encodedId}/cred.json`);
     const response = await fetch(url);
     if (!response.ok) {
       return Promise.reject(response);
