@@ -68,6 +68,10 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
 // this optional. However, note that this computation is performed at
 // build time, so end users of SourceCred as a library or application
 // should not need this dependency.
+//
+// Note: Calling `getGitState` inside test code seems to increase memory usage,
+// potentially leading to CI out-of-memory failures. We should investigate
+// this, and consider making `getGitState` a compile step for test code.
 function getGitState() /*: GitState */ {
   const env = {
     GIT_ATTR_NOSYSTEM: "1",
