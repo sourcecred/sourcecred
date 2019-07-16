@@ -6,7 +6,7 @@ import type {Command} from "./command";
 import {VERSION_SHORT} from "../core/version";
 
 import help from "./help";
-import load from "./deprecated_load";
+import load from "./load";
 import analyze from "./analyze";
 import pagerank from "./pagerank";
 import scores from "./scores";

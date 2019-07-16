@@ -4,7 +4,6 @@ import React from "react";
 import {shallow} from "enzyme";
 
 import {Graph} from "../../core/graph";
-import {makeRepoId} from "../../core/repoId";
 import {Assets} from "../../webutil/assets";
 import testLocalStore from "../../webutil/testLocalStore";
 
@@ -34,7 +33,7 @@ describe("explorer/legacy/App", () => {
       <App
         assets={new Assets("/foo/")}
         localStore={localStore}
-        repoId={makeRepoId("foo", "bar")}
+        projectId={"foo/bar"}
       />
     );
     if (setState == null || getState == null) {
@@ -55,14 +54,14 @@ describe("explorer/legacy/App", () => {
     readyToLoadGraph: (loadingState) => {
       return () => ({
         type: "READY_TO_LOAD_GRAPH",
-        repoId: makeRepoId("foo", "bar"),
+        projectId: "foo/bar",
         loading: loadingState,
       });
     },
     readyToRunPagerank: (loadingState) => {
       return () => ({
         type: "READY_TO_RUN_PAGERANK",
-        repoId: makeRepoId("foo", "bar"),
+        projectId: "foo/bar",
         loading: loadingState,
         graph: new Graph(),
       });
@@ -70,7 +69,7 @@ describe("explorer/legacy/App", () => {
     pagerankEvaluated: (loadingState) => {
       return () => ({
         type: "PAGERANK_EVALUATED",
-        repoId: makeRepoId("foo", "bar"),
+        projectId: "foo/bar",
         loading: loadingState,
         graph: new Graph(),
         pagerankNodeDecomposition: new Map(),
@@ -108,13 +107,12 @@ describe("explorer/legacy/App", () => {
   it("instantiates a ProjectDetail component with correct props", () => {
     const {el} = example();
     const projectDetail = el.find(ProjectDetail);
-    const correctProps = {repoId: makeRepoId("foo", "bar")};
+    const correctProps = {projectId: "foo/bar"};
     expect(projectDetail.props()).toEqual(correctProps);
   });
 
-  it("ProjectDetail component renders repoId correctly", () => {
-    const repoId = makeRepoId("foo", "bar");
-    const projectDetail = shallow(<ProjectDetail repoId={repoId} />);
+  it("ProjectDetail component renders projectId correctly", () => {
+    const projectDetail = shallow(<ProjectDetail projectId={"foo/bar"} />);
     const title = projectDetail.findWhere(
       (p) => p.is("p") && p.text() === "foo/bar"
     );

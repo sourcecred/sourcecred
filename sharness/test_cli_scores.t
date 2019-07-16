@@ -54,28 +54,28 @@ run_without_validation() (
 
 test_expect_success SETUP  "should print help message when called without args" '
     test_must_fail run_without_validation scores &&
-    grep -q "no repository ID provided" err &&
+    grep -q "no project ID provided" err &&
     grep -q "sourcecred help scores" err
 '
 
 test_expect_success SETUP  "help should print usage info" '
     run help scores &&
-    grep -q "usage: sourcecred scores REPO_ID" out
+    grep -q "usage: sourcecred scores PROJECT_ID" out
 '
 
 test_expect_success SETUP "--help should print usage info" '
     run scores --help &&
-    grep -q "usage: sourcecred scores REPO_ID" out
+    grep -q "usage: sourcecred scores PROJECT_ID" out
 '
 
-test_expect_success SETUP "should fail for multiple repos" '
+test_expect_success SETUP "should fail for multiple projects" '
     test_must_fail run_without_validation scores sourcecred/sourcecred torvalds/linux &&
-    grep -q "fatal: multiple repository IDs provided" err
+    grep -q "fatal: multiple project IDs provided" err
 '
 
-test_expect_success SETUP "should fail for unloaded repo" '
+test_expect_success SETUP "should fail for unloaded project" '
     test_must_fail run_without_validation scores torvalds/linux &&
-    grep -q "fatal: repository ID torvalds/linux not loaded" err
+    grep -q "fatal: project torvalds/linux not loaded" err
 '
 
 if [ -n "${UPDATE_SNAPSHOT}" ]; then
