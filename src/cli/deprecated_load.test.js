@@ -11,7 +11,7 @@ import {
   makeLoadDefaultPlugins,
   loadIndividualPlugin,
   help,
-} from "./load";
+} from "./deprecated_load";
 
 import * as RepoIdRegistry from "../core/repoIdRegistry";
 import {makeRepoId} from "../core/repoId";
@@ -27,7 +27,7 @@ const execDependencyGraph: JestMockFn = (require("../tools/execDependencyGraph")
 const loadGithubData: JestMockFn = (require("../plugins/github/loadGithubData")
   .loadGithubData: any);
 
-describe("cli/load", () => {
+describe("cli/deprecated_load", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Tests should call `newSourcecredDirectory` directly when they
