@@ -9,21 +9,21 @@ const chalk = require("chalk");
 const child_process = require("child_process");
 
 /*::
-type TaskId = string;
-type Task = {|
+export type TaskId = string;
+export type Task = {|
   +id: TaskId,
   +cmd: $ReadOnlyArray<string>,
   +deps: $ReadOnlyArray<TaskId>,
 |};
 
-type TaskResult = {|
+export type TaskResult = {|
   +id: TaskId,
   +success: boolean,
   +status: number,
   +stdout: string,
   +stderr: string,
 |};
-type OverallResult = {|
+export type OverallResult = {|
   +success: boolean,
 |};
 
@@ -31,7 +31,7 @@ type OverallResult = {|
 // should all be of the same width. The default options use a
 // 4-character string for each. Shorter strings with length of the same
 // parity can be extended by symmetrically adding spaces.
-type RunOptions = {|
+export type RunOptions = {|
   +taskPassLabel?: string,
   +taskFailLabel?: string,
   +taskLaunchLabel?: string,
