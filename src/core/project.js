@@ -1,6 +1,6 @@
 // @flow
 
-import base64 from "base-64";
+import base64url from "base64url";
 import {type RepoId} from "../core/repoId";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
@@ -43,5 +43,5 @@ export function projectFromJSON(j: ProjectJSON): Project {
  * or retrieved via XHR from the frontend.
  */
 export function encodeProjectId(id: ProjectId): string {
-  return base64.encode(id);
+  return base64url.encode(id);
 }

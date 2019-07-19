@@ -9,28 +9,36 @@
 // This file is tested in ./project_io.test.js
 
 const path = require("path");
-const base64 = require("base-64");
+const base64url = require("base64url");
 const fs = require("fs-extra");
 
-module.exports = function getProjectIds(
+/**
+ * Get the ids for every project saved on the filesystem.
+ *
+ * It is not guaranteed that it will be possible to load the id in question.
+ * (For example, the project may be malformed, or may have an outdated compat
+ * version.)
+ */
+module.exports = async function getProjectIds(
   sourcecredDirectory /*: string */
-) /*: $ReadOnlyArray<string> */ {
+) /*: Promise<$ReadOnlyArray<string>> */ {
   const projectsPath = path.join(sourcecredDirectory, "projects");
   let entries = [];
   try {
-    entries = fs.readdirSync(projectsPath);
+    entries = await fs.readdir(projectsPath);
   } catch {
     return [];
   }
-  const projectIds = [];
-  for (const entry of entries) {
-    const jsonPath = path.join(projectsPath, entry, "project.json");
+  const getProjectId = async (entry) => {
     try {
-      fs.statSync(jsonPath);
-      projectIds.push(base64.decode(entry));
+      const jsonPath = path.join(projectsPath, entry, "project.json");
+      await fs.stat(jsonPath);
+      return base64url.decode(entry);
     } catch {
-      continue;
+      return null;
     }
-  }
-  return projectIds;
+  };
+
+  const maybeProjectIds = await Promise.all(entries.map(getProjectId));
+  return maybeProjectIds.filter((x) => x != null);
 };

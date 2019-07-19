@@ -28,7 +28,7 @@ import _getProjectIds from "./_getProjectIds";
  */
 export function getProjectIds(
   sourcecredDirectory: string
-): $ReadOnlyArray<ProjectId> {
+): Promise<$ReadOnlyArray<ProjectId>> {
   return _getProjectIds(sourcecredDirectory);
 }
 

@@ -15,7 +15,7 @@ import {
 
 import {makeRepoId} from "./repoId";
 
-describe("core/project_io.js", () => {
+describe("core/project_io", () => {
   const foobar = Object.freeze(makeRepoId("foo", "bar"));
   const foozod = Object.freeze(makeRepoId("foo", "zod"));
   const p1: Project = Object.freeze({
@@ -30,7 +30,7 @@ describe("core/project_io.js", () => {
   it("setupProjectDirectory results in a loadable project", async () => {
     const sourcecredDirectory = tmp.dirSync().name;
     await setupProjectDirectory(p1, sourcecredDirectory);
-    const ps = getProjectIds(sourcecredDirectory);
+    const ps = await getProjectIds(sourcecredDirectory);
     expect(ps).toEqual([p1.id]);
     expect(await loadProject(p1.id, sourcecredDirectory)).toEqual(p1);
   });
@@ -38,7 +38,7 @@ describe("core/project_io.js", () => {
     const sourcecredDirectory = tmp.dirSync().name;
     await setupProjectDirectory(p1, sourcecredDirectory);
     await setupProjectDirectory(p2, sourcecredDirectory);
-    const ps = getProjectIds(sourcecredDirectory);
+    const ps = await getProjectIds(sourcecredDirectory);
     expect(ps).toHaveLength(2);
     expect(ps.slice().sort()).toEqual([p2.id, p1.id]);
     expect(await loadProject(p1.id, sourcecredDirectory)).toEqual(p1);
@@ -46,7 +46,7 @@ describe("core/project_io.js", () => {
   });
   it("getProjectIds returns no projects if none were setup", async () => {
     const sourcecredDirectory = tmp.dirSync().name;
-    const ps = getProjectIds(sourcecredDirectory);
+    const ps = await getProjectIds(sourcecredDirectory);
     expect(ps).toHaveLength(0);
   });
   it("setupProjectDirectory returns the right directory", async () => {
@@ -72,7 +72,7 @@ describe("core/project_io.js", () => {
     const sourcecredDirectory = tmp.dirSync().name;
     await setupProjectDirectory(p1, sourcecredDirectory);
     await fs.mkdirp(path.join(sourcecredDirectory, "projects", "foobar"));
-    const ps = getProjectIds(sourcecredDirectory);
+    const ps = await getProjectIds(sourcecredDirectory);
     expect(ps).toEqual([p1.id]);
   });
   it("getProjectIds ignores non-project file entries", async () => {
@@ -82,7 +82,7 @@ describe("core/project_io.js", () => {
       path.join(sourcecredDirectory, "projects", "foobar"),
       "1234"
     );
-    const ps = getProjectIds(sourcecredDirectory);
+    const ps = await getProjectIds(sourcecredDirectory);
     expect(ps).toEqual([p1.id]);
   });
   it("loadProject throws an error on inconsistent id", async () => {
