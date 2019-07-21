@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {EdgeAddress, Graph, NodeAddress, type Node, type Edge} from "./graph";
 
 /**
@@ -12,11 +13,10 @@ import {EdgeAddress, Graph, NodeAddress, type Node, type Edge} from "./graph";
  * the codebase.
  *
  * The returned node is frozen; as such, it is safe to re-use this exact
- * object across test cases. If any non-primitive field is added to Node,
- * please ensure this function freezes that field explicitly.
+ * object across test cases.
  */
 export function partsNode(parts: string[]): Node {
-  return Object.freeze({
+  return deepFreeze({
     address: NodeAddress.fromParts(parts),
     description: parts.toString(),
     timestampMs: null,
@@ -40,7 +40,7 @@ export function node(name: string): Node {
  * The returned edge is frozen, so it is safe to use across test cases.
  */
 export function partsEdge(parts: string[], src: Node, dst: Node): Edge {
-  return Object.freeze({
+  return deepFreeze({
     address: EdgeAddress.fromParts(parts),
     src: src.address,
     dst: dst.address,

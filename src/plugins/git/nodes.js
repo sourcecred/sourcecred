@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 import type {Hash} from "./types";
 
@@ -12,7 +13,7 @@ export function _gitAddress(...parts: string[]): RawAddress {
 
 export const COMMIT_TYPE: "COMMIT" = "COMMIT";
 
-export const Prefix = Object.freeze({
+export const Prefix = deepFreeze({
   base: GIT_PREFIX,
   commit: _gitAddress(COMMIT_TYPE),
 });

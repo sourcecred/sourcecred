@@ -1,15 +1,16 @@
 //@flow
 
+import deepFreeze from "deep-freeze";
 import {makeRepoId, repoIdToString, type RepoIdString} from "../../core/repoId";
 import type {Repository} from "./types";
 import {mergeRepository} from "./mergeRepository";
 
 describe("plugins/git/mergeRepository", () => {
   describe("mergeRepository", () => {
-    const empty: Repository = Object.freeze({commits: {}, commitToRepoId: {}});
+    const empty: Repository = deepFreeze({commits: {}, commitToRepoId: {}});
     const repoId1 = repoIdToString(makeRepoId("repo", "1"));
     const repoId2 = repoIdToString(makeRepoId("repo", "2"));
-    const repository1: Repository = Object.freeze({
+    const repository1: Repository = deepFreeze({
       commits: {
         commit1: {
           hash: "commit1",
@@ -31,7 +32,7 @@ describe("plugins/git/mergeRepository", () => {
         commit2: {[((repoId1: RepoIdString): any)]: true},
       },
     });
-    const repository2: Repository = Object.freeze({
+    const repository2: Repository = deepFreeze({
       commits: {
         commit1: {
           hash: "commit1",
@@ -89,7 +90,7 @@ describe("plugins/git/mergeRepository", () => {
       expect(mergeRepository([repository1, repository1])).toEqual(repository1);
     });
     it("throws an error if merging a repository with conflicting commits", () => {
-      const conflictingRepository: Repository = Object.freeze({
+      const conflictingRepository: Repository = deepFreeze({
         commits: {
           commit1: {
             hash: "commit1",

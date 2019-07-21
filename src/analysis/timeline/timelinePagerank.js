@@ -3,6 +3,7 @@
 /**
  * Core logic for computing timeline PageRank on a graph.
  */
+import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
 import {Graph, type NodeAddressT, type Edge, type Node} from "../../core/graph";
@@ -183,7 +184,7 @@ export function* _timelineMarkovChain(
     for (const {address} of edges) {
       edgeWeights.set(address, edgeEvaluator(address));
     }
-    const defaultEdgeWeight = Object.freeze({forwards: 0, backwards: 0});
+    const defaultEdgeWeight = deepFreeze({forwards: 0, backwards: 0});
     const currentEdgeWeight = (e: Edge) => {
       return NullUtil.orElse(edgeWeights.get(e.address), defaultEdgeWeight);
     };

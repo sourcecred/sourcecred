@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import type Database, {BindingDictionary, Statement} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 
@@ -2038,7 +2039,7 @@ type UpdateResult = {
   +[string]: OwnDataUpdateResult | NodeConnectionsUpdateResult,
 };
 
-export const _FIELD_PREFIXES = Object.freeze({
+export const _FIELD_PREFIXES = deepFreeze({
   /**
    * A key of an `UpdateResult` has this prefix if and only if the
    * corresponding value represents `OwnDataUpdateResult`s.

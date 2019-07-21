@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {type Weights, defaultWeights} from "./weights";
 import {weightsToEdgeEvaluator} from "./weightsToEdgeEvaluator";
@@ -14,7 +15,7 @@ describe("analysis/weightsToEdgeEvaluator", () => {
     timestampMs: 0,
   };
 
-  const fallbackNodeType = Object.freeze({
+  const fallbackNodeType = deepFreeze({
     name: "",
     pluralName: "",
     prefix: NodeAddress.empty,
@@ -22,7 +23,7 @@ describe("analysis/weightsToEdgeEvaluator", () => {
     description: "",
   });
 
-  const srcNodeType = Object.freeze({
+  const srcNodeType = deepFreeze({
     name: "",
     pluralName: "",
     prefix: src,
@@ -30,10 +31,10 @@ describe("analysis/weightsToEdgeEvaluator", () => {
     description: "",
   });
 
-  const fallbackEdgeType = Object.freeze({
+  const fallbackEdgeType = deepFreeze({
     forwardName: "",
     backwardName: "",
-    defaultWeight: Object.freeze({forwards: 1, backwards: 1}),
+    defaultWeight: {forwards: 1, backwards: 1},
     prefix: EdgeAddress.empty,
     description: "",
   });

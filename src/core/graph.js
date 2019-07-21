@@ -1,6 +1,7 @@
 // @flow
 
 import deepEqual from "lodash.isequal";
+import deepFreeze from "deep-freeze";
 
 import {makeAddressModule, type AddressModule} from "./address";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
@@ -151,7 +152,7 @@ export const Direction: {|
   +IN: DirectionT,
   +OUT: DirectionT,
   +ANY: DirectionT,
-|} = Object.freeze({
+|} = deepFreeze({
   IN: Symbol("IN"),
   OUT: Symbol("OUT"),
   ANY: Symbol("ANY"),
