@@ -3,12 +3,13 @@
 
 import os from "os";
 import path from "path";
+import deepFreeze from "deep-freeze";
 
 import * as NullUtil from "../util/null";
 
 export type PluginName = "git" | "github";
 
-export const defaultPlugins: PluginName[] = Object.freeze(["github"]);
+export const defaultPlugins: PluginName[] = deepFreeze(["github"]);
 
 export function defaultSourcecredDirectory() {
   return path.join(os.tmpdir(), "sourcecred");

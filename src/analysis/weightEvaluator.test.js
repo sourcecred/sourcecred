@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {nodeWeightEvaluator, edgeWeightEvaluator} from "./weightEvaluator";
 import {defaultWeights} from "./weights";
@@ -10,7 +11,7 @@ describe("src/analysis/weightEvaluator", () => {
     const foo = NodeAddress.fromParts(["foo"]);
     const foobar = NodeAddress.fromParts(["foo", "bar"]);
 
-    const fooNodeType = Object.freeze({
+    const fooNodeType = deepFreeze({
       name: "",
       pluralName: "",
       prefix: foo,
@@ -18,7 +19,7 @@ describe("src/analysis/weightEvaluator", () => {
       description: "",
     });
 
-    const fooBarNodeType = Object.freeze({
+    const fooBarNodeType = deepFreeze({
       name: "",
       pluralName: "",
       prefix: foobar,
@@ -26,7 +27,7 @@ describe("src/analysis/weightEvaluator", () => {
       description: "",
     });
 
-    const types = Object.freeze([fooNodeType, fooBarNodeType]);
+    const types = deepFreeze([fooNodeType, fooBarNodeType]);
 
     it("gives every node weight 1 with empty types and weights", () => {
       const evaluator = nodeWeightEvaluator([], defaultWeights());
@@ -69,20 +70,20 @@ describe("src/analysis/weightEvaluator", () => {
   describe("edgeEvaluator", () => {
     const foo = EdgeAddress.fromParts(["foo"]);
     const foobar = EdgeAddress.fromParts(["foo", "bar"]);
-    const fooType = {
+    const fooType = deepFreeze({
       forwardName: "",
       backwardName: "",
-      defaultWeight: Object.freeze({forwards: 2, backwards: 3}),
+      defaultWeight: {forwards: 2, backwards: 3},
       prefix: foo,
       description: "",
-    };
-    const fooBarType = {
+    });
+    const fooBarType = deepFreeze({
       forwardName: "",
       backwardName: "",
-      defaultWeight: Object.freeze({forwards: 4, backwards: 5}),
+      defaultWeight: {forwards: 4, backwards: 5},
       prefix: foobar,
       description: "",
-    };
+    });
     it("gives default 1,1 weights if no matching type", () => {
       const evaluator = edgeWeightEvaluator([], defaultWeights());
       expect(evaluator(foo)).toEqual({forwards: 1, backwards: 1});

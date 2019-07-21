@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import tmp from "tmp";
 import path from "path";
 import fs from "fs-extra";
@@ -16,15 +17,15 @@ import {
 import {makeRepoId} from "./repoId";
 
 describe("core/project_io", () => {
-  const foobar = Object.freeze(makeRepoId("foo", "bar"));
-  const foozod = Object.freeze(makeRepoId("foo", "zod"));
-  const p1: Project = Object.freeze({
+  const foobar = deepFreeze(makeRepoId("foo", "bar"));
+  const foozod = deepFreeze(makeRepoId("foo", "zod"));
+  const p1: Project = deepFreeze({
     id: "foo/bar",
-    repoIds: Object.freeze([foobar]),
+    repoIds: [foobar],
   });
-  const p2: Project = Object.freeze({
+  const p2: Project = deepFreeze({
     id: "@foo",
-    repoIds: Object.freeze([foobar, foozod]),
+    repoIds: [foobar, foozod],
   });
 
   it("setupProjectDirectory results in a loadable project", async () => {

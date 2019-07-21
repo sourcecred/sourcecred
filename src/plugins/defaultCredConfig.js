@@ -1,13 +1,14 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {userNodeType, repoNodeType, declaration} from "./github/declaration";
 import type {TimelineCredConfig} from "../analysis/timeline/timelineCred";
 
-export const DEFAULT_CRED_CONFIG: TimelineCredConfig = {
+export const DEFAULT_CRED_CONFIG: TimelineCredConfig = deepFreeze({
   scoreNodePrefix: userNodeType.prefix,
-  filterNodePrefixes: Object.freeze([userNodeType.prefix, repoNodeType.prefix]),
-  types: Object.freeze({
-    nodeTypes: Object.freeze(declaration.nodeTypes.slice()),
-    edgeTypes: Object.freeze(declaration.edgeTypes.slice()),
-  }),
-};
+  filterNodePrefixes: [userNodeType.prefix, repoNodeType.prefix],
+  types: {
+    nodeTypes: declaration.nodeTypes.slice(),
+    edgeTypes: declaration.edgeTypes.slice(),
+  },
+});

@@ -2,6 +2,7 @@
 
 import tmp from "tmp";
 import path from "path";
+import deepFreeze from "deep-freeze";
 
 import {
   Graph,
@@ -18,13 +19,14 @@ import {makeRepoId, type RepoId} from "../core/repoId";
 import {loadGraph} from "./loadGraph";
 import {node} from "../core/graphTestUtil";
 
-const declaration = (name) => ({
-  name,
-  nodePrefix: NodeAddress.empty,
-  edgePrefix: EdgeAddress.empty,
-  nodeTypes: Object.freeze([]),
-  edgeTypes: Object.freeze([]),
-});
+const declaration = (name) =>
+  deepFreeze({
+    name,
+    nodePrefix: NodeAddress.empty,
+    edgePrefix: EdgeAddress.empty,
+    nodeTypes: [],
+    edgeTypes: [],
+  });
 
 class MockStaticAdapter implements IBackendAdapterLoader {
   _resolutionGraph: ?Graph;

@@ -1,11 +1,12 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import * as N from "./nodes";
 import * as E from "./edges";
 import dedent from "../../util/dedent";
 
-export const repoNodeType = Object.freeze({
+export const repoNodeType = deepFreeze({
   name: "Repository",
   pluralName: "Repositories",
   prefix: N.Prefix.repo,
@@ -13,7 +14,7 @@ export const repoNodeType = Object.freeze({
   description: "NodeType for a GitHub repository",
 });
 
-const issueNodeType = Object.freeze({
+const issueNodeType = deepFreeze({
   name: "Issue",
   pluralName: "Issues",
   prefix: N.Prefix.issue,
@@ -21,7 +22,7 @@ const issueNodeType = Object.freeze({
   description: "NodeType for a GitHub issue",
 });
 
-const pullNodeType = Object.freeze({
+const pullNodeType = deepFreeze({
   name: "Pull request",
   pluralName: "Pull requests",
   prefix: N.Prefix.pull,
@@ -29,7 +30,7 @@ const pullNodeType = Object.freeze({
   description: "NodeType for a GitHub pull request",
 });
 
-const reviewNodeType = Object.freeze({
+const reviewNodeType = deepFreeze({
   name: "Pull request review",
   pluralName: "Pull request reviews",
   prefix: N.Prefix.review,
@@ -37,7 +38,7 @@ const reviewNodeType = Object.freeze({
   description: "NodeType for a GitHub code review",
 });
 
-const commentNodeType = Object.freeze({
+const commentNodeType = deepFreeze({
   name: "Comment",
   pluralName: "Comments",
   prefix: N.Prefix.comment,
@@ -45,7 +46,7 @@ const commentNodeType = Object.freeze({
   description: "NodeType for a GitHub comment",
 });
 
-const commitNodeType = Object.freeze({
+const commitNodeType = deepFreeze({
   name: "Commit",
   pluralName: "Commits",
   prefix: N.Prefix.commit,
@@ -54,7 +55,7 @@ const commitNodeType = Object.freeze({
     "Represents a particular Git commit on GitHub, i.e. scoped to a particular repository",
 });
 
-export const userNodeType = Object.freeze({
+export const userNodeType = deepFreeze({
   name: "User",
   pluralName: "Users",
   prefix: N.Prefix.user,
@@ -62,7 +63,7 @@ export const userNodeType = Object.freeze({
   description: "NodeType for a GitHub user",
 });
 
-const botNodeType = Object.freeze({
+const botNodeType = deepFreeze({
   name: "Bot",
   pluralName: "Bots",
   prefix: N.Prefix.bot,
@@ -70,7 +71,7 @@ const botNodeType = Object.freeze({
   description: "NodeType for a GitHub bot account",
 });
 
-const nodeTypes = Object.freeze([
+const nodeTypes = deepFreeze([
   repoNodeType,
   issueNodeType,
   pullNodeType,
@@ -81,7 +82,7 @@ const nodeTypes = Object.freeze([
   botNodeType,
 ]);
 
-const authorsEdgeType = Object.freeze({
+const authorsEdgeType = deepFreeze({
   forwardName: "authors",
   backwardName: "is authored by",
   defaultWeight: {forwards: 1 / 2, backwards: 1},
@@ -93,7 +94,7 @@ const authorsEdgeType = Object.freeze({
   `,
 });
 
-const hasParentEdgeType = Object.freeze({
+const hasParentEdgeType = deepFreeze({
   forwardName: "has parent",
   backwardName: "has child",
   defaultWeight: {forwards: 1, backwards: 1 / 4},
@@ -106,7 +107,7 @@ const hasParentEdgeType = Object.freeze({
   `,
 });
 
-const mergedAsEdgeType = Object.freeze({
+const mergedAsEdgeType = deepFreeze({
   forwardName: "merges",
   backwardName: "is merged by",
   defaultWeight: {forwards: 1 / 2, backwards: 1},
@@ -116,7 +117,7 @@ const mergedAsEdgeType = Object.freeze({
   `,
 });
 
-const referencesEdgeType = Object.freeze({
+const referencesEdgeType = deepFreeze({
   forwardName: "references",
   backwardName: "is referenced by",
   defaultWeight: {forwards: 1, backwards: 0},
@@ -130,7 +131,7 @@ const referencesEdgeType = Object.freeze({
   `,
 });
 
-const reactsHeartEdgeType = Object.freeze({
+const reactsHeartEdgeType = deepFreeze({
   forwardName: "reacted ❤️ to",
   backwardName: "got ❤️ from",
   defaultWeight: {forwards: 2, backwards: 0},
@@ -140,7 +141,7 @@ const reactsHeartEdgeType = Object.freeze({
   `,
 });
 
-const reactsThumbsUpEdgeType = Object.freeze({
+const reactsThumbsUpEdgeType = deepFreeze({
   forwardName: "reacted 👍 to",
   backwardName: "got 👍 from",
   defaultWeight: {forwards: 1, backwards: 0},
@@ -150,7 +151,7 @@ const reactsThumbsUpEdgeType = Object.freeze({
   `,
 });
 
-const reactsHoorayEdgeType = Object.freeze({
+const reactsHoorayEdgeType = deepFreeze({
   forwardName: "reacted 🎉 to",
   backwardName: "got 🎉 from",
   defaultWeight: {forwards: 4, backwards: 0},
@@ -160,7 +161,7 @@ const reactsHoorayEdgeType = Object.freeze({
   `,
 });
 
-const reactsRocketEdgeType = Object.freeze({
+const reactsRocketEdgeType = deepFreeze({
   forwardName: "reacted 🚀 to",
   backwardName: "got 🚀 from",
   defaultWeight: {forwards: 1, backwards: 0},
@@ -170,7 +171,7 @@ const reactsRocketEdgeType = Object.freeze({
   `,
 });
 
-const correspondsToCommitEdgeType = Object.freeze({
+const correspondsToCommitEdgeType = deepFreeze({
   forwardName: "corresponds to Git commit",
   backwardName: "merged on GitHub as",
   defaultWeight: {forwards: 1, backwards: 1},
@@ -180,7 +181,7 @@ const correspondsToCommitEdgeType = Object.freeze({
   `,
 });
 
-const edgeTypes = Object.freeze([
+const edgeTypes = deepFreeze([
   authorsEdgeType,
   hasParentEdgeType,
   mergedAsEdgeType,
@@ -192,7 +193,7 @@ const edgeTypes = Object.freeze([
   correspondsToCommitEdgeType,
 ]);
 
-export const declaration: PluginDeclaration = Object.freeze({
+export const declaration: PluginDeclaration = deepFreeze({
   name: "GitHub",
   nodePrefix: N.Prefix.base,
   edgePrefix: E.Prefix.base,

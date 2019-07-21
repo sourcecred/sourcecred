@@ -1,6 +1,7 @@
 // @flow
 
 import base64url from "base64url";
+import deepFreeze from "deep-freeze";
 import {
   projectToJSON,
   projectFromJSON,
@@ -11,15 +12,15 @@ import {
 import {makeRepoId} from "./repoId";
 
 describe("core/project", () => {
-  const foobar = Object.freeze(makeRepoId("foo", "bar"));
-  const foozod = Object.freeze(makeRepoId("foo", "zod"));
-  const p1: Project = Object.freeze({
+  const foobar = deepFreeze(makeRepoId("foo", "bar"));
+  const foozod = deepFreeze(makeRepoId("foo", "zod"));
+  const p1: Project = deepFreeze({
     id: "foo/bar",
-    repoIds: Object.freeze([foobar]),
+    repoIds: [foobar],
   });
-  const p2: Project = Object.freeze({
+  const p2: Project = deepFreeze({
     id: "@foo",
-    repoIds: Object.freeze([foobar, foozod]),
+    repoIds: [foobar, foozod],
   });
   describe("to/fro JSON", () => {
     it("round trip is identity", () => {
