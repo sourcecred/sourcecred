@@ -15,6 +15,7 @@ export type Options = {|
   +cacheDirectory: string,
 |};
 
+// This function is deprecated.
 export async function loadGithubData(options: Options): Promise<void> {
   // We intentionally fetch repositories sequentially rather than in
   // parallel, because GitHub asks that we not make concurrent
