@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 <!-- Please add new entries to the _top_ of this section. -->
+- Track cred on the project level, not the repo level (#1233)
+- Fix a bug with GitHub reference detection with multiple repos (#1233)
+- Enable loading whole orgs (via `sourcecred load @org-name`) (#1233)
 - Add `--weights` to `sourcecred load` to provide weight overrides (#1224).
 
 ## [0.3.0]
