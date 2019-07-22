@@ -1,7 +1,7 @@
 // @flow
 
-import mkdirp from "mkdirp";
 import tmp from "tmp";
+import fs from "fs-extra";
 
 import {makeUtils} from "../gitUtils";
 import type {Hash} from "../types";
@@ -31,7 +31,7 @@ export const SUBMODULE_COMMIT_2: Hash =
  */
 export function createExampleRepo(intoDirectory: string): RepositoryInfo {
   const repositoryPath = intoDirectory;
-  mkdirp(repositoryPath);
+  fs.mkdirpSync(repositoryPath);
   const git = makeUtils(repositoryPath);
   const commits = [];
   function commit(message) {
@@ -112,7 +112,7 @@ export function createExampleSubmoduleRepo(
   intoDirectory: string
 ): RepositoryInfo {
   const repositoryPath = intoDirectory;
-  mkdirp(repositoryPath);
+  fs.mkdirpSync(repositoryPath);
   const git = makeUtils(repositoryPath);
   const commits = [];
   function commit(message) {
