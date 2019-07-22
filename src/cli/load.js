@@ -1,7 +1,6 @@
 // @flow
 // Implementation of `sourcecred load`.
 
-import mkdirp from "mkdirp";
 import path from "path";
 import chalk from "chalk";
 
@@ -303,7 +302,7 @@ export const loadIndividualPlugin = async (
       repoIdToString(output),
       plugin
     );
-    mkdirp.sync(directory);
+    fs.mkdirpSync(directory);
     return directory;
   }
   const outputDirectory = scopedDirectory("data");
