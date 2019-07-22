@@ -1,7 +1,8 @@
 // @flow
 
 import {
-  TaskReporter,
+  LoggingTaskReporter,
+  TestTaskReporter,
   formatTimeElapsed,
   startMessage,
   finishMessage,
@@ -33,11 +34,11 @@ describe("util/taskReporter", () => {
     tc("555d 23h", 555 * days + 23 * hours);
   });
 
-  describe("TaskReporter", () => {
+  describe("LoggingTaskReporter", () => {
     class TestCase {
       _time: number;
       messages: string[];
-      taskReporter: TaskReporter;
+      taskReporter: LoggingTaskReporter;
 
       constructor() {
         this._time = 0;
@@ -46,7 +47,7 @@ describe("util/taskReporter", () => {
           this.messages.push(x);
         };
         const timeMock = () => this._time;
-        this.taskReporter = new TaskReporter(logMock, timeMock);
+        this.taskReporter = new LoggingTaskReporter(logMock, timeMock);
       }
       start(task: string) {
         this.taskReporter.start(task);
@@ -109,6 +110,50 @@ describe("util/taskReporter", () => {
         startMessage("foo"),
         finishMessage("foo", 200),
       ]);
+    });
+  });
+
+  describe("TestTaskReporter", () => {
+    it("errors when starting a task twice", () => {
+      const fail = () => new TestTaskReporter().start("foo").start("foo");
+      expect(fail).toThrow("task foo already active");
+    });
+    it("errors when finishing a task twice", () => {
+      const fail = () =>
+        new TestTaskReporter()
+          .start("foo")
+          .finish("foo")
+          .finish("foo");
+      expect(fail).toThrow("task foo not active");
+    });
+    it("errors when finishing an unstarted test", () => {
+      const fail = () => new TestTaskReporter().finish("foo");
+      expect(fail).toThrow("task foo not active");
+    });
+    it("works for starting a task", () => {
+      const reporter = new TestTaskReporter().start("foo");
+      expect(reporter.entries()).toEqual([{type: "START", taskId: "foo"}]);
+      expect(reporter.activeTasks()).toEqual(["foo"]);
+    });
+    it("works for starting and finishing a task", () => {
+      const reporter = new TestTaskReporter().start("foo").finish("foo");
+      expect(reporter.entries()).toEqual([
+        {type: "START", taskId: "foo"},
+        {type: "FINISH", taskId: "foo"},
+      ]);
+      expect(reporter.activeTasks()).toEqual([]);
+    });
+    it("works for starting two tasks and finishing one", () => {
+      const reporter = new TestTaskReporter()
+        .start("foo")
+        .start("bar")
+        .finish("foo");
+      expect(reporter.entries()).toEqual([
+        {type: "START", taskId: "foo"},
+        {type: "START", taskId: "bar"},
+        {type: "FINISH", taskId: "foo"},
+      ]);
+      expect(reporter.activeTasks()).toEqual(["bar"]);
     });
   });
 });
