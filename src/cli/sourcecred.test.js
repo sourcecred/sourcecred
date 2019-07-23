@@ -13,8 +13,6 @@ function mockCommand(name) {
 
 jest.mock("./help", () => mockCommand("help"));
 jest.mock("./load", () => mockCommand("load"));
-jest.mock("./analyze", () => mockCommand("analyze"));
-jest.mock("./pagerank", () => mockCommand("pagerank"));
 jest.mock("./clear", () => mockCommand("clear"));
 
 describe("cli/sourcecred", () => {
@@ -55,22 +53,6 @@ describe("cli/sourcecred", () => {
       exitCode: 2,
       stdout: ['out(load): ["foo/bar","foo/baz"]'],
       stderr: ["err(load)"],
-    });
-  });
-
-  it("responds to 'analyze'", async () => {
-    expect(await run(sourcecred, ["analyze", "foo/bar", "foo/baz"])).toEqual({
-      exitCode: 2,
-      stdout: ['out(analyze): ["foo/bar","foo/baz"]'],
-      stderr: ["err(analyze)"],
-    });
-  });
-
-  it("responds to 'pagerank'", async () => {
-    expect(await run(sourcecred, ["pagerank", "foo/bar", "foo/baz"])).toEqual({
-      exitCode: 2,
-      stdout: ['out(pagerank): ["foo/bar","foo/baz"]'],
-      stderr: ["err(pagerank)"],
     });
   });
 

@@ -14,9 +14,6 @@ import {
 import {type NodeType} from "../../../analysis/types";
 
 describe("explorer/legacy/pagerankTable/aggregate", () => {
-  // TODO: If making major modifications to these tests, consider switching
-  // from the hand-maintained connections and types, and instead use the demo
-  // adadpters from app/adapters/demoAdapters
   function example() {
     const nodes: {+[string]: NodeAddressT} = {
       root: NodeAddress.fromParts(["root"]),
