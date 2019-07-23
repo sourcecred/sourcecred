@@ -5,7 +5,7 @@ import {makeRouteData} from "./routeData";
 describe("homepage/routeData", () => {
   function routeData() {
     return makeRouteData([
-      "sourcecred/example-github",
+      "sourcecred-test/example-github",
       "sourcecred/sourcecred",
     ]);
   }

@@ -36,9 +36,9 @@ if [ -n "${SOURCECRED_GITHUB_TOKEN:-}" ]; then
 fi
 
 test_expect_success EXPENSIVE,SETUP,HAVE_GITHUB_TOKEN \
-    "should load sourcecred/example-github" '
+    "should load sourcecred-test/example-github" '
     SOURCECRED_DIRECTORY=. node "${SOURCECRED_BIN}/sourcecred.js" \
-        load sourcecred/example-github &&
+        load sourcecred-test/example-github &&
     rm -rf cache &&
     test_set_prereq LOADED_GITHUB
 '

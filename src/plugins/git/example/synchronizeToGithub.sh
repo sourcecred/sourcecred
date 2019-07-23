@@ -11,11 +11,11 @@ main() {
     printf '\n'
     printf 'Synchronizing: example-git\n'
     synchronize \
-        --no-submodule 'git@github.com:sourcecred/example-git.git'
+        --no-submodule 'git@github.com:sourcecred-test/example-git.git'
     printf '\n'
     printf 'Synchronizing: example-git-submodule\n'
     synchronize \
-        --submodule 'git@github.com:sourcecred/example-git-submodule.git'
+        --submodule 'git@github.com:sourcecred-test/example-git-submodule.git'
     printf '\n'
     printf 'Done.\n'
 }
