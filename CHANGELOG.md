@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 <!-- Please add new entries to the _top_ of this section. -->
+- Remove unused CLI commands (`pagerank` and `analyze`) (#1254)
 - Track cred on the project level, not the repo level (#1233)
 - Fix a bug with GitHub reference detection with multiple repos (#1233)
 - Enable loading whole orgs (via `sourcecred load @org-name`) (#1233)
