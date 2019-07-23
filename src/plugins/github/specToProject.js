@@ -12,7 +12,7 @@ import {fetchGithubOrg} from "./fetchGithubOrg";
  * Convert a string repository spec into a project.
  *
  * The spec may take one of two forms:
- * - $REPO_OWNER/$REPO_NAME, as in 'sourcecred/example-github'
+ * - $REPO_OWNER/$REPO_NAME, as in 'sourcecred-test/example-github'
  * - @$REPO_OWNER, as in '@sourcecred'
  *
  * In either case, we will create a project with the spec as its

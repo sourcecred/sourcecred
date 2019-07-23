@@ -317,10 +317,10 @@ describe("graphql/mirror", () => {
         const mirror = new Mirror(db, schema);
         mirror.registerObject({
           typename: "Issue",
-          id: "issue:sourcecred/example-github#1",
+          id: "issue:sourcecred-test/example-github#1",
         });
 
-        const issueId = "issue:sourcecred/example-github#1";
+        const issueId = "issue:sourcecred-test/example-github#1";
         expect(
           db
             .prepare("SELECT * FROM objects WHERE typename = ? AND id = ?")
@@ -382,7 +382,7 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const schema = buildGithubSchema();
         const mirror = new Mirror(db, schema);
-        const objectId = "issue:sourcecred/example-github#1";
+        const objectId = "issue:sourcecred-test/example-github#1";
         mirror.registerObject({
           typename: "Issue",
           id: objectId,
@@ -424,7 +424,7 @@ describe("graphql/mirror", () => {
         expect(() =>
           mirror.registerObject({
             typename: "Wat",
-            id: "repo:sourcecred/example-github",
+            id: "repo:sourcecred-test/example-github",
           })
         ).toThrow('Unknown type: "Wat"');
         expect(db.prepare("SELECT * FROM objects").all()).toHaveLength(0);

@@ -196,8 +196,8 @@ run_build TWO_PROJECTS \
     "should build the site with two projects and a CNAME" \
     --no-backend \
     --cname sourcecred.example.com \
-    --project sourcecred/example-git \
-    --project sourcecred/example-github \
+    --project sourcecred-test/example-git \
+    --project sourcecred-test/example-github \
     ;
 
 test_pages TWO_PROJECTS
@@ -205,13 +205,13 @@ test_pages TWO_PROJECTS
 test_expect_success TWO_PROJECTS \
     "TWO_PROJECTS: should have project ids loaded into env" '
     grep -F "PROJECT_IDS" out &&
-    grep -xF "PROJECT_IDS: [\"sourcecred/example-git\",\"sourcecred/example-github\"]" out
+    grep -xF "PROJECT_IDS: [\"sourcecred-test/example-git\",\"sourcecred-test/example-github\"]" out
 '
 
 test_expect_success TWO_PROJECTS \
     "TWO_PROJECTS: should have data for the two projects" '
-    # encoded ids for sourcecred/example-git and sourcecred/example-github
-    for id in c291cmNlY3JlZC9leGFtcGxlLWdpdA c291cmNlY3JlZC9leGFtcGxlLWdpdGh1Yg; do
+    # encoded ids for sourcecred-test/example-git and sourcecred-test/example-github
+    for id in c291cmNlY3JlZC10ZXN0L2V4YW1wbGUtZ2l0aHVi c291cmNlY3JlZC10ZXN0L2V4YW1wbGUtZ2l0; do
         test -s "${api_dir}/projects/${id}/cred.json" &&
         test -s "${api_dir}/projects/${id}/graph.json" ||
         return

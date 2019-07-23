@@ -9,7 +9,8 @@ import {NodeAddress, EdgeAddress} from "../../core/graph";
 
 const makeData = () => cloneDeep(require("./example/example-git"));
 
-describe("plugins/git/createGraph", () => {
+// Disabled while the Git plugin is inactive
+describe.skip("plugins/git/createGraph", () => {
   describe("createGraph", () => {
     it("processes a simple repository", () => {
       expect(createGraph(makeData())).toMatchSnapshot();

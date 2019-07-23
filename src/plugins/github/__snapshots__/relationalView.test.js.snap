@@ -10,11 +10,11 @@ Array [
 
 exports[`plugins/github/relationalView Comment has body 1`] = `"seems a bit capricious"`;
 
-exports[`plugins/github/relationalView Comment has description 1`] = `"[comment](https://github.com/sourcecred/example-github/pull/5#discussion_r171460198) on [review](https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
+exports[`plugins/github/relationalView Comment has description 1`] = `"[comment](https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198) on [review](https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred-test/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
 
 exports[`plugins/github/relationalView Comment has parent 1`] = `
 Object {
-  "url": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+  "url": "https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899",
 }
 `;
 
@@ -133,7 +133,7 @@ Array [
 
 exports[`plugins/github/relationalView Comment has timestampMs 1`] = `1519878210000`;
 
-exports[`plugins/github/relationalView Comment has url 1`] = `"https://github.com/sourcecred/example-github/pull/5#discussion_r171460198"`;
+exports[`plugins/github/relationalView Comment has url 1`] = `"https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198"`;
 
 exports[`plugins/github/relationalView Commit authors has expected number of authors 1`] = `1`;
 
@@ -143,7 +143,7 @@ Array [
 ]
 `;
 
-exports[`plugins/github/relationalView Commit has description 1`] = `"[0a22334](https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a): Merge pull request #3 from sourcecred/add-readme"`;
+exports[`plugins/github/relationalView Commit has description 1`] = `"[0a22334](https://github.com/sourcecred-test/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a): Merge pull request #3 from sourcecred/add-readme"`;
 
 exports[`plugins/github/relationalView Commit has message 1`] = `
 "Merge pull request #3 from sourcecred/add-readme
@@ -153,7 +153,7 @@ Add README, merge via PR."
 
 exports[`plugins/github/relationalView Commit has timestampMs 1`] = `1519807427000`;
 
-exports[`plugins/github/relationalView Commit has url 1`] = `"https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"`;
+exports[`plugins/github/relationalView Commit has url 1`] = `"https://github.com/sourcecred-test/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a"`;
 
 exports[`plugins/github/relationalView Issue authors has expected number of authors 1`] = `1`;
 
@@ -167,26 +167,26 @@ exports[`plugins/github/relationalView Issue comments has expected number of com
 
 exports[`plugins/github/relationalView Issue comments have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768850",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576185",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576220",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576248",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576273",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576936",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768703",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768850",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576185",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576220",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576248",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576273",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576920",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576936",
 ]
 `;
 
 exports[`plugins/github/relationalView Issue has body 1`] = `"This issue references another issue, namely #1"`;
 
-exports[`plugins/github/relationalView Issue has description 1`] = `"[#2](https://github.com/sourcecred/example-github/issues/2): A referencing issue."`;
+exports[`plugins/github/relationalView Issue has description 1`] = `"[#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue."`;
 
 exports[`plugins/github/relationalView Issue has number 1`] = `"2"`;
 
 exports[`plugins/github/relationalView Issue has parent 1`] = `
 Object {
-  "url": "https://github.com/sourcecred/example-github",
+  "url": "https://github.com/sourcecred-test/example-github",
 }
 `;
 
@@ -196,7 +196,7 @@ exports[`plugins/github/relationalView Issue has timestampMs 1`] = `151980712900
 
 exports[`plugins/github/relationalView Issue has title 1`] = `"A referencing issue."`;
 
-exports[`plugins/github/relationalView Issue has url 1`] = `"https://github.com/sourcecred/example-github/issues/2"`;
+exports[`plugins/github/relationalView Issue has url 1`] = `"https://github.com/sourcecred-test/example-github/issues/2"`;
 
 exports[`plugins/github/relationalView Pull authors has expected number of authors 1`] = `1`;
 
@@ -210,7 +210,7 @@ exports[`plugins/github/relationalView Pull comments has expected number of comm
 
 exports[`plugins/github/relationalView Pull comments have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
+  "https://github.com/sourcecred-test/example-github/pull/5#issuecomment-396430464",
 ]
 `;
 
@@ -226,7 +226,7 @@ exports[`plugins/github/relationalView Pull has body 1`] = `
 
 exports[`plugins/github/relationalView Pull has deletions 1`] = `0`;
 
-exports[`plugins/github/relationalView Pull has description 1`] = `"[#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
+exports[`plugins/github/relationalView Pull has description 1`] = `"[#5](https://github.com/sourcecred-test/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
 
 exports[`plugins/github/relationalView Pull has mergedAs 1`] = `
 Object {
@@ -239,7 +239,7 @@ exports[`plugins/github/relationalView Pull has number 1`] = `"5"`;
 
 exports[`plugins/github/relationalView Pull has parent 1`] = `
 Object {
-  "url": "https://github.com/sourcecred/example-github",
+  "url": "https://github.com/sourcecred-test/example-github",
 }
 `;
 
@@ -249,14 +249,14 @@ exports[`plugins/github/relationalView Pull has timestampMs 1`] = `1519807636000
 
 exports[`plugins/github/relationalView Pull has title 1`] = `"This pull request will be more contentious. I can feel it..."`;
 
-exports[`plugins/github/relationalView Pull has url 1`] = `"https://github.com/sourcecred/example-github/pull/5"`;
+exports[`plugins/github/relationalView Pull has url 1`] = `"https://github.com/sourcecred-test/example-github/pull/5"`;
 
 exports[`plugins/github/relationalView Pull reviews has expected number of reviews 1`] = `2`;
 
 exports[`plugins/github/relationalView Pull reviews have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
-  "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038",
+  "https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899",
+  "https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100314038",
 ]
 `;
 
@@ -264,25 +264,25 @@ exports[`plugins/github/relationalView RelationalView entity: comments has expec
 
 exports[`plugins/github/relationalView RelationalView entity: comments they have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420811872",
-  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813013",
-  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206",
-  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813621",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768850",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576185",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576220",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576248",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576273",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
-  "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576936",
-  "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768442",
-  "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
-  "https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316",
-  "https://github.com/sourcecred/example-github/issues/6#issuecomment-417104047",
-  "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
-  "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
-  "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464",
+  "https://github.com/sourcecred-test/example-github/issues/11#issuecomment-420811872",
+  "https://github.com/sourcecred-test/example-github/issues/11#issuecomment-420813013",
+  "https://github.com/sourcecred-test/example-github/issues/11#issuecomment-420813206",
+  "https://github.com/sourcecred-test/example-github/issues/11#issuecomment-420813621",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768703",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768850",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576185",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576220",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576248",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576273",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576920",
+  "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576936",
+  "https://github.com/sourcecred-test/example-github/issues/6#issuecomment-373768442",
+  "https://github.com/sourcecred-test/example-github/issues/6#issuecomment-373768538",
+  "https://github.com/sourcecred-test/example-github/issues/6#issuecomment-385223316",
+  "https://github.com/sourcecred-test/example-github/issues/6#issuecomment-417104047",
+  "https://github.com/sourcecred-test/example-github/pull/3#issuecomment-369162222",
+  "https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198",
+  "https://github.com/sourcecred-test/example-github/pull/5#issuecomment-396430464",
 ]
 `;
 
@@ -290,12 +290,12 @@ exports[`plugins/github/relationalView RelationalView entity: commits has expect
 
 exports[`plugins/github/relationalView RelationalView entity: commits they have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
-  "https://github.com/sourcecred/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
-  "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
-  "https://github.com/sourcecred/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86",
-  "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
-  "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+  "https://github.com/sourcecred-test/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+  "https://github.com/sourcecred-test/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+  "https://github.com/sourcecred-test/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+  "https://github.com/sourcecred-test/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86",
+  "https://github.com/sourcecred-test/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+  "https://github.com/sourcecred-test/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
 ]
 `;
 
@@ -303,16 +303,16 @@ exports[`plugins/github/relationalView RelationalView entity: issues has expecte
 
 exports[`plugins/github/relationalView RelationalView entity: issues they have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/issues/1",
-  "https://github.com/sourcecred/example-github/issues/10",
-  "https://github.com/sourcecred/example-github/issues/11",
-  "https://github.com/sourcecred/example-github/issues/12",
-  "https://github.com/sourcecred/example-github/issues/13",
-  "https://github.com/sourcecred/example-github/issues/2",
-  "https://github.com/sourcecred/example-github/issues/4",
-  "https://github.com/sourcecred/example-github/issues/6",
-  "https://github.com/sourcecred/example-github/issues/7",
-  "https://github.com/sourcecred/example-github/issues/8",
+  "https://github.com/sourcecred-test/example-github/issues/1",
+  "https://github.com/sourcecred-test/example-github/issues/10",
+  "https://github.com/sourcecred-test/example-github/issues/11",
+  "https://github.com/sourcecred-test/example-github/issues/12",
+  "https://github.com/sourcecred-test/example-github/issues/13",
+  "https://github.com/sourcecred-test/example-github/issues/2",
+  "https://github.com/sourcecred-test/example-github/issues/4",
+  "https://github.com/sourcecred-test/example-github/issues/6",
+  "https://github.com/sourcecred-test/example-github/issues/7",
+  "https://github.com/sourcecred-test/example-github/issues/8",
 ]
 `;
 
@@ -320,9 +320,9 @@ exports[`plugins/github/relationalView RelationalView entity: pulls has expected
 
 exports[`plugins/github/relationalView RelationalView entity: pulls they have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/pull/3",
-  "https://github.com/sourcecred/example-github/pull/5",
-  "https://github.com/sourcecred/example-github/pull/9",
+  "https://github.com/sourcecred-test/example-github/pull/3",
+  "https://github.com/sourcecred-test/example-github/pull/5",
+  "https://github.com/sourcecred-test/example-github/pull/9",
 ]
 `;
 
@@ -330,7 +330,7 @@ exports[`plugins/github/relationalView RelationalView entity: repos has expected
 
 exports[`plugins/github/relationalView RelationalView entity: repos they have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github",
+  "https://github.com/sourcecred-test/example-github",
 ]
 `;
 
@@ -338,8 +338,8 @@ exports[`plugins/github/relationalView RelationalView entity: reviews has expect
 
 exports[`plugins/github/relationalView RelationalView entity: reviews they have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
-  "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100314038",
+  "https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899",
+  "https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100314038",
 ]
 `;
 
@@ -353,30 +353,30 @@ Array [
 ]
 `;
 
-exports[`plugins/github/relationalView Repo has description 1`] = `"[sourcecred/example-github](https://github.com/sourcecred/example-github)"`;
+exports[`plugins/github/relationalView Repo has description 1`] = `"[sourcecred-test/example-github](https://github.com/sourcecred-test/example-github)"`;
 
 exports[`plugins/github/relationalView Repo has name 1`] = `"example-github"`;
 
-exports[`plugins/github/relationalView Repo has owner 1`] = `"sourcecred"`;
+exports[`plugins/github/relationalView Repo has owner 1`] = `"sourcecred-test"`;
 
 exports[`plugins/github/relationalView Repo has timestampMs 1`] = `1519807034000`;
 
-exports[`plugins/github/relationalView Repo has url 1`] = `"https://github.com/sourcecred/example-github"`;
+exports[`plugins/github/relationalView Repo has url 1`] = `"https://github.com/sourcecred-test/example-github"`;
 
 exports[`plugins/github/relationalView Repo issues has expected number of issues 1`] = `10`;
 
 exports[`plugins/github/relationalView Repo issues have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/issues/1",
-  "https://github.com/sourcecred/example-github/issues/10",
-  "https://github.com/sourcecred/example-github/issues/11",
-  "https://github.com/sourcecred/example-github/issues/12",
-  "https://github.com/sourcecred/example-github/issues/13",
-  "https://github.com/sourcecred/example-github/issues/2",
-  "https://github.com/sourcecred/example-github/issues/4",
-  "https://github.com/sourcecred/example-github/issues/6",
-  "https://github.com/sourcecred/example-github/issues/7",
-  "https://github.com/sourcecred/example-github/issues/8",
+  "https://github.com/sourcecred-test/example-github/issues/1",
+  "https://github.com/sourcecred-test/example-github/issues/10",
+  "https://github.com/sourcecred-test/example-github/issues/11",
+  "https://github.com/sourcecred-test/example-github/issues/12",
+  "https://github.com/sourcecred-test/example-github/issues/13",
+  "https://github.com/sourcecred-test/example-github/issues/2",
+  "https://github.com/sourcecred-test/example-github/issues/4",
+  "https://github.com/sourcecred-test/example-github/issues/6",
+  "https://github.com/sourcecred-test/example-github/issues/7",
+  "https://github.com/sourcecred-test/example-github/issues/8",
 ]
 `;
 
@@ -384,9 +384,9 @@ exports[`plugins/github/relationalView Repo pulls has expected number of pulls 1
 
 exports[`plugins/github/relationalView Repo pulls have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/pull/3",
-  "https://github.com/sourcecred/example-github/pull/5",
-  "https://github.com/sourcecred/example-github/pull/9",
+  "https://github.com/sourcecred-test/example-github/pull/3",
+  "https://github.com/sourcecred-test/example-github/pull/5",
+  "https://github.com/sourcecred-test/example-github/pull/9",
 ]
 `;
 
@@ -402,17 +402,17 @@ exports[`plugins/github/relationalView Review comments has expected number of co
 
 exports[`plugins/github/relationalView Review comments have expected urls 1`] = `
 Array [
-  "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+  "https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198",
 ]
 `;
 
 exports[`plugins/github/relationalView Review has body 1`] = `"hmmm.jpg"`;
 
-exports[`plugins/github/relationalView Review has description 1`] = `"[review](https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
+exports[`plugins/github/relationalView Review has description 1`] = `"[review](https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred-test/example-github/pull/5): This pull request will be more contentious. I can feel it..."`;
 
 exports[`plugins/github/relationalView Review has parent 1`] = `
 Object {
-  "url": "https://github.com/sourcecred/example-github/pull/5",
+  "url": "https://github.com/sourcecred-test/example-github/pull/5",
 }
 `;
 
@@ -420,7 +420,7 @@ exports[`plugins/github/relationalView Review has state 1`] = `"CHANGES_REQUESTE
 
 exports[`plugins/github/relationalView Review has timestampMs 1`] = `1519878210000`;
 
-exports[`plugins/github/relationalView Review has url 1`] = `"https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899"`;
+exports[`plugins/github/relationalView Review has url 1`] = `"https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899"`;
 
 exports[`plugins/github/relationalView Userlike has description 1`] = `"[@wchargin](https://github.com/wchargin)"`;
 
@@ -432,7 +432,7 @@ exports[`plugins/github/relationalView Userlike has url 1`] = `"https://github.c
 
 exports[`plugins/github/relationalView reaction detection set of all reactions matches snapshot 1`] = `
 Object {
-  "https://github.com/sourcecred/example-github/issues/1": Array [
+  "https://github.com/sourcecred-test/example-github/issues/1": Array [
     Object {
       "content": "LAUGH",
       "timestampMs": 1536878099000,
@@ -452,7 +452,7 @@ Object {
       },
     },
   ],
-  "https://github.com/sourcecred/example-github/issues/11#issuecomment-420813206": Array [
+  "https://github.com/sourcecred-test/example-github/issues/11#issuecomment-420813206": Array [
     Object {
       "content": "THUMBS_UP",
       "timestampMs": 1536952413000,
@@ -490,7 +490,7 @@ Object {
       },
     },
   ],
-  "https://github.com/sourcecred/example-github/issues/12": Array [
+  "https://github.com/sourcecred-test/example-github/issues/12": Array [
     Object {
       "content": "THUMBS_UP",
       "timestampMs": 1536878091000,
@@ -501,7 +501,7 @@ Object {
       },
     },
   ],
-  "https://github.com/sourcecred/example-github/issues/13": Array [
+  "https://github.com/sourcecred-test/example-github/issues/13": Array [
     Object {
       "content": "THUMBS_UP",
       "timestampMs": 1536878140000,
@@ -575,7 +575,7 @@ Object {
       },
     },
   ],
-  "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198": Array [
+  "https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198": Array [
     Object {
       "content": "THUMBS_UP",
       "timestampMs": 1537294753000,
@@ -685,7 +685,7 @@ Object {
       },
     },
   ],
-  "https://github.com/sourcecred/example-github/pull/5#issuecomment-396430464": Array [
+  "https://github.com/sourcecred-test/example-github/pull/5#issuecomment-396430464": Array [
     Object {
       "content": "HEART",
       "timestampMs": 1536952482000,
@@ -705,7 +705,7 @@ Object {
       },
     },
   ],
-  "https://github.com/sourcecred/example-github/pull/9": Array [
+  "https://github.com/sourcecred-test/example-github/pull/9": Array [
     Object {
       "content": "HEART",
       "timestampMs": 1536952427000,
@@ -731,95 +731,95 @@ Object {
 exports[`plugins/github/relationalView reference detection references match snapshot 1`] = `
 Array [
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2",
-    "to": "https://github.com/sourcecred/example-github/issues/1",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2",
+    "to": "https://github.com/sourcecred-test/example-github/issues/1",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/10",
-    "to": "https://github.com/sourcecred/example-github/issues/10",
+    "from": "https://github.com/sourcecred-test/example-github/issues/10",
+    "to": "https://github.com/sourcecred-test/example-github/issues/10",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/10",
-    "to": "https://github.com/sourcecred/example-github/issues/2",
+    "from": "https://github.com/sourcecred-test/example-github/issues/10",
+    "to": "https://github.com/sourcecred-test/example-github/issues/2",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/12",
-    "to": "https://github.com/sourcecred/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
+    "from": "https://github.com/sourcecred-test/example-github/issues/12",
+    "to": "https://github.com/sourcecred-test/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/12",
-    "to": "https://github.com/sourcecred/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
+    "from": "https://github.com/sourcecred-test/example-github/issues/12",
+    "to": "https://github.com/sourcecred-test/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/pull/5",
+    "from": "https://github.com/sourcecred-test/example-github/pull/5",
     "to": "https://github.com/wchargin",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768703",
-    "to": "https://github.com/sourcecred/example-github/issues/6",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768703",
+    "to": "https://github.com/sourcecred-test/example-github/issues/6",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-373768850",
-    "to": "https://github.com/sourcecred/example-github/issues/6#issuecomment-373768538",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768850",
+    "to": "https://github.com/sourcecred-test/example-github/issues/6#issuecomment-373768538",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576185",
-    "to": "https://github.com/sourcecred/example-github/pull/5",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576185",
+    "to": "https://github.com/sourcecred-test/example-github/pull/5",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576220",
-    "to": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576220",
+    "to": "https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576248",
-    "to": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576248",
+    "to": "https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576273",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576273",
     "to": "https://github.com/wchargin",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
-    "to": "https://github.com/sourcecred/example-github/issues/1",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred-test/example-github/issues/1",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
-    "to": "https://github.com/sourcecred/example-github/issues/2",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred-test/example-github/issues/2",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
-    "to": "https://github.com/sourcecred/example-github/pull/3",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred-test/example-github/pull/3",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
-    "to": "https://github.com/sourcecred/example-github/pull/5#discussion_r171460198",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/2#issuecomment-385576920",
-    "to": "https://github.com/sourcecred/example-github/pull/5#pullrequestreview-100313899",
+    "from": "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576920",
+    "to": "https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/issues/6#issuecomment-385223316",
-    "to": "https://github.com/sourcecred/example-github/issues/2",
+    "from": "https://github.com/sourcecred-test/example-github/issues/6#issuecomment-385223316",
+    "to": "https://github.com/sourcecred-test/example-github/issues/2",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/pull/3#issuecomment-369162222",
-    "to": "https://github.com/sourcecred/example-github/issues/2",
+    "from": "https://github.com/sourcecred-test/example-github/pull/3#issuecomment-369162222",
+    "to": "https://github.com/sourcecred-test/example-github/issues/2",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
-    "to": "https://github.com/sourcecred/example-github/pull/3",
+    "from": "https://github.com/sourcecred-test/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+    "to": "https://github.com/sourcecred-test/example-github/pull/3",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
-    "to": "https://github.com/sourcecred/example-github/pull/5",
+    "from": "https://github.com/sourcecred-test/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6",
+    "to": "https://github.com/sourcecred-test/example-github/pull/5",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
+    "from": "https://github.com/sourcecred-test/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34",
     "to": "https://github.com/wchargin",
   },
   Object {
-    "from": "https://github.com/sourcecred/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86",
+    "from": "https://github.com/sourcecred-test/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86",
     "to": "https://github.com/wchargin",
   },
 ]

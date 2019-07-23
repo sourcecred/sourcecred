@@ -83,12 +83,12 @@ if [ -n "${UPDATE_SNAPSHOT}" ]; then
 fi
 
 test_expect_success SETUP,UPDATE_SNAPSHOT  "should update the snapshot" '
-    run scores sourcecred/example-github &&
+    run scores sourcecred-test/example-github &&
     mv out "${snapshot_file}"
 '
 
 test_expect_success SETUP  "should be identical to the snapshot" '
-    run scores sourcecred/example-github &&
+    run scores sourcecred-test/example-github &&
     diff -u out ${snapshot_file}
 '
 

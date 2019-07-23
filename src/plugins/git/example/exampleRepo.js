@@ -15,7 +15,7 @@ type RepositoryInfo = {|
 // to a fixed value. We choose the URL of the GitHub mirror (it's as
 // good as any other, and makes sense).
 export const SUBMODULE_REMOTE_URL =
-  "https://github.com/sourcecred/example-git-submodule.git";
+  "https://github.com/sourcecred-test/example-git-submodule.git";
 
 // The example repository checks out two different versions of the
 // submodule, as given by the following two hashes. These must exist
