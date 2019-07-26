@@ -61,7 +61,7 @@
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.14.2",
     "file-loader": "^4.0.0",
-    "flow-bin": "^0.103.0",
+    "flow-bin": "^0.104.0",
     "jest": "^24.8.0",
     "jest-fetch-mock": "^2.1.2",
     "prettier": "^1.18.2",
