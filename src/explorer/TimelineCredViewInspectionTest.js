@@ -3,7 +3,7 @@
 import React from "react";
 import {timeWeek} from "d3-time";
 import type {Assets} from "../webutil/assets";
-import {TimelineCredView} from "./TimelineCredView";
+import {TimelineCredViewRenderer} from "./TimelineCredViewRenderer";
 import {Graph, NodeAddress} from "../core/graph";
 import {type Interval, TimelineCred} from "../analysis/timeline/timelineCred";
 import {type FilteredTimelineCred} from "../analysis/timeline/filterTimelineCred";
@@ -64,7 +64,7 @@ export default class TimelineCredViewInspectiontest extends React.Component<{|
   render() {
     const selectedNodeFilter = NodeAddress.fromParts(["foo"]);
     return (
-      <TimelineCredView
+      <TimelineCredViewRenderer
         timelineCred={this.timelineCred()}
         selectedNodeFilter={selectedNodeFilter}
       />

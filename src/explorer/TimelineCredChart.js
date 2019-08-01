@@ -18,7 +18,9 @@ import {
 } from "recharts";
 import * as NullUtil from "../util/null";
 import {type NodeAddressT} from "../core/graph";
-import {type Interval, TimelineCred} from "../analysis/timeline/timelineCred";
+import {type Interval} from "../analysis/timeline/interval";
+import {TimelineCred} from "../analysis/timeline/timelineCred";
+import {TimelineCredView} from "../analysis/timeline/timelineCredView";
 
 export type Props = {
   timelineCred: TimelineCred,
@@ -47,7 +49,8 @@ export const LINE_CHART_HEIGHT = 500;
 export class TimelineCredChart extends React.Component<Props> {
   render() {
     const {timelineCred, displayedNodes} = this.props;
-    const intervals = timelineCred.intervals();
+    const timelineCredView = new TimelineCredView(timelineCred);
+    const intervals = timelineCredView.intervals();
     const timeDomain = [
       intervals[0].startTimeMs,
       intervals[intervals.length - 1].endTimeMs,
@@ -55,7 +58,7 @@ export class TimelineCredChart extends React.Component<Props> {
     const data: LineChartDatum[] = intervals.map((interval, index) => {
       const score = new Map();
       for (const node of displayedNodes) {
-        const {cred} = NullUtil.get(timelineCred.credNode(node));
+        const {cred} = NullUtil.get(timelineCredView.credNode(node));
         const lastScore = index === 0 ? 0 : cred[index - 1];
         const nextScore = index === intervals.length - 1 ? 0 : cred[index + 1];
         const thisScore = cred[index];

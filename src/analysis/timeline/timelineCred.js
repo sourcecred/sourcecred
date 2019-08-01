@@ -1,8 +1,5 @@
 // @flow
 
-import {sum} from "d3-array";
-import sortBy from "lodash.sortby";
-import * as NullUtil from "../../util/null";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import {type Interval} from "./interval";
 import {timelinePagerank} from "./timelinePagerank";
@@ -11,7 +8,6 @@ import {
   Graph,
   type GraphJSON,
   type NodeAddressT,
-  NodeAddress,
   type Node,
 } from "../../core/graph";
 import {
@@ -30,18 +26,6 @@ import {
 } from "./filterTimelineCred";
 
 export type {Interval} from "./interval";
-
-/**
- * A Graph Node wrapped with cred information.
- */
-export type CredNode = {|
-  // The Graph Node in question
-  +node: Node,
-  // The total aggregated cred. (Summed across every interval).
-  +total: number,
-  // The timeline sequence of cred (one score per interval).
-  +cred: $ReadOnlyArray<number>,
-|};
 
 /**
  * Parameters for computing TimelineCred
@@ -128,6 +112,10 @@ export class TimelineCred {
     return this._config;
   }
 
+  availableNodes(): NodeAddressT[] {
+    return Array.from(this._cred.addressToCred.keys());
+  }
+
   /**
    * Creates a new TimelineCred based on the new Parameters.
    * Holds the graph and config constant.
@@ -143,35 +131,6 @@ export class TimelineCred {
    */
   intervals(): $ReadOnlyArray<Interval> {
     return this._cred.intervals;
-  }
-
-  /**
-   * Get the CredNode for a given NodeAddress.
-   *
-   * Returns undefined if the node is not in the filtered results.
-   *
-   * Note that it's possible that the node is present in the Graph, but not the
-   * filtered results; if so, it will return undefined.
-   */
-  credNode(a: NodeAddressT): ?CredNode {
-    const cred = this._cred.addressToCred.get(a);
-    if (cred === undefined) {
-      return undefined;
-    }
-    const total = sum(cred);
-    const node = NullUtil.get(this._graph.node(a));
-    return {cred, total, node};
-  }
-
-  /**
-   * Return all the nodes matching the prefix, along with their cred,
-   * sorted by total cred (descending).
-   */
-  credSortedNodes(prefix: NodeAddressT): $ReadOnlyArray<CredNode> {
-    const match = (a) => NodeAddress.hasPrefix(a, prefix);
-    const addresses = Array.from(this._cred.addressToCred.keys()).filter(match);
-    const credNodes = addresses.map((a) => this.credNode(a));
-    return sortBy(credNodes, (x: CredNode) => -x.total);
   }
 
   toJSON(): TimelineCredJSON {
@@ -202,6 +161,22 @@ export class TimelineCred {
   ): Promise<TimelineCred> {
     const ftc = await _computeTimelineCred(graph, params, config);
     return new TimelineCred(graph, ftc, params, config);
+  }
+
+  /**
+   * Returns the Node matching a given NodeAddressT, if such a node exists,
+   * or undefined otherwise.
+   */
+  node(a: NodeAddressT): ?Node {
+    return this.graph().node(a);
+  }
+
+  /**
+   * Returns an array of cred from a given NodeAddressT from FilteredTimelineCred,
+   * if such a node exists, or undefined otherwise.
+   */
+  cred(a: NodeAddressT): ?$ReadOnlyArray<number> {
+    return this._cred.addressToCred.get(a);
   }
 }
 

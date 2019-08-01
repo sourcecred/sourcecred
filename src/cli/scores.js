@@ -8,11 +8,11 @@ import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
 import stringify from "json-stable-stringify";
+import {TimelineCred, type Interval} from "../analysis/timeline/timelineCred";
 import {
-  TimelineCred,
-  type Interval,
+  TimelineCredView,
   type CredNode,
-} from "../analysis/timeline/timelineCred";
+} from "../analysis/timeline/timelineCredView";
 import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
 import {userNodeType} from "../plugins/github/declaration";
 import * as GN from "../plugins/github/nodes";
@@ -101,7 +101,8 @@ export const scores: Command = async (args, std) => {
   const credBlob = await fs.readFile(credFile);
   const credJSON = JSON.parse(credBlob.toString());
   const timelineCred = TimelineCred.fromJSON(credJSON, DEFAULT_CRED_CONFIG);
-  const userOutput: NodeOutput[] = timelineCred
+  const timelineCredView = new TimelineCredView(timelineCred);
+  const userOutput: NodeOutput[] = timelineCredView
     .credSortedNodes(userNodeType.prefix)
     .map((n: CredNode) => {
       const address = n.node.address;
@@ -117,7 +118,7 @@ export const scores: Command = async (args, std) => {
     });
   const output: ScoreOutput = toCompat(COMPAT_INFO, {
     users: userOutput,
-    intervals: timelineCred.intervals(),
+    intervals: timelineCredView.intervals(),
   });
   std.out(stringify(output, {space: 2}));
   return 0;

@@ -9,7 +9,7 @@ import {
   TimelineCred,
   type TimelineCredParameters,
 } from "../analysis/timeline/timelineCred";
-import {TimelineCredView} from "./TimelineCredView";
+import {TimelineCredViewRenderer} from "./TimelineCredViewRenderer";
 import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
 import {type NodeType} from "../analysis/types";
@@ -36,7 +36,7 @@ export type State = {
 /**
  * TimelineExplorer allows displaying, exploring, and re-calculating TimelineCred.
  *
- * It basically wraps a TimelineCredView with some additional features and options:
+ * It basically wraps a TimelineCredViewRenderer with some additional features and options:
  * - allows changing the weights and re-calculating cred with new weights
  * - allows saving/loading weights
  * - displays the string
@@ -171,8 +171,8 @@ export class TimelineExplorer extends React.Component<Props, State> {
   }
 
   render() {
-    const timelineCredView = (
-      <TimelineCredView
+    const timelineCredViewRenderer = (
+      <TimelineCredViewRenderer
         timelineCred={this.state.timelineCred}
         selectedNodeFilter={this.state.selectedNodeTypePrefix}
       />
@@ -180,7 +180,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
     return (
       <div style={{width: 900, margin: "0 auto"}}>
         {this.renderConfigurationRow()}
-        {timelineCredView}
+        {timelineCredViewRenderer}
       </div>
     );
   }

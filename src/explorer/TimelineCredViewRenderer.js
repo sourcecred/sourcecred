@@ -7,6 +7,7 @@ import {type NodeAddressT} from "../core/graph";
 import {TimelineCredChart} from "./TimelineCredChart";
 import {format} from "d3-format";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
+import {TimelineCredView} from "../analysis/timeline/timelineCredView";
 
 export type Props = {|
   +timelineCred: TimelineCred,
@@ -30,10 +31,11 @@ const DEFAULT_ENTRIES_PER_CHART = 6;
  * and then navigating to:
  * http://localhost:8080/test/TimelineCredView/
  */
-export class TimelineCredView extends React.Component<Props> {
+export class TimelineCredViewRenderer extends React.Component<Props> {
   render() {
     const {selectedNodeFilter, timelineCred} = this.props;
-    const nodes = timelineCred.credSortedNodes(selectedNodeFilter);
+    const timelineCredView = new TimelineCredView(timelineCred);
+    const nodes = timelineCredView.credSortedNodes(selectedNodeFilter);
     const tableNodes = nodes.slice(0, MAX_ENTRIES_PER_LIST);
     const chartNodes = nodes
       .slice(0, DEFAULT_ENTRIES_PER_CHART)
