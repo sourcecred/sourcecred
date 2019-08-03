@@ -1,0 +1,110 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/discourse/fetch snapshot testing loads a particular post from snapshot 1`] = `
+Object {
+  "authorUsername": "d11",
+  "id": 14,
+  "postNumber": 1,
+  "replyToPostNumber": null,
+  "timestampMs": 1564744349476,
+  "topicId": 11,
+}
+`;
+
+exports[`plugins/discourse/fetch snapshot testing loads a particular topic from snapshot 1`] = `
+Object {
+  "posts": Array [
+    Object {
+      "authorUsername": "d11",
+      "id": 14,
+      "postNumber": 1,
+      "replyToPostNumber": null,
+      "timestampMs": 1564744349476,
+      "topicId": 11,
+    },
+    Object {
+      "authorUsername": "dl-proto",
+      "id": 16,
+      "postNumber": 2,
+      "replyToPostNumber": null,
+      "timestampMs": 1564744496285,
+      "topicId": 11,
+    },
+    Object {
+      "authorUsername": "d11",
+      "id": 22,
+      "postNumber": 3,
+      "replyToPostNumber": null,
+      "timestampMs": 1564951839667,
+      "topicId": 11,
+    },
+  ],
+  "topic": Object {
+    "authorUsername": "d11",
+    "id": 11,
+    "timestampMs": 1564744349408,
+    "title": "My First Test Post",
+  },
+}
+`;
+
+exports[`plugins/discourse/fetch snapshot testing loads latest posts from snapshot 1`] = `
+Array [
+  Object {
+    "authorUsername": "d11",
+    "id": 22,
+    "postNumber": 3,
+    "replyToPostNumber": null,
+    "timestampMs": 1564951839667,
+    "topicId": 11,
+  },
+  Object {
+    "authorUsername": "d11",
+    "id": 18,
+    "postNumber": 2,
+    "replyToPostNumber": null,
+    "timestampMs": 1564744591313,
+    "topicId": 13,
+  },
+  Object {
+    "authorUsername": "dl-proto",
+    "id": 17,
+    "postNumber": 1,
+    "replyToPostNumber": null,
+    "timestampMs": 1564744553905,
+    "topicId": 13,
+  },
+  Object {
+    "authorUsername": "dl-proto",
+    "id": 16,
+    "postNumber": 2,
+    "replyToPostNumber": null,
+    "timestampMs": 1564744496285,
+    "topicId": 11,
+  },
+  Object {
+    "authorUsername": "d11",
+    "id": 14,
+    "postNumber": 1,
+    "replyToPostNumber": null,
+    "timestampMs": 1564744349476,
+    "topicId": 11,
+  },
+  Object {
+    "authorUsername": "system",
+    "id": 10,
+    "postNumber": 1,
+    "replyToPostNumber": null,
+    "timestampMs": 1554236412933,
+    "topicId": 7,
+  },
+  Object {
+    "authorUsername": "system",
+    "id": 1,
+    "postNumber": 1,
+    "replyToPostNumber": null,
+    "timestampMs": 1554236409844,
+    "topicId": 1,
+  },
+]
+`;
