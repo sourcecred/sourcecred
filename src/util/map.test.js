@@ -325,5 +325,11 @@ describe("util/map", () => {
       MapUtil.pushValue(map, "foo", 1);
       expect(map.get("foo")).toBe(arr);
     });
+    it("returns the resultant array", () => {
+      const arr = [];
+      const map = new Map().set("foo", arr);
+      const result = MapUtil.pushValue(map, "foo", 1);
+      expect(result).toBe(arr);
+    });
   });
 });

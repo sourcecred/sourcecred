@@ -153,10 +153,11 @@ export function merge<K, V>(maps: $ReadOnlyArray<Map<K, V>>): Map<K, V> {
  * If the key is already in the map, its value will be mutated, not
  * replaced.
  */
-export function pushValue<K, V>(map: Map<K, V[]>, key: K, value: V): void {
+export function pushValue<K, V>(map: Map<K, V[]>, key: K, value: V): V[] {
   let arr = map.get(key);
   if (arr == null) {
     map.set(key, (arr = []));
   }
   arr.push(value);
+  return arr;
 }
