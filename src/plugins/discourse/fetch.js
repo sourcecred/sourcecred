@@ -12,6 +12,8 @@
 
 import stringify from "json-stable-stringify";
 import fetch from "isomorphic-fetch";
+import Bottleneck from "bottleneck";
+import * as NullUtil from "../../util/null";
 
 export type UserId = number;
 export type PostId = number;
@@ -90,17 +92,40 @@ export interface Discourse {
   likesByUser(targetUsername: string, offset: number): Promise<LikeAction[]>;
 }
 
+const MAX_API_REQUESTS_PER_MINUTE = 55;
+
 export class Fetcher implements Discourse {
+  // We limit the rate of API requests, as documented here:
+  // https://meta.discourse.org/t/global-rate-limits-and-throttling-in-discourse/78612
+  // Note this limit is for admin API keys. If we change to user user API keys
+  // (would be convenient as the keys would be less sensitive), we will need to lower
+  // this rate limit by a factor of 3
+  // TODO: I've set the max requests per minute to 55 (below the stated limit
+  // of 60) to be a bit conservative, and avoid getting limited by the server.
+  // We could improve our throughput by increasing the requests per minute to the
+  // stated limit, and incorporating retry logic to account for the occasional 529.
+
   +options: DiscourseFetchOptions;
   +_fetchImplementation: typeof fetch;
 
   constructor(
     options: DiscourseFetchOptions,
     // fetchImplementation shouldn't be provided by clients, but is convenient for testing.
-    fetchImplementation?: typeof fetch
+    fetchImplementation?: typeof fetch,
+    // Used to avoid going over the Discourse API rate limit
+    minTimeMs?: number
   ) {
     this.options = options;
-    this._fetchImplementation = fetchImplementation || fetch;
+    const minTime = NullUtil.orElse(
+      minTimeMs,
+      (1000 * 60) / MAX_API_REQUESTS_PER_MINUTE
+    );
+    // n.b. the rate limiting isn't programmatically tested. However, it's easy
+    // to tell when it's broken: try to load a nontrivial Discourse server, and see
+    // if you get a 429 failure.
+    const limiter = new Bottleneck({minTime});
+    const unlimitedFetch = NullUtil.orElse(fetchImplementation, fetch);
+    this._fetchImplementation = limiter.wrap(unlimitedFetch);
   }
 
   _fetch(endpoint: string): Promise<Response> {
