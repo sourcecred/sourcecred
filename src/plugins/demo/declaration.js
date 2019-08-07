@@ -1,12 +1,12 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
+
 import {NodeAddress, EdgeAddress} from "../../core/graph";
-
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
-
 import type {EdgeType, NodeType} from "../../analysis/types";
 
-export const inserterNodeType: NodeType = Object.freeze({
+export const inserterNodeType: NodeType = deepFreeze({
   name: "inserter",
   pluralName: "inserters",
   prefix: NodeAddress.fromParts(["factorio", "inserter"]),
@@ -14,7 +14,7 @@ export const inserterNodeType: NodeType = Object.freeze({
   description: "Nodes for Factorio inserter objects in demo plugin",
 });
 
-export const machineNodeType: NodeType = Object.freeze({
+export const machineNodeType: NodeType = deepFreeze({
   name: "machine",
   pluralName: "machines",
   prefix: NodeAddress.fromParts(["factorio", "machine"]),
@@ -22,7 +22,7 @@ export const machineNodeType: NodeType = Object.freeze({
   description: "Nodes for Factorio machine objects in demo plugin",
 });
 
-export const assemblesEdgeType: EdgeType = Object.freeze({
+export const assemblesEdgeType: EdgeType = deepFreeze({
   forwardName: "assembles",
   backwardName: "is assembled by",
   defaultWeight: {forwards: 2, backwards: 2 ** -2},
@@ -30,7 +30,7 @@ export const assemblesEdgeType: EdgeType = Object.freeze({
   description: "Connects assembly machines to products they assemble.",
 });
 
-export const transportsEdgeType: EdgeType = Object.freeze({
+export const transportsEdgeType: EdgeType = deepFreeze({
   forwardName: "transports",
   backwardName: "is transported by",
   defaultWeight: {forwards: 2, backwards: 2 ** -1},
@@ -38,10 +38,10 @@ export const transportsEdgeType: EdgeType = Object.freeze({
   description: "Connects transporter belts to objects they transport.",
 });
 
-export const declaration: PluginDeclaration = Object.freeze({
+export const declaration: PluginDeclaration = deepFreeze({
   name: "Factorio demo adapter",
   nodePrefix: NodeAddress.fromParts(["factorio"]),
-  nodeTypes: Object.freeze([inserterNodeType, machineNodeType]),
+  nodeTypes: [inserterNodeType, machineNodeType],
   edgePrefix: EdgeAddress.fromParts(["factorio"]),
-  edgeTypes: Object.freeze([assemblesEdgeType, transportsEdgeType]),
+  edgeTypes: [assemblesEdgeType, transportsEdgeType],
 });

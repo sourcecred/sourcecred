@@ -7,7 +7,6 @@ import type {LocalStore} from "../../webutil/localStore";
 import CheckedLocalStore from "../../webutil/checkedLocalStore";
 import BrowserLocalStore from "../../webutil/browserLocalStore";
 import Link from "../../webutil/Link";
-import type {RepoId} from "../../core/repoId";
 import {type NodeAddressT} from "../../core/graph";
 import {declaration as githubDeclaration} from "../../plugins/github/declaration";
 
@@ -31,7 +30,7 @@ const feedbackUrl =
 
 export class AppPage extends React.Component<{|
   +assets: Assets,
-  +repoId: RepoId,
+  +projectId: string,
 |}> {
   static _LOCAL_STORE = new CheckedLocalStore(
     new BrowserLocalStore({
@@ -44,7 +43,7 @@ export class AppPage extends React.Component<{|
     const App = createApp(createStateTransitionMachine);
     return (
       <App
-        repoId={this.props.repoId}
+        projectId={this.props.projectId}
         assets={this.props.assets}
         localStore={AppPage._LOCAL_STORE}
       />
@@ -55,7 +54,7 @@ export class AppPage extends React.Component<{|
 type Props = {|
   +assets: Assets,
   +localStore: LocalStore,
-  +repoId: RepoId,
+  +projectId: string,
 |};
 type State = {|
   appState: AppState,
@@ -74,7 +73,7 @@ export function createApp(
     constructor(props: Props) {
       super(props);
       this.state = {
-        appState: initialState(this.props.repoId),
+        appState: initialState(this.props.projectId),
         weights: defaultWeights(),
       };
       this.stateTransitionMachine = createSTM(
@@ -137,7 +136,6 @@ export function createApp(
       const spacer = () => (
         <span style={{display: "inline-block", width: 12}} />
       );
-      const {owner, name} = this.props.repoId;
       return (
         <div style={{maxWidth: 900, margin: "0 auto", padding: "0 10px"}}>
           <p style={{textAlign: "right"}}>
@@ -147,10 +145,11 @@ export function createApp(
           </p>
           <h2>SourceCred Legacy Mode</h2>
           <p>
-            Back to <a href={`/timeline/${owner}/${name}/`}>timeline mode</a>
+            Back to{" "}
+            <a href={`/timeline/${this.props.projectId}/`}>timeline mode</a>
           </p>
 
-          <ProjectDetail repoId={this.props.repoId} />
+          <ProjectDetail projectId={this.props.projectId} />
           <button
             disabled={
               appState.type === "UNINITIALIZED" ||
@@ -179,10 +178,10 @@ export function createApp(
 }
 
 export class ProjectDetail extends React.PureComponent<{|
-  +repoId: RepoId,
+  +projectId: string,
 |}> {
   render() {
-    return <p>{`${this.props.repoId.owner}/${this.props.repoId.name}`}</p>;
+    return <p>{this.props.projectId}</p>;
   }
 }
 

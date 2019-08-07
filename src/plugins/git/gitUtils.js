@@ -1,8 +1,7 @@
 // @flow
 
 import {execFileSync} from "child_process";
-import fs from "fs";
-import mkdirp from "mkdirp";
+import fs from "fs-extra";
 import path from "path";
 
 export interface Utils {
@@ -62,7 +61,7 @@ export function makeUtils(repositoryPath: string): Utils {
     writeAndStage(filename: string, contents: string) {
       const filepath = path.join(repositoryPath, filename);
       const dirpath = path.join(repositoryPath, path.dirname(filename));
-      mkdirp.sync(dirpath);
+      fs.mkdirpSync(dirpath);
       fs.writeFileSync(filepath, contents);
       git(["add", filename]);
     },

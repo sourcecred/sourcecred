@@ -1,7 +1,7 @@
 // @flow
 
-import mkdirp from "mkdirp";
 import tmp from "tmp";
+import fs from "fs-extra";
 
 import {makeUtils} from "../gitUtils";
 import type {Hash} from "../types";
@@ -15,7 +15,7 @@ type RepositoryInfo = {|
 // to a fixed value. We choose the URL of the GitHub mirror (it's as
 // good as any other, and makes sense).
 export const SUBMODULE_REMOTE_URL =
-  "https://github.com/sourcecred/example-git-submodule.git";
+  "https://github.com/sourcecred-test/example-git-submodule.git";
 
 // The example repository checks out two different versions of the
 // submodule, as given by the following two hashes. These must exist
@@ -31,7 +31,7 @@ export const SUBMODULE_COMMIT_2: Hash =
  */
 export function createExampleRepo(intoDirectory: string): RepositoryInfo {
   const repositoryPath = intoDirectory;
-  mkdirp(repositoryPath);
+  fs.mkdirpSync(repositoryPath);
   const git = makeUtils(repositoryPath);
   const commits = [];
   function commit(message) {
@@ -112,7 +112,7 @@ export function createExampleSubmoduleRepo(
   intoDirectory: string
 ): RepositoryInfo {
   const repositoryPath = intoDirectory;
-  mkdirp(repositoryPath);
+  fs.mkdirpSync(repositoryPath);
   const git = makeUtils(repositoryPath);
   const commits = [];
   function commit(message) {

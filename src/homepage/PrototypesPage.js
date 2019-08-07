@@ -1,14 +1,12 @@
 // @flow
 
-import stringify from "json-stable-stringify";
 import React, {type ComponentType} from "react";
 
-import type {RepoIdRegistry} from "../core/repoIdRegistry";
 import Link from "../webutil/Link";
 import type {Assets} from "../webutil/assets";
 
 export default function makePrototypesPage(
-  registry: RepoIdRegistry
+  projectIds: $ReadOnlyArray<string>
 ): ComponentType<{|+assets: Assets|}> {
   return class PrototypesPage extends React.Component<{|+assets: Assets|}> {
     render() {
@@ -24,11 +22,9 @@ export default function makePrototypesPage(
         >
           <p>Select a project:</p>
           <ul>
-            {registry.map((x) => (
-              <li key={stringify(x)}>
-                <Link to={`/timeline/${x.repoId.owner}/${x.repoId.name}/`}>
-                  {`${x.repoId.owner}/${x.repoId.name}`}
-                </Link>
+            {projectIds.map((projectId) => (
+              <li key={projectId}>
+                <Link to={`/timeline/${projectId}/`}>{`${projectId}`}</Link>
               </li>
             ))}
           </ul>

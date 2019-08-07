@@ -72,11 +72,11 @@ describe("plugins/github/relationalView", () => {
 
   const repo = view.repo({
     type: N.REPO_TYPE,
-    owner: "sourcecred",
+    owner: "sourcecred-test",
     name: "example-github",
   });
   if (repo == null) {
-    throw new Error("Error: sourcecred/example-github must exist!");
+    throw new Error("Error: sourcecred-test/example-github must exist!");
   }
   describe("Repo", () => {
     const entity = repo;

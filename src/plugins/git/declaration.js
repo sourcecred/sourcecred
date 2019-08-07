@@ -1,11 +1,12 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {NodeType} from "../../analysis/types";
 import * as N from "./nodes";
 import * as E from "./edges";
 
-const commitNodeType: NodeType = Object.freeze({
+const commitNodeType: NodeType = deepFreeze({
   name: "Commit",
   pluralName: "Commits",
   prefix: N.Prefix.commit,
@@ -13,7 +14,7 @@ const commitNodeType: NodeType = Object.freeze({
   description: "NodeType representing a git commit",
 });
 
-const hasParentEdgeType = Object.freeze({
+const hasParentEdgeType = deepFreeze({
   forwardName: "has parent",
   backwardName: "is parent of",
   prefix: E.Prefix.hasParent,
@@ -21,10 +22,10 @@ const hasParentEdgeType = Object.freeze({
   description: "Connects a Git commit to its parent commit(s).",
 });
 
-const nodeTypes = Object.freeze([commitNodeType]);
-const edgeTypes = Object.freeze([hasParentEdgeType]);
+const nodeTypes = deepFreeze([commitNodeType]);
+const edgeTypes = deepFreeze([hasParentEdgeType]);
 
-export const declaration: PluginDeclaration = Object.freeze({
+export const declaration: PluginDeclaration = deepFreeze({
   name: "Git",
   nodePrefix: N.Prefix.base,
   edgePrefix: E.Prefix.base,

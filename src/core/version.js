@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 export type VersionInfo = {|
   +major: number,
   +minor: number,
@@ -24,10 +25,11 @@ export function parseGitState(raw: ?string): GitState {
   if (typeof raw !== "string") {
     throw new Error("gitState: not a string: " + String(raw));
   }
-  const parsed: mixed = Object.freeze(JSON.parse(raw));
+  const parsed: mixed = JSON.parse(raw);
   if (parsed == null || typeof parsed !== "object") {
     throw new Error("gitState: not a JSON object: " + String(parsed));
   }
+  deepFreeze(parsed);
   // This intermediate variable helps out Flow's inference...
   const gitState: Object = parsed;
   if (
@@ -56,7 +58,7 @@ export function parseEnvironment(raw: ?string): Environment {
 }
 const environment = parseEnvironment(process.env.NODE_ENV);
 
-export const VERSION_INFO: VersionInfo = Object.freeze({
+export const VERSION_INFO: VersionInfo = deepFreeze({
   major: 0,
   minor: 3,
   patch: 0,

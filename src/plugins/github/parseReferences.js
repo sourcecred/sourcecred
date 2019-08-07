@@ -90,7 +90,7 @@ function findGithubUrlReferences(textBlock: string): ParsedReference[] {
         .source +
       ")?" +
       ")" +
-      /(?=[^\w/]|$)/.source,
+      /(?=[^\w/-]|$)/.source,
     "gm"
   );
   return findAllMatches(urlRegex, textBlock).map((match) => ({

@@ -127,14 +127,6 @@ function makeTasks(
       ]),
       deps: ["backend"],
     },
-    {
-      id: "loadRepositoryTest",
-      cmd: withSourcecredBinEnv([
-        "./src/plugins/git/loadRepositoryTest.sh",
-        "--no-build",
-      ]),
-      deps: ["backend"],
-    },
   ];
   const tasks = (function() {
     switch (mode) {
