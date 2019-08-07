@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {
   type Edge,
   type EdgeAddressT,
@@ -31,7 +32,7 @@ function githubEdgeAddress(...parts: string[]): RawAddress {
   return EdgeAddress.append(GITHUB_PREFIX, ...parts);
 }
 
-export const Prefix = Object.freeze({
+export const Prefix = deepFreeze({
   base: GITHUB_PREFIX,
   authors: githubEdgeAddress(AUTHORS_TYPE),
   mergedAs: githubEdgeAddress(MERGED_AS_TYPE),
@@ -82,7 +83,7 @@ export type StructuredAddress =
   | ReactsAddress
   | CorrespondsToCommitAddress;
 
-export const createEdge = Object.freeze({
+export const createEdge = deepFreeze({
   authors: (
     author: GithubNode.UserlikeAddress,
     content: GithubNode.AuthorableAddress,

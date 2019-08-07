@@ -184,6 +184,17 @@ https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863b
 
     expect(
       parseReferences("(https://github.com/sourcecred/example_.repo/pull/94)")
+    ).toEqual([
+      {
+        refType: "BASIC",
+        ref: "https://github.com/sourcecred/example_.repo/pull/94",
+      },
+    ]);
+  });
+
+  it("doesn't find a user url inside a longer url (no hyphen)", () => {
+    expect(
+      parseReferences("https://github.com/sourcecred/example-repo/pull/94")
     ).toHaveLength(1);
   });
 
@@ -202,7 +213,8 @@ https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863b
 
   describe("commit references", () => {
     const commitHash = "6bd1b4c0b719c22c688a74863be07a699b7b9b34";
-    const urlPrefix = "https://github.com/sourcecred/example-github/commit/";
+    const urlPrefix =
+      "https://github.com/sourcecred-test/example-github/commit/";
     it("are valid if they are 40-chars long and all hex", () => {
       expect(parseReferences(commitHash)).toEqual([
         {refType: "BASIC", ref: commitHash},
@@ -241,7 +253,7 @@ https://github.com/sourcecred/exa_mple-git.hub/commit/6bd1b4c0b719c22c688a74863b
       ).toHaveLength(0);
     });
     it("if there is a ref to the url and hash, they are both found once", () => {
-      const commitUrl = `https://github.com/sourcecred/example-github/commit/${commitHash}`;
+      const commitUrl = `https://github.com/sourcecred-test/example-github/commit/${commitHash}`;
       const text = `${commitHash} ${commitUrl}`;
       const result = parseReferences(text);
       const hashRef = {refType: "BASIC", ref: commitHash};

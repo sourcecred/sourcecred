@@ -7,7 +7,6 @@ import type {
 } from "express";
 import type {RepoIdRegistry} from "../src/core/repoIdRegistry";
 */
-const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const webpack = require("webpack");
@@ -18,45 +17,22 @@ const StaticSiteGeneratorPlugin = require("static-site-generator-webpack-plugin"
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const paths = require("./paths");
 const getClientEnvironment = require("./env");
+const _getProjectIds = require("../src/core/_getProjectIds");
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
 
-function loadRepoRegistry() /*: RepoIdRegistry */ {
+function loadProjectIds() /*: Promise<$ReadOnlyArray<string>> */ {
   const env = process.env.SOURCECRED_DIRECTORY;
   // TODO(#945): de-duplicate finding the directory with src/cli/common.js
   const defaultDirectory = path.join(os.tmpdir(), "sourcecred");
   const scDirectory = env != null ? env : defaultDirectory;
-  // TODO(@dandelion): Remove hacks around compat usage here
-  // TODO(@dandelion): Import rather than hardcode the registry file name
-  const registryFile = path.join(scDirectory, "repositoryRegistry.json");
-
-  let jsonString;
-  try {
-    jsonString = fs.readFileSync(registryFile).toString();
-  } catch (e) {
-    if (e.code === "ENOENT") {
-      jsonString = JSON.stringify([
-        {version: "0.2.0", type: "REPO_ID_REGISTRY"},
-        [],
-      ]);
-    } else {
-      throw e;
-    }
-  }
-  const json = JSON.parse(jsonString);
-  const compat = json[0];
-  if (compat.version !== "0.2.0" || compat.type !== "REPO_ID_REGISTRY") {
-    throw new Error("Compat mismatch");
-  }
-  return json[1];
+  return _getProjectIds(scDirectory);
 }
-const repoRegistry = loadRepoRegistry();
 
-// Get environment variables to inject into our app.
-const env = getClientEnvironment(repoRegistry);
-
-function makeConfig(mode /*: "production" | "development" */) /*: mixed */ {
+async function makeConfig(
+  mode /*: "production" | "development" */
+) /*: Promise<mixed> */ {
   return {
     // Don't attempt to continue if there are any errors.
     bail: true,
@@ -211,7 +187,7 @@ function makeConfig(mode /*: "production" | "development" */) /*: mixed */ {
         },
       ],
     },
-    plugins: plugins(mode),
+    plugins: await plugins(mode),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
     node: {
@@ -225,12 +201,14 @@ function makeConfig(mode /*: "production" | "development" */) /*: mixed */ {
   };
 }
 
-function plugins(mode /*: "development" | "production" */) {
+async function plugins(mode /*: "development" | "production" */) {
+  const projectIds = await loadProjectIds();
+  const env = getClientEnvironment(projectIds);
   const basePlugins = [
     new StaticSiteGeneratorPlugin({
       entry: "ssr",
       paths: require("../src/homepage/routeData")
-        .makeRouteData(repoRegistry)
+        .makeRouteData(projectIds)
         .map(({path}) => path),
       locals: {},
     }),

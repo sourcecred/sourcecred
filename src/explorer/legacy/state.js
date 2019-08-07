@@ -4,7 +4,6 @@ import deepEqual from "lodash.isequal";
 
 import {Graph, type NodeAddressT} from "../../core/graph";
 import type {Assets} from "../../webutil/assets";
-import type {RepoId} from "../../core/repoId";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
 import type {NodeAndEdgeTypes} from "../../analysis/types";
 import {defaultLoader} from "../TimelineApp";
@@ -33,25 +32,25 @@ export type AppState =
 
 export type ReadyToLoadGraph = {|
   +type: "READY_TO_LOAD_GRAPH",
-  +repoId: RepoId,
+  +projectId: string,
   +loading: LoadingState,
 |};
 export type ReadyToRunPagerank = {|
   +type: "READY_TO_RUN_PAGERANK",
-  +repoId: RepoId,
+  +projectId: string,
   +graph: Graph,
   +loading: LoadingState,
 |};
 export type PagerankEvaluated = {|
   +type: "PAGERANK_EVALUATED",
   +graph: Graph,
-  +repoId: RepoId,
+  +projectId: string,
   +pagerankNodeDecomposition: PagerankNodeDecomposition,
   +loading: LoadingState,
 |};
 
-export function initialState(repoId: RepoId): ReadyToLoadGraph {
-  return {type: "READY_TO_LOAD_GRAPH", repoId, loading: "NOT_LOADING"};
+export function initialState(projectId: string): ReadyToLoadGraph {
+  return {type: "READY_TO_LOAD_GRAPH", projectId, loading: "NOT_LOADING"};
 }
 
 export function createStateTransitionMachine(
@@ -79,7 +78,7 @@ export interface StateTransitionMachineInterface {
 export class StateTransitionMachine implements StateTransitionMachineInterface {
   getState: () => AppState;
   setState: (AppState) => void;
-  doLoadGraph: (assets: Assets, repoId: RepoId) => Promise<Graph>;
+  doLoadGraph: (assets: Assets, projectId: string) => Promise<Graph>;
   pagerank: (
     Graph,
     EdgeEvaluator,
@@ -89,7 +88,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   constructor(
     getState: () => AppState,
     setState: (AppState) => void,
-    doLoadGraph: (assets: Assets, repoId: RepoId) => Promise<Graph>,
+    doLoadGraph: (assets: Assets, projectId: string) => Promise<Graph>,
     pagerank: (
       Graph,
       EdgeEvaluator,
@@ -108,17 +107,17 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     if (state.type !== "READY_TO_LOAD_GRAPH") {
       throw new Error("Tried to loadGraph in incorrect state");
     }
-    const {repoId} = state;
+    const {projectId} = state;
     const loadingState = {...state, loading: "LOADING"};
     this.setState(loadingState);
     let newState: ?AppState;
     let success = true;
     try {
-      const graph = await this.doLoadGraph(assets, repoId);
+      const graph = await this.doLoadGraph(assets, projectId);
       newState = {
         type: "READY_TO_RUN_PAGERANK",
         graph,
-        repoId,
+        projectId,
         loading: "NOT_LOADING",
       };
     } catch (e) {
@@ -166,7 +165,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
         type: "PAGERANK_EVALUATED",
         pagerankNodeDecomposition,
         graph: state.graph,
-        repoId: state.repoId,
+        projectId: state.projectId,
         loading: "NOT_LOADING",
       };
     } catch (e) {
@@ -209,9 +208,9 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
 
 export async function doLoadGraph(
   assets: Assets,
-  repoId: RepoId
+  projectId: string
 ): Promise<Graph> {
-  const loadResult = await defaultLoader(assets, repoId);
+  const loadResult = await defaultLoader(assets, projectId);
   if (loadResult.type !== "SUCCESS") {
     throw new Error(loadResult);
   }

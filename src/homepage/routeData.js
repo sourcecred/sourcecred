@@ -56,7 +56,9 @@ function inspectionTestFor(name, component) /*: RouteDatum */ {
   };
 }
 
-function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
+function makeRouteData(
+  projectIds /*: $ReadOnlyArray<string> */
+) /*: RouteData */ {
   return [
     {
       path: "/",
@@ -71,27 +73,27 @@ function makeRouteData(registry /*: RepoIdRegistry */) /*: RouteData */ {
       path: "/prototype/",
       contents: {
         type: "PAGE",
-        component: () => require("./PrototypesPage").default(registry),
+        component: () => require("./PrototypesPage").default(projectIds),
       },
       title: "SourceCred prototype",
       navTitle: "Prototype",
     },
-    ...registry.map((entry) => ({
-      path: `/prototype/${entry.repoId.owner}/${entry.repoId.name}/`,
+    ...projectIds.map((id) => ({
+      path: `/prototype/${id}/`,
       contents: {
         type: "PAGE",
-        component: () => require("./ProjectPage").default(entry.repoId),
+        component: () => require("./ProjectPage").default(id),
       },
-      title: `${entry.repoId.owner}/${entry.repoId.name} • SourceCred`,
+      title: `${id} • SourceCred`,
       navTitle: null,
     })),
-    ...registry.map((entry) => ({
-      path: `/timeline/${entry.repoId.owner}/${entry.repoId.name}/`,
+    ...projectIds.map((id) => ({
+      path: `/timeline/${id}/`,
       contents: {
         type: "PAGE",
-        component: () => require("./TimelinePage").default(entry.repoId),
+        component: () => require("./TimelinePage").default(id),
       },
-      title: `${entry.repoId.owner}/${entry.repoId.name} • Timeline`,
+      title: `${id} • Timeline`,
       navTitle: null,
     })),
     {

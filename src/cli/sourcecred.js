@@ -7,8 +7,6 @@ import {VERSION_SHORT} from "../core/version";
 
 import help from "./help";
 import load from "./load";
-import analyze from "./analyze";
-import pagerank from "./pagerank";
 import scores from "./scores";
 import clear from "./clear";
 
@@ -26,12 +24,8 @@ const sourcecred: Command = async (args, std) => {
       return help(args.slice(1), std);
     case "load":
       return load(args.slice(1), std);
-    case "analyze":
-      return analyze(args.slice(1), std);
     case "clear":
       return clear(args.slice(1), std);
-    case "pagerank":
-      return pagerank(args.slice(1), std);
     case "scores":
       return scores(args.slice(1), std);
     default:

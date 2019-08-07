@@ -1,6 +1,7 @@
 // @flow
 
 import stringify from "json-stable-stringify";
+import deepFreeze from "deep-freeze";
 
 import * as MapUtil from "../util/map";
 
@@ -233,5 +234,5 @@ export function makeAddressModule(options: Options): AddressModule<string> {
     append,
     hasPrefix,
   };
-  return Object.freeze(result);
+  return deepFreeze(result);
 }

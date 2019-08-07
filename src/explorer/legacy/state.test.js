@@ -4,7 +4,6 @@ import {StateTransitionMachine, type AppState} from "./state";
 
 import {Graph, NodeAddress} from "../../core/graph";
 import {Assets} from "../../webutil/assets";
-import {makeRepoId, type RepoId} from "../../core/repoId";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
 import {defaultWeights} from "../../analysis/weights";
 import type {
@@ -20,7 +19,7 @@ describe("explorer/legacy/state", () => {
       stateContainer.appState = appState;
     };
     const loadGraphMock: JestMockFn<
-      [Assets, RepoId],
+      [Assets, string],
       Promise<Graph>
     > = jest.fn();
 
@@ -39,14 +38,14 @@ describe("explorer/legacy/state", () => {
   function readyToLoadGraph(): AppState {
     return {
       type: "READY_TO_LOAD_GRAPH",
-      repoId: makeRepoId("foo", "bar"),
+      projectId: "foo/bar",
       loading: "NOT_LOADING",
     };
   }
   function readyToRunPagerank(): AppState {
     return {
       type: "READY_TO_RUN_PAGERANK",
-      repoId: makeRepoId("foo", "bar"),
+      projectId: "foo/bar",
       loading: "NOT_LOADING",
       graph: new Graph(),
     };
@@ -54,7 +53,7 @@ describe("explorer/legacy/state", () => {
   function pagerankEvaluated(): AppState {
     return {
       type: "PAGERANK_EVALUATED",
-      repoId: makeRepoId("foo", "bar"),
+      projectId: "foo/bar",
       graph: new Graph(),
       pagerankNodeDecomposition: pagerankNodeDecomposition(),
       loading: "NOT_LOADING",
@@ -80,16 +79,13 @@ describe("explorer/legacy/state", () => {
         );
       }
     });
-    it("passes along the repoId", () => {
+    it("passes along the projectId", () => {
       const {stm, loadGraphMock} = example(readyToLoadGraph());
       expect(loadGraphMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
       stm.loadGraph(assets);
       expect(loadGraphMock).toHaveBeenCalledTimes(1);
-      expect(loadGraphMock).toHaveBeenCalledWith(
-        assets,
-        makeRepoId("foo", "bar")
-      );
+      expect(loadGraphMock).toHaveBeenCalledWith(assets, "foo/bar");
     });
     it("immediately sets loading status", () => {
       const {getState, stm} = example(readyToLoadGraph());

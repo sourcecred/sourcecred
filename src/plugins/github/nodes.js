@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 
 export opaque type RawAddress: NodeAddressT = NodeAddressT;
@@ -19,7 +20,7 @@ export const USERLIKE_TYPE: "USERLIKE" = "USERLIKE";
 export const USER_SUBTYPE: "USER" = "USER";
 export const BOT_SUBTYPE: "BOT" = "BOT";
 
-export const Prefix = Object.freeze({
+export const Prefix = deepFreeze({
   base: GITHUB_PREFIX,
   repo: _githubAddress(REPO_TYPE),
   issue: _githubAddress(ISSUE_TYPE),

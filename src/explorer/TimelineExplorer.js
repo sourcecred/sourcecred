@@ -2,7 +2,6 @@
 
 import React from "react";
 import deepEqual from "lodash.isequal";
-import {type RepoId} from "../core/repoId";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {type Weights, copy as weightsCopy} from "../analysis/weights";
 import {
@@ -14,7 +13,7 @@ import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
 
 export type Props = {
-  repoId: RepoId,
+  projectId: string,
   initialTimelineCred: TimelineCred,
   // TODO: Get this info from the TimelineCred
   declarations: $ReadOnlyArray<PluginDeclaration>,
@@ -35,7 +34,7 @@ export type State = {
  * It basically wraps a TimelineCredView with some additional features and options:
  * - allows changing the weights and re-calculating cred with new weights
  * - allows saving/loading weights
- * - displays the RepoId
+ * - displays the string
  */
 export class TimelineExplorer extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -110,13 +109,12 @@ export class TimelineExplorer extends React.Component<Props, State> {
         re-compute cred
       </button>
     );
-    const {owner, name} = this.props.repoId;
     return (
       <div>
         <div style={{marginTop: 30, display: "flex"}}>
           <span style={{paddingLeft: 30}}>
-            cred for {owner}/{name}
-            <a href={`/prototype/${owner}/${name}/`}>(legacy)</a>
+            cred for {this.props.projectId}
+            <a href={`/prototype/${this.props.projectId}/`}>(legacy)</a>
           </span>
           <span style={{flexGrow: 1}} />
           <button

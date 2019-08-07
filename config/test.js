@@ -1,5 +1,7 @@
 // @flow
 
+/*:: import type {Task} from "../src/tools/execDependencyGraph"; */
+
 const tmp = require("tmp");
 
 const execDependencyGraph = require("../src/tools/execDependencyGraph");
@@ -125,14 +127,6 @@ function makeTasks(
       ]),
       deps: ["backend"],
     },
-    {
-      id: "loadRepositoryTest",
-      cmd: withSourcecredBinEnv([
-        "./src/plugins/git/loadRepositoryTest.sh",
-        "--no-build",
-      ]),
-      deps: ["backend"],
-    },
   ];
   const tasks = (function() {
     switch (mode) {
@@ -146,18 +140,39 @@ function makeTasks(
   })();
   if (limitMemoryUsage) {
     // We've had issues with our tests flakily failing in CI, due to apparent
-    // memory issues. I've found that if we both limit the maxWorkers to 2, and
-    // ensure that nothing else runs at the same time as jest, then it stops
-    // flakily failing.
+    // memory issues.
+    //
+    // This block attempts to limit memory usage by having flow to run first,
+    // then stopping the flow server, then running unit tests, and only
+    // afterwards running all other tasks.
+    //
+    // The reasoning is that the flow server is fairly memory demanding and we
+    // can safely kill it after we've checked the types, and jest is also quite
+    // memory intensive. Hopefully by finishing these tasks first and releasing
+    // their resources, we won't have more memory exhaustion.
     tasks.forEach((task) => {
-      if (task.id === "unit") {
-        task.cmd.push("--maxWorkers=2");
-      } else {
-        // Ensure that everything else depends on unit tests, so unit tests
-        // will run first and run alone.
-        task.deps.push("unit");
+      switch (task.id) {
+        case "flow":
+          // Run flow first
+          return;
+        case "unit":
+          task.cmd.push("--maxWorkers=2");
+          // Run unit after we _stopped_ the flow server
+          // (to free up memory from flow)
+          task.deps.push("flow-stop");
+          return;
+        default:
+          // Run everything else after unit tests
+          // (unit is a memory hog)
+          task.deps.push("unit");
       }
     });
+    const flowStopTask /*: Task */ = {
+      id: "flow-stop",
+      cmd: ["yarn", "run", "--silent", "flow", "stop"],
+      deps: ["flow"],
+    };
+    tasks.push(flowStopTask);
   }
   return tasks;
 }

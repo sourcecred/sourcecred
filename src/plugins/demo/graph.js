@@ -1,16 +1,17 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {Graph} from "../../core/graph";
 import {partsNode, partsEdge} from "../../core/graphTestUtil";
 
-export const nodes = Object.freeze({
+export const nodes = deepFreeze({
   inserter1: partsNode(["factorio", "inserter", "1"]),
   machine1: partsNode(["factorio", "machine", "1"]),
   inserter2: partsNode(["factorio", "inserter", "2"]),
   machine2: partsNode(["factorio", "machine", "2"]),
 });
 
-export const edges = Object.freeze({
+export const edges = deepFreeze({
   transports1: partsEdge(
     ["factorio", "transports", "1"],
     nodes.inserter1,

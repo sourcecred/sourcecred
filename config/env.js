@@ -134,9 +134,7 @@ function getGitState() /*: GitState */ {
 const SOURCECRED_GIT_STATE = stringify(getGitState());
 process.env.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
 
-function getClientEnvironment(
-  repoRegistryContents /*: RepoIdRegistry | null */
-) {
+function getClientEnvironment(projectIds /*: $ReadOnlyArray<string> | null*/) {
   const raw = {};
   // Useful for determining whether we’re running in production mode.
   // Most importantly, it switches React into the correct mode.
@@ -144,7 +142,7 @@ function getClientEnvironment(
   // Used by `src/core/version.js`.
   raw.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
   // Optional. Used by `src/homepage/routeData.js`
-  raw.REPO_REGISTRY = stringify(repoRegistryContents);
+  raw.PROJECT_IDS = stringify(projectIds);
 
   // Stringify all values so we can feed into Webpack's DefinePlugin.
   const stringified = {"process.env": {}};

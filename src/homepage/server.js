@@ -16,7 +16,7 @@ import {createRoutes} from "./createRoutes";
 import {resolveRouteFromPath, resolveTitleFromPath} from "./routeData";
 
 // Side effect for testing purposes
-console.log(`REPO_REGISTRY: ${process.env.REPO_REGISTRY || "bad"}`);
+console.log(`PROJECT_IDS: ${process.env.PROJECT_IDS || "bad"}`);
 
 // NOTE: This is a side-effect at module load time.
 const routeData = createRouteDataFromEnvironment();

@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 import * as MapUtil from "../../../util/map";
@@ -45,7 +46,7 @@ export type FlatAggregation = {|
   +connections: $ReadOnlyArray<ScoredConnection>,
 |};
 
-export const fallbackNodeType: NodeType = Object.freeze({
+export const fallbackNodeType: NodeType = deepFreeze({
   name: "node",
   pluralName: "nodes",
   prefix: NodeAddress.empty,
@@ -53,10 +54,10 @@ export const fallbackNodeType: NodeType = Object.freeze({
   description: "",
 });
 
-export const fallbackEdgeType: EdgeType = Object.freeze({
+export const fallbackEdgeType: EdgeType = deepFreeze({
   forwardName: "has edge to",
   backwardName: "has edge from",
-  defaultWeight: Object.freeze({forwards: 1, backwards: 1}),
+  defaultWeight: {forwards: 1, backwards: 1},
   prefix: EdgeAddress.empty,
   description: "",
 });

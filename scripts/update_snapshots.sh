@@ -28,9 +28,6 @@ echo "Updating sharness/test_load_example_github.t"
 echo "Updating sharness/test_cli_scores.t"
 (cd sharness; UPDATE_SNAPSHOT=1 ./test_cli_scores.t -l)
 
-echo "Updating git/loadRepositoryTest.sh"
-./src/plugins/git/loadRepositoryTest.sh -u --no-build
-
 echo "Updating github/fetchGithubOrgTest.sh"
 ./src/plugins/github/fetchGithubOrgTest.sh -u --no-build
 

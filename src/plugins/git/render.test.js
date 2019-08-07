@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import * as N from "./nodes";
 import {shallow} from "enzyme";
 import {description} from "./render";
@@ -48,7 +49,7 @@ describe("plugins/git/render", () => {
     createdAt: 123456789,
     parentHashes: [],
   };
-  const exampleRepository: Repository = Object.freeze({
+  const exampleRepository: Repository = deepFreeze({
     commits: {
       zeroRepoCommit,
       singleRepoCommit,
@@ -65,7 +66,7 @@ describe("plugins/git/render", () => {
     },
   });
 
-  const exampleGitGateway: GitGateway = Object.freeze({
+  const exampleGitGateway: GitGateway = deepFreeze({
     commitUrl(repo: RepoId, hash: Hash): URL {
       return repoIdToString(repo) + "/" + hash;
     },

@@ -3,8 +3,8 @@ set -eu
 
 usage() {
     printf 'usage: build_static_site.sh --target TARGET\n'
+    printf '                            [--project PROJECT [...]]\n'
     printf '                            [--weights WEIGHTS_FILE]\n'
-    printf '                            [--repo OWNER/NAME [...]]\n'
     printf '                            [--cname DOMAIN]\n'
     printf '                            [--no-backend]\n'
     printf '                            [-h|--help]\n'
@@ -13,12 +13,11 @@ usage() {
     printf '\n'
     printf '%s\n' '--target TARGET'
     printf '\t%s\n' 'an empty directory into which to build the site'
+    printf '%s\n' '--project PROJECT'
+    printf '\t%s\n' 'a project spec; see help for cli/load.js for details'
     printf '%s\n' '--weights WEIGHTS_FILE'
     printf '\t%s\n' 'path to a json file which contains a weights configuration.'
     printf '\t%s\n' 'This will be used instead of the default weights and persisted.'
-    printf '%s\n' '--repo OWNER/NAME'
-    printf '\t%s\n' 'a GitHub repository (e.g., torvalds/linux) for which'
-    printf '\t%s\n' 'to include example data'
     printf '%s\n' '--cname DOMAIN'
     printf '\t%s\n' 'configure DNS for a GitHub Pages site to point to'
     printf '\t%s\n' 'the provided custom domain'
@@ -55,6 +54,7 @@ parse_args() {
     cname=
     weights=
     repos=( )
+    projects=( )
     while [ $# -gt 0 ]; do
         case "$1" in
             --target)
@@ -73,10 +73,10 @@ parse_args() {
                 if [ $# -eq 0 ]; then die 'missing value for --weights'; fi
                 weights="$1"
                 ;;
-            --repo)
+            --project)
                 shift
-                if [ $# -eq 0 ]; then die 'missing value for --repo'; fi
-                repos+=( "$1" )
+                if [ $# -eq 0 ]; then die 'missing value for --project'; fi
+                projects+=( "$1" )
                 ;;
             --cname)
                 shift
@@ -140,15 +140,14 @@ build() {
         yarn -s backend --output-path "${SOURCECRED_BIN}"
     fi
 
-    if [ "${#repos[@]}" -ne 0 ]; then
+    if [ "${#projects[@]}" -ne 0 ]; then
         local weightsStr=""
         if [ -n "${weights}" ]; then
             weightsStr="--weights ${weights}"
         fi
-        for repo in "${repos[@]}"; do
-            printf >&2 'info: loading repository: %s\n' "${repo}"
+        for project in "${projects[@]}"; do
             NODE_PATH="./node_modules${NODE_PATH:+:${NODE_PATH}}" \
-                node "${SOURCECRED_BIN:-./bin}/sourcecred.js" load "${repo}" $weightsStr
+                node "${SOURCECRED_BIN:-./bin}/sourcecred.js" load "${project}" $weightsStr
         done
     fi
 
