@@ -4,6 +4,7 @@ import React from "react";
 import deepEqual from "lodash.isequal";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {type Weights, copy as weightsCopy} from "../analysis/weights";
+import {type NodeAddressT} from "../core/graph";
 import {
   TimelineCred,
   type TimelineCredParameters,
@@ -11,12 +12,15 @@ import {
 import {TimelineCredView} from "./TimelineCredView";
 import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
+import {type NodeType} from "../analysis/types";
 
 export type Props = {
   projectId: string,
   initialTimelineCred: TimelineCred,
   // TODO: Get this info from the TimelineCred
   declarations: $ReadOnlyArray<PluginDeclaration>,
+  +defaultNodeType: NodeType,
+  +filterableNodeTypes: $ReadOnlyArray<NodeType>,
 };
 
 export type State = {
@@ -26,6 +30,7 @@ export type State = {
   intervalDecay: number,
   loading: boolean,
   showWeightConfig: boolean,
+  selectedNodeTypePrefix: NodeAddressT,
 };
 
 /**
@@ -40,9 +45,10 @@ export class TimelineExplorer extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const timelineCred = props.initialTimelineCred;
+    const {defaultNodeType} = props;
     const {alpha, intervalDecay, weights} = timelineCred.params();
+    const selectedNodeTypePrefix = defaultNodeType.prefix;
     this.state = {
-      selectedNodeTypePrefix: timelineCred.config().scoreNodePrefix,
       timelineCred,
       alpha,
       intervalDecay,
@@ -52,6 +58,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
       weights: weightsCopy(weights),
       loading: false,
       showWeightConfig: false,
+      selectedNodeTypePrefix,
     };
   }
 
@@ -117,6 +124,8 @@ export class TimelineExplorer extends React.Component<Props, State> {
             <a href={`/prototype/${this.props.projectId}/`}>(legacy)</a>
           </span>
           <span style={{flexGrow: 1}} />
+          {this.renderFilterSelect()}
+          <span style={{flexGrow: 1}} />
           <button
             onClick={() => {
               this.setState(({showWeightConfig}) => ({
@@ -141,11 +150,31 @@ export class TimelineExplorer extends React.Component<Props, State> {
     );
   }
 
+  renderFilterSelect() {
+    return (
+      <label>
+        <span style={{marginLeft: "5px"}}>Showing: </span>
+        <select
+          value={this.state.selectedNodeTypePrefix}
+          onChange={(e) =>
+            this.setState({selectedNodeTypePrefix: e.target.value})
+          }
+        >
+          {this.props.filterableNodeTypes.map(({prefix, pluralName}) => (
+            <option key={prefix} value={prefix}>
+              {pluralName}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
+  }
+
   render() {
     const timelineCredView = (
       <TimelineCredView
         timelineCred={this.state.timelineCred}
-        selectedNodeFilter={this.state.timelineCred.config().scoreNodePrefix}
+        selectedNodeFilter={this.state.selectedNodeTypePrefix}
       />
     );
     return (
