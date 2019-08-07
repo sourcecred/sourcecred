@@ -1,6 +1,7 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
+import deepEqual from "lodash.isequal";
 import type Database, {BindingDictionary, Statement} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 
@@ -9,6 +10,19 @@ import * as MapUtil from "../util/map";
 import * as NullUtil from "../util/null";
 import * as Schema from "./schema";
 import * as Queries from "./queries";
+
+// The following version number must be updated if there is any
+// change to the way in which a GraphQL schema is mapped to a SQL
+// schema or the way in which the resulting SQL schema is
+// interpreted. If you've made a change and you're not sure whether
+// it requires bumping the version, bump it: requiring some extra
+// one-time cache resets is okay; doing the wrong thing is not.
+const MIRROR_VERSION = "MIRROR_v3";
+type MirrorConfig = {|
+  +version: string,
+  +schema: Schema.Schema,
+  +blacklistedIds: {|+[Schema.ObjectId]: true|},
+|};
 
 /**
  * A local mirror of a subset of a GraphQL database.
@@ -169,19 +183,12 @@ export class Mirror {
    * updated after it is first set.
    */
   _initialize() {
-    // The following version number must be updated if there is any
-    // change to the way in which a GraphQL schema is mapped to a SQL
-    // schema or the way in which the resulting SQL schema is
-    // interpreted. If you've made a change and you're not sure whether
-    // it requires bumping the version, bump it: requiring some extra
-    // one-time cache resets is okay; doing the wrong thing is not.
-    const blob = stringify({
-      version: "MIRROR_v3",
+    const mirrorConfig: MirrorConfig = {
+      version: MIRROR_VERSION,
       schema: this._schema,
-      options: {
-        blacklistedIds: this._blacklistedIds,
-      },
-    });
+      blacklistedIds: this._blacklistedIds,
+    };
+    const configBlob = stringify(mirrorConfig);
     const db = this._db;
     _inTransaction(db, () => {
       // We store the metadata in a singleton table `meta`, whose unique row
@@ -200,16 +207,36 @@ export class Mirror {
         .prepare("SELECT config FROM meta")
         .pluck()
         .get();
-      if (existingBlob === blob) {
+      if (existingBlob === configBlob) {
         // Already set up; nothing to do.
         return;
       } else if (existingBlob !== undefined) {
-        throw new Error(
-          "Database already populated with " +
-            "incompatible schema, options, or version"
-        );
+        const existingConfig: MirrorConfig = JSON.parse(existingBlob);
+        if (existingConfig.version !== mirrorConfig.version) {
+          throw new Error(
+            "Database already populated with incompatible version."
+          );
+        } else if (!deepEqual(existingConfig.schema, mirrorConfig.schema)) {
+          throw new Error(
+            "Database already populated with incompatible schema."
+          );
+        } else if (
+          !deepEqual(existingConfig.blacklistedIds, mirrorConfig.blacklistedIds)
+        ) {
+          console.error(dedent`\
+            Warning: Database already loaded with different blacklistedIds.\
+            Unexpected behavior may result. Consider resetting your cache.`);
+          // We don't need to do the rest of the initialization, because it was
+          // setup, albiet with different options.
+          // (The blacklisted Ids are not used in the rest of this initialization.)
+          return;
+        } else {
+          throw new Error("Database config differs in an unexpected way");
+        }
       }
-      db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(blob);
+      db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(
+        configBlob
+      );
 
       // First, create those tables that are independent of the schema.
       const structuralTables = [

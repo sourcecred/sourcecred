@@ -188,27 +188,29 @@ describe("graphql/mirror", () => {
         expect(() => new Mirror(db, schema0)).not.toThrow();
         const data = fs.readFileSync(filename).toJSON();
 
-        expect(() => new Mirror(db, schema1)).toThrow(
-          "incompatible schema, options, or version"
-        );
+        expect(() => new Mirror(db, schema1)).toThrow("incompatible schema");
         expect(fs.readFileSync(filename).toJSON()).toEqual(data);
 
-        expect(() => new Mirror(db, schema1)).toThrow(
-          "incompatible schema, options, or version"
-        );
+        expect(() => new Mirror(db, schema1)).toThrow("incompatible schema");
         expect(fs.readFileSync(filename).toJSON()).toEqual(data);
 
         expect(() => new Mirror(db, schema0)).not.toThrow();
         expect(fs.readFileSync(filename).toJSON()).toEqual(data);
       });
 
-      it("rejects when the set of blacklisted IDs has changed", () => {
+      it("warns when the set of blacklisted IDs has changed", () => {
         const db = new Database(":memory:");
         const schema = Schema.schema({A: Schema.object({id: Schema.id()})});
+        const oldError = console.error;
+        (console: any).error = jest.fn();
         new Mirror(db, schema, {blacklistedIds: []});
-        expect(() => {
-          new Mirror(db, schema, {blacklistedIds: ["ominous"]});
-        }).toThrow("incompatible schema, options, or version");
+        new Mirror(db, schema, {blacklistedIds: ["ominous"]});
+        expect(console.error).toHaveBeenCalledWith(
+          expect.stringMatching(
+            "Warning: Database already loaded with different blacklistedIds."
+          )
+        );
+        (console: any).error = oldError;
       });
 
       it("rejects a schema with SQL-unsafe type name", () => {
