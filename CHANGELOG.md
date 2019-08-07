@@ -2,7 +2,10 @@
 
 ## [Unreleased]
 
-<!-- Please add new entries to the _top_ of this section. -->
+<!-- Please add new entries just beneath this line. -->
+
+## [0.4.0]
+
 - Enable viewing cred over time for GitHub repos (#1268)
 - Remove unused CLI commands (`pagerank` and `analyze`) (#1254)
 - Track cred on the project level, not the repo level (#1233)
