@@ -56,7 +56,7 @@
     "enzyme-adapter-react-16": "^1.1.1",
     "enzyme-to-json": "^3.3.3",
     "eslint": "6.1.0",
-    "eslint-plugin-flowtype": "3.12.1",
+    "eslint-plugin-flowtype": "4.0.0",
     "eslint-plugin-import": "2.18.1",
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.14.3",
