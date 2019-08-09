@@ -14,7 +14,7 @@ main() {
 rasterize() {
     basename=$1
     size=$2
-    inkscape -z "`pwd`/${basename}.svg" -e "`pwd`/rasterized/${basename}_${size}.png" \
+    inkscape -z "${PWD}/${basename}.svg" -e "${PWD}/rasterized/${basename}_${size}.png" \
         -w "${size}" -h "${size}"
 }
 
