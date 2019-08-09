@@ -11,7 +11,7 @@ const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath);
 module.exports = {
   root: appDirectory,
   dotenv: resolveApp(".env"),
-  favicon: resolveApp("src/assets/logo/sourcecred_32.png"),
+  favicon: resolveApp("src/assets/logo/rasterized/logo_32.png"),
   appBuild: resolveApp("build"),
   appIndexJs: resolveApp("src/homepage/index.js"),
   appServerSideRenderingIndexJs: resolveApp("src/homepage/server.js"),
