@@ -72,11 +72,11 @@ export class Mirror {
     // are locked into the first config.
     db.prepare(
       dedent`\
-          CREATE TABLE IF NOT EXISTS meta (
-              zero INTEGER PRIMARY KEY,
-              config TEXT NOT NULL
-          )
-        `
+        CREATE TABLE IF NOT EXISTS meta (
+            zero INTEGER PRIMARY KEY,
+            config TEXT NOT NULL
+        )
+      `
     ).run();
 
     const config = stringify({
@@ -100,15 +100,15 @@ export class Mirror {
 
     const tables = [
       dedent`\
-          CREATE TABLE topics (
-              id INTEGER PRIMARY KEY,
-              title TEXT NOT NULL,
-              timestampMs INTEGER NOT NULL,
-              authorUsername TEXT NOT NULL
-      )
-    `,
+        CREATE TABLE topics (
+            id INTEGER PRIMARY KEY,
+            title TEXT NOT NULL,
+            timestampMs INTEGER NOT NULL,
+            authorUsername TEXT NOT NULL
+        )
+      `,
       dedent`\
-          CREATE TABLE posts (
+        CREATE TABLE posts (
             id INTEGER PRIMARY KEY,
             timestampMs INTEGER NOT NULL,
             authorUsername TEXT NOT NULL,
@@ -116,8 +116,8 @@ export class Mirror {
             postNumber INTEGER NOT NULL,
             replyToPostNumber INTEGER,
             FOREIGN KEY(topicId) REFERENCES topics(id)
-      )
-    `,
+        )
+      `,
     ];
     for (const sql of tables) {
       db.prepare(sql).run();
@@ -141,10 +141,10 @@ export class Mirror {
     return this._db
       .prepare(
         dedent`\
-      SELECT id
-      FROM posts
-      WHERE topicId = :topicId AND postNumber = :postNumber
-      `
+          SELECT id
+          FROM posts
+          WHERE topicId = :topicId AND postNumber = :postNumber
+        `
       )
       .pluck()
       .get({topicId, postNumber});
@@ -179,16 +179,16 @@ export class Mirror {
       } = post;
       db.prepare(
         dedent`\
-        INSERT INTO posts
-        VALUES (
-          :id,
-          :timestampMs,
-          :authorUsername,
-          :topicId,
-          :postNumber,
-          :replyToPostNumber
-        )
-      `
+          INSERT INTO posts
+          VALUES (
+            :id,
+            :timestampMs,
+            :authorUsername,
+            :topicId,
+            :postNumber,
+            :replyToPostNumber
+          )
+        `
       ).run({
         id,
         timestampMs,
