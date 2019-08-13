@@ -1,7 +1,7 @@
 {
   "name": "sourcecred",
   "version": "0.4.0",
-  "private": true,
+  "private": false,
   "dependencies": {
     "aphrodite": "^2.1.0",
     "base64url": "^3.0.1",
@@ -98,7 +98,7 @@
     "flow": "flow",
     "lint": "eslint src config --max-warnings 0"
   },
-  "license": "MIT + Apache-2",
+  "license": "(MIT OR Apache-2.0)",
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,mjs}"
