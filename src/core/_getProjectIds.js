@@ -26,7 +26,7 @@ module.exports = async function getProjectIds(
   let entries = [];
   try {
     entries = await fs.readdir(projectsPath);
-  } catch {
+  } catch (e) {
     return [];
   }
   const getProjectId = async (entry) => {
@@ -34,7 +34,7 @@ module.exports = async function getProjectIds(
       const jsonPath = path.join(projectsPath, entry, "project.json");
       await fs.stat(jsonPath);
       return base64url.decode(entry);
-    } catch {
+    } catch (e) {
       return null;
     }
   };
