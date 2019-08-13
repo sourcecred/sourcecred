@@ -1,4 +1,4 @@
-# If modifying this file, please modify .flowconfig-ci too!
+# If modifying this file, please modify .flowconfig too!
 [ignore]
 
 [include]
@@ -11,5 +11,6 @@ flow-typed
 [options]
 suppress_comment=\\(.\\|\n\\)*\\$ExpectFlowError
 include_warnings=true
+server.max_workers=1
 
 [strict]
