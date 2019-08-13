@@ -24,8 +24,11 @@ export class FileUploader extends React.Component<Props> {
     const onUpload = (e) => {
       const file = e.target.files[0];
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = () => {
         const jsonString = reader.result;
+        if (typeof jsonString !== "string") {
+          throw new Error("Unexpected: jsonString is not string");
+        }
         const json = JSON.parse(jsonString);
         this.props.onUpload(json);
       };
