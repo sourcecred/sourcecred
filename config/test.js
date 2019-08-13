@@ -49,6 +49,22 @@ function makeTasks(
     return ["env", "SOURCECRED_BIN=" + backendOutput, ...invocation];
   }
 
+  function flowCommand(limitMemoryUsage /*: boolean */) {
+    const cmd = [
+      "yarn",
+      "run",
+      "--silent",
+      "flow",
+      "--quiet",
+      "--max-warnings=0",
+    ];
+    // Use only one worker to try to avoid flow flakey failures
+    if (limitMemoryUsage) {
+      cmd.push("--flowconfig-name", ".flowconfig-ci");
+    }
+    return cmd;
+  }
+
   const basicTasks = [
     {
       id: "ensure-flow-typing",
@@ -74,7 +90,7 @@ function makeTasks(
     },
     {
       id: "flow",
-      cmd: ["yarn", "run", "--silent", "flow", "--quiet", "--max-warnings=0"],
+      cmd: flowCommand(limitMemoryUsage),
       deps: [],
     },
     {
