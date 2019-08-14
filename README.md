@@ -39,8 +39,15 @@ First, make sure that you have the following dependencies:
 [Node]: https://nodejs.org/en/
 [Yarn]: https://yarnpkg.com/lang/en/
 [GitHub API token]: https://github.com/settings/tokens
-
 [macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-417202213
+
+When you create a token, a good strategy is to write it into a local file that
+is ignored by the repository. For example, we can write it into `.token`.
+
+```bash
+export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN # or
+export SOURCECRED_GITHUB_TOKEN=$(cat .token)
+```
 
 Then, run the following commands to clone and build SourceCred:
 
@@ -49,7 +56,6 @@ git clone https://github.com/sourcecred/sourcecred.git
 cd sourcecred
 yarn install
 yarn backend
-export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 node bin/sourcecred.js load REPO_OWNER/REPO_NAME
 ```
 
@@ -61,6 +67,77 @@ yarn start
 
 Finally, we can navigate a browser window to `localhost:8080` to view generated data.
 
+### Running with Docker
+
+Optionally, you can build and run sourcecred in a container to avoid installing dependencies
+on your host. First, build the container:
+
+```bash
+$ docker build -t sourcecred .
+```
+
+If you don't want to build, the container is also provided at [vanessa/sourcecred](https://hub.docker.com/r/vanessa/sourcecred)
+
+```bash
+$ docker pull vanessa/sourcecred
+$ docker tag vanessa/sourcecred sourcecred
+```
+
+You will still need to export a GitHub token, and then provide it to the container
+when you run it. Notice that we are also binding port 8080 so we can
+view the web interface that will be opened up.  The only argument needed is the 
+GitHub repository to generate the sourcecred for:
+
+```bash
+REPOSITORY=sfosc/sfosc
+$ docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN=$(cat .token) -p 8080:8080 sourcecred $REPOSITORY
+```
+
+We are running in detached mode (-d) so it's easier to remove the container after. After running
+the command, you can inspect it's progress like this:
+
+```bash
+$ docker logs sourcecred
+  GO   load-sfosc/sfosc
+  GO   github/sfosc/sfosc
+ DONE  github/sfosc/sfosc: 25s
+  GO   compute-cred
+ DONE  compute-cred: 1s
+ DONE  load-sfosc/sfosc: 26s
+...
+```
+
+It will take about 30 seconds to do the initial build, and when the web server is running you'll see
+this at the end:
+
+```bash
+...
+[./node_modules/react/index.js] 190 bytes {main} {ssr} [built]
+[./src/homepage/index.js] 1.37 KiB {main} [built]
+[./src/homepage/server.js] 5.61 KiB {ssr} [built]
+    + 1006 hidden modules
+ℹ ｢wdm｣: Compiled successfully.
+```
+
+Then you can open up to [http://127.0.0.1:8080](http://127.0.0.1:8080) to see the interface!
+
+![img/home-screen.png](img/home-screen.png)
+
+You can click on "prototype" to see a list of repositories that you generated (we just did sfosc/sfosc):
+
+![img/prototype.png](img/prototype.png)
+
+And then finally, click on the repository name to see the graph.
+
+![img/graph.png](img/graph.png)
+
+When you are finished, stop and remove the container.
+
+```bash
+$ docker stop sourcecred
+```
+
+Since we used the remove (--rm) tag, stopping it will also remove it.
 #### Examples
 
 If you wanted to look at cred for [ipfs/js-ipfs], you could run:
