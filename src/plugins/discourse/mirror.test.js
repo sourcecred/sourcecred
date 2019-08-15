@@ -1,5 +1,6 @@
 // @flow
 
+import sortBy from "lodash.sortby";
 import Database from "better-sqlite3";
 import fs from "fs";
 import tmp from "tmp";
@@ -11,6 +12,7 @@ import {
   type Topic,
   type Post,
   type TopicWithPosts,
+  type LikeAction,
 } from "./fetch";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
@@ -19,12 +21,15 @@ type PostInfo = {|
   +indexWithinTopic: number,
   +replyToPostIndex: number | null,
   +topicId: number,
+  +authorUsername: string,
 |};
+
 class MockFetcher implements Discourse {
   _latestTopicId: number;
   _latestPostId: number;
   _topicToPostIds: Map<TopicId, PostId[]>;
   _posts: Map<PostId, PostInfo>;
+  _likes: LikeAction[];
 
   constructor() {
     this._latestTopicId = 1;
@@ -32,6 +37,7 @@ class MockFetcher implements Discourse {
     this._topicToPostIds = new Map();
     this._posts = new Map();
   }
+
   async latestTopicId(): Promise<TopicId> {
     return this._latestTopicId;
   }
@@ -59,6 +65,20 @@ class MockFetcher implements Discourse {
     return {topic: this._topic(id), posts};
   }
 
+  async likesByUser(
+    targetUsername: string,
+    offset: number
+  ): Promise<LikeAction[]> {
+    const CHUNK_SIZE = 5;
+    const matchingLikes = this._likes.filter(
+      ({username}) => username === targetUsername
+    );
+    return sortBy(matchingLikes, (x) => -x.timestampMs).slice(
+      offset,
+      offset + CHUNK_SIZE
+    );
+  }
+
   _topic(id: TopicId): Topic {
     return {
       id,
@@ -77,18 +97,27 @@ class MockFetcher implements Discourse {
     if (postInfo == null) {
       return null;
     }
-    const {replyToPostIndex, topicId, indexWithinTopic} = postInfo;
+    const {
+      replyToPostIndex,
+      topicId,
+      indexWithinTopic,
+      authorUsername,
+    } = postInfo;
     return {
       id,
       timestampMs: 2003,
       replyToPostIndex,
       topicId,
       indexWithinTopic,
-      authorUsername: "credbot",
+      authorUsername,
     };
   }
 
-  addPost(topicId: TopicId, replyToNumber: number | null): PostId {
+  addPost(
+    topicId: TopicId,
+    replyToNumber: number | null,
+    username?: string
+  ): PostId {
     const postId = this._latestPostId++;
     this._latestTopicId = Math.max(topicId, this._latestTopicId);
     const postsOnTopic = MapUtil.pushValue(
@@ -103,9 +132,17 @@ class MockFetcher implements Discourse {
       indexWithinTopic: postsOnTopic.length,
       replyToPostIndex: replyToNumber,
       topicId: topicId,
+      authorUsername: NullUtil.orElse(username, "credbot"),
     };
     this._posts.set(postId, postInfo);
     return postId;
+  }
+
+  addLike(actingUser: string, postId: PostId, timestampMs: number) {
+    if (!this._posts.has(postId)) {
+      throw new Error("bad postId");
+    }
+    this._likes.push({username: actingUser, postId, timestampMs});
   }
 }
 

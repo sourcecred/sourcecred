@@ -108,3 +108,13 @@ Array [
   },
 ]
 `;
+
+exports[`plugins/discourse/fetch snapshot testing loads user likes from snapshot 1`] = `
+Array [
+  Object {
+    "postId": 14,
+    "timestampMs": 1564744498189,
+    "username": "dl-proto",
+  },
+]
+`;
