@@ -9,10 +9,12 @@ RUN apt-get -yqq update && apt-get -yqq upgrade && apt-get -yqq install \
     yarn make g++ python git \
   && apt-get purge && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY . /opt/sourcecred
+COPY package.json yarn.lock /opt/sourcecred/
 WORKDIR /opt/sourcecred
+RUN yarn
 
-RUN yarn install && yarn backend
+COPY . /opt/sourcecred
+RUN yarn backend
 EXPOSE 8080
 ENV SOURCECRED_DIRECTORY=/opt/sourcecred/data
 ENTRYPOINT ["/opt/sourcecred/docker/entrypoint.sh"]
