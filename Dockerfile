@@ -6,7 +6,8 @@ RUN apt-get update && \
 RUN apt-get install -y build-essential && \
     mkdir -p /code
 WORKDIR /code
-ARG SOURCECRED_DIRECTORY=/data
+ARG SOURCECRED_DEFAULT_DIRECTORY=/data
+ENV SOURCECRED_DIRECTORY ${SOURCECRED_DEFAULT_DIRECTORY}
 ADD . /code
 RUN curl --compressed -o- -L https://yarnpkg.com/install.sh | bash && \
     yarn && \
