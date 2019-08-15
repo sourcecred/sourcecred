@@ -13,6 +13,7 @@
 /bin
 
 # misc
+/data
 .env
 .env.local
 .env.development.local

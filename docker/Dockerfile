@@ -14,4 +14,5 @@ WORKDIR /opt/sourcecred
 
 RUN yarn install && yarn backend
 EXPOSE 8080
+ENV SOURCECRED_DIRECTORY=/opt/sourcecred/data
 ENTRYPOINT ["/opt/sourcecred/docker/entrypoint.sh"]

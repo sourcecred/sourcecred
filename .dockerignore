@@ -2,6 +2,7 @@
 /coverage
 /build
 /bin
+/data
 .env
 .env.local
 .env.development.local
