@@ -49,6 +49,7 @@ async function makeConfig(
     },
     devServer: {
       inline: false,
+      host: mode == "development" ? '0.0.0.0' : 'localhost',
       before: (app /*: ExpressApp */) => {
         const apiRoot = "/api/v1/data";
         const rejectCache = (_unused_req, res /*: ExpressResponse */) => {
