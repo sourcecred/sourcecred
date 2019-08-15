@@ -82,6 +82,32 @@ node bin/sourcecred.js load ipfs/js-ipfs ipfs/go-ipfs --output ipfs/meta-ipfs
 
 will create a graph called `ipfs/meta-ipfs` in the cred explorer, containing the combined contents of the js-ipfs and go-ipfs repositories.
 
+#### Docker
+
+The prototype may also be run using `docker-compose`. To build the container,
+
+```Bash
+git clone https://github.com/sourcecred/sourcecred.git
+cd sourcecred
+docker-compose build
+```
+
+Arguments can now be passed to `node bin/sourcecred.js load` via:
+
+```Bash
+docker-compose run --rm \
+  -p 8080:8080 -e SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN \
+  sourcecred
+```
+
+For example,
+
+```Bash
+docker-compose run --rm \
+  -p 8080:8080 -e SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN \
+  sourcecred ipfs/js-ipfs ipfs/go-ipfs --output ipfs/meta-ipfs
+```
+
 ## Early Adopters
 
 We’re looking for projects who want to be early adopters of SourceCred!
