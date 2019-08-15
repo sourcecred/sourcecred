@@ -1,18 +1,13 @@
-FROM ubuntu:18.04
+FROM node:12-slim
 
 RUN apt-get -yqq update && apt-get -yqq upgrade && apt-get -yqq install \
-  wget git make g++ \
+    apt-transport-https \
+  && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+  && echo "deb https://dl.yarnpkg.com/debian/ stable main" \
+    | tee /etc/apt/sources.list.d/yarn.list \
+  && apt-get -yqq update && apt-get -yqq upgrade && apt-get -yqq install \
+    yarn make g++ python git \
   && apt-get purge && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install NodeJS + yarn with conda
-RUN \
-  wget -q https://repo.anaconda.com/miniconda/Miniconda2-4.7.10-Linux-x86_64.sh -O /tmp/miniconda.sh \
-  && echo '3bc6ffc6cda8efa467926dfd92a30bca */tmp/miniconda.sh' | md5sum -c - \
-  && bash /tmp/miniconda.sh -f -b -p /opt/conda \
-  && rm /tmp/miniconda.sh \
-  && /opt/conda/bin/conda install -y -c conda-forge nodejs yarn \
-  && /opt/conda/bin/conda clean -a -y
-ENV PATH=/opt/conda/bin:$PATH
 
 COPY . /opt/sourcecred
 WORKDIR /opt/sourcecred
