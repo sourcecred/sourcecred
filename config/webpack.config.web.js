@@ -30,6 +30,14 @@ function loadProjectIds() /*: Promise<$ReadOnlyArray<string>> */ {
   return _getProjectIds(scDirectory);
 }
 
+function getHost() {
+  const host = process.env.NODE_HOST;
+  if (host !== "") {
+    return host;
+  }
+  return "localhost";
+}
+
 async function makeConfig(
   mode /*: "production" | "development" */
 ) /*: Promise<mixed> */ {
@@ -49,7 +57,7 @@ async function makeConfig(
     },
     devServer: {
       inline: false,
-      host: mode == "development" ? '0.0.0.0' : 'localhost',
+      host: getHost(),
       before: (app /*: ExpressApp */) => {
         const apiRoot = "/api/v1/data";
         const rejectCache = (_unused_req, res /*: ExpressResponse */) => {

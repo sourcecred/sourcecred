@@ -6,7 +6,8 @@ services:
    context: .
    dockerfile: docker/Dockerfile
   environment:
-  - SOURCECRED_GITHUB_TOKEN
+   SOURCECRED_GITHUB_TOKEN: ${SOURCECRED_GITHUB_TOKEN}
+   NODE_HOST: ${NODE_HOST:-0.0.0.0}
   #network_mode: host
   ports:
   - "8080:8080"
