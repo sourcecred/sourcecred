@@ -84,7 +84,7 @@ GitHub repository to generate the sourcecred for:
 ```bash
 REPOSITORY=sfosc/sfosc
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred "${REPOSITORY}"
+    docker run --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred "${REPOSITORY}"
 ```
 
 ```bash
@@ -130,13 +130,10 @@ And then finally, click on the repository name to see the graph.
 
 ![img/graph.png](img/graph.png)
 
-When you are finished, stop and remove the container.
+When you are finished, you can press Control+c to kill the container.
+If you want to run in detached, add a `-d` argument, and optionally `--rm`
+to remove when you stop it.
 
-```bash
-$ docker stop sourcecred
-```
-
-Since we used the remove (--rm) tag, stopping it will also remove it.
 #### Examples
 
 If you wanted to look at cred for [ipfs/js-ipfs], you could run:
