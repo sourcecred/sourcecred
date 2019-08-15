@@ -2,7 +2,7 @@
 
 if [ -z "${SOURCECRED_GITHUB_TOKEN}" ]; then
     echo "Export SOURCECRED_GITHUB_TOKEN with the container."
-    echo 'docker run --env SOURCECRED_GITHUB_TOKEN=$(cat .token) -p 8080:8080 sourcecred <repository>'
+    echo 'SOURCECRED_GITHUB_TOKEN=xxxxxxxxxxx docker run --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred <repository>'
     exit 1;
 fi
 

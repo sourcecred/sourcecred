@@ -41,15 +41,8 @@ First, make sure that you have the following dependencies:
 [GitHub API token]: https://github.com/settings/tokens
 [macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-417202213
 
-When you create a token, a good strategy is to write it into a local file that
-is ignored by the repository. For example, we can write it into `.token`.
-
-```bash
-export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN # or
-export SOURCECRED_GITHUB_TOKEN=$(cat .token)
-```
-
-Then, run the following commands to clone and build SourceCred:
+You'll stil need to create a GitHub token to use as an environment variable
+(shown later). First, run the following commands to clone and build SourceCred:
 
 ```Bash
 git clone https://github.com/sourcecred/sourcecred.git
@@ -90,8 +83,11 @@ GitHub repository to generate the sourcecred for:
 
 ```bash
 REPOSITORY=sfosc/sfosc
-$ docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN=$(cat .token) -p 8080:8080 sourcecred $REPOSITORY
+$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
+    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred "${REPOSITORY}"
 ```
+
+```bash
 
 We are running in detached mode (-d) so it's easier to remove the container after. After running
 the command, you can inspect it's progress like this:
