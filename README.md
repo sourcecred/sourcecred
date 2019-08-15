@@ -69,6 +69,13 @@ on your host. First, build the container:
 $ docker build -t sourcecred .
 ```
 
+If you want to build and customize the `SOURCECRED_DIRECTORY`, you can
+set that as a `--build-arg`:
+
+```bash
+$ docker build --build-arg SOURCECRED_DEFAULT_DIRECTORY=/tmp/data -t sourcecred .
+```
+
 If you don't want to build, the container is also provided at [vanessa/sourcecred](https://hub.docker.com/r/vanessa/sourcecred)
 
 ```bash
@@ -78,19 +85,25 @@ $ docker tag vanessa/sourcecred sourcecred
 
 You will still need to export a GitHub token, and then provide it to the container
 when you run it. Notice that we are also binding port 8080 so we can
-view the web interface that will be opened up.  The only argument needed is the 
-GitHub repository to generate the sourcecred for:
+view the web interface that will be opened up.  The only argument needed is a command to load the GitHub repository to generate the sourcecred for:
 
 ```bash
 REPOSITORY=sfosc/sfosc
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred "${REPOSITORY}"
+    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred load "${REPOSITORY}"
 ```
 
-```bash
+If you want to bind the data folder to the host, you can do that too. In the example
+below, we have a folder "data" in the present working directory that we bind to
+"/data" in the container, the default `SOURCECRED_DIRECTORY`.
 
-We are running in detached mode (-d) so it's easier to remove the container after. After running
-the command, you can inspect it's progress like this:
+
+```bash
+$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
+    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 -v $PWD/data:/data sourcecred load "${REPOSITORY}"
+```
+
+We are running in detached mode (-d) so it's easier to remove the container after. After running the command, you can inspect it's progress like this:
 
 ```bash
 $ docker logs sourcecred
@@ -136,7 +149,25 @@ When you are finished, stop and remove the container.
 $ docker stop sourcecred
 ```
 
-Since we used the remove (--rm) tag, stopping it will also remove it.
+Since we used the remove (--rm) tag, stopping it will also remove it. If you bound
+the data folder to the host, you'll see the output remaining there from
+the generation:
+
+```bash
+$ tree data/
+data/
+├── cache
+│   └── mirror_4d4445774f6c4a6c6347397a61585276636e6b784e546b344f44677a4f54453d.db
+└── projects
+    └── c2Zvc2Mvc2Zvc2M
+        ├── cred.json
+        ├── graph.json
+        └── project.json
+
+3 directories, 4 files
+```
+
+Cool!
 
 #### Examples
 
