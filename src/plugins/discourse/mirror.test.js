@@ -5,7 +5,7 @@ import fs from "fs";
 import tmp from "tmp";
 import {Mirror} from "./mirror";
 import {
-  type DiscourseInterface,
+  type Discourse,
   type TopicId,
   type PostId,
   type Topic,
@@ -16,11 +16,11 @@ import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
 
 type PostInfo = {|
-  +postNumber: number,
-  +replyToPostNumber: number | null,
+  +indexWithinTopic: number,
+  +replyToPostIndex: number | null,
   +topicId: number,
 |};
-class MockFetcher implements DiscourseInterface {
+class MockFetcher implements Discourse {
   _latestTopicId: number;
   _latestPostId: number;
   _topicToPostIds: Map<TopicId, PostId[]>;
@@ -36,7 +36,7 @@ class MockFetcher implements DiscourseInterface {
     return this._latestTopicId;
   }
 
-  async latestPosts(): Promise<$ReadOnlyArray<Post>> {
+  async latestPosts(): Promise<Post[]> {
     const latestPost = this._post(this._latestPostId - 1);
     if (latestPost == null) {
       return [];
@@ -77,13 +77,13 @@ class MockFetcher implements DiscourseInterface {
     if (postInfo == null) {
       return null;
     }
-    const {replyToPostNumber, topicId, postNumber} = postInfo;
+    const {replyToPostIndex, topicId, indexWithinTopic} = postInfo;
     return {
       id,
       timestampMs: 2003,
-      replyToPostNumber,
+      replyToPostIndex,
       topicId,
-      postNumber,
+      indexWithinTopic,
       authorUsername: "credbot",
     };
   }
@@ -100,8 +100,8 @@ class MockFetcher implements DiscourseInterface {
       throw new Error("invalid replyToNumber");
     }
     const postInfo: PostInfo = {
-      postNumber: postsOnTopic.length,
-      replyToPostNumber: replyToNumber,
+      indexWithinTopic: postsOnTopic.length,
+      replyToPostIndex: replyToNumber,
       topicId: topicId,
     };
     this._posts.set(postId, postInfo);
@@ -261,7 +261,7 @@ describe("plugins/discourse/mirror", () => {
       const id = fetcher.addPost(5, null);
       const post = NullUtil.get(fetcher._post(id));
       expect(post.topicId).toEqual(5);
-      expect(post.postNumber).toEqual(1);
+      expect(post.indexWithinTopic).toEqual(1);
       await mirror.update();
       expect(mirror.findPostInTopic(5, 1)).toEqual(id);
     });
@@ -271,7 +271,7 @@ describe("plugins/discourse/mirror", () => {
       fetcher.addPost(1, null);
       const id = fetcher.addPost(1, 1);
       const post = NullUtil.get(fetcher._post(id));
-      expect(post.postNumber).toEqual(2);
+      expect(post.indexWithinTopic).toEqual(2);
       await mirror.update();
       expect(mirror.findPostInTopic(1, 2)).toEqual(id);
     });

@@ -4,7 +4,7 @@ import type Database from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
 import {
-  type DiscourseInterface,
+  type Discourse,
   type TopicId,
   type PostId,
   type Topic,
@@ -34,7 +34,7 @@ const VERSION = "discourse_mirror_v1";
  */
 export class Mirror {
   +_db: Database;
-  +_fetcher: DiscourseInterface;
+  +_fetcher: Discourse;
 
   /**
    * Construct a new Mirror instance.
@@ -45,7 +45,7 @@ export class Mirror {
    * A serverUrl is required so that we can ensure that this Mirror is only storing
    * data from a particular Discourse server.
    */
-  constructor(db: Database, fetcher: DiscourseInterface, serverUrl: string) {
+  constructor(db: Database, fetcher: Discourse, serverUrl: string) {
     if (db == null) throw new Error("db: " + String(db));
     this._db = db;
     this._fetcher = fetcher;
@@ -103,19 +103,19 @@ export class Mirror {
         CREATE TABLE topics (
             id INTEGER PRIMARY KEY,
             title TEXT NOT NULL,
-            timestampMs INTEGER NOT NULL,
-            authorUsername TEXT NOT NULL
+            timestamp_ms INTEGER NOT NULL,
+            author_username TEXT NOT NULL
         )
       `,
       dedent`\
         CREATE TABLE posts (
             id INTEGER PRIMARY KEY,
-            timestampMs INTEGER NOT NULL,
-            authorUsername TEXT NOT NULL,
-            topicId INTEGER NOT NULL,
-            postNumber INTEGER NOT NULL,
-            replyToPostNumber INTEGER,
-            FOREIGN KEY(topicId) REFERENCES topics(id)
+            timestamp_ms INTEGER NOT NULL,
+            author_username TEXT NOT NULL,
+            topic_id INTEGER NOT NULL,
+            index_within_topic INTEGER NOT NULL,
+            reply_to_post_index INTEGER,
+            FOREIGN KEY(topic_id) REFERENCES topics(id)
         )
       `,
     ];
@@ -125,11 +125,47 @@ export class Mirror {
   }
 
   topics(): $ReadOnlyArray<Topic> {
-    return this._db.prepare("SELECT * FROM topics").all();
+    return this._db
+      .prepare(
+        dedent`\
+        SELECT
+          id,
+          timestamp_ms,
+          author_username,
+          title
+        FROM topics`
+      )
+      .all()
+      .map((x) => ({
+        id: x.id,
+        timestampMs: x.timestamp_ms,
+        authorUsername: x.author_username,
+        title: x.title,
+      }));
   }
 
   posts(): $ReadOnlyArray<Post> {
-    return this._db.prepare("SELECT * FROM posts").all();
+    return this._db
+      .prepare(
+        dedent`\
+        SELECT
+          id,
+          timestamp_ms,
+          author_username,
+          topic_id,
+          index_within_topic,
+          reply_to_post_index
+        FROM posts`
+      )
+      .all()
+      .map((x) => ({
+        id: x.id,
+        timestampMs: x.timestamp_ms,
+        authorUsername: x.author_username,
+        topicId: x.topic_id,
+        indexWithinTopic: x.index_within_topic,
+        replyToPostIndex: x.reply_to_post_index,
+      }));
   }
 
   /**
@@ -137,32 +173,31 @@ export class Mirror {
    *
    * Returns undefined if no such post exists.
    */
-  findPostInTopic(topicId: TopicId, postNumber: number): ?PostId {
+  findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId {
     return this._db
       .prepare(
         dedent`\
           SELECT id
           FROM posts
-          WHERE topicId = :topicId AND postNumber = :postNumber
+          WHERE topic_id = :topic_id AND index_within_topic = :index_within_topic
         `
       )
       .pluck()
-      .get({topicId, postNumber});
+      .get({topic_id: topicId, index_within_topic: indexWithinTopic});
   }
 
   async update() {
-    // TODO: Make sure this happens in a transaction?
     const db = this._db;
     const latestTopicId = await this._fetcher.latestTopicId();
     const lastLocalPostId =
       db
-        .prepare(`SELECT MAX(id) FROM posts`)
+        .prepare("SELECT MAX(id) FROM posts")
         .pluck()
         .get() || 0;
 
     const lastLocalTopicId =
       db
-        .prepare(`SELECT MAX(id) FROM topics`)
+        .prepare("SELECT MAX(id) FROM topics")
         .pluck()
         .get() || 0;
 
@@ -172,30 +207,36 @@ export class Mirror {
       const {
         id,
         timestampMs,
-        replyToPostNumber,
-        postNumber,
+        replyToPostIndex,
+        indexWithinTopic,
         topicId,
         authorUsername,
       } = post;
       db.prepare(
         dedent`\
-          INSERT INTO posts
-          VALUES (
+          REPLACE INTO posts (
+            id,
+            timestamp_ms,
+            author_username,
+            topic_id,
+            index_within_topic,
+            reply_to_post_index
+          ) VALUES (
             :id,
-            :timestampMs,
-            :authorUsername,
-            :topicId,
-            :postNumber,
-            :replyToPostNumber
+            :timestamp_ms,
+            :author_username,
+            :topic_id,
+            :index_within_topic,
+            :reply_to_post_index
           )
         `
       ).run({
         id,
-        timestampMs,
-        replyToPostNumber,
-        postNumber,
-        topicId,
-        authorUsername,
+        timestamp_ms: timestampMs,
+        reply_to_post_index: replyToPostIndex,
+        index_within_topic: indexWithinTopic,
+        topic_id: topicId,
+        author_username: authorUsername,
       });
       encounteredPostIds.add(id);
     }
@@ -211,9 +252,25 @@ export class Mirror {
         const {id, title, timestampMs, authorUsername} = topic;
         this._db
           .prepare(
-            "INSERT INTO topics VALUES (:id, :title, :timestampMs, :authorUsername)"
+            dedent`\
+            REPLACE INTO topics (
+              id,
+              title,
+              timestamp_ms,
+              author_username
+            ) VALUES (
+              :id,
+              :title,
+              :timestamp_ms,
+              :author_username
+            )`
           )
-          .run({id, title, timestampMs, authorUsername});
+          .run({
+            id,
+            title,
+            timestamp_ms: timestampMs,
+            author_username: authorUsername,
+          });
         for (const post of posts) {
           addPost(post);
         }
@@ -229,7 +286,7 @@ export class Mirror {
 
     const latestPost = latestPosts[0];
     const latestPostId = latestPost == null ? 0 : latestPost.id;
-    for (let postId = lastLocalPostId + 1; postId < latestPostId; postId++) {
+    for (let postId = lastLocalPostId + 1; postId <= latestPostId; postId++) {
       if (encounteredPostIds.has(postId)) {
         continue;
       }
