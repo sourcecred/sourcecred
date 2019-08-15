@@ -28,11 +28,11 @@ export type Post = {|
   +id: PostId,
   +topicId: TopicId,
   // Which number post this was within the topic (starts at 1)
-  +postNumber: number,
-  // The postNumber of the post within the same topic that this post was a
+  +indexWithinTopic: number,
+  // The indexWithinTopic of the post within the same topic that this post was a
   // reply to. Will be `null` if this post was the first post, or if it was a
   // reply to the first post.
-  +replyToPostNumber: number | null,
+  +replyToPostIndex: number | null,
   +timestampMs: number,
   +authorUsername: string,
 |};
@@ -53,23 +53,31 @@ export type TopicWithPosts = {|
  * We have an interface (as opposed to just an implementation) to enable easy mocking and
  * testing.
  */
-export interface DiscourseInterface {
+export interface Discourse {
   // Get the `id` of the latest topic on the server.
   // Vital so that we can then enumerate and fetch every Topic we haven't seen yet.
+  // May reject on not OK status like 404 or 403.
   latestTopicId(): Promise<TopicId>;
-  // Retrieve the Topic with Posts for a given id. May be null, either because the
-  // topic is hidden from the api user, or it 404s. (Not sure why this happens.)
+  // Retrieve the Topic with Posts for a given id.
+  // Will resolve to null if the response status is 403 or 404. 403 because the
+  // topic may be hidden from the API user; 404 because we sometimes see
+  // 404s in prod and want to ignore those topic ids. (Not sure why it happens.)
+  // May reject if the status is not OK and is not 404 or 403.
   topicWithPosts(id: TopicId): Promise<TopicWithPosts | null>;
-  // Retrieve an individual Post by its id. May be null, e.g. because the post is
-  // hidden from the api user.
+  // Retrieve an individual Post by its id.
+  // Will resolve to null if the response status is 403 or 404. 403 because the
+  // topic may be hidden from the API user; 404 because we sometimes see
+  // 404s in prod and want to ignore those topic ids. (Not sure why it happens.)
+  // May reject if the status is not OK and is not 404 or 403.
   post(id: PostId): Promise<Post | null>;
   // Retrieve the latest posts from the server.
   // Vital so that we can then enumerate and fetch every Post that we haven't
   // encountered.
-  latestPosts(): Promise<$ReadOnlyArray<Post>>;
+  // May reject on not OK status like 404 or 403.
+  latestPosts(): Promise<Post[]>;
 }
 
-export class DiscourseFetcher implements DiscourseInterface {
+export class Fetcher implements Discourse {
   +options: DiscourseFetchOptions;
   +_fetchImplementation: typeof fetch;
 
@@ -95,7 +103,7 @@ export class DiscourseFetcher implements DiscourseInterface {
       headers: {
         "Api-Key": apiKey,
         "Api-Username": apiUsername,
-        "Content-Type": "application/json",
+        Accept: "application/json",
       },
     };
     const fullUrl = `${serverUrl}${endpoint}`;
@@ -104,16 +112,9 @@ export class DiscourseFetcher implements DiscourseInterface {
 
   async latestTopicId(): Promise<TopicId> {
     const response = await this._fetch("/latest.json?order=created");
-    if (response.status === 404) {
-      throw new Error(`404 from ${response.url}; maybe bad serverUrl?`);
-    }
-    if (response.status === 403) {
-      const {apiUsername, apiKey} = this.options;
-      throw new Error(
-        `got status 403; bad api username (${apiUsername}) or key (${apiKey})`
-      );
-    }
-    if (response.status !== 200) {
+    maybeFail404(response);
+    maybeFail403(response);
+    if (!response.ok) {
       throw new Error(`not OK status ${response.status} on ${response.url}`);
     }
     const json = await response.json();
@@ -123,18 +124,11 @@ export class DiscourseFetcher implements DiscourseInterface {
     return json.topic_list.topics[0].id;
   }
 
-  async latestPosts(): Promise<$ReadOnlyArray<Post>> {
+  async latestPosts(): Promise<Post[]> {
     const response = await this._fetch("/posts.json");
-    if (response.status === 404) {
-      throw new Error(`404 from ${response.url}; maybe bad serverUrl?`);
-    }
-    if (response.status === 403) {
-      const {apiUsername, apiKey} = this.options;
-      throw new Error(
-        `got status 403; bad api username (${apiUsername}) or key (${apiKey})`
-      );
-    }
-    if (response.status !== 200) {
+    maybeFail404(response);
+    maybeFail403(response);
+    if (!response.ok) {
       throw new Error(`not OK status ${response.status} on ${response.url}`);
     }
     const json = await response.json();
@@ -189,12 +183,24 @@ export class DiscourseFetcher implements DiscourseInterface {
   }
 }
 
+function maybeFail404(response) {
+  if (response.status === 404) {
+    throw new Error(`404 Not Found on: ${response.url}; maybe bad serverUrl?`);
+  }
+}
+
+function maybeFail403(response) {
+  if (response.status === 403) {
+    throw new Error(`403 Forbidden: bad API username or key?`);
+  }
+}
+
 function parsePost(json: any): Post {
   return {
     id: json.id,
-    timestampMs: +new Date(json.created_at),
-    postNumber: json.post_number,
-    replyToPostNumber: json.reply_to_post_number,
+    timestampMs: Date.parse(json.created_at),
+    indexWithinTopic: json.post_number,
+    replyToPostIndex: json.reply_to_post_number,
     topicId: json.topic_id,
     authorUsername: json.username,
   };

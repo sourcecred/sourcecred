@@ -1,7 +1,7 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
-import {DiscourseFetcher, type DiscourseFetchOptions} from "./fetch";
+import {Fetcher, type DiscourseFetchOptions} from "./fetch";
 import base64url from "base64url";
 import path from "path";
 import fs from "fs-extra";
@@ -27,7 +27,7 @@ describe("plugins/discourse/fetch", () => {
         throw new Error(`couldn't load snapshot for ${file}`);
       }
     }
-    const snapshotFetcher = () => new DiscourseFetcher(options, snapshotFetch);
+    const snapshotFetcher = () => new Fetcher(options, snapshotFetch);
 
     it("loads LatestTopicId from snapshot", async () => {
       const topicId = await snapshotFetcher().latestTopicId();
@@ -50,7 +50,7 @@ describe("plugins/discourse/fetch", () => {
       return Promise.resolve(resp);
     };
     const fetcherWithStatus = (status: number) =>
-      new DiscourseFetcher(options, fakeFetch(status));
+      new Fetcher(options, fakeFetch(status));
     function expectError(name, f, status) {
       it(`${name} errors on ${String(status)}`, () => {
         const fetcher = fetcherWithStatus(status);
@@ -91,14 +91,14 @@ describe("plugins/discourse/fetch", () => {
         fetchOptions = _options;
         return Promise.resolve(new Response("", {status: 404}));
       };
-      await new DiscourseFetcher(options, fakeFetch).post(1337);
+      await new Fetcher(options, fakeFetch).post(1337);
       if (fetchOptions == null) {
         throw new Error("fetchOptions == null");
       }
       expect(fetchOptions.method).toEqual("GET");
       expect(fetchOptions.headers["Api-Key"]).toEqual(options.apiKey);
       expect(fetchOptions.headers["Api-Username"]).toEqual(options.apiUsername);
-      expect(fetchOptions.headers["Content-Type"]).toEqual("application/json");
+      expect(fetchOptions.headers["Accept"]).toEqual("application/json");
     });
   });
 });

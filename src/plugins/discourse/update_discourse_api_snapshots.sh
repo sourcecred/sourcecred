@@ -27,6 +27,7 @@ fetch() {
   curl -sfL "$url" \
     -H "Api-Key: ${DISCOURSE_TEST_API_KEY}" \
     -H "Api-Username: ${test_instance_username}" \
+    -H "Accept: application/json" \
     | jq '.' > "${path}"
 }
 
