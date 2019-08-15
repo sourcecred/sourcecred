@@ -16,6 +16,38 @@ import {
 const VERSION = "discourse_mirror_v1";
 
 /**
+ * An interface for retrieving all of the Discourse data at once.
+ *
+ * Also has some convenience methods for interpeting the data (e.g. getting
+ * a post by its index in a topic).
+ *
+ * The mirror implements this; it's factored out as an interface for
+ * ease of testing.
+ */
+export interface DiscourseData {
+  /**
+   * Retrieve every Topic available.
+   *
+   * The order is unspecified.
+   */
+  topics(): $ReadOnlyArray<Topic>;
+
+  /**
+   * Retrieve every Post available.
+   *
+   * The order is unspecified.
+   */
+  posts(): $ReadOnlyArray<Post>;
+
+  /**
+   * Given a TopicId and a post number, find that numbered post within the topic.
+   *
+   * Returns undefined if no such post is available.
+   */
+  findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId;
+}
+
+/**
  * Mirrors data from the Discourse API into a local sqlite db.
  *
  * This class allows us to persist a local copy of data from a Discourse
@@ -32,7 +64,7 @@ const VERSION = "discourse_mirror_v1";
  * Each Mirror instance is tied to a particular server. Trying to use a mirror
  * for multiple Discourse servers is not permitted; use separate Mirrors.
  */
-export class Mirror {
+export class Mirror implements DiscourseData {
   +_db: Database;
   +_fetcher: Discourse;
 
@@ -168,11 +200,6 @@ export class Mirror {
       }));
   }
 
-  /**
-   * Given a TopicId and a post number, find that numbered post within the topic.
-   *
-   * Returns undefined if no such post exists.
-   */
   findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId {
     return this._db
       .prepare(
