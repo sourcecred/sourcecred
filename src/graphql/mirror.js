@@ -223,11 +223,11 @@ export class Mirror {
         } else if (
           !deepEqual(existingConfig.blacklistedIds, mirrorConfig.blacklistedIds)
         ) {
-          console.error(dedent`\
-            Warning: Database already loaded with different blacklistedIds.\
+          console.warn(dedent`\
+            Warning: Database already loaded with different blacklistedIds.
             Unexpected behavior may result. Consider resetting your cache.`);
           // We don't need to do the rest of the initialization, because it was
-          // setup, albiet with different options.
+          // set up, albeit with different options.
           // (The blacklisted Ids are not used in the rest of this initialization.)
           return;
         } else {
