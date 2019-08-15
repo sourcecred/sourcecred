@@ -1,0 +1,18 @@
+version: '3.4'
+services:
+ sourcecred:
+  container_name: sourcecred
+  image: sourcecred:latest
+  build:
+   context: .
+   dockerfile: docker/Dockerfile
+   cache_from:
+   - sourcecred:latest
+   - ubuntu:18.04
+  environment:
+  - SOURCECRED_GITHUB_TOKEN
+  hostname: sourcecred
+  #network_mode: host
+  restart: unless-stopped
+  ports:
+  - "8080:8080"
