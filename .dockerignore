@@ -1,1 +1,3 @@
 .token
+node_modules
+bin
