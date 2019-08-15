@@ -9,6 +9,7 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     apt-get install -y yarn build-essential && \
     mkdir -p /code
 WORKDIR /code
+ARG SOURCECRED_DIRECTORY=/data
 ADD . /code
 RUN curl --compressed -o- -L https://yarnpkg.com/install.sh | bash && \
     yarn && \

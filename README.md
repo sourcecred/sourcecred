@@ -107,8 +107,7 @@ $ docker logs sourcecred
 ...
 ```
 
-It will take about 30 seconds to do the initial build, and when the web server is running you'll see
-this at the end:
+It will take about 30 seconds to do the initial build, and when the web server is running you'll see this at the end:
 
 ```bash
 ...
@@ -118,6 +117,10 @@ this at the end:
     + 1006 hidden modules
 ℹ ｢wdm｣: Compiled successfully.
 ```
+
+**Important** Although we expose port 0.0.0.0 to be viewable on your host,
+this is _not a production_ deployment and you should take precaution in how
+you use it.
 
 Then you can open up to [http://127.0.0.1:8080](http://127.0.0.1:8080) to see the interface!
 
