@@ -1,6 +1,5 @@
-FROM node:10
+FROM node:12
 # docker build -t sourcecred .
-# available at vanessa/sourcecred if you don't want to build
 
 # Set up working directory.
 RUN mkdir -p /code
