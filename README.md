@@ -62,7 +62,7 @@ Finally, we can navigate a browser window to `localhost:8080` to view generated 
 
 ### Running with Docker
 
-Optionally, you can build and run sourcecred in a container to avoid installing dependencies
+You can build and run sourcecred in a container to avoid installing dependencies
 on your host. First, build the container:
 
 ```bash
@@ -74,13 +74,6 @@ set that as a `--build-arg`:
 
 ```bash
 $ docker build --build-arg SOURCECRED_DEFAULT_DIRECTORY=/tmp/data -t sourcecred .
-```
-
-If you don't want to build, the container is also provided at [vanessa/sourcecred](https://hub.docker.com/r/vanessa/sourcecred)
-
-```bash
-$ docker pull vanessa/sourcecred
-$ docker tag vanessa/sourcecred sourcecred
 ```
 
 You will still need to export a GitHub token, and then provide it to the container
