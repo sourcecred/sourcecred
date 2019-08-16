@@ -13,7 +13,7 @@ import {
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v1";
+const VERSION = "discourse_mirror_v2";
 
 /**
  * An interface for retrieving all of the Discourse data at once.
@@ -45,6 +45,13 @@ export interface DiscourseData {
    * Returns undefined if no such post is available.
    */
   findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId;
+
+  /**
+   * Get usernames for all users.
+   *
+   * The order is unspecified.
+   */
+  users(): $ReadOnlyArray<string>;
 }
 
 /**
@@ -131,12 +138,14 @@ export class Mirror implements DiscourseData {
     db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(config);
 
     const tables = [
+      "CREATE TABLE users (username TEXT PRIMARY KEY)",
       dedent`\
         CREATE TABLE topics (
             id INTEGER PRIMARY KEY,
             title TEXT NOT NULL,
             timestamp_ms INTEGER NOT NULL,
-            author_username TEXT NOT NULL
+            author_username TEXT NOT NULL,
+            FOREIGN KEY(author_username) REFERENCES users(username)
         )
       `,
       dedent`\
@@ -147,7 +156,8 @@ export class Mirror implements DiscourseData {
             topic_id INTEGER NOT NULL,
             index_within_topic INTEGER NOT NULL,
             reply_to_post_index INTEGER,
-            FOREIGN KEY(topic_id) REFERENCES topics(id)
+            FOREIGN KEY(topic_id) REFERENCES topics(id),
+            FOREIGN KEY(author_username) REFERENCES users(username)
         )
       `,
     ];
@@ -200,6 +210,13 @@ export class Mirror implements DiscourseData {
       }));
   }
 
+  users(): $ReadOnlyArray<string> {
+    return this._db
+      .prepare("SELECT username FROM users")
+      .pluck()
+      .all();
+  }
+
   findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId {
     return this._db
       .prepare(
@@ -237,6 +254,9 @@ export class Mirror implements DiscourseData {
         topicId,
         authorUsername,
       } = post;
+      db.prepare("INSERT OR IGNORE INTO users (username) VALUES (?)").run(
+        authorUsername
+      );
       db.prepare(
         dedent`\
           REPLACE INTO posts (
@@ -275,6 +295,9 @@ export class Mirror implements DiscourseData {
       if (topicWithPosts != null) {
         const {topic, posts} = topicWithPosts;
         const {id, title, timestampMs, authorUsername} = topic;
+        db.prepare("INSERT OR IGNORE INTO users (username) VALUES (?)").run(
+          authorUsername
+        );
         this._db
           .prepare(
             dedent`\

@@ -40,6 +40,16 @@ describe("plugins/discourse/createGraph", () => {
     posts(): $ReadOnlyArray<Post> {
       return this._posts;
     }
+    users(): $ReadOnlyArray<string> {
+      const users = new Set();
+      for (const {authorUsername} of this.posts()) {
+        users.add(authorUsername);
+      }
+      for (const {authorUsername} of this.topics()) {
+        users.add(authorUsername);
+      }
+      return Array.from(users);
+    }
     findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId {
       const post = this._posts.filter(
         (p) => p.topicId === topicId && p.indexWithinTopic === indexWithinTopic

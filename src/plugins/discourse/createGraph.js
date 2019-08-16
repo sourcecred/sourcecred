@@ -130,17 +130,19 @@ export function createGraph(serverUrl: string, data: DiscourseData): Graph {
   const g = new Graph();
   const topicIdToTitle: Map<TopicId, string> = new Map();
 
+  for (const username of data.users()) {
+    g.addNode(userNode(serverUrl, username));
+  }
+
   for (const topic of data.topics()) {
     topicIdToTitle.set(topic.id, topic.title);
     g.addNode(topicNode(serverUrl, topic));
-    g.addNode(userNode(serverUrl, topic.authorUsername));
     g.addEdge(authorsTopicEdge(serverUrl, topic));
   }
 
   for (const post of data.posts()) {
     const topicTitle = topicIdToTitle.get(post.topicId) || "[unknown topic]";
     g.addNode(postNode(serverUrl, post, topicTitle));
-    g.addNode(userNode(serverUrl, post.authorUsername));
     g.addEdge(authorsPostEdge(serverUrl, post));
     g.addEdge(topicContainsPostEdge(serverUrl, post));
     let replyToPostIndex = post.replyToPostIndex;

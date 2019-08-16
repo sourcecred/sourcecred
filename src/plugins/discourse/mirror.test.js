@@ -194,6 +194,21 @@ describe("plugins/discourse/mirror", () => {
     expect(mirror.posts()).toEqual(posts);
   });
 
+  it("provides usernames for all active users", async () => {
+    const {mirror, fetcher} = example();
+    fetcher.addPost(2, null, "alpha");
+    fetcher.addPost(3, null, "beta");
+    fetcher.addPost(3, 1, "alpha");
+    await mirror.update();
+    // credbot appears because it is the nominal author of all topics
+    expect(
+      mirror
+        .users()
+        .slice()
+        .sort()
+    ).toEqual(["alpha", "beta", "credbot"]);
+  });
+
   describe("update semantics", () => {
     it("only fetches new topics on `update`", async () => {
       const {mirror, fetcher} = example();
