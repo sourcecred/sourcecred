@@ -199,6 +199,50 @@ $ docker stop sourcecred
 ```
 
 
+#### Build
+
+Build is useful if you have a populated sourcecred data directory and can also provide a volume to generate output for.
+In the example below, we issue a build command for pre-generated files in "data" and specify output with `--output-path <path>` to be another volume.
+
+```bash
+$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
+    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -v $PWD/data:/data -v $PWD/docs:/output -p 8080:8080 sourcecred/sourcecred build --output-path /output
+```
+
+The container will run again for about 30 seconds, you can run `docker logs sourcecred` to see output.
+When the container no longer exists, you can look in "docs" in the present working directory to see output files:
+
+```bash
+$ ls docs/
+asset-manifest.json  discord-invite  favicon.png  index.html  prototype  static  test  timeline
+```
+
+This is the same content that we saw earlier with the development server, so a reasonable use case for this command would be to run to build docs that you then serve statically.
+
+#### Wildcard
+
+If your command doesn't start with one of build, dev-server, or dev-preview, it will just be passed on to the sourcecred.js. For example, here we can ask for a version or help:
+
+```bash
+$ docker run -it --name sourcecred --rm  sourcecred/sourcecred --version
+sourcecred v0.4.0
+```
+
+or for help:
+
+```bash
+$ docker run -it --name sourcecred --rm  sourcecred --help
+usage: sourcecred COMMAND [ARGS...]
+       sourcecred [--version] [--help]
+
+Commands:
+  load          load repository data into SourceCred
+  clear         clear SoucrceCred data
+  help          show this help message
+
+Use 'sourcecred help COMMAND' for help about an individual command.
+```
+
 #### Examples
 
 If you wanted to look at cred for [ipfs/js-ipfs], you could run:
