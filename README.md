@@ -41,8 +41,7 @@ First, make sure that you have the following dependencies:
 [GitHub API token]: https://github.com/settings/tokens
 [macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-417202213
 
-You'll stil need to create a GitHub token to use as an environment variable
-(shown later). First, run the following commands to clone and build SourceCred:
+You'll stil need to create a GitHub token to use as an environment variable (shown later). First, run the following commands to clone and build SourceCred:
 
 ```Bash
 git clone https://github.com/sourcecred/sourcecred.git
@@ -62,41 +61,56 @@ Finally, we can navigate a browser window to `localhost:8080` to view generated 
 
 ### Running with Docker
 
-You can build and run sourcecred in a container to avoid installing dependencies
-on your host. First, build the container:
+You can build and run sourcecred in a container to avoid installing dependencies on your host. First, build the container:
 
 ```bash
-$ docker build -t sourcecred .
+$ docker build -t sourcecred/sourcecred .
 ```
 
-If you want to build and customize the `SOURCECRED_DIRECTORY`, you can
-set that as a `--build-arg`:
+If you want to build and customize the `SOURCECRED_DIRECTORY`, you can set that as a `--build-arg`:
 
 ```bash
-$ docker build --build-arg SOURCECRED_DEFAULT_DIRECTORY=/tmp/data -t sourcecred .
+$ docker build --build-arg SOURCECRED_DEFAULT_DIRECTORY=/tmp/data -t sourcecred/sourcecred .
 ```
 
-You will still need to export a GitHub token, and then provide it to the container
-when you run it. Notice that we are also binding port 8080 so we can
-view the web interface that will be opened up.  The only argument needed is a command to load the GitHub repository to generate the sourcecred for:
+Your options for running the container including the following commands. 
+Examples will be shown for each.
+
+ - **dev-preview**: offers a shortcut for loading sourcecred and then starting a dev server. This is likely the option you'll choose if you want to provide a respository or an organization and preview results a web interface.
+ - **dev-server**: exposes several webpack operations without the initial load. This takes no arguments.
+ - **build**: simply provides the build command to yarn, followed by any argumnents that you provide.
+ - **(anything else)**: will be passed on to sourcecred.js
+
+#### Development Preview 
+
+To run the development preview, you will still need to export a GitHub token, and then provide it to the container when you run it. 
+Notice that we are also binding port 8080 so we can view the web interface that will be opened up.  
+The only argument needed is a command to load the GitHub repository to generate the sourcecred for:
 
 ```bash
 REPOSITORY=sfosc/sfosc
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred load "${REPOSITORY}"
+    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred/sourcecred dev-preview "${REPOSITORY}"
 ```
 
-If you want to bind the data folder to the host, you can do that too. In the example
-below, we have a folder "data" in the present working directory that we bind to
-"/data" in the container, the default `SOURCECRED_DIRECTORY`.
+You can also specify an entire organization:
 
+```bash
+ORGANIZATION=@sfosc
+$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
+    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred/sourcecred dev-preview "${ORGANIZATION}"
+```
+
+If you want to bind the data folder to the host, you can do that too. 
+In the example below, we have a folder "data" in the present working directory that we bind to "/data" in the container, the default `SOURCECRED_DIRECTORY`.
 
 ```bash
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 -v $PWD/data:/data sourcecred load "${REPOSITORY}"
+    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 -v $PWD/data:/data sourcecred/sourcecred load "${REPOSITORY}"
 ```
 
-We are running in detached mode (-d) so it's easier to remove the container after. After running the command, you can inspect it's progress like this:
+We are running in detached mode (-d) so it's easier to remove the container after. 
+After running the command, you can inspect it's progress like this:
 
 ```bash
 $ docker logs sourcecred
@@ -120,10 +134,7 @@ It will take about 30 seconds to do the initial build, and when the web server i
 ℹ ｢wdm｣: Compiled successfully.
 ```
 
-**Important** Although we expose port 0.0.0.0 to be viewable on your host,
-this is _not a production_ deployment and you should take precaution in how
-you use it.
-
+**Important** Although we expose port 0.0.0.0 to be viewable on your host, this is _not a production_ deployment and you should take precaution in how you use it.
 Then you can open up to [http://127.0.0.1:8080](http://127.0.0.1:8080) to see the interface!
 
 ![img/home-screen.png](img/home-screen.png)
@@ -142,9 +153,8 @@ When you are finished, stop and remove the container.
 $ docker stop sourcecred
 ```
 
-Since we used the remove (--rm) tag, stopping it will also remove it. If you bound
-the data folder to the host, you'll see the output remaining there from
-the generation:
+Since we used the remove (--rm) tag, stopping it will also remove it. 
+If you bound the data folder to the host, you'll see the output remaining there from the generation:
 
 ```bash
 $ tree data/
@@ -161,6 +171,33 @@ data/
 ```
 
 Cool!
+
+
+#### Development Server
+
+If you only want to start the development server, you can run the container like this:
+
+```bash
+$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
+    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred/sourcecred dev-server
+```
+
+That will start the server without load or generation first:
+
+```bash
+$ docker logs sourcecred
+(node:17) DeprecationWarning: Tapable.plugin is deprecated. Use new API on `.hooks` instead
+ℹ ｢wds｣: Project is running at http://0.0.0.0:8080/webpack-dev-server/
+ℹ ｢wds｣: webpack output is served from /
+ℹ ｢wds｣: Content not from webpack is served from /code
+```
+
+When you finish, don't forget to stop the container:
+
+```bash
+$ docker stop sourcecred
+```
+
 
 #### Examples
 
