@@ -13,6 +13,9 @@ import {
   authorsPostEdge,
   topicContainsPostEdge,
   postRepliesEdge,
+  likesEdge,
+  userAddress,
+  postAddress,
 } from "./createGraph";
 import {
   userNodeType,
@@ -22,6 +25,7 @@ import {
   authorsPostEdgeType,
   topicContainsPostEdgeType,
   postRepliesEdgeType,
+  likesEdgeType,
 } from "./declaration";
 import type {EdgeType, NodeType} from "../../analysis/types";
 
@@ -98,7 +102,7 @@ describe("plugins/discourse/createGraph", () => {
       authorUsername: "mzargham",
     };
     const likes: $ReadOnlyArray<LikeAction> = [
-      {timestampMs: 3, username: "mzargam", postId: 2},
+      {timestampMs: 3, username: "mzargham", postId: 2},
       {timestampMs: 4, username: "decentralion", postId: 3},
     ];
     const posts = [post1, post2, post3];
@@ -116,14 +120,14 @@ describe("plugins/discourse/createGraph", () => {
       );
       expect(node.timestampMs).toEqual(null);
       expect(NodeAddress.toParts(node.address)).toMatchInlineSnapshot(`
-                Array [
-                  "sourcecred",
-                  "discourse",
-                  "user",
-                  "https://url.com",
-                  "decentralion",
-                ]
-            `);
+                                Array [
+                                  "sourcecred",
+                                  "discourse",
+                                  "user",
+                                  "https://url.com",
+                                  "decentralion",
+                                ]
+                        `);
     });
     it("for topics", () => {
       const {url, topic} = example();
@@ -133,14 +137,14 @@ describe("plugins/discourse/createGraph", () => {
       );
       expect(node.timestampMs).toEqual(topic.timestampMs);
       expect(NodeAddress.toParts(node.address)).toMatchInlineSnapshot(`
-                Array [
-                  "sourcecred",
-                  "discourse",
-                  "topic",
-                  "https://url.com",
-                  "1",
-                ]
-            `);
+                                Array [
+                                  "sourcecred",
+                                  "discourse",
+                                  "topic",
+                                  "https://url.com",
+                                  "1",
+                                ]
+                        `);
     });
     it("for posts", () => {
       const {url, topic, posts} = example();
@@ -150,14 +154,14 @@ describe("plugins/discourse/createGraph", () => {
       );
       expect(node.timestampMs).toEqual(posts[1].timestampMs);
       expect(NodeAddress.toParts(node.address)).toMatchInlineSnapshot(`
-                Array [
-                  "sourcecred",
-                  "discourse",
-                  "post",
-                  "https://url.com",
-                  "2",
-                ]
-            `);
+                                Array [
+                                  "sourcecred",
+                                  "discourse",
+                                  "post",
+                                  "https://url.com",
+                                  "2",
+                                ]
+                        `);
     });
     it("gives an [unknown topic] description for posts without a matching topic", () => {
       const post = {
@@ -187,16 +191,16 @@ describe("plugins/discourse/createGraph", () => {
       expect(edge.dst).toEqual(expectedDst);
       expect(edge.timestampMs).toEqual(topic.timestampMs);
       expect(EdgeAddress.toParts(edge.address)).toMatchInlineSnapshot(`
-        Array [
-          "sourcecred",
-          "discourse",
-          "authors",
-          "topic",
-          "https://url.com",
-          "decentralion",
-          "1",
-        ]
-      `);
+                        Array [
+                          "sourcecred",
+                          "discourse",
+                          "authors",
+                          "topic",
+                          "https://url.com",
+                          "decentralion",
+                          "1",
+                        ]
+                  `);
     });
     it("for authorsPost", () => {
       const {url, posts, topic} = example();
@@ -208,16 +212,16 @@ describe("plugins/discourse/createGraph", () => {
       expect(edge.dst).toEqual(expectedDst);
       expect(edge.timestampMs).toEqual(post.timestampMs);
       expect(EdgeAddress.toParts(edge.address)).toMatchInlineSnapshot(`
-        Array [
-          "sourcecred",
-          "discourse",
-          "authors",
-          "post",
-          "https://url.com",
-          "wchargin",
-          "2",
-        ]
-      `);
+                        Array [
+                          "sourcecred",
+                          "discourse",
+                          "authors",
+                          "post",
+                          "https://url.com",
+                          "wchargin",
+                          "2",
+                        ]
+                  `);
     });
     it("for topicContainsPost", () => {
       const {url, posts, topic} = example();
@@ -229,15 +233,15 @@ describe("plugins/discourse/createGraph", () => {
       expect(edge.dst).toEqual(expectedDst);
       expect(edge.timestampMs).toEqual(post.timestampMs);
       expect(EdgeAddress.toParts(edge.address)).toMatchInlineSnapshot(`
-        Array [
-          "sourcecred",
-          "discourse",
-          "topicContainsPost",
-          "https://url.com",
-          "1",
-          "2",
-        ]
-      `);
+                        Array [
+                          "sourcecred",
+                          "discourse",
+                          "topicContainsPost",
+                          "https://url.com",
+                          "1",
+                          "2",
+                        ]
+                  `);
     });
     it("for postReplies", () => {
       const {url, posts, topic} = example();
@@ -250,12 +254,32 @@ describe("plugins/discourse/createGraph", () => {
       expect(edge.dst).toEqual(expectedDst);
       expect(edge.timestampMs).toEqual(post.timestampMs);
       expect(EdgeAddress.toParts(edge.address)).toMatchInlineSnapshot(`
+                        Array [
+                          "sourcecred",
+                          "discourse",
+                          "replyTo",
+                          "https://url.com",
+                          "3",
+                          "2",
+                        ]
+                  `);
+    });
+    it("for likes", () => {
+      const {url, likes} = example();
+      const like = likes[0];
+      const expectedSrc = userAddress(url, like.username);
+      const expectedDst = postAddress(url, like.postId);
+      const edge = likesEdge(url, like);
+      expect(edge.src).toEqual(expectedSrc);
+      expect(edge.dst).toEqual(expectedDst);
+      expect(edge.timestampMs).toEqual(like.timestampMs);
+      expect(EdgeAddress.toParts(edge.address)).toMatchInlineSnapshot(`
         Array [
           "sourcecred",
           "discourse",
-          "replyTo",
+          "likes",
           "https://url.com",
-          "3",
+          "mzargham",
           "2",
         ]
       `);
@@ -321,6 +345,11 @@ describe("plugins/discourse/createGraph", () => {
         postRepliesEdge(url, post3, post2.id),
       ];
       expectEdgesOfType(edges, postRepliesEdgeType);
+    });
+    it("likes edges", () => {
+      const {url, likes} = example();
+      const edges = likes.map((l) => likesEdge(url, l));
+      expectEdgesOfType(edges, likesEdgeType);
     });
   });
 });
