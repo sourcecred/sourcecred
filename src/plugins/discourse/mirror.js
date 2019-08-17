@@ -216,17 +216,15 @@ export class Mirror implements DiscourseData {
   async update() {
     const db = this._db;
     const latestTopicId = await this._fetcher.latestTopicId();
-    const lastLocalPostId =
-      db
-        .prepare("SELECT MAX(id) FROM posts")
-        .pluck()
-        .get() || 0;
-
-    const lastLocalTopicId =
-      db
-        .prepare("SELECT MAX(id) FROM topics")
-        .pluck()
-        .get() || 0;
+    const {max_post: lastLocalPostId, max_topic: lastLocalTopicId} = db
+      .prepare(
+        dedent`\
+          SELECT
+              (SELECT IFNULL(MAX(id), 0) FROM posts) AS max_post,
+              (SELECT IFNULL(MAX(id), 0) FROM topics) AS max_topic
+          `
+      )
+      .get();
 
     const encounteredPostIds = new Set();
 
