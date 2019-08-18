@@ -1,6 +1,6 @@
 // @flow
 
-import type Database from "better-sqlite3";
+import type {Database} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
 import {
@@ -271,46 +271,75 @@ export class Mirror implements DiscourseData {
 
     const encounteredPostIds = new Set();
 
-    function addPost(post: Post) {
-      const {
-        id,
-        timestampMs,
-        replyToPostIndex,
-        indexWithinTopic,
-        topicId,
-        authorUsername,
-      } = post;
-      db.prepare("INSERT OR IGNORE INTO users (username) VALUES (?)").run(
-        authorUsername
-      );
-      db.prepare(
+    const addPost: (Post) => void = (() => {
+      const query = db.prepare(
         dedent`\
           REPLACE INTO posts (
-            id,
-            timestamp_ms,
-            author_username,
-            topic_id,
-            index_within_topic,
-            reply_to_post_index
+              id,
+              timestamp_ms,
+              author_username,
+              topic_id,
+              index_within_topic,
+              reply_to_post_index
           ) VALUES (
-            :id,
-            :timestamp_ms,
-            :author_username,
-            :topic_id,
-            :index_within_topic,
-            :reply_to_post_index
+              :id,
+              :timestamp_ms,
+              :author_username,
+              :topic_id,
+              :index_within_topic,
+              :reply_to_post_index
           )
         `
-      ).run({
-        id,
-        timestamp_ms: timestampMs,
-        reply_to_post_index: replyToPostIndex,
-        index_within_topic: indexWithinTopic,
-        topic_id: topicId,
-        author_username: authorUsername,
-      });
-      encounteredPostIds.add(id);
-    }
+      );
+      return function addPost(post: Post) {
+        addUser(post.authorUsername);
+        query.run({
+          id: post.id,
+          timestamp_ms: post.timestampMs,
+          reply_to_post_index: post.replyToPostIndex,
+          index_within_topic: post.indexWithinTopic,
+          topic_id: post.topicId,
+          author_username: post.authorUsername,
+        });
+        encounteredPostIds.add(post.id);
+      };
+    })();
+
+    const addUser: (username: string) => void = (() => {
+      const query = db.prepare(
+        "INSERT OR IGNORE INTO users (username) VALUES (?)"
+      );
+      return function addUser(username: string) {
+        query.run(username);
+      };
+    })();
+
+    const addTopic: (Topic) => void = (() => {
+      const query = this._db.prepare(
+        dedent`\
+          REPLACE INTO topics (
+              id,
+              title,
+              timestamp_ms,
+              author_username
+          ) VALUES (
+              :id,
+              :title,
+              :timestamp_ms,
+              :author_username
+          )
+        `
+      );
+      return function addTopic(topic: Topic) {
+        addUser(topic.authorUsername);
+        query.run({
+          id: topic.id,
+          title: topic.title,
+          timestamp_ms: topic.timestampMs,
+          author_username: topic.authorUsername,
+        });
+      };
+    })();
 
     for (
       let topicId = lastLocalTopicId + 1;
@@ -320,31 +349,7 @@ export class Mirror implements DiscourseData {
       const topicWithPosts = await this._fetcher.topicWithPosts(topicId);
       if (topicWithPosts != null) {
         const {topic, posts} = topicWithPosts;
-        const {id, title, timestampMs, authorUsername} = topic;
-        db.prepare("INSERT OR IGNORE INTO users (username) VALUES (?)").run(
-          authorUsername
-        );
-        this._db
-          .prepare(
-            dedent`\
-            REPLACE INTO topics (
-              id,
-              title,
-              timestamp_ms,
-              author_username
-            ) VALUES (
-              :id,
-              :title,
-              :timestamp_ms,
-              :author_username
-            )`
-          )
-          .run({
-            id,
-            title,
-            timestamp_ms: timestampMs,
-            author_username: authorUsername,
-          });
+        addTopic(topic);
         for (const post of posts) {
           addPost(post);
         }
@@ -386,6 +391,23 @@ export class Mirror implements DiscourseData {
     // who we either haven't scanned in the last week, or who have been active
     // since our last scan. This would likely improve the performance of this
     // section of the update significantly.
+    const insertLike = db.prepare(
+      dedent`\
+        INSERT INTO likes (
+          post_id, timestamp_ms, username
+        ) VALUES (
+          :post_id, :timestamp_ms, :username
+        )
+      `
+    );
+    const alreadySeenLike = db
+      .prepare(
+        dedent`\
+          SELECT * FROM likes
+          WHERE post_id = :post_id AND username = :username
+        `
+      )
+      .pluck();
     for (const user of this.users()) {
       let offset = 0;
       let upToDate = false;
@@ -393,31 +415,14 @@ export class Mirror implements DiscourseData {
         const likeActions = await this._fetcher.likesByUser(user, offset);
         possiblePageSize = Math.max(likeActions.length, possiblePageSize);
         for (const {timestampMs, postId, username} of likeActions) {
-          const alreadySeenThisLike = db
-            .prepare(
-              dedent`\
-                SELECT * FROM likes
-                WHERE post_id = :post_id AND username = :username
-          `
-            )
-            .pluck()
-            .get({post_id: postId, username});
-          if (alreadySeenThisLike) {
+          if (alreadySeenLike.get({post_id: postId, username: username})) {
             upToDate = true;
             break;
           }
-          db.prepare(
-            dedent`\
-              INSERT INTO likes (
-                post_id, timestamp_ms, username
-              ) VALUES (
-                :post_id, :timestamp_ms, :username
-              )
-            `
-          ).run({
+          insertLike.run({
             post_id: postId,
             timestamp_ms: timestampMs,
-            username,
+            username: username,
           });
         }
         if (likeActions.length === 0 || likeActions.length < possiblePageSize) {
