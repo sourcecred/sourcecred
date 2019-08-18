@@ -51,8 +51,8 @@ export const postRepliesEdgeType: EdgeType = deepFreeze({
 });
 
 export const authorsTopicEdgeType: EdgeType = deepFreeze({
-  forwardName: "authors",
-  backwardName: "is authored by",
+  forwardName: "authors topic",
+  backwardName: "topic is authored by",
   prefix: EdgeAddress.fromParts([
     "sourcecred",
     "discourse",
@@ -64,8 +64,8 @@ export const authorsTopicEdgeType: EdgeType = deepFreeze({
 });
 
 export const authorsPostEdgeType: EdgeType = deepFreeze({
-  forwardName: "authors",
-  backwardName: "is authored by",
+  forwardName: "authors post",
+  backwardName: "post is authored by",
   prefix: EdgeAddress.fromParts(["sourcecred", "discourse", "authors", "post"]),
   defaultWeight: {forwards: 0.5, backwards: 1},
   description: "Connects an author to a post they've created.",
