@@ -90,7 +90,6 @@ export async function defaultLoader(
   projectId: ProjectId
 ): Promise<LoadResult> {
   async function fetchCred(): Promise<TimelineCred> {
-    console.error(">>>DEFAULTLOADER");
     const encodedId = encodeProjectId(projectId);
     const url = assets.resolve(`api/v1/data/projects/${encodedId}/cred.json`);
     const response = await fetch(url);
