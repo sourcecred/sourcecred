@@ -38,7 +38,7 @@ export const topicContainsPostEdgeType: EdgeType = deepFreeze({
     "discourse",
     "topicContainsPost",
   ]),
-  defaultWeight: {forwards: 0, backwards: 1},
+  defaultWeight: {forwards: 1 / 16, backwards: 1 / 4},
   description: "Connects a topic to the posts that it contains.",
 });
 
@@ -46,7 +46,7 @@ export const postRepliesEdgeType: EdgeType = deepFreeze({
   forwardName: "post is reply to",
   backwardName: "post replied to by",
   prefix: EdgeAddress.fromParts(["sourcecred", "discourse", "replyTo"]),
-  defaultWeight: {forwards: 1, backwards: 0},
+  defaultWeight: {forwards: 1, backwards: 1 / 16},
   description: "Connects a post to the post that it is a reply to.",
 });
 
@@ -59,7 +59,7 @@ export const authorsTopicEdgeType: EdgeType = deepFreeze({
     "authors",
     "topic",
   ]),
-  defaultWeight: {forwards: 0.5, backwards: 1},
+  defaultWeight: {forwards: 1 / 4, backwards: 1},
   description: "Connects an author to a topic they created.",
 });
 
@@ -67,7 +67,7 @@ export const authorsPostEdgeType: EdgeType = deepFreeze({
   forwardName: "authors post",
   backwardName: "post is authored by",
   prefix: EdgeAddress.fromParts(["sourcecred", "discourse", "authors", "post"]),
-  defaultWeight: {forwards: 0.5, backwards: 1},
+  defaultWeight: {forwards: 1 / 4, backwards: 1},
   description: "Connects an author to a post they've created.",
 });
 
@@ -75,7 +75,7 @@ export const likesEdgeType: EdgeType = deepFreeze({
   forwardName: "likes",
   backwardName: "is liked by",
   prefix: EdgeAddress.fromParts(["sourcecred", "discourse", "likes"]),
-  defaultWeight: {forwards: 1, backwards: 0},
+  defaultWeight: {forwards: 1, backwards: 1 / 16},
   description: "Connects a Discourse user to a post they liked.",
 });
 
