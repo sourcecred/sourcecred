@@ -391,39 +391,49 @@ export class Mirror implements DiscourseData {
     // who we either haven't scanned in the last week, or who have been active
     // since our last scan. This would likely improve the performance of this
     // section of the update significantly.
-    const insertLike = db.prepare(
-      dedent`\
-        INSERT INTO likes (
-          post_id, timestamp_ms, username
-        ) VALUES (
-          :post_id, :timestamp_ms, :username
-        )
-      `
-    );
-    const alreadySeenLike = db
-      .prepare(
+
+    /**
+     * Add a like action to the database. The user of the like is
+     * assumed to already exist in the database; if this is not known to
+     * be the case, run `addUser(like.username)` first.
+     *
+     * Returns a status indicating whether the database changed as a
+     * result of this call.
+     */
+    const addLike: (like: LikeAction) => {|+changed: boolean|} = (() => {
+      const query = db.prepare(
         dedent`\
-          SELECT * FROM likes
-          WHERE post_id = :post_id AND username = :username
+          INSERT OR IGNORE INTO likes (
+              post_id,
+              timestamp_ms,
+              username
+          ) VALUES (
+              :post_id,
+              :timestamp_ms,
+              :username
+          )
         `
-      )
-      .pluck();
+      );
+      return function addLike(like: LikeAction) {
+        const runResult = query.run({
+          post_id: like.postId,
+          timestamp_ms: like.timestampMs,
+          username: like.username,
+        });
+        return {changed: runResult.changes > 0};
+      };
+    })();
     for (const user of this.users()) {
       let offset = 0;
       let upToDate = false;
       while (!upToDate) {
         const likeActions = await this._fetcher.likesByUser(user, offset);
         possiblePageSize = Math.max(likeActions.length, possiblePageSize);
-        for (const {timestampMs, postId, username} of likeActions) {
-          if (alreadySeenLike.get({post_id: postId, username: username})) {
+        for (const like of likeActions) {
+          if (!addLike(like).changed) {
             upToDate = true;
             break;
           }
-          insertLike.run({
-            post_id: postId,
-            timestamp_ms: timestampMs,
-            username: username,
-          });
         }
         if (likeActions.length === 0 || likeActions.length < possiblePageSize) {
           upToDate = true;
