@@ -8,7 +8,13 @@ import {
   type Edge,
   type NodeAddressT,
 } from "../../core/graph";
-import {type PostId, type TopicId, type Post, type Topic} from "./fetch";
+import {
+  type PostId,
+  type TopicId,
+  type Post,
+  type Topic,
+  type LikeAction,
+} from "./fetch";
 import {type DiscourseData} from "./mirror";
 import {
   topicNodeType,
@@ -18,6 +24,7 @@ import {
   authorsTopicEdgeType,
   postRepliesEdgeType,
   topicContainsPostEdgeType,
+  likesEdgeType,
 } from "./declaration";
 
 export function topicAddress(serverUrl: string, id: TopicId): NodeAddressT {
@@ -114,12 +121,26 @@ export function postRepliesEdge(
     String(post.id),
     String(basePostId)
   );
-
   return {
     address,
     timestampMs: post.timestampMs,
     src: postAddress(serverUrl, post.id),
     dst: postAddress(serverUrl, basePostId),
+  };
+}
+
+export function likesEdge(serverUrl: string, like: LikeAction): Edge {
+  const address = EdgeAddress.append(
+    likesEdgeType.prefix,
+    serverUrl,
+    like.username,
+    String(like.postId)
+  );
+  return {
+    address,
+    timestampMs: like.timestampMs,
+    src: userAddress(serverUrl, like.username),
+    dst: postAddress(serverUrl, like.postId),
   };
 }
 
@@ -159,6 +180,10 @@ export function createGraph(serverUrl: string, data: DiscourseData): Graph {
         g.addEdge(postRepliesEdge(serverUrl, post, basePostId));
       }
     }
+  }
+
+  for (const like of data.likes()) {
+    g.addEdge(likesEdge(serverUrl, like));
   }
 
   return g;

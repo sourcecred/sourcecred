@@ -71,6 +71,14 @@ export const authorsPostEdgeType: EdgeType = deepFreeze({
   description: "Connects an author to a post they've created.",
 });
 
+export const likesEdgeType: EdgeType = deepFreeze({
+  forwardName: "likes",
+  backwardName: "is liked by",
+  prefix: EdgeAddress.fromParts(["sourcecred", "discourse", "likes"]),
+  defaultWeight: {forwards: 1, backwards: 0},
+  description: "Connects a Discourse user to a post they liked.",
+});
+
 export const declaration: PluginDeclaration = deepFreeze({
   name: "discourse",
   nodeTypes: [userNodeType, topicNodeType, postNodeType],
@@ -79,5 +87,6 @@ export const declaration: PluginDeclaration = deepFreeze({
     authorsTopicEdgeType,
     authorsPostEdgeType,
     topicContainsPostEdgeType,
+    likesEdgeType,
   ],
 });
