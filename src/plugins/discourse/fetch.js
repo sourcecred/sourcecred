@@ -48,6 +48,14 @@ export type TopicWithPosts = {|
   +posts: $ReadOnlyArray<Post>,
 |};
 
+export type LikeAction = {|
+  // The user who liked something
+  +username: string,
+  // The post being liked
+  +postId: PostId,
+  +timestampMs: number,
+|};
+
 /**
  * Interface over the external Discourse API, structured to suit our particular needs.
  * We have an interface (as opposed to just an implementation) to enable easy mocking and
@@ -75,6 +83,11 @@ export interface Discourse {
   // encountered.
   // May reject on not OK status like 404 or 403.
   latestPosts(): Promise<Post[]>;
+
+  /**
+   * Retrieves the like actions that were initiated by the target user.
+   */
+  likesByUser(targetUsername: string, offset: number): Promise<LikeAction[]>;
 }
 
 export class Fetcher implements Discourse {
@@ -112,11 +125,9 @@ export class Fetcher implements Discourse {
 
   async latestTopicId(): Promise<TopicId> {
     const response = await this._fetch("/latest.json?order=created");
-    maybeFail404(response);
-    maybeFail403(response);
-    if (!response.ok) {
-      throw new Error(`not OK status ${response.status} on ${response.url}`);
-    }
+    failFor404(response);
+    failFor403(response);
+    failForNotOk(response);
     const json = await response.json();
     if (json.topic_list.topics.length === 0) {
       throw new Error(`no topics! got ${stringify(json)} as latest topics.`);
@@ -126,11 +137,9 @@ export class Fetcher implements Discourse {
 
   async latestPosts(): Promise<Post[]> {
     const response = await this._fetch("/posts.json");
-    maybeFail404(response);
-    maybeFail403(response);
-    if (!response.ok) {
-      throw new Error(`not OK status ${response.status} on ${response.url}`);
-    }
+    failFor404(response);
+    failFor403(response);
+    failForNotOk(response);
     const json = await response.json();
     return json.latest_posts.map(parsePost);
   }
@@ -151,9 +160,7 @@ export class Fetcher implements Discourse {
       // topic id.
       return null;
     }
-    if (response.status !== 200) {
-      throw new Error(`not OK status ${response.status} on ${response.url}`);
-    }
+    failForNotOk(response);
     const json = await response.json();
     const posts = json.post_stream.posts.map(parsePost);
     const topic: Topic = {
@@ -175,23 +182,37 @@ export class Fetcher implements Discourse {
       // Probably this post is hidden or deleted.
       return null;
     }
-    if (response.status !== 200) {
-      throw new Error(`not OK status ${response.status} on ${response.url}`);
-    }
+    failForNotOk(response);
     const json = await response.json();
     return parsePost(json);
   }
+
+  async likesByUser(username: string, offset: number): Promise<LikeAction[]> {
+    const response = await this._fetch(
+      `/user_actions.json?username=${username}&filter=1&offset=${offset}`
+    );
+    failFor404(response);
+    failFor403(response);
+    failForNotOk(response);
+    const json = await response.json();
+    return json.user_actions.map(parseLike);
+  }
 }
 
-function maybeFail404(response) {
+function failFor404(response: Response) {
   if (response.status === 404) {
     throw new Error(`404 Not Found on: ${response.url}; maybe bad serverUrl?`);
   }
 }
 
-function maybeFail403(response) {
+function failFor403(response: Response) {
   if (response.status === 403) {
     throw new Error(`403 Forbidden: bad API username or key?`);
+  }
+}
+function failForNotOk(response: Response) {
+  if (!response.ok) {
+    throw new Error(`not OK status ${response.status} on ${response.url}`);
   }
 }
 
@@ -203,6 +224,14 @@ function parsePost(json: any): Post {
     replyToPostIndex: json.reply_to_post_number,
     topicId: json.topic_id,
     authorUsername: json.username,
+  };
+}
+
+function parseLike(json: any): LikeAction {
+  return {
+    username: json.target_username,
+    postId: json.post_id,
+    timestampMs: Date.parse(json.created_at),
   };
 }
 

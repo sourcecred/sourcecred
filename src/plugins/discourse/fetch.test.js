@@ -42,6 +42,11 @@ describe("plugins/discourse/fetch", () => {
     it("loads a particular post from snapshot", async () => {
       expect(await snapshotFetcher().post(14)).toMatchSnapshot();
     });
+    it("loads user likes from snapshot", async () => {
+      expect(
+        await snapshotFetcher().likesByUser("dl-proto", 0)
+      ).toMatchSnapshot();
+    });
   });
 
   describe("error handling", () => {
