@@ -59,7 +59,9 @@ export function postNode(
   post: Post,
   topicTitle: string
 ): Node {
-  const url = `${serverUrl}/t/${String(post.topicId)}/${String(post.id)}`;
+  const url = `${serverUrl}/t/${String(post.topicId)}/${String(
+    post.indexWithinTopic
+  )}`;
   const descr = `[post #${post.indexWithinTopic} on ${topicTitle}](${url})`;
   const address = postAddress(serverUrl, post.id);
   return {timestampMs: post.timestampMs, address, description: descr};
