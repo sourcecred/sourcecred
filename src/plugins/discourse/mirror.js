@@ -9,11 +9,12 @@ import {
   type PostId,
   type Topic,
   type Post,
+  type LikeAction,
 } from "./fetch";
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v2";
+const VERSION = "discourse_mirror_v3";
 
 /**
  * An interface for retrieving all of the Discourse data at once.
@@ -52,6 +53,11 @@ export interface DiscourseData {
    * The order is unspecified.
    */
   users(): $ReadOnlyArray<string>;
+
+  /**
+   * Gets all of the like actions in the history.
+   */
+  likes(): $ReadOnlyArray<LikeAction>;
 }
 
 /**
@@ -160,6 +166,15 @@ export class Mirror implements DiscourseData {
             FOREIGN KEY(author_username) REFERENCES users(username)
         )
       `,
+      dedent`\
+        CREATE TABLE likes (
+          username TEXT NOT NULL,
+          post_id INTEGER NOT NULL,
+          timestamp_ms INTEGER NOT NULL,
+          CONSTRAINT username_post PRIMARY KEY (username, post_id),
+          FOREIGN KEY(post_id) REFERENCES posts(id),
+          FOREIGN KEY(username) REFERENCES users(username)
+        )`,
     ];
     for (const sql of tables) {
       db.prepare(sql).run();
@@ -215,6 +230,17 @@ export class Mirror implements DiscourseData {
       .prepare("SELECT username FROM users")
       .pluck()
       .all();
+  }
+
+  likes(): $ReadOnlyArray<LikeAction> {
+    return this._db
+      .prepare("SELECT post_id, username, timestamp_ms FROM likes")
+      .all()
+      .map((x) => ({
+        postId: x.post_id,
+        timestampMs: x.timestamp_ms,
+        username: x.username,
+      }));
   }
 
   findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId {
@@ -341,6 +367,63 @@ export class Mirror implements DiscourseData {
       const post = await this._fetcher.post(postId);
       if (post != null) {
         addPost(post);
+      }
+    }
+
+    // I don't want to hard code the expected page size, in case it changes upstream.
+    // However, it's helpful to have a good guess of what the page size is, because if we
+    // get a result which is shorter than the page size, we know we've hit the end of the
+    // user's history, so we don't need to query any more.
+    // So, we guess that the largest page size we've seen thus far is likely the page size,
+    // and if we see any shorter pages, we know we are done for that particular user.
+    // If we are wrong about the page size, the worst case is that we do an unnecessary
+    // query when we are actually already done with the user.
+    let possiblePageSize = 0;
+    // TODO(perf): In the best case (there are no new likes), this requires
+    // doing one query for every user who ever commented in the instance. This
+    // is a bit excessive. For each user, we could store when we last checked
+    // their likes, and when they last posted. Then we could only scan users
+    // who we either haven't scanned in the last week, or who have been active
+    // since our last scan. This would likely improve the performance of this
+    // section of the update significantly.
+    for (const user of this.users()) {
+      let offset = 0;
+      let upToDate = false;
+      while (!upToDate) {
+        const likeActions = await this._fetcher.likesByUser(user, offset);
+        possiblePageSize = Math.max(likeActions.length, possiblePageSize);
+        for (const {timestampMs, postId, username} of likeActions) {
+          const alreadySeenThisLike = db
+            .prepare(
+              dedent`\
+                SELECT * FROM likes
+                WHERE post_id = :post_id AND username = :username
+          `
+            )
+            .pluck()
+            .get({post_id: postId, username});
+          if (alreadySeenThisLike) {
+            upToDate = true;
+            break;
+          }
+          db.prepare(
+            dedent`\
+              INSERT INTO likes (
+                post_id, timestamp_ms, username
+              ) VALUES (
+                :post_id, :timestamp_ms, :username
+              )
+            `
+          ).run({
+            post_id: postId,
+            timestamp_ms: timestampMs,
+            username,
+          });
+        }
+        if (likeActions.length === 0 || likeActions.length < possiblePageSize) {
+          upToDate = true;
+        }
+        offset += likeActions.length;
       }
     }
   }

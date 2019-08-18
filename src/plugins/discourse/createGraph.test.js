@@ -2,7 +2,7 @@
 
 import sortBy from "lodash.sortby";
 import type {DiscourseData} from "./mirror";
-import type {Topic, Post, PostId, TopicId} from "./fetch";
+import type {Topic, Post, PostId, TopicId, LikeAction} from "./fetch";
 import {NodeAddress, EdgeAddress, type Node, type Edge} from "../../core/graph";
 import {
   createGraph,
@@ -29,10 +29,12 @@ describe("plugins/discourse/createGraph", () => {
   class MockData implements DiscourseData {
     _topics: $ReadOnlyArray<Topic>;
     _posts: $ReadOnlyArray<Post>;
+    _likes: $ReadOnlyArray<LikeAction>;
 
-    constructor(topics, posts) {
+    constructor(topics, posts, likes) {
       this._topics = topics;
       this._posts = posts;
+      this._likes = likes;
     }
     topics(): $ReadOnlyArray<Topic> {
       return this._topics;
@@ -49,6 +51,9 @@ describe("plugins/discourse/createGraph", () => {
         users.add(authorUsername);
       }
       return Array.from(users);
+    }
+    likes(): $ReadOnlyArray<LikeAction> {
+      return this._likes;
     }
     findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId {
       const post = this._posts.filter(
@@ -92,10 +97,14 @@ describe("plugins/discourse/createGraph", () => {
       timestampMs: 1,
       authorUsername: "mzargham",
     };
+    const likes: $ReadOnlyArray<LikeAction> = [
+      {timestampMs: 3, username: "mzargam", postId: 2},
+      {timestampMs: 4, username: "decentralion", postId: 3},
+    ];
     const posts = [post1, post2, post3];
-    const data = new MockData([topic], [post1, post2, post3]);
+    const data = new MockData([topic], [post1, post2, post3], likes);
     const graph = createGraph(url, data);
-    return {graph, topic, url, posts};
+    return {graph, topic, url, posts, likes};
   }
 
   describe("nodes are constructed correctly", () => {
@@ -159,7 +168,7 @@ describe("plugins/discourse/createGraph", () => {
         timestampMs: 0,
         authorUsername: "decentralion",
       };
-      const data = new MockData([], [post]);
+      const data = new MockData([], [post], []);
       const url = "https://foo";
       const graph = createGraph(url, data);
       const actual = Array.from(graph.nodes({prefix: postNodeType.prefix}))[0];

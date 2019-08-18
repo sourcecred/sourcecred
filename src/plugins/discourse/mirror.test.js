@@ -36,6 +36,7 @@ class MockFetcher implements Discourse {
     this._latestPostId = 1;
     this._topicToPostIds = new Map();
     this._posts = new Map();
+    this._likes = [];
   }
 
   async latestTopicId(): Promise<TopicId> {
@@ -69,14 +70,11 @@ class MockFetcher implements Discourse {
     targetUsername: string,
     offset: number
   ): Promise<LikeAction[]> {
-    const CHUNK_SIZE = 5;
-    const matchingLikes = this._likes.filter(
-      ({username}) => username === targetUsername
-    );
-    return sortBy(matchingLikes, (x) => -x.timestampMs).slice(
-      offset,
-      offset + CHUNK_SIZE
-    );
+    const CHUNK_SIZE = 2;
+    const matchingLikes = this._likes
+      .filter(({username}) => username === targetUsername)
+      .reverse();
+    return matchingLikes.slice(offset, offset + CHUNK_SIZE);
   }
 
   _topic(id: TopicId): Topic {
@@ -138,11 +136,13 @@ class MockFetcher implements Discourse {
     return postId;
   }
 
-  addLike(actingUser: string, postId: PostId, timestampMs: number) {
+  addLike(actingUser: string, postId: PostId, timestampMs: number): LikeAction {
     if (!this._posts.has(postId)) {
       throw new Error("bad postId");
     }
-    this._likes.push({username: actingUser, postId, timestampMs});
+    const action = {username: actingUser, postId, timestampMs};
+    this._likes.push(action);
+    return action;
   }
 }
 
@@ -207,6 +207,38 @@ describe("plugins/discourse/mirror", () => {
         .slice()
         .sort()
     ).toEqual(["alpha", "beta", "credbot"]);
+  });
+
+  function expectLikesSorted(as, bs) {
+    const s = (ls) => sortBy(ls, (x) => x.username, (x) => x.postId);
+    expect(s(as)).toEqual(s(bs));
+  }
+
+  it("provides all the likes by users that have posted", async () => {
+    const {mirror, fetcher} = example();
+    fetcher.addPost(1, null, "alpha");
+    fetcher.addPost(2, null, "alpha");
+    fetcher.addPost(3, null, "beta");
+    const l1 = fetcher.addLike("beta", 1, 5);
+    const l2 = fetcher.addLike("beta", 2, 6);
+    const l3 = fetcher.addLike("beta", 3, 7);
+    const l4 = fetcher.addLike("alpha", 1, 8);
+    await mirror.update();
+    expectLikesSorted(mirror.likes(), [l1, l2, l3, l4]);
+    const l5 = fetcher.addLike("alpha", 2, 9);
+    fetcher.addPost(4, null, "credbot");
+    const l6 = fetcher.addLike("credbot", 2, 10);
+    const l7 = fetcher.addLike("beta", 4, 11);
+    await mirror.update();
+    expectLikesSorted(mirror.likes(), [l1, l2, l3, l4, l5, l6, l7]);
+  });
+
+  it("doesn't find likes of users that never posted", async () => {
+    const {mirror, fetcher} = example();
+    fetcher.addPost(1, null);
+    fetcher.addLike("nope", 1, 1);
+    await mirror.update();
+    expect(mirror.likes()).toEqual([]);
   });
 
   describe("update semantics", () => {
@@ -304,6 +336,46 @@ describe("plugins/discourse/mirror", () => {
       const fetchTopic = jest.spyOn(fetcher, "topicWithPosts");
       await mirror.update();
       expect(fetchTopic).not.toHaveBeenCalled();
+    });
+
+    it("queries for likes for every user", async () => {
+      const {mirror, fetcher} = example();
+      fetcher.addPost(1, null, "alpha");
+      const fetchLikes = jest.spyOn(fetcher, "likesByUser");
+      await mirror.update();
+      expect(fetchLikes).toHaveBeenCalledTimes(2);
+      expect(fetchLikes).toHaveBeenCalledWith("credbot", 0);
+      expect(fetchLikes).toHaveBeenCalledWith("alpha", 0);
+    });
+
+    it("queries with offset, as needed", async () => {
+      const {mirror, fetcher} = example();
+      fetcher.addPost(1, null, "credbot");
+      fetcher.addPost(2, null, "credbot");
+      fetcher.addPost(3, null, "credbot");
+      fetcher.addLike("credbot", 1, 1);
+      fetcher.addLike("credbot", 2, 2);
+      fetcher.addLike("credbot", 3, 3);
+      const fetchLikes = jest.spyOn(fetcher, "likesByUser");
+      await mirror.update();
+      expect(fetchLikes).toHaveBeenCalledTimes(2);
+      expect(fetchLikes).toHaveBeenCalledWith("credbot", 0);
+      expect(fetchLikes).toHaveBeenCalledWith("credbot", 2);
+    });
+
+    it("ceases querying once it has found all the new likes", async () => {
+      const {mirror, fetcher} = example();
+      fetcher.addPost(1, null, "credbot");
+      fetcher.addPost(2, null, "credbot");
+      fetcher.addPost(3, null, "credbot");
+      fetcher.addLike("credbot", 1, 1);
+      fetcher.addLike("credbot", 2, 2);
+      await mirror.update();
+      fetcher.addLike("credbot", 3, 3);
+      const fetchLikes = jest.spyOn(fetcher, "likesByUser");
+      await mirror.update();
+      expect(fetchLikes).toHaveBeenCalledTimes(1);
+      expect(fetchLikes).toHaveBeenCalledWith("credbot", 0);
     });
   });
 
