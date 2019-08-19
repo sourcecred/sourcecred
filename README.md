@@ -102,11 +102,12 @@ $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
 ```
 
 If you want to bind the data folder to the host, you can do that too. 
-In the example below, we have a folder "data" in the present working directory that we bind to "/data" in the container, the default `SOURCECRED_DIRECTORY`.
+In the example below, we have a folder "data" in the present working directory that we bind to "/data" in the container, the default `SOURCECRED_DIRECTORY`. 
+Since we've already generated the data, we no longer need the GitHub token.
 
 ```bash
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 -v $PWD/data:/data sourcecred/sourcecred load "${REPOSITORY}"
+    docker run --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -v $PWD/data:/data sourcecred/sourcecred dev-preview "${REPOSITORY}"
 ```
 
 We are running in detached mode (-d) so it's easier to remove the container after. 
