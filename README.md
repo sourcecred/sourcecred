@@ -70,7 +70,8 @@ $ docker build -t sourcecred/sourcecred .
 If you want to build and customize the `SOURCECRED_DIRECTORY`, you can set that as a `--build-arg`:
 
 ```bash
-$ docker build --build-arg SOURCECRED_DEFAULT_DIRECTORY=/tmp/data -t sourcecred/sourcecred .
+$ docker build --build-arg SOURCECRED_DEFAULT_DIRECTORY=/tmp/data \
+  -t sourcecred/sourcecred .
 ```
 
 Your options for running the container including the following commands. 
@@ -90,7 +91,8 @@ The only argument needed is a command to load the GitHub repository to generate 
 ```bash
 REPOSITORY=sfosc/sfosc
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred/sourcecred dev-preview "${REPOSITORY}"
+  docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN \
+  -p 8080:8080 sourcecred/sourcecred dev-preview "${REPOSITORY}"
 ```
 
 You can also specify an entire organization:
@@ -98,7 +100,8 @@ You can also specify an entire organization:
 ```bash
 ORGANIZATION=@sfosc
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred/sourcecred dev-preview "${ORGANIZATION}"
+  docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN \
+  -p 8080:8080 sourcecred/sourcecred dev-preview "${ORGANIZATION}"
 ```
 
 If you want to bind the data folder to the host, you can do that too. 
@@ -107,14 +110,13 @@ Since we've already generated the data, we no longer need the GitHub token.
 
 ```bash
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -v $PWD/data:/data sourcecred/sourcecred dev-preview "${REPOSITORY}"
+  docker run -ti --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN \
+  -v $PWD/data:/data sourcecred/sourcecred load "${REPOSITORY}"
 ```
 
-We are running in detached mode (-d) so it's easier to remove the container after. 
-After running the command, you can inspect it's progress like this:
+As the command runs, you will see a progress output like this:
 
 ```bash
-$ docker logs sourcecred
   GO   load-sfosc/sfosc
   GO   github/sfosc/sfosc
  DONE  github/sfosc/sfosc: 25s
@@ -124,9 +126,18 @@ $ docker logs sourcecred
 ...
 ```
 
+Once the command has completed, you can locally explore the data by using the `dev-server` command.
+
+```bash
+$ docker run -d --name sourcecred --rm -p 8080:8080 -v $PWD/data:/data \
+  sourcecred/sourcecred dev-server
+```
+
+We are running in detached mode (-d) so it's easier to remove the container after.
 It will take about 30 seconds to do the initial build, and when the web server is running you'll see this at the end:
 
 ```bash
+$ docker logs sourcecred
 ...
 [./node_modules/react/index.js] 190 bytes {main} {ssr} [built]
 [./src/homepage/index.js] 1.37 KiB {main} [built]
@@ -176,11 +187,12 @@ Cool!
 
 #### Development Server
 
-If you only want to start the development server, you can run the container like this:
+The development server lets you explore a populated sourcecred data directory using a local server.
+After you've loaded data into your directory, you can run the container like this:
 
 ```bash
-$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred/sourcecred dev-server
+$ docker run -d --name sourcecred --rm -p 8080:8080 -v $PWD/data:/data \
+  sourcecred/sourcecred dev-server
 ```
 
 That will start the server without load or generation first:
@@ -199,15 +211,17 @@ When you finish, don't forget to stop the container:
 $ docker stop sourcecred
 ```
 
+_Note: this is intended for development and local previews, it is not secure to host in production._
+
 
 #### Build
 
-Build is useful if you have a populated sourcecred data directory and can also provide a volume to generate output for.
+Build is used to generate static webpage files when you're ready to publish your sourcecred data.
 In the example below, we issue a build command for pre-generated files in "data" and specify output with `--output-path <path>` to be another volume.
 
 ```bash
-$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -v $PWD/data:/data -v $PWD/docs:/output -p 8080:8080 sourcecred/sourcecred build --output-path /output
+$ docker run -d --name sourcecred --rm -v $PWD/data:/data -v $PWD/docs:/output \
+  sourcecred/sourcecred build --output-path /output
 ```
 
 The container will run again for about 30 seconds, you can run `docker logs sourcecred` to see output.
