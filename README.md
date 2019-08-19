@@ -209,12 +209,11 @@ _Note: this is intended for development and local previews, it is not secure to 
 
 #### Build
 
-Build is useful if you have a populated sourcecred data directory and can also provide a volume to generate output for.
+Build is used to generate static webpage files when you're ready to publish your sourcecred data.
 In the example below, we issue a build command for pre-generated files in "data" and specify output with `--output-path <path>` to be another volume.
 
 ```bash
-$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -v $PWD/data:/data -v $PWD/docs:/output -p 8080:8080 sourcecred/sourcecred build --output-path /output
+$ docker run -d --name sourcecred --rm -v $PWD/data:/data -v $PWD/docs:/output sourcecred/sourcecred build --output-path /output
 ```
 
 The container will run again for about 30 seconds, you can run `docker logs sourcecred` to see output.
