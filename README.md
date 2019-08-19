@@ -181,11 +181,11 @@ Cool!
 
 #### Development Server
 
-If you only want to start the development server, you can run the container like this:
+The development server lets you explore a populated sourcecred data directory using a local server.
+After you've loaded data into your directory, you can run the container like this:
 
 ```bash
-$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 sourcecred/sourcecred dev-server
+$ docker run -d --name sourcecred --rm -p 8080:8080 -v $PWD/data:/data sourcecred/sourcecred dev-server
 ```
 
 That will start the server without load or generation first:
@@ -203,6 +203,8 @@ When you finish, don't forget to stop the container:
 ```bash
 $ docker stop sourcecred
 ```
+
+_Note: this is intended for development and local previews, it is not secure to host in production._
 
 
 #### Build
