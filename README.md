@@ -106,14 +106,12 @@ In the example below, we have a folder "data" in the present working directory t
 
 ```bash
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
-    docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -p 8080:8080 -v $PWD/data:/data sourcecred/sourcecred load "${REPOSITORY}"
+    docker run -ti --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN -v $PWD/data:/data sourcecred/sourcecred load "${REPOSITORY}"
 ```
 
-We are running in detached mode (-d) so it's easier to remove the container after. 
-After running the command, you can inspect it's progress like this:
+As the command runs, you will see a progress output like this:
 
 ```bash
-$ docker logs sourcecred
   GO   load-sfosc/sfosc
   GO   github/sfosc/sfosc
  DONE  github/sfosc/sfosc: 25s
@@ -123,9 +121,17 @@ $ docker logs sourcecred
 ...
 ```
 
+Once the command has completed, you can locally explore the data by using the `dev-server` command.
+
+```bash
+$ docker run -d --name sourcecred --rm -p 8080:8080 -v $PWD/data:/data sourcecred/sourcecred dev-server
+```
+
+We are running in detached mode (-d) so it's easier to remove the container after.
 It will take about 30 seconds to do the initial build, and when the web server is running you'll see this at the end:
 
 ```bash
+$ docker logs sourcecred
 ...
 [./node_modules/react/index.js] 190 bytes {main} {ssr} [built]
 [./src/homepage/index.js] 1.37 KiB {main} [built]
