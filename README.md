@@ -105,14 +105,16 @@ $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
 ```
 
 If you want to bind the data folder to the host, you can do that too. 
-In the example below, we have a folder "data" in the present working directory that we bind to "/data" in the container, the default `SOURCECRED_DIRECTORY`. 
-Since we've already generated the data, we no longer need the GitHub token.
+In the example below, we have a folder "data" in the present working directory that we bind to "/data" in the container, the default `SOURCECRED_DIRECTORY`. We can then generate the data (and it will
+be saved there):
 
 ```bash
 $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
   docker run -ti --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN \
   -v $PWD/data:/data sourcecred/sourcecred load "${REPOSITORY}"
 ```
+
+Notice that we don't need to bind the port because no web server is run.
 
 As the command runs, you will see a progress output like this:
 
@@ -126,7 +128,22 @@ As the command runs, you will see a progress output like this:
 ...
 ```
 
+The container will finish, and you can see the data generated in "data":
+
+```bash
+$ tree data/
+data/
+├── cache
+│   └── mirror_4d4445774f6c4a6c6347397a61585276636e6b784f544d784d5441784e44593d.db
+└── projects
+    └── QHNmb3Nj
+        ├── cred.json
+        ├── graph.json
+        └── project.json
+```
+
 Once the command has completed, you can locally explore the data by using the `dev-server` command.
+Since we've already generated the data, we no longer need the GitHub token.
 
 ```bash
 $ docker run -d --name sourcecred --rm -p 8080:8080 -v $PWD/data:/data \
