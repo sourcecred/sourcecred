@@ -31,6 +31,24 @@ import schema from "./schema";
  *    scraped from the repository, with data format to be specified
  *    later
  */
+
+export async function repoCacheFilename(
+  repoId: RepoId,
+  token: string
+): Promise<{|+dbFilename: string, +resolvedId: Schema.ObjectId|}> {
+  const postQueryWithToken = (payload) => postQuery(payload, token);
+  const resolvedId: Schema.ObjectId = await resolveRepositoryGraphqlId(
+    postQueryWithToken,
+    repoId
+  );
+  // Key the cache file against the GraphQL ID, but make sure that the
+  // name is valid and uniquely identifying even on case-insensitive
+  // filesystems (HFS, HFS+, APFS, NTFS) or filesystems preventing
+  // equals signs in file names.
+  const dbFilename = `mirror_${Buffer.from(resolvedId).toString("hex")}.db`;
+  return {dbFilename, resolvedId};
+}
+
 export default async function fetchGithubRepo(
   repoId: RepoId,
   options: {|+token: string, +cacheDirectory: string|}
@@ -42,17 +60,7 @@ export default async function fetchGithubRepo(
     throw new Error(`Invalid token: ${token}`);
   }
   const postQueryWithToken = (payload) => postQuery(payload, token);
-
-  const resolvedId: Schema.ObjectId = await resolveRepositoryGraphqlId(
-    postQueryWithToken,
-    repoId
-  );
-
-  // Key the cache file against the GraphQL ID, but make sure that the
-  // name is valid and uniquely identifying even on case-insensitive
-  // filesystems (HFS, HFS+, APFS, NTFS) or filesystems preventing
-  // equals signs in file names.
-  const dbFilename = `mirror_${Buffer.from(resolvedId).toString("hex")}.db`;
+  const {dbFilename, resolvedId} = await repoCacheFilename(repoId, token);
   const db = new Database(path.join(cacheDirectory, dbFilename));
   const mirror = new Mirror(db, schema(), {blacklistedIds: BLACKLISTED_IDS});
   mirror.registerObject({typename: "Repository", id: resolvedId});

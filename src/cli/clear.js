@@ -3,20 +3,27 @@
 
 import path from "path";
 import rimraf from "rimraf";
+const fs = require("fs-extra");
 
 import dedent from "../util/dedent";
 import {type Command} from "./command";
 import * as Common from "./common";
+import {directoryForProjectId} from "../core/project_io";
+import {repoCacheFilename} from "../plugins/github/fetchGithubRepo";
+import {type RepoId, stringToRepoId} from "../core/repoId";
+import * as Schema from "../graphql/schema";
 
 function usage(print: (string) => void): void {
   print(
     dedent`\
     usage: sourcecred clear --all
            sourcecred clear --cache
+           sourcecred clear OWNER/NAME
            sourcecred clear --help
 
     Remove the SOURCECRED_DIRECTORY, i.e. the directory where data, caches,
-    registries, etc. owned by SourceCred are stored.
+    registries, etc. owned by SourceCred are stored. To remove individual
+    projects, specify a GitHub repository in the form OWNER/NAME.
 
     Arguments:
         --all
@@ -24,6 +31,9 @@ function usage(print: (string) => void): void {
 
         --cache
             remove only the SourcCred cache directory
+
+        OWNER/NAME:
+          Identifier of a project to clear.
 
         --help
             Show this help message and exit, as 'sourcecred help clear'.
@@ -46,8 +56,17 @@ function die(std, message) {
   return 1;
 }
 
-export function makeClear(removeDir: (string) => Promise<void>): Command {
+export function makeClear(
+  removeDir: (string) => Promise<void>,
+  repoCacheFilename: (
+    repoId: RepoId,
+    token: string
+  ) => Promise<{|+dbFilename: string, +resolvedId: Schema.ObjectId|}>
+): Command {
   return async function clear(args, std) {
+    const sourcecredDirectory = Common.sourcecredDirectory();
+    const cacheDirectory = path.join(sourcecredDirectory, "cache");
+
     async function remove(dir) {
       try {
         await removeDir(dir);
@@ -55,6 +74,24 @@ export function makeClear(removeDir: (string) => Promise<void>): Command {
       } catch (error) {
         return die(std, `${error}`);
       }
+    }
+
+    async function rmProject(repoArg, projectPath) {
+      const repoId = stringToRepoId(repoArg);
+      let token = null;
+      try {
+        token = validateGithubToken();
+      } catch (error) {
+        return die(std, `${error}`);
+      }
+      const {dbFilename} = await repoCacheFilename(repoId, token);
+      try {
+        await removeDir(path.join(cacheDirectory, dbFilename));
+        await removeDir(projectPath);
+      } catch (error) {
+        return die(std, `${error}`);
+      }
+      return 0;
     }
 
     switch (args.length) {
@@ -67,13 +104,22 @@ export function makeClear(removeDir: (string) => Promise<void>): Command {
             return 0;
 
           case "--all":
-            return remove(Common.sourcecredDirectory());
+            return remove(sourcecredDirectory);
 
           case "--cache":
-            return remove(path.join(Common.sourcecredDirectory(), "cache"));
+            return remove(cacheDirectory);
 
           default:
-            return die(std, `unrecognized argument: '${args[0]}'`);
+            const projectPath = directoryForProjectId(
+              args[0],
+              sourcecredDirectory
+            );
+
+            if (await fs.exists(projectPath)) {
+              return rmProject(args[0], projectPath);
+            } else {
+              return die(std, `unrecognized argument: '${args[0]}'`);
+            }
         }
       default:
         return die(
@@ -106,6 +152,18 @@ export const help: Command = async (args, std) => {
   }
 };
 
-export const clear = makeClear(removeDir);
+export function validateGithubToken(): string {
+  const token = Common.githubToken();
+  if (token == null) {
+    throw new Error("SOURCECRED_GITHUB_TOKEN not set");
+  }
+  const validToken = /^[A-Fa-f0-9]{40}$/;
+  if (!validToken.test(token)) {
+    throw new Error(`Invalid token: ${token}`);
+  }
+  return token;
+}
+
+export const clear = makeClear(removeDir, repoCacheFilename);
 
 export default clear;
