@@ -23,3 +23,7 @@ export function sourcecredDirectory(): string {
 export function githubToken(): string | null {
   return NullUtil.orElse(process.env.SOURCECRED_GITHUB_TOKEN, null);
 }
+
+export function discourseKey(): string | null {
+  return NullUtil.orElse(process.env.SOURCECRED_DISCOURSE_KEY, null);
+}

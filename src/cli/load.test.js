@@ -27,10 +27,12 @@ describe("cli/load", () => {
   });
 
   const fakeGithubToken = "....".replace(/./g, "0123456789");
+  const fakeDiscourseKey = "abcdefg";
   function newSourcecredDirectory() {
     const dirname = tmp.dirSync().name;
     process.env.SOURCECRED_DIRECTORY = dirname;
     process.env.SOURCECRED_GITHUB_TOKEN = fakeGithubToken;
+    process.env.SOURCECRED_DISCOURSE_KEY = fakeDiscourseKey;
     return dirname;
   }
 
@@ -77,7 +79,7 @@ describe("cli/load", () => {
         params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
-        discourseKey: null,
+        discourseKey: fakeDiscourseKey,
       };
       expect(await invocation).toEqual({
         exitCode: 0,
@@ -101,7 +103,7 @@ describe("cli/load", () => {
         params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
-        discourseKey: null,
+        discourseKey: fakeDiscourseKey,
       });
       expect(await invocation).toEqual({
         exitCode: 0,
@@ -138,7 +140,7 @@ describe("cli/load", () => {
         params: {alpha: 0.05, intervalDecay: 0.5, weights},
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
-        discourseKey: null,
+        discourseKey: fakeDiscourseKey,
       };
       expect(await invocation).toEqual({
         exitCode: 0,
