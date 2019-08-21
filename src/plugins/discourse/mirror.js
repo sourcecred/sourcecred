@@ -3,6 +3,7 @@
 import type {Database} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
+import type {TaskReporter} from "../../util/taskReporter";
 import {
   type Discourse,
   type TopicId,
@@ -256,9 +257,9 @@ export class Mirror implements DiscourseData {
       .get({topic_id: topicId, index_within_topic: indexWithinTopic});
   }
 
-  async update() {
+  async update(reporter: TaskReporter) {
+    reporter.start("discourse");
     const db = this._db;
-    const latestTopicId = await this._fetcher.latestTopicId();
     const {max_post: lastLocalPostId, max_topic: lastLocalTopicId} = db
       .prepare(
         dedent`\
@@ -341,6 +342,8 @@ export class Mirror implements DiscourseData {
       };
     })();
 
+    reporter.start("discourse/topics");
+    const latestTopicId = await this._fetcher.latestTopicId();
     for (
       let topicId = lastLocalTopicId + 1;
       topicId <= latestTopicId;
@@ -355,7 +358,9 @@ export class Mirror implements DiscourseData {
         }
       }
     }
+    reporter.finish("discourse/topics");
 
+    reporter.start("discourse/posts");
     const latestPosts = await this._fetcher.latestPosts();
     for (const post of latestPosts) {
       if (!encounteredPostIds.has(post.id) && post.id > lastLocalPostId) {
@@ -374,6 +379,7 @@ export class Mirror implements DiscourseData {
         addPost(post);
       }
     }
+    reporter.finish("discourse/posts");
 
     // I don't want to hard code the expected page size, in case it changes upstream.
     // However, it's helpful to have a good guess of what the page size is, because if we
@@ -423,6 +429,8 @@ export class Mirror implements DiscourseData {
         return {changed: runResult.changes > 0};
       };
     })();
+
+    reporter.start("discourse/likes");
     for (const user of this.users()) {
       let offset = 0;
       let upToDate = false;
@@ -441,5 +449,7 @@ export class Mirror implements DiscourseData {
         offset += likeActions.length;
       }
     }
+    reporter.finish("discourse/likes");
+    reporter.finish("discourse");
   }
 }
