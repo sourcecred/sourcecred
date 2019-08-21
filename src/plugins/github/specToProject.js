@@ -36,12 +36,17 @@ export async function specToProject(
     const project: Project = {
       id: spec,
       repoIds: [stringToRepoId(spec)],
+      discourseServer: null,
     };
     return project;
   } else if (spec.match(ownerSpecMatcher)) {
     const owner = spec.slice(1);
     const org = await fetchGithubOrg(owner, token);
-    const project: Project = {id: spec, repoIds: org.repos};
+    const project: Project = {
+      id: spec,
+      repoIds: org.repos,
+      discourseServer: null,
+    };
     return project;
   }
   throw new Error(`invalid spec: ${spec}`);

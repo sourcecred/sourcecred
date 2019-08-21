@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import path from "path";
 
 import {TaskReporter} from "../util/taskReporter";
+import {Graph} from "../core/graph";
 import {loadGraph} from "../plugins/github/loadGraph";
 import {
   type TimelineCredParameters,
@@ -14,12 +15,15 @@ import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
 
 import {type Project} from "../core/project";
 import {setupProjectDirectory} from "../core/project_io";
+import {loadDiscourse} from "../plugins/discourse/loadDiscourse";
+import * as NullUtil from "../util/null";
 
 export type LoadOptions = {|
   +project: Project,
   +params: TimelineCredParameters,
   +sourcecredDirectory: string,
-  +githubToken: string,
+  +githubToken: string | null,
+  +discourseKey: string | null,
 |};
 
 /**
@@ -46,13 +50,48 @@ export async function load(
   const cacheDirectory = path.join(sourcecredDirectory, "cache");
   await fs.mkdirp(cacheDirectory);
 
-  // future: support loading more plugins, and merging their graphs
-  const githubOptions = {
-    repoIds: project.repoIds,
-    token: githubToken,
-    cacheDirectory,
-  };
-  const graph = await loadGraph(githubOptions, taskReporter);
+  function discourseGraph(): ?Promise<Graph> {
+    const discourseServer = project.discourseServer;
+    if (discourseServer != null) {
+      const {serverUrl, apiUsername} = discourseServer;
+      if (options.discourseKey == null) {
+        throw new Error("Tried to load Discourse, but no Discourse key set");
+      }
+      const discourseOptions = {
+        fetchOptions: {apiKey: options.discourseKey, serverUrl, apiUsername},
+        cacheDirectory,
+      };
+      return loadDiscourse(discourseOptions, taskReporter);
+    }
+  }
+
+  function githubGraph(): ?Promise<Graph> {
+    if (project.repoIds.length) {
+      if (githubToken == null) {
+        throw new Error("Tried to load GitHub, but no GitHub token set.");
+      }
+      const githubOptions = {
+        repoIds: project.repoIds,
+        token: githubToken,
+        cacheDirectory,
+      };
+
+      return loadGraph(githubOptions, taskReporter);
+    }
+  }
+
+  // For each plugin that wants to provide a Graph, get a Promise for the
+  // graph. That way we can request them in parallel, via Promise.all, rather
+  // than blocking on the plugins sequentially.
+  // Since plugins often perform rate-limited IO, this may be a big performance
+  // improvement.
+  const pluginGraphPromises: Promise<Graph>[] = NullUtil.filter([
+    discourseGraph(),
+    githubGraph(),
+  ]);
+
+  const pluginGraphs = await Promise.all(pluginGraphPromises);
+  const graph = Graph.merge(pluginGraphs);
 
   const projectDirectory = await setupProjectDirectory(
     project,

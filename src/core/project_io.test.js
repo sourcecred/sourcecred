@@ -22,10 +22,12 @@ describe("core/project_io", () => {
   const p1: Project = deepFreeze({
     id: "foo/bar",
     repoIds: [foobar],
+    discourseServer: null,
   });
   const p2: Project = deepFreeze({
     id: "@foo",
     repoIds: [foobar, foozod],
+    discourseServer: {serverUrl: "https://example.com", apiUsername: "credbot"},
   });
 
   it("setupProjectDirectory results in a loadable project", async () => {

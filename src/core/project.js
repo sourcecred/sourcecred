@@ -12,8 +12,9 @@ export type ProjectId = string;
  * Right now it has an `id` (which should be unique across a user's projects)
  * and an array of GitHub RepoIds.
  *
- * In the future, we will add support for more plugins (and remove the
- * hardcoded GitHub support).
+ * In the future, instead of hardcoding support for plugins like GitHub and Discourse,
+ * we will have a generic system for storing plugin-specific config, keyed by plugin
+ * identifier.
  *
  * We may add more fields (e.g. a description) to this object in the futre.
  *
@@ -24,6 +25,10 @@ export type ProjectId = string;
 export type Project = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
+  +discourseServer: {|
+    +serverUrl: string,
+    +apiUsername: string,
+  |} | null,
 |};
 
 const COMPAT_INFO = {type: "sourcecred/project", version: "0.1.0"};

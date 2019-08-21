@@ -110,6 +110,7 @@ const loadCommand: Command = async (args, std) => {
     params,
     sourcecredDirectory: Common.sourcecredDirectory(),
     githubToken,
+    discourseKey: null,
   }));
   // Deliberately load in serial because GitHub requests that their API not
   // be called concurrently
