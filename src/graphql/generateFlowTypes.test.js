@@ -5,7 +5,7 @@ import * as Schema from "./schema";
 
 describe("graphql/generateFlowTypes", () => {
   function run(schema: Schema.Schema): string {
-    return generateFlowTypes(schema, {parser: "babylon", trailingComma: "es5"});
+    return generateFlowTypes(schema, {parser: "babel", trailingComma: "es5"});
   }
 
   describe("generateFlowTypes", () => {
@@ -55,8 +55,8 @@ describe("graphql/generateFlowTypes", () => {
       const schema = s.schema({
         E: s.enum(["ONE", "TWO"]),
       });
-      const options1 = {parser: "babylon", singleQuote: false};
-      const options2 = {parser: "babylon", singleQuote: true};
+      const options1 = {parser: "babel", singleQuote: false};
+      const options2 = {parser: "babel", singleQuote: true};
       const output1 = generateFlowTypes(schema, options1);
       const output2 = generateFlowTypes(schema, options2);
       expect(output1).not.toEqual(output2);
