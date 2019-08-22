@@ -146,7 +146,7 @@ export function createApp(
           <h2>SourceCred Legacy Mode</h2>
           <p>
             Back to{" "}
-            <a href={`/timeline/${this.props.projectId}/`}>timeline mode</a>
+            <Link to={`/timeline/${this.props.projectId}/`}>timeline mode</Link>
           </p>
 
           <ProjectDetail projectId={this.props.projectId} />
