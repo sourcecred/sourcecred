@@ -1,5 +1,5 @@
-// flow-typed signature: 43ae578b930df44b55170ad70449a4c8
-// flow-typed version: c6154227d1/enzyme_v3.x.x/flow_>=v0.104.x
+// flow-typed signature: 1b68a1969e8305bf53fbaa98b4a5aaae
+// flow-typed version: f7ac3b9713/enzyme_v3.x.x/flow_>=v0.104.x
 
 declare module "enzyme" {
   declare type PredicateFunction<T: Wrapper<*>> = (
@@ -121,8 +121,6 @@ declare module "enzyme" {
       ...
     }
   ): ReactWrapper<T>;
-  // SourceCred-specific change, patching in upstream PR #3522:
-  // <https://github.com/flow-typed/flow-typed/pull/3522>
   declare function render(
     node: React$Node,
     options?: { context?: Object, ... }
