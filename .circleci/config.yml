@@ -5,6 +5,10 @@
 #
 version: 2.1
 
+orbs:
+  # https://circleci.com/orbs/registry/orb/circleci/docker
+  docker: circleci/docker@0.5.13
+
 executors:
   node10:
     docker:
@@ -51,22 +55,72 @@ jobs:
       - run: yarn test --full --ci
 
 workflows:
-  version: 2
+  version: 2.0
   commit:
     jobs:
       - test
+      - docker/publish:
+          deploy: false
+          image: sourcecred/sourcecred
+          tag: latest
+          requires:
+            - test
+          filters:
+            branches:
+              ignore: 
+                - master
+          after_build:
+            - run:
+                name: Preview Docker Tag for Build
+                command: |
+                   DOCKER_TAG=$(docker run sourcecred/sourcecred --version | cut -d' ' -f2)
+                   echo "Version that would be used for Docker tag is ${DOCKER_TAG}"
+
+      - docker/publish:
+          image: sourcecred/sourcecred
+          tag: latest
+          requires:
+            - test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+          after_build:
+            - run:
+                name: Publish Docker Tag with Sourcecred Version
+                command: |
+                   DOCKER_TAG=$(docker run sourcecred/sourcecred --version | cut -d' ' -f2)
+                   echo "Version for Docker tag is ${DOCKER_TAG}"
+                   docker tag sourcecred/sourcecred:latest sourcecred/sourcecred:${DOCKER_TAG}
+                   docker push sourcecred/sourcecred
+
       - test_full:
           filters:
             branches:
               only:
                 - master
                 - /ci-.*/
+
       - test_full_10:
           filters:
             branches:
               only:
                 - master
                 - /ci-.*/
+
+      - docker/publish:
+          image: sourcecred/sourcecred
+          requires:
+            - test
+            - test_full
+            - test_full_10
+          tag: dev
+          filters:
+            branches:
+              only: master
+
+
   nightly:
     triggers:
       - schedule:
