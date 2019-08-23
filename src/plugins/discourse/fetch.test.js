@@ -27,7 +27,7 @@ describe("plugins/discourse/fetch", () => {
         throw new Error(`couldn't load snapshot for ${file}`);
       }
     }
-    const snapshotFetcher = () => new Fetcher(options, snapshotFetch);
+    const snapshotFetcher = () => new Fetcher(options, snapshotFetch, 0);
 
     it("loads LatestTopicId from snapshot", async () => {
       const topicId = await snapshotFetcher().latestTopicId();
@@ -55,7 +55,7 @@ describe("plugins/discourse/fetch", () => {
       return Promise.resolve(resp);
     };
     const fetcherWithStatus = (status: number) =>
-      new Fetcher(options, fakeFetch(status));
+      new Fetcher(options, fakeFetch(status), 0);
     function expectError(name, f, status) {
       it(`${name} errors on ${String(status)}`, () => {
         const fetcher = fetcherWithStatus(status);
@@ -96,7 +96,7 @@ describe("plugins/discourse/fetch", () => {
         fetchOptions = _options;
         return Promise.resolve(new Response("", {status: 404}));
       };
-      await new Fetcher(options, fakeFetch).post(1337);
+      await new Fetcher(options, fakeFetch, 0).post(1337);
       if (fetchOptions == null) {
         throw new Error("fetchOptions == null");
       }
