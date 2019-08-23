@@ -39,17 +39,15 @@ First, make sure that you have the following dependencies:
 [Node]: https://nodejs.org/en/
 [Yarn]: https://yarnpkg.com/lang/en/
 [GitHub API token]: https://github.com/settings/tokens
-
 [macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-417202213
 
-Then, run the following commands to clone and build SourceCred:
+You'll stil need to create a GitHub token to use as an environment variable (shown later). First, run the following commands to clone and build SourceCred:
 
 ```Bash
 git clone https://github.com/sourcecred/sourcecred.git
 cd sourcecred
 yarn install
 yarn backend
-export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 node bin/sourcecred.js load REPO_OWNER/REPO_NAME
 ```
 
@@ -60,6 +58,222 @@ yarn start
 ```
 
 Finally, we can navigate a browser window to `localhost:8080` to view generated data.
+
+### Running with Docker
+
+You can build and run sourcecred in a container to avoid installing dependencies on your host. First, build the container:
+
+```bash
+$ docker build -t sourcecred/sourcecred .
+```
+
+If you want to build and customize the `SOURCECRED_DIRECTORY`, you can set that as a `--build-arg`:
+
+```bash
+$ docker build --build-arg SOURCECRED_DEFAULT_DIRECTORY=/tmp/data \
+  -t sourcecred/sourcecred .
+```
+
+Your options for running the container including the following commands. 
+Examples will be shown for each.
+
+ - **dev-preview**: offers a shortcut for loading sourcecred and then starting a dev server. This is likely the option you'll choose if you want to provide a respository or an organization and preview results a web interface.
+ - **dev-server**: exposes several webpack operations without the initial load. This takes no arguments.
+ - **build**: simply provides the build command to yarn, followed by any argumnents that you provide.
+ - **(anything else)**: will be passed on to sourcecred.js
+
+#### Development Preview 
+
+To run the development preview, you will still need to export a GitHub token, and then provide it to the container when you run it. 
+Notice that we are also binding port 8080 so we can view the web interface that will be opened up.  
+The only argument needed is a command to load the GitHub repository to generate the sourcecred for:
+
+```bash
+REPOSITORY=sfosc/sfosc
+$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
+  docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN \
+  -p 8080:8080 sourcecred/sourcecred dev-preview "${REPOSITORY}"
+```
+
+You can also specify an entire organization:
+
+```bash
+ORGANIZATION=@sfosc
+$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
+  docker run -d --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN \
+  -p 8080:8080 sourcecred/sourcecred dev-preview "${ORGANIZATION}"
+```
+
+If you want to bind the data folder to the host, you can do that too. 
+In the example below, we have a folder "data" in the present working directory that we bind to "/data" in the container, the default `SOURCECRED_DIRECTORY`. We can then generate the data (and it will
+be saved there):
+
+```bash
+$ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
+  docker run -ti --name sourcecred --rm --env SOURCECRED_GITHUB_TOKEN \
+  -v $PWD/data:/data sourcecred/sourcecred load "${REPOSITORY}"
+```
+
+Notice that we don't need to bind the port because no web server is run.
+
+As the command runs, you will see a progress output like this:
+
+```bash
+  GO   load-sfosc/sfosc
+  GO   github/sfosc/sfosc
+ DONE  github/sfosc/sfosc: 25s
+  GO   compute-cred
+ DONE  compute-cred: 1s
+ DONE  load-sfosc/sfosc: 26s
+...
+```
+
+The container will finish, and you can see the data generated in "data":
+
+```bash
+$ tree data/
+data/
+├── cache
+│   └── mirror_4d4445774f6c4a6c6347397a61585276636e6b784f544d784d5441784e44593d.db
+└── projects
+    └── QHNmb3Nj
+        ├── cred.json
+        ├── graph.json
+        └── project.json
+```
+
+Once the command has completed, you can locally explore the data by using the `dev-server` command.
+Since we've already generated the data, we no longer need the GitHub token.
+
+```bash
+$ docker run -d --name sourcecred --rm -p 8080:8080 -v $PWD/data:/data \
+  sourcecred/sourcecred dev-server
+```
+
+We are running in detached mode (-d) so it's easier to remove the container after.
+It will take about 30 seconds to do the initial build, and when the web server is running you'll see this at the end:
+
+```bash
+$ docker logs sourcecred
+...
+[./node_modules/react/index.js] 190 bytes {main} {ssr} [built]
+[./src/homepage/index.js] 1.37 KiB {main} [built]
+[./src/homepage/server.js] 5.61 KiB {ssr} [built]
+    + 1006 hidden modules
+ℹ ｢wdm｣: Compiled successfully.
+```
+
+**Important** Although we expose port 0.0.0.0 to be viewable on your host, this is _not a production_ deployment and you should take precaution in how you use it.
+Then you can open up to [http://127.0.0.1:8080](http://127.0.0.1:8080) to see the interface!
+
+![img/home-screen.png](img/home-screen.png)
+
+You can click on "prototype" to see a list of repositories that you generated (we just did sfosc/sfosc):
+
+![img/prototype.png](img/prototype.png)
+
+And then finally, click on the repository name to see the graph.
+
+![img/graph.png](img/graph.png)
+
+When you are finished, stop and remove the container.
+
+```bash
+$ docker stop sourcecred
+```
+
+Since we used the remove (--rm) tag, stopping it will also remove it. 
+If you bound the data folder to the host, you'll see the output remaining there from the generation:
+
+```bash
+$ tree data/
+data/
+├── cache
+│   └── mirror_4d4445774f6c4a6c6347397a61585276636e6b784e546b344f44677a4f54453d.db
+└── projects
+    └── c2Zvc2Mvc2Zvc2M
+        ├── cred.json
+        ├── graph.json
+        └── project.json
+
+3 directories, 4 files
+```
+
+Cool!
+
+
+#### Development Server
+
+The development server lets you explore a populated sourcecred data directory using a local server.
+After you've loaded data into your directory, you can run the container like this:
+
+```bash
+$ docker run -d --name sourcecred --rm -p 8080:8080 -v $PWD/data:/data \
+  sourcecred/sourcecred dev-server
+```
+
+That will start the server without load or generation first:
+
+```bash
+$ docker logs sourcecred
+(node:17) DeprecationWarning: Tapable.plugin is deprecated. Use new API on `.hooks` instead
+ℹ ｢wds｣: Project is running at http://0.0.0.0:8080/webpack-dev-server/
+ℹ ｢wds｣: webpack output is served from /
+ℹ ｢wds｣: Content not from webpack is served from /code
+```
+
+When you finish, don't forget to stop the container:
+
+```bash
+$ docker stop sourcecred
+```
+
+_Note: this is intended for development and local previews, it is not secure to host in production._
+
+
+#### Build
+
+Build is used to generate static webpage files when you're ready to publish your sourcecred data.
+In the example below, we issue a build command for pre-generated files in "data" and specify output with `--output-path <path>` to be another volume.
+
+```bash
+$ docker run -d --name sourcecred --rm -v $PWD/data:/data -v $PWD/docs:/output \
+  sourcecred/sourcecred build --output-path /output
+```
+
+The container will run again for about 30 seconds, you can run `docker logs sourcecred` to see output.
+When the container no longer exists, you can look in "docs" in the present working directory to see output files:
+
+```bash
+$ ls docs/
+asset-manifest.json  discord-invite  favicon.png  index.html  prototype  static  test  timeline
+```
+
+This is the same content that we saw earlier with the development server, so a reasonable use case for this command would be to run to build docs that you then serve statically.
+
+#### Wildcard
+
+If your command doesn't start with one of build, dev-server, or dev-preview, it will just be passed on to the sourcecred.js. For example, here we can ask for a version or help:
+
+```bash
+$ docker run -it --name sourcecred --rm  sourcecred/sourcecred --version
+sourcecred v0.4.0
+```
+
+or for help:
+
+```bash
+$ docker run -it --name sourcecred --rm  sourcecred --help
+usage: sourcecred COMMAND [ARGS...]
+       sourcecred [--version] [--help]
+
+Commands:
+  load          load repository data into SourceCred
+  clear         clear SoucrceCred data
+  help          show this help message
+
+Use 'sourcecred help COMMAND' for help about an individual command.
+```
 
 #### Examples
 
