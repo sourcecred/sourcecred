@@ -89,5 +89,8 @@ export function orElse<T>(x: ?T, defaultValue: T): T {
  * in a type-aware way.
  */
 export function filterList<T>(xs: $ReadOnlyArray<?T>): T[] {
-  return (xs.filter((x) => x != null): any);
+  // A type-safe way to implement this would be:
+  /*:: (xs.flatMap((x) => x == null ? [] : [x]): T[]); */
+  // For performance, we instead take an unsafe route.
+  return ((xs.filter((x) => x != null): any): T[]);
 }
