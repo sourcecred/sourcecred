@@ -85,7 +85,7 @@ export async function load(
   // than blocking on the plugins sequentially.
   // Since plugins often perform rate-limited IO, this may be a big performance
   // improvement.
-  const pluginGraphPromises: Promise<Graph>[] = NullUtil.filter([
+  const pluginGraphPromises: Promise<Graph>[] = NullUtil.filterList([
     discourseGraph(),
     githubGraph(),
   ]);

@@ -88,6 +88,6 @@ export function orElse<T>(x: ?T, defaultValue: T): T {
  * the callback that was passed to filter. This method basically wraps filter
  * in a type-aware way.
  */
-export function filter<T>(xs: $ReadOnlyArray<?T>): T[] {
+export function filterList<T>(xs: $ReadOnlyArray<?T>): T[] {
   return (xs.filter((x) => x != null): any);
 }
