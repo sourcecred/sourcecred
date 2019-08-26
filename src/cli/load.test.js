@@ -7,6 +7,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import {NodeAddress} from "../core/graph";
 import {run} from "./testUtil";
 import loadCommand, {help} from "./load";
+import type {LoadOptions} from "../api/load";
 import {defaultWeights, toJSON as weightsToJSON} from "../analysis/weights";
 import * as Common from "./common";
 
@@ -67,11 +68,16 @@ describe("cli/load", () => {
 
     it("calls load with a single repo", async () => {
       const invocation = run(loadCommand, ["foo/bar"]);
-      const expectedOptions = {
-        project: {id: "foo/bar", repoIds: [makeRepoId("foo", "bar")]},
+      const expectedOptions: LoadOptions = {
+        project: {
+          id: "foo/bar",
+          repoIds: [makeRepoId("foo", "bar")],
+          discourseServer: null,
+        },
         params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
+        discourseKey: null,
       };
       expect(await invocation).toEqual({
         exitCode: 0,
@@ -86,11 +92,16 @@ describe("cli/load", () => {
 
     it("calls load with multiple repos", async () => {
       const invocation = run(loadCommand, ["foo/bar", "zoink/zod"]);
-      const expectedOptions = (projectId: string) => ({
-        project: {id: projectId, repoIds: [stringToRepoId(projectId)]},
+      const expectedOptions: (string) => LoadOptions = (projectId: string) => ({
+        project: {
+          id: projectId,
+          repoIds: [stringToRepoId(projectId)],
+          discourseServer: null,
+        },
         params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
+        discourseKey: null,
       });
       expect(await invocation).toEqual({
         exitCode: 0,
@@ -118,11 +129,16 @@ describe("cli/load", () => {
         "--weights",
         weightsFile,
       ]);
-      const expectedOptions = {
-        project: {id: "foo/bar", repoIds: [makeRepoId("foo", "bar")]},
+      const expectedOptions: LoadOptions = {
+        project: {
+          id: "foo/bar",
+          repoIds: [makeRepoId("foo", "bar")],
+          discourseServer: null,
+        },
         params: {alpha: 0.05, intervalDecay: 0.5, weights},
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
+        discourseKey: null,
       };
       expect(await invocation).toEqual({
         exitCode: 0,

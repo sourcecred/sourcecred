@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs-extra";
 
 import type {Options as LoadGraphOptions} from "../plugins/github/loadGraph";
+import type {Options as LoadDiscourseOptions} from "../plugins/discourse/loadDiscourse";
 import type {Project} from "../core/project";
 import {
   directoryForProjectId,
@@ -14,7 +15,8 @@ import {
 } from "../core/project_io";
 import {makeRepoId} from "../core/repoId";
 import {defaultWeights} from "../analysis/weights";
-import {NodeAddress} from "../core/graph";
+import {NodeAddress, Graph} from "../core/graph";
+import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";
 import {load, type LoadOptions} from "./load";
 import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
@@ -25,6 +27,11 @@ jest.mock("../plugins/github/loadGraph", () => ({
 }));
 const loadGraph: JestMockFn = (require("../plugins/github/loadGraph")
   .loadGraph: any);
+jest.mock("../plugins/discourse/loadDiscourse", () => ({
+  loadDiscourse: jest.fn(),
+}));
+const loadDiscourse: JestMockFn = (require("../plugins/discourse/loadDiscourse")
+  .loadDiscourse: any);
 
 jest.mock("../analysis/timeline/timelineCred", () => ({
   TimelineCred: {compute: jest.fn()},
@@ -36,17 +43,30 @@ describe("api/load", () => {
   const fakeTimelineCred = deepFreeze({
     toJSON: () => ({is: "fake-timeline-cred"}),
   });
-  const fakeGraph = deepFreeze({toJSON: () => ({is: "fake-graph"})});
+  const githubSentinel = node("github-sentinel");
+  const githubGraph = () => new Graph().addNode(githubSentinel);
+  const discourseSentinel = node("discourse-sentinel");
+  const discourseGraph = () => new Graph().addNode(discourseSentinel);
+  const combinedGraph = () => Graph.merge([githubGraph(), discourseGraph()]);
   beforeEach(() => {
     jest.clearAllMocks();
-    loadGraph.mockResolvedValue(fakeGraph);
+    loadGraph.mockResolvedValue(githubGraph());
+    loadDiscourse.mockResolvedValue(discourseGraph());
     timelineCredCompute.mockResolvedValue(fakeTimelineCred);
   });
-  const project: Project = deepFreeze({
+  const discourseServerUrl = "https://example.com";
+  const discourseApiUsername = "credbot";
+  const project: Project = {
     id: "foo",
     repoIds: [makeRepoId("foo", "bar")],
-  });
+    discourseServer: {
+      serverUrl: discourseServerUrl,
+      apiUsername: discourseApiUsername,
+    },
+  };
+  deepFreeze(project);
   const githubToken = "EXAMPLE_TOKEN";
+  const discourseKey = "EXAMPLE_KEY";
   const weights = defaultWeights();
   // Tweaks the weights so that we can ensure we aren't overriding with default weights
   weights.nodeManualWeights.set(NodeAddress.empty, 33);
@@ -60,6 +80,7 @@ describe("api/load", () => {
       githubToken,
       params,
       project,
+      discourseKey,
     };
     return {options, taskReporter, sourcecredDirectory};
   };
@@ -86,7 +107,22 @@ describe("api/load", () => {
     );
   });
 
-  it("saves the resultant graph to disk", async () => {
+  it("calls loadDiscourse with the right options", async () => {
+    const {options, taskReporter, sourcecredDirectory} = example();
+    await load(options, taskReporter);
+    const cacheDirectory = path.join(sourcecredDirectory, "cache");
+    const expectedOptions: LoadDiscourseOptions = {
+      fetchOptions: {
+        apiUsername: discourseApiUsername,
+        apiKey: discourseKey,
+        serverUrl: discourseServerUrl,
+      },
+      cacheDirectory,
+    };
+    expect(loadDiscourse).toHaveBeenCalledWith(expectedOptions, taskReporter);
+  });
+
+  it("saves a merged graph to disk", async () => {
     const {options, taskReporter, sourcecredDirectory} = example();
     await load(options, taskReporter);
     const projectDirectory = directoryForProjectId(
@@ -95,16 +131,20 @@ describe("api/load", () => {
     );
     const graphFile = path.join(projectDirectory, "graph.json");
     const graphJSON = JSON.parse(await fs.readFile(graphFile));
-    expect(graphJSON).toEqual(fakeGraph.toJSON());
+    const expectedJSON = combinedGraph().toJSON();
+    expect(graphJSON).toEqual(expectedJSON);
   });
 
   it("calls TimelineCred.compute with the right graph and options", async () => {
     const {options, taskReporter} = example();
     await load(options, taskReporter);
     expect(timelineCredCompute).toHaveBeenCalledWith(
-      fakeGraph,
+      expect.anything(),
       params,
       DEFAULT_CRED_CONFIG
+    );
+    expect(timelineCredCompute.mock.calls[0][0].equals(combinedGraph())).toBe(
+      true
     );
   });
 
@@ -130,5 +170,55 @@ describe("api/load", () => {
       {type: "FINISH", taskId: "compute-cred"},
       {type: "FINISH", taskId: "load-foo"},
     ]);
+  });
+
+  it("errors if a discourse server is provided without a discourse key", () => {
+    const {options, taskReporter} = example();
+    const optionsWithoutKey = {...options, discourseKey: null};
+    expect.assertions(1);
+    return load(optionsWithoutKey, taskReporter).catch((e) =>
+      expect(e.message).toMatch("no Discourse key")
+    );
+  });
+
+  it("errors if GitHub repoIds are provided without a GitHub token", () => {
+    const {options, taskReporter} = example();
+    const optionsWithoutToken = {...options, githubToken: null};
+    expect.assertions(1);
+    return load(optionsWithoutToken, taskReporter).catch((e) =>
+      expect(e.message).toMatch("no GitHub token")
+    );
+  });
+
+  it("only loads GitHub if no Discourse server set", async () => {
+    const {options, taskReporter, sourcecredDirectory} = example();
+    const newProject = {...options.project, discourseServer: null};
+    const newOptions = {...options, project: newProject, discourseKey: null};
+    await load(newOptions, taskReporter);
+    expect(loadDiscourse).not.toHaveBeenCalled();
+    const projectDirectory = directoryForProjectId(
+      project.id,
+      sourcecredDirectory
+    );
+    const graphFile = path.join(projectDirectory, "graph.json");
+    const graphJSON = JSON.parse(await fs.readFile(graphFile));
+    const expectedJSON = githubGraph().toJSON();
+    expect(graphJSON).toEqual(expectedJSON);
+  });
+
+  it("only loads Discourse if no GitHub repoIds set ", async () => {
+    const {options, taskReporter, sourcecredDirectory} = example();
+    const newProject = {...options.project, repoIds: []};
+    const newOptions = {...options, project: newProject, githubToken: null};
+    await load(newOptions, taskReporter);
+    expect(loadGraph).not.toHaveBeenCalled();
+    const projectDirectory = directoryForProjectId(
+      project.id,
+      sourcecredDirectory
+    );
+    const graphFile = path.join(projectDirectory, "graph.json");
+    const graphJSON = JSON.parse(await fs.readFile(graphFile));
+    const expectedJSON = discourseGraph().toJSON();
+    expect(graphJSON).toEqual(expectedJSON);
   });
 });
