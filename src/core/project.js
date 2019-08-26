@@ -31,7 +31,7 @@ export type Project = {|
   |} | null,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/project", version: "0.1.0"};
+const COMPAT_INFO = {type: "sourcecred/project", version: "0.2.0"};
 
 export type ProjectJSON = Compatible<Project>;
 
