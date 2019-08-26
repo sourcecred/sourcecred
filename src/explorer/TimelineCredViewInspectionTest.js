@@ -10,7 +10,6 @@ import {
   TimelineCred,
   type TimelineCredConfig,
 } from "../analysis/timeline/timelineCred";
-import {type FilteredTimelineCred} from "../analysis/timeline/filterTimelineCred";
 import {defaultWeights} from "../analysis/weights";
 
 export default class TimelineCredViewInspectiontest extends React.Component<{|
@@ -51,17 +50,13 @@ export default class TimelineCredViewInspectiontest extends React.Component<{|
       const scores = intervals.map((_unuesd, i) => generator(i));
       addressToCred.set(address, scores);
     }
-    const filteredTimelineCred: FilteredTimelineCred = {
-      intervals,
-      addressToCred,
-    };
     const params = {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()};
     const config: TimelineCredConfig = {
       scoreNodePrefix: NodeAddress.empty,
       filterNodePrefixes: [NodeAddress.empty],
       types: {nodeTypes: [], edgeTypes: []},
     };
-    return new TimelineCred(graph, filteredTimelineCred, params, config);
+    return new TimelineCred(graph, intervals, addressToCred, params, config);
   }
 
   render() {

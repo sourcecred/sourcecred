@@ -3,6 +3,7 @@
 import {sum} from "d3-array";
 import sortBy from "lodash.sortby";
 import * as NullUtil from "../../util/null";
+import * as MapUtil from "../../util/map";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import {type Interval} from "./interval";
 import {timelinePagerank} from "./timelinePagerank";
@@ -24,9 +25,6 @@ import {type NodeAndEdgeTypes} from "../types";
 import {
   filterTimelineCred,
   type FilteredTimelineCred,
-  filteredTimelineCredToJSON,
-  filteredTimelineCredFromJSON,
-  type FilteredTimelineCredJSON,
 } from "./filterTimelineCred";
 
 export type {Interval} from "./interval";
@@ -100,18 +98,21 @@ export type TimelineCredConfig = {|
  */
 export class TimelineCred {
   _graph: Graph;
-  _cred: FilteredTimelineCred;
+  _intervals: $ReadOnlyArray<Interval>;
+  _addressToCred: Map<NodeAddressT, $ReadOnlyArray<number>>;
   _params: TimelineCredParameters;
   _config: TimelineCredConfig;
 
   constructor(
     graph: Graph,
-    cred: FilteredTimelineCred,
+    intervals: $ReadOnlyArray<Interval>,
+    addressToCred: Map<NodeAddressT, $ReadOnlyArray<number>>,
     params: TimelineCredParameters,
     config: TimelineCredConfig
   ) {
     this._graph = graph;
-    this._cred = cred;
+    this._intervals = intervals;
+    this._addressToCred = addressToCred;
     this._params = params;
     this._config = config;
   }
@@ -142,7 +143,7 @@ export class TimelineCred {
    * Return all the intervals in the timeline.
    */
   intervals(): $ReadOnlyArray<Interval> {
-    return this._cred.intervals;
+    return this._intervals;
   }
 
   /**
@@ -154,7 +155,7 @@ export class TimelineCred {
    * filtered results; if so, it will return undefined.
    */
   credNode(a: NodeAddressT): ?CredNode {
-    const cred = this._cred.addressToCred.get(a);
+    const cred = this._addressToCred.get(a);
     if (cred === undefined) {
       return undefined;
     }
@@ -169,7 +170,7 @@ export class TimelineCred {
    */
   credSortedNodes(prefix: NodeAddressT): $ReadOnlyArray<CredNode> {
     const match = (a) => NodeAddress.hasPrefix(a, prefix);
-    const addresses = Array.from(this._cred.addressToCred.keys()).filter(match);
+    const addresses = Array.from(this._addressToCred.keys()).filter(match);
     const credNodes = addresses.map((a) => this.credNode(a));
     return sortBy(credNodes, (x: CredNode) => -x.total);
   }
@@ -177,7 +178,8 @@ export class TimelineCred {
   toJSON(): TimelineCredJSON {
     const rawJSON = {
       graphJSON: this._graph.toJSON(),
-      credJSON: filteredTimelineCredToJSON(this._cred),
+      intervalsJSON: this._intervals,
+      credJSON: MapUtil.toObject(this._addressToCred),
       paramsJSON: paramsToJSON(this._params),
       configJSON: this._config,
     };
@@ -186,11 +188,11 @@ export class TimelineCred {
 
   static fromJSON(j: TimelineCredJSON): TimelineCred {
     const json = fromCompat(COMPAT_INFO, j);
-    const {graphJSON, credJSON, paramsJSON, configJSON} = json;
+    const {graphJSON, intervalsJSON, credJSON, paramsJSON, configJSON} = json;
+    const cred = MapUtil.fromObject(credJSON);
     const graph = Graph.fromJSON(graphJSON);
-    const cred = filteredTimelineCredFromJSON(credJSON);
     const params = paramsFromJSON(paramsJSON);
-    return new TimelineCred(graph, cred, params, configJSON);
+    return new TimelineCred(graph, intervalsJSON, cred, params, configJSON);
   }
 
   static async compute(
@@ -199,7 +201,13 @@ export class TimelineCred {
     config: TimelineCredConfig
   ): Promise<TimelineCred> {
     const ftc = await _computeTimelineCred(graph, params, config);
-    return new TimelineCred(graph, ftc, params, config);
+    return new TimelineCred(
+      graph,
+      ftc.intervals,
+      ftc.addressToCred,
+      params,
+      config
+    );
   }
 }
 
@@ -235,7 +243,8 @@ export opaque type TimelineCredJSON = Compatible<{|
   +graphJSON: GraphJSON,
   +paramsJSON: ParamsJSON,
   +configJSON: TimelineCredConfig,
-  +credJSON: FilteredTimelineCredJSON,
+  +credJSON: {[string]: $ReadOnlyArray<number>},
+  +intervalsJSON: $ReadOnlyArray<Interval>,
 |}>;
 
 type ParamsJSON = {|

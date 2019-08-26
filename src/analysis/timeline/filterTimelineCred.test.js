@@ -1,11 +1,7 @@
 // @flow
 
 import {NodeAddress} from "../../core/graph";
-import {
-  filterTimelineCred,
-  filteredTimelineCredToJSON,
-  filteredTimelineCredFromJSON,
-} from "./filterTimelineCred";
+import {filterTimelineCred} from "./filterTimelineCred";
 
 describe("src/analysis/timeline/filterTimelineCred", () => {
   const na = (...parts) => NodeAddress.fromParts(parts);
@@ -37,18 +33,5 @@ describe("src/analysis/timeline/filterTimelineCred", () => {
         expected
       );
     });
-  });
-
-  it("JSON serialization", () => {
-    const i0 = {startTimeMs: 0, endTimeMs: 10};
-    const i1 = {startTimeMs: 10, endTimeMs: 20};
-    const intervals = [i0, i1];
-    const fc = {
-      intervals,
-      addressToCred: new Map().set(na("foo"), [1, 4]).set(na("bar"), [2, 5]),
-    };
-    const json = filteredTimelineCredToJSON(fc);
-    const fc_ = filteredTimelineCredFromJSON(json);
-    expect(fc).toEqual(fc_);
   });
 });

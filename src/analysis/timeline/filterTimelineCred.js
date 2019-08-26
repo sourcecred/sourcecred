@@ -1,6 +1,5 @@
 // @flow
 
-import {toObject, fromObject} from "../../util/map";
 import {type Interval} from "./interval";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 import {type FullTimelineCred} from "./distributionToCred";
@@ -46,21 +45,4 @@ export function filterTimelineCred(
     }
   }
   return {intervals, addressToCred};
-}
-
-export type FilteredTimelineCredJSON = {|
-  +intervals: $ReadOnlyArray<Interval>,
-  +addressToCred: {[NodeAddressT]: $ReadOnlyArray<number>},
-|};
-
-export function filteredTimelineCredToJSON(
-  x: FilteredTimelineCred
-): FilteredTimelineCredJSON {
-  return {intervals: x.intervals, addressToCred: toObject(x.addressToCred)};
-}
-
-export function filteredTimelineCredFromJSON(
-  x: FilteredTimelineCredJSON
-): FilteredTimelineCred {
-  return {intervals: x.intervals, addressToCred: fromObject(x.addressToCred)};
 }
