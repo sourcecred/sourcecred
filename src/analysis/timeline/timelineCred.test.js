@@ -56,7 +56,7 @@ describe("src/analysis/timeline/timelineCred", () => {
   it("JSON serialization works", () => {
     const tc = exampleTimelineCred();
     const json = exampleTimelineCred().toJSON();
-    const tc_ = TimelineCred.fromJSON(json, credConfig());
+    const tc_ = TimelineCred.fromJSON(json);
     expect(tc.graph()).toEqual(tc_.graph());
     expect(tc.params()).toEqual(tc_.params());
     expect(tc.config()).toEqual(tc_.config());

@@ -9,7 +9,6 @@ import {
   userNodeType,
   repoNodeType,
 } from "../plugins/github/declaration";
-import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
 import {encodeProjectId, type ProjectId} from "../core/project";
 
 export type Props = {|
@@ -96,7 +95,7 @@ export async function defaultLoader(
     if (!response.ok) {
       return Promise.reject(response);
     }
-    return TimelineCred.fromJSON(await response.json(), DEFAULT_CRED_CONFIG);
+    return TimelineCred.fromJSON(await response.json());
   }
 
   try {

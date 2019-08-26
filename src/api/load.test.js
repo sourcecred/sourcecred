@@ -19,7 +19,6 @@ import {NodeAddress, Graph} from "../core/graph";
 import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";
 import {load, type LoadOptions} from "./load";
-import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
 
 type JestMockFn = $Call<typeof jest.fn>;
 jest.mock("../plugins/github/loadGraph", () => ({
@@ -72,6 +71,11 @@ describe("api/load", () => {
   weights.nodeManualWeights.set(NodeAddress.empty, 33);
   // Deep freeze will freeze the weights, too
   const params = deepFreeze({alpha: 0.05, intervalDecay: 0.5, weights});
+  const config = deepFreeze({
+    scoreNodePrefix: NodeAddress.empty,
+    filterNodePrefixes: [],
+    types: {nodeTypes: [], edgeTypes: []},
+  });
   const example = () => {
     const sourcecredDirectory = tmp.dirSync().name;
     const taskReporter = new TestTaskReporter();
@@ -79,6 +83,7 @@ describe("api/load", () => {
       sourcecredDirectory,
       githubToken,
       params,
+      config,
       project,
       discourseKey,
     };
@@ -141,7 +146,7 @@ describe("api/load", () => {
     expect(timelineCredCompute).toHaveBeenCalledWith(
       expect.anything(),
       params,
-      DEFAULT_CRED_CONFIG
+      config
     );
     expect(timelineCredCompute.mock.calls[0][0].equals(combinedGraph())).toBe(
       true

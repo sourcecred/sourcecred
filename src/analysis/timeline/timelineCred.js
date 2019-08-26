@@ -179,20 +179,18 @@ export class TimelineCred {
       graphJSON: this._graph.toJSON(),
       credJSON: filteredTimelineCredToJSON(this._cred),
       paramsJSON: paramsToJSON(this._params),
+      configJSON: this._config,
     };
     return toCompat(COMPAT_INFO, rawJSON);
   }
 
-  static fromJSON(
-    j: TimelineCredJSON,
-    config: TimelineCredConfig
-  ): TimelineCred {
+  static fromJSON(j: TimelineCredJSON): TimelineCred {
     const json = fromCompat(COMPAT_INFO, j);
-    const {graphJSON, credJSON, paramsJSON} = json;
+    const {graphJSON, credJSON, paramsJSON, configJSON} = json;
     const graph = Graph.fromJSON(graphJSON);
     const cred = filteredTimelineCredFromJSON(credJSON);
     const params = paramsFromJSON(paramsJSON);
-    return new TimelineCred(graph, cred, params, config);
+    return new TimelineCred(graph, cred, params, configJSON);
   }
 
   static async compute(
@@ -231,11 +229,12 @@ async function _computeTimelineCred(
   return filtered;
 }
 
-const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.1.0"};
+const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.2.0"};
 
 export opaque type TimelineCredJSON = Compatible<{|
   +graphJSON: GraphJSON,
   +paramsJSON: ParamsJSON,
+  +configJSON: TimelineCredConfig,
   +credJSON: FilteredTimelineCredJSON,
 |}>;
 

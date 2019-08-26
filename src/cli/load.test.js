@@ -10,6 +10,7 @@ import loadCommand, {help} from "./load";
 import type {LoadOptions} from "../api/load";
 import {defaultWeights, toJSON as weightsToJSON} from "../analysis/weights";
 import * as Common from "./common";
+import {DEFAULT_CRED_CONFIG} from "./defaultCredConfig";
 
 import {makeRepoId, stringToRepoId} from "../core/repoId";
 
@@ -76,6 +77,7 @@ describe("cli/load", () => {
           repoIds: [makeRepoId("foo", "bar")],
           discourseServer: null,
         },
+        config: DEFAULT_CRED_CONFIG,
         params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
@@ -101,6 +103,7 @@ describe("cli/load", () => {
           discourseServer: null,
         },
         params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
+        config: DEFAULT_CRED_CONFIG,
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
         discourseKey: fakeDiscourseKey,
@@ -138,6 +141,7 @@ describe("cli/load", () => {
           discourseServer: null,
         },
         params: {alpha: 0.05, intervalDecay: 0.5, weights},
+        config: DEFAULT_CRED_CONFIG,
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
         discourseKey: fakeDiscourseKey,

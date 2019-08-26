@@ -13,7 +13,6 @@ import {
   type Interval,
   type CredNode,
 } from "../analysis/timeline/timelineCred";
-import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
 import {userNodeType} from "../plugins/github/declaration";
 import * as GN from "../plugins/github/nodes";
 import {directoryForProjectId} from "../core/project_io";
@@ -100,7 +99,7 @@ export const scores: Command = async (args, std) => {
 
   const credBlob = await fs.readFile(credFile);
   const credJSON = JSON.parse(credBlob.toString());
-  const timelineCred = TimelineCred.fromJSON(credJSON, DEFAULT_CRED_CONFIG);
+  const timelineCred = TimelineCred.fromJSON(credJSON);
   const userOutput: NodeOutput[] = timelineCred
     .credSortedNodes(userNodeType.prefix)
     .map((n: CredNode) => {
