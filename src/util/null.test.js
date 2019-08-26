@@ -132,4 +132,26 @@ describe("util/null", () => {
       expect(NullUtil.orElse("", "not me")).toEqual("");
     });
   });
+
+  describe("filter", () => {
+    it("filters out undefined and null but not other falsey values", () => {
+      const x = [0, undefined, NaN, null, false, ""];
+      const f = NullUtil.filter(x);
+      expect(f).toEqual([0, NaN, false, ""]);
+    });
+    it("typechecks as expected", () => {
+      const rs: $ReadOnlyArray<?string> = ["foo", undefined];
+      const _: string[] = NullUtil.filter(rs);
+    });
+    it("returns a copy of the original array", () => {
+      const as = [1, 2, 3];
+      const bs = NullUtil.filter(as);
+      expect(as).not.toBe(bs);
+    });
+    it("doesn't allow bad coercions", () => {
+      const as = [1, "foo", 2];
+      // $ExpectFlowError
+      const _: number[] = NullUtil.filter(as);
+    });
+  });
 });

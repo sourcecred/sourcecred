@@ -79,3 +79,15 @@ export function orThrow<T>(x: ?T, getErrorMessage: () => string): T {
 export function orElse<T>(x: ?T, defaultValue: T): T {
   return x != null ? x : defaultValue;
 }
+
+/**
+ * Filter nulls and undefined out of an array, returning a new array.
+ *
+ * The functionality is easy to implement without a util method (just call
+ * `filter`); however Flow doesn't infer the type of the output array based on
+ * the callback that was passed to filter. This method basically wraps filter
+ * in a type-aware way.
+ */
+export function filter<T>(xs: $ReadOnlyArray<?T>): T[] {
+  return (xs.filter((x) => x != null): any);
+}
