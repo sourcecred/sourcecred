@@ -91,7 +91,7 @@ const GITHUB_ID_TYPENAME_PATTERN = /^[0-9]*:([A-Za-z0-9_-]*[A-Za-z_-])[0-9]+(?:[
 export function _guessTypename(
   objectId: Schema.ObjectId
 ): Schema.Typename | null {
-  const decodedId = new Buffer(objectId, "base64").toString("utf-8");
+  const decodedId = Buffer.from(objectId, "base64").toString("utf-8");
   const match = decodedId.match(GITHUB_ID_TYPENAME_PATTERN);
   return match ? match[1] : null;
 }
