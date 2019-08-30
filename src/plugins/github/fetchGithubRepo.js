@@ -86,7 +86,7 @@ export default async function fetchGithubRepo(
 // further section like ":commithash" for commits.
 //
 // See tests for `_guessTypename` for some example object IDs.
-const GITHUB_ID_TYPENAME_PATTERN = /^[0-9]*:([A-Za-z0-9_-]*[A-Za-z_-])[0-9]+(?:[^A-Za-z0-9_-].*)?$/;
+const GITHUB_ID_TYPENAME_PATTERN = /^[0-9]*:([a-z0-9_-]*[a-z_-])[0-9]+(?:[^a-z0-9_-].*)?$/i;
 
 export function _guessTypename(
   objectId: Schema.ObjectId
