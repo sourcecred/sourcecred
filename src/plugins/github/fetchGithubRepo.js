@@ -54,7 +54,10 @@ export default async function fetchGithubRepo(
   // equals signs in file names.
   const dbFilename = `mirror_${Buffer.from(resolvedId).toString("hex")}.db`;
   const db = new Database(path.join(cacheDirectory, dbFilename));
-  const mirror = new Mirror(db, schema(), {blacklistedIds: BLACKLISTED_IDS});
+  const mirror = new Mirror(db, schema(), {
+    blacklistedIds: BLACKLISTED_IDS,
+    guessTypename: _guessTypename,
+  });
   mirror.registerObject({typename: "Repository", id: resolvedId});
 
   // These are arbitrary tuning parameters.
@@ -74,6 +77,23 @@ export default async function fetchGithubRepo(
     connectionPageSize: 100,
   });
   return ((mirror.extract(resolvedId): any): Repository);
+}
+
+// GitHub object IDs are urlsafe-base64-encoded strings that decode to
+// ASCII strings of the form "123:Typename4567[...]", where the "123"
+// numbers are a function only of the typename and the "4567" numbers
+// are the object's database ID, and the "[...]" is either empty or a
+// further section like ":commithash" for commits.
+//
+// See tests for `_guessTypename` for some example object IDs.
+const GITHUB_ID_TYPENAME_PATTERN = /^[0-9]*:([A-Za-z0-9_-]*[A-Za-z_-])[0-9]+(?:[^A-Za-z0-9_-].*)?$/;
+
+export function _guessTypename(
+  objectId: Schema.ObjectId
+): Schema.Typename | null {
+  const decodedId = new Buffer(objectId, "base64").toString("utf-8");
+  const match = decodedId.match(GITHUB_ID_TYPENAME_PATTERN);
+  return match ? match[1] : null;
 }
 
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
