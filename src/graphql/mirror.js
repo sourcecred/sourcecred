@@ -1293,7 +1293,7 @@ export class Mirror {
           ].join("_"): string): any);
         },
       };
-      const updateEavPrimitive: ({|
+      const updatePrimitive: ({|
         +id: Schema.ObjectId,
         +fieldname: string,
         +value: string | 0 | 1,
@@ -1327,7 +1327,7 @@ export class Mirror {
           }
           const jsonValue = JSON.stringify(primitive);
           primitives[parameterNameFor.topLevelField(fieldname)] = jsonValue;
-          updateEavPrimitive({id: entry.id, fieldname, value: jsonValue});
+          updatePrimitive({id: entry.id, fieldname, value: jsonValue});
         }
 
         // Add nested primitives.
@@ -1347,7 +1347,7 @@ export class Mirror {
           }
           primitives[parameterNameFor.topLevelField(nestFieldname)] =
             topLevelNested == null ? 0 : 1;
-          updateEavPrimitive({
+          updatePrimitive({
             id: entry.id,
             fieldname: nestFieldname,
             value: topLevelNested == null ? 0 : 1,
@@ -1370,7 +1370,7 @@ export class Mirror {
             primitives[
               parameterNameFor.nestedField(nestFieldname, eggFieldname)
             ] = jsonValue;
-            updateEavPrimitive({
+            updatePrimitive({
               id: entry.id,
               fieldname: `${nestFieldname}.${eggFieldname}`,
               value: jsonValue,
