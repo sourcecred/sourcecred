@@ -142,7 +142,6 @@ describe("graphql/mirror", () => {
         expect(tables.sort()).toEqual(
           Array.from(
             new Set([
-              // Structural tables
               "meta",
               "updates",
               "objects",
@@ -150,15 +149,6 @@ describe("graphql/mirror", () => {
               "links",
               "connections",
               "connection_entries",
-              // Primitive data tables per OBJECT type (no UNIONs)
-              "primitives_Reaction",
-              "primitives_Repository",
-              "primitives_Issue",
-              "primitives_IssueComment",
-              "primitives_User",
-              "primitives_Bot",
-              "primitives_Organization",
-              ...issueTimelineItemClauses().map((x) => `primitives_${x}`),
             ])
           ).sort()
         );
@@ -216,63 +206,6 @@ describe("graphql/mirror", () => {
         expect(() => {
           new Mirror(db, schema, {blacklistedIds: ["ominous"]});
         }).toThrow("incompatible schema, options, or version");
-      });
-
-      it("rejects a schema with SQL-unsafe type name", () => {
-        const s = Schema;
-        const schema0 = s.schema({
-          "Non-Word-Characters": s.object({id: s.id()}),
-        });
-        const db = new Database(":memory:");
-        expect(() => new Mirror(db, schema0)).toThrow(
-          'invalid object type name: "Non-Word-Characters"'
-        );
-      });
-
-      it("rejects a schema with SQL-unsafe primitive field name", () => {
-        const s = Schema;
-        const schema0 = s.schema({
-          A: s.object({id: s.id(), "Non-Word-Characters": s.primitive()}),
-        });
-        const db = new Database(":memory:");
-        expect(() => new Mirror(db, schema0)).toThrow(
-          'invalid field name: "Non-Word-Characters"'
-        );
-      });
-
-      it("rejects a schema with SQL-unsafe nested field name", () => {
-        const s = Schema;
-        const schema0 = s.schema({
-          A: s.object({id: s.id(), "Non-Word-Characters": s.nested({})}),
-        });
-        const db = new Database(":memory:");
-        expect(() => new Mirror(db, schema0)).toThrow(
-          'invalid field name: "Non-Word-Characters"'
-        );
-      });
-
-      it("rejects a schema with SQL-unsafe nested primitive field name", () => {
-        const s = Schema;
-        const schema0 = s.schema({
-          A: s.object({
-            id: s.id(),
-            problem: s.nested({"Non-Word-Characters": s.primitive()}),
-          }),
-        });
-        const db = new Database(":memory:");
-        expect(() => new Mirror(db, schema0)).toThrow(
-          'invalid field name: "Non-Word-Characters" under "problem"'
-        );
-      });
-
-      it("allows specifying a good schema after rejecting one", () => {
-        const s = Schema;
-        const schema0 = s.schema({
-          A: s.object({id: s.id(), "Non-Word-Characters": s.primitive()}),
-        });
-        const db = new Database(":memory:");
-        expect(() => new Mirror(db, schema0)).toThrow("invalid field name");
-        expect(() => new Mirror(db, buildGithubSchema())).not.toThrow();
       });
     });
 
@@ -352,15 +285,6 @@ describe("graphql/mirror", () => {
             .all(issueId)
         ).toEqual(["author", "repository"].sort());
         expect(
-          db.prepare("SELECT * FROM primitives_Issue WHERE id = ?").all(issueId)
-        ).toEqual([
-          {
-            id: issueId,
-            url: null,
-            title: null,
-          },
-        ]);
-        expect(
           db
             .prepare(
               "SELECT fieldname FROM primitives WHERE object_id = ? " +
@@ -390,15 +314,6 @@ describe("graphql/mirror", () => {
             .pluck()
             .get()
         ).toBe(0);
-        expect(
-          db
-            .prepare(
-              "SELECT COUNT(1) FROM primitives_Issue WHERE " +
-                "url IS NOT NULL OR title IS NOT NULL"
-            )
-            .pluck()
-            .get()
-        ).toBe(0);
       });
       it("adds an object with nested primitives and links", () => {
         const db = new Database(":memory:");
@@ -423,18 +338,6 @@ describe("graphql/mirror", () => {
         ).toEqual(["author.user"]);
         expect(
           db
-            .prepare("SELECT * FROM primitives_Commit WHERE id = ?")
-            .all(commitId)
-        ).toEqual([
-          {
-            id: commitId,
-            oid: null,
-            author: null,
-            "author.date": null,
-          },
-        ]);
-        expect(
-          db
             .prepare(
               "SELECT fieldname FROM primitives WHERE object_id = ? " +
                 "ORDER BY fieldname ASC"
@@ -446,17 +349,6 @@ describe("graphql/mirror", () => {
         expect(
           db
             .prepare("SELECT COUNT(1) FROM links WHERE child_id IS NOT NULL")
-            .pluck()
-            .get()
-        ).toBe(0);
-        expect(
-          db
-            .prepare(
-              "SELECT COUNT(1) FROM primitives_Commit WHERE " +
-                "oid IS NOT NULL " +
-                "OR author IS NOT NULL " +
-                'OR "author.date" IS NOT NULL'
-            )
             .pluck()
             .get()
         ).toBe(0);
@@ -954,35 +846,6 @@ describe("graphql/mirror", () => {
           {id: "user:alice", fieldname: "url", value: null},
           // nothing for `ClosedEvent` (it has no primitive fields)
         ]);
-
-        // Check primitives (legacy format).
-        expect(
-          db
-            .prepare("SELECT * FROM primitives_Repository ORDER BY id ASC")
-            .all()
-        ).toEqual([{id: "repo:foo/bar", url: JSON.stringify("url://foo/bar")}]);
-        expect(
-          db.prepare("SELECT * FROM primitives_Issue ORDER BY id ASC").all()
-        ).toEqual([
-          {
-            id: "issue:#1",
-            title: JSON.stringify("something wicked"),
-            url: JSON.stringify("url://foo/bar/issue/1"),
-          },
-          {
-            id: "issue:#2",
-            title: JSON.stringify("this way comes"),
-            url: JSON.stringify("url://foo/bar/issue/2"),
-          },
-        ]);
-        expect(
-          db.prepare("SELECT * FROM primitives_User ORDER BY id ASC").all()
-        ).toEqual([{id: "user:alice", login: null, url: null}]);
-        expect(
-          db
-            .prepare("SELECT * FROM primitives_ClosedEvent ORDER BY id ASC")
-            .all()
-        ).toEqual([{id: "issue:#1!closed#0"}]);
 
         // Check that some links are correct.
         expect(
@@ -2164,13 +2027,6 @@ describe("graphql/mirror", () => {
             .sort()
         ).toEqual(["alice", "bob"].sort());
         expect(
-          db.prepare("SELECT * FROM primitives_Issue ORDER BY id ASC").all()
-        ).toEqual([
-          {id: "issue:#1", title: "13.75", url: '"url://issue/1"'},
-          {id: "issue:#2", title: "false", url: "null"},
-          {id: "issue:#3", title: null, url: null},
-        ]);
-        expect(
           db
             .prepare(
               "SELECT object_id AS id, fieldname, value " +
@@ -2212,22 +2068,6 @@ describe("graphql/mirror", () => {
               date: null,
               user: null,
             },
-          },
-        ]);
-        expect(
-          db.prepare("SELECT * FROM primitives_Commit ORDER BY id ASC").all()
-        ).toEqual([
-          {
-            id: "commit:oid",
-            author: +true,
-            "author.date": '"today"',
-            oid: '"yes"',
-          },
-          {
-            id: "commit:zzz",
-            oid: '"zzz"',
-            author: +true,
-            "author.date": "null",
           },
         ]);
         expect(
@@ -2296,16 +2136,6 @@ describe("graphql/mirror", () => {
           },
         ]);
         expect(
-          db.prepare("SELECT * FROM primitives_Commit ORDER BY id ASC").all()
-        ).toEqual([
-          {
-            id: "commit:oid",
-            oid: '"mmm"',
-            author: +false,
-            "author.date": "null",
-          },
-        ]);
-        expect(
           db
             .prepare(
               "SELECT object_id AS id, fieldname, value " +
@@ -2356,11 +2186,6 @@ describe("graphql/mirror", () => {
             actor: {__typename: "User", id: "user:alice"},
           },
         ]);
-        expect(
-          db
-            .prepare("SELECT * FROM primitives_LockedEvent ORDER BY id ASC")
-            .all()
-        ).toEqual([{id: "dos"}, {id: "uno"}]);
         expect(
           db
             .prepare(
@@ -3416,42 +3241,8 @@ describe("graphql/mirror", () => {
     }
 
     describe("extract", () => {
-      // Test in EAV mode, hiding the tables corresponding to the legacy
-      // mode to catch any accidental reads. (We hide and unhide rather
-      // than deleting because some test cases call `extract` multiple
-      // times.)
-      function hiddenName(name) {
-        return `${name}_DO_NOT_READ`;
-      }
-      function hideTable(db, name) {
-        db.prepare(`ALTER TABLE ${name} RENAME TO ${hiddenName(name)}`).run();
-      }
-      function unhideTable(db, name) {
-        db.prepare(`ALTER TABLE ${hiddenName(name)} RENAME TO ${name}`).run();
-      }
-
-      testExtract((mirror, id) => {
-        const legacyTables = mirror._db
-          .prepare(
-            "SELECT name FROM sqlite_master " +
-              "WHERE type = 'table' AND name LIKE 'primitives_%'"
-          )
-          .pluck()
-          .all();
-        if (legacyTables.length === 0) {
-          throw new Error("Found no type-specific primitives tables?");
-        }
-        for (const table of legacyTables) {
-          hideTable(mirror._db, table);
-        }
-        try {
-          return mirror.extract(id);
-        } finally {
-          for (const table of legacyTables) {
-            unhideTable(mirror._db, table);
-          }
-        }
-      });
+      // TODO(@wchargin): Inline this function.
+      testExtract((mirror, id) => mirror.extract(id));
     });
 
     describe("end-to-end typename guessing", () => {
