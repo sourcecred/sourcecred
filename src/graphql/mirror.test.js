@@ -384,6 +384,58 @@ describe("graphql/mirror", () => {
             .get()
         ).toBe(0);
       });
+      it("adds an object with nested primitives and links", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const commitId = "commit:9cba0e9e212a287ce26e8d7c2d273e1025c9f9bf";
+        mirror.registerObject({
+          typename: "Commit",
+          id: commitId,
+        });
+
+        expect(
+          db
+            .prepare("SELECT * FROM objects WHERE typename = ? AND id = ?")
+            .all("Commit", commitId)
+        ).toHaveLength(1);
+        expect(
+          db
+            .prepare("SELECT fieldname FROM links WHERE parent_id = ? ")
+            .pluck()
+            .all(commitId)
+        ).toEqual(["author.user"]);
+        expect(
+          db
+            .prepare("SELECT * FROM primitives_Commit WHERE id = ?")
+            .all(commitId)
+        ).toEqual([
+          {
+            id: commitId,
+            oid: null,
+            author: null,
+            "author.date": null,
+          },
+        ]);
+
+        expect(
+          db
+            .prepare("SELECT COUNT(1) FROM links WHERE child_id IS NOT NULL")
+            .pluck()
+            .get()
+        ).toBe(0);
+        expect(
+          db
+            .prepare(
+              "SELECT COUNT(1) FROM primitives_Commit WHERE " +
+                "oid IS NOT NULL " +
+                "OR author IS NOT NULL " +
+                'OR "author.date" IS NOT NULL'
+            )
+            .pluck()
+            .get()
+        ).toBe(0);
+      });
       it("doesn't touch an existing object with the same typename", () => {
         const db = new Database(":memory:");
         const schema = buildGithubSchema();
