@@ -146,6 +146,7 @@ describe("graphql/mirror", () => {
               "meta",
               "updates",
               "objects",
+              "primitives",
               "links",
               "connections",
               "connection_entries",

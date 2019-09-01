@@ -145,6 +145,10 @@ export class Mirror {
    *     efficiently in both space and time (see discussion on #883 for
    *     some options).
    *
+   *     NOTE: A migration is underway to switch from type-specific
+   *     primitive tables to a single entity-attribute-value table
+   *     storing primitives for all types. See issue #1313 for details.
+   *
    * We refer to node and primitive data together as "own data", because
    * this is the data that can be queried uniformly for all elements of
    * a type; querying connection data, by contrast, requires the
@@ -192,7 +196,7 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
-      version: "MIRROR_v3",
+      version: "MIRROR_v4",
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,
@@ -252,6 +256,20 @@ export class Mirror {
               last_update INTEGER,
               FOREIGN KEY(last_update) REFERENCES updates(rowid)
           )
+        `,
+        dedent`\
+          CREATE TABLE primitives (
+              rowid INTEGER PRIMARY KEY,
+              object_id TEXT NOT NULL,
+              fieldname TEXT NOT NULL,
+              value,  -- JSON string, or SQL 0 or 1 for nest fields
+              UNIQUE(object_id, fieldname),
+              FOREIGN KEY(object_id) REFERENCES objects(id)
+          )
+        `,
+        dedent`\
+          CREATE UNIQUE INDEX idx_primitives__object_id__fieldname
+          ON primitives (object_id, fieldname)
         `,
         dedent`\
           CREATE TABLE links (
