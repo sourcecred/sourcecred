@@ -2502,7 +2502,7 @@ describe("graphql/mirror", () => {
       });
     });
 
-    describe("extract", () => {
+    function testExtract(extract: (Mirror, Schema.ObjectId) => mixed) {
       // A schema with some useful edge cases.
       function buildTestSchema(): Schema.Schema {
         const s = Schema;
@@ -2571,7 +2571,7 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildTestSchema());
         expect(() => {
-          mirror.extract("wat");
+          extract(mirror, "wat");
         }).toThrow('No such object: "wat"');
       });
 
@@ -2580,7 +2580,7 @@ describe("graphql/mirror", () => {
         const mirror = new Mirror(db, buildTestSchema());
         mirror.registerObject({typename: "Caveman", id: "brog"});
         expect(() => {
-          mirror.extract("brog");
+          extract(mirror, "brog");
         }).toThrow(
           '"brog" transitively depends on "brog", ' +
             "but that object's own data has never been fetched"
@@ -2604,7 +2604,7 @@ describe("graphql/mirror", () => {
           nodes: [],
         });
         expect(() => {
-          mirror.extract("localhost");
+          extract(mirror, "localhost");
         }).toThrow(
           '"localhost" transitively depends on "localhost", ' +
             'but that object\'s "only" connection has never been fetched'
@@ -2616,7 +2616,7 @@ describe("graphql/mirror", () => {
           nodes: [],
         });
         expect(() => {
-          mirror.extract("loopback");
+          extract(mirror, "loopback");
         }).toThrow(
           '"loopback" transitively depends on "loopback", ' +
             'but that object\'s "connections" connection has never been fetched'
@@ -2645,7 +2645,7 @@ describe("graphql/mirror", () => {
           },
         ]);
         expect(() => {
-          mirror.extract("alpha");
+          extract(mirror, "alpha");
         }).toThrow(
           '"alpha" transitively depends on "gamma", ' +
             "but that object's own data has never been fetched"
@@ -2681,7 +2681,7 @@ describe("graphql/mirror", () => {
         updateConnection("localhost:8080", "connections", ["localhost:7070"]);
         updateConnection("localhost:7070", "connections", ["localhost:6060"]);
         expect(() => {
-          mirror.extract("localhost:8080");
+          extract(mirror, "localhost:8080");
         }).toThrow(
           '"localhost:8080" transitively depends on "localhost:6060", ' +
             'but that object\'s "connections" connection has never been fetched'
@@ -2696,7 +2696,7 @@ describe("graphql/mirror", () => {
         mirror._updateOwnData(updateId, [
           {__typename: "Caveman", id: "brog", only: "ugg", primitives: "ook"},
         ]);
-        const result: Caveman = (mirror.extract("brog"): any);
+        const result: Caveman = (extract(mirror, "brog"): any);
         expect(result).toEqual({
           __typename: "Caveman",
           id: "brog",
@@ -2732,7 +2732,7 @@ describe("graphql/mirror", () => {
             lynx: null,
           },
         ]);
-        const result = mirror.extract("alpha");
+        const result = extract(mirror, "alpha");
         expect(result).toEqual({
           __typename: "Feline",
           id: "alpha",
@@ -2783,7 +2783,7 @@ describe("graphql/mirror", () => {
           "localhost:6060",
         ]);
         updateConnection("localhost:6060", "connections", []);
-        const result = mirror.extract("localhost:8080");
+        const result = extract(mirror, "localhost:8080");
         expect(result).toEqual({
           __typename: "Socket",
           id: "localhost:8080",
@@ -2818,7 +2818,7 @@ describe("graphql/mirror", () => {
         mirror.registerObject({typename: "Empty", id: "mt"});
         const updateId = mirror._createUpdate(new Date(123));
         mirror._updateOwnData(updateId, [{__typename: "Empty", id: "mt"}]);
-        const result = mirror.extract("mt");
+        const result = extract(mirror, "mt");
         expect(result).toEqual({__typename: "Empty", id: "mt"});
       });
 
@@ -2830,7 +2830,7 @@ describe("graphql/mirror", () => {
         mirror._updateOwnData(updateId, [
           {__typename: "Caveman", id: "brog", only: false, primitives: true},
         ]);
-        expect(mirror.extract("brog")).toEqual({
+        expect(extract(mirror, "brog")).toEqual({
           __typename: "Caveman",
           id: "brog",
           only: false,
@@ -2846,7 +2846,7 @@ describe("graphql/mirror", () => {
         mirror._updateOwnData(updateId, [
           {__typename: "Caveman", id: "brog", only: null, primitives: null},
         ]);
-        expect(mirror.extract("brog")).toEqual({
+        expect(extract(mirror, "brog")).toEqual({
           __typename: "Caveman",
           id: "brog",
           only: null,
@@ -2862,7 +2862,7 @@ describe("graphql/mirror", () => {
         mirror._updateOwnData(updateId, [
           {__typename: "Caveman", id: "brog", only: 123, primitives: 987},
         ]);
-        expect(mirror.extract("brog")).toEqual({
+        expect(extract(mirror, "brog")).toEqual({
           __typename: "Caveman",
           id: "brog",
           only: 123,
@@ -2895,7 +2895,7 @@ describe("graphql/mirror", () => {
             lynx: null,
           },
         ]);
-        const result: Nest = (mirror.extract("eyrie"): any);
+        const result: Nest = (extract(mirror, "eyrie"): any);
         expect(result).toEqual({
           __typename: "Nest",
           id: "eyrie",
@@ -2939,7 +2939,7 @@ describe("graphql/mirror", () => {
             lynx: null,
           },
         ]);
-        const result: Feline = (mirror.extract("alpha"): any);
+        const result: Feline = (extract(mirror, "alpha"): any);
         expect(result).toEqual({
           __typename: "Feline",
           id: "alpha",
@@ -2993,7 +2993,7 @@ describe("graphql/mirror", () => {
           "localhost:6060",
         ]);
         updateConnection("localhost:6060", "connections", ["localhost:7070"]);
-        const result: Socket = (mirror.extract("localhost:8080"): any);
+        const result: Socket = (extract(mirror, "localhost:8080"): any);
         expect(result).toEqual({
           __typename: "Socket",
           id: "localhost:8080",
@@ -3050,7 +3050,7 @@ describe("graphql/mirror", () => {
             null,
           ],
         });
-        const result: Socket = (mirror.extract("localhost"): any);
+        const result: Socket = (extract(mirror, "localhost"): any);
         expect(result).toEqual({
           __typename: "Socket",
           id: "localhost",
@@ -3323,7 +3323,7 @@ describe("graphql/mirror", () => {
         mirror.registerObject(objects.noboty());
         mirror.registerObject(objects.issue3());
 
-        const result = mirror.extract("repo:foo/bar");
+        const result = extract(mirror, "repo:foo/bar");
         expect(result).toEqual({
           __typename: "Repository",
           id: "repo:foo/bar",
@@ -3411,6 +3411,75 @@ describe("graphql/mirror", () => {
               ],
             },
           ],
+        });
+      });
+    }
+
+    describe("extract", () => {
+      // We'll run under both legacy and EAV modes. In each case, hide
+      // the tables corresponding to the other mode to catch any
+      // accidental reads. (We hide and unhide rather than deleting
+      // because some test cases call `extract` multiple times.)
+      function hiddenName(name) {
+        return `${name}_DO_NOT_READ`;
+      }
+      function hideTable(db, name) {
+        db.prepare(`ALTER TABLE ${name} RENAME TO ${hiddenName(name)}`).run();
+      }
+      function unhideTable(db, name) {
+        db.prepare(`ALTER TABLE ${hiddenName(name)} RENAME TO ${name}`).run();
+      }
+
+      describe("with legacy type-specific primitives", () => {
+        testExtract((mirror, id) => {
+          hideTable(mirror._db, "primitives");
+          try {
+            return mirror.extract(id, {useEavPrimitives: false});
+          } finally {
+            unhideTable(mirror._db, "primitives");
+          }
+        });
+      });
+
+      describe("with EAV primitives", () => {
+        testExtract((mirror, id) => {
+          const legacyTables = mirror._db
+            .prepare(
+              "SELECT name FROM sqlite_master " +
+                "WHERE type = 'table' AND name LIKE 'primitives_%'"
+            )
+            .pluck()
+            .all();
+          if (legacyTables.length === 0) {
+            throw new Error("Found no type-specific primitives tables?");
+          }
+          for (const table of legacyTables) {
+            hideTable(mirror._db, table);
+          }
+          try {
+            return mirror.extract(id, {useEavPrimitives: true});
+          } finally {
+            for (const table of legacyTables) {
+              unhideTable(mirror._db, table);
+            }
+          }
+        });
+      });
+
+      it("works with default options", () => {
+        // Simple sanity check.
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        mirror.registerObject({typename: "SubscribedEvent", id: "sub"});
+        const update = mirror._createUpdate(new Date(123));
+        mirror._updateOwnData(update, [
+          {__typename: "SubscribedEvent", id: "sub", actor: null},
+        ]);
+        expect(mirror.extract("sub")).toEqual({
+          __typename: "SubscribedEvent",
+          id: "sub",
+          actor: null,
         });
       });
     });
