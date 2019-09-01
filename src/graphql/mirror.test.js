@@ -72,6 +72,11 @@ describe("graphql/mirror", () => {
         body: s.primitive(),
         author: s.node("Actor"),
       }),
+      Reaction: s.object({
+        id: s.id(),
+        content: s.primitive(s.nonNull("ReactionContent")),
+        user: s.node("User"),
+      }),
       Commit: s.object({
         id: s.id(),
         oid: s.primitive(),
@@ -145,6 +150,7 @@ describe("graphql/mirror", () => {
               "connections",
               "connection_entries",
               // Primitive data tables per OBJECT type (no UNIONs)
+              "primitives_Reaction",
               "primitives_Repository",
               "primitives_Issue",
               "primitives_IssueComment",
@@ -3248,6 +3254,215 @@ describe("graphql/mirror", () => {
         });
       });
     });
+
+    describe("end-to-end typename guessing", () => {
+      beforeAll(() => {
+        jest.spyOn(console, "warn").mockImplementation(() => {});
+      });
+      function spyWarn(): JestMockFn<[string], void> {
+        return ((console.warn: any): JestMockFn<any, void>);
+      }
+      beforeEach(() => {
+        spyWarn().mockReset();
+      });
+      afterAll(() => {
+        spyWarn().mockRestore();
+      });
+
+      // Guess typenames from object IDs like "<Commit>#123".
+      function guessTypename(
+        objectId: Schema.ObjectId
+      ): Schema.Typename | null {
+        const match = objectId.match(/^<([A-Za-z_-]*)>#[0-9]*$/);
+        return match ? match[1] : null;
+      }
+
+      function buildMirror() {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        return new Mirror(db, schema, {guessTypename});
+      }
+
+      it("catches bad top-level links", async () => {
+        const mirror = buildMirror();
+        // Reaction.user can actually be an organization.
+        mirror.registerObject({typename: "Reaction", id: "<Reaction>#123"});
+        const postQuery = jest.fn();
+        postQuery.mockImplementationOnce(() =>
+          Promise.resolve({
+            owndata_0: [
+              {
+                __typename: "Reaction",
+                id: "<Reaction>#123",
+                content: "THUMBS_DOWN",
+                user: {__typename: "User", id: "<Organization>#456"},
+              },
+            ],
+          })
+        );
+        postQuery.mockImplementationOnce(() =>
+          Promise.resolve({
+            owndata_0: [
+              {
+                __typename: "User",
+                id: "<Organization>#456",
+                url: "https://example.com/org/456",
+                login: "org456",
+              },
+            ],
+          })
+        );
+        postQuery.mockImplementationOnce(() =>
+          Promise.reject("Should not get here.")
+        );
+        await mirror.update(postQuery, {
+          nodesOfTypeLimit: 2,
+          nodesLimit: 3,
+          connectionLimit: 4,
+          connectionPageSize: 5,
+          since: new Date(0),
+          now: () => new Date(0),
+        });
+        expect(console.warn).toHaveBeenCalledTimes(1);
+        expect(console.warn).toHaveBeenCalledWith(
+          'Warning: when setting Reaction["<Reaction>#123"].user: ' +
+            'object "<Organization>#456" looks like it should have ' +
+            'type "Organization", but the server claims that it has ' +
+            'type "User"'
+        );
+      });
+
+      it("catches bad nested links", async () => {
+        const mirror = buildMirror();
+        // GitActor.user can actually be a bot.
+        mirror.registerObject({typename: "Commit", id: "<Commit>#123"});
+        const postQuery = jest.fn();
+        postQuery.mockImplementationOnce(() =>
+          Promise.resolve({
+            owndata_0: [
+              {
+                __typename: "Commit",
+                id: "<Commit>#123",
+                oid: "9cba0e9e212a287ce26e8d7c2d273e1025c9f9bf",
+                author: {
+                  date: "yesterday",
+                  user: {__typename: "User", id: "<Bot>#456"},
+                },
+              },
+            ],
+          })
+        );
+        postQuery.mockImplementationOnce(() =>
+          Promise.resolve({
+            owndata_0: [
+              {
+                __typename: "User",
+                id: "<Bot>#456",
+                url: "https://example.com/bot/456",
+                login: "bot456",
+              },
+            ],
+          })
+        );
+        postQuery.mockImplementationOnce(() =>
+          Promise.reject("Should not get here.")
+        );
+        await mirror.update(postQuery, {
+          nodesOfTypeLimit: 2,
+          nodesLimit: 3,
+          connectionLimit: 4,
+          connectionPageSize: 5,
+          since: new Date(0),
+          now: () => new Date(0),
+        });
+        expect(console.warn).toHaveBeenCalledTimes(1);
+        expect(console.warn).toHaveBeenCalledWith(
+          'Warning: when setting Commit["<Commit>#123"].author.user: ' +
+            'object "<Bot>#456" looks like it should have type "Bot", ' +
+            'but the server claims that it has type "User"'
+        );
+      });
+
+      it("catches bad connection entries", async () => {
+        const mirror = buildMirror();
+        // Suppose that Issue.comments could actually contain Reactions.
+        mirror.registerObject({typename: "Issue", id: "<Issue>#123"});
+        const postQuery = jest.fn();
+        postQuery.mockImplementationOnce(() =>
+          Promise.resolve({
+            owndata_0: [
+              {
+                __typename: "Issue",
+                id: "<Issue>#123",
+                url: "https://example.com/issue/123",
+                author: null,
+                repository: null,
+                title: "My twelvtythird issue",
+              },
+            ],
+            node_0: {
+              id: "<Issue>#123",
+              comments: {
+                totalCount: 1,
+                pageInfo: {hasNextPage: false, endCursor: "cursor:comments@1"},
+                nodes: [{__typename: "IssueComment", id: "<User>#456"}],
+              },
+              timeline: {
+                totalCount: 0,
+                pageInfo: {hasNextPage: false, endCursor: null},
+                nodes: [],
+              },
+            },
+          })
+        );
+        postQuery.mockImplementationOnce(() =>
+          Promise.resolve({
+            owndata_0: [
+              {
+                __typename: "IssueComment",
+                id: "<User>#456",
+                body: "dubious",
+                author: null,
+              },
+            ],
+          })
+        );
+        postQuery.mockImplementationOnce(() =>
+          Promise.reject("Should not get here.")
+        );
+        await mirror.update(postQuery, {
+          nodesOfTypeLimit: 2,
+          nodesLimit: 3,
+          connectionLimit: 4,
+          connectionPageSize: 5,
+          since: new Date(0),
+          now: () => new Date(0),
+        });
+        expect(console.warn).toHaveBeenCalledTimes(1);
+        expect(console.warn).toHaveBeenCalledWith(
+          'Warning: when processing "comments" connection ' +
+            'of object "<Issue>#123": ' +
+            'object "<User>#456" looks like it should have type "User", ' +
+            'but the server claims that it has type "IssueComment"'
+        );
+      });
+
+      it("catches bad manual registrations", () => {
+        const mirror = buildMirror();
+        mirror.registerObject({typename: "User", id: "<Organization>#123"});
+        expect(console.warn).toHaveBeenCalledTimes(1);
+        expect(console.warn).toHaveBeenCalledWith(
+          'Warning: object "<Organization>#123" looks like it should have ' +
+            'type "Organization", not "User"'
+        );
+      });
+
+      it("ignores null guesses", () => {
+        const mirror = buildMirror();
+        mirror.registerObject({typename: "User", id: "~~unorthodox~~"});
+        expect(console.warn).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe("_buildSchemaInfo", () => {
@@ -3256,6 +3471,7 @@ describe("graphql/mirror", () => {
       expect(Object.keys(result.objectTypes).sort()).toEqual(
         Array.from(
           new Set([
+            "Reaction",
             "Repository",
             "Issue",
             "IssueComment",

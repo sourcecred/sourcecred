@@ -34,6 +34,7 @@ export class Mirror {
   +_schema: Schema.Schema;
   +_schemaInfo: SchemaInfo;
   +_blacklistedIds: {|+[Schema.ObjectId]: true|};
+  +_guessTypename: (Schema.ObjectId) => Schema.Typename | null;
 
   /**
    * Create a GraphQL mirror using the given database connection and
@@ -54,16 +55,30 @@ export class Mirror {
    * matching ID will be treated as `null` when it appears as the target
    * of a node reference, nested node reference, or connection entry.
    * This can be used to work around bugs in remote schemas.
+   *
+   * If `guessTypename` is provided, it should attempt to guess the
+   * typename of an object given its ID, returning `null` if no guess
+   * can be made. This will be used as a cross-check against results
+   * returned from the server to provide an early warning in cases where
+   * the results differ, potentially due to server-side contract
+   * violations. This option only affects console warnings, not the
+   * final state of the mirror.
    */
   constructor(
     db: Database,
     schema: Schema.Schema,
-    options?: {|+blacklistedIds?: $ReadOnlyArray<Schema.ObjectId>|}
+    options?: {|
+      +blacklistedIds?: $ReadOnlyArray<Schema.ObjectId>,
+      +guessTypename?: (Schema.ObjectId) => Schema.Typename | null,
+    |}
   ): void {
     if (db == null) throw new Error("db: " + String(db));
     if (schema == null) throw new Error("schema: " + String(schema));
     const fullOptions = {
-      ...{blacklistedIds: []},
+      ...{
+        blacklistedIds: [],
+        guessTypename: () => null,
+      },
       ...(options || {}),
     };
     this._db = db;
@@ -76,6 +91,7 @@ export class Mirror {
       }
       return result;
     })();
+    this._guessTypename = fullOptions.guessTypename;
     this._initialize();
   }
 
@@ -373,7 +389,14 @@ export class Mirror {
     +id: Schema.ObjectId,
   |}): void {
     _inTransaction(this._db, () => {
-      this._nontransactionallyRegisterObject(object);
+      this._nontransactionallyRegisterObject(object, (guess) => {
+        const s = JSON.stringify;
+        const message =
+          `object ${s(object.id)} ` +
+          `looks like it should have type ${s(guess)}, ` +
+          `not ${s(object.typename)}`;
+        return message;
+      });
     });
   }
 
@@ -382,10 +405,13 @@ export class Mirror {
    * methods may call this method as a subroutine in a larger
    * transaction.
    */
-  _nontransactionallyRegisterObject(object: {|
-    +typename: Schema.Typename,
-    +id: Schema.ObjectId,
-  |}): void {
+  _nontransactionallyRegisterObject(
+    object: {|
+      +typename: Schema.Typename,
+      +id: Schema.ObjectId,
+    |},
+    guessMismatchMessage: (guess: Schema.Typename) => string
+  ): void {
     const db = this._db;
     const {typename, id} = object;
 
@@ -412,6 +438,11 @@ export class Mirror {
         "Cannot add object of non-object type: " +
           `${JSON.stringify(typename)} (${this._schema[typename].type})`
       );
+    }
+
+    const guess = this._guessTypename(object.id);
+    if (guess != null && guess !== object.typename) {
+      console.warn("Warning: " + guessMismatchMessage(guess));
     }
 
     this._db
@@ -475,7 +506,8 @@ export class Mirror {
    * See: `registerObject`.
    */
   _nontransactionallyRegisterNodeFieldResult(
-    result: NodeFieldResult
+    result: NodeFieldResult,
+    context: () => string
   ): Schema.ObjectId | null {
     if (result == null) {
       return null;
@@ -483,7 +515,14 @@ export class Mirror {
       return null;
     } else {
       const object = {typename: result.__typename, id: result.id};
-      this._nontransactionallyRegisterObject(object);
+      this._nontransactionallyRegisterObject(object, (guess) => {
+        const s = JSON.stringify;
+        const message =
+          `object ${s(object.id)} ` +
+          `looks like it should have type ${s(guess)}, ` +
+          `but the server claims that it has type ${s(object.typename)}`;
+        return `${context()}: ${message}`;
+      });
       return object.id;
     }
   }
@@ -1078,7 +1117,16 @@ export class Mirror {
       `
     );
     for (const node of queryResult.nodes) {
-      const childId = this._nontransactionallyRegisterNodeFieldResult(node);
+      const childId = this._nontransactionallyRegisterNodeFieldResult(
+        node,
+        () => {
+          const s = JSON.stringify;
+          return (
+            "when processing " +
+            `${s(fieldname)} connection of object ${s(objectId)}`
+          );
+        }
+      );
       const idx = nextIndex++;
       addEntry.run({connectionId, idx, childId});
     }
@@ -1401,8 +1449,13 @@ export class Mirror {
                 `of type ${s(typename)} (got ${(link: empty)})`
             );
           }
-          const childId = this._nontransactionallyRegisterNodeFieldResult(link);
           const parentId = entry.id;
+          const childId = this._nontransactionallyRegisterNodeFieldResult(
+            link,
+            () =>
+              "when setting " +
+              `${typename}[${JSON.stringify(parentId)}].${fieldname}`
+          );
           updateLink({parentId, fieldname, childId});
         }
 
@@ -1429,11 +1482,14 @@ export class Mirror {
                   `of type ${s(typename)} (got ${(link: empty)})`
               );
             }
-            const childId = this._nontransactionallyRegisterNodeFieldResult(
-              link
-            );
             const fieldname = `${nestFieldname}.${childFieldname}`;
             const parentId = entry.id;
+            const childId = this._nontransactionallyRegisterNodeFieldResult(
+              link,
+              () =>
+                "when setting " +
+                `${typename}[${JSON.stringify(parentId)}].${fieldname}`
+            );
             updateLink({parentId, fieldname, childId});
           }
         }
