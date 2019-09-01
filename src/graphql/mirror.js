@@ -196,7 +196,7 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
-      version: "MIRROR_v4",
+      version: "MIRROR_v5",
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,
@@ -479,6 +479,12 @@ export class Mirror {
         `
       )
       .run(id);
+    const addPrimitive = this._db.prepare(
+      dedent`
+        INSERT INTO primitives (object_id, fieldname, value)
+        VALUES (:id, :fieldname, NULL)
+      `
+    );
     const addLink = this._db.prepare(
       dedent`\
         INSERT INTO links (parent_id, fieldname, child_id)
@@ -495,12 +501,20 @@ export class Mirror {
       `
     );
     const objectType = this._schemaInfo.objectTypes[typename];
+    for (const fieldname of objectType.primitiveFieldNames) {
+      addPrimitive.run({id, fieldname});
+    }
     for (const fieldname of objectType.linkFieldNames) {
       addLink.run({id, fieldname});
     }
     for (const parentFieldname of objectType.nestedFieldNames) {
-      const children = objectType.nestedFields[parentFieldname].nodes;
-      for (const childFieldname of Object.keys(children)) {
+      addPrimitive.run({id, fieldname: parentFieldname});
+      const children = objectType.nestedFields[parentFieldname];
+      for (const childFieldname of Object.keys(children.primitives)) {
+        const fieldname = `${parentFieldname}.${childFieldname}`;
+        addPrimitive.run({id, fieldname});
+      }
+      for (const childFieldname of Object.keys(children.nodes)) {
         const fieldname = `${parentFieldname}.${childFieldname}`;
         addLink.run({id, fieldname});
       }

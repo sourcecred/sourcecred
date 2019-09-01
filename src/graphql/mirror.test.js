@@ -360,12 +360,27 @@ describe("graphql/mirror", () => {
             title: null,
           },
         ]);
+        expect(
+          db
+            .prepare(
+              "SELECT fieldname FROM primitives WHERE object_id = ? " +
+                "ORDER BY fieldname ASC"
+            )
+            .pluck()
+            .all(issueId)
+        ).toEqual(["url", "title"].sort());
 
         expect(
           db
             .prepare(
               "SELECT COUNT(1) FROM connections WHERE last_update IS NOT NULL"
             )
+            .pluck()
+            .get()
+        ).toBe(0);
+        expect(
+          db
+            .prepare("SELECT COUNT(1) FROM primitives WHERE value IS NOT NULL")
             .pluck()
             .get()
         ).toBe(0);
@@ -418,6 +433,15 @@ describe("graphql/mirror", () => {
             "author.date": null,
           },
         ]);
+        expect(
+          db
+            .prepare(
+              "SELECT fieldname FROM primitives WHERE object_id = ? " +
+                "ORDER BY fieldname ASC"
+            )
+            .pluck()
+            .all(commitId)
+        ).toEqual(["oid", "author", "author.date"].sort());
 
         expect(
           db
