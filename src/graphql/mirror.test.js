@@ -932,6 +932,30 @@ describe("graphql/mirror", () => {
 
         // Check that some objects have the right primitives.
         // (These poke at the internals of the storage format a bit.)
+
+        // Check primitives (EAV format).
+        expect(
+          db
+            .prepare(
+              "SELECT object_id AS id, fieldname, value " +
+                "FROM objects JOIN primitives ON objects.id = object_id " +
+                "WHERE " +
+                "typename IN ('Repository', 'Issue', 'User', 'ClosedEvent') " +
+                "ORDER BY id, fieldname ASC"
+            )
+            .all()
+        ).toEqual([
+          {id: "issue:#1", fieldname: "title", value: '"something wicked"'},
+          {id: "issue:#1", fieldname: "url", value: '"url://foo/bar/issue/1"'},
+          {id: "issue:#2", fieldname: "title", value: '"this way comes"'},
+          {id: "issue:#2", fieldname: "url", value: '"url://foo/bar/issue/2"'},
+          {id: "repo:foo/bar", fieldname: "url", value: '"url://foo/bar"'},
+          {id: "user:alice", fieldname: "login", value: null},
+          {id: "user:alice", fieldname: "url", value: null},
+          // nothing for `ClosedEvent` (it has no primitive fields)
+        ]);
+
+        // Check primitives (legacy format).
         expect(
           db
             .prepare("SELECT * FROM primitives_Repository ORDER BY id ASC")
@@ -942,13 +966,13 @@ describe("graphql/mirror", () => {
         ).toEqual([
           {
             id: "issue:#1",
-            url: JSON.stringify("url://foo/bar/issue/1"),
             title: JSON.stringify("something wicked"),
+            url: JSON.stringify("url://foo/bar/issue/1"),
           },
           {
             id: "issue:#2",
-            url: JSON.stringify("url://foo/bar/issue/2"),
             title: JSON.stringify("this way comes"),
+            url: JSON.stringify("url://foo/bar/issue/2"),
           },
         ]);
         expect(
@@ -2142,9 +2166,26 @@ describe("graphql/mirror", () => {
         expect(
           db.prepare("SELECT * FROM primitives_Issue ORDER BY id ASC").all()
         ).toEqual([
-          {id: "issue:#1", url: '"url://issue/1"', title: "13.75"},
-          {id: "issue:#2", url: "null", title: "false"},
-          {id: "issue:#3", url: null, title: null},
+          {id: "issue:#1", title: "13.75", url: '"url://issue/1"'},
+          {id: "issue:#2", title: "false", url: "null"},
+          {id: "issue:#3", title: null, url: null},
+        ]);
+        expect(
+          db
+            .prepare(
+              "SELECT object_id AS id, fieldname, value " +
+                "FROM objects JOIN primitives ON objects.id = object_id " +
+                "WHERE typename = 'Issue' " +
+                "ORDER BY id, fieldname ASC"
+            )
+            .all()
+        ).toEqual([
+          {id: "issue:#1", fieldname: "title", value: "13.75"},
+          {id: "issue:#1", fieldname: "url", value: '"url://issue/1"'},
+          {id: "issue:#2", fieldname: "title", value: "false"},
+          {id: "issue:#2", fieldname: "url", value: "null"},
+          {id: "issue:#3", fieldname: "title", value: null},
+          {id: "issue:#3", fieldname: "url", value: null},
         ]);
       });
       it("stores data with non-`null` nested fields", () => {
@@ -2178,9 +2219,9 @@ describe("graphql/mirror", () => {
         ).toEqual([
           {
             id: "commit:oid",
-            oid: '"yes"',
             author: +true,
             "author.date": '"today"',
+            oid: '"yes"',
           },
           {
             id: "commit:zzz",
@@ -2188,6 +2229,23 @@ describe("graphql/mirror", () => {
             author: +true,
             "author.date": "null",
           },
+        ]);
+        expect(
+          db
+            .prepare(
+              "SELECT object_id AS id, fieldname, value " +
+                "FROM objects JOIN primitives ON objects.id = object_id " +
+                "WHERE typename = 'Commit' " +
+                "ORDER BY id, fieldname ASC"
+            )
+            .all()
+        ).toEqual([
+          {id: "commit:oid", fieldname: "author", value: +true},
+          {id: "commit:oid", fieldname: "author.date", value: '"today"'},
+          {id: "commit:oid", fieldname: "oid", value: '"yes"'},
+          {id: "commit:zzz", fieldname: "author", value: +true},
+          {id: "commit:zzz", fieldname: "author.date", value: "null"},
+          {id: "commit:zzz", fieldname: "oid", value: '"zzz"'},
         ]);
         expect(
           db.prepare("SELECT * FROM links ORDER BY parent_id ASC").all()
@@ -2248,6 +2306,20 @@ describe("graphql/mirror", () => {
           },
         ]);
         expect(
+          db
+            .prepare(
+              "SELECT object_id AS id, fieldname, value " +
+                "FROM objects JOIN primitives ON objects.id = object_id " +
+                "WHERE typename = 'Commit' " +
+                "ORDER BY id, fieldname ASC"
+            )
+            .all()
+        ).toEqual([
+          {id: "commit:oid", fieldname: "author", value: +false},
+          {id: "commit:oid", fieldname: "author.date", value: "null"},
+          {id: "commit:oid", fieldname: "oid", value: '"mmm"'},
+        ]);
+        expect(
           db.prepare("SELECT * FROM links ORDER BY parent_id ASC").all()
         ).toEqual([
           {
@@ -2289,6 +2361,17 @@ describe("graphql/mirror", () => {
             .prepare("SELECT * FROM primitives_LockedEvent ORDER BY id ASC")
             .all()
         ).toEqual([{id: "dos"}, {id: "uno"}]);
+        expect(
+          db
+            .prepare(
+              "SELECT objects.id AS o_id, primitives.rowid AS p_rowid " +
+                "FROM objects LEFT OUTER JOIN primitives " +
+                "ON objects.id = object_id " +
+                "WHERE typename = 'LockedEvent' " +
+                "ORDER BY o_id ASC"
+            )
+            .all()
+        ).toEqual([{o_id: "dos", p_rowid: null}, {o_id: "uno", p_rowid: null}]);
         expect(
           db
             .prepare("SELECT * FROM links ORDER BY parent_id ASC")

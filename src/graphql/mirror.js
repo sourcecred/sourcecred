@@ -196,7 +196,7 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
-      version: "MIRROR_v5",
+      version: "MIRROR_v6",
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,
@@ -1356,7 +1356,7 @@ export class Mirror {
           ].join("_"): string): any);
         },
       };
-      const updatePrimitives: ({|
+      const updateTypeSpecificPrimitives: ({|
         +id: Schema.ObjectId,
         // These keys can be top-level primitive fields or the primitive
         // children of a nested field. The values are the JSON encodings
@@ -1387,6 +1387,19 @@ export class Mirror {
         );
         return _makeSingleUpdateFunction(stmt);
       })();
+      const updateEavPrimitive: ({|
+        +id: Schema.ObjectId,
+        +fieldname: string,
+        +value: string | 0 | 1,
+      |}) => void = _makeSingleUpdateFunction(
+        db.prepare(
+          dedent`\
+            UPDATE primitives
+            SET value = :value
+            WHERE object_id = :id AND fieldname = :fieldname
+          `
+        )
+      );
 
       for (const entry of queryResult) {
         const primitives: {|
@@ -1406,9 +1419,9 @@ export class Mirror {
                 `of type ${s(typename)} (got ${(primitive: empty)})`
             );
           }
-          primitives[
-            parameterNameFor.topLevelField(fieldname)
-          ] = JSON.stringify(primitive);
+          const jsonValue = JSON.stringify(primitive);
+          primitives[parameterNameFor.topLevelField(fieldname)] = jsonValue;
+          updateEavPrimitive({id: entry.id, fieldname, value: jsonValue});
         }
 
         // Add nested primitives.
@@ -1428,6 +1441,11 @@ export class Mirror {
           }
           primitives[parameterNameFor.topLevelField(nestFieldname)] =
             topLevelNested == null ? 0 : 1;
+          updateEavPrimitive({
+            id: entry.id,
+            fieldname: nestFieldname,
+            value: topLevelNested == null ? 0 : 1,
+          });
           const eggFields = objectType.nestedFields[nestFieldname].primitives;
           for (const eggFieldname of Object.keys(eggFields)) {
             const eggValue: PrimitiveResult | NodeFieldResult =
@@ -1442,13 +1460,19 @@ export class Mirror {
                   `of type ${s(typename)} (got ${(primitive: empty)})`
               );
             }
+            const jsonValue = JSON.stringify(primitive);
             primitives[
               parameterNameFor.nestedField(nestFieldname, eggFieldname)
-            ] = JSON.stringify(primitive);
+            ] = jsonValue;
+            updateEavPrimitive({
+              id: entry.id,
+              fieldname: `${nestFieldname}.${eggFieldname}`,
+              value: jsonValue,
+            });
           }
         }
 
-        updatePrimitives(primitives);
+        updateTypeSpecificPrimitives(primitives);
       }
     }
 
