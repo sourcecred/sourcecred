@@ -2081,23 +2081,6 @@ export function _inTransaction<R>(db: Database, fn: () => R): R {
   }
 }
 
-/*
- * In some cases, we need to interpolate user input in SQL queries in
- * positions that do not allow bound variables in prepared statements
- * (e.g., table and column names). In these cases, we manually sanitize.
- *
- * If this function returns `true`, then its argument may be safely
- * included in a SQL identifier. If it returns `false`, then no such
- * guarantee is made (this function is overly conservative, so it is
- * possible that the argument may in fact be safe).
- *
- * For instance, the function will return `true` if passed "col", but
- * will return `false` if passed "'); DROP TABLE objects; --".
- */
-function isSqlSafe(token: string) {
-  return !token.match(/[^A-Za-z0-9_]/);
-}
-
 /**
  * Convert a prepared statement into a JS function that executes that
  * statement and asserts that it makes exactly one change to the
@@ -2147,49 +2130,4 @@ export function _makeSingleUpdateFunction<Args: BindingDictionary>(
       );
     }
   };
-}
-
-/**
- * Find a name for a new table (or index) that starts with the given
- * prefix and is not used by any current table or index.
- *
- * This function does not actually create any tables. Consider including
- * it in a transaction that subsequently creates the table.
- *
- * The provided prefix must be a SQL-safe string, or an error will be
- * thrown.
- *
- * The result will be a SQL-safe string, and will not need to be quoted
- * unless the provided prefix does.
- *
- * See: `isSqlSafe`.
- */
-export function _nontransactionallyFindUnusedTableName(
-  db: Database,
-  prefix: string
-) {
-  if (!isSqlSafe(prefix)) {
-    throw new Error("Unsafe table name prefix: " + JSON.stringify(prefix));
-  }
-  const result: string = db
-    .prepare(
-      dedent`\
-        SELECT :prefix || (IFNULL(MAX(CAST(suffix AS INTEGER)), 0) + 1)
-        FROM (
-            SELECT SUBSTR(name, LENGTH(:prefix) + 1) AS suffix
-            FROM sqlite_master
-            WHERE SUBSTR(name, 1, LENGTH(:prefix)) = :prefix
-        )
-      `
-    )
-    .pluck()
-    .get({prefix});
-  // istanbul ignore if: should not be possible---it only has the
-  // prefix (which is safe as defined above) and a trailing integer.
-  if (!isSqlSafe(result)) {
-    throw new Error(
-      "Invariant violation: unsafe table name: " + JSON.stringify(result)
-    );
-  }
-  return result;
 }
