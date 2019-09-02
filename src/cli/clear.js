@@ -61,7 +61,8 @@ export function makeClear(
   repoCacheFilename: (
     repoId: RepoId,
     token: string
-  ) => Promise<{|+dbFilename: string, +resolvedId: Schema.ObjectId|}>
+  ) => Promise<{|+dbFilename: string, +resolvedId: Schema.ObjectId|}>,
+  token: string
 ): Command {
   return async function clear(args, std) {
     const sourcecredDirectory = Common.sourcecredDirectory();
@@ -78,12 +79,6 @@ export function makeClear(
 
     async function rmProject(repoArg, projectPath) {
       const repoId = stringToRepoId(repoArg);
-      let token = null;
-      try {
-        token = validateGithubToken();
-      } catch (error) {
-        return die(std, `${error}`);
-      }
       const {dbFilename} = await repoCacheFilename(repoId, token);
       try {
         await removeDir(path.join(cacheDirectory, dbFilename));
@@ -164,6 +159,10 @@ export function validateGithubToken(): string {
   return token;
 }
 
-export const clear = makeClear(removeDir, repoCacheFilename);
+export const clear = makeClear(
+  removeDir,
+  repoCacheFilename,
+  validateGithubToken()
+);
 
 export default clear;

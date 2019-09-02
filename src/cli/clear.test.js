@@ -38,7 +38,7 @@ describe("cli/clear", () => {
 
   describe("'makeClear' command", () => {
     it("prints usage with '--help'", async () => {
-      const clear = makeClear(jest.fn(), jest.fn());
+      const clear = makeClear(jest.fn(), jest.fn(), "token");
       expect(await run(clear, ["--help"])).toEqual({
         exitCode: 0,
         stdout: expect.arrayContaining([
@@ -49,7 +49,7 @@ describe("cli/clear", () => {
     });
 
     it("fails when no arguments specified", async () => {
-      const clear = makeClear(jest.fn(), jest.fn());
+      const clear = makeClear(jest.fn(), jest.fn(), "token");
       expect(await run(clear, [])).toEqual({
         exitCode: 1,
         stdout: [],
@@ -61,7 +61,7 @@ describe("cli/clear", () => {
     });
 
     it("fails when an invalid argument is specified", async () => {
-      const clear = makeClear(jest.fn(), jest.fn());
+      const clear = makeClear(jest.fn(), jest.fn(), "token");
       expect(await run(clear, ["invalid"])).toEqual({
         exitCode: 1,
         stdout: [],
@@ -73,7 +73,7 @@ describe("cli/clear", () => {
     });
 
     it("fails when more than one argument specified", async () => {
-      const clear = makeClear(jest.fn(), jest.fn());
+      const clear = makeClear(jest.fn(), jest.fn(), "token");
       expect(await run(clear, ["1", "2"])).toEqual({
         exitCode: 1,
         stdout: [],
@@ -86,21 +86,21 @@ describe("cli/clear", () => {
 
     it("passes correct param to removeDir with `--all`", async () => {
       const rmDir = jest.fn();
-      const clear = makeClear(rmDir, jest.fn());
+      const clear = makeClear(rmDir, jest.fn(), "token");
       await run(clear, ["--all"]);
       expect(rmDir).toHaveBeenCalledWith(Common.sourcecredDirectory());
     });
 
     it("passes correct param to removeDir with `--cache`", async () => {
       const rmDir = jest.fn();
-      const clear = makeClear(rmDir, jest.fn());
+      const clear = makeClear(rmDir, jest.fn(), "token");
       await run(clear, ["--cache"]);
       const cacheDir = path.join(Common.sourcecredDirectory(), "cache");
       expect(rmDir).toHaveBeenCalledWith(cacheDir);
     });
 
     it("--all returns error if removeDir errors", async () => {
-      const clear = makeClear(throwError, jest.fn());
+      const clear = makeClear(throwError, jest.fn(), "token");
       expect(await run(clear, ["--all"])).toEqual({
         exitCode: 1,
         stdout: [],
@@ -112,7 +112,7 @@ describe("cli/clear", () => {
     });
 
     it("--cache returns error if removeDir errors", async () => {
-      const clear = makeClear(throwError, jest.fn());
+      const clear = makeClear(throwError, jest.fn(), "token");
       expect(await run(clear, ["--cache"])).toEqual({
         exitCode: 1,
         stdout: [],
@@ -133,7 +133,7 @@ describe("cli/clear", () => {
         );
       });
 
-      const clear = makeClear(rmDir, cachePath);
+      const clear = makeClear(rmDir, cachePath, "token");
       const projectPath = directoryForProjectId(
         "foo/bar",
         Common.sourcecredDirectory()
@@ -150,7 +150,7 @@ describe("cli/clear", () => {
         name: "bar",
         owner: "foo",
       });
-      expect(cachePath.mock.calls[0][1]).toStrictEqual(Common.githubToken());
+      expect(cachePath.mock.calls[0][1]).toStrictEqual("token");
     });
 
     it("returns an error if removing the cache file errors", async () => {
@@ -159,7 +159,7 @@ describe("cli/clear", () => {
           resolve({dbFilename: "foobuzz", resolvedId: "foobuzz"})
         );
       });
-      const clear = makeClear(throwError, cachePath);
+      const clear = makeClear(throwError, cachePath, "token");
       const projectPath = directoryForProjectId(
         "foo/bar",
         Common.sourcecredDirectory()
