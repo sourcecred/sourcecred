@@ -10,6 +10,7 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDEyOk9yZ2FuaXphdGlvbjE3OTUyOTI1",
   "MDEyOk9yZ2FuaXphdGlvbjI5MTkzOTQ=",
   "MDEyOk9yZ2FuaXphdGlvbjEyNDE3MDI0",
+  "MDEyOk9yZ2FuaXphdGlvbjQzMDkzODIw",
   // In this case, the bot used to be a user (@greenkeeper)
   "MDM6Qm90MjMwNDAwNzY=",
   // @dependabot also gives incosistent results (user vs bot)
@@ -18,6 +19,7 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDg6UmVhY3Rpb24yMTY3ODkyNQ==",
   "MDg6UmVhY3Rpb240NDMwMzQ1",
   "MDg6UmVhY3Rpb24xMDI4MzQxOA==",
+  "MDg6UmVhY3Rpb24zNDUxNjA2MQ==",
   // Now org used to be a user (@nueko)
   "MDEyOk9yZ2FuaXphdGlvbjIxMzQ5NTM=",
   // Problematic interactions they did as a user: Thumbs up reactions.
