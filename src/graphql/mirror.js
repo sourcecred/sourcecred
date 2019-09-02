@@ -1548,15 +1548,14 @@ export class Mirror {
   extract(rootId: Schema.ObjectId): mixed {
     const db = this._db;
     return _inTransaction(db, () => {
-      // We'll compute the transitive dependencies and store them into a
-      // temporary table. To do so, we first find a free table name.
-      const temporaryTableName: string = _nontransactionallyFindUnusedTableName(
-        db,
-        "tmp_transitive_dependencies_"
-      );
+      // Pre-compute transitive dependencies into a temporary table.
       db.prepare(
-        `CREATE TEMPORARY TABLE ${temporaryTableName} ` +
-          "(id TEXT NOT NULL PRIMARY KEY, typename TEXT NOT NULL)"
+        dedent`\
+          CREATE TEMPORARY TABLE transitive_dependencies (
+              id TEXT NOT NULL PRIMARY KEY,
+              typename TEXT NOT NULL
+          )
+        `
       ).run();
 
       try {
@@ -1580,7 +1579,7 @@ export class Mirror {
                 FROM transitive_dependencies JOIN direct_dependencies
                 ON transitive_dependencies.id = direct_dependencies.parent_id
             )
-            INSERT INTO ${temporaryTableName} (id, typename)
+            INSERT INTO transitive_dependencies (id, typename)
             SELECT objects.id AS id, objects.typename AS typename
             FROM objects JOIN transitive_dependencies
             ON objects.id = transitive_dependencies.id
@@ -1597,12 +1596,12 @@ export class Mirror {
             .prepare(
               dedent`\
                 SELECT objects.id AS id, NULL as fieldname
-                FROM ${temporaryTableName}
+                FROM transitive_dependencies
                 JOIN objects USING (id)
                 WHERE objects.last_update IS NULL
                 UNION ALL
                 SELECT objects.id AS id, connections.fieldname AS fieldname
-                FROM ${temporaryTableName}
+                FROM transitive_dependencies
                 JOIN objects
                     USING (id)
                 LEFT OUTER JOIN connections
@@ -1637,7 +1636,7 @@ export class Mirror {
         // Initialize `allObjects`.
         {
           const getObjects = db.prepare(
-            `SELECT id AS id, typename AS typename FROM ${temporaryTableName}`
+            "SELECT id AS id, typename AS typename FROM transitive_dependencies"
           );
           for (const object of getObjects.iterate()) {
             allObjects.set(object.id, {
@@ -1655,8 +1654,8 @@ export class Mirror {
                 object_id AS objectId,
                 fieldname AS name,
                 value AS value
-              FROM ${temporaryTableName} JOIN primitives
-              ON ${temporaryTableName}.id = primitives.object_id
+              FROM transitive_dependencies JOIN primitives
+              ON transitive_dependencies.id = primitives.object_id
               -- Order by field name to ensure that nested fields appear
               -- before their eggs: e.g., "author" before "author.user".
               ORDER BY fieldname ASC
@@ -1707,8 +1706,8 @@ export class Mirror {
                 parent_id AS parentId,
                 fieldname AS fieldname,
                 child_id AS childId
-              FROM ${temporaryTableName} JOIN links
-              ON ${temporaryTableName}.id = links.parent_id
+              FROM transitive_dependencies JOIN links
+              ON transitive_dependencies.id = links.parent_id
             `
           );
           for (const link: {|
@@ -1752,7 +1751,7 @@ export class Mirror {
                   connections.fieldname AS fieldname,
                   connection_entries.connection_id IS NOT NULL AS hasContents,
                   connection_entries.child_id AS childId
-              FROM ${temporaryTableName}
+              FROM transitive_dependencies
               JOIN objects
                   USING (id)
               JOIN connections
@@ -1789,7 +1788,7 @@ export class Mirror {
         }
         return result;
       } finally {
-        this._db.prepare(`DROP TABLE ${temporaryTableName}`).run();
+        this._db.prepare("DROP TABLE temp.transitive_dependencies").run();
       }
     });
   }
