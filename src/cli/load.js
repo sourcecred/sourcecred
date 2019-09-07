@@ -9,6 +9,7 @@ import {defaultWeights, fromJSON as weightsFromJSON} from "../analysis/weights";
 import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
 import fs from "fs-extra";
+import {DEFAULT_CRED_CONFIG} from "./defaultCredConfig";
 
 function usage(print: (string) => void): void {
   print(
@@ -105,9 +106,11 @@ const loadCommand: Command = async (args, std) => {
     projectSpecs.map((s) => specToProject(s, githubToken))
   );
   const params = {alpha: 0.05, intervalDecay: 0.5, weights};
+  const config = DEFAULT_CRED_CONFIG;
   const optionses = projects.map((project) => ({
     project,
     params,
+    config,
     sourcecredDirectory: Common.sourcecredDirectory(),
     githubToken,
     discourseKey: Common.discourseKey(),
