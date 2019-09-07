@@ -52,7 +52,7 @@ export default class TimelineCredViewInspectiontest extends React.Component<{|
     }
     const params = {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()};
     const config: TimelineCredConfig = {
-      scoreNodePrefix: NodeAddress.empty,
+      scoreNodePrefixes: [NodeAddress.empty],
       types: {nodeTypes: [], edgeTypes: []},
     };
     return new TimelineCred(graph, intervals, addressToCred, params, config);
