@@ -73,7 +73,6 @@ describe("api/load", () => {
   const params = deepFreeze({alpha: 0.05, intervalDecay: 0.5, weights});
   const config = deepFreeze({
     scoreNodePrefix: NodeAddress.empty,
-    filterNodePrefixes: [],
     types: {nodeTypes: [], edgeTypes: []},
   });
   const example = () => {

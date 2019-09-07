@@ -22,10 +22,6 @@ import {
   fromJSON as weightsFromJSON,
 } from "../weights";
 import {type NodeAndEdgeTypes} from "../types";
-import {
-  filterTimelineCred,
-  type FilteredTimelineCred,
-} from "./filterTimelineCred";
 
 export type {Interval} from "./interval";
 
@@ -80,9 +76,6 @@ export type TimelineCredConfig = {|
   // nodes matching this prefix will be equal to the total weight of nodes in
   // the interval.
   +scoreNodePrefix: NodeAddressT,
-  // To save on space, we keep cred only for nodes matching one of these
-  // NodeAddresses.
-  +filterNodePrefixes: $ReadOnlyArray<NodeAddressT>,
   // The types are used to assign base cred to nodes based on their type. Node
   // that the weight for each type may be overriden in the params.
   +types: NodeAndEdgeTypes,
@@ -175,6 +168,58 @@ export class TimelineCred {
     return sortBy(credNodes, (x: CredNode) => -x.total);
   }
 
+  /**
+   * Create a new, filtered TimelineCred, by removing low-scored nodes.
+   *
+   * Cred Graphs may have a huge number of small contributions, like comments,
+   * in which end users are not particularly interested. However, the size of
+   * the TimelineCred offered to the frontend matters quite a bit. Therefore,
+   * we can use this method to discard almost all nodes in the graph.
+   *
+   * Specifically, `reduceSize` takes in an array of inclusion prefixes: for
+   * each inclusion prefix, we will take the top `k` nodes matching that prefix
+   * (by total score across all intervals).
+   *
+   * It also takes `fullInclusion` prefixes: for these prefixes, every matching
+   * node will be included. This allows us to ensure that e.g. every user will
+   * be included in the `cli scores` output, even if they are not in the top
+   * `k` users.
+   */
+  reduceSize(opts: {|
+    +typePrefixes: $ReadOnlyArray<NodeAddressT>,
+    +nodesPerType: number,
+    +fullInclusionPrefixes: $ReadOnlyArray<NodeAddressT>,
+  |}): TimelineCred {
+    const {typePrefixes, nodesPerType, fullInclusionPrefixes} = opts;
+    const selectedNodes: Set<NodeAddressT> = new Set();
+    for (const prefix of typePrefixes) {
+      const matchingNodes = this.credSortedNodes(prefix).slice(0, nodesPerType);
+      for (const {node} of matchingNodes) {
+        selectedNodes.add(node.address);
+      }
+    }
+    // For the fullInclusionPrefixes, we won't slice -- we just take every match.
+    for (const prefix of fullInclusionPrefixes) {
+      const matchingNodes = this.credSortedNodes(prefix);
+      for (const {node} of matchingNodes) {
+        selectedNodes.add(node.address);
+      }
+    }
+
+    const filteredAddressToCred = new Map();
+    for (const address of selectedNodes) {
+      const cred = NullUtil.get(this._addressToCred.get(address));
+      filteredAddressToCred.set(address, cred);
+    }
+    return new TimelineCred(
+      this._graph,
+      this._intervals,
+      filteredAddressToCred,
+      this._params,
+      this._config
+    );
+  }
+
   toJSON(): TimelineCredJSON {
     const rawJSON = {
       graphJSON: this._graph.toJSON(),
@@ -200,44 +245,42 @@ export class TimelineCred {
     params: TimelineCredParameters,
     config: TimelineCredConfig
   ): Promise<TimelineCred> {
-    const ftc = await _computeTimelineCred(graph, params, config);
-    return new TimelineCred(
+    const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
+    const distribution = await timelinePagerank(
       graph,
-      ftc.intervals,
-      ftc.addressToCred,
+      config.types,
+      params.weights,
+      params.intervalDecay,
+      params.alpha
+    );
+    const cred = distributionToCred(
+      distribution,
+      nodeOrder,
+      config.scoreNodePrefix
+    );
+    const addressToCred = new Map();
+    for (let i = 0; i < nodeOrder.length; i++) {
+      const addr = nodeOrder[i];
+      const addrCred = cred.map(({cred}) => cred[i]);
+      addressToCred.set(addr, addrCred);
+    }
+    const intervals = cred.map((x) => x.interval);
+    const preliminaryCred = new TimelineCred(
+      graph,
+      intervals,
+      addressToCred,
       params,
       config
     );
+    return preliminaryCred.reduceSize({
+      typePrefixes: config.types.nodeTypes.map((x) => x.prefix),
+      nodesPerType: 100,
+      fullInclusionPrefixes: [config.scoreNodePrefix],
+    });
   }
 }
 
-async function _computeTimelineCred(
-  graph: Graph,
-  params: TimelineCredParameters,
-  config: TimelineCredConfig
-): Promise<FilteredTimelineCred> {
-  const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
-  const distribution = await timelinePagerank(
-    graph,
-    config.types,
-    params.weights,
-    params.intervalDecay,
-    params.alpha
-  );
-  const cred = distributionToCred(
-    distribution,
-    nodeOrder,
-    config.scoreNodePrefix
-  );
-  const filtered = filterTimelineCred(
-    cred,
-    nodeOrder,
-    config.filterNodePrefixes
-  );
-  return filtered;
-}
-
-const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.2.0"};
+const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.3.0"};
 
 export opaque type TimelineCredJSON = Compatible<{|
   +graphJSON: GraphJSON,

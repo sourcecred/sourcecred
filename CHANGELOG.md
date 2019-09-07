@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 <!-- Please add new entries just beneath this line. -->
+- Include top nodes for every type in Timeline Cred (#1358)
 
 ## [0.4.0]
 

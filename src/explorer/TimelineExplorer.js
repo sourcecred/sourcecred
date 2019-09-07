@@ -21,7 +21,6 @@ export type Props = {
   // TODO: Get this info from the TimelineCred
   declarations: $ReadOnlyArray<PluginDeclaration>,
   +defaultNodeType: NodeType,
-  +filterableNodeTypes: $ReadOnlyArray<NodeType>,
 };
 
 export type State = {
@@ -161,11 +160,13 @@ export class TimelineExplorer extends React.Component<Props, State> {
             this.setState({selectedNodeTypePrefix: e.target.value})
           }
         >
-          {this.props.filterableNodeTypes.map(({prefix, pluralName}) => (
-            <option key={prefix} value={prefix}>
-              {pluralName}
-            </option>
-          ))}
+          {this.state.timelineCred
+            .config()
+            .types.nodeTypes.map(({prefix, pluralName}) => (
+              <option key={prefix} value={prefix}>
+                {pluralName}
+              </option>
+            ))}
         </select>
       </label>
     );
