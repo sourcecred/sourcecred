@@ -5,7 +5,6 @@ import sortBy from "lodash.sortby";
 import {utcWeek} from "d3-time";
 import {NodeAddress, Graph} from "../../core/graph";
 import {TimelineCred, type TimelineCredConfig} from "./timelineCred";
-import {type FilteredTimelineCred} from "./filterTimelineCred";
 import {defaultWeights} from "../weights";
 
 describe("src/analysis/timeline/timelineCred", () => {
@@ -45,12 +44,14 @@ describe("src/analysis/timeline/timelineCred", () => {
       const scores = intervals.map((_unuesd, i) => generator(i));
       addressToCred.set(address, scores);
     }
-    const filteredTimelineCred: FilteredTimelineCred = {
+    const params = {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()};
+    return new TimelineCred(
+      graph,
       intervals,
       addressToCred,
-    };
-    const params = {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()};
-    return new TimelineCred(graph, filteredTimelineCred, params, credConfig());
+      params,
+      credConfig()
+    );
   }
 
   it("JSON serialization works", () => {
