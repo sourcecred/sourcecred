@@ -8,19 +8,19 @@ import {Graph} from "../core/graph";
 import {loadGraph} from "../plugins/github/loadGraph";
 import {
   type TimelineCredParameters,
-  type TimelineCredConfig,
   TimelineCred,
 } from "../analysis/timeline/timelineCred";
 
 import {type Project} from "../core/project";
 import {setupProjectDirectory} from "../core/project_io";
 import {loadDiscourse} from "../plugins/discourse/loadDiscourse";
+import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import * as NullUtil from "../util/null";
 
 export type LoadOptions = {|
   +project: Project,
   +params: TimelineCredParameters,
-  +config: TimelineCredConfig,
+  +plugins: $ReadOnlyArray<PluginDeclaration>,
   +sourcecredDirectory: string,
   +githubToken: string | null,
   +discourseKey: string | null,
@@ -44,7 +44,7 @@ export async function load(
   options: LoadOptions,
   taskReporter: TaskReporter
 ): Promise<void> {
-  const {project, params, config, sourcecredDirectory, githubToken} = options;
+  const {project, params, plugins, sourcecredDirectory, githubToken} = options;
   const loadTask = `load-${options.project.id}`;
   taskReporter.start(loadTask);
   const cacheDirectory = path.join(sourcecredDirectory, "cache");
@@ -101,7 +101,7 @@ export async function load(
   await fs.writeFile(graphFile, JSON.stringify(graph.toJSON()));
 
   taskReporter.start("compute-cred");
-  const cred = await TimelineCred.compute(graph, params, config);
+  const cred = await TimelineCred.compute(graph, params, plugins);
   const credJSON = cred.toJSON();
   const credFile = path.join(projectDirectory, "cred.json");
   await fs.writeFile(credFile, JSON.stringify(credJSON));

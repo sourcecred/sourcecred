@@ -5,11 +5,7 @@ import {timeWeek} from "d3-time";
 import type {Assets} from "../webutil/assets";
 import {TimelineCredView} from "./TimelineCredView";
 import {Graph, NodeAddress} from "../core/graph";
-import {
-  type Interval,
-  TimelineCred,
-  type TimelineCredConfig,
-} from "../analysis/timeline/timelineCred";
+import {type Interval, TimelineCred} from "../analysis/timeline/timelineCred";
 import {defaultWeights} from "../analysis/weights";
 
 export default class TimelineCredViewInspectiontest extends React.Component<{|
@@ -51,11 +47,7 @@ export default class TimelineCredViewInspectiontest extends React.Component<{|
       addressToCred.set(address, scores);
     }
     const params = {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()};
-    const config: TimelineCredConfig = {
-      scoreNodePrefixes: [NodeAddress.empty],
-      types: {nodeTypes: [], edgeTypes: []},
-    };
-    return new TimelineCred(graph, intervals, addressToCred, params, config);
+    return new TimelineCred(graph, intervals, addressToCred, params, []);
   }
 
   render() {

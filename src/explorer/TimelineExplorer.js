@@ -2,7 +2,10 @@
 
 import React from "react";
 import deepEqual from "lodash.isequal";
-import {type PluginDeclaration} from "../analysis/pluginDeclaration";
+import {
+  type PluginDeclaration,
+  combineTypes,
+} from "../analysis/pluginDeclaration";
 import {type Weights, copy as weightsCopy} from "../analysis/weights";
 import {type NodeAddressT} from "../core/graph";
 import {
@@ -151,6 +154,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
   }
 
   renderFilterSelect() {
+    const {nodeTypes} = combineTypes(this.state.timelineCred.plugins());
     return (
       <label>
         <span style={{marginLeft: "5px"}}>Showing: </span>
@@ -160,13 +164,11 @@ export class TimelineExplorer extends React.Component<Props, State> {
             this.setState({selectedNodeTypePrefix: e.target.value})
           }
         >
-          {this.state.timelineCred
-            .config()
-            .types.nodeTypes.map(({prefix, pluralName}) => (
-              <option key={prefix} value={prefix}>
-                {pluralName}
-              </option>
-            ))}
+          {nodeTypes.map(({prefix, pluralName}) => (
+            <option key={prefix} value={prefix}>
+              {pluralName}
+            </option>
+          ))}
         </select>
       </label>
     );
