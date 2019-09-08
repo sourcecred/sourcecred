@@ -85,4 +85,5 @@ export const declaration: PluginDeclaration = deepFreeze({
     topicContainsPostEdgeType,
     likesEdgeType,
   ],
+  userTypes: [userNodeType],
 });
