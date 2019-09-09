@@ -9,6 +9,7 @@ import help from "./help";
 import load from "./load";
 import scores from "./scores";
 import clear from "./clear";
+import genProject from "./genProject";
 
 const sourcecred: Command = async (args, std) => {
   if (args.length === 0) {
@@ -28,6 +29,8 @@ const sourcecred: Command = async (args, std) => {
       return clear(args.slice(1), std);
     case "scores":
       return scores(args.slice(1), std);
+    case "gen-project":
+      return genProject(args.slice(1), std);
     default:
       std.err("fatal: unknown command: " + JSON.stringify(args[0]));
       std.err("fatal: run 'sourcecred help' for commands and usage");
