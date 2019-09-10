@@ -2,10 +2,7 @@
 
 import React from "react";
 import deepEqual from "lodash.isequal";
-import {
-  type PluginDeclaration,
-  combineTypes,
-} from "../analysis/pluginDeclaration";
+import {combineTypes} from "../analysis/pluginDeclaration";
 import {type Weights, copy as weightsCopy} from "../analysis/weights";
 import {type NodeAddressT} from "../core/graph";
 import {
@@ -16,14 +13,10 @@ import {TimelineCredView} from "./TimelineCredView";
 import Link from "../webutil/Link";
 import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
-import {type NodeType} from "../analysis/types";
 
 export type Props = {
   projectId: string,
   initialTimelineCred: TimelineCred,
-  // TODO: Get this info from the TimelineCred
-  declarations: $ReadOnlyArray<PluginDeclaration>,
-  +defaultNodeType: NodeType,
 };
 
 export type State = {
@@ -33,7 +26,7 @@ export type State = {
   intervalDecay: number,
   loading: boolean,
   showWeightConfig: boolean,
-  selectedNodeTypePrefix: NodeAddressT,
+  selectedNodeTypePrefix: NodeAddressT | null,
 };
 
 /**
@@ -48,9 +41,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const timelineCred = props.initialTimelineCred;
-    const {defaultNodeType} = props;
     const {alpha, intervalDecay, weights} = timelineCred.params();
-    const selectedNodeTypePrefix = defaultNodeType.prefix;
     this.state = {
       timelineCred,
       alpha,
@@ -61,7 +52,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
       weights: weightsCopy(weights),
       loading: false,
       showWeightConfig: false,
-      selectedNodeTypePrefix,
+      selectedNodeTypePrefix: null,
     };
   }
 
@@ -90,7 +81,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
     );
     const weightConfig = (
       <WeightConfig
-        declarations={this.props.declarations}
+        declarations={this.state.timelineCred.plugins()}
         nodeTypeWeights={this.state.weights.nodeTypeWeights}
         edgeTypeWeights={this.state.weights.edgeTypeWeights}
         onNodeWeightChange={(prefix, weight) => {
@@ -164,6 +155,9 @@ export class TimelineExplorer extends React.Component<Props, State> {
             this.setState({selectedNodeTypePrefix: e.target.value})
           }
         >
+          <option key={null} value={null}>
+            All users
+          </option>
           {nodeTypes.map(({prefix, pluralName}) => (
             <option key={prefix} value={prefix}>
               {pluralName}
