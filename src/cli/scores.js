@@ -101,7 +101,7 @@ export const scores: Command = async (args, std) => {
   const credJSON = JSON.parse(credBlob.toString());
   const timelineCred = TimelineCred.fromJSON(credJSON);
   const userOutput: NodeOutput[] = timelineCred
-    .credSortedNodes(userNodeType.prefix)
+    .credSortedNodes([userNodeType.prefix])
     .map((n: CredNode) => {
       const address = n.node.address;
       const structuredAddress = GN.fromRaw((address: any));

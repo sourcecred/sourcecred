@@ -138,12 +138,20 @@ export class TimelineCred {
   }
 
   /**
-   * Return all the nodes matching the prefix, along with their cred,
-   * sorted by total cred (descending).
+   * Returns nodes sorted by their total cred (descending).
+   *
+   * If prefixes is provided, then only nodes matching at least one of the provided
+   * address prefixes will be included.
    */
-  credSortedNodes(prefix: NodeAddressT): $ReadOnlyArray<CredNode> {
-    const match = (a) => NodeAddress.hasPrefix(a, prefix);
-    const addresses = Array.from(this._addressToCred.keys()).filter(match);
+  credSortedNodes(
+    prefixes?: $ReadOnlyArray<NodeAddressT>
+  ): $ReadOnlyArray<CredNode> {
+    let addresses = Array.from(this._addressToCred.keys());
+
+    if (prefixes != null) {
+      const match = (a) => prefixes.some((p) => NodeAddress.hasPrefix(a, p));
+      addresses = addresses.filter(match);
+    }
     const credNodes = addresses.map((a) => this.credNode(a));
     return sortBy(credNodes, (x: CredNode) => -x.total);
   }
@@ -173,17 +181,18 @@ export class TimelineCred {
     const {typePrefixes, nodesPerType, fullInclusionPrefixes} = opts;
     const selectedNodes: Set<NodeAddressT> = new Set();
     for (const prefix of typePrefixes) {
-      const matchingNodes = this.credSortedNodes(prefix).slice(0, nodesPerType);
+      const matchingNodes = this.credSortedNodes([prefix]).slice(
+        0,
+        nodesPerType
+      );
       for (const {node} of matchingNodes) {
         selectedNodes.add(node.address);
       }
     }
     // For the fullInclusionPrefixes, we won't slice -- we just take every match.
-    for (const prefix of fullInclusionPrefixes) {
-      const matchingNodes = this.credSortedNodes(prefix);
-      for (const {node} of matchingNodes) {
-        selectedNodes.add(node.address);
-      }
+    const matchingNodes = this.credSortedNodes(fullInclusionPrefixes);
+    for (const {node} of matchingNodes) {
+      selectedNodes.add(node.address);
     }
 
     const filteredAddressToCred = new Map();

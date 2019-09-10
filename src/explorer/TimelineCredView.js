@@ -33,7 +33,7 @@ const DEFAULT_ENTRIES_PER_CHART = 6;
 export class TimelineCredView extends React.Component<Props> {
   render() {
     const {selectedNodeFilter, timelineCred} = this.props;
-    const nodes = timelineCred.credSortedNodes(selectedNodeFilter);
+    const nodes = timelineCred.credSortedNodes([selectedNodeFilter]);
     const tableNodes = nodes.slice(0, MAX_ENTRIES_PER_LIST);
     const chartNodes = nodes
       .slice(0, DEFAULT_ENTRIES_PER_CHART)

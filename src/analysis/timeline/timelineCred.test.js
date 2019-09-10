@@ -93,23 +93,18 @@ describe("src/analysis/timeline/timelineCred", () => {
     const json = exampleTimelineCred().toJSON();
     const tc_ = TimelineCred.fromJSON(json);
     expect(tc.graph()).toEqual(tc_.graph());
-    expect(tc.params()).toEqual(tc_.params());
-    expect(tc.plugins()).toEqual(tc_.plugins());
-    expect(tc.credSortedNodes(NodeAddress.empty)).toEqual(
-      tc.credSortedNodes(NodeAddress.empty)
-    );
   });
 
   it("cred sorting works", () => {
     const tc = exampleTimelineCred();
-    const sorted = tc.credSortedNodes(NodeAddress.empty);
+    const sorted = tc.credSortedNodes();
     const expected = sortBy(sorted, (x) => -x.total);
     expect(sorted).toEqual(expected);
   });
 
-  it("type filtering works", () => {
+  it("prefix filtering works", () => {
     const tc = exampleTimelineCred();
-    const filtered = tc.credSortedNodes(userPrefix);
+    const filtered = tc.credSortedNodes([userPrefix]);
     for (const {node} of filtered) {
       const isUser = NodeAddress.hasPrefix(node.address, userPrefix);
       expect(isUser).toBe(true);
@@ -117,9 +112,29 @@ describe("src/analysis/timeline/timelineCred", () => {
     expect(filtered).toHaveLength(users.length);
   });
 
+  it("prefix filtering can combine disjoint prefixes", () => {
+    const tc = exampleTimelineCred();
+    const filtered = tc.credSortedNodes([userPrefix, fooPrefix]);
+    const all = tc.credSortedNodes();
+    expect(filtered).toEqual(all);
+  });
+
+  it("prefix filtering will not result in node double-inclusion", () => {
+    const tc = exampleTimelineCred();
+    const filtered = tc.credSortedNodes([userPrefix, NodeAddress.empty]);
+    const all = tc.credSortedNodes();
+    expect(filtered).toEqual(all);
+  });
+
+  it("an empty list of prefixes results in an empty array", () => {
+    const tc = exampleTimelineCred();
+    const filtered = tc.credSortedNodes([]);
+    expect(filtered).toHaveLength(0);
+  });
+
   it("cred aggregation works", () => {
     const tc = exampleTimelineCred();
-    const nodes = tc.credSortedNodes(NodeAddress.empty);
+    const nodes = tc.credSortedNodes();
     for (const node of nodes) {
       expect(node.total).toEqual(sum(node.cred));
     }
@@ -136,8 +151,8 @@ describe("src/analysis/timeline/timelineCred", () => {
       });
 
       const checkPrefix = (p: NodeAddressT) => {
-        const fullNodes = tc.credSortedNodes(p);
-        const truncatedNodes = filtered.credSortedNodes(p);
+        const fullNodes = tc.credSortedNodes([p]);
+        const truncatedNodes = filtered.credSortedNodes([p]);
         expect(truncatedNodes).toHaveLength(nodesPerType);
         expect(fullNodes.slice(0, nodesPerType)).toEqual(truncatedNodes);
       };
@@ -153,10 +168,10 @@ describe("src/analysis/timeline/timelineCred", () => {
         nodesPerType,
         fullInclusionPrefixes: [userPrefix],
       });
-      const fullUserNodes = tc.credSortedNodes(userPrefix);
-      const truncatedUserNodes = filtered.credSortedNodes(userPrefix);
+      const fullUserNodes = tc.credSortedNodes([userPrefix]);
+      const truncatedUserNodes = filtered.credSortedNodes([userPrefix]);
       expect(fullUserNodes).toEqual(truncatedUserNodes);
-      const truncatedFoo = filtered.credSortedNodes(fooPrefix);
+      const truncatedFoo = filtered.credSortedNodes([fooPrefix]);
       expect(truncatedFoo).toHaveLength(0);
     });
 
@@ -168,11 +183,11 @@ describe("src/analysis/timeline/timelineCred", () => {
         nodesPerType,
         fullInclusionPrefixes: [userPrefix, fooPrefix],
       });
-      const fullUserNodes = tc.credSortedNodes(userPrefix);
-      const truncatedUserNodes = filtered.credSortedNodes(userPrefix);
+      const fullUserNodes = tc.credSortedNodes([userPrefix]);
+      const truncatedUserNodes = filtered.credSortedNodes([userPrefix]);
       expect(fullUserNodes).toEqual(truncatedUserNodes);
-      const fullFoo = tc.credSortedNodes(fooPrefix);
-      const truncatedFoo = filtered.credSortedNodes(fooPrefix);
+      const fullFoo = tc.credSortedNodes([fooPrefix]);
+      const truncatedFoo = filtered.credSortedNodes([fooPrefix]);
       expect(fullFoo).toEqual(truncatedFoo);
     });
   });
