@@ -59,6 +59,29 @@ yarn start
 
 Finally, we can navigate a browser window to `localhost:8080` to view generated data.
 
+### Loading a Discourse Server
+
+SourceCred can also run on Discourse instances!
+
+To do so, you'll first need admin access on the Discourse server in question. Generate
+an admin API key, available at the `/admin/api/keys`. You should also create a user account
+on the instance that will be the nominal user for the API requests. You shouldn't use an admin
+user identity for this, because then SourceCred could pick up private or deleted posts. Instead,
+we recommend making a user called "credbot" with no special permissions.
+
+Once you have the key and user ready, prepare SourceCred using the same steps as above,
+and then use the `sourcecred discourse` command, providing the server url, and then the username.
+Below is an example for loading the cred for SourceCred's [own discourse instance][forum].
+
+```Bash
+git clone https://github.com/sourcecred/sourcecred.git
+cd sourcecred
+yarn install
+yarn backend
+export SOURCECRED_DISCOURSE_KEY=$YOUR_KEY
+node bin/sourcecred.js discourse https://discourse.sourcecred.io credbot
+```
+
 ### Running with Docker
 
 You can build and run sourcecred in a container to avoid installing dependencies on your host. First, build the container:
@@ -74,7 +97,7 @@ $ docker build --build-arg SOURCECRED_DEFAULT_DIRECTORY=/tmp/data \
   -t sourcecred/sourcecred .
 ```
 
-Your options for running the container including the following commands. 
+Your options for running the container including the following commands.
 Examples will be shown for each.
 
  - **dev-preview**: offers a shortcut for loading sourcecred and then starting a dev server. This is likely the option you'll choose if you want to provide a respository or an organization and preview results a web interface.
@@ -82,10 +105,10 @@ Examples will be shown for each.
  - **build**: simply provides the build command to yarn, followed by any argumnents that you provide.
  - **(anything else)**: will be passed on to sourcecred.js
 
-#### Development Preview 
+#### Development Preview
 
-To run the development preview, you will still need to export a GitHub token, and then provide it to the container when you run it. 
-Notice that we are also binding port 8080 so we can view the web interface that will be opened up.  
+To run the development preview, you will still need to export a GitHub token, and then provide it to the container when you run it.
+Notice that we are also binding port 8080 so we can view the web interface that will be opened up.
 The only argument needed is a command to load the GitHub repository to generate the sourcecred for:
 
 ```bash
@@ -104,7 +127,7 @@ $ SOURCECRED_GITHUB_TOKEN="xxxxxxxxxxxxxxxxx" \
   -p 8080:8080 sourcecred/sourcecred dev-preview "${ORGANIZATION}"
 ```
 
-If you want to bind the data folder to the host, you can do that too. 
+If you want to bind the data folder to the host, you can do that too.
 In the example below, we have a folder "data" in the present working directory that we bind to "/data" in the container, the default `SOURCECRED_DIRECTORY`. We can then generate the data (and it will
 be saved there):
 
@@ -182,7 +205,7 @@ When you are finished, stop and remove the container.
 $ docker stop sourcecred
 ```
 
-Since we used the remove (--rm) tag, stopping it will also remove it. 
+Since we used the remove (--rm) tag, stopping it will also remove it.
 If you bound the data folder to the host, you'll see the output remaining there from the generation:
 
 ```bash

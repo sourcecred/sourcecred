@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 <!-- Please add new entries just beneath this line. -->
+- Add `sourcecred discourse` for loading Discourse servers (#1374)
 - Breaking: Change output format for the scores command (#1372)
 - Include top nodes for every type in Timeline Cred (#1358)
 
