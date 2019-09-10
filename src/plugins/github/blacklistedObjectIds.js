@@ -11,10 +11,11 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDEyOk9yZ2FuaXphdGlvbjI5MTkzOTQ=",
   "MDEyOk9yZ2FuaXphdGlvbjEyNDE3MDI0",
   "MDEyOk9yZ2FuaXphdGlvbjQzMDkzODIw",
-  // In this case, the bot used to be a user (@greenkeeper)
-  "MDM6Qm90MjMwNDAwNzY=",
-  // @dependabot also gives incosistent results (user vs bot)
-  "MDM6Qm90NDk2OTkzMzM=",
+  // These are `Bot` nodes that are sometimes referenced in a `User`
+  // context: in particular, as the author of a commit.
+  "MDM6Qm90MjMwNDAwNzY=", // greenkeeper
+  "MDM6Qm90NDk2OTkzMzM=", // dependabot
+  "MDM6Qm90NDY0NDczMjE=", // allcontributors
   // These are the offending reactions.
   "MDg6UmVhY3Rpb24yMTY3ODkyNQ==",
   "MDg6UmVhY3Rpb240NDMwMzQ1",
