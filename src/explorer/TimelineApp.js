@@ -4,11 +4,6 @@ import React from "react";
 import type {Assets} from "../webutil/assets";
 import {TimelineExplorer} from "./TimelineExplorer";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
-import {
-  declaration as githubDeclaration,
-  userNodeType,
-  repoNodeType,
-} from "../plugins/github/declaration";
 import {encodeProjectId, type ProjectId} from "../core/project";
 
 export type Props = {|
@@ -72,9 +67,6 @@ export class TimelineApp extends React.Component<Props, State> {
           <TimelineExplorer
             initialTimelineCred={timelineCred}
             projectId={this.props.projectId}
-            declarations={[githubDeclaration]}
-            defaultNodeType={userNodeType}
-            filterableNodeTypes={[userNodeType, repoNodeType]}
           />
         );
       }
