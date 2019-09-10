@@ -75,7 +75,7 @@ export type TimelineCredConfig = {|
   // Cred is normalized so that for a given interval, the total score of all
   // nodes matching this prefix will be equal to the total weight of nodes in
   // the interval.
-  +scoreNodePrefix: NodeAddressT,
+  +scoreNodePrefixes: $ReadOnlyArray<NodeAddressT>,
   // The types are used to assign base cred to nodes based on their type. Node
   // that the weight for each type may be overriden in the params.
   +types: NodeAndEdgeTypes,
@@ -256,7 +256,7 @@ export class TimelineCred {
     const cred = distributionToCred(
       distribution,
       nodeOrder,
-      config.scoreNodePrefix
+      config.scoreNodePrefixes
     );
     const addressToCred = new Map();
     for (let i = 0; i < nodeOrder.length; i++) {
@@ -275,12 +275,12 @@ export class TimelineCred {
     return preliminaryCred.reduceSize({
       typePrefixes: config.types.nodeTypes.map((x) => x.prefix),
       nodesPerType: 100,
-      fullInclusionPrefixes: [config.scoreNodePrefix],
+      fullInclusionPrefixes: config.scoreNodePrefixes,
     });
   }
 }
 
-const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.3.0"};
+const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.4.0"};
 
 export opaque type TimelineCredJSON = Compatible<{|
   +graphJSON: GraphJSON,

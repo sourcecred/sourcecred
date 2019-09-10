@@ -27,7 +27,7 @@ describe("src/analysis/timeline/timelineCred", () => {
   };
   const fooPrefix = fooType.prefix;
   const credConfig: () => TimelineCredConfig = () => ({
-    scoreNodePrefix: userPrefix,
+    scoreNodePrefixes: [userPrefix],
     types: {nodeTypes: [userType, fooType], edgeTypes: []},
   });
   const users = [
