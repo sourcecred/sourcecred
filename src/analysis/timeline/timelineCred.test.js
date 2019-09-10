@@ -4,8 +4,14 @@ import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
 import sortBy from "lodash.sortby";
 import {utcWeek} from "d3-time";
-import {NodeAddress, Graph, type NodeAddressT} from "../../core/graph";
-import {TimelineCred, type TimelineCredConfig} from "./timelineCred";
+import {
+  NodeAddress,
+  Graph,
+  type NodeAddressT,
+  EdgeAddress,
+} from "../../core/graph";
+import {TimelineCred} from "./timelineCred";
+import {type PluginDeclaration} from "../pluginDeclaration";
 import {defaultWeights} from "../weights";
 import {type NodeType} from "../types";
 
@@ -26,9 +32,13 @@ describe("src/analysis/timeline/timelineCred", () => {
     description: "a foo",
   };
   const fooPrefix = fooType.prefix;
-  const credConfig: () => TimelineCredConfig = () => ({
-    scoreNodePrefixes: [userPrefix],
-    types: {nodeTypes: [userType, fooType], edgeTypes: []},
+  const plugin: PluginDeclaration = deepFreeze({
+    name: "foo",
+    nodePrefix: NodeAddress.empty,
+    edgePrefix: EdgeAddress.empty,
+    nodeTypes: [userType, fooType],
+    edgeTypes: [],
+    userTypes: [userType],
   });
   const users = [
     ["starter", (x) => Math.max(0, 20 - x)],
@@ -75,13 +85,7 @@ describe("src/analysis/timeline/timelineCred", () => {
       addressToCred.set(address, scores);
     }
     const params = {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()};
-    return new TimelineCred(
-      graph,
-      intervals,
-      addressToCred,
-      params,
-      credConfig()
-    );
+    return new TimelineCred(graph, intervals, addressToCred, params, [plugin]);
   }
 
   it("JSON serialization works", () => {
@@ -90,7 +94,7 @@ describe("src/analysis/timeline/timelineCred", () => {
     const tc_ = TimelineCred.fromJSON(json);
     expect(tc.graph()).toEqual(tc_.graph());
     expect(tc.params()).toEqual(tc_.params());
-    expect(tc.config()).toEqual(tc_.config());
+    expect(tc.plugins()).toEqual(tc_.plugins());
     expect(tc.credSortedNodes(NodeAddress.empty)).toEqual(
       tc.credSortedNodes(NodeAddress.empty)
     );

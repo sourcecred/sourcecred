@@ -8,6 +8,7 @@ import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import {type Interval} from "./interval";
 import {timelinePagerank} from "./timelinePagerank";
 import {distributionToCred} from "./distributionToCred";
+import {type PluginDeclaration, combineTypes} from "../pluginDeclaration";
 import {
   Graph,
   type GraphJSON,
@@ -21,7 +22,6 @@ import {
   toJSON as weightsToJSON,
   fromJSON as weightsFromJSON,
 } from "../weights";
-import {type NodeAndEdgeTypes} from "../types";
 
 export type {Interval} from "./interval";
 
@@ -62,26 +62,6 @@ export type TimelineCredParameters = {|
 |};
 
 /**
- * Configuration for computing TimelineCred
- *
- * Unlike the parameters, the config is expected to be static.
- * It's code-level config that isolates the TimelineCred algorithms from
- * specific plugin-level details about which nodes addresses are used for scoring,
- * etc.
- *
- * A default config is available in `src/plugins/defaultCredConfig`
- */
-export type TimelineCredConfig = {|
-  // Cred is normalized so that for a given interval, the total score of all
-  // nodes matching this prefix will be equal to the total weight of nodes in
-  // the interval.
-  +scoreNodePrefixes: $ReadOnlyArray<NodeAddressT>,
-  // The types are used to assign base cred to nodes based on their type. Node
-  // that the weight for each type may be overriden in the params.
-  +types: NodeAndEdgeTypes,
-|};
-
-/**
  * Represents the timeline cred of a graph. This class wraps all the data
  * needed to analyze and interpet cred (ie. it has the Graph and the cred
  * scores), and provides convenient view methods for accessing the cred.
@@ -94,20 +74,20 @@ export class TimelineCred {
   _intervals: $ReadOnlyArray<Interval>;
   _addressToCred: Map<NodeAddressT, $ReadOnlyArray<number>>;
   _params: TimelineCredParameters;
-  _config: TimelineCredConfig;
+  _plugins: $ReadOnlyArray<PluginDeclaration>;
 
   constructor(
     graph: Graph,
     intervals: $ReadOnlyArray<Interval>,
     addressToCred: Map<NodeAddressT, $ReadOnlyArray<number>>,
     params: TimelineCredParameters,
-    config: TimelineCredConfig
+    plugins: $ReadOnlyArray<PluginDeclaration>
   ) {
     this._graph = graph;
     this._intervals = intervals;
     this._addressToCred = addressToCred;
     this._params = params;
-    this._config = config;
+    this._plugins = plugins;
   }
 
   graph(): Graph {
@@ -118,8 +98,8 @@ export class TimelineCred {
     return this._params;
   }
 
-  config(): TimelineCredConfig {
-    return this._config;
+  plugins(): $ReadOnlyArray<PluginDeclaration> {
+    return this._plugins;
   }
 
   /**
@@ -129,7 +109,7 @@ export class TimelineCred {
    * This returns a new TimelineCred; it does not modify the existing one.
    */
   async reanalyze(newParams: TimelineCredParameters): Promise<TimelineCred> {
-    return await TimelineCred.compute(this._graph, newParams, this._config);
+    return await TimelineCred.compute(this._graph, newParams, this._plugins);
   }
 
   /**
@@ -216,7 +196,7 @@ export class TimelineCred {
       this._intervals,
       filteredAddressToCred,
       this._params,
-      this._config
+      this._plugins
     );
   }
 
@@ -226,29 +206,32 @@ export class TimelineCred {
       intervalsJSON: this._intervals,
       credJSON: MapUtil.toObject(this._addressToCred),
       paramsJSON: paramsToJSON(this._params),
-      configJSON: this._config,
+      pluginsJSON: this._plugins,
     };
     return toCompat(COMPAT_INFO, rawJSON);
   }
 
   static fromJSON(j: TimelineCredJSON): TimelineCred {
     const json = fromCompat(COMPAT_INFO, j);
-    const {graphJSON, intervalsJSON, credJSON, paramsJSON, configJSON} = json;
+    const {graphJSON, intervalsJSON, credJSON, paramsJSON, pluginsJSON} = json;
     const cred = MapUtil.fromObject(credJSON);
     const graph = Graph.fromJSON(graphJSON);
     const params = paramsFromJSON(paramsJSON);
-    return new TimelineCred(graph, intervalsJSON, cred, params, configJSON);
+    return new TimelineCred(graph, intervalsJSON, cred, params, pluginsJSON);
   }
 
   static async compute(
     graph: Graph,
     params: TimelineCredParameters,
-    config: TimelineCredConfig
+    plugins: $ReadOnlyArray<PluginDeclaration>
   ): Promise<TimelineCred> {
     const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
+    const types = combineTypes(plugins);
+    const userTypes = [].concat(...plugins.map((x) => x.userTypes));
+    const scorePrefixes = userTypes.map((x) => x.prefix);
     const distribution = await timelinePagerank(
       graph,
-      config.types,
+      types,
       params.weights,
       params.intervalDecay,
       params.alpha
@@ -256,7 +239,7 @@ export class TimelineCred {
     const cred = distributionToCred(
       distribution,
       nodeOrder,
-      config.scoreNodePrefixes
+      userTypes.map((x) => x.prefix)
     );
     const addressToCred = new Map();
     for (let i = 0; i < nodeOrder.length; i++) {
@@ -270,22 +253,22 @@ export class TimelineCred {
       intervals,
       addressToCred,
       params,
-      config
+      plugins
     );
     return preliminaryCred.reduceSize({
-      typePrefixes: config.types.nodeTypes.map((x) => x.prefix),
+      typePrefixes: types.nodeTypes.map((x) => x.prefix),
       nodesPerType: 100,
-      fullInclusionPrefixes: config.scoreNodePrefixes,
+      fullInclusionPrefixes: scorePrefixes,
     });
   }
 }
 
-const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.4.0"};
+const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.5.0"};
 
 export opaque type TimelineCredJSON = Compatible<{|
   +graphJSON: GraphJSON,
   +paramsJSON: ParamsJSON,
-  +configJSON: TimelineCredConfig,
+  +pluginsJSON: $ReadOnlyArray<PluginDeclaration>,
   +credJSON: {[string]: $ReadOnlyArray<number>},
   +intervalsJSON: $ReadOnlyArray<Interval>,
 |}>;

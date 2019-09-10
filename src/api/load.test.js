@@ -71,10 +71,7 @@ describe("api/load", () => {
   weights.nodeManualWeights.set(NodeAddress.empty, 33);
   // Deep freeze will freeze the weights, too
   const params = deepFreeze({alpha: 0.05, intervalDecay: 0.5, weights});
-  const config = deepFreeze({
-    scoreNodePrefixes: [NodeAddress.empty],
-    types: {nodeTypes: [], edgeTypes: []},
-  });
+  const plugins = deepFreeze([]);
   const example = () => {
     const sourcecredDirectory = tmp.dirSync().name;
     const taskReporter = new TestTaskReporter();
@@ -82,7 +79,7 @@ describe("api/load", () => {
       sourcecredDirectory,
       githubToken,
       params,
-      config,
+      plugins,
       project,
       discourseKey,
     };
@@ -145,7 +142,7 @@ describe("api/load", () => {
     expect(timelineCredCompute).toHaveBeenCalledWith(
       expect.anything(),
       params,
-      config
+      plugins
     );
     expect(timelineCredCompute.mock.calls[0][0].equals(combinedGraph())).toBe(
       true
