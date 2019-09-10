@@ -192,6 +192,11 @@ describe("src/analysis/timeline/timelineCred", () => {
     });
   });
 
+  it("userNodes returns the credSortedNodes for user types", () => {
+    const tc = exampleTimelineCred();
+    expect(tc.userNodes()).toEqual(tc.credSortedNodes([userPrefix]));
+  });
+
   it("credNode returns undefined for absent nodes", () => {
     const tc = exampleTimelineCred();
     expect(tc.credNode(NodeAddress.fromParts(["baz"]))).toBe(undefined);

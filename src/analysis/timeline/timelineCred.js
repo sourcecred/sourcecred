@@ -157,6 +157,17 @@ export class TimelineCred {
   }
 
   /**
+   * Returns all user-typed nodes, sorted by their total cred (descending).
+   *
+   * A node is considered a user-type node if its address has a prefix match
+   * with a type specified as a user type by one of the plugin declarations.
+   */
+  userNodes(): $ReadOnlyArray<CredNode> {
+    const userTypes = [].concat(...this.plugins().map((p) => p.userTypes));
+    return this.credSortedNodes(userTypes.map((x) => x.prefix));
+  }
+
+  /**
    * Create a new, filtered TimelineCred, by removing low-scored nodes.
    *
    * Cred Graphs may have a huge number of small contributions, like comments,
