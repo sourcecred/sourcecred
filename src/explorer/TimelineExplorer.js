@@ -2,7 +2,6 @@
 
 import React from "react";
 import deepEqual from "lodash.isequal";
-import {combineTypes} from "../analysis/pluginDeclaration";
 import {type Weights, copy as weightsCopy} from "../analysis/weights";
 import {type NodeAddressT} from "../core/graph";
 import {
@@ -13,6 +12,7 @@ import {TimelineCredView} from "./TimelineCredView";
 import Link from "../webutil/Link";
 import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
+import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 
 export type Props = {
   projectId: string,
@@ -145,7 +145,23 @@ export class TimelineExplorer extends React.Component<Props, State> {
   }
 
   renderFilterSelect() {
-    const {nodeTypes} = combineTypes(this.state.timelineCred.plugins());
+    const optionGroup = (declaration: PluginDeclaration) => {
+      const header = (
+        <option
+          key={declaration.nodePrefix}
+          value={declaration.nodePrefix}
+          style={{fontWeight: "bold"}}
+        >
+          {declaration.name}
+        </option>
+      );
+      const entries = declaration.nodeTypes.map((type) => (
+        <option key={type.prefix} value={type.prefix}>
+          {"\u2003" + type.name}
+        </option>
+      ));
+      return [header, ...entries];
+    };
     return (
       <label>
         <span style={{marginLeft: "5px"}}>Showing: </span>
@@ -158,11 +174,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
           <option key={null} value={null}>
             All users
           </option>
-          {nodeTypes.map(({prefix, pluralName}) => (
-            <option key={prefix} value={prefix}>
-              {pluralName}
-            </option>
-          ))}
+          {this.state.timelineCred.plugins().map(optionGroup)}
         </select>
       </label>
     );
