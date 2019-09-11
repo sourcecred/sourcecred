@@ -19,6 +19,10 @@ import {NodeAddress, Graph} from "../core/graph";
 import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";
 import {load, type LoadOptions} from "./load";
+import {
+  type PartialTimelineCredParameters,
+  partialParams,
+} from "../analysis/timeline/params";
 
 type JestMockFn = $Call<typeof jest.fn>;
 jest.mock("../plugins/github/loadGraph", () => ({
@@ -70,7 +74,7 @@ describe("api/load", () => {
   // Tweaks the weights so that we can ensure we aren't overriding with default weights
   weights.nodeManualWeights.set(NodeAddress.empty, 33);
   // Deep freeze will freeze the weights, too
-  const params = deepFreeze({alpha: 0.05, intervalDecay: 0.5, weights});
+  const params: PartialTimelineCredParameters = {weights};
   const plugins = deepFreeze([]);
   const example = () => {
     const sourcecredDirectory = tmp.dirSync().name;
@@ -139,14 +143,10 @@ describe("api/load", () => {
   it("calls TimelineCred.compute with the right graph and options", async () => {
     const {options, taskReporter} = example();
     await load(options, taskReporter);
-    expect(timelineCredCompute).toHaveBeenCalledWith(
-      expect.anything(),
-      params,
-      plugins
-    );
-    expect(timelineCredCompute.mock.calls[0][0].equals(combinedGraph())).toBe(
-      true
-    );
+    const args = timelineCredCompute.mock.calls[0][0];
+    expect(args.graph.equals(combinedGraph())).toBe(true);
+    expect(args.params).toEqual(partialParams(params));
+    expect(args.plugins).toEqual(plugins);
   });
 
   it("saves the resultant cred.json to disk", async () => {

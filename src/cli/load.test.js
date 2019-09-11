@@ -11,6 +11,7 @@ import type {LoadOptions} from "../api/load";
 import {defaultWeights, toJSON as weightsToJSON} from "../analysis/weights";
 import * as Common from "./common";
 import {DEFAULT_PLUGINS} from "./defaultPlugins";
+import {defaultParams, partialParams} from "../analysis/timeline/params";
 
 import {makeRepoId, stringToRepoId} from "../core/repoId";
 
@@ -78,7 +79,7 @@ describe("cli/load", () => {
           discourseServer: null,
         },
         plugins: DEFAULT_PLUGINS,
-        params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
+        params: defaultParams(),
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
         discourseKey: fakeDiscourseKey,
@@ -102,7 +103,7 @@ describe("cli/load", () => {
           repoIds: [stringToRepoId(projectId)],
           discourseServer: null,
         },
-        params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
+        params: defaultParams(),
         plugins: DEFAULT_PLUGINS,
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
@@ -140,7 +141,7 @@ describe("cli/load", () => {
           repoIds: [makeRepoId("foo", "bar")],
           discourseServer: null,
         },
-        params: {alpha: 0.05, intervalDecay: 0.5, weights},
+        params: partialParams({weights}),
         plugins: DEFAULT_PLUGINS,
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,

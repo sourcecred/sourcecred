@@ -11,8 +11,8 @@ import {
   EdgeAddress,
 } from "../../core/graph";
 import {TimelineCred} from "./timelineCred";
+import {defaultParams} from "./params";
 import {type PluginDeclaration} from "../pluginDeclaration";
-import {defaultWeights} from "../weights";
 import {type NodeType} from "../types";
 
 describe("src/analysis/timeline/timelineCred", () => {
@@ -84,8 +84,9 @@ describe("src/analysis/timeline/timelineCred", () => {
       const scores = intervals.map((_) => i);
       addressToCred.set(address, scores);
     }
-    const params = {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()};
-    return new TimelineCred(graph, intervals, addressToCred, params, [plugin]);
+    return new TimelineCred(graph, intervals, addressToCred, defaultParams(), [
+      plugin,
+    ]);
   }
 
   it("JSON serialization works", () => {
