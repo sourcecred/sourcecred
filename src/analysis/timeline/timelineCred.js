@@ -17,13 +17,14 @@ import {
   type Node,
 } from "../../core/graph";
 import {
-  type Weights,
-  type WeightsJSON,
-  toJSON as weightsToJSON,
-  fromJSON as weightsFromJSON,
-} from "../weights";
+  type TimelineCredParameters,
+  paramsToJSON,
+  paramsFromJSON,
+  type TimelineCredParametersJSON,
+} from "./params";
 
 export type {Interval} from "./interval";
+export type {TimelineCredParameters} from "./params";
 
 /**
  * A Graph Node wrapped with cred information.
@@ -35,30 +36,6 @@ export type CredNode = {|
   +total: number,
   // The timeline sequence of cred (one score per interval).
   +cred: $ReadOnlyArray<number>,
-|};
-
-/**
- * Parameters for computing TimelineCred
- *
- * The parameters are intended to be user-configurable.
- */
-export type TimelineCredParameters = {|
-  // Determines how quickly cred returns to the PageRank seed vector. If alpha
-  // is high, then cred will tend to "stick" to nodes that are seeded, e.g.
-  // issues and pull requests. Alpha should be between 0 and 1.
-  +alpha: number,
-  // Determines how quickly cred decays. The decay is 1, then cred never
-  // decays, and old nodes and edges will retain full weight forever. (This
-  // would result in cred that is highly biased towards old contributions, as
-  // they would continue earning cred in every timeslice, forever.) If the
-  // decay is 0, then weights go to zero the first week after their node/edge
-  // was created. Should be between 0 and 1.
-  +intervalDecay: number,
-  // The weights. This determines how much cred is assigned based on different
-  // node types, how cred flows across various edge types, and can specify
-  // manual weights directly on individual nodes. See the docs in
-  // `analysis/weights` for details.
-  +weights: Weights,
 |};
 
 /**
@@ -287,30 +264,8 @@ const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.5.0"};
 
 export opaque type TimelineCredJSON = Compatible<{|
   +graphJSON: GraphJSON,
-  +paramsJSON: ParamsJSON,
+  +paramsJSON: TimelineCredParametersJSON,
   +pluginsJSON: $ReadOnlyArray<PluginDeclaration>,
   +credJSON: {[string]: $ReadOnlyArray<number>},
   +intervalsJSON: $ReadOnlyArray<Interval>,
 |}>;
-
-type ParamsJSON = {|
-  +alpha: number,
-  +intervalDecay: number,
-  +weights: WeightsJSON,
-|};
-
-function paramsToJSON(p: TimelineCredParameters): ParamsJSON {
-  return {
-    alpha: p.alpha,
-    intervalDecay: p.intervalDecay,
-    weights: weightsToJSON(p.weights),
-  };
-}
-
-function paramsFromJSON(p: ParamsJSON): TimelineCredParameters {
-  return {
-    alpha: p.alpha,
-    intervalDecay: p.intervalDecay,
-    weights: weightsFromJSON(p.weights),
-  };
-}
