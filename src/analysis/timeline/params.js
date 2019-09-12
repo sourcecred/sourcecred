@@ -5,6 +5,7 @@ import {
   type WeightsJSON,
   toJSON as weightsToJSON,
   fromJSON as weightsFromJSON,
+  defaultWeights,
 } from "../weights";
 
 /**
@@ -31,6 +32,20 @@ export type TimelineCredParameters = {|
   +weights: Weights,
 |};
 
+export const DEFAULT_ALPHA = 0.05;
+export const DEFAULT_INTERVAL_DECAY = 0.5;
+
+/**
+ * The PartialTimelineCredParameters are a version of TimelineCredParameters
+ * where every field has been marked optional, to make it convenient for API
+ * clients to override just the parameters they want to.
+ */
+export type PartialTimelineCredParameters = {|
+  +alpha?: number,
+  +intervalDecay?: number,
+  +weights?: Weights,
+|};
+
 export type TimelineCredParametersJSON = {|
   +alpha: number,
   +intervalDecay: number,
@@ -55,4 +70,33 @@ export function paramsFromJSON(
     intervalDecay: p.intervalDecay,
     weights: weightsFromJSON(p.weights),
   };
+}
+
+/**
+ * Exports the default TimelineCredParameters.
+ *
+ * End consumers of SourceCred will not need to depend on this; it's
+ * provided for implementation of SourceCred's APIs.
+ */
+export function defaultParams(): TimelineCredParameters {
+  return {
+    alpha: DEFAULT_ALPHA,
+    intervalDecay: DEFAULT_INTERVAL_DECAY,
+    weights: defaultWeights(),
+  };
+}
+
+/**
+ * Promote PartialTimelineCredParameters to TimelineCredParameters.
+ *
+ * This takes PartialTimelineCredParameters and mixes them with the
+ * default parameters to provide a full TimelineCredParameters.
+ *
+ * End consumers of SourceCred will not need to depend on this; it's
+ * provided for implementation of SourceCred's APIs.
+ */
+export function partialParams(
+  partial: PartialTimelineCredParameters
+): TimelineCredParameters {
+  return {...defaultParams(), ...partial};
 }

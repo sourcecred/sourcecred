@@ -9,6 +9,7 @@ import {defaultWeights, fromJSON as weightsFromJSON} from "../analysis/weights";
 import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
 import fs from "fs-extra";
+import {partialParams} from "../analysis/timeline/params";
 import {DEFAULT_PLUGINS} from "./defaultPlugins";
 
 function usage(print: (string) => void): void {
@@ -105,7 +106,7 @@ const loadCommand: Command = async (args, std) => {
   const projects = await Promise.all(
     projectSpecs.map((s) => specToProject(s, githubToken))
   );
-  const params = {alpha: 0.05, intervalDecay: 0.5, weights};
+  const params = partialParams({weights});
   const plugins = DEFAULT_PLUGINS;
   const optionses = projects.map((project) => ({
     project,

@@ -21,10 +21,12 @@ import {
   paramsToJSON,
   paramsFromJSON,
   type TimelineCredParametersJSON,
+  type PartialTimelineCredParameters,
+  partialParams,
+  defaultParams,
 } from "./params";
 
 export type {Interval} from "./interval";
-export type {TimelineCredParameters} from "./params";
 
 /**
  * A Graph Node wrapped with cred information.
@@ -85,8 +87,14 @@ export class TimelineCred {
    *
    * This returns a new TimelineCred; it does not modify the existing one.
    */
-  async reanalyze(newParams: TimelineCredParameters): Promise<TimelineCred> {
-    return await TimelineCred.compute(this._graph, newParams, this._plugins);
+  async reanalyze(
+    newParams: PartialTimelineCredParameters
+  ): Promise<TimelineCred> {
+    return await TimelineCred.compute({
+      graph: this._graph,
+      params: newParams,
+      plugins: this._plugins,
+    });
   }
 
   /**
@@ -217,11 +225,13 @@ export class TimelineCred {
     return new TimelineCred(graph, intervalsJSON, cred, params, pluginsJSON);
   }
 
-  static async compute(
+  static async compute(opts: {|
     graph: Graph,
-    params: TimelineCredParameters,
-    plugins: $ReadOnlyArray<PluginDeclaration>
-  ): Promise<TimelineCred> {
+    params?: PartialTimelineCredParameters,
+    plugins: $ReadOnlyArray<PluginDeclaration>,
+  |}): Promise<TimelineCred> {
+    const {graph, params, plugins} = opts;
+    const fullParams = params == null ? defaultParams() : partialParams(params);
     const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
     const types = combineTypes(plugins);
     const userTypes = [].concat(...plugins.map((x) => x.userTypes));
@@ -229,9 +239,9 @@ export class TimelineCred {
     const distribution = await timelinePagerank(
       graph,
       types,
-      params.weights,
-      params.intervalDecay,
-      params.alpha
+      fullParams.weights,
+      fullParams.intervalDecay,
+      fullParams.alpha
     );
     const cred = distributionToCred(
       distribution,
@@ -249,7 +259,7 @@ export class TimelineCred {
       graph,
       intervals,
       addressToCred,
-      params,
+      fullParams,
       plugins
     );
     return preliminaryCred.reduceSize({
