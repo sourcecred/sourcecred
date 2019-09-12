@@ -5,10 +5,9 @@ import dedent from "../util/dedent";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import * as Common from "./common";
-import {defaultWeights, fromJSON as weightsFromJSON} from "../analysis/weights";
+import {defaultWeights} from "../analysis/weights";
 import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
-import fs from "fs-extra";
 import {partialParams} from "../analysis/timeline/params";
 import {DEFAULT_PLUGINS} from "./defaultPlugins";
 
@@ -93,7 +92,7 @@ const loadCommand: Command = async (args, std) => {
 
   let weights = defaultWeights();
   if (weightsPath) {
-    weights = await loadWeightOverrides(weightsPath);
+    weights = await Common.loadWeights(weightsPath);
   }
 
   const githubToken = Common.githubToken();
@@ -122,20 +121,6 @@ const loadCommand: Command = async (args, std) => {
     await load(options, taskReporter);
   }
   return 0;
-};
-
-const loadWeightOverrides = async (path: string) => {
-  if (!(await fs.exists(path))) {
-    throw new Error("Could not find the weights file");
-  }
-
-  const raw = await fs.readFile(path, "utf-8");
-  const weightsJSON = JSON.parse(raw);
-  try {
-    return weightsFromJSON(weightsJSON);
-  } catch (e) {
-    throw new Error(`provided weights file is invalid:\n${e}`);
-  }
 };
 
 export const help: Command = async (args, std) => {
