@@ -34,7 +34,7 @@ export type FullTimelineCred = $ReadOnlyArray<{|
 export function distributionToCred(
   ds: TimelineDistributions,
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
-  scoringNodePrefix: NodeAddressT
+  scoringNodePrefixes: $ReadOnlyArray<NodeAddressT>
 ): FullTimelineCred {
   if (ds.length === 0) {
     return [];
@@ -43,7 +43,8 @@ export function distributionToCred(
   const scoringNodeIndices = [];
   const cred = new Array(nodeOrder.length);
   for (let i = 0; i < nodeOrder.length; i++) {
-    if (NodeAddress.hasPrefix(nodeOrder[i], scoringNodePrefix)) {
+    const addr = nodeOrder[i];
+    if (scoringNodePrefixes.some((x) => NodeAddress.hasPrefix(addr, x))) {
       scoringNodeIndices.push(i);
     }
     cred[i] = new Array(intervals.length);
