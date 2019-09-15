@@ -1,7 +1,7 @@
 [
   {
     "type": "sourcecred/cli/scores",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "intervals": [
@@ -200,7 +200,13 @@
     ],
     "users": [
       {
-        "id": "decentralion",
+        "address": [
+          "sourcecred",
+          "github",
+          "USERLIKE",
+          "USER",
+          "decentralion"
+        ],
         "intervalCred": [
           9.383869639663432,
           4.691404861944296,
@@ -254,7 +260,13 @@
         "totalCred": 41.343602084119254
       },
       {
-        "id": "wchargin",
+        "address": [
+          "sourcecred",
+          "github",
+          "USERLIKE",
+          "USER",
+          "wchargin"
+        ],
         "intervalCred": [
           3.6161303603365673,
           1.808595138055704,

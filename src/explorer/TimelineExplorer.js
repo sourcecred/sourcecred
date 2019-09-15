@@ -2,26 +2,19 @@
 
 import React from "react";
 import deepEqual from "lodash.isequal";
-import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {type Weights, copy as weightsCopy} from "../analysis/weights";
 import {type NodeAddressT} from "../core/graph";
-import {
-  TimelineCred,
-  type TimelineCredParameters,
-} from "../analysis/timeline/timelineCred";
+import {TimelineCred} from "../analysis/timeline/timelineCred";
+import {type TimelineCredParameters} from "../analysis/timeline/params";
 import {TimelineCredView} from "./TimelineCredView";
 import Link from "../webutil/Link";
 import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
-import {type NodeType} from "../analysis/types";
+import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 
 export type Props = {
   projectId: string,
   initialTimelineCred: TimelineCred,
-  // TODO: Get this info from the TimelineCred
-  declarations: $ReadOnlyArray<PluginDeclaration>,
-  +defaultNodeType: NodeType,
-  +filterableNodeTypes: $ReadOnlyArray<NodeType>,
 };
 
 export type State = {
@@ -31,7 +24,7 @@ export type State = {
   intervalDecay: number,
   loading: boolean,
   showWeightConfig: boolean,
-  selectedNodeTypePrefix: NodeAddressT,
+  selectedNodeTypePrefix: NodeAddressT | null,
 };
 
 /**
@@ -46,9 +39,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const timelineCred = props.initialTimelineCred;
-    const {defaultNodeType} = props;
     const {alpha, intervalDecay, weights} = timelineCred.params();
-    const selectedNodeTypePrefix = defaultNodeType.prefix;
     this.state = {
       timelineCred,
       alpha,
@@ -59,7 +50,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
       weights: weightsCopy(weights),
       loading: false,
       showWeightConfig: false,
-      selectedNodeTypePrefix,
+      selectedNodeTypePrefix: null,
     };
   }
 
@@ -88,7 +79,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
     );
     const weightConfig = (
       <WeightConfig
-        declarations={this.props.declarations}
+        declarations={this.state.timelineCred.plugins()}
         nodeTypeWeights={this.state.weights.nodeTypeWeights}
         edgeTypeWeights={this.state.weights.edgeTypeWeights}
         onNodeWeightChange={(prefix, weight) => {
@@ -152,6 +143,23 @@ export class TimelineExplorer extends React.Component<Props, State> {
   }
 
   renderFilterSelect() {
+    const optionGroup = (declaration: PluginDeclaration) => {
+      const header = (
+        <option
+          key={declaration.nodePrefix}
+          value={declaration.nodePrefix}
+          style={{fontWeight: "bold"}}
+        >
+          {declaration.name}
+        </option>
+      );
+      const entries = declaration.nodeTypes.map((type) => (
+        <option key={type.prefix} value={type.prefix}>
+          {"\u2003" + type.name}
+        </option>
+      ));
+      return [header, ...entries];
+    };
     return (
       <label>
         <span style={{marginLeft: "5px"}}>Showing: </span>
@@ -161,11 +169,10 @@ export class TimelineExplorer extends React.Component<Props, State> {
             this.setState({selectedNodeTypePrefix: e.target.value})
           }
         >
-          {this.props.filterableNodeTypes.map(({prefix, pluralName}) => (
-            <option key={prefix} value={prefix}>
-              {pluralName}
-            </option>
-          ))}
+          <option key={null} value={null}>
+            All users
+          </option>
+          {this.state.timelineCred.plugins().map(optionGroup)}
         </select>
       </label>
     );

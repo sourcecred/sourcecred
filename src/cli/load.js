@@ -6,15 +6,21 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import * as Common from "./common";
 import {defaultWeights, fromJSON as weightsFromJSON} from "../analysis/weights";
+import {projectFromJSON} from "../core/project";
 import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
 import fs from "fs-extra";
+import {partialParams} from "../analysis/timeline/params";
+import {type PluginDeclaration} from "../analysis/pluginDeclaration";
+import {declaration as discourseDeclaration} from "../plugins/discourse/declaration";
+import {declaration as githubDeclaration} from "../plugins/github/declaration";
 
 function usage(print: (string) => void): void {
   print(
     dedent`\
     usage: sourcecred load [PROJECT_SPEC...]
                            [--weights WEIGHTS_FILE]
+                           [--project PROJECT_FILE]
            sourcecred load --help
 
     Load a target project, generating a cred attribution for it.
@@ -27,6 +33,10 @@ function usage(print: (string) => void): void {
     Arguments:
         PROJECT_SPEC:
             Identifier of a project to load.
+
+        --project PROJECT_FILE
+            Path to a json file which contains a project configuration.
+            That project will be loaded.
 
         --weights WEIGHTS_FILE
             Path to a json file which contains a weights configuration.
@@ -64,6 +74,7 @@ function die(std, message) {
 
 const loadCommand: Command = async (args, std) => {
   const projectSpecs: string[] = [];
+  const projectPaths: string[] = [];
   let weightsPath: ?string;
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -79,13 +90,19 @@ const loadCommand: Command = async (args, std) => {
         weightsPath = args[i];
         break;
       }
+      case "--project": {
+        if (++i >= args.length)
+          return die(std, "'--project' given without value");
+        projectPaths.push(args[i]);
+        break;
+      }
       default: {
         projectSpecs.push(args[i]);
         break;
       }
     }
   }
-  if (projectSpecs.length == 0) {
+  if (projectSpecs.length === 0 && projectPaths.length === 0) {
     return die(std, "projects not specified");
   }
 
@@ -101,17 +118,29 @@ const loadCommand: Command = async (args, std) => {
 
   const taskReporter = new LoggingTaskReporter();
 
-  const projects = await Promise.all(
+  const specProjects = await Promise.all(
     projectSpecs.map((s) => specToProject(s, githubToken))
   );
-  const params = {alpha: 0.05, intervalDecay: 0.5, weights};
-  const optionses = projects.map((project) => ({
-    project,
-    params,
-    sourcecredDirectory: Common.sourcecredDirectory(),
-    githubToken,
-    discourseKey: Common.discourseKey(),
-  }));
+  const params = partialParams({weights});
+  const manualProjects = await Promise.all(projectPaths.map(loadProject));
+  const projects = specProjects.concat(manualProjects);
+  const optionses = projects.map((project) => {
+    const plugins: PluginDeclaration[] = [];
+    if (project.discourseServer != null) {
+      plugins.push(discourseDeclaration);
+    }
+    if (project.repoIds.length) {
+      plugins.push(githubDeclaration);
+    }
+    return {
+      project,
+      params,
+      plugins,
+      sourcecredDirectory: Common.sourcecredDirectory(),
+      githubToken,
+      discourseKey: Common.discourseKey(),
+    };
+  });
   // Deliberately load in serial because GitHub requests that their API not
   // be called concurrently
   for (const options of optionses) {
@@ -131,6 +160,20 @@ const loadWeightOverrides = async (path: string) => {
     return weightsFromJSON(weightsJSON);
   } catch (e) {
     throw new Error(`provided weights file is invalid:\n${e}`);
+  }
+};
+
+const loadProject = async (path: string) => {
+  if (!(await fs.exists(path))) {
+    throw new Error(`Project path ${path} does not exist`);
+  }
+
+  const raw = await fs.readFile(path, "utf-8");
+  const json = JSON.parse(raw);
+  try {
+    return projectFromJSON(json);
+  } catch (e) {
+    throw new Error(`project at path ${path} is invalid:\n${e}`);
   }
 };
 
