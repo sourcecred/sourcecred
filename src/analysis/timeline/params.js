@@ -35,17 +35,6 @@ export type TimelineCredParameters = {|
 export const DEFAULT_ALPHA = 0.05;
 export const DEFAULT_INTERVAL_DECAY = 0.5;
 
-/**
- * The PartialTimelineCredParameters are a version of TimelineCredParameters
- * where every field has been marked optional, to make it convenient for API
- * clients to override just the parameters they want to.
- */
-export type PartialTimelineCredParameters = {|
-  +alpha?: number,
-  +intervalDecay?: number,
-  +weights?: Weights,
-|};
-
 export type TimelineCredParametersJSON = {|
   +alpha: number,
   +intervalDecay: number,
@@ -87,16 +76,10 @@ export function defaultParams(): TimelineCredParameters {
 }
 
 /**
- * Promote PartialTimelineCredParameters to TimelineCredParameters.
- *
- * This takes PartialTimelineCredParameters and mixes them with the
- * default parameters to provide a full TimelineCredParameters.
- *
- * End consumers of SourceCred will not need to depend on this; it's
- * provided for implementation of SourceCred's APIs.
+ * Fill in default values for timeline cred parameters.
  */
 export function partialParams(
-  partial: PartialTimelineCredParameters
+  partial: $Shape<TimelineCredParameters>
 ): TimelineCredParameters {
   return {...defaultParams(), ...partial};
 }
