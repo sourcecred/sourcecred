@@ -7,6 +7,7 @@ import dedent from "../util/dedent";
 import {help as loadHelp} from "./load";
 import {help as scoresHelp} from "./scores";
 import {help as clearHelp} from "./clear";
+import {help as genProjectHelp} from "./genProject";
 
 const help: Command = async (args, std) => {
   if (args.length === 0) {
@@ -19,6 +20,7 @@ const help: Command = async (args, std) => {
     load: loadHelp,
     scores: scoresHelp,
     clear: clearHelp,
+    "gen-project": genProjectHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);
@@ -39,6 +41,8 @@ function usage(print: (string) => void): void {
     Commands:
       load          load repository data into SourceCred
       clear         clear SoucrceCred data
+      scores        print SourceCred scores to stdout
+      gen-project   print a SourceCred project config to stdout
       help          show this help message
 
     Use 'sourcecred help COMMAND' for help about an individual command.
