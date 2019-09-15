@@ -1,6 +1,10 @@
 // @flow
 
 import path from "path";
+import tmp from "tmp";
+import fs from "fs-extra";
+import {defaultWeights, toJSON as weightsToJSON} from "../analysis/weights";
+import {NodeAddress} from "../core/graph";
 
 import {
   defaultPlugins,
@@ -8,6 +12,7 @@ import {
   sourcecredDirectory,
   githubToken,
   discourseKey,
+  loadWeights,
 } from "./common";
 
 describe("cli/common", () => {
@@ -64,6 +69,38 @@ describe("cli/common", () => {
     it("returns `null` if the environment variable is not set", () => {
       delete process.env.SOURCECRED_DISCOURSE_KEY;
       expect(discourseKey()).toBe(null);
+    });
+  });
+
+  describe("loadWeights", () => {
+    function tmpWithContents(contents: mixed) {
+      const name = tmp.tmpNameSync();
+      fs.writeFileSync(name, JSON.stringify(contents));
+      return name;
+    }
+    it("works in a simple success case", async () => {
+      const weights = defaultWeights();
+      // Make a modification, just to be sure we aren't always loading the
+      // default weights.
+      weights.nodeManualWeights.set(NodeAddress.empty, 3);
+      const weightsJSON = weightsToJSON(weights);
+      const file = tmpWithContents(weightsJSON);
+      const weights_ = await loadWeights(file);
+      expect(weights).toEqual(weights_);
+    });
+    it("rejects if the file is not a valid weights file", () => {
+      const file = tmpWithContents(1234);
+      expect.assertions(1);
+      return loadWeights(file).catch((e) =>
+        expect(e.message).toMatch("provided weights file is invalid:")
+      );
+    });
+    it("rejects if the file does not exist", () => {
+      const file = tmp.tmpNameSync();
+      expect.assertions(1);
+      return loadWeights(file).catch((e) =>
+        expect(e.message).toMatch("Could not find the weights file")
+      );
     });
   });
 });

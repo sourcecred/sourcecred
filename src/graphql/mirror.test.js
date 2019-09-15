@@ -433,6 +433,7 @@ describe("graphql/mirror", () => {
             "author.date": null,
           },
         ]);
+<<<<<<< HEAD
         expect(
           db
             .prepare(
@@ -442,6 +443,8 @@ describe("graphql/mirror", () => {
             .pluck()
             .all(commitId)
         ).toEqual(["oid", "author", "author.date"].sort());
+=======
+>>>>>>> 0418dfe9dd849fbca2fb4efa10eb861dc06425d1
 
         expect(
           db
