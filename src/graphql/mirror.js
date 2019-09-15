@@ -196,7 +196,11 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
+<<<<<<< HEAD
       version: "MIRROR_v6",
+=======
+      version: "MIRROR_v5",
+>>>>>>> 463f3a073a423a564377167bf11a1cfbce83dfda
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,

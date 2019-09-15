@@ -199,4 +199,5 @@ export const declaration: PluginDeclaration = deepFreeze({
   edgePrefix: E.Prefix.base,
   nodeTypes: nodeTypes,
   edgeTypes: edgeTypes,
+  userTypes: [userNodeType],
 });

@@ -74,7 +74,7 @@ export const likesEdgeType: EdgeType = deepFreeze({
 });
 
 export const declaration: PluginDeclaration = deepFreeze({
-  name: "discourse",
+  name: "Discourse",
   nodePrefix,
   edgePrefix,
   nodeTypes: [userNodeType, topicNodeType, postNodeType],
@@ -85,4 +85,5 @@ export const declaration: PluginDeclaration = deepFreeze({
     topicContainsPostEdgeType,
     likesEdgeType,
   ],
+  userTypes: [userNodeType],
 });
