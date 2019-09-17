@@ -7,6 +7,7 @@ import fs from "fs-extra";
 
 import type {Options as LoadGraphOptions} from "../plugins/github/loadGraph";
 import type {Options as LoadDiscourseOptions} from "../plugins/discourse/loadDiscourse";
+import {nodeContractions} from "../plugins/identity/nodeContractions";
 import type {Project} from "../core/project";
 import {
   directoryForProjectId,
@@ -66,6 +67,7 @@ describe("api/load", () => {
       serverUrl: discourseServerUrl,
       apiUsername: discourseApiUsername,
     },
+    identities: [],
   };
   deepFreeze(project);
   const githubToken = "EXAMPLE_TOKEN";
@@ -220,6 +222,25 @@ describe("api/load", () => {
     const graphFile = path.join(projectDirectory, "graph.json");
     const graphJSON = JSON.parse(await fs.readFile(graphFile));
     const expectedJSON = discourseGraph().toJSON();
+    expect(graphJSON).toEqual(expectedJSON);
+  });
+
+  it("applies identity transformations, if present in the project", async () => {
+    const {options, taskReporter, sourcecredDirectory} = example();
+    const identity = {username: "identity", aliases: []};
+    const newProject = {...options.project, identities: [identity]};
+    const newOptions = {...options, project: newProject};
+    await load(newOptions, taskReporter);
+    const projectDirectory = directoryForProjectId(
+      project.id,
+      sourcecredDirectory
+    );
+    const graphFile = path.join(projectDirectory, "graph.json");
+    const graphJSON = JSON.parse(await fs.readFile(graphFile));
+    const identityGraph = combinedGraph().contractNodes(
+      nodeContractions([identity], discourseServerUrl)
+    );
+    const expectedJSON = identityGraph.toJSON();
     expect(graphJSON).toEqual(expectedJSON);
   });
 });

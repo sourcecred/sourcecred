@@ -171,7 +171,7 @@ export async function createProject(opts: {|
     const subproject = await specToProject(spec, NullUtil.get(githubToken));
     repoIds = repoIds.concat(subproject.repoIds);
   }
-  return {id: projectId, repoIds, discourseServer};
+  return {id: projectId, repoIds, discourseServer, identities: []};
 }
 
 export default genProject;
