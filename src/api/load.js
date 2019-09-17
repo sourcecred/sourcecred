@@ -8,7 +8,7 @@ import {Graph} from "../core/graph";
 import {loadGraph} from "../plugins/github/loadGraph";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {defaultParams, partialParams} from "../analysis/timeline/params";
-import {type PartialTimelineCredParameters} from "../analysis/timeline/params";
+import {type TimelineCredParameters} from "../analysis/timeline/params";
 
 import {type Project} from "../core/project";
 import {setupProjectDirectory} from "../core/project_io";
@@ -18,7 +18,7 @@ import * as NullUtil from "../util/null";
 
 export type LoadOptions = {|
   +project: Project,
-  +params: ?PartialTimelineCredParameters,
+  +params: ?$Shape<TimelineCredParameters>,
   +plugins: $ReadOnlyArray<PluginDeclaration>,
   +sourcecredDirectory: string,
   +githubToken: string | null,

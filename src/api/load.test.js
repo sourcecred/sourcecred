@@ -20,7 +20,7 @@ import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";
 import {load, type LoadOptions} from "./load";
 import {
-  type PartialTimelineCredParameters,
+  type TimelineCredParameters,
   partialParams,
 } from "../analysis/timeline/params";
 
@@ -74,7 +74,7 @@ describe("api/load", () => {
   // Tweaks the weights so that we can ensure we aren't overriding with default weights
   weights.nodeManualWeights.set(NodeAddress.empty, 33);
   // Deep freeze will freeze the weights, too
-  const params: PartialTimelineCredParameters = {weights};
+  const params: $Shape<TimelineCredParameters> = {weights};
   const plugins = deepFreeze([]);
   const example = () => {
     const sourcecredDirectory = tmp.dirSync().name;
