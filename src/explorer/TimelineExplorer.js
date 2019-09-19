@@ -11,6 +11,7 @@ import Link from "../webutil/Link";
 import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
+import * as NullUtil from "../util/null";
 
 export type Props = {
   projectId: string,
@@ -164,12 +165,13 @@ export class TimelineExplorer extends React.Component<Props, State> {
       <label>
         <span style={{marginLeft: "5px"}}>Showing: </span>
         <select
-          value={this.state.selectedNodeTypePrefix}
-          onChange={(e) =>
-            this.setState({selectedNodeTypePrefix: e.target.value})
-          }
+          value={NullUtil.orElse(this.state.selectedNodeTypePrefix, "")}
+          onChange={(e) => {
+            const selectedNodeTypePrefix = e.target.value || null;
+            this.setState({selectedNodeTypePrefix});
+          }}
         >
-          <option key={null} value={null}>
+          <option key={"All users"} value={""}>
             All users
           </option>
           {this.state.timelineCred.plugins().map(optionGroup)}
