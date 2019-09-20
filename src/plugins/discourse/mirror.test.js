@@ -148,6 +148,19 @@ class MockFetcher implements Discourse {
 }
 
 describe("plugins/discourse/mirror", () => {
+  beforeAll(() => {
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+  function spyWarn(): JestMockFn<[string], void> {
+    return ((console.warn: any): JestMockFn<any, void>);
+  }
+  beforeEach(() => {
+    spyWarn().mockReset();
+  });
+  afterAll(() => {
+    expect(console.warn).not.toHaveBeenCalled();
+    spyWarn().mockRestore();
+  });
   const example = () => {
     const fetcher = new MockFetcher();
     const db = new Database(":memory:");
@@ -379,6 +392,68 @@ describe("plugins/discourse/mirror", () => {
       await mirror.update(reporter);
       expect(fetchLikes).toHaveBeenCalledTimes(1);
       expect(fetchLikes).toHaveBeenCalledWith("credbot", 0);
+    });
+
+    it("warns if one of the latest posts has no topic", async () => {
+      const {mirror, fetcher, reporter} = example();
+      const pid1 = fetcher.addPost(1, null, "credbot");
+      const pid2 = fetcher.addPost(2, null, "credbot");
+      // Verify that the problem post is one of the latest posts
+      const latestPostIds = (await fetcher.latestPosts()).map((x) => x.id);
+      expect(latestPostIds).toContain(pid2);
+      // Force the fetcher not to return topic 2
+      fetcher._latestTopicId--;
+      await mirror.update(reporter);
+      const topics = [fetcher._topic(1)];
+      expect(mirror.topics()).toEqual(topics);
+      const posts = [fetcher._post(pid1)];
+      expect(mirror.posts()).toEqual(posts);
+      expect(console.warn).toHaveBeenCalledWith(
+        "Warning: Encountered error 'FOREIGN KEY constraint failed' " +
+          "while adding post http://example.com/t/2/1."
+      );
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    it("warns if it finds a (non-latest) post with no topic", async () => {
+      const {mirror, fetcher, reporter} = example();
+      const pid1 = fetcher.addPost(1, null, "credbot");
+      const pid2 = fetcher.addPost(2, null, "credbot");
+      const pid3 = fetcher.addPost(1, null, "credbot");
+      // Verify that the problem post is not one of the latest posts
+      const latestPostIds = (await fetcher.latestPosts()).map((x) => x.id);
+      expect(latestPostIds).not.toContain(pid2);
+      // Force the fetcher not to return topic 2
+      fetcher._latestTopicId--;
+      await mirror.update(reporter);
+      const topics = [fetcher._topic(1)];
+      expect(mirror.topics()).toEqual(topics);
+      const posts = [pid1, pid3].map((x) => fetcher._post(x));
+      expect(mirror.posts()).toEqual(posts);
+      expect(console.warn).toHaveBeenCalledWith(
+        "Warning: Encountered error 'FOREIGN KEY constraint failed' " +
+          "while adding post http://example.com/t/2/1."
+      );
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    it("warns if it gets a like that doesn't correspond to any post", async () => {
+      const {mirror, fetcher, reporter} = example();
+      const pid = fetcher.addPost(1, null, "credbot");
+      const badLike = {username: "credbot", postId: 37, timestampMs: 0};
+      fetcher._likes.push(badLike);
+      await mirror.update(reporter);
+      expect(mirror.topics()).toEqual([fetcher._topic(1)]);
+      expect(mirror.posts()).toEqual([fetcher._post(pid)]);
+      expect(mirror.likes()).toEqual([]);
+      expect(console.warn).toHaveBeenCalledWith(
+        "Warning: Encountered error 'FOREIGN KEY constraint failed' " +
+          "on a like by credbot on post id 37."
+      );
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      jest.spyOn(console, "warn").mockImplementation(() => {});
     });
   });
 
