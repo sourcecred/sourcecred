@@ -105,6 +105,7 @@ const command: Command = async (args, std) => {
     id: projectId,
     repoIds: [],
     discourseServer: {serverUrl, apiUsername},
+    identities: [],
   };
   const taskReporter = new LoggingTaskReporter();
   let weights = defaultWeights();

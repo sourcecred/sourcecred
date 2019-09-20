@@ -37,6 +37,7 @@ export async function specToProject(
       id: spec,
       repoIds: [stringToRepoId(spec)],
       discourseServer: null,
+      identities: [],
     };
     return project;
   } else if (spec.match(ownerSpecMatcher)) {
@@ -46,6 +47,7 @@ export async function specToProject(
       id: spec,
       repoIds: org.repos,
       discourseServer: null,
+      identities: [],
     };
     return project;
   }

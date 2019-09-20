@@ -15,6 +15,7 @@ import {setupProjectDirectory} from "../core/project_io";
 import {loadDiscourse} from "../plugins/discourse/loadDiscourse";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import * as NullUtil from "../util/null";
+import {nodeContractions} from "../plugins/identity/nodeContractions";
 
 export type LoadOptions = {|
   +project: Project,
@@ -91,7 +92,16 @@ export async function load(
   ]);
 
   const pluginGraphs = await Promise.all(pluginGraphPromises);
-  const graph = Graph.merge(pluginGraphs);
+  let graph = Graph.merge(pluginGraphs);
+  const {identities, discourseServer} = project;
+  if (identities.length) {
+    const serverUrl =
+      discourseServer == null ? null : discourseServer.serverUrl;
+    const contractions = nodeContractions(identities, serverUrl);
+    // Only apply contractions if identities have been specified, since it involves
+    // a full Graph copy
+    graph = graph.contractNodes(contractions);
+  }
 
   const projectDirectory = await setupProjectDirectory(
     project,
