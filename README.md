@@ -1,7 +1,7 @@
 # [SourceCred](https://sourcecred.io)
 
 [![Build Status](https://circleci.com/gh/sourcecred/sourcecred.svg?style=svg)](https://circleci.com/gh/sourcecred/sourcecred)
-[![Discourse topics](https://img.shields.io/discourse/https/discourse.sourcecred.io/topics.svg)](https://discourse.sourcecred.io)
+[![Financial Contributors on Open Collective](https://opencollective.com/sourcecred/all/badge.svg?label=financial+contributors)](https://opencollective.com/sourcecred) [![Discourse topics](https://img.shields.io/discourse/https/discourse.sourcecred.io/topics.svg)](https://discourse.sourcecred.io)
 [![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://discord.gg/tsBTgc9)
 [![Greenkeeper badge](https://badges.greenkeeper.io/sourcecred/sourcecred.svg)](https://greenkeeper.io/)
 
@@ -337,6 +337,36 @@ If you’re looking for a place to start, we’ve tagged some [good first issues
 [Discord]: https://discord.gg/tsBTgc9
 [contributing guide]: https://github.com/sourcecred/sourcecred/blob/master/CONTRIBUTING.md
 [good first issues]: https://github.com/sourcecred/sourcecred/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/sourcecred/sourcecred/graphs/contributors"><img src="https://opencollective.com/sourcecred/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/sourcecred/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/sourcecred"><img src="https://opencollective.com/sourcecred/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/sourcecred/contribute)]
+
+<a href="https://opencollective.com/sourcecred/organization/0/website"><img src="https://opencollective.com/sourcecred/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/sourcecred/organization/1/website"><img src="https://opencollective.com/sourcecred/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/sourcecred/organization/2/website"><img src="https://opencollective.com/sourcecred/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/sourcecred/organization/3/website"><img src="https://opencollective.com/sourcecred/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/sourcecred/organization/4/website"><img src="https://opencollective.com/sourcecred/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/sourcecred/organization/5/website"><img src="https://opencollective.com/sourcecred/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/sourcecred/organization/6/website"><img src="https://opencollective.com/sourcecred/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/sourcecred/organization/7/website"><img src="https://opencollective.com/sourcecred/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/sourcecred/organization/8/website"><img src="https://opencollective.com/sourcecred/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/sourcecred/organization/9/website"><img src="https://opencollective.com/sourcecred/organization/9/avatar.svg"></a>
 
 ## License
 
