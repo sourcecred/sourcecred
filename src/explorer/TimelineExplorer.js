@@ -12,6 +12,7 @@ import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import * as NullUtil from "../util/null";
+import {format} from "d3-format";
 
 export type Props = {
   projectId: string,
@@ -97,6 +98,19 @@ export class TimelineExplorer extends React.Component<Props, State> {
         }}
       />
     );
+
+    const alphaSlider = (
+      <input
+        type="range"
+        min={0.05}
+        max={0.95}
+        step={0.05}
+        value={this.state.alpha}
+        onChange={(e) => {
+          this.setState({alpha: e.target.valueAsNumber});
+        }}
+      />
+    );
     const paramsUpToDate = deepEqual(
       this.params(),
       this.state.timelineCred.params()
@@ -136,6 +150,9 @@ export class TimelineExplorer extends React.Component<Props, State> {
           <div style={{marginTop: 10}}>
             <span>Upload/Download weights:</span>
             {weightFileManager}
+            <span>α</span>
+            {alphaSlider}
+            <span>{format(".2f")(this.state.alpha)}</span>
             {weightConfig}
           </div>
         )}
