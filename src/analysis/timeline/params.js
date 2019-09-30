@@ -32,7 +32,7 @@ export type TimelineCredParameters = {|
   +weights: Weights,
 |};
 
-export const DEFAULT_ALPHA = 0.05;
+export const DEFAULT_ALPHA = 0.2;
 export const DEFAULT_INTERVAL_DECAY = 0.5;
 
 export type TimelineCredParametersJSON = {|
