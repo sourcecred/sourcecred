@@ -37,6 +37,8 @@ export type Post = {|
   +replyToPostIndex: number | null,
   +timestampMs: number,
   +authorUsername: string,
+  // The post HTML for rendering.
+  +cooked: string,
 |};
 
 export type TopicWithPosts = {|
@@ -236,6 +238,7 @@ function parsePost(json: any): Post {
     replyToPostIndex: json.reply_to_post_number,
     topicId: json.topic_id,
     authorUsername: json.username,
+    cooked: json.cooked,
   };
 }
 
