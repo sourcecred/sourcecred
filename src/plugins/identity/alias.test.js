@@ -2,7 +2,7 @@
 
 import {resolveAlias} from "./alias";
 import {loginAddress as githubAddress} from "../github/nodes";
-import {userAddress as discourseAddress} from "../discourse/createGraph";
+import {userAddress as discourseAddress} from "../discourse/address";
 
 describe("src/plugins/identity/alias", () => {
   describe("resolveAlias", () => {

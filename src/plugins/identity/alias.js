@@ -2,7 +2,7 @@
 
 import {type NodeAddressT} from "../../core/graph";
 import {loginAddress as githubAddress} from "../github/nodes";
-import {userAddress as discourseAddress} from "../discourse/createGraph";
+import {userAddress as discourseAddress} from "../discourse/address";
 
 /** An Alias is a string specification of an identity within another plugin.
  *

@@ -1,13 +1,6 @@
 // @flow
 
-import {
-  Graph,
-  NodeAddress,
-  EdgeAddress,
-  type Node,
-  type Edge,
-  type NodeAddressT,
-} from "../../core/graph";
+import {Graph, EdgeAddress, type Node, type Edge} from "../../core/graph";
 import {
   type PostId,
   type TopicId,
@@ -17,25 +10,13 @@ import {
 } from "./fetch";
 import {type DiscourseData} from "./mirror";
 import {
-  topicNodeType,
-  postNodeType,
-  userNodeType,
   authorsPostEdgeType,
   authorsTopicEdgeType,
   postRepliesEdgeType,
   topicContainsPostEdgeType,
   likesEdgeType,
 } from "./declaration";
-
-export function topicAddress(serverUrl: string, id: TopicId): NodeAddressT {
-  return NodeAddress.append(topicNodeType.prefix, serverUrl, String(id));
-}
-export function postAddress(serverUrl: string, id: PostId): NodeAddressT {
-  return NodeAddress.append(postNodeType.prefix, serverUrl, String(id));
-}
-export function userAddress(serverUrl: string, username: string): NodeAddressT {
-  return NodeAddress.append(userNodeType.prefix, serverUrl, username);
-}
+import {userAddress, topicAddress, postAddress} from "./address";
 
 export function userNode(serverUrl: string, username: string): Node {
   const url = `${serverUrl}/u/${username}/`;

@@ -14,9 +14,10 @@ import {
   topicContainsPostEdge,
   postRepliesEdge,
   likesEdge,
-  userAddress,
-  postAddress,
 } from "./createGraph";
+
+import {userAddress, postAddress} from "./address";
+
 import {
   userNodeType,
   topicNodeType,
