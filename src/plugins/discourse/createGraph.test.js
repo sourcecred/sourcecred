@@ -16,7 +16,7 @@ import {
   likesEdge,
 } from "./createGraph";
 
-import {userAddress, postAddress} from "./address";
+import {userAddress, postAddress, topicAddress} from "./address";
 
 import {
   userNodeType,
@@ -27,6 +27,9 @@ import {
   topicContainsPostEdgeType,
   postRepliesEdgeType,
   likesEdgeType,
+  referencesTopicEdgeType,
+  referencesUserEdgeType,
+  referencesPostEdgeType,
 } from "./declaration";
 import type {EdgeType, NodeType} from "../../analysis/types";
 
@@ -83,7 +86,20 @@ describe("plugins/discourse/createGraph", () => {
       replyToPostIndex: null,
       timestampMs: 0,
       authorUsername: "decentralion",
-      cooked: "<h1>Hello</h1>",
+      cooked: `<p>Some references:
+      // A reference to a topic...
+      <a href="https://url.com/t/first-topic/1">First topic</a>
+      // A reference to a post (the slug doesn't matter)
+      <a href="https://url.com/t/irrelevant-slug/1/2?u=bla">Second post</a>
+      // A reference to a user
+      <a href="https://url.com/u/decentralion">@decentralion</a>
+      // A non-reference as the url is wrong
+      <a href="https://boo.com/t/first-topic/1/3">Wrong url</a>
+      // No post matching this index in topic, so no reference
+      <a href="https://url.com/t/first-topic/1/99">No post</a>
+      // A reference to a post with different capitalization
+      <a href="https://URL.com/t/irrelevant-slug/1/3?u=bla">Third post</a>
+      </p>`,
     };
     const post2 = {
       id: 2,
@@ -355,6 +371,65 @@ describe("plugins/discourse/createGraph", () => {
       const {url, likes} = example();
       const edges = likes.map((l) => likesEdge(url, l));
       expectEdgesOfType(edges, likesEdgeType);
+    });
+    it("references post edges", () => {
+      const {url, posts} = example();
+      const [post1, post2, post3] = posts;
+      const firstEdge = {
+        src: postAddress(url, post1.id),
+        dst: postAddress(url, post2.id),
+        address: EdgeAddress.append(
+          referencesPostEdgeType.prefix,
+          url,
+          String(post1.id),
+          String(post2.id)
+        ),
+        timestampMs: post1.timestampMs,
+      };
+      // Smoke test for url capitalization
+      // (This second edge has incorrect URL capitalization, but is still a valid reference)
+      const secondEdge = {
+        src: postAddress(url, post1.id),
+        dst: postAddress(url, post3.id),
+        address: EdgeAddress.append(
+          referencesPostEdgeType.prefix,
+          url,
+          String(post1.id),
+          String(post3.id)
+        ),
+        timestampMs: post1.timestampMs,
+      };
+      expectEdgesOfType([firstEdge, secondEdge], referencesPostEdgeType);
+    });
+    it("references topic edges", () => {
+      const {url, posts, topic} = example();
+      const edge = {
+        src: postAddress(url, posts[0].id),
+        dst: topicAddress(url, topic.id),
+        address: EdgeAddress.append(
+          referencesTopicEdgeType.prefix,
+          url,
+          String(posts[0].id),
+          String(topic.id)
+        ),
+        timestampMs: posts[0].timestampMs,
+      };
+      expectEdgesOfType([edge], referencesTopicEdgeType);
+    });
+    it("references user edges", () => {
+      const {url, posts} = example();
+      const edge = {
+        src: postAddress(url, posts[0].id),
+        dst: userAddress(url, "decentralion"),
+        address: EdgeAddress.append(
+          referencesUserEdgeType.prefix,
+          url,
+          String(posts[0].id),
+          "decentralion"
+        ),
+        timestampMs: posts[0].timestampMs,
+      };
+      expectEdgesOfType([edge], referencesUserEdgeType);
     });
   });
 });
