@@ -37,6 +37,8 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDEyOk9yZ2FuaXphdGlvbjI0ODk0Mzk5", // xelmedia
   "MDEyOk9yZ2FuaXphdGlvbjkwNDUyMjA=", // fraserc
   "MDEyOk9yZ2FuaXphdGlvbjQ0NDkzNTY4", // atsolution
+  "MDEyOk9yZ2FuaXphdGlvbjE4NDE5NzQ3", // nimat-netlinks
+  "MDEyOk9yZ2FuaXphdGlvbjE3NTA3NDU=", // dogtownmedia
 
   // These are `Bot` nodes that are sometimes referenced in a `User`
   // context: in particular, as the author of a commit.
@@ -59,9 +61,12 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDg6UmVhY3Rpb24xMjIxMTk2Ng==", //https://github.com/passbolt/passbolt_api/issues/19
   "MDg6UmVhY3Rpb24zMTg4NjU3NQ==", // https://github.com/prettier/prettier/issues/40
   "MDg6UmVhY3Rpb24xMzEzNjY5MA==", // https://github.com/prettier/prettier/issues/187
+  "MDg6UmVhY3Rpb24xMzEzNjc2OQ==", // https://github.com/prettier/prettier/issues/187#issuecomment-318651633
   "MDg6UmVhY3Rpb24xNTA0NDgwMw==", // https://github.com/lovell/sharp/issues/693#issuecomment-276087065
   "MDg6UmVhY3Rpb24xMDgwNTI3MA==", // https://github.com/facebook/jest/issues/1293
   "MDg6UmVhY3Rpb24yOTc4MTE3Mg==", // https://github.com/facebook/jest/issues/2441
+  "MDg6UmVhY3Rpb24xNzk2NTE5MA==", // https://github.com/facebook/jest/issues/3254#issuecomment-297214395
+  "MDg6UmVhY3Rpb24zMzkwMjY3Nw==", // https://github.com/facebook/jest/issues/3254#issuecomment-293188965
   "MDg6UmVhY3Rpb24yMzU1Mjg1OQ==", // https://github.com/babel/babel-eslint/issues/6
   "MDg6UmVhY3Rpb244NTkyODUz", // https://github.com/recharts/recharts/issues/274#issuecomment-274824705
   "MDg6UmVhY3Rpb240NDk2OTA3", // https://github.com/webpack-contrib/css-loader/issues/38#issuecomment-152411328
