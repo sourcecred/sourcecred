@@ -15,7 +15,7 @@ import {
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v3";
+const VERSION = "discourse_mirror_v4";
 
 /**
  * An interface for retrieving all of the Discourse data at once.
@@ -165,6 +165,7 @@ export class Mirror implements DiscourseData {
             topic_id INTEGER NOT NULL,
             index_within_topic INTEGER NOT NULL,
             reply_to_post_index INTEGER,
+            cooked TEXT NOT NULL,
             FOREIGN KEY(topic_id) REFERENCES topics(id),
             FOREIGN KEY(author_username) REFERENCES users(username)
         )
@@ -214,7 +215,8 @@ export class Mirror implements DiscourseData {
           author_username,
           topic_id,
           index_within_topic,
-          reply_to_post_index
+          reply_to_post_index,
+          cooked
         FROM posts`
       )
       .all()
@@ -225,6 +227,7 @@ export class Mirror implements DiscourseData {
         topicId: x.topic_id,
         indexWithinTopic: x.index_within_topic,
         replyToPostIndex: x.reply_to_post_index,
+        cooked: x.cooked,
       }));
   }
 
@@ -283,14 +286,16 @@ export class Mirror implements DiscourseData {
               author_username,
               topic_id,
               index_within_topic,
-              reply_to_post_index
+              reply_to_post_index,
+              cooked
           ) VALUES (
               :id,
               :timestamp_ms,
               :author_username,
               :topic_id,
               :index_within_topic,
-              :reply_to_post_index
+              :reply_to_post_index,
+              :cooked
           )
         `
       );
@@ -306,6 +311,7 @@ export class Mirror implements DiscourseData {
             index_within_topic: post.indexWithinTopic,
             topic_id: post.topicId,
             author_username: post.authorUsername,
+            cooked: post.cooked,
           });
         } catch (e) {
           const url = `${serverUrl}/t/${post.topicId}/${post.indexWithinTopic}`;

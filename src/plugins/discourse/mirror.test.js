@@ -23,6 +23,7 @@ type PostInfo = {|
   +replyToPostIndex: number | null,
   +topicId: number,
   +authorUsername: string,
+  +cooked: string,
 |};
 
 class MockFetcher implements Discourse {
@@ -101,6 +102,7 @@ class MockFetcher implements Discourse {
       topicId,
       indexWithinTopic,
       authorUsername,
+      cooked,
     } = postInfo;
     return {
       id,
@@ -109,13 +111,15 @@ class MockFetcher implements Discourse {
       topicId,
       indexWithinTopic,
       authorUsername,
+      cooked,
     };
   }
 
   addPost(
     topicId: TopicId,
     replyToNumber: number | null,
-    username?: string
+    username?: string,
+    cooked?: string
   ): PostId {
     const postId = this._latestPostId++;
     this._latestTopicId = Math.max(topicId, this._latestTopicId);
@@ -132,6 +136,7 @@ class MockFetcher implements Discourse {
       replyToPostIndex: replyToNumber,
       topicId: topicId,
       authorUsername: NullUtil.orElse(username, "credbot"),
+      cooked: NullUtil.orElse(cooked, "<h1>Hello World</h1>"),
     };
     this._posts.set(postId, postInfo);
     return postId;

@@ -82,6 +82,7 @@ describe("plugins/discourse/createGraph", () => {
       replyToPostIndex: null,
       timestampMs: 0,
       authorUsername: "decentralion",
+      cooked: "<h1>Hello</h1>",
     };
     const post2 = {
       id: 2,
@@ -92,6 +93,7 @@ describe("plugins/discourse/createGraph", () => {
       replyToPostIndex: null,
       timestampMs: 1,
       authorUsername: "wchargin",
+      cooked: "<h1>Hello</h1>",
     };
     const post3 = {
       id: 3,
@@ -100,6 +102,7 @@ describe("plugins/discourse/createGraph", () => {
       replyToPostIndex: 2,
       timestampMs: 1,
       authorUsername: "mzargham",
+      cooked: "<h1>Hello</h1>",
     };
     const likes: $ReadOnlyArray<LikeAction> = [
       {timestampMs: 3, username: "mzargham", postId: 2},
@@ -171,6 +174,7 @@ describe("plugins/discourse/createGraph", () => {
         replyToPostIndex: null,
         timestampMs: 0,
         authorUsername: "decentralion",
+        cooked: "<h1>Hello</h1>",
       };
       const data = new MockData([], [post], []);
       const url = "https://foo";
