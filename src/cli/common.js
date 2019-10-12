@@ -4,6 +4,8 @@
 import os from "os";
 import path from "path";
 import deepFreeze from "deep-freeze";
+import fs from "fs-extra";
+import {type Weights, fromJSON as weightsFromJSON} from "../analysis/weights";
 
 import * as NullUtil from "../util/null";
 
@@ -26,4 +28,17 @@ export function githubToken(): string | null {
 
 export function discourseKey(): string | null {
   return NullUtil.orElse(process.env.SOURCECRED_DISCOURSE_KEY, null);
+}
+
+export async function loadWeights(path: string): Promise<Weights> {
+  if (!(await fs.exists(path))) {
+    throw new Error("Could not find the weights file");
+  }
+  const raw = await fs.readFile(path, "utf-8");
+  const weightsJSON = JSON.parse(raw);
+  try {
+    return weightsFromJSON(weightsJSON);
+  } catch (e) {
+    throw new Error(`provided weights file is invalid:\n${e}`);
+  }
 }

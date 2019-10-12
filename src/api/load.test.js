@@ -7,6 +7,7 @@ import fs from "fs-extra";
 
 import type {Options as LoadGraphOptions} from "../plugins/github/loadGraph";
 import type {Options as LoadDiscourseOptions} from "../plugins/discourse/loadDiscourse";
+import {nodeContractions} from "../plugins/identity/nodeContractions";
 import type {Project} from "../core/project";
 import {
   directoryForProjectId,
@@ -19,7 +20,10 @@ import {NodeAddress, Graph} from "../core/graph";
 import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";
 import {load, type LoadOptions} from "./load";
-import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
+import {
+  type TimelineCredParameters,
+  partialParams,
+} from "../analysis/timeline/params";
 
 type JestMockFn = $Call<typeof jest.fn>;
 jest.mock("../plugins/github/loadGraph", () => ({
@@ -63,6 +67,7 @@ describe("api/load", () => {
       serverUrl: discourseServerUrl,
       apiUsername: discourseApiUsername,
     },
+    identities: [],
   };
   deepFreeze(project);
   const githubToken = "EXAMPLE_TOKEN";
@@ -71,7 +76,8 @@ describe("api/load", () => {
   // Tweaks the weights so that we can ensure we aren't overriding with default weights
   weights.nodeManualWeights.set(NodeAddress.empty, 33);
   // Deep freeze will freeze the weights, too
-  const params = deepFreeze({alpha: 0.05, intervalDecay: 0.5, weights});
+  const params: $Shape<TimelineCredParameters> = {weights};
+  const plugins = deepFreeze([]);
   const example = () => {
     const sourcecredDirectory = tmp.dirSync().name;
     const taskReporter = new TestTaskReporter();
@@ -79,6 +85,7 @@ describe("api/load", () => {
       sourcecredDirectory,
       githubToken,
       params,
+      plugins,
       project,
       discourseKey,
     };
@@ -138,14 +145,10 @@ describe("api/load", () => {
   it("calls TimelineCred.compute with the right graph and options", async () => {
     const {options, taskReporter} = example();
     await load(options, taskReporter);
-    expect(timelineCredCompute).toHaveBeenCalledWith(
-      expect.anything(),
-      params,
-      DEFAULT_CRED_CONFIG
-    );
-    expect(timelineCredCompute.mock.calls[0][0].equals(combinedGraph())).toBe(
-      true
-    );
+    const args = timelineCredCompute.mock.calls[0][0];
+    expect(args.graph.equals(combinedGraph())).toBe(true);
+    expect(args.params).toEqual(partialParams(params));
+    expect(args.plugins).toEqual(plugins);
   });
 
   it("saves the resultant cred.json to disk", async () => {
@@ -219,6 +222,25 @@ describe("api/load", () => {
     const graphFile = path.join(projectDirectory, "graph.json");
     const graphJSON = JSON.parse(await fs.readFile(graphFile));
     const expectedJSON = discourseGraph().toJSON();
+    expect(graphJSON).toEqual(expectedJSON);
+  });
+
+  it("applies identity transformations, if present in the project", async () => {
+    const {options, taskReporter, sourcecredDirectory} = example();
+    const identity = {username: "identity", aliases: []};
+    const newProject = {...options.project, identities: [identity]};
+    const newOptions = {...options, project: newProject};
+    await load(newOptions, taskReporter);
+    const projectDirectory = directoryForProjectId(
+      project.id,
+      sourcecredDirectory
+    );
+    const graphFile = path.join(projectDirectory, "graph.json");
+    const graphJSON = JSON.parse(await fs.readFile(graphFile));
+    const identityGraph = combinedGraph().contractNodes(
+      nodeContractions([identity], discourseServerUrl)
+    );
+    const expectedJSON = identityGraph.toJSON();
     expect(graphJSON).toEqual(expectedJSON);
   });
 });

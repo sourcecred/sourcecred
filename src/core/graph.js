@@ -209,6 +209,15 @@ type CachedOrder = {|
   +modificationCount: number,
 |};
 
+/**
+ * Specifies how to contract a graph, collapsing several old nodes
+ * into a single new node, and re-writing edges for consistency.
+ */
+export type NodeContraction = {|
+  +old: $ReadOnlyArray<NodeAddressT>,
+  +replacement: Node,
+|};
+
 export class Graph {
   _nodes: Map<NodeAddressT, Node>;
   _edges: Map<EdgeAddressT, Edge>;
@@ -887,6 +896,63 @@ export class Graph {
       }
     }
     return result;
+  }
+
+  /**
+   * Create a new graph, in which some nodes have been contracted together.
+   *
+   * contractNodes takes a list of NodeContractions, each of which specifies a
+   * replacement node, and a list of old node addresses to map onto the new
+   * node. A new graph will be returned where the new node is added, none of
+   * the old nodes are present, and every edge incident to one of the old nodes
+   * has been re-written so that it is incident to the new node instead.
+   *
+   * If the same node addresses is "old" for several contractions, all incident
+   * edges will be re-written to connect to whichever contraction came last.
+   *
+   * If the replacement node is present in the graph, no error will be thrown,
+   * provided that the replacement node is consistent with the one in the graph.
+   *
+   * If there is a "chain" of remaps (i.e. a->b and b->c), then an error will
+   * be thrown, as support for chaining has not yet been implemented.
+   *
+   * The original Graph is not mutated.
+   *
+   * contractNodes runs in O(n+e+k), where `n` is the number of nodes, `e` is the
+   * number of edges, and `k` is the number of contractions. If needed, we can
+   * improve the peformance by mutating the original graph instead of creating
+   * a new one.
+   */
+  contractNodes(contractions: $ReadOnlyArray<NodeContraction>): Graph {
+    const remap = new Map();
+    const replacements = new Set();
+    const contracted = new Graph();
+    for (const {old, replacement} of contractions) {
+      for (const addr of old) {
+        if (replacements.has(addr)) {
+          throw new Error(
+            `Chained contractions are not supported: ${NodeAddress.toString(
+              addr
+            )}`
+          );
+        }
+        remap.set(addr, replacement.address);
+      }
+      replacements.add(replacement.address);
+      contracted.addNode(replacement);
+    }
+    for (const node of this.nodes()) {
+      if (!remap.has(node.address)) {
+        contracted.addNode(node);
+      }
+    }
+    for (const edge of this.edges({showDangling: true})) {
+      const src = NullUtil.orElse(remap.get(edge.src), edge.src);
+      const dst = NullUtil.orElse(remap.get(edge.dst), edge.dst);
+      const newEdge = {...edge, src, dst};
+      contracted.addEdge(newEdge);
+    }
+    return contracted;
   }
 
   checkInvariants() {
