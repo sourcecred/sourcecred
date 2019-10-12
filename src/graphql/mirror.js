@@ -111,11 +111,9 @@ export class Mirror {
    * ---
    *
    * Objects have three kinds of fields: connections, links, and
-   * primitives (plus an ID, which we ignore for now). The database has
-   * a single `connections` table for all objects, and also a single
-   * `links` table for all objects. For primitives, each GraphQL data
-   * type has its own table, and each object of that type has a row in
-   * the corresponding table.
+   * primitives. The database likewise has a `connections` table,
+   * `links` table, and `primitives` table, each storing corresponding
+   * data for all GraphQL object types.
    *
    * In more detail:
    *
@@ -131,23 +129,24 @@ export class Mirror {
    *     where `fieldname` is the name of a link field on the object
    *     with the given ID. This simply points to the referenced object.
    *
-   *   - For each type `T`, the `primitives_T` table has one row for
-   *     each object of type `T`, storing the primitive data of the
-   *     object.
+   *   - The `primitives` table has a row for each `(id, fieldname)`
+   *     pair, where `fieldname` is the name of a (non-ID) primitive
+   *     field on the object with the given ID. The `value` column holds
+   *     the JSON-stringified primitive value: so, for instance, the
+   *     JSON value `null` is represented as the SQL string 'null',
+   *     _not_ SQL NULL, while the JSON string "null" is represented as
+   *     the SQL string '"null"'. This is primarily to accommodate
+   *     storing booleans: SQLite has no boolean storage class, and we
+   *     cannot simply encode `true` and `false` as `1` and `0` because
+   *     we need to be able to distinguish between these respective
+   *     values when we read them back out. There are other ways to do
+   *     this more efficiently in both space and time (see discussion on
+   *     #883 for some options).
    *
-   *     All values are stored as stringified JSON values: so, for
-   *     instance, the JSON value `null` is represented as the SQL
-   *     string 'null', _not_ SQL NULL, while the JSON string "null" is
-   *     represented as the SQL string '"null"'. This is primarily to
-   *     accommodate storing booleans: SQLite encodes `true` and `false`
-   *     as `1` and `0`, but we need to be able to distinguish between
-   *     these respective values. There are other ways to do this more
-   *     efficiently in both space and time (see discussion on #883 for
-   *     some options).
-   *
-   *     NOTE: A migration is underway to switch from type-specific
-   *     primitive tables to a single entity-attribute-value table
-   *     storing primitives for all types. See issue #1313 for details.
+   *     NOTE: A previous version of the schema used a separate
+   *     primitives table for each GraphQL object type. These
+   *     `primitives_*` tables are still written, but are no longer read
+   *     by default. They will be removed entirely in a future change.
    *
    * We refer to node and primitive data together as "own data", because
    * this is the data that can be queried uniformly for all elements of
@@ -155,19 +154,20 @@ export class Mirror {
    * object-specific end cursor.
    *
    * Nested fields merit additional explanation. The nested field itself
-   * exists on the primitives table with SQL value either NULL, 0, or 1
-   * (as SQL integers, not strings). As with all other primitives,
-   * `NULL` indicates that the value has never been fetched. If the
-   * value has been fetched, it is 0 if the nested field itself was
-   * `null` on the GraphQL result, or 1 if it was present. This field
-   * lets us distinguish "author: null" from "author: {user: null}".
+   * exists on the `primitives` table with SQL value NULL, 0, or 1 (as
+   * SQL integers, not strings). As with all other primitives, `NULL`
+   * indicates that the value has never been fetched. If the value has
+   * been fetched, it is 0 if the nested field itself was `null` on the
+   * GraphQL result, or 1 if it was present. This field lets us
+   * distinguish "author: null" from "author: {user: null}".
    *
    * The "eggs" of a nested field are treated as normal primitive or
    * link values, whose fieldname is the nested fieldname and egg
    * fieldname joined by a period. So, if object type `Foo` has nested
    * field `bar: Schema.nested({baz: Schema.primitive()})`, then the
-   * `primitives_Foo` table will include a column "bar.baz". Likewise, a
-   * row in the `links` table might have fieldname 'quux.zod'.
+   * `primitives` table will include a row with fieldname 'bar.baz'.
+   * Likewise, a row in the `links` table might have fieldname
+   * 'quux.zod'.
    *
    * All aforementioned tables are keyed by object ID. Each object also
    * appears once in the `objects` table, which relates its ID,
@@ -176,12 +176,11 @@ export class Mirror {
    * of each other and of own-data.
    *
    * Note that any object in the database should have entries in the
-   * `connections` and `links` table for all relevant fields, as well as
-   * an entry in the relevant primitives table, even if the node has
-   * never been updated. This is for convenience of implementation: it
-   * means that the first fetch for a node is the same as subsequent
-   * fetches (a SQL `UPDATE` instead of first requiring an existence
-   * check).
+   * `connections`, `links`, and `primitives` tables for all relevant
+   * fields, even if the node has never been updated. This is for
+   * convenience of implementation: it means that the first fetch for a
+   * node is the same as subsequent fetches (a simple SQL `UPDATE`
+   * instead of first requiring an existence check).
    *
    * Finally, a table `meta` is used to store metadata about the mirror
    * itself. This is used to make sure that the mirror is not loaded
