@@ -3416,17 +3416,10 @@ describe("graphql/mirror", () => {
     }
 
     describe("extract", () => {
-<<<<<<< HEAD
       // Test in EAV mode, hiding the tables corresponding to the legacy
       // mode to catch any accidental reads. (We hide and unhide rather
       // than deleting because some test cases call `extract` multiple
       // times.)
-=======
-      // We'll run under both legacy and EAV modes. In each case, hide
-      // the tables corresponding to the other mode to catch any
-      // accidental reads. (We hide and unhide rather than deleting
-      // because some test cases call `extract` multiple times.)
->>>>>>> 0380088af28ca1923e3443e118b3e548e4a57077
       function hiddenName(name) {
         return `${name}_DO_NOT_READ`;
       }
@@ -3437,7 +3430,6 @@ describe("graphql/mirror", () => {
         db.prepare(`ALTER TABLE ${hiddenName(name)} RENAME TO ${name}`).run();
       }
 
-<<<<<<< HEAD
       testExtract((mirror, id) => {
         const legacyTables = mirror._db
           .prepare(
@@ -3459,59 +3451,6 @@ describe("graphql/mirror", () => {
             unhideTable(mirror._db, table);
           }
         }
-=======
-      describe("with legacy type-specific primitives", () => {
-        testExtract((mirror, id) => {
-          hideTable(mirror._db, "primitives");
-          try {
-            return mirror.extract(id, {useEavPrimitives: false});
-          } finally {
-            unhideTable(mirror._db, "primitives");
-          }
-        });
-      });
-
-      describe("with EAV primitives", () => {
-        testExtract((mirror, id) => {
-          const legacyTables = mirror._db
-            .prepare(
-              "SELECT name FROM sqlite_master " +
-                "WHERE type = 'table' AND name LIKE 'primitives_%'"
-            )
-            .pluck()
-            .all();
-          if (legacyTables.length === 0) {
-            throw new Error("Found no type-specific primitives tables?");
-          }
-          for (const table of legacyTables) {
-            hideTable(mirror._db, table);
-          }
-          try {
-            return mirror.extract(id, {useEavPrimitives: true});
-          } finally {
-            for (const table of legacyTables) {
-              unhideTable(mirror._db, table);
-            }
-          }
-        });
-      });
-
-      it("works with default options", () => {
-        // Simple sanity check.
-        const db = new Database(":memory:");
-        const schema = buildGithubSchema();
-        const mirror = new Mirror(db, schema);
-        mirror.registerObject({typename: "SubscribedEvent", id: "sub"});
-        const update = mirror._createUpdate(new Date(123));
-        mirror._updateOwnData(update, [
-          {__typename: "SubscribedEvent", id: "sub", actor: null},
-        ]);
-        expect(mirror.extract("sub")).toEqual({
-          __typename: "SubscribedEvent",
-          id: "sub",
-          actor: null,
-        });
->>>>>>> 0380088af28ca1923e3443e118b3e548e4a57077
       });
     });
 
