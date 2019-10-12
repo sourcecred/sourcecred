@@ -148,10 +148,6 @@ export class Mirror {
    *     `primitives_*` tables are still written, but are no longer read
    *     by default. They will be removed entirely in a future change.
    *
-   *     NOTE: A migration is underway to switch from type-specific
-   *     primitive tables to a single entity-attribute-value table
-   *     storing primitives for all types. See issue #1313 for details.
-   *
    * We refer to node and primitive data together as "own data", because
    * this is the data that can be queried uniformly for all elements of
    * a type; querying connection data, by contrast, requires the
