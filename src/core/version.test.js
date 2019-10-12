@@ -54,6 +54,7 @@ describe("core/version", () => {
     });
     it("fails given a JSON object missing a property", () => {
       const gitState = version().gitState;
+      // $ExpectFlowError
       delete gitState.dirty;
       expect(() => parseGitState(JSON.stringify(gitState))).toThrow(
         "gitState: bad shape: {"

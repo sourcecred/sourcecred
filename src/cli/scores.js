@@ -13,12 +13,10 @@ import {
   type Interval,
   type CredNode,
 } from "../analysis/timeline/timelineCred";
-import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
-import {userNodeType} from "../plugins/github/declaration";
-import * as GN from "../plugins/github/nodes";
 import {directoryForProjectId} from "../core/project_io";
+import {NodeAddress} from "../core/graph";
 
-const COMPAT_INFO = {type: "sourcecred/cli/scores", version: "0.1.0"};
+const COMPAT_INFO = {type: "sourcecred/cli/scores", version: "0.2.0"};
 
 function usage(print: (string) => void): void {
   print(
@@ -57,7 +55,11 @@ function die(std, message) {
 }
 
 export type NodeOutput = {|
-  +id: string,
+  // The components of the SourceCred address for the node
+  // Conventionally, the first two components designate what plugin
+  // generated the node, as in [PLUGIN_AUTHOR, PLUGIN_NAME, ...]
+  // Subsequent components are created according to plugin-specific logic.
+  +address: $ReadOnlyArray<string>,
   +totalCred: number,
   +intervalCred: $ReadOnlyArray<number>,
 |};
@@ -100,17 +102,13 @@ export const scores: Command = async (args, std) => {
 
   const credBlob = await fs.readFile(credFile);
   const credJSON = JSON.parse(credBlob.toString());
-  const timelineCred = TimelineCred.fromJSON(credJSON, DEFAULT_CRED_CONFIG);
+  const timelineCred = TimelineCred.fromJSON(credJSON);
   const userOutput: NodeOutput[] = timelineCred
-    .credSortedNodes(userNodeType.prefix)
+    .userNodes()
     .map((n: CredNode) => {
-      const address = n.node.address;
-      const structuredAddress = GN.fromRaw((address: any));
-      if (structuredAddress.type !== GN.USERLIKE_TYPE) {
-        throw new Error("invariant violation");
-      }
+      const address = NodeAddress.toParts(n.node.address);
       return {
-        id: structuredAddress.login,
+        address,
         intervalCred: n.cred,
         totalCred: n.total,
       };
