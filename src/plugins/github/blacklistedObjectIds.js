@@ -39,6 +39,7 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDEyOk9yZ2FuaXphdGlvbjQ0NDkzNTY4", // atsolution
   "MDEyOk9yZ2FuaXphdGlvbjE4NDE5NzQ3", // nimat-netlinks
   "MDEyOk9yZ2FuaXphdGlvbjE3NTA3NDU=", // dogtownmedia
+  "MDEyOk9yZ2FuaXphdGlvbjI2MjExNDIz", // Pursuittech
 
   // These are `Bot` nodes that are sometimes referenced in a `User`
   // context: in particular, as the author of a commit.
@@ -62,26 +63,32 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDg6UmVhY3Rpb24zMTg4NjU3NQ==", // https://github.com/prettier/prettier/issues/40
   "MDg6UmVhY3Rpb24xMzEzNjY5MA==", // https://github.com/prettier/prettier/issues/187
   "MDg6UmVhY3Rpb24xMzEzNjc2OQ==", // https://github.com/prettier/prettier/issues/187#issuecomment-318651633
+  "MDg6UmVhY3Rpb24zMDI4MTA3NQ==", // https://github.com/prettier/prettier/issues/4959#issuecomment-417971638
   "MDg6UmVhY3Rpb24xNTA0NDgwMw==", // https://github.com/lovell/sharp/issues/693#issuecomment-276087065
   "MDg6UmVhY3Rpb24xMDgwNTI3MA==", // https://github.com/facebook/jest/issues/1293
   "MDg6UmVhY3Rpb24yOTc4MTE3Mg==", // https://github.com/facebook/jest/issues/2441
   "MDg6UmVhY3Rpb24xNzk2NTE5MA==", // https://github.com/facebook/jest/issues/3254#issuecomment-297214395
   "MDg6UmVhY3Rpb24zMzkwMjY3Nw==", // https://github.com/facebook/jest/issues/3254#issuecomment-293188965
+  "MDg6UmVhY3Rpb24zMzkwMjY3OQ==", // https://github.com/facebook/jest/issues/3254#issuecomment-293188965
   "MDg6UmVhY3Rpb24yMzU1Mjg1OQ==", // https://github.com/babel/babel-eslint/issues/6
   "MDg6UmVhY3Rpb244NTkyODUz", // https://github.com/recharts/recharts/issues/274#issuecomment-274824705
   "MDg6UmVhY3Rpb240NDk2OTA3", // https://github.com/webpack-contrib/css-loader/issues/38#issuecomment-152411328
   "MDg6UmVhY3Rpb241MjQ3Nzc2", // https://github.com/webpack-contrib/css-loader/issues/38#issuecomment-72287584
+  "MDg6UmVhY3Rpb242MDg1MTIz", // https://github.com/webpack-contrib/css-loader/issues/145#issuecomment-240553884
+  "MDg6UmVhY3Rpb24xODg5OTc5MQ==", // https://github.com/webpack-contrib/css-loader/issues/640#issuecomment-349993990
   "MDg6UmVhY3Rpb24xODUzNzYz", // https://github.com/yannickcr/eslint-plugin-react/issues/473#issuecomment-199787204
   "MDg6UmVhY3Rpb240NDY5ODc=", // https://github.com/vuejs/vuex/issues/139
   "MDg6UmVhY3Rpb24xNjk5MjEzNA==", // https://github.com/chimurai/http-proxy-middleware/issues/215
   "MDg6UmVhY3Rpb242NzQ1NzE3", // https://github.com/sass/node-sass/issues/1192#issuecomment-226215807
   "MDg6UmVhY3Rpb242MDY2NjQx", // https://github.com/sass/node-sass/issues/1527#issuecomment-217070514
   "MDg6UmVhY3Rpb24xMTE1ODMwOQ==", // https://github.com/sass/node-sass/issues/1579#issuecomment-227662011
+  "MDg6UmVhY3Rpb24xMTE1ODMxMg==", // https://github.com/sass/node-sass/issues/1579#issuecomment-227662011
   "MDg6UmVhY3Rpb245MDQzMTU3", // https://github.com/lodash/lodash/pull/942
   "MDg6UmVhY3Rpb24yNjc0OTYzNQ==", // https://github.com/vuejs/vue/issues/2164#issuecomment-259835750
   "MDg6UmVhY3Rpb243Njc5ODIw", // https://github.com/vuejs/vue/issues/4101#issuecomment-279121718
   "MDg6UmVhY3Rpb24yMjgyMDcyMQ==", // https://github.com/vuejs/vue/issues/4376#issuecomment-296125042
   "MDg6UmVhY3Rpb24xMzY0MTg5Ng==", // https://github.com/vuejs/vue/issues/4962#issuecomment-280779102
+  "MDg6UmVhY3Rpb24yNjc0OTYyNA==", // https://github.com/vuejs/vue/issues/2164#issuecomment-274279029
   "MDg6UmVhY3Rpb245MDU0NzYx", // https://github.com/ReactTraining/react-router/issues/4410
   "MDg6UmVhY3Rpb24yNTA4NDAx", // https://github.com/ReactTraining/react-router/issues/676#issuecomment-197548633
   "MDg6UmVhY3Rpb24yMDE4NzIxNQ==", // https://github.com/ReactTraining/react-router/issues/1147#issuecomment-221880855
@@ -89,6 +96,8 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDg6UmVhY3Rpb24yNjI5MjIyMg==", // https://github.com/ReactTraining/react-router/issues/3109#issuecomment-186998940
   "MDg6UmVhY3Rpb24yNjg3ODQwMA==", // https://github.com/ReactTraining/react-router/issues/3109#issuecomment-189782650
   "MDg6UmVhY3Rpb244ODk3NTU0", // https://github.com/ReactTraining/react-router/issues/3498#issuecomment-259543681
+  "MDg6UmVhY3Rpb245MDU0NzYy", // https://github.com/ReactTraining/react-router/issues/4410
   "MDg6UmVhY3Rpb24yNjg0OTU5", // https://github.com/axios/axios/issues/97#issuecomment-149153444
   "MDg6UmVhY3Rpb24zMTQ2ODAxMA==", // https://github.com/axios/axios/issues/1469
+  "MDg6UmVhY3Rpb24xODI2MDE3MA==", // https://github.com/axios/axios/issues/960#issuecomment-309287911
 ]);
