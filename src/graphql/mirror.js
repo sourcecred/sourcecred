@@ -1646,7 +1646,11 @@ export class Mirror {
     options?: {|+useEavPrimitives?: boolean|}
   ): mixed {
     const fullOptions = {
+<<<<<<< HEAD
       ...{useEavPrimitives: true},
+=======
+      ...{useEavPrimitives: false},
+>>>>>>> e5a77488de1ec953f753bee7f1e861ce67bfe3c8
       ...(options || {}),
     };
     const db = this._db;
