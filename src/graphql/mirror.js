@@ -1636,8 +1636,19 @@ export class Mirror {
    * error will be thrown. Furthermore, all transitive dependencies of
    * the object must have been at least partially loaded at some point,
    * or an error will be thrown.
+   *
+   * The `options` argument to `extract` has no stability guarantees and
+   * may be removed or changed at any time. For information about its
+   * semantics, read the current source code.
    */
-  extract(rootId: Schema.ObjectId): mixed {
+  extract(
+    rootId: Schema.ObjectId,
+    options?: {|+useEavPrimitives?: boolean|}
+  ): mixed {
+    const fullOptions = {
+      ...{useEavPrimitives: false},
+      ...(options || {}),
+    };
     const db = this._db;
     return _inTransaction(db, () => {
       // We'll compute the transitive dependencies and store them into a
@@ -1726,81 +1737,55 @@ export class Mirror {
         // Constructing the result set inherently requires mutation,
         // because the object graph can have cycles. We start by
         // creating a record for each object, with just that object's
-        // primitive data and typename. Then, we link in node references
-        // and connection entries.
+        // typename and ID (and, in legacy non-EAV mode, all primitive
+        // data). Then, we link in primitives (except in legacy non-EAV
+        // mode), node references, and connection entries.
         const allObjects: Map<Schema.ObjectId, Object> = new Map();
-        for (const typename of typenames) {
-          const objectType = this._schemaInfo.objectTypes[typename];
-          // istanbul ignore if: should not be possible using the
-          // publicly accessible APIs
-          if (objectType == null) {
-            throw new Error(
-              `Corruption: unknown object type ${JSON.stringify(typename)}`
-            );
-          }
-          const primitivesTableName = _primitivesTableName(typename);
-          const selections: $ReadOnlyArray<string> = [].concat(
-            [`${primitivesTableName}.id AS id`],
-            objectType.primitiveFieldNames.map(
-              (fieldname) =>
-                `${primitivesTableName}."${fieldname}" AS "${fieldname}"`
-            ),
-            objectType.nestedFieldNames.map(
-              (fieldname) =>
-                `${primitivesTableName}."${fieldname}" AS "${fieldname}"`
-            ),
-            ...objectType.nestedFieldNames.map((f1) =>
-              Object.keys(objectType.nestedFields[f1].primitives).map(
-                (f2) => `${primitivesTableName}."${f1}.${f2}" AS "${f1}.${f2}"`
-              )
-            )
+        if (fullOptions.useEavPrimitives) {
+          // Initialize `allObjects`.
+          const getObjects = db.prepare(
+            `SELECT id AS id, typename AS typename FROM ${temporaryTableName}`
           );
-          const rows: $ReadOnlyArray<{|
-            +id: Schema.ObjectId,
-            +[Schema.Fieldname]: string | 0 | 1,
-          |}> = db
-            .prepare(
-              dedent`\
-                SELECT ${selections.join(", ")}
-                FROM ${temporaryTableName} JOIN ${primitivesTableName}
-                USING (id)
-              `
-            )
-            .all();
-          for (const row of rows) {
-            const object = {};
-            object.id = row.id;
-            object.__typename = typename;
-            for (const fieldname of objectType.nestedFieldNames) {
-              const isPresent: string | 0 | 1 = row[fieldname];
-              // istanbul ignore if: should not be reachable
-              if (isPresent !== 0 && isPresent !== 1) {
-                const s = JSON.stringify;
-                const id = object.id;
-                throw new Error(
-                  `Corruption: nested field ${s(fieldname)} on ${s(id)} ` +
-                    `set to ${String(isPresent)}`
-                );
-              }
-              if (isPresent) {
-                // We'll add primitives and links onto this object.
-                object[fieldname] = {};
-              } else {
-                object[fieldname] = null;
-              }
-            }
-            for (const key of Object.keys(row)) {
-              if (key === "id") continue;
-              const rawValue = row[key];
-              if (rawValue === 0 || rawValue === 1) {
-                // Name of a nested field; already processed.
-                continue;
-              }
-              const value = JSON.parse(rawValue);
-              const parts = key.split(".");
+          for (const object of getObjects.iterate()) {
+            allObjects.set(object.id, {
+              id: object.id,
+              __typename: object.typename,
+            });
+          }
+
+          // Fill in primitive data.
+          const getPrimitives = db.prepare(
+            dedent`\
+              SELECT
+                object_id AS objectId,
+                fieldname AS name,
+                value AS value
+              FROM ${temporaryTableName} JOIN primitives
+              ON ${temporaryTableName}.id = primitives.object_id
+              -- Order by field name to ensure that nested fields appear
+              -- before their eggs: e.g., "author" before "author.user".
+              ORDER BY fieldname ASC
+            `
+          );
+          for (const field: {|
+            +objectId: Schema.ObjectId,
+            +name: Schema.Fieldname,
+            +value: string | 0 | 1,
+          |} of getPrimitives.iterate()) {
+            const object = NullUtil.get(allObjects.get(field.objectId));
+            if (field.value === 0) {
+              // Nested object is absent.
+              object[field.name] = null;
+            } else if (field.value === 1) {
+              // Nested object is present.
+              object[field.name] = {};
+            } else {
+              // Normal field, not nested object indicator.
+              const value = JSON.parse(field.value);
+              const parts = field.name.split(".");
               switch (parts.length) {
                 case 1:
-                  object[key] = value;
+                  object[field.name] = value;
                   break;
                 case 2: {
                   const [nestName, eggName] = parts;
@@ -1812,11 +1797,103 @@ export class Mirror {
                 // istanbul ignore next: should not be possible
                 default:
                   throw new Error(
-                    `Corruption: bad field name: ${JSON.stringify(key)}`
+                    `Corruption: bad field name: ${JSON.stringify(field.name)}`
                   );
               }
             }
-            allObjects.set(object.id, object);
+          }
+        } else {
+          // Legacy non-EAV mode.
+          for (const typename of typenames) {
+            const objectType = this._schemaInfo.objectTypes[typename];
+            // istanbul ignore if: should not be possible using the
+            // publicly accessible APIs
+            if (objectType == null) {
+              throw new Error(
+                `Corruption: unknown object type ${JSON.stringify(typename)}`
+              );
+            }
+            const primitivesTableName = _primitivesTableName(typename);
+            const selections: $ReadOnlyArray<string> = [].concat(
+              [`${primitivesTableName}.id AS id`],
+              objectType.primitiveFieldNames.map(
+                (fieldname) =>
+                  `${primitivesTableName}."${fieldname}" AS "${fieldname}"`
+              ),
+              objectType.nestedFieldNames.map(
+                (fieldname) =>
+                  `${primitivesTableName}."${fieldname}" AS "${fieldname}"`
+              ),
+              ...objectType.nestedFieldNames.map((f1) =>
+                Object.keys(objectType.nestedFields[f1].primitives).map(
+                  (f2) =>
+                    `${primitivesTableName}."${f1}.${f2}" AS "${f1}.${f2}"`
+                )
+              )
+            );
+            const rows: $ReadOnlyArray<{|
+              +id: Schema.ObjectId,
+              +[Schema.Fieldname]: string | 0 | 1,
+            |}> = db
+              .prepare(
+                dedent`\
+                  SELECT ${selections.join(", ")}
+                  FROM ${temporaryTableName} JOIN ${primitivesTableName}
+                  USING (id)
+                `
+              )
+              .all();
+            for (const row of rows) {
+              const object = {};
+              object.id = row.id;
+              object.__typename = typename;
+              for (const fieldname of objectType.nestedFieldNames) {
+                const isPresent: string | 0 | 1 = row[fieldname];
+                // istanbul ignore if: should not be reachable
+                if (isPresent !== 0 && isPresent !== 1) {
+                  const s = JSON.stringify;
+                  const id = object.id;
+                  throw new Error(
+                    `Corruption: nested field ${s(fieldname)} on ${s(id)} ` +
+                      `set to ${String(isPresent)}`
+                  );
+                }
+                if (isPresent) {
+                  // We'll add primitives and links onto this object.
+                  object[fieldname] = {};
+                } else {
+                  object[fieldname] = null;
+                }
+              }
+              for (const key of Object.keys(row)) {
+                if (key === "id") continue;
+                const rawValue = row[key];
+                if (rawValue === 0 || rawValue === 1) {
+                  // Name of a nested field; already processed.
+                  continue;
+                }
+                const value = JSON.parse(rawValue);
+                const parts = key.split(".");
+                switch (parts.length) {
+                  case 1:
+                    object[key] = value;
+                    break;
+                  case 2: {
+                    const [nestName, eggName] = parts;
+                    if (object[nestName] !== null) {
+                      object[nestName][eggName] = value;
+                    }
+                    break;
+                  }
+                  // istanbul ignore next: should not be possible
+                  default:
+                    throw new Error(
+                      `Corruption: bad field name: ${JSON.stringify(key)}`
+                    );
+                }
+              }
+              allObjects.set(object.id, object);
+            }
           }
         }
 
