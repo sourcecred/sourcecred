@@ -11,6 +11,8 @@ import Link from "../webutil/Link";
 import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
+import * as NullUtil from "../util/null";
+import {format} from "d3-format";
 
 export type Props = {
   projectId: string,
@@ -96,6 +98,19 @@ export class TimelineExplorer extends React.Component<Props, State> {
         }}
       />
     );
+
+    const alphaSlider = (
+      <input
+        type="range"
+        min={0.05}
+        max={0.95}
+        step={0.05}
+        value={this.state.alpha}
+        onChange={(e) => {
+          this.setState({alpha: e.target.valueAsNumber});
+        }}
+      />
+    );
     const paramsUpToDate = deepEqual(
       this.params(),
       this.state.timelineCred.params()
@@ -135,6 +150,9 @@ export class TimelineExplorer extends React.Component<Props, State> {
           <div style={{marginTop: 10}}>
             <span>Upload/Download weights:</span>
             {weightFileManager}
+            <span>α</span>
+            {alphaSlider}
+            <span>{format(".2f")(this.state.alpha)}</span>
             {weightConfig}
           </div>
         )}
@@ -164,12 +182,13 @@ export class TimelineExplorer extends React.Component<Props, State> {
       <label>
         <span style={{marginLeft: "5px"}}>Showing: </span>
         <select
-          value={this.state.selectedNodeTypePrefix}
-          onChange={(e) =>
-            this.setState({selectedNodeTypePrefix: e.target.value})
-          }
+          value={NullUtil.orElse(this.state.selectedNodeTypePrefix, "")}
+          onChange={(e) => {
+            const selectedNodeTypePrefix = e.target.value || null;
+            this.setState({selectedNodeTypePrefix});
+          }}
         >
-          <option key={null} value={null}>
+          <option key={"All users"} value={""}>
             All users
           </option>
           {this.state.timelineCred.plugins().map(optionGroup)}

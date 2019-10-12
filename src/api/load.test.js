@@ -7,6 +7,7 @@ import fs from "fs-extra";
 
 import type {Options as LoadGraphOptions} from "../plugins/github/loadGraph";
 import type {Options as LoadDiscourseOptions} from "../plugins/discourse/loadDiscourse";
+import {nodeContractions} from "../plugins/identity/nodeContractions";
 import type {Project} from "../core/project";
 import {
   directoryForProjectId,
@@ -20,7 +21,7 @@ import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";
 import {load, type LoadOptions} from "./load";
 import {
-  type PartialTimelineCredParameters,
+  type TimelineCredParameters,
   partialParams,
 } from "../analysis/timeline/params";
 
@@ -66,6 +67,7 @@ describe("api/load", () => {
       serverUrl: discourseServerUrl,
       apiUsername: discourseApiUsername,
     },
+    identities: [],
   };
   deepFreeze(project);
   const githubToken = "EXAMPLE_TOKEN";
@@ -74,7 +76,7 @@ describe("api/load", () => {
   // Tweaks the weights so that we can ensure we aren't overriding with default weights
   weights.nodeManualWeights.set(NodeAddress.empty, 33);
   // Deep freeze will freeze the weights, too
-  const params: PartialTimelineCredParameters = {weights};
+  const params: $Shape<TimelineCredParameters> = {weights};
   const plugins = deepFreeze([]);
   const example = () => {
     const sourcecredDirectory = tmp.dirSync().name;
@@ -220,6 +222,25 @@ describe("api/load", () => {
     const graphFile = path.join(projectDirectory, "graph.json");
     const graphJSON = JSON.parse(await fs.readFile(graphFile));
     const expectedJSON = discourseGraph().toJSON();
+    expect(graphJSON).toEqual(expectedJSON);
+  });
+
+  it("applies identity transformations, if present in the project", async () => {
+    const {options, taskReporter, sourcecredDirectory} = example();
+    const identity = {username: "identity", aliases: []};
+    const newProject = {...options.project, identities: [identity]};
+    const newOptions = {...options, project: newProject};
+    await load(newOptions, taskReporter);
+    const projectDirectory = directoryForProjectId(
+      project.id,
+      sourcecredDirectory
+    );
+    const graphFile = path.join(projectDirectory, "graph.json");
+    const graphJSON = JSON.parse(await fs.readFile(graphFile));
+    const identityGraph = combinedGraph().contractNodes(
+      nodeContractions([identity], discourseServerUrl)
+    );
+    const expectedJSON = identityGraph.toJSON();
     expect(graphJSON).toEqual(expectedJSON);
   });
 });

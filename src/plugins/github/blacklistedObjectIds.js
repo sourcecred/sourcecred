@@ -11,6 +11,7 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDEyOk9yZ2FuaXphdGlvbjI5MTkzOTQ=",
   "MDEyOk9yZ2FuaXphdGlvbjEyNDE3MDI0",
   "MDEyOk9yZ2FuaXphdGlvbjQzMDkzODIw",
+  "MDEyOk9yZ2FuaXphdGlvbjEyNDk5MDI=", // techtribe
   // These are `Bot` nodes that are sometimes referenced in a `User`
   // context: in particular, as the author of a commit.
   "MDM6Qm90MjMwNDAwNzY=", // greenkeeper
@@ -27,4 +28,5 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDg6UmVhY3Rpb24xNTUyODc3OQ==", // https://github.com/quasarframework/quasar/issues/1064
   "MDg6UmVhY3Rpb24xNjA5NDYyOQ==", // https://github.com/quasarframework/quasar/issues/1123#issuecomment-343846259
   "MDg6UmVhY3Rpb24xNjIxNTMzNQ==", // https://github.com/quasarframework/quasar/pull/1128#issuecomment-344605228
+  "MDg6UmVhY3Rpb24xMjIxMTk2Ng==", //https://github.com/passbolt/passbolt_api/issues/19
 ]);

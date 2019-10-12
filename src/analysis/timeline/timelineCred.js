@@ -21,7 +21,6 @@ import {
   paramsToJSON,
   paramsFromJSON,
   type TimelineCredParametersJSON,
-  type PartialTimelineCredParameters,
   partialParams,
   defaultParams,
 } from "./params";
@@ -88,7 +87,7 @@ export class TimelineCred {
    * This returns a new TimelineCred; it does not modify the existing one.
    */
   async reanalyze(
-    newParams: PartialTimelineCredParameters
+    newParams: $Shape<TimelineCredParameters>
   ): Promise<TimelineCred> {
     return await TimelineCred.compute({
       graph: this._graph,
@@ -227,7 +226,7 @@ export class TimelineCred {
 
   static async compute(opts: {|
     graph: Graph,
-    params?: PartialTimelineCredParameters,
+    params?: $Shape<TimelineCredParameters>,
     plugins: $ReadOnlyArray<PluginDeclaration>,
   |}): Promise<TimelineCred> {
     const {graph, params, plugins} = opts;

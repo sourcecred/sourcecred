@@ -15,7 +15,7 @@ import {
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v3";
+const VERSION = "discourse_mirror_v4";
 
 /**
  * An interface for retrieving all of the Discourse data at once.
@@ -81,6 +81,7 @@ export interface DiscourseData {
 export class Mirror implements DiscourseData {
   +_db: Database;
   +_fetcher: Discourse;
+  +_serverUrl: string;
 
   /**
    * Construct a new Mirror instance.
@@ -95,12 +96,13 @@ export class Mirror implements DiscourseData {
     if (db == null) throw new Error("db: " + String(db));
     this._db = db;
     this._fetcher = fetcher;
+    this._serverUrl = serverUrl;
     if (db.inTransaction) {
       throw new Error("already in transaction");
     }
     try {
       db.prepare("BEGIN").run();
-      this._initialize(serverUrl);
+      this._initialize();
       if (db.inTransaction) {
         db.prepare("COMMIT").run();
       }
@@ -111,7 +113,7 @@ export class Mirror implements DiscourseData {
     }
   }
 
-  _initialize(serverUrl: string) {
+  _initialize() {
     const db = this._db;
     // We store the config in a singleton table `meta`, whose unique row
     // has primary key `0`. Only the first ever insert will succeed; we
@@ -127,7 +129,7 @@ export class Mirror implements DiscourseData {
 
     const config = stringify({
       version: VERSION,
-      serverUrl: serverUrl,
+      serverUrl: this._serverUrl,
     });
 
     const existingConfig: string | void = db
@@ -163,6 +165,7 @@ export class Mirror implements DiscourseData {
             topic_id INTEGER NOT NULL,
             index_within_topic INTEGER NOT NULL,
             reply_to_post_index INTEGER,
+            cooked TEXT NOT NULL,
             FOREIGN KEY(topic_id) REFERENCES topics(id),
             FOREIGN KEY(author_username) REFERENCES users(username)
         )
@@ -212,7 +215,8 @@ export class Mirror implements DiscourseData {
           author_username,
           topic_id,
           index_within_topic,
-          reply_to_post_index
+          reply_to_post_index,
+          cooked
         FROM posts`
       )
       .all()
@@ -223,6 +227,7 @@ export class Mirror implements DiscourseData {
         topicId: x.topic_id,
         indexWithinTopic: x.index_within_topic,
         replyToPostIndex: x.reply_to_post_index,
+        cooked: x.cooked,
       }));
   }
 
@@ -281,28 +286,39 @@ export class Mirror implements DiscourseData {
               author_username,
               topic_id,
               index_within_topic,
-              reply_to_post_index
+              reply_to_post_index,
+              cooked
           ) VALUES (
               :id,
               :timestamp_ms,
               :author_username,
               :topic_id,
               :index_within_topic,
-              :reply_to_post_index
+              :reply_to_post_index,
+              :cooked
           )
         `
       );
+      const serverUrl = this._serverUrl;
       return function addPost(post: Post) {
-        addUser(post.authorUsername);
-        query.run({
-          id: post.id,
-          timestamp_ms: post.timestampMs,
-          reply_to_post_index: post.replyToPostIndex,
-          index_within_topic: post.indexWithinTopic,
-          topic_id: post.topicId,
-          author_username: post.authorUsername,
-        });
-        encounteredPostIds.add(post.id);
+        try {
+          addUser(post.authorUsername);
+          encounteredPostIds.add(post.id);
+          query.run({
+            id: post.id,
+            timestamp_ms: post.timestampMs,
+            reply_to_post_index: post.replyToPostIndex,
+            index_within_topic: post.indexWithinTopic,
+            topic_id: post.topicId,
+            author_username: post.authorUsername,
+            cooked: post.cooked,
+          });
+        } catch (e) {
+          const url = `${serverUrl}/t/${post.topicId}/${post.indexWithinTopic}`;
+          console.warn(
+            `Warning: Encountered error '${e.message}' while adding post ${url}.`
+          );
+        }
       };
     })();
 
@@ -403,10 +419,10 @@ export class Mirror implements DiscourseData {
      * assumed to already exist in the database; if this is not known to
      * be the case, run `addUser(like.username)` first.
      *
-     * Returns a status indicating whether the database changed as a
-     * result of this call.
+     * Returns a status indicating whether we are done processing this user
+     * (e.g. we have already seen all of their likes).
      */
-    const addLike: (like: LikeAction) => {|+changed: boolean|} = (() => {
+    const addLike: (like: LikeAction) => {|+doneWithUser: boolean|} = (() => {
       const query = db.prepare(
         dedent`\
           INSERT OR IGNORE INTO likes (
@@ -421,12 +437,21 @@ export class Mirror implements DiscourseData {
         `
       );
       return function addLike(like: LikeAction) {
-        const runResult = query.run({
-          post_id: like.postId,
-          timestamp_ms: like.timestampMs,
-          username: like.username,
-        });
-        return {changed: runResult.changes > 0};
+        try {
+          const runResult = query.run({
+            post_id: like.postId,
+            timestamp_ms: like.timestampMs,
+            username: like.username,
+          });
+          return {doneWithUser: runResult.changes === 0};
+        } catch (e) {
+          console.warn(
+            `Warning: Encountered error '${e.message}' ` +
+              `on a like by ${like.username} ` +
+              `on post id ${like.postId}.`
+          );
+          return {doneWithUser: false};
+        }
       };
     })();
 
@@ -438,7 +463,7 @@ export class Mirror implements DiscourseData {
         const likeActions = await this._fetcher.likesByUser(user, offset);
         possiblePageSize = Math.max(likeActions.length, possiblePageSize);
         for (const like of likeActions) {
-          if (!addLike(like).changed) {
+          if (addLike(like).doneWithUser) {
             upToDate = true;
             break;
           }
