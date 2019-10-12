@@ -10,7 +10,7 @@ import {TimelineCred} from "../analysis/timeline/timelineCred";
 
 export type Props = {|
   +timelineCred: TimelineCred,
-  +selectedNodeFilter: NodeAddressT,
+  +selectedNodeFilter: NodeAddressT | null,
 |};
 
 const MAX_ENTRIES_PER_LIST = 100;
@@ -33,7 +33,13 @@ const DEFAULT_ENTRIES_PER_CHART = 6;
 export class TimelineCredView extends React.Component<Props> {
   render() {
     const {selectedNodeFilter, timelineCred} = this.props;
-    const nodes = timelineCred.credSortedNodes(selectedNodeFilter);
+    const nodes = (() => {
+      if (selectedNodeFilter == null) {
+        return timelineCred.userNodes();
+      } else {
+        return timelineCred.credSortedNodes([selectedNodeFilter]);
+      }
+    })();
     const tableNodes = nodes.slice(0, MAX_ENTRIES_PER_LIST);
     const chartNodes = nodes
       .slice(0, DEFAULT_ENTRIES_PER_CHART)
