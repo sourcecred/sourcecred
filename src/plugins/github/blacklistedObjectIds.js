@@ -43,6 +43,13 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDEyOk9yZ2FuaXphdGlvbjY1ODAyMzU=", // blooprint
   "MDEyOk9yZ2FuaXphdGlvbjM2MTU1MDkz", // ngosafety
   "MDEyOk9yZ2FuaXphdGlvbjQ5MjEwNjU=", // jornak
+  "MDEyOk9yZ2FuaXphdGlvbjIyNzUwNTQw", // FringeAI
+  "MDEyOk9yZ2FuaXphdGlvbjE0NDYzMTM=", // collibra
+  "MDEyOk9yZ2FuaXphdGlvbjIyMTIwMzE1", // doctoome
+  "MDEyOk9yZ2FuaXphdGlvbjMxNzEwMDc5", // theviji
+  "MDEyOk9yZ2FuaXphdGlvbjI2NTQyODYw", // esc-co
+  "MDEyOk9yZ2FuaXphdGlvbjEzMzcwNDk5", // Imerso3D
+  "MDEyOk9yZ2FuaXphdGlvbjQ3MjYwMzI0", // wunbit
 
   // These are `Bot` nodes that are sometimes referenced in a `User`
   // context: in particular, as the author of a commit.
@@ -111,7 +118,16 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDg6UmVhY3Rpb24zMTQ2ODAxMA==", // https://github.com/axios/axios/issues/1469
   "MDg6UmVhY3Rpb24xODI2MDE3MA==", // https://github.com/axios/axios/issues/960#issuecomment-309287911
   "MDg6UmVhY3Rpb241MjExNjEwNQ==", // https://github.com/sinonjs/sinon/pull/2096#issuecomment-536904272
+  "MDg6UmVhY3Rpb241MjQ3ODM5NQ==", // https://github.com/sinonjs/sinon/pull/2116#issuecomment-538548018
   "MDg6UmVhY3Rpb241MDgyNTU3", // https://github.com/webpack/webpack-dev-server/issues/24#issuecomment-44366325
+  "MDg6UmVhY3Rpb243ODQwOTgw", // https://github.com/webpack/webpack-dev-server/issues/400#issuecomment-201213206
+  "MDg6UmVhY3Rpb24xNDk2NzExOA==", // https://github.com/webpack/webpack-dev-server/issues/533#issuecomment-296381317
+  "MDg6UmVhY3Rpb24yNjg1ODMyOA==", // https://github.com/webpack/webpack-dev-server/issues/547#issuecomment-237963007
+  "MDg6UmVhY3Rpb24xNjIxMDQ4Mw==", // https://github.com/webpack/webpack-dev-server/issues/547#issuecomment-284737321
   "MDg6UmVhY3Rpb24yNDAyNzczOA==", // https://github.com/webpack/webpack/issues/196#issuecomment-386411864
   "MDg6UmVhY3Rpb243MDA0MjQx", // https://github.com/webpack/webpack/issues/597#issuecomment-115922865
+  "MDg6UmVhY3Rpb24xMTMwNTIwOQ==", // https://github.com/webpack/webpack/issues/2145#issuecomment-307743682
+  "MDg6UmVhY3Rpb24xMDYwMTA2NA==", // https://github.com/webpack/webpack/issues/2704#issuecomment-228860162
+  "MDg6UmVhY3Rpb24zOTg1MTQ5OA==", // https://github.com/webpack/webpack/issues/7197#issuecomment-387973628
+  "MDg6UmVhY3Rpb24yMDEyODg1NQ==", // https://github.com/eslint/eslint/issues/9767#issuecomment-353840674
 ]);
