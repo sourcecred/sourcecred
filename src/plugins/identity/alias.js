@@ -21,7 +21,7 @@ export function resolveAlias(
   alias: Alias,
   discourseUrl: string | null
 ): NodeAddressT {
-  const re = /(\w+)\/@?(\w+)/g;
+  const re = /(\w+)\/@?([A-Za-z0-9-_]+)/g;
   const match = re.exec(alias);
   if (match == null) {
     throw new Error(`Unable to parse alias: ${alias}`);
