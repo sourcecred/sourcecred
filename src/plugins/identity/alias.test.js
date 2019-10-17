@@ -30,6 +30,11 @@ describe("src/plugins/identity/alias", () => {
         const expected = githubAddress("login");
         expect(actual).toEqual(expected);
       });
+      it("a github login with underscores and dashes", () => {
+        const actual = resolveAlias("github/login_foo-bar", null);
+        const expected = githubAddress("login_foo-bar");
+        expect(actual).toEqual(expected);
+      });
       it("a discourse login", () => {
         const url = "https://example.com";
         const actual = resolveAlias("discourse/login", url);
