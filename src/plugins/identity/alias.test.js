@@ -38,6 +38,11 @@ describe("src/plugins/identity/alias", () => {
           "Invalid GitHub username"
         );
       });
+      it("a github login with underscores", () => {
+        expect(() => resolveAlias("github/foo_bar", null)).toThrow(
+          "Invalid GitHub username"
+        );
+      });
       it("a discourse login with invalid characters", () => {
         expect(() => resolveAlias("discourse/!@#$", "url")).toThrow(
           "Invalid Discourse username"
@@ -50,9 +55,9 @@ describe("src/plugins/identity/alias", () => {
         const expected = githubAddress("login");
         expect(actual).toEqual(expected);
       });
-      it("a github login with underscores and dashes", () => {
-        const actual = resolveAlias("github/login_foo-bar", null);
-        const expected = githubAddress("login_foo-bar");
+      it("a github login with hyphens", () => {
+        const actual = resolveAlias("github/login-foo-bar", null);
+        const expected = githubAddress("login-foo-bar");
         expect(actual).toEqual(expected);
       });
       it("a discourse login", () => {

@@ -1,6 +1,7 @@
 // @flow
 
 import {type NodeAddressT} from "../../core/graph";
+import {githubOwnerPattern} from "../../core/repoId";
 import {loginAddress as githubAddress} from "../github/nodes";
 import {userAddress as discourseAddress} from "../discourse/address";
 
@@ -18,7 +19,7 @@ import {userAddress as discourseAddress} from "../discourse/address";
 export type Alias = string;
 
 const _VALID_ALIAS = /^(\w+)[/](.*)$/;
-const _VALID_GITHUB_NAME = /^@?([0-9a-z_-]+)$/i;
+const _VALID_GITHUB_NAME = new RegExp(`^@?(${githubOwnerPattern})$`);
 const _VALID_DISCOURSE_NAME = /^@?([0-9a-z_-]+)$/i;
 
 export function resolveAlias(
