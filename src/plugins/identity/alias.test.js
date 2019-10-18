@@ -13,6 +13,16 @@ describe("src/plugins/identity/alias", () => {
       it("an alias without a /-delimited prefix", () => {
         expect(() => resolveAlias("@credbot", null)).toThrow("Unable to parse");
       });
+      it("an alias not anchored to start of string", () => {
+        expect(() => resolveAlias("my github/@credbot", null)).toThrow(
+          "Unable to parse"
+        );
+      });
+      it("an alias not anchored to end of string", () => {
+        expect(() => resolveAlias("github/@credbot friend", null)).toThrow(
+          "Invalid GitHub username"
+        );
+      });
       it("an alias with an unknown prefix", () => {
         expect(() => resolveAlias("foo/bar", null)).toThrow(
           "Unknown type for alias"
@@ -21,6 +31,16 @@ describe("src/plugins/identity/alias", () => {
       it("a discourse alias without a url", () => {
         expect(() => resolveAlias("discourse/foo", null)).toThrow(
           "without Discourse url"
+        );
+      });
+      it("a github login with invalid characters", () => {
+        expect(() => resolveAlias("github/!@#$", null)).toThrow(
+          "Invalid GitHub username"
+        );
+      });
+      it("a discourse login with invalid characters", () => {
+        expect(() => resolveAlias("discourse/!@#$", "url")).toThrow(
+          "Invalid Discourse username"
         );
       });
     });
