@@ -17,26 +17,36 @@ import {userAddress as discourseAddress} from "../discourse/address";
  */
 export type Alias = string;
 
+const _VALID_ALIAS = /^(\w+)[/](.*)$/;
+const _VALID_GITHUB_NAME = /^@?([0-9a-z_-]+)$/i;
+const _VALID_DISCOURSE_NAME = /^@?([0-9a-z_-]+)$/i;
+
 export function resolveAlias(
   alias: Alias,
   discourseUrl: string | null
 ): NodeAddressT {
-  const re = /(\w+)\/@?([A-Za-z0-9-_]+)/g;
-  const match = re.exec(alias);
+  const match = alias.match(_VALID_ALIAS);
   if (match == null) {
     throw new Error(`Unable to parse alias: ${alias}`);
   }
-  const prefix = match[1];
-  const name = match[2];
+  const [_, prefix, name] = match;
   switch (prefix) {
     case "github": {
-      return githubAddress(name);
+      const match = name.match(_VALID_GITHUB_NAME);
+      if (!match) {
+        throw new Error(`Invalid GitHub username: ${name}`);
+      }
+      return githubAddress(match[1]);
     }
     case "discourse": {
       if (discourseUrl == null) {
         throw new Error(`Can't parse alias ${alias} without Discourse url`);
       }
-      return discourseAddress(discourseUrl, name);
+      const match = name.match(_VALID_DISCOURSE_NAME);
+      if (!match) {
+        throw new Error(`Invalid Discourse username: ${name}`);
+      }
+      return discourseAddress(discourseUrl, match[1]);
     }
     default:
       throw new Error(`Unknown type for alias: ${alias}`);
