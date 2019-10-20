@@ -1358,6 +1358,164 @@ describe("core/graph", () => {
     });
   });
 
+  describe("contractNodes", () => {
+    const a = node("a");
+    const b = node("b");
+    const c = node("c");
+    it("has no effect with no contractions", () => {
+      const g = simpleGraph();
+      const g_ = simpleGraph().contractNodes([]);
+      expect(g.equals(g_)).toBe(true);
+    });
+    it("adds the new node to the graph", () => {
+      const g = simpleGraph().contractNodes([{old: [], replacement: c}]);
+      const g_ = simpleGraph().addNode(c);
+      expect(g.equals(g_)).toBe(true);
+    });
+    it("filters old nodes from the graph", () => {
+      const g = new Graph()
+        .addNode(a)
+        .addNode(b)
+        .contractNodes([{old: [a.address, b.address], replacement: c}]);
+      const expected = new Graph().addNode(c);
+      expect(g.equals(expected)).toBe(true);
+    });
+    it("re-writes regular edges", () => {
+      const g = new Graph()
+        .addNode(a)
+        .addNode(b)
+        .addEdge(edge("forward", a, b))
+        .addEdge(edge("backward", b, a))
+        .contractNodes([{old: [a.address], replacement: c}]);
+      const expected = new Graph()
+        .addNode(c)
+        .addNode(b)
+        .addEdge(edge("forward", c, b))
+        .addEdge(edge("backward", b, c));
+      expect(g.equals(expected)).toBe(true);
+    });
+    it("re-writes edges, including dangling or loop edges", () => {
+      const g = new Graph()
+        .addNode(a)
+        .addEdge(edge("loop", a, a))
+        .addEdge(edge("dangle1", a, b))
+        .addEdge(edge("dangle2", b, a))
+        .contractNodes([{old: [a.address], replacement: c}]);
+      const expected = new Graph()
+        .addNode(c)
+        .addEdge(edge("loop", c, c))
+        .addEdge(edge("dangle1", c, b))
+        .addEdge(edge("dangle2", b, c));
+      expect(g.equals(expected)).toBe(true);
+    });
+    it("if multiple transforms target the same node, last one wins", () => {
+      const g = new Graph()
+        .addNode(a)
+        .addEdge(edge("loop", a, a))
+        .contractNodes([
+          {old: [a.address], replacement: b},
+          {old: [a.address], replacement: c},
+        ]);
+      const expected = new Graph()
+        .addNode(b)
+        .addNode(c)
+        .addEdge(edge("loop", c, c));
+      expect(g.equals(expected)).toBe(true);
+    });
+    it("doesn't mutate the original graph", () => {
+      const g1 = new Graph().addNode(a);
+      const g2 = g1.contractNodes([{old: [a.address], replacement: b}]);
+      expect(g1.equals(g2)).toBe(false);
+    });
+    it("allows replacements that are already in the graph", () => {
+      const g = new Graph()
+        .addNode(a)
+        .addNode(b)
+        .addEdge(edge("future-loop", a, b))
+        .contractNodes([{old: [a.address], replacement: b}]);
+      const expected = new Graph()
+        .addNode(b)
+        .addEdge(edge("future-loop", b, b));
+      expect(g.equals(expected)).toBe(true);
+    });
+    it("a node can replace itself", () => {
+      const g = new Graph().addNode(a).addEdge(edge("loop", a, a));
+      const g_ = g.contractNodes([{old: [a.address], replacement: a}]);
+      expect(g.equals(g_)).toBe(true);
+    });
+    it("a node can replace itself with a distinct node", () => {
+      // I don't think this is useful, but it's interesting to document.
+      const a_ = {...a, timestampMs: 1337};
+      const g = new Graph()
+        .addNode(a)
+        .contractNodes([{old: [a.address], replacement: a_}]);
+      const expected = new Graph().addNode(a_);
+      expect(g.equals(expected)).toBe(true);
+    });
+    it("adding a conflicting node via replacement throws an error", () => {
+      const b_ = {...b, timestampMs: 1337};
+      const fail = () =>
+        new Graph()
+          .addNode(a)
+          .addNode(b)
+          .contractNodes([{old: [a.address], replacement: b_}]);
+      expect(fail).toThrowError("conflict between new node");
+    });
+    it("does not allow chained contractions", () => {
+      const fail = () =>
+        new Graph()
+          .addNode(a)
+          .addEdge(edge("loop", a, a))
+          .contractNodes([
+            {old: [a.address], replacement: b},
+            {old: [b.address], replacement: c},
+          ]);
+      expect(fail).toThrow("Chained contractions are not supported");
+    });
+    /**
+     * If we decide to support chained contractions,
+     * these would be the semantics to shoot for.
+    it("can chain contractions", () => {
+      const g = new Graph()
+        .addNode(a)
+        .addEdge(edge("loop", a, a))
+        .contractNodes([
+          {old: [a.address], replacement: b},
+          {old: [b.address], replacement: c},
+        ]);
+      const chained = new Graph()
+        .addNode(a)
+        .addEdge(edge("loop", a, a))
+        .contractNodes([{old: [a.address], replacement: c}]);
+      // equivalent, due to chaining
+      expect(g.equals(chained)).toBe(true);
+      // documenting the output of chaining
+      const expected = new Graph().addNode(c).addEdge(edge("loop", c, c));
+      expect(g.equals(expected)).toBe(true);
+    });
+    */
+    it("only chains contractions in forward order", () => {
+      const g = new Graph()
+        .addNode(a)
+        .addEdge(edge("loop", a, a))
+        .contractNodes([
+          {old: [b.address], replacement: c},
+          {old: [a.address], replacement: b},
+        ]);
+      const chained = new Graph()
+        .addNode(a)
+        .addEdge(edge("loop", a, a))
+        .contractNodes([{old: [a.address], replacement: c}]);
+      // Not equal, because the order was wrong
+      expect(g.equals(chained)).toBe(false);
+      const expected = new Graph()
+        .addNode(b)
+        .addNode(c)
+        .addEdge(edge("loop", b, b));
+      expect(g.equals(expected)).toBe(true);
+    });
+  });
+
   describe("toJSON / fromJSON", () => {
     describe("snapshot testing", () => {
       it("a trivial graph", () => {
