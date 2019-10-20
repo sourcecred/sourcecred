@@ -10,6 +10,8 @@ import loadCommand, {help} from "./load";
 import type {LoadOptions} from "../api/load";
 import {defaultWeights, toJSON as weightsToJSON} from "../analysis/weights";
 import * as Common from "./common";
+import {defaultParams, partialParams} from "../analysis/timeline/params";
+import {declaration as githubDeclaration} from "../plugins/github/declaration";
 
 import {makeRepoId, stringToRepoId} from "../core/repoId";
 
@@ -75,8 +77,10 @@ describe("cli/load", () => {
           id: "foo/bar",
           repoIds: [makeRepoId("foo", "bar")],
           discourseServer: null,
+          identities: [],
         },
-        params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
+        params: defaultParams(),
+        plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
         discourseKey: fakeDiscourseKey,
@@ -99,8 +103,10 @@ describe("cli/load", () => {
           id: projectId,
           repoIds: [stringToRepoId(projectId)],
           discourseServer: null,
+          identities: [],
         },
-        params: {alpha: 0.05, intervalDecay: 0.5, weights: defaultWeights()},
+        params: defaultParams(),
+        plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
         discourseKey: fakeDiscourseKey,
@@ -136,8 +142,10 @@ describe("cli/load", () => {
           id: "foo/bar",
           repoIds: [makeRepoId("foo", "bar")],
           discourseServer: null,
+          identities: [],
         },
-        params: {alpha: 0.05, intervalDecay: 0.5, weights},
+        params: partialParams({weights}),
+        plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: fakeGithubToken,
         discourseKey: fakeDiscourseKey,

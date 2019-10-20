@@ -18,6 +18,7 @@ describe("plugins/github/specToProject", () => {
       id: spec,
       repoIds: [stringToRepoId(spec)],
       discourseServer: null,
+      identities: [],
     };
     const actual = await specToProject(spec, "FAKE_TOKEN");
     expect(expected).toEqual(actual);
@@ -31,7 +32,12 @@ describe("plugins/github/specToProject", () => {
     fetchGithubOrg.mockResolvedValueOnce(fakeOrg);
     const actual = await specToProject(spec, token);
     expect(fetchGithubOrg).toHaveBeenCalledWith(fakeOrg.name, token);
-    const expected: Project = {id: spec, repoIds: repos, discourseServer: null};
+    const expected: Project = {
+      id: spec,
+      repoIds: repos,
+      discourseServer: null,
+      identities: [],
+    };
     expect(actual).toEqual(expected);
   });
   describe("fails for malformed spec strings", () => {

@@ -4,6 +4,7 @@ set -eu
 usage() {
     printf 'usage: build_static_site.sh --target TARGET\n'
     printf '                            [--project PROJECT [...]]\n'
+    printf '                            [--project-file PROJECT_FILE [...]]\n'
     printf '                            [--weights WEIGHTS_FILE]\n'
     printf '                            [--cname DOMAIN]\n'
     printf '                            [--no-backend]\n'
@@ -15,6 +16,8 @@ usage() {
     printf '\t%s\n' 'an empty directory into which to build the site'
     printf '%s\n' '--project PROJECT'
     printf '\t%s\n' 'a project spec; see help for cli/load.js for details'
+    printf '%s\n' '--project-file PROJECT_FILE'
+    printf '\t%s\n' 'the path to a file containing a project config'
     printf '%s\n' '--weights WEIGHTS_FILE'
     printf '\t%s\n' 'path to a json file which contains a weights configuration.'
     printf '\t%s\n' 'This will be used instead of the default weights and persisted.'
@@ -55,6 +58,7 @@ parse_args() {
     weights=
     repos=( )
     projects=( )
+    project_files=( )
     while [ $# -gt 0 ]; do
         case "$1" in
             --target)
@@ -77,6 +81,11 @@ parse_args() {
                 shift
                 if [ $# -eq 0 ]; then die 'missing value for --project'; fi
                 projects+=( "$1" )
+                ;;
+            --project-file)
+                shift
+                if [ $# -eq 0 ]; then die 'missing value for --project-file'; fi
+                project_files+=( "$1" )
                 ;;
             --cname)
                 shift
@@ -148,6 +157,17 @@ build() {
         for project in "${projects[@]}"; do
             NODE_PATH="./node_modules${NODE_PATH:+:${NODE_PATH}}" \
                 node "${SOURCECRED_BIN:-./bin}/sourcecred.js" load "${project}" $weightsStr
+        done
+    fi
+
+    if [ "${#project_files[@]}" -ne 0 ]; then
+        local weightsStr=""
+        if [ -n "${weights}" ]; then
+            weightsStr="--weights ${weights}"
+        fi
+        for project_file in "${project_files[@]}"; do
+            NODE_PATH="./node_modules${NODE_PATH:+:${NODE_PATH}}" \
+                node "${SOURCECRED_BIN:-./bin}/sourcecred.js" load --project "${project_file}" $weightsStr
         done
     fi
 

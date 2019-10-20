@@ -1,12 +1,13 @@
 // @flow
 
+import * as NullUtil from "../../util/null";
 import {
   Graph,
-  NodeAddress,
   EdgeAddress,
   type Node,
   type Edge,
   type NodeAddressT,
+  type EdgeAddressT,
 } from "../../core/graph";
 import {
   type PostId,
@@ -17,25 +18,21 @@ import {
 } from "./fetch";
 import {type DiscourseData} from "./mirror";
 import {
-  topicNodeType,
-  postNodeType,
-  userNodeType,
   authorsPostEdgeType,
   authorsTopicEdgeType,
   postRepliesEdgeType,
   topicContainsPostEdgeType,
   likesEdgeType,
+  referencesTopicEdgeType,
+  referencesUserEdgeType,
+  referencesPostEdgeType,
 } from "./declaration";
-
-export function topicAddress(serverUrl: string, id: TopicId): NodeAddressT {
-  return NodeAddress.append(topicNodeType.prefix, serverUrl, String(id));
-}
-export function postAddress(serverUrl: string, id: PostId): NodeAddressT {
-  return NodeAddress.append(postNodeType.prefix, serverUrl, String(id));
-}
-export function userAddress(serverUrl: string, username: string): NodeAddressT {
-  return NodeAddress.append(userNodeType.prefix, serverUrl, username);
-}
+import {userAddress, topicAddress, postAddress} from "./address";
+import {
+  type DiscourseReference,
+  parseLinks,
+  linksToReferences,
+} from "./references";
 
 export function userNode(serverUrl: string, username: string): Node {
   const url = `${serverUrl}/u/${username}/`;
@@ -147,27 +144,67 @@ export function likesEdge(serverUrl: string, like: LikeAction): Edge {
 }
 
 export function createGraph(serverUrl: string, data: DiscourseData): Graph {
-  if (serverUrl.endsWith("/")) {
-    throw new Error(`by convention, serverUrl should not end with /`);
-  }
-  const g = new Graph();
-  const topicIdToTitle: Map<TopicId, string> = new Map();
+  const gc = new _GraphCreator(serverUrl, data);
+  return gc.graph;
+}
 
-  for (const username of data.users()) {
-    g.addNode(userNode(serverUrl, username));
+class _GraphCreator {
+  graph: Graph;
+  serverUrl: string;
+  data: DiscourseData;
+  topicIdToTitle: Map<TopicId, string>;
+
+  constructor(serverUrl: string, data: DiscourseData) {
+    if (serverUrl.endsWith("/")) {
+      throw new Error(`by convention, serverUrl should not end with /`);
+    }
+    this.serverUrl = serverUrl;
+    this.data = data;
+    this.graph = new Graph();
+    this.topicIdToTitle = new Map();
+
+    for (const username of data.users()) {
+      this.graph.addNode(userNode(serverUrl, username));
+    }
+
+    for (const topic of data.topics()) {
+      this.topicIdToTitle.set(topic.id, topic.title);
+      this.graph.addNode(topicNode(serverUrl, topic));
+      this.graph.addEdge(authorsTopicEdge(serverUrl, topic));
+    }
+
+    for (const post of data.posts()) {
+      this.addPost(post);
+    }
+
+    for (const like of data.likes()) {
+      this.graph.addEdge(likesEdge(serverUrl, like));
+    }
   }
 
-  for (const topic of data.topics()) {
-    topicIdToTitle.set(topic.id, topic.title);
-    g.addNode(topicNode(serverUrl, topic));
-    g.addEdge(authorsTopicEdge(serverUrl, topic));
+  addPost(post: Post) {
+    const topicTitle =
+      this.topicIdToTitle.get(post.topicId) || "[unknown topic]";
+    this.graph.addNode(postNode(this.serverUrl, post, topicTitle));
+    this.graph.addEdge(authorsPostEdge(this.serverUrl, post));
+    this.graph.addEdge(topicContainsPostEdge(this.serverUrl, post));
+    this.maybeAddPostRepliesEdge(post);
+
+    const discourseReferences = linksToReferences(parseLinks(post.cooked));
+    for (const reference of discourseReferences) {
+      const edge = this.referenceEdge(post, reference);
+      if (edge != null) {
+        this.graph.addEdge(edge);
+      }
+    }
   }
 
-  for (const post of data.posts()) {
-    const topicTitle = topicIdToTitle.get(post.topicId) || "[unknown topic]";
-    g.addNode(postNode(serverUrl, post, topicTitle));
-    g.addEdge(authorsPostEdge(serverUrl, post));
-    g.addEdge(topicContainsPostEdge(serverUrl, post));
+  /**
+   * Any post that is not the first post in the thread is a reply to some post.
+   * This method adds those reply edges. It is a bit hairy to work around unintuitive
+   * choices in the Discourse API.
+   */
+  maybeAddPostRepliesEdge(post: Post) {
     let replyToPostIndex = post.replyToPostIndex;
     if (replyToPostIndex == null && post.indexWithinTopic > 1) {
       // For posts that are a reply to the first posts (or, depending on how you look at it,
@@ -177,16 +214,76 @@ export function createGraph(serverUrl: string, data: DiscourseData): Graph {
       replyToPostIndex = 1;
     }
     if (replyToPostIndex != null) {
-      const basePostId = data.findPostInTopic(post.topicId, replyToPostIndex);
+      const basePostId = this.data.findPostInTopic(
+        post.topicId,
+        replyToPostIndex
+      );
       if (basePostId != null) {
-        g.addEdge(postRepliesEdge(serverUrl, post, basePostId));
+        this.graph.addEdge(postRepliesEdge(this.serverUrl, post, basePostId));
       }
     }
   }
 
-  for (const like of data.likes()) {
-    g.addEdge(likesEdge(serverUrl, like));
+  referenceEdge(post: Post, reference: DiscourseReference): Edge | null {
+    if (reference.serverUrl.toLowerCase() !== this.serverUrl.toLowerCase()) {
+      // Don't attempt to make cross-instance links for now, since we only
+      // load one Discourse forum in a given instance.
+      return null;
+    }
+    const src = postAddress(this.serverUrl, post.id);
+    const timestampMs = post.timestampMs;
+    let dst: NodeAddressT | null = null;
+    let address: EdgeAddressT | null = null;
+    switch (reference.type) {
+      case "TOPIC": {
+        address = EdgeAddress.append(
+          referencesTopicEdgeType.prefix,
+          this.serverUrl,
+          String(post.id),
+          String(reference.topicId)
+        );
+        dst = topicAddress(this.serverUrl, reference.topicId);
+        break;
+      }
+      case "POST": {
+        const referredPostId = this.data.findPostInTopic(
+          reference.topicId,
+          reference.postIndex
+        );
+        if (referredPostId == null) {
+          // Maybe a bad link, or the post or topic was deleted.
+          return null;
+        }
+        dst = postAddress(this.serverUrl, referredPostId);
+        address = EdgeAddress.append(
+          referencesPostEdgeType.prefix,
+          this.serverUrl,
+          String(post.id),
+          String(referredPostId)
+        );
+        break;
+      }
+      case "USER": {
+        dst = userAddress(this.serverUrl, reference.username);
+        address = EdgeAddress.append(
+          referencesUserEdgeType.prefix,
+          this.serverUrl,
+          String(post.id),
+          reference.username
+        );
+        break;
+      }
+      default: {
+        throw new Error(
+          `Unexpected reference type: ${(reference.type: empty)}`
+        );
+      }
+    }
+    return {
+      src,
+      dst: NullUtil.get(dst),
+      timestampMs,
+      address: NullUtil.get(address),
+    };
   }
-
-  return g;
 }

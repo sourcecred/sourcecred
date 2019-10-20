@@ -11,6 +11,11 @@ export type PluginDeclaration = {|
   +edgePrefix: EdgeAddressT,
   +nodeTypes: $ReadOnlyArray<NodeType>,
   +edgeTypes: $ReadOnlyArray<EdgeType>,
+  // Which node types represent user identities.
+  // Important for computing score and for display in the frontend.
+  // It's expected that the userTypes will also be included in the array of
+  // nodeTypes.
+  +userTypes: $ReadOnlyArray<NodeType>,
 |};
 
 export function combineTypes(
