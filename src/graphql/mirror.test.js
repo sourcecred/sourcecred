@@ -825,7 +825,7 @@ describe("graphql/mirror", () => {
         // Check that some objects have the right primitives.
         // (These poke at the internals of the storage format a bit.)
 
-        // Check primitives (EAV format).
+        // Check primitives.
         expect(
           db
             .prepare(
