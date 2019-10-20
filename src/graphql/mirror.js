@@ -143,11 +143,6 @@ export class Mirror {
    *     this more efficiently in both space and time (see discussion on
    *     #883 for some options).
    *
-   *     NOTE: A previous version of the schema used a separate
-   *     primitives table for each GraphQL object type. These
-   *     `primitives_*` tables are still written, but are no longer
-   *     read. They will be removed entirely in a future change.
-   *
    * We refer to node and primitive data together as "own data", because
    * this is the data that can be queried uniformly for all elements of
    * a type; querying connection data, by contrast, requires the
@@ -195,7 +190,7 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
-      version: "MIRROR_v6",
+      version: "MIRROR_v7",
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,
@@ -230,8 +225,7 @@ export class Mirror {
       }
       db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(blob);
 
-      // First, create those tables that are independent of the schema.
-      const structuralTables = [
+      const tables = [
         // Time is stored in milliseconds since 1970-01-01T00:00Z, with
         // ECMAScript semantics (leap seconds ignored, exactly 86.4M ms
         // per day, etc.).
@@ -327,56 +321,8 @@ export class Mirror {
           ON connection_entries (connection_id)
         `,
       ];
-      for (const sql of structuralTables) {
+      for (const sql of tables) {
         db.prepare(sql).run();
-      }
-
-      // Then, create primitive-data tables, which depend on the schema.
-      // We only create tables for object types, as union types have no
-      // physical representation; they exist only at the type level.
-      for (const typename of Object.keys(this._schemaInfo.objectTypes)) {
-        const type = this._schemaInfo.objectTypes[typename];
-        if (!isSqlSafe(typename)) {
-          throw new Error(
-            "invalid object type name: " + JSON.stringify(typename)
-          );
-        }
-        for (const fieldname of type.primitiveFieldNames) {
-          if (!isSqlSafe(fieldname)) {
-            throw new Error("invalid field name: " + JSON.stringify(fieldname));
-          }
-        }
-        for (const fieldname of type.nestedFieldNames) {
-          if (!isSqlSafe(fieldname)) {
-            throw new Error("invalid field name: " + JSON.stringify(fieldname));
-          }
-          const children = type.nestedFields[fieldname].primitives;
-          for (const childFieldname of Object.keys(children)) {
-            if (!isSqlSafe(childFieldname)) {
-              throw new Error(
-                "invalid field name: " +
-                  JSON.stringify(childFieldname) +
-                  " under " +
-                  JSON.stringify(fieldname)
-              );
-            }
-          }
-        }
-        const tableName = _primitivesTableName(typename);
-        const tableSpec = []
-          .concat(
-            ["id TEXT NOT NULL PRIMARY KEY"],
-            type.primitiveFieldNames.map((fieldname) => `"${fieldname}"`),
-            type.nestedFieldNames.map((fieldname) => `"${fieldname}"`),
-            ...type.nestedFieldNames.map((f1) =>
-              Object.keys(type.nestedFields[f1].primitives).map(
-                (f2) => `"${f1}.${f2}"`
-              )
-            ),
-            ["FOREIGN KEY(id) REFERENCES objects(id)"]
-          )
-          .join(", ");
-        db.prepare(`CREATE TABLE ${tableName} (${tableSpec})`).run();
       }
     });
   }
@@ -470,14 +416,6 @@ export class Mirror {
         `
       )
       .run({id, typename});
-    this._db
-      .prepare(
-        dedent`\
-          INSERT INTO ${_primitivesTableName(typename)} (id)
-          VALUES (?)
-        `
-      )
-      .run(id);
     const addPrimitive = this._db.prepare(
       dedent`
         INSERT INTO primitives (object_id, fieldname, value)
@@ -1355,37 +1293,6 @@ export class Mirror {
           ].join("_"): string): any);
         },
       };
-      const updateTypeSpecificPrimitives: ({|
-        +id: Schema.ObjectId,
-        // These keys can be top-level primitive fields or the primitive
-        // children of a nested field. The values are the JSON encodings
-        // of the values received from the GraphQL response. For a
-        // nested field, the value is `0` or `1` as the nested field is
-        // `null` or not. (See docs on `_initialize` for more details.)
-        +[parameterName: ParameterName]: string | 0 | 1,
-      |}) => void = (() => {
-        const updates: $ReadOnlyArray<string> = [].concat(
-          objectType.primitiveFieldNames.map(
-            (f) => `"${f}" = :${parameterNameFor.topLevelField(f)}`
-          ),
-          objectType.nestedFieldNames.map(
-            (f) => `"${f}" = :${parameterNameFor.topLevelField(f)}`
-          ),
-          ...objectType.nestedFieldNames.map((f1) =>
-            Object.keys(objectType.nestedFields[f1].primitives).map(
-              (f2) => `"${f1}.${f2}" = :${parameterNameFor.nestedField(f1, f2)}`
-            )
-          )
-        );
-        if (updates.length === 0) {
-          return () => {};
-        }
-        const tableName = _primitivesTableName(typename);
-        const stmt = db.prepare(
-          `UPDATE ${tableName} SET ${updates.join(", ")} WHERE id = :id`
-        );
-        return _makeSingleUpdateFunction(stmt);
-      })();
       const updateEavPrimitive: ({|
         +id: Schema.ObjectId,
         +fieldname: string,
@@ -1470,8 +1377,6 @@ export class Mirror {
             });
           }
         }
-
-        updateTypeSpecificPrimitives(primitives);
       }
     }
 
@@ -2192,25 +2097,6 @@ export function _inTransaction<R>(db: Database, fn: () => R): R {
  */
 function isSqlSafe(token: string) {
   return !token.match(/[^A-Za-z0-9_]/);
-}
-
-/**
- * Get the name of the table used to store primitive data for objects of
- * the given type, which should be SQL-safe lest an error be thrown.
- *
- * Note that the resulting string is double-quoted.
- */
-function _primitivesTableName(typename: Schema.Typename) {
-  // istanbul ignore if
-  if (!isSqlSafe(typename)) {
-    // This shouldn't be reachable---we should have caught it earlier.
-    // But checking it anyway is cheap.
-    throw new Error(
-      "Invariant violation: invalid object type name " +
-        JSON.stringify(typename)
-    );
-  }
-  return `"primitives_${typename}"`;
 }
 
 /**
