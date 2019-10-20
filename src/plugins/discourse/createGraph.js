@@ -1,6 +1,14 @@
 // @flow
 
-import {Graph, EdgeAddress, type Node, type Edge} from "../../core/graph";
+import * as NullUtil from "../../util/null";
+import {
+  Graph,
+  EdgeAddress,
+  type Node,
+  type Edge,
+  type NodeAddressT,
+  type EdgeAddressT,
+} from "../../core/graph";
 import {
   type PostId,
   type TopicId,
@@ -15,8 +23,16 @@ import {
   postRepliesEdgeType,
   topicContainsPostEdgeType,
   likesEdgeType,
+  referencesTopicEdgeType,
+  referencesUserEdgeType,
+  referencesPostEdgeType,
 } from "./declaration";
 import {userAddress, topicAddress, postAddress} from "./address";
+import {
+  type DiscourseReference,
+  parseLinks,
+  linksToReferences,
+} from "./references";
 
 export function userNode(serverUrl: string, username: string): Node {
   const url = `${serverUrl}/u/${username}/`;
@@ -173,6 +189,14 @@ class _GraphCreator {
     this.graph.addEdge(authorsPostEdge(this.serverUrl, post));
     this.graph.addEdge(topicContainsPostEdge(this.serverUrl, post));
     this.maybeAddPostRepliesEdge(post);
+
+    const discourseReferences = linksToReferences(parseLinks(post.cooked));
+    for (const reference of discourseReferences) {
+      const edge = this.referenceEdge(post, reference);
+      if (edge != null) {
+        this.graph.addEdge(edge);
+      }
+    }
   }
 
   /**
@@ -198,5 +222,68 @@ class _GraphCreator {
         this.graph.addEdge(postRepliesEdge(this.serverUrl, post, basePostId));
       }
     }
+  }
+
+  referenceEdge(post: Post, reference: DiscourseReference): Edge | null {
+    if (reference.serverUrl.toLowerCase() !== this.serverUrl.toLowerCase()) {
+      // Don't attempt to make cross-instance links for now, since we only
+      // load one Discourse forum in a given instance.
+      return null;
+    }
+    const src = postAddress(this.serverUrl, post.id);
+    const timestampMs = post.timestampMs;
+    let dst: NodeAddressT | null = null;
+    let address: EdgeAddressT | null = null;
+    switch (reference.type) {
+      case "TOPIC": {
+        address = EdgeAddress.append(
+          referencesTopicEdgeType.prefix,
+          this.serverUrl,
+          String(post.id),
+          String(reference.topicId)
+        );
+        dst = topicAddress(this.serverUrl, reference.topicId);
+        break;
+      }
+      case "POST": {
+        const referredPostId = this.data.findPostInTopic(
+          reference.topicId,
+          reference.postIndex
+        );
+        if (referredPostId == null) {
+          // Maybe a bad link, or the post or topic was deleted.
+          return null;
+        }
+        dst = postAddress(this.serverUrl, referredPostId);
+        address = EdgeAddress.append(
+          referencesPostEdgeType.prefix,
+          this.serverUrl,
+          String(post.id),
+          String(referredPostId)
+        );
+        break;
+      }
+      case "USER": {
+        dst = userAddress(this.serverUrl, reference.username);
+        address = EdgeAddress.append(
+          referencesUserEdgeType.prefix,
+          this.serverUrl,
+          String(post.id),
+          reference.username
+        );
+        break;
+      }
+      default: {
+        throw new Error(
+          `Unexpected reference type: ${(reference.type: empty)}`
+        );
+      }
+    }
+    return {
+      src,
+      dst: NullUtil.get(dst),
+      timestampMs,
+      address: NullUtil.get(address),
+    };
   }
 }

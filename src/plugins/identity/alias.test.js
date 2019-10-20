@@ -13,6 +13,16 @@ describe("src/plugins/identity/alias", () => {
       it("an alias without a /-delimited prefix", () => {
         expect(() => resolveAlias("@credbot", null)).toThrow("Unable to parse");
       });
+      it("an alias not anchored to start of string", () => {
+        expect(() => resolveAlias("my github/@credbot", null)).toThrow(
+          "Unable to parse"
+        );
+      });
+      it("an alias not anchored to end of string", () => {
+        expect(() => resolveAlias("github/@credbot friend", null)).toThrow(
+          "Invalid GitHub username"
+        );
+      });
       it("an alias with an unknown prefix", () => {
         expect(() => resolveAlias("foo/bar", null)).toThrow(
           "Unknown type for alias"
@@ -23,11 +33,31 @@ describe("src/plugins/identity/alias", () => {
           "without Discourse url"
         );
       });
+      it("a github login with invalid characters", () => {
+        expect(() => resolveAlias("github/!@#$", null)).toThrow(
+          "Invalid GitHub username"
+        );
+      });
+      it("a github login with underscores", () => {
+        expect(() => resolveAlias("github/foo_bar", null)).toThrow(
+          "Invalid GitHub username"
+        );
+      });
+      it("a discourse login with invalid characters", () => {
+        expect(() => resolveAlias("discourse/!@#$", "url")).toThrow(
+          "Invalid Discourse username"
+        );
+      });
     });
     describe("works on", () => {
       it("a github login", () => {
         const actual = resolveAlias("github/login", null);
         const expected = githubAddress("login");
+        expect(actual).toEqual(expected);
+      });
+      it("a github login with hyphens", () => {
+        const actual = resolveAlias("github/login-foo-bar", null);
+        const expected = githubAddress("login-foo-bar");
         expect(actual).toEqual(expected);
       });
       it("a discourse login", () => {
