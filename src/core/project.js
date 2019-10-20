@@ -3,6 +3,7 @@
 import base64url from "base64url";
 import {type RepoId} from "../core/repoId";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
+import {type Identity} from "../plugins/identity/identity";
 
 export type ProjectId = string;
 
@@ -29,9 +30,10 @@ export type Project = {|
     +serverUrl: string,
     +apiUsername: string,
   |} | null,
+  +identities: $ReadOnlyArray<Identity>,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/project", version: "0.2.0"};
+const COMPAT_INFO = {type: "sourcecred/project", version: "0.3.0"};
 
 export type ProjectJSON = Compatible<Project>;
 

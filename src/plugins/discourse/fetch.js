@@ -37,6 +37,8 @@ export type Post = {|
   +replyToPostIndex: number | null,
   +timestampMs: number,
   +authorUsername: string,
+  // The post HTML for rendering.
+  +cooked: string,
 |};
 
 export type TopicWithPosts = {|
@@ -150,8 +152,7 @@ export class Fetcher implements Discourse {
 
   async latestTopicId(): Promise<TopicId> {
     const response = await this._fetch("/latest.json?order=created");
-    failFor404(response);
-    failFor403(response);
+    failIfMissing(response);
     failForNotOk(response);
     const json = await response.json();
     if (json.topic_list.topics.length === 0) {
@@ -162,8 +163,7 @@ export class Fetcher implements Discourse {
 
   async latestPosts(): Promise<Post[]> {
     const response = await this._fetch("/posts.json");
-    failFor404(response);
-    failFor403(response);
+    failIfMissing(response);
     failForNotOk(response);
     const json = await response.json();
     return json.latest_posts.map(parsePost);
@@ -171,18 +171,10 @@ export class Fetcher implements Discourse {
 
   async topicWithPosts(id: TopicId): Promise<TopicWithPosts | null> {
     const response = await this._fetch(`/t/${id}.json`);
-    if (response.status === 404) {
-      // Not sure why this happens, but a topic can sometimes 404.
-      // We should just consider it unreachable.
-      // Here is an example: https://discourse.sourcecred.io/t/116
-      return null;
-    }
-    if (response.status === 403) {
-      // Probably this topic is hidden or deleted.
-      // Just consider it unreachable.
-      // If the issue is that the user provided bad keys, then
-      // they will get a more helpful error when they try to get the latest
-      // topic id.
+    const {status} = response;
+    if (status === 403 || status === 404 || status === 410) {
+      // The topic is hidden, deleted, or otherwise missing.
+      // Example of a 404 topic: https://discourse.sourcecred.io/t/116
       return null;
     }
     failForNotOk(response);
@@ -199,12 +191,9 @@ export class Fetcher implements Discourse {
 
   async post(id: PostId): Promise<Post | null> {
     const response = await this._fetch(`/posts/${id}.json`);
-    if (response.status === 404) {
-      // Since topics can 404, I assume posts can too.
-      return null;
-    }
-    if (response.status === 403) {
-      // Probably this post is hidden or deleted.
+    const {status} = response;
+    if (status === 403 || status === 404 || status === 410) {
+      // The post is hidden, deleted, or otherwise missing.
       return null;
     }
     failForNotOk(response);
@@ -216,25 +205,25 @@ export class Fetcher implements Discourse {
     const response = await this._fetch(
       `/user_actions.json?username=${username}&filter=1&offset=${offset}`
     );
-    failFor404(response);
-    failFor403(response);
+    failIfMissing(response);
     failForNotOk(response);
     const json = await response.json();
     return json.user_actions.map(parseLike);
   }
 }
 
-function failFor404(response: Response) {
+function failIfMissing(response: Response) {
   if (response.status === 404) {
     throw new Error(`404 Not Found on: ${response.url}; maybe bad serverUrl?`);
   }
-}
-
-function failFor403(response: Response) {
   if (response.status === 403) {
     throw new Error(`403 Forbidden: bad API username or key?`);
   }
+  if (response.status === 410) {
+    throw new Error(`410 Gone`);
+  }
 }
+
 function failForNotOk(response: Response) {
   if (!response.ok) {
     throw new Error(`not OK status ${response.status} on ${response.url}`);
@@ -249,6 +238,7 @@ function parsePost(json: any): Post {
     replyToPostIndex: json.reply_to_post_number,
     topicId: json.topic_id,
     authorUsername: json.username,
+    cooked: json.cooked,
   };
 }
 

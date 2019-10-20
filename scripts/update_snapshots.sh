@@ -34,7 +34,7 @@ echo "Updating github/fetchGithubOrgTest.sh"
 echo "Updating github/fetchGithubRepoTest.sh"
 ./src/plugins/github/fetchGithubRepoTest.sh -u --no-build
 
-if [ -z "${DISCOURSE_TEST_API_KEY:-}" ]; then
+if [ -n "${DISCOURSE_TEST_API_KEY:-}" ]; then
   echo "Updating Discourse API snapshots"
   ./src/plugins/discourse/update_discourse_api_snapshots.sh
 else
