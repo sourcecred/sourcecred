@@ -285,18 +285,6 @@ describe("graphql/mirror", () => {
             .all(issueId)
         ).toEqual(["author", "repository"].sort());
         expect(
-<<<<<<< HEAD
-=======
-          db.prepare("SELECT * FROM primitives_Issue WHERE id = ?").all(issueId)
-        ).toEqual([
-          {
-            id: issueId,
-            url: null,
-            title: null,
-          },
-        ]);
-        expect(
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
           db
             .prepare(
               "SELECT fieldname FROM primitives WHERE object_id = ? " +
@@ -361,67 +349,6 @@ describe("graphql/mirror", () => {
         expect(
           db
             .prepare("SELECT COUNT(1) FROM links WHERE child_id IS NOT NULL")
-            .pluck()
-            .get()
-        ).toBe(0);
-      });
-      it("adds an object with nested primitives and links", () => {
-        const db = new Database(":memory:");
-        const schema = buildGithubSchema();
-        const mirror = new Mirror(db, schema);
-        const commitId = "commit:9cba0e9e212a287ce26e8d7c2d273e1025c9f9bf";
-        mirror.registerObject({
-          typename: "Commit",
-          id: commitId,
-        });
-
-        expect(
-          db
-            .prepare("SELECT * FROM objects WHERE typename = ? AND id = ?")
-            .all("Commit", commitId)
-        ).toHaveLength(1);
-        expect(
-          db
-            .prepare("SELECT fieldname FROM links WHERE parent_id = ? ")
-            .pluck()
-            .all(commitId)
-        ).toEqual(["author.user"]);
-        expect(
-          db
-            .prepare("SELECT * FROM primitives_Commit WHERE id = ?")
-            .all(commitId)
-        ).toEqual([
-          {
-            id: commitId,
-            oid: null,
-            author: null,
-            "author.date": null,
-          },
-        ]);
-        expect(
-          db
-            .prepare(
-              "SELECT fieldname FROM primitives WHERE object_id = ? " +
-                "ORDER BY fieldname ASC"
-            )
-            .pluck()
-            .all(commitId)
-        ).toEqual(["oid", "author", "author.date"].sort());
-
-        expect(
-          db
-            .prepare("SELECT COUNT(1) FROM links WHERE child_id IS NOT NULL")
-            .pluck()
-            .get()
-        ).toBe(0);
-        expect(
-          db
-            .prepare(
-              "SELECT COUNT(1) FROM primitives_Commit WHERE " +
-                "oid IS NOT NULL " +
-                "OR author IS NOT NULL " +
-                'OR "author.date" IS NOT NULL'
-            )
             .pluck()
             .get()
         ).toBe(0);
@@ -899,8 +826,6 @@ describe("graphql/mirror", () => {
         // (These poke at the internals of the storage format a bit.)
 
         // Check primitives (EAV format).
-<<<<<<< HEAD
-=======
         expect(
           db
             .prepare(
@@ -920,42 +845,6 @@ describe("graphql/mirror", () => {
           {id: "user:alice", fieldname: "login", value: null},
           {id: "user:alice", fieldname: "url", value: null},
           // nothing for `ClosedEvent` (it has no primitive fields)
-        ]);
-
-        // Check primitives (legacy format).
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
-        expect(
-          db
-            .prepare(
-              "SELECT object_id AS id, fieldname, value " +
-                "FROM objects JOIN primitives ON objects.id = object_id " +
-                "WHERE " +
-                "typename IN ('Repository', 'Issue', 'User', 'ClosedEvent') " +
-                "ORDER BY id, fieldname ASC"
-            )
-            .all()
-        ).toEqual([
-<<<<<<< HEAD
-          {id: "issue:#1", fieldname: "title", value: '"something wicked"'},
-          {id: "issue:#1", fieldname: "url", value: '"url://foo/bar/issue/1"'},
-          {id: "issue:#2", fieldname: "title", value: '"this way comes"'},
-          {id: "issue:#2", fieldname: "url", value: '"url://foo/bar/issue/2"'},
-          {id: "repo:foo/bar", fieldname: "url", value: '"url://foo/bar"'},
-          {id: "user:alice", fieldname: "login", value: null},
-          {id: "user:alice", fieldname: "url", value: null},
-          // nothing for `ClosedEvent` (it has no primitive fields)
-=======
-          {
-            id: "issue:#1",
-            title: JSON.stringify("something wicked"),
-            url: JSON.stringify("url://foo/bar/issue/1"),
-          },
-          {
-            id: "issue:#2",
-            title: JSON.stringify("this way comes"),
-            url: JSON.stringify("url://foo/bar/issue/2"),
-          },
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
         ]);
 
         // Check that some links are correct.
@@ -2147,23 +2036,6 @@ describe("graphql/mirror", () => {
             )
             .all()
         ).toEqual([
-<<<<<<< HEAD
-=======
-          {id: "issue:#1", title: "13.75", url: '"url://issue/1"'},
-          {id: "issue:#2", title: "false", url: "null"},
-          {id: "issue:#3", title: null, url: null},
-        ]);
-        expect(
-          db
-            .prepare(
-              "SELECT object_id AS id, fieldname, value " +
-                "FROM objects JOIN primitives ON objects.id = object_id " +
-                "WHERE typename = 'Issue' " +
-                "ORDER BY id, fieldname ASC"
-            )
-            .all()
-        ).toEqual([
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
           {id: "issue:#1", fieldname: "title", value: "13.75"},
           {id: "issue:#1", fieldname: "url", value: '"url://issue/1"'},
           {id: "issue:#2", fieldname: "title", value: "false"},
@@ -2197,38 +2069,6 @@ describe("graphql/mirror", () => {
               user: null,
             },
           },
-        ]);
-        expect(
-          db
-            .prepare(
-              "SELECT object_id AS id, fieldname, value " +
-                "FROM objects JOIN primitives ON objects.id = object_id " +
-                "WHERE typename = 'Commit' " +
-                "ORDER BY id, fieldname ASC"
-            )
-            .all()
-        ).toEqual([
-<<<<<<< HEAD
-          {id: "commit:oid", fieldname: "author", value: +true},
-          {id: "commit:oid", fieldname: "author.date", value: '"today"'},
-          {id: "commit:oid", fieldname: "oid", value: '"yes"'},
-          {id: "commit:zzz", fieldname: "author", value: +true},
-          {id: "commit:zzz", fieldname: "author.date", value: "null"},
-          {id: "commit:zzz", fieldname: "oid", value: '"zzz"'},
-=======
-          {
-            id: "commit:oid",
-            author: +true,
-            "author.date": '"today"',
-            oid: '"yes"',
-          },
-          {
-            id: "commit:zzz",
-            oid: '"zzz"',
-            author: +true,
-            "author.date": "null",
-          },
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
         ]);
         expect(
           db
@@ -2310,20 +2150,6 @@ describe("graphql/mirror", () => {
           {id: "commit:oid", fieldname: "oid", value: '"mmm"'},
         ]);
         expect(
-          db
-            .prepare(
-              "SELECT object_id AS id, fieldname, value " +
-                "FROM objects JOIN primitives ON objects.id = object_id " +
-                "WHERE typename = 'Commit' " +
-                "ORDER BY id, fieldname ASC"
-            )
-            .all()
-        ).toEqual([
-          {id: "commit:oid", fieldname: "author", value: +false},
-          {id: "commit:oid", fieldname: "author.date", value: "null"},
-          {id: "commit:oid", fieldname: "oid", value: '"mmm"'},
-        ]);
-        expect(
           db.prepare("SELECT * FROM links ORDER BY parent_id ASC").all()
         ).toEqual([
           {
@@ -2360,17 +2186,6 @@ describe("graphql/mirror", () => {
             actor: {__typename: "User", id: "user:alice"},
           },
         ]);
-        expect(
-          db
-            .prepare(
-              "SELECT objects.id AS o_id, primitives.rowid AS p_rowid " +
-                "FROM objects LEFT OUTER JOIN primitives " +
-                "ON objects.id = object_id " +
-                "WHERE typename = 'LockedEvent' " +
-                "ORDER BY o_id ASC"
-            )
-            .all()
-        ).toEqual([{o_id: "dos", p_rowid: null}, {o_id: "uno", p_rowid: null}]);
         expect(
           db
             .prepare(
@@ -3426,47 +3241,8 @@ describe("graphql/mirror", () => {
     }
 
     describe("extract", () => {
-<<<<<<< HEAD
       // TODO(@wchargin): Inline this function.
       testExtract((mirror, id) => mirror.extract(id));
-=======
-      // Test in EAV mode, hiding the tables corresponding to the legacy
-      // mode to catch any accidental reads. (We hide and unhide rather
-      // than deleting because some test cases call `extract` multiple
-      // times.)
-      function hiddenName(name) {
-        return `${name}_DO_NOT_READ`;
-      }
-      function hideTable(db, name) {
-        db.prepare(`ALTER TABLE ${name} RENAME TO ${hiddenName(name)}`).run();
-      }
-      function unhideTable(db, name) {
-        db.prepare(`ALTER TABLE ${hiddenName(name)} RENAME TO ${name}`).run();
-      }
-
-      testExtract((mirror, id) => {
-        const legacyTables = mirror._db
-          .prepare(
-            "SELECT name FROM sqlite_master " +
-              "WHERE type = 'table' AND name LIKE 'primitives_%'"
-          )
-          .pluck()
-          .all();
-        if (legacyTables.length === 0) {
-          throw new Error("Found no type-specific primitives tables?");
-        }
-        for (const table of legacyTables) {
-          hideTable(mirror._db, table);
-        }
-        try {
-          return mirror.extract(id);
-        } finally {
-          for (const table of legacyTables) {
-            unhideTable(mirror._db, table);
-          }
-        }
-      });
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
     });
 
     describe("end-to-end typename guessing", () => {

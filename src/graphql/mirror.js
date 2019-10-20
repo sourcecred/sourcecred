@@ -142,14 +142,6 @@ export class Mirror {
    *     values when we read them back out. There are other ways to do
    *     this more efficiently in both space and time (see discussion on
    *     #883 for some options).
-<<<<<<< HEAD
-=======
-   *
-   *     NOTE: A previous version of the schema used a separate
-   *     primitives table for each GraphQL object type. These
-   *     `primitives_*` tables are still written, but are no longer
-   *     read. They will be removed entirely in a future change.
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
    *
    * We refer to node and primitive data together as "own data", because
    * this is the data that can be queried uniformly for all elements of
@@ -198,11 +190,7 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
-<<<<<<< HEAD
       version: "MIRROR_v7",
-=======
-      version: "MIRROR_v6",
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,
@@ -428,17 +416,6 @@ export class Mirror {
         `
       )
       .run({id, typename});
-<<<<<<< HEAD
-=======
-    this._db
-      .prepare(
-        dedent`\
-          INSERT INTO ${_primitivesTableName(typename)} (id)
-          VALUES (?)
-        `
-      )
-      .run(id);
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
     const addPrimitive = this._db.prepare(
       dedent`
         INSERT INTO primitives (object_id, fieldname, value)
@@ -1316,44 +1293,8 @@ export class Mirror {
           ].join("_"): string): any);
         },
       };
-<<<<<<< HEAD
       const updateEavPrimitive: ({|
         +id: Schema.ObjectId,
-=======
-      const updateTypeSpecificPrimitives: ({|
-        +id: Schema.ObjectId,
-        // These keys can be top-level primitive fields or the primitive
-        // children of a nested field. The values are the JSON encodings
-        // of the values received from the GraphQL response. For a
-        // nested field, the value is `0` or `1` as the nested field is
-        // `null` or not. (See docs on `_initialize` for more details.)
-        +[parameterName: ParameterName]: string | 0 | 1,
-      |}) => void = (() => {
-        const updates: $ReadOnlyArray<string> = [].concat(
-          objectType.primitiveFieldNames.map(
-            (f) => `"${f}" = :${parameterNameFor.topLevelField(f)}`
-          ),
-          objectType.nestedFieldNames.map(
-            (f) => `"${f}" = :${parameterNameFor.topLevelField(f)}`
-          ),
-          ...objectType.nestedFieldNames.map((f1) =>
-            Object.keys(objectType.nestedFields[f1].primitives).map(
-              (f2) => `"${f1}.${f2}" = :${parameterNameFor.nestedField(f1, f2)}`
-            )
-          )
-        );
-        if (updates.length === 0) {
-          return () => {};
-        }
-        const tableName = _primitivesTableName(typename);
-        const stmt = db.prepare(
-          `UPDATE ${tableName} SET ${updates.join(", ")} WHERE id = :id`
-        );
-        return _makeSingleUpdateFunction(stmt);
-      })();
-      const updateEavPrimitive: ({|
-        +id: Schema.ObjectId,
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
         +fieldname: string,
         +value: string | 0 | 1,
       |}) => void = _makeSingleUpdateFunction(
@@ -1436,11 +1377,6 @@ export class Mirror {
             });
           }
         }
-<<<<<<< HEAD
-=======
-
-        updateTypeSpecificPrimitives(primitives);
->>>>>>> 003efdffa7cc6d75998b18f805620ae8cd3f8602
       }
     }
 
