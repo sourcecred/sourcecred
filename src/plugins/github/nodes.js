@@ -2,6 +2,7 @@
 
 import deepFreeze from "deep-freeze";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
+import {botSet} from "./bots";
 
 export opaque type RawAddress: NodeAddressT = NodeAddressT;
 
@@ -35,6 +36,26 @@ export const Prefix = deepFreeze({
   issueComment: _githubAddress(COMMENT_TYPE, ISSUE_TYPE),
   pullComment: _githubAddress(COMMENT_TYPE, PULL_TYPE),
 });
+
+/**
+ * Return the address corresponding to a GitHub login.
+ *
+ * If the login is considered a bot, then a bot address is returned. Otherwise,
+ * a regular user address is returned. The method does not attempt to find out
+ * whether the address should actually be an organization address, as we don't
+ * yet handle organization addresses.
+ *
+ * Note: The signature will need to be refactored when we make the list of bots
+ * a configuration option rather than a hardcoded constant.
+ */
+export function loginAddress(username: string): RawAddress {
+  const bots = botSet();
+  if (bots.has(username)) {
+    return NodeAddress.append(Prefix.bot, username);
+  } else {
+    return NodeAddress.append(Prefix.user, username);
+  }
+}
 
 export type RepoAddress = {|
   +type: typeof REPO_TYPE,

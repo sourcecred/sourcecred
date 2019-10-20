@@ -6,21 +6,21 @@ import path from "path";
 import {TaskReporter} from "../util/taskReporter";
 import {Graph} from "../core/graph";
 import {loadGraph} from "../plugins/github/loadGraph";
-import {
-  type TimelineCredParameters,
-  TimelineCred,
-} from "../analysis/timeline/timelineCred";
-
-import {DEFAULT_CRED_CONFIG} from "../plugins/defaultCredConfig";
+import {TimelineCred} from "../analysis/timeline/timelineCred";
+import {defaultParams, partialParams} from "../analysis/timeline/params";
+import {type TimelineCredParameters} from "../analysis/timeline/params";
 
 import {type Project} from "../core/project";
 import {setupProjectDirectory} from "../core/project_io";
 import {loadDiscourse} from "../plugins/discourse/loadDiscourse";
+import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import * as NullUtil from "../util/null";
+import {nodeContractions} from "../plugins/identity/nodeContractions";
 
 export type LoadOptions = {|
   +project: Project,
-  +params: TimelineCredParameters,
+  +params: ?$Shape<TimelineCredParameters>,
+  +plugins: $ReadOnlyArray<PluginDeclaration>,
   +sourcecredDirectory: string,
   +githubToken: string | null,
   +discourseKey: string | null,
@@ -44,7 +44,8 @@ export async function load(
   options: LoadOptions,
   taskReporter: TaskReporter
 ): Promise<void> {
-  const {project, params, sourcecredDirectory, githubToken} = options;
+  const {project, params, plugins, sourcecredDirectory, githubToken} = options;
+  const fullParams = params == null ? defaultParams() : partialParams(params);
   const loadTask = `load-${options.project.id}`;
   taskReporter.start(loadTask);
   const cacheDirectory = path.join(sourcecredDirectory, "cache");
@@ -91,7 +92,16 @@ export async function load(
   ]);
 
   const pluginGraphs = await Promise.all(pluginGraphPromises);
-  const graph = Graph.merge(pluginGraphs);
+  let graph = Graph.merge(pluginGraphs);
+  const {identities, discourseServer} = project;
+  if (identities.length) {
+    const serverUrl =
+      discourseServer == null ? null : discourseServer.serverUrl;
+    const contractions = nodeContractions(identities, serverUrl);
+    // Only apply contractions if identities have been specified, since it involves
+    // a full Graph copy
+    graph = graph.contractNodes(contractions);
+  }
 
   const projectDirectory = await setupProjectDirectory(
     project,
@@ -101,7 +111,7 @@ export async function load(
   await fs.writeFile(graphFile, JSON.stringify(graph.toJSON()));
 
   taskReporter.start("compute-cred");
-  const cred = await TimelineCred.compute(graph, params, DEFAULT_CRED_CONFIG);
+  const cred = await TimelineCred.compute({graph, params: fullParams, plugins});
   const credJSON = cred.toJSON();
   const credFile = path.join(projectDirectory, "cred.json");
   await fs.writeFile(credFile, JSON.stringify(credJSON));

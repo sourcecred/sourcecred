@@ -3,6 +3,7 @@
 exports[`plugins/discourse/fetch snapshot testing loads a particular post from snapshot 1`] = `
 Object {
   "authorUsername": "d11",
+  "cooked": "<p>This is a test post.</p>",
   "id": 14,
   "indexWithinTopic": 1,
   "replyToPostIndex": null,
@@ -16,6 +17,7 @@ Object {
   "posts": Array [
     Object {
       "authorUsername": "d11",
+      "cooked": "<p>This is a test post.</p>",
       "id": 14,
       "indexWithinTopic": 1,
       "replyToPostIndex": null,
@@ -24,6 +26,7 @@ Object {
     },
     Object {
       "authorUsername": "dl-proto",
+      "cooked": "<p>Ah, an excellent post. I will like it and reply.</p>",
       "id": 16,
       "indexWithinTopic": 2,
       "replyToPostIndex": null,
@@ -32,6 +35,7 @@ Object {
     },
     Object {
       "authorUsername": "d11",
+      "cooked": "<p>Adding another post, after having deleted a whole thread.</p>",
       "id": 22,
       "indexWithinTopic": 3,
       "replyToPostIndex": null,
@@ -52,6 +56,7 @@ exports[`plugins/discourse/fetch snapshot testing loads latest posts from snapsh
 Array [
   Object {
     "authorUsername": "d11",
+    "cooked": "<p>Adding another post, after having deleted a whole thread.</p>",
     "id": 22,
     "indexWithinTopic": 3,
     "replyToPostIndex": null,
@@ -60,6 +65,15 @@ Array [
   },
   Object {
     "authorUsername": "d11",
+    "cooked": "<aside class=\\"quote no-group\\" data-post=\\"1\\" data-topic=\\"13\\">
+<div class=\\"title\\">
+<div class=\\"quote-controls\\"></div>
+<img alt width=\\"20\\" height=\\"20\\" src=\\"https://avatars.discourse.org/v4/letter/d/8797f3/40.png\\" class=\\"avatar\\"> dl-proto:</div>
+<blockquote>
+<p>Here is a link to another discourse thread:</p>
+</blockquote>
+</aside>
+<p>Excellent link. I’ve quoted you.</p>",
     "id": 18,
     "indexWithinTopic": 2,
     "replyToPostIndex": null,
@@ -68,6 +82,8 @@ Array [
   },
   Object {
     "authorUsername": "dl-proto",
+    "cooked": "<p>Here is a link to another discourse thread: <a href=\\"https://sourcecred-test.discourse.group/t/my-first-test-post/11/3\\" class=\\"inline-onebox\\">My First Test Post</a></p>
+<p>Here is a link to a GitHub issue: <a href=\\"https://github.com/sourcecred-test/example-github/issues/1\\" rel=\\"nofollow noopener\\">https://github.com/sourcecred-test/example-github/issues/1</a></p>",
     "id": 17,
     "indexWithinTopic": 1,
     "replyToPostIndex": null,
@@ -76,6 +92,7 @@ Array [
   },
   Object {
     "authorUsername": "dl-proto",
+    "cooked": "<p>Ah, an excellent post. I will like it and reply.</p>",
     "id": 16,
     "indexWithinTopic": 2,
     "replyToPostIndex": null,
@@ -84,6 +101,7 @@ Array [
   },
   Object {
     "authorUsername": "d11",
+    "cooked": "<p>This is a test post.</p>",
     "id": 14,
     "indexWithinTopic": 1,
     "replyToPostIndex": null,
@@ -92,6 +110,17 @@ Array [
   },
   Object {
     "authorUsername": "system",
+    "cooked": "<p>This is a test instance.<br>
+The first paragraph of this pinned topic will be visible as a welcome message to all new visitors on your homepage. It’s important!</p>
+<p><strong>Edit this</strong> into a brief description of your community:</p>
+<ul>
+<li>Who is it for?</li>
+<li>What can they find here?</li>
+<li>Why should they come here?</li>
+<li>Where can they read more (links, resources, etc)?</li>
+</ul>
+<p><img src=\\"https://sjc3.discourse-cdn.com/free1/images/welcome/discourse-edit-post-animated.gif\\" width=\\"508\\" height=\\"106\\"></p>
+<p>You may want to close this topic via the admin <img src=\\"https://sjc3.discourse-cdn.com/free1/images/emoji/twitter/wrench.png?v=9\\" title=\\":wrench:\\" class=\\"emoji\\" alt=\\":wrench:\\"> (at the upper right and bottom), so that replies don’t pile up on an announcement.</p>",
     "id": 10,
     "indexWithinTopic": 1,
     "replyToPostIndex": null,
@@ -100,6 +129,7 @@ Array [
   },
   Object {
     "authorUsername": "system",
+    "cooked": "<p>Discussion about this site, its organization, how it works, and how we can improve it.</p>",
     "id": 1,
     "indexWithinTopic": 1,
     "replyToPostIndex": null,
