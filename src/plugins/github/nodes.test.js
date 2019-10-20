@@ -2,7 +2,7 @@
 
 import {NodeAddress} from "../../core/graph";
 import * as GN from "./nodes";
-import {fromRaw, toRaw} from "./nodes";
+import {fromRaw, toRaw, type UserlikeAddress, loginAddress} from "./nodes";
 
 describe("plugins/github/nodes", () => {
   const repo = (): GN.RepoAddress => ({
@@ -241,6 +241,31 @@ describe("plugins/github/nodes", () => {
           toRaw({type: "COMMENT", parent: {type: "ICE_CREAM"}});
         }).toThrow("Bad comment parent type");
       });
+    });
+  });
+
+  describe("loginAddress", () => {
+    it("works for a regular user", () => {
+      const username = "foo";
+      const structured: UserlikeAddress = {
+        type: "USERLIKE",
+        subtype: "USER",
+        login: username,
+      };
+      const actual = loginAddress(username);
+      const expected = toRaw(structured);
+      expect(actual).toEqual(expected);
+    });
+    it("works for a bot", () => {
+      const username = "credbot";
+      const structured: UserlikeAddress = {
+        type: "USERLIKE",
+        subtype: "BOT",
+        login: username,
+      };
+      const actual = loginAddress(username);
+      const expected = toRaw(structured);
+      expect(actual).toEqual(expected);
     });
   });
 });

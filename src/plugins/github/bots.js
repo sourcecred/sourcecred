@@ -5,9 +5,11 @@
 export function botSet(): Set<string> {
   return new Set([
     "codecov",
+    "codecov-io",
     "credbot",
     "facebook-github-bot",
     "gitcoinbot",
+    "gitter-badger",
     "googlebot",
     "greenkeeper",
     "greenkeeperio-bot",

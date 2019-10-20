@@ -18,11 +18,18 @@ describe("core/project", () => {
     id: "foo/bar",
     repoIds: [foobar],
     discourseServer: null,
+    identities: [],
   });
   const p2: Project = deepFreeze({
     id: "@foo",
     repoIds: [foobar, foozod],
     discourseServer: {serverUrl: "https://example.com", apiUsername: "credbot"},
+    identities: [
+      {
+        username: "example",
+        aliases: ["github/example"],
+      },
+    ],
   });
   describe("to/fro JSON", () => {
     it("round trip is identity", () => {
