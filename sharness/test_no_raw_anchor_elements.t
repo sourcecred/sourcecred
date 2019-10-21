@@ -25,6 +25,7 @@ test_expect_success "application components must use <Link> instead of <a>" '
         ":(exclude,top)*/snapshots/*" \
         ":(exclude,top)src/plugins/discourse/references.test.js" \
         ":(exclude,top)src/plugins/discourse/createGraph.test.js" \
+        ":(exclude,top)src/plugins/initiatives/htmlTemplate.test.js" \
         ":(exclude,top)src/webutil/Link.js" \
         ;
 '
