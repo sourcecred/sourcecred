@@ -1,6 +1,472 @@
 {
   "latest_posts": [
     {
+      "id": 29,
+      "name": "D",
+      "username": "d11",
+      "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+      "created_at": "2019-10-23T18:26:31.281Z",
+      "cooked": "<p>Here is a mention: <a class=\"mention\" href=\"/u/dl-proto\">@dl-proto</a><br>\nHere is a topic reference:  <a href=\"https://sourcecred-test.discourse.group/t/123-a-post-with-numbers-in-slug/20/\" class=\"inline-onebox\">123 a post with numbers in slug</a><br>\nHere is a post reference with a slug: <a href=\"https://sourcecred-test.discourse.group/t/my-first-test-post/11/4\" class=\"inline-onebox\">My First Test Post</a></p>",
+      "post_number": 1,
+      "post_type": 1,
+      "updated_at": "2019-10-23T18:26:31.281Z",
+      "reply_count": 0,
+      "reply_to_post_number": null,
+      "quote_count": 0,
+      "incoming_link_count": 0,
+      "reads": 1,
+      "readers_count": 0,
+      "score": 0,
+      "yours": false,
+      "topic_id": 21,
+      "topic_slug": "a-post-with-references",
+      "topic_title": "A Post With References",
+      "topic_html_title": "A Post With References",
+      "category_id": 1,
+      "display_username": "D",
+      "primary_group_name": null,
+      "primary_group_flair_url": null,
+      "primary_group_flair_bg_color": null,
+      "primary_group_flair_color": null,
+      "version": 1,
+      "can_edit": false,
+      "can_delete": false,
+      "can_recover": false,
+      "can_wiki": false,
+      "user_title": null,
+      "raw": "Here is a mention: @dl-proto\nHere is a topic reference:  https://sourcecred-test.discourse.group/t/123-a-post-with-numbers-in-slug/20/\nHere is a post reference with a slug: https://sourcecred-test.discourse.group/t/my-first-test-post/11/4",
+      "actions_summary": [
+        {
+          "id": 2,
+          "can_act": true
+        },
+        {
+          "id": 3,
+          "can_act": true
+        },
+        {
+          "id": 4,
+          "can_act": true
+        },
+        {
+          "id": 8,
+          "can_act": true
+        },
+        {
+          "id": 6,
+          "can_act": true
+        },
+        {
+          "id": 7,
+          "can_act": true
+        }
+      ],
+      "moderator": false,
+      "admin": true,
+      "staff": true,
+      "user_id": 2,
+      "hidden": false,
+      "trust_level": 4,
+      "deleted_at": null,
+      "user_deleted": false,
+      "edit_reason": null,
+      "can_view_edit_history": true,
+      "wiki": false,
+      "user_created_at": "2019-04-02T20:22:14.312Z",
+      "user_date_of_birth": null,
+      "can_accept_answer": false,
+      "can_unaccept_answer": false,
+      "accepted_answer": false
+    },
+    {
+      "id": 28,
+      "name": "D",
+      "username": "d11",
+      "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+      "created_at": "2019-10-07T03:49:19.922Z",
+      "cooked": "<p>Oh the post won’t be empty I assure you.</p>",
+      "post_number": 1,
+      "post_type": 1,
+      "updated_at": "2019-10-07T03:49:19.922Z",
+      "reply_count": 0,
+      "reply_to_post_number": null,
+      "quote_count": 0,
+      "incoming_link_count": 0,
+      "reads": 1,
+      "readers_count": 0,
+      "score": 0.2,
+      "yours": false,
+      "topic_id": 20,
+      "topic_slug": "123-a-post-with-numbers-in-slug",
+      "topic_title": "123 a post with numbers in slug",
+      "topic_html_title": "123 a post with numbers in slug",
+      "category_id": 1,
+      "display_username": "D",
+      "primary_group_name": null,
+      "primary_group_flair_url": null,
+      "primary_group_flair_bg_color": null,
+      "primary_group_flair_color": null,
+      "version": 1,
+      "can_edit": false,
+      "can_delete": false,
+      "can_recover": false,
+      "can_wiki": false,
+      "user_title": null,
+      "raw": "Oh the post won't be empty I assure you.",
+      "actions_summary": [
+        {
+          "id": 2,
+          "can_act": true
+        },
+        {
+          "id": 3,
+          "can_act": true
+        },
+        {
+          "id": 4,
+          "can_act": true
+        },
+        {
+          "id": 8,
+          "can_act": true
+        },
+        {
+          "id": 6,
+          "can_act": true
+        },
+        {
+          "id": 7,
+          "can_act": true
+        }
+      ],
+      "moderator": false,
+      "admin": true,
+      "staff": true,
+      "user_id": 2,
+      "hidden": false,
+      "trust_level": 4,
+      "deleted_at": null,
+      "user_deleted": false,
+      "edit_reason": null,
+      "can_view_edit_history": true,
+      "wiki": false,
+      "user_created_at": "2019-04-02T20:22:14.312Z",
+      "user_date_of_birth": null,
+      "can_accept_answer": false,
+      "can_unaccept_answer": false,
+      "accepted_answer": false
+    },
+    {
+      "id": 27,
+      "name": "D",
+      "username": "d11",
+      "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+      "created_at": "2019-10-02T20:57:16.311Z",
+      "cooked": "<p>I’m replying to a wiki.</p>",
+      "post_number": 2,
+      "post_type": 1,
+      "updated_at": "2019-10-02T20:57:16.311Z",
+      "reply_count": 0,
+      "reply_to_post_number": null,
+      "quote_count": 0,
+      "incoming_link_count": 0,
+      "reads": 1,
+      "readers_count": 0,
+      "score": 0.2,
+      "yours": false,
+      "topic_id": 19,
+      "topic_slug": "this-post-will-be-a-wiki",
+      "topic_title": "This post will be a wiki",
+      "topic_html_title": "This post will be a wiki",
+      "category_id": 1,
+      "display_username": "D",
+      "primary_group_name": null,
+      "primary_group_flair_url": null,
+      "primary_group_flair_bg_color": null,
+      "primary_group_flair_color": null,
+      "version": 1,
+      "can_edit": false,
+      "can_delete": false,
+      "can_recover": false,
+      "can_wiki": false,
+      "user_title": null,
+      "raw": "I'm replying to a wiki.",
+      "actions_summary": [
+        {
+          "id": 2,
+          "can_act": true
+        },
+        {
+          "id": 3,
+          "can_act": true
+        },
+        {
+          "id": 4,
+          "can_act": true
+        },
+        {
+          "id": 8,
+          "can_act": true
+        },
+        {
+          "id": 6,
+          "can_act": true
+        },
+        {
+          "id": 7,
+          "can_act": true
+        }
+      ],
+      "moderator": false,
+      "admin": true,
+      "staff": true,
+      "user_id": 2,
+      "hidden": false,
+      "trust_level": 4,
+      "deleted_at": null,
+      "user_deleted": false,
+      "edit_reason": null,
+      "can_view_edit_history": true,
+      "wiki": false,
+      "user_created_at": "2019-04-02T20:22:14.312Z",
+      "user_date_of_birth": null,
+      "can_accept_answer": false,
+      "can_unaccept_answer": false,
+      "accepted_answer": false
+    },
+    {
+      "id": 26,
+      "name": "D",
+      "username": "d11",
+      "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+      "created_at": "2019-10-02T20:51:31.743Z",
+      "cooked": "<p>So I’m starting the wiki content.</p>\n<p>No remove that line.</p>\n<p>Ah now I’ve added another line.</p>",
+      "post_number": 1,
+      "post_type": 1,
+      "updated_at": "2019-10-02T20:53:28.182Z",
+      "reply_count": 0,
+      "reply_to_post_number": null,
+      "quote_count": 0,
+      "incoming_link_count": 0,
+      "reads": 2,
+      "readers_count": 1,
+      "score": 0.4,
+      "yours": false,
+      "topic_id": 19,
+      "topic_slug": "this-post-will-be-a-wiki",
+      "topic_title": "This post will be a wiki",
+      "topic_html_title": "This post will be a wiki",
+      "category_id": 1,
+      "display_username": "D",
+      "primary_group_name": null,
+      "primary_group_flair_url": null,
+      "primary_group_flair_bg_color": null,
+      "primary_group_flair_color": null,
+      "version": 3,
+      "can_edit": true,
+      "can_delete": false,
+      "can_recover": false,
+      "can_wiki": false,
+      "user_title": null,
+      "raw": "So I'm starting the wiki content.\n\nNo remove that line.\n\nAh now I've added another line.",
+      "actions_summary": [
+        {
+          "id": 2,
+          "can_act": true
+        },
+        {
+          "id": 3,
+          "can_act": true
+        },
+        {
+          "id": 4,
+          "can_act": true
+        },
+        {
+          "id": 8,
+          "can_act": true
+        },
+        {
+          "id": 6,
+          "can_act": true
+        },
+        {
+          "id": 7,
+          "can_act": true
+        }
+      ],
+      "moderator": false,
+      "admin": true,
+      "staff": true,
+      "user_id": 2,
+      "hidden": false,
+      "trust_level": 4,
+      "deleted_at": null,
+      "user_deleted": false,
+      "edit_reason": null,
+      "can_view_edit_history": true,
+      "wiki": true,
+      "last_wiki_edit": "2019-10-02T20:53:28.194Z",
+      "user_created_at": "2019-04-02T20:22:14.312Z",
+      "user_date_of_birth": null,
+      "can_accept_answer": false,
+      "can_unaccept_answer": false,
+      "accepted_answer": false
+    },
+    {
+      "id": 25,
+      "name": "D",
+      "username": "d11",
+      "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+      "created_at": "2019-10-02T20:50:10.625Z",
+      "cooked": "<p>Testing a poll. Let’s see how it works.</p>\n<div class=\"poll\" data-poll-status=\"open\" data-poll-max=\"5\" data-poll-min=\"1\" data-poll-public=\"true\" data-poll-results=\"always\" data-poll-type=\"multiple\" data-poll-name=\"poll\">\n<div>\n<div class=\"poll-container\">\n<ul>\n<li data-poll-option-id=\"159d8e412be4679f2d98fb5f0d0cce91\">One</li>\n<li data-poll-option-id=\"2cbb44549228f1cf22e44fba86b6db21\">Two</li>\n<li data-poll-option-id=\"7016bd7a00c7caff922822b2910a564a\">Three</li>\n<li data-poll-option-id=\"d2bb44ccb6b19c98cc57f5b8bb87effe\">Four</li>\n<li data-poll-option-id=\"c677eae47d33ca9b527e7ea7bb29612c\">Five</li>\n</ul>\n</div>\n<div class=\"poll-info\">\n<p>\n<span class=\"info-number\">0</span>\n<span class=\"info-label\">voters</span>\n</p>\n</div>\n</div>\n</div>",
+      "post_number": 1,
+      "post_type": 1,
+      "updated_at": "2019-10-02T20:50:10.625Z",
+      "reply_count": 0,
+      "reply_to_post_number": null,
+      "quote_count": 0,
+      "incoming_link_count": 0,
+      "reads": 2,
+      "readers_count": 1,
+      "score": 0.4,
+      "yours": false,
+      "topic_id": 18,
+      "topic_slug": "test-poll-please-ignore",
+      "topic_title": "Test Poll Please Ignore",
+      "topic_html_title": "Test Poll Please Ignore",
+      "category_id": 1,
+      "display_username": "D",
+      "primary_group_name": null,
+      "primary_group_flair_url": null,
+      "primary_group_flair_bg_color": null,
+      "primary_group_flair_color": null,
+      "version": 1,
+      "can_edit": false,
+      "can_delete": false,
+      "can_recover": false,
+      "can_wiki": false,
+      "user_title": null,
+      "raw": "Testing a poll. Let's see how it works.\n[poll type=multiple results=always min=1 max=5 public=true]\n* One\n* Two\n* Three\n* Four\n* Five\n[/poll]",
+      "actions_summary": [
+        {
+          "id": 2,
+          "can_act": true
+        },
+        {
+          "id": 3,
+          "can_act": true
+        },
+        {
+          "id": 4,
+          "can_act": true
+        },
+        {
+          "id": 8,
+          "can_act": true
+        },
+        {
+          "id": 6,
+          "can_act": true
+        },
+        {
+          "id": 7,
+          "can_act": true
+        }
+      ],
+      "moderator": false,
+      "admin": true,
+      "staff": true,
+      "user_id": 2,
+      "hidden": false,
+      "trust_level": 4,
+      "deleted_at": null,
+      "user_deleted": false,
+      "edit_reason": null,
+      "can_view_edit_history": true,
+      "wiki": false,
+      "user_created_at": "2019-04-02T20:22:14.312Z",
+      "user_date_of_birth": null,
+      "can_accept_answer": false,
+      "can_unaccept_answer": false,
+      "accepted_answer": false,
+      "polls": [
+        {
+          "name": "poll",
+          "type": "multiple",
+          "status": "open",
+          "public": true,
+          "results": "always",
+          "min": 1,
+          "max": 5,
+          "options": [
+            {
+              "id": "159d8e412be4679f2d98fb5f0d0cce91",
+              "html": "One",
+              "votes": 0
+            },
+            {
+              "id": "2cbb44549228f1cf22e44fba86b6db21",
+              "html": "Two",
+              "votes": 1
+            },
+            {
+              "id": "7016bd7a00c7caff922822b2910a564a",
+              "html": "Three",
+              "votes": 2
+            },
+            {
+              "id": "d2bb44ccb6b19c98cc57f5b8bb87effe",
+              "html": "Four",
+              "votes": 1
+            },
+            {
+              "id": "c677eae47d33ca9b527e7ea7bb29612c",
+              "html": "Five",
+              "votes": 0
+            }
+          ],
+          "voters": 2,
+          "preloaded_voters": {
+            "2cbb44549228f1cf22e44fba86b6db21": [
+              {
+                "id": 2,
+                "username": "d11",
+                "name": "D",
+                "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+                "title": null
+              }
+            ],
+            "7016bd7a00c7caff922822b2910a564a": [
+              {
+                "id": 2,
+                "username": "d11",
+                "name": "D",
+                "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+                "title": null
+              },
+              {
+                "id": 3,
+                "username": "dl-proto",
+                "name": "dandelion protocol acct",
+                "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png",
+                "title": null
+              }
+            ],
+            "d2bb44ccb6b19c98cc57f5b8bb87effe": [
+              {
+                "id": 3,
+                "username": "dl-proto",
+                "name": "dandelion protocol acct",
+                "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png",
+                "title": null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
       "id": 22,
       "name": "D",
       "username": "d11",
@@ -14,8 +480,9 @@
       "reply_to_post_number": null,
       "quote_count": 0,
       "incoming_link_count": 0,
-      "reads": 1,
-      "score": 0.2,
+      "reads": 2,
+      "readers_count": 1,
+      "score": 0.4,
       "yours": false,
       "topic_id": 11,
       "topic_slug": "my-first-test-post",
@@ -92,6 +559,7 @@
       "quote_count": 1,
       "incoming_link_count": 0,
       "reads": 1,
+      "readers_count": 0,
       "score": 0.2,
       "yours": false,
       "topic_id": 13,
@@ -169,6 +637,7 @@
       "quote_count": 0,
       "incoming_link_count": 0,
       "reads": 2,
+      "readers_count": 1,
       "score": 0.4,
       "yours": false,
       "topic_id": 13,
@@ -246,6 +715,7 @@
       "quote_count": 0,
       "incoming_link_count": 0,
       "reads": 2,
+      "readers_count": 1,
       "score": 0.4,
       "yours": false,
       "topic_id": 11,
@@ -323,6 +793,7 @@
       "quote_count": 0,
       "incoming_link_count": 0,
       "reads": 2,
+      "readers_count": 1,
       "score": 15.4,
       "yours": false,
       "topic_id": 11,
@@ -400,7 +871,8 @@
       "reply_to_post_number": null,
       "quote_count": 0,
       "incoming_link_count": 0,
-      "reads": 1,
+      "reads": 2,
+      "readers_count": 1,
       "score": 0.2,
       "yours": false,
       "topic_id": 7,
@@ -474,6 +946,7 @@
       "quote_count": 0,
       "incoming_link_count": 0,
       "reads": 1,
+      "readers_count": 0,
       "score": 0.2,
       "yours": false,
       "topic_id": 1,

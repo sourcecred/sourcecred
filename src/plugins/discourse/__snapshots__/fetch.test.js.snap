@@ -56,6 +56,74 @@ exports[`plugins/discourse/fetch snapshot testing loads latest posts from snapsh
 Array [
   Object {
     "authorUsername": "d11",
+    "cooked": "<p>Here is a mention: <a class=\\"mention\\" href=\\"/u/dl-proto\\">@dl-proto</a><br>
+Here is a topic reference:  <a href=\\"https://sourcecred-test.discourse.group/t/123-a-post-with-numbers-in-slug/20/\\" class=\\"inline-onebox\\">123 a post with numbers in slug</a><br>
+Here is a post reference with a slug: <a href=\\"https://sourcecred-test.discourse.group/t/my-first-test-post/11/4\\" class=\\"inline-onebox\\">My First Test Post</a></p>",
+    "id": 29,
+    "indexWithinTopic": 1,
+    "replyToPostIndex": null,
+    "timestampMs": 1571855191281,
+    "topicId": 21,
+  },
+  Object {
+    "authorUsername": "d11",
+    "cooked": "<p>Oh the post won’t be empty I assure you.</p>",
+    "id": 28,
+    "indexWithinTopic": 1,
+    "replyToPostIndex": null,
+    "timestampMs": 1570420159922,
+    "topicId": 20,
+  },
+  Object {
+    "authorUsername": "d11",
+    "cooked": "<p>I’m replying to a wiki.</p>",
+    "id": 27,
+    "indexWithinTopic": 2,
+    "replyToPostIndex": null,
+    "timestampMs": 1570049836311,
+    "topicId": 19,
+  },
+  Object {
+    "authorUsername": "d11",
+    "cooked": "<p>So I’m starting the wiki content.</p>
+<p>No remove that line.</p>
+<p>Ah now I’ve added another line.</p>",
+    "id": 26,
+    "indexWithinTopic": 1,
+    "replyToPostIndex": null,
+    "timestampMs": 1570049491743,
+    "topicId": 19,
+  },
+  Object {
+    "authorUsername": "d11",
+    "cooked": "<p>Testing a poll. Let’s see how it works.</p>
+<div class=\\"poll\\" data-poll-status=\\"open\\" data-poll-max=\\"5\\" data-poll-min=\\"1\\" data-poll-public=\\"true\\" data-poll-results=\\"always\\" data-poll-type=\\"multiple\\" data-poll-name=\\"poll\\">
+<div>
+<div class=\\"poll-container\\">
+<ul>
+<li data-poll-option-id=\\"159d8e412be4679f2d98fb5f0d0cce91\\">One</li>
+<li data-poll-option-id=\\"2cbb44549228f1cf22e44fba86b6db21\\">Two</li>
+<li data-poll-option-id=\\"7016bd7a00c7caff922822b2910a564a\\">Three</li>
+<li data-poll-option-id=\\"d2bb44ccb6b19c98cc57f5b8bb87effe\\">Four</li>
+<li data-poll-option-id=\\"c677eae47d33ca9b527e7ea7bb29612c\\">Five</li>
+</ul>
+</div>
+<div class=\\"poll-info\\">
+<p>
+<span class=\\"info-number\\">0</span>
+<span class=\\"info-label\\">voters</span>
+</p>
+</div>
+</div>
+</div>",
+    "id": 25,
+    "indexWithinTopic": 1,
+    "replyToPostIndex": null,
+    "timestampMs": 1570049410625,
+    "topicId": 18,
+  },
+  Object {
+    "authorUsername": "d11",
     "cooked": "<p>Adding another post, after having deleted a whole thread.</p>",
     "id": 22,
     "indexWithinTopic": 3,
