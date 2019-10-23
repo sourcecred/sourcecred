@@ -8,7 +8,6 @@ import CheckedLocalStore from "../../webutil/checkedLocalStore";
 import BrowserLocalStore from "../../webutil/browserLocalStore";
 import Link from "../../webutil/Link";
 import {type NodeAddressT} from "../../core/graph";
-import {declaration as githubDeclaration} from "../../plugins/github/declaration";
 
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "../weights/WeightConfig";
@@ -84,25 +83,6 @@ export function createApp(
 
     render() {
       const {appState} = this.state;
-      const weightConfig = (
-        <WeightConfig
-          declarations={[githubDeclaration]}
-          nodeTypeWeights={this.state.weights.nodeTypeWeights}
-          edgeTypeWeights={this.state.weights.edgeTypeWeights}
-          onNodeWeightChange={(prefix, weight) => {
-            this.setState(({weights}) => {
-              weights.nodeTypeWeights.set(prefix, weight);
-              return {weights};
-            });
-          }}
-          onEdgeWeightChange={(prefix, weight) => {
-            this.setState(({weights}) => {
-              weights.edgeTypeWeights.set(prefix, weight);
-              return {weights};
-            });
-          }}
-        />
-      );
       const weightFileManager = (
         <WeightsFileManager
           weights={this.state.weights}
@@ -113,6 +93,26 @@ export function createApp(
       );
       let pagerankTable;
       if (appState.type === "PAGERANK_EVALUATED") {
+        const declarations = appState.timelineCred.plugins();
+        const weightConfig = (
+          <WeightConfig
+            declarations={declarations}
+            nodeTypeWeights={this.state.weights.nodeTypeWeights}
+            edgeTypeWeights={this.state.weights.edgeTypeWeights}
+            onNodeWeightChange={(prefix, weight) => {
+              this.setState(({weights}) => {
+                weights.nodeTypeWeights.set(prefix, weight);
+                return {weights};
+              });
+            }}
+            onEdgeWeightChange={(prefix, weight) => {
+              this.setState(({weights}) => {
+                weights.edgeTypeWeights.set(prefix, weight);
+                return {weights};
+              });
+            }}
+          />
+        );
         const pnd = appState.pagerankNodeDecomposition;
         pagerankTable = (
           <PagerankTable
@@ -120,7 +120,7 @@ export function createApp(
             weightConfig={weightConfig}
             weightFileManager={weightFileManager}
             manualWeights={this.state.weights.nodeManualWeights}
-            declarations={[githubDeclaration]}
+            declarations={declarations}
             graph={appState.timelineCred.graph()}
             onManualWeightsChange={(addr: NodeAddressT, weight: number) =>
               this.setState(({weights}) => {
@@ -159,10 +159,6 @@ export function createApp(
               this.stateTransitionMachine.loadTimelineCredAndRunPagerank(
                 this.props.assets,
                 this.state.weights,
-                {
-                  nodeTypes: githubDeclaration.nodeTypes.slice(),
-                  edgeTypes: githubDeclaration.edgeTypes.slice(),
-                },
                 GithubPrefix.user
               )
             }
