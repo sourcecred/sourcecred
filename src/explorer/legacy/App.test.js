@@ -9,23 +9,25 @@ import testLocalStore from "../../webutil/testLocalStore";
 
 import {PagerankTable} from "./pagerankTable/Table";
 import {createApp, LoadingIndicator, ProjectDetail} from "./App";
+import {TimelineCred} from "../../analysis/timeline/timelineCred";
+import {defaultParams} from "../../analysis/timeline/params";
 
 require("../../webutil/testUtil").configureEnzyme();
 
 describe("explorer/legacy/App", () => {
   function example() {
     let setState, getState;
-    const loadGraph = jest.fn();
+    const loadTimelineCred = jest.fn();
     const runPagerank = jest.fn();
-    const loadGraphAndRunPagerank = jest.fn();
+    const loadTimelineCredAndRunPagerank = jest.fn();
     const localStore = testLocalStore();
     function createMockSTM(_getState, _setState) {
       setState = _setState;
       getState = _getState;
       return {
-        loadGraph,
+        loadTimelineCred,
         runPagerank,
-        loadGraphAndRunPagerank,
+        loadTimelineCredAndRunPagerank,
       };
     }
     const App = createApp(createMockSTM);
@@ -43,9 +45,9 @@ describe("explorer/legacy/App", () => {
       el,
       setState,
       getState,
-      loadGraph,
+      loadTimelineCred,
       runPagerank,
-      loadGraphAndRunPagerank,
+      loadTimelineCredAndRunPagerank,
       localStore,
     };
   }
@@ -63,7 +65,13 @@ describe("explorer/legacy/App", () => {
         type: "READY_TO_RUN_PAGERANK",
         projectId: "foo/bar",
         loading: loadingState,
-        graph: new Graph(),
+        timelineCred: new TimelineCred(
+          new Graph(),
+          [],
+          new Map(),
+          defaultParams(),
+          []
+        ),
       });
     },
     pagerankEvaluated: (loadingState) => {
@@ -71,7 +79,13 @@ describe("explorer/legacy/App", () => {
         type: "PAGERANK_EVALUATED",
         projectId: "foo/bar",
         loading: loadingState,
-        graph: new Graph(),
+        timelineCred: new TimelineCred(
+          new Graph(),
+          [],
+          new Map(),
+          defaultParams(),
+          []
+        ),
         pagerankNodeDecomposition: new Map(),
       });
     },
@@ -123,7 +137,7 @@ describe("explorer/legacy/App", () => {
     function testAnalyzeCredButton(stateFn, {disabled}) {
       const adjective = disabled ? "disabled" : "working";
       it(`has a ${adjective} analyze cred button`, () => {
-        const {el, loadGraphAndRunPagerank, setState} = example();
+        const {el, loadTimelineCredAndRunPagerank, setState} = example();
         setState(stateFn());
         el.update();
         const button = el.findWhere(
@@ -134,7 +148,7 @@ describe("explorer/legacy/App", () => {
         } else {
           expect(button.props().disabled).toBe(false);
           button.simulate("click");
-          expect(loadGraphAndRunPagerank).toBeCalledTimes(1);
+          expect(loadTimelineCredAndRunPagerank).toBeCalledTimes(1);
         }
       });
     }
