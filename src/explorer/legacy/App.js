@@ -20,7 +20,6 @@ import {
   type StateTransitionMachineInterface,
   initialState,
 } from "./state";
-import {userNodeType} from "../../plugins/github/declaration";
 
 const credOverviewUrl =
   "https://discourse.sourcecred.io/t/a-gentle-introduction-to-cred/20";
@@ -116,7 +115,6 @@ export function createApp(
         const pnd = appState.pagerankNodeDecomposition;
         pagerankTable = (
           <PagerankTable
-            defaultNodeType={userNodeType}
             weightConfig={weightConfig}
             weightFileManager={weightFileManager}
             manualWeights={this.state.weights.nodeManualWeights}
