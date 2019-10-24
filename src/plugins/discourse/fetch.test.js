@@ -31,7 +31,7 @@ describe("plugins/discourse/fetch", () => {
 
     it("loads LatestTopicId from snapshot", async () => {
       const topicId = await snapshotFetcher().latestTopicId();
-      expect(topicId).toMatchInlineSnapshot(`13`);
+      expect(topicId).toMatchInlineSnapshot(`21`);
     });
     it("loads latest posts from snapshot", async () => {
       expect(await snapshotFetcher().latestPosts()).toMatchSnapshot();
