@@ -29,9 +29,23 @@ export type DiscourseReference =
   | DiscourseUserReference;
 
 export type UrlString = string;
-export function parseLinks(cookedHtml: string): UrlString[] {
+/**
+ * Parse the links from a Discourse post's cookedHtml, generating
+ * an array of UrlStrings. All of the UrlStrings will contain the full
+ * server URL (i.e. relative references are made absolute). The serverUrl
+ * is required so that we can do this.
+ */
+export function parseLinks(cookedHtml: string, serverUrl: string): UrlString[] {
   const links = [];
   const httpRegex = /^https?:\/\//;
+  if (serverUrl[serverUrl.length - 1] === "/") {
+    // Strip trailing slash if it was provided, so we can concatenate
+    // strings below.
+    serverUrl = serverUrl.slice(0, serverUrl.length - 1);
+  }
+  if (!serverUrl.match(httpRegex)) {
+    throw new Error(`Invalid server url ${serverUrl}`);
+  }
   const parser = new htmlparser2.Parser({
     onopentag(name, attribs) {
       if (name === "a") {
@@ -39,6 +53,9 @@ export function parseLinks(cookedHtml: string): UrlString[] {
         if (href != null) {
           if (href.match(httpRegex)) {
             links.push(href);
+          }
+          if (href[0] === "/") {
+            links.push(serverUrl + href);
           }
         }
       }

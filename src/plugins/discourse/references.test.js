@@ -1,30 +1,51 @@
 // @flow
 
-import {parseLinks, linksToReferences} from "./references";
+import {
+  parseLinks,
+  linksToReferences,
+  type DiscourseReference,
+} from "./references";
+import {snapshotFetcher} from "./mockSnapshotFetcher";
 
 describe("plugins/discourse/references", () => {
   describe("parseLinks", () => {
+    const serverUrl = "https://example.com";
     it("does not error on empty string", () => {
-      expect(parseLinks("")).toEqual([]);
+      expect(parseLinks("", serverUrl)).toEqual([]);
     });
     it("does not error on non-html", () => {
-      expect(parseLinks("foo bar")).toEqual([]);
+      expect(parseLinks("foo bar", serverUrl)).toEqual([]);
     });
     it("does not pick up raw urls", () => {
-      expect(parseLinks("https://www.google.com")).toEqual([]);
+      expect(parseLinks("https://www.google.com", serverUrl)).toEqual([]);
     });
     it("picks up a (https://) hyperlink in href", () => {
-      expect(parseLinks(`<a href="https://www.google.com">A Link</a>`)).toEqual(
-        ["https://www.google.com"]
-      );
+      expect(
+        parseLinks(`<a href="https://www.google.com">A Link</a>`, serverUrl)
+      ).toEqual(["https://www.google.com"]);
     });
     it("picks up a (http://) hyperlink in href", () => {
-      expect(parseLinks(`<a href="http://www.google.com">A Link</a>`)).toEqual([
-        "http://www.google.com",
-      ]);
+      expect(
+        parseLinks(`<a href="http://www.google.com">A Link</a>`, serverUrl)
+      ).toEqual(["http://www.google.com"]);
     });
     it("doesn't pick up anchor hrefs", () => {
-      expect(parseLinks(`<a href="#foo">A Link</a>`)).toEqual([]);
+      expect(parseLinks(`<a href="#foo">A Link</a>`, serverUrl)).toEqual([]);
+    });
+    it("converts relative hrefs to full urls", () => {
+      expect(
+        parseLinks(`<a href="/u/decentralion">A Link</a>`, serverUrl)
+      ).toEqual([`${serverUrl}/u/decentralion`]);
+    });
+    it("errors for a bad serverUrl", () => {
+      expect(() =>
+        parseLinks(`<a href="/u/decentralion">A Link</a>`, "foobar")
+      ).toThrowError("Invalid server url");
+    });
+    it("strips trailing slashes in the serverUrl", () => {
+      expect(
+        parseLinks(`<a href="/u/decentralion">A Link</a>`, serverUrl + "/")
+      ).toEqual([`${serverUrl}/u/decentralion`]);
     });
   });
 
@@ -142,6 +163,102 @@ describe("plugins/discourse/references", () => {
             "type": "POST",
           },
         }
+      `);
+    });
+  });
+
+  describe("integration testing", () => {
+    const serverUrl = "https://sourcecred-test.discourse.group";
+    function linkIntegrationTest(
+      hyperlink: string,
+      expected: DiscourseReference
+    ) {
+      const link = `<a href=${hyperlink}></a>`;
+      const parsed = parseLinks(link, serverUrl);
+      const actual = linksToReferences(parsed);
+      expect(actual).toEqual([expected]);
+    }
+    it("for an absolute mention", () => {
+      linkIntegrationTest(`${serverUrl}/u/example`, {
+        type: "USER",
+        username: "example",
+        serverUrl,
+      });
+    });
+    it("for a relative mention", () => {
+      linkIntegrationTest("/u/example", {
+        type: "USER",
+        username: "example",
+        serverUrl,
+      });
+    });
+    it("for an absolute topic", () => {
+      linkIntegrationTest(`${serverUrl}/t/slug/103`, {
+        type: "TOPIC",
+        topicId: 103,
+        serverUrl,
+      });
+    });
+    it("for a relative topic", () => {
+      linkIntegrationTest("/t/slug/103", {
+        type: "TOPIC",
+        topicId: 103,
+        serverUrl,
+      });
+    });
+    it("for an absolute post", () => {
+      linkIntegrationTest(`${serverUrl}/t/slug/103/3`, {
+        type: "POST",
+        topicId: 103,
+        postIndex: 3,
+        serverUrl,
+      });
+    });
+    it("for a relative post", () => {
+      linkIntegrationTest("/t/slug/103/3", {
+        type: "POST",
+        topicId: 103,
+        postIndex: 3,
+        serverUrl,
+      });
+    });
+    it("snapshots on a topic with references", async () => {
+      const topic = await snapshotFetcher().topicWithPosts(21);
+      if (topic == null) {
+        throw new Error("Unable to find topic 21");
+      }
+      const serverUrl = "https://sourcecred-test.discourse.group";
+      const post = topic.posts[0];
+      const links = parseLinks(post.cooked, serverUrl);
+      expect(links).toMatchInlineSnapshot(`
+        Array [
+          "https://sourcecred-test.discourse.group/u/dl-proto",
+          "https://sourcecred-test.discourse.group/t/123-a-post-with-numbers-in-slug/20/",
+          "https://sourcecred-test.discourse.group/t/my-first-test-post/11/4",
+        ]
+      `);
+      // It should have a topic reference, post reference, and mention.
+      // See: https://sourcecred-test.discourse.group/t/a-post-with-references/21
+      const references = linksToReferences(links);
+      expect(references).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "serverUrl": "https://sourcecred-test.discourse.group",
+            "type": "USER",
+            "username": "dl-proto",
+          },
+          Object {
+            "serverUrl": "https://sourcecred-test.discourse.group",
+            "topicId": 20,
+            "type": "TOPIC",
+          },
+          Object {
+            "postIndex": 4,
+            "serverUrl": "https://sourcecred-test.discourse.group",
+            "topicId": 11,
+            "type": "POST",
+          },
+        ]
       `);
     });
   });

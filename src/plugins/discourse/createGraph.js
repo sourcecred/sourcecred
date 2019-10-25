@@ -190,7 +190,9 @@ class _GraphCreator {
     this.graph.addEdge(topicContainsPostEdge(this.serverUrl, post));
     this.maybeAddPostRepliesEdge(post);
 
-    const discourseReferences = linksToReferences(parseLinks(post.cooked));
+    const discourseReferences = linksToReferences(
+      parseLinks(post.cooked, this.serverUrl)
+    );
     for (const reference of discourseReferences) {
       const edge = this.referenceEdge(post, reference);
       if (edge != null) {
@@ -225,7 +227,10 @@ class _GraphCreator {
   }
 
   referenceEdge(post: Post, reference: DiscourseReference): Edge | null {
-    if (reference.serverUrl.toLowerCase() !== this.serverUrl.toLowerCase()) {
+    if (
+      reference.serverUrl != null &&
+      reference.serverUrl.toLowerCase() !== this.serverUrl.toLowerCase()
+    ) {
       // Don't attempt to make cross-instance links for now, since we only
       // load one Discourse forum in a given instance.
       return null;

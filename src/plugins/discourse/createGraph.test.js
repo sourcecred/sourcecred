@@ -92,7 +92,7 @@ describe("plugins/discourse/createGraph", () => {
       // A reference to a post (the slug doesn't matter)
       <a href="https://url.com/t/irrelevant-slug/1/2?u=bla">Second post</a>
       // A reference to a user
-      <a href="https://url.com/u/decentralion">@decentralion</a>
+      <a href="/u/decentralion">@decentralion</a>
       // A non-reference as the url is wrong
       <a href="https://boo.com/t/first-topic/1/3">Wrong url</a>
       // No post matching this index in topic, so no reference
