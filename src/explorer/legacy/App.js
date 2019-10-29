@@ -121,7 +121,7 @@ export function createApp(
             weightFileManager={weightFileManager}
             manualWeights={this.state.weights.nodeManualWeights}
             declarations={[githubDeclaration]}
-            graph={appState.graph}
+            graph={appState.timelineCred.graph()}
             onManualWeightsChange={(addr: NodeAddressT, weight: number) =>
               this.setState(({weights}) => {
                 weights.nodeManualWeights.set(addr, weight);
@@ -156,7 +156,7 @@ export function createApp(
               appState.loading === "LOADING"
             }
             onClick={() =>
-              this.stateTransitionMachine.loadGraphAndRunPagerank(
+              this.stateTransitionMachine.loadTimelineCredAndRunPagerank(
                 this.props.assets,
                 this.state.weights,
                 {

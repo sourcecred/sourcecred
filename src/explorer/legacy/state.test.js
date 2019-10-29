@@ -10,6 +10,8 @@ import type {
   PagerankNodeDecomposition,
   PagerankOptions,
 } from "../../analysis/pagerank";
+import {TimelineCred} from "../../analysis/timeline/timelineCred";
+import {defaultParams} from "../../analysis/timeline/params";
 
 describe("explorer/legacy/state", () => {
   function example(startingState: AppState) {
@@ -18,9 +20,9 @@ describe("explorer/legacy/state", () => {
     const setState = (appState) => {
       stateContainer.appState = appState;
     };
-    const loadGraphMock: JestMockFn<
+    const loadTimelineCredMock: JestMockFn<
       [Assets, string],
-      Promise<Graph>
+      Promise<TimelineCred>
     > = jest.fn();
 
     const pagerankMock: JestMockFn<
@@ -30,10 +32,10 @@ describe("explorer/legacy/state", () => {
     const stm = new StateTransitionMachine(
       getState,
       setState,
-      loadGraphMock,
+      loadTimelineCredMock,
       pagerankMock
     );
-    return {getState, stm, loadGraphMock, pagerankMock};
+    return {getState, stm, loadTimelineCredMock, pagerankMock};
   }
   function readyToLoadGraph(): AppState {
     return {
@@ -47,14 +49,26 @@ describe("explorer/legacy/state", () => {
       type: "READY_TO_RUN_PAGERANK",
       projectId: "foo/bar",
       loading: "NOT_LOADING",
-      graph: new Graph(),
+      timelineCred: new TimelineCred(
+        new Graph(),
+        [],
+        new Map(),
+        defaultParams(),
+        []
+      ),
     };
   }
   function pagerankEvaluated(): AppState {
     return {
       type: "PAGERANK_EVALUATED",
       projectId: "foo/bar",
-      graph: new Graph(),
+      timelineCred: new TimelineCred(
+        new Graph(),
+        [],
+        new Map(),
+        defaultParams(),
+        []
+      ),
       pagerankNodeDecomposition: pagerankNodeDecomposition(),
       loading: "NOT_LOADING",
     };
@@ -69,36 +83,43 @@ describe("explorer/legacy/state", () => {
     return state.loading;
   }
 
-  describe("loadGraph", () => {
+  describe("loadTimelineCred", () => {
     it("can only be called when READY_TO_LOAD_GRAPH", async () => {
       const badStates = [readyToRunPagerank(), pagerankEvaluated()];
       for (const b of badStates) {
         const {stm} = example(b);
-        await expect(stm.loadGraph(new Assets("/my/gateway/"))).rejects.toThrow(
-          "incorrect state"
-        );
+        await expect(
+          stm.loadTimelineCred(new Assets("/my/gateway/"))
+        ).rejects.toThrow("incorrect state");
       }
     });
     it("passes along the projectId", () => {
-      const {stm, loadGraphMock} = example(readyToLoadGraph());
-      expect(loadGraphMock).toHaveBeenCalledTimes(0);
+      const {stm, loadTimelineCredMock} = example(readyToLoadGraph());
+      expect(loadTimelineCredMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
-      stm.loadGraph(assets);
-      expect(loadGraphMock).toHaveBeenCalledTimes(1);
-      expect(loadGraphMock).toHaveBeenCalledWith(assets, "foo/bar");
+      stm.loadTimelineCred(assets);
+      expect(loadTimelineCredMock).toHaveBeenCalledTimes(1);
+      expect(loadTimelineCredMock).toHaveBeenCalledWith(assets, "foo/bar");
     });
     it("immediately sets loading status", () => {
       const {getState, stm} = example(readyToLoadGraph());
       expect(loading(getState())).toBe("NOT_LOADING");
-      stm.loadGraph(new Assets("/my/gateway/"));
+      stm.loadTimelineCred(new Assets("/my/gateway/"));
       expect(loading(getState())).toBe("LOADING");
       expect(getState().type).toBe("READY_TO_LOAD_GRAPH");
     });
     it("transitions to READY_TO_RUN_PAGERANK on success", async () => {
-      const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
-      const graph = new Graph();
-      loadGraphMock.mockReturnValue(Promise.resolve(graph));
-      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
+      const {getState, stm, loadTimelineCredMock} = example(readyToLoadGraph());
+
+      const timelineCred = new TimelineCred(
+        new Graph(),
+        [],
+        new Map(),
+        defaultParams(),
+        []
+      );
+      loadTimelineCredMock.mockReturnValue(Promise.resolve(timelineCred));
+      const succeeded = await stm.loadTimelineCred(new Assets("/my/gateway/"));
       expect(succeeded).toBe(true);
       const state = getState();
       expect(loading(state)).toBe("NOT_LOADING");
@@ -106,15 +127,15 @@ describe("explorer/legacy/state", () => {
       if (state.type !== "READY_TO_RUN_PAGERANK") {
         throw new Error("Impossible");
       }
-      expect(state.graph).toBe(graph);
+      expect(state.timelineCred).toBe(timelineCred);
     });
     it("sets loading state FAILED on reject", async () => {
-      const {getState, stm, loadGraphMock} = example(readyToLoadGraph());
+      const {getState, stm, loadTimelineCredMock} = example(readyToLoadGraph());
       const error = new Error("Oh no!");
       // $ExpectFlowError
       console.error = jest.fn();
-      loadGraphMock.mockReturnValue(Promise.reject(error));
-      const succeeded = await stm.loadGraph(new Assets("/my/gateway/"));
+      loadTimelineCredMock.mockReturnValue(Promise.reject(error));
+      const succeeded = await stm.loadTimelineCred(new Assets("/my/gateway/"));
       expect(succeeded).toBe(false);
       const state = getState();
       expect(loading(state)).toBe("FAILED");
@@ -183,69 +204,69 @@ describe("explorer/legacy/state", () => {
     });
   });
 
-  describe("loadGraphAndRunPagerank", () => {
+  describe("loadTimelineCredAndRunPagerank", () => {
     it("when READY_TO_LOAD_GRAPH, loads graph then runs pagerank", async () => {
       const {stm} = example(readyToLoadGraph());
-      (stm: any).loadGraph = jest.fn();
+      (stm: any).loadTimelineCred = jest.fn();
       (stm: any).runPagerank = jest.fn();
-      stm.loadGraph.mockResolvedValue(true);
+      stm.loadTimelineCred.mockResolvedValue(true);
       const assets = new Assets("/gateway/");
       const prefix = NodeAddress.fromParts(["bar"]);
       const types = defaultTypes();
       const wt = defaultWeights();
-      await stm.loadGraphAndRunPagerank(assets, wt, types, prefix);
-      expect(stm.loadGraph).toHaveBeenCalledTimes(1);
-      expect(stm.loadGraph).toHaveBeenCalledWith(assets);
+      await stm.loadTimelineCredAndRunPagerank(assets, wt, types, prefix);
+      expect(stm.loadTimelineCred).toHaveBeenCalledTimes(1);
+      expect(stm.loadTimelineCred).toHaveBeenCalledWith(assets);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
       expect(stm.runPagerank).toHaveBeenCalledWith(wt, types, prefix);
     });
-    it("does not run pagerank if loadGraph did not succeed", async () => {
+    it("does not run pagerank if loadTimelineCred did not succeed", async () => {
       const {stm} = example(readyToLoadGraph());
-      (stm: any).loadGraph = jest.fn();
+      (stm: any).loadTimelineCred = jest.fn();
       (stm: any).runPagerank = jest.fn();
-      stm.loadGraph.mockResolvedValue(false);
+      stm.loadTimelineCred.mockResolvedValue(false);
       const assets = new Assets("/gateway/");
       const prefix = NodeAddress.fromParts(["bar"]);
-      await stm.loadGraphAndRunPagerank(
+      await stm.loadTimelineCredAndRunPagerank(
         assets,
         defaultWeights(),
         defaultTypes(),
         prefix
       );
-      expect(stm.loadGraph).toHaveBeenCalledTimes(1);
+      expect(stm.loadTimelineCred).toHaveBeenCalledTimes(1);
       expect(stm.runPagerank).toHaveBeenCalledTimes(0);
     });
     it("when READY_TO_RUN_PAGERANK, runs pagerank", async () => {
       const {stm} = example(readyToRunPagerank());
-      (stm: any).loadGraph = jest.fn();
+      (stm: any).loadTimelineCred = jest.fn();
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
       const wt = defaultWeights();
       const types = defaultTypes();
-      await stm.loadGraphAndRunPagerank(
+      await stm.loadTimelineCredAndRunPagerank(
         new Assets("/gateway/"),
         wt,
         types,
         prefix
       );
-      expect(stm.loadGraph).toHaveBeenCalledTimes(0);
+      expect(stm.loadTimelineCred).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
       expect(stm.runPagerank).toHaveBeenCalledWith(wt, types, prefix);
     });
     it("when PAGERANK_EVALUATED, runs pagerank", async () => {
       const {stm} = example(pagerankEvaluated());
-      (stm: any).loadGraph = jest.fn();
+      (stm: any).loadTimelineCred = jest.fn();
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
       const wt = defaultWeights();
       const types = defaultTypes();
-      await stm.loadGraphAndRunPagerank(
+      await stm.loadTimelineCredAndRunPagerank(
         new Assets("/gateway/"),
         wt,
         types,
         prefix
       );
-      expect(stm.loadGraph).toHaveBeenCalledTimes(0);
+      expect(stm.loadTimelineCred).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
       expect(stm.runPagerank).toHaveBeenCalledWith(wt, types, prefix);
     });
