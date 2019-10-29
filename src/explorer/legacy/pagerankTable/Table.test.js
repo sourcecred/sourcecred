@@ -9,12 +9,11 @@ import {PagerankTable} from "./Table";
 import {example, COLUMNS} from "./sharedTestUtils";
 import {NodeRowList} from "./Node";
 import {WeightConfig} from "../../weights/WeightConfig";
-import {type NodeType} from "../../../analysis/types";
 
 require("../../../webutil/testUtil").configureEnzyme();
 describe("explorer/legacy/pagerankTable/Table", () => {
   describe("PagerankTable", () => {
-    async function setup(defaultNodeType?: NodeType) {
+    async function setup() {
       const {
         pnd,
         sharedProps,
@@ -26,7 +25,6 @@ describe("explorer/legacy/pagerankTable/Table", () => {
       } = await example();
       const element = shallow(
         <PagerankTable
-          defaultNodeType={defaultNodeType}
           weightConfig={weightConfig}
           weightFileManager={weightFileManager}
           pnd={pnd}
@@ -122,9 +120,8 @@ describe("explorer/legacy/pagerankTable/Table", () => {
         const value = option.prop("value");
         expect(value).not.toEqual(NodeAddress.empty);
         const previousNodes = element.find("NodeRowList").prop("nodes");
-        expect(
-          previousNodes.every((n) => NodeAddress.hasPrefix(n, value))
-        ).toBe(false);
+        // No user nodes, so no nodes shown
+        expect(previousNodes).toHaveLength(0);
         element.find("select").simulate("change", {target: {value}});
         const actualNodes = element.find("NodeRowList").prop("nodes");
         expect(actualNodes.every((n) => NodeAddress.hasPrefix(n, value))).toBe(
@@ -134,20 +131,7 @@ describe("explorer/legacy/pagerankTable/Table", () => {
       });
       it("filter defaults to show all if defaultNodeType not passed", async () => {
         const {element} = await setup();
-        expect(element.state().selectedNodeTypePrefix).toEqual(
-          NodeAddress.empty
-        );
-      });
-      it("selectedNodeTypePrefix defaults to provided NodeType, if available", async () => {
-        const nodeType: NodeType = {
-          name: "testNodeType",
-          pluralName: "testNodeTypes",
-          prefix: NodeAddress.fromParts(["foo"]),
-          defaultWeight: 1,
-          description: "test type",
-        };
-        const {element} = await setup(nodeType);
-        expect(element.state().selectedNodeTypePrefix).toEqual(nodeType.prefix);
+        expect(element.state().selectedNodeTypePrefix).toEqual(null);
       });
     });
 
@@ -157,11 +141,10 @@ describe("explorer/legacy/pagerankTable/Table", () => {
         const nrl = element.find(NodeRowList);
         expect(nrl.props().sharedProps).toEqual(sharedProps);
       });
-      it("including all nodes by default", async () => {
-        const {element, pnd} = await setup();
+      it("including all user nodes by default", async () => {
+        const {element} = await setup();
         const nrl = element.find(NodeRowList);
-        const expectedNodes = Array.from(pnd.keys());
-        expect(nrl.props().nodes).toEqual(expectedNodes);
+        expect(nrl.props().nodes).toEqual([]);
       });
     });
   });

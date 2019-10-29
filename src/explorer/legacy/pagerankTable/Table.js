@@ -8,7 +8,6 @@ import {WeightsFileManager} from "../../weights/WeightsFileManager";
 import {Graph, NodeAddress, type NodeAddressT} from "../../../core/graph";
 import type {PagerankNodeDecomposition} from "../../../analysis/pagerankNodeDecomposition";
 import {NodeRowList} from "./Node";
-import {type NodeType} from "../../../analysis/types";
 import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 
 type PagerankTableProps = {|
@@ -16,27 +15,23 @@ type PagerankTableProps = {|
   +declarations: $ReadOnlyArray<PluginDeclaration>,
   +graph: Graph,
   +maxEntriesPerList: number,
-  +defaultNodeType: ?NodeType,
   +manualWeights: Map<NodeAddressT, number>,
   +onManualWeightsChange: (NodeAddressT, number) => void,
   +weightConfig: React$Element<typeof WeightConfig>,
   +weightFileManager: React$Element<typeof WeightsFileManager>,
 |};
 type PagerankTableState = {|
-  selectedNodeTypePrefix: NodeAddressT,
+  selectedNodeTypePrefix: NodeAddressT | null,
   showWeightConfig: boolean,
 |};
 export class PagerankTable extends React.PureComponent<
   PagerankTableProps,
   PagerankTableState
 > {
-  constructor(props: PagerankTableProps): void {
+  constructor(): void {
     super();
-    const {defaultNodeType} = props;
-    const selectedNodeTypePrefix =
-      defaultNodeType != null ? defaultNodeType.prefix : NodeAddress.empty;
     this.state = {
-      selectedNodeTypePrefix,
+      selectedNodeTypePrefix: null,
       showWeightConfig: false,
     };
   }
@@ -135,6 +130,15 @@ export class PagerankTable extends React.PureComponent<
       onManualWeightsChange,
       graph,
     };
+    const userTypes = [].concat(...declarations.map((p) => p.userTypes));
+    const userPrefixes = userTypes.map((x) => x.prefix);
+    const filterAllUsers = (n) =>
+      userPrefixes.some((p) => NodeAddress.hasPrefix(n, p));
+    const {selectedNodeTypePrefix} = this.state;
+    const nodeFilter =
+      selectedNodeTypePrefix == null
+        ? filterAllUsers
+        : (n) => NodeAddress.hasPrefix(n, selectedNodeTypePrefix);
     return (
       <table
         style={{
@@ -155,9 +159,7 @@ export class PagerankTable extends React.PureComponent<
         <tbody>
           <NodeRowList
             sharedProps={sharedProps}
-            nodes={Array.from(pnd.keys()).filter((node) =>
-              NodeAddress.hasPrefix(node, this.state.selectedNodeTypePrefix)
-            )}
+            nodes={Array.from(pnd.keys()).filter(nodeFilter)}
           />
         </tbody>
       </table>
