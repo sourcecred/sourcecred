@@ -76,9 +76,6 @@ describe("explorer/legacy/state", () => {
   function pagerankNodeDecomposition() {
     return new Map();
   }
-  function defaultTypes() {
-    return {nodeTypes: [], edgeTypes: []};
-  }
   function loading(state: AppState) {
     return state.loading;
   }
@@ -150,7 +147,7 @@ describe("explorer/legacy/state", () => {
       const badState = readyToLoadGraph();
       const {stm} = example(badState);
       await expect(
-        stm.runPagerank(defaultWeights(), defaultTypes(), NodeAddress.empty)
+        stm.runPagerank(defaultWeights(), NodeAddress.empty)
       ).rejects.toThrow("incorrect state");
     });
     it("can be run when READY_TO_RUN_PAGERANK or PAGERANK_EVALUATED", async () => {
@@ -159,11 +156,7 @@ describe("explorer/legacy/state", () => {
         const {stm, getState, pagerankMock} = example(g);
         const pnd = pagerankNodeDecomposition();
         pagerankMock.mockReturnValue(Promise.resolve(pnd));
-        await stm.runPagerank(
-          defaultWeights(),
-          defaultTypes(),
-          NodeAddress.empty
-        );
+        await stm.runPagerank(defaultWeights(), NodeAddress.empty);
         const state = getState();
         if (state.type !== "PAGERANK_EVALUATED") {
           throw new Error("Impossible");
@@ -175,13 +168,13 @@ describe("explorer/legacy/state", () => {
     it("immediately sets loading status", () => {
       const {getState, stm} = example(readyToRunPagerank());
       expect(loading(getState())).toBe("NOT_LOADING");
-      stm.runPagerank(defaultWeights(), defaultTypes(), NodeAddress.empty);
+      stm.runPagerank(defaultWeights(), NodeAddress.empty);
       expect(loading(getState())).toBe("LOADING");
     });
     it("calls pagerank with the totalScoreNodePrefix option", async () => {
       const {pagerankMock, stm} = example(readyToRunPagerank());
       const foo = NodeAddress.fromParts(["foo"]);
-      await stm.runPagerank(defaultWeights(), defaultTypes(), foo);
+      await stm.runPagerank(defaultWeights(), foo);
       const args = pagerankMock.mock.calls[0];
       expect(args[2].totalScoreNodePrefix).toBe(foo);
     });
@@ -191,11 +184,7 @@ describe("explorer/legacy/state", () => {
       // $ExpectFlowError
       console.error = jest.fn();
       pagerankMock.mockReturnValue(Promise.reject(error));
-      await stm.runPagerank(
-        defaultWeights(),
-        defaultTypes(),
-        NodeAddress.empty
-      );
+      await stm.runPagerank(defaultWeights(), NodeAddress.empty);
       const state = getState();
       expect(loading(state)).toBe("FAILED");
       expect(state.type).toBe("READY_TO_RUN_PAGERANK");
@@ -212,13 +201,12 @@ describe("explorer/legacy/state", () => {
       stm.loadTimelineCred.mockResolvedValue(true);
       const assets = new Assets("/gateway/");
       const prefix = NodeAddress.fromParts(["bar"]);
-      const types = defaultTypes();
       const wt = defaultWeights();
-      await stm.loadTimelineCredAndRunPagerank(assets, wt, types, prefix);
+      await stm.loadTimelineCredAndRunPagerank(assets, wt, prefix);
       expect(stm.loadTimelineCred).toHaveBeenCalledTimes(1);
       expect(stm.loadTimelineCred).toHaveBeenCalledWith(assets);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
-      expect(stm.runPagerank).toHaveBeenCalledWith(wt, types, prefix);
+      expect(stm.runPagerank).toHaveBeenCalledWith(wt, prefix);
     });
     it("does not run pagerank if loadTimelineCred did not succeed", async () => {
       const {stm} = example(readyToLoadGraph());
@@ -230,7 +218,6 @@ describe("explorer/legacy/state", () => {
       await stm.loadTimelineCredAndRunPagerank(
         assets,
         defaultWeights(),
-        defaultTypes(),
         prefix
       );
       expect(stm.loadTimelineCred).toHaveBeenCalledTimes(1);
@@ -242,16 +229,14 @@ describe("explorer/legacy/state", () => {
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
       const wt = defaultWeights();
-      const types = defaultTypes();
       await stm.loadTimelineCredAndRunPagerank(
         new Assets("/gateway/"),
         wt,
-        types,
         prefix
       );
       expect(stm.loadTimelineCred).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
-      expect(stm.runPagerank).toHaveBeenCalledWith(wt, types, prefix);
+      expect(stm.runPagerank).toHaveBeenCalledWith(wt, prefix);
     });
     it("when PAGERANK_EVALUATED, runs pagerank", async () => {
       const {stm} = example(pagerankEvaluated());
@@ -259,16 +244,14 @@ describe("explorer/legacy/state", () => {
       (stm: any).runPagerank = jest.fn();
       const prefix = NodeAddress.fromParts(["bar"]);
       const wt = defaultWeights();
-      const types = defaultTypes();
       await stm.loadTimelineCredAndRunPagerank(
         new Assets("/gateway/"),
         wt,
-        types,
         prefix
       );
       expect(stm.loadTimelineCred).toHaveBeenCalledTimes(0);
       expect(stm.runPagerank).toHaveBeenCalledTimes(1);
-      expect(stm.runPagerank).toHaveBeenCalledWith(wt, types, prefix);
+      expect(stm.runPagerank).toHaveBeenCalledWith(wt, prefix);
     });
   });
 });

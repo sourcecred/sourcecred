@@ -5,7 +5,6 @@ import deepEqual from "lodash.isequal";
 import {Graph, type NodeAddressT} from "../../core/graph";
 import type {Assets} from "../../webutil/assets";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
-import type {NodeAndEdgeTypes} from "../../analysis/types";
 import {defaultLoader} from "../TimelineApp";
 import {
   type PagerankNodeDecomposition,
@@ -16,6 +15,7 @@ import {TimelineCred} from "../../analysis/timeline/timelineCred";
 
 import type {Weights} from "../../analysis/weights";
 import {weightsToEdgeEvaluator} from "../../analysis/weightsToEdgeEvaluator";
+import {combineTypes} from "../../analysis/pluginDeclaration";
 
 /*
   This models the UI states of the credExplorer/App as a state machine.
@@ -69,11 +69,10 @@ export function createStateTransitionMachine(
 // Exported for testing purposes.
 export interface StateTransitionMachineInterface {
   +loadTimelineCred: (Assets) => Promise<boolean>;
-  +runPagerank: (Weights, NodeAndEdgeTypes, NodeAddressT) => Promise<void>;
+  +runPagerank: (Weights, NodeAddressT) => Promise<void>;
   +loadTimelineCredAndRunPagerank: (
     Assets,
     Weights,
-    NodeAndEdgeTypes,
     NodeAddressT
   ) => Promise<void>;
 }
@@ -144,11 +143,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     return false;
   }
 
-  async runPagerank(
-    weights: Weights,
-    types: NodeAndEdgeTypes,
-    totalScoreNodePrefix: NodeAddressT
-  ) {
+  async runPagerank(weights: Weights, totalScoreNodePrefix: NodeAddressT) {
     const state = this.getState();
     if (
       state.type !== "READY_TO_RUN_PAGERANK" &&
@@ -164,6 +159,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     this.setState(loadingState);
     const graph = state.timelineCred.graph();
     let newState: ?AppState;
+    const types = combineTypes(state.timelineCred.plugins());
     try {
       const pagerankNodeDecomposition = await this.pagerank(
         graph,
@@ -196,7 +192,6 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   async loadTimelineCredAndRunPagerank(
     assets: Assets,
     weights: Weights,
-    types: NodeAndEdgeTypes,
     totalScoreNodePrefix: NodeAddressT
   ) {
     const state = this.getState();
@@ -205,12 +200,12 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
       case "READY_TO_LOAD_GRAPH":
         const loadedTimelineCred = await this.loadTimelineCred(assets);
         if (loadedTimelineCred) {
-          await this.runPagerank(weights, types, totalScoreNodePrefix);
+          await this.runPagerank(weights, totalScoreNodePrefix);
         }
         break;
       case "READY_TO_RUN_PAGERANK":
       case "PAGERANK_EVALUATED":
-        await this.runPagerank(weights, types, totalScoreNodePrefix);
+        await this.runPagerank(weights, totalScoreNodePrefix);
         break;
       default:
         throw new Error((type: empty));
