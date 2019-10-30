@@ -3,17 +3,20 @@
 import type {Database} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
-import {
-  type TopicId,
-  type PostId,
-  type Topic,
-  type Post,
-  type LikeAction,
+import type {
+  CategoryId,
+  TopicId,
+  PostId,
+  Topic,
+  Post,
+  LikeAction,
+  TopicWithPosts,
 } from "./fetch";
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v4";
+const VERSION = "discourse_mirror_v5";
+const DEFINITION_CHECK_KEY = "definition_check";
 
 /**
  * An interface for reading the local Discourse data.
@@ -53,9 +56,9 @@ export interface ReadRepository {
   likes(): $ReadOnlyArray<LikeAction>;
 }
 
-export type MaxIds = {|
-  +maxPostId: number,
-  +maxTopicId: number,
+export type SyncHeads = {|
+  +definitionCheckMs: number,
+  +topicBumpMs: number,
 |};
 
 export type AddResult = {|
@@ -65,10 +68,13 @@ export type AddResult = {|
 
 // Read-write interface the mirror uses internally.
 export interface MirrorRepository extends ReadRepository {
-  maxIds(): MaxIds;
-  addTopic(topic: Topic): AddResult;
-  addPost(post: Post): AddResult;
+  syncHeads(): SyncHeads;
   addLike(like: LikeAction): AddResult;
+  replaceTopicTransaction(topicWithPosts: TopicWithPosts): void;
+  bumpDefinitionTopicCheck(timestampMs: number): void;
+  topicsInCategories(
+    categoryIds: $ReadOnlyArray<CategoryId>
+  ): $ReadOnlyArray<TopicId>;
 }
 
 function toAddResult({
@@ -88,12 +94,19 @@ export class SqliteMirrorRepository
   constructor(db: Database, serverUrl: string) {
     if (db == null) throw new Error("db: " + String(db));
     this._db = db;
+    this._transaction(() => {
+      this._initialize(serverUrl);
+    });
+  }
+
+  _transaction(queries: () => void) {
+    const db = this._db;
     if (db.inTransaction) {
       throw new Error("already in transaction");
     }
     try {
       db.prepare("BEGIN").run();
-      this._initialize(serverUrl);
+      queries();
       if (db.inTransaction) {
         db.prepare("COMMIT").run();
       }
@@ -138,12 +151,19 @@ export class SqliteMirrorRepository
     db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(config);
 
     const tables = [
+      dedent`\
+        CREATE TABLE sync_heads (
+          key TEXT PRIMARY KEY,
+          timestamp_ms INTEGER NOT NULL
+        )`,
       "CREATE TABLE users (username TEXT PRIMARY KEY)",
       dedent`\
         CREATE TABLE topics (
             id INTEGER PRIMARY KEY,
+            category_id INTEGER NOT NULL,
             title TEXT NOT NULL,
             timestamp_ms INTEGER NOT NULL,
+            bumped_ms INTEGER NOT NULL,
             author_username TEXT NOT NULL,
             FOREIGN KEY(author_username) REFERENCES users(username)
         )
@@ -176,19 +196,19 @@ export class SqliteMirrorRepository
     }
   }
 
-  maxIds(): MaxIds {
+  syncHeads(): SyncHeads {
     const res = this._db
       .prepare(
         dedent`\
           SELECT
-              (SELECT IFNULL(MAX(id), 0) FROM posts) AS max_post,
-              (SELECT IFNULL(MAX(id), 0) FROM topics) AS max_topic
+              (SELECT IFNULL(MAX(bumped_ms), 0) FROM topics) AS max_topic_bump,
+              (SELECT timestamp_ms FROM sync_heads WHERE key = :DEFINITION_CHECK_KEY) AS definition_check
           `
       )
-      .get();
+      .get({DEFINITION_CHECK_KEY});
     return {
-      maxPostId: res.max_post,
-      maxTopicId: res.max_topic,
+      definitionCheckMs: res.definition_check || 0,
+      topicBumpMs: res.max_topic_bump,
     };
   }
 
@@ -198,17 +218,21 @@ export class SqliteMirrorRepository
         dedent`\
         SELECT
           id,
+          category_id,
+          title,
           timestamp_ms,
-          author_username,
-          title
+          bumped_ms,
+          author_username
         FROM topics`
       )
       .all()
       .map((x) => ({
         id: x.id,
-        timestampMs: x.timestamp_ms,
-        authorUsername: x.author_username,
+        categoryId: x.category_id,
         title: x.title,
+        timestampMs: x.timestamp_ms,
+        bumpedMs: x.bumped_ms,
+        authorUsername: x.author_username,
       }));
   }
 
@@ -269,6 +293,25 @@ export class SqliteMirrorRepository
       .get({topic_id: topicId, index_within_topic: indexWithinTopic});
   }
 
+  bumpDefinitionTopicCheck(timestampMs: number): void {
+    this._db
+      .prepare(
+        dedent`\
+          REPLACE INTO sync_heads (
+              key,
+              timestamp_ms
+          ) VALUES (
+              :key,
+              :timestamp_ms
+          )
+        `
+      )
+      .run({
+        key: DEFINITION_CHECK_KEY,
+        timestamp_ms: timestampMs,
+      });
+  }
+
   addLike(like: LikeAction): AddResult {
     this.addUser(like.username);
     const res = this._db
@@ -291,6 +334,43 @@ export class SqliteMirrorRepository
         username: like.username,
       });
     return toAddResult(res);
+  }
+
+  replaceTopicTransaction({topic, posts}: TopicWithPosts) {
+    this._transaction(() => {
+      this.addTopic(topic);
+      for (const post of posts) {
+        this.addPost(post);
+      }
+      this.deleteUnexpectedPosts(topic.id, posts.map((p) => p.id));
+    });
+  }
+
+  deleteUnexpectedPosts(topicId: TopicId, expected: PostId[]): number {
+    const res = this._db
+      .prepare(
+        dedent`\
+          DELETE FROM posts
+          WHERE topic_id = ?
+          AND id NOT IN (${expected.map((_) => "?").join(",")})
+        `
+      )
+      .run(topicId, ...expected);
+    return res.changes;
+  }
+
+  topicsInCategories(
+    categoryIds: $ReadOnlyArray<CategoryId>
+  ): $ReadOnlyArray<TopicId> {
+    return this._db
+      .prepare(
+        dedent`\
+          SELECT id FROM topics
+          WHERE category_id IN (${categoryIds.map((_) => "?").join(",")})
+        `
+      )
+      .all(...categoryIds)
+      .map((t) => t.id);
   }
 
   addPost(post: Post): AddResult {
@@ -336,21 +416,27 @@ export class SqliteMirrorRepository
         dedent`\
           REPLACE INTO topics (
               id,
+              category_id,
               title,
               timestamp_ms,
+              bumped_ms,
               author_username
           ) VALUES (
               :id,
+              :category_id,
               :title,
               :timestamp_ms,
+              :bumped_ms,
               :author_username
           )
         `
       )
       .run({
         id: topic.id,
+        category_id: topic.categoryId,
         title: topic.title,
         timestamp_ms: topic.timestampMs,
+        bumped_ms: topic.bumpedMs,
         author_username: topic.authorUsername,
       });
     return toAddResult(res);

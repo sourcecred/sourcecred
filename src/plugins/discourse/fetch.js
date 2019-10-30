@@ -22,8 +22,10 @@ export type CategoryId = number;
 
 export type Topic = {|
   +id: TopicId,
+  +categoryId: CategoryId,
   +title: string,
   +timestampMs: number,
+  +bumpedMs: number | null,
   +authorUsername: string,
 |};
 
@@ -67,34 +69,29 @@ export type LikeAction = {|
  * testing.
  */
 export interface Discourse {
-  // Get the `id` of the latest topic on the server.
-  // Vital so that we can then enumerate and fetch every Topic we haven't seen yet.
-  // May reject on not OK status like 404 or 403.
-  latestTopicId(): Promise<TopicId>;
   // Retrieve the Topic with Posts for a given id.
   // Will resolve to null if the response status is 403 or 404. 403 because the
   // topic may be hidden from the API user; 404 because we sometimes see
   // 404s in prod and want to ignore those topic ids. (Not sure why it happens.)
   // May reject if the status is not OK and is not 404 or 403.
   topicWithPosts(id: TopicId): Promise<TopicWithPosts | null>;
-  // Retrieve an individual Post by its id.
-  // Will resolve to null if the response status is 403 or 404. 403 because the
-  // topic may be hidden from the API user; 404 because we sometimes see
-  // 404s in prod and want to ignore those topic ids. (Not sure why it happens.)
-  // May reject if the status is not OK and is not 404 or 403.
-  post(id: PostId): Promise<Post | null>;
-  // Retrieve the latest posts from the server.
-  // Vital so that we can then enumerate and fetch every Post that we haven't
-  // encountered.
-  // May reject on not OK status like 404 or 403.
-  latestPosts(): Promise<Post[]>;
 
   /**
    * Retrieves the like actions that were initiated by the target user.
    */
   likesByUser(targetUsername: string, offset: number): Promise<LikeAction[]>;
+
+  // Gets topics ordered by bumped_at date.
+  // Will only return topics which have a bumped_at date greater than
+  // the one provided in sinceMs.
+  topicsBumpedSince(sinceMs: number): Promise<Topic[]>;
+
+  // Gets the topic IDs for every "about-x-category" topic.
+  // Discourse calls this a "definition" topic.
+  categoryDefinitionTopicIds(): Promise<TopicId[]>;
 }
 
+const MAX_API_CONCURRENT = 10;
 const MAX_API_REQUESTS_PER_MINUTE = 55;
 
 export class Fetcher implements Discourse {
@@ -126,7 +123,10 @@ export class Fetcher implements Discourse {
     // n.b. the rate limiting isn't programmatically tested. However, it's easy
     // to tell when it's broken: try to load a nontrivial Discourse server, and see
     // if you get a 429 failure.
-    const limiter = new Bottleneck({minTime});
+    const limiter = new Bottleneck({
+      maxConcurrent: MAX_API_CONCURRENT,
+      minTime,
+    });
     const unlimitedFetch = NullUtil.orElse(fetchImplementation, fetch);
     this._fetchImplementation = limiter.wrap(unlimitedFetch);
   }
@@ -149,23 +149,119 @@ export class Fetcher implements Discourse {
     return this._fetchImplementation(fullUrl, fetchOptions);
   }
 
-  async latestTopicId(): Promise<TopicId> {
-    const response = await this._fetch("/latest.json?order=created");
+  async categoryDefinitionTopicIds(): Promise<TopicId[]> {
+    const topicIdRE = new RegExp("/t/[\\w-]+/(\\d+)$");
+    const urls = [];
+    const withSubs = [];
+
+    // Root categories
+    const response = await this._fetch(
+      `/categories.json?show_subcategory_list=true`
+    );
     failIfMissing(response);
     failForNotOk(response);
-    const json = await response.json();
-    if (json.topic_list.topics.length === 0) {
-      throw new Error(`no topics! got ${stringify(json)} as latest topics.`);
+    const {categories: rootCategories} = (await response.json()).category_list;
+    for (const cat of rootCategories) {
+      if (cat.topic_url != null) {
+        urls.push(cat.topic_url);
+      }
+      if (cat.subcategory_ids) {
+        withSubs.push(cat.id);
+      }
     }
-    return json.topic_list.topics[0].id;
+
+    // Subcategories
+    for (const rootCatId of withSubs) {
+      const subResponse = await this._fetch(
+        `/categories.json?show_subcategory_list=true&parent_category_id=${rootCatId}`
+      );
+      failIfMissing(subResponse);
+      failForNotOk(subResponse);
+      const {
+        categories: subCategories,
+      } = (await subResponse.json()).category_list;
+      for (const cat of subCategories) {
+        if (cat.topic_url != null) {
+          urls.push(cat.topic_url);
+        }
+      }
+    }
+
+    const ids = urls.map((url) => {
+      const match = topicIdRE.exec(url);
+      if (match == null) {
+        throw new Error(
+          `Encountered topic URL we failed to parse it's TopicId from: ${url}`
+        );
+      }
+      return Number(match[1]);
+    });
+    const uniqueIds = Array.from(new Set(ids).values());
+    uniqueIds.sort((a, b) => a - b);
+    return uniqueIds;
   }
 
-  async latestPosts(): Promise<Post[]> {
-    const response = await this._fetch("/posts.json");
-    failIfMissing(response);
-    failForNotOk(response);
-    const json = await response.json();
-    return json.latest_posts.map(parsePost);
+  async topicsBumpedSince(sinceMs: number): Promise<Topic[]> {
+    const topics = [];
+    let pastSince = false;
+    let morePages = true;
+    let page = 0;
+
+    while (!pastSince && morePages) {
+      // Note: this will always fail to fetch the "about-x-category" topics.
+      // due to https://github.com/discourse/discourse/blob/594925b8965a26c512665371092fec3383320b58/app/controllers/list_controller.rb#L66
+      const response = await this._fetch(
+        `/latest.json?order=activity&ascending=false&page=${page}`
+      );
+      failIfMissing(response);
+      failForNotOk(response);
+      const json = await response.json();
+      if (json.topic_list.topics.length === 0) {
+        throw new Error(`no topics! got ${stringify(json)} as latest topics.`);
+      }
+      const {users, topic_list: topicList} = json;
+      const {per_page: perPage, topics: resultTopics} = topicList;
+      const usernamesById = new Map(users.map((u) => [u.id, u.username]));
+      morePages = perPage == resultTopics.length;
+      for (const t of resultTopics) {
+        // TODO: this is a code smell.
+        // Currently we're using a quirk of the API code, that the first poster in the summary
+        // is always the original poster. The only other way to tell is by parsing it from the
+        // translated human description.
+        // See: https://github.com/discourse/discourse/blob/23367e79ea735598766ec6f507f6132e0bad3dba/lib/topic_query.rb#L443
+        const opUsername = usernamesById.get(t.posters[0].user_id);
+        if (opUsername == null) {
+          throw new Error(
+            `Unexpected missing OP user for ${stringify(
+              t.posters[0]
+            )} in map ${stringify(Array.from(usernamesById.entries()))}`
+          );
+        }
+        const topic: Topic = {
+          id: t.id,
+          categoryId: t.category_id,
+          title: t.title,
+          timestampMs: Date.parse(t.created_at),
+          bumpedMs: t.bumped_at ? Date.parse(t.bumped_at) : null,
+          authorUsername: opUsername,
+        };
+
+        if (topic.bumpedMs == null) {
+          throw new Error(
+            "Unexpected missing bumped_at field for /latest.json request."
+          );
+        }
+
+        if (topic.bumpedMs > sinceMs) {
+          topics.push(topic);
+        } else if (!t.pinned) {
+          pastSince = true;
+        }
+      }
+      page++;
+    }
+
+    return topics;
   }
 
   async topicWithPosts(id: TopicId): Promise<TopicWithPosts | null> {
@@ -178,26 +274,32 @@ export class Fetcher implements Discourse {
     }
     failForNotOk(response);
     const json = await response.json();
-    const posts = json.post_stream.posts.map(parsePost);
+    const {posts_count: postCount} = json;
+    let posts = json.post_stream.posts.map(parsePost);
     const topic: Topic = {
       id: json.id,
+      categoryId: json.category_id,
       title: json.title,
-      timestampMs: +new Date(json.created_at),
+      timestampMs: Date.parse(json.created_at),
+      bumpedMs: json.bumped_at
+        ? Date.parse(json.bumped_at)
+        : Date.parse(json.created_at),
       authorUsername: json.details.created_by.username,
     };
-    return {topic, posts};
-  }
 
-  async post(id: PostId): Promise<Post | null> {
-    const response = await this._fetch(`/posts/${id}.json`);
-    const {status} = response;
-    if (status === 403 || status === 404 || status === 410) {
-      // The post is hidden, deleted, or otherwise missing.
-      return null;
+    // TODO: wondering if this could cause infinite loops in case the API is weird.
+    // Perhaps short-circuit it when a page returns 0 posts.
+    // Pagination here is 1-based.
+    let page = 1;
+    while (postCount > posts.length) {
+      page++;
+      const resNext = await this._fetch(`/t/${id}.json?page=${page}`);
+      failForNotOk(resNext);
+      const subPosts = (await resNext.json()).post_stream.posts.map(parsePost);
+      posts = [...posts, ...subPosts];
     }
-    failForNotOk(response);
-    const json = await response.json();
-    return parsePost(json);
+
+    return {topic, posts};
   }
 
   async likesByUser(username: string, offset: number): Promise<LikeAction[]> {

@@ -1,7 +1,7 @@
 // @flow
 
 import type {TaskReporter} from "../../util/taskReporter";
-import type {Discourse, CategoryId} from "./fetch";
+import type {Discourse, Topic, CategoryId} from "./fetch";
 import {MirrorRepository} from "./mirrorRepository";
 import {urlToProjectId} from "./urlsToProject";
 
@@ -24,6 +24,10 @@ const defaultOptions: MirrorOptions = {
   recheckCategoryDefinitionsAfterMs: 24 * 3600 * 1000, // 24h
   recheckTopicsInCategories: [],
 };
+
+function sortTopicByBumpedMs(a: Topic, b: Topic): number {
+  return (a.bumpedMs || 0) - (b.bumpedMs || 0);
+}
 
 /**
  * Mirrors data from the Discourse API into a local sqlite db.
@@ -74,21 +78,6 @@ export class Mirror {
 
   async update(reporter: TaskReporter) {
     const loggingNs = urlToProjectId(this._serverUrl);
-    // Local functions add the warning and tracking semantics we want from them.
-    const encounteredPostIds = new Set();
-
-    const addPost = (post) => {
-      try {
-        encounteredPostIds.add(post.id);
-        return this._repo.addPost(post);
-      } catch (e) {
-        const url = `${this._serverUrl}/t/${post.topicId}/${post.indexWithinTopic}`;
-        console.warn(
-          `Warning: Encountered error '${e.message}' while adding post ${url}.`
-        );
-        return {changes: 0, lastInsertRowid: -1};
-      }
-    };
 
     const addLike = (like) => {
       try {
@@ -107,48 +96,93 @@ export class Mirror {
     reporter.start(`discourse/${loggingNs}`);
 
     const {
-      maxPostId: lastLocalPostId,
-      maxTopicId: lastLocalTopicId,
-    } = this._repo.maxIds();
+      topicBumpMs: lastLocalTopicBumpMs,
+      definitionCheckMs: lastDefinitionCheckMs,
+    } = this._repo.syncHeads();
+
+    const startTime = Date.now();
+    const shouldCheckDefinitions =
+      startTime - lastDefinitionCheckMs >=
+      this._options.recheckCategoryDefinitionsAfterMs;
 
     reporter.start(`discourse/${loggingNs}/topics`);
-    const latestTopicId = await this._fetcher.latestTopicId();
-    for (
-      let topicId = lastLocalTopicId + 1;
-      topicId <= latestTopicId;
-      topicId++
-    ) {
+    const bumpedTopics: Topic[] = await this._fetcher.topicsBumpedSince(
+      lastLocalTopicBumpMs
+    );
+    const topicBumpsById: Map<number, number> = new Map(
+      bumpedTopics.map((t) => [t.id, t.bumpedMs || 0])
+    );
+
+    // Make sure we have oldest first in our load queue.
+    bumpedTopics.sort(sortTopicByBumpedMs);
+
+    // Create a uniqueness filter.
+    const existingTopics = new Set();
+    const once = (tid) => {
+      if (existingTopics.has(tid)) return false;
+      existingTopics.add(tid);
+      return true;
+    };
+
+    // Add definition topics if the flag to do so is set.
+    const definitionTopicIds = shouldCheckDefinitions
+      ? await this._fetcher.categoryDefinitionTopicIds()
+      : [];
+
+    // Add specific-category topics when it's set in our options.
+    const selectCategoryTopics = this._repo.topicsInCategories(
+      this._options.recheckTopicsInCategories
+    );
+
+    // Note: order is important here.
+    // Initial load should happen in order of bump date,
+    // reloads at the end are ok to be in random order.
+    const topicLoadQueue = [
+      ...bumpedTopics.map((t) => t.id),
+      ...definitionTopicIds,
+      ...selectCategoryTopics,
+    ].filter(once);
+
+    const writeJobs = [];
+    for (const topicId of topicLoadQueue) {
       const topicWithPosts = await this._fetcher.topicWithPosts(topicId);
       if (topicWithPosts != null) {
-        const {topic, posts} = topicWithPosts;
-        this._repo.addTopic(topic);
-        for (const post of posts) {
-          addPost(post);
-        }
+        // As we're writing a fiar bit of data to the DB, do so on nextTick.
+        // This way we can ask the fetcher to get the next topic and write the data while
+        // the HTTPS request is in transit.
+        writeJobs.push(
+          new Promise((res, _) => {
+            process.nextTick(() => {
+              const {topic, posts} = topicWithPosts;
+              const topicBump = topicBumpsById.get(topicId);
+              const thisBump = topic.bumpedMs;
+              let bumpedMs = null;
+              if (topicBump && thisBump) {
+                bumpedMs = Math.max(topicBump, thisBump);
+              }
+              if (topicBump || thisBump) {
+                bumpedMs = topicBump || thisBump;
+              }
+              const mergedTopic = {
+                ...topic,
+                bumpedMs,
+              };
+              this._repo.replaceTopicTransaction({topic: mergedTopic, posts});
+              res();
+            });
+          })
+        );
       }
+    }
+
+    // Make sure we're always waiting for writes to complete.
+    await Promise.all(writeJobs);
+    if (shouldCheckDefinitions) {
+      // Note: use the start time as to avoid missing any changes
+      // between when we queries upstream and when we completed all tasks.
+      this._repo.bumpDefinitionTopicCheck(startTime);
     }
     reporter.finish(`discourse/${loggingNs}/topics`);
-
-    reporter.start(`discourse/${loggingNs}/posts`);
-    const latestPosts = await this._fetcher.latestPosts();
-    for (const post of latestPosts) {
-      if (!encounteredPostIds.has(post.id) && post.id > lastLocalPostId) {
-        addPost(post);
-      }
-    }
-
-    const latestPost = latestPosts[0];
-    const latestPostId = latestPost == null ? 0 : latestPost.id;
-    for (let postId = lastLocalPostId + 1; postId <= latestPostId; postId++) {
-      if (encounteredPostIds.has(postId)) {
-        continue;
-      }
-      const post = await this._fetcher.post(postId);
-      if (post != null) {
-        addPost(post);
-      }
-    }
-    reporter.finish(`discourse/${loggingNs}/posts`);
 
     // I don't want to hard code the expected page size, in case it changes upstream.
     // However, it's helpful to have a good guess of what the page size is, because if we
@@ -168,24 +202,33 @@ export class Mirror {
     // section of the update significantly.
 
     reporter.start(`discourse/${loggingNs}/likes`);
+    const likeJobs = [];
     for (const user of this._repo.users()) {
-      let offset = 0;
-      let upToDate = false;
-      while (!upToDate) {
-        const likeActions = await this._fetcher.likesByUser(user, offset);
-        possiblePageSize = Math.max(likeActions.length, possiblePageSize);
-        for (const like of likeActions) {
-          if (addLike(like).doneWithUser) {
-            upToDate = true;
-            break;
+      likeJobs.push(
+        (async () => {
+          let offset = 0;
+          let upToDate = false;
+          while (!upToDate) {
+            const likeActions = await this._fetcher.likesByUser(user, offset);
+            possiblePageSize = Math.max(likeActions.length, possiblePageSize);
+            for (const like of likeActions) {
+              if (addLike(like).doneWithUser) {
+                upToDate = true;
+                break;
+              }
+            }
+            if (
+              likeActions.length === 0 ||
+              likeActions.length < possiblePageSize
+            ) {
+              upToDate = true;
+            }
+            offset += likeActions.length;
           }
-        }
-        if (likeActions.length === 0 || likeActions.length < possiblePageSize) {
-          upToDate = true;
-        }
-        offset += likeActions.length;
-      }
+        })()
+      );
     }
+    await Promise.all(likeJobs);
     reporter.finish(`discourse/${loggingNs}/likes`);
     reporter.finish(`discourse/${loggingNs}`);
   }

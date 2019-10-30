@@ -84,6 +84,8 @@ describe("plugins/discourse/createGraph", () => {
       title: "first topic",
       timestampMs: 0,
       authorUsername: "decentralion",
+      categoryId: 1,
+      bumpedMs: 0,
     };
     const post1 = {
       id: 1,
