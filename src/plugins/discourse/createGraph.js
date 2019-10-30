@@ -16,7 +16,7 @@ import {
   type Topic,
   type LikeAction,
 } from "./fetch";
-import {type DiscourseData} from "./mirror";
+import {type ReadRepository} from "./mirrorRepository";
 import {
   authorsPostEdgeType,
   authorsTopicEdgeType,
@@ -143,7 +143,7 @@ export function likesEdge(serverUrl: string, like: LikeAction): Edge {
   };
 }
 
-export function createGraph(serverUrl: string, data: DiscourseData): Graph {
+export function createGraph(serverUrl: string, data: ReadRepository): Graph {
   const gc = new _GraphCreator(serverUrl, data);
   return gc.graph;
 }
@@ -151,10 +151,10 @@ export function createGraph(serverUrl: string, data: DiscourseData): Graph {
 class _GraphCreator {
   graph: Graph;
   serverUrl: string;
-  data: DiscourseData;
+  data: ReadRepository;
   topicIdToTitle: Map<TopicId, string>;
 
-  constructor(serverUrl: string, data: DiscourseData) {
+  constructor(serverUrl: string, data: ReadRepository) {
     if (serverUrl.endsWith("/")) {
       throw new Error(`by convention, serverUrl should not end with /`);
     }
