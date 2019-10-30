@@ -3,7 +3,8 @@
 exports[`plugins/discourse/fetch snapshot testing loads a particular post from snapshot 1`] = `
 Object {
   "authorUsername": "d11",
-  "cooked": "<p>This is a test post.</p>",
+  "cooked": "<p>This is a test post.</p>
+<p>EDIT: This test post was edited on October 24, 2019.</p>",
   "id": 14,
   "indexWithinTopic": 1,
   "replyToPostIndex": null,
@@ -17,7 +18,8 @@ Object {
   "posts": Array [
     Object {
       "authorUsername": "d11",
-      "cooked": "<p>This is a test post.</p>",
+      "cooked": "<p>This is a test post.</p>
+<p>EDIT: This test post was edited on October 24, 2019.</p>",
       "id": 14,
       "indexWithinTopic": 1,
       "replyToPostIndex": null,
@@ -169,7 +171,8 @@ Here is a post reference with a slug: <a href=\\"https://sourcecred-test.discour
   },
   Object {
     "authorUsername": "d11",
-    "cooked": "<p>This is a test post.</p>",
+    "cooked": "<p>This is a test post.</p>
+<p>EDIT: This test post was edited on October 24, 2019.</p>",
     "id": 14,
     "indexWithinTopic": 1,
     "replyToPostIndex": null,

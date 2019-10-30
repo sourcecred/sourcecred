@@ -11,7 +11,6 @@ import {
   defaultSourcecredDirectory,
   sourcecredDirectory,
   githubToken,
-  discourseKey,
   loadWeights,
 } from "./common";
 
@@ -58,17 +57,6 @@ describe("cli/common", () => {
     it("returns `null` if the environment variable is not set", () => {
       delete process.env.SOURCECRED_GITHUB_TOKEN;
       expect(githubToken()).toBe(null);
-    });
-  });
-
-  describe("discourseKey", () => {
-    it("uses the environment variable when available", () => {
-      process.env.SOURCECRED_DISCOURSE_KEY = "010101";
-      expect(discourseKey()).toEqual("010101");
-    });
-    it("returns `null` if the environment variable is not set", () => {
-      delete process.env.SOURCECRED_DISCOURSE_KEY;
-      expect(discourseKey()).toBe(null);
     });
   });
 

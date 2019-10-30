@@ -15,7 +15,7 @@ import {type Project} from "../core/project";
 function usage(print: (string) => void): void {
   print(
     dedent`\
-    usage: sourcecred discourse DISCOURSE_URL DISCOURSE_USERNAME
+    usage: sourcecred discourse DISCOURSE_URL
                                 [--weights WEIGHTS_FILE]
            sourcecred discourse --help
 
@@ -26,13 +26,6 @@ function usage(print: (string) => void): void {
             The url to the Discourse server in question, for example
             https://discourse.sourcecred.io
 
-        DISCOURSE_USERNAME
-            A user account on the Discourse server, to be used as the
-            "perspective" for the Discourse API calls. This user should not be
-            a privileged or admin user, otherwise hidden or deleted topics may
-            be included in the results. We recommend making a new user called
-            "credbot" on the server, with no special roles or permissions.
-
         --weights WEIGHTS_FILE
             Path to a json file which contains a weights configuration.
             This will be used instead of the default weights and persisted.
@@ -41,13 +34,6 @@ function usage(print: (string) => void): void {
             Show this help message and exit, as 'sourcecred help discourse'.
 
     Environment variables:
-        SOURCECRED_DISCOURSE_KEY
-            A Discourse admin API key generated from discourse server in
-            question.
-
-            To generate a key, use the /admin/api/keys route on your Discourse
-            server, e.g. https://discourse.example.com/admin/api/keys
-
         SOURCECRED_DIRECTORY
             Directory owned by SourceCred, in which data, caches,
             registries, etc. are stored. Optional: defaults to a
@@ -88,10 +74,10 @@ const command: Command = async (args, std) => {
       }
     }
   }
-  if (positionalArgs.length !== 2) {
-    return die(std, "Expected two positional arguments (or --help).");
+  if (positionalArgs.length !== 1) {
+    return die(std, "Expected one positional arguments (or --help).");
   }
-  const [serverUrl, apiUsername] = positionalArgs;
+  const [serverUrl] = positionalArgs;
   let projectId = serverUrl;
   if (projectId.startsWith("https://")) {
     projectId = projectId.slice("https://".length);
@@ -104,7 +90,7 @@ const command: Command = async (args, std) => {
   const project: Project = {
     id: projectId,
     repoIds: [],
-    discourseServer: {serverUrl, apiUsername},
+    discourseServer: {serverUrl},
     identities: [],
   };
   const taskReporter = new LoggingTaskReporter();
@@ -121,7 +107,6 @@ const command: Command = async (args, std) => {
       plugins,
       sourcecredDirectory: Common.sourcecredDirectory(),
       githubToken: null,
-      discourseKey: Common.discourseKey(),
     },
     taskReporter
   );

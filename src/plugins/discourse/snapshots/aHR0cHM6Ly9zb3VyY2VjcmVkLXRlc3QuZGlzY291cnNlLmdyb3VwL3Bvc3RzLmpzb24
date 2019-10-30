@@ -13,10 +13,10 @@
       "reply_count": 0,
       "reply_to_post_number": null,
       "quote_count": 0,
-      "incoming_link_count": 0,
+      "incoming_link_count": 1,
       "reads": 1,
       "readers_count": 0,
-      "score": 0,
+      "score": 5.2,
       "yours": false,
       "topic_id": 21,
       "topic_slug": "a-post-with-references",
@@ -35,32 +35,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "Here is a mention: @dl-proto\nHere is a topic reference:  https://sourcecred-test.discourse.group/t/123-a-post-with-numbers-in-slug/20/\nHere is a post reference with a slug: https://sourcecred-test.discourse.group/t/my-first-test-post/11/4",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": false,
       "admin": true,
       "staff": true,
@@ -72,8 +47,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-04-02T20:22:14.312Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -113,32 +86,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "Oh the post won't be empty I assure you.",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": false,
       "admin": true,
       "staff": true,
@@ -150,8 +98,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-04-02T20:22:14.312Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -191,32 +137,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "I'm replying to a wiki.",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": false,
       "admin": true,
       "staff": true,
@@ -228,8 +149,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-04-02T20:22:14.312Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -263,38 +182,13 @@
       "primary_group_flair_bg_color": null,
       "primary_group_flair_color": null,
       "version": 3,
-      "can_edit": true,
+      "can_edit": false,
       "can_delete": false,
       "can_recover": false,
       "can_wiki": false,
       "user_title": null,
       "raw": "So I'm starting the wiki content.\n\nNo remove that line.\n\nAh now I've added another line.",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": false,
       "admin": true,
       "staff": true,
@@ -307,8 +201,6 @@
       "can_view_edit_history": true,
       "wiki": true,
       "last_wiki_edit": "2019-10-02T20:53:28.194Z",
-      "user_created_at": "2019-04-02T20:22:14.312Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -348,32 +240,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "Testing a poll. Let's see how it works.\n[poll type=multiple results=always min=1 max=5 public=true]\n* One\n* Two\n* Three\n* Four\n* Five\n[/poll]",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": false,
       "admin": true,
       "staff": true,
@@ -385,8 +252,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-04-02T20:22:14.312Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false,
@@ -501,32 +366,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "Adding another post, after having deleted a whole thread.",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": false,
       "admin": true,
       "staff": true,
@@ -538,8 +378,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-04-02T20:22:14.312Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -579,32 +417,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "[quote=\"dl-proto, post:1, topic:13\"]\nHere is a link to another discourse thread:\n[/quote]\n\nExcellent link. I've quoted you.",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": false,
       "admin": true,
       "staff": true,
@@ -616,8 +429,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-04-02T20:22:14.312Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -657,32 +468,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "Here is a link to another discourse thread: https://sourcecred-test.discourse.group/t/my-first-test-post/11/3\n\nHere is a link to a GitHub issue: https://github.com/sourcecred-test/example-github/issues/1",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": false,
       "admin": false,
       "staff": false,
@@ -694,8 +480,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-08-02T11:14:13.800Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -735,32 +519,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "Ah, an excellent post. I will like it and reply.",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": false,
       "admin": false,
       "staff": false,
@@ -772,8 +531,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-08-02T11:14:13.800Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -784,17 +541,17 @@
       "username": "d11",
       "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
       "created_at": "2019-08-02T11:12:29.476Z",
-      "cooked": "<p>This is a test post.</p>",
+      "cooked": "<p>This is a test post.</p>\n<p>EDIT: This test post was edited on October 24, 2019.</p>",
       "post_number": 1,
       "post_type": 1,
-      "updated_at": "2019-08-02T11:12:29.476Z",
+      "updated_at": "2019-10-24T16:51:12.095Z",
       "reply_count": 0,
       "reply_to_post_number": null,
       "quote_count": 0,
-      "incoming_link_count": 0,
+      "incoming_link_count": 1,
       "reads": 2,
       "readers_count": 1,
-      "score": 15.4,
+      "score": 20.4,
       "yours": false,
       "topic_id": 11,
       "topic_slug": "my-first-test-post",
@@ -806,38 +563,17 @@
       "primary_group_flair_url": null,
       "primary_group_flair_bg_color": null,
       "primary_group_flair_color": null,
-      "version": 1,
+      "version": 2,
       "can_edit": false,
       "can_delete": false,
       "can_recover": false,
       "can_wiki": false,
       "user_title": null,
-      "raw": "This is a test post.",
+      "raw": "This is a test post.\n\nEDIT: This test post was edited on October 24, 2019.",
       "actions_summary": [
         {
           "id": 2,
-          "count": 1,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 6,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
+          "count": 1
         }
       ],
       "moderator": false,
@@ -851,8 +587,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-04-02T20:22:14.312Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -873,7 +607,7 @@
       "incoming_link_count": 0,
       "reads": 2,
       "readers_count": 1,
-      "score": 0.2,
+      "score": 0.4,
       "yours": false,
       "topic_id": 7,
       "topic_slug": "welcome-to-discourse",
@@ -892,28 +626,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "This is a test instance.\nThe first paragraph of this pinned topic will be visible as a welcome message to all new visitors on your homepage. It's important!\n\n**Edit this** into a brief description of your community:\n\n- Who is it for?\n- What can they find here?\n- Why should they come here?\n- Where can they read more (links, resources, etc)?\n\n<img src=\"/images/welcome/discourse-edit-post-animated.gif\" width=\"508\" height=\"106\">\n\nYou may want to close this topic via the admin :wrench: (at the upper right and bottom), so that replies don't pile up on an announcement.",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": true,
       "admin": true,
       "staff": true,
@@ -925,8 +638,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-04-02T20:20:06.287Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false
@@ -966,28 +677,7 @@
       "can_wiki": false,
       "user_title": null,
       "raw": "Discussion about this site, its organization, how it works, and how we can improve it.",
-      "actions_summary": [
-        {
-          "id": 2,
-          "can_act": true
-        },
-        {
-          "id": 3,
-          "can_act": true
-        },
-        {
-          "id": 4,
-          "can_act": true
-        },
-        {
-          "id": 8,
-          "can_act": true
-        },
-        {
-          "id": 7,
-          "can_act": true
-        }
-      ],
+      "actions_summary": [],
       "moderator": true,
       "admin": true,
       "staff": true,
@@ -999,8 +689,6 @@
       "edit_reason": null,
       "can_view_edit_history": true,
       "wiki": false,
-      "user_created_at": "2019-04-02T20:20:06.287Z",
-      "user_date_of_birth": null,
       "can_accept_answer": false,
       "can_unaccept_answer": false,
       "accepted_answer": false

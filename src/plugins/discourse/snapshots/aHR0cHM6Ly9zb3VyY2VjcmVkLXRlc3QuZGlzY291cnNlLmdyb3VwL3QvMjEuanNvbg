@@ -14,10 +14,10 @@
         "reply_count": 0,
         "reply_to_post_number": null,
         "quote_count": 0,
-        "incoming_link_count": 0,
+        "incoming_link_count": 1,
         "reads": 1,
         "readers_count": 0,
-        "score": 0,
+        "score": 5.2,
         "yours": false,
         "topic_id": 21,
         "topic_slug": "a-post-with-references",
@@ -47,34 +47,9 @@
             "clicks": 0
           }
         ],
-        "read": false,
+        "read": true,
         "user_title": null,
-        "actions_summary": [
-          {
-            "id": 2,
-            "can_act": true
-          },
-          {
-            "id": 3,
-            "can_act": true
-          },
-          {
-            "id": 4,
-            "can_act": true
-          },
-          {
-            "id": 8,
-            "can_act": true
-          },
-          {
-            "id": 6,
-            "can_act": true
-          },
-          {
-            "id": 7,
-            "can_act": true
-          }
-        ],
+        "actions_summary": [],
         "moderator": false,
         "admin": true,
         "staff": true,
@@ -86,8 +61,6 @@
         "edit_reason": null,
         "can_view_edit_history": true,
         "wiki": false,
-        "user_created_at": "2019-04-02T20:22:14.312Z",
-        "user_date_of_birth": null,
         "can_accept_answer": false,
         "can_unaccept_answer": false,
         "accepted_answer": false
@@ -100,7 +73,7 @@
   "timeline_lookup": [
     [
       1,
-      0
+      7
     ]
   ],
   "suggested_topics": [
@@ -127,7 +100,7 @@
       "liked": null,
       "archetype": "regular",
       "like_count": 1,
-      "views": 26,
+      "views": 34,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
@@ -177,7 +150,47 @@
       "liked": null,
       "archetype": "regular",
       "like_count": 0,
-      "views": 5,
+      "views": 8,
+      "category_id": 1,
+      "featured_link": null,
+      "has_accepted_answer": false,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": 2,
+            "username": "d11",
+            "name": "D",
+            "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
+          }
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "Test Poll Please Ignore",
+      "fancy_title": "Test Poll Please Ignore",
+      "slug": "test-poll-please-ignore",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2019-10-02T20:50:10.568Z",
+      "last_posted_at": "2019-10-02T20:50:10.625Z",
+      "bumped": true,
+      "bumped_at": "2019-10-02T20:50:10.625Z",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "archetype": "regular",
+      "like_count": 0,
+      "views": 8,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
@@ -217,7 +230,7 @@
       "liked": null,
       "archetype": "regular",
       "like_count": 0,
-      "views": 6,
+      "views": 9,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
@@ -258,7 +271,7 @@
       "liked": null,
       "archetype": "regular",
       "like_count": 0,
-      "views": 5,
+      "views": 8,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
@@ -274,46 +287,6 @@
           }
         }
       ]
-    },
-    {
-      "id": 18,
-      "title": "Test Poll Please Ignore",
-      "fancy_title": "Test Poll Please Ignore",
-      "slug": "test-poll-please-ignore",
-      "posts_count": 1,
-      "reply_count": 0,
-      "highest_post_number": 1,
-      "image_url": null,
-      "created_at": "2019-10-02T20:50:10.568Z",
-      "last_posted_at": "2019-10-02T20:50:10.625Z",
-      "bumped": true,
-      "bumped_at": "2019-10-02T20:50:10.625Z",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "archetype": "regular",
-      "like_count": 0,
-      "views": 5,
-      "category_id": 1,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 2,
-            "username": "d11",
-            "name": "D",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
-          }
-        }
-      ]
     }
   ],
   "id": 21,
@@ -321,7 +294,7 @@
   "fancy_title": "A Post With References",
   "posts_count": 1,
   "created_at": "2019-10-23T18:26:31.140Z",
-  "views": 1,
+  "views": 9,
   "reply_count": 0,
   "like_count": 0,
   "last_posted_at": "2019-10-23T18:26:31.281Z",
@@ -342,7 +315,7 @@
   "image_url": null,
   "draft": null,
   "draft_key": "topic_21",
-  "draft_sequence": 0,
+  "draft_sequence": null,
   "unpinned": null,
   "pinned": false,
   "current_post_number": 1,
@@ -353,34 +326,30 @@
       "id": 4,
       "count": 0,
       "hidden": false,
-      "can_act": true
+      "can_act": false
     },
     {
       "id": 8,
       "count": 0,
       "hidden": false,
-      "can_act": true
+      "can_act": false
     },
     {
       "id": 7,
       "count": 0,
       "hidden": false,
-      "can_act": true
+      "can_act": false
     }
   ],
   "chunk_size": 20,
   "bookmarked": null,
   "topic_timer": null,
-  "private_topic_timer": null,
-  "message_bus_last_id": 2,
+  "message_bus_last_id": 0,
   "participant_count": 1,
   "show_read_indicator": false,
   "tags_disable_ads": false,
   "details": {
     "notification_level": 1,
-    "can_create_post": true,
-    "can_reply_as_new_topic": true,
-    "can_flag_topic": true,
     "participants": [
       {
         "id": 2,

@@ -23,7 +23,7 @@ describe("core/project", () => {
   const p2: Project = deepFreeze({
     id: "@foo",
     repoIds: [foobar, foozod],
-    discourseServer: {serverUrl: "https://example.com", apiUsername: "credbot"},
+    discourseServer: {serverUrl: "https://example.com"},
     identities: [
       {
         username: "example",

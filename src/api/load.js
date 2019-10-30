@@ -23,7 +23,6 @@ export type LoadOptions = {|
   +plugins: $ReadOnlyArray<PluginDeclaration>,
   +sourcecredDirectory: string,
   +githubToken: string | null,
-  +discourseKey: string | null,
 |};
 
 /**
@@ -54,12 +53,9 @@ export async function load(
   function discourseGraph(): ?Promise<Graph> {
     const discourseServer = project.discourseServer;
     if (discourseServer != null) {
-      const {serverUrl, apiUsername} = discourseServer;
-      if (options.discourseKey == null) {
-        throw new Error("Tried to load Discourse, but no Discourse key set");
-      }
+      const {serverUrl} = discourseServer;
       const discourseOptions = {
-        fetchOptions: {apiKey: options.discourseKey, serverUrl, apiUsername},
+        fetchOptions: {serverUrl},
         cacheDirectory,
       };
       return loadDiscourse(discourseOptions, taskReporter);

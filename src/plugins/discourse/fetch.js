@@ -131,7 +131,7 @@ export class Fetcher implements Discourse {
   }
 
   _fetch(endpoint: string): Promise<Response> {
-    const {serverUrl, apiKey, apiUsername} = this.options;
+    const {serverUrl} = this.options;
     if (!endpoint.startsWith("/")) {
       throw new Error(`invalid endpoint: ${endpoint}`);
     }
@@ -141,8 +141,6 @@ export class Fetcher implements Discourse {
     const fetchOptions = {
       method: "GET",
       headers: {
-        "Api-Key": apiKey,
-        "Api-Username": apiUsername,
         Accept: "application/json",
       },
     };
@@ -251,12 +249,5 @@ function parseLike(json: any): LikeAction {
 }
 
 export type DiscourseFetchOptions = {|
-  apiKey: string,
-  // We'll use the view permissions for this user. It needs to be a real user
-  // on the server. I recommend making a new user called "credbot" with no
-  // special permissions for this purpose. If you use a permissioned user (e.g.
-  // "system") then SourceCred will pick up hidden and deleted posts,
-  // potentially leaking private information.
-  apiUsername: string,
   serverUrl: string,
 |};

@@ -28,12 +28,14 @@ export type Project = {|
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: {|
     +serverUrl: string,
-    +apiUsername: string,
+    +apiUsername?: string,
   |} | null,
   +identities: $ReadOnlyArray<Identity>,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/project", version: "0.3.0"};
+const COMPAT_INFO = {type: "sourcecred/project", version: "0.3.1"};
+
+const upgrades = {"0.3.0": (p) => p};
 
 export type ProjectJSON = Compatible<Project>;
 
@@ -42,7 +44,7 @@ export function projectToJSON(p: Project): ProjectJSON {
 }
 
 export function projectFromJSON(j: ProjectJSON): Project {
-  return fromCompat(COMPAT_INFO, j);
+  return fromCompat(COMPAT_INFO, j, upgrades);
 }
 
 /**
