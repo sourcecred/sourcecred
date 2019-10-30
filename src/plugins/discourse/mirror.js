@@ -1,65 +1,8 @@
 // @flow
 
-import type {Database} from "better-sqlite3";
-import stringify from "json-stable-stringify";
-import dedent from "../../util/dedent";
 import type {TaskReporter} from "../../util/taskReporter";
-import {
-  type Discourse,
-  type TopicId,
-  type PostId,
-  type Topic,
-  type Post,
-  type LikeAction,
-} from "./fetch";
-
-// The version should be bumped any time the database schema is changed,
-// so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v4";
-
-/**
- * An interface for retrieving all of the Discourse data at once.
- *
- * Also has some convenience methods for interpeting the data (e.g. getting
- * a post by its index in a topic).
- *
- * The mirror implements this; it's factored out as an interface for
- * ease of testing.
- */
-export interface DiscourseData {
-  /**
-   * Retrieve every Topic available.
-   *
-   * The order is unspecified.
-   */
-  topics(): $ReadOnlyArray<Topic>;
-
-  /**
-   * Retrieve every Post available.
-   *
-   * The order is unspecified.
-   */
-  posts(): $ReadOnlyArray<Post>;
-
-  /**
-   * Given a TopicId and a post number, find that numbered post within the topic.
-   *
-   * Returns undefined if no such post is available.
-   */
-  findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId;
-
-  /**
-   * Get usernames for all users.
-   *
-   * The order is unspecified.
-   */
-  users(): $ReadOnlyArray<string>;
-
-  /**
-   * Gets all of the like actions in the history.
-   */
-  likes(): $ReadOnlyArray<LikeAction>;
-}
+import {type Discourse} from "./fetch";
+import {MirrorRepository} from "./mirrorRepository";
 
 /**
  * Mirrors data from the Discourse API into a local sqlite db.
@@ -78,8 +21,8 @@ export interface DiscourseData {
  * Each Mirror instance is tied to a particular server. Trying to use a mirror
  * for multiple Discourse servers is not permitted; use separate Mirrors.
  */
-export class Mirror implements DiscourseData {
-  +_db: Database;
+export class Mirror {
+  +_repo: MirrorRepository;
   +_fetcher: Discourse;
   +_serverUrl: string;
 
@@ -92,271 +35,49 @@ export class Mirror implements DiscourseData {
    * A serverUrl is required so that we can ensure that this Mirror is only storing
    * data from a particular Discourse server.
    */
-  constructor(db: Database, fetcher: Discourse, serverUrl: string) {
-    if (db == null) throw new Error("db: " + String(db));
-    this._db = db;
+  constructor(repo: MirrorRepository, fetcher: Discourse, serverUrl: string) {
+    this._repo = repo;
     this._fetcher = fetcher;
     this._serverUrl = serverUrl;
-    if (db.inTransaction) {
-      throw new Error("already in transaction");
-    }
-    try {
-      db.prepare("BEGIN").run();
-      this._initialize();
-      if (db.inTransaction) {
-        db.prepare("COMMIT").run();
-      }
-    } finally {
-      if (db.inTransaction) {
-        db.prepare("ROLLBACK").run();
-      }
-    }
-  }
-
-  _initialize() {
-    const db = this._db;
-    // We store the config in a singleton table `meta`, whose unique row
-    // has primary key `0`. Only the first ever insert will succeed; we
-    // are locked into the first config.
-    db.prepare(
-      dedent`\
-        CREATE TABLE IF NOT EXISTS meta (
-            zero INTEGER PRIMARY KEY,
-            config TEXT NOT NULL
-        )
-      `
-    ).run();
-
-    const config = stringify({
-      version: VERSION,
-      serverUrl: this._serverUrl,
-    });
-
-    const existingConfig: string | void = db
-      .prepare("SELECT config FROM meta")
-      .pluck()
-      .get();
-    if (existingConfig === config) {
-      // Already set up; nothing to do.
-      return;
-    } else if (existingConfig !== undefined) {
-      throw new Error(
-        "Database already populated with incompatible server or version"
-      );
-    }
-    db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(config);
-
-    const tables = [
-      "CREATE TABLE users (username TEXT PRIMARY KEY)",
-      dedent`\
-        CREATE TABLE topics (
-            id INTEGER PRIMARY KEY,
-            title TEXT NOT NULL,
-            timestamp_ms INTEGER NOT NULL,
-            author_username TEXT NOT NULL,
-            FOREIGN KEY(author_username) REFERENCES users(username)
-        )
-      `,
-      dedent`\
-        CREATE TABLE posts (
-            id INTEGER PRIMARY KEY,
-            timestamp_ms INTEGER NOT NULL,
-            author_username TEXT NOT NULL,
-            topic_id INTEGER NOT NULL,
-            index_within_topic INTEGER NOT NULL,
-            reply_to_post_index INTEGER,
-            cooked TEXT NOT NULL,
-            FOREIGN KEY(topic_id) REFERENCES topics(id),
-            FOREIGN KEY(author_username) REFERENCES users(username)
-        )
-      `,
-      dedent`\
-        CREATE TABLE likes (
-          username TEXT NOT NULL,
-          post_id INTEGER NOT NULL,
-          timestamp_ms INTEGER NOT NULL,
-          CONSTRAINT username_post PRIMARY KEY (username, post_id),
-          FOREIGN KEY(post_id) REFERENCES posts(id),
-          FOREIGN KEY(username) REFERENCES users(username)
-        )`,
-    ];
-    for (const sql of tables) {
-      db.prepare(sql).run();
-    }
-  }
-
-  topics(): $ReadOnlyArray<Topic> {
-    return this._db
-      .prepare(
-        dedent`\
-        SELECT
-          id,
-          timestamp_ms,
-          author_username,
-          title
-        FROM topics`
-      )
-      .all()
-      .map((x) => ({
-        id: x.id,
-        timestampMs: x.timestamp_ms,
-        authorUsername: x.author_username,
-        title: x.title,
-      }));
-  }
-
-  posts(): $ReadOnlyArray<Post> {
-    return this._db
-      .prepare(
-        dedent`\
-        SELECT
-          id,
-          timestamp_ms,
-          author_username,
-          topic_id,
-          index_within_topic,
-          reply_to_post_index,
-          cooked
-        FROM posts`
-      )
-      .all()
-      .map((x) => ({
-        id: x.id,
-        timestampMs: x.timestamp_ms,
-        authorUsername: x.author_username,
-        topicId: x.topic_id,
-        indexWithinTopic: x.index_within_topic,
-        replyToPostIndex: x.reply_to_post_index,
-        cooked: x.cooked,
-      }));
-  }
-
-  users(): $ReadOnlyArray<string> {
-    return this._db
-      .prepare("SELECT username FROM users")
-      .pluck()
-      .all();
-  }
-
-  likes(): $ReadOnlyArray<LikeAction> {
-    return this._db
-      .prepare("SELECT post_id, username, timestamp_ms FROM likes")
-      .all()
-      .map((x) => ({
-        postId: x.post_id,
-        timestampMs: x.timestamp_ms,
-        username: x.username,
-      }));
-  }
-
-  findPostInTopic(topicId: TopicId, indexWithinTopic: number): ?PostId {
-    return this._db
-      .prepare(
-        dedent`\
-          SELECT id
-          FROM posts
-          WHERE topic_id = :topic_id AND index_within_topic = :index_within_topic
-        `
-      )
-      .pluck()
-      .get({topic_id: topicId, index_within_topic: indexWithinTopic});
   }
 
   async update(reporter: TaskReporter) {
-    reporter.start("discourse");
-    const db = this._db;
-    const {max_post: lastLocalPostId, max_topic: lastLocalTopicId} = db
-      .prepare(
-        dedent`\
-          SELECT
-              (SELECT IFNULL(MAX(id), 0) FROM posts) AS max_post,
-              (SELECT IFNULL(MAX(id), 0) FROM topics) AS max_topic
-          `
-      )
-      .get();
-
+    // Local functions add the warning and tracking semantics we want from them.
     const encounteredPostIds = new Set();
 
-    const addPost: (Post) => void = (() => {
-      const query = db.prepare(
-        dedent`\
-          REPLACE INTO posts (
-              id,
-              timestamp_ms,
-              author_username,
-              topic_id,
-              index_within_topic,
-              reply_to_post_index,
-              cooked
-          ) VALUES (
-              :id,
-              :timestamp_ms,
-              :author_username,
-              :topic_id,
-              :index_within_topic,
-              :reply_to_post_index,
-              :cooked
-          )
-        `
-      );
-      const serverUrl = this._serverUrl;
-      return function addPost(post: Post) {
-        try {
-          addUser(post.authorUsername);
-          encounteredPostIds.add(post.id);
-          query.run({
-            id: post.id,
-            timestamp_ms: post.timestampMs,
-            reply_to_post_index: post.replyToPostIndex,
-            index_within_topic: post.indexWithinTopic,
-            topic_id: post.topicId,
-            author_username: post.authorUsername,
-            cooked: post.cooked,
-          });
-        } catch (e) {
-          const url = `${serverUrl}/t/${post.topicId}/${post.indexWithinTopic}`;
-          console.warn(
-            `Warning: Encountered error '${e.message}' while adding post ${url}.`
-          );
-        }
-      };
-    })();
+    const addPost = (post) => {
+      try {
+        encounteredPostIds.add(post.id);
+        return this._repo.addPost(post);
+      } catch (e) {
+        const url = `${this._serverUrl}/t/${post.topicId}/${post.indexWithinTopic}`;
+        console.warn(
+          `Warning: Encountered error '${e.message}' while adding post ${url}.`
+        );
+        return {changes: 0, lastInsertRowid: -1};
+      }
+    };
 
-    const addUser: (username: string) => void = (() => {
-      const query = db.prepare(
-        "INSERT OR IGNORE INTO users (username) VALUES (?)"
-      );
-      return function addUser(username: string) {
-        query.run(username);
-      };
-    })();
+    const addLike = (like) => {
+      try {
+        const res = this._repo.addLike(like);
+        return {doneWithUser: res.changes === 0};
+      } catch (e) {
+        console.warn(
+          `Warning: Encountered error '${e.message}' ` +
+            `on a like by ${like.username} ` +
+            `on post id ${like.postId}.`
+        );
+        return {doneWithUser: false};
+      }
+    };
 
-    const addTopic: (Topic) => void = (() => {
-      const query = this._db.prepare(
-        dedent`\
-          REPLACE INTO topics (
-              id,
-              title,
-              timestamp_ms,
-              author_username
-          ) VALUES (
-              :id,
-              :title,
-              :timestamp_ms,
-              :author_username
-          )
-        `
-      );
-      return function addTopic(topic: Topic) {
-        addUser(topic.authorUsername);
-        query.run({
-          id: topic.id,
-          title: topic.title,
-          timestamp_ms: topic.timestampMs,
-          author_username: topic.authorUsername,
-        });
-      };
-    })();
+    reporter.start("discourse");
+
+    const {
+      maxPostId: lastLocalPostId,
+      maxTopicId: lastLocalTopicId,
+    } = this._repo.maxIds();
 
     reporter.start("discourse/topics");
     const latestTopicId = await this._fetcher.latestTopicId();
@@ -368,7 +89,7 @@ export class Mirror implements DiscourseData {
       const topicWithPosts = await this._fetcher.topicWithPosts(topicId);
       if (topicWithPosts != null) {
         const {topic, posts} = topicWithPosts;
-        addTopic(topic);
+        this._repo.addTopic(topic);
         for (const post of posts) {
           addPost(post);
         }
@@ -414,47 +135,6 @@ export class Mirror implements DiscourseData {
     // since our last scan. This would likely improve the performance of this
     // section of the update significantly.
 
-    /**
-     * Add a like action to the database. The user of the like is
-     * assumed to already exist in the database; if this is not known to
-     * be the case, run `addUser(like.username)` first.
-     *
-     * Returns a status indicating whether we are done processing this user
-     * (e.g. we have already seen all of their likes).
-     */
-    const addLike: (like: LikeAction) => {|+doneWithUser: boolean|} = (() => {
-      const query = db.prepare(
-        dedent`\
-          INSERT OR IGNORE INTO likes (
-              post_id,
-              timestamp_ms,
-              username
-          ) VALUES (
-              :post_id,
-              :timestamp_ms,
-              :username
-          )
-        `
-      );
-      return function addLike(like: LikeAction) {
-        try {
-          const runResult = query.run({
-            post_id: like.postId,
-            timestamp_ms: like.timestampMs,
-            username: like.username,
-          });
-          return {doneWithUser: runResult.changes === 0};
-        } catch (e) {
-          console.warn(
-            `Warning: Encountered error '${e.message}' ` +
-              `on a like by ${like.username} ` +
-              `on post id ${like.postId}.`
-          );
-          return {doneWithUser: false};
-        }
-      };
-    })();
-
     reporter.start("discourse/likes");
     const addUserLikes = async (user: string) => {
       let offset = 0;
@@ -474,7 +154,7 @@ export class Mirror implements DiscourseData {
         offset += likeActions.length;
       }
     };
-    for (const user of this.users()) {
+    for (const user of this._repo.users()) {
       try {
         await addUserLikes(user);
       } catch (e) {

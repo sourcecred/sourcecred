@@ -1,7 +1,7 @@
 // @flow
 
 import sortBy from "lodash.sortby";
-import type {DiscourseData} from "./mirror";
+import type {ReadRepository} from "./mirrorRepository";
 import type {Topic, Post, PostId, TopicId, LikeAction} from "./fetch";
 import {NodeAddress, EdgeAddress, type Node, type Edge} from "../../core/graph";
 import {
@@ -34,7 +34,7 @@ import {
 import type {EdgeType, NodeType} from "../../analysis/types";
 
 describe("plugins/discourse/createGraph", () => {
-  class MockData implements DiscourseData {
+  class MockData implements ReadRepository {
     _topics: $ReadOnlyArray<Topic>;
     _posts: $ReadOnlyArray<Post>;
     _likes: $ReadOnlyArray<LikeAction>;
@@ -68,6 +68,12 @@ describe("plugins/discourse/createGraph", () => {
         (p) => p.topicId === topicId && p.indexWithinTopic === indexWithinTopic
       )[0];
       return post ? post.id : null;
+    }
+    maxIds() {
+      return {
+        maxPostId: this._posts.reduce((max, p) => Math.max(p.id, max), 0),
+        maxTopicId: this._topics.reduce((max, t) => Math.max(t.id, max), 0),
+      };
     }
   }
 
