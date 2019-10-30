@@ -74,7 +74,7 @@ describe("cli/load", () => {
         project: {
           id: "foo/bar",
           repoIds: [makeRepoId("foo", "bar")],
-          discourseServer: null,
+          discourseServers: [],
           identities: [],
         },
         params: defaultParams(),
@@ -99,7 +99,7 @@ describe("cli/load", () => {
         project: {
           id: projectId,
           repoIds: [stringToRepoId(projectId)],
-          discourseServer: null,
+          discourseServers: [],
           identities: [],
         },
         params: defaultParams(),
@@ -137,7 +137,7 @@ describe("cli/load", () => {
         project: {
           id: "foo/bar",
           repoIds: [makeRepoId("foo", "bar")],
-          discourseServer: null,
+          discourseServers: [],
           identities: [],
         },
         params: partialParams({weights}),

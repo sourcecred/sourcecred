@@ -4,6 +4,7 @@ import base64url from "base64url";
 import {type RepoId} from "../core/repoId";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import {type Identity} from "../plugins/identity/identity";
+import {type DiscourseServer} from "../plugins/discourse/loadDiscourse";
 
 export type ProjectId = string;
 
@@ -17,7 +18,7 @@ export type ProjectId = string;
  * we will have a generic system for storing plugin-specific config, keyed by plugin
  * identifier.
  *
- * We may add more fields (e.g. a description) to this object in the futre.
+ * We may add more fields (e.g. a description) to this object in the future.
  *
  * We may create a complimentary object with load/cache info for the project in
  * the future (e.g. showing the last update time for each of the project's data
@@ -26,16 +27,22 @@ export type ProjectId = string;
 export type Project = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
-  +discourseServer: {|
-    +serverUrl: string,
-    +apiUsername?: string,
-  |} | null,
+  +discourseServers: $ReadOnlyArray<DiscourseServer>,
   +identities: $ReadOnlyArray<Identity>,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/project", version: "0.3.1"};
+const COMPAT_INFO = {type: "sourcecred/project", version: "0.4.0"};
 
-const upgrades = {"0.3.0": (p) => p};
+const upgradeFrom030 = (p) => ({
+  ...p,
+  discourseServers:
+    p.discourseServer != null ? [{serverUrl: p.discourseServer.serverUrl}] : [],
+});
+
+const upgrades = {
+  "0.3.0": upgradeFrom030,
+  "0.3.1": upgradeFrom030,
+};
 
 export type ProjectJSON = Compatible<Project>;
 

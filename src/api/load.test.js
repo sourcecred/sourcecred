@@ -62,9 +62,7 @@ describe("api/load", () => {
   const project: Project = {
     id: "foo",
     repoIds: [makeRepoId("foo", "bar")],
-    discourseServer: {
-      serverUrl: discourseServerUrl,
-    },
+    discourseServers: [{serverUrl: discourseServerUrl}],
     identities: [],
   };
   deepFreeze(project);
@@ -115,9 +113,7 @@ describe("api/load", () => {
     await load(options, taskReporter);
     const cacheDirectory = path.join(sourcecredDirectory, "cache");
     const expectedOptions: LoadDiscourseOptions = {
-      fetchOptions: {
-        serverUrl: discourseServerUrl,
-      },
+      discourseServers: [{serverUrl: discourseServerUrl}],
       cacheDirectory,
     };
     expect(loadDiscourse).toHaveBeenCalledWith(expectedOptions, taskReporter);
@@ -180,7 +176,7 @@ describe("api/load", () => {
 
   it("only loads GitHub if no Discourse server set", async () => {
     const {options, taskReporter, sourcecredDirectory} = example();
-    const newProject = {...options.project, discourseServer: null};
+    const newProject = {...options.project, discourseServers: []};
     const newOptions = {...options, project: newProject};
     await load(newOptions, taskReporter);
     expect(loadDiscourse).not.toHaveBeenCalled();

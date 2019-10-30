@@ -19,8 +19,7 @@ function usage(print: (string) => void): void {
     dedent`\
     usage: sourcecred gen-project PROJECT_ID
                                   [--github GITHUB_SPEC [...]]
-                                  [--discourse-url DISCOURSE_URL]
-                                  [--discourse-username DISCOURSE_USERNAME]
+                                  [--discourse DISCOURSE_URL]
            sourcecred gen-project --help
 
     Generates a SourceCred project configuration based on the provided specs.
@@ -32,14 +31,10 @@ function usage(print: (string) => void): void {
     or @owner (as in '@torvalds') for loading all repositories owned by a given
     account.
 
-    A discourse url and discourse username may be provided. If one is provided,
-    then both must be. The discourse url is a url to a valid Discourse server,
-    as in 'https://discourse.sourcecred.io', and the username must be a valid
-    user on that server, as in 'credbot'. The user in question should not have
-    any special or admin permissions, so that it won't encounter hidden
-    messages.
+    Zero or more discourse urls may be provided. The discourse url is a url to
+    a valid Discourse server, as in 'https://discourse.sourcecred.io'.
 
-    All of the GitHub specs, and the Discourse specification (if it exists)
+    All of the GitHub specs, and the Discourse urls (if they exists)
     will be combined into a single project. The serialized project
     configuration will be printed to stdout.
 
@@ -51,7 +46,7 @@ function usage(print: (string) => void): void {
             A specification (in form 'OWNER/NAME' or '@OWNER') of GitHub
             repositories to load.
 
-        --discourse-url DISCOURSE_URL
+        --discourse DISCOURSE_URL
             The url of a Discourse server to load.
 
         --help
@@ -78,7 +73,7 @@ function die(std, message) {
 
 export const genProject: Command = async (args, std) => {
   let projectId: string | null = null;
-  let discourseUrl: string | null = null;
+  let discourseServers: string[] = [];
   const githubSpecs: string[] = [];
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -92,12 +87,10 @@ export const genProject: Command = async (args, std) => {
         githubSpecs.push(args[i]);
         break;
       }
-      case "--discourse-url": {
-        if (discourseUrl != undefined)
-          return die(std, "'--discourse-url' given multiple times");
+      case "--discourse": {
         if (++i >= args.length)
-          return die(std, "'--discourse-url' given without value");
-        discourseUrl = args[i];
+          return die(std, "'--discourse' given without value");
+        discourseServers.push(args[i]);
         break;
       }
       default: {
@@ -116,7 +109,7 @@ export const genProject: Command = async (args, std) => {
   const project: Project = await createProject({
     projectId,
     githubSpecs,
-    discourseUrl,
+    discourseServers,
     githubToken,
   });
   const projectJSON = projectToJSON(project);
@@ -127,15 +120,11 @@ export const genProject: Command = async (args, std) => {
 export async function createProject(opts: {|
   +projectId: string,
   +githubSpecs: $ReadOnlyArray<string>,
-  +discourseUrl: string | null,
+  +discourseServers: $ReadOnlyArray<string>,
   +githubToken: string | null,
 |}): Promise<Project> {
-  const {projectId, githubSpecs, discourseUrl, githubToken} = opts;
+  const {projectId, githubSpecs, discourseServers, githubToken} = opts;
   let repoIds: RepoId[] = [];
-  let discourseServer = null;
-  if (discourseUrl) {
-    discourseServer = {serverUrl: discourseUrl};
-  }
   if (githubSpecs.length && githubToken == null) {
     throw new Error("Provided GitHub specs without GitHub token.");
   }
@@ -143,7 +132,12 @@ export async function createProject(opts: {|
     const subproject = await specToProject(spec, NullUtil.get(githubToken));
     repoIds = repoIds.concat(subproject.repoIds);
   }
-  return {id: projectId, repoIds, discourseServer, identities: []};
+  return {
+    id: projectId,
+    repoIds,
+    discourseServers: discourseServers.map((serverUrl) => ({serverUrl})),
+    identities: [],
+  };
 }
 
 export default genProject;

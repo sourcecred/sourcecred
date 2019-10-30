@@ -10,12 +10,12 @@ import * as Common from "./common";
 import {defaultWeights} from "../analysis/weights";
 import {load} from "../api/load";
 import {declaration as discourseDeclaration} from "../plugins/discourse/declaration";
-import {type Project} from "../core/project";
+import {urlsToProject} from "../plugins/discourse/urlsToProject";
 
 function usage(print: (string) => void): void {
   print(
     dedent`\
-    usage: sourcecred discourse DISCOURSE_URL
+    usage: sourcecred discourse DISCOURSE_URL [...]
                                 [--weights WEIGHTS_FILE]
            sourcecred discourse --help
 
@@ -74,42 +74,28 @@ const command: Command = async (args, std) => {
       }
     }
   }
-  if (positionalArgs.length !== 1) {
-    return die(std, "Expected one positional arguments (or --help).");
-  }
-  const [serverUrl] = positionalArgs;
-  let projectId = serverUrl;
-  if (projectId.startsWith("https://")) {
-    projectId = projectId.slice("https://".length);
-  } else if (projectId.startsWith("http://")) {
-    projectId = projectId.slice("http://".length);
-  } else {
-    die(std, "expected server url to start with 'https://' or 'http://'");
+
+  if (positionalArgs.length < 1) {
+    return die(std, "Expected at least one positional argument (or --help).");
   }
 
-  const project: Project = {
-    id: projectId,
-    repoIds: [],
-    discourseServer: {serverUrl},
-    identities: [],
-  };
   const taskReporter = new LoggingTaskReporter();
   let weights = defaultWeights();
   if (weightsPath) {
     weights = await Common.loadWeights(weightsPath);
   }
   const plugins = [discourseDeclaration];
+  const uniqueUrls = [...new Set(positionalArgs).values()];
+  const project = urlsToProject(uniqueUrls);
+  const options = {
+    project,
+    params: {weights},
+    plugins,
+    sourcecredDirectory: Common.sourcecredDirectory(),
+    githubToken: null,
+  };
 
-  await load(
-    {
-      project,
-      params: {weights},
-      plugins,
-      sourcecredDirectory: Common.sourcecredDirectory(),
-      githubToken: null,
-    },
-    taskReporter
-  );
+  await load(options, taskReporter);
   return 0;
 };
 

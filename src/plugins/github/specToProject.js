@@ -36,7 +36,7 @@ export async function specToProject(
     const project: Project = {
       id: spec,
       repoIds: [stringToRepoId(spec)],
-      discourseServer: null,
+      discourseServers: [],
       identities: [],
     };
     return project;
@@ -46,7 +46,7 @@ export async function specToProject(
     const project: Project = {
       id: spec,
       repoIds: org.repos,
-      discourseServer: null,
+      discourseServers: [],
       identities: [],
     };
     return project;

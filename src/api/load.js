@@ -51,11 +51,10 @@ export async function load(
   await fs.mkdirp(cacheDirectory);
 
   function discourseGraph(): ?Promise<Graph> {
-    const discourseServer = project.discourseServer;
-    if (discourseServer != null) {
-      const {serverUrl} = discourseServer;
+    const discourseServers = project.discourseServers;
+    if (discourseServers.length > 0) {
       const discourseOptions = {
-        fetchOptions: {serverUrl},
+        discourseServers,
         cacheDirectory,
       };
       return loadDiscourse(discourseOptions, taskReporter);
@@ -89,10 +88,15 @@ export async function load(
 
   const pluginGraphs = await Promise.all(pluginGraphPromises);
   let graph = Graph.merge(pluginGraphs);
-  const {identities, discourseServer} = project;
+  const {identities, discourseServers} = project;
   if (identities.length) {
-    const serverUrl =
-      discourseServer == null ? null : discourseServer.serverUrl;
+    if (discourseServers.length != 1) {
+      //TODO
+      throw new Error(
+        "More than 1 discourse server, don't know how to merge identities"
+      );
+    }
+    const serverUrl = discourseServers[0].serverUrl;
     const contractions = nodeContractions(identities, serverUrl);
     // Only apply contractions if identities have been specified, since it involves
     // a full Graph copy

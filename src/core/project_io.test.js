@@ -22,13 +22,13 @@ describe("core/project_io", () => {
   const p1: Project = deepFreeze({
     id: "foo/bar",
     repoIds: [foobar],
-    discourseServer: null,
+    discourseServers: [],
     identities: [],
   });
   const p2: Project = deepFreeze({
     id: "@foo",
     repoIds: [foobar, foozod],
-    discourseServer: {serverUrl: "https://example.com"},
+    discourseServers: [{serverUrl: "https://example.com"}],
     identities: [{username: "foo", aliases: ["github/foo", "discourse/foo"]}],
   });
 

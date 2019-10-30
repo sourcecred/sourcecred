@@ -17,7 +17,7 @@ describe("plugins/github/specToProject", () => {
     const expected: Project = {
       id: spec,
       repoIds: [stringToRepoId(spec)],
-      discourseServer: null,
+      discourseServers: [],
       identities: [],
     };
     const actual = await specToProject(spec, "FAKE_TOKEN");
@@ -35,7 +35,7 @@ describe("plugins/github/specToProject", () => {
     const expected: Project = {
       id: spec,
       repoIds: repos,
-      discourseServer: null,
+      discourseServers: [],
       identities: [],
     };
     expect(actual).toEqual(expected);

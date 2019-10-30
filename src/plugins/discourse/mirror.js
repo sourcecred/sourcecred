@@ -1,8 +1,29 @@
 // @flow
 
 import type {TaskReporter} from "../../util/taskReporter";
-import {type Discourse} from "./fetch";
+import type {Discourse, CategoryId} from "./fetch";
 import {MirrorRepository} from "./mirrorRepository";
+import {urlToProjectId} from "./urlsToProject";
+
+export type MirrorOptions = {|
+  // Category definition topics don't show up
+  // in the list of bumped topics.
+  // We need to proactively check them.
+  // This sets the interval at which we
+  // should check.
+  +recheckCategoryDefinitionsAfterMs: number,
+
+  // When you're concerned about potentially missed edits,
+  // this option lets you recheck all existing topics in a
+  // given set of category IDs (where 1 is uncategorized).
+  // It does not propagate into subcategories.
+  +recheckTopicsInCategories: $ReadOnlyArray<CategoryId>,
+|};
+
+const defaultOptions: MirrorOptions = {
+  recheckCategoryDefinitionsAfterMs: 24 * 3600 * 1000, // 24h
+  recheckTopicsInCategories: [],
+};
 
 /**
  * Mirrors data from the Discourse API into a local sqlite db.
@@ -22,6 +43,7 @@ import {MirrorRepository} from "./mirrorRepository";
  * for multiple Discourse servers is not permitted; use separate Mirrors.
  */
 export class Mirror {
+  +_options: MirrorOptions;
   +_repo: MirrorRepository;
   +_fetcher: Discourse;
   +_serverUrl: string;
@@ -35,13 +57,23 @@ export class Mirror {
    * A serverUrl is required so that we can ensure that this Mirror is only storing
    * data from a particular Discourse server.
    */
-  constructor(repo: MirrorRepository, fetcher: Discourse, serverUrl: string) {
+  constructor(
+    repo: MirrorRepository,
+    fetcher: Discourse,
+    serverUrl: string,
+    options?: $Shape<MirrorOptions>
+  ) {
     this._repo = repo;
     this._fetcher = fetcher;
     this._serverUrl = serverUrl;
+    this._options = {
+      ...defaultOptions,
+      ...(options || {}),
+    };
   }
 
   async update(reporter: TaskReporter) {
+    const loggingNs = urlToProjectId(this._serverUrl);
     // Local functions add the warning and tracking semantics we want from them.
     const encounteredPostIds = new Set();
 
@@ -72,14 +104,14 @@ export class Mirror {
       }
     };
 
-    reporter.start("discourse");
+    reporter.start(`discourse/${loggingNs}`);
 
     const {
       maxPostId: lastLocalPostId,
       maxTopicId: lastLocalTopicId,
     } = this._repo.maxIds();
 
-    reporter.start("discourse/topics");
+    reporter.start(`discourse/${loggingNs}/topics`);
     const latestTopicId = await this._fetcher.latestTopicId();
     for (
       let topicId = lastLocalTopicId + 1;
@@ -95,9 +127,9 @@ export class Mirror {
         }
       }
     }
-    reporter.finish("discourse/topics");
+    reporter.finish(`discourse/${loggingNs}/topics`);
 
-    reporter.start("discourse/posts");
+    reporter.start(`discourse/${loggingNs}/posts`);
     const latestPosts = await this._fetcher.latestPosts();
     for (const post of latestPosts) {
       if (!encounteredPostIds.has(post.id) && post.id > lastLocalPostId) {
@@ -116,7 +148,7 @@ export class Mirror {
         addPost(post);
       }
     }
-    reporter.finish("discourse/posts");
+    reporter.finish(`discourse/${loggingNs}/posts`);
 
     // I don't want to hard code the expected page size, in case it changes upstream.
     // However, it's helpful to have a good guess of what the page size is, because if we
@@ -135,7 +167,7 @@ export class Mirror {
     // since our last scan. This would likely improve the performance of this
     // section of the update significantly.
 
-    reporter.start("discourse/likes");
+    reporter.start(`discourse/${loggingNs}/likes`);
     for (const user of this._repo.users()) {
       let offset = 0;
       let upToDate = false;
@@ -154,7 +186,7 @@ export class Mirror {
         offset += likeActions.length;
       }
     }
-    reporter.finish("discourse/likes");
-    reporter.finish("discourse");
+    reporter.finish(`discourse/${loggingNs}/likes`);
+    reporter.finish(`discourse/${loggingNs}`);
   }
 }

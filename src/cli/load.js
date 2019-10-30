@@ -127,7 +127,7 @@ const loadCommand: Command = async (args, std) => {
   const projects = specProjects.concat(manualProjects);
   const optionses = projects.map((project) => {
     const plugins: PluginDeclaration[] = [];
-    if (project.discourseServer != null) {
+    if (project.discourseServers.length > 0) {
       plugins.push(discourseDeclaration);
     }
     if (project.repoIds.length) {

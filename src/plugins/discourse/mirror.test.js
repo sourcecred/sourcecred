@@ -2,7 +2,7 @@
 
 import sortBy from "lodash.sortby";
 import Database from "better-sqlite3";
-import {Mirror} from "./mirror";
+import {Mirror, type MirrorOptions} from "./mirror";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {
   type Discourse,
@@ -165,12 +165,20 @@ describe("plugins/discourse/mirror", () => {
     expect(console.warn).not.toHaveBeenCalled();
     spyWarn().mockRestore();
   });
-  const example = () => {
+  const example = (optionOverrides?: $Shape<MirrorOptions>) => {
+    // Explicitly set all options, so we know what to expect in tests.
+    const options: MirrorOptions = {
+      recheckCategoryDefinitionsAfterMs: 3600000, // 1h
+      recheckTopicsInCategories: [],
+    };
     const fetcher = new MockFetcher();
     const db = new Database(":memory:");
     const url = "http://example.com";
     const repo = new SqliteMirrorRepository(db, url);
-    const mirror = new Mirror(repo, fetcher, url);
+    const mirror = new Mirror(repo, fetcher, url, {
+      ...options,
+      ...(optionOverrides || {}),
+    });
     const reporter = new TestTaskReporter();
     return {fetcher, mirror, reporter, url, repo};
   };
@@ -448,14 +456,14 @@ describe("plugins/discourse/mirror", () => {
     await mirror.update(reporter);
     expect(reporter.activeTasks()).toEqual([]);
     expect(reporter.entries()).toEqual([
-      {type: "START", taskId: "discourse"},
-      {type: "START", taskId: "discourse/topics"},
-      {type: "FINISH", taskId: "discourse/topics"},
-      {type: "START", taskId: "discourse/posts"},
-      {type: "FINISH", taskId: "discourse/posts"},
-      {type: "START", taskId: "discourse/likes"},
-      {type: "FINISH", taskId: "discourse/likes"},
-      {type: "FINISH", taskId: "discourse"},
+      {type: "START", taskId: "discourse/example.com"},
+      {type: "START", taskId: "discourse/example.com/topics"},
+      {type: "FINISH", taskId: "discourse/example.com/topics"},
+      {type: "START", taskId: "discourse/example.com/posts"},
+      {type: "FINISH", taskId: "discourse/example.com/posts"},
+      {type: "START", taskId: "discourse/example.com/likes"},
+      {type: "FINISH", taskId: "discourse/example.com/likes"},
+      {type: "FINISH", taskId: "discourse/example.com"},
     ]);
   });
 
