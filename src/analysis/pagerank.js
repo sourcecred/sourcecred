@@ -28,16 +28,17 @@ import {uniformDistribution} from "../core/attribution/distribution";
 
 export type {NodeDistribution} from "../core/attribution/nodeDistribution";
 export type {PagerankNodeDecomposition} from "./pagerankNodeDecomposition";
-export type PagerankOptions = {|
-  +selfLoopWeight?: number,
-  +verbose?: boolean,
-  +convergenceThreshold?: number,
-  +maxIterations?: number,
+export type FullPagerankOptions = {|
+  +selfLoopWeight: number,
+  +verbose: boolean,
+  +convergenceThreshold: number,
+  +maxIterations: number,
   // Scores will be normalized so that scores sum to totalScore
-  +totalScore?: number,
+  +totalScore: number,
   // Only nodes matching this prefix will count for normalization
-  +totalScoreNodePrefix?: NodeAddressT,
+  +totalScoreNodePrefix: NodeAddressT,
 |};
+export type PagerankOptions = $Shape<FullPagerankOptions>;
 
 export type {EdgeWeight} from "../core/attribution/graphToMarkovChain";
 export type EdgeEvaluator = (Edge) => EdgeWeight;

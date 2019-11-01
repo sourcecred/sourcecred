@@ -38,7 +38,8 @@ export function localGit(repositoryPath: string): GitDriver {
       // This post has some useful information on SSH_AUTH_SOCK:
       // http://blog.joncairns.com/2013/12/understanding-ssh-agent-and-ssh-add/
       SSH_AUTH_SOCK: process.env.SSH_AUTH_SOCK,
-      ...(env || {}),
+      // Workaround for <https://github.com/facebook/flow/issues/7128>.
+      ...(((env: any): {|[string]: string|}) || {}),
     };
     const options = {env: fullEnv};
     return execFileSync(

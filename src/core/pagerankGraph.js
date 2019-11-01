@@ -77,15 +77,15 @@ export opaque type PagerankGraphJSON = Compatible<{|
 /**
  * Options to control how PageRank runs and when it stops
  */
-export type PagerankOptions = {|
+export type FullPagerankOptions = {|
   // Maximum number of iterations before we give up on PageRank Convergence
   // Defaults to DEFAULT_MAX_ITERATIONS if not provided.
-  +maxIterations?: number,
+  +maxIterations: number,
 
   // PageRank will stop running once the diff between the previous iteration
   // and the latest is less than this threshold.
   // Defaults to DEFAULT_CONVERGENCE_THRESHOLD if not provided.
-  +convergenceThreshold?: number,
+  +convergenceThreshold: number,
 
   // Specifies a seed vector for PageRank "teleportation".
   // At every step, some proportion `alpha` of the weight will
@@ -99,13 +99,14 @@ export type PagerankOptions = {|
   //
   // Specifying any negative, NaN, or infinite weights is an error.
   // Specifying weights for nodes that are not in the graph is also an error.
-  +seed?: Map<NodeAddressT, number>,
+  +seed: Map<NodeAddressT, number>,
 
   // Specifies the probability with which score 'teleports' to the seed vector.
   // If alpha=0, then the teleportation never happens. If alpha=1, then PageRank
   // always converges to precisely the seed vector. Defaults to DEFAULT_ALPHA.
-  +alpha?: number,
+  +alpha: number,
 |};
+export type PagerankOptions = $Shape<FullPagerankOptions>;
 
 export type PagerankConvergenceReport = {|
   // A quantitative measure of how close to convergence the final distribution was.
@@ -123,7 +124,7 @@ export const DEFAULT_CONVERGENCE_THRESHOLD = 1e-7;
 export const DEFAULT_ALPHA = 0;
 export const DEFAULT_SEED: () => Map<NodeAddressT, number> = () => new Map();
 
-function defaultOptions(): PagerankOptions {
+function defaultOptions(): FullPagerankOptions {
   return {
     maxIterations: DEFAULT_MAX_ITERATIONS,
     convergenceThreshold: DEFAULT_CONVERGENCE_THRESHOLD,
