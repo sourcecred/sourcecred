@@ -7,8 +7,8 @@ import schema from "./schema";
 
 export default function generateGraphqlFlowTypes() {
   const prettierOptions = {
-    ...{parser: "babel"},
-    ...(prettier.resolveConfig.sync(__filename) || {}),
+    parser: "babel",
+    ...prettier.resolveConfig.sync(__filename),
   };
   return generateFlowTypes(schema(), prettierOptions);
 }

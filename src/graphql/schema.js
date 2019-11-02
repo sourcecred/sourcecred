@@ -230,7 +230,9 @@ export function object(fields: {[Fieldname]: FieldType}): NodeType {
   if (fields[ID_FIELD_NAME].type !== "ID") {
     throw new Error(`field "${ID_FIELD_NAME}" must be an ID field`);
   }
-  return {type: "OBJECT", fields: {...fields}};
+  // Workaround for <https://github.com/facebook/flow/issues/7128>.
+  const exactFields: {|[Fieldname]: FieldType|} = ({...fields}: any);
+  return {type: "OBJECT", fields: exactFields};
 }
 
 export function union(clauses: $ReadOnlyArray<Typename>): NodeType {

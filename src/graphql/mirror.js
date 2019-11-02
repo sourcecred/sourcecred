@@ -75,10 +75,8 @@ export class Mirror {
     if (db == null) throw new Error("db: " + String(db));
     if (schema == null) throw new Error("schema: " + String(schema));
     const fullOptions = {
-      ...{
-        blacklistedIds: [],
-        guessTypename: () => null,
-      },
+      blacklistedIds: [],
+      guessTypename: () => null,
       ...(options || {}),
     };
     this._db = db;
