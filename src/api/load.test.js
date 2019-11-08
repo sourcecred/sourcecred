@@ -59,19 +59,16 @@ describe("api/load", () => {
     timelineCredCompute.mockResolvedValue(fakeTimelineCred);
   });
   const discourseServerUrl = "https://example.com";
-  const discourseApiUsername = "credbot";
   const project: Project = {
     id: "foo",
     repoIds: [makeRepoId("foo", "bar")],
     discourseServer: {
       serverUrl: discourseServerUrl,
-      apiUsername: discourseApiUsername,
     },
     identities: [],
   };
   deepFreeze(project);
   const githubToken = "EXAMPLE_TOKEN";
-  const discourseKey = "EXAMPLE_KEY";
   const weights = defaultWeights();
   // Tweaks the weights so that we can ensure we aren't overriding with default weights
   weights.nodeManualWeights.set(NodeAddress.empty, 33);
@@ -87,7 +84,6 @@ describe("api/load", () => {
       params,
       plugins,
       project,
-      discourseKey,
     };
     return {options, taskReporter, sourcecredDirectory};
   };
@@ -120,8 +116,6 @@ describe("api/load", () => {
     const cacheDirectory = path.join(sourcecredDirectory, "cache");
     const expectedOptions: LoadDiscourseOptions = {
       fetchOptions: {
-        apiUsername: discourseApiUsername,
-        apiKey: discourseKey,
         serverUrl: discourseServerUrl,
       },
       cacheDirectory,
@@ -175,15 +169,6 @@ describe("api/load", () => {
     ]);
   });
 
-  it("errors if a discourse server is provided without a discourse key", () => {
-    const {options, taskReporter} = example();
-    const optionsWithoutKey = {...options, discourseKey: null};
-    expect.assertions(1);
-    return load(optionsWithoutKey, taskReporter).catch((e) =>
-      expect(e.message).toMatch("no Discourse key")
-    );
-  });
-
   it("errors if GitHub repoIds are provided without a GitHub token", () => {
     const {options, taskReporter} = example();
     const optionsWithoutToken = {...options, githubToken: null};
@@ -196,7 +181,7 @@ describe("api/load", () => {
   it("only loads GitHub if no Discourse server set", async () => {
     const {options, taskReporter, sourcecredDirectory} = example();
     const newProject = {...options.project, discourseServer: null};
-    const newOptions = {...options, project: newProject, discourseKey: null};
+    const newOptions = {...options, project: newProject};
     await load(newOptions, taskReporter);
     expect(loadDiscourse).not.toHaveBeenCalled();
     const projectDirectory = directoryForProjectId(

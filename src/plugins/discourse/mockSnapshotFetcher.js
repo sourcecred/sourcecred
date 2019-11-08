@@ -7,8 +7,6 @@ import fs from "fs-extra";
 import {Fetcher, type DiscourseFetchOptions} from "./fetch";
 
 export const options: DiscourseFetchOptions = deepFreeze({
-  apiKey: "FAKE_KEY",
-  apiUsername: "credbot",
   serverUrl: "https://sourcecred-test.discourse.group",
 });
 

@@ -77,8 +77,6 @@ describe("plugins/discourse/fetch", () => {
         throw new Error("fetchOptions == null");
       }
       expect(fetchOptions.method).toEqual("GET");
-      expect(fetchOptions.headers["Api-Key"]).toEqual(options.apiKey);
-      expect(fetchOptions.headers["Api-Username"]).toEqual(options.apiUsername);
       expect(fetchOptions.headers["Accept"]).toEqual("application/json");
     });
   });

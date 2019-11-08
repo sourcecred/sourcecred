@@ -63,23 +63,15 @@ Finally, we can navigate a browser window to `localhost:8080` to view generated 
 
 SourceCred can also run on Discourse instances!
 
-To do so, you'll first need admin access on the Discourse server in question. Generate
-an admin API key, available at the `/admin/api/keys`. You should also create a user account
-on the instance that will be the nominal user for the API requests. You shouldn't use an admin
-user identity for this, because then SourceCred could pick up private or deleted posts. Instead,
-we recommend making a user called "credbot" with no special permissions.
-
-Once you have the key and user ready, prepare SourceCred using the same steps as above,
-and then use the `sourcecred discourse` command, providing the server url, and then the username.
-Below is an example for loading the cred for SourceCred's [own discourse instance][forum].
+Prepare SourceCred using the same steps as above, then use the `sourcecred discourse` command,
+providing the server url. Below is an example for loading the cred for SourceCred's [own discourse instance][forum].
 
 ```Bash
 git clone https://github.com/sourcecred/sourcecred.git
 cd sourcecred
 yarn install
 yarn backend
-export SOURCECRED_DISCOURSE_KEY=$YOUR_KEY
-node bin/sourcecred.js discourse https://discourse.sourcecred.io credbot
+node bin/sourcecred.js discourse https://discourse.sourcecred.io
 ```
 
 ### Running with Docker

@@ -26,10 +26,6 @@ export function githubToken(): string | null {
   return NullUtil.orElse(process.env.SOURCECRED_GITHUB_TOKEN, null);
 }
 
-export function discourseKey(): string | null {
-  return NullUtil.orElse(process.env.SOURCECRED_DISCOURSE_KEY, null);
-}
-
 export async function loadWeights(path: string): Promise<Weights> {
   if (!(await fs.exists(path))) {
     throw new Error("Could not find the weights file");

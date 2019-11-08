@@ -6,12 +6,6 @@ snapshots_dir=src/plugins/discourse/snapshots
 test_instance_url="https://sourcecred-test.discourse.group"
 test_instance_username="credbot"
 
-if [ -z "${DISCOURSE_TEST_API_KEY:-}" ]; then
-  printf >&2 'Please set the DISCOURSE_TEST_API_KEY environment variable.\n'
-  printf >&2 'Contact the SourceCred maintainers to get the key.\n'
-  exit 1
-fi
-
 if [ ! "$(jq --version)" ]; then
   printf >&2 'This script depends on jq. Please install it.\n'
   exit 1
@@ -25,8 +19,6 @@ fetch() {
   filename="$(printf '%s' "${url}" | base64 -w 0 | tr -d '=' | tr '/+' '_-')"
   path="${snapshots_dir}/${filename}"
   curl -sfL "$url" \
-    -H "Api-Key: ${DISCOURSE_TEST_API_KEY}" \
-    -H "Api-Username: ${test_instance_username}" \
     -H "Accept: application/json" \
     | jq '.' > "${path}"
 }

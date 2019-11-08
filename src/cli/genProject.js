@@ -54,10 +54,6 @@ function usage(print: (string) => void): void {
         --discourse-url DISCOURSE_URL
             The url of a Discourse server to load.
 
-        --discourse-username DISCOURSE_USERNAME
-            The username of a Discourse account to scan from. It's recommended
-            to make an account called "credbot".
-
         --help
             Show this help message and exit, as 'sourcecred help scores'.
 
@@ -83,7 +79,6 @@ function die(std, message) {
 export const genProject: Command = async (args, std) => {
   let projectId: string | null = null;
   let discourseUrl: string | null = null;
-  let discourseUsername: string | null = null;
   const githubSpecs: string[] = [];
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -105,14 +100,6 @@ export const genProject: Command = async (args, std) => {
         discourseUrl = args[i];
         break;
       }
-      case "--discourse-username": {
-        if (discourseUsername != undefined)
-          return die(std, "'--discourse-username' given multiple times");
-        if (++i >= args.length)
-          return die(std, "'--discourse-username' given without value");
-        discourseUsername = args[i];
-        break;
-      }
       default: {
         if (projectId != null) return die(std, "multiple project IDs provided");
         projectId = args[i];
@@ -129,7 +116,6 @@ export const genProject: Command = async (args, std) => {
   const project: Project = await createProject({
     projectId,
     githubSpecs,
-    discourseUsername,
     discourseUrl,
     githubToken,
   });
@@ -141,28 +127,14 @@ export const genProject: Command = async (args, std) => {
 export async function createProject(opts: {|
   +projectId: string,
   +githubSpecs: $ReadOnlyArray<string>,
-  +discourseUsername: string | null,
   +discourseUrl: string | null,
   +githubToken: string | null,
 |}): Promise<Project> {
-  const {
-    projectId,
-    githubSpecs,
-    discourseUsername,
-    discourseUrl,
-    githubToken,
-  } = opts;
+  const {projectId, githubSpecs, discourseUrl, githubToken} = opts;
   let repoIds: RepoId[] = [];
   let discourseServer = null;
-  if (discourseUrl && discourseUsername) {
-    discourseServer = {serverUrl: discourseUrl, apiUsername: discourseUsername};
-  } else if (
-    (!discourseUrl && discourseUsername) ||
-    (discourseUrl && !discourseUsername)
-  ) {
-    throw new Error(
-      "If either of discourseUrl and discourseUsername are provided, then both must be."
-    );
+  if (discourseUrl) {
+    discourseServer = {serverUrl: discourseUrl};
   }
   if (githubSpecs.length && githubToken == null) {
     throw new Error("Provided GitHub specs without GitHub token.");
