@@ -25,7 +25,10 @@ describe("src/analysis/timeline/timelinePagerank", () => {
       const expected = [
         new Map([[foo.address, 2]]),
         new Map([[foo.address, 1]]),
-        new Map([[foo.address, 0.5], [bar.address, 0.5]]),
+        new Map([
+          [foo.address, 0.5],
+          [bar.address, 0.5],
+        ]),
       ];
       expect(weights).toEqual(expected);
     });

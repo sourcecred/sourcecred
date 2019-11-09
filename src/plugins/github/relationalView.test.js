@@ -57,12 +57,36 @@ describe("plugins/github/relationalView", () => {
         });
       });
     }
-    hasEntityMethods("repos", () => view.repos(), (x) => view.repo(x));
-    hasEntityMethods("issues", () => view.issues(), (x) => view.issue(x));
-    hasEntityMethods("pulls", () => view.pulls(), (x) => view.pull(x));
-    hasEntityMethods("reviews", () => view.reviews(), (x) => view.review(x));
-    hasEntityMethods("comments", () => view.comments(), (x) => view.comment(x));
-    hasEntityMethods("commits", () => view.commits(), (x) => view.commit(x));
+    hasEntityMethods(
+      "repos",
+      () => view.repos(),
+      (x) => view.repo(x)
+    );
+    hasEntityMethods(
+      "issues",
+      () => view.issues(),
+      (x) => view.issue(x)
+    );
+    hasEntityMethods(
+      "pulls",
+      () => view.pulls(),
+      (x) => view.pull(x)
+    );
+    hasEntityMethods(
+      "reviews",
+      () => view.reviews(),
+      (x) => view.review(x)
+    );
+    hasEntityMethods(
+      "comments",
+      () => view.comments(),
+      (x) => view.comment(x)
+    );
+    hasEntityMethods(
+      "commits",
+      () => view.commits(),
+      (x) => view.commit(x)
+    );
     hasEntityMethods(
       "userlikes",
       () => view.userlikes(),

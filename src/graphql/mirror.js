@@ -861,9 +861,10 @@ export class Mirror {
       case "UNION":
         return [
           b.field("__typename"),
-          ...this._schemaInfo.unionTypes[typename].clauses.map(
-            (clause: Schema.Typename) =>
-              b.inlineFragment(clause, [b.field("id")])
+          ...this._schemaInfo.unionTypes[
+            typename
+          ].clauses.map((clause: Schema.Typename) =>
+            b.inlineFragment(clause, [b.field("id")])
           ),
         ];
       // istanbul ignore next

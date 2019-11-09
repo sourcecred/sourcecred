@@ -231,7 +231,12 @@ describe("plugins/discourse/mirror", () => {
   });
 
   function expectLikesSorted(as, bs) {
-    const s = (ls) => sortBy(ls, (x) => x.username, (x) => x.postId);
+    const s = (ls) =>
+      sortBy(
+        ls,
+        (x) => x.username,
+        (x) => x.postId
+      );
     expect(s(as)).toEqual(s(bs));
   }
 
