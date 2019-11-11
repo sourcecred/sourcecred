@@ -64,6 +64,13 @@ workflows:
   commit:
     jobs:
       - test
+      # We also run full-tests on each commit, but they're not configured as
+      # blocking checks. Thus, in the case that they complete before you want
+      # to merge your pull request, they provide information, and otherwise
+      # they don't get in your way.
+      - test_full
+      - test_full_10
+
       - docker/publish:
           deploy: false
           image: sourcecred/sourcecred
@@ -105,20 +112,6 @@ workflows:
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag sourcecred/sourcecred:latest sourcecred/sourcecred:${DOCKER_TAG}
                    docker push sourcecred/sourcecred
-
-      - test_full:
-          filters:
-            branches:
-              only:
-                - master
-                - /ci-.*/
-
-      - test_full_10:
-          filters:
-            branches:
-              only:
-                - master
-                - /ci-.*/
 
       - docker/publish:
           image: sourcecred/sourcecred
