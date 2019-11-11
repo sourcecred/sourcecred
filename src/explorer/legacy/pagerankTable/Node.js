@@ -29,7 +29,11 @@ export class NodeRowList extends React.PureComponent<NodeRowListProps> {
     const {pnd, maxEntriesPerList} = sharedProps;
     return (
       <React.Fragment>
-        {sortBy(nodes, (n) => -NullUtil.get(pnd.get(n)).score, (n) => n)
+        {sortBy(
+          nodes,
+          (n) => -NullUtil.get(pnd.get(n)).score,
+          (n) => n
+        )
           .slice(0, maxEntriesPerList)
           .map((node) => (
             <NodeRow

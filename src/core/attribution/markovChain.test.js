@@ -34,7 +34,11 @@ describe("core/attribution/markovChain", () => {
 
   describe("sparseMarkovChainFromTransitionMatrix", () => {
     it("works for a simple matrix", () => {
-      const matrix = [[1, 0, 0], [0.25, 0, 0.75], [0.25, 0.75, 0]];
+      const matrix = [
+        [1, 0, 0],
+        [0.25, 0, 0.75],
+        [0.25, 0.75, 0],
+      ];
       const chain = sparseMarkovChainFromTransitionMatrix(matrix);
       const expected = [
         {
@@ -80,7 +84,11 @@ describe("core/attribution/markovChain", () => {
     });
 
     it("rejects a matrix with negative entries", () => {
-      const matrix = [[1, 0, 0], [-0.5, 0.75, 0.75], [0, 0, 1]];
+      const matrix = [
+        [1, 0, 0],
+        [-0.5, 0.75, 0.75],
+        [0, 0, 1],
+      ];
       expect(() => sparseMarkovChainFromTransitionMatrix(matrix)).toThrow(
         /positive real.*-0.5/
       );
@@ -101,7 +109,10 @@ describe("core/attribution/markovChain", () => {
     });
 
     it("rejects a non-stochastic matrix", () => {
-      const matrix = [[1, 0], [0.125, 0.625]];
+      const matrix = [
+        [1, 0],
+        [0.125, 0.625],
+      ];
       expect(() => sparseMarkovChainFromTransitionMatrix(matrix)).toThrow(
         /sums to 0.75/
       );
@@ -338,7 +349,10 @@ describe("core/attribution/markovChain", () => {
     });
 
     it("finds the stationary distribution of a periodic chain", async () => {
-      const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [1, 0]]);
+      const chain = sparseMarkovChainFromTransitionMatrix([
+        [0, 1],
+        [1, 0],
+      ]);
       const params: PagerankParams = {
         chain,
         alpha: 0,
@@ -359,7 +373,10 @@ describe("core/attribution/markovChain", () => {
     });
 
     it("returns initial distribution if maxIterations===0", async () => {
-      const chain = sparseMarkovChainFromTransitionMatrix([[0, 1], [0, 1]]);
+      const chain = sparseMarkovChainFromTransitionMatrix([
+        [0, 1],
+        [0, 1],
+      ]);
       const params: PagerankParams = {
         chain,
         alpha: 0,

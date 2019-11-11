@@ -82,9 +82,9 @@ describe("plugins/github/parseReferences", () => {
       ]);
     });
     it("a link with surrounding context", () => {
-      expect(parseReferences("please see sourcecred/example_.repo#12")).toEqual(
-        [{refType: "BASIC", ref: repoRef}]
-      );
+      expect(
+        parseReferences("please see sourcecred/example_.repo#12")
+      ).toEqual([{refType: "BASIC", ref: repoRef}]);
     });
   });
 

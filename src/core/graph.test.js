@@ -994,7 +994,10 @@ describe("core/graph", () => {
             Direction.IN,
             [],
             [],
-            [{node: loop, edge: loop_loop}, {node: foo, edge: foo_loop}]
+            [
+              {node: loop, edge: loop_loop},
+              {node: foo, edge: foo_loop},
+            ]
           );
         });
         it("OUT", () => {
@@ -1076,7 +1079,10 @@ describe("core/graph", () => {
         it("works for a proper prefix match", () => {
           edgeExpectNeighbors(
             ["foo"],
-            [{node: foo, edge: foo_loop}, {node: foo, edge: loop_foo}]
+            [
+              {node: foo, edge: foo_loop},
+              {node: foo, edge: loop_foo},
+            ]
           );
         });
         it("works when there are no matching edges", () => {

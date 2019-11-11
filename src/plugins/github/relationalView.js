@@ -295,9 +295,11 @@ export class RelationalView {
       issues: expectAllNonNull(json, "issues", json.issues).map((x) =>
         this._addIssue(address, x)
       ),
-      pulls: expectAllNonNull(json, "pullRequests", json.pullRequests).map(
-        (x) => this._addPull(address, x)
-      ),
+      pulls: expectAllNonNull(
+        json,
+        "pullRequests",
+        json.pullRequests
+      ).map((x) => this._addPull(address, x)),
       timestampMs: +new Date(json.createdAt),
     };
     const raw = N.toRaw(address);

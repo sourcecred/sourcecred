@@ -2195,7 +2195,10 @@ describe("graphql/mirror", () => {
                 "ORDER BY o_id ASC"
             )
             .all()
-        ).toEqual([{o_id: "dos", p_rowid: null}, {o_id: "uno", p_rowid: null}]);
+        ).toEqual([
+          {o_id: "dos", p_rowid: null},
+          {o_id: "uno", p_rowid: null},
+        ]);
         expect(
           db
             .prepare("SELECT * FROM links ORDER BY parent_id ASC")
