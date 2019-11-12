@@ -153,18 +153,18 @@ class MockFetcher implements Discourse {
 }
 
 describe("plugins/discourse/mirror", () => {
-  beforeAll(() => {
-    jest.spyOn(console, "warn").mockImplementation(() => {});
-  });
   function spyWarn(): JestMockFn<[string], void> {
     return ((console.warn: any): JestMockFn<any, void>);
   }
   beforeEach(() => {
-    spyWarn().mockReset();
+    jest.spyOn(console, "warn").mockImplementation(() => {});
   });
-  afterAll(() => {
-    expect(console.warn).not.toHaveBeenCalled();
-    spyWarn().mockRestore();
+  afterEach(() => {
+    try {
+      expect(console.warn).not.toHaveBeenCalled();
+    } finally {
+      spyWarn().mockRestore();
+    }
   });
   const example = () => {
     const fetcher = new MockFetcher();
@@ -423,7 +423,7 @@ describe("plugins/discourse/mirror", () => {
           "while adding post http://example.com/t/2/1."
       );
       expect(console.warn).toHaveBeenCalledTimes(1);
-      jest.spyOn(console, "warn").mockImplementation(() => {});
+      spyWarn().mockReset();
     });
 
     it("warns if it finds a (non-latest) post with no topic", async () => {
@@ -446,7 +446,7 @@ describe("plugins/discourse/mirror", () => {
           "while adding post http://example.com/t/2/1."
       );
       expect(console.warn).toHaveBeenCalledTimes(1);
-      jest.spyOn(console, "warn").mockImplementation(() => {});
+      spyWarn().mockReset();
     });
 
     it("warns if it gets a like that doesn't correspond to any post", async () => {
@@ -463,7 +463,7 @@ describe("plugins/discourse/mirror", () => {
           "on a like by credbot on post id 37."
       );
       expect(console.warn).toHaveBeenCalledTimes(1);
-      jest.spyOn(console, "warn").mockImplementation(() => {});
+      spyWarn().mockReset();
     });
   });
 
@@ -482,7 +482,7 @@ describe("plugins/discourse/mirror", () => {
         "while processing likes for credbot; skipping this user."
     );
     expect(console.warn).toHaveBeenCalledTimes(1);
-    jest.spyOn(console, "warn").mockImplementation(() => {});
+    spyWarn().mockReset();
   });
 
   it("sends the right tasks to the TaskReporter", async () => {
