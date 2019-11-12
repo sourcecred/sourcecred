@@ -53,9 +53,8 @@ export async function load(
   function discourseGraph(): ?Promise<Graph> {
     const discourseServer = project.discourseServer;
     if (discourseServer != null) {
-      const {serverUrl} = discourseServer;
       const discourseOptions = {
-        fetchOptions: {serverUrl},
+        discourseServer,
         cacheDirectory,
       };
       return loadDiscourse(discourseOptions, taskReporter);

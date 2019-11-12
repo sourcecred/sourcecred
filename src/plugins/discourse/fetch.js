@@ -18,6 +18,7 @@ import * as NullUtil from "../../util/null";
 export type UserId = number;
 export type PostId = number;
 export type TopicId = number;
+export type CategoryId = number;
 
 export type Topic = {|
   +id: TopicId,
