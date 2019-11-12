@@ -456,7 +456,7 @@ export class Mirror implements DiscourseData {
     })();
 
     reporter.start("discourse/likes");
-    for (const user of this.users()) {
+    const addUserLikes = async (user: string) => {
       let offset = 0;
       let upToDate = false;
       while (!upToDate) {
@@ -472,6 +472,16 @@ export class Mirror implements DiscourseData {
           upToDate = true;
         }
         offset += likeActions.length;
+      }
+    };
+    for (const user of this.users()) {
+      try {
+        await addUserLikes(user);
+      } catch (e) {
+        console.warn(
+          `Warning: Encountered error '${e.message}' ` +
+            `while processing likes for ${user}; skipping this user.`
+        );
       }
     }
     reporter.finish("discourse/likes");

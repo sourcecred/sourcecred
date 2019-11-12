@@ -467,6 +467,24 @@ describe("plugins/discourse/mirror", () => {
     });
   });
 
+  it("warns if a user's likes are missing", async () => {
+    const {mirror, fetcher, reporter} = example();
+    const pid = fetcher.addPost(1, null, "credbot");
+    (fetcher: any).likesByUser = async () => {
+      throw new Error("404 - Likes not found");
+    };
+    await mirror.update(reporter);
+    expect(mirror.topics()).toEqual([fetcher._topic(1)]);
+    expect(mirror.posts()).toEqual([fetcher._post(pid)]);
+    expect(mirror.likes()).toEqual([]);
+    expect(console.warn).toHaveBeenCalledWith(
+      "Warning: Encountered error '404 - Likes not found' " +
+        "while processing likes for credbot; skipping this user."
+    );
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
   it("sends the right tasks to the TaskReporter", async () => {
     const {mirror, fetcher, reporter} = example();
     fetcher.addPost(1, null, "credbot");
