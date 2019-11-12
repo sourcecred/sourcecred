@@ -1,8 +1,28 @@
 // @flow
 
 import type {TaskReporter} from "../../util/taskReporter";
-import {type Discourse} from "./fetch";
+import type {Discourse, CategoryId} from "./fetch";
 import {MirrorRepository} from "./mirrorRepository";
+
+export type MirrorOptions = {|
+  // Category definition topics don't show up
+  // in the list of bumped topics.
+  // We need to proactively check them.
+  // This sets the interval at which we
+  // should check.
+  +recheckCategoryDefinitionsAfterMs: number,
+
+  // When you're concerned about potentially missed edits,
+  // this option lets you recheck all existing topics in a
+  // given set of category IDs (where 1 is uncategorized).
+  // It does not propagate into subcategories.
+  +recheckTopicsInCategories: $ReadOnlyArray<CategoryId>,
+|};
+
+const defaultOptions: MirrorOptions = {
+  recheckCategoryDefinitionsAfterMs: 24 * 3600 * 1000, // 24h
+  recheckTopicsInCategories: [],
+};
 
 /**
  * Mirrors data from the Discourse API into a local sqlite db.
@@ -22,6 +42,7 @@ import {MirrorRepository} from "./mirrorRepository";
  * for multiple Discourse servers is not permitted; use separate Mirrors.
  */
 export class Mirror {
+  +_options: MirrorOptions;
   +_repo: MirrorRepository;
   +_fetcher: Discourse;
   +_serverUrl: string;
@@ -35,10 +56,19 @@ export class Mirror {
    * A serverUrl is required so that we can ensure that this Mirror is only storing
    * data from a particular Discourse server.
    */
-  constructor(repo: MirrorRepository, fetcher: Discourse, serverUrl: string) {
+  constructor(
+    repo: MirrorRepository,
+    fetcher: Discourse,
+    serverUrl: string,
+    options?: $Shape<MirrorOptions>
+  ) {
     this._repo = repo;
     this._fetcher = fetcher;
     this._serverUrl = serverUrl;
+    this._options = {
+      ...defaultOptions,
+      ...(options || {}),
+    };
   }
 
   async update(reporter: TaskReporter) {

@@ -31,7 +31,7 @@ describe("core/project", () => {
       },
     ],
   });
-  describe("to/fro JSON", () => {
+  describe("to/from JSON", () => {
     it("round trip is identity", () => {
       function check(p: Project) {
         const json = projectToJSON(p);
