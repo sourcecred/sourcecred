@@ -20,7 +20,6 @@ function usage(print: (string) => void): void {
     usage: sourcecred gen-project PROJECT_ID
                                   [--github GITHUB_SPEC [...]]
                                   [--discourse-url DISCOURSE_URL]
-                                  [--discourse-username DISCOURSE_USERNAME]
            sourcecred gen-project --help
 
     Generates a SourceCred project configuration based on the provided specs.
