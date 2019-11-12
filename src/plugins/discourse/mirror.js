@@ -456,11 +456,14 @@ export class Mirror implements DiscourseData {
     })();
 
     reporter.start("discourse/likes");
-    const addUserLikes = async (user: string) => {
+    for (const user of this.users()) {
       let offset = 0;
       let upToDate = false;
       while (!upToDate) {
         const likeActions = await this._fetcher.likesByUser(user, offset);
+        if (likeActions == null) {
+          break;
+        }
         possiblePageSize = Math.max(likeActions.length, possiblePageSize);
         for (const like of likeActions) {
           if (addLike(like).doneWithUser) {
@@ -472,16 +475,6 @@ export class Mirror implements DiscourseData {
           upToDate = true;
         }
         offset += likeActions.length;
-      }
-    };
-    for (const user of this.users()) {
-      try {
-        await addUserLikes(user);
-      } catch (e) {
-        console.warn(
-          `Warning: Encountered error '${e.message}' ` +
-            `while processing likes for ${user}; skipping this user.`
-        );
       }
     }
     reporter.finish("discourse/likes");

@@ -467,22 +467,33 @@ describe("plugins/discourse/mirror", () => {
     });
   });
 
-  it("warns if a user's likes are missing", async () => {
+  it("ignores if a user's likes are missing", async () => {
     const {mirror, fetcher, reporter} = example();
     const pid = fetcher.addPost(1, null, "credbot");
-    (fetcher: any).likesByUser = async () => {
-      throw new Error("404 - Likes not found");
-    };
+    (fetcher: any).likesByUser = async () => null;
     await mirror.update(reporter);
     expect(mirror.topics()).toEqual([fetcher._topic(1)]);
     expect(mirror.posts()).toEqual([fetcher._post(pid)]);
     expect(mirror.likes()).toEqual([]);
-    expect(console.warn).toHaveBeenCalledWith(
-      "Warning: Encountered error '404 - Likes not found' " +
-        "while processing likes for credbot; skipping this user."
-    );
-    expect(console.warn).toHaveBeenCalledTimes(1);
-    spyWarn().mockReset();
+  });
+
+  it("inserts other likes if one user's likes are missing", async () => {
+    const {mirror, fetcher, reporter} = example();
+    const p1 = fetcher.addPost(1, null, "credbot");
+    const p2 = fetcher.addPost(1, 1, "otheruser");
+    const l1 = fetcher.addLike("otheruser", 1, 123);
+    const _likesByUser = fetcher.likesByUser.bind(fetcher);
+    (fetcher: any).likesByUser = async (
+      targetUsername: string,
+      offset: number
+    ) => {
+      if (targetUsername == "credbot") return null;
+      return await _likesByUser(targetUsername, offset);
+    };
+    await mirror.update(reporter);
+    expect(mirror.topics()).toEqual([fetcher._topic(1)]);
+    expect(mirror.posts()).toEqual([fetcher._post(p1), fetcher._post(p2)]);
+    expect(mirror.likes()).toEqual([l1]);
   });
 
   it("sends the right tasks to the TaskReporter", async () => {
