@@ -4,7 +4,6 @@ set -eu
 
 snapshots_dir=src/plugins/discourse/snapshots
 test_instance_url="https://sourcecred-test.discourse.group"
-test_instance_username="credbot"
 
 if [ ! "$(jq --version)" ]; then
   printf >&2 'This script depends on jq. Please install it.\n'
@@ -31,3 +30,6 @@ fetch "/t/11.json"
 fetch "/t/21.json"
 fetch "/posts/14.json"
 fetch "/user_actions.json?username=dl-proto&filter=1&offset=0"
+
+# New API loading style.
+fetch "/categories.json?show_subcategory_list=true"

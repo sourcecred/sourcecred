@@ -23,6 +23,11 @@ describe("plugins/discourse/fetch", () => {
         await snapshotFetcher().likesByUser("dl-proto", 0)
       ).toMatchSnapshot();
     });
+    it("loads topic IDs that are category definition topics", async () => {
+      expect(
+        await snapshotFetcher().categoryDefinitionTopicIds()
+      ).toMatchSnapshot();
+    });
   });
 
   describe("error handling", () => {
@@ -50,6 +55,11 @@ describe("plugins/discourse/fetch", () => {
 
     expectError("topic", (x) => x.topicWithPosts(14), 429);
     expectError("post", (x) => x.post(14), 429);
+    expectError(
+      "categoryDefinitionTopicIds",
+      (x) => x.categoryDefinitionTopicIds(),
+      429
+    );
 
     function expectNull(name, f, status) {
       it(`${name} returns null on ${String(status)}`, async () => {
