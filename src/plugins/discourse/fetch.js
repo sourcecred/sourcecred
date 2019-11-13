@@ -20,11 +20,27 @@ export type PostId = number;
 export type TopicId = number;
 export type CategoryId = number;
 
-export type Topic = {|
+/**
+ * The "view" received from the Discourse API
+ * when getting a topic by ID.
+ *
+ * This filters some relevant data like bumpedMs,
+ * and the type separation makes this distinction clear.
+ */
+export type TopicView = {|
   +id: TopicId,
+  +categoryId: CategoryId,
   +title: string,
   +timestampMs: number,
   +authorUsername: string,
+|};
+
+/**
+ * A complete Topic object.
+ */
+export type Topic = {|
+  ...TopicView,
+  +bumpedMs: number,
 |};
 
 export type Post = {|
@@ -43,7 +59,7 @@ export type Post = {|
 |};
 
 export type TopicWithPosts = {|
-  +topic: Topic,
+  +topic: TopicView,
   // Not guaranteed to contain all the Posts in the topic—clients will need to
   // manually request some posts. The raw response actually includes a list of
   // all the PostIds in the topic, but for now we don't use them.
@@ -178,11 +194,12 @@ export class Fetcher implements Discourse {
     }
     failForNotOk(response);
     const json = await response.json();
-    const posts = json.post_stream.posts.map(parsePost);
-    const topic: Topic = {
+    let posts = json.post_stream.posts.map(parsePost);
+    const topic: TopicView = {
       id: json.id,
+      categoryId: json.category_id,
       title: json.title,
-      timestampMs: +new Date(json.created_at),
+      timestampMs: Date.parse(json.created_at),
       authorUsername: json.details.created_by.username,
     };
     return {topic, posts};
