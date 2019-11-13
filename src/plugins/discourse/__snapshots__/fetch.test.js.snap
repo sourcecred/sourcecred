@@ -217,6 +217,67 @@ Array [
 ]
 `;
 
+exports[`plugins/discourse/fetch snapshot testing loads topics ordered by bumped_at since a given timestamp 1`] = `
+Array [
+  Object {
+    "authorUsername": "system",
+    "bumpedMs": 1554938179399,
+    "categoryId": 1,
+    "id": 7,
+    "timestampMs": 1554236412879,
+    "title": "Welcome to Discourse",
+  },
+  Object {
+    "authorUsername": "d11",
+    "bumpedMs": 1571855191281,
+    "categoryId": 1,
+    "id": 21,
+    "timestampMs": 1571855191140,
+    "title": "A Post With References",
+  },
+  Object {
+    "authorUsername": "d11",
+    "bumpedMs": 1570420159922,
+    "categoryId": 1,
+    "id": 20,
+    "timestampMs": 1570420159868,
+    "title": "123 a post with numbers in slug",
+  },
+  Object {
+    "authorUsername": "d11",
+    "bumpedMs": 1570049836311,
+    "categoryId": 1,
+    "id": 19,
+    "timestampMs": 1570049491690,
+    "title": "This post will be a wiki",
+  },
+  Object {
+    "authorUsername": "d11",
+    "bumpedMs": 1570049410625,
+    "categoryId": 1,
+    "id": 18,
+    "timestampMs": 1570049410568,
+    "title": "Test Poll Please Ignore",
+  },
+  Object {
+    "authorUsername": "d11",
+    "bumpedMs": 1564951839667,
+    "categoryId": 1,
+    "id": 11,
+    "timestampMs": 1564744349408,
+    "title": "My First Test Post",
+  },
+  Object {
+    "authorUsername": "dl-proto",
+    "bumpedMs": 1564744632755,
+    "categoryId": 1,
+    "id": 13,
+    "timestampMs": 1564744553843,
+    "title": "A Thread With Links",
+  },
+]
+`;
+
 exports[`plugins/discourse/fetch snapshot testing loads user likes from snapshot 1`] = `
 Array [
   Object {

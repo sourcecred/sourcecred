@@ -45,6 +45,10 @@ class MockFetcher implements Discourse {
     throw new Error("Method should not be used yet by mirror");
   }
 
+  async topicsBumpedSince(_unused_sinceMs: number): Promise<Topic[]> {
+    throw new Error("Method should not be used yet by mirror");
+  }
+
   async latestTopicId(): Promise<TopicId> {
     return this._latestTopicId;
   }

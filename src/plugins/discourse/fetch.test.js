@@ -28,6 +28,9 @@ describe("plugins/discourse/fetch", () => {
         await snapshotFetcher().categoryDefinitionTopicIds()
       ).toMatchSnapshot();
     });
+    it("loads topics ordered by bumped_at since a given timestamp", async () => {
+      expect(await snapshotFetcher().topicsBumpedSince(0)).toMatchSnapshot();
+    });
   });
 
   describe("error handling", () => {
@@ -55,6 +58,8 @@ describe("plugins/discourse/fetch", () => {
 
     expectError("topic", (x) => x.topicWithPosts(14), 429);
     expectError("post", (x) => x.post(14), 429);
+
+    expectError("topicsBumpedSince", (x) => x.topicsBumpedSince(0), 429);
     expectError(
       "categoryDefinitionTopicIds",
       (x) => x.categoryDefinitionTopicIds(),

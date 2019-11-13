@@ -33,3 +33,4 @@ fetch "/user_actions.json?username=dl-proto&filter=1&offset=0"
 
 # New API loading style.
 fetch "/categories.json?show_subcategory_list=true"
+fetch "/latest.json?order=activity&ascending=false&page=0"
