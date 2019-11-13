@@ -4,6 +4,7 @@ import Database from "better-sqlite3";
 import fs from "fs";
 import tmp from "tmp";
 import {SqliteMirrorRepository} from "./mirrorRepository";
+import type {Topic} from "./fetch";
 
 describe("plugins/discourse/mirrorRepository", () => {
   it("rejects a different server url without changing the database", () => {
@@ -23,5 +24,62 @@ describe("plugins/discourse/mirrorRepository", () => {
 
     expect(() => new SqliteMirrorRepository(db, url1)).not.toThrow();
     expect(fs.readFileSync(filename).toJSON()).toEqual(data);
+  });
+
+  it("bumpedMsForTopic finds an existing topic's bumpedMs", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+    const topic: Topic = {
+      id: 123,
+      categoryId: 1,
+      title: "Sample topic",
+      timestampMs: 456789,
+      bumpedMs: 456789,
+      authorUsername: "credbot",
+    };
+
+    // When
+    repository.addTopic(topic);
+    const bumpedMs = repository.bumpedMsForTopic(topic.id);
+
+    // Then
+    expect(bumpedMs).toEqual(topic.bumpedMs);
+  });
+
+  it("bumpedMsForTopic returns null when missing topic", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+
+    // When
+    const bumpedMs = repository.bumpedMsForTopic(123);
+
+    // Then
+    expect(bumpedMs).toEqual(null);
+  });
+
+  it("topicsInCategories finds an an existing topic by categoryId", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+    const topic: Topic = {
+      id: 123,
+      categoryId: 42,
+      title: "Sample topic",
+      timestampMs: 456789,
+      bumpedMs: 456789,
+      authorUsername: "credbot",
+    };
+
+    // When
+    repository.addTopic(topic);
+    const topicIds = repository.topicsInCategories([topic.categoryId]);
+
+    // Then
+    expect(topicIds).toEqual([topic.id]);
   });
 });
