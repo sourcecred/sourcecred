@@ -78,15 +78,11 @@ const command: Command = async (args, std) => {
     return die(std, "Expected one positional arguments (or --help).");
   }
   const [serverUrl] = positionalArgs;
-  let projectId = serverUrl;
-  if (projectId.startsWith("https://")) {
-    projectId = projectId.slice("https://".length);
-  } else if (projectId.startsWith("http://")) {
-    projectId = projectId.slice("http://".length);
-  } else {
+  const httpRE = new RegExp(/^https?:\/\//);
+  if (!httpRE.test(serverUrl)) {
     die(std, "expected server url to start with 'https://' or 'http://'");
   }
-
+  const projectId = serverUrl.trim().replace(httpRE, "");
   const project: Project = {
     id: projectId,
     repoIds: [],
