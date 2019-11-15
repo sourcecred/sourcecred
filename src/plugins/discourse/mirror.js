@@ -70,6 +70,13 @@ export class Mirror {
   }
 
   async update(reporter: TaskReporter) {
+    reporter.start("discourse");
+    await this._updateTopics(reporter);
+    await this._updateLikes(reporter);
+    reporter.finish("discourse");
+  }
+
+  async _updateTopics(reporter: TaskReporter) {
     // Local functions add the warning and tracking semantics we want from them.
     const encounteredPostIds = new Set();
 
@@ -85,22 +92,6 @@ export class Mirror {
         return {changes: 0, lastInsertRowid: -1};
       }
     };
-
-    const addLike = (like) => {
-      try {
-        const res = this._repo.addLike(like);
-        return {doneWithUser: res.changes === 0};
-      } catch (e) {
-        console.warn(
-          `Warning: Encountered error '${e.message}' ` +
-            `on a like by ${like.username} ` +
-            `on post id ${like.postId}.`
-        );
-        return {doneWithUser: false};
-      }
-    };
-
-    reporter.start("discourse");
 
     const {
       maxPostId: lastLocalPostId,
@@ -148,6 +139,22 @@ export class Mirror {
       }
     }
     reporter.finish("discourse/posts");
+  }
+
+  async _updateLikes(reporter: TaskReporter) {
+    const addLike = (like) => {
+      try {
+        const res = this._repo.addLike(like);
+        return {doneWithUser: res.changes === 0};
+      } catch (e) {
+        console.warn(
+          `Warning: Encountered error '${e.message}' ` +
+            `on a like by ${like.username} ` +
+            `on post id ${like.postId}.`
+        );
+        return {doneWithUser: false};
+      }
+    };
 
     // I don't want to hard code the expected page size, in case it changes upstream.
     // However, it's helpful to have a good guess of what the page size is, because if we
@@ -189,6 +196,5 @@ export class Mirror {
       }
     }
     reporter.finish("discourse/likes");
-    reporter.finish("discourse");
   }
 }
