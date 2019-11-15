@@ -60,12 +60,7 @@ export type Post = {|
 
 export type TopicWithPosts = {|
   +topic: TopicView,
-  // Not guaranteed to contain all the Posts in the topic—clients will need to
-  // manually request some posts. The raw response actually includes a list of
-  // all the PostIds in the topic, but for now we don't use them.
-  //
-  // We do use these Posts though, as it allows us to save requesting them all
-  // individually.
+  // Guaranteed to contain all the Posts in the topic.
   +posts: $ReadOnlyArray<Post>,
 |};
 
@@ -198,6 +193,7 @@ export class Fetcher implements Discourse {
     }
     failForNotOk(response);
     const json = await response.json();
+    const {posts_count: postCount} = json;
     let posts = json.post_stream.posts.map(parsePost);
     const topic: TopicView = {
       id: json.id,
@@ -206,6 +202,19 @@ export class Fetcher implements Discourse {
       timestampMs: Date.parse(json.created_at),
       authorUsername: json.details.created_by.username,
     };
+
+    // This shouldn't could cause infinite loops when the API is weird.
+    // As requesting pages beyond the last page will produce a 404.
+    // Pagination here is 1-based, and we already had page 1.
+    let page = 2;
+    while (postCount > posts.length) {
+      const resNext = await this._fetch(`/t/${id}.json?page=${page}`);
+      failForNotOk(resNext);
+      const subPosts = (await resNext.json()).post_stream.posts.map(parsePost);
+      posts = [...posts, ...subPosts];
+      page++;
+    }
+
     return {topic, posts};
   }
 

@@ -15,6 +15,9 @@ describe("plugins/discourse/fetch", () => {
     it("loads a particular topic from snapshot", async () => {
       expect(await snapshotFetcher().topicWithPosts(11)).toMatchSnapshot();
     });
+    it("loads a topic with pagination from snapshot", async () => {
+      expect(await snapshotFetcher().topicWithPosts(26)).toMatchSnapshot();
+    });
     it("loads a particular post from snapshot", async () => {
       expect(await snapshotFetcher().post(14)).toMatchSnapshot();
     });
