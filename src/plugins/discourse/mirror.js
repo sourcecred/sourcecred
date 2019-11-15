@@ -1,7 +1,7 @@
 // @flow
 
 import type {TaskReporter} from "../../util/taskReporter";
-import type {Discourse, CategoryId} from "./fetch";
+import type {Discourse, CategoryId, Topic} from "./fetch";
 import {MirrorRepository} from "./mirrorRepository";
 
 export type MirrorOptions = {|
@@ -117,7 +117,10 @@ export class Mirror {
       const topicWithPosts = await this._fetcher.topicWithPosts(topicId);
       if (topicWithPosts != null) {
         const {topic, posts} = topicWithPosts;
-        this._repo.addTopic(topic);
+        // TODO: Quick hack, as TopicView does not include bumpedMs.
+        // This should be resolved in the new sync logic.
+        const workaroundTopic: Topic = {...topic, bumpedMs: topic.timestampMs};
+        this._repo.addTopic(workaroundTopic);
         for (const post of posts) {
           addPost(post);
         }

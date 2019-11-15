@@ -9,6 +9,7 @@ import {
   type TopicId,
   type PostId,
   type Topic,
+  type TopicView,
   type Post,
   type TopicWithPosts,
   type LikeAction,
@@ -64,7 +65,7 @@ class MockFetcher implements Discourse {
     // Only return the first post in the posts array, to ensure that we have to
     // test the functionality where we manually grab posts by ID
     const posts = [firstPost];
-    return {topic: this._topic(id), posts};
+    return {topic: this._topicView(id), posts};
   }
 
   async likesByUser(
@@ -80,7 +81,15 @@ class MockFetcher implements Discourse {
 
   _topic(id: TopicId): Topic {
     return {
+      ...this._topicView(id),
+      bumpedMs: 1000,
+    };
+  }
+
+  _topicView(id: TopicId): TopicView {
+    return {
       id,
+      categoryId: 1,
       title: `topic ${id}`,
       timestampMs: 1000,
       authorUsername: "credbot",
