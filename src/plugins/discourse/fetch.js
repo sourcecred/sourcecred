@@ -108,6 +108,10 @@ export interface Discourse {
     targetUsername: string,
     offset: number
   ): Promise<LikeAction[] | null>;
+
+  // Gets the topic IDs for every "about-x-category" topic.
+  // Discourse calls this a "definition" topic.
+  categoryDefinitionTopicIds(): Promise<Set<TopicId>>;
 }
 
 const MAX_API_REQUESTS_PER_MINUTE = 55;
@@ -164,6 +168,57 @@ export class Fetcher implements Discourse {
     return this._fetchImplementation(fullUrl, fetchOptions);
   }
 
+  async categoryDefinitionTopicIds(): Promise<Set<TopicId>> {
+    const topicIdRE = new RegExp("/t/[\\w-]+/(\\d+)$");
+    const urls: string[] = [];
+    const categoriesWithSubcategories: CategoryId[] = [];
+
+    // Root categories
+    const response = await this._fetch(
+      `/categories.json?show_subcategory_list=true`
+    );
+    failIfMissing(response);
+    failForNotOk(response);
+    const {categories: rootCategories} = (await response.json()).category_list;
+    for (const cat of rootCategories) {
+      if (cat.topic_url != null) {
+        urls.push(cat.topic_url);
+      }
+      if (cat.subcategory_ids) {
+        categoriesWithSubcategories.push(cat.id);
+      }
+    }
+
+    // Subcategories
+    for (const rootCatId of categoriesWithSubcategories) {
+      const subResponse = await this._fetch(
+        `/categories.json?show_subcategory_list=true&parent_category_id=${rootCatId}`
+      );
+      failIfMissing(subResponse);
+      failForNotOk(subResponse);
+      const {categories: subCategories} = (
+        await subResponse.json()
+      ).category_list;
+      for (const cat of subCategories) {
+        if (cat.topic_url != null) {
+          urls.push(cat.topic_url);
+        }
+      }
+    }
+
+    const ids = urls.map((url) => {
+      const match = topicIdRE.exec(url);
+      if (match == null) {
+        throw new Error(
+          `Encountered topic URL we failed to parse it's TopicId from: ${url}`
+        );
+      }
+      return Number(match[1]);
+    });
+
+    return new Set(ids);
+  }
+
   async latestTopicId(): Promise<TopicId> {
     const response = await this._fetch("/latest.json?order=created");
     failIfMissing(response);
@@ -172,6 +227,7 @@ export class Fetcher implements Discourse {
     if (json.topic_list.topics.length === 0) {
       throw new Error(`no topics! got ${stringify(json)} as latest topics.`);
     }
+
     return json.topic_list.topics[0].id;
   }
 
