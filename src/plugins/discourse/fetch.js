@@ -36,11 +36,26 @@ export type TopicView = {|
 |};
 
 /**
+ * The "latest" format Topic from the Discourse API
+ * when getting a list of sorted topics.
+ *
+ * This filters relevant data like authorUsername,
+ * and the type separation makes this distinction clear.
+ */
+export type TopicLatest = {|
+  +id: TopicId,
+  +categoryId: CategoryId,
+  +title: string,
+  +timestampMs: number,
+  +bumpedMs: number,
+|};
+
+/**
  * A complete Topic object.
  */
 export type Topic = {|
   ...TopicView,
-  +bumpedMs: number,
+  ...TopicLatest,
 |};
 
 export type Post = {|
@@ -112,6 +127,17 @@ export interface Discourse {
   // Gets the topic IDs for every "about-x-category" topic.
   // Discourse calls this a "definition" topic.
   categoryDefinitionTopicIds(): Promise<Set<TopicId>>;
+
+  /**
+   * Fetches Topics that have been bumped to a higher timestamp than `sinceMs`.
+   *
+   * Note: this will not be able to find "about-x-category" category definition topics.
+   * due to a hard-coded filter in the API.
+   * https://github.com/discourse/discourse/blob/594925b8965a26c512665371092fec3383320b58/app/controllers/list_controller.rb#L66
+   *
+   * Use categoryDefinitionTopicIds() to find those topics.
+   */
+  topicsBumpedSince(sinceMs: number): Promise<TopicLatest[]>;
 }
 
 const MAX_API_REQUESTS_PER_MINUTE = 55;
@@ -303,6 +329,49 @@ export class Fetcher implements Discourse {
     const json = await response.json();
     return json.user_actions.map(parseLike);
   }
+
+  async topicsBumpedSince(sinceMs: number): Promise<TopicLatest[]> {
+    const topics: TopicLatest[] = [];
+    let lastUnpinnedTimestamp: number = Infinity;
+    let morePages: boolean = true;
+    let page: number = 0;
+
+    // Keep going till we've found timestamps older than sinceMs.
+    while (lastUnpinnedTimestamp >= sinceMs && morePages) {
+      const response = await this._fetch(
+        `/latest.json?order=activity&ascending=false&page=${page}`
+      );
+      failIfMissing(response);
+      failForNotOk(response);
+      const {topic_list: topicList} = await response.json();
+
+      // Having the same amount of results as expected by pagination, assume there's another page.
+      morePages = topicList.per_page == topicList.topics.length;
+
+      for (const jsonTopic of topicList.topics) {
+        const topic = parseLatestTopic(jsonTopic);
+
+        // Due to how pinning works, we may have some topics in here that weren't bumped past `sinceMs`.
+        // Filter those out now.
+        if (topic.bumpedMs > sinceMs) {
+          topics.push(topic);
+        }
+
+        // Make sure we ignore pinned topics for this value, as pinned topics move to the top,
+        // and are unhelpful in knowing whether we should fetch another page.
+        if (!jsonTopic.pinned) {
+          lastUnpinnedTimestamp = Math.min(
+            lastUnpinnedTimestamp,
+            topic.bumpedMs
+          );
+        }
+      }
+
+      page++;
+    }
+
+    return topics;
+  }
 }
 
 function failIfMissing(response: Response) {
@@ -321,6 +390,31 @@ function failForNotOk(response: Response) {
   if (!response.ok) {
     throw new Error(`not OK status ${response.status} on ${response.url}`);
   }
+}
+
+/**
+ * Parses a "latest" topic.
+ *
+ * A "latest" topic, is a topic as returned by the /latest.json API call,
+ * and has a distinct assumptions:
+ * - bumped_at is always present.
+ *
+ * usernamesById map used to resolve these IDs to usernames.
+ */
+function parseLatestTopic(json: any): TopicLatest {
+  if (json.bumped_at == null) {
+    throw new Error(
+      `Unexpected missing bumped_at field for /latest.json request for topic ID ${json.id}.`
+    );
+  }
+
+  return {
+    id: json.id,
+    categoryId: json.category_id,
+    title: json.title,
+    timestampMs: Date.parse(json.created_at),
+    bumpedMs: Date.parse(json.bumped_at),
+  };
 }
 
 function parsePost(json: any): Post {

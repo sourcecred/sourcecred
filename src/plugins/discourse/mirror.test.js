@@ -10,6 +10,7 @@ import {
   type PostId,
   type Topic,
   type TopicView,
+  type TopicLatest,
   type Post,
   type TopicWithPosts,
   type LikeAction,
@@ -42,6 +43,10 @@ class MockFetcher implements Discourse {
   }
 
   async categoryDefinitionTopicIds(): Promise<Set<TopicId>> {
+    throw new Error("Method should not be used yet by mirror");
+  }
+
+  async topicsBumpedSince(_unused_sinceMs: number): Promise<TopicLatest[]> {
     throw new Error("Method should not be used yet by mirror");
   }
 
