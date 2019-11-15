@@ -90,8 +90,12 @@ export interface Discourse {
 
   /**
    * Retrieves the like actions that were initiated by the target user.
+   * May be 404 on the server, which will return a null here.
    */
-  likesByUser(targetUsername: string, offset: number): Promise<LikeAction[]>;
+  likesByUser(
+    targetUsername: string,
+    offset: number
+  ): Promise<LikeAction[] | null>;
 }
 
 const MAX_API_REQUESTS_PER_MINUTE = 55;
@@ -199,10 +203,18 @@ export class Fetcher implements Discourse {
     return parsePost(json);
   }
 
-  async likesByUser(username: string, offset: number): Promise<LikeAction[]> {
+  async likesByUser(
+    username: string,
+    offset: number
+  ): Promise<LikeAction[] | null> {
     const response = await this._fetch(
       `/user_actions.json?username=${username}&filter=1&offset=${offset}`
     );
+    const {status} = response;
+    if (status === 404) {
+      // The user probably no longer exists. This is expected, see #1440.
+      return null;
+    }
     failIfMissing(response);
     failForNotOk(response);
     const json = await response.json();
