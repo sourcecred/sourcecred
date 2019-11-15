@@ -3259,10 +3259,10 @@ eslint-module-utils@^2.4.0:
     debug "^2.6.8"
     pkg-dir "^2.0.0"
 
-eslint-plugin-flowtype@4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-4.0.0.tgz#5af33e6c0f401ea4a531999b69ea0d96b6f7ef51"
-  integrity sha512-Rs+kYKuAD6nWdRAvJJR58LCPF49ws8LDkYdpadSW/PPBuRG4BOEP6yE+LmmL3fPfvEif6NO8zaO8NwDPArZUPw==
+eslint-plugin-flowtype@4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-4.3.1.tgz#2e8a17865ed089e6b30e3abab8fd8d3d2ae73e89"
+  integrity sha512-iLZ67gvqA681WU3+pc/r9nvrzgFThYBrKGbCkMD4xKW5NrDO7EPme6T3hlBAm1B97YoiRuZIA4jLKeZhlpRp1w==
   dependencies:
     lodash "^4.17.15"
 
@@ -3780,10 +3780,10 @@ flatted@^2.0.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-2.0.1.tgz#69e57caa8f0eacbc281d2e2cb458d46fdb449e08"
   integrity sha512-a1hQMktqW9Nmqr5aktAux3JMNqaucxGcjtjWnZLHX7yyPCmlSV3M54nGYbqT8K+0GhF3NBgmJCc3ma+WOgX8Jg==
 
-flow-bin@^0.111.0:
-  version "0.111.0"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.111.0.tgz#dda5d07911df2268ef0f9061fb3c8d71bbb3bc3d"
-  integrity sha512-RQQMJ23r9zdGJjmYDoAoKqFy3TAudqbf/QGpsgsZvzMPg/qgIPK6e0hDLJe4aARR6B1+Gs0xBbVRBcFEFK8jyg==
+flow-bin@^0.112.0:
+  version "0.112.0"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.112.0.tgz#6a21c31937c4a2f23a750056a364c598a95ea216"
+  integrity sha512-vdcuKv0UU55vjv0e2EVh1ZxlU+TSNT19SkE+6gT1vYzTKtzYE6dLuAmBIiS3Rg2N9D9HOI6TKSyl53zPtqZLrA==
 
 flush-write-stream@^1.0.0:
   version "1.1.1"
