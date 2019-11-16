@@ -62,9 +62,7 @@ describe("api/load", () => {
   const project: Project = {
     id: "foo",
     repoIds: [makeRepoId("foo", "bar")],
-    discourseServer: {
-      serverUrl: discourseServerUrl,
-    },
+    discourseServer: {serverUrl: discourseServerUrl},
     identities: [],
   };
   deepFreeze(project);
@@ -115,9 +113,7 @@ describe("api/load", () => {
     await load(options, taskReporter);
     const cacheDirectory = path.join(sourcecredDirectory, "cache");
     const expectedOptions: LoadDiscourseOptions = {
-      fetchOptions: {
-        serverUrl: discourseServerUrl,
-      },
+      discourseServer: {serverUrl: discourseServerUrl},
       cacheDirectory,
     };
     expect(loadDiscourse).toHaveBeenCalledWith(expectedOptions, taskReporter);

@@ -2,7 +2,7 @@
 
 import sortBy from "lodash.sortby";
 import Database from "better-sqlite3";
-import {Mirror} from "./mirror";
+import {Mirror, type MirrorOptions} from "./mirror";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {
   type Discourse,
@@ -165,12 +165,20 @@ describe("plugins/discourse/mirror", () => {
       spyWarn().mockRestore();
     }
   });
-  const example = () => {
+  const example = (optionOverrides?: $Shape<MirrorOptions>) => {
+    // Explicitly set all options, so we know what to expect in tests.
+    const options: MirrorOptions = {
+      recheckCategoryDefinitionsAfterMs: 3600000, // 1h
+      recheckTopicsInCategories: [],
+    };
     const fetcher = new MockFetcher();
     const db = new Database(":memory:");
     const url = "http://example.com";
     const repo = new SqliteMirrorRepository(db, url);
-    const mirror = new Mirror(repo, fetcher, url);
+    const mirror = new Mirror(repo, fetcher, url, {
+      ...options,
+      ...(optionOverrides || {}),
+    });
     const reporter = new TestTaskReporter();
     return {fetcher, mirror, reporter, url, repo};
   };
