@@ -55,6 +55,250 @@ Object {
 }
 `;
 
+exports[`plugins/discourse/fetch snapshot testing loads a topic with pagination from snapshot 1`] = `
+Object {
+  "posts": Array [
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>This topic will have 2 pages.<br>
+Needing at least &gt; 20 posts.</p>",
+      "id": 34,
+      "indexWithinTopic": 1,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839733554,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#2</span>
+</h2>",
+      "id": 35,
+      "indexWithinTopic": 2,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839810871,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#3</span>
+</h2>",
+      "id": 36,
+      "indexWithinTopic": 3,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839814701,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#4</span>
+</h2>",
+      "id": 37,
+      "indexWithinTopic": 4,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839818330,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#5</span>
+</h2>",
+      "id": 38,
+      "indexWithinTopic": 5,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839821821,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#6</span>
+</h2>",
+      "id": 39,
+      "indexWithinTopic": 6,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839825601,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#7</span>
+</h2>",
+      "id": 40,
+      "indexWithinTopic": 7,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839828825,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#8</span>
+</h2>",
+      "id": 41,
+      "indexWithinTopic": 8,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839832023,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#9</span>
+</h2>",
+      "id": 42,
+      "indexWithinTopic": 9,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839835298,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#10</span>
+</h2>",
+      "id": 43,
+      "indexWithinTopic": 10,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839840261,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#11</span>
+</h2>",
+      "id": 44,
+      "indexWithinTopic": 11,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839843418,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#12</span>
+</h2>",
+      "id": 45,
+      "indexWithinTopic": 12,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839846537,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#13</span>
+</h2>",
+      "id": 46,
+      "indexWithinTopic": 13,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839849459,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#14</span>
+</h2>",
+      "id": 47,
+      "indexWithinTopic": 14,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839852186,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#15</span>
+</h2>",
+      "id": 48,
+      "indexWithinTopic": 15,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839855068,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#16</span>
+</h2>",
+      "id": 49,
+      "indexWithinTopic": 16,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839857787,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#17</span>
+</h2>",
+      "id": 50,
+      "indexWithinTopic": 17,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839860730,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#18</span>
+</h2>",
+      "id": 51,
+      "indexWithinTopic": 18,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839863576,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#19</span>
+</h2>",
+      "id": 52,
+      "indexWithinTopic": 19,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839866548,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#20</span>
+</h2>",
+      "id": 53,
+      "indexWithinTopic": 20,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839869555,
+      "topicId": 26,
+    },
+    Object {
+      "authorUsername": "beanow.sc-test",
+      "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>
+<h2>Post <span class=\\"hashtag\\">#21</span>
+</h2>",
+      "id": 54,
+      "indexWithinTopic": 21,
+      "replyToPostIndex": null,
+      "timestampMs": 1573839872244,
+      "topicId": 26,
+    },
+  ],
+  "topic": Object {
+    "authorUsername": "beanow.sc-test",
+    "categoryId": 6,
+    "id": 26,
+    "timestampMs": 1573839733506,
+    "title": "Big Filler Topic 1",
+  },
+}
+`;
+
 exports[`plugins/discourse/fetch snapshot testing loads latest posts from snapshot 1`] = `
 Array [
   Object {

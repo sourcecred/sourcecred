@@ -1,0 +1,373 @@
+{
+  "post_stream": {
+    "posts": [
+      {
+        "id": 54,
+        "name": "Beanow",
+        "username": "beanow.sc-test",
+        "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png",
+        "created_at": "2019-11-15T17:44:32.244Z",
+        "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>\n<h2>Post <span class=\"hashtag\">#21</span>\n</h2>",
+        "post_number": 21,
+        "post_type": 1,
+        "updated_at": "2019-11-15T17:44:32.244Z",
+        "reply_count": 0,
+        "reply_to_post_number": null,
+        "quote_count": 0,
+        "incoming_link_count": 0,
+        "reads": 1,
+        "readers_count": 0,
+        "score": 0.2,
+        "yours": false,
+        "topic_id": 26,
+        "topic_slug": "big-filler-topic-1",
+        "display_username": "Beanow",
+        "primary_group_name": null,
+        "primary_group_flair_url": null,
+        "primary_group_flair_bg_color": null,
+        "primary_group_flair_color": null,
+        "version": 1,
+        "can_edit": false,
+        "can_delete": false,
+        "can_recover": false,
+        "can_wiki": false,
+        "read": true,
+        "user_title": null,
+        "actions_summary": [],
+        "moderator": false,
+        "admin": true,
+        "staff": true,
+        "user_id": 5,
+        "hidden": false,
+        "trust_level": 1,
+        "deleted_at": null,
+        "user_deleted": false,
+        "edit_reason": null,
+        "can_view_edit_history": true,
+        "wiki": false,
+        "can_accept_answer": false,
+        "can_unaccept_answer": false,
+        "accepted_answer": false
+      }
+    ],
+    "stream": [
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54
+    ]
+  },
+  "timeline_lookup": [
+    [
+      1,
+      0
+    ]
+  ],
+  "suggested_topics": [
+    {
+      "id": 7,
+      "title": "Welcome to Discourse",
+      "fancy_title": "Welcome to Discourse",
+      "slug": "welcome-to-discourse",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": "https://sjc2.discourse-cdn.com/free1/images/welcome/discourse-edit-post-animated.gif",
+      "created_at": "2019-04-02T20:20:12.879Z",
+      "last_posted_at": "2019-04-02T20:20:12.933Z",
+      "bumped": true,
+      "bumped_at": "2019-04-10T23:16:19.399Z",
+      "unseen": false,
+      "pinned": true,
+      "unpinned": null,
+      "excerpt": "This is a test instance. \nThe first paragraph of this pinned topic will be visible as a welcome message to all new visitors on your homepage. It’s important! \nEdit this into a brief description of your community: \n\nWho i&hellip;",
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "archetype": "regular",
+      "like_count": 0,
+      "views": 10,
+      "category_id": 1,
+      "featured_link": null,
+      "has_accepted_answer": false,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": -1,
+            "username": "system",
+            "name": "system",
+            "avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png"
+          }
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "title": "Filler Topic #1",
+      "fancy_title": "Filler Topic #1",
+      "slug": "filler-topic-1",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2019-11-15T17:49:19.140Z",
+      "last_posted_at": "2019-11-15T17:49:19.198Z",
+      "bumped": true,
+      "bumped_at": "2019-11-15T17:49:19.198Z",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "archetype": "regular",
+      "like_count": 0,
+      "views": 2,
+      "category_id": 5,
+      "featured_link": null,
+      "has_accepted_answer": false,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": 5,
+            "username": "beanow.sc-test",
+            "name": "Beanow",
+            "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+          }
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "title": "Filler Topic #2",
+      "fancy_title": "Filler Topic #2",
+      "slug": "filler-topic-2",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2019-11-15T17:50:33.177Z",
+      "last_posted_at": "2019-11-15T17:50:33.231Z",
+      "bumped": true,
+      "bumped_at": "2019-11-15T17:50:33.231Z",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "archetype": "regular",
+      "like_count": 0,
+      "views": 2,
+      "category_id": 5,
+      "featured_link": null,
+      "has_accepted_answer": false,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": 5,
+            "username": "beanow.sc-test",
+            "name": "Beanow",
+            "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+          }
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "title": "Filler Topic #18",
+      "fancy_title": "Filler Topic #18",
+      "slug": "filler-topic-18",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2019-11-15T17:55:02.978Z",
+      "last_posted_at": "2019-11-15T17:55:03.032Z",
+      "bumped": true,
+      "bumped_at": "2019-11-15T17:55:03.032Z",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "archetype": "regular",
+      "like_count": 0,
+      "views": 1,
+      "category_id": 5,
+      "featured_link": null,
+      "has_accepted_answer": false,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": 5,
+            "username": "beanow.sc-test",
+            "name": "Beanow",
+            "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+          }
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "title": "Filler Topic #19",
+      "fancy_title": "Filler Topic #19",
+      "slug": "filler-topic-19",
+      "posts_count": 1,
+      "reply_count": 0,
+      "highest_post_number": 1,
+      "image_url": null,
+      "created_at": "2019-11-15T17:55:09.297Z",
+      "last_posted_at": "2019-11-15T17:55:09.355Z",
+      "bumped": true,
+      "bumped_at": "2019-11-15T17:55:09.355Z",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "archetype": "regular",
+      "like_count": 0,
+      "views": 1,
+      "category_id": 5,
+      "featured_link": null,
+      "has_accepted_answer": false,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": 5,
+            "username": "beanow.sc-test",
+            "name": "Beanow",
+            "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+          }
+        }
+      ]
+    }
+  ],
+  "id": 26,
+  "title": "Big Filler Topic 1",
+  "fancy_title": "Big Filler Topic 1",
+  "posts_count": 21,
+  "created_at": "2019-11-15T17:42:13.506Z",
+  "views": 2,
+  "reply_count": 0,
+  "like_count": 0,
+  "last_posted_at": "2019-11-15T17:44:32.244Z",
+  "visible": true,
+  "closed": false,
+  "archived": false,
+  "has_summary": false,
+  "archetype": "regular",
+  "slug": "big-filler-topic-1",
+  "category_id": 6,
+  "word_count": 231,
+  "deleted_at": null,
+  "user_id": 5,
+  "featured_link": null,
+  "pinned_globally": false,
+  "pinned_at": null,
+  "pinned_until": null,
+  "image_url": null,
+  "draft": null,
+  "draft_key": "topic_26",
+  "draft_sequence": null,
+  "unpinned": null,
+  "pinned": false,
+  "current_post_number": 1,
+  "highest_post_number": 21,
+  "deleted_by": null,
+  "actions_summary": [
+    {
+      "id": 4,
+      "count": 0,
+      "hidden": false,
+      "can_act": false
+    },
+    {
+      "id": 8,
+      "count": 0,
+      "hidden": false,
+      "can_act": false
+    },
+    {
+      "id": 7,
+      "count": 0,
+      "hidden": false,
+      "can_act": false
+    }
+  ],
+  "chunk_size": 20,
+  "bookmarked": null,
+  "topic_timer": null,
+  "message_bus_last_id": 21,
+  "participant_count": 1,
+  "show_read_indicator": false,
+  "tags_disable_ads": false,
+  "details": {
+    "notification_level": 1,
+    "participants": [
+      {
+        "id": 5,
+        "username": "beanow.sc-test",
+        "name": "Beanow",
+        "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png",
+        "post_count": 21,
+        "primary_group_name": null,
+        "primary_group_flair_url": null,
+        "primary_group_flair_color": null,
+        "primary_group_flair_bg_color": null
+      }
+    ],
+    "created_by": {
+      "id": 5,
+      "username": "beanow.sc-test",
+      "name": "Beanow",
+      "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+    },
+    "last_poster": {
+      "id": 5,
+      "username": "beanow.sc-test",
+      "name": "Beanow",
+      "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+    }
+  }
+}

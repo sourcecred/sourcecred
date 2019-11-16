@@ -31,3 +31,7 @@ fetch "/t/11.json"
 fetch "/t/21.json"
 fetch "/posts/14.json"
 fetch "/user_actions.json?username=dl-proto&filter=1&offset=0"
+
+# New API loading style.
+fetch "/t/26.json"
+fetch "/t/26.json?page=2"
