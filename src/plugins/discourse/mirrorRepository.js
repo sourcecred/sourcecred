@@ -3,17 +3,11 @@
 import type {Database} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
-import {
-  type TopicId,
-  type PostId,
-  type Topic,
-  type Post,
-  type LikeAction,
-} from "./fetch";
+import type {TopicId, PostId, Topic, Post, LikeAction} from "./fetch";
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v4";
+const VERSION = "discourse_mirror_v5";
 
 /**
  * An interface for reading the local Discourse data.
@@ -142,8 +136,10 @@ export class SqliteMirrorRepository
       dedent`\
         CREATE TABLE topics (
             id INTEGER PRIMARY KEY,
+            category_id INTEGER NOT NULL,
             title TEXT NOT NULL,
             timestamp_ms INTEGER NOT NULL,
+            bumped_ms INTEGER NOT NULL,
             author_username TEXT NOT NULL,
             FOREIGN KEY(author_username) REFERENCES users(username)
         )
@@ -198,17 +194,21 @@ export class SqliteMirrorRepository
         dedent`\
         SELECT
           id,
+          category_id,
+          title,
           timestamp_ms,
-          author_username,
-          title
+          bumped_ms,
+          author_username
         FROM topics`
       )
       .all()
       .map((x) => ({
         id: x.id,
-        timestampMs: x.timestamp_ms,
-        authorUsername: x.author_username,
+        categoryId: x.category_id,
         title: x.title,
+        timestampMs: x.timestamp_ms,
+        bumpedMs: x.bumped_ms,
+        authorUsername: x.author_username,
       }));
   }
 
@@ -336,21 +336,27 @@ export class SqliteMirrorRepository
         dedent`\
           REPLACE INTO topics (
               id,
+              category_id,
               title,
               timestamp_ms,
+              bumped_ms,
               author_username
           ) VALUES (
               :id,
+              :category_id,
               :title,
               :timestamp_ms,
+              :bumped_ms,
               :author_username
           )
         `
       )
       .run({
         id: topic.id,
+        category_id: topic.categoryId,
         title: topic.title,
         timestamp_ms: topic.timestampMs,
+        bumped_ms: topic.bumpedMs,
         author_username: topic.authorUsername,
       });
     return toAddResult(res);

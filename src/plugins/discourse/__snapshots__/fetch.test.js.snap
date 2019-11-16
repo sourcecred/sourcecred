@@ -47,6 +47,7 @@ Object {
   ],
   "topic": Object {
     "authorUsername": "d11",
+    "categoryId": 1,
     "id": 11,
     "timestampMs": 1564744349408,
     "title": "My First Test Post",
