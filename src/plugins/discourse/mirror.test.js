@@ -41,6 +41,10 @@ class MockFetcher implements Discourse {
     this._likes = [];
   }
 
+  async categoryDefinitionTopicIds(): Promise<Set<TopicId>> {
+    throw new Error("Method should not be used yet by mirror");
+  }
+
   async latestTopicId(): Promise<TopicId> {
     return this._latestTopicId;
   }

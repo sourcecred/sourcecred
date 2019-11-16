@@ -455,6 +455,14 @@ The first paragraph of this pinned topic will be visible as a welcome message to
 ]
 `;
 
+exports[`plugins/discourse/fetch snapshot testing loads topic IDs that are category definition topics 1`] = `
+Set {
+  24,
+  1,
+  25,
+}
+`;
+
 exports[`plugins/discourse/fetch snapshot testing loads user likes from snapshot 1`] = `
 Array [
   Object {

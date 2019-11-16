@@ -1,0 +1,78 @@
+{
+  "category_list": {
+    "can_create_category": false,
+    "can_create_topic": false,
+    "draft": null,
+    "draft_key": "new_topic",
+    "draft_sequence": null,
+    "categories": [
+      {
+        "id": 6,
+        "name": "Big Filler",
+        "color": "9EB83B",
+        "text_color": "FFFFFF",
+        "slug": "big-filler",
+        "topic_count": 1,
+        "post_count": 0,
+        "position": 5,
+        "description": "Like Filler, but topics have enough posts to paginate.",
+        "description_text": "Like Filler, but topics have enough posts to paginate.",
+        "topic_url": "/t/about-the-big-filler-category/25",
+        "read_restricted": false,
+        "permission": null,
+        "parent_category_id": 5,
+        "notification_level": null,
+        "topic_template": null,
+        "has_children": false,
+        "sort_order": null,
+        "sort_ascending": null,
+        "show_subcategory_list": false,
+        "num_featured_topics": 3,
+        "default_view": null,
+        "subcategory_list_style": "rows_with_featured_topics",
+        "default_top_period": "all",
+        "minimum_required_tags": 0,
+        "navigate_to_first_post_after_read": false,
+        "topics_day": 0,
+        "topics_week": 0,
+        "topics_month": 0,
+        "topics_year": 0,
+        "topics_all_time": 1,
+        "description_excerpt": "Like Filler, but topics have enough posts to paginate.",
+        "uploaded_logo": null,
+        "uploaded_background": null,
+        "topics": [
+          {
+            "id": 26,
+            "title": "Big Filler Topic 1",
+            "fancy_title": "Big Filler Topic 1",
+            "slug": "big-filler-topic-1",
+            "posts_count": 21,
+            "reply_count": 0,
+            "highest_post_number": 21,
+            "image_url": null,
+            "created_at": "2019-11-15T17:42:13.506Z",
+            "last_posted_at": "2019-11-15T17:44:32.244Z",
+            "bumped": true,
+            "bumped_at": "2019-11-15T17:44:32.244Z",
+            "unseen": false,
+            "pinned": false,
+            "unpinned": null,
+            "visible": true,
+            "closed": false,
+            "archived": false,
+            "bookmarked": null,
+            "liked": null,
+            "has_accepted_answer": false,
+            "last_poster": {
+              "id": 5,
+              "username": "beanow.sc-test",
+              "name": "Beanow",
+              "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
