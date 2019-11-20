@@ -7,6 +7,7 @@ import {
   type DiscourseQueries,
 } from "./discourse";
 import {type Initiative} from "./initiative";
+import type {ReadRepository} from "../discourse/mirrorRepository";
 import type {Topic, Post, CategoryId, TopicId} from "../discourse/fetch";
 import {NodeAddress} from "../../core/graph";
 import dedent from "../../util/dedent";
@@ -154,6 +155,14 @@ describe("plugins/initiatives/discourse", () => {
     } finally {
       spyWarn().mockRestore();
     }
+  });
+
+  describe("DiscourseQueries", () => {
+    it("should be a subset of the ReadRepository interface", () => {
+      const _unused_toDiscourseQueries = (
+        x: ReadRepository
+      ): DiscourseQueries => x;
+    });
   });
 
   describe("DiscourseInitiativeRepository", () => {

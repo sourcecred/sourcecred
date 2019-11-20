@@ -67,6 +67,19 @@ export interface ReadRepository {
    * Note: input username is case-insensitive.
    */
   findUsername(username: string): ?string;
+
+  /**
+   * Gets a Topic by ID.
+   */
+  topicById(id: TopicId): ?Topic;
+
+  /**
+   * Gets a number of Posts in a given Topic. Starting with the first post,
+   * ordered by `indexWithinTopic`.
+   *
+   * numberOfPosts: the maximum number of posts to get (may return fewer).
+   */
+  postsInTopic(topicId: TopicId, numberOfPosts: number): $ReadOnlyArray<Post>;
 }
 
 export type SyncHeads = {|
@@ -278,6 +291,36 @@ export class SqliteMirrorRepository
       }));
   }
 
+  topicById(id: TopicId): ?Topic {
+    const res = this._db
+      .prepare(
+        dedent`\
+        SELECT
+          id,
+          category_id,
+          title,
+          timestamp_ms,
+          bumped_ms,
+          author_username
+        FROM topics
+        WHERE id = :id`
+      )
+      .get({id});
+
+    if (!res) {
+      return null;
+    }
+
+    return {
+      id: res.id,
+      categoryId: res.category_id,
+      title: res.title,
+      timestampMs: res.timestamp_ms,
+      bumpedMs: res.bumped_ms,
+      authorUsername: res.author_username,
+    };
+  }
+
   posts(): $ReadOnlyArray<Post> {
     return this._db
       .prepare(
@@ -293,6 +336,35 @@ export class SqliteMirrorRepository
         FROM posts`
       )
       .all()
+      .map((x) => ({
+        id: x.id,
+        timestampMs: x.timestamp_ms,
+        authorUsername: x.author_username,
+        topicId: x.topic_id,
+        indexWithinTopic: x.index_within_topic,
+        replyToPostIndex: x.reply_to_post_index,
+        cooked: x.cooked,
+      }));
+  }
+
+  postsInTopic(topicId: TopicId, numberOfPosts: number): $ReadOnlyArray<Post> {
+    return this._db
+      .prepare(
+        dedent`\
+        SELECT
+          id,
+          timestamp_ms,
+          author_username,
+          topic_id,
+          index_within_topic,
+          reply_to_post_index,
+          cooked
+        FROM posts
+        WHERE topic_id = :topic_id
+        ORDER BY index_within_topic ASC
+        LIMIT :max`
+      )
+      .all({topic_id: topicId, max: numberOfPosts})
       .map((x) => ({
         id: x.id,
         timestampMs: x.timestamp_ms,
