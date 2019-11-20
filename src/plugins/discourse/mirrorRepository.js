@@ -83,6 +83,14 @@ export interface MirrorRepository extends ReadRepository {
    * Returns null, when the topic wasn't found.
    */
   bumpedMsForTopic(id: TopicId): number | null;
+
+  /**
+   * Idempotent insert/replace of a Topic, including all it's Posts.
+   *
+   * Note: this will insert new posts, update existing posts and delete old posts.
+   * As these are separate queries, we use a transaction here.
+   */
+  replaceTopicTransaction(topic: Topic, posts: $ReadOnlyArray<Post>): void;
 }
 
 function toAddResult({
@@ -102,12 +110,19 @@ export class SqliteMirrorRepository
   constructor(db: Database, serverUrl: string) {
     if (db == null) throw new Error("db: " + String(db));
     this._db = db;
+    this._transaction(() => {
+      this._initialize(serverUrl);
+    });
+  }
+
+  _transaction(queries: () => void) {
+    const db = this._db;
     if (db.inTransaction) {
       throw new Error("already in transaction");
     }
     try {
       db.prepare("BEGIN").run();
-      this._initialize(serverUrl);
+      queries();
       if (db.inTransaction) {
         db.prepare("COMMIT").run();
       }
@@ -311,6 +326,32 @@ export class SqliteMirrorRepository
         username: like.username,
       });
     return toAddResult(res);
+  }
+
+  replaceTopicTransaction(topic: Topic, posts: $ReadOnlyArray<Post>) {
+    this._transaction(() => {
+      this.addTopic(topic);
+      for (const post of posts) {
+        this.addPost(post);
+      }
+      this.deleteUnexpectedPosts(
+        topic.id,
+        posts.map((p) => p.id)
+      );
+    });
+  }
+
+  deleteUnexpectedPosts(topicId: TopicId, expected: PostId[]): number {
+    const res = this._db
+      .prepare(
+        dedent`\
+          DELETE FROM posts
+          WHERE topic_id = ?
+          AND id NOT IN (${expected.map((_) => "?").join(",")})
+        `
+      )
+      .run(topicId, ...expected);
+    return res.changes;
   }
 
   topicsInCategories(
