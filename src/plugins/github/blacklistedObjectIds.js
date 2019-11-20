@@ -60,6 +60,7 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDM6Qm90Mjk5NjY3OTc=", // eslint
   "MDM6Qm90Mjc4NTYyOTc=", // dependabot-preview
   "MDM6Qm90MzY3NzE0MDE=", // azure-pipelines
+  "MDM6Qm90NDE4OTgyODI=", // github-actions
 
   // Problematic interactions they did as a user: reactions.
   "MDg6UmVhY3Rpb24yMTY3ODkyNQ==",
