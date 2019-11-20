@@ -14,7 +14,8 @@ import type {
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v5";
+const VERSION = "discourse_mirror_v6";
+const DEFINITION_CHECK_KEY = "definition_check";
 
 /**
  * An interface for reading the local Discourse data.
@@ -61,6 +62,21 @@ export interface ReadRepository {
   ): $ReadOnlyArray<TopicId>;
 }
 
+export type SyncHeads = {|
+  /**
+   * The timestamp of the last time we've loaded category definition topics.
+   * Used for determining whether we should reload them during an update.
+   */
+  +definitionCheckMs: number,
+
+  /**
+   * The most recent bumpedMs timestamp of all topics.
+   * Used for determining what the most recent topic changes we have stored in
+   * our local mirror, and which we should fetch from the API during update.
+   */
+  +topicBumpMs: number,
+|};
+
 export type MaxIds = {|
   +maxPostId: number,
   +maxTopicId: number,
@@ -85,12 +101,23 @@ export interface MirrorRepository extends ReadRepository {
   bumpedMsForTopic(id: TopicId): number | null;
 
   /**
+   * Finds the SyncHeads values, used as input to skip
+   * already up-to-date content when mirroring.
+   */
+  syncHeads(): SyncHeads;
+
+  /**
    * Idempotent insert/replace of a Topic, including all it's Posts.
    *
    * Note: this will insert new posts, update existing posts and delete old posts.
    * As these are separate queries, we use a transaction here.
    */
   replaceTopicTransaction(topic: Topic, posts: $ReadOnlyArray<Post>): void;
+
+  /**
+   * Bumps the definitionCheckMs (from SyncHeads) to the provided timestamp.
+   */
+  bumpDefinitionTopicCheck(timestampMs: number): void;
 }
 
 function toAddResult({
@@ -167,6 +194,11 @@ export class SqliteMirrorRepository
     db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(config);
 
     const tables = [
+      dedent`\
+        CREATE TABLE sync_heads (
+          key TEXT PRIMARY KEY,
+          timestamp_ms INTEGER NOT NULL
+        )`,
       "CREATE TABLE users (username TEXT PRIMARY KEY)",
       dedent`\
         CREATE TABLE topics (
@@ -220,6 +252,22 @@ export class SqliteMirrorRepository
     return {
       maxPostId: res.max_post,
       maxTopicId: res.max_topic,
+    };
+  }
+
+  syncHeads(): SyncHeads {
+    const res = this._db
+      .prepare(
+        dedent`\
+          SELECT
+              (SELECT IFNULL(MAX(bumped_ms), 0) FROM topics) AS max_topic_bump,
+              (SELECT timestamp_ms FROM sync_heads WHERE key = :DEFINITION_CHECK_KEY) AS definition_check
+          `
+      )
+      .get({DEFINITION_CHECK_KEY});
+    return {
+      definitionCheckMs: res.definition_check || 0,
+      topicBumpMs: res.max_topic_bump,
     };
   }
 
@@ -302,6 +350,25 @@ export class SqliteMirrorRepository
       )
       .pluck()
       .get({topic_id: topicId, index_within_topic: indexWithinTopic});
+  }
+
+  bumpDefinitionTopicCheck(timestampMs: number): void {
+    this._db
+      .prepare(
+        dedent`\
+          REPLACE INTO sync_heads (
+              key,
+              timestamp_ms
+          ) VALUES (
+              :key,
+              :timestamp_ms
+          )
+        `
+      )
+      .run({
+        key: DEFINITION_CHECK_KEY,
+        timestamp_ms: timestampMs,
+      });
   }
 
   addLike(like: LikeAction): AddResult {
