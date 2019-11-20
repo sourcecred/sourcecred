@@ -169,6 +169,14 @@ class MockFetcher implements Discourse {
   }
 }
 
+function normalizeMode1Topics(topics: Topic[]): Topic[] {
+  return topics.map((topic) => ({
+    ...topic,
+    // Mode 1 didn't support bumpMs handling.
+    bumpedMs: topic.timestampMs,
+  }));
+}
+
 describe("plugins/discourse/mirror", () => {
   function spyWarn(): JestMockFn<[string], void> {
     return ((console.warn: any): JestMockFn<any, void>);
@@ -201,79 +209,79 @@ describe("plugins/discourse/mirror", () => {
     return {fetcher, mirror, reporter, url, repo};
   };
 
-  it("mirrors topics from the fetcher", async () => {
-    const {mirror, fetcher, reporter, repo} = example();
-    fetcher.addPost(2, null);
-    fetcher.addPost(3, null);
-    const topic2 = fetcher._topic(2);
-    const topic3 = fetcher._topic(3);
-    await mirror.update(reporter);
-    expect(repo.topics()).toEqual([topic2, topic3]);
-  });
+  describe("mirror mode 1", () => {
+    it("mirrors topics from the fetcher", async () => {
+      const {mirror, fetcher, reporter, repo} = example();
+      fetcher.addPost(2, null);
+      fetcher.addPost(3, null);
+      const topic2 = fetcher._topic(2);
+      const topic3 = fetcher._topic(3);
+      await mirror.update(reporter);
+      expect(repo.topics()).toEqual(normalizeMode1Topics([topic2, topic3]));
+    });
 
-  it("mirrors posts from the fetcher", async () => {
-    const {mirror, fetcher, reporter, repo} = example();
-    const p1 = fetcher.addPost(2, null);
-    const p2 = fetcher.addPost(3, null);
-    const p3 = fetcher.addPost(3, 1);
-    await mirror.update(reporter);
-    const posts = [fetcher._post(p1), fetcher._post(p2), fetcher._post(p3)];
-    expect(repo.posts()).toEqual(posts);
-  });
+    it("mirrors posts from the fetcher", async () => {
+      const {mirror, fetcher, reporter, repo} = example();
+      const p1 = fetcher.addPost(2, null);
+      const p2 = fetcher.addPost(3, null);
+      const p3 = fetcher.addPost(3, 1);
+      await mirror.update(reporter);
+      const posts = [fetcher._post(p1), fetcher._post(p2), fetcher._post(p3)];
+      expect(repo.posts()).toEqual(posts);
+    });
 
-  it("provides usernames for all active users", async () => {
-    const {mirror, fetcher, reporter, repo} = example();
-    fetcher.addPost(2, null, "alpha");
-    fetcher.addPost(3, null, "beta");
-    fetcher.addPost(3, 1, "alpha");
-    await mirror.update(reporter);
-    // credbot appears because it is the nominal author of all topics
-    expect(
-      repo
-        .users()
-        .slice()
-        .sort()
-    ).toEqual(["alpha", "beta", "credbot"]);
-  });
+    it("provides usernames for all active users", async () => {
+      const {mirror, fetcher, reporter, repo} = example();
+      fetcher.addPost(2, null, "alpha");
+      fetcher.addPost(3, null, "beta");
+      fetcher.addPost(3, 1, "alpha");
+      await mirror.update(reporter);
+      // credbot appears because it is the nominal author of all topics
+      expect(
+        repo
+          .users()
+          .slice()
+          .sort()
+      ).toEqual(["alpha", "beta", "credbot"]);
+    });
 
-  function expectLikesSorted(as, bs) {
-    const s = (ls) =>
-      sortBy(
-        ls,
-        (x) => x.username,
-        (x) => x.postId
-      );
-    expect(s(as)).toEqual(s(bs));
-  }
+    function expectLikesSorted(as, bs) {
+      const s = (ls) =>
+        sortBy(
+          ls,
+          (x) => x.username,
+          (x) => x.postId
+        );
+      expect(s(as)).toEqual(s(bs));
+    }
 
-  it("provides all the likes by users that have posted", async () => {
-    const {mirror, fetcher, reporter, repo} = example();
-    fetcher.addPost(1, null, "alpha");
-    fetcher.addPost(2, null, "alpha");
-    fetcher.addPost(3, null, "beta");
-    const l1 = fetcher.addLike("beta", 1, 5);
-    const l2 = fetcher.addLike("beta", 2, 6);
-    const l3 = fetcher.addLike("beta", 3, 7);
-    const l4 = fetcher.addLike("alpha", 1, 8);
-    await mirror.update(reporter);
-    expectLikesSorted(repo.likes(), [l1, l2, l3, l4]);
-    const l5 = fetcher.addLike("alpha", 2, 9);
-    fetcher.addPost(4, null, "credbot");
-    const l6 = fetcher.addLike("credbot", 2, 10);
-    const l7 = fetcher.addLike("beta", 4, 11);
-    await mirror.update(reporter);
-    expectLikesSorted(repo.likes(), [l1, l2, l3, l4, l5, l6, l7]);
-  });
+    it("provides all the likes by users that have posted", async () => {
+      const {mirror, fetcher, reporter, repo} = example();
+      fetcher.addPost(1, null, "alpha");
+      fetcher.addPost(2, null, "alpha");
+      fetcher.addPost(3, null, "beta");
+      const l1 = fetcher.addLike("beta", 1, 5);
+      const l2 = fetcher.addLike("beta", 2, 6);
+      const l3 = fetcher.addLike("beta", 3, 7);
+      const l4 = fetcher.addLike("alpha", 1, 8);
+      await mirror.update(reporter);
+      expectLikesSorted(repo.likes(), [l1, l2, l3, l4]);
+      const l5 = fetcher.addLike("alpha", 2, 9);
+      fetcher.addPost(4, null, "credbot");
+      const l6 = fetcher.addLike("credbot", 2, 10);
+      const l7 = fetcher.addLike("beta", 4, 11);
+      await mirror.update(reporter);
+      expectLikesSorted(repo.likes(), [l1, l2, l3, l4, l5, l6, l7]);
+    });
 
-  it("doesn't find likes of users that never posted", async () => {
-    const {mirror, fetcher, reporter, repo} = example();
-    fetcher.addPost(1, null);
-    fetcher.addLike("nope", 1, 1);
-    await mirror.update(reporter);
-    expect(repo.likes()).toEqual([]);
-  });
+    it("doesn't find likes of users that never posted", async () => {
+      const {mirror, fetcher, reporter, repo} = example();
+      fetcher.addPost(1, null);
+      fetcher.addLike("nope", 1, 1);
+      await mirror.update(reporter);
+      expect(repo.likes()).toEqual([]);
+    });
 
-  describe("update semantics", () => {
     it("only fetches new topics on `update`", async () => {
       const {mirror, fetcher, reporter, repo} = example();
       fetcher.addPost(1, null);
@@ -420,7 +428,7 @@ describe("plugins/discourse/mirror", () => {
       // Force the fetcher not to return topic 2
       fetcher._latestTopicId--;
       await mirror.update(reporter);
-      const topics = [fetcher._topic(1)];
+      const topics = normalizeMode1Topics([fetcher._topic(1)]);
       expect(repo.topics()).toEqual(topics);
       const posts = [fetcher._post(pid1)];
       expect(repo.posts()).toEqual(posts);
@@ -443,7 +451,7 @@ describe("plugins/discourse/mirror", () => {
       // Force the fetcher not to return topic 2
       fetcher._latestTopicId--;
       await mirror.update(reporter);
-      const topics = [fetcher._topic(1)];
+      const topics = normalizeMode1Topics([fetcher._topic(1)]);
       expect(repo.topics()).toEqual(topics);
       const posts = [pid1, pid3].map((x) => fetcher._post(x));
       expect(repo.posts()).toEqual(posts);
@@ -461,7 +469,8 @@ describe("plugins/discourse/mirror", () => {
       const badLike = {username: "credbot", postId: 37, timestampMs: 0};
       fetcher._likes.push(badLike);
       await mirror.update(reporter);
-      expect(repo.topics()).toEqual([fetcher._topic(1)]);
+      const topics = normalizeMode1Topics([fetcher._topic(1)]);
+      expect(repo.topics()).toEqual(topics);
       expect(repo.posts()).toEqual([fetcher._post(pid)]);
       expect(repo.likes()).toEqual([]);
       expect(console.warn).toHaveBeenCalledWith(
@@ -471,92 +480,92 @@ describe("plugins/discourse/mirror", () => {
       expect(console.warn).toHaveBeenCalledTimes(1);
       spyWarn().mockReset();
     });
-  });
 
-  it("warns if a user's likes are missing", async () => {
-    const {mirror, fetcher, reporter, repo} = example();
-    const pid = fetcher.addPost(1, null, "credbot");
-    (fetcher: any).likesByUser = async () => null;
-    await mirror.update(reporter);
-    expect(repo.topics()).toEqual([fetcher._topic(1)]);
-    expect(repo.posts()).toEqual([fetcher._post(pid)]);
-    expect(repo.likes()).toEqual([]);
-  });
-
-  it("inserts other likes if one user's likes are missing", async () => {
-    const {mirror, fetcher, reporter, repo} = example();
-    const p1 = fetcher.addPost(1, null, "credbot");
-    const p2 = fetcher.addPost(1, 1, "otheruser");
-    const l1 = fetcher.addLike("otheruser", 1, 123);
-    const _likesByUser = fetcher.likesByUser.bind(fetcher);
-    (fetcher: any).likesByUser = async (
-      targetUsername: string,
-      offset: number
-    ) => {
-      if (targetUsername == "credbot") return null;
-      return await _likesByUser(targetUsername, offset);
-    };
-    await mirror.update(reporter);
-    expect(repo.topics()).toEqual([fetcher._topic(1)]);
-    expect(repo.posts()).toEqual([fetcher._post(p1), fetcher._post(p2)]);
-    expect(repo.likes()).toEqual([l1]);
-  });
-
-  it("sends the right tasks to the TaskReporter", async () => {
-    const {mirror, fetcher, reporter} = example();
-    fetcher.addPost(1, null, "credbot");
-    await mirror.update(reporter);
-    expect(reporter.activeTasks()).toEqual([]);
-    expect(reporter.entries()).toEqual([
-      {type: "START", taskId: "discourse"},
-      {type: "START", taskId: "discourse/topics"},
-      {type: "FINISH", taskId: "discourse/topics"},
-      {type: "START", taskId: "discourse/posts"},
-      {type: "FINISH", taskId: "discourse/posts"},
-      {type: "START", taskId: "discourse/likes"},
-      {type: "FINISH", taskId: "discourse/likes"},
-      {type: "FINISH", taskId: "discourse"},
-    ]);
-  });
-
-  describe("findPostInTopic", () => {
-    it("works for the first post in a topic", async () => {
+    it("warns if a user's likes are missing", async () => {
       const {mirror, fetcher, reporter, repo} = example();
-      const id = fetcher.addPost(5, null);
-      const post = NullUtil.get(fetcher._post(id));
-      expect(post.topicId).toEqual(5);
-      expect(post.indexWithinTopic).toEqual(1);
+      const pid = fetcher.addPost(1, null, "credbot");
+      (fetcher: any).likesByUser = async () => null;
       await mirror.update(reporter);
-      expect(repo.findPostInTopic(5, 1)).toEqual(id);
+      expect(repo.topics()).toEqual(normalizeMode1Topics([fetcher._topic(1)]));
+      expect(repo.posts()).toEqual([fetcher._post(pid)]);
+      expect(repo.likes()).toEqual([]);
     });
 
-    it("works for the second post in a topic", async () => {
+    it("inserts other likes if one user's likes are missing", async () => {
       const {mirror, fetcher, reporter, repo} = example();
-      fetcher.addPost(1, null);
-      const id = fetcher.addPost(1, 1);
-      const post = NullUtil.get(fetcher._post(id));
-      expect(post.indexWithinTopic).toEqual(2);
+      const p1 = fetcher.addPost(1, null, "credbot");
+      const p2 = fetcher.addPost(1, 1, "otheruser");
+      const l1 = fetcher.addLike("otheruser", 1, 123);
+      const _likesByUser = fetcher.likesByUser.bind(fetcher);
+      (fetcher: any).likesByUser = async (
+        targetUsername: string,
+        offset: number
+      ) => {
+        if (targetUsername == "credbot") return null;
+        return await _likesByUser(targetUsername, offset);
+      };
       await mirror.update(reporter);
-      expect(repo.findPostInTopic(1, 2)).toEqual(id);
+      expect(repo.topics()).toEqual(normalizeMode1Topics([fetcher._topic(1)]));
+      expect(repo.posts()).toEqual([fetcher._post(p1), fetcher._post(p2)]);
+      expect(repo.likes()).toEqual([l1]);
     });
 
-    it("returns undefined for a post with too high an index", async () => {
-      const {mirror, fetcher, reporter, repo} = example();
-      fetcher.addPost(1, null);
+    it("sends the right tasks to the TaskReporter", async () => {
+      const {mirror, fetcher, reporter} = example();
+      fetcher.addPost(1, null, "credbot");
       await mirror.update(reporter);
-      expect(repo.findPostInTopic(1, 2)).toBe(undefined);
+      expect(reporter.activeTasks()).toEqual([]);
+      expect(reporter.entries()).toEqual([
+        {type: "START", taskId: "discourse"},
+        {type: "START", taskId: "discourse/topics"},
+        {type: "FINISH", taskId: "discourse/topics"},
+        {type: "START", taskId: "discourse/posts"},
+        {type: "FINISH", taskId: "discourse/posts"},
+        {type: "START", taskId: "discourse/likes"},
+        {type: "FINISH", taskId: "discourse/likes"},
+        {type: "FINISH", taskId: "discourse"},
+      ]);
     });
 
-    it("returns undefined for topic that doesnt exist", async () => {
-      const {mirror, fetcher, reporter, repo} = example();
-      fetcher.addPost(1, null);
-      await mirror.update(reporter);
-      expect(repo.findPostInTopic(2, 1)).toBe(undefined);
-    });
+    describe("findPostInTopic", () => {
+      it("works for the first post in a topic", async () => {
+        const {mirror, fetcher, reporter, repo} = example();
+        const id = fetcher.addPost(5, null);
+        const post = NullUtil.get(fetcher._post(id));
+        expect(post.topicId).toEqual(5);
+        expect(post.indexWithinTopic).toEqual(1);
+        await mirror.update(reporter);
+        expect(repo.findPostInTopic(5, 1)).toEqual(id);
+      });
 
-    it("returns undefined for a mirror that never updated", async () => {
-      const {repo} = example();
-      expect(repo.findPostInTopic(1, 1)).toBe(undefined);
+      it("works for the second post in a topic", async () => {
+        const {mirror, fetcher, reporter, repo} = example();
+        fetcher.addPost(1, null);
+        const id = fetcher.addPost(1, 1);
+        const post = NullUtil.get(fetcher._post(id));
+        expect(post.indexWithinTopic).toEqual(2);
+        await mirror.update(reporter);
+        expect(repo.findPostInTopic(1, 2)).toEqual(id);
+      });
+
+      it("returns undefined for a post with too high an index", async () => {
+        const {mirror, fetcher, reporter, repo} = example();
+        fetcher.addPost(1, null);
+        await mirror.update(reporter);
+        expect(repo.findPostInTopic(1, 2)).toBe(undefined);
+      });
+
+      it("returns undefined for topic that doesnt exist", async () => {
+        const {mirror, fetcher, reporter, repo} = example();
+        fetcher.addPost(1, null);
+        await mirror.update(reporter);
+        expect(repo.findPostInTopic(2, 1)).toBe(undefined);
+      });
+
+      it("returns undefined for a mirror that never updated", async () => {
+        const {repo} = example();
+        expect(repo.findPostInTopic(1, 1)).toBe(undefined);
+      });
     });
   });
 });
