@@ -1,6 +1,12 @@
 {
   "users": [
     {
+      "id": -1,
+      "username": "system",
+      "name": "system",
+      "avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png"
+    },
+    {
       "id": 5,
       "username": "beanow.sc-test",
       "name": "Beanow",
@@ -10,12 +16,52 @@
   "primary_groups": [],
   "topic_list": {
     "can_create_topic": false,
-    "more_topics_url": "/latest?no_definitions=true&order=created&page=1",
+    "more_topics_url": "/latest?ascending=false&no_definitions=true&order=activity&page=1",
     "draft": null,
     "draft_key": "new_topic",
     "draft_sequence": null,
     "per_page": 30,
     "topics": [
+      {
+        "id": 7,
+        "title": "Welcome to Discourse",
+        "fancy_title": "Welcome to Discourse",
+        "slug": "welcome-to-discourse",
+        "posts_count": 1,
+        "reply_count": 0,
+        "highest_post_number": 1,
+        "image_url": "https://sjc2.discourse-cdn.com/free1/images/welcome/discourse-edit-post-animated.gif",
+        "created_at": "2019-04-02T20:20:12.879Z",
+        "last_posted_at": "2019-04-02T20:20:12.933Z",
+        "bumped": true,
+        "bumped_at": "2019-04-10T23:16:19.399Z",
+        "unseen": false,
+        "pinned": true,
+        "unpinned": null,
+        "excerpt": "This is a test instance. \nThe first paragraph of this pinned topic will be visible as a welcome message to all new visitors on your homepage. It’s important! \nEdit this into a brief description of your community: \n\nWho i&hellip;",
+        "visible": true,
+        "closed": false,
+        "archived": false,
+        "bookmarked": null,
+        "liked": null,
+        "views": 10,
+        "like_count": 0,
+        "has_summary": false,
+        "archetype": "regular",
+        "last_poster_username": "system",
+        "category_id": 1,
+        "pinned_globally": true,
+        "featured_link": null,
+        "has_accepted_answer": false,
+        "posters": [
+          {
+            "extras": "latest single",
+            "description": "Original Poster, Most Recent Poster",
+            "user_id": -1,
+            "primary_group_id": null
+          }
+        ]
+      },
       {
         "id": 57,
         "title": "Filler Topic #31",
@@ -1130,45 +1176,6 @@
         "bookmarked": null,
         "liked": null,
         "views": 1,
-        "like_count": 0,
-        "has_summary": false,
-        "archetype": "regular",
-        "last_poster_username": "beanow.sc-test",
-        "category_id": 5,
-        "pinned_globally": false,
-        "featured_link": null,
-        "has_accepted_answer": false,
-        "posters": [
-          {
-            "extras": "latest single",
-            "description": "Original Poster, Most Recent Poster",
-            "user_id": 5,
-            "primary_group_id": null
-          }
-        ]
-      },
-      {
-        "id": 28,
-        "title": "Filler Topic #2",
-        "fancy_title": "Filler Topic #2",
-        "slug": "filler-topic-2",
-        "posts_count": 1,
-        "reply_count": 0,
-        "highest_post_number": 1,
-        "image_url": null,
-        "created_at": "2019-11-15T17:50:33.177Z",
-        "last_posted_at": "2019-11-15T17:50:33.231Z",
-        "bumped": true,
-        "bumped_at": "2019-11-15T17:50:33.231Z",
-        "unseen": false,
-        "pinned": false,
-        "unpinned": null,
-        "visible": true,
-        "closed": false,
-        "archived": false,
-        "bookmarked": null,
-        "liked": null,
-        "views": 2,
         "like_count": 0,
         "has_summary": false,
         "archetype": "regular",

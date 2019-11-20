@@ -7,7 +7,7 @@ describe("plugins/discourse/fetch", () => {
   describe("snapshot testing", () => {
     it("loads LatestTopicId from snapshot", async () => {
       const topicId = await snapshotFetcher().latestTopicId();
-      expect(topicId).toMatchInlineSnapshot(`21`);
+      expect(topicId).toMatchInlineSnapshot(`57`);
     });
     it("loads latest posts from snapshot", async () => {
       expect(await snapshotFetcher().latestPosts()).toMatchSnapshot();
@@ -30,6 +30,13 @@ describe("plugins/discourse/fetch", () => {
       expect(
         await snapshotFetcher().categoryDefinitionTopicIds()
       ).toMatchSnapshot();
+    });
+
+    it("loads topics ordered by bumped_at since a given timestamp", async () => {
+      const topicsBumpedSince = await snapshotFetcher().topicsBumpedSince(0);
+      expect(topicsBumpedSince).toMatchSnapshot();
+      // This checks we have pagination in our snapshot.
+      expect(topicsBumpedSince.length).toBeGreaterThan(30);
     });
   });
 
@@ -58,6 +65,13 @@ describe("plugins/discourse/fetch", () => {
 
     expectError("topic", (x) => x.topicWithPosts(14), 429);
     expectError("post", (x) => x.post(14), 429);
+    expectError(
+      "categoryDefinitionTopicIds",
+      (x) => x.categoryDefinitionTopicIds(),
+      429
+    );
+
+    expectError("topicsBumpedSince", (x) => x.topicsBumpedSince(0), 429);
     expectError(
       "categoryDefinitionTopicIds",
       (x) => x.categoryDefinitionTopicIds(),
