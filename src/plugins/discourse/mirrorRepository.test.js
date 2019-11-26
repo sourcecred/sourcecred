@@ -48,6 +48,49 @@ describe("plugins/discourse/mirrorRepository", () => {
     expect(bumpedMs).toEqual(topic.bumpedMs);
   });
 
+  it("syncHeads finds an an existing topic's bumpedMs", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+    const topic: Topic = {
+      id: 123,
+      categoryId: 1,
+      title: "Sample topic",
+      timestampMs: 456789,
+      bumpedMs: 456999,
+      authorUsername: "credbot",
+    };
+
+    // When
+    repository.addTopic(topic);
+    const syncHeads = repository.syncHeads();
+
+    // Then
+    expect(syncHeads).toEqual({
+      definitionCheckMs: 0,
+      topicBumpMs: topic.bumpedMs,
+    });
+  });
+
+  it("syncHeads stores and recalls a bumpDefinitionTopicCheck", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+    const definitionCheckMs = 617283;
+
+    // When
+    repository.bumpDefinitionTopicCheck(definitionCheckMs);
+    const syncHeads = repository.syncHeads();
+
+    // Then
+    expect(syncHeads).toEqual({
+      definitionCheckMs,
+      topicBumpMs: 0,
+    });
+  });
+
   it("bumpedMsForTopic returns null when missing topic", () => {
     // Given
     const db = new Database(":memory:");
