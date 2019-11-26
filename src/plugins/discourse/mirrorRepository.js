@@ -3,7 +3,14 @@
 import type {Database} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
-import type {TopicId, PostId, Topic, Post, LikeAction} from "./fetch";
+import type {
+  CategoryId,
+  TopicId,
+  PostId,
+  Topic,
+  Post,
+  LikeAction,
+} from "./fetch";
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
@@ -45,6 +52,13 @@ export interface ReadRepository {
    * Gets all of the like actions in the history.
    */
   likes(): $ReadOnlyArray<LikeAction>;
+
+  /**
+   * Finds the TopicIds of topics that have one of the categoryIds as it's category.
+   */
+  topicsInCategories(
+    categoryIds: $ReadOnlyArray<CategoryId>
+  ): $ReadOnlyArray<TopicId>;
 }
 
 export type MaxIds = {|
@@ -63,6 +77,12 @@ export interface MirrorRepository extends ReadRepository {
   addTopic(topic: Topic): AddResult;
   addPost(post: Post): AddResult;
   addLike(like: LikeAction): AddResult;
+
+  /**
+   * For the given topic ID, retrieves the bumpedMs value.
+   * Returns null, when the topic wasn't found.
+   */
+  bumpedMsForTopic(id: TopicId): number | null;
 }
 
 function toAddResult({
@@ -291,6 +311,27 @@ export class SqliteMirrorRepository
         username: like.username,
       });
     return toAddResult(res);
+  }
+
+  topicsInCategories(
+    categoryIds: $ReadOnlyArray<CategoryId>
+  ): $ReadOnlyArray<TopicId> {
+    return this._db
+      .prepare(
+        dedent`\
+          SELECT id FROM topics
+          WHERE category_id IN (${categoryIds.map((_) => "?").join(",")})
+        `
+      )
+      .all(...categoryIds)
+      .map((t) => t.id);
+  }
+
+  bumpedMsForTopic(id: TopicId): number | null {
+    const res = this._db
+      .prepare(`SELECT bumped_ms FROM topics WHERE id = :id`)
+      .get({id});
+    return res != null ? res.bumped_ms : null;
   }
 
   addPost(post: Post): AddResult {

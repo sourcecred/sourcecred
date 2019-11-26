@@ -75,6 +75,11 @@ describe("plugins/discourse/createGraph", () => {
         maxTopicId: this._topics.reduce((max, t) => Math.max(t.id, max), 0),
       };
     }
+    topicsInCategories() {
+      throw new Error(
+        "Method topicsInCategories should be unused for createGraph"
+      );
+    }
   }
 
   function example() {
