@@ -1,7 +1,7 @@
 // @flow
 
 import type {TaskReporter} from "../../util/taskReporter";
-import type {Discourse, CategoryId, Topic} from "./fetch";
+import type {Discourse, CategoryId, Topic, TopicLatest} from "./fetch";
 import {MirrorRepository} from "./mirrorRepository";
 
 export type MirrorOptions = {|
@@ -21,6 +21,12 @@ const defaultOptions: MirrorOptions = {
   recheckCategoryDefinitionsAfterMs: 24 * 3600 * 1000, // 24h
   recheckTopicsInCategories: [],
 };
+
+function sortTopicByBumpedMs(a: TopicLatest, b: TopicLatest): number {
+  return a.bumpedMs - b.bumpedMs;
+}
+
+export type MirrorMode = "MODE_1_ITERATE_BY_ID" | "MODE_2_LOAD_BUMPED_TOPICS";
 
 /**
  * Mirrors data from the Discourse API into a local sqlite db.
@@ -44,6 +50,7 @@ export class Mirror {
   +_repo: MirrorRepository;
   +_fetcher: Discourse;
   +_serverUrl: string;
+  +_mode: MirrorMode;
 
   /**
    * Construct a new Mirror instance.
@@ -58,7 +65,8 @@ export class Mirror {
     repo: MirrorRepository,
     fetcher: Discourse,
     serverUrl: string,
-    options?: $Shape<MirrorOptions>
+    options?: $Shape<MirrorOptions>,
+    mode?: MirrorMode
   ) {
     this._repo = repo;
     this._fetcher = fetcher;
@@ -67,13 +75,108 @@ export class Mirror {
       ...defaultOptions,
       ...(options || {}),
     };
+    this._mode = mode || "MODE_1_ITERATE_BY_ID";
   }
 
   async update(reporter: TaskReporter) {
     reporter.start("discourse");
-    await this._updateTopics(reporter);
-    await this._updateLikes(reporter);
+    switch (this._mode) {
+      case "MODE_1_ITERATE_BY_ID":
+        await this._updateTopics(reporter);
+        await this._updateLikes(reporter);
+        break;
+      case "MODE_2_LOAD_BUMPED_TOPICS":
+        await this._updateTopicsV2(reporter);
+        await this._updateLikes(reporter);
+        break;
+      default:
+        (this._mode: empty);
+        throw new Error(`Invalid mode ${this._mode}`);
+    }
     reporter.finish("discourse");
+  }
+
+  async _updateTopicsV2(reporter: TaskReporter) {
+    reporter.start("discourse/topics");
+
+    const {
+      topicBumpMs: lastLocalTopicBumpMs,
+      definitionCheckMs: lastDefinitionCheckMs,
+    } = this._repo.syncHeads();
+
+    const startTime = Date.now();
+    const shouldCheckDefinitions =
+      startTime - lastDefinitionCheckMs >=
+      this._options.recheckCategoryDefinitionsAfterMs;
+
+    const bumpedTopics: TopicLatest[] = await this._fetcher.topicsBumpedSince(
+      lastLocalTopicBumpMs
+    );
+    const topicBumpsById: Map<number, number> = new Map(
+      bumpedTopics.map((t) => [t.id, t.bumpedMs])
+    );
+
+    // Make sure we have oldest first in our load queue.
+    bumpedTopics.sort(sortTopicByBumpedMs);
+
+    // Create a uniqueness filter.
+    const existingTopics = new Set();
+    const once = (tid) => {
+      if (existingTopics.has(tid)) return false;
+      existingTopics.add(tid);
+      return true;
+    };
+
+    // Add definition topics if the flag to do so is set.
+    const definitionTopicIds = shouldCheckDefinitions
+      ? await this._fetcher.categoryDefinitionTopicIds()
+      : [];
+
+    // Add specific-category topics when it's set in our options.
+    const selectCategoryTopics = this._repo.topicsInCategories(
+      this._options.recheckTopicsInCategories
+    );
+
+    // Note: order is important here.
+    // Initial load should happen in order of bump date,
+    // reloads at the end are ok to be in random order.
+    const topicLoadQueue = [
+      ...bumpedTopics.map((t) => t.id),
+      ...definitionTopicIds,
+      ...selectCategoryTopics,
+    ].filter(once);
+
+    for (const topicId of topicLoadQueue) {
+      const topicWithPosts = await this._fetcher.topicWithPosts(topicId);
+      if (topicWithPosts != null) {
+        const {topic, posts} = topicWithPosts;
+
+        // We find the bump by:
+        // 1. What fetcher's topicsBumpedSince tells us.
+        // 2. What the local DB contains (probably force updated a topic that wasn't bumped).
+        // 3. Fall back on creation date (category definition topics don't normally have bump dates at all).
+        const bumpedMs =
+          topicBumpsById.get(topicId) ||
+          this._repo.bumpedMsForTopic(topicId) ||
+          topic.timestampMs;
+        if (bumpedMs == null) {
+          throw new Error(`Missing bump date for topic ID: ${topic.id}`);
+        }
+        const mergedTopic: Topic = {
+          ...topic,
+          bumpedMs,
+        };
+        this._repo.replaceTopicTransaction(mergedTopic, posts);
+      }
+    }
+
+    if (shouldCheckDefinitions) {
+      // Note: use the start time as to avoid missing any changes
+      // between when we queries upstream and when we completed all tasks.
+      this._repo.bumpDefinitionTopicCheck(startTime);
+    }
+
+    reporter.finish("discourse/topics");
   }
 
   async _updateTopics(reporter: TaskReporter) {
