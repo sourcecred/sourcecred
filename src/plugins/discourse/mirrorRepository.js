@@ -3,11 +3,19 @@
 import type {Database} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
-import type {TopicId, PostId, Topic, Post, LikeAction} from "./fetch";
+import type {
+  CategoryId,
+  TopicId,
+  PostId,
+  Topic,
+  Post,
+  LikeAction,
+} from "./fetch";
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v5";
+const VERSION = "discourse_mirror_v6";
+const DEFINITION_CHECK_KEY = "definition_check";
 
 /**
  * An interface for reading the local Discourse data.
@@ -45,7 +53,29 @@ export interface ReadRepository {
    * Gets all of the like actions in the history.
    */
   likes(): $ReadOnlyArray<LikeAction>;
+
+  /**
+   * Finds the TopicIds of topics that have one of the categoryIds as it's category.
+   */
+  topicsInCategories(
+    categoryIds: $ReadOnlyArray<CategoryId>
+  ): $ReadOnlyArray<TopicId>;
 }
+
+export type SyncHeads = {|
+  /**
+   * The timestamp of the last time we've loaded category definition topics.
+   * Used for determining whether we should reload them during an update.
+   */
+  +definitionCheckMs: number,
+
+  /**
+   * The most recent bumpedMs timestamp of all topics.
+   * Used for determining what the most recent topic changes we have stored in
+   * our local mirror, and which we should fetch from the API during update.
+   */
+  +topicBumpMs: number,
+|};
 
 export type MaxIds = {|
   +maxPostId: number,
@@ -63,6 +93,31 @@ export interface MirrorRepository extends ReadRepository {
   addTopic(topic: Topic): AddResult;
   addPost(post: Post): AddResult;
   addLike(like: LikeAction): AddResult;
+
+  /**
+   * For the given topic ID, retrieves the bumpedMs value.
+   * Returns null, when the topic wasn't found.
+   */
+  bumpedMsForTopic(id: TopicId): number | null;
+
+  /**
+   * Finds the SyncHeads values, used as input to skip
+   * already up-to-date content when mirroring.
+   */
+  syncHeads(): SyncHeads;
+
+  /**
+   * Idempotent insert/replace of a Topic, including all it's Posts.
+   *
+   * Note: this will insert new posts, update existing posts and delete old posts.
+   * As these are separate queries, we use a transaction here.
+   */
+  replaceTopicTransaction(topic: Topic, posts: $ReadOnlyArray<Post>): void;
+
+  /**
+   * Bumps the definitionCheckMs (from SyncHeads) to the provided timestamp.
+   */
+  bumpDefinitionTopicCheck(timestampMs: number): void;
 }
 
 function toAddResult({
@@ -82,12 +137,19 @@ export class SqliteMirrorRepository
   constructor(db: Database, serverUrl: string) {
     if (db == null) throw new Error("db: " + String(db));
     this._db = db;
+    this._transaction(() => {
+      this._initialize(serverUrl);
+    });
+  }
+
+  _transaction(queries: () => void) {
+    const db = this._db;
     if (db.inTransaction) {
       throw new Error("already in transaction");
     }
     try {
       db.prepare("BEGIN").run();
-      this._initialize(serverUrl);
+      queries();
       if (db.inTransaction) {
         db.prepare("COMMIT").run();
       }
@@ -132,6 +194,11 @@ export class SqliteMirrorRepository
     db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(config);
 
     const tables = [
+      dedent`\
+        CREATE TABLE sync_heads (
+          key TEXT PRIMARY KEY,
+          timestamp_ms INTEGER NOT NULL
+        )`,
       "CREATE TABLE users (username TEXT PRIMARY KEY)",
       dedent`\
         CREATE TABLE topics (
@@ -185,6 +252,22 @@ export class SqliteMirrorRepository
     return {
       maxPostId: res.max_post,
       maxTopicId: res.max_topic,
+    };
+  }
+
+  syncHeads(): SyncHeads {
+    const res = this._db
+      .prepare(
+        dedent`\
+          SELECT
+              (SELECT IFNULL(MAX(bumped_ms), 0) FROM topics) AS max_topic_bump,
+              (SELECT timestamp_ms FROM sync_heads WHERE key = :DEFINITION_CHECK_KEY) AS definition_check
+          `
+      )
+      .get({DEFINITION_CHECK_KEY});
+    return {
+      definitionCheckMs: res.definition_check || 0,
+      topicBumpMs: res.max_topic_bump,
     };
   }
 
@@ -269,6 +352,25 @@ export class SqliteMirrorRepository
       .get({topic_id: topicId, index_within_topic: indexWithinTopic});
   }
 
+  bumpDefinitionTopicCheck(timestampMs: number): void {
+    this._db
+      .prepare(
+        dedent`\
+          REPLACE INTO sync_heads (
+              key,
+              timestamp_ms
+          ) VALUES (
+              :key,
+              :timestamp_ms
+          )
+        `
+      )
+      .run({
+        key: DEFINITION_CHECK_KEY,
+        timestamp_ms: timestampMs,
+      });
+  }
+
   addLike(like: LikeAction): AddResult {
     this.addUser(like.username);
     const res = this._db
@@ -291,6 +393,53 @@ export class SqliteMirrorRepository
         username: like.username,
       });
     return toAddResult(res);
+  }
+
+  replaceTopicTransaction(topic: Topic, posts: $ReadOnlyArray<Post>) {
+    this._transaction(() => {
+      this.addTopic(topic);
+      for (const post of posts) {
+        this.addPost(post);
+      }
+      this.deleteUnexpectedPosts(
+        topic.id,
+        posts.map((p) => p.id)
+      );
+    });
+  }
+
+  deleteUnexpectedPosts(topicId: TopicId, expected: PostId[]): number {
+    const res = this._db
+      .prepare(
+        dedent`\
+          DELETE FROM posts
+          WHERE topic_id = ?
+          AND id NOT IN (${expected.map((_) => "?").join(",")})
+        `
+      )
+      .run(topicId, ...expected);
+    return res.changes;
+  }
+
+  topicsInCategories(
+    categoryIds: $ReadOnlyArray<CategoryId>
+  ): $ReadOnlyArray<TopicId> {
+    return this._db
+      .prepare(
+        dedent`\
+          SELECT id FROM topics
+          WHERE category_id IN (${categoryIds.map((_) => "?").join(",")})
+        `
+      )
+      .all(...categoryIds)
+      .map((t) => t.id);
+  }
+
+  bumpedMsForTopic(id: TopicId): number | null {
+    const res = this._db
+      .prepare(`SELECT bumped_ms FROM topics WHERE id = :id`)
+      .get({id});
+    return res != null ? res.bumped_ms : null;
   }
 
   addPost(post: Post): AddResult {
