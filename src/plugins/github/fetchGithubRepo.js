@@ -17,6 +17,7 @@ import * as Schema from "../../graphql/schema";
 import {BLACKLISTED_IDS} from "./blacklistedObjectIds";
 import type {Repository} from "./graphqlTypes";
 import schema from "./schema";
+import {validateToken} from "./token";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -37,10 +38,15 @@ export default async function fetchGithubRepo(
 ): Promise<Repository> {
   const {token, cacheDirectory} = options;
 
-  const validToken = /^[A-Fa-f0-9]{40}$/;
-  if (!validToken.test(token)) {
-    throw new Error(`Invalid token: ${token}`);
+  // Right now, only warn on likely to be bad tokens (see #1461).
+  // This lets us proceed to the GitHub API validating the token,
+  // while giving users instructions to remedy if it was their mistake.
+  try {
+    validateToken(token);
+  } catch (e) {
+    console.warn(`Warning: ${e}`);
   }
+
   const postQueryWithToken = (payload) => postQuery(payload, token);
 
   const resolvedId: Schema.ObjectId = await resolveRepositoryGraphqlId(
