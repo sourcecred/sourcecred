@@ -75,7 +75,7 @@ export class Mirror {
       ...defaultOptions,
       ...(options || {}),
     };
-    this._mode = mode || "MODE_1_ITERATE_BY_ID";
+    this._mode = mode || "MODE_2_LOAD_BUMPED_TOPICS";
   }
 
   async update(reporter: TaskReporter) {
