@@ -12,7 +12,7 @@ export type ProjectId = string;
  * A project represents a scope for cred analysis.
  *
  * Right now it has an `id` (which should be unique across a user's projects)
- * and an array of GitHub RepoIds.
+ * and information to configure the GitHub, Discourse, and Identity plugins.
  *
  * In the future, instead of hardcoding support for plugins like GitHub and Discourse,
  * we will have a generic system for storing plugin-specific config, keyed by plugin
@@ -28,6 +28,9 @@ export type Project = Project_v040;
 export type SupportedProject = Project_v030 | Project_v031 | Project_v040;
 
 type Project_v040 = {|
+  // the id field is required for pre-instance SourceCred, when multiple
+  // projects may co-exist in a SourceCred directory. Once we fully migrate
+  // to an instance system, it will be removed.
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,

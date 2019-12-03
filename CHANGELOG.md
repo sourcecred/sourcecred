@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 <!-- Please add new entries just beneath this line. -->
+- Add the `sourcecred init` command (#1515)
 - Change default alpha from 0.05 to 0.20 (#1391)
 - Enable viewing and changing alpha in the explorer (#1390)
 - Enable combining different user identities together (#1385)

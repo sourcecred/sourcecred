@@ -1,0 +1,32 @@
+[
+    {
+        "type": "sourcecred/project",
+        "version": "0.4.0"
+    },
+    {
+        "discourseServer": {
+            "serverUrl": "https://discourse.sourcecred.io"
+        },
+        "id": "obsolete-id",
+        "identities": [
+        ],
+        "repoIds": [
+            {
+                "name": "example-github",
+                "owner": "sourcecred-test"
+            },
+            {
+                "name": "example-git-submodule",
+                "owner": "sourcecred-test"
+            },
+            {
+                "name": "example-git",
+                "owner": "sourcecred-test"
+            },
+            {
+                "name": "sourcecred",
+                "owner": "sourcecred"
+            }
+        ]
+    }
+]
