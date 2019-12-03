@@ -4,6 +4,7 @@
 // before we build a more intentional declarative json config approach, as discussed
 // here: https://github.com/sourcecred/sourcecred/issues/1232#issuecomment-519538494
 // This method is untested; please take care when modifying it!
+// This command is deprecated by `sourcecred init` and will shortly be removed.
 
 import dedent from "../util/dedent";
 import type {Command} from "./command";

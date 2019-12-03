@@ -1,0 +1,14 @@
+[
+    {
+        "type": "sourcecred/project",
+        "version": "0.4.0"
+    },
+    {
+        "discourseServer": null,
+        "id": "obsolete-id",
+        "identities": [
+        ],
+        "repoIds": [
+        ]
+    }
+]
