@@ -9,6 +9,7 @@ import {help as scoresHelp} from "./scores";
 import {help as clearHelp} from "./clear";
 import {help as genProjectHelp} from "./genProject";
 import {help as discourseHelp} from "./discourse";
+import {help as initHelp} from "./init";
 
 const help: Command = async (args, std) => {
   if (args.length === 0) {
@@ -23,6 +24,7 @@ const help: Command = async (args, std) => {
     clear: clearHelp,
     "gen-project": genProjectHelp,
     discourse: discourseHelp,
+    init: initHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);
@@ -46,6 +48,7 @@ function usage(print: (string) => void): void {
       scores        print SourceCred scores to stdout
       gen-project   print a SourceCred project config to stdout
       discourse     load a Discourse server into SourceCred
+      init          initialize a SourceCred instance
       help          show this help message
 
     Use 'sourcecred help COMMAND' for help about an individual command.
