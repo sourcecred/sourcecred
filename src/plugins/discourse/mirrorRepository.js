@@ -77,11 +77,6 @@ export type SyncHeads = {|
   +topicBumpMs: number,
 |};
 
-export type MaxIds = {|
-  +maxPostId: number,
-  +maxTopicId: number,
-|};
-
 export type AddResult = {|
   +changes: number,
   +lastInsertRowid: number,
@@ -89,9 +84,6 @@ export type AddResult = {|
 
 // Read-write interface the mirror uses internally.
 export interface MirrorRepository extends ReadRepository {
-  maxIds(): MaxIds;
-  addTopic(topic: Topic): AddResult;
-  addPost(post: Post): AddResult;
   addLike(like: LikeAction): AddResult;
 
   /**
@@ -237,22 +229,6 @@ export class SqliteMirrorRepository
     for (const sql of tables) {
       db.prepare(sql).run();
     }
-  }
-
-  maxIds(): MaxIds {
-    const res = this._db
-      .prepare(
-        dedent`\
-          SELECT
-              (SELECT IFNULL(MAX(id), 0) FROM posts) AS max_post,
-              (SELECT IFNULL(MAX(id), 0) FROM topics) AS max_topic
-          `
-      )
-      .get();
-    return {
-      maxPostId: res.max_post,
-      maxTopicId: res.max_topic,
-    };
   }
 
   syncHeads(): SyncHeads {
