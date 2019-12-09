@@ -63,7 +63,7 @@ describe("plugins/discourse/fetch", () => {
     expectError("latestPosts", (x) => x.latestPosts(), 403);
     expectError("latestPosts", (x) => x.latestPosts(), 429);
 
-    expectError("topic", (x) => x.topicWithPosts(14), 429);
+    expectError("topicWithPosts", (x) => x.topicWithPosts(14), 429);
     expectError("post", (x) => x.post(14), 429);
     expectError(
       "categoryDefinitionTopicIds",
@@ -77,6 +77,8 @@ describe("plugins/discourse/fetch", () => {
       (x) => x.categoryDefinitionTopicIds(),
       429
     );
+    expectError("likesByUser", (x) => x.likesByUser("dl-proto", 0), 403);
+    expectError("likesByUser", (x) => x.likesByUser("dl-proto", 0), 429);
 
     function expectNull(name, f, status) {
       it(`${name} returns null on ${String(status)}`, async () => {
@@ -86,8 +88,8 @@ describe("plugins/discourse/fetch", () => {
       });
     }
 
-    expectNull("topic", (x) => x.topicWithPosts(14), 404);
-    expectNull("topic", (x) => x.topicWithPosts(14), 403);
+    expectNull("topicWithPosts", (x) => x.topicWithPosts(14), 404);
+    expectNull("topicWithPosts", (x) => x.topicWithPosts(14), 403);
     expectNull("post", (x) => x.post(14), 404);
     expectNull("post", (x) => x.post(14), 403);
   });
@@ -99,7 +101,7 @@ describe("plugins/discourse/fetch", () => {
         fetchOptions = _options;
         return Promise.resolve(new Response("", {status: 404}));
       };
-      await new Fetcher(options, fakeFetch, 0).post(1337);
+      await new Fetcher(options, fakeFetch, 0).topicWithPosts(1337);
       if (fetchOptions == null) {
         throw new Error("fetchOptions == null");
       }
