@@ -5,21 +5,11 @@ import {options, snapshotFetcher} from "./mockSnapshotFetcher";
 
 describe("plugins/discourse/fetch", () => {
   describe("snapshot testing", () => {
-    it("loads LatestTopicId from snapshot", async () => {
-      const topicId = await snapshotFetcher().latestTopicId();
-      expect(topicId).toMatchInlineSnapshot(`57`);
-    });
-    it("loads latest posts from snapshot", async () => {
-      expect(await snapshotFetcher().latestPosts()).toMatchSnapshot();
-    });
     it("loads a particular topic from snapshot", async () => {
       expect(await snapshotFetcher().topicWithPosts(11)).toMatchSnapshot();
     });
     it("loads a topic with pagination from snapshot", async () => {
       expect(await snapshotFetcher().topicWithPosts(26)).toMatchSnapshot();
-    });
-    it("loads a particular post from snapshot", async () => {
-      expect(await snapshotFetcher().post(14)).toMatchSnapshot();
     });
     it("loads user likes from snapshot", async () => {
       expect(
@@ -55,28 +45,16 @@ describe("plugins/discourse/fetch", () => {
         return result.catch((e) => expect(e.message).toMatch(String(status)));
       });
     }
-    expectError("latestTopicId", (x) => x.latestTopicId(), 404);
-    expectError("latestTopicId", (x) => x.latestTopicId(), 403);
-    expectError("latestTopicId", (x) => x.latestTopicId(), 429);
 
-    expectError("latestPosts", (x) => x.latestPosts(), 404);
-    expectError("latestPosts", (x) => x.latestPosts(), 403);
-    expectError("latestPosts", (x) => x.latestPosts(), 429);
-
-    expectError("topic", (x) => x.topicWithPosts(14), 429);
-    expectError("post", (x) => x.post(14), 429);
-    expectError(
-      "categoryDefinitionTopicIds",
-      (x) => x.categoryDefinitionTopicIds(),
-      429
-    );
-
+    expectError("topicWithPosts", (x) => x.topicWithPosts(14), 429);
     expectError("topicsBumpedSince", (x) => x.topicsBumpedSince(0), 429);
     expectError(
       "categoryDefinitionTopicIds",
       (x) => x.categoryDefinitionTopicIds(),
       429
     );
+    expectError("likesByUser", (x) => x.likesByUser("dl-proto", 0), 403);
+    expectError("likesByUser", (x) => x.likesByUser("dl-proto", 0), 429);
 
     function expectNull(name, f, status) {
       it(`${name} returns null on ${String(status)}`, async () => {
@@ -86,10 +64,8 @@ describe("plugins/discourse/fetch", () => {
       });
     }
 
-    expectNull("topic", (x) => x.topicWithPosts(14), 404);
-    expectNull("topic", (x) => x.topicWithPosts(14), 403);
-    expectNull("post", (x) => x.post(14), 404);
-    expectNull("post", (x) => x.post(14), 403);
+    expectNull("topicWithPosts", (x) => x.topicWithPosts(14), 404);
+    expectNull("topicWithPosts", (x) => x.topicWithPosts(14), 403);
   });
 
   describe("fetch headers", () => {
@@ -99,7 +75,7 @@ describe("plugins/discourse/fetch", () => {
         fetchOptions = _options;
         return Promise.resolve(new Response("", {status: 404}));
       };
-      await new Fetcher(options, fakeFetch, 0).post(1337);
+      await new Fetcher(options, fakeFetch, 0).topicWithPosts(1337);
       if (fetchOptions == null) {
         throw new Error("fetchOptions == null");
       }

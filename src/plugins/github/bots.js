@@ -19,5 +19,7 @@ export function botSet(): Set<string> {
     "tensorflow-gardener",
     "tensorflow-jenkins",
     "tensorflowbutler",
+    "github-actions",
+    "transifex-integration",
   ]);
 }
