@@ -10,7 +10,6 @@
  * on the results to simplify it to data that is relevant for us.
  */
 
-import stringify from "json-stable-stringify";
 import fetch from "isomorphic-fetch";
 import Bottleneck from "bottleneck";
 import * as NullUtil from "../../util/null";
@@ -93,27 +92,12 @@ export type LikeAction = {|
  * testing.
  */
 export interface Discourse {
-  // Get the `id` of the latest topic on the server.
-  // Vital so that we can then enumerate and fetch every Topic we haven't seen yet.
-  // May reject on not OK status like 404 or 403.
-  latestTopicId(): Promise<TopicId>;
   // Retrieve the Topic with Posts for a given id.
   // Will resolve to null if the response status is 403 or 404. 403 because the
   // topic may be hidden from the API user; 404 because we sometimes see
   // 404s in prod and want to ignore those topic ids. (Not sure why it happens.)
   // May reject if the status is not OK and is not 404 or 403.
   topicWithPosts(id: TopicId): Promise<TopicWithPosts | null>;
-  // Retrieve an individual Post by its id.
-  // Will resolve to null if the response status is 403 or 404. 403 because the
-  // topic may be hidden from the API user; 404 because we sometimes see
-  // 404s in prod and want to ignore those topic ids. (Not sure why it happens.)
-  // May reject if the status is not OK and is not 404 or 403.
-  post(id: PostId): Promise<Post | null>;
-  // Retrieve the latest posts from the server.
-  // Vital so that we can then enumerate and fetch every Post that we haven't
-  // encountered.
-  // May reject on not OK status like 404 or 403.
-  latestPosts(): Promise<Post[]>;
 
   /**
    * Retrieves the like actions that were initiated by the target user.
@@ -245,26 +229,6 @@ export class Fetcher implements Discourse {
     return new Set(ids);
   }
 
-  async latestTopicId(): Promise<TopicId> {
-    const response = await this._fetch("/latest.json?order=created");
-    failIfMissing(response);
-    failForNotOk(response);
-    const json = await response.json();
-    if (json.topic_list.topics.length === 0) {
-      throw new Error(`no topics! got ${stringify(json)} as latest topics.`);
-    }
-
-    return json.topic_list.topics[0].id;
-  }
-
-  async latestPosts(): Promise<Post[]> {
-    const response = await this._fetch("/posts.json");
-    failIfMissing(response);
-    failForNotOk(response);
-    const json = await response.json();
-    return json.latest_posts.map(parsePost);
-  }
-
   async topicWithPosts(id: TopicId): Promise<TopicWithPosts | null> {
     const response = await this._fetch(`/t/${id}.json`);
     const {status} = response;
@@ -298,18 +262,6 @@ export class Fetcher implements Discourse {
     }
 
     return {topic, posts};
-  }
-
-  async post(id: PostId): Promise<Post | null> {
-    const response = await this._fetch(`/posts/${id}.json`);
-    const {status} = response;
-    if (status === 403 || status === 404 || status === 410) {
-      // The post is hidden, deleted, or otherwise missing.
-      return null;
-    }
-    failForNotOk(response);
-    const json = await response.json();
-    return parsePost(json);
   }
 
   async likesByUser(

@@ -26,8 +26,6 @@ function sortTopicByBumpedMs(a: TopicLatest, b: TopicLatest): number {
   return a.bumpedMs - b.bumpedMs;
 }
 
-export type MirrorMode = "MODE_1_ITERATE_BY_ID" | "MODE_2_LOAD_BUMPED_TOPICS";
-
 /**
  * Mirrors data from the Discourse API into a local sqlite db.
  *
@@ -50,7 +48,6 @@ export class Mirror {
   +_repo: MirrorRepository;
   +_fetcher: Discourse;
   +_serverUrl: string;
-  +_mode: MirrorMode;
 
   /**
    * Construct a new Mirror instance.
@@ -65,8 +62,7 @@ export class Mirror {
     repo: MirrorRepository,
     fetcher: Discourse,
     serverUrl: string,
-    options?: $Shape<MirrorOptions>,
-    mode?: MirrorMode
+    options?: $Shape<MirrorOptions>
   ) {
     this._repo = repo;
     this._fetcher = fetcher;
@@ -75,24 +71,12 @@ export class Mirror {
       ...defaultOptions,
       ...(options || {}),
     };
-    this._mode = mode || "MODE_2_LOAD_BUMPED_TOPICS";
   }
 
   async update(reporter: TaskReporter) {
     reporter.start("discourse");
-    switch (this._mode) {
-      case "MODE_1_ITERATE_BY_ID":
-        await this._updateTopics(reporter);
-        await this._updateLikes(reporter);
-        break;
-      case "MODE_2_LOAD_BUMPED_TOPICS":
-        await this._updateTopicsV2(reporter);
-        await this._updateLikes(reporter);
-        break;
-      default:
-        (this._mode: empty);
-        throw new Error(`Invalid mode ${this._mode}`);
-    }
+    await this._updateTopicsV2(reporter);
+    await this._updateLikes(reporter);
     reporter.finish("discourse");
   }
 
@@ -177,71 +161,6 @@ export class Mirror {
     }
 
     reporter.finish("discourse/topics");
-  }
-
-  async _updateTopics(reporter: TaskReporter) {
-    // Local functions add the warning and tracking semantics we want from them.
-    const encounteredPostIds = new Set();
-
-    const addPost = (post) => {
-      try {
-        encounteredPostIds.add(post.id);
-        return this._repo.addPost(post);
-      } catch (e) {
-        const url = `${this._serverUrl}/t/${post.topicId}/${post.indexWithinTopic}`;
-        console.warn(
-          `Warning: Encountered error '${e.message}' while adding post ${url}.`
-        );
-        return {changes: 0, lastInsertRowid: -1};
-      }
-    };
-
-    const {
-      maxPostId: lastLocalPostId,
-      maxTopicId: lastLocalTopicId,
-    } = this._repo.maxIds();
-
-    reporter.start("discourse/topics");
-    const latestTopicId = await this._fetcher.latestTopicId();
-    for (
-      let topicId = lastLocalTopicId + 1;
-      topicId <= latestTopicId;
-      topicId++
-    ) {
-      const topicWithPosts = await this._fetcher.topicWithPosts(topicId);
-      if (topicWithPosts != null) {
-        const {topic, posts} = topicWithPosts;
-        // TODO: Quick hack, as TopicView does not include bumpedMs.
-        // This should be resolved in the new sync logic.
-        const workaroundTopic: Topic = {...topic, bumpedMs: topic.timestampMs};
-        this._repo.addTopic(workaroundTopic);
-        for (const post of posts) {
-          addPost(post);
-        }
-      }
-    }
-    reporter.finish("discourse/topics");
-
-    reporter.start("discourse/posts");
-    const latestPosts = await this._fetcher.latestPosts();
-    for (const post of latestPosts) {
-      if (!encounteredPostIds.has(post.id) && post.id > lastLocalPostId) {
-        addPost(post);
-      }
-    }
-
-    const latestPost = latestPosts[0];
-    const latestPostId = latestPost == null ? 0 : latestPost.id;
-    for (let postId = lastLocalPostId + 1; postId <= latestPostId; postId++) {
-      if (encounteredPostIds.has(postId)) {
-        continue;
-      }
-      const post = await this._fetcher.post(postId);
-      if (post != null) {
-        addPost(post);
-      }
-    }
-    reporter.finish("discourse/posts");
   }
 
   async _updateLikes(reporter: TaskReporter) {
