@@ -59,7 +59,7 @@ describe("plugins/github/token", () => {
 
     it("should accept an installation access token format", () => {
       // Given
-      const token = "v1.1bfb713d900c4962";
+      const token = "v1.1bfb713d900c49621bfb713d900c49621bfb713d";
 
       // When
       validateToken(token);
@@ -70,7 +70,7 @@ describe("plugins/github/token", () => {
 
     it("should warn when installation access token has an unexpected version", () => {
       // Given
-      const token = "v5.1bfb713d900c4962";
+      const token = "v5.1bfb713d900c49621bfb713d900c49621bfb713d";
 
       // When
       validateToken(token);
