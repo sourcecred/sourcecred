@@ -53,7 +53,7 @@ describe("cli/testUtil", () => {
         stdout: ["???"],
         stderr: [
           "what is going on",
-          expect.stringMatching(/^Error: throw\n *at testCommand/),
+          expect.stringMatching(/^Error: throw\n *at command/),
         ],
       });
     });

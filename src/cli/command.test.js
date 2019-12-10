@@ -37,7 +37,7 @@ describe("cli/command", () => {
       expect(stdio.out).toHaveBeenCalledTimes(0);
       expect(stdio.err).toHaveBeenCalledTimes(1);
       expect(stdio.err.mock.calls[0]).toHaveLength(1);
-      expect(stdio.err.mock.calls[0][0]).toMatch(/^Error: wat\n *at cmd/);
+      expect(stdio.err.mock.calls[0][0]).toMatch(/^Error: wat\n *at command/);
     });
 
     it("handles a thrown string", async () => {
@@ -62,7 +62,7 @@ describe("cli/command", () => {
       expect(stdio.out).toHaveBeenCalledTimes(0);
       expect(stdio.err).toHaveBeenCalledTimes(1);
       expect(stdio.err.mock.calls[0]).toHaveLength(1);
-      expect(stdio.err.mock.calls[0][0]).toMatch(/^Error: wat\n *at cmd/);
+      expect(stdio.err.mock.calls[0][0]).toMatch(/^Error: wat\n *at command/);
     });
 
     it("handles rejection with a string", async () => {
