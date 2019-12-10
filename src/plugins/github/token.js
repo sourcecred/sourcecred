@@ -30,7 +30,7 @@ export function validateToken(token: string) {
       );
     }
 
-    if (hexCode.length != 16) {
+    if (hexCode.length != 40) {
       console.warn(
         `Warning: GitHub installation access token has an unexpected hexadecimal component ` +
           `length of ${hexCode.length}.`
