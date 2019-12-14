@@ -44,13 +44,11 @@ const upgrades = {
   "0.3.1": upgradeFrom030,
 };
 
-export type ProjectJSON = Compatible<Project>;
-
-export function projectToJSON(p: Project): ProjectJSON {
+export function projectToJSON(p: Project): Compatible<Project> {
   return toCompat(COMPAT_INFO, p);
 }
 
-export function projectFromJSON(j: ProjectJSON): Project {
+export function projectFromJSON(j: Compatible<any>): Project {
   return fromCompat(COMPAT_INFO, j, upgrades);
 }
 
