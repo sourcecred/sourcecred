@@ -4,6 +4,13 @@
 
 <!-- Please add new entries just beneath this line. -->
 
+## [0.4.1]
+
+_Note: this is a backport release to include #1503._
+
+- Adding Docker container with instructions for running sourcecred (#1288)
+- Security: force update yarn version in Dockerfile (#1503)
+
 ## [0.4.0]
 
 - Enable viewing cred over time for GitHub repos (#1268)
