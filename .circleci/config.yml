@@ -93,28 +93,6 @@ workflows:
 
       - docker/publish:
           image: sourcecred/sourcecred
-          tag: latest
-          requires:
-            - test
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
-          extra_build_args: --cache-from=node:12,sourcecred/sourcecred:dev
-          before_build:
-            - pull_cache
-          after_build:
-            - run:
-                name: Publish Docker Tag with Sourcecred Version
-                command: |
-                   DOCKER_TAG=$(docker run sourcecred/sourcecred --version | cut -d' ' -f2)
-                   echo "Version for Docker tag is ${DOCKER_TAG}"
-                   docker tag sourcecred/sourcecred:latest sourcecred/sourcecred:${DOCKER_TAG}
-                   docker push sourcecred/sourcecred
-
-      - docker/publish:
-          image: sourcecred/sourcecred
           extra_build_args: --cache-from=node:12,sourcecred/sourcecred:dev
           before_build:
             - pull_cache
