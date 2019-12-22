@@ -65,7 +65,7 @@
     "file-loader": "^5.0.2",
     "flow-bin": "^0.114.0",
     "jest": "^24.8.0",
-    "jest-fetch-mock": "^2.1.2",
+    "jest-fetch-mock": "^3.0.0",
     "prettier": "1.19.1",
     "raf": "3.4.1",
     "react-dev-utils": "^5.0.0",

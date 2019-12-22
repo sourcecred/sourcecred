@@ -16,7 +16,7 @@ One good forum post to start with is [A Gentle Introduction to Cred].
 For an example of SourceCred in action, you can see SourceCred’s own [prototype cred attribution][prototype].
 
 [our website]: https://sourcecred.io/
-[prototype]: https://sourcecred.io/prototype/
+[prototype]: https://sourcecred.io/cred/timeline/@sourcecred/
 [A Gentle Introduction to Cred]: https://discourse.sourcecred.io/t/a-gentle-introduction-to-cred/20
 
 ## Current Status
