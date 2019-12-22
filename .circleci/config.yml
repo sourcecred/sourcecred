@@ -111,6 +111,43 @@ workflows:
             branches:
               only: master
 
+  # Separate workflow just for version tag releases.
+  tagged-release:
+    jobs:
+      - test:
+          filters: &version-tag-only
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+
+      - test_full:
+          filters: *version-tag-only
+
+      - test_full_10:
+          filters: *version-tag-only
+
+      - docker/publish:
+          filters: *version-tag-only
+          requires:
+            - test
+            - test_full
+            - test_full_10
+          deploy: false
+          image: sourcecred/sourcecred
+          tag: latest
+          extra_build_args: --cache-from=node:12,sourcecred/sourcecred:dev
+          before_build:
+            - pull_cache
+          after_build:
+            - run:
+                name: Publish Docker Tag with Sourcecred Version
+                command: |
+                   DOCKER_TAG=$(docker run sourcecred/sourcecred --version | cut -d' ' -f2)
+                   echo "Version for Docker tag is ${DOCKER_TAG}"
+                   docker tag sourcecred/sourcecred:latest sourcecred/sourcecred:${DOCKER_TAG}
+                   docker push sourcecred/sourcecred:${DOCKER_TAG}
+                   docker push sourcecred/sourcecred:latest
 
   nightly:
     triggers:
