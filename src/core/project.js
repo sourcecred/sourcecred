@@ -24,16 +24,35 @@ export type ProjectId = string;
  * the future (e.g. showing the last update time for each of the project's data
  * dependencies).
  */
-export type Project = {|
+export type Project = Project_v040;
+export type SupportedProject = Project_v030 | Project_v031 | Project_v040;
+
+type Project_v040 = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,
   +identities: $ReadOnlyArray<Identity>,
 |};
 
+type Project_v031 = {|
+  ...Project_v040,
+  +discourseServer: {|
+    +serverUrl: string,
+    +apiUsername?: string,
+  |} | null,
+|};
+
+type Project_v030 = {|
+  ...Project_v040,
+  +discourseServer: {|
+    +serverUrl: string,
+    +apiUsername: string,
+  |} | null,
+|};
+
 const COMPAT_INFO = {type: "sourcecred/project", version: "0.4.0"};
 
-const upgradeFrom030 = (p) => ({
+const upgradeFrom030 = (p: Project_v030 | Project_v031): Project_v040 => ({
   ...p,
   discourseServer:
     p.discourseServer != null ? {serverUrl: p.discourseServer.serverUrl} : null,
@@ -48,7 +67,7 @@ export function projectToJSON(p: Project): Compatible<Project> {
   return toCompat(COMPAT_INFO, p);
 }
 
-export function projectFromJSON(j: Compatible<any>): Project {
+export function projectFromJSON(j: Compatible<SupportedProject>): Project {
   return fromCompat(COMPAT_INFO, j, upgrades);
 }
 

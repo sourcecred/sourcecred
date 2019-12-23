@@ -1,6 +1,6 @@
 // @flow
 
-export opaque type Compatible<T> = [CompatInfo, T];
+export type Compatible<T> = [CompatInfo, T];
 type CompatInfo = {|
   +type: string,
   +version: string,

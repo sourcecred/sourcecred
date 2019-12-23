@@ -6,10 +6,15 @@ import {
   projectToJSON,
   projectFromJSON,
   type Project,
+  type SupportedProject,
   encodeProjectId,
 } from "./project";
 import {makeRepoId} from "./repoId";
-import {toCompat} from "../util/compat";
+import {toCompat, type Compatible} from "../util/compat";
+
+function castType<T>(cp: Compatible<any>): Compatible<T> {
+  return [cp[0], cp[1]];
+}
 
 describe("core/project", () => {
   const foobar = deepFreeze(makeRepoId("foo", "bar"));
@@ -35,7 +40,8 @@ describe("core/project", () => {
     it("round trip is identity", () => {
       function check(p: Project) {
         const json = projectToJSON(p);
-        const p_ = projectFromJSON(json);
+        const supportedJson = castType<SupportedProject>(json);
+        const p_ = projectFromJSON(supportedJson);
         expect(p).toEqual(p_);
       }
       check(p1);
