@@ -9,7 +9,6 @@ import help from "./help";
 import load from "./load";
 import scores from "./scores";
 import clear from "./clear";
-import genProject from "./genProject";
 import discourse from "./discourse";
 import init from "./init";
 
@@ -31,8 +30,6 @@ const sourcecred: Command = async (args, std) => {
       return clear(args.slice(1), std);
     case "scores":
       return scores(args.slice(1), std);
-    case "gen-project":
-      return genProject(args.slice(1), std);
     case "discourse":
       return discourse(args.slice(1), std);
     case "init":
