@@ -86,7 +86,7 @@ function die(std, message) {
 const initCommand: Command = async (args, std) => {
   let withForce = false;
   let printToStdOut = false;
-  let discourseUrl: ?string;
+  let discourseUrl: string | null = null;
   let githubSpecs: string[] = [];
 
   for (let i = 0; i < args.length; i++) {
@@ -106,6 +106,7 @@ const initCommand: Command = async (args, std) => {
         if (++i >= args.length)
           return die(std, "--discourse given without value");
         discourseUrl = args[i];
+        /*
         if (!discourseUrl.match(new RegExp("^https?://"))) {
           return die(
             std,
@@ -115,6 +116,7 @@ const initCommand: Command = async (args, std) => {
         if (discourseUrl.endsWith("/")) {
           discourseUrl = discourseUrl.slice(0, discourseUrl.length - 1);
         }
+        */
         break;
       }
       case "--force": {
@@ -138,26 +140,13 @@ const initCommand: Command = async (args, std) => {
   }
 
   const githubToken = Common.githubToken();
-  if (!githubToken && githubSpecs.length > 0) {
-    return die(std, "tried to load GitHub specs, but no GitHub token provided");
-  }
-  let repoIds: RepoId[] = [];
-  for (const spec of githubSpecs) {
-    const subproject = await specToProject(spec, NullUtil.get(githubToken));
-    repoIds = [...repoIds, ...subproject.repoIds];
-  }
 
-  const discourseServer: DiscourseServer | null = discourseUrl
-    ? {serverUrl: discourseUrl}
-    : null;
-  const project: Project = createProject({
-    // the id field is obsolete in the instance system, and will be
-    // removed once we fully migrate to sourcecred instances.
-    id: "obsolete-id",
-    repoIds,
-    discourseServer,
-  });
-
+  if (githubToken == null && githubSpecs.length) {
+    die(std, `provided GitHub specs, but no GitHub token present. try --help`);
+  }
+  const specsWithToken =
+    githubToken == null ? null : {specs: githubSpecs, token: githubToken};
+  const project = await genProject(discourseUrl, specsWithToken);
   const projectJson = projectToJSON(project);
   const stringified = stringify(projectJson, {space: 4});
   if (printToStdOut) {
@@ -168,6 +157,54 @@ const initCommand: Command = async (args, std) => {
 
   return 0;
 };
+
+export type GitHubSpecsWithToken = {|
+  +specs: $ReadOnlyArray<string>,
+  +token: string,
+|};
+export async function genProject(
+  discourseUrl: string | null,
+  githubSpecsWithToken: GitHubSpecsWithToken | null
+): Promise<Project> {
+  const project: Project = createProject({
+    // the id field is obsolete in the instance system, and will be
+    // removed once we fully migrate to sourcecred instances.
+    id: "obsolete-id",
+    repoIds: await genRepoIds(githubSpecsWithToken),
+    discourseServer: genDiscourseServer(discourseUrl),
+  });
+  return project;
+}
+
+export function genDiscourseServer(
+  discourseUrl: string | null
+): DiscourseServer | null {
+  if (discourseUrl == null) {
+    return null;
+  }
+  if (!discourseUrl.match(new RegExp("^https?://"))) {
+    throw new Error(`discourse url must start with http:// or https://`);
+  }
+  if (discourseUrl.endsWith("/")) {
+    discourseUrl = discourseUrl.slice(0, discourseUrl.length - 1);
+  }
+  return {serverUrl: discourseUrl};
+}
+
+export async function genRepoIds(
+  specsWithToken: GitHubSpecsWithToken | null
+): Promise<$ReadOnlyArray<RepoId>> {
+  let repoIds: RepoId[] = [];
+  if (specsWithToken == null) {
+    return repoIds;
+  }
+  const {token, specs} = specsWithToken;
+  for (const spec of specs) {
+    const subproject = await specToProject(spec, token);
+    repoIds = [...repoIds, ...subproject.repoIds];
+  }
+  return repoIds;
+}
 
 export const help: Command = async (args, std) => {
   if (args.length === 0) {
