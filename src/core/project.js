@@ -54,7 +54,7 @@ export function encodeProjectId(id: ProjectId): string {
   return base64url.encode(id);
 }
 
-const upgradeFrom030 = (p) => ({
+const upgradeFrom030 = (p: Project_v031 | Project_v030) => ({
   ...p,
   discourseServer:
     p.discourseServer != null ? {serverUrl: p.discourseServer.serverUrl} : null,
