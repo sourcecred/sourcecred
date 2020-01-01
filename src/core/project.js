@@ -24,7 +24,10 @@ export type ProjectId = string;
  * the future (e.g. showing the last update time for each of the project's data
  * dependencies).
  */
-export type Project = {|
+export type Project = Project_v040;
+export type SupportedProject = Project_v030 | Project_v031 | Project_v040;
+
+type Project_v040 = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,
@@ -32,17 +35,6 @@ export type Project = {|
 |};
 
 const COMPAT_INFO = {type: "sourcecred/project", version: "0.4.0"};
-
-const upgradeFrom030 = (p) => ({
-  ...p,
-  discourseServer:
-    p.discourseServer != null ? {serverUrl: p.discourseServer.serverUrl} : null,
-});
-
-const upgrades = {
-  "0.3.0": upgradeFrom030,
-  "0.3.1": upgradeFrom030,
-};
 
 export type ProjectJSON = Compatible<Project>;
 
@@ -61,3 +53,34 @@ export function projectFromJSON(j: ProjectJSON): Project {
 export function encodeProjectId(id: ProjectId): string {
   return base64url.encode(id);
 }
+
+const upgradeFrom030 = (p) => ({
+  ...p,
+  discourseServer:
+    p.discourseServer != null ? {serverUrl: p.discourseServer.serverUrl} : null,
+});
+
+type Project_v031 = {|
+  +id: ProjectId,
+  +repoIds: $ReadOnlyArray<RepoId>,
+  +discourseServer: {|
+    +serverUrl: string,
+    +apiUsername?: string,
+  |} | null,
+  +identities: $ReadOnlyArray<Identity>,
+|};
+
+type Project_v030 = {|
+  +id: ProjectId,
+  +repoIds: $ReadOnlyArray<RepoId>,
+  +discourseServer: {|
+    +serverUrl: string,
+    +apiUsername: string,
+  |} | null,
+  +identities: $ReadOnlyArray<Identity>,
+|};
+
+const upgrades = {
+  "0.3.0": upgradeFrom030,
+  "0.3.1": upgradeFrom030,
+};
