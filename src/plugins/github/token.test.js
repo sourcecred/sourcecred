@@ -51,10 +51,10 @@ describe("plugins/github/token", () => {
       const token = "1bfb713d900c4962586ec615260b3902438b1d3c";
 
       // When
-      validateToken(token);
+      const validated = validateToken(token);
 
       // Then
-      // Shouldn't throw.
+      expect(token).toEqual(validated);
     });
 
     it("should accept an installation access token format", () => {
@@ -62,10 +62,10 @@ describe("plugins/github/token", () => {
       const token = "v1.1bfb713d900c49621bfb713d900c49621bfb713d";
 
       // When
-      validateToken(token);
+      const validated = validateToken(token);
 
       // Then
-      // Shouldn't throw.
+      expect(token).toEqual(validated);
     });
 
     it("should warn when installation access token has an unexpected version", () => {
@@ -73,7 +73,7 @@ describe("plugins/github/token", () => {
       const token = "v5.1bfb713d900c49621bfb713d900c49621bfb713d";
 
       // When
-      validateToken(token);
+      const validated = validateToken(token);
 
       // Then
       expect(console.warn).toHaveBeenCalledWith(
@@ -81,6 +81,7 @@ describe("plugins/github/token", () => {
       );
       expect(console.warn).toHaveBeenCalledTimes(1);
       spyWarn().mockReset();
+      expect(token).toEqual(validated);
     });
 
     it("should warn when installation access token has an unexpected length", () => {
@@ -88,7 +89,7 @@ describe("plugins/github/token", () => {
       const token = "v1.1bfb713d900c49621bfb713d900c4962";
 
       // When
-      validateToken(token);
+      const validated = validateToken(token);
 
       // Then
       expect(console.warn).toHaveBeenCalledWith(
@@ -96,6 +97,7 @@ describe("plugins/github/token", () => {
       );
       expect(console.warn).toHaveBeenCalledTimes(1);
       spyWarn().mockReset();
+      expect(token).toEqual(validated);
     });
   });
 });

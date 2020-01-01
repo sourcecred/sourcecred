@@ -6,6 +6,7 @@ import path from "path";
 import {TaskReporter} from "../util/taskReporter";
 import {Graph} from "../core/graph";
 import {loadGraph} from "../plugins/github/loadGraph";
+import {type GithubToken} from "../plugins/github/token";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {defaultParams, partialParams} from "../analysis/timeline/params";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
@@ -22,7 +23,7 @@ export type LoadOptions = {|
   +params: ?$Shape<TimelineCredParameters>,
   +plugins: $ReadOnlyArray<PluginDeclaration>,
   +sourcecredDirectory: string,
-  +githubToken: string | null,
+  +githubToken: ?GithubToken,
 |};
 
 /**
