@@ -42,7 +42,7 @@ export function projectToJSON(p: Project): ProjectJSON {
   return toCompat(COMPAT_INFO, p);
 }
 
-export function projectFromJSON(j: ProjectJSON): Project {
+export function projectFromJSON(j: Compatible<any>): Project {
   return fromCompat(COMPAT_INFO, j, upgrades);
 }
 
@@ -54,7 +54,7 @@ export function encodeProjectId(id: ProjectId): string {
   return base64url.encode(id);
 }
 
-const upgradeFrom030 = (p) => ({
+const upgradeFrom030 = (p: Project_v030 | Project_v031): Project_v040 => ({
   ...p,
   discourseServer:
     p.discourseServer != null ? {serverUrl: p.discourseServer.serverUrl} : null,
