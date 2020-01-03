@@ -2,7 +2,7 @@
 
 import {specToProject} from "./specToProject";
 import {stringToRepoId} from "../../core/repoId";
-import {type Project} from "../../core/project";
+import {type Project, createProject} from "../../core/project";
 jest.mock("./fetchGithubOrg", () => ({fetchGithubOrg: jest.fn()}));
 type JestMockFn = $Call<typeof jest.fn>;
 const fetchGithubOrg: JestMockFn = (require("./fetchGithubOrg")
@@ -14,12 +14,10 @@ describe("plugins/github/specToProject", () => {
   });
   it("works for a repoId", async () => {
     const spec = "foo/bar";
-    const expected: Project = {
+    const expected: Project = createProject({
       id: spec,
       repoIds: [stringToRepoId(spec)],
-      discourseServer: null,
-      identities: [],
-    };
+    });
     const actual = await specToProject(spec, "FAKE_TOKEN");
     expect(expected).toEqual(actual);
     expect(fetchGithubOrg).not.toHaveBeenCalled();
@@ -32,12 +30,10 @@ describe("plugins/github/specToProject", () => {
     fetchGithubOrg.mockResolvedValueOnce(fakeOrg);
     const actual = await specToProject(spec, token);
     expect(fetchGithubOrg).toHaveBeenCalledWith(fakeOrg.name, token);
-    const expected: Project = {
+    const expected: Project = createProject({
       id: spec,
       repoIds: repos,
-      discourseServer: null,
-      identities: [],
-    };
+    });
     expect(actual).toEqual(expected);
   });
   describe("fails for malformed spec strings", () => {

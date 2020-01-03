@@ -7,6 +7,7 @@ import {
   projectFromJSON,
   type Project,
   encodeProjectId,
+  createProject,
 } from "./project";
 
 import {makeRepoId} from "./repoId";
@@ -103,6 +104,56 @@ describe("core/project", () => {
     });
     it("is decodable to identity", () => {
       expect(base64url.decode(encodeProjectId("foo bar"))).toEqual("foo bar");
+    });
+  });
+  describe("createProject", () => {
+    it("requires an id field", () => {
+      // Given
+      const projectShape = {};
+
+      // When
+      const fn = () => createProject(projectShape);
+
+      // Then
+      expect(fn).toThrow("Project.id must be set");
+    });
+    it("adds default values", () => {
+      // Given
+      const projectShape = {
+        id: "minimal-project",
+      };
+
+      // When
+      const project = createProject(projectShape);
+
+      // Then
+      expect(project).toEqual({
+        id: projectShape.id,
+        discourseServer: null,
+        repoIds: [],
+        identities: [],
+      });
+    });
+    it("treats input shape as overrides", () => {
+      // Given
+      // Note: adding Project type annotation to force all fields are used.
+      const projectShape: Project = {
+        id: "@foo",
+        repoIds: [foobar, foozod],
+        discourseServer: {serverUrl: "https://example.com"},
+        identities: [
+          {
+            username: "example",
+            aliases: ["github/example"],
+          },
+        ],
+      };
+
+      // When
+      const project = createProject(projectShape);
+
+      // Then
+      expect(project).toEqual(projectShape);
     });
   });
 });

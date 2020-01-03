@@ -10,7 +10,7 @@ import * as Common from "./common";
 import {defaultWeights} from "../analysis/weights";
 import {load} from "../api/load";
 import {declaration as discourseDeclaration} from "../plugins/discourse/declaration";
-import {type Project} from "../core/project";
+import {type Project, createProject} from "../core/project";
 
 function usage(print: (string) => void): void {
   print(
@@ -83,12 +83,10 @@ const command: Command = async (args, std) => {
     die(std, "expected server url to start with 'https://' or 'http://'");
   }
   const projectId = serverUrl.trim().replace(httpRE, "");
-  const project: Project = {
+  const project: Project = createProject({
     id: projectId,
-    repoIds: [],
     discourseServer: {serverUrl},
-    identities: [],
-  };
+  });
   const taskReporter = new LoggingTaskReporter();
   let weights = defaultWeights();
   if (weightsPath) {
