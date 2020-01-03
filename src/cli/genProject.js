@@ -9,7 +9,11 @@ import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
 import stringify from "json-stable-stringify";
-import {type Project, projectToJSON} from "../core/project";
+import {
+  type Project,
+  projectToJSON,
+  createProject as defaultProject,
+} from "../core/project";
 import {type RepoId} from "../core/repoId";
 import {specToProject} from "../plugins/github/specToProject";
 import * as NullUtil from "../util/null";
@@ -142,7 +146,7 @@ export async function createProject(opts: {|
     const subproject = await specToProject(spec, NullUtil.get(githubToken));
     repoIds = repoIds.concat(subproject.repoIds);
   }
-  return {id: projectId, repoIds, discourseServer, identities: []};
+  return defaultProject({id: projectId, repoIds, discourseServer});
 }
 
 export default genProject;

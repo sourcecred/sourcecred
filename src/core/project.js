@@ -36,6 +36,24 @@ type Project_v040 = {|
 
 const COMPAT_INFO = {type: "sourcecred/project", version: "0.4.0"};
 
+/**
+ * Creates a new Project instance with default values.
+ *
+ * Note: the `id` field is required, as there's no sensible default.
+ */
+export function createProject(p: $Shape<Project>): Project {
+  if (!p.id) {
+    throw new Error("Project.id must be set");
+  }
+
+  return {
+    repoIds: [],
+    identities: [],
+    discourseServer: null,
+    ...p,
+  };
+}
+
 export type ProjectJSON = Compatible<Project>;
 
 export function projectToJSON(p: Project): ProjectJSON {
