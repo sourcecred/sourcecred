@@ -10,6 +10,7 @@ import {
 } from "./project";
 
 import {makeRepoId} from "./repoId";
+import {toCompat} from "../util/compat";
 
 describe("core/project", () => {
   const foobar = deepFreeze(makeRepoId("foo", "bar"));
@@ -40,6 +41,58 @@ describe("core/project", () => {
       }
       check(p1);
       check(p2);
+    });
+    it("should upgrade from 0.3.0 formatting", () => {
+      // Given
+      const body = {
+        id: "example-030",
+        repoIds: [foobar, foozod],
+        discourseServer: {
+          serverUrl: "https://example.com",
+          apiUsername: "hello-test",
+        },
+        identities: [],
+      };
+      const compat = toCompat(
+        {type: "sourcecred/project", version: "0.3.0"},
+        body
+      );
+
+      // When
+      const project = projectFromJSON(compat);
+
+      // Then
+      expect(project).toEqual({
+        ...body,
+        // It should strip the apiUsername field, keeping just serverUrl.
+        discourseServer: {serverUrl: "https://example.com"},
+      });
+    });
+    it("should upgrade from 0.3.1 formatting", () => {
+      // Given
+      const body = {
+        id: "example-031",
+        repoIds: [foobar, foozod],
+        discourseServer: {
+          serverUrl: "https://example.com",
+          apiUsername: "hello-test",
+        },
+        identities: [],
+      };
+      const compat = toCompat(
+        {type: "sourcecred/project", version: "0.3.1"},
+        body
+      );
+
+      // When
+      const project = projectFromJSON(compat);
+
+      // Then
+      expect(project).toEqual({
+        ...body,
+        // It should strip the apiUsername field, keeping just serverUrl.
+        discourseServer: {serverUrl: "https://example.com"},
+      });
     });
   });
   describe("encodeProjectId", () => {
