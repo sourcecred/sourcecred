@@ -48,6 +48,7 @@ git clone https://github.com/sourcecred/sourcecred.git
 cd sourcecred
 yarn install
 yarn backend
+export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 node bin/sourcecred.js load REPO_OWNER/REPO_NAME
 ```
 
