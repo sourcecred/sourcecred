@@ -10,6 +10,9 @@ main();
 
 function main() {
   const options = parseArgs();
+  if (checkForkedPrFullRun(options)) {
+    return;
+  }
   const printVerboseResults = options.mode === "FULL";
   const runOptions = {printVerboseResults};
   const tasks = makeTasks(options.mode, options.limitMemoryUsage);
@@ -31,6 +34,36 @@ function parseArgs() {
     }
   }
   return options;
+}
+
+/**
+ * Check if we're running full CI for a PR created on a fork. In this
+ * state, Circle CI omits secure environment variables (which is good
+ * and desired). Returns a boolean indicating whether we're in this
+ * state, and if so prints an error and sets the process exit code.
+ */
+function checkForkedPrFullRun(options) {
+  if (options.mode !== "FULL") {
+    return false;
+  }
+  if (!process.env["CIRCLE_PR_NUMBER"]) {
+    // This environment variable is only set on forked PRs.
+    // https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
+    return false;
+  }
+  if (process.env["SOURCECRED_GITHUB_TOKEN"]) {
+    return false;
+  }
+  console.error(
+    [
+      "fatal: cannot run full test suite: missing credentials",
+      "Tests on forked PRs run without credentials by default. A core team ",
+      "member will sanity-check your PR and push its head commit to a branch ",
+      "on the main SourceCred repository, which will re-run these tests.",
+    ].join("\n")
+  );
+  process.exitCode = 1;
+  return true;
 }
 
 function makeTasks(
