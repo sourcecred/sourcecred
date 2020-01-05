@@ -277,6 +277,20 @@ Please be aware that, as a rule, we do not create merge commits. If you
 have a stack of commits, we can either rebase the stack onto master
 (preserving the history) or squash the stack into a single commit.
 
+### Running full tests on CI
+
+As soon as you open your pull request, our CI will start running the
+basic test suite (`yarn test --ci`). It will also try to run the full
+test suite (`yarn test --ci --full`), but this will fail for PRs created
+from forks because it depends on credentials that aren’t exposed to
+untrusted PRs by default. This is expected—don’t worry!
+
+Once a core team member sanity-checks your PR to make sure that it’s not
+accidentally leaking credentials into logs, they can “bless” your commit
+by pushing it to any branch on the main SourceCred repository. This will
+restart the full test suite, which will now actually run. Once your
+tests pass and the PR is approved, we’ll delete the extra branch.
+
 ## After your pull request is merged
 
 …you’re done! :-)
