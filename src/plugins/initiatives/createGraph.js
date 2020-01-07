@@ -19,7 +19,7 @@ import {
   championsEdgeType,
 } from "./declaration";
 
-function initiativeAddress(initiative: Initiative): NodeAddressT {
+export function initiativeAddress(initiative: Initiative): NodeAddressT {
   return NodeAddress.append(
     initiativeNodeType.prefix,
     ...NodeAddress.toParts(initiative.tracker)
