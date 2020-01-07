@@ -28,3 +28,13 @@ export type Initiative = {|
   +contributions: $ReadOnlyArray<URL>,
   +champions: $ReadOnlyArray<URL>,
 |};
+
+/**
+ * Represents a source of Initiatives.
+ */
+export interface InitiativeRepository {
+  /**
+   * Gets an array of all Initiatives in this repository.
+   */
+  initiatives(): $ReadOnlyArray<Initiative>;
+}
