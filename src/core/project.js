@@ -5,6 +5,7 @@ import {type RepoId} from "../core/repoId";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import {type Identity} from "../plugins/identity/identity";
 import {type DiscourseServer} from "../plugins/discourse/loadDiscourse";
+import {type InitiativeOptions} from "../plugins/initiatives/loadInitiatives";
 
 export type ProjectId = string;
 
@@ -24,17 +25,22 @@ export type ProjectId = string;
  * the future (e.g. showing the last update time for each of the project's data
  * dependencies).
  */
-export type Project = Project_v040;
-export type SupportedProject = Project_v030 | Project_v031 | Project_v040;
+export type Project = Project_v050;
+export type SupportedProject =
+  | Project_v030
+  | Project_v031
+  | Project_v040
+  | Project_v050;
 
-type Project_v040 = {|
+type Project_v050 = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,
   +identities: $ReadOnlyArray<Identity>,
+  +initiatives: InitiativeOptions | null,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/project", version: "0.4.0"};
+const COMPAT_INFO = {type: "sourcecred/project", version: "0.5.0"};
 
 /**
  * Creates a new Project instance with default values.
@@ -50,6 +56,7 @@ export function createProject(p: $Shape<Project>): Project {
     repoIds: [],
     identities: [],
     discourseServer: null,
+    initiatives: null,
     ...p,
   };
 }
@@ -72,11 +79,26 @@ export function encodeProjectId(id: ProjectId): string {
   return base64url.encode(id);
 }
 
-const upgradeFrom030 = (p: Project_v030 | Project_v031): Project_v040 => ({
+const upgradeFrom040 = (p: Project_v040): Project_v050 => ({
   ...p,
-  discourseServer:
-    p.discourseServer != null ? {serverUrl: p.discourseServer.serverUrl} : null,
+  initiatives: null,
 });
+
+type Project_v040 = {|
+  +id: ProjectId,
+  +repoIds: $ReadOnlyArray<RepoId>,
+  +discourseServer: DiscourseServer | null,
+  +identities: $ReadOnlyArray<Identity>,
+|};
+
+const upgradeFrom030 = (p: Project_v030 | Project_v031): Project_v050 =>
+  upgradeFrom040({
+    ...p,
+    discourseServer:
+      p.discourseServer != null
+        ? {serverUrl: p.discourseServer.serverUrl}
+        : null,
+  });
 
 type Project_v031 = {|
   +id: ProjectId,
@@ -101,4 +123,5 @@ type Project_v030 = {|
 const upgrades = {
   "0.3.0": upgradeFrom030,
   "0.3.1": upgradeFrom030,
+  "0.4.0": upgradeFrom040,
 };

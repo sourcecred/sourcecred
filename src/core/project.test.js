@@ -21,6 +21,7 @@ describe("core/project", () => {
     repoIds: [foobar],
     discourseServer: null,
     identities: [],
+    initiatives: null,
   });
   const p2: Project = deepFreeze({
     id: "@foo",
@@ -32,6 +33,10 @@ describe("core/project", () => {
         aliases: ["github/example"],
       },
     ],
+    initiatives: {
+      discourseCategoryId: 12,
+      topicBlacklist: [666],
+    },
   });
   describe("to/from JSON", () => {
     it("round trip is identity", () => {
@@ -67,6 +72,8 @@ describe("core/project", () => {
         ...body,
         // It should strip the apiUsername field, keeping just serverUrl.
         discourseServer: {serverUrl: "https://example.com"},
+        // It should default to not using the Initiatives plugin.
+        initiatives: null,
       });
     });
     it("should upgrade from 0.3.1 formatting", () => {
@@ -93,6 +100,33 @@ describe("core/project", () => {
         ...body,
         // It should strip the apiUsername field, keeping just serverUrl.
         discourseServer: {serverUrl: "https://example.com"},
+        // It should default to not using the Initiatives plugin.
+        initiatives: null,
+      });
+    });
+    it("should upgrade from 0.4.0 formatting", () => {
+      // Given
+      const body = {
+        id: "example-040",
+        repoIds: [foobar, foozod],
+        discourseServer: {
+          serverUrl: "https://example.com",
+        },
+        identities: [],
+      };
+      const compat = toCompat(
+        {type: "sourcecred/project", version: "0.4.0"},
+        body
+      );
+
+      // When
+      const project = projectFromJSON(compat);
+
+      // Then
+      expect(project).toEqual({
+        ...body,
+        // It should default to not using the Initiatives plugin.
+        initiatives: null,
       });
     });
   });
@@ -127,12 +161,15 @@ describe("core/project", () => {
       const project = createProject(projectShape);
 
       // Then
-      expect(project).toEqual({
+      // Note: adding Project type annotation to force all fields are used.
+      const expectedProject: Project = {
         id: projectShape.id,
         discourseServer: null,
         repoIds: [],
         identities: [],
-      });
+        initiatives: null,
+      };
+      expect(project).toEqual(expectedProject);
     });
     it("treats input shape as overrides", () => {
       // Given
@@ -147,6 +184,10 @@ describe("core/project", () => {
             aliases: ["github/example"],
           },
         ],
+        initiatives: {
+          discourseCategoryId: 12,
+          topicBlacklist: [666],
+        },
       };
 
       // When
