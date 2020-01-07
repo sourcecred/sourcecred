@@ -515,6 +515,15 @@ export class RelationalView {
     }
   }
 
+  urlReferenceMap() {
+    const refToAddress: Map<string, N.RawAddress> = new Map();
+    for (const e: ReferentEntity of this.referentEntities()) {
+      const a = N.toRaw(e.address());
+      refToAddress.set(e.url(), a);
+    }
+    return refToAddress;
+  }
+
   _addReferences() {
     // TODO(perf): _addReferences regenerates all refs from scratch
     this._mapReferences = new Map();
