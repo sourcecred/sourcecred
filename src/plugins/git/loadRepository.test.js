@@ -2,7 +2,7 @@
 
 import tmp from "tmp";
 
-import {makeRepoId, repoIdToString} from "../../core/repoId";
+import {makeRepoId, repoIdToString} from "../github/repoId";
 import {createExampleRepo} from "./example/exampleRepo";
 import {localGit} from "./gitUtils";
 import {loadRepository} from "./loadRepository";

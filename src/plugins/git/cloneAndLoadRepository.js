@@ -4,7 +4,7 @@ import tmp from "tmp";
 import {localGit} from "./gitUtils";
 import type {Repository} from "./types";
 import {loadRepository} from "./loadRepository";
-import type {RepoId} from "../../core/repoId";
+import type {RepoId} from "../../plugins/github/repoId";
 
 /**
  * Load Git repository data from a fresh clone of a GitHub repo. Loads

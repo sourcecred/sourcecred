@@ -1,7 +1,7 @@
 // @flow
 
 import {specToProject} from "./specToProject";
-import {stringToRepoId} from "../../core/repoId";
+import {stringToRepoId} from "./repoId";
 import {type Project, createProject} from "../../core/project";
 jest.mock("./fetchGithubOrg", () => ({fetchGithubOrg: jest.fn()}));
 type JestMockFn = $Call<typeof jest.fn>;

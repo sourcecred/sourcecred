@@ -16,7 +16,7 @@ import stringify from "json-stable-stringify";
 import tmp from "tmp";
 
 import fetchGithubRepo from "../fetchGithubRepo";
-import {makeRepoId} from "../../../core/repoId";
+import {makeRepoId} from "../repoId";
 
 function parseArgs() {
   const argv = process.argv.slice(2);

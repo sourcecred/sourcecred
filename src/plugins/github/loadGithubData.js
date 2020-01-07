@@ -6,7 +6,7 @@ import pako from "pako";
 
 import fetchGithubRepo from "./fetchGithubRepo";
 import {RelationalView} from "./relationalView";
-import type {RepoId} from "../../core/repoId";
+import type {RepoId} from "./repoId";
 
 export type Options = {|
   +token: string,

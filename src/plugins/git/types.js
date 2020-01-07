@@ -1,6 +1,6 @@
 // @flow
 
-import type {RepoIdString} from "../../core/repoId";
+import type {RepoIdString} from "../github/repoId";
 
 export type Repository = {|
   +commits: {[Hash]: Commit},

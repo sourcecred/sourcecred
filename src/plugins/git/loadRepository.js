@@ -13,11 +13,7 @@ import * as MapUtil from "../../util/map";
 import type {GitDriver} from "./gitUtils";
 import type {Repository, Commit} from "./types";
 import {localGit} from "./gitUtils";
-import {
-  repoIdToString,
-  type RepoId,
-  type RepoIdString,
-} from "../../core/repoId";
+import {repoIdToString, type RepoId, type RepoIdString} from "../github/repoId";
 
 /**
  * Load a Git repository from disk into memory. The `rootRef` should be

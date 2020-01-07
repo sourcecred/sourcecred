@@ -1,6 +1,6 @@
 // @flow
 
-import {type RepoId} from "../../core/repoId";
+import {type RepoId} from "./repoId";
 import type {Hash} from "../git/types";
 import type {GitGateway, URL} from "../git/gitGateway";
 

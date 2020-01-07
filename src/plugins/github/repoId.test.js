@@ -8,7 +8,7 @@ import {
   type RepoIdString,
 } from "./repoId";
 
-describe("core/repoId", () => {
+describe("plugins/github/repoId", () => {
   describe("RepoId type", () => {
     it("manually constructing a RepoId is illegal", () => {
       // $ExpectFlowError

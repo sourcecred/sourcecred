@@ -14,7 +14,7 @@ import {
   getProjectIds,
   loadProject,
 } from "../core/project_io";
-import {makeRepoId} from "../core/repoId";
+import {makeRepoId} from "../plugins/github/repoId";
 import {defaultWeights} from "../analysis/weights";
 import {NodeAddress, Graph} from "../core/graph";
 import {node} from "../core/graphTestUtil";
