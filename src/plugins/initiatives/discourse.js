@@ -1,9 +1,105 @@
 // @flow
 
-import type {Topic, Post, TopicId} from "../discourse/fetch";
-import type {Initiative, URL} from "./initiative";
-import type {HtmlTemplateInitiativePartial} from "./htmlTemplate";
+import type {Topic, Post, CategoryId, TopicId} from "../discourse/fetch";
+import type {Initiative, URL, InitiativeRepository} from "./initiative";
+import {
+  parseCookedHtml,
+  type HtmlTemplateInitiativePartial,
+} from "./htmlTemplate";
 import {topicAddress} from "../discourse/address";
+
+/**
+ * A subset of queries we need for our plugin.
+ */
+export interface DiscourseQueries {
+  /**
+   * Finds the TopicIds of topics that have one of the categoryIds as it's category.
+   */
+  topicsInCategories(
+    categoryIds: $ReadOnlyArray<CategoryId>
+  ): $ReadOnlyArray<TopicId>;
+
+  /**
+   * Gets a Topic by ID.
+   */
+  topicById(id: TopicId): ?Topic;
+
+  /**
+   * Gets a number of Posts in a given Topic.
+   */
+  postsInTopic(topicId: TopicId, numberOfPosts: number): $ReadOnlyArray<Post>;
+}
+
+type DiscourseInitiativeRepositoryOptions = {|
+  +serverUrl: string,
+  +queries: DiscourseQueries,
+  +initiativesCategory: CategoryId,
+  +topicBlacklist: $ReadOnlyArray<TopicId>,
+  +parseCookedHtml?: (cookedHTML: string) => HtmlTemplateInitiativePartial,
+|};
+
+/**
+ * Repository to get Initiatives from Discourse data.
+ *
+ * Note: will warn about parsing errors and only return Initiatives that could
+ * be parsed successfully.
+ */
+export class DiscourseInitiativeRepository implements InitiativeRepository {
+  _options: DiscourseInitiativeRepositoryOptions;
+
+  constructor(options: DiscourseInitiativeRepositoryOptions) {
+    this._options = options;
+  }
+
+  initiatives(): $ReadOnlyArray<Initiative> {
+    const {
+      serverUrl,
+      queries,
+      initiativesCategory,
+      topicBlacklist,
+    } = this._options;
+    const parser = this._options.parseCookedHtml || parseCookedHtml;
+
+    // Gets a list of TopicIds by category, and remove the blacklisted ones.
+    const topicIds = new Set(queries.topicsInCategories([initiativesCategory]));
+    for (const tid of topicBlacklist) {
+      topicIds.delete(tid);
+    }
+
+    const initiatives = [];
+    const errors = [];
+    const expected = topicIds.size;
+    for (const tid of topicIds) {
+      const topic = queries.topicById(tid);
+      const [openingPost] = queries.postsInTopic(tid, 1);
+
+      if (!topic || !openingPost) {
+        throw new Error("Implementation bug, should have topic and op here.");
+      }
+
+      // We're using parse errors only for informative purposes.
+      // Trap them here and push to errors list.
+      try {
+        initiatives.push(
+          initiativeFromDiscourseTracker(serverUrl, topic, openingPost, parser)
+        );
+      } catch (e) {
+        errors.push(e.message);
+      }
+    }
+
+    // Warn about the issues we've encountered in one go.
+    if (errors.length > 0) {
+      console.warn(
+        `Failed loading [${
+          errors.length
+        }/${expected}] initiatives:\n${errors.join("\n")}`
+      );
+    }
+
+    return initiatives;
+  }
+}
 
 /**
  * Uses data from a Discourse Topic to create an Initiative representation.
