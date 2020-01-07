@@ -8,7 +8,6 @@
 
 /*::
 import type {Assets} from "../webutil/assets";
-import type {RepoIdRegistry} from "../core/repoIdRegistry";
 
 type RouteDatum = {|
   +path: string,
