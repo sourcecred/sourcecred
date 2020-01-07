@@ -26,6 +26,23 @@ describe("plugins/discourse/mirrorRepository", () => {
     expect(fs.readFileSync(filename).toJSON()).toEqual(data);
   });
 
+  it("findUsername does a case-insensitive query", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const username = "PascalFan1988";
+    const repository = new SqliteMirrorRepository(db, url);
+
+    // When
+    repository.addUser(username);
+    const result1 = repository.findUsername("pascalfan1988");
+    const result2 = repository.findUsername(username);
+
+    // Then
+    expect(result1).toEqual(username);
+    expect(result2).toEqual(username);
+  });
+
   it("bumpedMsForTopic finds an existing topic's bumpedMs", () => {
     // Given
     const db = new Database(":memory:");

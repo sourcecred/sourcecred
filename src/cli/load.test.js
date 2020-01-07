@@ -12,7 +12,7 @@ import {defaultWeights, toJSON as weightsToJSON} from "../analysis/weights";
 import * as Common from "./common";
 import {defaultParams, partialParams} from "../analysis/timeline/params";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";
-
+import {createProject} from "../core/project";
 import {makeRepoId, stringToRepoId} from "../core/repoId";
 
 jest.mock("../api/load", () => ({load: jest.fn()}));
@@ -71,12 +71,10 @@ describe("cli/load", () => {
     it("calls load with a single repo", async () => {
       const invocation = run(loadCommand, ["foo/bar"]);
       const expectedOptions: LoadOptions = {
-        project: {
+        project: createProject({
           id: "foo/bar",
           repoIds: [makeRepoId("foo", "bar")],
-          discourseServer: null,
-          identities: [],
-        },
+        }),
         params: defaultParams(),
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
@@ -96,12 +94,10 @@ describe("cli/load", () => {
     it("calls load with multiple repos", async () => {
       const invocation = run(loadCommand, ["foo/bar", "zoink/zod"]);
       const expectedOptions: (string) => LoadOptions = (projectId: string) => ({
-        project: {
+        project: createProject({
           id: projectId,
           repoIds: [stringToRepoId(projectId)],
-          discourseServer: null,
-          identities: [],
-        },
+        }),
         params: defaultParams(),
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
@@ -134,12 +130,10 @@ describe("cli/load", () => {
         weightsFile,
       ]);
       const expectedOptions: LoadOptions = {
-        project: {
+        project: createProject({
           id: "foo/bar",
           repoIds: [makeRepoId("foo", "bar")],
-          discourseServer: null,
-          identities: [],
-        },
+        }),
         params: partialParams({weights}),
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),

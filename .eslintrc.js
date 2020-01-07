@@ -29,6 +29,7 @@ module.exports = {
         caughtErrorsIgnorePattern: "^_$|^_unused_",
       },
     ],
+    "no-constant-condition": ["warn", {checkLoops: false}],
     "no-use-before-define": ["off"],
     "no-useless-constructor": ["off"],
     "no-case-declarations": ["off"],

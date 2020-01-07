@@ -8,7 +8,7 @@ import fs from "fs-extra";
 import type {Options as LoadGraphOptions} from "../plugins/github/loadGraph";
 import type {Options as LoadDiscourseOptions} from "../plugins/discourse/loadDiscourse";
 import {nodeContractions} from "../plugins/identity/nodeContractions";
-import type {Project} from "../core/project";
+import {type Project, createProject} from "../core/project";
 import {
   directoryForProjectId,
   getProjectIds,
@@ -59,12 +59,11 @@ describe("api/load", () => {
     timelineCredCompute.mockResolvedValue(fakeTimelineCred);
   });
   const discourseServerUrl = "https://example.com";
-  const project: Project = {
+  const project: Project = createProject({
     id: "foo",
     repoIds: [makeRepoId("foo", "bar")],
     discourseServer: {serverUrl: discourseServerUrl},
-    identities: [],
-  };
+  });
   deepFreeze(project);
   const githubToken = "EXAMPLE_TOKEN";
   const weights = defaultWeights();

@@ -1,6 +1,6 @@
 // @flow
 
-import {type Project} from "../../core/project";
+import {type Project, createProject} from "../../core/project";
 import {
   stringToRepoId,
   githubOwnerPattern,
@@ -33,22 +33,18 @@ export async function specToProject(
   );
   const ownerSpecMatcher = new RegExp(`^@${githubOwnerPattern}$`);
   if (spec.match(repoSpecMatcher)) {
-    const project: Project = {
+    const project: Project = createProject({
       id: spec,
       repoIds: [stringToRepoId(spec)],
-      discourseServer: null,
-      identities: [],
-    };
+    });
     return project;
   } else if (spec.match(ownerSpecMatcher)) {
     const owner = spec.slice(1);
     const org = await fetchGithubOrg(owner, token);
-    const project: Project = {
+    const project: Project = createProject({
       id: spec,
       repoIds: org.repos,
-      discourseServer: null,
-      identities: [],
-    };
+    });
     return project;
   }
   throw new Error(`invalid spec: ${spec}`);

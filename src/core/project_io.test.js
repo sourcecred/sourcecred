@@ -5,7 +5,12 @@ import tmp from "tmp";
 import path from "path";
 import fs from "fs-extra";
 
-import {type Project, encodeProjectId, projectToJSON} from "./project";
+import {
+  type Project,
+  encodeProjectId,
+  projectToJSON,
+  createProject,
+} from "./project";
 
 import {
   getProjectIds,
@@ -19,12 +24,14 @@ import {makeRepoId} from "./repoId";
 describe("core/project_io", () => {
   const foobar = deepFreeze(makeRepoId("foo", "bar"));
   const foozod = deepFreeze(makeRepoId("foo", "zod"));
-  const p1: Project = deepFreeze({
-    id: "foo/bar",
-    repoIds: [foobar],
-    discourseServer: null,
-    identities: [],
-  });
+  const p1: Project = deepFreeze(
+    createProject({
+      id: "foo/bar",
+      repoIds: [foobar],
+    })
+  );
+  // Note: the point of P2 is to use all project options.
+  // So we're avoiding createProject, to not forget new options.
   const p2: Project = deepFreeze({
     id: "@foo",
     repoIds: [foobar, foozod],

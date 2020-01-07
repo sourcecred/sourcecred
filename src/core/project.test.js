@@ -7,9 +7,11 @@ import {
   projectFromJSON,
   type Project,
   encodeProjectId,
+  createProject,
 } from "./project";
 
 import {makeRepoId} from "./repoId";
+import {toCompat} from "../util/compat";
 
 describe("core/project", () => {
   const foobar = deepFreeze(makeRepoId("foo", "bar"));
@@ -41,6 +43,58 @@ describe("core/project", () => {
       check(p1);
       check(p2);
     });
+    it("should upgrade from 0.3.0 formatting", () => {
+      // Given
+      const body = {
+        id: "example-030",
+        repoIds: [foobar, foozod],
+        discourseServer: {
+          serverUrl: "https://example.com",
+          apiUsername: "hello-test",
+        },
+        identities: [],
+      };
+      const compat = toCompat(
+        {type: "sourcecred/project", version: "0.3.0"},
+        body
+      );
+
+      // When
+      const project = projectFromJSON(compat);
+
+      // Then
+      expect(project).toEqual({
+        ...body,
+        // It should strip the apiUsername field, keeping just serverUrl.
+        discourseServer: {serverUrl: "https://example.com"},
+      });
+    });
+    it("should upgrade from 0.3.1 formatting", () => {
+      // Given
+      const body = {
+        id: "example-031",
+        repoIds: [foobar, foozod],
+        discourseServer: {
+          serverUrl: "https://example.com",
+          apiUsername: "hello-test",
+        },
+        identities: [],
+      };
+      const compat = toCompat(
+        {type: "sourcecred/project", version: "0.3.1"},
+        body
+      );
+
+      // When
+      const project = projectFromJSON(compat);
+
+      // Then
+      expect(project).toEqual({
+        ...body,
+        // It should strip the apiUsername field, keeping just serverUrl.
+        discourseServer: {serverUrl: "https://example.com"},
+      });
+    });
   });
   describe("encodeProjectId", () => {
     it("is a base64-url encoded id", () => {
@@ -50,6 +104,56 @@ describe("core/project", () => {
     });
     it("is decodable to identity", () => {
       expect(base64url.decode(encodeProjectId("foo bar"))).toEqual("foo bar");
+    });
+  });
+  describe("createProject", () => {
+    it("requires an id field", () => {
+      // Given
+      const projectShape = {};
+
+      // When
+      const fn = () => createProject(projectShape);
+
+      // Then
+      expect(fn).toThrow("Project.id must be set");
+    });
+    it("adds default values", () => {
+      // Given
+      const projectShape = {
+        id: "minimal-project",
+      };
+
+      // When
+      const project = createProject(projectShape);
+
+      // Then
+      expect(project).toEqual({
+        id: projectShape.id,
+        discourseServer: null,
+        repoIds: [],
+        identities: [],
+      });
+    });
+    it("treats input shape as overrides", () => {
+      // Given
+      // Note: adding Project type annotation to force all fields are used.
+      const projectShape: Project = {
+        id: "@foo",
+        repoIds: [foobar, foozod],
+        discourseServer: {serverUrl: "https://example.com"},
+        identities: [
+          {
+            username: "example",
+            aliases: ["github/example"],
+          },
+        ],
+      };
+
+      // When
+      const project = createProject(projectShape);
+
+      // Then
+      expect(project).toEqual(projectShape);
     });
   });
 });
