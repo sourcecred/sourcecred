@@ -12,6 +12,9 @@
 # backend
 /bin
 
+# api
+/dist
+
 # misc
 data/
 .token
