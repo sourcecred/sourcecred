@@ -15,7 +15,7 @@ import {
   loadProject,
 } from "../core/project_io";
 import {makeRepoId} from "../core/repoId";
-import {defaultWeights} from "../analysis/weights";
+import {Weights} from "../analysis/weights";
 import {NodeAddress, Graph} from "../core/graph";
 import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";
@@ -66,7 +66,7 @@ describe("api/load", () => {
   });
   deepFreeze(project);
   const githubToken = "EXAMPLE_TOKEN";
-  const weights = defaultWeights();
+  const weights = new Weights();
   // Tweaks the weights so that we can ensure we aren't overriding with default weights
   weights.nodeManualWeights.set(NodeAddress.empty, 33);
   // Deep freeze will freeze the weights, too

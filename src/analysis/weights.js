@@ -19,41 +19,48 @@ export type NodeWeight = number;
  */
 export type EdgeWeight = {|+forwards: number, +backwards: number|};
 
-/**
- * Represents the user-chosen weights for Node and Edge types, as well as for
- * individual nodes.
- *
- * Only user / project choices are stored here. If a weight is not present for
- * a particular type or node, then a default weight is used.
- */
-export type Weights = {|
-  // Maps from the NodeType's prefix to the weight.
-  +nodeTypeWeights: Map<NodeAddressT, NodeWeight>,
-  // Maps from the EdgeType's prefix to the weight.
-  +edgeTypeWeights: Map<EdgeAddressT, EdgeWeight>,
-  // Maps from the node's address to the weight.
-  +nodeManualWeights: Map<NodeAddressT, NodeWeight>,
-|};
+export class Weights {
+  nodeTypeWeights: Map<NodeAddressT, NodeWeight>;
+  edgeTypeWeights: Map<EdgeAddressT, EdgeWeight>;
+  nodeManualWeights: Map<NodeAddressT, NodeWeight>;
 
-/**
- * Creates default (i.e. empty) weights.
- *
- * When the weights are empty, defaults will be used for every type and node.
- */
-export function defaultWeights(): Weights {
-  return {
-    nodeTypeWeights: new Map(),
-    edgeTypeWeights: new Map(),
-    nodeManualWeights: new Map(),
-  };
-}
+  constructor() {
+    this.nodeTypeWeights = new Map();
+    this.edgeTypeWeights = new Map();
+    this.nodeManualWeights = new Map();
+  }
 
-export function copy(w: Weights): Weights {
-  return {
-    nodeTypeWeights: new Map(w.nodeTypeWeights),
-    edgeTypeWeights: new Map(w.edgeTypeWeights),
-    nodeManualWeights: new Map(w.nodeManualWeights),
-  };
+  /**
+   * Create an independent copy of the Weights.
+   *
+   * Mutating the copy will not affect the original.
+   */
+  copy(): Weights {
+    const result = new Weights();
+    result.nodeTypeWeights = new Map(this.nodeTypeWeights);
+    result.edgeTypeWeights = new Map(this.edgeTypeWeights);
+    result.nodeManualWeights = new Map(this.nodeManualWeights);
+    return result;
+  }
+
+  toJSON(): WeightsJSON {
+    return toCompat(COMPAT_INFO, {
+      nodeTypeWeights: MapUtil.toObject(this.nodeTypeWeights),
+      edgeTypeWeights: MapUtil.toObject(this.edgeTypeWeights),
+      nodeManualWeights: MapUtil.toObject(this.nodeManualWeights),
+    });
+  }
+  static fromJSON(json: WeightsJSON): Weights {
+    const {nodeTypeWeights, edgeTypeWeights, nodeManualWeights} = fromCompat(
+      COMPAT_INFO,
+      json
+    );
+    const w = new Weights();
+    w.nodeTypeWeights = MapUtil.fromObject(nodeTypeWeights);
+    w.edgeTypeWeights = MapUtil.fromObject(edgeTypeWeights);
+    w.nodeManualWeights = MapUtil.fromObject(nodeManualWeights);
+    return w;
+  }
 }
 
 export type WeightsJSON = Compatible<{|
@@ -62,23 +69,3 @@ export type WeightsJSON = Compatible<{|
   +nodeManualWeights: {[NodeAddressT]: NodeWeight},
 |}>;
 const COMPAT_INFO = {type: "sourcecred/weights", version: "0.1.0"};
-
-export function toJSON(weights: Weights): WeightsJSON {
-  return toCompat(COMPAT_INFO, {
-    nodeTypeWeights: MapUtil.toObject(weights.nodeTypeWeights),
-    edgeTypeWeights: MapUtil.toObject(weights.edgeTypeWeights),
-    nodeManualWeights: MapUtil.toObject(weights.nodeManualWeights),
-  });
-}
-
-export function fromJSON(json: WeightsJSON): Weights {
-  const {nodeTypeWeights, edgeTypeWeights, nodeManualWeights} = fromCompat(
-    COMPAT_INFO,
-    json
-  );
-  return {
-    nodeTypeWeights: MapUtil.fromObject(nodeTypeWeights),
-    edgeTypeWeights: MapUtil.fromObject(edgeTypeWeights),
-    nodeManualWeights: MapUtil.fromObject(nodeManualWeights),
-  };
-}

@@ -2,7 +2,7 @@
 
 import deepFreeze from "deep-freeze";
 import {NodeAddress, EdgeAddress} from "../core/graph";
-import {type Weights, defaultWeights} from "./weights";
+import {Weights} from "./weights";
 import {weightsToEdgeEvaluator} from "./weightsToEdgeEvaluator";
 
 describe("analysis/weightsToEdgeEvaluator", () => {
@@ -48,17 +48,17 @@ describe("analysis/weightsToEdgeEvaluator", () => {
   }
 
   it("applies default weights when none are specified", () => {
-    expect(evaluateEdge(defaultWeights())).toEqual({forwards: 1, backwards: 2});
+    expect(evaluateEdge(new Weights())).toEqual({forwards: 1, backwards: 2});
   });
 
   it("only matches the most specific node types", () => {
-    const weights = defaultWeights();
+    const weights = new Weights();
     weights.nodeTypeWeights.set(NodeAddress.empty, 99);
     expect(evaluateEdge(weights)).toEqual({forwards: 99, backwards: 2});
   });
 
   it("takes manually specified edge type weights into account", () => {
-    const weights = defaultWeights();
+    const weights = new Weights();
     // Note that here we grab the fallout edge type. This also verifies that
     // we are doing prefix matching on the types (rather than exact matching).
     weights.edgeTypeWeights.set(EdgeAddress.empty, {
@@ -69,13 +69,13 @@ describe("analysis/weightsToEdgeEvaluator", () => {
   });
 
   it("takes manually specified per-node weights into account", () => {
-    const weights = defaultWeights();
+    const weights = new Weights();
     weights.nodeManualWeights.set(src, 10);
     expect(evaluateEdge(weights)).toEqual({forwards: 1, backwards: 20});
   });
 
   it("uses 1 as a default weight for unmatched nodes and edges", () => {
-    const evaluator = weightsToEdgeEvaluator(defaultWeights(), {
+    const evaluator = weightsToEdgeEvaluator(new Weights(), {
       nodeTypes: [],
       edgeTypes: [],
     });
@@ -83,8 +83,8 @@ describe("analysis/weightsToEdgeEvaluator", () => {
   });
 
   it("ignores extra weights if they do not apply", () => {
-    const withoutExtraWeights = evaluateEdge(defaultWeights());
-    const extraWeights = defaultWeights();
+    const withoutExtraWeights = evaluateEdge(new Weights());
+    const extraWeights = new Weights();
     extraWeights.nodeManualWeights.set(NodeAddress.fromParts(["foo"]), 99);
     extraWeights.nodeTypeWeights.set(NodeAddress.fromParts(["foo"]), 99);
     extraWeights.edgeTypeWeights.set(EdgeAddress.fromParts(["foo"]), {

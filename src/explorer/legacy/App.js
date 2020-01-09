@@ -12,7 +12,7 @@ import {type NodeAddressT} from "../../core/graph";
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "../weights/WeightConfig";
 import {WeightsFileManager} from "../weights/WeightsFileManager";
-import {type Weights, defaultWeights} from "../../analysis/weights";
+import {Weights} from "../../analysis/weights";
 import {Prefix as GithubPrefix} from "../../plugins/github/nodes";
 import {
   createStateTransitionMachine,
@@ -72,7 +72,7 @@ export function createApp(
       super(props);
       this.state = {
         appState: initialState(this.props.projectId),
-        weights: defaultWeights(),
+        weights: new Weights(),
       };
       this.stateTransitionMachine = createSTM(
         () => this.state.appState,

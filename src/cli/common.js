@@ -5,7 +5,7 @@ import os from "os";
 import path from "path";
 import deepFreeze from "deep-freeze";
 import fs from "fs-extra";
-import {type Weights, fromJSON as weightsFromJSON} from "../analysis/weights";
+import {Weights} from "../analysis/weights";
 
 import * as NullUtil from "../util/null";
 
@@ -33,7 +33,7 @@ export async function loadWeights(path: string): Promise<Weights> {
   const raw = await fs.readFile(path, "utf-8");
   const weightsJSON = JSON.parse(raw);
   try {
-    return weightsFromJSON(weightsJSON);
+    return Weights.fromJSON(weightsJSON);
   } catch (e) {
     throw new Error(`provided weights file is invalid:\n${e}`);
   }

@@ -5,7 +5,7 @@ import dedent from "../util/dedent";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import * as Common from "./common";
-import {defaultWeights, fromJSON as weightsFromJSON} from "../analysis/weights";
+import {Weights} from "../analysis/weights";
 import {projectFromJSON} from "../core/project";
 import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
@@ -107,7 +107,7 @@ const loadCommand: Command = async (args, std) => {
     return die(std, "projects not specified");
   }
 
-  let weights = defaultWeights();
+  let weights = new Weights();
   if (weightsPath) {
     weights = await loadWeightOverrides(weightsPath);
   }
@@ -160,7 +160,7 @@ const loadWeightOverrides = async (path: string) => {
   const raw = await fs.readFile(path, "utf-8");
   const weightsJSON = JSON.parse(raw);
   try {
-    return weightsFromJSON(weightsJSON);
+    return Weights.fromJSON(weightsJSON);
   } catch (e) {
     throw new Error(`provided weights file is invalid:\n${e}`);
   }

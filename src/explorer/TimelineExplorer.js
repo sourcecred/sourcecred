@@ -2,7 +2,7 @@
 
 import React from "react";
 import deepEqual from "lodash.isequal";
-import {type Weights, copy as weightsCopy} from "../analysis/weights";
+import {Weights} from "../analysis/weights";
 import {type NodeAddressT} from "../core/graph";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
@@ -49,7 +49,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
       // Set the weights to a copy, to ensure we don't mutate the weights in the
       // initialTimelineCred. This enables e.g. disabling the analyze button
       // when the parameters are unchanged.
-      weights: weightsCopy(weights),
+      weights: weights.copy(),
       loading: false,
       showWeightConfig: false,
       selectedNodeTypePrefix: null,
@@ -60,7 +60,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
     const {alpha, intervalDecay, weights} = this.state;
     // Set the weights to a copy, to ensure that the weights we pass into e.g.
     // analyzeCred are a distinct reference from the one we keep in our state.
-    return {alpha, intervalDecay, weights: weightsCopy(weights)};
+    return {alpha, intervalDecay, weights: weights.copy()};
   }
 
   async analyzeCred() {

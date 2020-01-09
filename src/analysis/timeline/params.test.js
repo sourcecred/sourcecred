@@ -9,12 +9,12 @@ import {
   DEFAULT_ALPHA,
   DEFAULT_INTERVAL_DECAY,
 } from "./params";
-import {defaultWeights} from "../weights";
+import {Weights} from "../weights";
 import {NodeAddress} from "../../core/graph";
 
 describe("analysis/timeline/params", () => {
   const customWeights = () => {
-    const weights = defaultWeights();
+    const weights = new Weights();
     // Ensure it works with non-default weights
     weights.nodeManualWeights.set(NodeAddress.empty, 33);
     return weights;
@@ -35,7 +35,7 @@ describe("analysis/timeline/params", () => {
     const expected: TimelineCredParameters = {
       alpha: DEFAULT_ALPHA,
       intervalDecay: DEFAULT_INTERVAL_DECAY,
-      weights: defaultWeights(),
+      weights: new Weights(),
     };
     expect(defaultParams()).toEqual(expected);
   });
@@ -46,7 +46,7 @@ describe("analysis/timeline/params", () => {
     });
     it("accepts an alpha override", () => {
       const params = partialParams({alpha: 0.99});
-      expect(params.weights).toEqual(defaultWeights());
+      expect(params.weights).toEqual(new Weights());
       expect(params.alpha).toEqual(0.99);
       expect(params.intervalDecay).toEqual(DEFAULT_INTERVAL_DECAY);
     });
@@ -59,7 +59,7 @@ describe("analysis/timeline/params", () => {
     });
     it("accepts intervalDecay override", () => {
       const params = partialParams({intervalDecay: 0.1});
-      expect(params.weights).toEqual(defaultWeights());
+      expect(params.weights).toEqual(new Weights());
       expect(params.alpha).toEqual(DEFAULT_ALPHA);
       expect(params.intervalDecay).toEqual(0.1);
     });

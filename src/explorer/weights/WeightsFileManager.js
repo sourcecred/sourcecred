@@ -5,7 +5,7 @@ import React from "react";
 import {FileUploader} from "../../util/FileUploader";
 import Link from "../../webutil/Link";
 import {MdFileDownload, MdFileUpload} from "react-icons/md";
-import {type Weights, toJSON, fromJSON} from "../../analysis/weights";
+import {Weights} from "../../analysis/weights";
 
 export type Props = {|
   +weights: Weights,
@@ -13,8 +13,9 @@ export type Props = {|
 |};
 export class WeightsFileManager extends React.Component<Props> {
   render() {
-    const weightsJSON = stringify(toJSON(this.props.weights));
-    const onUpload = (json) => this.props.onWeightsChange(fromJSON(json));
+    const weightsJSON = stringify(this.props.weights.toJSON());
+    const onUpload = (json) =>
+      this.props.onWeightsChange(Weights.fromJSON(json));
     return (
       <div>
         <Link

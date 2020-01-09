@@ -3,7 +3,7 @@
 import deepFreeze from "deep-freeze";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {nodeWeightEvaluator, edgeWeightEvaluator} from "./weightEvaluator";
-import {defaultWeights} from "./weights";
+import {Weights} from "./weights";
 
 describe("src/analysis/weightEvaluator", () => {
   describe("nodeWeightEvaluator", () => {
@@ -30,18 +30,18 @@ describe("src/analysis/weightEvaluator", () => {
     const types = deepFreeze([fooNodeType, fooBarNodeType]);
 
     it("gives every node weight 1 with empty types and weights", () => {
-      const evaluator = nodeWeightEvaluator([], defaultWeights());
+      const evaluator = nodeWeightEvaluator([], new Weights());
       expect(evaluator(empty)).toEqual(1);
       expect(evaluator(foo)).toEqual(1);
     });
     it("matches the most specific possible node type", () => {
-      const evaluator = nodeWeightEvaluator(types, defaultWeights());
+      const evaluator = nodeWeightEvaluator(types, new Weights());
       expect(evaluator(empty)).toEqual(1);
       expect(evaluator(foo)).toEqual(2);
       expect(evaluator(foobar)).toEqual(3);
     });
     it("uses type weight overrides", () => {
-      const weights = defaultWeights();
+      const weights = new Weights();
       weights.nodeTypeWeights.set(foo, 3);
       weights.nodeTypeWeights.set(foobar, 4);
       const evaluator = nodeWeightEvaluator(types, weights);
@@ -50,7 +50,7 @@ describe("src/analysis/weightEvaluator", () => {
       expect(evaluator(foobar)).toEqual(4);
     });
     it("uses manually-specified weights", () => {
-      const weights = defaultWeights();
+      const weights = new Weights();
       weights.nodeManualWeights.set(foo, 3);
       const evaluator = nodeWeightEvaluator([], weights);
       expect(evaluator(empty)).toEqual(1);
@@ -58,7 +58,7 @@ describe("src/analysis/weightEvaluator", () => {
       expect(evaluator(foobar)).toEqual(1);
     });
     it("composes manual and type weights multiplicatively", () => {
-      const weights = defaultWeights();
+      const weights = new Weights();
       weights.nodeManualWeights.set(foo, 3);
       const evaluator = nodeWeightEvaluator(types, weights);
       weights.nodeManualWeights.set(foo, 3);
@@ -85,13 +85,13 @@ describe("src/analysis/weightEvaluator", () => {
       description: "",
     });
     it("gives default 1,1 weights if no matching type", () => {
-      const evaluator = edgeWeightEvaluator([], defaultWeights());
+      const evaluator = edgeWeightEvaluator([], new Weights());
       expect(evaluator(foo)).toEqual({forwards: 1, backwards: 1});
     });
     it("uses weights for the most specific matching type", () => {
       const evaluator = edgeWeightEvaluator(
         [fooType, fooBarType],
-        defaultWeights()
+        new Weights()
       );
       expect(evaluator(foo)).toEqual({forwards: 2, backwards: 3});
       expect(evaluator(foobar)).toEqual({forwards: 4, backwards: 5});
@@ -101,7 +101,7 @@ describe("src/analysis/weightEvaluator", () => {
       });
     });
     it("uses weight overrides if available", () => {
-      const weights = defaultWeights();
+      const weights = new Weights();
       weights.edgeTypeWeights.set(foo, {forwards: 99, backwards: 101});
       const evaluator = edgeWeightEvaluator([fooType, fooBarType], weights);
       expect(evaluator(foo)).toEqual({forwards: 99, backwards: 101});

@@ -1,12 +1,6 @@
 // @flow
 
-import {
-  type Weights,
-  type WeightsJSON,
-  toJSON as weightsToJSON,
-  fromJSON as weightsFromJSON,
-  defaultWeights,
-} from "../weights";
+import {Weights, type WeightsJSON} from "../weights";
 
 /**
  * Parameters for computing TimelineCred
@@ -47,7 +41,7 @@ export function paramsToJSON(
   return {
     alpha: p.alpha,
     intervalDecay: p.intervalDecay,
-    weights: weightsToJSON(p.weights),
+    weights: p.weights.toJSON(),
   };
 }
 
@@ -57,7 +51,7 @@ export function paramsFromJSON(
   return {
     alpha: p.alpha,
     intervalDecay: p.intervalDecay,
-    weights: weightsFromJSON(p.weights),
+    weights: Weights.fromJSON(p.weights),
   };
 }
 
@@ -71,7 +65,7 @@ export function defaultParams(): TimelineCredParameters {
   return {
     alpha: DEFAULT_ALPHA,
     intervalDecay: DEFAULT_INTERVAL_DECAY,
-    weights: defaultWeights(),
+    weights: new Weights(),
   };
 }
 
