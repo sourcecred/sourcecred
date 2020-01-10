@@ -133,7 +133,6 @@ workflows:
             - test
             - test_full
             - test_full_10
-          deploy: false
           image: sourcecred/sourcecred
           tag: latest
           extra_build_args: --cache-from=node:12,sourcecred/sourcecred:dev
