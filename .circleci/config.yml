@@ -7,7 +7,7 @@ version: 2.1
 
 orbs:
   # https://circleci.com/orbs/registry/orb/circleci/docker
-  docker: circleci/docker@0.5.13
+  docker: circleci/docker@0.5.20
 
 executors:
   node10:
@@ -38,11 +38,6 @@ commands:
           paths:
             - node_modules
           key: v1-node<< parameters.node_version >>-dependencies-{{ checksum "package.json" }}
-  pull_cache:
-    description: Pulls docker images usable for our cache
-    steps:
-      - run: docker pull sourcecred/sourcecred:dev
-      - run: docker pull node:12
 
 jobs:
   test:
@@ -81,15 +76,13 @@ workflows:
           deploy: false
           image: sourcecred/sourcecred
           tag: latest
+          cache_from: node:12,sourcecred/sourcecred:dev
           requires:
             - test
           filters:
             branches:
               ignore: 
                 - master
-          extra_build_args: --cache-from=node:12,sourcecred/sourcecred:dev
-          before_build:
-            - pull_cache
           after_build:
             - run:
                 name: Preview Docker Tag for Build
@@ -99,9 +92,7 @@ workflows:
 
       - docker/publish:
           image: sourcecred/sourcecred
-          extra_build_args: --cache-from=node:12,sourcecred/sourcecred:dev
-          before_build:
-            - pull_cache
+          cache_from: node:12,sourcecred/sourcecred:dev
           requires:
             - test
             - test_full
@@ -136,9 +127,7 @@ workflows:
           deploy: false
           image: sourcecred/sourcecred
           tag: latest
-          extra_build_args: --cache-from=node:12,sourcecred/sourcecred:dev
-          before_build:
-            - pull_cache
+          cache_from: node:12,sourcecred/sourcecred:dev
           after_build:
             - run:
                 name: Publish Docker Tag with Sourcecred Version
