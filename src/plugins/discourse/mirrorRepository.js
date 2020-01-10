@@ -60,6 +60,13 @@ export interface ReadRepository {
   topicsInCategories(
     categoryIds: $ReadOnlyArray<CategoryId>
   ): $ReadOnlyArray<TopicId>;
+
+  /**
+   * Gets the username of a user, if it exists.
+   *
+   * Note: input username is case-insensitive.
+   */
+  findUsername(username: string): ?string;
 }
 
 export type SyncHeads = {|
@@ -302,6 +309,19 @@ export class SqliteMirrorRepository
       .prepare("SELECT username FROM users")
       .pluck()
       .all();
+  }
+
+  findUsername(username: string): ?string {
+    return this._db
+      .prepare(
+        dedent`\
+          SELECT username
+          FROM users
+          WHERE username = :username COLLATE NOCASE
+        `
+      )
+      .pluck()
+      .get({username});
   }
 
   likes(): $ReadOnlyArray<LikeAction> {

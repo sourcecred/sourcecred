@@ -20,6 +20,9 @@ module.exports = {
   yarnLockFile: resolveApp("yarn.lock"),
   appNodeModules: resolveApp("node_modules"),
 
+  apiIndexJs: resolveApp("src/api/index.js"),
+  apiBuild: resolveApp("dist"),
+
   backendBuild: resolveApp("bin"),
   // This object should have one key-value pair per entry point. For
   // each key, the value should be the path to the entry point for the

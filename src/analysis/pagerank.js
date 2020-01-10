@@ -2,11 +2,6 @@
 
 import {type Edge, Graph, NodeAddress, type NodeAddressT} from "../core/graph";
 import {
-  DEFAULT_MAX_ITERATIONS,
-  DEFAULT_CONVERGENCE_THRESHOLD,
-  DEFAULT_SYNTHETIC_LOOP_WEIGHT,
-} from "../core/pagerankGraph";
-import {
   distributionToNodeDistribution,
   createConnections,
   createOrderedSparseMarkovChain,
@@ -42,6 +37,10 @@ export type PagerankOptions = $Shape<FullPagerankOptions>;
 
 export type {EdgeWeight} from "../core/attribution/graphToMarkovChain";
 export type EdgeEvaluator = (Edge) => EdgeWeight;
+
+export const DEFAULT_SYNTHETIC_LOOP_WEIGHT = 1e-3;
+export const DEFAULT_MAX_ITERATIONS = 255;
+export const DEFAULT_CONVERGENCE_THRESHOLD = 1e-7;
 
 function defaultOptions(): PagerankOptions {
   return {
