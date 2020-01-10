@@ -124,7 +124,6 @@ workflows:
             - test
             - test_full
             - test_full_10
-          deploy: false
           image: sourcecred/sourcecred
           tag: latest
           cache_from: node:12,sourcecred/sourcecred:dev
