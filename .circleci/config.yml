@@ -22,17 +22,22 @@ executors:
 commands:
   set_up_node_modules:
     description: "load node_modules, updating and storing back into cache if necessary"
+    parameters:
+      node_version:
+        description: Which node version we're caching packages for
+        type: integer
+        default: 12
     steps:
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-node<< parameters.node_version >>-dependencies-{{ checksum "package.json" }}
             # fall back to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v1-node<< parameters.node_version >>-dependencies-
       - run: yarn install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: v1-node<< parameters.node_version >>-dependencies-{{ checksum "package.json" }}
   pull_cache:
     description: Pulls docker images usable for our cache
     steps:
@@ -56,7 +61,8 @@ jobs:
     executor: node10
     steps:
       - checkout
-      - set_up_node_modules
+      - set_up_node_modules:
+          node_version: 10
       - run: yarn test --full --ci
 
 workflows:
@@ -64,6 +70,13 @@ workflows:
   commit:
     jobs:
       - test
+      # We also run full-tests on each commit, but they're not configured as
+      # blocking checks. Thus, in the case that they complete before you want
+      # to merge your pull request, they provide information, and otherwise
+      # they don't get in your way.
+      - test_full
+      - test_full_10
+
       - docker/publish:
           deploy: false
           image: sourcecred/sourcecred
@@ -83,42 +96,6 @@ workflows:
                 command: |
                    DOCKER_TAG=$(docker run sourcecred/sourcecred --version | cut -d' ' -f2)
                    echo "Version that would be used for Docker tag is ${DOCKER_TAG}"
-
-      - docker/publish:
-          image: sourcecred/sourcecred
-          tag: latest
-          requires:
-            - test
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
-          extra_build_args: --cache-from=node:12,sourcecred/sourcecred:dev
-          before_build:
-            - pull_cache
-          after_build:
-            - run:
-                name: Publish Docker Tag with Sourcecred Version
-                command: |
-                   DOCKER_TAG=$(docker run sourcecred/sourcecred --version | cut -d' ' -f2)
-                   echo "Version for Docker tag is ${DOCKER_TAG}"
-                   docker tag sourcecred/sourcecred:latest sourcecred/sourcecred:${DOCKER_TAG}
-                   docker push sourcecred/sourcecred
-
-      - test_full:
-          filters:
-            branches:
-              only:
-                - master
-                - /ci-.*/
-
-      - test_full_10:
-          filters:
-            branches:
-              only:
-                - master
-                - /ci-.*/
 
       - docker/publish:
           image: sourcecred/sourcecred
