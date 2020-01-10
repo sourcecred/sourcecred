@@ -69,7 +69,7 @@ export function parseLinks(cookedHtml: string, serverUrl: string): UrlString[] {
 export function linksToReferences(
   links: $ReadOnlyArray<UrlString>
 ): DiscourseReference[] {
-  const server = "(https://[\\w.-]+)";
+  const server = "(https?://[\\w.-]+)";
   const topic = `(?:${server})/t/[\\w-]+/(\\d+)`;
   const post = `(?:${topic})/(\\d+)`;
   const params = "(?:\\?[\\w-=]+)?";
