@@ -19,7 +19,7 @@ import {
   loadProject,
 } from "./project_io";
 
-import {makeRepoId} from "./repoId";
+import {makeRepoId} from "../plugins/github/repoId";
 
 describe("core/project_io", () => {
   const foobar = deepFreeze(makeRepoId("foo", "bar"));

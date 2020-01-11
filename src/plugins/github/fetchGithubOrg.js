@@ -1,6 +1,6 @@
 // @flow
 
-import {type RepoId, makeRepoId} from "../../core/repoId";
+import {type RepoId, makeRepoId} from "./repoId";
 import * as Queries from "../../graphql/queries";
 import {postQuery} from "./fetchGithubRepo";
 

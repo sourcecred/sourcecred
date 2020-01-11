@@ -1,11 +1,7 @@
 // @flow
 
 import {type Project, createProject} from "../../core/project";
-import {
-  stringToRepoId,
-  githubOwnerPattern,
-  githubRepoPattern,
-} from "../../core/repoId";
+import {stringToRepoId, githubOwnerPattern, githubRepoPattern} from "./repoId";
 import {fetchGithubOrg} from "./fetchGithubOrg";
 
 /**

@@ -1,6 +1,6 @@
 // @flow
 
-import {makeRepoId} from "../../core/repoId";
+import {makeRepoId} from "./repoId";
 import {GithubGitGateway} from "./githubGitGateway";
 
 describe("src/plugins/github/githubGitGateway", () => {

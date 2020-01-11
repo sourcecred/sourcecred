@@ -4,7 +4,7 @@ import deepFreeze from "deep-freeze";
 import * as N from "./nodes";
 import {shallow} from "enzyme";
 import {description} from "./render";
-import {type RepoId, repoIdToString, makeRepoId} from "../../core/repoId";
+import {type RepoId, repoIdToString, makeRepoId} from "../github/repoId";
 import type {Repository, Hash, Commit} from "./types";
 import type {GitGateway, URL} from "./gitGateway";
 import Link from "../../webutil/Link";

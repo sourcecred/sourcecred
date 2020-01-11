@@ -14,7 +14,7 @@ import {
   projectToJSON,
   createProject as defaultProject,
 } from "../core/project";
-import {type RepoId} from "../core/repoId";
+import {type RepoId} from "../plugins/github/repoId";
 import {specToProject} from "../plugins/github/specToProject";
 import * as NullUtil from "../util/null";
 

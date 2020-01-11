@@ -4,7 +4,7 @@ import {TaskReporter} from "../../util/taskReporter";
 import {createGraph} from "./createGraph";
 import fetchGithubRepo from "./fetchGithubRepo";
 import {RelationalView} from "./relationalView";
-import {type RepoId, repoIdToString} from "../../core/repoId";
+import {type RepoId, repoIdToString} from "./repoId";
 import {Graph} from "../../core/graph";
 
 export type Options = {|

@@ -1,7 +1,7 @@
 // @flow
 
 import {type NodeAddressT} from "../../core/graph";
-import {githubOwnerPattern} from "../../core/repoId";
+import {githubOwnerPattern} from "../github/repoId";
 import {loginAddress as githubAddress} from "../github/nodes";
 import {userAddress as discourseAddress} from "../discourse/address";
 
