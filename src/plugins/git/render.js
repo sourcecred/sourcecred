@@ -4,7 +4,7 @@ import React from "react";
 import Link from "../../webutil/Link";
 import * as N from "./nodes";
 import type {Repository} from "./types";
-import {type RepoIdString, stringToRepoId} from "../../core/repoId";
+import {type RepoIdString, stringToRepoId} from "../github/repoId";
 import type {GitGateway} from "./gitGateway";
 
 export function description(

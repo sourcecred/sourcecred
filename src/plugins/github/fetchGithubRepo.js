@@ -9,7 +9,7 @@ import fetch from "isomorphic-fetch";
 import path from "path";
 import retry from "retry";
 
-import {type RepoId, repoIdToString} from "../../core/repoId";
+import {type RepoId, repoIdToString} from "./repoId";
 import {Mirror} from "../../graphql/mirror";
 import * as Queries from "../../graphql/queries";
 import {stringify, inlineLayout, type Body} from "../../graphql/queries";

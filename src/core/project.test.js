@@ -10,7 +10,7 @@ import {
   createProject,
 } from "./project";
 
-import {makeRepoId} from "./repoId";
+import {makeRepoId} from "../plugins/github/repoId";
 import {toCompat} from "../util/compat";
 
 describe("core/project", () => {

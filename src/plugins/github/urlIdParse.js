@@ -1,6 +1,6 @@
 // @flow
 
-import {githubOwnerPattern, githubRepoPattern} from "../../core/repoId";
+import {githubOwnerPattern, githubRepoPattern} from "./repoId";
 const urlBase = "^https?://github\\.com";
 const repoUrl = `${urlBase}/(?:${githubOwnerPattern})/(?:${githubRepoPattern})/`;
 

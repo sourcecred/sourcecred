@@ -50,6 +50,24 @@ describe("plugins/discourse/references", () => {
   });
 
   describe("linksToReferences", () => {
+    it("works for http and https servers", () => {
+      const hyperlinks = [
+        "http://sourcecred-test.discourse.group/t/123-a-post-with-numbers-in-slug/20",
+        "https://sourcecred-test.discourse.group/t/123-a-post-with-numbers-in-slug/20",
+      ];
+      expect(linksToReferences(hyperlinks)).toEqual([
+        {
+          type: "TOPIC",
+          topicId: 20,
+          serverUrl: "http://sourcecred-test.discourse.group",
+        },
+        {
+          type: "TOPIC",
+          topicId: 20,
+          serverUrl: "https://sourcecred-test.discourse.group",
+        },
+      ]);
+    });
     it("works for topics", () => {
       const hyperlinks = [
         "https://sourcecred-test.discourse.group/t/123-a-post-with-numbers-in-slug/20",

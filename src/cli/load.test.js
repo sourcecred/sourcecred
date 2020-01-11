@@ -13,7 +13,7 @@ import * as Common from "./common";
 import {defaultParams, partialParams} from "../analysis/timeline/params";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";
 import {createProject} from "../core/project";
-import {makeRepoId, stringToRepoId} from "../core/repoId";
+import {makeRepoId, stringToRepoId} from "../plugins/github/repoId";
 
 jest.mock("../api/load", () => ({load: jest.fn()}));
 type JestMockFn = $Call<typeof jest.fn>;

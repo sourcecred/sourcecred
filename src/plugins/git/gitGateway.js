@@ -1,6 +1,6 @@
 // @flow
 
-import type {RepoId} from "../../core/repoId";
+import type {RepoId} from "../../plugins/github/repoId";
 import type {Hash} from "./types";
 
 export type URL = string;
