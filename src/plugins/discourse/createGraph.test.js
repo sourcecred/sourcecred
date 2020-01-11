@@ -83,6 +83,12 @@ describe("plugins/discourse/createGraph", () => {
     findUsername() {
       throw new Error("Method findUsername should be unused by createGraph");
     }
+    topicById() {
+      throw new Error("Method topicById should be unused by createGraph");
+    }
+    postsInTopic() {
+      throw new Error("Method postsInTopic should be unused by createGraph");
+    }
   }
 
   function example() {
