@@ -1,5 +1,6 @@
 /bin
 /build
 /coverage
+/dist
 /flow-typed
 /sharness
