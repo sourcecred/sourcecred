@@ -3,7 +3,6 @@
 
 import stringify from "json-stable-stringify";
 import dedent from "../util/dedent";
-import {type RepoId} from "../core/repoId";
 import {type Project, projectToJSON, createProject} from "../core/project";
 import type {Command} from "./command";
 import * as Common from "./common";
@@ -11,6 +10,7 @@ import fs from "fs-extra";
 import process from "process";
 import path from "path";
 import {type DiscourseServer} from "../plugins/discourse/loadDiscourse";
+import {type RepoId} from "../plugins/github/repoId";
 import {specToProject} from "../plugins/github/specToProject";
 import * as NullUtil from "../util/null";
 
@@ -106,17 +106,6 @@ const initCommand: Command = async (args, std) => {
         if (++i >= args.length)
           return die(std, "--discourse given without value");
         discourseUrl = args[i];
-        /*
-        if (!discourseUrl.match(new RegExp("^https?://"))) {
-          return die(
-            std,
-            "invalid discourse url: must start with http:// or https://"
-          );
-        }
-        if (discourseUrl.endsWith("/")) {
-          discourseUrl = discourseUrl.slice(0, discourseUrl.length - 1);
-        }
-        */
         break;
       }
       case "--force": {
