@@ -2,6 +2,7 @@
 
 import {type Project, createProject} from "../../core/project";
 import {stringToRepoId, githubOwnerPattern, githubRepoPattern} from "./repoId";
+import {type GithubToken} from "./token";
 import {fetchGithubOrg} from "./fetchGithubOrg";
 
 /**
@@ -22,7 +23,7 @@ import {fetchGithubOrg} from "./fetchGithubOrg";
  */
 export async function specToProject(
   spec: string,
-  token: string
+  token: GithubToken
 ): Promise<Project> {
   const repoSpecMatcher = new RegExp(
     `^${githubOwnerPattern}/${githubRepoPattern}$`

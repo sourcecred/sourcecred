@@ -6,10 +6,11 @@ import fetchGithubRepo from "./fetchGithubRepo";
 import {RelationalView} from "./relationalView";
 import {type RepoId, repoIdToString} from "./repoId";
 import {Graph} from "../../core/graph";
+import {type GithubToken} from "./token";
 
 export type Options = {|
   +repoIds: $ReadOnlyArray<RepoId>,
-  +token: string,
+  +token: GithubToken,
   +cacheDirectory: string,
 |};
 

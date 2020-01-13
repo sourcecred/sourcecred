@@ -3,6 +3,7 @@
 import {type RepoId, makeRepoId} from "./repoId";
 import * as Queries from "../../graphql/queries";
 import {postQuery} from "./fetchGithubRepo";
+import {type GithubToken} from "./token";
 
 export type Organization = {|
   +repos: $ReadOnlyArray<RepoId>,
@@ -19,7 +20,7 @@ const DEFAULT_PAGE_SIZE = 100;
  */
 export async function fetchGithubOrg(
   org: string,
-  token: string,
+  token: GithubToken,
   // Regular clients should leave pageSize at the default 50.
   // Exposed for testing purposes.
   pageSize: ?number
