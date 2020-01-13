@@ -120,7 +120,7 @@ describe("cli/load", () => {
 
     it("loads the weights, if provided", async () => {
       const weights = defaultWeights();
-      weights.nodeTypeWeights.set(NodeAddress.empty, 33);
+      weights.nodeWeights.set(NodeAddress.empty, 33);
       const weightsJSON = weightsToJSON(weights);
       const weightsFile = tmp.tmpNameSync();
       fs.writeFileSync(weightsFile, JSON.stringify(weightsJSON));

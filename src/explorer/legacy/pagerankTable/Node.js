@@ -59,9 +59,9 @@ export type NodeRowProps = {|
 export class NodeRow extends React.PureComponent<NodeRowProps> {
   render() {
     const {depth, node, sharedProps, showPadding} = this.props;
-    const {pnd, graph, onManualWeightsChange, manualWeights} = sharedProps;
+    const {pnd, graph, onNodeWeightsChange, nodeWeights} = sharedProps;
     const {score} = NullUtil.get(pnd.get(node));
-    const weight = NullUtil.orElse(manualWeights.get(node), 1);
+    const weight = NullUtil.orElse(nodeWeights.get(node), 1);
     const slider = (
       <label>
         <span>{formatWeight(weight)}</span>
@@ -73,7 +73,7 @@ export class NodeRow extends React.PureComponent<NodeRowProps> {
           value={weightToSlider(weight)}
           onChange={(e) => {
             const weight = sliderToWeight(e.target.valueAsNumber);
-            onManualWeightsChange(node, weight);
+            onNodeWeightsChange(node, weight);
           }}
         />
       </label>

@@ -96,17 +96,17 @@ export function createApp(
         const weightConfig = (
           <WeightConfig
             declarations={declarations}
-            nodeTypeWeights={this.state.weights.nodeTypeWeights}
-            edgeTypeWeights={this.state.weights.edgeTypeWeights}
+            nodeWeights={this.state.weights.nodeWeights}
+            edgeWeights={this.state.weights.edgeWeights}
             onNodeWeightChange={(prefix, weight) => {
               this.setState(({weights}) => {
-                weights.nodeTypeWeights.set(prefix, weight);
+                weights.nodeWeights.set(prefix, weight);
                 return {weights};
               });
             }}
             onEdgeWeightChange={(prefix, weight) => {
               this.setState(({weights}) => {
-                weights.edgeTypeWeights.set(prefix, weight);
+                weights.edgeWeights.set(prefix, weight);
                 return {weights};
               });
             }}
@@ -117,12 +117,12 @@ export function createApp(
           <PagerankTable
             weightConfig={weightConfig}
             weightFileManager={weightFileManager}
-            manualWeights={this.state.weights.nodeManualWeights}
+            nodeWeights={this.state.weights.nodeWeights}
             declarations={declarations}
             graph={appState.timelineCred.graph()}
-            onManualWeightsChange={(addr: NodeAddressT, weight: number) =>
+            onNodeWeightsChange={(addr: NodeAddressT, weight: number) =>
               this.setState(({weights}) => {
-                weights.nodeManualWeights.set(addr, weight);
+                weights.nodeWeights.set(addr, weight);
                 return {weights};
               })
             }

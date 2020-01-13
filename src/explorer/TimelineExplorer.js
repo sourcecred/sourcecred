@@ -82,17 +82,17 @@ export class TimelineExplorer extends React.Component<Props, State> {
     const weightConfig = (
       <WeightConfig
         declarations={this.state.timelineCred.plugins()}
-        nodeTypeWeights={this.state.weights.nodeTypeWeights}
-        edgeTypeWeights={this.state.weights.edgeTypeWeights}
+        nodeWeights={this.state.weights.nodeWeights}
+        edgeWeights={this.state.weights.edgeWeights}
         onNodeWeightChange={(prefix, weight) => {
           this.setState(({weights}) => {
-            weights.nodeTypeWeights.set(prefix, weight);
+            weights.nodeWeights.set(prefix, weight);
             return {weights};
           });
         }}
         onEdgeWeightChange={(prefix, weight) => {
           this.setState(({weights}) => {
-            weights.edgeTypeWeights.set(prefix, weight);
+            weights.edgeWeights.set(prefix, weight);
             return {weights};
           });
         }}

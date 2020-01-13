@@ -17,8 +17,8 @@ describe("explorer/legacy/pagerankTable/Table", () => {
       const {
         pnd,
         sharedProps,
-        manualWeights,
-        onManualWeightsChange,
+        nodeWeights,
+        onNodeWeightsChange,
         weightConfig,
         weightFileManager,
         maxEntriesPerList,
@@ -31,8 +31,8 @@ describe("explorer/legacy/pagerankTable/Table", () => {
           graph={sharedProps.graph}
           declarations={sharedProps.declarations}
           maxEntriesPerList={maxEntriesPerList}
-          manualWeights={manualWeights}
-          onManualWeightsChange={onManualWeightsChange}
+          nodeWeights={nodeWeights}
+          onNodeWeightsChange={onNodeWeightsChange}
         />
       );
       return {
@@ -40,8 +40,8 @@ describe("explorer/legacy/pagerankTable/Table", () => {
         element,
         maxEntriesPerList,
         weightConfig,
-        onManualWeightsChange,
-        manualWeights,
+        onNodeWeightsChange,
+        nodeWeights,
         sharedProps,
       };
     }

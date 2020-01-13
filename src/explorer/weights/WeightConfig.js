@@ -13,9 +13,9 @@ import {EdgeTypeConfig, styledVariable} from "./EdgeTypeConfig";
 type Props = {|
   +declarations: $ReadOnlyArray<PluginDeclaration>,
   // Map from NodeType prefix to weight.
-  +nodeTypeWeights: Map<NodeAddressT, NodeWeight>,
+  +nodeWeights: Map<NodeAddressT, NodeWeight>,
   // Map from EdgeType prefix to weight.
-  +edgeTypeWeights: Map<EdgeAddressT, EdgeWeight>,
+  +edgeWeights: Map<EdgeAddressT, EdgeWeight>,
   +onNodeWeightChange: (NodeAddressT, number) => void,
   +onEdgeWeightChange: (EdgeAddressT, EdgeWeight) => void,
 |};
@@ -28,15 +28,15 @@ type Props = {|
  * organized by plugin at the top level, and then by whether they represent
  * node or edge types at the level beneath.
  *
- * Each slider displays the weight associated in the `nodeTypeWeights` or
- * `edgeTypeWeights` maps provided in props. When the user changes the weight,
+ * Each slider displays the weight associated in the `nodeWeights` or
+ * `edgeWeights` maps provided in props. When the user changes the weight,
  * `onNodeWeightChange` or `onEdgeWeightChange` is called with the new weight.
  */
 export class WeightConfig extends React.Component<Props> {
   _nodeConfig(type: NodeType) {
     const {prefix, defaultWeight} = type;
-    const {onNodeWeightChange, nodeTypeWeights} = this.props;
-    const weight = NullUtil.orElse(nodeTypeWeights.get(prefix), defaultWeight);
+    const {onNodeWeightChange, nodeWeights} = this.props;
+    const weight = NullUtil.orElse(nodeWeights.get(prefix), defaultWeight);
     const onChange = (weight) => onNodeWeightChange(prefix, weight);
     return (
       <NodeTypeConfig
@@ -50,8 +50,8 @@ export class WeightConfig extends React.Component<Props> {
 
   _edgeConfig(type: EdgeType) {
     const {prefix, defaultWeight} = type;
-    const {onEdgeWeightChange, edgeTypeWeights} = this.props;
-    const weight = NullUtil.orElse(edgeTypeWeights.get(prefix), defaultWeight);
+    const {onEdgeWeightChange, edgeWeights} = this.props;
+    const weight = NullUtil.orElse(edgeWeights.get(prefix), defaultWeight);
     const onChange = (weight) => onEdgeWeightChange(prefix, weight);
     return (
       <EdgeTypeConfig

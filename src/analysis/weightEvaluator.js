@@ -1,65 +1,84 @@
 // @flow
 
-import * as NullUtil from "../util/null";
 import type {NodeAddressT, EdgeAddressT} from "../core/graph";
 import type {NodeType, EdgeType} from "./types";
-import type {Weights, EdgeWeight} from "./weights";
+import type {Weights as WeightsT, EdgeWeight, NodeWeight} from "./weights";
+import * as Weights from "./weights";
 import {NodeTrie, EdgeTrie} from "../core/trie";
 
-export type NodeWeightEvaluator = (NodeAddressT) => number;
+export type NodeWeightEvaluator = (NodeAddressT) => NodeWeight;
 export type EdgeWeightEvaluator = (EdgeAddressT) => EdgeWeight;
 
 /**
- * Given the weights and types, produces a NodeEvaluator, which assigns a weight to a
- * NodeAddressT based on its type and whether it has any manual weight specified.
+ * Given the weights and types, produce a NodeWeightEvaluator, which assigns a
+ * numerical weight to any node.
  *
- * Every node address is assigned a weight based on its most specific matching
- * type (i.e. the type with the longest shared prefix). If that type has a
- * weight specified in the typeWeights map, the specified weight will be used.
- * If not, then the type's default weight is used. If no type matches a given
- * node, then it will get a default weight of 1.
+ * The weights are interpreted as prefixes, i.e. a given address may match
+ * multiple weights. When this is the case, the matching weights are multiplied
+ * together. When no weights match, a default weight of 1 is returned.
  *
- * If the node address has a manual weight specified in the manualWeights map,
- * that weight will be multiplied by its type weight.
+ * We currently take the NodeTypes and use them to 'fill in' default type
+ * weights if no weight for the type's prefix is explicitly set. This is a
+ * legacy affordance; shortly we will remove the NodeTypes and require that the
+ * plugins provide the type weights when the Weights object is constructed.
  */
 export function nodeWeightEvaluator(
   types: $ReadOnlyArray<NodeType>,
-  weights: Weights
+  weights: WeightsT
 ): NodeWeightEvaluator {
-  const {
-    nodeTypeWeights: typeWeights,
-    nodeManualWeights: manualWeights,
-  } = weights;
-  const nodeTrie = new NodeTrie();
+  const {nodeWeights} = Weights.copy(weights);
+
   for (const {prefix, defaultWeight} of types) {
-    const weight = NullUtil.orElse(typeWeights.get(prefix), defaultWeight);
+    if (!nodeWeights.has(prefix)) {
+      nodeWeights.set(prefix, defaultWeight);
+    }
+  }
+  const nodeTrie: NodeTrie<NodeWeight> = new NodeTrie();
+  for (const [prefix, weight] of nodeWeights.entries()) {
     nodeTrie.add(prefix, weight);
   }
-  return function nodeWeight(a: NodeAddressT): number {
-    const typeWeight = NullUtil.orElse(nodeTrie.getLast(a), 1);
-    const manualWeight = NullUtil.orElse(manualWeights.get(a), 1);
-    return typeWeight * manualWeight;
+  return function nodeWeight(a: NodeAddressT): NodeWeight {
+    const matchingWeights = nodeTrie.get(a);
+    return matchingWeights.reduce((a, b) => a * b, 1);
   };
 }
 
 /**
- * Given the weights and types, produce an EdgeEvaluator, which assigns a toWeight and froWeight
- * to an edge address based only on its type.
+ * Given the weights and the types, produce an EdgeWeightEvaluator,
+ * which will assign an EdgeWeight to any edge.
+ *
+ * The edge weights are interpreted as prefix matchers, so a single edge may
+ * match zero or more EdgeWeights. The weight for the edge will be the product
+ * of all matching EdgeWeights (with 1 as the default forwards and backwards
+ * weight.)
+ *
+ * The types are used to 'fill in' extra type weights. This is a temporary
+ * state of affairs; we will change plugins to include the type weights
+ * directly in the weights object, so that producing weight evaluators will no
+ * longer depend on having plugin declarations on hand.
  */
 export function edgeWeightEvaluator(
   types: $ReadOnlyArray<EdgeType>,
-  weights: Weights
+  weights: WeightsT
 ): EdgeWeightEvaluator {
-  const typeWeights = weights.edgeTypeWeights;
-  const edgeTrie = new EdgeTrie();
+  const {edgeWeights} = Weights.copy(weights);
   for (const {prefix, defaultWeight} of types) {
-    const weight = NullUtil.orElse(typeWeights.get(prefix), defaultWeight);
+    if (!edgeWeights.has(prefix)) {
+      edgeWeights.set(prefix, defaultWeight);
+    }
+  }
+  const edgeTrie: EdgeTrie<EdgeWeight> = new EdgeTrie();
+  for (const [prefix, weight] of edgeWeights.entries()) {
     edgeTrie.add(prefix, weight);
   }
-  return function evaluator(address: EdgeAddressT) {
-    return NullUtil.orElse(edgeTrie.getLast(address), {
-      forwards: 1,
-      backwards: 1,
-    });
+  return function evaluator(address: EdgeAddressT): EdgeWeight {
+    const weights = edgeTrie.get(address);
+    return weights.reduce(
+      (a: EdgeWeight, b: EdgeWeight) => ({
+        forwards: a.forwards * b.forwards,
+        backwards: a.backwards * b.backwards,
+      }),
+      {forwards: 1, backwards: 1}
+    );
   };
 }
