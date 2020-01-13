@@ -824,3 +824,48 @@ Array [
   },
 ]
 `;
+
+exports[`plugins/github/relationalView urlReferenceMap should match example snapshot 1`] = `
+Array [
+  Array [
+    "https://github.com/credbot",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"USERLIKE\\",\\"BOT\\",\\"credbot\\"]",
+  ],
+  Array [
+    "https://github.com/decentralion",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"USERLIKE\\",\\"USER\\",\\"decentralion\\"]",
+  ],
+  Array [
+    "https://github.com/sourcecred-test/example-github",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"REPO\\",\\"sourcecred-test\\",\\"example-github\\"]",
+  ],
+  Array [
+    "https://github.com/sourcecred-test/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"COMMIT\\",\\"MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE=\\"]",
+  ],
+  Array [
+    "https://github.com/sourcecred-test/example-github/issues/1",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"ISSUE\\",\\"sourcecred-test\\",\\"example-github\\",\\"1\\"]",
+  ],
+  Array [
+    "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768703",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"COMMENT\\",\\"ISSUE\\",\\"sourcecred-test\\",\\"example-github\\",\\"2\\",\\"373768703\\"]",
+  ],
+  Array [
+    "https://github.com/sourcecred-test/example-github/pull/3",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"PULL\\",\\"sourcecred-test\\",\\"example-github\\",\\"3\\"]",
+  ],
+  Array [
+    "https://github.com/sourcecred-test/example-github/pull/3#issuecomment-369162222",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"COMMENT\\",\\"PULL\\",\\"sourcecred-test\\",\\"example-github\\",\\"3\\",\\"369162222\\"]",
+  ],
+  Array [
+    "https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"COMMENT\\",\\"REVIEW\\",\\"sourcecred-test\\",\\"example-github\\",\\"5\\",\\"100313899\\",\\"171460198\\"]",
+  ],
+  Array [
+    "https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899",
+    "NodeAddress[\\"sourcecred\\",\\"github\\",\\"REVIEW\\",\\"sourcecred-test\\",\\"example-github\\",\\"5\\",\\"100313899\\"]",
+  ],
+]
+`;

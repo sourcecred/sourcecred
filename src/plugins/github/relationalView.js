@@ -1,5 +1,7 @@
 // @flow
 
+import {type URL} from "../../core/references";
+import {NodeAddress, type NodeAddressT} from "../../core/graph";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import stringify from "json-stable-stringify";
 import {parseReferences} from "./parseReferences";
@@ -513,6 +515,30 @@ export class RelationalView {
       this._userlikes.set(N.toRaw(address), entry);
       return [address];
     }
+  }
+
+  /**
+   * Creates a Map<URL, NodeAddressT> for each ReferentEntity in this view.
+   * Note: duplicates are accepted within one view. However for any URL, the
+   * corresponding N.RawAddress should be the same, or we'll throw an error.
+   */
+  urlReferenceMap(): Map<URL, NodeAddressT> {
+    const refToAddress: Map<URL, NodeAddressT> = new Map();
+    for (const e: ReferentEntity of this.referentEntities()) {
+      const addr = N.toRaw(e.address());
+      const url = e.url();
+      const existing = refToAddress.get(url);
+      if (existing && existing != addr) {
+        throw new Error(dedent`\
+          An entry for ${url} already existed, but with a different NodeAddressT.
+          This is probably a bug with SourceCred. Please report it on GitHub.
+          Old: ${NodeAddress.toString(existing)}
+          New: ${NodeAddress.toString(addr)}
+        `);
+      }
+      refToAddress.set(url, addr);
+    }
+    return refToAddress;
   }
 
   _addReferences() {

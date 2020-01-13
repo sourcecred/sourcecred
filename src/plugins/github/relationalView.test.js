@@ -1,5 +1,6 @@
 // @flow
 
+import {NodeAddress} from "../../core/graph";
 import * as R from "./relationalView";
 import * as N from "./nodes";
 import {exampleRepository, exampleRelationalView} from "./example/example";
@@ -387,6 +388,40 @@ describe("plugins/github/relationalView", () => {
       const view1 = R.RelationalView.fromJSON(json1);
       const json2 = view1.toJSON();
       expect(json1).toEqual(json2);
+    });
+  });
+
+  describe("urlReferenceMap", () => {
+    it("should match example snapshot", () => {
+      // Given
+      const rv = exampleRelationalView();
+
+      // When
+      const map = rv.urlReferenceMap();
+
+      // Then
+      const snapshotMapWith = (urls: string[]): [string, ?string][] => {
+        // Sort, for less test flakes.
+        // Remove null bytes from NodeAddress.
+        // Generate selective [key, value] tuples.
+        urls.sort();
+        const maybeString = (a) => (a ? NodeAddress.toString(a) : a);
+        return urls.map((url) => [url, maybeString(map.get(url))]);
+      };
+      expect(
+        snapshotMapWith([
+          "https://github.com/decentralion",
+          "https://github.com/credbot",
+          "https://github.com/sourcecred-test/example-github",
+          "https://github.com/sourcecred-test/example-github/issues/1",
+          "https://github.com/sourcecred-test/example-github/pull/3",
+          "https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899",
+          "https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768703",
+          "https://github.com/sourcecred-test/example-github/pull/3#issuecomment-369162222",
+          "https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198",
+          "https://github.com/sourcecred-test/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a",
+        ])
+      ).toMatchSnapshot();
     });
   });
 
