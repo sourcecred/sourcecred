@@ -16,6 +16,7 @@ import {
 } from "../core/project";
 import {type RepoId} from "../plugins/github/repoId";
 import {specToProject} from "../plugins/github/specToProject";
+import {type GithubToken} from "../plugins/github/token";
 import * as NullUtil from "../util/null";
 
 function usage(print: (string) => void): void {
@@ -131,7 +132,7 @@ export async function createProject(opts: {|
   +projectId: string,
   +githubSpecs: $ReadOnlyArray<string>,
   +discourseUrl: string | null,
-  +githubToken: string | null,
+  +githubToken: ?GithubToken,
 |}): Promise<Project> {
   const {projectId, githubSpecs, discourseUrl, githubToken} = opts;
   let repoIds: RepoId[] = [];

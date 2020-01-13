@@ -5,6 +5,7 @@ import tmp from "tmp";
 import fs from "fs-extra";
 import {defaultWeights, toJSON as weightsToJSON} from "../analysis/weights";
 import {NodeAddress} from "../core/graph";
+import {validateToken} from "../plugins/github/token";
 
 import {
   defaultPlugins,
@@ -15,6 +16,7 @@ import {
 } from "./common";
 
 describe("cli/common", () => {
+  const exampleGithubToken = validateToken("0".repeat(40));
   beforeEach(() => {
     jest
       .spyOn(require("os"), "tmpdir")
@@ -51,8 +53,8 @@ describe("cli/common", () => {
 
   describe("githubToken", () => {
     it("uses the environment variable when available", () => {
-      process.env.SOURCECRED_GITHUB_TOKEN = "010101";
-      expect(githubToken()).toEqual("010101");
+      process.env.SOURCECRED_GITHUB_TOKEN = exampleGithubToken;
+      expect(githubToken()).toEqual(exampleGithubToken);
     });
     it("returns `null` if the environment variable is not set", () => {
       delete process.env.SOURCECRED_GITHUB_TOKEN;

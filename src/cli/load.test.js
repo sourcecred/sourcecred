@@ -14,12 +14,14 @@ import {defaultParams, partialParams} from "../analysis/timeline/params";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";
 import {createProject} from "../core/project";
 import {makeRepoId, stringToRepoId} from "../plugins/github/repoId";
+import {validateToken} from "../plugins/github/token";
 
 jest.mock("../api/load", () => ({load: jest.fn()}));
 type JestMockFn = $Call<typeof jest.fn>;
 const load: JestMockFn = (require("../api/load").load: any);
 
 describe("cli/load", () => {
+  const exampleGithubToken = validateToken("0".repeat(40));
   beforeEach(() => {
     jest.clearAllMocks();
     // Tests should call `newSourcecredDirectory` directly when they
@@ -28,11 +30,10 @@ describe("cli/load", () => {
     newSourcecredDirectory();
   });
 
-  const fakeGithubToken = "....".replace(/./g, "0123456789");
   function newSourcecredDirectory() {
     const dirname = tmp.dirSync().name;
     process.env.SOURCECRED_DIRECTORY = dirname;
-    process.env.SOURCECRED_GITHUB_TOKEN = fakeGithubToken;
+    process.env.SOURCECRED_GITHUB_TOKEN = exampleGithubToken;
     return dirname;
   }
 
@@ -78,7 +79,7 @@ describe("cli/load", () => {
         params: defaultParams(),
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
-        githubToken: fakeGithubToken,
+        githubToken: exampleGithubToken,
       };
       expect(await invocation).toEqual({
         exitCode: 0,
@@ -101,7 +102,7 @@ describe("cli/load", () => {
         params: defaultParams(),
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
-        githubToken: fakeGithubToken,
+        githubToken: exampleGithubToken,
       });
       expect(await invocation).toEqual({
         exitCode: 0,
@@ -137,7 +138,7 @@ describe("cli/load", () => {
         params: partialParams({weights}),
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
-        githubToken: fakeGithubToken,
+        githubToken: exampleGithubToken,
       };
       expect(await invocation).toEqual({
         exitCode: 0,

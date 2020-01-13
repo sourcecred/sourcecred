@@ -15,6 +15,7 @@
 import stringify from "json-stable-stringify";
 
 import {fetchGithubOrg} from "../fetchGithubOrg";
+import {validateToken} from "../token";
 
 function parseArgs() {
   const argv = process.argv.slice(2);
@@ -27,11 +28,12 @@ function parseArgs() {
   if (argv.length < 2) {
     fail();
   }
-  const [organization, githubToken, ...rest] = argv;
+  const [organization, unvalidatedGithubToken, ...rest] = argv;
   let pageSize: ?number;
   if (rest.length === 1) {
     pageSize = Number(rest[0]);
   }
+  const githubToken = validateToken(unvalidatedGithubToken);
   const result = {organization, githubToken, pageSize};
   if (rest.length > 1) {
     fail();
