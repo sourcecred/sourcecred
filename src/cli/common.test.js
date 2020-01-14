@@ -72,7 +72,7 @@ describe("cli/common", () => {
       const weights = defaultWeights();
       // Make a modification, just to be sure we aren't always loading the
       // default weights.
-      weights.nodeManualWeights.set(NodeAddress.empty, 3);
+      weights.nodeWeights.set(NodeAddress.empty, 3);
       const weightsJSON = weightsToJSON(weights);
       const file = tmpWithContents(weightsJSON);
       const weights_ = await loadWeights(file);

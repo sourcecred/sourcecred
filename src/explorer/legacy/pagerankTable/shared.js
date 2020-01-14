@@ -47,8 +47,8 @@ export type SharedProps = {|
   +graph: Graph,
   +declarations: $ReadOnlyArray<PluginDeclaration>,
   +maxEntriesPerList: number,
-  +manualWeights: Map<NodeAddressT, number>,
-  +onManualWeightsChange: (NodeAddressT, number) => void,
+  +nodeWeights: Map<NodeAddressT, number>,
+  +onNodeWeightsChange: (NodeAddressT, number) => void,
 |};
 
 export function Badge({children}: {children: ReactNode}): ReactNode {

@@ -18,8 +18,8 @@ export async function example() {
     backwards: 1,
   }));
   const maxEntriesPerList = 123;
-  const manualWeights: Map<NodeAddressT, number> = new Map();
-  const onManualWeightsChange: (NodeAddressT, number) => void = jest.fn();
+  const nodeWeights: Map<NodeAddressT, number> = new Map();
+  const onNodeWeightsChange: (NodeAddressT, number) => void = jest.fn();
   const weightConfig: any = <div data-test-weight-config={true} />;
   const weightFileManager: any = <div data-test-weight-file-manager={true} />;
 
@@ -28,16 +28,16 @@ export async function example() {
     declarations,
     pnd,
     maxEntriesPerList,
-    manualWeights,
-    onManualWeightsChange,
+    nodeWeights,
+    onNodeWeightsChange,
   };
 
   return {
     pnd,
     maxEntriesPerList,
     sharedProps,
-    manualWeights,
-    onManualWeightsChange,
+    nodeWeights,
+    onNodeWeightsChange,
     weightConfig,
     weightFileManager,
   };

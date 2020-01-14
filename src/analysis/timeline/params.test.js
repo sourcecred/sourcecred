@@ -16,7 +16,7 @@ describe("analysis/timeline/params", () => {
   const customWeights = () => {
     const weights = defaultWeights();
     // Ensure it works with non-default weights
-    weights.nodeManualWeights.set(NodeAddress.empty, 33);
+    weights.nodeWeights.set(NodeAddress.empty, 33);
     return weights;
   };
   it("JSON round trip", () => {

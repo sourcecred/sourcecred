@@ -51,27 +51,27 @@ describe("analysis/weightsToEdgeEvaluator", () => {
     expect(evaluateEdge(defaultWeights())).toEqual({forwards: 1, backwards: 2});
   });
 
-  it("only matches the most specific node types", () => {
+  it("matches all prefixes of the nodes in scope", () => {
     const weights = defaultWeights();
-    weights.nodeTypeWeights.set(NodeAddress.empty, 99);
-    expect(evaluateEdge(weights)).toEqual({forwards: 99, backwards: 2});
+    weights.nodeWeights.set(NodeAddress.empty, 99);
+    expect(evaluateEdge(weights)).toEqual({forwards: 99, backwards: 2 * 99});
   });
 
   it("takes manually specified edge type weights into account", () => {
     const weights = defaultWeights();
     // Note that here we grab the fallout edge type. This also verifies that
     // we are doing prefix matching on the types (rather than exact matching).
-    weights.edgeTypeWeights.set(EdgeAddress.empty, {
+    weights.edgeWeights.set(EdgeAddress.empty, {
       forwards: 6,
       backwards: 12,
     });
     expect(evaluateEdge(weights)).toEqual({forwards: 6, backwards: 24});
   });
 
-  it("takes manually specified per-node weights into account", () => {
+  it("an explicit weight on a prefix overrides the type weight", () => {
     const weights = defaultWeights();
-    weights.nodeManualWeights.set(src, 10);
-    expect(evaluateEdge(weights)).toEqual({forwards: 1, backwards: 20});
+    weights.nodeWeights.set(src, 1);
+    expect(evaluateEdge(weights)).toEqual({forwards: 1, backwards: 1});
   });
 
   it("uses 1 as a default weight for unmatched nodes and edges", () => {
@@ -85,9 +85,9 @@ describe("analysis/weightsToEdgeEvaluator", () => {
   it("ignores extra weights if they do not apply", () => {
     const withoutExtraWeights = evaluateEdge(defaultWeights());
     const extraWeights = defaultWeights();
-    extraWeights.nodeManualWeights.set(NodeAddress.fromParts(["foo"]), 99);
-    extraWeights.nodeTypeWeights.set(NodeAddress.fromParts(["foo"]), 99);
-    extraWeights.edgeTypeWeights.set(EdgeAddress.fromParts(["foo"]), {
+    extraWeights.nodeWeights.set(NodeAddress.fromParts(["foo"]), 99);
+    extraWeights.nodeWeights.set(NodeAddress.fromParts(["foo"]), 99);
+    extraWeights.edgeWeights.set(EdgeAddress.fromParts(["foo"]), {
       forwards: 14,
       backwards: 19,
     });

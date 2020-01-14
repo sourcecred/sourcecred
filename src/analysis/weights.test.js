@@ -8,13 +8,13 @@ describe("analysis/weights", () => {
   it("copy makes a copy", () => {
     const w = defaultWeights();
     const w1 = copy(w);
-    w1.nodeTypeWeights.set(NodeAddress.empty, 33);
-    w1.edgeTypeWeights.set(EdgeAddress.empty, {forwards: 34, backwards: 39});
-    w1.nodeManualWeights.set(NodeAddress.empty, 35);
+    w1.nodeWeights.set(NodeAddress.empty, 33);
+    w1.edgeWeights.set(EdgeAddress.empty, {forwards: 34, backwards: 39});
+    w1.nodeWeights.set(NodeAddress.empty, 35);
     expect(w1).not.toEqual(w);
-    expect(w1.nodeTypeWeights).not.toEqual(w.nodeTypeWeights);
-    expect(w1.edgeTypeWeights).not.toEqual(w.edgeTypeWeights);
-    expect(w1.nodeManualWeights).not.toEqual(w.nodeManualWeights);
+    expect(w1.nodeWeights).not.toEqual(w.nodeWeights);
+    expect(w1.edgeWeights).not.toEqual(w.edgeWeights);
+    expect(w1.nodeWeights).not.toEqual(w.nodeWeights);
   });
   describe("toJSON/fromJSON", () => {
     it("works for the default weights", () => {
@@ -22,56 +22,50 @@ describe("analysis/weights", () => {
       const json = toJSON(weights);
       const jsonString = stringify(json, {space: 4});
       expect(jsonString).toMatchInlineSnapshot(`
-"[
-    {
-        \\"type\\": \\"sourcecred/weights\\",
-        \\"version\\": \\"0.1.0\\"
-    },
-    {
-        \\"edgeTypeWeights\\": {
-        },
-        \\"nodeManualWeights\\": {
-        },
-        \\"nodeTypeWeights\\": {
-        }
-    }
-]"
-`);
+        "[
+            {
+                \\"type\\": \\"sourcecred/weights\\",
+                \\"version\\": \\"0.2.0\\"
+            },
+            {
+                \\"edgeWeights\\": {
+                },
+                \\"nodeWeights\\": {
+                }
+            }
+        ]"
+      `);
       expect(weights).toEqual(fromJSON(json));
     });
 
     it("works for non-default weights", () => {
       const weights = defaultWeights();
-      weights.nodeTypeWeights.set(NodeAddress.empty, 32);
-      weights.edgeTypeWeights.set(EdgeAddress.empty, {
+      weights.nodeWeights.set(NodeAddress.empty, 32);
+      weights.edgeWeights.set(EdgeAddress.empty, {
         forwards: 7,
         backwards: 9,
       });
-      weights.nodeManualWeights.set(NodeAddress.fromParts(["foo"]), 42);
       const json = toJSON(weights);
       const jsonString = stringify(json, {space: 4});
       expect(jsonString).toMatchInlineSnapshot(`
-"[
-    {
-        \\"type\\": \\"sourcecred/weights\\",
-        \\"version\\": \\"0.1.0\\"
-    },
-    {
-        \\"edgeTypeWeights\\": {
-            \\"E\\\\u0000\\": {
-                \\"backwards\\": 9,
-                \\"forwards\\": 7
+        "[
+            {
+                \\"type\\": \\"sourcecred/weights\\",
+                \\"version\\": \\"0.2.0\\"
+            },
+            {
+                \\"edgeWeights\\": {
+                    \\"E\\\\u0000\\": {
+                        \\"backwards\\": 9,
+                        \\"forwards\\": 7
+                    }
+                },
+                \\"nodeWeights\\": {
+                    \\"N\\\\u0000\\": 32
+                }
             }
-        },
-        \\"nodeManualWeights\\": {
-            \\"N\\\\u0000foo\\\\u0000\\": 42
-        },
-        \\"nodeTypeWeights\\": {
-            \\"N\\\\u0000\\": 32
-        }
-    }
-]"
-`);
+        ]"
+      `);
       expect(weights).toEqual(fromJSON(json));
     });
   });

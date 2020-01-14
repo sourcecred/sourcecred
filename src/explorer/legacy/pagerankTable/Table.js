@@ -15,8 +15,8 @@ type PagerankTableProps = {|
   +declarations: $ReadOnlyArray<PluginDeclaration>,
   +graph: Graph,
   +maxEntriesPerList: number,
-  +manualWeights: Map<NodeAddressT, number>,
-  +onManualWeightsChange: (NodeAddressT, number) => void,
+  +nodeWeights: Map<NodeAddressT, number>,
+  +onNodeWeightsChange: (NodeAddressT, number) => void,
   +weightConfig: React$Element<typeof WeightConfig>,
   +weightFileManager: React$Element<typeof WeightsFileManager>,
 |};
@@ -115,8 +115,8 @@ export class PagerankTable extends React.PureComponent<
       pnd,
       declarations,
       maxEntriesPerList,
-      manualWeights,
-      onManualWeightsChange,
+      nodeWeights,
+      onNodeWeightsChange,
       graph,
     } = this.props;
     if (pnd == null || declarations == null || maxEntriesPerList == null) {
@@ -126,8 +126,8 @@ export class PagerankTable extends React.PureComponent<
       pnd,
       declarations,
       maxEntriesPerList,
-      manualWeights,
-      onManualWeightsChange,
+      nodeWeights,
+      onNodeWeightsChange,
       graph,
     };
     const userTypes = [].concat(...declarations.map((p) => p.userTypes));

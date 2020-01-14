@@ -113,8 +113,8 @@ describe("explorer/legacy/pagerankTable/Node", () => {
       describe("with a weight slider", () => {
         async function setupSlider(initialWeight: number = 0) {
           const node = factorioNodes.inserter1.address;
-          const manualWeights = new Map([[node, initialWeight]]);
-          const partialSharedProps: any = {manualWeights};
+          const nodeWeights = new Map([[node, initialWeight]]);
+          const partialSharedProps: any = {nodeWeights};
           const {row, sharedProps} = await setup({
             sharedProps: partialSharedProps,
           });
@@ -122,10 +122,10 @@ describe("explorer/legacy/pagerankTable/Node", () => {
           const label = multiuseColumn.find("label");
           const input = label.find("input");
           const span = label.find("span");
-          const {onManualWeightsChange} = sharedProps;
+          const {onNodeWeightsChange} = sharedProps;
           return {
-            onManualWeightsChange,
-            manualWeights,
+            onNodeWeightsChange,
+            nodeWeights,
             input,
             span,
             node,
@@ -139,20 +139,20 @@ describe("explorer/legacy/pagerankTable/Node", () => {
           expect(input.props().type).toEqual("range");
           expect(span).toHaveLength(1);
         });
-        it("whose onChange triggers onManualWeightsChange", async () => {
-          const {node, input, onManualWeightsChange} = await setupSlider();
-          expect(onManualWeightsChange).toHaveBeenCalledTimes(0);
+        it("whose onChange triggers onNodeWeightsChange", async () => {
+          const {node, input, onNodeWeightsChange} = await setupSlider();
+          expect(onNodeWeightsChange).toHaveBeenCalledTimes(0);
           input.simulate("change", {target: {valueAsNumber: MIN_SLIDER}});
-          expect(onManualWeightsChange).toHaveBeenLastCalledWith(
+          expect(onNodeWeightsChange).toHaveBeenLastCalledWith(
             node,
             sliderToWeight(MIN_SLIDER)
           );
           input.simulate("change", {target: {valueAsNumber: MAX_SLIDER}});
-          expect(onManualWeightsChange).toHaveBeenLastCalledWith(
+          expect(onNodeWeightsChange).toHaveBeenLastCalledWith(
             node,
             sliderToWeight(MAX_SLIDER)
           );
-          expect(onManualWeightsChange).toHaveBeenCalledTimes(2);
+          expect(onNodeWeightsChange).toHaveBeenCalledTimes(2);
         });
         it("which encodes the weight in slider position", async () => {
           const {input} = await setupSlider(4);

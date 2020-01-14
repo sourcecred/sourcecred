@@ -34,36 +34,27 @@ describe("src/analysis/weightEvaluator", () => {
       expect(evaluator(empty)).toEqual(1);
       expect(evaluator(foo)).toEqual(1);
     });
-    it("matches the most specific possible node type", () => {
+    it("composes matching weights multiplicatively", () => {
       const evaluator = nodeWeightEvaluator(types, defaultWeights());
       expect(evaluator(empty)).toEqual(1);
       expect(evaluator(foo)).toEqual(2);
-      expect(evaluator(foobar)).toEqual(3);
+      expect(evaluator(foobar)).toEqual(6);
     });
-    it("uses type weight overrides", () => {
+    it("explicitly set weights on type prefixes override the type weights", () => {
       const weights = defaultWeights();
-      weights.nodeTypeWeights.set(foo, 3);
-      weights.nodeTypeWeights.set(foobar, 4);
+      weights.nodeWeights.set(foo, 3);
+      weights.nodeWeights.set(foobar, 4);
       const evaluator = nodeWeightEvaluator(types, weights);
       expect(evaluator(empty)).toEqual(1);
       expect(evaluator(foo)).toEqual(3);
-      expect(evaluator(foobar)).toEqual(4);
+      expect(evaluator(foobar)).toEqual(12);
     });
     it("uses manually-specified weights", () => {
       const weights = defaultWeights();
-      weights.nodeManualWeights.set(foo, 3);
+      weights.nodeWeights.set(foo, 3);
       const evaluator = nodeWeightEvaluator([], weights);
       expect(evaluator(empty)).toEqual(1);
       expect(evaluator(foo)).toEqual(3);
-      expect(evaluator(foobar)).toEqual(1);
-    });
-    it("composes manual and type weights multiplicatively", () => {
-      const weights = defaultWeights();
-      weights.nodeManualWeights.set(foo, 3);
-      const evaluator = nodeWeightEvaluator(types, weights);
-      weights.nodeManualWeights.set(foo, 3);
-      expect(evaluator(empty)).toEqual(1);
-      expect(evaluator(foo)).toEqual(6);
       expect(evaluator(foobar)).toEqual(3);
     });
   });
@@ -88,24 +79,24 @@ describe("src/analysis/weightEvaluator", () => {
       const evaluator = edgeWeightEvaluator([], defaultWeights());
       expect(evaluator(foo)).toEqual({forwards: 1, backwards: 1});
     });
-    it("uses weights for the most specific matching type", () => {
+    it("composes weights multiplicatively for all matching types", () => {
       const evaluator = edgeWeightEvaluator(
         [fooType, fooBarType],
         defaultWeights()
       );
       expect(evaluator(foo)).toEqual({forwards: 2, backwards: 3});
-      expect(evaluator(foobar)).toEqual({forwards: 4, backwards: 5});
+      expect(evaluator(foobar)).toEqual({forwards: 8, backwards: 15});
       expect(evaluator(EdgeAddress.fromParts(["foo", "bar", "qox"]))).toEqual({
-        forwards: 4,
-        backwards: 5,
+        forwards: 8,
+        backwards: 15,
       });
     });
-    it("uses weight overrides if available", () => {
+    it("explicit weights override defaults from types", () => {
       const weights = defaultWeights();
-      weights.edgeTypeWeights.set(foo, {forwards: 99, backwards: 101});
+      weights.edgeWeights.set(foo, {forwards: 99, backwards: 101});
       const evaluator = edgeWeightEvaluator([fooType, fooBarType], weights);
       expect(evaluator(foo)).toEqual({forwards: 99, backwards: 101});
-      expect(evaluator(foobar)).toEqual({forwards: 4, backwards: 5});
+      expect(evaluator(foobar)).toEqual({forwards: 4 * 99, backwards: 5 * 101});
     });
   });
 });

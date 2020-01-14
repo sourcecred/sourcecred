@@ -69,7 +69,7 @@ describe("api/load", () => {
   deepFreeze(project);
   const weights = defaultWeights();
   // Tweaks the weights so that we can ensure we aren't overriding with default weights
-  weights.nodeManualWeights.set(NodeAddress.empty, 33);
+  weights.nodeWeights.set(NodeAddress.empty, 33);
   // Deep freeze will freeze the weights, too
   const params: $Shape<TimelineCredParameters> = {weights};
   const plugins = deepFreeze([]);
