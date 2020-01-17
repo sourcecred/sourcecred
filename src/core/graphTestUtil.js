@@ -73,7 +73,7 @@ export function advancedGraph() {
   const hom1 = partsEdge(["hom", "1"], src, dst);
   const hom2 = partsEdge(["hom", "2"], src, dst);
   const loop = node("loop");
-  const loop_loop = edge("loop", loop, loop);
+  const loopLoop = edge("loop", loop, loop);
 
   const halfIsolated = node("halfIsolated");
   const phantomNode = node("phantom");
@@ -89,7 +89,7 @@ export function advancedGraph() {
       .addNode(isolated)
       .addEdge(hom1)
       .addEdge(hom2)
-      .addEdge(loop_loop)
+      .addEdge(loopLoop)
       .addNode(halfIsolated)
       .addEdge(halfDanglingEdge)
       .addEdge(fullDanglingEdge);
@@ -156,17 +156,17 @@ export function advancedGraph() {
       .addNode(loop)
       // N: [src, halfIsolated, dst, isolated, loop]
       // E: [halfDanglingEdge, fullDanglingEdge, hom2]
-      .addEdge(loop_loop)
+      .addEdge(loopLoop)
       // N: [src, halfIsolated, dst, isolated, loop]
-      // E: [halfDanglingEdge, fullDanglingEdge, hom2, loop_loop]
+      // E: [halfDanglingEdge, fullDanglingEdge, hom2, loopLoop]
       .addEdge(hom1);
   //     N: [src, halfIsolated, dst, isolated, loop]
-  //     E: [halfDanglingEdge, fullDanglingEdge, hom2, loop_loop, hom1]
+  //     E: [halfDanglingEdge, fullDanglingEdge, hom2, loopLoop, hom1]
   const nodes = {src, dst, loop, isolated, phantomNode, halfIsolated};
   const edges = {
     hom1,
     hom2,
-    loop_loop,
+    loopLoop,
     phantomEdge1,
     phantomEdge2,
     halfDanglingEdge,

@@ -6,7 +6,7 @@
 // and we use the Flow comment syntax instead of the inline syntax.
 
 const chalk = require("chalk");
-const child_process = require("child_process");
+const {execFile} = require("child_process");
 
 /*::
 export type TaskId = string;
@@ -219,7 +219,7 @@ function processTask(task /*: Task */) /*: Promise<TaskResult> */ {
   const file = task.cmd[0];
   const args = task.cmd.slice(1);
   return new Promise((resolve, _unused_reject) => {
-    child_process.execFile(file, args, (error, stdout, stderr) => {
+    execFile(file, args, (error, stdout, stderr) => {
       resolve({
         id: task.id,
         success: !error,

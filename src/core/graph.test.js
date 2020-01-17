@@ -906,10 +906,10 @@ describe("core/graph", () => {
       // It's included so we can verify it has no neighbors.
       const halfIsolated = partsNode(["halfIsolated"]);
 
-      const foo_loop = partsEdge(["foo", "1"], foo, loop);
-      const loop_foo = partsEdge(["foo", "2"], loop, foo);
-      const loop_loop = partsEdge(["loop"], loop, loop);
-      const repeated_loop_foo = partsEdge(["repeated", "foo"], loop, foo);
+      const fooLoop = partsEdge(["foo", "1"], foo, loop);
+      const loopFoo = partsEdge(["foo", "2"], loop, foo);
+      const loopLoop = partsEdge(["loop"], loop, loop);
+      const repeatedLoopFoo = partsEdge(["repeated", "foo"], loop, foo);
       const dangling = partsEdge(
         ["dangling"],
         halfIsolated,
@@ -922,10 +922,10 @@ describe("core/graph", () => {
           .addNode(loop)
           .addNode(isolated)
           .addNode(halfIsolated)
-          .addEdge(foo_loop)
-          .addEdge(loop_foo)
-          .addEdge(loop_loop)
-          .addEdge(repeated_loop_foo)
+          .addEdge(fooLoop)
+          .addEdge(loopFoo)
+          .addEdge(loopLoop)
+          .addEdge(repeatedLoopFoo)
           .addEdge(dangling);
       }
 
@@ -995,8 +995,8 @@ describe("core/graph", () => {
             [],
             [],
             [
-              {node: loop, edge: loop_loop},
-              {node: foo, edge: foo_loop},
+              {node: loop, edge: loopLoop},
+              {node: foo, edge: fooLoop},
             ]
           );
         });
@@ -1006,9 +1006,9 @@ describe("core/graph", () => {
             [],
             [],
             [
-              {node: loop, edge: loop_loop},
-              {node: foo, edge: repeated_loop_foo},
-              {node: foo, edge: loop_foo},
+              {node: loop, edge: loopLoop},
+              {node: foo, edge: repeatedLoopFoo},
+              {node: foo, edge: loopFoo},
             ]
           );
         });
@@ -1019,10 +1019,10 @@ describe("core/graph", () => {
             [],
             [],
             [
-              {node: loop, edge: loop_loop},
-              {node: foo, edge: repeated_loop_foo},
-              {node: foo, edge: loop_foo},
-              {node: foo, edge: foo_loop},
+              {node: loop, edge: loopLoop},
+              {node: foo, edge: repeatedLoopFoo},
+              {node: foo, edge: loopFoo},
+              {node: foo, edge: fooLoop},
             ]
           );
         });
@@ -1041,15 +1041,15 @@ describe("core/graph", () => {
           );
         }
         it("returns nodes exactly matching prefix", () => {
-          nodeExpectNeighbors(["loop"], [{node: loop, edge: loop_loop}]);
+          nodeExpectNeighbors(["loop"], [{node: loop, edge: loopLoop}]);
         });
         it("returns nodes inexactly matching prefix", () => {
           nodeExpectNeighbors(
             ["foo"],
             [
-              {node: foo, edge: loop_foo},
-              {node: foo, edge: foo_loop},
-              {node: foo, edge: repeated_loop_foo},
+              {node: foo, edge: loopFoo},
+              {node: foo, edge: fooLoop},
+              {node: foo, edge: repeatedLoopFoo},
             ]
           );
         });
@@ -1073,15 +1073,15 @@ describe("core/graph", () => {
         it("works for an exact address match", () => {
           edgeExpectNeighbors(
             ["repeated", "foo"],
-            [{node: foo, edge: repeated_loop_foo}]
+            [{node: foo, edge: repeatedLoopFoo}]
           );
         });
         it("works for a proper prefix match", () => {
           edgeExpectNeighbors(
             ["foo"],
             [
-              {node: foo, edge: foo_loop},
-              {node: foo, edge: loop_foo},
+              {node: foo, edge: fooLoop},
+              {node: foo, edge: loopFoo},
             ]
           );
         });
@@ -1098,7 +1098,7 @@ describe("core/graph", () => {
             nodePrefix: NodeAddress.fromParts(["foo"]),
             edgePrefix: EdgeAddress.fromParts(["repeated"]),
           },
-          [{node: foo, edge: repeated_loop_foo}]
+          [{node: foo, edge: repeatedLoopFoo}]
         );
       });
 
@@ -1295,13 +1295,13 @@ describe("core/graph", () => {
         .addNode(bar)
         .addEdge(foobar);
       const g2 = new Graph().addNode(zod);
-      const g3_actual = Graph.merge([g1, g2]);
-      const g3_expected = new Graph()
+      const g3Actual = Graph.merge([g1, g2]);
+      const g3Expected = new Graph()
         .addNode(foo)
         .addNode(bar)
         .addNode(zod)
         .addEdge(foobar);
-      expect(g3_actual.equals(g3_expected)).toBe(true);
+      expect(g3Actual.equals(g3Expected)).toBe(true);
     });
     it("merges two graphs with nontrivial intersection", () => {
       const g1 = new Graph()
@@ -1314,15 +1314,15 @@ describe("core/graph", () => {
         .addNode(zod)
         .addEdge(zodfoo)
         .addEdge(foofoo);
-      const g3_actual = Graph.merge([g1, g2]);
-      const g3_expected = new Graph()
+      const g3Actual = Graph.merge([g1, g2]);
+      const g3Expected = new Graph()
         .addNode(foo)
         .addNode(bar)
         .addNode(zod)
         .addEdge(foobar)
         .addEdge(zodfoo)
         .addEdge(foofoo);
-      expect(g3_actual.equals(g3_expected)).toBe(true);
+      expect(g3Actual.equals(g3Expected)).toBe(true);
     });
     it("merges many graphs", () => {
       const graphs = [];
