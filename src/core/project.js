@@ -24,10 +24,10 @@ export type ProjectId = string;
  * the future (e.g. showing the last update time for each of the project's data
  * dependencies).
  */
-export type Project = Project_v040;
-export type SupportedProject = Project_v030 | Project_v031 | Project_v040;
+export type Project = ProjectV040;
+export type SupportedProject = ProjectV030 | ProjectV031 | ProjectV040;
 
-type Project_v040 = {|
+type ProjectV040 = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,
@@ -72,13 +72,13 @@ export function encodeProjectId(id: ProjectId): string {
   return base64url.encode(id);
 }
 
-const upgradeFrom030 = (p: Project_v030 | Project_v031): Project_v040 => ({
+const upgradeFrom030 = (p: ProjectV030 | ProjectV031): ProjectV040 => ({
   ...p,
   discourseServer:
     p.discourseServer != null ? {serverUrl: p.discourseServer.serverUrl} : null,
 });
 
-type Project_v031 = {|
+type ProjectV031 = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: {|
@@ -88,7 +88,7 @@ type Project_v031 = {|
   +identities: $ReadOnlyArray<Identity>,
 |};
 
-type Project_v030 = {|
+type ProjectV030 = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: {|

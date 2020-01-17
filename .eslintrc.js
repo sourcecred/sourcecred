@@ -21,6 +21,7 @@ module.exports = {
     "plugin:flowtype/recommended",
   ],
   rules: {
+    camelcase: ["error", {properties: "never", allow: ["^_unused_.*"]}],
     "no-unused-vars": [
       "warn",
       {
