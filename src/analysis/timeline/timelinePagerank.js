@@ -8,7 +8,7 @@ import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
 import {Graph, type NodeAddressT, type Edge, type Node} from "../../core/graph";
 import {type NodeAndEdgeTypes} from "../types";
-import {type Weights} from "../weights";
+import {type Weights} from "../../core/weights";
 import {type Interval, partitionGraph} from "./interval";
 import {
   nodeWeightEvaluator,

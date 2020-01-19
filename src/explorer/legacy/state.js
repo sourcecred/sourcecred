@@ -13,7 +13,7 @@ import {
 } from "../../analysis/pagerank";
 import {TimelineCred} from "../../analysis/timeline/timelineCred";
 
-import type {Weights} from "../../analysis/weights";
+import type {Weights} from "../../core/weights";
 import {weightsToEdgeEvaluator} from "../../analysis/weightsToEdgeEvaluator";
 import {combineTypes} from "../../analysis/pluginDeclaration";
 

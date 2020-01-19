@@ -3,7 +3,7 @@
 import React from "react";
 import {WeightSlider} from "./WeightSlider";
 import type {NodeType} from "../../analysis/types";
-import type {NodeWeight} from "../../analysis/weights";
+import type {NodeWeight} from "../../core/weights";
 
 export class NodeTypeConfig extends React.Component<{
   +weight: NodeWeight,

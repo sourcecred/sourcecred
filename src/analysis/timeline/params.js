@@ -6,7 +6,7 @@ import {
   toJSON as weightsToJSON,
   fromJSON as weightsFromJSON,
   defaultWeights,
-} from "../weights";
+} from "../../core/weights";
 
 /**
  * Parameters for computing TimelineCred

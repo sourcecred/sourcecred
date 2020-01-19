@@ -4,7 +4,7 @@ import stringify from "json-stable-stringify";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {toJSON, fromJSON, defaultWeights, copy} from "./weights";
 
-describe("analysis/weights", () => {
+describe("core/weights", () => {
   it("copy makes a copy", () => {
     const w = defaultWeights();
     const w1 = copy(w);

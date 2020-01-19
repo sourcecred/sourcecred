@@ -2,7 +2,7 @@
 
 import React from "react";
 import deepEqual from "lodash.isequal";
-import {type Weights, copy as weightsCopy} from "../analysis/weights";
+import {type Weights, copy as weightsCopy} from "../core/weights";
 import {type NodeAddressT} from "../core/graph";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {type TimelineCredParameters} from "../analysis/timeline/params";

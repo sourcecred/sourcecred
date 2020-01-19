@@ -5,7 +5,7 @@ import dedent from "../util/dedent";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import * as Common from "./common";
-import {defaultWeights, fromJSON as weightsFromJSON} from "../analysis/weights";
+import {defaultWeights, fromJSON as weightsFromJSON} from "../core/weights";
 import {projectFromJSON} from "../core/project";
 import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";

@@ -2,8 +2,12 @@
 
 import type {NodeAddressT, EdgeAddressT} from "../core/graph";
 import type {NodeType, EdgeType} from "./types";
-import type {Weights as WeightsT, EdgeWeight, NodeWeight} from "./weights";
-import * as Weights from "./weights";
+import type {
+  Weights as WeightsT,
+  EdgeWeight,
+  NodeWeight,
+} from "../core/weights";
+import * as Weights from "../core/weights";
 import {NodeTrie, EdgeTrie} from "../core/trie";
 
 export type NodeWeightEvaluator = (NodeAddressT) => NodeWeight;

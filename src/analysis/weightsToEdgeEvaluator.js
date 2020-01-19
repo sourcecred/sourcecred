@@ -2,7 +2,7 @@
 
 import type {Edge} from "../core/graph";
 import type {NodeAndEdgeTypes} from "./types";
-import type {Weights} from "./weights";
+import type {Weights} from "../core/weights";
 import type {EdgeEvaluator} from "./pagerank";
 import {nodeWeightEvaluator, edgeWeightEvaluator} from "./weightEvaluator";
 

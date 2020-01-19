@@ -12,7 +12,7 @@ import {type NodeAddressT} from "../../core/graph";
 import {PagerankTable} from "./pagerankTable/Table";
 import {WeightConfig} from "../weights/WeightConfig";
 import {WeightsFileManager} from "../weights/WeightsFileManager";
-import {type Weights, defaultWeights} from "../../analysis/weights";
+import {type Weights, defaultWeights} from "../../core/weights";
 import {Prefix as GithubPrefix} from "../../plugins/github/nodes";
 import {
   createStateTransitionMachine,

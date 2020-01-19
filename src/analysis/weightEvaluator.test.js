@@ -3,7 +3,7 @@
 import deepFreeze from "deep-freeze";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {nodeWeightEvaluator, edgeWeightEvaluator} from "./weightEvaluator";
-import {defaultWeights} from "./weights";
+import {defaultWeights} from "../core/weights";
 
 describe("src/analysis/weightEvaluator", () => {
   describe("nodeWeightEvaluator", () => {

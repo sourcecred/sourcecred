@@ -4,7 +4,7 @@ import React from "react";
 import * as NullUtil from "../../util/null";
 
 import {type NodeAddressT, type EdgeAddressT} from "../../core/graph";
-import {type EdgeWeight, type NodeWeight} from "../../analysis/weights";
+import {type EdgeWeight, type NodeWeight} from "../../core/weights";
 import {type NodeType, type EdgeType} from "../../analysis/types";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {NodeTypeConfig} from "./NodeTypeConfig";
