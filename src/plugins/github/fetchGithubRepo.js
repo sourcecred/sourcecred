@@ -18,6 +18,18 @@ import {BLACKLISTED_IDS} from "./blacklistedObjectIds";
 import type {Repository} from "./graphqlTypes";
 import schema from "./schema";
 import {validateToken} from "./token";
+import {type CacheProvider} from "../../backend/cache";
+
+function cacheID(resolvedId: Schema.ObjectId): string {
+  return `mirror_${Buffer.from(resolvedId).toString("hex")}`;
+}
+
+function dbFromDirectory(
+  cacheDirectory: string,
+  resolvedId: Schema.ObjectId
+): Database {
+  return new Database(path.join(cacheDirectory, `${cacheID(resolvedId)}.db`));
+}
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -34,7 +46,7 @@ import {validateToken} from "./token";
  */
 export default async function fetchGithubRepo(
   repoId: RepoId,
-  options: {|+token: string, +cacheDirectory: string|}
+  options: {|+token: string, +cacheDirectory: string, +cache?: CacheProvider|}
 ): Promise<Repository> {
   const {token, cacheDirectory} = options;
 
@@ -58,8 +70,10 @@ export default async function fetchGithubRepo(
   // name is valid and uniquely identifying even on case-insensitive
   // filesystems (HFS, HFS+, APFS, NTFS) or filesystems preventing
   // equals signs in file names.
-  const dbFilename = `mirror_${Buffer.from(resolvedId).toString("hex")}.db`;
-  const db = new Database(path.join(cacheDirectory, dbFilename));
+  const db: Database = options.cache
+    ? await options.cache.database(cacheID(resolvedId))
+    : dbFromDirectory(cacheDirectory, resolvedId);
+
   const mirror = new Mirror(db, schema(), {
     blacklistedIds: BLACKLISTED_IDS,
     guessTypename: _guessTypename,
