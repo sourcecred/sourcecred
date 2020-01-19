@@ -20,7 +20,7 @@ export function fromRelationalViews(
   for (const view of views) {
     for (const [url, addr] of view.urlReferenceMap().entries()) {
       const existing = map.get(url);
-      if (existing && existing != addr) {
+      if (existing && existing !== addr) {
         throw new Error(dedent`\
           An entry for ${url} already existed, but with a different NodeAddressT.
           This is probably a bug with SourceCred. Please report it on GitHub.

@@ -26,13 +26,13 @@ export function validateToken(token: string): GithubToken {
   if (matches != null) {
     const [_, version, hexCode] = matches;
 
-    if (version != "v1") {
+    if (version !== "v1") {
       console.warn(
         `Warning: GitHub installation access token has an unexpected version "${version}".`
       );
     }
 
-    if (hexCode.length != 40) {
+    if (hexCode.length !== 40) {
       console.warn(
         `Warning: GitHub installation access token has an unexpected hexadecimal component ` +
           `length of ${hexCode.length}.`

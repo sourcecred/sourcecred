@@ -84,7 +84,7 @@ const loadCommand: Command = async (args, std) => {
         return 0;
       }
       case "--weights": {
-        if (weightsPath != undefined)
+        if (weightsPath != null)
           return die(std, "'--weights' given multiple times");
         if (++i >= args.length)
           return die(std, "'--weights' given without value");
