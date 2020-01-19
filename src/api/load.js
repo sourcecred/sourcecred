@@ -2,6 +2,7 @@
 
 import fs from "fs-extra";
 import path from "path";
+import stringify from "json-stable-stringify";
 
 import {TaskReporter} from "../util/taskReporter";
 import {Graph} from "../core/graph";
@@ -118,13 +119,13 @@ export async function load(
     sourcecredDirectory
   );
   const graphFile = path.join(projectDirectory, "graph.json");
-  await fs.writeFile(graphFile, JSON.stringify(graph.toJSON()));
+  await fs.writeFile(graphFile, stringify(graph.toJSON()));
 
   taskReporter.start("compute-cred");
   const cred = await TimelineCred.compute({graph, params: fullParams, plugins});
   const credJSON = cred.toJSON();
   const credFile = path.join(projectDirectory, "cred.json");
-  await fs.writeFile(credFile, JSON.stringify(credJSON));
+  await fs.writeFile(credFile, stringify(credJSON));
   taskReporter.finish("compute-cred");
   taskReporter.finish(loadTask);
 }
