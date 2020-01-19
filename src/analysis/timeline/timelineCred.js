@@ -242,11 +242,7 @@ export class TimelineCred {
       fullParams.intervalDecay,
       fullParams.alpha
     );
-    const cred = distributionToCred(
-      distribution,
-      nodeOrder,
-      userTypes.map((x) => x.prefix)
-    );
+    const cred = distributionToCred(distribution, nodeOrder, scorePrefixes);
     const addressToCred = new Map();
     for (let i = 0; i < nodeOrder.length; i++) {
       const addr = nodeOrder[i];

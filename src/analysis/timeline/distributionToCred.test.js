@@ -87,7 +87,7 @@ describe("src/analysis/timeline/distributionToCred", () => {
       ];
       expect(expected).toEqual(actual);
     });
-    it("errors when no nodes are scoring", () => {
+    it("handles the case where no nodes are scoring", () => {
       const ds = [
         {
           interval: {startTimeMs: 0, endTimeMs: 10},
@@ -96,9 +96,35 @@ describe("src/analysis/timeline/distributionToCred", () => {
         },
       ];
       const nodeOrder = [na("foo"), na("bar")];
-      const fail = () => distributionToCred(ds, nodeOrder, []);
-      expect(fail).toThrowError("no nodes matched scoringNodePrefix");
+      const actual = distributionToCred(ds, nodeOrder, []);
+      const expected = [
+        {
+          interval: {startTimeMs: 0, endTimeMs: 10},
+          cred: new Float64Array([0, 0]),
+        },
+      ];
+      expect(actual).toEqual(expected);
     });
+
+    it("handles the case where all nodes' cred sums to zero", () => {
+      const ds = [
+        {
+          interval: {startTimeMs: 0, endTimeMs: 10},
+          intervalWeight: 2,
+          distribution: new Float64Array([1, 0]),
+        },
+      ];
+      const nodeOrder = [na("foo"), na("bar")];
+      const actual = distributionToCred(ds, nodeOrder, [na("bar")]);
+      const expected = [
+        {
+          interval: {startTimeMs: 0, endTimeMs: 10},
+          cred: new Float64Array([0, 0]),
+        },
+      ];
+      expect(actual).toEqual(expected);
+    });
+
     it("returns empty array if no intervals are present", () => {
       expect(distributionToCred([], [], [])).toEqual([]);
     });

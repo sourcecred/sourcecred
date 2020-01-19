@@ -30,6 +30,13 @@ export type FullTimelineCred = $ReadOnlyArray<{|
  * This implementation normalizes the scores so that in each interval, the
  * total score of every node matching scoringNodePrefix is equal to the
  * interval's weight.
+ *
+ * Edge cases:
+ *     - If in an interval the sum of the scoring nodes' distribution is 0,
+ *       return a total cred score of 0 for all nodes in the interval.
+ *     - If none of the nodes match a scoring node prefix, return
+ *       a total cred score of 0 for all nodes in all intervals.
+ *
  */
 export function distributionToCred(
   ds: TimelineDistributions,
@@ -49,15 +56,14 @@ export function distributionToCred(
     }
     cred[i] = new Array(intervals.length);
   }
-  if (scoringNodeIndices.length === 0) {
-    throw new Error("no nodes matched scoringNodePrefix");
-  }
 
   return ds.map(({interval, distribution, intervalWeight}) => {
     const intervalTotalScore = sum(
       scoringNodeIndices.map((x) => distribution[x])
     );
-    const intervalNormalizer = intervalWeight / intervalTotalScore;
+
+    const intervalNormalizer =
+      intervalTotalScore == 0 ? 0 : intervalWeight / intervalTotalScore;
     const cred = distribution.map((x) => x * intervalNormalizer);
     return {interval, cred};
   });
