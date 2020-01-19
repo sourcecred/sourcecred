@@ -17,8 +17,29 @@ import * as Schema from "../../graphql/schema";
 import {BLACKLISTED_IDS} from "./blacklistedObjectIds";
 import type {Repository} from "./graphqlTypes";
 import schema from "./schema";
-import {validateToken} from "./token";
+import {validateToken, type GithubToken} from "./token";
 import {type CacheProvider} from "../../backend/cache";
+
+export async function fetchGithubRepoFromCache(
+  repoId: RepoId,
+  token: GithubToken,
+  cache: CacheProvider
+): Promise<Repository> {
+  const postQueryWithToken = (payload) => postQuery(payload, token);
+  const resolvedId: Schema.ObjectId = await resolveRepositoryGraphqlId(
+    postQueryWithToken,
+    repoId
+  );
+
+  const db = await cache.database(cacheID(resolvedId));
+  const mirror = new Mirror(db, schema(), {
+    blacklistedIds: BLACKLISTED_IDS,
+    guessTypename: _guessTypename,
+  });
+
+  mirror.registerObject({typename: "Repository", id: resolvedId});
+  return ((mirror.extract(resolvedId): any): Repository);
+}
 
 function cacheID(resolvedId: Schema.ObjectId): string {
   return `mirror_${Buffer.from(resolvedId).toString("hex")}`;
