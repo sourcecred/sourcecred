@@ -1,7 +1,10 @@
 // @flow
 
+import tmp from "tmp";
+import {TestTaskReporter} from "../util/taskReporter";
+import {validateToken} from "../plugins/github/token";
 import {createProject} from "../core/project";
-import {type LoadPlan, executePlan} from "./loadPlan";
+import {type LoadPlan, createPlan, executePlan} from "./loadPlan";
 
 type JestMockFn = $Call<typeof jest.fn>;
 
@@ -18,6 +21,21 @@ const mockLoadPlan = (): LoadPlan => {
 };
 
 describe("src/backend/loadPlan", () => {
+  describe("createPlan", () => {
+    it("should not throw errors", () => {
+      const sourcecredDirectory = tmp.dirSync().name;
+      const token = validateToken("0".repeat(40));
+      const reporter = new TestTaskReporter();
+      const plugins = [];
+      const _: LoadPlan = createPlan(
+        sourcecredDirectory,
+        token,
+        plugins,
+        reporter
+      );
+    });
+  });
+
   describe("executePlan", () => {
     const project = createProject({id: "testing-project"});
     const params = {alpha: 0.123};
