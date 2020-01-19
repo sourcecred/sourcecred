@@ -18,6 +18,9 @@ import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import * as NullUtil from "../util/null";
 import {nodeContractions} from "../plugins/identity/nodeContractions";
 
+import {DataDirectory} from "../backend/dataDirectory";
+import {createPlan, executePlan} from "../backend/loadPlan";
+
 export type LoadOptions = {|
   +project: Project,
   +params: ?$Shape<TimelineCredParameters>,
@@ -25,6 +28,17 @@ export type LoadOptions = {|
   +sourcecredDirectory: string,
   +githubToken: ?GithubToken,
 |};
+
+export async function loadDefaultPlan(
+  options: LoadOptions,
+  taskReporter: TaskReporter
+): Promise<void> {
+  const {project, params, plugins, sourcecredDirectory, githubToken} = options;
+  const data = new DataDirectory(sourcecredDirectory);
+  const plan = createPlan(data, githubToken, plugins, taskReporter);
+  const {graph, cred} = await executePlan(plan, project, params);
+  await data.storeProject(project, {graph, cred});
+}
 
 /**
  * Loads and computes cred for a project.
