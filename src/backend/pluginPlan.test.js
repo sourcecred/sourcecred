@@ -4,7 +4,7 @@ import {Graph} from "../core/graph";
 import {node as graphNode} from "../core/graphTestUtil";
 import {createProject} from "../core/project";
 import {TestTaskReporter} from "../util/taskReporter";
-import {pluginMirrorPlan} from "./pluginPlan";
+import {pluginMirrorPlan, pluginGraphPlan} from "./pluginPlan";
 
 const githubSentinel = graphNode("github-sentinel");
 const githubGraph = () => new Graph().addNode(githubSentinel);
@@ -113,6 +113,89 @@ describe("src/backend/pluginPlan", () => {
         reporter
       );
       expect(github.createGraph).toBeCalledTimes(0);
+      expect(identity.contractGraph).toBeCalledTimes(0);
+    });
+  });
+
+  describe("pluginGraphPlan", () => {
+    it("should update discourse graph", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const ghToken = null;
+      const project = createProject({
+        id: "has-discourse",
+        discourseServer: {serverUrl: "http://foo.bar"},
+      });
+
+      // When
+      const createGraph = pluginGraphPlan(loaders, ghToken, cache);
+      const graph = await createGraph(project);
+
+      // Then
+      const {discourse, github, identity} = loaders;
+      expect(graph).toEqual(discourseGraph());
+      expect(discourse.updateMirror).toBeCalledTimes(0);
+      expect(discourse.createGraph).toBeCalledTimes(1);
+      expect(discourse.createGraph).toBeCalledWith(
+        project.discourseServer,
+        cache
+      );
+      expect(github.updateMirror).toBeCalledTimes(0);
+      expect(github.createGraph).toBeCalledTimes(0);
+      expect(identity.contractGraph).toBeCalledTimes(0);
+    });
+
+    it("fail when missing GithubToken", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const ghToken = null;
+      const project = createProject({
+        id: "has-github",
+        repoIds: ([{owner: "sourcecred-test", name: "example-github"}]: any),
+      });
+
+      // When
+      const createGraph = pluginGraphPlan(loaders, ghToken, cache);
+      const p = createGraph(project);
+
+      // Then
+      const {discourse, github, identity} = loaders;
+      await expect(p).rejects.toThrow("GithubToken not set");
+      expect(discourse.updateMirror).toBeCalledTimes(0);
+      expect(discourse.createGraph).toBeCalledTimes(0);
+      expect(github.updateMirror).toBeCalledTimes(0);
+      expect(github.createGraph).toBeCalledTimes(0);
+      expect(identity.contractGraph).toBeCalledTimes(0);
+    });
+
+    it("should update github graph", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const ghToken = ("t000ken": any);
+      const project = createProject({
+        id: "has-github",
+        repoIds: ([{owner: "sourcecred-test", name: "example-github"}]: any),
+      });
+
+      // When
+      const createGraph = pluginGraphPlan(loaders, ghToken, cache);
+      const graph = await createGraph(project);
+
+      // Then
+      const {discourse, github, identity} = loaders;
+      expect(graph).toEqual(githubGraph());
+      expect(discourse.updateMirror).toBeCalledTimes(0);
+      expect(discourse.createGraph).toBeCalledTimes(0);
+      expect(github.updateMirror).toBeCalledTimes(0);
+      expect(github.createGraph).toBeCalledTimes(1);
+      expect(github.createGraph).toBeCalledWith(
+        project.repoIds,
+        "t000ken",
+        cache
+      );
       expect(identity.contractGraph).toBeCalledTimes(0);
     });
   });

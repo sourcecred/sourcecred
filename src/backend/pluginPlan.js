@@ -1,7 +1,8 @@
 //@flow
 
 import {type CacheProvider} from "./cache";
-import {type MirrorPlan} from "./loadPlan";
+import {type MirrorPlan, type GraphPlan} from "./loadPlan";
+import {Graph} from "../core/graph";
 import {type Project} from "../core/project";
 import {TaskReporter} from "../util/taskReporter";
 import {type GithubToken} from "../plugins/github/token";
@@ -38,5 +39,34 @@ export function pluginMirrorPlan(
     }
 
     await Promise.all(tasks);
+  };
+}
+
+export function pluginGraphPlan(
+  {github, discourse, identity}: PluginLoaders,
+  githubToken: ?GithubToken,
+  cache: CacheProvider
+): GraphPlan {
+  return async (project: Project): Promise<Graph> => {
+    const tasks: Promise<Graph>[] = [];
+
+    if (project.discourseServer) {
+      tasks.push(discourse.createGraph(project.discourseServer, cache));
+    }
+
+    if (project.repoIds.length) {
+      if (!githubToken) throw new Error("GithubToken not set");
+      tasks.push(github.createGraph(project.repoIds, githubToken, cache));
+    }
+
+    const pluginGraphs = await Promise.all(tasks);
+    let graph = Graph.merge(pluginGraphs);
+
+    if (project.identities.length) {
+      const {serverUrl} = project.discourseServer || {serverUrl: null};
+      graph = identity.contractGraph(graph, project.identities, serverUrl);
+    }
+
+    return graph;
   };
 }
