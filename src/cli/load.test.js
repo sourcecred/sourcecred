@@ -16,9 +16,12 @@ import {createProject} from "../core/project";
 import {makeRepoId, stringToRepoId} from "../plugins/github/repoId";
 import {validateToken} from "../plugins/github/token";
 
-jest.mock("../api/load", () => ({load: jest.fn()}));
+jest.mock("../api/load", () => ({
+  load: jest.fn(),
+  loadDefaultPlan: jest.fn(),
+}));
 type JestMockFn = $Call<typeof jest.fn>;
-const load: JestMockFn = (require("../api/load").load: any);
+const load: JestMockFn = (require("../api/load").loadDefaultPlan: any);
 
 describe("cli/load", () => {
   const exampleGithubToken = validateToken("0".repeat(40));

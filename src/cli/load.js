@@ -7,7 +7,7 @@ import type {Command} from "./command";
 import * as Common from "./common";
 import {defaultWeights, fromJSON as weightsFromJSON} from "../analysis/weights";
 import {projectFromJSON} from "../core/project";
-import {load} from "../api/load";
+import {loadDefaultPlan as load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
 import fs from "fs-extra";
 import {partialParams} from "../analysis/timeline/params";
