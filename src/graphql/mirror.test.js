@@ -14,6 +14,7 @@ import {
   _makeSingleUpdateFunction,
   Mirror,
 } from "./mirror";
+import stringify from "json-stable-stringify";
 
 describe("graphql/mirror", () => {
   function issueTimelineItemClauses() {
@@ -148,6 +149,7 @@ describe("graphql/mirror", () => {
               "links",
               "connections",
               "connection_entries",
+              "network_log",
             ])
           ).sort()
         );
@@ -987,13 +989,30 @@ describe("graphql/mirror", () => {
         const spyFindOutdated = jest.spyOn(Mirror.prototype, "_findOutdated");
         const spyQueryFromPlan = jest.spyOn(Mirror.prototype, "_queryFromPlan");
         const spyCreateUpdate = jest.spyOn(Mirror.prototype, "_createUpdate");
-        const spies = [spyFindOutdated, spyQueryFromPlan, spyCreateUpdate];
+        const spyLogRequest = jest.spyOn(Mirror.prototype, "_logRequest");
+        const spyLogResponse = jest.spyOn(Mirror.prototype, "_logResponse");
+        const spyLogRequestUpdateId = jest.spyOn(
+          Mirror.prototype,
+          "_logRequestUpdateId"
+        );
+        const spies = [
+          spyFindOutdated,
+          spyQueryFromPlan,
+          spyCreateUpdate,
+          spyLogRequest,
+          spyLogResponse,
+          spyLogRequestUpdateId,
+        ];
 
         const postQuery = jest.fn();
         const now = jest
           .fn()
           .mockImplementationOnce(() => new Date(456))
-          .mockImplementationOnce(() => new Date(789));
+          .mockImplementationOnce(() => new Date(457))
+          .mockImplementationOnce(() => new Date(458))
+          .mockImplementationOnce(() => new Date(789))
+          .mockImplementationOnce(() => new Date(790))
+          .mockImplementationOnce(() => new Date(791));
 
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
@@ -1096,8 +1115,51 @@ describe("graphql/mirror", () => {
 
         // We should have created two updates with sequential dates.
         expect(spyCreateUpdate).toHaveBeenCalledTimes(2);
-        expect(spyCreateUpdate.mock.calls[0]).toEqual([new Date(456)]);
-        expect(spyCreateUpdate.mock.calls[1]).toEqual([new Date(789)]);
+        expect(spyCreateUpdate.mock.calls[0]).toEqual([new Date(458)]);
+        expect(spyCreateUpdate.mock.calls[1]).toEqual([new Date(791)]);
+
+        // We should have called logRequest twice with query,
+        // query parameters, and sequential timestamps.
+        expect(spyLogRequest).toHaveBeenCalledTimes(2);
+        expect(spyLogRequest.mock.calls[0]).toEqual([
+          postQuery.mock.calls[0][0].body,
+          postQuery.mock.calls[0][0].variables,
+          new Date(456),
+        ]);
+
+        expect(spyLogRequest).toHaveBeenCalledTimes(2);
+        expect(spyLogRequest.mock.calls[1]).toEqual([
+          postQuery.mock.calls[1][0].body,
+          postQuery.mock.calls[1][0].variables,
+          new Date(789),
+        ]);
+
+        // We should have called logResponse twice with response
+        // and sequential timestamps
+        expect(spyLogResponse).toHaveBeenCalledTimes(2);
+        expect(spyLogResponse.mock.calls[0]).toEqual([
+          spyLogRequest.mock.results[0].value,
+          await postQuery.mock.results[0].value,
+          new Date(457),
+        ]);
+
+        expect(spyLogResponse.mock.calls[1]).toEqual([
+          spyLogRequest.mock.results[1].value,
+          await postQuery.mock.results[1].value,
+          new Date(790),
+        ]);
+
+        // We should have called logRequestUpdateId with updateId
+        expect(spyLogRequestUpdateId).toHaveBeenCalledTimes(2);
+        expect(spyLogRequestUpdateId.mock.calls[0]).toEqual([
+          spyLogRequest.mock.results[0].value,
+          spyCreateUpdate.mock.results[0].value,
+        ]);
+
+        expect(spyLogRequestUpdateId.mock.calls[1]).toEqual([
+          spyLogRequest.mock.results[1].value,
+          spyCreateUpdate.mock.results[1].value,
+        ]);
 
         // We should now be able to extract the right data.
         const result = mirror.extract("repo:foo/bar");
@@ -3624,6 +3686,74 @@ describe("graphql/mirror", () => {
       expect(() => _inTransaction(db, () => {})).toThrow(
         "already in transaction"
       );
+    });
+  });
+
+  describe("logging network requests", () => {
+    describe("_logRequest", () => {
+      it("saves query, query parameters, and request timestamp", async () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const query = [
+          Queries.build.query("MirrorUpdate", [], [Queries.build.field("foo")]),
+        ];
+        const queryParameters = {foo: "bar"};
+        mirror._logRequest(query, queryParameters, new Date(123));
+        const results = await db
+          .prepare(
+            "SELECT query, query_parameters, request_time_epoch_millis FROM network_log"
+          )
+          .get();
+        const expected = Queries.stringify.body(query, Queries.inlineLayout());
+        expect(results.query).toEqual(expected);
+        expect(results.query_parameters).toEqual(stringify({foo: "bar"}));
+        expect(results.request_time_epoch_millis).toEqual(123);
+      });
+    });
+
+    describe("_logResponse", () => {
+      it("saves response and request timestamp", async () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const query = [Queries.build.query("Foo", [], [])];
+        const queryParameters = {};
+        const rowid = mirror._logRequest(query, queryParameters, new Date(123));
+
+        const response = {
+          owndata_0: [
+            {
+              __typename: "Repository",
+              id: "repo:foo/bar",
+              url: "url://foo/bar",
+            },
+          ],
+        };
+
+        mirror._logResponse(rowid, response, new Date(456));
+        const results = await db
+          .prepare(
+            "SELECT response, response_time_epoch_millis FROM network_log"
+          )
+          .get();
+        expect(results.response).toEqual(stringify(response));
+        expect(results.response_time_epoch_millis).toBe(456);
+      });
+    });
+
+    describe("_logRequestUpdateId", () => {
+      it("saves updateId", async () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const query = [Queries.build.query("Foo", [], [])];
+        const queryParameters = {};
+        const rowid = mirror._logRequest(query, queryParameters, new Date(123));
+        const updateId = mirror._createUpdate(new Date(456));
+        mirror._logRequestUpdateId(rowid, updateId);
+        const results = await db
+          .prepare("SELECT update_id FROM network_log")
+          .get();
+        expect(results.update_id).toBe(updateId);
+      });
     });
   });
 

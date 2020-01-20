@@ -188,7 +188,7 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
-      version: "MIRROR_v7",
+      version: "MIRROR_v8",
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,
@@ -317,6 +317,21 @@ export class Mirror {
         dedent`\
           CREATE INDEX idx_connection_entries__connection_id
           ON connection_entries (connection_id)
+        `,
+        dedent`\
+          CREATE TABLE network_log (
+              rowid INTEGER PRIMARY KEY,
+              query TEXT,
+              query_parameters TEXT,  -- stringified JSON object
+              request_time_epoch_millis INTEGER,
+              response TEXT,
+              response_time_epoch_millis INTEGER,
+              update_id INTEGER,
+              CHECK((query IS NULL) = (query_parameters IS NULL)),
+              CHECK((request_time_epoch_millis IS NULL) = (query IS NULL)),
+              CHECK((response_time_epoch_millis IS NULL) = (response IS NULL)),
+              FOREIGN KEY(update_id) REFERENCES updates(rowid)
+          )
         `,
       ];
       for (const sql of tables) {
@@ -729,6 +744,74 @@ export class Mirror {
   }
 
   /**
+   * Save the request query and query parameters to the database.
+   */
+  _logRequest(
+    body: Queries.Body,
+    variables: {+[string]: any},
+    timestamp: Date
+  ): NetworkLogId {
+    const query = Queries.stringify.body(body, Queries.inlineLayout());
+    const queryParameters = stringify(variables);
+
+    return this._db
+      .prepare(
+        dedent`\
+          INSERT INTO network_log (
+              query, query_parameters, request_time_epoch_millis
+          )
+          VALUES (:query, :queryParameters, :requestTimestamp)
+        `
+      )
+      .run({
+        query,
+        queryParameters,
+        requestTimestamp: +timestamp,
+      }).lastInsertRowid;
+  }
+
+  /**
+   * Save the network response and response timestamp to the table row
+   * corresponding to the request that generated it.
+   */
+  _logResponse(
+    rowid: NetworkLogId,
+    jsonResponse: UpdateResult,
+    timestamp: Date
+  ): void {
+    const response = stringify(jsonResponse);
+
+    const stmt = this._db.prepare(
+      dedent`\
+        UPDATE network_log
+        SET
+            response = :response,
+            response_time_epoch_millis = :responseTimestamp
+        WHERE rowid = :rowid
+      `
+    );
+    const saveResponse = _makeSingleUpdateFunction(stmt);
+    saveResponse({response, responseTimestamp: +timestamp, rowid});
+  }
+
+  /**
+   * Save the UpdateId in the table row corresponding to the network request
+   * that generated it.
+   */
+  _logRequestUpdateId(rowid: NetworkLogId, updateId: UpdateId): void {
+    const stmt = this._db.prepare(
+      dedent`\
+        UPDATE network_log
+        SET
+            update_id = :updateId
+        WHERE rowid = :rowid
+      `
+    );
+    const saveUpdateId = _makeSingleUpdateFunction(stmt);
+    saveUpdateId({rowid, updateId});
+  }
+
+  /**
    * Perform one step of the update loop: find outdated entities, fetch
    * their updates, and feed the results back into the database.
    *
@@ -759,9 +842,14 @@ export class Mirror {
       connectionLimit: options.connectionLimit,
     });
     const body = [Queries.build.query("MirrorUpdate", [], querySelections)];
-    const result: UpdateResult = await postQuery({body, variables: {}});
+    const variables = {};
+    const requestRowId = this._logRequest(body, variables, options.now());
+    const result: UpdateResult = await postQuery({body, variables});
+    this._logResponse(requestRowId, result, options.now());
+
     _inTransaction(this._db, () => {
       const updateId = this._createUpdate(options.now());
+      this._logRequestUpdateId(requestRowId, updateId);
       this._nontransactionallyUpdateData(updateId, result);
     });
     return Promise.resolve(true);
@@ -1947,6 +2035,7 @@ export function _buildSchemaInfo(schema: Schema.Schema): SchemaInfo {
 }
 
 type UpdateId = number;
+type NetworkLogId = number;
 
 /**
  * A set of objects and connections that should be updated.
