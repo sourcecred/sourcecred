@@ -18,6 +18,7 @@ import {BLACKLISTED_IDS} from "./blacklistedObjectIds";
 import type {Repository} from "./graphqlTypes";
 import schema from "./schema";
 import {validateToken} from "./token";
+import {cacheIdForRepoId} from "./cacheId";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -54,11 +55,11 @@ export default async function fetchGithubRepo(
     repoId
   );
 
-  // Key the cache file against the GraphQL ID, but make sure that the
+  // Key the cache file against the RepoId, but make sure that the
   // name is valid and uniquely identifying even on case-insensitive
   // filesystems (HFS, HFS+, APFS, NTFS) or filesystems preventing
   // equals signs in file names.
-  const dbFilename = `mirror_${Buffer.from(resolvedId).toString("hex")}.db`;
+  const dbFilename = `${cacheIdForRepoId(repoId)}.db`;
   const db = new Database(path.join(cacheDirectory, dbFilename));
   const mirror = new Mirror(db, schema(), {
     blacklistedIds: BLACKLISTED_IDS,
