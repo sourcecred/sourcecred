@@ -22,6 +22,7 @@ module.exports = {
   ],
   rules: {
     camelcase: ["error", {properties: "never", allow: ["^_unused_.*"]}],
+    eqeqeq: ["error", "always", {null: "ignore"}],
     "no-unused-vars": [
       "warn",
       {

@@ -229,7 +229,7 @@ class MockFetcher implements Discourse {
     this._topicToPostIds.set(topicId, []);
 
     // Add to category.
-    if (categoryId != undefined) {
+    if (categoryId != null) {
       this._topicToCategory.set(topicId, categoryId);
     }
 
@@ -330,7 +330,7 @@ class MockFetcher implements Discourse {
     }
     this._topicToPostIds.set(
       oldPost.topicId,
-      postList.filter((pid) => pid != postId)
+      postList.filter((pid) => pid !== postId)
     );
     this._posts.delete(postId);
   }
@@ -886,7 +886,7 @@ describe("plugins/discourse/mirror", () => {
         targetUsername: string,
         offset: number
       ) => {
-        if (targetUsername == "credbot") return null;
+        if (targetUsername === "credbot") return null;
         return await _likesByUser(targetUsername, offset);
       };
       await mirror.update(reporter);

@@ -114,11 +114,11 @@ export function formatTimeElapsed(elapsed: MsSinceEpoch): string {
   }
   const seconds = Math.round(elapsed / 1000);
   const minutes = Math.floor(seconds / 60);
-  if (minutes == 0) return `${seconds}s`;
+  if (minutes === 0) return `${seconds}s`;
   const hours = Math.floor(minutes / 60);
-  if (hours == 0) return `${minutes}m ${seconds % 60}s`;
+  if (hours === 0) return `${minutes}m ${seconds % 60}s`;
   const days = Math.floor(hours / 24);
-  if (days == 0) return `${hours}h ${minutes % 60}m`;
+  if (days === 0) return `${hours}h ${minutes % 60}m`;
   return `${days}d ${hours % 24}h`;
 }
 
