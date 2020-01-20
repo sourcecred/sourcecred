@@ -322,7 +322,7 @@ export class Mirror {
           CREATE TABLE network_log (
               rowid INTEGER PRIMARY KEY,
               query TEXT,
-              query_parameters TEXT, -- stringified JSON object
+              query_parameters TEXT,  -- stringified JSON object
               request_time_epoch_millis INTEGER,
               response TEXT,
               response_time_epoch_millis INTEGER,
@@ -757,9 +757,11 @@ export class Mirror {
     return this._db
       .prepare(
         dedent`\
-        INSERT INTO network_log (query, query_parameters, request_time_epoch_millis)
-        VALUES (:query, :queryParameters, :requestTimestamp)
-      `
+          INSERT INTO network_log (
+              query, query_parameters, request_time_epoch_millis
+          )
+          VALUES (:query, :queryParameters, :requestTimestamp)
+        `
       )
       .run({
         query,
@@ -781,11 +783,11 @@ export class Mirror {
 
     const stmt = this._db.prepare(
       dedent`\
-          UPDATE network_log
-          SET
-              response = :response,
-              response_time_epoch_millis = :responseTimestamp
-          WHERE rowid = :rowid
+        UPDATE network_log
+        SET
+            response = :response,
+            response_time_epoch_millis = :responseTimestamp
+        WHERE rowid = :rowid
       `
     );
     const saveResponse = _makeSingleUpdateFunction(stmt);
@@ -799,11 +801,11 @@ export class Mirror {
   _logRequestUpdateId(rowid: NetworkLogId, updateId: UpdateId): void {
     const stmt = this._db.prepare(
       dedent`\
-          UPDATE network_log
-          SET
-              update_id = :updateId
-          WHERE rowid = :rowid
-        `
+        UPDATE network_log
+        SET
+            update_id = :updateId
+        WHERE rowid = :rowid
+      `
     );
     const saveUpdateId = _makeSingleUpdateFunction(stmt);
     saveUpdateId({rowid, updateId});
