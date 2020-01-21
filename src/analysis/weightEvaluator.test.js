@@ -3,7 +3,7 @@
 import deepFreeze from "deep-freeze";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {nodeWeightEvaluator, edgeWeightEvaluator} from "./weightEvaluator";
-import {defaultWeights} from "../core/weights";
+import * as Weights from "../core/weights";
 
 describe("src/analysis/weightEvaluator", () => {
   describe("nodeWeightEvaluator", () => {
@@ -30,18 +30,18 @@ describe("src/analysis/weightEvaluator", () => {
     const types = deepFreeze([fooNodeType, fooBarNodeType]);
 
     it("gives every node weight 1 with empty types and weights", () => {
-      const evaluator = nodeWeightEvaluator([], defaultWeights());
+      const evaluator = nodeWeightEvaluator([], Weights.empty());
       expect(evaluator(empty)).toEqual(1);
       expect(evaluator(foo)).toEqual(1);
     });
     it("composes matching weights multiplicatively", () => {
-      const evaluator = nodeWeightEvaluator(types, defaultWeights());
+      const evaluator = nodeWeightEvaluator(types, Weights.empty());
       expect(evaluator(empty)).toEqual(1);
       expect(evaluator(foo)).toEqual(2);
       expect(evaluator(foobar)).toEqual(6);
     });
     it("explicitly set weights on type prefixes override the type weights", () => {
-      const weights = defaultWeights();
+      const weights = Weights.empty();
       weights.nodeWeights.set(foo, 3);
       weights.nodeWeights.set(foobar, 4);
       const evaluator = nodeWeightEvaluator(types, weights);
@@ -50,7 +50,7 @@ describe("src/analysis/weightEvaluator", () => {
       expect(evaluator(foobar)).toEqual(12);
     });
     it("uses manually-specified weights", () => {
-      const weights = defaultWeights();
+      const weights = Weights.empty();
       weights.nodeWeights.set(foo, 3);
       const evaluator = nodeWeightEvaluator([], weights);
       expect(evaluator(empty)).toEqual(1);
@@ -76,13 +76,13 @@ describe("src/analysis/weightEvaluator", () => {
       description: "",
     });
     it("gives default 1,1 weights if no matching type", () => {
-      const evaluator = edgeWeightEvaluator([], defaultWeights());
+      const evaluator = edgeWeightEvaluator([], Weights.empty());
       expect(evaluator(foo)).toEqual({forwards: 1, backwards: 1});
     });
     it("composes weights multiplicatively for all matching types", () => {
       const evaluator = edgeWeightEvaluator(
         [fooType, fooBarType],
-        defaultWeights()
+        Weights.empty()
       );
       expect(evaluator(foo)).toEqual({forwards: 2, backwards: 3});
       expect(evaluator(foobar)).toEqual({forwards: 8, backwards: 15});
@@ -92,7 +92,7 @@ describe("src/analysis/weightEvaluator", () => {
       });
     });
     it("explicit weights override defaults from types", () => {
-      const weights = defaultWeights();
+      const weights = Weights.empty();
       weights.edgeWeights.set(foo, {forwards: 99, backwards: 101});
       const evaluator = edgeWeightEvaluator([fooType, fooBarType], weights);
       expect(evaluator(foo)).toEqual({forwards: 99, backwards: 101});
