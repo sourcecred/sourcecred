@@ -48,6 +48,21 @@ export function copy(w: Weights): Weights {
   };
 }
 
+/**
+ * Merge multiple Weights together.
+ *
+ * The resultant Weights will have every weight specified by each of the
+ * input weights. If there are any overlaps (i.e. the same address is present
+ * in two or more of the input weights), an error will be thrown. In the future,
+ * we will likely modify this function to add a resolver that determines how to
+ * combine multiple overlapping weights.
+ */
+export function merge(ws: $ReadOnlyArray<Weights>): Weights {
+  const nodeWeights = MapUtil.merge(ws.map((x) => x.nodeWeights));
+  const edgeWeights = MapUtil.merge(ws.map((x) => x.edgeWeights));
+  return {nodeWeights, edgeWeights};
+}
+
 export type WeightsJSON = Compatible<{|
   +nodeWeights: {[NodeAddressT]: NodeWeight},
   +edgeWeights: {[EdgeAddressT]: EdgeWeight},
