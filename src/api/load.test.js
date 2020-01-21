@@ -16,7 +16,7 @@ import {
   loadProject,
 } from "../core/project_io";
 import {makeRepoId} from "../plugins/github/repoId";
-import {defaultWeights} from "../core/weights";
+import * as Weights from "../core/weights";
 import {NodeAddress, Graph} from "../core/graph";
 import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";
@@ -67,7 +67,7 @@ describe("api/load", () => {
     discourseServer: {serverUrl: discourseServerUrl},
   });
   deepFreeze(project);
-  const weights = defaultWeights();
+  const weights = Weights.empty();
   // Tweaks the weights so that we can ensure we aren't overriding with default weights
   weights.nodeWeights.set(NodeAddress.empty, 33);
   // Deep freeze will freeze the weights, too

@@ -7,7 +7,7 @@ import dedent from "../util/dedent";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import * as Common from "./common";
-import {defaultWeights} from "../core/weights";
+import * as Weights from "../core/weights";
 import {load} from "../api/load";
 import {declaration as discourseDeclaration} from "../plugins/discourse/declaration";
 import {type Project, createProject} from "../core/project";
@@ -88,7 +88,7 @@ const command: Command = async (args, std) => {
     discourseServer: {serverUrl},
   });
   const taskReporter = new LoggingTaskReporter();
-  let weights = defaultWeights();
+  let weights = Weights.empty();
   if (weightsPath) {
     weights = await Common.loadWeights(weightsPath);
   }
