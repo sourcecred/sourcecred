@@ -1,7 +1,12 @@
 // @flow
 
 import * as MapUtil from "../util/map";
-import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
+import {
+  type NodeAddressT,
+  type EdgeAddressT,
+  NodeAddress,
+  EdgeAddress,
+} from "../core/graph";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
 /**
@@ -46,6 +51,42 @@ export function copy(w: Weights): Weights {
     nodeWeights: new Map(w.nodeWeights),
     edgeWeights: new Map(w.edgeWeights),
   };
+}
+
+/**
+ * Merge multiple Weights together.
+ *
+ * The resultant Weights will have every weight specified by each of the
+ * input weights. If the inputs provide contradictory weights for any node
+ * or edge address, an error will be thrown.
+ */
+export function merge(ws: $ReadOnlyArray<Weights>): Weights {
+  const weights = empty();
+  for (const {nodeWeights, edgeWeights} of ws) {
+    for (const [addr, weight] of nodeWeights.entries()) {
+      const existing = weights.nodeWeights.get(addr);
+      if (existing != null && existing != weight) {
+        throw new Error(
+          `inconsistent weights for ${NodeAddress.toString(addr)}`
+        );
+      }
+      weights.nodeWeights.set(addr, weight);
+    }
+    for (const [addr, weight] of edgeWeights.entries()) {
+      const existing = weights.edgeWeights.get(addr);
+      if (
+        existing != null &&
+        (existing.forwards != weight.forwards ||
+          existing.backwards != weight.backwards)
+      ) {
+        throw new Error(
+          `inconsistent weights for ${EdgeAddress.toString(addr)}`
+        );
+      }
+      weights.edgeWeights.set(addr, weight);
+    }
+  }
+  return weights;
 }
 
 export type WeightsJSON = Compatible<{|
