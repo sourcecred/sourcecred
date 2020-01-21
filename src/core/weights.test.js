@@ -6,6 +6,21 @@ import {type Weights as WeightsT} from "./weights";
 import * as Weights from "./weights";
 
 describe("core/weights", () => {
+  function simpleWeights(
+    nodeWeights: [string, number][],
+    edgeWeights: [string, number, number][]
+  ): WeightsT {
+    const w = Weights.empty();
+    for (const [addrPart, weight] of nodeWeights) {
+      w.nodeWeights.set(NodeAddress.fromParts([addrPart]), weight);
+    }
+    for (const [addrPart, forwards, backwards] of edgeWeights) {
+      const weight = {forwards, backwards};
+      w.edgeWeights.set(EdgeAddress.fromParts([addrPart]), weight);
+    }
+    return w;
+  }
+
   it("copy makes a copy", () => {
     const w = Weights.empty();
     const w1 = Weights.copy(w);
@@ -71,20 +86,6 @@ describe("core/weights", () => {
     });
   });
   describe("merge", () => {
-    function simpleWeights(
-      nodeWeights: [string, number][],
-      edgeWeights: [string, number, number][]
-    ): WeightsT {
-      const w = Weights.empty();
-      for (const [addrPart, weight] of nodeWeights) {
-        w.nodeWeights.set(NodeAddress.fromParts([addrPart]), weight);
-      }
-      for (const [addrPart, forwards, backwards] of edgeWeights) {
-        const weight = {forwards, backwards};
-        w.edgeWeights.set(EdgeAddress.fromParts([addrPart]), weight);
-      }
-      return w;
-    }
     it("produces empty weights when given an empty array", () => {
       expect(Weights.merge([])).toEqual(Weights.empty());
     });
@@ -142,6 +143,26 @@ describe("core/weights", () => {
       expect(() => Weights.merge([w1, w2])).toThrowError(
         "inconsistent weights"
       );
+    });
+  });
+  describe("equals", () => {
+    it("empty weights are equal to empty weights", () => {
+      expect(Weights.equals(Weights.empty(), Weights.empty())).toBe(true);
+    });
+    it("non-empty weights are equal to their copies", () => {
+      const w1 = simpleWeights([["foo", 2]], [["bar", 2, 3]]);
+      const w2 = Weights.copy(w1);
+      expect(Weights.equals(w1, w2)).toBe(true);
+    });
+    it("weights with distinct node weights are not equal", () => {
+      const w1 = simpleWeights([["foo", 1]], []);
+      const w2 = simpleWeights([["foo", 2]], []);
+      expect(Weights.equals(w1, w2)).toBe(false);
+    });
+    it("weights with distinct nodes are not equal", () => {
+      const w1 = simpleWeights([], [["foo", 1, 2]]);
+      const w2 = simpleWeights([], [["foo", 2, 2]]);
+      expect(Weights.equals(w1, w2)).toBe(false);
     });
   });
 });

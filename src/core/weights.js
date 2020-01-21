@@ -1,6 +1,7 @@
 // @flow
 
 import * as MapUtil from "../util/map";
+import deepEqual from "lodash.isequal";
 import {
   type NodeAddressT,
   type EdgeAddressT,
@@ -87,6 +88,18 @@ export function merge(ws: $ReadOnlyArray<Weights>): Weights {
     }
   }
   return weights;
+}
+
+/**
+ * Returns whether two weights are equal.
+ *
+ * This is actually just a deep equality check, but is provided as
+ * an explicit function for consistency with other modules (e.g. Graph),
+ * and ensures that the interface is robust to future changes in how
+ * we represent the weights.
+ */
+export function equals(a: Weights, b: Weights): boolean {
+  return deepEqual(a, b);
 }
 
 export type WeightsJSON = Compatible<{|
