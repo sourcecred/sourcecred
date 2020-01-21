@@ -16,7 +16,7 @@ import {
   loadProject,
 } from "../core/project_io";
 import {makeRepoId} from "../plugins/github/repoId";
-import {defaultWeights} from "../analysis/weights";
+import {defaultWeights} from "../core/weights";
 import {NodeAddress, Graph} from "../core/graph";
 import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";

@@ -7,7 +7,7 @@ import dedent from "../util/dedent";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import * as Common from "./common";
-import {defaultWeights} from "../analysis/weights";
+import {defaultWeights} from "../core/weights";
 import {load} from "../api/load";
 import {declaration as discourseDeclaration} from "../plugins/discourse/declaration";
 import {type Project, createProject} from "../core/project";

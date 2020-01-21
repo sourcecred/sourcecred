@@ -5,7 +5,7 @@ import os from "os";
 import path from "path";
 import deepFreeze from "deep-freeze";
 import fs from "fs-extra";
-import {type Weights, fromJSON as weightsFromJSON} from "../analysis/weights";
+import {type Weights, fromJSON as weightsFromJSON} from "../core/weights";
 import {validateToken, type GithubToken} from "../plugins/github/token";
 
 export type PluginName = "git" | "github";

@@ -5,7 +5,7 @@ import {StateTransitionMachine, type AppState} from "./state";
 import {Graph, NodeAddress} from "../../core/graph";
 import {Assets} from "../../webutil/assets";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
-import {defaultWeights} from "../../analysis/weights";
+import {defaultWeights} from "../../core/weights";
 import type {
   PagerankNodeDecomposition,
   PagerankOptions,

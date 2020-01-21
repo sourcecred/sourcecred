@@ -8,7 +8,7 @@ import {NodeAddress} from "../core/graph";
 import {run} from "./testUtil";
 import loadCommand, {help} from "./load";
 import type {LoadOptions} from "../api/load";
-import {defaultWeights, toJSON as weightsToJSON} from "../analysis/weights";
+import {defaultWeights, toJSON as weightsToJSON} from "../core/weights";
 import * as Common from "./common";
 import {defaultParams, partialParams} from "../analysis/timeline/params";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";

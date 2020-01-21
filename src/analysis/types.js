@@ -1,7 +1,7 @@
 // @flow
 
 import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
-import {type EdgeWeight} from "./weights";
+import {type EdgeWeight} from "../core/weights";
 
 /**
  * This module defines `NodeType`s and `EdgeType`s, both of which are

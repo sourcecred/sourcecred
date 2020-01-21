@@ -5,7 +5,7 @@ import React from "react";
 import {FileUploader} from "../../util/FileUploader";
 import Link from "../../webutil/Link";
 import {MdFileDownload, MdFileUpload} from "react-icons/md";
-import {type Weights, toJSON, fromJSON} from "../../analysis/weights";
+import {type Weights, toJSON, fromJSON} from "../../core/weights";
 
 export type Props = {|
   +weights: Weights,

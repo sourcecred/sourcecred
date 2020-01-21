@@ -9,7 +9,7 @@ import {
   DEFAULT_ALPHA,
   DEFAULT_INTERVAL_DECAY,
 } from "./params";
-import {defaultWeights} from "../weights";
+import {defaultWeights} from "../../core/weights";
 import {NodeAddress} from "../../core/graph";
 
 describe("analysis/timeline/params", () => {

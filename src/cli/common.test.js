@@ -3,7 +3,7 @@
 import path from "path";
 import tmp from "tmp";
 import fs from "fs-extra";
-import {defaultWeights, toJSON as weightsToJSON} from "../analysis/weights";
+import {defaultWeights, toJSON as weightsToJSON} from "../core/weights";
 import {NodeAddress} from "../core/graph";
 import {validateToken} from "../plugins/github/token";
 
