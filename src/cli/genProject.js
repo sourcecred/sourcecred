@@ -97,7 +97,7 @@ export const genProject: Command = async (args, std) => {
         break;
       }
       case "--discourse-url": {
-        if (discourseUrl != undefined)
+        if (discourseUrl != null)
           return die(std, "'--discourse-url' given multiple times");
         if (++i >= args.length)
           return die(std, "'--discourse-url' given without value");

@@ -298,7 +298,7 @@ export class Fetcher implements Discourse {
       const {topic_list: topicList} = await response.json();
 
       // Having the same amount of results as expected by pagination, assume there's another page.
-      morePages = topicList.per_page == topicList.topics.length;
+      morePages = topicList.per_page === topicList.topics.length;
 
       for (const jsonTopic of topicList.topics) {
         const topic = parseLatestTopic(jsonTopic);

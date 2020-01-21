@@ -63,7 +63,7 @@ export function distributionToCred(
     );
 
     const intervalNormalizer =
-      intervalTotalScore == 0 ? 0 : intervalWeight / intervalTotalScore;
+      intervalTotalScore === 0 ? 0 : intervalWeight / intervalTotalScore;
     const cred = distribution.map((x) => x * intervalNormalizer);
     return {interval, cred};
   });

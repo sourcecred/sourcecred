@@ -131,7 +131,7 @@ class MockDiscourseQueries implements DiscourseQueries {
   }
 
   postsInTopic(topicId: TopicId, numberOfPosts: number): $ReadOnlyArray<Post> {
-    if (numberOfPosts != 1) {
+    if (numberOfPosts !== 1) {
       throw new Error(
         "MockDiscourseQueries doesn't support anything but 1 for numberOfPosts"
       );

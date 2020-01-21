@@ -528,7 +528,7 @@ export class RelationalView {
       const addr = N.toRaw(e.address());
       const url = e.url();
       const existing = refToAddress.get(url);
-      if (existing && existing != addr) {
+      if (existing && existing !== addr) {
         throw new Error(dedent`\
           An entry for ${url} already existed, but with a different NodeAddressT.
           This is probably a bug with SourceCred. Please report it on GitHub.
