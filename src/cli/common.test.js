@@ -3,7 +3,7 @@
 import path from "path";
 import tmp from "tmp";
 import fs from "fs-extra";
-import {defaultWeights, toJSON as weightsToJSON} from "../core/weights";
+import * as Weights from "../core/weights";
 import {NodeAddress} from "../core/graph";
 import {validateToken} from "../plugins/github/token";
 
@@ -69,11 +69,11 @@ describe("cli/common", () => {
       return name;
     }
     it("works in a simple success case", async () => {
-      const weights = defaultWeights();
+      const weights = Weights.empty();
       // Make a modification, just to be sure we aren't always loading the
       // default weights.
       weights.nodeWeights.set(NodeAddress.empty, 3);
-      const weightsJSON = weightsToJSON(weights);
+      const weightsJSON = Weights.toJSON(weights);
       const file = tmpWithContents(weightsJSON);
       const weights_ = await loadWeights(file);
       expect(weights).toEqual(weights_);
