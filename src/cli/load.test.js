@@ -8,7 +8,7 @@ import {NodeAddress} from "../core/graph";
 import {run} from "./testUtil";
 import loadCommand, {help} from "./load";
 import type {LoadOptions} from "../api/load";
-import {defaultWeights, toJSON as weightsToJSON} from "../core/weights";
+import * as Weights from "../core/weights";
 import * as Common from "./common";
 import {defaultParams, partialParams} from "../analysis/timeline/params";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";
@@ -120,9 +120,9 @@ describe("cli/load", () => {
     });
 
     it("loads the weights, if provided", async () => {
-      const weights = defaultWeights();
+      const weights = Weights.empty();
       weights.nodeWeights.set(NodeAddress.empty, 33);
-      const weightsJSON = weightsToJSON(weights);
+      const weightsJSON = Weights.toJSON(weights);
       const weightsFile = tmp.tmpNameSync();
       fs.writeFileSync(weightsFile, JSON.stringify(weightsJSON));
       const invocation = run(loadCommand, [
