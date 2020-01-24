@@ -1,6 +1,6 @@
 // @flow
 
-import {Graph, type GraphJSON} from "./graph";
+import {Graph, type GraphJSON, type NodeContraction} from "./graph";
 import {type Weights as WeightsT, type WeightsJSON} from "./weights";
 import * as Weights from "./weights";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
@@ -46,4 +46,28 @@ export function merge(ws: $ReadOnlyArray<WeightedGraph>): WeightedGraph {
   const graph = Graph.merge(ws.map((w) => w.graph));
   const weights = Weights.merge(ws.map((w) => w.weights));
   return {graph, weights};
+}
+
+/**
+ * Create a new WeightedGraph, in which some nodes were contracted together.
+ *
+ * This is a wrapper over `Graph.contractNodes`. No effort is made to contract
+ * the weights; thus, it is entirely possible that nodes will "lose" their
+ * associated weight during a contraction.
+ *
+ * These semantics are currently acceptable becuase `contractNodes` is used by
+ * the identity plugin to collapse user identities together, and we currently
+ * always give users a weight of 0 (as they do not mint cred). If we want to
+ * start giving users specific weights, or if we begin using contractNodes for
+ * other types of nodes in the graph, we should revisit this assumption.
+ *
+ * The original WeightedGraph is not mutated, and an independent WeightedGraph
+ * is returned.
+ */
+export function contractNodes(
+  wg: WeightedGraph,
+  contractions: $ReadOnlyArray<NodeContraction>
+): WeightedGraph {
+  const graph = wg.graph.contractNodes(contractions);
+  return {graph, weights: Weights.copy(wg.weights)};
 }

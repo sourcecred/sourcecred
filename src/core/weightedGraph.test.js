@@ -60,4 +60,28 @@ describe("core/weightedGraph", () => {
       expectEqual(wg, wg_);
     });
   });
+  describe("contractNodes", () => {
+    it("contracts the graph without contracting any weights", () => {
+      const a = GraphTest.node("a");
+      const b = GraphTest.node("b");
+      const graph = new Graph().addNode(a).addNode(b);
+      const weights = Weights.empty();
+      weights.nodeWeights.set(a.address, 3);
+      weights.nodeWeights.set(b.address, 4);
+      const graph_ = graph.copy();
+      const weights_ = Weights.copy(weights);
+      const wg = {graph, weights};
+      const contractions = [{old: [a.address], replacement: b}];
+      const wgContracted = WeightedGraph.contractNodes(wg, contractions);
+      const graphContracted = graph.contractNodes(contractions);
+
+      // Verify originals were not mutated
+      expect(graph.equals(graph_)).toBe(true);
+      expect(weights).toEqual(weights_);
+
+      // Verify the graph was contracted properly
+      const expectedWG = {graph: graphContracted, weights};
+      expectEqual(expectedWG, wgContracted);
+    });
+  });
 });
