@@ -78,15 +78,6 @@ function makeRouteData(
       navTitle: "Prototype",
     },
     ...projectIds.map((id) => ({
-      path: `/prototype/${id}/`,
-      contents: {
-        type: "PAGE",
-        component: () => require("./ProjectPage").default(id),
-      },
-      title: `${id} • SourceCred`,
-      navTitle: null,
-    })),
-    ...projectIds.map((id) => ({
       path: `/timeline/${id}/`,
       contents: {
         type: "PAGE",

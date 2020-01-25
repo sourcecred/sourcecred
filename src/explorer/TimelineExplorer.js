@@ -7,7 +7,6 @@ import {type NodeAddressT} from "../core/graph";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
 import {TimelineCredView} from "./TimelineCredView";
-import Link from "../webutil/Link";
 import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
@@ -126,11 +125,6 @@ export class TimelineExplorer extends React.Component<Props, State> {
     return (
       <div>
         <div style={{marginTop: 30, display: "flex"}}>
-          <span style={{paddingLeft: 30}}>
-            cred for {this.props.projectId}
-            <Link to={`/prototype/${this.props.projectId}/`}>(legacy)</Link>
-          </span>
-          <span style={{flexGrow: 1}} />
           {this.renderFilterSelect()}
           <span style={{flexGrow: 1}} />
           <button
