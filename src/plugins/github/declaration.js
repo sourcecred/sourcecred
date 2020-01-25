@@ -59,7 +59,7 @@ export const userNodeType = deepFreeze({
   name: "User",
   pluralName: "Users",
   prefix: N.Prefix.user,
-  defaultWeight: 1,
+  defaultWeight: 0,
   description: "NodeType for a GitHub user",
 });
 
@@ -67,7 +67,7 @@ const botNodeType = deepFreeze({
   name: "Bot",
   pluralName: "Bots",
   prefix: N.Prefix.bot,
-  defaultWeight: 0.25,
+  defaultWeight: 0,
   description: "NodeType for a GitHub bot account",
 });
 

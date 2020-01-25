@@ -29,7 +29,7 @@ export const userNodeType: NodeType = deepFreeze({
   name: "User",
   pluralName: "Users",
   prefix: NodeAddress.append(nodePrefix, "user"),
-  defaultWeight: 1,
+  defaultWeight: 0,
   description: "A user account on a particular Discourse instance.",
 });
 
