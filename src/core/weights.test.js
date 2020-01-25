@@ -2,6 +2,7 @@
 
 import stringify from "json-stable-stringify";
 import {NodeAddress, EdgeAddress} from "../core/graph";
+import {type Weights as WeightsT} from "./weights";
 import * as Weights from "./weights";
 
 describe("core/weights", () => {
@@ -67,6 +68,73 @@ describe("core/weights", () => {
         ]"
       `);
       expect(weights).toEqual(Weights.fromJSON(json));
+    });
+  });
+  describe("merge", () => {
+    function simpleWeights(
+      nodeWeights: [string, number][],
+      edgeWeights: [string, number, number][]
+    ): WeightsT {
+      const w = Weights.empty();
+      for (const [addrPart, weight] of nodeWeights) {
+        w.nodeWeights.set(NodeAddress.fromParts([addrPart]), weight);
+      }
+      for (const [addrPart, forwards, backwards] of edgeWeights) {
+        const weight = {forwards, backwards};
+        w.edgeWeights.set(EdgeAddress.fromParts([addrPart]), weight);
+      }
+      return w;
+    }
+    it("produces empty weights when given an empty array", () => {
+      expect(Weights.merge([])).toEqual(Weights.empty());
+    });
+    it("produces empty weights when given empty weights", () => {
+      expect(Weights.merge([Weights.empty(), Weights.empty()])).toEqual(
+        Weights.empty()
+      );
+    });
+    it("returns a copy when given only one weights", () => {
+      const w = simpleWeights([["foo", 3]], [["bar", 2, 3]]);
+      const wc = Weights.copy(w);
+      const merged = Weights.merge([w]);
+      expect(merged).toEqual(wc);
+      expect(merged).not.toBe(wc);
+    });
+    it("can merge two non-overlapping weights", () => {
+      const w1 = simpleWeights([["foo", 3]], [["bar", 2, 3]]);
+      const w2 = simpleWeights([["zod", 4]], [["zoink", 4, 5]]);
+      const w3 = simpleWeights(
+        [
+          ["foo", 3],
+          ["zod", 4],
+        ],
+        [
+          ["bar", 2, 3],
+          ["zoink", 4, 5],
+        ]
+      );
+      const merged = Weights.merge([w1, w2]);
+      expect(merged).toEqual(w3);
+    });
+    it("throws an error on overlapping weights with no conflicts", () => {
+      const w1 = simpleWeights([["foo", 3]], [["bar", 2, 3]]);
+      const w2 = simpleWeights([["foo", 3]], [["bar", 2, 3]]);
+      expect(() => Weights.merge([w1, w2])).toThrowError("duplicate key");
+    });
+    it("errors on conflicting node weights", () => {
+      const w1 = simpleWeights([["foo", 3]], []);
+      const w2 = simpleWeights([["foo", 4]], []);
+      expect(() => Weights.merge([w1, w2])).toThrowError("duplicate key");
+    });
+    it("errors on conflicting edge weights (forwards)", () => {
+      const w1 = simpleWeights([], [["foo", 3, 4]]);
+      const w2 = simpleWeights([], [["foo", 4, 4]]);
+      expect(() => Weights.merge([w1, w2])).toThrowError("duplicate key");
+    });
+    it("errors on conflicting edge weights (backwards)", () => {
+      const w1 = simpleWeights([], [["foo", 4, 4]]);
+      const w2 = simpleWeights([], [["foo", 4, 5]]);
+      expect(() => Weights.merge([w1, w2])).toThrowError("duplicate key");
     });
   });
 });
