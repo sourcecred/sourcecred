@@ -14,7 +14,7 @@ export const identityType: NodeType = deepFreeze({
   name: "Identity",
   pluralName: "Identities",
   prefix: nodePrefix,
-  defaultWeight: 1,
+  defaultWeight: 0,
   description: "A combined user identity as specified to SourceCred",
 });
 
