@@ -116,25 +116,104 @@ describe("core/weights", () => {
       const merged = Weights.merge([w1, w2]);
       expect(merged).toEqual(w3);
     });
-    it("throws an error on overlapping weights with no conflicts", () => {
-      const w1 = simpleWeights([["foo", 3]], [["bar", 2, 3]]);
-      const w2 = simpleWeights([["foo", 3]], [["bar", 2, 3]]);
-      expect(() => Weights.merge([w1, w2])).toThrowError("duplicate key");
+
+    it("uses node resolvers propertly", () => {
+      const w1 = simpleWeights(
+        [
+          ["miss", 100],
+          ["hit", 100],
+        ],
+        []
+      );
+      const w2 = simpleWeights([["hit", 100]], []);
+      const w3 = simpleWeights([["hit", 100]], []);
+      const nodeResolver = (a, b) => a + b;
+      const edgeResolver = (_unused_a, _unused_b) => {
+        throw new Error("edge");
+      };
+      const resolvers = {nodeResolver, edgeResolver};
+      const merged = Weights.merge([w1, w2, w3], resolvers);
+      const expected = simpleWeights(
+        [
+          ["miss", 100],
+          ["hit", 300],
+        ],
+        []
+      );
+      expect(expected).toEqual(merged);
     });
-    it("errors on conflicting node weights", () => {
-      const w1 = simpleWeights([["foo", 3]], []);
-      const w2 = simpleWeights([["foo", 4]], []);
-      expect(() => Weights.merge([w1, w2])).toThrowError("duplicate key");
+
+    it("gives the node address when a node resolver errors", () => {
+      const w1 = simpleWeights([["hit", 100]], []);
+      const w2 = simpleWeights([["hit", 100]], []);
+      expect(() => Weights.merge([w1, w2])).toThrow(
+        'when resolving NodeAddress["hit"]'
+      );
     });
-    it("errors on conflicting edge weights (forwards)", () => {
-      const w1 = simpleWeights([], [["foo", 3, 4]]);
-      const w2 = simpleWeights([], [["foo", 4, 4]]);
-      expect(() => Weights.merge([w1, w2])).toThrowError("duplicate key");
+
+    it("gives the edge address when a edge resolver errors", () => {
+      const w1 = simpleWeights([], [["hit", 3, 3]]);
+      const w2 = simpleWeights([], [["hit", 3, 3]]);
+      expect(() => Weights.merge([w1, w2])).toThrow(
+        'when resolving EdgeAddress["hit"]'
+      );
     });
-    it("errors on conflicting edge weights (backwards)", () => {
-      const w1 = simpleWeights([], [["foo", 4, 4]]);
-      const w2 = simpleWeights([], [["foo", 4, 5]]);
-      expect(() => Weights.merge([w1, w2])).toThrowError("duplicate key");
+
+    it("uses edge resolvers propertly", () => {
+      const w1 = simpleWeights(
+        [],
+        [
+          ["hit", 3, 3],
+          ["miss", 3, 3],
+        ]
+      );
+      const w2 = simpleWeights([], [["hit", 3, 3]]);
+      const w3 = simpleWeights([], [["hit", 3, 3]]);
+      const nodeResolver = (a, b) => a + b;
+      const edgeResolver = (a, b) => ({
+        forwards: a.forwards + b.forwards,
+        backwards: a.backwards * b.backwards,
+      });
+      const merged = Weights.merge([w1, w2, w3], {nodeResolver, edgeResolver});
+      const expected = simpleWeights(
+        [],
+        [
+          ["hit", 9, 27],
+          ["miss", 3, 3],
+        ]
+      );
+      expect(expected).toEqual(merged);
+    });
+
+    describe("when no resolvers are provided", () => {
+      it("throws an error on overlapping weights with no conflicts", () => {
+        const w1 = simpleWeights([["foo", 3]], [["bar", 2, 3]]);
+        const w2 = simpleWeights([["foo", 3]], [["bar", 2, 3]]);
+        expect(() => Weights.merge([w1, w2])).toThrowError(
+          "node weight conflict"
+        );
+      });
+      it("errors on conflicting node weights", () => {
+        const w1 = simpleWeights([["foo", 3]], []);
+        const w2 = simpleWeights([["foo", 4]], []);
+        expect(() => Weights.merge([w1, w2])).toThrowError(
+          "node weight conflict"
+        );
+      });
+      it("errors on conflicting edge weights (forwards)", () => {
+        const w1 = simpleWeights([], [["foo", 3, 4]]);
+        const w2 = simpleWeights([], [["foo", 4, 4]]);
+        expect(() => Weights.merge([w1, w2])).toThrowError(
+          "edge weight conflict"
+        );
+      });
+      it("errors on conflicting edge weights (backwards)", () => {
+        const w1 = simpleWeights([], [["foo", 4, 4]]);
+        const w2 = simpleWeights([], [["foo", 4, 5]]);
+        expect(() => Weights.merge([w1, w2])).toThrowError(
+          "edge weight conflict"
+        );
+      });
     });
   });
 });
