@@ -64,8 +64,11 @@ export class WeightConfig extends React.Component<Props> {
   }
 
   _renderPlugin(declaration: PluginDeclaration) {
-    const {name, nodeTypes, edgeTypes} = declaration;
-    const nodeConfigs = nodeTypes.map((t) => this._nodeConfig(t));
+    const {name, nodeTypes, edgeTypes, userTypes} = declaration;
+    const nonUserTypes = nodeTypes.filter(
+      ({prefix}) => !userTypes.some((t) => t.prefix === prefix)
+    );
+    const nodeConfigs = nonUserTypes.map((t) => this._nodeConfig(t));
     const edgeConfigs = edgeTypes.map((t) => this._edgeConfig(t));
     return (
       <div key={name}>

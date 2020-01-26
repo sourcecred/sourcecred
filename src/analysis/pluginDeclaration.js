@@ -17,6 +17,9 @@ export type PluginDeclaration = {|
   // Important for computing score and for display in the frontend.
   // It's expected that the userTypes will also be included in the array of
   // nodeTypes.
+  // It's expected that every userType will have a default weight of 0, as
+  // users should not mint cred. UIs and interfaces should disallow changing
+  // user type weights.
   +userTypes: $ReadOnlyArray<NodeType>,
 |};
 
