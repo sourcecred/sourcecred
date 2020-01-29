@@ -3,7 +3,7 @@
 import React from "react";
 import {shallow} from "enzyme";
 
-import {Graph} from "../../core/graph";
+import * as WeightedGraph from "../../core/weightedGraph";
 import {Assets} from "../../webutil/assets";
 import testLocalStore from "../../webutil/testLocalStore";
 
@@ -66,7 +66,7 @@ describe("explorer/legacy/App", () => {
         projectId: "foo/bar",
         loading: loadingState,
         timelineCred: new TimelineCred(
-          new Graph(),
+          WeightedGraph.empty(),
           [],
           new Map(),
           defaultParams(),
@@ -80,7 +80,7 @@ describe("explorer/legacy/App", () => {
         projectId: "foo/bar",
         loading: loadingState,
         timelineCred: new TimelineCred(
-          new Graph(),
+          WeightedGraph.empty(),
           [],
           new Map(),
           defaultParams(),

@@ -4,12 +4,8 @@ import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
 import sortBy from "lodash.sortby";
 import {utcWeek} from "d3-time";
-import {
-  NodeAddress,
-  Graph,
-  type NodeAddressT,
-  EdgeAddress,
-} from "../../core/graph";
+import {NodeAddress, type NodeAddressT, EdgeAddress} from "../../core/graph";
+import * as WeightedGraph from "../../core/weightedGraph";
 import {TimelineCred} from "./timelineCred";
 import {defaultParams} from "./params";
 import {type PluginDeclaration} from "../pluginDeclaration";
@@ -62,11 +58,11 @@ describe("src/analysis/timeline/timelineCred", () => {
       });
     }
 
-    const graph = new Graph();
+    const weightedGraph = WeightedGraph.empty();
     const addressToCred = new Map();
     for (const [name, generator] of users) {
       const address = NodeAddress.append(userPrefix, name);
-      graph.addNode({
+      weightedGraph.graph.addNode({
         address,
         description: `[@${name}](https://github.com/${name})`,
         timestampMs: null,
@@ -76,7 +72,7 @@ describe("src/analysis/timeline/timelineCred", () => {
     }
     for (let i = 0; i < 100; i++) {
       const address = NodeAddress.append(fooPrefix, String(i));
-      graph.addNode({
+      weightedGraph.graph.addNode({
         address,
         timestampMs: null,
         description: `foo ${i}`,
@@ -84,16 +80,20 @@ describe("src/analysis/timeline/timelineCred", () => {
       const scores = intervals.map((_) => i);
       addressToCred.set(address, scores);
     }
-    return new TimelineCred(graph, intervals, addressToCred, defaultParams(), [
-      plugin,
-    ]);
+    return new TimelineCred(
+      weightedGraph,
+      intervals,
+      addressToCred,
+      defaultParams(),
+      [plugin]
+    );
   }
 
   it("JSON serialization works", () => {
     const tc = exampleTimelineCred();
     const json = exampleTimelineCred().toJSON();
     const tc_ = TimelineCred.fromJSON(json);
-    expect(tc.graph()).toEqual(tc_.graph());
+    expect(tc.weightedGraph()).toEqual(tc_.weightedGraph());
   });
 
   it("cred sorting works", () => {

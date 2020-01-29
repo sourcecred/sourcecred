@@ -71,8 +71,9 @@ export class TimelineCredChart extends React.Component<Props> {
     });
     const scale = scaleOrdinal(displayedNodes, schemeCategory10);
     const Lines = displayedNodes.map((n: NodeAddressT) => {
-      const description = NullUtil.get(timelineCred.graph().node(n))
-        .description;
+      const description = NullUtil.get(
+        timelineCred.weightedGraph().graph.node(n)
+      ).description;
       const plainDescription = removeMd(description);
       return (
         <Line

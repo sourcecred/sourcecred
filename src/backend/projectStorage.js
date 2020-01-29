@@ -1,11 +1,11 @@
 //@flow
 
-import {Graph} from "../core/graph";
+import {type WeightedGraph} from "../core/weightedGraph";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {type Project} from "../core/project";
 
 export type ProjectStorageExtras = {
-  +graph?: Graph,
+  +weightedGraph?: WeightedGraph,
   +cred?: TimelineCred,
 };
 

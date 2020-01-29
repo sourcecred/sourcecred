@@ -8,7 +8,7 @@ import fs from "fs-extra";
 import {validateToken} from "../plugins/github/token";
 import type {Options as LoadGraphOptions} from "../plugins/github/loadGraph";
 import type {Options as LoadDiscourseOptions} from "../plugins/discourse/loadDiscourse";
-import {nodeContractions} from "../plugins/identity/nodeContractions";
+import {contractIdentities} from "../plugins/identity/contractIdentities";
 import {type Project, createProject} from "../core/project";
 import {
   directoryForProjectId,
@@ -17,7 +17,7 @@ import {
 } from "../core/project_io";
 import {makeRepoId} from "../plugins/github/repoId";
 import * as Weights from "../core/weights";
-import {NodeAddress, Graph} from "../core/graph";
+import {Graph} from "../core/graph";
 import {node} from "../core/graphTestUtil";
 import {TestTaskReporter} from "../util/taskReporter";
 import {load, type LoadOptions} from "./load";
@@ -25,18 +25,19 @@ import {
   type TimelineCredParameters,
   partialParams,
 } from "../analysis/timeline/params";
+import * as WeightedGraph from "../core/weightedGraph";
 
 type JestMockFn = $Call<typeof jest.fn>;
-jest.mock("../plugins/github/loadGraph", () => ({
-  loadGraph: jest.fn(),
+jest.mock("../plugins/github/loadWeightedGraph", () => ({
+  loadWeightedGraph: jest.fn(),
 }));
-const loadGraph: JestMockFn = (require("../plugins/github/loadGraph")
-  .loadGraph: any);
-jest.mock("../plugins/discourse/loadDiscourse", () => ({
-  loadDiscourse: jest.fn(),
+const githubWeightedGraph: JestMockFn = (require("../plugins/github/loadWeightedGraph")
+  .loadWeightedGraph: any);
+jest.mock("../plugins/discourse/loadWeightedGraph", () => ({
+  loadWeightedGraph: jest.fn(),
 }));
-const loadDiscourse: JestMockFn = (require("../plugins/discourse/loadDiscourse")
-  .loadDiscourse: any);
+const discourseWeightedGraph: JestMockFn = (require("../plugins/discourse/loadWeightedGraph")
+  .loadWeightedGraph: any);
 
 jest.mock("../analysis/timeline/timelineCred", () => ({
   TimelineCred: {compute: jest.fn()},
@@ -50,14 +51,21 @@ describe("api/load", () => {
     toJSON: () => ({is: "fake-timeline-cred"}),
   });
   const githubSentinel = node("github-sentinel");
-  const githubGraph = () => new Graph().addNode(githubSentinel);
+  const githubGraph = () => {
+    const graph = new Graph().addNode(githubSentinel);
+    return {graph, weights: Weights.empty()};
+  };
   const discourseSentinel = node("discourse-sentinel");
-  const discourseGraph = () => new Graph().addNode(discourseSentinel);
-  const combinedGraph = () => Graph.merge([githubGraph(), discourseGraph()]);
+  const discourseGraph = () => {
+    const graph = new Graph().addNode(discourseSentinel);
+    return {graph, weights: Weights.empty()};
+  };
+  const combinedGraph = () =>
+    WeightedGraph.merge([githubGraph(), discourseGraph()]);
   beforeEach(() => {
     jest.clearAllMocks();
-    loadGraph.mockResolvedValue(githubGraph());
-    loadDiscourse.mockResolvedValue(discourseGraph());
+    githubWeightedGraph.mockResolvedValue(githubGraph());
+    discourseWeightedGraph.mockResolvedValue(discourseGraph());
     timelineCredCompute.mockResolvedValue(fakeTimelineCred);
   });
   const discourseServerUrl = "https://example.com";
@@ -68,9 +76,6 @@ describe("api/load", () => {
   });
   deepFreeze(project);
   const weights = Weights.empty();
-  // Tweaks the weights so that we can ensure we aren't overriding with default weights
-  weights.nodeWeights.set(NodeAddress.empty, 33);
-  // Deep freeze will freeze the weights, too
   const params: $Shape<TimelineCredParameters> = {weights};
   const plugins = deepFreeze([]);
   const example = () => {
@@ -93,7 +98,7 @@ describe("api/load", () => {
     expect(await loadProject(project.id, sourcecredDirectory)).toEqual(project);
   });
 
-  it("calls github loadGraph with the right options", async () => {
+  it("calls github githubWeightedGraph with the right options", async () => {
     const {options, taskReporter, sourcecredDirectory} = example();
     await load(options, taskReporter);
     const cacheDirectory = path.join(sourcecredDirectory, "cache");
@@ -102,13 +107,13 @@ describe("api/load", () => {
       token: exampleGithubToken,
       cacheDirectory,
     };
-    expect(loadGraph).toHaveBeenCalledWith(
+    expect(githubWeightedGraph).toHaveBeenCalledWith(
       expectedLoadGraphOptions,
       taskReporter
     );
   });
 
-  it("calls loadDiscourse with the right options", async () => {
+  it("calls discourseWeightedGraph with the right options", async () => {
     const {options, taskReporter, sourcecredDirectory} = example();
     await load(options, taskReporter);
     const cacheDirectory = path.join(sourcecredDirectory, "cache");
@@ -116,7 +121,10 @@ describe("api/load", () => {
       discourseServer: {serverUrl: discourseServerUrl},
       cacheDirectory,
     };
-    expect(loadDiscourse).toHaveBeenCalledWith(expectedOptions, taskReporter);
+    expect(discourseWeightedGraph).toHaveBeenCalledWith(
+      expectedOptions,
+      taskReporter
+    );
   });
 
   it("saves a merged graph to disk", async () => {
@@ -126,9 +134,9 @@ describe("api/load", () => {
       project.id,
       sourcecredDirectory
     );
-    const graphFile = path.join(projectDirectory, "graph.json");
+    const graphFile = path.join(projectDirectory, "weightedGraph.json");
     const graphJSON = JSON.parse(await fs.readFile(graphFile));
-    const expectedJSON = combinedGraph().toJSON();
+    const expectedJSON = WeightedGraph.toJSON(combinedGraph());
     expect(graphJSON).toEqual(expectedJSON);
   });
 
@@ -136,7 +144,8 @@ describe("api/load", () => {
     const {options, taskReporter} = example();
     await load(options, taskReporter);
     const args = timelineCredCompute.mock.calls[0][0];
-    expect(args.graph.equals(combinedGraph())).toBe(true);
+    expect(args.weightedGraph.graph.equals(combinedGraph().graph)).toBe(true);
+    expect(args.weightedGraph.weights).toEqual(combinedGraph().weights);
     expect(args.params).toEqual(partialParams(params));
     expect(args.plugins).toEqual(plugins);
   });
@@ -159,6 +168,8 @@ describe("api/load", () => {
     expect(taskReporter.activeTasks()).toEqual([]);
     expect(taskReporter.entries()).toEqual([
       {type: "START", taskId: "load-foo"},
+      {type: "START", taskId: "load-weighted-graph"},
+      {type: "FINISH", taskId: "load-weighted-graph"},
       {type: "START", taskId: "compute-cred"},
       {type: "FINISH", taskId: "compute-cred"},
       {type: "FINISH", taskId: "load-foo"},
@@ -179,14 +190,14 @@ describe("api/load", () => {
     const newProject = {...options.project, discourseServer: null};
     const newOptions = {...options, project: newProject};
     await load(newOptions, taskReporter);
-    expect(loadDiscourse).not.toHaveBeenCalled();
+    expect(discourseWeightedGraph).not.toHaveBeenCalled();
     const projectDirectory = directoryForProjectId(
       project.id,
       sourcecredDirectory
     );
-    const graphFile = path.join(projectDirectory, "graph.json");
+    const graphFile = path.join(projectDirectory, "weightedGraph.json");
     const graphJSON = JSON.parse(await fs.readFile(graphFile));
-    const expectedJSON = githubGraph().toJSON();
+    const expectedJSON = WeightedGraph.toJSON(githubGraph());
     expect(graphJSON).toEqual(expectedJSON);
   });
 
@@ -195,14 +206,14 @@ describe("api/load", () => {
     const newProject = {...options.project, repoIds: []};
     const newOptions = {...options, project: newProject, githubToken: null};
     await load(newOptions, taskReporter);
-    expect(loadGraph).not.toHaveBeenCalled();
+    expect(githubWeightedGraph).not.toHaveBeenCalled();
     const projectDirectory = directoryForProjectId(
       project.id,
       sourcecredDirectory
     );
-    const graphFile = path.join(projectDirectory, "graph.json");
+    const graphFile = path.join(projectDirectory, "weightedGraph.json");
     const graphJSON = JSON.parse(await fs.readFile(graphFile));
-    const expectedJSON = discourseGraph().toJSON();
+    const expectedJSON = WeightedGraph.toJSON(discourseGraph());
     expect(graphJSON).toEqual(expectedJSON);
   });
 
@@ -216,13 +227,11 @@ describe("api/load", () => {
       project.id,
       sourcecredDirectory
     );
-    const graphFile = path.join(projectDirectory, "graph.json");
+    const graphFile = path.join(projectDirectory, "weightedGraph.json");
     const graphJSON = JSON.parse(await fs.readFile(graphFile));
     const identitySpec = {identities: [identity], discourseServerUrl};
-    const identityGraph = combinedGraph().contractNodes(
-      nodeContractions(identitySpec)
-    );
-    const expectedJSON = identityGraph.toJSON();
+    const identityGraph = contractIdentities(combinedGraph(), identitySpec);
+    const expectedJSON = WeightedGraph.toJSON(identityGraph);
     expect(graphJSON).toEqual(expectedJSON);
   });
 });
