@@ -23,11 +23,12 @@ import {
   postRepliesEdgeType,
   topicContainsPostEdgeType,
   likesEdgeType,
+  createsLikeEdgeType,
   referencesTopicEdgeType,
   referencesUserEdgeType,
   referencesPostEdgeType,
 } from "./declaration";
-import {userAddress, topicAddress, postAddress} from "./address";
+import {userAddress, topicAddress, postAddress, likeAddress} from "./address";
 import {
   type DiscourseReference,
   parseLinks,
@@ -54,14 +55,20 @@ export function topicNode(serverUrl: string, topic: Topic): Node {
 export function postNode(
   serverUrl: string,
   post: Post,
-  topicTitle: string
+  description: string
 ): Node {
-  const url = `${serverUrl}/t/${String(post.topicId)}/${String(
-    post.indexWithinTopic
-  )}`;
-  const descr = `[post #${post.indexWithinTopic} on ${topicTitle}](${url})`;
   const address = postAddress(serverUrl, post.id);
-  return {timestampMs: post.timestampMs, address, description: descr};
+  return {timestampMs: post.timestampMs, address, description};
+}
+
+export function likeNode(
+  serverUrl: string,
+  like: LikeAction,
+  postDescription: string
+): Node {
+  const address = likeAddress(serverUrl, like);
+  const description = `❤️ by ${like.username} on post ${postDescription}`;
+  return {timestampMs: like.timestampMs, address, description};
 }
 
 export function authorsTopicEdge(serverUrl: string, topic: Topic): Edge {
@@ -128,6 +135,21 @@ export function postRepliesEdge(
   };
 }
 
+export function createsLikeEdge(serverUrl: string, like: LikeAction): Edge {
+  const address = EdgeAddress.append(
+    createsLikeEdgeType.prefix,
+    serverUrl,
+    like.username,
+    String(like.postId)
+  );
+  return {
+    address,
+    timestampMs: like.timestampMs,
+    src: userAddress(serverUrl, like.username),
+    dst: likeAddress(serverUrl, like),
+  };
+}
+
 export function likesEdge(serverUrl: string, like: LikeAction): Edge {
   const address = EdgeAddress.append(
     likesEdgeType.prefix,
@@ -138,7 +160,7 @@ export function likesEdge(serverUrl: string, like: LikeAction): Edge {
   return {
     address,
     timestampMs: like.timestampMs,
-    src: userAddress(serverUrl, like.username),
+    src: likeAddress(serverUrl, like),
     dst: postAddress(serverUrl, like.postId),
   };
 }
@@ -153,6 +175,7 @@ class _GraphCreator {
   serverUrl: string;
   data: ReadRepository;
   topicIdToTitle: Map<TopicId, string>;
+  postIdToDescription: Map<PostId, string>;
 
   constructor(serverUrl: string, data: ReadRepository) {
     if (serverUrl.endsWith("/")) {
@@ -162,6 +185,7 @@ class _GraphCreator {
     this.data = data;
     this.graph = new Graph();
     this.topicIdToTitle = new Map();
+    this.postIdToDescription = new Map();
 
     for (const username of data.users()) {
       this.graph.addNode(userNode(serverUrl, username));
@@ -174,18 +198,23 @@ class _GraphCreator {
     }
 
     for (const post of data.posts()) {
-      this.addPost(post);
+      const topicTitle =
+        this.topicIdToTitle.get(post.topicId) || `[unknown topic]`;
+      const url = `${this.serverUrl}/t/${String(post.topicId)}/${String(
+        post.indexWithinTopic
+      )}`;
+      const description = `[post #${post.indexWithinTopic} on ${topicTitle}](${url})`;
+      this.addPost(post, description);
+      this.postIdToDescription.set(post.id, description);
     }
 
     for (const like of data.likes()) {
-      this.graph.addEdge(likesEdge(serverUrl, like));
+      this.addLike(like);
     }
   }
 
-  addPost(post: Post) {
-    const topicTitle =
-      this.topicIdToTitle.get(post.topicId) || "[unknown topic]";
-    this.graph.addNode(postNode(this.serverUrl, post, topicTitle));
+  addPost(post: Post, description: string) {
+    this.graph.addNode(postNode(this.serverUrl, post, description));
     this.graph.addEdge(authorsPostEdge(this.serverUrl, post));
     this.graph.addEdge(topicContainsPostEdge(this.serverUrl, post));
     this.maybeAddPostRepliesEdge(post);
@@ -199,6 +228,14 @@ class _GraphCreator {
         this.graph.addEdge(edge);
       }
     }
+  }
+
+  addLike(like: LikeAction) {
+    const postDescription =
+      this.postIdToDescription.get(like.postId) || "[unknown post]";
+    this.graph.addNode(likeNode(this.serverUrl, like, postDescription));
+    this.graph.addEdge(likesEdge(this.serverUrl, like));
+    this.graph.addEdge(createsLikeEdge(this.serverUrl, like));
   }
 
   /**

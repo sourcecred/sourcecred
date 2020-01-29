@@ -33,6 +33,14 @@ export const userNodeType: NodeType = deepFreeze({
   description: "A user account on a particular Discourse instance.",
 });
 
+export const likeNodeType: NodeType = deepFreeze({
+  name: "Like",
+  pluralName: "Likes",
+  prefix: NodeAddress.append(nodePrefix, "like"),
+  defaultWeight: 4,
+  description: "A like by some user, directed at some post",
+});
+
 export const topicContainsPostEdgeType: EdgeType = deepFreeze({
   forwardName: "contains post",
   backwardName: "is contained by topic",
@@ -65,12 +73,20 @@ export const authorsPostEdgeType: EdgeType = deepFreeze({
   description: "Connects an author to a post they've created.",
 });
 
+export const createsLikeEdgeType: EdgeType = deepFreeze({
+  forwardName: "creates like",
+  backwardName: "like created by",
+  prefix: EdgeAddress.append(edgePrefix, "createsLike"),
+  defaultWeight: {forwards: 1, backwards: 1 / 16},
+  description: "Connects a Discourse user to a like that they created.",
+});
+
 export const likesEdgeType: EdgeType = deepFreeze({
   forwardName: "likes",
   backwardName: "is liked by",
   prefix: EdgeAddress.append(edgePrefix, "likes"),
   defaultWeight: {forwards: 1, backwards: 1 / 16},
-  description: "Connects a Discourse user to a post they liked.",
+  description: "Connects a Discourse like to a post that was liked.",
 });
 
 export const referencesPostEdgeType: EdgeType = deepFreeze({
@@ -101,13 +117,14 @@ export const declaration: PluginDeclaration = deepFreeze({
   name: "Discourse",
   nodePrefix,
   edgePrefix,
-  nodeTypes: [userNodeType, topicNodeType, postNodeType],
+  nodeTypes: [userNodeType, topicNodeType, postNodeType, likeNodeType],
   edgeTypes: [
     postRepliesEdgeType,
     authorsTopicEdgeType,
     authorsPostEdgeType,
     topicContainsPostEdgeType,
     likesEdgeType,
+    createsLikeEdgeType,
     referencesPostEdgeType,
     referencesTopicEdgeType,
     referencesUserEdgeType,
