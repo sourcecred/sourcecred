@@ -1,5 +1,13 @@
 // @flow
 
+// This module is deprecated, and is being replaced by
+// github/loadWeightedGraph. Over the course of finishing #1557,
+// @decentralion will remove this module and merge its implementation into
+// loadWeightedGraph.
+//
+// This module is untested, because it is an IO-heavy composition of pieces of
+// functionality which are individually quite well tested.
+
 import {TaskReporter} from "../../util/taskReporter";
 import {createGraph} from "./createGraph";
 import fetchGithubRepo from "./fetchGithubRepo";
