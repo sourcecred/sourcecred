@@ -4,7 +4,8 @@ import React from "react";
 import {timeWeek} from "d3-time";
 import type {Assets} from "../webutil/assets";
 import {TimelineCredView} from "./TimelineCredView";
-import {Graph, NodeAddress} from "../core/graph";
+import {NodeAddress} from "../core/graph";
+import * as WeightedGraph from "../core/weightedGraph";
 import {type Interval, TimelineCred} from "../analysis/timeline/timelineCred";
 import {defaultParams} from "../analysis/timeline/params";
 
@@ -34,11 +35,11 @@ export default class TimelineCredViewInspectiontest extends React.Component<{|
       ["latecomer", (x) => Math.max(0, x - 20)],
     ];
 
-    const graph = new Graph();
+    const weightedGraph = WeightedGraph.empty();
     const addressToCred = new Map();
     for (const [name, generator] of users) {
       const address = NodeAddress.fromParts(["foo", name]);
-      graph.addNode({
+      weightedGraph.graph.addNode({
         address,
         description: `[@${name}](https://github.com/${name})`,
         timestampMs: null,
@@ -47,7 +48,13 @@ export default class TimelineCredViewInspectiontest extends React.Component<{|
       addressToCred.set(address, scores);
     }
     const params = defaultParams();
-    return new TimelineCred(graph, intervals, addressToCred, params, []);
+    return new TimelineCred(
+      weightedGraph,
+      intervals,
+      addressToCred,
+      params,
+      []
+    );
   }
 
   render() {

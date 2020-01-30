@@ -213,7 +213,7 @@ test_expect_success TWO_PROJECTS \
     # encoded ids for sourcecred-test/example-git and sourcecred-test/example-github
     for id in c291cmNlY3JlZC10ZXN0L2V4YW1wbGUtZ2l0aHVi c291cmNlY3JlZC10ZXN0L2V4YW1wbGUtZ2l0; do
         test -s "${api_dir}/projects/${id}/cred.json" &&
-        test -s "${api_dir}/projects/${id}/graph.json" ||
+        test -s "${api_dir}/projects/${id}/weightedGraph.json" ||
         return
     done
 '
@@ -234,7 +234,7 @@ test_expect_success NO_PROJECTS \
 test_expect_success NO_REPOS \
     "NO_REPOS: should not have repository data" '
     for id in c291cmNlY3JlZC9leGFtcGxlLWdpdA== c291cmNlY3JlZC9leGFtcGxlLWdpdGh1Yg==; do
-        for file in graph.json cred.json; do
+        for file in weightedGraph.json cred.json; do
             test_must_fail test -f "${api_dir}/projects/${id}/${file}" || return
         done
     done

@@ -157,7 +157,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
         ? {...state, loading: "LOADING"}
         : {...state, loading: "LOADING"};
     this.setState(loadingState);
-    const graph = state.timelineCred.graph();
+    const graph = state.timelineCred.weightedGraph().graph;
     let newState: ?AppState;
     const types = combineTypes(state.timelineCred.plugins());
     try {

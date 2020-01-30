@@ -120,7 +120,7 @@ export function createApp(
             weightFileManager={weightFileManager}
             nodeWeights={this.state.weights.nodeWeights}
             declarations={declarations}
-            graph={appState.timelineCred.graph()}
+            graph={appState.timelineCred.weightedGraph().graph}
             onNodeWeightsChange={(addr: NodeAddressT, weight: number) =>
               this.setState(({weights}) => {
                 weights.nodeWeights.set(addr, weight);

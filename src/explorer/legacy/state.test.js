@@ -3,6 +3,7 @@
 import {StateTransitionMachine, type AppState} from "./state";
 
 import {Graph, NodeAddress} from "../../core/graph";
+import * as WeightedGraph from "../../core/weightedGraph";
 import {Assets} from "../../webutil/assets";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
 import * as Weights from "../../core/weights";
@@ -50,7 +51,7 @@ describe("explorer/legacy/state", () => {
       projectId: "foo/bar",
       loading: "NOT_LOADING",
       timelineCred: new TimelineCred(
-        new Graph(),
+        WeightedGraph.empty(),
         [],
         new Map(),
         defaultParams(),
@@ -63,7 +64,7 @@ describe("explorer/legacy/state", () => {
       type: "PAGERANK_EVALUATED",
       projectId: "foo/bar",
       timelineCred: new TimelineCred(
-        new Graph(),
+        WeightedGraph.empty(),
         [],
         new Map(),
         defaultParams(),
@@ -109,7 +110,7 @@ describe("explorer/legacy/state", () => {
       const {getState, stm, loadTimelineCredMock} = example(readyToLoadGraph());
 
       const timelineCred = new TimelineCred(
-        new Graph(),
+        WeightedGraph.empty(),
         [],
         new Map(),
         defaultParams(),

@@ -1,5 +1,6 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import tmp from "tmp";
 import path from "path";
 import fs from "fs-extra";
@@ -8,19 +9,18 @@ import {createProject, projectToJSON, encodeProjectId} from "../core/project";
 import {type CacheProvider} from "./cache";
 import {type ProjectStorageProvider} from "./projectStorage";
 import {DataDirectory} from "./dataDirectory";
+import * as WeightedGraph from "../core/weightedGraph";
 
 const project = createProject({id: "testing-project"});
 
-const fakeGraph = ({
-  toJSON: () => ({is: "fake-graph"}),
-}: any);
+const fakeWeightedGraph = deepFreeze(WeightedGraph.empty());
 
 const fakeCred = ({
   toJSON: () => ({is: "fake-cred"}),
 }: any);
 
 const fakeExtras = {
-  graph: fakeGraph,
+  weightedGraph: fakeWeightedGraph,
   cred: fakeCred,
 };
 
@@ -106,7 +106,10 @@ describe("src/backend/dataDirectory", () => {
           expect(actual).toEqual(expected);
         };
         await expectJSONFile("project.json", projectToJSON(project));
-        await expectJSONFile("graph.json", fakeGraph.toJSON());
+        await expectJSONFile(
+          "weightedGraph.json",
+          WeightedGraph.toJSON(fakeWeightedGraph)
+        );
         await expectJSONFile("cred.json", fakeCred.toJSON());
       });
 
@@ -133,7 +136,10 @@ describe("src/backend/dataDirectory", () => {
           expect(actual).toEqual(expected);
         };
         await expectJSONFile("project.json", projectToJSON(project));
-        await expectJSONFile("graph.json", fakeGraph.toJSON());
+        await expectJSONFile(
+          "weightedGraph.json",
+          WeightedGraph.toJSON(fakeWeightedGraph)
+        );
         await expectJSONFile("cred.json", fakeCred.toJSON());
       });
 
