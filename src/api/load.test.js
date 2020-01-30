@@ -218,8 +218,9 @@ describe("api/load", () => {
     );
     const graphFile = path.join(projectDirectory, "graph.json");
     const graphJSON = JSON.parse(await fs.readFile(graphFile));
+    const identitySpec = {identities: [identity], discourseServerUrl};
     const identityGraph = combinedGraph().contractNodes(
-      nodeContractions([identity], discourseServerUrl)
+      nodeContractions(identitySpec)
     );
     const expectedJSON = identityGraph.toJSON();
     expect(graphJSON).toEqual(expectedJSON);
