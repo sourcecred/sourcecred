@@ -23,7 +23,7 @@ import {type IdentitySpec} from "./identity";
  *
  * For more context on this decision, see discussion in #1591.
  */
-export function _contractWeightedGraph(
+export function contractWeightedGraph(
   wg: WeightedGraphT,
   contractions: $ReadOnlyArray<NodeContraction>
 ): WeightedGraphT {
@@ -62,5 +62,5 @@ export function contractIdentities(
   wg: WeightedGraphT,
   identitySpec: IdentitySpec
 ): WeightedGraphT {
-  return _contractWeightedGraph(wg, nodeContractions(identitySpec));
+  return contractWeightedGraph(wg, nodeContractions(identitySpec));
 }

@@ -3,7 +3,7 @@
 import {node} from "../../core/graphTestUtil";
 import {Graph, NodeAddress} from "../../core/graph";
 import * as Weights from "../../core/weights";
-import {_contractWeightedGraph} from "./contractIdentities";
+import {contractWeightedGraph} from "./contractIdentities";
 
 describe("plugins/identity/contractIdentities", () => {
   const a = node("a");
@@ -16,17 +16,17 @@ describe("plugins/identity/contractIdentities", () => {
     w.nodeWeights.set(NodeAddress.empty, 3);
     return w;
   };
-  describe("_contractWeightedGraph", () => {
+  describe("contractWeightedGraph", () => {
     it("contracts the graph", () => {
       const wg = {graph: graph(), weights: weights()};
-      const contracted = _contractWeightedGraph(wg, contractions());
+      const contracted = contractWeightedGraph(wg, contractions());
       const expected = graph().contractNodes(contractions());
       expect(expected.equals(contracted.graph)).toBe(true);
     });
     it("returns a copy of the weights", () => {
       const ws = weights();
       const wg = {graph: graph(), weights: ws};
-      const contracted = _contractWeightedGraph(wg, contractions());
+      const contracted = contractWeightedGraph(wg, contractions());
       expect(contracted.weights).not.toBe(ws);
       expect(ws).toEqual(contracted.weights);
       // check they can be modified independently
@@ -37,7 +37,7 @@ describe("plugins/identity/contractIdentities", () => {
       const ws = weights();
       ws.nodeWeights.set(a.address, 5);
       const wg = {graph: graph(), weights: ws};
-      expect(() => _contractWeightedGraph(wg, contractions())).toThrow(
+      expect(() => contractWeightedGraph(wg, contractions())).toThrow(
         "Explicit weight 5 on contracted node"
       );
     });
