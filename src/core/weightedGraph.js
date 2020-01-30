@@ -52,3 +52,27 @@ export function merge(ws: $ReadOnlyArray<WeightedGraph>): WeightedGraph {
   const weights = Weights.merge(ws.map((w) => w.weights));
   return {graph, weights};
 }
+
+/**
+ * Create a new WeightedGraph where default weights have been overriden.
+ *
+ * This takes a base WeightedGraph along with a set of "override" weights. The
+ * new graph has the union of both the base and override weights; wherever
+ * there is a conflict, the override weights will replace the base weights.
+ * This is useful in situations where we want to let the user manually specify
+ * some weights, and ensure that the user's decisions will trump any defaults.
+ *
+ * This method does not mutuate any of the original arguments. For performance
+ * reasons, it is not a full copy; the input and output WeightedGraphs have the
+ * exact same underlying Graph, which should not be modified.
+ */
+export function overrideWeights(
+  wg: WeightedGraph,
+  overrides: WeightsT
+): WeightedGraph {
+  const weights = Weights.merge([wg.weights, overrides], {
+    nodeResolver: (a, b) => b,
+    edgeResolver: (a, b) => b,
+  });
+  return {graph: wg.graph, weights};
+}

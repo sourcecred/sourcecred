@@ -2,7 +2,6 @@
 
 import * as WeightedGraph from "../core/weightedGraph";
 import {type WeightedGraph as WeightedGraphT} from "../core/weightedGraph";
-import * as Weights from "../core/weights";
 import {type Weights as WeightsT} from "../core/weights";
 import {type NodeContraction} from "../core/graph";
 import {TaskReporter} from "../util/taskReporter";
@@ -68,9 +67,5 @@ export function _combineGraphs(
 ): WeightedGraphT {
   const merged = WeightedGraph.merge(graphs);
   const contracted = contractWeightedGraph(merged, contractions);
-  const weights = Weights.merge([contracted.weights, weightsOverrides], {
-    nodeResolver: (a, b) => b,
-    edgeResolver: (a, b) => b,
-  });
-  return {graph: contracted.graph, weights};
+  return WeightedGraph.overrideWeights(contracted, weightsOverrides);
 }
