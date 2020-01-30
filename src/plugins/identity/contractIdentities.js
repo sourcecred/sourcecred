@@ -4,7 +4,7 @@ import * as Weights from "../../core/weights";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import {type NodeContraction, NodeAddress} from "../../core/graph";
 import {nodeContractions} from "./nodeContractions";
-import {type Identity} from "./identity";
+import {type IdentitySpec} from "./identity";
 
 /**
  * Applies nodeContractions to a WeightedGraph.
@@ -60,8 +60,7 @@ export function _contractWeightedGraph(
  */
 export function contractIdentities(
   wg: WeightedGraphT,
-  identities: $ReadOnlyArray<Identity>,
-  discourseUrl: string | null
+  identitySpec: IdentitySpec
 ): WeightedGraphT {
-  return _contractWeightedGraph(wg, nodeContractions(identities, discourseUrl));
+  return _contractWeightedGraph(wg, nodeContractions(identitySpec));
 }

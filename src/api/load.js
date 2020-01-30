@@ -91,10 +91,13 @@ export async function load(
   const pluginGraphs = await Promise.all(pluginGraphPromises);
   let graph = Graph.merge(pluginGraphs);
   const {identities, discourseServer} = project;
-  if (identities.length) {
-    const serverUrl =
-      discourseServer == null ? null : discourseServer.serverUrl;
-    const contractions = nodeContractions(identities, serverUrl);
+  const identitySpec = {
+    identities,
+    discourseServerUrl:
+      discourseServer == null ? null : discourseServer.serverUrl,
+  };
+  if (identitySpec.identities.length) {
+    const contractions = nodeContractions(identitySpec);
     // Only apply contractions if identities have been specified, since it involves
     // a full Graph copy
     graph = graph.contractNodes(contractions);
