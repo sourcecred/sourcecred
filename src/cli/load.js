@@ -10,11 +10,11 @@ import {projectFromJSON} from "../core/project";
 import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
 import fs from "fs-extra";
-import {partialParams} from "../analysis/timeline/params";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {declaration as discourseDeclaration} from "../plugins/discourse/declaration";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";
 import {declaration as identityDeclaration} from "../plugins/identity/declaration";
+import {defaultParams} from "../analysis/timeline/params";
 
 function usage(print: (string) => void): void {
   print(
@@ -122,7 +122,6 @@ const loadCommand: Command = async (args, std) => {
   const specProjects = await Promise.all(
     projectSpecs.map((s) => specToProject(s, githubToken))
   );
-  const params = partialParams({weights});
   const manualProjects = await Promise.all(projectPaths.map(loadProject));
   const projects = specProjects.concat(manualProjects);
   const optionses = projects.map((project) => {
@@ -138,7 +137,8 @@ const loadCommand: Command = async (args, std) => {
     }
     return {
       project,
-      params,
+      params: defaultParams(),
+      weightsOverrides: weights,
       plugins,
       sourcecredDirectory: Common.sourcecredDirectory(),
       githubToken,

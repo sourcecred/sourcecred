@@ -2,7 +2,8 @@
 
 import React from "react";
 import deepEqual from "lodash.isequal";
-import {type Weights, copy as weightsCopy} from "../core/weights";
+import * as Weights from "../core/weights";
+import {type Weights as WeightsT} from "../core/weights";
 import {type NodeAddressT} from "../core/graph";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
@@ -21,7 +22,7 @@ export type Props = {
 
 export type State = {
   timelineCred: TimelineCred,
-  weights: Weights,
+  weights: WeightsT,
   alpha: number,
   intervalDecay: number,
   loading: boolean,
@@ -41,7 +42,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const timelineCred = props.initialTimelineCred;
-    const {alpha, intervalDecay, weights} = timelineCred.params();
+    const {alpha, intervalDecay} = timelineCred.params();
     this.state = {
       timelineCred,
       alpha,
@@ -49,7 +50,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
       // Set the weights to a copy, to ensure we don't mutate the weights in the
       // initialTimelineCred. This enables e.g. disabling the analyze button
       // when the parameters are unchanged.
-      weights: weightsCopy(weights),
+      weights: Weights.copy(timelineCred.weightedGraph().weights),
       loading: false,
       showWeightConfig: false,
       selectedNodeTypePrefix: null,
@@ -57,15 +58,22 @@ export class TimelineExplorer extends React.Component<Props, State> {
   }
 
   params(): TimelineCredParameters {
-    const {alpha, intervalDecay, weights} = this.state;
+    const {alpha, intervalDecay} = this.state;
+    return {alpha, intervalDecay};
+  }
+
+  weights(): WeightsT {
     // Set the weights to a copy, to ensure that the weights we pass into e.g.
     // analyzeCred are a distinct reference from the one we keep in our state.
-    return {alpha, intervalDecay, weights: weightsCopy(weights)};
+    return Weights.copy(this.state.weights);
   }
 
   async analyzeCred() {
     this.setState({loading: true});
-    const timelineCred = await this.state.timelineCred.reanalyze(this.params());
+    const timelineCred = await this.state.timelineCred.reanalyze(
+      this.weights(),
+      this.params()
+    );
     this.setState({timelineCred, loading: false});
   }
 
@@ -74,7 +82,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
     const weightFileManager = (
       <WeightsFileManager
         weights={this.state.weights}
-        onWeightsChange={(weights: Weights) => {
+        onWeightsChange={(weights: WeightsT) => {
           this.setState({weights});
         }}
       />
@@ -111,10 +119,12 @@ export class TimelineExplorer extends React.Component<Props, State> {
         }}
       />
     );
-    const paramsUpToDate = deepEqual(
-      this.params(),
-      this.state.timelineCred.params()
-    );
+    const paramsUpToDate =
+      deepEqual(this.params(), this.state.timelineCred.params()) &&
+      deepEqual(
+        this.weights(),
+        this.state.timelineCred.weightedGraph().weights
+      );
     const analyzeButton = (
       <button
         disabled={this.state.loading || paramsUpToDate}

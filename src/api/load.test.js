@@ -75,8 +75,8 @@ describe("api/load", () => {
     discourseServer: {serverUrl: discourseServerUrl},
   });
   deepFreeze(project);
-  const weights = Weights.empty();
-  const params: $Shape<TimelineCredParameters> = {weights};
+  const weightsOverrides = Weights.empty();
+  const params: $Shape<TimelineCredParameters> = {};
   const plugins = deepFreeze([]);
   const example = () => {
     const sourcecredDirectory = tmp.dirSync().name;
@@ -87,6 +87,7 @@ describe("api/load", () => {
       params,
       plugins,
       project,
+      weightsOverrides,
     };
     return {options, taskReporter, sourcecredDirectory};
   };

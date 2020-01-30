@@ -16,11 +16,13 @@ import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import * as Discourse from "../plugins/discourse/loadWeightedGraph";
 import * as Github from "../plugins/github/loadWeightedGraph";
 import * as WeightedGraph from "../core/weightedGraph";
+import {type Weights as WeightsT} from "../core/weights";
 import {loadWeightedGraph} from "./loadWeightedGraph";
 
 export type LoadOptions = {|
   +project: Project,
   +params: ?$Shape<TimelineCredParameters>,
+  +weightsOverrides: WeightsT,
   +plugins: $ReadOnlyArray<PluginDeclaration>,
   +sourcecredDirectory: string,
   +githubToken: ?GithubToken,
@@ -44,7 +46,14 @@ export async function load(
   options: LoadOptions,
   taskReporter: TaskReporter
 ): Promise<void> {
-  const {project, params, plugins, sourcecredDirectory, githubToken} = options;
+  const {
+    project,
+    params,
+    plugins,
+    sourcecredDirectory,
+    githubToken,
+    weightsOverrides,
+  } = options;
   const {identities, discourseServer} = project;
   const fullParams = params == null ? defaultParams() : partialParams(params);
   const loadTask = `load-${options.project.id}`;
@@ -82,7 +91,7 @@ export async function load(
       discourseOptions,
       githubOptions,
       identitySpec,
-      weightsOverrides: fullParams.weights,
+      weightsOverrides,
     },
     taskReporter
   );
