@@ -11,6 +11,7 @@ import {distributionToCred} from "./distributionToCred";
 import {type PluginDeclaration, combineTypes} from "../pluginDeclaration";
 import {type NodeAddressT, NodeAddress, type Node} from "../../core/graph";
 import * as WeightedGraph from "../../core/weightedGraph";
+import {type Weights as WeightsT} from "../../core/weights";
 import type {
   WeightedGraph as WeightedGraphT,
   WeightedGraphJSON,
@@ -86,10 +87,14 @@ export class TimelineCred {
    * This returns a new TimelineCred; it does not modify the existing one.
    */
   async reanalyze(
+    newWeights: WeightsT,
     newParams: $Shape<TimelineCredParameters>
   ): Promise<TimelineCred> {
     return await TimelineCred.compute({
-      weightedGraph: this._weightedGraph,
+      weightedGraph: WeightedGraph.overrideWeights(
+        this._weightedGraph,
+        newWeights
+      ),
       params: newParams,
       plugins: this._plugins,
     });
@@ -241,7 +246,7 @@ export class TimelineCred {
     plugins: $ReadOnlyArray<PluginDeclaration>,
   |}): Promise<TimelineCred> {
     const {weightedGraph, params, plugins} = opts;
-    const {graph} = weightedGraph;
+    const {graph, weights} = weightedGraph;
     const fullParams = params == null ? defaultParams() : partialParams(params);
     const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
     const types = combineTypes(plugins);
@@ -250,7 +255,7 @@ export class TimelineCred {
     const distribution = await timelinePagerank(
       graph,
       types,
-      fullParams.weights,
+      weights,
       fullParams.intervalDecay,
       fullParams.alpha
     );
