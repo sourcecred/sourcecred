@@ -43,8 +43,9 @@ async function loadMessages(postRequest) {
     const messages = await response.json()
 
     if (messages.length > 0) {
-      const lastMessage = sortBy(messages, (x) => x.timestamp)[0]
-      
+      const lastMessage = sortBy(messages, (x) => x.timestamp)[0].id 
+
+
     }
 
 
