@@ -26,6 +26,7 @@ import {
   partialParams,
 } from "../analysis/timeline/params";
 import * as WeightedGraph from "../core/weightedGraph";
+import {DataDirectory} from "../backend/dataDirectory";
 
 type JestMockFn = $Call<typeof jest.fn>;
 jest.mock("../plugins/github/loadWeightedGraph", () => ({
@@ -102,11 +103,11 @@ describe("api/load", () => {
   it("calls github githubWeightedGraph with the right options", async () => {
     const {options, taskReporter, sourcecredDirectory} = example();
     await load(options, taskReporter);
-    const cacheDirectory = path.join(sourcecredDirectory, "cache");
+    const cache = new DataDirectory(sourcecredDirectory);
     const expectedLoadGraphOptions: LoadGraphOptions = {
       repoIds: project.repoIds,
       token: exampleGithubToken,
-      cacheDirectory,
+      cache,
     };
     expect(githubWeightedGraph).toHaveBeenCalledWith(
       expectedLoadGraphOptions,
