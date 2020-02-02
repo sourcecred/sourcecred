@@ -20,6 +20,57 @@ import {validateToken} from "./token";
 import {cacheIdForRepoId} from "./cacheId";
 import {type CacheProvider} from "../../backend/cache";
 
+type FetchRepoOptions = {|
+  +token: string,
+  +cache: CacheProvider,
+|};
+
+/**
+ * Retrieve previously scraped data for a GitHub repo from cache.
+ *
+ * Note: the GithubToken requirement is planned to be removed.
+ * See https://github.com/sourcecred/sourcecred/issues/1580
+ *
+ * @param {RepoId} repoId
+ *    the GitHub repository to retrieve from cache
+ * @param {GithubToken} token
+ *    authentication token to be used for the GitHub API; generate a
+ *    token at: https://github.com/settings/tokens
+ * @return {Promise<Repository>}
+ *    a promise that resolves to a JSON object containing the data
+ *    scraped from the repository, with data format to be specified
+ *    later
+ */
+export async function fetchGithubRepoFromCache(
+  repoId: RepoId,
+  {token, cache}: FetchRepoOptions
+): Promise<Repository> {
+  // Right now, only warn on likely to be bad tokens (see #1461).
+  // This lets us proceed to the GitHub API validating the token,
+  // while giving users instructions to remedy if it was their mistake.
+  try {
+    validateToken(token);
+  } catch (e) {
+    console.warn(`Warning: ${e}`);
+  }
+
+  // TODO: remove the need for a GithubToken to resolve the ID.
+  // See https://github.com/sourcecred/sourcecred/issues/1580
+  const postQueryWithToken = (payload) => postQuery(payload, token);
+  const resolvedId: Schema.ObjectId = await resolveRepositoryGraphqlId(
+    postQueryWithToken,
+    repoId
+  );
+
+  const db = await cache.database(cacheIdForRepoId(repoId));
+  const mirror = new Mirror(db, schema(), {
+    blacklistedIds: BLACKLISTED_IDS,
+    guessTypename: _guessTypename,
+  });
+
+  return ((mirror.extract(resolvedId): any): Repository);
+}
+
 /**
  * Scrape data from a GitHub repo using the GitHub API.
  *
@@ -35,10 +86,8 @@ import {type CacheProvider} from "../../backend/cache";
  */
 export default async function fetchGithubRepo(
   repoId: RepoId,
-  options: {|+token: string, +cache: CacheProvider|}
+  {token, cache}: FetchRepoOptions
 ): Promise<Repository> {
-  const {token, cache} = options;
-
   // Right now, only warn on likely to be bad tokens (see #1461).
   // This lets us proceed to the GitHub API validating the token,
   // while giving users instructions to remedy if it was their mistake.

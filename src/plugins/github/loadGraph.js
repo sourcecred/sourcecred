@@ -10,7 +10,10 @@
 
 import {TaskReporter} from "../../util/taskReporter";
 import {createGraph} from "./createGraph";
-import fetchGithubRepo from "./fetchGithubRepo";
+import {
+  default as fetchGithubRepo,
+  fetchGithubRepoFromCache,
+} from "./fetchGithubRepo";
 import {RelationalView} from "./relationalView";
 import {type RepoId, repoIdToString} from "./repoId";
 import {Graph} from "../../core/graph";
@@ -44,7 +47,12 @@ export async function loadGraph(
       await fetchGithubRepo(repoId, {
         token: options.token,
         cache: options.cache,
-      })
+      }).then((_) =>
+        fetchGithubRepoFromCache(repoId, {
+          token: options.token,
+          cache: options.cache,
+        })
+      )
     );
     taskReporter.finish(taskId);
   }
