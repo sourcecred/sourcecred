@@ -1,6 +1,10 @@
 #!/bin/sh
 
-# Automatically update all SourceCred snapshot data.
+# Automatically update SourceCred snapshot data.
+# This deliberately does not update Discourse API snapshots,
+# because they are very noisy. If you want to update Discourse
+# snapshots, run ./src/plugins/discourse/update_discourse_api_snapshots.sh
+
 set -eu
 
 toplevel="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
@@ -33,13 +37,6 @@ echo "Updating github/fetchGithubOrgTest.sh"
 
 echo "Updating github/fetchGithubRepoTest.sh"
 ./src/plugins/github/fetchGithubRepoTest.sh -u --no-build
-
-if [ -n "${DISCOURSE_TEST_API_KEY:-}" ]; then
-  echo "Updating Discourse API snapshots"
-  ./src/plugins/discourse/update_discourse_api_snapshots.sh
-else
-  echo "Not updating Discourse API snapshots (need DISCOURSE_TEST_API_KEY)"
-fi
 
 echo "Updating Jest snapshots"
 yarn unit -u

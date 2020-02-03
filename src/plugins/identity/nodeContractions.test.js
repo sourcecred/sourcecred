@@ -41,27 +41,27 @@ describe("src/plugins/identity/nodeContractions", () => {
         {username: "foo", aliases: ["github/foo", "github/bar"]},
         {username: "foo", aliases: []},
       ];
-      expect(() => nodeContractions(identities, null)).toThrowError(
-        "Duplicate username"
-      );
+      expect(() =>
+        nodeContractions({identities, discourseServerUrl: null})
+      ).toThrowError("Duplicate username");
     });
     it("errors if any alias is duplicated", () => {
       const identities = [
         {username: "foo", aliases: ["github/foo", "github/bar"]},
         {username: "bar", aliases: ["github/foo"]},
       ];
-      expect(() => nodeContractions(identities, null)).toThrowError(
-        "Duplicate alias"
-      );
+      expect(() =>
+        nodeContractions({identities, discourseServerUrl: null})
+      ).toThrowError("Duplicate alias");
     });
     it("produces a contraction for each identity", () => {
       const identities = [
         {username: "foo", aliases: ["discourse/foo"]},
         {username: "bar", aliases: ["github/bar"]},
       ];
-      const url = "https://example.com";
-      expect(nodeContractions(identities, url)).toEqual(
-        identities.map((i) => _contraction(i, url))
+      const spec = {identities, discourseServerUrl: "https://example.com"};
+      expect(nodeContractions(spec)).toEqual(
+        identities.map((i) => _contraction(i, spec.discourseServerUrl))
       );
     });
   });

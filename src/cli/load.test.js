@@ -10,11 +10,11 @@ import loadCommand, {help} from "./load";
 import type {LoadOptions} from "../api/load";
 import * as Weights from "../core/weights";
 import * as Common from "./common";
-import {defaultParams, partialParams} from "../analysis/timeline/params";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";
 import {createProject} from "../core/project";
 import {makeRepoId, stringToRepoId} from "../plugins/github/repoId";
 import {validateToken} from "../plugins/github/token";
+import {defaultParams} from "../analysis/timeline/params";
 
 jest.mock("../api/load", () => ({load: jest.fn()}));
 type JestMockFn = $Call<typeof jest.fn>;
@@ -77,6 +77,7 @@ describe("cli/load", () => {
           repoIds: [makeRepoId("foo", "bar")],
         }),
         params: defaultParams(),
+        weightsOverrides: Weights.empty(),
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: exampleGithubToken,
@@ -100,6 +101,7 @@ describe("cli/load", () => {
           repoIds: [stringToRepoId(projectId)],
         }),
         params: defaultParams(),
+        weightsOverrides: Weights.empty(),
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: exampleGithubToken,
@@ -135,7 +137,8 @@ describe("cli/load", () => {
           id: "foo/bar",
           repoIds: [makeRepoId("foo", "bar")],
         }),
-        params: partialParams({weights}),
+        params: defaultParams(),
+        weightsOverrides: weights,
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: exampleGithubToken,

@@ -97,7 +97,8 @@ const command: Command = async (args, std) => {
   await load(
     {
       project,
-      params: {weights},
+      params: null,
+      weightsOverrides: weights,
       plugins,
       sourcecredDirectory: Common.sourcecredDirectory(),
       githubToken: null,

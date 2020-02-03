@@ -1,7 +1,7 @@
 // @flow
 
 import {type NodeContraction} from "../../core/graph";
-import {type Identity, identityNode} from "./identity";
+import {type Identity, identityNode, type IdentitySpec} from "./identity";
 import {resolveAlias} from "./alias";
 
 /**
@@ -20,10 +20,7 @@ import {resolveAlias} from "./alias";
  * refactor this method so it no longer takes a Discourse server url as a
  * special argument.
  */
-export function nodeContractions(
-  identities: $ReadOnlyArray<Identity>,
-  discourseUrl: string | null
-): NodeContraction[] {
+export function nodeContractions(spec: IdentitySpec): NodeContraction[] {
   function errorOnDuplicate(xs: $ReadOnlyArray<string>, kind: string) {
     const s = new Set();
     for (const x of xs) {
@@ -33,11 +30,12 @@ export function nodeContractions(
       s.add(x);
     }
   }
+  const {identities, discourseServerUrl} = spec;
   const usernames = identities.map((x) => x.username);
   errorOnDuplicate(usernames, "username");
   const aliases = [].concat(...identities.map((x) => x.aliases));
   errorOnDuplicate(aliases, "alias");
-  return identities.map((i) => _contraction(i, discourseUrl));
+  return identities.map((i) => _contraction(i, discourseServerUrl));
 }
 
 /**

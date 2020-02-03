@@ -147,7 +147,7 @@ const COMPAT_INFO = {type: "sourcecred/graph", version: "0.8.0"};
 
 export type Neighbor = {|+node: Node, +edge: Edge|};
 
-export opaque type DirectionT = Symbol;
+export opaque type DirectionT = symbol;
 export const Direction: {|
   +IN: DirectionT,
   +OUT: DirectionT,

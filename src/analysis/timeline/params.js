@@ -1,8 +1,5 @@
 // @flow
 
-import {type Weights as WeightsT, type WeightsJSON} from "../../core/weights";
-import * as Weights from "../../core/weights";
-
 /**
  * Parameters for computing TimelineCred
  *
@@ -20,11 +17,6 @@ export type TimelineCredParameters = {|
   // decay is 0, then weights go to zero the first week after their node/edge
   // was created. Should be between 0 and 1.
   +intervalDecay: number,
-  // The weights. This determines how much cred is assigned based on different
-  // node types, how cred flows across various edge types, and can specify
-  // manual weights directly on individual nodes. See the docs in
-  // `analysis/weights` for details.
-  +weights: WeightsT,
 |};
 
 export const DEFAULT_ALPHA = 0.2;
@@ -33,7 +25,6 @@ export const DEFAULT_INTERVAL_DECAY = 0.5;
 export type TimelineCredParametersJSON = {|
   +alpha: number,
   +intervalDecay: number,
-  +weights: WeightsJSON,
 |};
 
 export function paramsToJSON(
@@ -42,7 +33,6 @@ export function paramsToJSON(
   return {
     alpha: p.alpha,
     intervalDecay: p.intervalDecay,
-    weights: Weights.toJSON(p.weights),
   };
 }
 
@@ -52,7 +42,6 @@ export function paramsFromJSON(
   return {
     alpha: p.alpha,
     intervalDecay: p.intervalDecay,
-    weights: Weights.fromJSON(p.weights),
   };
 }
 
@@ -66,7 +55,6 @@ export function defaultParams(): TimelineCredParameters {
   return {
     alpha: DEFAULT_ALPHA,
     intervalDecay: DEFAULT_INTERVAL_DECAY,
-    weights: Weights.empty(),
   };
 }
 

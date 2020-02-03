@@ -6,6 +6,7 @@ import Database from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import {type Project, projectToJSON} from "../core/project";
 import {directoryForProjectId} from "../core/project_io";
+import * as WeightedGraph from "../core/weightedGraph";
 import {type CacheProvider} from "./cache";
 import type {
   ProjectStorageProvider,
@@ -32,7 +33,7 @@ export class DataDirectory implements CacheProvider, ProjectStorageProvider {
 
   async storeProject(
     project: Project,
-    {graph, cred}: ProjectStorageExtras
+    {weightedGraph, cred}: ProjectStorageExtras
   ): Promise<void> {
     const projectDirectory = directoryForProjectId(
       project.id,
@@ -44,7 +45,11 @@ export class DataDirectory implements CacheProvider, ProjectStorageProvider {
       await fs.writeFile(fileName, data);
     };
     writeFile("project.json", stringify(projectToJSON(project)));
-    if (graph) writeFile("graph.json", stringify(graph.toJSON()));
+    if (weightedGraph)
+      writeFile(
+        "weightedGraph.json",
+        stringify(WeightedGraph.toJSON(weightedGraph))
+      );
     if (cred) writeFile("cred.json", stringify(cred.toJSON()));
   }
 }

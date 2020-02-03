@@ -154,7 +154,7 @@ data/
 └── projects
     └── QHNmb3Nj
         ├── cred.json
-        ├── graph.json
+        ├── weightedGraph.json
         └── project.json
 ```
 
@@ -209,7 +209,7 @@ data/
 └── projects
     └── c2Zvc2Mvc2Zvc2M
         ├── cred.json
-        ├── graph.json
+        ├── weightedGraph.json
         └── project.json
 
 3 directories, 4 files

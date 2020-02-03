@@ -1,6 +1,7 @@
 // @flow
 
 import sortBy from "lodash.sortby";
+import * as NullUtil from "../../util/null";
 import type {ReadRepository} from "./mirrorRepository";
 import type {Topic, Post, PostId, TopicId, LikeAction} from "./fetch";
 import {NodeAddress, EdgeAddress, type Node, type Edge} from "../../core/graph";
@@ -9,24 +10,28 @@ import {
   userNode,
   topicNode,
   postNode,
+  likeNode,
   authorsTopicEdge,
   authorsPostEdge,
   topicContainsPostEdge,
   postRepliesEdge,
   likesEdge,
+  createsLikeEdge,
 } from "./createGraph";
 
-import {userAddress, postAddress, topicAddress} from "./address";
+import {userAddress, postAddress, topicAddress, likeAddress} from "./address";
 
 import {
   userNodeType,
   topicNodeType,
   postNodeType,
+  likeNodeType,
   authorsTopicEdgeType,
   authorsPostEdgeType,
   topicContainsPostEdgeType,
   postRepliesEdgeType,
   likesEdgeType,
+  createsLikeEdgeType,
   referencesTopicEdgeType,
   referencesUserEdgeType,
   referencesPostEdgeType,
@@ -171,6 +176,7 @@ describe("plugins/discourse/createGraph", () => {
                                 ]
                         `);
     });
+
     it("for topics", () => {
       const {url, topic} = example();
       const node = topicNode(url, topic);
@@ -188,12 +194,12 @@ describe("plugins/discourse/createGraph", () => {
                                 ]
                         `);
     });
+
     it("for posts", () => {
-      const {url, topic, posts} = example();
-      const node = postNode(url, posts[1], topic.title);
-      expect(node.description).toMatchInlineSnapshot(
-        `"[post #2 on first topic](https://url.com/t/1/2)"`
-      );
+      const {url, posts} = example();
+      const description = "[post #2 on first topic](https://url.com/t/1/2)";
+      const node = postNode(url, posts[1], description);
+      expect(node.description).toEqual(description);
       expect(node.timestampMs).toEqual(posts[1].timestampMs);
       expect(NodeAddress.toParts(node.address)).toMatchInlineSnapshot(`
                                 Array [
@@ -205,6 +211,42 @@ describe("plugins/discourse/createGraph", () => {
                                 ]
                         `);
     });
+
+    it("for likes", () => {
+      const {url, likes, posts, graph} = example();
+      const like = likes[0];
+      const post = posts[1];
+      expect(like.postId).toEqual(post.id);
+      const postDescription = `[post #2 on first topic](https://url.com/t/1/2)`;
+      const node = likeNode(url, like, postDescription);
+      expect(node.description).toMatchInlineSnapshot(
+        `"❤️ by mzargham on post [post #2 on first topic](https://url.com/t/1/2)"`
+      );
+      expect(node.timestampMs).toEqual(like.timestampMs);
+      expect(NodeAddress.toParts(node.address)).toMatchInlineSnapshot(`
+        Array [
+          "sourcecred",
+          "discourse",
+          "like",
+          "https://url.com",
+          "mzargham",
+          "2",
+        ]
+      `);
+      expect(graph.node(node.address)).toEqual(node);
+    });
+
+    it("gives an [unknown post] description for likes without a matching post", () => {
+      const {likes} = example();
+      const like = likes[0];
+      const data = new MockData([], [], [like]);
+      const url = "https://foo";
+      const graph = createGraph(url, data);
+      const actual = Array.from(graph.nodes())[0];
+      const expected = likeNode(url, like, "[unknown post]");
+      expect(actual).toEqual(expected);
+    });
+
     it("gives an [unknown topic] description for posts without a matching topic", () => {
       const post = {
         id: 1,
@@ -218,8 +260,12 @@ describe("plugins/discourse/createGraph", () => {
       const data = new MockData([], [post], []);
       const url = "https://foo";
       const graph = createGraph(url, data);
+      const postUrl = `${url}/t/${String(post.topicId)}/${String(
+        post.indexWithinTopic
+      )}`;
+      const expectedDescription = `[post #${post.indexWithinTopic} on [unknown topic]](${postUrl})`;
       const actual = Array.from(graph.nodes({prefix: postNodeType.prefix}))[0];
-      const expected = postNode(url, post, "[unknown topic]");
+      const expected = postNode(url, post, expectedDescription);
       expect(actual).toEqual(expected);
     });
   });
@@ -310,7 +356,7 @@ describe("plugins/discourse/createGraph", () => {
     it("for likes", () => {
       const {url, likes} = example();
       const like = likes[0];
-      const expectedSrc = userAddress(url, like.username);
+      const expectedSrc = likeAddress(url, like);
       const expectedDst = postAddress(url, like.postId);
       const edge = likesEdge(url, like);
       expect(edge.src).toEqual(expectedSrc);
@@ -321,6 +367,26 @@ describe("plugins/discourse/createGraph", () => {
           "sourcecred",
           "discourse",
           "likes",
+          "https://url.com",
+          "mzargham",
+          "2",
+        ]
+      `);
+    });
+    it("for createsLike", () => {
+      const {url, likes} = example();
+      const like = likes[0];
+      const expectedSrc = userAddress(url, like.username);
+      const expectedDst = likeAddress(url, like);
+      const edge = createsLikeEdge(url, like);
+      expect(edge.src).toEqual(expectedSrc);
+      expect(edge.dst).toEqual(expectedDst);
+      expect(edge.timestampMs).toEqual(like.timestampMs);
+      expect(EdgeAddress.toParts(edge.address)).toMatchInlineSnapshot(`
+        Array [
+          "sourcecred",
+          "discourse",
+          "createsLike",
           "https://url.com",
           "mzargham",
           "2",
@@ -350,8 +416,29 @@ describe("plugins/discourse/createGraph", () => {
     });
     it("for posts", () => {
       const {url, posts, topic} = example();
-      const expected = posts.map((x) => postNode(url, x, topic.title));
+      const expected = posts.map((x) => {
+        const postUrl = `${url}/t/${String(x.topicId)}/${String(
+          x.indexWithinTopic
+        )}`;
+        const description = `[post #${x.indexWithinTopic} on ${topic.title}](${postUrl})`;
+        return postNode(url, x, description);
+      });
       expectNodesOfType(expected, postNodeType);
+    });
+    it("for likes", () => {
+      const {url, posts, topic, likes} = example();
+      const postIdToDescription = new Map();
+      for (const post of posts) {
+        const postUrl = `${url}/t/${String(post.topicId)}/${String(
+          post.indexWithinTopic
+        )}`;
+        const description = `[post #${post.indexWithinTopic} on ${topic.title}](${postUrl})`;
+        postIdToDescription.set(post.id, description);
+      }
+      const expected = likes.map((x) =>
+        likeNode(url, x, NullUtil.get(postIdToDescription.get(x.postId)))
+      );
+      expectNodesOfType(expected, likeNodeType);
     });
   });
 
@@ -393,6 +480,11 @@ describe("plugins/discourse/createGraph", () => {
       const {url, likes} = example();
       const edges = likes.map((l) => likesEdge(url, l));
       expectEdgesOfType(edges, likesEdgeType);
+    });
+    it("createsLike edges", () => {
+      const {url, likes} = example();
+      const edges = likes.map((l) => createsLikeEdge(url, l));
+      expectEdgesOfType(edges, createsLikeEdgeType);
     });
     it("references post edges", () => {
       const {url, posts} = example();

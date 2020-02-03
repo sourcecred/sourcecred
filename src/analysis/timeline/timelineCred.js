@@ -9,13 +9,13 @@ import {type Interval} from "./interval";
 import {timelinePagerank} from "./timelinePagerank";
 import {distributionToCred} from "./distributionToCred";
 import {type PluginDeclaration, combineTypes} from "../pluginDeclaration";
-import {
-  Graph,
-  type GraphJSON,
-  type NodeAddressT,
-  NodeAddress,
-  type Node,
-} from "../../core/graph";
+import {type NodeAddressT, NodeAddress, type Node} from "../../core/graph";
+import * as WeightedGraph from "../../core/weightedGraph";
+import {type Weights as WeightsT} from "../../core/weights";
+import type {
+  WeightedGraph as WeightedGraphT,
+  WeightedGraphJSON,
+} from "../../core/weightedGraph";
 import {
   type TimelineCredParameters,
   paramsToJSON,
@@ -41,35 +41,35 @@ export type CredNode = {|
 
 /**
  * Represents the timeline cred of a graph. This class wraps all the data
- * needed to analyze and interpet cred (ie. it has the Graph and the cred
+ * needed to analyze and interpet cred (ie. it has the WeightedGraph and the cred
  * scores), and provides convenient view methods for accessing the cred.
  *
  * The TimelineCred also has the params and config. The intention is that this
  * is a "one stop shop" for serializing SourceCred results.
  */
 export class TimelineCred {
-  _graph: Graph;
+  _weightedGraph: WeightedGraphT;
   _intervals: $ReadOnlyArray<Interval>;
   _addressToCred: Map<NodeAddressT, $ReadOnlyArray<number>>;
   _params: TimelineCredParameters;
   _plugins: $ReadOnlyArray<PluginDeclaration>;
 
   constructor(
-    graph: Graph,
+    graph: WeightedGraphT,
     intervals: $ReadOnlyArray<Interval>,
     addressToCred: Map<NodeAddressT, $ReadOnlyArray<number>>,
     params: TimelineCredParameters,
     plugins: $ReadOnlyArray<PluginDeclaration>
   ) {
-    this._graph = graph;
+    this._weightedGraph = graph;
     this._intervals = intervals;
     this._addressToCred = addressToCred;
     this._params = params;
     this._plugins = plugins;
   }
 
-  graph(): Graph {
-    return this._graph;
+  weightedGraph(): WeightedGraphT {
+    return this._weightedGraph;
   }
 
   params(): TimelineCredParameters {
@@ -87,10 +87,14 @@ export class TimelineCred {
    * This returns a new TimelineCred; it does not modify the existing one.
    */
   async reanalyze(
+    newWeights: WeightsT,
     newParams: $Shape<TimelineCredParameters>
   ): Promise<TimelineCred> {
     return await TimelineCred.compute({
-      graph: this._graph,
+      weightedGraph: WeightedGraph.overrideWeights(
+        this._weightedGraph,
+        newWeights
+      ),
       params: newParams,
       plugins: this._plugins,
     });
@@ -117,7 +121,7 @@ export class TimelineCred {
       return undefined;
     }
     const total = sum(cred);
-    const node = NullUtil.get(this._graph.node(a));
+    const node = NullUtil.get(this._weightedGraph.graph.node(a));
     return {cred, total, node};
   }
 
@@ -196,7 +200,7 @@ export class TimelineCred {
       filteredAddressToCred.set(address, cred);
     }
     return new TimelineCred(
-      this._graph,
+      this._weightedGraph,
       this._intervals,
       filteredAddressToCred,
       this._params,
@@ -206,7 +210,7 @@ export class TimelineCred {
 
   toJSON(): TimelineCredJSON {
     const rawJSON = {
-      graphJSON: this._graph.toJSON(),
+      weightedGraphJSON: WeightedGraph.toJSON(this._weightedGraph),
       intervalsJSON: this._intervals,
       credJSON: MapUtil.toObject(this._addressToCred),
       paramsJSON: paramsToJSON(this._params),
@@ -217,19 +221,32 @@ export class TimelineCred {
 
   static fromJSON(j: TimelineCredJSON): TimelineCred {
     const json = fromCompat(COMPAT_INFO, j);
-    const {graphJSON, intervalsJSON, credJSON, paramsJSON, pluginsJSON} = json;
+    const {
+      weightedGraphJSON,
+      intervalsJSON,
+      credJSON,
+      paramsJSON,
+      pluginsJSON,
+    } = json;
     const cred = MapUtil.fromObject(credJSON);
-    const graph = Graph.fromJSON(graphJSON);
+    const weightedGraph = WeightedGraph.fromJSON(weightedGraphJSON);
     const params = paramsFromJSON(paramsJSON);
-    return new TimelineCred(graph, intervalsJSON, cred, params, pluginsJSON);
+    return new TimelineCred(
+      weightedGraph,
+      intervalsJSON,
+      cred,
+      params,
+      pluginsJSON
+    );
   }
 
   static async compute(opts: {|
-    graph: Graph,
+    weightedGraph: WeightedGraphT,
     params?: $Shape<TimelineCredParameters>,
     plugins: $ReadOnlyArray<PluginDeclaration>,
   |}): Promise<TimelineCred> {
-    const {graph, params, plugins} = opts;
+    const {weightedGraph, params, plugins} = opts;
+    const {graph, weights} = weightedGraph;
     const fullParams = params == null ? defaultParams() : partialParams(params);
     const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
     const types = combineTypes(plugins);
@@ -238,7 +255,7 @@ export class TimelineCred {
     const distribution = await timelinePagerank(
       graph,
       types,
-      fullParams.weights,
+      weights,
       fullParams.intervalDecay,
       fullParams.alpha
     );
@@ -251,7 +268,7 @@ export class TimelineCred {
     }
     const intervals = cred.map((x) => x.interval);
     const preliminaryCred = new TimelineCred(
-      graph,
+      weightedGraph,
       intervals,
       addressToCred,
       fullParams,
@@ -265,10 +282,10 @@ export class TimelineCred {
   }
 }
 
-const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.5.0"};
+const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.6.0"};
 
 export opaque type TimelineCredJSON = Compatible<{|
-  +graphJSON: GraphJSON,
+  +weightedGraphJSON: WeightedGraphJSON,
   +paramsJSON: TimelineCredParametersJSON,
   +pluginsJSON: $ReadOnlyArray<PluginDeclaration>,
   +credJSON: {[string]: $ReadOnlyArray<number>},

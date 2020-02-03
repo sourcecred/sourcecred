@@ -1,7 +1,12 @@
 // @flow
 
 import * as MapUtil from "../util/map";
-import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
+import {
+  type NodeAddressT,
+  type EdgeAddressT,
+  NodeAddress,
+  EdgeAddress,
+} from "../core/graph";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
 /**
@@ -11,6 +16,8 @@ import {toCompat, fromCompat, type Compatible} from "../util/compat";
  */
 export type NodeWeight = number;
 
+export type NodeOperator = (NodeWeight, NodeWeight) => NodeWeight;
+
 /**
  * Represents the forwards and backwards weights for a particular Edge (or
  * edge address prefix).
@@ -18,6 +25,8 @@ export type NodeWeight = number;
  * Weights are linear, so 2 is twice as important as 1.
  */
 export type EdgeWeight = {|+forwards: number, +backwards: number|};
+
+export type EdgeOperator = (EdgeWeight, EdgeWeight) => EdgeWeight;
 
 /**
  * Represents the weights for nodes and edges.
@@ -46,6 +55,70 @@ export function copy(w: Weights): Weights {
     nodeWeights: new Map(w.nodeWeights),
     edgeWeights: new Map(w.edgeWeights),
   };
+}
+
+/** Merge multiple Weights together.
+ *
+ * The resultant Weights will have every weight specified by each of the input
+ * weights.
+ *
+ * When there are overlaps (i.e. the same address is present in two or more of
+ * the Weights), then the appropriate resolver will be invoked to resolve the
+ * conflict. The resolver takes two weights and combines them to return a new
+ * weight.
+ *
+ * When no resolvers are explicitly provided, merge defaults to
+ * conservative "error on conflict" resolvers.
+ */
+export function merge(
+  ws: $ReadOnlyArray<Weights>,
+  resolvers: ?{|+nodeResolver: NodeOperator, +edgeResolver: EdgeOperator|}
+): Weights {
+  if (resolvers == null) {
+    const nodeResolver = (_unused_a, _unused_b) => {
+      throw new Error(
+        "node weight conflict detected, but no resolver specified"
+      );
+    };
+    const edgeResolver = (_unused_a, _unused_b) => {
+      throw new Error(
+        "edge weight conflict detected, but no resolver specified"
+      );
+    };
+    resolvers = {nodeResolver, edgeResolver};
+  }
+  const weights: Weights = empty();
+  const {nodeWeights, edgeWeights} = weights;
+  const {nodeResolver, edgeResolver} = resolvers;
+  for (const w of ws) {
+    for (const [addr, val] of w.nodeWeights.entries()) {
+      const existing = nodeWeights.get(addr);
+      if (existing == null) {
+        nodeWeights.set(addr, val);
+      } else {
+        try {
+          nodeWeights.set(addr, nodeResolver(existing, val));
+        } catch (e) {
+          throw new Error(`${e} when resolving ${NodeAddress.toString(addr)}`);
+        }
+      }
+    }
+    for (const [addr, val] of w.edgeWeights.entries()) {
+      const existing = edgeWeights.get(addr);
+      if (existing == null) {
+        edgeWeights.set(addr, val);
+      } else {
+        try {
+          edgeWeights.set(addr, edgeResolver(existing, val));
+        } catch (e) {
+          throw new Error(
+            `Error ${e} when resolving ${EdgeAddress.toString(addr)}`
+          );
+        }
+      }
+    }
+  }
+  return weights;
 }
 
 export type WeightsJSON = Compatible<{|

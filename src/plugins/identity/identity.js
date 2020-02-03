@@ -20,6 +20,17 @@ export type Identity = {|
 |};
 
 /**
+ * Fully specifies all Identity information.
+ *
+ * The discourseServerurl is needed if any Discourse aliases are present
+ * in the included identities.
+ */
+export type IdentitySpec = {|
+  +identities: $ReadOnlyArray<Identity>,
+  +discourseServerUrl: string | null,
+|};
+
+/**
  * Create a new node representing an identity.
  */
 export function identityNode(identity: Identity): Node {
