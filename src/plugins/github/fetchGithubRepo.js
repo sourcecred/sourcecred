@@ -6,7 +6,6 @@
 
 import Database from "better-sqlite3";
 import fetch from "isomorphic-fetch";
-import path from "path";
 import retry from "retry";
 
 import {type RepoId, repoIdToString} from "./repoId";
@@ -19,6 +18,7 @@ import type {Repository} from "./graphqlTypes";
 import schema from "./schema";
 import {validateToken} from "./token";
 import {cacheIdForRepoId} from "./cacheId";
+import {type CacheProvider} from "../../backend/cache";
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
@@ -35,9 +35,9 @@ import {cacheIdForRepoId} from "./cacheId";
  */
 export default async function fetchGithubRepo(
   repoId: RepoId,
-  options: {|+token: string, +cacheDirectory: string|}
+  options: {|+token: string, +cache: CacheProvider|}
 ): Promise<Repository> {
-  const {token, cacheDirectory} = options;
+  const {token, cache} = options;
 
   // Right now, only warn on likely to be bad tokens (see #1461).
   // This lets us proceed to the GitHub API validating the token,
@@ -59,8 +59,7 @@ export default async function fetchGithubRepo(
   // name is valid and uniquely identifying even on case-insensitive
   // filesystems (HFS, HFS+, APFS, NTFS) or filesystems preventing
   // equals signs in file names.
-  const dbFilename = `${cacheIdForRepoId(repoId)}.db`;
-  const db = new Database(path.join(cacheDirectory, dbFilename));
+  const db: Database = await cache.database(cacheIdForRepoId(repoId));
   const mirror = new Mirror(db, schema(), {
     blacklistedIds: BLACKLISTED_IDS,
     guessTypename: _guessTypename,
