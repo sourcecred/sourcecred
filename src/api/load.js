@@ -12,7 +12,10 @@ import {type TimelineCredParameters} from "../analysis/timeline/params";
 
 import {type Project} from "../core/project";
 import {setupProjectDirectory} from "../core/project_io";
-import {type PluginDeclaration} from "../analysis/pluginDeclaration";
+import {
+  type PluginDeclaration,
+  toJSON as pluginsToJSON,
+} from "../analysis/pluginDeclaration";
 import * as Discourse from "../plugins/discourse/loadWeightedGraph";
 import * as Github from "../plugins/github/loadWeightedGraph";
 import * as WeightedGraph from "../core/weightedGraph";
@@ -106,6 +109,10 @@ export async function load(
   const graphFile = path.join(projectDirectory, "weightedGraph.json");
   const graphJSON = WeightedGraph.toJSON(weightedGraph);
   await fs.writeFile(graphFile, stringify(graphJSON));
+
+  const pluginsFile = path.join(projectDirectory, "pluginDeclarations.json");
+  const pluginsJSON = pluginsToJSON(plugins);
+  await fs.writeFile(pluginsFile, stringify(pluginsJSON));
 
   taskReporter.start("compute-cred");
   const cred = await TimelineCred.compute({
