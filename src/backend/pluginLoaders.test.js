@@ -10,6 +10,7 @@ import * as PluginLoaders from "./pluginLoaders";
 
 const githubSentinel = graphNode("github-sentinel");
 const discourseSentinel = graphNode("discourse-sentinel");
+const identitySentinel = graphNode("identity-sentinel");
 
 const mockGithubGraph = () => {
   const wg = WeightedGraph.empty();
@@ -20,6 +21,12 @@ const mockGithubGraph = () => {
 const mockDiscourseGraph = () => {
   const wg = WeightedGraph.empty();
   wg.graph.addNode(discourseSentinel);
+  return wg;
+};
+
+const mockContractedGraph = () => {
+  const wg = WeightedGraph.empty();
+  wg.graph.addNode(identitySentinel);
   return wg;
 };
 
@@ -44,6 +51,7 @@ const mockPluginLoaders = () => ({
   },
   identity: {
     declaration: jest.fn().mockReturnValue(fakeIdentityDec),
+    contractIdentities: jest.fn().mockReturnValue(mockContractedGraph()),
   },
 });
 
@@ -267,6 +275,71 @@ describe("src/backend/pluginLoaders", () => {
         githubToken,
         cache
       );
+    });
+  });
+
+  describe("contractPluginGraphs", () => {
+    it("should only merge graphs when no identities are defined", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const project = createProject({
+        id: "has-github-and-discourse",
+        discourseServer: {serverUrl: "http://foo.bar"},
+        repoIds: [exampleRepoId],
+      });
+      const pluginGraphs = ({
+        graphs: [mockGithubGraph(), mockDiscourseGraph()],
+        cachedProject: {project, cache},
+      }: any);
+
+      // When
+      const graph = await PluginLoaders.contractPluginGraphs(
+        loaders,
+        pluginGraphs
+      );
+
+      // Then
+      const expectedGraph = WeightedGraph.merge([
+        mockGithubGraph(),
+        mockDiscourseGraph(),
+      ]);
+      expect(graph).toEqual(expectedGraph);
+    });
+
+    it("should contract identities when they are defined", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const project = createProject({
+        id: "has-github-and-discourse-and-identity",
+        identities: [{username: "foo", aliases: ["github/foo"]}],
+        discourseServer: {serverUrl: "http://foo.bar"},
+        repoIds: [exampleRepoId],
+      });
+      const pluginGraphs = ({
+        graphs: [mockGithubGraph(), mockDiscourseGraph()],
+        cachedProject: {project, cache},
+      }: any);
+
+      // When
+      const graph = await PluginLoaders.contractPluginGraphs(
+        loaders,
+        pluginGraphs
+      );
+
+      // Then
+      const {identity} = loaders;
+      const expectedGraph = WeightedGraph.merge([
+        mockGithubGraph(),
+        mockDiscourseGraph(),
+      ]);
+      expect(graph).toEqual(mockContractedGraph());
+      expect(identity.contractIdentities).toBeCalledTimes(1);
+      expect(identity.contractIdentities).toBeCalledWith(expectedGraph, {
+        identities: project.identities,
+        discourseServerUrl: (project.discourseServer: any).serverUrl,
+      });
     });
   });
 });
