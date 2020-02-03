@@ -93,7 +93,7 @@ export function createApp(
       );
       let pagerankTable;
       if (appState.type === "PAGERANK_EVALUATED") {
-        const declarations = appState.timelineCred.plugins();
+        const declarations = appState.pluginDeclarations;
         const weightConfig = (
           <WeightConfig
             declarations={declarations}
