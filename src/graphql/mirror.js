@@ -1645,7 +1645,7 @@ export class Mirror {
         db.prepare(
           dedent`\
             WITH RECURSIVE
-            direct_dependencies (parent_id, child_id) AS (
+            cte_direct_deps (parent_id, child_id) AS (
                 SELECT parent_id, child_id FROM links
                 WHERE child_id IS NOT NULL
                 UNION
@@ -1656,16 +1656,16 @@ export class Mirror {
                 ON connections.rowid = connection_entries.connection_id
                 WHERE child_id IS NOT NULL
             ),
-            transitive_dependencies (id) AS (
+            cte_transitive_deps (id) AS (
                 VALUES (:rootId) UNION
-                SELECT direct_dependencies.child_id
-                FROM transitive_dependencies JOIN direct_dependencies
-                ON transitive_dependencies.id = direct_dependencies.parent_id
+                SELECT cte_direct_deps.child_id
+                FROM cte_transitive_deps JOIN cte_direct_deps
+                ON cte_transitive_deps.id = cte_direct_deps.parent_id
             )
             INSERT INTO transitive_dependencies (id, typename)
             SELECT objects.id AS id, objects.typename AS typename
-            FROM objects JOIN transitive_dependencies
-            ON objects.id = transitive_dependencies.id
+            FROM objects JOIN cte_transitive_deps
+            ON objects.id = cte_transitive_deps.id
           `
         ).run({rootId});
 
