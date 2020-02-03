@@ -4,6 +4,9 @@ import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
 import type {EdgeType, NodeType, NodeAndEdgeTypes} from "./types";
 import * as Weights from "../core/weights";
 import {type Weights as WeightsT} from "../core/weights";
+import {toCompat, fromCompat, type Compatible} from "../util/compat";
+
+const COMPAT_INFO = {type: "sourcecred/pluginDeclarations", version: "0.1.0"};
 
 // TODO(@decentralion): Maybe merge this file with analysis/types
 
@@ -22,6 +25,18 @@ export type PluginDeclaration = {|
   // user type weights.
   +userTypes: $ReadOnlyArray<NodeType>,
 |};
+
+export type PluginDeclarations = $ReadOnlyArray<PluginDeclaration>;
+
+export function toJSON(decs: PluginDeclarations): PluginDeclarationsJSON {
+  return toCompat(COMPAT_INFO, decs);
+}
+
+export function fromJSON(json: PluginDeclarationsJSON): PluginDeclarations {
+  return fromCompat(COMPAT_INFO, json);
+}
+
+export type PluginDeclarationsJSON = Compatible<PluginDeclarations>;
 
 export function combineTypes(
   decs: $ReadOnlyArray<PluginDeclaration>
