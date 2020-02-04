@@ -365,14 +365,7 @@ export class Mirror {
     +id: Schema.ObjectId,
   |}): void {
     _inTransaction(this._db, () => {
-      this._nontransactionallyRegisterObject(object, (guess) => {
-        const s = JSON.stringify;
-        const message =
-          `object ${s(object.id)} ` +
-          `looks like it should have type ${s(guess)}, ` +
-          `not ${s(object.typename)}`;
-        return message;
-      });
+      this._nontransactionallyRegisterObject(object);
     });
   }
 
@@ -386,10 +379,21 @@ export class Mirror {
       +typename: Schema.Typename,
       +id: Schema.ObjectId,
     |},
-    guessMismatchMessage: (guess: Schema.Typename) => string
+    guessMismatchMessage?: (guess: Schema.Typename) => string
   ): void {
     const db = this._db;
     const {typename, id} = object;
+
+    if (guessMismatchMessage == null) {
+      guessMismatchMessage = (guess) => {
+        const s = JSON.stringify;
+        const message =
+          `object ${s(object.id)} ` +
+          `looks like it should have type ${s(guess)}, ` +
+          `not ${s(object.typename)}`;
+        return message;
+      };
+    }
 
     const existingTypename = db
       .prepare("SELECT typename FROM objects WHERE id = ?")
@@ -1627,10 +1631,6 @@ export class Mirror {
    * error will be thrown. Furthermore, all transitive dependencies of
    * the object must have been at least partially loaded at some point,
    * or an error will be thrown.
-   *
-   * The `options` argument to `extract` has no stability guarantees and
-   * may be removed or changed at any time. For information about its
-   * semantics, read the current source code.
    */
   extract(rootId: Schema.ObjectId): mixed {
     const db = this._db;
