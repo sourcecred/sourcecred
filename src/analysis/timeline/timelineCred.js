@@ -76,10 +76,6 @@ export class TimelineCred {
     return this._params;
   }
 
-  plugins(): $ReadOnlyArray<PluginDeclaration> {
-    return this._plugins;
-  }
-
   /**
    * Creates a new TimelineCred based on the new Parameters.
    * Holds the graph and config constant.
@@ -151,7 +147,7 @@ export class TimelineCred {
    * with a type specified as a user type by one of the plugin declarations.
    */
   userNodes(): $ReadOnlyArray<CredNode> {
-    const userTypes = [].concat(...this.plugins().map((p) => p.userTypes));
+    const userTypes = [].concat(...this._plugins.map((p) => p.userTypes));
     return this.credSortedNodes(userTypes.map((x) => x.prefix));
   }
 

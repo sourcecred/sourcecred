@@ -72,6 +72,7 @@ describe("explorer/legacy/App", () => {
           defaultParams(),
           []
         ),
+        pluginDeclarations: [],
       });
     },
     pagerankEvaluated: (loadingState) => {
@@ -86,6 +87,7 @@ describe("explorer/legacy/App", () => {
           defaultParams(),
           []
         ),
+        pluginDeclarations: [],
         pagerankNodeDecomposition: new Map(),
       });
     },
