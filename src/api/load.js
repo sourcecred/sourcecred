@@ -18,6 +18,8 @@ import * as Github from "../plugins/github/loadWeightedGraph";
 import * as WeightedGraph from "../core/weightedGraph";
 import {type Weights as WeightsT} from "../core/weights";
 import {loadWeightedGraph} from "./loadWeightedGraph";
+import {DataDirectory} from "../backend/dataDirectory";
+import {type CacheProvider} from "../backend/cache";
 
 export type LoadOptions = {|
   +project: Project,
@@ -58,6 +60,7 @@ export async function load(
   const fullParams = params == null ? defaultParams() : partialParams(params);
   const loadTask = `load-${options.project.id}`;
   taskReporter.start(loadTask);
+  const dataDirectory = new DataDirectory(sourcecredDirectory);
   const cacheDirectory = path.join(sourcecredDirectory, "cache");
   await fs.mkdirp(cacheDirectory);
 
@@ -77,7 +80,7 @@ export async function load(
     githubOptions = {
       repoIds: project.repoIds,
       token: githubToken,
-      cacheDirectory,
+      cache: (dataDirectory: CacheProvider),
     };
   }
 
