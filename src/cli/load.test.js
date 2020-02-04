@@ -16,9 +16,9 @@ import {makeRepoId, stringToRepoId} from "../plugins/github/repoId";
 import {validateToken} from "../plugins/github/token";
 import {defaultParams} from "../analysis/timeline/params";
 
-jest.mock("../api/load", () => ({load: jest.fn()}));
+jest.mock("../api/load", () => ({loadContext: jest.fn()}));
 type JestMockFn = $Call<typeof jest.fn>;
-const load: JestMockFn = (require("../api/load").load: any);
+const load: JestMockFn = (require("../api/load").loadContext: any);
 
 describe("cli/load", () => {
   const exampleGithubToken = validateToken("0".repeat(40));
