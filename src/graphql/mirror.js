@@ -1631,10 +1631,6 @@ export class Mirror {
    * error will be thrown. Furthermore, all transitive dependencies of
    * the object must have been at least partially loaded at some point,
    * or an error will be thrown.
-   *
-   * The `options` argument to `extract` has no stability guarantees and
-   * may be removed or changed at any time. For information about its
-   * semantics, read the current source code.
    */
   extract(rootId: Schema.ObjectId): mixed {
     const db = this._db;
