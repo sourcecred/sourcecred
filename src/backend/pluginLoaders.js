@@ -3,6 +3,7 @@
 import {TaskReporter} from "../util/taskReporter";
 import {type Project} from "../core/project";
 import {type WeightedGraph as WeightedGraphT} from "../core/weightedGraph";
+import * as WeightedGraph from "../core/weightedGraph";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {type CacheProvider} from "./cache";
 import {type GithubToken} from "../plugins/github/token";
@@ -122,4 +123,27 @@ export async function createPluginGraphs(
     graphs: await Promise.all(tasks),
     cachedProject: {cache, project},
   };
+}
+
+/**
+ * Takes PluginGraphs and merges it into a WeightedGraph with identities contracted.
+ */
+export async function contractPluginGraphs(
+  {identity}: PluginLoaders,
+  {graphs, cachedProject}: PluginGraphs
+): Promise<WeightedGraphT> {
+  const {project} = cachedProject;
+  const mergedGraph = WeightedGraph.merge(graphs);
+
+  // Don't contract when there's no identities. This will prevent unnecessary copying.
+  if (!project.identities.length) {
+    return mergedGraph;
+  }
+
+  const discourseServer = project.discourseServer || {serverUrl: null};
+  const identitySpec = {
+    identities: project.identities,
+    discourseServerUrl: discourseServer.serverUrl,
+  };
+  return identity.contractIdentities(mergedGraph, identitySpec);
 }
