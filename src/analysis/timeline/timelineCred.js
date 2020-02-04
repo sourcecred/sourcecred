@@ -8,7 +8,7 @@ import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import {type Interval} from "./interval";
 import {timelinePagerank} from "./timelinePagerank";
 import {distributionToCred} from "./distributionToCred";
-import {type PluginDeclaration, combineTypes} from "../pluginDeclaration";
+import {type PluginDeclaration} from "../pluginDeclaration";
 import {type NodeAddressT, NodeAddress, type Node} from "../../core/graph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import {type Weights as WeightsT} from "../../core/weights";
@@ -189,16 +189,13 @@ export class TimelineCred {
     plugins: $ReadOnlyArray<PluginDeclaration>,
   |}): Promise<TimelineCred> {
     const {weightedGraph, params, plugins} = opts;
-    const {graph, weights} = weightedGraph;
+    const {graph} = weightedGraph;
     const fullParams = params == null ? defaultParams() : partialParams(params);
     const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
-    const types = combineTypes(plugins);
     const userTypes = [].concat(...plugins.map((x) => x.userTypes));
     const scorePrefixes = userTypes.map((x) => x.prefix);
     const distribution = await timelinePagerank(
-      graph,
-      types,
-      weights,
+      weightedGraph,
       fullParams.intervalDecay,
       fullParams.alpha
     );

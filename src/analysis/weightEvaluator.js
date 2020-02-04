@@ -1,13 +1,11 @@
 // @flow
 
 import type {NodeAddressT, EdgeAddressT} from "../core/graph";
-import type {NodeType, EdgeType} from "./types";
 import type {
   Weights as WeightsT,
   EdgeWeight,
   NodeWeight,
 } from "../core/weights";
-import * as Weights from "../core/weights";
 import {NodeTrie, EdgeTrie} from "../core/trie";
 
 export type NodeWeightEvaluator = (NodeAddressT) => NodeWeight;
@@ -26,19 +24,9 @@ export type EdgeWeightEvaluator = (EdgeAddressT) => EdgeWeight;
  * legacy affordance; shortly we will remove the NodeTypes and require that the
  * plugins provide the type weights when the Weights object is constructed.
  */
-export function nodeWeightEvaluator(
-  types: $ReadOnlyArray<NodeType>,
-  weights: WeightsT
-): NodeWeightEvaluator {
-  const {nodeWeights} = Weights.copy(weights);
-
-  for (const {prefix, defaultWeight} of types) {
-    if (!nodeWeights.has(prefix)) {
-      nodeWeights.set(prefix, defaultWeight);
-    }
-  }
+export function nodeWeightEvaluator(weights: WeightsT): NodeWeightEvaluator {
   const nodeTrie: NodeTrie<NodeWeight> = new NodeTrie();
-  for (const [prefix, weight] of nodeWeights.entries()) {
+  for (const [prefix, weight] of weights.nodeWeights.entries()) {
     nodeTrie.add(prefix, weight);
   }
   return function nodeWeight(a: NodeAddressT): NodeWeight {
@@ -61,18 +49,9 @@ export function nodeWeightEvaluator(
  * directly in the weights object, so that producing weight evaluators will no
  * longer depend on having plugin declarations on hand.
  */
-export function edgeWeightEvaluator(
-  types: $ReadOnlyArray<EdgeType>,
-  weights: WeightsT
-): EdgeWeightEvaluator {
-  const {edgeWeights} = Weights.copy(weights);
-  for (const {prefix, defaultWeight} of types) {
-    if (!edgeWeights.has(prefix)) {
-      edgeWeights.set(prefix, defaultWeight);
-    }
-  }
+export function edgeWeightEvaluator(weights: WeightsT): EdgeWeightEvaluator {
   const edgeTrie: EdgeTrie<EdgeWeight> = new EdgeTrie();
-  for (const [prefix, weight] of edgeWeights.entries()) {
+  for (const [prefix, weight] of weights.edgeWeights.entries()) {
     edgeTrie.add(prefix, weight);
   }
   return function evaluator(address: EdgeAddressT): EdgeWeight {
