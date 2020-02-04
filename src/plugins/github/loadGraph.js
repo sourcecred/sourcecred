@@ -15,11 +15,12 @@ import {RelationalView} from "./relationalView";
 import {type RepoId, repoIdToString} from "./repoId";
 import {Graph} from "../../core/graph";
 import {type GithubToken} from "./token";
+import {type CacheProvider} from "../../backend/cache";
 
 export type Options = {|
   +repoIds: $ReadOnlyArray<RepoId>,
   +token: GithubToken,
-  +cacheDirectory: string,
+  +cache: CacheProvider,
 |};
 
 /**
@@ -42,7 +43,7 @@ export async function loadGraph(
     repositories.push(
       await fetchGithubRepo(repoId, {
         token: options.token,
-        cacheDirectory: options.cacheDirectory,
+        cache: options.cache,
       })
     );
     taskReporter.finish(taskId);

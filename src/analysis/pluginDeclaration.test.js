@@ -1,11 +1,14 @@
 // @flow
 
+import stringify from "json-stable-stringify";
 import deepFreeze from "deep-freeze";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {type NodeType, type EdgeType} from "./types";
 import {
   weightsForDeclaration,
   type PluginDeclaration,
+  toJSON,
+  fromJSON,
 } from "./pluginDeclaration";
 import * as Weights from "../core/weights";
 
@@ -50,6 +53,27 @@ describe("analysis/pluginDeclaration", () => {
       expected.edgeWeights.set(edgeType.prefix, edgeType.defaultWeight);
       const actual = weightsForDeclaration(nonEmptyDeclaration);
       expect(expected).toEqual(actual);
+    });
+  });
+
+  describe("to/fromJSON", () => {
+    it("works round-trip on an empty declaration", () => {
+      const json = toJSON([emptyDeclaration]);
+      const result = fromJSON(json);
+      expect(result).toEqual([emptyDeclaration]);
+    });
+    it("snapshots on an empty declaration", () => {
+      // stringify to avoid having literal NUL bytes in our source.
+      expect(stringify(toJSON([emptyDeclaration]))).toMatchSnapshot();
+    });
+    it("works round-trip on an non-empty declaration", () => {
+      const json = toJSON([nonEmptyDeclaration]);
+      const result = fromJSON(json);
+      expect(result).toEqual([nonEmptyDeclaration]);
+    });
+    it("snapshots on an non-empty declaration", () => {
+      // stringify to avoid having literal NUL bytes in our source.
+      expect(stringify(toJSON([nonEmptyDeclaration]))).toMatchSnapshot();
     });
   });
 });
