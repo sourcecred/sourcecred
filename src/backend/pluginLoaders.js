@@ -2,6 +2,7 @@
 
 import {TaskReporter} from "../util/taskReporter";
 import {type Project} from "../core/project";
+import {type WeightedGraph as WeightedGraphT} from "../core/weightedGraph";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {type CacheProvider} from "./cache";
 import {type GithubToken} from "../plugins/github/token";
@@ -31,10 +32,22 @@ opaque type CachedProject = {|
   +project: Project,
 |};
 
+/**
+ * Represents all disjoint WeightedGraphs for a CachedProject.
+ */
+opaque type PluginGraphs = {|
+  +graphs: $ReadOnlyArray<WeightedGraphT>,
+  +cachedProject: CachedProject,
+|};
+
 type MirrorEnv = {
   +githubToken: ?GithubToken,
   +reporter: TaskReporter,
   +cache: CacheProvider,
+};
+
+type GraphEnv = {
+  +githubToken: ?GithubToken,
 };
 
 /**
@@ -81,4 +94,32 @@ export async function updateMirror(
   }
   await Promise.all(tasks);
   return {project, cache};
+}
+
+/**
+ * Creates PluginGraphs containing all plugins requested by the Project.
+ */
+export async function createPluginGraphs(
+  {github, discourse}: PluginLoaders,
+  {githubToken}: GraphEnv,
+  {cache, project}: CachedProject
+): Promise<PluginGraphs> {
+  const tasks: Promise<WeightedGraphT>[] = [];
+  if (project.discourseServer) {
+    tasks.push(discourse.createGraph(project.discourseServer, cache));
+  }
+  if (project.repoIds.length) {
+    if (!githubToken) {
+      throw new Error("Tried to load GitHub, but no GitHub token set");
+    }
+    tasks.push(github.createGraph(project.repoIds, githubToken, cache));
+  }
+
+  // It's important to use Promise.all so that we can load the plugins in
+  // parallel -- since loading is often IO-bound, this can be a big performance
+  // improvement.
+  return {
+    graphs: await Promise.all(tasks),
+    cachedProject: {cache, project},
+  };
 }
