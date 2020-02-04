@@ -10,10 +10,12 @@ import {type CacheProvider} from "./cache";
 import {type ProjectStorageProvider} from "./projectStorage";
 import {DataDirectory} from "./dataDirectory";
 import * as WeightedGraph from "../core/weightedGraph";
+import {toJSON as pluginsToJSON} from "../analysis/pluginDeclaration";
 
 const project = createProject({id: "testing-project"});
 
 const fakeWeightedGraph = deepFreeze(WeightedGraph.empty());
+const fakeDeclarations = deepFreeze([]);
 
 const fakeCred = ({
   toJSON: () => ({is: "fake-cred"}),
@@ -22,6 +24,7 @@ const fakeCred = ({
 const fakeExtras = {
   weightedGraph: fakeWeightedGraph,
   cred: fakeCred,
+  pluginDeclarations: fakeDeclarations,
 };
 
 describe("src/backend/dataDirectory", () => {
@@ -111,6 +114,10 @@ describe("src/backend/dataDirectory", () => {
           WeightedGraph.toJSON(fakeWeightedGraph)
         );
         await expectJSONFile("cred.json", fakeCred.toJSON());
+        await expectJSONFile(
+          "pluginDeclarations.json",
+          pluginsToJSON(fakeDeclarations)
+        );
       });
 
       it("should work when sourcecredDirectory doesn't exist", async () => {
@@ -141,6 +148,10 @@ describe("src/backend/dataDirectory", () => {
           WeightedGraph.toJSON(fakeWeightedGraph)
         );
         await expectJSONFile("cred.json", fakeCred.toJSON());
+        await expectJSONFile(
+          "pluginDeclarations.json",
+          pluginsToJSON(fakeDeclarations)
+        );
       });
 
       it("should fail when sourcecredDirectory is a file", async () => {
