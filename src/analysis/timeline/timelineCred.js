@@ -242,16 +242,14 @@ export class TimelineCred {
     plugins: $ReadOnlyArray<PluginDeclaration>,
   |}): Promise<TimelineCred> {
     const {weightedGraph, params, plugins} = opts;
-    const {graph, weights} = weightedGraph;
+    const {graph} = weightedGraph;
     const fullParams = params == null ? defaultParams() : partialParams(params);
     const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
     const types = combineTypes(plugins);
     const userTypes = [].concat(...plugins.map((x) => x.userTypes));
     const scorePrefixes = userTypes.map((x) => x.prefix);
     const distribution = await timelinePagerank(
-      graph,
-      types,
-      weights,
+      weightedGraph,
       fullParams.intervalDecay,
       fullParams.alpha
     );

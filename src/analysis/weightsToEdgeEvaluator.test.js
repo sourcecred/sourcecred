@@ -1,6 +1,5 @@
 // @flow
 
-import deepFreeze from "deep-freeze";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {type Weights as WeightsT} from "../core/weights";
 import * as Weights from "../core/weights";
@@ -16,57 +15,19 @@ describe("analysis/weightsToEdgeEvaluator", () => {
     timestampMs: 0,
   };
 
-  const fallbackNodeType = deepFreeze({
-    name: "",
-    pluralName: "",
-    prefix: NodeAddress.empty,
-    defaultWeight: 1,
-    description: "",
-  });
-
-  const srcNodeType = deepFreeze({
-    name: "",
-    pluralName: "",
-    prefix: src,
-    defaultWeight: 2,
-    description: "",
-  });
-
-  const fallbackEdgeType = deepFreeze({
-    forwardName: "",
-    backwardName: "",
-    defaultWeight: {forwards: 1, backwards: 1},
-    prefix: EdgeAddress.empty,
-    description: "",
-  });
-
   function evaluateEdge(weights: WeightsT) {
-    const evaluator = weightsToEdgeEvaluator(weights, {
-      nodeTypes: [fallbackNodeType, srcNodeType],
-      edgeTypes: [fallbackEdgeType],
-    });
+    const evaluator = weightsToEdgeEvaluator(weights);
     return evaluator(edge);
   }
 
   it("applies default weights when none are specified", () => {
-    expect(evaluateEdge(Weights.empty())).toEqual({forwards: 1, backwards: 2});
+    expect(evaluateEdge(Weights.empty())).toEqual({forwards: 1, backwards: 1});
   });
 
   it("matches all prefixes of the nodes in scope", () => {
     const weights = Weights.empty();
     weights.nodeWeights.set(NodeAddress.empty, 99);
-    expect(evaluateEdge(weights)).toEqual({forwards: 99, backwards: 2 * 99});
-  });
-
-  it("takes manually specified edge type weights into account", () => {
-    const weights = Weights.empty();
-    // Note that here we grab the fallout edge type. This also verifies that
-    // we are doing prefix matching on the types (rather than exact matching).
-    weights.edgeWeights.set(EdgeAddress.empty, {
-      forwards: 6,
-      backwards: 12,
-    });
-    expect(evaluateEdge(weights)).toEqual({forwards: 6, backwards: 24});
+    expect(evaluateEdge(weights)).toEqual({forwards: 99, backwards: 99});
   });
 
   it("an explicit weight on a prefix overrides the type weight", () => {
@@ -76,10 +37,7 @@ describe("analysis/weightsToEdgeEvaluator", () => {
   });
 
   it("uses 1 as a default weight for unmatched nodes and edges", () => {
-    const evaluator = weightsToEdgeEvaluator(Weights.empty(), {
-      nodeTypes: [],
-      edgeTypes: [],
-    });
+    const evaluator = weightsToEdgeEvaluator(Weights.empty());
     expect(evaluator(edge)).toEqual({forwards: 1, backwards: 1});
   });
 
