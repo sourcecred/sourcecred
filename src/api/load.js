@@ -23,6 +23,7 @@ import {type Weights as WeightsT} from "../core/weights";
 import {loadWeightedGraph} from "./loadWeightedGraph";
 import {DataDirectory} from "../backend/dataDirectory";
 import {type CacheProvider} from "../backend/cache";
+import {LoadContext} from "../backend/loadContext";
 
 export type LoadOptions = {|
   +project: Project,
@@ -32,6 +33,26 @@ export type LoadOptions = {|
   +sourcecredDirectory: string,
   +githubToken: ?GithubToken,
 |};
+
+export async function loadContext(
+  options: LoadOptions,
+  reporter: TaskReporter
+): Promise<void> {
+  const {
+    sourcecredDirectory,
+    githubToken,
+    project,
+    params,
+    weightsOverrides,
+  } = options;
+  const data = new DataDirectory(sourcecredDirectory);
+  const context = new LoadContext({cache: data, githubToken, reporter});
+  const result = await context.load(project, {
+    params: params || {},
+    weightsOverrides,
+  });
+  data.storeProject(project, result);
+}
 
 /**
  * Loads and computes cred for a project.

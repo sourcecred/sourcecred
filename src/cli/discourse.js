@@ -8,7 +8,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import * as Common from "./common";
 import * as Weights from "../core/weights";
-import {load} from "../api/load";
+import {loadContext as load} from "../api/load";
 import {declaration as discourseDeclaration} from "../plugins/discourse/declaration";
 import {type Project, createProject} from "../core/project";
 
