@@ -27,6 +27,7 @@ import {
 } from "../analysis/timeline/params";
 import * as WeightedGraph from "../core/weightedGraph";
 import {DataDirectory} from "../backend/dataDirectory";
+import {fromJSON as pluginsFromJSON} from "../analysis/pluginDeclaration";
 
 type JestMockFn = $Call<typeof jest.fn>;
 jest.mock("../plugins/github/loadWeightedGraph", () => ({
@@ -235,5 +236,18 @@ describe("api/load", () => {
     const identityGraph = contractIdentities(combinedGraph(), identitySpec);
     const expectedJSON = WeightedGraph.toJSON(identityGraph);
     expect(graphJSON).toEqual(expectedJSON);
+  });
+
+  it("saves plugin declarations to disk", async () => {
+    const {options, taskReporter, sourcecredDirectory} = example();
+    await load(options, taskReporter);
+    const projectDirectory = directoryForProjectId(
+      project.id,
+      sourcecredDirectory
+    );
+    const pluginsFile = path.join(projectDirectory, "pluginDeclarations.json");
+    const pluginsJSON = JSON.parse(await fs.readFile(pluginsFile));
+    const actualPlugins = pluginsFromJSON(pluginsJSON);
+    expect(actualPlugins).toEqual(plugins);
   });
 });
