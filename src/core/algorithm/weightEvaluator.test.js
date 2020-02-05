@@ -1,10 +1,10 @@
 // @flow
 
-import {NodeAddress, EdgeAddress} from "../core/graph";
+import {NodeAddress, EdgeAddress} from "../graph";
 import {nodeWeightEvaluator, edgeWeightEvaluator} from "./weightEvaluator";
-import * as Weights from "../core/weights";
+import * as Weights from "../weights";
 
-describe("src/analysis/weightEvaluator", () => {
+describe("src/core/algorithm/weightEvaluator", () => {
   describe("nodeWeightEvaluator", () => {
     const empty = NodeAddress.fromParts([]);
     const foo = NodeAddress.fromParts(["foo"]);

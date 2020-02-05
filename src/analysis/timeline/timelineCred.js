@@ -5,9 +5,9 @@ import sortBy from "lodash.sortby";
 import * as NullUtil from "../../util/null";
 import * as MapUtil from "../../util/map";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
-import {type Interval} from "./interval";
-import {timelinePagerank} from "./timelinePagerank";
-import {distributionToCred} from "./distributionToCred";
+import {type Interval} from "../../core/interval";
+import {timelinePagerank} from "../../core/algorithm/timelinePagerank";
+import {distributionToCred} from "../../core/algorithm/distributionToCred";
 import {type PluginDeclaration} from "../pluginDeclaration";
 import {type NodeAddressT, NodeAddress, type Node} from "../../core/graph";
 import * as WeightedGraph from "../../core/weightedGraph";
@@ -25,7 +25,7 @@ import {
   defaultParams,
 } from "./params";
 
-export type {Interval} from "./interval";
+export type {Interval} from "../../core/interval";
 
 /**
  * A Graph Node wrapped with cred information.

@@ -3,7 +3,10 @@
 import type {Edge} from "../core/graph";
 import type {Weights} from "../core/weights";
 import type {EdgeEvaluator} from "./pagerank";
-import {nodeWeightEvaluator, edgeWeightEvaluator} from "./weightEvaluator";
+import {
+  nodeWeightEvaluator,
+  edgeWeightEvaluator,
+} from "../core/algorithm/weightEvaluator";
 
 /**
  * Given the weight choices and the node and edge types, produces an edge

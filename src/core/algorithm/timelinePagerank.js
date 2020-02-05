@@ -6,26 +6,26 @@
 import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
-import {Graph, type NodeAddressT, type Edge, type Node} from "../../core/graph";
-import {type WeightedGraph} from "../../core/weightedGraph";
-import {type Interval, partitionGraph} from "./interval";
+import {Graph, type NodeAddressT, type Edge, type Node} from "../graph";
+import {type WeightedGraph} from "../weightedGraph";
+import {type Interval, partitionGraph} from "../interval";
 import {
   nodeWeightEvaluator,
   edgeWeightEvaluator,
   type NodeWeightEvaluator,
   type EdgeWeightEvaluator,
-} from "../weightEvaluator";
-import {weightedDistribution} from "../../core/algorithm/nodeDistribution";
-import {type Distribution} from "../../core/algorithm/distribution";
+} from "./weightEvaluator";
+import {weightedDistribution} from "./nodeDistribution";
+import {type Distribution} from "./distribution";
 import {
   createOrderedSparseMarkovChain,
   createConnections,
-} from "../../core/algorithm/graphToMarkovChain";
+} from "./graphToMarkovChain";
 import {
   findStationaryDistribution,
   type PagerankParams,
   type SparseMarkovChain,
-} from "../../core/algorithm/markovChain";
+} from "./markovChain";
 
 /**
  * Represents raw PageRank distributions on a graph over time.

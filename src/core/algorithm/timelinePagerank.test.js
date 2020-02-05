@@ -2,17 +2,17 @@
 
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
-import {node, edge} from "../../core/graphTestUtil";
-import {Graph, type EdgeAddressT, type Edge} from "../../core/graph";
+import {node, edge} from "../graphTestUtil";
+import {Graph, type EdgeAddressT, type Edge} from "../graph";
 import {_timelineNodeWeights, _timelineMarkovChain} from "./timelinePagerank";
 import {
   createConnections,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
-} from "../../core/algorithm/graphToMarkovChain";
-import {type SparseMarkovChain} from "../../core/algorithm/markovChain";
+} from "./graphToMarkovChain";
+import {type SparseMarkovChain} from "./markovChain";
 
-describe("src/analysis/timeline/timelinePagerank", () => {
+describe("src/core/algorithm/timelinePagerank", () => {
   describe("_timelineNodeWeights", () => {
     it("works in a simple case", () => {
       const foo = node("foo");
