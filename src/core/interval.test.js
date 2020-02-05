@@ -1,11 +1,11 @@
 // @flow
 
 import {utcWeek} from "d3-time";
-import {node, edge} from "../../core/graphTestUtil";
-import {Graph} from "../../core/graph";
+import {node, edge} from "./graphTestUtil";
+import {Graph} from "./graph";
 import {partitionGraph, graphIntervals, weekIntervals} from "./interval";
 
-describe("src/analysis/timeline/interval", () => {
+describe("src/core/interval", () => {
   const WEEK_MID = 1562501362239;
   const WEEK_START = +utcWeek.floor(WEEK_MID);
   const WEEK_END = +utcWeek.ceil(WEEK_MID);

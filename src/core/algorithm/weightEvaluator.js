@@ -1,12 +1,8 @@
 // @flow
 
-import type {NodeAddressT, EdgeAddressT} from "../core/graph";
-import type {
-  Weights as WeightsT,
-  EdgeWeight,
-  NodeWeight,
-} from "../core/weights";
-import {NodeTrie, EdgeTrie} from "../core/trie";
+import type {NodeAddressT, EdgeAddressT} from "../graph";
+import type {Weights as WeightsT, EdgeWeight, NodeWeight} from "../weights";
+import {NodeTrie, EdgeTrie} from "../trie";
 
 export type NodeWeightEvaluator = (NodeAddressT) => NodeWeight;
 export type EdgeWeightEvaluator = (EdgeAddressT) => EdgeWeight;

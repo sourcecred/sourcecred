@@ -5,7 +5,7 @@
  */
 
 import {sum} from "d3-array";
-import {type Interval} from "./interval";
+import {type Interval} from "../interval";
 import {type TimelineDistributions} from "./timelinePagerank";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 
