@@ -16,12 +16,12 @@ import * as Schema from "../../graphql/schema";
 import {BLACKLISTED_IDS} from "./blacklistedObjectIds";
 import type {Repository} from "./graphqlTypes";
 import schema from "./schema";
-import {validateToken} from "./token";
+import {type GithubToken} from "./token";
 import {cacheIdForRepoId} from "./cacheId";
 import {type CacheProvider} from "../../backend/cache";
 
 type FetchRepoOptions = {|
-  +token: string,
+  +token: GithubToken,
   +cache: CacheProvider,
 |};
 
@@ -45,15 +45,6 @@ export async function fetchGithubRepoFromCache(
   repoId: RepoId,
   {token, cache}: FetchRepoOptions
 ): Promise<Repository> {
-  // Right now, only warn on likely to be bad tokens (see #1461).
-  // This lets us proceed to the GitHub API validating the token,
-  // while giving users instructions to remedy if it was their mistake.
-  try {
-    validateToken(token);
-  } catch (e) {
-    console.warn(`Warning: ${e}`);
-  }
-
   // TODO: remove the need for a GithubToken to resolve the ID.
   // See https://github.com/sourcecred/sourcecred/issues/1580
   const postQueryWithToken = (payload) => postQuery(payload, token);
@@ -76,7 +67,7 @@ export async function fetchGithubRepoFromCache(
  *
  * @param {RepoId} repoId
  *    the GitHub repository to be scraped
- * @param {String} token
+ * @param {GithubToken} token
  *    authentication token to be used for the GitHub API; generate a
  *    token at: https://github.com/settings/tokens
  * @return {Promise<object>}
@@ -88,17 +79,7 @@ export default async function fetchGithubRepo(
   repoId: RepoId,
   {token, cache}: FetchRepoOptions
 ): Promise<Repository> {
-  // Right now, only warn on likely to be bad tokens (see #1461).
-  // This lets us proceed to the GitHub API validating the token,
-  // while giving users instructions to remedy if it was their mistake.
-  try {
-    validateToken(token);
-  } catch (e) {
-    console.warn(`Warning: ${e}`);
-  }
-
   const postQueryWithToken = (payload) => postQuery(payload, token);
-
   const resolvedId: Schema.ObjectId = await resolveRepositoryGraphqlId(
     postQueryWithToken,
     repoId
@@ -247,7 +228,7 @@ function retryGithubFetch(fetch, fetchOptions) {
 
 export async function postQuery(
   {body, variables}: {+body: Body, +variables: mixed},
-  token: string
+  token: GithubToken
 ): Promise<any> {
   const postBody = JSON.stringify({
     query: stringify.body(body, inlineLayout()),
