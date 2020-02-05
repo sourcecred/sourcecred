@@ -16,17 +16,17 @@ import {
   type NodeWeightEvaluator,
   type EdgeWeightEvaluator,
 } from "../weightEvaluator";
-import {weightedDistribution} from "../../core/attribution/nodeDistribution";
-import {type Distribution} from "../../core/attribution/distribution";
+import {weightedDistribution} from "../../core/algorithm/nodeDistribution";
+import {type Distribution} from "../../core/algorithm/distribution";
 import {
   createOrderedSparseMarkovChain,
   createConnections,
-} from "../../core/attribution/graphToMarkovChain";
+} from "../../core/algorithm/graphToMarkovChain";
 import {
   findStationaryDistribution,
   type PagerankParams,
   type SparseMarkovChain,
-} from "../../core/attribution/markovChain";
+} from "../../core/algorithm/markovChain";
 
 /**
  * Represents raw PageRank distributions on a graph over time.

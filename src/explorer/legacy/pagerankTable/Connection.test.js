@@ -4,7 +4,7 @@ import React from "react";
 import {shallow} from "enzyme";
 import * as NullUtil from "../../../util/null";
 
-import type {Connection} from "../../../core/attribution/graphToMarkovChain";
+import type {Connection} from "../../../core/algorithm/graphToMarkovChain";
 import {ConnectionRowList, ConnectionRow, ConnectionView} from "./Connection";
 import {example} from "./sharedTestUtils";
 import {TableRow} from "./TableRow";

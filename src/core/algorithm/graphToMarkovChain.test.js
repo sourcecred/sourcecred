@@ -14,7 +14,7 @@ import * as MapUtil from "../../util/map";
 
 import {node, advancedGraph, edge} from "../graphTestUtil";
 
-describe("core/attribution/graphToMarkovChain", () => {
+describe("core/algorithm/graphToMarkovChain", () => {
   const n1 = node("n1");
   const n2 = node("n2");
   const n3 = node("n3");

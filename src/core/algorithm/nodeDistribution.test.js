@@ -6,7 +6,7 @@ import {
   distributionToNodeDistribution,
 } from "./nodeDistribution";
 
-describe("core/attribution/nodeDistribution", () => {
+describe("core/algorithm/nodeDistribution", () => {
   const n1 = NodeAddress.fromParts(["n1"]);
   const n2 = NodeAddress.fromParts(["n2"]);
 

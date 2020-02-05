@@ -9,8 +9,8 @@ import {
   createConnections,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
-} from "../../core/attribution/graphToMarkovChain";
-import {type SparseMarkovChain} from "../../core/attribution/markovChain";
+} from "../../core/algorithm/graphToMarkovChain";
+import {type SparseMarkovChain} from "../../core/algorithm/markovChain";
 
 describe("src/analysis/timeline/timelinePagerank", () => {
   describe("_timelineNodeWeights", () => {
