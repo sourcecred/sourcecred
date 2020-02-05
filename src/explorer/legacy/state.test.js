@@ -15,7 +15,20 @@ import {TimelineCred} from "../../analysis/timeline/timelineCred";
 import {defaultParams} from "../../analysis/timeline/params";
 import {type LoadSuccess} from "../TimelineApp";
 
+jest.spyOn(console, "log").mockImplementation(() => {});
+jest.spyOn(console, "error").mockImplementation(() => {});
+const logMock: JestMockFn<any, void> = console.log;
+const errorMock: JestMockFn<any, void> = console.error;
+
 describe("explorer/legacy/state", () => {
+  beforeEach(() => {
+    logMock.mockClear();
+    errorMock.mockClear();
+  });
+  afterEach(() => {
+    expect(errorMock).not.toHaveBeenCalled();
+    expect(logMock).not.toHaveBeenCalled();
+  });
   function example(startingState: AppState) {
     const stateContainer = {appState: startingState};
     const getState = () => stateContainer.appState;
@@ -26,6 +39,13 @@ describe("explorer/legacy/state", () => {
       [Assets, string],
       Promise<LoadSuccess>
     > = jest.fn();
+    loadMock.mockImplementation(() =>
+      Promise.resolve({
+        pluginDeclarations: [],
+        timelineCred: (null: any),
+        type: "SUCCESS",
+      })
+    );
 
     const pagerankMock: JestMockFn<
       [Graph, EdgeEvaluator, PagerankOptions],
