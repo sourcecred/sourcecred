@@ -5,12 +5,12 @@ import {
   distributionToNodeDistribution,
   createConnections,
   createOrderedSparseMarkovChain,
-} from "../core/attribution/graphToMarkovChain";
+} from "../core/algorithm/graphToMarkovChain";
 import {
   findStationaryDistribution,
   type PagerankParams,
-} from "../core/attribution/markovChain";
-import {uniformDistribution} from "../core/attribution/distribution";
+} from "../core/algorithm/markovChain";
+import {uniformDistribution} from "../core/algorithm/distribution";
 import {
   decompose,
   type PagerankNodeDecomposition,

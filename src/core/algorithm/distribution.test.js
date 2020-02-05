@@ -2,7 +2,7 @@
 
 import {uniformDistribution, computeDelta} from "./distribution";
 
-describe("core/attribution/distribution", () => {
+describe("core/algorithm/distribution", () => {
   describe("uniformDistribution", () => {
     describe("errors for: ", () => {
       [
