@@ -14,7 +14,7 @@ import {
   type PagerankParams,
 } from "./markovChain";
 
-describe("core/attribution/markovChain", () => {
+describe("core/algorithm/markovChain", () => {
   /** A distribution that is 1 at the chosen index, and 0 elsewhere.*/
   function singleIndexDistribution(size: number, index: number): Distribution {
     if (!isFinite(size) || size !== Math.floor(size) || size <= 0) {

@@ -12,8 +12,8 @@ import * as githubDeclaration from "../plugins/github/declaration";
 import * as githubEdges from "../plugins/github/edges";
 import * as githubNodes from "../plugins/github/nodes";
 import * as graph from "../core/graph";
-import * as graphToMarkovChain from "../core/attribution/graphToMarkovChain";
-import * as markovChain from "../core/attribution/markovChain";
+import * as graphToMarkovChain from "../core/algorithm/graphToMarkovChain";
+import * as markovChain from "../core/algorithm/markovChain";
 import * as timelineCred from "../analysis/timeline/timelineCred";
 
 export default deepFreeze({
@@ -24,7 +24,7 @@ export default deepFreeze({
   },
   core: {
     address,
-    attribution: {
+    algorithm: {
       markovChain,
       graphToMarkovChain,
     },
