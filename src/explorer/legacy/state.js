@@ -15,10 +15,7 @@ import {TimelineCred} from "../../analysis/timeline/timelineCred";
 
 import type {Weights} from "../../core/weights";
 import {weightsToEdgeEvaluator} from "../../analysis/weightsToEdgeEvaluator";
-import {
-  combineTypes,
-  type PluginDeclarations,
-} from "../../analysis/pluginDeclaration";
+import {type PluginDeclarations} from "../../analysis/pluginDeclaration";
 
 /*
   This models the UI states of the credExplorer/App as a state machine.
@@ -157,11 +154,10 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     this.setState(loadingState);
     const graph = state.timelineCred.weightedGraph().graph;
     let newState: ?AppState;
-    const types = combineTypes(state.pluginDeclarations);
     try {
       const pagerankNodeDecomposition = await this.pagerank(
         graph,
-        weightsToEdgeEvaluator(weights, types),
+        weightsToEdgeEvaluator(weights),
         {
           verbose: true,
           totalScoreNodePrefix: totalScoreNodePrefix,
