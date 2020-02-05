@@ -7,7 +7,7 @@ import type {Command} from "./command";
 import * as Common from "./common";
 import * as Weights from "../core/weights";
 import {projectFromJSON} from "../core/project";
-import {loadContext as load} from "../api/load";
+import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
 import fs from "fs-extra";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
