@@ -5,17 +5,13 @@ import {TaskReporter} from "../../util/taskReporter";
 import {type CacheProvider} from "../../backend/cache";
 import {type WeightedGraph} from "../../core/weightedGraph";
 import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
-import {type MirrorOptions, Mirror} from "./mirror";
+import {type DiscourseServer} from "./server";
+import {Mirror} from "./mirror";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {createGraph as _createGraph} from "./createGraph";
 import {declaration} from "./declaration";
 import {Fetcher} from "./fetch";
-
-export type DiscourseServer = {|
-  +serverUrl: string,
-  +mirrorOptions?: $Shape<MirrorOptions>,
-|};
 
 export interface Loader {
   declaration(): PluginDeclaration;
