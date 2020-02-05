@@ -4,7 +4,7 @@ import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
 import sortBy from "lodash.sortby";
 import {utcWeek} from "d3-time";
-import {NodeAddress, type NodeAddressT, EdgeAddress} from "../../core/graph";
+import {NodeAddress, EdgeAddress} from "../../core/graph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import {TimelineCred} from "./timelineCred";
 import {defaultParams} from "./params";
@@ -139,58 +139,6 @@ describe("src/analysis/timeline/timelineCred", () => {
     for (const node of nodes) {
       expect(node.total).toEqual(sum(node.cred));
     }
-  });
-
-  describe("reduceSize", () => {
-    it("chooses top nodes for each type prefix", () => {
-      const nodesPerType = 3;
-      const tc = exampleTimelineCred();
-      const filtered = tc.reduceSize({
-        typePrefixes: [userPrefix, fooPrefix],
-        nodesPerType,
-        fullInclusionPrefixes: [],
-      });
-
-      const checkPrefix = (p: NodeAddressT) => {
-        const fullNodes = tc.credSortedNodes([p]);
-        const truncatedNodes = filtered.credSortedNodes([p]);
-        expect(truncatedNodes).toHaveLength(nodesPerType);
-        expect(fullNodes.slice(0, nodesPerType)).toEqual(truncatedNodes);
-      };
-      checkPrefix(userPrefix);
-      checkPrefix(fooPrefix);
-    });
-
-    it("can keep only scoring nodes", () => {
-      const nodesPerType = 3;
-      const tc = exampleTimelineCred();
-      const filtered = tc.reduceSize({
-        typePrefixes: [],
-        nodesPerType,
-        fullInclusionPrefixes: [userPrefix],
-      });
-      const fullUserNodes = tc.credSortedNodes([userPrefix]);
-      const truncatedUserNodes = filtered.credSortedNodes([userPrefix]);
-      expect(fullUserNodes).toEqual(truncatedUserNodes);
-      const truncatedFoo = filtered.credSortedNodes([fooPrefix]);
-      expect(truncatedFoo).toHaveLength(0);
-    });
-
-    it("keeps all scoring nodes (with multiple scoring types)", () => {
-      const nodesPerType = 3;
-      const tc = exampleTimelineCred();
-      const filtered = tc.reduceSize({
-        typePrefixes: [userPrefix, NodeAddress.fromParts(["nope"])],
-        nodesPerType,
-        fullInclusionPrefixes: [userPrefix, fooPrefix],
-      });
-      const fullUserNodes = tc.credSortedNodes([userPrefix]);
-      const truncatedUserNodes = filtered.credSortedNodes([userPrefix]);
-      expect(fullUserNodes).toEqual(truncatedUserNodes);
-      const fullFoo = tc.credSortedNodes([fooPrefix]);
-      const truncatedFoo = filtered.credSortedNodes([fooPrefix]);
-      expect(fullFoo).toEqual(truncatedFoo);
-    });
   });
 
   it("userNodes returns the credSortedNodes for user types", () => {
