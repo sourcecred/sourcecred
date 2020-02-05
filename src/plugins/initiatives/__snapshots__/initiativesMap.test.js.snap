@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/initiatives/initiativesMap smoke test should handle a full round-trip 1`] = `
+"[
+  {
+    \\"champions\\": [
+      \\"https://github.com/Beanow\\"
+    ],
+    \\"completed\\": false,
+    \\"contributions\\": [
+    ],
+    \\"dependencies\\": [
+      \\"https://discourse.sourcecred.io/t/write-the-initiatives-plugin/269\\"
+    ],
+    \\"references\\": [
+      \\"https://github.com/sourcecred/sourcecred/pull/1493\\"
+    ],
+    \\"timestampMs\\": 1578520917751,
+    \\"title\\": \\"Hello prototype!\\",
+    \\"tracker\\": \\"N\\\\u0000sourcecred\\\\u0000initiativesMap\\\\u0000make-prototype-happen\\\\u0000\\"
+  },
+  {
+    \\"champions\\": [
+    ],
+    \\"completed\\": false,
+    \\"contributions\\": [
+    ],
+    \\"dependencies\\": [
+    ],
+    \\"references\\": [
+      \\"https://discourse.sourcecred.io/t/draft-initiatives-guide/525\\"
+    ],
+    \\"timestampMs\\": 1578520917752,
+    \\"title\\": \\"Another prototype :o\\",
+    \\"tracker\\": \\"N\\\\u0000sourcecred\\\\u0000initiativesMap\\\\u0000another-one\\\\u0000\\"
+  }
+]"
+`;
+
+exports[`plugins/initiatives/initiativesMap smoke test should handle a full round-trip 2`] = `
+Array [
+  Object {
+    "type": "sourcecred/initiatives",
+    "version": "0.1.0",
+  },
+  Object {
+    "2020-01-08_another-prototype-o": Object {
+      "champions": Array [],
+      "completed": false,
+      "contributions": Array [],
+      "dependencies": Array [],
+      "references": Array [
+        "https://discourse.sourcecred.io/t/draft-initiatives-guide/525",
+      ],
+      "timestampMs": 1578520917752,
+      "title": "Another prototype :o",
+    },
+    "2020-01-08_hello-prototype": Object {
+      "champions": Array [
+        "https://github.com/Beanow",
+      ],
+      "completed": false,
+      "contributions": Array [],
+      "dependencies": Array [
+        "https://discourse.sourcecred.io/t/write-the-initiatives-plugin/269",
+      ],
+      "references": Array [
+        "https://github.com/sourcecred/sourcecred/pull/1493",
+      ],
+      "timestampMs": 1578520917751,
+      "title": "Hello prototype!",
+    },
+  },
+]
+`;

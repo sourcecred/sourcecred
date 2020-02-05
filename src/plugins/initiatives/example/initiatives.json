@@ -1,0 +1,34 @@
+[
+  {
+    "type": "sourcecred/initiatives",
+    "version": "0.1.0"
+  },
+  {
+    "make-prototype-happen": {
+      "title": "Hello prototype!",
+      "timestampMs": 1578520917751,
+      "completed": false,
+      "dependencies": [
+        "https://discourse.sourcecred.io/t/write-the-initiatives-plugin/269"
+      ],
+      "references": [
+        "https://github.com/sourcecred/sourcecred/pull/1493"
+      ],
+      "contributions": [],
+      "champions": [
+        "https://github.com/Beanow"
+      ]
+    },
+    "another-one": {
+      "title": "Another prototype :o",
+      "timestampMs": 1578520917752,
+      "completed": false,
+      "dependencies": [],
+      "references": [
+        "https://discourse.sourcecred.io/t/draft-initiatives-guide/525"
+      ],
+      "contributions": [],
+      "champions": []
+    }
+  }
+]
