@@ -1,8 +1,17 @@
 // @flow
 
 import {type ReferenceDetector} from "../../core/references";
+import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import {type Compatible, fromCompat, toCompat} from "../../util/compat";
-import {type InitiativeRepository, type URL} from "./initiative";
+import {initiativeNodeType} from "./declaration";
+import {
+  type InitiativeId,
+  type InitiativeRepository,
+  type URL,
+  createId,
+} from "./initiative";
+
+export const INITIATIVE_FILE_SUBTYPE = "INITIATIVE_FILE";
 
 /**
  * Represents an Initiatives directory.
@@ -60,4 +69,32 @@ export function fromJSON(j: Compatible<any>): InitiativeFile {
 
 export function toJSON(m: InitiativeFile): Compatible<InitiativeFile> {
   return toCompat(COMPAT_INFO, m);
+}
+
+/**
+ * When provided with the initiative NodeAddressT of an InitiativeFile this extracts
+ * the URL from it. Or null when the address is not for an InitiativeFile.
+ */
+export function initiativeFileURL(address: NodeAddressT): string | null {
+  const initiativeFilePrefix = NodeAddress.append(
+    initiativeNodeType.prefix,
+    INITIATIVE_FILE_SUBTYPE
+  );
+
+  if (!NodeAddress.hasPrefix(address, initiativeFilePrefix)) {
+    return null;
+  }
+
+  const parts = NodeAddress.toParts(address);
+  const remoteUrl = parts[4];
+  const fileName = parts[5];
+  return `${remoteUrl}/${fileName}`;
+}
+
+// Creates the InitiativeId for an InitiativeFile.
+export function _initiativeFileId(
+  {remoteUrl}: InitiativesDirectory,
+  fileName: string
+): InitiativeId {
+  return createId(INITIATIVE_FILE_SUBTYPE, remoteUrl, fileName);
 }
