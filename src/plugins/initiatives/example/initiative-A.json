@@ -1,0 +1,15 @@
+[
+  {
+    "type": "sourcecred/initiativeFile",
+    "version": "0.1.0"
+  },
+  {
+    "title": "Initiative A",
+    "timestampIso": "2020-01-08T22:01:57.711Z",
+    "completed": true,
+    "champions": ["http://foo.bar/A/champ"],
+    "contributions": ["http://foo.bar/A/contrib"],
+    "dependencies": ["http://foo.bar/A/dep"],
+    "references": ["http://foo.bar/A/ref"]
+  }
+]
