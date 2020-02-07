@@ -8,7 +8,7 @@ import {
 } from "../../core/graph";
 import type {ReferenceDetector, URL} from "../../core/references";
 import type {Initiative, InitiativeRepository} from "./initiative";
-import {topicAddress} from "../discourse/address";
+import {createId} from "./initiative";
 import {createGraph} from "./createGraph";
 import {
   initiativeNodeType,
@@ -32,10 +32,10 @@ class MockInitiativeRepository implements InitiativeRepository {
     this._counter++;
 
     const initiative: Initiative = {
+      id: createId("TEST_SUBTYPE", String(num)),
       title: `Example Initiative ${num}`,
       timestampMs: 400 + num,
       completed: false,
-      tracker: topicAddress("https://example.com", num),
       dependencies: [],
       references: [],
       contributions: [],
@@ -80,10 +80,11 @@ function exampleNodeAddress(id: number): NodeAddressT {
   return NodeAddress.fromParts(["example", String(id)]);
 }
 
-function discourseInitiativeAddress(id: number): NodeAddressT {
+function testInitiativeAddress(num: number): NodeAddressT {
   return NodeAddress.append(
     initiativeNodeType.prefix,
-    ...NodeAddress.toParts(topicAddress("https://example.com", id))
+    "TEST_SUBTYPE",
+    String(num)
   );
 }
 
@@ -124,40 +125,12 @@ describe("plugins/initiatives/createGraph", () => {
         {
           description: "Example Initiative 1",
           timestampMs: 401,
-          address: discourseInitiativeAddress(1),
+          address: testInitiativeAddress(1),
         },
         {
           description: "Example Initiative 2",
           timestampMs: 402,
-          address: discourseInitiativeAddress(2),
-        },
-      ]);
-    });
-
-    it("should add the tracker as a contribution edge", () => {
-      // Given
-      const {repo, refs} = example();
-      const i1 = repo.addInitiative();
-
-      // When
-      const graph = createGraph(repo, refs);
-
-      // Then
-      const contributions = Array.from(
-        graph.edges({
-          addressPrefix: contributesToEdgeType.prefix,
-          showDangling: true,
-        })
-      );
-      expect(contributions).toEqual([
-        {
-          address: contributionEdgeAddress(
-            discourseInitiativeAddress(1),
-            i1.tracker
-          ),
-          dst: discourseInitiativeAddress(1),
-          src: i1.tracker,
-          timestampMs: i1.timestampMs,
+          address: testInitiativeAddress(2),
         },
       ]);
     });
@@ -251,10 +224,10 @@ describe("plugins/initiatives/createGraph", () => {
         expect(dependencies).toHaveLength(1);
         expect(dependencies).toContainEqual({
           address: dependencyEdgeAddress(
-            discourseInitiativeAddress(1),
+            testInitiativeAddress(1),
             exampleNodeAddress(1)
           ),
-          src: discourseInitiativeAddress(1),
+          src: testInitiativeAddress(1),
           dst: exampleNodeAddress(1),
           timestampMs: 401,
         });
@@ -282,10 +255,10 @@ describe("plugins/initiatives/createGraph", () => {
         expect(references).toHaveLength(1);
         expect(references).toContainEqual({
           address: referenceEdgeAddress(
-            discourseInitiativeAddress(1),
+            testInitiativeAddress(1),
             exampleNodeAddress(2)
           ),
-          src: discourseInitiativeAddress(1),
+          src: testInitiativeAddress(1),
           dst: exampleNodeAddress(2),
           timestampMs: 401,
         });
@@ -310,14 +283,14 @@ describe("plugins/initiatives/createGraph", () => {
           })
         );
         expect(refs.addressFromUrl).toHaveBeenCalledTimes(2);
-        expect(contributions).toHaveLength(2);
+        expect(contributions).toHaveLength(1);
         expect(contributions).toContainEqual({
           address: contributionEdgeAddress(
-            discourseInitiativeAddress(1),
+            testInitiativeAddress(1),
             exampleNodeAddress(3)
           ),
           src: exampleNodeAddress(3),
-          dst: discourseInitiativeAddress(1),
+          dst: testInitiativeAddress(1),
           timestampMs: 401,
         });
       });
@@ -344,11 +317,11 @@ describe("plugins/initiatives/createGraph", () => {
         expect(champions).toHaveLength(1);
         expect(champions).toContainEqual({
           address: championEdgeAddress(
-            discourseInitiativeAddress(1),
+            testInitiativeAddress(1),
             exampleNodeAddress(4)
           ),
           src: exampleNodeAddress(4),
-          dst: discourseInitiativeAddress(1),
+          dst: testInitiativeAddress(1),
           timestampMs: 401,
         });
       });
