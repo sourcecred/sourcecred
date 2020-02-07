@@ -4,7 +4,7 @@ import tmp from "tmp";
 import path from "path";
 import fs from "fs-extra";
 import {NodeAddress} from "../../core/graph";
-import {createId, addressFromId} from "./initiative";
+import {type Initiative, createId, addressFromId} from "./initiative";
 import {
   type InitiativeFile,
   type InitiativesDirectory,
@@ -15,6 +15,9 @@ import {
   _validatePath,
   _findFiles,
   _readFiles,
+  _validateUrl,
+  _convertToInitiatives,
+  _createReferenceMap,
 } from "./initiativesDirectory";
 
 const exampleInitiativeFile = (): InitiativeFile => ({
@@ -26,6 +29,15 @@ const exampleInitiativeFile = (): InitiativeFile => ({
   dependencies: ["http://foo.bar/dep"],
   references: ["http://foo.bar/ref"],
 });
+
+const exampleInitiative = (remoteUrl: string, fileName: string): Initiative => {
+  const {timestampIso, ...partialInitiativeFile} = exampleInitiativeFile();
+  return {
+    ...partialInitiativeFile,
+    id: createId("INITIATIVE_FILE", remoteUrl, fileName),
+    timestampMs: Date.parse((timestampIso: any)),
+  };
+};
 
 describe("plugins/initiatives/initiativesDirectory", () => {
   describe("toJSON/fromJSON", () => {
@@ -181,6 +193,117 @@ describe("plugins/initiatives/initiativesDirectory", () => {
 
       // Then
       await expect(p).rejects.toThrow("Could not find Initiative file at:");
+    });
+  });
+
+  describe("_validateUrl", () => {
+    it("should remove trailing slashes from URLs", () => {
+      // Given
+      const remoteUrl = "http://example.com/initiatives///";
+
+      // When
+      const actual = _validateUrl(remoteUrl);
+
+      // Then
+      expect(actual).toEqual("http://example.com/initiatives");
+    });
+
+    it("should throw on invalid URL", () => {
+      // Given
+      const remoteUrl = ";;;";
+
+      // When
+      const fn = () => _validateUrl(remoteUrl);
+
+      // Then
+      expect(fn).toThrow(
+        `Provided initiatives directory URL was invalid: ${remoteUrl}\n` +
+          `TypeError: Invalid URL`
+      );
+    });
+
+    it("should throw when given a search", () => {
+      // Given
+      const remoteUrl = "http://example.com/initiatives?test";
+
+      // When
+      const fn = () => _validateUrl(remoteUrl);
+
+      // Then
+      expect(fn).toThrow(
+        `Provided initiatives directory URL was invalid: ${remoteUrl}\n` +
+          `URL should not have a search component: ?test`
+      );
+    });
+
+    it("should throw when given a hash", () => {
+      // Given
+      const remoteUrl = "http://example.com/initiatives#test";
+
+      // When
+      const fn = () => _validateUrl(remoteUrl);
+
+      // Then
+      expect(fn).toThrow(
+        `Provided initiatives directory URL was invalid: ${remoteUrl}\n` +
+          `URL should not have a hash component: #test`
+      );
+    });
+  });
+
+  describe("_convertToInitiatives", () => {
+    it("should correctly convert initiativeFile from a map", async () => {
+      // Given
+      const dir: InitiativesDirectory = {
+        localPath: "should-not-be-used",
+        remoteUrl: "http://example.com/initiatives",
+      };
+      const map = new Map([["initiative-A.json", exampleInitiativeFile()]]);
+
+      // When
+      const initiatives = await _convertToInitiatives(dir, map);
+
+      // Then
+      expect(initiatives).toEqual([
+        exampleInitiative(dir.remoteUrl, "initiative-A.json"),
+      ]);
+    });
+  });
+
+  describe("_createReferenceMap", () => {
+    it("should correctly map initiatives as <URL, NodeAddressT> pairs", () => {
+      // Given
+      const fileName = "initiative-A.json";
+      const remoteUrl = "http://example.com/initiatives";
+      const initiatives = [exampleInitiative(remoteUrl, fileName)];
+
+      // When
+      const map = _createReferenceMap(initiatives);
+
+      // Then
+      expect(map).toBeInstanceOf(Map);
+      expect([...map.entries()]).toEqual([
+        [
+          "http://example.com/initiatives/initiative-A.json",
+          addressFromId(createId("INITIATIVE_FILE", remoteUrl, fileName)),
+        ],
+      ]);
+    });
+
+    it("should throw when given an Initiative not created from an InitiativeFile", () => {
+      // Given
+      const fileName = "initiative-A.json";
+      const remoteUrl = "http://example.com/initiatives";
+      const initiative = {
+        ...exampleInitiative(remoteUrl, fileName),
+        id: createId("TEST", "not-from-file"),
+      };
+
+      // When
+      const fn = () => _createReferenceMap([initiative]);
+
+      // Then
+      expect(fn).toThrow("BUG: Initiative doesn't return an initiativeFileURL");
     });
   });
 });
