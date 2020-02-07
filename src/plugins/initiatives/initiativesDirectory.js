@@ -3,11 +3,14 @@
 import path from "path";
 import fs from "fs-extra";
 import globby from "globby";
-import {type ReferenceDetector} from "../../core/references";
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import {type Compatible, fromCompat, toCompat} from "../../util/compat";
 import {compatReader} from "../../backend/compatIO";
 import {initiativeNodeType} from "./declaration";
+import {
+  type ReferenceDetector,
+  MappedReferenceDetector,
+} from "../../core/references";
 import {
   type Initiative,
   type InitiativeId,
@@ -44,9 +47,31 @@ export opaque type LoadedInitiativesDirectory: {|
   +initiatives: InitiativeRepository,
 |};
 
-// Adding below signature to help clarity of this commit.
-// TODO: @beanow will implement this in a follow-up.
-type _unused_loadDirectoryFunction = (InitiativesDirectory) => Promise<LoadedInitiativesDirectory>;
+/**
+ * Loads a given InitiativesDirectory.
+ */
+export async function loadDirectory(
+  dir: InitiativesDirectory
+): Promise<LoadedInitiativesDirectory> {
+  // Validate input.
+  const remoteUrl = _validateUrl(dir.remoteUrl);
+  const localPath = await _validatePath(dir.localPath);
+  const validatedDir: InitiativesDirectory = {remoteUrl, localPath};
+
+  // Load data.
+  const fileNames = await _findFiles(localPath);
+  const fileMap = await _readFiles(localPath, fileNames);
+  const initiatives = _convertToInitiatives(validatedDir, fileMap);
+  const refMap = _createReferenceMap(initiatives);
+
+  // Create output types.
+  const repository = ({initiatives: () => initiatives}: InitiativeRepository);
+  const referenceDetector = new MappedReferenceDetector(refMap);
+  return {
+    initiatives: repository,
+    referenceDetector,
+  };
+}
 
 /**
  * Represents a single Initiative using a file as source.

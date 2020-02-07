@@ -3,7 +3,9 @@
 import tmp from "tmp";
 import path from "path";
 import fs from "fs-extra";
+import stringify from "json-stable-stringify";
 import {NodeAddress} from "../../core/graph";
+import {MappedReferenceDetector} from "../../core/references";
 import {type Initiative, createId, addressFromId} from "./initiative";
 import {
   type InitiativeFile,
@@ -11,6 +13,7 @@ import {
   fromJSON,
   toJSON,
   initiativeFileURL,
+  loadDirectory,
   _initiativeFileId,
   _validatePath,
   _findFiles,
@@ -304,6 +307,92 @@ describe("plugins/initiatives/initiativesDirectory", () => {
 
       // Then
       expect(fn).toThrow("BUG: Initiative doesn't return an initiativeFileURL");
+    });
+  });
+
+  describe("loadDirectory", () => {
+    it("should handle an example smoke test", async () => {
+      // Given
+      const dir: InitiativesDirectory = {
+        localPath: path.join(__dirname, "example"),
+        remoteUrl: "http://example.com/initiatives",
+      };
+
+      // When
+      const {initiatives: repo, referenceDetector} = await loadDirectory(dir);
+      const initiatives = repo.initiatives();
+
+      // Then
+      expect(referenceDetector).toBeInstanceOf(MappedReferenceDetector);
+      const referenceEntries = [...(referenceDetector: any).map.entries()];
+      expect(stringify(referenceEntries, {space: 2})).toMatchSnapshot();
+      expect(stringify(initiatives, {space: 2})).toMatchSnapshot();
+    });
+
+    it("should perform localPath testing", async () => {
+      // Given
+      const dir: InitiativesDirectory = {
+        // Local path doesn't exist.
+        localPath: path.join(tmp.dirSync().name, "findFiles_test"),
+        remoteUrl: "http://example.com/initiatives",
+      };
+
+      // When
+      const p = loadDirectory(dir);
+
+      // Then
+      await expect(p).rejects.toThrow(
+        `Provided initiatives directory does not exist`
+      );
+    });
+
+    it("should perform remoteUrl testing", async () => {
+      // Given
+      const dir: InitiativesDirectory = {
+        localPath: path.join(__dirname, "example"),
+        // URL is invalid
+        remoteUrl: "http://example.com/initiatives#invalid-hash",
+      };
+
+      // When
+      const p = loadDirectory(dir);
+
+      // Then
+      await expect(p).rejects.toThrow(
+        `Provided initiatives directory URL was invalid`
+      );
+    });
+
+    it("should use validated URL to create mappings and addresses", async () => {
+      // Given
+      const dir: InitiativesDirectory = {
+        localPath: path.join(__dirname, "example"),
+        // URL has trailing slashes we need to remove.
+        remoteUrl: "http://example.com/initiatives///",
+      };
+
+      // When
+      const {initiatives: repo, referenceDetector} = await loadDirectory(dir);
+      const initiatives = repo.initiatives();
+
+      // Then
+      const urls = [...(referenceDetector: any).map.keys()];
+      expect(urls).toEqual([
+        "http://example.com/initiatives/initiative-A.json",
+        "http://example.com/initiatives/initiative-B.json",
+      ]);
+      expect(initiatives.map((i) => i.id)).toEqual([
+        [
+          "INITIATIVE_FILE",
+          "http://example.com/initiatives",
+          "initiative-A.json",
+        ],
+        [
+          "INITIATIVE_FILE",
+          "http://example.com/initiatives",
+          "initiative-B.json",
+        ],
+      ]);
     });
   });
 });
