@@ -1,5 +1,6 @@
 // @flow
 
+import {type CacheProvider} from "./cache";
 import * as WeightedGraph from "../core/weightedGraph";
 import {node as graphNode} from "../core/graphTestUtil";
 import {createProject} from "../core/project";
@@ -8,50 +9,42 @@ import {validateToken} from "../plugins/github/token";
 import {makeRepoId} from "../plugins/github/repoId";
 import * as PluginLoaders from "./pluginLoaders";
 
-const githubSentinel = graphNode("github-sentinel");
-const discourseSentinel = graphNode("discourse-sentinel");
-const identitySentinel = graphNode("identity-sentinel");
+export function createWG(name: string) {
+  const weightedGraph = WeightedGraph.empty();
+  weightedGraph.graph.addNode(graphNode(`${name}-sentinel`));
+  return weightedGraph;
+}
 
-const mockGithubGraph = () => {
-  const wg = WeightedGraph.empty();
-  wg.graph.addNode(githubSentinel);
-  return wg;
+const mockGraphs = {
+  github: createWG("github"),
+  discourse: createWG("discourse"),
+  contracted: createWG("identity-contracted"),
 };
 
-const mockDiscourseGraph = () => {
-  const wg = WeightedGraph.empty();
-  wg.graph.addNode(discourseSentinel);
-  return wg;
+const fakes = {
+  githubDeclaration: ({fake: "githubDeclaration"}: any),
+  discourseDeclaration: ({fake: "discourseDeclaration"}: any),
+  identityDeclaration: ({fake: "identityDeclaration"}: any),
 };
 
-const mockContractedGraph = () => {
-  const wg = WeightedGraph.empty();
-  wg.graph.addNode(identitySentinel);
-  return wg;
-};
-
-const mockCacheProvider = () => ({
+const mockCacheProvider = (): CacheProvider => ({
   database: jest.fn(),
 });
 
-const fakeGithubDec = ("fake-github-dec": any);
-const fakeDiscourseDec = ("fake-discourse-dec": any);
-const fakeIdentityDec = ("fake-identity-dec": any);
-
 const mockPluginLoaders = () => ({
   github: {
-    declaration: jest.fn().mockReturnValue(fakeGithubDec),
+    declaration: jest.fn().mockReturnValue(fakes.githubDeclaration),
     updateMirror: jest.fn(),
-    createGraph: jest.fn().mockResolvedValue(mockGithubGraph()),
+    createGraph: jest.fn().mockResolvedValue(mockGraphs.github),
   },
   discourse: {
-    declaration: jest.fn().mockReturnValue(fakeDiscourseDec),
+    declaration: jest.fn().mockReturnValue(fakes.discourseDeclaration),
     updateMirror: jest.fn(),
-    createGraph: jest.fn().mockResolvedValue(mockDiscourseGraph()),
+    createGraph: jest.fn().mockResolvedValue(mockGraphs.discourse),
   },
   identity: {
-    declaration: jest.fn().mockReturnValue(fakeIdentityDec),
-    contractIdentities: jest.fn().mockReturnValue(mockContractedGraph()),
+    declaration: jest.fn().mockReturnValue(fakes.identityDeclaration),
+    contractIdentities: jest.fn().mockReturnValue(mockGraphs.contracted),
   },
 });
 
@@ -72,7 +65,7 @@ describe("src/backend/pluginLoaders", () => {
       const decs = PluginLoaders.declarations(loaders, project);
 
       // Then
-      expect(decs).toEqual([fakeDiscourseDec]);
+      expect(decs).toEqual([fakes.discourseDeclaration]);
     });
 
     it("should include github declaration", async () => {
@@ -87,7 +80,7 @@ describe("src/backend/pluginLoaders", () => {
       const decs = PluginLoaders.declarations(loaders, project);
 
       // Then
-      expect(decs).toEqual([fakeGithubDec]);
+      expect(decs).toEqual([fakes.githubDeclaration]);
     });
 
     it("should include identity declaration", async () => {
@@ -102,7 +95,7 @@ describe("src/backend/pluginLoaders", () => {
       const decs = PluginLoaders.declarations(loaders, project);
 
       // Then
-      expect(decs).toEqual([fakeIdentityDec]);
+      expect(decs).toEqual([fakes.identityDeclaration]);
     });
   });
 
@@ -211,7 +204,7 @@ describe("src/backend/pluginLoaders", () => {
       // Then
       const {discourse} = loaders;
       expect(pluginGraphs).toEqual({
-        graphs: [mockDiscourseGraph()],
+        graphs: [mockGraphs.discourse],
         cachedProject,
       });
       expect(discourse.createGraph).toBeCalledTimes(1);
@@ -266,7 +259,7 @@ describe("src/backend/pluginLoaders", () => {
       // Then
       const {github} = loaders;
       expect(pluginGraphs).toEqual({
-        graphs: [mockGithubGraph()],
+        graphs: [mockGraphs.github],
         cachedProject,
       });
       expect(github.createGraph).toBeCalledTimes(1);
@@ -289,7 +282,7 @@ describe("src/backend/pluginLoaders", () => {
         repoIds: [exampleRepoId],
       });
       const pluginGraphs = ({
-        graphs: [mockGithubGraph(), mockDiscourseGraph()],
+        graphs: [mockGraphs.github, mockGraphs.discourse],
         cachedProject: {project, cache},
       }: any);
 
@@ -301,8 +294,8 @@ describe("src/backend/pluginLoaders", () => {
 
       // Then
       const expectedGraph = WeightedGraph.merge([
-        mockGithubGraph(),
-        mockDiscourseGraph(),
+        mockGraphs.github,
+        mockGraphs.discourse,
       ]);
       expect(graph).toEqual(expectedGraph);
     });
@@ -318,7 +311,7 @@ describe("src/backend/pluginLoaders", () => {
         repoIds: [exampleRepoId],
       });
       const pluginGraphs = ({
-        graphs: [mockGithubGraph(), mockDiscourseGraph()],
+        graphs: [mockGraphs.github, mockGraphs.discourse],
         cachedProject: {project, cache},
       }: any);
 
@@ -331,10 +324,10 @@ describe("src/backend/pluginLoaders", () => {
       // Then
       const {identity} = loaders;
       const expectedGraph = WeightedGraph.merge([
-        mockGithubGraph(),
-        mockDiscourseGraph(),
+        mockGraphs.github,
+        mockGraphs.discourse,
       ]);
-      expect(graph).toEqual(mockContractedGraph());
+      expect(graph).toEqual(mockGraphs.contracted);
       expect(identity.contractIdentities).toBeCalledTimes(1);
       expect(identity.contractIdentities).toBeCalledWith(expectedGraph, {
         identities: project.identities,
