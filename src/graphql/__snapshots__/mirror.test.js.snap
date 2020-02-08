@@ -259,6 +259,17 @@ exports[`graphql/mirror Mirror _updateOwnData snapshot test for actual GitHub qu
       title
     }
   }
+  reaction: node(id: \\"MDg6UmVhY3Rpb24yOTUzNDM4Mw==\\") {
+    ... on Reaction {
+      __typename
+      id
+      content
+      user {
+        __typename
+        id
+      }
+    }
+  }
   commit: node(id: \\"MDY6Q29tbWl0MTIwMTQ1NTcwOjU1OTUwZjUzNTQ1NTEwOWJhNDhhYmYyYjk3N2U2NmFhMWNjMzVlNjk=\\") {
     ... on Commit {
       __typename

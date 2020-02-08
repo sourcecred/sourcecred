@@ -2364,6 +2364,7 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const exampleIssueId = "MDU6SXNzdWUzNDg1NDA0NjE=";
+        const exampleReactionId = "MDg6UmVhY3Rpb24yOTUzNDM4Mw==";
         const exampleCommitId =
           "MDY6Q29tbWl0MTIwMTQ1NTcwOjU1OTUwZjUzNTQ1NTEwOWJhNDhhYmYyYjk3N2U2NmFhMWNjMzVlNjk=";
         const b = Queries.build;
@@ -2375,6 +2376,12 @@ describe("graphql/mirror", () => {
               "issue",
               b.field("node", {id: b.literal(exampleIssueId)}, [
                 b.inlineFragment("Issue", mirror._queryOwnData("Issue")),
+              ])
+            ),
+            b.alias(
+              "reaction",
+              b.field("node", {id: b.literal(exampleReactionId)}, [
+                b.inlineFragment("Reaction", mirror._queryOwnData("Reaction")),
               ])
             ),
             b.alias(
