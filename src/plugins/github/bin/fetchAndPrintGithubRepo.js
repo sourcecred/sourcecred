@@ -13,10 +13,10 @@
  */
 
 import stringify from "json-stable-stringify";
-import tmp from "tmp";
-
 import fetchGithubRepo from "../fetchGithubRepo";
 import {makeRepoId} from "../repoId";
+import {MemoryCacheProvider} from "../../../backend/memoryCacheProvider";
+import {validateToken} from "../token";
 
 function parseArgs() {
   const argv = process.argv.slice(2);
@@ -27,7 +27,8 @@ function parseArgs() {
   if (argv.length < 2) {
     fail();
   }
-  const [owner, name, githubToken, ...rest] = argv;
+  const [owner, name, unvalidatedGithubToken, ...rest] = argv;
+  const githubToken = validateToken(unvalidatedGithubToken);
   const result = {owner, name, githubToken};
   if (rest.length > 0) {
     fail();
@@ -38,7 +39,8 @@ function parseArgs() {
 function main() {
   const args = parseArgs();
   const repoId = makeRepoId(args.owner, args.name);
-  const options = {token: args.githubToken, cacheDirectory: tmp.dirSync().name};
+  const cache = new MemoryCacheProvider();
+  const options = {token: args.githubToken, cache};
   fetchGithubRepo(repoId, options)
     .then((data) => {
       console.log(stringify(data, {space: 4}));

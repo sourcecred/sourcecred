@@ -12,6 +12,7 @@ import type {
   ProjectStorageProvider,
   ProjectStorageExtras,
 } from "./projectStorage";
+import {toJSON as pluginsToJSON} from "../analysis/pluginDeclaration";
 
 /**
  * Represents a SourceCred data directory.
@@ -33,7 +34,7 @@ export class DataDirectory implements CacheProvider, ProjectStorageProvider {
 
   async storeProject(
     project: Project,
-    {weightedGraph, cred}: ProjectStorageExtras
+    {weightedGraph, cred, pluginDeclarations}: ProjectStorageExtras
   ): Promise<void> {
     const projectDirectory = directoryForProjectId(
       project.id,
@@ -45,11 +46,20 @@ export class DataDirectory implements CacheProvider, ProjectStorageProvider {
       await fs.writeFile(fileName, data);
     };
     writeFile("project.json", stringify(projectToJSON(project)));
-    if (weightedGraph)
+    if (weightedGraph) {
       writeFile(
         "weightedGraph.json",
         stringify(WeightedGraph.toJSON(weightedGraph))
       );
-    if (cred) writeFile("cred.json", stringify(cred.toJSON()));
+    }
+    if (cred) {
+      writeFile("cred.json", stringify(cred.toJSON()));
+    }
+    if (pluginDeclarations) {
+      writeFile(
+        "pluginDeclarations.json",
+        stringify(pluginsToJSON(pluginDeclarations))
+      );
+    }
   }
 }

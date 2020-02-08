@@ -6,7 +6,6 @@
 
 import Database from "better-sqlite3";
 import fetch from "isomorphic-fetch";
-import path from "path";
 import retry from "retry";
 
 import {type RepoId, repoIdToString} from "./repoId";
@@ -17,15 +16,58 @@ import * as Schema from "../../graphql/schema";
 import {BLACKLISTED_IDS} from "./blacklistedObjectIds";
 import type {Repository} from "./graphqlTypes";
 import schema from "./schema";
-import {validateToken} from "./token";
+import {type GithubToken} from "./token";
 import {cacheIdForRepoId} from "./cacheId";
+import {type CacheProvider} from "../../backend/cache";
+
+type FetchRepoOptions = {|
+  +token: GithubToken,
+  +cache: CacheProvider,
+|};
+
+/**
+ * Retrieve previously scraped data for a GitHub repo from cache.
+ *
+ * Note: the GithubToken requirement is planned to be removed.
+ * See https://github.com/sourcecred/sourcecred/issues/1580
+ *
+ * @param {RepoId} repoId
+ *    the GitHub repository to retrieve from cache
+ * @param {GithubToken} token
+ *    authentication token to be used for the GitHub API; generate a
+ *    token at: https://github.com/settings/tokens
+ * @return {Promise<Repository>}
+ *    a promise that resolves to a JSON object containing the data
+ *    scraped from the repository, with data format to be specified
+ *    later
+ */
+export async function fetchGithubRepoFromCache(
+  repoId: RepoId,
+  {token, cache}: FetchRepoOptions
+): Promise<Repository> {
+  // TODO: remove the need for a GithubToken to resolve the ID.
+  // See https://github.com/sourcecred/sourcecred/issues/1580
+  const postQueryWithToken = (payload) => postQuery(payload, token);
+  const resolvedId: Schema.ObjectId = await resolveRepositoryGraphqlId(
+    postQueryWithToken,
+    repoId
+  );
+
+  const db = await cache.database(cacheIdForRepoId(repoId));
+  const mirror = new Mirror(db, schema(), {
+    blacklistedIds: BLACKLISTED_IDS,
+    guessTypename: _guessTypename,
+  });
+
+  return ((mirror.extract(resolvedId): any): Repository);
+}
 
 /**
  * Scrape data from a GitHub repo using the GitHub API.
  *
  * @param {RepoId} repoId
  *    the GitHub repository to be scraped
- * @param {String} token
+ * @param {GithubToken} token
  *    authentication token to be used for the GitHub API; generate a
  *    token at: https://github.com/settings/tokens
  * @return {Promise<object>}
@@ -35,21 +77,9 @@ import {cacheIdForRepoId} from "./cacheId";
  */
 export default async function fetchGithubRepo(
   repoId: RepoId,
-  options: {|+token: string, +cacheDirectory: string|}
+  {token, cache}: FetchRepoOptions
 ): Promise<Repository> {
-  const {token, cacheDirectory} = options;
-
-  // Right now, only warn on likely to be bad tokens (see #1461).
-  // This lets us proceed to the GitHub API validating the token,
-  // while giving users instructions to remedy if it was their mistake.
-  try {
-    validateToken(token);
-  } catch (e) {
-    console.warn(`Warning: ${e}`);
-  }
-
   const postQueryWithToken = (payload) => postQuery(payload, token);
-
   const resolvedId: Schema.ObjectId = await resolveRepositoryGraphqlId(
     postQueryWithToken,
     repoId
@@ -59,8 +89,7 @@ export default async function fetchGithubRepo(
   // name is valid and uniquely identifying even on case-insensitive
   // filesystems (HFS, HFS+, APFS, NTFS) or filesystems preventing
   // equals signs in file names.
-  const dbFilename = `${cacheIdForRepoId(repoId)}.db`;
-  const db = new Database(path.join(cacheDirectory, dbFilename));
+  const db: Database = await cache.database(cacheIdForRepoId(repoId));
   const mirror = new Mirror(db, schema(), {
     blacklistedIds: BLACKLISTED_IDS,
     guessTypename: _guessTypename,
@@ -199,7 +228,7 @@ function retryGithubFetch(fetch, fetchOptions) {
 
 export async function postQuery(
   {body, variables}: {+body: Body, +variables: mixed},
-  token: string
+  token: GithubToken
 ): Promise<any> {
   const postBody = JSON.stringify({
     query: stringify.body(body, inlineLayout()),

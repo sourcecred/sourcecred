@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress, type NodeAddressT} from "../core/graph";
-import type {NodeDistribution} from "../core/attribution/nodeDistribution";
+import type {NodeDistribution} from "../core/algorithm/nodeDistribution";
 
 export type NodeScore = Map<NodeAddressT, number>;
 

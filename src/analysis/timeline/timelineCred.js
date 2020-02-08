@@ -5,10 +5,10 @@ import sortBy from "lodash.sortby";
 import * as NullUtil from "../../util/null";
 import * as MapUtil from "../../util/map";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
-import {type Interval} from "./interval";
-import {timelinePagerank} from "./timelinePagerank";
-import {distributionToCred} from "./distributionToCred";
-import {type PluginDeclaration, combineTypes} from "../pluginDeclaration";
+import {type Interval} from "../../core/interval";
+import {timelinePagerank} from "../../core/algorithm/timelinePagerank";
+import {distributionToCred} from "../../core/algorithm/distributionToCred";
+import {type PluginDeclaration} from "../pluginDeclaration";
 import {type NodeAddressT, NodeAddress, type Node} from "../../core/graph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import {type Weights as WeightsT} from "../../core/weights";
@@ -25,7 +25,7 @@ import {
   defaultParams,
 } from "./params";
 
-export type {Interval} from "./interval";
+export type {Interval} from "../../core/interval";
 
 /**
  * A Graph Node wrapped with cred information.
@@ -74,10 +74,6 @@ export class TimelineCred {
 
   params(): TimelineCredParameters {
     return this._params;
-  }
-
-  plugins(): $ReadOnlyArray<PluginDeclaration> {
-    return this._plugins;
   }
 
   /**
@@ -151,61 +147,8 @@ export class TimelineCred {
    * with a type specified as a user type by one of the plugin declarations.
    */
   userNodes(): $ReadOnlyArray<CredNode> {
-    const userTypes = [].concat(...this.plugins().map((p) => p.userTypes));
+    const userTypes = [].concat(...this._plugins.map((p) => p.userTypes));
     return this.credSortedNodes(userTypes.map((x) => x.prefix));
-  }
-
-  /**
-   * Create a new, filtered TimelineCred, by removing low-scored nodes.
-   *
-   * Cred Graphs may have a huge number of small contributions, like comments,
-   * in which end users are not particularly interested. However, the size of
-   * the TimelineCred offered to the frontend matters quite a bit. Therefore,
-   * we can use this method to discard almost all nodes in the graph.
-   *
-   * Specifically, `reduceSize` takes in an array of inclusion prefixes: for
-   * each inclusion prefix, we will take the top `k` nodes matching that prefix
-   * (by total score across all intervals).
-   *
-   * It also takes `fullInclusion` prefixes: for these prefixes, every matching
-   * node will be included. This allows us to ensure that e.g. every user will
-   * be included in the `cli scores` output, even if they are not in the top
-   * `k` users.
-   */
-  reduceSize(opts: {|
-    +typePrefixes: $ReadOnlyArray<NodeAddressT>,
-    +nodesPerType: number,
-    +fullInclusionPrefixes: $ReadOnlyArray<NodeAddressT>,
-  |}): TimelineCred {
-    const {typePrefixes, nodesPerType, fullInclusionPrefixes} = opts;
-    const selectedNodes: Set<NodeAddressT> = new Set();
-    for (const prefix of typePrefixes) {
-      const matchingNodes = this.credSortedNodes([prefix]).slice(
-        0,
-        nodesPerType
-      );
-      for (const {node} of matchingNodes) {
-        selectedNodes.add(node.address);
-      }
-    }
-    // For the fullInclusionPrefixes, we won't slice -- we just take every match.
-    const matchingNodes = this.credSortedNodes(fullInclusionPrefixes);
-    for (const {node} of matchingNodes) {
-      selectedNodes.add(node.address);
-    }
-
-    const filteredAddressToCred = new Map();
-    for (const address of selectedNodes) {
-      const cred = NullUtil.get(this._addressToCred.get(address));
-      filteredAddressToCred.set(address, cred);
-    }
-    return new TimelineCred(
-      this._weightedGraph,
-      this._intervals,
-      filteredAddressToCred,
-      this._params,
-      this._plugins
-    );
   }
 
   toJSON(): TimelineCredJSON {
@@ -246,16 +189,13 @@ export class TimelineCred {
     plugins: $ReadOnlyArray<PluginDeclaration>,
   |}): Promise<TimelineCred> {
     const {weightedGraph, params, plugins} = opts;
-    const {graph, weights} = weightedGraph;
+    const {graph} = weightedGraph;
     const fullParams = params == null ? defaultParams() : partialParams(params);
     const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
-    const types = combineTypes(plugins);
     const userTypes = [].concat(...plugins.map((x) => x.userTypes));
     const scorePrefixes = userTypes.map((x) => x.prefix);
     const distribution = await timelinePagerank(
-      graph,
-      types,
-      weights,
+      weightedGraph,
       fullParams.intervalDecay,
       fullParams.alpha
     );
@@ -267,18 +207,13 @@ export class TimelineCred {
       addressToCred.set(addr, addrCred);
     }
     const intervals = cred.map((x) => x.interval);
-    const preliminaryCred = new TimelineCred(
+    return new TimelineCred(
       weightedGraph,
       intervals,
       addressToCred,
       fullParams,
       plugins
     );
-    return preliminaryCred.reduceSize({
-      typePrefixes: types.nodeTypes.map((x) => x.prefix),
-      nodesPerType: 100,
-      fullInclusionPrefixes: scorePrefixes,
-    });
   }
 }
 

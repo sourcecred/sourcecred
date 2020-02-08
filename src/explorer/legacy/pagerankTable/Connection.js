@@ -5,7 +5,7 @@ import * as NullUtil from "../../../util/null";
 
 import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 import {type NodeAddressT, Graph} from "../../../core/graph";
-import type {Connection} from "../../../core/attribution/graphToMarkovChain";
+import type {Connection} from "../../../core/algorithm/graphToMarkovChain";
 import type {ScoredConnection} from "../../../analysis/pagerankNodeDecomposition";
 import {TableRow} from "./TableRow";
 import {NodeRow} from "./Node";
