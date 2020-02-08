@@ -1,8 +1,12 @@
 // @flow
 
+import path from "path";
+import fs from "fs-extra";
+import globby from "globby";
 import {type ReferenceDetector} from "../../core/references";
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import {type Compatible, fromCompat, toCompat} from "../../util/compat";
+import {compatReader} from "../../backend/compatIO";
 import {initiativeNodeType} from "./declaration";
 import {
   type InitiativeId,
@@ -97,4 +101,52 @@ export function _initiativeFileId(
   fileName: string
 ): InitiativeId {
   return createId(INITIATIVE_FILE_SUBTYPE, remoteUrl, fileName);
+}
+
+// Checks the path exists and is a directory.
+// Returns the absolute path or throws.
+export async function _validatePath(localPath: string): Promise<string> {
+  const absPath = path.resolve(localPath);
+  if (!(await fs.exists(absPath))) {
+    throw new Error(
+      `Provided initiatives directory does not exist at: ${absPath}`
+    );
+  }
+  if (!(await fs.lstat(absPath)).isDirectory()) {
+    throw new Error(
+      `Provided initiatives directory is not a directory at: ${absPath}`
+    );
+  }
+  return absPath;
+}
+
+// Gets all *.json filenames in the given directory.
+export async function _findFiles(
+  localPath: string
+): Promise<$ReadOnlyArray<string>> {
+  const absoluteFileNames = await globby(path.join(localPath, "*.json"));
+  return absoluteFileNames.map((a) => path.basename(a));
+}
+
+type NamesToInitiativeFiles = Map<string, InitiativeFile>;
+
+// Reads all given filenames in the given directory, validating them as compat.
+export async function _readFiles(
+  localPath: string,
+  fileNames: $ReadOnlyArray<string>
+): Promise<NamesToInitiativeFiles> {
+  const map: NamesToInitiativeFiles = new Map();
+  const readInitiativeFile = compatReader(fromJSON, "Initiative");
+
+  // Sorting to be careful about predictability.
+  // The eventual output of $ReadOnlyArray<Initiative> is ordered, so we'll see
+  // the order matters for equality throughout the system.
+  const sortedFileNames = [...fileNames].sort();
+  for (const fileName of sortedFileNames) {
+    const filePath = path.join(localPath, fileName);
+    const initiativeFile = await readInitiativeFile(filePath);
+    map.set(fileName, initiativeFile);
+  }
+
+  return map;
 }

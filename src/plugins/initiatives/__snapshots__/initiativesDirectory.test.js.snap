@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/initiatives/initiativesDirectory _readFiles should read provided initiativeFiles, sorted by name 1`] = `
+Map {
+  "initiative-A.json" => Object {
+    "champions": Array [
+      "http://foo.bar/A/champ",
+    ],
+    "completed": true,
+    "contributions": Array [
+      "http://foo.bar/A/contrib",
+    ],
+    "dependencies": Array [
+      "http://foo.bar/A/dep",
+    ],
+    "references": Array [
+      "http://foo.bar/A/ref",
+    ],
+    "timestampIso": "2020-01-08T22:01:57.711Z",
+    "title": "Initiative A",
+  },
+  "initiative-B.json" => Object {
+    "champions": Array [
+      "http://foo.bar/B/champ",
+    ],
+    "completed": false,
+    "contributions": Array [
+      "http://foo.bar/B/contrib",
+    ],
+    "dependencies": Array [
+      "http://foo.bar/B/dep",
+    ],
+    "references": Array [
+      "http://foo.bar/B/ref",
+    ],
+    "timestampIso": "2020-01-08T22:01:57.722Z",
+    "title": "Initiative B",
+  },
+}
+`;
