@@ -7,50 +7,59 @@ import {validateToken} from "../plugins/github/token";
 import {TestTaskReporter} from "../util/taskReporter";
 import {LoadContext} from "./loadContext";
 
-const fakeDeclarations = (["fake-declaration"]: any);
-const fakePluginGraphs = ({is: "fake-plugin-graphs"}: any);
-const fakeContractedGraph = ({is: "fake-contracted-graph"}: any);
-const fakeWeightedGraph = ({is: "fake-weighted-graph"}: any);
-const fakeCred = ({is: "fake-cred"}: any);
+const fakes = {
+  declarations: ({fake: "declarations"}: any),
+  pluginGraphs: ({fake: "pluginGraphs"}: any),
+  contractedGraph: ({fake: "contractedGraph"}: any),
+  weightedGraph: ({fake: "weightedGraph"}: any),
+  timelineCred: ({fake: "timelineCred"}: any),
+};
 
-const mockCache = (): CacheProvider => ({
+const mockCacheProvider = (): CacheProvider => ({
   database: jest.fn(),
 });
 
-const calledMoreThanOnce = (name: string) => () => {
-  throw new Error(`Called ${name} more than once`);
-};
+const spyBuilderFor = (target) => ({
+  proxyMethod: (on: string) => {
+    return jest.spyOn(target, `_${on}`).mockImplementation(() => {
+      throw new Error(`Unexpected call of _${on}`);
+    });
+  },
+});
 
 const mockProxyMethods = (
   loadContext: LoadContext,
   project: Project,
   cache: CacheProvider
-) => ({
-  declarations: jest
-    .spyOn(loadContext, "_declarations")
-    .mockImplementation(calledMoreThanOnce("_declarations"))
-    .mockReturnValueOnce(fakeDeclarations),
-  updateMirror: jest
-    .spyOn(loadContext, "_updateMirror")
-    .mockImplementation(calledMoreThanOnce("_updateMirror"))
-    .mockResolvedValueOnce({project, cache}),
-  createPluginGraphs: jest
-    .spyOn(loadContext, "_createPluginGraphs")
-    .mockImplementation(calledMoreThanOnce("_createPluginGraphs"))
-    .mockResolvedValueOnce(fakePluginGraphs),
-  contractPluginGraphs: jest
-    .spyOn(loadContext, "_contractPluginGraphs")
-    .mockImplementation(calledMoreThanOnce("_contractPluginGraphs"))
-    .mockReturnValueOnce(fakeContractedGraph),
-  overrideWeights: jest
-    .spyOn(loadContext, "_overrideWeights")
-    .mockImplementation(calledMoreThanOnce("_overrideWeights"))
-    .mockReturnValueOnce(fakeWeightedGraph),
-  computeTask: jest
-    .spyOn(loadContext, "_computeTask")
-    .mockImplementation(calledMoreThanOnce("_computeTask"))
-    .mockResolvedValueOnce(fakeCred),
-});
+) => {
+  const spyBuilder = spyBuilderFor(loadContext);
+
+  return {
+    declarations: spyBuilder
+      .proxyMethod("declarations")
+      .mockReturnValueOnce(fakes.declarations),
+
+    updateMirror: spyBuilder
+      .proxyMethod("updateMirror")
+      .mockResolvedValueOnce({project, cache}),
+
+    createPluginGraphs: spyBuilder
+      .proxyMethod("createPluginGraphs")
+      .mockResolvedValueOnce(fakes.pluginGraphs),
+
+    contractPluginGraphs: spyBuilder
+      .proxyMethod("contractPluginGraphs")
+      .mockReturnValueOnce(fakes.contractedGraph),
+
+    overrideWeights: spyBuilder
+      .proxyMethod("overrideWeights")
+      .mockReturnValueOnce(fakes.weightedGraph),
+
+    computeTask: spyBuilder
+      .proxyMethod("computeTask")
+      .mockResolvedValueOnce(fakes.timelineCred),
+  };
+};
 
 describe("src/backend/loadContext", () => {
   describe("LoadContext", () => {
@@ -67,7 +76,7 @@ describe("src/backend/loadContext", () => {
        */
       it("should expose proxy properties", () => {
         // Given
-        const cache = mockCache();
+        const cache = mockCacheProvider();
         const reporter = new TestTaskReporter();
 
         // When
@@ -93,7 +102,7 @@ describe("src/backend/loadContext", () => {
     describe("load", () => {
       it("should call proxy methods with correct arguments", async () => {
         // Given
-        const cache = mockCache();
+        const cache = mockCacheProvider();
         const reporter = new TestTaskReporter();
         const weightsOverrides = Weights.empty();
         const loadContext = new LoadContext({cache, githubToken, reporter});
@@ -125,22 +134,26 @@ describe("src/backend/loadContext", () => {
         );
         expect(spies.contractPluginGraphs).toBeCalledWith(
           loadContext._pluginLoaders,
-          fakePluginGraphs
+          fakes.pluginGraphs
         );
         expect(spies.overrideWeights).toBeCalledWith(
-          fakeContractedGraph,
+          fakes.contractedGraph,
           weightsOverrides
         );
         expect(spies.computeTask).toBeCalledWith(
           loadContext._compute,
           expectedEnv,
-          {weightedGraph: fakeWeightedGraph, plugins: fakeDeclarations, params}
+          {
+            weightedGraph: fakes.weightedGraph,
+            plugins: fakes.declarations,
+            params,
+          }
         );
       });
 
       it("should support omitting optional arguments", async () => {
         // Given
-        const cache = mockCache();
+        const cache = mockCacheProvider();
         const reporter = new TestTaskReporter();
         const loadContext = new LoadContext({cache, githubToken, reporter});
         const spies = mockProxyMethods(loadContext, project, cache);
@@ -163,13 +176,13 @@ describe("src/backend/loadContext", () => {
         expect(spies.computeTask).toBeCalledWith(
           loadContext._compute,
           expectedEnv,
-          {weightedGraph: fakeContractedGraph, plugins: fakeDeclarations}
+          {weightedGraph: fakes.contractedGraph, plugins: fakes.declarations}
         );
       });
 
       it("should return a LoadResult", async () => {
         // Given
-        const cache = mockCache();
+        const cache = mockCacheProvider();
         const reporter = new TestTaskReporter();
         const weightsOverrides = Weights.empty();
         const loadContext = new LoadContext({cache, githubToken, reporter});
@@ -183,9 +196,9 @@ describe("src/backend/loadContext", () => {
 
         // Then
         expect(result).toEqual({
-          pluginDeclarations: fakeDeclarations,
-          weightedGraph: fakeWeightedGraph,
-          cred: fakeCred,
+          pluginDeclarations: fakes.declarations,
+          weightedGraph: fakes.weightedGraph,
+          cred: fakes.timelineCred,
         });
       });
     });
