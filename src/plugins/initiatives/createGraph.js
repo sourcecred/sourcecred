@@ -11,8 +11,8 @@ import {
 } from "../../core/graph";
 import type {ReferenceDetector, URL} from "../../core/references";
 import type {Initiative, InitiativeRepository} from "./initiative";
+import {addressFromId} from "./initiative";
 import {
-  initiativeNodeType,
   dependsOnEdgeType,
   referencesEdgeType,
   contributesToEdgeType,
@@ -20,10 +20,7 @@ import {
 } from "./declaration";
 
 function initiativeAddress(initiative: Initiative): NodeAddressT {
-  return NodeAddress.append(
-    initiativeNodeType.prefix,
-    ...NodeAddress.toParts(initiative.tracker)
-  );
+  return addressFromId(initiative.id);
 }
 
 function initiativeNode(initiative: Initiative): Node {
@@ -71,9 +68,6 @@ export function createGraph(
   for (const initiative of repo.initiatives()) {
     // Adds the Initiative node.
     graph.addNode(initiativeNode(initiative));
-
-    // Consider the tracker a contribution.
-    graph.addEdge(contributionEdge(initiative, initiative.tracker));
 
     // Generic approach to adding edges when the reference detector has a hit.
     const edgeHandler = (

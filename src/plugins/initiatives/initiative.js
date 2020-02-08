@@ -36,10 +36,10 @@ export function addressFromId(id: InitiativeId): NodeAddressT {
  * See https://discourse.sourcecred.io/t/write-the-initiatives-plugin/269/6
  */
 export type Initiative = {|
+  +id: InitiativeId,
   +title: string,
   +timestampMs: number,
   +completed: boolean,
-  +tracker: NodeAddressT,
   +dependencies: $ReadOnlyArray<URL>,
   +references: $ReadOnlyArray<URL>,
   +contributions: $ReadOnlyArray<URL>,

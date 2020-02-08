@@ -6,10 +6,8 @@ import {
   DiscourseInitiativeRepository,
   type DiscourseQueries,
 } from "./discourse";
-import {type Initiative} from "./initiative";
 import type {ReadRepository} from "../discourse/mirrorRepository";
 import type {Topic, Post, CategoryId, TopicId} from "../discourse/fetch";
-import {NodeAddress} from "../../core/graph";
 import dedent from "../../util/dedent";
 
 function givenParseError(message: string) {
@@ -26,13 +24,6 @@ function mockParseCookedHtml(
   fn: () => HtmlTemplateInitiativePartial
 ): (cookedHTML: string) => HtmlTemplateInitiativePartial {
   return jest.fn().mockImplementation(fn);
-}
-
-function snapshotInitiative(initiative: Initiative): Object {
-  return {
-    ...initiative,
-    tracker: NodeAddress.toParts(initiative.tracker),
-  };
 }
 
 function exampleTopic(overrides?: $Shape<Topic>): Topic {
@@ -241,43 +232,39 @@ describe("plugins/initiatives/discourse", () => {
       const initiatives = repo.initiatives();
 
       // Then
-      expect(initiatives.map(snapshotInitiative)).toMatchInlineSnapshot(`
+      expect(initiatives).toMatchInlineSnapshot(`
         Array [
           Object {
             "champions": Array [],
             "completed": false,
             "contributions": Array [],
             "dependencies": Array [],
+            "id": Array [
+              "DISCOURSE_TOPIC",
+              "https://foo.bar",
+              "40",
+            ],
             "references": Array [
               "https://example.org/references/included",
             ],
             "timestampMs": 1571498171951,
             "title": "Example initiative",
-            "tracker": Array [
-              "sourcecred",
-              "discourse",
-              "topic",
-              "https://foo.bar",
-              "40",
-            ],
           },
           Object {
             "champions": Array [],
             "completed": false,
             "contributions": Array [],
             "dependencies": Array [],
+            "id": Array [
+              "DISCOURSE_TOPIC",
+              "https://foo.bar",
+              "42",
+            ],
             "references": Array [
               "https://example.org/references/included",
             ],
             "timestampMs": 1571498171951,
             "title": "Example initiative",
-            "tracker": Array [
-              "sourcecred",
-              "discourse",
-              "topic",
-              "https://foo.bar",
-              "42",
-            ],
           },
         ]
       `);
@@ -397,7 +384,7 @@ describe("plugins/initiatives/discourse", () => {
       expect(initiative.timestampMs).toEqual(firstPost.timestampMs);
     });
 
-    it("derives the tracker address from topic ID", () => {
+    it("derives the id from topic ID", () => {
       // Given
       const serverUrl = "https://foo.bar";
       const topic = exampleTopic({
@@ -418,10 +405,8 @@ describe("plugins/initiatives/discourse", () => {
       );
 
       // Then
-      expect(NodeAddress.toParts(initiative.tracker)).toEqual([
-        "sourcecred",
-        "discourse",
-        "topic",
+      expect(initiative.id).toEqual([
+        "DISCOURSE_TOPIC",
         serverUrl,
         String(topic.id),
       ]);
