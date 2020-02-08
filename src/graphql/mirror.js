@@ -175,6 +175,15 @@ export class Mirror {
    * node is the same as subsequent fetches (a simple SQL `UPDATE`
    * instead of first requiring an existence check).
    *
+   * A table `network_log` logs all GraphQL requests made by this module
+   * and their corresponding responses, as well as the update created
+   * from the response. This is for debugging. For example, if a node in
+   * the database is corrupt in some way, inspecting the network log
+   * will show exactly which queries caused it to enter its broken
+   * state. In theory, it should be possible to replay the network log
+   * to re-create the database state exactly, though no tooling exists
+   * to do so automatically.
+   *
    * Finally, a table `meta` is used to store metadata about the mirror
    * itself. This is used to make sure that the mirror is not loaded
    * with an incompatible version of the code or schema. It is never
