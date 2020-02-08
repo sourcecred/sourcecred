@@ -2,11 +2,13 @@
 
 import type {Topic, Post, CategoryId, TopicId} from "../discourse/fetch";
 import type {Initiative, URL, InitiativeRepository} from "./initiative";
+import {createId} from "./initiative";
 import {
   parseCookedHtml,
   type HtmlTemplateInitiativePartial,
 } from "./htmlTemplate";
-import {topicAddress} from "../discourse/address";
+
+export const DISCOURSE_TOPIC_SUBTYPE = "DISCOURSE_TOPIC";
 
 /**
  * A subset of queries we need for our plugin.
@@ -130,11 +132,10 @@ export function initiativeFromDiscourseTracker(
       );
     }
 
-    const tracker = topicAddress(serverUrl, topic.id);
     const partial = parseCookedHtml(openingPost.cooked);
     return {
+      id: createId(DISCOURSE_TOPIC_SUBTYPE, serverUrl, String(topic.id)),
       title,
-      tracker,
       timestampMs,
       completed: partial.completed,
       dependencies: absoluteURLs(serverUrl, partial.dependencies),

@@ -4,7 +4,7 @@ import base64url from "base64url";
 import {type RepoId} from "../plugins/github/repoId";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import {type Identity} from "../plugins/identity/identity";
-import {type DiscourseServer} from "../plugins/discourse/loadDiscourse";
+import {type DiscourseServer} from "../plugins/discourse/server";
 
 export type ProjectId = string;
 

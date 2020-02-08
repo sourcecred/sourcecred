@@ -1,9 +1,9 @@
 // @flow
 
-import {NodeAddress} from "../../core/graph";
+import {NodeAddress} from "../graph";
 import {distributionToCred} from "./distributionToCred";
 
-describe("src/analysis/timeline/distributionToCred", () => {
+describe("src/core/algorithm/distributionToCred", () => {
   const na = (...parts) => NodeAddress.fromParts(parts);
   describe("distributionToCred", () => {
     it("works in a case where all nodes are scoring", () => {

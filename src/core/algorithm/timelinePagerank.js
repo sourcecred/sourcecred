@@ -6,27 +6,26 @@
 import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
-import {Graph, type NodeAddressT, type Edge, type Node} from "../../core/graph";
-import {type NodeAndEdgeTypes} from "../types";
-import {type Weights} from "../../core/weights";
-import {type Interval, partitionGraph} from "./interval";
+import {Graph, type NodeAddressT, type Edge, type Node} from "../graph";
+import {type WeightedGraph} from "../weightedGraph";
+import {type Interval, partitionGraph} from "../interval";
 import {
   nodeWeightEvaluator,
   edgeWeightEvaluator,
   type NodeWeightEvaluator,
   type EdgeWeightEvaluator,
-} from "../weightEvaluator";
-import {weightedDistribution} from "../../core/attribution/nodeDistribution";
-import {type Distribution} from "../../core/attribution/distribution";
+} from "./weightEvaluator";
+import {weightedDistribution} from "./nodeDistribution";
+import {type Distribution} from "./distribution";
 import {
   createOrderedSparseMarkovChain,
   createConnections,
-} from "../../core/attribution/graphToMarkovChain";
+} from "./graphToMarkovChain";
 import {
   findStationaryDistribution,
   type PagerankParams,
   type SparseMarkovChain,
-} from "../../core/attribution/markovChain";
+} from "./markovChain";
 
 /**
  * Represents raw PageRank distributions on a graph over time.
@@ -98,9 +97,7 @@ export type TimelineDistributions = $ReadOnlyArray<{|
  * the pieces and run PageRank for each interval.
  */
 export async function timelinePagerank(
-  graph: Graph,
-  types: NodeAndEdgeTypes,
-  weights: Weights,
+  weightedGraph: WeightedGraph,
   intervalDecay: number,
   alpha: number
 ): Promise<TimelineDistributions> {
@@ -112,24 +109,26 @@ export async function timelinePagerank(
   }
   // Produce the evaluators we will use to get the baseline weight for each
   // node and edge
-  const nodeEvaluator = nodeWeightEvaluator(types.nodeTypes, weights);
-  const edgeEvaluator = edgeWeightEvaluator(types.edgeTypes, weights);
+  const nodeEvaluator = nodeWeightEvaluator(weightedGraph.weights);
+  const edgeEvaluator = edgeWeightEvaluator(weightedGraph.weights);
 
-  const graphPartitionSlices = partitionGraph(graph);
+  const graphPartitionSlices = partitionGraph(weightedGraph.graph);
   if (graphPartitionSlices.length === 0) {
     return [];
   }
   const intervals = graphPartitionSlices.map((x) => x.interval);
   const nodeCreationHistory = graphPartitionSlices.map((x) => x.nodes);
   const edgeCreationHistory = graphPartitionSlices.map((x) => x.edges);
-  const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
+  const nodeOrder = Array.from(weightedGraph.graph.nodes()).map(
+    (x) => x.address
+  );
   const nodeWeightIterator = _timelineNodeWeights(
     nodeCreationHistory,
     nodeEvaluator,
     intervalDecay
   );
   const markovChainIterator = _timelineMarkovChain(
-    graph,
+    weightedGraph.graph,
     edgeCreationHistory,
     edgeEvaluator,
     intervalDecay

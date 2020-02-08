@@ -5,7 +5,7 @@ import deepEqual from "lodash.isequal";
 import {Graph, type NodeAddressT} from "../../core/graph";
 import type {Assets} from "../../webutil/assets";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
-import {defaultLoader} from "../TimelineApp";
+import {defaultLoader, type LoadSuccess} from "../TimelineApp";
 import {
   type PagerankNodeDecomposition,
   type PagerankOptions,
@@ -15,7 +15,7 @@ import {TimelineCred} from "../../analysis/timeline/timelineCred";
 
 import type {Weights} from "../../core/weights";
 import {weightsToEdgeEvaluator} from "../../analysis/weightsToEdgeEvaluator";
-import {combineTypes} from "../../analysis/pluginDeclaration";
+import {type PluginDeclarations} from "../../analysis/pluginDeclaration";
 
 /*
   This models the UI states of the credExplorer/App as a state machine.
@@ -40,11 +40,13 @@ export type ReadyToRunPagerank = {|
   +type: "READY_TO_RUN_PAGERANK",
   +projectId: string,
   +timelineCred: TimelineCred,
+  +pluginDeclarations: PluginDeclarations,
   +loading: LoadingState,
 |};
 export type PagerankEvaluated = {|
   +type: "PAGERANK_EVALUATED",
   +timelineCred: TimelineCred,
+  +pluginDeclarations: PluginDeclarations,
   +projectId: string,
   +pagerankNodeDecomposition: PagerankNodeDecomposition,
   +loading: LoadingState,
@@ -58,12 +60,7 @@ export function createStateTransitionMachine(
   getState: () => AppState,
   setState: (AppState) => void
 ): StateTransitionMachine {
-  return new StateTransitionMachine(
-    getState,
-    setState,
-    doLoadTimelineCred,
-    pagerank
-  );
+  return new StateTransitionMachine(getState, setState, doLoad, pagerank);
 }
 
 // Exported for testing purposes.
@@ -83,10 +80,7 @@ export interface StateTransitionMachineInterface {
 export class StateTransitionMachine implements StateTransitionMachineInterface {
   getState: () => AppState;
   setState: (AppState) => void;
-  doLoadTimelineCred: (
-    assets: Assets,
-    projectId: string
-  ) => Promise<TimelineCred>;
+  doLoad: (assets: Assets, projectId: string) => Promise<LoadSuccess>;
   pagerank: (
     Graph,
     EdgeEvaluator,
@@ -96,10 +90,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   constructor(
     getState: () => AppState,
     setState: (AppState) => void,
-    doLoadTimelineCred: (
-      assets: Assets,
-      projectId: string
-    ) => Promise<TimelineCred>,
+    doLoad: (assets: Assets, projectId: string) => Promise<LoadSuccess>,
     pagerank: (
       Graph,
       EdgeEvaluator,
@@ -108,7 +99,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   ) {
     this.getState = getState;
     this.setState = setState;
-    this.doLoadTimelineCred = doLoadTimelineCred;
+    this.doLoad = doLoad;
     this.pagerank = pagerank;
   }
 
@@ -124,10 +115,14 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     let newState: ?AppState;
     let success = true;
     try {
-      const timelineCred = await this.doLoadTimelineCred(assets, projectId);
+      const {pluginDeclarations, timelineCred} = await this.doLoad(
+        assets,
+        projectId
+      );
       newState = {
         type: "READY_TO_RUN_PAGERANK",
         timelineCred,
+        pluginDeclarations,
         projectId,
         loading: "NOT_LOADING",
       };
@@ -159,11 +154,10 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     this.setState(loadingState);
     const graph = state.timelineCred.weightedGraph().graph;
     let newState: ?AppState;
-    const types = combineTypes(state.timelineCred.plugins());
     try {
       const pagerankNodeDecomposition = await this.pagerank(
         graph,
-        weightsToEdgeEvaluator(weights, types),
+        weightsToEdgeEvaluator(weights),
         {
           verbose: true,
           totalScoreNodePrefix: totalScoreNodePrefix,
@@ -173,6 +167,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
         type: "PAGERANK_EVALUATED",
         pagerankNodeDecomposition,
         timelineCred: state.timelineCred,
+        pluginDeclarations: state.pluginDeclarations,
         projectId: state.projectId,
         loading: "NOT_LOADING",
       };
@@ -213,13 +208,13 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   }
 }
 
-export async function doLoadTimelineCred(
+export async function doLoad(
   assets: Assets,
   projectId: string
-): Promise<TimelineCred> {
+): Promise<LoadSuccess> {
   const loadResult = await defaultLoader(assets, projectId);
   if (loadResult.type !== "SUCCESS") {
     throw new Error(loadResult);
   }
-  return loadResult.timelineCred;
+  return loadResult;
 }

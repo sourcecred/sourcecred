@@ -11,13 +11,17 @@ import {TimelineCredView} from "./TimelineCredView";
 import Link from "../webutil/Link";
 import {WeightConfig} from "./weights/WeightConfig";
 import {WeightsFileManager} from "./weights/WeightsFileManager";
-import {type PluginDeclaration} from "../analysis/pluginDeclaration";
+import {
+  type PluginDeclarations,
+  type PluginDeclaration,
+} from "../analysis/pluginDeclaration";
 import * as NullUtil from "../util/null";
 import {format} from "d3-format";
 
 export type Props = {
   projectId: string,
   initialTimelineCred: TimelineCred,
+  pluginDeclarations: PluginDeclarations,
 };
 
 export type State = {
@@ -89,7 +93,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
     );
     const weightConfig = (
       <WeightConfig
-        declarations={this.state.timelineCred.plugins()}
+        declarations={this.props.pluginDeclarations}
         nodeWeights={this.state.weights.nodeWeights}
         edgeWeights={this.state.weights.edgeWeights}
         onNodeWeightChange={(prefix, weight) => {
@@ -201,7 +205,7 @@ export class TimelineExplorer extends React.Component<Props, State> {
           <option key={"All users"} value={""}>
             All users
           </option>
-          {this.state.timelineCred.plugins().map(optionGroup)}
+          {this.props.pluginDeclarations.map(optionGroup)}
         </select>
       </label>
     );

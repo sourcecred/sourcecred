@@ -3,8 +3,8 @@
 import {max, min} from "d3-array";
 import sortBy from "lodash.sortby";
 import {utcWeek} from "d3-time";
-import * as NullUtil from "../../util/null";
-import type {Node, Edge, Graph} from "../../core/graph";
+import * as NullUtil from "../util/null";
+import type {Node, Edge, Graph} from "./graph";
 
 /**
  * Represents a time interval

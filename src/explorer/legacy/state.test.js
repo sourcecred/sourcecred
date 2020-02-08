@@ -13,18 +13,39 @@ import type {
 } from "../../analysis/pagerank";
 import {TimelineCred} from "../../analysis/timeline/timelineCred";
 import {defaultParams} from "../../analysis/timeline/params";
+import {type LoadSuccess} from "../TimelineApp";
+
+jest.spyOn(console, "log").mockImplementation(() => {});
+jest.spyOn(console, "error").mockImplementation(() => {});
+const logMock: JestMockFn<any, void> = console.log;
+const errorMock: JestMockFn<any, void> = console.error;
 
 describe("explorer/legacy/state", () => {
+  beforeEach(() => {
+    logMock.mockClear();
+    errorMock.mockClear();
+  });
+  afterEach(() => {
+    expect(errorMock).not.toHaveBeenCalled();
+    expect(logMock).not.toHaveBeenCalled();
+  });
   function example(startingState: AppState) {
     const stateContainer = {appState: startingState};
     const getState = () => stateContainer.appState;
     const setState = (appState) => {
       stateContainer.appState = appState;
     };
-    const loadTimelineCredMock: JestMockFn<
+    const loadMock: JestMockFn<
       [Assets, string],
-      Promise<TimelineCred>
+      Promise<LoadSuccess>
     > = jest.fn();
+    loadMock.mockImplementation(() =>
+      Promise.resolve({
+        pluginDeclarations: [],
+        timelineCred: (null: any),
+        type: "SUCCESS",
+      })
+    );
 
     const pagerankMock: JestMockFn<
       [Graph, EdgeEvaluator, PagerankOptions],
@@ -33,10 +54,10 @@ describe("explorer/legacy/state", () => {
     const stm = new StateTransitionMachine(
       getState,
       setState,
-      loadTimelineCredMock,
+      loadMock,
       pagerankMock
     );
-    return {getState, stm, loadTimelineCredMock, pagerankMock};
+    return {getState, stm, loadMock, pagerankMock};
   }
   function readyToLoadGraph(): AppState {
     return {
@@ -57,6 +78,7 @@ describe("explorer/legacy/state", () => {
         defaultParams(),
         []
       ),
+      pluginDeclarations: [],
     };
   }
   function pagerankEvaluated(): AppState {
@@ -70,6 +92,7 @@ describe("explorer/legacy/state", () => {
         defaultParams(),
         []
       ),
+      pluginDeclarations: [],
       pagerankNodeDecomposition: pagerankNodeDecomposition(),
       loading: "NOT_LOADING",
     };
@@ -92,12 +115,12 @@ describe("explorer/legacy/state", () => {
       }
     });
     it("passes along the projectId", () => {
-      const {stm, loadTimelineCredMock} = example(readyToLoadGraph());
-      expect(loadTimelineCredMock).toHaveBeenCalledTimes(0);
+      const {stm, loadMock} = example(readyToLoadGraph());
+      expect(loadMock).toHaveBeenCalledTimes(0);
       const assets = new Assets("/my/gateway/");
       stm.loadTimelineCred(assets);
-      expect(loadTimelineCredMock).toHaveBeenCalledTimes(1);
-      expect(loadTimelineCredMock).toHaveBeenCalledWith(assets, "foo/bar");
+      expect(loadMock).toHaveBeenCalledTimes(1);
+      expect(loadMock).toHaveBeenCalledWith(assets, "foo/bar");
     });
     it("immediately sets loading status", () => {
       const {getState, stm} = example(readyToLoadGraph());
@@ -107,7 +130,7 @@ describe("explorer/legacy/state", () => {
       expect(getState().type).toBe("READY_TO_LOAD_GRAPH");
     });
     it("transitions to READY_TO_RUN_PAGERANK on success", async () => {
-      const {getState, stm, loadTimelineCredMock} = example(readyToLoadGraph());
+      const {getState, stm, loadMock} = example(readyToLoadGraph());
 
       const timelineCred = new TimelineCred(
         WeightedGraph.empty(),
@@ -116,7 +139,12 @@ describe("explorer/legacy/state", () => {
         defaultParams(),
         []
       );
-      loadTimelineCredMock.mockReturnValue(Promise.resolve(timelineCred));
+      const loadResult = {
+        type: "SUCCESS",
+        timelineCred,
+        pluginDeclarations: [],
+      };
+      loadMock.mockReturnValue(Promise.resolve(loadResult));
       const succeeded = await stm.loadTimelineCred(new Assets("/my/gateway/"));
       expect(succeeded).toBe(true);
       const state = getState();
@@ -128,11 +156,11 @@ describe("explorer/legacy/state", () => {
       expect(state.timelineCred).toBe(timelineCred);
     });
     it("sets loading state FAILED on reject", async () => {
-      const {getState, stm, loadTimelineCredMock} = example(readyToLoadGraph());
+      const {getState, stm, loadMock} = example(readyToLoadGraph());
       const error = new Error("Oh no!");
       // $ExpectFlowError
       console.error = jest.fn();
-      loadTimelineCredMock.mockReturnValue(Promise.reject(error));
+      loadMock.mockReturnValue(Promise.reject(error));
       const succeeded = await stm.loadTimelineCred(new Assets("/my/gateway/"));
       expect(succeeded).toBe(false);
       const state = getState();

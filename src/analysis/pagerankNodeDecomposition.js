@@ -7,7 +7,7 @@ import {
   type Connection,
   type NodeToConnections,
   adjacencySource,
-} from "../core/attribution/graphToMarkovChain";
+} from "../core/algorithm/graphToMarkovChain";
 import type {NodeScore} from "./nodeScore";
 import * as MapUtil from "../util/map";
 import * as NullUtil from "../util/null";

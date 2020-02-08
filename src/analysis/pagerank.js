@@ -6,7 +6,7 @@ import {
   createConnections,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
-} from "../core/attribution/graphToMarkovChain";
+} from "../core/algorithm/graphToMarkovChain";
 import {
   decompose,
   type PagerankNodeDecomposition,
@@ -18,10 +18,10 @@ import {
   findStationaryDistribution,
   type PagerankParams,
   type PagerankOptions as CorePagerankOptions,
-} from "../core/attribution/markovChain";
-import {uniformDistribution} from "../core/attribution/distribution";
+} from "../core/algorithm/markovChain";
+import {uniformDistribution} from "../core/algorithm/distribution";
 
-export type {NodeDistribution} from "../core/attribution/nodeDistribution";
+export type {NodeDistribution} from "../core/algorithm/nodeDistribution";
 export type {PagerankNodeDecomposition} from "./pagerankNodeDecomposition";
 export type FullPagerankOptions = {|
   +selfLoopWeight: number,
@@ -35,7 +35,7 @@ export type FullPagerankOptions = {|
 |};
 export type PagerankOptions = $Shape<FullPagerankOptions>;
 
-export type {EdgeWeight} from "../core/attribution/graphToMarkovChain";
+export type {EdgeWeight} from "../core/algorithm/graphToMarkovChain";
 export type EdgeEvaluator = (Edge) => EdgeWeight;
 
 export const DEFAULT_SYNTHETIC_LOOP_WEIGHT = 1e-3;

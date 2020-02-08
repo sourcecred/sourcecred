@@ -5,6 +5,10 @@ import type {Assets} from "../webutil/assets";
 import {TimelineExplorer} from "./TimelineExplorer";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {encodeProjectId, type ProjectId} from "../core/project";
+import {
+  type PluginDeclarations,
+  fromJSON as pluginsFromJSON,
+} from "../analysis/pluginDeclaration";
 
 export type Props = {|
   +assets: Assets,
@@ -19,6 +23,7 @@ export type Loading = {|+type: "LOADING"|};
 export type LoadSuccess = {|
   +type: "SUCCESS",
   +timelineCred: TimelineCred,
+  +pluginDeclarations: PluginDeclarations,
 |};
 export type LoadError = {|+type: "ERROR", +error: any|};
 
@@ -62,11 +67,12 @@ export class TimelineApp extends React.Component<Props, State> {
         );
       }
       case "SUCCESS": {
-        const {timelineCred} = loadResult;
+        const {timelineCred, pluginDeclarations} = loadResult;
         return (
           <TimelineExplorer
             initialTimelineCred={timelineCred}
             projectId={this.props.projectId}
+            pluginDeclarations={pluginDeclarations}
           />
         );
       }
@@ -90,9 +96,24 @@ export async function defaultLoader(
     return TimelineCred.fromJSON(await response.json());
   }
 
+  async function fetchPluginDeclarations(): Promise<PluginDeclarations> {
+    const encodedId = encodeProjectId(projectId);
+    const url = assets.resolve(
+      `api/v1/data/projects/${encodedId}/pluginDeclarations.json`
+    );
+    const response = await fetch(url);
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
+    return pluginsFromJSON(await response.json());
+  }
+
   try {
-    const timelineCred = await fetchCred();
-    return {type: "SUCCESS", timelineCred};
+    const [timelineCred, pluginDeclarations] = await Promise.all([
+      fetchCred(),
+      fetchPluginDeclarations(),
+    ]);
+    return {type: "SUCCESS", timelineCred, pluginDeclarations};
   } catch (e) {
     console.error(e);
     return {type: "ERROR", error: e};

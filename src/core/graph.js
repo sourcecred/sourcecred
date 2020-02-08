@@ -191,7 +191,7 @@ type IndexedEdgeJSON = {|
   +timestampMs: number,
 |};
 
-export opaque type GraphJSON = Compatible<{|
+export type GraphJSON = Compatible<{|
   // A node address can be present because it corresponds to a node, or because
   // it is referenced by a dangling edge.
   +sortedNodeAddresses: AddressJSON[],
