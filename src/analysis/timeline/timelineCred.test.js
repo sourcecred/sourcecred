@@ -4,47 +4,20 @@ import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
 import sortBy from "lodash.sortby";
 import {utcWeek} from "d3-time";
-import {NodeAddress, EdgeAddress} from "../../core/graph";
+import {NodeAddress} from "../../core/graph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import {TimelineCred} from "./timelineCred";
 import {defaultParams} from "./params";
-import {type PluginDeclaration} from "../pluginDeclaration";
-import {type NodeType} from "../types";
 
 describe("src/analysis/timeline/timelineCred", () => {
-  const userType: NodeType = {
-    name: "user",
-    pluralName: "users",
-    prefix: NodeAddress.fromParts(["user"]),
-    defaultWeight: 0,
-    description: "a user",
-  };
-  const userPrefix = userType.prefix;
-  const fooType: NodeType = {
-    name: "foo",
-    pluralName: "foos",
-    prefix: NodeAddress.fromParts(["foo"]),
-    defaultWeight: 0,
-    description: "a foo",
-  };
-  const fooPrefix = fooType.prefix;
-  const plugin: PluginDeclaration = deepFreeze({
-    name: "foo",
-    nodePrefix: NodeAddress.empty,
-    edgePrefix: EdgeAddress.empty,
-    nodeTypes: [userType, fooType],
-    edgeTypes: [],
-    userTypes: [userType],
-  });
-  const users = [
+  const userPrefix = NodeAddress.fromParts(["user"]);
+  const fooPrefix = NodeAddress.fromParts(["foo"]);
+  const users = deepFreeze([
     ["starter", (x) => Math.max(0, 20 - x)],
     ["steady", (_) => 4],
     ["finisher", (x) => (x * x) / 20],
     ["latecomer", (x) => Math.max(0, x - 20)],
-  ];
-
-  // Ensure tests can't contaminate shared state.
-  deepFreeze([userType, fooType, users]);
+  ]);
 
   function exampleTimelineCred(): TimelineCred {
     const startTimeMs = +new Date(2017, 0);
@@ -85,7 +58,7 @@ describe("src/analysis/timeline/timelineCred", () => {
       intervals,
       addressToCred,
       defaultParams(),
-      [plugin]
+      [userPrefix]
     );
   }
 
@@ -141,9 +114,9 @@ describe("src/analysis/timeline/timelineCred", () => {
     }
   });
 
-  it("userNodes returns the credSortedNodes for user types", () => {
+  it("scoringNodes returns the credSortedNodes for user types", () => {
     const tc = exampleTimelineCred();
-    expect(tc.userNodes()).toEqual(tc.credSortedNodes([userPrefix]));
+    expect(tc.scoringNodes()).toEqual(tc.credSortedNodes([userPrefix]));
   });
 
   it("credNode returns undefined for absent nodes", () => {

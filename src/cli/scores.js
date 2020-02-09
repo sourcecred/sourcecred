@@ -104,7 +104,7 @@ export const scores: Command = async (args, std) => {
   const credJSON = JSON.parse(credBlob.toString());
   const timelineCred = TimelineCred.fromJSON(credJSON);
   const userOutput: NodeOutput[] = timelineCred
-    .userNodes()
+    .scoringNodes()
     .map((n: CredNode) => {
       const address = NodeAddress.toParts(n.node.address);
       return {

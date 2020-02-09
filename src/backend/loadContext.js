@@ -111,9 +111,11 @@ export class LoadContext {
       weightedGraph = this._overrideWeights(contractedGraph, weightsOverrides);
     }
     const plugins = this._declarations(this._pluginLoaders, project);
+    const userTypes = [].concat(...plugins.map((x) => x.userTypes));
+    const scoringNodePrefixes = userTypes.map((x) => x.prefix);
     const cred = await this._computeTask(this._compute, this._options, {
       params,
-      plugins,
+      scoringNodePrefixes,
       weightedGraph,
     });
     return {

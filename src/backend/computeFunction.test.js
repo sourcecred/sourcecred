@@ -21,7 +21,7 @@ describe("src/backend/computeFunction", () => {
   describe("computeTask", () => {
     it("should defer to the provided compute function", async () => {
       // Given
-      const plugins = [];
+      const scoringNodePrefixes = [];
       const reporter = new TestTaskReporter();
       const params = {alpha: 0.456};
       const compute = mockCompute();
@@ -31,7 +31,7 @@ describe("src/backend/computeFunction", () => {
       const cred = await computeTask(
         compute,
         {reporter},
-        {weightedGraph: fakeWeightedGraph, plugins, params}
+        {weightedGraph: fakeWeightedGraph, scoringNodePrefixes, params}
       );
 
       // Then
@@ -39,14 +39,14 @@ describe("src/backend/computeFunction", () => {
       expect(compute).toBeCalledTimes(1);
       expect(compute).toBeCalledWith({
         weightedGraph: fakeWeightedGraph,
-        plugins,
+        scoringNodePrefixes,
         params,
       });
     });
 
     it("should give the right tasks to the TaskReporter", async () => {
       // Given
-      const plugins = [];
+      const scoringNodePrefixes = [];
       const reporter = new TestTaskReporter();
       const params = {alpha: 0.456};
       const compute = mockCompute();
@@ -56,7 +56,7 @@ describe("src/backend/computeFunction", () => {
       await computeTask(
         compute,
         {reporter},
-        {weightedGraph: fakeWeightedGraph, plugins, params}
+        {weightedGraph: fakeWeightedGraph, scoringNodePrefixes, params}
       );
 
       // Then

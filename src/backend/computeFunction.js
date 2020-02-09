@@ -1,9 +1,9 @@
 //@flow
 
+import {type NodeAddressT} from "../core/graph";
 import {type WeightedGraph} from "../core/weightedGraph";
 import {TaskReporter} from "../util/taskReporter";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
-import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 
 /**
@@ -19,8 +19,9 @@ type ComputeEnv = {
 type ComputeOpts = {|
   weightedGraph: WeightedGraph,
   params?: $Shape<TimelineCredParameters>,
-  // TODO(@decentralion, #1557): remove plugins arg
-  plugins: $ReadOnlyArray<PluginDeclaration>,
+  // Which node addresses will be considered "scoring" for cred
+  // calculation purposes.
+  scoringNodePrefixes: $ReadOnlyArray<NodeAddressT>,
 |};
 
 export async function computeTask(

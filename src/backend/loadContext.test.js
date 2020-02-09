@@ -1,19 +1,46 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {type CacheProvider} from "./cache";
 import {type Project, createProject} from "../core/project";
+import {NodeAddress, EdgeAddress} from "../core/graph";
 import * as Weights from "../core/weights";
 import {validateToken} from "../plugins/github/token";
 import {TestTaskReporter} from "../util/taskReporter";
 import {LoadContext} from "./loadContext";
+import {type PluginDeclaration} from "../analysis/pluginDeclaration";
+import {type NodeType} from "../analysis/types";
 
-const fakes = {
-  declarations: ({fake: "declarations"}: any),
+const userType: NodeType = {
+  name: "user",
+  pluralName: "users",
+  prefix: NodeAddress.fromParts(["user"]),
+  defaultWeight: 0,
+  description: "a user",
+};
+const userPrefix = userType.prefix;
+const fooType: NodeType = {
+  name: "foo",
+  pluralName: "foos",
+  prefix: NodeAddress.fromParts(["foo"]),
+  defaultWeight: 0,
+  description: "a foo",
+};
+const plugin: PluginDeclaration = deepFreeze({
+  name: "foo",
+  nodePrefix: NodeAddress.empty,
+  edgePrefix: EdgeAddress.empty,
+  nodeTypes: [userType, fooType],
+  edgeTypes: [],
+  userTypes: [userType],
+});
+const fakes = deepFreeze({
+  declarations: [plugin],
   pluginGraphs: ({fake: "pluginGraphs"}: any),
   contractedGraph: ({fake: "contractedGraph"}: any),
   weightedGraph: ({fake: "weightedGraph"}: any),
   timelineCred: ({fake: "timelineCred"}: any),
-};
+});
 
 const mockCacheProvider = (): CacheProvider => ({
   database: jest.fn(),
@@ -145,7 +172,7 @@ describe("src/backend/loadContext", () => {
           expectedEnv,
           {
             weightedGraph: fakes.weightedGraph,
-            plugins: fakes.declarations,
+            scoringNodePrefixes: [userPrefix],
             params,
           }
         );
@@ -176,7 +203,10 @@ describe("src/backend/loadContext", () => {
         expect(spies.computeTask).toBeCalledWith(
           loadContext._compute,
           expectedEnv,
-          {weightedGraph: fakes.contractedGraph, plugins: fakes.declarations}
+          {
+            weightedGraph: fakes.contractedGraph,
+            scoringNodePrefixes: [userPrefix],
+          }
         );
       });
 

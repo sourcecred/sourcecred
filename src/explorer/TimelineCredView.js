@@ -35,7 +35,7 @@ export class TimelineCredView extends React.Component<Props> {
     const {selectedNodeFilter, timelineCred} = this.props;
     const nodes = (() => {
       if (selectedNodeFilter == null) {
-        return timelineCred.userNodes();
+        return timelineCred.scoringNodes();
       } else {
         return timelineCred.credSortedNodes([selectedNodeFilter]);
       }

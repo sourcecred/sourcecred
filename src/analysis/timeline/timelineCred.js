@@ -8,7 +8,6 @@ import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import {type Interval} from "../../core/interval";
 import {timelinePagerank} from "../../core/algorithm/timelinePagerank";
 import {distributionToCred} from "../../core/algorithm/distributionToCred";
-import {type PluginDeclaration} from "../pluginDeclaration";
 import {type NodeAddressT, NodeAddress, type Node} from "../../core/graph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import {type Weights as WeightsT} from "../../core/weights";
@@ -52,20 +51,20 @@ export class TimelineCred {
   _intervals: $ReadOnlyArray<Interval>;
   _addressToCred: Map<NodeAddressT, $ReadOnlyArray<number>>;
   _params: TimelineCredParameters;
-  _plugins: $ReadOnlyArray<PluginDeclaration>;
+  _scoringNodePrefixes: $ReadOnlyArray<NodeAddressT>;
 
   constructor(
     graph: WeightedGraphT,
     intervals: $ReadOnlyArray<Interval>,
     addressToCred: Map<NodeAddressT, $ReadOnlyArray<number>>,
     params: TimelineCredParameters,
-    plugins: $ReadOnlyArray<PluginDeclaration>
+    scoringNodePrefixes: $ReadOnlyArray<NodeAddressT>
   ) {
     this._weightedGraph = graph;
     this._intervals = intervals;
     this._addressToCred = addressToCred;
     this._params = params;
-    this._plugins = plugins;
+    this._scoringNodePrefixes = scoringNodePrefixes;
   }
 
   weightedGraph(): WeightedGraphT {
@@ -92,7 +91,7 @@ export class TimelineCred {
         newWeights
       ),
       params: newParams,
-      plugins: this._plugins,
+      scoringNodePrefixes: this._scoringNodePrefixes,
     });
   }
 
@@ -141,14 +140,13 @@ export class TimelineCred {
   }
 
   /**
-   * Returns all user-typed nodes, sorted by their total cred (descending).
+   * Returns all scoring nodes, sorted by their total cred (descending).
    *
-   * A node is considered a user-type node if its address has a prefix match
-   * with a type specified as a user type by one of the plugin declarations.
+   * A node is a scoring node if its address has a prefix match with any of
+   * the scoringNodePrefixes.
    */
-  userNodes(): $ReadOnlyArray<CredNode> {
-    const userTypes = [].concat(...this._plugins.map((p) => p.userTypes));
-    return this.credSortedNodes(userTypes.map((x) => x.prefix));
+  scoringNodes(): $ReadOnlyArray<CredNode> {
+    return this.credSortedNodes(this._scoringNodePrefixes);
   }
 
   toJSON(): TimelineCredJSON {
@@ -157,7 +155,9 @@ export class TimelineCred {
       intervalsJSON: this._intervals,
       credJSON: MapUtil.toObject(this._addressToCred),
       paramsJSON: paramsToJSON(this._params),
-      pluginsJSON: this._plugins,
+      scoringNodePrefixesJSON: this._scoringNodePrefixes.map(
+        NodeAddress.toParts
+      ),
     };
     return toCompat(COMPAT_INFO, rawJSON);
   }
@@ -169,7 +169,7 @@ export class TimelineCred {
       intervalsJSON,
       credJSON,
       paramsJSON,
-      pluginsJSON,
+      scoringNodePrefixesJSON,
     } = json;
     const cred = MapUtil.fromObject(credJSON);
     const weightedGraph = WeightedGraph.fromJSON(weightedGraphJSON);
@@ -179,27 +179,29 @@ export class TimelineCred {
       intervalsJSON,
       cred,
       params,
-      pluginsJSON
+      scoringNodePrefixesJSON.map(NodeAddress.fromParts)
     );
   }
 
   static async compute(opts: {|
     weightedGraph: WeightedGraphT,
     params?: $Shape<TimelineCredParameters>,
-    plugins: $ReadOnlyArray<PluginDeclaration>,
+    scoringNodePrefixes: $ReadOnlyArray<NodeAddressT>,
   |}): Promise<TimelineCred> {
-    const {weightedGraph, params, plugins} = opts;
+    const {weightedGraph, params, scoringNodePrefixes} = opts;
     const {graph} = weightedGraph;
     const fullParams = params == null ? defaultParams() : partialParams(params);
     const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
-    const userTypes = [].concat(...plugins.map((x) => x.userTypes));
-    const scorePrefixes = userTypes.map((x) => x.prefix);
     const distribution = await timelinePagerank(
       weightedGraph,
       fullParams.intervalDecay,
       fullParams.alpha
     );
-    const cred = distributionToCred(distribution, nodeOrder, scorePrefixes);
+    const cred = distributionToCred(
+      distribution,
+      nodeOrder,
+      scoringNodePrefixes
+    );
     const addressToCred = new Map();
     for (let i = 0; i < nodeOrder.length; i++) {
       const addr = nodeOrder[i];
@@ -212,17 +214,17 @@ export class TimelineCred {
       intervals,
       addressToCred,
       fullParams,
-      plugins
+      scoringNodePrefixes
     );
   }
 }
 
-const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.6.0"};
+const COMPAT_INFO = {type: "sourcecred/timelineCred", version: "0.7.0"};
 
 export opaque type TimelineCredJSON = Compatible<{|
   +weightedGraphJSON: WeightedGraphJSON,
   +paramsJSON: TimelineCredParametersJSON,
-  +pluginsJSON: $ReadOnlyArray<PluginDeclaration>,
+  +scoringNodePrefixesJSON: $ReadOnlyArray<$ReadOnlyArray<string>>,
   +credJSON: {[string]: $ReadOnlyArray<number>},
   +intervalsJSON: $ReadOnlyArray<Interval>,
 |}>;
