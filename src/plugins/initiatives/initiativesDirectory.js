@@ -9,10 +9,12 @@ import {type Compatible, fromCompat, toCompat} from "../../util/compat";
 import {compatReader} from "../../backend/compatIO";
 import {initiativeNodeType} from "./declaration";
 import {
+  type Initiative,
   type InitiativeId,
   type InitiativeRepository,
   type URL,
   createId,
+  addressFromId,
 } from "./initiative";
 
 export const INITIATIVE_FILE_SUBTYPE = "INITIATIVE_FILE";
@@ -149,4 +151,57 @@ export async function _readFiles(
   }
 
   return map;
+}
+
+// Checks the provided URL will parse and has no trailing slashes, search or hash.
+// Returns the validated URL without trailing slashes or throws.
+export function _validateUrl(remoteUrl: string): string {
+  try {
+    const url = new global.URL(remoteUrl);
+    if (url.search) {
+      throw `URL should not have a search component: ${url.search}`;
+    }
+    if (url.hash) {
+      throw `URL should not have a hash component: ${url.hash}`;
+    }
+    return url.toString().replace(/\/+$/, "");
+  } catch (e) {
+    throw new Error(
+      `Provided initiatives directory URL was invalid: ${remoteUrl}\n${e}`
+    );
+  }
+}
+
+// Converts the InitiativeFiles we've read to Initiatives.
+export function _convertToInitiatives(
+  directory: InitiativesDirectory,
+  map: NamesToInitiativeFiles
+): $ReadOnlyArray<Initiative> {
+  const initiatives = [];
+  for (const [fileName, initiativeFile] of map.entries()) {
+    const {timestampIso, ...partialInitiativeFile} = initiativeFile;
+    const initiative: Initiative = {
+      ...partialInitiativeFile,
+      id: _initiativeFileId(directory, fileName),
+      timestampMs: Date.parse(timestampIso),
+    };
+    initiatives.push(initiative);
+  }
+  return initiatives;
+}
+
+// Creates a reference map using `initiativeFileURL`.
+export function _createReferenceMap(
+  initiatives: $ReadOnlyArray<Initiative>
+): Map<URL, NodeAddressT> {
+  const refs = new Map();
+  for (const {id} of initiatives) {
+    const address = addressFromId(id);
+    const url = initiativeFileURL(address);
+    if (!url) {
+      throw new Error("BUG: Initiative doesn't return an initiativeFileURL");
+    }
+    refs.set(url, address);
+  }
+  return refs;
 }
