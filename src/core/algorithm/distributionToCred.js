@@ -9,26 +9,41 @@ import {type Interval} from "../interval";
 import {type TimelineDistributions} from "./timelinePagerank";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 
-/**
- * Represents the full timeline cred for a graph.
- */
-export type FullTimelineCred = $ReadOnlyArray<{|
-  // The interval for this slice.
-  +interval: Interval,
-  // The cred for each node.
-  // (Uses the graph's canonical node ordering.)
-  +cred: Float64Array,
-|}>;
+export opaque type NodeOrderedCredScores: Float64Array = Float64Array;
 
 /**
- * Convert a TimelineDistribution into TimelineCred.
+ * Represents cred scores over time.
+ *
+ * It contains an array of intervals, which give timing information, and an
+ * array of CredTimeSlices, which are Float64Arrays. Each CredTimeSlice
+ * contains cred scores for an interval. The cred scores are included in
+ * node-address-sorted order, and as such the CredScores can only be
+ * interpreted in the context of an associated Graph.
+ *
+ * As invariants, it is guaranteed that:
+ * - intervals and intervalCredScores will always have the same length
+ * - all of the intervalCredScores will have a consistent implicit node ordering
+ *
+ * The type is marked opaque so that no-one else can construct instances that
+ * don't conform to these invariants.
+ */
+export opaque type TimelineCredScores: {|
+  +intervals: $ReadOnlyArray<Interval>,
+  +intervalCredScores: $ReadOnlyArray<NodeOrderedCredScores>,
+|} = {|
+  +intervals: $ReadOnlyArray<Interval>,
+  +intervalCredScores: $ReadOnlyArray<NodeOrderedCredScores>,
+|};
+
+/**
+ * Convert a TimelineDistribution into CredScores.
  *
  * The difference between the distribution and cred is that cred has been
  * re-normalized to present human-agreeable scores, rather than a probability
  * distribution.
  *
  * This implementation normalizes the scores so that in each interval, the
- * total score of every node matching scoringNodePrefix is equal to the
+ * total score of every node matching a scoringNodePrefix is equal to the
  * interval's weight.
  *
  * Edge cases:
@@ -42,22 +57,19 @@ export function distributionToCred(
   ds: TimelineDistributions,
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
   scoringNodePrefixes: $ReadOnlyArray<NodeAddressT>
-): FullTimelineCred {
+): TimelineCredScores {
   if (ds.length === 0) {
-    return [];
+    return {intervals: [], intervalCredScores: []};
   }
-  const intervals = ds.map((x) => x.interval);
   const scoringNodeIndices = [];
-  const cred = new Array(nodeOrder.length);
   for (let i = 0; i < nodeOrder.length; i++) {
     const addr = nodeOrder[i];
     if (scoringNodePrefixes.some((x) => NodeAddress.hasPrefix(addr, x))) {
       scoringNodeIndices.push(i);
     }
-    cred[i] = new Array(intervals.length);
   }
-
-  return ds.map(({interval, distribution, intervalWeight}) => {
+  const intervals = ds.map((x) => x.interval);
+  const intervalCredScores = ds.map(({distribution, intervalWeight}) => {
     const intervalTotalScore = sum(
       scoringNodeIndices.map((x) => distribution[x])
     );
@@ -65,6 +77,7 @@ export function distributionToCred(
     const intervalNormalizer =
       intervalTotalScore === 0 ? 0 : intervalWeight / intervalTotalScore;
     const cred = distribution.map((x) => x * intervalNormalizer);
-    return {interval, cred};
+    return cred;
   });
+  return {intervalCredScores, intervals};
 }
