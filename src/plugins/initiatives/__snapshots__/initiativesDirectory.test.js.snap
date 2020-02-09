@@ -38,3 +38,65 @@ Map {
   },
 }
 `;
+
+exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an example smoke test 1`] = `
+"[
+  [
+    \\"http://example.com/initiatives/initiative-A.json\\",
+    \\"N\\\\u0000sourcecred\\\\u0000initiatives\\\\u0000initiative\\\\u0000INITIATIVE_FILE\\\\u0000http://example.com/initiatives\\\\u0000initiative-A.json\\\\u0000\\"
+  ],
+  [
+    \\"http://example.com/initiatives/initiative-B.json\\",
+    \\"N\\\\u0000sourcecred\\\\u0000initiatives\\\\u0000initiative\\\\u0000INITIATIVE_FILE\\\\u0000http://example.com/initiatives\\\\u0000initiative-B.json\\\\u0000\\"
+  ]
+]"
+`;
+
+exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an example smoke test 2`] = `
+"[
+  {
+    \\"champions\\": [
+      \\"http://foo.bar/A/champ\\"
+    ],
+    \\"completed\\": true,
+    \\"contributions\\": [
+      \\"http://foo.bar/A/contrib\\"
+    ],
+    \\"dependencies\\": [
+      \\"http://foo.bar/A/dep\\"
+    ],
+    \\"id\\": [
+      \\"INITIATIVE_FILE\\",
+      \\"http://example.com/initiatives\\",
+      \\"initiative-A.json\\"
+    ],
+    \\"references\\": [
+      \\"http://foo.bar/A/ref\\"
+    ],
+    \\"timestampMs\\": 1578520917711,
+    \\"title\\": \\"Initiative A\\"
+  },
+  {
+    \\"champions\\": [
+      \\"http://foo.bar/B/champ\\"
+    ],
+    \\"completed\\": false,
+    \\"contributions\\": [
+      \\"http://foo.bar/B/contrib\\"
+    ],
+    \\"dependencies\\": [
+      \\"http://foo.bar/B/dep\\"
+    ],
+    \\"id\\": [
+      \\"INITIATIVE_FILE\\",
+      \\"http://example.com/initiatives\\",
+      \\"initiative-B.json\\"
+    ],
+    \\"references\\": [
+      \\"http://foo.bar/B/ref\\"
+    ],
+    \\"timestampMs\\": 1578520917722,
+    \\"title\\": \\"Initiative B\\"
+  }
+]"
+`;
