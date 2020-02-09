@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress} from "../graph";
-import {distributionToCred} from "./distributionToCred";
+import {distributionToCred, toJSON, fromJSON} from "./distributionToCred";
 
 describe("src/core/algorithm/distributionToCred", () => {
   const na = (...parts) => NodeAddress.fromParts(parts);
@@ -126,6 +126,27 @@ describe("src/core/algorithm/distributionToCred", () => {
         intervals: [],
         intervalCredScores: [],
       });
+    });
+  });
+  describe("to/from JSON", () => {
+    it("satisfies round-trip equality", () => {
+      const ds = [
+        {
+          interval: {startTimeMs: 0, endTimeMs: 10},
+          intervalWeight: 2,
+          distribution: new Float64Array([0.5, 0.5]),
+        },
+        {
+          interval: {startTimeMs: 10, endTimeMs: 20},
+          intervalWeight: 10,
+          distribution: new Float64Array([0.9, 0.1]),
+        },
+      ];
+      const nodeOrder = [na("foo"), na("bar")];
+      const before = distributionToCred(ds, nodeOrder, [na("bar")]);
+      const json = toJSON(before);
+      const after = fromJSON(json);
+      expect(before).toEqual(after);
     });
   });
 });

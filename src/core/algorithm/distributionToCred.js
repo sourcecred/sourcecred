@@ -5,6 +5,7 @@
  */
 
 import {sum} from "d3-array";
+import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import {type Interval} from "../interval";
 import {type TimelineDistributions} from "./timelinePagerank";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
@@ -78,4 +79,22 @@ export function distributionToCred(
     return cred;
   });
   return {intervalCredScores, intervals};
+}
+
+const COMPAT_INFO = {type: "sourcecred/timelineCredScores", version: "0.1.0"};
+
+export type TimelineCredScoresJSON = Compatible<{|
+  +intervals: $ReadOnlyArray<Interval>,
+  // TODO: Serializing floats as strings is space-inefficient. We can likely
+  // get space savings if we base64 encode a byte representation of the
+  // floats.
+  +intervalCredScores: $ReadOnlyArray<Float64Array>,
+|}>;
+
+export function toJSON(s: TimelineCredScores): TimelineCredScoresJSON {
+  return toCompat(COMPAT_INFO, s);
+}
+
+export function fromJSON(j: TimelineCredScoresJSON): TimelineCredScores {
+  return fromCompat(COMPAT_INFO, j);
 }
