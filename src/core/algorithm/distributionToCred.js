@@ -90,13 +90,20 @@ export type TimelineCredScoresJSON = Compatible<{|
   // TODO: Serializing floats as strings is space-inefficient. We can likely
   // get space savings if we base64 encode a byte representation of the
   // floats.
-  +intervalCredScores: $ReadOnlyArray<Float64Array>,
+  +intervalCredScores: $ReadOnlyArray<$ReadOnlyArray<number>>,
 |}>;
 
 export function toJSON(s: TimelineCredScores): TimelineCredScoresJSON {
-  return toCompat(COMPAT_INFO, s);
+  return toCompat(COMPAT_INFO, {
+    intervals: s.intervals,
+    intervalCredScores: s.intervalCredScores.map((x) => Array.from(x)),
+  });
 }
 
 export function fromJSON(j: TimelineCredScoresJSON): TimelineCredScores {
-  return fromCompat(COMPAT_INFO, j);
+  const {intervals, intervalCredScores} = fromCompat(COMPAT_INFO, j);
+  return {
+    intervals,
+    intervalCredScores: intervalCredScores.map((x) => new Float64Array(x)),
+  };
 }

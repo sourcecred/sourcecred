@@ -129,7 +129,7 @@ describe("src/core/algorithm/distributionToCred", () => {
     });
   });
   describe("to/from JSON", () => {
-    it("satisfies round-trip equality", () => {
+    const exampleCred = () => {
       const ds = [
         {
           interval: {startTimeMs: 0, endTimeMs: 10},
@@ -143,10 +143,44 @@ describe("src/core/algorithm/distributionToCred", () => {
         },
       ];
       const nodeOrder = [na("foo"), na("bar")];
-      const before = distributionToCred(ds, nodeOrder, [na("bar")]);
-      const json = toJSON(before);
-      const after = fromJSON(json);
-      expect(before).toEqual(after);
+      return distributionToCred(ds, nodeOrder, [na("bar")]);
+    };
+    it("satisfies round-trip equality", () => {
+      const json = toJSON(exampleCred());
+      const result = fromJSON(json);
+      expect(result).toEqual(exampleCred());
+    });
+    it("snapshots as expected", () => {
+      expect(toJSON(exampleCred())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "type": "sourcecred/timelineCredScores",
+            "version": "0.1.0",
+          },
+          Object {
+            "intervalCredScores": Array [
+              Array [
+                2,
+                2,
+              ],
+              Array [
+                90,
+                10,
+              ],
+            ],
+            "intervals": Array [
+              Object {
+                "endTimeMs": 10,
+                "startTimeMs": 0,
+              },
+              Object {
+                "endTimeMs": 20,
+                "startTimeMs": 10,
+              },
+            ],
+          },
+        ]
+      `);
     });
   });
 });
