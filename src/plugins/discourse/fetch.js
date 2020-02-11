@@ -157,7 +157,7 @@ export class Fetcher implements Discourse {
     // if you get a 429 failure.
     const limiter = new Bottleneck({minTime});
     const unlimitedFetch = NullUtil.orElse(fetchImplementation, fetch);
-    this._fetchImplementation = limiter.wrap(unlimitedFetch);
+    this._fetchImplementation = unlimitedFetch //limiter.wrap(unlimitedFetch);
   }
 
   _fetch(endpoint: string): Promise<Response> {
@@ -188,7 +188,7 @@ export class Fetcher implements Discourse {
       `/categories.json?show_subcategory_list=true`
     );
     failIfMissing(response);
-    failForNotOk(response);
+    await failForNotOk(response);
     const {categories: rootCategories} = (await response.json()).category_list;
     for (const cat of rootCategories) {
       if (cat.topic_url != null) {
@@ -205,7 +205,7 @@ export class Fetcher implements Discourse {
         `/categories.json?show_subcategory_list=true&parent_category_id=${rootCatId}`
       );
       failIfMissing(subResponse);
-      failForNotOk(subResponse);
+      await failForNotOk(subResponse);
       const {categories: subCategories} = (
         await subResponse.json()
       ).category_list;
@@ -237,7 +237,7 @@ export class Fetcher implements Discourse {
       // Example of a 404 topic: https://discourse.sourcecred.io/t/116
       return null;
     }
-    failForNotOk(response);
+    await failForNotOk(response);
     const json = await response.json();
     const {posts_count: postCount} = json;
     let posts = json.post_stream.posts.map(parsePost);
@@ -255,7 +255,7 @@ export class Fetcher implements Discourse {
     let page = 2;
     while (postCount > posts.length) {
       const resNext = await this._fetch(`/t/${id}.json?page=${page}`);
-      failForNotOk(resNext);
+      await failForNotOk(resNext);
       const subPosts = (await resNext.json()).post_stream.posts.map(parsePost);
       posts = [...posts, ...subPosts];
       page++;
@@ -277,7 +277,7 @@ export class Fetcher implements Discourse {
       return null;
     }
     failIfMissing(response);
-    failForNotOk(response);
+    await failForNotOk(response);
     const json = await response.json();
     return json.user_actions.map(parseLike);
   }
@@ -294,7 +294,7 @@ export class Fetcher implements Discourse {
         `/latest.json?order=activity&ascending=false&page=${page}`
       );
       failIfMissing(response);
-      failForNotOk(response);
+      await failForNotOk(response);
       const {topic_list: topicList} = await response.json();
 
       // Having the same amount of results as expected by pagination, assume there's another page.
@@ -338,7 +338,16 @@ function failIfMissing(response: Response) {
   }
 }
 
-function failForNotOk(response: Response) {
+async function await failForNotOk(response: Response) {
+  if (response.status === 429) {
+    console.log(response)
+    console.log(response.headers)
+    const json = await response.json()
+    console.log(json)
+    console.log(json.extras)
+    console.log(json.extras.wait_seconds)
+  }
+
   if (!response.ok) {
     throw new Error(`not OK status ${response.status} on ${response.url}`);
   }
