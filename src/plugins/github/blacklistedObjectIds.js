@@ -64,14 +64,14 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   "MDM6Qm90NDM4ODA5MDM=", // transifex-integration
 
   // Problematic interactions they did as a user: reactions.
-  "MDg6UmVhY3Rpb24yMTY3ODkyNQ==",
-  "MDg6UmVhY3Rpb240NDMwMzQ1",
-  "MDg6UmVhY3Rpb24xMDI4MzQxOA==",
-  "MDg6UmVhY3Rpb24zNDUxNjA2MQ==",
+  "MDg6UmVhY3Rpb24yMTY3ODkyNQ==", // https://github.com/twbs/bootstrap/issues/11037#issuecomment-105283986
+  "MDg6UmVhY3Rpb240NDMwMzQ1", // https://github.com/twbs/bootstrap/issues/20631#issuecomment-245479378
+  "MDg6UmVhY3Rpb24xMDI4MzQxOA==", // https://github.com/twbs/bootstrap/issues/22683#issuecomment-304187232
+  "MDg6UmVhY3Rpb24zNDUxNjA2MQ==", // https://github.com/quasarframework/quasar-cli/issues/164
   "MDg6UmVhY3Rpb24xNTUyODc3OQ==", // https://github.com/quasarframework/quasar/issues/1064
   "MDg6UmVhY3Rpb24xNjA5NDYyOQ==", // https://github.com/quasarframework/quasar/issues/1123#issuecomment-343846259
   "MDg6UmVhY3Rpb24xNjIxNTMzNQ==", // https://github.com/quasarframework/quasar/pull/1128#issuecomment-344605228
-  "MDg6UmVhY3Rpb24xMjIxMTk2Ng==", //https://github.com/passbolt/passbolt_api/issues/19
+  "MDg6UmVhY3Rpb24xMjIxMTk2Ng==", // https://github.com/passbolt/passbolt_api/issues/19
   "MDg6UmVhY3Rpb24zMTg4NjU3NQ==", // https://github.com/prettier/prettier/issues/40
   "MDg6UmVhY3Rpb24xMzEzNjY5MA==", // https://github.com/prettier/prettier/issues/187
   "MDg6UmVhY3Rpb24xMzEzNjc2OQ==", // https://github.com/prettier/prettier/issues/187#issuecomment-318651633
