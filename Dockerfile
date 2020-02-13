@@ -5,6 +5,9 @@ FROM node:12
 RUN mkdir -p /code
 WORKDIR /code
 
+# Updates and install jq for downstream actions
+RUN apt-get update && apt-get install -y jq
+
 # Install global and local dependencies first so they can be cached.
 RUN npm install -gf yarn@^1.21.1
 COPY package.json yarn.lock /code/
