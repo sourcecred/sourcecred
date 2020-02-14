@@ -338,15 +338,7 @@ function failIfMissing(response: Response) {
   }
 }
 
-async function await failForNotOk(response: Response) {
-  if (response.status === 429) {
-    console.log(response)
-    console.log(response.headers)
-    const json = await response.json()
-    console.log(json)
-    console.log(json.extras)
-    console.log(json.extras.wait_seconds)
-  }
+function failForNotOk(response: Response) {
 
   if (!response.ok) {
     throw new Error(`not OK status ${response.status} on ${response.url}`);
