@@ -7,10 +7,10 @@ export const BLACKLISTED_IDS: $ReadOnlyArray<ObjectId> = deepFreeze([
   // These are `Organization` nodes that are sometimes referenced in a
   // `User` context: in particular, as the author of a reaction.
   // See: https://gist.github.com/wchargin/a2b8561b81bcc932c84e493d2485ea8a
-  "MDEyOk9yZ2FuaXphdGlvbjE3OTUyOTI1",
-  "MDEyOk9yZ2FuaXphdGlvbjI5MTkzOTQ=",
-  "MDEyOk9yZ2FuaXphdGlvbjEyNDE3MDI0",
-  "MDEyOk9yZ2FuaXphdGlvbjQzMDkzODIw",
+  "MDEyOk9yZ2FuaXphdGlvbjE3OTUyOTI1", // webineh
+  "MDEyOk9yZ2FuaXphdGlvbjI5MTkzOTQ=", // ck-ws
+  "MDEyOk9yZ2FuaXphdGlvbjEyNDE3MDI0", // DediData
+  "MDEyOk9yZ2FuaXphdGlvbjQzMDkzODIw", // airgram
   "MDEyOk9yZ2FuaXphdGlvbjEyNDk5MDI=", // techtribe
   "MDEyOk9yZ2FuaXphdGlvbjIxMzQ5NTM=", // nueko
   "MDEyOk9yZ2FuaXphdGlvbjQ0MDU2MDY4", // foodles-tech
