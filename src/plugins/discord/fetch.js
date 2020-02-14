@@ -8,12 +8,7 @@ const guildid = "453243919774253079"
 const channel = "543168537062014987"
 const urlChannel = `${DISCORD_SERVER}/channels/${channel}`
 const url = `${urlChannel}/messages?667618906734592031&limit=100&around=0`
-const CLIENT_ID = "673208303567765516"
-const CLIENT_SECRET = "sRemXufBbspQ6akkk_n-eSq3uQejYmv_"
-const redirect = "http://localhost:8000"
 
-// const url3 = "https://discordapp.com/api/oauth2/authorize?client_id=673208303567765516&redirect_uri=http%3A%2F%2Flocalhost%3A8000&response_type=code&scope=guilds"
- var count = 0
 
 const fetchOptions = {
   method: "GET",
