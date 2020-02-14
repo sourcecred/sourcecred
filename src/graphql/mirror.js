@@ -654,6 +654,9 @@ export class Mirror {
   _queryFromPlan(
     queryPlan: QueryPlan,
     options: {|
+      // When fetching typenames for nodes originally referenced by
+      // unfaithful fields, how many typenames may we fetch at once?
+      +typenamesLimit: number,
       // When fetching own-data for nodes of a given type, how many
       // nodes may we fetch at once?
       +nodesOfTypeLimit: number,
@@ -667,9 +670,21 @@ export class Mirror {
       +connectionPageSize: number,
     |}
   ): Queries.Selection[] {
-    if (queryPlan.typenames.length > 0) {
-      throw new Error("Typename queries not yet supported");
+    const fetchTypenamesFor = queryPlan.typenames.slice(
+      0,
+      options.typenamesLimit
+    );
+    const typenameBatches = [];
+    for (
+      let i = 0;
+      i < fetchTypenamesFor.length;
+      i += options.nodesOfTypeLimit
+    ) {
+      typenameBatches.push(
+        fetchTypenamesFor.slice(i, i + options.nodesOfTypeLimit)
+      );
     }
+
     // Group objects by type, so that we have to specify each type's
     // fieldset fewer times (only once per `nodesOfTypeLimit` nodes
     // instead of for every node).
@@ -726,16 +741,30 @@ export class Mirror {
 
     const b = Queries.build;
 
-    // Each top-level field corresponds to either an object type
-    // (fetching own data for objects of that type) or a particular node
-    // (updating connections on that node). We alias each such field,
-    // which is necessary to ensure that their names are all unique. The
-    // names chosen are sufficient to identify which _kind_ of query the
-    // field corresponds to (type's own data vs node's connections), but
-    // do not need to identify the particular type or node in question.
-    // This is because all descendant selections are self-describing:
-    // they include the ID of any relevant objects.
+    // Each top-level field other than `typenames` corresponds to either
+    // an object type (fetching own data for objects of that type) or a
+    // particular node (updating connections on that node). We alias
+    // each such field, which is necessary to ensure that their names
+    // are all unique. The names chosen are sufficient to identify which
+    // _kind_ of query the field corresponds to (type's own data vs
+    // node's connections), but do not need to identify the particular
+    // type or node in question. This is because all descendant
+    // selections are self-describing: they include the ID of any
+    // relevant objects.
     return [].concat(
+      typenameBatches.map((typenames, i) => {
+        const name = `${_FIELD_PREFIXES.TYPENAMES}${i}`;
+        return b.alias(
+          name,
+          b.field(
+            "nodes",
+            {
+              ids: b.list(typenames.map((id) => b.literal(id))),
+            },
+            this._queryTypename()
+          )
+        );
+      }),
       paginatedObjectsByType.map(({typename, ids}, i) => {
         const name = `${_FIELD_PREFIXES.OWN_DATA}${i}`;
         return b.alias(
@@ -917,6 +946,9 @@ export class Mirror {
       return Promise.resolve(false);
     }
     const querySelections = this._queryFromPlan(queryPlan, {
+      // TODO(@wchargin): Expose `typenamesLimit` as an option and fix
+      // up callers.
+      typenamesLimit: options.nodesLimit,
       nodesLimit: options.nodesLimit,
       nodesOfTypeLimit: options.nodesOfTypeLimit,
       connectionPageSize: options.connectionPageSize,
@@ -1632,6 +1664,20 @@ export class Mirror {
     }
 
     // Last-updates, primitives, and links all updated: we're done.
+  }
+
+  /**
+   * Create a GraphQL selection set required to fetch the typename of an
+   * object. The resulting GraphQL can be embedded in any node context.
+   *
+   * The result of this query has type `E`, where `E` is the element
+   * type of `TypenamesUpdateResult`.
+   *
+   * This function is pure: it does not interact with the database.
+   */
+  _queryTypename(): Queries.Selection[] {
+    const b = Queries.build;
+    return [b.field("__typename"), b.field("id")];
   }
 
   /**
