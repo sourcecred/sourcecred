@@ -823,16 +823,17 @@ export class Mirror {
     queryResult: UpdateResult
   ): void {
     for (const topLevelKey of Object.keys(queryResult)) {
+      const rawValue:
+        | TypenamesUpdateResult
+        | OwnDataUpdateResult
+        | NodeConnectionsUpdateResult = queryResult[topLevelKey];
       if (topLevelKey.startsWith(_FIELD_PREFIXES.TYPENAMES)) {
-        throw new Error("Typename update results not yet supported");
+        const updateRecord: TypenamesUpdateResult = (rawValue: any);
+        this._nontransactionallyUpdateTypenames(updateRecord);
       } else if (topLevelKey.startsWith(_FIELD_PREFIXES.OWN_DATA)) {
-        const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
-          queryResult[topLevelKey];
         const updateRecord: OwnDataUpdateResult = (rawValue: any);
         this._nontransactionallyUpdateOwnData(updateId, updateRecord);
       } else if (topLevelKey.startsWith(_FIELD_PREFIXES.NODE_CONNECTIONS)) {
-        const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
-          queryResult[topLevelKey];
         const updateRecord: NodeConnectionsUpdateResult = (rawValue: any);
         for (const fieldname of Object.keys(updateRecord)) {
           if (fieldname === "id") {
@@ -1678,6 +1679,33 @@ export class Mirror {
   _queryTypename(): Queries.Selection[] {
     const b = Queries.build;
     return [b.field("__typename"), b.field("id")];
+  }
+
+  /**
+   * Ingest typenames for many object IDs.
+   *
+   * See: `_queryTypenames`.
+   */
+  _updateTypenames(queryResult: TypenamesUpdateResult): void {
+    _inTransaction(this._db, () => {
+      this._nontransactionallyUpdateTypenames(queryResult);
+    });
+  }
+
+  /**
+   * As `_updateTypenames`, but do not enter any transactions. Other
+   * methods may call this method as a subroutine in a larger
+   * transaction.
+   */
+  _nontransactionallyUpdateTypenames(queryResult: TypenamesUpdateResult): void {
+    for (const datum of queryResult) {
+      // Need to go through `registerObject` to ensure that primitives,
+      // links, and connections are initialized.
+      this._nontransactionallyRegisterObject({
+        id: datum.id,
+        typename: datum.__typename,
+      });
+    }
   }
 
   /**
