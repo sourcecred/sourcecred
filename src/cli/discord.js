@@ -1,7 +1,7 @@
-import {f} from "../plugins/discord/fetch";
+import {fetchDiscord} from "../plugins/discord/fetch";
 
 const discord = (args, std) => {
-  f()
+  fetchDiscord()
 }
 
 export default discord;
