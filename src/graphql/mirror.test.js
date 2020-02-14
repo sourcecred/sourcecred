@@ -566,6 +566,7 @@ describe("graphql/mirror", () => {
 
         const actual = mirror._findOutdated(new Date(midUpdate.time));
         const expected = {
+          typenames: [],
           objects: [
             {typename: "Repository", id: "repo:ab/cd"}, // loaded before cutoff
             // issue:ab/cd#1 was loaded after the cutoff
@@ -608,6 +609,7 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const plan = {
+          typenames: [],
           objects: [],
           connections: [
             {
@@ -636,10 +638,28 @@ describe("graphql/mirror", () => {
             '"Issue" vs. "Repository"'
         );
       });
+      it("errors if given any typename requests", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          typenames: ["hmmm"],
+          objects: [],
+          connections: [],
+        };
+        expect(() => {
+          mirror._queryFromPlan(plan, {
+            nodesLimit: 10,
+            nodesOfTypeLimit: 5,
+            connectionLimit: 5,
+            connectionPageSize: 23,
+          });
+        }).toThrow("Typename queries not yet supported");
+      });
       it("creates a good query", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const plan = {
+          typenames: [],
           objects: [
             {typename: "Issue", id: "i#1"},
             {typename: "Repository", id: "repo#2"},
@@ -1136,6 +1156,7 @@ describe("graphql/mirror", () => {
           spyFindOutdated.mock.results[1].value
         );
         expect(spyFindOutdated.mock.results[2].value).toEqual({
+          typenames: [],
           objects: [],
           connections: [],
         });
