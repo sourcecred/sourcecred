@@ -142,6 +142,9 @@ export class Mirror {
    *     this more efficiently in both space and time (see discussion on
    *     #883 for some options).
    *
+   * These fields are type-specific, and so only exist once a node's
+   * typename is set.
+   *
    * We refer to node and primitive data together as "own data", because
    * this is the data that can be queried uniformly for all elements of
    * a type; querying connection data, by contrast, requires the
@@ -167,7 +170,11 @@ export class Mirror {
    * appears once in the `objects` table, which relates its ID,
    * typename, and last own-data update. Each connection has its own
    * last-update value, because connections can be updated independently
-   * of each other and of own-data.
+   * of each other and of own-data. An object's typename may be `NULL`
+   * if we have only reached the object through edges of unfaithful
+   * type, in which case we will perform an extra query to definitively
+   * determine fetch the object's type before requesting its own data or
+   * connections.
    *
    * Note that any object in the database should have entries in the
    * `connections`, `links`, and `primitives` tables for all relevant
@@ -198,7 +205,7 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
-      version: "MIRROR_v8",
+      version: "MIRROR_v9",
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,
@@ -253,9 +260,10 @@ export class Mirror {
         dedent`\
           CREATE TABLE objects (
               id TEXT NOT NULL PRIMARY KEY,
-              typename TEXT NOT NULL,
+              typename TEXT,
               last_update INTEGER,
-              FOREIGN KEY(last_update) REFERENCES updates(rowid)
+              FOREIGN KEY(last_update) REFERENCES updates(rowid),
+              CHECK((last_update IS NOT NULL) <= (typename IS NOT NULL))
           )
         `,
         dedent`\
@@ -362,8 +370,9 @@ export class Mirror {
 
   /**
    * Inform the GraphQL mirror of the existence of an object. The
-   * object's name and concrete type must be specified. The concrete
-   * type must be an OBJECT type in the GraphQL schema.
+   * object's ID must be specified. The object's concrete type may also
+   * be specified, in which case it must be an OBJECT type in the
+   * GraphQL schema.
    *
    * If the object has previously been registered with the same type, no
    * action is taken and no error is raised. If the object has
@@ -371,7 +380,7 @@ export class Mirror {
    * thrown, and the database is left unchanged.
    */
   registerObject(object: {|
-    +typename: Schema.Typename,
+    +typename: null | Schema.Typename,
     +id: Schema.ObjectId,
   |}): void {
     _inTransaction(this._db, () => {
@@ -383,10 +392,13 @@ export class Mirror {
    * As `registerObject`, but do not enter any transactions. Other
    * methods may call this method as a subroutine in a larger
    * transaction.
+   *
+   * This internal method also permits registering an object without
+   * specifying its typename.
    */
   _nontransactionallyRegisterObject(
     object: {|
-      +typename: Schema.Typename,
+      +typename: null | Schema.Typename,
       +id: Schema.ObjectId,
     |},
     guessMismatchMessage?: (guess: Schema.Typename) => string
@@ -410,9 +422,18 @@ export class Mirror {
       .pluck()
       .get(id);
     if (existingTypename === typename) {
-      // Already registered; nothing to do.
+      // Already registered, and no typename upgrade; nothing to do.
       return;
-    } else if (existingTypename !== undefined) {
+    } else if (existingTypename != null && typename == null) {
+      // Already registered, and already have typename; nothing to do.
+      return;
+    } else if (existingTypename === undefined) {
+      // OK: New registration.
+    } else if (existingTypename === null) {
+      // OK: Typename upgrade. Take the user-supplied type as reliable.
+      // We still need to add primitives, links, and connections rows.
+    } else {
+      // Not OK: Already had a typename, but it didn't match.
       const s = JSON.stringify;
       throw new Error(
         `Inconsistent type for ID ${s(id)}: ` +
@@ -420,29 +441,49 @@ export class Mirror {
       );
     }
 
-    if (this._schema[typename] == null) {
-      throw new Error("Unknown type: " + JSON.stringify(typename));
-    }
-    if (this._schema[typename].type !== "OBJECT") {
-      throw new Error(
-        "Cannot add object of non-object type: " +
-          `${JSON.stringify(typename)} (${this._schema[typename].type})`
-      );
+    if (typename != null) {
+      if (this._schema[typename] == null) {
+        throw new Error("Unknown type: " + JSON.stringify(typename));
+      }
+      if (this._schema[typename].type !== "OBJECT") {
+        throw new Error(
+          "Cannot add object of non-object type: " +
+            `${JSON.stringify(typename)} (${this._schema[typename].type})`
+        );
+      }
+
+      const guess = this._guessTypename(object.id);
+      if (guess != null && guess !== object.typename) {
+        console.warn("Warning: " + guessMismatchMessage(guess));
+      }
     }
 
-    const guess = this._guessTypename(object.id);
-    if (guess != null && guess !== object.typename) {
-      console.warn("Warning: " + guessMismatchMessage(guess));
-    }
-
-    this._db
-      .prepare(
+    if (existingTypename === undefined) {
+      this._db
+        .prepare(
+          dedent`\
+            INSERT INTO objects (id, last_update, typename)
+            VALUES (:id, NULL, :typename)
+          `
+        )
+        .run({id, typename});
+    } else {
+      // Should be a typename upgrade.
+      const stmt = db.prepare(
         dedent`\
-          INSERT INTO objects (id, last_update, typename)
-          VALUES (:id, NULL, :typename)
+          UPDATE objects SET typename = :typename
+          WHERE id = :id
+          AND typename IS NULL  -- sanity check
+          AND :typename IS NOT NULL  -- sanity check
         `
-      )
-      .run({id, typename});
+      );
+      _makeSingleUpdateFunction(stmt)({id, typename});
+    }
+
+    if (typename == null) {
+      // Can't add fields if typename not known.
+      return;
+    }
     const addPrimitive = this._db.prepare(
       dedent`
         INSERT INTO primitives (object_id, fieldname, value)
@@ -526,6 +567,9 @@ export class Mirror {
   /**
    * Find objects and connections that are not known to be up-to-date.
    *
+   * An object's typename is up-to-date if it has ever been fetched from
+   * a faithful field reference or a direct typename query.
+   *
    * An object is up-to-date if its own data has been loaded at least as
    * recently as the provided date.
    *
@@ -536,17 +580,28 @@ export class Mirror {
   _findOutdated(since: Date): QueryPlan {
     const db = this._db;
     return _inTransaction(db, () => {
-      // All objects must have recorded typenames due to the `NOT NULL`
-      // constraint on `typename` column of the `objects` table.
-      const typenames: $PropertyType<QueryPlan, "typenames"> = [];
+      const typenames: $PropertyType<QueryPlan, "typenames"> = db
+        .prepare(
+          dedent`\
+            SELECT id AS id
+            FROM objects
+            WHERE typename IS NULL
+          `
+        )
+        .pluck()
+        .all({timeEpochMillisThreshold: +since});
       const objects: $PropertyType<QueryPlan, "objects"> = db
         .prepare(
           dedent`\
             SELECT typename AS typename, id AS id
             FROM objects
             LEFT OUTER JOIN updates ON objects.last_update = updates.rowid
-            WHERE objects.last_update IS NULL
-            OR updates.time_epoch_millis < :timeEpochMillisThreshold
+            WHERE
+                typename IS NOT NULL
+                AND (
+                    objects.last_update IS NULL
+                    OR updates.time_epoch_millis < :timeEpochMillisThreshold
+                )
           `
         )
         .all({timeEpochMillisThreshold: +since});
@@ -564,9 +619,13 @@ export class Mirror {
                 ON connections.last_update = updates.rowid
             JOIN objects
                 ON connections.object_id = objects.id
-            WHERE connections.has_next_page
-            OR connections.last_update IS NULL
-            OR updates.time_epoch_millis < :timeEpochMillisThreshold
+            WHERE
+                objectTypename IS NOT NULL
+                AND (
+                    connections.has_next_page
+                    OR connections.last_update IS NULL
+                    OR updates.time_epoch_millis < :timeEpochMillisThreshold
+                )
           `
         )
         .all({timeEpochMillisThreshold: +since})
@@ -1343,13 +1402,20 @@ export class Mirror {
     // First, make sure that all objects for which we're given own data
     // actually exist and have the correct typename.
     {
-      const doesObjectExist = db
-        .prepare("SELECT COUNT(1) FROM objects WHERE id = ?")
+      const checkTypename = db
+        .prepare("SELECT typename IS NOT NULL FROM objects WHERE id = ?")
         .pluck();
       for (const entry of queryResult) {
-        if (!doesObjectExist.get(entry.id)) {
+        const hasTypename = checkTypename.get(entry.id);
+        if (hasTypename == null) {
           throw new Error(
             "Cannot update data for nonexistent node: " +
+              JSON.stringify(entry.id)
+          );
+        }
+        if (!hasTypename) {
+          throw new Error(
+            "Cannot update data before typename known: " +
               JSON.stringify(entry.id)
           );
         }
