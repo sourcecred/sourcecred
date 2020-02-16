@@ -1,11 +1,16 @@
 // @flow
 
+import * as MapUtil from "../util/map";
 import {type Edge, Graph, NodeAddress, type NodeAddressT} from "../core/graph";
+import {type WeightedGraph} from "../core/weightedGraph";
+import {MarkovProcessGraph} from "../core/markovProcessGraph";
 import {
   distributionToNodeDistribution,
   createConnections,
   createOrderedSparseMarkovChain,
   type EdgeWeight,
+  type Connection,
+  type Adjacency,
 } from "../core/algorithm/graphToMarkovChain";
 import {
   decompose,
@@ -54,20 +59,26 @@ function defaultOptions(): PagerankOptions {
 }
 
 export async function pagerank(
-  graph: Graph,
-  edgeWeight: EdgeEvaluator,
+  wg: WeightedGraph,
   options?: PagerankOptions
 ): Promise<PagerankNodeDecomposition> {
   const fullOptions = {
     ...defaultOptions(),
     ...(options || {}),
   };
-  const connections = createConnections(
-    graph,
-    edgeWeight,
-    fullOptions.selfLoopWeight
-  );
-  const osmc = createOrderedSparseMarkovChain(connections);
+  const timeBoundaries = Array(52)
+    .fill()
+    .map((_, i) => (1580603309 - 86400 * 7 * (i + 1)) * 1000);
+  const fibration = {
+    what: [NodeAddress.fromParts(["sourcecred", "github", "USERLIKE", "USER"])],
+    timeBoundaries,
+    beta: 0.5,
+    gammaForward: 0.1,
+    gammaBackward: 0.1,
+  };
+  const seed = {alpha: 0.1};
+  const mpg = new MarkovProcessGraph(wg, fibration, seed);
+  const osmc = mpg.toMarkovChain();
   const params: PagerankParams = {
     chain: osmc.chain,
     alpha: 0,
@@ -93,5 +104,24 @@ export async function pagerank(
     fullOptions.totalScore,
     fullOptions.totalScoreNodePrefix
   );
-  return decompose(scores, connections);
+  const nodeToConnections: Map<
+    NodeAddressT,
+    $ReadOnlyArray<Connection>
+  > = new Map();
+  const markovEdges = mpg._edges.values();
+  for (const me of markovEdges) {
+    const noflip = !me.reversed;
+    const src = noflip ? me.src : me.dst;
+    const dst = noflip ? me.dst : me.src;
+    const edge: Edge = {address: me.address, src, dst, timestampMs: 0};
+    const adjacency: Adjacency = noflip
+      ? {type: "OUT_EDGE", edge}
+      : {type: "IN_EDGE", edge};
+    const connection: Connection = {
+      adjacency,
+      weight: me.transitionProbability,
+    };
+    MapUtil.pushValue((nodeToConnections: any), me.dst, connection);
+  }
+  return decompose(scores, nodeToConnections);
 }

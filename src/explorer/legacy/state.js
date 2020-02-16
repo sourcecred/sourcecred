@@ -3,6 +3,7 @@
 import deepEqual from "lodash.isequal";
 
 import {Graph, type NodeAddressT} from "../../core/graph";
+import {type WeightedGraph} from "../../core/weightedGraph";
 import type {Assets} from "../../webutil/assets";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
 import {defaultLoader, type LoadSuccess} from "../TimelineApp";
@@ -82,8 +83,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
   setState: (AppState) => void;
   doLoad: (assets: Assets, projectId: string) => Promise<LoadSuccess>;
   pagerank: (
-    Graph,
-    EdgeEvaluator,
+    WeightedGraph,
     PagerankOptions
   ) => Promise<PagerankNodeDecomposition>;
 
@@ -92,8 +92,7 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
     setState: (AppState) => void,
     doLoad: (assets: Assets, projectId: string) => Promise<LoadSuccess>,
     pagerank: (
-      Graph,
-      EdgeEvaluator,
+      WeightedGraph,
       PagerankOptions
     ) => Promise<PagerankNodeDecomposition>
   ) {
@@ -152,17 +151,13 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
         ? {...state, loading: "LOADING"}
         : {...state, loading: "LOADING"};
     this.setState(loadingState);
-    const graph = state.timelineCred.weightedGraph().graph;
+    const weightedGraph = state.timelineCred.weightedGraph();
     let newState: ?AppState;
     try {
-      const pagerankNodeDecomposition = await this.pagerank(
-        graph,
-        weightsToEdgeEvaluator(weights),
-        {
-          verbose: true,
-          totalScoreNodePrefix: totalScoreNodePrefix,
-        }
-      );
+      const pagerankNodeDecomposition = await this.pagerank(weightedGraph, {
+        verbose: true,
+        totalScoreNodePrefix: totalScoreNodePrefix,
+      });
       newState = {
         type: "PAGERANK_EVALUATED",
         pagerankNodeDecomposition,

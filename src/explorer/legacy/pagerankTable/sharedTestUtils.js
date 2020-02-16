@@ -2,6 +2,7 @@
 
 import React from "react";
 
+import * as Weights from "../../../core/weights";
 import {type NodeAddressT} from "../../../core/graph";
 import {pagerank} from "../../../analysis/pagerank";
 import {graph as demoGraph} from "../../../plugins/demo/graph";
@@ -12,11 +13,9 @@ export const COLUMNS = () => ["Description", "", "Cred"];
 
 export async function example() {
   const graph = demoGraph();
+  const wg = {graph, weights: Weights.empty()};
   const declarations = [demoDeclaration];
-  const pnd = await pagerank(graph, (_unused_Edge) => ({
-    forwards: 1,
-    backwards: 1,
-  }));
+  const pnd = await pagerank(wg);
   const maxEntriesPerList = 123;
   const nodeWeights: Map<NodeAddressT, number> = new Map();
   const onNodeWeightsChange: (NodeAddressT, number) => void = jest.fn();
