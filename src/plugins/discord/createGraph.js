@@ -1,5 +1,6 @@
 // @flow
 
+import {escape} from "entities";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import {type Weights, type NodeWeight} from "../../core/weights";
@@ -22,6 +23,9 @@ import {
   reactsToEdgeType,
 } from "./declaration";
 import * as Model from "./models";
+
+// Display this many characters in description.
+const MESSAGE_LENGTH = 30;
 
 function messageUrl(
   guild: Model.Snowflake,
@@ -48,17 +52,20 @@ function messageAddress(message: Model.Message): NodeAddressT {
 }
 
 function reactionAddress(reaction: Model.Reaction): NodeAddressT {
+  // Hacky order, so we can boost categories.
   return NodeAddress.append(
     reactionNodeType.prefix,
+    reaction.channelId,
     Model.emojiToRef(reaction.emoji),
     reaction.authorId,
-    reaction.channelId,
     reaction.messageId
   );
 }
 
 function memberNode(member: Model.GuildMember): Node {
-  const description = `${member.user.username}#${member.user.discriminator}`;
+  const description = `${escape(member.user.username)}#${
+    member.user.discriminator
+  }`;
   return {
     address: memberAddress(member),
     description,
@@ -66,9 +73,14 @@ function memberNode(member: Model.GuildMember): Node {
   };
 }
 
-function messageNode(message: Model.Message, guild: Model.Snowflake): Node {
+function messageNode(
+  message: Model.Message,
+  guild: Model.Snowflake,
+  channelName: string
+): Node {
   const url = messageUrl(guild, message.channelId, message.id);
-  const description = `Message [${message.id}](${url})`;
+  const partialMessage = escape(message.content.substring(0, MESSAGE_LENGTH));
+  const description = `#${channelName} message ["${partialMessage}..."](${url})`;
   return {
     address: messageAddress(message),
     description,
@@ -95,7 +107,11 @@ function authorsMessageEdge(
   };
 }
 
-function reactionNode(reaction: Model.Reaction, timestampMs: number, guild: Model.Snowflake): Node {
+function reactionNode(
+  reaction: Model.Reaction,
+  timestampMs: number,
+  guild: Model.Snowflake
+): Node {
   const msgUrl = messageUrl(guild, reaction.channelId, reaction.messageId);
   const reactionStr = reaction.emoji.id
     ? `:${reaction.emoji.name}:`
@@ -151,6 +167,16 @@ function reactsToEdge(reaction: Model.Reaction, message: Model.Message): Edge {
 
 export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
 
+function channelReactionsPrefix(channel: Model.Snowflake): NodeAddressT {
+  return NodeAddress.append(reactionNodeType.prefix, channel);
+}
+
+const hackBoostedCategories = [
+  [channelReactionsPrefix("629411717704712192"), 5], // strat
+  [channelReactionsPrefix("629412800346849302"), 5], // buidl
+  [channelReactionsPrefix("635151982298136587"), 3], // shill
+];
+
 export function createGraph(
   guild: Model.Snowflake,
   repo: SqliteMirrorRepository,
@@ -161,6 +187,10 @@ export function createGraph(
     graph: new Graph(),
     weights: declarationWeights,
   };
+
+  for(const [prefix, multiplier] of hackBoostedCategories) {
+    wg.weights.nodeWeights.set(prefix, multiplier);
+  }
 
   const memberMap = new Map(repo.members().map((m) => [m.user.id, m]));
   const channels = repo.channels();
@@ -181,7 +211,11 @@ export function createGraph(
 
         const reactingMember = memberMap.get(reaction.authorId);
         if (!reactingMember) {
-          throw new Error(`Reacting member not loaded ${reaction.authorId}`);
+          console.warn(
+            `Reacting member not loaded ${reaction.authorId} (reacted ${emojiRef}), maybe a Deleted User?\n` +
+              `${messageUrl(guild, channel.id, message.id)}`
+          );
+          continue;
         }
 
         hasWeightedEmoji = true;
@@ -199,10 +233,14 @@ export function createGraph(
       if (hasWeightedEmoji) {
         const author = memberMap.get(message.authorId);
         if (!author) {
-          throw new Error(`Message author not loaded ${message.authorId}`);
+          console.warn(
+            `Message author not loaded ${message.authorId}, maybe a Deleted User?\n` +
+              `${messageUrl(guild, channel.id, message.id)}`
+          );
+          continue;
         }
         wg.graph.addNode(memberNode(author));
-        wg.graph.addNode(messageNode(message, guild));
+        wg.graph.addNode(messageNode(message, guild, channel.name));
         wg.graph.addEdge(authorsMessageEdge(message, author));
       }
     }

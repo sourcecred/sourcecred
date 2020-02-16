@@ -5,6 +5,9 @@ import {type DiscordApi} from "./fetcher";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import * as Model from "./models";
 
+// How many messages for each channel to reload.
+const RELOAD_DEPTH = 50;
+
 export class Mirror {
   +_repo: SqliteMirrorRepository;
   +_api: DiscordApi;
@@ -67,9 +70,8 @@ export class Mirror {
   }
 
   async addMessages(channel: Model.Snowflake, messageLimit?: number) {
-    // TODO: don't hardcode the 100 here.
-    const loadStart = this._repo.nthMessageFromTail(channel, 100);
-    console.log(channel, (loadStart || {}).id);
+    const loadStart = this._repo.nthMessageFromTail(channel, RELOAD_DEPTH);
+    // console.log(channel, (loadStart || {}).id);
 
     const limit = messageLimit || 100;
     let page: $ReadOnlyArray<Model.Message> = [];
