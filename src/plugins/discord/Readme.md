@@ -32,3 +32,7 @@ With the bot invited and auth set up. Find out the Guild ID using:
 
 `GET https://discordapp.com/api/users/@me/guilds`
 
+Find your custom emoji using:
+
+`GET https://discordapp.com/api/guilds/{{discordGuildId}}/emojis`
+

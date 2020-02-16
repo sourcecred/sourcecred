@@ -196,6 +196,48 @@ export class SqliteMirrorRepository {
       }));
   }
 
+  nthMessageFromTail(channel: Model.Snowflake, n: number): ?Model.Message {
+    const count = this._db
+      .prepare(
+        dedent`\
+        SELECT count(*) as count
+        FROM messages
+        WHERE channel_id = :channel_id`
+      )
+      .get({channel_id: channel}).count;
+
+    if (count < n) return null;
+    const offset = count - n;
+    const m = this._db
+      .prepare(
+        dedent`\
+        SELECT
+          id,
+          channel_id,
+          author_id,
+          non_user_author,
+          timestamp_ms,
+          content
+        FROM messages
+        WHERE channel_id = :channel_id
+        ORDER BY timestamp_ms
+        LIMIT 1
+        OFFSET :offset
+        `
+      )
+      .get({channel_id: channel, offset});
+
+    return {
+      id: m.id,
+      channelId: m.channel_id,
+      authorId: m.author_id,
+      nonUserAuthor: m.non_user_author === 1,
+      timestampMs: m.timestamp_ms,
+      content: m.content,
+      reactionEmoji: this.reactionEmoji(m.channel_id, m.id),
+    };
+  }
+
   reactionEmoji(
     channel: Model.Snowflake,
     message: Model.Snowflake
