@@ -5,6 +5,22 @@ import * as Model from "./models";
 
 export interface DiscordApi {
   guilds(): Promise<$ReadOnlyArray<Model.Guild>>;
+  emojis(guild: Model.Snowflake): Promise<$ReadOnlyArray<Model.Emoji>>;
+  channels(guild: Model.Snowflake): Promise<$ReadOnlyArray<Model.Channel>>;
+  roles(guild: Model.Snowflake): Promise<$ReadOnlyArray<Model.Role>>;
+  members(guild: Model.Snowflake): Promise<$ReadOnlyArray<Model.GuildMember>>;
+  messages(
+    channel: Model.Snowflake,
+    after: Model.Snowflake,
+    limit: number
+  ): Promise<$ReadOnlyArray<Model.Message>>;
+  reactions(
+    channel: Model.Snowflake,
+    message: Model.Snowflake,
+    emoji: Model.EmojiRef,
+    after: Model.Snowflake,
+    limit: number
+  ): Promise<$ReadOnlyArray<Model.Reaction>>;
 }
 
 const fetcherDefaults: FetcherOptions = {
@@ -44,14 +60,110 @@ export class Fetcher implements DiscordApi {
     return this._options.fetch(`${apiUrl}${endpoint}`, requestOptions);
   }
 
-  async guilds(): Promise<$ReadOnlyArray<Model.Guild>> {
-    const res = await this._fetch("/users/@me/guilds");
+  async _fetchJson(endpoint: string): Promise<any> {
+    const res = await this._fetch(endpoint);
     failIfMissing(res);
     failForNotOk(res);
-    return (await res.json()).map((g) => ({
-      id: g.id,
-      name: g.name,
-      permissions: g.permissions,
+    return await res.json();
+  }
+
+  async guilds(): Promise<$ReadOnlyArray<Model.Guild>> {
+    const guilds = await this._fetchJson("/users/@me/guilds");
+    return guilds.map((x) => ({
+      id: x.id,
+      name: x.name,
+      permissions: x.permissions,
+    }));
+  }
+
+  async emojis(guild: Model.Snowflake): Promise<$ReadOnlyArray<Model.Emoji>> {
+    const emojis = await this._fetchJson(`/guilds/${guild}/emojis`);
+    return emojis.map((x) => ({
+      id: x.id,
+      name: x.name,
+    }));
+  }
+
+  async channels(
+    guild: Model.Snowflake
+  ): Promise<$ReadOnlyArray<Model.Channel>> {
+    const channels = await this._fetchJson(`/guilds/${guild}/channels`);
+    return channels.map((x) => ({
+      id: x.id,
+      name: x.name,
+      type: Model.channelTypeFromId(x.type),
+    }));
+  }
+
+  async roles(guild: Model.Snowflake): Promise<$ReadOnlyArray<Model.Role>> {
+    const roles = await this._fetchJson(`/guilds/${guild}/roles`);
+    return roles.map((x) => ({
+      id: x.id,
+      name: x.name,
+    }));
+  }
+
+  async members(
+    guild: Model.Snowflake
+  ): Promise<$ReadOnlyArray<Model.GuildMember>> {
+    // TODO: hack, should have pagination.
+    const members = await this._fetchJson(
+      `/guilds/${guild}/members?limit=1000`
+    );
+    if (members.length === 1000) {
+      throw new Error(
+        "TODO: getting 1000 members, needs to implement pagination"
+      );
+    }
+    return members.map((x) => ({
+      user: {
+        id: x.user.id,
+        username: x.user.username,
+        discriminator: x.user.discriminator,
+        bot: x.user.bot || x.user.system || false,
+      },
+      nick: x.nick || null,
+      roles: x.roles,
+    }));
+  }
+
+  async messages(
+    channel: Model.Snowflake,
+    after: Model.Snowflake,
+    limit: number
+  ): Promise<$ReadOnlyArray<Model.Message>> {
+    const messages = await this._fetchJson(
+      `/channels/${channel}/messages?after=${after}&limit=${limit}`
+    );
+    return messages.map((x) => ({
+      id: x.id,
+      authorId: x.author.id,
+      timestampMs: Date.parse(x.timestamp),
+      content: x.content,
+      reactionEmoji: (x.reactions || []).map((r) => r.emoji),
+      nonUserAuthor: x.webhook_id != null || false,
+    }));
+  }
+
+  async reactions(
+    channel: Model.Snowflake,
+    message: Model.Snowflake,
+    emoji: Model.EmojiRef
+  ): Promise<$ReadOnlyArray<Model.Reaction>> {
+    // TODO: implement pagination.
+    const after = "0";
+    const limit = 100;
+    const reactingUsers = await this._fetchJson(
+      `/channels/${channel}/messages/${message}/reactions/${emoji}?after=${after}&limit=${limit}`
+    );
+    if (reactingUsers.length === 100) {
+      throw new Error("TODO: implement reactions pagination");
+    }
+    return reactingUsers.map((x) => ({
+      channelId: channel,
+      messageId: message,
+      emoji,
+      authorId: x.id,
     }));
   }
 }

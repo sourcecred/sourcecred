@@ -1,0 +1,87 @@
+[
+  {
+    "user": {
+      "id": "143776454050709505",
+      "username": "Beanow",
+      "avatar": "6496446fe1455f31f9536b132dcc4ac8",
+      "discriminator": "5887"
+    },
+    "roles": [
+      "678349848684003359",
+      "678350026946117694"
+    ],
+    "nick": null,
+    "premium_since": null,
+    "mute": false,
+    "deaf": false,
+    "joined_at": "2020-02-15T21:16:40.215000+00:00"
+  },
+  {
+    "user": {
+      "id": "420341518948237331",
+      "username": "decentralion",
+      "avatar": "d54a9b690fd2e47abd4268c55cc25b8f",
+      "discriminator": "8636"
+    },
+    "roles": [
+      "678349848684003359",
+      "678350026946117694"
+    ],
+    "nick": null,
+    "premium_since": null,
+    "mute": false,
+    "deaf": false,
+    "joined_at": "2020-02-15T22:31:31.243000+00:00"
+  },
+  {
+    "user": {
+      "id": "432981598858903585",
+      "username": "wchargin",
+      "avatar": "012988df3eab485878fd588696097802",
+      "discriminator": "8658"
+    },
+    "roles": [
+      "678349848684003359",
+      "678350026946117694"
+    ],
+    "nick": null,
+    "premium_since": null,
+    "mute": false,
+    "deaf": false,
+    "joined_at": "2020-02-15T22:21:55.613000+00:00"
+  },
+  {
+    "user": {
+      "id": "439050857921904640",
+      "username": "Brian Litwin",
+      "avatar": "1cc439c3506ede04a77be8105d934df4",
+      "discriminator": "2386"
+    },
+    "roles": [
+      "678349848684003359",
+      "678350026946117694"
+    ],
+    "nick": null,
+    "premium_since": null,
+    "mute": false,
+    "deaf": false,
+    "joined_at": "2020-02-16T00:45:23.478000+00:00"
+  },
+  {
+    "user": {
+      "id": "678351352770068560",
+      "username": "CredBot-Beanow",
+      "avatar": "04fdfc8af8cca3c0b3155a946dccc435",
+      "discriminator": "1705",
+      "bot": true
+    },
+    "roles": [
+      "678359229433905152"
+    ],
+    "nick": null,
+    "premium_since": null,
+    "mute": false,
+    "deaf": false,
+    "joined_at": "2020-02-15T21:57:23.609000+00:00"
+  }
+]
