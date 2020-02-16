@@ -1,16 +1,27 @@
 // @flow
 
+import deepEqual from "lodash.isequal";
 import {
   EdgeAddress,
   Graph,
   NodeAddress,
+  type Edge,
   type EdgeAddressT,
+  type EdgesOptions,
   type GraphJSON,
+  type ModificationCount,
+  type Node,
   type NodeAddressT,
 } from "./graph";
-import {type Weights as WeightsT, type WeightsJSON} from "./weights";
+import {
+  type EdgeWeight,
+  type NodeWeight,
+  type Weights as WeightsT,
+  type WeightsJSON,
+} from "./weights";
 import * as Weights from "./weights";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
+import * as NullUtil from "../util/null";
 
 /** The WeightedGraph a Graph alongside associated Weights
  *
@@ -108,3 +119,94 @@ export function fibrate(
   newWeights.edgeWeights.set(epochEdgePrefix, {forwards: 1.0, backwards: 0.0});
   return overrideWeights({graph: newGraph, weights: wg.weights}, newWeights);
 }
+
+export const WeightedGraphC = class WeightedGraph {
+  _graph: Graph;
+  _weights: WeightsT;
+  _originalModificationCount: ModificationCount;
+  _originalWeights: WeightsT;
+
+  constructor(graph: Graph, weights: WeightsT) {
+    this._graph = graph;
+    this._weights = weights;
+    this._originalModificationCount = this._graph.modificationCount();
+    this._originalWeights = Weights.copy(this._weights);
+  }
+
+  _checkUnmodified() {
+    const actualModificationCount = this._graph.modificationCount();
+    const originalModificationCount = this._originalModificationCount;
+    if (actualModificationCount !== originalModificationCount) {
+      throw new Error(
+        `Underlying graph modified ` +
+          `(${actualModificationCount} !== ${originalModificationCount}`
+      );
+    }
+
+    if (!deepEqual(this._weights, this._originalWeights)) {
+      throw new Error("Underlying weights modified");
+    }
+  }
+
+  node(address: NodeAddressT): ?WeightedNode {
+    this._checkUnmodified();
+    const node = this._graph.node(address);
+    if (node == null) return node;
+    const weight = NullUtil.orElse(this._weights.nodeWeights.get(address), 1.0);
+    return {node, weight};
+  }
+
+  edge(address: EdgeAddressT): ?WeightedEdge {
+    this._checkUnmodified();
+    const edge = this._graph.edge(address);
+    if (edge == null) return edge;
+    const weight = NullUtil.orElse(this._weights.edgeWeights.get(address), {
+      forwards: 1.0,
+      backwards: 1.0,
+    });
+    return {edge, weight};
+  }
+
+  *nodes(options?: {|+prefix: NodeAddressT|}): Iterator<WeightedNode> {
+    for (const node of this._graph.nodes(options)) {
+      yield NullUtil.get(this.node(node.address));
+    }
+  }
+
+  *edges(options: EdgesOptions): Iterator<WeightedEdge> {
+    for (const edge of this._graph.edges(options)) {
+      yield NullUtil.get(this.edge(edge.address));
+    }
+  }
+
+  fibrate(
+    prefixes: $ReadOnlyArray<NodeAddressT>,
+    timeBoundariesMs: $ReadOnlyArray<number>
+  ): WeightedGraphC {
+    const raw = fibrate(
+      {graph: this._graph, weights: this._weights},
+      prefixes,
+      timeBoundariesMs
+    );
+    return new WeightedGraphC(raw.graph, raw.weights);
+  }
+
+  toJSON() {
+    return toJSON({graph: this._graph, weights: this._weights});
+  }
+
+  fromJSON(j: WeightedGraphJSON) {
+    const raw = fromJSON(j);
+    return new WeightedGraphC(raw.graph, raw.weights);
+  }
+};
+
+export type WeightedNode = {|
+  +node: Node,
+  +weight: NodeWeight,
+|};
+
+export type WeightedEdge = {|
+  +edge: Edge,
+  +weight: EdgeWeight,
+|};
