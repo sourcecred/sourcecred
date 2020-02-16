@@ -41,7 +41,12 @@ export function edgeVerb(
         }
       }
     }
-    return "frobnicates";
+    return {
+      forwardName: "default",
+      backwardName: "default",
+      defaultWeight: {forwards: 1, backwards: 1},
+      prefix: EdgeAddress.empty,
+    };
   }
   const edgeType = getType();
   return direction === "FORWARD" ? edgeType.forwardName : edgeType.backwardName;
