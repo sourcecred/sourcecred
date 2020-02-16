@@ -4,6 +4,7 @@ import {type Project} from "../core/project";
 import {type Weights as WeightsT} from "../core/weights";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
+import {type DiscordToken} from "../plugins/discord/params";
 import {type GithubToken} from "../plugins/github/token";
 import {type CacheProvider} from "../backend/cache";
 import {DataDirectory} from "../backend/dataDirectory";
@@ -17,6 +18,7 @@ export type LoadOptions = {|
   +plugins: $ReadOnlyArray<PluginDeclaration>,
   +sourcecredDirectory: string,
   +githubToken: ?GithubToken,
+  +discordToken: ?DiscordToken,
 |};
 
 /**
@@ -29,6 +31,7 @@ export async function load(
   const {
     sourcecredDirectory,
     githubToken,
+    discordToken,
     project,
     params,
     weightsOverrides,
@@ -37,6 +40,7 @@ export async function load(
   const context = new LoadContext({
     cache: (data: CacheProvider),
     githubToken,
+    discordToken,
     reporter,
   });
   const result = await context.load(project, {

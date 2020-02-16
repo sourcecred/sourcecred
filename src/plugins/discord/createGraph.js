@@ -97,7 +97,10 @@ function authorsMessageEdge(
 
 function reactionNode(reaction: Model.Reaction, guild: Model.Snowflake): Node {
   const msgUrl = messageUrl(guild, reaction.channelId, reaction.messageId);
-  const description = `Reacted \`${reaction.emoji.name}\` to message [${reaction.messageId}](${msgUrl})`;
+  const reactionStr = reaction.emoji.id
+    ? `:${reaction.emoji.name}:`
+    : reaction.emoji.name;
+  const description = `Reacted \`${reactionStr}\` to message [${reaction.messageId}](${msgUrl})`;
   return {
     address: reactionAddress(reaction),
     description,
@@ -146,7 +149,7 @@ function reactsToEdge(reaction: Model.Reaction, message: Model.Message): Edge {
   };
 }
 
-export type EmojiWeightMap = Map<Model.EmojiRef, NodeWeight>;
+export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
 
 export function createGraph(
   guild: Model.Snowflake,
@@ -171,7 +174,7 @@ export function createGraph(
       const reactions = repo.reactions(channel.id, message.id);
       for (const reaction of reactions) {
         const emojiRef = Model.emojiToRef(reaction.emoji);
-        const reactionWeight = emojiWeights.get(emojiRef);
+        const reactionWeight = emojiWeights[emojiRef];
 
         // TODO: Skip all unweighted emoji in prototype.
         if (!reactionWeight) continue;
@@ -182,8 +185,10 @@ export function createGraph(
         }
 
         hasWeightedEmoji = true;
+        const node = reactionNode(reaction, guild);
+        wg.weights.nodeWeights.set(node.address, reactionWeight);
+        wg.graph.addNode(node);
         wg.graph.addNode(memberNode(reactingMember));
-        wg.graph.addNode(reactionNode(reaction, guild));
         wg.graph.addEdge(reactsToEdge(reaction, message));
         wg.graph.addEdge(
           addsReactionEdge(reaction, reactingMember, message.timestampMs)

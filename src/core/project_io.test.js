@@ -37,6 +37,10 @@ describe("core/project_io", () => {
     repoIds: [foobar, foozod],
     discourseServer: {serverUrl: "https://example.com"},
     identities: [{username: "foo", aliases: ["github/foo", "discourse/foo"]}],
+    discord: {
+      guildId: "678348980639498428",
+      reactionWeights: {"sourcecred:678399364418502669": 4},
+    },
   });
 
   it("setupProjectDirectory results in a loadable project", async () => {

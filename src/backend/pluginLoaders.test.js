@@ -17,12 +17,14 @@ export function createWG(name: string) {
 
 const mockGraphs = {
   github: createWG("github"),
+  discord: createWG("discord"),
   discourse: createWG("discourse"),
   contracted: createWG("identity-contracted"),
 };
 
 const fakes = {
   githubDeclaration: ({fake: "githubDeclaration"}: any),
+  discordDeclaration: ({fake: "discordDeclaration"}: any),
   discourseDeclaration: ({fake: "discourseDeclaration"}: any),
   identityDeclaration: ({fake: "identityDeclaration"}: any),
 };
@@ -37,6 +39,11 @@ const mockPluginLoaders = () => ({
     updateMirror: jest.fn(),
     createGraph: jest.fn().mockResolvedValue(mockGraphs.github),
   },
+  discord: {
+    declaration: jest.fn().mockReturnValue(fakes.discordDeclaration),
+    updateMirror: jest.fn(),
+    createGraph: jest.fn().mockResolvedValue(mockGraphs.discord),
+  },
   discourse: {
     declaration: jest.fn().mockReturnValue(fakes.discourseDeclaration),
     updateMirror: jest.fn(),
@@ -50,6 +57,7 @@ const mockPluginLoaders = () => ({
 
 describe("src/backend/pluginLoaders", () => {
   const exampleGithubToken = validateToken("0".repeat(40));
+  const exampleDiscordToken = "fakeBotToken";
   const exampleRepoId = makeRepoId("sourcecred-test", "example-github");
 
   describe("declarations", () => {
@@ -106,6 +114,7 @@ describe("src/backend/pluginLoaders", () => {
       const cache = mockCacheProvider();
       const reporter = new TestTaskReporter();
       const githubToken = null;
+      const discordToken = null;
       const project = createProject({
         id: "has-discourse",
         discourseServer: {serverUrl: "http://foo.bar"},
@@ -114,7 +123,7 @@ describe("src/backend/pluginLoaders", () => {
       // When
       await PluginLoaders.updateMirror(
         loaders,
-        {githubToken, cache, reporter},
+        {githubToken, discordToken, cache, reporter},
         project
       );
 
@@ -133,6 +142,7 @@ describe("src/backend/pluginLoaders", () => {
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = null;
+      const discordToken = null;
       const reporter = new TestTaskReporter();
       const project = createProject({
         id: "has-github",
@@ -142,7 +152,7 @@ describe("src/backend/pluginLoaders", () => {
       // When
       const p = PluginLoaders.updateMirror(
         loaders,
-        {githubToken, cache, reporter},
+        {githubToken, discordToken, cache, reporter},
         project
       );
 
@@ -157,6 +167,7 @@ describe("src/backend/pluginLoaders", () => {
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = exampleGithubToken;
+      const discordToken = null;
       const reporter = new TestTaskReporter();
       const project = createProject({
         id: "has-github",
@@ -166,7 +177,7 @@ describe("src/backend/pluginLoaders", () => {
       // When
       await PluginLoaders.updateMirror(
         loaders,
-        {githubToken, cache, reporter},
+        {githubToken, discordToken, cache, reporter},
         project
       );
 
@@ -188,6 +199,7 @@ describe("src/backend/pluginLoaders", () => {
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = null;
+      const discordToken = null;
       const project = createProject({
         id: "has-discourse",
         discourseServer: {serverUrl: "http://foo.bar"},
@@ -197,7 +209,7 @@ describe("src/backend/pluginLoaders", () => {
       // When
       const pluginGraphs = await PluginLoaders.createPluginGraphs(
         loaders,
-        {githubToken},
+        {githubToken, discordToken},
         cachedProject
       );
 
@@ -219,6 +231,7 @@ describe("src/backend/pluginLoaders", () => {
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = null;
+      const discordToken = null;
       const project = createProject({
         id: "has-github",
         repoIds: [exampleRepoId],
@@ -228,7 +241,7 @@ describe("src/backend/pluginLoaders", () => {
       // When
       const p = PluginLoaders.createPluginGraphs(
         loaders,
-        {githubToken},
+        {githubToken, discordToken},
         cachedProject
       );
 
@@ -243,6 +256,7 @@ describe("src/backend/pluginLoaders", () => {
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = exampleGithubToken;
+      const discordToken = null;
       const project = createProject({
         id: "has-github",
         repoIds: [exampleRepoId],
@@ -252,7 +266,7 @@ describe("src/backend/pluginLoaders", () => {
       // When
       const pluginGraphs = await PluginLoaders.createPluginGraphs(
         loaders,
-        {githubToken},
+        {githubToken, discordToken},
         cachedProject
       );
 

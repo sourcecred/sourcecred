@@ -7,9 +7,11 @@ import * as WeightedGraph from "../core/weightedGraph";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {type CacheProvider} from "./cache";
 import {type GithubToken} from "../plugins/github/token";
+import {type DiscordToken} from "../plugins/discord/params";
 import {type Loader as GithubLoader} from "../plugins/github/loader";
-import {type Loader as IdentityLoader} from "../plugins/identity/loader";
+import {type Loader as DiscordLoader} from "../plugins/discord/loader";
 import {type Loader as DiscourseLoader} from "../plugins/discourse/loader";
+import {type Loader as IdentityLoader} from "../plugins/identity/loader";
 
 /**
  * A type combining all known plugin Loader interfaces.
@@ -19,6 +21,7 @@ import {type Loader as DiscourseLoader} from "../plugins/discourse/loader";
  */
 export type PluginLoaders = {|
   +github: GithubLoader,
+  +discord: DiscordLoader,
   +discourse: DiscourseLoader,
   +identity: IdentityLoader,
 |};
@@ -43,19 +46,21 @@ opaque type PluginGraphs = {|
 
 type MirrorEnv = {
   +githubToken: ?GithubToken,
+  +discordToken: ?DiscordToken,
   +reporter: TaskReporter,
   +cache: CacheProvider,
 };
 
 type GraphEnv = {
   +githubToken: ?GithubToken,
+  +discordToken: ?DiscordToken,
 };
 
 /**
  * Gets all relevant PluginDeclarations for a given Project.
  */
 export function declarations(
-  {github, discourse, identity}: PluginLoaders,
+  {github, discourse, discord, identity}: PluginLoaders,
   project: Project
 ): $ReadOnlyArray<PluginDeclaration> {
   const plugins: PluginDeclaration[] = [];
@@ -64,6 +69,9 @@ export function declarations(
   }
   if (project.discourseServer != null) {
     plugins.push(discourse.declaration());
+  }
+  if (project.discord != null) {
+    plugins.push(discord.declaration());
   }
   if (project.identities.length) {
     plugins.push(identity.declaration());
@@ -75,8 +83,8 @@ export function declarations(
  * Updates all mirrors into cache as requested by the Project.
  */
 export async function updateMirror(
-  {github, discourse}: PluginLoaders,
-  {githubToken, cache, reporter}: MirrorEnv,
+  {github, discourse, discord}: PluginLoaders,
+  {githubToken, discordToken, cache, reporter}: MirrorEnv,
   project: Project
 ): Promise<CachedProject> {
   const tasks: Promise<void>[] = [];
@@ -93,6 +101,14 @@ export async function updateMirror(
       github.updateMirror(project.repoIds, githubToken, cache, reporter)
     );
   }
+  if (project.discord) {
+    if (!discordToken) {
+      throw new Error("Tried to load Discord, but no Discord bot token set");
+    }
+    tasks.push(
+      discord.updateMirror(project.discord, discordToken, cache, reporter)
+    );
+  }
   await Promise.all(tasks);
   return {project, cache};
 }
@@ -101,8 +117,8 @@ export async function updateMirror(
  * Creates PluginGraphs containing all plugins requested by the Project.
  */
 export async function createPluginGraphs(
-  {github, discourse}: PluginLoaders,
-  {githubToken}: GraphEnv,
+  {github, discourse, discord}: PluginLoaders,
+  {githubToken, discordToken}: GraphEnv,
   {cache, project}: CachedProject
 ): Promise<PluginGraphs> {
   const tasks: Promise<WeightedGraphT>[] = [];
@@ -114,6 +130,12 @@ export async function createPluginGraphs(
       throw new Error("Tried to load GitHub, but no GitHub token set");
     }
     tasks.push(github.createGraph(project.repoIds, githubToken, cache));
+  }
+  if (project.discord) {
+    if (!discordToken) {
+      throw new Error("Tried to load Discord, but no Discord bot token set");
+    }
+    tasks.push(discord.createGraph(project.discord, cache));
   }
 
   // It's important to use Promise.all so that we can load the plugins in

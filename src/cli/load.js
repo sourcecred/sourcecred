@@ -142,6 +142,7 @@ const loadCommand: Command = async (args, std) => {
       plugins,
       sourcecredDirectory: Common.sourcecredDirectory(),
       githubToken,
+      discordToken: Common.discordToken(),
     };
   });
   // Deliberately load in serial because GitHub requests that their API not

@@ -20,12 +20,17 @@ describe("core/project", () => {
     id: "foo/bar",
     repoIds: [foobar],
     discourseServer: null,
+    discord: null,
     identities: [],
   });
   const p2: Project = deepFreeze({
     id: "@foo",
     repoIds: [foobar, foozod],
     discourseServer: {serverUrl: "https://example.com"},
+    discord: {
+      guildId: "678348980639498428",
+      reactionWeights: {"sourcecred:678399364418502669": 4},
+    },
     identities: [
       {
         username: "example",
@@ -67,6 +72,7 @@ describe("core/project", () => {
         ...body,
         // It should strip the apiUsername field, keeping just serverUrl.
         discourseServer: {serverUrl: "https://example.com"},
+        discord: null,
       });
     });
     it("should upgrade from 0.3.1 formatting", () => {
@@ -93,6 +99,7 @@ describe("core/project", () => {
         ...body,
         // It should strip the apiUsername field, keeping just serverUrl.
         discourseServer: {serverUrl: "https://example.com"},
+        discord: null,
       });
     });
   });
@@ -129,6 +136,7 @@ describe("core/project", () => {
       // Then
       expect(project).toEqual({
         id: projectShape.id,
+        discord: null,
         discourseServer: null,
         repoIds: [],
         identities: [],
@@ -147,6 +155,10 @@ describe("core/project", () => {
             aliases: ["github/example"],
           },
         ],
+        discord: {
+          guildId: "678348980639498428",
+          reactionWeights: {"sourcecred:678399364418502669": 4},
+        },
       };
 
       // When

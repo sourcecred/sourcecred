@@ -13,7 +13,7 @@ function die(std, message) {
 }
 
 // TODO: hack
-const emojiWeights = new Map([["sourcecred:678399364418502669", 4]]);
+const reactionWeights = {"sourcecred:678399364418502669": 4};
 
 const discord: Command = async (args, std) => {
   if (args.length !== 1) {
@@ -28,9 +28,14 @@ const discord: Command = async (args, std) => {
     throw new Error("Expecting a SOURCECRED_DISCORD_TOKEN");
   }
 
-  await Loader.updateMirror(guildId, token, dir, taskReporter);
-  const wg = await Loader.createGraph(guildId, dir, emojiWeights);
-  console.log(wg.graph);
+  const opts = {
+    guildId,
+    reactionWeights,
+  };
+
+  await Loader.updateMirror(opts, token, dir, taskReporter);
+  const wg = await Loader.createGraph(opts, dir);
+  console.log(wg.graph, wg.weights);
   return 0;
 };
 

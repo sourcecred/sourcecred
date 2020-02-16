@@ -6,7 +6,8 @@ import {TaskReporter} from "../../util/taskReporter";
 import {type CacheProvider} from "../../backend/cache";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
-import {type EmojiWeightMap, createGraph as _createGraph} from "./createGraph";
+import {createGraph as _createGraph} from "./createGraph";
+import {type ProjectOptions} from "./params";
 import {declaration} from "./declaration";
 import * as Model from "./models";
 import {Fetcher} from "./fetcher";
@@ -25,25 +26,24 @@ export default ({
 }: Loader);
 
 export async function updateMirror(
-  guild: Model.Snowflake,
+  {guildId}: ProjectOptions,
   token: Model.BotToken,
   cache: CacheProvider,
   reporter: TaskReporter
 ): Promise<void> {
-  const repo = await repository(cache, guild);
+  const repo = await repository(cache, guildId);
   const fetcher = new Fetcher({token});
-  const mirror = new Mirror(repo, fetcher, guild);
+  const mirror = new Mirror(repo, fetcher, guildId);
   await mirror.update(reporter);
 }
 
 export async function createGraph(
-  guild: Model.Snowflake,
-  cache: CacheProvider,
-  emojiWeights: EmojiWeightMap
+  {guildId, reactionWeights}: ProjectOptions,
+  cache: CacheProvider
 ): Promise<WeightedGraph> {
-  const repo = await repository(cache, guild);
+  const repo = await repository(cache, guildId);
   const declarationWeights = weightsForDeclaration(declaration);
-  return await _createGraph(guild, repo, declarationWeights, emojiWeights);
+  return await _createGraph(guildId, repo, declarationWeights, reactionWeights);
 }
 
 async function repository(
