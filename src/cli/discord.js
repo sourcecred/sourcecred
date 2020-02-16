@@ -26,6 +26,8 @@ const discord: Command = async (args, std) => {
   }
 
   await Loader.updateMirror(guildId, token, dir, taskReporter);
+  const wg = await Loader.createGraph(guildId, dir);
+  console.log(wg.graph._nodes);
   return 0;
 };
 

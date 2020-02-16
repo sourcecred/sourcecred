@@ -8,15 +8,15 @@ import {NodeAddress, EdgeAddress} from "../../core/graph";
 export const nodePrefix = NodeAddress.fromParts(["sourcecred", "discord"]);
 export const edgePrefix = EdgeAddress.fromParts(["sourcecred", "discord"]);
 
-export const memberNode: NodeType = deepFreeze({
+export const memberNodeType: NodeType = deepFreeze({
   name: "Member",
   pluralName: "Members",
-  prefix: NodeAddress.append(nodePrefix, "reaction"),
+  prefix: NodeAddress.append(nodePrefix, "member"),
   defaultWeight: 0,
   description: "A member of the Discord server",
 });
 
-export const messageNode: NodeType = deepFreeze({
+export const messageNodeType: NodeType = deepFreeze({
   name: "Message",
   pluralName: "Messages",
   prefix: NodeAddress.append(nodePrefix, "message"),
@@ -24,7 +24,7 @@ export const messageNode: NodeType = deepFreeze({
   description: "A Discord message, posted in a particular channel",
 });
 
-export const reactionNode: NodeType = deepFreeze({
+export const reactionNodeType: NodeType = deepFreeze({
   name: "Reaction",
   pluralName: "Reactions",
   prefix: NodeAddress.append(nodePrefix, "reaction"),
@@ -60,7 +60,7 @@ export const declaration: PluginDeclaration = deepFreeze({
   name: "Discord",
   nodePrefix,
   edgePrefix,
-  nodeTypes: [memberNode, messageNode, reactionNode],
+  nodeTypes: [memberNodeType, messageNodeType, reactionNodeType],
   edgeTypes: [authorsMessageEdgeType, addsReactionEdgeType, reactsEdgeType],
-  userTypes: [memberNode],
+  userTypes: [memberNodeType],
 });
