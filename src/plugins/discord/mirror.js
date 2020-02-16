@@ -21,13 +21,32 @@ export class Mirror {
   }
 
   async update(reporter: TaskReporter) {
-    reporter.start(`discord-${this.guild}`);
+    const guild = await this.validateGuildId();
+    reporter.start(`discord/${guild.name}`);
     await this.addMembers();
     const channels = await this.addTextChannels();
     for (const channel of channels) {
-      await this.addMessages(channel.id);
+      reporter.start(`discord/${guild.name}/#${channel.name}`);
+      try {
+        await this.addMessages(channel.id);
+      } catch (e) {
+        console.warn(e);
+      }
+      reporter.finish(`discord/${guild.name}/#${channel.name}`);
     }
-    reporter.finish(`discord-${this.guild}`);
+    reporter.finish(`discord/${guild.name}`);
+  }
+
+  async validateGuildId() {
+    const guilds = await this._api.guilds();
+    const guild = guilds.find((g) => g.id === this.guild);
+    if (!guild) {
+      throw new Error(
+        `Couldn't find guild with ID ${this.guild}\nMaybe the bot has no access to it?`
+      );
+    }
+    // TODO: validate bot permissions
+    return guild;
   }
 
   async addMembers() {
@@ -48,9 +67,13 @@ export class Mirror {
   }
 
   async addMessages(channel: Model.Snowflake, messageLimit?: number) {
+    // TODO: don't hardcode the 100 here.
+    const loadStart = this._repo.nthMessageFromTail(channel, 100);
+    console.log(channel, (loadStart || {}).id);
+
     const limit = messageLimit || 100;
     let page: $ReadOnlyArray<Model.Message> = [];
-    let after: Model.Snowflake = "0";
+    let after: Model.Snowflake = loadStart ? loadStart.id : "0";
     do {
       page = await this._api.messages(channel, after, limit);
       for (const message of page) {
