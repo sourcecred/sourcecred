@@ -1,13 +1,16 @@
 // @flow
 
+import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {TaskReporter} from "../../util/taskReporter";
 import {type CacheProvider} from "../../backend/cache";
 import {SqliteMirrorRepository} from "./mirrorRepository";
+import {declaration} from "./declaration";
 import * as Model from "./models";
 import {Fetcher} from "./fetcher";
 import {Mirror} from "./mirror";
 
 export interface Loader {
+  declaration(): PluginDeclaration;
   updateMirror(
     guild: Model.Snowflake,
     token: Model.BotToken,
@@ -17,6 +20,7 @@ export interface Loader {
 }
 
 export default ({
+  declaration: () => declaration,
   updateMirror,
 }: Loader);
 
