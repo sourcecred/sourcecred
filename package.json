@@ -16,6 +16,7 @@
     "d3-time": "^1.1.0",
     "d3-time-format": "^2.2.3",
     "deep-freeze": "^0.0.1",
+    "entities": "^2.0.0",
     "express": "^4.17.1",
     "fs-extra": "^8.1.0",
     "globby": "^11.0.0",
