@@ -7,7 +7,6 @@ import {
   type EdgeAddressT,
   EdgeAddress,
 } from "./graph";
-import * as WeightedGraph from "./weightedGraph";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
 import {
   nodeWeightEvaluator,
@@ -18,7 +17,6 @@ import * as MapUtil from "../util/map";
 import {type SparseMarkovChain} from "./algorithm/markovChain";
 
 type TimestampMs = number;
-type NonnegativeReal = number;
 type TransitionProbability = number;
 
 type MarkovNode = {|
