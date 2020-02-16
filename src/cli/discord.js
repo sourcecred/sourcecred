@@ -12,6 +12,9 @@ function die(std, message) {
   return 1;
 }
 
+// TODO: hack
+const emojiWeights = new Map([["sourcecred:678399364418502669", 4]]);
+
 const discord: Command = async (args, std) => {
   if (args.length !== 1) {
     return die(std, "Expected one positional argument (or --help).");
@@ -26,8 +29,8 @@ const discord: Command = async (args, std) => {
   }
 
   await Loader.updateMirror(guildId, token, dir, taskReporter);
-  const wg = await Loader.createGraph(guildId, dir);
-  console.log(wg.graph._nodes);
+  const wg = await Loader.createGraph(guildId, dir, emojiWeights);
+  console.log(wg.graph);
   return 0;
 };
 
