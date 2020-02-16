@@ -7,7 +7,7 @@ describe("plugins/discord/fetcher", () => {
     const guildId = "678348980639498428";
     const channelId = "678394406507905129";
     const messageId = "678394436757094410";
-    const emojiRef = "sourcecred:678399364418502669";
+    const emoji = {id: "678399364418502669", name: "sourcecred"};
 
     it("loads guilds", async () => {
       expect(await snapshotFetcher().guilds()).toMatchSnapshot();
@@ -34,7 +34,7 @@ describe("plugins/discord/fetcher", () => {
     });
     it("loads reactions", async () => {
       expect(
-        await snapshotFetcher().reactions(channelId, messageId, emojiRef)
+        await snapshotFetcher().reactions(channelId, messageId, emoji)
       ).toMatchSnapshot();
     });
   });
