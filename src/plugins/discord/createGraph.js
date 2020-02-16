@@ -21,6 +21,7 @@ import {
   authorsMessageEdgeType,
   addsReactionEdgeType,
   reactsToEdgeType,
+  mentionsEdgeType,
 } from "./declaration";
 import * as Model from "./models";
 
@@ -165,6 +166,23 @@ function reactsToEdge(reaction: Model.Reaction, message: Model.Message): Edge {
   };
 }
 
+function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
+  const address: EdgeAddressT = EdgeAddress.append(
+    mentionsEdgeType.prefix,
+    member.user.bot ? "bot" : "user",
+    member.user.id,
+    message.channelId,
+    message.authorId,
+    message.id
+  );
+  return {
+    address,
+    timestampMs: message.timestampMs,
+    src: messageAddress(message),
+    dst: memberAddress(member),
+  };
+}
+
 export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
 
 function channelReactionsPrefix(channel: Model.Snowflake): NodeAddressT {
@@ -188,7 +206,7 @@ export function createGraph(
     weights: declarationWeights,
   };
 
-  for(const [prefix, multiplier] of hackBoostedCategories) {
+  for (const [prefix, multiplier] of hackBoostedCategories) {
     wg.weights.nodeWeights.set(prefix, multiplier);
   }
 
@@ -197,7 +215,8 @@ export function createGraph(
   for (const channel of channels) {
     const messages = repo.messages(channel.id);
     for (const message of messages) {
-      if (message.reactionEmoji.length === 0) continue;
+      const hasMentions = message.mentions.length > 0;
+      if (!hasMentions && message.reactionEmoji.length === 0) continue;
       if (message.nonUserAuthor) continue;
 
       let hasWeightedEmoji = false;
@@ -229,8 +248,21 @@ export function createGraph(
         );
       }
 
+      for (const userId of message.mentions) {
+        const mentionedMember = memberMap.get(userId);
+        if (!mentionedMember) {
+          console.warn(
+            `Mentioned member not loaded ${userId}, maybe a Deleted User?\n` +
+              `${messageUrl(guild, channel.id, message.id)}`
+          );
+          continue;
+        }
+        wg.graph.addNode(memberNode(mentionedMember));
+        wg.graph.addEdge(mentionsEdge(message, mentionedMember));
+      }
+
       // Don't bloat the graph with no-weighted-reaction messages.
-      if (hasWeightedEmoji) {
+      if (hasWeightedEmoji || hasMentions) {
         const author = memberMap.get(message.authorId);
         if (!author) {
           console.warn(

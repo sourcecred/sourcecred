@@ -112,6 +112,14 @@ export class SqliteMirrorRepository {
             CONSTRAINT value_object PRIMARY KEY (channel_id, message_id, author_id, emoji)
         )
       `,
+      dedent`\
+        CREATE TABLE message_mentions (
+            channel_id TEXT NOT NULL,
+            message_id TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            CONSTRAINT value_object PRIMARY KEY (channel_id, message_id, user_id)
+        )
+      `,
     ];
     for (const sql of tables) {
       db.prepare(sql).run();
@@ -193,6 +201,7 @@ export class SqliteMirrorRepository {
         timestampMs: m.timestamp_ms,
         content: m.content,
         reactionEmoji: this.reactionEmoji(m.channel_id, m.id),
+        mentions: this.mentions(m.channel_id, m.id),
       }));
   }
 
@@ -235,7 +244,24 @@ export class SqliteMirrorRepository {
       timestampMs: m.timestamp_ms,
       content: m.content,
       reactionEmoji: this.reactionEmoji(m.channel_id, m.id),
+      mentions: this.mentions(m.channel_id, m.id),
     };
+  }
+
+  mentions(
+    channel: Model.Snowflake,
+    message: Model.Snowflake
+  ): $ReadOnlyArray<Model.Snowflake> {
+    return this._db
+      .prepare(
+        dedent`\
+        SELECT user_id
+        FROM message_mentions
+        WHERE channel_id = :channel_id
+          AND message_id = :message_id`
+      )
+      .all({channel_id: channel, message_id: message})
+      .map((res) => res.user_id);
   }
 
   reactionEmoji(
@@ -331,6 +357,10 @@ export class SqliteMirrorRepository {
         timestamp_ms: message.timestampMs,
         content: message.content,
       });
+
+    for (const user of message.mentions) {
+      this.addMention(message, user);
+    }
   }
 
   addReaction(reaction: Model.Reaction) {
@@ -355,6 +385,28 @@ export class SqliteMirrorRepository {
         message_id: reaction.messageId,
         author_id: reaction.authorId,
         emoji: Model.emojiToRef(reaction.emoji),
+      });
+  }
+
+  addMention(message: Model.Message, user: Model.Snowflake) {
+    this._db
+      .prepare(
+        dedent`\
+          INSERT OR IGNORE INTO message_mentions (
+              channel_id,
+              message_id,
+              user_id
+          ) VALUES (
+              :channel_id,
+              :message_id,
+              :user_id
+          )
+        `
+      )
+      .run({
+        channel_id: message.channelId,
+        message_id: message.id,
+        user_id: user,
       });
   }
 

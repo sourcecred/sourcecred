@@ -56,11 +56,19 @@ export const reactsToEdgeType: EdgeType = deepFreeze({
   description: "Connects a reaction to a message that it reacts to.",
 });
 
+export const mentionsEdgeType: EdgeType = deepFreeze({
+  forwardName: "mentions",
+  backwardName: "is mentioned by",
+  prefix: EdgeAddress.append(edgePrefix, "MENTIONS"),
+  defaultWeight: {forwards: 1, backwards: 1 / 16},
+  description: "Connects a message to the member being mentioned.",
+});
+
 export const declaration: PluginDeclaration = deepFreeze({
   name: "Discord",
   nodePrefix,
   edgePrefix,
   nodeTypes: [memberNodeType, messageNodeType, reactionNodeType],
-  edgeTypes: [authorsMessageEdgeType, addsReactionEdgeType, reactsToEdgeType],
+  edgeTypes: [authorsMessageEdgeType, addsReactionEdgeType, reactsToEdgeType, mentionsEdgeType],
   userTypes: [memberNodeType],
 });
