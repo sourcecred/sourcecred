@@ -25,14 +25,17 @@ type MarkovNode = {|
   +address: NodeAddressT,
   +description: string,
 |};
-type GraphEdgeDirection = "FORWARDS" | "BACKWARDS";
-// src and edge here are in the markov semantics; direction indicates
-// whether this has flipped from any underlying graph edge
 type MarkovEdge = {|
+  // note: primary key is `(address, reversed)`, not just `(address)`
   +address: EdgeAddressT,
-  +direction: GraphEdgeDirection,
+  // If this came from an underlying graph edge, have its `src` and
+  // `dst` been flipped?
+  +reversed: boolean,
+  // source node at markov chain level
   +src: NodeAddressT,
+  // destination node at markov chain level
   +dst: NodeAddressT,
+  // Pr[X_{n+1} = dst | X_{n} = dst]
   +transitionProbability: TransitionProbability,
 |};
 export opaque type MarkovEdgeAddressT: string = string;
@@ -169,7 +172,7 @@ export class MarkovProcessGraph {
               String(boundary),
               ...NodeAddress.toParts(scoringAddress),
             ]),
-            direction: "FORWARDS",
+            flipped: false,
             src: thisEpoch,
             dst: scoringAddress,
             transitionProbability: fibration.beta,
@@ -190,14 +193,14 @@ export class MarkovProcessGraph {
             ]);
             addEdge({
               address: webAddress,
-              direction: "FORWARDS",
+              flipped: false,
               src: lastEpoch,
               dst: thisEpoch,
               transitionProbability: fibration.gammaForward,
             });
             addEdge({
               address: webAddress,
-              direction: "BACKWARDS",
+              flipped: true,
               src: thisEpoch,
               dst: lastEpoch,
               transitionProbability: fibration.gammaBackward,
@@ -215,7 +218,7 @@ export class MarkovProcessGraph {
               "SEED_IN",
               ...NodeAddress.toParts(node.address),
             ]),
-            direction: "FORWARDS",
+            flipped: false,
             src: node.address,
             dst: SEED_ADDRESS,
             transitionProbability: seed.alpha,
@@ -249,7 +252,7 @@ export class MarkovProcessGraph {
                 "SEED_OUT",
                 ...NodeAddress.toParts(address),
               ]),
-              direction: "FORWARDS",
+              flipped: false,
               src: SEED_ADDRESS,
               dst: address,
               transitionProbability: weight / totalNodeWeight,
@@ -300,7 +303,7 @@ export class MarkovProcessGraph {
                 const weight = ewe(edge.address);
                 yield {
                   address: edge.address,
-                  direction: "FORWARDS",
+                  flipped: false,
                   src: edge.src,
                   dst: edge.dst,
                   timestamp: edge.timestampMs,
@@ -308,7 +311,7 @@ export class MarkovProcessGraph {
                 };
                 yield {
                   address: edge.address,
-                  direction: "BACKWARDS",
+                  flipped: true,
                   src: edge.dst,
                   dst: edge.src,
                   timestamp: edge.timestampMs,
@@ -410,7 +413,7 @@ export class MarkovProcessGraph {
 
 type _UnidirectionalGraphEdge = {|
   +address: EdgeAddressT,
-  +direction: GraphEdgeDirection,
+  +flipped: boolean,
   +src: NodeAddressT,
   +dst: NodeAddressT,
   +timestamp: TimestampMs,
