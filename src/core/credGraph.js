@@ -6,7 +6,7 @@ import {
   Graph,
   type Edge,
   type Node,
-  EdgesOptions,
+  type EdgesOptions,
 } from "./graph";
 import * as WeightedGraph from "./weightedGraph";
 import {type NodeWeight, type EdgeWeight} from "./weights";
@@ -30,14 +30,14 @@ export type CredNode = {|
 export type CredEdge = {|
   +edge: Edge,
   +weight: EdgeWeight,
-  +normalizedWeight: EdgeWeight,
-  +credFlow: EdgeWeight,
+  //+normalizedWeight: EdgeWeight,
+  //+credFlow: EdgeWeight,
 |};
 
 export type CredNeighbor = {|
   +node: CredNode,
   +edge: CredEdge,
-  +cred: number,
+  //+cred: number,
 |};
 
 export class CredGraph {
