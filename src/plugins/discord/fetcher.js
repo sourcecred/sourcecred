@@ -17,9 +17,7 @@ export interface DiscordApi {
   reactions(
     channel: Model.Snowflake,
     message: Model.Snowflake,
-    emoji: Model.EmojiRef,
-    after: Model.Snowflake,
-    limit: number
+    emoji: Model.Emoji
   ): Promise<$ReadOnlyArray<Model.Reaction>>;
 }
 
@@ -57,7 +55,8 @@ export class Fetcher implements DiscordApi {
         Authorization: `Bot ${token}`,
       },
     };
-    return this._options.fetch(`${apiUrl}${endpoint}`, requestOptions);
+    const url = new URL(`${apiUrl}${endpoint}`).href;
+    return this._options.fetch(url, requestOptions);
   }
 
   async _fetchJson(endpoint: string): Promise<any> {
@@ -137,6 +136,7 @@ export class Fetcher implements DiscordApi {
     );
     return messages.map((x) => ({
       id: x.id,
+      channelId: channel,
       authorId: x.author.id,
       timestampMs: Date.parse(x.timestamp),
       content: x.content,
@@ -148,13 +148,14 @@ export class Fetcher implements DiscordApi {
   async reactions(
     channel: Model.Snowflake,
     message: Model.Snowflake,
-    emoji: Model.EmojiRef
+    emoji: Model.Emoji
   ): Promise<$ReadOnlyArray<Model.Reaction>> {
     // TODO: implement pagination.
     const after = "0";
     const limit = 100;
+    const emojiRef = Model.emojiToRef(emoji);
     const reactingUsers = await this._fetchJson(
-      `/channels/${channel}/messages/${message}/reactions/${emoji}?after=${after}&limit=${limit}`
+      `/channels/${channel}/messages/${message}/reactions/${emojiRef}?after=${after}&limit=${limit}`
     );
     if (reactingUsers.length === 100) {
       throw new Error("TODO: implement reactions pagination");
@@ -173,7 +174,7 @@ function failIfMissing(response: Response) {
     throw new Error(`404 Not Found on: ${response.url}; maybe bad serverUrl?`);
   }
   if (response.status === 403) {
-    throw new Error(`403 Forbidden: bad API username or key?`);
+    throw new Error(`403 Forbidden: bad API username or key?\n${response.url}`);
   }
   if (response.status === 410) {
     throw new Error(`410 Gone`);

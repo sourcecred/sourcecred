@@ -122,6 +122,7 @@ exports[`plugins/discord/fetcher snapshot testing loads messages 1`] = `
 Array [
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "10",
     "id": "678394455849566208",
     "nonUserAuthor": false,
@@ -130,6 +131,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "9",
     "id": "678394451462193154",
     "nonUserAuthor": false,
@@ -138,6 +140,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "8",
     "id": "678394448497082388",
     "nonUserAuthor": false,
@@ -146,6 +149,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "7",
     "id": "678394445351092275",
     "nonUserAuthor": false,
@@ -154,6 +158,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "6",
     "id": "678394442301833247",
     "nonUserAuthor": false,
@@ -162,6 +167,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "5",
     "id": "678394436757094410",
     "nonUserAuthor": false,
@@ -175,6 +181,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "4",
     "id": "678394433233747978",
     "nonUserAuthor": false,
@@ -183,6 +190,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "3",
     "id": "678394431149178940",
     "nonUserAuthor": false,
@@ -191,6 +199,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "2",
     "id": "678394428569813013",
     "nonUserAuthor": false,
@@ -199,6 +208,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "1",
     "id": "678394426153893948",
     "nonUserAuthor": false,
@@ -217,6 +227,7 @@ exports[`plugins/discord/fetcher snapshot testing loads messages 2`] = `
 Array [
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "20",
     "id": "678394498098659349",
     "nonUserAuthor": false,
@@ -225,6 +236,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "19",
     "id": "678394493124476939",
     "nonUserAuthor": false,
@@ -233,6 +245,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "18",
     "id": "678394489391415348",
     "nonUserAuthor": false,
@@ -241,6 +254,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "17",
     "id": "678394486644146187",
     "nonUserAuthor": false,
@@ -249,6 +263,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "16",
     "id": "678394484291141700",
     "nonUserAuthor": false,
@@ -257,6 +272,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "15",
     "id": "678394480184918016",
     "nonUserAuthor": false,
@@ -270,6 +286,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "14",
     "id": "678394477106167818",
     "nonUserAuthor": false,
@@ -278,6 +295,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "13",
     "id": "678394473428025354",
     "nonUserAuthor": false,
@@ -286,6 +304,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "12",
     "id": "678394469048909841",
     "nonUserAuthor": false,
@@ -294,6 +313,7 @@ Array [
   },
   Object {
     "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
     "content": "11",
     "id": "678394468373626890",
     "nonUserAuthor": false,
@@ -308,7 +328,10 @@ Array [
   Object {
     "authorId": "143776454050709505",
     "channelId": "678394406507905129",
-    "emoji": "sourcecred:678399364418502669",
+    "emoji": Object {
+      "id": "678399364418502669",
+      "name": "sourcecred",
+    },
     "messageId": "678394436757094410",
   },
 ]

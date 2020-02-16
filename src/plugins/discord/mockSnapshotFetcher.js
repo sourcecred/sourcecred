@@ -13,7 +13,7 @@ async function snapshotFetch(url: string | Request | URL): Promise<Response> {
     const contents = await fs.readFile(file);
     return new Response(contents, {status: 200});
   } else {
-    throw new Error(`couldn't load snapshot for ${file}`);
+    throw new Error(`couldn't load snapshot for ${file} (${String(url)})`);
   }
 }
 

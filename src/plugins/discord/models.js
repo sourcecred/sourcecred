@@ -64,7 +64,7 @@ export type User = {|
 
 export type GuildMember = {|
   +user: User,
-  +nick: ?string,
+  +nick: string | null,
   +roles: $ReadOnlyArray<Snowflake>,
 |};
 
@@ -74,6 +74,7 @@ export type Emoji = {|
 |};
 
 export type EmojiRef = string;
+
 export function emojiToRef({id, name}: Emoji): EmojiRef {
   // Built-in emoji, unicode names.
   if (!id) return name;
@@ -82,8 +83,15 @@ export function emojiToRef({id, name}: Emoji): EmojiRef {
   return `${name}:${id}`;
 }
 
+export function refToEmoji(ref: EmojiRef): Emoji {
+  const [name, id] = ref.split(":");
+  if (!id) return {id: null, name};
+  return {id, name};
+}
+
 export type Message = {|
   +id: Snowflake,
+  +channelId: Snowflake,
   +authorId: Snowflake,
   // Could be a message from a webhook, meaning the authorId isn't a user.
   +nonUserAuthor: boolean,
@@ -98,5 +106,5 @@ export type Reaction = {|
   +channelId: Snowflake,
   +messageId: Snowflake,
   +authorId: Snowflake,
-  +emoji: EmojiRef,
+  +emoji: Emoji,
 |};
