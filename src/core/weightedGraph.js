@@ -2,6 +2,7 @@
 
 import deepEqual from "lodash.isequal";
 import {
+  Direction,
   EdgeAddress,
   Graph,
   NodeAddress,
@@ -13,6 +14,12 @@ import {
   type Node,
   type NodeAddressT,
 } from "./graph";
+import {
+  nodeWeightEvaluator,
+  edgeWeightEvaluator,
+  type NodeWeightEvaluator,
+  type EdgeWeightEvaluator,
+} from "./algorithm/weightEvaluator";
 import {
   type EdgeWeight,
   type NodeWeight,
@@ -125,12 +132,58 @@ export const WeightedGraphC = class WeightedGraph {
   _weights: WeightsT;
   _originalModificationCount: ModificationCount;
   _originalWeights: WeightsT;
+  _transitionProbabilities: Map<EdgeAddressT, EdgeWeight>;
+  _nodeEvaluator: NodeWeightEvaluator;
+  _edgeEvaluator: EdgeWeightEvaluator;
 
   constructor(graph: Graph, weights: WeightsT) {
     this._graph = graph;
     this._weights = weights;
     this._originalModificationCount = this._graph.modificationCount();
     this._originalWeights = Weights.copy(this._weights);
+
+    this._nodeEvaluator = nodeWeightEvaluator(this._weights);
+    this._edgeEvaluator = edgeWeightEvaluator(this._weights);
+    this._transitionProbabilities = this._computeTransitionProbabilities();
+  }
+
+  _computeTransitionProbabilities(): Map<EdgeAddressT, EdgeWeight> {
+    const result = new Map();
+
+    const totalOutWeights: Map<NodeAddressT, number> = new Map();
+    for (const node of this._graph.nodes()) {
+      totalOutWeights.set(node.address, 0.0);
+    }
+
+    // Set up total weights
+    for (const edge of this._graph.edges({showDangling: false})) {
+      const edgeWeight = this._edgeEvaluator(edge.address);
+      const {forwards, backwards} = this._edgeEvaluator(edge.address);
+      totalOutWeights.set(
+        edge.src,
+        NullUtil.get(totalOutWeights.get(edge.src)) + forwards
+      );
+      totalOutWeights.set(
+        edge.dst,
+        NullUtil.get(totalOutWeights.get(edge.dst)) + backwards
+      );
+    }
+
+    // Compute transition probabilities
+    for (const edge of this._graph.edges({showDangling: false})) {
+      const edgeWeight = this._edgeEvaluator(edge.address);
+      const {forwards, backwards} = this._edgeEvaluator(edge.address);
+      totalOutWeights.set(
+        edge.src,
+        NullUtil.get(totalOutWeights.get(edge.src)) + forwards
+      );
+      totalOutWeights.set(
+        edge.dst,
+        NullUtil.get(totalOutWeights.get(edge.dst)) + backwards
+      );
+    }
+
+    return result;
   }
 
   _checkUnmodified() {
@@ -155,6 +208,8 @@ export const WeightedGraphC = class WeightedGraph {
     const weight = NullUtil.orElse(this._weights.nodeWeights.get(address), 1.0);
     return {node, weight};
   }
+
+  _edgeWeight(address: EdgeAddressT) {}
 
   edge(address: EdgeAddressT): ?WeightedEdge {
     this._checkUnmodified();
