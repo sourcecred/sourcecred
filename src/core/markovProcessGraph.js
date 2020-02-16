@@ -276,10 +276,10 @@ export class MarkovProcessGraph {
         {
           // Find an epoch node, or just the original node if it's not a
           // scoring address.
-          function rewriteEpochNode(
+          const rewriteEpochNode = (
             address: NodeAddressT,
             edgeTimestampMs: number
-          ): NodeAddressT {
+          ): NodeAddressT => {
             if (!scoringAddresses.has(address)) {
               return address;
             }
@@ -294,10 +294,10 @@ export class MarkovProcessGraph {
               owner: address,
               epochStart: epochTimestampMs,
             });
-          }
+          };
 
           // Split graph edges by direction.
-          function* unidirectionalGraphEdges(): Iterator<_UnidirectionalGraphEdge> {
+          const unidirectionalGraphEdges = function*(): Iterator<_UnidirectionalGraphEdge> {
             const ewe = edgeWeightEvaluator(wg.weights);
             for (const edge of (function*() {
               for (const edge of wg.graph.edges({showDangling: false})) {
@@ -324,7 +324,7 @@ export class MarkovProcessGraph {
                 yield edge;
               }
             }
-          }
+          };
 
           // Domain: (nodes with out-edges) union (epoch nodes)
           const srcNodes: Map<
