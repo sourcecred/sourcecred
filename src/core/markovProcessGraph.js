@@ -333,10 +333,10 @@ export class MarkovProcessGraph {
           > = new Map();
           for (const graphEdge of unidirectionalGraphEdges()) {
             const src = rewriteEpochNode(graphEdge.src, graphEdge.timestamp);
-            let datum = srcNodes.get(graphEdge.src);
+            let datum = srcNodes.get(src);
             if (datum == null) {
               datum = {totalOutWeight: 0, outEdges: []};
-              srcNodes.set(graphEdge.src, datum);
+              srcNodes.set(src, datum);
             }
             datum.totalOutWeight += graphEdge.weight;
             datum.outEdges.push(graphEdge);
