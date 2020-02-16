@@ -1,5 +1,6 @@
 // @flow
 
+import {TaskReporter} from "../../util/taskReporter";
 import {type DiscordApi} from "./fetcher";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import * as Model from "./models";
@@ -19,12 +20,14 @@ export class Mirror {
     this.guild = guild;
   }
 
-  async load() {
+  async update(reporter: TaskReporter) {
+    reporter.start(`discord-${this.guild}`);
     await this.addMembers();
     const channels = await this.addTextChannels();
     for (const channel of channels) {
       await this.addMessages(channel.id);
     }
+    reporter.finish(`discord-${this.guild}`);
   }
 
   async addMembers() {
