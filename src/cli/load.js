@@ -149,6 +149,7 @@ const loadCommand: Command = async (args, std) => {
       plugins,
       sourcecredDirectory: Common.sourcecredDirectory(),
       githubToken,
+      discordToken: Common.discordToken(),
       initiativesDirectory,
     };
   });

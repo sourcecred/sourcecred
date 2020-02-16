@@ -23,6 +23,7 @@ describe("core/project", () => {
     id: "foo/bar",
     repoIds: [foobar],
     discourseServer: null,
+    discord: null,
     initiatives: null,
     identities: [],
   });
@@ -30,6 +31,10 @@ describe("core/project", () => {
     id: "@foo",
     repoIds: [foobar, foozod],
     discourseServer: {serverUrl: "https://example.com"},
+    discord: {
+      guildId: "678348980639498428",
+      reactionWeights: {"sourcecred:678399364418502669": 4},
+    },
     initiatives: {remoteUrl: "http://foo.bar/initiatives"},
     identities: [
       {
@@ -74,6 +79,7 @@ describe("core/project", () => {
           // It should strip the apiUsername field, keeping just serverUrl.
           discourseServer: {serverUrl: "https://example.com"},
           initiatives: null,
+          discord: null,
         }: Project)
       );
     });
@@ -103,6 +109,7 @@ describe("core/project", () => {
           // It should strip the apiUsername field, keeping just serverUrl.
           discourseServer: {serverUrl: "https://example.com"},
           initiatives: null,
+          discord: null,
         }: Project)
       );
     });
@@ -112,6 +119,7 @@ describe("core/project", () => {
         id: "example-040",
         repoIds: [foobar, foozod],
         discourseServer: {serverUrl: "https://example.com"},
+        discord: null,
         identities: [],
       };
       const compat = toCompat(
@@ -165,6 +173,7 @@ describe("core/project", () => {
       // Then
       expect(project).toEqual({
         id: projectShape.id,
+        discord: null,
         discourseServer: null,
         initiatives: null,
         repoIds: [],
@@ -185,6 +194,10 @@ describe("core/project", () => {
             aliases: ["github/example"],
           },
         ],
+        discord: {
+          guildId: "678348980639498428",
+          reactionWeights: {"sourcecred:678399364418502669": 4},
+        },
       };
 
       // When

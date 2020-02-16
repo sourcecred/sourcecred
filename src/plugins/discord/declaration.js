@@ -28,7 +28,7 @@ export const reactionNodeType: NodeType = deepFreeze({
   name: "Reaction",
   pluralName: "Reactions",
   prefix: NodeAddress.append(nodePrefix, "REACTION"),
-  defaultWeight: 0,
+  defaultWeight: 1,
   description: "A reaction by some user, directed at some message",
 });
 

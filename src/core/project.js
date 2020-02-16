@@ -6,6 +6,7 @@ import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import {type ProjectParameters as Initiatives} from "../plugins/initiatives/params";
 import {type Identity} from "../plugins/identity/identity";
 import {type DiscourseServer} from "../plugins/discourse/server";
+import {type ProjectOptions as Discord} from "../plugins/discord/params";
 
 export type ProjectId = string;
 
@@ -38,6 +39,8 @@ export type ProjectV050 = {|
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,
   +identities: $ReadOnlyArray<Identity>,
+  // TODO: pretend like it was always in 0.4.0
+  +discord: Discord | null,
 |};
 
 const COMPAT_INFO = {type: "sourcecred/project", version: "0.5.0"};
@@ -56,6 +59,7 @@ export function createProject(p: $Shape<Project>): Project {
     repoIds: [],
     identities: [],
     discourseServer: null,
+    discord: null,
     initiatives: null,
     ...p,
   };
@@ -94,6 +98,7 @@ export type ProjectV040 = {|
 const upgradeFrom030 = (p: ProjectV030 | ProjectV031) =>
   upgradeFrom040({
     ...p,
+    discord: null,
     discourseServer:
       p.discourseServer != null
         ? {serverUrl: p.discourseServer.serverUrl}
