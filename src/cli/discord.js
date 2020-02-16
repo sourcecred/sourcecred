@@ -1,10 +1,10 @@
 // @flow
 
-import Database from "better-sqlite3";
+import * as Common from "./common";
 import {type Command} from "./command";
-import {SqliteMirrorRepository} from "../plugins/discord/mirrorRepository";
-import {Fetcher} from "../plugins/discord/fetcher";
-import {Mirror} from "../plugins/discord/mirror";
+import {LoggingTaskReporter} from "../util/taskReporter";
+import {DataDirectory} from "../backend/dataDirectory";
+import Loader from "../plugins/discord/loader";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -18,13 +18,14 @@ const discord: Command = async (args, std) => {
   }
   const [guildId] = args;
 
-  const repo = new SqliteMirrorRepository(new Database(":memory:"), guildId);
-  const api = new Fetcher({
-    token: process.env.SOURCECRED_DISCORD_TOKEN || null,
-  });
+  const taskReporter = new LoggingTaskReporter();
+  const dir = new DataDirectory(Common.sourcecredDirectory());
+  const token = process.env.SOURCECRED_DISCORD_TOKEN || null;
+  if (!token) {
+    throw new Error("Expecting a SOURCECRED_DISCORD_TOKEN");
+  }
 
-  const mirror = new Mirror(repo, api, guildId);
-  mirror.load();
+  await Loader.updateMirror(guildId, token, dir, taskReporter);
   return 0;
 };
 
