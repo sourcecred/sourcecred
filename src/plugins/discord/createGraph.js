@@ -95,7 +95,7 @@ function authorsMessageEdge(
   };
 }
 
-function reactionNode(reaction: Model.Reaction, guild: Model.Snowflake): Node {
+function reactionNode(reaction: Model.Reaction, timestampMs: number, guild: Model.Snowflake): Node {
   const msgUrl = messageUrl(guild, reaction.channelId, reaction.messageId);
   const reactionStr = reaction.emoji.id
     ? `:${reaction.emoji.name}:`
@@ -104,7 +104,7 @@ function reactionNode(reaction: Model.Reaction, guild: Model.Snowflake): Node {
   return {
     address: reactionAddress(reaction),
     description,
-    timestampMs: null,
+    timestampMs,
   };
 }
 
@@ -185,7 +185,7 @@ export function createGraph(
         }
 
         hasWeightedEmoji = true;
-        const node = reactionNode(reaction, guild);
+        const node = reactionNode(reaction, message.timestampMs, guild);
         wg.weights.nodeWeights.set(node.address, reactionWeight);
         wg.graph.addNode(node);
         wg.graph.addNode(memberNode(reactingMember));

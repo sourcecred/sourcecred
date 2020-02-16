@@ -12,7 +12,7 @@ export const memberNodeType: NodeType = deepFreeze({
   name: "Member",
   pluralName: "Members",
   prefix: NodeAddress.append(nodePrefix, "MEMBER"),
-  defaultWeight: 0,
+  defaultWeight: 1,
   description: "A member of the Discord server",
 });
 
@@ -20,7 +20,7 @@ export const messageNodeType: NodeType = deepFreeze({
   name: "Message",
   pluralName: "Messages",
   prefix: NodeAddress.append(nodePrefix, "MESSAGE"),
-  defaultWeight: 0,
+  defaultWeight: 1,
   description: "A Discord message, posted in a particular channel",
 });
 
