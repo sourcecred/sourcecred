@@ -4,6 +4,7 @@ import {type NodeAddressT} from "../../core/graph";
 import {githubOwnerPattern} from "../github/repoId";
 import {loginAddress as githubAddress} from "../github/nodes";
 import {userAddress as discourseAddress} from "../discourse/address";
+import {userAddress as discordAddress} from "../discord/createGraph";
 
 /** An Alias is a string specification of an identity within another plugin.
  *
@@ -32,6 +33,9 @@ export function resolveAlias(
   }
   const [_, prefix, name] = match;
   switch (prefix) {
+    case "discord": {
+      return discordAddress(name);
+    }
     case "github": {
       const match = name.match(_VALID_GITHUB_NAME);
       if (!match) {
