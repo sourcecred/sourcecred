@@ -2,6 +2,7 @@
 
 import deepEqual from "lodash.isequal";
 import deepFreeze from "deep-freeze";
+import sortedIndex from "lodash.sortedindex";
 
 import {makeAddressModule, type AddressModule} from "./address";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
@@ -391,6 +392,99 @@ export class Graph {
     this._markModification();
     this._maybeCheckInvariants();
     return this;
+  }
+
+  fibrate(
+    prefixes: $ReadOnlyArray<NodeAddressT>,
+    timeBoundariesMs: $ReadOnlyArray<number>
+  ): Graph {
+    {
+      let lastBoundary = -Infinity;
+      for (const boundary of timeBoundariesMs) {
+        if (!isFinite(boundary)) {
+          throw new Error(`non-finite boundary: ${String(boundary)}`);
+        }
+        if (boundary <= lastBoundary) {
+          throw new Error(
+            `non-increasing boundary: ` +
+              `${String(boundary)} <= ${String(lastBoundary)}`
+          );
+        }
+      }
+    }
+    timeBoundariesMs = [-Infinity, ...timeBoundariesMs, Infinity];
+
+    const result = this.copy();
+    const scoringAddresses = new Set();
+    for (const address of result._getOrder().nodeOrder) {
+      if (prefixes.some((prefix) => NodeAddress.hasPrefix(address, prefix))) {
+        scoringAddresses.add(address);
+      }
+    }
+
+    function epochAddress(epochTimestampMs: number, scoringAddress) {
+      return NodeAddress.fromParts([
+        "sourcecred",
+        "core",
+        "fibration",
+        "EPOCH",
+        String(epochTimestampMs),
+        ...NodeAddress.toParts(scoringAddress),
+      ]);
+    }
+    for (const scoringAddress of scoringAddresses) {
+      for (const boundaryMs of timeBoundariesMs) {
+        const thisEpoch = epochAddress(boundaryMs, scoringAddress);
+        const parts = result.addNode({
+          address: thisEpoch,
+          description: "Markdown is the bane of my existence",
+          timestampMs: boundaryMs,
+        });
+        result.addEdge({
+          address: EdgeAddress.fromParts([
+            "sourcecred",
+            "core",
+            "fibration",
+            "EPOCH_OWNED_BY",
+            String(boundaryMs),
+            ...NodeAddress.toParts(scoringAddress),
+          ]),
+          src: thisEpoch,
+          dst: scoringAddress,
+          timestampMs: boundaryMs,
+        });
+      }
+    }
+
+    // Find an epoch node, or just the original node if it's not a
+    // scoring address.
+    function findEpochNode(address: NodeAddressT, edgeTimestampMs: number) {
+      if (!scoringAddresses.has(address)) {
+        return address;
+      }
+      const epochEndIndex = sortedIndex(timeBoundariesMs, edgeTimestampMs);
+      const epochStartIndex = epochEndIndex - 1;
+      const epochTimestampMs = timeBoundariesMs[epochStartIndex];
+      return epochAddress(epochTimestampMs, address);
+    }
+
+    for (const edge of this.edges({showDangling: true})) {
+      // (iterate over `this.edges` to avoid concurrent modification)
+      const newSrc = findEpochNode(edge.src, edge.timestampMs);
+      const newDst = findEpochNode(edge.dst, edge.timestampMs);
+      if (newSrc === edge.src && newDst === edge.dst) {
+        continue;
+      }
+      result.removeEdge(edge.address);
+      result.addEdge({
+        address: edge.address,
+        src: newSrc,
+        dst: newDst,
+        timestampMs: edge.timestampMs,
+      });
+    }
+
+    return result;
   }
 
   /**

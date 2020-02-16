@@ -7,6 +7,7 @@ import {
   type EdgeAddressT,
   type NodeAddressT,
   EdgeAddress,
+  NodeAddress,
 } from "../../../core/graph";
 import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 
@@ -18,7 +19,11 @@ export function nodeDescription(
 ): ReactNode {
   const node = graph.node(address);
   if (node == null) {
-    throw new Error(`No node for ${address}`);
+    return (
+      <span>
+        <i>Unknown node:</i> <code>{NodeAddress.toString(address)}</code>
+      </span>
+    );
   }
   return <Markdown renderers={{paragraph: "span"}} source={node.description} />;
 }
@@ -36,7 +41,7 @@ export function edgeVerb(
         }
       }
     }
-    throw Error(`No matching type for ${address}`);
+    return "frobnicates";
   }
   const edgeType = getType();
   return direction === "FORWARD" ? edgeType.forwardName : edgeType.backwardName;

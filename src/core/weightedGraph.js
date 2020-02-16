@@ -1,6 +1,13 @@
 // @flow
 
-import {Graph, type GraphJSON} from "./graph";
+import {
+  EdgeAddress,
+  Graph,
+  NodeAddress,
+  type EdgeAddressT,
+  type GraphJSON,
+  type NodeAddressT,
+} from "./graph";
 import {type Weights as WeightsT, type WeightsJSON} from "./weights";
 import * as Weights from "./weights";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
@@ -75,4 +82,29 @@ export function overrideWeights(
     edgeResolver: (a, b) => b,
   });
   return {graph: wg.graph, weights};
+}
+
+export function fibrate(
+  wg: WeightedGraph,
+  prefixes: $ReadOnlyArray<NodeAddressT>,
+  timeBoundariesMs: $ReadOnlyArray<number>
+): WeightedGraph {
+  const newGraph = wg.graph.fibrate(prefixes, timeBoundariesMs);
+  const newWeights = Weights.empty();
+  // TODO(@wchargin): Deduplicate these constants.
+  const epochNodePrefix = NodeAddress.fromParts([
+    "sourcecred",
+    "core",
+    "fibration",
+    "EPOCH",
+  ]);
+  const epochEdgePrefix = EdgeAddress.fromParts([
+    "sourcecred",
+    "core",
+    "fibration",
+    "EPOCH_OWNED_BY",
+  ]);
+  newWeights.nodeWeights.set(epochNodePrefix, 1.0);
+  newWeights.edgeWeights.set(epochEdgePrefix, {forwards: 1.0, backwards: 0.0});
+  return overrideWeights({graph: newGraph, weights: wg.weights}, newWeights);
 }

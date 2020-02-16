@@ -2,7 +2,8 @@
 
 import deepEqual from "lodash.isequal";
 
-import {Graph, type NodeAddressT} from "../../core/graph";
+import {Graph, NodeAddress, type NodeAddressT} from "../../core/graph";
+import * as WeightedGraph from "../../core/weightedGraph";
 import type {Assets} from "../../webutil/assets";
 import {type EdgeEvaluator} from "../../analysis/pagerank";
 import {defaultLoader, type LoadSuccess} from "../TimelineApp";
@@ -152,12 +153,24 @@ export class StateTransitionMachine implements StateTransitionMachineInterface {
         ? {...state, loading: "LOADING"}
         : {...state, loading: "LOADING"};
     this.setState(loadingState);
-    const graph = state.timelineCred.weightedGraph().graph;
+    const fiberedGraph = WeightedGraph.overrideWeights(
+      WeightedGraph.fibrate(
+        state.timelineCred.weightedGraph(),
+        []
+          .concat(...state.timelineCred._plugins.map((x) => x.userTypes))
+          .map((x) => x.prefix),
+        Array(52)
+          .fill()
+          .map((_, i) => (1580603309 - 86400 * 7 * (i + 1)) * 1000)
+      ),
+      weights
+    );
+    const graph = fiberedGraph.graph;
     let newState: ?AppState;
     try {
       const pagerankNodeDecomposition = await this.pagerank(
         graph,
-        weightsToEdgeEvaluator(weights),
+        weightsToEdgeEvaluator(fiberedGraph.weights),
         {
           verbose: true,
           totalScoreNodePrefix: totalScoreNodePrefix,
