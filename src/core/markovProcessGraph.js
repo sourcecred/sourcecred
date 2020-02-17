@@ -385,20 +385,30 @@ export class MarkovProcessGraph {
     }
   }
 
-  node() {
-    throw new Error("Not yet implemented");
+  node(address: NodeAddressT): MarkovNode | null {
+    NodeAddress.assertValid(address);
+    return this._nodes.get(address) || null;
   }
-  edge() {
-    throw new Error("Not yet implemented");
+
+  *nodes(): Iterator<MarkovNode> {
+    for (const node of self._nodes.values()) {
+      yield node;
+    }
   }
-  nodes() {
-    throw new Error("Not yet implemented");
+
+  *edges(): Iterator<MarkovEdge> {
+    for (const edge of self._edges.values()) {
+      yield edge;
+    }
   }
-  edges() {
-    throw new Error("Not yet implemented");
-  }
-  neighbors() {
-    throw new Error("Not yet implemented");
+
+  *inNeighbors(nodeAddress: NodeAddressT): Iterator<MarkovEdge> {
+    for (const edge of this._edges.values()) {
+      if (edge.dst !== nodeAddress) {
+        continue;
+      }
+      yield edge;
+    }
   }
 
   toMarkovChain(): OrderedSparseMarkovChain {
