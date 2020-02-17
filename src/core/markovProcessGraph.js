@@ -478,7 +478,7 @@ export class MarkovProcessGraph {
     };
   }
 
-  fromJSON(j: MarkovProcessGraphJSON): MarkovProcessGraph {
+  static fromJSON(j: MarkovProcessGraphJSON): MarkovProcessGraph {
     return new MarkovProcessGraph(
       MapUtil.fromObject(j.nodes),
       MapUtil.fromObject(j.edges),
