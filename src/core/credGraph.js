@@ -1,6 +1,7 @@
 // @flow
 
 import * as NullUtil from "../util/null";
+import * as MapUtil from "../util/map";
 import {
   type NodeAddressT,
   Graph,
@@ -18,6 +19,7 @@ import {
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
 import {
   MarkovProcessGraph,
+  type MarkovProcessGraphJSON,
   type MarkovEdge,
   type MarkovNode,
   type TransitionProbability,
@@ -37,6 +39,11 @@ export type Edge = {|
   +dst: NodeAddressT,
   +transitionProbability: TransitionProbability,
   +credFlow: number,
+|};
+
+export type CredGraphJSON = {|
+  +mpg: MarkovProcessGraphJSON,
+  +scores: {|+[NodeAddressT]: number|},
 |};
 
 export class CredGraph {
@@ -76,5 +83,19 @@ export class CredGraph {
     for (const edge of this._mpg.inNeighbors(addr)) {
       yield {...edge, credFlow: this._credFlow(edge)};
     }
+  }
+
+  toJSON(): CredGraphJSON {
+    return {
+      mpg: this._mpg.toJSON(),
+      scores: MapUtil.toObject(this._scores),
+    };
+  }
+
+  static fromJSON(j: CredGraphJSON): CredGraph {
+    return new CredGraph(
+      MarkovProcessGraph.fromJSON(j.mpg),
+      MapUtil.fromObject(j.scores)
+    );
   }
 }
