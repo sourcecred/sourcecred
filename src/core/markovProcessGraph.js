@@ -436,24 +436,24 @@ export class MarkovProcessGraph {
       nodeIndex.set(n, i);
     });
 
-    const outNeighbors: Map<NodeAddressT, MarkovEdge[]> = new Map();
+    const inNeighbors: Map<NodeAddressT, MarkovEdge[]> = new Map();
     for (const edge of this._edges.values()) {
-      MapUtil.pushValue(outNeighbors, edge.src, edge);
+      MapUtil.pushValue(inNeighbors, edge.dst, edge);
     }
 
     const chain = nodeOrder.map((addr) => {
-      const outEdges = NullUtil.get(outNeighbors.get(addr));
-      const outDegree = outEdges.length;
-      const neighbor = new Uint32Array(outDegree);
-      const weight = new Float64Array(outDegree);
-      outEdges.forEach((e, i) => {
-        // Note: We don't group-by dst, so there may be multiple `j`
+      const inEdges = NullUtil.get(inNeighbors.get(addr));
+      const inDegree = inEdges.length;
+      const neighbor = new Uint32Array(inDegree);
+      const weight = new Float64Array(inDegree);
+      inEdges.forEach((e, i) => {
+        // Note: We don't group-by src, so there may be multiple `j`
         // such that `neighbor[j] === k` for a given `k` when there are
         // parallel edges in the source graph. This should just work
         // down the stack..
-        const result = nodeIndex.get(e.dst);
+        const result = nodeIndex.get(e.src);
         if (result == null) {
-          throw new Error(e.dst);
+          throw new Error(e.src);
         }
         neighbor[i] = result;
         weight[i] = e.transitionProbability;
