@@ -1,4 +1,7 @@
 // @flow
+
+import {max, min} from "d3-array";
+import {weekIntervals} from "./interval";
 import sortedIndex from "lodash.sortedindex";
 import {makeAddressModule, type AddressModule} from "./address";
 import {
@@ -75,7 +78,6 @@ function epochNodeAddressToRaw(addr: EpochNodeAddress) {
 // STOPSHIP document these parameters
 export type FibrationOptions = {|
   +what: $ReadOnlyArray<NodeAddressT>,
-  +timeBoundaries: $ReadOnlyArray<TimestampMs>,
   +beta: TransitionProbability,
   +gammaForward: TransitionProbability,
   +gammaBackward: TransitionProbability,
@@ -138,21 +140,13 @@ export class MarkovProcessGraph {
       return result;
     })();
 
-    const timeBoundaries = (() => {
-      let lastBoundary = -Infinity;
-      for (const boundary of fibration.timeBoundaries) {
-        if (!isFinite(boundary)) {
-          throw new Error(`non-finite boundary: ${String(boundary)}`);
-        }
-        if (boundary <= lastBoundary) {
-          throw new Error(
-            `non-increasing boundary: ` +
-              `${String(boundary)} <= ${String(lastBoundary)}`
-          );
-        }
-      }
-      return [-Infinity, ...fibration.timeBoundaries, Infinity];
-    })();
+    const edgeTimestamps = Array.from(
+      wg.graph.edges({showDangling: false})
+    ).map((x) => x.timestampMs);
+    const start = min(edgeTimestamps);
+    const end = max(edgeTimestamps);
+    const boundaries = weekIntervals(start, end).map((x) => x.startTimeMs);
+    const timeBoundaries = [-Infinity, ...boundaries, Infinity];
 
     // Build graph
     {
@@ -410,7 +404,7 @@ export class MarkovProcessGraph {
 
   *nodes(options?: {|+prefix: NodeAddressT|}): Iterator<MarkovNode> {
     const prefix = options ? options.prefix : NodeAddress.empty;
-    for (const node of self._nodes.values()) {
+    for (const node of this._nodes.values()) {
       if (NodeAddress.hasPrefix(node.address, prefix)) {
         yield node;
       }
@@ -418,7 +412,7 @@ export class MarkovProcessGraph {
   }
 
   *edges(): Iterator<MarkovEdge> {
-    for (const edge of self._edges.values()) {
+    for (const edge of this._edges.values()) {
       yield edge;
     }
   }

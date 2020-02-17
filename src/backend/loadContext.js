@@ -4,12 +4,17 @@ import {type Project} from "../core/project";
 import {type Weights as WeightsT} from "../core/weights";
 import {type WeightedGraph as WeightedGraphT} from "../core/weightedGraph";
 import * as WeightedGraph from "../core/weightedGraph";
+import {CredGraph} from "../core/credGraph";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
 import {type GithubToken} from "../plugins/github/token";
 import {type CacheProvider} from "./cache";
 import {TaskReporter} from "../util/taskReporter";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
-import {type ComputeFunction as ComputeFunctionT} from "./computeFunction";
+import {pagerank as credGraphCompute} from "../core/algorithm/pagerank";
+import {
+  type ComputeFunction as ComputeFunctionT,
+  type CredGraphComputeFunction as CredGraphComputeFunctionT,
+} from "./computeFunction";
 import {type PluginLoaders as PluginLoadersT} from "./pluginLoaders";
 import * as ComputeFunction from "./computeFunction";
 import * as PluginLoaders from "./pluginLoaders";
@@ -22,6 +27,7 @@ export type LoadResult = {|
   +pluginDeclarations: PluginDeclarations,
   +weightedGraph: WeightedGraphT,
   +cred: TimelineCred,
+  +credGraph: CredGraph,
 |};
 
 export type LoadContextOptions = {|
@@ -70,6 +76,7 @@ export class LoadContext {
   +_contractPluginGraphs = PluginLoaders.contractPluginGraphs;
   +_overrideWeights = WeightedGraph.overrideWeights;
   +_computeTask = ComputeFunction.computeTask;
+  +_computeCredGraphTask = ComputeFunction.credGraphComputeTask;
 
   /**
    * The above proxy functions we're deferring to, accept interfaces so they
@@ -79,6 +86,8 @@ export class LoadContext {
    */
 
   +_compute: ComputeFunctionT = TimelineCred.compute;
+  +_computeCredGraph: CredGraphComputeFunctionT = (opts) =>
+    credGraphCompute(opts.weightedGraph, opts.options);
   +_pluginLoaders: PluginLoadersT = {
     github: githubLoader,
     discourse: discourseLoader,
@@ -116,10 +125,30 @@ export class LoadContext {
       plugins,
       weightedGraph,
     });
+    const userTypes = [].concat(...plugins.map((p) => p.userTypes));
+    const scoringPrefixes = userTypes.map((x) => x.prefix);
+    const credGraph = await this._computeCredGraphTask(
+      this._computeCredGraph,
+      this._options,
+      {
+        weightedGraph,
+        options: {
+          fibrationOptions: {
+            what: scoringPrefixes,
+            beta: 0.5,
+            gammaForward: 0.15,
+            gammaBackward: 0.15,
+          },
+          seedOptions: {alpha: 0.1},
+          pagerankOptions: {},
+        },
+      }
+    );
     return {
       pluginDeclarations: plugins,
       weightedGraph,
       cred,
+      credGraph,
     };
   }
 }

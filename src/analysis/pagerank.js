@@ -71,7 +71,6 @@ export async function pagerank(
     .map((_, i) => (1580603309 - 86400 * 7 * (i + 1)) * 1000);
   const fibration = {
     what: [NodeAddress.fromParts(["sourcecred", "github", "USERLIKE", "USER"])],
-    timeBoundaries,
     beta: 0.5,
     gammaForward: 0.1,
     gammaBackward: 0.1,
