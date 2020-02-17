@@ -94,12 +94,23 @@ export class MarkovProcessGraph {
   _scoringAddresses: Set<NodeAddressT>;
 
   constructor(
+    nodes: Map<NodeAddressT, MarkovNode>,
+    edges: Map<MarkovEdgeAddressT, MarkovEdge>,
+    scoringAddresses: Set<NodeAddressT>
+  ) {
+    this._nodes = nodes;
+    this._edges = edges;
+    this._scoringAddresses = scoringAddresses;
+  }
+
+  static new(
     wg: WeightedGraphT,
     fibration: FibrationOptions,
     seed: SeedOptions
   ) {
-    this._nodes = new Map();
-    this._edges = new Map();
+    const _nodes = new Map();
+    const _edges = new Map();
+    const _scoringAddresses = new Set();
 
     const epochTransitionRemainder = (() => {
       const {beta, gammaForward, gammaBackward} = fibration;
@@ -138,20 +149,20 @@ export class MarkovProcessGraph {
     // Build graph
     {
       const addNode = (node: MarkovNode) => {
-        if (this._nodes.has(node.address)) {
+        if (_nodes.has(node.address)) {
           throw new Error("Node conflict: " + node.address);
         }
-        this._nodes.set(node.address, node);
+        _nodes.set(node.address, node);
       };
       const addEdge = (edge: MarkovEdge) => {
         const mae = MarkovEdgeAddress.fromParts([
           edge.reversed ? "B" /* Backward */ : "F" /* Forward */,
           ...EdgeAddress.toParts(edge.address),
         ]);
-        if (this._edges.has(mae)) {
+        if (_edges.has(mae)) {
           throw new Error("Edge conflict: " + mae);
         }
-        this._edges.set(mae, edge);
+        _edges.set(mae, edge);
       };
 
       // Add seed node
@@ -175,19 +186,18 @@ export class MarkovProcessGraph {
         });
       }
 
-      this._scoringAddresses = new Set();
       for (const {address} of wg.graph.nodes()) {
         if (
           fibration.what.some((prefix) =>
             NodeAddress.hasPrefix(address, prefix)
           )
         ) {
-          this._scoringAddresses.add(address);
+          _scoringAddresses.add(address);
         }
       }
 
       // Add epoch nodes, epoch-out edges, and epoch webbing
-      for (const scoringAddress of this._scoringAddresses) {
+      for (const scoringAddress of _scoringAddresses) {
         let lastBoundary = null;
         for (const boundary of timeBoundaries) {
           const thisEpoch = epochNodeAddressToRaw({
@@ -268,7 +278,7 @@ export class MarkovProcessGraph {
         {
           let totalNodeWeight = 0.0;
           const positiveNodeWeights: Map<NodeAddressT, number> = new Map();
-          for (const {address, weight} of this._nodes.values()) {
+          for (const {address, weight} of _nodes.values()) {
             if (weight > 0) {
               totalNodeWeight += weight;
               positiveNodeWeights.set(address, weight);
@@ -301,7 +311,7 @@ export class MarkovProcessGraph {
             address: NodeAddressT,
             edgeTimestampMs: number
           ): NodeAddressT => {
-            if (!this._scoringAddresses.has(address)) {
+            if (!_scoringAddresses.has(address)) {
               return address;
             }
             const epochEndIndex = sortedIndex(timeBoundaries, edgeTimestampMs);
@@ -377,6 +387,8 @@ export class MarkovProcessGraph {
         }
       }
     }
+
+    return new MarkovProcessGraph(_nodes, _edges, _scoringAddresses);
   }
 
   scoringAddresses(): Set<NodeAddressT> {
