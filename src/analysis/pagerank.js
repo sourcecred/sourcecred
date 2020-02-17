@@ -77,7 +77,7 @@ export async function pagerank(
     gammaBackward: 0.1,
   };
   const seed = {alpha: 0.1};
-  const mpg = new MarkovProcessGraph(wg, fibration, seed);
+  const mpg = MarkovProcessGraph.new(wg, fibration, seed);
   const osmc = mpg.toMarkovChain();
   const params: PagerankParams = {
     chain: osmc.chain,

@@ -42,7 +42,7 @@ export async function pagerank(
     verbose: DEFAULT_VERBOSE,
   };
   const pagerankOptions = {...defaultOptions, ...options.pagerankOptions};
-  const mpg = new MarkovProcessGraph(
+  const mpg = MarkovProcessGraph.new(
     wg,
     options.fibrationOptions,
     options.seedOptions
