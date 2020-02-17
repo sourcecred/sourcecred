@@ -442,7 +442,7 @@ export class MarkovProcessGraph {
     }
 
     const chain = nodeOrder.map((addr) => {
-      const inEdges = NullUtil.get(inNeighbors.get(addr));
+      const inEdges = NullUtil.orElse(inNeighbors.get(addr), []);
       const inDegree = inEdges.length;
       const neighbor = new Uint32Array(inDegree);
       const weight = new Float64Array(inDegree);
