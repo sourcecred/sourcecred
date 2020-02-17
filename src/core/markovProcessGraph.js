@@ -52,7 +52,7 @@ export type OrderedSparseMarkovChain = {|
 |};
 
 const SEED_ADDRESS = NodeAddress.fromParts(["sourcecred", "core", "SEED"]);
-const SEED_DESCRIPTION = "\u{1ff31}";
+const SEED_DESCRIPTION = "\u{1f331}";
 
 const EPOCH_PREFIX = NodeAddress.fromParts(["sourcecred", "core", "EPOCH"]);
 
