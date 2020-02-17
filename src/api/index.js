@@ -17,6 +17,9 @@ import * as weights from "../core/weights";
 import * as graphToMarkovChain from "../core/algorithm/graphToMarkovChain";
 import * as markovChain from "../core/algorithm/markovChain";
 import * as timelineCred from "../analysis/timeline/timelineCred";
+import * as markovProcessGraph from "../core/markovProcessGraph";
+import * as credGraph from "../core/credGraph";
+import * as pagerank from "../core/algorithm/pagerank";
 
 export default deepFreeze({
   analysis: {
@@ -29,10 +32,13 @@ export default deepFreeze({
     algorithm: {
       markovChain,
       graphToMarkovChain,
+      pagerank,
     },
     graph,
     weightedGraph,
     weights,
+    credGraph,
+    markovProcessGraph,
   },
   plugins: {
     github: {
