@@ -390,9 +390,12 @@ export class MarkovProcessGraph {
     return this._nodes.get(address) || null;
   }
 
-  *nodes(): Iterator<MarkovNode> {
+  *nodes(options?: {|+prefix: NodeAddressT|}): Iterator<MarkovNode> {
+    const prefix = options ? options.prefix : NodeAddress.empty;
     for (const node of self._nodes.values()) {
-      yield node;
+      if (NodeAddress.hasPrefix(node.address, prefix)) {
+        yield node;
+      }
     }
   }
 
