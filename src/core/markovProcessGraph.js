@@ -83,6 +83,14 @@ export type FibrationOptions = {|
 export type SeedOptions = {|
   +alpha: TransitionProbability,
 |};
+
+// STOPSHIP use CompatInfo
+export type MarkovProcessGraphJSON = {|
+  +nodes: {|+[NodeAddressT]: MarkovNode|},
+  +edges: {|+[MarkovEdgeAddressT]: MarkovEdge|},
+  +scoringAddresses: $ReadOnlyArray<NodeAddressT>,
+|};
+
 // properties:
 //   - unidirectional multiedge weighted graph
 //   - outbound transition probabilities sum to 1 for each node
@@ -460,6 +468,22 @@ export class MarkovProcessGraph {
     });
 
     return {nodeOrder, chain};
+  }
+
+  toJSON(): MarkovProcessGraphJSON {
+    return {
+      nodes: MapUtil.toObject(this._nodes),
+      edges: MapUtil.toObject(this._edges),
+      scoringAddresses: Array.from(this._scoringAddresses),
+    };
+  }
+
+  fromJSON(j: MarkovProcessGraphJSON): MarkovProcessGraph {
+    return new MarkovProcessGraph(
+      MapUtil.fromObject(j.nodes),
+      MapUtil.fromObject(j.edges),
+      new Set(j.scoringAddresses)
+    );
   }
 }
 
