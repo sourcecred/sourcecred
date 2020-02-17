@@ -113,6 +113,22 @@ export class MarkovProcessGraph {
       return result;
     })();
 
+    const timeBoundaries = (() => {
+      let lastBoundary = -Infinity;
+      for (const boundary of fibration.timeBoundaries) {
+        if (!isFinite(boundary)) {
+          throw new Error(`non-finite boundary: ${String(boundary)}`);
+        }
+        if (boundary <= lastBoundary) {
+          throw new Error(
+            `non-increasing boundary: ` +
+              `${String(boundary)} <= ${String(lastBoundary)}`
+          );
+        }
+      }
+      return [-Infinity, ...fibration.timeBoundaries, Infinity];
+    })();
+
     // Build graph
     {
       const addNode = (node: MarkovNode) => {
@@ -157,13 +173,10 @@ export class MarkovProcessGraph {
         }
       }
 
-      // STOPSHIP: Preprocess `timeBoundaries` to add -inf, +inf and
-      // validate order/uniqueness.
-
       // Add epoch nodes, epoch-out edges, and epoch webbing
       for (const scoringAddress of scoringAddresses) {
         let lastBoundary = null;
-        for (const boundary of fibration.timeBoundaries) {
+        for (const boundary of timeBoundaries) {
           const thisEpoch = epochNodeAddressToRaw({
             type: "EPOCH_NODE",
             owner: scoringAddress,
@@ -297,12 +310,9 @@ export class MarkovProcessGraph {
             if (!scoringAddresses.has(address)) {
               return address;
             }
-            const epochEndIndex = sortedIndex(
-              fibration.timeBoundaries,
-              edgeTimestampMs
-            );
+            const epochEndIndex = sortedIndex(timeBoundaries, edgeTimestampMs);
             const epochStartIndex = epochEndIndex - 1;
-            const epochTimestampMs = fibration.timeBoundaries[epochStartIndex];
+            const epochTimestampMs = timeBoundaries[epochStartIndex];
             return epochNodeAddressToRaw({
               type: "EPOCH_NODE",
               owner: address,
