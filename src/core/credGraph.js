@@ -67,6 +67,12 @@ export class CredGraph {
     return srcCred * edge.transitionProbability;
   }
 
+  node(addr: NodeAddressT): ?Node {
+    const node = this._mpg._nodes.get(addr);
+    if (node == null) return undefined;
+    return {...node, cred: this._cred(addr)};
+  }
+
   *nodes(): Iterator<Node> {
     for (const node of this._mpg.nodes()) {
       yield {...node, cred: this._cred(node.address)};
@@ -76,6 +82,12 @@ export class CredGraph {
   *edges(): Iterator<Edge> {
     for (const edge of this._mpg.edges()) {
       yield {...edge, credFlow: this._credFlow(edge)};
+    }
+  }
+
+  *scoringNodes(): Iterator<Node> {
+    for (const addr of this._mpg.scoringAddresses()) {
+      yield NullUtil.get(this.node(addr));
     }
   }
 
