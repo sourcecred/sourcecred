@@ -20,6 +20,7 @@ import {
   MarkovProcessGraph,
   type MarkovEdge,
   type MarkovNode,
+  type TransitionProbability,
 } from "./markovProcessGraph";
 
 export type Node = {|
@@ -58,20 +59,20 @@ export class CredGraph {
     return srcCred * edge.transitionProbability;
   }
 
-  *nodes(options?: {|+prefix: NodeAddressT|}): Iterator<Node> {
-    for (const node of this._mpg.nodes(options)) {
+  *nodes(): Iterator<Node> {
+    for (const node of this._mpg.nodes()) {
       yield {...node, cred: this._cred(node.address)};
     }
   }
 
-  *edges(options: EdgesOptions): Iterator<Edge> {
-    for (const edge of this._mpg.edges(options)) {
+  *edges(): Iterator<Edge> {
+    for (const edge of this._mpg.edges()) {
       yield {...edge, credFlow: this._credFlow(edge)};
     }
   }
 
-  *neighbors(addr: NodeAddressT): Iterator<Edge> {
-    for (const edge of this._mpg.neighbors(addr)) {
+  *inNeighbors(addr: NodeAddressT): Iterator<Edge> {
+    for (const edge of this._mpg.inNeighbors(addr)) {
       yield {...edge, credFlow: this._credFlow(edge)};
     }
   }

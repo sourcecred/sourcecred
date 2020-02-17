@@ -16,14 +16,14 @@ import * as NullUtil from "../util/null";
 import * as MapUtil from "../util/map";
 import {type SparseMarkovChain} from "./algorithm/markovChain";
 
-type TimestampMs = number;
-type TransitionProbability = number;
+export type TimestampMs = number;
+export type TransitionProbability = number;
 
-type MarkovNode = {|
+export type MarkovNode = {|
   +address: NodeAddressT,
   +description: string,
 |};
-type MarkovEdge = {|
+export type MarkovEdge = {|
   // note: primary key is `(address, reversed)`, not just `(address)`
   +address: EdgeAddressT,
   // If this came from an underlying graph edge, have its `src` and
