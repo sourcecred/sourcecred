@@ -8,6 +8,7 @@ import {
   EdgeAddress,
 } from "./graph";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
+import {type NodeWeight} from "./weights";
 import {
   nodeWeightEvaluator,
   edgeWeightEvaluator,
@@ -22,6 +23,7 @@ export type TransitionProbability = number;
 export type MarkovNode = {|
   +address: NodeAddressT,
   +description: string,
+  +weight: NodeWeight,
 |};
 export type MarkovEdge = {|
   // note: primary key is `(address, reversed)`, not just `(address)`
@@ -70,6 +72,17 @@ function epochNodeAddressToRaw(addr: EpochNodeAddress) {
   );
 }
 
+// STOPSHIP document these parameters
+export type FibrationOptions = {|
+  +what: $ReadOnlyArray<NodeAddressT>,
+  +timeBoundaries: $ReadOnlyArray<TimestampMs>,
+  +beta: TransitionProbability,
+  +gammaForward: TransitionProbability,
+  +gammaBackward: TransitionProbability,
+|};
+export type SeedOptions = {|
+  +alpha: TransitionProbability,
+|};
 // properties:
 //   - unidirectional multiedge weighted graph
 //   - outbound transition probabilities sum to 1 for each node
@@ -78,19 +91,12 @@ function epochNodeAddressToRaw(addr: EpochNodeAddress) {
 export class MarkovProcessGraph {
   _nodes: Map<NodeAddressT, MarkovNode>;
   _edges: Map<MarkovEdgeAddressT, MarkovEdge>;
+  _scoringAddresses: Set<NodeAddressT>;
 
   constructor(
     wg: WeightedGraphT,
-    fibration: {|
-      +what: $ReadOnlyArray<NodeAddressT>,
-      +timeBoundaries: $ReadOnlyArray<TimestampMs>,
-      +beta: TransitionProbability,
-      +gammaForward: TransitionProbability,
-      +gammaBackward: TransitionProbability,
-    |},
-    seed: {|
-      +alpha: TransitionProbability,
-    |}
+    fibration: FibrationOptions,
+    seed: SeedOptions
   ) {
     this._nodes = new Map();
     this._edges = new Map();
@@ -152,29 +158,36 @@ export class MarkovProcessGraph {
       addNode({
         address: SEED_ADDRESS,
         description: SEED_DESCRIPTION,
+        weight: 0,
       });
 
       // Add graph nodes
+      const nwe = nodeWeightEvaluator(wg.weights);
       for (const node of wg.graph.nodes()) {
+        const weight = nwe(node.address);
+        if (weight < 0) {
+          throw new Error(">:-(");
+        }
         addNode({
           address: node.address,
           description: node.description,
+          weight,
         });
       }
 
-      const scoringAddresses = new Set();
+      this._scoringAddresses = new Set();
       for (const {address} of wg.graph.nodes()) {
         if (
           fibration.what.some((prefix) =>
             NodeAddress.hasPrefix(address, prefix)
           )
         ) {
-          scoringAddresses.add(address);
+          this._scoringAddresses.add(address);
         }
       }
 
       // Add epoch nodes, epoch-out edges, and epoch webbing
-      for (const scoringAddress of scoringAddresses) {
+      for (const scoringAddress of this._scoringAddresses) {
         let lastBoundary = null;
         for (const boundary of timeBoundaries) {
           const thisEpoch = epochNodeAddressToRaw({
@@ -185,6 +198,7 @@ export class MarkovProcessGraph {
           addNode({
             address: thisEpoch,
             description: "Markdown is the bane of my existence",
+            weight: 0,
           });
           addEdge({
             address: EdgeAddress.fromParts([
@@ -235,21 +249,7 @@ export class MarkovProcessGraph {
 
       {
         // Add seed-in edges
-        console.log("222");
         for (const node of wg.graph.nodes()) {
-          const sentinel = NodeAddress.fromParts([
-            "sourcecred",
-            "github",
-            "COMMENT",
-            "ISSUE",
-            "sourcecred",
-            "sourcecred",
-            "1004",
-            "437639471",
-          ]);
-          if (node.address === sentinel) {
-            console.log("SENTINELJk");
-          }
           addEdge({
             address: EdgeAddress.fromParts([
               "sourcecred",
@@ -266,15 +266,9 @@ export class MarkovProcessGraph {
 
         // Add seed-out edges
         {
-          const nwe = nodeWeightEvaluator(wg.weights);
-
           let totalNodeWeight = 0.0;
           const positiveNodeWeights: Map<NodeAddressT, number> = new Map();
-          for (const {address} of wg.graph.nodes()) {
-            const weight = nwe(address);
-            if (weight < 0) {
-              throw new Error(">:-(");
-            }
+          for (const {address, weight} of this._nodes.values()) {
             if (weight > 0) {
               totalNodeWeight += weight;
               positiveNodeWeights.set(address, weight);
@@ -307,7 +301,7 @@ export class MarkovProcessGraph {
             address: NodeAddressT,
             edgeTimestampMs: number
           ): NodeAddressT => {
-            if (!scoringAddresses.has(address)) {
+            if (!this._scoringAddresses.has(address)) {
               return address;
             }
             const epochEndIndex = sortedIndex(timeBoundaries, edgeTimestampMs);
@@ -383,6 +377,10 @@ export class MarkovProcessGraph {
         }
       }
     }
+  }
+
+  scoringAddresses(): Set<NodeAddressT> {
+    return new Set(this._scoringAddresses);
   }
 
   node(address: NodeAddressT): MarkovNode | null {
