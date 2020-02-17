@@ -70,59 +70,11 @@ export class TimelineApp extends React.Component<Props, State> {
       }
       case "SUCCESS": {
         const {timelineCred, pluginDeclarations} = loadResult;
-        const corePlugin: PluginDeclaration = {
-          name: "core",
-          nodePrefix: NodeAddress.fromParts(["sourcecred", "core"]),
-          edgePrefix: EdgeAddress.fromParts(["sourcecred", "core"]),
-          nodeTypes: [
-            {
-              name: "seed",
-              pluralName: "seeds",
-              prefix: NodeAddress.fromParts(["sourcecred", "core", "SEED"]),
-              defaultWeight: 0,
-              description: "seed",
-            },
-            {
-              name: "epoch",
-              pluralName: "epochs",
-              prefix: NodeAddress.fromParts(["sourcecred", "core", "EPOCH"]),
-              defaultWeight: 0,
-              description: "epoch",
-            },
-          ],
-          edgeTypes: [
-            {
-              forwardName: "epoch payout",
-              backwardName: "backward epoch payout",
-              prefix: EdgeAddress.fromParts([
-                "sourcecred",
-                "core",
-                "fibration",
-                "EPOCH_PAYOUT",
-              ]),
-              defaultWeight: {forwards: 0, backwards: 0},
-              description: "epoch payout",
-            },
-            {
-              forwardName: "webbing",
-              backwardName: "backward webbing",
-              prefix: EdgeAddress.fromParts([
-                "sourcecred",
-                "core",
-                "fibration",
-                "EPOCH_WEBBING",
-              ]),
-              defaultWeight: {forwards: 0, backwards: 0},
-              description: "epoch webbing",
-            },
-          ],
-          userTypes: [],
-        };
         return (
           <TimelineExplorer
             initialTimelineCred={timelineCred}
             projectId={this.props.projectId}
-            pluginDeclarations={[corePlugin, ...pluginDeclarations]}
+            pluginDeclarations={pluginDeclarations}
           />
         );
       }
@@ -163,7 +115,59 @@ export async function defaultLoader(
       fetchCred(),
       fetchPluginDeclarations(),
     ]);
-    return {type: "SUCCESS", timelineCred, pluginDeclarations};
+    const corePlugin: PluginDeclaration = {
+      name: "core",
+      nodePrefix: NodeAddress.fromParts(["sourcecred", "core"]),
+      edgePrefix: EdgeAddress.fromParts(["sourcecred", "core"]),
+      nodeTypes: [
+        {
+          name: "seed",
+          pluralName: "seeds",
+          prefix: NodeAddress.fromParts(["sourcecred", "core", "SEED"]),
+          defaultWeight: 0,
+          description: "seed",
+        },
+        {
+          name: "epoch",
+          pluralName: "epochs",
+          prefix: NodeAddress.fromParts(["sourcecred", "core", "EPOCH"]),
+          defaultWeight: 0,
+          description: "epoch",
+        },
+      ],
+      edgeTypes: [
+        {
+          forwardName: "epoch payout",
+          backwardName: "backward epoch payout",
+          prefix: EdgeAddress.fromParts([
+            "sourcecred",
+            "core",
+            "fibration",
+            "EPOCH_PAYOUT",
+          ]),
+          defaultWeight: {forwards: 0, backwards: 0},
+          description: "epoch payout",
+        },
+        {
+          forwardName: "webbing",
+          backwardName: "backward webbing",
+          prefix: EdgeAddress.fromParts([
+            "sourcecred",
+            "core",
+            "fibration",
+            "EPOCH_WEBBING",
+          ]),
+          defaultWeight: {forwards: 0, backwards: 0},
+          description: "epoch webbing",
+        },
+      ],
+      userTypes: [],
+    };
+    return {
+      type: "SUCCESS",
+      timelineCred,
+      pluginDeclarations: [corePlugin, ...pluginDeclarations],
+    };
   } catch (e) {
     console.error(e);
     return {type: "ERROR", error: e};
