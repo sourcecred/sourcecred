@@ -375,7 +375,9 @@ export class MarkovProcessGraph {
                 address: outEdge.address,
                 reversed: outEdge.reversed,
                 src: outEdge.src,
-                dst: outEdge.dst,
+                // stopship this looks right but is a bit clunky to only
+                // rewrite dst here and src above
+                dst: rewriteEpochNode(outEdge.dst, outEdge.timestamp),
                 transitionProbability: pr,
               });
             }
