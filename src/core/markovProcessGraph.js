@@ -146,11 +146,22 @@ export class MarkovProcessGraph {
         });
       }
 
+      const scoringAddresses = new Set();
+      for (const {address} of wg.graph.nodes()) {
+        if (
+          fibration.what.some((prefix) =>
+            NodeAddress.hasPrefix(address, prefix)
+          )
+        ) {
+          scoringAddresses.add(address);
+        }
+      }
+
       // STOPSHIP: Preprocess `timeBoundaries` to add -inf, +inf and
       // validate order/uniqueness.
 
       // Add epoch nodes, epoch-out edges, and epoch webbing
-      for (const scoringAddress of fibration.what) {
+      for (const scoringAddress of scoringAddresses) {
         let lastBoundary = null;
         for (const boundary of fibration.timeBoundaries) {
           const thisEpoch = epochNodeAddressToRaw({
@@ -207,9 +218,25 @@ export class MarkovProcessGraph {
           }
           lastBoundary = boundary;
         }
+      }
 
+      {
         // Add seed-in edges
+        console.log("222");
         for (const node of wg.graph.nodes()) {
+          const sentinel = NodeAddress.fromParts([
+            "sourcecred",
+            "github",
+            "COMMENT",
+            "ISSUE",
+            "sourcecred",
+            "sourcecred",
+            "1004",
+            "437639471",
+          ]);
+          if (node.address === sentinel) {
+            console.log("SENTINELJk");
+          }
           addEdge({
             address: EdgeAddress.fromParts([
               "sourcecred",
@@ -256,17 +283,6 @@ export class MarkovProcessGraph {
               dst: address,
               transitionProbability: weight / totalNodeWeight,
             });
-          }
-        }
-
-        const scoringAddresses = new Set();
-        for (const {address} of wg.graph.nodes()) {
-          if (
-            fibration.what.some((prefix) =>
-              NodeAddress.hasPrefix(address, prefix)
-            )
-          ) {
-            scoringAddresses.add(address);
           }
         }
 
@@ -400,7 +416,11 @@ export class MarkovProcessGraph {
         // such that `neighbor[j] === k` for a given `k` when there are
         // parallel edges in the source graph. This should just work
         // down the stack..
-        neighbor[i] = NullUtil.get(nodeIndex.get(e.dst));
+        const result = nodeIndex.get(e.dst);
+        if (result == null) {
+          throw new Error(e.dst);
+        }
+        neighbor[i] = result;
         weight[i] = e.transitionProbability;
       });
       return {neighbor, weight};
