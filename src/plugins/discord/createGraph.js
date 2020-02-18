@@ -173,11 +173,11 @@ function reactsToEdge(reaction: Model.Reaction, message: Model.Message): Edge {
 function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
   const address: EdgeAddressT = EdgeAddress.append(
     mentionsEdgeType.prefix,
-    member.user.bot ? "bot" : "user",
-    member.user.id,
     message.channelId,
     message.authorId,
-    message.id
+    message.id,
+    member.user.bot ? "bot" : "user",
+    member.user.id
   );
   return {
     address,

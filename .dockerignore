@@ -2,3 +2,5 @@ data
 .token
 node_modules
 bin
+.circleci
+.projects
