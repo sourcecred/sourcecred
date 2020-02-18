@@ -67,12 +67,27 @@ export type EpochNodeAddress = {|
   +epochStart: TimestampMs,
 |};
 
-function epochNodeAddressToRaw(addr: EpochNodeAddress) {
+export function epochNodeAddressToRaw(addr: EpochNodeAddress): NodeAddressT {
   return NodeAddress.append(
     EPOCH_PREFIX,
     String(addr.epochStart),
     ...NodeAddress.toParts(addr.owner)
   );
+}
+
+export function epochNodeAddressFromRaw(addr: NodeAddressT): EpochNodeAddress {
+  if (!NodeAddress.hasPrefix(addr, EPOCH_PREFIX)) {
+    throw new Error("not epochNodeAddress");
+  }
+  const epochPrefixLength = NodeAddress.toParts(EPOCH_PREFIX).length;
+  const parts = NodeAddress.toParts(addr);
+  const epochStart = +parts[epochPrefixLength];
+  const owner = NodeAddress.fromParts(parts.slice(epochPrefixLength + 1));
+  return {
+    type: "EPOCH_NODE",
+    owner,
+    epochStart,
+  };
 }
 
 // STOPSHIP document these parameters
