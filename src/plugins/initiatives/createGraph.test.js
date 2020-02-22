@@ -6,10 +6,11 @@ import {
   type EdgeAddressT,
   type NodeAddressT,
 } from "../../core/graph";
+import * as Weights from "../../core/weights";
 import type {ReferenceDetector, URL} from "../../core/references";
 import type {Initiative, InitiativeRepository} from "./initiative";
 import {createId, addressFromId} from "./initiative";
-import {createGraph} from "./createGraph";
+import {createWeightedGraph, initiativeWeight} from "./createGraph";
 import {
   initiativeNodeType,
   dependsOnEdgeType,
@@ -17,6 +18,20 @@ import {
   contributesToEdgeType,
   championsEdgeType,
 } from "./declaration";
+
+function _createInitiative(overrides?: $Shape<Initiative>): Initiative {
+  return {
+    id: createId("UNSET_SUBTYPE", "42"),
+    title: "Unset test initiative",
+    timestampMs: 123,
+    completed: false,
+    dependencies: [],
+    references: [],
+    contributions: [],
+    champions: [],
+    ...overrides,
+  };
+}
 
 class MockInitiativeRepository implements InitiativeRepository {
   _counter: number;
@@ -31,17 +46,12 @@ class MockInitiativeRepository implements InitiativeRepository {
     const num = this._counter;
     this._counter++;
 
-    const initiative: Initiative = {
+    const initiative = _createInitiative({
       id: createId("TEST_SUBTYPE", String(num)),
       title: `Example Initiative ${num}`,
       timestampMs: 400 + num,
-      completed: false,
-      dependencies: [],
-      references: [],
-      contributions: [],
-      champions: [],
       ...shape,
-    };
+    });
 
     this._initiatives.push(initiative);
     return initiative;
@@ -107,7 +117,55 @@ const contributionEdgeAddress = edgeAddress(contributesToEdgeType.prefix);
 const championEdgeAddress = edgeAddress(championsEdgeType.prefix);
 
 describe("plugins/initiatives/createGraph", () => {
-  describe("createGraph", () => {
+  describe("initiativeWeight", () => {
+    it("should be falsy when the initiative has no weight set", () => {
+      // Given
+      const initiative = _createInitiative({
+        id: createId("TEST_INITIATIVE_WEIGHTS", "41"),
+        title: "No weight set",
+      });
+
+      // When
+      const maybeWeight = initiativeWeight(initiative);
+
+      // Then
+      expect(maybeWeight).toBeFalsy();
+    });
+
+    it("should use the first weight when not completed", () => {
+      // Given
+      const initiative = _createInitiative({
+        id: createId("TEST_INITIATIVE_WEIGHTS", "41"),
+        title: "Weights set, not completed",
+        completed: false,
+        weight: {incomplete: 222, complete: 333},
+      });
+
+      // When
+      const maybeWeight = initiativeWeight(initiative);
+
+      // Then
+      expect(maybeWeight).toEqual(222);
+    });
+
+    it("should use the second weight when completed", () => {
+      // Given
+      const initiative = _createInitiative({
+        id: createId("TEST_INITIATIVE_WEIGHTS", "41"),
+        title: "Weights set, completed",
+        completed: true,
+        weight: {incomplete: 222, complete: 333},
+      });
+
+      // When
+      const maybeWeight = initiativeWeight(initiative);
+
+      // Then
+      expect(maybeWeight).toEqual(333);
+    });
+  });
+
+  describe("createWeightedGraph", () => {
     it("should add initiative nodes to the graph", () => {
       // Given
       const {repo, refs} = example();
@@ -115,7 +173,7 @@ describe("plugins/initiatives/createGraph", () => {
       repo.addInitiative();
 
       // When
-      const graph = createGraph(repo, refs);
+      const {graph, weights} = createWeightedGraph(repo, refs);
 
       // Then
       const nodes = Array.from(
@@ -133,6 +191,25 @@ describe("plugins/initiatives/createGraph", () => {
           address: testInitiativeAddress(2),
         },
       ]);
+      expect(weights).toEqual(Weights.empty());
+    });
+
+    it("should add node weights for initiatives with weights", () => {
+      // Given
+      const {repo, refs} = example();
+      repo.addInitiative({weight: {incomplete: 360, complete: 420}});
+      repo.addInitiative({weight: {incomplete: 42, complete: 69}});
+      repo.addInitiative({
+        weight: {incomplete: 42, complete: 69},
+        completed: true,
+      });
+
+      // When
+      const {weights} = createWeightedGraph(repo, refs);
+
+      // Then
+      expect(weights.edgeWeights.size).toEqual(0);
+      expect([...weights.nodeWeights.values()]).toEqual([360, 42, 69]);
     });
 
     it("should add initiative file urls to the description", () => {
@@ -145,7 +222,7 @@ describe("plugins/initiatives/createGraph", () => {
       repo.addInitiative({id});
 
       // When
-      const graph = createGraph(repo, refs);
+      const {graph} = createWeightedGraph(repo, refs);
 
       // Then
       const node = graph.node(addres);
@@ -163,7 +240,7 @@ describe("plugins/initiatives/createGraph", () => {
         });
 
         // When
-        createGraph(repo, refs);
+        createWeightedGraph(repo, refs);
 
         // Then
         expect(refs.addressFromUrl).toHaveBeenCalledWith(
@@ -179,7 +256,7 @@ describe("plugins/initiatives/createGraph", () => {
         });
 
         // When
-        createGraph(repo, refs);
+        createWeightedGraph(repo, refs);
 
         // Then
         expect(refs.addressFromUrl).toHaveBeenCalledWith(
@@ -195,7 +272,7 @@ describe("plugins/initiatives/createGraph", () => {
         });
 
         // When
-        createGraph(repo, refs);
+        createWeightedGraph(repo, refs);
 
         // Then
         expect(refs.addressFromUrl).toHaveBeenCalledWith(
@@ -211,7 +288,7 @@ describe("plugins/initiatives/createGraph", () => {
         });
 
         // When
-        createGraph(repo, refs);
+        createWeightedGraph(repo, refs);
 
         // Then
         expect(refs.addressFromUrl).toHaveBeenCalledWith(
@@ -230,7 +307,7 @@ describe("plugins/initiatives/createGraph", () => {
         });
 
         // When
-        const graph = createGraph(repo, refs);
+        const {graph} = createWeightedGraph(repo, refs);
 
         // Then
         const dependencies = Array.from(
@@ -261,7 +338,7 @@ describe("plugins/initiatives/createGraph", () => {
         });
 
         // When
-        const graph = createGraph(repo, refs);
+        const {graph} = createWeightedGraph(repo, refs);
 
         // Then
         const references = Array.from(
@@ -292,7 +369,7 @@ describe("plugins/initiatives/createGraph", () => {
         });
 
         // When
-        const graph = createGraph(repo, refs);
+        const {graph} = createWeightedGraph(repo, refs);
 
         // Then
         const contributions = Array.from(
@@ -323,7 +400,7 @@ describe("plugins/initiatives/createGraph", () => {
         });
 
         // When
-        const graph = createGraph(repo, refs);
+        const {graph} = createWeightedGraph(repo, refs);
 
         // Then
         const champions = Array.from(
