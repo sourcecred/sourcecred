@@ -1,6 +1,10 @@
 // @flow
 
 import {type CacheProvider} from "./cache";
+import {
+  type ReferenceDetector,
+  CascadingReferenceDetector,
+} from "../core/references";
 import * as WeightedGraph from "../core/weightedGraph";
 import {node as graphNode} from "../core/graphTestUtil";
 import {createProject} from "../core/project";
@@ -23,7 +27,9 @@ const mockGraphs = {
 
 const fakes = {
   githubDeclaration: ({fake: "githubDeclaration"}: any),
+  githubReferences: ({fake: "githubReferences"}: any),
   discourseDeclaration: ({fake: "discourseDeclaration"}: any),
+  discourseReferences: ({fake: "discourseReferences"}: any),
   identityDeclaration: ({fake: "identityDeclaration"}: any),
 };
 
@@ -31,15 +37,21 @@ const mockCacheProvider = (): CacheProvider => ({
   database: jest.fn(),
 });
 
+const mockReferenceDetector = (): ReferenceDetector => ({
+  addressFromUrl: jest.fn(),
+});
+
 const mockPluginLoaders = () => ({
   github: {
     declaration: jest.fn().mockReturnValue(fakes.githubDeclaration),
     updateMirror: jest.fn(),
+    referenceDetector: jest.fn().mockResolvedValue(fakes.githubReferences),
     createGraph: jest.fn().mockResolvedValue(mockGraphs.github),
   },
   discourse: {
     declaration: jest.fn().mockReturnValue(fakes.discourseDeclaration),
     updateMirror: jest.fn(),
+    referenceDetector: jest.fn().mockResolvedValue(fakes.discourseReferences),
     createGraph: jest.fn().mockResolvedValue(mockGraphs.discourse),
   },
   identity: {
@@ -185,6 +197,7 @@ describe("src/backend/pluginLoaders", () => {
   describe("createPluginGraphs", () => {
     it("should create discourse graph", async () => {
       // Given
+      const references = mockReferenceDetector();
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = null;
@@ -198,7 +211,8 @@ describe("src/backend/pluginLoaders", () => {
       const pluginGraphs = await PluginLoaders.createPluginGraphs(
         loaders,
         {githubToken},
-        cachedProject
+        cachedProject,
+        references
       );
 
       // Then
@@ -216,6 +230,7 @@ describe("src/backend/pluginLoaders", () => {
 
     it("fail when missing GithubToken", async () => {
       // Given
+      const references = mockReferenceDetector();
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = null;
@@ -229,7 +244,8 @@ describe("src/backend/pluginLoaders", () => {
       const p = PluginLoaders.createPluginGraphs(
         loaders,
         {githubToken},
-        cachedProject
+        cachedProject,
+        references
       );
 
       // Then
@@ -240,6 +256,7 @@ describe("src/backend/pluginLoaders", () => {
 
     it("should create github graph", async () => {
       // Given
+      const references = mockReferenceDetector();
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = exampleGithubToken;
@@ -253,7 +270,8 @@ describe("src/backend/pluginLoaders", () => {
       const pluginGraphs = await PluginLoaders.createPluginGraphs(
         loaders,
         {githubToken},
-        cachedProject
+        cachedProject,
+        references
       );
 
       // Then
@@ -268,6 +286,35 @@ describe("src/backend/pluginLoaders", () => {
         githubToken,
         cache
       );
+    });
+  });
+
+  describe("createReferenceDetector", () => {
+    it("should create a CascadingReferenceDetector", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const githubToken = exampleGithubToken;
+      const project = createProject({
+        id: "has-github-and-discourse",
+        discourseServer: {serverUrl: "http://foo.bar"},
+        repoIds: [exampleRepoId],
+      });
+      const cachedProject = ({project, cache}: any);
+
+      // When
+      const references = await PluginLoaders.createReferenceDetector(
+        loaders,
+        {githubToken},
+        cachedProject
+      );
+
+      // Then
+      expect(references).toBeInstanceOf(CascadingReferenceDetector);
+      expect(((references: any): CascadingReferenceDetector).refs).toEqual([
+        fakes.githubReferences,
+        fakes.discourseReferences,
+      ]);
     });
   });
 

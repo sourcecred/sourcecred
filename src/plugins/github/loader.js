@@ -3,6 +3,7 @@
 import {TaskReporter} from "../../util/taskReporter";
 import {type CacheProvider} from "../../backend/cache";
 import {type WeightedGraph} from "../../core/weightedGraph";
+import {type ReferenceDetector} from "../../core/references";
 import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {type GithubToken} from "./token";
 import {Graph} from "../../core/graph";
@@ -15,6 +16,7 @@ import {
   default as fetchGithubRepo,
   fetchGithubRepoFromCache,
 } from "./fetchGithubRepo";
+import {fromRelationalViews as referenceDetectorFromRelationalViews} from "./referenceDetector";
 
 export interface Loader {
   declaration(): PluginDeclaration;
@@ -24,6 +26,11 @@ export interface Loader {
     cache: CacheProvider,
     reporter: TaskReporter
   ): Promise<void>;
+  referenceDetector(
+    repoIds: $ReadOnlyArray<RepoId>,
+    token: GithubToken,
+    cache: CacheProvider
+  ): Promise<ReferenceDetector>;
   createGraph(
     repoIds: $ReadOnlyArray<RepoId>,
     token: GithubToken,
@@ -33,6 +40,7 @@ export interface Loader {
 
 export default ({
   declaration: () => declaration,
+  referenceDetector,
   updateMirror,
   createGraph,
 }: Loader);
@@ -52,6 +60,21 @@ export async function updateMirror(
     });
     reporter.finish(taskId);
   }
+}
+
+export async function referenceDetector(
+  repoIds: $ReadOnlyArray<RepoId>,
+  token: GithubToken,
+  cache: CacheProvider
+): Promise<ReferenceDetector> {
+  const rvs = [];
+  for (const repoId of repoIds) {
+    const repo = await fetchGithubRepoFromCache(repoId, {token, cache});
+    const rv = new RelationalView();
+    rv.addRepository(repo);
+    rvs.push(rv);
+  }
+  return referenceDetectorFromRelationalViews(rvs);
 }
 
 export async function createGraph(
