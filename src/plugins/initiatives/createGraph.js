@@ -18,16 +18,20 @@ import {
   contributesToEdgeType,
   championsEdgeType,
 } from "./declaration";
+import {initiativeFileURL} from "./initiativesDirectory";
 
 function initiativeAddress(initiative: Initiative): NodeAddressT {
   return addressFromId(initiative.id);
 }
 
 function initiativeNode(initiative: Initiative): Node {
+  const address = initiativeAddress(initiative);
+  const url = initiativeFileURL(address);
   return {
-    address: initiativeAddress(initiative),
+    address,
     timestampMs: initiative.timestampMs,
-    description: initiative.title,
+    description:
+      url == null ? initiative.title : `[${initiative.title}](${url})`,
   };
 }
 
