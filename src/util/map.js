@@ -21,7 +21,7 @@ export function toObject<K: string, V, InK: K, InV: V>(
  * iteration order, as returned by `Object.keys`.
  */
 export function fromObject<K, V, InK: K & string, InV: V>(object: {
-  [InK]: InV,
+  +[InK]: InV,
 }): Map<K, V> {
   const result = new Map();
   const keys = (((Object.keys(object): string[]): any): InK[]);

@@ -8,7 +8,7 @@ import {
 } from "../../core/graph";
 import type {ReferenceDetector, URL} from "../../core/references";
 import type {Initiative, InitiativeRepository} from "./initiative";
-import {createId} from "./initiative";
+import {createId, addressFromId} from "./initiative";
 import {createGraph} from "./createGraph";
 import {
   initiativeNodeType,
@@ -133,6 +133,25 @@ describe("plugins/initiatives/createGraph", () => {
           address: testInitiativeAddress(2),
         },
       ]);
+    });
+
+    it("should add initiative file urls to the description", () => {
+      // Given
+      const {repo, refs} = example();
+      const remoteUrl = "http://foo.bar/dir";
+      const fileName = "sample.json";
+      const id = createId("INITIATIVE_FILE", remoteUrl, fileName);
+      const addres = addressFromId(id);
+      repo.addInitiative({id});
+
+      // When
+      const graph = createGraph(repo, refs);
+
+      // Then
+      const node = graph.node(addres);
+      expect(node).toMatchObject({
+        description: `[Example Initiative 1](${remoteUrl}/${fileName})`,
+      });
     });
 
     describe("reference detection attempts", () => {
