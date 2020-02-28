@@ -71,6 +71,10 @@ describe("util/map", () => {
       const o: {|[string]: number|} = ({a: 1}: any);
       const _: Map<string, number> = MapUtil.fromObject(o);
     });
+    it("can accept a read-only object", () => {
+      const o: {+[string]: number} = {a: 1};
+      const _: Map<string, number> = MapUtil.fromObject(o);
+    });
     it("statically rejects a map with keys not a subtype of string", () => {
       const input: {[number]: string} = {};
       input[12] = "not okay";
