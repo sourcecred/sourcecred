@@ -9,6 +9,7 @@ import {LoadContext} from "./loadContext";
 
 const fakes = {
   declarations: ({fake: "declarations"}: any),
+  referenceDetector: ({fake: "referenceDetector"}: any),
   pluginGraphs: ({fake: "pluginGraphs"}: any),
   contractedGraph: ({fake: "contractedGraph"}: any),
   weightedGraph: ({fake: "weightedGraph"}: any),
@@ -43,6 +44,10 @@ const mockProxyMethods = (
     updateMirror: spyBuilder
       .proxyMethod("updateMirror")
       .mockResolvedValueOnce({project, cache}),
+
+    createReferenceDetector: spyBuilder
+      .proxyMethod("createReferenceDetector")
+      .mockResolvedValueOnce(fakes.referenceDetector),
 
     createPluginGraphs: spyBuilder
       .proxyMethod("createPluginGraphs")
@@ -98,6 +103,7 @@ describe("src/backend/loadContext", () => {
           // Methods
           _declarations: expect.anything(),
           _updateMirror: expect.anything(),
+          _createReferenceDetector: expect.anything(),
           _createPluginGraphs: expect.anything(),
           _contractPluginGraphs: expect.anything(),
           _overrideWeights: expect.anything(),
@@ -140,10 +146,16 @@ describe("src/backend/loadContext", () => {
           expectedEnv,
           project
         );
-        expect(spies.createPluginGraphs).toBeCalledWith(
+        expect(spies.createReferenceDetector).toBeCalledWith(
           loadContext._pluginLoaders,
           expectedEnv,
           cachedProject
+        );
+        expect(spies.createPluginGraphs).toBeCalledWith(
+          loadContext._pluginLoaders,
+          expectedEnv,
+          cachedProject,
+          fakes.referenceDetector
         );
         expect(spies.contractPluginGraphs).toBeCalledWith(
           loadContext._pluginLoaders,
