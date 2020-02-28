@@ -13,10 +13,13 @@ import {
   sourcecredDirectory,
   githubToken,
   loadWeights,
+  initiativesDirectory,
 } from "./common";
 
 describe("cli/common", () => {
   const exampleGithubToken = validateToken("0".repeat(40));
+  const exampleInitiativesDirectory = path.join(__dirname, "initiatives");
+
   beforeEach(() => {
     jest
       .spyOn(require("os"), "tmpdir")
@@ -59,6 +62,17 @@ describe("cli/common", () => {
     it("returns `null` if the environment variable is not set", () => {
       delete process.env.SOURCECRED_GITHUB_TOKEN;
       expect(githubToken()).toBe(null);
+    });
+  });
+
+  describe("initiativesDirectory", () => {
+    it("uses the environment variable when available", () => {
+      process.env.SOURCECRED_INITIATIVES_DIRECTORY = exampleInitiativesDirectory;
+      expect(initiativesDirectory()).toEqual(exampleInitiativesDirectory);
+    });
+    it("returns `null` if the environment variable is not set", () => {
+      delete process.env.SOURCECRED_INITIATIVES_DIRECTORY;
+      expect(initiativesDirectory()).toBe(null);
     });
   });
 

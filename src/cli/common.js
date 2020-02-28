@@ -21,6 +21,10 @@ export function sourcecredDirectory(): string {
   return env != null ? env : defaultSourcecredDirectory();
 }
 
+export function initiativesDirectory(): string | null {
+  return process.env.SOURCECRED_INITIATIVES_DIRECTORY || null;
+}
+
 export function githubToken(): ?GithubToken {
   const envToken = process.env.SOURCECRED_GITHUB_TOKEN;
   if (envToken == null || !envToken.length) {

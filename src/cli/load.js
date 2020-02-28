@@ -57,11 +57,17 @@ function usage(print: (string) => void): void {
             public repositories, no special permissions are required.
             For private repositories, the 'repo' scope is required.
 
+        SOURCECRED_INITIATIVES_DIRECTORY
+            Local path to a directory containing json files with
+            initiative declarations. Required when using the Initiatives
+            plugin; ignored otherwise.
+
         SOURCECRED_DIRECTORY
             Directory owned by SourceCred, in which data, caches,
             registries, etc. are stored. Optional: defaults to a
             directory 'sourcecred' under your OS's temporary directory;
             namely:
+
                 ${Common.defaultSourcecredDirectory()}
     `.trimRight()
   );
@@ -112,6 +118,7 @@ const loadCommand: Command = async (args, std) => {
     weights = await loadWeightOverrides(weightsPath);
   }
 
+  const initiativesDirectory = Common.initiativesDirectory();
   const githubToken = Common.githubToken();
   if (githubToken == null) {
     return die(std, "SOURCECRED_GITHUB_TOKEN not set");
@@ -142,6 +149,7 @@ const loadCommand: Command = async (args, std) => {
       plugins,
       sourcecredDirectory: Common.sourcecredDirectory(),
       githubToken,
+      initiativesDirectory,
     };
   });
   // Deliberately load in serial because GitHub requests that their API not

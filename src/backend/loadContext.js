@@ -28,6 +28,7 @@ export type LoadContextOptions = {|
   +cache: CacheProvider,
   +reporter: TaskReporter,
   +githubToken: ?GithubToken,
+  +initiativesDirectory: ?string,
 |};
 
 type OptionalLoadArguments = {|

@@ -14,6 +14,7 @@ const fakes = {
   contractedGraph: ({fake: "contractedGraph"}: any),
   weightedGraph: ({fake: "weightedGraph"}: any),
   timelineCred: ({fake: "timelineCred"}: any),
+  initiativesDirectory: ({fake: "initiativesDirectory"}: any),
 };
 
 const mockCacheProvider = (): CacheProvider => ({
@@ -71,6 +72,7 @@ describe("src/backend/loadContext", () => {
     const githubToken = validateToken("0".repeat(40));
     const project = createProject({id: "testing-project"});
     const params = {alpha: 0.123};
+    const initiativesDirectory = fakes.initiativesDirectory;
 
     describe("constructor", () => {
       /**
@@ -85,7 +87,12 @@ describe("src/backend/loadContext", () => {
         const reporter = new TestTaskReporter();
 
         // When
-        const loadContext = new LoadContext({cache, githubToken, reporter});
+        const loadContext = new LoadContext({
+          cache,
+          githubToken,
+          reporter,
+          initiativesDirectory,
+        });
 
         // Then
         expect(loadContext).toMatchObject({
@@ -111,7 +118,12 @@ describe("src/backend/loadContext", () => {
         const cache = mockCacheProvider();
         const reporter = new TestTaskReporter();
         const weightsOverrides = Weights.empty();
-        const loadContext = new LoadContext({cache, githubToken, reporter});
+        const loadContext = new LoadContext({
+          cache,
+          githubToken,
+          reporter,
+          initiativesDirectory,
+        });
         const spies = mockProxyMethods(loadContext, project, cache);
 
         // When
@@ -120,6 +132,7 @@ describe("src/backend/loadContext", () => {
         // Then
         const cachedProject = {project, cache};
         const expectedEnv = {
+          initiativesDirectory,
           githubToken,
           reporter,
           cache,
@@ -167,7 +180,12 @@ describe("src/backend/loadContext", () => {
         // Given
         const cache = mockCacheProvider();
         const reporter = new TestTaskReporter();
-        const loadContext = new LoadContext({cache, githubToken, reporter});
+        const loadContext = new LoadContext({
+          cache,
+          githubToken,
+          reporter,
+          initiativesDirectory,
+        });
         const spies = mockProxyMethods(loadContext, project, cache);
 
         // When
@@ -175,6 +193,7 @@ describe("src/backend/loadContext", () => {
 
         // Then
         const expectedEnv = {
+          initiativesDirectory,
           githubToken,
           reporter,
           cache,
@@ -197,7 +216,12 @@ describe("src/backend/loadContext", () => {
         const cache = mockCacheProvider();
         const reporter = new TestTaskReporter();
         const weightsOverrides = Weights.empty();
-        const loadContext = new LoadContext({cache, githubToken, reporter});
+        const loadContext = new LoadContext({
+          cache,
+          githubToken,
+          reporter,
+          initiativesDirectory,
+        });
         mockProxyMethods(loadContext, project, cache);
 
         // When
