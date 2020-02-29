@@ -13,6 +13,7 @@ import {
 } from "../../core/references";
 import {
   type Initiative,
+  type InitiativeWeight,
   type InitiativeId,
   type InitiativeRepository,
   type URL,
@@ -82,6 +83,7 @@ export async function loadDirectory(
 export type InitiativeFile = {|
   +title: string,
   +timestampIso: ISOTimestamp,
+  +weight: InitiativeWeight,
   +completed: boolean,
   +dependencies: $ReadOnlyArray<URL>,
   +references: $ReadOnlyArray<URL>,
