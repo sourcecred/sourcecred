@@ -26,6 +26,14 @@ describe("graphql/generateFlowTypes", () => {
           color: s.primitive(s.nonNull("Color")),
           designer: s.node("Actor"),
           painters: s.connection("Actor"),
+          client: s.node(
+            "Human",
+            s.unfaithful(["Human", "TalentedChimpanzee"])
+          ),
+          coClients: s.connection(
+            "Human",
+            s.unfaithful(["Human", "TalentedChimpanzee"])
+          ),
           referrer: s.node("PaintJob"),
           relatedWork: s.connection("PaintJob"),
           details: s.nested({
@@ -33,6 +41,10 @@ describe("graphql/generateFlowTypes", () => {
             description: s.primitive(s.nullable("String")),
             oldColor: s.primitive(s.nonNull("Color")),
             oldPainter: s.node("Actor"),
+            oldClient: s.node(
+              "Human",
+              s.unfaithful(["Human", "TalentedChimpanzee"])
+            ),
           }),
         }),
         Actor: s.union(["Human", "TalentedChimpanzee"]),
@@ -46,6 +58,10 @@ describe("graphql/generateFlowTypes", () => {
         }),
         EmptyEnum: s.enum([]),
         EmptyUnion: s.union([]),
+        EmptyUnfaithfulSet: s.object({
+          id: s.id(),
+          foo: s.node("Human", s.unfaithful([])),
+        }),
       });
       expect(run(schema)).toMatchSnapshot();
     });
@@ -124,6 +140,27 @@ describe("graphql/generateFlowTypes", () => {
             x: s.primitive(),
           }),
         }),
+      });
+      expect(run(s1)).toEqual(run(s2));
+    });
+
+    it("is invariant with respect to unfaithful typename order", () => {
+      const s = Schema;
+      const s1 = s.schema({
+        O: s.object({
+          id: s.id(),
+          x: s.node("A", s.unfaithful(["A", "B"])),
+        }),
+        A: s.object({id: s.id()}),
+        B: s.object({id: s.id()}),
+      });
+      const s2 = s.schema({
+        O: s.object({
+          id: s.id(),
+          x: s.node("A", s.unfaithful(["B", "A"])),
+        }),
+        A: s.object({id: s.id()}),
+        B: s.object({id: s.id()}),
       });
       expect(run(s1)).toEqual(run(s2));
     });

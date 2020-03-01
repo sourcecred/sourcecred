@@ -25,6 +25,12 @@ export type EmptyEnum = empty;
 
 export const EmptyEnum$Values: {||} = deepFreeze({});
 
+export type EmptyUnfaithfulSet = {|
+  +__typename: \\"EmptyUnfaithfulSet\\",
+  +foo: null | empty,
+  +id: string,
+|};
+
 export type EmptyUnion = empty;
 
 export type Human = {|
@@ -35,6 +41,8 @@ export type Human = {|
 
 export type PaintJob = {|
   +__typename: \\"PaintJob\\",
+  +client: null | Human | TalentedChimpanzee,
+  +coClients: $ReadOnlyArray<null | Human | TalentedChimpanzee>,
   +color: Color,
   +completed: null | DateTime,
   +cost: Dollars,
@@ -42,6 +50,7 @@ export type PaintJob = {|
   +details: null | {|
     +description: null | String,
     +moreMetadata: mixed,
+    +oldClient: null | Human | TalentedChimpanzee,
     +oldColor: Color,
     +oldPainter: null | Actor,
   |},

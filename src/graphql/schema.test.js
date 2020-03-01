@@ -26,7 +26,7 @@ describe("graphql/schema", () => {
         oid: s.primitive(),
         author: /* GitActor */ s.nested({
           date: s.primitive(s.nonNull("DateTime")),
-          user: s.node("User"),
+          user: s.node("User", s.unfaithful(["User", "Bot"])),
         }),
       }),
       IssueComment: s.object({
@@ -249,6 +249,48 @@ describe("graphql/schema", () => {
       );
     });
 
+    it("disallows node fidelities with non-object types", () => {
+      const s = Schema;
+      const types = {
+        Color: s.enum(["RED", "GREEN", "BLUE"]),
+        O: s.object({id: s.id(), foo: s.node("O", s.unfaithful(["Color"]))}),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'unfaithful typenames list of field "O"/"foo" has ' +
+          'invalid type "Color" of kind "ENUM"'
+      );
+    });
+    it("disallows connection fidelities with non-object types", () => {
+      const s = Schema;
+      const types = {
+        Color: s.enum(["RED", "GREEN", "BLUE"]),
+        O: s.object({
+          id: s.id(),
+          foo: s.connection("O", s.unfaithful(["Color"])),
+        }),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'unfaithful typenames list of field "O"/"foo" has ' +
+          'invalid type "Color" of kind "ENUM"'
+      );
+    });
+    it("disallows nest-node fidelities with non-object types", () => {
+      const s = Schema;
+      const types = {
+        Color: s.enum(["RED", "GREEN", "BLUE"]),
+        O: s.object({
+          id: s.id(),
+          foo: s.nested({
+            bar: s.node("O", s.unfaithful(["Color"])),
+          }),
+        }),
+      };
+      expect(() => Schema.schema(types)).toThrowError(
+        'unfaithful typenames list of field "O"/"foo"/"bar" has ' +
+          'invalid type "Color" of kind "ENUM"'
+      );
+    });
+
     it("disallows unions with unknown clauses", () => {
       const s = Schema;
       const types = {
@@ -325,6 +367,25 @@ describe("graphql/schema", () => {
     });
     it("is invariant with respect to clause order", () => {
       expect(s.union(["One", "Two"])).toEqual(s.union(["Two", "One"]));
+    });
+  });
+
+  describe("faithful", () => {
+    it("creates a datum", () => {
+      expect(Schema.faithful()).toEqual({type: "FAITHFUL"});
+    });
+  });
+  describe("unfaithful", () => {
+    it("creates a datum", () => {
+      expect(Schema.unfaithful(["User", "Bot"])).toEqual({
+        type: "UNFAITHFUL",
+        actualTypenames: {User: true, Bot: true},
+      });
+    });
+    it("is invariant with respect to field order", () => {
+      const a = Schema.unfaithful(["User", "Bot"]);
+      const b = Schema.unfaithful(["Bot", "User"]);
+      expect(a).toEqual(b);
     });
   });
 });

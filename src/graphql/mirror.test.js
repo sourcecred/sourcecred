@@ -13,6 +13,8 @@ import {
   _inTransaction,
   _makeSingleUpdateFunction,
   Mirror,
+  type _OwnDataUpdateResult,
+  type _TypenamesUpdateResult,
 } from "./mirror";
 import stringify from "json-stable-stringify";
 
@@ -75,14 +77,21 @@ describe("graphql/mirror", () => {
       Reaction: s.object({
         id: s.id(),
         content: s.primitive(s.nonNull("ReactionContent")),
-        user: s.node("User"),
+        user: s.node("User", s.unfaithful(["User", "Organization"])),
+      }),
+      MultiAuthorReaction: s.object({
+        // Not a real GitHub entity; used to exhibit an unfaithful
+        // connection field.
+        id: s.id(),
+        content: s.primitive(s.nonNull("ReactionContent")),
+        users: s.connection("User", s.unfaithful(["User", "Organization"])),
       }),
       Commit: s.object({
         id: s.id(),
         oid: s.primitive(),
         author: /* GitActor */ s.nested({
           date: s.primitive(s.nonNull("Date")),
-          user: s.node("User"),
+          user: s.node("User", s.unfaithful(["User", "Bot"])),
         }),
       }),
       IssueTimelineItem: s.union(issueTimelineItemClauses()),
@@ -252,6 +261,17 @@ describe("graphql/mirror", () => {
     });
 
     describe("registerObject", () => {
+      function countFields(db) {
+        const stmt = db.prepare(
+          dedent`\
+            SELECT
+                (SELECT COUNT(1) FROM primitives) AS primitives,
+                (SELECT COUNT(1) FROM links) AS links,
+                (SELECT COUNT(1) FROM connections) AS connections
+          `
+        );
+        return stmt.get();
+      }
       it("adds an object and its connections, links, and primitives", () => {
         const db = new Database(":memory:");
         const schema = buildGithubSchema();
@@ -353,6 +373,60 @@ describe("graphql/mirror", () => {
             .pluck()
             .get()
         ).toBe(0);
+      });
+      it("upgrades an object's type from unknown to known", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const objectId = "issue:#1";
+        mirror.registerObject({typename: null, id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 0,
+          links: 0,
+          connections: 0,
+        });
+        mirror.registerObject({typename: "Issue", id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 2,
+          links: 2,
+          connections: 2,
+        });
+      });
+      it("doesn't touch an existing object with no typename", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const objectId = "issue:#1";
+        mirror.registerObject({typename: null, id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 0,
+          links: 0,
+          connections: 0,
+        });
+        mirror.registerObject({typename: null, id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 0,
+          links: 0,
+          connections: 0,
+        });
+      });
+      it("doesn't touch an object whose typename is known but not provided", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const objectId = "issue:#1";
+        mirror.registerObject({typename: "Issue", id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 2,
+          links: 2,
+          connections: 2,
+        });
+        mirror.registerObject({typename: null, id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 2,
+          links: 2,
+          connections: 2,
+        });
       });
       it("doesn't touch an existing object with the same typename", () => {
         const db = new Database(":memory:");
@@ -517,6 +591,7 @@ describe("graphql/mirror", () => {
 
         const actual = mirror._findOutdated(new Date(midUpdate.time));
         const expected = {
+          typenames: [],
           objects: [
             {typename: "Repository", id: "repo:ab/cd"}, // loaded before cutoff
             // issue:ab/cd#1 was loaded after the cutoff
@@ -552,6 +627,19 @@ describe("graphql/mirror", () => {
         };
         expect(actual).toEqual(expected);
       });
+
+      it("for objects without typename, requests typename only", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        mirror.registerObject({typename: null, id: "foo"});
+        const actual = mirror._findOutdated(new Date(123));
+        expect(actual).toEqual({
+          typenames: ["foo"],
+          objects: [],
+          connections: [],
+        });
+      });
     });
 
     describe("_queryFromPlan", () => {
@@ -559,6 +647,7 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const plan = {
+          typenames: [],
           objects: [],
           connections: [
             {
@@ -577,6 +666,7 @@ describe("graphql/mirror", () => {
         };
         expect(() => {
           mirror._queryFromPlan(plan, {
+            typenamesLimit: 10,
             nodesLimit: 10,
             nodesOfTypeLimit: 5,
             connectionLimit: 5,
@@ -591,6 +681,7 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const plan = {
+          typenames: ["hmm#1", "hmm#2", "hmm#3", "hmm#4", "hmm#5"],
           objects: [
             {typename: "Issue", id: "i#1"},
             {typename: "Repository", id: "repo#2"},
@@ -646,6 +737,7 @@ describe("graphql/mirror", () => {
           ],
         };
         const actual = mirror._queryFromPlan(plan, {
+          typenamesLimit: 3,
           nodesLimit: 4,
           nodesOfTypeLimit: 2,
           connectionLimit: 5,
@@ -653,6 +745,21 @@ describe("graphql/mirror", () => {
         });
         const b = Queries.build;
         expect(actual).toEqual([
+          b.alias(
+            "typenames_0",
+            b.field(
+              "nodes",
+              {ids: b.list([b.literal("hmm#1"), b.literal("hmm#2")])},
+              [b.field("__typename"), b.field("id")]
+            )
+          ),
+          b.alias(
+            "typenames_1",
+            b.field("nodes", {ids: b.list([b.literal("hmm#3")])}, [
+              b.field("__typename"),
+              b.field("id"),
+            ])
+          ),
           b.alias(
             "owndata_0",
             b.field(
@@ -740,15 +847,25 @@ describe("graphql/mirror", () => {
         mirror.registerObject({typename: "Repository", id: "repo:foo/bar"});
         mirror.registerObject({typename: "Issue", id: "issue:#1"});
         mirror.registerObject({typename: "Issue", id: "issue:#2"});
+        mirror.registerObject({typename: null, id: "issue:#3"});
+        mirror.registerObject({typename: null, id: "user:alice"});
+        mirror.registerObject({typename: null, id: "user:bob"});
+        mirror.registerObject({typename: null, id: "user:cheryl"});
         const result = {
-          owndata_0: [
+          typenames_0: ([
+            // note: "user:alice" also populated by an own data update result
+            {__typename: "User", id: "user:alice"},
+            {__typename: "Bot", id: "user:bob"},
+            {__typename: "Issue", id: "issue:#3"},
+          ]: _TypenamesUpdateResult),
+          owndata_0: ([
             {
               __typename: "Repository",
               id: "repo:foo/bar",
               url: "url://foo/bar",
             },
-          ],
-          owndata_1: [
+          ]: _OwnDataUpdateResult),
+          owndata_1: ([
             {
               __typename: "Issue",
               id: "issue:#1",
@@ -777,7 +894,7 @@ describe("graphql/mirror", () => {
                 id: "user:alice",
               },
             },
-          ],
+          ]: _OwnDataUpdateResult),
           node_0: {
             id: "repo:foo/bar",
             issues: {
@@ -819,8 +936,11 @@ describe("graphql/mirror", () => {
           {typename: "Issue", id: "issue:#1", last_update: updateId},
           {typename: "ClosedEvent", id: "issue:#1!closed#0", last_update: null},
           {typename: "Issue", id: "issue:#2", last_update: updateId},
+          {typename: "Issue", id: "issue:#3", last_update: null},
           {typename: "Repository", id: "repo:foo/bar", last_update: updateId},
           {typename: "User", id: "user:alice", last_update: null},
+          {typename: "Bot", id: "user:bob", last_update: null},
+          {typename: null, id: "user:cheryl", last_update: null},
         ]);
 
         // Check that some objects have the right primitives.
@@ -842,6 +962,8 @@ describe("graphql/mirror", () => {
           {id: "issue:#1", fieldname: "url", value: '"url://foo/bar/issue/1"'},
           {id: "issue:#2", fieldname: "title", value: '"this way comes"'},
           {id: "issue:#2", fieldname: "url", value: '"url://foo/bar/issue/2"'},
+          {id: "issue:#3", fieldname: "title", value: null},
+          {id: "issue:#3", fieldname: "url", value: null},
           {id: "repo:foo/bar", fieldname: "url", value: '"url://foo/bar"'},
           {id: "user:alice", fieldname: "login", value: null},
           {id: "user:alice", fieldname: "url", value: null},
@@ -887,6 +1009,18 @@ describe("graphql/mirror", () => {
             child_id: "repo:foo/bar",
             rowid: expect.anything(),
           },
+          {
+            parent_id: "issue:#3",
+            fieldname: "author",
+            child_id: null,
+            rowid: expect.anything(),
+          },
+          {
+            parent_id: "issue:#3",
+            fieldname: "repository",
+            child_id: null,
+            rowid: expect.anything(),
+          },
         ]);
 
         // Check that the connection metadata are correct.
@@ -926,6 +1060,25 @@ describe("graphql/mirror", () => {
           },
           {
             object_id: "issue:#2",
+            fieldname: "timeline",
+            last_update: null,
+            has_next_page: null,
+            end_cursor: null,
+            total_count: null,
+            rowid: expect.anything(),
+          },
+          // Issue #3 is only newly known to be an issue.
+          {
+            object_id: "issue:#3",
+            fieldname: "comments",
+            last_update: null,
+            has_next_page: null,
+            end_cursor: null,
+            total_count: null,
+            rowid: expect.anything(),
+          },
+          {
+            object_id: "issue:#3",
             fieldname: "timeline",
             last_update: null,
             has_next_page: null,
@@ -1087,6 +1240,7 @@ describe("graphql/mirror", () => {
           spyFindOutdated.mock.results[1].value
         );
         expect(spyFindOutdated.mock.results[2].value).toEqual({
+          typenames: [],
           objects: [],
           connections: [],
         });
@@ -1097,6 +1251,7 @@ describe("graphql/mirror", () => {
         expect(spyQueryFromPlan.mock.calls[0]).toEqual([
           spyFindOutdated.mock.results[0].value,
           {
+            typenamesLimit: 3,
             nodesOfTypeLimit: 2,
             nodesLimit: 3,
             connectionLimit: 4,
@@ -1106,6 +1261,7 @@ describe("graphql/mirror", () => {
         expect(spyQueryFromPlan.mock.calls[1]).toEqual([
           spyFindOutdated.mock.results[1].value,
           {
+            typenamesLimit: 3,
             nodesOfTypeLimit: 2,
             nodesLimit: 3,
             connectionLimit: 4,
@@ -1192,37 +1348,48 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         expect(() => {
-          mirror._queryShallow("Wat");
+          mirror._queryShallow("Wat", Schema.faithful());
         }).toThrow('No such type: "Wat"');
       });
       it("fails when given a scalar type", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         expect(() => {
-          mirror._queryShallow("Date");
+          mirror._queryShallow("Date", Schema.faithful());
         }).toThrow('Cannot create selections for scalar type: "Date"');
       });
       it("fails when given an enum type", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         expect(() => {
-          mirror._queryShallow("ReactionContent");
+          mirror._queryShallow("ReactionContent", Schema.faithful());
         }).toThrow('Cannot create selections for enum type: "ReactionContent"');
       });
       it("handles an object type", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const b = Queries.build;
-        expect(mirror._queryShallow("Issue")).toEqual([
+        expect(mirror._queryShallow("Issue", Schema.faithful())).toEqual([
           b.field("__typename"),
           b.field("id"),
         ]);
+      });
+      it("handles an object type along unfaithful edge", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const b = Queries.build;
+        expect(
+          mirror._queryShallow(
+            "User",
+            Schema.unfaithful(["User", "Organization"])
+          )
+        ).toEqual([b.field("id")]);
       });
       it("handles a union type", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const b = Queries.build;
-        expect(mirror._queryShallow("Actor")).toEqual([
+        expect(mirror._queryShallow("Actor", Schema.faithful())).toEqual([
           b.field("__typename"),
           b.inlineFragment("User", [b.field("id")]),
           b.inlineFragment("Bot", [b.field("id")]),
@@ -1804,6 +1971,39 @@ describe("graphql/mirror", () => {
           has_next_page: +false,
         });
       });
+      it("stores data from an unfaithful connection field", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({
+          typename: "MultiAuthorReaction",
+          id: "reaction:#1",
+        });
+        const updateId = mirror._createUpdate(new Date(123));
+        const queryResult = {
+          totalCount: 2,
+          pageInfo: {
+            hasNextPage: false,
+            endCursor: "cursor:reaction#1.users@update1",
+          },
+          nodes: [{id: "user:alice"}, {id: "org:hmm"}],
+        };
+        mirror._updateConnection(updateId, "reaction:#1", "users", queryResult);
+        const objects = db
+          .prepare("SELECT id, typename FROM objects ORDER BY id, typename")
+          .all();
+        expect(objects).toEqual([
+          {id: "org:hmm", typename: null},
+          {id: "reaction:#1", typename: "MultiAuthorReaction"},
+          {id: "user:alice", typename: null},
+        ]);
+        const connectionEntries = db
+          .prepare("SELECT child_id FROM connection_entries ORDER BY idx")
+          .all();
+        expect(connectionEntries).toEqual([
+          {child_id: "user:alice"},
+          {child_id: "org:hmm"},
+        ]);
+      });
     });
 
     describe("_queryOwnData", () => {
@@ -1857,7 +2057,7 @@ describe("graphql/mirror", () => {
           b.field("oid"),
           b.field("author", {}, [
             b.field("date"),
-            b.field("user", {}, [b.field("__typename"), b.field("id")]),
+            b.field("user", {}, [b.field("id")]),
           ]),
         ]);
       });
@@ -1879,6 +2079,28 @@ describe("graphql/mirror", () => {
         expect(() => {
           mirror._updateOwnData(updateId, [{__typename: "Actor", id: "wut"}]);
         }).toThrow('Cannot update data for non-object type: "Actor" (UNION)');
+      });
+      it("fails given an object with unset typename", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const updateId = mirror._createUpdate(new Date(123));
+        // The public APIs don't yet have any way to get a mirror into a
+        // state where a node's typename is unknown, so we patch the DB.
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        db.prepare("UPDATE objects SET typename = NULL").run();
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Issue",
+              id: "issue:#1",
+              url: "url://issue/1",
+              author: null,
+              repository: null,
+              title: "hello",
+            },
+          ]);
+        }).toThrow('Cannot update data before typename known: "issue:#1"');
       });
       it("fails given a nonexistent object with a link to itself", () => {
         // A naive implementation might register the link targets as
@@ -2103,6 +2325,42 @@ describe("graphql/mirror", () => {
           {id: "issue:#2", fieldname: "url", value: "null"},
           {id: "issue:#3", fieldname: "title", value: null},
           {id: "issue:#3", fieldname: "url", value: null},
+        ]);
+      });
+      it("stores data from an unfaithful node field", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Reaction", id: "reaction:#1"});
+        const updateId = mirror._createUpdate(new Date(123));
+
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Reaction",
+            id: "reaction:#1",
+            content: "HOORAY",
+            user: {id: "org:hmm"},
+          },
+        ]);
+        expect(
+          db
+            .prepare("SELECT typename, id FROM objects ORDER BY typename, id")
+            .all()
+        ).toEqual([
+          {typename: null, id: "org:hmm"},
+          {typename: "Reaction", id: "reaction:#1"},
+        ]);
+        expect(
+          db
+            .prepare(
+              "SELECT objects.id AS id, fieldname, value " +
+                "FROM objects LEFT OUTER JOIN primitives " +
+                "ON objects.id = primitives.object_id " +
+                "ORDER BY id, fieldname"
+            )
+            .all()
+        ).toEqual([
+          {id: "org:hmm", fieldname: null, value: null},
+          {id: "reaction:#1", fieldname: "content", value: '"HOORAY"'},
         ]);
       });
       it("stores data with non-`null` nested fields", () => {
@@ -2395,6 +2653,108 @@ describe("graphql/mirror", () => {
         const format = (body: Queries.Body): string =>
           Queries.stringify.body(body, Queries.multilineLayout("  "));
         expect(format([query])).toMatchSnapshot();
+      });
+    });
+
+    describe("_queryTypename", () => {
+      it("generates a query with ID and typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const query = mirror._queryTypename();
+        const b = Queries.build;
+        expect(query).toEqual([b.field("__typename"), b.field("id")]);
+      });
+    });
+
+    describe("_updateTypenames", () => {
+      it("sets multiple typenames on multiple objects", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const getTypes = db.prepare(
+          "SELECT id, typename FROM objects ORDER BY id ASC"
+        );
+        expect(getTypes.all()).toEqual([]);
+        mirror.registerObject({typename: null, id: "issue:#1"});
+        mirror.registerObject({typename: null, id: "issue:#2"});
+        mirror.registerObject({typename: null, id: "user:alice"});
+        mirror.registerObject({typename: null, id: "issue:#3"});
+        mirror.registerObject({typename: null, id: "user:bob"});
+        expect(getTypes.all()).toEqual([
+          {id: "issue:#1", typename: null},
+          {id: "issue:#2", typename: null},
+          {id: "issue:#3", typename: null},
+          {id: "user:alice", typename: null},
+          {id: "user:bob", typename: null},
+        ]);
+        mirror._updateTypenames([
+          {__typename: "Issue", id: "issue:#2"},
+          {__typename: "Bot", id: "user:bob"},
+          {__typename: "User", id: "user:alice"},
+          {__typename: "Issue", id: "issue:#1"},
+        ]);
+        expect(getTypes.all()).toEqual([
+          {id: "issue:#1", typename: "Issue"},
+          {id: "issue:#2", typename: "Issue"},
+          {id: "issue:#3", typename: null},
+          {id: "user:alice", typename: "User"},
+          {id: "user:bob", typename: "Bot"},
+        ]);
+      });
+      it("populates primitives, links, and connections", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const getPrimitives = db.prepare(
+          "SELECT object_id AS id, fieldname, value FROM primitives " +
+            "ORDER BY id, fieldname ASC"
+        );
+        const getLinks = db.prepare(
+          "SELECT parent_id AS id, fieldname, child_id AS value FROM links " +
+            "ORDER BY id, fieldname ASC"
+        );
+        const getConnections = db.prepare(
+          "SELECT object_id AS id, fieldname FROM connections " +
+            "ORDER BY id, fieldname ASC"
+        );
+        const getFields = () => ({
+          primitives: getPrimitives.all(),
+          links: getLinks.all(),
+          connections: getConnections.all(),
+        });
+        expect(getFields()).toEqual({
+          primitives: [],
+          links: [],
+          connections: [],
+        });
+        mirror.registerObject({typename: "User", id: "user:alice"});
+        mirror.registerObject({typename: null, id: "issue:#1"});
+        expect(getFields()).toEqual({
+          primitives: [
+            {id: "user:alice", fieldname: "login", value: null},
+            {id: "user:alice", fieldname: "url", value: null},
+          ],
+          links: [],
+          connections: [],
+        });
+        mirror._updateTypenames([
+          {__typename: "User", id: "user:alice"},
+          {__typename: "Issue", id: "issue:#1"},
+        ]);
+        expect(getFields()).toEqual({
+          primitives: [
+            {id: "issue:#1", fieldname: "title", value: null},
+            {id: "issue:#1", fieldname: "url", value: null},
+            {id: "user:alice", fieldname: "login", value: null},
+            {id: "user:alice", fieldname: "url", value: null},
+          ],
+          links: [
+            {id: "issue:#1", fieldname: "author", value: null},
+            {id: "issue:#1", fieldname: "repository", value: null},
+          ],
+          connections: [
+            {id: "issue:#1", fieldname: "comments"},
+            {id: "issue:#1", fieldname: "timeline"},
+          ],
+        });
       });
     });
 
@@ -3528,6 +3888,7 @@ describe("graphql/mirror", () => {
         Array.from(
           new Set([
             "Reaction",
+            "MultiAuthorReaction",
             "Repository",
             "Issue",
             "IssueComment",
@@ -3555,7 +3916,9 @@ describe("graphql/mirror", () => {
       expect(result.objectTypes["Commit"].nestedFields).toEqual({
         author: {
           primitives: {date: Schema.primitive(Schema.nonNull("Date"))},
-          nodes: {user: Schema.node("User")},
+          nodes: {
+            user: Schema.node("User", Schema.unfaithful(["User", "Bot"])),
+          },
         },
       });
     });
@@ -3727,13 +4090,13 @@ describe("graphql/mirror", () => {
         const rowid = mirror._logRequest(query, queryParameters, new Date(123));
 
         const response = {
-          owndata_0: [
+          owndata_0: ([
             {
               __typename: "Repository",
               id: "repo:foo/bar",
               url: "url://foo/bar",
             },
-          ],
+          ]: _OwnDataUpdateResult),
         };
 
         mirror._logResponse(rowid, response, new Date(456));

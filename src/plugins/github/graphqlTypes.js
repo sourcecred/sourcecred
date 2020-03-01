@@ -23,7 +23,7 @@ export type Commit = {|
   +__typename: "Commit",
   +author: null | {|
     +date: null | GitTimestamp,
-    +user: null | User,
+    +user: null | Bot | User,
   |},
   +authoredDate: GitTimestamp,
   +id: string,
@@ -77,6 +77,7 @@ export type PullRequest = {|
   +__typename: "PullRequest",
   +additions: Int,
   +author: null | Actor,
+  +baseRefName: String,
   +body: String,
   +comments: $ReadOnlyArray<null | IssueComment>,
   +createdAt: DateTime,
@@ -137,7 +138,7 @@ export type Reaction = {|
   +content: ReactionContent,
   +createdAt: DateTime,
   +id: string,
-  +user: null | User,
+  +user: null | Organization | User,
 |};
 
 export type ReactionContent =
