@@ -1,6 +1,6 @@
 // @flow
 
-import {makeRepoId, repoIdToString, type RepoId} from "./repoId";
+import {makeRepoId, type RepoId} from "./repoId";
 import {type CacheId, cacheIdForRepoId} from "./cacheId";
 
 describe("plugins/github/cacheId", () => {
