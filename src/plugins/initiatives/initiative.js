@@ -1,6 +1,7 @@
 // @flow
 
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
+import {type NodeWeight} from "../../core/weights";
 import {initiativeNodeType} from "./declaration";
 
 export type URL = string;
@@ -21,6 +22,12 @@ export function addressFromId(id: InitiativeId): NodeAddressT {
   return NodeAddress.append(initiativeNodeType.prefix, ...id);
 }
 
+// A before completion and after completion weight for Initiatives.
+export type InitiativeWeight = {|
+  +incomplete: NodeWeight,
+  +complete: NodeWeight,
+|};
+
 /**
  * An intermediate representation of an Initiative.
  *
@@ -39,6 +46,7 @@ export type Initiative = {|
   +id: InitiativeId,
   +title: string,
   +timestampMs: number,
+  +weight?: InitiativeWeight,
   +completed: boolean,
   +dependencies: $ReadOnlyArray<URL>,
   +references: $ReadOnlyArray<URL>,

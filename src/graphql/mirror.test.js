@@ -217,6 +217,55 @@ describe("graphql/mirror", () => {
           new Mirror(db, schema, {blacklistedIds: ["ominous"]});
         }).toThrow("incompatible schema, options, or version");
       });
+
+      describe("rejects a schema with unfaithful fields", () => {
+        it("of node type", () => {
+          const s = Schema;
+          const schema = s.schema({
+            Foo: s.object({
+              id: s.id(),
+              bar: s.node("Foo", s.unfaithful(["Foo", "Bar"])),
+            }),
+            Bar: s.object({id: s.id()}),
+          });
+          const db = new Database(":memory:");
+          expect(() => {
+            new Mirror(db, schema);
+          }).toThrow("Unfaithful fields not yet supported: Foo.bar");
+        });
+
+        it("of connection type", () => {
+          const s = Schema;
+          const schema = s.schema({
+            Foo: s.object({
+              id: s.id(),
+              bar: s.connection("Foo", s.unfaithful(["Foo", "Bar"])),
+            }),
+            Bar: s.object({id: s.id()}),
+          });
+          const db = new Database(":memory:");
+          expect(() => {
+            new Mirror(db, schema);
+          }).toThrow("Unfaithful fields not yet supported: Foo.bar");
+        });
+
+        it("of egg-node type", () => {
+          const s = Schema;
+          const schema = s.schema({
+            Foo: s.object({
+              id: s.id(),
+              bar: s.nested({
+                baz: s.node("Foo", s.unfaithful(["Foo", "Bar"])),
+              }),
+            }),
+            Bar: s.object({id: s.id()}),
+          });
+          const db = new Database(":memory:");
+          expect(() => {
+            new Mirror(db, schema);
+          }).toThrow("Unfaithful fields not yet supported: Foo.bar.baz");
+        });
+      });
     });
 
     describe("_createUpdate", () => {
