@@ -18,6 +18,10 @@ Map {
     ],
     "timestampIso": "2020-01-08T22:01:57.711Z",
     "title": "Initiative A",
+    "weight": Object {
+      "complete": 100,
+      "incomplete": 0,
+    },
   },
   "initiative-B.json" => Object {
     "champions": Array [
@@ -35,6 +39,10 @@ Map {
     ],
     "timestampIso": "2020-01-08T22:01:57.722Z",
     "title": "Initiative B",
+    "weight": Object {
+      "complete": 69,
+      "incomplete": 42,
+    },
   },
 }
 `;
@@ -74,7 +82,11 @@ exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an
       \\"http://foo.bar/A/ref\\"
     ],
     \\"timestampMs\\": 1578520917711,
-    \\"title\\": \\"Initiative A\\"
+    \\"title\\": \\"Initiative A\\",
+    \\"weight\\": {
+      \\"complete\\": 100,
+      \\"incomplete\\": 0
+    }
   },
   {
     \\"champions\\": [
@@ -96,7 +108,11 @@ exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an
       \\"http://foo.bar/B/ref\\"
     ],
     \\"timestampMs\\": 1578520917722,
-    \\"title\\": \\"Initiative B\\"
+    \\"title\\": \\"Initiative B\\",
+    \\"weight\\": {
+      \\"complete\\": 69,
+      \\"incomplete\\": 42
+    }
   }
 ]"
 `;
