@@ -8,6 +8,9 @@ import {
   type Project,
   encodeProjectId,
   createProject,
+  type ProjectV040,
+  type ProjectV031,
+  type ProjectV030,
 } from "./project";
 
 import {makeRepoId} from "../plugins/github/repoId";
@@ -20,12 +23,14 @@ describe("core/project", () => {
     id: "foo/bar",
     repoIds: [foobar],
     discourseServer: null,
+    initiatives: null,
     identities: [],
   });
   const p2: Project = deepFreeze({
     id: "@foo",
     repoIds: [foobar, foozod],
     discourseServer: {serverUrl: "https://example.com"},
+    initiatives: {remoteUrl: "http://foo.bar/initiatives"},
     identities: [
       {
         username: "example",
@@ -45,7 +50,7 @@ describe("core/project", () => {
     });
     it("should upgrade from 0.3.0 formatting", () => {
       // Given
-      const body = {
+      const body: ProjectV030 = {
         id: "example-030",
         repoIds: [foobar, foozod],
         discourseServer: {
@@ -63,15 +68,18 @@ describe("core/project", () => {
       const project = projectFromJSON(compat);
 
       // Then
-      expect(project).toEqual({
-        ...body,
-        // It should strip the apiUsername field, keeping just serverUrl.
-        discourseServer: {serverUrl: "https://example.com"},
-      });
+      expect(project).toEqual(
+        ({
+          ...body,
+          // It should strip the apiUsername field, keeping just serverUrl.
+          discourseServer: {serverUrl: "https://example.com"},
+          initiatives: null,
+        }: Project)
+      );
     });
     it("should upgrade from 0.3.1 formatting", () => {
       // Given
-      const body = {
+      const body: ProjectV031 = {
         id: "example-031",
         repoIds: [foobar, foozod],
         discourseServer: {
@@ -89,11 +97,39 @@ describe("core/project", () => {
       const project = projectFromJSON(compat);
 
       // Then
-      expect(project).toEqual({
-        ...body,
-        // It should strip the apiUsername field, keeping just serverUrl.
+      expect(project).toEqual(
+        ({
+          ...body,
+          // It should strip the apiUsername field, keeping just serverUrl.
+          discourseServer: {serverUrl: "https://example.com"},
+          initiatives: null,
+        }: Project)
+      );
+    });
+    it("should upgrade from 0.4.0 formatting", () => {
+      // Given
+      const body: ProjectV040 = {
+        id: "example-040",
+        repoIds: [foobar, foozod],
         discourseServer: {serverUrl: "https://example.com"},
-      });
+        identities: [],
+      };
+      const compat = toCompat(
+        {type: "sourcecred/project", version: "0.4.0"},
+        body
+      );
+
+      // When
+      const project = projectFromJSON(compat);
+
+      // Then
+      expect(project).toEqual(
+        ({
+          ...body,
+          // It should add a default initiatives field.
+          initiatives: null,
+        }: Project)
+      );
     });
   });
   describe("encodeProjectId", () => {
@@ -130,6 +166,7 @@ describe("core/project", () => {
       expect(project).toEqual({
         id: projectShape.id,
         discourseServer: null,
+        initiatives: null,
         repoIds: [],
         identities: [],
       });
@@ -141,6 +178,7 @@ describe("core/project", () => {
         id: "@foo",
         repoIds: [foobar, foozod],
         discourseServer: {serverUrl: "https://example.com"},
+        initiatives: {remoteUrl: "http://foo.bar/initiatives"},
         identities: [
           {
             username: "example",

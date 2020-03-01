@@ -34,6 +34,7 @@ describe("cli/load", () => {
     const dirname = tmp.dirSync().name;
     process.env.SOURCECRED_DIRECTORY = dirname;
     process.env.SOURCECRED_GITHUB_TOKEN = exampleGithubToken;
+    process.env.SOURCECRED_INITIATIVES_DIRECTORY = tmp.dirSync().name;
     return dirname;
   }
 
@@ -81,6 +82,7 @@ describe("cli/load", () => {
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: exampleGithubToken,
+        initiativesDirectory: Common.initiativesDirectory(),
       };
       expect(await invocation).toEqual({
         exitCode: 0,
@@ -105,6 +107,7 @@ describe("cli/load", () => {
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: exampleGithubToken,
+        initiativesDirectory: Common.initiativesDirectory(),
       });
       expect(await invocation).toEqual({
         exitCode: 0,
@@ -142,6 +145,7 @@ describe("cli/load", () => {
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: exampleGithubToken,
+        initiativesDirectory: Common.initiativesDirectory(),
       };
       expect(await invocation).toEqual({
         exitCode: 0,

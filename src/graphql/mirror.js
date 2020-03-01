@@ -423,10 +423,17 @@ export class Mirror {
       .get(id);
     if (existingTypename === typename) {
       // Already registered, and no typename upgrade; nothing to do.
+<<<<<<< HEAD
       return;
     } else if (existingTypename != null && typename == null) {
       // Already registered, and already have typename; nothing to do.
       return;
+=======
+      return;
+    } else if (existingTypename != null && typename == null) {
+      // Already registered, and already have typename; nothing to do.
+      return;
+>>>>>>> 60bc7561b509d3fce62b130ff8f543c828bd2c37
     } else if (existingTypename === undefined) {
       // OK: New registration.
     } else if (existingTypename === null) {
@@ -823,6 +830,7 @@ export class Mirror {
     queryResult: UpdateResult
   ): void {
     for (const topLevelKey of Object.keys(queryResult)) {
+<<<<<<< HEAD
       const rawValue:
         | TypenamesUpdateResult
         | OwnDataUpdateResult
@@ -831,6 +839,13 @@ export class Mirror {
         const updateRecord: TypenamesUpdateResult = (rawValue: any);
         this._nontransactionallyUpdateTypenames(updateRecord);
       } else if (topLevelKey.startsWith(_FIELD_PREFIXES.OWN_DATA)) {
+=======
+      if (topLevelKey.startsWith(_FIELD_PREFIXES.TYPENAMES)) {
+        throw new Error("Typename update results not yet supported");
+      } else if (topLevelKey.startsWith(_FIELD_PREFIXES.OWN_DATA)) {
+        const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
+          queryResult[topLevelKey];
+>>>>>>> 60bc7561b509d3fce62b130ff8f543c828bd2c37
         const updateRecord: OwnDataUpdateResult = (rawValue: any);
         this._nontransactionallyUpdateOwnData(updateId, updateRecord);
       } else if (topLevelKey.startsWith(_FIELD_PREFIXES.NODE_CONNECTIONS)) {
@@ -1682,6 +1697,7 @@ export class Mirror {
   }
 
   /**
+<<<<<<< HEAD
    * Ingest typenames for many object IDs.
    *
    * See: `_queryTypenames`.
@@ -1709,6 +1725,8 @@ export class Mirror {
   }
 
   /**
+=======
+>>>>>>> 60bc7561b509d3fce62b130ff8f543c828bd2c37
    * Extract a structured object and all of its transitive dependencies
    * from the database.
    *
