@@ -423,10 +423,17 @@ export class Mirror {
       .get(id);
     if (existingTypename === typename) {
       // Already registered, and no typename upgrade; nothing to do.
+<<<<<<< HEAD
       return;
     } else if (existingTypename != null && typename == null) {
       // Already registered, and already have typename; nothing to do.
       return;
+=======
+      return;
+    } else if (existingTypename != null && typename == null) {
+      // Already registered, and already have typename; nothing to do.
+      return;
+>>>>>>> 96157a2da5d49c6d9cfd1a995b563f9a41928b60
     } else if (existingTypename === undefined) {
       // OK: New registration.
     } else if (existingTypename === null) {
@@ -670,6 +677,7 @@ export class Mirror {
       +connectionPageSize: number,
     |}
   ): Queries.Selection[] {
+<<<<<<< HEAD
     const fetchTypenamesFor = queryPlan.typenames.slice(
       0,
       options.typenamesLimit
@@ -685,6 +693,11 @@ export class Mirror {
       );
     }
 
+=======
+    if (queryPlan.typenames.length > 0) {
+      throw new Error("Typename queries not yet supported");
+    }
+>>>>>>> 96157a2da5d49c6d9cfd1a995b563f9a41928b60
     // Group objects by type, so that we have to specify each type's
     // fieldset fewer times (only once per `nodesOfTypeLimit` nodes
     // instead of for every node).

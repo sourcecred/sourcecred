@@ -6,6 +6,10 @@
   {
     "title": "Initiative B",
     "timestampIso": "2020-01-08T22:01:57.722Z",
+    "weight": {
+      "incomplete": 42,
+      "complete": 69
+    },
     "completed": false,
     "champions": ["http://foo.bar/B/champ"],
     "contributions": ["http://foo.bar/B/contrib"],

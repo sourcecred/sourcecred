@@ -719,11 +719,32 @@ describe("graphql/mirror", () => {
             '"Issue" vs. "Repository"'
         );
       });
+      it("errors if given any typename requests", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const plan = {
+          typenames: ["hmmm"],
+          objects: [],
+          connections: [],
+        };
+        expect(() => {
+          mirror._queryFromPlan(plan, {
+            nodesLimit: 10,
+            nodesOfTypeLimit: 5,
+            connectionLimit: 5,
+            connectionPageSize: 23,
+          });
+        }).toThrow("Typename queries not yet supported");
+      });
       it("creates a good query", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const plan = {
+<<<<<<< HEAD
           typenames: ["hmm#1", "hmm#2", "hmm#3", "hmm#4", "hmm#5"],
+=======
+          typenames: [],
+>>>>>>> 96157a2da5d49c6d9cfd1a995b563f9a41928b60
           objects: [
             {typename: "Issue", id: "i#1"},
             {typename: "Repository", id: "repo#2"},
