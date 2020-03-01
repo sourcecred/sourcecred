@@ -13,6 +13,8 @@ import {
   _inTransaction,
   _makeSingleUpdateFunction,
   Mirror,
+  type _OwnDataUpdateResult,
+  type _TypenamesUpdateResult,
 } from "./mirror";
 import stringify from "json-stable-stringify";
 
@@ -799,6 +801,20 @@ describe("graphql/mirror", () => {
         }).toThrow('Bad key in query result: "wat_0"');
       });
 
+      it("throws if given a key with typename results", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const updateId = mirror._createUpdate(new Date(123));
+        const result = {
+          typenames_0: ([
+            {id: "issue:#1", __typename: "Issue"},
+          ]: _TypenamesUpdateResult),
+        };
+        expect(() => {
+          mirror._nontransactionallyUpdateData(updateId, result);
+        }).toThrow("Typename update results not yet supported");
+      });
+
       // We test the happy path lightly, because it just delegates to
       // other methods, which are themselves tested. This test is
       // sufficient to effect full coverage.
@@ -810,14 +826,14 @@ describe("graphql/mirror", () => {
         mirror.registerObject({typename: "Issue", id: "issue:#1"});
         mirror.registerObject({typename: "Issue", id: "issue:#2"});
         const result = {
-          owndata_0: [
+          owndata_0: ([
             {
               __typename: "Repository",
               id: "repo:foo/bar",
               url: "url://foo/bar",
             },
-          ],
-          owndata_1: [
+          ]: _OwnDataUpdateResult),
+          owndata_1: ([
             {
               __typename: "Issue",
               id: "issue:#1",
@@ -846,7 +862,7 @@ describe("graphql/mirror", () => {
                 id: "user:alice",
               },
             },
-          ],
+          ]: _OwnDataUpdateResult),
           node_0: {
             id: "repo:foo/bar",
             issues: {
@@ -3797,13 +3813,13 @@ describe("graphql/mirror", () => {
         const rowid = mirror._logRequest(query, queryParameters, new Date(123));
 
         const response = {
-          owndata_0: [
+          owndata_0: ([
             {
               __typename: "Repository",
               id: "repo:foo/bar",
               url: "url://foo/bar",
             },
-          ],
+          ]: _OwnDataUpdateResult),
         };
 
         mirror._logResponse(rowid, response, new Date(456));

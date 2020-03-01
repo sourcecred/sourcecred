@@ -735,7 +735,9 @@ export class Mirror {
     queryResult: UpdateResult
   ): void {
     for (const topLevelKey of Object.keys(queryResult)) {
-      if (topLevelKey.startsWith(_FIELD_PREFIXES.OWN_DATA)) {
+      if (topLevelKey.startsWith(_FIELD_PREFIXES.TYPENAMES)) {
+        throw new Error("Typename update results not yet supported");
+      } else if (topLevelKey.startsWith(_FIELD_PREFIXES.OWN_DATA)) {
         const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
           queryResult[topLevelKey];
         const updateRecord: OwnDataUpdateResult = (rawValue: any);
@@ -2093,6 +2095,16 @@ type NestedFieldResult = {
 } | null;
 
 /**
+ * Result describing only the typename of a set of nodes. Used when we
+ * only have references to nodes via unfaithful fields.
+ */
+type TypenamesUpdateResult = $ReadOnlyArray<{|
+  +__typename: Schema.Typename,
+  +id: Schema.ObjectId,
+|}>;
+export type _TypenamesUpdateResult = TypenamesUpdateResult; // for tests
+
+/**
  * Result describing own-data for many nodes of a given type. Whether a
  * value is a `PrimitiveResult` or a `NodeFieldResult` is determined by
  * the schema.
@@ -2107,6 +2119,7 @@ type OwnDataUpdateResult = $ReadOnlyArray<{
     | NodeFieldResult
     | NestedFieldResult,
 }>;
+export type _OwnDataUpdateResult = OwnDataUpdateResult; // for tests
 
 /**
  * Result describing new elements for connections on a single node.
@@ -2117,12 +2130,13 @@ type NodeConnectionsUpdateResult = {
   +id: Schema.ObjectId,
   +[connectionFieldname: Schema.Fieldname]: ConnectionFieldResult,
 };
+export type _NodeConnectionsUpdateResult = NodeConnectionsUpdateResult; // for tests
 
 /**
- * Result describing both own-data updates and connection updates. Each
- * key's prefix determines what type of results the corresponding value
- * represents (see constants below). No field prefix is a prefix of
- * another, so this characterization is complete.
+ * Result describing all kinds of updates. Each key's prefix determines
+ * what type of results the corresponding value represents (see
+ * constants below). No field prefix is a prefix of another, so this
+ * characterization is complete.
  *
  * This type would be exact but for facebook/flow#2977, et al.
  *
@@ -2131,10 +2145,19 @@ type NodeConnectionsUpdateResult = {
 type UpdateResult = {
   // The prefix of each key determines what type of results the value
   // represents. See constants below.
-  +[string]: OwnDataUpdateResult | NodeConnectionsUpdateResult,
+  +[string]:
+    | TypenamesUpdateResult
+    | OwnDataUpdateResult
+    | NodeConnectionsUpdateResult,
 };
 
 export const _FIELD_PREFIXES = deepFreeze({
+  /**
+   * A key of an `UpdateResult` has this prefix if and only if the
+   * corresponding value represents `TypenamesUpdateResult`s.
+   */
+  TYPENAMES: "typenames_",
+
   /**
    * A key of an `UpdateResult` has this prefix if and only if the
    * corresponding value represents `OwnDataUpdateResult`s.
