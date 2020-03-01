@@ -580,7 +580,6 @@ export class Mirror {
   _findOutdated(since: Date): QueryPlan {
     const db = this._db;
     return _inTransaction(db, () => {
-<<<<<<< HEAD
       const typenames: $PropertyType<QueryPlan, "typenames"> = db
         .prepare(
           dedent`\
@@ -591,11 +590,6 @@ export class Mirror {
         )
         .pluck()
         .all({timeEpochMillisThreshold: +since});
-=======
-      // All objects must have recorded typenames due to the `NOT NULL`
-      // constraint on `typename` column of the `objects` table.
-      const typenames: $PropertyType<QueryPlan, "typenames"> = [];
->>>>>>> 5c937d860473e22b390ca67827348f6ce90df1de
       const objects: $PropertyType<QueryPlan, "objects"> = db
         .prepare(
           dedent`\
