@@ -879,20 +879,6 @@ describe("graphql/mirror", () => {
         }).toThrow('Bad key in query result: "wat_0"');
       });
 
-      it("throws if given a key with typename results", () => {
-        const db = new Database(":memory:");
-        const mirror = new Mirror(db, buildGithubSchema());
-        const updateId = mirror._createUpdate(new Date(123));
-        const result = {
-          typenames_0: ([
-            {id: "issue:#1", __typename: "Issue"},
-          ]: _TypenamesUpdateResult),
-        };
-        expect(() => {
-          mirror._nontransactionallyUpdateData(updateId, result);
-        }).toThrow("Typename update results not yet supported");
-      });
-
       // We test the happy path lightly, because it just delegates to
       // other methods, which are themselves tested. This test is
       // sufficient to effect full coverage.
@@ -908,15 +894,12 @@ describe("graphql/mirror", () => {
         mirror.registerObject({typename: null, id: "user:bob"});
         mirror.registerObject({typename: null, id: "user:cheryl"});
         const result = {
-<<<<<<< HEAD
           typenames_0: ([
             // note: "user:alice" also populated by an own data update result
             {__typename: "User", id: "user:alice"},
             {__typename: "Bot", id: "user:bob"},
             {__typename: "Issue", id: "issue:#3"},
           ]: _TypenamesUpdateResult),
-=======
->>>>>>> 60bc7561b509d3fce62b130ff8f543c828bd2c37
           owndata_0: ([
             {
               __typename: "Repository",
@@ -2645,7 +2628,6 @@ describe("graphql/mirror", () => {
       });
     });
 
-<<<<<<< HEAD
     describe("_updateTypenames", () => {
       it("sets multiple typenames on multiple objects", () => {
         const db = new Database(":memory:");
@@ -2738,8 +2720,6 @@ describe("graphql/mirror", () => {
       });
     });
 
-=======
->>>>>>> 60bc7561b509d3fce62b130ff8f543c828bd2c37
     describe("extract", () => {
       // A schema with some useful edge cases.
       function buildTestSchema(): Schema.Schema {
