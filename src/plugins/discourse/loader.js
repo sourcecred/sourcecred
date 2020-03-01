@@ -4,11 +4,13 @@ import base64url from "base64url";
 import {TaskReporter} from "../../util/taskReporter";
 import {type CacheProvider} from "../../backend/cache";
 import {type WeightedGraph} from "../../core/weightedGraph";
+import {type ReferenceDetector} from "../../core/references";
 import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {type DiscourseServer} from "./server";
 import {Mirror} from "./mirror";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
+import {DiscourseReferenceDetector} from "./referenceDetector";
 import {createGraph as _createGraph} from "./createGraph";
 import {declaration} from "./declaration";
 import {Fetcher} from "./fetch";
@@ -20,6 +22,10 @@ export interface Loader {
     cache: CacheProvider,
     reporter: TaskReporter
   ): Promise<void>;
+  referenceDetector(
+    server: DiscourseServer,
+    cache: CacheProvider
+  ): Promise<ReferenceDetector>;
   createGraph(
     server: DiscourseServer,
     cache: CacheProvider
@@ -29,6 +35,7 @@ export interface Loader {
 export default ({
   declaration: () => declaration,
   updateMirror,
+  referenceDetector,
   createGraph,
 }: Loader);
 
@@ -42,6 +49,14 @@ export async function updateMirror(
   const fetcher = new Fetcher({serverUrl});
   const mirror = new Mirror(repo, fetcher, serverUrl, mirrorOptions);
   await mirror.update(reporter);
+}
+
+export async function referenceDetector(
+  {serverUrl}: DiscourseServer,
+  cache: CacheProvider
+): Promise<ReferenceDetector> {
+  const repo = await repository(cache, serverUrl);
+  return new DiscourseReferenceDetector(repo);
 }
 
 export async function createGraph(

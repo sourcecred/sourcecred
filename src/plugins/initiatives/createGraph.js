@@ -1,7 +1,6 @@
 // @flow
 
 import {
-  Graph,
   EdgeAddress,
   NodeAddress,
   type Edge,
@@ -9,6 +8,9 @@ import {
   type EdgeAddressT,
   type NodeAddressT,
 } from "../../core/graph";
+import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
+import * as WeightedGraph from "../../core/weightedGraph";
+import type {NodeWeight} from "../../core/weights";
 import type {ReferenceDetector, URL} from "../../core/references";
 import type {Initiative, InitiativeRepository} from "./initiative";
 import {addressFromId} from "./initiative";
@@ -18,17 +20,28 @@ import {
   contributesToEdgeType,
   championsEdgeType,
 } from "./declaration";
+import {initiativeFileURL} from "./initiativesDirectory";
 
 function initiativeAddress(initiative: Initiative): NodeAddressT {
   return addressFromId(initiative.id);
 }
 
 function initiativeNode(initiative: Initiative): Node {
+  const address = initiativeAddress(initiative);
+  const url = initiativeFileURL(address);
   return {
-    address: initiativeAddress(initiative),
+    address,
     timestampMs: initiative.timestampMs,
-    description: initiative.title,
+    description:
+      url == null ? initiative.title : `[${initiative.title}](${url})`,
   };
+}
+
+export function initiativeWeight(initiative: Initiative): ?NodeWeight {
+  if (!initiative.weight) return;
+  return initiative.completed
+    ? initiative.weight.complete
+    : initiative.weight.incomplete;
 }
 
 type EdgeFactoryT = (initiative: Initiative, other: NodeAddressT) => Edge;
@@ -59,15 +72,21 @@ const referenceEdge = edgeFactory(referencesEdgeType.prefix, true);
 const contributionEdge = edgeFactory(contributesToEdgeType.prefix, false);
 const championEdge = edgeFactory(championsEdgeType.prefix, false);
 
-export function createGraph(
+export function createWeightedGraph(
   repo: InitiativeRepository,
   refs: ReferenceDetector
-): Graph {
-  const graph = new Graph();
+): WeightedGraphT {
+  const wg = WeightedGraph.empty();
+  const {graph, weights} = wg;
 
   for (const initiative of repo.initiatives()) {
     // Adds the Initiative node.
-    graph.addNode(initiativeNode(initiative));
+    const node = initiativeNode(initiative);
+    const weight = initiativeWeight(initiative);
+    graph.addNode(node);
+    if (weight) {
+      weights.nodeWeights.set(node.address, weight);
+    }
 
     // Generic approach to adding edges when the reference detector has a hit.
     const edgeHandler = (
@@ -88,5 +107,5 @@ export function createGraph(
     edgeHandler(initiative.champions, championEdge);
   }
 
-  return graph;
+  return wg;
 }

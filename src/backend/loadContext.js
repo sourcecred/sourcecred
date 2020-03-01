@@ -16,6 +16,7 @@ import * as PluginLoaders from "./pluginLoaders";
 import {default as githubLoader} from "../plugins/github/loader";
 import {default as identityLoader} from "../plugins/identity/loader";
 import {default as discourseLoader} from "../plugins/discourse/loader";
+import {default as initiativesLoader} from "../plugins/initiatives/loader";
 import {type PluginDeclarations} from "../analysis/pluginDeclaration";
 
 export type LoadResult = {|
@@ -28,6 +29,7 @@ export type LoadContextOptions = {|
   +cache: CacheProvider,
   +reporter: TaskReporter,
   +githubToken: ?GithubToken,
+  +initiativesDirectory: ?string,
 |};
 
 type OptionalLoadArguments = {|
@@ -67,6 +69,7 @@ export class LoadContext {
   +_declarations = PluginLoaders.declarations;
   +_updateMirror = PluginLoaders.updateMirror;
   +_createPluginGraphs = PluginLoaders.createPluginGraphs;
+  +_createReferenceDetector = PluginLoaders.createReferenceDetector;
   +_contractPluginGraphs = PluginLoaders.contractPluginGraphs;
   +_overrideWeights = WeightedGraph.overrideWeights;
   +_computeTask = ComputeFunction.computeTask;
@@ -83,6 +86,7 @@ export class LoadContext {
     github: githubLoader,
     discourse: discourseLoader,
     identity: identityLoader,
+    initiatives: initiativesLoader,
   };
 
   /**
@@ -97,10 +101,16 @@ export class LoadContext {
       this._options,
       project
     );
-    const pluginGraphs = await this._createPluginGraphs(
+    const referenceDetector = await this._createReferenceDetector(
       this._pluginLoaders,
       this._options,
       cachedProject
+    );
+    const pluginGraphs = await this._createPluginGraphs(
+      this._pluginLoaders,
+      this._options,
+      cachedProject,
+      referenceDetector
     );
     const contractedGraph = await this._contractPluginGraphs(
       this._pluginLoaders,
