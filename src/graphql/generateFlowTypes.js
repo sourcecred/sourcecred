@@ -4,12 +4,14 @@ import prettier, {type Options as PrettierOptions} from "prettier";
 
 import type {
   ConnectionFieldType,
+  Fidelity,
   FieldType,
   IdFieldType,
   NestedFieldType,
   NodeFieldType,
   PrimitiveFieldType,
   Schema,
+  Typename,
 } from "./schema";
 
 export default function generateFlowTypes(
@@ -38,6 +40,19 @@ export default function generateFlowTypes(
   function formatIdField(_unused_field: IdFieldType): string {
     return "string";
   }
+  function formatFidelity(nominal: Typename, fidelity: Fidelity): string {
+    switch (fidelity.type) {
+      case "FAITHFUL":
+        return nominal;
+      case "UNFAITHFUL": {
+        const values = Object.keys(fidelity.actualTypenames).sort();
+        return values.length === 0 ? "empty" : values.join(" | ");
+      }
+      // istanbul ignore next: unreachable per Flow
+      default:
+        throw new Error((fidelity.type: empty));
+    }
+  }
   function formatPrimitiveField(field: PrimitiveFieldType): string {
     if (field.annotation == null) {
       return "mixed";
@@ -48,10 +63,12 @@ export default function generateFlowTypes(
     }
   }
   function formatNodeField(field: NodeFieldType): string {
-    return "null | " + field.elementType;
+    const elementType = formatFidelity(field.elementType, field.fidelity);
+    return `null | ${elementType}`;
   }
   function formatConnectionField(field: ConnectionFieldType): string {
-    return `$ReadOnlyArray<null | ${field.elementType}>`;
+    const elementType = formatFidelity(field.elementType, field.fidelity);
+    return `$ReadOnlyArray<null | ${elementType}>`;
   }
   function formatNestedField(field: NestedFieldType): string {
     const eggs = [];

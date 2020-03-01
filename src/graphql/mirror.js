@@ -82,6 +82,7 @@ export class Mirror {
     this._db = db;
     this._schema = schema;
     this._schemaInfo = _buildSchemaInfo(this._schema);
+    _checkAllFaithful(this._schemaInfo);
     this._blacklistedIds = (() => {
       const result: {|[Schema.ObjectId]: true|} = ({}: any);
       for (const id of fullOptions.blacklistedIds) {
@@ -2227,4 +2228,55 @@ export function _makeSingleUpdateFunction<Args: BindingDictionary>(
       );
     }
   };
+}
+
+/**
+ * Ensure that the provided schema only has node fields of faithful
+ * fidelity.
+ */
+function _checkAllFaithful(schemaInfo) {
+  function check(path, field) {
+    if (field.fidelity.type === "FAITHFUL") {
+      return;
+    }
+    const pathMsg = path.join(".");
+    throw new Error(`Unfaithful fields not yet supported: ${pathMsg}`);
+  }
+  for (const typename of Object.keys(schemaInfo.objectTypes)) {
+    const type = schemaInfo.objectTypes[typename];
+    const fields = type.fields;
+    for (const fieldname of Object.keys(fields)) {
+      const field = fields[fieldname];
+      switch (field.type) {
+        case "ID":
+          continue;
+        case "PRIMITIVE":
+          continue;
+        case "NODE":
+          check([typename, fieldname], field);
+          break;
+        case "CONNECTION":
+          check([typename, fieldname], field);
+          break;
+        case "NESTED":
+          for (const eggName of Object.keys(field.eggs)) {
+            const egg = field.eggs[eggName];
+            switch (egg.type) {
+              case "PRIMITIVE":
+                break;
+              case "NODE":
+                check([typename, fieldname, eggName], egg);
+                break;
+              // istanbul ignore next
+              default:
+                throw new Error((egg.type: empty));
+            }
+          }
+          break;
+        // istanbul ignore next
+        default:
+          throw new Error((field.type: empty));
+      }
+    }
+  }
 }

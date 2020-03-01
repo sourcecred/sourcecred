@@ -69,23 +69,68 @@ export type PrimitiveTypeAnnotation = {|
   +nonNull: boolean,
   +elementType: Typename,
 |};
-export type NodeFieldType = {|+type: "NODE", +elementType: Typename|};
+export type NodeFieldType = {|
+  +type: "NODE",
+  +elementType: Typename,
+  +fidelity: Fidelity,
+|};
 export type ConnectionFieldType = {|
   +type: "CONNECTION",
   +elementType: Typename,
+  +fidelity: Fidelity,
 |};
 export type NestedFieldType = {|
   +type: "NESTED",
   +eggs: {+[Fieldname]: PrimitiveFieldType | NodeFieldType},
 |};
 
+// A field is _faithful_ if selecting its `__typename` and `id` will
+// always yield the correct `__typename` for the node of the given ID.
+// In theory, this should always be the case, but some remote schemas
+// are broken. For details, see:
+//
+//   - https://github.com/sourcecred/sourcecred/issues/996
+//   - https://github.com/sourcecred/sourcecred/issues/998
+//
+// For an unfaithful field, the `actualTypenames` property lists all the
+// types of objects that can _actually_ be returned when the field is
+// queried. (This set only affects generated Flow types, not runtime
+// semantics.) These must all be object types.
+//
+// It is always sound to represent an actually-faithful field as
+// unfaithful, but doing so may incur additional queries. Marking a type
+// as faithful should be seen as an optimization that may be performed
+// only when the server is abiding by its contract for that field.
+export type Fidelity =
+  | {|+type: "FAITHFUL"|}
+  | {|+type: "UNFAITHFUL", actualTypenames: {|+[Typename]: true|}|};
+
+export function faithful(): Fidelity {
+  return {type: "FAITHFUL"};
+}
+
+export function unfaithful(actualTypenames: $ReadOnlyArray<Typename>) {
+  const actualTypenamesObject: {|[Typename]: true|} = ({}: any);
+  for (const t of actualTypenames) {
+    actualTypenamesObject[t] = true;
+  }
+  return {type: "UNFAITHFUL", actualTypenames: actualTypenamesObject};
+}
+
 // Every object must have exactly one `id` field, and it must have this
 // name.
 const ID_FIELD_NAME = "id";
 
 export function schema(types: {[Typename]: NodeType}): Schema {
-  function assertKind(path, elementTypename, validKinds) {
-    const self = `field ${path.map((x) => JSON.stringify(x)).join("/")}`;
+  function assertKind(
+    path,
+    elementTypename,
+    validKinds,
+    {isFidelity = false} = {}
+  ) {
+    const self =
+      (isFidelity ? "unfaithful typenames list of " : "") +
+      `field ${path.map((x) => JSON.stringify(x)).join("/")}`;
     const elementType = types[elementTypename];
     if (elementType == null) {
       throw new Error(`${self} has unknown type: "${elementTypename}"`);
@@ -95,6 +140,20 @@ export function schema(types: {[Typename]: NodeType}): Schema {
         `${self} has invalid type "${elementTypename}" ` +
           `of kind "${elementType.type}"`
       );
+    }
+  }
+  function validateFidelity(path, fidelity) {
+    switch (fidelity.type) {
+      case "FAITHFUL":
+        break;
+      case "UNFAITHFUL":
+        for (const typename of Object.keys(fidelity.actualTypenames)) {
+          assertKind(path, typename, ["OBJECT"], {isFidelity: true});
+        }
+        break;
+      // istanbul ignore next: unreachable per Flow
+      default:
+        throw new Error((fidelity.type: empty));
     }
   }
   const result = {};
@@ -131,12 +190,14 @@ export function schema(types: {[Typename]: NodeType}): Schema {
                 "OBJECT",
                 "UNION",
               ]);
+              validateFidelity([typename, fieldname], field.fidelity);
               break;
             case "CONNECTION":
               assertKind([typename, fieldname], field.elementType, [
                 "OBJECT",
                 "UNION",
               ]);
+              validateFidelity([typename, fieldname], field.fidelity);
               break;
             case "NESTED":
               for (const eggName of Object.keys(field.eggs)) {
@@ -156,6 +217,10 @@ export function schema(types: {[Typename]: NodeType}): Schema {
                       [typename, fieldname, eggName],
                       egg.elementType,
                       ["OBJECT", "UNION"]
+                    );
+                    validateFidelity(
+                      [typename, fieldname, eggName],
+                      egg.fidelity
                     );
                     break;
                   // istanbul ignore next: unreachable per Flow
@@ -256,12 +321,18 @@ export function primitive(
   return {type: "PRIMITIVE", annotation: annotation || null};
 }
 
-export function node(elementType: Typename): NodeFieldType {
-  return {type: "NODE", elementType};
+export function node(
+  elementType: Typename,
+  fidelity: Fidelity = faithful()
+): NodeFieldType {
+  return {type: "NODE", elementType, fidelity};
 }
 
-export function connection(elementType: Typename): ConnectionFieldType {
-  return {type: "CONNECTION", elementType};
+export function connection(
+  elementType: Typename,
+  fidelity: Fidelity = faithful()
+): ConnectionFieldType {
+  return {type: "CONNECTION", elementType, fidelity};
 }
 
 export function nonNull(elementType: Typename): PrimitiveTypeAnnotation {
