@@ -82,7 +82,6 @@ export class Mirror {
     this._db = db;
     this._schema = schema;
     this._schemaInfo = _buildSchemaInfo(this._schema);
-    _checkAllFaithful(this._schemaInfo);
     this._blacklistedIds = (() => {
       const result: {|[Schema.ObjectId]: true|} = ({}: any);
       for (const id of fullOptions.blacklistedIds) {
@@ -551,7 +550,12 @@ export class Mirror {
     } else if (this._blacklistedIds[result.id]) {
       return null;
     } else {
-      const object = {typename: result.__typename, id: result.id};
+      // If queried via an unfaithful field, typename will be missing;
+      // in that case, register the object with unknown type (`null`).
+      const typename =
+        result.__typename === undefined ? null : result.__typename;
+      const id = result.id;
+      const object = {typename, id};
       this._nontransactionallyRegisterObject(object, (guess) => {
         const s = JSON.stringify;
         const message =
@@ -1018,11 +1022,14 @@ export class Mirror {
   }
 
   /**
-   * Create a GraphQL selection set required to identify the typename
-   * and ID for an object of the given declared type, which may be
-   * either an object type or a union type. This is the minimal
-   * whenever we find a reference to an object that we want to traverse
-   * later.
+   * Create a GraphQL selection set required to identify an object of
+   * the given declared type, which may be either an object type or a
+   * union type. This is the minimal required data whenever we find a
+   * reference to an object that we want to traverse later.
+   *
+   * The `fidelity` argument should be the fidelity of the field being
+   * traversed. If it is faithful, the object's typename will be queried
+   * as well; if it is unfaithful, the typename will not be requested.
    *
    * The resulting GraphQL should be embedded in the context of any node
    * of the provided type. For instance, `_queryShallow("Issue")`
@@ -1041,13 +1048,28 @@ export class Mirror {
    *
    * This function is pure: it does not interact with the database.
    */
-  _queryShallow(typename: Schema.Typename): Queries.Selection[] {
+  _queryShallow(
+    typename: Schema.Typename,
+    fidelity: Schema.Fidelity
+  ): Queries.Selection[] {
     const type = this._schema[typename];
     if (type == null) {
       // Should not be reachable via APIs.
       throw new Error("No such type: " + JSON.stringify(typename));
     }
     const b = Queries.build;
+    const typenameQuery = [];
+    switch (fidelity.type) {
+      case "FAITHFUL":
+        typenameQuery.push(b.field("__typename"));
+        break;
+      case "UNFAITHFUL":
+        // Do not query typename.
+        break;
+      // istanbul ignore next
+      default:
+        throw new Error((fidelity.type: empty));
+    }
     switch (type.type) {
       case "SCALAR":
         throw new Error(
@@ -1059,10 +1081,18 @@ export class Mirror {
           "Cannot create selections for enum type: " + JSON.stringify(typename)
         );
       case "OBJECT":
-        return [b.field("__typename"), b.field("id")];
+        return [...typenameQuery, b.field("id")];
       case "UNION":
         return [
-          b.field("__typename"),
+          // Known issue: This selection set may be empty if the field
+          // is unfaithful and the union type has no clauses. This would
+          // emit an invalid GraphQL query; the GraphQL syntax requires
+          // at least one selection. However, empty union types are also
+          // disallowed in GraphQL, so this should not be a problem on a
+          // well-formed schema. Handling this properly would require
+          // transitively upward-pruning the query and seems unlikely to
+          // be worth it at this time.
+          ...typenameQuery,
           ...this._schemaInfo.unionTypes[
             typename
           ].clauses.map((clause: Schema.Typename) =>
@@ -1192,7 +1222,11 @@ export class Mirror {
       b.field(fieldname, connectionArguments, [
         b.field("totalCount"),
         b.field("pageInfo", {}, [b.field("endCursor"), b.field("hasNextPage")]),
-        b.field("nodes", {}, this._queryShallow(field.elementType)),
+        b.field(
+          "nodes",
+          {},
+          this._queryShallow(field.elementType, field.fidelity)
+        ),
       ]),
     ];
   }
@@ -1357,7 +1391,7 @@ export class Mirror {
               return b.field(
                 fieldname,
                 {},
-                this._queryShallow(field.elementType)
+                this._queryShallow(field.elementType, field.fidelity)
               );
             case "CONNECTION":
               // Not handled by this function.
@@ -1375,7 +1409,10 @@ export class Mirror {
                       return b.field(
                         childFieldname,
                         {},
-                        this._queryShallow(childField.elementType)
+                        this._queryShallow(
+                          childField.elementType,
+                          childField.fidelity
+                        )
                       );
                     // istanbul ignore next
                     default:
@@ -2222,7 +2259,7 @@ type EndCursor = string | null;
 
 type PrimitiveResult = string | number | boolean | null;
 type NodeFieldResult = {|
-  +__typename: Schema.Typename,
+  +__typename?: Schema.Typename, // omitted for queries via unfaithful fields
   +id: Schema.ObjectId,
 |} | null;
 type ConnectionFieldResult = {|
@@ -2398,55 +2435,4 @@ export function _makeSingleUpdateFunction<Args: BindingDictionary>(
       );
     }
   };
-}
-
-/**
- * Ensure that the provided schema only has node fields of faithful
- * fidelity.
- */
-function _checkAllFaithful(schemaInfo) {
-  function check(path, field) {
-    if (field.fidelity.type === "FAITHFUL") {
-      return;
-    }
-    const pathMsg = path.join(".");
-    throw new Error(`Unfaithful fields not yet supported: ${pathMsg}`);
-  }
-  for (const typename of Object.keys(schemaInfo.objectTypes)) {
-    const type = schemaInfo.objectTypes[typename];
-    const fields = type.fields;
-    for (const fieldname of Object.keys(fields)) {
-      const field = fields[fieldname];
-      switch (field.type) {
-        case "ID":
-          continue;
-        case "PRIMITIVE":
-          continue;
-        case "NODE":
-          check([typename, fieldname], field);
-          break;
-        case "CONNECTION":
-          check([typename, fieldname], field);
-          break;
-        case "NESTED":
-          for (const eggName of Object.keys(field.eggs)) {
-            const egg = field.eggs[eggName];
-            switch (egg.type) {
-              case "PRIMITIVE":
-                break;
-              case "NODE":
-                check([typename, fieldname, eggName], egg);
-                break;
-              // istanbul ignore next
-              default:
-                throw new Error((egg.type: empty));
-            }
-          }
-          break;
-        // istanbul ignore next
-        default:
-          throw new Error((field.type: empty));
-      }
-    }
-  }
 }

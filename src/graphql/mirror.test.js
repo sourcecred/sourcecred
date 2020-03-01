@@ -77,14 +77,21 @@ describe("graphql/mirror", () => {
       Reaction: s.object({
         id: s.id(),
         content: s.primitive(s.nonNull("ReactionContent")),
-        user: s.node("User"),
+        user: s.node("User", s.unfaithful(["User", "Organization"])),
+      }),
+      MultiAuthorReaction: s.object({
+        // Not a real GitHub entity; used to exhibit an unfaithful
+        // connection field.
+        id: s.id(),
+        content: s.primitive(s.nonNull("ReactionContent")),
+        users: s.connection("User", s.unfaithful(["User", "Organization"])),
       }),
       Commit: s.object({
         id: s.id(),
         oid: s.primitive(),
         author: /* GitActor */ s.nested({
           date: s.primitive(s.nonNull("Date")),
-          user: s.node("User"),
+          user: s.node("User", s.unfaithful(["User", "Bot"])),
         }),
       }),
       IssueTimelineItem: s.union(issueTimelineItemClauses()),
@@ -209,55 +216,6 @@ describe("graphql/mirror", () => {
         expect(() => {
           new Mirror(db, schema, {blacklistedIds: ["ominous"]});
         }).toThrow("incompatible schema, options, or version");
-      });
-
-      describe("rejects a schema with unfaithful fields", () => {
-        it("of node type", () => {
-          const s = Schema;
-          const schema = s.schema({
-            Foo: s.object({
-              id: s.id(),
-              bar: s.node("Foo", s.unfaithful(["Foo", "Bar"])),
-            }),
-            Bar: s.object({id: s.id()}),
-          });
-          const db = new Database(":memory:");
-          expect(() => {
-            new Mirror(db, schema);
-          }).toThrow("Unfaithful fields not yet supported: Foo.bar");
-        });
-
-        it("of connection type", () => {
-          const s = Schema;
-          const schema = s.schema({
-            Foo: s.object({
-              id: s.id(),
-              bar: s.connection("Foo", s.unfaithful(["Foo", "Bar"])),
-            }),
-            Bar: s.object({id: s.id()}),
-          });
-          const db = new Database(":memory:");
-          expect(() => {
-            new Mirror(db, schema);
-          }).toThrow("Unfaithful fields not yet supported: Foo.bar");
-        });
-
-        it("of egg-node type", () => {
-          const s = Schema;
-          const schema = s.schema({
-            Foo: s.object({
-              id: s.id(),
-              bar: s.nested({
-                baz: s.node("Foo", s.unfaithful(["Foo", "Bar"])),
-              }),
-            }),
-            Bar: s.object({id: s.id()}),
-          });
-          const db = new Database(":memory:");
-          expect(() => {
-            new Mirror(db, schema);
-          }).toThrow("Unfaithful fields not yet supported: Foo.bar.baz");
-        });
       });
     });
 
@@ -1390,37 +1348,48 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         expect(() => {
-          mirror._queryShallow("Wat");
+          mirror._queryShallow("Wat", Schema.faithful());
         }).toThrow('No such type: "Wat"');
       });
       it("fails when given a scalar type", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         expect(() => {
-          mirror._queryShallow("Date");
+          mirror._queryShallow("Date", Schema.faithful());
         }).toThrow('Cannot create selections for scalar type: "Date"');
       });
       it("fails when given an enum type", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         expect(() => {
-          mirror._queryShallow("ReactionContent");
+          mirror._queryShallow("ReactionContent", Schema.faithful());
         }).toThrow('Cannot create selections for enum type: "ReactionContent"');
       });
       it("handles an object type", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const b = Queries.build;
-        expect(mirror._queryShallow("Issue")).toEqual([
+        expect(mirror._queryShallow("Issue", Schema.faithful())).toEqual([
           b.field("__typename"),
           b.field("id"),
         ]);
+      });
+      it("handles an object type along unfaithful edge", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const b = Queries.build;
+        expect(
+          mirror._queryShallow(
+            "User",
+            Schema.unfaithful(["User", "Organization"])
+          )
+        ).toEqual([b.field("id")]);
       });
       it("handles a union type", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const b = Queries.build;
-        expect(mirror._queryShallow("Actor")).toEqual([
+        expect(mirror._queryShallow("Actor", Schema.faithful())).toEqual([
           b.field("__typename"),
           b.inlineFragment("User", [b.field("id")]),
           b.inlineFragment("Bot", [b.field("id")]),
@@ -2002,6 +1971,39 @@ describe("graphql/mirror", () => {
           has_next_page: +false,
         });
       });
+      it("stores data from an unfaithful connection field", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({
+          typename: "MultiAuthorReaction",
+          id: "reaction:#1",
+        });
+        const updateId = mirror._createUpdate(new Date(123));
+        const queryResult = {
+          totalCount: 2,
+          pageInfo: {
+            hasNextPage: false,
+            endCursor: "cursor:reaction#1.users@update1",
+          },
+          nodes: [{id: "user:alice"}, {id: "org:hmm"}],
+        };
+        mirror._updateConnection(updateId, "reaction:#1", "users", queryResult);
+        const objects = db
+          .prepare("SELECT id, typename FROM objects ORDER BY id, typename")
+          .all();
+        expect(objects).toEqual([
+          {id: "org:hmm", typename: null},
+          {id: "reaction:#1", typename: "MultiAuthorReaction"},
+          {id: "user:alice", typename: null},
+        ]);
+        const connectionEntries = db
+          .prepare("SELECT child_id FROM connection_entries ORDER BY idx")
+          .all();
+        expect(connectionEntries).toEqual([
+          {child_id: "user:alice"},
+          {child_id: "org:hmm"},
+        ]);
+      });
     });
 
     describe("_queryOwnData", () => {
@@ -2055,7 +2057,7 @@ describe("graphql/mirror", () => {
           b.field("oid"),
           b.field("author", {}, [
             b.field("date"),
-            b.field("user", {}, [b.field("__typename"), b.field("id")]),
+            b.field("user", {}, [b.field("id")]),
           ]),
         ]);
       });
@@ -2323,6 +2325,42 @@ describe("graphql/mirror", () => {
           {id: "issue:#2", fieldname: "url", value: "null"},
           {id: "issue:#3", fieldname: "title", value: null},
           {id: "issue:#3", fieldname: "url", value: null},
+        ]);
+      });
+      it("stores data from an unfaithful node field", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        mirror.registerObject({typename: "Reaction", id: "reaction:#1"});
+        const updateId = mirror._createUpdate(new Date(123));
+
+        mirror._updateOwnData(updateId, [
+          {
+            __typename: "Reaction",
+            id: "reaction:#1",
+            content: "HOORAY",
+            user: {id: "org:hmm"},
+          },
+        ]);
+        expect(
+          db
+            .prepare("SELECT typename, id FROM objects ORDER BY typename, id")
+            .all()
+        ).toEqual([
+          {typename: null, id: "org:hmm"},
+          {typename: "Reaction", id: "reaction:#1"},
+        ]);
+        expect(
+          db
+            .prepare(
+              "SELECT objects.id AS id, fieldname, value " +
+                "FROM objects LEFT OUTER JOIN primitives " +
+                "ON objects.id = primitives.object_id " +
+                "ORDER BY id, fieldname"
+            )
+            .all()
+        ).toEqual([
+          {id: "org:hmm", fieldname: null, value: null},
+          {id: "reaction:#1", fieldname: "content", value: '"HOORAY"'},
         ]);
       });
       it("stores data with non-`null` nested fields", () => {
@@ -3850,6 +3888,7 @@ describe("graphql/mirror", () => {
         Array.from(
           new Set([
             "Reaction",
+            "MultiAuthorReaction",
             "Repository",
             "Issue",
             "IssueComment",
@@ -3877,7 +3916,9 @@ describe("graphql/mirror", () => {
       expect(result.objectTypes["Commit"].nestedFields).toEqual({
         author: {
           primitives: {date: Schema.primitive(Schema.nonNull("Date"))},
-          nodes: {user: Schema.node("User")},
+          nodes: {
+            user: Schema.node("User", Schema.unfaithful(["User", "Bot"])),
+          },
         },
       });
     });

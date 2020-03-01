@@ -265,7 +265,6 @@ exports[`graphql/mirror Mirror _updateOwnData snapshot test for actual GitHub qu
       id
       content
       user {
-        __typename
         id
       }
     }
@@ -278,7 +277,6 @@ exports[`graphql/mirror Mirror _updateOwnData snapshot test for actual GitHub qu
       author {
         date
         user {
-          __typename
           id
         }
       }
