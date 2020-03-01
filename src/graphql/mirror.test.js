@@ -708,6 +708,7 @@ describe("graphql/mirror", () => {
         };
         expect(() => {
           mirror._queryFromPlan(plan, {
+            typenamesLimit: 10,
             nodesLimit: 10,
             nodesOfTypeLimit: 5,
             connectionLimit: 5,
@@ -718,28 +719,11 @@ describe("graphql/mirror", () => {
             '"Issue" vs. "Repository"'
         );
       });
-      it("errors if given any typename requests", () => {
-        const db = new Database(":memory:");
-        const mirror = new Mirror(db, buildGithubSchema());
-        const plan = {
-          typenames: ["hmmm"],
-          objects: [],
-          connections: [],
-        };
-        expect(() => {
-          mirror._queryFromPlan(plan, {
-            nodesLimit: 10,
-            nodesOfTypeLimit: 5,
-            connectionLimit: 5,
-            connectionPageSize: 23,
-          });
-        }).toThrow("Typename queries not yet supported");
-      });
       it("creates a good query", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         const plan = {
-          typenames: [],
+          typenames: ["hmm#1", "hmm#2", "hmm#3", "hmm#4", "hmm#5"],
           objects: [
             {typename: "Issue", id: "i#1"},
             {typename: "Repository", id: "repo#2"},
@@ -795,6 +779,7 @@ describe("graphql/mirror", () => {
           ],
         };
         const actual = mirror._queryFromPlan(plan, {
+          typenamesLimit: 3,
           nodesLimit: 4,
           nodesOfTypeLimit: 2,
           connectionLimit: 5,
@@ -802,6 +787,21 @@ describe("graphql/mirror", () => {
         });
         const b = Queries.build;
         expect(actual).toEqual([
+          b.alias(
+            "typenames_0",
+            b.field(
+              "nodes",
+              {ids: b.list([b.literal("hmm#1"), b.literal("hmm#2")])},
+              [b.field("__typename"), b.field("id")]
+            )
+          ),
+          b.alias(
+            "typenames_1",
+            b.field("nodes", {ids: b.list([b.literal("hmm#3")])}, [
+              b.field("__typename"),
+              b.field("id"),
+            ])
+          ),
           b.alias(
             "owndata_0",
             b.field(
@@ -1261,6 +1261,7 @@ describe("graphql/mirror", () => {
         expect(spyQueryFromPlan.mock.calls[0]).toEqual([
           spyFindOutdated.mock.results[0].value,
           {
+            typenamesLimit: 3,
             nodesOfTypeLimit: 2,
             nodesLimit: 3,
             connectionLimit: 4,
@@ -1270,6 +1271,7 @@ describe("graphql/mirror", () => {
         expect(spyQueryFromPlan.mock.calls[1]).toEqual([
           spyFindOutdated.mock.results[1].value,
           {
+            typenamesLimit: 3,
             nodesOfTypeLimit: 2,
             nodesLimit: 3,
             connectionLimit: 4,
@@ -2581,6 +2583,16 @@ describe("graphql/mirror", () => {
         const format = (body: Queries.Body): string =>
           Queries.stringify.body(body, Queries.multilineLayout("  "));
         expect(format([query])).toMatchSnapshot();
+      });
+    });
+
+    describe("_queryTypename", () => {
+      it("generates a query with ID and typename", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        const query = mirror._queryTypename();
+        const b = Queries.build;
+        expect(query).toEqual([b.field("__typename"), b.field("id")]);
       });
     });
 
