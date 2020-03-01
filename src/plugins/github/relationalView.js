@@ -352,15 +352,16 @@ export class RelationalView {
 
   _addCommit(json: T.Commit): CommitAddress {
     const commitStack = [json]; // reified recursion to avoid stack overflow
-    let originalAddress;
+    let originalAddress = null;
     while (true) {
       const json = commitStack.pop();
       if (json == null) {
+        // End of stack.
         break;
       }
       const address = {type: N.COMMIT_TYPE, id: json.id};
       const rawAddress = N.toRaw(address);
-      if (originalAddress === undefined) {
+      if (originalAddress == null) {
         originalAddress = address;
       }
       // This fast-return is critical, because a single commit may appear
@@ -410,7 +411,8 @@ export class RelationalView {
         }
       }
     }
-    return originalAddress;
+    // must have gone through at least one loop iteration
+    return NullUtil.get(originalAddress);
   }
 
   _addPull(repo: RepoAddress, json: T.PullRequest): PullAddress {
