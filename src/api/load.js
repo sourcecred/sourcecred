@@ -17,6 +17,7 @@ export type LoadOptions = {|
   +plugins: $ReadOnlyArray<PluginDeclaration>,
   +sourcecredDirectory: string,
   +githubToken: ?GithubToken,
+  +initiativesDirectory: ?string,
 |};
 
 /**
@@ -32,12 +33,14 @@ export async function load(
     project,
     params,
     weightsOverrides,
+    initiativesDirectory,
   } = options;
   const data = new DataDirectory(sourcecredDirectory);
   const context = new LoadContext({
     cache: (data: CacheProvider),
     githubToken,
     reporter,
+    initiativesDirectory,
   });
   const result = await context.load(project, {
     params: params || {},

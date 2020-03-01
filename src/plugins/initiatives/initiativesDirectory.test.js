@@ -26,6 +26,7 @@ import {
 const exampleInitiativeFile = (): InitiativeFile => ({
   title: "Sample initiative",
   timestampIso: ("2020-01-08T22:01:57.766Z": any),
+  weight: {incomplete: 360, complete: 420},
   completed: false,
   champions: ["http://foo.bar/champ"],
   contributions: ["http://foo.bar/contrib"],
