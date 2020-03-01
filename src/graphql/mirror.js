@@ -536,6 +536,9 @@ export class Mirror {
   _findOutdated(since: Date): QueryPlan {
     const db = this._db;
     return _inTransaction(db, () => {
+      // All objects must have recorded typenames due to the `NOT NULL`
+      // constraint on `typename` column of the `objects` table.
+      const typenames: $PropertyType<QueryPlan, "typenames"> = [];
       const objects: $PropertyType<QueryPlan, "objects"> = db
         .prepare(
           dedent`\
@@ -575,7 +578,7 @@ export class Mirror {
           delete result.neverUpdated;
           return result;
         });
-      return {objects, connections};
+      return {typenames, objects, connections};
     });
   }
 
@@ -605,6 +608,9 @@ export class Mirror {
       +connectionPageSize: number,
     |}
   ): Queries.Selection[] {
+    if (queryPlan.typenames.length > 0) {
+      throw new Error("Typename queries not yet supported");
+    }
     // Group objects by type, so that we have to specify each type's
     // fieldset fewer times (only once per `nodesOfTypeLimit` nodes
     // instead of for every node).
@@ -2051,6 +2057,7 @@ type NetworkLogId = number;
  * A set of objects and connections that should be updated.
  */
 type QueryPlan = {|
+  +typenames: $ReadOnlyArray<Schema.ObjectId>,
   +objects: $ReadOnlyArray<{|
     +typename: Schema.Typename,
     +id: Schema.ObjectId,
