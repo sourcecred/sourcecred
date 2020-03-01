@@ -303,6 +303,17 @@ describe("graphql/mirror", () => {
     });
 
     describe("registerObject", () => {
+      function countFields(db) {
+        const stmt = db.prepare(
+          dedent`\
+            SELECT
+                (SELECT COUNT(1) FROM primitives) AS primitives,
+                (SELECT COUNT(1) FROM links) AS links,
+                (SELECT COUNT(1) FROM connections) AS connections
+          `
+        );
+        return stmt.get();
+      }
       it("adds an object and its connections, links, and primitives", () => {
         const db = new Database(":memory:");
         const schema = buildGithubSchema();
@@ -404,6 +415,60 @@ describe("graphql/mirror", () => {
             .pluck()
             .get()
         ).toBe(0);
+      });
+      it("upgrades an object's type from unknown to known", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const objectId = "issue:#1";
+        mirror.registerObject({typename: null, id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 0,
+          links: 0,
+          connections: 0,
+        });
+        mirror.registerObject({typename: "Issue", id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 2,
+          links: 2,
+          connections: 2,
+        });
+      });
+      it("doesn't touch an existing object with no typename", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const objectId = "issue:#1";
+        mirror.registerObject({typename: null, id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 0,
+          links: 0,
+          connections: 0,
+        });
+        mirror.registerObject({typename: null, id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 0,
+          links: 0,
+          connections: 0,
+        });
+      });
+      it("doesn't touch an object whose typename is known but not provided", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const objectId = "issue:#1";
+        mirror.registerObject({typename: "Issue", id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 2,
+          links: 2,
+          connections: 2,
+        });
+        mirror.registerObject({typename: null, id: objectId});
+        expect(countFields(db)).toEqual({
+          primitives: 2,
+          links: 2,
+          connections: 2,
+        });
       });
       it("doesn't touch an existing object with the same typename", () => {
         const db = new Database(":memory:");
@@ -603,6 +668,19 @@ describe("graphql/mirror", () => {
           ],
         };
         expect(actual).toEqual(expected);
+      });
+
+      it("for objects without typename, requests typename only", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        mirror.registerObject({typename: null, id: "foo"});
+        const actual = mirror._findOutdated(new Date(123));
+        expect(actual).toEqual({
+          typenames: ["foo"],
+          objects: [],
+          connections: [],
+        });
       });
     });
 
@@ -1965,6 +2043,28 @@ describe("graphql/mirror", () => {
         expect(() => {
           mirror._updateOwnData(updateId, [{__typename: "Actor", id: "wut"}]);
         }).toThrow('Cannot update data for non-object type: "Actor" (UNION)');
+      });
+      it("fails given an object with unset typename", () => {
+        const db = new Database(":memory:");
+        const schema = buildGithubSchema();
+        const mirror = new Mirror(db, schema);
+        const updateId = mirror._createUpdate(new Date(123));
+        // The public APIs don't yet have any way to get a mirror into a
+        // state where a node's typename is unknown, so we patch the DB.
+        mirror.registerObject({typename: "Issue", id: "issue:#1"});
+        db.prepare("UPDATE objects SET typename = NULL").run();
+        expect(() => {
+          mirror._updateOwnData(updateId, [
+            {
+              __typename: "Issue",
+              id: "issue:#1",
+              url: "url://issue/1",
+              author: null,
+              repository: null,
+              title: "hello",
+            },
+          ]);
+        }).toThrow('Cannot update data before typename known: "issue:#1"');
       });
       it("fails given a nonexistent object with a link to itself", () => {
         // A naive implementation might register the link targets as
