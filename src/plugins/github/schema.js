@@ -92,7 +92,7 @@ export default function schema(): Schema.Schema {
     Reaction: s.object({
       id: s.id(),
       content: s.primitive(s.nonNull("ReactionContent")),
-      user: s.node("User"),
+      user: s.node("User", s.unfaithful(["User", "Organization"])),
       createdAt: s.primitive(s.nonNull("DateTime")),
     }),
     Ref: s.object({
@@ -115,7 +115,7 @@ export default function schema(): Schema.Schema {
         // The GitHub schema indicates that `date` can be null, but does
         // not indicate when this might be the case.
         date: s.primitive(s.nullable("GitTimestamp")),
-        user: s.node("User"),
+        user: s.node("User", s.unfaithful(["User", "Bot"])),
       }),
       parents: s.connection("Commit"),
       // In contrast to the author.date, this is both nonNull and is
