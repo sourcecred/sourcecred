@@ -316,6 +316,7 @@ describe("plugins/github/relationalView", () => {
           __typename: "PullRequest",
           additions: 0,
           author: userNode,
+          baseRefName: "master",
           body: "",
           comments: [],
           createdAt: dateString,
