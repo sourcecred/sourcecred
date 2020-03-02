@@ -77,6 +77,7 @@ export type PullRequest = {|
   +__typename: "PullRequest",
   +additions: Int,
   +author: null | Actor,
+  +baseRefName: String,
   +body: String,
   +comments: $ReadOnlyArray<null | IssueComment>,
   +createdAt: DateTime,

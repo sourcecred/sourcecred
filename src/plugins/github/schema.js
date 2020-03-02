@@ -63,6 +63,7 @@ export default function schema(): Schema.Schema {
       reviews: s.connection("PullRequestReview"),
       reactions: s.connection("Reaction"),
       createdAt: s.primitive(s.nonNull("DateTime")),
+      baseRefName: s.primitive(s.nonNull("String")),
     }),
     IssueComment: s.object({
       id: s.id(),
