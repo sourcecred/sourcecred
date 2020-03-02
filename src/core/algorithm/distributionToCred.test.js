@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress} from "../graph";
-import {distributionToCred} from "./distributionToCred";
+import {distributionToCred, toJSON, fromJSON} from "./distributionToCred";
 
 describe("src/core/algorithm/distributionToCred", () => {
   const na = (...parts) => NodeAddress.fromParts(parts);
@@ -126,6 +126,61 @@ describe("src/core/algorithm/distributionToCred", () => {
         intervals: [],
         intervalCredScores: [],
       });
+    });
+  });
+  describe("to/from JSON", () => {
+    const exampleCred = () => {
+      const ds = [
+        {
+          interval: {startTimeMs: 0, endTimeMs: 10},
+          intervalWeight: 2,
+          distribution: new Float64Array([0.5, 0.5]),
+        },
+        {
+          interval: {startTimeMs: 10, endTimeMs: 20},
+          intervalWeight: 10,
+          distribution: new Float64Array([0.9, 0.1]),
+        },
+      ];
+      const nodeOrder = [na("foo"), na("bar")];
+      return distributionToCred(ds, nodeOrder, [na("bar")]);
+    };
+    it("satisfies round-trip equality", () => {
+      const json = toJSON(exampleCred());
+      const result = fromJSON(json);
+      expect(result).toEqual(exampleCred());
+    });
+    it("snapshots as expected", () => {
+      expect(toJSON(exampleCred())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "type": "sourcecred/timelineCredScores",
+            "version": "0.1.0",
+          },
+          Object {
+            "intervalCredScores": Array [
+              Array [
+                2,
+                2,
+              ],
+              Array [
+                90,
+                10,
+              ],
+            ],
+            "intervals": Array [
+              Object {
+                "endTimeMs": 10,
+                "startTimeMs": 0,
+              },
+              Object {
+                "endTimeMs": 20,
+                "startTimeMs": 10,
+              },
+            ],
+          },
+        ]
+      `);
     });
   });
 });
