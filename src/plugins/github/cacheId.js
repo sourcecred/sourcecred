@@ -31,7 +31,7 @@ export function cacheIdForRepoId(repoId: RepoId): CacheId {
   // only `[0-9A-Za-z_.-]` and so is valid on all major filesystems.
   const owner = repoId.owner.toLowerCase();
   const name = repoId.name.toLowerCase();
-  if (owner.indexOf("_") !== -1) {
+  if (owner.includes("_")) {
     throw new Error(
       "unexpected underscore in GitHub owner name would be ambiguous: " +
         repoIdToString(repoId)
