@@ -1,7 +1,7 @@
 // @flow
 
 import {max, min} from "d3-array";
-import sortBy from "lodash.sortby";
+import sortBy from "../util/sortBy";
 import {utcWeek} from "d3-time";
 import * as NullUtil from "../util/null";
 import type {Node, Edge, Graph} from "./graph";
@@ -30,6 +30,8 @@ export type GraphInterval = {|
 
 export type GraphIntervalPartition = $ReadOnlyArray<GraphInterval>;
 
+type TimefulNode = {|...Node, timestampMs: number|};
+
 /**
  * Partition a graph based on time intervals.
  *
@@ -40,7 +42,9 @@ export type GraphIntervalPartition = $ReadOnlyArray<GraphInterval>;
  */
 export function partitionGraph(graph: Graph): GraphIntervalPartition {
   const nodes = Array.from(graph.nodes());
-  const timefulNodes = nodes.filter((x) => x.timestampMs != null);
+  const timefulNodes: $ReadOnlyArray<TimefulNode> = (nodes.filter(
+    (x) => x.timestampMs != null
+  ): any);
   const sortedNodes = sortBy(timefulNodes, (x) => x.timestampMs);
   const edges = Array.from(graph.edges({showDangling: false}));
   const sortedEdges = sortBy(edges, (x) => x.timestampMs);

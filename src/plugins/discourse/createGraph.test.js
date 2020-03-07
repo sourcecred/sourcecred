@@ -1,6 +1,6 @@
 // @flow
 
-import sortBy from "lodash.sortby";
+import sortBy from "../../util/sortBy";
 import * as NullUtil from "../../util/null";
 import type {ReadRepository} from "./mirrorRepository";
 import type {Topic, Post, PostId, TopicId, LikeAction} from "./fetch";

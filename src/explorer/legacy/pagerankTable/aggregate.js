@@ -1,7 +1,7 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
-import sortBy from "lodash.sortby";
+import sortBy from "../../../util/sortBy";
 import stringify from "json-stable-stringify";
 import * as MapUtil from "../../../util/map";
 import * as NullUtil from "../../../util/null";
