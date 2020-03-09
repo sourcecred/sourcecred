@@ -1,6 +1,5 @@
 // @flow
 
-import base64url from "base64url";
 import {TaskReporter} from "../../util/taskReporter";
 import {type CacheProvider} from "../../backend/cache";
 import {type WeightedGraph} from "../../core/weightedGraph";
@@ -14,6 +13,8 @@ import {DiscourseReferenceDetector} from "./referenceDetector";
 import {createGraph as _createGraph} from "./createGraph";
 import {declaration} from "./declaration";
 import {Fetcher} from "./fetch";
+import {parseServerUrl} from "./models";
+import {cacheKey} from "./cacheKey";
 
 export interface Loader {
   declaration(): PluginDeclaration;
@@ -73,7 +74,7 @@ async function repository(
   cache: CacheProvider,
   serverUrl: string
 ): Promise<SqliteMirrorRepository> {
-  // TODO: should replace base64url with hex, to be case insensitive.
-  const db = await cache.database(base64url.encode(serverUrl));
+  const normalizedUrl = parseServerUrl(serverUrl);
+  const db = await cache.database(cacheKey(normalizedUrl));
   return new SqliteMirrorRepository(db, serverUrl);
 }
