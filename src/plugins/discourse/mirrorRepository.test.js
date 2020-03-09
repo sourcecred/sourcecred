@@ -4,6 +4,7 @@ import Database from "better-sqlite3";
 import fs from "fs";
 import tmp from "tmp";
 import {SqliteMirrorRepository} from "./mirrorRepository";
+import {createVersion, stringifyConfig} from "./mirrorSchema";
 import type {Topic, Post} from "./fetch";
 
 describe("plugins/discourse/mirrorRepository", () => {
@@ -18,12 +19,47 @@ describe("plugins/discourse/mirrorRepository", () => {
     const data = fs.readFileSync(filename).toJSON();
 
     expect(() => new SqliteMirrorRepository(db, url2)).toThrow(
-      "incompatible server or version"
+      "already populated with incompatible server"
     );
     expect(fs.readFileSync(filename).toJSON()).toEqual(data);
 
     expect(() => new SqliteMirrorRepository(db, url1)).not.toThrow();
     expect(fs.readFileSync(filename).toJSON()).toEqual(data);
+  });
+
+  it("should fail if there's no upgrade path", () => {
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+
+    // Manually create a "fake" database
+    for (const sql of createVersion.meta()) {
+      db.prepare(sql).run();
+    }
+    db.prepare("REPLACE INTO meta (zero, config) VALUES (0, ?)").run(
+      stringifyConfig({version: "discourse_mirror_fake", serverUrl: url})
+    );
+
+    // Fail to upgrade.
+    expect(() => new SqliteMirrorRepository(db, url)).toThrow(
+      "already populated with incompatible version"
+    );
+  });
+
+  it("should upgrade from v5", () => {
+    const db = new Database(":memory:");
+    const serverUrl = "http://example.com";
+    const version = "discourse_mirror_v5";
+
+    // Manually create a v5 database
+    for (const sql of createVersion[version]()) {
+      db.prepare(sql).run();
+    }
+    db.prepare("REPLACE INTO meta (zero, config) VALUES (0, ?)").run(
+      stringifyConfig({version, serverUrl})
+    );
+
+    // Silently upgrade.
+    expect(() => new SqliteMirrorRepository(db, serverUrl)).not.toThrow();
   });
 
   it("findUsername does a case-insensitive query", () => {

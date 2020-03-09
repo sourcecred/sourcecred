@@ -1,8 +1,14 @@
 // @flow
 
 import type {Database} from "better-sqlite3";
-import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
+import {
+  SCHEMA_VERSION,
+  upgrades,
+  createVersion,
+  stringifyConfig,
+  parseConfig,
+} from "./mirrorSchema";
 import type {
   CategoryId,
   TopicId,
@@ -12,9 +18,6 @@ import type {
   LikeAction,
 } from "./fetch";
 
-// The version should be bumped any time the database schema is changed,
-// so that the cache will be properly invalidated.
-const VERSION = "discourse_mirror_v6";
 const DEFINITION_CHECK_KEY = "definition_check";
 
 /**
@@ -172,83 +175,60 @@ export class SqliteMirrorRepository
     }
   }
 
+  _runAll(statements: $ReadOnlyArray<string>) {
+    for (const sql of statements) {
+      this._db.prepare(sql).run();
+    }
+  }
+
   _initialize(serverUrl: string) {
     const db = this._db;
     // We store the config in a singleton table `meta`, whose unique row
     // has primary key `0`. Only the first ever insert will succeed; we
     // are locked into the first config.
-    db.prepare(
-      dedent`\
-        CREATE TABLE IF NOT EXISTS meta (
-            zero INTEGER PRIMARY KEY,
-            config TEXT NOT NULL
-        )
-      `
-    ).run();
+    this._runAll(createVersion.meta());
 
-    const config = stringify({
-      version: VERSION,
-      serverUrl: serverUrl,
+    const expectedConfig = stringifyConfig({
+      version: SCHEMA_VERSION,
+      serverUrl,
     });
 
-    const existingConfig: string | void = db
+    const existingConfig: ?string = db
       .prepare("SELECT config FROM meta")
       .pluck()
       .get();
-    if (existingConfig === config) {
-      // Already set up; nothing to do.
-      return;
-    } else if (existingConfig !== undefined) {
-      throw new Error(
-        "Database already populated with incompatible server or version"
-      );
-    }
-    db.prepare("INSERT INTO meta (zero, config) VALUES (0, ?)").run(config);
 
-    const tables = [
-      dedent`\
-        CREATE TABLE sync_heads (
-          key TEXT PRIMARY KEY,
-          timestamp_ms INTEGER NOT NULL
-        )`,
-      "CREATE TABLE users (username TEXT PRIMARY KEY)",
-      dedent`\
-        CREATE TABLE topics (
-            id INTEGER PRIMARY KEY,
-            category_id INTEGER NOT NULL,
-            title TEXT NOT NULL,
-            timestamp_ms INTEGER NOT NULL,
-            bumped_ms INTEGER NOT NULL,
-            author_username TEXT NOT NULL,
-            FOREIGN KEY(author_username) REFERENCES users(username)
-        )
-      `,
-      dedent`\
-        CREATE TABLE posts (
-            id INTEGER PRIMARY KEY,
-            timestamp_ms INTEGER NOT NULL,
-            author_username TEXT NOT NULL,
-            topic_id INTEGER NOT NULL,
-            index_within_topic INTEGER NOT NULL,
-            reply_to_post_index INTEGER,
-            cooked TEXT NOT NULL,
-            FOREIGN KEY(topic_id) REFERENCES topics(id),
-            FOREIGN KEY(author_username) REFERENCES users(username)
-        )
-      `,
-      dedent`\
-        CREATE TABLE likes (
-          username TEXT NOT NULL,
-          post_id INTEGER NOT NULL,
-          timestamp_ms INTEGER NOT NULL,
-          CONSTRAINT username_post PRIMARY KEY (username, post_id),
-          FOREIGN KEY(post_id) REFERENCES posts(id),
-          FOREIGN KEY(username) REFERENCES users(username)
-        )`,
-    ];
-    for (const sql of tables) {
-      db.prepare(sql).run();
+    if (expectedConfig === existingConfig) {
+      // Already latest, nothing to do.
+      return;
     }
+
+    if (existingConfig == null) {
+      this._runAll(createVersion[SCHEMA_VERSION]());
+    } else {
+      let {version, serverUrl: existingServerUrl} = parseConfig(existingConfig);
+      if (serverUrl !== existingServerUrl) {
+        throw new Error(
+          `Database already populated with incompatible server ${existingServerUrl}`
+        );
+      }
+
+      while (version !== SCHEMA_VERSION) {
+        if (!upgrades[version]) {
+          throw new Error(
+            `Database already populated with incompatible version '${version}'`
+          );
+        }
+
+        const {changes, target} = upgrades[version];
+        this._runAll(changes);
+        version = target;
+      }
+    }
+
+    db.prepare("REPLACE INTO meta (zero, config) VALUES (0, ?)").run(
+      expectedConfig
+    );
   }
 
   syncHeads(): SyncHeads {
