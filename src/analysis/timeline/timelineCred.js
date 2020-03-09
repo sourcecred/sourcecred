@@ -1,7 +1,7 @@
 // @flow
 
 import {sum} from "d3-array";
-import sortBy from "lodash.sortby";
+import sortBy from "../../util/sortBy";
 import * as NullUtil from "../../util/null";
 import * as MapUtil from "../../util/map";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
@@ -136,7 +136,9 @@ export class TimelineCred {
       const match = (a) => prefixes.some((p) => NodeAddress.hasPrefix(a, p));
       addresses = addresses.filter(match);
     }
-    const credNodes = addresses.map((a) => this.credNode(a));
+    const credNodes = NullUtil.filterList(
+      addresses.map((a) => this.credNode(a))
+    );
     return sortBy(credNodes, (x: CredNode) => -x.total);
   }
 

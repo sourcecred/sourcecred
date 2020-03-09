@@ -2,7 +2,7 @@
 
 import React from "react";
 import {shallow} from "enzyme";
-import sortBy from "lodash.sortby";
+import sortBy from "../../../util/sortBy";
 import * as NullUtil from "../../../util/null";
 import {TableRow} from "./TableRow";
 import {AggregationRowList} from "./Aggregation";

@@ -1,7 +1,7 @@
 // @flow
 
 import React from "react";
-import sortBy from "lodash.sortby";
+import sortBy from "../../../util/sortBy";
 
 import {WeightConfig} from "../../weights/WeightConfig";
 import {WeightsFileManager} from "../../weights/WeightsFileManager";
