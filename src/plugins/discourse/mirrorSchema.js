@@ -5,7 +5,7 @@ import dedent from "../../util/dedent";
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
-export const SCHEMA_VERSION = "discourse_mirror_v6";
+export const SCHEMA_VERSION = "discourse_mirror_v7";
 
 type Upgrade = {|
   +target: string,
@@ -25,6 +25,17 @@ export const parseConfig = (json: string): VersionConfig => JSON.parse(json);
 
 // Queries to upgrade from a previous version to the target version.
 export const upgrades: Upgrades = {
+  // Perf: this is important to make `findPostInTopic` faster.
+  // Which is in a hot loop for creating graphs.
+  discourse_mirror_v6: {
+    target: "discourse_mirror_v7",
+    changes: [
+      dedent`\
+        CREATE UNIQUE INDEX idx_posts__topic_id__index_within_topic
+          ON posts (topic_id, index_within_topic)
+      `,
+    ],
+  },
   discourse_mirror_v5: {
     target: "discourse_mirror_v6",
     changes: [
@@ -39,6 +50,12 @@ export const upgrades: Upgrades = {
 
 // Queries to build a "greenfield" instance of that version.
 export const createVersion: Creates = {
+  discourse_mirror_v7() {
+    return [
+      ...this.discourse_mirror_v6(),
+      ...upgrades.discourse_mirror_v6.changes,
+    ];
+  },
   discourse_mirror_v6() {
     return [
       ...this.discourse_mirror_v5(),

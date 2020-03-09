@@ -45,12 +45,29 @@ describe("plugins/discourse/mirrorRepository", () => {
     );
   });
 
+  it("should upgrade from v6", () => {
+    const db = new Database(":memory:");
+    const serverUrl = "http://example.com";
+    const version = "discourse_mirror_v6";
+
+    // Manually create an older database
+    for (const sql of createVersion[version]()) {
+      db.prepare(sql).run();
+    }
+    db.prepare("REPLACE INTO meta (zero, config) VALUES (0, ?)").run(
+      stringifyConfig({version, serverUrl})
+    );
+
+    // Silently upgrade.
+    expect(() => new SqliteMirrorRepository(db, serverUrl)).not.toThrow();
+  });
+
   it("should upgrade from v5", () => {
     const db = new Database(":memory:");
     const serverUrl = "http://example.com";
     const version = "discourse_mirror_v5";
 
-    // Manually create a v5 database
+    // Manually create an older database
     for (const sql of createVersion[version]()) {
       db.prepare(sql).run();
     }
