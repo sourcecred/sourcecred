@@ -80,7 +80,13 @@ export function linksToReferences(
   const references: DiscourseReference[] = [];
   for (const link of links) {
     let match = null;
-    const decoded = decodeURI(link);
+    let decoded;
+    try {
+      decoded = decodeURI(link);
+    } catch (e) {
+      console.error(`${e}\nFor URL: ${link}`);
+      continue;
+    }
     if ((match = decoded.match(postRegex))) {
       references.push({
         type: "POST",
