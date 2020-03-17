@@ -119,7 +119,6 @@ describe("core/project", () => {
         id: "example-040",
         repoIds: [foobar, foozod],
         discourseServer: {serverUrl: "https://example.com"},
-        discord: null,
         identities: [],
       };
       const compat = toCompat(
@@ -135,6 +134,7 @@ describe("core/project", () => {
         ({
           ...body,
           // It should add a default initiatives field.
+          discord: null,
           initiatives: null,
         }: Project)
       );
