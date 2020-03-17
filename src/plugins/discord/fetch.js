@@ -1,3 +1,4 @@
+// @no-flow
 import fetch from "isomorphic-fetch";
 import sortBy from "lodash.sortby";
 import retry from "retry";
@@ -6,7 +7,7 @@ const DISCORD_SERVER = "https://discordapp.com/api";
 const guildid = "453243919774253079";
 const channel = "543168537062014987";
 const urlChannel = `${DISCORD_SERVER}/channels/${channel}`;
-const url = `${urlChannel}/messages?667618906734592031&limit=100&around=0`;
+// const url = `${urlChannel}/messages?667618906734592031&limit=100&around=0`;
 
 const fetchOptions = {
   method: "GET",
@@ -89,6 +90,7 @@ async function fetchReactions(message, reaction) {
     const data = await response.json();
 
     if (data.code === 10014) {
+      console.log("[discord.fetchReactions] unknown emoji");
     }
   } catch (e) {
     console.log(e);

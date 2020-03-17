@@ -2,7 +2,6 @@
 
 import {escape} from "entities";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
-import * as WeightedGraph from "../../core/weightedGraph";
 import {type Weights, type NodeWeight} from "../../core/weights";
 import {
   Graph,
