@@ -1,29 +1,29 @@
 // @flow
 
-import {format, one, decimalPrecision, zero} from "./grain";
+import {format, ONE, DECIMAL_PRECISION, ZERO} from "./grain";
 
 describe("src/grain/grain", () => {
   describe("format", () => {
     // $ExpectFlowError
-    const pointOne = one / 10n;
+    const pointOne = ONE / 10n;
     // $ExpectFlowError
     const onePointFive = pointOne * 15n;
     // $ExpectFlowError
-    const almostOne = one - 1n;
+    const almostOne = ONE - 1n;
     // $ExpectFlowError
-    const fortyTwo = one * 42n;
+    const fortyTwo = ONE * 42n;
     // $ExpectFlowError
     const negative = -1n;
     // $ExpectFlowError
-    const leet = one * 1337n;
+    const leet = ONE * 1337n;
     // $ExpectFlowError
     const leetAndSpecial = leet * 1000n + fortyTwo + fortyTwo / 100n;
 
     it("correctly rounds to smallest integer when decimals==0", () => {
-      expect(format(zero)).toEqual("0g");
+      expect(format(ZERO)).toEqual("0g");
       expect(format(pointOne)).toEqual("0g");
       expect(format(almostOne)).toEqual("0g");
-      expect(format(one)).toEqual("1g");
+      expect(format(ONE)).toEqual("1g");
       expect(format(onePointFive)).toEqual("1g");
       expect(format(fortyTwo)).toEqual("42g");
     });
@@ -45,16 +45,16 @@ describe("src/grain/grain", () => {
       expect(format(negative * leetAndSpecial, 2)).toEqual("-1,337,042.42g");
     });
     it("handles full precision", () => {
-      expect(format(zero, decimalPrecision)).toEqual("0.000000000000000000g");
-      expect(format(one, decimalPrecision)).toEqual("1.000000000000000000g");
-      expect(format(pointOne, decimalPrecision)).toEqual(
+      expect(format(ZERO, DECIMAL_PRECISION)).toEqual("0.000000000000000000g");
+      expect(format(ONE, DECIMAL_PRECISION)).toEqual("1.000000000000000000g");
+      expect(format(pointOne, DECIMAL_PRECISION)).toEqual(
         "0.100000000000000000g"
       );
       // $ExpectFlowError
-      expect(format(-12345n, decimalPrecision)).toEqual(
+      expect(format(-12345n, DECIMAL_PRECISION)).toEqual(
         "-0.000000000000012345g"
       );
-      expect(format(leetAndSpecial, decimalPrecision)).toEqual(
+      expect(format(leetAndSpecial, DECIMAL_PRECISION)).toEqual(
         "1,337,042.420000000000000000g"
       );
     });
@@ -71,13 +71,13 @@ describe("src/grain/grain", () => {
         -1,
         -0.5,
         0.33,
-        decimalPrecision + 1,
+        DECIMAL_PRECISION + 1,
         Infinity,
         -Infinity,
         NaN,
       ];
       for (const bad of badValues) {
-        expect(() => format(one, bad)).toThrowError("must be integer in range");
+        expect(() => format(ONE, bad)).toThrowError("must be integer in range");
       }
     });
   });

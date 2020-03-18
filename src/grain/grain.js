@@ -27,14 +27,14 @@
 export type Grain = number;
 
 // $ExpectFlowError
-export const zero = 0n;
+export const ZERO = 0n;
 
 // How many digits of precision there are in "one" grain
-export const decimalPrecision = 18;
+export const DECIMAL_PRECISION = 18;
 
 // One "full" grain
 // $ExpectFlowError
-export const one = 10n ** BigInt(decimalPrecision);
+export const ONE = 10n ** BigInt(DECIMAL_PRECISION);
 
 export const DEFAULT_SUFFIX = "g";
 
@@ -65,10 +65,10 @@ export function format(
   if (
     !Number.isInteger(decimals) ||
     decimals < 0 ||
-    decimals > decimalPrecision
+    decimals > DECIMAL_PRECISION
   ) {
     throw new Error(
-      `decimals must be integer in range [0..${decimalPrecision}]`
+      `decimals must be integer in range [0..${DECIMAL_PRECISION}]`
     );
   }
   const isNegative = grain < 0;
@@ -79,15 +79,15 @@ export function format(
   }
 
   // If the number is less than one, we need to pad it with zeros at the front
-  if (digits.length < decimalPrecision + 1) {
+  if (digits.length < DECIMAL_PRECISION + 1) {
     digits = [
-      ...new Array(decimalPrecision + 1 - digits.length).fill("0"),
+      ...new Array(DECIMAL_PRECISION + 1 - digits.length).fill("0"),
       ...digits,
     ];
   }
   // If we have more than 1000 grain, then we will insert commas for
   // readability
-  const integerDigits = digits.length - decimalPrecision;
+  const integerDigits = digits.length - DECIMAL_PRECISION;
   const numCommasToInsert = Math.floor(integerDigits / 3);
   for (let i = 0; i < numCommasToInsert; i++) {
     // Count digits backwards from the last integer.
@@ -98,10 +98,10 @@ export function format(
   }
   if (decimals > 0) {
     // Insert a decimal point at the right spot
-    digits.splice(digits.length - decimalPrecision, 0, ".");
+    digits.splice(digits.length - DECIMAL_PRECISION, 0, ".");
   }
   // Slice away all the unwanted precision
-  digits = digits.slice(0, digits.length - decimalPrecision + decimals);
+  digits = digits.slice(0, digits.length - DECIMAL_PRECISION + decimals);
   if (isNegative) {
     // re-insert the negative sign, if appropriate
     digits.splice(0, 0, "-");
