@@ -12,6 +12,9 @@ type Upgrade = {|
   +changes: $ReadOnlyArray<string>,
 |};
 
+export type Upgrades = {[current: string]: Upgrade};
+export type Creates = {[target: string]: () => $ReadOnlyArray<string>};
+
 type VersionConfig = {|
   +version: string,
   +serverUrl: string,
@@ -21,7 +24,7 @@ export const stringifyConfig = (c: VersionConfig): string => stringify(c);
 export const parseConfig = (json: string): VersionConfig => JSON.parse(json);
 
 // Queries to upgrade from a previous version to the target version.
-export const upgrades: {[current: string]: Upgrade} = {
+export const upgrades: Upgrades = {
   discourse_mirror_v5: {
     target: "discourse_mirror_v6",
     changes: [
@@ -35,7 +38,7 @@ export const upgrades: {[current: string]: Upgrade} = {
 };
 
 // Queries to build a "greenfield" instance of that version.
-export const createVersion: {[target: string]: () => $ReadOnlyArray<string>} = {
+export const createVersion: Creates = {
   discourse_mirror_v6() {
     return [
       ...this.discourse_mirror_v5(),
