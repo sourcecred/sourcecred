@@ -73,10 +73,7 @@ describe("util/taskReporter", () => {
     });
     it("errors when finishing a task twice", () => {
       const fail = () =>
-        new TestCase()
-          .start("foo")
-          .finish("foo")
-          .finish("foo");
+        new TestCase().start("foo").finish("foo").finish("foo");
       expect(fail).toThrowError("task foo not registered");
     });
 
@@ -120,10 +117,7 @@ describe("util/taskReporter", () => {
     });
     it("errors when finishing a task twice", () => {
       const fail = () =>
-        new TestTaskReporter()
-          .start("foo")
-          .finish("foo")
-          .finish("foo");
+        new TestTaskReporter().start("foo").finish("foo").finish("foo");
       expect(fail).toThrow("task foo not active");
     });
     it("errors when finishing an unstarted test", () => {

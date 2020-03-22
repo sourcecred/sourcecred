@@ -473,7 +473,7 @@ export class RelationalView {
     parent: IssueAddress | PullAddress | ReviewAddress,
     json: T.IssueComment | T.PullRequestReviewComment
   ): CommentAddress {
-    const id = (function() {
+    const id = (function () {
       switch (parent.type) {
         case N.ISSUE_TYPE:
           return issueCommentUrlToId(json.url);
