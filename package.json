@@ -90,7 +90,7 @@
   },
   "scripts": {
     "prettify": "prettier --write '**/*.js'",
-    "check-pretty": "prettier --list-different '**/*.js' || echo 'Failures OK during Prettier upgrade'",
+    "check-pretty": "prettier --list-different '**/*.js'",
     "start": "NODE_ENV=development webpack-dev-server --config config/webpack.config.web.js",
     "build": "NODE_ENV=production webpack --config config/webpack.config.web.js",
     "backend": "NODE_ENV=development webpack --config config/webpack.config.backend.js",
