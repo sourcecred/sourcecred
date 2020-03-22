@@ -234,10 +234,7 @@ describe("graphql/mirror", () => {
         expect(rowId).toEqual(1);
         expect(+date).toBe(12345); // please don't mutate the date...
         expect(
-          db
-            .prepare("SELECT time_epoch_millis FROM updates")
-            .pluck()
-            .all()
+          db.prepare("SELECT time_epoch_millis FROM updates").pluck().all()
         ).toEqual([12345]);
       });
       it("returns distinct results regardless of timestamps", () => {
@@ -252,10 +249,7 @@ describe("graphql/mirror", () => {
         expect(uid2).not.toEqual(uid3);
         expect(uid3).not.toEqual(uid1);
         expect(
-          db
-            .prepare("SELECT COUNT(1) FROM updates")
-            .pluck()
-            .get()
+          db.prepare("SELECT COUNT(1) FROM updates").pluck().get()
         ).toEqual(3);
       });
     });

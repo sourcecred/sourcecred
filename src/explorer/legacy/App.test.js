@@ -110,12 +110,9 @@ describe("explorer/legacy/App", () => {
 
   it("should have a feedback link with a valid URL", () => {
     const {el} = example();
-    const link = el.find("Link").filterWhere((x) =>
-      x
-        .children()
-        .text()
-        .includes("feedback")
-    );
+    const link = el
+      .find("Link")
+      .filterWhere((x) => x.children().text().includes("feedback"));
     expect(link).toHaveLength(1);
     expect(link.prop("href")).toMatch(/https?:\/\//);
   });

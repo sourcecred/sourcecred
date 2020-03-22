@@ -36,10 +36,7 @@ describe("core/graph", () => {
   const loopEdge = edge("loop", src, src);
 
   const simpleGraph = () =>
-    new Graph()
-      .addNode(src)
-      .addNode(dst)
-      .addEdge(simpleEdge);
+    new Graph().addNode(src).addNode(dst).addEdge(simpleEdge);
 
   function sortNodes(nodes: Node[]): Node[] {
     return sortBy(nodes, (x) => x.address);
@@ -410,11 +407,7 @@ describe("core/graph", () => {
         const n3 = partsNode(["foo", "bar"]);
         const n4 = partsNode(["zod", "bar"]);
         const prefixGraph = () =>
-          new Graph()
-            .addNode(n1)
-            .addNode(n2)
-            .addNode(n3)
-            .addNode(n4);
+          new Graph().addNode(n1).addNode(n2).addNode(n3).addNode(n4);
         function expectEqualNodes(
           options: {|+prefix: NodeAddressT|} | void,
           expected: Node[]
@@ -490,10 +483,7 @@ describe("core/graph", () => {
           it("throws on conflicting edge", () => {
             const e1 = edge("1", src, dst);
             const e2 = edge("1", src, src);
-            const graph = new Graph()
-              .addNode(src)
-              .addNode(dst)
-              .addEdge(e1);
+            const graph = new Graph().addNode(src).addNode(dst).addEdge(e1);
             expect(() => graph.addEdge(e2)).toThrow(
               "conflict between new edge"
             );
@@ -513,10 +503,7 @@ describe("core/graph", () => {
               dst: dst.address,
               timestampMs: 1,
             };
-            const graph = new Graph()
-              .addNode(src)
-              .addNode(dst)
-              .addEdge(e1);
+            const graph = new Graph().addNode(src).addNode(dst).addEdge(e1);
             expect(() => graph.addEdge(e2)).toThrow(
               "conflict between new edge"
             );
@@ -779,11 +766,7 @@ describe("core/graph", () => {
         describe("with multiple loop edges", () => {
           const e1 = edge("e1", src, src);
           const e2 = edge("e2", src, src);
-          const quiver = () =>
-            new Graph()
-              .addNode(src)
-              .addEdge(e1)
-              .addEdge(e2);
+          const quiver = () => new Graph().addNode(src).addEdge(e1).addEdge(e2);
           it("adding multiple loop edges throws no error", () => {
             quiver();
           });
@@ -827,10 +810,7 @@ describe("core/graph", () => {
             expect(g.isDanglingEdge(simpleEdge.address)).toBe(true);
           });
           it("in the case where an edge ceased being dangling after being added", () => {
-            const g = new Graph()
-              .addEdge(simpleEdge)
-              .addNode(src)
-              .addNode(dst);
+            const g = new Graph().addEdge(simpleEdge).addNode(src).addNode(dst);
             expect(g.hasEdge(simpleEdge.address)).toBe(true);
             expect(Array.from(g.edges({showDangling: true}))).toEqual([
               simpleEdge,
@@ -1160,10 +1140,7 @@ describe("core/graph", () => {
       });
       it("adding an edge changes equality", () => {
         const g1 = new Graph().addNode(src).addNode(dst);
-        const g2 = new Graph()
-          .addNode(src)
-          .addNode(dst)
-          .addEdge(simpleEdge);
+        const g2 = new Graph().addNode(src).addNode(dst).addEdge(simpleEdge);
         expectEquality(g1, g2, false);
       });
       it("adding nodes in different order doesn't change equality", () => {
@@ -1172,10 +1149,7 @@ describe("core/graph", () => {
         expectEquality(g1, g2, true);
       });
       it("graphs with conflicting edges are not equal", () => {
-        const g1 = new Graph()
-          .addNode(src)
-          .addNode(dst)
-          .addEdge(simpleEdge);
+        const g1 = new Graph().addNode(src).addNode(dst).addEdge(simpleEdge);
         const g2 = new Graph()
           .addNode(src)
           .addNode(dst)
@@ -1247,10 +1221,7 @@ describe("core/graph", () => {
         expectCopyEqual(g);
       });
       it("graph with an edge", () => {
-        const g = new Graph()
-          .addNode(src)
-          .addNode(dst)
-          .addEdge(simpleEdge);
+        const g = new Graph().addNode(src).addNode(dst).addEdge(simpleEdge);
         expectCopyEqual(g);
       });
       it("graph with edge added and removed", () => {
@@ -1283,17 +1254,11 @@ describe("core/graph", () => {
       expect(g1.equals(g2)).toBe(false);
     });
     it("is identity on a singleton input", () => {
-      const graph = new Graph()
-        .addNode(foo)
-        .addNode(bar)
-        .addEdge(foobar);
+      const graph = new Graph().addNode(foo).addNode(bar).addEdge(foobar);
       expect(graph.equals(Graph.merge([graph]))).toBe(true);
     });
     it("merges two graphs with no intersection", () => {
-      const g1 = new Graph()
-        .addNode(foo)
-        .addNode(bar)
-        .addEdge(foobar);
+      const g1 = new Graph().addNode(foo).addNode(bar).addEdge(foobar);
       const g2 = new Graph().addNode(zod);
       const g3Actual = Graph.merge([g1, g2]);
       const g3Expected = new Graph()
@@ -1352,10 +1317,7 @@ describe("core/graph", () => {
       expect(merged.equals(expected)).toBe(true);
     });
     it("rejects graphs with conflicting edges", () => {
-      const g1 = new Graph()
-        .addNode(foo)
-        .addNode(zod)
-        .addEdge(zodfoo);
+      const g1 = new Graph().addNode(foo).addNode(zod).addEdge(zodfoo);
       const g2 = new Graph()
         .addNode(foo)
         .addNode(zod)
@@ -1562,10 +1524,7 @@ describe("core/graph", () => {
         expectCompose(g);
       });
       it("for a graph with nodes added and removed", () => {
-        const g = new Graph()
-          .addNode(src)
-          .addNode(dst)
-          .removeNode(src.address);
+        const g = new Graph().addNode(src).addNode(dst).removeNode(src.address);
         expectCompose(g);
       });
       it("a graph with a dangling edge added and removed", () => {
@@ -1615,10 +1574,7 @@ describe("core/graph", () => {
           .addEdge(simpleEdge)
           .removeEdge(simpleEdge.address)
           .addEdge(loopEdge);
-        const g2 = new Graph()
-          .addNode(src)
-          .addNode(dst)
-          .addEdge(loopEdge);
+        const g2 = new Graph().addNode(src).addNode(dst).addEdge(loopEdge);
         expectCanonicity(g1, g2);
       });
       it("for the advanced graph", () => {

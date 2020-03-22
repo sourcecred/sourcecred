@@ -17,7 +17,7 @@ export default class App extends React.Component<{|
       <Router
         history={history}
         routes={createRoutes(routeData)}
-        onUpdate={function() {
+        onUpdate={function () {
           const router = this;
           const path: string = router.state.location.pathname;
           document.title = resolveTitleFromPath(routeData, path);

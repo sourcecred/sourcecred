@@ -209,12 +209,7 @@ describe("explorer/legacy/pagerankTable/Connection", () => {
       const {cvForConnection, syntheticConnection} = await setup();
       const view = cvForConnection(syntheticConnection);
       expect(view.find("span")).toHaveLength(0);
-      expect(
-        view
-          .find("Badge")
-          .children()
-          .text()
-      ).toEqual("synthetic loop");
+      expect(view.find("Badge").children().text()).toEqual("synthetic loop");
     });
   });
 });
