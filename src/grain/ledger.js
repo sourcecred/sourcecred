@@ -8,8 +8,8 @@ import sortBy from "../util/sortBy";
 import {
   type Grain,
   format as formatGrain,
-  zero,
-  decimalPrecision,
+  ZERO,
+  DECIMAL_PRECISION,
 } from "./grain";
 
 export opaque type EventOrderT = symbol;
@@ -21,40 +21,21 @@ export const EventOrder: {|
   DESCENDING: Symbol("DESCENDING"),
 });
 
-export opaque type EventSortT = symbol;
-export const EventSort: {|
-  +AMOUNT: EventSortT,
-  +TIMESTAMP: EventSortT,
-|} = deepFreeze({
-  AMOUNT: Symbol("AMOUNT"),
-  TIMESTAMP: Symbol("TIMESTAMP"),
-});
-
 export type EventsOptions = {|
-  // The address to filter for; events will be returned if this address is
-  // involved at all (e.g. as a recipient or sender).
-  // Only exact address matches are included (no prefix matching).
-  // If null, all addresses are included.
-  +address: NodeAddressT | null,
   // The order to return results in (ASCENDING or DESCENDING).
   // Defaults to ASCENDING.
   +eventOrder: EventOrderT,
-  // The sorting strategy to use (by TIMESTAMP or by AMOUNT).
-  // Defaults to TIMESTAMP.
-  +eventSort: EventSortT,
 |};
 
 export const DEFAULT_EVENTS_OPTIONS = deepFreeze({
-  address: null,
   eventOrder: EventOrder.ASCENDING,
-  eventSort: EventSort.TIMESTAMP,
 });
 
 /**
  * Models a transfer of grain from a sender to recipient.
  * A grainholder may transfer grain to themself (which is a no-op).
  */
-export type Transfer = {|
+export type Transfer_v_0_1_0 = {|
   +type: "TRANSFER",
   +version: string,
   +sender: NodeAddressT,
@@ -62,19 +43,23 @@ export type Transfer = {|
   +amount: Grain,
   +timestampMs: number,
 |};
+export type Transfer = Transfer_v_0_1_0;
 
 /**
- * Models a participant recieving newly minted grain.
+ * A harvest distributes newly minted grain to contributors.
  */
-export type Distribution = {|
-  +type: "DISTRIBUTION",
+export type Harvest_v_0_1_0 = {|
+  +type: "HARVEST",
   +version: string,
-  +recipient: NodeAddressT,
-  +amount: Grain,
+  +receipts: $ReadOnlyArray<{|
+    +address: NodeAddressT,
+    +amount: Grain,
+  |}>,
   +timestampMs: number,
 |};
+export type Harvest = Harvest_v_0_1_0;
 
-export type LedgerEvent = Distribution | Transfer;
+export type LedgerEvent = Harvest | Transfer;
 
 /**
  * A ledger tracks balances, earnings, and the event history of participants.
@@ -124,8 +109,8 @@ export class InMemoryLedger implements Ledger {
         );
       }
       switch (e.type) {
-        case "DISTRIBUTION":
-          this._processDistribution((e: Distribution));
+        case "HARVEST":
+          this._processHarvest((e: Harvest));
           break;
         case "TRANSFER":
           this._processTransfer((e: Transfer));
@@ -136,32 +121,8 @@ export class InMemoryLedger implements Ledger {
     }
   }
 
-  events(options: ?$Shape<EventsOptions>): $ReadOnlyArray<LedgerEvent> {
-    const fullOptions = {
-      ...DEFAULT_EVENTS_OPTIONS,
-      ...NullUtil.orElse(options, {}),
-    };
-    const {address, eventOrder, eventSort} = fullOptions;
-    let filter = (_) => true;
-    if (address) {
-      filter = (x: LedgerEvent) => {
-        switch (x.type) {
-          case "DISTRIBUTION":
-            return x.recipient === address;
-          case "TRANSFER":
-            return x.recipient === address || x.sender === address;
-          default:
-            throw new Error((x.type: empty));
-        }
-      };
-    }
-    const events = this._events.filter(filter);
-    const sorted =
-      eventSort === EventSort.AMOUNT ? sortBy(events, (x) => x.amount) : events;
-    if (eventOrder === EventOrder.DESCENDING) {
-      sorted.reverse();
-    }
-    return sorted;
+  events(): $ReadOnlyArray<LedgerEvent> {
+    return this._events.slice();
   }
 
   balances(): Map<NodeAddressT, Grain> {
@@ -169,26 +130,28 @@ export class InMemoryLedger implements Ledger {
   }
 
   _balance(a: NodeAddressT): Grain {
-    return NullUtil.orElse(this._balances.get(a), zero);
+    return NullUtil.orElse(this._balances.get(a), ZERO);
   }
 
   _earning(a: NodeAddressT): Grain {
-    return NullUtil.orElse(this._earnings.get(a), zero);
+    return NullUtil.orElse(this._earnings.get(a), ZERO);
   }
 
   earnings(): Map<NodeAddressT, Grain> {
     return new Map(this._earnings);
   }
 
-  _processDistribution(d: Distribution) {
-    const {version, recipient, amount} = d;
+  _processHarvest(d: Harvest) {
+    const {version, receipts} = d;
     if (version !== "0.1.0") {
-      throw new Error(`Unsupported distribution version: ${version}`);
+      throw new Error(`Unsupported harvest version: ${version}`);
     }
-    const balance = this._balance(recipient) + amount;
-    this._balances.set(recipient, balance);
-    const earned = this._earning(recipient) + amount;
-    this._earnings.set(recipient, earned);
+    for (const {address, amount} of receipts) {
+      const balance = this._balance(address) + amount;
+      this._balances.set(address, balance);
+      const earned = this._earning(address) + amount;
+      this._earnings.set(address, earned);
+    }
   }
 
   _processTransfer(t: Transfer) {
@@ -200,7 +163,7 @@ export class InMemoryLedger implements Ledger {
     const senderBalance = this._balance(sender);
     if (senderBalance < amount) {
       const forDisplay = {
-        amount: formatGrain(amount, decimalPrecision),
+        amount: formatGrain(amount, DECIMAL_PRECISION),
         recipient: NodeAddress.toString(recipient),
         sender: NodeAddress.toString(sender),
         timestampMs: timestampMs,
