@@ -49,7 +49,7 @@ describe("src/grain/grain", () => {
       expect(format(ZERO, DECIMAL_PRECISION)).toEqual("0.000000000000000000g");
       expect(format(ONE, DECIMAL_PRECISION)).toEqual("1.000000000000000000g");
       expect(format(fromFloat(0.1), DECIMAL_PRECISION)).toEqual(
-        "0.100000000000000000g"
+        "0.100000000000000006g"
       );
       // $ExpectFlowError
       expect(format(-12345n, DECIMAL_PRECISION)).toEqual(
@@ -101,6 +101,11 @@ describe("src/grain/grain", () => {
       // $ExpectFlowError
       expect(multiplyFloat(ONE, -2)).toEqual(-2n * ONE);
     });
+    it("exactly preserves grain when multiplying by 1", () => {
+      // $ExpectFlowError
+      const g = ONE + 1n;
+      expect(multiplyFloat(g, 1)).toEqual(g);
+    });
     describe("has small error on large grain values", () => {
       // To compare with arbitrary precision results, see:
       // https://observablehq.com/@decentralion/grain-arithmetic
@@ -126,7 +131,7 @@ describe("src/grain/grain", () => {
           // $ExpectFlowError
           expected: 747943156320120n,
           // $ExpectFlowError
-          tolerance: 1000n,
+          tolerance: 0n,
         });
       });
       it("on Math.PI", () => {
@@ -135,7 +140,7 @@ describe("src/grain/grain", () => {
           // $ExpectFlowError
           expected: 3141592653589793116n,
           // $ExpectFlowError
-          tolerance: 300000n,
+          tolerance: 0n,
         });
       });
     });
