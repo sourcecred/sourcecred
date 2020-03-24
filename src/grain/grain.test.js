@@ -87,26 +87,52 @@ describe("src/grain/grain", () => {
       // $ExpectFlowError
       expect(multiplyFloat(ONE, 2)).toEqual(2n * ONE);
     });
-    it("has small error on large grain values", () => {
+    describe("has small error on large grain values", () => {
       // To compare with arbitrary precision results, see:
       // https://observablehq.com/@decentralion/grain-arithmetic
 
-      // Within 1 attoGrain of "true" value
-      // $ExpectFlowError
-      expect(multiplyFloat(ONE, 1 / 1337)).toEqual(747943156320119n);
-
-      // Within 300 attoGrain of "true" value
-      // $ExpectFlowError
-      expect(multiplyFloat(ONE, Math.PI)).toEqual(3141592653589793280n);
+      // To generate expected values:
+      //
+      // ```python
+      // input = 1.0 / 1337
+      // (p, q) = input.as_integer_ratio()
+      // floored = (p * (10 ** 18)) // q
+      // rounded = (p * (10 ** 18) * 2 + q) // (2 * q)
+      // print(floored)
+      // print(rounded)
+      // ```
+      function check({input, expected, tolerance}) {
+        const actual = multiplyFloat(ONE, input);
+        expect(actual).toBeGreaterThanOrEqual(expected - tolerance);
+        expect(actual).toBeLessThanOrEqual(expected + tolerance);
+      }
+      it("on 1 / 1337", () => {
+        check({
+          input: 1 / 1337,
+          // $ExpectFlowError
+          expected: 747943156320120n,
+          // $ExpectFlowError
+          tolerance: 1000n,
+        });
+      });
+      it("on Math.PI", () => {
+        check({
+          input: Math.PI,
+          // $ExpectFlowError
+          expected: 3141592653589793116n,
+          // $ExpectFlowError
+          tolerance: 300000n,
+        });
+      });
     });
   });
   describe("fromFloat", () => {
     it("fromFloat(1) === ONE", () => {
       expect(fromFloat(1)).toEqual(ONE);
     });
-    it("fromFloat(0.1) === ONE / 10", () => {
+    it("fromFloat(0.5) === ONE / 2", () => {
       // $ExpectFlowError
-      expect(fromFloat(0.1)).toEqual(ONE / 10n);
+      expect(fromFloat(0.5)).toEqual(ONE / 2n);
     });
   });
 });
