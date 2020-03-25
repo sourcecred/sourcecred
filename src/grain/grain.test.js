@@ -93,6 +93,14 @@ describe("src/grain/grain", () => {
       // $ExpectFlowError
       expect(multiplyFloat(ONE, 2)).toEqual(2n * ONE);
     });
+    it("supports multiplying by zero", () => {
+      // $ExpectFlowError
+      expect(multiplyFloat(ONE, 0)).toEqual(0n);
+    });
+    it("behaves reasonably for negative factors", () => {
+      // $ExpectFlowError
+      expect(multiplyFloat(ONE, -2)).toEqual(-2n * ONE);
+    });
     describe("has small error on large grain values", () => {
       // To compare with arbitrary precision results, see:
       // https://observablehq.com/@decentralion/grain-arithmetic
