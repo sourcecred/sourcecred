@@ -197,9 +197,7 @@ export function multilineLayout(tab: string): LayoutStrategy {
   function strategy(indentLevel: number) {
     return {
       atom: (line: string) => {
-        const indentation = Array(indentLevel)
-          .fill(tab)
-          .join("");
+        const indentation = Array(indentLevel).fill(tab).join("");
         return indentation + line;
       },
       join: (xs: string[]) => xs.join("\n"),

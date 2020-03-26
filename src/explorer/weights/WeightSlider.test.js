@@ -42,22 +42,12 @@ describe("explorer/weights/WeightSlider", () => {
     it("prints the provided weight", () => {
       for (const w of exampleWeights) {
         const {element} = example(w);
-        expect(
-          element
-            .find("span")
-            .at(1)
-            .text()
-        ).toBe(formatWeight(w));
+        expect(element.find("span").at(1).text()).toBe(formatWeight(w));
       }
     });
     it("displays the provided name", () => {
       const {element} = example(0);
-      expect(
-        element
-          .find("span")
-          .at(0)
-          .text()
-      ).toBe("foo");
+      expect(element.find("span").at(0).text()).toBe("foo");
     });
     it("changes to the slider trigger the onChange with the corresponding weight", () => {
       const sliderVals = [MIN_SLIDER, 0, MAX_SLIDER];
@@ -71,12 +61,9 @@ describe("explorer/weights/WeightSlider", () => {
     });
     it("has a description tooltip", () => {
       const {element} = example(0);
-      expect(
-        element
-          .find("label")
-          .at(0)
-          .prop("title")
-      ).toBe("A test description");
+      expect(element.find("label").at(0).prop("title")).toBe(
+        "A test description"
+      );
     });
     it("the weight and slider position may be inconsistent", () => {
       // If the weight does not correspond to an integer slider value, then

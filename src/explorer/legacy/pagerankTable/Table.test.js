@@ -94,10 +94,7 @@ describe("explorer/legacy/pagerankTable/Table", () => {
       it("with expected label text", async () => {
         const {element} = await setup();
         const label = element.find("label");
-        const filterText = label
-          .find("span")
-          .first()
-          .text();
+        const filterText = label.find("span").first().text();
         expect(filterText).toMatchSnapshot();
       });
       it("with expected option groups", async () => {

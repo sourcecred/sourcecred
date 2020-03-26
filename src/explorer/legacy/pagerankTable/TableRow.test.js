@@ -98,9 +98,7 @@ describe("explorer/legacy/pagerankTable/TableRow", () => {
   it("can display literal text in the multiuseColumn", () => {
     const index = COLUMNS().indexOf("");
     expect(index).not.toEqual(-1);
-    const td = example()
-      .find("td")
-      .at(index);
+    const td = example().find("td").at(index);
     expect(td.text()).toEqual("50.00%");
   });
   it("displays general react nodes in the multiuseColumn", () => {
@@ -115,17 +113,13 @@ describe("explorer/legacy/pagerankTable/TableRow", () => {
   it("displays formatted cred in the correct column", () => {
     const index = COLUMNS().indexOf("Cred");
     expect(index).not.toEqual(-1);
-    const td = example()
-      .find("td")
-      .at(index);
+    const td = example().find("td").at(index);
     expect(td.text()).toEqual("133.70");
   });
   it("displays the description in the correct column", () => {
     const index = COLUMNS().indexOf("Description");
     expect(index).not.toEqual(-1);
-    const td = example()
-      .find("td")
-      .at(index);
+    const td = example().find("td").at(index);
     expect(td.find({"data-test-description": true})).toHaveLength(1);
   });
   it("doesn't create extra padding rows if showPadding=false", () => {

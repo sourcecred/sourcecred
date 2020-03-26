@@ -57,11 +57,7 @@ describe("src/core/algorithm/timelinePagerank", () => {
       const b = node("b");
       const e1 = edge("e1", a, b);
       const e2 = edge("e2", a, a);
-      const graph = new Graph()
-        .addNode(a)
-        .addNode(b)
-        .addEdge(e1)
-        .addEdge(e2);
+      const graph = new Graph().addNode(a).addNode(b).addEdge(e1).addEdge(e2);
 
       function weightsToChain(
         w: Map<EdgeAddressT, EdgeWeight>
