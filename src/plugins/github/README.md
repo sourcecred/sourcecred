@@ -3,6 +3,47 @@
 This is the SourceCred GitHub plugin. It creates a cred graph based on data
 from [GitHub].
 
+The goal of the GitHub plugin is to assign cred to contributors participating
+on GitHub, for example by writing or reviewing code, filing and triaging bug
+reports, maintaining the build, and cutting new releases.
+
+The plugin does this by downloading extensive data on the repository history
+from GitHub, and using it to create a contribution graph. You can read below to
+see the kinds of nodes and edges in that graph. The data is temporarily cached
+locally, but the source of truth for the GitHub plugin is always GitHub's live
+servers. That means that if content is deleted on GitHub, it will also
+disappear from the GitHub plugin (after a cache refresh).
+
+## Status and Caveats
+
+The GitHub plugin is still in beta. It tends to assign reasonable cred scores
+to contributors, based on their activity levels. However, it has difficulty
+assessing the value of different pull requests. A minor pull request that
+generated lots of review discussion or bikeshedding is likely to get a higher
+score than highly important work that merged easily.
+
+In general, the plugin mints cred based on _raw activity_. Depending on weight
+choices, every pull will mint a fixed amount of cred, likewise for every
+comment, issue, review, and so forth.
+
+This is problematic because, to put it simply, not all activity is equally
+valuable. Minting cred directly on raw activity encourages contributors to
+focus on quantity over quality. As an example, a poorly thought out pull
+request (which requires lots of review and feedback to fix) will generate more
+cred than a clean, elegant pull request (which merges with a minimum of fuss).
+
+We intend to improve the cred robustness of the GitHub plugin by
+adding better heuristics for assigning cred, e.g.:
+- minting cred when pulls are merged, rather than when they are created
+- allowing custom labels that influence the cred minted to pulls
+- modifying cred minting based on metrics like the size of the pull request
+
+We also intend to move cred minting away from raw activity and towards
+actions that require review, e.g.:
+- minting cred when a pull request merges
+- minting cred when a release is created
+- minting cred when a feature is added (via the Initiatives Plugin)
+
 [GitHub]: https://github.com/
 
 ## Nodes
@@ -12,9 +53,9 @@ The GitHub plugin creates the following kinds of nodes:
 ### Repo
 
 A GitHub repository, e.g. [sourcecred/sourcecred]. It will be directly
-connected to all of the pulls and issues in the repository. Setting a weight on
-the repository will have no effect (i.e. they do not mint cred). This will
-change when we switch to [CredRank].
+connected to all of the pulls and issues in the repository. The repo node has
+no timestamp, so setting a weight on the repository will have no effect (i.e.
+they do not mint cred). This will change when we switch to [CredRank].
 
 [CredRank]: https://github.com/sourcecred/sourcecred/issues/1686
 
@@ -24,8 +65,7 @@ change when we switch to [CredRank].
 
 A GitHub issue, e.g. [sourcecred/sourcecred#40]. Issues are connected to their
 author(s), to entities that they reference, to their comments, and to the
-containing GitHub repository. If issues are given a positive weight, then each
-issue will mint cred. Note that this could be abused by spammers.
+containing GitHub repository.
 
 [sourcecred/sourcecred#40]: https://github.com/sourcecred/sourcecred/issues/40
 
@@ -34,20 +74,16 @@ issue will mint cred. Note that this could be abused by spammers.
 A GitHub pull request, e.g. [sourcecred/sourcecred#35][pull]. Pulls are
 connected to their author(s), to entities they reference, to their comments,
 their reviews, to their containing repository, and, (if merged) to the commit
-that they merged as. If pulls are given a positive weight, then each pull will
-mint cred, regardless of whether or not it merged. Note that this could be
-abused by spammers. There's a proposal ([merge-minted cred]) to have pulls mint
-cred only when they merge.
+that they merged as.
 
 [pull]: https://github.com/sourcecred/sourcecred/pull/35
-[merge-minted cred]: https://github.com/sourcecred/sourcecred/issues/1682
 
 ### Pull Request Review
 
 A review of a GitHub pull request, e.g. [this review]. Reviews are connected to
 their author(s), to entities they reference, to their comments, and to the pull
-they review. If a positive weight is set on the reviews, then every review will
-mint cred; this could be abused by spammers.
+they review. Note that review assignments are not currently tracked.
+
 
 [this review]: https://github.com/sourcecred/sourcecred/pull/91#pullrequestreview-105254836
 
@@ -55,24 +91,23 @@ mint cred; this could be abused by spammers.
 
 A comment on an issue, pull request, or pull request review. Comments are
 connected to their author(s), to entities they reference, and to their 'parent'
-(the containing issue, pull, or review). If a positive weight is set on
-comments, then every comment will mint cred. This can be absued by spammers,
-and also may encourage long bikeshedding discussions or flame wars.
+(the containing issue, pull, or review).
 
 ### Commit
 
 A commit is a Git commit, as discovered via the GitHub API, e.g. [this commit].
 We currently enumerate every commit that is in the history of the `master`
-branch. We added commits back when we had a Git plugin; since we've disabled
-that plugin, commits are no longer well supported. Commits are connected to
-their author(s), to entities they reference, to their parent and child commits,
-and to the pull that merged them (if any). If a positive weight is set on
-commits, then every commit will mint cred. This is not recommended, since
-commits are not well-supported.
+branch.
 
-Commits will become useful once we re-implement a Git plugin, perhaps with
-directory and file tracking. Until then, we may deprecate them since they don't
-add much to the plugin at the moment.
+Commits currently do not add much value in the cred graph, because they are not
+meaningfully connected to the contents of the commits. For example, it would be
+great if a code module flowed cred to commits that implemented or modified the
+module, which could then flow to the pull requests that added those commits. In
+this case, we would be making meaningful use of having commits in the graph.
+
+However, as of March 2020, we do not track cred at the module, file, or
+directory level. Because of this, commits do not add much value beyond their
+connections to pull requests (which are already in the graph).
 
 [this commit]: https://github.com/sourcecred/sourcecred/commit/94b04541514b991c304616aadfcb417a19871e82
 
@@ -105,12 +140,13 @@ Bots have the same connections as users.
 
 ### Authors
 
-An authors edge connects an author (i.e. a user or bot) to a post (i.e. a pull,
-issue, comment, or review). If the post contains the text "paired with
+An "authors" edge connects an author (i.e. a user or bot) to a post (i.e. a
+pull, issue, comment, or review). If the post contains the text "paired with
 @other-author", then from SourceCred's perspective, that post will have
 multiple authors, all of whom receive an equal share of the cred.
 
-The following are all valid examples of using "paired with":
+The "paired with" flag is case-insensitive, and may optionally include a
+hyphen or colon, so that the below are all valid "paired with" designators:
 
 > paired with @wchargin
 >
@@ -138,10 +174,11 @@ from SourceCred's perspective it's the same kind of edge.
 
 ### Reacts
 
-A react edge connects a user (or bot) to a pull, issue, or comment. There are subtypes
-of reaction edges corresponding to the type of reaction; currently we support thumbs-up,
-heart, and hooray emojis. In the future, we might reify the reactions as nodes, so as to
-support reaction-minted cred, in the style of [like-minted cred].
+A react edge connects a user (or bot) to a pull, issue, or comment. There are
+subtypes of reaction edges corresponding to the type of reaction; currently we
+support thumbs-up, heart, and hooray emojis. In the future, we might reify the
+reactions as nodes, so as to support reaction-minted cred, in the style of
+[like-minted cred].
 
 [like-minted cred]: https://discourse.sourcecred.io/t/minting-discourse-cred-on-likes-not-posts/603
 
@@ -162,7 +199,7 @@ summarizing these relationships:
 ### Merged As
 
 A merged-as edge connects a pull request to the commit that it merged, assuming
-the pull request merged.
+the pull request was merged.
 
 
 ## Implementation
