@@ -8,47 +8,18 @@ import {
   type Message,
   type GuildMember,
   type Snowflake,
-  type Emoji,
   type User,
 } from "./models";
+import {
+  testChannel,
+  testUser,
+  testMember,
+  testMessage,
+  customEmoji,
+  genericEmoji,
+} from "./testUtils";
 
 describe("plugins/discord/sqliteMirror", () => {
-  const customEmoji = (): Emoji => ({id: "id", name: "name"});
-  const genericEmoji = (): Emoji => ({id: null, name: "🐙"});
-
-  const testChannel = (id: Snowflake): Channel => ({
-    id: id,
-    name: "testChannelName",
-    type: "GUILD_TEXT",
-  });
-
-  const testMessage = (
-    id: Snowflake,
-    channelId: Snowflake,
-    authorId: Snowflake
-  ): Message => ({
-    id: id,
-    channelId: channelId,
-    authorId: authorId,
-    timestampMs: Date.parse("2020-03-03T23:35:10.615000+00:00"),
-    content: "Just going to drop this here",
-    reactionEmoji: [customEmoji()],
-    nonUserAuthor: false,
-    mentions: ["1", "23"],
-  });
-
-  const testUser = (id: Snowflake): User => ({
-    id: id,
-    username: "username",
-    discriminator: "disc",
-    bot: true,
-  });
-
-  const testMember = (userId: Snowflake): GuildMember => ({
-    user: testUser(userId),
-    nick: "nickname",
-  });
-
   describe("constructor", () => {
     it("initializes a new database succsessfully", () => {
       const db = new Database(":memory:");
