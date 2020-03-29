@@ -101,6 +101,17 @@ export function emojiToRef({id, name}: Emoji): EmojiRef {
   return `${name}:${id}`;
 }
 
+/**
+ * Returns an Emoji object based on a string reference in the form:
+ * `${name}:${id}`
+ */
+export function refToEmoji(ref: EmojiRef): Emoji {
+  // TODO: Test that ref is in correct form
+  const [name, id] = ref.split(":");
+  if (!id) return {id: null, name};
+  return {id, name};
+}
+
 // Determines whether the message was created by a webhook or a Discord User
 export function isAuthoredByNonUser(rawMessage: {
   +webhook_id?: Snowflake,

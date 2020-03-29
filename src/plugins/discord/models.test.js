@@ -1,19 +1,23 @@
 // @flow
 
-import {emojiToRef, isAuthoredByNonUser} from "./models";
+import {emojiToRef, refToEmoji, isAuthoredByNonUser} from "./models";
 
 describe("plugins/discord/models", () => {
   describe("model helper functions", () => {
     describe("emojiToRef", () => {
       it("returns name if id is null", () => {
-        expect(emojiToRef({id: null, name: "testEmojiName"})).toBe(
-          "testEmojiName"
-        );
+        expect(emojiToRef({id: null, name: "🐙"})).toBe("🐙");
       });
       it("returns name and id if id is not null", () => {
-        expect(emojiToRef({id: "testEmojiId", name: "testEmojiName"})).toBe(
-          "testEmojiName:testEmojiId"
-        );
+        expect(emojiToRef({id: "id", name: "name"})).toBe("name:id");
+      });
+    });
+    describe("refToEmoji", () => {
+      it("returns correct object if id is null", () => {
+        expect(refToEmoji("🐙")).toEqual({name: "🐙", id: null});
+      });
+      it("returns correct object if id is not null", () => {
+        expect(refToEmoji("name:id")).toEqual({name: "name", id: "id"});
       });
     });
     describe("isAuthoredByNonUser", () => {
