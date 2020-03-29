@@ -26,6 +26,30 @@ export type ResultPage<T> = {|
 |};
 
 /**
+ * An interface to fetch Discord data
+ */
+export interface DiscordFetcher {
+  channels(guildId: Snowflake): Promise<$ReadOnlyArray<Model.Channel>>;
+
+  members(
+    guildId: Snowflake,
+    after: Snowflake
+  ): Promise<ResultPage<Model.GuildMember>>;
+
+  messages(
+    channel: Snowflake,
+    after: Snowflake
+  ): Promise<ResultPage<Model.Message>>;
+
+  reactions(
+    channel: Snowflake,
+    message: Snowflake,
+    emoji: Model.Emoji,
+    after: Snowflake
+  ): Promise<ResultPage<Model.Reaction>>;
+}
+
+/**
  * Fetcher is responsible for:
  * - Returning the correct endpoint to fetch against for Guilds, Channels,
  *   Members, and Reactions.
@@ -43,7 +67,7 @@ export type ResultPage<T> = {|
  *   returning an array of Channel objects in the corresponding method.
  *   See: https://discordapp.com/developers/docs/resources/guild#get-guild-channels
  */
-export class Fetcher {
+export class Fetcher implements DiscordFetcher {
   +_fetch: FetchEndpoint;
   +_options: FetchOptions;
 

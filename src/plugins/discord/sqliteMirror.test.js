@@ -8,47 +8,18 @@ import {
   type Message,
   type GuildMember,
   type Snowflake,
-  type Emoji,
   type User,
 } from "./models";
+import {
+  testChannel,
+  testUser,
+  testMember,
+  testMessage,
+  customEmoji,
+  genericEmoji,
+} from "./testUtils";
 
 describe("plugins/discord/sqliteMirror", () => {
-  const customEmoji = (): Emoji => ({id: "id", name: "name"});
-  const genericEmoji = (): Emoji => ({id: null, name: "🐙"});
-
-  const testChannel = (id: Snowflake): Channel => ({
-    id: id,
-    name: "testChannelName",
-    type: "GUILD_TEXT",
-  });
-
-  const testMessage = (
-    id: Snowflake,
-    channelId: Snowflake,
-    authorId: Snowflake
-  ): Message => ({
-    id: id,
-    channelId: channelId,
-    authorId: authorId,
-    timestampMs: Date.parse("2020-03-03T23:35:10.615000+00:00"),
-    content: "Just going to drop this here",
-    reactionEmoji: [customEmoji()],
-    nonUserAuthor: false,
-    mentions: ["1", "23"],
-  });
-
-  const testUser = (id: Snowflake): User => ({
-    id: id,
-    username: "username",
-    discriminator: "disc",
-    bot: true,
-  });
-
-  const testMember = (userId: Snowflake): GuildMember => ({
-    user: testUser(userId),
-    nick: "nickname",
-  });
-
   describe("constructor", () => {
     it("initializes a new database succsessfully", () => {
       const db = new Database(":memory:");
@@ -261,8 +232,12 @@ describe("plugins/discord/sqliteMirror", () => {
       const messageId2 = "2";
       const channelId = "3";
       const authorId = "4";
-      const mes1: Message = testMessage(messageId1, channelId, authorId);
-      const mes2: Message = testMessage(messageId2, channelId, authorId);
+      const mes1: Message = testMessage(messageId1, channelId, authorId, [
+        customEmoji(),
+      ]);
+      const mes2: Message = testMessage(messageId2, channelId, authorId, [
+        customEmoji(),
+      ]);
 
       const db = new Database(":memory:");
       const sqliteMirror = new SqliteMirror(db, "0");
@@ -270,16 +245,6 @@ describe("plugins/discord/sqliteMirror", () => {
       sqliteMirror.addChannel(testChannel(channelId));
       sqliteMirror.addMessage(mes1);
       sqliteMirror.addMessage(mes2);
-
-      for (const user of mes1.mentions) {
-        sqliteMirror.addUser(testUser(user));
-        sqliteMirror.addMention(mes1, user);
-      }
-
-      for (const user of mes2.mentions) {
-        sqliteMirror.addUser(testUser(user));
-        sqliteMirror.addMention(mes2, user);
-      }
 
       for (const emoji of mes1.reactionEmoji) {
         sqliteMirror.addReaction({
@@ -407,8 +372,11 @@ describe("plugins/discord/sqliteMirror", () => {
       const messageId: Snowflake = "1";
       const channelId = "2";
       const authorId = "3";
-      const message: Message = testMessage(messageId, channelId, authorId);
-      const [userId1, userId2] = message.mentions;
+      const userId1 = "4";
+      const userId2 = "5";
+      const message: Message = testMessage(messageId, channelId, authorId, [
+        customEmoji(),
+      ]);
       const db = new Database(":memory:");
       const sqliteMirror = new SqliteMirror(db, "0");
       sqliteMirror.addUser(testUser(userId1));
