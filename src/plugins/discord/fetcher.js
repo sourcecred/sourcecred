@@ -83,7 +83,6 @@ export class Fetcher {
         bot: x.user.bot || x.user.system || false,
       },
       nick: x.nick || null,
-      roles: x.roles,
     }));
     const hasNextPage = results.length === membersLimit;
     const endCursor =
