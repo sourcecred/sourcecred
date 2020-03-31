@@ -10,10 +10,11 @@
 # replacing `COMMIT_HASH` with the appropriate hash, or pass similar
 # formatting to `git log`, etc.
 #
-# To teach your Git client to read this file, run
+# To use this file, ensure that you have Git 2.23 or later installed,
+# then configure your repository to teach it about this file:
 #
 #     git config blame.ignoreRevsFile .git-blame-ignore-revs
 #
-# (with Git 2.23+). See `git help blame` `git help config` for details.
+# See `git help blame` or `git help config` for details.
 
 421aded196eb40c1dd3ec103bedc48d13111fa98  # prettier: reformat code for 2.0.1
