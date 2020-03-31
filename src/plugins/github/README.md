@@ -17,14 +17,10 @@ disappear from the GitHub plugin (after a cache refresh).
 ## Status and Caveats
 
 The GitHub plugin is still in beta. It tends to assign reasonable cred scores
-to contributors, based on their activity levels. However, it has difficulty
-assessing the value of different pull requests. A minor pull request that
-generated lots of review discussion or bikeshedding is likely to get a higher
-score than highly important work that merged easily.
-
-In general, the plugin mints cred based on _raw activity_. Depending on weight
-choices, every pull will mint a fixed amount of cred, likewise for every
-comment, issue, review, and so forth.
+to contributors. However, it has difficulty assigning cred scores to pull
+requests. This is because, in general, the plugin mints cred based on raw
+activity. Depending on weight choices, every pull will mint a fixed amount of
+cred, likewise for every comment, issue, review, and so forth.
 
 This is problematic because, to put it simply, not all activity is equally
 valuable. Minting cred directly on raw activity encourages contributors to
@@ -34,15 +30,15 @@ cred than a clean, elegant pull request (which merges with a minimum of fuss).
 
 We intend to improve the cred robustness of the GitHub plugin by
 adding better heuristics for assigning cred, e.g.:
-- minting cred when pulls are merged, rather than when they are created
-- allowing custom labels that influence the cred minted to pulls
-- modifying cred minting based on metrics like the size of the pull request
+- Minting cred when PRs are merged, rather than when they are created.
+- Allowing custom labels that influence the cred minted to pulls.
+- Modifying cred minting based on metrics like the size of the pull request.
 
 We also intend to move cred minting away from raw activity and towards
 actions that require review, e.g.:
-- minting cred when a pull request merges
-- minting cred when a release is created
-- minting cred when a feature is added (via the Initiatives Plugin)
+- Minting cred when a pull request merges.
+- Minting cred when a release is created.
+- Minting cred when a feature is added (via the Initiatives Plugin).
 
 [GitHub]: https://github.com/
 
@@ -52,16 +48,19 @@ The GitHub plugin creates the following kinds of nodes:
 
 ### Repo
 
-A GitHub repository, e.g. [sourcecred/sourcecred]. It will be directly
-connected to all of the pulls and issues in the repository. The repo node has
-no timestamp, so setting a weight on the repository will have no effect (i.e.
-they do not mint cred). This will change when we switch to [CredRank].
+- **Repo**:
+
+A GitHub repository, e.g. [sourcecred/sourcecred]. The repo node will be
+directly connected to all of the PRs and issues in the repository. The repo
+node has no timestamp, so setting a weight on the repository will have no
+effect (i.e. repos do not mint cred). This may change when we switch to
+[CredRank].
 
 [CredRank]: https://github.com/sourcecred/sourcecred/issues/1686
 
 [sourcecred/sourcecred]: https://github.com/sourcecred/sourcecred
 
-### Issue
+- **Issue**:
 
 A GitHub issue, e.g. [sourcecred/sourcecred#40]. Issues are connected to their
 author(s), to entities that they reference, to their comments, and to the
@@ -69,16 +68,16 @@ containing GitHub repository.
 
 [sourcecred/sourcecred#40]: https://github.com/sourcecred/sourcecred/issues/40
 
-### Pull Request
+- **Pull Request**:
 
 A GitHub pull request, e.g. [sourcecred/sourcecred#35][pull]. Pulls are
 connected to their author(s), to entities they reference, to their comments,
 their reviews, to their containing repository, and, (if merged) to the commit
-that they merged as.
+that they created when merged.
 
 [pull]: https://github.com/sourcecred/sourcecred/pull/35
 
-### Pull Request Review
+- **Pull Request Review**:
 
 A review of a GitHub pull request, e.g. [this review]. Reviews are connected to
 their author(s), to entities they reference, to their comments, and to the pull
@@ -87,13 +86,13 @@ they review. Note that review assignments are not currently tracked.
 
 [this review]: https://github.com/sourcecred/sourcecred/pull/91#pullrequestreview-105254836
 
-### Comment
+- **Comment**:
 
 A comment on an issue, pull request, or pull request review. Comments are
 connected to their author(s), to entities they reference, and to their 'parent'
 (the containing issue, pull, or review).
 
-### Commit
+- **Commit**:
 
 A commit is a Git commit, as discovered via the GitHub API, e.g. [this commit].
 We currently enumerate every commit that is in the history of the `master`
@@ -111,7 +110,7 @@ connections to pull requests (which are already in the graph).
 
 [this commit]: https://github.com/sourcecred/sourcecred/commit/94b04541514b991c304616aadfcb417a19871e82
 
-### User
+- **User**:
 
 A GitHub user account, e.g. [@decentralion]. User accounts do not mint cred, so
 setting a node weight would have no effect. Using the identity plugin, it's
@@ -125,7 +124,7 @@ mention them.
 
 [@decentralion]: https://github.com/decentralion
 
-### Bot
+- **Bot**:
 
 A GitHub user account that has been explicitly marked as a bot, via inclusion
 in [bots.js]. This is useful so that we can filter out bot accounts from
@@ -138,7 +137,7 @@ Bots have the same connections as users.
 
 ## Edges
 
-### Authors
+- **Authors**:
 
 An "authors" edge connects an author (i.e. a user or bot) to a post (i.e. a
 pull, issue, comment, or review). If the post contains the text "paired with
@@ -163,7 +162,7 @@ hyphen or colon, so that the below are all valid "paired with" designators:
 > Paired-With: @wchargin
 >
 
-### References
+- **References**:
 
 A references edge connects a post (i.e. a pull, issue, comment, or review) to
 another referencable node (i.e. a node that corresponds to a specific url on
@@ -172,7 +171,7 @@ GitHub).
 If the reference is pointing to a user, we call it a "mention", but
 from SourceCred's perspective it's the same kind of edge.
 
-### Reacts
+- **Reacts**:
 
 A react edge connects a user (or bot) to a pull, issue, or comment. There are
 subtypes of reaction edges corresponding to the type of reaction; currently we
@@ -182,7 +181,7 @@ reactions as nodes, so as to support reaction-minted cred, in the style of
 
 [like-minted cred]: https://discourse.sourcecred.io/t/minting-discourse-cred-on-likes-not-posts/603
 
-### Has Parent
+- **Has Parent**:
 
 A has-parent edge connects a "child" node to its "parent" node. Here's a table
 summarizing these relationships:
@@ -196,7 +195,7 @@ summarizing these relationships:
 | Pull Request Review | Pull Request |
 | Pull Request Review Comment | Pull Request Review |
 
-### Merged As
+- **Merged As**:
 
 A merged-as edge connects a pull request to the commit that it merged, assuming
 the pull request was merged.
