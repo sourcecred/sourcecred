@@ -80,7 +80,6 @@ describe("plugins/discord/fetcher", () => {
         bot: true,
       },
       nick: "nickname",
-      roles: ["test role"],
     });
 
     const options = () => ({

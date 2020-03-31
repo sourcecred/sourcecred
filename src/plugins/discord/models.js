@@ -74,7 +74,6 @@ export type User = {|
 export type GuildMember = {|
   +user: User,
   +nick: string | null,
-  +roles: $ReadOnlyArray<Snowflake>,
 |};
 
 // From the Discord docs: "emoji takes the form of name:id for
