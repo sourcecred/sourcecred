@@ -177,7 +177,7 @@ function lengthDecode(
 }
 function multiLengthDecode(x: $ReadOnlyArray<string>, fail: () => Error) {
   let remaining = x;
-  let partses = [];
+  const partses = [];
   while (remaining.length > 0) {
     const {parts, rest} = lengthDecode(remaining, fail);
     partses.push(parts);

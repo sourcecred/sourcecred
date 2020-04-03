@@ -203,7 +203,7 @@ export function findStationaryDistribution(
   params: PagerankParams,
   options: PagerankOptions
 ): Promise<StationaryDistributionResult> {
-  let gen = findStationaryDistributionGenerator(params, {
+  const gen = findStationaryDistributionGenerator(params, {
     verbose: options.verbose,
     convergenceThreshold: options.convergenceThreshold,
     maxIterations: options.maxIterations,

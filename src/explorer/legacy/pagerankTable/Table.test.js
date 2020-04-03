@@ -84,7 +84,7 @@ describe("explorer/legacy/pagerankTable/Table", () => {
         const {element} = await setup();
         findButton(element).simulate("click");
         findButton(element).simulate("click");
-        let button = findButton(element);
+        const button = findButton(element);
         expect(button.text()).toEqual("Show weight configuration");
         expect(element.find({"data-test-weight-config": true})).toHaveLength(0);
       });
