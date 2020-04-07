@@ -34,7 +34,7 @@ Identities can be configured using the `project.json` file.
 By adding entries to the the `identities` array.
 
 Below is an example `project.json` file which defines two identities, "User-A"
-and "User-B", contrating their respective GitHub and Discourse accounts.
+and "User-B", contracting their respective GitHub and Discourse accounts.
 
 ```js
 [
