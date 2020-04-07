@@ -1,22 +1,28 @@
 # SourceCred Identity Plugin
 
-This folder contains the Identity plugin. Unlike most other plugins, the
-Identity plugin does not add any new contributions to the graph. Instead, it
-allows collapsing different user accounts together into a shared 'identity'
-node.
+Unlike most other plugins, the Identity plugin does not add any new
+contributions to the graph. Instead, it's goal is to combine different user
+accounts into a single identity. For example, if a contributor has an account
+on both GitHub and Discourse (potentially with different usernames on each),
+the identity plugin can combine these two accounts into a single identity,
+allowing SourceCred to properly compute the Cred for this identity.
 
-To see why this is valuable, imagine that a contributor has an account on both
-GitHub and Discourse (potentially with a different username on each service).
-We would like to combine these two identities together, so that we can
-represent that user's combined cred properly. The Identity plugin enables this.
+The technical term for how we do such combining is a _contraction_. Which we'll
+use for the rest of this document.
 
 ## Status and Caveats
 
-The Identity plugin currently only applies to new (Weighted)Graphs and Cred
-scores being generated. When including historical Graphs/Cred scores, for
-example to distribute Grain, you may need to contract the identities again.
-This can be tricky to do correctly, as they may have already received Grain
-on their GitHub/Discourse addresses before contraction.
+The Identity plugin currently only applies to new WeightedGraphs and Cred
+scores being generated. However, if you're using this data to distribute
+Grain or other tokens, you may need to contract the identities again.
+
+For example, someone might have received Grain in the past for their GitHub and
+Discourse user respectively, creating 2 separate accounts in the Grain ledger.
+After these GitHub and Discourse nodes were contracted to one identity node,
+the ledger would now have 3 separate accounts. The GitHub and Discourse ones
+holding past distributions, but no longer receiving more. And a new identity
+one which will receive distributions going forward. Normally you'd want to
+have just 1 account instead which holds all distributions including past ones.
 
 Code-reviewed support for Grain built into SourceCred should handle this in
 the future. But for now, requires the instance maintainer to handle Grain
@@ -27,7 +33,8 @@ account contraction.
 Identities can be configured using the `project.json` file.
 By adding entries to the the `identities` array.
 
-As an example of what this would look like:
+Below is an example `project.json` file which defines two identities, "User-A"
+and "User-B", contrating their respective GitHub and Discourse accounts.
 
 ```js
 [
@@ -36,7 +43,7 @@ As an example of what this would look like:
     "version": "0.4.0",
   },
   {
-    // The identities we should collapse.
+    // The identities we should contract.
     "identities": [
       {
         "username": "User-A",
@@ -61,7 +68,7 @@ As an example of what this would look like:
 
 ### Username
 
-The `username` field allows you to choose a new username for the collapsed
+The `username` field allows you to choose a new username for the contracted
 identity.
 
 It's case-sensitive, must be _unique in this project_ and can contain `A-Z`,
@@ -83,11 +90,18 @@ Currently supported plugins are:
 
 ## How a contraction works
 
-Firstly, contractions are done _after_ the plugins have created their respective
-parts of the graph. But _before_ any Cred scores are calculated.
+Here is a simplified illustration of how contracting works under the hood.
 
-The GitHub and Discourse plugins create edges for their respective user nodes
-before contraction:
+Note that contractions are done _after_ the plugins have created their
+respective parts of the graph. But _before_ any Cred scores are calculated.
+
+Let’s assume we have a user `abc`, who has both GitHub and Discourse accounts
+which we want to contract.
+
+The GitHub and Discourse plugins have mapped out the contributions, users and
+edges as they exist on those services. Even though we merge this into a single
+graph, the GitHub and Discourse contributions of the _same person_ are still
+disconnected.
 
 ```
 GitHub user @abc
@@ -99,8 +113,8 @@ Discourse user /u/abc
 └── authored Post /t/123/2
 ```
 
-A new node is created, representing the Identity, with the username
-provided in the project file. While removing the alias nodes.
+The identity plugin creates a new node, representing the Identity, with the
+username provided in the project file. While removing the alias nodes.
 
 ```
 Identity @abc
@@ -114,7 +128,8 @@ Identity @abc
 └── authored Post /t/123/2
 ```
 
-And we connect the edges to the new identity node.
+Then the edges that were connected to the alias nodes are connected to the new
+identity node instead.
 
 ```
 Identity @abc
@@ -124,22 +139,6 @@ Identity @abc
 └── authored Post /t/123/2
 ```
 
-Now we're ready to calculate Cred scores.
-
-### Reference detection
-
-Plugins often support reference detection. This analyses a URL found in a piece
-of content, to create a reference edge in the graph. The "detection" here means
-to find out, whether the URL we found represents a node in the graph or not.
-
-There isn't currently a URL scheme which represents an identity.
-
-But because reference detection is done _before_ contraction, this means we can
-use the URL for any of the aliases, and they'll point to the same identity.
-For example:
-
-- `https://github.com/abc`
-- `https://example.discourse/u/abc`
-
-These are effectively equivalent in this example, both creating edges to
-`Identity @abc`.
+The disconnect between the GitHub and Discourse service is now gone. If we now
+run the SourceCred algorithm, user `@abc`'s Cred will flow to a single node and
+produce a much more accurate Cred score than before.
