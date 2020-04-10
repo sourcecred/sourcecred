@@ -72,12 +72,14 @@ export interface Ledger {
    * Stores the current grain balance of each address.
    */
   balances(): Map<NodeAddressT, Grain>;
+
   /**
    * Stores the lifetime earnings of each address.
    *
    * Necessary for computing which participants have been underpaid.
    */
   earnings(): Map<NodeAddressT, Grain>;
+
   /**
    * Retrieve the events.
    *
