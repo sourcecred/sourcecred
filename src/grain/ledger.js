@@ -35,7 +35,7 @@ export const DEFAULT_EVENTS_OPTIONS = deepFreeze({
  * Models a transfer of grain from a sender to recipient.
  * A grainholder may transfer grain to themself (which is a no-op).
  */
-export type Transfer_v_0_1_0 = {|
+export type Transfer_v1 = {|
   +type: "TRANSFER",
   +version: string,
   +sender: NodeAddressT,
@@ -43,12 +43,12 @@ export type Transfer_v_0_1_0 = {|
   +amount: Grain,
   +timestampMs: number,
 |};
-export type Transfer = Transfer_v_0_1_0;
+export type Transfer = Transfer_v1;
 
 /**
  * A harvest distributes newly minted grain to contributors.
  */
-export type Harvest_v_0_1_0 = {|
+export type Harvest_v1 = {|
   +type: "HARVEST",
   +version: string,
   +receipts: $ReadOnlyArray<{|
@@ -57,7 +57,7 @@ export type Harvest_v_0_1_0 = {|
   |}>,
   +timestampMs: number,
 |};
-export type Harvest = Harvest_v_0_1_0;
+export type Harvest = Harvest_v1;
 
 export type LedgerEvent = Harvest | Transfer;
 
