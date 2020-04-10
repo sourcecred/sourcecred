@@ -1,6 +1,7 @@
 // @flow
 
 import {type URL} from "../../core/references";
+import {type TimestampISO} from "../../util/timestamp";
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import {type Compatible, fromCompat, toCompat} from "../../util/compat";
 import {initiativeNodeType} from "./declaration";
@@ -17,7 +18,7 @@ export const INITIATIVE_FILE_SUBTYPE = "INITIATIVE_FILE";
  */
 export type InitiativeFile = {|
   +title: string,
-  +timestampIso: ISOTimestamp,
+  +timestampIso: TimestampISO,
   +weight: InitiativeWeight,
   +completed: boolean,
   +dependencies: $ReadOnlyArray<URL>,
@@ -25,9 +26,6 @@ export type InitiativeFile = {|
   +contributions: $ReadOnlyArray<URL>,
   +champions: $ReadOnlyArray<URL>,
 |};
-
-// Note: setting this to opaque forces us to convert it to timestampMs.
-opaque type ISOTimestamp: string = string;
 
 const COMPAT_INFO = {type: "sourcecred/initiativeFile", version: "0.1.0"};
 
