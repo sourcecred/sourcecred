@@ -2,9 +2,9 @@
 
 import {NodeAddress} from "../core/graph";
 import {ONE, ZERO, fromFloat} from "./grain";
-import {fixedAmount, fixedRatio, underpayment} from "./payouts";
+import {fixedAmount, fixedRatio, underpayment} from "./harvestStrategies";
 
-describe("src/grain/payouts", () => {
+describe("src/grain/harvestStrategies", () => {
   const foo = NodeAddress.fromParts(["foo"]);
   const bar = NodeAddress.fromParts(["bar"]);
 

@@ -1,5 +1,6 @@
 // @flow
 
+import {sum} from "d3-array";
 import * as MapUtil from "../util/map";
 import {type NodeAddressT} from "../core/graph";
 import {type Grain, ZERO, ONE, multiplyFloat} from "./grain";
@@ -55,6 +56,13 @@ export function harvest(
       case "FAIR":
         if (strategy.version !== 1) {
           throw new Error(`Unsupported FAIR strategy: ${strategy.version}`);
+        }
+        const totalScores = new Map();
+        for (const {scores} of filteredSlices) {
+          for (const [address, score] of scores.entries()) {
+            const existingScore = totalScores.get(address) || 0;
+            totalScores.set(address, existingScore + score);
+          }
         }
         return underpayment(strategy.amount, totalScores, earnings);
       default:
