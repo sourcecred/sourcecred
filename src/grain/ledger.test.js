@@ -20,7 +20,7 @@ describe("src/grain/ledger", () => {
       const events = [
         {
           type: "HARVEST",
-          version: "0.1.0",
+          version: "1",
           receipts: [
             {address: foo, amount: fromFloat(10)},
             {address: bar, amount: fromFloat(99)},
@@ -40,7 +40,7 @@ describe("src/grain/ledger", () => {
       const events = [
         {
           type: "HARVEST",
-          version: "0.1.0",
+          version: "1",
           receipts: [
             {address: foo, amount: fromFloat(10)},
             {address: bar, amount: fromFloat(99)},
@@ -49,7 +49,7 @@ describe("src/grain/ledger", () => {
         },
         {
           type: "TRANSFER",
-          version: "0.1.0",
+          version: "1",
           recipient: foo,
           sender: bar,
           amount: fromFloat(50),
@@ -73,13 +73,13 @@ describe("src/grain/ledger", () => {
       const events = [
         {
           type: "HARVEST",
-          version: "0.1.0",
+          version: "1",
           receipts: [{address: foo, amount: fromFloat(10)}],
           timestampMs: 0,
         },
         {
           type: "TRANSFER",
-          version: "0.1.0",
+          version: "1",
           recipient: foo,
           sender: foo,
           amount: fromFloat(5),
@@ -99,7 +99,7 @@ describe("src/grain/ledger", () => {
         const events = [
           {
             type: "HARVEST",
-            version: "0.1.0",
+            version: "1",
             receipts: [
               {
                 address: foo,
@@ -110,7 +110,7 @@ describe("src/grain/ledger", () => {
           },
           {
             type: "TRANSFER",
-            version: "0.1.0",
+            version: "1",
             recipient: foo,
             sender: bar,
             amount: fromFloat(50),
@@ -124,7 +124,7 @@ describe("src/grain/ledger", () => {
         const events = [
           {
             type: "TRANSFER",
-            version: "0.1.0",
+            version: "1",
             recipient: foo,
             sender: foo,
             amount: fromFloat(50),
@@ -138,25 +138,25 @@ describe("src/grain/ledger", () => {
         const events = [
           {
             type: "HARVEST",
-            version: "0.x.0",
+            version: "x",
             receipts: [{address: foo, amount: fromFloat(10)}],
             timestampMs: 0,
           },
         ];
         const fail = () => new InMemoryLedger(events);
-        expect(fail).toThrowError("Unsupported harvest version: 0.x.0");
+        expect(fail).toThrowError("Unsupported harvest version: x");
       });
       it("transfers with unsupported version", () => {
         const events = [
           {
             type: "HARVEST",
-            version: "0.1.0",
+            version: "1",
             receipts: [{address: foo, amount: fromFloat(10)}],
             timestampMs: 0,
           },
           {
             type: "TRANSFER",
-            version: "0.x.0",
+            version: "x",
             recipient: foo,
             sender: bar,
             amount: fromFloat(10),
@@ -164,13 +164,13 @@ describe("src/grain/ledger", () => {
           },
         ];
         const fail = () => new InMemoryLedger(events);
-        expect(fail).toThrowError("Unsupported transfer version: 0.x.0");
+        expect(fail).toThrowError("Unsupported transfer version: x");
       });
       it("unsupported event types", () => {
         const events = [
           {
             type: "FOO",
-            version: "0.1.0",
+            version: "1",
             recipient: foo,
             amount: fromFloat(10),
             timestampMs: 0,

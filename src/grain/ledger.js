@@ -145,7 +145,7 @@ export class InMemoryLedger implements Ledger {
 
   _processHarvest(d: Harvest) {
     const {version, receipts} = d;
-    if (version !== "0.1.0") {
+    if (version !== "1") {
       throw new Error(`Unsupported harvest version: ${version}`);
     }
     for (const {address, amount} of receipts) {
@@ -158,7 +158,7 @@ export class InMemoryLedger implements Ledger {
 
   _processTransfer(t: Transfer) {
     const {recipient, sender, amount, version, timestampMs} = t;
-    if (version !== "0.1.0") {
+    if (version !== "1") {
       throw new Error(`Unsupported transfer version: ${t.version}`);
     }
     const recipientBalance = this._balance(recipient);
