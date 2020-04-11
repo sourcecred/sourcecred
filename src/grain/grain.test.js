@@ -5,7 +5,7 @@ import {
   ONE,
   DECIMAL_PRECISION,
   ZERO,
-  fromFloat,
+  fromApproximateFloat,
   multiplyFloat,
 } from "./grain";
 
@@ -16,33 +16,39 @@ describe("src/grain/grain", () => {
 
     it("correctly rounds to smallest integer when decimals==0", () => {
       expect(format(ZERO)).toEqual("0g");
-      expect(format(fromFloat(0.1))).toEqual("0g");
+      expect(format(fromApproximateFloat(0.1))).toEqual("0g");
       expect(format(almostOne)).toEqual("0g");
       expect(format(ONE)).toEqual("1g");
-      expect(format(fromFloat(1.5))).toEqual("1g");
-      expect(format(fromFloat(42))).toEqual("42g");
+      expect(format(fromApproximateFloat(1.5))).toEqual("1g");
+      expect(format(fromApproximateFloat(42))).toEqual("42g");
     });
     it("correctly adds comma formatting for large numbers", () => {
-      expect(format(fromFloat(1337))).toEqual("1,337g");
-      expect(format(fromFloat(1337), 1)).toEqual("1,337.0g");
-      expect(format(fromFloat(1337.11))).toEqual("1,337g");
-      expect(format(fromFloat(1337.11), 1)).toEqual("1,337.1g");
-      expect(format(fromFloat(1337042.42), 0)).toEqual("1,337,042g");
-      expect(format(fromFloat(1337042.42), 2)).toEqual("1,337,042.42g");
+      expect(format(fromApproximateFloat(1337))).toEqual("1,337g");
+      expect(format(fromApproximateFloat(1337), 1)).toEqual("1,337.0g");
+      expect(format(fromApproximateFloat(1337.11))).toEqual("1,337g");
+      expect(format(fromApproximateFloat(1337.11), 1)).toEqual("1,337.1g");
+      expect(format(fromApproximateFloat(1337042.42), 0)).toEqual("1,337,042g");
+      expect(format(fromApproximateFloat(1337042.42), 2)).toEqual(
+        "1,337,042.42g"
+      );
     });
     it("correctly handles negative numbers", () => {
-      expect(format(fromFloat(-0.1))).toEqual("-0g");
-      expect(format(fromFloat(-1.5))).toEqual("-1g");
-      expect(format(fromFloat(-42))).toEqual("-42g");
-      expect(format(fromFloat(-1.5), 1)).toEqual("-1.5g");
-      expect(format(fromFloat(-1.5), 1)).toEqual("-1.5g");
-      expect(format(fromFloat(-1337042.42), 0)).toEqual("-1,337,042g");
-      expect(format(fromFloat(-1337042.42), 2)).toEqual("-1,337,042.42g");
+      expect(format(fromApproximateFloat(-0.1))).toEqual("-0g");
+      expect(format(fromApproximateFloat(-1.5))).toEqual("-1g");
+      expect(format(fromApproximateFloat(-42))).toEqual("-42g");
+      expect(format(fromApproximateFloat(-1.5), 1)).toEqual("-1.5g");
+      expect(format(fromApproximateFloat(-1.5), 1)).toEqual("-1.5g");
+      expect(format(fromApproximateFloat(-1337042.42), 0)).toEqual(
+        "-1,337,042g"
+      );
+      expect(format(fromApproximateFloat(-1337042.42), 2)).toEqual(
+        "-1,337,042.42g"
+      );
     });
     it("handles full precision", () => {
       expect(format(ZERO, DECIMAL_PRECISION)).toEqual("0.000000000000000000g");
       expect(format(ONE, DECIMAL_PRECISION)).toEqual("1.000000000000000000g");
-      expect(format(fromFloat(0.1), DECIMAL_PRECISION)).toEqual(
+      expect(format(fromApproximateFloat(0.1), DECIMAL_PRECISION)).toEqual(
         "0.100000000000000000g"
       );
       // $ExpectFlowError
@@ -55,10 +61,12 @@ describe("src/grain/grain", () => {
       );
     });
     it("supports alternative suffixes", () => {
-      expect(format(fromFloat(1.5), 0, "SEEDS")).toEqual("1SEEDS");
-      expect(format(fromFloat(42), 0, "SEEDS")).toEqual("42SEEDS");
-      expect(format(fromFloat(-1.5), 1, "SEEDS")).toEqual("-1.5SEEDS");
-      expect(format(fromFloat(-1337042.42), 0, "SEEDS")).toEqual(
+      expect(format(fromApproximateFloat(1.5), 0, "SEEDS")).toEqual("1SEEDS");
+      expect(format(fromApproximateFloat(42), 0, "SEEDS")).toEqual("42SEEDS");
+      expect(format(fromApproximateFloat(-1.5), 1, "SEEDS")).toEqual(
+        "-1.5SEEDS"
+      );
+      expect(format(fromApproximateFloat(-1337042.42), 0, "SEEDS")).toEqual(
         "-1,337,042SEEDS"
       );
     });
@@ -100,13 +108,13 @@ describe("src/grain/grain", () => {
       expect(multiplyFloat(ONE, Math.PI)).toEqual(3141592653589793280n);
     });
   });
-  describe("fromFloat", () => {
-    it("fromFloat(1) === ONE", () => {
-      expect(fromFloat(1)).toEqual(ONE);
+  describe("fromApproximateFloat", () => {
+    it("fromApproximateFloat(1) === ONE", () => {
+      expect(fromApproximateFloat(1)).toEqual(ONE);
     });
-    it("fromFloat(0.1) === ONE / 10", () => {
+    it("fromApproximateFloat(0.1) === ONE / 10", () => {
       // $ExpectFlowError
-      expect(fromFloat(0.1)).toEqual(ONE / 10n);
+      expect(fromApproximateFloat(0.1)).toEqual(ONE / 10n);
     });
   });
 });
