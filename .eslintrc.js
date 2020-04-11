@@ -45,4 +45,7 @@ module.exports = {
       version: "detect",
     },
   },
+  globals: {
+    BigInt: "readonly",
+  },
 };

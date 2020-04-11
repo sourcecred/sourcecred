@@ -1,7 +1,5 @@
 // @flow
 
-/* global BigInt */
-
 /**
  * This module contains the types for tracking Grain, which is the native
  * project-specific, cred-linked token created in SourceCred instances. In
