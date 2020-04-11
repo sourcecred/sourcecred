@@ -126,7 +126,7 @@ export function multiplyFloat(grain: Grain, num: number): Grain {
 }
 
 /**
- * Aproximately create a grain balance from a float.
+ * Approximately create a grain balance from a float.
  *
  * This method tries to convert the floating point `amt` into a grain
  * balance. For example, `grain(1)` approximately equals `ONE`.
@@ -136,6 +136,6 @@ export function multiplyFloat(grain: Grain, num: number): Grain {
  *
  * This is a shorthand for `multiplyFloat(ONE, amt)`.
  */
-export function fromFloat(f: number): Grain {
+export function fromApproximateFloat(f: number): Grain {
   return multiplyFloat(ONE, f);
 }
