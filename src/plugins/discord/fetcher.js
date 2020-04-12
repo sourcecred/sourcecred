@@ -8,7 +8,6 @@ type FetchEndpoint = (endpoint: string) => Promise<any>;
 /**
  * Provide the Guild ID to fetch against, and the 'limit'
  * parameter when fetching GuildMembers, Messages, and Reactions.
- *
  */
 type FetchOptions = {|
   membersLimit: number,
@@ -43,7 +42,6 @@ export type ResultPage<T> = {|
  *   Note that Discord doesn't support pagination for Channels, so we're
  *   returning an array of Channel objects in the corresponding method.
  *   See: https://discordapp.com/developers/docs/resources/guild#get-guild-channels
- *
  */
 export class Fetcher {
   +_fetch: FetchEndpoint;
