@@ -3,6 +3,7 @@
 import path from "path";
 import fs from "fs-extra";
 import globby from "globby";
+import {type URL} from "../../core/references";
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import {type Compatible, fromCompat, toCompat} from "../../util/compat";
 import {compatReader} from "../../backend/compatIO";
@@ -16,7 +17,6 @@ import {
   type InitiativeWeight,
   type InitiativeId,
   type InitiativeRepository,
-  type URL,
   createId,
   addressFromId,
 } from "./initiative";
