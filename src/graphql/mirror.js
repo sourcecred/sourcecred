@@ -778,7 +778,8 @@ export class Mirror {
           ])
         );
       }),
-      Array.from(connectionsByObject.entries()).map(
+      MapUtil.mapToArray(
+        connectionsByObject,
         ([id, {typename, connections}], i) => {
           const name = `${_FIELD_PREFIXES.NODE_CONNECTIONS}${i}`;
           return b.alias(
