@@ -39,6 +39,7 @@ describe("src/grain/ledger", () => {
       sender: from,
       amount: fromApproximateFloat(amount),
       timestampMs,
+      memo: "",
     };
   }
 
@@ -157,6 +158,7 @@ describe("src/grain/ledger", () => {
             sender: foo,
             amount: ZERO,
             timestampMs: 2,
+            memo: "bad",
           },
         ];
         const fail = () => new InMemoryLedger(events);

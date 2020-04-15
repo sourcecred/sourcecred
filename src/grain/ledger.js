@@ -22,6 +22,7 @@ export type TransferV1 = {|
   +recipient: NodeAddressT,
   +amount: Grain,
   +timestampMs: number,
+  +memo: string,
 |};
 
 export type LedgerEvent = DistributionV1 | TransferV1;
