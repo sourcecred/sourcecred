@@ -8,6 +8,7 @@ import {
 } from "../../core/graph";
 import * as Weights from "../../core/weights";
 import type {ReferenceDetector, URL} from "../../core/references";
+import * as Timestamp from "../../util/timestamp";
 import type {Initiative, InitiativeRepository} from "./initiative";
 import {createId, addressFromId} from "./initiative";
 import {createWeightedGraph, initiativeWeight} from "./createGraph";
@@ -23,7 +24,7 @@ function _createInitiative(overrides?: $Shape<Initiative>): Initiative {
   return {
     id: createId("UNSET_SUBTYPE", "42"),
     title: "Unset test initiative",
-    timestampMs: 123,
+    timestampMs: Timestamp.fromNumber(123),
     completed: false,
     dependencies: [],
     references: [],
@@ -49,7 +50,7 @@ class MockInitiativeRepository implements InitiativeRepository {
     const initiative = _createInitiative({
       id: createId("TEST_SUBTYPE", String(num)),
       title: `Example Initiative ${num}`,
-      timestampMs: 400 + num,
+      timestampMs: Timestamp.fromNumber(400 + num),
       ...shape,
     });
 

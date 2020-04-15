@@ -1,6 +1,7 @@
 // @flow
 
 import {NodeAddress} from "../../core/graph";
+import * as Timestamp from "../../util/timestamp";
 import {createId, addressFromId} from "./initiative";
 import {type InitiativesDirectory} from "./initiativesDirectory";
 import {
@@ -13,7 +14,7 @@ import {
 
 const exampleInitiativeFile = (): InitiativeFile => ({
   title: "Sample initiative",
-  timestampIso: ("2020-01-08T22:01:57.766Z": any),
+  timestampIso: Timestamp.toISO(Date.parse("2020-01-08T22:01:57.766Z")),
   weight: {incomplete: 360, complete: 420},
   completed: false,
   champions: ["http://foo.bar/champ"],

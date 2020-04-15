@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs-extra";
 import stringify from "json-stable-stringify";
 import {MappedReferenceDetector} from "../../core/references";
+import * as Timestamp from "../../util/timestamp";
 import {type Initiative, createId, addressFromId} from "./initiative";
 import {
   type InitiativesDirectory,
@@ -20,7 +21,7 @@ import {type InitiativeFile} from "./initiativeFile";
 
 const exampleInitiativeFile = (): InitiativeFile => ({
   title: "Sample initiative",
-  timestampIso: ("2020-01-08T22:01:57.766Z": any),
+  timestampIso: Timestamp.toISO(Date.parse("2020-01-08T22:01:57.766Z")),
   weight: {incomplete: 360, complete: 420},
   completed: false,
   champions: ["http://foo.bar/champ"],
@@ -31,10 +32,11 @@ const exampleInitiativeFile = (): InitiativeFile => ({
 
 const exampleInitiative = (remoteUrl: string, fileName: string): Initiative => {
   const {timestampIso, ...partialInitiativeFile} = exampleInitiativeFile();
+  const timestampMs = Timestamp.fromISO(timestampIso);
   return {
     ...partialInitiativeFile,
     id: createId("INITIATIVE_FILE", remoteUrl, fileName),
-    timestampMs: Date.parse((timestampIso: any)),
+    timestampMs,
   };
 };
 

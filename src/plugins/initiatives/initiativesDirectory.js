@@ -5,6 +5,7 @@ import fs from "fs-extra";
 import globby from "globby";
 import {type URL} from "../../core/references";
 import {type NodeAddressT} from "../../core/graph";
+import * as Timestamp from "../../util/timestamp";
 import {compatReader} from "../../backend/compatIO";
 import {
   type ReferenceDetector,
@@ -148,10 +149,11 @@ export function _convertToInitiatives(
   const initiatives = [];
   for (const [fileName, initiativeFile] of map.entries()) {
     const {timestampIso, ...partialInitiativeFile} = initiativeFile;
+    const timestampMs = Timestamp.fromISO(timestampIso);
     const initiative: Initiative = {
       ...partialInitiativeFile,
       id: initiativeFileId(directory, fileName),
-      timestampMs: Date.parse(timestampIso),
+      timestampMs,
     };
     initiatives.push(initiative);
   }
