@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress, type NodeAddressT} from "../core/graph";
-import {InMemoryLedger} from "./ledger";
+import {inMemoryLedger} from "./ledger";
 import {fromApproximateFloat, ZERO, type Grain} from "./grain";
 import {type DistributionV1, type DistributionStrategy} from "./distribution";
 
@@ -14,14 +14,14 @@ describe("src/grain/ledger", () => {
       address,
       amount: fromApproximateFloat(amount),
     }));
-    let amt = ZERO;
+    let budget = ZERO;
     for (const {amount} of receipts) {
-      amt += amount;
+      budget += amount;
     }
     const strategy: DistributionStrategy = {
       type: "IMMEDIATE",
       version: 1,
-      amount: amt,
+      budget,
     };
     return {type: "DISTRIBUTION", version: 1, receipts, strategy, timestampMs};
   }
@@ -58,7 +58,7 @@ describe("src/grain/ledger", () => {
     const bar = NodeAddress.fromParts(["bar"]);
 
     it("works properly for an empty history", () => {
-      const ledger = new InMemoryLedger([]);
+      const ledger = inMemoryLedger([]);
       expect(ledger.balances()).toEqual(new Map());
       expect(ledger.earnings()).toEqual(new Map());
       expect(ledger.events()).toEqual([]);
@@ -70,7 +70,7 @@ describe("src/grain/ledger", () => {
           [bar, 99],
         ]),
       ];
-      const ledger = new InMemoryLedger(events);
+      const ledger = inMemoryLedger(events);
       const expected = grainMap([
         [foo, 10],
         [bar, 99],
@@ -87,7 +87,7 @@ describe("src/grain/ledger", () => {
         ]),
         mockTransfer(2, bar, foo, 50),
       ];
-      const ledger = new InMemoryLedger(events);
+      const ledger = inMemoryLedger(events);
       const expectedEarnings = grainMap([
         [foo, 10],
         [bar, 99],
@@ -105,7 +105,7 @@ describe("src/grain/ledger", () => {
         mockDistribution(0, [[foo, 10]]),
         mockTransfer(1, foo, foo, 5),
       ];
-      const ledger = new InMemoryLedger(events);
+      const ledger = inMemoryLedger(events);
       const expectedEarnings = grainMap([[foo, 10]]);
       const expectedBalances = grainMap([[foo, 10]]);
       expect(ledger.balances()).toEqual(expectedBalances);
@@ -113,7 +113,7 @@ describe("src/grain/ledger", () => {
       expect(ledger.events()).toEqual(events);
     });
     it("events returns an independent copy", () => {
-      const ledger = new InMemoryLedger([]);
+      const ledger = inMemoryLedger([]);
       // $ExpectFlowError
       ledger.events().push(33);
       expect(ledger.events()).toHaveLength(0);
@@ -125,7 +125,7 @@ describe("src/grain/ledger", () => {
           mockDistribution(0, [[foo, 10]]),
           mockTransfer(1, bar, foo, 5),
         ];
-        const fail = () => new InMemoryLedger(events);
+        const fail = () => inMemoryLedger(events);
         expect(fail).toThrowError("Invalid transfer (sender can't afford)");
       });
       it("unaffordable self-transfers", () => {
@@ -133,7 +133,7 @@ describe("src/grain/ledger", () => {
           mockDistribution(0, [[foo, 10]]),
           mockTransfer(1, foo, foo, 11),
         ];
-        const fail = () => new InMemoryLedger(events);
+        const fail = () => inMemoryLedger(events);
         expect(fail).toThrowError("Invalid transfer (sender can't afford)");
       });
       it("distributions with unsupported versions", () => {
@@ -145,7 +145,7 @@ describe("src/grain/ledger", () => {
           },
         ];
         // $ExpectFlowError
-        const fail = () => new InMemoryLedger(events);
+        const fail = () => inMemoryLedger(events);
         expect(fail).toThrowError("Unsupported distribution version: 99");
       });
       it("transfers with unsupported version", () => {
@@ -161,7 +161,7 @@ describe("src/grain/ledger", () => {
             memo: "bad",
           },
         ];
-        const fail = () => new InMemoryLedger(events);
+        const fail = () => inMemoryLedger(events);
         expect(fail).toThrowError("Unsupported transfer version: 999");
       });
       it("unsupported event types", () => {
@@ -173,12 +173,12 @@ describe("src/grain/ledger", () => {
           },
         ];
         // $ExpectFlowError
-        const fail = () => new InMemoryLedger(events);
+        const fail = () => inMemoryLedger(events);
         expect(fail).toThrowError("Unsupported event type: FOO");
       });
       it("out-of-order events", () => {
         const events = [mockDistribution(5, []), mockDistribution(4, [])];
-        const fail = () => new InMemoryLedger(events);
+        const fail = () => inMemoryLedger(events);
         expect(fail).toThrowError("event timestamps out of order");
       });
     });

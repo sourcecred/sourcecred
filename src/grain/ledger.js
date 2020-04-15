@@ -50,7 +50,11 @@ export interface Ledger {
   events(): $ReadOnlyArray<LedgerEvent>;
 }
 
-export class InMemoryLedger implements Ledger {
+export function inMemoryLedger(events: $ReadOnlyArray<LedgerEvent>): Ledger {
+  return new _InMemoryLedger(events);
+}
+
+class _InMemoryLedger implements Ledger {
   _balances: Map<NodeAddressT, Grain>;
   _earnings: Map<NodeAddressT, Grain>;
   _events: $ReadOnlyArray<LedgerEvent>;
