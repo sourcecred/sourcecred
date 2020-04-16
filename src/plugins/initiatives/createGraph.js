@@ -20,7 +20,7 @@ import {
   contributesToEdgeType,
   championsEdgeType,
 } from "./declaration";
-import {initiativeFileURL} from "./initiativesDirectory";
+import {initiativeFileURL} from "./initiativeFile";
 
 function initiativeAddress(initiative: Initiative): NodeAddressT {
   return addressFromId(initiative.id);

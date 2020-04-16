@@ -3,25 +3,25 @@
 import path from "path";
 import fs from "fs-extra";
 import globby from "globby";
-import {type NodeAddressT, NodeAddress} from "../../core/graph";
-import {type Compatible, fromCompat, toCompat} from "../../util/compat";
+import {type URL} from "../../core/references";
+import {type NodeAddressT} from "../../core/graph";
+import * as Timestamp from "../../util/timestamp";
 import {compatReader} from "../../backend/compatIO";
-import {initiativeNodeType} from "./declaration";
 import {
   type ReferenceDetector,
   MappedReferenceDetector,
 } from "../../core/references";
 import {
   type Initiative,
-  type InitiativeWeight,
-  type InitiativeId,
   type InitiativeRepository,
-  type URL,
-  createId,
   addressFromId,
 } from "./initiative";
-
-export const INITIATIVE_FILE_SUBTYPE = "INITIATIVE_FILE";
+import {
+  type InitiativeFile,
+  fromJSON,
+  initiativeFileURL,
+  initiativeFileId,
+} from "./initiativeFile";
 
 /**
  * Represents an Initiatives directory.
@@ -72,64 +72,6 @@ export async function loadDirectory(
     initiatives: repository,
     referenceDetector,
   };
-}
-
-/**
- * Represents a single Initiative using a file as source.
- *
- * Note: The file name will be used to derive the InitiativeId. So it doesn't
- * make sense to use this outside of the context of an InitiativesDirectory.
- */
-export type InitiativeFile = {|
-  +title: string,
-  +timestampIso: ISOTimestamp,
-  +weight: InitiativeWeight,
-  +completed: boolean,
-  +dependencies: $ReadOnlyArray<URL>,
-  +references: $ReadOnlyArray<URL>,
-  +contributions: $ReadOnlyArray<URL>,
-  +champions: $ReadOnlyArray<URL>,
-|};
-
-// Note: setting this to opaque forces us to convert it to timestampMs.
-opaque type ISOTimestamp = string;
-
-const COMPAT_INFO = {type: "sourcecred/initiativeFile", version: "0.1.0"};
-
-export function fromJSON(j: Compatible<any>): InitiativeFile {
-  return fromCompat(COMPAT_INFO, j);
-}
-
-export function toJSON(m: InitiativeFile): Compatible<InitiativeFile> {
-  return toCompat(COMPAT_INFO, m);
-}
-
-/**
- * When provided with the initiative NodeAddressT of an InitiativeFile this extracts
- * the URL from it. Or null when the address is not for an InitiativeFile.
- */
-export function initiativeFileURL(address: NodeAddressT): string | null {
-  const initiativeFilePrefix = NodeAddress.append(
-    initiativeNodeType.prefix,
-    INITIATIVE_FILE_SUBTYPE
-  );
-
-  if (!NodeAddress.hasPrefix(address, initiativeFilePrefix)) {
-    return null;
-  }
-
-  const parts = NodeAddress.toParts(address);
-  const remoteUrl = parts[4];
-  const fileName = parts[5];
-  return `${remoteUrl}/${fileName}`;
-}
-
-// Creates the InitiativeId for an InitiativeFile.
-export function _initiativeFileId(
-  {remoteUrl}: InitiativesDirectory,
-  fileName: string
-): InitiativeId {
-  return createId(INITIATIVE_FILE_SUBTYPE, remoteUrl, fileName);
 }
 
 // Checks the path exists and is a directory.
@@ -207,10 +149,11 @@ export function _convertToInitiatives(
   const initiatives = [];
   for (const [fileName, initiativeFile] of map.entries()) {
     const {timestampIso, ...partialInitiativeFile} = initiativeFile;
+    const timestampMs = Timestamp.fromISO(timestampIso);
     const initiative: Initiative = {
       ...partialInitiativeFile,
-      id: _initiativeFileId(directory, fileName),
-      timestampMs: Date.parse(timestampIso),
+      id: initiativeFileId(directory, fileName),
+      timestampMs,
     };
     initiatives.push(initiative);
   }

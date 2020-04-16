@@ -4,17 +4,12 @@ import tmp from "tmp";
 import path from "path";
 import fs from "fs-extra";
 import stringify from "json-stable-stringify";
-import {NodeAddress} from "../../core/graph";
 import {MappedReferenceDetector} from "../../core/references";
+import * as Timestamp from "../../util/timestamp";
 import {type Initiative, createId, addressFromId} from "./initiative";
 import {
-  type InitiativeFile,
   type InitiativesDirectory,
-  fromJSON,
-  toJSON,
-  initiativeFileURL,
   loadDirectory,
-  _initiativeFileId,
   _validatePath,
   _findFiles,
   _readFiles,
@@ -22,10 +17,11 @@ import {
   _convertToInitiatives,
   _createReferenceMap,
 } from "./initiativesDirectory";
+import {type InitiativeFile} from "./initiativeFile";
 
 const exampleInitiativeFile = (): InitiativeFile => ({
   title: "Sample initiative",
-  timestampIso: ("2020-01-08T22:01:57.766Z": any),
+  timestampIso: Timestamp.toISO(Date.parse("2020-01-08T22:01:57.766Z")),
   weight: {incomplete: 360, complete: 420},
   completed: false,
   champions: ["http://foo.bar/champ"],
@@ -36,72 +32,15 @@ const exampleInitiativeFile = (): InitiativeFile => ({
 
 const exampleInitiative = (remoteUrl: string, fileName: string): Initiative => {
   const {timestampIso, ...partialInitiativeFile} = exampleInitiativeFile();
+  const timestampMs = Timestamp.fromISO(timestampIso);
   return {
     ...partialInitiativeFile,
     id: createId("INITIATIVE_FILE", remoteUrl, fileName),
-    timestampMs: Date.parse((timestampIso: any)),
+    timestampMs,
   };
 };
 
 describe("plugins/initiatives/initiativesDirectory", () => {
-  describe("toJSON/fromJSON", () => {
-    it("should handle an example round-trip", () => {
-      // Given
-      const initiativeFile = exampleInitiativeFile();
-
-      // When
-      const actual = fromJSON(toJSON(initiativeFile));
-
-      // Then
-      expect(actual).toEqual(initiativeFile);
-    });
-  });
-
-  describe("initiativeFileURL", () => {
-    it("should return null for a different prefix", () => {
-      // Given
-      const address = NodeAddress.fromParts(["foobar"]);
-
-      // When
-      const url = initiativeFileURL(address);
-
-      // Then
-      expect(url).toEqual(null);
-    });
-
-    it("should detect the correct prefix and create a URL", () => {
-      // Given
-      const remoteUrl = "http://foo.bar/dir";
-      const fileName = "sample.json";
-      const address = addressFromId(
-        createId("INITIATIVE_FILE", remoteUrl, fileName)
-      );
-
-      // When
-      const url = initiativeFileURL(address);
-
-      // Then
-      expect(url).toEqual(`${remoteUrl}/${fileName}`);
-    });
-  });
-
-  describe("_initiativeFileId", () => {
-    it("should add the correct prefix to a remoteUrl and fileName", () => {
-      // Given
-      const dir: InitiativesDirectory = {
-        localPath: "should-not-be-used",
-        remoteUrl: "http://foo.bar/dir",
-      };
-      const fileName = "sample.json";
-
-      // When
-      const id = _initiativeFileId(dir, fileName);
-
-      // Then
-      expect(id).toEqual(createId("INITIATIVE_FILE", dir.remoteUrl, fileName));
-    });
-  });
-
   describe("_validatePath", () => {
     it("should resolve relative paths", async () => {
       // Given
