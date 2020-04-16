@@ -3,6 +3,7 @@
 import {resolveAlias} from "./alias";
 import {loginAddress as githubAddress} from "../github/nodes";
 import {userAddress as discourseAddress} from "../discourse/address";
+import {identityAddress} from "./identity";
 
 describe("src/plugins/identity/alias", () => {
   describe("resolveAlias", () => {
@@ -75,6 +76,16 @@ describe("src/plugins/identity/alias", () => {
         const url = "https://example.com";
         const a = resolveAlias("discourse/login", url);
         const b = resolveAlias("discourse/@login", url);
+        expect(a).toEqual(b);
+      });
+      it("a sourcecred identity", () => {
+        const actual = resolveAlias("sourcecred/example", null);
+        const expected = identityAddress("example");
+        expect(actual).toEqual(expected);
+      });
+      it("a discourse login with prefixed @", () => {
+        const a = resolveAlias("sourcecred/example", null);
+        const b = resolveAlias("sourcecred/@example", null);
         expect(a).toEqual(b);
       });
     });

@@ -3,6 +3,7 @@
 import {NodeAddress, type Node} from "../../core/graph";
 import {nodePrefix} from "./declaration";
 import {type Alias} from "./alias";
+import type {NodeAddressT} from "../../core/graph";
 
 /**
  * A Username is a locally (within-instance) unique identifier for a user of
@@ -31,16 +32,30 @@ export type IdentitySpec = {|
 |};
 
 /**
+ * Internal method for validating a username.
+ *
+ * Returns the username with any leading @ symbol stripped.
+ * Throws an error if the username is invalid.
+ */
+function validateUsername(username: string): Username {
+  const re = new RegExp(USERNAME_PATTERN);
+  const match = re.exec(username);
+  if (match == null) {
+    throw new Error(`Invalid username: ${username}`);
+  }
+  return match[1];
+}
+
+/**
  * Create a new node representing an identity.
  */
 export function identityNode(identity: Identity): Node {
-  const re = new RegExp(USERNAME_PATTERN);
-  const match = re.exec(identity.username);
-  if (match == null) {
-    throw new Error(`Invalid username: ${identity.username}`);
-  }
-  const username = match[1];
-  const address = NodeAddress.append(nodePrefix, username);
+  const username = validateUsername(identity.username);
+  const address = identityAddress(username);
   const description = `@${username}`;
   return {address, timestampMs: null, description};
+}
+
+export function identityAddress(username: Username): NodeAddressT {
+  return NodeAddress.append(nodePrefix, validateUsername(username));
 }
