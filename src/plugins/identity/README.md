@@ -113,8 +113,8 @@ Discourse user /u/abc
 └── authored Post /t/123/2
 ```
 
-The identity plugin creates a new node, representing the Identity, with the
-username provided in the project file. While removing the alias nodes.
+Using the information from the project file, the plugin creates a new Identity
+node and removes the alias nodes.
 
 ```
 Identity @abc
