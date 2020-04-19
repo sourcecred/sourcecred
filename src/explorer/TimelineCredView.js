@@ -14,7 +14,7 @@ export type Props = {|
 |};
 
 const MAX_ENTRIES_PER_LIST = 100;
-const DEFAULT_ENTRIES_PER_CHART = 6;
+const DEFAULT_ENTRIES_PER_CHART = 12; // to 12 from 6
 
 /**
  * Render a view on TimelineCred.

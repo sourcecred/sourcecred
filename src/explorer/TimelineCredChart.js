@@ -81,7 +81,7 @@ export class TimelineCredChart extends React.Component<Props> {
           dot={false}
           key={n}
           stroke={scale(n)}
-          dataKey={(x) => x.score.get(n)}
+          dataKey={(x) => Math.log(1+x.score.get(n))} //applied log(cred+1) data transformation
           name={plainDescription}
         />
       );
@@ -111,7 +111,8 @@ export class TimelineCredChart extends React.Component<Props> {
           tickFormatter={multiFormat}
           ticks={ticks}
         />
-        <YAxis />
+        {/* labled axis log(cred+1) data transformation */}
+        <YAxis label={{ value: 'log(1+cred)', angle: -90, position: 'insideLeft' }} />
         {Lines}
         <Tooltip
           formatter={format(".1d")}
