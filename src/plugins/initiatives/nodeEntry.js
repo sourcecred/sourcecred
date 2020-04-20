@@ -3,6 +3,7 @@
 import {type URL} from "../../core/references";
 import {type NodeWeight} from "../../core/weights";
 import {type TimestampMs, type TimestampISO} from "../../util/timestamp";
+import * as Timestamp from "../../util/timestamp";
 
 /**
  * Represents an "inline contribution" node. They're called entries and named
@@ -38,8 +39,53 @@ export type NodeEntryJson = $Shape<{
   // Key defaults to a url-friendly-slug of the title. Override it if you need
   // to preserve a specific NodeAddress, or the slug produces duplicate keys.
   +key: string,
+  // Defaults to an empty array.
   +contributors: $ReadOnlyArray<URL>,
   // Timestamp of this node, but in ISO format as it's more human friendly.
   +timestampIso: TimestampISO,
+  // Defaults to null.
   +weight: NodeWeight | null,
 }>;
+
+/**
+ * Takes a NodeEntryJson and normalizes it to a NodeEntry.
+ *
+ * Will throw when required fields are missing. Otherwise handles default
+ * values and converting ISO timestamps.
+ */
+export function normalizeNodeEntry(
+  input: NodeEntryJson,
+  defaultTimestampMs: TimestampMs
+): NodeEntry {
+  if (!input.title) {
+    throw new TypeError(
+      `Title is required for an entry, received ${JSON.stringify(input)}`
+    );
+  }
+
+  return {
+    key: input.key || _titleSlug(input.title),
+    title: input.title,
+    timestampMs: input.timestampIso
+      ? Timestamp.fromISO(input.timestampIso)
+      : defaultTimestampMs,
+    contributors: input.contributors || [],
+    weight: input.weight || null,
+  };
+}
+
+/**
+ * Creates a url-friendly-slug from the title of a NodeEntry. Useful for
+ * generating a default key.
+ *
+ * Note: keys are not required to meet the formatting rules of this slug,
+ * this is mostly for predictability and convenience of NodeAddresses.
+ */
+export function _titleSlug(title: string): string {
+  return String(title)
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/g, "-")
+    .replace(/--+/g, "-")
+    .replace(/^-/, "")
+    .replace(/-$/, "");
+}
