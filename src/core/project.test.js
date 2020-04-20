@@ -109,6 +109,7 @@ describe("core/project", () => {
           // It should strip the apiUsername field, keeping just serverUrl.
           discourseServer: {serverUrl: "https://example.com"},
           initiatives: null,
+          discord: null,
         }: Project)
       );
     });

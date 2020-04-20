@@ -85,7 +85,6 @@ export function encodeProjectId(id: ProjectId): string {
 
 const upgradeFrom040 = (p: ProjectV040): ProjectV050 => ({
   ...p,
-  discord: null,
   discourseServer:
     p.discourseServer != null ? {serverUrl: p.discourseServer.serverUrl} : null,
   initiatives: null,
@@ -103,6 +102,7 @@ export type ProjectV040 = {|
 const upgradeFrom030 = (p: ProjectV030 | ProjectV031) =>
   upgradeFrom040({
     ...p,
+    discord: null,
     discourseServer:
       p.discourseServer != null
         ? {serverUrl: p.discourseServer.serverUrl}
