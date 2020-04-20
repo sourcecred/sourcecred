@@ -8,6 +8,20 @@ import {
 import {snapshotFetcher} from "./mockSnapshotFetcher";
 
 describe("plugins/discourse/references", () => {
+  function spyError(): JestMockFn<[string], void> {
+    return ((console.error: any): JestMockFn<any, void>);
+  }
+  beforeEach(() => {
+    jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+  afterEach(() => {
+    try {
+      expect(console.error).not.toHaveBeenCalled();
+    } finally {
+      spyError().mockRestore();
+    }
+  });
+
   describe("parseLinks", () => {
     const serverUrl = "https://example.com";
     it("does not error on empty string", () => {
@@ -122,8 +136,15 @@ describe("plugins/discourse/references", () => {
         " https://sourcecred-test.discourse.group/t/foo/120",
         // unexpected trailing stuff
         "https://sourcecred-test.discourse.group/t/foo/120$$",
+        // malformed URI.
+        "https://foo.bar/incorrect%20encoding%20%93.htm",
       ];
       expect(linksToReferences(hyperlinks)).toEqual([]);
+      expect(console.error).toHaveBeenCalledWith(
+        "URIError: URI malformed\nFor URL: https://foo.bar/incorrect%20encoding%20%93.htm"
+      );
+      expect(console.error).toHaveBeenCalledTimes(1);
+      spyError().mockReset();
     });
     it("works on a snapshot corpus", () => {
       const hyperlinks = [

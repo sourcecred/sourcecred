@@ -2,7 +2,7 @@
 
 import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
-import sortBy from "lodash.sortby";
+import sortBy from "../../util/sortBy";
 import {utcWeek} from "d3-time";
 import {NodeAddress, EdgeAddress} from "../../core/graph";
 import * as WeightedGraph from "../../core/weightedGraph";

@@ -12,6 +12,12 @@ import {type Loader as GithubLoader} from "../plugins/github/loader";
 import {type Loader as DiscordLoader} from "../plugins/discord/loader";
 import {type Loader as DiscourseLoader} from "../plugins/discourse/loader";
 import {type Loader as IdentityLoader} from "../plugins/identity/loader";
+import {type Loader as InitiativesLoader} from "../plugins/initiatives/loader";
+import {type LoadedInitiativesDirectory} from "../plugins/initiatives/initiativesDirectory";
+import {
+  type ReferenceDetector,
+  CascadingReferenceDetector,
+} from "../core/references";
 
 /**
  * A type combining all known plugin Loader interfaces.
@@ -24,6 +30,7 @@ export type PluginLoaders = {|
   +discord: DiscordLoader,
   +discourse: DiscourseLoader,
   +identity: IdentityLoader,
+  +initiatives: InitiativesLoader,
 |};
 
 /**
@@ -32,6 +39,7 @@ export type PluginLoaders = {|
  * Note: no guarantees about the cache are made, it's state is a best effort.
  */
 opaque type CachedProject = {|
+  +loadedInitiativesDirectory: ?LoadedInitiativesDirectory,
   +cache: CacheProvider,
   +project: Project,
 |};
@@ -45,6 +53,7 @@ opaque type PluginGraphs = {|
 |};
 
 type MirrorEnv = {
+  +initiativesDirectory: ?string,
   +githubToken: ?GithubToken,
   +discordToken: ?DiscordToken,
   +reporter: TaskReporter,
@@ -60,7 +69,7 @@ type GraphEnv = {
  * Gets all relevant PluginDeclarations for a given Project.
  */
 export function declarations(
-  {github, discourse, discord, identity}: PluginLoaders,
+  {github, discourse, discord, identity, initiatives}: PluginLoaders,
   project: Project
 ): $ReadOnlyArray<PluginDeclaration> {
   const plugins: PluginDeclaration[] = [];
@@ -76,6 +85,9 @@ export function declarations(
   if (project.identities.length) {
     plugins.push(identity.declaration());
   }
+  if (project.initiatives) {
+    plugins.push(initiatives.declaration());
+  }
   return plugins;
 }
 
@@ -83,8 +95,8 @@ export function declarations(
  * Updates all mirrors into cache as requested by the Project.
  */
 export async function updateMirror(
-  {github, discourse, discord}: PluginLoaders,
-  {githubToken, discordToken, cache, reporter}: MirrorEnv,
+  {github, discourse, discord, initiatives}: PluginLoaders,
+  {githubToken, discordToken, cache, reporter, initiativesDirectory}: MirrorEnv,
   project: Project
 ): Promise<CachedProject> {
   const tasks: Promise<void>[] = [];
@@ -109,22 +121,72 @@ export async function updateMirror(
       discord.updateMirror(project.discord, discordToken, cache, reporter)
     );
   }
+
+  let loadedInitiativesDirectory: ?LoadedInitiativesDirectory;
+  if (project.initiatives) {
+    if (!initiativesDirectory) {
+      throw new Error(
+        "Tried to load Initiatives, but no Initiatives directory set"
+      );
+    }
+    loadedInitiativesDirectory = await initiatives.loadDirectory(
+      {
+        localPath: initiativesDirectory,
+        remoteUrl: project.initiatives.remoteUrl,
+      },
+      reporter
+    );
+  }
+
   await Promise.all(tasks);
-  return {project, cache};
+  return {project, cache, loadedInitiativesDirectory};
+}
+
+/**
+ * Creates a ReferenceDetector composing all plugin reference detectors
+ * requested by the project.
+ */
+export async function createReferenceDetector(
+  {github, discourse}: $Shape<PluginLoaders>,
+  {githubToken}: GraphEnv,
+  {cache, project, loadedInitiativesDirectory}: CachedProject
+): Promise<ReferenceDetector> {
+  const refs: ReferenceDetector[] = [];
+  if (project.repoIds.length) {
+    // TODO: similar to create graph, rather not depend on the token (#1580).
+    if (!githubToken) {
+      throw new Error("Tried to load GitHub, but no GitHub token set");
+    }
+    refs.push(
+      await github.referenceDetector(project.repoIds, githubToken, cache)
+    );
+  }
+  if (project.discourseServer) {
+    refs.push(
+      await discourse.referenceDetector(project.discourseServer, cache)
+    );
+  }
+  if (loadedInitiativesDirectory) {
+    refs.push(loadedInitiativesDirectory.referenceDetector);
+  }
+  return new CascadingReferenceDetector(refs);
 }
 
 /**
  * Creates PluginGraphs containing all plugins requested by the Project.
  */
 export async function createPluginGraphs(
-  {github, discourse, discord}: PluginLoaders,
+  {github, discourse, discord, initiatives}: PluginLoaders,
   {githubToken, discordToken}: GraphEnv,
-  {cache, project}: CachedProject
+  {cache, project, loadedInitiativesDirectory}: CachedProject,
+  referenceDetector: ReferenceDetector
 ): Promise<PluginGraphs> {
   const tasks: Promise<WeightedGraphT>[] = [];
+
   if (project.discourseServer) {
     tasks.push(discourse.createGraph(project.discourseServer, cache));
   }
+
   if (project.repoIds.length) {
     if (!githubToken) {
       throw new Error("Tried to load GitHub, but no GitHub token set");
@@ -138,12 +200,21 @@ export async function createPluginGraphs(
     tasks.push(discord.createGraph(project.discord, cache));
   }
 
+  if (loadedInitiativesDirectory) {
+    tasks.push(
+      initiatives.createGraph(
+        loadedInitiativesDirectory.initiatives,
+        referenceDetector
+      )
+    );
+  }
+
   // It's important to use Promise.all so that we can load the plugins in
   // parallel -- since loading is often IO-bound, this can be a big performance
   // improvement.
   return {
     graphs: await Promise.all(tasks),
-    cachedProject: {cache, project},
+    cachedProject: {cache, project, loadedInitiativesDirectory},
   };
 }
 

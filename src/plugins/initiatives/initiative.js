@@ -1,9 +1,10 @@
 // @flow
 
+import {type URL} from "../../core/references";
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
+import {type NodeWeight} from "../../core/weights";
+import {type TimestampMs} from "../../util/timestamp";
 import {initiativeNodeType} from "./declaration";
-
-export type URL = string;
 
 // Composite ID, used as input for NodeAddressT.
 export opaque type InitiativeId = string[];
@@ -20,6 +21,12 @@ export function createId(
 export function addressFromId(id: InitiativeId): NodeAddressT {
   return NodeAddress.append(initiativeNodeType.prefix, ...id);
 }
+
+// A before completion and after completion weight for Initiatives.
+export type InitiativeWeight = {|
+  +incomplete: NodeWeight,
+  +complete: NodeWeight,
+|};
 
 /**
  * An intermediate representation of an Initiative.
@@ -38,7 +45,8 @@ export function addressFromId(id: InitiativeId): NodeAddressT {
 export type Initiative = {|
   +id: InitiativeId,
   +title: string,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
+  +weight?: InitiativeWeight,
   +completed: boolean,
   +dependencies: $ReadOnlyArray<URL>,
   +references: $ReadOnlyArray<URL>,

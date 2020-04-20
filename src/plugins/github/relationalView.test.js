@@ -3,6 +3,7 @@
 import {NodeAddress} from "../../core/graph";
 import * as R from "./relationalView";
 import * as N from "./nodes";
+import * as T from "./graphqlTypes";
 import {exampleRepository, exampleRelationalView} from "./example/example";
 import * as MapUtil from "../../util/map";
 
@@ -257,6 +258,122 @@ describe("plugins/github/relationalView", () => {
     hasCorrectParent("issue", issue);
     hasCorrectParent("pull", pull);
     hasCorrectParent("review", review);
+  });
+
+  describe("handles long sequences of commits", () => {
+    // Chain length needs to be significantly higher than what one might
+    // expect would be sufficient to trigger a stack overflow (~5000)
+    // due to V8 hotspot-based optimizations. See:
+    // https://github.com/sourcecred/sourcecred/issues/1354#issuecomment-593062805
+    const COMMIT_CHAIN_LENGTH = 8192;
+    const PULL_REQUEST_SPACING = 10;
+    function exampleResponse(options: {|
+      +includePullRequests: boolean,
+    |}): T.Repository {
+      const dateString: string = "2001-02-03T04:05:06Z";
+      const userNode: T.User = {
+        __typename: "User",
+        id: "user:admin",
+        login: "admin",
+        url: "https://example.com/admin",
+      };
+      function wrapCommit(
+        index: number,
+        parents: $ReadOnlyArray<T.Commit>
+      ): T.Commit {
+        const hex = index.toString(16);
+        const oid = "0".repeat(40 - hex.length) + hex;
+        return {
+          __typename: "Commit",
+          author: {
+            date: dateString,
+            user: userNode,
+          },
+          authoredDate: dateString,
+          id: `commit:${oid}`,
+          message: "",
+          oid,
+          parents,
+          url: `https://example.com/admin/repo/commit/${oid}`,
+        };
+      }
+      function commitChain(n: number): T.Commit[] {
+        let head = wrapCommit(0, []);
+        const results = [head];
+        for (let i = 1; i < n; i++) {
+          head = wrapCommit(i, [head]);
+          results.push(head);
+        }
+        return results;
+      }
+      const commits = commitChain(COMMIT_CHAIN_LENGTH);
+      const pullRequests: T.PullRequest[] = [];
+      function pullRequest(
+        prNumber: number,
+        mergeCommit: T.Commit
+      ): T.PullRequest {
+        return {
+          __typename: "PullRequest",
+          additions: 0,
+          author: userNode,
+          baseRefName: "master",
+          body: "",
+          comments: [],
+          createdAt: dateString,
+          deletions: 0,
+          id: `pr:admin/repo#${prNumber}`,
+          mergeCommit,
+          number: prNumber,
+          reactions: [],
+          reviews: [],
+          title: "",
+          url: `https://example.com/admin/repo/pull/${prNumber}`,
+        };
+      }
+      {
+        let nextPrNumber = 1;
+        if (options.includePullRequests) {
+          for (let i = 0; i < commits.length - 1; i += PULL_REQUEST_SPACING) {
+            pullRequests.push(pullRequest(nextPrNumber++, commits[i]));
+          }
+        }
+        pullRequests.push(
+          pullRequest(nextPrNumber++, commits[commits.length - 1])
+        );
+      }
+      return {
+        __typename: "Repository",
+        createdAt: dateString,
+        defaultBranchRef: {
+          __typename: "Ref",
+          id: "ref:master",
+          target: commits[commits.length - 1],
+        },
+        id: "repo:admin/repo",
+        issues: [],
+        name: "repo",
+        owner: userNode,
+        pullRequests,
+        url: "https://example.com/admin/repo",
+      };
+    }
+
+    it("without regularly spaced pull requests", () => {
+      const rv = new R.RelationalView();
+      // Next line expected to stack overflow on a naive implementation.
+      rv.addRepository(exampleResponse({includePullRequests: false}));
+      expect(Array.from(rv.commits())).toHaveLength(COMMIT_CHAIN_LENGTH);
+      expect(Array.from(rv.pulls())).toHaveLength(1);
+    });
+
+    it("with regularly spaced pull requests", () => {
+      const rv = new R.RelationalView();
+      rv.addRepository(exampleResponse({includePullRequests: true}));
+      expect(Array.from(rv.commits())).toHaveLength(COMMIT_CHAIN_LENGTH);
+      expect(Array.from(rv.pulls())).toHaveLength(
+        Math.ceil((COMMIT_CHAIN_LENGTH - 1) / PULL_REQUEST_SPACING) + 1
+      );
+    });
   });
 
   it("paired with edges", () => {

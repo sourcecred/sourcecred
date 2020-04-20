@@ -103,6 +103,7 @@ const command: Command = async (args, std) => {
       sourcecredDirectory: Common.sourcecredDirectory(),
       githubToken: null,
       discordToken: null,
+      initiativesDirectory: null,
     },
     taskReporter
   );

@@ -3,6 +3,7 @@
 import base64url from "base64url";
 import {type RepoId} from "../plugins/github/repoId";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
+import {type ProjectParameters as Initiatives} from "../plugins/initiatives/params";
 import {type Identity} from "../plugins/identity/identity";
 import {type DiscourseServer} from "../plugins/discourse/server";
 import {type ProjectOptions as Discord} from "../plugins/discord/params";
@@ -25,11 +26,16 @@ export type ProjectId = string;
  * the future (e.g. showing the last update time for each of the project's data
  * dependencies).
  */
-export type Project = ProjectV040;
-export type SupportedProject = ProjectV030 | ProjectV031 | ProjectV040;
+export type Project = ProjectV050;
+export type SupportedProject =
+  | ProjectV030
+  | ProjectV031
+  | ProjectV040
+  | ProjectV050;
 
-type ProjectV040 = {|
+export type ProjectV050 = {|
   +id: ProjectId,
+  +initiatives: Initiatives | null,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,
   +identities: $ReadOnlyArray<Identity>,
@@ -37,7 +43,7 @@ type ProjectV040 = {|
   +discord: Discord | null,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/project", version: "0.4.0"};
+const COMPAT_INFO = {type: "sourcecred/project", version: "0.5.0"};
 
 /**
  * Creates a new Project instance with default values.
@@ -54,6 +60,7 @@ export function createProject(p: $Shape<Project>): Project {
     identities: [],
     discourseServer: null,
     discord: null,
+    initiatives: null,
     ...p,
   };
 }
@@ -76,14 +83,33 @@ export function encodeProjectId(id: ProjectId): string {
   return base64url.encode(id);
 }
 
-const upgradeFrom030 = (p: ProjectV030 | ProjectV031): ProjectV040 => ({
+const upgradeFrom040 = (p: ProjectV040): ProjectV050 => ({
   ...p,
   discord: null,
   discourseServer:
     p.discourseServer != null ? {serverUrl: p.discourseServer.serverUrl} : null,
+  initiatives: null,
 });
 
-type ProjectV031 = {|
+export type ProjectV040 = {|
+  +id: ProjectId,
+  +repoIds: $ReadOnlyArray<RepoId>,
+  +discourseServer: DiscourseServer | null,
+  +identities: $ReadOnlyArray<Identity>,
+  // TODO: pretend like it was always in 0.4.0
+  +discord: Discord | null,
+|};
+
+const upgradeFrom030 = (p: ProjectV030 | ProjectV031) =>
+  upgradeFrom040({
+    ...p,
+    discourseServer:
+      p.discourseServer != null
+        ? {serverUrl: p.discourseServer.serverUrl}
+        : null,
+  });
+
+export type ProjectV031 = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: {|
@@ -93,7 +119,7 @@ type ProjectV031 = {|
   +identities: $ReadOnlyArray<Identity>,
 |};
 
-type ProjectV030 = {|
+export type ProjectV030 = {|
   +id: ProjectId,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: {|
@@ -106,4 +132,5 @@ type ProjectV030 = {|
 const upgrades = {
   "0.3.0": upgradeFrom030,
   "0.3.1": upgradeFrom030,
+  "0.4.0": upgradeFrom040,
 };

@@ -753,6 +753,7 @@
                 "login": "decentralion",
                 "url": "https://github.com/decentralion"
             },
+            "baseRefName": "master",
             "body": "Oh look, it's a pull request.",
             "comments": [
                 {
@@ -867,6 +868,7 @@
                 "login": "decentralion",
                 "url": "https://github.com/decentralion"
             },
+            "baseRefName": "master",
             "body": "@wchargin could you please do the following:\r\n- add a commit comment\r\n- add a review comment requesting some trivial change\r\n- i'll change it\r\n- then approve the pr",
             "comments": [
                 {
@@ -1215,6 +1217,7 @@
                 "login": "decentralion",
                 "url": "https://github.com/decentralion"
             },
+            "baseRefName": "master",
             "body": "Nominally paired with @wchargin",
             "comments": [
             ],

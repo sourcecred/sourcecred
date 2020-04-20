@@ -1,7 +1,7 @@
 // @flow
 
 import {max} from "d3-array";
-import sortBy from "lodash.sortby";
+import sortBy from "../../util/sortBy";
 import Database from "better-sqlite3";
 import {Mirror, type MirrorOptions} from "./mirror";
 import {SqliteMirrorRepository} from "./mirrorRepository";

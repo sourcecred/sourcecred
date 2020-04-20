@@ -141,6 +141,9 @@ export class Mirror {
    *     this more efficiently in both space and time (see discussion on
    *     #883 for some options).
    *
+   * These fields are type-specific, and so only exist once a node's
+   * typename is set.
+   *
    * We refer to node and primitive data together as "own data", because
    * this is the data that can be queried uniformly for all elements of
    * a type; querying connection data, by contrast, requires the
@@ -166,7 +169,11 @@ export class Mirror {
    * appears once in the `objects` table, which relates its ID,
    * typename, and last own-data update. Each connection has its own
    * last-update value, because connections can be updated independently
-   * of each other and of own-data.
+   * of each other and of own-data. An object's typename may be `NULL`
+   * if we have only reached the object through edges of unfaithful
+   * type, in which case we will perform an extra query to definitively
+   * determine fetch the object's type before requesting its own data or
+   * connections.
    *
    * Note that any object in the database should have entries in the
    * `connections`, `links`, and `primitives` tables for all relevant
@@ -197,7 +204,7 @@ export class Mirror {
     // it requires bumping the version, bump it: requiring some extra
     // one-time cache resets is okay; doing the wrong thing is not.
     const blob = stringify({
-      version: "MIRROR_v8",
+      version: "MIRROR_v9",
       schema: this._schema,
       options: {
         blacklistedIds: this._blacklistedIds,
@@ -252,9 +259,10 @@ export class Mirror {
         dedent`\
           CREATE TABLE objects (
               id TEXT NOT NULL PRIMARY KEY,
-              typename TEXT NOT NULL,
+              typename TEXT,
               last_update INTEGER,
-              FOREIGN KEY(last_update) REFERENCES updates(rowid)
+              FOREIGN KEY(last_update) REFERENCES updates(rowid),
+              CHECK((last_update IS NOT NULL) <= (typename IS NOT NULL))
           )
         `,
         dedent`\
@@ -361,8 +369,9 @@ export class Mirror {
 
   /**
    * Inform the GraphQL mirror of the existence of an object. The
-   * object's name and concrete type must be specified. The concrete
-   * type must be an OBJECT type in the GraphQL schema.
+   * object's ID must be specified. The object's concrete type may also
+   * be specified, in which case it must be an OBJECT type in the
+   * GraphQL schema.
    *
    * If the object has previously been registered with the same type, no
    * action is taken and no error is raised. If the object has
@@ -370,7 +379,7 @@ export class Mirror {
    * thrown, and the database is left unchanged.
    */
   registerObject(object: {|
-    +typename: Schema.Typename,
+    +typename: null | Schema.Typename,
     +id: Schema.ObjectId,
   |}): void {
     _inTransaction(this._db, () => {
@@ -382,10 +391,13 @@ export class Mirror {
    * As `registerObject`, but do not enter any transactions. Other
    * methods may call this method as a subroutine in a larger
    * transaction.
+   *
+   * This internal method also permits registering an object without
+   * specifying its typename.
    */
   _nontransactionallyRegisterObject(
     object: {|
-      +typename: Schema.Typename,
+      +typename: null | Schema.Typename,
       +id: Schema.ObjectId,
     |},
     guessMismatchMessage?: (guess: Schema.Typename) => string
@@ -409,9 +421,18 @@ export class Mirror {
       .pluck()
       .get(id);
     if (existingTypename === typename) {
-      // Already registered; nothing to do.
+      // Already registered, and no typename upgrade; nothing to do.
       return;
-    } else if (existingTypename !== undefined) {
+    } else if (existingTypename != null && typename == null) {
+      // Already registered, and already have typename; nothing to do.
+      return;
+    } else if (existingTypename === undefined) {
+      // OK: New registration.
+    } else if (existingTypename === null) {
+      // OK: Typename upgrade. Take the user-supplied type as reliable.
+      // We still need to add primitives, links, and connections rows.
+    } else {
+      // Not OK: Already had a typename, but it didn't match.
       const s = JSON.stringify;
       throw new Error(
         `Inconsistent type for ID ${s(id)}: ` +
@@ -419,29 +440,49 @@ export class Mirror {
       );
     }
 
-    if (this._schema[typename] == null) {
-      throw new Error("Unknown type: " + JSON.stringify(typename));
-    }
-    if (this._schema[typename].type !== "OBJECT") {
-      throw new Error(
-        "Cannot add object of non-object type: " +
-          `${JSON.stringify(typename)} (${this._schema[typename].type})`
-      );
+    if (typename != null) {
+      if (this._schema[typename] == null) {
+        throw new Error("Unknown type: " + JSON.stringify(typename));
+      }
+      if (this._schema[typename].type !== "OBJECT") {
+        throw new Error(
+          "Cannot add object of non-object type: " +
+            `${JSON.stringify(typename)} (${this._schema[typename].type})`
+        );
+      }
+
+      const guess = this._guessTypename(object.id);
+      if (guess != null && guess !== object.typename) {
+        console.warn("Warning: " + guessMismatchMessage(guess));
+      }
     }
 
-    const guess = this._guessTypename(object.id);
-    if (guess != null && guess !== object.typename) {
-      console.warn("Warning: " + guessMismatchMessage(guess));
-    }
-
-    this._db
-      .prepare(
+    if (existingTypename === undefined) {
+      this._db
+        .prepare(
+          dedent`\
+            INSERT INTO objects (id, last_update, typename)
+            VALUES (:id, NULL, :typename)
+          `
+        )
+        .run({id, typename});
+    } else {
+      // Should be a typename upgrade.
+      const stmt = db.prepare(
         dedent`\
-          INSERT INTO objects (id, last_update, typename)
-          VALUES (:id, NULL, :typename)
+          UPDATE objects SET typename = :typename
+          WHERE id = :id
+          AND typename IS NULL  -- sanity check
+          AND :typename IS NOT NULL  -- sanity check
         `
-      )
-      .run({id, typename});
+      );
+      _makeSingleUpdateFunction(stmt)({id, typename});
+    }
+
+    if (typename == null) {
+      // Can't add fields if typename not known.
+      return;
+    }
     const addPrimitive = this._db.prepare(
       dedent`
         INSERT INTO primitives (object_id, fieldname, value)
@@ -509,7 +550,12 @@ export class Mirror {
     } else if (this._blacklistedIds[result.id]) {
       return null;
     } else {
-      const object = {typename: result.__typename, id: result.id};
+      // If queried via an unfaithful field, typename will be missing;
+      // in that case, register the object with unknown type (`null`).
+      const typename =
+        result.__typename === undefined ? null : result.__typename;
+      const id = result.id;
+      const object = {typename, id};
       this._nontransactionallyRegisterObject(object, (guess) => {
         const s = JSON.stringify;
         const message =
@@ -525,6 +571,9 @@ export class Mirror {
   /**
    * Find objects and connections that are not known to be up-to-date.
    *
+   * An object's typename is up-to-date if it has ever been fetched from
+   * a faithful field reference or a direct typename query.
+   *
    * An object is up-to-date if its own data has been loaded at least as
    * recently as the provided date.
    *
@@ -535,14 +584,28 @@ export class Mirror {
   _findOutdated(since: Date): QueryPlan {
     const db = this._db;
     return _inTransaction(db, () => {
+      const typenames: $PropertyType<QueryPlan, "typenames"> = db
+        .prepare(
+          dedent`\
+            SELECT id AS id
+            FROM objects
+            WHERE typename IS NULL
+          `
+        )
+        .pluck()
+        .all({timeEpochMillisThreshold: +since});
       const objects: $PropertyType<QueryPlan, "objects"> = db
         .prepare(
           dedent`\
             SELECT typename AS typename, id AS id
             FROM objects
             LEFT OUTER JOIN updates ON objects.last_update = updates.rowid
-            WHERE objects.last_update IS NULL
-            OR updates.time_epoch_millis < :timeEpochMillisThreshold
+            WHERE
+                typename IS NOT NULL
+                AND (
+                    objects.last_update IS NULL
+                    OR updates.time_epoch_millis < :timeEpochMillisThreshold
+                )
           `
         )
         .all({timeEpochMillisThreshold: +since});
@@ -560,9 +623,13 @@ export class Mirror {
                 ON connections.last_update = updates.rowid
             JOIN objects
                 ON connections.object_id = objects.id
-            WHERE connections.has_next_page
-            OR connections.last_update IS NULL
-            OR updates.time_epoch_millis < :timeEpochMillisThreshold
+            WHERE
+                objectTypename IS NOT NULL
+                AND (
+                    connections.has_next_page
+                    OR connections.last_update IS NULL
+                    OR updates.time_epoch_millis < :timeEpochMillisThreshold
+                )
           `
         )
         .all({timeEpochMillisThreshold: +since})
@@ -574,7 +641,7 @@ export class Mirror {
           delete result.neverUpdated;
           return result;
         });
-      return {objects, connections};
+      return {typenames, objects, connections};
     });
   }
 
@@ -591,6 +658,9 @@ export class Mirror {
   _queryFromPlan(
     queryPlan: QueryPlan,
     options: {|
+      // When fetching typenames for nodes originally referenced by
+      // unfaithful fields, how many typenames may we fetch at once?
+      +typenamesLimit: number,
       // When fetching own-data for nodes of a given type, how many
       // nodes may we fetch at once?
       +nodesOfTypeLimit: number,
@@ -604,6 +674,21 @@ export class Mirror {
       +connectionPageSize: number,
     |}
   ): Queries.Selection[] {
+    const fetchTypenamesFor = queryPlan.typenames.slice(
+      0,
+      options.typenamesLimit
+    );
+    const typenameBatches = [];
+    for (
+      let i = 0;
+      i < fetchTypenamesFor.length;
+      i += options.nodesOfTypeLimit
+    ) {
+      typenameBatches.push(
+        fetchTypenamesFor.slice(i, i + options.nodesOfTypeLimit)
+      );
+    }
+
     // Group objects by type, so that we have to specify each type's
     // fieldset fewer times (only once per `nodesOfTypeLimit` nodes
     // instead of for every node).
@@ -660,16 +745,30 @@ export class Mirror {
 
     const b = Queries.build;
 
-    // Each top-level field corresponds to either an object type
-    // (fetching own data for objects of that type) or a particular node
-    // (updating connections on that node). We alias each such field,
-    // which is necessary to ensure that their names are all unique. The
-    // names chosen are sufficient to identify which _kind_ of query the
-    // field corresponds to (type's own data vs node's connections), but
-    // do not need to identify the particular type or node in question.
-    // This is because all descendant selections are self-describing:
-    // they include the ID of any relevant objects.
+    // Each top-level field other than `typenames` corresponds to either
+    // an object type (fetching own data for objects of that type) or a
+    // particular node (updating connections on that node). We alias
+    // each such field, which is necessary to ensure that their names
+    // are all unique. The names chosen are sufficient to identify which
+    // _kind_ of query the field corresponds to (type's own data vs
+    // node's connections), but do not need to identify the particular
+    // type or node in question. This is because all descendant
+    // selections are self-describing: they include the ID of any
+    // relevant objects.
     return [].concat(
+      typenameBatches.map((typenames, i) => {
+        const name = `${_FIELD_PREFIXES.TYPENAMES}${i}`;
+        return b.alias(
+          name,
+          b.field(
+            "nodes",
+            {
+              ids: b.list(typenames.map((id) => b.literal(id))),
+            },
+            this._queryTypename()
+          )
+        );
+      }),
       paginatedObjectsByType.map(({typename, ids}, i) => {
         const name = `${_FIELD_PREFIXES.OWN_DATA}${i}`;
         return b.alias(
@@ -679,7 +778,8 @@ export class Mirror {
           ])
         );
       }),
-      Array.from(connectionsByObject.entries()).map(
+      MapUtil.mapToArray(
+        connectionsByObject,
         ([id, {typename, connections}], i) => {
           const name = `${_FIELD_PREFIXES.NODE_CONNECTIONS}${i}`;
           return b.alias(
@@ -728,14 +828,17 @@ export class Mirror {
     queryResult: UpdateResult
   ): void {
     for (const topLevelKey of Object.keys(queryResult)) {
-      if (topLevelKey.startsWith(_FIELD_PREFIXES.OWN_DATA)) {
-        const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
-          queryResult[topLevelKey];
+      const rawValue:
+        | TypenamesUpdateResult
+        | OwnDataUpdateResult
+        | NodeConnectionsUpdateResult = queryResult[topLevelKey];
+      if (topLevelKey.startsWith(_FIELD_PREFIXES.TYPENAMES)) {
+        const updateRecord: TypenamesUpdateResult = (rawValue: any);
+        this._nontransactionallyUpdateTypenames(updateRecord);
+      } else if (topLevelKey.startsWith(_FIELD_PREFIXES.OWN_DATA)) {
         const updateRecord: OwnDataUpdateResult = (rawValue: any);
         this._nontransactionallyUpdateOwnData(updateId, updateRecord);
       } else if (topLevelKey.startsWith(_FIELD_PREFIXES.NODE_CONNECTIONS)) {
-        const rawValue: OwnDataUpdateResult | NodeConnectionsUpdateResult =
-          queryResult[topLevelKey];
         const updateRecord: NodeConnectionsUpdateResult = (rawValue: any);
         for (const fieldname of Object.keys(updateRecord)) {
           if (fieldname === "id") {
@@ -849,6 +952,9 @@ export class Mirror {
       return Promise.resolve(false);
     }
     const querySelections = this._queryFromPlan(queryPlan, {
+      // TODO(@wchargin): Expose `typenamesLimit` as an option and fix
+      // up callers.
+      typenamesLimit: options.nodesLimit,
       nodesLimit: options.nodesLimit,
       nodesOfTypeLimit: options.nodesOfTypeLimit,
       connectionPageSize: options.connectionPageSize,
@@ -917,11 +1023,14 @@ export class Mirror {
   }
 
   /**
-   * Create a GraphQL selection set required to identify the typename
-   * and ID for an object of the given declared type, which may be
-   * either an object type or a union type. This is the minimal
-   * whenever we find a reference to an object that we want to traverse
-   * later.
+   * Create a GraphQL selection set required to identify an object of
+   * the given declared type, which may be either an object type or a
+   * union type. This is the minimal required data whenever we find a
+   * reference to an object that we want to traverse later.
+   *
+   * The `fidelity` argument should be the fidelity of the field being
+   * traversed. If it is faithful, the object's typename will be queried
+   * as well; if it is unfaithful, the typename will not be requested.
    *
    * The resulting GraphQL should be embedded in the context of any node
    * of the provided type. For instance, `_queryShallow("Issue")`
@@ -940,13 +1049,28 @@ export class Mirror {
    *
    * This function is pure: it does not interact with the database.
    */
-  _queryShallow(typename: Schema.Typename): Queries.Selection[] {
+  _queryShallow(
+    typename: Schema.Typename,
+    fidelity: Schema.Fidelity
+  ): Queries.Selection[] {
     const type = this._schema[typename];
     if (type == null) {
       // Should not be reachable via APIs.
       throw new Error("No such type: " + JSON.stringify(typename));
     }
     const b = Queries.build;
+    const typenameQuery = [];
+    switch (fidelity.type) {
+      case "FAITHFUL":
+        typenameQuery.push(b.field("__typename"));
+        break;
+      case "UNFAITHFUL":
+        // Do not query typename.
+        break;
+      // istanbul ignore next
+      default:
+        throw new Error((fidelity.type: empty));
+    }
     switch (type.type) {
       case "SCALAR":
         throw new Error(
@@ -958,10 +1082,18 @@ export class Mirror {
           "Cannot create selections for enum type: " + JSON.stringify(typename)
         );
       case "OBJECT":
-        return [b.field("__typename"), b.field("id")];
+        return [...typenameQuery, b.field("id")];
       case "UNION":
         return [
-          b.field("__typename"),
+          // Known issue: This selection set may be empty if the field
+          // is unfaithful and the union type has no clauses. This would
+          // emit an invalid GraphQL query; the GraphQL syntax requires
+          // at least one selection. However, empty union types are also
+          // disallowed in GraphQL, so this should not be a problem on a
+          // well-formed schema. Handling this properly would require
+          // transitively upward-pruning the query and seems unlikely to
+          // be worth it at this time.
+          ...typenameQuery,
           ...this._schemaInfo.unionTypes[
             typename
           ].clauses.map((clause: Schema.Typename) =>
@@ -1091,7 +1223,11 @@ export class Mirror {
       b.field(fieldname, connectionArguments, [
         b.field("totalCount"),
         b.field("pageInfo", {}, [b.field("endCursor"), b.field("hasNextPage")]),
-        b.field("nodes", {}, this._queryShallow(field.elementType)),
+        b.field(
+          "nodes",
+          {},
+          this._queryShallow(field.elementType, field.fidelity)
+        ),
       ]),
     ];
   }
@@ -1256,7 +1392,7 @@ export class Mirror {
               return b.field(
                 fieldname,
                 {},
-                this._queryShallow(field.elementType)
+                this._queryShallow(field.elementType, field.fidelity)
               );
             case "CONNECTION":
               // Not handled by this function.
@@ -1274,7 +1410,10 @@ export class Mirror {
                       return b.field(
                         childFieldname,
                         {},
-                        this._queryShallow(childField.elementType)
+                        this._queryShallow(
+                          childField.elementType,
+                          childField.fidelity
+                        )
                       );
                     // istanbul ignore next
                     default:
@@ -1334,13 +1473,20 @@ export class Mirror {
     // First, make sure that all objects for which we're given own data
     // actually exist and have the correct typename.
     {
-      const doesObjectExist = db
-        .prepare("SELECT COUNT(1) FROM objects WHERE id = ?")
+      const checkTypename = db
+        .prepare("SELECT typename IS NOT NULL FROM objects WHERE id = ?")
         .pluck();
       for (const entry of queryResult) {
-        if (!doesObjectExist.get(entry.id)) {
+        const hasTypename = checkTypename.get(entry.id);
+        if (hasTypename == null) {
           throw new Error(
             "Cannot update data for nonexistent node: " +
+              JSON.stringify(entry.id)
+          );
+        }
+        if (!hasTypename) {
+          throw new Error(
+            "Cannot update data before typename known: " +
               JSON.stringify(entry.id)
           );
         }
@@ -1557,6 +1703,47 @@ export class Mirror {
     }
 
     // Last-updates, primitives, and links all updated: we're done.
+  }
+
+  /**
+   * Create a GraphQL selection set required to fetch the typename of an
+   * object. The resulting GraphQL can be embedded in any node context.
+   *
+   * The result of this query has type `E`, where `E` is the element
+   * type of `TypenamesUpdateResult`.
+   *
+   * This function is pure: it does not interact with the database.
+   */
+  _queryTypename(): Queries.Selection[] {
+    const b = Queries.build;
+    return [b.field("__typename"), b.field("id")];
+  }
+
+  /**
+   * Ingest typenames for many object IDs.
+   *
+   * See: `_queryTypenames`.
+   */
+  _updateTypenames(queryResult: TypenamesUpdateResult): void {
+    _inTransaction(this._db, () => {
+      this._nontransactionallyUpdateTypenames(queryResult);
+    });
+  }
+
+  /**
+   * As `_updateTypenames`, but do not enter any transactions. Other
+   * methods may call this method as a subroutine in a larger
+   * transaction.
+   */
+  _nontransactionallyUpdateTypenames(queryResult: TypenamesUpdateResult): void {
+    for (const datum of queryResult) {
+      // Need to go through `registerObject` to ensure that primitives,
+      // links, and connections are initialized.
+      this._nontransactionallyRegisterObject({
+        id: datum.id,
+        typename: datum.__typename,
+      });
+    }
   }
 
   /**
@@ -2050,6 +2237,7 @@ type NetworkLogId = number;
  * A set of objects and connections that should be updated.
  */
 type QueryPlan = {|
+  +typenames: $ReadOnlyArray<Schema.ObjectId>,
   +objects: $ReadOnlyArray<{|
     +typename: Schema.Typename,
     +id: Schema.ObjectId,
@@ -2072,7 +2260,7 @@ type EndCursor = string | null;
 
 type PrimitiveResult = string | number | boolean | null;
 type NodeFieldResult = {|
-  +__typename: Schema.Typename,
+  +__typename?: Schema.Typename, // omitted for queries via unfaithful fields
   +id: Schema.ObjectId,
 |} | null;
 type ConnectionFieldResult = {|
@@ -2083,6 +2271,16 @@ type ConnectionFieldResult = {|
 type NestedFieldResult = {
   +[Schema.Fieldname]: PrimitiveResult | NodeFieldResult,
 } | null;
+
+/**
+ * Result describing only the typename of a set of nodes. Used when we
+ * only have references to nodes via unfaithful fields.
+ */
+type TypenamesUpdateResult = $ReadOnlyArray<{|
+  +__typename: Schema.Typename,
+  +id: Schema.ObjectId,
+|}>;
+export type _TypenamesUpdateResult = TypenamesUpdateResult; // for tests
 
 /**
  * Result describing own-data for many nodes of a given type. Whether a
@@ -2099,6 +2297,7 @@ type OwnDataUpdateResult = $ReadOnlyArray<{
     | NodeFieldResult
     | NestedFieldResult,
 }>;
+export type _OwnDataUpdateResult = OwnDataUpdateResult; // for tests
 
 /**
  * Result describing new elements for connections on a single node.
@@ -2109,12 +2308,13 @@ type NodeConnectionsUpdateResult = {
   +id: Schema.ObjectId,
   +[connectionFieldname: Schema.Fieldname]: ConnectionFieldResult,
 };
+export type _NodeConnectionsUpdateResult = NodeConnectionsUpdateResult; // for tests
 
 /**
- * Result describing both own-data updates and connection updates. Each
- * key's prefix determines what type of results the corresponding value
- * represents (see constants below). No field prefix is a prefix of
- * another, so this characterization is complete.
+ * Result describing all kinds of updates. Each key's prefix determines
+ * what type of results the corresponding value represents (see
+ * constants below). No field prefix is a prefix of another, so this
+ * characterization is complete.
  *
  * This type would be exact but for facebook/flow#2977, et al.
  *
@@ -2123,10 +2323,19 @@ type NodeConnectionsUpdateResult = {
 type UpdateResult = {
   // The prefix of each key determines what type of results the value
   // represents. See constants below.
-  +[string]: OwnDataUpdateResult | NodeConnectionsUpdateResult,
+  +[string]:
+    | TypenamesUpdateResult
+    | OwnDataUpdateResult
+    | NodeConnectionsUpdateResult,
 };
 
 export const _FIELD_PREFIXES = deepFreeze({
+  /**
+   * A key of an `UpdateResult` has this prefix if and only if the
+   * corresponding value represents `TypenamesUpdateResult`s.
+   */
+  TYPENAMES: "typenames_",
+
   /**
    * A key of an `UpdateResult` has this prefix if and only if the
    * corresponding value represents `OwnDataUpdateResult`s.

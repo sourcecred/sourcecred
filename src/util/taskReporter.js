@@ -34,7 +34,7 @@ export class LoggingTaskReporter implements TaskReporter {
     this._consoleLog = consoleLog || console.log;
     this._getTime =
       getTime ||
-      function() {
+      function () {
         return +new Date();
       };
     this.activeTasks = new Map();

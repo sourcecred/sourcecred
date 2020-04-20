@@ -1,6 +1,6 @@
 // @flow
 
-import sortBy from "lodash.sortby";
+import sortBy from "../../util/sortBy";
 
 import {Graph, EdgeAddress} from "../graph";
 import {

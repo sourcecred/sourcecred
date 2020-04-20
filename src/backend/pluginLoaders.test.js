@@ -1,6 +1,10 @@
 // @flow
 
 import {type CacheProvider} from "./cache";
+import {
+  type ReferenceDetector,
+  CascadingReferenceDetector,
+} from "../core/references";
 import * as WeightedGraph from "../core/weightedGraph";
 import {node as graphNode} from "../core/graphTestUtil";
 import {createProject} from "../core/project";
@@ -8,6 +12,7 @@ import {TestTaskReporter} from "../util/taskReporter";
 import {validateToken} from "../plugins/github/token";
 import {makeRepoId} from "../plugins/github/repoId";
 import * as PluginLoaders from "./pluginLoaders";
+import {type LoadedInitiativesDirectory} from "../plugins/initiatives/initiativesDirectory";
 
 export function createWG(name: string) {
   const weightedGraph = WeightedGraph.empty();
@@ -19,24 +24,41 @@ const mockGraphs = {
   github: createWG("github"),
   discord: createWG("discord"),
   discourse: createWG("discourse"),
+  initiatives: createWG("initiatives"),
   contracted: createWG("identity-contracted"),
 };
 
 const fakes = {
   githubDeclaration: ({fake: "githubDeclaration"}: any),
   discordDeclaration: ({fake: "discordDeclaration"}: any),
+  githubReferences: ({fake: "githubReferences"}: any),
   discourseDeclaration: ({fake: "discourseDeclaration"}: any),
+  discourseReferences: ({fake: "discourseReferences"}: any),
   identityDeclaration: ({fake: "identityDeclaration"}: any),
+  initiativesDeclaration: ({fake: "initiativesDeclaration"}: any),
+  initiativesReferences: ({fake: "initiativesReferences"}: any),
+  initiativesRepository: ({fake: "initiativesRepository"}: any),
 };
+
+const mockLoadedDirectory = (): LoadedInitiativesDirectory =>
+  ({
+    referenceDetector: fakes.initiativesReferences,
+    initiatives: fakes.initiativesRepository,
+  }: any);
 
 const mockCacheProvider = (): CacheProvider => ({
   database: jest.fn(),
+});
+
+const mockReferenceDetector = (): ReferenceDetector => ({
+  addressFromUrl: jest.fn(),
 });
 
 const mockPluginLoaders = () => ({
   github: {
     declaration: jest.fn().mockReturnValue(fakes.githubDeclaration),
     updateMirror: jest.fn(),
+    referenceDetector: jest.fn().mockResolvedValue(fakes.githubReferences),
     createGraph: jest.fn().mockResolvedValue(mockGraphs.github),
   },
   discord: {
@@ -47,11 +69,17 @@ const mockPluginLoaders = () => ({
   discourse: {
     declaration: jest.fn().mockReturnValue(fakes.discourseDeclaration),
     updateMirror: jest.fn(),
+    referenceDetector: jest.fn().mockResolvedValue(fakes.discourseReferences),
     createGraph: jest.fn().mockResolvedValue(mockGraphs.discourse),
   },
   identity: {
     declaration: jest.fn().mockReturnValue(fakes.identityDeclaration),
     contractIdentities: jest.fn().mockReturnValue(mockGraphs.contracted),
+  },
+  initiatives: {
+    declaration: jest.fn().mockReturnValue(fakes.initiativesDeclaration),
+    loadDirectory: jest.fn().mockResolvedValue(mockLoadedDirectory()),
+    createGraph: jest.fn().mockResolvedValue(mockGraphs.initiatives),
   },
 });
 
@@ -91,6 +119,21 @@ describe("src/backend/pluginLoaders", () => {
       expect(decs).toEqual([fakes.githubDeclaration]);
     });
 
+    it("should include initiatives declaration", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const project = createProject({
+        id: "has-initiatives",
+        initiatives: {remoteUrl: "http://example.com/initiatives"},
+      });
+
+      // When
+      const decs = PluginLoaders.declarations(loaders, project);
+
+      // Then
+      expect(decs).toEqual([fakes.initiativesDeclaration]);
+    });
+
     it("should include identity declaration", async () => {
       // Given
       const loaders = mockPluginLoaders();
@@ -115,6 +158,7 @@ describe("src/backend/pluginLoaders", () => {
       const reporter = new TestTaskReporter();
       const githubToken = null;
       const discordToken = null;
+      const initiativesDirectory = null;
       const project = createProject({
         id: "has-discourse",
         discourseServer: {serverUrl: "http://foo.bar"},
@@ -123,7 +167,7 @@ describe("src/backend/pluginLoaders", () => {
       // When
       await PluginLoaders.updateMirror(
         loaders,
-        {githubToken, discordToken, cache, reporter},
+        {githubToken, discordToken, cache, reporter, initiativesDirectory},
         project
       );
 
@@ -137,12 +181,69 @@ describe("src/backend/pluginLoaders", () => {
       );
     });
 
+    it("should fail when missing initiativesDirectory", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const githubToken = null;
+      const initiativesDirectory = null;
+      const reporter = new TestTaskReporter();
+      const project = createProject({
+        id: "has-initiatives",
+        initiatives: {remoteUrl: "http://example.com/initiatives"},
+      });
+
+      // When
+      const p = PluginLoaders.updateMirror(
+        loaders,
+        {githubToken, cache, reporter, initiativesDirectory},
+        project
+      );
+
+      // Then
+      await expect(p).rejects.toThrow(
+        "Tried to load Initiatives, but no Initiatives directory set"
+      );
+    });
+
+    it("should load initiatives directory", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const reporter = new TestTaskReporter();
+      const githubToken = null;
+      const initiativesDirectory = __dirname;
+      const project = createProject({
+        id: "has-initiatives",
+        initiatives: {remoteUrl: "http://example.com/initiatives"},
+      });
+
+      // When
+      await PluginLoaders.updateMirror(
+        loaders,
+        {githubToken, cache, reporter, initiativesDirectory},
+        project
+      );
+
+      // Then
+      const {initiatives} = loaders;
+      expect(initiatives.loadDirectory).toBeCalledTimes(1);
+      expect(initiatives.loadDirectory).toBeCalledWith(
+        {
+          localPath: initiativesDirectory,
+          remoteUrl: "http://example.com/initiatives",
+        },
+        reporter
+      );
+    });
+
     it("should fail when missing GithubToken", async () => {
       // Given
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = null;
       const discordToken = null;
+      const initiativesDirectory = null;
       const reporter = new TestTaskReporter();
       const project = createProject({
         id: "has-github",
@@ -152,7 +253,7 @@ describe("src/backend/pluginLoaders", () => {
       // When
       const p = PluginLoaders.updateMirror(
         loaders,
-        {githubToken, discordToken, cache, reporter},
+        {githubToken, discordToken, cache, reporter, initiativesDirectory},
         project
       );
 
@@ -169,6 +270,7 @@ describe("src/backend/pluginLoaders", () => {
       const githubToken = exampleGithubToken;
       const discordToken = null;
       const reporter = new TestTaskReporter();
+      const initiativesDirectory = null;
       const project = createProject({
         id: "has-github",
         repoIds: [exampleRepoId],
@@ -177,7 +279,7 @@ describe("src/backend/pluginLoaders", () => {
       // When
       await PluginLoaders.updateMirror(
         loaders,
-        {githubToken, discordToken, cache, reporter},
+        {githubToken, discordToken, cache, reporter, initiativesDirectory},
         project
       );
 
@@ -196,6 +298,7 @@ describe("src/backend/pluginLoaders", () => {
   describe("createPluginGraphs", () => {
     it("should create discourse graph", async () => {
       // Given
+      const references = mockReferenceDetector();
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = null;
@@ -210,7 +313,8 @@ describe("src/backend/pluginLoaders", () => {
       const pluginGraphs = await PluginLoaders.createPluginGraphs(
         loaders,
         {githubToken, discordToken},
-        cachedProject
+        cachedProject,
+        references
       );
 
       // Then
@@ -226,8 +330,43 @@ describe("src/backend/pluginLoaders", () => {
       );
     });
 
+    it("should create initiatives graph", async () => {
+      // Given
+      const references = mockReferenceDetector();
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const loadedInitiativesDirectory = mockLoadedDirectory();
+      const githubToken = null;
+      const project = createProject({
+        id: "has-initiatives",
+        initiatives: {remoteUrl: "http://example.com/initiatives"},
+      });
+      const cachedProject = ({project, cache, loadedInitiativesDirectory}: any);
+
+      // When
+      const pluginGraphs = await PluginLoaders.createPluginGraphs(
+        loaders,
+        {githubToken},
+        cachedProject,
+        references
+      );
+
+      // Then
+      const {initiatives} = loaders;
+      expect(pluginGraphs).toEqual({
+        graphs: [mockGraphs.initiatives],
+        cachedProject,
+      });
+      expect(initiatives.createGraph).toBeCalledTimes(1);
+      expect(initiatives.createGraph).toBeCalledWith(
+        loadedInitiativesDirectory.initiatives,
+        references
+      );
+    });
+
     it("fail when missing GithubToken", async () => {
       // Given
+      const references = mockReferenceDetector();
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = null;
@@ -242,7 +381,8 @@ describe("src/backend/pluginLoaders", () => {
       const p = PluginLoaders.createPluginGraphs(
         loaders,
         {githubToken, discordToken},
-        cachedProject
+        cachedProject,
+        references
       );
 
       // Then
@@ -253,6 +393,7 @@ describe("src/backend/pluginLoaders", () => {
 
     it("should create github graph", async () => {
       // Given
+      const references = mockReferenceDetector();
       const loaders = mockPluginLoaders();
       const cache = mockCacheProvider();
       const githubToken = exampleGithubToken;
@@ -267,7 +408,8 @@ describe("src/backend/pluginLoaders", () => {
       const pluginGraphs = await PluginLoaders.createPluginGraphs(
         loaders,
         {githubToken, discordToken},
-        cachedProject
+        cachedProject,
+        references
       );
 
       // Then
@@ -282,6 +424,38 @@ describe("src/backend/pluginLoaders", () => {
         githubToken,
         cache
       );
+    });
+  });
+
+  describe("createReferenceDetector", () => {
+    it("should create a CascadingReferenceDetector", async () => {
+      // Given
+      const loaders = mockPluginLoaders();
+      const cache = mockCacheProvider();
+      const githubToken = exampleGithubToken;
+      const loadedInitiativesDirectory = mockLoadedDirectory();
+      const project = createProject({
+        id: "has-github-discourse-initiatives",
+        discourseServer: {serverUrl: "http://foo.bar"},
+        initiatives: {remoteUrl: "http://example.com/initiatives"},
+        repoIds: [exampleRepoId],
+      });
+      const cachedProject = ({project, cache, loadedInitiativesDirectory}: any);
+
+      // When
+      const references = await PluginLoaders.createReferenceDetector(
+        loaders,
+        {githubToken},
+        cachedProject
+      );
+
+      // Then
+      expect(references).toBeInstanceOf(CascadingReferenceDetector);
+      expect(((references: any): CascadingReferenceDetector).refs).toEqual([
+        fakes.githubReferences,
+        fakes.discourseReferences,
+        fakes.initiativesReferences,
+      ]);
     });
   });
 

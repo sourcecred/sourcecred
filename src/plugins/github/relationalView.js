@@ -351,55 +351,68 @@ export class RelationalView {
   }
 
   _addCommit(json: T.Commit): CommitAddress {
-    const address = {type: N.COMMIT_TYPE, id: json.id};
-    const rawAddress = N.toRaw(address);
-    // This fast-return is critical, because a single commit may appear
-    // many times in the repository.
-    //
-    // For example, a repository with 1000 commits, each of which was
-    // created by merging a pull request, will include 1001 structural
-    // references to the root commit (one via the HEAD ref, and one
-    // along a parent-chain from each pull request), so the number of
-    // occurrences of commits can easily be quadratic in the number of
-    // actual commits.
-    //
-    // Furthermore, it can be exponential: consider merge commits like
-    //
-    //     HEAD
-    //     / \
-    //    1A 1B
-    //    | X |
-    //    2A 2B
-    //    | X |
-    //    3A 3B
-    //     \ /
-    //     root
-    //
-    // where each merge commit has two parents. The root commit is
-    // reachable along about 2^(n/2) paths.
-    //
-    // This check ensures that we process each commit edge only once.
-    if (this._commits.has(rawAddress)) {
-      return address;
-    }
+    const commitStack = [json]; // reified recursion to avoid stack overflow
+    let originalAddress = null;
+    while (true) {
+      const json = commitStack.pop();
+      if (json == null) {
+        // End of stack.
+        break;
+      }
+      const address = {type: N.COMMIT_TYPE, id: json.id};
+      const rawAddress = N.toRaw(address);
+      if (originalAddress == null) {
+        originalAddress = address;
+      }
+      // This fast-return is critical, because a single commit may appear
+      // many times in the repository.
+      //
+      // For example, a repository with 1000 commits, each of which was
+      // created by merging a pull request, will include 1001 structural
+      // references to the root commit (one via the HEAD ref, and one
+      // along a parent-chain from each pull request), so the number of
+      // occurrences of commits can easily be quadratic in the number of
+      // actual commits.
+      //
+      // Furthermore, it can be exponential: consider merge commits like
+      //
+      //     HEAD
+      //     / \
+      //    1A 1B
+      //    | X |
+      //    2A 2B
+      //    | X |
+      //    3A 3B
+      //     \ /
+      //     root
+      //
+      // where each merge commit has two parents. The root commit is
+      // reachable along about 2^(n/2) paths.
+      //
+      // This check ensures that we process each commit edge only once.
+      if (this._commits.has(rawAddress)) {
+        continue;
+      }
 
-    const authors =
-      json.author == null ? [] : this._addNullableAuthor(json.author.user);
-    const entry: CommitEntry = {
-      address,
-      url: json.url,
-      authors,
-      message: json.message,
-      hash: json.oid,
-      timestampMs: +new Date(json.authoredDate),
-    };
-    this._commits.set(N.toRaw(address), entry);
-    for (const parent of json.parents) {
-      if (parent != null) {
-        this._addCommit(parent);
+      const authors =
+        json.author == null ? [] : this._addNullableAuthor(json.author.user);
+      const entry: CommitEntry = {
+        address,
+        url: json.url,
+        authors,
+        message: json.message,
+        hash: json.oid,
+        timestampMs: +new Date(json.authoredDate),
+      };
+      this._commits.set(N.toRaw(address), entry);
+      for (const parent of json.parents) {
+        if (parent != null) {
+          commitStack.push(parent);
+        }
       }
     }
-    return address;
+    // must have gone through at least one loop iteration
+    return NullUtil.get(originalAddress);
   }
 
   _addPull(repo: RepoAddress, json: T.PullRequest): PullAddress {
@@ -460,7 +473,7 @@ export class RelationalView {
     parent: IssueAddress | PullAddress | ReviewAddress,
     json: T.IssueComment | T.PullRequestReviewComment
   ): CommentAddress {
-    const id = (function() {
+    const id = (function () {
       switch (parent.type) {
         case N.ISSUE_TYPE:
           return issueCommentUrlToId(json.url);

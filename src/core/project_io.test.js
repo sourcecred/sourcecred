@@ -41,6 +41,7 @@ describe("core/project_io", () => {
       guildId: "678348980639498428",
       reactionWeights: {"sourcecred:678399364418502669": 4},
     },
+    initiatives: {remoteUrl: "https://example.com/initiatives"},
   });
 
   it("setupProjectDirectory results in a loadable project", async () => {

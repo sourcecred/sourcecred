@@ -9,10 +9,12 @@ import {LoadContext} from "./loadContext";
 
 const fakes = {
   declarations: ({fake: "declarations"}: any),
+  referenceDetector: ({fake: "referenceDetector"}: any),
   pluginGraphs: ({fake: "pluginGraphs"}: any),
   contractedGraph: ({fake: "contractedGraph"}: any),
   weightedGraph: ({fake: "weightedGraph"}: any),
   timelineCred: ({fake: "timelineCred"}: any),
+  initiativesDirectory: ({fake: "initiativesDirectory"}: any),
 };
 
 const mockCacheProvider = (): CacheProvider => ({
@@ -43,6 +45,10 @@ const mockProxyMethods = (
       .proxyMethod("updateMirror")
       .mockResolvedValueOnce({project, cache}),
 
+    createReferenceDetector: spyBuilder
+      .proxyMethod("createReferenceDetector")
+      .mockResolvedValueOnce(fakes.referenceDetector),
+
     createPluginGraphs: spyBuilder
       .proxyMethod("createPluginGraphs")
       .mockResolvedValueOnce(fakes.pluginGraphs),
@@ -67,6 +73,7 @@ describe("src/backend/loadContext", () => {
     const discordToken = "fakeBotToken";
     const project = createProject({id: "testing-project"});
     const params = {alpha: 0.123};
+    const initiativesDirectory = fakes.initiativesDirectory;
 
     describe("constructor", () => {
       /**
@@ -86,6 +93,7 @@ describe("src/backend/loadContext", () => {
           githubToken,
           discordToken,
           reporter,
+          initiativesDirectory,
         });
 
         // Then
@@ -97,6 +105,7 @@ describe("src/backend/loadContext", () => {
           // Methods
           _declarations: expect.anything(),
           _updateMirror: expect.anything(),
+          _createReferenceDetector: expect.anything(),
           _createPluginGraphs: expect.anything(),
           _contractPluginGraphs: expect.anything(),
           _overrideWeights: expect.anything(),
@@ -116,6 +125,7 @@ describe("src/backend/loadContext", () => {
           githubToken,
           discordToken,
           reporter,
+          initiativesDirectory,
         });
         const spies = mockProxyMethods(loadContext, project, cache);
 
@@ -125,6 +135,7 @@ describe("src/backend/loadContext", () => {
         // Then
         const cachedProject = {project, cache};
         const expectedEnv = {
+          initiativesDirectory,
           githubToken,
           discordToken,
           reporter,
@@ -139,10 +150,16 @@ describe("src/backend/loadContext", () => {
           expectedEnv,
           project
         );
-        expect(spies.createPluginGraphs).toBeCalledWith(
+        expect(spies.createReferenceDetector).toBeCalledWith(
           loadContext._pluginLoaders,
           expectedEnv,
           cachedProject
+        );
+        expect(spies.createPluginGraphs).toBeCalledWith(
+          loadContext._pluginLoaders,
+          expectedEnv,
+          cachedProject,
+          fakes.referenceDetector
         );
         expect(spies.contractPluginGraphs).toBeCalledWith(
           loadContext._pluginLoaders,
@@ -172,6 +189,7 @@ describe("src/backend/loadContext", () => {
           githubToken,
           discordToken,
           reporter,
+          initiativesDirectory,
         });
         const spies = mockProxyMethods(loadContext, project, cache);
 
@@ -180,6 +198,7 @@ describe("src/backend/loadContext", () => {
 
         // Then
         const expectedEnv = {
+          initiativesDirectory,
           githubToken,
           discordToken,
           reporter,
@@ -208,6 +227,7 @@ describe("src/backend/loadContext", () => {
           githubToken,
           discordToken,
           reporter,
+          initiativesDirectory,
         });
         mockProxyMethods(loadContext, project, cache);
 

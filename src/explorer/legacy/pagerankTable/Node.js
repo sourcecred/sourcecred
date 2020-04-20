@@ -1,7 +1,7 @@
 // @flow
 
 import React from "react";
-import sortBy from "lodash.sortby";
+import sortBy from "../../../util/sortBy";
 import * as NullUtil from "../../../util/null";
 
 import {type NodeAddressT} from "../../../core/graph";

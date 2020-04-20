@@ -45,18 +45,18 @@ export class DataDirectory implements CacheProvider, ProjectStorageProvider {
       const fileName = path.join(projectDirectory, name);
       await fs.writeFile(fileName, data);
     };
-    writeFile("project.json", stringify(projectToJSON(project)));
+    await writeFile("project.json", stringify(projectToJSON(project)));
     if (weightedGraph) {
-      writeFile(
+      await writeFile(
         "weightedGraph.json",
         stringify(WeightedGraph.toJSON(weightedGraph))
       );
     }
     if (cred) {
-      writeFile("cred.json", stringify(cred.toJSON()));
+      await writeFile("cred.json", stringify(cred.toJSON()));
     }
     if (pluginDeclarations) {
-      writeFile(
+      await writeFile(
         "pluginDeclarations.json",
         stringify(pluginsToJSON(pluginDeclarations))
       );
