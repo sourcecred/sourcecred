@@ -6,7 +6,7 @@ import {DISTRIBUTION_VERSION_1, distribution} from "./distribution";
 import deepFreeze from "deep-freeze";
 import type {
   CredHistory,
-  LifetimeV1,
+  BalancedV1,
   ImmediateV1,
   GrainReceipt,
   DistributionStrategy,
@@ -176,17 +176,17 @@ describe("src/grain/distribution", () => {
     });
   });
 
-  describe("lifetimeDistribution", () => {
+  describe("balancedDistribution", () => {
     const strategy = deepFreeze({
-      type: "LIFETIME",
+      type: "BALANCED",
       budget: fromApproximateFloat(14),
       version: 1,
     });
 
-    const createLifetimeDistribution = (
+    const createBalancedDistribution = (
       timestampMs: number,
       receipts: $ReadOnlyArray<GrainReceipt>,
-      strategy: LifetimeV1
+      strategy: BalancedV1
     ) => {
       return {
         type: "DISTRIBUTION",
@@ -247,7 +247,7 @@ describe("src/grain/distribution", () => {
       };
       expect(() =>
         distribution(unsupportedStrategy, credHistory, new Map(), timestampMs)
-      ).toThrowError(`Unsupported LIFETIME strategy: 2`);
+      ).toThrowError(`Unsupported BALANCED strategy: 2`);
     });
 
     it("should only pay Foo if Foo is sufficiently underpaid", () => {
@@ -258,7 +258,7 @@ describe("src/grain/distribution", () => {
       const expectedReceipts = [
         {address: foo, amount: fromApproximateFloat(14)},
       ];
-      const expectedDistribution = createLifetimeDistribution(
+      const expectedDistribution = createBalancedDistribution(
         timestampMs,
         expectedReceipts,
         strategy
@@ -266,7 +266,7 @@ describe("src/grain/distribution", () => {
       const actual = distribution(strategy, credHistory, earnings, timestampMs);
       expectDistributionsEqual(expectedDistribution, actual);
     });
-    it("should divide according to cred if everyone is already lifetimely paid", () => {
+    it("should divide according to cred if everyone is already balanced paid", () => {
       const earnings = new Map([
         [foo, fromApproximateFloat(5)],
         [bar, fromApproximateFloat(2)],
@@ -277,7 +277,7 @@ describe("src/grain/distribution", () => {
         {address: bar, amount: fromApproximateFloat(4)},
       ];
 
-      const expectedDistribution = createLifetimeDistribution(
+      const expectedDistribution = createBalancedDistribution(
         timestampMs,
         expectedReceipts,
         strategy
@@ -300,7 +300,7 @@ describe("src/grain/distribution", () => {
         {address: bar, amount: fromApproximateFloat(4)},
       ];
 
-      const expectedDistribution = createLifetimeDistribution(
+      const expectedDistribution = createBalancedDistribution(
         timestampMs,
         expectedReceipts,
         strategy15
@@ -325,7 +325,7 @@ describe("src/grain/distribution", () => {
         {address: bar, amount: fromApproximateFloat(2)},
       ];
 
-      const expectedDistribution = createLifetimeDistribution(
+      const expectedDistribution = createBalancedDistribution(
         middleTimes,
         expectedReceipts,
         strategy12
@@ -347,7 +347,7 @@ describe("src/grain/distribution", () => {
       ];
       const strategy2 = {...strategy, budget: fromApproximateFloat(2)};
 
-      const expectedDistribution = createLifetimeDistribution(
+      const expectedDistribution = createBalancedDistribution(
         timestampMs,
         expectedReceipts,
         strategy2
@@ -371,7 +371,7 @@ describe("src/grain/distribution", () => {
         {address: bar, amount: fromApproximateFloat(4)},
       ];
 
-      const expectedDistribution = createLifetimeDistribution(
+      const expectedDistribution = createBalancedDistribution(
         timestampMs,
         expectedReceipts,
         strategy

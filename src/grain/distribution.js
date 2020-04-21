@@ -12,7 +12,7 @@
  * Currently we support two strategies:
  * - IMMEDIATE, which distributes a fixed budget of grain based on the cred scores
  * in the most recent completed time interval
- * - LIFETIME, which distributes a fixed budget of grain based on cred scores
+ * - BALANCED, which distributes a fixed budget of grain based on cred scores
  * across
  * all time, prioritizing paying people who were under-paid historically (i.e.
  * their lifetime earnings are lower than we would expect given their current
@@ -37,7 +37,7 @@ import {
 
 export const DISTRIBUTION_VERSION_1 = 1;
 
-export type DistributionStrategy = ImmediateV1 | LifetimeV1;
+export type DistributionStrategy = ImmediateV1 | BalancedV1;
 
 export type ImmediateV1 = {|
   +type: "IMMEDIATE",
@@ -45,8 +45,8 @@ export type ImmediateV1 = {|
   +budget: Grain,
 |};
 
-export type LifetimeV1 = {|
-  +type: "LIFETIME",
+export type BalancedV1 = {|
+  +type: "BALANCED",
   +version: number,
   +budget: Grain,
 |};
@@ -107,9 +107,9 @@ export function distribution(
         }
         const lastSlice = filteredSlices[filteredSlices.length - 1];
         return computeImmediateReceipts(strategy.budget, lastSlice.cred);
-      case "LIFETIME":
+      case "BALANCED":
         if (strategy.version !== 1) {
-          throw new Error(`Unsupported LIFETIME strategy: ${strategy.version}`);
+          throw new Error(`Unsupported BALANCED strategy: ${strategy.version}`);
         }
         const totalCred = new Map();
         for (const {cred} of filteredSlices) {
@@ -118,7 +118,7 @@ export function distribution(
             totalCred.set(address, existingCred + ownCred);
           }
         }
-        return computeLifetimeReceipts(strategy.budget, totalCred, earnings);
+        return computeBalancedReceipts(strategy.budget, totalCred, earnings);
       default:
         throw new Error(`Unexpected type ${(strategy.type: empty)}`);
     }
@@ -173,14 +173,14 @@ function computeImmediateReceipts(
  * Distribute a fixed budget of Grain to the users who were "most underpaid".
  *
  * We consider a user underpaid if they have recieved a smaller proportion of
- * past earnings than their share of score. They are lifetimely paid if their
+ * past earnings than their share of score. They are balanced paid if their
  * proportion of earnings is equal to their score share, and they are overpaid
  * if their proportion of earnings is higher than their share of the score.
  *
  * We start by imagining a hypothetical world, where the entire grain supply of
  * the project (including this distribution) were distributed according to the
- * current scores. Based on this, we can calculate the "lifetime" lifetime earnings
- * for each participant. Usually, some will be "underpaid" (they recieved less
+ * current scores. Based on this, we can calculate the "balanced" lifetime earnings
+ * for each participant. Usually, some will be "underpaid" (they received less
  * than this amount) and others are "overpaid".
  *
  * We can sum across all users who were underpaid to find the "total
@@ -194,7 +194,7 @@ function computeImmediateReceipts(
  * across participants in a way that aligns long-term payment with total cred
  * scores.
  */
-function computeLifetimeReceipts(
+function computeBalancedReceipts(
   budget: Grain,
   credMap: Map<NodeAddressT, number>,
   earnings: Map<NodeAddressT, Grain>
