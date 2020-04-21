@@ -81,6 +81,22 @@ describe("src/grain/distribution", () => {
         timestampMs,
       });
 
+      it("the budget is zero", () => {
+        const zeroBudgetStrategy = {...strategy, budget: ZERO};
+
+        const actual = distribution(
+          zeroBudgetStrategy,
+          credHistory,
+          new Map(),
+          timestampMs
+        );
+
+        expectDistributionsEqual(actual, {
+          ...emptyDistribution,
+          strategy: zeroBudgetStrategy,
+        });
+      });
+
       it("there are no cred scores at all", () => {
         const actual = distribution(strategy, [], new Map(), timestampMs);
         expectDistributionsEqual(actual, emptyDistribution);
@@ -215,6 +231,22 @@ describe("src/grain/distribution", () => {
         receipts: [],
         strategy,
         timestampMs,
+      });
+
+      it("the budget is zero", () => {
+        const zeroBudgetStrategy = {...strategy, budget: ZERO};
+
+        const actual = distribution(
+          zeroBudgetStrategy,
+          credHistory,
+          new Map(),
+          timestampMs
+        );
+
+        expectDistributionsEqual(actual, {
+          ...emptyDistribution,
+          strategy: zeroBudgetStrategy,
+        });
       });
 
       it("there are no cred scores at all", () => {

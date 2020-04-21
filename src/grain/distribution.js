@@ -128,7 +128,7 @@ function computeImmediateReceipts(
     throw new Error(`invalid budget: ${String(budget)}`);
   }
 
-  if (!credHistory.length) {
+  if (budget === ZERO || !credHistory.length) {
     return [];
   }
 
@@ -199,7 +199,7 @@ function computeBalancedReceipts(
     throw new Error(`invalid budget: ${String(budget)}`);
   }
 
-  if (!credHistory.length) {
+  if (budget === ZERO || !credHistory.length) {
     return [];
   }
 
