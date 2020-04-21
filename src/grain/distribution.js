@@ -81,7 +81,7 @@ export type CredHistory = $ReadOnlyArray<CredTimeSlice>;
 export function distribution(
   strategy: DistributionStrategy,
   credHistory: CredHistory,
-  earnings: Map<NodeAddressT, Grain>,
+  lifetimeEarningsMap: Map<NodeAddressT, Grain>,
   timestampMs: number
 ): DistributionV1 {
   const timeFilteredCredHistory = credHistory.filter(
@@ -96,7 +96,7 @@ export function distribution(
         return computeBalancedReceipts(
           strategy,
           timeFilteredCredHistory,
-          earnings
+          lifetimeEarningsMap
         );
       default:
         throw new Error(`Unexpected type ${strategy.type}`);
@@ -189,7 +189,7 @@ function computeImmediateReceipts(
 function computeBalancedReceipts(
   {budget, version}: BalancedV1,
   credHistory: CredHistory,
-  earnings: Map<NodeAddressT, Grain>
+  lifetimeEarningsMap: Map<NodeAddressT, Grain>
 ): $ReadOnlyArray<GrainReceipt> {
   if (version !== 1) {
     throw new Error(`Unsupported BALANCED strategy: ${version}`);
@@ -212,7 +212,7 @@ function computeBalancedReceipts(
   }
 
   let totalEarnings = ZERO;
-  for (const e of earnings.values()) {
+  for (const e of lifetimeEarningsMap.values()) {
     totalEarnings += e;
   }
   let totalCred = 0;
@@ -230,10 +230,10 @@ function computeBalancedReceipts(
 
   let totalUnderpayment = ZERO;
   const userUnderpayment: Map<NodeAddressT, Grain> = new Map();
-  const addresses = new Set([...credMap.keys(), ...earnings.keys()]);
+  const addresses = new Set([...credMap.keys(), ...lifetimeEarningsMap.keys()]);
 
   for (const addr of addresses) {
-    const earned = earnings.get(addr) || ZERO;
+    const earned = lifetimeEarningsMap.get(addr) || ZERO;
     const cred = credMap.get(addr) || 0;
 
     const target = multiplyFloat(targetGrainPerCred, cred);

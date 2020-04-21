@@ -294,7 +294,7 @@ describe("src/grain/distribution", () => {
     });
 
     it("should only pay Foo if Foo is sufficiently underpaid", () => {
-      const earnings = new Map([
+      const lifetimeEarnings = new Map([
         [foo, ZERO],
         [bar, fromApproximateFloat(99)],
       ]);
@@ -306,11 +306,16 @@ describe("src/grain/distribution", () => {
         expectedReceipts,
         strategy
       );
-      const actual = distribution(strategy, credHistory, earnings, timestampMs);
+      const actual = distribution(
+        strategy,
+        credHistory,
+        lifetimeEarnings,
+        timestampMs
+      );
       expectDistributionsEqual(expectedDistribution, actual);
     });
     it("should divide according to cred if everyone is already balanced paid", () => {
-      const earnings = new Map([
+      const lifetimeEarnings = new Map([
         [foo, fromApproximateFloat(5)],
         [bar, fromApproximateFloat(2)],
       ]);
@@ -326,12 +331,17 @@ describe("src/grain/distribution", () => {
         strategy
       );
 
-      const actual = distribution(strategy, credHistory, earnings, timestampMs);
+      const actual = distribution(
+        strategy,
+        credHistory,
+        lifetimeEarnings,
+        timestampMs
+      );
       expectDistributionsEqual(expectedDistribution, actual);
     });
     it("'top off' users who were slightly underpaid'", () => {
       // Foo is exactly 1 grain behind where they "should" be
-      const earnings = new Map([
+      const lifetimeEarnings = new Map([
         [foo, fromApproximateFloat(4)],
         [bar, fromApproximateFloat(2)],
       ]);
@@ -352,7 +362,7 @@ describe("src/grain/distribution", () => {
       const actual = distribution(
         strategy15,
         credHistory,
-        earnings,
+        lifetimeEarnings,
         timestampMs
       );
       expectDistributionsEqual(expectedDistribution, actual);
@@ -383,7 +393,7 @@ describe("src/grain/distribution", () => {
       expectDistributionsEqual(expectedDistribution, actual);
     });
     it("should handle the case where one user has no historical earnings", () => {
-      const earnings = new Map([[foo, fromApproximateFloat(5)]]);
+      const lifetimeEarnings = new Map([[foo, fromApproximateFloat(5)]]);
 
       const expectedReceipts = [
         {address: bar, amount: fromApproximateFloat(2)},
@@ -399,13 +409,13 @@ describe("src/grain/distribution", () => {
       const actual = distribution(
         strategy2,
         credHistory,
-        earnings,
+        lifetimeEarnings,
         timestampMs
       );
       expectDistributionsEqual(expectedDistribution, actual);
     });
     it("should not break if a user has earnings but no cred", () => {
-      const earnings = new Map([
+      const lifetimeEarnings = new Map([
         [NodeAddress.fromParts(["zoink"]), fromApproximateFloat(10)],
       ]);
 
@@ -420,7 +430,12 @@ describe("src/grain/distribution", () => {
         strategy
       );
 
-      const actual = distribution(strategy, credHistory, earnings, timestampMs);
+      const actual = distribution(
+        strategy,
+        credHistory,
+        lifetimeEarnings,
+        timestampMs
+      );
       expectDistributionsEqual(expectedDistribution, actual);
     });
   });
