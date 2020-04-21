@@ -84,73 +84,65 @@ export function distribution(
   earnings: Map<NodeAddressT, Grain>,
   timestampMs: number
 ): DistributionV1 {
-  const filteredSlices = credHistory.filter(
+  const timeFilteredCredHistory = credHistory.filter(
     (s) => s.intervalEndMs <= timestampMs
   );
-  if (!filteredSlices.length) {
-    return {
-      type: "DISTRIBUTION",
-      timestampMs,
-      version: DISTRIBUTION_VERSION_1,
-      strategy,
-      receipts: [],
-    };
-  }
 
-  const receipts: $ReadOnlyArray<GrainReceipt> = (function () {
+  const computeReceipts = (): $ReadOnlyArray<GrainReceipt> => {
     switch (strategy.type) {
       case "IMMEDIATE":
-        if (strategy.version !== 1) {
-          throw new Error(
-            `Unsupported IMMEDIATE strategy: ${strategy.version}`
-          );
-        }
-        const lastSlice = filteredSlices[filteredSlices.length - 1];
-        return computeImmediateReceipts(strategy.budget, lastSlice.cred);
+        return computeImmediateReceipts(strategy, timeFilteredCredHistory);
       case "BALANCED":
-        if (strategy.version !== 1) {
-          throw new Error(`Unsupported BALANCED strategy: ${strategy.version}`);
-        }
-        const totalCred = new Map();
-        for (const {cred} of filteredSlices) {
-          for (const [address, ownCred] of cred.entries()) {
-            const existingCred = totalCred.get(address) || 0;
-            totalCred.set(address, existingCred + ownCred);
-          }
-        }
-        return computeBalancedReceipts(strategy.budget, totalCred, earnings);
+        return computeBalancedReceipts(
+          strategy,
+          timeFilteredCredHistory,
+          earnings
+        );
       default:
-        throw new Error(`Unexpected type ${(strategy.type: empty)}`);
+        throw new Error(`Unexpected type ${strategy.type}`);
     }
-  })();
+  };
 
   return {
     type: "DISTRIBUTION",
     version: DISTRIBUTION_VERSION_1,
     strategy,
-    receipts,
+    receipts: computeReceipts(),
     timestampMs,
   };
 }
 
 /**
- * Split a grain budget in proportion to the provided scores
+ * Split a grain budget in proportion to the cred scores in
+ * the most recent time interval
  */
 function computeImmediateReceipts(
-  budget: Grain,
-  cred: Map<NodeAddressT, number>
+  {budget, version}: ImmediateV1,
+  credHistory: CredHistory
 ): $ReadOnlyArray<GrainReceipt> {
+  if (version !== 1) {
+    throw new Error(`Unsupported IMMEDIATE strategy: ${version}`);
+  }
+
   if (budget < ZERO) {
     throw new Error(`invalid budget: ${String(budget)}`);
   }
 
-  const totalCred = sum(cred.values());
+  if (!credHistory.length) {
+    return [];
+  }
+
+  const lastSlice = credHistory[credHistory.length - 1];
+
+  const credMap = lastSlice.cred;
+
+  const totalCred = sum(credMap.values());
   if (totalCred === 0) {
     return [];
   }
 
   let totalPaid = ZERO;
-  const receipts = mapToArray(cred, ([address, cred]) => {
+  const receipts = mapToArray(credMap, ([address, cred]) => {
     const amount = multiplyFloat(budget, cred / totalCred);
     totalPaid += amount;
     return {
@@ -195,12 +187,28 @@ function computeImmediateReceipts(
  * scores.
  */
 function computeBalancedReceipts(
-  budget: Grain,
-  credMap: Map<NodeAddressT, number>,
+  {budget, version}: BalancedV1,
+  credHistory: CredHistory,
   earnings: Map<NodeAddressT, Grain>
 ): $ReadOnlyArray<GrainReceipt> {
+  if (version !== 1) {
+    throw new Error(`Unsupported BALANCED strategy: ${version}`);
+  }
+
   if (budget < ZERO) {
     throw new Error(`invalid budget: ${String(budget)}`);
+  }
+
+  if (!credHistory.length) {
+    return [];
+  }
+
+  const credMap = new Map();
+  for (const {cred} of credHistory) {
+    for (const [address, ownCred] of cred.entries()) {
+      const existingCred = credMap.get(address) || 0;
+      credMap.set(address, existingCred + ownCred);
+    }
   }
 
   let totalEarnings = ZERO;

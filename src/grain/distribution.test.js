@@ -136,6 +136,17 @@ describe("src/grain/distribution", () => {
         distribution(unsupportedStrategy, credHistory, new Map(), timestampMs)
       ).toThrowError(`Unsupported IMMEDIATE strategy: 2`);
     });
+
+    it("throws an error if given an unsupported strategy and an empty credHistory", () => {
+      const unsupportedStrategy = {
+        ...strategy,
+        version: 2,
+      };
+      expect(() =>
+        distribution(unsupportedStrategy, [], new Map(), timestampMs)
+      ).toThrowError(`Unsupported IMMEDIATE strategy: 2`);
+    });
+
     it("handles an interval in the middle", () => {
       const result = distribution(strategy, credHistory, new Map(), 20);
       // $ExpectFlowError
