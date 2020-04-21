@@ -7,6 +7,7 @@ import {
   ZERO,
   fromApproximateFloat,
   multiplyFloat,
+  toFloatRatio,
 } from "./grain";
 
 describe("src/grain/grain", () => {
@@ -115,6 +116,34 @@ describe("src/grain/grain", () => {
     it("fromApproximateFloat(0.1) === ONE / 10", () => {
       // $ExpectFlowError
       expect(fromApproximateFloat(0.1)).toEqual(ONE / 10n);
+    });
+  });
+
+  describe("toFloatRatio", () => {
+    it("handles a one-to-one ratio", () => {
+      expect(toFloatRatio(ONE, ONE)).toEqual(1);
+    });
+    it("handles a larger numerator", () => {
+      // $ExpectFlowError
+      expect(toFloatRatio(ONE * 2n, ONE)).toEqual(2);
+    });
+    it("handles fractional numbers", () => {
+      // $ExpectFlowError
+      expect(toFloatRatio(ONE * 5n, ONE * 2n)).toEqual(2.5);
+    });
+    it("calculates repeating decimal ratios", () => {
+      // $ExpectFlowError
+      expect(toFloatRatio(ONE * 5n, ONE * 3n)).toEqual(5 / 3);
+    });
+    it("approximates correctly when Grain values are not exactly equal", () => {
+      // $ExpectFlowError
+      const almostOne = ONE - 1n;
+      expect(toFloatRatio(ONE, almostOne)).toEqual(1);
+    });
+    it("handles irrational numbers", () => {
+      const bigPi = multiplyFloat(ONE, Math.PI);
+      // $ExpectFlowError
+      expect(toFloatRatio(bigPi, ONE * 2n)).toEqual(Math.PI / 2);
     });
   });
 });
