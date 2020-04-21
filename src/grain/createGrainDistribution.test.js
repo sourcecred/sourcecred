@@ -2,7 +2,10 @@
 
 import {NodeAddress} from "../core/graph";
 import {ONE, ZERO, fromApproximateFloat, format} from "./grain";
-import {DISTRIBUTION_VERSION_1, distribution} from "./distribution";
+import {
+  GRAIN_DISTRIBUTION_VERSION_1,
+  createGrainDistribution,
+} from "./createGrainDistribution";
 import deepFreeze from "deep-freeze";
 import type {
   CredHistory,
@@ -10,11 +13,11 @@ import type {
   ImmediateV1,
   GrainReceipt,
   DistributionStrategy,
-  DistributionV1,
-} from "./distribution";
+  GrainDistributionV1,
+} from "./createGrainDistribution";
 import type {Grain} from "./grain";
 
-describe("src/grain/distribution", () => {
+describe("src/grain/createGrainDistribution", () => {
   const foo = NodeAddress.fromParts(["foo"]);
   const bar = NodeAddress.fromParts(["bar"]);
 
@@ -54,7 +57,7 @@ describe("src/grain/distribution", () => {
   function safeStrategy(strat: DistributionStrategy) {
     return {...strat, budget: fmt(strat.budget)};
   }
-  function safeDistribution(distribution: DistributionV1) {
+  function safeDistribution(distribution: GrainDistributionV1) {
     return {
       ...distribution,
       strategy: safeStrategy(distribution.strategy),
@@ -72,10 +75,10 @@ describe("src/grain/distribution", () => {
       version: 1,
     });
 
-    describe("it should return an empty distribution when", () => {
+    describe("it should return an empty createGrainDistribution when", () => {
       const emptyDistribution = deepFreeze({
-        type: "DISTRIBUTION",
-        version: DISTRIBUTION_VERSION_1,
+        type: "GRAIN_DISTRIBUTION",
+        version: GRAIN_DISTRIBUTION_VERSION_1,
         receipts: [],
         strategy,
         timestampMs,
@@ -84,7 +87,7 @@ describe("src/grain/distribution", () => {
       it("the budget is zero", () => {
         const zeroBudgetStrategy = {...strategy, budget: ZERO};
 
-        const actual = distribution(
+        const actual = createGrainDistribution(
           zeroBudgetStrategy,
           credHistory,
           new Map(),
@@ -98,12 +101,22 @@ describe("src/grain/distribution", () => {
       });
 
       it("there are no cred scores at all", () => {
-        const actual = distribution(strategy, [], new Map(), timestampMs);
+        const actual = createGrainDistribution(
+          strategy,
+          [],
+          new Map(),
+          timestampMs
+        );
         expectDistributionsEqual(actual, emptyDistribution);
       });
 
       it("all cred scores are from the future", () => {
-        const actual = distribution(strategy, credHistory, new Map(), 0);
+        const actual = createGrainDistribution(
+          strategy,
+          credHistory,
+          new Map(),
+          0
+        );
         expectDistributionsEqual(actual, {
           ...emptyDistribution,
           timestampMs: 0,
@@ -111,7 +124,7 @@ describe("src/grain/distribution", () => {
       });
 
       it("all the cred sums to 0", () => {
-        const actual = distribution(
+        const actual = createGrainDistribution(
           strategy,
           [
             {
@@ -135,8 +148,8 @@ describe("src/grain/distribution", () => {
       receipts: $ReadOnlyArray<GrainReceipt>
     ) => {
       return {
-        type: "DISTRIBUTION",
-        version: DISTRIBUTION_VERSION_1,
+        type: "GRAIN_DISTRIBUTION",
+        version: GRAIN_DISTRIBUTION_VERSION_1,
         receipts,
         strategy,
         timestampMs,
@@ -149,7 +162,12 @@ describe("src/grain/distribution", () => {
         version: 2,
       };
       expect(() =>
-        distribution(unsupportedStrategy, credHistory, new Map(), timestampMs)
+        createGrainDistribution(
+          unsupportedStrategy,
+          credHistory,
+          new Map(),
+          timestampMs
+        )
       ).toThrowError(`Unsupported IMMEDIATE strategy: 2`);
     });
 
@@ -159,12 +177,17 @@ describe("src/grain/distribution", () => {
         version: 2,
       };
       expect(() =>
-        distribution(unsupportedStrategy, [], new Map(), timestampMs)
+        createGrainDistribution(unsupportedStrategy, [], new Map(), timestampMs)
       ).toThrowError(`Unsupported IMMEDIATE strategy: 2`);
     });
 
     it("handles an interval in the middle", () => {
-      const result = distribution(strategy, credHistory, new Map(), 20);
+      const result = createGrainDistribution(
+        strategy,
+        credHistory,
+        new Map(),
+        20
+      );
       // $ExpectFlowError
       const HALF = ONE / 2n;
       const expectedReceipts = [
@@ -177,8 +200,13 @@ describe("src/grain/distribution", () => {
       );
       expectDistributionsEqual(result, expectedDistribution);
     });
-    it("handles an interval with un-even cred distribution", () => {
-      const result = distribution(strategy, credHistory, new Map(), 12);
+    it("handles an interval with un-even cred createGrainDistribution", () => {
+      const result = createGrainDistribution(
+        strategy,
+        credHistory,
+        new Map(),
+        12
+      );
       // $ExpectFlowError
       const ONE_TENTH = ONE / 10n;
       const NINE_TENTHS = ONE - ONE_TENTH;
@@ -193,7 +221,12 @@ describe("src/grain/distribution", () => {
       expectDistributionsEqual(result, expectedDistribution);
     });
     it("handles an interval at the end", () => {
-      const result = distribution(strategy, credHistory, new Map(), 1000);
+      const result = createGrainDistribution(
+        strategy,
+        credHistory,
+        new Map(),
+        1000
+      );
       const expectedReceipts = [{address: bar, amount: ONE}];
       const expectedDistribution = createImmediateDistribution(
         1000,
@@ -216,8 +249,8 @@ describe("src/grain/distribution", () => {
       strategy: BalancedV1
     ) => {
       return {
-        type: "DISTRIBUTION",
-        version: DISTRIBUTION_VERSION_1,
+        type: "GRAIN_DISTRIBUTION",
+        version: GRAIN_DISTRIBUTION_VERSION_1,
         receipts,
         strategy,
         timestampMs,
@@ -226,8 +259,8 @@ describe("src/grain/distribution", () => {
 
     describe("it should return an empty distribution when", () => {
       const emptyDistribution = deepFreeze({
-        type: "DISTRIBUTION",
-        version: DISTRIBUTION_VERSION_1,
+        type: "GRAIN_DISTRIBUTION",
+        version: GRAIN_DISTRIBUTION_VERSION_1,
         receipts: [],
         strategy,
         timestampMs,
@@ -236,7 +269,7 @@ describe("src/grain/distribution", () => {
       it("the budget is zero", () => {
         const zeroBudgetStrategy = {...strategy, budget: ZERO};
 
-        const actual = distribution(
+        const actual = createGrainDistribution(
           zeroBudgetStrategy,
           credHistory,
           new Map(),
@@ -250,13 +283,23 @@ describe("src/grain/distribution", () => {
       });
 
       it("there are no cred scores at all", () => {
-        const actual = distribution(strategy, [], new Map(), timestampMs);
+        const actual = createGrainDistribution(
+          strategy,
+          [],
+          new Map(),
+          timestampMs
+        );
 
         expectDistributionsEqual(actual, emptyDistribution);
       });
 
       it("all cred scores are from the future", () => {
-        const actual = distribution(strategy, credHistory, new Map(), 0);
+        const actual = createGrainDistribution(
+          strategy,
+          credHistory,
+          new Map(),
+          0
+        );
         expectDistributionsEqual(actual, {
           ...emptyDistribution,
           timestampMs: 0,
@@ -264,7 +307,7 @@ describe("src/grain/distribution", () => {
       });
 
       it("all the cred sums to 0", () => {
-        const actual = distribution(
+        const actual = createGrainDistribution(
           strategy,
           [
             {
@@ -289,7 +332,12 @@ describe("src/grain/distribution", () => {
         version: 2,
       };
       expect(() =>
-        distribution(unsupportedStrategy, credHistory, new Map(), timestampMs)
+        createGrainDistribution(
+          unsupportedStrategy,
+          credHistory,
+          new Map(),
+          timestampMs
+        )
       ).toThrowError(`Unsupported BALANCED strategy: 2`);
     });
 
@@ -306,7 +354,7 @@ describe("src/grain/distribution", () => {
         expectedReceipts,
         strategy
       );
-      const actual = distribution(
+      const actual = createGrainDistribution(
         strategy,
         credHistory,
         lifetimeEarnings,
@@ -331,7 +379,7 @@ describe("src/grain/distribution", () => {
         strategy
       );
 
-      const actual = distribution(
+      const actual = createGrainDistribution(
         strategy,
         credHistory,
         lifetimeEarnings,
@@ -359,7 +407,7 @@ describe("src/grain/distribution", () => {
         strategy15
       );
 
-      const actual = distribution(
+      const actual = createGrainDistribution(
         strategy15,
         credHistory,
         lifetimeEarnings,
@@ -384,7 +432,7 @@ describe("src/grain/distribution", () => {
         strategy12
       );
 
-      const actual = distribution(
+      const actual = createGrainDistribution(
         strategy12,
         credHistory,
         new Map(),
@@ -406,7 +454,7 @@ describe("src/grain/distribution", () => {
         strategy2
       );
 
-      const actual = distribution(
+      const actual = createGrainDistribution(
         strategy2,
         credHistory,
         lifetimeEarnings,
@@ -430,7 +478,7 @@ describe("src/grain/distribution", () => {
         strategy
       );
 
-      const actual = distribution(
+      const actual = createGrainDistribution(
         strategy,
         credHistory,
         lifetimeEarnings,

@@ -35,7 +35,7 @@ import {
   DECIMAL_PRECISION,
 } from "./grain";
 
-export const DISTRIBUTION_VERSION_1 = 1;
+export const GRAIN_DISTRIBUTION_VERSION_1 = 1;
 
 export type DistributionStrategy = ImmediateV1 | BalancedV1;
 
@@ -56,8 +56,8 @@ export type GrainReceipt = {|
   +amount: Grain,
 |};
 
-export type DistributionV1 = {|
-  +type: "DISTRIBUTION",
+export type GrainDistributionV1 = {|
+  +type: "GRAIN_DISTRIBUTION",
   +timestampMs: number,
   +version: number,
   +strategy: DistributionStrategy,
@@ -78,12 +78,12 @@ export type CredHistory = $ReadOnlyArray<CredTimeSlice>;
  * - the lifetime earnings of all users
  * - the timestamp for the distribution
  */
-export function distribution(
+export function createGrainDistribution(
   strategy: DistributionStrategy,
   credHistory: CredHistory,
   lifetimeEarningsMap: Map<NodeAddressT, Grain>,
   timestampMs: number
-): DistributionV1 {
+): GrainDistributionV1 {
   const timeFilteredCredHistory = credHistory.filter(
     (s) => s.intervalEndMs <= timestampMs
   );
@@ -104,8 +104,8 @@ export function distribution(
   };
 
   return {
-    type: "DISTRIBUTION",
-    version: DISTRIBUTION_VERSION_1,
+    type: "GRAIN_DISTRIBUTION",
+    version: GRAIN_DISTRIBUTION_VERSION_1,
     strategy,
     receipts: computeReceipts(),
     timestampMs,
