@@ -4,9 +4,10 @@ import {type URL} from "../../core/references";
 import {type TimestampISO} from "../../util/timestamp";
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import {type Compatible, fromCompat, toCompat} from "../../util/compat";
-import {initiativeNodeType} from "./declaration";
 import {type InitiativeWeight, type InitiativeId, createId} from "./initiative";
 import {type InitiativesDirectory} from "./initiativesDirectory";
+import {type EdgeSpecJson} from "./edgeSpec";
+import {initiativeNodeType} from "./declaration";
 
 export const INITIATIVE_FILE_SUBTYPE = "INITIATIVE_FILE";
 
@@ -16,7 +17,27 @@ export const INITIATIVE_FILE_SUBTYPE = "INITIATIVE_FILE";
  * Note: The file name will be used to derive the InitiativeId. So it doesn't
  * make sense to use this outside of the context of an InitiativesDirectory.
  */
-export type InitiativeFile = {|
+export type InitiativeFile = InitiativeFileV020;
+
+export type InitiativeFileV020 = {|
+  +title: string,
+  +timestampIso: TimestampISO,
+  +weight: InitiativeWeight,
+  +completed: boolean,
+  +contributions?: EdgeSpecJson,
+  +dependencies?: EdgeSpecJson,
+  +references?: EdgeSpecJson,
+  +champions?: $ReadOnlyArray<URL>,
+|};
+
+const upgradeFrom010 = (file: InitiativeFileV010): InitiativeFileV020 => ({
+  ...file,
+  contributions: {urls: file.contributions},
+  dependencies: {urls: file.dependencies},
+  references: {urls: file.references},
+});
+
+export type InitiativeFileV010 = {|
   +title: string,
   +timestampIso: TimestampISO,
   +weight: InitiativeWeight,
@@ -27,10 +48,14 @@ export type InitiativeFile = {|
   +champions: $ReadOnlyArray<URL>,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/initiativeFile", version: "0.1.0"};
+const upgrades = {
+  "0.1.0": upgradeFrom010,
+};
+
+const COMPAT_INFO = {type: "sourcecred/initiativeFile", version: "0.2.0"};
 
 export function fromJSON(j: Compatible<any>): InitiativeFile {
-  return fromCompat(COMPAT_INFO, j);
+  return fromCompat(COMPAT_INFO, j, upgrades);
 }
 
 export function toJSON(m: InitiativeFile): Compatible<InitiativeFile> {

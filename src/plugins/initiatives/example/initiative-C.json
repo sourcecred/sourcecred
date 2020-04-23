@@ -1,0 +1,42 @@
+[
+  {
+    "type": "sourcecred/initiativeFile",
+    "version": "0.2.0"
+  },
+  {
+    "title": "Initiative C",
+    "timestampIso": "2020-01-08T22:01:57.733Z",
+    "weight": {
+      "incomplete": 123,
+      "complete": 321
+    },
+    "completed": false,
+    "champions": ["http://foo.bar/C/champ"],
+    "contributions": {
+      "entries": [
+        {
+          "title": "Add test contrib",
+          "weight": 10,
+          "contributors": ["https://foo.bar/C/contrib-user"]
+        }
+      ]
+    },
+    "dependencies": {
+      "entries": [
+        {
+          "title": "Add test dependency",
+          "timestampIso": "2020-01-02T22:01:57.700Z",
+          "contributors": ["https://foo.bar/C/dep-user"]
+        }
+      ]
+    },
+    "references": {
+      "entries": [
+        {
+          "title": "Add test reference",
+          "contributors": ["https://foo.bar/C/ref-user"]
+        }
+      ]
+    }
+  }
+]

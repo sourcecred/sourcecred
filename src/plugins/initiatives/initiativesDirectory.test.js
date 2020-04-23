@@ -16,6 +16,7 @@ import {
   _validateUrl,
   _convertToInitiatives,
   _createReferenceMap,
+  _lossyURLFromEdgeSpecJson,
 } from "./initiativesDirectory";
 import {type InitiativeFile} from "./initiativeFile";
 
@@ -25,18 +26,38 @@ const exampleInitiativeFile = (): InitiativeFile => ({
   weight: {incomplete: 360, complete: 420},
   completed: false,
   champions: ["http://foo.bar/champ"],
-  contributions: ["http://foo.bar/contrib"],
-  dependencies: ["http://foo.bar/dep"],
-  references: ["http://foo.bar/ref"],
+  contributions: {
+    urls: ["http://foo.bar/contrib"],
+    entries: [{title: "Inline contrib"}],
+  },
+  dependencies: {
+    urls: ["http://foo.bar/dep"],
+    entries: [{title: "Inline dep"}],
+  },
+  references: {
+    urls: ["http://foo.bar/ref"],
+    entries: [{title: "Inline ref"}],
+  },
 });
 
 const exampleInitiative = (remoteUrl: string, fileName: string): Initiative => {
-  const {timestampIso, ...partialInitiativeFile} = exampleInitiativeFile();
+  const {
+    timestampIso,
+    contributions,
+    dependencies,
+    references,
+    champions,
+    ...partialInitiativeFile
+  } = exampleInitiativeFile();
   const timestampMs = Timestamp.fromISO(timestampIso);
   return {
     ...partialInitiativeFile,
     id: createId("INITIATIVE_FILE", remoteUrl, fileName),
     timestampMs,
+    champions: champions || [],
+    contributions: _lossyURLFromEdgeSpecJson(contributions),
+    dependencies: _lossyURLFromEdgeSpecJson(dependencies),
+    references: _lossyURLFromEdgeSpecJson(references),
   };
 };
 
@@ -92,7 +113,11 @@ describe("plugins/initiatives/initiativesDirectory", () => {
       // Then
       // Shallow copy to sort, because the array is read-only.
       const actualNames = [...fileNames].sort();
-      expect(actualNames).toEqual(["initiative-A.json", "initiative-B.json"]);
+      expect(actualNames).toEqual([
+        "initiative-A.json",
+        "initiative-B.json",
+        "initiative-C.json",
+      ]);
     });
   });
 
@@ -100,7 +125,11 @@ describe("plugins/initiatives/initiativesDirectory", () => {
     it("should read provided initiativeFiles, sorted by name", async () => {
       // Given
       const localPath = path.join(__dirname, "example");
-      const fileNames = ["initiative-B.json", "initiative-A.json"];
+      const fileNames = [
+        "initiative-C.json",
+        "initiative-B.json",
+        "initiative-A.json",
+      ];
 
       // When
       const map = await _readFiles(localPath, fileNames);
@@ -109,6 +138,7 @@ describe("plugins/initiatives/initiativesDirectory", () => {
       expect([...map.keys()]).toEqual([
         "initiative-A.json",
         "initiative-B.json",
+        "initiative-C.json",
       ]);
       expect(map).toMatchSnapshot();
     });
@@ -116,7 +146,11 @@ describe("plugins/initiatives/initiativesDirectory", () => {
     it("should throw when directory doesn't exist", async () => {
       // Given
       const localPath = path.join(tmp.dirSync().name, "findFiles_test");
-      const fileNames = ["initiative-B.json", "initiative-A.json"];
+      const fileNames = [
+        "initiative-C.json",
+        "initiative-B.json",
+        "initiative-A.json",
+      ];
 
       // When
       const p = _readFiles(localPath, fileNames);
@@ -128,7 +162,11 @@ describe("plugins/initiatives/initiativesDirectory", () => {
     it("should throw when directory is not a directory", async () => {
       // Given
       const localPath = path.join(tmp.dirSync().name, "findFiles_test");
-      const fileNames = ["initiative-B.json", "initiative-A.json"];
+      const fileNames = [
+        "initiative-C.json",
+        "initiative-B.json",
+        "initiative-A.json",
+      ];
       await fs.writeFile(localPath, "");
 
       // When
@@ -320,6 +358,7 @@ describe("plugins/initiatives/initiativesDirectory", () => {
       expect(urls).toEqual([
         "http://example.com/initiatives/initiative-A.json",
         "http://example.com/initiatives/initiative-B.json",
+        "http://example.com/initiatives/initiative-C.json",
       ]);
       expect(initiatives.map((i) => i.id)).toEqual([
         [
@@ -331,6 +370,11 @@ describe("plugins/initiatives/initiativesDirectory", () => {
           "INITIATIVE_FILE",
           "http://example.com/initiatives",
           "initiative-B.json",
+        ],
+        [
+          "INITIATIVE_FILE",
+          "http://example.com/initiatives",
+          "initiative-C.json",
         ],
       ]);
     });
