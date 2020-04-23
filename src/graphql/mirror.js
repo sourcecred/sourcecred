@@ -646,6 +646,18 @@ export class Mirror {
   }
 
   /**
+   * Check whether the given query plan indicates that the mirror is
+   * already up to date and no further queries are required.
+   */
+  _isUpToDate(queryPlan: QueryPlan): boolean {
+    return (
+      queryPlan.typenames.length === 0 &&
+      queryPlan.objects.length === 0 &&
+      queryPlan.connections.length === 0
+    );
+  }
+
+  /**
    * Create a GraphQL selection set to fetch data corresponding to the
    * given query plan.
    *
@@ -948,7 +960,7 @@ export class Mirror {
     |}
   ): Promise<boolean> {
     const queryPlan = this._findOutdated(options.since);
-    if (queryPlan.objects.length === 0 && queryPlan.connections.length === 0) {
+    if (this._isUpToDate(queryPlan)) {
       return Promise.resolve(false);
     }
     const querySelections = this._queryFromPlan(queryPlan, {
