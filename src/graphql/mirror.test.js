@@ -636,6 +636,52 @@ describe("graphql/mirror", () => {
       });
     });
 
+    describe("_isUpToDate", () => {
+      it("marks empty query plans as up to date", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(
+          mirror._isUpToDate({typenames: [], objects: [], connections: []})
+        ).toBe(true);
+      });
+      it("marks query plans with typename queries as dirty", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(
+          mirror._isUpToDate({typenames: ["foo"], objects: [], connections: []})
+        ).toBe(false);
+      });
+      it("marks query plans with object queries as dirty", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(
+          mirror._isUpToDate({
+            typenames: [],
+            objects: [{typename: "Repository", id: "bar"}],
+            connections: [],
+          })
+        ).toBe(false);
+      });
+      it("marks query plans with connection queries as dirty", () => {
+        const db = new Database(":memory:");
+        const mirror = new Mirror(db, buildGithubSchema());
+        expect(
+          mirror._isUpToDate({
+            typenames: [],
+            objects: [],
+            connections: [
+              {
+                objectTypename: "Issue",
+                objectId: "baz",
+                fieldname: "comments",
+                endCursor: undefined,
+              },
+            ],
+          })
+        ).toBe(false);
+      });
+    });
+
     describe("_queryFromPlan", () => {
       it("errors if connections for an object have distinct typename", () => {
         const db = new Database(":memory:");
