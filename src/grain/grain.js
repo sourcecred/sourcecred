@@ -139,3 +139,15 @@ export function multiplyFloat(grain: Grain, num: number): Grain {
 export function fromApproximateFloat(f: number): Grain {
   return multiplyFloat(ONE, f);
 }
+
+/**
+ * Approximates the division of two grain values
+ *
+ * This naive implementation of grain division converts the given values
+ * to floats and performs simple floating point division.
+ *
+ * Do not assume this will be precise!
+ */
+export function toFloatRatio(numerator: Grain, denominator: Grain): number {
+  return Number(numerator) / Number(denominator);
+}
