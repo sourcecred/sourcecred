@@ -1,25 +1,35 @@
 // @flow
 
 import {
-  EdgeAddress,
-  NodeAddress,
   type Edge,
   type Node,
   type EdgeAddressT,
   type NodeAddressT,
+  EdgeAddress,
+  NodeAddress,
 } from "../../core/graph";
+import type {ReferenceDetector, URL} from "../../core/references";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import type {NodeWeight} from "../../core/weights";
-import type {ReferenceDetector, URL} from "../../core/references";
 import type {EdgeSpec} from "./edgeSpec";
-import type {Initiative, InitiativeRepository} from "./initiative";
-import {addressFromId} from "./initiative";
+import {
+  type Initiative,
+  type InitiativeId,
+  type InitiativeRepository,
+  addressFromId,
+} from "./initiative";
+import {
+  type NodeEntry,
+  type NodeEntryField,
+  addressForNodeEntry,
+} from "./nodeEntry";
 import {
   dependsOnEdgeType,
   referencesEdgeType,
   contributesToEdgeType,
   championsEdgeType,
+  contributesToEntryEdgeType,
 } from "./declaration";
 import {initiativeFileURL} from "./initiativeFile";
 
@@ -35,6 +45,19 @@ function initiativeNode(initiative: Initiative): Node {
     timestampMs: initiative.timestampMs,
     description:
       url == null ? initiative.title : `[${initiative.title}](${url})`,
+  };
+}
+
+function nodeFromEntry(
+  entry: NodeEntry,
+  parentId: InitiativeId,
+  field: NodeEntryField
+): Node {
+  const address = addressForNodeEntry(field, parentId, entry.key);
+  return {
+    address,
+    timestampMs: entry.timestampMs,
+    description: entry.title,
   };
 }
 
@@ -89,28 +112,58 @@ export function createWeightedGraph(
       weights.nodeWeights.set(node.address, weight);
     }
 
-    // Generic approach to adding edges when the reference detector has a hit.
+    // Generic approach to adding edges and entries from EdgeSpec or URLs.
     const edgeHandler = (
       edges: $ReadOnlyArray<URL> | EdgeSpec,
-      createEdge: EdgeFactoryT
+      createEdge: EdgeFactoryT,
+      field: ?NodeEntryField
     ) => {
-      // TODO: this is a temporary implementation, which takes an EdgeSpec and
-      // just takes the $ReadOnlyArray<URL>. This is only done to allow support
-      // for graphing NodeEntries to be added in a separate commit.
-      const urls = Array.isArray(edges) ? edges : edges.urls;
+      const {urls, entries} = Array.isArray(edges)
+        ? {urls: edges, entries: []}
+        : edges;
 
+      // Handle edge URLs.
       for (const url of urls) {
         const addr = refs.addressFromUrl(url);
         if (!addr) continue;
         graph.addEdge(createEdge(initiative, addr));
       }
+
+      // Handle NodeEntry when a field is set.
+      for (const entry of entries) {
+        if (!field) throw new Error("BUG: field not set, but got entries");
+
+        // Add the NodeEntry contribution itself to the graph.
+        const node = nodeFromEntry(entry, initiative.id, field);
+        graph.addNode(node);
+        graph.addEdge(createEdge(initiative, node.address));
+        if (entry.weight != null) {
+          weights.nodeWeights.set(node.address, entry.weight);
+        }
+
+        // Add edges to the contributors.
+        for (const contributor of entry.contributors) {
+          const addr = refs.addressFromUrl(contributor);
+          if (!addr) continue;
+          graph.addEdge({
+            address: EdgeAddress.append(
+              contributesToEntryEdgeType.prefix,
+              ...NodeAddress.toParts(node.address),
+              ...NodeAddress.toParts(addr)
+            ),
+            timestampMs: entry.timestampMs,
+            src: addr,
+            dst: node.address,
+          });
+        }
+      }
     };
 
     // Maps the edge types to it's fields.
-    edgeHandler(initiative.dependencies, depedencyEdge);
-    edgeHandler(initiative.references, referenceEdge);
-    edgeHandler(initiative.contributions, contributionEdge);
-    edgeHandler(initiative.champions, championEdge);
+    edgeHandler(initiative.dependencies, depedencyEdge, "DEPENDENCY");
+    edgeHandler(initiative.references, referenceEdge, "REFERENCE");
+    edgeHandler(initiative.contributions, contributionEdge, "CONTRIBUTION");
+    edgeHandler(initiative.champions, championEdge, null);
   }
 
   return wg;
