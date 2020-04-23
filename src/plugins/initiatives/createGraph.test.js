@@ -26,9 +26,9 @@ function _createInitiative(overrides?: $Shape<Initiative>): Initiative {
     title: "Unset test initiative",
     timestampMs: Timestamp.fromNumber(123),
     completed: false,
-    dependencies: [],
-    references: [],
-    contributions: [],
+    contributions: {urls: [], entries: []},
+    dependencies: {urls: [], entries: []},
+    references: {urls: [], entries: []},
     champions: [],
     ...overrides,
   };
@@ -237,7 +237,10 @@ describe("plugins/initiatives/createGraph", () => {
         // Given
         const {repo, refs} = example();
         repo.addInitiative({
-          dependencies: ["https://example.com/1"],
+          dependencies: {
+            urls: ["https://example.com/1"],
+            entries: [],
+          },
         });
 
         // When
@@ -253,7 +256,10 @@ describe("plugins/initiatives/createGraph", () => {
         // Given
         const {repo, refs} = example();
         repo.addInitiative({
-          references: ["https://example.com/2"],
+          references: {
+            urls: ["https://example.com/2"],
+            entries: [],
+          },
         });
 
         // When
@@ -269,7 +275,10 @@ describe("plugins/initiatives/createGraph", () => {
         // Given
         const {repo, refs} = example();
         repo.addInitiative({
-          contributions: ["https://example.com/3"],
+          contributions: {
+            urls: ["https://example.com/3"],
+            entries: [],
+          },
         });
 
         // When
@@ -304,7 +313,10 @@ describe("plugins/initiatives/createGraph", () => {
         const {repo, refs} = example();
         refs.addReference("https://example.com/1", exampleNodeAddress(1));
         repo.addInitiative({
-          dependencies: ["https://example.com/1", "https://example.com/99"],
+          dependencies: {
+            urls: ["https://example.com/1", "https://example.com/99"],
+            entries: [],
+          },
         });
 
         // When
@@ -335,7 +347,10 @@ describe("plugins/initiatives/createGraph", () => {
         const {repo, refs} = example();
         refs.addReference("https://example.com/2", exampleNodeAddress(2));
         repo.addInitiative({
-          references: ["https://example.com/2", "https://example.com/99"],
+          references: {
+            urls: ["https://example.com/2", "https://example.com/99"],
+            entries: [],
+          },
         });
 
         // When
@@ -366,7 +381,10 @@ describe("plugins/initiatives/createGraph", () => {
         const {repo, refs} = example();
         refs.addReference("https://example.com/3", exampleNodeAddress(3));
         repo.addInitiative({
-          contributions: ["https://example.com/3", "https://example.com/99"],
+          contributions: {
+            urls: ["https://example.com/3", "https://example.com/99"],
+            entries: [],
+          },
         });
 
         // When
