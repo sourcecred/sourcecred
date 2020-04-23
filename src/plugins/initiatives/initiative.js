@@ -7,7 +7,7 @@ import {type TimestampMs} from "../../util/timestamp";
 import {initiativeNodeType} from "./declaration";
 
 // Composite ID, used as input for NodeAddressT.
-export opaque type InitiativeId = string[];
+export opaque type InitiativeId: string[] = string[];
 
 // Enforce that each ID has at least a sub-type and 1..n components.
 export function createId(
