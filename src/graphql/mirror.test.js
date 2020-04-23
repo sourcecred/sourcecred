@@ -655,14 +655,29 @@ describe("graphql/mirror", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         expect(
-          mirror._isUpToDate({typenames: [], objects: ["bar"], connections: []})
+          mirror._isUpToDate({
+            typenames: [],
+            objects: [{typename: "Repository", id: "bar"}],
+            connections: [],
+          })
         ).toBe(false);
       });
       it("marks query plans with connection queries as dirty", () => {
         const db = new Database(":memory:");
         const mirror = new Mirror(db, buildGithubSchema());
         expect(
-          mirror._isUpToDate({typenames: [], objects: [], connections: ["baz"]})
+          mirror._isUpToDate({
+            typenames: [],
+            objects: [],
+            connections: [
+              {
+                objectTypename: "Issue",
+                objectId: "baz",
+                fieldname: "comments",
+                endCursor: undefined,
+              },
+            ],
+          })
         ).toBe(false);
       });
     });
