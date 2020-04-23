@@ -11,6 +11,7 @@ import {
   type ReferenceDetector,
   MappedReferenceDetector,
 } from "../../core/references";
+import {type EdgeSpecJson} from "./edgeSpec";
 import {
   type Initiative,
   type InitiativeRepository,
@@ -148,16 +149,39 @@ export function _convertToInitiatives(
 ): $ReadOnlyArray<Initiative> {
   const initiatives = [];
   for (const [fileName, initiativeFile] of map.entries()) {
-    const {timestampIso, ...partialInitiativeFile} = initiativeFile;
+    const {
+      timestampIso,
+      champions,
+      contributions,
+      dependencies,
+      references,
+      ...partialInitiativeFile
+    } = initiativeFile;
+
     const timestampMs = Timestamp.fromISO(timestampIso);
+
     const initiative: Initiative = {
       ...partialInitiativeFile,
       id: initiativeFileId(directory, fileName),
       timestampMs,
+      champions: champions || [],
+      contributions: _lossyURLFromEdgeSpecJson(contributions),
+      dependencies: _lossyURLFromEdgeSpecJson(dependencies),
+      references: _lossyURLFromEdgeSpecJson(references),
     };
+
     initiatives.push(initiative);
   }
   return initiatives;
+}
+
+// TODO: this is a temporary function, which reverts an ?EdgeSpecJson to just
+// $ReadOnlyArray<URL>. It only exists to allow the `Initiative` type to add
+// support for EdgeSpec in a separate commit.
+export function _lossyURLFromEdgeSpecJson(
+  json?: EdgeSpecJson
+): $ReadOnlyArray<URL> {
+  return (json || {}).urls || [];
 }
 
 // Creates a reference map using `initiativeFileURL`.

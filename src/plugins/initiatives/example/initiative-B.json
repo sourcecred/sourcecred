@@ -1,7 +1,7 @@
 [
   {
     "type": "sourcecred/initiativeFile",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   {
     "title": "Initiative B",
@@ -12,8 +12,8 @@
     },
     "completed": false,
     "champions": ["http://foo.bar/B/champ"],
-    "contributions": ["http://foo.bar/B/contrib"],
-    "dependencies": ["http://foo.bar/B/dep"],
-    "references": ["http://foo.bar/B/ref"]
+    "contributions": {"urls": ["http://foo.bar/B/contrib"]},
+    "dependencies": {"urls": ["http://foo.bar/B/dep"]},
+    "references": {"urls": ["http://foo.bar/B/ref"]}
   }
 ]
