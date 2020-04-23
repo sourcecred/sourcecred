@@ -127,20 +127,32 @@ exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an
       \\"http://foo.bar/A/champ\\"
     ],
     \\"completed\\": true,
-    \\"contributions\\": [
-      \\"http://foo.bar/A/contrib\\"
-    ],
-    \\"dependencies\\": [
-      \\"http://foo.bar/A/dep\\"
-    ],
+    \\"contributions\\": {
+      \\"entries\\": [
+      ],
+      \\"urls\\": [
+        \\"http://foo.bar/A/contrib\\"
+      ]
+    },
+    \\"dependencies\\": {
+      \\"entries\\": [
+      ],
+      \\"urls\\": [
+        \\"http://foo.bar/A/dep\\"
+      ]
+    },
     \\"id\\": [
       \\"INITIATIVE_FILE\\",
       \\"http://example.com/initiatives\\",
       \\"initiative-A.json\\"
     ],
-    \\"references\\": [
-      \\"http://foo.bar/A/ref\\"
-    ],
+    \\"references\\": {
+      \\"entries\\": [
+      ],
+      \\"urls\\": [
+        \\"http://foo.bar/A/ref\\"
+      ]
+    },
     \\"timestampMs\\": 1578520917711,
     \\"title\\": \\"Initiative A\\",
     \\"weight\\": {
@@ -153,20 +165,32 @@ exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an
       \\"http://foo.bar/B/champ\\"
     ],
     \\"completed\\": false,
-    \\"contributions\\": [
-      \\"http://foo.bar/B/contrib\\"
-    ],
-    \\"dependencies\\": [
-      \\"http://foo.bar/B/dep\\"
-    ],
+    \\"contributions\\": {
+      \\"entries\\": [
+      ],
+      \\"urls\\": [
+        \\"http://foo.bar/B/contrib\\"
+      ]
+    },
+    \\"dependencies\\": {
+      \\"entries\\": [
+      ],
+      \\"urls\\": [
+        \\"http://foo.bar/B/dep\\"
+      ]
+    },
     \\"id\\": [
       \\"INITIATIVE_FILE\\",
       \\"http://example.com/initiatives\\",
       \\"initiative-B.json\\"
     ],
-    \\"references\\": [
-      \\"http://foo.bar/B/ref\\"
-    ],
+    \\"references\\": {
+      \\"entries\\": [
+      ],
+      \\"urls\\": [
+        \\"http://foo.bar/B/ref\\"
+      ]
+    },
     \\"timestampMs\\": 1578520917722,
     \\"title\\": \\"Initiative B\\",
     \\"weight\\": {
@@ -179,17 +203,56 @@ exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an
       \\"http://foo.bar/C/champ\\"
     ],
     \\"completed\\": false,
-    \\"contributions\\": [
-    ],
-    \\"dependencies\\": [
-    ],
+    \\"contributions\\": {
+      \\"entries\\": [
+        {
+          \\"contributors\\": [
+            \\"https://foo.bar/C/contrib-user\\"
+          ],
+          \\"key\\": \\"add-test-contrib\\",
+          \\"timestampMs\\": 1578520917733,
+          \\"title\\": \\"Add test contrib\\",
+          \\"weight\\": 10
+        }
+      ],
+      \\"urls\\": [
+      ]
+    },
+    \\"dependencies\\": {
+      \\"entries\\": [
+        {
+          \\"contributors\\": [
+            \\"https://foo.bar/C/dep-user\\"
+          ],
+          \\"key\\": \\"add-test-dependency\\",
+          \\"timestampMs\\": 1578002517700,
+          \\"title\\": \\"Add test dependency\\",
+          \\"weight\\": null
+        }
+      ],
+      \\"urls\\": [
+      ]
+    },
     \\"id\\": [
       \\"INITIATIVE_FILE\\",
       \\"http://example.com/initiatives\\",
       \\"initiative-C.json\\"
     ],
-    \\"references\\": [
-    ],
+    \\"references\\": {
+      \\"entries\\": [
+        {
+          \\"contributors\\": [
+            \\"https://foo.bar/C/ref-user\\"
+          ],
+          \\"key\\": \\"add-test-reference\\",
+          \\"timestampMs\\": 1578520917733,
+          \\"title\\": \\"Add test reference\\",
+          \\"weight\\": null
+        }
+      ],
+      \\"urls\\": [
+      ]
+    },
     \\"timestampMs\\": 1578520917733,
     \\"title\\": \\"Initiative C\\",
     \\"weight\\": {

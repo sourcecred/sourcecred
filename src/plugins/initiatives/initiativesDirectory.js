@@ -7,11 +7,11 @@ import {type URL} from "../../core/references";
 import {type NodeAddressT} from "../../core/graph";
 import * as Timestamp from "../../util/timestamp";
 import {compatReader} from "../../backend/compatIO";
+import {normalizeEdgeSpec} from "./edgeSpec";
 import {
   type ReferenceDetector,
   MappedReferenceDetector,
 } from "../../core/references";
-import {type EdgeSpecJson} from "./edgeSpec";
 import {
   type Initiative,
   type InitiativeRepository,
@@ -165,23 +165,14 @@ export function _convertToInitiatives(
       id: initiativeFileId(directory, fileName),
       timestampMs,
       champions: champions || [],
-      contributions: _lossyURLFromEdgeSpecJson(contributions),
-      dependencies: _lossyURLFromEdgeSpecJson(dependencies),
-      references: _lossyURLFromEdgeSpecJson(references),
+      contributions: normalizeEdgeSpec(contributions, timestampMs),
+      dependencies: normalizeEdgeSpec(dependencies, timestampMs),
+      references: normalizeEdgeSpec(references, timestampMs),
     };
 
     initiatives.push(initiative);
   }
   return initiatives;
-}
-
-// TODO: this is a temporary function, which reverts an ?EdgeSpecJson to just
-// $ReadOnlyArray<URL>. It only exists to allow the `Initiative` type to add
-// support for EdgeSpec in a separate commit.
-export function _lossyURLFromEdgeSpecJson(
-  json?: EdgeSpecJson
-): $ReadOnlyArray<URL> {
-  return (json || {}).urls || [];
 }
 
 // Creates a reference map using `initiativeFileURL`.
