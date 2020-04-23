@@ -593,7 +593,7 @@ export class Mirror {
           `
         )
         .pluck()
-        .all({timeEpochMillisThreshold: +since});
+        .all();
       const objects: $PropertyType<QueryPlan, "objects"> = db
         .prepare(
           dedent`\
