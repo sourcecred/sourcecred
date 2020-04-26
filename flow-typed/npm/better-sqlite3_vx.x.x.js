@@ -1,5 +1,5 @@
-// flow-typed signature: 946429b216273f6ed9345df0294cfd25
-// flow-typed version: <<STUB>>/better-sqlite3_v4.1.4/flow_v0.77.0
+// flow-typed signature: eb0227169323c50fa1a5b34a9f938e98
+// flow-typed version: <<STUB>>/better-sqlite3_v7.0.0/flow_v0.120.1
 
 declare class bettersqlite3$Database {
   +memory: boolean;
@@ -49,9 +49,11 @@ declare type bettersqlite3$Database$RegisterOptions = {
 // values. In the case that a user provides multiple binding
 // dictionaries, better-sqlite3 will fail fast with a TypeError.
 //
-// Also note that better-sqlite3 permits binding `Integer.IntLike` from
-// npm/integer, not just `number`, but we don't have those typedefs. For
-// now, `number` is a good approximation.
+// Also note that better-sqlite3 permits binding and returning `BigInt`s
+// rather than `number`s, but Flow doesn't support `BigInt`s. As long as
+// `defaultSafeIntegers` is not set and the user code never itself
+// provides `BigInt`s, using `number` alone is a good enough
+// approximation.
 declare type bettersqlite3$BoundValue = number | string | Buffer | null;
 declare type bettersqlite3$BindingDictionary = {
   +[string]: bettersqlite3$BoundValue
