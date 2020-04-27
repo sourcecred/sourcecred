@@ -7,15 +7,21 @@ Map {
       "http://foo.bar/A/champ",
     ],
     "completed": true,
-    "contributions": Array [
-      "http://foo.bar/A/contrib",
-    ],
-    "dependencies": Array [
-      "http://foo.bar/A/dep",
-    ],
-    "references": Array [
-      "http://foo.bar/A/ref",
-    ],
+    "contributions": Object {
+      "urls": Array [
+        "http://foo.bar/A/contrib",
+      ],
+    },
+    "dependencies": Object {
+      "urls": Array [
+        "http://foo.bar/A/dep",
+      ],
+    },
+    "references": Object {
+      "urls": Array [
+        "http://foo.bar/A/ref",
+      ],
+    },
     "timestampIso": "2020-01-08T22:01:57.711Z",
     "title": "Initiative A",
     "weight": Object {
@@ -28,20 +34,70 @@ Map {
       "http://foo.bar/B/champ",
     ],
     "completed": false,
-    "contributions": Array [
-      "http://foo.bar/B/contrib",
-    ],
-    "dependencies": Array [
-      "http://foo.bar/B/dep",
-    ],
-    "references": Array [
-      "http://foo.bar/B/ref",
-    ],
+    "contributions": Object {
+      "urls": Array [
+        "http://foo.bar/B/contrib",
+      ],
+    },
+    "dependencies": Object {
+      "urls": Array [
+        "http://foo.bar/B/dep",
+      ],
+    },
+    "references": Object {
+      "urls": Array [
+        "http://foo.bar/B/ref",
+      ],
+    },
     "timestampIso": "2020-01-08T22:01:57.722Z",
     "title": "Initiative B",
     "weight": Object {
       "complete": 69,
       "incomplete": 42,
+    },
+  },
+  "initiative-C.json" => Object {
+    "champions": Array [
+      "http://foo.bar/C/champ",
+    ],
+    "completed": false,
+    "contributions": Object {
+      "entries": Array [
+        Object {
+          "contributors": Array [
+            "https://foo.bar/C/contrib-user",
+          ],
+          "title": "Add test contrib",
+          "weight": 10,
+        },
+      ],
+    },
+    "dependencies": Object {
+      "entries": Array [
+        Object {
+          "contributors": Array [
+            "https://foo.bar/C/dep-user",
+          ],
+          "timestampIso": "2020-01-02T22:01:57.700Z",
+          "title": "Add test dependency",
+        },
+      ],
+    },
+    "references": Object {
+      "entries": Array [
+        Object {
+          "contributors": Array [
+            "https://foo.bar/C/ref-user",
+          ],
+          "title": "Add test reference",
+        },
+      ],
+    },
+    "timestampIso": "2020-01-08T22:01:57.733Z",
+    "title": "Initiative C",
+    "weight": Object {
+      "complete": 321,
+      "incomplete": 123,
     },
   },
 }
@@ -56,6 +112,10 @@ exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an
   [
     \\"http://example.com/initiatives/initiative-B.json\\",
     \\"N\\\\u0000sourcecred\\\\u0000initiatives\\\\u0000initiative\\\\u0000INITIATIVE_FILE\\\\u0000http://example.com/initiatives\\\\u0000initiative-B.json\\\\u0000\\"
+  ],
+  [
+    \\"http://example.com/initiatives/initiative-C.json\\",
+    \\"N\\\\u0000sourcecred\\\\u0000initiatives\\\\u0000initiative\\\\u0000INITIATIVE_FILE\\\\u0000http://example.com/initiatives\\\\u0000initiative-C.json\\\\u0000\\"
   ]
 ]"
 `;
@@ -112,6 +172,29 @@ exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an
     \\"weight\\": {
       \\"complete\\": 69,
       \\"incomplete\\": 42
+    }
+  },
+  {
+    \\"champions\\": [
+      \\"http://foo.bar/C/champ\\"
+    ],
+    \\"completed\\": false,
+    \\"contributions\\": [
+    ],
+    \\"dependencies\\": [
+    ],
+    \\"id\\": [
+      \\"INITIATIVE_FILE\\",
+      \\"http://example.com/initiatives\\",
+      \\"initiative-C.json\\"
+    ],
+    \\"references\\": [
+    ],
+    \\"timestampMs\\": 1578520917733,
+    \\"title\\": \\"Initiative C\\",
+    \\"weight\\": {
+      \\"complete\\": 321,
+      \\"incomplete\\": 123
     }
   }
 ]"
