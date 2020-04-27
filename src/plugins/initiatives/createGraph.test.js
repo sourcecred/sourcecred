@@ -8,6 +8,7 @@ import {
 } from "../../core/graph";
 import * as Weights from "../../core/weights";
 import type {ReferenceDetector, URL} from "../../core/references";
+import * as Timestamp from "../../util/timestamp";
 import type {Initiative, InitiativeRepository} from "./initiative";
 import {createId, addressFromId} from "./initiative";
 import {createWeightedGraph, initiativeWeight} from "./createGraph";
@@ -23,11 +24,11 @@ function _createInitiative(overrides?: $Shape<Initiative>): Initiative {
   return {
     id: createId("UNSET_SUBTYPE", "42"),
     title: "Unset test initiative",
-    timestampMs: 123,
+    timestampMs: Timestamp.fromNumber(123),
     completed: false,
-    dependencies: [],
-    references: [],
-    contributions: [],
+    contributions: {urls: [], entries: []},
+    dependencies: {urls: [], entries: []},
+    references: {urls: [], entries: []},
     champions: [],
     ...overrides,
   };
@@ -49,7 +50,7 @@ class MockInitiativeRepository implements InitiativeRepository {
     const initiative = _createInitiative({
       id: createId("TEST_SUBTYPE", String(num)),
       title: `Example Initiative ${num}`,
-      timestampMs: 400 + num,
+      timestampMs: Timestamp.fromNumber(400 + num),
       ...shape,
     });
 
@@ -236,7 +237,10 @@ describe("plugins/initiatives/createGraph", () => {
         // Given
         const {repo, refs} = example();
         repo.addInitiative({
-          dependencies: ["https://example.com/1"],
+          dependencies: {
+            urls: ["https://example.com/1"],
+            entries: [],
+          },
         });
 
         // When
@@ -252,7 +256,10 @@ describe("plugins/initiatives/createGraph", () => {
         // Given
         const {repo, refs} = example();
         repo.addInitiative({
-          references: ["https://example.com/2"],
+          references: {
+            urls: ["https://example.com/2"],
+            entries: [],
+          },
         });
 
         // When
@@ -268,7 +275,10 @@ describe("plugins/initiatives/createGraph", () => {
         // Given
         const {repo, refs} = example();
         repo.addInitiative({
-          contributions: ["https://example.com/3"],
+          contributions: {
+            urls: ["https://example.com/3"],
+            entries: [],
+          },
         });
 
         // When
@@ -303,7 +313,10 @@ describe("plugins/initiatives/createGraph", () => {
         const {repo, refs} = example();
         refs.addReference("https://example.com/1", exampleNodeAddress(1));
         repo.addInitiative({
-          dependencies: ["https://example.com/1", "https://example.com/99"],
+          dependencies: {
+            urls: ["https://example.com/1", "https://example.com/99"],
+            entries: [],
+          },
         });
 
         // When
@@ -334,7 +347,10 @@ describe("plugins/initiatives/createGraph", () => {
         const {repo, refs} = example();
         refs.addReference("https://example.com/2", exampleNodeAddress(2));
         repo.addInitiative({
-          references: ["https://example.com/2", "https://example.com/99"],
+          references: {
+            urls: ["https://example.com/2", "https://example.com/99"],
+            entries: [],
+          },
         });
 
         // When
@@ -365,7 +381,10 @@ describe("plugins/initiatives/createGraph", () => {
         const {repo, refs} = example();
         refs.addReference("https://example.com/3", exampleNodeAddress(3));
         repo.addInitiative({
-          contributions: ["https://example.com/3", "https://example.com/99"],
+          contributions: {
+            urls: ["https://example.com/3", "https://example.com/99"],
+            entries: [],
+          },
         });
 
         // When

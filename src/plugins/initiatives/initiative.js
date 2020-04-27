@@ -1,13 +1,14 @@
 // @flow
 
+import {type URL} from "../../core/references";
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import {type NodeWeight} from "../../core/weights";
+import {type TimestampMs} from "../../util/timestamp";
+import {type EdgeSpec} from "./edgeSpec";
 import {initiativeNodeType} from "./declaration";
 
-export type URL = string;
-
 // Composite ID, used as input for NodeAddressT.
-export opaque type InitiativeId = string[];
+export opaque type InitiativeId: string[] = string[];
 
 // Enforce that each ID has at least a sub-type and 1..n components.
 export function createId(
@@ -45,12 +46,12 @@ export type InitiativeWeight = {|
 export type Initiative = {|
   +id: InitiativeId,
   +title: string,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
   +weight?: InitiativeWeight,
   +completed: boolean,
-  +dependencies: $ReadOnlyArray<URL>,
-  +references: $ReadOnlyArray<URL>,
-  +contributions: $ReadOnlyArray<URL>,
+  +dependencies: EdgeSpec,
+  +references: EdgeSpec,
+  +contributions: EdgeSpec,
   +champions: $ReadOnlyArray<URL>,
 |};
 

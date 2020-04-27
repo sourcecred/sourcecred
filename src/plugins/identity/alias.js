@@ -4,6 +4,10 @@ import {type NodeAddressT} from "../../core/graph";
 import {githubOwnerPattern} from "../github/repoId";
 import {loginAddress as githubAddress} from "../github/nodes";
 import {userAddress as discourseAddress} from "../discourse/address";
+import {
+  identityAddress,
+  USERNAME_PATTERN as _VALID_IDENTITY_PATTERN,
+} from "./identity";
 
 /** An Alias is a string specification of an identity within another plugin.
  *
@@ -48,6 +52,13 @@ export function resolveAlias(
         throw new Error(`Invalid Discourse username: ${name}`);
       }
       return discourseAddress(discourseUrl, match[1]);
+    }
+    case "sourcecred": {
+      const match = name.match(_VALID_IDENTITY_PATTERN);
+      if (!match) {
+        throw new Error(`Invalid SourceCred identity: ${name}`);
+      }
+      return identityAddress(match[1]);
     }
     default:
       throw new Error(`Unknown type for alias: ${alias}`);
