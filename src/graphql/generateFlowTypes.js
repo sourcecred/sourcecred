@@ -129,9 +129,7 @@ export default function generateFlowTypes(
         const rhs =
           Object.keys(type.clauses).length === 0
             ? "empty"
-            : Object.keys(type.clauses)
-                .sort()
-                .join(" | ");
+            : Object.keys(type.clauses).sort().join(" | ");
         definitions.push(`export type ${typename} = ${rhs};`);
         break;
       }

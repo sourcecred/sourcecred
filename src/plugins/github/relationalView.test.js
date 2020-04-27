@@ -299,7 +299,7 @@ describe("plugins/github/relationalView", () => {
       }
       function commitChain(n: number): T.Commit[] {
         let head = wrapCommit(0, []);
-        let results = [head];
+        const results = [head];
         for (let i = 1; i < n; i++) {
           head = wrapCommit(i, [head]);
           results.push(head);
@@ -307,7 +307,7 @@ describe("plugins/github/relationalView", () => {
         return results;
       }
       const commits = commitChain(COMMIT_CHAIN_LENGTH);
-      let pullRequests: T.PullRequest[] = [];
+      const pullRequests: T.PullRequest[] = [];
       function pullRequest(
         prNumber: number,
         mergeCommit: T.Commit

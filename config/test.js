@@ -180,7 +180,7 @@ function makeTasks(
       deps: ["backend"],
     },
   ];
-  const tasks = (function() {
+  const tasks = (function () {
     switch (mode) {
       case "BASIC":
         return basicTasks;

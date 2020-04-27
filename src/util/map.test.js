@@ -1,6 +1,7 @@
 // @flow
 
 import * as MapUtil from "./map";
+import {mapToArray} from "./map";
 
 describe("util/map", () => {
   describe("toObject", () => {
@@ -119,16 +120,10 @@ describe("util/map", () => {
       input.set(3, "three");
       output.set(4, "four");
       expect(input).toEqual(
-        new Map()
-          .set(1, "one")
-          .set(2, "two")
-          .set(3, "three")
+        new Map().set(1, "one").set(2, "two").set(3, "three")
       );
       expect(output).toEqual(
-        new Map()
-          .set(1, "one")
-          .set(2, "two")
-          .set(4, "four")
+        new Map().set(1, "one").set(2, "two").set(4, "four")
       );
     });
     it("allows upcasting the key and value types of the result map", () => {
@@ -273,10 +268,7 @@ describe("util/map", () => {
       const b = new Map().set("b", 2);
       const c = new Map().set("c", 3);
       expect(MapUtil.merge([a, b, c])).toEqual(
-        new Map()
-          .set("a", 1)
-          .set("b", 2)
-          .set("c", 3)
+        new Map().set("a", 1).set("b", 2).set("c", 3)
       );
     });
     it("treats empty map as an identity", () => {
@@ -334,6 +326,45 @@ describe("util/map", () => {
       const map = new Map().set("foo", arr);
       const result = MapUtil.pushValue(map, "foo", 1);
       expect(result).toBe(arr);
+    });
+  });
+
+  describe("mapToArray", () => {
+    const fn = ([key, val]) => ({key, val});
+
+    it("works for an empty map", () => {
+      const map = new Map();
+
+      expect(mapToArray(map, fn)).toEqual([]);
+    });
+
+    it("works for simple use case", () => {
+      const map = new Map([
+        ["foo", 1],
+        ["bar", 2],
+      ]);
+
+      const expected = [
+        {
+          key: "foo",
+          val: 1,
+        },
+        {
+          key: "bar",
+          val: 2,
+        },
+      ];
+      expect(mapToArray(map, fn)).toEqual(expected);
+    });
+
+    it("should provide the index to the function", () => {
+      const map = new Map([
+        ["foo", 1],
+        ["bar", 99],
+      ]);
+
+      const expected = [0, 1];
+      expect(mapToArray(map, (_, i) => i)).toEqual(expected);
     });
   });
 });

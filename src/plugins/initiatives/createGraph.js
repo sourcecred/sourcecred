@@ -12,6 +12,7 @@ import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import type {NodeWeight} from "../../core/weights";
 import type {ReferenceDetector, URL} from "../../core/references";
+import type {EdgeSpec} from "./edgeSpec";
 import type {Initiative, InitiativeRepository} from "./initiative";
 import {addressFromId} from "./initiative";
 import {
@@ -20,7 +21,7 @@ import {
   contributesToEdgeType,
   championsEdgeType,
 } from "./declaration";
-import {initiativeFileURL} from "./initiativesDirectory";
+import {initiativeFileURL} from "./initiativeFile";
 
 function initiativeAddress(initiative: Initiative): NodeAddressT {
   return addressFromId(initiative.id);
@@ -90,9 +91,14 @@ export function createWeightedGraph(
 
     // Generic approach to adding edges when the reference detector has a hit.
     const edgeHandler = (
-      urls: $ReadOnlyArray<URL>,
+      edges: $ReadOnlyArray<URL> | EdgeSpec,
       createEdge: EdgeFactoryT
     ) => {
+      // TODO: this is a temporary implementation, which takes an EdgeSpec and
+      // just takes the $ReadOnlyArray<URL>. This is only done to allow support
+      // for graphing NodeEntries to be added in a separate commit.
+      const urls = Array.isArray(edges) ? edges : edges.urls;
+
       for (const url of urls) {
         const addr = refs.addressFromUrl(url);
         if (!addr) continue;

@@ -84,7 +84,7 @@ describe("explorer/legacy/pagerankTable/Table", () => {
         const {element} = await setup();
         findButton(element).simulate("click");
         findButton(element).simulate("click");
-        let button = findButton(element);
+        const button = findButton(element);
         expect(button.text()).toEqual("Show weight configuration");
         expect(element.find({"data-test-weight-config": true})).toHaveLength(0);
       });
@@ -94,10 +94,7 @@ describe("explorer/legacy/pagerankTable/Table", () => {
       it("with expected label text", async () => {
         const {element} = await setup();
         const label = element.find("label");
-        const filterText = label
-          .find("span")
-          .first()
-          .text();
+        const filterText = label.find("span").first().text();
         expect(filterText).toMatchSnapshot();
       });
       it("with expected option groups", async () => {

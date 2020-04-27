@@ -74,19 +74,13 @@ describe("core/trie", () => {
   });
 
   it("get isn't fazed by intermediary parts missing values", () => {
-    const x = new NodeTrie()
-      .add(fooBar, 2)
-      .add(fooBarZod, 3)
-      .add(empty, 0);
+    const x = new NodeTrie().add(fooBar, 2).add(fooBarZod, 3).add(empty, 0);
     // note there is no "foo" node
     expect(x.get(fooBarZod)).toEqual([0, 2, 3]);
   });
 
   it("getLast gets the last available value", () => {
-    const x = new NodeTrie()
-      .add(foo, 2)
-      .add(fooBar, 3)
-      .add(empty, 0);
+    const x = new NodeTrie().add(foo, 2).add(fooBar, 3).add(empty, 0);
     expect(x.getLast(fooBarZod)).toEqual(3);
   });
 
@@ -96,10 +90,7 @@ describe("core/trie", () => {
 
   it("overwriting a value is illegal", () => {
     expect(() =>
-      new NodeTrie()
-        .add(foo, 3)
-        .add(empty, 1)
-        .add(foo, 4)
+      new NodeTrie().add(foo, 3).add(empty, 1).add(foo, 4)
     ).toThrowError("overwrite");
   });
 

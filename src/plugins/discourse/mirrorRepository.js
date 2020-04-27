@@ -377,10 +377,7 @@ export class SqliteMirrorRepository
   }
 
   users(): $ReadOnlyArray<string> {
-    return this._db
-      .prepare("SELECT username FROM users")
-      .pluck()
-      .all();
+    return this._db.prepare("SELECT username FROM users").pluck().all();
   }
 
   findUsername(username: string): ?string {

@@ -161,3 +161,14 @@ export function pushValue<K, V>(map: Map<K, V[]>, key: K, value: V): V[] {
   arr.push(value);
   return arr;
 }
+
+/**
+ * Given a Map, transform its entries into an Array using a
+ * provided transformer function.
+ */
+export function mapToArray<K, V, R>(
+  map: Map<K, V>,
+  fn: (pair: [K, V], index: number) => R
+): R[] {
+  return Array.from(map.entries()).map(fn);
+}

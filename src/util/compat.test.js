@@ -116,7 +116,7 @@ describe("util/compat", () => {
       }
       fromJSON(json: any): OuterV1 {
         return fromCompat({type: "outer", version: v1}, json, {
-          [v1]: function(x) {
+          [v1]: function (x) {
             return new OuterV1(InnerV2.fromJSON(x.platypus));
           },
         });
@@ -137,10 +137,10 @@ describe("util/compat", () => {
       }
       static fromJSON(json: any): OuterV2 {
         return fromCompat({type: "outer", version: v2}, json, {
-          [v1]: function(x) {
+          [v1]: function (x) {
             return new OuterV2(InnerV2.fromJSON(x.platypus));
           },
-          [v2]: function(x) {
+          [v2]: function (x) {
             return new OuterV2(InnerV2.fromJSON(x.inner));
           },
         });

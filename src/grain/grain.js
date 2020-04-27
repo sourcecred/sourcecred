@@ -1,7 +1,5 @@
 // @flow
 
-/* global BigInt */
-
 /**
  * This module contains the types for tracking Grain, which is the native
  * project-specific, cred-linked token created in SourceCred instances. In
@@ -107,4 +105,49 @@ export function format(
     digits.splice(0, 0, "-");
   }
   return digits.join("") + suffix;
+}
+
+/**
+ * Multiply a grain amount by a floating point number.
+ *
+ * Use this method when you need to multiply a grain balance by a floating
+ * point number, e.g. a ratio.
+ *
+ * Note that this method is imprecise. It is not safe to assume, for example,
+ * that `multiply(g, 1/3) + multiply(g, 2/3) === g` due to loss of precision.
+ * However, the errors will be small in absolute terms (i.e. tiny compared to
+ * one full grain).
+ *
+ * See some messy analysis of the numerical errors here:
+ * https://observablehq.com/@decentralion/grain-arithmetic
+ */
+export function multiplyFloat(grain: Grain, num: number): Grain {
+  return BigInt(Math.floor(Number(grain) * num));
+}
+
+/**
+ * Approximately create a grain balance from a float.
+ *
+ * This method tries to convert the floating point `amt` into a grain
+ * balance. For example, `grain(1)` approximately equals `ONE`.
+ *
+ * Do not assume this will be precise! For example, `grain(0.1337)` results in
+ * `133700000000000016n`. This method is intended for test code.
+ *
+ * This is a shorthand for `multiplyFloat(ONE, amt)`.
+ */
+export function fromApproximateFloat(f: number): Grain {
+  return multiplyFloat(ONE, f);
+}
+
+/**
+ * Approximates the division of two grain values
+ *
+ * This naive implementation of grain division converts the given values
+ * to floats and performs simple floating point division.
+ *
+ * Do not assume this will be precise!
+ */
+export function toFloatRatio(numerator: Grain, denominator: Grain): number {
+  return Number(numerator) / Number(denominator);
 }

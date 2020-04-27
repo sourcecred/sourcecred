@@ -49,11 +49,7 @@ describe("core/algorithm/nodeDistribution", () => {
       );
     });
     it("can create a uniform distribution if all weights are equal", () => {
-      const map = new Map()
-        .set(a, 1)
-        .set(b, 1)
-        .set(c, 1)
-        .set(d, 1);
+      const map = new Map().set(a, 1).set(b, 1).set(c, 1).set(d, 1);
       expect(weightedDistribution(order(), map)).toEqual(
         new Float64Array([0.25, 0.25, 0.25, 0.25])
       );

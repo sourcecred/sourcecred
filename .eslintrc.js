@@ -21,6 +21,7 @@ module.exports = {
     "plugin:flowtype/recommended",
   ],
   rules: {
+    "prefer-const": ["warn"],
     camelcase: ["error", {properties: "never", allow: ["^_unused_.*"]}],
     eqeqeq: ["error", "always", {null: "ignore"}],
     "no-unused-vars": [
@@ -43,5 +44,8 @@ module.exports = {
     react: {
       version: "detect",
     },
+  },
+  globals: {
+    BigInt: "readonly",
   },
 };

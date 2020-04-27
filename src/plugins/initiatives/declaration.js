@@ -4,6 +4,7 @@ import deepFreeze from "deep-freeze";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {NodeType, EdgeType} from "../../analysis/types";
 import {NodeAddress, EdgeAddress} from "../../core/graph";
+import type {NodeEntryField} from "./nodeEntry";
 
 export const nodePrefix = NodeAddress.fromParts(["sourcecred", "initiatives"]);
 export const edgePrefix = EdgeAddress.fromParts(["sourcecred", "initiatives"]);
@@ -17,11 +18,42 @@ export const initiativeNodeType: NodeType = deepFreeze({
     "An initiative supernode, describing a scoped improvement to a project from proposal to completion.",
 });
 
+// Changes capitalization for the field for display purposes.
+export function _formatNodeEntryField(field: NodeEntryField): string {
+  return field[0].toUpperCase() + field.substring(1).toLowerCase();
+}
+
+function nodeEntryType(field: NodeEntryField): NodeType {
+  const displayField = _formatNodeEntryField(field);
+  return deepFreeze({
+    name: `${displayField} Entry`,
+    pluralName: `${displayField} Entries`,
+    prefix: NodeAddress.append(nodePrefix, String(field)),
+    defaultWeight: 1,
+    description:
+      `A ${displayField.toLowerCase()} entry node, to easily include` +
+      `contributions when other plugins don't add it to the graph.`,
+  });
+}
+
+// Note: we're exporting an object map with `NodeEntryField` as the key type.
+// This allows a generalized lookup of the NodeType in graphing logic.
+export const nodeEntryTypes: {[NodeEntryField]: NodeType} = deepFreeze({
+  CONTRIBUTION: nodeEntryType("CONTRIBUTION"),
+  DEPENDENCY: nodeEntryType("DEPENDENCY"),
+  REFERENCE: nodeEntryType("REFERENCE"),
+});
+
+// Keeping with convention of other declarations, also name each type.
+export const contributionEntryType = nodeEntryTypes.CONTRIBUTION;
+export const dependencyEntryType = nodeEntryTypes.DEPENDENCY;
+export const referenceEntryType = nodeEntryTypes.REFERENCE;
+
 /*
-	Note on the forward and backward naming convention.
-	It follows the core/graph.js documentation to use
-	a <subject> <verb> <object> format to figure out
-	the directionality.
+  Note on the forward and backward naming convention.
+  It follows the core/graph.js documentation to use
+  a <subject> <verb> <object> format to figure out
+  the directionality.
 */
 
 /**
@@ -70,6 +102,21 @@ export const contributesToEdgeType: EdgeType = deepFreeze({
 });
 
 /**
+ * A contributor (src) CONTRIBUTES TO (verb) an entry node (dst).
+ * Forward: a contributor towards the entry node has a small endorsement of that
+ * contribution. Though a high weight would risk contributors' own cred gets
+ * "lost to alpha".
+ * Backward: flows the value of the contribution to the contributors.
+ */
+export const contributesToEntryEdgeType: EdgeType = deepFreeze({
+  forwardName: "contributes to entry",
+  backwardName: "entry is contributed to by",
+  prefix: EdgeAddress.append(edgePrefix, "contributesToEntry"),
+  defaultWeight: {forwards: 1 / 16, backwards: 1},
+  description: "Connects a contributor to an entry node.",
+});
+
+/**
  * A user (src) CHAMPIONS (verb) an initiative (dst).
  * Meaning forward is the user claiming and committing they will champion an
  * initiative. And backward is the return of cred based on the completion and
@@ -92,12 +139,18 @@ export const declaration: PluginDeclaration = deepFreeze({
   name: "Initiatives",
   nodePrefix,
   edgePrefix,
-  nodeTypes: [initiativeNodeType],
+  nodeTypes: [
+    initiativeNodeType,
+    contributionEntryType,
+    dependencyEntryType,
+    referenceEntryType,
+  ],
   edgeTypes: [
     dependsOnEdgeType,
     referencesEdgeType,
     contributesToEdgeType,
     championsEdgeType,
+    contributesToEntryEdgeType,
   ],
   userTypes: [],
 });
