@@ -7,6 +7,7 @@ import stringify from "json-stable-stringify";
 import {MappedReferenceDetector} from "../../core/references";
 import * as Timestamp from "../../util/timestamp";
 import {type Initiative, createId, addressFromId} from "./initiative";
+import {normalizeEdgeSpec} from "./edgeSpec";
 import {
   type InitiativesDirectory,
   loadDirectory,
@@ -16,7 +17,6 @@ import {
   _validateUrl,
   _convertToInitiatives,
   _createReferenceMap,
-  _lossyURLFromEdgeSpecJson,
 } from "./initiativesDirectory";
 import {type InitiativeFile} from "./initiativeFile";
 
@@ -55,9 +55,9 @@ const exampleInitiative = (remoteUrl: string, fileName: string): Initiative => {
     id: createId("INITIATIVE_FILE", remoteUrl, fileName),
     timestampMs,
     champions: champions || [],
-    contributions: _lossyURLFromEdgeSpecJson(contributions),
-    dependencies: _lossyURLFromEdgeSpecJson(dependencies),
-    references: _lossyURLFromEdgeSpecJson(references),
+    contributions: normalizeEdgeSpec(contributions, timestampMs),
+    dependencies: normalizeEdgeSpec(dependencies, timestampMs),
+    references: normalizeEdgeSpec(references, timestampMs),
   };
 };
 
