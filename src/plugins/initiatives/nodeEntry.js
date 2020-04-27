@@ -2,8 +2,11 @@
 
 import {type URL} from "../../core/references";
 import {type NodeWeight} from "../../core/weights";
+import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import {type TimestampMs, type TimestampISO} from "../../util/timestamp";
 import * as Timestamp from "../../util/timestamp";
+import {type InitiativeId} from "./initiative";
+import {nodeEntryTypes} from "./declaration";
 
 /**
  * Represents an "inline contribution" node. They're called entries and named
@@ -46,6 +49,14 @@ export type NodeEntryJson = $Shape<{
   // Defaults to null.
   +weight: NodeWeight | null,
 }>;
+
+export function addressForNodeEntry(
+  field: NodeEntryField,
+  id: InitiativeId,
+  key: string
+): NodeAddressT {
+  return NodeAddress.append(nodeEntryTypes[field].prefix, ...id, key);
+}
 
 /**
  * Takes a NodeEntryJson and normalizes it to a NodeEntry.
