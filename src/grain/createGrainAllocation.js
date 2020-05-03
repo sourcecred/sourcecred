@@ -4,24 +4,18 @@
  * In SourceCred, projects regularly distribute Grain to contributors based on
  * their Cred scores. This is called a "Distribution".
  *
- * This module contains the logic for calculating distribution amounts for
- * contributors. A distribution contains "receipts" showing how much Grain each
- * contributor will receive, the timestamp of the distribution in question, and the
- * "strategy" used to distribute grain.
+ * This module contains the logic for calculating allocation amounts for
+ * contributors. An allocation contains "receipts" showing how much Grain each
+ * contributor will receive in a distribution, and the "strategy"
+ * used to allocate grain.
  *
  * Currently we support two strategies:
- * - IMMEDIATE, which distributes a fixed budget of grain based on the cred scores
+ * - IMMEDIATE, which allocates a fixed budget of grain based on the cred scores
  * in the most recent completed time interval
- * - BALANCED, which distributes a fixed budget of grain based on cred scores
- * across
- * all time, prioritizing paying people who were under-paid historically (i.e.
- * their lifetime earnings are lower than we would expect given their current
- * cred score)
- *
- * In all cases, the timestamp for the distribution is used to determine which cred
- * scores are in scope. For example, if you create a immediate distribution with a
- * timestamp in the past, it will reward people with cred in the past time
- * period, not the current one.
+ * - BALANCED, which allocates a fixed budget of grain based on cred scores
+ * across all time, prioritizing paying people who were under-paid historically
+ * (i.e. their lifetime earnings are lower than we would expect given their
+ * current cred score)
  */
 import {sum} from "d3-array";
 import {mapToArray} from "../util/map";
@@ -35,9 +29,9 @@ import {
   DECIMAL_PRECISION,
 } from "./grain";
 
-export const GRAIN_DISTRIBUTION_VERSION_1 = 1;
+export const GRAIN_ALLOCATION_VERSION_1 = 1;
 
-export type DistributionStrategy = ImmediateV1 | BalancedV1;
+export type AllocationStrategy = ImmediateV1 | BalancedV1;
 
 export type ImmediateV1 = {|
   +type: "IMMEDIATE",
@@ -56,11 +50,9 @@ export type GrainReceipt = {|
   +amount: Grain,
 |};
 
-export type GrainDistributionV1 = {|
-  +type: "GRAIN_DISTRIBUTION",
-  +timestampMs: number,
+export type GrainAllocationV1 = {|
   +version: number,
-  +strategy: DistributionStrategy,
+  +strategy: AllocationStrategy,
   +receipts: $ReadOnlyArray<GrainReceipt>,
 |};
 
@@ -72,30 +64,25 @@ export type CredTimeSlice = {|
 export type CredHistory = $ReadOnlyArray<CredTimeSlice>;
 
 /**
- * Compute a full Distribution given:
+ * Compute a full Allocation given:
  * - the strategy we're using
  * - the full cred history for all users
- * - the lifetime earnings of all users
- * - the timestamp for the distribution
+ * - a Map of the total lifetime grain that
+ *   has been distributed to each user
  */
-export function createGrainDistribution(
-  strategy: DistributionStrategy,
+export function createGrainAllocation(
+  strategy: AllocationStrategy,
   credHistory: CredHistory,
-  lifetimeEarningsMap: Map<NodeAddressT, Grain>,
-  timestampMs: number
-): GrainDistributionV1 {
-  const timeFilteredCredHistory = credHistory.filter(
-    (s) => s.intervalEndMs <= timestampMs
-  );
-
+  lifetimeEarningsMap: Map<NodeAddressT, Grain>
+): GrainAllocationV1 {
   const computeReceipts = (): $ReadOnlyArray<GrainReceipt> => {
     switch (strategy.type) {
       case "IMMEDIATE":
-        return computeImmediateReceipts(strategy, timeFilteredCredHistory);
+        return computeImmediateReceipts(strategy, credHistory);
       case "BALANCED":
         return computeBalancedReceipts(
           strategy,
-          timeFilteredCredHistory,
+          credHistory,
           lifetimeEarningsMap
         );
       default:
@@ -104,11 +91,9 @@ export function createGrainDistribution(
   };
 
   return {
-    type: "GRAIN_DISTRIBUTION",
-    version: GRAIN_DISTRIBUTION_VERSION_1,
+    version: GRAIN_ALLOCATION_VERSION_1,
     strategy,
     receipts: computeReceipts(),
-    timestampMs,
   };
 }
 
@@ -121,7 +106,7 @@ function computeImmediateReceipts(
   credHistory: CredHistory
 ): $ReadOnlyArray<GrainReceipt> {
   if (version !== 1) {
-    throw new Error(`Unsupported IMMEDIATE strategy: ${version}`);
+    throw new Error(`Unsupported IMMEDIATE version: ${version}`);
   }
 
   if (budget < ZERO) {
@@ -162,15 +147,15 @@ function computeImmediateReceipts(
 }
 
 /**
- * Distribute a fixed budget of Grain to the users who were "most underpaid".
+ * Allocate a fixed budget of Grain to the users who were "most underpaid".
  *
- * We consider a user underpaid if they have recieved a smaller proportion of
+ * We consider a user underpaid if they have received a smaller proportion of
  * past earnings than their share of score. They are balanced paid if their
  * proportion of earnings is equal to their score share, and they are overpaid
  * if their proportion of earnings is higher than their share of the score.
  *
  * We start by imagining a hypothetical world, where the entire grain supply of
- * the project (including this distribution) were distributed according to the
+ * the project (including this allocation) was allocated according to the
  * current scores. Based on this, we can calculate the "balanced" lifetime earnings
  * for each participant. Usually, some will be "underpaid" (they received less
  * than this amount) and others are "overpaid".
@@ -179,10 +164,10 @@ function computeImmediateReceipts(
  * underpayment".
  *
  * Now that we've calculated each actor's underpayment, and the total
- * underpayment, we divide the distribution's grain budget across users in
+ * underpayment, we divide the allocation's grain budget across users in
  * proportion to their underpayment.
  *
- * You should use this distribution when you want to divide a fixed budget of grain
+ * You should use this allocation when you want to divide a fixed budget of grain
  * across participants in a way that aligns long-term payment with total cred
  * scores.
  */
@@ -192,7 +177,7 @@ function computeBalancedReceipts(
   lifetimeEarningsMap: Map<NodeAddressT, Grain>
 ): $ReadOnlyArray<GrainReceipt> {
   if (version !== 1) {
-    throw new Error(`Unsupported BALANCED strategy: ${version}`);
+    throw new Error(`Unsupported BALANCED version: ${version}`);
   }
 
   if (budget < ZERO) {
