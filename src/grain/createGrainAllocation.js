@@ -36,13 +36,11 @@ export type AllocationStrategy = ImmediateV1 | BalancedV1;
 export type ImmediateV1 = {|
   +type: "IMMEDIATE",
   +version: number,
-  +budget: Grain,
 |};
 
 export type BalancedV1 = {|
   +type: "BALANCED",
   +version: number,
-  +budget: Grain,
 |};
 
 export type GrainReceipt = {|
@@ -53,6 +51,7 @@ export type GrainReceipt = {|
 export type GrainAllocationV1 = {|
   +version: number,
   +strategy: AllocationStrategy,
+  +budget: Grain,
   +receipts: $ReadOnlyArray<GrainReceipt>,
 |};
 
@@ -66,22 +65,29 @@ export type CredHistory = $ReadOnlyArray<CredTimeSlice>;
 /**
  * Compute a full Allocation given:
  * - the strategy we're using
+ * - the amount of Grain to allocate
  * - the full cred history for all users
  * - a Map of the total lifetime grain that
  *   has been distributed to each user
  */
 export function createGrainAllocation(
   strategy: AllocationStrategy,
+  budget: Grain,
   credHistory: CredHistory,
   lifetimeEarningsMap: Map<NodeAddressT, Grain>
 ): GrainAllocationV1 {
+  if (budget < ZERO) {
+    throw new Error(`invalid budget: ${String(budget)}`);
+  }
+
   const computeReceipts = (): $ReadOnlyArray<GrainReceipt> => {
     switch (strategy.type) {
       case "IMMEDIATE":
-        return computeImmediateReceipts(strategy, credHistory);
+        return computeImmediateReceipts(strategy, budget, credHistory);
       case "BALANCED":
         return computeBalancedReceipts(
           strategy,
+          budget,
           credHistory,
           lifetimeEarningsMap
         );
@@ -93,6 +99,7 @@ export function createGrainAllocation(
   return {
     version: GRAIN_ALLOCATION_VERSION_1,
     strategy,
+    budget,
     receipts: computeReceipts(),
   };
 }
@@ -102,18 +109,15 @@ export function createGrainAllocation(
  * the most recent time interval
  */
 function computeImmediateReceipts(
-  {budget, version}: ImmediateV1,
+  {version}: ImmediateV1,
+  budget: Grain,
   credHistory: CredHistory
 ): $ReadOnlyArray<GrainReceipt> {
   if (version !== 1) {
     throw new Error(`Unsupported IMMEDIATE version: ${version}`);
   }
 
-  if (budget < ZERO) {
-    throw new Error(`invalid budget: ${String(budget)}`);
-  }
-
-  if (budget === ZERO || !credHistory.length) {
+  if (budget <= ZERO || !credHistory.length) {
     return [];
   }
 
@@ -172,7 +176,8 @@ function computeImmediateReceipts(
  * scores.
  */
 function computeBalancedReceipts(
-  {budget, version}: BalancedV1,
+  {version}: BalancedV1,
+  budget: Grain,
   credHistory: CredHistory,
   lifetimeEarningsMap: Map<NodeAddressT, Grain>
 ): $ReadOnlyArray<GrainReceipt> {
@@ -180,11 +185,7 @@ function computeBalancedReceipts(
     throw new Error(`Unsupported BALANCED version: ${version}`);
   }
 
-  if (budget < ZERO) {
-    throw new Error(`invalid budget: ${String(budget)}`);
-  }
-
-  if (budget === ZERO || !credHistory.length) {
+  if (budget <= ZERO || !credHistory.length) {
     return [];
   }
 

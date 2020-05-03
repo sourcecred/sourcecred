@@ -61,13 +61,10 @@ describe("src/grain/createGrainAllocation", () => {
       amount: fmt(amount),
     }));
   }
-  function safeStrategy(strat: AllocationStrategy) {
-    return {...strat, budget: fmt(strat.budget)};
-  }
   function safeAllocation(allocation: GrainAllocationV1) {
     return {
       ...allocation,
-      strategy: safeStrategy(allocation.strategy),
+      budget: fmt(allocation.budget),
       receipts: safeReceipts(allocation.receipts),
     };
   }
@@ -76,42 +73,43 @@ describe("src/grain/createGrainAllocation", () => {
   }
 
   describe("immediateAllocation", () => {
+    const BUDGET = ONE;
     const strategy: ImmediateV1 = deepFreeze({
       type: "IMMEDIATE",
-      budget: ONE,
       version: 1,
     });
 
     describe("it should return an empty createGrainAllocation when", () => {
       const emptyAllocation = deepFreeze({
         version: GRAIN_ALLOCATION_VERSION_1,
-        receipts: [],
         strategy,
+        budget: BUDGET,
+        receipts: [],
       });
 
       it("the budget is zero", () => {
-        const zeroBudgetStrategy = {...strategy, budget: ZERO};
-
         const actual = createGrainAllocation(
-          zeroBudgetStrategy,
+          strategy,
+          ZERO,
           credHistory,
           new Map()
         );
 
         expectAllocationsEqual(actual, {
           ...emptyAllocation,
-          strategy: zeroBudgetStrategy,
+          budget: ZERO,
         });
       });
 
       it("there are no cred scores at all", () => {
-        const actual = createGrainAllocation(strategy, [], new Map());
+        const actual = createGrainAllocation(strategy, BUDGET, [], new Map());
         expectAllocationsEqual(actual, emptyAllocation);
       });
 
       it("all the cred sums to 0", () => {
         const actual = createGrainAllocation(
           strategy,
+          BUDGET,
           [
             {
               intervalEndMs: 500,
@@ -130,11 +128,12 @@ describe("src/grain/createGrainAllocation", () => {
 
     const createImmediateAllocation = (
       receipts: $ReadOnlyArray<GrainReceipt>
-    ) => {
+    ): GrainAllocationV1 => {
       return {
         version: GRAIN_ALLOCATION_VERSION_1,
-        receipts,
         strategy,
+        budget: BUDGET,
+        receipts,
       };
     };
 
@@ -144,8 +143,13 @@ describe("src/grain/createGrainAllocation", () => {
         version: 2,
       };
       expect(() =>
-        createGrainAllocation(unsupportedStrategy, credHistory, new Map())
-      ).toThrowError(`Unsupported IMMEDIATE strategy: 2`);
+        createGrainAllocation(
+          unsupportedStrategy,
+          BUDGET,
+          credHistory,
+          new Map()
+        )
+      ).toThrowError(`Unsupported IMMEDIATE version: 2`);
     });
 
     it("throws an error if given an unsupported strategy and an empty credHistory", () => {
@@ -154,13 +158,14 @@ describe("src/grain/createGrainAllocation", () => {
         version: 2,
       };
       expect(() =>
-        createGrainAllocation(unsupportedStrategy, [], new Map())
-      ).toThrowError(`Unsupported IMMEDIATE strategy: 2`);
+        createGrainAllocation(unsupportedStrategy, BUDGET, [], new Map())
+      ).toThrowError(`Unsupported IMMEDIATE version: 2`);
     });
 
     it("handles an interval with even cred distribution", () => {
       const result = createGrainAllocation(
         strategy,
+        BUDGET,
         [evenInterval],
         new Map()
       );
@@ -170,14 +175,13 @@ describe("src/grain/createGrainAllocation", () => {
         {address: foo, amount: HALF},
         {address: bar, amount: HALF},
       ];
-      const expectedAllocation = createImmediateAllocation(
-        expectedReceipts
-      );
+      const expectedAllocation = createImmediateAllocation(expectedReceipts);
       expectAllocationsEqual(result, expectedAllocation);
     });
     it("handles an interval with un-even cred distribution", () => {
       const result = createGrainAllocation(
         strategy,
+        BUDGET,
         [unevenInterval],
         new Map()
       );
@@ -188,36 +192,38 @@ describe("src/grain/createGrainAllocation", () => {
         {address: foo, amount: NINE_TENTHS},
         {address: bar, amount: ONE_TENTH},
       ];
-      const expectedAllocation = createImmediateAllocation(
-        expectedReceipts
-      );
+      const expectedAllocation = createImmediateAllocation(expectedReceipts);
       expectAllocationsEqual(result, expectedAllocation);
     });
     it("handles an interval with one cred recipient", () => {
-      const result = createGrainAllocation(strategy, [singlePersonInterval], new Map());
-      const expectedReceipts = [{address: bar, amount: ONE}];
-      const expectedAllocation = createImmediateAllocation(
-        expectedReceipts
+      const result = createGrainAllocation(
+        strategy,
+        BUDGET,
+        [singlePersonInterval],
+        new Map()
       );
+      const expectedReceipts = [{address: bar, amount: BUDGET}];
+      const expectedAllocation = createImmediateAllocation(expectedReceipts);
       expectAllocationsEqual(result, expectedAllocation);
     });
   });
 
   describe("balancedAllocation", () => {
-    const strategy = deepFreeze({
+    const BUDGET = fromApproximateFloat(14);
+    const strategy: BalancedV1 = deepFreeze({
       type: "BALANCED",
-      budget: fromApproximateFloat(14),
       version: 1,
     });
 
     const createBalancedAllocation = (
       receipts: $ReadOnlyArray<GrainReceipt>,
-      strategy: BalancedV1
+      budget: Grain
     ) => {
       return {
         version: GRAIN_ALLOCATION_VERSION_1,
-        receipts,
         strategy,
+        budget,
+        receipts,
       };
     };
 
@@ -225,33 +231,34 @@ describe("src/grain/createGrainAllocation", () => {
       const emptyAllocation = deepFreeze({
         version: GRAIN_ALLOCATION_VERSION_1,
         receipts: [],
+        budget: BUDGET,
         strategy,
       });
 
       it("the budget is zero", () => {
-        const zeroBudgetStrategy = {...strategy, budget: ZERO};
-
         const actual = createGrainAllocation(
-          zeroBudgetStrategy,
+          strategy,
+          ZERO,
           credHistory,
           new Map()
         );
 
         expectAllocationsEqual(actual, {
           ...emptyAllocation,
-          strategy: zeroBudgetStrategy,
+          budget: ZERO,
         });
       });
 
       it("there are no cred scores at all", () => {
-        const actual = createGrainAllocation(strategy, [], new Map());
+        const actual = createGrainAllocation(strategy, BUDGET, [], new Map());
 
         expectAllocationsEqual(actual, emptyAllocation);
       });
-      
+
       it("all the cred sums to 0", () => {
         const actual = createGrainAllocation(
           strategy,
+          BUDGET,
           [
             {
               intervalEndMs: 500,
@@ -274,8 +281,13 @@ describe("src/grain/createGrainAllocation", () => {
         version: 2,
       };
       expect(() =>
-        createGrainAllocation(unsupportedStrategy, credHistory, new Map())
-      ).toThrowError(`Unsupported BALANCED strategy: 2`);
+        createGrainAllocation(
+          unsupportedStrategy,
+          BUDGET,
+          credHistory,
+          new Map()
+        )
+      ).toThrowError(`Unsupported BALANCED version: 2`);
     });
 
     it("should only pay Foo if Foo is sufficiently underpaid", () => {
@@ -288,10 +300,11 @@ describe("src/grain/createGrainAllocation", () => {
       ];
       const expectedAllocation = createBalancedAllocation(
         expectedReceipts,
-        strategy
+        BUDGET
       );
       const actual = createGrainAllocation(
         strategy,
+        BUDGET,
         credHistory,
         lifetimeEarnings
       );
@@ -310,11 +323,12 @@ describe("src/grain/createGrainAllocation", () => {
 
       const expectedAllocation = createBalancedAllocation(
         expectedReceipts,
-        strategy
+        BUDGET
       );
 
       const actual = createGrainAllocation(
         strategy,
+        BUDGET,
         credHistory,
         lifetimeEarnings
       );
@@ -327,7 +341,7 @@ describe("src/grain/createGrainAllocation", () => {
         [bar, fromApproximateFloat(2)],
       ]);
 
-      const strategy15 = {...strategy, budget: fromApproximateFloat(15)};
+      const BUDGET15 = fromApproximateFloat(15);
 
       const expectedReceipts = [
         {address: foo, amount: fromApproximateFloat(11)},
@@ -336,11 +350,12 @@ describe("src/grain/createGrainAllocation", () => {
 
       const expectedAllocation = createBalancedAllocation(
         expectedReceipts,
-        strategy15
+        BUDGET15
       );
 
       const actual = createGrainAllocation(
-        strategy15,
+        strategy,
+        BUDGET15,
         credHistory,
         lifetimeEarnings
       );
@@ -353,15 +368,16 @@ describe("src/grain/createGrainAllocation", () => {
       const expectedReceipts = [
         {address: bar, amount: fromApproximateFloat(2)},
       ];
-      const strategy2 = {...strategy, budget: fromApproximateFloat(2)};
+      const BUDGET2 = fromApproximateFloat(2);
 
       const expectedAllocation = createBalancedAllocation(
         expectedReceipts,
-        strategy2
+        BUDGET2
       );
 
       const actual = createGrainAllocation(
-        strategy2,
+        strategy,
+        BUDGET2,
         credHistory,
         lifetimeEarnings
       );
@@ -379,11 +395,12 @@ describe("src/grain/createGrainAllocation", () => {
 
       const expectedAllocation = createBalancedAllocation(
         expectedReceipts,
-        strategy
+        BUDGET
       );
 
       const actual = createGrainAllocation(
         strategy,
+        BUDGET,
         credHistory,
         lifetimeEarnings
       );
