@@ -1,68 +1,73 @@
 // @flow
 
-import {format, ONE, DECIMAL_PRECISION, ZERO} from "./grain";
+import {
+  format,
+  ONE,
+  DECIMAL_PRECISION,
+  ZERO,
+  fromApproximateFloat,
+  multiplyFloat,
+  toFloatRatio,
+} from "./grain";
 
 describe("src/grain/grain", () => {
   describe("format", () => {
     // $ExpectFlowError
-    const pointOne = ONE / 10n;
-    // $ExpectFlowError
-    const onePointFive = pointOne * 15n;
-    // $ExpectFlowError
     const almostOne = ONE - 1n;
-    // $ExpectFlowError
-    const fortyTwo = ONE * 42n;
-    // $ExpectFlowError
-    const negative = -1n;
-    // $ExpectFlowError
-    const leet = ONE * 1337n;
-    // $ExpectFlowError
-    const leetAndSpecial = leet * 1000n + fortyTwo + fortyTwo / 100n;
 
     it("correctly rounds to smallest integer when decimals==0", () => {
       expect(format(ZERO)).toEqual("0g");
-      expect(format(pointOne)).toEqual("0g");
+      expect(format(fromApproximateFloat(0.1))).toEqual("0g");
       expect(format(almostOne)).toEqual("0g");
       expect(format(ONE)).toEqual("1g");
-      expect(format(onePointFive)).toEqual("1g");
-      expect(format(fortyTwo)).toEqual("42g");
+      expect(format(fromApproximateFloat(1.5))).toEqual("1g");
+      expect(format(fromApproximateFloat(42))).toEqual("42g");
     });
     it("correctly adds comma formatting for large numbers", () => {
-      expect(format(leet)).toEqual("1,337g");
-      expect(format(leet, 1)).toEqual("1,337.0g");
-      expect(format(leet + pointOne)).toEqual("1,337g");
-      expect(format(leet + pointOne, 1)).toEqual("1,337.1g");
-      expect(format(leetAndSpecial, 0)).toEqual("1,337,042g");
-      expect(format(leetAndSpecial, 2)).toEqual("1,337,042.42g");
+      expect(format(fromApproximateFloat(1337))).toEqual("1,337g");
+      expect(format(fromApproximateFloat(1337), 1)).toEqual("1,337.0g");
+      expect(format(fromApproximateFloat(1337.11))).toEqual("1,337g");
+      expect(format(fromApproximateFloat(1337.11), 1)).toEqual("1,337.1g");
+      expect(format(fromApproximateFloat(1337042.42), 0)).toEqual("1,337,042g");
+      expect(format(fromApproximateFloat(1337042.42), 2)).toEqual(
+        "1,337,042.42g"
+      );
     });
     it("correctly handles negative numbers", () => {
-      expect(format(negative * pointOne)).toEqual("-0g");
-      expect(format(negative * onePointFive)).toEqual("-1g");
-      expect(format(negative * fortyTwo)).toEqual("-42g");
-      expect(format(negative * onePointFive, 1)).toEqual("-1.5g");
-      expect(format(negative * onePointFive, 1)).toEqual("-1.5g");
-      expect(format(negative * leetAndSpecial, 0)).toEqual("-1,337,042g");
-      expect(format(negative * leetAndSpecial, 2)).toEqual("-1,337,042.42g");
+      expect(format(fromApproximateFloat(-0.1))).toEqual("-0g");
+      expect(format(fromApproximateFloat(-1.5))).toEqual("-1g");
+      expect(format(fromApproximateFloat(-42))).toEqual("-42g");
+      expect(format(fromApproximateFloat(-1.5), 1)).toEqual("-1.5g");
+      expect(format(fromApproximateFloat(-1.5), 1)).toEqual("-1.5g");
+      expect(format(fromApproximateFloat(-1337042.42), 0)).toEqual(
+        "-1,337,042g"
+      );
+      expect(format(fromApproximateFloat(-1337042.42), 2)).toEqual(
+        "-1,337,042.42g"
+      );
     });
     it("handles full precision", () => {
       expect(format(ZERO, DECIMAL_PRECISION)).toEqual("0.000000000000000000g");
       expect(format(ONE, DECIMAL_PRECISION)).toEqual("1.000000000000000000g");
-      expect(format(pointOne, DECIMAL_PRECISION)).toEqual(
+      expect(format(fromApproximateFloat(0.1), DECIMAL_PRECISION)).toEqual(
         "0.100000000000000000g"
       );
       // $ExpectFlowError
       expect(format(-12345n, DECIMAL_PRECISION)).toEqual(
         "-0.000000000000012345g"
       );
-      expect(format(leetAndSpecial, DECIMAL_PRECISION)).toEqual(
+      // $ExpectFlowError
+      expect(format((ONE / 100n) * 133704242n, DECIMAL_PRECISION)).toEqual(
         "1,337,042.420000000000000000g"
       );
     });
     it("supports alternative suffixes", () => {
-      expect(format(onePointFive, 0, "SEEDS")).toEqual("1SEEDS");
-      expect(format(fortyTwo, 0, "SEEDS")).toEqual("42SEEDS");
-      expect(format(negative * onePointFive, 1, "SEEDS")).toEqual("-1.5SEEDS");
-      expect(format(negative * leetAndSpecial, 0, "SEEDS")).toEqual(
+      expect(format(fromApproximateFloat(1.5), 0, "SEEDS")).toEqual("1SEEDS");
+      expect(format(fromApproximateFloat(42), 0, "SEEDS")).toEqual("42SEEDS");
+      expect(format(fromApproximateFloat(-1.5), 1, "SEEDS")).toEqual(
+        "-1.5SEEDS"
+      );
+      expect(format(fromApproximateFloat(-1337042.42), 0, "SEEDS")).toEqual(
         "-1,337,042SEEDS"
       );
     });
@@ -79,6 +84,66 @@ describe("src/grain/grain", () => {
       for (const bad of badValues) {
         expect(() => format(ONE, bad)).toThrowError("must be integer in range");
       }
+    });
+  });
+
+  describe("multiplyFloat", () => {
+    it("behaves reasonably for tiny grain values", () => {
+      // $ExpectFlowError
+      expect(multiplyFloat(1n, 5)).toEqual(5n);
+    });
+    it("behaves reasonably for larger grain values", () => {
+      // $ExpectFlowError
+      expect(multiplyFloat(ONE, 2)).toEqual(2n * ONE);
+    });
+    it("has small error on large grain values", () => {
+      // To compare with arbitrary precision results, see:
+      // https://observablehq.com/@decentralion/grain-arithmetic
+
+      // Within 1 attoGrain of "true" value
+      // $ExpectFlowError
+      expect(multiplyFloat(ONE, 1 / 1337)).toEqual(747943156320119n);
+
+      // Within 300 attoGrain of "true" value
+      // $ExpectFlowError
+      expect(multiplyFloat(ONE, Math.PI)).toEqual(3141592653589793280n);
+    });
+  });
+  describe("fromApproximateFloat", () => {
+    it("fromApproximateFloat(1) === ONE", () => {
+      expect(fromApproximateFloat(1)).toEqual(ONE);
+    });
+    it("fromApproximateFloat(0.1) === ONE / 10", () => {
+      // $ExpectFlowError
+      expect(fromApproximateFloat(0.1)).toEqual(ONE / 10n);
+    });
+  });
+
+  describe("toFloatRatio", () => {
+    it("handles a one-to-one ratio", () => {
+      expect(toFloatRatio(ONE, ONE)).toEqual(1);
+    });
+    it("handles a larger numerator", () => {
+      // $ExpectFlowError
+      expect(toFloatRatio(ONE * 2n, ONE)).toEqual(2);
+    });
+    it("handles fractional numbers", () => {
+      // $ExpectFlowError
+      expect(toFloatRatio(ONE * 5n, ONE * 2n)).toEqual(2.5);
+    });
+    it("calculates repeating decimal ratios", () => {
+      // $ExpectFlowError
+      expect(toFloatRatio(ONE * 5n, ONE * 3n)).toEqual(5 / 3);
+    });
+    it("approximates correctly when Grain values are not exactly equal", () => {
+      // $ExpectFlowError
+      const almostOne = ONE - 1n;
+      expect(toFloatRatio(ONE, almostOne)).toEqual(1);
+    });
+    it("handles irrational numbers", () => {
+      const bigPi = multiplyFloat(ONE, Math.PI);
+      // $ExpectFlowError
+      expect(toFloatRatio(bigPi, ONE * 2n)).toEqual(Math.PI / 2);
     });
   });
 });

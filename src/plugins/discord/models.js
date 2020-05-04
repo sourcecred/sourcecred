@@ -9,7 +9,6 @@ export type BotToken = string;
 /**
  * Discord Channels can be of various types, defined below.
  * See: https://discordapp.com/developers/docs/resources/channel#channel-object-channel-types
- *
  */
 export type ChannelType =
   | "GUILD_TEXT"
@@ -24,7 +23,6 @@ export type ChannelType =
  * The Discord server returns an Id field of type number to represent
  * the type of Channel. Here we convert that to a text representation,
  * also based on: https://discordapp.com/developers/docs/resources/channel#channel-object-channel-types
- *
  */
 export function channelTypeFromId(id: number): ChannelType {
   switch (id) {
@@ -99,6 +97,17 @@ export function emojiToRef({id, name}: Emoji): EmojiRef {
 
   // Custom emoji.
   return `${name}:${id}`;
+}
+
+/**
+ * Returns an Emoji object based on a string reference in the form:
+ * `${name}:${id}`
+ */
+export function refToEmoji(ref: EmojiRef): Emoji {
+  // TODO: Test that ref is in correct form
+  const [name, id] = ref.split(":");
+  if (!id) return {id: null, name};
+  return {id, name};
 }
 
 // Determines whether the message was created by a webhook or a Discord User

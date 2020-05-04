@@ -1,26 +1,37 @@
 // @flow
 
 import {
-  EdgeAddress,
-  NodeAddress,
   type Edge,
   type Node,
   type EdgeAddressT,
   type NodeAddressT,
+  EdgeAddress,
+  NodeAddress,
 } from "../../core/graph";
+import type {ReferenceDetector, URL} from "../../core/references";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import type {NodeWeight} from "../../core/weights";
-import type {ReferenceDetector, URL} from "../../core/references";
-import type {Initiative, InitiativeRepository} from "./initiative";
-import {addressFromId} from "./initiative";
+import type {EdgeSpec} from "./edgeSpec";
+import {
+  type Initiative,
+  type InitiativeId,
+  type InitiativeRepository,
+  addressFromId,
+} from "./initiative";
+import {
+  type NodeEntry,
+  type NodeEntryField,
+  addressForNodeEntry,
+} from "./nodeEntry";
 import {
   dependsOnEdgeType,
   referencesEdgeType,
   contributesToEdgeType,
   championsEdgeType,
+  contributesToEntryEdgeType,
 } from "./declaration";
-import {initiativeFileURL} from "./initiativesDirectory";
+import {initiativeFileURL} from "./initiativeFile";
 
 function initiativeAddress(initiative: Initiative): NodeAddressT {
   return addressFromId(initiative.id);
@@ -34,6 +45,19 @@ function initiativeNode(initiative: Initiative): Node {
     timestampMs: initiative.timestampMs,
     description:
       url == null ? initiative.title : `[${initiative.title}](${url})`,
+  };
+}
+
+function nodeFromEntry(
+  entry: NodeEntry,
+  parentId: InitiativeId,
+  field: NodeEntryField
+): Node {
+  const address = addressForNodeEntry(field, parentId, entry.key);
+  return {
+    address,
+    timestampMs: entry.timestampMs,
+    description: entry.title,
   };
 }
 
@@ -89,7 +113,7 @@ export function createWeightedGraph(
     }
 
     // Generic approach to adding edges when the reference detector has a hit.
-    const edgeHandler = (
+    const urlHandler = (
       urls: $ReadOnlyArray<URL>,
       createEdge: EdgeFactoryT
     ) => {
@@ -100,11 +124,47 @@ export function createWeightedGraph(
       }
     };
 
+    // Generic approach to handling EdgeSpecs.
+    const edgeSpecHandler = (
+      {urls, entries}: EdgeSpec,
+      createEdge: EdgeFactoryT,
+      field: NodeEntryField
+    ) => {
+      // Delegate handling the URLs.
+      urlHandler(urls, createEdge);
+
+      for (const entry of entries) {
+        // Add the NodeEntry contribution itself to the graph.
+        const entryNode = nodeFromEntry(entry, initiative.id, field);
+        graph.addNode(entryNode);
+        graph.addEdge(createEdge(initiative, entryNode.address));
+        if (entry.weight != null) {
+          weights.nodeWeights.set(entryNode.address, entry.weight);
+        }
+
+        // Add edges to the contributors.
+        for (const contributor of entry.contributors) {
+          const addr = refs.addressFromUrl(contributor);
+          if (!addr) continue;
+          graph.addEdge({
+            address: EdgeAddress.append(
+              contributesToEntryEdgeType.prefix,
+              ...NodeAddress.toParts(entryNode.address),
+              ...NodeAddress.toParts(addr)
+            ),
+            timestampMs: entry.timestampMs,
+            src: addr,
+            dst: entryNode.address,
+          });
+        }
+      }
+    };
+
     // Maps the edge types to it's fields.
-    edgeHandler(initiative.dependencies, depedencyEdge);
-    edgeHandler(initiative.references, referenceEdge);
-    edgeHandler(initiative.contributions, contributionEdge);
-    edgeHandler(initiative.champions, championEdge);
+    edgeSpecHandler(initiative.dependencies, depedencyEdge, "DEPENDENCY");
+    edgeSpecHandler(initiative.references, referenceEdge, "REFERENCE");
+    edgeSpecHandler(initiative.contributions, contributionEdge, "CONTRIBUTION");
+    urlHandler(initiative.champions, championEdge);
   }
 
   return wg;
