@@ -12,8 +12,8 @@ import type {
   BalancedV1,
   ImmediateV1,
   GrainReceipt,
-  AllocationStrategy,
   GrainAllocationV1,
+  AllocationStrategy,
 } from "./createGrainAllocation";
 import type {Grain} from "./grain";
 
@@ -72,99 +72,112 @@ describe("src/grain/createGrainAllocation", () => {
     expect(safeAllocation(h1)).toEqual(safeAllocation(h2));
   }
 
-  describe("immediateAllocation", () => {
-    const BUDGET = ONE;
-    const strategy: ImmediateV1 = deepFreeze({
-      type: "IMMEDIATE",
-      version: 1,
-    });
+  const immediateStrategy: ImmediateV1 = deepFreeze({
+    type: "IMMEDIATE",
+    version: 1,
+  });
 
-    describe("it should return an empty createGrainAllocation when", () => {
-      const emptyAllocation = deepFreeze({
-        version: GRAIN_ALLOCATION_VERSION_1,
-        strategy,
-        budget: BUDGET,
-        receipts: [],
+  const balancedStrategy: BalancedV1 = deepFreeze({
+    type: "BALANCED",
+    version: 1,
+  });
+
+  describe.each([[immediateStrategy], [balancedStrategy]])(
+    "Common Tests for %o",
+    (strategy: AllocationStrategy) => {
+      const BUDGET = ONE;
+
+      it("throws an error if given an unsupported strategy", () => {
+        const unsupportedStrategy = {
+          ...strategy,
+          version: 2,
+        };
+        expect(() =>
+          createGrainAllocation(
+            unsupportedStrategy,
+            BUDGET,
+            credHistory,
+            new Map()
+          )
+        ).toThrowError(`Unsupported ${strategy.type} version: 2`);
       });
 
-      it("the budget is zero", () => {
-        const actual = createGrainAllocation(
-          strategy,
-          ZERO,
-          credHistory,
-          new Map()
-        );
+      it("throws an error if given an unsupported strategy and an empty credHistory", () => {
+        const unsupportedStrategy = {
+          ...strategy,
+          version: 2,
+        };
+        expect(() =>
+          createGrainAllocation(unsupportedStrategy, BUDGET, [], new Map())
+        ).toThrowError(`Unsupported ${strategy.type} version: 2`);
+      });
 
-        expectAllocationsEqual(actual, {
-          ...emptyAllocation,
-          budget: ZERO,
+      describe("it should return an empty allocation when", () => {
+        const emptyAllocation = deepFreeze({
+          version: GRAIN_ALLOCATION_VERSION_1,
+          strategy,
+          budget: BUDGET,
+          receipts: [],
+        });
+
+        it("the budget is zero", () => {
+          const actual = createGrainAllocation(
+            strategy,
+            ZERO,
+            credHistory,
+            new Map()
+          );
+
+          expectAllocationsEqual(actual, {
+            ...emptyAllocation,
+            budget: ZERO,
+          });
+        });
+
+        it("there are no cred scores at all", () => {
+          const actual = createGrainAllocation(strategy, BUDGET, [], new Map());
+          expectAllocationsEqual(actual, emptyAllocation);
+        });
+
+        it("all the cred sums to 0", () => {
+          const actual = createGrainAllocation(
+            strategy,
+            BUDGET,
+            [
+              {
+                intervalEndMs: 500,
+                cred: new Map([
+                  [foo, 0],
+                  [bar, 0],
+                ]),
+              },
+            ],
+            new Map()
+          );
+
+          expectAllocationsEqual(actual, emptyAllocation);
         });
       });
+    }
+  );
 
-      it("there are no cred scores at all", () => {
-        const actual = createGrainAllocation(strategy, BUDGET, [], new Map());
-        expectAllocationsEqual(actual, emptyAllocation);
-      });
-
-      it("all the cred sums to 0", () => {
-        const actual = createGrainAllocation(
-          strategy,
-          BUDGET,
-          [
-            {
-              intervalEndMs: 500,
-              cred: new Map([
-                [foo, 0],
-                [bar, 0],
-              ]),
-            },
-          ],
-          new Map()
-        );
-
-        expectAllocationsEqual(actual, emptyAllocation);
-      });
-    });
+  describe("immediateAllocation", () => {
+    const BUDGET = ONE;
 
     const createImmediateAllocation = (
       receipts: $ReadOnlyArray<GrainReceipt>
     ): GrainAllocationV1 => {
       return {
         version: GRAIN_ALLOCATION_VERSION_1,
-        strategy,
+        strategy: immediateStrategy,
         budget: BUDGET,
         receipts,
       };
     };
 
-    it("throws an error if given an unsupported strategy", () => {
-      const unsupportedStrategy = {
-        ...strategy,
-        version: 2,
-      };
-      expect(() =>
-        createGrainAllocation(
-          unsupportedStrategy,
-          BUDGET,
-          credHistory,
-          new Map()
-        )
-      ).toThrowError(`Unsupported IMMEDIATE version: 2`);
-    });
-
-    it("throws an error if given an unsupported strategy and an empty credHistory", () => {
-      const unsupportedStrategy = {
-        ...strategy,
-        version: 2,
-      };
-      expect(() =>
-        createGrainAllocation(unsupportedStrategy, BUDGET, [], new Map())
-      ).toThrowError(`Unsupported IMMEDIATE version: 2`);
-    });
-
     it("handles an interval with even cred distribution", () => {
       const result = createGrainAllocation(
-        strategy,
+        immediateStrategy,
         BUDGET,
         [evenInterval],
         new Map()
@@ -180,7 +193,7 @@ describe("src/grain/createGrainAllocation", () => {
     });
     it("handles an interval with un-even cred distribution", () => {
       const result = createGrainAllocation(
-        strategy,
+        immediateStrategy,
         BUDGET,
         [unevenInterval],
         new Map()
@@ -197,7 +210,7 @@ describe("src/grain/createGrainAllocation", () => {
     });
     it("handles an interval with one cred recipient", () => {
       const result = createGrainAllocation(
-        strategy,
+        immediateStrategy,
         BUDGET,
         [singlePersonInterval],
         new Map()
@@ -210,10 +223,6 @@ describe("src/grain/createGrainAllocation", () => {
 
   describe("balancedAllocation", () => {
     const BUDGET = fromApproximateFloat(14);
-    const strategy: BalancedV1 = deepFreeze({
-      type: "BALANCED",
-      version: 1,
-    });
 
     const createBalancedAllocation = (
       receipts: $ReadOnlyArray<GrainReceipt>,
@@ -221,74 +230,11 @@ describe("src/grain/createGrainAllocation", () => {
     ) => {
       return {
         version: GRAIN_ALLOCATION_VERSION_1,
-        strategy,
+        strategy: balancedStrategy,
         budget,
         receipts,
       };
     };
-
-    describe("it should return an empty allocation when", () => {
-      const emptyAllocation = deepFreeze({
-        version: GRAIN_ALLOCATION_VERSION_1,
-        receipts: [],
-        budget: BUDGET,
-        strategy,
-      });
-
-      it("the budget is zero", () => {
-        const actual = createGrainAllocation(
-          strategy,
-          ZERO,
-          credHistory,
-          new Map()
-        );
-
-        expectAllocationsEqual(actual, {
-          ...emptyAllocation,
-          budget: ZERO,
-        });
-      });
-
-      it("there are no cred scores at all", () => {
-        const actual = createGrainAllocation(strategy, BUDGET, [], new Map());
-
-        expectAllocationsEqual(actual, emptyAllocation);
-      });
-
-      it("all the cred sums to 0", () => {
-        const actual = createGrainAllocation(
-          strategy,
-          BUDGET,
-          [
-            {
-              intervalEndMs: 500,
-              cred: new Map([
-                [foo, 0],
-                [bar, 0],
-              ]),
-            },
-          ],
-          new Map()
-        );
-
-        expectAllocationsEqual(actual, emptyAllocation);
-      });
-    });
-
-    it("throws an error if given an unsupported strategy", () => {
-      const unsupportedStrategy = {
-        ...strategy,
-        version: 2,
-      };
-      expect(() =>
-        createGrainAllocation(
-          unsupportedStrategy,
-          BUDGET,
-          credHistory,
-          new Map()
-        )
-      ).toThrowError(`Unsupported BALANCED version: 2`);
-    });
 
     it("should only pay Foo if Foo is sufficiently underpaid", () => {
       const lifetimeEarnings = new Map([
@@ -303,7 +249,7 @@ describe("src/grain/createGrainAllocation", () => {
         BUDGET
       );
       const actual = createGrainAllocation(
-        strategy,
+        balancedStrategy,
         BUDGET,
         credHistory,
         lifetimeEarnings
@@ -327,7 +273,7 @@ describe("src/grain/createGrainAllocation", () => {
       );
 
       const actual = createGrainAllocation(
-        strategy,
+        balancedStrategy,
         BUDGET,
         credHistory,
         lifetimeEarnings
@@ -354,7 +300,7 @@ describe("src/grain/createGrainAllocation", () => {
       );
 
       const actual = createGrainAllocation(
-        strategy,
+        balancedStrategy,
         BUDGET15,
         credHistory,
         lifetimeEarnings
@@ -376,7 +322,7 @@ describe("src/grain/createGrainAllocation", () => {
       );
 
       const actual = createGrainAllocation(
-        strategy,
+        balancedStrategy,
         BUDGET2,
         credHistory,
         lifetimeEarnings
@@ -399,7 +345,7 @@ describe("src/grain/createGrainAllocation", () => {
       );
 
       const actual = createGrainAllocation(
-        strategy,
+        balancedStrategy,
         BUDGET,
         credHistory,
         lifetimeEarnings
