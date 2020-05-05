@@ -7,6 +7,7 @@ import {type URL} from "../../core/references";
 import {type NodeAddressT} from "../../core/graph";
 import * as Timestamp from "../../util/timestamp";
 import {compatReader} from "../../backend/compatIO";
+import {normalizeEdgeSpec} from "./edgeSpec";
 import {
   type ReferenceDetector,
   MappedReferenceDetector,
@@ -148,13 +149,27 @@ export function _convertToInitiatives(
 ): $ReadOnlyArray<Initiative> {
   const initiatives = [];
   for (const [fileName, initiativeFile] of map.entries()) {
-    const {timestampIso, ...partialInitiativeFile} = initiativeFile;
+    const {
+      timestampIso,
+      champions,
+      contributions,
+      dependencies,
+      references,
+      ...partialInitiativeFile
+    } = initiativeFile;
+
     const timestampMs = Timestamp.fromISO(timestampIso);
+
     const initiative: Initiative = {
       ...partialInitiativeFile,
       id: initiativeFileId(directory, fileName),
       timestampMs,
+      champions: champions || [],
+      contributions: normalizeEdgeSpec(contributions, timestampMs),
+      dependencies: normalizeEdgeSpec(dependencies, timestampMs),
+      references: normalizeEdgeSpec(references, timestampMs),
     };
+
     initiatives.push(initiative);
   }
   return initiatives;

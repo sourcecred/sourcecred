@@ -211,7 +211,7 @@ export class Mirror {
       },
     });
     const db = this._db;
-    _inTransaction(db, () => {
+    db.transaction(() => {
       // We store the metadata in a singleton table `meta`, whose unique row
       // has primary key `0`. Only the first ever insert will succeed; we
       // are locked into the first config.
@@ -354,7 +354,7 @@ export class Mirror {
       for (const sql of tables) {
         db.prepare(sql).run();
       }
-    });
+    })();
   }
 
   /**
@@ -382,9 +382,9 @@ export class Mirror {
     +typename: null | Schema.Typename,
     +id: Schema.ObjectId,
   |}): void {
-    _inTransaction(this._db, () => {
+    this._db.transaction(() => {
       this._nontransactionallyRegisterObject(object);
-    });
+    })();
   }
 
   /**
@@ -583,7 +583,7 @@ export class Mirror {
    */
   _findOutdated(since: Date): QueryPlan {
     const db = this._db;
-    return _inTransaction(db, () => {
+    return db.transaction(() => {
       const typenames: $PropertyType<QueryPlan, "typenames"> = db
         .prepare(
           dedent`\
@@ -642,7 +642,7 @@ export class Mirror {
           return result;
         });
       return {typenames, objects, connections};
-    });
+    })();
   }
 
   /**
@@ -826,9 +826,9 @@ export class Mirror {
    * See: `_queryFromPlan`.
    */
   _updateData(updateId: UpdateId, queryResult: UpdateResult): void {
-    _inTransaction(this._db, () => {
+    this._db.transaction(() => {
       this._nontransactionallyUpdateData(updateId, queryResult);
-    });
+    })();
   }
 
   /**
@@ -978,11 +978,11 @@ export class Mirror {
     const result: UpdateResult = await postQuery({body, variables});
     this._logResponse(requestRowId, result, options.now());
 
-    _inTransaction(this._db, () => {
+    this._db.transaction(() => {
       const updateId = this._createUpdate(options.now());
       this._logRequestUpdateId(requestRowId, updateId);
       this._nontransactionallyUpdateData(updateId, result);
-    });
+    })();
     return Promise.resolve(true);
   }
 
@@ -1262,14 +1262,14 @@ export class Mirror {
     fieldname: Schema.Fieldname,
     queryResult: ConnectionFieldResult
   ): void {
-    _inTransaction(this._db, () => {
+    this._db.transaction(() => {
       this._nontransactionallyUpdateConnection(
         updateId,
         objectId,
         fieldname,
         queryResult
       );
-    });
+    })();
   }
 
   /**
@@ -1451,9 +1451,9 @@ export class Mirror {
    * See: `_queryOwnData`.
    */
   _updateOwnData(updateId: UpdateId, queryResult: OwnDataUpdateResult): void {
-    _inTransaction(this._db, () => {
+    this._db.transaction(() => {
       this._nontransactionallyUpdateOwnData(updateId, queryResult);
-    });
+    })();
   }
 
   /**
@@ -1737,9 +1737,9 @@ export class Mirror {
    * See: `_queryTypenames`.
    */
   _updateTypenames(queryResult: TypenamesUpdateResult): void {
-    _inTransaction(this._db, () => {
+    this._db.transaction(() => {
       this._nontransactionallyUpdateTypenames(queryResult);
-    });
+    })();
   }
 
   /**
@@ -1842,7 +1842,7 @@ export class Mirror {
    */
   extract(rootId: Schema.ObjectId): mixed {
     const db = this._db;
-    return _inTransaction(db, () => {
+    return db.transaction(() => {
       // Pre-compute transitive dependencies into a temporary table.
       db.prepare(
         dedent`\
@@ -2085,7 +2085,7 @@ export class Mirror {
       } finally {
         this._db.prepare("DROP TABLE temp.transitive_dependencies").run();
       }
-    });
+    })();
   }
 }
 
@@ -2360,44 +2360,6 @@ export const _FIELD_PREFIXES = deepFreeze({
    */
   NODE_CONNECTIONS: "node_",
 });
-
-/**
- * Execute a function inside a database transaction.
- *
- * The database must not be in a transaction. A new transaction will be
- * entered, and then the callback will be invoked.
- *
- * If the callback completes normally, then its return value is passed
- * up to the caller, and the currently active transaction (if any) is
- * committed.
- *
- * If the callback throws an error, then the error is propagated to the
- * caller, and the currently active transaction (if any) is rolled back.
- *
- * Note that the callback may choose to commit or roll back the
- * transaction before returning or throwing an error. Conversely, note
- * that if the callback commits the transaction, and then begins a new
- * transaction but does not end it, then this function will commit the
- * new transaction if the callback returns (or roll it back if it
- * throws).
- */
-export function _inTransaction<R>(db: Database, fn: () => R): R {
-  if (db.inTransaction) {
-    throw new Error("already in transaction");
-  }
-  try {
-    db.prepare("BEGIN").run();
-    const result = fn();
-    if (db.inTransaction) {
-      db.prepare("COMMIT").run();
-    }
-    return result;
-  } finally {
-    if (db.inTransaction) {
-      db.prepare("ROLLBACK").run();
-    }
-  }
-}
 
 /**
  * Convert a prepared statement into a JS function that executes that

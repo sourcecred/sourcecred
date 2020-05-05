@@ -5,7 +5,7 @@
   "dependencies": {
     "aphrodite": "^2.4.0",
     "base64url": "^3.0.1",
-    "better-sqlite3": "^6.0.1",
+    "better-sqlite3": "^7.0.0",
     "bottleneck": "^2.19.5",
     "chalk": "^3.0.0",
     "commonmark": "^0.29.1",

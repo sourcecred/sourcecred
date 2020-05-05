@@ -2,14 +2,54 @@
 
 import {type TimestampMs} from "../../util/timestamp";
 import * as Timestamp from "../../util/timestamp";
+import {NodeAddress} from "../../core/graph";
+import {createId} from "./initiative";
 import {
   type NodeEntry,
   type NodeEntryJson,
+  addressForNodeEntry,
   normalizeNodeEntry,
   _titleSlug,
 } from "./nodeEntry";
 
 describe("plugins/initiatives/nodeEntry", () => {
+  describe("addressForNodeEntry", () => {
+    it("should handle each field value as a different node type", () => {
+      const id = createId("EXAMPLE", "123");
+      const addresses = [
+        addressForNodeEntry("DEPENDENCY", id, "some-dependency-key"),
+        addressForNodeEntry("REFERENCE", id, "some-reference-key"),
+        addressForNodeEntry("CONTRIBUTION", id, "contrib-key"),
+      ];
+      expect(addresses).toEqual([
+        NodeAddress.fromParts([
+          "sourcecred",
+          "initiatives",
+          "DEPENDENCY",
+          "EXAMPLE",
+          "123",
+          "some-dependency-key",
+        ]),
+        NodeAddress.fromParts([
+          "sourcecred",
+          "initiatives",
+          "REFERENCE",
+          "EXAMPLE",
+          "123",
+          "some-reference-key",
+        ]),
+        NodeAddress.fromParts([
+          "sourcecred",
+          "initiatives",
+          "CONTRIBUTION",
+          "EXAMPLE",
+          "123",
+          "contrib-key",
+        ]),
+      ]);
+    });
+  });
+
   describe("normalizeNodeEntry", () => {
     it("should throw without a title", () => {
       const timestampMs: TimestampMs = Timestamp.fromNumber(123);

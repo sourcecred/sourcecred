@@ -18,9 +18,18 @@ const exampleInitiativeFile = (): InitiativeFile => ({
   weight: {incomplete: 360, complete: 420},
   completed: false,
   champions: ["http://foo.bar/champ"],
-  contributions: ["http://foo.bar/contrib"],
-  dependencies: ["http://foo.bar/dep"],
-  references: ["http://foo.bar/ref"],
+  contributions: {
+    urls: ["http://foo.bar/contrib"],
+    entries: [{title: "Inline contrib"}],
+  },
+  dependencies: {
+    urls: ["http://foo.bar/dep"],
+    entries: [{title: "Inline dep"}],
+  },
+  references: {
+    urls: ["http://foo.bar/ref"],
+    entries: [{title: "Inline ref"}],
+  },
 });
 
 describe("plugins/initiatives/initiativeFile", () => {
