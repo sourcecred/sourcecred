@@ -17,7 +17,7 @@
     "d3-time-format": "^2.2.3",
     "deep-freeze": "^0.0.1",
     "express": "^4.17.1",
-    "fs-extra": "^8.1.0",
+    "fs-extra": "^9.0.0",
     "globby": "^11.0.0",
     "history": "^3.3.0",
     "htmlparser2": "^4.1.0",
