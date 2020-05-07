@@ -3,11 +3,15 @@
 import {type NodeAddressT} from "../../core/graph";
 import {githubOwnerPattern} from "../github/repoId";
 import {loginAddress as githubAddress} from "../github/nodes";
+import {userNodeType as githubUserType} from "../github/declaration";
 import {userAddress as discourseAddress} from "../discourse/address";
+import {userNodeType as discourseUserType} from "../discourse/declaration";
+import {identityType} from "./declaration";
 import {
   identityAddress,
   USERNAME_PATTERN as _VALID_IDENTITY_PATTERN,
 } from "./identity";
+import {NodeAddress} from "../../core/graph";
 
 /** An Alias is a string specification of an identity within another plugin.
  *
@@ -63,4 +67,30 @@ export function resolveAlias(
     default:
       throw new Error(`Unknown type for alias: ${alias}`);
   }
+}
+
+/**
+ * Attempt to convert a NodeAddressT to an Alias.
+ *
+ * If the provided node address corresponds to a known aliasing scheme, an
+ * alias will be returned. Otherwise, null is returned. Since it's possible
+ * that the node address is a valid user node address provided by a plugin that
+ * didn't update this alias registry, clients should endeavor to accomodate
+ * those addresses rather than erroring.
+ */
+export function toAlias(n: NodeAddressT): Alias | null {
+  const parts = NodeAddress.toParts(n);
+  const terminator = parts[parts.length - 1];
+  const prefixes: Map<string, NodeAddressT> = new Map([
+    ["github", githubUserType.prefix],
+    ["discourse", discourseUserType.prefix],
+    ["sourcecred", identityType.prefix],
+  ]);
+
+  for (const [prefix, nodePrefix] of prefixes.entries()) {
+    if (NodeAddress.hasPrefix(n, nodePrefix)) {
+      return `${prefix}/${terminator}`;
+    }
+  }
+  return null;
 }
