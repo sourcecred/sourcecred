@@ -1,0 +1,817 @@
+[
+  {
+    "type": "sourcecred/analysis/output",
+    "version": "0.1.0"
+  },
+  {
+    "orderedNodes": [
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "11",
+          "420811872"
+        ],
+        "cred": 2.53312921101789,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/11#issuecomment-420811872) on [#11](https://github.com/sourcecred-test/example-github/issues/11): An issue with a comment from a deleted user",
+        "minted": 1,
+        "timestamp": 1536789545000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "11",
+          "420813013"
+        ],
+        "cred": 4.246639988874127,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/11#issuecomment-420813013) on [#11](https://github.com/sourcecred-test/example-github/issues/11): An issue with a comment from a deleted user",
+        "minted": 1,
+        "timestamp": 1536789813000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "11",
+          "420813206"
+        ],
+        "cred": 3.196807145579773,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/11#issuecomment-420813206) on [#11](https://github.com/sourcecred-test/example-github/issues/11): An issue with a comment from a deleted user",
+        "minted": 1,
+        "timestamp": 1536789858000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "11",
+          "420813621"
+        ],
+        "cred": 2.5925309334355573,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/11#issuecomment-420813621) on [#11](https://github.com/sourcecred-test/example-github/issues/11): An issue with a comment from a deleted user",
+        "minted": 1,
+        "timestamp": 1536789965000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "2",
+          "373768703"
+        ],
+        "cred": 2.5960839493691235,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768703) on [#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue.",
+        "minted": 1,
+        "timestamp": 1521217693000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "2",
+          "373768850"
+        ],
+        "cred": 2.5960839493691235,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/2#issuecomment-373768850) on [#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue.",
+        "minted": 1,
+        "timestamp": 1521217725000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "2",
+          "385576185"
+        ],
+        "cred": 2.298714421476436,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576185) on [#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue.",
+        "minted": 1,
+        "timestamp": 1525137909000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "2",
+          "385576220"
+        ],
+        "cred": 2.298714421476436,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576220) on [#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue.",
+        "minted": 1,
+        "timestamp": 1525137925000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "2",
+          "385576248"
+        ],
+        "cred": 2.298714421476436,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576248) on [#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue.",
+        "minted": 1,
+        "timestamp": 1525137939000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "2",
+          "385576273"
+        ],
+        "cred": 2.298714421476436,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576273) on [#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue.",
+        "minted": 1,
+        "timestamp": 1525137951000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "2",
+          "385576920"
+        ],
+        "cred": 2.2839401004354816,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576920) on [#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue.",
+        "minted": 1,
+        "timestamp": 1525138231000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "2",
+          "385576936"
+        ],
+        "cred": 2.3098538252064444,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/2#issuecomment-385576936) on [#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue.",
+        "minted": 1,
+        "timestamp": 1525138238000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "6",
+          "373768442"
+        ],
+        "cred": 2.8015678617071846,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/6#issuecomment-373768442) on [#6](https://github.com/sourcecred-test/example-github/issues/6): An issue with comments",
+        "minted": 1,
+        "timestamp": 1521217642000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "6",
+          "373768538"
+        ],
+        "cred": 3.493088229494534,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/6#issuecomment-373768538) on [#6](https://github.com/sourcecred-test/example-github/issues/6): An issue with comments",
+        "minted": 1,
+        "timestamp": 1521217661000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "6",
+          "385223316"
+        ],
+        "cred": 2.0342606197228528,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/6#issuecomment-385223316) on [#6](https://github.com/sourcecred-test/example-github/issues/6): An issue with comments",
+        "minted": 1,
+        "timestamp": 1524973307000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "6",
+          "417104047"
+        ],
+        "cred": 504.37376817302504,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/issues/6#issuecomment-417104047) on [#6](https://github.com/sourcecred-test/example-github/issues/6): An issue with comments",
+        "minted": 1,
+        "timestamp": 1535576390000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "PULL",
+          "sourcecred-test",
+          "example-github",
+          "3",
+          "369162222"
+        ],
+        "cred": 3.119026688513382,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/pull/3#issuecomment-369162222) on [#3](https://github.com/sourcecred-test/example-github/pull/3): Add README, merge via PR.",
+        "minted": 1,
+        "timestamp": 1519807420000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "PULL",
+          "sourcecred-test",
+          "example-github",
+          "5",
+          "396430464"
+        ],
+        "cred": 3.8210842968806733,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/pull/5#issuecomment-396430464) on [#5](https://github.com/sourcecred-test/example-github/pull/5): This pull request will be more contentious. I can feel it...",
+        "minted": 1,
+        "timestamp": 1528764380000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMENT",
+          "REVIEW",
+          "sourcecred-test",
+          "example-github",
+          "5",
+          "100313899",
+          "171460198"
+        ],
+        "cred": 22.134653244287485,
+        "description": "[comment](https://github.com/sourcecred-test/example-github/pull/5#discussion_r171460198) on [review](https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred-test/example-github/pull/5): This pull request will be more contentious. I can feel it...",
+        "minted": 1,
+        "timestamp": 1519878210000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjBhMjIzMzQ2YjRlNmRlYzAxMjdiMWU2YWE4OTJjNGVlMDQyNGI2NmE="
+        ],
+        "cred": 3.8900937101434803,
+        "description": "[0a22334](https://github.com/sourcecred-test/example-github/commit/0a223346b4e6dec0127b1e6aa892c4ee0424b66a): Merge pull request #3 from sourcecred/add-readme",
+        "minted": 1,
+        "timestamp": 1519807427000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjZiZDFiNGMwYjcxOWMyMmM2ODhhNzQ4NjNiZTA3YTY5OWI3YjliMzQ="
+        ],
+        "cred": 1.5906962249252243,
+        "description": "[6bd1b4c](https://github.com/sourcecred-test/example-github/commit/6bd1b4c0b719c22c688a74863be07a699b7b9b34): A commit from someone with no GitHub account",
+        "minted": 1,
+        "timestamp": 1536806901000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OjZkNWIzYWEzMWViYjY4YTA2Y2ViNDZiYmQ2Y2Y0OWI2Y2NkNmY1ZTY="
+        ],
+        "cred": 3.683594905039237,
+        "description": "[6d5b3aa](https://github.com/sourcecred-test/example-github/commit/6d5b3aa31ebb68a06ceb46bbd6cf49b6ccd6f5e6): This pull request will be more contentious. I can feel it... (#5)",
+        "minted": 1,
+        "timestamp": 1519878354000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmM0MzBiZDc0NDU1MTA1Zjc3MjE1ZWNlNTE5NDUwOTRjZWVlZTZjODY="
+        ],
+        "cred": 2.431360411380684,
+        "description": "[c430bd7](https://github.com/sourcecred-test/example-github/commit/c430bd74455105f77215ece51945094ceeee6c86): Hello from credbot!",
+        "minted": 1,
+        "timestamp": 1536788634000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmVjOTFhZGI3MThhNjA0NWI0OTIzMDNmMDBkOGU4YmViOTU3ZGM3ODA="
+        ],
+        "cred": 7.635343061238825,
+        "description": "[ec91adb](https://github.com/sourcecred-test/example-github/commit/ec91adb718a6045b492303f00d8e8beb957dc780): Commit without pull request.",
+        "minted": 1,
+        "timestamp": 1519807271000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "COMMIT",
+          "MDY6Q29tbWl0MTIzMjU1MDA2OmVjYzg4OWRjOTRjZjZkYTE3YWU2ZWFiNWJiN2I3MTU1ZjU3NzUxOWQ="
+        ],
+        "cred": 7.635343061238825,
+        "description": "[ecc889d](https://github.com/sourcecred-test/example-github/commit/ecc889dc94cf6da17ae6eab5bb7b7155f577519d): Add README, merge via PR.",
+        "minted": 1,
+        "timestamp": 1519807329000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "1"
+        ],
+        "cred": 9.250716448278208,
+        "description": "[#1](https://github.com/sourcecred-test/example-github/issues/1): An example issue.",
+        "minted": 2,
+        "timestamp": 1519807088000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "10"
+        ],
+        "cred": 6.770418609862759,
+        "description": "[#10](https://github.com/sourcecred-test/example-github/issues/10): Paired with multireference",
+        "minted": 2,
+        "timestamp": 1530297021000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "11"
+        ],
+        "cred": 14.105993387589589,
+        "description": "[#11](https://github.com/sourcecred-test/example-github/issues/11): An issue with a comment from a deleted user",
+        "minted": 2,
+        "timestamp": 1536789479000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "12"
+        ],
+        "cred": 5.294237506404908,
+        "description": "[#12](https://github.com/sourcecred-test/example-github/issues/12): An issue with commit references",
+        "minted": 2,
+        "timestamp": 1536878086000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "13"
+        ],
+        "cred": 6.096967388154107,
+        "description": "[#13](https://github.com/sourcecred-test/example-github/issues/13): An issue with reactions",
+        "minted": 2,
+        "timestamp": 1536878137000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "2"
+        ],
+        "cred": 14.437658732555255,
+        "description": "[#2](https://github.com/sourcecred-test/example-github/issues/2): A referencing issue.",
+        "minted": 2,
+        "timestamp": 1519807129000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "4"
+        ],
+        "cred": 5.685066854410411,
+        "description": "[#4](https://github.com/sourcecred-test/example-github/issues/4): A closed pull request",
+        "minted": 2,
+        "timestamp": 1519807454000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "6"
+        ],
+        "cred": 211.3423976445397,
+        "description": "[#6](https://github.com/sourcecred-test/example-github/issues/6): An issue with comments",
+        "minted": 2,
+        "timestamp": 1521217624000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "7"
+        ],
+        "cred": 4.946610260970458,
+        "description": "[#7](https://github.com/sourcecred-test/example-github/issues/7): An issue with an extremely long title, which even has a VerySuperFragicalisticialiManyCharacterUberLongTriplePlusGood word in it, and should really be truncated intelligently or something",
+        "minted": 2,
+        "timestamp": 1521569949000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "ISSUE",
+          "sourcecred-test",
+          "example-github",
+          "8"
+        ],
+        "cred": 4.946610260970458,
+        "description": "[#8](https://github.com/sourcecred-test/example-github/issues/8): Issue with Unicode: ȴሲ𣐳楢👍 :heart: 𐤔𐤁𐤀𐤑𐤍𐤉𐤔𐤌𐤄𐤍𐤍 ❤️",
+        "minted": 2,
+        "timestamp": 1521570243000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "PULL",
+          "sourcecred-test",
+          "example-github",
+          "3"
+        ],
+        "cred": 10.732840975697513,
+        "description": "[#3](https://github.com/sourcecred-test/example-github/pull/3): Add README, merge via PR.",
+        "minted": 4,
+        "timestamp": 1519807399000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "PULL",
+          "sourcecred-test",
+          "example-github",
+          "5"
+        ],
+        "cred": 14.89549879746905,
+        "description": "[#5](https://github.com/sourcecred-test/example-github/pull/5): This pull request will be more contentious. I can feel it...",
+        "minted": 4,
+        "timestamp": 1519807636000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "PULL",
+          "sourcecred-test",
+          "example-github",
+          "9"
+        ],
+        "cred": 11.767241520609149,
+        "description": "[#9](https://github.com/sourcecred-test/example-github/pull/9): An unmerged pull request",
+        "minted": 4,
+        "timestamp": 1525373595000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "REPO",
+          "sourcecred-test",
+          "example-github"
+        ],
+        "cred": 34.166739709229304,
+        "description": "[sourcecred-test/example-github](https://github.com/sourcecred-test/example-github)",
+        "minted": 4,
+        "timestamp": 1519807034000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "REVIEW",
+          "sourcecred-test",
+          "example-github",
+          "5",
+          "100313899"
+        ],
+        "cred": 6.3173802744599445,
+        "description": "[review](https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899) on [#5](https://github.com/sourcecred-test/example-github/pull/5): This pull request will be more contentious. I can feel it...",
+        "minted": 1,
+        "timestamp": 1519878210000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "REVIEW",
+          "sourcecred-test",
+          "example-github",
+          "5",
+          "100314038"
+        ],
+        "cred": 3.2722027157529268,
+        "description": "[review](https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100314038) on [#5](https://github.com/sourcecred-test/example-github/pull/5): This pull request will be more contentious. I can feel it...",
+        "minted": 1,
+        "timestamp": 1519878296000
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "USERLIKE",
+          "BOT",
+          "credbot"
+        ],
+        "cred": 203.0134417581194,
+        "description": "[@credbot](https://github.com/credbot)",
+        "minted": 0,
+        "timestamp": null
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "USERLIKE",
+          "USER",
+          "decentralion"
+        ],
+        "cred": 42.33425220677316,
+        "description": "[@decentralion](https://github.com/decentralion)",
+        "minted": 0,
+        "timestamp": null
+      },
+      {
+        "address": [
+          "sourcecred",
+          "github",
+          "USERLIKE",
+          "USER",
+          "wchargin"
+        ],
+        "cred": 20.665736109648424,
+        "description": "[@wchargin](https://github.com/wchargin)",
+        "minted": 0,
+        "timestamp": null
+      }
+    ],
+    "plugins": [
+      {
+        "edgePrefix": "E\u0000sourcecred\u0000github\u0000",
+        "edgeTypes": [
+          {
+            "backwardName": "is authored by",
+            "defaultWeight": {
+              "backwards": 1,
+              "forwards": 0.5
+            },
+            "description": "Connects a GitHub account to a post that they authored.\n\nExamples of posts include issues, pull requests, and comments.\n",
+            "forwardName": "authors",
+            "prefix": "E\u0000sourcecred\u0000github\u0000AUTHORS\u0000"
+          },
+          {
+            "backwardName": "has child",
+            "defaultWeight": {
+              "backwards": 0.25,
+              "forwards": 1
+            },
+            "description": "Connects a GitHub entity to its child entities.\n\nFor example, a Repository has Issues and Pull Requests as children, and a\nPull Request has comments and reviews as children.\n",
+            "forwardName": "has parent",
+            "prefix": "E\u0000sourcecred\u0000github\u0000HAS_PARENT\u0000"
+          },
+          {
+            "backwardName": "is merged by",
+            "defaultWeight": {
+              "backwards": 1,
+              "forwards": 0.5
+            },
+            "description": "Connects a GitHub pull request to the Git commit that it merges.\n",
+            "forwardName": "merges",
+            "prefix": "E\u0000sourcecred\u0000github\u0000MERGED_AS\u0000"
+          },
+          {
+            "backwardName": "is referenced by",
+            "defaultWeight": {
+              "backwards": 0,
+              "forwards": 1
+            },
+            "description": "Connects a GitHub post to an entity that it references.\n\nFor example, if you write a GitHub issue comment that says \"thanks\n@username for pull #1337\", it will create references edges to both the user\n@username, and to pull #1337 in the same repository.\n",
+            "forwardName": "references",
+            "prefix": "E\u0000sourcecred\u0000github\u0000REFERENCES\u0000"
+          },
+          {
+            "backwardName": "got 👍 from",
+            "defaultWeight": {
+              "backwards": 0,
+              "forwards": 1
+            },
+            "description": "Connects users to posts to which they gave a 👍 reaction.\n",
+            "forwardName": "reacted 👍 to",
+            "prefix": "E\u0000sourcecred\u0000github\u0000REACTS\u0000THUMBS_UP\u0000"
+          },
+          {
+            "backwardName": "got ❤️ from",
+            "defaultWeight": {
+              "backwards": 0,
+              "forwards": 2
+            },
+            "description": "Connects users to posts to which they gave a ❤️ reaction.\n",
+            "forwardName": "reacted ❤️ to",
+            "prefix": "E\u0000sourcecred\u0000github\u0000REACTS\u0000HEART\u0000"
+          },
+          {
+            "backwardName": "got 🎉 from",
+            "defaultWeight": {
+              "backwards": 0,
+              "forwards": 4
+            },
+            "description": "Connects users to posts to which they gave a 🎉 reaction.\n",
+            "forwardName": "reacted 🎉 to",
+            "prefix": "E\u0000sourcecred\u0000github\u0000REACTS\u0000HOORAY\u0000"
+          },
+          {
+            "backwardName": "got 🚀 from",
+            "defaultWeight": {
+              "backwards": 0,
+              "forwards": 1
+            },
+            "description": "Connects users to posts to which they gave a 🚀 reaction.\n",
+            "forwardName": "reacted 🚀 to",
+            "prefix": "E\u0000sourcecred\u0000github\u0000REACTS\u0000ROCKET\u0000"
+          },
+          {
+            "backwardName": "merged on GitHub as",
+            "defaultWeight": {
+              "backwards": 1,
+              "forwards": 1
+            },
+            "description": "Connects a commit on GitHub to the corresponding raw Git commit.\n",
+            "forwardName": "corresponds to Git commit",
+            "prefix": "E\u0000sourcecred\u0000github\u0000CORRESPONDS_TO_COMMIT_TYPE\u0000"
+          }
+        ],
+        "name": "GitHub",
+        "nodePrefix": "N\u0000sourcecred\u0000github\u0000",
+        "nodeTypes": [
+          {
+            "defaultWeight": 4,
+            "description": "NodeType for a GitHub repository",
+            "name": "Repository",
+            "pluralName": "Repositories",
+            "prefix": "N\u0000sourcecred\u0000github\u0000REPO\u0000"
+          },
+          {
+            "defaultWeight": 2,
+            "description": "NodeType for a GitHub issue",
+            "name": "Issue",
+            "pluralName": "Issues",
+            "prefix": "N\u0000sourcecred\u0000github\u0000ISSUE\u0000"
+          },
+          {
+            "defaultWeight": 4,
+            "description": "NodeType for a GitHub pull request",
+            "name": "Pull request",
+            "pluralName": "Pull requests",
+            "prefix": "N\u0000sourcecred\u0000github\u0000PULL\u0000"
+          },
+          {
+            "defaultWeight": 1,
+            "description": "NodeType for a GitHub code review",
+            "name": "Pull request review",
+            "pluralName": "Pull request reviews",
+            "prefix": "N\u0000sourcecred\u0000github\u0000REVIEW\u0000"
+          },
+          {
+            "defaultWeight": 1,
+            "description": "NodeType for a GitHub comment",
+            "name": "Comment",
+            "pluralName": "Comments",
+            "prefix": "N\u0000sourcecred\u0000github\u0000COMMENT\u0000"
+          },
+          {
+            "defaultWeight": 1,
+            "description": "Represents a particular Git commit on GitHub, i.e. scoped to a particular repository",
+            "name": "Commit",
+            "pluralName": "Commits",
+            "prefix": "N\u0000sourcecred\u0000github\u0000COMMIT\u0000"
+          },
+          {
+            "defaultWeight": 0,
+            "description": "NodeType for a GitHub user",
+            "name": "User",
+            "pluralName": "Users",
+            "prefix": "N\u0000sourcecred\u0000github\u0000USERLIKE\u0000USER\u0000"
+          },
+          {
+            "defaultWeight": 0,
+            "description": "NodeType for a GitHub bot account",
+            "name": "Bot",
+            "pluralName": "Bots",
+            "prefix": "N\u0000sourcecred\u0000github\u0000USERLIKE\u0000BOT\u0000"
+          }
+        ],
+        "userTypes": [
+          {
+            "defaultWeight": 0,
+            "description": "NodeType for a GitHub user",
+            "name": "User",
+            "pluralName": "Users",
+            "prefix": "N\u0000sourcecred\u0000github\u0000USERLIKE\u0000USER\u0000"
+          }
+        ]
+      }
+    ]
+  }
+]

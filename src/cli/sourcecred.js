@@ -8,6 +8,7 @@ import {VERSION_SHORT} from "../core/version";
 import help from "./help";
 import load from "./load";
 import scores from "./scores";
+import output from "./output";
 import clear from "./clear";
 import genProject from "./genProject";
 import discourse from "./discourse";
@@ -30,6 +31,8 @@ const sourcecred: Command = async (args, std) => {
       return clear(args.slice(1), std);
     case "scores":
       return scores(args.slice(1), std);
+    case "output":
+      return output(args.slice(1), std);
     case "gen-project":
       return genProject(args.slice(1), std);
     case "discourse":
