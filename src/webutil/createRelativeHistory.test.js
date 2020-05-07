@@ -12,7 +12,7 @@ import createRelativeHistory from "./createRelativeHistory";
 require("./testUtil").configureEnzyme();
 
 describe("webutil/createRelativeHistory", () => {
-  function createHistory(basename, path) {
+  function createHistory(basename: string, path: string) {
     const memoryHistory = createMemoryHistory(path);
     const relativeHistory = createRelativeHistory(memoryHistory, basename);
     return {memoryHistory, relativeHistory};
@@ -46,10 +46,13 @@ describe("webutil/createRelativeHistory", () => {
         );
       });
       it("should require a basename", () => {
-        // $ExpectFlowError
-        expect(() => createHistory(undefined, "undefined/")).toThrow(
-          "basename: expected string, got: undefined"
-        );
+        expect(() =>
+          createHistory(
+            // $ExpectFlowError
+            undefined,
+            "undefined/"
+          )
+        ).toThrow("basename: expected string, got: undefined");
       });
       it("should reject a basename that does not start with a slash", () => {
         expect(() =>
