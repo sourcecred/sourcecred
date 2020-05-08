@@ -6,7 +6,8 @@ import {type Snowflake} from "./models";
 import * as Model from "./models";
 import * as nullUtil from "../../util/null";
 
-type FetchType<T> = (Snowflake) => Promise<ResultPage<T>>;
+// Unused
+// type FetchType<T> = (Snowflake) => Promise<ResultPage<T>>;
 
 /**
  * Mirrors data from the Discord API into a local sqlite db.
@@ -26,15 +27,15 @@ export class Mirror {
     this._fetcher = fetcher;
   }
 
-  async *_paginatedFetch<T>(
-    fetch: (endCursor: Snowflake) => Promise<ResultPage<T>>,
+  async *_streamPages<T>(
+    fetchPage: (endCursor: Snowflake) => Promise<ResultPage<T>>,
     endCursor: Snowflake
   ): AsyncGenerator<T, void, void> {
     let after = endCursor;
     let hasNextPage = true;
 
     while (hasNextPage) {
-      const {results, pageInfo} = await fetch(after);
+      const {results, pageInfo} = await fetchPage(after);
       for (const result of results) {
         yield result;
       }
@@ -48,59 +49,64 @@ export class Mirror {
     }
   }
 
-  async _fetchMembers(): Promise<void> {
-    const fetchMembers: FetchType<Model.GuildMember> = async (
-      after: Snowflake
-    ) => {
-      return await this._fetcher.members(this._guildId, after);
-    };
-
-    const members = this._paginatedFetch(fetchMembers, "0");
-    for await (const member of members) {
-      this._sqliteMirror.addMember(member);
-    }
+  _members(
+    guildId: Snowflake,
+    after: ?Snowflake
+  ): AsyncGenerator<Model.GuildMember, void, void> {
+    return this._streamPages(
+      (after: Snowflake) => this._fetcher.members(guildId, after),
+      after || "0"
+    );
   }
 
-  async _fetchReactions(
+  _messages(
+    channel: Snowflake,
+    after: ?Snowflake
+  ): AsyncGenerator<Model.Message, void, void> {
+    return this._streamPages(
+      (after: Snowflake) => this._fetcher.messages(channel, after),
+      after || "0"
+    );
+  }
+
+  _reactions(
     channel: Snowflake,
     message: Snowflake,
-    emoji: Model.Emoji
-  ): Promise<void> {
-    const fetchReactions: FetchType<Model.Reaction> = async (
-      after: Snowflake
-    ) => {
-      return await this._fetcher.reactions(channel, message, emoji, after);
-    };
-
-    const reactions = this._paginatedFetch(fetchReactions, "0");
-    for await (const reaction of reactions) {
-      this._sqliteMirror.addReaction(reaction);
-    }
+    emoji: Model.Emoji,
+    after: ?Snowflake
+  ): AsyncGenerator<Model.Reaction, void, void> {
+    return this._streamPages(
+      (after: Snowflake) =>
+        this._fetcher.reactions(channel, message, emoji, after),
+      after || "0"
+    );
   }
 
-  async _fetchMessageDataInChannel(channel: Snowflake) {
-    const fetchMessages: FetchType<Model.Message> = async (
-      after: Snowflake
-    ) => {
-      return await this._fetcher.messages(channel, after);
-    };
-
-    const messages = this._paginatedFetch(fetchMessages, "0");
+  async updateChannel(channel: Snowflake) {
+    // TODO: don't load messages from "0" when we can use cache.
+    const messages = this._messages(channel, "0");
     for await (const message of messages) {
       this._sqliteMirror.addMessage(message);
 
       for (const emoji of message.reactionEmoji) {
-        await this._fetchReactions(channel, message.id, emoji);
+        const reactions = this._reactions(channel, message.id, emoji);
+        for await (const reaction of reactions) {
+          this._sqliteMirror.addReaction(reaction);
+        }
       }
     }
   }
 
   async update() {
-    await this._fetchMembers();
+    // Updates the server members. We always get all of them.
+    for await (const member of this._members(this._guildId)) {
+      this._sqliteMirror.addMember(member);
+    }
+
     const channels = await this._fetcher.channels(this._guildId);
     for (const channel of channels) {
       this._sqliteMirror.addChannel(channel);
-      await this._fetchMessageDataInChannel(channel.id);
+      await this.updateChannel(channel.id);
     }
   }
 }
