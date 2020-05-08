@@ -11,6 +11,7 @@ import type {
   Post,
   LikeAction,
 } from "./fetch";
+import {type TimestampMs} from "../../util/timestamp";
 
 // The version should be bumped any time the database schema is changed,
 // so that the cache will be properly invalidated.
@@ -129,7 +130,7 @@ export interface MirrorRepository extends ReadRepository {
   /**
    * Bumps the definitionCheckMs (from SyncHeads) to the provided timestamp.
    */
-  bumpDefinitionTopicCheck(timestampMs: number): void;
+  bumpDefinitionTopicCheck(timestampMs: TimestampMs): void;
 }
 
 function toAddResult({
@@ -417,7 +418,7 @@ export class SqliteMirrorRepository
       .get({topic_id: topicId, index_within_topic: indexWithinTopic});
   }
 
-  bumpDefinitionTopicCheck(timestampMs: number): void {
+  bumpDefinitionTopicCheck(timestampMs: TimestampMs): void {
     this._db
       .prepare(
         dedent`\

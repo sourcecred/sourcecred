@@ -7,6 +7,7 @@ import stringify from "json-stable-stringify";
 import {parseReferences} from "./parseReferences";
 import * as N from "./nodes";
 import dedent from "../../util/dedent";
+import {type TimestampMs} from "../../util/timestamp";
 
 // Workaround for https://github.com/facebook/flow/issues/6538
 import type {
@@ -734,7 +735,7 @@ export class RelationalView {
 type ReactionRecord = {|
   +content: T.ReactionContent,
   +user: UserlikeAddress,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 type Entry =
@@ -775,7 +776,7 @@ type RepoEntry = {|
   +url: string,
   +issues: IssueAddress[],
   +pulls: PullAddress[],
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 export class Repo extends _Entity<RepoEntry> {
@@ -819,7 +820,7 @@ type IssueEntry = {|
   +comments: CommentAddress[],
   +authors: UserlikeAddress[],
   +reactions: ReactionRecord[],
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 export class Issue extends _Entity<IssueEntry> {
@@ -878,7 +879,7 @@ type PullEntry = {|
   +deletions: number,
   +authors: UserlikeAddress[],
   +reactions: ReactionRecord[],
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 export class Pull extends _Entity<PullEntry> {
@@ -947,7 +948,7 @@ type ReviewEntry = {|
   +comments: CommentAddress[],
   +state: T.PullRequestReviewState,
   +authors: UserlikeAddress[],
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 export class Review extends _Entity<ReviewEntry> {
@@ -994,7 +995,7 @@ type CommentEntry = {|
   +url: string,
   +authors: UserlikeAddress[],
   +reactions: ReactionRecord[],
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 export class Comment extends _Entity<CommentEntry> {
@@ -1048,7 +1049,7 @@ type CommitEntry = {|
   +hash: string,
   +authors: UserlikeAddress[],
   +message: string,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 export class Commit extends _Entity<CommitEntry> {

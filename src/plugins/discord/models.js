@@ -1,5 +1,6 @@
 // @flow
 
+import {type TimestampMs} from "../../util/timestamp";
 // https://discordapp.com/developers/docs/reference#snowflakes
 export type Snowflake = string;
 export const ZeroSnowflake: Snowflake = "0";
@@ -124,7 +125,7 @@ export type Message = {|
   +authorId: Snowflake,
   // Could be a message from a webhook, meaning the authorId isn't a user.
   +nonUserAuthor: boolean,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
   +content: string,
   // Normally includes reaction counters, but we don't care about counters.
   // We could filter based on which types of emoji have been added though.

@@ -13,6 +13,7 @@ import {
   type ReactionContent,
   ReactionContent$Values as Reactions,
 } from "./graphqlTypes";
+import {type TimestampMs} from "../../util/timestamp";
 
 export opaque type RawAddress: EdgeAddressT = EdgeAddressT;
 
@@ -87,7 +88,7 @@ export const createEdge = deepFreeze({
   authors: (
     author: GithubNode.UserlikeAddress,
     content: GithubNode.AuthorableAddress,
-    timestampMs: number
+    timestampMs: TimestampMs
   ): Edge => ({
     address: toRaw({type: AUTHORS_TYPE, author, content}),
     src: GithubNode.toRaw(author),
@@ -97,7 +98,7 @@ export const createEdge = deepFreeze({
   mergedAs: (
     pull: GithubNode.PullAddress,
     commit: GithubNode.CommitAddress,
-    timestampMs: number
+    timestampMs: TimestampMs
   ): Edge => ({
     address: toRaw({type: MERGED_AS_TYPE, pull}),
     src: GithubNode.toRaw(pull),
@@ -107,7 +108,7 @@ export const createEdge = deepFreeze({
   correspondsToCommit: (
     githubCommit: GithubNode.CommitAddress,
     gitCommit: GitNode.CommitAddress,
-    timestampMs: number
+    timestampMs: TimestampMs
   ): Edge => ({
     address: toRaw({type: CORRESPONDS_TO_COMMIT_TYPE, githubCommit}),
     src: GithubNode.toRaw(githubCommit),
@@ -117,7 +118,7 @@ export const createEdge = deepFreeze({
   hasParent: (
     child: GithubNode.ChildAddress,
     parent: GithubNode.ParentAddress,
-    timestampMs: number
+    timestampMs: TimestampMs
   ): Edge => ({
     address: toRaw({type: HAS_PARENT_TYPE, child}),
     src: GithubNode.toRaw(child),
@@ -127,7 +128,7 @@ export const createEdge = deepFreeze({
   references: (
     referrer: GithubNode.TextContentAddress,
     referent: GithubNode.ReferentAddress,
-    timestampMs: number
+    timestampMs: TimestampMs
   ): Edge => ({
     address: toRaw({type: REFERENCES_TYPE, referrer, referent}),
     src: GithubNode.toRaw(referrer),
@@ -138,7 +139,7 @@ export const createEdge = deepFreeze({
     reactionType: ReactionContent,
     user: GithubNode.UserlikeAddress,
     reactable: GithubNode.ReactableAddress,
-    timestampMs: number
+    timestampMs: TimestampMs
   ): Edge => ({
     address: toRaw({
       type: REACTS_TYPE,

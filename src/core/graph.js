@@ -6,6 +6,7 @@ import deepFreeze from "deep-freeze";
 import {makeAddressModule, type AddressModule} from "./address";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import * as NullUtil from "../util/null";
+import {type TimestampMs} from "../util/timestamp";
 
 /**
  * This module contains the Graph, which is one of the most fundamental pieces
@@ -130,7 +131,7 @@ export type Node = {|
   // Should be null for a "timeless" node, where we don't
   // want to model that node as having been created at any particular
   // point in time. User nodes are a good example of this.
-  +timestampMs: number | null,
+  +timestampMs: TimestampMs | null,
 |};
 
 /**
@@ -140,7 +141,7 @@ export type Edge = {|
   +address: EdgeAddressT,
   +src: NodeAddressT,
   +dst: NodeAddressT,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 const COMPAT_INFO = {type: "sourcecred/graph", version: "0.8.0"};
@@ -182,13 +183,13 @@ type Integer = number;
 type IndexedNodeJSON = {|
   +index: Integer,
   +description: string,
-  +timestampMs: number | null,
+  +timestampMs: TimestampMs | null,
 |};
 type IndexedEdgeJSON = {|
   +address: AddressJSON,
   +srcIndex: Integer,
   +dstIndex: Integer,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 export type GraphJSON = Compatible<{|
@@ -1187,7 +1188,7 @@ export function edgeToStrings(
   +address: string,
   +src: string,
   +dst: string,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |} {
   return {
     address: EdgeAddress.toString(edge.address),
@@ -1203,7 +1204,7 @@ export function edgeToParts(
   +addressParts: string[],
   +srcParts: string[],
   +dstParts: string[],
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |} {
   const addressParts = EdgeAddress.toParts(edge.address);
   const srcParts = NodeAddress.toParts(edge.src);
