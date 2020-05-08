@@ -8,6 +8,7 @@ import {
   NodeAddress,
 } from "../../core/graph";
 import * as GitNode from "./nodes";
+import {type TimestampMs} from "../../util/timestamp";
 
 export opaque type RawAddress: EdgeAddressT = EdgeAddressT;
 
@@ -39,7 +40,7 @@ export const createEdge = deepFreeze({
   hasParent: (
     child: GitNode.CommitAddress,
     parent: GitNode.CommitAddress,
-    timestampMs: number
+    timestampMs: TimestampMs
   ): Edge => ({
     address: toRaw({type: HAS_PARENT_TYPE, child, parent}),
     src: GitNode.toRaw(child),

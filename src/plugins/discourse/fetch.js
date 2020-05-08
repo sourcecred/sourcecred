@@ -13,6 +13,7 @@
 import fetch from "isomorphic-fetch";
 import Bottleneck from "bottleneck";
 import * as NullUtil from "../../util/null";
+import {type TimestampMs} from "../../util/timestamp";
 
 export type UserId = number;
 export type PostId = number;
@@ -30,7 +31,7 @@ export type TopicView = {|
   +id: TopicId,
   +categoryId: CategoryId,
   +title: string,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
   +authorUsername: string,
 |};
 
@@ -45,7 +46,7 @@ export type TopicLatest = {|
   +id: TopicId,
   +categoryId: CategoryId,
   +title: string,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
   +bumpedMs: number,
 |};
 
@@ -66,7 +67,7 @@ export type Post = {|
   // reply to. Will be `null` if this post was the first post, or if it was a
   // reply to the first post.
   +replyToPostIndex: number | null,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
   +authorUsername: string,
   // The post HTML for rendering.
   +cooked: string,
@@ -83,7 +84,7 @@ export type LikeAction = {|
   +username: string,
   // The post being liked
   +postId: PostId,
-  +timestampMs: number,
+  +timestampMs: TimestampMs,
 |};
 
 /**

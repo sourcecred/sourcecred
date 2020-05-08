@@ -9,7 +9,7 @@
  */
 
 // A timestamp representation in ms since epoch.
-export opaque type TimestampMs: number = number;
+export type TimestampMs = number;
 
 // A timestamp representation in ISO 8601 format.
 export opaque type TimestampISO: string = string;

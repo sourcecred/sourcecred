@@ -4,6 +4,7 @@ import {max, min} from "d3-array";
 import sortBy from "../util/sortBy";
 import {utcWeek} from "d3-time";
 import * as NullUtil from "../util/null";
+import type {TimestampMs} from "../util/timestamp";
 import type {Node, Edge, Graph} from "./graph";
 
 /**
@@ -13,8 +14,8 @@ import type {Node, Edge, Graph} from "./graph";
  * start of the older interval.
  */
 export type Interval = {|
-  +startTimeMs: number,
-  +endTimeMs: number,
+  +startTimeMs: TimestampMs,
+  +endTimeMs: TimestampMs,
 |};
 
 /**
@@ -30,7 +31,7 @@ export type GraphInterval = {|
 
 export type GraphIntervalPartition = $ReadOnlyArray<GraphInterval>;
 
-type TimefulNode = {|...Node, timestampMs: number|};
+type TimefulNode = {|...Node, timestampMs: TimestampMs|};
 
 /**
  * Partition a graph based on time intervals.
