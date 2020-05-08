@@ -295,6 +295,7 @@ describe("util/map", () => {
       // $ExpectFlowError
       const _unused_badMap: Map<string, number> = MapUtil.merge([
         numberMap,
+        // $ExpectFlowError
         stringMap,
       ]);
     });

@@ -64,8 +64,8 @@ describe("plugins/github/nodes", () => {
 
   // Incorrect types should be caught statically, either due to being
   // totally invalid...
-  // $ExpectFlowError
   const _unused_badRepo: GN.RepoAddress = {
+    // $ExpectFlowError
     type: "REPOSITORY",
     owner: "foo",
     name: "bar",
