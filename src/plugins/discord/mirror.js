@@ -26,18 +26,17 @@ export class Mirror {
     this._fetcher = fetcher;
   }
 
-  async _paginatedFetch<T>(
+  async *_paginatedFetch<T>(
     fetch: (endCursor: Snowflake) => Promise<ResultPage<T>>,
-    process: (object: T) => void | Promise<void>,
     endCursor: Snowflake
-  ): Promise<void> {
+  ): AsyncGenerator<T, void, void> {
     let after = endCursor;
     let hasNextPage = true;
 
     while (hasNextPage) {
       const {results, pageInfo} = await fetch(after);
       for (const result of results) {
-        await process(result);
+        yield result;
       }
       hasNextPage = pageInfo.hasNextPage;
       if (hasNextPage) {
@@ -56,11 +55,10 @@ export class Mirror {
       return await this._fetcher.members(this._guildId, after);
     };
 
-    const processMember: (Model.GuildMember) => void = (
-      member: Model.GuildMember
-    ) => this._sqliteMirror.addMember(member);
-
-    await this._paginatedFetch(fetchMembers, processMember, "0");
+    const members = this._paginatedFetch(fetchMembers, "0");
+    for await (const member of members) {
+      this._sqliteMirror.addMember(member);
+    }
   }
 
   async _fetchReactions(
@@ -74,11 +72,10 @@ export class Mirror {
       return await this._fetcher.reactions(channel, message, emoji, after);
     };
 
-    const processReaction: (Model.Reaction) => void = (
-      reaction: Model.Reaction
-    ) => this._sqliteMirror.addReaction(reaction);
-
-    await this._paginatedFetch(fetchReactions, processReaction, "0");
+    const reactions = this._paginatedFetch(fetchReactions, "0");
+    for await (const reaction of reactions) {
+      this._sqliteMirror.addReaction(reaction);
+    }
   }
 
   async _fetchMessageDataInChannel(channel: Snowflake) {
@@ -88,16 +85,14 @@ export class Mirror {
       return await this._fetcher.messages(channel, after);
     };
 
-    const processMessage: (Model.Message) => Promise<void> = async (
-      msg: Model.Message
-    ) => {
-      this._sqliteMirror.addMessage(msg);
+    const messages = this._paginatedFetch(fetchMessages, "0");
+    for await (const message of messages) {
+      this._sqliteMirror.addMessage(message);
 
-      for (const emoji of msg.reactionEmoji) {
-        await this._fetchReactions(channel, msg.id, emoji);
+      for (const emoji of message.reactionEmoji) {
+        await this._fetchReactions(channel, message.id, emoji);
       }
-    };
-    await this._paginatedFetch(fetchMessages, processMessage, "0");
+    }
   }
 
   async update() {

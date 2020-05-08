@@ -323,45 +323,45 @@ describe("plugins/discord/mirror", () => {
       ]);
     });
   });
-  describe("paginated fetch", () => {
-    it("calls fetch and processes results", async () => {
-      const guildId = "0";
-      const db = new Database(":memory:");
-      const sqliteMirror = new SqliteMirror(db, guildId);
-      const fetcher = new MockFetcher({
-        channels: emptyChannels,
-        members: emptyMembers,
-        messages: emptyMessages,
-        reactions: emptyReactions,
-      });
-      const mirror = new Mirror(guildId, sqliteMirror, fetcher);
-
-      const fetch = jest
-        .fn()
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            results: [1, 2],
-            pageInfo: {hasNextPage: true, endCursor: "2"},
-          })
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            results: [3, 4],
-            pageInfo: {hasNextPage: true, endCursor: "4"},
-          })
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            results: [5],
-            pageInfo: {hasNextPage: false, endCursor: "5"},
-          })
-        );
-
-      const process = jest.fn();
-      await mirror._paginatedFetch(fetch, process, "0");
-
-      expect(fetch.mock.calls).toEqual([["0"], ["2"], ["4"]]);
-      expect(process.mock.calls).toEqual([[1], [2], [3], [4], [5]]);
-    });
-  });
+  //   describe("paginated fetch", () => {
+  //     it("calls fetch and processes results", async () => {
+  //       const guildId = "0";
+  //       const db = new Database(":memory:");
+  //       const sqliteMirror = new SqliteMirror(db, guildId);
+  //       const fetcher = new MockFetcher({
+  //         channels: emptyChannels,
+  //         members: emptyMembers,
+  //         messages: emptyMessages,
+  //         reactions: emptyReactions,
+  //       });
+  //       const mirror = new Mirror(guildId, sqliteMirror, fetcher);
+  //
+  //       const fetch = jest
+  //         .fn()
+  //         .mockImplementationOnce(() =>
+  //           Promise.resolve({
+  //             results: [1, 2],
+  //             pageInfo: {hasNextPage: true, endCursor: "2"},
+  //           })
+  //         )
+  //         .mockImplementationOnce(() =>
+  //           Promise.resolve({
+  //             results: [3, 4],
+  //             pageInfo: {hasNextPage: true, endCursor: "4"},
+  //           })
+  //         )
+  //         .mockImplementationOnce(() =>
+  //           Promise.resolve({
+  //             results: [5],
+  //             pageInfo: {hasNextPage: false, endCursor: "5"},
+  //           })
+  //         );
+  //
+  //       const process = jest.fn();
+  //       await mirror._paginatedFetch(fetch, process, "0");
+  //
+  //       expect(fetch.mock.calls).toEqual([["0"], ["2"], ["4"]]);
+  //       expect(process.mock.calls).toEqual([[1], [2], [3], [4], [5]]);
+  //     });
+  //   });
 });
