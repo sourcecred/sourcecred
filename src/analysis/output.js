@@ -4,12 +4,23 @@
  * This module defines a rich output format for cred scores, so that we can use
  * it to drive UIs and data analysis.
  */
+import * as NullUtil from "../util/null";
+import {NodeAddress} from "../core/graph";
 import type {Alias} from "../plugins/identity/alias";
 import type {PluginDeclaration} from "./pluginDeclaration";
 import type {TimestampMs} from "../util/timestamp";
+import * as Timestamp from "../util/timestamp";
+import {TimelineCred} from "./timeline/timelineCred";
+import {nodeWeightEvaluator} from "../core/algorithm/weightEvaluator";
 
 export type Index = number;
 export type CredFlow = {|+forwards: number, +backwards: number|};
+
+export type Output = OutputV1;
+export const COMPAT_INFO = {
+  type: "sourcecred/analysis/output",
+  version: "0.1.0",
+};
 
 /**
  * Describes an individual node in the contribution graph.
@@ -41,6 +52,33 @@ export type OutputV1 = {|
   +orderedNodes: $ReadOnlyArray<OutputNode>,
   +plugins: $ReadOnlyArray<PluginDeclaration>,
 |};
+
+export function fromTimelineCredAndPlugins(
+  tc: TimelineCred,
+  plugins: $ReadOnlyArray<PluginDeclaration>
+): Output {
+  const {graph, weights} = tc.weightedGraph();
+  const nodeEvaluator = nodeWeightEvaluator(weights);
+  const orderedNodes = Array.from(graph.nodes()).map(
+    ({description, address, timestampMs}) => {
+      const cred = NullUtil.get(tc.credNode(address)).total;
+      // In TimelineCred, a node with a null timestamp will never mint cred, because we don't
+      // know what period to mint it in.
+      // When we transition to CredRank, we should remove this check.
+      const minted = timestampMs == null ? 0 : nodeEvaluator(address);
+      const timestamp =
+        timestampMs == null ? null : Timestamp.fromNumber(timestampMs);
+      return {
+        address: NodeAddress.toParts(address),
+        cred,
+        minted,
+        description,
+        timestamp,
+      };
+    }
+  );
+  return {orderedNodes, plugins};
+}
 
 /**
  * Extra data for Contributors. Note that each Contributor corresponds
