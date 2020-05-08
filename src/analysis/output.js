@@ -16,6 +16,12 @@ import {nodeWeightEvaluator} from "../core/algorithm/weightEvaluator";
 export type Index = number;
 export type CredFlow = {|+forwards: number, +backwards: number|};
 
+export type Output = OutputV1;
+export const COMPAT_INFO = {
+  type: "sourcecred/analysis/output",
+  version: "0.1.0",
+};
+
 /**
  * Describes an individual node in the contribution graph.
  * Includes the information in the raw Graph node, along with scoring
@@ -50,7 +56,7 @@ export type OutputV1 = {|
 export function fromTimelineCredAndPlugins(
   tc: TimelineCred,
   plugins: $ReadOnlyArray<PluginDeclaration>
-): OutputV1 {
+): Output {
   const {graph, weights} = tc.weightedGraph();
   const nodeEvaluator = nodeWeightEvaluator(weights);
   const orderedNodes = Array.from(graph.nodes()).map(

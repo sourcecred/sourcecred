@@ -6,6 +6,7 @@ import dedent from "../util/dedent";
 
 import {help as loadHelp} from "./load";
 import {help as scoresHelp} from "./scores";
+import {help as outputHelp} from "./output";
 import {help as clearHelp} from "./clear";
 import {help as genProjectHelp} from "./genProject";
 import {help as discourseHelp} from "./discourse";
@@ -20,6 +21,7 @@ const help: Command = async (args, std) => {
     help: metaHelp,
     load: loadHelp,
     scores: scoresHelp,
+    output: outputHelp,
     clear: clearHelp,
     "gen-project": genProjectHelp,
     discourse: discourseHelp,
@@ -44,6 +46,7 @@ function usage(print: (string) => void): void {
       load          load repository data into SourceCred
       clear         clear SoucrceCred data
       scores        print SourceCred scores to stdout
+      output        print SourceCred data output to stdout
       gen-project   print a SourceCred project config to stdout
       discourse     load a Discourse server into SourceCred
       help          show this help message
