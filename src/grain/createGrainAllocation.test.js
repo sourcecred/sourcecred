@@ -237,7 +237,7 @@ describe("src/grain/createGrainAllocation", () => {
     };
 
     it("should only pay Foo if Foo is sufficiently underpaid", () => {
-      const lifetimeEarnings = new Map([
+      const lifetimeAllocations = new Map([
         [foo, ZERO],
         [bar, fromApproximateFloat(99)],
       ]);
@@ -252,12 +252,12 @@ describe("src/grain/createGrainAllocation", () => {
         balancedStrategy,
         BUDGET,
         credHistory,
-        lifetimeEarnings
+        lifetimeAllocations
       );
       expectAllocationsEqual(expectedAllocation, actual);
     });
     it("should divide according to cred if everyone is already balanced paid", () => {
-      const lifetimeEarnings = new Map([
+      const lifetimeAllocations = new Map([
         [foo, fromApproximateFloat(5)],
         [bar, fromApproximateFloat(2)],
       ]);
@@ -276,13 +276,13 @@ describe("src/grain/createGrainAllocation", () => {
         balancedStrategy,
         BUDGET,
         credHistory,
-        lifetimeEarnings
+        lifetimeAllocations
       );
       expectAllocationsEqual(expectedAllocation, actual);
     });
-    it("'top off' users who were slightly underpaid'", () => {
+    it("'top off' users who were slightly underpaid", () => {
       // Foo is exactly 1 grain behind where they "should" be
-      const lifetimeEarnings = new Map([
+      const lifetimeAllocations = new Map([
         [foo, fromApproximateFloat(4)],
         [bar, fromApproximateFloat(2)],
       ]);
@@ -303,13 +303,13 @@ describe("src/grain/createGrainAllocation", () => {
         balancedStrategy,
         BUDGET15,
         credHistory,
-        lifetimeEarnings
+        lifetimeAllocations
       );
       expectAllocationsEqual(expectedAllocation, actual);
     });
 
     it("should handle the case where one user has no historical earnings", () => {
-      const lifetimeEarnings = new Map([[foo, fromApproximateFloat(5)]]);
+      const lifetimeAllocations = new Map([[foo, fromApproximateFloat(5)]]);
 
       const expectedReceipts = [
         {address: bar, amount: fromApproximateFloat(2)},
@@ -325,12 +325,12 @@ describe("src/grain/createGrainAllocation", () => {
         balancedStrategy,
         BUDGET2,
         credHistory,
-        lifetimeEarnings
+        lifetimeAllocations
       );
       expectAllocationsEqual(expectedAllocation, actual);
     });
     it("should not break if a user has earnings but no cred", () => {
-      const lifetimeEarnings = new Map([
+      const lifetimeAllocations = new Map([
         [NodeAddress.fromParts(["zoink"]), fromApproximateFloat(10)],
       ]);
 
@@ -348,7 +348,7 @@ describe("src/grain/createGrainAllocation", () => {
         balancedStrategy,
         BUDGET,
         credHistory,
-        lifetimeEarnings
+        lifetimeAllocations
       );
       expectAllocationsEqual(expectedAllocation, actual);
     });

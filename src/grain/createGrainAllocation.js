@@ -74,7 +74,7 @@ export function createGrainAllocation(
   strategy: AllocationStrategy,
   budget: Grain,
   credHistory: CredHistory,
-  lifetimeEarningsMap: Map<NodeAddressT, Grain>
+  lifetimeGrainAllocation: Map<NodeAddressT, Grain>
 ): GrainAllocationV1 {
   if (budget < ZERO) {
     throw new Error(`invalid budget: ${String(budget)}`);
@@ -89,7 +89,7 @@ export function createGrainAllocation(
           strategy,
           budget,
           credHistory,
-          lifetimeEarningsMap
+          lifetimeGrainAllocation
         );
       default:
         throw new Error(`Unexpected type ${strategy.type}`);
@@ -123,15 +123,15 @@ function computeImmediateReceipts(
 
   const lastSlice = credHistory[credHistory.length - 1];
 
-  const credMap = lastSlice.cred;
+  const immediateCredMap = lastSlice.cred;
 
-  const totalCred = sum(credMap.values());
+  const totalCred = sum(immediateCredMap.values());
   if (totalCred === 0) {
     return [];
   }
 
   let totalPaid = ZERO;
-  const receipts = mapToArray(credMap, ([address, cred]) => {
+  const receipts = mapToArray(immediateCredMap, ([address, cred]) => {
     const amount = multiplyFloat(budget, cred / totalCred);
     totalPaid += amount;
     return {
@@ -179,7 +179,7 @@ function computeBalancedReceipts(
   {version}: BalancedV1,
   budget: Grain,
   credHistory: CredHistory,
-  lifetimeEarningsMap: Map<NodeAddressT, Grain>
+  lifetimeGrainAllocation: Map<NodeAddressT, Grain>
 ): $ReadOnlyArray<GrainReceipt> {
   if (version !== 1) {
     throw new Error(`Unsupported BALANCED version: ${version}`);
@@ -189,20 +189,20 @@ function computeBalancedReceipts(
     return [];
   }
 
-  const credMap = new Map();
+  const lifetimeCredMap = new Map();
   for (const {cred} of credHistory) {
     for (const [address, ownCred] of cred.entries()) {
-      const existingCred = credMap.get(address) || 0;
-      credMap.set(address, existingCred + ownCred);
+      const existingCred = lifetimeCredMap.get(address) || 0;
+      lifetimeCredMap.set(address, existingCred + ownCred);
     }
   }
 
   let totalEarnings = ZERO;
-  for (const e of lifetimeEarningsMap.values()) {
+  for (const e of lifetimeGrainAllocation.values()) {
     totalEarnings += e;
   }
   let totalCred = 0;
-  for (const s of credMap.values()) {
+  for (const s of lifetimeCredMap.values()) {
     totalCred += s;
   }
   if (totalCred === 0) {
@@ -216,11 +216,14 @@ function computeBalancedReceipts(
 
   let totalUnderpayment = ZERO;
   const userUnderpayment: Map<NodeAddressT, Grain> = new Map();
-  const addresses = new Set([...credMap.keys(), ...lifetimeEarningsMap.keys()]);
+  const addresses = new Set([
+    ...lifetimeCredMap.keys(),
+    ...lifetimeGrainAllocation.keys(),
+  ]);
 
   for (const addr of addresses) {
-    const earned = lifetimeEarningsMap.get(addr) || ZERO;
-    const cred = credMap.get(addr) || 0;
+    const earned = lifetimeGrainAllocation.get(addr) || ZERO;
+    const cred = lifetimeCredMap.get(addr) || 0;
 
     const target = multiplyFloat(targetGrainPerCred, cred);
     if (target > earned) {
