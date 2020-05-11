@@ -183,7 +183,7 @@ describe("src/grain/createGrainAllocation", () => {
         new Map()
       );
       // $ExpectFlowError
-      const HALF = ONE / 2n;
+      const HALF = BUDGET / 2n;
       const expectedReceipts = [
         {address: foo, amount: HALF},
         {address: bar, amount: HALF},
@@ -199,8 +199,8 @@ describe("src/grain/createGrainAllocation", () => {
         new Map()
       );
       // $ExpectFlowError
-      const ONE_TENTH = ONE / 10n;
-      const NINE_TENTHS = ONE - ONE_TENTH;
+      const ONE_TENTH = BUDGET / 10n;
+      const NINE_TENTHS = BUDGET - ONE_TENTH;
       const expectedReceipts = [
         {address: foo, amount: NINE_TENTHS},
         {address: bar, amount: ONE_TENTH},
@@ -262,6 +262,9 @@ describe("src/grain/createGrainAllocation", () => {
         [bar, fromApproximateFloat(2)],
       ]);
 
+      // Total cred is foo: 10, bar: 4, past allocations are exactly half this
+      // Since we are distributing 14g, we expect it to be proportional to
+      // their cred scores since past allocations are already "balanced"
       const expectedReceipts = [
         {address: foo, amount: fromApproximateFloat(10)},
         {address: bar, amount: fromApproximateFloat(4)},
