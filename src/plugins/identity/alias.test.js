@@ -1,9 +1,10 @@
 // @flow
 
-import {resolveAlias} from "./alias";
+import {resolveAlias, toAlias} from "./alias";
 import {loginAddress as githubAddress} from "../github/nodes";
 import {userAddress as discourseAddress} from "../discourse/address";
 import {identityAddress} from "./identity";
+import {NodeAddress} from "../../core/graph";
 
 describe("src/plugins/identity/alias", () => {
   describe("resolveAlias", () => {
@@ -88,6 +89,25 @@ describe("src/plugins/identity/alias", () => {
         const b = resolveAlias("sourcecred/@example", null);
         expect(a).toEqual(b);
       });
+    });
+  });
+  describe("toAlias", () => {
+    function checkRoundTrip(alias) {
+      const addr = resolveAlias(alias, "https://example.com");
+      expect(toAlias(addr)).toEqual(alias);
+    }
+    it("works for a GitHub node address", () => {
+      checkRoundTrip("github/example");
+    });
+    it("works for a Discourse node address", () => {
+      checkRoundTrip("discourse/example");
+    });
+    it("works for a identity node address", () => {
+      checkRoundTrip("sourcecred/example");
+    });
+    it("returns null for an address without an aliasing scheme", () => {
+      const address = NodeAddress.fromParts(["sourcecred", "plugin", "foo"]);
+      expect(toAlias(address)).toEqual(null);
     });
   });
 });
