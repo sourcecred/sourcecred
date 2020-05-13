@@ -7,7 +7,6 @@ import {
   NodeAddress,
 } from "../../core/graph";
 import * as Weights from "../../core/weights";
-import * as Timestamp from "../../util/timestamp";
 import sortBy from "../../util/sortBy";
 import type {ReferenceDetector, URL} from "../../core/references";
 import {createWeightedGraph, initiativeWeight} from "./createGraph";
@@ -30,7 +29,7 @@ import {
 const exampleEntry = (overrides: $Shape<NodeEntry>): NodeEntry => ({
   key: overrides.title ? _titleSlug(overrides.title) : "sample-title",
   title: "Sample title",
-  timestampMs: Timestamp.fromNumber(123),
+  timestampMs: 123,
   contributors: [],
   weight: 456,
   ...overrides,
@@ -40,7 +39,7 @@ function _createInitiative(overrides?: $Shape<Initiative>): Initiative {
   return {
     id: createId("UNSET_SUBTYPE", "42"),
     title: "Unset test initiative",
-    timestampMs: Timestamp.fromNumber(123),
+    timestampMs: 123,
     completed: false,
     contributions: {urls: [], entries: []},
     dependencies: {urls: [], entries: []},
@@ -66,7 +65,7 @@ class MockInitiativeRepository implements InitiativeRepository {
     const initiative = _createInitiative({
       id: createId("TEST_SUBTYPE", String(num)),
       title: `Example Initiative ${num}`,
-      timestampMs: Timestamp.fromNumber(400 + num),
+      timestampMs: 400 + num,
       ...shape,
     });
 

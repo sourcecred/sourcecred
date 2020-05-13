@@ -1,7 +1,6 @@
 // @flow
 
 import {type TimestampMs} from "../../util/timestamp";
-import * as Timestamp from "../../util/timestamp";
 import {type NodeEntry} from "./nodeEntry";
 import {
   type EdgeSpec,
@@ -14,7 +13,7 @@ import {
 const exampleEntry = (overrides: $Shape<NodeEntry>): NodeEntry => ({
   key: "sample-title",
   title: "Sample title",
-  timestampMs: Timestamp.fromNumber(123),
+  timestampMs: 123,
   contributors: [],
   weight: 456,
   ...overrides,
@@ -23,7 +22,7 @@ const exampleEntry = (overrides: $Shape<NodeEntry>): NodeEntry => ({
 describe("plugins/initiatives/edgeSpec", () => {
   describe("normalizeEdgeSpec", () => {
     it("should add empty arrays when missing", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(321);
+      const timestampMs: TimestampMs = 321;
       const json: EdgeSpecJson = {};
 
       const actual = normalizeEdgeSpec(json, timestampMs);
@@ -31,7 +30,7 @@ describe("plugins/initiatives/edgeSpec", () => {
     });
 
     it("should preserve urls when present", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(321);
+      const timestampMs: TimestampMs = 321;
       const json: EdgeSpecJson = {
         urls: ["https://foo.bar/a", "https://foo.bar/b"],
       };
@@ -41,7 +40,7 @@ describe("plugins/initiatives/edgeSpec", () => {
     });
 
     it("should normalize any entries from json format", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(321);
+      const timestampMs: TimestampMs = 321;
       const json: EdgeSpecJson = {
         entries: [{title: "Minimal example"}],
       };
@@ -62,7 +61,7 @@ describe("plugins/initiatives/edgeSpec", () => {
     });
 
     it("should throw on entries with the same key", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(321);
+      const timestampMs: TimestampMs = 321;
       const json: EdgeSpecJson = {
         entries: [
           {key: "1", title: "first"},

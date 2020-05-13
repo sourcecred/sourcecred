@@ -1,7 +1,7 @@
 // @flow
 
 import type {TimestampMs, TimestampISO} from "./timestamp";
-import {fromISO, toISO, fromNumber} from "./timestamp";
+import {fromISO, toISO, validate} from "./timestamp";
 
 /**
  * Helper function to write readable "toThrow" tests. This intentionally
@@ -33,14 +33,14 @@ describe("util/timestamp", () => {
   describe("roundtrips", () => {
     it("should handle number roundtrips", () => {
       const origin: number = fullExample.ms;
-      expect(fromNumber(origin)).toBe(origin);
+      expect(validate(origin)).toBe(origin);
       expect(fromISO(toISO(origin))).toBe(origin);
-      expect(fromNumber(fromISO(toISO(origin)))).toBe(origin);
+      expect(validate(fromISO(toISO(origin)))).toBe(origin);
     });
     it("should handle ISO roundtrips", () => {
       const origin: TimestampISO = fullExample.ISO;
       expect(toISO(fromISO(origin))).toBe(origin);
-      expect(toISO(fromNumber(fromISO(origin)))).toBe(origin);
+      expect(toISO(validate(fromISO(origin)))).toBe(origin);
     });
   });
 
@@ -96,34 +96,34 @@ describe("util/timestamp", () => {
     });
   });
 
-  describe("fromNumber", () => {
+  describe("validate", () => {
     it("should throw on null", () => {
-      given(null).expect(fromNumber).toThrow(TypeError);
+      given(null).expect(validate).toThrow(TypeError);
     });
     it("should throw on undefined", () => {
-      given(undefined).expect(fromNumber).toThrow(TypeError);
+      given(undefined).expect(validate).toThrow(TypeError);
     });
     it("should throw on NaN", () => {
-      given(NaN).expect(fromNumber).toThrow(TypeError);
+      given(NaN).expect(validate).toThrow(TypeError);
     });
     it("should throw on Infinity", () => {
-      given(Infinity).expect(fromNumber).toThrow(TypeError);
+      given(Infinity).expect(validate).toThrow(TypeError);
     });
     it("should throw on floating point numbers", () => {
       given(1 / 3)
-        .expect(fromNumber)
+        .expect(validate)
         .toThrow(TypeError);
     });
     it("should handle 0 correctly", () => {
-      expect(fromNumber(0)).toBe(0);
+      expect(validate(0)).toBe(0);
     });
     it("should handle Date.now correctly", () => {
       const now = Date.now();
-      expect(fromNumber(now)).toBe(now);
+      expect(validate(now)).toBe(now);
     });
     it("should handle examples correctly", () => {
-      expect(fromNumber(fullExample.ms)).toBe(fullExample.ms);
-      expect(fromNumber(partialExample.ms)).toBe(partialExample.ms);
+      expect(validate(fullExample.ms)).toBe(fullExample.ms);
+      expect(validate(partialExample.ms)).toBe(partialExample.ms);
     });
   });
 });

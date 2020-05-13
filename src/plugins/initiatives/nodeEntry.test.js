@@ -52,14 +52,14 @@ describe("plugins/initiatives/nodeEntry", () => {
 
   describe("normalizeNodeEntry", () => {
     it("should throw without a title", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(123);
+      const timestampMs: TimestampMs = 123;
       const entry: NodeEntryJson = {key: "no-title"};
       const f = () => normalizeNodeEntry(entry, timestampMs);
       expect(f).toThrow(TypeError);
     });
 
     it("should handle a minimal entry", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(123);
+      const timestampMs = 123;
       const entry: NodeEntryJson = {title: "Most minimal"};
       const expected: NodeEntry = {
         title: "Most minimal",
@@ -72,7 +72,7 @@ describe("plugins/initiatives/nodeEntry", () => {
     });
 
     it("should handle an entry with weights", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(123);
+      const timestampMs: TimestampMs = 123;
       const entry: NodeEntryJson = {title: "Include weight", weight: 42};
       const expected: NodeEntry = {
         title: "Include weight",
@@ -85,7 +85,7 @@ describe("plugins/initiatives/nodeEntry", () => {
     });
 
     it("should handle an entry with contributors", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(123);
+      const timestampMs: TimestampMs = 123;
       const entry: NodeEntryJson = {
         title: "Include contributors",
         contributors: ["https://foo.bar/u/abc"],
@@ -101,7 +101,7 @@ describe("plugins/initiatives/nodeEntry", () => {
     });
 
     it("should handle an entry with timestamp", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(123);
+      const timestampMs: TimestampMs = 123;
       const entry: NodeEntryJson = {
         title: "Include timestamp",
         timestampIso: Timestamp.toISO(Date.parse("2018-02-03T12:34:56.789Z")),
@@ -110,16 +110,14 @@ describe("plugins/initiatives/nodeEntry", () => {
         title: "Include timestamp",
         key: "include-timestamp",
         contributors: [],
-        timestampMs: Timestamp.fromNumber(
-          Date.parse("2018-02-03T12:34:56.789Z")
-        ),
+        timestampMs: Date.parse("2018-02-03T12:34:56.789Z"),
         weight: null,
       };
       expect(normalizeNodeEntry(entry, timestampMs)).toEqual(expected);
     });
 
     it("should handle an entry with key", () => {
-      const timestampMs: TimestampMs = Timestamp.fromNumber(123);
+      const timestampMs: TimestampMs = 123;
       const entry: NodeEntryJson = {
         title: "Include key",
         key: "much-different-key",
