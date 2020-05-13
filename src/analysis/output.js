@@ -9,7 +9,6 @@ import {NodeAddress} from "../core/graph";
 import type {Alias} from "../plugins/identity/alias";
 import type {PluginDeclaration} from "./pluginDeclaration";
 import type {TimestampMs} from "../util/timestamp";
-import * as Timestamp from "../util/timestamp";
 import {TimelineCred} from "./timeline/timelineCred";
 import {nodeWeightEvaluator} from "../core/algorithm/weightEvaluator";
 
@@ -66,14 +65,12 @@ export function fromTimelineCredAndPlugins(
       // know what period to mint it in.
       // When we transition to CredRank, we should remove this check.
       const minted = timestampMs == null ? 0 : nodeEvaluator(address);
-      const timestamp =
-        timestampMs == null ? null : Timestamp.fromNumber(timestampMs);
       return {
         address: NodeAddress.toParts(address),
         cred,
         minted,
         description,
-        timestamp,
+        timestamp: timestampMs,
       };
     }
   );

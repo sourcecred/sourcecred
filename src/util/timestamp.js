@@ -9,7 +9,7 @@
  */
 
 // A timestamp representation in ms since epoch.
-export opaque type TimestampMs: number = number;
+export type TimestampMs = number;
 
 // A timestamp representation in ISO 8601 format.
 export opaque type TimestampISO: string = string;
@@ -22,7 +22,7 @@ export opaque type TimestampISO: string = string;
  * than a forced refactor across the codebase.
  */
 export function toISO(timestampLike: TimestampMs | number): TimestampISO {
-  const timestampMs: TimestampMs = fromNumber(timestampLike);
+  const timestampMs: TimestampMs = validate(timestampLike);
   return new Date(timestampMs).toISOString();
 }
 
@@ -47,13 +47,12 @@ export function fromISO(timestampISO: TimestampISO): TimestampMs {
 }
 
 /**
- * Creates a TimestampMs from a number input.
+ * Validate that a number is potentially a valid timestamp.
  *
- * Since much of the previous types have used `number` as a type instead of
- * TimestampMs. Accepting `number` will give an easier upgrade path, rather
- * than a forced refactor across the codebase.
+ * This checks that the number is a finite integer, which avoids some potential
+ * numbers that are not valid timestamps.
  */
-export function fromNumber(timestampMs: number): TimestampMs {
+export function validate(timestampMs: number): TimestampMs {
   const asNumber = Number(timestampMs);
   if (
     timestampMs === null ||
