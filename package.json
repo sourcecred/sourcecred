@@ -52,7 +52,7 @@
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.0.1",
     "babel-loader": "^8.0.6",
-    "copy-webpack-plugin": "^5.1.1",
+    "copy-webpack-plugin": "^6.0.0",
     "css-loader": "^3.4.2",
     "dotenv": "^8.2.0",
     "dotenv-expand": "^5.1.0",
