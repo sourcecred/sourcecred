@@ -122,6 +122,31 @@ describe("core/algorithm/graphToMarkovChain", () => {
         MapUtil.mapValues(map, (_, v) => sortBy(v, (x) => JSON.stringify(x)));
       expect(canonicalize(actual)).toEqual(canonicalize(expected));
     });
+    it("works on a chain with loops", () => {
+      const loop = edge("loop", n1, n1);
+      const e1 = edge("e1", n1, n2);
+
+      const g = new Graph().addNode(n1).addNode(n2).addEdge(loop).addEdge(e1);
+      const edgeWeight = () => ({forwards: 6.0, backwards: 3.0});
+      const actual = createConnections(g, edgeWeight, 1.0);
+      // Total out-weights (for normalization factors):
+      //   - for `n1`: 2 out, 1 in, 1 synthetic: 12 + 3 + 1 = 16
+      //   - for `n2`: 0 out, 1 in, 1 synthetic: 0 + 3 + 1 = 7
+      const expected = new Map()
+        .set(n1.address, [
+          {adjacency: {type: "SYNTHETIC_LOOP"}, weight: 1 / 16},
+          {adjacency: {type: "IN_EDGE", edge: loop}, weight: 6 / 16},
+          {adjacency: {type: "OUT_EDGE", edge: loop}, weight: 3 / 16},
+          {adjacency: {type: "OUT_EDGE", edge: e1}, weight: 3 / 4},
+        ])
+        .set(n2.address, [
+          {adjacency: {type: "SYNTHETIC_LOOP"}, weight: 1 / 4},
+          {adjacency: {type: "IN_EDGE", edge: e1}, weight: 6 / 16},
+        ]);
+      const canonicalize = (map) =>
+        MapUtil.mapValues(map, (_, v) => sortBy(v, (x) => JSON.stringify(x)));
+      expect(canonicalize(actual)).toEqual(canonicalize(expected));
+    });
   });
 
   describe("createOrderedSparseMarkovChain", () => {
@@ -197,6 +222,33 @@ describe("core/algorithm/graphToMarkovChain", () => {
           {
             neighbor: new Uint32Array([0, 1, 2]),
             weight: new Float64Array([0.5, 1.0, 1.0]),
+          },
+        ],
+      };
+      expect(normalize(osmc)).toEqual(normalize(expected));
+    });
+
+    it("works on a simple chain with a loop edge", () => {
+      // The loop edge will implicitly correspond to one forward edge with weight 2, and one backward edge with weight 1
+      const loop = edge("loop", n1, n1);
+      const e1 = edge("e1", n1, n2);
+
+      const g = new Graph().addNode(n1).addNode(n2).addEdge(e1).addEdge(loop);
+      const edgeWeight = () => ({forwards: 2, backwards: 1});
+      const osmc = createOrderedSparseMarkovChain(
+        createConnections(g, edgeWeight, 0.0)
+      );
+      const expected = {
+        nodeOrder: [n1.address, n2.address],
+        chain: [
+          {
+            neighbor: new Uint32Array([0, 1]),
+            // Reproduce floating point imprecision
+            weight: new Float64Array([2 / 5 + 1 / 5, 1]),
+          },
+          {
+            neighbor: new Uint32Array([0, 1]),
+            weight: new Float64Array([2 / 5, 0]),
           },
         ],
       };
