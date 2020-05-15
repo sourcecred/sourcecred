@@ -18,7 +18,7 @@ export type CredFlow = {|+forwards: number, +backwards: number|};
 export type Output = OutputV1;
 export const COMPAT_INFO = {
   type: "sourcecred/analysis/output",
-  version: "0.1.0",
+  version: "0.2.0",
 };
 
 /**
@@ -33,6 +33,10 @@ export const COMPAT_INFO = {
 export type OutputNode = {|
   +address: $ReadOnlyArray<string>,
   +cred: number,
+  // Full cred over time (aligned with output interval boundaries).
+  // It's optional because it inflates the output size a lot -- we'll
+  // want to filter out low-cred nodes for large projects
+  +credOverTime: ?$ReadOnlyArray<number>,
   +minted: number,
   +timestamp: TimestampMs | null,
   // Description comes from the underlying Graph node, so it's determined by the
@@ -50,6 +54,8 @@ export type OutputV1 = {|
   // Ordered by address
   +orderedNodes: $ReadOnlyArray<OutputNode>,
   +plugins: $ReadOnlyArray<PluginDeclaration>,
+  // Interval endpoints, aligned with credOverTime
+  +intervalEndpoints: $ReadOnlyArray<TimestampMs>,
 |};
 
 export function fromTimelineCredAndPlugins(
@@ -58,23 +64,26 @@ export function fromTimelineCredAndPlugins(
 ): Output {
   const {graph, weights} = tc.weightedGraph();
   const nodeEvaluator = nodeWeightEvaluator(weights);
+  const intervalEndpoints = tc.intervals().map((x) => x.endTimeMs);
   const orderedNodes = Array.from(graph.nodes()).map(
     ({description, address, timestampMs}) => {
-      const cred = NullUtil.get(tc.credNode(address)).total;
+      const {cred, total} = NullUtil.get(tc.credNode(address));
       // In TimelineCred, a node with a null timestamp will never mint cred, because we don't
       // know what period to mint it in.
       // When we transition to CredRank, we should remove this check.
       const minted = timestampMs == null ? 0 : nodeEvaluator(address);
       return {
         address: NodeAddress.toParts(address),
-        cred,
+        cred: total,
+        // todo: add optional filtering to reduce the data size
+        credOverTime: cred,
         minted,
         description,
         timestamp: timestampMs,
       };
     }
   );
-  return {orderedNodes, plugins};
+  return {orderedNodes, plugins, intervalEndpoints};
 }
 
 /**
@@ -115,7 +124,7 @@ export type OutputV2 = {|
   +orderedNodes: $ReadOnlyArray<OutputNode>,
   +plugins: $ReadOnlyArray<PluginDeclaration>,
   +contributors: $ReadOnlyArray<Contributor>,
-  +intervalEnd: $ReadOnlyArray<TimestampMs>,
+  +intervalEndpoints: $ReadOnlyArray<TimestampMs>,
 |};
 
 /**
