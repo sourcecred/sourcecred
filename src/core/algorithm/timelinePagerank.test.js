@@ -4,7 +4,10 @@ import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
 import {node, edge} from "../graphTestUtil";
 import {Graph, type EdgeAddressT, type Edge} from "../graph";
-import {_timelineNodeWeights, _timelineMarkovChain} from "./timelinePagerank";
+import {
+  _timelineNodeWeights,
+  _timelineNodeToConnections,
+} from "./timelinePagerank";
 import {
   createConnections,
   createOrderedSparseMarkovChain,
@@ -51,7 +54,7 @@ describe("src/core/algorithm/timelinePagerank", () => {
     });
   });
 
-  describe("_timelineMarkovChain", () => {
+  describe("_timelineNodeToConnections", () => {
     it("works for a simple case", () => {
       const a = node("a");
       const b = node("b");
@@ -64,19 +67,21 @@ describe("src/core/algorithm/timelinePagerank", () => {
       ): SparseMarkovChain {
         const edgeWeight = (e: Edge) =>
           NullUtil.orElse(w.get(e.address), {forwards: 0, backwards: 0});
-        const connections = createConnections(graph, edgeWeight, 1e-3);
-        return createOrderedSparseMarkovChain(connections).chain;
+        const nodeToConnections = createConnections(graph, edgeWeight, 1e-3);
+        return createOrderedSparseMarkovChain(nodeToConnections).chain;
       }
 
       const edgeCreationHistory = [[], [e1], [], [e2]];
       const edgeEvaluator = (_) => ({forwards: 1, backwards: 0});
-      const chainIterator = _timelineMarkovChain(
+      const nodeToConnectionsIterator = _timelineNodeToConnections(
         graph,
         edgeCreationHistory,
         edgeEvaluator,
         0.5
       );
-      const chains = Array.from(chainIterator);
+      const chains = Array.from(nodeToConnectionsIterator).map(
+        (x) => createOrderedSparseMarkovChain(x).chain
+      );
 
       const w1 = new Map();
       const chain1 = weightsToChain(w1);

@@ -20,12 +20,9 @@ import {type Distribution} from "./distribution";
 import {
   createOrderedSparseMarkovChain,
   createConnections,
+  type NodeToConnections,
 } from "./graphToMarkovChain";
-import {
-  findStationaryDistribution,
-  type PagerankParams,
-  type SparseMarkovChain,
-} from "./markovChain";
+import {findStationaryDistribution, type PagerankParams} from "./markovChain";
 
 /**
  * Represents raw PageRank distributions on a graph over time.
@@ -127,7 +124,7 @@ export async function timelinePagerank(
     nodeEvaluator,
     intervalDecay
   );
-  const markovChainIterator = _timelineMarkovChain(
+  const nodeToConnectionsIterator = _timelineNodeToConnections(
     weightedGraph.graph,
     edgeCreationHistory,
     edgeEvaluator,
@@ -137,7 +134,7 @@ export async function timelinePagerank(
     nodeOrder,
     intervals,
     nodeWeightIterator,
-    markovChainIterator,
+    nodeToConnectionsIterator,
     alpha
   );
 }
@@ -166,12 +163,12 @@ export function* _timelineNodeWeights(
   }
 }
 
-export function* _timelineMarkovChain(
+export function* _timelineNodeToConnections(
   graph: Graph,
   edgeCreationHistory: $ReadOnlyArray<$ReadOnlyArray<Edge>>,
   edgeEvaluator: EdgeWeightEvaluator,
   intervalDecay: number
-): Iterator<SparseMarkovChain> {
+): Iterator<NodeToConnections> {
   const edgeWeights = new Map();
   for (const edges of edgeCreationHistory) {
     for (const [address, {forwards, backwards}] of edgeWeights.entries()) {
@@ -187,19 +184,7 @@ export function* _timelineMarkovChain(
     const currentEdgeWeight = (e: Edge) => {
       return NullUtil.orElse(edgeWeights.get(e.address), defaultEdgeWeight);
     };
-    // Construct a new Markov chain corresponding to the current weights
-    // of the edges.
-    // TODO: Rather than constructing a markov chain from scratch, we can
-    // update the markov chain in-place. This should result in a significant
-    // performance improvement. We will need to change the markov chain
-    // representation to do so (we should add a `totalOutWeight` array to the
-    // chain, so that we can efficiently update the total weight as we add new
-    // connections, rather than needing to re-normalize the whole chain for
-    // each interval).
-    const chain = createOrderedSparseMarkovChain(
-      createConnections(graph, currentEdgeWeight, 1e-3)
-    ).chain;
-    yield chain;
+    yield createConnections(graph, currentEdgeWeight, 1e-3);
   }
 }
 
@@ -209,14 +194,17 @@ export async function _computeTimelineDistribution(
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
   intervals: $ReadOnlyArray<Interval>,
   nodeWeightIterator: Iterator<Map<NodeAddressT, number>>,
-  markovChainIterator: Iterator<SparseMarkovChain>,
+  nodeToConnectionsIterator: Iterator<NodeToConnections>,
   alpha: number
 ): Promise<TimelineDistributions> {
   const results = [];
   let pi0: Distribution | null = null;
   for (const interval of intervals) {
     const nodeWeights = NullUtil.get(nodeWeightIterator.next().value);
-    const chain = NullUtil.get(markovChainIterator.next().value);
+    const nodeToConnections = NullUtil.get(
+      nodeToConnectionsIterator.next().value
+    );
+    const {chain} = createOrderedSparseMarkovChain(nodeToConnections);
 
     const seed = weightedDistribution(nodeOrder, nodeWeights);
     if (pi0 == null) {
