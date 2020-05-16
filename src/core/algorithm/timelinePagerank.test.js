@@ -3,7 +3,7 @@
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
 import {node, edge, advancedGraph} from "../graphTestUtil";
-import {Graph, type EdgeAddressT, type Edge} from "../graph";
+import {Graph, type NodeAddressT, type EdgeAddressT, type Edge} from "../graph";
 import {
   _timelineNodeWeights,
   _timelineNodeToConnections,
@@ -114,6 +114,9 @@ describe("src/core/algorithm/timelinePagerank", () => {
       const edgeFn = (_unused_edge) => ({forwards: 1, backwards: 0.5});
       const nodeToConnections = createConnections(g, edgeFn, 1e-3);
       const nodeOrder = Array.from(g.nodes()).map((x) => x.address);
+      const edgeOrder = Array.from(g.edges({showDangling: false})).map(
+        (x) => x.address
+      );
       const interval = {endTimeMs: 1000, startTimeMs: 0};
       const pi0 = null;
       const alpha = 0.05;
@@ -121,6 +124,7 @@ describe("src/core/algorithm/timelinePagerank", () => {
         nodeWeights,
         nodeToConnections,
         nodeOrder,
+        edgeOrder,
         interval,
         pi0,
         alpha
@@ -129,6 +133,7 @@ describe("src/core/algorithm/timelinePagerank", () => {
         graph: g,
         nodes,
         nodeOrder,
+        edgeOrder,
         nodeWeights,
         edgeFn,
         nodeToConnections,
@@ -164,6 +169,39 @@ describe("src/core/algorithm/timelinePagerank", () => {
       expect(isoScore).toBeCloseTo(2 / 3);
       // src has the weight, and dst doesnt, so it should have a higher score
       expect(srcScore).toBeGreaterThan(dstScore);
+    });
+    it("satisfies the flow conservation invariants", async () => {
+      const {nodeOrder, edgeOrder, result, graph} = await example();
+      const {
+        distribution,
+        forwardFlow,
+        backwardFlow,
+        syntheticLoopFlow,
+        seedFlow,
+      } = result;
+      // For any node: Its score is equal to the sum of:
+      // - The score it received from the seed vector
+      // - The score it received from every in edge
+      // - The score it received from every out edge
+      // - The score it received from its self loop
+      const nodeToExpectedScore = new Map();
+      function addScore(a: NodeAddressT, score: number) {
+        const existing = nodeToExpectedScore.get(a) || 0;
+        nodeToExpectedScore.set(a, existing + score);
+      }
+      nodeOrder.forEach((na, i) => {
+        addScore(na, seedFlow[i] + syntheticLoopFlow[i]);
+      });
+      edgeOrder.forEach((ea, i) => {
+        const {src, dst} = NullUtil.get(graph.edge(ea));
+        addScore(src, backwardFlow[i]);
+        addScore(dst, forwardFlow[i]);
+      });
+      nodeOrder.forEach((na, i) => {
+        const expected = nodeToExpectedScore.get(na);
+        const actual = distribution[i];
+        expect(expected).toBeCloseTo(actual);
+      });
     });
   });
 });
