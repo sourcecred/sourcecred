@@ -6,7 +6,13 @@
 import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
-import {Graph, type NodeAddressT, type Edge, type Node} from "../graph";
+import {
+  Graph,
+  type NodeAddressT,
+  type EdgeAddressT,
+  type Edge,
+  type Node,
+} from "../graph";
 import {type WeightedGraph} from "../weightedGraph";
 import {type Interval, partitionGraph} from "../interval";
 import {
@@ -20,6 +26,7 @@ import {type Distribution} from "./distribution";
 import {
   createOrderedSparseMarkovChain,
   createConnections,
+  adjacencySource,
   type NodeToConnections,
 } from "./graphToMarkovChain";
 import {findStationaryDistribution, type PagerankParams} from "./markovChain";
@@ -34,6 +41,22 @@ export type IntervalResult = {|
   // The raw score distribution over nodes for this interval (i.e. sums to 1).
   // Uses the canonical graph node order.
   +distribution: Distribution,
+  // For each edge, how much forward score flow there was (in terms of raw
+  // probability mass). Uses the canonical graph edge order.
+  +forwardFlow: Distribution,
+  // For each edge, how much backward score flow there was (in terms of raw
+  // probability mass). Uses the canonical graph edge order.
+  +backwardFlow: Distribution,
+  // For each node, how much score flowed along its synthetic self loop edge.
+  +syntheticLoopFlow: Distribution,
+  // For each node, how much score flowed to it from the seed vector.
+  +seedFlow: Distribution,
+  // Invariant: A node's score in the distribution is equal (modulo floating point error)
+  // to the sum of:
+  // - its seedFlow
+  // - its syntheticLoopFlow
+  // - the forwardFlow of each edge for which the node is the destination
+  // - the backwardFlow of each edge for which the node is the source
 |};
 /**
  * Represents raw PageRank distributions on a graph over time.
@@ -120,6 +143,9 @@ export async function timelinePagerank(
   const nodeOrder = Array.from(weightedGraph.graph.nodes()).map(
     (x) => x.address
   );
+  const edgeOrder = Array.from(
+    weightedGraph.graph.edges({showDangling: false})
+  ).map((x) => x.address);
   const nodeWeightIterator = _timelineNodeWeights(
     nodeCreationHistory,
     nodeEvaluator,
@@ -133,6 +159,7 @@ export async function timelinePagerank(
   );
   return _computeTimelineDistribution(
     nodeOrder,
+    edgeOrder,
     intervals,
     nodeWeightIterator,
     nodeToConnectionsIterator,
@@ -193,6 +220,7 @@ export function* _timelineNodeToConnections(
 // Modify with care.
 export async function _computeTimelineDistribution(
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
+  edgeOrder: $ReadOnlyArray<EdgeAddressT>,
   intervals: $ReadOnlyArray<Interval>,
   nodeWeightIterator: Iterator<Map<NodeAddressT, number>>,
   nodeToConnectionsIterator: Iterator<NodeToConnections>,
@@ -200,6 +228,7 @@ export async function _computeTimelineDistribution(
 ): Promise<TimelineDistributions> {
   const results = [];
   let pi0: Distribution | null = null;
+
   for (const interval of intervals) {
     const nodeWeights = NullUtil.get(nodeWeightIterator.next().value);
     const nodeToConnections = NullUtil.get(
@@ -209,6 +238,7 @@ export async function _computeTimelineDistribution(
       nodeWeights,
       nodeToConnections,
       nodeOrder,
+      edgeOrder,
       interval,
       pi0,
       alpha
@@ -225,11 +255,16 @@ export async function _intervalResult(
   nodeWeights: Map<NodeAddressT, number>,
   nodeToConnections: NodeToConnections,
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
+  edgeOrder: $ReadOnlyArray<EdgeAddressT>,
   interval: Interval,
   pi0: Distribution | null,
   alpha: number
 ): Promise<IntervalResult> {
   const {chain} = createOrderedSparseMarkovChain(nodeToConnections);
+  const nodeToIndex: Map<NodeAddressT, number> = new Map();
+  nodeOrder.forEach((a, i) => nodeToIndex.set(a, i));
+  const edgeToIndex: Map<EdgeAddressT, number> = new Map();
+  edgeOrder.forEach((a, i) => edgeToIndex.set(a, i));
 
   const seed = weightedDistribution(nodeOrder, nodeWeights);
   if (pi0 == null) {
@@ -243,9 +278,63 @@ export async function _intervalResult(
     yieldAfterMs: 30,
   });
   const intervalWeight = sum(nodeWeights.values());
+  const forwardFlow = new Float64Array(edgeOrder.length);
+  const backwardFlow = new Float64Array(edgeOrder.length);
+  const syntheticLoopFlow = new Float64Array(nodeOrder.length);
+  const seedFlow = seed.map((x) => x * alpha);
+
+  for (const [target, connections] of nodeToConnections.entries()) {
+    for (const {adjacency, weight} of connections) {
+      // We now iterate over every "adjacency" in the markov chain. Every edge corresponds to
+      // two adjacencies (one forward, one backward), and every synthetic loop also corresponds
+      // to one adjacency.
+      // The adjacencies are used to construct the underling Markov Chain, and crucially their
+      // "weights" are normalized probabilities rather than raw pre-normalized weights. This means
+      // we can now calculate the exact amount of score that flowed along each adjacency.
+      // The score flow on an adjacency is equal to (1-alpha) * (sourceScore * adjacencyWeight),
+      // where sourceScore is the score of the node that is the "source" of that adjacency (the
+      // src for an IN_EDGE adjacency, the dst for an OUT_EDGE adjacency, or the node itself
+      // for a synthetic loop adjacency). Since the sum of the outbound weights for any source
+      // is `1`, we have an invariant that the total outbound score flow for any node is that node's
+      // score times (1-alpha), which satisfies the PageRank property.
+      const source = adjacencySource(target, adjacency);
+      const sourceIndex = NullUtil.get(nodeToIndex.get(source));
+      const contribution =
+        weight * distributionResult.pi[sourceIndex] * (1 - alpha);
+      switch (adjacency.type) {
+        case "SYNTHETIC_LOOP": {
+          syntheticLoopFlow[sourceIndex] = contribution;
+          break;
+        }
+        case "IN_EDGE": {
+          // IN_EDGE from the perspective of the target, i.e. it's forward flow
+          const edgeIndex = NullUtil.get(
+            edgeToIndex.get(adjacency.edge.address)
+          );
+          forwardFlow[edgeIndex] = contribution;
+          break;
+        }
+        case "OUT_EDGE": {
+          // OUT_EDGE from the perspective of the target, i.e. it's backwards flow
+          const edgeIndex = NullUtil.get(
+            edgeToIndex.get(adjacency.edge.address)
+          );
+          backwardFlow[edgeIndex] = contribution;
+          break;
+        }
+        default: {
+          throw new Error((adjacency.type: empty));
+        }
+      }
+    }
+  }
   return {
     interval,
     intervalWeight,
     distribution: distributionResult.pi,
+    forwardFlow,
+    backwardFlow,
+    syntheticLoopFlow,
+    seedFlow,
   };
 }
