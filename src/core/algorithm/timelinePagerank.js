@@ -24,10 +24,7 @@ import {
 } from "./graphToMarkovChain";
 import {findStationaryDistribution, type PagerankParams} from "./markovChain";
 
-/**
- * Represents raw PageRank distributions on a graph over time.
- */
-export type TimelineDistributions = $ReadOnlyArray<{|
+export type IntervalResult = {|
   // The interval for this slice
   +interval: Interval,
   // The total node weight within this interval (normalized to account for the
@@ -37,7 +34,11 @@ export type TimelineDistributions = $ReadOnlyArray<{|
   // The raw score distribution over nodes for this interval (i.e. sums to 1).
   // Uses the canonical graph node order.
   +distribution: Distribution,
-|}>;
+|};
+/**
+ * Represents raw PageRank distributions on a graph over time.
+ */
+export type TimelineDistributions = $ReadOnlyArray<IntervalResult>;
 
 /**
  * Runs timeline PageRank on a graph.
@@ -204,28 +205,47 @@ export async function _computeTimelineDistribution(
     const nodeToConnections = NullUtil.get(
       nodeToConnectionsIterator.next().value
     );
-    const {chain} = createOrderedSparseMarkovChain(nodeToConnections);
-
-    const seed = weightedDistribution(nodeOrder, nodeWeights);
-    if (pi0 == null) {
-      pi0 = seed;
-    }
-    const params: PagerankParams = {chain, alpha, seed, pi0};
-    const distributionResult = await findStationaryDistribution(params, {
-      verbose: false,
-      convergenceThreshold: 1e-7,
-      maxIterations: 255,
-      yieldAfterMs: 30,
-    });
-    const intervalWeight = sum(nodeWeights.values());
-    results.push({
+    const result = await _intervalResult(
+      nodeWeights,
+      nodeToConnections,
+      nodeOrder,
       interval,
-      intervalWeight,
-      distribution: distributionResult.pi,
-    });
+      pi0,
+      alpha
+    );
+    results.push(result);
     // Use the latest convergce results as the starting point for the next run
     // of PageRank
-    pi0 = distributionResult.pi;
+    pi0 = result.distribution;
   }
   return results;
+}
+
+export async function _intervalResult(
+  nodeWeights: Map<NodeAddressT, number>,
+  nodeToConnections: NodeToConnections,
+  nodeOrder: $ReadOnlyArray<NodeAddressT>,
+  interval: Interval,
+  pi0: Distribution | null,
+  alpha: number
+): Promise<IntervalResult> {
+  const {chain} = createOrderedSparseMarkovChain(nodeToConnections);
+
+  const seed = weightedDistribution(nodeOrder, nodeWeights);
+  if (pi0 == null) {
+    pi0 = seed;
+  }
+  const params: PagerankParams = {chain, alpha, seed, pi0};
+  const distributionResult = await findStationaryDistribution(params, {
+    verbose: false,
+    convergenceThreshold: 1e-7,
+    maxIterations: 255,
+    yieldAfterMs: 30,
+  });
+  const intervalWeight = sum(nodeWeights.values());
+  return {
+    interval,
+    intervalWeight,
+    distribution: distributionResult.pi,
+  };
 }
