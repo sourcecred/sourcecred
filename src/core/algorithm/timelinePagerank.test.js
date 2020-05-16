@@ -2,11 +2,12 @@
 
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
-import {node, edge} from "../graphTestUtil";
+import {node, edge, advancedGraph} from "../graphTestUtil";
 import {Graph, type EdgeAddressT, type Edge} from "../graph";
 import {
   _timelineNodeWeights,
   _timelineNodeToConnections,
+  _intervalResult,
 } from "./timelinePagerank";
 import {
   createConnections,
@@ -100,6 +101,69 @@ describe("src/core/algorithm/timelinePagerank", () => {
         .set(e2.address, {forwards: 1, backwards: 0});
       const chain4 = weightsToChain(w4);
       expect(chains[3]).toEqual(chain4);
+    });
+  });
+
+  describe("_intervalResult", () => {
+    async function example() {
+      const {graph1, nodes} = advancedGraph();
+      const g = graph1();
+      const nodeWeights = new Map()
+        .set(nodes.src.address, 1)
+        .set(nodes.isolated.address, 2);
+      const edgeFn = (_unused_edge) => ({forwards: 1, backwards: 0.5});
+      const nodeToConnections = createConnections(g, edgeFn, 1e-3);
+      const nodeOrder = Array.from(g.nodes()).map((x) => x.address);
+      const interval = {endTimeMs: 1000, startTimeMs: 0};
+      const pi0 = null;
+      const alpha = 0.05;
+      const result = await _intervalResult(
+        nodeWeights,
+        nodeToConnections,
+        nodeOrder,
+        interval,
+        pi0,
+        alpha
+      );
+      return {
+        graph: g,
+        nodes,
+        nodeOrder,
+        nodeWeights,
+        edgeFn,
+        nodeToConnections,
+        interval,
+        pi0,
+        alpha,
+        result,
+      };
+    }
+    it("passes through the interval", async () => {
+      const {result, interval} = await example();
+      expect(result.interval).toEqual(interval);
+    });
+    it("computes the summed nodeWeight", async () => {
+      const {result, nodeWeights} = await example();
+      const actualIntervalWeight = sum(nodeWeights.values());
+      expect(result.intervalWeight).toEqual(actualIntervalWeight);
+    });
+    it("produces sane score distribution on an example graph", async () => {
+      const {result, nodes, nodeOrder} = await example();
+      function getScore(a) {
+        const idx = nodeOrder.indexOf(a.address);
+        if (idx === -1) {
+          throw new Error("bad address");
+        }
+        return result.distribution[idx];
+      }
+      const isoScore = getScore(nodes.isolated);
+      const srcScore = getScore(nodes.src);
+      const dstScore = getScore(nodes.dst);
+      expect(isoScore + srcScore + dstScore).toBeCloseTo(1);
+      // It has 2/3rd weight, and is isolated, so it's simple
+      expect(isoScore).toBeCloseTo(2 / 3);
+      // src has the weight, and dst doesnt, so it should have a higher score
+      expect(srcScore).toBeGreaterThan(dstScore);
     });
   });
 });
