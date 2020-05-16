@@ -3,7 +3,7 @@
     "createdAt": "2018-02-28T08:37:14Z",
     "defaultBranchRef": {
         "__typename": "Ref",
-        "id": "MDM6UmVmMTIzMjU1MDA2Om1hc3Rlcg==",
+        "id": "MDM6UmVmMTIzMjU1MDA2OnJlZnMvaGVhZHMvbWFzdGVy",
         "target": {
             "__typename": "Commit",
             "author": {
