@@ -15,6 +15,7 @@ import {
 
 import {makeRepoId} from "../plugins/github/repoId";
 import {toCompat} from "../util/compat";
+import type {ProjectV050} from "./project";
 
 describe("core/project", () => {
   const foobar = deepFreeze(makeRepoId("foo", "bar"));
@@ -25,6 +26,7 @@ describe("core/project", () => {
     discourseServer: null,
     initiatives: null,
     identities: [],
+    params: {},
   });
   const p2: Project = deepFreeze({
     id: "@foo",
@@ -37,6 +39,7 @@ describe("core/project", () => {
         aliases: ["github/example"],
       },
     ],
+    params: {},
   });
   describe("to/from JSON", () => {
     it("round trip is identity", () => {
@@ -74,6 +77,7 @@ describe("core/project", () => {
           // It should strip the apiUsername field, keeping just serverUrl.
           discourseServer: {serverUrl: "https://example.com"},
           initiatives: null,
+          params: {},
         }: Project)
       );
     });
@@ -103,6 +107,7 @@ describe("core/project", () => {
           // It should strip the apiUsername field, keeping just serverUrl.
           discourseServer: {serverUrl: "https://example.com"},
           initiatives: null,
+          params: {},
         }: Project)
       );
     });
@@ -128,6 +133,33 @@ describe("core/project", () => {
           ...body,
           // It should add a default initiatives field.
           initiatives: null,
+          params: {},
+        }: Project)
+      );
+    });
+    it("should upgrade from 0.5.0 formatting", () => {
+      // Given
+      const body: ProjectV050 = {
+        id: "example-050",
+        repoIds: [foobar, foozod],
+        discourseServer: {serverUrl: "https://example.com"},
+        identities: [],
+        initiatives: null,
+      };
+      const compat = toCompat(
+        {type: "sourcecred/project", version: "0.5.0"},
+        body
+      );
+
+      // When
+      const project = projectFromJSON(compat);
+
+      // Then
+      expect(project).toEqual(
+        ({
+          ...body,
+          // It should add default params field.
+          params: {},
         }: Project)
       );
     });
@@ -169,6 +201,7 @@ describe("core/project", () => {
         initiatives: null,
         repoIds: [],
         identities: [],
+        params: {},
       });
     });
     it("treats input shape as overrides", () => {
@@ -185,6 +218,7 @@ describe("core/project", () => {
             aliases: ["github/example"],
           },
         ],
+        params: {alpha: 0.2, intervalDecay: 0.5},
       };
 
       // When

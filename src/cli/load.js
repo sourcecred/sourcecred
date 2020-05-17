@@ -14,7 +14,7 @@ import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {declaration as discourseDeclaration} from "../plugins/discourse/declaration";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";
 import {declaration as identityDeclaration} from "../plugins/identity/declaration";
-import {defaultParams} from "../analysis/timeline/params";
+import {partialParams} from "../analysis/timeline/params";
 
 function usage(print: (string) => void): void {
   print(
@@ -142,9 +142,11 @@ const loadCommand: Command = async (args, std) => {
     if (project.identities.length) {
       plugins.push(identityDeclaration);
     }
+    const params = partialParams(project.params);
+
     return {
       project,
-      params: defaultParams(),
+      params,
       weightsOverrides: weights,
       plugins,
       sourcecredDirectory: Common.sourcecredDirectory(),

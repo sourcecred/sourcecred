@@ -38,6 +38,7 @@ describe("core/project_io", () => {
     discourseServer: {serverUrl: "https://example.com"},
     identities: [{username: "foo", aliases: ["github/foo", "discourse/foo"]}],
     initiatives: {remoteUrl: "https://example.com/initiatives"},
+    params: {alpha: 0.2, intervalDecay: 0.5},
   });
 
   it("setupProjectDirectory results in a loadable project", async () => {

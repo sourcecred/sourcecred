@@ -6,6 +6,7 @@ import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import {type ProjectParameters as Initiatives} from "../plugins/initiatives/params";
 import {type Identity} from "../plugins/identity/identity";
 import {type DiscourseServer} from "../plugins/discourse/server";
+import type {TimelineCredParameters} from "../analysis/timeline/params";
 
 export type ProjectId = string;
 
@@ -25,22 +26,24 @@ export type ProjectId = string;
  * the future (e.g. showing the last update time for each of the project's data
  * dependencies).
  */
-export type Project = ProjectV050;
+export type Project = ProjectV051;
 export type SupportedProject =
   | ProjectV030
   | ProjectV031
   | ProjectV040
+  | ProjectV051
   | ProjectV050;
 
-export type ProjectV050 = {|
+export type ProjectV051 = {|
   +id: ProjectId,
   +initiatives: Initiatives | null,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,
   +identities: $ReadOnlyArray<Identity>,
+  +params: $Shape<TimelineCredParameters>,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/project", version: "0.5.0"};
+const COMPAT_INFO = {type: "sourcecred/project", version: "0.5.1"};
 
 /**
  * Creates a new Project instance with default values.
@@ -57,6 +60,7 @@ export function createProject(p: $Shape<Project>): Project {
     identities: [],
     discourseServer: null,
     initiatives: null,
+    params: {},
     ...p,
   };
 }
@@ -79,10 +83,24 @@ export function encodeProjectId(id: ProjectId): string {
   return base64url.encode(id);
 }
 
-const upgradeFrom040 = (p: ProjectV040): ProjectV050 => ({
+const upgradeFrom050 = (p: ProjectV050): ProjectV051 => ({
   ...p,
-  initiatives: null,
+  params: {},
 });
+
+export type ProjectV050 = {|
+  +id: ProjectId,
+  +initiatives: Initiatives | null,
+  +repoIds: $ReadOnlyArray<RepoId>,
+  +discourseServer: DiscourseServer | null,
+  +identities: $ReadOnlyArray<Identity>,
+|};
+
+const upgradeFrom040 = (p: ProjectV040) =>
+  upgradeFrom050({
+    ...p,
+    initiatives: null,
+  });
 
 export type ProjectV040 = {|
   +id: ProjectId,
@@ -124,4 +142,5 @@ const upgrades = {
   "0.3.0": upgradeFrom030,
   "0.3.1": upgradeFrom030,
   "0.4.0": upgradeFrom040,
+  "0.5.0": upgradeFrom050,
 };
