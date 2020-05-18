@@ -122,5 +122,15 @@ describe("src/analysis/output", () => {
         expect(cred).toEqual(credNode.total);
       }
     });
+    it("by default, all nodes have cred over time", () => {
+      const {output, timelineCred} = example();
+      for (const {address, credOverTime} of output.orderedNodes) {
+        const credNode = timelineCred.credNode(NodeAddress.fromParts(address));
+        if (credNode == null) {
+          throw new Error("Can't find node");
+        }
+        expect(credOverTime).toEqual(credNode.cred);
+      }
+    });
   });
 });
