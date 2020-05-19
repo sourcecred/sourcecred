@@ -17,6 +17,7 @@ import {
   testMessage,
   customEmoji,
   genericEmoji,
+  buildNMessages,
 } from "./testUtils";
 
 describe("plugins/discord/sqliteMirror", () => {
@@ -222,8 +223,37 @@ describe("plugins/discord/sqliteMirror", () => {
         channel_id: "2",
         author_id: "3",
         non_user_author: 0,
-        timestamp_ms: 1583278510615,
+        timestamp_ms: 2,
         content: "Just going to drop this here",
+      });
+    });
+
+    describe("nthMessageIdFromTail", () => {
+      const channelId: Snowflake = "1";
+      const authorId: Snowflake = "2";
+
+      it("retrieves nth message from tail", () => {
+        const db = new Database(":memory:");
+        const sqliteMirror = new SqliteMirror(db, "0");
+        buildNMessages(5, sqliteMirror, channelId, authorId);
+        expect(sqliteMirror.messages(channelId).map((x) => x.id)).toEqual([
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+        ]);
+        expect(sqliteMirror.nthMessageIdFromTail(channelId, 4)).toBe("2");
+      });
+      it("returns undefined when n is greater than message count", () => {
+        const db = new Database(":memory:");
+        const sqliteMirror = new SqliteMirror(db, "0");
+        buildNMessages(2, sqliteMirror, channelId, authorId);
+        expect(sqliteMirror.messages(channelId).map((x) => x.id)).toEqual([
+          "1",
+          "2",
+        ]);
+        expect(sqliteMirror.nthMessageIdFromTail(channelId, 3)).toBe(undefined);
       });
     });
 

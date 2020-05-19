@@ -497,4 +497,21 @@ export class SqliteMirror {
       .all({channel_id: channel, message_id: message})
       .map((e) => Model.refToEmoji(e.emoji));
   }
+
+  // returns undefined if n is greater than the number of messages in the channel
+  nthMessageIdFromTail(channel: Model.Snowflake, n: number): ?Model.Snowflake {
+    return this._db
+      .prepare(
+        dedent`
+          SELECT id
+          FROM messages
+          WHERE channel_id = :channel_id
+          ORDER BY timestamp_ms DESC
+          LIMIT 1
+          OFFSET :offset
+        `
+      )
+      .pluck()
+      .get({channel_id: channel, offset: n - 1});
+  }
 }

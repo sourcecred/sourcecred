@@ -9,6 +9,7 @@ import {
   type User,
   type Reaction,
 } from "./models";
+import {type SqliteMirror} from "./sqliteMirror";
 
 export const customEmoji = (): Emoji => ({id: "id", name: "name"});
 export const genericEmoji = (): Emoji => ({id: null, name: "🐙"});
@@ -29,7 +30,7 @@ export const testMessage = (
   id: id,
   channelId: channelId,
   authorId: authorId,
-  timestampMs: Date.parse("2020-03-03T23:35:10.615000+00:00"),
+  timestampMs: Number(id) * 2,
   content: "Just going to drop this here",
   reactionEmoji: reactionEmoji || [],
   nonUserAuthor: false,
@@ -60,3 +61,28 @@ export const testReaction = (
     emoji: customEmoji(),
   };
 };
+
+// creates n messages indexed from 1 and saves them to provided sqliteMirror
+export function buildNMessages(
+  n: number,
+  sqliteMirror: SqliteMirror,
+  channelId: Snowflake,
+  authorId: Snowflake
+) {
+  sqliteMirror.addUser(testUser(authorId));
+  sqliteMirror.addChannel(testChannel(channelId));
+
+  for (let x = 1; x <= n; x++) {
+    const message = {
+      id: String(x),
+      channelId: channelId,
+      authorId: authorId,
+      timestampMs: Number(x) * 2,
+      content: "content",
+      reactionEmoji: [],
+      nonUserAuthor: false,
+      mentions: [],
+    };
+    sqliteMirror.addMessage(message);
+  }
+}
