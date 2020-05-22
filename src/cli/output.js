@@ -1,15 +1,12 @@
 // @flow
 // Implementation of `sourcecred output`.
 
-import {fromJSON as pluginsFromJSON} from "../analysis/pluginDeclaration";
-import {fromTimelineCredAndPlugins} from "../analysis/output";
 import path from "path";
 import fs from "fs-extra";
 import dedent from "../util/dedent";
 import type {Command} from "./command";
 import * as Common from "./common";
 import stringify from "json-stable-stringify";
-import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {directoryForProjectId} from "../core/project_io";
 
 function usage(print: (string) => void): void {
@@ -72,22 +69,15 @@ export const output: Command = async (args, std) => {
     projectId,
     Common.sourcecredDirectory()
   );
-  const credFile = path.join(projectDirectory, "cred.json");
-  const pluginsFile = path.join(projectDirectory, "pluginDeclarations.json");
-  if (!fs.existsSync(credFile) || !fs.existsSync(pluginsFile)) {
+  const outputFile = path.join(projectDirectory, "output.json");
+  if (!fs.existsSync(outputFile)) {
     std.err(`fatal: project ${projectId} not loaded`);
     std.err(`Try running \`sourcecred load ${projectId}\` first.`);
     return 1;
   }
 
-  const credBlob = await fs.readFile(credFile);
-  const credJSON = JSON.parse(credBlob.toString());
-  const timelineCred = TimelineCred.fromJSON(credJSON);
-
-  const pluginsBlob = await fs.readFile(pluginsFile);
-  const pluginsJSON = JSON.parse(pluginsBlob.toString());
-  const plugins = pluginsFromJSON(pluginsJSON);
-  const output = fromTimelineCredAndPlugins(timelineCred, plugins);
+  const outputBlob = await fs.readFile(outputFile);
+  const output = JSON.parse(outputBlob);
   std.out(stringify(output, {space: 2}));
   return 0;
 };

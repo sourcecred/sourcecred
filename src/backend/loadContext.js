@@ -18,11 +18,14 @@ import {default as identityLoader} from "../plugins/identity/loader";
 import {default as discourseLoader} from "../plugins/discourse/loader";
 import {default as initiativesLoader} from "../plugins/initiatives/loader";
 import {type PluginDeclarations} from "../analysis/pluginDeclaration";
+import * as Output from "../analysis/output";
+import type {Output as OutputT} from "../analysis/output";
 
 export type LoadResult = {|
   +pluginDeclarations: PluginDeclarations,
   +weightedGraph: WeightedGraphT,
   +cred: TimelineCred,
+  +output: OutputT,
 |};
 
 export type LoadContextOptions = {|
@@ -73,6 +76,7 @@ export class LoadContext {
   +_contractPluginGraphs = PluginLoaders.contractPluginGraphs;
   +_overrideWeights = WeightedGraph.overrideWeights;
   +_computeTask = ComputeFunction.computeTask;
+  +_computeOutput = Output.fromTimelineCredAndPlugins;
 
   /**
    * The above proxy functions we're deferring to, accept interfaces so they
@@ -126,10 +130,12 @@ export class LoadContext {
       plugins,
       weightedGraph,
     });
+    const output = this._computeOutput(cred, plugins);
     return {
       pluginDeclarations: plugins,
       weightedGraph,
       cred,
+      output,
     };
   }
 }

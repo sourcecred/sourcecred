@@ -14,6 +14,7 @@ const fakes = {
   contractedGraph: ({fake: "contractedGraph"}: any),
   weightedGraph: ({fake: "weightedGraph"}: any),
   timelineCred: ({fake: "timelineCred"}: any),
+  output: ({fake: "output"}: any),
   initiativesDirectory: ({fake: "initiativesDirectory"}: any),
 };
 
@@ -64,6 +65,10 @@ const mockProxyMethods = (
     computeTask: spyBuilder
       .proxyMethod("computeTask")
       .mockResolvedValueOnce(fakes.timelineCred),
+
+    computeOutput: spyBuilder
+      .proxyMethod("computeOutput")
+      .mockReturnValueOnce(fakes.output),
   };
 };
 
@@ -174,6 +179,10 @@ describe("src/backend/loadContext", () => {
             params,
           }
         );
+        expect(spies.computeOutput).toBeCalledWith(
+          fakes.timelineCred,
+          fakes.declarations
+        );
       });
 
       it("should support omitting optional arguments", async () => {
@@ -235,6 +244,7 @@ describe("src/backend/loadContext", () => {
           pluginDeclarations: fakes.declarations,
           weightedGraph: fakes.weightedGraph,
           cred: fakes.timelineCred,
+          output: fakes.output,
         });
       });
     });

@@ -34,7 +34,7 @@ export class DataDirectory implements CacheProvider, ProjectStorageProvider {
 
   async storeProject(
     project: Project,
-    {weightedGraph, cred, pluginDeclarations}: ProjectStorageExtras
+    {weightedGraph, cred, pluginDeclarations, output}: ProjectStorageExtras
   ): Promise<void> {
     const projectDirectory = directoryForProjectId(
       project.id,
@@ -54,6 +54,9 @@ export class DataDirectory implements CacheProvider, ProjectStorageProvider {
     }
     if (cred) {
       await writeFile("cred.json", stringify(cred.toJSON()));
+    }
+    if (output) {
+      await writeFile("output.json", stringify(output));
     }
     if (pluginDeclarations) {
       await writeFile(

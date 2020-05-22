@@ -16,6 +16,7 @@ const project = createProject({id: "testing-project"});
 
 const fakeWeightedGraph = deepFreeze(WeightedGraph.empty());
 const fakeDeclarations = deepFreeze([]);
+const fakeOutput = ({is: "fake-output"}: any);
 
 const fakeCred = ({
   toJSON: () => ({is: "fake-cred"}),
@@ -25,6 +26,7 @@ const fakeExtras = {
   weightedGraph: fakeWeightedGraph,
   cred: fakeCred,
   pluginDeclarations: fakeDeclarations,
+  output: fakeOutput,
 };
 
 describe("src/backend/dataDirectory", () => {
@@ -114,6 +116,7 @@ describe("src/backend/dataDirectory", () => {
           WeightedGraph.toJSON(fakeWeightedGraph)
         );
         await expectJSONFile("cred.json", fakeCred.toJSON());
+        await expectJSONFile("output.json", fakeOutput);
         await expectJSONFile(
           "pluginDeclarations.json",
           pluginsToJSON(fakeDeclarations)
