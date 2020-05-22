@@ -11,11 +11,18 @@ import type {PluginDeclaration} from "./pluginDeclaration";
 import type {TimestampMs} from "../util/timestamp";
 import {TimelineCred} from "./timeline/timelineCred";
 import {nodeWeightEvaluator} from "../core/algorithm/weightEvaluator";
+import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
 export type Index = number;
 export type CredFlow = {|+forwards: number, +backwards: number|};
 
-export type Output = OutputV1;
+/**
+ * Since this is intended to be used as an output format
+ * (e.g. written to disk, consumed by external tools), we always compatibilze it
+ * by default. The `extract` method may be used to pull the underlying data type out
+ * from the compatible object.
+ */
+export type Output = Compatible<RawOutputV1>;
 export const COMPAT_INFO = {
   type: "sourcecred/analysis/output",
   version: "0.2.0",
@@ -50,7 +57,7 @@ export type OutputNode = {|
  * analyses like: how much cred was minted within each plugin? Within each
  * contribution type? Etc.
  */
-export type OutputV1 = {|
+export type RawOutputV1 = {|
   // Ordered by address
   +orderedNodes: $ReadOnlyArray<OutputNode>,
   +plugins: $ReadOnlyArray<PluginDeclaration>,
@@ -83,7 +90,14 @@ export function fromTimelineCredAndPlugins(
       };
     }
   );
-  return {orderedNodes, plugins, intervalEndpoints};
+  return toCompat(COMPAT_INFO, {orderedNodes, plugins, intervalEndpoints});
+}
+
+/**
+ * Extract the raw output data from the compatible object.
+ */
+export function extract(o: Output): RawOutputV1 {
+  return fromCompat(COMPAT_INFO, o);
 }
 
 /**
@@ -120,7 +134,7 @@ export type Contributor = {|
  * with cred-over-time and convenient aliases for looking up particular
  * contributors.
  */
-export type OutputV2 = {|
+export type RawOutputV2 = {|
   +orderedNodes: $ReadOnlyArray<OutputNode>,
   +plugins: $ReadOnlyArray<PluginDeclaration>,
   +contributors: $ReadOnlyArray<Contributor>,
@@ -141,7 +155,7 @@ export type OutputEdge = {|
   +dstIndex: Index,
 |};
 
-export type OutputV3 = {|
+export type RawOutputV3 = {|
   +orderedNodes: $ReadOnlyArray<OutputNode>,
   +plugins: $ReadOnlyArray<PluginDeclaration>,
   +contributors: $ReadOnlyArray<Contributor>,

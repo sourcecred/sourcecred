@@ -1,12 +1,8 @@
 // @flow
 // Implementation of `sourcecred output`.
 
-import {toCompat} from "../util/compat";
 import {fromJSON as pluginsFromJSON} from "../analysis/pluginDeclaration";
-import {
-  fromTimelineCredAndPlugins,
-  COMPAT_INFO as OUTPUT_COMPAT_INFO,
-} from "../analysis/output";
+import {fromTimelineCredAndPlugins} from "../analysis/output";
 import path from "path";
 import fs from "fs-extra";
 import dedent from "../util/dedent";
@@ -92,8 +88,7 @@ export const output: Command = async (args, std) => {
   const pluginsJSON = JSON.parse(pluginsBlob.toString());
   const plugins = pluginsFromJSON(pluginsJSON);
   const output = fromTimelineCredAndPlugins(timelineCred, plugins);
-  const compatOutput = toCompat(OUTPUT_COMPAT_INFO, output);
-  std.out(stringify(compatOutput, {space: 2}));
+  std.out(stringify(output, {space: 2}));
   return 0;
 };
 

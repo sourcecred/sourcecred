@@ -5,7 +5,7 @@ import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
 import {TimelineCred} from "./timeline/timelineCred";
 import {defaultParams} from "./timeline/params";
 import {nodeWeightEvaluator} from "../core/algorithm/weightEvaluator";
-import {fromTimelineCredAndPlugins} from "./output";
+import {fromTimelineCredAndPlugins, extract, COMPAT_INFO} from "./output";
 
 describe("src/analysis/output", () => {
   const nodeType = {
@@ -73,20 +73,33 @@ describe("src/analysis/output", () => {
     );
 
     const output = fromTimelineCredAndPlugins(timelineCred, plugins);
+    const rawOutput = extract(output);
 
-    return {aNode, bNode, userNode, intervals, timelineCred, output};
+    return {
+      aNode,
+      bNode,
+      userNode,
+      intervals,
+      timelineCred,
+      rawOutput,
+      output,
+    };
   }
 
   describe("output via fromTimelineCredAndPlugins", () => {
-    it("contains plugins", () => {
+    it("has a compat header", () => {
       const {output} = example();
-      expect(output.plugins).toEqual([plugin]);
+      expect((output: any)[0]).toEqual(COMPAT_INFO);
+    });
+    it("contains plugins", () => {
+      const {rawOutput} = example();
+      expect(rawOutput.plugins).toEqual([plugin]);
     });
     it("nodes have address, timestamp, description, and ordering from the graph", () => {
-      const {output, timelineCred} = example();
+      const {rawOutput, timelineCred} = example();
       const nodes = Array.from(timelineCred.weightedGraph().graph.nodes());
       expect(
-        output.orderedNodes.map((n) => ({
+        rawOutput.orderedNodes.map((n) => ({
           address: NodeAddress.fromParts(n.address),
           description: n.description,
           timestampMs: n.timestamp,
@@ -97,11 +110,11 @@ describe("src/analysis/output", () => {
       // The minted cred is equal to the node weight, except in the special
       // case where the timetsamp is null, in which case the minted cred is
       // zero (per semantics of TimelineCred).
-      const {output, timelineCred} = example();
+      const {rawOutput, timelineCred} = example();
       const {weights} = timelineCred.weightedGraph();
       const nodeEvaluator = nodeWeightEvaluator(weights);
       let foundEdgeCase = false;
-      for (const {address, minted, timestamp} of output.orderedNodes) {
+      for (const {address, minted, timestamp} of rawOutput.orderedNodes) {
         const weight = nodeEvaluator(NodeAddress.fromParts(address));
         if (timestamp == null && weight !== 0) {
           foundEdgeCase = true;
@@ -113,8 +126,8 @@ describe("src/analysis/output", () => {
       expect(foundEdgeCase).toBe(true);
     });
     it("nodes' cred is equal to the total cred across time slices", () => {
-      const {output, timelineCred} = example();
-      for (const {address, cred} of output.orderedNodes) {
+      const {rawOutput, timelineCred} = example();
+      for (const {address, cred} of rawOutput.orderedNodes) {
         const credNode = timelineCred.credNode(NodeAddress.fromParts(address));
         if (credNode == null) {
           throw new Error("Can't find node");
@@ -123,8 +136,8 @@ describe("src/analysis/output", () => {
       }
     });
     it("by default, all nodes have cred over time", () => {
-      const {output, timelineCred} = example();
-      for (const {address, credOverTime} of output.orderedNodes) {
+      const {rawOutput, timelineCred} = example();
+      for (const {address, credOverTime} of rawOutput.orderedNodes) {
         const credNode = timelineCred.credNode(NodeAddress.fromParts(address));
         if (credNode == null) {
           throw new Error("Can't find node");
