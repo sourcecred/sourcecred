@@ -1,6 +1,7 @@
 // @flow
 
 import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
+import {get as nullGet} from "../util/null";
 import type {NodeType, EdgeType} from "./types";
 import {
   type PluginDeclaration,
@@ -139,6 +140,104 @@ describe("analysis/credView", () => {
     it("can retrieve the plugin declarations", async () => {
       const {credView, declaration} = await example();
       expect(credView.plugins()).toEqual([declaration]);
+    });
+  });
+
+  describe("nodes", () => {
+    it("can retrieve a CredNode", async () => {
+      const {credView, foo1, graph, credResult} = await example();
+      const {
+        address,
+        credOverTime,
+        credSummary,
+        description,
+        minted,
+        timestamp,
+      } = nullGet(credView.node(foo1.address));
+      expect({address, description, timestampMs: timestamp}).toEqual(foo1);
+      expect(minted).toEqual(2);
+      const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
+      const index = nodeOrder.findIndex((x) => x === foo1.address);
+      expect(credOverTime).toEqual(credResult.credData.nodeOverTime[index]);
+      expect(credSummary).toEqual(credResult.credData.nodeSummaries[index]);
+    });
+    it("returns undefined for non-existent node", async () => {
+      const {credView} = await example();
+      expect(credView.node(NodeAddress.fromParts(["nope"]))).toBe(undefined);
+    });
+    it("returns array of all nodes when no arguments provided", async () => {
+      const {credView, foo1, foo2, user} = await example();
+      expect(credView.nodes()).toEqual(
+        [foo1, foo2, user].map((x) => credView.node(x.address))
+      );
+    });
+    it("nodes can filter by prefix", async () => {
+      const {credView, foo1, foo2, fooType} = await example();
+      expect(credView.nodes({prefix: fooType.prefix})).toEqual(
+        [foo1, foo2].map((x) => credView.node(x.address))
+      );
+    });
+  });
+  describe("edges", () => {
+    it("can retrieve a CredEdge", async () => {
+      const {credView, flow1, credResult, graph} = await example();
+      const {
+        address,
+        src,
+        dst,
+        credOverTime,
+        credSummary,
+        rawWeight,
+        timestamp,
+      } = nullGet(credView.edge(flow1.address));
+      expect({
+        address,
+        src: src.address,
+        dst: dst.address,
+        timestampMs: timestamp,
+      }).toEqual(flow1);
+      const edgeOrder = Array.from(graph.edges({showDangling: false})).map(
+        (x) => x.address
+      );
+      const index = edgeOrder.findIndex((x) => x === flow1.address);
+      expect(src).toEqual(credView.node(src.address));
+      expect(dst).toEqual(credView.node(dst.address));
+      expect(rawWeight).toEqual({forwards: 2, backwards: 3});
+      expect(credOverTime).toEqual(credResult.credData.edgeOverTime[index]);
+      expect(credSummary).toEqual(credResult.credData.edgeSummaries[index]);
+    });
+    it("returns undefined for non-existent edge", async () => {
+      const {credView} = await example();
+      expect(credView.edge(EdgeAddress.fromParts(["nope"]))).toBe(undefined);
+    });
+    it("returns undefined for a dangling edge", async () => {
+      const {credView, dangling} = await example();
+      expect(credView.edge(dangling.address)).toBe(undefined);
+    });
+    it("returns array of all non-dangling edges when no arguments provided", async () => {
+      const {credView, flow1, flow2, stream1} = await example();
+      expect(credView.edges()).toEqual(
+        [flow1, flow2, stream1].map((x) => credView.edge(x.address))
+      );
+    });
+    it("edges can filter by address prefix", async () => {
+      const {credView, flow1, flow2, flowType} = await example();
+      expect(credView.edges({addressPrefix: flowType.prefix})).toEqual(
+        [flow1, flow2].map((x) => credView.edge(x.address))
+      );
+    });
+    it("edges can filter by src prefix", async () => {
+      const {credView, stream1, userType} = await example();
+      expect(credView.edges({srcPrefix: userType.prefix})).toEqual([
+        credView.edge(stream1.address),
+      ]);
+    });
+    it("edges can filter by dst prefix", async () => {
+      const {credView, flow1, flow2, userType} = await example();
+      expect(credView.edges({dstPrefix: userType.prefix})).toEqual([
+        credView.edge(flow1.address),
+        credView.edge(flow2.address),
+      ]);
     });
   });
 });
