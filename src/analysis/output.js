@@ -7,11 +7,16 @@
 import * as NullUtil from "../util/null";
 import {NodeAddress} from "../core/graph";
 import type {Alias} from "../plugins/identity/alias";
-import type {PluginDeclaration} from "./pluginDeclaration";
+import type {
+  PluginDeclaration,
+  PluginDeclarationsJSON,
+} from "./pluginDeclaration";
 import type {TimestampMs} from "../util/timestamp";
 import {TimelineCred} from "./timeline/timelineCred";
+import type {TimelineCredParametersJSON} from "./timeline/params";
 import {nodeWeightEvaluator} from "../core/algorithm/weightEvaluator";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
+import {type EdgeWeight} from "../core/weights";
 
 export type Index = number;
 export type CredFlow = {|+forwards: number, +backwards: number|};
@@ -129,36 +134,42 @@ export type Contributor = {|
   +credOverTime: $ReadOnlyArray<number>,
 |};
 
-/**
- * The second version of the output format includes explicit contributor data,
- * with cred-over-time and convenient aliases for looking up particular
- * contributors.
- */
-export type RawOutputV2 = {|
-  +orderedNodes: $ReadOnlyArray<OutputNode>,
-  +plugins: $ReadOnlyArray<PluginDeclaration>,
-  +contributors: $ReadOnlyArray<Contributor>,
-  +intervalEndpoints: $ReadOnlyArray<TimestampMs>,
+export type PartsAddress = $ReadOnlyArray<string>;
+
+export type NodeCredInfo = {|
+  +cred: number,
+  +seedFlow: number,
+  +syntheticFlow: number,
+|};
+export type Node2 = {|
+  +address: PartsAddress,
+  +minted: number,
+  +description: string,
+  +totalCred: NodeCredInfo,
+  +credOverTime: $ReadOnlyArray<NodeCredInfo> | null,
 |};
 
-/**
- * This edge format includes the standard Graph.Edge information, along with
- * the cred flow across the edge. In TimelineCred, the cred flow will be summed
- * across every time period; once we switch to CredRank, the summing will no
- * longer be necessary.
- */
-export type OutputEdge = {|
-  +address: $ReadOnlyArray<string>,
-  +credFlow: CredFlow,
+export type EdgeCredInfo = {|
+  +forwardFlow: number,
+  +backwardFlow: number,
+  +rawWeight: EdgeWeight,
+  +markovWeight: EdgeWeight,
+|};
+export type Edge2 = {|
+  +address: PartsAddress,
+  +srcIndex: number,
+  +dstIndex: number,
+  +totalCred: EdgeCredInfo,
+  +credOverTime: $ReadOnlyArray<EdgeCredInfo> | null,
   +timestamp: TimestampMs,
-  +srcIndex: Index,
-  +dstIndex: Index,
 |};
 
-export type RawOutputV3 = {|
-  +orderedNodes: $ReadOnlyArray<OutputNode>,
-  +plugins: $ReadOnlyArray<PluginDeclaration>,
-  +contributors: $ReadOnlyArray<Contributor>,
-  +intervalEnd: $ReadOnlyArray<TimestampMs>,
-  +edges: $ReadOnlyArray<OutputEdge>,
+export type RawOutputV2 = {|
+  // Ordered by address
+  +orderedNodes: $ReadOnlyArray<Node2>,
+  +orderedEdges: $ReadOnlyArray<Edge2>,
+  +plugins: PluginDeclarationsJSON,
+  // Interval endpoints, aligned with credOverTime
+  +intervalEndpoints: $ReadOnlyArray<TimestampMs>,
+  +params: $ReadOnlyArray<TimelineCredParametersJSON>,
 |};
