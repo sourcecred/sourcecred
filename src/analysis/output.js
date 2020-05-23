@@ -145,7 +145,7 @@ export type PartsAddress = $ReadOnlyArray<string>;
 export type NodeCredInfo = {|
   +cred: number,
   +seedFlow: number,
-  +syntheticFlow: number,
+  +syntheticLoopFlow: number,
 |};
 export type Node2 = {|
   +address: PartsAddress,
@@ -153,13 +153,12 @@ export type Node2 = {|
   +description: string,
   +totalCred: NodeCredInfo,
   +credOverTime: $ReadOnlyArray<NodeCredInfo> | null,
+  +timestamp: TimestampMs | null,
 |};
 
 export type EdgeCredInfo = {|
   +forwardFlow: number,
   +backwardFlow: number,
-  +rawWeight: EdgeWeight,
-  +markovWeight: EdgeWeight,
 |};
 export type Edge2 = {|
   +address: PartsAddress,
@@ -168,6 +167,7 @@ export type Edge2 = {|
   +totalCred: EdgeCredInfo,
   +credOverTime: $ReadOnlyArray<EdgeCredInfo> | null,
   +timestamp: TimestampMs,
+  +rawWeight: EdgeWeight,
 |};
 
 export type RawOutputV2 = {|
