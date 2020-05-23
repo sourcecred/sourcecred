@@ -9,14 +9,20 @@ import {NodeAddress} from "../core/graph";
 import type {Alias} from "../plugins/identity/alias";
 import type {
   PluginDeclaration,
+  PluginDeclarations,
   PluginDeclarationsJSON,
 } from "./pluginDeclaration";
 import type {TimestampMs} from "../util/timestamp";
 import {TimelineCred} from "./timeline/timelineCred";
-import type {TimelineCredParametersJSON} from "./timeline/params";
+import type {
+  TimelineCredParametersJSON,
+  TimelineCredParameters,
+} from "./timeline/params";
 import {nodeWeightEvaluator} from "../core/algorithm/weightEvaluator";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import {type EdgeWeight} from "../core/weights";
+import {type WeightedGraph} from "../core/weightedGraph";
+import {type TimelineCredScores} from "../core/algorithm/distributionToCred";
 
 export type Index = number;
 export type CredFlow = {|+forwards: number, +backwards: number|};
@@ -173,3 +179,36 @@ export type RawOutputV2 = {|
   +intervalEndpoints: $ReadOnlyArray<TimestampMs>,
   +params: $ReadOnlyArray<TimelineCredParametersJSON>,
 |};
+
+export function rawOutputV2(
+  wg: WeightedGraph,
+  scores: TimelineCredScores,
+  params: TimelineCredParameters,
+  plugins: PluginDeclarations
+): RawOutputV2 {
+  const {graph, weights} = wg;
+  const nodes = Array.from(graph.nodes());
+  const edges = Array.from(graph.edges({showDangling: false}));
+  const orderedNodes = nodes.map((node, nodeIndex) => {
+    const {address, description, timestampMs} = node;
+    const totalCred = {minted: 0, cred: 0, seedFlow: 0, syntheticFlow: 0};
+    const credOverTime = intervalEndpoints.map((_, intervalIndex) => {
+      const {cred, seedFlow, syntheticLoopFlow} = scores[intervalIndex];
+      const entry = {
+        seedFlow: seedFlow[nodeIndex],
+        syntheticFlow: syntheticLoopFlow[nodeIndex],
+        cred: cred[nodeIndex],
+      };
+      totalCred.seedFlow += entry.seedFlow;
+      totalCred.syntheticFlow += entry.syntheticFlow;
+      totalCred.cred += entry.cred;
+      return entry;
+    });
+    return {
+      credOverTime,
+      totalCred,
+      description,
+      address: NodeAddress.toParts(address),
+    };
+  });
+}
