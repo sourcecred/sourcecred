@@ -186,6 +186,10 @@ export type RawOutputV2 = {|
 |};
 
 export type OutputV2 = Compatible<RawOutputV2>;
+export const COMPAT_INFO_V2 = {
+  type: "sourcecred/analysis/output",
+  version: "0.3.0",
+};
 
 export function rawOutputV2(
   wg: WeightedGraph,
@@ -260,4 +264,21 @@ export function rawOutputV2(
     params: paramsToJSON(params),
     plugins: pluginsToJSON(plugins),
   };
+}
+
+export function output2(
+  wg: WeightedGraph,
+  scores: TimelineCredScores,
+  params: TimelineCredParameters,
+  plugins: PluginDeclarations,
+  intervalEndpoints: $ReadOnlyArray<TimestampMs>
+): OutputV2 {
+  return toCompat(
+    COMPAT_INFO_V2,
+    rawOutputV2(wg, scores, params, plugins, intervalEndpoints)
+  );
+}
+
+export function extractV2(o: OutputV2): RawOutputV2 {
+  return fromCompat(COMPAT_INFO_V2, o);
 }
