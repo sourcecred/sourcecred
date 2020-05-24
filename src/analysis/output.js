@@ -38,8 +38,8 @@ export type CredFlow = {|+forwards: number, +backwards: number|};
  * by default. The `extract` method may be used to pull the underlying data type out
  * from the compatible object.
  */
-export type Output = Compatible<RawOutputV1>;
-export const COMPAT_INFO = {
+export type OutputV1 = Compatible<RawOutputV1>;
+export const COMPAT_INFO_V1 = {
   type: "sourcecred/analysis/output",
   version: "0.2.0",
 };
@@ -84,7 +84,7 @@ export type RawOutputV1 = {|
 export function fromTimelineCredAndPlugins(
   tc: TimelineCred,
   plugins: $ReadOnlyArray<PluginDeclaration>
-): Output {
+): OutputV1 {
   const {graph, weights} = tc.weightedGraph();
   const nodeEvaluator = nodeWeightEvaluator(weights);
   const intervalEndpoints = tc.intervals().map((x) => x.endTimeMs);
@@ -106,14 +106,14 @@ export function fromTimelineCredAndPlugins(
       };
     }
   );
-  return toCompat(COMPAT_INFO, {orderedNodes, plugins, intervalEndpoints});
+  return toCompat(COMPAT_INFO_V1, {orderedNodes, plugins, intervalEndpoints});
 }
 
 /**
  * Extract the raw output data from the compatible object.
  */
-export function extract(o: Output): RawOutputV1 {
-  return fromCompat(COMPAT_INFO, o);
+export function extractV1(o: OutputV1): RawOutputV1 {
+  return fromCompat(COMPAT_INFO_V1, o);
 }
 
 /**
@@ -184,6 +184,8 @@ export type RawOutputV2 = {|
   +intervalEndpoints: $ReadOnlyArray<TimestampMs>,
   +params: TimelineCredParametersJSON,
 |};
+
+export type OutputV2 = Compatible<RawOutputV2>;
 
 export function rawOutputV2(
   wg: WeightedGraph,

@@ -4,13 +4,13 @@ import {type WeightedGraph} from "../core/weightedGraph";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {type Project} from "../core/project";
 import {type PluginDeclarations} from "../analysis/pluginDeclaration";
-import {type Output} from "../analysis/output";
+import {type OutputV1} from "../analysis/output";
 
 export type ProjectStorageExtras = {
   +weightedGraph?: WeightedGraph,
   +cred?: TimelineCred,
   +pluginDeclarations?: PluginDeclarations,
-  +output: Output,
+  +output: OutputV1,
 };
 
 export interface ProjectStorageProvider {

@@ -5,7 +5,7 @@ import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
 import {TimelineCred} from "./timeline/timelineCred";
 import {defaultParams} from "./timeline/params";
 import {nodeWeightEvaluator} from "../core/algorithm/weightEvaluator";
-import {fromTimelineCredAndPlugins, extract, COMPAT_INFO} from "./output";
+import {fromTimelineCredAndPlugins, extractV1, COMPAT_INFO_V1} from "./output";
 
 describe("src/analysis/output", () => {
   const nodeType = {
@@ -73,7 +73,7 @@ describe("src/analysis/output", () => {
     );
 
     const output = fromTimelineCredAndPlugins(timelineCred, plugins);
-    const rawOutput = extract(output);
+    const rawOutput = extractV1(output);
 
     return {
       aNode,
@@ -89,7 +89,7 @@ describe("src/analysis/output", () => {
   describe("output via fromTimelineCredAndPlugins", () => {
     it("has a compat header", () => {
       const {output} = example();
-      expect((output: any)[0]).toEqual(COMPAT_INFO);
+      expect((output: any)[0]).toEqual(COMPAT_INFO_V1);
     });
     it("contains plugins", () => {
       const {rawOutput} = example();

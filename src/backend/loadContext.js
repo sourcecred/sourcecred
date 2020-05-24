@@ -19,7 +19,7 @@ import {default as discourseLoader} from "../plugins/discourse/loader";
 import {default as initiativesLoader} from "../plugins/initiatives/loader";
 import {type PluginDeclarations} from "../analysis/pluginDeclaration";
 import * as Output from "../analysis/output";
-import type {Output as OutputT} from "../analysis/output";
+import type {OutputV1 as OutputT} from "../analysis/output";
 
 export type LoadResult = {|
   +pluginDeclarations: PluginDeclarations,
