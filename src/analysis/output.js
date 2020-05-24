@@ -5,20 +5,25 @@
  * it to drive UIs and data analysis.
  */
 import * as NullUtil from "../util/null";
-import {NodeAddress} from "../core/graph";
+import {NodeAddress, EdgeAddress} from "../core/graph";
 import type {Alias} from "../plugins/identity/alias";
-import type {
-  PluginDeclaration,
-  PluginDeclarations,
-  PluginDeclarationsJSON,
+import {
+  type PluginDeclaration,
+  type PluginDeclarations,
+  type PluginDeclarationsJSON,
+  toJSON as pluginsToJSON,
 } from "./pluginDeclaration";
 import type {TimestampMs} from "../util/timestamp";
 import {TimelineCred} from "./timeline/timelineCred";
-import type {
-  TimelineCredParametersJSON,
-  TimelineCredParameters,
+import {
+  type TimelineCredParametersJSON,
+  type TimelineCredParameters,
+  paramsToJSON,
 } from "./timeline/params";
-import {nodeWeightEvaluator} from "../core/algorithm/weightEvaluator";
+import {
+  nodeWeightEvaluator,
+  edgeWeightEvaluator,
+} from "../core/algorithm/weightEvaluator";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import {type EdgeWeight} from "../core/weights";
 import {type WeightedGraph} from "../core/weightedGraph";
@@ -215,6 +220,42 @@ export function rawOutputV2(
       totalCred,
       description,
       address: NodeAddress.toParts(address),
+      timestamp: timestampMs,
+      minted: nodeEvaluator(address),
     };
   });
+
+  const orderedEdges = edges.map((edge, edgeIndex) => {
+    const {src, dst, timestampMs, address} = edge;
+    const srcIndex = NullUtil.get(nodeAddressToIndex.get(src));
+    const dstIndex = NullUtil.get(nodeAddressToIndex.get(dst));
+    const totalCred = {forwardFlow: 0, backwardFlow: 0};
+    const credOverTime = intervalEndpoints.map((_, intervalIndex) => {
+      const {forwardFlow, backwardFlow} = scores[intervalIndex];
+      const entry = {
+        forwardFlow: forwardFlow[edgeIndex],
+        backwardFlow: backwardFlow[edgeIndex],
+      };
+      totalCred.forwardFlow += entry.forwardFlow;
+      totalCred.backwardFlow += entry.backwardFlow;
+      return entry;
+    });
+    return {
+      address: EdgeAddress.toParts(address),
+      timestamp: timestampMs,
+      credOverTime,
+      totalCred,
+      srcIndex,
+      dstIndex,
+      rawWeight: edgeEvaluator(address),
+    };
+  });
+
+  return {
+    orderedNodes,
+    orderedEdges,
+    intervalEndpoints,
+    params: paramsToJSON(params),
+    plugins: pluginsToJSON(plugins),
+  };
 }
