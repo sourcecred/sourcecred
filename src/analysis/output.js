@@ -267,6 +267,11 @@ export function rawOutputV2(
       totalSyntheticLoopFlow += syntheticLoopFlow[nodeIndex];
       syntheticLoopFlowOverTime[intervalIndex] = syntheticLoopFlow[nodeIndex];
     });
+    if (totalCred < 10) {
+      nodeData.credOverTime[nodeIndex] = null;
+      nodeData.seedFlowOverTime[nodeIndex] = null;
+      nodeData.syntheticLoopFlowOverTime[nodeIndex] = null;
+    }
   });
 
   const edgeData = {
@@ -305,6 +310,10 @@ export function rawOutputV2(
       edgeData.forwardFlowOverTime[edgeIndex][intervalIndex] = forwardFlow;
       edgeData.backwardFlowOverTime[edgeIndex][intervalIndex] = backwardFlow;
     });
+    if (totalForwardFlow < 10 && totalBackwardFlow < 10) {
+      edgeData.forwardFlowOverTime[edgeIndex] = null;
+      edgeData.backwardFlowOverTime[edgeIndex] = null;
+    }
     const rawWeight = edgeEvaluator(address);
     edgeData.rawForwardWeight[edgeIndex] = rawWeight.forwards;
     edgeData.rawBackwardWeight[edgeIndex] = rawWeight.backwards;
