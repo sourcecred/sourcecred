@@ -175,10 +175,35 @@ export type Edge2 = {|
   +rawWeight: EdgeWeight,
 |};
 
+export type Output2NodeData = {|
+  +address: $ReadOnlyArray<PartsAddress>,
+  +description: $ReadOnlyArray<string>,
+  +totalCred: $ReadOnlyArray<number>,
+  +totalSeedFlow: $ReadOnlyArray<number>,
+  +totalSyntheticLoopFlow: $ReadOnlyArray<number>,
+  +minted: $ReadOnlyArray<number>,
+  +timestamp: $ReadOnlyArray<number | null>,
+  +credOverTime: $ReadOnlyArray<$ReadOnlyArray<number> | null>,
+  +seedFlowOverTime: $ReadOnlyArray<$ReadOnlyArray<number> | null>,
+  +syntheticLoopFlowOverTime: $ReadOnlyArray<$ReadOnlyArray<number> | null>,
+|};
+
+export type Output2EdgeData = {|
+  +address: $ReadOnlyArray<PartsAddress>,
+  +srcIndex: $ReadOnlyArray<number>,
+  +dstIndex: $ReadOnlyArray<number>,
+  +timestamp: $ReadOnlyArray<number>,
+  +totalForwardFlow: $ReadOnlyArray<number>,
+  +totalBackwardFlow: $ReadOnlyArray<number>,
+  +forwardFlowOverTime: $ReadOnlyArray<$ReadOnlyArray<number> | null>,
+  +backwardFlowOverTime: $ReadOnlyArray<$ReadOnlyArray<number> | null>,
+  +rawForwardWeight: $ReadOnlyArray<number>,
+  +rawBackwardWeight: $ReadOnlyArray<number>,
+|};
+
 export type RawOutputV2 = {|
-  // Ordered by address
-  +orderedNodes: $ReadOnlyArray<Node2>,
-  +orderedEdges: $ReadOnlyArray<Edge2>,
+  +nodeData: Output2NodeData,
+  +edgeData: Output2EdgeData,
   +plugins: PluginDeclarationsJSON,
   // Interval endpoints, aligned with credOverTime
   +intervalEndpoints: $ReadOnlyArray<TimestampMs>,
@@ -204,62 +229,90 @@ export function rawOutputV2(
   const nodes = Array.from(graph.nodes());
   const edges = Array.from(graph.edges({showDangling: false}));
 
+  const nodeData = {
+    address: new Array(nodes.length),
+    description: new Array(nodes.length),
+    totalCred: new Array(nodes.length),
+    totalSeedFlow: new Array(nodes.length),
+    totalSyntheticLoopFlow: new Array(nodes.length),
+    minted: new Array(nodes.length),
+    timestamp: new Array(nodes.length),
+    credOverTime: new Array(nodes.length),
+    seedFlowOverTime: new Array(nodes.length),
+    syntheticLoopFlowOverTime: new Array(nodes.length),
+  };
   const nodeAddressToIndex = new Map();
-  const orderedNodes = nodes.map((node, nodeIndex) => {
+  nodes.forEach((node, nodeIndex) => {
     const {address, description, timestampMs} = node;
+    nodeData.address[nodeIndex] = NodeAddress.toParts(address);
+    nodeData.description[nodeIndex] = description;
+    nodeData.timestamp[nodeIndex] = timestampMs;
     nodeAddressToIndex.set(address, nodeIndex);
-    const totalCred = {cred: 0, seedFlow: 0, syntheticLoopFlow: 0};
-    const credOverTime = intervalEndpoints.map((_, intervalIndex) => {
+
+    const credOverTime = new Array(intervalEndpoints.length);
+    const seedFlowOverTime = new Array(intervalEndpoints.length);
+    const syntheticLoopFlowOverTime = new Array(intervalEndpoints.length);
+    nodeData.credOverTime[nodeIndex] = credOverTime;
+    nodeData.seedFlowOverTime[nodeIndex] = seedFlowOverTime;
+    nodeData.syntheticLoopFlowOverTime[nodeIndex] = syntheticLoopFlowOverTime;
+    let totalCred = 0;
+    let totalSeedFlow = 0;
+    let totalSyntheticLoopFlow = 0;
+    intervalEndpoints.forEach((_, intervalIndex) => {
       const {cred, seedFlow, syntheticLoopFlow} = scores[intervalIndex];
-      const entry = {
-        seedFlow: seedFlow[nodeIndex],
-        syntheticLoopFlow: syntheticLoopFlow[nodeIndex],
-        cred: cred[nodeIndex],
-      };
-      totalCred.seedFlow += entry.seedFlow;
-      totalCred.syntheticLoopFlow += entry.syntheticLoopFlow;
-      totalCred.cred += entry.cred;
-      return entry;
+      totalCred += cred[nodeIndex];
+      credOverTime[intervalIndex] = cred[nodeIndex];
+      totalSeedFlow += seedFlow[nodeIndex];
+      seedFlowOverTime[intervalIndex] = seedFlow[nodeIndex];
+      totalSyntheticLoopFlow += syntheticLoopFlow[nodeIndex];
+      syntheticLoopFlowOverTime[intervalIndex] = syntheticLoopFlow[nodeIndex];
     });
-    return {
-      credOverTime,
-      totalCred,
-      description,
-      address: NodeAddress.toParts(address),
-      timestamp: timestampMs,
-      minted: nodeEvaluator(address),
-    };
   });
 
-  const orderedEdges = edges.map((edge, edgeIndex) => {
+  const edgeData = {
+    address: new Array(edges.length),
+    srcIndex: new Array(edges.length),
+    dstIndex: new Array(edges.length),
+    timestamp: new Array(edges.length),
+    totalForwardFlow: new Array(edges.length),
+    totalBackwardFlow: new Array(edges.length),
+    forwardFlowOverTime: new Array(edges.length),
+    backwardFlowOverTime: new Array(edges.length),
+    rawForwardWeight: new Array(edges.length),
+    rawBackwardWeight: new Array(edges.length),
+  };
+  edges.forEach((edge, edgeIndex) => {
     const {src, dst, timestampMs, address} = edge;
+    edgeData.address[edgeIndex] = EdgeAddress.toParts(address);
+    edgeData.timestamp[edgeIndex] = timestampMs;
     const srcIndex = NullUtil.get(nodeAddressToIndex.get(src));
     const dstIndex = NullUtil.get(nodeAddressToIndex.get(dst));
-    const totalCred = {forwardFlow: 0, backwardFlow: 0};
-    const credOverTime = intervalEndpoints.map((_, intervalIndex) => {
-      const {forwardFlow, backwardFlow} = scores[intervalIndex];
-      const entry = {
-        forwardFlow: forwardFlow[edgeIndex],
-        backwardFlow: backwardFlow[edgeIndex],
-      };
-      totalCred.forwardFlow += entry.forwardFlow;
-      totalCred.backwardFlow += entry.backwardFlow;
-      return entry;
+    edgeData.srcIndex[edgeIndex] = srcIndex;
+    edgeData.dstIndex[edgeIndex] = dstIndex;
+    let totalForwardFlow = 0;
+    let totalBackwardFlow = 0;
+    edgeData.forwardFlowOverTime[edgeIndex] = new Array(
+      intervalEndpoints.length
+    );
+    edgeData.backwardFlowOverTime[edgeIndex] = new Array(
+      intervalEndpoints.length
+    );
+    intervalEndpoints.map((_, intervalIndex) => {
+      const forwardFlow = scores[intervalIndex].forwardFlow[edgeIndex];
+      totalForwardFlow += forwardFlow;
+      const backwardFlow = scores[intervalIndex].backwardFlow[edgeIndex];
+      totalBackwardFlow += backwardFlow;
+      edgeData.forwardFlowOverTime[edgeIndex][intervalIndex] = forwardFlow;
+      edgeData.backwardFlowOverTime[edgeIndex][intervalIndex] = backwardFlow;
     });
-    return {
-      address: EdgeAddress.toParts(address),
-      timestamp: timestampMs,
-      credOverTime,
-      totalCred,
-      srcIndex,
-      dstIndex,
-      rawWeight: edgeEvaluator(address),
-    };
+    const rawWeight = edgeEvaluator(address);
+    edgeData.rawForwardWeight[edgeIndex] = rawWeight.forwards;
+    edgeData.rawBackwardWeight[edgeIndex] = rawWeight.backwards;
   });
 
   return {
-    orderedNodes,
-    orderedEdges,
+    nodeData,
+    edgeData,
     intervalEndpoints,
     params: paramsToJSON(params),
     plugins: pluginsToJSON(plugins),
