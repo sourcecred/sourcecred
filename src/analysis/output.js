@@ -149,11 +149,11 @@ export type NodeCredInfo = {|
 |};
 export type Node2 = {|
   +address: PartsAddress,
-  +minted: number,
   +description: string,
   +totalCred: NodeCredInfo,
   +credOverTime: $ReadOnlyArray<NodeCredInfo> | null,
   +timestamp: TimestampMs | null,
+  +minted: number,
 |};
 
 export type EdgeCredInfo = {|
@@ -177,30 +177,36 @@ export type RawOutputV2 = {|
   +plugins: PluginDeclarationsJSON,
   // Interval endpoints, aligned with credOverTime
   +intervalEndpoints: $ReadOnlyArray<TimestampMs>,
-  +params: $ReadOnlyArray<TimelineCredParametersJSON>,
+  +params: TimelineCredParametersJSON,
 |};
 
 export function rawOutputV2(
   wg: WeightedGraph,
   scores: TimelineCredScores,
   params: TimelineCredParameters,
-  plugins: PluginDeclarations
+  plugins: PluginDeclarations,
+  intervalEndpoints: $ReadOnlyArray<TimestampMs>
 ): RawOutputV2 {
   const {graph, weights} = wg;
+  const nodeEvaluator = nodeWeightEvaluator(weights);
+  const edgeEvaluator = edgeWeightEvaluator(weights);
   const nodes = Array.from(graph.nodes());
   const edges = Array.from(graph.edges({showDangling: false}));
+
+  const nodeAddressToIndex = new Map();
   const orderedNodes = nodes.map((node, nodeIndex) => {
     const {address, description, timestampMs} = node;
-    const totalCred = {minted: 0, cred: 0, seedFlow: 0, syntheticFlow: 0};
+    nodeAddressToIndex.set(address, nodeIndex);
+    const totalCred = {cred: 0, seedFlow: 0, syntheticLoopFlow: 0};
     const credOverTime = intervalEndpoints.map((_, intervalIndex) => {
       const {cred, seedFlow, syntheticLoopFlow} = scores[intervalIndex];
       const entry = {
         seedFlow: seedFlow[nodeIndex],
-        syntheticFlow: syntheticLoopFlow[nodeIndex],
+        syntheticLoopFlow: syntheticLoopFlow[nodeIndex],
         cred: cred[nodeIndex],
       };
       totalCred.seedFlow += entry.seedFlow;
-      totalCred.syntheticFlow += entry.syntheticFlow;
+      totalCred.syntheticLoopFlow += entry.syntheticLoopFlow;
       totalCred.cred += entry.cred;
       return entry;
     });
