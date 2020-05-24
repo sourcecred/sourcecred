@@ -195,10 +195,10 @@ export function rawOutputV2(
   wg: WeightedGraph,
   scores: TimelineCredScores,
   params: TimelineCredParameters,
-  plugins: PluginDeclarations,
-  intervalEndpoints: $ReadOnlyArray<TimestampMs>
+  plugins: PluginDeclarations
 ): RawOutputV2 {
   const {graph, weights} = wg;
+  const intervalEndpoints = scores.map((x) => x.interval.endTimeMs);
   const nodeEvaluator = nodeWeightEvaluator(weights);
   const edgeEvaluator = edgeWeightEvaluator(weights);
   const nodes = Array.from(graph.nodes());
@@ -270,13 +270,9 @@ export function output2(
   wg: WeightedGraph,
   scores: TimelineCredScores,
   params: TimelineCredParameters,
-  plugins: PluginDeclarations,
-  intervalEndpoints: $ReadOnlyArray<TimestampMs>
+  plugins: PluginDeclarations
 ): OutputV2 {
-  return toCompat(
-    COMPAT_INFO_V2,
-    rawOutputV2(wg, scores, params, plugins, intervalEndpoints)
-  );
+  return toCompat(COMPAT_INFO_V2, rawOutputV2(wg, scores, params, plugins));
 }
 
 export function extractV2(o: OutputV2): RawOutputV2 {
