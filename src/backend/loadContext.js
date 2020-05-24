@@ -19,7 +19,7 @@ import {default as discourseLoader} from "../plugins/discourse/loader";
 import {default as initiativesLoader} from "../plugins/initiatives/loader";
 import {type PluginDeclarations} from "../analysis/pluginDeclaration";
 import * as Output from "../analysis/output";
-import type {OutputV1 as OutputT} from "../analysis/output";
+import type {OutputV2 as OutputT} from "../analysis/output";
 
 export type LoadResult = {|
   +pluginDeclarations: PluginDeclarations,
@@ -76,7 +76,7 @@ export class LoadContext {
   +_contractPluginGraphs = PluginLoaders.contractPluginGraphs;
   +_overrideWeights = WeightedGraph.overrideWeights;
   +_computeTask = ComputeFunction.computeTask;
-  +_computeOutput = Output.fromTimelineCredAndPlugins;
+  +_computeOutput = Output.output2;
 
   /**
    * The above proxy functions we're deferring to, accept interfaces so they
@@ -125,16 +125,19 @@ export class LoadContext {
       weightedGraph = this._overrideWeights(contractedGraph, weightsOverrides);
     }
     const plugins = this._declarations(this._pluginLoaders, project);
-    const cred = await this._computeTask(this._compute, this._options, {
-      params,
-      plugins,
-      weightedGraph,
-    });
-    const output = this._computeOutput(cred, plugins);
+    const {timelineCred, output} = await this._computeTask(
+      this._compute,
+      this._options,
+      {
+        params,
+        plugins,
+        weightedGraph,
+      }
+    );
     return {
       pluginDeclarations: plugins,
       weightedGraph,
-      cred,
+      cred: timelineCred,
       output,
     };
   }

@@ -12,6 +12,7 @@ import {type PluginDeclaration} from "../pluginDeclaration";
 import {type NodeAddressT, NodeAddress, type Node} from "../../core/graph";
 import * as WeightedGraph from "../../core/weightedGraph";
 import {type Weights as WeightsT} from "../../core/weights";
+import {output2, type OutputV2} from "../output";
 import type {
   WeightedGraph as WeightedGraphT,
   WeightedGraphJSON,
@@ -189,7 +190,7 @@ export class TimelineCred {
     weightedGraph: WeightedGraphT,
     params?: $Shape<TimelineCredParameters>,
     plugins: $ReadOnlyArray<PluginDeclaration>,
-  |}): Promise<TimelineCred> {
+  |}): Promise<{|+timelineCred: TimelineCred, +output: OutputV2|}> {
     const {weightedGraph, params, plugins} = opts;
     const {graph} = weightedGraph;
     const fullParams = params == null ? defaultParams() : partialParams(params);
@@ -212,13 +213,15 @@ export class TimelineCred {
       const addrCred = credScores.map(({cred}) => cred[i]);
       addressToCred.set(addr, addrCred);
     }
-    return new TimelineCred(
+    const timelineCred = new TimelineCred(
       weightedGraph,
       credScores.map((x) => x.interval),
       addressToCred,
       fullParams,
       plugins
     );
+    const output = output2(weightedGraph, credScores, fullParams, plugins);
+    return {timelineCred, output};
   }
 }
 

@@ -1,5 +1,3 @@
-// @flow
-
 import {TestTaskReporter} from "../util/taskReporter";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {type ComputeFunction, computeTask} from "./computeFunction";
