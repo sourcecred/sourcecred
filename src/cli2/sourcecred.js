@@ -3,9 +3,10 @@
 
 import type {Command} from "./command";
 
+import load from "./load";
+
 const sourcecred: Command = async (args, std) => {
-  std.err("SourceCred CLI v2 not yet implemented");
-  return 1;
+  return load(args, std);
 };
 
 export default sourcecred;
