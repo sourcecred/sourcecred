@@ -1,6 +1,15 @@
 // @flow
 
+import {CliPlugin} from "./cliPlugin";
+import {bundledPlugins as getAllBundledPlugins} from "./bundledPlugins";
+
+type PluginName = string;
+
 export type InstanceConfig = {|
+  +bundledPlugins: Map<PluginName, CliPlugin>,
+|};
+
+export type RawInstanceConfig = {|
   +bundledPlugins: $ReadOnlyArray<BundledPluginSpec>,
 |};
 
@@ -24,15 +33,23 @@ export function parse(raw: JsonObject): InstanceConfig {
   }
   const {bundledPlugins: rawBundledPlugins} = raw;
   if (!Array.isArray(rawBundledPlugins)) {
+    console.warn(JSON.stringify(raw));
     throw new Error(
       "bad bundled plugins: " + JSON.stringify(rawBundledPlugins)
     );
   }
-  const bundledPlugins = rawBundledPlugins.map((x) => {
-    if (typeof x !== "string") {
-      throw new Error("bad bundled plugin: " + JSON.stringify(x));
+  const allBundledPlugins = getAllBundledPlugins();
+  const bundledPlugins = new Map();
+  for (const name of rawBundledPlugins) {
+    if (typeof name !== "string") {
+      throw new Error("bad bundled plugin: " + JSON.stringify(name));
     }
-    return x;
-  });
-  return {bundledPlugins};
+    const plugin = allBundledPlugins[name];
+    if (plugin == null) {
+      throw new Error("bad bundled plugin: " + JSON.stringify(name));
+    }
+    bundledPlugins.set(name, plugin);
+  }
+  const result = {bundledPlugins};
+  return result;
 }
