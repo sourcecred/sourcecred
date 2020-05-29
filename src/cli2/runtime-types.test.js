@@ -1,6 +1,9 @@
 // @flow
 
 import tcomb from "tcomb";
+import * as iots from "io-ts";
+import {PathReporter} from "io-ts/lib/PathReporter";
+import {fold, left} from "fp-ts/lib/Either";
 import tcombFromJSON from "tcomb/lib/fromJSON";
 import fr, {type Type as FlowRuntimeType} from "flow-runtime";
 import {
@@ -100,6 +103,7 @@ describe("src/cli2/runtime-types", () => {
         "2018-02-01T12:34:56.789Z" to a Date type because it will attempt using it's contructor.
 
       Cons:
+      - No {key?: T} support, normalizes to {key: ?T}
       - Flow type based generation seems unmaintained / deprectated
         https://github.com/gcanti/babel-plugin-tcomb (fork recommends flow-runtime)
       - Library's Flow types published as a copy-paste declaration, are bugged and not helpful
@@ -189,6 +193,129 @@ describe("src/cli2/runtime-types", () => {
       expect(f).toThrow(TypeError);
       expect(f).toThrow(
         "[tcomb] Invalid value 1 supplied to GitHubConfig/repoIds: Array<RepoId>/0: RepoId (expected an object)"
+      );
+    });
+
+    it("should add keys for maybe types", () => {
+      const T = tcomb.struct({
+        foo: tcomb.maybe(tcomb.String),
+      });
+      const out = T({});
+      expect(Object.keys(out)).toEqual(["foo"]);
+    });
+  });
+
+  describe("io-ts", () => {
+    /*
+      Pros:
+      - Has support for parsing, besides only asserting.
+
+      Maybe:
+      - Experimental schema concept.
+      - FP-style safety rather than TypeError throwing assertions.
+
+      Cons:
+      - Flow types were dropped https://github.com/gcanti/io-ts/issues/145
+      - Aims for TypeScript rather than Flow parity. (maybe can derive Flow types from TS?)
+      - Has peer dependency `fp-ts`.
+    */
+
+    const identity = (x) => x;
+    function throwingDecode<T>(raw: any, typedef: {decode: Function}): T {
+      function decodeError(errors: Object[]) {
+        // Reporter expect an either, wrap it back in a left().
+        const errorString = PathReporter.report(left(errors)).join("\n\t");
+        throw new TypeError(`Validation failed on decode:\n\t${errorString}`);
+      }
+      const assert = fold(decodeError, identity);
+      return assert(typedef.decode(raw));
+    }
+
+    const RepoIdType = iots.strict(
+      {owner: iots.string, name: iots.string},
+      "RepoId"
+    );
+
+    const GitHubConfigType = iots.strict(
+      {repoIds: iots.readonlyArray(RepoIdType)},
+      "GitHubConfig"
+    );
+
+    const RepoIdFromStringType = new iots.Type(
+      "RepoIdFromString",
+      function is(x: mixed): boolean {
+        return typeof x === "string" && RepoIdStringPattern.test(x);
+      },
+      // TODO: use create our own Either<Errors, RepoId> Flow type to return.
+      function decode(x: mixed, context): any {
+        try {
+          if (typeof x === "string") {
+            return iots.success(stringToRepoId(x));
+          }
+        } catch (e) {
+          // swallow error
+        }
+        return iots.failure(x, context);
+      },
+      // encode
+      repoIdToString
+    );
+
+    const ParsingGitHubConfigType = iots.strict(
+      {repoIds: iots.readonlyArray(RepoIdFromStringType)},
+      "GitHubConfig"
+    );
+
+    it("should parse an empty example", () => {
+      const json: JsonObject = {repoIds: []};
+      const config = throwingDecode(json, GitHubConfigType);
+      expect(config).toEqual(json);
+    });
+
+    it("should validate an object based example", () => {
+      const json: JsonObject = {
+        repoIds: [{owner: "missing repo"}, {owner: "foo", name: "bar"}],
+      };
+      const f = () => throwingDecode(json, GitHubConfigType);
+      expect(f).toThrow(TypeError);
+      expect(f).toThrow(
+        `Validation failed on decode:` +
+          `\n\tInvalid value undefined supplied to : GitHubConfig/repoIds: ReadonlyArray<RepoId>/0: RepoId/name: string`
+      );
+    });
+
+    it("should decode valid RepoIdStrings to objects", () => {
+      const json: JsonObject = {repoIds: ["sourcecred/sourcecred", "foo/bar"]};
+      const config: GitHubConfig = throwingDecode(
+        json,
+        ParsingGitHubConfigType
+      );
+      expect(config).toEqual({
+        repoIds: [
+          {owner: "sourcecred", name: "sourcecred"},
+          {owner: "foo", name: "bar"},
+        ],
+      });
+    });
+
+    it("should encode RepoIds back to strings", () => {
+      const config = {
+        repoIds: [
+          {owner: "sourcecred", name: "sourcecred"},
+          {owner: "foo", name: "bar"},
+        ],
+      };
+      const json: JsonObject = ParsingGitHubConfigType.encode(config);
+      expect(json).toEqual({repoIds: ["sourcecred/sourcecred", "foo/bar"]});
+    });
+
+    it("should throw when RepoId strings don't match pattern", () => {
+      const json: JsonObject = {repoIds: ["foo/bar", "not-a-repoId"]};
+      const f = () => throwingDecode(json, ParsingGitHubConfigType);
+      expect(f).toThrow(TypeError);
+      expect(f).toThrow(
+        `Validation failed on decode:` +
+          `\n\tInvalid value "not-a-repoId" supplied to : GitHubConfig/repoIds: ReadonlyArray<RepoIdFromString>/1: RepoId`
       );
     });
   });
