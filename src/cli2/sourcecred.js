@@ -1,5 +1,4 @@
 // @flow
-// Implementation of the root `sourcecred` command.
 
 import type {Command} from "./command";
 
