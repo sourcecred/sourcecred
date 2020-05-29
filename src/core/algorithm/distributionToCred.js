@@ -15,25 +15,17 @@ export opaque type NodeOrderedCredScores: Float64Array = Float64Array;
 /**
  * Represents cred scores over time.
  *
- * It contains an array of intervals, which give timing information, and an
- * array of CredTimeSlices, which are Float64Arrays. Each CredTimeSlice
- * contains cred scores for an interval. The cred scores are included in
- * node-address-sorted order, and as such the CredScores can only be
- * interpreted in the context of an associated Graph.
- *
- * As invariants, it is guaranteed that:
- * - intervals and intervalCredScores will always have the same length
- * - all of the intervalCredScores will have a consistent implicit node ordering
- *
- * The type is marked opaque so that no-one else can construct instances that
- * don't conform to these invariants.
+ * The TimelineCredScores consists of a time-ordered array of IntervalCreds.
+ * Each IntervalCred contains the interval information, as well as the raw
+ * cred score for every node in the graph. The cred is stored as a Float64Array,
+ * with scores corresponding to nodes by the node's index in the Graph's
+ * canonical address-sorted node ordering.
  */
-export opaque type TimelineCredScores: {|
-  +intervals: $ReadOnlyArray<Interval>,
-  +intervalCredScores: $ReadOnlyArray<NodeOrderedCredScores>,
-|} = {|
-  +intervals: $ReadOnlyArray<Interval>,
-  +intervalCredScores: $ReadOnlyArray<NodeOrderedCredScores>,
+export type TimelineCredScores = $ReadOnlyArray<IntervalCred>;
+
+export type IntervalCred = {|
+  +interval: Interval,
+  +cred: NodeOrderedCredScores,
 |};
 
 /**
@@ -59,9 +51,6 @@ export function distributionToCred(
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
   scoringNodePrefixes: $ReadOnlyArray<NodeAddressT>
 ): TimelineCredScores {
-  if (ds.length === 0) {
-    return {intervals: [], intervalCredScores: []};
-  }
   const scoringNodeIndices = [];
   for (let i = 0; i < nodeOrder.length; i++) {
     const addr = nodeOrder[i];
@@ -69,8 +58,7 @@ export function distributionToCred(
       scoringNodeIndices.push(i);
     }
   }
-  const intervals = ds.map((x) => x.interval);
-  const intervalCredScores = ds.map(({distribution, intervalWeight}) => {
+  return ds.map(({interval, distribution, intervalWeight}) => {
     const intervalTotalScore = sum(
       scoringNodeIndices.map((x) => distribution[x])
     );
@@ -78,32 +66,33 @@ export function distributionToCred(
     const intervalNormalizer =
       intervalTotalScore === 0 ? 0 : intervalWeight / intervalTotalScore;
     const cred = distribution.map((x) => x * intervalNormalizer);
-    return cred;
+    return {interval, cred};
   });
-  return {intervalCredScores, intervals};
 }
 
-const COMPAT_INFO = {type: "sourcecred/timelineCredScores", version: "0.1.0"};
+const COMPAT_INFO = {type: "sourcecred/timelineCredScores", version: "0.2.0"};
 
-export type TimelineCredScoresJSON = Compatible<{|
-  +intervals: $ReadOnlyArray<Interval>,
-  // TODO: Serializing floats as strings is space-inefficient. We can likely
-  // get space savings if we base64 encode a byte representation of the
-  // floats.
-  +intervalCredScores: $ReadOnlyArray<$ReadOnlyArray<number>>,
-|}>;
+export type TimelineCredScoresJSON = Compatible<
+  $ReadOnlyArray<{|
+    +interval: Interval,
+    // TODO: Serializing floats as strings is space-inefficient. We can likely
+    // get space savings if we base64 encode a byte representation of the
+    // floats.
+    +cred: $ReadOnlyArray<number>,
+  |}>
+>;
 
 export function toJSON(s: TimelineCredScores): TimelineCredScoresJSON {
-  return toCompat(COMPAT_INFO, {
-    intervals: s.intervals,
-    intervalCredScores: s.intervalCredScores.map((x) => Array.from(x)),
-  });
+  return toCompat(
+    COMPAT_INFO,
+    s.map(({interval, cred}) => ({interval, cred: Array.from(cred)}))
+  );
 }
 
 export function fromJSON(j: TimelineCredScoresJSON): TimelineCredScores {
-  const {intervals, intervalCredScores} = fromCompat(COMPAT_INFO, j);
-  return {
-    intervals,
-    intervalCredScores: intervalCredScores.map((x) => new Float64Array(x)),
-  };
+  const scoreArray = fromCompat(COMPAT_INFO, j);
+  return scoreArray.map(({cred, interval}) => ({
+    cred: new Float64Array(cred),
+    interval,
+  }));
 }
