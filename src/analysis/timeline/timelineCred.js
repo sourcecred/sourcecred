@@ -209,12 +209,12 @@ export class TimelineCred {
     const addressToCred = new Map();
     for (let i = 0; i < nodeOrder.length; i++) {
       const addr = nodeOrder[i];
-      const addrCred = credScores.intervalCredScores.map((cred) => cred[i]);
+      const addrCred = credScores.map(({cred}) => cred[i]);
       addressToCred.set(addr, addrCred);
     }
     return new TimelineCred(
       weightedGraph,
-      credScores.intervals,
+      credScores.map((x) => x.interval),
       addressToCred,
       fullParams,
       plugins
