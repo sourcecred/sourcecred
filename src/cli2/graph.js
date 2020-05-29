@@ -19,7 +19,7 @@ function die(std, message) {
   return 1;
 }
 
-const loadCommand: Command = async (args, std) => {
+const graphCommand: Command = async (args, std) => {
   if (args.length !== 0) {
     die(std, "usage: sourcecred graph");
   }
@@ -52,4 +52,4 @@ async function buildReferenceDetector(baseDir, config) {
   return new CascadingReferenceDetector(rds);
 }
 
-export default loadCommand;
+export default graphCommand;
