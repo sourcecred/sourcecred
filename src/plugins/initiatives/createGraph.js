@@ -119,7 +119,10 @@ export function createWeightedGraph(
     ) => {
       for (const url of urls) {
         const addr = refs.addressFromUrl(url);
-        if (!addr) continue;
+        if (!addr) {
+          console.warn(`initiative ${initiative.title}: no address for ${url}`);
+          continue;
+        }
         graph.addEdge(createEdge(initiative, addr));
       }
     };
@@ -145,7 +148,12 @@ export function createWeightedGraph(
         // Add edges to the contributors.
         for (const contributor of entry.contributors) {
           const addr = refs.addressFromUrl(contributor);
-          if (!addr) continue;
+          if (!addr) {
+            console.warn(
+              `entry ${entry.title}: no address for contributor ${contributor}`
+            );
+            continue;
+          }
           graph.addEdge({
             address: EdgeAddress.append(
               contributesToEntryEdgeType.prefix,
