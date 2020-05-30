@@ -17,6 +17,11 @@ export type ParseResult<+T> =
 
 export class Parser<+T> {
   +_f: (JsonObject) => ParseResult<T>;
+  // Phantom data for the output type of this parser. Used to more
+  // reliably match on parsers at the type level, via `$PropertyType`
+  // rather than `$Call`. Not populated at runtime; do not dereference.
+  +_phantomT: T;
+
   constructor(f: (JsonObject) => ParseResult<T>) {
     this._f = f;
   }
@@ -32,6 +37,11 @@ export class Parser<+T> {
     }
   }
 }
+
+// Helper type to extract the underlying type of a parser: for instance,
+// `ParserOutput<Parser<string>>` is just `string`.
+export type ParserOutput<P: Parser<mixed>> = $PropertyType<P, "_phantomT">;
+type ExtractParserOutput = <P: Parser<mixed>>(P) => ParserOutput<P>;
 
 // Helper to make a successful parse result. For readability.
 function success<T>(t: T): ParseResult<T> {
@@ -156,3 +166,65 @@ export function array<T>(p: Parser<T>): Parser<T[]> {
     return success(result);
   });
 }
+
+type Fields = {+[string]: Parser<mixed>};
+
+// Parser combinator for an object type all of whose fields are
+// required.
+type PObjectAllRequired = <FReq: Fields>(
+  required: FReq
+) => Parser<$ObjMap<FReq, ExtractParserOutput>>;
+
+// Parser combinator for an object type with some required fields (maybe
+// none) and some optional ones.
+type PObjectWithOptionals = <FReq: Fields, FOpt: Fields>(
+  required: FReq,
+  optional: FOpt
+) => Parser<
+  $Exact<{
+    ...$Exact<$ObjMap<FReq, ExtractParserOutput>>,
+    ...$Rest<$Exact<$ObjMap<FOpt, ExtractParserOutput>>, {}>,
+  }>
+>;
+
+// Parser combinator for an object type with some required fields (maybe
+// none) and maybe some optional ones. (This is an intersection type
+// rather than a normal function with optional second argument to force
+// inference to pick a branch based on arity rather than inferring an
+// `empty` type.)
+type PObject = PObjectAllRequired & PObjectWithOptionals;
+
+export const object: PObject = (function object(
+  requiredFields,
+  optionalFields?
+) {
+  return new Parser((x) => {
+    if (typeof x !== "object" || Array.isArray(x) || x == null) {
+      return failure("expected object, got " + typename(x));
+    }
+    const result = {};
+    const fieldsets = [
+      {fields: requiredFields, required: true},
+      {fields: optionalFields || {}, required: false},
+    ];
+    for (const {fields, required} of fieldsets) {
+      for (const key of Object.keys(fields)) {
+        const raw = x[key];
+        if (raw === undefined) {
+          if (required) {
+            return failure("missing key: " + JSON.stringify(key));
+          } else {
+            continue;
+          }
+        }
+        const parser = fields[key];
+        const parsed = parser.parse(raw);
+        if (!parsed.ok) {
+          return failure(`key ${JSON.stringify(key)}: ${parsed.err}`);
+        }
+        result[key] = parsed.value;
+      }
+    }
+    return success(result);
+  });
+}: any);
