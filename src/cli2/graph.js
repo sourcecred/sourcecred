@@ -22,7 +22,7 @@ function die(std, message) {
 
 const graphCommand: Command = async (args, std) => {
   if (args.length !== 0) {
-    die(std, "usage: sourcecred graph");
+    return die(std, "usage: sourcecred graph");
   }
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("graph");
