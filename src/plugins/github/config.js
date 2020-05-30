@@ -1,5 +1,6 @@
 // @flow
 
+import * as Combo from "../../util/combo";
 import {type RepoId, stringToRepoId} from "./repoId";
 
 export type GithubConfig = {|
@@ -20,19 +21,16 @@ type JsonObject =
   | JsonObject[]
   | {[string]: JsonObject};
 
-export function parse(raw: JsonObject): GithubConfig {
-  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
-    throw new Error("bad config: " + JSON.stringify(raw));
-  }
-  const {repositories} = raw;
-  if (!Array.isArray(repositories)) {
-    throw new Error("bad repositories: " + JSON.stringify(repositories));
-  }
-  const repoIds = repositories.map((x) => {
-    if (typeof x !== "string") {
-      throw new Error("bad repository: " + JSON.stringify(x));
-    }
-    return stringToRepoId(x);
+const parser: Combo.Parser<GithubConfig> = (() => {
+  const C = Combo;
+  return C.object({
+    repoIds: C.rename(
+      "repositories",
+      C.array(C.fmap(C.string, stringToRepoId))
+    ),
   });
-  return {repoIds};
+})();
+
+export function parse(raw: Combo.JsonObject): GithubConfig {
+  return parser.parseOrThrow(raw);
 }
