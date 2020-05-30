@@ -85,7 +85,6 @@ export const null_: Parser<null> = new Parser((x) => {
   return success(x);
 });
 
-<<<<<<< HEAD
 // Lift a plain value into a parser that always returns that value,
 // ignoring its input.
 export function pure<T>(t: T): Parser<T> {
@@ -140,8 +139,6 @@ export function fmap<T, U>(p: Parser<T>, f: (T) => U): Parser<U> {
   });
 }
 
-=======
->>>>>>> 297c4e915670fe63c171f06022fa665598b7524a
 export function array<T>(p: Parser<T>): Parser<T[]> {
   return new Parser((x) => {
     if (!Array.isArray(x)) {

@@ -75,7 +75,6 @@ describe("src/util/combo", () => {
     });
   });
 
-<<<<<<< HEAD
   describe("pure", () => {
     it("does what it says on the tin", () => {
       type Color = "RED" | "GREEN" | "BLUE";
@@ -136,8 +135,6 @@ describe("src/util/combo", () => {
     });
   });
 
-=======
->>>>>>> 297c4e915670fe63c171f06022fa665598b7524a
   describe("array", () => {
     it("accepts an empty array", () => {
       const p: C.Parser<string[]> = C.array(C.string);
