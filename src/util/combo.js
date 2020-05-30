@@ -41,10 +41,6 @@ export class Parser<+T> {
 // Helper type to extract the underlying type of a parser: for instance,
 // `ParserOutput<Parser<string>>` is just `string`.
 export type ParserOutput<P: Parser<mixed>> = $PropertyType<P, "_phantomT">;
-<<<<<<< HEAD
-=======
-type ExtractParserOutput = <P: Parser<mixed>>(P) => ParserOutput<P>;
->>>>>>> ce578ef84c425d143281b1e1c58f65b06f96b690
 
 // Helper to make a successful parse result. For readability.
 function success<T>(t: T): ParseResult<T> {
@@ -170,7 +166,6 @@ export function array<T>(p: Parser<T>): Parser<T[]> {
   });
 }
 
-<<<<<<< HEAD
 // Fields for an object type. Each is either a bare parser or the result
 // of `rename("oldFieldName", p)` for a parser `p`, to be used when the
 // field name in the output type is to be different from the field name
@@ -195,19 +190,12 @@ class RenameFieldImpl<+T> extends Parser<T> {
     this.oldKey = oldKey;
   }
 }
-=======
-type Fields = {+[string]: Parser<mixed>};
->>>>>>> ce578ef84c425d143281b1e1c58f65b06f96b690
 
 // Parser combinator for an object type all of whose fields are
 // required.
 type PObjectAllRequired = <FReq: Fields>(
   required: FReq
-<<<<<<< HEAD
 ) => Parser<$ObjMap<FReq, ExtractFieldOutput>>;
-=======
-) => Parser<$ObjMap<FReq, ExtractParserOutput>>;
->>>>>>> ce578ef84c425d143281b1e1c58f65b06f96b690
 
 // Parser combinator for an object type with some required fields (maybe
 // none) and some optional ones.
@@ -216,13 +204,8 @@ type PObjectWithOptionals = <FReq: Fields, FOpt: Fields>(
   optional: FOpt
 ) => Parser<
   $Exact<{
-<<<<<<< HEAD
     ...$Exact<$ObjMap<FReq, ExtractFieldOutput>>,
     ...$Rest<$Exact<$ObjMap<FOpt, ExtractFieldOutput>>, {}>,
-=======
-    ...$Exact<$ObjMap<FReq, ExtractParserOutput>>,
-    ...$Rest<$Exact<$ObjMap<FOpt, ExtractParserOutput>>, {}>,
->>>>>>> ce578ef84c425d143281b1e1c58f65b06f96b690
   }>
 >;
 
@@ -241,7 +224,6 @@ export const object: PObject = (function object(
   requiredFields,
   optionalFields?
 ) {
-<<<<<<< HEAD
   const newKeysSeen = new Set();
   const fields: Array<{|
     +oldKey: string,
@@ -264,14 +246,11 @@ export const object: PObject = (function object(
       fields.push({oldKey, newKey, parser, required});
     }
   }
-=======
->>>>>>> ce578ef84c425d143281b1e1c58f65b06f96b690
   return new Parser((x) => {
     if (typeof x !== "object" || Array.isArray(x) || x == null) {
       return failure("expected object, got " + typename(x));
     }
     const result = {};
-<<<<<<< HEAD
     for (const {oldKey, newKey, parser, required} of fields) {
       const raw = x[oldKey];
       if (raw === undefined) {
@@ -286,29 +265,6 @@ export const object: PObject = (function object(
         return failure(`key ${JSON.stringify(oldKey)}: ${parsed.err}`);
       }
       result[newKey] = parsed.value;
-=======
-    const fieldsets = [
-      {fields: requiredFields, required: true},
-      {fields: optionalFields || {}, required: false},
-    ];
-    for (const {fields, required} of fieldsets) {
-      for (const key of Object.keys(fields)) {
-        const raw = x[key];
-        if (raw === undefined) {
-          if (required) {
-            return failure("missing key: " + JSON.stringify(key));
-          } else {
-            continue;
-          }
-        }
-        const parser = fields[key];
-        const parsed = parser.parse(raw);
-        if (!parsed.ok) {
-          return failure(`key ${JSON.stringify(key)}: ${parsed.err}`);
-        }
-        result[key] = parsed.value;
-      }
->>>>>>> ce578ef84c425d143281b1e1c58f65b06f96b690
     }
     return success(result);
   });
