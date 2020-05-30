@@ -323,9 +323,12 @@ describe("src/util/combo", () => {
         const thunk = () => p.parseOrThrow({one: 1, two: 2});
         expect(thunk).toThrow('missing key: "dos"');
       });
-      it("only accepts the user-facing keys", () => {
-        const thunk = () => p.parseOrThrow({one: 1, two: 2});
-        expect(thunk).toThrow('missing key: "dos"');
+      it("only accepts the user-facing keys for optionals", () => {
+        expect(p.parseOrThrow({one: 1, dos: 2, three: 3, four: 4})).toEqual({
+          one: 1,
+          two: 2,
+          three: 3,
+        });
       });
       it("allows mapping one old key to multiple new keys", () => {
         // This makes it a bit harder to see how to turn `object` into
@@ -354,10 +357,16 @@ describe("src/util/combo", () => {
         C.object({hmm: C.string}, {hmm: C.rename("hum", C.string)});
       }).toThrow('duplicate key: "hmm"');
     });
-    it("forbids renaming a rename at the type level", () => {
-      C.rename("old", C.string);
+    it("doesn't type a rename as a parser", () => {
+      // In the (current) implementation, a `C.rename(...)` actually is
+      // a parser, for weird typing reasons. This test ensures that that
+      // implementation detail doesn't leak past the opaque type
+      // boundary.
+      const rename = C.rename("old", C.string);
       // $ExpectFlowError
-      (C.rename("old", C.string): C.Parser<string>);
+      (rename: C.Parser<string>);
+    });
+    it("forbids renaming a rename at the type level", () => {
       // $ExpectFlowError
       C.rename("hmm", C.rename("old", C.string));
     });
