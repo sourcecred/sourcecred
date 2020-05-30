@@ -17,11 +17,14 @@ export type ParseResult<+T> =
 
 export class Parser<+T> {
   +_f: (JsonObject) => ParseResult<T>;
+<<<<<<< HEAD
   // Phantom data for the output type of this parser. Used to more
   // reliably match on parsers at the type level, via `$PropertyType`
   // rather than `$Call`. Not populated at runtime; do not dereference.
   +_phantomT: T;
 
+=======
+>>>>>>> c5bdfcd174b1360230a06a482b84c0aa7361b0f0
   constructor(f: (JsonObject) => ParseResult<T>) {
     this._f = f;
   }
@@ -38,11 +41,14 @@ export class Parser<+T> {
   }
 }
 
+<<<<<<< HEAD
 // Helper type to extract the underlying type of a parser: for instance,
 // `ParserOutput<Parser<string>>` is just `string`.
 export type ParserOutput<P: Parser<mixed>> = $PropertyType<P, "_phantomT">;
 type ExtractParserOutput = <P: Parser<mixed>>(P) => ParserOutput<P>;
 
+=======
+>>>>>>> c5bdfcd174b1360230a06a482b84c0aa7361b0f0
 // Helper to make a successful parse result. For readability.
 function success<T>(t: T): ParseResult<T> {
   return {ok: true, value: t};
@@ -166,6 +172,7 @@ export function array<T>(p: Parser<T>): Parser<T[]> {
     return success(result);
   });
 }
+<<<<<<< HEAD
 
 type Fields = {+[string]: Parser<mixed>};
 
@@ -232,3 +239,5 @@ export const object: PObject = (function object(
     return success(result);
   });
 }: any);
+=======
+>>>>>>> c5bdfcd174b1360230a06a482b84c0aa7361b0f0

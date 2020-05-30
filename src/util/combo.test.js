@@ -179,6 +179,7 @@ describe("src/util/combo", () => {
       (C.array(C.string): C.Parser<string[][]>);
     });
   });
+<<<<<<< HEAD
 
   describe("object", () => {
     it("type-errors if the unique field doesn't match", () => {
@@ -298,4 +299,6 @@ describe("src/util/combo", () => {
       });
     });
   });
+=======
+>>>>>>> c5bdfcd174b1360230a06a482b84c0aa7361b0f0
 });
