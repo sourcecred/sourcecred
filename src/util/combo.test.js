@@ -58,7 +58,8 @@ describe("src/util/combo", () => {
         expect(C.null_.parseOrThrow(null)).toEqual(null);
       });
       it("rejects undefined", () => {
-        // This is a defense-in-depth test---undefined isn't actually a valid JSON value---so silence Flow's justified complaint.
+        // This is a defense-in-depth test---undefined isn't actually a
+        // valid JSON value---so silence Flow's justified complaint.
         const undef: C.JsonObject = (undefined: any);
         const thunk = () => C.null_.parseOrThrow(undef);
         expect(thunk).toThrow("expected null, got undefined");
