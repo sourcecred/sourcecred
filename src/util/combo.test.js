@@ -192,6 +192,17 @@ describe("src/util/combo", () => {
         +age: string,
       |}>);
     });
+    it("type-errors if two optional fields on an object are swapped", () => {
+      // $ExpectFlowError
+      (C.object(
+        {id: C.string},
+        {maybeName: C.string, maybeAge: C.number}
+      ): C.Parser<{|
+        +id: string,
+        +maybeName?: number,
+        +maybeAge?: string,
+      |}>);
+    });
     it("type-errors on bad required fields when optionals present", () => {
       // $ExpectFlowError
       (C.object({name: C.string, age: C.number}, {hmm: C.boolean}): C.Parser<{|
@@ -218,6 +229,16 @@ describe("src/util/combo", () => {
         age: C.number,
       });
       expect(p.parseOrThrow({name: "alice", age: 42})).toEqual({
+        name: "alice",
+        age: 42,
+      });
+    });
+    it("ignores extraneous fields on input values", () => {
+      const p: C.Parser<{|+name: string, +age: number|}> = C.object({
+        name: C.string,
+        age: C.number,
+      });
+      expect(p.parseOrThrow({name: "alice", age: 42, hoopy: true})).toEqual({
         name: "alice",
         age: 42,
       });

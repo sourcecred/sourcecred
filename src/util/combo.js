@@ -194,6 +194,10 @@ type PObjectWithOptionals = <FReq: Fields, FOpt: Fields>(
 // `empty` type.)
 type PObject = PObjectAllRequired & PObjectWithOptionals;
 
+// Create a parser for an object type, with required fields and
+// (optionally) optional fields. The returned parser will silently drop
+// extraneous fields on values that it parses, to facilitate forward and
+// backward compatibility.
 export const object: PObject = (function object(
   requiredFields,
   optionalFields?
