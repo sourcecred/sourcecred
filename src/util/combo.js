@@ -41,7 +41,6 @@ export class Parser<+T> {
 // Helper type to extract the underlying type of a parser: for instance,
 // `ParserOutput<Parser<string>>` is just `string`.
 export type ParserOutput<P: Parser<mixed>> = $PropertyType<P, "_phantomT">;
-type ExtractParserOutput = <P: Parser<mixed>>(P) => ParserOutput<P>;
 
 // Helper to make a successful parse result. For readability.
 function success<T>(t: T): ParseResult<T> {
