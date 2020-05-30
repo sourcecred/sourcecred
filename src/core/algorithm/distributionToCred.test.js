@@ -12,11 +12,19 @@ describe("src/core/algorithm/distributionToCred", () => {
           interval: {startTimeMs: 0, endTimeMs: 10},
           intervalWeight: 2,
           distribution: new Float64Array([0.5, 0.5]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([0.5, 0.5]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
         {
           interval: {startTimeMs: 10, endTimeMs: 20},
           intervalWeight: 10,
           distribution: new Float64Array([0.9, 0.1]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([0.5, 0.5]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
       ];
       const nodeOrder = [na("foo"), na("bar")];
@@ -39,11 +47,19 @@ describe("src/core/algorithm/distributionToCred", () => {
           interval: {startTimeMs: 0, endTimeMs: 10},
           intervalWeight: 2,
           distribution: new Float64Array([0.5, 0.5]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([0.5, 0.5]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
         {
           interval: {startTimeMs: 10, endTimeMs: 20},
           intervalWeight: 10,
           distribution: new Float64Array([0.9, 0.1]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([0.5, 0.5]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
       ];
       const nodeOrder = [na("foo"), na("bar")];
@@ -66,11 +82,19 @@ describe("src/core/algorithm/distributionToCred", () => {
           interval: {startTimeMs: 0, endTimeMs: 10},
           intervalWeight: 2,
           distribution: new Float64Array([0.5, 0.5]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([0.5, 0.5]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
         {
           interval: {startTimeMs: 10, endTimeMs: 20},
           intervalWeight: 10,
           distribution: new Float64Array([0.9, 0.1]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([0.9, 0.1]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
       ];
       const nodeOrder = [na("foo"), na("bar")];
@@ -93,6 +117,10 @@ describe("src/core/algorithm/distributionToCred", () => {
           interval: {startTimeMs: 0, endTimeMs: 10},
           intervalWeight: 2,
           distribution: new Float64Array([0.5, 0.5]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([0.5, 0.5]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
       ];
       const nodeOrder = [na("foo"), na("bar")];
@@ -112,6 +140,10 @@ describe("src/core/algorithm/distributionToCred", () => {
           interval: {startTimeMs: 0, endTimeMs: 10},
           intervalWeight: 2,
           distribution: new Float64Array([1, 0]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([1, 0]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
       ];
       const nodeOrder = [na("foo"), na("bar")];
@@ -136,11 +168,19 @@ describe("src/core/algorithm/distributionToCred", () => {
           interval: {startTimeMs: 0, endTimeMs: 10},
           intervalWeight: 2,
           distribution: new Float64Array([0.5, 0.5]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([0.5, 0.5]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
         {
           interval: {startTimeMs: 10, endTimeMs: 20},
           intervalWeight: 10,
           distribution: new Float64Array([0.9, 0.1]),
+          backwardFlow: new Float64Array([]),
+          forwardFlow: new Float64Array([]),
+          seedFlow: new Float64Array([0.9, 0.1]),
+          syntheticLoopFlow: new Float64Array([0, 0]),
         },
       ];
       const nodeOrder = [na("foo"), na("bar")];
