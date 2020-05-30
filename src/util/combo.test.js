@@ -179,4 +179,123 @@ describe("src/util/combo", () => {
       (C.array(C.string): C.Parser<string[][]>);
     });
   });
+
+  describe("object", () => {
+    it("type-errors if the unique field doesn't match", () => {
+      // $ExpectFlowError
+      (C.object({name: C.string}): C.Parser<{|+name: number|}>);
+    });
+    it("type-errors if two fields on an object are swapped", () => {
+      // $ExpectFlowError
+      (C.object({name: C.string, age: C.number}): C.Parser<{|
+        +name: number,
+        +age: string,
+      |}>);
+    });
+    it("type-errors if two optional fields on an object are swapped", () => {
+      // $ExpectFlowError
+      (C.object(
+        {id: C.string},
+        {maybeName: C.string, maybeAge: C.number}
+      ): C.Parser<{|
+        +id: string,
+        +maybeName?: number,
+        +maybeAge?: string,
+      |}>);
+    });
+    it("type-errors on bad required fields when optionals present", () => {
+      // $ExpectFlowError
+      (C.object({name: C.string, age: C.number}, {hmm: C.boolean}): C.Parser<{|
+        +name: number,
+        +age: string,
+        +hmm?: boolean,
+      |}>);
+    });
+    it("type-errors on bad required fields when empty optionals present", () => {
+      // $ExpectFlowError
+      (C.object({name: C.string, age: C.number}, {}): C.Parser<{|
+        +name: number,
+        +age: string,
+        +hmm?: boolean,
+      |}>);
+    });
+    it("accepts an object with one field", () => {
+      const p: C.Parser<{|+name: string|}> = C.object({name: C.string});
+      expect(p.parseOrThrow({name: "alice"})).toEqual({name: "alice"});
+    });
+    it("accepts an object with two fields at distinct types", () => {
+      const p: C.Parser<{|+name: string, +age: number|}> = C.object({
+        name: C.string,
+        age: C.number,
+      });
+      expect(p.parseOrThrow({name: "alice", age: 42})).toEqual({
+        name: "alice",
+        age: 42,
+      });
+    });
+    it("ignores extraneous fields on input values", () => {
+      const p: C.Parser<{|+name: string, +age: number|}> = C.object({
+        name: C.string,
+        age: C.number,
+      });
+      expect(p.parseOrThrow({name: "alice", age: 42, hoopy: true})).toEqual({
+        name: "alice",
+        age: 42,
+      });
+    });
+    it("rejects an object with missing fields", () => {
+      const p: C.Parser<{|+name: string, +age: number|}> = C.object({
+        name: C.string,
+        age: C.number,
+      });
+      const thunk = () => p.parseOrThrow({name: "alice"});
+      expect(thunk).toThrow('missing key: "age"');
+    });
+    it("rejects an object with fields at the wrong type", () => {
+      const p: C.Parser<{|+name: string, +age: number|}> = C.object({
+        name: C.string,
+        age: C.number,
+      });
+      const thunk = () => p.parseOrThrow({name: "alice", age: "secret"});
+      expect(thunk).toThrow('key "age": expected number, got string');
+    });
+    it("rejects arrays", () => {
+      const p = C.object({name: C.string});
+      const thunk = () => p.parseOrThrow(["alice", "bob"]);
+      expect(thunk).toThrow("expected object, got array");
+    });
+    it("rejects null", () => {
+      const p = C.object({name: C.string});
+      const thunk = () => p.parseOrThrow(null);
+      expect(thunk).toThrow("expected object, got null");
+    });
+    it("rejects strings", () => {
+      const p = C.object({name: C.string});
+      const thunk = () => p.parseOrThrow("hmm");
+      expect(thunk).toThrow("expected object, got string");
+    });
+    describe("for objects with some required and some optional fields", () => {
+      const p: C.Parser<{|
+        +rs: string,
+        +rn: number,
+        +os?: string,
+        +on?: number,
+      |}> = C.object(
+        {rs: C.string, rn: C.number},
+        {os: C.string, on: C.number}
+      );
+      it("accepts values with none of the optional fields", () => {
+        const v = {rs: "a", rn: 1};
+        expect(p.parseOrThrow(v)).toEqual(v);
+      });
+      it("accepts values with a strict subset of the optional fields", () => {
+        const v = {rs: "a", rn: 1, on: 9};
+        expect(p.parseOrThrow(v)).toEqual(v);
+      });
+      it("accepts values with all the optional fields", () => {
+        const v = {rs: "a", rn: 1, os: "z", on: 9};
+        expect(p.parseOrThrow(v)).toEqual(v);
+      });
+    });
+  });
 });
