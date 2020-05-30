@@ -85,6 +85,60 @@ export const null_: Parser<null> = new Parser((x) => {
   return success(x);
 });
 
+// Lift a plain value into a parser that always returns that value,
+// ignoring its input.
+export function pure<T>(t: T): Parser<T> {
+  return new Parser((_) => success(t));
+}
+
+// Transform the output of a parser with a pure function. For instance,
+// if `p: Parser<number>` and `f = (n: number) => n % 2 === 0`, then
+// `fmap(p, f)` is a `Parser<boolean>` that first uses `p` to parse its
+// input to a number and then checks whether the number is even.
+//
+// If the function `f` throws, the thrown value will be converted to
+// string and returned as a parse error. (The string conversion takes
+// `e.message` if the thrown value `e` is an `Error`, else just converts
+// with the `String` builtin.)
+//
+// This can be used for "strong validation". If `U` is a (possibly
+// opaque) subtype of `T`, and `f: (T) => U` is a checked downcast that
+// either returns a `U` or throws an error, then `fmap` can transform a
+// `Parser<T>` into a validating `Parser<U>`, where the fact that the
+// validation has been performed is encoded at the type level. Thus:
+//
+//    import * as C from ".../combo";
+//    import {NodeAddress, type NodeAddressT} from ".../core/graph";
+//
+//    const addressParser: Parser<NodeAddressT> =
+//      C.fmap(C.array(C.string), NodeAddress.fromParts);
+//
+// As a degenerate case, it can also be used for "weak validation",
+// where the types `T` and `U` are the same and the function `f` simply
+// returns its argument or throws, but in this case there is nothing
+// preventing a user of a `Parser<T>` from simply forgetting to
+// validate. Prefer strong validation when possible.
+export function fmap<T, U>(p: Parser<T>, f: (T) => U): Parser<U> {
+  return new Parser((x) => {
+    const maybeT = p.parse(x);
+    if (!maybeT.ok) {
+      return failure(maybeT.err);
+    }
+    const t = maybeT.value;
+    let u: U;
+    try {
+      u = f(t);
+    } catch (e) {
+      if (e instanceof Error) {
+        return failure(e.message);
+      } else {
+        return failure(String(e));
+      }
+    }
+    return success(u);
+  });
+}
+
 export function array<T>(p: Parser<T>): Parser<T[]> {
   return new Parser((x) => {
     if (!Array.isArray(x)) {
