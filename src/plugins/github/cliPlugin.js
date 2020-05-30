@@ -18,6 +18,8 @@ import {fromRelationalViews as referenceDetectorFromRelationalViews} from "./ref
 import {parse as parseConfig, type GithubConfig} from "./config";
 import {validateToken, type GithubToken} from "./token";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
+import {type TaskReporter} from "../../util/taskReporter";
+import {repoIdToString} from "./repoId";
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_GITHUB_TOKEN";
 
@@ -56,12 +58,19 @@ export class GithubCliPlugin implements CliPlugin {
     return declaration;
   }
 
-  async load(ctx: PluginDirectoryContext): Promise<void> {
+  async load(
+    ctx: PluginDirectoryContext,
+    reporter: TaskReporter
+  ): Promise<void> {
     const cache = new CacheProviderImpl(ctx);
     const token = getTokenFromEnv();
     const config = await loadConfig(ctx);
     for (const repoId of config.repoIds) {
+      const repoString = repoIdToString(repoId);
+      const task = `github: loading ${repoString}`;
+      reporter.start(task);
       await fetchGithubRepo(repoId, {token, cache});
+      reporter.finish(task);
     }
   }
 
