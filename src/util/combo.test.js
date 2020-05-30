@@ -58,7 +58,8 @@ describe("src/util/combo", () => {
         expect(C.null_.parseOrThrow(null)).toEqual(null);
       });
       it("rejects undefined", () => {
-        // This is a defense-in-depth test---undefined isn't actually a valid JSON value---so silence Flow's justified complaint.
+        // This is a defense-in-depth test---undefined isn't actually a
+        // valid JSON value---so silence Flow's justified complaint.
         const undef: C.JsonObject = (undefined: any);
         const thunk = () => C.null_.parseOrThrow(undef);
         expect(thunk).toThrow("expected null, got undefined");
@@ -191,6 +192,17 @@ describe("src/util/combo", () => {
         +age: string,
       |}>);
     });
+    it("type-errors if two optional fields on an object are swapped", () => {
+      // $ExpectFlowError
+      (C.object(
+        {id: C.string},
+        {maybeName: C.string, maybeAge: C.number}
+      ): C.Parser<{|
+        +id: string,
+        +maybeName?: number,
+        +maybeAge?: string,
+      |}>);
+    });
     it("type-errors on bad required fields when optionals present", () => {
       // $ExpectFlowError
       (C.object({name: C.string, age: C.number}, {hmm: C.boolean}): C.Parser<{|
@@ -217,6 +229,16 @@ describe("src/util/combo", () => {
         age: C.number,
       });
       expect(p.parseOrThrow({name: "alice", age: 42})).toEqual({
+        name: "alice",
+        age: 42,
+      });
+    });
+    it("ignores extraneous fields on input values", () => {
+      const p: C.Parser<{|+name: string, +age: number|}> = C.object({
+        name: C.string,
+        age: C.number,
+      });
+      expect(p.parseOrThrow({name: "alice", age: 42, hoopy: true})).toEqual({
         name: "alice",
         age: 42,
       });
