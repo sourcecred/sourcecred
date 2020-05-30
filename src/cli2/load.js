@@ -11,7 +11,7 @@ function die(std, message) {
 
 const loadCommand: Command = async (args, std) => {
   if (args.length !== 0) {
-    die(std, "usage: sourcecred load");
+    return die(std, "usage: sourcecred load");
   }
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("load");
