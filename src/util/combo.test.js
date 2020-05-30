@@ -275,5 +275,69 @@ describe("src/util/combo", () => {
         expect(p.parseOrThrow(v)).toEqual(v);
       });
     });
+    describe("with field renaming", () => {
+      const p: C.Parser<{|
+        +one: number,
+        +two: number,
+        +three?: number,
+        +four?: number,
+      |}> = C.object(
+        {one: C.number, two: C.rename("dos", C.number)},
+        {three: C.number, four: C.rename("cuatro", C.number)}
+      );
+      it("renames both required and optional fields", () => {
+        expect(p.parseOrThrow({one: 1, dos: 2, three: 3, cuatro: 4})).toEqual({
+          one: 1,
+          two: 2,
+          three: 3,
+          four: 4,
+        });
+      });
+      it("provides missing key errors using the user-facing name", () => {
+        const thunk = () => p.parseOrThrow({one: 1, cuatro: 4});
+        expect(thunk).toThrow('missing key: "dos"');
+      });
+      it("only accepts the user-facing keys", () => {
+        const thunk = () => p.parseOrThrow({one: 1, two: 2});
+        expect(thunk).toThrow('missing key: "dos"');
+      });
+      it("only accepts the user-facing keys", () => {
+        const thunk = () => p.parseOrThrow({one: 1, two: 2});
+        expect(thunk).toThrow('missing key: "dos"');
+      });
+      it("allows mapping one old key to multiple new keys", () => {
+        // This makes it a bit harder to see how to turn `object` into
+        // an iso, but it's the intended behavior for now, so let's test
+        // it.
+        const p: C.Parser<{|
+          +value: number,
+          +valueAsString: string,
+        |}> = C.object({
+          value: C.number,
+          valueAsString: C.rename(
+            "value",
+            C.fmap(C.number, (n) => n.toFixed())
+          ),
+        });
+        expect(p.parseOrThrow({value: 7})).toEqual({
+          value: 7,
+          valueAsString: "7",
+        });
+      });
+    });
+    it("fails when `required` and `optional` have overlapping new keys", () => {
+      expect(() => {
+        // ...even if the parser types are compatible and the old keys
+        // are different
+        C.object({hmm: C.string}, {hmm: C.rename("hum", C.string)});
+      }).toThrow('duplicate key: "hmm"');
+    });
+    it("forbids renaming a rename at the type level", () => {
+      C.rename("old", C.string);
+      // $ExpectFlowError
+      (C.rename("old", C.string): C.Parser<string>);
+      // $ExpectFlowError
+      C.rename("hmm", C.rename("old", C.string));
+    });
   });
 });

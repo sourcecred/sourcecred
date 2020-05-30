@@ -167,13 +167,36 @@ export function array<T>(p: Parser<T>): Parser<T[]> {
   });
 }
 
-type Fields = {+[string]: Parser<mixed>};
+// Fields for an object type. Each is either a bare parser or the result
+// of `rename("oldFieldName", p)` for a parser `p`, to be used when the
+// field name in the output type is to be different from the field name
+// in the input type.
+export type Field<+T> = Parser<T> | RenameField<T>;
+export opaque type RenameField<+T>: {+_phantomT: T} = RenameFieldImpl<T>;
+export type Fields = {+[string]: Field<mixed>};
+
+// Like `ExtractParserOutput`, but works on `Field`s even when the
+// bound ascription is checked outside of this module.
+type FieldOutput<F: Field<mixed>> = $PropertyType<F, "_phantomT">;
+type ExtractFieldOutput = <F: Field<mixed>>(F) => FieldOutput<F>;
+
+export function rename<T>(oldKey: string, parser: Parser<T>): RenameField<T> {
+  return new RenameFieldImpl(oldKey, parser);
+}
+
+class RenameFieldImpl<+T> extends Parser<T> {
+  +oldKey: string;
+  constructor(oldKey: string, parser: Parser<T>) {
+    super(parser._f);
+    this.oldKey = oldKey;
+  }
+}
 
 // Parser combinator for an object type all of whose fields are
 // required.
 type PObjectAllRequired = <FReq: Fields>(
   required: FReq
-) => Parser<$ObjMap<FReq, ExtractParserOutput>>;
+) => Parser<$ObjMap<FReq, ExtractFieldOutput>>;
 
 // Parser combinator for an object type with some required fields (maybe
 // none) and some optional ones.
@@ -182,8 +205,8 @@ type PObjectWithOptionals = <FReq: Fields, FOpt: Fields>(
   optional: FOpt
 ) => Parser<
   $Exact<{
-    ...$Exact<$ObjMap<FReq, ExtractParserOutput>>,
-    ...$Rest<$Exact<$ObjMap<FOpt, ExtractParserOutput>>, {}>,
+    ...$Exact<$ObjMap<FReq, ExtractFieldOutput>>,
+    ...$Rest<$Exact<$ObjMap<FOpt, ExtractFieldOutput>>, {}>,
   }>
 >;
 
@@ -198,32 +221,47 @@ export const object: PObject = (function object(
   requiredFields,
   optionalFields?
 ) {
+  const newKeysSeen = new Set();
+  const fields: Array<{|
+    +oldKey: string,
+    +newKey: string,
+    +required: boolean,
+    +parser: Parser<mixed>,
+  |}> = [];
+  const fieldsets = [
+    {inputFields: requiredFields, required: true},
+    {inputFields: optionalFields || {}, required: false},
+  ];
+  for (const {inputFields, required} of fieldsets) {
+    for (const newKey of Object.keys(inputFields)) {
+      const parser = inputFields[newKey];
+      if (newKeysSeen.has(newKey)) {
+        throw new Error("duplicate key: " + JSON.stringify(newKey));
+      }
+      newKeysSeen.add(newKey);
+      const oldKey = parser instanceof RenameFieldImpl ? parser.oldKey : newKey;
+      fields.push({oldKey, newKey, parser, required});
+    }
+  }
   return new Parser((x) => {
     if (typeof x !== "object" || Array.isArray(x) || x == null) {
       return failure("expected object, got " + typename(x));
     }
     const result = {};
-    const fieldsets = [
-      {fields: requiredFields, required: true},
-      {fields: optionalFields || {}, required: false},
-    ];
-    for (const {fields, required} of fieldsets) {
-      for (const key of Object.keys(fields)) {
-        const raw = x[key];
-        if (raw === undefined) {
-          if (required) {
-            return failure("missing key: " + JSON.stringify(key));
-          } else {
-            continue;
-          }
+    for (const {oldKey, newKey, parser, required} of fields) {
+      const raw = x[oldKey];
+      if (raw === undefined) {
+        if (required) {
+          return failure("missing key: " + JSON.stringify(oldKey));
+        } else {
+          continue;
         }
-        const parser = fields[key];
-        const parsed = parser.parse(raw);
-        if (!parsed.ok) {
-          return failure(`key ${JSON.stringify(key)}: ${parsed.err}`);
-        }
-        result[key] = parsed.value;
       }
+      const parsed = parser.parse(raw);
+      if (!parsed.ok) {
+        return failure(`key ${JSON.stringify(oldKey)}: ${parsed.err}`);
+      }
+      result[newKey] = parsed.value;
     }
     return success(result);
   });
