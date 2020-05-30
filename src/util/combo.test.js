@@ -74,6 +74,66 @@ describe("src/util/combo", () => {
     });
   });
 
+  describe("pure", () => {
+    it("does what it says on the tin", () => {
+      type Color = "RED" | "GREEN" | "BLUE";
+      const p: C.Parser<Color> = C.pure("GREEN");
+      expect(p.parseOrThrow(p)).toEqual("GREEN");
+    });
+  });
+
+  describe("fmap", () => {
+    type Color = "RED" | "GREEN" | "BLUE";
+    function stringToColor(s: string): Color {
+      const c = s.toLowerCase().charAt(0);
+      switch (c) {
+        case "r":
+          return "RED";
+        case "g":
+          return "GREEN";
+        case "b":
+          return "BLUE";
+        default:
+          throw new Error("unknown color: " + JSON.stringify(s));
+      }
+    }
+    it("handles the success case", () => {
+      const p: C.Parser<Color> = C.fmap(C.string, stringToColor);
+      expect(p.parseOrThrow("blu")).toEqual("BLUE");
+    });
+    it("handles failure of the base parser", () => {
+      const p: C.Parser<Color> = C.fmap(C.string, stringToColor);
+      const thunk = () => p.parseOrThrow(77);
+      expect(thunk).toThrow("expected string, got number");
+    });
+    it("handles `Error`s thrown by the mapping function", () => {
+      const p: C.Parser<Color> = C.fmap(C.string, stringToColor);
+      // Avoid `.toThrow` because that checks for a substring, and we
+      // want to ensure no "Error: " prefix is included.
+      expect(p.parse("wat")).toEqual({ok: false, err: 'unknown color: "wat"'});
+    });
+    it("handles failure of the mapping function", () => {
+      const p: C.Parser<Color> = C.fmap(C.string, () => {
+        throw 123;
+      });
+      expect(p.parse("wat")).toEqual({ok: false, err: "123"});
+    });
+    it("composes", () => {
+      const raw: C.Parser<string> = C.string;
+      const trimmed: C.Parser<string> = C.fmap(raw, (s) => s.trim());
+      const color: C.Parser<Color> = C.fmap(trimmed, stringToColor);
+      expect(color.parseOrThrow("  blu\n\n")).toEqual("BLUE");
+    });
+    it("is type-safe", () => {
+      // input safety
+      // $ExpectFlowError
+      C.fmap(C.string, (n: number) => n.toFixed());
+      // output safety
+      // $ExpectFlowError
+      (C.fmap(C.number, (n: number) => n.toFixed()): C.Parser<number>);
+    });
+  });
+
   describe("array", () => {
     it("accepts an empty array", () => {
       const p: C.Parser<string[]> = C.array(C.string);
