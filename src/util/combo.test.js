@@ -297,6 +297,7 @@ describe("src/util/combo", () => {
         expect(p.parseOrThrow(v)).toEqual(v);
       });
     });
+<<<<<<< HEAD
     describe("with field renaming", () => {
       const p: C.Parser<{|
         +one: number,
@@ -370,5 +371,7 @@ describe("src/util/combo", () => {
       // $ExpectFlowError
       C.rename("hmm", C.rename("old", C.string));
     });
+=======
+>>>>>>> ce578ef84c425d143281b1e1c58f65b06f96b690
   });
 });
