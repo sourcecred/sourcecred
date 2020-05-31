@@ -371,4 +371,29 @@ describe("src/util/combo", () => {
       C.rename("hmm", C.rename("old", C.string));
     });
   });
+
+  describe("shape", () => {
+    // Light test; this is a special case of `object`.
+    it("works for normal and renamed fields", () => {
+      const p: C.Parser<{|
+        +one?: number,
+        +two?: number,
+        +three?: number,
+        +four?: number,
+      |}> = C.shape({
+        one: C.number,
+        two: C.rename("dos", C.number),
+        three: C.number,
+        four: C.rename("cuatro", C.number),
+      });
+      expect(p.parseOrThrow({one: 1, dos: 2})).toEqual({one: 1, two: 2});
+    });
+    it("type-errors if the output has any required fields", () => {
+      // $ExpectFlowError
+      const _: C.Parser<{|+a?: null, +b: null /* bad */|}> = C.shape({
+        a: C.null_,
+        b: C.null_,
+      });
+    });
+  });
 });
