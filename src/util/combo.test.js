@@ -75,6 +75,29 @@ describe("src/util/combo", () => {
     });
   });
 
+  describe("raw", () => {
+    it("parses strings", () => {
+      expect(C.raw.parseOrThrow("hey")).toEqual("hey");
+    });
+    it("parses numbers", () => {
+      expect(C.raw.parseOrThrow(123)).toEqual(123);
+    });
+    it("parses booleans", () => {
+      expect(C.raw.parseOrThrow(true)).toEqual(true);
+      expect(C.raw.parseOrThrow(false)).toEqual(false);
+    });
+    it("parses null", () => {
+      expect(C.raw.parseOrThrow(null)).toEqual(null);
+    });
+    it("parses heterogeneous arrays", () => {
+      expect(C.raw.parseOrThrow([1, "two"])).toEqual([1, "two"]);
+    });
+    it("parses heterogeneous objects", () => {
+      const input = {one: 2, three: "five"};
+      expect(C.raw.parseOrThrow(input)).toEqual({one: 2, three: "five"});
+    });
+  });
+
   describe("pure", () => {
     it("does what it says on the tin", () => {
       type Color = "RED" | "GREEN" | "BLUE";

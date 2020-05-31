@@ -95,6 +95,19 @@ export const null_: Parser<null> = new Parser((x) => {
   return success(x);
 });
 
+// The identity operation: a parser that always succeeds, emitting a
+// `JsonObject` (not `any`) with the input. Used when you need a parser
+// that matches anything:
+//
+//    // Accepts an arbitrary heterogeneous array and returns its length
+//    C.fmap(C.array(C.raw), (a) => a.length)
+//
+//    // Accepts a config file with dynamic plugin-specific data
+//    C.object({version: string, pluginConfig: C.dict(C.raw)})
+//
+// To destructure the parsed value dynamically, pair with `fmap`.
+export const raw: Parser<JsonObject> = new Parser(success);
+
 // Lift a plain value into a parser that always returns that value,
 // ignoring its input.
 export function pure<T>(t: T): Parser<T> {
