@@ -314,3 +314,31 @@ export function tuple<T: Iterable<Parser<mixed>>>(
     return success(result);
   });
 }
+
+// Create a parser for objects with arbitrary string keys and
+// homogeneous values. For instance, a set of package versions:
+//
+//    {"better-sqlite3": "^7.0.0", "react": "^16.13.0"}
+//
+// might be parsed by the following parser:
+//
+//    C.dict(C.fmap(C.string, (s) => SemVer.parse(s)))
+//
+// Objects may have any number of entries, including zero.
+export function dict<V>(valueParser: Parser<V>): Parser<{|[string]: V|}> {
+  return new Parser((x) => {
+    if (typeof x !== "object" || Array.isArray(x) || x == null) {
+      return failure("expected object, got " + typename(x));
+    }
+    const result: {|[string]: V|} = ({}: any);
+    for (const key of Object.keys(x)) {
+      const raw = x[key];
+      const parsed = valueParser.parse(raw);
+      if (!parsed.ok) {
+        return failure(`key ${JSON.stringify(key)}: ${parsed.err}`);
+      }
+      result[key] = parsed.value;
+    }
+    return success(result);
+  });
+}
