@@ -106,6 +106,48 @@ describe("src/util/combo", () => {
     });
   });
 
+  describe("exactly", () => {
+    it("is type-safe", () => {
+      (C.exactly([1, 2, 3]): C.Parser<1 | 2 | 3>);
+      (C.exactly(["one", 2]): C.Parser<"one" | 2>);
+      (C.exactly([]): C.Parser<empty>);
+      // $ExpectFlowError
+      (C.exactly([1, 2, 3]): C.Parser<1 | 2>);
+      // $ExpectFlowError
+      (C.exactly(["one", 2]): C.Parser<1 | "two">);
+      // $ExpectFlowError
+      (C.exactly([false]): C.Parser<empty>);
+    });
+    it("accepts any matching value", () => {
+      type Color = "RED" | "GREEN" | "BLUE";
+      const p: C.Parser<Color> = C.exactly(["RED", "GREEN", "BLUE"]);
+      expect([p.parse("RED"), p.parse("GREEN"), p.parse("BLUE")]).toEqual([
+        {ok: true, value: "RED"},
+        {ok: true, value: "GREEN"},
+        {ok: true, value: "BLUE"},
+      ]);
+    });
+    it("rejects a non-matching value among multiple alternatives", () => {
+      type Color = "RED" | "GREEN" | "BLUE";
+      const p: C.Parser<Color> = C.exactly(["RED", "GREEN", "BLUE"]);
+      const thunk = () => p.parseOrThrow("YELLOW");
+      expect(thunk).toThrow(
+        'expected one of ["RED","GREEN","BLUE"], got string'
+      );
+    });
+    it("rejects a non-matching value from just one option", () => {
+      type Consent = {|+acceptedEula: true|};
+      const p: C.Parser<Consent> = C.object({acceptedEula: C.exactly([true])});
+      const thunk = () => p.parseOrThrow({acceptedEula: false});
+      expect(thunk).toThrow("expected true, got boolean");
+    });
+    it("rejects a non-matching value from no options", () => {
+      const p: C.Parser<empty> = C.exactly([]);
+      const thunk = () => p.parseOrThrow("wat");
+      expect(thunk).toThrow("expected one of [], got string");
+    });
+  });
+
   describe("fmap", () => {
     type Color = "RED" | "GREEN" | "BLUE";
     function stringToColor(s: string): Color {
