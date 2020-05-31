@@ -162,6 +162,52 @@ export function fmap<T, U>(p: Parser<T>, f: (T) => U): Parser<U> {
   });
 }
 
+// Create a parser that tries each of the given parsers on the same
+// input, taking the first successful parse or failing if all parsers
+// fail. In the failure case, the provided `errorFn` will be called with
+// the error messages from all the subparsers to form the resulting
+// error; the default error function includes the full text of all the
+// error messages, but a user-supplied error function may act with
+// domain-specific precision.
+//
+// One use case is for parsing unions, including discriminated unions:
+//
+//    type Expr =
+//      | {|+type: "CONSTANT", +value: number|}
+//      | {|+type: "VARIABLE", +name: string|};
+//    const exprParser: C.Parser<Expr> = C.orElse([
+//      C.fmap(C.number, (value) => ({type: "CONSTANT", value})),
+//      C.fmap(C.string, (name) => ({type: "VARIABLE", name})),
+//    ]);
+//
+// Another is to use `pure` to provide a default value:
+//
+//    const lenientNumber: C.Parser<number | "(unknown)"> = C.orElse([
+//      C.number,
+//      C.pure("(unknown)"),
+//    ]);
+//
+// This last parser will always succeed, because `C.pure(v)` always
+// succeeds and always returns `v`.
+export function orElse<T: $ReadOnlyArray<Parser<mixed>>>(
+  parsers: T,
+  errorFn?: (string[]) => string = (errors) =>
+    `no parse matched: ${JSON.stringify(errors)}`
+): Parser<$ElementType<$TupleMap<T, ExtractParserOutput>, number>> {
+  return new Parser((x) => {
+    const errors = [];
+    for (const parser of parsers) {
+      const result = parser.parse(x);
+      if (result.ok) {
+        return success((result.value: any));
+      } else {
+        errors.push(result.err);
+      }
+    }
+    return failure(errorFn(errors));
+  });
+}
+
 export function array<T>(p: Parser<T>): Parser<T[]> {
   return new Parser((x) => {
     if (!Array.isArray(x)) {
