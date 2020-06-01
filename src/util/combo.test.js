@@ -396,7 +396,6 @@ describe("src/util/combo", () => {
       });
     });
   });
-<<<<<<< HEAD
 
   describe("tuple", () => {
     describe("for an empty tuple type", () => {
@@ -412,6 +411,11 @@ describe("src/util/combo", () => {
       });
     });
     describe("for a heterogeneous tuple type", () => {
+      it("is typesafe", () => {
+        (C.tuple([C.string, C.number]): C.Parser<[string, number]>);
+        // $ExpectFlowError
+        (C.tuple([C.string, C.number]): C.Parser<[string, string]>);
+      });
       const makeParser = (): C.Parser<[string, number]> =>
         C.tuple([C.fmap(C.string, (s) => s + "!"), C.number]);
       it("rejects a non-array", () => {
@@ -435,6 +439,4 @@ describe("src/util/combo", () => {
       });
     });
   });
-=======
->>>>>>> 930ac715fa49e85ead0aa3994264b112a4b28f31
 });
