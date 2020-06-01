@@ -209,6 +209,12 @@ type PObjectWithOptionals = <FReq: Fields, FOpt: Fields>(
   }>
 >;
 
+// Parser combinator for an object type where all fields are optional.
+// Special case of `PObjectWithOptionals`.
+type PObjectShape = <FOpt: Fields>(
+  optional: FOpt
+) => Parser<$Rest<$Exact<$ObjMap<FOpt, ExtractFieldOutput>>, {}>>;
+
 // Parser combinator for an object type with some required fields (maybe
 // none) and maybe some optional ones. (This is an intersection type
 // rather than a normal function with optional second argument to force
@@ -269,3 +275,9 @@ export const object: PObject = (function object(
     return success(result);
   });
 }: any);
+
+// Create a parser for an object type all of whose fields are optional.
+// Shorthand for `object` with an empty first argument.
+export const shape: PObjectShape = function shape(fields) {
+  return object({}, fields);
+};
