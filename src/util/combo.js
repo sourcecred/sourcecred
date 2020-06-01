@@ -114,6 +114,35 @@ export function pure<T>(t: T): Parser<T> {
   return new Parser((_) => success(t));
 }
 
+// Create a parser that accepts any value from a fixed set. This can be
+// used for enumerated values in configs:
+//
+//    type Environment = "dev" | "prod";
+//    const p: C.Parser<Environment> = C.exactly(["dev", "prod"]);
+//
+// This function only supports value types. Performing an `any`-cast
+// guarded by a deep equality check would be unsound, breaking opaque
+// type boundaries: e.g., a module could `export opaque type T = {}` and
+// provide two constants `ONE = {}` and `TWO = {}` (different objects),
+// and then expect that any value of type `T` would be identical to
+// either `ONE` or `TWO`. Using strict reference equality for array and
+// object types would be sound, but would not usually be what was
+// wanted, as it wouldn't match ~any actual output of `JSON.parse`.
+export function exactly<T: string | number | boolean | null>(
+  ts: $ReadOnlyArray<T>
+): Parser<T> {
+  return new Parser((x) => {
+    for (const t of ts) {
+      if (x === t) {
+        return success(t);
+      }
+    }
+    const expected: string =
+      ts.length === 1 ? String(ts[0]) : `one of ${JSON.stringify(ts)}`;
+    return failure(`expected ${expected}, got ${typename(x)}`);
+  });
+}
+
 // Transform the output of a parser with a pure function. For instance,
 // if `p: Parser<number>` and `f = (n: number) => n % 2 === 0`, then
 // `fmap(p, f)` is a `Parser<boolean>` that first uses `p` to parse its
