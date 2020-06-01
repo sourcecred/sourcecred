@@ -282,6 +282,7 @@ export const object: PObject = (function object(
 export const shape: PObjectShape = function shape(fields) {
   return object({}, fields);
 };
+<<<<<<< HEAD
 
 // Create a parser for a tuple: a fixed-length array with possibly
 // heterogeneous element types. For instance,
@@ -314,3 +315,5 @@ export function tuple<T: Iterable<Parser<mixed>>>(
     return success(result);
   });
 }
+=======
+>>>>>>> 930ac715fa49e85ead0aa3994264b112a4b28f31

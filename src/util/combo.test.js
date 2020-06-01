@@ -396,6 +396,7 @@ describe("src/util/combo", () => {
       });
     });
   });
+<<<<<<< HEAD
 
   describe("tuple", () => {
     describe("for an empty tuple type", () => {
@@ -434,4 +435,6 @@ describe("src/util/combo", () => {
       });
     });
   });
+=======
+>>>>>>> 930ac715fa49e85ead0aa3994264b112a4b28f31
 });
