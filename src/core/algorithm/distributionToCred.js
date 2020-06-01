@@ -11,6 +11,7 @@ import {type TimelineDistributions} from "./timelinePagerank";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 
 export opaque type NodeOrderedCredScores: Float64Array = Float64Array;
+export opaque type EdgeOrderedCredScores: Float64Array = Float64Array;
 
 /**
  * Represents cred scores over time.
@@ -26,6 +27,10 @@ export type TimelineCredScores = $ReadOnlyArray<IntervalCred>;
 export type IntervalCred = {|
   +interval: Interval,
   +cred: NodeOrderedCredScores,
+  +forwardFlow: EdgeOrderedCredScores,
+  +backwardFlow: EdgeOrderedCredScores,
+  +seedFlow: NodeOrderedCredScores,
+  +syntheticLoopFlow: NodeOrderedCredScores,
 |};
 
 /**
@@ -58,16 +63,33 @@ export function distributionToCred(
       scoringNodeIndices.push(i);
     }
   }
-  return ds.map(({interval, distribution, intervalWeight}) => {
-    const intervalTotalScore = sum(
-      scoringNodeIndices.map((x) => distribution[x])
-    );
+  return ds.map(
+    ({
+      interval,
+      distribution,
+      intervalWeight,
+      forwardFlow,
+      backwardFlow,
+      syntheticLoopFlow,
+      seedFlow,
+    }) => {
+      const intervalTotalScore = sum(
+        scoringNodeIndices.map((x) => distribution[x])
+      );
 
-    const intervalNormalizer =
-      intervalTotalScore === 0 ? 0 : intervalWeight / intervalTotalScore;
-    const cred = distribution.map((x) => x * intervalNormalizer);
-    return {interval, cred};
-  });
+      const intervalNormalizer =
+        intervalTotalScore === 0 ? 0 : intervalWeight / intervalTotalScore;
+      const normalize = (arr) => arr.map((x) => x * intervalNormalizer);
+      return {
+        interval,
+        cred: normalize(distribution),
+        forwardFlow: normalize(forwardFlow),
+        backwardFlow: normalize(backwardFlow),
+        seedFlow: normalize(seedFlow),
+        syntheticLoopFlow: normalize(syntheticLoopFlow),
+      };
+    }
+  );
 }
 
 const COMPAT_INFO = {type: "sourcecred/timelineCredScores", version: "0.2.0"};
@@ -79,20 +101,53 @@ export type TimelineCredScoresJSON = Compatible<
     // get space savings if we base64 encode a byte representation of the
     // floats.
     +cred: $ReadOnlyArray<number>,
+    +forwardFlow: $ReadOnlyArray<number>,
+    +backwardFlow: $ReadOnlyArray<number>,
+    +seedFlow: $ReadOnlyArray<number>,
+    +syntheticLoopFlow: $ReadOnlyArray<number>,
   |}>
 >;
 
 export function toJSON(s: TimelineCredScores): TimelineCredScoresJSON {
   return toCompat(
     COMPAT_INFO,
-    s.map(({interval, cred}) => ({interval, cred: Array.from(cred)}))
+    s.map(
+      ({
+        interval,
+        cred,
+        forwardFlow,
+        backwardFlow,
+        seedFlow,
+        syntheticLoopFlow,
+      }) => ({
+        interval,
+        cred: Array.from(cred),
+        forwardFlow: Array.from(forwardFlow),
+        backwardFlow: Array.from(backwardFlow),
+        seedFlow: Array.from(seedFlow),
+        syntheticLoopFlow: Array.from(syntheticLoopFlow),
+      })
+    )
   );
 }
 
 export function fromJSON(j: TimelineCredScoresJSON): TimelineCredScores {
   const scoreArray = fromCompat(COMPAT_INFO, j);
-  return scoreArray.map(({cred, interval}) => ({
-    cred: new Float64Array(cred),
-    interval,
-  }));
+  return scoreArray.map(
+    ({
+      cred,
+      interval,
+      forwardFlow,
+      backwardFlow,
+      seedFlow,
+      syntheticLoopFlow,
+    }) => ({
+      cred: new Float64Array(cred),
+      forwardFlow: new Float64Array(forwardFlow),
+      backwardFlow: new Float64Array(backwardFlow),
+      seedFlow: new Float64Array(seedFlow),
+      syntheticLoopFlow: new Float64Array(syntheticLoopFlow),
+      interval,
+    })
+  );
 }
