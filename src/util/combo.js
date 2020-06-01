@@ -314,7 +314,6 @@ export function tuple<T: Iterable<Parser<mixed>>>(
     return success(result);
   });
 }
-<<<<<<< HEAD
 
 // Create a parser for objects with arbitrary string keys and
 // homogeneous values. For instance, a set of package versions:
@@ -343,5 +342,3 @@ export function dict<V>(valueParser: Parser<V>): Parser<{|[string]: V|}> {
     return success(result);
   });
 }
-=======
->>>>>>> 205f6e064cdee6e6aa0786996c83abf1d0b673dc
