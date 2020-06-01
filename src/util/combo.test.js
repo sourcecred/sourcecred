@@ -439,4 +439,36 @@ describe("src/util/combo", () => {
       });
     });
   });
+
+  describe("dict", () => {
+    const makeParser = (): C.Parser<{|[string]: number|}> => C.dict(C.number);
+    it("rejects null", () => {
+      const p = makeParser();
+      const thunk = () => p.parseOrThrow(null);
+      expect(thunk).toThrow("expected object, got null");
+    });
+    it("rejects arrays", () => {
+      const p = makeParser();
+      const thunk = () => p.parseOrThrow([1, 2, 3]);
+      expect(thunk).toThrow("expected object, got array");
+    });
+    it("accepts an empty object", () => {
+      const p = makeParser();
+      expect(p.parseOrThrow({})).toEqual({});
+    });
+    it("accepts an object with one entries", () => {
+      const p = makeParser();
+      expect(p.parseOrThrow({one: 1})).toEqual({one: 1});
+    });
+    it("accepts an object with multiple entries", () => {
+      const p = makeParser();
+      const input = {one: 1, two: 2, three: 3};
+      expect(p.parseOrThrow(input)).toEqual({one: 1, two: 2, three: 3});
+    });
+    it("rejects an object with bad values", () => {
+      const p = makeParser();
+      const thunk = () => p.parseOrThrow({one: "two?"});
+      expect(thunk).toThrow('key "one": expected number, got string');
+    });
+  });
 });
