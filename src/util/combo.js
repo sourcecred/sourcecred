@@ -131,14 +131,14 @@ export function pure<T>(t: T): Parser<T> {
 export function exactly<T: string | number | boolean | null>(
   ts: $ReadOnlyArray<T>
 ): Parser<T> {
-  const expected: string =
-    ts.length === 1 ? String(ts[0]) : `one of ${JSON.stringify(ts)}`;
   return new Parser((x) => {
     for (const t of ts) {
       if (x === t) {
         return success(t);
       }
     }
+    const expected: string =
+      ts.length === 1 ? String(ts[0]) : `one of ${JSON.stringify(ts)}`;
     return failure(`expected ${expected}, got ${typename(x)}`);
   });
 }

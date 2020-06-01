@@ -551,14 +551,11 @@ describe("src/util/combo", () => {
       });
     });
     describe("for a heterogeneous tuple type", () => {
-<<<<<<< HEAD
-=======
       it("is typesafe", () => {
         (C.tuple([C.string, C.number]): C.Parser<[string, number]>);
         // $ExpectFlowError
         (C.tuple([C.string, C.number]): C.Parser<[string, string]>);
       });
->>>>>>> ee0beaf1f1aeb25b375fd796f7553a8260b7ce5c
       const makeParser = (): C.Parser<[string, number]> =>
         C.tuple([C.fmap(C.string, (s) => s + "!"), C.number]);
       it("rejects a non-array", () => {
