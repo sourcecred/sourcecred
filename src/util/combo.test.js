@@ -396,4 +396,47 @@ describe("src/util/combo", () => {
       });
     });
   });
+
+  describe("tuple", () => {
+    describe("for an empty tuple type", () => {
+      const makeParser = (): C.Parser<[]> => C.tuple([]);
+      it("accepts an empty array", () => {
+        const p: C.Parser<[]> = makeParser();
+        expect(p.parseOrThrow([])).toEqual([]);
+      });
+      it("rejects a non-empty array", () => {
+        const p: C.Parser<[]> = makeParser();
+        const thunk = () => p.parseOrThrow([1, 2, 3]);
+        expect(thunk).toThrow("expected array of length 0, got 3");
+      });
+    });
+    describe("for a heterogeneous tuple type", () => {
+      it("is typesafe", () => {
+        (C.tuple([C.string, C.number]): C.Parser<[string, number]>);
+        // $ExpectFlowError
+        (C.tuple([C.string, C.number]): C.Parser<[string, string]>);
+      });
+      const makeParser = (): C.Parser<[string, number]> =>
+        C.tuple([C.fmap(C.string, (s) => s + "!"), C.number]);
+      it("rejects a non-array", () => {
+        const p: C.Parser<[string, number]> = makeParser();
+        const thunk = () => p.parseOrThrow({hmm: "hum"});
+        expect(thunk).toThrow("expected array, got object");
+      });
+      it("rejects an empty array", () => {
+        const p: C.Parser<[string, number]> = makeParser();
+        const thunk = () => p.parseOrThrow([]);
+        expect(thunk).toThrow("expected array of length 2, got 0");
+      });
+      it("rejects an array of proper length but bad values", () => {
+        const p: C.Parser<[string, number]> = makeParser();
+        const thunk = () => p.parseOrThrow(["one", "two"]);
+        expect(thunk).toThrow("index 1: expected number, got string");
+      });
+      it("accepts a properly typed input", () => {
+        const p: C.Parser<[string, number]> = makeParser();
+        expect(p.parseOrThrow(["one", 23])).toEqual(["one!", 23]);
+      });
+    });
+  });
 });

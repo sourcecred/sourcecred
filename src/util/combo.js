@@ -41,6 +41,7 @@ export class Parser<+T> {
 // Helper type to extract the underlying type of a parser: for instance,
 // `ParserOutput<Parser<string>>` is just `string`.
 export type ParserOutput<P: Parser<mixed>> = $PropertyType<P, "_phantomT">;
+type ExtractParserOutput = <P: Parser<mixed>>(P) => ParserOutput<P>;
 
 // Helper to make a successful parse result. For readability.
 function success<T>(t: T): ParseResult<T> {
@@ -281,3 +282,35 @@ export const object: PObject = (function object(
 export const shape: PObjectShape = function shape(fields) {
   return object({}, fields);
 };
+
+// Create a parser for a tuple: a fixed-length array with possibly
+// heterogeneous element types. For instance,
+//
+//    C.tuple([C.string, C.number, C.boolean])
+//
+// is a parser that accepts length-3 arrays whose first element is a
+// string, second element is a number, and third element is a boolean.
+export function tuple<T: Iterable<Parser<mixed>>>(
+  parsers: T
+): Parser<$TupleMap<T, ExtractParserOutput>> {
+  const ps = Array.from(parsers);
+  return new Parser((x) => {
+    if (!Array.isArray(x)) {
+      return failure("expected array, got " + typename(x));
+    }
+    if (x.length !== ps.length) {
+      return failure(`expected array of length ${ps.length}, got ${x.length}`);
+    }
+    const result = Array(ps.length);
+    for (let i = 0; i < result.length; i++) {
+      const raw = x[i];
+      const parser = ps[i];
+      const parsed = parser.parse(raw);
+      if (!parsed.ok) {
+        return failure(`index ${i}: ${parsed.err}`);
+      }
+      result[i] = parsed.value;
+    }
+    return success(result);
+  });
+}
