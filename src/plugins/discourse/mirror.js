@@ -1,5 +1,6 @@
 // @flow
 
+import * as Combo from "../../util/combo";
 import type {TaskReporter} from "../../util/taskReporter";
 import type {Discourse, CategoryId, Topic, TopicLatest} from "./fetch";
 import {MirrorRepository} from "./mirrorRepository";
@@ -16,6 +17,17 @@ export type MirrorOptions = {|
   // It does not propagate into subcategories.
   +recheckTopicsInCategories: $ReadOnlyArray<CategoryId>,
 |};
+
+const optionsParserFields = {
+  recheckCategoryDefinitionsAfterMs: Combo.number,
+  recheckTopicsInCategories: Combo.array<number>(Combo.number),
+};
+export const optionsParser: Combo.Parser<MirrorOptions> = Combo.object(
+  optionsParserFields
+);
+export const optionsShapeParser: Combo.Parser<
+  $Shape<MirrorOptions>
+> = Combo.shape(optionsParserFields);
 
 const defaultOptions: MirrorOptions = {
   recheckCategoryDefinitionsAfterMs: 24 * 3600 * 1000, // 24h
