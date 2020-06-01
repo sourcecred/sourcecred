@@ -411,6 +411,14 @@ describe("src/util/combo", () => {
       });
     });
     describe("for a heterogeneous tuple type", () => {
+<<<<<<< HEAD
+=======
+      it("is typesafe", () => {
+        (C.tuple([C.string, C.number]): C.Parser<[string, number]>);
+        // $ExpectFlowError
+        (C.tuple([C.string, C.number]): C.Parser<[string, string]>);
+      });
+>>>>>>> 205f6e064cdee6e6aa0786996c83abf1d0b673dc
       const makeParser = (): C.Parser<[string, number]> =>
         C.tuple([C.fmap(C.string, (s) => s + "!"), C.number]);
       it("rejects a non-array", () => {
@@ -434,6 +442,7 @@ describe("src/util/combo", () => {
       });
     });
   });
+<<<<<<< HEAD
 
   describe("dict", () => {
     const makeParser = (): C.Parser<{|[string]: number|}> => C.dict(C.number);
@@ -466,4 +475,6 @@ describe("src/util/combo", () => {
       expect(thunk).toThrow('key "one": expected number, got string');
     });
   });
+=======
+>>>>>>> 205f6e064cdee6e6aa0786996c83abf1d0b673dc
 });
