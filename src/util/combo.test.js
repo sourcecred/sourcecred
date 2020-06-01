@@ -158,6 +158,81 @@ describe("src/util/combo", () => {
     });
   });
 
+  describe("orElse", () => {
+    it("is type-safe", () => {
+      (C.orElse([C.number, C.string]): C.Parser<number | string>);
+      (C.orElse([C.number, C.null_]): C.Parser<number | null>);
+      (C.orElse([C.number, C.null_]): C.Parser<?number>);
+      (C.orElse([C.number, C.null_]): C.Parser<number | null | boolean>);
+      (C.orElse([]): C.Parser<empty>);
+      // $ExpectFlowError
+      (C.orElse([C.number, C.string]): C.Parser<number | boolean>);
+      // $ExpectFlowError
+      (C.orElse([C.number, C.string]): C.Parser<empty>);
+    });
+
+    it("takes the first alternative if it works", () => {
+      const p: C.Parser<number | string> = C.orElse([C.number, C.string]);
+      expect(p.parseOrThrow(123)).toEqual(123);
+    });
+    it("takes the second alternative if necessary", () => {
+      const p: C.Parser<number | string> = C.orElse([C.number, C.string]);
+      expect(p.parseOrThrow("four")).toEqual("four");
+    });
+    it("takes the first alternative even if both work", () => {
+      const p: C.Parser<1 | 2> = C.orElse([C.pure(1), C.pure(2)]);
+      expect(p.parseOrThrow("hmm")).toEqual(1);
+    });
+    it("permits an empty set of parsers, always rejecting", () => {
+      const p: C.Parser<empty> = C.orElse([]);
+      expect(() => p.parseOrThrow("anything")).toThrow("no parse matched: []");
+    });
+
+    function extractError(result: C.ParseResult<mixed>): string {
+      expect(result).toEqual(expect.objectContaining({ok: false}));
+      if (result.ok) {
+        throw new Error("(unreachable)");
+      }
+      return result.err;
+    }
+    function checkPositive(x: number): number {
+      if (!(x > 0)) throw new Error("not positive");
+      return x;
+    }
+    function checkNegative(x: number): number {
+      if (!(x < 0)) throw new Error("not negative");
+      return x;
+    }
+    function checkZero(x: number): number {
+      if (!(x === 0)) throw new Error("not zero");
+      return x;
+    }
+
+    it("combines error messages with a default combination function", () => {
+      const p: C.Parser<number> = C.orElse([
+        C.fmap(C.number, checkPositive),
+        C.fmap(C.number, checkNegative),
+        C.fmap(C.number, checkZero),
+      ]);
+      expect(() => p.parseOrThrow(NaN)).toThrow(
+        'no parse matched: ["not positive","not negative","not zero"]'
+      );
+    });
+    it("applies a user-specified error combination function", () => {
+      const p: C.Parser<number> = C.orElse(
+        [
+          C.fmap(C.number, checkPositive),
+          C.fmap(C.number, checkNegative),
+          C.fmap(C.number, checkZero),
+        ],
+        (errors) => errors.map((e) => `${e}!`).join(" and ")
+      );
+      const result = p.parse(NaN);
+      const err = extractError(result);
+      expect(err).toEqual("not positive! and not negative! and not zero!");
+    });
+  });
+
   describe("array", () => {
     it("accepts an empty array", () => {
       const p: C.Parser<string[]> = C.array(C.string);
