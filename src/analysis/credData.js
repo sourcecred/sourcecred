@@ -122,3 +122,84 @@ export function computeCredData(scores: TimelineCredScores): CredData {
     intervalEnds,
   };
 }
+
+/**
+ * Compress the cred data by removing all time-level info on
+ * flows/accumulations that sum to less than the threshold.
+ *
+ * E.g. if we set the threshold to 10 and a node has only 9 cred, we store its
+ * summary info but not how those flows split across time.
+ *
+ * If the node had 11 cred but only 1 cred from seed and 0 from synthetic loop,
+ * then we store the timing info for its cred, but not for its seed or
+ * synthetic loop flows.
+ *
+ * Likewise for edges, we separately decide whether to store the forward flow
+ * and the backward flow.
+ */
+export function compressByThreshold(x: CredData, threshold: number): CredData {
+  const {
+    nodeSummaries,
+    nodeOverTime,
+    edgeSummaries,
+    edgeOverTime,
+    intervalEnds,
+  } = x;
+
+  const newNodeOverTime = nodeOverTime.map((d, i) => {
+    if (d == null) {
+      // It might be null if the data was already compressed. The function
+      // should be idempotent. This way we can chain compression strategies
+      // later on.
+      return null;
+    }
+    const s = nodeSummaries[i];
+    if (s.cred < threshold) {
+      // If the cred is below threshold, then we know both the seed flow and
+      // the synthetic loop flow are below threshold, since the cred is the sum
+      // of those flows plus the flows from edges. So we can shortcut straight
+      // to returning null.
+      return null;
+    }
+    return {
+      // We get a space efficiency boost here, since for the majority of nodes,
+      // even though they have material cred, they have little seed or
+      // synthetic loop flow. So we can save ourselves from storing large
+      // arrays of near-zero values.
+      cred: d.cred,
+      seedFlow: s.seedFlow < threshold ? null : d.seedFlow,
+      syntheticLoopFlow:
+        s.syntheticLoopFlow < threshold ? null : d.syntheticLoopFlow,
+    };
+  });
+
+  const newEdgeOverTime = edgeOverTime.map((d, i) => {
+    if (d == null) {
+      // It might be null if the data was already compressed. The function
+      // should be idempotent. This way we can chain compression strategies
+      // later on.
+      return null;
+    }
+    const {forwardFlow, backwardFlow} = edgeSummaries[i];
+    const checkF = forwardFlow >= threshold;
+    const checkB = backwardFlow >= threshold;
+    if (checkF || checkB) {
+      // The edge might be effectively unidrectional--in that case let's not
+      // waste space storing data for the direction that had very little cred
+      // flow.
+      return {
+        forwardFlow: checkF ? d.forwardFlow : null,
+        backwardFlow: checkB ? d.backwardFlow : null,
+      };
+    }
+    return null;
+  });
+
+  return {
+    nodeOverTime: newNodeOverTime,
+    edgeOverTime: newEdgeOverTime,
+    nodeSummaries,
+    edgeSummaries,
+    intervalEnds,
+  };
+}

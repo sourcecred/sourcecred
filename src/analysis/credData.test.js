@@ -1,6 +1,6 @@
 // @flow
 
-import {computeCredData} from "./credData";
+import {computeCredData, compressByThreshold} from "./credData";
 import type {TimelineCredScores} from "../core/algorithm/distributionToCred";
 
 describe("src/analysis/credData", () => {
@@ -51,5 +51,57 @@ describe("src/analysis/credData", () => {
       edgeOverTime: [{forwardFlow: [1, 1], backwardFlow: [2, 0]}],
     };
     expect(computeCredData(scores)).toEqual(expected);
+  });
+  it("compresses by threshold correctly", () => {
+    const intervalEnds = [100, 200];
+    const nodeSummaries = [
+      {cred: 14, seedFlow: 0, syntheticLoopFlow: 0.2},
+      {cred: 20, seedFlow: 20, syntheticLoopFlow: 0},
+      {cred: 1, seedFlow: 1, syntheticLoopFlow: 0},
+    ];
+    const nodeOverTime = [
+      {cred: [4, 10], seedFlow: [0, 0], syntheticLoopFlow: [0.1, 0.1]},
+      {cred: [10, 10], seedFlow: [10, 10], syntheticLoopFlow: [0, 0]},
+      {cred: [5, 0], seedFlow: [0, 0], syntheticLoopFlow: [0, 0]},
+    ];
+    const edgeSummaries = [
+      {forwardFlow: 20, backwardFlow: 2},
+      {
+        forwardFlow: 10,
+        backwardFlow: 10,
+      },
+      {forwardFlow: 1, backwardFlow: 1},
+    ];
+    const edgeOverTime = [
+      {forwardFlow: [19, 1], backwardFlow: [2, 0]},
+      {forwardFlow: [5, 5], backwardFlow: [9, 1]},
+      {forwardFlow: [1, 0], backwardFlow: [0, 1]},
+    ];
+    const input = {
+      intervalEnds,
+      nodeSummaries,
+      nodeOverTime,
+      edgeSummaries,
+      edgeOverTime,
+    };
+    const expected = {
+      intervalEnds,
+      nodeSummaries,
+      nodeOverTime: [
+        {cred: [4, 10], seedFlow: null, syntheticLoopFlow: null},
+        {cred: [10, 10], seedFlow: [10, 10], syntheticLoopFlow: null},
+        null,
+      ],
+      edgeSummaries,
+      edgeOverTime: [
+        {forwardFlow: [19, 1], backwardFlow: null},
+        {forwardFlow: [5, 5], backwardFlow: [9, 1]},
+        null,
+      ],
+    };
+    const result = compressByThreshold(input, 10);
+    expect(result).toEqual(expected);
+    // Check that it's idempotent too.
+    expect(compressByThreshold(result, 10)).toEqual(result);
   });
 });

@@ -20,7 +20,11 @@ import {
   fromJSON as pluginsFromJSON,
 } from "./pluginDeclaration";
 import {timelinePagerank} from "../core/algorithm/timelinePagerank";
-import {type CredData, computeCredData} from "./credData";
+import {
+  type CredData,
+  computeCredData,
+  compressByThreshold as _compressByThreshold,
+} from "./credData";
 import {distributionToCred} from "../core/algorithm/distributionToCred";
 
 /**
@@ -54,6 +58,23 @@ export async function compute(
   const credScores = distributionToCred(distribution, nodeOrder, scorePrefixes);
   const credData = computeCredData(credScores);
   return {weightedGraph: wg, credData, params, plugins};
+}
+
+// Lossily compress a CredResult, by throwing away time-specific cred
+// data for any flows that summed to less than `threshold` cred.
+// We may want to implement more sophisticated and context-aware strategies
+// in the future.
+export function compressByThreshold(
+  x: CredResult,
+  threshold: number
+): CredResult {
+  const {params, plugins, weightedGraph, credData} = x;
+  return {
+    params,
+    plugins,
+    weightedGraph,
+    credData: _compressByThreshold(credData, threshold),
+  };
 }
 
 const COMPAT_INFO = {type: "sourcecred/credResult", version: "0.1.0"};
