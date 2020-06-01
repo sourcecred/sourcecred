@@ -26,7 +26,7 @@ describe("core/project", () => {
     discourseServer: null,
     initiatives: null,
     identities: [],
-    params: {},
+    timelineCredParams: null,
   });
   const p2: Project = deepFreeze({
     id: "@foo",
@@ -39,7 +39,7 @@ describe("core/project", () => {
         aliases: ["github/example"],
       },
     ],
-    params: {},
+    timelineCredParams: null,
   });
   describe("to/from JSON", () => {
     it("round trip is identity", () => {
@@ -77,7 +77,7 @@ describe("core/project", () => {
           // It should strip the apiUsername field, keeping just serverUrl.
           discourseServer: {serverUrl: "https://example.com"},
           initiatives: null,
-          params: {},
+          timelineCredParams: {},
         }: Project)
       );
     });
@@ -107,7 +107,7 @@ describe("core/project", () => {
           // It should strip the apiUsername field, keeping just serverUrl.
           discourseServer: {serverUrl: "https://example.com"},
           initiatives: null,
-          params: {},
+          timelineCredParams: {},
         }: Project)
       );
     });
@@ -133,7 +133,7 @@ describe("core/project", () => {
           ...body,
           // It should add a default initiatives field.
           initiatives: null,
-          params: {},
+          timelineCredParams: {},
         }: Project)
       );
     });
@@ -159,7 +159,7 @@ describe("core/project", () => {
         ({
           ...body,
           // It should add default params field.
-          params: {},
+          timelineCredParams: {},
         }: Project)
       );
     });
@@ -201,7 +201,7 @@ describe("core/project", () => {
         initiatives: null,
         repoIds: [],
         identities: [],
-        params: {},
+        timelineCredParams: null,
       });
     });
     it("treats input shape as overrides", () => {
@@ -218,7 +218,7 @@ describe("core/project", () => {
             aliases: ["github/example"],
           },
         ],
-        params: {alpha: 0.2, intervalDecay: 0.5},
+        timelineCredParams: {alpha: 0.2, intervalDecay: 0.5},
       };
 
       // When

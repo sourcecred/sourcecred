@@ -62,7 +62,7 @@ export function defaultParams(): TimelineCredParameters {
  * Fill in default values for timeline cred parameters.
  */
 export function partialParams(
-  partial: $Shape<TimelineCredParameters>
+  partial: $Shape<TimelineCredParameters> | null
 ): TimelineCredParameters {
   return {...defaultParams(), ...partial};
 }

@@ -40,7 +40,7 @@ export type ProjectV051 = {|
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,
   +identities: $ReadOnlyArray<Identity>,
-  +params: $Shape<TimelineCredParameters>,
+  +timelineCredParams: $Shape<TimelineCredParameters> | null,
 |};
 
 const COMPAT_INFO = {type: "sourcecred/project", version: "0.5.1"};
@@ -60,7 +60,7 @@ export function createProject(p: $Shape<Project>): Project {
     identities: [],
     discourseServer: null,
     initiatives: null,
-    params: {},
+    timelineCredParams: null,
     ...p,
   };
 }
@@ -85,7 +85,7 @@ export function encodeProjectId(id: ProjectId): string {
 
 const upgradeFrom050 = (p: ProjectV050): ProjectV051 => ({
   ...p,
-  params: {},
+  timelineCredParams: {},
 });
 
 export type ProjectV050 = {|

@@ -6,7 +6,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import * as Common from "./common";
 import * as Weights from "../core/weights";
-import {projectFromJSON} from "../core/project";
+import {projectFromJSON, type Project} from "../core/project";
 import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
 import fs from "fs-extra";
@@ -126,7 +126,7 @@ const loadCommand: Command = async (args, std) => {
 
   const taskReporter = new LoggingTaskReporter();
 
-  const specProjects = await Promise.all(
+  const specProjects: $ReadOnlyArray<Project> = await Promise.all(
     projectSpecs.map((s) => specToProject(s, githubToken))
   );
   const manualProjects = await Promise.all(projectPaths.map(loadProject));
@@ -142,7 +142,7 @@ const loadCommand: Command = async (args, std) => {
     if (project.identities.length) {
       plugins.push(identityDeclaration);
     }
-    const params = partialParams(project.params);
+    const params = partialParams(project.timelineCredParams);
 
     return {
       project,
