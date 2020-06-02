@@ -9,12 +9,21 @@ import {loadInstanceConfig} from "./common";
 import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
 import {defaultParams} from "../analysis/timeline/params";
 import {LoggingTaskReporter} from "../util/taskReporter";
-import {compute, toJSON as credResultToJSON} from "../analysis/credResult";
+import {
+  compute,
+  toJSON as credResultToJSON,
+  compressByThreshold,
+} from "../analysis/credResult";
 
 function die(std, message) {
   std.err("fatal: " + message);
   return 1;
 }
+
+// Any cred flow that sums to less than this threshold will be filtered
+// from the time-level cred data (though we will still have a summary).
+// TODO: Make this a configurable parameter.
+const CRED_THRESHOLD = 10;
 
 const scoreCommand: Command = async (args, std) => {
   if (args.length !== 0) {
@@ -36,7 +45,8 @@ const scoreCommand: Command = async (args, std) => {
   const params = defaultParams();
 
   const credResult = await compute(graph, params, declarations);
-  const credJSON = stringify(credResultToJSON(credResult));
+  const compressed = compressByThreshold(credResult, CRED_THRESHOLD);
+  const credJSON = stringify(credResultToJSON(compressed));
   const outputPath = pathJoin(baseDir, "output", "credResult.json");
   await fs.writeFile(outputPath, credJSON);
   taskReporter.finish("score");
