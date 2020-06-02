@@ -8,13 +8,8 @@ import type {Command} from "./command";
 import {loadInstanceConfig} from "./common";
 import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
 import {defaultParams} from "../analysis/timeline/params";
-import {TimelineCred} from "../analysis/timeline/timelineCred";
 import {LoggingTaskReporter} from "../util/taskReporter";
-import {
-  fromTimelineCredAndPlugins,
-  COMPAT_INFO as OUTPUT_COMPAT_INFO,
-} from "../analysis/output";
-import {toCompat} from "../util/compat";
+import {compute, toJSON as credResultToJSON} from "../analysis/credResult";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -40,15 +35,10 @@ const scoreCommand: Command = async (args, std) => {
   // TODO: Support loading params from config.
   const params = defaultParams();
 
-  const tc = await TimelineCred.compute({
-    weightedGraph: graph,
-    params,
-    plugins: declarations,
-  });
-  const output = fromTimelineCredAndPlugins(tc, declarations);
-  const outputJSON = stringify(toCompat(OUTPUT_COMPAT_INFO, output));
-  const outputPath = pathJoin(baseDir, "output", "cred.json");
-  await fs.writeFile(outputPath, outputJSON);
+  const credResult = await compute(graph, params, declarations);
+  const credJSON = stringify(credResultToJSON(credResult));
+  const outputPath = pathJoin(baseDir, "output", "credResult.json");
+  await fs.writeFile(outputPath, credJSON);
   taskReporter.finish("score");
   return 0;
 };
