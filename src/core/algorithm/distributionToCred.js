@@ -10,8 +10,8 @@ import {type Interval} from "../interval";
 import {type TimelineDistributions} from "./timelinePagerank";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
 
-export opaque type NodeOrderedCredScores: Float64Array = Float64Array;
-export opaque type EdgeOrderedCredScores: Float64Array = Float64Array;
+export type NodeOrderedCredScores = Float64Array;
+export type EdgeOrderedCredScores = Float64Array;
 
 /**
  * Represents cred scores over time.
