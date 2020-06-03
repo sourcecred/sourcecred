@@ -21,6 +21,6 @@ export function botSet(): Set<string> {
     "tensorflowbutler",
     "github-actions",
     "transifex-integration",
-    "dependabot"
+    "dependabot",
   ]);
 }
