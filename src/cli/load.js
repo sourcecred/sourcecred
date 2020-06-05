@@ -6,7 +6,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import type {Command} from "./command";
 import * as Common from "./common";
 import * as Weights from "../core/weights";
-import {projectFromJSON} from "../core/project";
+import {projectFromJSON, type Project} from "../core/project";
 import {load} from "../api/load";
 import {specToProject} from "../plugins/github/specToProject";
 import fs from "fs-extra";
@@ -14,7 +14,7 @@ import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {declaration as discourseDeclaration} from "../plugins/discourse/declaration";
 import {declaration as githubDeclaration} from "../plugins/github/declaration";
 import {declaration as identityDeclaration} from "../plugins/identity/declaration";
-import {defaultParams} from "../analysis/timeline/params";
+import {partialParams} from "../analysis/timeline/params";
 
 function usage(print: (string) => void): void {
   print(
@@ -126,7 +126,7 @@ const loadCommand: Command = async (args, std) => {
 
   const taskReporter = new LoggingTaskReporter();
 
-  const specProjects = await Promise.all(
+  const specProjects: $ReadOnlyArray<Project> = await Promise.all(
     projectSpecs.map((s) => specToProject(s, githubToken))
   );
   const manualProjects = await Promise.all(projectPaths.map(loadProject));
@@ -142,9 +142,11 @@ const loadCommand: Command = async (args, std) => {
     if (project.identities.length) {
       plugins.push(identityDeclaration);
     }
+    const params = partialParams(project.timelineCredParams);
+
     return {
       project,
-      params: defaultParams(),
+      params,
       weightsOverrides: weights,
       plugins,
       sourcecredDirectory: Common.sourcecredDirectory(),
