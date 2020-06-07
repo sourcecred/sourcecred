@@ -6,6 +6,7 @@ import {type WeightedGraph as WeightedGraphT} from "../core/weightedGraph";
 import * as WeightedGraph from "../core/weightedGraph";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
 import {type GithubToken} from "../plugins/github/token";
+import {type DiscordToken} from "../plugins/experimental-discord/params";
 import {type CacheProvider} from "./cache";
 import {TaskReporter} from "../util/taskReporter";
 import {TimelineCred} from "../analysis/timeline/timelineCred";
@@ -14,8 +15,9 @@ import {type PluginLoaders as PluginLoadersT} from "./pluginLoaders";
 import * as ComputeFunction from "./computeFunction";
 import * as PluginLoaders from "./pluginLoaders";
 import {default as githubLoader} from "../plugins/github/loader";
-import {default as identityLoader} from "../plugins/identity/loader";
+import {default as discordLoader} from "../plugins/experimental-discord/loader";
 import {default as discourseLoader} from "../plugins/discourse/loader";
+import {default as identityLoader} from "../plugins/identity/loader";
 import {default as initiativesLoader} from "../plugins/initiatives/loader";
 import {type PluginDeclarations} from "../analysis/pluginDeclaration";
 
@@ -29,6 +31,7 @@ export type LoadContextOptions = {|
   +cache: CacheProvider,
   +reporter: TaskReporter,
   +githubToken: ?GithubToken,
+  +discordToken: ?DiscordToken,
   +initiativesDirectory: ?string,
 |};
 
@@ -84,6 +87,7 @@ export class LoadContext {
   +_compute: ComputeFunctionT = TimelineCred.compute;
   +_pluginLoaders: PluginLoadersT = {
     github: githubLoader,
+    discord: discordLoader,
     discourse: discourseLoader,
     identity: identityLoader,
     initiatives: initiativesLoader,

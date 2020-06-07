@@ -102,6 +102,7 @@ const command: Command = async (args, std) => {
       plugins,
       sourcecredDirectory: Common.sourcecredDirectory(),
       githubToken: null,
+      discordToken: null,
       initiativesDirectory: null,
     },
     taskReporter
