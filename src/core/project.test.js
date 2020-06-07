@@ -27,6 +27,7 @@ describe("core/project", () => {
     initiatives: null,
     identities: [],
     timelineCredParams: null,
+    discord: null,
   });
   const p2: Project = deepFreeze({
     id: "@foo",
@@ -40,6 +41,7 @@ describe("core/project", () => {
       },
     ],
     timelineCredParams: null,
+    discord: {guildId: "1234", reactionWeights: {}},
   });
   describe("to/from JSON", () => {
     it("round trip is identity", () => {
