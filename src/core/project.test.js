@@ -15,7 +15,7 @@ import {
 
 import {makeRepoId} from "../plugins/github/repoId";
 import {toCompat} from "../util/compat";
-import type {ProjectV050, ProjectV051} from "./project";
+import type {ProjectV050, ProjectV051, ProjectV052} from "./project";
 
 describe("core/project", () => {
   const foobar = deepFreeze(makeRepoId("foo", "bar"));
@@ -173,7 +173,7 @@ describe("core/project", () => {
   it("should upgrade from 0.5.1 formatting", () => {
     // Given
     const body: ProjectV051 = {
-      id: "example-050",
+      id: "example-051",
       repoIds: [foobar, foozod],
       discourseServer: {serverUrl: "https://example.com"},
       identities: [],
@@ -193,6 +193,33 @@ describe("core/project", () => {
       ({
         ...body,
         discord: null,
+      }: Project)
+    );
+  });
+
+  it("should upgrade from 0.5.0 formatting without overwriting fields", () => {
+    // Given
+    const body: ProjectV052 = {
+      id: "example-051",
+      repoIds: [foobar, foozod],
+      discourseServer: {serverUrl: "https://example.com"},
+      identities: [],
+      initiatives: null,
+      timelineCredParams: {alpha: 0.2, intervalDecay: 0.5},
+      discord: {guildId: "1234", reactionWeights: {}},
+    };
+    const compat = toCompat(
+      {type: "sourcecred/project", version: "0.5.0"},
+      body
+    );
+
+    // When
+    const project = projectFromJSON(compat);
+
+    // Then
+    expect(project).toEqual(
+      ({
+        ...body,
       }: Project)
     );
   });

@@ -88,8 +88,8 @@ export function encodeProjectId(id: ProjectId): string {
 }
 
 const upgradeFrom051 = (p: ProjectV051): ProjectV052 => ({
-  ...p,
   discord: null,
+  ...p,
 });
 
 export type ProjectV051 = {|
@@ -103,8 +103,8 @@ export type ProjectV051 = {|
 
 const upgradeFrom050 = (p: ProjectV050) =>
   upgradeFrom051({
-    ...p,
     timelineCredParams: {},
+    ...p,
   });
 
 export type ProjectV050 = {|
@@ -117,8 +117,8 @@ export type ProjectV050 = {|
 
 const upgradeFrom040 = (p: ProjectV040) =>
   upgradeFrom050({
-    ...p,
     initiatives: null,
+    ...p,
   });
 
 export type ProjectV040 = {|
