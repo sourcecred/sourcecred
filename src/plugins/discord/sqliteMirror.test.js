@@ -12,7 +12,7 @@ import {
   type User,
 } from "./models";
 
-describe("plugins/experimental-discord/sqliteMirror", () => {
+describe("plugins/discord/sqliteMirror", () => {
   const customEmoji = (): Emoji => ({id: "id", name: "name"});
   const genericEmoji = (): Emoji => ({id: null, name: "🐙"});
 

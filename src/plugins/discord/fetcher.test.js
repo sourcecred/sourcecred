@@ -17,7 +17,7 @@ import {
  * appropriate handlers
  */
 
-describe("plugins/experimental-discord/fetcher", () => {
+describe("plugins/discord/fetcher", () => {
   const defaultOptions = () => ({
     membersLimit: 100,
     messagesLimit: 100,

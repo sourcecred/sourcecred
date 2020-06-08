@@ -2,7 +2,7 @@
 
 import {snapshotFetcher} from "./mockSnapshotFetcher";
 
-describe("plugins/discord/fetcher", () => {
+describe("plugins/experimental-discord/fetcher", () => {
   describe("snapshot testing", () => {
     const guildId = "678348980639498428";
     const channelId = "678394406507905129";
