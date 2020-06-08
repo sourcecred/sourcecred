@@ -64,6 +64,7 @@ export function createProject(p: $Shape<Project>): Project {
     discourseServer: null,
     initiatives: null,
     timelineCredParams: null,
+    discord: null,
     ...p,
   };
 }
@@ -100,10 +101,11 @@ export type ProjectV051 = {|
   +timelineCredParams: $Shape<TimelineCredParameters> | null,
 |};
 
-const upgradeFrom050 = (p: ProjectV050): ProjectV051 => ({
-  ...p,
-  timelineCredParams: {},
-});
+const upgradeFrom050 = (p: ProjectV050) =>
+  upgradeFrom051({
+    ...p,
+    timelineCredParams: {},
+  });
 
 export type ProjectV050 = {|
   +id: ProjectId,
