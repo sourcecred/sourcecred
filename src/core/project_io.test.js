@@ -39,6 +39,12 @@ describe("core/project_io", () => {
     identities: [{username: "foo", aliases: ["github/foo", "discourse/foo"]}],
     initiatives: {remoteUrl: "https://example.com/initiatives"},
     timelineCredParams: {alpha: 0.2, intervalDecay: 0.5},
+    discord: {
+      guildId: "123",
+      reactionWeights: {
+        emoji: 1,
+      },
+    },
   });
 
   it("setupProjectDirectory results in a loadable project", async () => {

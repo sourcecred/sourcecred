@@ -7,6 +7,7 @@ import {type ProjectParameters as Initiatives} from "../plugins/initiatives/para
 import {type Identity} from "../plugins/identity/identity";
 import {type DiscourseServer} from "../plugins/discourse/server";
 import type {TimelineCredParameters} from "../analysis/timeline/params";
+import {type ProjectOptions as Discord} from "../plugins/experimental-discord/params";
 
 export type ProjectId = string;
 
@@ -26,24 +27,26 @@ export type ProjectId = string;
  * the future (e.g. showing the last update time for each of the project's data
  * dependencies).
  */
-export type Project = ProjectV051;
+export type Project = ProjectV052;
 export type SupportedProject =
   | ProjectV030
   | ProjectV031
   | ProjectV040
+  | ProjectV050
   | ProjectV051
-  | ProjectV050;
+  | ProjectV052;
 
-export type ProjectV051 = {|
+export type ProjectV052 = {|
   +id: ProjectId,
   +initiatives: Initiatives | null,
   +repoIds: $ReadOnlyArray<RepoId>,
   +discourseServer: DiscourseServer | null,
+  +discord: Discord | null,
   +identities: $ReadOnlyArray<Identity>,
   +timelineCredParams: $Shape<TimelineCredParameters> | null,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/project", version: "0.5.1"};
+const COMPAT_INFO = {type: "sourcecred/project", version: "0.5.2"};
 
 /**
  * Creates a new Project instance with default values.
@@ -61,6 +64,7 @@ export function createProject(p: $Shape<Project>): Project {
     discourseServer: null,
     initiatives: null,
     timelineCredParams: null,
+    discord: null,
     ...p,
   };
 }
@@ -83,10 +87,25 @@ export function encodeProjectId(id: ProjectId): string {
   return base64url.encode(id);
 }
 
-const upgradeFrom050 = (p: ProjectV050): ProjectV051 => ({
+const upgradeFrom051 = (p: ProjectV051): ProjectV052 => ({
+  discord: null,
   ...p,
-  timelineCredParams: {},
 });
+
+export type ProjectV051 = {|
+  +id: ProjectId,
+  +initiatives: Initiatives | null,
+  +repoIds: $ReadOnlyArray<RepoId>,
+  +discourseServer: DiscourseServer | null,
+  +identities: $ReadOnlyArray<Identity>,
+  +timelineCredParams: $Shape<TimelineCredParameters> | null,
+|};
+
+const upgradeFrom050 = (p: ProjectV050) =>
+  upgradeFrom051({
+    timelineCredParams: {},
+    ...p,
+  });
 
 export type ProjectV050 = {|
   +id: ProjectId,
@@ -98,8 +117,8 @@ export type ProjectV050 = {|
 
 const upgradeFrom040 = (p: ProjectV040) =>
   upgradeFrom050({
-    ...p,
     initiatives: null,
+    ...p,
   });
 
 export type ProjectV040 = {|
@@ -143,4 +162,5 @@ const upgrades = {
   "0.3.1": upgradeFrom030,
   "0.4.0": upgradeFrom040,
   "0.5.0": upgradeFrom050,
+  "0.5.1": upgradeFrom051,
 };

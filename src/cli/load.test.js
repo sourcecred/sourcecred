@@ -22,6 +22,7 @@ const load: JestMockFn = (require("../api/load").load: any);
 
 describe("cli/load", () => {
   const exampleGithubToken = validateToken("0".repeat(40));
+  const exampleDiscordToken = "fakeBotToken";
   beforeEach(() => {
     jest.clearAllMocks();
     // Tests should call `newSourcecredDirectory` directly when they
@@ -34,6 +35,7 @@ describe("cli/load", () => {
     const dirname = tmp.dirSync().name;
     process.env.SOURCECRED_DIRECTORY = dirname;
     process.env.SOURCECRED_GITHUB_TOKEN = exampleGithubToken;
+    process.env.SOURCECRED_DISCORD_TOKEN = exampleDiscordToken;
     process.env.SOURCECRED_INITIATIVES_DIRECTORY = tmp.dirSync().name;
     return dirname;
   }
@@ -82,6 +84,7 @@ describe("cli/load", () => {
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: exampleGithubToken,
+        discordToken: exampleDiscordToken,
         initiativesDirectory: Common.initiativesDirectory(),
       };
       expect(await invocation).toEqual({
@@ -107,6 +110,7 @@ describe("cli/load", () => {
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: exampleGithubToken,
+        discordToken: exampleDiscordToken,
         initiativesDirectory: Common.initiativesDirectory(),
       });
       expect(await invocation).toEqual({
@@ -145,6 +149,7 @@ describe("cli/load", () => {
         plugins: [githubDeclaration],
         sourcecredDirectory: Common.sourcecredDirectory(),
         githubToken: exampleGithubToken,
+        discordToken: exampleDiscordToken,
         initiativesDirectory: Common.initiativesDirectory(),
       };
       expect(await invocation).toEqual({

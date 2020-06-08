@@ -1,0 +1,42 @@
+[
+  {
+    "id": "678348980639498428",
+    "name": "@everyone",
+    "permissions": 33620992,
+    "position": 0,
+    "color": 0,
+    "hoist": false,
+    "managed": false,
+    "mentionable": false
+  },
+  {
+    "id": "678349848684003359",
+    "name": "allow-adding-data",
+    "permissions": 104324673,
+    "position": 1,
+    "color": 2123412,
+    "hoist": false,
+    "managed": false,
+    "mentionable": false
+  },
+  {
+    "id": "678350026946117694",
+    "name": "admins",
+    "permissions": 104324681,
+    "position": 2,
+    "color": 15105570,
+    "hoist": false,
+    "managed": false,
+    "mentionable": false
+  },
+  {
+    "id": "678359229433905152",
+    "name": "CredBot-Beanow",
+    "permissions": 66560,
+    "position": 1,
+    "color": 0,
+    "hoist": false,
+    "managed": true,
+    "mentionable": false
+  }
+]
