@@ -6,6 +6,8 @@ import {loginAddress as githubAddress} from "../github/nodes";
 import {userNodeType as githubUserType} from "../github/declaration";
 import {userAddress as discourseAddress} from "../discourse/address";
 import {userNodeType as discourseUserType} from "../discourse/declaration";
+import {userAddress as discordAddress} from "../experimental-discord/createGraph";
+import {memberNodeType as discordUserType} from "../experimental-discord/declaration";
 import {identityType} from "./declaration";
 import {
   identityAddress,
@@ -40,6 +42,9 @@ export function resolveAlias(
   }
   const [_, prefix, name] = match;
   switch (prefix) {
+    case "discord": {
+      return discordAddress(name);
+    }
     case "github": {
       const match = name.match(_VALID_GITHUB_NAME);
       if (!match) {
@@ -85,6 +90,7 @@ export function toAlias(n: NodeAddressT): Alias | null {
     ["github", githubUserType.prefix],
     ["discourse", discourseUserType.prefix],
     ["sourcecred", identityType.prefix],
+    ["discord", discordUserType.prefix],
   ]);
 
   for (const [prefix, nodePrefix] of prefixes.entries()) {
