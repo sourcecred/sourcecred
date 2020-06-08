@@ -149,6 +149,7 @@ const loadCommand: Command = async (args, std) => {
       params,
       weightsOverrides: weights,
       plugins,
+      discordToken: Common.discordToken(),
       sourcecredDirectory: Common.sourcecredDirectory(),
       githubToken,
       initiativesDirectory,

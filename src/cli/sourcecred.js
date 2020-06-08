@@ -12,6 +12,7 @@ import output from "./output";
 import clear from "./clear";
 import genProject from "./genProject";
 import discourse from "./discourse";
+import discord from "./discord";
 
 const sourcecred: Command = async (args, std) => {
   if (args.length === 0) {
@@ -35,6 +36,8 @@ const sourcecred: Command = async (args, std) => {
       return output(args.slice(1), std);
     case "gen-project":
       return genProject(args.slice(1), std);
+    case "discord":
+      return discord(args.slice(1), std);
     case "discourse":
       return discourse(args.slice(1), std);
     default:

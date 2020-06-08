@@ -7,6 +7,7 @@ import deepFreeze from "deep-freeze";
 import fs from "fs-extra";
 import {type Weights, fromJSON as weightsFromJSON} from "../core/weights";
 import {validateToken, type GithubToken} from "../plugins/github/token";
+import {type DiscordToken} from "../plugins/experimental-discord/params";
 
 export type PluginName = "git" | "github";
 
@@ -31,6 +32,10 @@ export function githubToken(): ?GithubToken {
     return null;
   }
   return validateToken(envToken);
+}
+
+export function discordToken(): ?DiscordToken {
+  return process.env.SOURCECRED_DISCORD_TOKEN || null;
 }
 
 export async function loadWeights(path: string): Promise<Weights> {
