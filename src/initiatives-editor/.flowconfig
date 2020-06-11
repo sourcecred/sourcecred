@@ -1,0 +1,11 @@
+[ignore]
+config/*
+[include]
+
+[libs]
+
+[lints]
+
+[options]
+
+[strict]

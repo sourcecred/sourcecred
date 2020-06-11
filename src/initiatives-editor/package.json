@@ -1,0 +1,50 @@
+{
+  "name": "initiatives-editor",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-react": "^7.10.1",
+    "@svgr/webpack": "4.3.3",
+    "babel-eslint": "10.1.0",
+    "babel-jest": "^24.9.0",
+    "babel-loader": "8.1.0",
+    "eslint-plugin-flowtype": "4.6.0",
+    "eslint-plugin-import": "2.20.1",
+    "eslint-plugin-jsx-a11y": "6.2.3",
+    "eslint-plugin-react": "7.19.0",
+    "eslint-plugin-react-hooks": "^1.6.1",
+    "history": "^4.10.1",
+    "immutable": "^4.0.0-rc.12",
+    "json-server": "^0.16.1",
+    "parcel-bundler": "^1.12.4",
+    "prop-types": "^15.7.2",
+    "ra-data-json-server": "^3.6.0",
+    "react": "^16.13.1",
+    "react-admin": "^3.5.5",
+    "react-dom": "^16.13.1",
+    "seamless-immutable": "^7.1.4"
+  },
+  "scripts": {
+    "build": "parcel build src/index.html",
+    "serve": "flow-node src/localservice/serve.js",
+    "start": " yarn serve & parcel src/index.html --no-cache --open"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.2",
+    "flow-remove-types": "^2.126.1"
+  }
+}
