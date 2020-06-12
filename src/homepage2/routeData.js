@@ -26,37 +26,8 @@ type RouteDatum = {|
 export type RouteData = $ReadOnlyArray<RouteDatum>;
 */
 
-/**
- * Adds an 'Inspection Test', which is a standalone React component
- * which allows us to manually inspect some frontend behavior.
- *
- * Writing inspection tests is especially convenient for cases where it's
- * easy to verify that a component is working properly by manually interacting
- * with it, but hard/expensive to test automatically.
- *
- * An example is a FileUploader component which uploads a file from the user,
- * goes through the FileReader API, etc.
- *
- * TODO([#1148]): Improve the inspection testing system (e.g. so we can access
- * a list of all tests from the frontend), and separate it from serving the
- * homepage.
- *
- * [#1148]: https://github.com/sourcecred/sourcecred/issues/1148
- */
-function inspectionTestFor(name, component) /*: RouteDatum */ {
-  return {
-    path: "/test/" + name + "/",
-    contents: {
-      type: "PAGE",
-      component: component,
-    },
-    title: "Inspection test for: " + name,
-    navTitle: null,
-  };
-}
-
 function makeRouteData(
-  projectIds /*: $ReadOnlyArray<string> */
+  _unused_projectIds /*: $ReadOnlyArray<string> */
 ) /*: RouteData */ {
   return [
     {
@@ -68,51 +39,6 @@ function makeRouteData(
       title: "SourceCred",
       navTitle: "Home",
     },
-    {
-      path: "/prototype/",
-      contents: {
-        type: "PAGE",
-        component: () => require("./PrototypesPage").default(projectIds),
-      },
-      title: "SourceCred prototype",
-      navTitle: "Prototype",
-    },
-    ...projectIds.map((id) => ({
-      path: `/prototype/${id}/`,
-      contents: {
-        type: "PAGE",
-        component: () => require("./ProjectPage").default(id),
-      },
-      title: `${id} • SourceCred`,
-      navTitle: null,
-    })),
-    ...projectIds.map((id) => ({
-      path: `/timeline/${id}/`,
-      contents: {
-        type: "PAGE",
-        component: () => require("./TimelinePage").default(id),
-      },
-      title: `${id} • Timeline`,
-      navTitle: null,
-    })),
-    {
-      path: "/discord-invite/",
-      contents: {
-        type: "EXTERNAL_REDIRECT",
-        redirectTo: "https://discord.gg/tsBTgc9",
-      },
-      title: "SourceCred Discord invite",
-      navTitle: null,
-    },
-    // Inspection Tests Below //
-    inspectionTestFor(
-      "FileUploader",
-      () => require("../util/FileUploaderInspectionTest").default
-    ),
-    inspectionTestFor(
-      "TimelineCredView",
-      () => require("../explorer/TimelineCredViewInspectionTest").default
-    ),
   ];
 }
 exports.makeRouteData = makeRouteData;
