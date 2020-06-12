@@ -11,15 +11,14 @@ import {Assets, rootFromPath} from "../webutil/assets";
 import createRelativeHistory from "../webutil/createRelativeHistory";
 import ExternalRedirect from "./ExternalRedirect";
 import Page from "./Page";
-import createRouteDataFromEnvironment from "./createRouteDataFromEnvironment";
 import {createRoutes} from "./createRoutes";
-import {resolveRouteFromPath, resolveTitleFromPath} from "./routeData";
+import {
+  makeRouteData,
+  resolveRouteFromPath,
+  resolveTitleFromPath,
+} from "./routeData";
 
-// Side effect for testing purposes
-console.log(`PROJECT_IDS: ${process.env.PROJECT_IDS || "bad"}`);
-
-// NOTE: This is a side-effect at module load time.
-const routeData = createRouteDataFromEnvironment();
+const routeData = makeRouteData();
 
 export default function render(
   locals: {+path: string, +assets: {[string]: string}},
