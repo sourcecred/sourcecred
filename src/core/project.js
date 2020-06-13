@@ -7,7 +7,7 @@ import {type ProjectParameters as Initiatives} from "../plugins/initiatives/para
 import {type Identity} from "../plugins/identity/identity";
 import {type DiscourseServer} from "../plugins/discourse/server";
 import type {TimelineCredParameters} from "../analysis/timeline/params";
-import {type ProjectOptions as Discord} from "../plugins/experimental-discord/params";
+import {type DiscordConfig as Discord} from "../plugins/experimental-discord/config";
 
 export type ProjectId = string;
 

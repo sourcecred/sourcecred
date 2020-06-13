@@ -5,7 +5,7 @@ import {type EmojiWeightMap} from "./createGraph";
 
 export type {BotToken as DiscordToken} from "./models";
 
-export type ProjectOptions = {|
+export type DiscordConfig = {|
   +guildId: Model.Snowflake,
   +reactionWeights: EmojiWeightMap,
 |};
