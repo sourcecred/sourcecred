@@ -4,7 +4,7 @@ import {type Project} from "../core/project";
 import {type Weights as WeightsT} from "../core/weights";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
-import {type DiscordToken} from "../plugins/experimental-discord/params";
+import {type DiscordToken} from "../plugins/experimental-discord/config";
 import {type GithubToken} from "../plugins/github/token";
 import {type CacheProvider} from "../backend/cache";
 import {DataDirectory} from "../backend/dataDirectory";

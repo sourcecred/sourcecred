@@ -7,7 +7,7 @@ import * as WeightedGraph from "../core/weightedGraph";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import {type CacheProvider} from "./cache";
 import {type GithubToken} from "../plugins/github/token";
-import {type DiscordToken} from "../plugins/experimental-discord/params";
+import {type DiscordToken} from "../plugins/experimental-discord/config";
 import {type Loader as GithubLoader} from "../plugins/github/loader";
 import {type Loader as DiscordLoader} from "../plugins/experimental-discord/loader";
 import {type Loader as DiscourseLoader} from "../plugins/discourse/loader";

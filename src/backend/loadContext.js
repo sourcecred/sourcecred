@@ -6,7 +6,7 @@ import {type WeightedGraph as WeightedGraphT} from "../core/weightedGraph";
 import * as WeightedGraph from "../core/weightedGraph";
 import {type TimelineCredParameters} from "../analysis/timeline/params";
 import {type GithubToken} from "../plugins/github/token";
-import {type DiscordToken} from "../plugins/experimental-discord/params";
+import {type DiscordToken} from "../plugins/experimental-discord/config";
 import {type CacheProvider} from "./cache";
 import {TaskReporter} from "../util/taskReporter";
 import {TimelineCred} from "../analysis/timeline/timelineCred";

@@ -7,7 +7,7 @@ import {type CacheProvider} from "../../backend/cache";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {createGraph as _createGraph} from "./createGraph";
-import {type ProjectOptions} from "./params";
+import {type DiscordConfig} from "./config";
 import {declaration} from "./declaration";
 import * as Model from "./models";
 import {Fetcher} from "./fetcher";
@@ -26,7 +26,7 @@ export default ({
 }: Loader);
 
 export async function updateMirror(
-  {guildId}: ProjectOptions,
+  {guildId}: DiscordConfig,
   token: Model.BotToken,
   cache: CacheProvider,
   reporter: TaskReporter
@@ -38,7 +38,7 @@ export async function updateMirror(
 }
 
 export async function createGraph(
-  {guildId, reactionWeights}: ProjectOptions,
+  {guildId, reactionWeights}: DiscordConfig,
   cache: CacheProvider
 ): Promise<WeightedGraph> {
   const repo = await repository(cache, guildId);
