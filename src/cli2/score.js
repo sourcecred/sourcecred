@@ -5,9 +5,10 @@ import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
 
 import type {Command} from "./command";
-import {loadInstanceConfig} from "./common";
+import {makePluginDir, loadInstanceConfig} from "./common";
 import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
 import {defaultParams} from "../analysis/timeline/params";
+import {type WeightedGraph, merge} from "../core/weightedGraph";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {
   compute,
@@ -34,9 +35,17 @@ const scoreCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const config = await loadInstanceConfig(baseDir);
 
-  const graphFilePath = pathJoin(baseDir, "output", "graph.json");
-  const graphJSON = JSON.parse(await fs.readFile(graphFilePath));
-  const graph = weightedGraphFromJSON(graphJSON);
+  const graphOutputPrefix = ["output", "graphs"];
+  async function loadGraph(pluginName): Promise<WeightedGraph> {
+    const outputDir = makePluginDir(baseDir, graphOutputPrefix, pluginName);
+    const outputPath = pathJoin(outputDir, "graph.json");
+    const graphJSON = JSON.parse(await fs.readFile(outputPath));
+    return weightedGraphFromJSON(graphJSON);
+  }
+
+  const pluginNames = Array.from(config.bundledPlugins.keys());
+  const graphs = await Promise.all(pluginNames.map(loadGraph));
+  const combinedGraph = merge(graphs);
 
   const plugins = Array.from(config.bundledPlugins.values());
   const declarations = plugins.map((x) => x.declaration());
@@ -44,7 +53,7 @@ const scoreCommand: Command = async (args, std) => {
   // TODO: Support loading params from config.
   const params = defaultParams();
 
-  const credResult = await compute(graph, params, declarations);
+  const credResult = await compute(combinedGraph, params, declarations);
   const compressed = compressByThreshold(credResult, CRED_THRESHOLD);
   const credJSON = stringify(credResultToJSON(compressed));
   const outputPath = pathJoin(baseDir, "output", "credResult.json");
