@@ -49,7 +49,7 @@ export async function credrank(
   );
   const cred: Map<NodeAddressT, number> = new Map();
   let totalNodeWeight = 0;
-  for (const {weight} of mpg.nodes()) {
+  for (const {mint: weight} of mpg.nodes()) {
     totalNodeWeight += weight;
   }
   osmc.nodeOrder.forEach((node, index) => {

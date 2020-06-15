@@ -15,7 +15,7 @@ export type Node = {|
   +address: NodeAddressT,
   +description: string,
   +cred: number,
-  +weight: NodeWeight,
+  +mint: number,
 |};
 
 export type Edge = {|

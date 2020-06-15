@@ -82,7 +82,7 @@ export type MarkovNode = {|
   // Markdown source description, as in `Node` from `core/graph`.
   +description: string,
   // Amount of cred to mint at this node.
-  +weight: NodeWeight,
+  +mint: number,
 |};
 export type MarkovEdge = {|
   // Address of the underlying edge. Note that this attribute alone does
@@ -271,7 +271,7 @@ export class MarkovProcessGraph {
     addNode({
       address: SEED_ADDRESS,
       description: SEED_DESCRIPTION,
-      weight: 0,
+      mint: 0,
     });
 
     // Add graph nodes
@@ -285,7 +285,7 @@ export class MarkovProcessGraph {
       addNode({
         address: node.address,
         description: node.description,
-        weight,
+        mint: weight,
       });
     }
 
@@ -301,7 +301,7 @@ export class MarkovProcessGraph {
         addNode({
           address: thisEpoch,
           description: `Epoch starting ${boundary} ms past epoch`,
-          weight: 0,
+          mint: 0,
         });
         addEdge({
           address: EdgeAddress.append(
@@ -362,10 +362,10 @@ export class MarkovProcessGraph {
     {
       let totalNodeWeight = 0.0;
       const positiveNodeWeights: Map<NodeAddressT, number> = new Map();
-      for (const {address, weight} of _nodes.values()) {
-        if (weight > 0) {
-          totalNodeWeight += weight;
-          positiveNodeWeights.set(address, weight);
+      for (const {address, mint} of _nodes.values()) {
+        if (mint > 0) {
+          totalNodeWeight += mint;
+          positiveNodeWeights.set(address, mint);
         }
       }
       if (!(totalNodeWeight > 0)) {
