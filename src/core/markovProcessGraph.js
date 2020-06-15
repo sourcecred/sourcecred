@@ -61,7 +61,6 @@ import {
   type Graph,
 } from "./graph";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
-import {type NodeWeight} from "./weights";
 import {
   nodeWeightEvaluator,
   edgeWeightEvaluator,
