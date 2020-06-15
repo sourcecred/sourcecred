@@ -40,10 +40,8 @@
  *   - *contribution edges* between nodes in the underlying graph, which
  *     are lifted to their corresponding contribution nodes or to epoch
  *     nodes if either endpoint has been fibrated;
- *   - *seed-in* / "redistribution" / "radiation" edges from nodes to
- *     the seed node;
- *   - *seed-out* / "minting" edges from the seed node to cred-minting
- *     nodes;
+ *   - *radiation edges* edges from nodes to the seed node;
+ *   - *minting* edges from the seed node to cred-minting nodes;
  *   - *webbing edges* between temporally adjacent epoch nodes; and
  *   - *payout edges* from an epoch node to its owner (a scoring node).
  *
@@ -131,7 +129,7 @@ export type OrderedSparseMarkovChain = {|
 // is also a node prefix for the "seed node" type, which contains only
 // one node.
 const SEED_ADDRESS = NodeAddress.fromParts(["sourcecred", "core", "SEED"]);
-const SEED_DESCRIPTION = "\u{1f331}"; // SEEDLING
+const SEED_DESCRIPTION = "\u{1f331}"; // U+1F331 SEEDLING
 
 // Node address prefix for epoch nodes.
 const EPOCH_PREFIX = NodeAddress.fromParts(["sourcecred", "core", "EPOCH"]);
@@ -174,8 +172,12 @@ const FIBRATION_EDGE = EdgeAddress.fromParts([
 const EPOCH_PAYOUT = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_PAYOUT");
 const EPOCH_WEBBING = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_WEBBING");
 // Prefixes for seed edges.
-const SEED_IN = EdgeAddress.fromParts(["sourcecred", "core", "SEED_IN"]);
-const SEED_OUT = EdgeAddress.fromParts(["sourcecred", "core", "SEED_OUT"]);
+const SEED_RADIATION = EdgeAddress.fromParts([
+  "sourcecred",
+  "core",
+  "SEED_RADIATION",
+]);
+const SEED_MINT = EdgeAddress.fromParts(["sourcecred", "core", "SEED_MINT"]);
 
 export type FibrationOptions = {|
   // List of node prefixes for temporal fibration. A node with address
@@ -342,11 +344,11 @@ export class MarkovProcessGraph {
       }
     }
 
-    // Add radiation (seed-in) edges
+    // Add radiation edges, from graph nodes back to the seed
     for (const node of wg.graph.nodes()) {
       addEdge({
         address: EdgeAddress.append(
-          SEED_IN,
+          SEED_RADIATION,
           ...NodeAddress.toParts(node.address)
         ),
         reversed: false,
@@ -356,7 +358,7 @@ export class MarkovProcessGraph {
       });
     }
 
-    // Add minting (seed-out) edges
+    // Add minting edges, from the seed to positive-weight graph nodes
     {
       let totalNodeWeight = 0.0;
       const positiveNodeWeights: Map<NodeAddressT, number> = new Map();
@@ -372,7 +374,7 @@ export class MarkovProcessGraph {
       for (const [address, weight] of positiveNodeWeights) {
         addEdge({
           address: EdgeAddress.append(
-            SEED_OUT,
+            SEED_MINT,
             ...NodeAddress.toParts(address)
           ),
           reversed: false,
