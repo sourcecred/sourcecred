@@ -69,9 +69,9 @@ import {
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 import * as NullUtil from "../util/null";
 import * as MapUtil from "../util/map";
+import type {TimestampMs} from "../util/timestamp";
 import {type SparseMarkovChain} from "./algorithm/markovChain";
 
-export type TimestampMs = number;
 export type TransitionProbability = number;
 
 export type MarkovNode = {|
@@ -391,7 +391,7 @@ export class MarkovProcessGraph {
      */
     const rewriteEpochNode = (
       address: NodeAddressT,
-      edgeTimestampMs: number
+      edgeTimestampMs: TimestampMs
     ): NodeAddressT => {
       if (!_scoringAddresses.has(address)) {
         return address;
