@@ -2,7 +2,7 @@
 
 import * as NullUtil from "../util/null";
 import * as MapUtil from "../util/map";
-import {type NodeAddressT, type EdgeAddressT} from "./graph";
+import type {NodeAddressT, EdgeAddressT} from "./graph";
 import {
   MarkovProcessGraph,
   type MarkovProcessGraphJSON,
