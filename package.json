@@ -23,12 +23,14 @@
     "deep-freeze": "^0.0.1",
     "downshift": "^5.4.7",
     "express": "^4.17.1",
+    "flow-remove-types": "^2.127.0",
     "fs-extra": "^9.0.0",
     "get-random-values": "^1.2.0",
     "globby": "^11.0.0",
     "history": "^4.10.1",
     "htmlparser2": "^4.1.0",
     "isomorphic-fetch": "^2.2.1",
+    "json-server": "^0.16.1",
     "json-stable-stringify": "^1.0.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
@@ -48,6 +50,7 @@
     "remove-markdown": "^0.3.0",
     "retry": "^0.12.0",
     "rimraf": "^3.0.2",
+    "serve-static": "^1.14.1",
     "svg-react-loader": "^0.4.6",
     "tmp": "0.0.33",
     "whatwg-fetch": "^2.0.4"
@@ -103,6 +106,7 @@
     ]
   },
   "scripts": {
+    "adminServe": "flow-node ./src/admin/localService/serve.js",
     "prettify": "prettier --write '**/*.js'",
     "check-pretty": "prettier --list-different '**/*.js'",
     "start": "NODE_ENV=development webpack-dev-server --config config/webpack.config.web.js",
@@ -154,6 +158,9 @@
       "node",
       "mjs"
     ]
+  },
+  "bin": {
+    "adminServe": "flow-node ./src/admin/localService/serve.js"
   },
   "files": [
     "/bin",
