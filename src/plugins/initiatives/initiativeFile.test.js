@@ -6,7 +6,6 @@ import {createId, addressFromId} from "./initiative";
 import {type InitiativesDirectory} from "./initiativesDirectory";
 import {
   type InitiativeFile,
-  type InitiativeFileV100,
   fromJSON,
   toJSON,
   initiativeFileURL,
@@ -31,31 +30,6 @@ const exampleInitiativeFile = (): InitiativeFile => ({
     urls: ["http://foo.bar/ref"],
     entries: [{title: "Inline ref"}],
   },
-});
-
-const exampleInitiativeFileV100 = (): InitiativeFileV100 => ({
-  id: "sample.json",
-  type: "sourcecred/initiativeFile",
-  version: "1.0.0",
-  title: "Sample initiative",
-  timestampIso: Timestamp.toISO(Date.parse("2020-01-08T22:01:57.766Z")),
-  weight: {incomplete: 360, complete: 420},
-  completed: false,
-  champions: [NodeAddress.fromParts(["core", "pluginA", "user0"])],
-  contributions: [{title: "Inline contrib"}],
-  dependencies: [
-    addressFromId(
-      createId("INITIATIVE_FILE", "http://foo.bar/dir", "sample.json")
-    ),
-  ],
-  references: [
-    NodeAddress.fromParts([
-      "core",
-      "pluginB",
-      "https://test.test/post",
-      "Post2319",
-    ]),
-  ],
 });
 
 describe("plugins/initiatives/initiativeFile", () => {
