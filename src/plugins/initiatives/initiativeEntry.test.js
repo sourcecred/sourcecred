@@ -11,7 +11,15 @@ export const exampleInitiativeEntry = (): InitiativeEntry => ({
   weight: {incomplete: 360, complete: 420},
   completed: false,
   champions: [NodeAddress.fromParts(["core", "pluginA", "user0"])],
-  contributions: [{title: "Inline contrib"}],
+  contributions: [
+    {
+      key: "unique-guid",
+      title: "Inline contrib",
+      timestampMs: Date.parse("2020-01-15T22:01:57.766Z"),
+      weight: 50,
+      contributors: [NodeAddress.fromParts(["core", "pluginA", "user25"])],
+    },
+  ],
   dependencies: [
     addressFromId(
       createId("INITIATIVE_FILE", "http://foo.bar/dir", "sample.json")
