@@ -37,6 +37,15 @@ function makeRouteData() /*: RouteData */ {
       title: "SourceCred",
       navTitle: "Home",
     },
+    {
+      path: "/dashboard/",
+      contents: {
+        type: "PAGE",
+        component: () => require("./Dashboard").default,
+      },
+      title: "SourceCred Dashboard",
+      navTitle: "Dashboard",
+    },
   ];
 }
 exports.makeRouteData = makeRouteData;
