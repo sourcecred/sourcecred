@@ -1,5 +1,6 @@
 // @flow
 
+import * as C from "./combo";
 export opaque type Compatible<T> = [CompatInfo, T];
 type CompatInfo = {|
   +type: string,
@@ -42,4 +43,35 @@ export function fromCompat<T>(
     throw new Error(`${type}: tried to load unsupported version ${version}`);
   }
   return result;
+}
+
+const headerParser = C.object({type: C.string, version: C.string});
+const wrappedParser = C.tuple([headerParser, C.raw]);
+
+export function compatibleParser<T>(
+  expectedType: string,
+  handlers: {+[version: string]: C.Parser<T>}
+): C.Parser<T> {
+  return new C.Parser((x) => {
+    const wrapResult = wrappedParser.parse(x);
+    if (!wrapResult.ok) {
+      return {ok: false, err: `unable to unwrap compatible: ${wrapResult.err}`};
+    }
+    const [{type, version}, raw] = wrapResult.value;
+    if (type !== expectedType) {
+      return {
+        ok: false,
+        err: `expected type "${expectedType}" but got "${type}"`,
+      };
+    }
+    if (!Object.prototype.hasOwnProperty.call(handlers, version)) {
+      return {ok: false, err: `no "${type}/${version}" handler`};
+    }
+    const parseResult = handlers[version].parse(raw);
+    if (parseResult.ok) {
+      return parseResult;
+    } else {
+      return {ok: false, err: `${type}/${version}: ${parseResult.err}`};
+    }
+  });
 }
