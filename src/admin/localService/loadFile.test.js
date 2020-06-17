@@ -2,27 +2,35 @@
 import {loadFile} from "./loadFile";
 import fs from "fs";
 
+const testDirRoot = "./test";
+const testDirPath = `${testDirRoot}/dir`;
+const testFilePath = `${testDirPath}/some-file.txt`;
+
 describe("src/admin/localService/loadFile", () => {
   beforeAll(async () => {
     // Arrange
-    await fs.promises.mkdir("./test/dir", {recursive: true});
-    await fs.promises.writeFile("./test/dir/some-file.txt", "found me!");
+    await fs.promises.mkdir(testDirPath, {recursive: true});
+    await fs.promises.writeFile(testFilePath, "found me!");
   });
   it("finds and reads a file", async () => {
+    // Arrange
+    expect.assertions(1);
     // Act
-    const filePath = await loadFile("test", "some-file.txt");
+    const fileContent = await loadFile("test", "some-file.txt");
     // Assert
-    expect(filePath).toEqual("found me!");
+    expect(fileContent).toEqual("found me!");
   });
   it("throws an error if no file is found in an existing directory", async () => {
+    // Arrange
+    expect.assertions(1);
     // Act
     return expect(loadFile("test", "missing-file.txt")).rejects.toThrow(
       // Assert
-      "missing-file.txt not found. Please enter a full cred repo"
+      "missing-file.txt not found. Please enter the root folder for Cred repo that contains the file."
     );
   });
   it("throws an error if the entered directory doesn't exist", async () => {
-    //arrange
+    // Arrange
     expect.assertions(1);
     // Act
     return expect(
@@ -32,8 +40,8 @@ describe("src/admin/localService/loadFile", () => {
     );
   });
   afterAll(async () => {
-    await fs.promises.unlink("./test/dir/some-file.txt");
-    await fs.promises.rmdir("./test/dir");
-    return await fs.promises.rmdir("./test");
+    await fs.promises.unlink(testFilePath);
+    await fs.promises.rmdir(testDirPath);
+    return await fs.promises.rmdir(testDirRoot); // recursive dir unlinking is still unstable, thus this second step
   });
 });

@@ -11,7 +11,9 @@ async function loadFile(credDir: string, fileName: string): Promise<string> {
   const filePath = await getFilePath(`${credDir}/`, fileName);
   if (!filePath)
     return Promise.reject(
-      new Error(`${fileName} not found. Please enter a full cred repo`)
+      new Error(
+        `${fileName} not found. Please enter the root folder for Cred repo that contains the file.`
+      )
     );
 
   return fs.promises.readFile(pathJoin(filePath, fileName), "utf8");
@@ -22,6 +24,9 @@ async function loadFile(credDir: string, fileName: string): Promise<string> {
  * weightedGraph.json
  * project.json
  * pluginDeclarations.json
+ *
+ * Recursively traverses the provided `dir` until it finds the first instance of the `targetFile`
+ * and returns the containing path to the file's directory. Otherwise it return a falsy empty string
  */
 async function getFilePath(dir: string, targetFile: string): Promise<string> {
   const files: Dirent[] = await ((readdir(dir, {
@@ -33,12 +38,10 @@ async function getFilePath(dir: string, targetFile: string): Promise<string> {
     .map(async (f) => {
       return await getFilePath(pathJoin(dir, f.name), targetFile);
     });
-  if (search.length > 0) {
-    const results: Array<string> = await Promise.all(search);
-    const result = results.find((e) => !!e) || "";
-    return result;
-  }
-  return "";
+  if (!search.length) return "";
+
+  const results: Array<string> = await Promise.all(search);
+  return results.find((e) => !!e) || "";
 }
 
 type Dirent = {|
