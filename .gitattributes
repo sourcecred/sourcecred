@@ -1,0 +1,2 @@
+# Large single-line snapshot files.
+sharness/__snapshots__/**/*.json -diff

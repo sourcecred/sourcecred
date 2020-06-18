@@ -133,6 +133,8 @@ function getGitState() /*: GitState */ {
 const SOURCECRED_GIT_STATE = stringify(getGitState());
 process.env.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
 
+// TODO: When we have switched fully to the instance system, we can remove
+// the projectIds argument.
 function getClientEnvironment(projectIds /*: $ReadOnlyArray<string> | null*/) {
   const raw = {};
   // Useful for determining whether we’re running in production mode.

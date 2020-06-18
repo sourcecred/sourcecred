@@ -15,7 +15,7 @@ import {
 
 import {makeRepoId} from "../plugins/github/repoId";
 import {toCompat} from "../util/compat";
-import type {ProjectV050} from "./project";
+import type {ProjectV050, ProjectV051, ProjectV052} from "./project";
 
 describe("core/project", () => {
   const foobar = deepFreeze(makeRepoId("foo", "bar"));
@@ -27,6 +27,7 @@ describe("core/project", () => {
     initiatives: null,
     identities: [],
     timelineCredParams: null,
+    discord: null,
   });
   const p2: Project = deepFreeze({
     id: "@foo",
@@ -40,6 +41,7 @@ describe("core/project", () => {
       },
     ],
     timelineCredParams: null,
+    discord: {guildId: "1234", reactionWeights: {}},
   });
   describe("to/from JSON", () => {
     it("round trip is identity", () => {
@@ -77,6 +79,7 @@ describe("core/project", () => {
           // It should strip the apiUsername field, keeping just serverUrl.
           discourseServer: {serverUrl: "https://example.com"},
           initiatives: null,
+          discord: null,
           timelineCredParams: {},
         }: Project)
       );
@@ -107,6 +110,7 @@ describe("core/project", () => {
           // It should strip the apiUsername field, keeping just serverUrl.
           discourseServer: {serverUrl: "https://example.com"},
           initiatives: null,
+          discord: null,
           timelineCredParams: {},
         }: Project)
       );
@@ -133,6 +137,7 @@ describe("core/project", () => {
           ...body,
           // It should add a default initiatives field.
           initiatives: null,
+          discord: null,
           timelineCredParams: {},
         }: Project)
       );
@@ -160,9 +165,63 @@ describe("core/project", () => {
           ...body,
           // It should add default params field.
           timelineCredParams: {},
+          discord: null,
         }: Project)
       );
     });
+  });
+  it("should upgrade from 0.5.1 formatting", () => {
+    // Given
+    const body: ProjectV051 = {
+      id: "example-051",
+      repoIds: [foobar, foozod],
+      discourseServer: {serverUrl: "https://example.com"},
+      identities: [],
+      initiatives: null,
+      timelineCredParams: {},
+    };
+    const compat = toCompat(
+      {type: "sourcecred/project", version: "0.5.1"},
+      body
+    );
+
+    // When
+    const project = projectFromJSON(compat);
+
+    // Then
+    expect(project).toEqual(
+      ({
+        ...body,
+        discord: null,
+      }: Project)
+    );
+  });
+
+  it("should upgrade from 0.5.0 formatting without overwriting fields", () => {
+    // Given
+    const body: ProjectV052 = {
+      id: "example-051",
+      repoIds: [foobar, foozod],
+      discourseServer: {serverUrl: "https://example.com"},
+      identities: [],
+      initiatives: null,
+      timelineCredParams: {alpha: 0.2, intervalDecay: 0.5},
+      discord: {guildId: "1234", reactionWeights: {}},
+    };
+    const compat = toCompat(
+      {type: "sourcecred/project", version: "0.5.0"},
+      body
+    );
+
+    // When
+    const project = projectFromJSON(compat);
+
+    // Then
+    expect(project).toEqual(
+      ({
+        ...body,
+      }: Project)
+    );
   });
   describe("encodeProjectId", () => {
     it("is a base64-url encoded id", () => {
@@ -202,6 +261,7 @@ describe("core/project", () => {
         repoIds: [],
         identities: [],
         timelineCredParams: null,
+        discord: null,
       });
     });
     it("treats input shape as overrides", () => {
@@ -219,6 +279,12 @@ describe("core/project", () => {
           },
         ],
         timelineCredParams: {alpha: 0.2, intervalDecay: 0.5},
+        discord: {
+          guildId: "123",
+          reactionWeights: {
+            emoji: 1,
+          },
+        },
       };
 
       // When

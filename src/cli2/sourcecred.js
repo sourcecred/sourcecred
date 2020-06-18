@@ -4,7 +4,6 @@ import type {Command} from "./command";
 
 import load from "./load";
 import graph from "./graph";
-import merge from "./merge";
 import score from "./score";
 
 const sourcecred: Command = async (args, std) => {
@@ -17,8 +16,6 @@ const sourcecred: Command = async (args, std) => {
       return load(args.slice(1), std);
     case "graph":
       return graph(args.slice(1), std);
-    case "merge":
-      return merge(args.slice(1), std);
     case "score":
       return score(args.slice(1), std);
     default:

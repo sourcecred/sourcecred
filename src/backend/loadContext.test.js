@@ -70,6 +70,7 @@ const mockProxyMethods = (
 describe("src/backend/loadContext", () => {
   describe("LoadContext", () => {
     const githubToken = validateToken("0".repeat(40));
+    const discordToken = "fakeBotToken";
     const project = createProject({id: "testing-project"});
     const params = {alpha: 0.123};
     const initiativesDirectory = fakes.initiativesDirectory;
@@ -90,6 +91,7 @@ describe("src/backend/loadContext", () => {
         const loadContext = new LoadContext({
           cache,
           githubToken,
+          discordToken,
           reporter,
           initiativesDirectory,
         });
@@ -121,6 +123,7 @@ describe("src/backend/loadContext", () => {
         const loadContext = new LoadContext({
           cache,
           githubToken,
+          discordToken,
           reporter,
           initiativesDirectory,
         });
@@ -134,6 +137,7 @@ describe("src/backend/loadContext", () => {
         const expectedEnv = {
           initiativesDirectory,
           githubToken,
+          discordToken,
           reporter,
           cache,
         };
@@ -183,6 +187,7 @@ describe("src/backend/loadContext", () => {
         const loadContext = new LoadContext({
           cache,
           githubToken,
+          discordToken,
           reporter,
           initiativesDirectory,
         });
@@ -195,6 +200,7 @@ describe("src/backend/loadContext", () => {
         const expectedEnv = {
           initiativesDirectory,
           githubToken,
+          discordToken,
           reporter,
           cache,
         };
@@ -219,6 +225,7 @@ describe("src/backend/loadContext", () => {
         const loadContext = new LoadContext({
           cache,
           githubToken,
+          discordToken,
           reporter,
           initiativesDirectory,
         });
