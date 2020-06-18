@@ -8,6 +8,7 @@
 
 # production
 /build
+/build2
 
 # backend
 /bin
