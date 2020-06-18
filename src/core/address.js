@@ -5,7 +5,7 @@ import deepFreeze from "deep-freeze";
 
 import * as MapUtil from "../util/map";
 
-export interface AddressModule<Address> {
+export interface AddressModule<Address: string> {
   /**
    * Assert at runtime that the provided address is actually a valid
    * address of this kind, throwing an error if it is not. If `what` is
@@ -73,6 +73,19 @@ export interface AddressModule<Address> {
    * e.g., `toParts(["ban"])` is not a prefix of `toParts(["banana"])`.
    */
   hasPrefix(address: Address, prefix: Address): boolean;
+
+  /**
+   * Interpret the provided string as an Address.
+   *
+   * Addresses are natively stored as strings. This method verifies
+   * that the provided "raw" address is actually an Address, so that
+   * you can have a type-level assurance that a string is an Address.
+   *
+   * This is useful if e.g. you are loading serialized Addresses.
+   *
+   * Throws an error if the string is not a valid Address.
+   */
+  fromRaw(raw: string): Address;
 }
 
 export type Options = {|
@@ -224,6 +237,28 @@ export function makeAddressModule(options: Options): AddressModule<string> {
     return address.startsWith(prefix);
   }
 
+  function fromRaw(address: string): Address {
+    if (!address.endsWith(separator)) {
+      throw new Error(
+        `address does not end with separator: ${stringify(address)}`
+      );
+    }
+    if (!address.startsWith(nonceWithSeparator)) {
+      for (const [
+        otherNonceWithSeparator,
+        otherName,
+      ] of otherNoncesWithSeparators) {
+        if (address.startsWith(otherNonceWithSeparator)) {
+          throw new Error(
+            `expected ${name}, got ${otherName}: ${stringify(address)}`
+          );
+        }
+      }
+      throw new Error(`expected ${name}, got: ${stringify(address)}`);
+    }
+    return address;
+  }
+
   const result = {
     assertValid,
     assertValidParts,
@@ -233,6 +268,7 @@ export function makeAddressModule(options: Options): AddressModule<string> {
     toString,
     append,
     hasPrefix,
+    fromRaw,
   };
   return deepFreeze(result);
 }
