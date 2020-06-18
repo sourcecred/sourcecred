@@ -42,14 +42,13 @@ async function makeConfig(
       before: (app /*: ExpressApp */) => {
         let developmentInstancePath /*: ?string */ =
           process.env["SOURCECRED_DEV_INSTANCE"];
-        const lastArg = process.argv[process.argv.length - 1];
-        if (lastArg.startsWith("--instance")) {
-          const pieces = lastArg.split("=");
-          developmentInstancePath = pieces[1];
+        const argv = process.argv;
+        if (argv[argv.length - 2] === "--instance") {
+          developmentInstancePath = argv[argv.length - 1];
         }
         if (developmentInstancePath == null) {
           throw new Error(
-            "Please provide a SourceCred cli2 instance, via $SOURCECRED_DEV_INSTANCE, or --instance=PATH"
+            "Please provide a SourceCred cli2 instance, via $SOURCECRED_DEV_INSTANCE, or --instance PATH"
           );
         }
         const configPath = path.join(
