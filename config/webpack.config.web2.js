@@ -16,18 +16,9 @@ const StaticSiteGeneratorPlugin = require("static-site-generator-webpack-plugin"
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const paths = require("./paths");
 const getClientEnvironment = require("./env");
-const _getProjectIds = require("../src/core/_getProjectIds");
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
-
-function loadProjectIds() /*: Promise<$ReadOnlyArray<string>> */ {
-  const env = process.env.SOURCECRED_DIRECTORY;
-  // TODO(#945): de-duplicate finding the directory with src/cli/common.js
-  const defaultDirectory = path.join(os.tmpdir(), "sourcecred");
-  const scDirectory = env != null ? env : defaultDirectory;
-  return _getProjectIds(scDirectory);
-}
 
 async function makeConfig(
   mode /*: "production" | "development" */
@@ -201,13 +192,14 @@ async function makeConfig(
 }
 
 async function plugins(mode /*: "development" | "production" */) {
-  const projectIds = await loadProjectIds();
-  const env = getClientEnvironment(projectIds);
+  // TODO: When we have switched fully to the instance system, we can remove
+  // the projectIds argument.
+  const env = getClientEnvironment(null);
   const basePlugins = [
     new StaticSiteGeneratorPlugin({
       entry: "ssr",
       paths: require("../src/homepage2/routeData")
-        .makeRouteData(projectIds)
+        .makeRouteData()
         .map(({path}) => path),
       locals: {},
     }),

@@ -1,15 +1,8 @@
 // @flow
 
-import {makeRouteData} from "./routeData";
+import {makeRouteData as routeData} from "./routeData";
 
 describe("homepage2/routeData", () => {
-  function routeData() {
-    return makeRouteData([
-      "sourcecred-test/example-github",
-      "sourcecred/sourcecred",
-    ]);
-  }
-
   /*
    * React Router doesn't support relative paths. I'm not sure exactly
    * what a path without a leading slash would do; it's asking for

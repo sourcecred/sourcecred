@@ -6,7 +6,7 @@ import createBrowserHistory from "history/lib/createBrowserHistory";
 import normalize from "../util/pathNormalize";
 import createRelativeHistory from "../webutil/createRelativeHistory";
 import App from "./App";
-import createRouteDataFromEnvironment from "./createRouteDataFromEnvironment";
+import {makeRouteData} from "./routeData";
 
 const target = document.getElementById("root");
 if (target == null) {
@@ -24,7 +24,7 @@ if (initialRoot == null) {
 const basename = normalize(`${window.location.pathname}/${initialRoot}/`);
 const history = createRelativeHistory(createBrowserHistory(), basename);
 
-const routeData = createRouteDataFromEnvironment();
+const routeData = makeRouteData();
 ReactDOM.hydrate(<App routeData={routeData} history={history} />, target);
 
 // In Chrome, relative favicon URLs are recomputed at every pushState,

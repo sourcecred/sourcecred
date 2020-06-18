@@ -26,9 +26,7 @@ type RouteDatum = {|
 export type RouteData = $ReadOnlyArray<RouteDatum>;
 */
 
-function makeRouteData(
-  _unused_projectIds /*: $ReadOnlyArray<string> */
-) /*: RouteData */ {
+function makeRouteData() /*: RouteData */ {
   return [
     {
       path: "/",
