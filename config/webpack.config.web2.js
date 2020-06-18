@@ -235,9 +235,7 @@ async function plugins(mode /*: "development" | "production" */) {
   const basePlugins = [
     new StaticSiteGeneratorPlugin({
       entry: "ssr",
-      paths: require("../src/homepage2/routeData")
-        .makeRouteData()
-        .map(({path}) => path),
+      paths: ["/"],
       locals: {},
     }),
     new CopyPlugin([{from: paths.favicon, to: "favicon.png"}]),
