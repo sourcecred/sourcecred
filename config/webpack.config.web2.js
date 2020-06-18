@@ -6,8 +6,8 @@ import type {
   $Response as ExpressResponse,
 } from "express";
 */
-const os = require("os");
 const path = require("path");
+const fs = require("fs-extra");
 const webpack = require("webpack");
 const RemoveBuildDirectoryPlugin = require("./RemoveBuildDirectoryPlugin");
 const CopyPlugin = require("copy-webpack-plugin");
@@ -40,18 +40,55 @@ async function makeConfig(
     devServer: {
       inline: false,
       before: (app /*: ExpressApp */) => {
-        const apiRoot = "/api/v1/data";
+        let developmentInstancePath /*: ?string */ =
+          process.env["SOURCECRED_DEV_INSTANCE"];
+        const lastArg = process.argv[process.argv.length - 1];
+        if (lastArg.startsWith("--instance")) {
+          const pieces = lastArg.split("=");
+          developmentInstancePath = pieces[1];
+        }
+        if (developmentInstancePath == null) {
+          throw new Error(
+            "Please provide a SourceCred cli2 instance, via $SOURCECRED_DEV_INSTANCE, or --instance=PATH"
+          );
+        }
+        const configPath = path.join(
+          developmentInstancePath,
+          "sourcecred.json"
+        );
+        if (!fs.existsSync(configPath)) {
+          // Sanity check; we won't try to verify that the right output files are there, since it may change and the
+          // frontend should have helpful error messages in that case. But if there's no sourcecred.json file, then
+          // it's likely the developer has made a mistake and would find a quick failure helpful.
+          throw new Error(
+            `Provided instance directory ${developmentInstancePath} doesn't have a sourcecred.json file`
+          );
+        }
+
+        const configContents = fs.readFileSync(configPath);
+        const serveConfig = (_unused_req, res /*: ExpressResponse */) => {
+          res.status(200).send(configContents);
+        };
         const rejectCache = (_unused_req, res /*: ExpressResponse */) => {
           res.status(400).send("Bad Request: Cache unavailable at runtime\n");
         };
-        app.get(`${apiRoot}/cache`, rejectCache);
-        app.get(`${apiRoot}/cache/*`, rejectCache);
+
+        app.get("/sourcecred.json", serveConfig);
+        app.get(`/cache`, rejectCache);
+        app.get(`/cache/*`, rejectCache);
+
+        // It's important that we individually whitelist directories (and the
+        // sourcecred.json file) rather than indiscriminately serving from
+        // root, because there might be a "permanent" frontend installed in
+        // that instance, and we don't want to accidentally load the existing
+        // frontend instead of our development copy.
         app.use(
-          apiRoot,
-          express.static(
-            process.env.SOURCECRED_DIRECTORY ||
-              path.join(os.tmpdir(), "sourcecred")
-          )
+          "/output/",
+          express.static(path.join(developmentInstancePath, "output"))
+        );
+        app.use(
+          "/config/",
+          express.static(path.join(developmentInstancePath, "config"))
         );
       },
     },
