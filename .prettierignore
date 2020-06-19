@@ -1,5 +1,6 @@
 /bin
 /build
+/build2
 /coverage
 /dist
 /flow-typed

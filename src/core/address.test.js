@@ -164,6 +164,33 @@ describe("core/address", () => {
       });
     });
 
+    describe("fromRaw", () => {
+      const {FooAddress, BarAddress} = makeModules();
+      function thunk(x: string) {
+        return () => FooAddress.fromRaw(x);
+      }
+      it("throws on an empty string", () => {
+        expect(thunk("")).toThrow("address does not end with separator");
+      });
+      it("throws on a string that doesn't start with the right separator", () => {
+        expect(thunk("\0")).toThrow("expected FooAddress, got");
+      });
+      it("throws on a string from a different address module", () => {
+        expect(thunk(BarAddress.empty)).toThrow(
+          "expected FooAddress, got BarAddress"
+        );
+      });
+      function roundTrip(x) {
+        expect(FooAddress.fromRaw(x)).toEqual(x);
+      }
+      it("works on an empty address", () => {
+        roundTrip(FooAddress.empty);
+      });
+      it("works on a non-empty address", () => {
+        roundTrip(FooAddress.fromParts(["foo", "bar"]));
+      });
+    });
+
     describe("fromParts", () => {
       const {FooAddress, BarAddress} = makeModules();
 

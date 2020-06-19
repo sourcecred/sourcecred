@@ -1,6 +1,7 @@
 // @flow
 
-import {toCompat, fromCompat} from "./compat";
+import * as C from "./combo";
+import {toCompat, fromCompat, compatibleParser} from "./compat";
 import type {Compatible} from "./compat";
 
 describe("util/compat", () => {
@@ -69,6 +70,53 @@ describe("util/compat", () => {
     };
     expect(fromCompat({type, version: v1}, compatV1, handlers)).toEqual({
       hello: "world",
+    });
+  });
+
+  describe("compatibleParser", () => {
+    function parseCompatible(x, type, handlers) {
+      return compatibleParser(type, handlers).parseOrThrow(x);
+    }
+    it("throws on json missing a compatible header", () => {
+      expect(() => parseCompatible("foo", "unused", {})).toThrow(
+        "unable to unwrap compatible"
+      );
+    });
+    it("throws on json with an invalid compatible header", () => {
+      expect(() =>
+        parseCompatible([{type: "foo", version: 3}, {}], "unused", {})
+      ).toThrow("unable to unwrap compatible");
+    });
+    it("throws on json with the wrong type", () => {
+      expect(() =>
+        parseCompatible(
+          (toCompat({type: "foo", version: "1.0.0"}, {}): any),
+          "bar",
+          {}
+        )
+      ).toThrow(`expected type "bar" but got "foo"`);
+    });
+    it("throws on json with no matching version handler", () => {
+      expect(() =>
+        parseCompatible(
+          (toCompat({type: "foo", version: "1.0.0"}, {}): any),
+          "foo",
+          {}
+        )
+      ).toThrow(`no "foo/1.0.0" handler`);
+    });
+    it("uses the correct version handler", () => {
+      const object = {v1: 5, v2: 6};
+      const parseV1 = C.object({v1: C.number});
+      const parseV2 = C.object({v2: C.number});
+      const parsers = {v1: parseV1, v2: parseV2};
+      const compatInfo1 = {type: "foo", version: "v1"};
+      const compatInfo2 = {type: "foo", version: "v2"};
+      const compatV1 = toCompat(compatInfo1, object);
+      const compatV2 = toCompat(compatInfo2, object);
+      const parse = (x) => parseCompatible((x: any), "foo", parsers);
+      expect(parse(compatV1)).toEqual({v1: 5});
+      expect(parse(compatV2)).toEqual({v2: 6});
     });
   });
 

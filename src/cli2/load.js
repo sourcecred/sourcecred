@@ -1,5 +1,6 @@
 // @flow
 
+import * as NullUtil from "../util/null";
 import type {Command} from "./command";
 import {loadInstanceConfig, pluginDirectoryContext} from "./common";
 import {LoggingTaskReporter} from "../util/taskReporter";
@@ -10,15 +11,28 @@ function die(std, message) {
 }
 
 const loadCommand: Command = async (args, std) => {
-  if (args.length !== 0) {
-    return die(std, "usage: sourcecred load");
+  let pluginsToLoad = [];
+  const baseDir = process.cwd();
+  const config = await loadInstanceConfig(baseDir);
+  if (args.length === 0) {
+    pluginsToLoad = config.bundledPlugins.keys();
+  } else {
+    for (const arg of args) {
+      if (config.bundledPlugins.has(arg)) {
+        pluginsToLoad.push(arg);
+      } else {
+        return die(
+          std,
+          `can't find plugin ${arg}; remember to use fully scoped name, as in sourcecred/github`
+        );
+      }
+    }
   }
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("load");
-  const baseDir = process.cwd();
-  const config = await loadInstanceConfig(baseDir);
   const loadPromises = [];
-  for (const [name, plugin] of config.bundledPlugins) {
+  for (const name of pluginsToLoad) {
+    const plugin = NullUtil.get(config.bundledPlugins.get(name));
     const task = `loading ${name}`;
     taskReporter.start(task);
     const dirContext = pluginDirectoryContext(baseDir, name);

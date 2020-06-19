@@ -7,7 +7,7 @@ import deepFreeze from "deep-freeze";
 import fs from "fs-extra";
 import {type Weights, fromJSON as weightsFromJSON} from "../core/weights";
 import {validateToken, type GithubToken} from "../plugins/github/token";
-import {type DiscordToken} from "../plugins/experimental-discord/params";
+import {type DiscordToken} from "../plugins/experimental-discord/config";
 
 export type PluginName = "git" | "github";
 
