@@ -1,13 +1,14 @@
 // @flow
 
 import * as MapUtil from "../util/map";
+import * as C from "../util/combo";
 import {
   type NodeAddressT,
   type EdgeAddressT,
   NodeAddress,
   EdgeAddress,
 } from "../core/graph";
-import {toCompat, fromCompat, type Compatible} from "../util/compat";
+import {toCompat, type Compatible, compatibleParser} from "../util/compat";
 
 /**
  * Represents the weight for a particular Node (or node address prefix).
@@ -121,23 +122,49 @@ export function merge(
   return weights;
 }
 
-export type WeightsJSON = Compatible<{|
+export type SerializedWeights_0_2_0 = {|
   +nodeWeights: {[NodeAddressT]: NodeWeight},
   +edgeWeights: {[EdgeAddressT]: EdgeWeight},
-|}>;
+|};
 
-export function toJSON(weights: Weights): WeightsJSON {
-  return toCompat(COMPAT_INFO, {
+function serialize_0_2_0(weights: Weights): SerializedWeights_0_2_0 {
+  return {
     nodeWeights: MapUtil.toObject(weights.nodeWeights),
     edgeWeights: MapUtil.toObject(weights.edgeWeights),
-  });
-}
-
-export function fromJSON(json: Compatible<any>): Weights {
-  const {nodeWeights, edgeWeights} = fromCompat(COMPAT_INFO, json);
-  return {
-    nodeWeights: MapUtil.fromObject(nodeWeights),
-    edgeWeights: MapUtil.fromObject(edgeWeights),
   };
 }
+
+function deserialize_0_2_0(weights: SerializedWeights_0_2_0): Weights {
+  return {
+    nodeWeights: MapUtil.fromObject(weights.nodeWeights),
+    edgeWeights: MapUtil.fromObject(weights.edgeWeights),
+  };
+}
+
+const Parse_0_2_0: C.Parser<SerializedWeights_0_2_0> = (() => {
+  const parseNodeAddress = C.fmap(C.string, NodeAddress.fromRaw);
+  const parseEdgeAddress = C.fmap(C.string, EdgeAddress.fromRaw);
+  const parseEdgeWeight = C.object({forwards: C.number, backwards: C.number});
+  return C.object({
+    nodeWeights: C.dict(C.number, parseNodeAddress),
+    edgeWeights: C.dict(parseEdgeWeight, parseEdgeAddress),
+  });
+})();
+
 const COMPAT_INFO = {type: "sourcecred/weights", version: "0.2.0"};
+
+export const parser: C.Parser<Weights> = compatibleParser(COMPAT_INFO.type, {
+  "0.2.0": C.fmap(Parse_0_2_0, deserialize_0_2_0),
+});
+
+export type WeightsJSON_0_2_0 = Compatible<SerializedWeights_0_2_0>;
+export type WeightsJSON = WeightsJSON_0_2_0;
+
+export function toJSON(weights: Weights): WeightsJSON {
+  return toCompat(COMPAT_INFO, serialize_0_2_0(weights));
+}
+
+export function fromJSON(json: WeightsJSON) {
+  // Any cast due to #1875
+  return parser.parseOrThrow((json: any));
+}
