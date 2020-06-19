@@ -12,7 +12,7 @@ import * as nullUtil from "../../util/null";
 
 export async function fetchDiscord(
   sqliteMirror: SqliteMirror,
-  streams: StreamingFetcher
+  streams: DepaginatedFetcher
 ) {
   for (const member of await streams.members()) {
     sqliteMirror.addMember(member);
@@ -38,7 +38,7 @@ export async function fetchDiscord(
 }
 
 // Note: most of this is about wrapping pagination.
-export interface StreamingFetcher {
+export interface DepaginatedFetcher {
   members(after: ?Snowflake): Promise<$ReadOnlyArray<Model.GuildMember>>;
   channels(): Promise<$ReadOnlyArray<Model.Channel>>;
   messages(

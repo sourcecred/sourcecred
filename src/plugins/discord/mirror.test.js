@@ -1,7 +1,7 @@
 // @flow
 
 import Database from "better-sqlite3";
-import {fetchDiscord, StreamingFetcher, getPages} from "./mirror";
+import {fetchDiscord, DepaginatedFetcher, getPages} from "./mirror";
 import {SqliteMirror} from "./sqliteMirror";
 import * as Model from "./models";
 import {type Snowflake} from "./models";
@@ -55,29 +55,20 @@ describe("plugins/discord/mirror", () => {
       }
     }
 
-    function mockStream(): StreamingFetcher {
+    function mockStream(): DepaginatedFetcher {
       return {
-        // eslint-disable-next-line no-unused-vars
-        members(after: ?Snowflake): Promise<$ReadOnlyArray<Model.GuildMember>> {
+        members(): Promise<$ReadOnlyArray<Model.GuildMember>> {
           return Promise.resolve(testMembers());
         },
         channels(): Promise<$ReadOnlyArray<Model.Channel>> {
           return Promise.resolve(testChannels());
         },
-        messages(
-          channel: Snowflake,
-          // eslint-disable-next-line no-unused-vars
-          after: ?Snowflake
-        ): Promise<$ReadOnlyArray<Model.Message>> {
+        messages(channel: Snowflake): Promise<$ReadOnlyArray<Model.Message>> {
           return Promise.resolve(testMessages(channel));
         },
         reactions(
           channel: Snowflake,
-          message: Snowflake,
-          // eslint-disable-next-line no-unused-vars
-          emoji: Model.Emoji,
-          // eslint-disable-next-line no-unused-vars
-          after: ?Snowflake
+          message: Snowflake
         ): Promise<$ReadOnlyArray<Model.Reaction>> {
           return Promise.resolve(testReactions(channel, message));
         },
