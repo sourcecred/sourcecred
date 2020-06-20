@@ -18,6 +18,7 @@ import {
   type ReferenceDetector,
   CascadingReferenceDetector,
 } from "../core/references";
+import {identityAddress} from "../plugins/identity/identity";
 
 /**
  * A type combining all known plugin Loader interfaces.
@@ -168,6 +169,16 @@ export async function createReferenceDetector(
   }
   if (loadedInitiativesDirectory) {
     refs.push(loadedInitiativesDirectory.referenceDetector);
+  }
+  // Hack around for https://github.com/sourcecred/sourcecred/issues/1807
+  // The current initiative format (and this code) are both deprecated, so not worried
+  // about this being a long term solution -- just trying to unblock MetaGame
+  if (project.identities) {
+    const map = new Map();
+    for (const {username} of project.identities) {
+      map.set(`@${username}`, identityAddress(username));
+    }
+    refs.push({addressFromUrl: (url) => map.get(url)});
   }
   return new CascadingReferenceDetector(refs);
 }
