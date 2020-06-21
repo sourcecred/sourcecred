@@ -60,7 +60,7 @@ describe("plugins/github/specToProject", () => {
             // The typedef says toThrow returns void, but this promise chain does
             // actually work. We don't need help from flow, since tests will fail
             // if the type is wrong.
-            // $ExpectFlowError
+            // $FlowExpectedError
             .then(() => {
               expect(fetchGithubOrg).toHaveBeenCalledTimes(0);
             })

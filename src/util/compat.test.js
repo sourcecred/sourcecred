@@ -24,7 +24,7 @@ describe("util/compat", () => {
   it("known issue: Compatibles are not JsonObjects", () => {
     // See: https://github.com/sourcecred/sourcecred/issues/1875
     const compatible = toCompat({type: "example", version: "1"}, {});
-    // $ExpectFlowError
+    // $FlowExpectedError
     const _unused_example: C.JsonObject = compatible;
   });
 

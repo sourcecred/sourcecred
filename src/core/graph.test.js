@@ -23,9 +23,9 @@ import {advancedGraph, node, partsNode, edge, partsEdge} from "./graphTestUtil";
 
 describe("core/graph", () => {
   function _unused_itExportsDistinctNodeAddressAndEdgeAddressTypes() {
-    // $ExpectFlowError
+    // $FlowExpectedError
     const _unused_nodeToEdge = (x: NodeAddressT): EdgeAddressT => x;
-    // $ExpectFlowError
+    // $FlowExpectedError
     const _unused_edgeToNode = (x: EdgeAddressT): NodeAddressT => x;
   }
 
@@ -45,7 +45,7 @@ describe("core/graph", () => {
   describe("Direction values", () => {
     it("are read-only", () => {
       expect(() => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         Direction.IN = Direction.OUT;
       }).toThrow(/read.only property/);
     });
@@ -55,7 +55,7 @@ describe("core/graph", () => {
     it("can be constructed", () => {
       const x = new Graph();
       // Verify that `x` is not of type `any`
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(() => x.measureSpectacularity()).toThrow();
     });
     function graphRejectsNulls(f) {
@@ -170,23 +170,23 @@ describe("core/graph", () => {
       it("detects when an edge has bad address", () => {
         const g = simpleGraph();
         g._edges.set(simpleEdge.address, differentAddressEdge);
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(dst.address).inEdges = [differentAddressEdge];
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(src.address).outEdges = [differentAddressEdge];
         expect(() => g._checkInvariants()).toThrow("bad edge address");
       });
       // Invariant 2.4
       it("detects when an edge is missing in `_inEdges`", () => {
         const g = simpleGraph();
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.dst).inEdges = [];
         expect(() => g._checkInvariants()).toThrow("missing in-edge");
       });
       // Invariant 2.5
       it("detects when an edge is missing in `_outEdges`", () => {
         const g = simpleGraph();
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.src).outEdges = [];
         expect(() => g._checkInvariants()).toThrow("missing out-edge");
       });
@@ -194,14 +194,14 @@ describe("core/graph", () => {
       // Invariant 3.1
       it("detects when an edge is duplicated in `_inEdges`", () => {
         const g = simpleGraph();
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.dst).inEdges = [simpleEdge, simpleEdge];
         expect(() => g._checkInvariants()).toThrow("duplicate in-edge");
       });
       // Invariant 4.1
       it("detects when an edge is duplicated in `_outEdges`", () => {
         const g = simpleGraph();
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.src).outEdges = [
           simpleEdge,
           simpleEdge,
@@ -212,13 +212,13 @@ describe("core/graph", () => {
       // Invariant 3.2 (two failure modes: absent or wrong data)
       it("detects when an edge is spurious in `_inEdges`", () => {
         const g = simpleGraph().removeEdge(simpleEdge.address);
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.dst).inEdges = [simpleEdge];
         expect(() => g._checkInvariants()).toThrow("spurious in-edge");
       });
       it("detects when an edge has bad `dst` in `_inEdges`", () => {
         const g = simpleGraph();
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.dst).inEdges = [
           {src: dst.address, dst: dst.address, address: simpleEdge.address},
         ];
@@ -227,13 +227,13 @@ describe("core/graph", () => {
       // Invariant 4.2 (two failure modes: absent or wrong data)
       it("detects when an edge is spurious in `_outEdges`", () => {
         const g = simpleGraph().removeEdge(simpleEdge.address);
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.src).outEdges = [simpleEdge];
         expect(() => g._checkInvariants()).toThrow("spurious out-edge");
       });
       it("detects when an edge has bad `src` in `_outEdges`", () => {
         const g = simpleGraph();
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.src).outEdges = [
           {src: src.address, dst: src.address, address: simpleEdge.address},
         ];
@@ -243,18 +243,18 @@ describe("core/graph", () => {
       // Invariant 3.3
       it("detects when an edge has bad anchor in `_inEdges`", () => {
         const g = simpleGraph();
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.dst).inEdges = [];
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.src).inEdges = [simpleEdge];
         expect(() => g._checkInvariants()).toThrow(/bad in-edge.*anchor/);
       });
       // Invariant 4.3
       it("detects when an edge has bad anchor in `_outEdges`", () => {
         const g = simpleGraph();
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.src).outEdges = [];
-        // $ExpectFlowError
+        // $FlowExpectedError
         g._incidentEdges.get(simpleEdge.dst).outEdges = [simpleEdge];
         expect(() => g._checkInvariants()).toThrow(/bad out-edge.*anchor/);
       });
@@ -280,7 +280,7 @@ describe("core/graph", () => {
               ...node("foo"),
               address: EdgeAddress.fromParts(["foo"]),
             };
-            // $ExpectFlowError
+            // $FlowExpectedError
             expect(() => new Graph().addNode(n).toThrow("got EdgeAddress"));
           });
         });
@@ -289,7 +289,7 @@ describe("core/graph", () => {
           const g = new Graph();
           const n1 = node("foo");
           const n2 = {...n1, boink: "zod"};
-          // $ExpectFlowError
+          // $FlowExpectedError
           expect(() => g.addNode(n1).addNode(n2)).toThrow(
             "conflict between new node"
           );
@@ -419,7 +419,7 @@ describe("core/graph", () => {
           expectEqualNodes(undefined, [n1, n2, n3, n4]);
         });
         it("requires a prefix when options are specified", () => {
-          // $ExpectFlowError
+          // $FlowExpectedError
           expect(() => simpleGraph().nodes({})).toThrow("prefix");
         });
         it("does a prefix filter", () => {
@@ -548,7 +548,7 @@ describe("core/graph", () => {
             badEdges.forEach(({what, edge, msg}) => {
               it(what, () => {
                 const graph = new Graph().addNode(node("foo"));
-                // $ExpectFlowError
+                // $FlowExpectedError
                 expect(() => graph.addEdge(edge)).toThrow(msg);
               });
             });
@@ -1089,7 +1089,7 @@ describe("core/graph", () => {
           nodePrefix: NodeAddress.empty,
         });
         function throwsWith(node, options, message) {
-          // $ExpectFlowError
+          // $FlowExpectedError
           expect(() => new Graph().neighbors(node, options)).toThrow(message);
         }
         it("invalid address", () => {
@@ -1183,15 +1183,15 @@ describe("core/graph", () => {
         expect(graph1().equals(graph2())).toBe(true);
       });
       it("throws error on null", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => new Graph().equals(null)).toThrow("null");
       });
       it("throws error on undefined", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => new Graph().equals(undefined)).toThrow("undefined");
       });
       it("throws error on non-graph object", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => new Graph().equals({})).toThrow("object");
       });
     });

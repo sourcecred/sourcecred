@@ -65,14 +65,14 @@ describe("plugins/github/nodes", () => {
   // Incorrect types should be caught statically, either due to being
   // totally invalid...
   const _unused_badRepo: GN.RepoAddress = {
-    // $ExpectFlowError
+    // $FlowExpectedError
     type: "REPOSITORY",
     owner: "foo",
     name: "bar",
   };
   // ...or due to being annotated with the type of a distinct structured
   // address:
-  // $ExpectFlowError
+  // $FlowExpectedError
   const _unused_badIssue: GN.IssueAddress = {...pull()};
 
   describe("`fromRaw` after `toRaw` is identity", () => {
@@ -113,7 +113,7 @@ describe("plugins/github/nodes", () => {
             "github",
             ...parts,
           ]);
-          // $ExpectFlowError
+          // $FlowExpectedError
           expect(() => fromRaw(address)).toThrow("Bad address");
         });
       }
@@ -131,15 +131,15 @@ describe("plugins/github/nodes", () => {
         }
       }
       it("undefined", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => fromRaw(undefined)).toThrow("undefined");
       });
       it("null", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => fromRaw(null)).toThrow("null");
       });
       it("with bad prefix", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => fromRaw(NodeAddress.fromParts(["foo"]))).toThrow(
           "Bad address"
         );
@@ -224,20 +224,20 @@ describe("plugins/github/nodes", () => {
 
     describe("toRaw(...) with", () => {
       it("null", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => toRaw(null)).toThrow("null");
       });
       it("undefined", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => toRaw(undefined)).toThrow("undefined");
       });
       it("bad type", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => toRaw({type: "ICE_CREAM"})).toThrow("Unexpected type");
       });
       it("bad comment type", () => {
         expect(() => {
-          // $ExpectFlowError
+          // $FlowExpectedError
           toRaw({type: "COMMENT", parent: {type: "ICE_CREAM"}});
         }).toThrow("Bad comment parent type");
       });

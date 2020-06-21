@@ -12,7 +12,7 @@ import {
 
 describe("src/grain/grain", () => {
   describe("format", () => {
-    // $ExpectFlowError
+    // $FlowExpectedError
     const almostOne = ONE - 1n;
 
     it("correctly rounds to smallest integer when decimals==0", () => {
@@ -52,11 +52,11 @@ describe("src/grain/grain", () => {
       expect(format(fromApproximateFloat(0.1), DECIMAL_PRECISION)).toEqual(
         "0.100000000000000000g"
       );
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(format(-12345n, DECIMAL_PRECISION)).toEqual(
         "-0.000000000000012345g"
       );
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(format((ONE / 100n) * 133704242n, DECIMAL_PRECISION)).toEqual(
         "1,337,042.420000000000000000g"
       );
@@ -89,11 +89,11 @@ describe("src/grain/grain", () => {
 
   describe("multiplyFloat", () => {
     it("behaves reasonably for tiny grain values", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(multiplyFloat(1n, 5)).toEqual(5n);
     });
     it("behaves reasonably for larger grain values", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(multiplyFloat(ONE, 2)).toEqual(2n * ONE);
     });
     it("has small error on large grain values", () => {
@@ -101,11 +101,11 @@ describe("src/grain/grain", () => {
       // https://observablehq.com/@decentralion/grain-arithmetic
 
       // Within 1 attoGrain of "true" value
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(multiplyFloat(ONE, 1 / 1337)).toEqual(747943156320119n);
 
       // Within 300 attoGrain of "true" value
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(multiplyFloat(ONE, Math.PI)).toEqual(3141592653589793280n);
     });
   });
@@ -114,7 +114,7 @@ describe("src/grain/grain", () => {
       expect(fromApproximateFloat(1)).toEqual(ONE);
     });
     it("fromApproximateFloat(0.1) === ONE / 10", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(fromApproximateFloat(0.1)).toEqual(ONE / 10n);
     });
   });
@@ -124,25 +124,25 @@ describe("src/grain/grain", () => {
       expect(toFloatRatio(ONE, ONE)).toEqual(1);
     });
     it("handles a larger numerator", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(toFloatRatio(ONE * 2n, ONE)).toEqual(2);
     });
     it("handles fractional numbers", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(toFloatRatio(ONE * 5n, ONE * 2n)).toEqual(2.5);
     });
     it("calculates repeating decimal ratios", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(toFloatRatio(ONE * 5n, ONE * 3n)).toEqual(5 / 3);
     });
     it("approximates correctly when Grain values are not exactly equal", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       const almostOne = ONE - 1n;
       expect(toFloatRatio(ONE, almostOne)).toEqual(1);
     });
     it("handles irrational numbers", () => {
       const bigPi = multiplyFloat(ONE, Math.PI);
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(toFloatRatio(bigPi, ONE * 2n)).toEqual(Math.PI / 2);
     });
   });

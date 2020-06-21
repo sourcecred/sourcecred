@@ -128,12 +128,12 @@ describe("graphql/mirror", () => {
       });
 
       it("fails if the database connection is `null`", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => new Mirror(null, buildGithubSchema())).toThrow("db: null");
       });
 
       it("fails if the schema is `null`", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => new Mirror(new Database(":memory:"), null)).toThrow(
           "schema: null"
         );

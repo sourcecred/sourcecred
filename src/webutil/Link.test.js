@@ -20,7 +20,7 @@ describe("webutil/Link", () => {
     // Must specify either `href` or `to`
     <Link href="https://example.com/">click me</Link>,
     <Link to="/prototype/">click me, too</Link>,
-    // $ExpectFlowError
+    // $FlowExpectedError
     <Link>missing to/href</Link>,
 
     // May specify styles
@@ -48,7 +48,7 @@ describe("webutil/Link", () => {
   });
 
   it("fails if neither `to` nor `href` is provided", () => {
-    // $ExpectFlowError
+    // $FlowExpectedError
     const component = <Link>uhhhhh</Link>;
     expect(() => {
       shallow(component);
