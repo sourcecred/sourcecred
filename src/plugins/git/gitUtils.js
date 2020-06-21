@@ -22,7 +22,7 @@ export function localGit(repositoryPath: string): GitDriver {
     // `exec` step of a Git rebase.
     //
     // [1]: https://github.com/git/git/blob/1f1cddd558b54bb0ce19c8ace353fd07b758510d/t/test-lib.sh#L90
-    const fullEnv = {
+    const baseEnv: {[string]: string | void} = {
       // Standardize output.
       LANG: "C",
       LC_ALL: "C",
@@ -38,8 +38,10 @@ export function localGit(repositoryPath: string): GitDriver {
       // This post has some useful information on SSH_AUTH_SOCK:
       // http://blog.joncairns.com/2013/12/understanding-ssh-agent-and-ssh-add/
       SSH_AUTH_SOCK: process.env.SSH_AUTH_SOCK,
-      // Workaround for <https://github.com/facebook/flow/issues/7128>.
-      ...(((env: any): {|[string]: string|}) || {}),
+    };
+    const fullEnv: {[string]: string | void} = {
+      ...baseEnv,
+      ...(env || {}: {+[string]: string | void}),
     };
     const options = {env: fullEnv};
     return execFileSync(
