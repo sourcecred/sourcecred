@@ -3,6 +3,7 @@ const express = require("express");
 /*::
 import type {
   $Application as ExpressApp,
+  $Request as ExpressRequest,
   $Response as ExpressResponse,
 } from "express";
 */
@@ -48,7 +49,7 @@ async function makeConfig(
     },
     devServer: {
       inline: false,
-      before: (app /*: ExpressApp */) => {
+      before: (app /*: ExpressApp<ExpressRequest, ExpressResponse> */) => {
         const apiRoot = "/api/v1/data";
         const rejectCache = (_unused_req, res /*: ExpressResponse */) => {
           res.status(400).send("Bad Request: Cache unavailable at runtime\n");

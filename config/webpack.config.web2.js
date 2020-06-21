@@ -3,6 +3,7 @@ const express = require("express");
 /*::
 import type {
   $Application as ExpressApp,
+  $Request as ExpressRequest,
   $Response as ExpressResponse,
 } from "express";
 */
@@ -39,7 +40,7 @@ async function makeConfig(
     },
     devServer: {
       inline: false,
-      before: (app /*: ExpressApp */) => {
+      before: (app /*: ExpressApp<ExpressRequest, ExpressResponse> */) => {
         let developmentInstancePath /*: ?string */ =
           process.env["SOURCECRED_DEV_INSTANCE"];
         const argv = process.argv;
