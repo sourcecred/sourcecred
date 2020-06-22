@@ -8,8 +8,8 @@ export type JsonObject =
   | number
   | boolean
   | null
-  | JsonObject[]
-  | {[string]: JsonObject};
+  | $ReadOnlyArray<JsonObject>
+  | {+[string]: JsonObject};
 
 export type ParseResult<+T> =
   | {|+ok: true, +value: T|}
