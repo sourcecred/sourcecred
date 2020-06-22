@@ -29,7 +29,7 @@ module.exports = {
   // source file, and the key will be the filename of the bundled entry
   // point within the build directory.
   backendEntryPoints: {
-    sc2: resolveApp("src/cli2/main.js"),
+    sourcecred: resolveApp("src/cli/main.js"),
     //
     generateGithubGraphqlFlowTypes: resolveApp(
       "src/plugins/github/bin/generateGraphqlFlowTypes.js"

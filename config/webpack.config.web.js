@@ -49,7 +49,7 @@ async function makeConfig(
         }
         if (developmentInstancePath == null) {
           throw new Error(
-            "Please provide a SourceCred cli2 instance, via $SOURCECRED_DEV_INSTANCE, or --instance PATH"
+            "Please provide a SourceCred cli instance, via $SOURCECRED_DEV_INSTANCE, or --instance PATH"
           );
         }
         const configPath = path.join(

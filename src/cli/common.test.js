@@ -6,7 +6,7 @@ import fs from "fs-extra";
 import * as C from "../util/combo";
 import {join as pathJoin} from "path";
 
-describe("cli2/common", () => {
+describe("cli/common", () => {
   function tmpWithContents(contents: mixed) {
     const name = tmp.tmpNameSync();
     fs.writeFileSync(name, JSON.stringify(contents));
