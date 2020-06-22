@@ -3,6 +3,14 @@
 import * as C from "./combo";
 
 describe("src/util/combo", () => {
+  describe("type JsonObject", () => {
+    it("includes compound structures of strict subtypes", () => {
+      // (requires covariance in the array/object clauses)
+      (x: string[]): C.JsonObject => x;
+      (x: {[string]: number}): C.JsonObject => x;
+    });
+  });
+
   describe("primitives", () => {
     describe("string", () => {
       it("accepts strings", () => {
