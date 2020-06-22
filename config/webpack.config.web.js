@@ -31,10 +31,10 @@ async function makeConfig(
     devtool: shouldUseSourceMap ? "source-map" : false,
     // In production, we only want to load the polyfills and the app code.
     entry: {
-      main: [require.resolve("./polyfills"), paths.appIndexJs2],
+      main: [require.resolve("./polyfills"), paths.appIndexJs],
       ssr: [
         require.resolve("./polyfills"),
-        paths.appServerSideRenderingIndexJs2,
+        paths.appServerSideRenderingIndexJs,
       ],
     },
     devServer: {
@@ -93,7 +93,7 @@ async function makeConfig(
     },
     output: {
       // The build folder.
-      path: paths.appBuild2,
+      path: paths.appBuild,
       // Generated JS file names (with nested folders).
       // There will be one main bundle, and one file per asynchronous chunk.
       // We don't currently advertise code splitting but Webpack supports it.
