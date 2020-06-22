@@ -13,7 +13,7 @@ describe("plugins/git/nodes", () => {
   };
 
   // Incorrect types should be caught statically
-  // $ExpectFlowError
+  // $FlowExpectedError
   const _unused_badTree: GN.RepoAddress = {
     type: "TREEEEE",
     hash: "browns",
@@ -57,15 +57,15 @@ describe("plugins/git/nodes", () => {
         });
       }
       it("undefined", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => fromRaw(undefined)).toThrow("undefined");
       });
       it("null", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => fromRaw(null)).toThrow("null");
       });
       it("bad prefix", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => fromRaw(NodeAddress.fromParts(["foo"]))).toThrow(
           "Bad address"
         );
@@ -84,15 +84,15 @@ describe("plugins/git/nodes", () => {
 
     describe("toRaw(...) with", () => {
       it("null", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => toRaw(null)).toThrow("null");
       });
       it("undefined", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => toRaw(undefined)).toThrow("undefined");
       });
       it("bad type", () => {
-        // $ExpectFlowError
+        // $FlowExpectedError
         expect(() => toRaw({type: "ICE_CREAM"})).toThrow("Unexpected type");
       });
     });

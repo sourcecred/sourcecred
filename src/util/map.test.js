@@ -30,12 +30,12 @@ describe("util/map", () => {
       const input: Map<number, string> = new Map()
         .set(12, "not okay")
         .set(13, "also not okay");
-      // $ExpectFlowError
+      // $FlowExpectedError
       MapUtil.toObject(input);
     });
     it("statically refuses to output an object with non-string keys", () => {
       const input: Map<string, number> = new Map().set("one", 1).set("two", 2);
-      // $ExpectFlowError
+      // $FlowExpectedError
       const _: {[string | number]: number} = MapUtil.toObject(input);
     });
     it("allows upcasting the key and value types of the result object", () => {
@@ -80,7 +80,7 @@ describe("util/map", () => {
       const input: {[number]: string} = {};
       input[12] = "not okay";
       input[13] = "also not okay";
-      // $ExpectFlowError
+      // $FlowExpectedError
       MapUtil.fromObject(input);
       // If that were valid, then `(result.keys(): Iterator<number>)`
       // would contain the strings "12" and "13".
@@ -292,10 +292,10 @@ describe("util/map", () => {
     it("produces expected type errors", () => {
       const numberMap: Map<number, number> = new Map().set(1, 2);
       const stringMap: Map<string, string> = new Map().set("one", "two");
-      // $ExpectFlowError
+      // $FlowExpectedError
       const _unused_badMap: Map<string, number> = MapUtil.merge([
         numberMap,
-        // $ExpectFlowError
+        // $FlowExpectedError
         stringMap,
       ]);
     });

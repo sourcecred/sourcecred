@@ -67,7 +67,7 @@ describe("plugins/github/urlIdParse", () => {
         const examples = [...instances, ...garbage];
         examples.forEach(({instance, name}) => {
           it(`recieving ${name}`, () => {
-            // $ExpectFlowError
+            // $FlowExpectedError
             expect(() => f(instance)).toThrow("Error parsing");
           });
         });

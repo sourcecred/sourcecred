@@ -111,11 +111,11 @@ describe("src/util/combo", () => {
       (C.exactly([1, 2, 3]): C.Parser<1 | 2 | 3>);
       (C.exactly(["one", 2]): C.Parser<"one" | 2>);
       (C.exactly([]): C.Parser<empty>);
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.exactly([1, 2, 3]): C.Parser<1 | 2>);
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.exactly(["one", 2]): C.Parser<1 | "two">);
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.exactly([false]): C.Parser<empty>);
     });
     it("accepts any matching value", () => {
@@ -192,10 +192,10 @@ describe("src/util/combo", () => {
     });
     it("is type-safe", () => {
       // input safety
-      // $ExpectFlowError
+      // $FlowExpectedError
       C.fmap(C.string, (n: number) => n.toFixed());
       // output safety
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.fmap(C.number, (n: number) => n.toFixed()): C.Parser<number>);
     });
   });
@@ -207,9 +207,9 @@ describe("src/util/combo", () => {
       (C.orElse([C.number, C.null_]): C.Parser<?number>);
       (C.orElse([C.number, C.null_]): C.Parser<number | null | boolean>);
       (C.orElse([]): C.Parser<empty>);
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.orElse([C.number, C.string]): C.Parser<number | boolean>);
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.orElse([C.number, C.string]): C.Parser<empty>);
     });
 
@@ -311,29 +311,29 @@ describe("src/util/combo", () => {
       expect(thunk).toThrow("index 2: index 0: expected string, got number");
     });
     it("is type-safe", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.array(C.string): C.Parser<string>);
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.array(C.string): C.Parser<number[]>);
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.array(C.string): C.Parser<string[][]>);
     });
   });
 
   describe("object", () => {
     it("type-errors if the unique field doesn't match", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.object({name: C.string}): C.Parser<{|+name: number|}>);
     });
     it("type-errors if two fields on an object are swapped", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.object({name: C.string, age: C.number}): C.Parser<{|
         +name: number,
         +age: string,
       |}>);
     });
     it("type-errors if two optional fields on an object are swapped", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.object(
         {id: C.string},
         {maybeName: C.string, maybeAge: C.number}
@@ -344,7 +344,7 @@ describe("src/util/combo", () => {
       |}>);
     });
     it("type-errors on bad required fields when optionals present", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.object({name: C.string, age: C.number}, {hmm: C.boolean}): C.Parser<{|
         +name: number,
         +age: string,
@@ -352,7 +352,7 @@ describe("src/util/combo", () => {
       |}>);
     });
     it("type-errors on bad required fields when empty optionals present", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.object({name: C.string, age: C.number}, {}): C.Parser<{|
         +name: number,
         +age: string,
@@ -503,11 +503,11 @@ describe("src/util/combo", () => {
       // implementation detail doesn't leak past the opaque type
       // boundary.
       const rename = C.rename("old", C.string);
-      // $ExpectFlowError
+      // $FlowExpectedError
       (rename: C.Parser<string>);
     });
     it("forbids renaming a rename at the type level", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       C.rename("hmm", C.rename("old", C.string));
     });
   });
@@ -529,7 +529,7 @@ describe("src/util/combo", () => {
       expect(p.parseOrThrow({one: 1, dos: 2})).toEqual({one: 1, two: 2});
     });
     it("type-errors if the output has any required fields", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       const _: C.Parser<{|+a?: null, +b: null /* bad */|}> = C.shape({
         a: C.null_,
         b: C.null_,
@@ -553,7 +553,7 @@ describe("src/util/combo", () => {
     describe("for a heterogeneous tuple type", () => {
       it("is typesafe", () => {
         (C.tuple([C.string, C.number]): C.Parser<[string, number]>);
-        // $ExpectFlowError
+        // $FlowExpectedError
         (C.tuple([C.string, C.number]): C.Parser<[string, string]>);
       });
       const makeParser = (): C.Parser<[string, number]> =>
@@ -584,7 +584,7 @@ describe("src/util/combo", () => {
     const makeParser = (): C.Parser<{|[string]: number|}> => C.dict(C.number);
     it("is type-safe", () => {
       // when no key parser is given, key type must be string
-      // $ExpectFlowError
+      // $FlowExpectedError
       (C.dict(C.string): C.Parser<{["hmm"]: string}>);
     });
     it("rejects null", () => {
@@ -648,7 +648,7 @@ describe("src/util/combo", () => {
         const asciiNumber: C.Parser<number> = C.fmap(C.string, (x) =>
           parseInt(x, 10)
         );
-        // $ExpectFlowError
+        // $FlowExpectedError
         C.dict(C.boolean, asciiNumber);
       });
     });

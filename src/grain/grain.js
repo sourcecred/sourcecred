@@ -24,14 +24,14 @@
  */
 export type Grain = number;
 
-// $ExpectFlowError
+// $FlowExpectedError
 export const ZERO = 0n;
 
 // How many digits of precision there are in "one" grain
 export const DECIMAL_PRECISION = 18;
 
 // One "full" grain
-// $ExpectFlowError
+// $FlowExpectedError
 export const ONE = 10n ** BigInt(DECIMAL_PRECISION);
 
 export const DEFAULT_SUFFIX = "g";

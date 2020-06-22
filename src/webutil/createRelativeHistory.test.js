@@ -48,7 +48,7 @@ describe("webutil/createRelativeHistory", () => {
       it("should require a basename", () => {
         expect(() =>
           createHistory(
-            // $ExpectFlowError
+            // $FlowExpectedError
             undefined,
             "undefined/"
           )
@@ -429,7 +429,7 @@ describe("webutil/createRelativeHistory", () => {
           );
           // Reset console.error to a clean mock to satisfy afterEach check from
           // configureEnzyme()
-          // $ExpectFlowError
+          // $FlowExpectedError
           console.error = jest.fn();
         });
 
@@ -449,7 +449,7 @@ describe("webutil/createRelativeHistory", () => {
           );
           // Reset console.error to a clean mock to satisfy afterEach check from
           // configureEnzyme()
-          // $ExpectFlowError
+          // $FlowExpectedError
           console.error = jest.fn();
         });
 

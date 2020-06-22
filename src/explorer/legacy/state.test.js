@@ -158,7 +158,7 @@ describe("explorer/legacy/state", () => {
     it("sets loading state FAILED on reject", async () => {
       const {getState, stm, loadMock} = example(readyToLoadGraph());
       const error = new Error("Oh no!");
-      // $ExpectFlowError
+      // $FlowExpectedError
       console.error = jest.fn();
       loadMock.mockReturnValue(Promise.reject(error));
       const succeeded = await stm.loadTimelineCred(new Assets("/my/gateway/"));
@@ -210,7 +210,7 @@ describe("explorer/legacy/state", () => {
     it("sets loading state FAILED on reject", async () => {
       const {getState, stm, pagerankMock} = example(readyToRunPagerank());
       const error = new Error("Oh no!");
-      // $ExpectFlowError
+      // $FlowExpectedError
       console.error = jest.fn();
       pagerankMock.mockReturnValue(Promise.reject(error));
       await stm.runPagerank(Weights.empty(), NodeAddress.empty);

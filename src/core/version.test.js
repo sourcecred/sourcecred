@@ -47,14 +47,14 @@ describe("core/version", () => {
       );
     });
     it("fails given a non-stringified `GitState`", () => {
-      // $ExpectFlowError
+      // $FlowExpectedError
       expect(() => parseGitState(version().gitState)).toThrow(
         "gitState: not a string: [object Object]"
       );
     });
     it("fails given a JSON object missing a property", () => {
       const gitState = version().gitState;
-      // $ExpectFlowError
+      // $FlowExpectedError
       delete gitState.dirty;
       expect(() => parseGitState(JSON.stringify(gitState))).toThrow(
         "gitState: bad shape: {"

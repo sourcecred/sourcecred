@@ -150,7 +150,7 @@ describe("util/null", () => {
     });
     it("doesn't allow bad coercions", () => {
       const as = [1, "foo", 2];
-      // $ExpectFlowError
+      // $FlowExpectedError
       const _: number[] = NullUtil.filterList(as);
     });
   });

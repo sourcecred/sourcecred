@@ -182,7 +182,7 @@ describe("src/grain/createGrainAllocation", () => {
         [evenInterval],
         new Map()
       );
-      // $ExpectFlowError
+      // $FlowExpectedError
       const HALF = BUDGET / 2n;
       const expectedReceipts = [
         {address: foo, amount: HALF},
@@ -198,7 +198,7 @@ describe("src/grain/createGrainAllocation", () => {
         [unevenInterval],
         new Map()
       );
-      // $ExpectFlowError
+      // $FlowExpectedError
       const ONE_TENTH = BUDGET / 10n;
       const NINE_TENTHS = BUDGET - ONE_TENTH;
       const expectedReceipts = [
