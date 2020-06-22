@@ -4,13 +4,6 @@
 import type {Command} from "./command";
 import dedent from "../util/dedent";
 
-import {help as loadHelp} from "./load";
-import {help as scoresHelp} from "./scores";
-import {help as outputHelp} from "./output";
-import {help as clearHelp} from "./clear";
-import {help as genProjectHelp} from "./genProject";
-import {help as discourseHelp} from "./discourse";
-
 const help: Command = async (args, std) => {
   if (args.length === 0) {
     usage(std.out);
@@ -19,12 +12,6 @@ const help: Command = async (args, std) => {
   const command = args[0];
   const subHelps: {[string]: Command} = {
     help: metaHelp,
-    load: loadHelp,
-    scores: scoresHelp,
-    output: outputHelp,
-    clear: clearHelp,
-    "gen-project": genProjectHelp,
-    discourse: discourseHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);
@@ -43,12 +30,6 @@ function usage(print: (string) => void): void {
            sourcecred [--version] [--help]
 
     Commands:
-      load          load repository data into SourceCred
-      clear         clear SoucrceCred data
-      scores        print SourceCred scores to stdout
-      output        print SourceCred data output to stdout
-      gen-project   print a SourceCred project config to stdout
-      discourse     load a Discourse server into SourceCred
       help          show this help message
 
     Use 'sourcecred help COMMAND' for help about an individual command.
