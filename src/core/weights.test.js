@@ -81,8 +81,7 @@ describe("core/weights", () => {
           edgeWeights: {},
         }
       );
-      // Any cast due to #1875
-      expect(Weights.parser.parseOrThrow((json: any))).toEqual(Weights.empty());
+      expect(Weights.parser.parseOrThrow(json)).toEqual(Weights.empty());
     });
   });
 
