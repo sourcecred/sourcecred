@@ -40,11 +40,7 @@ async function makeConfig(
     },
     devServer: {
       inline: false,
-<<<<<<< HEAD
       before: (app /*: ExpressApp<ExpressRequest, ExpressResponse> */) => {
-        const apiRoot = "/api/v1/data";
-=======
-      before: (app /*: ExpressApp */) => {
         let developmentInstancePath /*: ?string */ =
           process.env["SOURCECRED_DEV_INSTANCE"];
         const argv = process.argv;
@@ -73,7 +69,6 @@ async function makeConfig(
         const serveConfig = (_unused_req, res /*: ExpressResponse */) => {
           res.status(200).send(configContents);
         };
->>>>>>> e744b2bd4a789f77574d37489bc7644ad1e1b667
         const rejectCache = (_unused_req, res /*: ExpressResponse */) => {
           res.status(400).send("Bad Request: Cache unavailable at runtime\n");
         };
