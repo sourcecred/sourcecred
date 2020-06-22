@@ -4,6 +4,7 @@ import stringify from "json-stable-stringify";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {type Weights as WeightsT} from "./weights";
 import * as Weights from "./weights";
+import {toCompat} from "../util/compat";
 
 describe("core/weights", () => {
   it("copy makes a copy", () => {
@@ -70,6 +71,21 @@ describe("core/weights", () => {
       expect(weights).toEqual(Weights.fromJSON(json));
     });
   });
+
+  describe("parser", () => {
+    it("works for the 0_2_0 format", () => {
+      const json: Weights.WeightsJSON_0_2_0 = toCompat(
+        {type: "sourcecred/weights", version: "0.2.0"},
+        {
+          nodeWeights: {},
+          edgeWeights: {},
+        }
+      );
+      // Any cast due to #1875
+      expect(Weights.parser.parseOrThrow((json: any))).toEqual(Weights.empty());
+    });
+  });
+
   describe("merge", () => {
     function simpleWeights(
       nodeWeights: [string, number][],
