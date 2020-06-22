@@ -9,10 +9,6 @@ flow-typed
 [lints]
 
 [options]
-<<<<<<< HEAD
-=======
-suppress_comment=\\(.\\|\n\\)*\\$FlowExpectedError
->>>>>>> 61d6d22c2f9e1b6675aae6f84e82b5614ff008ba
 include_warnings=true
 
 [strict]
