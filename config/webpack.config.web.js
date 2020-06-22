@@ -10,6 +10,7 @@ import type {
 const path = require("path");
 const fs = require("fs-extra");
 const webpack = require("webpack");
+
 const RemoveBuildDirectoryPlugin = require("./RemoveBuildDirectoryPlugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const ManifestPlugin = require("webpack-manifest-plugin");
@@ -165,6 +166,10 @@ async function makeConfig(
           // match the requirements. When no loader matches it will fall
           // back to the "file" loader at the end of the loader list.
           oneOf: [
+            {
+              test: [/@testing-library\/dom/, /@testing-library\/react/],
+              use: "null-loader",
+            },
             // "url" loader works just like "file" loader but it also embeds
             // assets smaller than specified size as data URLs to avoid requests.
             {
