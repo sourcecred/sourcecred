@@ -6,7 +6,7 @@ import {join as pathJoin} from "path";
 
 import fetchGithubRepo, {fetchGithubRepoFromCache} from "./fetchGithubRepo";
 import type {CacheProvider} from "../../backend/cache";
-import type {CliPlugin, PluginDirectoryContext} from "../../cli2/cliPlugin";
+import type {CliPlugin, PluginDirectoryContext} from "../../cli/cliPlugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {ReferenceDetector} from "../../core/references/referenceDetector";
 import type {WeightedGraph} from "../../core/weightedGraph";

@@ -11,7 +11,7 @@ jest.spyOn(console, "error").mockImplementation(() => {});
 const logMock: JestMockFn<any, void> = console.log;
 const errorMock: JestMockFn<any, void> = console.error;
 
-describe("cli2/main", () => {
+describe("cli/main", () => {
   beforeEach(() => {
     sourcecredMock.mockReset();
     logMock.mockClear();
