@@ -165,6 +165,5 @@ export function toJSON(weights: Weights): WeightsJSON {
 }
 
 export function fromJSON(json: WeightsJSON) {
-  // Any cast due to #1875
-  return parser.parseOrThrow((json: any));
+  return parser.parseOrThrow(json);
 }
