@@ -403,6 +403,16 @@ export function tuple<T: Iterable<Parser<mixed>>>(
   });
 }
 
+// Parser combinator for a dictionary whose keys are arbitrary strings.
+type PDictStringKey = <V>(Parser<V>) => Parser<{|[string]: V|}>;
+// Parser combinator for a dictionary whose keys are a specified subtype
+// of string.
+type PDictCustomKey = <V, K: string>(
+  Parser<V>,
+  Parser<K>
+) => Parser<{|[K]: V|}>;
+type PDict = PDictStringKey & PDictCustomKey;
+
 // Create a parser for objects with arbitrary string keys and
 // homogeneous values. For instance, a set of package versions:
 //
@@ -413,20 +423,42 @@ export function tuple<T: Iterable<Parser<mixed>>>(
 //    C.dict(C.fmap(C.string, (s) => SemVer.parse(s)))
 //
 // Objects may have any number of entries, including zero.
-export function dict<V>(valueParser: Parser<V>): Parser<{|[string]: V|}> {
+//
+// An optional second argument may be passed to refine the keys to a
+// subtype of `string`, such as an opaque subtype (`NodeAddressT`) or a
+// string enum (`"ONE" | "TWO"`). Fails if the key parser gives the same
+// output for two distinct keys.
+export const dict: PDict = (function dict<V, K: string>(
+  valueParser,
+  keyParser: Parser<K> = (string: any) // safe when called as `PDict`
+): Parser<{[K]: V}> {
   return new Parser((x) => {
     if (typeof x !== "object" || Array.isArray(x) || x == null) {
       return failure("expected object, got " + typename(x));
     }
-    const result: {|[string]: V|} = ({}: any);
-    for (const key of Object.keys(x)) {
-      const raw = x[key];
-      const parsed = valueParser.parse(raw);
-      if (!parsed.ok) {
-        return failure(`key ${JSON.stringify(key)}: ${parsed.err}`);
+    const rawKeys: Map<K, string> = new Map();
+    const result: {|[K]: V|} = ({}: any);
+    for (const rawKey of Object.keys(x)) {
+      const parsedKey = keyParser.parse(rawKey);
+      if (!parsedKey.ok) {
+        return failure(`key ${JSON.stringify(rawKey)}: ${parsedKey.err}`);
       }
-      result[key] = parsed.value;
+      const oldRawKey = rawKeys.get(parsedKey.value);
+      if (oldRawKey != null) {
+        const s = JSON.stringify;
+        return failure(
+          `conflicting keys ${s(oldRawKey)} and ${s(rawKey)} ` +
+            `both have logical key ${s(parsedKey.value)}`
+        );
+      }
+      rawKeys.set(parsedKey.value, rawKey);
+      const rawValue = x[rawKey];
+      const parsedValue = valueParser.parse(rawValue);
+      if (!parsedValue.ok) {
+        return failure(`value ${JSON.stringify(rawKey)}: ${parsedValue.err}`);
+      }
+      result[parsedKey.value] = parsedValue.value;
     }
     return success(result);
   });
-}
+}: any);

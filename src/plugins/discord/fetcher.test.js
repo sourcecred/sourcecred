@@ -7,9 +7,9 @@ import {
   type Reaction,
   type Message,
   type GuildMember,
-  type Snowflake,
   type Emoji,
 } from "./models";
+import {testChannel} from "./testUtils";
 
 /**
  * Note: the 'any' type signature is assigned to server response objects
@@ -50,20 +50,14 @@ describe("plugins/discord/fetcher", () => {
     });
 
     it("handles response", async () => {
-      const testChannel = (id: string): any => ({
+      const testChannelResp = (id: string): any => ({
         id: id,
         name: "testChannelName",
         type: 0,
       });
 
-      const testChannelObj = (id: Snowflake): Channel => ({
-        id: id,
-        name: "testChannelName",
-        type: "GUILD_TEXT",
-      });
-
-      const response: any[] = [testChannel("1")];
-      const expected: Channel[] = [testChannelObj("1")];
+      const response: any[] = [testChannelResp("1")];
+      const expected: Channel[] = [testChannel("1")];
       const fetch = jest.fn(() => Promise.resolve(response));
       const fetcher = new Fetcher(fetch, defaultOptions());
       const data = await fetcher.channels("0");

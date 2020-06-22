@@ -21,6 +21,13 @@ describe("util/compat", () => {
     return {dataV1, dataV2, compatV1, compatV2};
   };
 
+  it("known issue: Compatibles are not JsonObjects", () => {
+    // See: https://github.com/sourcecred/sourcecred/issues/1875
+    const compatible = toCompat({type: "example", version: "1"}, {});
+    // $ExpectFlowError
+    const _unused_example: C.JsonObject = compatible;
+  });
+
   it("toCompat doesn't fails on primitives", () => {
     expect(
       fromCompat({type, version: v1}, toCompat({type, version: v1}, 3))

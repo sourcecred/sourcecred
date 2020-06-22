@@ -13,7 +13,7 @@ const EMPTY_ENTRY_SYMBOL = Symbol("EMPTY");
 
 type Entry<V> = {|+map: RecursiveMap<V>, value: V | typeof EMPTY_ENTRY_SYMBOL|};
 type RecursiveMap<V> = Map<string, Entry<V>>;
-class BaseTrie<K, V> {
+class BaseTrie<K: string, V> {
   addressModule: AddressModule<K>;
   entry: Entry<V>;
 

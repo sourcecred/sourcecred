@@ -582,6 +582,11 @@ describe("src/util/combo", () => {
 
   describe("dict", () => {
     const makeParser = (): C.Parser<{|[string]: number|}> => C.dict(C.number);
+    it("is type-safe", () => {
+      // when no key parser is given, key type must be string
+      // $ExpectFlowError
+      (C.dict(C.string): C.Parser<{["hmm"]: string}>);
+    });
     it("rejects null", () => {
       const p = makeParser();
       const thunk = () => p.parseOrThrow(null);
@@ -608,7 +613,44 @@ describe("src/util/combo", () => {
     it("rejects an object with bad values", () => {
       const p = makeParser();
       const thunk = () => p.parseOrThrow({one: "two?"});
-      expect(thunk).toThrow('key "one": expected number, got string');
+      expect(thunk).toThrow('value "one": expected number, got string');
+    });
+    describe("with custom key parser", () => {
+      type Color = "RED" | "GREEN" | "BLUE";
+      const color: C.Parser<Color> = C.fmap(C.string, (x) => {
+        x = x.toUpperCase();
+        if (x === "RED" || x === "GREEN" || x === "BLUE") {
+          return x;
+        }
+        throw new Error(`bad color: ${x}`);
+      });
+      it("accepts an object", () => {
+        const p: C.Parser<{[Color]: number}> = C.dict(C.number, color);
+        const input = {red: 1, green: 2};
+        expect(p.parseOrThrow(input)).toEqual({RED: 1, GREEN: 2});
+      });
+      it("rejects unparseable keys", () => {
+        const p: C.Parser<{[Color]: number}> = C.dict(C.number, color);
+        const input = {yellow: 777};
+        const thunk = () => p.parseOrThrow(input);
+        expect(thunk).toThrow('key "yellow": bad color: YELLOW');
+      });
+      it("rejects conflicting keys", () => {
+        const p: C.Parser<{[Color]: number}> = C.dict(C.number, color);
+        const input = {rEd: 1, ReD: 2};
+        const thunk = () => p.parseOrThrow(input);
+        expect(thunk).toThrow(
+          'conflicting keys "rEd" and "ReD" both have logical key "RED"'
+        );
+      });
+      it("is type-safe", () => {
+        // key type must be string subtype
+        const asciiNumber: C.Parser<number> = C.fmap(C.string, (x) =>
+          parseInt(x, 10)
+        );
+        // $ExpectFlowError
+        C.dict(C.boolean, asciiNumber);
+      });
     });
   });
 });
