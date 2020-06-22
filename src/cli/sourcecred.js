@@ -1,18 +1,12 @@
 // @flow
-// Implementation of the root `sourcecred` command.
 
 import type {Command} from "./command";
-
 import {VERSION_SHORT} from "../core/version";
 
-import help from "./help";
 import load from "./load";
-import scores from "./scores";
-import output from "./output";
-import clear from "./clear";
-import genProject from "./genProject";
-import discourse from "./discourse";
-import discord from "./discord";
+import graph from "./graph";
+import score from "./score";
+import help from "./help";
 
 const sourcecred: Command = async (args, std) => {
   if (args.length === 0) {
@@ -28,18 +22,10 @@ const sourcecred: Command = async (args, std) => {
       return help(args.slice(1), std);
     case "load":
       return load(args.slice(1), std);
-    case "clear":
-      return clear(args.slice(1), std);
-    case "scores":
-      return scores(args.slice(1), std);
-    case "output":
-      return output(args.slice(1), std);
-    case "gen-project":
-      return genProject(args.slice(1), std);
-    case "discord":
-      return discord(args.slice(1), std);
-    case "discourse":
-      return discourse(args.slice(1), std);
+    case "graph":
+      return graph(args.slice(1), std);
+    case "score":
+      return score(args.slice(1), std);
     default:
       std.err("fatal: unknown command: " + JSON.stringify(args[0]));
       std.err("fatal: run 'sourcecred help' for commands and usage");

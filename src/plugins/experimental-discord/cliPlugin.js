@@ -2,7 +2,7 @@
 
 import Database from "better-sqlite3";
 
-import type {CliPlugin, PluginDirectoryContext} from "../../cli2/cliPlugin";
+import type {CliPlugin, PluginDirectoryContext} from "../../cli/cliPlugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {parseConfig, type DiscordConfig, type DiscordToken} from "./config";
 import {declaration} from "./declaration";

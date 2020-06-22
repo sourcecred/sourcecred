@@ -1,110 +1,70 @@
 // @flow
 
-import path from "path";
+import {loadJson, loadJsonWithDefault} from "./common";
 import tmp from "tmp";
 import fs from "fs-extra";
-import * as Weights from "../core/weights";
-import {NodeAddress} from "../core/graph";
-import {validateToken} from "../plugins/github/token";
-
-import {
-  defaultPlugins,
-  defaultSourcecredDirectory,
-  sourcecredDirectory,
-  githubToken,
-  loadWeights,
-  initiativesDirectory,
-} from "./common";
+import * as C from "../util/combo";
+import {join as pathJoin} from "path";
 
 describe("cli/common", () => {
-  const exampleGithubToken = validateToken("0".repeat(40));
-  const exampleInitiativesDirectory = path.join(__dirname, "initiatives");
-
-  beforeEach(() => {
-    jest
-      .spyOn(require("os"), "tmpdir")
-      .mockReturnValue(path.join("/", "your", "tmpdir"));
-  });
-
-  describe("defaultPlugins", () => {
-    it("is an array including the GitHub plugin name", () => {
-      expect(defaultPlugins).toEqual(expect.arrayContaining(["github"]));
+  function tmpWithContents(contents: mixed) {
+    const name = tmp.tmpNameSync();
+    fs.writeFileSync(name, JSON.stringify(contents));
+    return name;
+  }
+  describe("loadJson / loadJsonWithDefault", () => {
+    const badPath = () => pathJoin(tmp.dirSync().name, "not-a-real-path");
+    const fooParser = C.object({foo: C.number});
+    const fooInstance = Object.freeze({foo: 42});
+    const fooDefault = () => ({foo: 1337});
+    const barInstance = Object.freeze({bar: "1337"});
+    it("loadJson works when valid file is present", async () => {
+      const f = tmpWithContents(fooInstance);
+      expect(await loadJson(f, fooParser)).toEqual(fooInstance);
     });
-  });
-
-  describe("defaultSourcecredDirectory", () => {
-    it("gives a file under the OS's temporary directory", () => {
-      expect(defaultSourcecredDirectory()).toEqual(
-        path.join("/", "your", "tmpdir", "sourcecred")
+    it("loadJson errors if the path does not exist", async () => {
+      const fail = async () => await loadJson(badPath(), fooParser);
+      await expect(fail).rejects.toThrow("ENOENT");
+    });
+    it("loadJson errors if the combo parse fails", async () => {
+      const f = tmpWithContents(barInstance);
+      const fail = async () => await loadJson(f, fooParser);
+      await expect(fail).rejects.toThrow("missing key");
+    });
+    it("loadJson errors if JSON.parse fails", async () => {
+      const f = tmp.tmpNameSync();
+      fs.writeFileSync(f, "zzz");
+      const fail = async () => await loadJson(f, C.raw);
+      await expect(fail).rejects.toThrow();
+    });
+    it("loadJsonWithDefault works when valid file is present", async () => {
+      const f = tmpWithContents(fooInstance);
+      expect(await loadJsonWithDefault(f, fooParser, fooDefault)).toEqual(
+        fooInstance
       );
     });
-  });
-
-  describe("sourcecredDirectory", () => {
-    it("uses the environment variable when available", () => {
-      const dir = path.join("/", "my", "sourcecred");
-      process.env.SOURCECRED_DIRECTORY = dir;
-      expect(sourcecredDirectory()).toEqual(dir);
+    it("loadJsonWithDefault loads default if file not present", async () => {
+      expect(
+        await loadJsonWithDefault(badPath(), fooParser, fooDefault)
+      ).toEqual(fooDefault());
     });
-    it("uses the default directory if no environment variable is set", () => {
-      delete process.env.SOURCECRED_DIRECTORY;
-      expect(sourcecredDirectory()).toEqual(
-        path.join("/", "your", "tmpdir", "sourcecred")
-      );
+    it("loadJsonWithDefault errors if parse fails", async () => {
+      const f = tmpWithContents(barInstance);
+      const fail = async () =>
+        await loadJsonWithDefault(f, fooParser, fooDefault);
+      await expect(fail).rejects.toThrow("missing key");
     });
-  });
-
-  describe("githubToken", () => {
-    it("uses the environment variable when available", () => {
-      process.env.SOURCECRED_GITHUB_TOKEN = exampleGithubToken;
-      expect(githubToken()).toEqual(exampleGithubToken);
+    it("loadJsonWithDefault errors if JSON.parse fails", async () => {
+      const f = tmp.tmpNameSync();
+      fs.writeFileSync(f, "zzz");
+      const fail = async () => await loadJsonWithDefault(f, C.raw, fooDefault);
+      await expect(fail).rejects.toThrow();
     });
-    it("returns `null` if the environment variable is not set", () => {
-      delete process.env.SOURCECRED_GITHUB_TOKEN;
-      expect(githubToken()).toBe(null);
-    });
-  });
-
-  describe("initiativesDirectory", () => {
-    it("uses the environment variable when available", () => {
-      process.env.SOURCECRED_INITIATIVES_DIRECTORY = exampleInitiativesDirectory;
-      expect(initiativesDirectory()).toEqual(exampleInitiativesDirectory);
-    });
-    it("returns `null` if the environment variable is not set", () => {
-      delete process.env.SOURCECRED_INITIATIVES_DIRECTORY;
-      expect(initiativesDirectory()).toBe(null);
-    });
-  });
-
-  describe("loadWeights", () => {
-    function tmpWithContents(contents: mixed) {
-      const name = tmp.tmpNameSync();
-      fs.writeFileSync(name, JSON.stringify(contents));
-      return name;
-    }
-    it("works in a simple success case", async () => {
-      const weights = Weights.empty();
-      // Make a modification, just to be sure we aren't always loading the
-      // default weights.
-      weights.nodeWeights.set(NodeAddress.empty, 3);
-      const weightsJSON = Weights.toJSON(weights);
-      const file = tmpWithContents(weightsJSON);
-      const weights_ = await loadWeights(file);
-      expect(weights).toEqual(weights_);
-    });
-    it("rejects if the file is not a valid weights file", () => {
-      const file = tmpWithContents(1234);
-      expect.assertions(1);
-      return loadWeights(file).catch((e) =>
-        expect(e.message).toMatch("provided weights file is invalid:")
-      );
-    });
-    it("rejects if the file does not exist", () => {
-      const file = tmp.tmpNameSync();
-      expect.assertions(1);
-      return loadWeights(file).catch((e) =>
-        expect(e.message).toMatch("Could not find the weights file")
-      );
+    it("loadJsonWithDefault errors if file loading fails for a non-ENOENT reason", async () => {
+      const directoryPath = tmp.dirSync().name;
+      const fail = async () =>
+        await loadJsonWithDefault(directoryPath, fooParser, fooDefault);
+      await expect(fail).rejects.toThrow("EISDIR");
     });
   });
 });
