@@ -22,7 +22,10 @@ module.exports = {
   ],
   rules: {
     "prefer-const": ["warn"],
-    camelcase: ["error", {properties: "never", allow: ["^_unused_.*"]}],
+    camelcase: [
+      "error",
+      {properties: "never", allow: ["^_unused_.*", "(_\\d+)+"]},
+    ],
     eqeqeq: ["error", "always", {null: "ignore"}],
     "no-unused-vars": [
       "warn",
