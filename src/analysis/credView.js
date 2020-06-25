@@ -4,6 +4,7 @@ import {type Weights} from "../core/weights";
 import {type CredResult} from "./credResult";
 import {type TimelineCredParameters} from "./timeline/params";
 import {type PluginDeclarations} from "./pluginDeclaration";
+import {type NodeType, type EdgeType} from "./types";
 
 import {get as nullGet} from "../util/null";
 import {type EdgeWeight} from "../core/weights";
@@ -14,6 +15,7 @@ import {
   type EdgeWeightEvaluator,
   edgeWeightEvaluator,
 } from "../core/algorithm/weightEvaluator";
+import {NodeTrie, EdgeTrie} from "../core/trie";
 import {
   Graph,
   type NodeAddressT,
@@ -39,6 +41,7 @@ export type CredNode = {|
   +timestamp: TimestampMs | null,
   +credSummary: NodeCredSummary,
   +credOverTime: NodeCredOverTime | null,
+  +type: NodeType | null,
 |};
 
 export type CredEdge = {|
@@ -49,6 +52,7 @@ export type CredEdge = {|
   +credSummary: EdgeCredSummary,
   +credOverTime: EdgeCredOverTime | null,
   +timestamp: TimestampMs,
+  +type: EdgeType | null,
 |};
 
 export type EdgeFlow = {|
@@ -99,6 +103,8 @@ export class CredView {
   +_edgeAddressToIndex: Map<EdgeAddressT, number>;
   +_nodeEvaluator: NodeWeightEvaluator;
   +_edgeEvaluator: EdgeWeightEvaluator;
+  +_nodeTypeTrie: NodeTrie<NodeType>;
+  +_edgeTypeTrie: EdgeTrie<EdgeType>;
 
   constructor(result: CredResult) {
     this._credResult = result;
@@ -109,6 +115,16 @@ export class CredView {
     this._edgeAddressToIndex = new Map(edges.map((n, i) => [n.address, i]));
     this._nodeEvaluator = nodeWeightEvaluator(weights);
     this._edgeEvaluator = edgeWeightEvaluator(weights);
+    const nodeTypes = [].concat(...result.plugins.map((p) => p.nodeTypes));
+    this._nodeTypeTrie = new NodeTrie();
+    for (const t of nodeTypes) {
+      this._nodeTypeTrie.add(t.prefix, t);
+    }
+    const edgeTypes = [].concat(...result.plugins.map((p) => p.edgeTypes));
+    this._edgeTypeTrie = new EdgeTrie();
+    for (const t of edgeTypes) {
+      this._edgeTypeTrie.add(t.prefix, t);
+    }
   }
 
   graph(): Graph {
@@ -136,6 +152,7 @@ export class CredView {
     const credSummary = this._credResult.credData.nodeSummaries[idx];
     const credOverTime = this._credResult.credData.nodeOverTime[idx];
     const minted = this._nodeEvaluator(n.address);
+    const type = this._nodeTypeTrie.getLast(n.address);
     return {
       timestamp: n.timestampMs,
       description: n.description,
@@ -143,6 +160,7 @@ export class CredView {
       credSummary,
       credOverTime,
       minted,
+      type: type ? type : null,
     };
   }
   node(a: NodeAddressT): ?CredNode {
@@ -173,6 +191,7 @@ export class CredView {
     const credSummary = this._credResult.credData.edgeSummaries[idx];
     const credOverTime = this._credResult.credData.edgeOverTime[idx];
     const rawWeight = this._edgeEvaluator(e.address);
+    const type = this._edgeTypeTrie.getLast(e.address);
     return {
       timestamp: e.timestampMs,
       address: e.address,
@@ -181,6 +200,7 @@ export class CredView {
       credSummary,
       credOverTime,
       rawWeight,
+      type: type ? type : null,
     };
   }
   edge(a: EdgeAddressT): ?CredEdge {
