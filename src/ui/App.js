@@ -1,24 +1,65 @@
 // @flow
 
 import React from "react";
+import {fromJSON as credResultFromJSON} from "../analysis/credResult";
+import {CredView} from "../analysis/credView";
+import {Explorer} from "./Explorer.js";
 
-async function loadAndReport(path) {
-  const response = await fetch(path);
+export type LoadResult = LoadSuccess | LoadFailure;
+export type LoadSuccess = {|
+  +type: "SUCCESS",
+  +credView: CredView,
+|};
+export type LoadFailure = {|+type: "FAILURE", +error: any|};
+
+export async function load(): Promise<LoadResult> {
+  const response = await fetch("output/credResult.json");
   if (!response.ok) {
-    console.error(path, response);
+    console.error(response);
+    return {type: "FAILURE", error: response.status};
   }
-  const json = await response.json();
-  console.log(path, json);
+  try {
+    const json = await response.json();
+    const credResult = credResultFromJSON(json);
+    const credView = new CredView(credResult);
+    return {type: "SUCCESS", credView};
+  } catch (e) {
+    console.error(e);
+    return {type: "FAILURE", error: e};
+  }
 }
 
-export default class App extends React.Component<{||}> {
+export type Props = {||};
+export type State = {|
+  loadResult: LoadResult | null,
+|};
+
+export default class App extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {loadResult: null};
+  }
   async componentDidMount() {
-    loadAndReport("sourcecred.json");
-    loadAndReport("output/credResult.json");
-    loadAndReport("config/sourcecred/discourse/config.json");
+    this.setState({loadResult: await load()});
   }
 
   render() {
-    return <h1>Under Construction</h1>;
+    const {loadResult} = this.state;
+    if (loadResult == null) {
+      return <h1>Loading...</h1>;
+    }
+    switch (loadResult.type) {
+      case "FAILURE":
+        return (
+          <div>
+            <h1>Load Failure</h1>
+            <p>Check console for details.</p>
+          </div>
+        );
+      case "SUCCESS":
+        return <Explorer view={loadResult.credView} />;
+      default:
+        throw new Error((loadResult.type: empty));
+    }
   }
 }
