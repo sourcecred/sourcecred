@@ -3,7 +3,6 @@
 import {type Weights} from "../core/weights";
 import {type CredResult} from "./credResult";
 import {type TimelineCredParameters} from "./timeline/params";
-import {Graph} from "../core/graph";
 import {type PluginDeclarations} from "./pluginDeclaration";
 
 import {get as nullGet} from "../util/null";
@@ -16,6 +15,7 @@ import {
   edgeWeightEvaluator,
 } from "../core/algorithm/weightEvaluator";
 import {
+  Graph,
   type NodeAddressT,
   type EdgeAddressT,
   type Node as GraphNode,
@@ -155,6 +155,15 @@ export class CredView {
   nodes(options?: {|+prefix: NodeAddressT|}): $ReadOnlyArray<CredNode> {
     const graphNodes = Array.from(this.graph().nodes(options));
     return graphNodes.map((x) => this._promoteNode(x));
+  }
+  userNodes(): $ReadOnlyArray<CredNode> {
+    const userPrefixes = []
+      .concat(...this.plugins().map((x) => x.userTypes))
+      .map((x) => x.prefix);
+    const nodes = this.nodes();
+    return nodes.filter((n) =>
+      userPrefixes.some((p) => NodeAddress.hasPrefix(n.address, p))
+    );
   }
 
   _promoteEdge(e: GraphEdge): CredEdge {
