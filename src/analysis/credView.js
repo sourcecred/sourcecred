@@ -20,6 +20,10 @@ import {
   type EdgeAddressT,
   type Node as GraphNode,
   type Edge as GraphEdge,
+  type DirectionT,
+  Direction,
+  NodeAddress,
+  EdgeAddress,
 } from "../core/graph";
 import type {
   NodeCredSummary,
@@ -46,6 +50,30 @@ export type CredEdge = {|
   +credOverTime: EdgeCredOverTime | null,
   +timestamp: TimestampMs,
 |};
+
+export type EdgeFlow = {|
+  +type: "EDGE",
+  +edge: CredEdge,
+  +neighbor: CredNode,
+  +flow: number,
+|};
+
+export type ReturnFlow = {|
+  +type: "RADIATE",
+  +flow: number,
+|};
+
+export type MintFlow = {|
+  +type: "MINT",
+  +flow: number,
+|};
+
+export type SyntheticLoopFlow = {|
+  +type: "SYNTHETIC_LOOP",
+  +flow: number,
+|};
+
+export type Flow = EdgeFlow | MintFlow | ReturnFlow | SyntheticLoopFlow;
 
 export type EdgesOptions = {|
   // An edge address prefix. Only show edges whose addresses match this prefix.
@@ -159,4 +187,55 @@ export class CredView {
     );
     return graphEdges.map((x) => this._promoteEdge(x));
   }
+
+  inflows(addr: NodeAddressT): ?$ReadOnlyArray<Flow> {
+    return this._flows(addr, Direction.IN);
+  }
+
+  outflows(addr: NodeAddressT): ?$ReadOnlyArray<Flow> {
+    return this._flows(addr, Direction.OUT);
+  }
+
+  _flows(addr: NodeAddressT, direction: DirectionT): ?$ReadOnlyArray<Flow> {
+    const credNode = this.node(addr);
+    if (credNode == null) {
+      return undefined;
+    }
+    const {alpha} = this.params();
+    const flows: Flow[] = [];
+    const {seedFlow, syntheticLoopFlow, cred} = credNode.credSummary;
+    if (syntheticLoopFlow > 0) {
+      flows.push({type: "SYNTHETIC_LOOP", flow: syntheticLoopFlow});
+    }
+    if (direction === Direction.IN) {
+      if (seedFlow > 0) {
+        flows.push({type: "MINT", flow: seedFlow});
+      }
+    } else {
+      flows.push({type: "RADIATE", flow: cred * alpha});
+    }
+
+    for (const {edge, node} of this.graph().neighbors(addr, {
+      direction: Direction.ANY,
+      nodePrefix: NodeAddress.empty,
+      edgePrefix: EdgeAddress.empty,
+    })) {
+      const credEdge = nullGet(this.edge(edge.address));
+      const credNeighbor = nullGet(this.node(node.address));
+      const {forwardFlow, backwardFlow} = credEdge.credSummary;
+      const flowDirection = xor(addr === edge.src, direction === Direction.IN);
+      const edgeFlow: EdgeFlow = {
+        type: "EDGE",
+        edge: credEdge,
+        neighbor: credNeighbor,
+        flow: flowDirection ? forwardFlow : backwardFlow,
+      };
+      flows.push(edgeFlow);
+    }
+    return flows;
+  }
+}
+
+function xor(a: boolean, b: boolean): boolean {
+  return (a && !b) || (!a && b);
 }
