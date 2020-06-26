@@ -4,7 +4,6 @@ import tmp from "tmp";
 import path from "path";
 import fs from "fs-extra";
 import {type Compatible, toCompat, fromCompat} from "../util/compat";
-import {createProject, projectToJSON, projectFromJSON} from "../core/project";
 import {Graph} from "../core/graph";
 import * as WeightedGraph from "../core/weightedGraph";
 import {node as graphNode} from "../core/graphTestUtil";
@@ -188,22 +187,6 @@ describe("src/backend/compatIO", () => {
 
       // Then
       expect(actualData).toEqual(data);
-    });
-
-    // Note: this is a smoke test and can be safely removed if needed.
-    it("should work with Project Compatible type", async () => {
-      // Given
-      const filePath = path.join(tmp.dirSync().name, "project.json");
-      const project = createProject({id: "example-project"});
-
-      // When
-      const writer = compatWriter(projectToJSON);
-      const reader = compatReader(projectFromJSON);
-      await writer(filePath, project);
-      const actual = await reader(filePath);
-
-      // Then
-      expect(actual).toEqual(project);
     });
 
     // Note: this is a smoke test and can be safely removed if needed.
