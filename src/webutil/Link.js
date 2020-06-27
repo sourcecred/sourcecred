@@ -1,7 +1,7 @@
 // @flow
 
 import React, {Component} from "react";
-import {Link as RouterLink} from "react-router";
+import {Link as RouterLink} from "react-router-dom";
 import {StyleSheet, css} from "aphrodite/no-important";
 
 import Colors from "./Colors";
