@@ -6,7 +6,7 @@ import {mount, render} from "enzyme";
 
 import normalize from "../util/pathNormalize";
 import type {History /* actually `any` */} from "history";
-import createMemoryHistory from "history/lib/createMemoryHistory";
+import createMemoryHistory from "history/createMemoryHistory";
 import createRelativeHistory from "./createRelativeHistory";
 
 require("./testUtil").configureEnzyme();
