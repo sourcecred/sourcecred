@@ -7,7 +7,7 @@ import {mount, render} from "enzyme";
 import {Assets} from "./assets";
 import withAssets from "./withAssets";
 
-import createMemoryHistory from "history/lib/createMemoryHistory";
+import createMemoryHistory from "history/createMemoryHistory";
 import createRelativeHistory from "./createRelativeHistory";
 
 require("./testUtil").configureEnzyme();
