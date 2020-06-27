@@ -89,7 +89,7 @@ export const InitiativeCreate = (scData: AppState) => (props: Object) => {
         />
         {/**/}
         <ArrayInput label="Contributions" source="contributions">
-          <SimpleFormIterator initialValues={{title: "poop"}}>
+          <SimpleFormIterator>
             <TextInput
               source="key"
               label="Contribution Key"

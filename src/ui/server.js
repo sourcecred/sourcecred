@@ -7,7 +7,7 @@ import {StaticRouter} from "react-router";
 
 import dedent from "../util/dedent";
 import {Assets, rootFromPath} from "../webutil/assets";
-import App from "./App";
+import Main from "./Main";
 
 export default function render(
   locals: {+path: string, +assets: {[string]: string}},
@@ -24,8 +24,8 @@ export default function render(
     const bundlePath = locals.assets["main"];
     const {html, css} = StyleSheetServer.renderStatic(() =>
       ReactDOMServer.renderToString(
-        <StaticRouter location="/" context={context}>
-          <App />
+        <StaticRouter location={path} context={context}>
+          <Main />
         </StaticRouter>
       )
     );

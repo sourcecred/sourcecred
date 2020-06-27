@@ -1,8 +1,8 @@
 // @flow
 
 import React from "react";
-import {fromJSON as credResultFromJSON} from "../analysis/credResult";
-import {CredView} from "../analysis/credView";
+import {fromJSON as credResultFromJSON} from "../../analysis/credResult";
+import {CredView} from "../../analysis/credView";
 import {Explorer} from "./Explorer.js";
 
 export type LoadResult = LoadSuccess | LoadFailure;
