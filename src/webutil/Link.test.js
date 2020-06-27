@@ -2,7 +2,7 @@
 import {StyleSheet} from "aphrodite/no-important";
 import {shallow} from "enzyme";
 import React from "react";
-import {Link as RouterLink} from "react-router";
+import {Link as RouterLink} from "react-router-dom";
 
 import Link from "./Link";
 
