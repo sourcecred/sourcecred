@@ -1,14 +1,20 @@
 // @flow
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App";
+import {BrowserRouter} from "react-router-dom";
+import Main from "./Main";
 
 const target = document.getElementById("root");
 if (target == null) {
   throw new Error("Unable to find root element!");
 }
 
-ReactDOM.hydrate(<App />, target);
+ReactDOM.hydrate(
+  <BrowserRouter>
+    <Main />
+  </BrowserRouter>,
+  target
+);
 
 // In Chrome, relative favicon URLs are recomputed at every pushState,
 // although other assets (like the `src` of an `img`) are not. We don't
