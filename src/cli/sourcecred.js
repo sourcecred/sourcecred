@@ -6,6 +6,7 @@ import {VERSION_SHORT} from "../core/version";
 import load from "./load";
 import graph from "./graph";
 import score from "./score";
+import site from "./site";
 import help from "./help";
 
 const sourcecred: Command = async (args, std) => {
@@ -26,6 +27,8 @@ const sourcecred: Command = async (args, std) => {
       return graph(args.slice(1), std);
     case "score":
       return score(args.slice(1), std);
+    case "site":
+      return site(args.slice(1), std);
     default:
       std.err("fatal: unknown command: " + JSON.stringify(args[0]));
       std.err("fatal: run 'sourcecred help' for commands and usage");
