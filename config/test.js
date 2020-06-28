@@ -145,7 +145,7 @@ function makeTasks(
         "yarn",
         "run",
         "--silent",
-        "backend",
+        "build:backend",
         "--output-path",
         backendOutput,
       ],
