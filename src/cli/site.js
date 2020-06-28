@@ -36,7 +36,7 @@ async function lnsf(src: string, dst: string): Promise<void> {
     }
   }
   await fs.unlink(dst);
-  return fs.symlink(src, dst);
+  await fs.symlink(src, dst);
 }
 
 export default siteCommand;
