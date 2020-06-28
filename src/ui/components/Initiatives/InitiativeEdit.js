@@ -17,11 +17,9 @@ import {
   dateFormatter,
   dateParser,
 } from "../../initiativeUtils";
+import {CredView} from "../../../analysis/credView";
 
-import {type AppState} from "../InitiativesEditor";
-
-export const InitiativeEdit = (scData: AppState) => (props: Object) => {
-  const initiatives = scData.activities;
+export const InitiativeEdit = (credView: CredView) => (props: Object) => {
   return (
     <Edit title="Edit Initiative" {...props}>
       <SimpleForm>
@@ -38,12 +36,11 @@ export const InitiativeEdit = (scData: AppState) => (props: Object) => {
         />
         <NumberInput label="Weight When Completed" source="weight.complete" />
         <BooleanInput label="Completed" source="completed" />
-        {/**/}
         <AutocompleteArrayInput
           source="champions"
           allowDuplicates={false}
           translateChoice={false}
-          choices={scData.users}
+          choices={credView.userNodes()}
           optionValue="address"
           optionText={getPlainDescFromMd}
           label="Champions"
@@ -53,7 +50,7 @@ export const InitiativeEdit = (scData: AppState) => (props: Object) => {
           source="dependencies"
           allowDuplicates={false}
           translateChoice={false}
-          choices={initiatives}
+          choices={credView.nodes()}
           optionValue="address"
           optionText={getPlainDescFromMd}
           label="Dependencies"
@@ -63,7 +60,7 @@ export const InitiativeEdit = (scData: AppState) => (props: Object) => {
           source="references"
           allowDuplicates={false}
           translateChoice={false}
-          choices={scData.activities}
+          choices={credView.nodes()}
           optionValue="address"
           optionText={getPlainDescFromMd}
           label="References"
@@ -90,7 +87,7 @@ export const InitiativeEdit = (scData: AppState) => (props: Object) => {
               source="contributors"
               allowDuplicates={false}
               translateChoice={false}
-              choices={scData.users}
+              choices={credView.userNodes()}
               optionValue="address"
               optionText={getPlainDescFromMd}
               label="Contributors"
