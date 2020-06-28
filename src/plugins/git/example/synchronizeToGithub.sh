@@ -7,7 +7,7 @@ main() {
         DRY_RUN=1
     fi
     cd "$(git rev-parse --show-toplevel)"
-    yarn backend
+    yarn build:backend
     printf '\n'
     printf 'Synchronizing: example-git\n'
     synchronize \
