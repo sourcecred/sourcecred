@@ -17,10 +17,9 @@ import {
   dateFormatter,
   dateParser,
 } from "../../initiativeUtils";
+import {CredView} from "../../../analysis/credView";
 
-import {type AppState} from "../InitiativesEditor";
-
-export const InitiativeCreate = (scData: AppState) => (props: Object) => {
+export const InitiativeCreate = (credView: CredView) => (props: Object) => {
   const defaultInitiativeValues = {
     id: uuid(),
     timestampMs: Date.now(),
@@ -31,8 +30,6 @@ export const InitiativeCreate = (scData: AppState) => (props: Object) => {
     weight: {incomplete: 0, complete: 0},
     completed: false,
   };
-  const initiatives = scData.activities;
-  console.log("props: ", props);
   return (
     <Create title="Create New Initiative" {...props}>
       <SimpleForm initialValues={defaultInitiativeValues}>
@@ -56,12 +53,11 @@ export const InitiativeCreate = (scData: AppState) => (props: Object) => {
         />
         <NumberInput label="Weight When Completed" source="weight.complete" />
         <BooleanInput label="Completed" source="completed" />
-        {/**/}
         <AutocompleteArrayInput
           source="champions"
           allowDuplicates={false}
           translateChoice={false}
-          choices={scData.users}
+          choices={credView.userNodes()}
           optionValue="address"
           optionText={getPlainDescFromMd}
           label="Champions"
@@ -71,7 +67,7 @@ export const InitiativeCreate = (scData: AppState) => (props: Object) => {
           source="dependencies"
           allowDuplicates={false}
           translateChoice={false}
-          choices={initiatives}
+          choices={credView.nodes()}
           optionValue="address"
           optionText={getPlainDescFromMd}
           label="Dependencies"
@@ -81,13 +77,12 @@ export const InitiativeCreate = (scData: AppState) => (props: Object) => {
           source="references"
           allowDuplicates={false}
           translateChoice={false}
-          choices={scData.activities}
+          choices={credView.nodes()}
           optionValue="address"
           optionText={getPlainDescFromMd}
           label="References"
           suggestionLimit={10}
         />
-        {/**/}
         <ArrayInput label="Contributions" source="contributions">
           <SimpleFormIterator>
             <TextInput
@@ -109,7 +104,7 @@ export const InitiativeCreate = (scData: AppState) => (props: Object) => {
               source="contributors"
               allowDuplicates={false}
               translateChoice={false}
-              choices={scData.users}
+              choices={credView.userNodes()}
               optionValue="address"
               optionText={getPlainDescFromMd}
               label="Contributors"
