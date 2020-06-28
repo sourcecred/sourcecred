@@ -51,7 +51,7 @@ You'll still need to create a GitHub token to use as an environment variable (sh
 git clone https://github.com/sourcecred/sourcecred.git
 cd sourcecred
 yarn install
-yarn backend
+yarn build
 export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 ```
 

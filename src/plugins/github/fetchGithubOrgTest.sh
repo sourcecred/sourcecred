@@ -12,7 +12,7 @@ usage() {
   printf '  -u|--updateSnapshot\n'
   printf '      Update the stored file instead of checking its contents\n'
   printf ' --[no-]build\n'
-  printf '      Whether to run "yarn backend" before the test.\n'
+  printf '      Whether to run "yarn build:backend" before the test.\n'
   printf '      Default is --build.\n'
   printf '  --help\n'
   printf '      Show this message\n'
@@ -20,7 +20,8 @@ usage() {
   printf 'Environment variables:'
   printf '  SOURCECRED_BIN\n'
   printf '      When using --no-build, directory containing the SourceCred\n'
-  printf '      executables (output of "yarn backend"). Default is ./bin.\n'
+  printf '      executables (output of "yarn build:backend").\n'
+  printf '      Default is ./bin.\n'
 }
 
 fetch() {
@@ -80,7 +81,7 @@ main() {
   done
   if [ -n "${BUILD}" ]; then
     unset BIN
-    yarn backend
+    yarn build:backend
   else
     export NODE_PATH="./node_modules${NODE_PATH:+:${NODE_PATH}}"
   fi
