@@ -9,7 +9,7 @@ import {assemblesEdgeType} from "../../plugins/demo/declaration";
 
 require("../../webutil/testUtil").configureEnzyme();
 
-describe("explorer/weights/EdgeTypeConfig", () => {
+describe("ui/weights/EdgeTypeConfig", () => {
   describe("EdgeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();

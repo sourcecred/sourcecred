@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`explorer/weights/EdgeTypeConfig EdgeWeightSlider renders the name along with some Greek characters 1`] = `
+exports[`ui/weights/EdgeTypeConfig EdgeWeightSlider renders the name along with some Greek characters 1`] = `
 <React.Fragment>
   <span
     style={
