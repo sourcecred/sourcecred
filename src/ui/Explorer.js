@@ -1,6 +1,7 @@
 // @flow
 
 import React, {type Node as ReactNode} from "react";
+import deepEqual from "lodash.isequal";
 import {StyleSheet, css} from "aphrodite/no-important";
 import Markdown from "react-markdown";
 import {format} from "d3-format";
@@ -17,21 +18,38 @@ import {line} from "d3-shape";
 import {type NodeAddressT} from "../core/graph";
 import {type PluginDeclaration} from "../analysis/pluginDeclaration";
 import * as NullUtil from "../util/null";
+import {type Weights, copy as weightsCopy} from "../core/weights";
+import {WeightConfig} from "./weights/WeightConfig";
+import {WeightsFileManager} from "./weights/WeightsFileManager";
+import {type TimelineCredParameters} from "../analysis/timeline/params";
 
 export type ExplorerProps = {|
-  +view: CredView,
+  +initialView: CredView,
 |};
 
 export type ExplorerState = {|
   // Whether to filter down to a particular type prefix.
   // If unset, shows all user-typed nodes
   filter: NodeAddressT | null,
+  weights: Weights,
+  params: TimelineCredParameters,
+  showWeightConfig: boolean,
+  view: CredView,
+  recalculating: boolean,
 |};
 
 export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
   constructor(props: ExplorerProps) {
     super(props);
-    this.state = {filter: null};
+    const view = props.initialView;
+    this.state = {
+      view,
+      filter: null,
+      weights: weightsCopy(view.weights()),
+      params: {...view.params()},
+      showWeightConfig: false,
+      recalculating: false,
+    };
   }
 
   // Renders the dropdown that lets the user select a type
@@ -66,34 +84,137 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           <option key={"All users"} value={""}>
             All users
           </option>
-          {this.props.view.plugins().map(optionGroup)}
+          {this.state.view.plugins().map(optionGroup)}
         </select>
       </label>
     );
   }
 
+  renderConfigurationRow() {
+    const {showWeightConfig, view, params, weights} = this.state;
+    const weightFileManager = (
+      <WeightsFileManager
+        weights={weights}
+        onWeightsChange={(weights: Weights) => {
+          this.setState({weights});
+        }}
+      />
+    );
+    const weightConfig = (
+      <WeightConfig
+        declarations={view.plugins()}
+        nodeWeights={weights.nodeWeights}
+        edgeWeights={weights.edgeWeights}
+        onNodeWeightChange={(prefix, weight) => {
+          this.setState(({weights}) => {
+            weights.nodeWeights.set(prefix, weight);
+            return {weights};
+          });
+        }}
+        onEdgeWeightChange={(prefix, weight) => {
+          this.setState(({weights}) => {
+            weights.edgeWeights.set(prefix, weight);
+            return {weights};
+          });
+        }}
+      />
+    );
+
+    const alphaSlider = (
+      <input
+        type="range"
+        min={0.05}
+        max={0.95}
+        step={0.05}
+        value={params.alpha}
+        onChange={(e) => {
+          const newParams = {
+            ...params,
+            alpha: e.target.valueAsNumber,
+          };
+          this.setState({params: newParams});
+        }}
+      />
+    );
+    const paramsUpToDate =
+      deepEqual(params, view.params()) && deepEqual(weights, view.weights());
+    const analyzeButton = (
+      <button
+        disabled={this.state.recalculating || paramsUpToDate}
+        onClick={() => this.analyzeCred()}
+      >
+        re-compute cred
+      </button>
+    );
+    return (
+      <div>
+        <div style={{marginTop: 30, display: "flex"}}>
+          <span style={{flexGrow: 1}} />
+          {this.renderFilterSelect()}
+          <span style={{flexGrow: 1}} />
+          <button
+            onClick={() => {
+              this.setState(({showWeightConfig}) => ({
+                showWeightConfig: !showWeightConfig,
+              }));
+            }}
+          >
+            {showWeightConfig
+              ? "Hide weight configuration"
+              : "Show weight configuration"}
+          </button>
+          {analyzeButton}
+        </div>
+        {showWeightConfig && (
+          <div style={{marginTop: 10}}>
+            <span>Upload/Download weights:</span>
+            {weightFileManager}
+            <span>α</span>
+            {alphaSlider}
+            <span>{format(".2f")(this.state.params.alpha)}</span>
+            {weightConfig}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  async analyzeCred() {
+    this.setState({recalculating: true});
+    const view = await this.state.view.recompute(
+      this.state.weights,
+      this.state.params
+    );
+    this.setState({view, recalculating: false});
+  }
+
   render() {
-    const {view} = this.props;
-    const {filter} = this.state;
+    const {filter, view, recalculating} = this.state;
     const nodes =
       filter == null ? view.userNodes() : view.nodes({prefix: filter});
     // TODO: Allow sorting/displaying only recent cred...
     const sortedNodes = sortBy(nodes, (n) => -n.credSummary.cred);
     const total = sum(nodes.map((n) => n.credSummary.cred));
     return (
-      <div>
+      <div style={{width: "1000px", margin: "0 auto"}}>
         <h1>Nodes: {view.nodes().length}</h1>
         <h1>Edges: {view.edges().length}</h1>
-        {this.renderFilterSelect()}
+        {this.renderConfigurationRow()}
+        {recalculating ? <h1>Recalculating...</h1> : ""}
         <table
-          style={{width: "1200px", margin: "0 auto", padding: "20px 10px"}}
+          style={{
+            width: "100%",
+            tableLayout: "fixed",
+            margin: "0 auto",
+            padding: "20px 10px",
+          }}
         >
           <thead>
             <tr>
-              <th style={{textAlign: "left"}}>Node</th>
-              <th style={{textAlign: "right"}}>Cred</th>
-              <th style={{textAlign: "right"}}>% Total</th>
-              <th style={{textAlign: "right"}}></th>
+              <th style={{textAlign: "left", width: "50%"}}>Node</th>
+              <th style={{textAlign: "right", width: "10%"}}>Cred</th>
+              <th style={{textAlign: "right", width: "10%"}}>% Total</th>
+              <th style={{textAlign: "right", width: "30%"}}></th>
             </tr>
           </thead>
           <tbody>
