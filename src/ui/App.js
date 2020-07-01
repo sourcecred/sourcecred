@@ -57,7 +57,7 @@ export default class App extends React.Component<Props, State> {
           </div>
         );
       case "SUCCESS":
-        return <Explorer view={loadResult.credView} />;
+        return <Explorer initialView={loadResult.credView} />;
       default:
         throw new Error((loadResult.type: empty));
     }
