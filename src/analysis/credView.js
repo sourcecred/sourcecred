@@ -1,13 +1,12 @@
 // @flow
 
-import {type Weights} from "../core/weights";
-import {type CredResult} from "./credResult";
+import {type Weights, type EdgeWeight} from "../core/weights";
+import {type CredResult, compute} from "./credResult";
 import {type TimelineCredParameters} from "./timeline/params";
 import {type PluginDeclarations} from "./pluginDeclaration";
 import {type NodeType, type EdgeType} from "./types";
 
 import {get as nullGet} from "../util/null";
-import {type EdgeWeight} from "../core/weights";
 import type {TimestampMs} from "../util/timestamp";
 import {
   type NodeWeightEvaluator,
@@ -27,6 +26,7 @@ import {
   NodeAddress,
   EdgeAddress,
 } from "../core/graph";
+import {overrideWeights} from "../core/weightedGraph";
 import type {
   NodeCredSummary,
   NodeCredOverTime,
@@ -262,6 +262,19 @@ export class CredView {
       flows.push(edgeFlow);
     }
     return flows;
+  }
+
+  /**
+   * Compute a new CredView, with new params and weights but using the
+   * graph from this CredView.
+   */
+  async recompute(
+    weights: Weights,
+    params: TimelineCredParameters
+  ): Promise<CredView> {
+    const wg = overrideWeights(this._credResult.weightedGraph, weights);
+    const credResult = await compute(wg, params, this.plugins());
+    return new CredView(credResult);
   }
 }
 
