@@ -15,7 +15,7 @@ import {
 
 require("../../webutil/testUtil").configureEnzyme();
 
-describe("explorer/weights/WeightSlider", () => {
+describe("ui/weights/WeightSlider", () => {
   describe("WeightSlider", () => {
     function example(weight: Weight) {
       const onChange = jest.fn();

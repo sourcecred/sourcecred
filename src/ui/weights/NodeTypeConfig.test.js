@@ -9,7 +9,7 @@ import {inserterNodeType} from "../../plugins/demo/declaration";
 
 require("../../webutil/testUtil").configureEnzyme();
 
-describe("explorer/weights/NodeTypeConfig", () => {
+describe("ui/weights/NodeTypeConfig", () => {
   describe("NodeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();
