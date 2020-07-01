@@ -48,9 +48,7 @@ async function makeConfig(
           developmentInstancePath = argv[argv.length - 1];
         }
         if (developmentInstancePath == null) {
-          throw new Error(
-            "Please provide a SourceCred cli instance, via $SOURCECRED_DEV_INSTANCE, or --instance PATH"
-          );
+          developmentInstancePath = "sharness/__snapshots__/test-instance";
         }
         const configPath = path.join(
           developmentInstancePath,
