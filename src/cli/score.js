@@ -5,9 +5,8 @@ import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
 
 import type {Command} from "./command";
-import {makePluginDir, loadInstanceConfig} from "./common";
+import {makePluginDir, loadInstanceConfig, loadJsonWithDefault} from "./common";
 import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
-import {defaultParams} from "../analysis/timeline/params";
 import {type WeightedGraph, merge} from "../core/weightedGraph";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {
@@ -15,6 +14,7 @@ import {
   toJSON as credResultToJSON,
   compressByThreshold,
 } from "../analysis/credResult";
+import * as Params from "../analysis/timeline/params";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -50,8 +50,13 @@ const scoreCommand: Command = async (args, std) => {
   const plugins = Array.from(config.bundledPlugins.values());
   const declarations = plugins.map((x) => x.declaration());
 
-  // TODO: Support loading params from config.
-  const params = defaultParams();
+  // TODO(@decentralion): This is snapshot tested, add unit tests?
+  const paramsPath = pathJoin(baseDir, "config", "params.json");
+  const params = await loadJsonWithDefault(
+    paramsPath,
+    Params.parser,
+    Params.defaultParams
+  );
 
   const credResult = await compute(combinedGraph, params, declarations);
   const compressed = compressByThreshold(credResult, CRED_THRESHOLD);
