@@ -5,6 +5,7 @@ import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
 
+import * as NullUtil from "../util/null";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {CascadingReferenceDetector} from "../core/references/cascadingReferenceDetector";
 import type {Command} from "./command";
@@ -21,17 +22,32 @@ function die(std, message) {
 }
 
 const graphCommand: Command = async (args, std) => {
-  if (args.length !== 0) {
-    return die(std, "usage: sourcecred graph");
-  }
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("graph");
   const baseDir = process.cwd();
   const config = await loadInstanceConfig(baseDir);
+
+  let pluginsToLoad = [];
+  if (args.length === 0) {
+    pluginsToLoad = config.bundledPlugins.keys();
+  } else {
+    for (const arg of args) {
+      if (config.bundledPlugins.has(arg)) {
+        pluginsToLoad.push(arg);
+      } else {
+        return die(
+          std,
+          `can't find plugin ${arg}; remember to use fully scoped name, as in sourcecred/github`
+        );
+      }
+    }
+  }
+
   const graphOutputPrefix = ["output", "graphs"];
 
   const rd = await buildReferenceDetector(baseDir, config, taskReporter);
-  for (const [name, plugin] of config.bundledPlugins) {
+  for (const name of pluginsToLoad) {
+    const plugin = NullUtil.get(config.bundledPlugins.get(name));
     const task = `${name}: generating graph`;
     taskReporter.start(task);
     const dirContext = pluginDirectoryContext(baseDir, name);

@@ -4,6 +4,7 @@
   "private": false,
   "dependencies": {
     "aphrodite": "^2.4.0",
+    "base-64": "^0.1.0",
     "base64url": "^3.0.1",
     "better-sqlite3": "^7.0.0",
     "bottleneck": "^2.19.5",
@@ -23,6 +24,7 @@
     "history": "^3.3.0",
     "htmlparser2": "^4.1.0",
     "isomorphic-fetch": "^2.2.1",
+    "isomorphic-webcrypto": "^2.3.6",
     "json-stable-stringify": "^1.0.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
