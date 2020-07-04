@@ -2,7 +2,11 @@
 
 import Database from "better-sqlite3";
 
-import type {CliPlugin, PluginDirectoryContext} from "../../cli/cliPlugin";
+import type {
+  CliPlugin,
+  PluginDirectoryContext,
+  AliasResolver,
+} from "../../cli/cliPlugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {parseConfig, type DiscordConfig, type DiscordToken} from "./config";
 import {declaration} from "./declaration";
@@ -14,7 +18,7 @@ import {Mirror} from "./mirror";
 import type {ReferenceDetector} from "../../core/references/referenceDetector";
 import type {WeightedGraph} from "../../core/weightedGraph";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
-import {createGraph} from "./createGraph";
+import {createGraph, userAddress} from "./createGraph";
 import * as Model from "./models";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 
@@ -76,6 +80,12 @@ export class DiscordCliPlugin implements CliPlugin {
     // TODO: Implement Discord reference detection
     // (low priority bc ppl rarely hardlink to Discord messages)
     return {addressFromUrl: () => undefined};
+  }
+
+  async aliasResolver(
+    _unused_ctx: PluginDirectoryContext
+  ): Promise<AliasResolver> {
+    return (id: string) => userAddress(id);
   }
 }
 

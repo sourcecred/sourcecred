@@ -4,12 +4,17 @@ import Database from "better-sqlite3";
 import fs from "fs-extra";
 import {join as pathJoin} from "path";
 
-import type {CliPlugin, PluginDirectoryContext} from "../../cli/cliPlugin";
+import type {
+  CliPlugin,
+  PluginDirectoryContext,
+  AliasResolver,
+} from "../../cli/cliPlugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {ReferenceDetector} from "../../core/references/referenceDetector";
 import type {WeightedGraph} from "../../core/weightedGraph";
 import {createGraph} from "./createGraph";
 import {declaration} from "./declaration";
+import {userAddress} from "./address";
 import {parseConfig, type DiscourseConfig} from "./config";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {SqliteMirrorRepository} from "./mirrorRepository";
@@ -70,5 +75,10 @@ export class DiscourseCliPlugin implements CliPlugin {
     const config = await loadConfig(ctx);
     const repo = await repository(ctx, config.serverUrl);
     return new DiscourseReferenceDetector(repo);
+  }
+
+  async aliasResolver(ctx: PluginDirectoryContext): Promise<AliasResolver> {
+    const {serverUrl} = await loadConfig(ctx);
+    return (username) => userAddress(serverUrl, username);
   }
 }

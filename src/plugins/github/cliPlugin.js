@@ -6,7 +6,11 @@ import {join as pathJoin} from "path";
 
 import fetchGithubRepo, {fetchGithubRepoFromCache} from "./fetchGithubRepo";
 import type {CacheProvider} from "../../backend/cache";
-import type {CliPlugin, PluginDirectoryContext} from "../../cli/cliPlugin";
+import type {
+  CliPlugin,
+  PluginDirectoryContext,
+  AliasResolver,
+} from "../../cli/cliPlugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {ReferenceDetector} from "../../core/references/referenceDetector";
 import type {WeightedGraph} from "../../core/weightedGraph";
@@ -20,6 +24,7 @@ import {validateToken, type GithubToken} from "./token";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {type TaskReporter} from "../../util/taskReporter";
 import {repoIdToString} from "./repoId";
+import {loginAddress} from "./nodes";
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_GITHUB_TOKEN";
 
@@ -113,5 +118,11 @@ export class GithubCliPlugin implements CliPlugin {
       rvs.push(rv);
     }
     return referenceDetectorFromRelationalViews(rvs);
+  }
+
+  async aliasResolver(
+    _unused_ctx: PluginDirectoryContext
+  ): Promise<AliasResolver> {
+    return (username) => loginAddress(username);
   }
 }
