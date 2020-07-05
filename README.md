@@ -4,60 +4,155 @@
 [![Discourse topics](https://img.shields.io/discourse/https/discourse.sourcecred.io/topics.svg)](https://discourse.sourcecred.io)
 [![Discord](https://img.shields.io/discord/453243919774253079.svg)](https://sourcecred.io/discord)
 
-SourceCred allows communities to assign Cred scores, which measure the value that contributors have brought to the community.
-The community can then use the scores to distribute rewards (e.g. project-specific Grain tokens) to their contributors.
+SourceCred is an open-source tool that enables online communities to create a
+community-specific contribution score, called Cred, which measures how much
+value every contributor has added to the project. SourceCred then enables the
+project to issue tokens, called Grain, to contributors based on their Cred.
+Grain is purchased by sponsors of the project, and gives sponsors the ability
+to influence Cred scores.
 
-Cred is computed by constructing a Cred Graph showing every contribution to a project, and then running a version of the PageRank
-algorithm to assign scores to every contribution and contributor.
+You can read more at [sourcecred.io].
 
-We currently support loading data from GitHub, Discourse, Discord, and via custom "initiatives".
+[sourcecred.io]: https://sourcecred.io/
 
-Please check out [our website] for more information. If you'd like to get involved as a contributor, please drop by [our Discord]
-and say "hi"!
+## Plugin Architecture
 
-[our website]: https://sourcecred.io/
+SourceCred is organized around a plugin architecture, which ensures that it can
+track and reward any kind of contribution, so long as you can assign addresses
+to contributions, and record how they relate to one another. Currently, we have the following four plugins:
+
+- `sourcecred/github`: Loads GitHub repositories, including issues, pull requests, and reviews
+- `sourcecred/discourse`: Loads Discourse forums, including posts, topics, and likes
+- `sourcecred/discord`: Loads Discord servers, including messages and reactions
+- `sourcecred/initiatives`: Loads manually added contributions. Still in alpha.
+
+Every plugin has a two-part name in the form `$OWNER/$NAME`; for example,
+SourceCred's own GitHub plugin is named `sourcecred/github`.
+
+## The Instance System
+
+SourceCred is organized around the concept of "instances". A SourceCred instance
+contains all of the configuration and data associataed with Cred and Grain, and
+optionally may be set up as a deployable website that displays those scores.
+Each instance has the following directory structure:
+
+```
+./package.json      # SourceCred version and package scripts
+./sourcecred.json   # Lists enabled plugins
+./config            # User-edited config files
+./data              # Persistent data, e.g. ledger history
+./output            # Output data, may be removed/regenerated
+./site              # Bundled frontend, if included
+./cache             # Temporary data, should not be checked in to git
+```
+
+We recommend storing instances in a Git repository. The best way to set up an
+instance is by forking [sourcecred/example-instance].
+
+Once your instance is setup, you can update it with the following commands:
+
+- `yarn load`: Regenerate the cache
+- `yarn graph`: Recompute graphs from cache
+- `yarn score`: Re-run Cred calculations
+- `yarn site`: Regenerate the website (potentially upgrading it)
+- `yarn go`: Runs `load`, `graph` and `score` in sequence.
+
+If you want to update the data for just one plugin (e.g. `sourcecred/github`), you can use the following
+command sequence:
+
+- `yarn load sourcecred/github`
+- `yarn graph sourcecred/github`
+- `yarn score`
+
+## Contributing Guidelines
+
+If you'd like to contribute to the codebase, we ask you to follow the following
+steps:
+
+### 1. Drop by [our Discord].
+
+Come to the #intros channel and introduce yourself. Let us know that you're
+interested in helping out. We're friendly and will be happy to help you get
+oriented.
+
+### 2. Read our [Contributing Guidelines].
+
+We pride ourself on tidy software engineering; part of how we do that is by
+splitting our changes up into many small, atomic commits, each of which are
+easy to review. If you'd like to work alongside us, we ask you to adopt our
+practices.
+
+### 3. Find an issue to work on.
+
+You can check out the issues marked [contributions welcome], or ask in the
+Discord's #programming channel if anyone has something you can contribute to.
+
 [our Discord]: https://sourcecred.io/discord
-
-## Current Status
-
-SourceCred is still in beta; as such, the interfaces are in flux and the documentation is spotty.
-We're working on a polished release which will include more documentation, and more maintainable instances. We expect this to land
-by early July.
-
-For now, if you want to use SourceCred, you might start by forking [MetaGame's Cred Instance].
-
-Note that our next release (v0.7.0) will totally revamp how SourceCred instances are setup, and replace the CLI. As such,
-expect that migrating from v0.6.0 to v0.7.0 will involve making changes to your configuration.
-
-[MetaGame's Cred Instance]: https://github.com/MetaFam/TheSource
+[Contributing Guidelines]: ./contributing.md
+[contributions welcome]: https://github.com/sourcecred/sourcecred/issues?q=is%3Aopen+is%3Aissue+label%3Acontributions-welcome
 
 ## Development Setup
 
+### Dependencies
+
   - Install [Node] (tested on v12.x.x and v10.x.x).
   - Install [Yarn] (tested on v1.7.0).
-  - Create a [GitHub API token]. No special permissions are required.
   - For macOS users: Ensure that your environment provides GNU
     coreutils. [See this comment for details about what, how, and
     why.][macos-gnu]
 
 [Node]: https://nodejs.org/en/
 [Yarn]: https://yarnpkg.com/lang/en/
-[GitHub API token]: https://github.com/settings/tokens
 [macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-417202213
 
-You'll still need to create a GitHub token to use as an environment variable (shown later). First, run the following commands to clone and build SourceCred:
+If you want to work on the GitHub plugin, you should
+create a [GitHub API token]. No special permissions are required.
+
+[GitHub API token]: https://github.com/settings/tokens
+
+Then, set it in your environment:
+```Bash
+export SOURCECRED_GITHUB_TOKEN=1234....asdf
+```
+
+If you want to work on the Discord plugin, you need a
+Discord bot token specific to the bot/server that you are loading.
+See instructions [here](https://github.com/sourcecred/example-instance#discord).
+
+### Building SourceCred Locally
+
+First, run the following commands to clone and build SourceCred:
 
 ```Bash
 git clone https://github.com/sourcecred/sourcecred.git
 cd sourcecred
-yarn install
+yarn
 yarn build
-export SOURCECRED_GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 ```
 
-Once that's been setup, you can start running SourceCred development commands.
-In master, the commands are currently in flux. This README will be updated when we have a stable CLI again.
+### Using A Modified Backend
 
+You'll likely want to test out your modified version of SourceCred on an
+instance you're familiar with. A convenient way to do that is to create an
+alias for your altered version of SourceCred. Here's an example of how to do
+so:
+
+```Bash
+SC_REPOSITORY_DIR=`pwd`
+alias scdev=node "$SC_REPOSITORY_DIR"/bin/sourcecred.js
+cd $MY_SC_INSTANCE
+# Run the `sourcecred go` command, in your instance, using your modified code.
+scdev go
+```
+### Using a Modified Frontend
+
+If you've made changes to the SourceCred frontend, you can preview and test it using our builtin development server:
+
+`yarn start`
+
+By default, the server will run in the tiny example instance located at `./sharness/__snapshots__/example-instance`.
+If you'd like to run it in your instance instead, start it via:
+`yarn start --instance $PATH_TO_INSTANCE`.
 
 ## License
 
