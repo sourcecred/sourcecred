@@ -60,7 +60,7 @@ const environment = parseEnvironment(process.env.NODE_ENV);
 
 export const VERSION_INFO: VersionInfo = deepFreeze({
   major: 0,
-  minor: 5,
+  minor: 7,
   patch: 0,
   gitState,
   environment,

@@ -204,18 +204,15 @@ export function createGraph(
   for (const channel of channels) {
     const messages = repo.messages(channel.id);
     for (const message of messages) {
-      const hasMentions = message.mentions.length > 0;
-      if (!hasMentions && message.reactionEmoji.length === 0) continue;
+      if (message.mentions.length === 0 && message.reactionEmoji.length === 0)
+        continue;
       if (message.nonUserAuthor) continue;
 
-      let hasWeightedEmoji = false;
+      let hasEdges = false;
       const reactions = repo.reactions(channel.id, message.id);
       for (const reaction of reactions) {
         const emojiRef = Model.emojiToRef(reaction.emoji);
         const reactionWeight = emojiWeights[emojiRef];
-
-        // TODO: Skip all unweighted emoji in prototype.
-        if (!reactionWeight) continue;
 
         const reactingMember = memberMap.get(reaction.authorId);
         if (!reactingMember) {
@@ -226,15 +223,17 @@ export function createGraph(
           continue;
         }
 
-        hasWeightedEmoji = true;
         const node = reactionNode(reaction, message.timestampMs, guild);
-        wg.weights.nodeWeights.set(node.address, reactionWeight);
+        if (reactionWeight != null) {
+          wg.weights.nodeWeights.set(node.address, reactionWeight);
+        }
         wg.graph.addNode(node);
         wg.graph.addNode(memberNode(reactingMember));
         wg.graph.addEdge(reactsToEdge(reaction, message));
         wg.graph.addEdge(
           addsReactionEdge(reaction, reactingMember, message.timestampMs)
         );
+        hasEdges = true;
       }
 
       for (const userId of message.mentions) {
@@ -248,10 +247,11 @@ export function createGraph(
         }
         wg.graph.addNode(memberNode(mentionedMember));
         wg.graph.addEdge(mentionsEdge(message, mentionedMember));
+        hasEdges = true;
       }
 
-      // Don't bloat the graph with no-weighted-reaction messages.
-      if (hasWeightedEmoji || hasMentions) {
+      // Don't bloat the graph with isolated messages.
+      if (hasEdges) {
         const author = memberMap.get(message.authorId);
         if (!author) {
           console.warn(
