@@ -17,7 +17,7 @@ cleanup() {
 trap cleanup EXIT
 
 SOURCECRED_BIN="${tmpdir}/bin"
-yarn run --silent backend --output-path "${SOURCECRED_BIN}"
+yarn run --silent build:backend --output-path "${SOURCECRED_BIN}"
 export SOURCECRED_BIN  # for Sharness and shell tests
 export NODE_PATH="${toplevel}/node_modules${NODE_PATH:+:${NODE_PATH}}"
 
