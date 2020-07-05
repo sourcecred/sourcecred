@@ -37,9 +37,11 @@ import {
 
 /**
  * We validate usernames using GitHub-esque rules.
+ *
+ * Usernames are always lower-case.
  */
 export opaque type Username: string = string;
-const USERNAME_PATTERN = /^@?([A-Za-z0-9-_]+)$/;
+const USERNAME_PATTERN = /^[A-Za-z0-9-]+$/;
 
 export type UserId = Uuid;
 export type User = {|
@@ -54,7 +56,11 @@ export type User = {|
 
 // It's not in the typical [owner, name] format because it isn't provided by a plugin.
 // Instead, it's a raw type owned by SourceCred project.
-export const USER_PREFIX = NodeAddress.fromParts(["sourcecred", "USER"]);
+export const USER_PREFIX = NodeAddress.fromParts([
+  "sourcecred",
+  "core",
+  "USER",
+]);
 
 /**
  * Create a new user, assigning a random id.
@@ -73,12 +79,10 @@ export function createUser(name: string): User {
  * Throws an error if the username is invalid.
  */
 export function usernameFromString(username: string): Username {
-  const re = new RegExp(USERNAME_PATTERN);
-  const match = re.exec(username);
-  if (match == null) {
+  if (!username.match(USERNAME_PATTERN)) {
     throw new Error(`invalid username: ${username}`);
   }
-  return match[1];
+  return username.toLowerCase();
 }
 
 export function userAddress(id: UserId): NodeAddressT {

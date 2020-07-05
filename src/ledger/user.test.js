@@ -38,16 +38,26 @@ describe("ledger/user", () => {
   });
   describe("usernameFromString", () => {
     it("fails on invalid usernames", () => {
-      const bad = ["With Space", "With.Period", "A/Slash", ""];
+      const bad = [
+        "With Space",
+        "With.Period",
+        "A/Slash",
+        "",
+        "with_underscore",
+        "@name",
+      ];
       for (const b of bad) {
         expect(() => usernameFromString(b)).toThrowError("invalid username");
       }
     });
     it("succeeds on valid usernames", () => {
-      const names = ["h", "hi_there", "ZaX99324cab"];
+      const names = ["h", "hi-there", "ZaX99324cab"];
       for (const n of names) {
-        expect(usernameFromString(n)).toEqual(n);
+        expect(usernameFromString(n)).toEqual(n.toLowerCase());
       }
+    });
+    it("lower-cases usernames", () => {
+      expect(usernameFromString("FooBAR")).toEqual("foobar");
     });
   });
 });
