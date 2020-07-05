@@ -30,6 +30,7 @@ const loadCommand: Command = async (args, std) => {
   }
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("load");
+  const failedPlugins = [];
   const loadPromises = [];
   for (const name of pluginsToLoad) {
     const plugin = NullUtil.get(config.bundledPlugins.get(name));
@@ -38,11 +39,18 @@ const loadCommand: Command = async (args, std) => {
     const dirContext = pluginDirectoryContext(baseDir, name);
     const promise = plugin
       .load(dirContext, taskReporter)
-      .then(() => taskReporter.finish(task));
+      .then(() => taskReporter.finish(task))
+      .catch((e) => {
+        console.error(e);
+        failedPlugins.push(name);
+      });
     loadPromises.push(promise);
   }
   await Promise.all(loadPromises);
   taskReporter.finish("load");
+  if (failedPlugins.length) {
+    return die(std, `load failed for plugins: ${failedPlugins.join(", ")}`);
+  }
   return 0;
 };
 
