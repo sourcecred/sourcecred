@@ -43,7 +43,7 @@ const graphCommand: Command = async (args, std) => {
     }
   }
 
-  const graphOutputPrefix = ["output", "graphs"];
+  const graphOutputPrefix = ["data", "graphs"];
 
   const rd = await buildReferenceDetector(baseDir, config, taskReporter);
   for (const name of pluginsToLoad) {

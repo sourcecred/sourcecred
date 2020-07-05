@@ -40,7 +40,7 @@ const scoreCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const config = await loadInstanceConfig(baseDir);
 
-  const graphOutputPrefix = ["output", "graphs"];
+  const graphOutputPrefix = ["data", "graphs"];
   async function loadGraph(pluginName): Promise<WeightedGraph> {
     const outputDir = makePluginDir(baseDir, graphOutputPrefix, pluginName);
     const outputPath = pathJoin(outputDir, "graph.json");

@@ -17,7 +17,9 @@
 /dist
 
 # misc
-data/
+# TODO(@decentralion): Remove ./data/ when the Dockerfile is updated
+# to no longer setup a SourceCred directory.
+./data/
 .token
 .env.local
 .env.development.local
