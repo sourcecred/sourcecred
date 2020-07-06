@@ -21,7 +21,7 @@ export interface ProjectionQueries {
  * Note: this Projection is implemented as a mutating object. Though it's API
  * would support changing to an immutable implementation.
  */
-export default class Projection {
+export default class Projection implements ProjectionQueries {
   +users: Map<UserId, User> = new Map();
 
   getUser(id: UserId): ?User {
