@@ -103,3 +103,18 @@ export const userParser: C.Parser<User> = C.object({
   name: usernameParser,
   aliases: C.array(C.fmap(C.string, NodeAddress.fromRaw)),
 });
+
+type Aliases = $PropertyType<User, "aliases">;
+export function aliasesDiffer(a: Aliases, b: Aliases): boolean {
+  const setA = new Set(a);
+  const setB = new Set(b);
+
+  // Should any value be missing from Set B, they're different.
+  for (const value of setA) {
+    if (!setB.has(value)) return false;
+    setB.delete(value);
+  }
+
+  // After removing all of Set A, they're different if Set B is not empty.
+  return setB.size === 0;
+}

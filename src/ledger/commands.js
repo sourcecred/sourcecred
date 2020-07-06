@@ -1,7 +1,7 @@
 // @flow
 
 import {State} from "./state";
-import {type User} from "./user";
+import {type User, aliasesDiffer} from "./user";
 import {
   type Event,
   userCreated,
@@ -44,17 +44,3 @@ export function trackUser(state: State, user: User): $ReadOnlyArray<Event> {
   }
 }
 
-type Aliases = $PropertyType<User, "aliases">;
-function aliasesDiffer(a: Aliases, b: Aliases): boolean {
-  const setA = new Set(a);
-  const setB = new Set(b);
-
-  // Should any value be missing from Set B, they're different.
-  for (const value of setA) {
-    if (!setB.has(value)) return false;
-    setB.delete(value);
-  }
-
-  // After removing all of Set A, they're different if Set B is not empty.
-  return setB.size === 0;
-}
