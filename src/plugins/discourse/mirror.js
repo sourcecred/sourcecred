@@ -2,7 +2,7 @@
 
 import * as Combo from "../../util/combo";
 import type {TaskReporter} from "../../util/taskReporter";
-import type {Discourse, CategoryId, Topic, TopicLatest} from "./fetch";
+import type {Discourse, Topic, TopicLatest} from "./fetch";
 import {MirrorRepository} from "./mirrorRepository";
 
 export type MirrorOptions = {|
@@ -10,17 +10,10 @@ export type MirrorOptions = {|
   // We need to proactively check them. This sets the interval at which we
   // should check.
   +recheckCategoryDefinitionsAfterMs: number,
-
-  // When you're concerned about potentially missed edits,
-  // this option lets you recheck all existing topics in a
-  // given set of category IDs (where 1 is uncategorized).
-  // It does not propagate into subcategories.
-  +recheckTopicsInCategories: $ReadOnlyArray<CategoryId>,
 |};
 
 const optionsParserFields = {
   recheckCategoryDefinitionsAfterMs: Combo.number,
-  recheckTopicsInCategories: Combo.array<number>(Combo.number),
 };
 export const optionsParser: Combo.Parser<MirrorOptions> = Combo.object(
   optionsParserFields
@@ -31,7 +24,6 @@ export const optionsShapeParser: Combo.Parser<
 
 const defaultOptions: MirrorOptions = {
   recheckCategoryDefinitionsAfterMs: 24 * 3600 * 1000, // 24h
-  recheckTopicsInCategories: [],
 };
 
 function sortTopicByBumpedMs(a: TopicLatest, b: TopicLatest): number {
@@ -128,18 +120,12 @@ export class Mirror {
       ? await this._fetcher.categoryDefinitionTopicIds()
       : [];
 
-    // Add specific-category topics when it's set in our options.
-    const selectCategoryTopics = this._repo.topicsInCategories(
-      this._options.recheckTopicsInCategories
-    );
-
     // Note: order is important here.
     // Initial load should happen in order of bump date,
     // reloads at the end are ok to be in random order.
     const topicLoadQueue = [
       ...bumpedTopics.map((t) => t.id),
       ...definitionTopicIds,
-      ...selectCategoryTopics,
     ].filter(once);
 
     for (const topicId of topicLoadQueue) {

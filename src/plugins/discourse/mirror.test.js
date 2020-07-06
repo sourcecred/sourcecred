@@ -355,7 +355,6 @@ describe("plugins/discourse/mirror", () => {
     // Explicitly set all options, so we know what to expect in tests.
     const options: MirrorOptions = {
       recheckCategoryDefinitionsAfterMs: 3600000, // 1h
-      recheckTopicsInCategories: [],
     };
     const fetcher = new MockFetcher();
     const db = new Database(":memory:");
@@ -624,108 +623,6 @@ describe("plugins/discourse/mirror", () => {
 
       expect(firstTopics).toEqual([topic1]);
       expect(laterTopics).toEqual([topic1, topic2]);
-    });
-
-    it("mirrors respects recheckTopicsInCategories option", async () => {
-      const expectedCategoryId = 2;
-      const {mirror, fetcher, reporter, repo} = example({
-        recheckTopicsInCategories: [expectedCategoryId],
-      });
-      const cooked = "<p>New content, without bump</p>";
-
-      const [t1, t2, t3] = [
-        fetcher.addTopic(),
-        fetcher.addTopic(),
-        fetcher.addTopic(),
-      ];
-      const c1 = fetcher.addCategory();
-      const t5 = fetcher.addTopic({categoryId: c1.categoryId});
-
-      const topicsCall = jest.spyOn(fetcher, "topicWithPosts");
-      await mirror.update(reporter);
-
-      const earlyT1Post = fetcher._post(t1.postId);
-      fetcher.editPost(t1.postId, {cooked});
-      fetcher.editPost(t5.postId, {cooked});
-      const earlyCalls = [...topicsCall.mock.calls];
-      topicsCall.mockClear();
-
-      await mirror.update(reporter);
-      const laterPosts = repo.posts();
-
-      // The initial load has strict order requirements.
-      expect(earlyCalls).toEqual([
-        // Found through their bump date.
-        [t1.topicId],
-        [t2.topicId],
-        [t3.topicId],
-        [t5.topicId],
-        // Found through category definitions.
-        [c1.topicId],
-      ]);
-
-      // The update does not.
-      expect(topicsCall).toHaveBeenCalledTimes(2);
-      expect(topicsCall).toHaveBeenCalledWith(4);
-      expect(topicsCall).toHaveBeenCalledWith(5);
-
-      // Make sure the t5 post is updated, but t1 isn't.
-      expect(laterPosts).toEqual([
-        earlyT1Post,
-        fetcher._post(t2.postId),
-        fetcher._post(t3.postId),
-        fetcher._post(c1.postId),
-        fetcher._post(t5.postId),
-      ]);
-    });
-
-    it("mirrors supports the uncategorized category in recheckTopicsInCategories option", async () => {
-      const {mirror, fetcher, reporter} = example({
-        recheckTopicsInCategories: [1],
-      });
-      const [t1, t2] = [fetcher.addTopic(), fetcher.addTopic()];
-
-      const topicsCall = jest.spyOn(fetcher, "topicWithPosts");
-      await mirror.update(reporter);
-
-      const earlyCalls = [...topicsCall.mock.calls];
-      topicsCall.mockClear();
-      await mirror.update(reporter);
-
-      // The initial load has strict order requirements.
-      expect(earlyCalls).toEqual([[t1.topicId], [t2.topicId]]);
-      // The update does not.
-      expect(topicsCall).toHaveBeenCalledTimes(2);
-      expect(topicsCall).toHaveBeenCalledWith(1);
-      expect(topicsCall).toHaveBeenCalledWith(2);
-    });
-
-    it("doesn't recheck a topic more than once", async () => {
-      const expectedCategoryId = 2;
-      const {mirror, fetcher, reporter} = example({
-        recheckTopicsInCategories: [expectedCategoryId],
-      });
-      const [t1, _unused_t2, _unused_t3] = [
-        fetcher.addTopic(),
-        fetcher.addTopic(),
-        fetcher.addTopic(),
-      ];
-      const c1 = fetcher.addCategory();
-      const t5 = fetcher.addTopic({categoryId: c1.categoryId});
-      await mirror.update(reporter);
-
-      const topicsCall = jest.spyOn(fetcher, "topicWithPosts");
-      fetcher.addPost({topicId: t1.topicId});
-      fetcher.addPost({topicId: t5.topicId});
-      await mirror.update(reporter);
-
-      // #1 will be updated because of the new post bump.
-      // #4 will be updated because of the recheck of category.
-      // #5 will be updated because of the new post bump and recheck of category.
-      expect(topicsCall).toHaveBeenCalledTimes(3);
-      expect(topicsCall).toHaveBeenCalledWith(t1.topicId);
-      expect(topicsCall).toHaveBeenCalledWith(c1.topicId);
-      expect(topicsCall).toHaveBeenCalledWith(t5.topicId);
     });
 
     it("should not fetch existing topics when adding a new one on second `update`", async () => {
