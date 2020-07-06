@@ -2,23 +2,27 @@
 
 import * as NullUtil from "../../util/null";
 import {Graph} from "../../core/graph";
+import {type WeightedGraph} from "../../core/weightedGraph";
+import {type Weights, empty as emptyWeights} from "../../core/weights";
 import * as GitNode from "../git/nodes";
 import * as N from "./nodes";
 import * as R from "./relationalView";
 import {createEdge} from "./edges";
 import {ReactionContent$Values as Reactions} from "./graphqlTypes";
 
-export function createGraph(view: R.RelationalView): Graph {
+export function createGraph(view: R.RelationalView): WeightedGraph {
   const creator = new GraphCreator();
   creator.addData(view);
-  return creator.graph;
+  return {graph: creator.graph, weights: creator.weights};
 }
 
 class GraphCreator {
   graph: Graph;
+  weights: Weights;
 
   constructor() {
     this.graph = new Graph();
+    this.weights = emptyWeights();
   }
 
   addData(view: R.RelationalView) {
@@ -46,6 +50,10 @@ class GraphCreator {
         this.graph.addEdge(
           createEdge.mergedAs(pull.address(), commit, commitTimestamp)
         );
+      } else {
+        const addr = N.toRaw(pull.address());
+        // Un-merged PRs do not mint cred.
+        this.weights.nodeWeights.set(addr, 0);
       }
     }
 

@@ -2,7 +2,7 @@
 
 import {RelationalView} from "../relationalView";
 import type {Repository} from "../graphqlTypes";
-import {Graph} from "../../../core/graph";
+import {type WeightedGraph} from "../../../core/weightedGraph";
 import cloneDeep from "lodash.clonedeep";
 import {createGraph} from "../createGraph";
 
@@ -16,7 +16,7 @@ export function exampleRelationalView(): RelationalView {
   return rv;
 }
 
-export function exampleGraph(): Graph {
+export function exampleGraph(): WeightedGraph {
   return createGraph(exampleRelationalView());
 }
 
