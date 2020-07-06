@@ -39,9 +39,7 @@ test_expect_success EXPENSIVE,SETUP,HAVE_GITHUB_TOKEN \
     "should load the example instance" '
     cp -r "${snapshot_directory}" . &&
     cd test-instance &&
-    node "${SOURCECRED_BIN}/sourcecred.js" load &&
-    node "${SOURCECRED_BIN}/sourcecred.js" graph &&
-    node "${SOURCECRED_BIN}/sourcecred.js" score &&
+    node "${SOURCECRED_BIN}/sourcecred.js" go &&
     rm -rf cache &&
     test_set_prereq LOADED
 '
