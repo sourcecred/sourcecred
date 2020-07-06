@@ -9,7 +9,7 @@ export interface Log<T> {
    * Appends several items to the log. Acts as a transaction, either all or none
    * of the items are appended.
    */
-  append(items: $ReadOnlyArray<T>): void;
+  append(items: Iterable<T>): void;
 
   /**
    * Implements the Iterable interface as Flow wants to see it.
@@ -30,14 +30,14 @@ type _ArrayLog<T> = {|
   // Note: this is a read-write property of a read only array. Rather than
   // mutating the internal array, we'll update to reference a new array.
   _items: $ReadOnlyArray<T>,
-  append(items: $ReadOnlyArray<T>): void,
+  append(items: Iterable<T>): void,
   @@iterator(): Iterator<T>,
   values(): Iterator<T>,
 |};
 
 // Factory for this "class". Initialize with `ArrayLog()` or `new ArrayLog()`.
 export function ArrayLog<T>(): _ArrayLog<T> {
-  function append(items: $ReadOnlyArray<T>): void {
+  function append(items: Iterable<T>): void {
     this._items = [...this._items, ...items];
   }
 
