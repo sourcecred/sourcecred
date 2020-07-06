@@ -3,14 +3,7 @@
 import type {Database} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
-import type {
-  CategoryId,
-  TopicId,
-  PostId,
-  Topic,
-  Post,
-  LikeAction,
-} from "./fetch";
+import type {TopicId, PostId, Topic, Post, LikeAction} from "./fetch";
 import {type TimestampMs} from "../../util/timestamp";
 
 // The version should be bumped any time the database schema is changed,
@@ -56,13 +49,6 @@ export interface ReadRepository {
   likes(): $ReadOnlyArray<LikeAction>;
 
   /**
-   * Finds the TopicIds of topics that have one of the categoryIds as it's category.
-   */
-  topicsInCategories(
-    categoryIds: $ReadOnlyArray<CategoryId>
-  ): $ReadOnlyArray<TopicId>;
-
-  /**
    * Gets the username of a user, if it exists.
    *
    * Note: input username is case-insensitive.
@@ -73,14 +59,6 @@ export interface ReadRepository {
    * Gets a Topic by ID.
    */
   topicById(id: TopicId): ?Topic;
-
-  /**
-   * Gets a number of Posts in a given Topic. Starting with the first post,
-   * ordered by `indexWithinTopic`.
-   *
-   * numberOfPosts: the maximum number of posts to get (may return fewer).
-   */
-  postsInTopic(topicId: TopicId, numberOfPosts: number): $ReadOnlyArray<Post>;
 }
 
 export type SyncHeads = {|
@@ -348,35 +326,6 @@ export class SqliteMirrorRepository
       }));
   }
 
-  postsInTopic(topicId: TopicId, numberOfPosts: number): $ReadOnlyArray<Post> {
-    return this._db
-      .prepare(
-        dedent`\
-        SELECT
-          id,
-          timestamp_ms,
-          author_username,
-          topic_id,
-          index_within_topic,
-          reply_to_post_index,
-          cooked
-        FROM posts
-        WHERE topic_id = :topic_id
-        ORDER BY index_within_topic ASC
-        LIMIT :max`
-      )
-      .all({topic_id: topicId, max: numberOfPosts})
-      .map((x) => ({
-        id: x.id,
-        timestampMs: x.timestamp_ms,
-        authorUsername: x.author_username,
-        topicId: x.topic_id,
-        indexWithinTopic: x.index_within_topic,
-        replyToPostIndex: x.reply_to_post_index,
-        cooked: x.cooked,
-      }));
-  }
-
   users(): $ReadOnlyArray<string> {
     return this._db.prepare("SELECT username FROM users").pluck().all();
   }
@@ -485,20 +434,6 @@ export class SqliteMirrorRepository
       )
       .run(topicId, ...expected);
     return res.changes;
-  }
-
-  topicsInCategories(
-    categoryIds: $ReadOnlyArray<CategoryId>
-  ): $ReadOnlyArray<TopicId> {
-    return this._db
-      .prepare(
-        dedent`\
-          SELECT id FROM topics
-          WHERE category_id IN (${categoryIds.map((_) => "?").join(",")})
-        `
-      )
-      .all(...categoryIds)
-      .map((t) => t.id);
   }
 
   bumpedMsForTopic(id: TopicId): number | null {
