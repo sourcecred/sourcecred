@@ -10,7 +10,7 @@ export const repoNodeType = deepFreeze({
   name: "Repository",
   pluralName: "Repositories",
   prefix: N.Prefix.repo,
-  defaultWeight: 4,
+  defaultWeight: 0,
   description: "NodeType for a GitHub repository",
 });
 
@@ -18,7 +18,7 @@ const issueNodeType = deepFreeze({
   name: "Issue",
   pluralName: "Issues",
   prefix: N.Prefix.issue,
-  defaultWeight: 2,
+  defaultWeight: 0,
   description: "NodeType for a GitHub issue",
 });
 
@@ -42,7 +42,7 @@ const commentNodeType = deepFreeze({
   name: "Comment",
   pluralName: "Comments",
   prefix: N.Prefix.comment,
-  defaultWeight: 1,
+  defaultWeight: 0,
   description: "NodeType for a GitHub comment",
 });
 
@@ -50,7 +50,7 @@ const commitNodeType = deepFreeze({
   name: "Commit",
   pluralName: "Commits",
   prefix: N.Prefix.commit,
-  defaultWeight: 1,
+  defaultWeight: 0,
   description:
     "Represents a particular Git commit on GitHub, i.e. scoped to a particular repository",
 });
