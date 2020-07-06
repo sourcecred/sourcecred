@@ -72,6 +72,7 @@ module.exports = {
   plugins: [
     new RemoveBuildDirectoryPlugin(),
     new webpack.DefinePlugin(env.individuallyStringified),
+    new webpack.BannerPlugin({banner: "#!/usr/bin/env node", raw: true}),
   ],
   mode: process.env.NODE_ENV,
 };
