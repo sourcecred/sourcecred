@@ -24,29 +24,28 @@ describe("util/jsonLog", () => {
     expect(Array.from(arrValues)).toEqual([1, 2, 3]);
   });
 
-  it("converts empty log to empty string", () => {
-    expect(new JsonLog().toString()).toEqual("");
+  it("converts empty log to empty json array", () => {
+    const emptyLogString = new JsonLog().toString();
+    expect(JSON.parse(emptyLogString)).toEqual([]);
+    expect(new JsonLog().toString()).toEqual("[]");
   });
   it("parses an empty string as an empty log", () => {
-    expect(JsonLog.fromString("", C.number)).toEqual(new JsonLog());
-  });
-  it("parses a string with just a comment as an empty log", () => {
-    expect(JsonLog.fromString("// Example Comment", C.number)).toEqual(
-      new JsonLog()
-    );
-  });
-  it("parses a log with comments", () => {
-    expect(JsonLog.fromString(`// Example Comment\n3\n`, C.number)).toEqual(
-      new JsonLog().append([3])
-    );
+    expect(JsonLog.fromString("[]", C.number)).toEqual(new JsonLog());
   });
 
-  it("converts logs to a string representation with each item on its own line", () => {
+  it("converts logs to a json representation with each item on its own line", () => {
     const s = new JsonLog().append([{name: "foo"}, {name: "bar"}]).toString();
     expect(s).toMatchInlineSnapshot(`
-      "{\\"name\\":\\"foo\\"}
-      {\\"name\\":\\"bar\\"}"
+      "[
+      {\\"name\\":\\"foo\\"},
+      {\\"name\\":\\"bar\\"}
+      ]"
     `);
+  });
+  it("outputs valid json", () => {
+    const items = [{name: "foo"}, {name: "bar"}];
+    const s = new JsonLog().append(items).toString();
+    expect(JSON.parse(s)).toEqual(items);
   });
   it("parses from the serialized format correctly", () => {
     const parser = C.object({foo: C.number});
