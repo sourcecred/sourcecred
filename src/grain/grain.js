@@ -1,5 +1,7 @@
 // @flow
 
+import * as C from "../util/combo";
+
 /**
  * This module contains the types for tracking Grain, which is the native
  * project-specific, cred-linked token created in SourceCred instances. In
@@ -151,3 +153,29 @@ export function fromApproximateFloat(f: number): Grain {
 export function toFloatRatio(numerator: Grain, denominator: Grain): number {
   return Number(numerator) / Number(denominator);
 }
+
+/**
+ * Force BigInts to serialize as strings; we'll write a parser that accomodates this.
+ *
+ * Suggested by:
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt
+ */
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
+const bigIntParser: C.Parser<Grain> = new C.Parser((x) => {
+  // Flow is so dead set against BigInts that it refuses to recognize
+  // that typeof can return them!
+  // $FlowExpectedError
+  if (typeof x !== "bigint") {
+    return {ok: false, err: "expected raw BigInt value"};
+  }
+  return {ok: true, value: (x: any)};
+});
+const stringParser: C.Parser<Grain> = C.fmap(C.string, (s) => BigInt(s));
+
+export const grainParser: C.Parser<Grain> = C.orElse([
+  bigIntParser,
+  stringParser,
+]);
