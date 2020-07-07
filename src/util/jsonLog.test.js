@@ -24,16 +24,20 @@ describe("util/jsonLog", () => {
     expect(Array.from(arrValues)).toEqual([1, 2, 3]);
   });
 
-  it("converts empty log with no comments to empty string", () => {
+  it("converts empty log to empty string", () => {
     expect(new JsonLog().toString()).toEqual("");
-    expect(new JsonLog().toString([])).toEqual("");
   });
   it("parses an empty string as an empty log", () => {
     expect(JsonLog.fromString("", C.number)).toEqual(new JsonLog());
   });
-  it("parses an log with only comments as an empty log", () => {
+  it("parses a string with just a comment as an empty log", () => {
     expect(JsonLog.fromString("// Example Comment", C.number)).toEqual(
       new JsonLog()
+    );
+  });
+  it("parses a log with comments", () => {
+    expect(JsonLog.fromString(`// Example Comment\n3\n`, C.number)).toEqual(
+      new JsonLog().append([3])
     );
   });
 
@@ -44,42 +48,19 @@ describe("util/jsonLog", () => {
       {\\"name\\":\\"bar\\"}"
     `);
   });
-  it("can include comments in the log format", () => {
-    const s = new JsonLog()
-      .append([{name: "foo"}, {name: "bar"}])
-      .toString(["A Comment", "Or Two"]);
-    expect(s).toMatchInlineSnapshot(`
-      "// A Comment
-      // Or Two
-      {\\"name\\":\\"foo\\"}
-      {\\"name\\":\\"bar\\"}"
-    `);
-  });
-  it("errors if the comments contain any newlines", () => {
-    const thunk = () => new JsonLog().toString(["My Bad\n Example"]);
-    expect(thunk).toThrowError("comments may not contain newlines");
-  });
   it("parses from the serialized format correctly", () => {
     const parser = C.object({foo: C.number});
-    const potentialComments = [
-      undefined,
-      [],
-      ["comment"],
-      ["some", "comments"],
-    ];
-    for (const comments of potentialComments) {
-      const ts = [{foo: 1}, {foo: 2}, {foo: 3}];
-      const logString = new JsonLog().append(ts).toString(comments);
-      const log = JsonLog.fromString(logString, parser);
-      const items = Array.from(log.values());
-      expect(items).toEqual(ts);
-    }
+    const ts = [{foo: 1}, {foo: 2}, {foo: 3}];
+    const logString = new JsonLog().append(ts).toString();
+    const log = JsonLog.fromString(logString, parser);
+    const items = Array.from(log.values());
+    expect(items).toEqual(ts);
   });
 
   it("writes and reads to a log file correctly", async () => {
     const fname = tmp.tmpNameSync();
     const log = new JsonLog().append([1, 2, 3]);
-    await log.writeJsonLog(fname, ["My Cool File"]);
+    await log.writeJsonLog(fname);
     const log2 = await JsonLog.readJsonLog(fname, C.number);
     expect(log).toEqual(log2);
   });

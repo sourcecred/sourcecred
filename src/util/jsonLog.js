@@ -44,21 +44,8 @@ export class JsonLog<T: C.JsonObject> {
     return this._items.values();
   }
 
-  toString(prefixComments: ?$ReadOnlyArray<string>): string {
-    const stringified = this._items.map((x) => stringify(x)).join("\n");
-    if (prefixComments != null && prefixComments.length !== 0) {
-      const multilineComments = prefixComments.filter(
-        (x) => x.indexOf("\n") !== -1
-      );
-      if (multilineComments.length !== 0) {
-        throw new Error(
-          "comments may not contain newlines (just split them up)"
-        );
-      }
-      const prelude = prefixComments.map((x) => "// " + x).join("\n") + "\n";
-      return prelude + stringified;
-    }
-    return stringified;
+  toString(): string {
+    return this._items.map((x) => stringify(x)).join("\n");
   }
 
   static fromString(log: string, parser: C.Parser<T>): JsonLog<T> {
@@ -70,12 +57,8 @@ export class JsonLog<T: C.JsonObject> {
     return new JsonLog().append(items);
   }
 
-  async writeJsonLog(
-    path: string,
-    comments: ?$ReadOnlyArray<string>
-  ): Promise<void> {
-    const logString = this.toString(comments);
-    await fs.writeFile(path, logString);
+  async writeJsonLog(path: string): Promise<void> {
+    await fs.writeFile(path, this.toString());
   }
 
   static async readJsonLog(
