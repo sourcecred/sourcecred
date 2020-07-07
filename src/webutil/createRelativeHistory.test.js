@@ -76,18 +76,14 @@ describe("webutil/createRelativeHistory", () => {
     // basename, and are unlikely to break only for a root basename, so
     // there's no need to duplicate the tests.
     describe('with a root basename ("/")', () => {
-      it("should return React-space from `getCurrentLocation`", () => {
+      it("should return React-space from `location`", () => {
         const {memoryHistory, relativeHistory} = createHistory(
           "/",
           "/foo/bar/"
         );
-        expect(relativeHistory.getCurrentLocation().pathname).toEqual(
-          "/foo/bar/"
-        );
+        expect(relativeHistory.location.pathname).toEqual("/foo/bar/");
         memoryHistory.push("/baz/quux/");
-        expect(relativeHistory.getCurrentLocation().pathname).toEqual(
-          "/baz/quux/"
-        );
+        expect(relativeHistory.location.pathname).toEqual("/baz/quux/");
       });
       it("should return DOM-space from `createHref` at root", () => {
         expect(
@@ -107,7 +103,7 @@ describe("webutil/createRelativeHistory", () => {
           "/foo/bar/"
         );
         relativeHistory.push("/baz/quux/#browns");
-        expect(memoryHistory.getCurrentLocation()).toEqual(
+        expect(memoryHistory.location).toEqual(
           expect.objectContaining({
             pathname: "/baz/quux/",
             search: "",
@@ -121,13 +117,17 @@ describe("webutil/createRelativeHistory", () => {
           "/",
           "/foo/bar/"
         );
-        relativeHistory.push({pathname: "/baz/quux/", hash: "#browns"});
-        expect(memoryHistory.getCurrentLocation()).toEqual(
+        relativeHistory.push({
+          pathname: "/baz/quux/",
+          hash: "#browns",
+          state: {bat: "ter"},
+        });
+        expect(memoryHistory.location).toEqual(
           expect.objectContaining({
             pathname: "/baz/quux/",
             search: "",
             hash: "#browns",
-            state: undefined,
+            state: {bat: "ter"},
           })
         );
       });
@@ -137,27 +137,21 @@ describe("webutil/createRelativeHistory", () => {
       const createStandardHistory = () =>
         createHistory("/my/gateway/", "/my/gateway/foo/bar/");
 
-      describe("getCurrentLocation", () => {
+      describe("location property", () => {
         it("should return the initial location, in React-space", () => {
           const {relativeHistory} = createStandardHistory();
-          expect(relativeHistory.getCurrentLocation().pathname).toEqual(
-            "/foo/bar/"
-          );
+          expect(relativeHistory.location.pathname).toEqual("/foo/bar/");
         });
         it("should accommodate changes in the delegate location", () => {
           const {memoryHistory, relativeHistory} = createStandardHistory();
           memoryHistory.push("/my/gateway/baz/quux/");
-          expect(relativeHistory.getCurrentLocation().pathname).toEqual(
-            "/baz/quux/"
-          );
+          expect(relativeHistory.location.pathname).toEqual("/baz/quux/");
         });
         it("should throw if the delegate moves out of basename scope", () => {
           const {memoryHistory, relativeHistory} = createStandardHistory();
-          expect(relativeHistory.getCurrentLocation().pathname).toEqual(
-            "/foo/bar/"
-          );
+          expect(relativeHistory.location.pathname).toEqual("/foo/bar/");
           memoryHistory.push("/not/my/gateway/baz/quux/");
-          expect(() => relativeHistory.getCurrentLocation()).toThrow(
+          expect(() => relativeHistory.location).toThrow(
             'basename violation: "/my/gateway/" is not ' +
               'a prefix of "/not/my/gateway/baz/quux/"'
           );
@@ -223,7 +217,7 @@ describe("webutil/createRelativeHistory", () => {
           expect(listener).toHaveBeenCalledTimes(0);
           listener.mockImplementationOnce((newLocation) => {
             // We should already have transitioned.
-            expect(relativeHistory.getCurrentLocation().pathname).toEqual(
+            expect(relativeHistory.location.pathname).toEqual(
               newLocation.pathname
             );
             expect(newLocation.pathname).toEqual("/baz/quux/");
@@ -306,22 +300,18 @@ describe("webutil/createRelativeHistory", () => {
         it("should accept a location string", () => {
           const {memoryHistory, relativeHistory} = createStandardHistory();
           relativeHistory[method].call(relativeHistory, "/baz/quux/#browns");
-          expect(memoryHistory.getCurrentLocation()).toEqual(
+          expect(memoryHistory.location).toEqual(
             expect.objectContaining({
               pathname: "/my/gateway/baz/quux/",
               search: "",
               hash: "#browns",
-              state: undefined,
-              action: "POP",
             })
           );
-          expect(relativeHistory.getCurrentLocation()).toEqual(
+          expect(relativeHistory.location).toEqual(
             expect.objectContaining({
               pathname: "/baz/quux/",
               search: "",
               hash: "#browns",
-              state: undefined,
-              action: "POP",
             })
           );
         });
@@ -332,22 +322,20 @@ describe("webutil/createRelativeHistory", () => {
             hash: "#browns",
             state: "california",
           });
-          expect(memoryHistory.getCurrentLocation()).toEqual(
+          expect(memoryHistory.location).toEqual(
             expect.objectContaining({
               pathname: "/my/gateway/baz/quux/",
               search: "",
               hash: "#browns",
               state: "california",
-              action: "POP",
             })
           );
-          expect(relativeHistory.getCurrentLocation()).toEqual(
+          expect(relativeHistory.location).toEqual(
             expect.objectContaining({
               pathname: "/baz/quux/",
               search: "",
               hash: "#browns",
               state: "california",
-              action: "POP",
             })
           );
         });
@@ -375,12 +363,8 @@ describe("webutil/createRelativeHistory", () => {
           };
         };
         function expectPageNumber(relativeHistory, memoryHistory, n) {
-          expect(relativeHistory.getCurrentLocation().pathname).toEqual(
-            `/${n}/`
-          );
-          expect(memoryHistory.getCurrentLocation().pathname).toEqual(
-            `/my/gateway/${n}/`
-          );
+          expect(relativeHistory.location.pathname).toEqual(`/${n}/`);
+          expect(memoryHistory.location.pathname).toEqual(`/my/gateway/${n}/`);
         }
 
         it("navigates back three, then forward two", () => {
@@ -553,18 +537,18 @@ describe("webutil/createRelativeHistory", () => {
     describe("with another instance of itself as the delegate", () => {
       it("seems to work", () => {
         // Why? Because it's classy, mostly.
-        const h0 = createMemoryHistory("/a1/a2/b1/b2/c/");
+        const h0 = createMemoryHistory({initialEntries: ["/a1/a2/b1/b2/c/"]});
         const h1 = createRelativeHistory(h0, "/a1/a2/");
         const h2 = createRelativeHistory(h1, "/b1/b2/");
-        expect(h2.getCurrentLocation().pathname).toEqual("/c/");
+        expect(h2.location.pathname).toEqual("/c/");
         h2.push("/c1/c2/");
-        expect(h0.getCurrentLocation().pathname).toEqual("/a1/a2/b1/b2/c1/c2/");
-        expect(h1.getCurrentLocation().pathname).toEqual("/b1/b2/c1/c2/");
-        expect(h2.getCurrentLocation().pathname).toEqual("/c1/c2/");
+        expect(h0.location.pathname).toEqual("/a1/a2/b1/b2/c1/c2/");
+        expect(h1.location.pathname).toEqual("/b1/b2/c1/c2/");
+        expect(h2.location.pathname).toEqual("/c1/c2/");
         h2.goBack();
-        expect(h0.getCurrentLocation().pathname).toEqual("/a1/a2/b1/b2/c/");
-        expect(h1.getCurrentLocation().pathname).toEqual("/b1/b2/c/");
-        expect(h2.getCurrentLocation().pathname).toEqual("/c/");
+        expect(h0.location.pathname).toEqual("/a1/a2/b1/b2/c/");
+        expect(h1.location.pathname).toEqual("/b1/b2/c/");
+        expect(h2.location.pathname).toEqual("/c/");
       });
     });
   });
@@ -621,7 +605,7 @@ describe("webutil/createRelativeHistory", () => {
         expect(e.find("a").attr("href")).toEqual("about/");
         expect(e.find("main").children()).toHaveLength(0);
         expect(e.find("main").text()).toEqual("");
-        expect(memoryHistory.getCurrentLocation().pathname).toEqual(
+        expect(memoryHistory.location.pathname).toEqual(
           normalize(basename + "/")
         );
       });
@@ -637,7 +621,7 @@ describe("webutil/createRelativeHistory", () => {
         expect(e.find("a").attr("href")).toEqual("../about/");
         expect(e.find("main").children()).toHaveLength(1);
         expect(e.find("main").text()).toEqual("content coming soon");
-        expect(memoryHistory.getCurrentLocation().pathname).toEqual(
+        expect(memoryHistory.location.pathname).toEqual(
           normalize(basename + "/about/")
         );
         expect(e.html()).toEqual(
@@ -684,10 +668,8 @@ describe("webutil/createRelativeHistory", () => {
         expect(e.find("tt").text()).toEqual("/");
         expect(e.find("Link")).toHaveLength(1);
         click(e.find("a"));
-        expect(relativeHistory.getCurrentLocation().pathname).toEqual(
-          "/about/"
-        );
-        expect(memoryHistory.getCurrentLocation().pathname).toEqual(
+        expect(relativeHistory.location.pathname).toEqual("/about/");
+        expect(memoryHistory.location.pathname).toEqual(
           normalize(basename + "/about/")
         );
       });

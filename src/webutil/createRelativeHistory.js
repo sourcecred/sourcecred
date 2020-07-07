@@ -25,7 +25,7 @@
  *     `window.location` is always represented in browser-space.
  *
  *   - Interactions with React Router are in React-space. In particular,
- *     the result of `getCurrentLocation()` is in React-space, and the
+ *     the contents of `location` is in React-space, and the
  *     argument to `createHref` is in React-space. This is
  *     necessary/convenient because it is an assumption of React Router
  *     (e.g., actual route data must be specified thus).
@@ -65,10 +65,10 @@ export default function createRelativeHistory(
   delegate: History,
   basename: string
 ): History {
-  if (!delegate.getCurrentLocation) {
+  if (!delegate.location) {
     // (The `Router` component of `react-router` uses the same check.)
     throw new Error(
-      "delegate: expected history@3 implementation, got: " + String(delegate)
+      "delegate: expected history@4 implementation, got:" + String(delegate)
     );
   }
   if (typeof basename !== "string") {
@@ -80,7 +80,7 @@ export default function createRelativeHistory(
   if (!basename.endsWith("/")) {
     throw new Error("basename: must end in slash: " + basename);
   }
-  verifyBasename(delegate.getCurrentLocation().pathname);
+  verifyBasename(delegate.location.pathname);
 
   interface Lens {
     (pathname: string): string;
@@ -131,7 +131,7 @@ export default function createRelativeHistory(
   });
   const browserToDom = lens((path) => {
     verifyBasename(path);
-    const current = delegate.getCurrentLocation().pathname;
+    const current = delegate.location.pathname;
     verifyBasename(current);
     const relativeRoot = current
       .slice(basename.length)
