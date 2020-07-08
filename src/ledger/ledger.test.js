@@ -5,6 +5,7 @@ import {random as randomUuid} from "../util/uuid";
 import {NodeAddress} from "../core/graph";
 import {Ledger} from "./ledger";
 import {userAddress} from "./user";
+import * as G from "./grain";
 
 describe("ledger/ledger", () => {
   function setFakeDate(ts: number) {
@@ -227,7 +228,7 @@ describe("ledger/ledger", () => {
         setFakeDate(1);
         ledger.addAlias(id, a1);
         setFakeDate(2);
-        ledger.removeAlias(id, a1);
+        ledger.removeAlias(id, a1, 0);
         const user = ledger.userById(id);
         expect(user).toEqual({id, name: "foo", aliases: []});
         expect(ledger.actionLog()).toEqual([
@@ -251,6 +252,7 @@ describe("ledger/ledger", () => {
             timestamp: 2,
             userId: id,
             alias: a1,
+            retroactivePaid: "0",
           },
         ]);
       });
@@ -258,21 +260,21 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         failsWithoutMutation(
           ledger,
-          (l) => l.removeAlias(randomUuid(), a1),
+          (l) => l.removeAlias(randomUuid(), a1, 0),
           "removeAlias: no user matching id"
         );
       });
       it("throws an error if the user doesn't already has that alias", () => {
         const ledger = new Ledger();
         const id = ledger.createUser("foo");
-        const thunk = () => ledger.removeAlias(id, a1);
+        const thunk = () => ledger.removeAlias(id, a1, 0);
         failsWithoutMutation(ledger, thunk, "user does not have alias");
       });
       it("errors if the address is the user's innate address", () => {
         const ledger = new Ledger();
         const id = ledger.createUser("foo");
         const innateAddress = userAddress(id);
-        const thunk = () => ledger.removeAlias(id, innateAddress);
+        const thunk = () => ledger.removeAlias(id, innateAddress, 0);
         failsWithoutMutation(
           ledger,
           thunk,
@@ -284,10 +286,22 @@ describe("ledger/ledger", () => {
         const id1 = ledger.createUser("foo");
         const id2 = ledger.createUser("bar");
         ledger.addAlias(id1, a1);
-        ledger.removeAlias(id1, a1);
+        ledger.removeAlias(id1, a1, 0);
         ledger.addAlias(id2, a1);
         const u2 = ledger.userById(id2);
         expect(u2).toEqual({id: id2, name: "bar", aliases: [a1]});
+      });
+      it("errors on invalid credProportion", () => {
+        const ledger = new Ledger();
+        const id1 = ledger.createUser("foo");
+        ledger.addAlias(id1, a1);
+        for (const bad of [-0.3, 1.3, Infinity, NaN, -Infinity]) {
+          failsWithoutMutation(
+            ledger,
+            () => ledger.removeAlias(id1, a1, bad),
+            "invalid credProportion"
+          );
+        }
       });
       it("throws on unrecognized version", () => {
         // $FlowExpectedError
@@ -319,8 +333,141 @@ describe("ledger/ledger", () => {
     it("unlinked aliases are again canonical", () => {
       const ledger = new Ledger();
       const id = ledger.createUser("foo");
-      ledger.addAlias(id, a1).removeAlias(id, a1);
+      ledger.addAlias(id, a1).removeAlias(id, a1, 0);
       expect(ledger.canonicalAddress(a1)).toEqual(a1);
+    });
+  });
+
+  describe("grain accounts", () => {
+    const g = (s) => G.fromString(s);
+    it("newly created users have an empty account", () => {
+      const ledger = new Ledger();
+      const userId = ledger.createUser("foo");
+      const address = userAddress(userId);
+      const account = ledger.accountByAddress(address);
+      expect(account).toEqual({
+        userId,
+        address,
+        paid: "0",
+        balance: "0",
+      });
+      expect(ledger.accounts()).toEqual([account]);
+    });
+    it("unseen addresses don't have accounts", () => {
+      const ledger = new Ledger();
+      expect(ledger.accountByAddress(a1)).toEqual(undefined);
+      expect(ledger.accounts()).toEqual([]);
+    });
+    it("non-user addresses can have accounts", () => {
+      const ledger = new Ledger();
+      ledger._allocateGrain(a1, g("10"));
+      const account = ledger.accountByAddress(a1);
+      expect(account).toEqual({
+        userId: null,
+        address: a1,
+        balance: "10",
+        paid: "10",
+      });
+      expect(ledger.accounts()).toEqual([account]);
+    });
+    it("accountByAddress returns canonical accounts", () => {
+      const ledger = new Ledger();
+      const userId = ledger.createUser("foo");
+      const addr = userAddress(userId);
+      ledger.addAlias(userId, a1);
+      expect(ledger.accountByAddress(a1)).toEqual({
+        // Note: we asked for `a1`, but got address `addr`.
+        // This is intended behavior.
+        address: addr,
+        userId,
+        paid: "0",
+        balance: "0",
+      });
+    });
+    it("when a user gets an alias, it claims the alias's balance", () => {
+      const ledger = new Ledger();
+      const userId = ledger.createUser("foo");
+      const addr = userAddress(userId);
+      ledger._allocateGrain(a1, g("1"));
+      ledger._allocateGrain(addr, g("1"));
+      ledger.addAlias(userId, a1);
+      const userAccount = ledger.accountByAddress(addr);
+      expect(userAccount).toEqual({
+        userId,
+        address: addr,
+        paid: "2",
+        balance: "2",
+      });
+      expect(ledger.accounts()).toEqual([userAccount]);
+    });
+    it("if an alias is allocated Grain, it's received by the canonical address", () => {
+      const ledger = new Ledger();
+      const userId = ledger.createUser("foo");
+      const addr = userAddress(userId);
+      ledger.addAlias(userId, a1);
+      ledger._allocateGrain(a1, g("1"));
+      ledger._allocateGrain(addr, g("1"));
+      const userAccount = ledger.accountByAddress(addr);
+      expect(userAccount).toEqual({
+        userId,
+        address: addr,
+        paid: "2",
+        balance: "2",
+      });
+      expect(ledger.accounts()).toEqual([userAccount]);
+    });
+    it("removed alias accounts with retroactive payouts are handled correctly", () => {
+      const examples = [
+        {
+          credProportion: 0.1,
+          expectedRetroactivePaid: g("10"),
+        },
+        {
+          credProportion: 1,
+          expectedRetroactivePaid: g("100"),
+        },
+      ];
+      for (const {credProportion, expectedRetroactivePaid} of examples) {
+        const ledger = new Ledger();
+        const userId = ledger.createUser("foo");
+        const addr = userAddress(userId);
+        ledger.addAlias(userId, a1);
+        ledger._allocateGrain(a1, g("100"));
+        ledger.removeAlias(userId, a1, credProportion);
+        const aliasAccount = ledger.accountByAddress(a1);
+        expect(aliasAccount).toEqual({
+          userId: null,
+          address: a1,
+          paid: expectedRetroactivePaid,
+          balance: "0",
+        });
+        const userAccount = ledger.accountByAddress(addr);
+        expect(userAccount).toEqual({
+          userId,
+          address: addr,
+          paid: G.sub(g("100"), expectedRetroactivePaid),
+          balance: "100",
+        });
+        expect(ledger.accounts()).toEqual([userAccount, aliasAccount]);
+      }
+    });
+    it("removed aliases without retroactive payouts don't have an alias account", () => {
+      const ledger = new Ledger();
+      const userId = ledger.createUser("foo");
+      const addr = userAddress(userId);
+      ledger.addAlias(userId, a1);
+      ledger._allocateGrain(a1, g("100"));
+      ledger.removeAlias(userId, a1, 0);
+      const aliasAccount = ledger.accountByAddress(a1);
+      expect(aliasAccount).toEqual(undefined);
+      const userAccount = ledger.accountByAddress(addr);
+      expect(userAccount).toEqual({
+        userId,
+        address: addr,
+        paid: "100",
+        balance: "100",
+      });
+      expect(ledger.accounts()).toEqual([userAccount]);
     });
   });
 
@@ -335,7 +482,7 @@ describe("ledger/ledger", () => {
       const id1 = ledger.createUser("foo");
       const id2 = ledger.createUser("bar");
       ledger.addAlias(id1, a1);
-      ledger.removeAlias(id1, a1);
+      ledger.removeAlias(id1, a1, 0);
       ledger.addAlias(id2, a1);
       expect(Ledger.fromActionLog(ledger.actionLog())).toEqual(ledger);
     });
