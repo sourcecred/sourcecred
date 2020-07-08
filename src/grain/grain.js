@@ -22,17 +22,48 @@
  * [BigInt]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt
  * [flow]: https://github.com/facebook/flow/issues/6639
  */
-export type Grain = number;
+export opaque type Grain: string = string;
 
-// $FlowExpectedError
-export const ZERO = 0n;
+export const ZERO: Grain = "0";
 
 // How many digits of precision there are in "one" grain
 export const DECIMAL_PRECISION = 18;
 
 // One "full" grain
 // $FlowExpectedError
-export const ONE = 10n ** BigInt(DECIMAL_PRECISION);
+export const ONE: Grain = (10n ** BigInt(DECIMAL_PRECISION)).toString();
+
+export function add(a: Grain, b: Grain): Grain {
+  return (BigInt(a) + BigInt(b)).toString();
+}
+export function sub(a: Grain, b: Grain): Grain {
+  return (BigInt(a) - BigInt(b)).toString();
+}
+export function mul(a: Grain, b: Grain): Grain {
+  return (BigInt(a) * BigInt(b)).toString();
+}
+export function div(a: Grain, b: Grain): Grain {
+  return (BigInt(a) / BigInt(b)).toString();
+}
+export function lt(a: Grain, b: Grain): boolean {
+  return BigInt(a) < BigInt(b);
+}
+export function gt(a: Grain, b: Grain): boolean {
+  return BigInt(a) > BigInt(b);
+}
+export function lte(a: Grain, b: Grain): boolean {
+  return BigInt(a) <= BigInt(b);
+}
+export function gte(a: Grain, b: Grain): boolean {
+  return BigInt(a) >= BigInt(b);
+}
+export function eq(a: Grain, b: Grain): boolean {
+  return BigInt(a) === BigInt(b);
+}
+
+export function fromString(s: string): Grain {
+  return BigInt(s).toString();
+}
 
 export const DEFAULT_SUFFIX = "g";
 
@@ -69,8 +100,8 @@ export function format(
       `decimals must be integer in range [0..${DECIMAL_PRECISION}]`
     );
   }
-  const isNegative = grain < 0;
-  let digits = [...grain.toString()];
+  const isNegative = grain[0] === "-";
+  let digits = [...grain];
   if (isNegative) {
     // Remove the negative sign for consistency, we'll prepend it back at the end
     digits = digits.slice(1, digits.length);
@@ -122,7 +153,7 @@ export function format(
  * https://observablehq.com/@decentralion/grain-arithmetic
  */
 export function multiplyFloat(grain: Grain, num: number): Grain {
-  return BigInt(Math.floor(Number(grain) * num));
+  return BigInt(Math.floor(Number(grain) * num)).toString();
 }
 
 /**

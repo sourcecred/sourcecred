@@ -20,14 +20,7 @@
 import {sum} from "d3-array";
 import {mapToArray} from "../util/map";
 import {type NodeAddressT} from "../core/graph";
-import {
-  type Grain,
-  multiplyFloat,
-  ZERO,
-  toFloatRatio,
-  format,
-  DECIMAL_PRECISION,
-} from "./grain";
+import * as G from "./grain";
 
 export const GRAIN_ALLOCATION_VERSION_1 = 1;
 
@@ -45,13 +38,13 @@ export type BalancedV1 = {|
 
 export type GrainReceipt = {|
   +address: NodeAddressT,
-  +amount: Grain,
+  +amount: G.Grain,
 |};
 
 export type GrainAllocationV1 = {|
   +version: number,
   +strategy: AllocationStrategy,
-  +budget: Grain,
+  +budget: G.Grain,
   +receipts: $ReadOnlyArray<GrainReceipt>,
 |};
 
@@ -72,11 +65,11 @@ export type CredHistory = $ReadOnlyArray<CredTimeSlice>;
  */
 export function createGrainAllocation(
   strategy: AllocationStrategy,
-  budget: Grain,
+  budget: G.Grain,
   credHistory: CredHistory,
-  lifetimeGrainAllocation: Map<NodeAddressT, Grain>
+  lifetimeGrainAllocation: Map<NodeAddressT, G.Grain>
 ): GrainAllocationV1 {
-  if (budget < ZERO) {
+  if (G.lt(budget, G.ZERO)) {
     throw new Error(`invalid budget: ${String(budget)}`);
   }
 
@@ -110,14 +103,14 @@ export function createGrainAllocation(
  */
 function computeImmediateReceipts(
   {version}: ImmediateV1,
-  budget: Grain,
+  budget: G.Grain,
   credHistory: CredHistory
 ): $ReadOnlyArray<GrainReceipt> {
   if (version !== 1) {
     throw new Error(`Unsupported IMMEDIATE version: ${version}`);
   }
 
-  if (budget <= ZERO || !credHistory.length) {
+  if (budget <= G.ZERO || !credHistory.length) {
     return [];
   }
 
@@ -130,21 +123,18 @@ function computeImmediateReceipts(
     return [];
   }
 
-  let totalPaid = ZERO;
+  let totalPaid = G.ZERO;
   const receipts = mapToArray(immediateCredMap, ([address, cred]) => {
-    const amount = multiplyFloat(budget, cred / totalCred);
-    totalPaid += amount;
+    const amount = G.multiplyFloat(budget, cred / totalCred);
+    totalPaid = G.add(totalPaid, amount);
     return {
       address,
       amount,
     };
   });
-  if (totalPaid > budget) {
-    console.warn(
-      `Warning: had budget of ${format(
-        budget,
-        DECIMAL_PRECISION
-      )} but paying out ${format(totalPaid, DECIMAL_PRECISION)}`
+  if (G.gt(totalPaid, budget)) {
+    throw new Error(
+      `invariant violation: paid ${totalPaid} greater than budget ${budget}`
     );
   }
   return receipts;
@@ -177,15 +167,15 @@ function computeImmediateReceipts(
  */
 function computeBalancedReceipts(
   {version}: BalancedV1,
-  budget: Grain,
+  budget: G.Grain,
   credHistory: CredHistory,
-  lifetimeGrainAllocation: Map<NodeAddressT, Grain>
+  lifetimeGrainAllocation: Map<NodeAddressT, G.Grain>
 ): $ReadOnlyArray<GrainReceipt> {
   if (version !== 1) {
     throw new Error(`Unsupported BALANCED version: ${version}`);
   }
 
-  if (budget <= ZERO || !credHistory.length) {
+  if (budget <= G.ZERO || !credHistory.length) {
     return [];
   }
 
@@ -197,9 +187,9 @@ function computeBalancedReceipts(
     }
   }
 
-  let totalEarnings = ZERO;
+  let totalEarnings = G.ZERO;
   for (const e of lifetimeGrainAllocation.values()) {
-    totalEarnings += e;
+    totalEarnings = G.add(totalEarnings, e);
   }
   let totalCred = 0;
   for (const s of lifetimeCredMap.values()) {
@@ -209,49 +199,46 @@ function computeBalancedReceipts(
     return [];
   }
 
-  const targetGrainPerCred = multiplyFloat(
-    totalEarnings + budget,
+  const targetGrainPerCred = G.multiplyFloat(
+    G.add(totalEarnings, budget),
     1 / totalCred
   );
 
-  let totalUnderpayment = ZERO;
-  const userUnderpayment: Map<NodeAddressT, Grain> = new Map();
+  let totalUnderpayment = G.ZERO;
+  const userUnderpayment: Map<NodeAddressT, G.Grain> = new Map();
   const addresses = new Set([
     ...lifetimeCredMap.keys(),
     ...lifetimeGrainAllocation.keys(),
   ]);
 
   for (const addr of addresses) {
-    const earned = lifetimeGrainAllocation.get(addr) || ZERO;
+    const earned = lifetimeGrainAllocation.get(addr) || G.ZERO;
     const cred = lifetimeCredMap.get(addr) || 0;
 
-    const target = multiplyFloat(targetGrainPerCred, cred);
-    if (target > earned) {
-      const underpayment = target - earned;
+    const target = G.multiplyFloat(targetGrainPerCred, cred);
+    if (G.gt(target, earned)) {
+      const underpayment = G.sub(target, earned);
       userUnderpayment.set(addr, underpayment);
-      totalUnderpayment += underpayment;
+      totalUnderpayment = G.add(totalUnderpayment, underpayment);
     }
   }
 
-  let totalPaid = ZERO;
+  let totalPaid = G.ZERO;
   const receipts = mapToArray(userUnderpayment, ([address, underpayment]) => {
-    const underpaymentProportion = toFloatRatio(
+    const underpaymentProportion = G.toFloatRatio(
       underpayment,
       totalUnderpayment
     );
-    const amount = multiplyFloat(budget, underpaymentProportion);
-    totalPaid += amount;
+    const amount = G.multiplyFloat(budget, underpaymentProportion);
+    totalPaid = G.add(totalPaid, amount);
     return {
       address,
       amount,
     };
   });
-  if (totalPaid > budget) {
-    console.warn(
-      `Warning: had budget of ${format(
-        budget,
-        DECIMAL_PRECISION
-      )} but paying out ${format(totalPaid, DECIMAL_PRECISION)}`
+  if (G.gt(totalPaid, budget)) {
+    throw new Error(
+      `invariant violation: paid ${totalPaid} greater than budget ${budget}`
     );
   }
   return receipts;
