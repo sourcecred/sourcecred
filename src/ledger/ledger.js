@@ -8,17 +8,24 @@
  * every action that's happened in the ledger, so that we can audit the ledger
  * state to ensure its integrity.
  */
-import deepEqual from "lodash.isequal";
-import {type UserId, type User, type Username, userAddress} from "./user";
+import {
+  type UserId,
+  type User,
+  type Username,
+  userAddress,
+  usernameFromString,
+} from "./user";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
+import {type TimestampMs} from "../util/timestamp";
+import * as NullUtil from "../util/null";
+import {random as randomUuid} from "../util/uuid";
 
 /**
  * The ledger for storing identity changes and (eventually) Grain distributions.
  *
  * The following API methods change the ledger state:
- * - `addUser`
+ * - `createUser`
  * - `renameUser`
- * - `removeUser`
  * - `addAlias`
  * - `removeAlias`
  *
@@ -26,6 +33,11 @@ import {type NodeAddressT, NodeAddress} from "../core/graph";
  * the ledger's action log. The ledger state may be serialized by saving the
  * action log, and then reconstructed by replaying the action log. The
  * corresponding methods are `actionLog` and `Ledger.fromActionLog`.
+ *
+ * None of these methods are idempotent, since they all modify the Ledger state
+ * on success by adding a new action to the log. Therefore, they will all fail
+ * if they would not cause any change to the ledger's logical state, so as to
+ * prevent the ledger from permanently accumulating no-op clutter in the log.
  *
  * It's important that any API method that fails (e.g. trying to add a
  * conflicting user) fails without mutating the ledger state; this way we avoid
@@ -70,71 +82,70 @@ export class Ledger {
   /**
    * Return the User matching given username, or undefined
    * if no user matches the username.
+   *
+   * Throws if the name provided is invalid.
    */
-  userByUsername(name: Username): ?User {
-    const id = this._usernameToId.get(name);
+  userByUsername(name: string): ?User {
+    const username = usernameFromString(name);
+    const id = this._usernameToId.get(username);
     if (id != null) {
       return this._users.get(id);
     }
   }
 
   /**
-   * Add a User to the Ledger.
+   * Create a User in the ledger.
    *
    * This will reserve the user's username, and its innate address.
    *
-   * Will no-op is the user is already in the ledger.
+   * This returns the newly created User's ID, so that the caller
+   * store it for future reference.
    *
-   * Will fail if a conflicting user is present, or if the user's username is
-   * already taken, or if the user's innate address is already taken, or if any
-   * of the user's aliases are already taken.
+   * Will fail if the username is not valid, or already taken.
    */
-  addUser(user: User): Ledger {
-    return this._act({type: "ADD_USER", user: user});
+  createUser(name: string): UserId {
+    const username = usernameFromString(name);
+    this._act({
+      type: "CREATE_USER",
+      userId: randomUuid(),
+      username,
+      version: 1,
+      timestamp: _getTimestamp(),
+    });
+    return NullUtil.get(this._usernameToId.get(username));
   }
-  _addUser(user: User) {
-    const existingUser = this._users.get(user.id);
-    if (existingUser != null) {
-      if (deepEqual(existingUser, user)) {
-        // No-op; This user already exists in the ledger.
-        return;
-      } else {
-        throw new Error(`addUser: conflicting user with id ${user.id}`);
-      }
+  _createUser(username: Username, userId: UserId) {
+    if (this._usernameToId.has(username)) {
+      // This user already exists; return.
+      throw new Error(`createUser: username already taken: ${username}`);
     }
-    if (this._usernameToId.has(user.name)) {
-      throw new Error(`addUser: username already claimed ${user.name}`);
-    }
-    for (const alias of user.aliases) {
-      if (this._aliases.has(alias)) {
-        throw new Error(
-          `addUser: alias already claimed: ${NodeAddress.toString(alias)}`
-        );
-      }
-    }
-    if (this._aliases.has(userAddress(user.id))) {
-      throw new Error(`addUser: innate address already claimed ${user.id}`);
+    // istanbul ignore if
+    if (this._aliases.has(userAddress(userId))) {
+      // This should never happen, as it implies a UUID conflict.
+      throw new Error(`createUser: innate address already claimed ${userId}`);
     }
 
-    // Now that we've done all our validation, we update state.
-    // This way, in case we fail, we don't get the ledger into a corrupted state.
-    for (const alias of user.aliases) {
-      this._aliases.add(alias);
-    }
-    this._usernameToId.set(user.name, user.id);
-    this._users.set(user.id, user);
+    // Mutations! Method must not fail after this comment.
+    this._usernameToId.set(username, userId);
+    this._users.set(userId, {name: username, id: userId, aliases: []});
     // Reserve this user's own address
-    this._aliases.add(userAddress(user.id));
+    this._aliases.add(userAddress(userId));
   }
 
   /**
    * Change a user's username.
    *
-   * Will fail if no user matches the userId, or if the user's new
-   * name is already claimed.
+   * Will fail if no user matches the userId, or if the user already has that
+   * name, or if the user's new name is claimed by another user.
    */
-  renameUser(userId: UserId, newName: Username): Ledger {
-    return this._act({type: "RENAME_USER", userId, newName});
+  renameUser(userId: UserId, newName: string): Ledger {
+    return this._act({
+      type: "RENAME_USER",
+      userId,
+      newName: usernameFromString(newName),
+      version: 1,
+      timestamp: _getTimestamp(),
+    });
   }
   _renameUser(userId: UserId, newName: Username) {
     const existingUser = this._users.get(userId);
@@ -142,8 +153,10 @@ export class Ledger {
       throw new Error(`renameUser: no user matches id ${userId}`);
     }
     if (existingUser.name === newName) {
-      // No-op; user already has this name.
-      return;
+      // We error rather than silently succeed because we don't want the ledger
+      // to get polluted with no-op records (no successful operations are
+      // idempotent, since they do add to the ledger logs)
+      throw new Error(`renameUser: user already has name ${newName}`);
     }
     if (this._usernameToId.has(newName)) {
       // We already checked that the name is not owned by this user,
@@ -155,34 +168,11 @@ export class Ledger {
       name: newName,
       aliases: existingUser.aliases,
     };
+
+    // Mutations! Method must not fail after this comment.
     this._usernameToId.delete(existingUser.name);
     this._usernameToId.set(newName, userId);
     this._users.set(userId, updatedUser);
-  }
-
-  /**
-   * Remove a user from the ledger.
-   *
-   * This also free's the user's username,
-   * the user's innate address, and all the user's aliases.
-   *
-   * Will no-op if the user doesn't exist.
-   */
-  removeUser(userId: UserId): Ledger {
-    return this._act({type: "REMOVE_USER", userId});
-  }
-  _removeUser(userId: UserId) {
-    const existingUser = this._users.get(userId);
-    if (existingUser == null) {
-      // User already removed; no-op.
-      return;
-    }
-    this._usernameToId.delete(existingUser.name);
-    this._users.delete(userId);
-    this._aliases.delete(userAddress(userId));
-    for (const a of existingUser.aliases) {
-      this._aliases.delete(a);
-    }
   }
 
   /**
@@ -196,7 +186,13 @@ export class Ledger {
    * another user's innate address.
    */
   addAlias(userId: UserId, alias: NodeAddressT): Ledger {
-    return this._act({type: "ADD_ALIAS", userId, alias});
+    return this._act({
+      type: "ADD_ALIAS",
+      userId,
+      alias,
+      version: 1,
+      timestamp: _getTimestamp(),
+    });
   }
   _addAlias(userId: UserId, alias: NodeAddressT) {
     const existingUser = this._users.get(userId);
@@ -205,8 +201,11 @@ export class Ledger {
     }
     const existingAliases = existingUser.aliases;
     if (existingAliases.indexOf(alias) !== -1) {
-      // User already has this alias; no-op.
-      return;
+      throw new Error(
+        `addAlias: user already has alias: ${
+          existingUser.name
+        }, ${NodeAddress.toString(alias)}`
+      );
     }
     if (this._aliases.has(alias)) {
       // Some other user has this alias; fail.
@@ -222,6 +221,8 @@ export class Ledger {
       name: existingUser.name,
       aliases: updatedAliases,
     };
+
+    // State mutations! Method must not fail past this comment.
     this._users.set(userId, updatedUser);
   }
 
@@ -235,7 +236,13 @@ export class Ledger {
    * Will fail if the alias is in fact the user's innate address.
    */
   removeAlias(userId: UserId, alias: NodeAddressT): Ledger {
-    return this._act({type: "REMOVE_ALIAS", userId, alias});
+    return this._act({
+      type: "REMOVE_ALIAS",
+      userId,
+      alias,
+      version: 1,
+      timestamp: _getTimestamp(),
+    });
   }
   _removeAlias(userId: UserId, alias: NodeAddressT) {
     const existingUser = this._users.get(userId);
@@ -248,11 +255,16 @@ export class Ledger {
     const existingAliases = existingUser.aliases;
     const idx = existingAliases.indexOf(alias);
     if (idx === -1) {
-      // User is already not bound to this alias. No-op.
-      return;
+      throw new Error(
+        `removeAlias: user does not have alias: ${
+          existingUser.name
+        }, ${NodeAddress.toString(alias)}`
+      );
     }
     const aliases = existingAliases.slice();
     aliases.splice(idx, 1);
+
+    // State mutations! Method must not fail past this comment.
     this._aliases.delete(alias);
     this._users.set(userId, {
       id: userId,
@@ -283,14 +295,11 @@ export class Ledger {
 
   _act(a: Action): Ledger {
     switch (a.type) {
-      case "ADD_USER":
-        this._addUser(a.user);
+      case "CREATE_USER":
+        this._createUser(a.username, a.userId);
         break;
       case "RENAME_USER":
         this._renameUser(a.userId, a.newName);
-        break;
-      case "REMOVE_USER":
-        this._removeUser(a.userId);
         break;
       case "ADD_ALIAS":
         this._addAlias(a.userId, a.alias);
@@ -298,6 +307,7 @@ export class Ledger {
       case "REMOVE_ALIAS":
         this._removeAlias(a.userId, a.alias);
         break;
+      // istanbul ignore next: unreachable per Flow
       default:
         throw new Error(`Unknown type: ${(a.type: empty)}`);
     }
@@ -317,28 +327,35 @@ export opaque type LedgerLog = $ReadOnlyArray<Action>;
 /**
  * The Actions are used to store the history of Ledger changes.
  */
-type Action = AddUser | RenameUser | RemoveUser | AddAlias | RemoveAlias;
+type Action = CreateUserV1 | RenameUserV1 | AddAliasV1 | RemoveAliasV1;
 
-type AddUser = {|
-  +type: "ADD_USER",
-  +user: User,
+type CreateUserV1 = {|
+  +type: "CREATE_USER",
+  +username: Username,
+  +version: 1,
+  +timestamp: TimestampMs,
+  +userId: UserId,
 |};
-type RenameUser = {|
+type RenameUserV1 = {|
   +type: "RENAME_USER",
   +userId: UserId,
   +newName: Username,
+  +version: 1,
+  +timestamp: TimestampMs,
 |};
-type RemoveUser = {|
-  +type: "REMOVE_USER",
-  +userId: UserId,
-|};
-type AddAlias = {|
+type AddAliasV1 = {|
   +type: "ADD_ALIAS",
   +userId: UserId,
   +alias: NodeAddressT,
+  +version: 1,
+  +timestamp: TimestampMs,
 |};
-type RemoveAlias = {|
+type RemoveAliasV1 = {|
   +type: "REMOVE_ALIAS",
   +userId: UserId,
   +alias: NodeAddressT,
+  +version: 1,
+  +timestamp: TimestampMs,
 |};
+
+const _getTimestamp = () => Date.now();
