@@ -39,7 +39,7 @@
  * right interface to each client.
  */
 
-import type {History /* actually `any` */} from "history";
+export type History = any;
 
 /**
  * Given a history implementation that operates in browser-space with
@@ -142,26 +142,12 @@ export default function createRelativeHistory(
     return relativeRoot + path.slice(basename.length);
   });
 
-  function getCurrentLocation() {
-    return browserToReact(delegate.getCurrentLocation());
-  }
-  function listenBefore(listener) {
-    // Result is a function `unlisten: () => void`; no need to
-    // transform.
-    return delegate.listenBefore((currentLocation) => {
-      return listener(browserToReact(currentLocation));
-    });
-  }
   function listen(listener) {
     // Result is a function `unlisten: () => void`; no need to
     // transform.
     return delegate.listen((currentLocation) => {
       return listener(browserToReact(currentLocation));
     });
-  }
-  function transitionTo(location) {
-    // Result is `undefined`; no need to transform.
-    return delegate.transitionTo(reactToBrowser(location));
   }
   function push(location) {
     // Result is `undefined`; no need to transform.
@@ -184,46 +170,27 @@ export default function createRelativeHistory(
     // Result is `undefined`; no need to transform.
     return delegate.goForward();
   }
-  function createKey() {
-    // Result is not a path; no need to transform.
-    return delegate.createKey();
-  }
-  function createPath(_unused_location) {
-    // It is not clear whether this function is part of the public
-    // API. If it is, it is not clear what kind of URL (which
-    // representation space) it is supposed to return. This is because
-    // the `history` module does not actually have any API docs. This
-    // function is not called by React Router v3, so, given that we do
-    // not know what the semantics should be, we refrain from
-    // implementing it.
-    //
-    // If this ever throws, maybe we'll have a better idea of what to
-    // do.
-    throw new Error("createPath is not part of the public API");
-  }
   function createHref(location) {
     return browserToDom(delegate.createHref(reactToBrowser(location)));
   }
-  function createLocation(location, action) {
-    // `action` is an enum constant ("POP", "PUSH", or "REPLACE"); no
-    // need to transform it.
-    return browserToReact(
-      delegate.createLocation(reactToBrowser(location), action)
-    );
-  }
-  return {
-    getCurrentLocation,
-    listenBefore,
+
+  const memHist = {
     listen,
-    transitionTo,
     push,
     replace,
     go,
     goBack,
     goForward,
-    createKey,
-    createPath,
     createHref,
-    createLocation,
+    delegate,
   };
+
+  const delegateHistoryPropertyHandler = {
+    get: function (relativeHistory, prop) {
+      if (prop === "location")
+        return browserToReact(relativeHistory.delegate[prop]);
+      return prop in relativeHistory ? relativeHistory[prop] : undefined;
+    },
+  };
+  return new Proxy(memHist, delegateHistoryPropertyHandler);
 }
