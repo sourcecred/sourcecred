@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress} from "../core/graph";
-import {ONE, ZERO, fromApproximateFloat, format} from "./grain";
+import {ONE, ZERO, fromApproximateFloat} from "./grain";
 import {
   GRAIN_ALLOCATION_VERSION_1,
   createGrainAllocation,
@@ -15,7 +15,7 @@ import type {
   GrainAllocationV1,
   AllocationStrategy,
 } from "./createGrainAllocation";
-import type {Grain} from "./grain";
+import * as G from "./grain";
 
 describe("src/grain/createGrainAllocation", () => {
   const foo = NodeAddress.fromParts(["foo"]);
@@ -47,30 +47,6 @@ describe("src/grain/createGrainAllocation", () => {
     evenInterval,
     singlePersonInterval,
   ]);
-
-  // there's no JSON serialization for BigInts, so we need to convert
-  // the BigInts before passing them into expect comparisons. Otherwise,
-  // when the tests fail, they'll fail with an unhelpful JSON serialization
-  // issue.
-  function fmt(g: Grain) {
-    return format(g, 3);
-  }
-  function safeReceipts(receipts: $ReadOnlyArray<GrainReceipt>) {
-    return receipts.map(({address, amount}) => ({
-      address,
-      amount: fmt(amount),
-    }));
-  }
-  function safeAllocation(allocation: GrainAllocationV1) {
-    return {
-      ...allocation,
-      budget: fmt(allocation.budget),
-      receipts: safeReceipts(allocation.receipts),
-    };
-  }
-  function expectAllocationsEqual(h1, h2) {
-    expect(safeAllocation(h1)).toEqual(safeAllocation(h2));
-  }
 
   const immediateStrategy: ImmediateV1 = deepFreeze({
     type: "IMMEDIATE",
@@ -128,7 +104,7 @@ describe("src/grain/createGrainAllocation", () => {
             new Map()
           );
 
-          expectAllocationsEqual(actual, {
+          expect(actual).toEqual({
             ...emptyAllocation,
             budget: ZERO,
           });
@@ -136,7 +112,7 @@ describe("src/grain/createGrainAllocation", () => {
 
         it("there are no cred scores at all", () => {
           const actual = createGrainAllocation(strategy, BUDGET, [], new Map());
-          expectAllocationsEqual(actual, emptyAllocation);
+          expect(actual).toEqual(emptyAllocation);
         });
 
         it("all the cred sums to 0", () => {
@@ -155,7 +131,7 @@ describe("src/grain/createGrainAllocation", () => {
             new Map()
           );
 
-          expectAllocationsEqual(actual, emptyAllocation);
+          expect(actual).toEqual(emptyAllocation);
         });
       });
     }
@@ -182,14 +158,13 @@ describe("src/grain/createGrainAllocation", () => {
         [evenInterval],
         new Map()
       );
-      // $FlowExpectedError
-      const HALF = BUDGET / 2n;
+      const HALF = G.fromApproximateFloat(0.5);
       const expectedReceipts = [
         {address: foo, amount: HALF},
         {address: bar, amount: HALF},
       ];
       const expectedAllocation = createImmediateAllocation(expectedReceipts);
-      expectAllocationsEqual(result, expectedAllocation);
+      expect(result).toEqual(expectedAllocation);
     });
     it("handles an interval with un-even cred distribution", () => {
       const result = createGrainAllocation(
@@ -198,15 +173,14 @@ describe("src/grain/createGrainAllocation", () => {
         [unevenInterval],
         new Map()
       );
-      // $FlowExpectedError
-      const ONE_TENTH = BUDGET / 10n;
-      const NINE_TENTHS = BUDGET - ONE_TENTH;
+      const ONE_TENTH = G.fromApproximateFloat(0.1);
+      const NINE_TENTHS = G.fromApproximateFloat(0.9);
       const expectedReceipts = [
         {address: foo, amount: NINE_TENTHS},
         {address: bar, amount: ONE_TENTH},
       ];
       const expectedAllocation = createImmediateAllocation(expectedReceipts);
-      expectAllocationsEqual(result, expectedAllocation);
+      expect(result).toEqual(expectedAllocation);
     });
     it("handles an interval with one cred recipient", () => {
       const result = createGrainAllocation(
@@ -217,7 +191,7 @@ describe("src/grain/createGrainAllocation", () => {
       );
       const expectedReceipts = [{address: bar, amount: BUDGET}];
       const expectedAllocation = createImmediateAllocation(expectedReceipts);
-      expectAllocationsEqual(result, expectedAllocation);
+      expect(result).toEqual(expectedAllocation);
     });
   });
 
@@ -226,7 +200,7 @@ describe("src/grain/createGrainAllocation", () => {
 
     const createBalancedAllocation = (
       receipts: $ReadOnlyArray<GrainReceipt>,
-      budget: Grain
+      budget: G.Grain
     ) => {
       return {
         version: GRAIN_ALLOCATION_VERSION_1,
@@ -254,7 +228,7 @@ describe("src/grain/createGrainAllocation", () => {
         credHistory,
         lifetimeAllocations
       );
-      expectAllocationsEqual(expectedAllocation, actual);
+      expect(expectedAllocation).toEqual(actual);
     });
     it("should divide according to cred if everyone is already balanced paid", () => {
       const lifetimeAllocations = new Map([
@@ -281,7 +255,7 @@ describe("src/grain/createGrainAllocation", () => {
         credHistory,
         lifetimeAllocations
       );
-      expectAllocationsEqual(expectedAllocation, actual);
+      expect(expectedAllocation).toEqual(actual);
     });
     it("'top off' users who were slightly underpaid", () => {
       // Foo is exactly 1 grain behind where they "should" be
@@ -308,7 +282,7 @@ describe("src/grain/createGrainAllocation", () => {
         credHistory,
         lifetimeAllocations
       );
-      expectAllocationsEqual(expectedAllocation, actual);
+      expect(expectedAllocation).toEqual(actual);
     });
 
     it("should handle the case where one user has no historical earnings", () => {
@@ -330,7 +304,7 @@ describe("src/grain/createGrainAllocation", () => {
         credHistory,
         lifetimeAllocations
       );
-      expectAllocationsEqual(expectedAllocation, actual);
+      expect(expectedAllocation).toEqual(actual);
     });
     it("should not break if a user has earnings but no cred", () => {
       const lifetimeAllocations = new Map([
@@ -353,7 +327,7 @@ describe("src/grain/createGrainAllocation", () => {
         credHistory,
         lifetimeAllocations
       );
-      expectAllocationsEqual(expectedAllocation, actual);
+      expect(expectedAllocation).toEqual(actual);
     });
   });
 });
