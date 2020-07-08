@@ -1,19 +1,22 @@
 // @flow
 
 import React, {type Node as ReactNode} from "react";
-import {Router, Route, Link} from "react-router";
+import {Router} from "react-router";
+import {Route, Link} from "react-router-dom";
 import {mount, render} from "enzyme";
 
 import normalize from "../util/pathNormalize";
-import type {History /* actually `any` */} from "history";
-import createMemoryHistory from "history/createMemoryHistory";
+import type {History /* actually `any` */} from "./createRelativeHistory";
+import {createMemoryHistory} from "history";
 import createRelativeHistory from "./createRelativeHistory";
 
 require("./testUtil").configureEnzyme();
 
+const stringToLocation = (path: string): Object => ({pathname: path});
+
 describe("webutil/createRelativeHistory", () => {
   function createHistory(basename: string, path: string) {
-    const memoryHistory = createMemoryHistory(path);
+    const memoryHistory = createMemoryHistory({initialEntries: [path]});
     const relativeHistory = createRelativeHistory(memoryHistory, basename);
     return {memoryHistory, relativeHistory};
   }
@@ -21,28 +24,9 @@ describe("webutil/createRelativeHistory", () => {
   describe("by direct interaction", () => {
     describe("construction", () => {
       it("should require a valid `history` implementation", () => {
-        const historyV4Object = {
-          length: 1,
-          action: "POP",
-          location: {
-            pathname: "/foo/",
-            search: "",
-            hash: "",
-            key: "123456",
-            state: undefined,
-          },
-          createHref: () => "wat",
-          push: () => undefined,
-          replace: () => undefined,
-          go: () => undefined,
-          goBack: () => undefined,
-          goForward: () => undefined,
-          canGo: () => true,
-          block: () => undefined,
-          listen: () => undefined,
-        };
-        expect(() => createRelativeHistory(historyV4Object, "/")).toThrow(
-          "delegate: expected history@3 implementation, got: [object Object]"
+        const historyV3String = "/bad/param/";
+        expect(() => createRelativeHistory(historyV3String, "/")).toThrow(
+          "delegate: expected history@4 implementation, got:/bad/param/"
         );
       });
       it("should require a basename", () => {
@@ -87,13 +71,15 @@ describe("webutil/createRelativeHistory", () => {
       });
       it("should return DOM-space from `createHref` at root", () => {
         expect(
-          createHistory("/", "/").relativeHistory.createHref("/favicon.png")
+          createHistory("/", "/").relativeHistory.createHref(
+            stringToLocation("/favicon.png")
+          )
         ).toEqual("favicon.png");
       });
       it("should return DOM-space from `createHref` at non-root", () => {
         expect(
           createHistory("/", "/foo/bar/").relativeHistory.createHref(
-            "/favicon.png"
+            stringToLocation("/favicon.png")
           )
         ).toEqual("../../favicon.png");
       });
@@ -158,57 +144,6 @@ describe("webutil/createRelativeHistory", () => {
         });
       });
 
-      describe("listenBefore", () => {
-        function testListener(target: "RELATIVE" | "MEMORY") {
-          const {memoryHistory, relativeHistory} = createStandardHistory();
-          const listener = jest.fn();
-          relativeHistory.listenBefore(listener);
-          expect(listener).toHaveBeenCalledTimes(0);
-          listener.mockImplementationOnce((newLocation) => {
-            // We should _not_ already have transitioned. (Strictly,
-            // this doesn't mean that the pathnames must not be
-            // equal---an event could be fired if, say, only the hash
-            // changes---but it suffices for our test cases.)
-            expect(relativeHistory.getCurrentLocation().pathname).not.toEqual(
-              newLocation.pathname
-            );
-            expect(newLocation.pathname).toEqual("/baz/quux/");
-            expect(newLocation.hash).toEqual("#browns");
-            expect(newLocation.search).toEqual("");
-          });
-          if (target === "RELATIVE") {
-            relativeHistory.push("/baz/quux/#browns");
-          } else if (target === "MEMORY") {
-            memoryHistory.push("/my/gateway/baz/quux/#browns");
-          } else {
-            throw new Error((target: empty));
-          }
-          expect(listener).toHaveBeenCalledTimes(1);
-        }
-
-        it("should handle events fired on the relative history", () => {
-          testListener("RELATIVE");
-        });
-
-        it("should handle events fired on the delegate history", () => {
-          testListener("MEMORY");
-        });
-
-        it("should unlisten when asked", () => {
-          const {memoryHistory, relativeHistory} = createStandardHistory();
-          const listener = jest.fn();
-          const unlisten = relativeHistory.listenBefore(listener);
-
-          expect(listener).toHaveBeenCalledTimes(0);
-          memoryHistory.push("/my/gateway/baz/quux/#browns");
-          expect(listener).toHaveBeenCalledTimes(1);
-
-          unlisten();
-          memoryHistory.push("/my/gateway/some/thing/else/");
-          expect(listener).toHaveBeenCalledTimes(1);
-        });
-      });
-
       describe("listen", () => {
         function testListener(target: "RELATIVE" | "MEMORY") {
           const {memoryHistory, relativeHistory} = createStandardHistory();
@@ -254,41 +189,6 @@ describe("webutil/createRelativeHistory", () => {
           unlisten();
           memoryHistory.push("/my/gateway/some/thing/else/");
           expect(listener).toHaveBeenCalledTimes(1);
-        });
-      });
-
-      // I have no idea what `transitionTo` is supposed to do. One would
-      // think that it effects a transition, but one would be wrong:
-      //
-      //     > var mh = require("history/lib/createMemoryHistory").default();
-      //     > mh.transitionTo("/foo/");
-      //     > mh.getCurrentLocation().pathname;
-      //     '/'
-      //
-      // The best that I can think of to do is to verify that the
-      // appropriate argument is passed along.
-      describe("transitionTo", () => {
-        it("forwards a browser-space string", () => {
-          const {memoryHistory, relativeHistory} = createStandardHistory();
-          const spy = jest.spyOn(memoryHistory, "transitionTo");
-          relativeHistory.transitionTo("/baz/quux/");
-          expect(spy).toHaveBeenCalledTimes(1);
-          expect(spy).toHaveBeenCalledWith("/my/gateway/baz/quux/");
-        });
-        it("forwards a browser-space location object", () => {
-          const {memoryHistory, relativeHistory} = createStandardHistory();
-          const spy = jest.spyOn(memoryHistory, "transitionTo");
-          relativeHistory.transitionTo({
-            pathname: "/baz/quux/",
-            hash: "#browns",
-            state: "california",
-          });
-          expect(spy).toHaveBeenCalledTimes(1);
-          expect(spy).toHaveBeenCalledWith({
-            pathname: "/my/gateway/baz/quux/",
-            hash: "#browns",
-            state: "california",
-          });
         });
       });
 
@@ -397,40 +297,19 @@ describe("webutil/createRelativeHistory", () => {
           expectPageNumber(4);
         });
 
-        it("warns on overflow", () => {
-          const {relativeHistory} = createFivePageHistory();
+        it("doesn't overflow; stops at top of history stack", () => {
+          const {relativeHistory, expectPageNumber} = createFivePageHistory();
           relativeHistory.goBack();
-          // Setup by configureEnzyme()
-          const errorMock: JestMockFn<
-            $ReadOnlyArray<void>,
-            void
-          > = (console.error: any);
-          expect(errorMock).not.toHaveBeenCalled();
+          expectPageNumber(4);
           relativeHistory.go(2);
-          expect(errorMock).toHaveBeenCalledTimes(1);
-          expect(errorMock.mock.calls[0][0]).toMatch(
-            /Warning:.*there is not enough history/
-          );
-          // Reset console.error to a clean mock to satisfy afterEach check from
-          // configureEnzyme()
-          // $FlowExpectedError
-          console.error = jest.fn();
         });
 
-        it("warns on underflow", () => {
-          const {relativeHistory} = createFivePageHistory();
-          // Setup by configureEnzyme()
-          const errorMock: JestMockFn<
-            $ReadOnlyArray<void>,
-            void
-          > = (console.error: any);
+        it("doesn't underflow; stops at bottom of history stack", () => {
+          const {relativeHistory, expectPageNumber} = createFivePageHistory();
           relativeHistory.go(-4);
-          expect(errorMock).not.toHaveBeenCalled();
+          expectPageNumber(1);
           relativeHistory.go(-2);
-          expect(errorMock).toHaveBeenCalledTimes(1);
-          expect(errorMock.mock.calls[0][0]).toMatch(
-            /Warning:.*there is not enough history/
-          );
+          expect(relativeHistory.location.pathname).toEqual("/foo/bar/");
           // Reset console.error to a clean mock to satisfy afterEach check from
           // configureEnzyme()
           // $FlowExpectedError
@@ -453,83 +332,35 @@ describe("webutil/createRelativeHistory", () => {
         });
       });
 
-      describe("createKey", () => {
-        it("returns a string", () => {
-          const {relativeHistory} = createStandardHistory();
-          const key = relativeHistory.createKey(); // nondeterministic
-          expect(key).toEqual(expect.stringContaining(""));
-        });
-        it("delegates", () => {
-          const {memoryHistory, relativeHistory} = createStandardHistory();
-          const secret = "ouagadougou";
-          memoryHistory.createKey = jest
-            .fn()
-            .mockImplementationOnce(() => secret);
-          expect(relativeHistory.createKey()).toEqual(secret);
-          expect(memoryHistory.createKey).toHaveBeenCalledTimes(1);
-        });
-      });
-
-      describe("createPath", () => {
-        // We have no idea what this function is supposed to do. It
-        // shouldn't be called. If it is, fail.
-        it("throws unconditionally", () => {
-          const {relativeHistory} = createStandardHistory();
-          expect(() => relativeHistory.createPath("/wat/")).toThrow(
-            "createPath is not part of the public API"
-          );
-        });
-      });
-
       describe("createHref", () => {
         it("should return DOM-space at root", () => {
           expect(
             createHistory(
               "/my/gateway/",
               "/my/gateway/"
-            ).relativeHistory.createHref("/favicon.png")
+            ).relativeHistory.createHref(stringToLocation("/favicon.png"))
           ).toEqual("favicon.png");
         });
         it("should return DOM-space at non-root", () => {
           expect(
-            createStandardHistory().relativeHistory.createHref("/favicon.png")
+            createStandardHistory().relativeHistory.createHref(
+              stringToLocation("/favicon.png")
+            )
           ).toEqual("../../favicon.png");
         });
         it("should traverse up and back down the tree", () => {
           expect(
             createStandardHistory().relativeHistory.createHref(
-              "/baz/quux/data.csv"
+              stringToLocation("/baz/quux/data.csv")
             )
           ).toEqual("../../baz/quux/data.csv");
         });
         it("should resolve the root", () => {
           expect(
-            createStandardHistory().relativeHistory.createHref("/")
-          ).toEqual("../../");
-        });
-      });
-
-      describe("createLocation", () => {
-        it("should return React-space at root", () => {
-          expect(
-            createHistory(
-              "/my/gateway/",
-              "/my/gateway/"
-            ).relativeHistory.createLocation("/baz/quux/")
-          ).toEqual(expect.objectContaining({pathname: "/baz/quux/"}));
-        });
-        it("should return React-space at non-root", () => {
-          expect(
-            createStandardHistory().relativeHistory.createLocation("/baz/quux/")
-          ).toEqual(expect.objectContaining({pathname: "/baz/quux/"}));
-        });
-        it("should include the given action", () => {
-          expect(
-            createStandardHistory().relativeHistory.createLocation(
-              "/baz/quux/",
-              "REPLACE"
+            createStandardHistory().relativeHistory.createHref(
+              stringToLocation("/")
             )
-          ).toEqual(expect.objectContaining({action: "REPLACE"}));
+          ).toEqual("../../");
         });
       });
     });
@@ -555,23 +386,27 @@ describe("webutil/createRelativeHistory", () => {
 
   describe("in a React app", () => {
     class MainPage extends React.Component<{|
-      +router: Router,
-      +children: ReactNode,
+      +history: any,
     |}> {
       render() {
-        const {router} = this.props;
+        const {history} = this.props;
         return (
           <div>
             <h1>Welcome</h1>
             <p>
               <i>currently viewing route:</i>{" "}
-              <tt>{router.getCurrentLocation().pathname}</tt>
+              <tt>{history.location.pathname}</tt>
             </p>
-            <img alt="logo" src={router.createHref("/logo.png")} />
+            <img
+              alt="logo"
+              src={history.createHref(stringToLocation("/logo.png"))}
+            />
             <nav>
               <Link to="/about/">About us</Link>
             </nav>
-            <main>{this.props.children}</main>
+            <main>
+              <Route path="/about/" component={AboutPage} />
+            </main>
           </div>
         );
       }
@@ -585,9 +420,7 @@ describe("webutil/createRelativeHistory", () => {
       render() {
         return (
           <Router history={this.props.history}>
-            <Route path="/" component={MainPage}>
-              <Route path="/about/" component={AboutPage} />
-            </Route>
+            <Route path="/" component={MainPage} />
           </Router>
         );
       }
@@ -603,7 +436,6 @@ describe("webutil/createRelativeHistory", () => {
         expect(e.find("tt").text()).toEqual("/");
         expect(e.find("img").attr("src")).toEqual("logo.png");
         expect(e.find("a").attr("href")).toEqual("about/");
-        expect(e.find("main").children()).toHaveLength(0);
         expect(e.find("main").text()).toEqual("");
         expect(memoryHistory.location.pathname).toEqual(
           normalize(basename + "/")
