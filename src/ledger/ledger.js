@@ -55,13 +55,13 @@ export class Ledger {
   _actionLog: Action[];
   _users: Map<UserId, User>;
   _usernameToId: Map<Username, UserId>;
-  _aliases: Set<NodeAddressT>;
+  _aliases: Map<NodeAddressT, UserId>;
 
   constructor() {
     this._actionLog = [];
     this._users = new Map();
     this._usernameToId = new Map();
-    this._aliases = new Set();
+    this._aliases = new Map();
   }
 
   /**
@@ -91,6 +91,21 @@ export class Ledger {
     if (id != null) {
       return this._users.get(id);
     }
+  }
+
+  /**
+   * Get some address's "canoncial" address.
+   *
+   * If the address is the alias of some user, then
+   * the user's innate address is caanonical. Otherwise,
+   * the address is itself canonical.
+   */
+  canonicalAddress(address: NodeAddressT): NodeAddressT {
+    const userId = this._aliases.get(address);
+    if (userId != null) {
+      return userAddress(userId);
+    }
+    return address;
   }
 
   /**
@@ -132,7 +147,7 @@ export class Ledger {
     this._usernameToId.set(username, userId);
     this._users.set(userId, {name: username, id: userId, aliases: []});
     // Reserve this user's own address
-    this._aliases.add(userAddress(userId));
+    this._aliases.set(userAddress(userId), userId);
   }
 
   /**
@@ -222,7 +237,7 @@ export class Ledger {
         `addAlias: alias ${NodeAddress.toString(alias)} already bound`
       );
     }
-    this._aliases.add(alias);
+    this._aliases.set(alias, userId);
     const updatedAliases = existingAliases.slice();
     updatedAliases.push(alias);
     const updatedUser = {

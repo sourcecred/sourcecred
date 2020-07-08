@@ -298,6 +298,32 @@ describe("ledger/ledger", () => {
     });
   });
 
+  describe("canonicalAddress", () => {
+    it("users' addresses are canonical", () => {
+      const ledger = new Ledger();
+      const id = ledger.createUser("foo");
+      const addr = userAddress(id);
+      expect(ledger.canonicalAddress(addr)).toEqual(addr);
+    });
+    it("hitherto unseen addresses are canonical", () => {
+      const ledger = new Ledger();
+      expect(ledger.canonicalAddress(a1)).toEqual(a1);
+    });
+    it("aliases are not canonical", () => {
+      const ledger = new Ledger();
+      const id = ledger.createUser("foo");
+      ledger.addAlias(id, a1);
+      const addr = userAddress(id);
+      expect(ledger.canonicalAddress(a1)).toEqual(addr);
+    });
+    it("unlinked aliases are again canonical", () => {
+      const ledger = new Ledger();
+      const id = ledger.createUser("foo");
+      ledger.addAlias(id, a1).removeAlias(id, a1);
+      expect(ledger.canonicalAddress(a1)).toEqual(a1);
+    });
+  });
+
   describe("state reconstruction", () => {
     it("fromActionLog with an empty action log results in an empty ledger", () => {
       const emptyLog = new Ledger().actionLog();
