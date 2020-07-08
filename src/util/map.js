@@ -6,7 +6,7 @@
  * first.
  */
 export function toObject<K: string, V, InK: K, InV: V>(
-  map: Map<InK, InV>
+  map: $ReadOnlyMap<InK, InV>
 ): {|[K]: V|} {
   const result: {|[K]: V|} = ({}: any);
   for (const [k, v] of map.entries()) {
@@ -54,7 +54,9 @@ export function fromObject<K, V, InK: K & string, InV: V>(object: {
  * opportunity to upcast its type parameters: `copy(dogMap)` _can_ be a
  * `Map<string, Animal>`.
  */
-export function copy<K, V, InK: K, InV: V>(map: Map<InK, InV>): Map<K, V> {
+export function copy<K, V, InK: K, InV: V>(
+  map: $ReadOnlyMap<InK, InV>
+): Map<K, V> {
   const entries = map.entries();
   return new Map((((entries: Iterator<[InK, InV]>): any): Iterator<[K, V]>));
 }
@@ -68,7 +70,7 @@ export function copy<K, V, InK: K, InV: V>(map: Map<InK, InV>): Map<K, V> {
  * be thrown.
  */
 export function mapKeys<K, V, InK, InV: V>(
-  map: Map<InK, InV>,
+  map: $ReadOnlyMap<InK, InV>,
   f: (InK, InV) => K
 ): Map<K, V> {
   const result = new Map();
@@ -90,7 +92,7 @@ export function mapKeys<K, V, InK, InV: V>(
  * particular, it need not be injective).
  */
 export function mapValues<K, V, InK: K, InV>(
-  map: Map<InK, InV>,
+  map: $ReadOnlyMap<InK, InV>,
   g: (InK, InV) => V
 ): Map<K, V> {
   const result = new Map();
@@ -109,7 +111,7 @@ export function mapValues<K, V, InK: K, InV>(
  * function.
  */
 export function mapEntries<K, V, InK, InV>(
-  map: Map<InK, InV>,
+  map: $ReadOnlyMap<InK, InV>,
   h: (InK, InV) => [K, V]
 ): Map<K, V> {
   const result = new Map();
@@ -131,7 +133,9 @@ export function mapEntries<K, V, InK, InV>(
  * are mutated. In the event that multiple maps have the same key, an
  * error will be thrown.
  */
-export function merge<K, V>(maps: $ReadOnlyArray<Map<K, V>>): Map<K, V> {
+export function merge<K, V>(
+  maps: $ReadOnlyArray<$ReadOnlyMap<K, V>>
+): Map<K, V> {
   const result = new Map();
   let updates = 0;
   for (const map of maps) {
@@ -167,7 +171,7 @@ export function pushValue<K, V>(map: Map<K, V[]>, key: K, value: V): V[] {
  * provided transformer function.
  */
 export function mapToArray<K, V, R>(
-  map: Map<K, V>,
+  map: $ReadOnlyMap<K, V>,
   fn: (pair: [K, V], index: number) => R
 ): R[] {
   return Array.from(map.entries()).map(fn);

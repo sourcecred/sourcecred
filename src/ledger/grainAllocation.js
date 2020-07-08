@@ -50,7 +50,7 @@ export type GrainAllocationV1 = {|
 
 export type CredTimeSlice = {|
   +intervalEndMs: number,
-  +cred: Map<NodeAddressT, number>,
+  +cred: $ReadOnlyMap<NodeAddressT, number>,
 |};
 
 export type CredHistory = $ReadOnlyArray<CredTimeSlice>;
@@ -67,7 +67,7 @@ export function createGrainAllocation(
   strategy: AllocationStrategy,
   budget: G.Grain,
   credHistory: CredHistory,
-  lifetimeGrainAllocation: Map<NodeAddressT, G.Grain>
+  lifetimeGrainAllocation: $ReadOnlyMap<NodeAddressT, G.Grain>
 ): GrainAllocationV1 {
   if (G.lt(budget, G.ZERO)) {
     throw new Error(`invalid budget: ${String(budget)}`);
@@ -169,7 +169,7 @@ function computeBalancedReceipts(
   {version}: BalancedV1,
   budget: G.Grain,
   credHistory: CredHistory,
-  lifetimeGrainAllocation: Map<NodeAddressT, G.Grain>
+  lifetimeGrainAllocation: $ReadOnlyMap<NodeAddressT, G.Grain>
 ): $ReadOnlyArray<GrainReceipt> {
   if (version !== 1) {
     throw new Error(`Unsupported BALANCED version: ${version}`);
