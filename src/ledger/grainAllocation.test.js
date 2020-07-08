@@ -1,23 +1,21 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
 import {NodeAddress} from "../core/graph";
 import {ONE, ZERO, fromApproximateFloat} from "./grain";
 import {
   GRAIN_ALLOCATION_VERSION_1,
   createGrainAllocation,
-} from "./createGrainAllocation";
-import deepFreeze from "deep-freeze";
-import type {
-  CredHistory,
-  BalancedV1,
-  ImmediateV1,
-  GrainReceipt,
-  GrainAllocationV1,
-  AllocationStrategy,
-} from "./createGrainAllocation";
+  type CredHistory,
+  type BalancedV1,
+  type ImmediateV1,
+  type GrainReceipt,
+  type GrainAllocationV1,
+  type AllocationStrategy,
+} from "./grainAllocation";
 import * as G from "./grain";
 
-describe("src/grain/createGrainAllocation", () => {
+describe("src/ledger/grainAllocation", () => {
   const foo = NodeAddress.fromParts(["foo"]);
   const bar = NodeAddress.fromParts(["bar"]);
 
