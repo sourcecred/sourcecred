@@ -114,7 +114,10 @@ export class Ledger {
     });
     return NullUtil.get(this._usernameToId.get(username));
   }
-  _createUser(username: Username, userId: UserId) {
+  _createUser({username, userId, version}: CreateUserV1) {
+    if (version !== 1) {
+      throw new Error(`createUser: unrecognized version ${version}`);
+    }
     if (this._usernameToId.has(username)) {
       // This user already exists; return.
       throw new Error(`createUser: username already taken: ${username}`);
@@ -147,7 +150,10 @@ export class Ledger {
       timestamp: _getTimestamp(),
     });
   }
-  _renameUser(userId: UserId, newName: Username) {
+  _renameUser({userId, newName, version}: RenameUserV1) {
+    if (version !== 1) {
+      throw new Error(`renameUser: unrecognized version ${version}`);
+    }
     const existingUser = this._users.get(userId);
     if (existingUser == null) {
       throw new Error(`renameUser: no user matches id ${userId}`);
@@ -194,7 +200,10 @@ export class Ledger {
       timestamp: _getTimestamp(),
     });
   }
-  _addAlias(userId: UserId, alias: NodeAddressT) {
+  _addAlias({userId, alias, version}: AddAliasV1) {
+    if (version !== 1) {
+      throw new Error(`addAlias: unrecognized version ${version}`);
+    }
     const existingUser = this._users.get(userId);
     if (existingUser == null) {
       throw new Error(`addAlias: no matching userId ${userId}`);
@@ -244,7 +253,10 @@ export class Ledger {
       timestamp: _getTimestamp(),
     });
   }
-  _removeAlias(userId: UserId, alias: NodeAddressT) {
+  _removeAlias({userId, alias, version}: RemoveAliasV1) {
+    if (version !== 1) {
+      throw new Error(`removeAlias: unrecognized version ${version}`);
+    }
     const existingUser = this._users.get(userId);
     if (existingUser == null) {
       throw new Error(`removeAlias: no user matching id ${userId}`);
@@ -296,16 +308,16 @@ export class Ledger {
   _act(a: Action): Ledger {
     switch (a.type) {
       case "CREATE_USER":
-        this._createUser(a.username, a.userId);
+        this._createUser(a);
         break;
       case "RENAME_USER":
-        this._renameUser(a.userId, a.newName);
+        this._renameUser(a);
         break;
       case "ADD_ALIAS":
-        this._addAlias(a.userId, a.alias);
+        this._addAlias(a);
         break;
       case "REMOVE_ALIAS":
-        this._removeAlias(a.userId, a.alias);
+        this._removeAlias(a);
         break;
       // istanbul ignore next: unreachable per Flow
       default:

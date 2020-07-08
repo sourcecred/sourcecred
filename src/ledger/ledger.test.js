@@ -54,6 +54,12 @@ describe("ledger/ledger", () => {
         const thunk = () => ledger.createUser("foo");
         failsWithoutMutation(ledger, thunk, "username already taken");
       });
+      it("throws on unrecognized version", () => {
+        // $FlowExpectedError
+        expect(() => new Ledger()._createUser({version: 1337})).toThrowError(
+          "unrecognized version"
+        );
+      });
     });
 
     describe("renameUser", () => {
@@ -121,6 +127,12 @@ describe("ledger/ledger", () => {
         const fooId = ledger.createUser("foo");
         const thunk = () => ledger.renameUser(fooId, "foo bar");
         failsWithoutMutation(ledger, thunk, "invalid username");
+      });
+      it("throws on unrecognized version", () => {
+        // $FlowExpectedError
+        expect(() => new Ledger()._renameUser({version: 1337})).toThrowError(
+          "unrecognized version"
+        );
       });
     });
 
@@ -200,6 +212,12 @@ describe("ledger/ledger", () => {
           `addAlias: alias ${NodeAddress.toString(innateAddress)} already bound`
         );
       });
+      it("throws on unrecognized version", () => {
+        // $FlowExpectedError
+        expect(() => new Ledger()._addAlias({version: 1337})).toThrowError(
+          "unrecognized version"
+        );
+      });
     });
     describe("removeAlias", () => {
       it("works", () => {
@@ -270,6 +288,12 @@ describe("ledger/ledger", () => {
         ledger.addAlias(id2, a1);
         const u2 = ledger.userById(id2);
         expect(u2).toEqual({id: id2, name: "bar", aliases: [a1]});
+      });
+      it("throws on unrecognized version", () => {
+        // $FlowExpectedError
+        expect(() => new Ledger()._removeAlias({version: 1337})).toThrowError(
+          "unrecognized version"
+        );
       });
     });
   });
