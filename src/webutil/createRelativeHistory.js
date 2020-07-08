@@ -40,6 +40,7 @@
  */
 
 export type History = any;
+declare function Unblock(): void;
 
 /**
  * Given a history implementation that operates in browser-space with
@@ -173,24 +174,54 @@ export default function createRelativeHistory(
   function createHref(location) {
     return browserToDom(delegate.createHref(reactToBrowser(location)));
   }
-
-  const memHist = {
-    listen,
-    push,
-    replace,
+  function block(prompt): typeof Unblock {
+    // Result is `Unblock` hook
+    // `prompt` is either a prompt string or
+    // a callback that is called after history is updated
+    return delegate.block(prompt);
+  }
+  const rawRelativeHistory = {
+    block,
+    createHref,
+    delegate,
     go,
     goBack,
     goForward,
-    createHref,
-    delegate,
+    listen,
+    push,
+    replace,
   };
 
+  /*
+   * expose delegate state via calls to the parent `relativeHistory`
+   *
+   * For consistency, duplicating state in `relativeHistory` (the parent) must be avoided, but
+   * the history api must provide access to location state via top-level property access.
+   * This handler allows top-level state accesses to be redirected to the delegate state
+   * and recontextualized where necessary
+   *
+   * This is accomplished using a Proxy
+   * (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+   * The getter handler provides direct access to underlying objects via top-level requests
+   *
+   * calls to location are processed through `browserToReact` to yield the expected react-space
+   * in the returned path
+   */
   const delegateHistoryPropertyHandler = {
     get: function (relativeHistory, prop) {
-      if (prop === "location")
-        return browserToReact(relativeHistory.delegate[prop]);
-      return prop in relativeHistory ? relativeHistory[prop] : undefined;
+      switch (prop) {
+        case "location":
+          return browserToReact(relativeHistory.delegate[prop]);
+        case "action":
+        case "length":
+        case "index":
+          return relativeHistory.delegate[prop];
+        case "entries":
+          return relativeHistory.delegate[prop].map(browserToReact);
+        default:
+          return prop in relativeHistory ? relativeHistory[prop] : undefined;
+      }
     },
   };
-  return new Proxy(memHist, delegateHistoryPropertyHandler);
+  return new Proxy(rawRelativeHistory, delegateHistoryPropertyHandler);
 }

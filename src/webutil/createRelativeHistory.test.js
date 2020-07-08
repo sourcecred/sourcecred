@@ -1,6 +1,6 @@
 // @flow
 
-import React, {type Node as ReactNode} from "react";
+import React from "react";
 import {Router} from "react-router";
 import {Route, Link} from "react-router-dom";
 import {mount, render} from "enzyme";
@@ -9,10 +9,10 @@ import normalize from "../util/pathNormalize";
 import type {History /* actually `any` */} from "./createRelativeHistory";
 import {createMemoryHistory} from "history";
 import createRelativeHistory from "./createRelativeHistory";
-
-require("./testUtil").configureEnzyme();
+import {configureEnzyme, relativeEntries, memoryEntries} from "./testUtil";
 
 const stringToLocation = (path: string): Object => ({pathname: path});
+configureEnzyme();
 
 describe("webutil/createRelativeHistory", () => {
   function createHistory(basename: string, path: string) {
@@ -247,26 +247,25 @@ describe("webutil/createRelativeHistory", () => {
         testTransitionFunction("replace");
       });
 
-      describe("go, goForward, and goBack", () => {
-        const createFivePageHistory = () => {
-          const {memoryHistory, relativeHistory} = createStandardHistory();
-          relativeHistory.push("/1/");
-          relativeHistory.push("/2/");
-          relativeHistory.push("/3/");
-          relativeHistory.push("/4/");
-          relativeHistory.push("/5/");
-          return {
-            memoryHistory,
-            relativeHistory,
-            expectPageNumber: (n) =>
-              expectPageNumber(relativeHistory, memoryHistory, n),
-          };
+      const createFivePageHistory = () => {
+        const {memoryHistory, relativeHistory} = createStandardHistory();
+        relativeHistory.push("/1/");
+        relativeHistory.push("/2/");
+        relativeHistory.push("/3/");
+        relativeHistory.push("/4/");
+        relativeHistory.push("/5/");
+        return {
+          memoryHistory,
+          relativeHistory,
+          expectPageNumber: (n) =>
+            expectPageNumber(relativeHistory, memoryHistory, n),
         };
-        function expectPageNumber(relativeHistory, memoryHistory, n) {
-          expect(relativeHistory.location.pathname).toEqual(`/${n}/`);
-          expect(memoryHistory.location.pathname).toEqual(`/my/gateway/${n}/`);
-        }
-
+      };
+      function expectPageNumber(relativeHistory, memoryHistory, n) {
+        expect(relativeHistory.location.pathname).toEqual(`/${n}/`);
+        expect(memoryHistory.location.pathname).toEqual(`/my/gateway/${n}/`);
+      }
+      describe("go, goForward, and goBack", () => {
         it("navigates back three, then forward two", () => {
           const {relativeHistory, expectPageNumber} = createFivePageHistory();
           expectPageNumber(5);
@@ -329,6 +328,111 @@ describe("webutil/createRelativeHistory", () => {
           expectPageNumber(relativeHistory, memoryHistory, 2);
           relativeHistory.go(2);
           expectPageNumber(relativeHistory, memoryHistory, 4);
+        });
+      });
+
+      describe("V4 History properties and methods", () => {
+        // history location states update simultaneously
+        // in both Relative and delegate histories:
+        // action: the last change made to the history state
+        // length: the number of entries of in the history state
+        // index: the index of the current location in the entries array
+        // entries: array of locations collected in history
+        describe("properties: action, length, index, entries", () => {
+          const {memoryHistory, relativeHistory} = createFivePageHistory();
+          it("history state stays synced between relative and delegate histories", () => {
+            // verify initial state after creating history
+            expect(relativeHistory.action).toEqual("PUSH");
+            expect(relativeHistory.length).toEqual(6);
+            expect(relativeHistory.index).toEqual(5);
+            relativeHistory.entries.forEach((historyEntry, idx) => {
+              expect(historyEntry).toEqual(
+                expect.objectContaining(relativeEntries[idx])
+              );
+            });
+            expect(memoryHistory.action).toEqual("PUSH");
+            expect(memoryHistory.length).toEqual(6);
+            expect(memoryHistory.index).toEqual(5);
+            memoryHistory.entries.forEach((memoryEntry, idx) => {
+              expect(memoryEntry).toEqual(
+                expect.objectContaining(memoryEntries[idx])
+              );
+            });
+            // go back 4 locations
+            relativeHistory.go(-4);
+            // check that history state updated as expected
+            // in both relative and delegate histories
+            expect(relativeHistory.action).toEqual("POP");
+            expect(relativeHistory.length).toEqual(6);
+            expect(relativeHistory.index).toEqual(1);
+            relativeHistory.entries.forEach((historyEntry, idx) => {
+              expect(historyEntry).toEqual(
+                expect.objectContaining(relativeEntries[idx])
+              );
+            });
+            expect(memoryHistory.action).toEqual("POP");
+            expect(memoryHistory.length).toEqual(6);
+            expect(memoryHistory.index).toEqual(1);
+            memoryHistory.entries.forEach((memoryEntry, idx) => {
+              expect(memoryEntry).toEqual(
+                expect.objectContaining(memoryEntries[idx])
+              );
+            });
+          });
+        });
+        // The block method is utilized to prevent any location transitions
+        describe("block method", () => {
+          describe("at root", () => {
+            const {memoryHistory, relativeHistory} = createHistory("/", "/");
+            let unblockFn;
+            it("should prevent location updates if delegate is blocked", () => {
+              unblockFn = memoryHistory.block();
+              relativeHistory.push(stringToLocation("/about/"));
+              expect(relativeHistory.location.pathname).toEqual("/");
+              expect(memoryHistory.location.pathname).toEqual("/");
+            });
+            it("should update after unblocking", () => {
+              unblockFn();
+              relativeHistory.push(stringToLocation("/about/"));
+              expect(relativeHistory.location.pathname).toEqual("/about/");
+              expect(memoryHistory.location.pathname).toEqual("/about/");
+            });
+            it("relativeHistory can prevent transitions", () => {
+              unblockFn = relativeHistory.block();
+              relativeHistory.push(stringToLocation("/"));
+              expect(relativeHistory.location.pathname).toEqual("/about/");
+              expect(memoryHistory.location.pathname).toEqual("/about/");
+            });
+            it("hook from relativeHistory can reenable transitions", () => {
+              unblockFn();
+              relativeHistory.push(stringToLocation("/"));
+              expect(relativeHistory.location.pathname).toEqual("/");
+              expect(memoryHistory.location.pathname).toEqual("/");
+            });
+          });
+          describe("at nonroot", () => {
+            const {memoryHistory, relativeHistory} = createHistory(
+              "/main/directory/",
+              "/main/directory/home/"
+            );
+            let unblockFn;
+            it("should prevent location updates if delegate is blocked at nonroot", () => {
+              unblockFn = memoryHistory.block();
+              relativeHistory.push(stringToLocation("/about"));
+              expect(relativeHistory.location.pathname).toEqual("/home/");
+              expect(memoryHistory.location.pathname).toEqual(
+                "/main/directory/home/"
+              );
+            });
+            it("should update after unblocking", () => {
+              unblockFn();
+              relativeHistory.push(stringToLocation("/about/"));
+              expect(relativeHistory.location.pathname).toEqual("/about/");
+              expect(memoryHistory.location.pathname).toEqual(
+                "/main/directory/about/"
+              );
+            });
+          });
         });
       });
 
