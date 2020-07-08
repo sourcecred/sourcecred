@@ -4,7 +4,6 @@ import deepFreeze from "deep-freeze";
 import {fromString as uuidFromString} from "../util/uuid";
 import {NodeAddress} from "../core/graph";
 import {
-  createUser,
   userAddress,
   usernameFromString,
   USER_PREFIX,
@@ -19,13 +18,6 @@ describe("ledger/user", () => {
     id: uuid,
     name,
     aliases: [NodeAddress.empty],
-  });
-  it("createUser works", () => {
-    const user = createUser(name);
-    expect(user.aliases).toEqual([]);
-    expect(user.name).toEqual(name);
-    // Verify it is a valid UUID
-    uuidFromString(user.id);
   });
   it("userAddress works", () => {
     expect(userAddress(uuid)).toEqual(NodeAddress.append(USER_PREFIX, uuid));
