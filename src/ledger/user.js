@@ -23,11 +23,7 @@
  * isn't being used as a transaction ledger.
  *
  */
-import {
-  type Uuid,
-  parser as uuidParser,
-  random as randomUuid,
-} from "../util/uuid";
+import {type Uuid, parser as uuidParser} from "../util/uuid";
 import * as C from "../util/combo";
 import {
   type NodeAddressT,
@@ -61,17 +57,6 @@ export const USER_PREFIX = NodeAddress.fromParts([
   "core",
   "USER",
 ]);
-
-/**
- * Create a new user, assigning a random id.
- */
-export function createUser(name: string): User {
-  return {
-    id: randomUuid(),
-    name,
-    aliases: [],
-  };
-}
 
 /**
  * Parse a Username from a string.
