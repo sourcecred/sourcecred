@@ -19,6 +19,20 @@ import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
 import {random as randomUuid} from "../util/uuid";
+import * as G from "./grain";
+
+/**
+ * An GrainAccount is an address that is present in the Ledger
+ * and has some associated Grain.
+ */
+type MutableGrainAccount = {|
+  +address: NodeAddressT,
+  +userId: UserId | null,
+  balance: G.Grain,
+  paid: G.Grain,
+|};
+
+export type GrainAccount = $ReadOnly<MutableGrainAccount>;
 
 /**
  * The ledger for storing identity changes and (eventually) Grain distributions.
@@ -47,21 +61,39 @@ import {random as randomUuid} from "../util/uuid";
  * avoid adding any ledger state that can't be verified by deep equality
  * checking (e.g. don't store state in functions or closures that aren't
  * attached to the Ledger object).
- *
- * Currently, the Ledger only supports user management; logic for tracking
- * Grain distributions will be added in a future commit.
  */
 export class Ledger {
   _actionLog: Action[];
   _users: Map<UserId, User>;
   _usernameToId: Map<Username, UserId>;
   _aliases: Map<NodeAddressT, UserId>;
+  _accounts: Map<NodeAddressT, MutableGrainAccount>;
 
   constructor() {
     this._actionLog = [];
     this._users = new Map();
     this._usernameToId = new Map();
     this._aliases = new Map();
+    this._accounts = new Map();
+  }
+
+  /**
+   * Return all the GrainAccounts in the ledger.
+   */
+  accounts(): $ReadOnlyArray<GrainAccount> {
+    return Array.from(this._accounts.values());
+  }
+
+  /**
+   * Get the GrainAccount associated with a particular address.
+   *
+   * If the address is associated with a user, that user's account is returned.
+   * If the address is not associated with a user, but has received Grain in
+   * the past, then an alias-style account is returned (no userId set).
+   * If the address hasn't been encountered, we return undefined.
+   */
+  accountByAddress(address: NodeAddressT): ?GrainAccount {
+    return this._accounts.get(this.canonicalAddress(address));
   }
 
   /**
@@ -142,12 +174,20 @@ export class Ledger {
       // This should never happen, as it implies a UUID conflict.
       throw new Error(`createUser: innate address already claimed ${userId}`);
     }
+    const addr = userAddress(userId);
 
     // Mutations! Method must not fail after this comment.
     this._usernameToId.set(username, userId);
     this._users.set(userId, {name: username, id: userId, aliases: []});
     // Reserve this user's own address
-    this._aliases.set(userAddress(userId), userId);
+    this._aliases.set(addr, userId);
+    // Every user has a corresponding GrainAccount.
+    this._accounts.set(addr, {
+      balance: G.ZERO,
+      paid: G.ZERO,
+      address: addr,
+      userId,
+    });
   }
 
   /**
@@ -199,10 +239,12 @@ export class Ledger {
   /**
    * Add an alias for a user.
    *
+   * If the alias has a GrainAccount, then its balance is transfered to the
+   * user, its paid is added to the user's paid amount, and then its account is
+   * deleted.
+   *
    * Will no-op if the user already has that alias.
-   *
-   * Will faill if the user does not exist.
-   *
+   * Will fail if the user does not exist.
    * Will fail if the alias is already claimed, or if it is
    * another user's innate address.
    */
@@ -245,13 +287,34 @@ export class Ledger {
       name: existingUser.name,
       aliases: updatedAliases,
     };
+    const addr = userAddress(userId);
+    const aliasAccount = this._unsafeGetAccount(alias);
+    const userAccount = this._unsafeGetAccount(addr);
 
     // State mutations! Method must not fail past this comment.
     this._users.set(userId, updatedUser);
+    // Transfer alias's balance and paid to the canonical account
+    userAccount.paid = G.add(userAccount.paid, aliasAccount.paid);
+    userAccount.balance = G.add(userAccount.balance, aliasAccount.balance);
+    this._accounts.delete(alias);
   }
 
   /**
    * Remove an alias from a user.
+   *
+   * In order to safely remove an alias, we need to know what proportion of
+   * that user's Cred came from this alias. That way, we can re-allocate an
+   * appropriate share of the user's lifetime grain receipts to the alias they
+   * are disconnecting from. Otherwise, it would be possible for the user to
+   * game the BALANCED allocation strategy by strategically linking and
+   * unlinking aliases.
+   *
+   * When an alias is removed, none of the user's current Grain balance goes
+   * back to that alias.
+   *
+   * If the alias was linked fraudulently (someone claimed another person's
+   * account), then remedial action may be appropriate, e.g. transferring the
+   * fraudster's own Grain back to the account they tried to steal from.
    *
    * Will no-op if the user doesn't have that alias.
    *
@@ -259,16 +322,27 @@ export class Ledger {
    *
    * Will fail if the alias is in fact the user's innate address.
    */
-  removeAlias(userId: UserId, alias: NodeAddressT): Ledger {
+  removeAlias(
+    userId: UserId,
+    alias: NodeAddressT,
+    credProportion: number
+  ): Ledger {
+    if (credProportion < 0 || credProportion > 1 || !isFinite(credProportion)) {
+      throw new Error(`removeAlias: invalid credProportion ${credProportion}`);
+    }
+    const paid = this._getAccount(alias).paid;
+    const retroactivePaid = G.multiplyFloat(paid, credProportion);
+
     return this._act({
       type: "REMOVE_ALIAS",
       userId,
       alias,
       version: 1,
+      retroactivePaid,
       timestamp: _getTimestamp(),
     });
   }
-  _removeAlias({userId, alias, version}: RemoveAliasV1) {
+  _removeAlias({userId, alias, version, retroactivePaid}: RemoveAliasV1) {
     if (version !== 1) {
       throw new Error(`removeAlias: unrecognized version ${version}`);
     }
@@ -292,12 +366,18 @@ export class Ledger {
     aliases.splice(idx, 1);
 
     // State mutations! Method must not fail past this comment.
+    const userAccount = this._unsafeGetAccount(alias);
     this._aliases.delete(alias);
     this._users.set(userId, {
       id: userId,
       name: existingUser.name,
       aliases,
     });
+    if (retroactivePaid !== G.ZERO) {
+      userAccount.paid = G.sub(userAccount.paid, retroactivePaid);
+      // Create a new alias account to hold onto our retroactivePaid amount
+      this._unsafeGetAccount(alias).paid = retroactivePaid;
+    }
   }
 
   /**
@@ -341,6 +421,51 @@ export class Ledger {
     this._actionLog.push(a);
     return this;
   }
+
+  // Helper method for recording that Grain was allocated to a user.
+  // Increases the user's paid amount and balance in sync.
+  _allocateGrain(recipient: NodeAddressT, amount: G.Grain) {
+    const canonical = this.canonicalAddress(recipient);
+    const account = this._unsafeGetAccount(canonical);
+    account.paid = G.add(amount, account.paid);
+    account.balance = G.add(amount, account.balance);
+  }
+
+  /**
+   * Get an account for this address, returning an empty alias-style
+   * account if it's not found.
+   *
+   * This does not add the account to state, so it's safe to use in the non-mutating
+   * parts of the ledger.
+   */
+  _getAccount(addr: NodeAddressT) {
+    const canonical = this.canonicalAddress(addr);
+    const existingAccount = this._accounts.get(canonical);
+    if (existingAccount == null) {
+      return {
+        address: canonical,
+        balance: G.ZERO,
+        paid: G.ZERO,
+        userId: null,
+      };
+    } else {
+      return existingAccount;
+    }
+  }
+
+  /**
+   * Get an account for this address, returning an empty alias-style account if it's not
+   * found. If no account was found, it will also set the account, which makes this
+   * mutating & unsafe.
+   */
+  _unsafeGetAccount(addr: NodeAddressT) {
+    const canonical = this.canonicalAddress(addr);
+    const account = this._getAccount(addr);
+    if (!this._accounts.has(canonical)) {
+      this._accounts.set(canonical, account);
+    }
+    return account;
+  }
 }
 
 /**
@@ -383,6 +508,7 @@ type RemoveAliasV1 = {|
   +alias: NodeAddressT,
   +version: 1,
   +timestamp: TimestampMs,
+  +retroactivePaid: G.Grain,
 |};
 
 const _getTimestamp = () => Date.now();
