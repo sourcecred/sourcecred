@@ -903,6 +903,25 @@ describe("ledger/ledger", () => {
     });
   });
 
+  describe("timestamps", () => {
+    it("out-of-order events are illegal", () => {
+      const ledger = new Ledger();
+      setFakeDate(3);
+      ledger.createUser("foo");
+      setFakeDate(2);
+      const thunk = () => ledger.createUser("foo");
+      failsWithoutMutation(ledger, thunk, "out-of-order timestamp");
+    });
+    it("non-numeric timestamps are illegal", () => {
+      const ledger = new Ledger();
+      for (const bad of [NaN, Infinity, -Infinity]) {
+        setFakeDate(bad);
+        const thunk = () => ledger.createUser("foo");
+        failsWithoutMutation(ledger, thunk, "invalid timestamp");
+      }
+    });
+  });
+
   describe("state reconstruction", () => {
     // This is a ledger which has had at least one of every
     // supported Action.

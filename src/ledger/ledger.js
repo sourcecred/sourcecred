@@ -78,6 +78,10 @@ export type DistributionPolicy = {|
  * avoid adding any ledger state that can't be verified by deep equality
  * checking (e.g. don't store state in functions or closures that aren't
  * attached to the Ledger object).
+ *
+ * Every Ledger action has a timestamp, and the Ledger's actions must always be
+ * in timestamp-sorted order. Adding a new Action with a timestamp older than a
+ * previous action is illegal.
  */
 export class Ledger {
   _actionLog: Action[];
@@ -85,6 +89,7 @@ export class Ledger {
   _usernameToId: Map<Username, UserId>;
   _aliases: Map<NodeAddressT, UserId>;
   _accounts: Map<NodeAddressT, MutableGrainAccount>;
+  _latestTimestamp: TimestampMs = -Infinity;
 
   constructor() {
     this._actionLog = [];
@@ -552,6 +557,14 @@ export class Ledger {
   }
 
   _act(a: Action): Ledger {
+    if (a.timestamp == null || !isFinite(a.timestamp)) {
+      throw new Error(`ledger: invalid timestamp ${a.timestamp}`);
+    }
+    if (a.timestamp < this._latestTimestamp) {
+      throw new Error(
+        `ledger: out-of-order timestamp: ${a.timestamp} < ${this._latestTimestamp}`
+      );
+    }
     switch (a.type) {
       case "CREATE_USER":
         this._createUser(a);
@@ -576,6 +589,7 @@ export class Ledger {
         throw new Error(`Unknown type: ${(a.type: empty)}`);
     }
     this._actionLog.push(a);
+    this._latestTimestamp = a.timestamp;
     return this;
   }
 
