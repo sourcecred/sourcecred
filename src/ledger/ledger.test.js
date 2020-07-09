@@ -742,6 +742,165 @@ describe("ledger/ledger", () => {
         expect(ledger.accounts()).toEqual([accountU, account1, account2]);
       });
     });
+
+    describe("transferGrain", () => {
+      it("works in a simple legal case", () => {
+        const ledger = new Ledger();
+        ledger._allocateGrain(a1, g("100"));
+        ledger._allocateGrain(a2, g("5"));
+        setFakeDate(4);
+        ledger.transferGrain({from: a1, to: a2, amount: g("80"), memo: "test"});
+        const e1 = {
+          address: a1,
+          userId: null,
+          paid: g("100"),
+          balance: g("20"),
+        };
+        const e2 = {address: a2, userId: null, paid: g("5"), balance: g("85")};
+        expect(ledger.accountByAddress(a1)).toEqual(e1);
+        expect(ledger.accountByAddress(a2)).toEqual(e2);
+        expect(ledger.actionLog()).toEqual([
+          {
+            type: "TRANSFER_GRAIN",
+            version: 1,
+            timestamp: 4,
+            amount: "80",
+            memo: "test",
+            from: a1,
+            to: a2,
+          },
+        ]);
+      });
+      it("creates a GrainAccount for the recipient, if it did not already exist", () => {
+        const ledger = new Ledger();
+        ledger._allocateGrain(a1, g("1"));
+        setFakeDate(4);
+        ledger.transferGrain({from: a1, to: a2, amount: g("1"), memo: "test"});
+        const e1 = {
+          address: a1,
+          userId: null,
+          paid: g("1"),
+          balance: g("0"),
+        };
+        const e2 = {address: a2, userId: null, paid: g("0"), balance: g("1")};
+        expect(ledger.accountByAddress(a1)).toEqual(e1);
+        expect(ledger.accountByAddress(a2)).toEqual(e2);
+        expect(ledger.actionLog()).toEqual([
+          {
+            type: "TRANSFER_GRAIN",
+            version: 1,
+            timestamp: 4,
+            amount: "1",
+            memo: "test",
+            from: a1,
+            to: a2,
+          },
+        ]);
+      });
+      it("a zero-amount transfer from a nonexistent account is legal", () => {
+        // and should result in both accounts getting reified, i.e. if a previously
+        // empty alias sends a transaction, it gets a GrainAccount.
+        const ledger = new Ledger();
+        setFakeDate(4);
+        ledger.transferGrain({from: a1, to: a2, amount: g("0"), memo: "test"});
+        const e1 = {
+          address: a1,
+          userId: null,
+          paid: g("0"),
+          balance: g("0"),
+        };
+        const e2 = {address: a2, userId: null, paid: g("0"), balance: g("0")};
+        expect(ledger.accountByAddress(a1)).toEqual(e1);
+        expect(ledger.accountByAddress(a2)).toEqual(e2);
+        expect(ledger.actionLog()).toEqual([
+          {
+            type: "TRANSFER_GRAIN",
+            version: 1,
+            timestamp: 4,
+            amount: "0",
+            memo: "test",
+            from: a1,
+            to: a2,
+          },
+        ]);
+      });
+      it("if a transfer sends from an alias, the canonical account is debited", () => {
+        const ledger = new Ledger();
+        const userId = ledger.createUser("user");
+        ledger.addAlias(userId, a1);
+        ledger._allocateGrain(a1, g("1"));
+        ledger.transferGrain({from: a1, to: a2, amount: g("1"), memo: "test"});
+        const e1 = {
+          address: userAddress(userId),
+          userId,
+          paid: g("1"),
+          balance: g("0"),
+        };
+        const e2 = {address: a2, userId: null, paid: g("0"), balance: g("1")};
+        expect(ledger.accountByAddress(a1)).toEqual(e1);
+        expect(ledger.accountByAddress(a2)).toEqual(e2);
+        expect(ledger.accounts()).toEqual([e1, e2]);
+      });
+      it("if a transfers sends to an alias, the canonical account is credited", () => {
+        const ledger = new Ledger();
+        const userId = ledger.createUser("user");
+        ledger.addAlias(userId, a1);
+        ledger._allocateGrain(a2, g("1"));
+        ledger.transferGrain({from: a2, to: a1, amount: g("1"), memo: "test"});
+        const e1 = {
+          address: userAddress(userId),
+          userId,
+          paid: g("0"),
+          balance: g("1"),
+        };
+        const e2 = {address: a2, userId: null, paid: g("1"), balance: g("0")};
+        expect(ledger.accountByAddress(a1)).toEqual(e1);
+        expect(ledger.accountByAddress(a2)).toEqual(e2);
+        expect(ledger.accounts()).toEqual([e1, e2]);
+      });
+      it("an account may transfer to itself", () => {
+        const ledger = new Ledger();
+        ledger._allocateGrain(a1, g("2"));
+        ledger.transferGrain({from: a1, to: a1, amount: g("1"), memo: "test"});
+        const e1 = {
+          address: a1,
+          userId: null,
+          paid: g("2"),
+          balance: g("2"),
+        };
+        expect(ledger.accountByAddress(a1)).toEqual(e1);
+      });
+      it("an account may not be overdrawn", () => {
+        const ledger = new Ledger();
+        ledger._allocateGrain(a1, g("2"));
+        const thunk = () =>
+          ledger.transferGrain({
+            from: a1,
+            to: a2,
+            amount: g("3"),
+            memo: "test",
+          });
+        expect(thunk).toThrowError("insufficient balance for transfer");
+      });
+      it("a negative transfer is illegal", () => {
+        const ledger = new Ledger();
+        ledger._allocateGrain(a1, g("2"));
+        const thunk = () =>
+          ledger.transferGrain({
+            from: a1,
+            to: a2,
+            amount: g("-3"),
+            memo: "test",
+          });
+        expect(thunk).toThrowError("cannot transfer negative Grain amount");
+      });
+      it("fails for unknown transfer versions", () => {
+        expect(() =>
+          // $FlowExpectedError
+          new Ledger()._transferGrain({version: 1337})
+        ).toThrowError("unknown TRANSFER_GRAIN version: 1337");
+      });
+    });
   });
 
   describe("state reconstruction", () => {
@@ -781,6 +940,7 @@ describe("ledger/ledger", () => {
         },
       ];
       ledger.distributeGrain(policies, credHistory);
+      ledger.transferGrain({from: ua1, to: ua2, amount: g("10"), memo: null});
       expect(Ledger.fromActionLog(ledger.actionLog())).toEqual(ledger);
     });
   });
