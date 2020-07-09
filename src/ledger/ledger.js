@@ -14,18 +14,22 @@ import {
   type Username,
   userAddress,
   usernameFromString,
+  usernameParser,
 } from "./user";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
-import {random as randomUuid} from "../util/uuid";
+import {random as randomUuid, parser as uuidParser} from "../util/uuid";
 import {
   type DistributionPolicy,
   computeDistribution,
   type CredHistory,
   type Distribution,
+  distributionParser,
 } from "./grainAllocation";
 import * as G from "./grain";
+import {JsonLog} from "../util/jsonLog";
+import * as C from "../util/combo";
 
 /**
  * An GrainAccount is an address that is present in the Ledger
@@ -73,7 +77,7 @@ export type GrainAccount = $ReadOnly<MutableGrainAccount>;
  * previous action is illegal.
  */
 export class Ledger {
-  _actionLog: Action[];
+  _actionLog: JsonLog<Action>;
   _users: Map<UserId, User>;
   _usernameToId: Map<Username, UserId>;
   _aliases: Map<NodeAddressT, UserId>;
@@ -81,7 +85,7 @@ export class Ledger {
   _latestTimestamp: TimestampMs = -Infinity;
 
   constructor() {
-    this._actionLog = [];
+    this._actionLog = new JsonLog();
     this._users = new Map();
     this._usernameToId = new Map();
     this._aliases = new Map();
@@ -524,7 +528,7 @@ export class Ledger {
    * May be used to reconstruct the Ledger after serialization.
    */
   actionLog(): LedgerLog {
-    return this._actionLog;
+    return Array.from(this._actionLog.values());
   }
 
   /**
@@ -536,6 +540,16 @@ export class Ledger {
       ledger._act(a);
     }
     return ledger;
+  }
+
+  /**
+   * Serialize the events as a JsonLog-style string.
+   *
+   * Will be a valid JSON string formatted so as to
+   * have one action per line.
+   */
+  serialize(): string {
+    return this._actionLog.toString();
   }
 
   _act(a: Action): Ledger {
@@ -570,8 +584,8 @@ export class Ledger {
       default:
         throw new Error(`Unknown type: ${(a.type: empty)}`);
     }
-    this._actionLog.push(a);
     this._latestTimestamp = a.timestamp;
+    this._actionLog.append([a]);
     return this;
   }
 
@@ -642,25 +656,49 @@ type Action =
 
 type CreateUserV1 = {|
   +type: "CREATE_USER",
-  +username: Username,
   +version: 1,
   +timestamp: TimestampMs,
+  +username: Username,
   +userId: UserId,
 |};
+const createUserV1Parser: C.Parser<CreateUserV1> = C.object({
+  type: C.exactly(["CREATE_USER"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  username: usernameParser,
+  userId: uuidParser,
+});
+
 type RenameUserV1 = {|
   +type: "RENAME_USER",
+  +version: 1,
+  +timestamp: TimestampMs,
   +userId: UserId,
   +newName: Username,
-  +version: 1,
-  +timestamp: TimestampMs,
 |};
+const renameUserV1Parser: C.Parser<RenameUserV1> = C.object({
+  type: C.exactly(["RENAME_USER"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  userId: uuidParser,
+  newName: usernameParser,
+});
+
 type AddAliasV1 = {|
   +type: "ADD_ALIAS",
-  +userId: UserId,
-  +alias: NodeAddressT,
   +version: 1,
   +timestamp: TimestampMs,
+  +userId: UserId,
+  +alias: NodeAddressT,
 |};
+const addAliasV1Parser: C.Parser<AddAliasV1> = C.object({
+  type: C.exactly(["ADD_ALIAS"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  userId: uuidParser,
+  alias: NodeAddress.parser,
+});
+
 type RemoveAliasV1 = {|
   +type: "REMOVE_ALIAS",
   +userId: UserId,
@@ -669,12 +707,28 @@ type RemoveAliasV1 = {|
   +timestamp: TimestampMs,
   +retroactivePaid: G.Grain,
 |};
+const removeAliasV1Parser: C.Parser<RemoveAliasV1> = C.object({
+  type: C.exactly(["REMOVE_ALIAS"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  userId: uuidParser,
+  alias: NodeAddress.parser,
+  retroactivePaid: G.parser,
+});
+
 type DistributeGrainV1 = {|
   +type: "DISTRIBUTE_GRAIN",
   +version: 1,
   +timestamp: TimestampMs,
   +distribution: Distribution,
 |};
+const distributeGrainV1Parser: C.Parser<DistributeGrainV1> = C.object({
+  type: C.exactly(["DISTRIBUTE_GRAIN"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  distribution: distributionParser,
+});
+
 type TransferGrainV1 = {|
   +type: "TRANSFER_GRAIN",
   +version: 1,
@@ -684,5 +738,26 @@ type TransferGrainV1 = {|
   +amount: G.Grain,
   +memo: string | null,
 |};
+const transferGrainV1Parser: C.Parser<TransferGrainV1> = C.object({
+  type: C.exactly(["TRANSFER_GRAIN"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  from: NodeAddress.parser,
+  to: NodeAddress.parser,
+  amount: G.parser,
+  memo: C.orElse([C.string, C.null_]),
+});
+
+const actionParser: C.Parser<Action> = C.orElse([
+  createUserV1Parser,
+  renameUserV1Parser,
+  addAliasV1Parser,
+  removeAliasV1Parser,
+  distributeGrainV1Parser,
+  transferGrainV1Parser,
+]);
+export const parser: C.Parser<Ledger> = C.fmap(C.array(actionParser), (x) =>
+  Ledger.fromActionLog(x)
+);
 
 const _getTimestamp = () => Date.now();
