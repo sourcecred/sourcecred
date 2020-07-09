@@ -19,6 +19,12 @@ import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
 import {random as randomUuid} from "../util/uuid";
+import {
+  type AllocationStrategy,
+  createGrainAllocation,
+  type CredHistory,
+  type GrainAllocationV1,
+} from "./grainAllocation";
 import * as G from "./grain";
 
 /**
@@ -33,6 +39,17 @@ type MutableGrainAccount = {|
 |};
 
 export type GrainAccount = $ReadOnly<MutableGrainAccount>;
+
+/**
+ * A policy for producing a Grain distribution.
+ *
+ * A single distribution event may combine multiple policies;
+ * they are evaluated in order.
+ */
+export type DistributionPolicy = {|
+  +strategy: AllocationStrategy,
+  +budget: G.Grain,
+|};
 
 /**
  * The ledger for storing identity changes and (eventually) Grain distributions.
@@ -381,6 +398,85 @@ export class Ledger {
   }
 
   /**
+   * Distribute Grain given allocation policies, and the Cred history.
+   *
+   * The order of the policies will not have any affect on the distribution.
+   *
+   * See logic and types in `ledger/grainAllocation.js`.
+   */
+  distributeGrain(
+    policies: $ReadOnlyArray<DistributionPolicy>,
+    credHistory: CredHistory
+  ): Ledger {
+    if (credHistory.length === 0) {
+      throw new Error(`distributeGrain: empty cred history`);
+    }
+    const credTimestamp = credHistory[credHistory.length - 1].intervalEndMs;
+    const paidMap = this._computePaidMap(credHistory);
+
+    const allocations = policies.map(({strategy, budget}) =>
+      createGrainAllocation(strategy, budget, credHistory, paidMap)
+    );
+    return this._act({
+      type: "DISTRIBUTE_GRAIN",
+      version: 1,
+      timestamp: _getTimestamp(),
+      allocations,
+      credTimestamp,
+    });
+  }
+  _distributeGrain({version, allocations}: DistributeGrainV1) {
+    if (version !== 1) {
+      throw new Error(`unknown DISTRIBUTE_GRAIN version: ${version}`);
+    }
+    for (const {version} of allocations) {
+      if (version !== 1) {
+        throw new Error(`unknown allocation version ${version}`);
+      }
+    }
+
+    // Mutation ahead: This method may not fail after this comment
+    for (const {receipts} of allocations) {
+      for (const {address, amount} of receipts) {
+        this._allocateGrain(address, amount);
+      }
+    }
+  }
+  /**
+   * For a CredHistory, create a map showing how much every address in the history
+   * has been paid.
+   *
+   * The CredHistory should have been computed using the Ledger's existing set
+   * of Users and aliases, which means no alias should be present in the
+   * CredHistory. This is important so we can compute BALANCED allocations
+   * properly. If this invariant is violated, we throw an error.
+   */
+  _computePaidMap(history: CredHistory): Map<NodeAddressT, G.Grain> {
+    const credAddresses = new Set();
+    for (const {cred} of history) {
+      for (const address of cred.keys()) {
+        credAddresses.add(address);
+      }
+    }
+    const paidMap = new Map();
+    for (const address of credAddresses) {
+      if (this.canonicalAddress(address) !== address) {
+        const account = NullUtil.get(this.accountByAddress(address));
+        const userId = NullUtil.get(account.userId);
+        const user = NullUtil.get(this.userById(userId));
+        throw new Error(
+          `distributeGrain: non-canonical address in credHistory: ${NodeAddress.toString(
+            address
+          )} (alias of ${user.name})`
+        );
+      }
+      const {paid} = this._getAccount(address);
+      paidMap.set(address, paid);
+    }
+    return paidMap;
+  }
+
+  /**
    * Retrieve the log of all actions in the Ledger's history.
    *
    * May be used to reconstruct the Ledger after serialization.
@@ -413,6 +509,9 @@ export class Ledger {
         break;
       case "REMOVE_ALIAS":
         this._removeAlias(a);
+        break;
+      case "DISTRIBUTE_GRAIN":
+        this._distributeGrain(a);
         break;
       // istanbul ignore next: unreachable per Flow
       default:
@@ -479,7 +578,12 @@ export opaque type LedgerLog = $ReadOnlyArray<Action>;
 /**
  * The Actions are used to store the history of Ledger changes.
  */
-type Action = CreateUserV1 | RenameUserV1 | AddAliasV1 | RemoveAliasV1;
+type Action =
+  | CreateUserV1
+  | RenameUserV1
+  | AddAliasV1
+  | RemoveAliasV1
+  | DistributeGrainV1;
 
 type CreateUserV1 = {|
   +type: "CREATE_USER",
@@ -509,6 +613,18 @@ type RemoveAliasV1 = {|
   +version: 1,
   +timestamp: TimestampMs,
   +retroactivePaid: G.Grain,
+|};
+type DistributeGrainV1 = {|
+  +type: "DISTRIBUTE_GRAIN",
+  +version: 1,
+  +timestamp: TimestampMs,
+  // Timestamp for the Cred Interval for which we're doing the distribution, as
+  // distinct from the timestamp when the distribution literally happened.
+  // If we are doing "catch up" payments for weeks in which we didn't issue Grain,
+  // but meant to, then there might be multiple credTimestamps with the same
+  // literal timestamp.
+  +credTimestamp: TimestampMs,
+  +allocations: $ReadOnlyArray<GrainAllocationV1>,
 |};
 
 const _getTimestamp = () => Date.now();
