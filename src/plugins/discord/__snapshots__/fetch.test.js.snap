@@ -1,0 +1,278 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plugins/discord/fetcher passes snapshot tests fetches channels 1`] = `
+Array [
+  Object {
+    "id": "678348980756938813",
+    "name": "Text Channels",
+    "type": "GUILD_CATEGORY",
+  },
+  Object {
+    "id": "678348980798881844",
+    "name": "Voice Channels",
+    "type": "GUILD_CATEGORY",
+  },
+  Object {
+    "id": "678348980849213472",
+    "name": "general",
+    "type": "GUILD_TEXT",
+  },
+  Object {
+    "id": "678348980878573661",
+    "name": "General",
+    "type": "GUILD_VOICE",
+  },
+  Object {
+    "id": "678394406507905129",
+    "name": "pagination",
+    "type": "GUILD_TEXT",
+  },
+  Object {
+    "id": "678696874869522446",
+    "name": "notmymessage",
+    "type": "GUILD_TEXT",
+  },
+]
+`;
+
+exports[`plugins/discord/fetcher passes snapshot tests fetches emojis 1`] = `
+Array [
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "emoji": Object {
+      "id": "678399364418502669",
+      "name": "sourcecred",
+    },
+    "messageId": "678394436757094410",
+  },
+  Object {
+    "authorId": "439050857921904640",
+    "channelId": "678394406507905129",
+    "emoji": Object {
+      "id": "678399364418502669",
+      "name": "sourcecred",
+    },
+    "messageId": "678394436757094410",
+  },
+]
+`;
+
+exports[`plugins/discord/fetcher passes snapshot tests fetches members 1`] = `
+Array [
+  Object {
+    "nick": null,
+    "user": Object {
+      "bot": false,
+      "discriminator": "5887",
+      "id": "143776454050709505",
+      "username": "Beanow",
+    },
+  },
+  Object {
+    "nick": null,
+    "user": Object {
+      "bot": false,
+      "discriminator": "1337",
+      "id": "420341518948237331",
+      "username": "decentralion",
+    },
+  },
+  Object {
+    "nick": null,
+    "user": Object {
+      "bot": false,
+      "discriminator": "8658",
+      "id": "432981598858903585",
+      "username": "wchargin",
+    },
+  },
+  Object {
+    "nick": null,
+    "user": Object {
+      "bot": false,
+      "discriminator": "2386",
+      "id": "439050857921904640",
+      "username": "Brian Litwin",
+    },
+  },
+  Object {
+    "nick": null,
+    "user": Object {
+      "bot": true,
+      "discriminator": "1705",
+      "id": "678351352770068560",
+      "username": "CredBot-Beanow",
+    },
+  },
+  Object {
+    "nick": null,
+    "user": Object {
+      "bot": true,
+      "discriminator": "3557",
+      "id": "728738433199112280",
+      "username": "sts-credbot",
+    },
+  },
+]
+`;
+
+exports[`plugins/discord/fetcher passes snapshot tests fetches messages 1`] = `
+Array [
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "5",
+    "id": "678394436757094410",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [
+      Object {
+        "id": "678399364418502669",
+        "name": "sourcecred",
+      },
+    ],
+    "timestampMs": 1581812237682,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "4",
+    "id": "678394433233747978",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812236842,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "3",
+    "id": "678394431149178940",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812236345,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "2",
+    "id": "678394428569813013",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812235730,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "1",
+    "id": "678394426153893948",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812235154,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "10",
+    "id": "678394455849566208",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812242234,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "9",
+    "id": "678394451462193154",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812241188,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "8",
+    "id": "678394448497082388",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812240481,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "7",
+    "id": "678394445351092275",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812239731,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "6",
+    "id": "678394442301833247",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812239004,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "15",
+    "id": "678394480184918016",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812248036,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "14",
+    "id": "678394477106167818",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812247302,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "13",
+    "id": "678394473428025354",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812246425,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "12",
+    "id": "678394469048909841",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812245381,
+  },
+  Object {
+    "authorId": "143776454050709505",
+    "channelId": "678394406507905129",
+    "content": "11",
+    "id": "678394468373626890",
+    "mentions": Array [],
+    "nonUserAuthor": false,
+    "reactionEmoji": Array [],
+    "timestampMs": 1581812245220,
+  },
+]
+`;
