@@ -904,12 +904,9 @@ describe("ledger/ledger", () => {
   });
 
   describe("state reconstruction", () => {
-    it("fromActionLog with an empty action log results in an empty ledger", () => {
-      const emptyLog = new Ledger().actionLog();
-      expect(emptyLog).toEqual([]);
-      expect(Ledger.fromActionLog(emptyLog)).toEqual(new Ledger());
-    });
-    it("actionLog and fromActionLog compose to identity", () => {
+    // This is a ledger which has had at least one of every
+    // supported Action.
+    function richLedger(): Ledger {
       const ledger = new Ledger();
       const id1 = ledger.createUser("foo");
       const id2 = ledger.createUser("bar");
@@ -941,6 +938,15 @@ describe("ledger/ledger", () => {
       ];
       ledger.distributeGrain(policies, credHistory);
       ledger.transferGrain({from: ua1, to: ua2, amount: g("10"), memo: null});
+      return ledger;
+    }
+    it("fromActionLog with an empty action log results in an empty ledger", () => {
+      const emptyLog = new Ledger().actionLog();
+      expect(emptyLog).toEqual([]);
+      expect(Ledger.fromActionLog(emptyLog)).toEqual(new Ledger());
+    });
+    it("actionLog and fromActionLog compose to identity", () => {
+      const ledger = richLedger();
       expect(Ledger.fromActionLog(ledger.actionLog())).toEqual(ledger);
     });
   });
