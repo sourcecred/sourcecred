@@ -1,11 +1,10 @@
 // @flow
 
-import {fetchDiscordServer} from "./fetch.js";
 import base64url from "base64url";
 import path from "path";
 import fs from "fs-extra";
 import Database from "better-sqlite3";
-import {DISCORD_SERVER} from "./fetch";
+import {DISCORD_SERVER, fetchDiscordServer, buildDiscordFetch} from "./fetch";
 import {SqliteMirror} from "./sqliteMirror";
 
 const TEST_GUILD_ID = "678348980639498428";
@@ -69,6 +68,23 @@ describe("plugins/discord/fetcher", () => {
       const reactions = mirror.reactions(channelId, messageId);
       expect(reactions.length).toBe(2);
       expect(reactions).toMatchSnapshot();
+    });
+  });
+  describe("network error handling", () => {
+    const makeFetch = (params) => {
+      return jest
+        .fn()
+        .mockImplementation(() => Promise.resolve(new Response("", params)));
+    };
+    it("handles errors", async () => {
+      const fetch = makeFetch({status: 404});
+      const fakeFetch = () => buildDiscordFetch(fetch, "");
+      expect(fakeFetch()).rejects.toThrow("404");
+    });
+    it("handles 50001 code", async () => {
+      const fetch = makeFetch({code: 50001});
+      const fakeFetch = () => buildDiscordFetch(fetch, "");
+      expect(fakeFetch()).rejects.toThrow("50001");
     });
   });
 });

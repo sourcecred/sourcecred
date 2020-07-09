@@ -56,19 +56,40 @@ function getTokenFromEnv(): string {
   return token;
 }
 
-export function buildDiscordFetch(fetch: typeof fetch) {
+function handleErrors(response: Response) {
+  // TODO: handle 50001
+  if (response.status === 429) {
+    // TODO: Retry strategy
+    throw new Error("429");
+  }
+  if (response.status === 404) {
+    throw new Error(`404 Not Found on: ${response.url}; maybe bad serverUrl?`);
+  }
+  if (response.status === 403) {
+    throw new Error(`403 Forbidden: bad API username or key?\n${response.url}`);
+  }
+  if (response.status === 410) {
+    throw new Error(`410 Gone`);
+  }
+  throw new Error(`FETCH ERROR\nresponse status: ${response.status}`);
+}
+
+export function buildDiscordFetch(fetch: typeof fetch, token: string) {
   return async (endpoint: string) => {
-    const fetchOptions = {
+    const params = {
       method: "GET",
       headers: {
         Accept: "application/json",
-        Authorization: `Bot ${getTokenFromEnv()}`,
+        Authorization: `Bot ${token}`,
       },
     };
     const url = new URL(`${DISCORD_SERVER}${endpoint}`).href;
-    const resp = await fetch(url, fetchOptions);
-    // TODO: Error handling
-    return await resp.json();
+    const response = await fetch(url, params);
+    if (response.status !== 200 || response.status !== 201) {
+      handleErrors(response);
+    } else {
+      return await response.json();
+    }
   };
 }
 
@@ -96,7 +117,7 @@ export async function makefetchDiscordServer(guildId: Snowflake) {
   };
   return fetchDiscordServer(
     guildId,
-    fetch,
+    buildDiscordFetch(fetch, getTokenFromEnv()),
     fetchOptions,
     buildSqliteMirror(guildId)
   );
