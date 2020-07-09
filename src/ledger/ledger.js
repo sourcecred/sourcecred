@@ -442,6 +442,61 @@ export class Ledger {
       }
     }
   }
+
+  /**
+   * Transfer Grain from one account to another.
+   *
+   * Fails if the sender does not have enough Grain, or if the Grain amount is negative.
+   * Self-transfers are supported.
+   * An optional memo may be added.
+   *
+   * Note: The arguments need to be bundled together in an object with named
+   * keys, to avoid getting confused about which positional argument is `from`
+   * and which one is `to`.
+   */
+  transferGrain(opts: {|
+    from: NodeAddressT,
+    to: NodeAddressT,
+    amount: G.Grain,
+    memo: string | null,
+  |}) {
+    const {from, to, amount, memo} = opts;
+    return this._act({
+      from,
+      to,
+      amount,
+      memo,
+      timestamp: _getTimestamp(),
+      type: "TRANSFER_GRAIN",
+      version: 1,
+    });
+  }
+  _transferGrain({from, to, amount, version}: TransferGrainV1) {
+    if (version !== 1) {
+      throw new Error(`unknown TRANSFER_GRAIN version: ${version}`);
+    }
+    const fromAccount = this._getAccount(from);
+    if (G.lt(amount, G.ZERO)) {
+      throw new Error(`cannot transfer negative Grain amount: ${amount}`);
+    }
+    if (G.gt(amount, fromAccount.balance)) {
+      throw new Error(
+        `transferGrain: ${NodeAddress.toString(
+          from
+        )} has insufficient balance for transfer: ${amount} > ${
+          fromAccount.balance
+        }`
+      );
+    }
+
+    // Mutation ahead: May not fail after this comment
+    // Ensure that both fromAccount and toAccount exist, by calling _unsafeGetAccount
+    const toAccount = this._unsafeGetAccount(to);
+    this._unsafeGetAccount(from);
+    fromAccount.balance = G.sub(fromAccount.balance, amount);
+    toAccount.balance = G.add(toAccount.balance, amount);
+  }
+
   /**
    * For a CredHistory, create a map showing how much every address in the history
    * has been paid.
@@ -513,6 +568,9 @@ export class Ledger {
       case "DISTRIBUTE_GRAIN":
         this._distributeGrain(a);
         break;
+      case "TRANSFER_GRAIN":
+        this._transferGrain(a);
+        break;
       // istanbul ignore next: unreachable per Flow
       default:
         throw new Error(`Unknown type: ${(a.type: empty)}`);
@@ -583,7 +641,8 @@ type Action =
   | RenameUserV1
   | AddAliasV1
   | RemoveAliasV1
-  | DistributeGrainV1;
+  | DistributeGrainV1
+  | TransferGrainV1;
 
 type CreateUserV1 = {|
   +type: "CREATE_USER",
@@ -625,6 +684,15 @@ type DistributeGrainV1 = {|
   // literal timestamp.
   +credTimestamp: TimestampMs,
   +allocations: $ReadOnlyArray<GrainAllocationV1>,
+|};
+type TransferGrainV1 = {|
+  +type: "TRANSFER_GRAIN",
+  +version: 1,
+  +timestamp: TimestampMs,
+  +from: NodeAddressT,
+  +to: NodeAddressT,
+  +amount: G.Grain,
+  +memo: string | null,
 |};
 
 const _getTimestamp = () => Date.now();
