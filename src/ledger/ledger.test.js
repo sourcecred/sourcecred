@@ -4,7 +4,8 @@ import deepFreeze from "deep-freeze";
 import cloneDeep from "lodash.clonedeep";
 import {random as randomUuid} from "../util/uuid";
 import {NodeAddress} from "../core/graph";
-import {Ledger, type DistributionPolicy} from "./ledger";
+import {Ledger} from "./ledger";
+import {type DistributionPolicy, computeDistribution} from "./grainAllocation";
 import {userAddress} from "./user";
 import * as G from "./grain";
 
@@ -497,14 +498,6 @@ describe("ledger/ledger", () => {
           intervalEndMs: 3,
         },
       ]);
-      it("errors on an empty credHistory", () => {
-        const ledger = new Ledger();
-        failsWithoutMutation(
-          ledger,
-          () => ledger.distributeGrain([], []),
-          "distributeGrain: empty cred history"
-        );
-      });
       it("produces an empty distribution if there are no policies", () => {
         setFakeDate(4);
         const ledger = new Ledger().distributeGrain([], credHistory);
@@ -513,8 +506,7 @@ describe("ledger/ledger", () => {
             type: "DISTRIBUTE_GRAIN",
             version: 1,
             timestamp: 4,
-            credTimestamp: 3,
-            allocations: [],
+            distribution: {credTimestamp: 3, allocations: []},
           },
         ]);
         expect(ledger.accounts()).toEqual([]);
@@ -533,10 +525,15 @@ describe("ledger/ledger", () => {
       it("computes an IMMEDIATE allocation correctly", () => {
         const policy: DistributionPolicy = {
           budget: g("10"),
-          strategy: {type: "IMMEDIATE", version: 1},
+          policyType: "IMMEDIATE",
         };
         setFakeDate(4);
         const ledger = new Ledger().distributeGrain([policy], credHistory);
+        const expectedDistribution = computeDistribution(
+          [policy],
+          credHistory,
+          new Map()
+        );
         const account1 = ledger.accountByAddress(a1);
         const account2 = ledger.accountByAddress(a2);
         expect(account1).toEqual({
@@ -555,32 +552,26 @@ describe("ledger/ledger", () => {
           {
             type: "DISTRIBUTE_GRAIN",
             version: 1,
-            credTimestamp: 3,
             timestamp: 4,
-            allocations: [
-              {
-                strategy: policy.strategy,
-                budget: policy.budget,
-                version: 1,
-                receipts: [
-                  {address: a1, amount: "0"},
-                  {address: a2, amount: "10"},
-                ],
-              },
-            ],
+            distribution: expectedDistribution,
           },
         ]);
       });
       it("computes a BALANCED allocation correctly", () => {
         const policy: DistributionPolicy = {
           budget: g("15"),
-          strategy: {type: "BALANCED", version: 1},
+          policyType: "BALANCED",
         };
         setFakeDate(4);
         const ledger = new Ledger();
         // Give a2 some past payouts, so that the BALANCED
         // strategy should preferentially pay a1
         ledger._allocateGrain(a2, g("5"));
+        const expectedDistribution = computeDistribution(
+          [policy],
+          credHistory,
+          new Map([[a2, g("5")]])
+        );
         ledger.distributeGrain([policy], credHistory);
         const account1 = ledger.accountByAddress(a1);
         const account2 = ledger.accountByAddress(a2);
@@ -600,44 +591,10 @@ describe("ledger/ledger", () => {
           {
             type: "DISTRIBUTE_GRAIN",
             version: 1,
-            credTimestamp: 3,
             timestamp: 4,
-            allocations: [
-              {
-                strategy: policy.strategy,
-                budget: policy.budget,
-                version: 1,
-                receipts: [
-                  {address: a1, amount: "10"},
-                  {address: a2, amount: "5"},
-                ],
-              },
-            ],
+            distribution: expectedDistribution,
           },
         ]);
-      });
-      it("order of the policies doesn't matter", () => {
-        // We are not incrementally computing each allocation, applying it, and
-        // then computing the next one.
-        // Instead, we compute them all upfront, and then apply them.
-        // This means that in the example below, the "BALANCED" policy doesn't
-        // "know" about the payouts from the immediate policy, so someone can
-        // get overpaid from the perspective of the balanced policy. This is OK
-        // because it will get evened out by next week's BALANCED policy taking
-        // this into account.
-        const p1: DistributionPolicy = {
-          budget: g("10"),
-          strategy: {type: "BALANCED", version: 1},
-        };
-        const p2: DistributionPolicy = {
-          budget: g("10"),
-          strategy: {type: "IMMEDIATE", version: 1},
-        };
-        const ps1 = [p1, p2];
-        const ps2 = [p2, p1];
-        const l1 = new Ledger().distributeGrain(ps1, credHistory);
-        const l2 = new Ledger().distributeGrain(ps2, credHistory);
-        expect(l1.accounts()).toEqual(l2.accounts());
       });
       it("errors on unknown action version", () => {
         expect(() =>
@@ -645,23 +602,11 @@ describe("ledger/ledger", () => {
           new Ledger()._distributeGrain({version: 1337})
         ).toThrowError("unknown DISTRIBUTE_GRAIN version: 1337");
       });
-      it("errors on unknown allocation version", () => {
-        expect(() =>
-          new Ledger()._distributeGrain({
-            version: 1,
-            type: "DISTRIBUTE_GRAIN",
-            timestamp: 4,
-            credTimestamp: 9,
-            // $FlowExpectedError
-            allocations: [{version: 1337}],
-          })
-        ).toThrowError("unknown allocation version 1337");
-      });
       it("BALANCED strategy accounts for unlinked aliases' retroactive paid", () => {
         // Sanity check since this property is important.
         const p: DistributionPolicy = {
           budget: g("7"),
-          strategy: {type: "BALANCED", version: 1},
+          policyType: "BALANCED",
         };
         const ledger = new Ledger();
         setFakeDate(4);
@@ -677,6 +622,11 @@ describe("ledger/ledger", () => {
         // From the perspective of the balanced payout: a1 and a2 have equal cred,
         // and a1 has a retroactive allotment of 5 Grain, so therefore from this payout,
         // 6 should go to a2, and 1 should go to a1, bringing them both to 6 Grain post-payout.
+        const expectedDistribution = computeDistribution(
+          [p],
+          credHistory,
+          new Map([[a1, g("5")]])
+        );
         const accountU = ledger.accountByAddress(aU);
         const account1 = ledger.accountByAddress(a1);
         const account2 = ledger.accountByAddress(a2);
@@ -724,19 +674,8 @@ describe("ledger/ledger", () => {
           {
             type: "DISTRIBUTE_GRAIN",
             version: 1,
-            credTimestamp: 3,
             timestamp: 7,
-            allocations: [
-              {
-                strategy: p.strategy,
-                budget: p.budget,
-                version: 1,
-                receipts: [
-                  {address: a1, amount: "1"},
-                  {address: a2, amount: "6"},
-                ],
-              },
-            ],
+            distribution: expectedDistribution,
           },
         ]);
         expect(ledger.accounts()).toEqual([accountU, account1, account2]);
@@ -936,8 +875,8 @@ describe("ledger/ledger", () => {
       const ua1 = userAddress(id1);
       const ua2 = userAddress(id2);
       const policies = [
-        {budget: g("400"), strategy: {type: "BALANCED", version: 1}},
-        {budget: g("100"), strategy: {type: "IMMEDIATE", version: 1}},
+        {budget: g("400"), policyType: "BALANCED"},
+        {budget: g("100"), policyType: "IMMEDIATE"},
       ];
       const credHistory = [
         {

@@ -2,38 +2,47 @@
 
 /**
  * In SourceCred, projects regularly distribute Grain to contributors based on
- * their Cred scores. This is called a "Distribution".
- *
- * This module contains the logic for calculating allocation amounts for
- * contributors. An allocation contains "receipts" showing how much Grain each
- * contributor will receive in a distribution, and the "strategy"
- * used to allocate grain.
- *
- * Currently we support two strategies:
- * - IMMEDIATE, which allocates a fixed budget of grain based on the cred scores
- * in the most recent completed time interval
- * - BALANCED, which allocates a fixed budget of grain based on cred scores
- * across all time, prioritizing paying people who were under-paid historically
- * (i.e. their lifetime earnings are lower than we would expect given their
- * current cred score)
+ * their Cred scores. This is called a "Distribution". This module contains the
+ * logic for computing distributions.
  */
 import {sum} from "d3-array";
 import {mapToArray} from "../util/map";
-import {type NodeAddressT} from "../core/graph";
+import {type NodeAddressT, NodeAddress} from "../core/graph";
 import * as G from "./grain";
+import * as P from "../util/combo";
+import {type TimestampMs} from "../util/timestamp";
 
-export const GRAIN_ALLOCATION_VERSION_1 = 1;
+/**
+ * The Balanced policy attempts to pay Grain to everyone so that their
+ * lifetime Grain payouts are consistent with their lifetime Cred scores.
+ *
+ * We recommend use of the Balanced strategy as it takes new information into
+ * account-- for example, if a user's contributions earned little Cred in the
+ * past, but are now seen as more valuable, the Balanced policy will take this
+ * into account and pay them more, to fully appreciate their past
+ * contributions.
+ */
+export type Balanced = "BALANCED";
+/**
+ * The Immediate policy evenly distributes its Grain budget
+ * across users based on their Cred in the most recent interval.
+ *
+ * It's used when you want to ensure that everyone gets some consistent reward
+ * for participating (even if they may be "overpaid" in a lifetime sense).
+ * We recommend using a smaller budget for the Immediate policy.
+ */
+export type Immediate = "IMMEDIATE";
+export type PolicyType = Immediate | Balanced;
 
-export type AllocationStrategy = ImmediateV1 | BalancedV1;
-
-export type ImmediateV1 = {|
-  +type: "IMMEDIATE",
-  +version: number,
+export type DistributionPolicy = {|
+  +policyType: PolicyType,
+  +budget: G.Grain,
 |};
 
-export type BalancedV1 = {|
-  +type: "BALANCED",
-  +version: number,
+export type Distribution = {|
+  +allocations: $ReadOnlyArray<Allocation>,
+  // The Timestamp of the latest Cred interval used when computing this distribution.
+  +credTimestamp: TimestampMs,
 |};
 
 export type GrainReceipt = {|
@@ -41,10 +50,8 @@ export type GrainReceipt = {|
   +amount: G.Grain,
 |};
 
-export type GrainAllocationV1 = {|
-  +version: number,
-  +strategy: AllocationStrategy,
-  +budget: G.Grain,
+export type Allocation = {|
+  +policy: DistributionPolicy,
   +receipts: $ReadOnlyArray<GrainReceipt>,
 |};
 
@@ -52,47 +59,52 @@ export type CredTimeSlice = {|
   +intervalEndMs: number,
   +cred: $ReadOnlyMap<NodeAddressT, number>,
 |};
-
 export type CredHistory = $ReadOnlyArray<CredTimeSlice>;
 
-/**
- * Compute a full Allocation given:
- * - the strategy we're using
- * - the amount of Grain to allocate
- * - the full cred history for all users
- * - a Map of the total lifetime grain that
- *   has been distributed to each user
- */
-export function createGrainAllocation(
-  strategy: AllocationStrategy,
-  budget: G.Grain,
+export function computeDistribution(
+  policies: $ReadOnlyArray<DistributionPolicy>,
   credHistory: CredHistory,
-  lifetimeGrainAllocation: $ReadOnlyMap<NodeAddressT, G.Grain>
-): GrainAllocationV1 {
+  lifetimePaid: $ReadOnlyMap<NodeAddressT, G.Grain>
+): Distribution {
+  if (credHistory.length === 0) {
+    throw new Error(`cannot distribute with empty credHistory`);
+  }
+  const credTimestamp = credHistory[credHistory.length - 1].intervalEndMs;
+  if (!isFinite(credTimestamp)) {
+    throw new Error(`invalid credTimestamp: ${credTimestamp}`);
+  }
+  const allocations = policies.map((p) =>
+    computeAllocation(p, credHistory, lifetimePaid)
+  );
+  return {credTimestamp, allocations};
+}
+
+export function computeAllocation(
+  policy: DistributionPolicy,
+  credHistory: CredHistory,
+  // A map from each address to the total amount of Grain already paid
+  // to that Address, across time.
+  lifetimePaid: $ReadOnlyMap<NodeAddressT, G.Grain>
+): Allocation {
+  const {budget, policyType} = policy;
   if (G.lt(budget, G.ZERO)) {
     throw new Error(`invalid budget: ${String(budget)}`);
   }
 
   const computeReceipts = (): $ReadOnlyArray<GrainReceipt> => {
-    switch (strategy.type) {
+    switch (policyType) {
       case "IMMEDIATE":
-        return computeImmediateReceipts(strategy, budget, credHistory);
+        return computeImmediateReceipts(budget, credHistory);
       case "BALANCED":
-        return computeBalancedReceipts(
-          strategy,
-          budget,
-          credHistory,
-          lifetimeGrainAllocation
-        );
+        return computeBalancedReceipts(budget, credHistory, lifetimePaid);
+      // istanbul ignore next: unreachable per Flow
       default:
-        throw new Error(`Unexpected type ${strategy.type}`);
+        throw new Error(`Unexpected type ${(policyType: empty)}`);
     }
   };
 
   return {
-    version: GRAIN_ALLOCATION_VERSION_1,
-    strategy,
-    budget,
+    policy,
     receipts: computeReceipts(),
   };
 }
@@ -102,14 +114,9 @@ export function createGrainAllocation(
  * the most recent time interval
  */
 function computeImmediateReceipts(
-  {version}: ImmediateV1,
   budget: G.Grain,
   credHistory: CredHistory
 ): $ReadOnlyArray<GrainReceipt> {
-  if (version !== 1) {
-    throw new Error(`Unsupported IMMEDIATE version: ${version}`);
-  }
-
   if (budget <= G.ZERO || !credHistory.length) {
     return [];
   }
@@ -166,15 +173,10 @@ function computeImmediateReceipts(
  * scores.
  */
 function computeBalancedReceipts(
-  {version}: BalancedV1,
   budget: G.Grain,
   credHistory: CredHistory,
   lifetimeGrainAllocation: $ReadOnlyMap<NodeAddressT, G.Grain>
 ): $ReadOnlyArray<GrainReceipt> {
-  if (version !== 1) {
-    throw new Error(`Unsupported BALANCED version: ${version}`);
-  }
-
   if (budget <= G.ZERO || !credHistory.length) {
     return [];
   }
@@ -243,3 +245,20 @@ function computeBalancedReceipts(
   }
   return receipts;
 }
+
+const policyParser: P.Parser<DistributionPolicy> = P.object({
+  policyType: P.exactly(["IMMEDIATE", "BALANCED"]),
+  budget: G.parser,
+});
+const grainReceiptParser: P.Parser<GrainReceipt> = P.object({
+  address: NodeAddress.parser,
+  amount: G.parser,
+});
+export const allocationParser: P.Parser<Allocation> = P.object({
+  policy: policyParser,
+  receipts: P.array(grainReceiptParser),
+});
+export const distributionParser: P.Parser<Distribution> = P.object({
+  allocations: P.array(allocationParser),
+  credTimestamp: P.number,
+});

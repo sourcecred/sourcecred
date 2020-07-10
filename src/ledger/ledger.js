@@ -20,10 +20,10 @@ import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
 import {random as randomUuid} from "../util/uuid";
 import {
-  type AllocationStrategy,
-  createGrainAllocation,
+  type DistributionPolicy,
+  computeDistribution,
   type CredHistory,
-  type GrainAllocationV1,
+  type Distribution,
 } from "./grainAllocation";
 import * as G from "./grain";
 
@@ -39,17 +39,6 @@ type MutableGrainAccount = {|
 |};
 
 export type GrainAccount = $ReadOnly<MutableGrainAccount>;
-
-/**
- * A policy for producing a Grain distribution.
- *
- * A single distribution event may combine multiple policies;
- * they are evaluated in order.
- */
-export type DistributionPolicy = {|
-  +strategy: AllocationStrategy,
-  +budget: G.Grain,
-|};
 
 /**
  * The ledger for storing identity changes and (eventually) Grain distributions.
@@ -406,42 +395,35 @@ export class Ledger {
    * Distribute Grain given allocation policies, and the Cred history.
    *
    * The order of the policies will not have any affect on the distribution.
-   *
    * See logic and types in `ledger/grainAllocation.js`.
+   *
+   * TODO: Consider refactoring this method to take the Distribution directly,
+   * rather than computing it inline. In that case, we can make a public
+   * endpoint for retrieving the paidMap. This refcator changes the programming
+   * interface but not the serialized Ledger type, so it's not urgent, but
+   * it might be a little cleaner.
    */
   distributeGrain(
     policies: $ReadOnlyArray<DistributionPolicy>,
     credHistory: CredHistory
   ): Ledger {
-    if (credHistory.length === 0) {
-      throw new Error(`distributeGrain: empty cred history`);
-    }
-    const credTimestamp = credHistory[credHistory.length - 1].intervalEndMs;
     const paidMap = this._computePaidMap(credHistory);
 
-    const allocations = policies.map(({strategy, budget}) =>
-      createGrainAllocation(strategy, budget, credHistory, paidMap)
-    );
+    const distribution = computeDistribution(policies, credHistory, paidMap);
     return this._act({
       type: "DISTRIBUTE_GRAIN",
       version: 1,
       timestamp: _getTimestamp(),
-      allocations,
-      credTimestamp,
+      distribution,
     });
   }
-  _distributeGrain({version, allocations}: DistributeGrainV1) {
+  _distributeGrain({version, distribution}: DistributeGrainV1) {
     if (version !== 1) {
       throw new Error(`unknown DISTRIBUTE_GRAIN version: ${version}`);
     }
-    for (const {version} of allocations) {
-      if (version !== 1) {
-        throw new Error(`unknown allocation version ${version}`);
-      }
-    }
 
     // Mutation ahead: This method may not fail after this comment
-    for (const {receipts} of allocations) {
+    for (const {receipts} of distribution.allocations) {
       for (const {address, amount} of receipts) {
         this._allocateGrain(address, amount);
       }
@@ -691,13 +673,7 @@ type DistributeGrainV1 = {|
   +type: "DISTRIBUTE_GRAIN",
   +version: 1,
   +timestamp: TimestampMs,
-  // Timestamp for the Cred Interval for which we're doing the distribution, as
-  // distinct from the timestamp when the distribution literally happened.
-  // If we are doing "catch up" payments for weeks in which we didn't issue Grain,
-  // but meant to, then there might be multiple credTimestamps with the same
-  // literal timestamp.
-  +credTimestamp: TimestampMs,
-  +allocations: $ReadOnlyArray<GrainAllocationV1>,
+  +distribution: Distribution,
 |};
 type TransferGrainV1 = {|
   +type: "TRANSFER_GRAIN",

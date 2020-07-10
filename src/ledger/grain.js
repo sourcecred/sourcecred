@@ -1,5 +1,7 @@
 // @flow
 
+import * as P from "../util/combo";
+
 /**
  * This module contains the types for tracking Grain, which is the native
  * project-specific, cred-linked token created in SourceCred instances. In
@@ -182,3 +184,5 @@ export function fromApproximateFloat(f: number): Grain {
 export function toFloatRatio(numerator: Grain, denominator: Grain): number {
   return Number(numerator) / Number(denominator);
 }
+
+export const parser: P.Parser<Grain> = P.fmap(P.string, fromString);
