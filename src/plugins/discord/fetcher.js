@@ -59,7 +59,6 @@ export class DiscordFetcher {
 
   async channels(guildId: Snowflake): Promise<$ReadOnlyArray<Model.Channel>> {
     const response = await this._fetch(`/guilds/${guildId}/channels`);
-    console.log(response);
     return response.map((x) => ({
       id: x.id,
       name: x.name,
