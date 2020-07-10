@@ -67,6 +67,16 @@
       "hoist": false,
       "managed": true,
       "mentionable": false
+    },
+    {
+      "id": "728740243926286386",
+      "name": "sts-credbot",
+      "permissions": 66560,
+      "position": 1,
+      "color": 0,
+      "hoist": false,
+      "managed": true,
+      "mentionable": false
     }
   ],
   "default_message_notifications": 1,
