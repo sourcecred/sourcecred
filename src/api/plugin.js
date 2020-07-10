@@ -4,9 +4,9 @@ import type {PluginDeclaration} from "../analysis/pluginDeclaration";
 import type {WeightedGraph} from "../core/weightedGraph";
 import type {ReferenceDetector} from "../core/references/referenceDetector";
 import type {TaskReporter} from "../util/taskReporter";
-import type {PluginId} from "../api/pluginId";
+import type {PluginId} from "./pluginId";
 
-export interface CliPlugin {
+export interface Plugin {
   +id: PluginId;
   declaration(): PluginDeclaration;
   load(PluginDirectoryContext, TaskReporter): Promise<void>;

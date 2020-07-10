@@ -3,8 +3,11 @@
 import {join as pathJoin} from "path";
 import fs from "fs-extra";
 
-import type {PluginDirectoryContext} from "./cliPlugin";
-import {parser as configParser, type InstanceConfig} from "./instanceConfig";
+import type {PluginDirectoryContext} from "../api/plugin";
+import {
+  parser as configParser,
+  type InstanceConfig,
+} from "../api/instanceConfig";
 import * as C from "../util/combo";
 
 export function loadInstanceConfig(baseDir: string): Promise<InstanceConfig> {
