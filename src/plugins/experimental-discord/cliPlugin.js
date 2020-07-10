@@ -17,6 +17,10 @@ import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {createGraph} from "./createGraph";
 import * as Model from "./models";
 import {SqliteMirrorRepository} from "./mirrorRepository";
+import {
+  type PluginId,
+  fromString as pluginIdFromString,
+} from "../../api/pluginId";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
@@ -38,6 +42,8 @@ function getTokenFromEnv(): DiscordToken {
 }
 
 export class DiscordCliPlugin implements CliPlugin {
+  id: PluginId = pluginIdFromString("sourcecred/discord");
+
   declaration(): PluginDeclaration {
     return declaration;
   }

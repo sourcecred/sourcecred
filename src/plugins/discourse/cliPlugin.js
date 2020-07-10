@@ -17,6 +17,10 @@ import {Fetcher} from "./fetch";
 import {Mirror} from "./mirror";
 import {DiscourseReferenceDetector} from "./referenceDetector";
 import {type TaskReporter} from "../../util/taskReporter";
+import {
+  type PluginId,
+  fromString as pluginIdFromString,
+} from "../../api/pluginId";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
@@ -37,6 +41,8 @@ async function repository(
 }
 
 export class DiscourseCliPlugin implements CliPlugin {
+  id: PluginId = pluginIdFromString("sourcecred/discourse");
+
   declaration(): PluginDeclaration {
     return declaration;
   }

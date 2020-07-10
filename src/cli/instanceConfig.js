@@ -1,44 +1,37 @@
 // @flow
 
-import * as Combo from "../util/combo";
+import * as P from "../util/combo";
 import {CliPlugin} from "./cliPlugin";
 import {bundledPlugins as getAllBundledPlugins} from "./bundledPlugins";
-
-type PluginName = string;
+import * as pluginId from "../api/pluginId";
 
 export type InstanceConfig = {|
-  +bundledPlugins: Map<PluginName, CliPlugin>,
+  +bundledPlugins: Map<pluginId.PluginId, CliPlugin>,
 |};
 
-export type RawInstanceConfig = {|
-  +bundledPlugins: $ReadOnlyArray<BundledPluginSpec>,
+type RawInstanceConfig = {|
+  // Plugin identifier, like `sourcecred/identity`. Version number is
+  // implicit from the SourceCred version. This is a stopgap until we have
+  // a plugin system that admits external, dynamically loaded
+  // dependencies.
+  +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
 |};
 
-// Plugin identifier, like `sourcecred/identity`. Version number is
-// implicit from the SourceCred version. This is a stopgap until we have
-// a plugin system that admits external, dynamically loaded
-// dependencies.
-export type BundledPluginSpec = string;
+const rawParser: P.Parser<RawInstanceConfig> = P.object({
+  bundledPlugins: P.array(pluginId.parser),
+});
 
-const parser: Combo.Parser<InstanceConfig> = (() => {
-  const C = Combo;
-  function makePluginMap(bundledPluginNames) {
-    const allBundledPlugins = getAllBundledPlugins();
-    const bundledPlugins = new Map();
-    for (const name of bundledPluginNames) {
-      const plugin = allBundledPlugins[name];
-      if (plugin == null) {
-        throw new Error("bad bundled plugin: " + JSON.stringify(name));
-      }
-      bundledPlugins.set(name, plugin);
+function upgrade(raw: RawInstanceConfig): InstanceConfig {
+  const allBundledPlugins = getAllBundledPlugins();
+  const bundledPlugins = new Map();
+  for (const id of raw.bundledPlugins) {
+    const plugin = allBundledPlugins[id];
+    if (plugin == null) {
+      throw new Error("bad bundled plugin: " + JSON.stringify(id));
     }
-    return bundledPlugins;
+    bundledPlugins.set(id, plugin);
   }
-  return C.object({
-    bundledPlugins: C.fmap(C.array(C.string), makePluginMap),
-  });
-})();
-
-export function parse(raw: Combo.JsonObject): InstanceConfig {
-  return parser.parseOrThrow(raw);
+  return {bundledPlugins};
 }
+
+export const parser: P.Parser<InstanceConfig> = P.fmap(rawParser, upgrade);

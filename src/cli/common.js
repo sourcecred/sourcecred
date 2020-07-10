@@ -4,15 +4,12 @@ import {join as pathJoin} from "path";
 import fs from "fs-extra";
 
 import type {PluginDirectoryContext} from "./cliPlugin";
-import {parse as parseConfig, type InstanceConfig} from "./instanceConfig";
+import {parser as configParser, type InstanceConfig} from "./instanceConfig";
 import * as C from "../util/combo";
 
-export async function loadInstanceConfig(
-  baseDir: string
-): Promise<InstanceConfig> {
+export function loadInstanceConfig(baseDir: string): Promise<InstanceConfig> {
   const projectFilePath = pathJoin(baseDir, "sourcecred.json");
-  const contents = await fs.readFile(projectFilePath);
-  return Promise.resolve(parseConfig(JSON.parse(contents)));
+  return loadJson(projectFilePath, configParser);
 }
 
 // Make a directory, if it doesn't exist.

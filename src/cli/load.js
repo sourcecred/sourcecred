@@ -4,6 +4,7 @@ import * as NullUtil from "../util/null";
 import type {Command} from "./command";
 import {loadInstanceConfig, pluginDirectoryContext} from "./common";
 import {LoggingTaskReporter} from "../util/taskReporter";
+import * as pluginId from "../api/pluginId";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -18,12 +19,13 @@ const loadCommand: Command = async (args, std) => {
     pluginsToLoad = config.bundledPlugins.keys();
   } else {
     for (const arg of args) {
-      if (config.bundledPlugins.has(arg)) {
-        pluginsToLoad.push(arg);
+      const id = pluginId.fromString(arg);
+      if (config.bundledPlugins.has(id)) {
+        pluginsToLoad.push(id);
       } else {
         return die(
           std,
-          `can't find plugin ${arg}; remember to use fully scoped name, as in sourcecred/github`
+          `can't find plugin ${id}; remember to use fully scoped name, as in sourcecred/github`
         );
       }
     }
