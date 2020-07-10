@@ -100,8 +100,8 @@ to run them all. This will run:
     disable spurious lint errors on a per-line basis by inserting a
     preceding line with `// eslint-disable-next-line LINT_RULE_NAME`.
 
-  - **Backend applications build** (`yarn backend`). This makes sure
-    that the CLI still builds.
+  - **Backend applications build** (`yarn build:backend`). This makes
+    sure that the CLI still builds.
 
   - **Check for `@flow` pragmas** (`./scripts/ensure-flow.sh`). This
     makes sure that every file includes a `// @flow` directive or an

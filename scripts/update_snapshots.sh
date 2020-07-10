@@ -17,7 +17,7 @@ cleanup() {
 trap cleanup EXIT
 
 SOURCECRED_BIN="${tmpdir}/bin"
-yarn run --silent backend --output-path "${SOURCECRED_BIN}"
+yarn run --silent build:backend --output-path "${SOURCECRED_BIN}"
 export SOURCECRED_BIN  # for Sharness and shell tests
 export NODE_PATH="${toplevel}/node_modules${NODE_PATH:+:${NODE_PATH}}"
 
@@ -27,10 +27,7 @@ node "${SOURCECRED_BIN}/generateGithubGraphqlFlowTypes.js" \
     >src/plugins/github/graphqlTypes.js
 
 echo "Updating sharness/test_load_example_github.t"
-(cd sharness; UPDATE_SNAPSHOT=1 ./test_load_example_github.t -l)
-
-echo "Updating sharness/test_cli_scores.t"
-(cd sharness; UPDATE_SNAPSHOT=1 ./test_cli_scores.t -l)
+(cd sharness; UPDATE_SNAPSHOT=1 ./load_test_instance.t -l)
 
 echo "Updating github/fetchGithubOrgTest.sh"
 ./src/plugins/github/fetchGithubOrgTest.sh -u --no-build

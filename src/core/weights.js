@@ -142,12 +142,10 @@ function deserialize_0_2_0(weights: SerializedWeights_0_2_0): Weights {
 }
 
 const Parse_0_2_0: C.Parser<SerializedWeights_0_2_0> = (() => {
-  const parseNodeAddress = C.fmap(C.string, NodeAddress.fromRaw);
-  const parseEdgeAddress = C.fmap(C.string, EdgeAddress.fromRaw);
   const parseEdgeWeight = C.object({forwards: C.number, backwards: C.number});
   return C.object({
-    nodeWeights: C.dict(C.number, parseNodeAddress),
-    edgeWeights: C.dict(parseEdgeWeight, parseEdgeAddress),
+    nodeWeights: C.dict(C.number, NodeAddress.parser),
+    edgeWeights: C.dict(parseEdgeWeight, EdgeAddress.parser),
   });
 })();
 

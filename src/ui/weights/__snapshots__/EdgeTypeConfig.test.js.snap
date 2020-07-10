@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ui/weights/EdgeTypeConfig EdgeWeightSlider renders the name along with some Greek characters 1`] = `
+<React.Fragment>
+  <span
+    style={
+      Object {
+        "fontStyle": "italic",
+        "fontWeight": 700,
+        "marginRight": "0.15em",
+      }
+    }
+  >
+    α
+  </span>
+   
+  foo
+   
+  <span
+    style={
+      Object {
+        "fontStyle": "italic",
+        "fontWeight": 700,
+        "marginRight": "0.15em",
+      }
+    }
+  >
+    β
+  </span>
+</React.Fragment>
+`;

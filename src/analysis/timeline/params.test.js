@@ -8,6 +8,7 @@ import {
   type TimelineCredParameters,
   DEFAULT_ALPHA,
   DEFAULT_INTERVAL_DECAY,
+  parser,
 } from "./params";
 
 describe("analysis/timeline/params", () => {
@@ -43,6 +44,19 @@ describe("analysis/timeline/params", () => {
       const params = partialParams({intervalDecay: 0.1});
       expect(params.alpha).toEqual(DEFAULT_ALPHA);
       expect(params.intervalDecay).toEqual(0.1);
+    });
+  });
+
+  describe("parser", () => {
+    it("works on a full object", () => {
+      const params: TimelineCredParameters = {alpha: 0.34, intervalDecay: 0.1};
+      expect(parser.parseOrThrow(params)).toEqual(params);
+    });
+    it("works on a partial object", () => {
+      expect(parser.parseOrThrow({})).toEqual(defaultParams());
+    });
+    it("rejects bad params", () => {
+      expect(() => parser.parseOrThrow({alpha: "foo"})).toThrowError("string");
     });
   });
 });

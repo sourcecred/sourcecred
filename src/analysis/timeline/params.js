@@ -1,5 +1,7 @@
 // @flow
 
+import * as C from "../../util/combo";
+
 /**
  * Parameters for computing TimelineCred
  *
@@ -44,6 +46,16 @@ export function paramsFromJSON(
     intervalDecay: p.intervalDecay,
   };
 }
+
+const partialParser: C.Parser<$Shape<TimelineCredParameters>> = C.shape({
+  alpha: C.number,
+  intervalDecay: C.number,
+});
+
+export const parser: C.Parser<TimelineCredParameters> = C.fmap(
+  partialParser,
+  partialParams
+);
 
 /**
  * Exports the default TimelineCredParameters.

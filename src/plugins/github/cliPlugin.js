@@ -9,8 +9,11 @@ import type {CacheProvider} from "../../backend/cache";
 import type {CliPlugin, PluginDirectoryContext} from "../../cli/cliPlugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {ReferenceDetector} from "../../core/references/referenceDetector";
-import type {WeightedGraph} from "../../core/weightedGraph";
-import {Graph} from "../../core/graph";
+import {
+  type WeightedGraph,
+  merge as mergeWeightedGraph,
+} from "../../core/weightedGraph";
+import {merge as mergeWeights} from "../../core/weights";
 import {RelationalView} from "./relationalView";
 import {createGraph} from "./createGraph";
 import {declaration} from "./declaration";
@@ -87,15 +90,16 @@ export class GithubCliPlugin implements CliPlugin {
     for (const repoId of config.repoIds) {
       repositories.push(await fetchGithubRepoFromCache(repoId, {token, cache}));
     }
-    const graph = Graph.merge(
+    const wg = mergeWeightedGraph(
       repositories.map((r) => {
         const rv = new RelationalView();
         rv.addRepository(r);
         return createGraph(rv);
       })
     );
-    const weights = weightsForDeclaration(declaration);
-    return {graph, weights};
+    const pluginDefaultWeights = weightsForDeclaration(declaration);
+    const weights = mergeWeights([wg.weights, pluginDefaultWeights]);
+    return {graph: wg.graph, weights};
   }
 
   async referenceDetector(

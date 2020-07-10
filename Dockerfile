@@ -16,6 +16,6 @@ ENV SOURCECRED_DIRECTORY ${SOURCECRED_DEFAULT_DIRECTORY}
 
 # Install the remainder of our code.
 COPY . /code
-RUN yarn backend
+RUN yarn build
 
 ENTRYPOINT ["/bin/bash", "/code/scripts/docker-entrypoint.sh"]

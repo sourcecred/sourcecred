@@ -80,19 +80,11 @@ describe("plugins/discourse/createGraph", () => {
         maxTopicId: this._topics.reduce((max, t) => Math.max(t.id, max), 0),
       };
     }
-    topicsInCategories() {
-      throw new Error(
-        "Method topicsInCategories should be unused for createGraph"
-      );
-    }
     findUsername() {
       throw new Error("Method findUsername should be unused by createGraph");
     }
     topicById() {
       throw new Error("Method topicById should be unused by createGraph");
-    }
-    postsInTopic() {
-      throw new Error("Method postsInTopic should be unused by createGraph");
     }
   }
 

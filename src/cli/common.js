@@ -50,7 +50,7 @@ export function pluginDirectoryContext(
   pluginName: string
 ): PluginDirectoryContext {
   const cacheDir = makePluginDir(baseDir, ["cache"], pluginName);
-  const configDir = makePluginDir(baseDir, ["config"], pluginName);
+  const configDir = makePluginDir(baseDir, ["config", "plugins"], pluginName);
   return {
     configDirectory() {
       return configDir;

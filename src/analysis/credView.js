@@ -1,13 +1,12 @@
 // @flow
 
-import {type Weights} from "../core/weights";
-import {type CredResult} from "./credResult";
+import {type Weights, type EdgeWeight} from "../core/weights";
+import {type CredResult, compute} from "./credResult";
 import {type TimelineCredParameters} from "./timeline/params";
-import {Graph} from "../core/graph";
 import {type PluginDeclarations} from "./pluginDeclaration";
+import {type NodeType, type EdgeType} from "./types";
 
 import {get as nullGet} from "../util/null";
-import {type EdgeWeight} from "../core/weights";
 import type {TimestampMs} from "../util/timestamp";
 import {
   type NodeWeightEvaluator,
@@ -15,12 +14,19 @@ import {
   type EdgeWeightEvaluator,
   edgeWeightEvaluator,
 } from "../core/algorithm/weightEvaluator";
+import {NodeTrie, EdgeTrie} from "../core/trie";
 import {
+  Graph,
   type NodeAddressT,
   type EdgeAddressT,
   type Node as GraphNode,
   type Edge as GraphEdge,
+  type DirectionT,
+  Direction,
+  NodeAddress,
+  EdgeAddress,
 } from "../core/graph";
+import {overrideWeights} from "../core/weightedGraph";
 import type {
   NodeCredSummary,
   NodeCredOverTime,
@@ -35,6 +41,7 @@ export type CredNode = {|
   +timestamp: TimestampMs | null,
   +credSummary: NodeCredSummary,
   +credOverTime: NodeCredOverTime | null,
+  +type: NodeType | null,
 |};
 
 export type CredEdge = {|
@@ -45,7 +52,32 @@ export type CredEdge = {|
   +credSummary: EdgeCredSummary,
   +credOverTime: EdgeCredOverTime | null,
   +timestamp: TimestampMs,
+  +type: EdgeType | null,
 |};
+
+export type EdgeFlow = {|
+  +type: "EDGE",
+  +edge: CredEdge,
+  +neighbor: CredNode,
+  +flow: number,
+|};
+
+export type ReturnFlow = {|
+  +type: "RADIATE",
+  +flow: number,
+|};
+
+export type MintFlow = {|
+  +type: "MINT",
+  +flow: number,
+|};
+
+export type SyntheticLoopFlow = {|
+  +type: "SYNTHETIC_LOOP",
+  +flow: number,
+|};
+
+export type Flow = EdgeFlow | MintFlow | ReturnFlow | SyntheticLoopFlow;
 
 export type EdgesOptions = {|
   // An edge address prefix. Only show edges whose addresses match this prefix.
@@ -71,6 +103,8 @@ export class CredView {
   +_edgeAddressToIndex: Map<EdgeAddressT, number>;
   +_nodeEvaluator: NodeWeightEvaluator;
   +_edgeEvaluator: EdgeWeightEvaluator;
+  +_nodeTypeTrie: NodeTrie<NodeType>;
+  +_edgeTypeTrie: EdgeTrie<EdgeType>;
 
   constructor(result: CredResult) {
     this._credResult = result;
@@ -81,6 +115,16 @@ export class CredView {
     this._edgeAddressToIndex = new Map(edges.map((n, i) => [n.address, i]));
     this._nodeEvaluator = nodeWeightEvaluator(weights);
     this._edgeEvaluator = edgeWeightEvaluator(weights);
+    const nodeTypes = [].concat(...result.plugins.map((p) => p.nodeTypes));
+    this._nodeTypeTrie = new NodeTrie();
+    for (const t of nodeTypes) {
+      this._nodeTypeTrie.add(t.prefix, t);
+    }
+    const edgeTypes = [].concat(...result.plugins.map((p) => p.edgeTypes));
+    this._edgeTypeTrie = new EdgeTrie();
+    for (const t of edgeTypes) {
+      this._edgeTypeTrie.add(t.prefix, t);
+    }
   }
 
   graph(): Graph {
@@ -108,6 +152,7 @@ export class CredView {
     const credSummary = this._credResult.credData.nodeSummaries[idx];
     const credOverTime = this._credResult.credData.nodeOverTime[idx];
     const minted = this._nodeEvaluator(n.address);
+    const type = this._nodeTypeTrie.getLast(n.address);
     return {
       timestamp: n.timestampMs,
       description: n.description,
@@ -115,6 +160,7 @@ export class CredView {
       credSummary,
       credOverTime,
       minted,
+      type: type ? type : null,
     };
   }
   node(a: NodeAddressT): ?CredNode {
@@ -128,6 +174,15 @@ export class CredView {
     const graphNodes = Array.from(this.graph().nodes(options));
     return graphNodes.map((x) => this._promoteNode(x));
   }
+  userNodes(): $ReadOnlyArray<CredNode> {
+    const userPrefixes = []
+      .concat(...this.plugins().map((x) => x.userTypes))
+      .map((x) => x.prefix);
+    const nodes = this.nodes();
+    return nodes.filter((n) =>
+      userPrefixes.some((p) => NodeAddress.hasPrefix(n.address, p))
+    );
+  }
 
   _promoteEdge(e: GraphEdge): CredEdge {
     const idx = nullGet(this._edgeAddressToIndex.get(e.address));
@@ -136,6 +191,7 @@ export class CredView {
     const credSummary = this._credResult.credData.edgeSummaries[idx];
     const credOverTime = this._credResult.credData.edgeOverTime[idx];
     const rawWeight = this._edgeEvaluator(e.address);
+    const type = this._edgeTypeTrie.getLast(e.address);
     return {
       timestamp: e.timestampMs,
       address: e.address,
@@ -144,6 +200,7 @@ export class CredView {
       credSummary,
       credOverTime,
       rawWeight,
+      type: type ? type : null,
     };
   }
   edge(a: EdgeAddressT): ?CredEdge {
@@ -159,4 +216,68 @@ export class CredView {
     );
     return graphEdges.map((x) => this._promoteEdge(x));
   }
+
+  inflows(addr: NodeAddressT): ?$ReadOnlyArray<Flow> {
+    return this._flows(addr, Direction.IN);
+  }
+
+  outflows(addr: NodeAddressT): ?$ReadOnlyArray<Flow> {
+    return this._flows(addr, Direction.OUT);
+  }
+
+  _flows(addr: NodeAddressT, direction: DirectionT): ?$ReadOnlyArray<Flow> {
+    const credNode = this.node(addr);
+    if (credNode == null) {
+      return undefined;
+    }
+    const {alpha} = this.params();
+    const flows: Flow[] = [];
+    const {seedFlow, syntheticLoopFlow, cred} = credNode.credSummary;
+    if (syntheticLoopFlow > 0) {
+      flows.push({type: "SYNTHETIC_LOOP", flow: syntheticLoopFlow});
+    }
+    if (direction === Direction.IN) {
+      if (seedFlow > 0) {
+        flows.push({type: "MINT", flow: seedFlow});
+      }
+    } else {
+      flows.push({type: "RADIATE", flow: cred * alpha});
+    }
+
+    for (const {edge, node} of this.graph().neighbors(addr, {
+      direction: Direction.ANY,
+      nodePrefix: NodeAddress.empty,
+      edgePrefix: EdgeAddress.empty,
+    })) {
+      const credEdge = nullGet(this.edge(edge.address));
+      const credNeighbor = nullGet(this.node(node.address));
+      const {forwardFlow, backwardFlow} = credEdge.credSummary;
+      const flowDirection = xor(addr === edge.src, direction === Direction.IN);
+      const edgeFlow: EdgeFlow = {
+        type: "EDGE",
+        edge: credEdge,
+        neighbor: credNeighbor,
+        flow: flowDirection ? forwardFlow : backwardFlow,
+      };
+      flows.push(edgeFlow);
+    }
+    return flows;
+  }
+
+  /**
+   * Compute a new CredView, with new params and weights but using the
+   * graph from this CredView.
+   */
+  async recompute(
+    weights: Weights,
+    params: TimelineCredParameters
+  ): Promise<CredView> {
+    const wg = overrideWeights(this._credResult.weightedGraph, weights);
+    const credResult = await compute(wg, params, this.plugins());
+    return new CredView(credResult);
+  }
+}
+
+function xor(a: boolean, b: boolean): boolean {
+  return (a && !b) || (!a && b);
 }
