@@ -90,5 +90,5 @@ export const usernameParser: C.Parser<Username> = C.fmap(
 export const userParser: C.Parser<User> = C.object({
   id: uuidParser,
   name: usernameParser,
-  aliases: C.array(C.fmap(C.string, NodeAddress.fromRaw)),
+  aliases: C.array(NodeAddress.parser),
 });

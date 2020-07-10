@@ -4,6 +4,7 @@ import stringify from "json-stable-stringify";
 import deepFreeze from "deep-freeze";
 
 import * as MapUtil from "../util/map";
+import * as C from "../util/combo";
 
 export interface AddressModule<Address: string> {
   /**
@@ -86,6 +87,13 @@ export interface AddressModule<Address: string> {
    * Throws an error if the string is not a valid Address.
    */
   fromRaw(raw: string): Address;
+
+  /**
+   * A parser for Addresses.
+   *
+   * Convenience wrapper `fromRaw`.
+   */
+  parser: C.Parser<Address>;
 }
 
 export type Options = {|
@@ -259,6 +267,8 @@ export function makeAddressModule(options: Options): AddressModule<string> {
     return address;
   }
 
+  const parser: C.Parser<Address> = C.fmap(C.string, fromRaw);
+
   const result = {
     assertValid,
     assertValidParts,
@@ -269,6 +279,7 @@ export function makeAddressModule(options: Options): AddressModule<string> {
     append,
     hasPrefix,
     fromRaw,
+    parser,
   };
   return deepFreeze(result);
 }
