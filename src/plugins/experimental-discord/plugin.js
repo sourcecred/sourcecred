@@ -2,7 +2,7 @@
 
 import Database from "better-sqlite3";
 
-import type {CliPlugin, PluginDirectoryContext} from "../../cli/cliPlugin";
+import type {Plugin, PluginDirectoryContext} from "../../api/plugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {parseConfig, type DiscordConfig, type DiscordToken} from "./config";
 import {declaration} from "./declaration";
@@ -41,7 +41,7 @@ function getTokenFromEnv(): DiscordToken {
   return rawToken;
 }
 
-export class DiscordCliPlugin implements CliPlugin {
+export class DiscordPlugin implements Plugin {
   id: PluginId = pluginIdFromString("sourcecred/discord");
 
   declaration(): PluginDeclaration {

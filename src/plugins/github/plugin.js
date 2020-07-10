@@ -6,7 +6,7 @@ import {join as pathJoin} from "path";
 
 import fetchGithubRepo, {fetchGithubRepoFromCache} from "./fetchGithubRepo";
 import type {CacheProvider} from "../../backend/cache";
-import type {CliPlugin, PluginDirectoryContext} from "../../cli/cliPlugin";
+import type {Plugin, PluginDirectoryContext} from "../../api/plugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {ReferenceDetector} from "../../core/references/referenceDetector";
 import {
@@ -60,7 +60,7 @@ function getTokenFromEnv(): GithubToken {
   return validateToken(rawToken);
 }
 
-export class GithubCliPlugin implements CliPlugin {
+export class GithubPlugin implements Plugin {
   id: PluginId = pluginIdFromString("sourcecred/github");
 
   declaration(): PluginDeclaration {

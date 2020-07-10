@@ -1,12 +1,12 @@
 // @flow
 
 import * as P from "../util/combo";
-import {CliPlugin} from "./cliPlugin";
+import {Plugin} from "./plugin";
 import {bundledPlugins as getAllBundledPlugins} from "./bundledPlugins";
-import * as pluginId from "../api/pluginId";
+import * as pluginId from "./pluginId";
 
 export type InstanceConfig = {|
-  +bundledPlugins: Map<pluginId.PluginId, CliPlugin>,
+  +bundledPlugins: Map<pluginId.PluginId, Plugin>,
 |};
 
 type RawInstanceConfig = {|

@@ -9,7 +9,7 @@ import * as NullUtil from "../util/null";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {CascadingReferenceDetector} from "../core/references/cascadingReferenceDetector";
 import type {Command} from "./command";
-import {type InstanceConfig} from "./instanceConfig";
+import {type InstanceConfig} from "../api/instanceConfig";
 import {
   makePluginDir,
   loadInstanceConfig,
