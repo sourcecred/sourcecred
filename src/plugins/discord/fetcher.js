@@ -9,7 +9,7 @@ type FetchEndpoint = (endpoint: string) => Promise<any>;
  * Provide the Guild ID to fetch against, and the 'limit'
  * parameter when fetching GuildMembers, Messages, and Reactions.
  */
-type FetchOptions = {|
+export type FetchOptions = {|
   membersLimit: number,
   messagesLimit: number,
   reactionsLimit: number,
@@ -24,30 +24,6 @@ export type ResultPage<T> = {|
   +pageInfo: PageInfo,
   +results: $ReadOnlyArray<T>,
 |};
-
-/**
- * An interface to fetch Discord data
- */
-export interface DiscordFetcher {
-  channels(guildId: Snowflake): Promise<$ReadOnlyArray<Model.Channel>>;
-
-  members(
-    guildId: Snowflake,
-    after: Snowflake
-  ): Promise<ResultPage<Model.GuildMember>>;
-
-  messages(
-    channel: Snowflake,
-    after: Snowflake
-  ): Promise<ResultPage<Model.Message>>;
-
-  reactions(
-    channel: Snowflake,
-    message: Snowflake,
-    emoji: Model.Emoji,
-    after: Snowflake
-  ): Promise<ResultPage<Model.Reaction>>;
-}
 
 /**
  * Fetcher is responsible for:
@@ -67,7 +43,7 @@ export interface DiscordFetcher {
  *   returning an array of Channel objects in the corresponding method.
  *   See: https://discordapp.com/developers/docs/resources/guild#get-guild-channels
  */
-export class Fetcher implements DiscordFetcher {
+export class DiscordFetcher {
   +_fetch: FetchEndpoint;
   +_options: FetchOptions;
 
@@ -83,6 +59,7 @@ export class Fetcher implements DiscordFetcher {
 
   async channels(guildId: Snowflake): Promise<$ReadOnlyArray<Model.Channel>> {
     const response = await this._fetch(`/guilds/${guildId}/channels`);
+    console.log(response);
     return response.map((x) => ({
       id: x.id,
       name: x.name,
@@ -131,8 +108,7 @@ export class Fetcher implements DiscordFetcher {
       mentions: (x.mentions || []).map((user) => user.id),
     }));
     const hasNextPage = results.length === messagesLimit;
-    const endCursor =
-      response.length > 0 ? response[response.length - 1].id : null;
+    const endCursor = response.length > 0 ? response[0].id : null;
     const pageInfo = {hasNextPage, endCursor};
     return {results, pageInfo};
   }
@@ -148,7 +124,7 @@ export class Fetcher implements DiscordFetcher {
     const endpoint = `/channels/${channel}/messages/${message}/reactions/${emojiRef}?after=${after}&limit=${reactionsLimit}`;
     const response = await this._fetch(endpoint);
     const results = response.map((x) => ({
-      emoji: x.emoji,
+      emoji: emoji,
       channelId: channel,
       messageId: message,
       authorId: x.id,

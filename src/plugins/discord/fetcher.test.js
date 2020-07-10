@@ -1,6 +1,6 @@
 // @flow
 
-import {Fetcher} from "./fetcher";
+import {DiscordFetcher} from "./fetcher";
 import {
   type Channel,
   type Guild,
@@ -27,7 +27,7 @@ describe("plugins/discord/fetcher", () => {
   describe("fetch guild", () => {
     it("passes correct endpoint", async () => {
       const fetch = jest.fn(() => Promise.resolve([]));
-      const fetcher = new Fetcher(fetch, defaultOptions());
+      const fetcher = new DiscordFetcher(fetch, defaultOptions());
       await fetcher.guild("1");
       expect(fetch.mock.calls[0]).toEqual(["guilds/1"]);
     });
@@ -35,7 +35,7 @@ describe("plugins/discord/fetcher", () => {
     it("handles response", async () => {
       const expected: Guild = {id: "1", name: "guildname", permissions: 0};
       const fetch = jest.fn(() => Promise.resolve(expected));
-      const fetcher = new Fetcher(fetch, defaultOptions());
+      const fetcher = new DiscordFetcher(fetch, defaultOptions());
       const guild = await fetcher.guild("1");
       expect(guild).toEqual(expected);
     });
@@ -44,7 +44,7 @@ describe("plugins/discord/fetcher", () => {
   describe("fetch channels", () => {
     it("passes correct endpoint", async () => {
       const fetch = jest.fn(() => Promise.resolve([]));
-      const fetcher = new Fetcher(fetch, defaultOptions());
+      const fetcher = new DiscordFetcher(fetch, defaultOptions());
       await fetcher.channels("1");
       expect(fetch.mock.calls[0]).toEqual(["/guilds/1/channels"]);
     });
@@ -59,7 +59,7 @@ describe("plugins/discord/fetcher", () => {
       const response: any[] = [testChannelResp("1")];
       const expected: Channel[] = [testChannel("1")];
       const fetch = jest.fn(() => Promise.resolve(response));
-      const fetcher = new Fetcher(fetch, defaultOptions());
+      const fetcher = new DiscordFetcher(fetch, defaultOptions());
       const data = await fetcher.channels("0");
       expect(data).toEqual(expected);
     });
@@ -84,7 +84,7 @@ describe("plugins/discord/fetcher", () => {
 
     it("passes correct endpoint", async () => {
       const fetch = jest.fn(() => Promise.resolve([]));
-      const fetcher = new Fetcher(fetch, options());
+      const fetcher = new DiscordFetcher(fetch, options());
       await fetcher.members("1", "0");
       expect(fetch.mock.calls[0]).toEqual([
         "/guilds/1/members?after=0&limit=2",
@@ -94,7 +94,7 @@ describe("plugins/discord/fetcher", () => {
     it("handles response", async () => {
       const response: GuildMember[] = [testMember("1")];
       const fetch = jest.fn(() => Promise.resolve(response));
-      const fetcher = new Fetcher(fetch, options());
+      const fetcher = new DiscordFetcher(fetch, options());
       const {results} = await fetcher.members("1", "0");
       expect(results).toEqual(response);
     });
@@ -102,7 +102,7 @@ describe("plugins/discord/fetcher", () => {
     it("returns correct endCursor", async () => {
       const response: any[] = [testMember("1"), testMember("2")];
       const fetch = jest.fn(() => Promise.resolve(response));
-      const fetcher = new Fetcher(fetch, options());
+      const fetcher = new DiscordFetcher(fetch, options());
       const {endCursor} = (await fetcher.members("1", "0")).pageInfo;
       expect(endCursor).toEqual("2");
     });
@@ -111,7 +111,7 @@ describe("plugins/discord/fetcher", () => {
       it("next page = true", async () => {
         const response: any[] = [testMember("1")];
         const fetch = jest.fn(() => Promise.resolve(response));
-        const fetcher = new Fetcher(fetch, {
+        const fetcher = new DiscordFetcher(fetch, {
           membersLimit: 1,
           messagesLimit: 100,
           reactionsLimit: 100,
@@ -123,7 +123,7 @@ describe("plugins/discord/fetcher", () => {
       it("next page = false", async () => {
         const response: any[] = [testMember("1")];
         const fetch = jest.fn(() => Promise.resolve(response));
-        const fetcher = new Fetcher(fetch, {
+        const fetcher = new DiscordFetcher(fetch, {
           membersLimit: 2,
           messagesLimit: 100,
           reactionsLimit: 100,
@@ -145,7 +145,7 @@ describe("plugins/discord/fetcher", () => {
 
     it("passes correct endpoint", async () => {
       const fetch = jest.fn(() => Promise.resolve([]));
-      const fetcher = new Fetcher(fetch, options());
+      const fetcher = new DiscordFetcher(fetch, options());
       await fetcher.reactions("1", "2", emoji, "0");
       expect(fetch.mock.calls[0]).toEqual([
         `/channels/1/messages/2/reactions/emojiname:1?after=0&limit=2`,
@@ -156,7 +156,7 @@ describe("plugins/discord/fetcher", () => {
       // response object from server, prior to type transformation
       const response: any[] = [{id: "123", emoji}];
       const fetch = jest.fn(() => Promise.resolve(response));
-      const fetcher = new Fetcher(fetch, options());
+      const fetcher = new DiscordFetcher(fetch, options());
       const {results} = await fetcher.reactions("3", "2", emoji, "0");
       const expected: Reaction[] = [
         {emoji, channelId: "3", messageId: "2", authorId: "123"},
@@ -170,7 +170,7 @@ describe("plugins/discord/fetcher", () => {
         {id: "2", emoji},
       ];
       const fetch = jest.fn(() => Promise.resolve(response));
-      const fetcher = new Fetcher(fetch, options());
+      const fetcher = new DiscordFetcher(fetch, options());
       const {endCursor} = (
         await fetcher.reactions("1", "2", emoji, "0")
       ).pageInfo;
@@ -181,7 +181,7 @@ describe("plugins/discord/fetcher", () => {
       it("next page = true", async () => {
         const response: any[] = [{id: 1, emoji}];
         const fetch = jest.fn(() => Promise.resolve(response));
-        const fetcher = new Fetcher(fetch, {
+        const fetcher = new DiscordFetcher(fetch, {
           membersLimit: 100,
           messagesLimit: 100,
           reactionsLimit: 1,
@@ -195,7 +195,7 @@ describe("plugins/discord/fetcher", () => {
       it("next page = false", async () => {
         const response: any[] = [{id: 1, emoji}];
         const fetch = jest.fn(() => Promise.resolve(response));
-        const fetcher = new Fetcher(fetch, {
+        const fetcher = new DiscordFetcher(fetch, {
           membersLimit: 100,
           messagesLimit: 100,
           reactionsLimit: 2,
@@ -226,7 +226,7 @@ describe("plugins/discord/fetcher", () => {
 
     it("passes correct endpoint", async () => {
       const fetch = jest.fn(() => Promise.resolve([]));
-      const fetcher = new Fetcher(fetch, options());
+      const fetcher = new DiscordFetcher(fetch, options());
       await fetcher.messages("1", "0");
       expect(fetch.mock.calls[0]).toEqual([
         "/channels/1/messages?after=0&limit=2",
@@ -250,15 +250,15 @@ describe("plugins/discord/fetcher", () => {
       ];
 
       const fetch = jest.fn(() => Promise.resolve(response));
-      const fetcher = new Fetcher(fetch, options());
+      const fetcher = new DiscordFetcher(fetch, options());
       const {results} = await fetcher.messages("123", "0");
       expect(results).toEqual(expected);
     });
 
     it("returns correct endCursor", async () => {
-      const response: any[] = [testMessage("1"), testMessage("2")];
+      const response: any[] = [testMessage("2"), testMessage("1")];
       const fetch = jest.fn(() => Promise.resolve(response));
-      const fetcher = new Fetcher(fetch, options());
+      const fetcher = new DiscordFetcher(fetch, options());
       const {endCursor} = (await fetcher.messages("123", "0")).pageInfo;
       expect(endCursor).toBe("2");
     });
@@ -267,7 +267,7 @@ describe("plugins/discord/fetcher", () => {
       it("next page = true", async () => {
         const response: any[] = [testMessage("1")];
         const fetch = jest.fn(() => Promise.resolve(response));
-        const fetcher = new Fetcher(fetch, {
+        const fetcher = new DiscordFetcher(fetch, {
           membersLimit: 100,
           messagesLimit: 1,
           reactionsLimit: 2,
@@ -279,7 +279,7 @@ describe("plugins/discord/fetcher", () => {
       it("next page = false", async () => {
         const response: any[] = [testMessage("1")];
         const fetch = jest.fn(() => Promise.resolve(response));
-        const fetcher = new Fetcher(fetch, {
+        const fetcher = new DiscordFetcher(fetch, {
           membersLimit: 100,
           messagesLimit: 2,
           reactionsLimit: 2,
