@@ -191,6 +191,29 @@ describe("core/address", () => {
       });
     });
 
+    describe("parser", () => {
+      const {FooAddress, BarAddress} = makeModules();
+      function thunk(x: string) {
+        return () => FooAddress.parser.parseOrThrow(x);
+      }
+      it("parses a valid address", () => {
+        expect(FooAddress.parser.parseOrThrow(FooAddress.empty)).toEqual(
+          FooAddress.empty
+        );
+      });
+      it("rejects an empty string", () => {
+        expect(thunk("")).toThrow("address does not end with separator");
+      });
+      it("rejects a string that doesn't start with the right separator", () => {
+        expect(thunk("\0")).toThrow("expected FooAddress, got");
+      });
+      it("rejects an address from the wrong module", () => {
+        expect(thunk(BarAddress.empty)).toThrow(
+          "expected FooAddress, got BarAddress"
+        );
+      });
+    });
+
     describe("fromParts", () => {
       const {FooAddress, BarAddress} = makeModules();
 
