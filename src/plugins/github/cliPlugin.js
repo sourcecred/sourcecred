@@ -23,6 +23,10 @@ import {validateToken, type GithubToken} from "./token";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {type TaskReporter} from "../../util/taskReporter";
 import {repoIdToString} from "./repoId";
+import {
+  type PluginId,
+  fromString as pluginIdFromString,
+} from "../../api/pluginId";
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_GITHUB_TOKEN";
 
@@ -57,6 +61,8 @@ function getTokenFromEnv(): GithubToken {
 }
 
 export class GithubCliPlugin implements CliPlugin {
+  id: PluginId = pluginIdFromString("sourcecred/github");
+
   declaration(): PluginDeclaration {
     return declaration;
   }
