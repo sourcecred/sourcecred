@@ -10,9 +10,12 @@ import * as nullUtil from "../../util/null";
  * Mirrors data from the Discord API into a local sqlite db.
  */
 
+const REFETCH = 50;
+
 export async function fetchDiscord(
   sqliteMirror: SqliteMirror,
-  streams: DepaginatedFetcher
+  streams: DepaginatedFetcher,
+  refetchNMessages: number = REFETCH
 ) {
   for (const member of await streams.members()) {
     sqliteMirror.addMember(member);
@@ -20,8 +23,10 @@ export async function fetchDiscord(
 
   for (const channel of await streams.channels()) {
     sqliteMirror.addChannel(channel);
+    const endCursor: Snowflake =
+      sqliteMirror.nthMessageIdFromTail(channel.id, refetchNMessages) || "0";
 
-    for (const message of await streams.messages(channel.id)) {
+    for (const message of await streams.messages(channel.id, endCursor)) {
       sqliteMirror.addMessage(message);
 
       for (const emoji of message.reactionEmoji) {

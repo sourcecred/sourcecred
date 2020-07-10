@@ -11,12 +11,14 @@ import {
   testMessage,
   customEmoji,
   testReaction,
+  buildNMessages,
 } from "./testUtils";
 
 describe("plugins/discord/mirror", () => {
   describe("updateMirror", () => {
     const activeChannelId = "12";
     const activeMessageid = "34";
+    const activeAuthorId = "56";
 
     function testMirror() {
       const db = new Database(":memory:");
@@ -24,7 +26,7 @@ describe("plugins/discord/mirror", () => {
     }
 
     function testMembers() {
-      return [testMember("1"), testMember("2"), testMember("3")];
+      return [testMember(activeAuthorId), testMember("2"), testMember("3")];
     }
 
     function testChannels() {
@@ -33,11 +35,15 @@ describe("plugins/discord/mirror", () => {
 
     function testMessages(channelId) {
       if (channelId === activeChannelId) {
-        const authorId = "1";
         const reactionEmoji = [customEmoji()];
         return [
-          testMessage(activeMessageid, channelId, authorId, reactionEmoji),
-          testMessage("2", channelId, authorId, []),
+          testMessage(
+            activeMessageid,
+            channelId,
+            activeAuthorId,
+            reactionEmoji
+          ),
+          testMessage("2", channelId, activeAuthorId, []),
         ];
       } else {
         return [];
@@ -47,7 +53,7 @@ describe("plugins/discord/mirror", () => {
     function testReactions(channelId, messageId) {
       if (channelId === activeChannelId && messageId === activeMessageid) {
         return [
-          testReaction(channelId, messageId, "1"),
+          testReaction(channelId, messageId, activeAuthorId),
           testReaction(channelId, messageId, "2"),
         ];
       } else {
@@ -94,15 +100,46 @@ describe("plugins/discord/mirror", () => {
     it("fetches messages", async () => {
       const {mirror, stream} = setupTestData();
       await fetchDiscord(mirror, stream);
-
-      expect(mirror.messages(activeMessageid)).toEqual(testMessages("1"));
+      expect(mirror.messages(activeChannelId)).toEqual(
+        testMessages(activeChannelId)
+      );
     });
     it("fetches reactions", async () => {
       const {mirror, stream} = setupTestData();
       await fetchDiscord(mirror, stream);
       expect(mirror.reactions(activeMessageid, activeChannelId)).toEqual(
-        testReactions("1", "1")
+        testReactions(activeMessageid, activeChannelId)
       );
+    });
+    it("refetch n messages defaults to 0 for endcursor", async () => {
+      const {mirror, stream} = setupTestData();
+      const spyFetchMessages = jest.spyOn(stream, "messages");
+      await fetchDiscord(mirror, stream, 50);
+      const expectedEndCursor = "0";
+      expect(spyFetchMessages.mock.calls[0]).toEqual([
+        activeChannelId,
+        expectedEndCursor,
+      ]);
+    });
+    it("refetches n messages", async () => {
+      const {mirror, stream} = setupTestData();
+      const spyFetchMessages = jest.spyOn(stream, "messages");
+      buildNMessages(4, mirror, activeChannelId, activeMessageid);
+      expect(mirror.messages(activeChannelId).map((x) => x.id)).toEqual([
+        "1",
+        "2",
+        "3",
+        "4",
+      ]);
+      await fetchDiscord(mirror, stream, 2);
+      // there should be 5 messages saved in the db w/ ids: 0, 1, 2, 3, 4
+      // expect the fetch plan to re-fetch 3 and 4, i.e. provide
+      // call to fetch messages with 3 as starting endCursor
+      const expectedEndCursor = "3";
+      expect(spyFetchMessages.mock.calls[0]).toEqual([
+        activeChannelId,
+        expectedEndCursor,
+      ]);
     });
   });
 
