@@ -9,7 +9,7 @@ export type InstanceConfig = {|
   +bundledPlugins: Map<pluginId.PluginId, Plugin>,
 |};
 
-type RawInstanceConfig = {|
+export type RawInstanceConfig = {|
   // Plugin identifier, like `sourcecred/identity`. Version number is
   // implicit from the SourceCred version. This is a stopgap until we have
   // a plugin system that admits external, dynamically loaded
@@ -17,7 +17,7 @@ type RawInstanceConfig = {|
   +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
 |};
 
-const rawParser: P.Parser<RawInstanceConfig> = P.object({
+export const rawParser: P.Parser<RawInstanceConfig> = P.object({
   bundledPlugins: P.array(pluginId.parser),
 });
 
