@@ -1,5 +1,6 @@
 // @flow
 
+import sortBy from "../../util/sortBy";
 import * as Model from "./models";
 import {type Snowflake} from "./models";
 
@@ -85,7 +86,9 @@ export class DiscordFetcher {
     }));
     const hasNextPage = results.length === membersLimit;
     const endCursor =
-      response.length > 0 ? response[response.length - 1].user.id : null;
+      response.length > 0
+        ? sortBy(response, (x) => x.user.id)[response.length - 1].user.id
+        : null;
     const pageInfo = {hasNextPage, endCursor};
     return {results, pageInfo};
   }
@@ -108,7 +111,10 @@ export class DiscordFetcher {
       mentions: (x.mentions || []).map((user) => user.id),
     }));
     const hasNextPage = results.length === messagesLimit;
-    const endCursor = response.length > 0 ? response[0].id : null;
+    const endCursor =
+      response.length > 0
+        ? sortBy(response, (x) => x.id)[response.length - 1].id
+        : null;
     const pageInfo = {hasNextPage, endCursor};
     return {results, pageInfo};
   }
@@ -131,7 +137,9 @@ export class DiscordFetcher {
     }));
     const hasNextPage = results.length === reactionsLimit;
     const endCursor =
-      response.length > 0 ? response[response.length - 1].id : null;
+      response.length > 0
+        ? sortBy(response, (x) => x.id)[response.length - 1].id
+        : null;
     const pageInfo = {hasNextPage, endCursor};
     return {results, pageInfo};
   }
