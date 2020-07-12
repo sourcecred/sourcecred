@@ -35,7 +35,7 @@ type ContributionEntry = {|
 |};
 
 export const getPlainDescFromMd = ({description}: {description: string}) =>
-  removeMd((description: string));
+  removeMd(description);
 
 declare type DateString = string;
 
