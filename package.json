@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.8.7",
+    "@babel/node": "^7.8.7",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-syntax-bigint": "^7.8.3",
     "@babel/preset-env": "^7.8.7",
@@ -109,6 +110,7 @@
     "build:backend": "NODE_ENV=development webpack --config config/webpack.config.backend.js",
     "api": "webpack --config config/webpack.config.api.js",
     "test": "node ./config/test.js",
+    "createLedger": "babel-node ./scripts/createLedgerFromLegacyProject.js",
     "unit": "BABEL_ENV=test NODE_ENV=test jest --env=jsdom",
     "sharness": "make -sC ./sharness prove PROVE_OPTS=-f TEST_OPTS='--chain-lint'",
     "sharness-full": "make -sC ./sharness prove PROVE_OPTS=-vf TEST_OPTS='-v --chain-lint --long'",
