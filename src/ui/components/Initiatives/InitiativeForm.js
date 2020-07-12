@@ -5,8 +5,6 @@ import {
   dateParser,
   getPlainDescFromMd,
 } from "../../initiativeUtils";
-import {v4 as uuid} from "uuid";
-
 import {CredView} from "../../../analysis/credView";
 import React from "react";
 import {
@@ -19,6 +17,7 @@ import {
   SimpleFormIterator,
   TextInput,
 } from "react-admin";
+import {InlineKeyField} from "./InlineKeyField";
 
 type InitiativeFormProps = {|
   initialValues?: InitiativeEntry,
@@ -32,13 +31,7 @@ export const InitiativeForm = ({
   const userNodes = React.useMemo(() => credView.userNodes(), [credView]);
   return (
     <SimpleForm initialValues={initialValues}>
-      <TextInput
-        source="id"
-        label="Initiative ID"
-        disabled
-        type="hidden"
-        style={{display: "none"}}
-      />
+      <TextInput source="id" label="Initiative ID" disabled />
       <TextInput label="Title" source="title" />
       <DateInput
         format={dateFormatter}
@@ -81,13 +74,7 @@ export const InitiativeForm = ({
       />
       <ArrayInput label="Contributions" source="contributions">
         <SimpleFormIterator>
-          <TextInput
-            source="key"
-            label="Contribution Key"
-            disabled
-            initialValue={uuid()}
-            style={{display: "none"}}
-          />
+          <InlineKeyField source="key" label="Contribution Key" />
           <TextInput label="Contribution Name" source="title" />
           <DateInput
             format={dateFormatter}
