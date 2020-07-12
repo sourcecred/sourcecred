@@ -154,7 +154,7 @@ describe("plugins/discord/fetcher", () => {
 
     it("handles response", async () => {
       // response object from server, prior to type transformation
-      const response: any[] = [{id: "123", emoji}];
+      const response: any[] = [{id: "123"}];
       const fetch = jest.fn(() => Promise.resolve(response));
       const fetcher = new DiscordFetcher(fetch, options());
       const {results} = await fetcher.reactions("3", "2", emoji, "0");
