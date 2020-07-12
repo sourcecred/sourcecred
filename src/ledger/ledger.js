@@ -250,25 +250,59 @@ export class Ledger {
   /**
    * Add an alias for a user.
    *
-   * If the alias has a GrainAccount, then its balance is transfered to the
-   * user, its paid is added to the user's paid amount, and then its account is
-   * deleted.
+   * If the alias has a Grain balance, then this will emit two events: first,
+   * one adding the alias, and a followup transferring the alias's Grain
+   * balance to the canonical user.
+   *
+   * We explicitly emit two events (rather than including the balance transfer
+   * as a part of the alias action) to improve audit-ability, and make it
+   * easier to undo accidental or fraudulent linking.
    *
    * Will no-op if the user already has that alias.
    * Will fail if the user does not exist.
    * Will fail if the alias is already claimed, or if it is
    * another user's innate address.
+   *
+   * Careful! This method may emit two_ events. Care must be taken to ensure
+   * that it cannot fail after it has emitted the first event. That means we
+   * must explicitly check all of the possible failure modes of the second
+   * event. Otherwise, we risk leaving the ledger in an inadvertently
+   * half-updated state, where the first event has been processed but the
+   * second one failed.
    */
   addAlias(userId: UserId, alias: NodeAddressT): Ledger {
-    return this._act({
+    // Ensure that if we emit two events, they both have the
+    // same timestamp.
+    const timestamp = _getTimestamp();
+
+    // Validate the ADD_ALIAS action so it cannot fail after we have
+    // already emitted the account transfer
+    const aliasAction: AddAliasV1 = {
       type: "ADD_ALIAS",
       userId,
       alias,
       version: 1,
-      timestamp: _getTimestamp(),
-    });
+      timestamp,
+    };
+    this._validateAddAlias(aliasAction);
+
+    // If the alias had some grain, explicitly transfer it to the new account.
+    const aliasAccount = this._getAccount(alias);
+    if (aliasAccount.balance !== G.ZERO) {
+      // No mutations allowed from this line onward
+      this._act({
+        from: alias,
+        to: userAddress(userId),
+        amount: aliasAccount.balance,
+        memo: "transfer from alias to canonical account",
+        timestamp,
+        type: "TRANSFER_GRAIN",
+        version: 1,
+      });
+    }
+    return this._act(aliasAction);
   }
-  _addAlias({userId, alias, version}: AddAliasV1) {
+  _validateAddAlias({userId, version, alias}: AddAliasV1) {
     if (version !== 1) {
       throw new Error(`addAlias: unrecognized version ${version}`);
     }
@@ -290,8 +324,25 @@ export class Ledger {
         `addAlias: alias ${NodeAddress.toString(alias)} already bound`
       );
     }
+    // Just a convenience, since we already verified it exists; we'll
+    // make it available to _addAlias.
+    // Makes it more obvious that _addAlias can't fail due to the existingUser
+    // being null.
+    return existingUser;
+  }
+  /**
+   * The ADD_ALIAS action may get emitted after a TRANSFER_GRAIN event
+   * that is part of the same transaction. As such, it should never fail
+   * outside of the _validateAddAlias method (which is checked before
+   * emitting the TRANSFER_GRAIN action).
+   */
+  _addAlias(action: AddAliasV1) {
+    const existingUser = this._validateAddAlias(action);
+    const {userId, alias} = action;
+    const aliasAccount = this._getAccount(alias);
+
     this._aliases.set(alias, userId);
-    const updatedAliases = existingAliases.slice();
+    const updatedAliases = existingUser.aliases.slice();
     updatedAliases.push(alias);
     const updatedUser = {
       id: existingUser.id,
@@ -299,13 +350,17 @@ export class Ledger {
       aliases: updatedAliases,
     };
     const addr = userAddress(userId);
-    const aliasAccount = this._unsafeGetAccount(alias);
     const userAccount = this._unsafeGetAccount(addr);
 
-    // State mutations! Method must not fail past this comment.
     this._users.set(userId, updatedUser);
-    // Transfer alias's balance and paid to the canonical account
+    // Transfer the alias's history of getting paid to the user account.
+    // This is necessary since the BALANCED payout policy takes
+    // users' lifetime of cred distributions into account.
     userAccount.paid = G.add(userAccount.paid, aliasAccount.paid);
+    // Assuming the event was added using the API, this balance will have
+    // already been explicitly transferred. However, just for good measure
+    // and robustness to future changes, we add this anyway, so that there
+    // will never be "vanishing Grain" when the alias account is deleted.
     userAccount.balance = G.add(userAccount.balance, aliasAccount.balance);
     this._accounts.delete(alias);
   }
