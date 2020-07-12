@@ -46,24 +46,18 @@ describe("src/ledger/grainAllocation", () => {
     (policyType: PolicyType) => {
       const policy = deepFreeze({policyType, budget: G.ONE});
 
-      describe("it should return an empty allocation when", () => {
-        const emptyAllocation = deepFreeze({
-          policy,
+      it("it should return an empty allocation when the budget is zero", () => {
+        const zeroPolicy = {budget: G.ZERO, policyType};
+        const actual = computeAllocation(zeroPolicy, credHistory, new Map());
+
+        expect(actual).toEqual({
+          policy: zeroPolicy,
           receipts: [],
         });
-
-        it("the budget is zero", () => {
-          const zeroPolicy = {budget: G.ZERO, policyType};
-          const actual = computeAllocation(zeroPolicy, credHistory, new Map());
-
-          expect(actual).toEqual({
-            policy: zeroPolicy,
-            receipts: [],
-          });
-        });
-
-        it("all the cred sums to 0", () => {
-          const actual = computeAllocation(
+      });
+      it("should error when the Cred sums to 0", () => {
+        const fail = () =>
+          computeAllocation(
             policy,
             [
               {
@@ -77,8 +71,16 @@ describe("src/ledger/grainAllocation", () => {
             new Map()
           );
 
-          expect(actual).toEqual(emptyAllocation);
-        });
+        expect(fail).toThrowError("cred sums to 0");
+      });
+      it("should error when there is no Cred", () => {
+        const fail = () => computeAllocation(policy, [], new Map());
+        expect(fail).toThrowError("credHistory is empty");
+      });
+      it("should error when the budget is negative", () => {
+        const badPolicy = {...policy, budget: G.fromString("-100")};
+        const fail = () => computeAllocation(badPolicy, [], new Map());
+        expect(fail).toThrowError("invalid budget");
       });
     }
   );
@@ -184,14 +186,6 @@ describe("src/ledger/grainAllocation", () => {
 
       const actual = computeAllocation(policy2, credHistory, alreadyPaid);
       expect(actual).toEqual({policy: policy2, receipts: expectedReceipts});
-    });
-    it.skip("TODO(@decentralion): FIX THIS", () => {
-      const alreadyPaid = new Map([[foo, G.fromApproximateFloat(5)]]);
-      computeAllocation(
-        {policyType: "BALANCED", budget: G.fromApproximateFloat(5)},
-        credHistory,
-        alreadyPaid
-      );
     });
     it("should not break if a user has earnings but no cred", () => {
       const alreadyPaid = new Map([

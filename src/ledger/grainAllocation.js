@@ -117,8 +117,12 @@ function computeImmediateReceipts(
   budget: G.Grain,
   credHistory: CredHistory
 ): $ReadOnlyArray<GrainReceipt> {
-  if (budget <= G.ZERO || !credHistory.length) {
+  if (budget === G.ZERO) {
     return [];
+  }
+
+  if (!credHistory.length) {
+    throw new Error("cannot allocate Grain: credHistory is empty");
   }
 
   const lastSlice = credHistory[credHistory.length - 1];
@@ -127,24 +131,15 @@ function computeImmediateReceipts(
 
   const totalCred = sum(immediateCredMap.values());
   if (totalCred === 0) {
-    return [];
+    throw new Error("cannot allocate Grain: cred sums to 0");
   }
 
-  let totalPaid = G.ZERO;
-  const receipts = mapToArray(immediateCredMap, ([address, cred]) => {
-    const amount = G.multiplyFloat(budget, cred / totalCred);
-    totalPaid = G.add(totalPaid, amount);
-    return {
-      address,
-      amount,
-    };
-  });
-  if (G.gt(totalPaid, budget)) {
-    throw new Error(
-      `invariant violation: paid ${totalPaid} greater than budget ${budget}`
-    );
-  }
-  return receipts;
+  const scores: number[] = mapToArray(immediateCredMap, (x) => x[1]);
+  const grainPieces = G.splitBudget(budget, scores);
+  return mapToArray(immediateCredMap, (x, i) => ({
+    address: x[0],
+    amount: grainPieces[i],
+  }));
 }
 
 /**
@@ -177,8 +172,11 @@ function computeBalancedReceipts(
   credHistory: CredHistory,
   lifetimeGrainAllocation: $ReadOnlyMap<NodeAddressT, G.Grain>
 ): $ReadOnlyArray<GrainReceipt> {
-  if (budget <= G.ZERO || !credHistory.length) {
+  if (budget === G.ZERO) {
     return [];
+  }
+  if (!credHistory.length) {
+    throw new Error("cannot allocate Grain: credHistory is empty");
   }
 
   const lifetimeCredMap = new Map();
@@ -198,7 +196,7 @@ function computeBalancedReceipts(
     totalCred += s;
   }
   if (totalCred === 0) {
-    return [];
+    throw new Error("cannot allocate Grain: cred sums to 0");
   }
 
   const targetGrainPerCred = G.multiplyFloat(
@@ -225,25 +223,12 @@ function computeBalancedReceipts(
     }
   }
 
-  let totalPaid = G.ZERO;
-  const receipts = mapToArray(userUnderpayment, ([address, underpayment]) => {
-    const underpaymentProportion = G.toFloatRatio(
-      underpayment,
-      totalUnderpayment
-    );
-    const amount = G.multiplyFloat(budget, underpaymentProportion);
-    totalPaid = G.add(totalPaid, amount);
-    return {
-      address,
-      amount,
-    };
-  });
-  if (G.gt(totalPaid, budget)) {
-    throw new Error(
-      `invariant violation: paid ${totalPaid} greater than budget ${budget}`
-    );
-  }
-  return receipts;
+  const underpayment = mapToArray(userUnderpayment, (x) => Number(x[1]));
+  const grainPieces = G.splitBudget(budget, underpayment);
+  return mapToArray(userUnderpayment, (x, i) => ({
+    address: x[0],
+    amount: grainPieces[i],
+  }));
 }
 
 const policyParser: P.Parser<DistributionPolicy> = P.object({
