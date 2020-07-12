@@ -19,7 +19,7 @@ import {
 } from "./fetch";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
-import {TestTaskReporter} from "../../util/taskReporter";
+import {SilentTaskReporter} from "../../util/taskReporter";
 
 type TopicOptions = {|
   // Defaults to: 1 (synonymous to "uncategorized")
@@ -364,7 +364,7 @@ describe("plugins/discourse/mirror", () => {
       ...options,
       ...(optionOverrides || {}),
     });
-    const reporter = new TestTaskReporter();
+    const reporter = new SilentTaskReporter();
     return {fetcher, mirror, reporter, url, repo};
   };
 
