@@ -1,5 +1,4 @@
 // @flow
-import type {InitiativeEntry} from "../../initiativeUtils";
 import {
   dateFormatter,
   dateParser,
