@@ -13,34 +13,34 @@ import {
   BooleanInput,
   DateInput,
   NumberInput,
-  SimpleForm,
   SimpleFormIterator,
   TextInput,
 } from "react-admin";
 import {InlineKeyField} from "./InlineKeyField";
 
 type InitiativeFormProps = {|
-  initialValues?: InitiativeEntry,
   credView: CredView,
 |};
-export const InitiativeForm = ({
-  credView,
-  initialValues,
-}: InitiativeFormProps) => {
+export const InitiativeForm = ({credView}: InitiativeFormProps) => {
   const allNodes = React.useMemo(() => credView.nodes(), [credView]);
   const userNodes = React.useMemo(() => credView.userNodes(), [credView]);
   return (
-    <SimpleForm initialValues={initialValues}>
+    <>
       <TextInput source="id" label="Initiative ID" disabled />
+      <br />
       <TextInput label="Title" source="title" />
+      <br />
       <DateInput
         format={dateFormatter}
         parse={dateParser}
         label="Date"
         source="timestampMs"
       />
+      <br />
       <NumberInput label="Weight While Incomplete" source="weight.incomplete" />
+      <br />
       <NumberInput label="Weight When Completed" source="weight.complete" />
+      <br />
       <BooleanInput label="Completed" source="completed" />
       <AutocompleteArrayInput
         source="champions"
@@ -95,6 +95,6 @@ export const InitiativeForm = ({
           />
         </SimpleFormIterator>
       </ArrayInput>
-    </SimpleForm>
+    </>
   );
 };
