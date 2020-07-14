@@ -5,7 +5,8 @@ import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
 
 import type {Command} from "./command";
-import {makePluginDir, loadInstanceConfig, loadJsonWithDefault} from "./common";
+import {makePluginDir, loadInstanceConfig} from "./common";
+import {loadJsonWithDefault} from "../util/disk";
 import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
 import {
   type WeightedGraph,

@@ -4,7 +4,7 @@ import Database from "better-sqlite3";
 import fs from "fs-extra";
 import {join as pathJoin} from "path";
 
-import type {CliPlugin, PluginDirectoryContext} from "../../cli/cliPlugin";
+import type {Plugin, PluginDirectoryContext} from "../../api/plugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {ReferenceDetector} from "../../core/references/referenceDetector";
 import type {WeightedGraph} from "../../core/weightedGraph";
@@ -17,6 +17,10 @@ import {Fetcher} from "./fetch";
 import {Mirror} from "./mirror";
 import {DiscourseReferenceDetector} from "./referenceDetector";
 import {type TaskReporter} from "../../util/taskReporter";
+import {
+  type PluginId,
+  fromString as pluginIdFromString,
+} from "../../api/pluginId";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
@@ -36,7 +40,9 @@ async function repository(
   return new SqliteMirrorRepository(db, serverUrl);
 }
 
-export class DiscourseCliPlugin implements CliPlugin {
+export class DiscoursePlugin implements Plugin {
+  id: PluginId = pluginIdFromString("sourcecred/discourse");
+
   declaration(): PluginDeclaration {
     return declaration;
   }

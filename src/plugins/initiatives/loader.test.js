@@ -1,7 +1,7 @@
 // @flow
 
 import path from "path";
-import {TestTaskReporter} from "../../util/taskReporter";
+import {SilentTaskReporter} from "../../util/taskReporter";
 import {MappedReferenceDetector} from "../../core/references";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {type InitiativesDirectory} from "./initiativesDirectory";
@@ -12,7 +12,7 @@ describe("plugins/initiatives/loader", () => {
   describe("loadDirectory", () => {
     it("should report correct tasks", async () => {
       // Given
-      const reporter = new TestTaskReporter();
+      const reporter = new SilentTaskReporter();
       const dir: InitiativesDirectory = {
         localPath: path.join(__dirname, "example"),
         remoteUrl: "http://example.com/initiatives",

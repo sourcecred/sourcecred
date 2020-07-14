@@ -9,12 +9,14 @@ import * as NullUtil from "../util/null";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {CascadingReferenceDetector} from "../core/references/cascadingReferenceDetector";
 import type {Command} from "./command";
+import {type InstanceConfig} from "../api/instanceConfig";
 import {
   makePluginDir,
   loadInstanceConfig,
   pluginDirectoryContext,
 } from "./common";
 import {toJSON as weightedGraphToJSON} from "../core/weightedGraph";
+import * as pluginId from "../api/pluginId";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -25,19 +27,20 @@ const graphCommand: Command = async (args, std) => {
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("graph");
   const baseDir = process.cwd();
-  const config = await loadInstanceConfig(baseDir);
+  const config: InstanceConfig = await loadInstanceConfig(baseDir);
 
   let pluginsToLoad = [];
   if (args.length === 0) {
     pluginsToLoad = config.bundledPlugins.keys();
   } else {
     for (const arg of args) {
-      if (config.bundledPlugins.has(arg)) {
-        pluginsToLoad.push(arg);
+      const id = pluginId.fromString(arg);
+      if (config.bundledPlugins.has(id)) {
+        pluginsToLoad.push(id);
       } else {
         return die(
           std,
-          `can't find plugin ${arg}; remember to use fully scoped name, as in sourcecred/github`
+          `can't find plugin ${id}; remember to use fully scoped name, as in sourcecred/github`
         );
       }
     }

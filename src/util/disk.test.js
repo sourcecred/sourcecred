@@ -1,12 +1,12 @@
 // @flow
 
-import {loadJson, loadJsonWithDefault} from "./common";
+import {loadJsonWithDefault, loadJson, mkdirx} from "./disk";
 import tmp from "tmp";
 import fs from "fs-extra";
-import * as C from "../util/combo";
+import * as P from "./combo";
 import {join as pathJoin} from "path";
 
-describe("cli/common", () => {
+describe("util/disk", () => {
   function tmpWithContents(contents: mixed) {
     const name = tmp.tmpNameSync();
     fs.writeFileSync(name, JSON.stringify(contents));
@@ -14,7 +14,7 @@ describe("cli/common", () => {
   }
   describe("loadJson / loadJsonWithDefault", () => {
     const badPath = () => pathJoin(tmp.dirSync().name, "not-a-real-path");
-    const fooParser = C.object({foo: C.number});
+    const fooParser = P.object({foo: P.number});
     const fooInstance = Object.freeze({foo: 42});
     const fooDefault = () => ({foo: 1337});
     const barInstance = Object.freeze({bar: "1337"});
@@ -34,7 +34,7 @@ describe("cli/common", () => {
     it("loadJson errors if JSON.parse fails", async () => {
       const f = tmp.tmpNameSync();
       fs.writeFileSync(f, "zzz");
-      const fail = async () => await loadJson(f, C.raw);
+      const fail = async () => await loadJson(f, P.raw);
       await expect(fail).rejects.toThrow();
     });
     it("loadJsonWithDefault works when valid file is present", async () => {
@@ -57,7 +57,7 @@ describe("cli/common", () => {
     it("loadJsonWithDefault errors if JSON.parse fails", async () => {
       const f = tmp.tmpNameSync();
       fs.writeFileSync(f, "zzz");
-      const fail = async () => await loadJsonWithDefault(f, C.raw, fooDefault);
+      const fail = async () => await loadJsonWithDefault(f, P.raw, fooDefault);
       await expect(fail).rejects.toThrow();
     });
     it("loadJsonWithDefault errors if file loading fails for a non-ENOENT reason", async () => {
@@ -65,6 +65,30 @@ describe("cli/common", () => {
       const fail = async () =>
         await loadJsonWithDefault(directoryPath, fooParser, fooDefault);
       await expect(fail).rejects.toThrow("EISDIR");
+    });
+  });
+
+  describe("mkdirx", () => {
+    it("makes the directory if it doesn't exist", () => {
+      const name = tmp.tmpNameSync();
+      mkdirx(name);
+      const stat = fs.lstatSync(name);
+      expect(stat.isDirectory()).toEqual(true);
+    });
+    it("silently no-ops if the directory does exist", () => {
+      const name = tmp.tmpNameSync();
+      mkdirx(name);
+      mkdirx(name);
+      const stat = fs.lstatSync(name);
+      expect(stat.isDirectory()).toEqual(true);
+    });
+    it("does not create parent directories", () => {
+      // This also checks that it properly thorws non-EEXIST errors.
+      const name = tmp.tmpNameSync();
+      const path = pathJoin(name, "foo");
+      expect(() => mkdirx(path)).toThrowError(
+        "ENOENT: no such file or directory"
+      );
     });
   });
 });

@@ -2,7 +2,7 @@
 
 import {
   LoggingTaskReporter,
-  TestTaskReporter,
+  SilentTaskReporter,
   formatTimeElapsed,
   startMessage,
   finishMessage,
@@ -110,27 +110,27 @@ describe("util/taskReporter", () => {
     });
   });
 
-  describe("TestTaskReporter", () => {
+  describe("SilentTaskReporter", () => {
     it("errors when starting a task twice", () => {
-      const fail = () => new TestTaskReporter().start("foo").start("foo");
+      const fail = () => new SilentTaskReporter().start("foo").start("foo");
       expect(fail).toThrow("task foo already active");
     });
     it("errors when finishing a task twice", () => {
       const fail = () =>
-        new TestTaskReporter().start("foo").finish("foo").finish("foo");
+        new SilentTaskReporter().start("foo").finish("foo").finish("foo");
       expect(fail).toThrow("task foo not active");
     });
     it("errors when finishing an unstarted test", () => {
-      const fail = () => new TestTaskReporter().finish("foo");
+      const fail = () => new SilentTaskReporter().finish("foo");
       expect(fail).toThrow("task foo not active");
     });
     it("works for starting a task", () => {
-      const reporter = new TestTaskReporter().start("foo");
+      const reporter = new SilentTaskReporter().start("foo");
       expect(reporter.entries()).toEqual([{type: "START", taskId: "foo"}]);
       expect(reporter.activeTasks()).toEqual(["foo"]);
     });
     it("works for starting and finishing a task", () => {
-      const reporter = new TestTaskReporter().start("foo").finish("foo");
+      const reporter = new SilentTaskReporter().start("foo").finish("foo");
       expect(reporter.entries()).toEqual([
         {type: "START", taskId: "foo"},
         {type: "FINISH", taskId: "foo"},
@@ -138,7 +138,7 @@ describe("util/taskReporter", () => {
       expect(reporter.activeTasks()).toEqual([]);
     });
     it("works for starting two tasks and finishing one", () => {
-      const reporter = new TestTaskReporter()
+      const reporter = new SilentTaskReporter()
         .start("foo")
         .start("bar")
         .finish("foo");
@@ -148,6 +148,20 @@ describe("util/taskReporter", () => {
         {type: "FINISH", taskId: "foo"},
       ]);
       expect(reporter.activeTasks()).toEqual(["bar"]);
+    });
+    it("doesn't emit anything to the console", () => {
+      let usedConsole = false;
+      jest.spyOn(console, "log").mockImplementation(() => {
+        usedConsole = true;
+      });
+      jest.spyOn(console, "error").mockImplementation(() => {
+        usedConsole = true;
+      });
+      jest.spyOn(console, "warn").mockImplementation(() => {
+        usedConsole = true;
+      });
+      new SilentTaskReporter().start("foo").start("bar").finish("foo");
+      expect(usedConsole).toEqual(false);
     });
   });
 });
