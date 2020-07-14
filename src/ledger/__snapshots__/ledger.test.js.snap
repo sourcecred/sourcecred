@@ -2,8 +2,8 @@
 
 exports[`ledger/ledger state reconstruction serialized ledger snapshots as expected 1`] = `
 "[
-{\\"action\\":{\\"identityId\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"identityName\\":\\"foo\\",\\"type\\":\\"CREATE_IDENTITY\\",\\"version\\":\\"1\\"},\\"ledgerTimestamp\\":1,\\"version\\":\\"1\\"},
-{\\"action\\":{\\"identityId\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\",\\"identityName\\":\\"bar\\",\\"type\\":\\"CREATE_IDENTITY\\",\\"version\\":\\"1\\"},\\"ledgerTimestamp\\":2,\\"version\\":\\"1\\"},
+{\\"action\\":{\\"identity\\":{\\"aliases\\":[],\\"id\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"name\\":\\"foo\\"},\\"type\\":\\"CREATE_IDENTITY\\",\\"version\\":\\"1\\"},\\"ledgerTimestamp\\":1,\\"version\\":\\"1\\"},
+{\\"action\\":{\\"identity\\":{\\"aliases\\":[],\\"id\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\",\\"name\\":\\"bar\\"},\\"type\\":\\"CREATE_IDENTITY\\",\\"version\\":\\"1\\"},\\"ledgerTimestamp\\":2,\\"version\\":\\"1\\"},
 {\\"action\\":{\\"alias\\":\\"N\\\\u0000a1\\\\u0000\\",\\"identityId\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"type\\":\\"ADD_ALIAS\\",\\"version\\":\\"1\\"},\\"ledgerTimestamp\\":3,\\"version\\":\\"1\\"},
 {\\"action\\":{\\"alias\\":\\"N\\\\u0000a1\\\\u0000\\",\\"identityId\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"retroactivePaid\\":\\"0\\",\\"type\\":\\"REMOVE_ALIAS\\",\\"version\\":\\"1\\"},\\"ledgerTimestamp\\":4,\\"version\\":\\"1\\"},
 {\\"action\\":{\\"alias\\":\\"N\\\\u0000a1\\\\u0000\\",\\"identityId\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\",\\"type\\":\\"ADD_ALIAS\\",\\"version\\":\\"1\\"},\\"ledgerTimestamp\\":5,\\"version\\":\\"1\\"},

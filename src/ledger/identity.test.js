@@ -9,6 +9,7 @@ import {
   IDENTITY_PREFIX,
   graphNode,
   type Identity,
+  newIdentity,
 } from "./identity";
 
 describe("ledger/identity", () => {
@@ -18,6 +19,24 @@ describe("ledger/identity", () => {
     id: uuid,
     name,
     aliases: [NodeAddress.empty],
+  });
+  describe("newIdentity", () => {
+    it("makes a new identity without aliases", () => {
+      expect(newIdentity("foo")).toEqual({
+        id: expect.anything(),
+        name: "foo",
+        aliases: [],
+      });
+    });
+    it("includes a valid UUID", () => {
+      const ident = newIdentity("foo");
+      // Should not error
+      uuidFromString(ident.id);
+    });
+    it("errors on invalid names", () => {
+      const fail = () => newIdentity("bad string");
+      expect(fail).toThrowError("invalid identityName");
+    });
   });
   it("identityAddress works", () => {
     expect(identityAddress(uuid)).toEqual(

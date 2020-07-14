@@ -23,7 +23,11 @@
  * isn't being used as a transaction ledger.
  *
  */
-import {type Uuid, parser as uuidParser} from "../util/uuid";
+import {
+  type Uuid,
+  parser as uuidParser,
+  random as randomUuid,
+} from "../util/uuid";
 import * as C from "../util/combo";
 import {
   type NodeAddressT,
@@ -49,6 +53,14 @@ export type Identity = {|
   // of calling (identityAddress(identity.id)).
   +aliases: $ReadOnlyArray<NodeAddressT>,
 |};
+
+export function newIdentity(name: string): Identity {
+  return {
+    id: randomUuid(),
+    name: identityNameFromString(name),
+    aliases: [],
+  };
+}
 
 // It's not in the typical [owner, name] format because it isn't provided by a plugin.
 // Instead, it's a raw type owned by SourceCred project.

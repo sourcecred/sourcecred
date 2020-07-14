@@ -13,13 +13,15 @@ import {
   type Identity,
   type IdentityName,
   identityAddress,
-  identityNameFromString,
+  identityParser,
+  newIdentity,
   identityNameParser,
+  identityNameFromString,
 } from "./identity";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
-import {random as randomUuid, parser as uuidParser} from "../util/uuid";
+import {parser as uuidParser} from "../util/uuid";
 import {
   type DistributionPolicy,
   computeDistribution,
@@ -166,47 +168,45 @@ export class Ledger {
    * Will fail if the identityName is not valid, or already taken.
    */
   createIdentity(name: string): IdentityId {
-    const identityName = identityNameFromString(name);
+    const identity = newIdentity(name);
     const action = {
       type: "CREATE_IDENTITY",
-      identityId: randomUuid(),
-      identityName,
+      identity,
       version: "1",
     };
     this._createAndProcessEvent(action);
-    return NullUtil.get(this._identityNameToId.get(identityName));
+    return NullUtil.get(this._identityNameToId.get(identity.name));
   }
-  _createIdentity({identityName, identityId}: CreateIdentity) {
-    if (this._identityNameToId.has(identityName)) {
+  _createIdentity({identity}: CreateIdentity) {
+    if (this._identityNameToId.has(identity.name)) {
       // This identity already exists; return.
       throw new Error(
-        `createIdentity: identityName already taken: ${identityName}`
+        `createIdentity: identityName already taken: ${identity.name}`
       );
+    }
+    if (identity.aliases.length !== 0) {
+      throw new Error(`createIdentity: new identities may not have aliases`);
     }
     // istanbul ignore if
-    if (this._aliases.has(identityAddress(identityId))) {
+    if (this._aliases.has(identityAddress(identity.id))) {
       // This should never happen, as it implies a UUID conflict.
       throw new Error(
-        `createIdentity: innate address already claimed ${identityId}`
+        `createIdentity: innate address already claimed ${identity.id}`
       );
     }
-    const addr = identityAddress(identityId);
+    const addr = identityAddress(identity.id);
 
     // Mutations! Method must not fail after this comment.
-    this._identityNameToId.set(identityName, identityId);
-    this._identities.set(identityId, {
-      name: identityName,
-      id: identityId,
-      aliases: [],
-    });
+    this._identityNameToId.set(identity.name, identity.id);
+    this._identities.set(identity.id, identity);
     // Reserve this identity's own address
-    this._aliases.set(addr, identityId);
+    this._aliases.set(addr, identity.id);
     // Every identity has a corresponding GrainAccount.
     this._accounts.set(addr, {
       balance: G.ZERO,
       paid: G.ZERO,
       address: addr,
-      identityId,
+      identityId: identity.id,
     });
   }
 
@@ -730,14 +730,12 @@ type Action =
 type CreateIdentity = {|
   +type: "CREATE_IDENTITY",
   +version: "1",
-  +identityName: IdentityName,
-  +identityId: IdentityId,
+  +identity: Identity,
 |};
 const createIdentityParser: C.Parser<CreateIdentity> = C.object({
   type: C.exactly(["CREATE_IDENTITY"]),
   version: C.exactly(["1"]),
-  identityName: identityNameParser,
-  identityId: uuidParser,
+  identity: identityParser,
 });
 
 type RenameIdentity = {|

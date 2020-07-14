@@ -5,7 +5,7 @@ import cloneDeep from "lodash.clonedeep";
 import {NodeAddress} from "../core/graph";
 import {Ledger, parser} from "./ledger";
 import {type DistributionPolicy, computeDistribution} from "./grainAllocation";
-import {identityAddress} from "./identity";
+import {identityAddress, newIdentity} from "./identity";
 import * as G from "./grain";
 import * as uuid from "../util/uuid"; // for spy purposes
 
@@ -50,9 +50,8 @@ describe("ledger/ledger", () => {
             version: "1",
             action: {
               type: "CREATE_IDENTITY",
-              identityName: "foo",
+              identity: foo,
               version: "1",
-              identityId: id,
             },
           },
         ]);
@@ -69,6 +68,14 @@ describe("ledger/ledger", () => {
         const thunk = () => ledger.createIdentity("foo");
         failsWithoutMutation(ledger, thunk, "identityName already taken");
       });
+      it("throws an error given an identity with aliases", () => {
+        const ledger = new Ledger();
+        let identity = newIdentity("foo");
+        identity = {...identity, aliases: [NodeAddress.empty]};
+        const action = {type: "CREATE_IDENTITY", identity, version: "1"};
+        const thunk = () => ledger._createIdentity(action);
+        expect(thunk).toThrowError("new identities may not have aliases");
+      });
     });
 
     describe("renameIdentity", () => {
@@ -76,6 +83,7 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         setFakeDate(0);
         const id = ledger.createIdentity("foo");
+        const initialIdentity = ledger.identityById(id);
         setFakeDate(1);
         ledger.renameIdentity(id, "bar");
         const identity = ledger.identityById(id);
@@ -92,8 +100,7 @@ describe("ledger/ledger", () => {
             action: {
               type: "CREATE_IDENTITY",
               version: "1",
-              identityName: "foo",
-              identityId: id,
+              identity: initialIdentity,
             },
           },
           {
@@ -161,8 +168,7 @@ describe("ledger/ledger", () => {
             action: {
               type: "CREATE_IDENTITY",
               version: "1",
-              identityId: id,
-              identityName: "foo",
+              identity: expect.anything(),
             },
           },
           {
@@ -193,8 +199,7 @@ describe("ledger/ledger", () => {
             action: {
               type: "CREATE_IDENTITY",
               version: "1",
-              identityId: id,
-              identityName: "foo",
+              identity: expect.anything(),
             },
           },
           {
@@ -295,8 +300,7 @@ describe("ledger/ledger", () => {
             action: {
               type: "CREATE_IDENTITY",
               version: "1",
-              identityId: id,
-              identityName: "foo",
+              identity: expect.anything(),
             },
           },
           {
@@ -712,9 +716,8 @@ describe("ledger/ledger", () => {
             version: "1",
             action: {
               type: "CREATE_IDENTITY",
-              identityName: "identity",
               version: "1",
-              identityId,
+              identity: expect.anything(),
             },
           },
           {
