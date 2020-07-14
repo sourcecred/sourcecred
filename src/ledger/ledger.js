@@ -14,18 +14,22 @@ import {
   type Username,
   userAddress,
   usernameFromString,
+  usernameParser,
 } from "./user";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
-import {random as randomUuid} from "../util/uuid";
+import {random as randomUuid, parser as uuidParser} from "../util/uuid";
 import {
   type DistributionPolicy,
   computeDistribution,
   type CredHistory,
   type Distribution,
+  distributionParser,
 } from "./grainAllocation";
 import * as G from "./grain";
+import {JsonLog} from "../util/jsonLog";
+import * as C from "../util/combo";
 
 /**
  * An GrainAccount is an address that is present in the Ledger
@@ -73,7 +77,7 @@ export type GrainAccount = $ReadOnly<MutableGrainAccount>;
  * previous action is illegal.
  */
 export class Ledger {
-  _actionLog: Action[];
+  _actionLog: JsonLog<Action>;
   _users: Map<UserId, User>;
   _usernameToId: Map<Username, UserId>;
   _aliases: Map<NodeAddressT, UserId>;
@@ -81,7 +85,7 @@ export class Ledger {
   _latestTimestamp: TimestampMs = -Infinity;
 
   constructor() {
-    this._actionLog = [];
+    this._actionLog = new JsonLog();
     this._users = new Map();
     this._usernameToId = new Map();
     this._aliases = new Map();
@@ -250,25 +254,59 @@ export class Ledger {
   /**
    * Add an alias for a user.
    *
-   * If the alias has a GrainAccount, then its balance is transfered to the
-   * user, its paid is added to the user's paid amount, and then its account is
-   * deleted.
+   * If the alias has a Grain balance, then this will emit two events: first,
+   * one adding the alias, and a followup transferring the alias's Grain
+   * balance to the canonical user.
+   *
+   * We explicitly emit two events (rather than including the balance transfer
+   * as a part of the alias action) to improve audit-ability, and make it
+   * easier to undo accidental or fraudulent linking.
    *
    * Will no-op if the user already has that alias.
    * Will fail if the user does not exist.
    * Will fail if the alias is already claimed, or if it is
    * another user's innate address.
+   *
+   * Careful! This method may emit two_ events. Care must be taken to ensure
+   * that it cannot fail after it has emitted the first event. That means we
+   * must explicitly check all of the possible failure modes of the second
+   * event. Otherwise, we risk leaving the ledger in an inadvertently
+   * half-updated state, where the first event has been processed but the
+   * second one failed.
    */
   addAlias(userId: UserId, alias: NodeAddressT): Ledger {
-    return this._act({
+    // Ensure that if we emit two events, they both have the
+    // same timestamp.
+    const timestamp = _getTimestamp();
+
+    // Validate the ADD_ALIAS action so it cannot fail after we have
+    // already emitted the account transfer
+    const aliasAction: AddAliasV1 = {
       type: "ADD_ALIAS",
       userId,
       alias,
       version: 1,
-      timestamp: _getTimestamp(),
-    });
+      timestamp,
+    };
+    this._validateAddAlias(aliasAction);
+
+    // If the alias had some grain, explicitly transfer it to the new account.
+    const aliasAccount = this._getAccount(alias);
+    if (aliasAccount.balance !== G.ZERO) {
+      // No mutations allowed from this line onward
+      this._act({
+        from: alias,
+        to: userAddress(userId),
+        amount: aliasAccount.balance,
+        memo: "transfer from alias to canonical account",
+        timestamp,
+        type: "TRANSFER_GRAIN",
+        version: 1,
+      });
+    }
+    return this._act(aliasAction);
   }
-  _addAlias({userId, alias, version}: AddAliasV1) {
+  _validateAddAlias({userId, version, alias}: AddAliasV1) {
     if (version !== 1) {
       throw new Error(`addAlias: unrecognized version ${version}`);
     }
@@ -290,8 +328,25 @@ export class Ledger {
         `addAlias: alias ${NodeAddress.toString(alias)} already bound`
       );
     }
+    // Just a convenience, since we already verified it exists; we'll
+    // make it available to _addAlias.
+    // Makes it more obvious that _addAlias can't fail due to the existingUser
+    // being null.
+    return existingUser;
+  }
+  /**
+   * The ADD_ALIAS action may get emitted after a TRANSFER_GRAIN event
+   * that is part of the same transaction. As such, it should never fail
+   * outside of the _validateAddAlias method (which is checked before
+   * emitting the TRANSFER_GRAIN action).
+   */
+  _addAlias(action: AddAliasV1) {
+    const existingUser = this._validateAddAlias(action);
+    const {userId, alias} = action;
+    const aliasAccount = this._getAccount(alias);
+
     this._aliases.set(alias, userId);
-    const updatedAliases = existingAliases.slice();
+    const updatedAliases = existingUser.aliases.slice();
     updatedAliases.push(alias);
     const updatedUser = {
       id: existingUser.id,
@@ -299,13 +354,17 @@ export class Ledger {
       aliases: updatedAliases,
     };
     const addr = userAddress(userId);
-    const aliasAccount = this._unsafeGetAccount(alias);
     const userAccount = this._unsafeGetAccount(addr);
 
-    // State mutations! Method must not fail past this comment.
     this._users.set(userId, updatedUser);
-    // Transfer alias's balance and paid to the canonical account
+    // Transfer the alias's history of getting paid to the user account.
+    // This is necessary since the BALANCED payout policy takes
+    // users' lifetime of cred distributions into account.
     userAccount.paid = G.add(userAccount.paid, aliasAccount.paid);
+    // Assuming the event was added using the API, this balance will have
+    // already been explicitly transferred. However, just for good measure
+    // and robustness to future changes, we add this anyway, so that there
+    // will never be "vanishing Grain" when the alias account is deleted.
     userAccount.balance = G.add(userAccount.balance, aliasAccount.balance);
     this._accounts.delete(alias);
   }
@@ -524,7 +583,7 @@ export class Ledger {
    * May be used to reconstruct the Ledger after serialization.
    */
   actionLog(): LedgerLog {
-    return this._actionLog;
+    return Array.from(this._actionLog.values());
   }
 
   /**
@@ -536,6 +595,16 @@ export class Ledger {
       ledger._act(a);
     }
     return ledger;
+  }
+
+  /**
+   * Serialize the events as a JsonLog-style string.
+   *
+   * Will be a valid JSON string formatted so as to
+   * have one action per line.
+   */
+  serialize(): string {
+    return this._actionLog.toString();
   }
 
   _act(a: Action): Ledger {
@@ -570,8 +639,8 @@ export class Ledger {
       default:
         throw new Error(`Unknown type: ${(a.type: empty)}`);
     }
-    this._actionLog.push(a);
     this._latestTimestamp = a.timestamp;
+    this._actionLog.append([a]);
     return this;
   }
 
@@ -642,25 +711,49 @@ type Action =
 
 type CreateUserV1 = {|
   +type: "CREATE_USER",
-  +username: Username,
   +version: 1,
   +timestamp: TimestampMs,
+  +username: Username,
   +userId: UserId,
 |};
+const createUserV1Parser: C.Parser<CreateUserV1> = C.object({
+  type: C.exactly(["CREATE_USER"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  username: usernameParser,
+  userId: uuidParser,
+});
+
 type RenameUserV1 = {|
   +type: "RENAME_USER",
+  +version: 1,
+  +timestamp: TimestampMs,
   +userId: UserId,
   +newName: Username,
-  +version: 1,
-  +timestamp: TimestampMs,
 |};
+const renameUserV1Parser: C.Parser<RenameUserV1> = C.object({
+  type: C.exactly(["RENAME_USER"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  userId: uuidParser,
+  newName: usernameParser,
+});
+
 type AddAliasV1 = {|
   +type: "ADD_ALIAS",
-  +userId: UserId,
-  +alias: NodeAddressT,
   +version: 1,
   +timestamp: TimestampMs,
+  +userId: UserId,
+  +alias: NodeAddressT,
 |};
+const addAliasV1Parser: C.Parser<AddAliasV1> = C.object({
+  type: C.exactly(["ADD_ALIAS"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  userId: uuidParser,
+  alias: NodeAddress.parser,
+});
+
 type RemoveAliasV1 = {|
   +type: "REMOVE_ALIAS",
   +userId: UserId,
@@ -669,12 +762,28 @@ type RemoveAliasV1 = {|
   +timestamp: TimestampMs,
   +retroactivePaid: G.Grain,
 |};
+const removeAliasV1Parser: C.Parser<RemoveAliasV1> = C.object({
+  type: C.exactly(["REMOVE_ALIAS"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  userId: uuidParser,
+  alias: NodeAddress.parser,
+  retroactivePaid: G.parser,
+});
+
 type DistributeGrainV1 = {|
   +type: "DISTRIBUTE_GRAIN",
   +version: 1,
   +timestamp: TimestampMs,
   +distribution: Distribution,
 |};
+const distributeGrainV1Parser: C.Parser<DistributeGrainV1> = C.object({
+  type: C.exactly(["DISTRIBUTE_GRAIN"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  distribution: distributionParser,
+});
+
 type TransferGrainV1 = {|
   +type: "TRANSFER_GRAIN",
   +version: 1,
@@ -684,5 +793,26 @@ type TransferGrainV1 = {|
   +amount: G.Grain,
   +memo: string | null,
 |};
+const transferGrainV1Parser: C.Parser<TransferGrainV1> = C.object({
+  type: C.exactly(["TRANSFER_GRAIN"]),
+  version: C.exactly([1]),
+  timestamp: C.number,
+  from: NodeAddress.parser,
+  to: NodeAddress.parser,
+  amount: G.parser,
+  memo: C.orElse([C.string, C.null_]),
+});
+
+const actionParser: C.Parser<Action> = C.orElse([
+  createUserV1Parser,
+  renameUserV1Parser,
+  addAliasV1Parser,
+  removeAliasV1Parser,
+  distributeGrainV1Parser,
+  transferGrainV1Parser,
+]);
+export const parser: C.Parser<Ledger> = C.fmap(C.array(actionParser), (x) =>
+  Ledger.fromActionLog(x)
+);
 
 const _getTimestamp = () => Date.now();

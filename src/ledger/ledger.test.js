@@ -2,18 +2,24 @@
 
 import deepFreeze from "deep-freeze";
 import cloneDeep from "lodash.clonedeep";
-import {random as randomUuid} from "../util/uuid";
 import {NodeAddress} from "../core/graph";
-import {Ledger} from "./ledger";
+import {Ledger, parser} from "./ledger";
 import {type DistributionPolicy, computeDistribution} from "./grainAllocation";
 import {userAddress} from "./user";
 import * as G from "./grain";
+import * as uuid from "../util/uuid"; // for spy purposes
 
 describe("ledger/ledger", () => {
   // Helper for constructing Grain values.
   const g = (s) => G.fromString(s);
   function setFakeDate(ts: number) {
     jest.spyOn(global.Date, "now").mockImplementationOnce(() => ts);
+  }
+
+  const uuid1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
+  const uuid2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
+  function setNextUuid(x: uuid.Uuid) {
+    jest.spyOn(uuid, "random").mockImplementationOnce(() => x);
   }
 
   // Verify that a method fails, throwing an error, without mutating the ledger.
@@ -113,7 +119,7 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         failsWithoutMutation(
           ledger,
-          (l) => l.renameUser(randomUuid(), "bar"),
+          (l) => l.renameUser(uuid.random(), "bar"),
           "renameUser: no user matches id"
         );
       });
@@ -168,11 +174,47 @@ describe("ledger/ledger", () => {
           },
         ]);
       });
+      it("if the alias has a balance, an extra TRANSFER_GRAIN event is emitted", () => {
+        const ledger = new Ledger();
+        setFakeDate(0);
+        const id = ledger.createUser("foo");
+        ledger._allocateGrain(a1, g("100"));
+        setFakeDate(1);
+        ledger.addAlias(id, a1);
+        const user = ledger.userById(id);
+        expect(user).toEqual({id, name: "foo", aliases: [a1]});
+        expect(ledger.actionLog()).toEqual([
+          {
+            type: "CREATE_USER",
+            version: 1,
+            timestamp: 0,
+            userId: id,
+            username: "foo",
+          },
+          {
+            type: "TRANSFER_GRAIN",
+            version: 1,
+            timestamp: 1,
+            from: a1,
+            to: userAddress(id),
+            memo: "transfer from alias to canonical account",
+            amount: "100",
+          },
+          {
+            type: "ADD_ALIAS",
+            version: 1,
+            timestamp: 1,
+            userId: id,
+            alias: a1,
+          },
+        ]);
+      });
       it("errors if there's no matching user", () => {
         const ledger = new Ledger();
+        ledger._allocateGrain(a1, G.ONE);
         failsWithoutMutation(
           ledger,
-          (l) => l.addAlias(randomUuid(), a1),
+          (l) => l.addAlias(uuid.random(), a1),
           "addAlias: no matching userId"
         );
       });
@@ -180,6 +222,7 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         const id = ledger.createUser("foo");
         ledger.addAlias(id, a1);
+        ledger._allocateGrain(a1, G.ONE);
         const thunk = () => ledger.addAlias(id, a1);
         failsWithoutMutation(ledger, thunk, "user already has alias");
       });
@@ -188,6 +231,7 @@ describe("ledger/ledger", () => {
         const id1 = ledger.createUser("foo");
         const id2 = ledger.createUser("bar");
         ledger.addAlias(id1, a1);
+        ledger._allocateGrain(a1, G.ONE);
         const thunk = () => ledger.addAlias(id2, a1);
         failsWithoutMutation(
           ledger,
@@ -199,6 +243,7 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         const id = ledger.createUser("foo");
         const innateAddress = userAddress(id);
+        ledger._allocateGrain(innateAddress, G.ONE);
         const thunk = () => ledger.addAlias(id, innateAddress);
         failsWithoutMutation(
           ledger,
@@ -211,6 +256,7 @@ describe("ledger/ledger", () => {
         const id1 = ledger.createUser("foo");
         const innateAddress = userAddress(id1);
         const id2 = ledger.createUser("bar");
+        ledger._allocateGrain(innateAddress, G.ONE);
         const thunk = () => ledger.addAlias(id2, innateAddress);
         failsWithoutMutation(
           ledger,
@@ -265,7 +311,7 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         failsWithoutMutation(
           ledger,
-          (l) => l.removeAlias(randomUuid(), a1, 0),
+          (l) => l.removeAlias(uuid.random(), a1, 0),
           "removeAlias: no user matching id"
         );
       });
@@ -392,15 +438,15 @@ describe("ledger/ledger", () => {
       const ledger = new Ledger();
       const userId = ledger.createUser("foo");
       const addr = userAddress(userId);
-      ledger._allocateGrain(a1, g("1"));
+      ledger._allocateGrain(a1, g("2"));
       ledger._allocateGrain(addr, g("1"));
       ledger.addAlias(userId, a1);
       const userAccount = ledger.accountByAddress(addr);
       expect(userAccount).toEqual({
         userId,
         address: addr,
-        paid: "2",
-        balance: "2",
+        paid: "3",
+        balance: "3",
       });
       expect(ledger.accounts()).toEqual([userAccount]);
     });
@@ -409,14 +455,14 @@ describe("ledger/ledger", () => {
       const userId = ledger.createUser("foo");
       const addr = userAddress(userId);
       ledger.addAlias(userId, a1);
-      ledger._allocateGrain(a1, g("1"));
+      ledger._allocateGrain(a1, g("2"));
       ledger._allocateGrain(addr, g("1"));
       const userAccount = ledger.accountByAddress(addr);
       expect(userAccount).toEqual({
         userId,
         address: addr,
-        paid: "2",
-        balance: "2",
+        paid: "3",
+        balance: "3",
       });
       expect(ledger.accounts()).toEqual([userAccount]);
     });
@@ -866,10 +912,17 @@ describe("ledger/ledger", () => {
     // supported Action.
     function richLedger(): Ledger {
       const ledger = new Ledger();
+      setFakeDate(1);
+      setNextUuid(uuid1);
       const id1 = ledger.createUser("foo");
+      setFakeDate(2);
+      setNextUuid(uuid2);
       const id2 = ledger.createUser("bar");
+      setFakeDate(3);
       ledger.addAlias(id1, a1);
+      setFakeDate(4);
       ledger.removeAlias(id1, a1, 0);
+      setFakeDate(5);
       ledger.addAlias(id2, a1);
 
       const ua1 = userAddress(id1);
@@ -894,7 +947,9 @@ describe("ledger/ledger", () => {
           ]),
         },
       ];
+      setFakeDate(6);
       ledger.distributeGrain(policies, credHistory);
+      setFakeDate(7);
       ledger.transferGrain({from: ua1, to: ua2, amount: g("10"), memo: null});
       return ledger;
     }
@@ -906,6 +961,15 @@ describe("ledger/ledger", () => {
     it("actionLog and fromActionLog compose to identity", () => {
       const ledger = richLedger();
       expect(Ledger.fromActionLog(ledger.actionLog())).toEqual(ledger);
+    });
+    it("serialized LedgerLogs may be parsed", () => {
+      const ledger = richLedger();
+      const ledgerString = ledger.serialize();
+      const ledgerJson = JSON.parse(ledgerString);
+      expect(parser.parseOrThrow(ledgerJson)).toEqual(ledger);
+    });
+    it("serialized ledger snapshots as expected", () => {
+      expect(richLedger().serialize()).toMatchSnapshot();
     });
   });
 });

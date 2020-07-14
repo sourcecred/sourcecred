@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ledger/ledger state reconstruction serialized ledger snapshots as expected 1`] = `
+"[
+{\\"timestamp\\":1,\\"type\\":\\"CREATE_USER\\",\\"userId\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"username\\":\\"foo\\",\\"version\\":1},
+{\\"timestamp\\":2,\\"type\\":\\"CREATE_USER\\",\\"userId\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\",\\"username\\":\\"bar\\",\\"version\\":1},
+{\\"alias\\":\\"N\\\\u0000a1\\\\u0000\\",\\"timestamp\\":3,\\"type\\":\\"ADD_ALIAS\\",\\"userId\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"version\\":1},
+{\\"alias\\":\\"N\\\\u0000a1\\\\u0000\\",\\"retroactivePaid\\":\\"0\\",\\"timestamp\\":4,\\"type\\":\\"REMOVE_ALIAS\\",\\"userId\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"version\\":1},
+{\\"alias\\":\\"N\\\\u0000a1\\\\u0000\\",\\"timestamp\\":5,\\"type\\":\\"ADD_ALIAS\\",\\"userId\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\",\\"version\\":1},
+{\\"distribution\\":{\\"allocations\\":[{\\"policy\\":{\\"budget\\":\\"400\\",\\"policyType\\":\\"BALANCED\\"},\\"receipts\\":[{\\"address\\":\\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000USER\\\\u0000YVZhbGlkVXVpZEF0TGFzdA\\\\u0000\\",\\"amount\\":\\"213\\"},{\\"address\\":\\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000USER\\\\u0000URgLrCxgvjHxtGJ9PgmckQ\\\\u0000\\",\\"amount\\":\\"186\\"}]},{\\"policy\\":{\\"budget\\":\\"100\\",\\"policyType\\":\\"IMMEDIATE\\"},\\"receipts\\":[{\\"address\\":\\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000USER\\\\u0000YVZhbGlkVXVpZEF0TGFzdA\\\\u0000\\",\\"amount\\":\\"30\\"},{\\"address\\":\\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000USER\\\\u0000URgLrCxgvjHxtGJ9PgmckQ\\\\u0000\\",\\"amount\\":\\"70\\"}]}],\\"credTimestamp\\":20},\\"timestamp\\":6,\\"type\\":\\"DISTRIBUTE_GRAIN\\",\\"version\\":1},
+{\\"amount\\":\\"10\\",\\"from\\":\\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000USER\\\\u0000YVZhbGlkVXVpZEF0TGFzdA\\\\u0000\\",\\"memo\\":null,\\"timestamp\\":7,\\"to\\":\\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000USER\\\\u0000URgLrCxgvjHxtGJ9PgmckQ\\\\u0000\\",\\"type\\":\\"TRANSFER_GRAIN\\",\\"version\\":1}
+]"
+`;
