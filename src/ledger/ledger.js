@@ -171,15 +171,12 @@ export class Ledger {
       type: "CREATE_USER",
       userId: randomUuid(),
       username,
-      version: 1,
+      version: "1",
       timestamp: _getTimestamp(),
     });
     return NullUtil.get(this._usernameToId.get(username));
   }
-  _createUser({username, userId, version}: CreateUserV1) {
-    if (version !== 1) {
-      throw new Error(`createUser: unrecognized version ${version}`);
-    }
+  _createUser({username, userId}: CreateUser) {
     if (this._usernameToId.has(username)) {
       // This user already exists; return.
       throw new Error(`createUser: username already taken: ${username}`);
@@ -216,14 +213,11 @@ export class Ledger {
       type: "RENAME_USER",
       userId,
       newName: usernameFromString(newName),
-      version: 1,
+      version: "1",
       timestamp: _getTimestamp(),
     });
   }
-  _renameUser({userId, newName, version}: RenameUserV1) {
-    if (version !== 1) {
-      throw new Error(`renameUser: unrecognized version ${version}`);
-    }
+  _renameUser({userId, newName}: RenameUser) {
     const existingUser = this._users.get(userId);
     if (existingUser == null) {
       throw new Error(`renameUser: no user matches id ${userId}`);
@@ -281,11 +275,11 @@ export class Ledger {
 
     // Validate the ADD_ALIAS action so it cannot fail after we have
     // already emitted the account transfer
-    const aliasAction: AddAliasV1 = {
+    const aliasAction: AddAlias = {
       type: "ADD_ALIAS",
       userId,
       alias,
-      version: 1,
+      version: "1",
       timestamp,
     };
     this._validateAddAlias(aliasAction);
@@ -301,15 +295,12 @@ export class Ledger {
         memo: "transfer from alias to canonical account",
         timestamp,
         type: "TRANSFER_GRAIN",
-        version: 1,
+        version: "1",
       });
     }
     return this._act(aliasAction);
   }
-  _validateAddAlias({userId, version, alias}: AddAliasV1) {
-    if (version !== 1) {
-      throw new Error(`addAlias: unrecognized version ${version}`);
-    }
+  _validateAddAlias({userId, alias}: AddAlias) {
     const existingUser = this._users.get(userId);
     if (existingUser == null) {
       throw new Error(`addAlias: no matching userId ${userId}`);
@@ -340,7 +331,7 @@ export class Ledger {
    * outside of the _validateAddAlias method (which is checked before
    * emitting the TRANSFER_GRAIN action).
    */
-  _addAlias(action: AddAliasV1) {
+  _addAlias(action: AddAlias) {
     const existingUser = this._validateAddAlias(action);
     const {userId, alias} = action;
     const aliasAccount = this._getAccount(alias);
@@ -407,15 +398,12 @@ export class Ledger {
       type: "REMOVE_ALIAS",
       userId,
       alias,
-      version: 1,
+      version: "1",
       retroactivePaid,
       timestamp: _getTimestamp(),
     });
   }
-  _removeAlias({userId, alias, version, retroactivePaid}: RemoveAliasV1) {
-    if (version !== 1) {
-      throw new Error(`removeAlias: unrecognized version ${version}`);
-    }
+  _removeAlias({userId, alias, retroactivePaid}: RemoveAlias) {
     const existingUser = this._users.get(userId);
     if (existingUser == null) {
       throw new Error(`removeAlias: no user matching id ${userId}`);
@@ -471,16 +459,12 @@ export class Ledger {
     const distribution = computeDistribution(policies, credHistory, paidMap);
     return this._act({
       type: "DISTRIBUTE_GRAIN",
-      version: 1,
+      version: "1",
       timestamp: _getTimestamp(),
       distribution,
     });
   }
-  _distributeGrain({version, distribution}: DistributeGrainV1) {
-    if (version !== 1) {
-      throw new Error(`unknown DISTRIBUTE_GRAIN version: ${version}`);
-    }
-
+  _distributeGrain({distribution}: DistributeGrain) {
     // Mutation ahead: This method may not fail after this comment
     for (const {receipts} of distribution.allocations) {
       for (const {address, amount} of receipts) {
@@ -514,13 +498,10 @@ export class Ledger {
       memo,
       timestamp: _getTimestamp(),
       type: "TRANSFER_GRAIN",
-      version: 1,
+      version: "1",
     });
   }
-  _transferGrain({from, to, amount, version}: TransferGrainV1) {
-    if (version !== 1) {
-      throw new Error(`unknown TRANSFER_GRAIN version: ${version}`);
-    }
+  _transferGrain({from, to, amount}: TransferGrain) {
     const fromAccount = this._getAccount(from);
     if (G.lt(amount, G.ZERO)) {
       throw new Error(`cannot transfer negative Grain amount: ${amount}`);
@@ -702,100 +683,100 @@ export opaque type LedgerLog = $ReadOnlyArray<Action>;
  * The Actions are used to store the history of Ledger changes.
  */
 type Action =
-  | CreateUserV1
-  | RenameUserV1
-  | AddAliasV1
-  | RemoveAliasV1
-  | DistributeGrainV1
-  | TransferGrainV1;
+  | CreateUser
+  | RenameUser
+  | AddAlias
+  | RemoveAlias
+  | DistributeGrain
+  | TransferGrain;
 
-type CreateUserV1 = {|
+type CreateUser = {|
   +type: "CREATE_USER",
-  +version: 1,
+  +version: "1",
   +timestamp: TimestampMs,
   +username: Username,
   +userId: UserId,
 |};
-const createUserV1Parser: C.Parser<CreateUserV1> = C.object({
+const createUserParser: C.Parser<CreateUser> = C.object({
   type: C.exactly(["CREATE_USER"]),
-  version: C.exactly([1]),
+  version: C.exactly(["1"]),
   timestamp: C.number,
   username: usernameParser,
   userId: uuidParser,
 });
 
-type RenameUserV1 = {|
+type RenameUser = {|
   +type: "RENAME_USER",
-  +version: 1,
+  +version: "1",
   +timestamp: TimestampMs,
   +userId: UserId,
   +newName: Username,
 |};
-const renameUserV1Parser: C.Parser<RenameUserV1> = C.object({
+const renameUserParser: C.Parser<RenameUser> = C.object({
   type: C.exactly(["RENAME_USER"]),
-  version: C.exactly([1]),
+  version: C.exactly(["1"]),
   timestamp: C.number,
   userId: uuidParser,
   newName: usernameParser,
 });
 
-type AddAliasV1 = {|
+type AddAlias = {|
   +type: "ADD_ALIAS",
-  +version: 1,
+  +version: "1",
   +timestamp: TimestampMs,
   +userId: UserId,
   +alias: NodeAddressT,
 |};
-const addAliasV1Parser: C.Parser<AddAliasV1> = C.object({
+const addAliasParser: C.Parser<AddAlias> = C.object({
   type: C.exactly(["ADD_ALIAS"]),
-  version: C.exactly([1]),
+  version: C.exactly(["1"]),
   timestamp: C.number,
   userId: uuidParser,
   alias: NodeAddress.parser,
 });
 
-type RemoveAliasV1 = {|
+type RemoveAlias = {|
   +type: "REMOVE_ALIAS",
   +userId: UserId,
   +alias: NodeAddressT,
-  +version: 1,
+  +version: "1",
   +timestamp: TimestampMs,
   +retroactivePaid: G.Grain,
 |};
-const removeAliasV1Parser: C.Parser<RemoveAliasV1> = C.object({
+const removeAliasParser: C.Parser<RemoveAlias> = C.object({
   type: C.exactly(["REMOVE_ALIAS"]),
-  version: C.exactly([1]),
+  version: C.exactly(["1"]),
   timestamp: C.number,
   userId: uuidParser,
   alias: NodeAddress.parser,
   retroactivePaid: G.parser,
 });
 
-type DistributeGrainV1 = {|
+type DistributeGrain = {|
   +type: "DISTRIBUTE_GRAIN",
-  +version: 1,
+  +version: "1",
   +timestamp: TimestampMs,
   +distribution: Distribution,
 |};
-const distributeGrainV1Parser: C.Parser<DistributeGrainV1> = C.object({
+const distributeGrainParser: C.Parser<DistributeGrain> = C.object({
   type: C.exactly(["DISTRIBUTE_GRAIN"]),
-  version: C.exactly([1]),
+  version: C.exactly(["1"]),
   timestamp: C.number,
   distribution: distributionParser,
 });
 
-type TransferGrainV1 = {|
+type TransferGrain = {|
   +type: "TRANSFER_GRAIN",
-  +version: 1,
+  +version: "1",
   +timestamp: TimestampMs,
   +from: NodeAddressT,
   +to: NodeAddressT,
   +amount: G.Grain,
   +memo: string | null,
 |};
-const transferGrainV1Parser: C.Parser<TransferGrainV1> = C.object({
+const transferGrainParser: C.Parser<TransferGrain> = C.object({
   type: C.exactly(["TRANSFER_GRAIN"]),
-  version: C.exactly([1]),
+  version: C.exactly(["1"]),
   timestamp: C.number,
   from: NodeAddress.parser,
   to: NodeAddress.parser,
@@ -804,12 +785,12 @@ const transferGrainV1Parser: C.Parser<TransferGrainV1> = C.object({
 });
 
 const actionParser: C.Parser<Action> = C.orElse([
-  createUserV1Parser,
-  renameUserV1Parser,
-  addAliasV1Parser,
-  removeAliasV1Parser,
-  distributeGrainV1Parser,
-  transferGrainV1Parser,
+  createUserParser,
+  renameUserParser,
+  addAliasParser,
+  removeAliasParser,
+  distributeGrainParser,
+  transferGrainParser,
 ]);
 export const parser: C.Parser<Ledger> = C.fmap(C.array(actionParser), (x) =>
   Ledger.fromActionLog(x)
