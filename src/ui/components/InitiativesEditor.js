@@ -1,17 +1,15 @@
 // @flow
 
 import React from "react";
+import {Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
-import {InitiativeList, InitiativeCreate, InitiativeEdit} from "./Initiatives";
-import fakeDataProvider from "ra-data-fakerest";
-import {fakeInitiatives} from "../mock/fakeInitiatives";
-import {createMemoryHistory} from "history";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
-import {load, type LoadResult} from "./ExplorerApp";
-import ExplorerApp from "./ExplorerApp";
+import fakeDataProvider from "ra-data-fakerest";
+import {fakeInitiatives} from "../mock/fakeInitiatives";
+import {InitiativeList, InitiativeCreate, InitiativeEdit} from "./Initiatives";
+import ExplorerApp, {load, type LoadResult} from "./ExplorerApp";
 import Menu from "./Menu";
-import {Route /*useHistory*/} from "react-router-dom";
 
 const dataProvider = fakeDataProvider(fakeInitiatives, true);
 
@@ -34,12 +32,7 @@ const InitiativesEditor = () => {
     load().then(setLoadResult);
   }, []);
 
-  // relative history (using a basename) does not work with the `Admin` component
-  // therefore a memoryHistory instance will be utilized with the `Admin` component
-  // so it maintains its own internal routing for now, while still working with
-  // a url basename
-  //const history = useHistory();
-  const history = createMemoryHistory();
+  const history = useHistory();
 
   if (!loadResult) {
     return (
