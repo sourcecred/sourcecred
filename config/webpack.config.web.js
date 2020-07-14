@@ -238,7 +238,7 @@ async function plugins(mode /*: "development" | "production" */) {
   const basePlugins = [
     new StaticSiteGeneratorPlugin({
       entry: "ssr",
-      paths: ["/", "/admin"],
+      paths: ["/"],
       locals: {},
     }),
     new CopyPlugin([{from: paths.favicon, to: "favicon.png"}]),

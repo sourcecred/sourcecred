@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {BrowserRouter} from "react-router-dom";
 import normalize from "../util/pathNormalize";
-import Main from "./Main";
+import App from "./components/AdminApp";
 
 const target = document.getElementById("root");
 if (target == null) {
@@ -25,7 +25,7 @@ const basename = normalize(
 );
 ReactDOM.hydrate(
   <BrowserRouter basename={basename}>
-    <Main />
+    <App />
   </BrowserRouter>,
   target
 );
