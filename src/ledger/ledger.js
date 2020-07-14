@@ -12,7 +12,6 @@ import {
   type IdentityId,
   type Identity,
   type IdentityName,
-  identityAddress,
   identityParser,
   newIdentity,
   identityNameParser,
@@ -152,7 +151,8 @@ export class Ledger {
   canonicalAddress(address: NodeAddressT): NodeAddressT {
     const identityId = this._aliases.get(address);
     if (identityId != null) {
-      return identityAddress(identityId);
+      const identity = NullUtil.get(this.identityById(identityId));
+      return identity.address;
     }
     return address;
   }
@@ -188,24 +188,23 @@ export class Ledger {
       throw new Error(`createIdentity: new identities may not have aliases`);
     }
     // istanbul ignore if
-    if (this._aliases.has(identityAddress(identity.id))) {
+    if (this._aliases.has(identity.address)) {
       // This should never happen, as it implies a UUID conflict.
       throw new Error(
         `createIdentity: innate address already claimed ${identity.id}`
       );
     }
-    const addr = identityAddress(identity.id);
 
     // Mutations! Method must not fail after this comment.
     this._identityNameToId.set(identity.name, identity.id);
     this._identities.set(identity.id, identity);
     // Reserve this identity's own address
-    this._aliases.set(addr, identity.id);
+    this._aliases.set(identity.address, identity.id);
     // Every identity has a corresponding GrainAccount.
-    this._accounts.set(addr, {
+    this._accounts.set(identity.address, {
       balance: G.ZERO,
       paid: G.ZERO,
-      address: addr,
+      address: identity.address,
       identityId: identity.id,
     });
   }
@@ -244,6 +243,7 @@ export class Ledger {
     const updatedIdentity = {
       id: identityId,
       name: newName,
+      address: existingIdentity.address,
       aliases: existingIdentity.aliases,
     };
 
@@ -289,7 +289,7 @@ export class Ledger {
       alias,
       version: "1",
     };
-    this._validateAddAlias(aliasAction);
+    const existingIdentity = this._validateAddAlias(aliasAction);
     const aliasEvent: LedgerEvent = {
       action: aliasAction,
       ledgerTimestamp,
@@ -302,7 +302,7 @@ export class Ledger {
       // The method may not fail below this line
       const transferAction = {
         from: alias,
-        to: identityAddress(identityId),
+        to: existingIdentity.address,
         amount: aliasAccount.balance,
         memo: "transfer from alias to canonical account",
         type: "TRANSFER_GRAIN",
@@ -351,7 +351,7 @@ export class Ledger {
    */
   _addAlias(action: AddAlias) {
     const existingIdentity = this._validateAddAlias(action);
-    const {identityId, alias} = action;
+    const {alias, identityId} = action;
     const aliasAccount = this._getAccount(alias);
 
     this._aliases.set(alias, identityId);
@@ -361,9 +361,9 @@ export class Ledger {
       id: existingIdentity.id,
       name: existingIdentity.name,
       aliases: updatedAliases,
+      address: existingIdentity.address,
     };
-    const addr = identityAddress(identityId);
-    const identityAccount = this._unsafeGetAccount(addr);
+    const identityAccount = this._unsafeGetAccount(existingIdentity.address);
 
     this._identities.set(identityId, updatedIdentity);
     // Transfer the alias's history of getting paid to the identity account.
@@ -429,7 +429,7 @@ export class Ledger {
     if (existingIdentity == null) {
       throw new Error(`removeAlias: no identity matching id ${identityId}`);
     }
-    if (alias === identityAddress(identityId)) {
+    if (alias === existingIdentity.address) {
       throw new Error(`removeAlias: cannot remove identity's innate address`);
     }
     const existingAliases = existingIdentity.aliases;
@@ -450,6 +450,7 @@ export class Ledger {
     this._identities.set(identityId, {
       id: identityId,
       name: existingIdentity.name,
+      address: existingIdentity.address,
       aliases,
     });
     if (retroactivePaid !== G.ZERO) {

@@ -48,6 +48,8 @@ export type Identity = {|
   // UUID, assigned when the identity is created.
   +id: IdentityId,
   +name: IdentityName,
+  // The identity's own node address.
+  +address: NodeAddressT,
   // Every other node in the graph that this identity corresponds to.
   // Does not include the identity's "own" address, i.e. the result
   // of calling (identityAddress(identity.id)).
@@ -55,8 +57,10 @@ export type Identity = {|
 |};
 
 export function newIdentity(name: string): Identity {
+  const id = randomUuid();
   return {
-    id: randomUuid(),
+    id,
+    address: NodeAddress.append(IDENTITY_PREFIX, id),
     name: identityNameFromString(name),
     aliases: [],
   };
@@ -82,13 +86,9 @@ export function identityNameFromString(identityName: string): IdentityName {
   return identityName.toLowerCase();
 }
 
-export function identityAddress(id: IdentityId): NodeAddressT {
-  return NodeAddress.append(IDENTITY_PREFIX, id);
-}
-
-export function graphNode({id, name}: Identity): GraphNode {
+export function graphNode({name, address}: Identity): GraphNode {
   return {
-    address: identityAddress(id),
+    address,
     description: name,
     timestampMs: null,
   };
@@ -102,5 +102,6 @@ export const identityNameParser: C.Parser<IdentityName> = C.fmap(
 export const identityParser: C.Parser<Identity> = C.object({
   id: uuidParser,
   name: identityNameParser,
+  address: NodeAddress.parser,
   aliases: C.array(NodeAddress.parser),
 });

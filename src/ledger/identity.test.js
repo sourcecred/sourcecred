@@ -4,29 +4,24 @@ import deepFreeze from "deep-freeze";
 import {fromString as uuidFromString} from "../util/uuid";
 import {NodeAddress} from "../core/graph";
 import {
-  identityAddress,
   identityNameFromString,
-  IDENTITY_PREFIX,
   graphNode,
   type Identity,
   newIdentity,
 } from "./identity";
 
 describe("ledger/identity", () => {
-  const uuid = uuidFromString("YVZhbGlkVXVpZEF0TGFzdA");
-  const name = identityNameFromString("foo");
-  const example: Identity = deepFreeze({
-    id: uuid,
-    name,
-    aliases: [NodeAddress.empty],
-  });
+  const example: Identity = deepFreeze(newIdentity("foo"));
   describe("newIdentity", () => {
-    it("makes a new identity without aliases", () => {
-      expect(newIdentity("foo")).toEqual({
-        id: expect.anything(),
-        name: "foo",
-        aliases: [],
-      });
+    it("new identities don't have aliases", () => {
+      const identity = newIdentity("foo");
+      expect(identity.aliases).toEqual([]);
+    });
+    it("identity addresses are as expected", () => {
+      const identity = newIdentity("foo");
+      expect(identity.address).toEqual(
+        NodeAddress.fromParts(["sourcecred", "core", "IDENTITY", identity.id])
+      );
     });
     it("includes a valid UUID", () => {
       const ident = newIdentity("foo");
@@ -38,15 +33,10 @@ describe("ledger/identity", () => {
       expect(fail).toThrowError("invalid identityName");
     });
   });
-  it("identityAddress works", () => {
-    expect(identityAddress(uuid)).toEqual(
-      NodeAddress.append(IDENTITY_PREFIX, uuid)
-    );
-  });
   it("graphNode works", () => {
     const node = graphNode(example);
     expect(node.description).toEqual(example.name);
-    expect(node.address).toEqual(identityAddress(uuid));
+    expect(node.address).toEqual(example.address);
     expect(node.timestampMs).toEqual(null);
   });
   describe("identityNameFromString", () => {
