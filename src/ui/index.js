@@ -1,8 +1,7 @@
 // @flow
 import React from "react";
 import ReactDOM from "react-dom";
-import {BrowserRouter} from "react-router-dom";
-import normalize from "../util/pathNormalize";
+import {HashRouter} from "react-router-dom";
 import App from "./components/AdminApp";
 
 const target = document.getElementById("root");
@@ -10,19 +9,10 @@ if (target == null) {
   throw new Error("Unable to find root element!");
 }
 
-let initialRoot: string = target.dataset.initialRoot;
-if (initialRoot == null) {
-  console.error(
-    `Initial root unset (${initialRoot}): this should not happen! ` +
-      'Falling back to ".".'
-  );
-  initialRoot = ".";
-}
-const basename = normalize(`${window.location.pathname}/${initialRoot}/`);
 ReactDOM.hydrate(
-  <BrowserRouter basename={basename}>
+  <HashRouter>
     <App />
-  </BrowserRouter>,
+  </HashRouter>,
   target
 );
 
