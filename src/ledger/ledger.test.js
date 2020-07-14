@@ -5,9 +5,10 @@ import cloneDeep from "lodash.clonedeep";
 import {NodeAddress} from "../core/graph";
 import {Ledger, parser} from "./ledger";
 import {type DistributionPolicy, computeDistribution} from "./grainAllocation";
-import {identityAddress, newIdentity} from "./identity";
+import {newIdentity} from "./identity";
 import * as G from "./grain";
 import * as uuid from "../util/uuid"; // for spy purposes
+import * as NullUtil from "../util/null";
 
 describe("ledger/ledger", () => {
   // Helper for constructing Grain values.
@@ -83,12 +84,17 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         setFakeDate(0);
         const id = ledger.createIdentity("foo");
-        const initialIdentity = ledger.identityById(id);
+        const initialIdentity = NullUtil.get(ledger.identityById(id));
         setFakeDate(1);
         ledger.renameIdentity(id, "bar");
         const identity = ledger.identityById(id);
 
-        expect(identity).toEqual({id, name: "bar", aliases: []});
+        expect(identity).toEqual({
+          id,
+          name: "bar",
+          address: initialIdentity.address,
+          aliases: [],
+        });
         expect(ledger.identityByIdentityName("bar")).toEqual(identity);
         expect(ledger.identityByIdentityName("foo")).toEqual(undefined);
         expect(ledger.identities()).toEqual([identity]);
@@ -159,8 +165,8 @@ describe("ledger/ledger", () => {
         const id = ledger.createIdentity("foo");
         setFakeDate(1);
         ledger.addAlias(id, a1);
-        const identity = ledger.identityById(id);
-        expect(identity).toEqual({id, name: "foo", aliases: [a1]});
+        const identity = NullUtil.get(ledger.identityById(id));
+        expect(identity.aliases).toEqual([a1]);
         expect(ledger.eventLog()).toEqual([
           {
             ledgerTimestamp: 0,
@@ -190,8 +196,8 @@ describe("ledger/ledger", () => {
         ledger._allocateGrain(a1, g("100"));
         setFakeDate(1);
         ledger.addAlias(id, a1);
-        const identity = ledger.identityById(id);
-        expect(identity).toEqual({id, name: "foo", aliases: [a1]});
+        const identity = NullUtil.get(ledger.identityById(id));
+        expect(identity.aliases).toEqual([a1]);
         expect(ledger.eventLog()).toEqual([
           {
             ledgerTimestamp: 0,
@@ -209,7 +215,7 @@ describe("ledger/ledger", () => {
               type: "TRANSFER_GRAIN",
               version: "1",
               from: a1,
-              to: identityAddress(id),
+              to: identity.address,
               memo: "transfer from alias to canonical account",
               amount: "100",
             },
@@ -259,26 +265,30 @@ describe("ledger/ledger", () => {
       it("errors if the address is the identity's innate address", () => {
         const ledger = new Ledger();
         const id = ledger.createIdentity("foo");
-        const innateAddress = identityAddress(id);
-        ledger._allocateGrain(innateAddress, G.ONE);
-        const thunk = () => ledger.addAlias(id, innateAddress);
+        const identity = NullUtil.get(ledger.identityById(id));
+        ledger._allocateGrain(identity.address, G.ONE);
+        const thunk = () => ledger.addAlias(id, identity.address);
         failsWithoutMutation(
           ledger,
           thunk,
-          `addAlias: alias ${NodeAddress.toString(innateAddress)} already bound`
+          `addAlias: alias ${NodeAddress.toString(
+            identity.address
+          )} already bound`
         );
       });
       it("errors if the address is another identity's innate address", () => {
         const ledger = new Ledger();
         const id1 = ledger.createIdentity("foo");
-        const innateAddress = identityAddress(id1);
+        const identity1 = NullUtil.get(ledger.identityById(id1));
         const id2 = ledger.createIdentity("bar");
-        ledger._allocateGrain(innateAddress, G.ONE);
-        const thunk = () => ledger.addAlias(id2, innateAddress);
+        ledger._allocateGrain(identity1.address, G.ONE);
+        const thunk = () => ledger.addAlias(id2, identity1.address);
         failsWithoutMutation(
           ledger,
           thunk,
-          `addAlias: alias ${NodeAddress.toString(innateAddress)} already bound`
+          `addAlias: alias ${NodeAddress.toString(
+            identity1.address
+          )} already bound`
         );
       });
     });
@@ -291,8 +301,8 @@ describe("ledger/ledger", () => {
         ledger.addAlias(id, a1);
         setFakeDate(2);
         ledger.removeAlias(id, a1, 0);
-        const identity = ledger.identityById(id);
-        expect(identity).toEqual({id, name: "foo", aliases: []});
+        const identity = NullUtil.get(ledger.identityById(id));
+        expect(identity.aliases).toEqual([]);
         expect(ledger.eventLog()).toEqual([
           {
             ledgerTimestamp: 0,
@@ -343,8 +353,8 @@ describe("ledger/ledger", () => {
       it("errors if the address is the identity's innate address", () => {
         const ledger = new Ledger();
         const id = ledger.createIdentity("foo");
-        const innateAddress = identityAddress(id);
-        const thunk = () => ledger.removeAlias(id, innateAddress, 0);
+        const identity = NullUtil.get(ledger.identityById(id));
+        const thunk = () => ledger.removeAlias(id, identity.address, 0);
         failsWithoutMutation(
           ledger,
           thunk,
@@ -358,8 +368,8 @@ describe("ledger/ledger", () => {
         ledger.addAlias(id1, a1);
         ledger.removeAlias(id1, a1, 0);
         ledger.addAlias(id2, a1);
-        const u2 = ledger.identityById(id2);
-        expect(u2).toEqual({id: id2, name: "bar", aliases: [a1]});
+        const u2 = NullUtil.get(ledger.identityById(id2));
+        expect(u2.aliases).toEqual([a1]);
       });
       it("errors on invalid credProportion", () => {
         const ledger = new Ledger();
@@ -380,8 +390,10 @@ describe("ledger/ledger", () => {
     it("identities' addresses are canonical", () => {
       const ledger = new Ledger();
       const id = ledger.createIdentity("foo");
-      const addr = identityAddress(id);
-      expect(ledger.canonicalAddress(addr)).toEqual(addr);
+      const identity = NullUtil.get(ledger.identityById(id));
+      expect(ledger.canonicalAddress(identity.address)).toEqual(
+        identity.address
+      );
     });
     it("hitherto unseen addresses are canonical", () => {
       const ledger = new Ledger();
@@ -390,9 +402,9 @@ describe("ledger/ledger", () => {
     it("aliases are not canonical", () => {
       const ledger = new Ledger();
       const id = ledger.createIdentity("foo");
+      const identity = NullUtil.get(ledger.identityById(id));
       ledger.addAlias(id, a1);
-      const addr = identityAddress(id);
-      expect(ledger.canonicalAddress(a1)).toEqual(addr);
+      expect(ledger.canonicalAddress(a1)).toEqual(identity.address);
     });
     it("unlinked aliases are again canonical", () => {
       const ledger = new Ledger();
@@ -406,7 +418,7 @@ describe("ledger/ledger", () => {
     it("newly created identities have an empty account", () => {
       const ledger = new Ledger();
       const identityId = ledger.createIdentity("foo");
-      const address = identityAddress(identityId);
+      const address = NullUtil.get(ledger.identityById(identityId)).address;
       const account = ledger.accountByAddress(address);
       expect(account).toEqual({
         identityId,
@@ -436,7 +448,7 @@ describe("ledger/ledger", () => {
     it("accountByAddress returns canonical accounts", () => {
       const ledger = new Ledger();
       const identityId = ledger.createIdentity("foo");
-      const addr = identityAddress(identityId);
+      const addr = NullUtil.get(ledger.identityById(identityId)).address;
       ledger.addAlias(identityId, a1);
       expect(ledger.accountByAddress(a1)).toEqual({
         // Note: we asked for `a1`, but got address `addr`.
@@ -450,7 +462,7 @@ describe("ledger/ledger", () => {
     it("when a identity gets an alias, it claims the alias's balance", () => {
       const ledger = new Ledger();
       const identityId = ledger.createIdentity("foo");
-      const addr = identityAddress(identityId);
+      const addr = NullUtil.get(ledger.identityById(identityId)).address;
       ledger._allocateGrain(a1, g("2"));
       ledger._allocateGrain(addr, g("1"));
       ledger.addAlias(identityId, a1);
@@ -466,7 +478,7 @@ describe("ledger/ledger", () => {
     it("if an alias is allocated Grain, it's received by the canonical address", () => {
       const ledger = new Ledger();
       const identityId = ledger.createIdentity("foo");
-      const addr = identityAddress(identityId);
+      const addr = NullUtil.get(ledger.identityById(identityId)).address;
       ledger.addAlias(identityId, a1);
       ledger._allocateGrain(a1, g("2"));
       ledger._allocateGrain(addr, g("1"));
@@ -493,7 +505,7 @@ describe("ledger/ledger", () => {
       for (const {credProportion, expectedRetroactivePaid} of examples) {
         const ledger = new Ledger();
         const identityId = ledger.createIdentity("foo");
-        const addr = identityAddress(identityId);
+        const addr = NullUtil.get(ledger.identityById(identityId)).address;
         ledger.addAlias(identityId, a1);
         ledger._allocateGrain(a1, g("100"));
         ledger.removeAlias(identityId, a1, credProportion);
@@ -517,7 +529,7 @@ describe("ledger/ledger", () => {
     it("removed aliases without retroactive payouts don't have an alias account", () => {
       const ledger = new Ledger();
       const identityId = ledger.createIdentity("foo");
-      const addr = identityAddress(identityId);
+      const addr = NullUtil.get(ledger.identityById(identityId)).address;
       ledger.addAlias(identityId, a1);
       ledger._allocateGrain(a1, g("100"));
       ledger.removeAlias(identityId, a1, 0);
@@ -673,7 +685,7 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         setFakeDate(4);
         const identityId = ledger.createIdentity("identity");
-        const aU = identityAddress(identityId);
+        const aU = NullUtil.get(ledger.identityById(identityId)).address;
         setFakeDate(5);
         ledger.addAlias(identityId, a1);
         ledger._allocateGrain(aU, g("10"));
@@ -863,11 +875,12 @@ describe("ledger/ledger", () => {
       it("if a transfer sends from an alias, the canonical account is debited", () => {
         const ledger = new Ledger();
         const identityId = ledger.createIdentity("identity");
+        const address = NullUtil.get(ledger.identityById(identityId)).address;
         ledger.addAlias(identityId, a1);
         ledger._allocateGrain(a1, g("1"));
         ledger.transferGrain({from: a1, to: a2, amount: g("1"), memo: "test"});
         const e1 = {
-          address: identityAddress(identityId),
+          address,
           identityId,
           paid: g("1"),
           balance: g("0"),
@@ -885,11 +898,12 @@ describe("ledger/ledger", () => {
       it("if a transfers sends to an alias, the canonical account is credited", () => {
         const ledger = new Ledger();
         const identityId = ledger.createIdentity("identity");
+        const addr = NullUtil.get(ledger.identityById(identityId)).address;
         ledger.addAlias(identityId, a1);
         ledger._allocateGrain(a2, g("1"));
         ledger.transferGrain({from: a2, to: a1, amount: g("1"), memo: "test"});
         const e1 = {
-          address: identityAddress(identityId),
+          address: addr,
           identityId,
           paid: g("0"),
           balance: g("1"),
@@ -970,9 +984,11 @@ describe("ledger/ledger", () => {
       setFakeDate(1);
       setNextUuid(uuid1);
       const id1 = ledger.createIdentity("foo");
+      const addr1 = NullUtil.get(ledger.identityById(id1)).address;
       setFakeDate(2);
       setNextUuid(uuid2);
       const id2 = ledger.createIdentity("bar");
+      const addr2 = NullUtil.get(ledger.identityById(id2)).address;
       setFakeDate(3);
       ledger.addAlias(id1, a1);
       setFakeDate(4);
@@ -980,8 +996,6 @@ describe("ledger/ledger", () => {
       setFakeDate(5);
       ledger.addAlias(id2, a1);
 
-      const ua1 = identityAddress(id1);
-      const ua2 = identityAddress(id2);
       const policies = [
         {budget: g("400"), policyType: "BALANCED"},
         {budget: g("100"), policyType: "IMMEDIATE"},
@@ -990,22 +1004,27 @@ describe("ledger/ledger", () => {
         {
           intervalEndMs: 10,
           cred: new Map([
-            [ua1, 5],
-            [ua2, 0],
+            [addr1, 5],
+            [addr2, 0],
           ]),
         },
         {
           intervalEndMs: 20,
           cred: new Map([
-            [ua1, 3],
-            [ua2, 7],
+            [addr1, 3],
+            [addr2, 7],
           ]),
         },
       ];
       setFakeDate(6);
       ledger.distributeGrain(policies, credHistory);
       setFakeDate(7);
-      ledger.transferGrain({from: ua1, to: ua2, amount: g("10"), memo: null});
+      ledger.transferGrain({
+        from: addr1,
+        to: addr2,
+        amount: g("10"),
+        memo: null,
+      });
       return ledger;
     }
     it("fromEventLog with an empty action log results in an empty ledger", () => {
