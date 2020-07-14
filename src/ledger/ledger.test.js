@@ -44,13 +44,16 @@ describe("ledger/ledger", () => {
         const id = l.createUser("foo");
         const foo = l.userById(id);
         expect(l.users()).toEqual([foo]);
-        expect(l.actionLog()).toEqual([
+        expect(l.eventLog()).toEqual([
           {
-            type: "CREATE_USER",
-            username: "foo",
+            ledgerTimestamp: 123,
             version: "1",
-            timestamp: 123,
-            userId: id,
+            action: {
+              type: "CREATE_USER",
+              username: "foo",
+              version: "1",
+              userId: id,
+            },
           },
         ]);
       });
@@ -82,20 +85,26 @@ describe("ledger/ledger", () => {
         expect(ledger.userByUsername("foo")).toEqual(undefined);
         expect(ledger.users()).toEqual([user]);
 
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "CREATE_USER",
+            ledgerTimestamp: 0,
             version: "1",
-            username: "foo",
-            timestamp: 0,
-            userId: id,
+            action: {
+              type: "CREATE_USER",
+              version: "1",
+              username: "foo",
+              userId: id,
+            },
           },
           {
-            type: "RENAME_USER",
+            ledgerTimestamp: 1,
             version: "1",
-            newName: "bar",
-            userId: id,
-            timestamp: 1,
+            action: {
+              type: "RENAME_USER",
+              version: "1",
+              newName: "bar",
+              userId: id,
+            },
           },
         ]);
       });
@@ -145,20 +154,26 @@ describe("ledger/ledger", () => {
         ledger.addAlias(id, a1);
         const user = ledger.userById(id);
         expect(user).toEqual({id, name: "foo", aliases: [a1]});
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "CREATE_USER",
+            ledgerTimestamp: 0,
             version: "1",
-            timestamp: 0,
-            userId: id,
-            username: "foo",
+            action: {
+              type: "CREATE_USER",
+              version: "1",
+              userId: id,
+              username: "foo",
+            },
           },
           {
-            type: "ADD_ALIAS",
+            ledgerTimestamp: 1,
             version: "1",
-            timestamp: 1,
-            userId: id,
-            alias: a1,
+            action: {
+              type: "ADD_ALIAS",
+              version: "1",
+              userId: id,
+              alias: a1,
+            },
           },
         ]);
       });
@@ -171,29 +186,38 @@ describe("ledger/ledger", () => {
         ledger.addAlias(id, a1);
         const user = ledger.userById(id);
         expect(user).toEqual({id, name: "foo", aliases: [a1]});
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "CREATE_USER",
+            ledgerTimestamp: 0,
             version: "1",
-            timestamp: 0,
-            userId: id,
-            username: "foo",
+            action: {
+              type: "CREATE_USER",
+              version: "1",
+              userId: id,
+              username: "foo",
+            },
           },
           {
-            type: "TRANSFER_GRAIN",
+            ledgerTimestamp: 1,
             version: "1",
-            timestamp: 1,
-            from: a1,
-            to: userAddress(id),
-            memo: "transfer from alias to canonical account",
-            amount: "100",
+            action: {
+              type: "TRANSFER_GRAIN",
+              version: "1",
+              from: a1,
+              to: userAddress(id),
+              memo: "transfer from alias to canonical account",
+              amount: "100",
+            },
           },
           {
-            type: "ADD_ALIAS",
+            ledgerTimestamp: 1,
             version: "1",
-            timestamp: 1,
-            userId: id,
-            alias: a1,
+            action: {
+              type: "ADD_ALIAS",
+              version: "1",
+              userId: id,
+              alias: a1,
+            },
           },
         ]);
       });
@@ -264,28 +288,37 @@ describe("ledger/ledger", () => {
         ledger.removeAlias(id, a1, 0);
         const user = ledger.userById(id);
         expect(user).toEqual({id, name: "foo", aliases: []});
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "CREATE_USER",
+            ledgerTimestamp: 0,
             version: "1",
-            timestamp: 0,
-            userId: id,
-            username: "foo",
+            action: {
+              type: "CREATE_USER",
+              version: "1",
+              userId: id,
+              username: "foo",
+            },
           },
           {
-            type: "ADD_ALIAS",
+            ledgerTimestamp: 1,
             version: "1",
-            timestamp: 1,
-            userId: id,
-            alias: a1,
+            action: {
+              type: "ADD_ALIAS",
+              version: "1",
+              userId: id,
+              alias: a1,
+            },
           },
           {
-            type: "REMOVE_ALIAS",
+            ledgerTimestamp: 2,
             version: "1",
-            timestamp: 2,
-            userId: id,
-            alias: a1,
-            retroactivePaid: "0",
+            action: {
+              type: "REMOVE_ALIAS",
+              version: "1",
+              userId: id,
+              alias: a1,
+              retroactivePaid: "0",
+            },
           },
         ]);
       });
@@ -523,12 +556,15 @@ describe("ledger/ledger", () => {
       it("produces an empty distribution if there are no policies", () => {
         setFakeDate(4);
         const ledger = new Ledger().distributeGrain([], credHistory);
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "DISTRIBUTE_GRAIN",
+            ledgerTimestamp: 4,
             version: "1",
-            timestamp: 4,
-            distribution: {credTimestamp: 3, allocations: []},
+            action: {
+              type: "DISTRIBUTE_GRAIN",
+              version: "1",
+              distribution: {credTimestamp: 3, allocations: []},
+            },
           },
         ]);
         expect(ledger.accounts()).toEqual([]);
@@ -570,12 +606,15 @@ describe("ledger/ledger", () => {
           balance: "10",
           paid: "10",
         });
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "DISTRIBUTE_GRAIN",
+            ledgerTimestamp: 4,
             version: "1",
-            timestamp: 4,
-            distribution: expectedDistribution,
+            action: {
+              type: "DISTRIBUTE_GRAIN",
+              version: "1",
+              distribution: expectedDistribution,
+            },
           },
         ]);
       });
@@ -609,12 +648,15 @@ describe("ledger/ledger", () => {
           balance: "10",
           paid: "10",
         });
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "DISTRIBUTE_GRAIN",
+            ledgerTimestamp: 4,
             version: "1",
-            timestamp: 4,
-            distribution: expectedDistribution,
+            action: {
+              type: "DISTRIBUTE_GRAIN",
+              version: "1",
+              distribution: expectedDistribution,
+            },
           },
         ]);
       });
@@ -664,34 +706,46 @@ describe("ledger/ledger", () => {
           balance: "6",
           paid: "6",
         });
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "CREATE_USER",
-            username: "user",
+            ledgerTimestamp: 4,
             version: "1",
-            timestamp: 4,
-            userId,
+            action: {
+              type: "CREATE_USER",
+              username: "user",
+              version: "1",
+              userId,
+            },
           },
           {
-            type: "ADD_ALIAS",
+            ledgerTimestamp: 5,
             version: "1",
-            timestamp: 5,
-            userId,
-            alias: a1,
+            action: {
+              type: "ADD_ALIAS",
+              version: "1",
+              userId,
+              alias: a1,
+            },
           },
           {
-            type: "REMOVE_ALIAS",
+            ledgerTimestamp: 6,
             version: "1",
-            timestamp: 6,
-            userId,
-            alias: a1,
-            retroactivePaid: "5",
+            action: {
+              type: "REMOVE_ALIAS",
+              version: "1",
+              userId,
+              alias: a1,
+              retroactivePaid: "5",
+            },
           },
           {
-            type: "DISTRIBUTE_GRAIN",
+            ledgerTimestamp: 7,
             version: "1",
-            timestamp: 7,
-            distribution: expectedDistribution,
+            action: {
+              type: "DISTRIBUTE_GRAIN",
+              version: "1",
+              distribution: expectedDistribution,
+            },
           },
         ]);
         expect(ledger.accounts()).toEqual([accountU, account1, account2]);
@@ -714,15 +768,18 @@ describe("ledger/ledger", () => {
         const e2 = {address: a2, userId: null, paid: g("5"), balance: g("85")};
         expect(ledger.accountByAddress(a1)).toEqual(e1);
         expect(ledger.accountByAddress(a2)).toEqual(e2);
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "TRANSFER_GRAIN",
+            ledgerTimestamp: 4,
             version: "1",
-            timestamp: 4,
-            amount: "80",
-            memo: "test",
-            from: a1,
-            to: a2,
+            action: {
+              type: "TRANSFER_GRAIN",
+              version: "1",
+              amount: "80",
+              memo: "test",
+              from: a1,
+              to: a2,
+            },
           },
         ]);
       });
@@ -740,15 +797,18 @@ describe("ledger/ledger", () => {
         const e2 = {address: a2, userId: null, paid: g("0"), balance: g("1")};
         expect(ledger.accountByAddress(a1)).toEqual(e1);
         expect(ledger.accountByAddress(a2)).toEqual(e2);
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "TRANSFER_GRAIN",
+            ledgerTimestamp: 4,
             version: "1",
-            timestamp: 4,
-            amount: "1",
-            memo: "test",
-            from: a1,
-            to: a2,
+            action: {
+              type: "TRANSFER_GRAIN",
+              version: "1",
+              amount: "1",
+              memo: "test",
+              from: a1,
+              to: a2,
+            },
           },
         ]);
       });
@@ -767,15 +827,18 @@ describe("ledger/ledger", () => {
         const e2 = {address: a2, userId: null, paid: g("0"), balance: g("0")};
         expect(ledger.accountByAddress(a1)).toEqual(e1);
         expect(ledger.accountByAddress(a2)).toEqual(e2);
-        expect(ledger.actionLog()).toEqual([
+        expect(ledger.eventLog()).toEqual([
           {
-            type: "TRANSFER_GRAIN",
+            ledgerTimestamp: 4,
             version: "1",
-            timestamp: 4,
-            amount: "0",
-            memo: "test",
-            from: a1,
-            to: a2,
+            action: {
+              type: "TRANSFER_GRAIN",
+              version: "1",
+              amount: "0",
+              memo: "test",
+              from: a1,
+              to: a2,
+            },
           },
         ]);
       });
@@ -917,14 +980,14 @@ describe("ledger/ledger", () => {
       ledger.transferGrain({from: ua1, to: ua2, amount: g("10"), memo: null});
       return ledger;
     }
-    it("fromActionLog with an empty action log results in an empty ledger", () => {
-      const emptyLog = new Ledger().actionLog();
+    it("fromEventLog with an empty action log results in an empty ledger", () => {
+      const emptyLog = new Ledger().eventLog();
       expect(emptyLog).toEqual([]);
-      expect(Ledger.fromActionLog(emptyLog)).toEqual(new Ledger());
+      expect(Ledger.fromEventLog(emptyLog)).toEqual(new Ledger());
     });
-    it("actionLog and fromActionLog compose to identity", () => {
+    it("eventLog and fromEventLog compose to identity", () => {
       const ledger = richLedger();
-      expect(Ledger.fromActionLog(ledger.actionLog())).toEqual(ledger);
+      expect(Ledger.fromEventLog(ledger.eventLog())).toEqual(ledger);
     });
     it("serialized LedgerLogs may be parsed", () => {
       const ledger = richLedger();

@@ -77,7 +77,7 @@ export type GrainAccount = $ReadOnly<MutableGrainAccount>;
  * previous action is illegal.
  */
 export class Ledger {
-  _actionLog: JsonLog<Action>;
+  _ledgerEventLog: JsonLog<LedgerEvent>;
   _users: Map<UserId, User>;
   _usernameToId: Map<Username, UserId>;
   _aliases: Map<NodeAddressT, UserId>;
@@ -85,7 +85,7 @@ export class Ledger {
   _latestTimestamp: TimestampMs = -Infinity;
 
   constructor() {
-    this._actionLog = new JsonLog();
+    this._ledgerEventLog = new JsonLog();
     this._users = new Map();
     this._usernameToId = new Map();
     this._aliases = new Map();
@@ -167,13 +167,13 @@ export class Ledger {
    */
   createUser(name: string): UserId {
     const username = usernameFromString(name);
-    this._act({
+    const action = {
       type: "CREATE_USER",
       userId: randomUuid(),
       username,
       version: "1",
-      timestamp: _getTimestamp(),
-    });
+    };
+    this._createAndProcessEvent(action);
     return NullUtil.get(this._usernameToId.get(username));
   }
   _createUser({username, userId}: CreateUser) {
@@ -209,13 +209,13 @@ export class Ledger {
    * name, or if the user's new name is claimed by another user.
    */
   renameUser(userId: UserId, newName: string): Ledger {
-    return this._act({
+    this._createAndProcessEvent({
       type: "RENAME_USER",
       userId,
       newName: usernameFromString(newName),
       version: "1",
-      timestamp: _getTimestamp(),
     });
+    return this;
   }
   _renameUser({userId, newName}: RenameUser) {
     const existingUser = this._users.get(userId);
@@ -271,7 +271,7 @@ export class Ledger {
   addAlias(userId: UserId, alias: NodeAddressT): Ledger {
     // Ensure that if we emit two events, they both have the
     // same timestamp.
-    const timestamp = _getTimestamp();
+    const ledgerTimestamp = _getTimestamp();
 
     // Validate the ADD_ALIAS action so it cannot fail after we have
     // already emitted the account transfer
@@ -280,25 +280,35 @@ export class Ledger {
       userId,
       alias,
       version: "1",
-      timestamp,
     };
     this._validateAddAlias(aliasAction);
+    const aliasEvent: LedgerEvent = {
+      action: aliasAction,
+      ledgerTimestamp,
+      version: "1",
+    };
 
     // If the alias had some grain, explicitly transfer it to the new account.
     const aliasAccount = this._getAccount(alias);
     if (aliasAccount.balance !== G.ZERO) {
-      // No mutations allowed from this line onward
-      this._act({
+      // The method may not fail below this line
+      const transferAction = {
         from: alias,
         to: userAddress(userId),
         amount: aliasAccount.balance,
         memo: "transfer from alias to canonical account",
-        timestamp,
         type: "TRANSFER_GRAIN",
         version: "1",
-      });
+      };
+      const transferEvent = {
+        action: transferAction,
+        ledgerTimestamp,
+        version: "1",
+      };
+      this._processEvent(transferEvent);
     }
-    return this._act(aliasAction);
+    this._processEvent(aliasEvent);
+    return this;
   }
   _validateAddAlias({userId, alias}: AddAlias) {
     const existingUser = this._users.get(userId);
@@ -394,14 +404,14 @@ export class Ledger {
     const paid = this._getAccount(alias).paid;
     const retroactivePaid = G.multiplyFloat(paid, credProportion);
 
-    return this._act({
+    this._createAndProcessEvent({
       type: "REMOVE_ALIAS",
       userId,
       alias,
       version: "1",
       retroactivePaid,
-      timestamp: _getTimestamp(),
     });
+    return this;
   }
   _removeAlias({userId, alias, retroactivePaid}: RemoveAlias) {
     const existingUser = this._users.get(userId);
@@ -457,12 +467,12 @@ export class Ledger {
     const paidMap = this._computePaidMap(credHistory);
 
     const distribution = computeDistribution(policies, credHistory, paidMap);
-    return this._act({
+    this._createAndProcessEvent({
       type: "DISTRIBUTE_GRAIN",
       version: "1",
-      timestamp: _getTimestamp(),
       distribution,
     });
+    return this;
   }
   _distributeGrain({distribution}: DistributeGrain) {
     // Mutation ahead: This method may not fail after this comment
@@ -491,15 +501,15 @@ export class Ledger {
     memo: string | null,
   |}) {
     const {from, to, amount, memo} = opts;
-    return this._act({
+    this._createAndProcessEvent({
       from,
       to,
       amount,
       memo,
-      timestamp: _getTimestamp(),
       type: "TRANSFER_GRAIN",
       version: "1",
     });
+    return this;
   }
   _transferGrain({from, to, amount}: TransferGrain) {
     const fromAccount = this._getAccount(from);
@@ -563,17 +573,17 @@ export class Ledger {
    *
    * May be used to reconstruct the Ledger after serialization.
    */
-  actionLog(): LedgerLog {
-    return Array.from(this._actionLog.values());
+  eventLog(): LedgerLog {
+    return Array.from(this._ledgerEventLog.values());
   }
 
   /**
    * Reconstruct a Ledger from a LedgerLog.
    */
-  static fromActionLog(log: LedgerLog): Ledger {
+  static fromEventLog(log: LedgerLog): Ledger {
     const ledger = new Ledger();
-    for (const a of log) {
-      ledger._act(a);
+    for (const e of log) {
+      ledger._processEvent(e);
     }
     return ledger;
   }
@@ -585,44 +595,54 @@ export class Ledger {
    * have one action per line.
    */
   serialize(): string {
-    return this._actionLog.toString();
+    return this._ledgerEventLog.toString();
   }
 
-  _act(a: Action): Ledger {
-    if (a.timestamp == null || !isFinite(a.timestamp)) {
-      throw new Error(`ledger: invalid timestamp ${a.timestamp}`);
-    }
-    if (a.timestamp < this._latestTimestamp) {
-      throw new Error(
-        `ledger: out-of-order timestamp: ${a.timestamp} < ${this._latestTimestamp}`
-      );
-    }
-    switch (a.type) {
+  _processAction(action: Action) {
+    switch (action.type) {
       case "CREATE_USER":
-        this._createUser(a);
+        this._createUser(action);
         break;
       case "RENAME_USER":
-        this._renameUser(a);
+        this._renameUser(action);
         break;
       case "ADD_ALIAS":
-        this._addAlias(a);
+        this._addAlias(action);
         break;
       case "REMOVE_ALIAS":
-        this._removeAlias(a);
+        this._removeAlias(action);
         break;
       case "DISTRIBUTE_GRAIN":
-        this._distributeGrain(a);
+        this._distributeGrain(action);
         break;
       case "TRANSFER_GRAIN":
-        this._transferGrain(a);
+        this._transferGrain(action);
         break;
       // istanbul ignore next: unreachable per Flow
       default:
-        throw new Error(`Unknown type: ${(a.type: empty)}`);
+        throw new Error(`Unknown type: ${(action.type: empty)}`);
     }
-    this._latestTimestamp = a.timestamp;
-    this._actionLog.append([a]);
-    return this;
+  }
+
+  _processEvent(e: LedgerEvent) {
+    const {action, ledgerTimestamp} = e;
+    if (ledgerTimestamp == null || !isFinite(ledgerTimestamp)) {
+      throw new Error(`ledger: invalid timestamp ${ledgerTimestamp}`);
+    }
+    if (ledgerTimestamp < this._latestTimestamp) {
+      throw new Error(
+        `ledger: out-of-order timestamp: ${ledgerTimestamp} < ${this._latestTimestamp}`
+      );
+    }
+    this._processAction(action);
+    this._latestTimestamp = ledgerTimestamp;
+    this._ledgerEventLog.append([e]);
+  }
+
+  _createAndProcessEvent(action: Action) {
+    const ledgerTimestamp = _getTimestamp();
+    const ledgerEvent = {ledgerTimestamp, action, version: "1"};
+    this._processEvent(ledgerEvent);
   }
 
   // Helper method for recording that Grain was allocated to a user.
@@ -677,7 +697,13 @@ export class Ledger {
  * This is an opaque type; clients must not modify the log, since they
  * could put it in an inconsistent state.
  */
-export opaque type LedgerLog = $ReadOnlyArray<Action>;
+export opaque type LedgerLog = $ReadOnlyArray<LedgerEvent>;
+
+type LedgerEvent = {|
+  +action: Action,
+  +ledgerTimestamp: TimestampMs,
+  +version: "1",
+|};
 
 /**
  * The Actions are used to store the history of Ledger changes.
@@ -693,14 +719,12 @@ type Action =
 type CreateUser = {|
   +type: "CREATE_USER",
   +version: "1",
-  +timestamp: TimestampMs,
   +username: Username,
   +userId: UserId,
 |};
 const createUserParser: C.Parser<CreateUser> = C.object({
   type: C.exactly(["CREATE_USER"]),
   version: C.exactly(["1"]),
-  timestamp: C.number,
   username: usernameParser,
   userId: uuidParser,
 });
@@ -708,14 +732,12 @@ const createUserParser: C.Parser<CreateUser> = C.object({
 type RenameUser = {|
   +type: "RENAME_USER",
   +version: "1",
-  +timestamp: TimestampMs,
   +userId: UserId,
   +newName: Username,
 |};
 const renameUserParser: C.Parser<RenameUser> = C.object({
   type: C.exactly(["RENAME_USER"]),
   version: C.exactly(["1"]),
-  timestamp: C.number,
   userId: uuidParser,
   newName: usernameParser,
 });
@@ -723,14 +745,12 @@ const renameUserParser: C.Parser<RenameUser> = C.object({
 type AddAlias = {|
   +type: "ADD_ALIAS",
   +version: "1",
-  +timestamp: TimestampMs,
   +userId: UserId,
   +alias: NodeAddressT,
 |};
 const addAliasParser: C.Parser<AddAlias> = C.object({
   type: C.exactly(["ADD_ALIAS"]),
   version: C.exactly(["1"]),
-  timestamp: C.number,
   userId: uuidParser,
   alias: NodeAddress.parser,
 });
@@ -740,13 +760,11 @@ type RemoveAlias = {|
   +userId: UserId,
   +alias: NodeAddressT,
   +version: "1",
-  +timestamp: TimestampMs,
   +retroactivePaid: G.Grain,
 |};
 const removeAliasParser: C.Parser<RemoveAlias> = C.object({
   type: C.exactly(["REMOVE_ALIAS"]),
   version: C.exactly(["1"]),
-  timestamp: C.number,
   userId: uuidParser,
   alias: NodeAddress.parser,
   retroactivePaid: G.parser,
@@ -755,20 +773,17 @@ const removeAliasParser: C.Parser<RemoveAlias> = C.object({
 type DistributeGrain = {|
   +type: "DISTRIBUTE_GRAIN",
   +version: "1",
-  +timestamp: TimestampMs,
   +distribution: Distribution,
 |};
 const distributeGrainParser: C.Parser<DistributeGrain> = C.object({
   type: C.exactly(["DISTRIBUTE_GRAIN"]),
   version: C.exactly(["1"]),
-  timestamp: C.number,
   distribution: distributionParser,
 });
 
 type TransferGrain = {|
   +type: "TRANSFER_GRAIN",
   +version: "1",
-  +timestamp: TimestampMs,
   +from: NodeAddressT,
   +to: NodeAddressT,
   +amount: G.Grain,
@@ -777,7 +792,6 @@ type TransferGrain = {|
 const transferGrainParser: C.Parser<TransferGrain> = C.object({
   type: C.exactly(["TRANSFER_GRAIN"]),
   version: C.exactly(["1"]),
-  timestamp: C.number,
   from: NodeAddress.parser,
   to: NodeAddress.parser,
   amount: G.parser,
@@ -792,8 +806,16 @@ const actionParser: C.Parser<Action> = C.orElse([
   distributeGrainParser,
   transferGrainParser,
 ]);
-export const parser: C.Parser<Ledger> = C.fmap(C.array(actionParser), (x) =>
-  Ledger.fromActionLog(x)
+
+const ledgerEventParser: C.Parser<LedgerEvent> = C.object({
+  action: actionParser,
+  ledgerTimestamp: C.number,
+  version: C.exactly(["1"]),
+});
+
+export const parser: C.Parser<Ledger> = C.fmap(
+  C.array(ledgerEventParser),
+  (x) => Ledger.fromEventLog(x)
 );
 
 const _getTimestamp = () => Date.now();
