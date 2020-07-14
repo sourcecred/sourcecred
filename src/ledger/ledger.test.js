@@ -48,7 +48,7 @@ describe("ledger/ledger", () => {
           {
             type: "CREATE_USER",
             username: "foo",
-            version: 1,
+            version: "1",
             timestamp: 123,
             userId: id,
           },
@@ -65,12 +65,6 @@ describe("ledger/ledger", () => {
         ledger.createUser("foo");
         const thunk = () => ledger.createUser("foo");
         failsWithoutMutation(ledger, thunk, "username already taken");
-      });
-      it("throws on unrecognized version", () => {
-        // $FlowExpectedError
-        expect(() => new Ledger()._createUser({version: 1337})).toThrowError(
-          "unrecognized version"
-        );
       });
     });
 
@@ -91,14 +85,14 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "CREATE_USER",
-            version: 1,
+            version: "1",
             username: "foo",
             timestamp: 0,
             userId: id,
           },
           {
             type: "RENAME_USER",
-            version: 1,
+            version: "1",
             newName: "bar",
             userId: id,
             timestamp: 1,
@@ -140,12 +134,6 @@ describe("ledger/ledger", () => {
         const thunk = () => ledger.renameUser(fooId, "foo bar");
         failsWithoutMutation(ledger, thunk, "invalid username");
       });
-      it("throws on unrecognized version", () => {
-        // $FlowExpectedError
-        expect(() => new Ledger()._renameUser({version: 1337})).toThrowError(
-          "unrecognized version"
-        );
-      });
     });
 
     describe("addAlias", () => {
@@ -160,14 +148,14 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "CREATE_USER",
-            version: 1,
+            version: "1",
             timestamp: 0,
             userId: id,
             username: "foo",
           },
           {
             type: "ADD_ALIAS",
-            version: 1,
+            version: "1",
             timestamp: 1,
             userId: id,
             alias: a1,
@@ -186,14 +174,14 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "CREATE_USER",
-            version: 1,
+            version: "1",
             timestamp: 0,
             userId: id,
             username: "foo",
           },
           {
             type: "TRANSFER_GRAIN",
-            version: 1,
+            version: "1",
             timestamp: 1,
             from: a1,
             to: userAddress(id),
@@ -202,7 +190,7 @@ describe("ledger/ledger", () => {
           },
           {
             type: "ADD_ALIAS",
-            version: 1,
+            version: "1",
             timestamp: 1,
             userId: id,
             alias: a1,
@@ -264,12 +252,6 @@ describe("ledger/ledger", () => {
           `addAlias: alias ${NodeAddress.toString(innateAddress)} already bound`
         );
       });
-      it("throws on unrecognized version", () => {
-        // $FlowExpectedError
-        expect(() => new Ledger()._addAlias({version: 1337})).toThrowError(
-          "unrecognized version"
-        );
-      });
     });
     describe("removeAlias", () => {
       it("works", () => {
@@ -285,21 +267,21 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "CREATE_USER",
-            version: 1,
+            version: "1",
             timestamp: 0,
             userId: id,
             username: "foo",
           },
           {
             type: "ADD_ALIAS",
-            version: 1,
+            version: "1",
             timestamp: 1,
             userId: id,
             alias: a1,
           },
           {
             type: "REMOVE_ALIAS",
-            version: 1,
+            version: "1",
             timestamp: 2,
             userId: id,
             alias: a1,
@@ -353,12 +335,6 @@ describe("ledger/ledger", () => {
             "invalid credProportion"
           );
         }
-      });
-      it("throws on unrecognized version", () => {
-        // $FlowExpectedError
-        expect(() => new Ledger()._removeAlias({version: 1337})).toThrowError(
-          "unrecognized version"
-        );
       });
     });
   });
@@ -550,7 +526,7 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "DISTRIBUTE_GRAIN",
-            version: 1,
+            version: "1",
             timestamp: 4,
             distribution: {credTimestamp: 3, allocations: []},
           },
@@ -597,7 +573,7 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "DISTRIBUTE_GRAIN",
-            version: 1,
+            version: "1",
             timestamp: 4,
             distribution: expectedDistribution,
           },
@@ -636,17 +612,11 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "DISTRIBUTE_GRAIN",
-            version: 1,
+            version: "1",
             timestamp: 4,
             distribution: expectedDistribution,
           },
         ]);
-      });
-      it("errors on unknown action version", () => {
-        expect(() =>
-          // $FlowExpectedError
-          new Ledger()._distributeGrain({version: 1337})
-        ).toThrowError("unknown DISTRIBUTE_GRAIN version: 1337");
       });
       it("BALANCED strategy accounts for unlinked aliases' retroactive paid", () => {
         // Sanity check since this property is important.
@@ -698,20 +668,20 @@ describe("ledger/ledger", () => {
           {
             type: "CREATE_USER",
             username: "user",
-            version: 1,
+            version: "1",
             timestamp: 4,
             userId,
           },
           {
             type: "ADD_ALIAS",
-            version: 1,
+            version: "1",
             timestamp: 5,
             userId,
             alias: a1,
           },
           {
             type: "REMOVE_ALIAS",
-            version: 1,
+            version: "1",
             timestamp: 6,
             userId,
             alias: a1,
@@ -719,7 +689,7 @@ describe("ledger/ledger", () => {
           },
           {
             type: "DISTRIBUTE_GRAIN",
-            version: 1,
+            version: "1",
             timestamp: 7,
             distribution: expectedDistribution,
           },
@@ -747,7 +717,7 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "TRANSFER_GRAIN",
-            version: 1,
+            version: "1",
             timestamp: 4,
             amount: "80",
             memo: "test",
@@ -773,7 +743,7 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "TRANSFER_GRAIN",
-            version: 1,
+            version: "1",
             timestamp: 4,
             amount: "1",
             memo: "test",
@@ -800,7 +770,7 @@ describe("ledger/ledger", () => {
         expect(ledger.actionLog()).toEqual([
           {
             type: "TRANSFER_GRAIN",
-            version: 1,
+            version: "1",
             timestamp: 4,
             amount: "0",
             memo: "test",
@@ -878,12 +848,6 @@ describe("ledger/ledger", () => {
             memo: "test",
           });
         expect(thunk).toThrowError("cannot transfer negative Grain amount");
-      });
-      it("fails for unknown transfer versions", () => {
-        expect(() =>
-          // $FlowExpectedError
-          new Ledger()._transferGrain({version: 1337})
-        ).toThrowError("unknown TRANSFER_GRAIN version: 1337");
       });
     });
   });
