@@ -18,11 +18,7 @@ if (initialRoot == null) {
   );
   initialRoot = ".";
 }
-const basename = normalize(
-  // filtering the editor path segment from the basename is a temporary hack
-  // until the intiatives editor and the explorer are merged into a single webapp
-  `${window.location.pathname.replace(/admin$/, "")}/${initialRoot}/`
-);
+const basename = normalize(`${window.location.pathname}/${initialRoot}/`);
 ReactDOM.hydrate(
   <BrowserRouter basename={basename}>
     <App />
