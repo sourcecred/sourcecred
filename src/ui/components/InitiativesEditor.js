@@ -1,7 +1,7 @@
 // @flow
 
 import React from "react";
-import {Admin, Resource, Loading} from "react-admin";
+import {Admin, Resource, Layout, Loading} from "react-admin";
 import {InitiativeList, InitiativeCreate, InitiativeEdit} from "./Initiatives";
 import fakeDataProvider from "ra-data-fakerest";
 import {fakeInitiatives} from "../mock/fakeInitiatives";
@@ -9,10 +9,11 @@ import {createMemoryHistory} from "history";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import {load, type LoadResult} from "./ExplorerApp";
+import ExplorerApp from "./ExplorerApp";
+import Menu from "./Menu";
+import {Route /*useHistory*/} from "react-router-dom";
 
 const dataProvider = fakeDataProvider(fakeInitiatives, true);
-
-const history = createMemoryHistory();
 
 const theme = createMuiTheme({
   palette: {
@@ -21,11 +22,24 @@ const theme = createMuiTheme({
   },
 });
 
+const AppLayout = (props) => <Layout {...props} menu={Menu} />;
+
+const customRoutes = [
+  <Route key={0} exact path="/explorer" component={ExplorerApp} />,
+];
+
 const InitiativesEditor = () => {
   const [loadResult, setLoadResult] = React.useState<LoadResult | null>(null);
   React.useEffect(() => {
     load().then(setLoadResult);
   }, []);
+
+  // relative history (using a basename) does not work with the `Admin` component
+  // therefore a memoryHistory instance will be utilized with the `Admin` component
+  // so it maintains its own internal routing for now, while still working with
+  // a url basename
+  //const history = useHistory();
+  const history = createMemoryHistory();
 
   if (!loadResult) {
     return (
@@ -45,7 +59,13 @@ const InitiativesEditor = () => {
       );
     case "SUCCESS":
       return (
-        <Admin theme={theme} dataProvider={dataProvider} history={history}>
+        <Admin
+          layout={AppLayout}
+          theme={theme}
+          dataProvider={dataProvider}
+          history={history}
+          customRoutes={customRoutes}
+        >
           <Resource
             name="initiatives"
             list={InitiativeList}
