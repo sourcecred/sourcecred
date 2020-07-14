@@ -2,18 +2,24 @@
 
 import deepFreeze from "deep-freeze";
 import cloneDeep from "lodash.clonedeep";
-import {random as randomUuid} from "../util/uuid";
 import {NodeAddress} from "../core/graph";
-import {Ledger} from "./ledger";
+import {Ledger, parser} from "./ledger";
 import {type DistributionPolicy, computeDistribution} from "./grainAllocation";
 import {userAddress} from "./user";
 import * as G from "./grain";
+import * as uuid from "../util/uuid"; // for spy purposes
 
 describe("ledger/ledger", () => {
   // Helper for constructing Grain values.
   const g = (s) => G.fromString(s);
   function setFakeDate(ts: number) {
     jest.spyOn(global.Date, "now").mockImplementationOnce(() => ts);
+  }
+
+  const uuid1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
+  const uuid2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
+  function setNextUuid(x: uuid.Uuid) {
+    jest.spyOn(uuid, "random").mockImplementationOnce(() => x);
   }
 
   // Verify that a method fails, throwing an error, without mutating the ledger.
@@ -113,7 +119,7 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         failsWithoutMutation(
           ledger,
-          (l) => l.renameUser(randomUuid(), "bar"),
+          (l) => l.renameUser(uuid.random(), "bar"),
           "renameUser: no user matches id"
         );
       });
@@ -208,7 +214,7 @@ describe("ledger/ledger", () => {
         ledger._allocateGrain(a1, G.ONE);
         failsWithoutMutation(
           ledger,
-          (l) => l.addAlias(randomUuid(), a1),
+          (l) => l.addAlias(uuid.random(), a1),
           "addAlias: no matching userId"
         );
       });
@@ -305,7 +311,7 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         failsWithoutMutation(
           ledger,
-          (l) => l.removeAlias(randomUuid(), a1, 0),
+          (l) => l.removeAlias(uuid.random(), a1, 0),
           "removeAlias: no user matching id"
         );
       });
@@ -906,10 +912,17 @@ describe("ledger/ledger", () => {
     // supported Action.
     function richLedger(): Ledger {
       const ledger = new Ledger();
+      setFakeDate(1);
+      setNextUuid(uuid1);
       const id1 = ledger.createUser("foo");
+      setFakeDate(2);
+      setNextUuid(uuid2);
       const id2 = ledger.createUser("bar");
+      setFakeDate(3);
       ledger.addAlias(id1, a1);
+      setFakeDate(4);
       ledger.removeAlias(id1, a1, 0);
+      setFakeDate(5);
       ledger.addAlias(id2, a1);
 
       const ua1 = userAddress(id1);
@@ -934,7 +947,9 @@ describe("ledger/ledger", () => {
           ]),
         },
       ];
+      setFakeDate(6);
       ledger.distributeGrain(policies, credHistory);
+      setFakeDate(7);
       ledger.transferGrain({from: ua1, to: ua2, amount: g("10"), memo: null});
       return ledger;
     }
@@ -946,6 +961,15 @@ describe("ledger/ledger", () => {
     it("actionLog and fromActionLog compose to identity", () => {
       const ledger = richLedger();
       expect(Ledger.fromActionLog(ledger.actionLog())).toEqual(ledger);
+    });
+    it("serialized LedgerLogs may be parsed", () => {
+      const ledger = richLedger();
+      const ledgerString = ledger.serialize();
+      const ledgerJson = JSON.parse(ledgerString);
+      expect(parser.parseOrThrow(ledgerJson)).toEqual(ledger);
+    });
+    it("serialized ledger snapshots as expected", () => {
+      expect(richLedger().serialize()).toMatchSnapshot();
     });
   });
 });
