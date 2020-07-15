@@ -43,11 +43,13 @@ import {
 export opaque type IdentityName: string = string;
 const IDENTITY_NAME_PATTERN = /^[A-Za-z0-9-]+$/;
 
+export type IdentitySubtype = "USER" | "PROJECT" | "ORGANIZATION" | "BOT";
 export type IdentityId = Uuid;
 export type Identity = {|
   // UUID, assigned when the identity is created.
   +id: IdentityId,
   +name: IdentityName,
+  +subtype: IdentitySubtype,
   // The identity's own node address.
   +address: NodeAddressT,
   // Every other node in the graph that this identity corresponds to.
@@ -56,11 +58,17 @@ export type Identity = {|
   +aliases: $ReadOnlyArray<NodeAddressT>,
 |};
 
-export function newIdentity(name: string): Identity {
+export function newIdentity(subtype: IdentitySubtype, name: string): Identity {
   const id = randomUuid();
+  try {
+    identitySubtypeParser.parseOrThrow(subtype);
+  } catch (e) {
+    throw new Error(`invalid identity subtype: ${subtype}`);
+  }
   return {
     id,
-    address: NodeAddress.append(IDENTITY_PREFIX, id),
+    subtype,
+    address: NodeAddress.append(IDENTITY_PREFIX, subtype, id),
     name: identityNameFromString(name),
     aliases: [],
   };
@@ -99,8 +107,16 @@ export const identityNameParser: C.Parser<IdentityName> = C.fmap(
   identityNameFromString
 );
 
+export const identitySubtypeParser: C.Parser<IdentitySubtype> = C.exactly([
+  "USER",
+  "BOT",
+  "ORGANIZATION",
+  "PROJECT",
+]);
+
 export const identityParser: C.Parser<Identity> = C.object({
   id: uuidParser,
+  subtype: identitySubtypeParser,
   name: identityNameParser,
   address: NodeAddress.parser,
   aliases: C.array(NodeAddress.parser),

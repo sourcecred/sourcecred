@@ -11,26 +11,40 @@ import {
 } from "./identity";
 
 describe("ledger/identity", () => {
-  const example: Identity = deepFreeze(newIdentity("foo"));
+  const example: Identity = deepFreeze(newIdentity("USER", "foo"));
   describe("newIdentity", () => {
     it("new identities don't have aliases", () => {
-      const identity = newIdentity("foo");
+      const identity = newIdentity("USER", "foo");
       expect(identity.aliases).toEqual([]);
     });
     it("identity addresses are as expected", () => {
-      const identity = newIdentity("foo");
-      expect(identity.address).toEqual(
-        NodeAddress.fromParts(["sourcecred", "core", "IDENTITY", identity.id])
-      );
+      const subtypes = ["USER", "BOT", "PROJECT", "ORGANIZATION"];
+      for (const subtype of subtypes) {
+        const identity = newIdentity(subtype, "foo");
+        expect(identity.address).toEqual(
+          NodeAddress.fromParts([
+            "sourcecred",
+            "core",
+            "IDENTITY",
+            subtype,
+            identity.id,
+          ])
+        );
+      }
     });
     it("includes a valid UUID", () => {
-      const ident = newIdentity("foo");
+      const ident = newIdentity("USER", "foo");
       // Should not error
       uuidFromString(ident.id);
     });
     it("errors on invalid names", () => {
-      const fail = () => newIdentity("bad string");
+      const fail = () => newIdentity("USER", "bad string");
       expect(fail).toThrowError("invalid identityName");
+    });
+    it("errors on invalid subtype", () => {
+      // $FlowExpectedError
+      const fail = () => newIdentity("FOO", "name");
+      expect(fail).toThrowError("invalid identity subtype: ");
     });
   });
   it("graphNode works", () => {
