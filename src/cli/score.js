@@ -21,6 +21,11 @@ import {
   compressByThreshold,
 } from "../analysis/credResult";
 import * as Params from "../analysis/timeline/params";
+import {
+  contractions as identityContractions,
+  declaration as identityDeclaration,
+} from "../ledger/identity";
+import {Ledger, parser as ledgerParser} from "../ledger/ledger";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -62,8 +67,26 @@ const scoreCommand: Command = async (args, std) => {
   );
   const weightedGraph = overrideWeights(combinedGraph, weights);
 
+  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
+  const ledger = await loadJsonWithDefault(
+    ledgerPath,
+    ledgerParser,
+    () => new Ledger()
+  );
+  const identities = ledger.identities();
+  const contractedGraph = weightedGraph.graph.contractNodes(
+    identityContractions(identities)
+  );
+  const contractedWeightedGraph = {
+    graph: contractedGraph,
+    weights: weightedGraph.weights,
+  };
+
   const plugins = Array.from(config.bundledPlugins.values());
   const declarations = plugins.map((x) => x.declaration());
+  if (identities.length) {
+    declarations.push(identityDeclaration);
+  }
 
   // TODO(@decentralion): This is snapshot tested, add unit tests?
   const paramsPath = pathJoin(baseDir, "config", "params.json");
@@ -73,7 +96,11 @@ const scoreCommand: Command = async (args, std) => {
     Params.defaultParams
   );
 
-  const credResult = await compute(weightedGraph, params, declarations);
+  const credResult = await compute(
+    contractedWeightedGraph,
+    params,
+    declarations
+  );
   const compressed = compressByThreshold(credResult, CRED_THRESHOLD);
   const credJSON = stringify(credResultToJSON(compressed));
   const outputPath = pathJoin(baseDir, "output", "credResult.json");
