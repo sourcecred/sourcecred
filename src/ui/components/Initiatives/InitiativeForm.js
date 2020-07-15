@@ -1,9 +1,5 @@
 // @flow
-import {
-  dateFormatter,
-  dateParser,
-  getPlainDescFromMd,
-} from "../../initiativeUtils";
+import {dateFormatter, dateParser, getPlainDescFromMd} from "../../uiUtils";
 import {CredView} from "../../../analysis/credView";
 import React from "react";
 import {
