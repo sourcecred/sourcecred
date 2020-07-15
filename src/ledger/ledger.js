@@ -23,8 +23,6 @@ import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
 import {parser as uuidParser} from "../util/uuid";
 import {
-  type AllocationPolicy,
-  computeDistribution,
   type CredHistory,
   type Distribution,
   distributionParser,
@@ -465,24 +463,9 @@ export class Ledger {
   }
 
   /**
-   * Distribute Grain given allocation policies, and the Cred history.
-   *
-   * The order of the policies will not have any affect on the distribution.
-   * See logic and types in `ledger/grainAllocation.js`.
-   *
-   * TODO: Consider refactoring this method to take the Distribution directly,
-   * rather than computing it inline. In that case, we can make a public
-   * endpoint for retrieving the paidMap. This refcator changes the programming
-   * interface but not the serialized Ledger type, so it's not urgent, but
-   * it might be a little cleaner.
+   * Canonicalize a Grain distribution in the ledger.
    */
-  distributeGrain(
-    policies: $ReadOnlyArray<AllocationPolicy>,
-    credHistory: CredHistory
-  ): Ledger {
-    const paidMap = this._computePaidMap(credHistory);
-
-    const distribution = computeDistribution(policies, credHistory, paidMap);
+  distributeGrain(distribution: Distribution): Ledger {
     this._createAndProcessEvent({
       type: "DISTRIBUTE_GRAIN",
       version: "1",
