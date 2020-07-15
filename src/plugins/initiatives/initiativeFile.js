@@ -44,10 +44,10 @@ export type InitiativeFileV010 = {|
   +timestampIso: TimestampISO,
   +weight: InitiativeWeight,
   +completed: boolean,
-  +dependencies: $ReadOnlyArray<URL>,
-  +references: $ReadOnlyArray<URL>,
-  +contributions: $ReadOnlyArray<URL>,
-  +champions: $ReadOnlyArray<URL>,
+  +dependencies?: $ReadOnlyArray<URL>,
+  +references?: $ReadOnlyArray<URL>,
+  +contributions?: $ReadOnlyArray<URL>,
+  +champions?: $ReadOnlyArray<URL>,
 |};
 
 const upgrades = {
