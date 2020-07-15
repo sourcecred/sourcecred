@@ -4,7 +4,7 @@ import deepFreeze from "deep-freeze";
 import cloneDeep from "lodash.clonedeep";
 import {NodeAddress} from "../core/graph";
 import {Ledger, parser} from "./ledger";
-import {type DistributionPolicy, computeDistribution} from "./grainAllocation";
+import {type AllocationPolicy, computeDistribution} from "./grainAllocation";
 import {newIdentity} from "./identity";
 import * as G from "./grain";
 import * as uuid from "../util/uuid"; // for spy purposes
@@ -598,7 +598,7 @@ describe("ledger/ledger", () => {
         );
       });
       it("computes an IMMEDIATE allocation correctly", () => {
-        const policy: DistributionPolicy = {
+        const policy: AllocationPolicy = {
           budget: g("10"),
           policyType: "IMMEDIATE",
         };
@@ -636,7 +636,7 @@ describe("ledger/ledger", () => {
         ]);
       });
       it("computes a BALANCED allocation correctly", () => {
-        const policy: DistributionPolicy = {
+        const policy: AllocationPolicy = {
           budget: g("15"),
           policyType: "BALANCED",
         };
@@ -679,7 +679,7 @@ describe("ledger/ledger", () => {
       });
       it("BALANCED strategy accounts for unlinked aliases' retroactive paid", () => {
         // Sanity check since this property is important.
-        const p: DistributionPolicy = {
+        const p: AllocationPolicy = {
           budget: g("7"),
           policyType: "BALANCED",
         };
