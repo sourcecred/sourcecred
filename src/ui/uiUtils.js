@@ -5,6 +5,7 @@ import {type TimestampMs} from "../util/timestamp";
 import {type NodeAddressT} from "../core/graph";
 import {type InitiativeWeight} from "../plugins/initiatives/initiative";
 import {type NodeWeight} from "../core/weights";
+import {type UserId, type Username} from "../ledger/user";
 
 // TODO: create formal initiative type once shape is defined (see github PR #1864)
 export type InitiativeEntry = {|
@@ -32,6 +33,14 @@ type ContributionEntry = {|
   +timestampMs: TimestampMs,
   // Defaults to null.
   +weight: NodeWeight,
+|};
+
+type UserEntry = {|
+  +id: UserId,
+  +name: Username,
+  // stores aliases that have not yet been linked in the ledger module
+  +newAliases: Array<NodeAddressT>,
+  +aliases: $ReadOnlyArray<NodeAddressT>,
 |};
 
 export const getPlainDescFromMd = ({description}: {description: string}) =>
@@ -62,4 +71,27 @@ export const dateFormatter = (t: TimestampMs): ?DateString => {
   const mm = (v.getMonth() + 1).toString();
   const dd = v.getDate().toString();
   return `${yy}-${(pad + mm).slice(-2)}-${(pad + dd).slice(-2)}`;
+};
+
+export const jsonExporter = (initiatives: InitiativeEntry[] | UserEntry[]) => {
+  const fakeLink = document.createElement("a");
+  fakeLink.style.display = "none";
+  if (!document.body) {
+    console.error("Error: no DOM context to mount initiative download link");
+    return;
+  }
+  document.body.appendChild(fakeLink);
+  const initiativesToSave = {initiatives: initiatives};
+  const blob = new Blob([JSON.stringify(initiativesToSave)], {
+    type: "application/json",
+  });
+  if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+    // accomodate IE11+ & Edge
+    window.navigator.msSaveOrOpenBlob(blob, `export.json`);
+  } else {
+    fakeLink.setAttribute("href", URL.createObjectURL(blob));
+    fakeLink.setAttribute("download", `initiatives.json`);
+    fakeLink.click();
+  }
+  fakeLink.remove();
 };
