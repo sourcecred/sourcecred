@@ -12,6 +12,7 @@ import {
   type IdentityId,
   type Identity,
   type IdentityName,
+  type IdentitySubtype,
   identityParser,
   newIdentity,
   identityNameParser,
@@ -167,8 +168,8 @@ export class Ledger {
    *
    * Will fail if the identityName is not valid, or already taken.
    */
-  createIdentity(name: string): IdentityId {
-    const identity = newIdentity(name);
+  createIdentity(subtype: IdentitySubtype, name: string): IdentityId {
+    const identity = newIdentity(subtype, name);
     const action = {
       type: "CREATE_IDENTITY",
       identity,
@@ -243,6 +244,7 @@ export class Ledger {
     const updatedIdentity = {
       id: identityId,
       name: newName,
+      subtype: existingIdentity.subtype,
       address: existingIdentity.address,
       aliases: existingIdentity.aliases,
     };
@@ -360,6 +362,7 @@ export class Ledger {
     const updatedIdentity = {
       id: existingIdentity.id,
       name: existingIdentity.name,
+      subtype: existingIdentity.subtype,
       aliases: updatedAliases,
       address: existingIdentity.address,
     };
@@ -451,6 +454,7 @@ export class Ledger {
       id: identityId,
       name: existingIdentity.name,
       address: existingIdentity.address,
+      subtype: existingIdentity.subtype,
       aliases,
     });
     if (retroactivePaid !== G.ZERO) {
