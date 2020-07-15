@@ -34,7 +34,7 @@ export type Balanced = "BALANCED";
 export type Immediate = "IMMEDIATE";
 export type PolicyType = Immediate | Balanced;
 
-export type DistributionPolicy = {|
+export type AllocationPolicy = {|
   +policyType: PolicyType,
   +budget: G.Grain,
 |};
@@ -51,7 +51,7 @@ export type GrainReceipt = {|
 |};
 
 export type Allocation = {|
-  +policy: DistributionPolicy,
+  +policy: AllocationPolicy,
   +receipts: $ReadOnlyArray<GrainReceipt>,
 |};
 
@@ -62,7 +62,7 @@ export type CredTimeSlice = {|
 export type CredHistory = $ReadOnlyArray<CredTimeSlice>;
 
 export function computeDistribution(
-  policies: $ReadOnlyArray<DistributionPolicy>,
+  policies: $ReadOnlyArray<AllocationPolicy>,
   credHistory: CredHistory,
   lifetimePaid: $ReadOnlyMap<NodeAddressT, G.Grain>
 ): Distribution {
@@ -80,7 +80,7 @@ export function computeDistribution(
 }
 
 export function computeAllocation(
-  policy: DistributionPolicy,
+  policy: AllocationPolicy,
   credHistory: CredHistory,
   // A map from each address to the total amount of Grain already paid
   // to that Address, across time.
@@ -246,7 +246,7 @@ function computeBalancedReceipts(
   return receipts;
 }
 
-const policyParser: P.Parser<DistributionPolicy> = P.object({
+export const allocationPolicyParser: P.Parser<AllocationPolicy> = P.object({
   policyType: P.exactly(["IMMEDIATE", "BALANCED"]),
   budget: G.parser,
 });
@@ -255,7 +255,7 @@ const grainReceiptParser: P.Parser<GrainReceipt> = P.object({
   amount: G.parser,
 });
 export const allocationParser: P.Parser<Allocation> = P.object({
-  policy: policyParser,
+  policy: allocationPolicyParser,
   receipts: P.array(grainReceiptParser),
 });
 export const distributionParser: P.Parser<Distribution> = P.object({

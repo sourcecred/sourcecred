@@ -23,7 +23,7 @@ import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
 import {parser as uuidParser} from "../util/uuid";
 import {
-  type DistributionPolicy,
+  type AllocationPolicy,
   computeDistribution,
   type CredHistory,
   type Distribution,
@@ -477,7 +477,7 @@ export class Ledger {
    * it might be a little cleaner.
    */
   distributeGrain(
-    policies: $ReadOnlyArray<DistributionPolicy>,
+    policies: $ReadOnlyArray<AllocationPolicy>,
     credHistory: CredHistory
   ): Ledger {
     const paidMap = this._computePaidMap(credHistory);
