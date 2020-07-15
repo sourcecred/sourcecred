@@ -6,12 +6,13 @@ import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
-import {fakeInitiatives} from "../mock/fakeInitiatives";
+import {fakeDB} from "../mock/fakeDB";
 import {InitiativeList, InitiativeCreate, InitiativeEdit} from "./Initiatives";
 import ExplorerApp, {load, type LoadResult} from "./ExplorerApp";
 import Menu from "./Menu";
+import {UserList} from "./Users";
 
-const dataProvider = fakeDataProvider(fakeInitiatives, true);
+const dataProvider = fakeDataProvider(fakeDB, true);
 
 const theme = createMuiTheme({
   palette: {
@@ -59,6 +60,10 @@ const InitiativesEditor = () => {
           history={history}
           customRoutes={customRoutes}
         >
+          <Resource
+            name="users"
+            list={UserList}
+          />
           <Resource
             name="initiatives"
             list={InitiativeList}

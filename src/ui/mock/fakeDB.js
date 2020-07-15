@@ -1,6 +1,7 @@
 // @flow
 
-export const fakeInitiatives = {
+export const fakeDB = {
+  users: [],
   initiatives: [
     {
       id: "08a2945c-3e62-4d7a-bf4c-b38b42441bdd",
