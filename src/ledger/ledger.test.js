@@ -1,10 +1,8 @@
 // @flow
 
-import deepFreeze from "deep-freeze";
 import cloneDeep from "lodash.clonedeep";
 import {NodeAddress} from "../core/graph";
 import {Ledger, parser} from "./ledger";
-import {type AllocationPolicy, computeDistribution} from "./grainAllocation";
 import {newIdentity} from "./identity";
 import * as G from "./grain";
 import * as uuid from "../util/uuid"; // for spy purposes
@@ -549,222 +547,79 @@ describe("ledger/ledger", () => {
 
   describe("grain updates", () => {
     describe("distributeGrain", () => {
-      // Motivation for the following history:
-      // Across the history, both addresses earn equally, so the BALANCED
-      // payout wants to give equal Grain
-      // In the most recent week, only a2 had cred, so the IMMEDIATE payout
-      // gives Grain only to them.
-      const credHistory = deepFreeze([
-        {
-          cred: new Map([
-            [a1, 2],
-            [a2, 1],
-          ]),
-          intervalEndMs: 1,
-        },
-        {
-          cred: new Map([
-            [a1, 0],
-            [a2, 1],
-          ]),
-          intervalEndMs: 3,
-        },
-      ]);
-      it("produces an empty distribution if there are no policies", () => {
-        setFakeDate(4);
-        const ledger = new Ledger().distributeGrain([], credHistory);
-        expect(ledger.eventLog()).toEqual([
-          {
-            ledgerTimestamp: 4,
-            version: "1",
-            action: {
-              type: "DISTRIBUTE_GRAIN",
-              version: "1",
-              distribution: {credTimestamp: 3, allocations: []},
-            },
-          },
-        ]);
+      it("works for an empty distribution", () => {
+        const ledger = new Ledger();
+        const distribution = {credTimestamp: 1, allocations: []};
+        setFakeDate(2);
+        ledger.distributeGrain(distribution);
         expect(ledger.accounts()).toEqual([]);
-      });
-      it("errors if credHistory contains non-canonical addresses", () => {
-        const ledger = new Ledger();
-        const id = ledger.createIdentity("USER", "foo");
-        ledger.addAlias(id, a1);
-        const thunk = () => ledger.distributeGrain([], credHistory);
-        failsWithoutMutation(
-          ledger,
-          thunk,
-          "non-canonical address in credHistory"
-        );
-      });
-      it("computes an IMMEDIATE allocation correctly", () => {
-        const policy: AllocationPolicy = {
-          budget: g("10"),
-          policyType: "IMMEDIATE",
-        };
-        setFakeDate(4);
-        const ledger = new Ledger().distributeGrain([policy], credHistory);
-        const expectedDistribution = computeDistribution(
-          [policy],
-          credHistory,
-          new Map()
-        );
-        const account1 = ledger.accountByAddress(a1);
-        const account2 = ledger.accountByAddress(a2);
-        expect(account1).toEqual({
-          address: a1,
-          identityId: null,
-          balance: "0",
-          paid: "0",
-        });
-        expect(account2).toEqual({
-          address: a2,
-          identityId: null,
-          balance: "10",
-          paid: "10",
-        });
         expect(ledger.eventLog()).toEqual([
           {
-            ledgerTimestamp: 4,
             version: "1",
-            action: {
-              type: "DISTRIBUTE_GRAIN",
-              version: "1",
-              distribution: expectedDistribution,
-            },
+            ledgerTimestamp: 2,
+            action: {type: "DISTRIBUTE_GRAIN", version: "1", distribution},
           },
         ]);
       });
-      it("computes a BALANCED allocation correctly", () => {
-        const policy: AllocationPolicy = {
-          budget: g("15"),
-          policyType: "BALANCED",
-        };
-        setFakeDate(4);
+      it("handles a case with a single allocation", () => {
         const ledger = new Ledger();
-        // Give a2 some past payouts, so that the BALANCED
-        // strategy should preferentially pay a1
-        ledger._allocateGrain(a2, g("5"));
-        const expectedDistribution = computeDistribution(
-          [policy],
-          credHistory,
-          new Map([[a2, g("5")]])
-        );
-        ledger.distributeGrain([policy], credHistory);
-        const account1 = ledger.accountByAddress(a1);
-        const account2 = ledger.accountByAddress(a2);
-        expect(account1).toEqual({
+        const allocation = {
+          policy: {policyType: "IMMEDIATE", budget: g("10")},
+          receipts: [
+            {amount: g("3"), address: a1},
+            {amount: g("7"), address: a2},
+          ],
+        };
+        const distribution = {credTimestamp: 1, allocations: [allocation]};
+        ledger.distributeGrain(distribution);
+        const ac1 = {
           address: a1,
           identityId: null,
-          balance: "10",
-          paid: "10",
-        });
-        expect(account2).toEqual({
+          balance: g("3"),
+          paid: g("3"),
+        };
+        const ac2 = {
           address: a2,
           identityId: null,
-          balance: "10",
-          paid: "10",
-        });
-        expect(ledger.eventLog()).toEqual([
-          {
-            ledgerTimestamp: 4,
-            version: "1",
-            action: {
-              type: "DISTRIBUTE_GRAIN",
-              version: "1",
-              distribution: expectedDistribution,
-            },
-          },
-        ]);
+          balance: g("7"),
+          paid: g("7"),
+        };
+        expect(ledger.accounts()).toEqual([ac1, ac2]);
       });
-      it("BALANCED strategy accounts for unlinked aliases' retroactive paid", () => {
-        // Sanity check since this property is important.
-        const p: AllocationPolicy = {
-          budget: g("7"),
-          policyType: "BALANCED",
-        };
+      it("handles multiple allocations", () => {
         const ledger = new Ledger();
-        setFakeDate(4);
-        const identityId = ledger.createIdentity("USER", "identity");
-        const aU = NullUtil.get(ledger.identityById(identityId)).address;
-        setFakeDate(5);
-        ledger.addAlias(identityId, a1);
-        ledger._allocateGrain(aU, g("10"));
-        setFakeDate(6);
-        ledger.removeAlias(identityId, a1, 0.5);
-        setFakeDate(7);
-        ledger.distributeGrain([p], credHistory);
-        // From the perspective of the balanced payout: a1 and a2 have equal cred,
-        // and a1 has a retroactive allotment of 5 Grain, so therefore from this payout,
-        // 6 should go to a2, and 1 should go to a1, bringing them both to 6 Grain post-payout.
-        const expectedDistribution = computeDistribution(
-          [p],
-          credHistory,
-          new Map([[a1, g("5")]])
-        );
-        const accountU = ledger.accountByAddress(aU);
-        const account1 = ledger.accountByAddress(a1);
-        const account2 = ledger.accountByAddress(a2);
-        expect(accountU).toEqual({
-          address: aU,
-          identityId,
-          balance: "10",
-          paid: "5",
-        });
-        expect(account1).toEqual({
+        const allocation1 = {
+          policy: {policyType: "IMMEDIATE", budget: g("10")},
+          receipts: [
+            {amount: g("3"), address: a1},
+            {amount: g("7"), address: a2},
+          ],
+        };
+        const allocation2 = {
+          policy: {policyType: "BALANCED", budget: g("20")},
+          receipts: [
+            {amount: g("10"), address: a1},
+            {amount: g("10"), address: a2},
+          ],
+        };
+        const distribution = {
+          credTimestamp: 1,
+          allocations: [allocation1, allocation2],
+        };
+        ledger.distributeGrain(distribution);
+        const ac1 = {
           address: a1,
           identityId: null,
-          balance: "1",
-          paid: "6",
-        });
-        expect(account2).toEqual({
+          balance: g("13"),
+          paid: g("13"),
+        };
+        const ac2 = {
           address: a2,
           identityId: null,
-          balance: "6",
-          paid: "6",
-        });
-        expect(ledger.eventLog()).toEqual([
-          {
-            ledgerTimestamp: 4,
-            version: "1",
-            action: {
-              type: "CREATE_IDENTITY",
-              version: "1",
-              identity: expect.anything(),
-            },
-          },
-          {
-            ledgerTimestamp: 5,
-            version: "1",
-            action: {
-              type: "ADD_ALIAS",
-              version: "1",
-              identityId,
-              alias: a1,
-            },
-          },
-          {
-            ledgerTimestamp: 6,
-            version: "1",
-            action: {
-              type: "REMOVE_ALIAS",
-              version: "1",
-              identityId,
-              alias: a1,
-              retroactivePaid: "5",
-            },
-          },
-          {
-            ledgerTimestamp: 7,
-            version: "1",
-            action: {
-              type: "DISTRIBUTE_GRAIN",
-              version: "1",
-              distribution: expectedDistribution,
-            },
-          },
-        ]);
-        expect(ledger.accounts()).toEqual([accountU, account1, account2]);
+          balance: g("17"),
+          paid: g("17"),
+        };
+        expect(ledger.accounts()).toEqual([ac1, ac2]);
       });
     });
 
@@ -997,28 +852,19 @@ describe("ledger/ledger", () => {
       setFakeDate(5);
       ledger.addAlias(id2, a1);
 
-      const policies = [
-        {budget: g("400"), policyType: "BALANCED"},
-        {budget: g("100"), policyType: "IMMEDIATE"},
-      ];
-      const credHistory = [
-        {
-          intervalEndMs: 10,
-          cred: new Map([
-            [addr1, 5],
-            [addr2, 0],
-          ]),
-        },
-        {
-          intervalEndMs: 20,
-          cred: new Map([
-            [addr1, 3],
-            [addr2, 7],
-          ]),
-        },
-      ];
       setFakeDate(6);
-      ledger.distributeGrain(policies, credHistory);
+      ledger.distributeGrain({
+        credTimestamp: 5,
+        allocations: [
+          {
+            policy: {policyType: "IMMEDIATE", budget: g("100")},
+            receipts: [
+              {address: addr1, amount: g("50")},
+              {address: addr2, amount: g("50")},
+            ],
+          },
+        ],
+      });
       setFakeDate(7);
       ledger.transferGrain({
         from: addr1,
