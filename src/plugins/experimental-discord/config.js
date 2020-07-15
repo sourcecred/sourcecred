@@ -24,11 +24,7 @@ export type DiscordConfig = {|
   +reactionWeights: EmojiWeightMap,
 |};
 
-export function parseConfig(raw: Combo.JsonObject): DiscordConfig {
-  return parser.parseOrThrow(raw);
-}
-
-const parser: Combo.Parser<DiscordConfig> = (() => {
+export const parser: Combo.Parser<DiscordConfig> = (() => {
   const C = Combo;
   return C.object({
     guildId: C.string,

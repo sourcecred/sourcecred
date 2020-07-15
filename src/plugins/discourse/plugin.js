@@ -1,16 +1,15 @@
 // @flow
 
 import Database from "better-sqlite3";
-import fs from "fs-extra";
 import {join as pathJoin} from "path";
 
 import type {Plugin, PluginDirectoryContext} from "../../api/plugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
-import type {ReferenceDetector} from "../../core/references/referenceDetector";
+import type {ReferenceDetector} from "../../core/references";
 import type {WeightedGraph} from "../../core/weightedGraph";
 import {createGraph} from "./createGraph";
 import {declaration} from "./declaration";
-import {parseConfig, type DiscourseConfig} from "./config";
+import {parser, type DiscourseConfig} from "./config";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {Fetcher} from "./fetch";
@@ -21,14 +20,14 @@ import {
   type PluginId,
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
+import {loadJson} from "../../util/disk";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
 ): Promise<DiscourseConfig> {
   const dirname = dirContext.configDirectory();
   const path = pathJoin(dirname, "config.json");
-  const contents = await fs.readFile(path);
-  return Promise.resolve(parseConfig(JSON.parse(contents)));
+  return loadJson(path, parser);
 }
 
 async function repository(
