@@ -33,7 +33,11 @@ import {
   type NodeAddressT,
   NodeAddress,
   type Node as GraphNode,
+  type NodeContraction,
+  EdgeAddress,
 } from "../core/graph";
+import type {NodeType} from "../analysis/types";
+import type {PluginDeclaration} from "../analysis/pluginDeclaration";
 
 /**
  * We validate identityNames using GitHub-esque rules.
@@ -102,6 +106,12 @@ export function graphNode({name, address}: Identity): GraphNode {
   };
 }
 
+export function contractions(
+  identities: $ReadOnlyArray<Identity>
+): $ReadOnlyArray<NodeContraction> {
+  return identities.map((i) => ({replacement: graphNode(i), old: i.aliases}));
+}
+
 export const identityNameParser: C.Parser<IdentityName> = C.fmap(
   C.string,
   identityNameFromString
@@ -121,3 +131,47 @@ export const identityParser: C.Parser<Identity> = C.object({
   address: NodeAddress.parser,
   aliases: C.array(NodeAddress.parser),
 });
+
+const userNodeType: NodeType = {
+  name: "user",
+  pluralName: "users",
+  defaultWeight: 0,
+  description: "a canonical user identity",
+  prefix: NodeAddress.append(IDENTITY_PREFIX, "USER"),
+};
+const projectNodeType: NodeType = {
+  name: "project",
+  pluralName: "projects",
+  defaultWeight: 0,
+  description: "a canonical project identity",
+  prefix: NodeAddress.append(IDENTITY_PREFIX, "PROJECT"),
+};
+const organizationNodeType: NodeType = {
+  name: "organization",
+  pluralName: "organizations",
+  defaultWeight: 0,
+  description: "a canonical organization identity",
+  prefix: NodeAddress.append(IDENTITY_PREFIX, "ORGANIZATION"),
+};
+const botNodeType: NodeType = {
+  name: "bot",
+  pluralName: "bots",
+  defaultWeight: 0,
+  description: "a canonical bot identity",
+  prefix: NodeAddress.append(IDENTITY_PREFIX, "BOT"),
+};
+const nodeTypes = [
+  userNodeType,
+  projectNodeType,
+  organizationNodeType,
+  botNodeType,
+];
+
+export const declaration: PluginDeclaration = {
+  name: "Identity",
+  nodePrefix: IDENTITY_PREFIX,
+  edgePrefix: EdgeAddress.fromParts(["sourcecred", "core", "IDENTITY"]),
+  nodeTypes,
+  userTypes: nodeTypes,
+  edgeTypes: [],
+};
