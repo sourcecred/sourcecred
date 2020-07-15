@@ -10,7 +10,7 @@ import {fakeDB} from "../mock/fakeDB";
 import {InitiativeList, InitiativeCreate, InitiativeEdit} from "./Initiatives";
 import ExplorerApp, {load, type LoadResult} from "./ExplorerApp";
 import Menu from "./Menu";
-import {UserList} from "./Users";
+import {UserCreate, UserList} from "./Users";
 
 const dataProvider = fakeDataProvider(fakeDB, true);
 
@@ -63,6 +63,7 @@ const InitiativesEditor = () => {
           <Resource
             name="users"
             list={UserList}
+            create={UserCreate(loadResult.credView)}
           />
           <Resource
             name="initiatives"
