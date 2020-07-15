@@ -30,7 +30,9 @@ export type InitiativeFileV020 = {|
   +champions?: $ReadOnlyArray<URL>,
 |};
 
-const upgradeFrom010 = (file: InitiativeFileV010): InitiativeFileV020 => ({
+export const upgradeFrom010 = (
+  file: InitiativeFileV010
+): InitiativeFileV020 => ({
   ...file,
   contributions: {urls: file.contributions},
   dependencies: {urls: file.dependencies},
@@ -52,7 +54,10 @@ const upgrades = {
   "0.1.0": upgradeFrom010,
 };
 
-const COMPAT_INFO = {type: "sourcecred/initiativeFile", version: "0.2.0"};
+export const COMPAT_INFO = {
+  type: "sourcecred/initiativeFile",
+  version: "0.2.0",
+};
 
 export function fromJSON(j: Compatible<any>): InitiativeFile {
   return fromCompat(COMPAT_INFO, j, upgrades);
