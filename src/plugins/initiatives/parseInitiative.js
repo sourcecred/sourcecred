@@ -7,16 +7,16 @@ import type {
   InitiativeFileV010,
   InitiativeFileV020,
 } from "./initiativeFile";
-import type {Compatible} from "../../util/compat";
 import {_validateUrl} from "./initiativesDirectory";
+import {fromISO, toISO} from "../../util/timestamp";
 
 const URLParser = C.fmap(C.string, _validateUrl);
 
-export type InitiativesFile = Compatible<InitiativeFile>;
+const TimestampParser = C.fmap(C.string, (t) => toISO(fromISO(t)));
 
 const CommonFields = {
   title: C.string,
-  timestampIso: C.string,
+  timestampIso: TimestampParser,
   weight: C.object({incomplete: C.number, complete: C.number}),
   completed: C.boolean,
 };
@@ -25,7 +25,7 @@ const Parse_020: C.Parser<InitiativeFileV020> = (() => {
   const NodeEntryParser = C.object(
     {
       title: C.string,
-      timestampIso: C.string,
+      timestampIso: TimestampParser,
       contributors: C.array(URLParser),
     },
     {
@@ -56,7 +56,7 @@ const Parse_010: C.Parser<InitiativeFileV010> = (() => {
   });
 })();
 
-export const parser: C.Parser<InitiativesFile> = compatibleParser(
+export const parser: C.Parser<InitiativeFile> = compatibleParser(
   COMPAT_INFO.type,
   {
     "0.2.0": Parse_020,

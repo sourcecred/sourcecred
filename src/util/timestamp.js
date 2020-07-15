@@ -29,7 +29,7 @@ export function toISO(timestampLike: TimestampMs | number): TimestampISO {
 /**
  * Creates a TimestampMs from a TimestampISO.
  */
-export function fromISO(timestampISO: TimestampISO): TimestampMs {
+export function fromISO(timestampISO: TimestampISO | string): TimestampMs {
   if (typeof timestampISO !== "string") {
     throw new TypeError(
       `TimestampISO values must be strings, ` +
