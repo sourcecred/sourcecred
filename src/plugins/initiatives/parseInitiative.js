@@ -21,31 +21,29 @@ const CommonFields = {
   completed: C.boolean,
 };
 
-const Parse_020: C.Parser<InitiativeFileV020> = (() => {
-  const NodeEntryParser = C.object(
-    {
-      title: C.string,
-      timestampIso: TimestampParser,
-      contributors: C.array(URLParser),
-    },
-    {
-      key: C.string,
-      weight: C.number,
-    }
-  );
+const NodeEntryParser = C.object(
+  {
+    title: C.string,
+    timestampIso: TimestampParser,
+    contributors: C.array(URLParser),
+  },
+  {
+    key: C.string,
+    weight: C.number,
+  }
+);
 
-  const EdgeSpecParser = C.object({
-    urls: C.array(URLParser),
-    entries: C.array(NodeEntryParser),
-  });
+const EdgeSpecParser = C.object({
+  urls: C.array(URLParser),
+  entries: C.array(NodeEntryParser),
+});
 
-  return C.object(CommonFields, {
-    contributions: EdgeSpecParser,
-    dependencies: EdgeSpecParser,
-    references: EdgeSpecParser,
-    champions: C.array(URLParser),
-  });
-})();
+const Parse_020: C.Parser<InitiativeFileV020> = C.object(CommonFields, {
+  contributions: EdgeSpecParser,
+  dependencies: EdgeSpecParser,
+  references: EdgeSpecParser,
+  champions: C.array(URLParser),
+});
 
 const Parse_010: C.Parser<InitiativeFileV010> = (() => {
   return C.object(CommonFields, {
