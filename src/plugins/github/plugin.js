@@ -1,14 +1,12 @@
 // @flow
 
 import Database from "better-sqlite3";
-import fs from "fs-extra";
 import {join as pathJoin} from "path";
-
 import fetchGithubRepo, {fetchGithubRepoFromCache} from "./fetchGithubRepo";
 import type {CacheProvider} from "../../backend/cache";
 import type {Plugin, PluginDirectoryContext} from "../../api/plugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
-import type {ReferenceDetector} from "../../core/references/referenceDetector";
+import type {ReferenceDetector} from "../../core/references";
 import {
   type WeightedGraph,
   merge as mergeWeightedGraph,
@@ -18,7 +16,7 @@ import {RelationalView} from "./relationalView";
 import {createGraph} from "./createGraph";
 import {declaration} from "./declaration";
 import {fromRelationalViews as referenceDetectorFromRelationalViews} from "./referenceDetector";
-import {parse as parseConfig, type GithubConfig} from "./config";
+import {parser, type GithubConfig} from "./config";
 import {validateToken, type GithubToken} from "./token";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {type TaskReporter} from "../../util/taskReporter";
@@ -27,6 +25,7 @@ import {
   type PluginId,
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
+import {loadJson} from "../../util/disk";
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_GITHUB_TOKEN";
 
@@ -35,8 +34,7 @@ async function loadConfig(
 ): Promise<GithubConfig> {
   const dirname = dirContext.configDirectory();
   const path = pathJoin(dirname, "config.json");
-  const contents = await fs.readFile(path);
-  return Promise.resolve(parseConfig(JSON.parse(contents)));
+  return loadJson(path, parser);
 }
 
 // Shim to interface with `fetchGithubRepo`; TODO: refactor that to just

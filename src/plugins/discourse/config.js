@@ -8,7 +8,7 @@ export type DiscourseConfig = {|
   +mirrorOptions?: $Shape<MirrorOptions>,
 |};
 
-const parser: Combo.Parser<DiscourseConfig> = (() => {
+export const parser: Combo.Parser<DiscourseConfig> = (() => {
   const C = Combo;
   return C.object(
     {
@@ -27,7 +27,3 @@ const parser: Combo.Parser<DiscourseConfig> = (() => {
     }
   );
 })();
-
-export function parseConfig(raw: Combo.JsonObject): DiscourseConfig {
-  return parser.parseOrThrow(raw);
-}

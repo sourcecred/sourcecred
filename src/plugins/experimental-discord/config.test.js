@@ -1,6 +1,6 @@
 // @flow
 
-import {type DiscordConfig, parseConfig} from "./config";
+import {type DiscordConfig, parser} from "./config";
 
 describe("plugins/experimental-discord/config", () => {
   it("can load a basic config", () => {
@@ -11,7 +11,7 @@ describe("plugins/experimental-discord/config", () => {
         ":sourcecred:626763367893303303": 16,
       },
     };
-    const parsed: DiscordConfig = parseConfig(raw);
+    const parsed: DiscordConfig = parser.parseOrThrow(raw);
     expect(parsed).toEqual(raw);
   });
 });

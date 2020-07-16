@@ -21,7 +21,7 @@ type JsonObject =
   | JsonObject[]
   | {[string]: JsonObject};
 
-const parser: Combo.Parser<GithubConfig> = (() => {
+export const parser: Combo.Parser<GithubConfig> = (() => {
   const C = Combo;
   return C.object({
     repoIds: C.rename(
@@ -30,7 +30,3 @@ const parser: Combo.Parser<GithubConfig> = (() => {
     ),
   });
 })();
-
-export function parse(raw: Combo.JsonObject): GithubConfig {
-  return parser.parseOrThrow(raw);
-}

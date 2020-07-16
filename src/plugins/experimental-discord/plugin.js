@@ -4,14 +4,13 @@ import Database from "better-sqlite3";
 
 import type {Plugin, PluginDirectoryContext} from "../../api/plugin";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
-import {parseConfig, type DiscordConfig, type DiscordToken} from "./config";
+import {parser, type DiscordConfig, type DiscordToken} from "./config";
 import {declaration} from "./declaration";
 import {join as pathJoin} from "path";
-import fs from "fs-extra";
 import {type TaskReporter} from "../../util/taskReporter";
 import {Fetcher} from "./fetcher";
 import {Mirror} from "./mirror";
-import type {ReferenceDetector} from "../../core/references/referenceDetector";
+import type {ReferenceDetector} from "../../core/references";
 import type {WeightedGraph} from "../../core/weightedGraph";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {createGraph} from "./createGraph";
@@ -21,14 +20,14 @@ import {
   type PluginId,
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
+import {loadJson} from "../../util/disk";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
 ): Promise<DiscordConfig> {
   const dirname = dirContext.configDirectory();
   const path = pathJoin(dirname, "config.json");
-  const contents = await fs.readFile(path);
-  return Promise.resolve(parseConfig(JSON.parse(contents)));
+  return loadJson(path, parser);
 }
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_DISCORD_TOKEN";
