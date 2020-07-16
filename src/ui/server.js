@@ -3,6 +3,7 @@
 import {StyleSheetServer} from "aphrodite/no-important";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
+import {StaticRouter} from "react-router";
 
 import dedent from "../util/dedent";
 import {Assets, rootFromPath} from "../webutil/assets";
@@ -15,13 +16,18 @@ export default function render(
   const path = locals.path;
   const root = rootFromPath(path);
   const assets = new Assets(root);
+  const context = {};
+
   return renderStandardRoute();
 
   function renderStandardRoute() {
     const bundlePath = locals.assets["main"];
-    const component = <App />;
     const {html, css} = StyleSheetServer.renderStatic(() =>
-      ReactDOMServer.renderToString(component)
+      ReactDOMServer.renderToString(
+        <StaticRouter location="/" context={context}>
+          <App />
+        </StaticRouter>
+      )
     );
     const page = dedent`\
       <!DOCTYPE html>

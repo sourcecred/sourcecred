@@ -32,7 +32,7 @@ function isClean(s: string): boolean {
 function randomUuidUnchecked(): string {
   const bytes = getRandomValues(new Uint8Array(16));
   const blob = [...bytes].map((n) => String.fromCharCode(n)).join("");
-  return btoa(blob).slice(0, -2); // drop "==" padding
+  return base64Encode(blob).slice(0, -2); // drop "==" padding
 }
 
 // Generate this many uniformly random UUIDs looking for a clean one.
