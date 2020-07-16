@@ -15,8 +15,9 @@ describe("ledger/ledger", () => {
     jest.spyOn(global.Date, "now").mockImplementationOnce(() => ts);
   }
 
-  const uuid1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
-  const uuid2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
+  const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
+  const id2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
+  const id3 = uuid.fromString("EpbMqV0HmcolKvpXTwSddA");
   function setNextUuid(x: uuid.Uuid) {
     jest.spyOn(uuid, "random").mockImplementationOnce(() => x);
   }
@@ -32,6 +33,17 @@ describe("ledger/ledger", () => {
     expect(copy).toEqual(ledger);
   }
 
+  function ledgerWithIdentities() {
+    const ledger = new Ledger();
+    setNextUuid(id1);
+    setFakeDate(1);
+    ledger.createIdentity("USER", "steven");
+    setNextUuid(id2);
+    setFakeDate(2);
+    ledger.createIdentity("ORGANIZATION", "crystal-gems");
+    return ledger;
+  }
+
   const a1 = NodeAddress.fromParts(["a1"]);
   const a2 = NodeAddress.fromParts(["a2"]);
 
@@ -43,6 +55,7 @@ describe("ledger/ledger", () => {
         const id = l.createIdentity("USER", "foo");
         const foo = l.identityById(id);
         expect(l.identities()).toEqual([foo]);
+        expect(l.accounts()).toEqual([{id, balance: G.ZERO, paid: G.ZERO}]);
         expect(l.eventLog()).toEqual([
           {
             ledgerTimestamp: 123,
@@ -188,52 +201,8 @@ describe("ledger/ledger", () => {
           },
         ]);
       });
-      it("if the alias has a balance, an extra TRANSFER_GRAIN event is emitted", () => {
-        const ledger = new Ledger();
-        setFakeDate(0);
-        const id = ledger.createIdentity("USER", "foo");
-        ledger._allocateGrain(a1, g("100"));
-        setFakeDate(1);
-        ledger.addAlias(id, a1);
-        const identity = NullUtil.get(ledger.identityById(id));
-        expect(identity.aliases).toEqual([a1]);
-        expect(ledger.eventLog()).toEqual([
-          {
-            ledgerTimestamp: 0,
-            version: "1",
-            action: {
-              type: "CREATE_IDENTITY",
-              version: "1",
-              identity: expect.anything(),
-            },
-          },
-          {
-            ledgerTimestamp: 1,
-            version: "1",
-            action: {
-              type: "TRANSFER_GRAIN",
-              version: "1",
-              from: a1,
-              to: identity.address,
-              memo: "transfer from alias to canonical account",
-              amount: "100",
-            },
-          },
-          {
-            ledgerTimestamp: 1,
-            version: "1",
-            action: {
-              type: "ADD_ALIAS",
-              version: "1",
-              identityId: id,
-              alias: a1,
-            },
-          },
-        ]);
-      });
       it("errors if there's no matching identity", () => {
         const ledger = new Ledger();
-        ledger._allocateGrain(a1, G.ONE);
         failsWithoutMutation(
           ledger,
           (l) => l.addAlias(uuid.random(), a1),
@@ -244,7 +213,6 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         const id = ledger.createIdentity("USER", "foo");
         ledger.addAlias(id, a1);
-        ledger._allocateGrain(a1, G.ONE);
         const thunk = () => ledger.addAlias(id, a1);
         failsWithoutMutation(ledger, thunk, "identity already has alias");
       });
@@ -253,7 +221,6 @@ describe("ledger/ledger", () => {
         const id1 = ledger.createIdentity("USER", "foo");
         const id2 = ledger.createIdentity("USER", "bar");
         ledger.addAlias(id1, a1);
-        ledger._allocateGrain(a1, G.ONE);
         const thunk = () => ledger.addAlias(id2, a1);
         failsWithoutMutation(
           ledger,
@@ -265,7 +232,6 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         const id = ledger.createIdentity("USER", "foo");
         const identity = NullUtil.get(ledger.identityById(id));
-        ledger._allocateGrain(identity.address, G.ONE);
         const thunk = () => ledger.addAlias(id, identity.address);
         failsWithoutMutation(
           ledger,
@@ -280,7 +246,6 @@ describe("ledger/ledger", () => {
         const id1 = ledger.createIdentity("USER", "foo");
         const identity1 = NullUtil.get(ledger.identityById(id1));
         const id2 = ledger.createIdentity("USER", "bar");
-        ledger._allocateGrain(identity1.address, G.ONE);
         const thunk = () => ledger.addAlias(id2, identity1.address);
         failsWithoutMutation(
           ledger,
@@ -340,7 +305,7 @@ describe("ledger/ledger", () => {
         failsWithoutMutation(
           ledger,
           (l) => l.removeAlias(uuid.random(), a1, 0),
-          "removeAlias: no identity matching id"
+          "removeAlias: no identity with id"
         );
       });
       it("throws an error if the identity doesn't already has that alias", () => {
@@ -385,43 +350,13 @@ describe("ledger/ledger", () => {
     });
   });
 
-  describe("canonicalAddress", () => {
-    it("identities' addresses are canonical", () => {
-      const ledger = new Ledger();
-      const id = ledger.createIdentity("USER", "foo");
-      const identity = NullUtil.get(ledger.identityById(id));
-      expect(ledger.canonicalAddress(identity.address)).toEqual(
-        identity.address
-      );
-    });
-    it("hitherto unseen addresses are canonical", () => {
-      const ledger = new Ledger();
-      expect(ledger.canonicalAddress(a1)).toEqual(a1);
-    });
-    it("aliases are not canonical", () => {
-      const ledger = new Ledger();
-      const id = ledger.createIdentity("USER", "foo");
-      const identity = NullUtil.get(ledger.identityById(id));
-      ledger.addAlias(id, a1);
-      expect(ledger.canonicalAddress(a1)).toEqual(identity.address);
-    });
-    it("unlinked aliases are again canonical", () => {
-      const ledger = new Ledger();
-      const id = ledger.createIdentity("USER", "foo");
-      ledger.addAlias(id, a1).removeAlias(id, a1, 0);
-      expect(ledger.canonicalAddress(a1)).toEqual(a1);
-    });
-  });
-
   describe("grain accounts", () => {
     it("newly created identities have an empty account", () => {
       const ledger = new Ledger();
-      const identityId = ledger.createIdentity("USER", "foo");
-      const address = NullUtil.get(ledger.identityById(identityId)).address;
-      const account = ledger.accountByAddress(address);
+      const id = ledger.createIdentity("USER", "foo");
+      const account = ledger.account(id);
       expect(account).toEqual({
-        identityId,
-        address,
+        id,
         paid: "0",
         balance: "0",
       });
@@ -429,124 +364,14 @@ describe("ledger/ledger", () => {
     });
     it("unseen addresses don't have accounts", () => {
       const ledger = new Ledger();
-      expect(ledger.accountByAddress(a1)).toEqual(undefined);
+      const thunk = () => ledger.account(id1);
+      expect(thunk).toThrowError(`no GrainAccount for identity: ${id1}`);
       expect(ledger.accounts()).toEqual([]);
-    });
-    it("non-identity addresses can have accounts", () => {
-      const ledger = new Ledger();
-      ledger._allocateGrain(a1, g("10"));
-      const account = ledger.accountByAddress(a1);
-      expect(account).toEqual({
-        identityId: null,
-        address: a1,
-        balance: "10",
-        paid: "10",
-      });
-      expect(ledger.accounts()).toEqual([account]);
-    });
-    it("accountByAddress returns canonical accounts", () => {
-      const ledger = new Ledger();
-      const identityId = ledger.createIdentity("USER", "foo");
-      const addr = NullUtil.get(ledger.identityById(identityId)).address;
-      ledger.addAlias(identityId, a1);
-      expect(ledger.accountByAddress(a1)).toEqual({
-        // Note: we asked for `a1`, but got address `addr`.
-        // This is intended behavior.
-        address: addr,
-        identityId,
-        paid: "0",
-        balance: "0",
-      });
-    });
-    it("when a identity gets an alias, it claims the alias's balance", () => {
-      const ledger = new Ledger();
-      const identityId = ledger.createIdentity("USER", "foo");
-      const addr = NullUtil.get(ledger.identityById(identityId)).address;
-      ledger._allocateGrain(a1, g("2"));
-      ledger._allocateGrain(addr, g("1"));
-      ledger.addAlias(identityId, a1);
-      const identityAccount = ledger.accountByAddress(addr);
-      expect(identityAccount).toEqual({
-        identityId,
-        address: addr,
-        paid: "3",
-        balance: "3",
-      });
-      expect(ledger.accounts()).toEqual([identityAccount]);
-    });
-    it("if an alias is allocated Grain, it's received by the canonical address", () => {
-      const ledger = new Ledger();
-      const identityId = ledger.createIdentity("USER", "foo");
-      const addr = NullUtil.get(ledger.identityById(identityId)).address;
-      ledger.addAlias(identityId, a1);
-      ledger._allocateGrain(a1, g("2"));
-      ledger._allocateGrain(addr, g("1"));
-      const identityAccount = ledger.accountByAddress(addr);
-      expect(identityAccount).toEqual({
-        identityId,
-        address: addr,
-        paid: "3",
-        balance: "3",
-      });
-      expect(ledger.accounts()).toEqual([identityAccount]);
-    });
-    it("removed alias accounts with retroactive payouts are handled correctly", () => {
-      const examples = [
-        {
-          credProportion: 0.1,
-          expectedRetroactivePaid: g("10"),
-        },
-        {
-          credProportion: 1,
-          expectedRetroactivePaid: g("100"),
-        },
-      ];
-      for (const {credProportion, expectedRetroactivePaid} of examples) {
-        const ledger = new Ledger();
-        const identityId = ledger.createIdentity("USER", "foo");
-        const addr = NullUtil.get(ledger.identityById(identityId)).address;
-        ledger.addAlias(identityId, a1);
-        ledger._allocateGrain(a1, g("100"));
-        ledger.removeAlias(identityId, a1, credProportion);
-        const aliasAccount = ledger.accountByAddress(a1);
-        expect(aliasAccount).toEqual({
-          identityId: null,
-          address: a1,
-          paid: expectedRetroactivePaid,
-          balance: "0",
-        });
-        const identityAccount = ledger.accountByAddress(addr);
-        expect(identityAccount).toEqual({
-          identityId,
-          address: addr,
-          paid: G.sub(g("100"), expectedRetroactivePaid),
-          balance: "100",
-        });
-        expect(ledger.accounts()).toEqual([identityAccount, aliasAccount]);
-      }
-    });
-    it("removed aliases without retroactive payouts don't have an alias account", () => {
-      const ledger = new Ledger();
-      const identityId = ledger.createIdentity("USER", "foo");
-      const addr = NullUtil.get(ledger.identityById(identityId)).address;
-      ledger.addAlias(identityId, a1);
-      ledger._allocateGrain(a1, g("100"));
-      ledger.removeAlias(identityId, a1, 0);
-      const aliasAccount = ledger.accountByAddress(a1);
-      expect(aliasAccount).toEqual(undefined);
-      const identityAccount = ledger.accountByAddress(addr);
-      expect(identityAccount).toEqual({
-        identityId,
-        address: addr,
-        paid: "100",
-        balance: "100",
-      });
-      expect(ledger.accounts()).toEqual([identityAccount]);
     });
   });
 
   describe("grain updates", () => {
-    describe("distributeGrain", () => {
+    describe.skip("distributeGrain", () => {
       it("works for an empty distribution", () => {
         const ledger = new Ledger();
         const distribution = {credTimestamp: 1, allocations: []};
@@ -625,26 +450,32 @@ describe("ledger/ledger", () => {
 
     describe("transferGrain", () => {
       it("works in a simple legal case", () => {
-        const ledger = new Ledger();
-        ledger._allocateGrain(a1, g("100"));
-        ledger._allocateGrain(a2, g("5"));
+        const ledger = ledgerWithIdentities();
+        ledger._allocateGrain(id1, g("100"));
+        ledger._allocateGrain(id2, g("5"));
         setFakeDate(4);
-        ledger.transferGrain({from: a1, to: a2, amount: g("80"), memo: "test"});
-        const e1 = {
-          address: a1,
-          identityId: null,
+        ledger.transferGrain({
+          from: id1,
+          to: id2,
+          amount: g("80"),
+          memo: "test",
+        });
+        const account1 = {
+          id: id1,
           paid: g("100"),
           balance: g("20"),
         };
-        const e2 = {
-          address: a2,
-          identityId: null,
+        const account2 = {
+          id: id2,
           paid: g("5"),
           balance: g("85"),
         };
-        expect(ledger.accountByAddress(a1)).toEqual(e1);
-        expect(ledger.accountByAddress(a2)).toEqual(e2);
+        expect(ledger.account(id1)).toEqual(account1);
+        expect(ledger.account(id2)).toEqual(account2);
         expect(ledger.eventLog()).toEqual([
+          // Two createIdentity actions we aren't interested in
+          expect.anything(),
+          expect.anything(),
           {
             ledgerTimestamp: 4,
             version: "1",
@@ -653,162 +484,80 @@ describe("ledger/ledger", () => {
               version: "1",
               amount: "80",
               memo: "test",
-              from: a1,
-              to: a2,
+              from: id1,
+              to: id2,
             },
           },
         ]);
       });
-      it("creates a GrainAccount for the recipient, if it did not already exist", () => {
-        const ledger = new Ledger();
-        ledger._allocateGrain(a1, g("1"));
-        setFakeDate(4);
-        ledger.transferGrain({from: a1, to: a2, amount: g("1"), memo: "test"});
-        const e1 = {
-          address: a1,
-          identityId: null,
-          paid: g("1"),
-          balance: g("0"),
-        };
-        const e2 = {
-          address: a2,
-          identityId: null,
-          paid: g("0"),
-          balance: g("1"),
-        };
-        expect(ledger.accountByAddress(a1)).toEqual(e1);
-        expect(ledger.accountByAddress(a2)).toEqual(e2);
-        expect(ledger.eventLog()).toEqual([
-          {
-            ledgerTimestamp: 4,
-            version: "1",
-            action: {
-              type: "TRANSFER_GRAIN",
-              version: "1",
-              amount: "1",
-              memo: "test",
-              from: a1,
-              to: a2,
-            },
-          },
-        ]);
+      it("errors if the sender does not exist", () => {
+        const ledger = ledgerWithIdentities();
+        const thunk = () =>
+          ledger.transferGrain({
+            to: id1,
+            from: id3,
+            amount: G.ZERO,
+            memo: null,
+          });
+        failsWithoutMutation(ledger, thunk, `invalid sender: ${id3}`);
       });
-      it("a zero-amount transfer from a nonexistent account is legal", () => {
-        // and should result in both accounts getting reified, i.e. if a previously
-        // empty alias sends a transaction, it gets a GrainAccount.
-        const ledger = new Ledger();
-        setFakeDate(4);
-        ledger.transferGrain({from: a1, to: a2, amount: g("0"), memo: "test"});
-        const e1 = {
-          address: a1,
-          identityId: null,
-          paid: g("0"),
-          balance: g("0"),
-        };
-        const e2 = {
-          address: a2,
-          identityId: null,
-          paid: g("0"),
-          balance: g("0"),
-        };
-        expect(ledger.accountByAddress(a1)).toEqual(e1);
-        expect(ledger.accountByAddress(a2)).toEqual(e2);
-        expect(ledger.eventLog()).toEqual([
-          {
-            ledgerTimestamp: 4,
-            version: "1",
-            action: {
-              type: "TRANSFER_GRAIN",
-              version: "1",
-              amount: "0",
-              memo: "test",
-              from: a1,
-              to: a2,
-            },
-          },
-        ]);
-      });
-      it("if a transfer sends from an alias, the canonical account is debited", () => {
-        const ledger = new Ledger();
-        const identityId = ledger.createIdentity("USER", "identity");
-        const address = NullUtil.get(ledger.identityById(identityId)).address;
-        ledger.addAlias(identityId, a1);
-        ledger._allocateGrain(a1, g("1"));
-        ledger.transferGrain({from: a1, to: a2, amount: g("1"), memo: "test"});
-        const e1 = {
-          address,
-          identityId,
-          paid: g("1"),
-          balance: g("0"),
-        };
-        const e2 = {
-          address: a2,
-          identityId: null,
-          paid: g("0"),
-          balance: g("1"),
-        };
-        expect(ledger.accountByAddress(a1)).toEqual(e1);
-        expect(ledger.accountByAddress(a2)).toEqual(e2);
-        expect(ledger.accounts()).toEqual([e1, e2]);
-      });
-      it("if a transfers sends to an alias, the canonical account is credited", () => {
-        const ledger = new Ledger();
-        const identityId = ledger.createIdentity("USER", "identity");
-        const addr = NullUtil.get(ledger.identityById(identityId)).address;
-        ledger.addAlias(identityId, a1);
-        ledger._allocateGrain(a2, g("1"));
-        ledger.transferGrain({from: a2, to: a1, amount: g("1"), memo: "test"});
-        const e1 = {
-          address: addr,
-          identityId,
-          paid: g("0"),
-          balance: g("1"),
-        };
-        const e2 = {
-          address: a2,
-          identityId: null,
-          paid: g("1"),
-          balance: g("0"),
-        };
-        expect(ledger.accountByAddress(a1)).toEqual(e1);
-        expect(ledger.accountByAddress(a2)).toEqual(e2);
-        expect(ledger.accounts()).toEqual([e1, e2]);
+      it("errors if the recipient does not exist", () => {
+        const ledger = ledgerWithIdentities();
+        const thunk = () =>
+          ledger.transferGrain({
+            to: id3,
+            from: id1,
+            amount: G.ZERO,
+            memo: null,
+          });
+        failsWithoutMutation(ledger, thunk, `invalid recipient: ${id3}`);
       });
       it("an account may transfer to itself", () => {
-        const ledger = new Ledger();
-        ledger._allocateGrain(a1, g("2"));
-        ledger.transferGrain({from: a1, to: a1, amount: g("1"), memo: "test"});
-        const e1 = {
-          address: a1,
-          identityId: null,
+        const ledger = ledgerWithIdentities();
+        ledger._allocateGrain(id1, g("2"));
+        ledger.transferGrain({
+          from: id1,
+          to: id1,
+          amount: g("1"),
+          memo: "test",
+        });
+        const account = {
+          id: id1,
           paid: g("2"),
           balance: g("2"),
         };
-        expect(ledger.accountByAddress(a1)).toEqual(e1);
+        expect(ledger.account(id1)).toEqual(account);
       });
       it("an account may not be overdrawn", () => {
-        const ledger = new Ledger();
-        ledger._allocateGrain(a1, g("2"));
+        const ledger = ledgerWithIdentities();
+        ledger._allocateGrain(id1, g("2"));
         const thunk = () =>
           ledger.transferGrain({
-            from: a1,
-            to: a2,
+            from: id1,
+            to: id2,
             amount: g("3"),
             memo: "test",
           });
-        expect(thunk).toThrowError("insufficient balance for transfer");
+        failsWithoutMutation(
+          ledger,
+          thunk,
+          "insufficient balance for transfer"
+        );
       });
       it("a negative transfer is illegal", () => {
-        const ledger = new Ledger();
-        ledger._allocateGrain(a1, g("2"));
+        const ledger = ledgerWithIdentities();
         const thunk = () =>
           ledger.transferGrain({
-            from: a1,
-            to: a2,
+            from: id1,
+            to: id2,
             amount: g("-3"),
             memo: "test",
           });
-        expect(thunk).toThrowError("cannot transfer negative Grain amount");
+        failsWithoutMutation(
+          ledger,
+          thunk,
+          "cannot transfer negative Grain amount"
+        );
       });
     });
   });
@@ -838,13 +587,11 @@ describe("ledger/ledger", () => {
     function richLedger(): Ledger {
       const ledger = new Ledger();
       setFakeDate(1);
-      setNextUuid(uuid1);
-      const id1 = ledger.createIdentity("USER", "foo");
-      const addr1 = NullUtil.get(ledger.identityById(id1)).address;
+      setNextUuid(id1);
+      ledger.createIdentity("USER", "foo");
       setFakeDate(2);
-      setNextUuid(uuid2);
-      const id2 = ledger.createIdentity("USER", "bar");
-      const addr2 = NullUtil.get(ledger.identityById(id2)).address;
+      setNextUuid(id2);
+      ledger.createIdentity("USER", "bar");
       setFakeDate(3);
       ledger.addAlias(id1, a1);
       setFakeDate(4);
@@ -852,6 +599,8 @@ describe("ledger/ledger", () => {
       setFakeDate(5);
       ledger.addAlias(id2, a1);
 
+      /**
+       * TODO: (@decentralion): Add this back in once we've refactored grain distributions.
       setFakeDate(6);
       ledger.distributeGrain({
         credTimestamp: 5,
@@ -872,6 +621,7 @@ describe("ledger/ledger", () => {
         amount: g("10"),
         memo: null,
       });
+      */
       return ledger;
     }
     it("fromEventLog with an empty action log results in an empty ledger", () => {

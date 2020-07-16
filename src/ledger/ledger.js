@@ -22,11 +22,7 @@ import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
 import {parser as uuidParser} from "../util/uuid";
-import {
-  type CredHistory,
-  type Distribution,
-  distributionParser,
-} from "./grainAllocation";
+import {type Distribution, distributionParser} from "./grainAllocation";
 import * as G from "./grain";
 import {JsonLog} from "../util/jsonLog";
 import * as C from "../util/combo";
@@ -36,8 +32,7 @@ import * as C from "../util/combo";
  * and has some associated Grain.
  */
 type MutableGrainAccount = {|
-  +address: NodeAddressT,
-  +identityId: IdentityId | null,
+  +id: IdentityId,
   balance: G.Grain,
   paid: G.Grain,
 |};
@@ -81,7 +76,7 @@ export class Ledger {
   _identities: Map<IdentityId, Identity>;
   _identityNameToId: Map<IdentityName, IdentityId>;
   _aliases: Map<NodeAddressT, IdentityId>;
-  _accounts: Map<NodeAddressT, MutableGrainAccount>;
+  _accounts: Map<IdentityId, MutableGrainAccount>;
   _latestTimestamp: TimestampMs = -Infinity;
 
   constructor() {
@@ -100,15 +95,21 @@ export class Ledger {
   }
 
   /**
-   * Get the GrainAccount associated with a particular address.
+   * Get the GrainAccount associated with a particular identity.
    *
-   * If the address is associated with a identity, that identity's account is returned.
-   * If the address is not associated with a identity, but has received Grain in
-   * the past, then an alias-style account is returned (no identityId set).
-   * If the address hasn't been encountered, we return undefined.
+   * If the identity is not in the ledger, an error is thrown.
    */
-  accountByAddress(address: NodeAddressT): ?GrainAccount {
-    return this._accounts.get(this.canonicalAddress(address));
+  account(id: IdentityId): GrainAccount {
+    // This wrapper ensures it's a read-only type
+    return this._mutableAccount(id);
+  }
+
+  _mutableAccount(id: IdentityId): MutableGrainAccount {
+    const result = this._accounts.get(id);
+    if (result == null) {
+      throw new Error(`no GrainAccount for identity: ${id}`);
+    }
+    return result;
   }
 
   /**
@@ -138,22 +139,6 @@ export class Ledger {
     if (id != null) {
       return this._identities.get(id);
     }
-  }
-
-  /**
-   * Get some address's "canoncial" address.
-   *
-   * If the address is the alias of some identity, then
-   * the identity's innate address is caanonical. Otherwise,
-   * the address is itself canonical.
-   */
-  canonicalAddress(address: NodeAddressT): NodeAddressT {
-    const identityId = this._aliases.get(address);
-    if (identityId != null) {
-      const identity = NullUtil.get(this.identityById(identityId));
-      return identity.address;
-    }
-    return address;
   }
 
   /**
@@ -200,11 +185,10 @@ export class Ledger {
     // Reserve this identity's own address
     this._aliases.set(identity.address, identity.id);
     // Every identity has a corresponding GrainAccount.
-    this._accounts.set(identity.address, {
+    this._accounts.set(identity.id, {
       balance: G.ZERO,
       paid: G.ZERO,
-      address: identity.address,
-      identityId: identity.id,
+      id: identity.id,
     });
   }
 
@@ -256,69 +240,23 @@ export class Ledger {
   /**
    * Add an alias for a identity.
    *
-   * If the alias has a Grain balance, then this will emit two events: first,
-   * one adding the alias, and a followup transferring the alias's Grain
-   * balance to the canonical identity.
+   * If that alias is associated with past Grain payments (because it
+   * was unlinked from another identity), those past Grain payments will be
+   * associated with the newly linked identity.
    *
-   * We explicitly emit two events (rather than including the balance transfer
-   * as a part of the alias action) to improve audit-ability, and make it
-   * easier to undo accidental or fraudulent linking.
-   *
-   * Will no-op if the identity already has that alias.
    * Will fail if the identity does not exist.
-   * Will fail if the alias is already claimed, or if it is
-   * another identity's innate address.
-   *
-   * Careful! This method may emit two_ events. Care must be taken to ensure
-   * that it cannot fail after it has emitted the first event. That means we
-   * must explicitly check all of the possible failure modes of the second
-   * event. Otherwise, we risk leaving the ledger in an inadvertently
-   * half-updated state, where the first event has been processed but the
-   * second one failed.
+   * Will fail if the alias is already claimed by any identity.
    */
   addAlias(identityId: IdentityId, alias: NodeAddressT): Ledger {
-    // Ensure that if we emit two events, they both have the
-    // same timestamp.
-    const ledgerTimestamp = _getTimestamp();
-
-    // Validate the ADD_ALIAS action so it cannot fail after we have
-    // already emitted the account transfer
-    const aliasAction: AddAlias = {
+    this._createAndProcessEvent({
       type: "ADD_ALIAS",
       identityId,
       alias,
       version: "1",
-    };
-    const existingIdentity = this._validateAddAlias(aliasAction);
-    const aliasEvent: LedgerEvent = {
-      action: aliasAction,
-      ledgerTimestamp,
-      version: "1",
-    };
-
-    // If the alias had some grain, explicitly transfer it to the new account.
-    const aliasAccount = this._getAccount(alias);
-    if (aliasAccount.balance !== G.ZERO) {
-      // The method may not fail below this line
-      const transferAction = {
-        from: alias,
-        to: existingIdentity.address,
-        amount: aliasAccount.balance,
-        memo: "transfer from alias to canonical account",
-        type: "TRANSFER_GRAIN",
-        version: "1",
-      };
-      const transferEvent = {
-        action: transferAction,
-        ledgerTimestamp,
-        version: "1",
-      };
-      this._processEvent(transferEvent);
-    }
-    this._processEvent(aliasEvent);
+    });
     return this;
   }
-  _validateAddAlias({identityId, alias}: AddAlias) {
+  _addAlias({identityId, alias}: AddAlias) {
     const existingIdentity = this._identities.get(identityId);
     if (existingIdentity == null) {
       throw new Error(`addAlias: no matching identityId ${identityId}`);
@@ -337,22 +275,6 @@ export class Ledger {
         `addAlias: alias ${NodeAddress.toString(alias)} already bound`
       );
     }
-    // Just a convenience, since we already verified it exists; we'll
-    // make it available to _addAlias.
-    // Makes it more obvious that _addAlias can't fail due to the existingIdentity
-    // being null.
-    return existingIdentity;
-  }
-  /**
-   * The ADD_ALIAS action may get emitted after a TRANSFER_GRAIN event
-   * that is part of the same transaction. As such, it should never fail
-   * outside of the _validateAddAlias method (which is checked before
-   * emitting the TRANSFER_GRAIN action).
-   */
-  _addAlias(action: AddAlias) {
-    const existingIdentity = this._validateAddAlias(action);
-    const {alias, identityId} = action;
-    const aliasAccount = this._getAccount(alias);
 
     this._aliases.set(alias, identityId);
     const updatedAliases = existingIdentity.aliases.slice();
@@ -364,22 +286,8 @@ export class Ledger {
       aliases: updatedAliases,
       address: existingIdentity.address,
     };
-    const identityAccount = this._unsafeGetAccount(existingIdentity.address);
 
     this._identities.set(identityId, updatedIdentity);
-    // Transfer the alias's history of getting paid to the identity account.
-    // This is necessary since the BALANCED payout policy takes
-    // identities' lifetime of cred distributions into account.
-    identityAccount.paid = G.add(identityAccount.paid, aliasAccount.paid);
-    // Assuming the event was added using the API, this balance will have
-    // already been explicitly transferred. However, just for good measure
-    // and robustness to future changes, we add this anyway, so that there
-    // will never be "vanishing Grain" when the alias account is deleted.
-    identityAccount.balance = G.add(
-      identityAccount.balance,
-      aliasAccount.balance
-    );
-    this._accounts.delete(alias);
   }
 
   /**
@@ -413,7 +321,10 @@ export class Ledger {
     if (credProportion < 0 || credProportion > 1 || !isFinite(credProportion)) {
       throw new Error(`removeAlias: invalid credProportion ${credProportion}`);
     }
-    const paid = this._getAccount(alias).paid;
+    if (!this._identities.has(identityId)) {
+      throw new Error(`removeAlias: no identity with id ${identityId}`);
+    }
+    const paid = this.account(identityId).paid;
     const retroactivePaid = G.multiplyFloat(paid, credProportion);
 
     this._createAndProcessEvent({
@@ -425,7 +336,7 @@ export class Ledger {
     });
     return this;
   }
-  _removeAlias({identityId, alias, retroactivePaid}: RemoveAlias) {
+  _removeAlias({identityId, alias}: RemoveAlias) {
     const existingIdentity = this._identities.get(identityId);
     if (existingIdentity == null) {
       throw new Error(`removeAlias: no identity matching id ${identityId}`);
@@ -446,7 +357,6 @@ export class Ledger {
     aliases.splice(idx, 1);
 
     // State mutations! Method must not fail past this comment.
-    const identityAccount = this._unsafeGetAccount(alias);
     this._aliases.delete(alias);
     this._identities.set(identityId, {
       id: identityId,
@@ -455,11 +365,6 @@ export class Ledger {
       subtype: existingIdentity.subtype,
       aliases,
     });
-    if (retroactivePaid !== G.ZERO) {
-      identityAccount.paid = G.sub(identityAccount.paid, retroactivePaid);
-      // Create a new alias account to hold onto our retroactivePaid amount
-      this._unsafeGetAccount(alias).paid = retroactivePaid;
-    }
   }
 
   /**
@@ -473,13 +378,8 @@ export class Ledger {
     });
     return this;
   }
-  _distributeGrain({distribution}: DistributeGrain) {
-    // Mutation ahead: This method may not fail after this comment
-    for (const {receipts} of distribution.allocations) {
-      for (const {address, amount} of receipts) {
-        this._allocateGrain(address, amount);
-      }
-    }
+  _distributeGrain(_: DistributeGrain) {
+    throw new Error("Not yet re-implemented using Ledger Identities");
   }
 
   /**
@@ -494,8 +394,8 @@ export class Ledger {
    * and which one is `to`.
    */
   transferGrain(opts: {|
-    from: NodeAddressT,
-    to: NodeAddressT,
+    from: IdentityId,
+    to: IdentityId,
     amount: G.Grain,
     memo: string | null,
   |}) {
@@ -511,60 +411,26 @@ export class Ledger {
     return this;
   }
   _transferGrain({from, to, amount}: TransferGrain) {
-    const fromAccount = this._getAccount(from);
+    if (!this._identities.has(from)) {
+      throw new Error(`invalid sender: ${from}`);
+    }
+    if (!this._identities.has(to)) {
+      throw new Error(`invalid recipient: ${to}`);
+    }
+    const fromAccount = this._mutableAccount(from);
+    const toAccount = this._mutableAccount(to);
     if (G.lt(amount, G.ZERO)) {
       throw new Error(`cannot transfer negative Grain amount: ${amount}`);
     }
     if (G.gt(amount, fromAccount.balance)) {
       throw new Error(
-        `transferGrain: ${NodeAddress.toString(
-          from
-        )} has insufficient balance for transfer: ${amount} > ${
-          fromAccount.balance
-        }`
+        `transferGrain: ${from} has insufficient balance for transfer: ${amount} > ${fromAccount.balance}`
       );
     }
 
     // Mutation ahead: May not fail after this comment
-    // Ensure that both fromAccount and toAccount exist, by calling _unsafeGetAccount
-    const toAccount = this._unsafeGetAccount(to);
-    this._unsafeGetAccount(from);
     fromAccount.balance = G.sub(fromAccount.balance, amount);
     toAccount.balance = G.add(toAccount.balance, amount);
-  }
-
-  /**
-   * For a CredHistory, create a map showing how much every address in the history
-   * has been paid.
-   *
-   * The CredHistory should have been computed using the Ledger's existing set
-   * of Identities and aliases, which means no alias should be present in the
-   * CredHistory. This is important so we can compute BALANCED allocations
-   * properly. If this invariant is violated, we throw an error.
-   */
-  _computePaidMap(history: CredHistory): Map<NodeAddressT, G.Grain> {
-    const credAddresses = new Set();
-    for (const {cred} of history) {
-      for (const address of cred.keys()) {
-        credAddresses.add(address);
-      }
-    }
-    const paidMap = new Map();
-    for (const address of credAddresses) {
-      if (this.canonicalAddress(address) !== address) {
-        const account = NullUtil.get(this.accountByAddress(address));
-        const identityId = NullUtil.get(account.identityId);
-        const identity = NullUtil.get(this.identityById(identityId));
-        throw new Error(
-          `distributeGrain: non-canonical address in credHistory: ${NodeAddress.toString(
-            address
-          )} (alias of ${identity.name})`
-        );
-      }
-      const {paid} = this._getAccount(address);
-      paidMap.set(address, paid);
-    }
-    return paidMap;
   }
 
   /**
@@ -646,47 +512,10 @@ export class Ledger {
 
   // Helper method for recording that Grain was allocated to a identity.
   // Increases the identity's paid amount and balance in sync.
-  _allocateGrain(recipient: NodeAddressT, amount: G.Grain) {
-    const canonical = this.canonicalAddress(recipient);
-    const account = this._unsafeGetAccount(canonical);
+  _allocateGrain(recipient: IdentityId, amount: G.Grain) {
+    const account = this._mutableAccount(recipient);
     account.paid = G.add(amount, account.paid);
     account.balance = G.add(amount, account.balance);
-  }
-
-  /**
-   * Get an account for this address, returning an empty alias-style
-   * account if it's not found.
-   *
-   * This does not add the account to state, so it's safe to use in the non-mutating
-   * parts of the ledger.
-   */
-  _getAccount(addr: NodeAddressT) {
-    const canonical = this.canonicalAddress(addr);
-    const existingAccount = this._accounts.get(canonical);
-    if (existingAccount == null) {
-      return {
-        address: canonical,
-        balance: G.ZERO,
-        paid: G.ZERO,
-        identityId: null,
-      };
-    } else {
-      return existingAccount;
-    }
-  }
-
-  /**
-   * Get an account for this address, returning an empty alias-style account if it's not
-   * found. If no account was found, it will also set the account, which makes this
-   * mutating & unsafe.
-   */
-  _unsafeGetAccount(addr: NodeAddressT) {
-    const canonical = this.canonicalAddress(addr);
-    const account = this._getAccount(addr);
-    if (!this._accounts.has(canonical)) {
-      this._accounts.set(canonical, account);
-    }
-    return account;
   }
 }
 
@@ -781,16 +610,16 @@ const distributeGrainParser: C.Parser<DistributeGrain> = C.object({
 type TransferGrain = {|
   +type: "TRANSFER_GRAIN",
   +version: "1",
-  +from: NodeAddressT,
-  +to: NodeAddressT,
+  +from: IdentityId,
+  +to: IdentityId,
   +amount: G.Grain,
   +memo: string | null,
 |};
 const transferGrainParser: C.Parser<TransferGrain> = C.object({
   type: C.exactly(["TRANSFER_GRAIN"]),
   version: C.exactly(["1"]),
-  from: NodeAddress.parser,
-  to: NodeAddress.parser,
+  from: uuidParser,
+  to: uuidParser,
   amount: G.parser,
   memo: C.orElse([C.string, C.null_]),
 });
