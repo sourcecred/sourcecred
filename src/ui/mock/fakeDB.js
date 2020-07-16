@@ -1,7 +1,23 @@
 // @flow
 
 export const fakeDB = {
-  users: [],
+  users: [
+    {
+      id: "1f7470e3-fc9a-4e4c-a25b-b8e83221fbe2",
+      name: "testUser",
+      aliases: [
+        {
+          address:
+            "N\u0000sourcecred\u0000discord\u0000MEMBER\u0000user\u0000143776454050709505\u0000",
+        },
+        {
+          address:
+            "N\u0000sourcecred\u0000discord\u0000MEMBER\u0000user\u0000432981598858903585\u0000",
+        },
+      ],
+      newAliases: [],
+    },
+  ],
   initiatives: [
     {
       id: "08a2945c-3e62-4d7a-bf4c-b38b42441bdd",
