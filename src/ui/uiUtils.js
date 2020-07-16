@@ -73,7 +73,7 @@ export const dateFormatter = (t: TimestampMs): ?DateString => {
   return `${yy}-${(pad + mm).slice(-2)}-${(pad + dd).slice(-2)}`;
 };
 
-export const jsonExporter = (initiatives: InitiativeEntry[] | UserEntry[]) => {
+export const jsonExporter = (entries: InitiativeEntry[] | UserEntry[]) => {
   const fakeLink = document.createElement("a");
   fakeLink.style.display = "none";
   if (!document.body) {
@@ -81,8 +81,7 @@ export const jsonExporter = (initiatives: InitiativeEntry[] | UserEntry[]) => {
     return;
   }
   document.body.appendChild(fakeLink);
-  const initiativesToSave = {initiatives: initiatives};
-  const blob = new Blob([JSON.stringify(initiativesToSave)], {
+  const blob = new Blob([JSON.stringify(entries)], {
     type: "application/json",
   });
   if (window.navigator && window.navigator.msSaveOrOpenBlob) {
@@ -90,7 +89,7 @@ export const jsonExporter = (initiatives: InitiativeEntry[] | UserEntry[]) => {
     window.navigator.msSaveOrOpenBlob(blob, `export.json`);
   } else {
     fakeLink.setAttribute("href", URL.createObjectURL(blob));
-    fakeLink.setAttribute("download", `initiatives.json`);
+    fakeLink.setAttribute("download", `export.json`);
     fakeLink.click();
   }
   fakeLink.remove();
