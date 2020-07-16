@@ -46,7 +46,6 @@ export type GrainAccount = $ReadOnly<MutableGrainAccount>;
  * - `createIdentity`
  * - `renameIdentity`
  * - `addAlias`
- * - `removeAlias`
  *
  * Every time the ledger state is changed, a corresponding Action is added to
  * the ledger's action log. The ledger state may be serialized by saving the
@@ -291,83 +290,6 @@ export class Ledger {
   }
 
   /**
-   * Remove an alias from a identity.
-   *
-   * In order to safely remove an alias, we need to know what proportion of
-   * that identity's Cred came from this alias. That way, we can re-allocate an
-   * appropriate share of the identity's lifetime grain receipts to the alias they
-   * are disconnecting from. Otherwise, it would be possible for the identity to
-   * game the BALANCED allocation strategy by strategically linking and
-   * unlinking aliases.
-   *
-   * When an alias is removed, none of the identity's current Grain balance goes
-   * back to that alias.
-   *
-   * If the alias was linked fraudulently (someone claimed another person's
-   * account), then remedial action may be appropriate, e.g. transferring the
-   * fraudster's own Grain back to the account they tried to steal from.
-   *
-   * Will no-op if the identity doesn't have that alias.
-   *
-   * Will fail if the identity does not exist.
-   *
-   * Will fail if the alias is in fact the identity's innate address.
-   */
-  removeAlias(
-    identityId: IdentityId,
-    alias: NodeAddressT,
-    credProportion: number
-  ): Ledger {
-    if (credProportion < 0 || credProportion > 1 || !isFinite(credProportion)) {
-      throw new Error(`removeAlias: invalid credProportion ${credProportion}`);
-    }
-    if (!this._identities.has(identityId)) {
-      throw new Error(`removeAlias: no identity with id ${identityId}`);
-    }
-    const paid = this.account(identityId).paid;
-    const retroactivePaid = G.multiplyFloat(paid, credProportion);
-
-    this._createAndProcessEvent({
-      type: "REMOVE_ALIAS",
-      identityId,
-      alias,
-      version: "1",
-      retroactivePaid,
-    });
-    return this;
-  }
-  _removeAlias({identityId, alias}: RemoveAlias) {
-    const existingIdentity = this._identities.get(identityId);
-    if (existingIdentity == null) {
-      throw new Error(`removeAlias: no identity matching id ${identityId}`);
-    }
-    if (alias === existingIdentity.address) {
-      throw new Error(`removeAlias: cannot remove identity's innate address`);
-    }
-    const existingAliases = existingIdentity.aliases;
-    const idx = existingAliases.indexOf(alias);
-    if (idx === -1) {
-      throw new Error(
-        `removeAlias: identity does not have alias: ${
-          existingIdentity.name
-        }, ${NodeAddress.toString(alias)}`
-      );
-    }
-    const aliases = existingAliases.slice();
-    aliases.splice(idx, 1);
-
-    // State mutations! Method must not fail past this comment.
-    this._aliases.delete(alias);
-    this._identities.set(identityId, {
-      id: identityId,
-      name: existingIdentity.name,
-      address: existingIdentity.address,
-      subtype: existingIdentity.subtype,
-      aliases,
-    });
-  }
-
-  /**
    * Canonicalize a Grain distribution in the ledger.
    */
   distributeGrain(distribution: Distribution): Ledger {
@@ -474,9 +396,6 @@ export class Ledger {
       case "ADD_ALIAS":
         this._addAlias(action);
         break;
-      case "REMOVE_ALIAS":
-        this._removeAlias(action);
-        break;
       case "DISTRIBUTE_GRAIN":
         this._distributeGrain(action);
         break;
@@ -540,7 +459,6 @@ type Action =
   | CreateIdentity
   | RenameIdentity
   | AddAlias
-  | RemoveAlias
   | DistributeGrain
   | TransferGrain;
 
@@ -581,21 +499,6 @@ const addAliasParser: C.Parser<AddAlias> = C.object({
   alias: NodeAddress.parser,
 });
 
-type RemoveAlias = {|
-  +type: "REMOVE_ALIAS",
-  +identityId: IdentityId,
-  +alias: NodeAddressT,
-  +version: "1",
-  +retroactivePaid: G.Grain,
-|};
-const removeAliasParser: C.Parser<RemoveAlias> = C.object({
-  type: C.exactly(["REMOVE_ALIAS"]),
-  version: C.exactly(["1"]),
-  identityId: uuidParser,
-  alias: NodeAddress.parser,
-  retroactivePaid: G.parser,
-});
-
 type DistributeGrain = {|
   +type: "DISTRIBUTE_GRAIN",
   +version: "1",
@@ -628,7 +531,6 @@ const actionParser: C.Parser<Action> = C.orElse([
   createIdentityParser,
   renameIdentityParser,
   addAliasParser,
-  removeAliasParser,
   distributeGrainParser,
   transferGrainParser,
 ]);

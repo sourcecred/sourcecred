@@ -256,98 +256,6 @@ describe("ledger/ledger", () => {
         );
       });
     });
-    describe("removeAlias", () => {
-      it("works", () => {
-        const ledger = new Ledger();
-        setFakeDate(0);
-        const id = ledger.createIdentity("USER", "foo");
-        setFakeDate(1);
-        ledger.addAlias(id, a1);
-        setFakeDate(2);
-        ledger.removeAlias(id, a1, 0);
-        const identity = NullUtil.get(ledger.identityById(id));
-        expect(identity.aliases).toEqual([]);
-        expect(ledger.eventLog()).toEqual([
-          {
-            ledgerTimestamp: 0,
-            version: "1",
-            action: {
-              type: "CREATE_IDENTITY",
-              version: "1",
-              identity: expect.anything(),
-            },
-          },
-          {
-            ledgerTimestamp: 1,
-            version: "1",
-            action: {
-              type: "ADD_ALIAS",
-              version: "1",
-              identityId: id,
-              alias: a1,
-            },
-          },
-          {
-            ledgerTimestamp: 2,
-            version: "1",
-            action: {
-              type: "REMOVE_ALIAS",
-              version: "1",
-              identityId: id,
-              alias: a1,
-              retroactivePaid: "0",
-            },
-          },
-        ]);
-      });
-      it("errors if there's no matching identity", () => {
-        const ledger = new Ledger();
-        failsWithoutMutation(
-          ledger,
-          (l) => l.removeAlias(uuid.random(), a1, 0),
-          "removeAlias: no identity with id"
-        );
-      });
-      it("throws an error if the identity doesn't already has that alias", () => {
-        const ledger = new Ledger();
-        const id = ledger.createIdentity("USER", "foo");
-        const thunk = () => ledger.removeAlias(id, a1, 0);
-        failsWithoutMutation(ledger, thunk, "identity does not have alias");
-      });
-      it("errors if the address is the identity's innate address", () => {
-        const ledger = new Ledger();
-        const id = ledger.createIdentity("USER", "foo");
-        const identity = NullUtil.get(ledger.identityById(id));
-        const thunk = () => ledger.removeAlias(id, identity.address, 0);
-        failsWithoutMutation(
-          ledger,
-          thunk,
-          `removeAlias: cannot remove identity's innate address`
-        );
-      });
-      it("frees the alias to be re-added", () => {
-        const ledger = new Ledger();
-        const id1 = ledger.createIdentity("USER", "foo");
-        const id2 = ledger.createIdentity("USER", "bar");
-        ledger.addAlias(id1, a1);
-        ledger.removeAlias(id1, a1, 0);
-        ledger.addAlias(id2, a1);
-        const u2 = NullUtil.get(ledger.identityById(id2));
-        expect(u2.aliases).toEqual([a1]);
-      });
-      it("errors on invalid credProportion", () => {
-        const ledger = new Ledger();
-        const id1 = ledger.createIdentity("USER", "foo");
-        ledger.addAlias(id1, a1);
-        for (const bad of [-0.3, 1.3, Infinity, NaN, -Infinity]) {
-          failsWithoutMutation(
-            ledger,
-            () => ledger.removeAlias(id1, a1, bad),
-            "invalid credProportion"
-          );
-        }
-      });
-    });
   });
 
   describe("grain accounts", () => {
@@ -585,23 +493,13 @@ describe("ledger/ledger", () => {
     // This is a ledger which has had at least one of every
     // supported Action.
     function richLedger(): Ledger {
-      const ledger = new Ledger();
-      setFakeDate(1);
-      setNextUuid(id1);
-      ledger.createIdentity("USER", "foo");
-      setFakeDate(2);
-      setNextUuid(id2);
-      ledger.createIdentity("USER", "bar");
+      const ledger = ledgerWithIdentities();
       setFakeDate(3);
       ledger.addAlias(id1, a1);
-      setFakeDate(4);
-      ledger.removeAlias(id1, a1, 0);
-      setFakeDate(5);
-      ledger.addAlias(id2, a1);
 
       /**
        * TODO: (@decentralion): Add this back in once we've refactored grain distributions.
-      setFakeDate(6);
+      setFakeDate(4);
       ledger.distributeGrain({
         credTimestamp: 5,
         allocations: [
@@ -614,7 +512,7 @@ describe("ledger/ledger", () => {
           },
         ],
       });
-      setFakeDate(7);
+      setFakeDate(5);
       ledger.transferGrain({
         from: addr1,
         to: addr2,
