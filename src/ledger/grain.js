@@ -155,7 +155,16 @@ export function format(
  * https://observablehq.com/@decentralion/grain-arithmetic
  */
 export function multiplyFloat(grain: Grain, num: number): Grain {
-  return BigInt(Math.floor(Number(grain) * num)).toString();
+  if (!isFinite(num)) {
+    throw new Error(`invalid input: num is ${num}`);
+  }
+  if (num === 1) {
+    // The one case where we can be sure to return a correct answer :)
+    return grain;
+  }
+
+  const floatProduct = Number(grain) * num;
+  return BigInt(Math.floor(floatProduct)).toString();
 }
 
 /**
@@ -183,6 +192,100 @@ export function fromApproximateFloat(f: number): Grain {
  */
 export function toFloatRatio(numerator: Grain, denominator: Grain): number {
   return Number(numerator) / Number(denominator);
+}
+
+/**
+ * Splits a budget of Grain proportional to floating-point scores.
+ *
+ * splitBudget guarantees that the total amount distributed will precisely
+ * equal the budget. This is a surprisingly challenging property to ensure, and
+ * it explains the complexity of this algorithm. We stress-test the method with
+ * extremely uneven share distribution (e.g. a split where some users' scores
+ * are 10**100 larger than others).
+ *
+ * The algorithm can be arbitrarily unfair at the atto-Grain level; for
+ * example, in the case `splitBudget(fromString("1"), [1, 100])` it will give
+ * all the Grain to the first account, even though it only has 1/100th the score
+ * of the second account. However, since Grain is tracked with 18 decimal point
+ * precision, these tiny biases mean very little in practice. In testing, when
+ * splitting one full Grain (i.e. 10**18 attoGrain), we haven't seen discrepancies
+ * over ~100 attoGrain, or one billion-million-th of a full Grain.
+ */
+export function splitBudget(
+  budget: Grain,
+  scores: $ReadOnlyArray<number>
+): $ReadOnlyArray<Grain> {
+  if (lt(budget, ZERO)) {
+    throw new Error("negative budget");
+  }
+  const totalScore = scores.reduce((a, b) => a + b, 0);
+  if (!isFinite(totalScore)) {
+    throw new Error(`scores must all be finite, got: ${totalScore}`);
+  }
+  if (totalScore <= 0) {
+    throw new Error(`total score must be positive, got: ${totalScore}`);
+  }
+
+  let scoreRemaining = totalScore;
+  let budgetRemaining = budget;
+  const pieces = scores.map((s) => {
+    if (s < 0) {
+      throw new Error("negative score: " + s);
+    }
+    if (s === 0 || scoreRemaining === 0) {
+      // You would think that s === 0 implies scoreRemaining === 0, but
+      // testing in extreme circumstances reveals that both checks are needed.
+      return "0";
+    }
+    let fraction = s / scoreRemaining;
+    if (fraction > 1) {
+      fraction = 1;
+    }
+    const piece = multiplyFloat(budgetRemaining, fraction);
+
+    /**
+     * Uncomment below if you want to measure the discrepancy caused by
+     * forcing fracion=1 whenever fraction > 1.
+     *
+     * In testing, when distributing one full Grain across wildly unequal
+     * scores, it never produced more than ~hundreds of attoGrain discrepancy.
+     */
+    /*
+    const altPiece = multiplyFloat(budgetRemaining, s / scoreRemaining);
+    if (altPiece !== piece) {
+      const delta = sub(altPiece, piece);
+      console.error(
+        `${delta} discrepancy due to capping ${s} / ${scoreRemaining} from ${
+          s / scoreRemaining
+        } to 1`
+      );
+    }
+    */
+
+    budgetRemaining = sub(budgetRemaining, piece);
+    scoreRemaining -= s;
+    return piece;
+  });
+
+  // istanbul ignore if
+  if (lt(budgetRemaining, "0")) {
+    // Per the contract of the function, this should never happen.
+    throw new Error("invariant error: budget overspent: " + budgetRemaining);
+  }
+  if (gt(budgetRemaining, "0")) {
+    /**
+     * Uncomment below if you want to measure the discrepancy caused by this
+     * "giveaway-leftovers" approach. In testing, when run with wildly varying
+     * shares, it never produced more than ~hundreds of attoGrain discrepancy.
+     */
+    /*
+    console.error(
+      `${budgetRemaining} discrepancy being resolved via giveaway to last share`
+    );
+    */
+    pieces[pieces.length - 1] = add(pieces[pieces.length - 1], budgetRemaining);
+  }
+  return pieces;
 }
 
 export const parser: P.Parser<Grain> = P.fmap(P.string, fromString);

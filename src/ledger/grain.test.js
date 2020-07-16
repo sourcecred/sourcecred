@@ -123,6 +123,15 @@ describe("src/ledger/grain", () => {
         G.fromString("3141592653589793280")
       );
     });
+    it("returns the exact Grain value if multiplying by 1", () => {
+      const huge = G.mul(G.ONE, G.ONE);
+      expect(G.multiplyFloat(huge, 1)).toEqual(huge);
+    });
+    it("errors if the multiplier is not finite", () => {
+      expect(() => G.multiplyFloat(G.ONE, Infinity)).toThrowError(
+        "invalid input"
+      );
+    });
   });
   describe("G.fromApproximateFloat", () => {
     it("G.fromApproximateFloat(1) === G.ONE", () => {
@@ -157,6 +166,100 @@ describe("src/ledger/grain", () => {
     it("handles irrational numbers", () => {
       const bigPi = G.multiplyFloat(G.ONE, Math.PI);
       expect(G.toFloatRatio(bigPi, two)).toEqual(Math.PI / 2);
+    });
+  });
+
+  describe("splitBudget", () => {
+    const g = G.fromString;
+    const fail = (budget, scores, why) => {
+      const thunk = () => G.splitBudget(budget, scores);
+      expect(thunk).toThrowError(why);
+    };
+    it("errors for negative budget", () => {
+      fail(g("-1"), [1, 2, 3], "negative budget");
+    });
+    it("errors if there are negative scores", () => {
+      fail(g("1"), [1, -2, 3], "negative score");
+    });
+    it("errors if the scores sum to 0", () => {
+      fail(g("1"), [0, 0], "total score must be positive, got: 0");
+      fail(g("1"), [], "total score must be positive, got: 0");
+    });
+    it("errors if any scores are not finite", () => {
+      for (const b of [NaN, Infinity, -Infinity]) {
+        const arr = [1, b, 99];
+        fail(G.ONE, arr, `scores must all be finite, got: ${b}`);
+      }
+    });
+    it("handles a 0 budget correctly", () => {
+      const split = G.splitBudget(g("0"), [1, 2]);
+      expect(split).toEqual(["0", "0"]);
+    });
+    it("handles an even split correctly", () => {
+      const split = G.splitBudget(g("2"), [1, 1]);
+      expect(split).toEqual(["1", "1"]);
+    });
+    it("can make unfair splits when necessary", () => {
+      const split = G.splitBudget(g("1"), [1, 1]);
+      expect(split).toEqual(["0", "1"]);
+    });
+    it("handles a situation where each user's score is too small to get Grain", () => {
+      const split = G.splitBudget(g("3"), [1 / 4, 1 / 4, 1 / 4, 1 / 4]);
+      expect(split).toEqual(["0", "1", "1", "1"]);
+    });
+    describe("stress testing", () => {
+      function _check(scores) {
+        const pieces = G.splitBudget(G.ONE, scores);
+        let total = g("0");
+        const totalScores = scores.reduce((a, b) => a + b);
+        for (let i = 0; i < scores.length; i++) {
+          total = G.add(total, pieces[i]);
+          const ratio = G.toFloatRatio(pieces[i], G.ONE);
+          const actual = scores[i] / totalScores;
+          expect(ratio).toBeCloseTo(actual, 10);
+        }
+        expect(total).toEqual(G.ONE);
+      }
+      function check(scores) {
+        const rev = scores.slice().reverse();
+        _check(scores);
+        _check(rev);
+      }
+      it("many equal scores", () => {
+        check(Array(997).fill(1));
+      });
+      it("VERY uneven split", () => {
+        check([1, 10 ** 100]);
+      });
+      it("highly unequal scores", () => {
+        const scores = [];
+        for (let i = 0; i < 100; i++) {
+          scores.push(i * i);
+        }
+        check(scores);
+      });
+      it("extravagantly unequal scores", () => {
+        const scores = [];
+        for (let i = 0; i < 100; i++) {
+          scores.push(2 ** i);
+        }
+        check(scores);
+      });
+      it("late stage capitalism unequal scores", () => {
+        const scores = [];
+        for (let i = 0; i < 100; i++) {
+          scores.push(10 ** i);
+        }
+        check(scores);
+      });
+      it("a mix of small and huge scores", () => {
+        const scores = [];
+        for (let i = 0; i < 50; i += 1) {
+          scores.push(0.5 ** i);
+          scores.push(7 ** i);
+        }
+        check(scores);
+      });
     });
   });
 });
