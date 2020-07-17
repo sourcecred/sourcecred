@@ -7,7 +7,7 @@
 // the serialized form is clean for machine and human eyes.
 
 import {encode as base64Encode, decode as base64Decode} from "base-64";
-import {getRandomValues} from "isomorphic-webcrypto";
+import getRandomValues from "get-random-values";
 
 import * as C from "./combo";
 
