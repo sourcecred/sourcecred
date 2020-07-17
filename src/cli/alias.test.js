@@ -1,12 +1,11 @@
 // @flow
 
+import {NodeAddress} from "../core/graph";
 import {resolveAlias, toAlias} from "./alias";
-import {loginAddress as githubAddress} from "../github/nodes";
-import {userAddress as discourseAddress} from "../discourse/address";
-import {identityAddress} from "./identity";
-import {NodeAddress} from "../../core/graph";
+import {loginAddress as githubAddress} from "../plugins/github/nodes";
+import {userAddress as discourseAddress} from "../plugins/discourse/address";
 
-describe("src/plugins/identity/alias", () => {
+describe("src/cli/alias", () => {
   describe("resolveAlias", () => {
     describe("errors on", () => {
       it("an empty alias", () => {
@@ -79,16 +78,6 @@ describe("src/plugins/identity/alias", () => {
         const b = resolveAlias("discourse/@login", url);
         expect(a).toEqual(b);
       });
-      it("a sourcecred identity", () => {
-        const actual = resolveAlias("sourcecred/example", null);
-        const expected = identityAddress("example");
-        expect(actual).toEqual(expected);
-      });
-      it("a sourcecred identity with prefixed @", () => {
-        const a = resolveAlias("sourcecred/example", null);
-        const b = resolveAlias("sourcecred/@example", null);
-        expect(a).toEqual(b);
-      });
     });
   });
   describe("toAlias", () => {
@@ -101,9 +90,6 @@ describe("src/plugins/identity/alias", () => {
     });
     it("works for a Discourse node address", () => {
       checkRoundTrip("discourse/example");
-    });
-    it("works for a identity node address", () => {
-      checkRoundTrip("sourcecred/example");
     });
     it("returns null for an address without an aliasing scheme", () => {
       const address = NodeAddress.fromParts(["sourcecred", "plugin", "foo"]);
