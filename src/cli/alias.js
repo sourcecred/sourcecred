@@ -1,19 +1,13 @@
 // @flow
 
-import {type NodeAddressT} from "../../core/graph";
-import {githubOwnerPattern} from "../github/repoId";
-import {loginAddress as githubAddress} from "../github/nodes";
-import {userNodeType as githubUserType} from "../github/declaration";
-import {userAddress as discourseAddress} from "../discourse/address";
-import {userNodeType as discourseUserType} from "../discourse/declaration";
-import {userAddress as discordAddress} from "../experimental-discord/createGraph";
-import {memberNodeType as discordUserType} from "../experimental-discord/declaration";
-import {identityType} from "./declaration";
-import {
-  identityAddress,
-  USERNAME_PATTERN as _VALID_IDENTITY_PATTERN,
-} from "./identity";
-import {NodeAddress} from "../../core/graph";
+import {type NodeAddressT, NodeAddress} from "../core/graph";
+import {githubOwnerPattern} from "../plugins/github/repoId";
+import {loginAddress as githubAddress} from "../plugins/github/nodes";
+import {userNodeType as githubUserType} from "../plugins/github/declaration";
+import {userAddress as discourseAddress} from "../plugins/discourse/address";
+import {userNodeType as discourseUserType} from "../plugins/discourse/declaration";
+import {userAddress as discordAddress} from "../plugins/experimental-discord/createGraph";
+import {memberNodeType as discordUserType} from "../plugins/experimental-discord/declaration";
 
 /** An Alias is a string specification of an identity within another plugin.
  *
@@ -25,6 +19,9 @@ import {NodeAddress} from "../../core/graph";
  * by hand, as in the near future the alias files will be maintained by hand.
  * This system will not scale well when user-provided plugins need to add to the
  * aliasing scheme, so at that point we will rewrite this system.
+ *
+ * Note: This system is deprecated. We do not intend to extend this to support other
+ * plugins.
  */
 export type Alias = string;
 
@@ -62,13 +59,6 @@ export function resolveAlias(
       }
       return discourseAddress(discourseUrl, match[1]);
     }
-    case "sourcecred": {
-      const match = name.match(_VALID_IDENTITY_PATTERN);
-      if (!match) {
-        throw new Error(`Invalid SourceCred identity: ${name}`);
-      }
-      return identityAddress(match[1]);
-    }
     default:
       throw new Error(`Unknown type for alias: ${alias}`);
   }
@@ -89,7 +79,6 @@ export function toAlias(n: NodeAddressT): Alias | null {
   const prefixes: Map<string, NodeAddressT> = new Map([
     ["github", githubUserType.prefix],
     ["discourse", discourseUserType.prefix],
-    ["sourcecred", identityType.prefix],
     ["discord", discordUserType.prefix],
   ]);
 

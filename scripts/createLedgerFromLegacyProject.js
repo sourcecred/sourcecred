@@ -3,10 +3,9 @@ import fs from "fs-extra";
 import path from "path";
 
 import * as C from "../src/util/combo";
-import type {Identity} from "../src/plugins/identity/identity";
 import {Ledger} from "../src/ledger/ledger";
 import type {NodeAddressT} from "../src/core/graph";
-import {resolveAlias} from "../src/plugins/identity/alias";
+import {resolveAlias} from "../src/cli/alias";
 import {identityNameFromString} from "../src/ledger/identity";
 
 const URL_PATTERN = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
@@ -20,7 +19,7 @@ type LegacyProject = [
     discourseServer: {|
       serverUrl: string,
     |},
-    identities: Array<Identity>,
+    identities: Array<{|+username: string, +aliases: Array<string>|}>,
   }
 ];
 
