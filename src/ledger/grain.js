@@ -288,4 +288,16 @@ export function splitBudget(
   return pieces;
 }
 
+/**
+ * Sum a sequence of Grain values.
+ */
+export function sum(xs: Iterable<Grain>): Grain {
+  // $FlowExpectedError
+  let total = 0n;
+  for (const x of xs) {
+    total += BigInt(x);
+  }
+  return total.toString();
+}
+
 export const parser: P.Parser<Grain> = P.fmap(P.string, fromString);
