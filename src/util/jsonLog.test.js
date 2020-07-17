@@ -2,7 +2,6 @@
 
 import {JsonLog} from "./jsonLog";
 import * as C from "./combo";
-import tmp from "tmp";
 
 describe("util/jsonLog", () => {
   it("initializes to an empty log", () => {
@@ -54,13 +53,5 @@ describe("util/jsonLog", () => {
     const log = JsonLog.fromString(logString, parser);
     const items = Array.from(log.values());
     expect(items).toEqual(ts);
-  });
-
-  it("writes and reads to a log file correctly", async () => {
-    const fname = tmp.tmpNameSync();
-    const log = new JsonLog().append([1, 2, 3]);
-    await log.writeJsonLog(fname);
-    const log2 = await JsonLog.readJsonLog(fname, C.number);
-    expect(log).toEqual(log2);
   });
 });
