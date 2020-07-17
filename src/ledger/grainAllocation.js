@@ -6,11 +6,14 @@
  * logic for computing distributions.
  */
 import {sum} from "d3-array";
-import {mapToArray} from "../util/map";
-import {type NodeAddressT, NodeAddress} from "../core/graph";
 import * as G from "./grain";
 import * as P from "../util/combo";
-import {type TimestampMs} from "../util/timestamp";
+import {
+  type Uuid,
+  random as randomUuid,
+  parser as uuidParser,
+} from "../util/uuid";
+import {type IdentityId} from "./identity";
 
 /**
  * The Balanced policy attempts to pay Grain to everyone so that their
@@ -39,107 +42,141 @@ export type AllocationPolicy = {|
   +budget: G.Grain,
 |};
 
-export type Distribution = {|
-  +allocations: $ReadOnlyArray<Allocation>,
-  // The Timestamp of the latest Cred interval used when computing this distribution.
-  +credTimestamp: TimestampMs,
-|};
-
 export type GrainReceipt = {|
-  +address: NodeAddressT,
+  +id: IdentityId,
   +amount: G.Grain,
 |};
 
 export type Allocation = {|
+  +id: Uuid,
   +policy: AllocationPolicy,
   +receipts: $ReadOnlyArray<GrainReceipt>,
 |};
 
-export type CredTimeSlice = {|
-  +intervalEndMs: number,
-  +cred: $ReadOnlyMap<NodeAddressT, number>,
+export type AllocationIdentity = {|
+  +cred: $ReadOnlyArray<number>,
+  +paid: G.Grain,
+  +id: IdentityId,
 |};
-export type CredHistory = $ReadOnlyArray<CredTimeSlice>;
-
-export function computeDistribution(
-  policies: $ReadOnlyArray<AllocationPolicy>,
-  credHistory: CredHistory,
-  lifetimePaid: $ReadOnlyMap<NodeAddressT, G.Grain>
-): Distribution {
-  if (credHistory.length === 0) {
-    throw new Error(`cannot distribute with empty credHistory`);
-  }
-  const credTimestamp = credHistory[credHistory.length - 1].intervalEndMs;
-  if (!isFinite(credTimestamp)) {
-    throw new Error(`invalid credTimestamp: ${credTimestamp}`);
-  }
-  const allocations = policies.map((p) =>
-    computeAllocation(p, credHistory, lifetimePaid)
-  );
-  return {credTimestamp, allocations};
-}
 
 export function computeAllocation(
   policy: AllocationPolicy,
-  credHistory: CredHistory,
-  // A map from each address to the total amount of Grain already paid
-  // to that Address, across time.
-  lifetimePaid: $ReadOnlyMap<NodeAddressT, G.Grain>
+  identities: $ReadOnlyArray<AllocationIdentity>
 ): Allocation {
-  const {budget, policyType} = policy;
-  if (G.lt(budget, G.ZERO)) {
-    throw new Error(`invalid budget: ${String(budget)}`);
-  }
-
-  const computeReceipts = (): $ReadOnlyArray<GrainReceipt> => {
-    switch (policyType) {
-      case "IMMEDIATE":
-        return computeImmediateReceipts(budget, credHistory);
-      case "BALANCED":
-        return computeBalancedReceipts(budget, credHistory, lifetimePaid);
-      // istanbul ignore next: unreachable per Flow
-      default:
-        throw new Error(`Unexpected type ${(policyType: empty)}`);
-    }
-  };
-
-  return {
+  const validatedPolicy = _validatePolicy(policy);
+  const processedIdentities = _processIdentities(identities);
+  return _validateAllocationBudget({
     policy,
-    receipts: computeReceipts(),
-  };
+    receipts: receipts(validatedPolicy, processedIdentities),
+    id: randomUuid(),
+  });
+}
+
+// ProcessedIdentities type has the following guarantees:
+// - no Cred is negative
+// - no Paid is negative
+// - total Cred is positive
+// - all cred arrays have same length
+opaque type ProcessedIdentities = $ReadOnlyArray<{|
+  +paid: G.Grain,
+  +id: IdentityId,
+  +cred: $ReadOnlyArray<number>,
+  +lifetimeCred: number,
+  +mostRecentCred: number,
+|}>;
+function _processIdentities(
+  items: $ReadOnlyArray<AllocationIdentity>
+): ProcessedIdentities {
+  if (items.length === 0) {
+    throw new Error(`must have at least one identity to allocate grain to`);
+  }
+  let hasPositiveCred = false;
+  const credLength = items[0].cred.length;
+  const results = items.map((i) => {
+    const {cred, id, paid} = i;
+    if (G.lt(paid, G.ZERO)) {
+      throw new Error(`negative paid: ${paid}`);
+    }
+    if (credLength !== cred.length) {
+      throw new Error(
+        `inconsistent cred length: ${credLength} vs ${cred.length}`
+      );
+    }
+    let lifetimeCred = 0;
+    for (const c of cred) {
+      if (c < 0 || !isFinite(c)) {
+        throw new Error(`invalid cred: ${c}`);
+      }
+      if (c > 0) {
+        hasPositiveCred = true;
+      }
+      lifetimeCred += c;
+    }
+    return {
+      id,
+      paid,
+      cred,
+      lifetimeCred,
+      mostRecentCred: cred[cred.length - 1],
+    };
+  });
+  if (!hasPositiveCred) {
+    throw new Error("cred is zero");
+  }
+  return results;
+}
+
+opaque type ValidatedPolicy = {|
+  +policyType: PolicyType,
+  +budget: G.Grain,
+|};
+function _validatePolicy(p: AllocationPolicy) {
+  policyTypeParser.parseOrThrow(p.policyType);
+  if (G.lt(p.budget, G.ZERO)) {
+    throw new Error(`invalid budget: ${p.budget}`);
+  }
+  return p;
+}
+
+// Exported for test purposes.
+export function _validateAllocationBudget(a: Allocation): Allocation {
+  const amt = G.sum(a.receipts.map((a) => a.amount));
+  if (amt !== a.policy.budget) {
+    throw new Error(
+      `allocation has budget of ${a.policy.budget} but distributed ${amt}`
+    );
+  }
+  return a;
+}
+
+function receipts(
+  policy: ValidatedPolicy,
+  identities: ProcessedIdentities
+): $ReadOnlyArray<GrainReceipt> {
+  switch (policy.policyType) {
+    case "IMMEDIATE":
+      return immediateReceipts(policy.budget, identities);
+    case "BALANCED":
+      return balancedReceipts(policy.budget, identities);
+    // istanbul ignore next: unreachable per Flow
+    default:
+      throw new Error(`Unknown policyType: ${(policy.policyType: empty)}`);
+  }
 }
 
 /**
  * Split a grain budget in proportion to the cred scores in
  * the most recent time interval
  */
-function computeImmediateReceipts(
+function immediateReceipts(
   budget: G.Grain,
-  credHistory: CredHistory
+  identities: ProcessedIdentities
 ): $ReadOnlyArray<GrainReceipt> {
-  if (budget === G.ZERO) {
-    return [];
-  }
-
-  if (!credHistory.length) {
-    throw new Error("cannot allocate Grain: credHistory is empty");
-  }
-
-  const lastSlice = credHistory[credHistory.length - 1];
-
-  const immediateCredMap = lastSlice.cred;
-
-  const totalCred = sum(immediateCredMap.values());
-  if (totalCred === 0) {
-    throw new Error("cannot allocate Grain: cred sums to 0");
-  }
-
-  const scores: number[] = mapToArray(immediateCredMap, (x) => x[1]);
-  const grainPieces = G.splitBudget(budget, scores);
-  return mapToArray(immediateCredMap, (x, i) => ({
-    address: x[0],
-    amount: grainPieces[i],
-  }));
+  const amounts = G.splitBudget(
+    budget,
+    identities.map((i) => i.mostRecentCred)
+  );
+  return identities.map(({id}, i) => ({id, amount: amounts[i]}));
 }
 
 /**
@@ -167,83 +204,45 @@ function computeImmediateReceipts(
  * across participants in a way that aligns long-term payment with total cred
  * scores.
  */
-function computeBalancedReceipts(
+function balancedReceipts(
   budget: G.Grain,
-  credHistory: CredHistory,
-  lifetimeGrainAllocation: $ReadOnlyMap<NodeAddressT, G.Grain>
+  identities: ProcessedIdentities
 ): $ReadOnlyArray<GrainReceipt> {
-  if (budget === G.ZERO) {
-    return [];
-  }
-  if (!credHistory.length) {
-    throw new Error("cannot allocate Grain: credHistory is empty");
-  }
+  const totalCred = sum(identities.map((x) => x.lifetimeCred));
+  const totalEverPaid = G.sum(identities.map((i) => i.paid));
 
-  const lifetimeCredMap = new Map();
-  for (const {cred} of credHistory) {
-    for (const [address, ownCred] of cred.entries()) {
-      const existingCred = lifetimeCredMap.get(address) || 0;
-      lifetimeCredMap.set(address, existingCred + ownCred);
-    }
-  }
-
-  let totalEarnings = G.ZERO;
-  for (const e of lifetimeGrainAllocation.values()) {
-    totalEarnings = G.add(totalEarnings, e);
-  }
-  let totalCred = 0;
-  for (const s of lifetimeCredMap.values()) {
-    totalCred += s;
-  }
-  if (totalCred === 0) {
-    throw new Error("cannot allocate Grain: cred sums to 0");
-  }
-
+  const targetTotalDistributed = G.add(totalEverPaid, budget);
   const targetGrainPerCred = G.multiplyFloat(
-    G.add(totalEarnings, budget),
+    targetTotalDistributed,
     1 / totalCred
   );
 
-  let totalUnderpayment = G.ZERO;
-  const userUnderpayment: Map<NodeAddressT, G.Grain> = new Map();
-  const addresses = new Set([
-    ...lifetimeCredMap.keys(),
-    ...lifetimeGrainAllocation.keys(),
-  ]);
-
-  for (const addr of addresses) {
-    const earned = lifetimeGrainAllocation.get(addr) || G.ZERO;
-    const cred = lifetimeCredMap.get(addr) || 0;
-
-    const target = G.multiplyFloat(targetGrainPerCred, cred);
-    if (G.gt(target, earned)) {
-      const underpayment = G.sub(target, earned);
-      userUnderpayment.set(addr, underpayment);
-      totalUnderpayment = G.add(totalUnderpayment, underpayment);
+  const userUnderpayment = identities.map(({paid, lifetimeCred}) => {
+    const target = G.multiplyFloat(targetGrainPerCred, lifetimeCred);
+    if (G.gt(target, paid)) {
+      return G.sub(target, paid);
+    } else {
+      return G.ZERO;
     }
-  }
+  });
 
-  const underpayment = mapToArray(userUnderpayment, (x) => Number(x[1]));
-  const grainPieces = G.splitBudget(budget, underpayment);
-  return mapToArray(userUnderpayment, (x, i) => ({
-    address: x[0],
-    amount: grainPieces[i],
-  }));
+  const floatUnderpayment = userUnderpayment.map((x) => Number(x));
+
+  const grainAmounts = G.splitBudget(budget, floatUnderpayment);
+  return identities.map(({id}, i) => ({id, amount: grainAmounts[i]}));
 }
 
+const policyTypeParser = P.exactly(["IMMEDIATE", "BALANCED"]);
 export const allocationPolicyParser: P.Parser<AllocationPolicy> = P.object({
-  policyType: P.exactly(["IMMEDIATE", "BALANCED"]),
+  policyType: policyTypeParser,
   budget: G.parser,
 });
 const grainReceiptParser: P.Parser<GrainReceipt> = P.object({
-  address: NodeAddress.parser,
+  id: uuidParser,
   amount: G.parser,
 });
 export const allocationParser: P.Parser<Allocation> = P.object({
   policy: allocationPolicyParser,
+  id: uuidParser,
   receipts: P.array(grainReceiptParser),
-});
-export const distributionParser: P.Parser<Distribution> = P.object({
-  allocations: P.array(allocationParser),
-  credTimestamp: P.number,
 });
