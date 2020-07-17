@@ -262,4 +262,17 @@ describe("src/ledger/grain", () => {
       });
     });
   });
+
+  describe("sum", () => {
+    const n = (x: number) => G.fromString(x.toString());
+    it("handles the empty case", () => {
+      expect(G.sum([])).toEqual(n(0));
+    });
+    it("handles a few numbers", () => {
+      expect(G.sum([n(1), n(2), n(3)])).toEqual(n(6));
+    });
+    it("handles negative numbers", () => {
+      expect(G.sum([n(1), n(-2), n(-3)])).toEqual(n(-4));
+    });
+  });
 });
