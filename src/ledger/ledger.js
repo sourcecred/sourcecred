@@ -22,7 +22,7 @@ import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
 import {parser as uuidParser} from "../util/uuid";
-import {type Distribution, distributionParser} from "./grainAllocation";
+import {type Distribution, parser as distributionParser} from "./distribution";
 import * as G from "./grain";
 import {JsonLog} from "../util/jsonLog";
 import * as C from "../util/combo";
@@ -300,8 +300,23 @@ export class Ledger {
     });
     return this;
   }
-  _distributeGrain(_: DistributeGrain) {
-    throw new Error("Not yet re-implemented using Ledger Identities");
+  _distributeGrain({distribution}: DistributeGrain) {
+    for (const {receipts} of distribution.allocations) {
+      for (const {id, amount} of receipts) {
+        if (!this._identities.has(id)) {
+          throw new Error(`cannot distribute; invalid id ${id}`);
+        }
+        if (G.lt(amount, G.ZERO)) {
+          throw new Error(`negative Grain amount: ${amount}`);
+        }
+      }
+    }
+    // Mutations beckon: method must not fail after this comment
+    for (const {receipts} of distribution.allocations) {
+      for (const {id, amount} of receipts) {
+        this._allocateGrain(id, amount);
+      }
+    }
   }
 
   /**

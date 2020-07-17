@@ -45,7 +45,6 @@ describe("ledger/ledger", () => {
   }
 
   const a1 = NodeAddress.fromParts(["a1"]);
-  const a2 = NodeAddress.fromParts(["a2"]);
 
   describe("identity updates", () => {
     describe("createIdentity", () => {
@@ -279,10 +278,14 @@ describe("ledger/ledger", () => {
   });
 
   describe("grain updates", () => {
-    describe.skip("distributeGrain", () => {
+    describe("distributeGrain", () => {
       it("works for an empty distribution", () => {
         const ledger = new Ledger();
-        const distribution = {credTimestamp: 1, allocations: []};
+        const distribution = {
+          credTimestamp: 1,
+          allocations: [],
+          id: uuid.random(),
+        };
         setFakeDate(2);
         ledger.distributeGrain(distribution);
         expect(ledger.accounts()).toEqual([]);
@@ -295,64 +298,104 @@ describe("ledger/ledger", () => {
         ]);
       });
       it("handles a case with a single allocation", () => {
-        const ledger = new Ledger();
+        const ledger = ledgerWithIdentities();
         const allocation = {
           policy: {policyType: "IMMEDIATE", budget: g("10")},
+          id: uuid.random(),
           receipts: [
-            {amount: g("3"), address: a1},
-            {amount: g("7"), address: a2},
+            {amount: g("3"), id: id1},
+            {amount: g("7"), id: id2},
           ],
         };
-        const distribution = {credTimestamp: 1, allocations: [allocation]};
+        const distribution = {
+          credTimestamp: 1,
+          allocations: [allocation],
+          id: uuid.random(),
+        };
         ledger.distributeGrain(distribution);
         const ac1 = {
-          address: a1,
-          identityId: null,
+          id: id1,
           balance: g("3"),
           paid: g("3"),
         };
         const ac2 = {
-          address: a2,
-          identityId: null,
+          id: id2,
           balance: g("7"),
           paid: g("7"),
         };
         expect(ledger.accounts()).toEqual([ac1, ac2]);
       });
       it("handles multiple allocations", () => {
-        const ledger = new Ledger();
+        const ledger = ledgerWithIdentities();
         const allocation1 = {
           policy: {policyType: "IMMEDIATE", budget: g("10")},
+          id: uuid.random(),
           receipts: [
-            {amount: g("3"), address: a1},
-            {amount: g("7"), address: a2},
+            {amount: g("3"), id: id1},
+            {amount: g("7"), id: id2},
           ],
         };
         const allocation2 = {
+          id: uuid.random(),
           policy: {policyType: "BALANCED", budget: g("20")},
           receipts: [
-            {amount: g("10"), address: a1},
-            {amount: g("10"), address: a2},
+            {amount: g("10"), id: id1},
+            {amount: g("10"), id: id2},
           ],
         };
         const distribution = {
           credTimestamp: 1,
           allocations: [allocation1, allocation2],
+          id: uuid.random(),
         };
         ledger.distributeGrain(distribution);
         const ac1 = {
-          address: a1,
-          identityId: null,
+          id: id1,
           balance: g("13"),
           paid: g("13"),
         };
         const ac2 = {
-          address: a2,
-          identityId: null,
+          id: id2,
           balance: g("17"),
           paid: g("17"),
         };
         expect(ledger.accounts()).toEqual([ac1, ac2]);
+      });
+      it("fails if any receipt is invalid", () => {
+        const ledger = ledgerWithIdentities();
+        const allocation = {
+          policy: {policyType: "IMMEDIATE", budget: g("7")},
+          id: uuid.random(),
+          receipts: [
+            {id: id1, amount: g("3")},
+            {id: id3, amount: g("4")},
+          ],
+        };
+        const distribution = {
+          credTimestamp: 1,
+          id: uuid.random(),
+          allocations: [allocation],
+        };
+        const thunk = () => ledger.distributeGrain(distribution);
+        failsWithoutMutation(ledger, thunk, "invalid id");
+      });
+      it("fails if any receipt is invalid", () => {
+        const ledger = ledgerWithIdentities();
+        const allocation = {
+          policy: {policyType: "IMMEDIATE", budget: g("7")},
+          id: uuid.random(),
+          receipts: [
+            {id: id1, amount: g("3")},
+            {id: id2, amount: g("-4")},
+          ],
+        };
+        const distribution = {
+          credTimestamp: 1,
+          id: uuid.random(),
+          allocations: [allocation],
+        };
+        const thunk = () => ledger.distributeGrain(distribution);
+        failsWithoutMutation(ledger, thunk, "negative Grain amount");
       });
     });
 
@@ -497,29 +540,30 @@ describe("ledger/ledger", () => {
       setFakeDate(3);
       ledger.addAlias(id1, a1);
 
-      /**
-       * TODO: (@decentralion): Add this back in once we've refactored grain distributions.
+      const distributionId = uuid.fromString("f9xPz9YGH0PuBpPAg2824Q");
+      const allocationId = uuid.fromString("yYNur0NEEkh7fMaUn6n9QQ");
       setFakeDate(4);
       ledger.distributeGrain({
-        credTimestamp: 5,
+        credTimestamp: 1,
+        id: distributionId,
         allocations: [
           {
+            id: allocationId,
             policy: {policyType: "IMMEDIATE", budget: g("100")},
             receipts: [
-              {address: addr1, amount: g("50")},
-              {address: addr2, amount: g("50")},
+              {id: id1, amount: g("50")},
+              {id: id2, amount: g("50")},
             ],
           },
         ],
       });
       setFakeDate(5);
       ledger.transferGrain({
-        from: addr1,
-        to: addr2,
+        from: id1,
+        to: id2,
         amount: g("10"),
         memo: null,
       });
-      */
       return ledger;
     }
     it("fromEventLog with an empty action log results in an empty ledger", () => {
