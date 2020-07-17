@@ -4,6 +4,7 @@ import React from "react";
 import {fromJSON as credResultFromJSON} from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import {Explorer} from "./Explorer.js";
+import {LedgerAdmin} from "./Admin";
 
 export type LoadResult = LoadSuccess | LoadFailure;
 export type LoadSuccess = {|
@@ -44,6 +45,10 @@ export default class App extends React.Component<Props, State> {
   }
 
   render() {
+    if (1) {
+      // Hack Hack Hack
+      return <LedgerAdmin />;
+    }
     const {loadResult} = this.state;
     if (loadResult == null) {
       return <h1>Loading...</h1>;
