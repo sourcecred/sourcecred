@@ -1,7 +1,6 @@
 // @flow
 
 import stringify from "json-stable-stringify";
-import fs from "fs-extra";
 import * as C from "./combo";
 
 /**
@@ -49,17 +48,5 @@ export class JsonLog<T: C.JsonObject> {
   static fromString(log: string, parser: C.Parser<T>): JsonLog<T> {
     const items = C.array(parser).parseOrThrow(JSON.parse(log));
     return new JsonLog().append(items);
-  }
-
-  async writeJsonLog(path: string): Promise<void> {
-    await fs.writeFile(path, this.toString());
-  }
-
-  static async readJsonLog(
-    path: string,
-    parser: C.Parser<T>
-  ): Promise<JsonLog<T>> {
-    const logString = await fs.readFile(path);
-    return JsonLog.fromString(logString.toString(), parser);
   }
 }
