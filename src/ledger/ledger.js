@@ -33,19 +33,22 @@ import * as C from "../util/combo";
  */
 type MutableGrainAccount = {|
   +id: IdentityId,
+  // The current Grain balance of this account
   balance: G.Grain,
+  // The amount of Grain this account has received in past Distributions
   paid: G.Grain,
+  // Whether or not the account is currently "active". An inactive account
+  // may not receive or transfer Grain. Accounts start inactive, and must
+  // be explicitly activated.
+  active: boolean,
 |};
 
 export type GrainAccount = $ReadOnly<MutableGrainAccount>;
 
 /**
- * The ledger for storing identity changes and (eventually) Grain distributions.
- *
- * The following API methods change the ledger state:
- * - `createIdentity`
- * - `renameIdentity`
- * - `addAlias`
+ * The Ledger is an append-only auditable data store which tracks
+ * - Identities and what aliases they possess
+ * - Identities' grain balances
  *
  * Every time the ledger state is changed, a corresponding Action is added to
  * the ledger's action log. The ledger state may be serialized by saving the
@@ -188,6 +191,7 @@ export class Ledger {
       balance: G.ZERO,
       paid: G.ZERO,
       id: identity.id,
+      active: false,
     });
   }
 
@@ -290,7 +294,64 @@ export class Ledger {
   }
 
   /**
+   * Activate an account, making it eligible to send and recieve Grain.
+   *
+   * If the account is already active, this will no-op (without emitting any
+   * event).
+   */
+  activate(id: IdentityId): Ledger {
+    if (!this._identities.has(id)) {
+      throw new Error(`identity ${id} not found`);
+    }
+    const {active} = this.account(id);
+    if (active) {
+      // no-op; account already active
+      return this;
+    } else {
+      this._createAndProcessEvent({
+        type: "TOGGLE_ACTIVATION",
+        version: "1",
+        identityId: id,
+      });
+      return this;
+    }
+  }
+
+  /**
+   * Deactivate an account, making it ineligible to send or recieve Grain.
+   *
+   * The account's Grain balance will remain untouched until it is reactivated.
+   *
+   * If the account is already inactive, this will no-op (without emitting any
+   * event).
+   */
+  deactivate(id: IdentityId): Ledger {
+    if (!this._identities.has(id)) {
+      throw new Error(`identity ${id} not found`);
+    }
+    const {active} = this.account(id);
+    if (active) {
+      this._createAndProcessEvent({
+        type: "TOGGLE_ACTIVATION",
+        version: "1",
+        identityId: id,
+      });
+      return this;
+    } else {
+      // no-op; account already inactive
+      return this;
+    }
+  }
+  _toggleActivation({identityId}: ToggleActivation) {
+    const account = this._mutableAccount(identityId);
+    // Cannot fail below this line.
+    account.active = !account.active;
+  }
+
+  /**
    * Canonicalize a Grain distribution in the ledger.
+   *
+   * Fails if any of the recipients are not active.
    */
   distributeGrain(distribution: Distribution): Ledger {
     this._createAndProcessEvent({
@@ -309,6 +370,10 @@ export class Ledger {
         if (G.lt(amount, G.ZERO)) {
           throw new Error(`negative Grain amount: ${amount}`);
         }
+        const {active} = this.account(id);
+        if (!active) {
+          throw new Error(`attempt to distribute to inactive account: ${id}`);
+        }
       }
     }
     // Mutations beckon: method must not fail after this comment
@@ -322,7 +387,9 @@ export class Ledger {
   /**
    * Transfer Grain from one account to another.
    *
-   * Fails if the sender does not have enough Grain, or if the Grain amount is negative.
+   * Fails if the sender does not have enough Grain, or if the Grain amount is
+   * negative.
+   * Fails if either the sender or the receipient have not been activated.
    * Self-transfers are supported.
    * An optional memo may be added.
    *
@@ -356,6 +423,12 @@ export class Ledger {
     }
     const fromAccount = this._mutableAccount(from);
     const toAccount = this._mutableAccount(to);
+    if (!fromAccount.active) {
+      throw new Error(`transfer from inactive account: ${from}`);
+    }
+    if (!toAccount.active) {
+      throw new Error(`transfer to inactive account: ${to}`);
+    }
     if (G.lt(amount, G.ZERO)) {
       throw new Error(`cannot transfer negative Grain amount: ${amount}`);
     }
@@ -410,6 +483,9 @@ export class Ledger {
         break;
       case "ADD_ALIAS":
         this._addAlias(action);
+        break;
+      case "TOGGLE_ACTIVATION":
+        this._toggleActivation(action);
         break;
       case "DISTRIBUTE_GRAIN":
         this._distributeGrain(action);
@@ -474,6 +550,7 @@ type Action =
   | CreateIdentity
   | RenameIdentity
   | AddAlias
+  | ToggleActivation
   | DistributeGrain
   | TransferGrain;
 
@@ -514,6 +591,17 @@ const addAliasParser: C.Parser<AddAlias> = C.object({
   alias: NodeAddress.parser,
 });
 
+type ToggleActivation = {|
+  +type: "TOGGLE_ACTIVATION",
+  +version: "1",
+  +identityId: IdentityId,
+|};
+const toggleActivationParser: C.Parser<ToggleActivation> = C.object({
+  type: C.exactly(["TOGGLE_ACTIVATION"]),
+  version: C.exactly(["1"]),
+  identityId: uuidParser,
+});
+
 type DistributeGrain = {|
   +type: "DISTRIBUTE_GRAIN",
   +version: "1",
@@ -546,6 +634,7 @@ const actionParser: C.Parser<Action> = C.orElse([
   createIdentityParser,
   renameIdentityParser,
   addAliasParser,
+  toggleActivationParser,
   distributeGrainParser,
   transferGrainParser,
 ]);
