@@ -79,6 +79,11 @@ export type TopicWithPosts = {|
   +posts: $ReadOnlyArray<Post>,
 |};
 
+export type User = {|
+  +username: string,
+  +trust_level: number,
+|};
+
 export type LikeAction = {|
   // The user who liked something
   +username: string,
@@ -265,6 +270,22 @@ export class Fetcher implements Discourse {
     return {topic, posts};
   }
 
+  async getUserData(username: string): Promise<User | null> {
+    const response = await this._fetch(`/users/${username}.json`);
+
+    if (response.status === 404) {
+      // The user probably no longer exists. This is expected, see #1440.
+      return null;
+    }
+
+    failIfMissing(response);
+    failForNotOk(response);
+
+    const json = await response.json();
+
+    return parseUser(json.user);
+  }
+
   async likesByUser(
     username: string,
     offset: number
@@ -379,6 +400,13 @@ function parsePost(json: any): Post {
     topicId: json.topic_id,
     authorUsername: json.username,
     cooked: json.cooked,
+  };
+}
+
+function parseUser(json: any): User {
+  return {
+    username: json.username,
+    trust_level: json.trust_level,
   };
 }
 

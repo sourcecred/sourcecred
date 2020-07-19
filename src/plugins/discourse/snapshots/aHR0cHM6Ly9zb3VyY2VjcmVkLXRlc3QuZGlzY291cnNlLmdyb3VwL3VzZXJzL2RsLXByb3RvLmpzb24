@@ -1,0 +1,172 @@
+{
+  "user_badges": [
+    {
+      "id": 12,
+      "granted_at": "2019-08-03T08:14:57.815Z",
+      "created_at": "2019-08-03T08:14:57.815Z",
+      "count": 1,
+      "badge_id": 1,
+      "user_id": 3,
+      "granted_by_id": -1
+    },
+    {
+      "id": 10,
+      "granted_at": "2019-08-02T11:14:58.189Z",
+      "created_at": "2019-08-02T11:14:58.189Z",
+      "count": 1,
+      "post_id": 14,
+      "post_number": 1,
+      "badge_id": 11,
+      "user_id": 3,
+      "granted_by_id": -1,
+      "topic_id": 11
+    },
+    {
+      "id": 17,
+      "granted_at": "2019-10-02T20:52:28.209Z",
+      "created_at": "2019-10-02T20:52:28.209Z",
+      "count": 1,
+      "badge_id": 48,
+      "user_id": 3,
+      "granted_by_id": -1
+    }
+  ],
+  "badges": [
+    {
+      "id": 1,
+      "name": "Basic",
+      "description": "<a href=\"https://blog.discourse.org/2018/06/understanding-discourse-trust-levels/\">Granted</a> all essential community functions",
+      "grant_count": 4,
+      "allow_title": false,
+      "multiple_grant": false,
+      "icon": "fa-user",
+      "image": null,
+      "listable": true,
+      "enabled": true,
+      "badge_grouping_id": 4,
+      "system": true,
+      "slug": "basic",
+      "manually_grantable": false,
+      "badge_type_id": 3
+    },
+    {
+      "id": 11,
+      "name": "First Like",
+      "description": "Liked a post",
+      "grant_count": 1,
+      "allow_title": false,
+      "multiple_grant": false,
+      "icon": "fa-certificate",
+      "image": null,
+      "listable": true,
+      "enabled": true,
+      "badge_grouping_id": 1,
+      "system": true,
+      "slug": "first-like",
+      "manually_grantable": false,
+      "badge_type_id": 3
+    },
+    {
+      "id": 48,
+      "name": "Wiki Editor",
+      "description": "First wiki edit",
+      "grant_count": 2,
+      "allow_title": false,
+      "multiple_grant": false,
+      "icon": "fa-certificate",
+      "image": null,
+      "listable": true,
+      "enabled": true,
+      "badge_grouping_id": 1,
+      "system": true,
+      "slug": "wiki-editor",
+      "manually_grantable": false,
+      "badge_type_id": 3
+    }
+  ],
+  "badge_types": [
+    {
+      "id": 3,
+      "name": "Bronze",
+      "sort_order": 7
+    }
+  ],
+  "users": [
+    {
+      "id": 3,
+      "username": "dl-proto",
+      "name": "dandelion protocol acct",
+      "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png",
+      "moderator": false,
+      "admin": false
+    },
+    {
+      "id": -1,
+      "username": "system",
+      "name": "system",
+      "avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png",
+      "moderator": true,
+      "admin": true
+    }
+  ],
+  "topics": [
+    {
+      "id": 11,
+      "title": "My First Test Post",
+      "fancy_title": "My First Test Post",
+      "slug": "my-first-test-post",
+      "posts_count": 3
+    }
+  ],
+  "user": {
+    "id": 3,
+    "username": "dl-proto",
+    "name": "dandelion protocol acct",
+    "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png",
+    "last_posted_at": "2019-08-02T11:15:53.905Z",
+    "last_seen_at": "2020-02-09T02:17:34.361Z",
+    "created_at": "2019-08-02T11:14:13.800Z",
+    "ignored": false,
+    "muted": false,
+    "can_ignore_user": false,
+    "can_mute_user": false,
+    "can_send_private_messages": false,
+    "can_send_private_message_to_user": false,
+    "trust_level": 1,
+    "moderator": false,
+    "admin": false,
+    "title": null,
+    "badge_count": 3,
+    "custom_fields": {},
+    "time_read": 261,
+    "recent_time_read": 0,
+    "primary_group_id": null,
+    "primary_group_name": null,
+    "primary_group_flair_url": null,
+    "primary_group_flair_bg_color": null,
+    "primary_group_flair_color": null,
+    "featured_topic": null,
+    "bio_excerpt": null,
+    "bio_cooked": null,
+    "can_edit": false,
+    "can_edit_username": false,
+    "can_edit_email": false,
+    "can_edit_name": false,
+    "uploaded_avatar_id": null,
+    "pending_count": 0,
+    "profile_view_count": 4,
+    "mailing_list_posts_per_day": 0,
+    "featured_user_badge_ids": [
+      12,
+      10,
+      17
+    ],
+    "invited_by": {
+      "id": 2,
+      "username": "d11",
+      "name": "D",
+      "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
+    },
+    "groups": []
+  }
+}

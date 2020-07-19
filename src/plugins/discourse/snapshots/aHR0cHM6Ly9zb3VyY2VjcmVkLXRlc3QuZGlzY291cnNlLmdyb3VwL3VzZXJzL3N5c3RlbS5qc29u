@@ -1,0 +1,107 @@
+{
+  "user_badges": [
+    {
+      "id": 9,
+      "granted_at": "2019-04-02T20:20:12.933Z",
+      "created_at": "2019-04-02T20:20:12.933Z",
+      "count": 1,
+      "post_id": 10,
+      "post_number": 1,
+      "badge_id": 41,
+      "user_id": -1,
+      "granted_by_id": -1,
+      "topic_id": 7
+    }
+  ],
+  "badges": [
+    {
+      "id": 41,
+      "name": "First Emoji",
+      "description": "Used an Emoji in a Post",
+      "grant_count": 1,
+      "allow_title": false,
+      "multiple_grant": false,
+      "icon": "fa-certificate",
+      "image": null,
+      "listable": true,
+      "enabled": true,
+      "badge_grouping_id": 1,
+      "system": true,
+      "slug": "first-emoji",
+      "manually_grantable": false,
+      "badge_type_id": 3
+    }
+  ],
+  "badge_types": [
+    {
+      "id": 3,
+      "name": "Bronze",
+      "sort_order": 7
+    }
+  ],
+  "users": [
+    {
+      "id": -1,
+      "username": "system",
+      "name": "system",
+      "avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png",
+      "moderator": true,
+      "admin": true
+    }
+  ],
+  "topics": [
+    {
+      "id": 7,
+      "title": "Welcome to Discourse",
+      "fancy_title": "Welcome to Discourse",
+      "slug": "welcome-to-discourse",
+      "posts_count": 1
+    }
+  ],
+  "user": {
+    "id": -1,
+    "username": "system",
+    "name": "system",
+    "avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png",
+    "last_posted_at": "2019-08-30T13:59:17.943Z",
+    "last_seen_at": null,
+    "created_at": "2019-04-02T20:20:06.287Z",
+    "ignored": false,
+    "muted": false,
+    "can_ignore_user": false,
+    "can_mute_user": false,
+    "can_send_private_messages": false,
+    "can_send_private_message_to_user": false,
+    "trust_level": 4,
+    "moderator": true,
+    "admin": true,
+    "title": null,
+    "badge_count": 1,
+    "custom_fields": {},
+    "time_read": 0,
+    "recent_time_read": 0,
+    "primary_group_id": null,
+    "primary_group_name": null,
+    "primary_group_flair_url": null,
+    "primary_group_flair_bg_color": null,
+    "primary_group_flair_color": null,
+    "featured_topic": null,
+    "bio_excerpt": null,
+    "bio_cooked": null,
+    "can_edit": false,
+    "can_edit_username": false,
+    "can_edit_email": false,
+    "can_edit_name": false,
+    "uploaded_avatar_id": 1,
+    "pending_count": 0,
+    "profile_view_count": 2,
+    "gravatar_avatar_upload_id": 1,
+    "gravatar_avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png",
+    "mailing_list_posts_per_day": 0,
+    "featured_user_badge_ids": [
+      9
+    ],
+    "invited_by": null,
+    "groups": []
+  }
+}
