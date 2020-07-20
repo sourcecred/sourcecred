@@ -88,7 +88,7 @@ You can check out the issues marked [contributions welcome], or ask in the
 Discord's #programming channel if anyone has something you can contribute to.
 
 [our Discord]: https://sourcecred.io/discord
-[Contributing Guidelines]: ./contributing.md
+[Contributing Guidelines]: ./CONTRIBUTING.md
 [contributions welcome]: https://github.com/sourcecred/sourcecred/issues?q=is%3Aopen+is%3Aissue+label%3Acontributions-welcome
 
 ## Development Setup
