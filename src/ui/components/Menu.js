@@ -16,6 +16,14 @@ const Menu = ({onMenuClick, logout}: menuProps) => {
   const resources = useSelector(getResources);
   return (
     <>
+      <MenuItemLink
+        to="/explorer"
+        primaryText="explorer"
+        leftIcon={<TrendingUpIcon />}
+        onClick={onMenuClick}
+        sidebarIsOpen={open}
+      />
+
       {resources.map((resource) => {
         return (
           <MenuItemLink
@@ -32,13 +40,6 @@ const Menu = ({onMenuClick, logout}: menuProps) => {
           />
         );
       })}
-      <MenuItemLink
-        to="/explorer"
-        primaryText="explorer"
-        leftIcon={<TrendingUpIcon />}
-        onClick={onMenuClick}
-        sidebarIsOpen={open}
-      />
       {isXSmall && logout}
     </>
   );

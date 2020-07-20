@@ -1,7 +1,7 @@
 // @flow
 
 import React from "react";
-import {Route, useHistory} from "react-router-dom";
+import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
@@ -21,7 +21,10 @@ const theme = createMuiTheme({
 const AppLayout = (props) => <Layout {...props} menu={Menu} />;
 
 const customRoutes = [
-  <Route key={0} exact path="/explorer" component={ExplorerApp} />,
+  <Route key="explorer" exact path="/explorer" component={ExplorerApp} />,
+  <Route key="root" exact path="/">
+    <Redirect to="/explorer" />
+  </Route>,
 ];
 
 const AdminApp = () => {
