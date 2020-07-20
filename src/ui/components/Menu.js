@@ -4,7 +4,7 @@ import {createElement} from "react";
 import {useSelector} from "react-redux";
 import {useMediaQuery} from "@material-ui/core";
 import {MenuItemLink, getResources} from "react-admin";
-import {type LoadSuccess} from "./ExplorerApp";
+import {type LoadSuccess} from "../load";
 import TrendingUpIcon from "@material-ui/icons/TrendingUp";
 import DefaultIcon from "@material-ui/icons/ViewList";
 

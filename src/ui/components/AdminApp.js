@@ -6,11 +6,8 @@ import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
-import ExplorerApp, {
-  load,
-  type LoadResult,
-  type LoadSuccess,
-} from "./ExplorerApp";
+import ExplorerApp from "./ExplorerApp";
+import {load, type LoadResult, type LoadSuccess} from "../load";
 import {withRouter} from "react-router-dom";
 import Menu from "./Menu";
 
@@ -39,7 +36,6 @@ const AdminApp = () => {
   React.useEffect(() => {
     load().then(setLoadResult);
   }, []);
-  console.log(loadResult);
   const history = useHistory();
 
   if (!loadResult) {
