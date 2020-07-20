@@ -6,7 +6,12 @@ import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
-import ExplorerApp, {load, type LoadResult} from "./ExplorerApp";
+import ExplorerApp, {
+  load,
+  type LoadResult,
+  type LoadSuccess,
+} from "./ExplorerApp";
+import {withRouter} from "react-router-dom";
 import Menu from "./Menu";
 
 const dataProvider = fakeDataProvider({}, true);
@@ -18,7 +23,9 @@ const theme = createMuiTheme({
   },
 });
 
-const AppLayout = (props) => <Layout {...props} menu={Menu} />;
+const AppLayout = (loadResult: LoadSuccess) => (props) => (
+  <Layout {...props} menu={withRouter(Menu(loadResult))} />
+);
 
 const customRoutes = [
   <Route key="explorer" exact path="/explorer" component={ExplorerApp} />,
@@ -32,7 +39,7 @@ const AdminApp = () => {
   React.useEffect(() => {
     load().then(setLoadResult);
   }, []);
-
+  console.log(loadResult);
   const history = useHistory();
 
   if (!loadResult) {
@@ -54,7 +61,7 @@ const AdminApp = () => {
     case "SUCCESS":
       return (
         <Admin
-          layout={AppLayout}
+          layout={AppLayout(loadResult)}
           theme={theme}
           dataProvider={dataProvider}
           history={history}
