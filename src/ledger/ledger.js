@@ -28,11 +28,10 @@ import {JsonLog} from "../util/jsonLog";
 import * as C from "../util/combo";
 
 /**
- * An GrainAccount is an address that is present in the Ledger
- * and has some associated Grain.
+ * Every Identity in the ledger has an Account.
  */
-type MutableGrainAccount = {|
-  +id: IdentityId,
+type MutableAccount = {|
+  identity: Identity,
   // The current Grain balance of this account
   balance: G.Grain,
   // The amount of Grain this account has received in past Distributions
@@ -42,8 +41,7 @@ type MutableGrainAccount = {|
   // be explicitly activated.
   active: boolean,
 |};
-
-export type GrainAccount = $ReadOnly<MutableGrainAccount>;
+export type Account = $ReadOnly<MutableAccount>;
 
 /**
  * The Ledger is an append-only auditable data store which tracks
@@ -75,76 +73,45 @@ export type GrainAccount = $ReadOnly<MutableGrainAccount>;
  */
 export class Ledger {
   _ledgerEventLog: JsonLog<LedgerEvent>;
-  _identities: Map<IdentityId, Identity>;
   _identityNameToId: Map<IdentityName, IdentityId>;
   _aliases: Map<NodeAddressT, IdentityId>;
-  _accounts: Map<IdentityId, MutableGrainAccount>;
+  _accounts: Map<IdentityId, MutableAccount>;
   _latestTimestamp: TimestampMs = -Infinity;
 
   constructor() {
     this._ledgerEventLog = new JsonLog();
-    this._identities = new Map();
     this._identityNameToId = new Map();
     this._aliases = new Map();
     this._accounts = new Map();
   }
 
   /**
-   * Return all the GrainAccounts in the ledger.
+   * Return all the Accounts in the ledger.
    */
-  accounts(): $ReadOnlyArray<GrainAccount> {
+  accounts(): $ReadOnlyArray<Account> {
     return Array.from(this._accounts.values());
   }
 
   /**
-   * Get the GrainAccount associated with a particular identity.
+   * Get the Account associated with a particular identity.
    *
    * If the identity is not in the ledger, an error is thrown.
    */
-  account(id: IdentityId): GrainAccount {
+  account(id: IdentityId): Account {
     // This wrapper ensures it's a read-only type
     return this._mutableAccount(id);
   }
 
-  _mutableAccount(id: IdentityId): MutableGrainAccount {
+  _mutableAccount(id: IdentityId): MutableAccount {
     const result = this._accounts.get(id);
     if (result == null) {
-      throw new Error(`no GrainAccount for identity: ${id}`);
+      throw new Error(`no Account for identity: ${id}`);
     }
     return result;
   }
 
   /**
-   * Return all of the Identities in the Ledger.
-   */
-  identities(): $ReadOnlyArray<Identity> {
-    return Array.from(this._identities.values());
-  }
-
-  /**
-   * Return the Identity matching given id, or undefined if no identity
-   * matches the id.
-   */
-  identityById(id: IdentityId): ?Identity {
-    return this._identities.get(id);
-  }
-
-  /**
-   * Return the Identity matching given identityName, or undefined
-   * if no identity matches the identityName.
-   *
-   * Throws if the name provided is invalid.
-   */
-  identityByIdentityName(name: string): ?Identity {
-    const identityName = identityNameFromString(name);
-    const id = this._identityNameToId.get(identityName);
-    if (id != null) {
-      return this._identities.get(id);
-    }
-  }
-
-  /**
-   * Create a Identity in the ledger.
+   * Create an account in the ledger.
    *
    * This will reserve the identity's identityName, and its innate address.
    *
@@ -183,20 +150,19 @@ export class Ledger {
 
     // Mutations! Method must not fail after this comment.
     this._identityNameToId.set(identity.name, identity.id);
-    this._identities.set(identity.id, identity);
     // Reserve this identity's own address
     this._aliases.set(identity.address, identity.id);
-    // Every identity has a corresponding GrainAccount.
+    // Every identity has a corresponding Account.
     this._accounts.set(identity.id, {
       balance: G.ZERO,
       paid: G.ZERO,
-      id: identity.id,
+      identity,
       active: false,
     });
   }
 
   /**
-   * Change a identity's identityName.
+   * Change a identity's name.
    *
    * Will fail if no identity matches the identityId, or if the identity already has that
    * name, or if the identity's new name is claimed by another identity.
@@ -211,10 +177,11 @@ export class Ledger {
     return this;
   }
   _renameIdentity({identityId, newName}: RenameIdentity) {
-    const existingIdentity = this._identities.get(identityId);
-    if (existingIdentity == null) {
+    if (!this._accounts.has(identityId)) {
       throw new Error(`renameIdentity: no identity matches id ${identityId}`);
     }
+    const account = this._mutableAccount(identityId);
+    const existingIdentity = account.identity;
     if (existingIdentity.name === newName) {
       // We error rather than silently succeed because we don't want the ledger
       // to get polluted with no-op records (no successful operations are
@@ -237,7 +204,7 @@ export class Ledger {
     // Mutations! Method must not fail after this comment.
     this._identityNameToId.delete(existingIdentity.name);
     this._identityNameToId.set(newName, identityId);
-    this._identities.set(identityId, updatedIdentity);
+    account.identity = updatedIdentity;
   }
 
   /**
@@ -260,10 +227,11 @@ export class Ledger {
     return this;
   }
   _addAlias({identityId, alias}: AddAlias) {
-    const existingIdentity = this._identities.get(identityId);
-    if (existingIdentity == null) {
-      throw new Error(`addAlias: no matching identityId ${identityId}`);
+    if (!this._accounts.has(identityId)) {
+      throw new Error(`addAlias: no identity matches id ${identityId}`);
     }
+    const account = this._mutableAccount(identityId);
+    const existingIdentity = account.identity;
     const existingAliases = existingIdentity.aliases;
     if (existingAliases.indexOf(alias) !== -1) {
       throw new Error(
@@ -279,6 +247,7 @@ export class Ledger {
       );
     }
 
+    // Mutations below; method must not fail after this line.
     this._aliases.set(alias, identityId);
     const updatedAliases = existingIdentity.aliases.slice();
     updatedAliases.push(alias);
@@ -289,8 +258,7 @@ export class Ledger {
       aliases: updatedAliases,
       address: existingIdentity.address,
     };
-
-    this._identities.set(identityId, updatedIdentity);
+    account.identity = updatedIdentity;
   }
 
   /**
@@ -300,7 +268,7 @@ export class Ledger {
    * event).
    */
   activate(id: IdentityId): Ledger {
-    if (!this._identities.has(id)) {
+    if (!this._accounts.has(id)) {
       throw new Error(`identity ${id} not found`);
     }
     const {active} = this.account(id);
@@ -326,7 +294,7 @@ export class Ledger {
    * event).
    */
   deactivate(id: IdentityId): Ledger {
-    if (!this._identities.has(id)) {
+    if (!this._accounts.has(id)) {
       throw new Error(`identity ${id} not found`);
     }
     const {active} = this.account(id);
@@ -364,7 +332,7 @@ export class Ledger {
   _distributeGrain({distribution}: DistributeGrain) {
     for (const {receipts} of distribution.allocations) {
       for (const {id, amount} of receipts) {
-        if (!this._identities.has(id)) {
+        if (!this._accounts.has(id)) {
           throw new Error(`cannot distribute; invalid id ${id}`);
         }
         if (G.lt(amount, G.ZERO)) {
@@ -415,10 +383,10 @@ export class Ledger {
     return this;
   }
   _transferGrain({from, to, amount}: TransferGrain) {
-    if (!this._identities.has(from)) {
+    if (!this._accounts.has(from)) {
       throw new Error(`invalid sender: ${from}`);
     }
-    if (!this._identities.has(to)) {
+    if (!this._accounts.has(to)) {
       throw new Error(`invalid recipient: ${to}`);
     }
     const fromAccount = this._mutableAccount(from);

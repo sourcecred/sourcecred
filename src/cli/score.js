@@ -73,7 +73,7 @@ const scoreCommand: Command = async (args, std) => {
     ledgerParser,
     () => new Ledger()
   );
-  const identities = ledger.identities();
+  const identities = ledger.accounts().map((a) => a.identity);
   const contractedGraph = weightedGraph.graph.contractNodes(
     identityContractions(identities)
   );
