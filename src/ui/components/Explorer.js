@@ -11,17 +11,17 @@ import {
   type CredNode,
   type Flow,
   type EdgeFlow,
-} from "../analysis/credView";
-import sortBy from "../util/sortBy";
+} from "../../analysis/credView";
+import sortBy from "../../util/sortBy";
 import {scaleLinear} from "d3-scale";
 import {line} from "d3-shape";
-import {type NodeAddressT} from "../core/graph";
-import {type PluginDeclaration} from "../analysis/pluginDeclaration";
-import * as NullUtil from "../util/null";
-import {type Weights, copy as weightsCopy} from "../core/weights";
-import {WeightConfig} from "./weights/WeightConfig";
-import {WeightsFileManager} from "./weights/WeightsFileManager";
-import {type TimelineCredParameters} from "../analysis/timeline/params";
+import {type NodeAddressT} from "../../core/graph";
+import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
+import * as NullUtil from "../../util/null";
+import {type Weights, copy as weightsCopy} from "../../core/weights";
+import {WeightConfig} from "../weights/WeightConfig";
+import {WeightsFileManager} from "../weights/WeightsFileManager";
+import {type TimelineCredParameters} from "../../analysis/timeline/params";
 
 export type ExplorerProps = {|
   +initialView: CredView,

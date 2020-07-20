@@ -1,14 +1,34 @@
 // @flow
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App";
+import {BrowserRouter} from "react-router-dom";
+import normalize from "../util/pathNormalize";
+import Main from "./Main";
 
 const target = document.getElementById("root");
 if (target == null) {
   throw new Error("Unable to find root element!");
 }
 
-ReactDOM.hydrate(<App />, target);
+let initialRoot: string = target.dataset.initialRoot;
+if (initialRoot == null) {
+  console.error(
+    `Initial root unset (${initialRoot}): this should not happen! ` +
+      'Falling back to ".".'
+  );
+  initialRoot = ".";
+}
+const basename = normalize(
+  // filtering the editor path segment from the basename is a temporary hack
+  // until the intiatives editor and the explorer are merged into a single webapp
+  `${window.location.pathname.replace(/admin$/, "")}/${initialRoot}/`
+);
+ReactDOM.hydrate(
+  <BrowserRouter basename={basename}>
+    <Main />
+  </BrowserRouter>,
+  target
+);
 
 // In Chrome, relative favicon URLs are recomputed at every pushState,
 // although other assets (like the `src` of an `img`) are not. We don't
