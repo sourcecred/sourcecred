@@ -6,7 +6,7 @@ import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
-import ExplorerApp from "./ExplorerApp";
+import {Explorer} from "./Explorer";
 import {load, type LoadResult, type LoadSuccess} from "../load";
 import {withRouter} from "react-router-dom";
 import Menu from "./Menu";
@@ -24,8 +24,10 @@ const AppLayout = (loadResult: LoadSuccess) => (props) => (
   <Layout {...props} menu={withRouter(Menu(loadResult))} />
 );
 
-const customRoutes = [
-  <Route key="explorer" exact path="/explorer" component={ExplorerApp} />,
+const customRoutes = (loadResult: LoadSuccess) => [
+  <Route key="explorer" exact path="/explorer">
+    <Explorer initialView={loadResult.credView} />
+  </Route>,
   <Route key="root" exact path="/">
     <Redirect to="/explorer" />
   </Route>,
@@ -61,7 +63,7 @@ const AdminApp = () => {
           theme={theme}
           dataProvider={dataProvider}
           history={history}
-          customRoutes={customRoutes}
+          customRoutes={customRoutes(loadResult)}
         >
           {/*
           This dummy resource is required to get react
