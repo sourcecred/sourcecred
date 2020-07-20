@@ -196,7 +196,14 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     const sortedNodes = sortBy(nodes, (n) => -n.credSummary.cred);
     const total = sum(nodes.map((n) => n.credSummary.cred));
     return (
-      <div style={{width: "1000px", margin: "0 auto", background: "white"}}>
+      <div
+        style={{
+          width: "1000px",
+          margin: "0 auto",
+          background: "white",
+          padding: "0 5em 5em",
+        }}
+      >
         <h1>Nodes: {view.nodes().length}</h1>
         <h1>Edges: {view.edges().length}</h1>
         {this.renderConfigurationRow()}
