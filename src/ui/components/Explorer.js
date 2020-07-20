@@ -198,7 +198,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     return (
       <div
         style={{
-          width: "1000px",
+          width: "80%",
           margin: "0 auto",
           background: "white",
           padding: "0 5em 5em",
