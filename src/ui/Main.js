@@ -10,7 +10,7 @@ export default class Main extends React.PureComponent<{||}, {||}> {
     return (
       <Switch>
         <Route exact path="/" render={(props) => <ExplorerApp {...props} />} />
-        <Route path="/editor" render={(props) => <AdminApp {...props} />} />
+        <Route path="/admin" render={(props) => <AdminApp {...props} />} />
       </Switch>
     );
   }
