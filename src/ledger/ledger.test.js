@@ -101,6 +101,7 @@ describe("ledger/ledger", () => {
         expect(l.eventLog()).toEqual([
           {
             ledgerTimestamp: 123,
+            uuid: expect.anything(),
             version: "1",
             action: {
               type: "CREATE_IDENTITY",
@@ -151,6 +152,7 @@ describe("ledger/ledger", () => {
         expect(ledger.eventLog()).toEqual([
           {
             ledgerTimestamp: 0,
+            uuid: expect.anything(),
             version: "1",
             action: {
               type: "CREATE_IDENTITY",
@@ -159,6 +161,7 @@ describe("ledger/ledger", () => {
           },
           {
             ledgerTimestamp: 1,
+            uuid: expect.anything(),
             version: "1",
             action: {
               type: "RENAME_IDENTITY",
@@ -217,6 +220,7 @@ describe("ledger/ledger", () => {
         expect(ledger.eventLog()).toEqual([
           {
             ledgerTimestamp: 0,
+            uuid: expect.anything(),
             version: "1",
             action: {
               type: "CREATE_IDENTITY",
@@ -225,6 +229,7 @@ describe("ledger/ledger", () => {
           },
           {
             ledgerTimestamp: 1,
+            uuid: expect.anything(),
             version: "1",
             action: {
               type: "ADD_ALIAS",
@@ -311,6 +316,7 @@ describe("ledger/ledger", () => {
         expect.anything(),
         {
           ledgerTimestamp: expect.anything(),
+          uuid: expect.anything(),
           action: {type: "TOGGLE_ACTIVATION", identityId: id1},
           version: "1",
         },
@@ -332,11 +338,13 @@ describe("ledger/ledger", () => {
         expect.anything(),
         {
           ledgerTimestamp: expect.anything(),
+          uuid: expect.anything(),
           action: {type: "TOGGLE_ACTIVATION", identityId: id1},
           version: "1",
         },
         {
           ledgerTimestamp: expect.anything(),
+          uuid: expect.anything(),
           action: {type: "TOGGLE_ACTIVATION", identityId: id1},
           version: "1",
         },
@@ -405,6 +413,7 @@ describe("ledger/ledger", () => {
           {
             version: "1",
             ledgerTimestamp: 2,
+            uuid: expect.anything(),
             action: {type: "DISTRIBUTE_GRAIN", distribution},
           },
         ]);
@@ -591,6 +600,7 @@ describe("ledger/ledger", () => {
           expect.anything(),
           {
             ledgerTimestamp: 5,
+            uuid: expect.anything(),
             version: "1",
             action: {
               type: "TRANSFER_GRAIN",
@@ -715,6 +725,16 @@ describe("ledger/ledger", () => {
         const thunk = () => ledger.createIdentity("USER", "foo");
         failsWithoutMutation(ledger, thunk, "invalid timestamp");
       }
+    });
+  });
+
+  describe("timestamps", () => {
+    it("ledger events have uuids", () => {
+      const ledger = new Ledger();
+      resetFakeUuid();
+      ledger.createIdentity("USER", "foo");
+      const ev = ledger.eventLog()[0];
+      expect(ev.uuid).toEqual("000000000000000000001A");
     });
   });
 

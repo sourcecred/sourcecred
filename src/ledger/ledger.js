@@ -21,7 +21,7 @@ import {
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
-import {parser as uuidParser} from "../util/uuid";
+import * as uuid from "../util/uuid";
 import {type Distribution, parser as distributionParser} from "./distribution";
 import * as G from "./grain";
 import {JsonLog} from "../util/jsonLog";
@@ -491,7 +491,12 @@ export class Ledger {
 
   _createAndProcessEvent(action: Action) {
     const ledgerTimestamp = _getTimestamp();
-    const ledgerEvent = {ledgerTimestamp, action, version: "1"};
+    const ledgerEvent = {
+      ledgerTimestamp,
+      action,
+      version: "1",
+      uuid: uuid.random(),
+    };
     this._processEvent(ledgerEvent);
   }
 
@@ -504,18 +509,13 @@ export class Ledger {
   }
 }
 
-/**
- * The log of all Actions in the Ledger.
- *
- * This is an opaque type; clients must not modify the log, since they
- * could put it in an inconsistent state.
- */
-export opaque type LedgerLog = $ReadOnlyArray<LedgerEvent>;
+export type LedgerLog = $ReadOnlyArray<LedgerEvent>;
 
-type LedgerEvent = {|
+export type LedgerEvent = {|
   +action: Action,
   +ledgerTimestamp: TimestampMs,
   +version: "1",
+  +uuid: uuid.Uuid,
 |};
 
 /**
@@ -545,7 +545,7 @@ type RenameIdentity = {|
 |};
 const renameIdentityParser: C.Parser<RenameIdentity> = C.object({
   type: C.exactly(["RENAME_IDENTITY"]),
-  identityId: uuidParser,
+  identityId: uuid.parser,
   newName: identityNameParser,
 });
 
@@ -556,7 +556,7 @@ type AddAlias = {|
 |};
 const addAliasParser: C.Parser<AddAlias> = C.object({
   type: C.exactly(["ADD_ALIAS"]),
-  identityId: uuidParser,
+  identityId: uuid.parser,
   alias: NodeAddress.parser,
 });
 
@@ -566,7 +566,7 @@ type ToggleActivation = {|
 |};
 const toggleActivationParser: C.Parser<ToggleActivation> = C.object({
   type: C.exactly(["TOGGLE_ACTIVATION"]),
-  identityId: uuidParser,
+  identityId: uuid.parser,
 });
 
 type DistributeGrain = {|
@@ -587,8 +587,8 @@ type TransferGrain = {|
 |};
 const transferGrainParser: C.Parser<TransferGrain> = C.object({
   type: C.exactly(["TRANSFER_GRAIN"]),
-  from: uuidParser,
-  to: uuidParser,
+  from: uuid.parser,
+  to: uuid.parser,
   amount: G.parser,
   memo: C.orElse([C.string, C.null_]),
 });
@@ -606,6 +606,7 @@ const ledgerEventParser: C.Parser<LedgerEvent> = C.object({
   action: actionParser,
   ledgerTimestamp: C.number,
   version: C.exactly(["1"]),
+  uuid: uuid.parser,
 });
 
 export const parser: C.Parser<Ledger> = C.fmap(
