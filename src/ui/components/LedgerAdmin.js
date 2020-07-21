@@ -15,6 +15,7 @@ export const LedgerAdmin = ({credView}: Props) => {
   const [nextIdentityName, setIdentityName] = useState<string>("");
   const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
+  const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
 
   // TODO: fix any
   function changeIdentityName(event: any) {
@@ -37,15 +38,30 @@ export const LedgerAdmin = ({credView}: Props) => {
     }
   }
 
+  function toggleIdentityActivation({id}: Identity) {
+    let nextLedger;
+    if (ledger.account(id).active) {
+      nextLedger = ledger.deactivate(id);
+      setCheckBoxSelected(false);
+    } else {
+      nextLedger = ledger.activate(id);
+      setCheckBoxSelected(true);
+    }
+    setLedger(nextLedger);
+    setCurrentIdentity(nextLedger.account(id).identity);
+  }
+
   function setActiveIdentity(identity: Identity) {
     const {name} = identity;
     if (currentIdentity && name === currentIdentity.name) {
       setIdentityName("");
       setCurrentIdentity(null);
+      setCheckBoxSelected(false);
       setPromptString("Add Identity: ");
     } else {
       setIdentityName(name);
       setCurrentIdentity(identity);
+      setCheckBoxSelected(ledger.account(identity.id).active);
       setPromptString("Update Identity: ");
     }
   }
@@ -81,6 +97,15 @@ export const LedgerAdmin = ({credView}: Props) => {
               value="New identity"
               onClick={() => setActiveIdentity(currentIdentity)}
             />
+            <br />
+            <input
+              type="checkbox"
+              id="active"
+              name="active"
+              checked={checkboxSelected}
+              onChange={() => toggleIdentityActivation(currentIdentity)}
+            />
+            <label htmlFor="active">Account is active</label>
           </>
         )}
       </form>
