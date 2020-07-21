@@ -77,6 +77,7 @@ export class Ledger {
   _aliases: Map<NodeAddressT, IdentityId>;
   _accounts: Map<IdentityId, MutableAccount>;
   _latestTimestamp: TimestampMs = -Infinity;
+  _lastDistributionTimestamp: TimestampMs = -Infinity;
 
   constructor() {
     this._ledgerEventLog = new JsonLog();
@@ -350,6 +351,9 @@ export class Ledger {
         this._allocateGrain(id, amount);
       }
     }
+    if (distribution.credTimestamp > this._lastDistributionTimestamp) {
+      this._lastDistributionTimestamp = distribution.credTimestamp;
+    }
   }
 
   /**
@@ -439,6 +443,16 @@ export class Ledger {
    */
   serialize(): string {
     return this._ledgerEventLog.toString();
+  }
+
+  /**
+   * Return the cred-effective timestamp for the last Grain distribution.
+   *
+   * We provide this because we may want to have a policy that issues one
+   * distribution for each interval in the history of the project.
+   */
+  lastDistributionTimestamp(): TimestampMs {
+    return this._lastDistributionTimestamp;
   }
 
   _processAction(action: Action) {
