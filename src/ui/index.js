@@ -1,32 +1,18 @@
 // @flow
 import React from "react";
 import ReactDOM from "react-dom";
-import {BrowserRouter} from "react-router-dom";
-import normalize from "../util/pathNormalize";
-import Main from "./Main";
+import {HashRouter} from "react-router-dom";
+import App from "./components/AdminApp";
 
 const target = document.getElementById("root");
 if (target == null) {
   throw new Error("Unable to find root element!");
 }
 
-let initialRoot: string = target.dataset.initialRoot;
-if (initialRoot == null) {
-  console.error(
-    `Initial root unset (${initialRoot}): this should not happen! ` +
-      'Falling back to ".".'
-  );
-  initialRoot = ".";
-}
-const basename = normalize(
-  // filtering the editor path segment from the basename is a temporary hack
-  // until the intiatives editor and the explorer are merged into a single webapp
-  `${window.location.pathname.replace(/admin$/, "")}/${initialRoot}/`
-);
 ReactDOM.hydrate(
-  <BrowserRouter basename={basename}>
-    <Main />
-  </BrowserRouter>,
+  <HashRouter>
+    <App />
+  </HashRouter>,
   target
 );
 
