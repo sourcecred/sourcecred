@@ -74,14 +74,14 @@ export const LedgerAdmin = ({credView}: Props) => {
         <input type="submit" value="Submit" />
       </form>
       <div>
-        {/* Warning: don't conditionally render this because it contains react hooks*/}
-        {AliasSelector({
-          currentIdentity,
-          ledger,
-          setLedger,
-          setCurrentIdentity,
-          credView,
-        })}
+        {/* Warning: don't conditionally render AliasSelector because it contains react hooks*/}
+        <AliasSelector
+          currentIdentity={currentIdentity}
+          ledger={ledger}
+          setLedger={setLedger}
+          setCurrentIdentity={setCurrentIdentity}
+          credView={credView}
+        />
       </div>
     </div>
   );
