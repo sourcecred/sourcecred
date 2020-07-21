@@ -58,7 +58,8 @@ export const LedgerAdmin = ({credView}: Props) => {
         padding: "0 5em 5em",
       }}
     >
-      <h1>Identities:</h1>
+      <h1>Identities</h1>
+      {ledger.accounts().length > 0 && <h3>click one to update it</h3>}
       <ul>{renderIdentities()}</ul>
       <h1>{promptString}</h1>
       <form onSubmit={(e) => createOrUpdateIdentity(e)}>
@@ -72,6 +73,16 @@ export const LedgerAdmin = ({credView}: Props) => {
           />
         </p>
         <input type="submit" value="Submit" />
+        {currentIdentity && (
+          <>
+            <br />
+            <input
+              type="button"
+              value="New identity"
+              onClick={() => setActiveIdentity(currentIdentity)}
+            />
+          </>
+        )}
       </form>
       <div>
         {/* Warning: don't conditionally render AliasSelector because it contains react hooks*/}
