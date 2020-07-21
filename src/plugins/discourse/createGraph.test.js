@@ -146,7 +146,7 @@ describe("plugins/discourse/createGraph", () => {
     ];
     const posts = [post1, post2, post3];
     const data = new MockData([topic], [post1, post2, post3], likes);
-    const graph = createGraph(url, data);
+    const {graph} = createGraph(url, data);
     return {graph, topic, url, posts, likes};
   }
 
@@ -233,7 +233,7 @@ describe("plugins/discourse/createGraph", () => {
       const like = likes[0];
       const data = new MockData([], [], [like]);
       const url = "https://foo";
-      const graph = createGraph(url, data);
+      const {graph} = createGraph(url, data);
       const actual = Array.from(graph.nodes())[0];
       const expected = likeNode(url, like, "[unknown post]");
       expect(actual).toEqual(expected);
@@ -251,7 +251,7 @@ describe("plugins/discourse/createGraph", () => {
       };
       const data = new MockData([], [post], []);
       const url = "https://foo";
-      const graph = createGraph(url, data);
+      const {graph} = createGraph(url, data);
       const postUrl = `${url}/t/${String(post.topicId)}/${String(
         post.indexWithinTopic
       )}`;

@@ -9,6 +9,8 @@ import {
   type NodeAddressT,
   type EdgeAddressT,
 } from "../../core/graph";
+import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
+import {type WeightedGraph} from "../../core/weightedGraph";
 import {
   type PostId,
   type TopicId,
@@ -20,6 +22,7 @@ import {type ReadRepository} from "./mirrorRepository";
 import {
   authorsPostEdgeType,
   authorsTopicEdgeType,
+  declaration,
   postRepliesEdgeType,
   topicContainsPostEdgeType,
   likesEdgeType,
@@ -165,9 +168,13 @@ export function likesEdge(serverUrl: string, like: LikeAction): Edge {
   };
 }
 
-export function createGraph(serverUrl: string, data: ReadRepository): Graph {
+export function createGraph(
+  serverUrl: string,
+  data: ReadRepository
+): WeightedGraph {
   const gc = new _GraphCreator(serverUrl, data);
-  return gc.graph;
+  const weights = weightsForDeclaration(declaration);
+  return {graph: gc.graph, weights};
 }
 
 class _GraphCreator {
