@@ -9,6 +9,7 @@ import fakeDataProvider from "ra-data-fakerest";
 import {Explorer} from "./Explorer";
 import {load, type LoadResult, type LoadSuccess} from "../load";
 import {withRouter} from "react-router-dom";
+import AppBar from "./AppBar";
 import Menu from "./Menu";
 
 const dataProvider = fakeDataProvider({}, true);
@@ -21,7 +22,7 @@ const theme = createMuiTheme({
 });
 
 const AppLayout = (loadResult: LoadSuccess) => (props) => (
-  <Layout {...props} menu={withRouter(Menu(loadResult))} />
+  <Layout {...props} appBar={AppBar} menu={withRouter(Menu(loadResult))} />
 );
 
 const customRoutes = (loadResult: LoadSuccess) => [

@@ -2,19 +2,14 @@
 import React from "react";
 import {createElement} from "react";
 import {useSelector} from "react-redux";
-import {useMediaQuery} from "@material-ui/core";
 import {MenuItemLink, getResources} from "react-admin";
 import {type LoadSuccess} from "../load";
 import TrendingUpIcon from "@material-ui/icons/TrendingUp";
 import DefaultIcon from "@material-ui/icons/ViewList";
 
-type menuProps = {|onMenuClick: Function, logout: Function|};
+type menuProps = {|onMenuClick: Function|};
 
-const Menu = ({bundledPlugins}: LoadSuccess) => ({
-  onMenuClick,
-  logout,
-}: menuProps) => {
-  const isXSmall = useMediaQuery((theme) => theme.breakpoints.down("xs"));
+const Menu = ({bundledPlugins}: LoadSuccess) => ({onMenuClick}: menuProps) => {
   const open = useSelector((state) => state.admin.ui.sidebarOpen);
   const resources = useSelector(getResources);
   return (
@@ -44,7 +39,6 @@ const Menu = ({bundledPlugins}: LoadSuccess) => ({
             />
           );
         })}
-      {isXSmall && logout}
     </>
   );
 };
