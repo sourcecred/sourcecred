@@ -17,25 +17,24 @@ export const LedgerAdmin = ({credView}: Props) => {
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
 
-  // TODO: fix any
-  function changeIdentityName(event: any) {
-    setIdentityName(event.target.value);
+  function changeIdentityName(event: SyntheticInputEvent<HTMLInputElement>) {
+    setIdentityName(event.currentTarget.value);
   }
 
-  function createOrUpdateIdentity(event: any) {
+  function createOrUpdateIdentity(
+    event: SyntheticInputEvent<HTMLInputElement>
+  ) {
     event.preventDefault();
     if (!currentIdentity) {
       const newID = ledger.createIdentity("USER", nextIdentityName);
-      setLedger(ledger);
-      setIdentityName("");
       setActiveIdentity(ledger.account(newID).identity);
     } else {
       const {id} = currentIdentity;
       ledger.renameIdentity(id, nextIdentityName);
-      setLedger(ledger);
       setIdentityName("");
       setCurrentIdentity(null);
     }
+    setLedger(ledger);
   }
 
   function toggleIdentityActivation({id}: Identity) {
@@ -88,7 +87,10 @@ export const LedgerAdmin = ({credView}: Props) => {
             onChange={(e) => changeIdentityName(e)}
           />
         </p>
-        <input type="submit" value="Submit" />
+        <input
+          type="submit"
+          value={currentIdentity ? "update username" : "create identity"}
+        />
         {currentIdentity && (
           <>
             <br />
