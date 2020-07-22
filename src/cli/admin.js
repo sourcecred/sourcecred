@@ -4,7 +4,7 @@ import type {Command} from "./command";
 
 const fs = require("fs");
 const path = require("path");
-const jsonServer = require("json-server");
+const express = require("express");
 const serveStatic = require("serve-static");
 
 function die(std, message) {
@@ -18,10 +18,9 @@ const adminCommand: Command = async (args, std) => {
   }
   const baseDir = process.cwd();
 
-  const server = jsonServer.create();
-  const middlewares = jsonServer.defaults();
+  const server = express();
 
-  server.use(middlewares);
+  server.use(express.static("."));
 
   server.listen(6006, () => {
     console.info("JSON Server is running");
