@@ -39,6 +39,13 @@ const Menu = ({bundledPlugins}: LoadSuccess) => ({onMenuClick}: menuProps) => {
             />
           );
         })}
+      <MenuItemLink
+        to="/admin"
+        primaryText="Ledger Admin"
+        leftIcon={<DefaultIcon />}
+        onClick={onMenuClick}
+        sidebarIsOpen={open}
+      />
     </>
   );
 };
