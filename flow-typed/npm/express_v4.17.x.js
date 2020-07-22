@@ -323,7 +323,7 @@ declare type express$UrlEncodedOptions = {
   ...
 }
 
-declare type express$textOptions = {
+declare type express$TextOptions = {
   defaultCharset?: string,
   inflate?: boolean,
   limit?: mixed,
@@ -351,7 +351,7 @@ declare module "express" {
     // If you try to call like a function, it will use this signature
     <Req: express$Request, Res: express$Response>(): express$Application<Req, Res>,
     json: (opts: ?JsonOptions) => express$Middleware<>,
-    text: (opts: ?express$textOptions) => express$Middleware<>,
+    text: (opts: ?express$TextOptions) => express$Middleware<>,
     // `static` property on the function
     static: <Req: express$Request, Res: express$Response>(root: string, options?: Object) => express$Middleware<Req, Res>,
     // `Router` property on the function

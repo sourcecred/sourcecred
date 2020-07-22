@@ -18,8 +18,9 @@ const adminCommand: Command = async (args, std) => {
 
   const server = express();
 
-  // for fetching the ledger.json
+  // for fetching data/ledger.json
   server.use("/data", express.static(path.join(__dirname, "data")));
+  // serve the static admin site
   server.use(express.static("."));
 
   // middleware that parses text request bodies for us
