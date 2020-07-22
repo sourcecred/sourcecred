@@ -168,6 +168,17 @@ export function multiplyFloat(grain: Grain, num: number): Grain {
 }
 
 /**
+ * Convert an integer number (in floating-point representation) into a precise
+ * Grain value.
+ */
+export function fromInteger(x: number): Grain {
+  if (!isFinite(x) || Math.floor(x) !== x) {
+    throw new Error(`not an integer: ${x}`);
+  }
+  return (BigInt(ONE) * BigInt(x)).toString();
+}
+
+/**
  * Approximately create a grain balance from a float.
  *
  * This method tries to convert the floating point `amt` into a grain

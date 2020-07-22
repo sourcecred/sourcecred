@@ -133,6 +133,28 @@ describe("src/ledger/grain", () => {
       );
     });
   });
+
+  describe("G.fromInteger", () => {
+    it("works on 0", () => {
+      expect(G.fromInteger(0)).toEqual("0");
+    });
+    it("works on 1", () => {
+      expect(G.fromInteger(1)).toEqual(G.ONE);
+    });
+    it("works on 3", () => {
+      expect(G.fromInteger(3)).toEqual("3000000000000000000");
+    });
+    it("works on -3", () => {
+      expect(G.fromInteger(-3)).toEqual("-3000000000000000000");
+    });
+    it("errors for non-integers", () => {
+      for (const bad of [1.2, NaN, Infinity, -Infinity]) {
+        const thunk = () => G.fromInteger(bad);
+        expect(thunk).toThrowError(`not an integer: ${bad}`);
+      }
+    });
+  });
+
   describe("G.fromApproximateFloat", () => {
     it("G.fromApproximateFloat(1) === G.ONE", () => {
       expect(G.fromApproximateFloat(1)).toEqual(G.ONE);
