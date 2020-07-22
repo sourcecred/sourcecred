@@ -1,6 +1,7 @@
 // @flow
 
 import type {Command} from "./command";
+import {loadInstanceConfig} from "./common";
 
 const fs = require("fs");
 const express = require("express");
@@ -11,6 +12,10 @@ function die(std, message) {
 }
 
 const adminCommand: Command = async (args, std) => {
+  const basedir = process.cwd();
+  // check to ensure service is running within an instance directory
+  await loadInstanceConfig(basedir);
+
   if (args.length !== 0) {
     return die(std, "usage: sourcecred admin");
   }
