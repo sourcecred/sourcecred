@@ -35,7 +35,7 @@ const adminCommand: Command = async (args, std) => {
   });
 
   server.listen(6006, () => {
-    console.info("Server is running");
+    console.info("admin server running: navigate to http://localhost:6006");
   });
   return 0;
 };
