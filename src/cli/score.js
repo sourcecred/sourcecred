@@ -18,7 +18,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import {
   compute,
   toJSON as credResultToJSON,
-  compressByThreshold,
+  stripOverTimeDataForNonUsers,
 } from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import * as Params from "../analysis/timeline/params";
@@ -33,11 +33,6 @@ function die(std, message) {
   std.err("fatal: " + message);
   return 1;
 }
-
-// Any cred flow that sums to less than this threshold will be filtered
-// from the time-level cred data (though we will still have a summary).
-// TODO: Make this a configurable parameter.
-const CRED_THRESHOLD = 10;
 
 const scoreCommand: Command = async (args, std) => {
   if (args.length !== 0) {
@@ -103,8 +98,10 @@ const scoreCommand: Command = async (args, std) => {
     params,
     declarations
   );
-  const compressed = compressByThreshold(credResult, CRED_THRESHOLD);
-  const credJSON = stringify(credResultToJSON(compressed));
+  // Throw away over-time data for all non-user nodes; we may not have that
+  // information available once we merge CredRank, anyway.
+  const stripped = stripOverTimeDataForNonUsers(credResult);
+  const credJSON = stringify(credResultToJSON(stripped));
   const outputPath = pathJoin(baseDir, "output", "credResult.json");
   await fs.writeFile(outputPath, credJSON);
 

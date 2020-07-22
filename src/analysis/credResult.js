@@ -6,6 +6,7 @@ import {
   toJSON as wgToJSON,
   fromJSON as wgFromJSON,
 } from "../core/weightedGraph";
+import {NodeAddress} from "../core/graph";
 import {type Compatible, toCompat, fromCompat} from "../util/compat";
 import {
   type TimelineCredParameters,
@@ -24,6 +25,7 @@ import {
   type CredData,
   computeCredData,
   compressByThreshold as _compressByThreshold,
+  compressDownToMatchingIndices,
 } from "./credData";
 import {distributionToCred} from "../core/algorithm/distributionToCred";
 
@@ -75,6 +77,24 @@ export function compressByThreshold(
     weightedGraph,
     credData: _compressByThreshold(credData, threshold),
   };
+}
+
+export function stripOverTimeDataForNonUsers(x: CredResult): CredResult {
+  const {params, plugins, weightedGraph, credData} = x;
+  const userPrefixes = []
+    .concat(...plugins.map((x) => x.userTypes))
+    .map((x) => x.prefix);
+  const nodeOrder = Array.from(weightedGraph.graph.nodes()).map(
+    (x) => x.address
+  );
+  const inclusionIndices = new Set();
+  nodeOrder.forEach((a, i) => {
+    if (userPrefixes.some((p) => NodeAddress.hasPrefix(a, p))) {
+      inclusionIndices.add(i);
+    }
+  });
+  const newCredData = compressDownToMatchingIndices(credData, inclusionIndices);
+  return {params, plugins, weightedGraph, credData: newCredData};
 }
 
 const COMPAT_INFO = {type: "sourcecred/credResult", version: "0.1.0"};

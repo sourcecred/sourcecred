@@ -203,3 +203,45 @@ export function compressByThreshold(x: CredData, threshold: number): CredData {
     intervalEnds,
   };
 }
+
+/**
+ * Keep Cred scores over time for nodes matching specified indices.
+ *
+ * Throw away all other over-time data.
+ *
+ * Very aggressive, but matches where we'll be at with initial CredRank.
+ */
+export function compressDownToMatchingIndices(
+  x: CredData,
+  inclusionIndices: Set<number>
+): CredData {
+  const {
+    nodeSummaries,
+    nodeOverTime,
+    edgeSummaries,
+    edgeOverTime,
+    intervalEnds,
+  } = x;
+
+  const newNodeOverTime = nodeOverTime.map((d, i) => {
+    if (d == null) {
+      // It might be null if the data was already compressed. The function
+      // should be idempotent. This way we can chain compression strategies
+      // later on.
+      return null;
+    }
+    if (inclusionIndices.has(i)) {
+      return {cred: d.cred, seedFlow: null, syntheticLoopFlow: null};
+    } else {
+      return null;
+    }
+  });
+  const newEdgeOverTime = edgeOverTime.map(() => null);
+  return {
+    nodeOverTime: newNodeOverTime,
+    edgeOverTime: newEdgeOverTime,
+    nodeSummaries,
+    edgeSummaries,
+    intervalEnds,
+  };
+}
