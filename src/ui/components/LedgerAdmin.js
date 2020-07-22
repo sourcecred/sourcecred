@@ -97,7 +97,7 @@ export const LedgerAdmin = ({credView, initialLedger}: Props) => {
           type="button"
           value="save ledger to disk"
           onClick={() => {
-            fetch("http://localhost:6006/data/ledger.json", {
+            fetch("data/ledger.json", {
               headers: {
                 Accept: "text/plain",
                 "Content-Type": "text/plain",
