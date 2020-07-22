@@ -337,6 +337,7 @@ describe("ledger/ledger", () => {
     it("activating an already-active account is a no-op", () => {
       function ex() {
         const ledger = ledgerWithIdentities();
+        setFakeDate(3);
         ledger.activate(id1);
         return ledger;
       }
