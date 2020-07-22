@@ -8,6 +8,7 @@ import graph from "./graph";
 import score from "./score";
 import site from "./site";
 import go from "./go";
+import admin from "./admin";
 import help from "./help";
 
 const sourcecred: Command = async (args, std) => {
@@ -32,6 +33,8 @@ const sourcecred: Command = async (args, std) => {
       return site(args.slice(1), std);
     case "go":
       return go(args.slice(1), std);
+    case "admin":
+      return admin(args.slice(1), std);
     default:
       std.err("fatal: unknown command: " + JSON.stringify(args[0]));
       std.err("fatal: run 'sourcecred help' for commands and usage");
