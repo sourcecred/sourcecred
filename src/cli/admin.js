@@ -22,14 +22,12 @@ const adminCommand: Command = async (args, std) => {
   server.use("/data", express.static(path.join(__dirname, "data")));
   server.use(express.static("."));
 
-  // middleware that parses json for us
-  server.use(express.json());
+  // middleware that parses text request bodies for us
+  server.use(express.text());
   // write posted ledger.json files to disk
   server.post("/data/ledger.json", (req, res) => {
-    console.log(req.body);
-    const stringifiedLedger = JSON.stringify(req.body);
     try {
-      fs.writeFileSync("./data/ledger.json", stringifiedLedger, "utf8");
+      fs.writeFileSync("./data/ledger.json", req.body, "utf8");
     } catch (e) {
       res.status(500).send(`error saving ledger.json file: ${e}`);
     }

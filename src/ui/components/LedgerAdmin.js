@@ -99,8 +99,8 @@ export const LedgerAdmin = ({credView, initialLedger}: Props) => {
           onClick={() => {
             fetch("http://localhost:6006/data/ledger.json", {
               headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
+                Accept: "text/plain",
+                "Content-Type": "text/plain",
               },
               method: "POST",
               body: ledger.serialize(),
