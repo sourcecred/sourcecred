@@ -91,6 +91,21 @@ export const LedgerAdmin = ({credView}: Props) => {
           type="submit"
           value={currentIdentity ? "update username" : "create identity"}
         />
+        <br />
+        <input
+          type="button"
+          value="save ledger to disk"
+          onClick={() => {
+            fetch("http://localhost:6006/data/ledger.json", {
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              method: "POST",
+              body: ledger.serialize(),
+            });
+          }}
+        />
         {currentIdentity && (
           <>
             <br />
