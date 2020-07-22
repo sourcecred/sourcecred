@@ -518,6 +518,28 @@ describe("ledger/ledger", () => {
         const thunk = () => ledger.distributeGrain(distribution);
         failsWithoutMutation(ledger, thunk, "distribute to inactive account");
       });
+      it("updates the last distribution timestamp", () => {
+        const l = new Ledger();
+        expect(l.lastDistributionTimestamp()).toEqual(-Infinity);
+        l.distributeGrain({
+          id: uuid.random(),
+          allocations: [],
+          credTimestamp: 100,
+        });
+        expect(l.lastDistributionTimestamp()).toEqual(100);
+        l.distributeGrain({
+          id: uuid.random(),
+          allocations: [],
+          credTimestamp: 50,
+        });
+        expect(l.lastDistributionTimestamp()).toEqual(100);
+        l.distributeGrain({
+          id: uuid.random(),
+          allocations: [],
+          credTimestamp: 102,
+        });
+        expect(l.lastDistributionTimestamp()).toEqual(102);
+      });
     });
 
     describe("transferGrain", () => {
