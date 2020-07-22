@@ -20,12 +20,14 @@ import {
   toJSON as credResultToJSON,
   compressByThreshold,
 } from "../analysis/credResult";
+import {CredView} from "../analysis/credView";
 import * as Params from "../analysis/timeline/params";
 import {
   contractions as identityContractions,
   declaration as identityDeclaration,
 } from "../ledger/identity";
 import {Ledger, parser as ledgerParser} from "../ledger/ledger";
+import {computeCredAccounts} from "../ledger/credAccounts";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -105,6 +107,15 @@ const scoreCommand: Command = async (args, std) => {
   const credJSON = stringify(credResultToJSON(compressed));
   const outputPath = pathJoin(baseDir, "output", "credResult.json");
   await fs.writeFile(outputPath, credJSON);
+
+  // Write out the account data for convenient usage.
+  // Note: this is an experimental format and may change or get
+  // removed in the future.
+  const credView = new CredView(credResult);
+  const credAccounts = computeCredAccounts(ledger, credView);
+  const accountsPath = pathJoin(baseDir, "output", "accounts.json");
+  await fs.writeFile(accountsPath, stringify(credAccounts));
+
   taskReporter.finish("score");
   return 0;
 };
