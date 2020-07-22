@@ -3,7 +3,6 @@
 import type {Command} from "./command";
 
 const fs = require("fs");
-const path = require("path");
 const express = require("express");
 
 function die(std, message) {
@@ -18,9 +17,8 @@ const adminCommand: Command = async (args, std) => {
 
   const server = express();
 
-  // for fetching data/ledger.json
-  server.use("/data", express.static(path.join(__dirname, "data")));
-  // serve the static admin site
+  // serve the static admin site and all subdirectories
+  // also enables GETing data/ledger.json
   server.use(express.static("."));
 
   // middleware that parses text request bodies for us
