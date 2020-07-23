@@ -126,7 +126,6 @@ export class Ledger {
     const action = {
       type: "CREATE_IDENTITY",
       identity,
-      version: "1",
     };
     this._createAndProcessEvent(action);
     return NullUtil.get(this._identityNameToId.get(identity.name));
@@ -173,7 +172,6 @@ export class Ledger {
       type: "RENAME_IDENTITY",
       identityId,
       newName: identityNameFromString(newName),
-      version: "1",
     });
     return this;
   }
@@ -223,7 +221,6 @@ export class Ledger {
       type: "ADD_ALIAS",
       identityId,
       alias,
-      version: "1",
     });
     return this;
   }
@@ -279,7 +276,6 @@ export class Ledger {
     } else {
       this._createAndProcessEvent({
         type: "TOGGLE_ACTIVATION",
-        version: "1",
         identityId: id,
       });
       return this;
@@ -302,7 +298,6 @@ export class Ledger {
     if (active) {
       this._createAndProcessEvent({
         type: "TOGGLE_ACTIVATION",
-        version: "1",
         identityId: id,
       });
       return this;
@@ -325,7 +320,6 @@ export class Ledger {
   distributeGrain(distribution: Distribution): Ledger {
     this._createAndProcessEvent({
       type: "DISTRIBUTE_GRAIN",
-      version: "1",
       distribution,
     });
     return this;
@@ -382,7 +376,6 @@ export class Ledger {
       amount,
       memo,
       type: "TRANSFER_GRAIN",
-      version: "1",
     });
     return this;
   }
@@ -538,66 +531,55 @@ type Action =
 
 type CreateIdentity = {|
   +type: "CREATE_IDENTITY",
-  +version: "1",
   +identity: Identity,
 |};
 const createIdentityParser: C.Parser<CreateIdentity> = C.object({
   type: C.exactly(["CREATE_IDENTITY"]),
-  version: C.exactly(["1"]),
   identity: identityParser,
 });
 
 type RenameIdentity = {|
   +type: "RENAME_IDENTITY",
-  +version: "1",
   +identityId: IdentityId,
   +newName: IdentityName,
 |};
 const renameIdentityParser: C.Parser<RenameIdentity> = C.object({
   type: C.exactly(["RENAME_IDENTITY"]),
-  version: C.exactly(["1"]),
   identityId: uuidParser,
   newName: identityNameParser,
 });
 
 type AddAlias = {|
   +type: "ADD_ALIAS",
-  +version: "1",
   +identityId: IdentityId,
   +alias: NodeAddressT,
 |};
 const addAliasParser: C.Parser<AddAlias> = C.object({
   type: C.exactly(["ADD_ALIAS"]),
-  version: C.exactly(["1"]),
   identityId: uuidParser,
   alias: NodeAddress.parser,
 });
 
 type ToggleActivation = {|
   +type: "TOGGLE_ACTIVATION",
-  +version: "1",
   +identityId: IdentityId,
 |};
 const toggleActivationParser: C.Parser<ToggleActivation> = C.object({
   type: C.exactly(["TOGGLE_ACTIVATION"]),
-  version: C.exactly(["1"]),
   identityId: uuidParser,
 });
 
 type DistributeGrain = {|
   +type: "DISTRIBUTE_GRAIN",
-  +version: "1",
   +distribution: Distribution,
 |};
 const distributeGrainParser: C.Parser<DistributeGrain> = C.object({
   type: C.exactly(["DISTRIBUTE_GRAIN"]),
-  version: C.exactly(["1"]),
   distribution: distributionParser,
 });
 
 type TransferGrain = {|
   +type: "TRANSFER_GRAIN",
-  +version: "1",
   +from: IdentityId,
   +to: IdentityId,
   +amount: G.Grain,
@@ -605,7 +587,6 @@ type TransferGrain = {|
 |};
 const transferGrainParser: C.Parser<TransferGrain> = C.object({
   type: C.exactly(["TRANSFER_GRAIN"]),
-  version: C.exactly(["1"]),
   from: uuidParser,
   to: uuidParser,
   amount: G.parser,
