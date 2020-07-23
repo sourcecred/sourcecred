@@ -119,7 +119,7 @@ export function format(
   // If we have more than 1000 grain, then we will insert commas for
   // readability
   const integerDigits = digits.length - DECIMAL_PRECISION;
-  const numCommasToInsert = Math.floor(integerDigits / 3);
+  const numCommasToInsert = Math.floor((integerDigits - 1) / 3);
   for (let i = 0; i < numCommasToInsert; i++) {
     // Count digits backwards from the last integer.
     // Since we are moving from high index to low, we don't need to adjust for

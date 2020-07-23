@@ -14,11 +14,12 @@ describe("src/ledger/grain", () => {
       expect(G.format(G.fromApproximateFloat(1.5))).toEqual("1g");
       expect(G.format(G.fromApproximateFloat(42))).toEqual("42g");
     });
-    it("correctly G.adds comma G.formatting for large numbers", () => {
+    it("correctly adds comma formatting for large numbers", () => {
       expect(G.format(G.fromApproximateFloat(1337))).toEqual("1,337g");
       expect(G.format(G.fromApproximateFloat(1337), 1)).toEqual("1,337.0g");
       expect(G.format(G.fromApproximateFloat(1337.11))).toEqual("1,337g");
       expect(G.format(G.fromApproximateFloat(1337.11), 1)).toEqual("1,337.1g");
+      expect(G.format(G.fromInteger(125000))).toEqual("125,000g");
       expect(G.format(G.fromApproximateFloat(1337042.42), 0)).toEqual(
         "1,337,042g"
       );
