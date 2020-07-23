@@ -6,7 +6,6 @@ import globby from "globby";
 import {type URL} from "../../core/references";
 import {type NodeAddressT} from "../../core/graph";
 import * as Timestamp from "../../util/timestamp";
-import {compatReader} from "../../backend/compatIO";
 import {normalizeEdgeSpec} from "./edgeSpec";
 import {
   type ReferenceDetector,
@@ -19,10 +18,11 @@ import {
 } from "./initiative";
 import {
   type InitiativeFile,
-  fromJSON,
   initiativeFileURL,
   initiativeFileId,
 } from "./initiativeFile";
+import {loadJson} from "../../util/disk";
+import {parser as initiativeParser} from "./parseInitiative";
 
 /**
  * Represents an Initiatives directory.
@@ -108,7 +108,6 @@ export async function _readFiles(
   fileNames: $ReadOnlyArray<string>
 ): Promise<NamesToInitiativeFiles> {
   const map: NamesToInitiativeFiles = new Map();
-  const readInitiativeFile = compatReader(fromJSON, "Initiative");
 
   // Sorting to be careful about predictability.
   // The eventual output of $ReadOnlyArray<Initiative> is ordered, so we'll see
@@ -116,7 +115,7 @@ export async function _readFiles(
   const sortedFileNames = [...fileNames].sort();
   for (const fileName of sortedFileNames) {
     const filePath = path.join(localPath, fileName);
-    const initiativeFile = await readInitiativeFile(filePath);
+    const initiativeFile = await loadJson(filePath, initiativeParser);
     map.set(fileName, initiativeFile);
   }
 

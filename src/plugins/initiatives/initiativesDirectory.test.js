@@ -156,7 +156,7 @@ describe("plugins/initiatives/initiativesDirectory", () => {
       const p = _readFiles(localPath, fileNames);
 
       // Then
-      await expect(p).rejects.toThrow("Could not find Initiative file at:");
+      await expect(p).rejects.toThrow("ENOENT: no such file or directory");
     });
 
     it("should throw when directory is not a directory", async () => {
@@ -173,7 +173,7 @@ describe("plugins/initiatives/initiativesDirectory", () => {
       const p = _readFiles(localPath, fileNames);
 
       // Then
-      await expect(p).rejects.toThrow("Could not find Initiative file at:");
+      await expect(p).rejects.toThrow("ENOTDIR: not a directory");
     });
   });
 

@@ -67,6 +67,7 @@ Map {
           "contributors": Array [
             "https://foo.bar/C/contrib-user",
           ],
+          "timestampIso": "2020-01-01T22:01:57.700Z",
           "title": "Add test contrib",
           "weight": 10,
         },
@@ -89,6 +90,7 @@ Map {
           "contributors": Array [
             "https://foo.bar/C/ref-user",
           ],
+          "timestampIso": "2020-01-03T22:01:57.700Z",
           "title": "Add test reference",
         },
       ],
@@ -210,7 +212,7 @@ exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an
             \\"https://foo.bar/C/contrib-user\\"
           ],
           \\"key\\": \\"add-test-contrib\\",
-          \\"timestampMs\\": 1578520917733,
+          \\"timestampMs\\": 1577916117700,
           \\"title\\": \\"Add test contrib\\",
           \\"weight\\": 10
         }
@@ -245,7 +247,7 @@ exports[`plugins/initiatives/initiativesDirectory loadDirectory should handle an
             \\"https://foo.bar/C/ref-user\\"
           ],
           \\"key\\": \\"add-test-reference\\",
-          \\"timestampMs\\": 1578520917733,
+          \\"timestampMs\\": 1578088917700,
           \\"title\\": \\"Add test reference\\",
           \\"weight\\": null
         }
