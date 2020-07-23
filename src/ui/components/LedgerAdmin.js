@@ -8,10 +8,11 @@ import {AliasSelector} from "./AliasSelector";
 
 export type Props = {|
   +credView: CredView,
+  +initialLedger: Ledger,
 |};
 
-export const LedgerAdmin = ({credView}: Props) => {
-  const [ledger, setLedger] = useState<Ledger>(new Ledger());
+export const LedgerAdmin = ({credView, initialLedger}: Props) => {
+  const [ledger, setLedger] = useState<Ledger>(initialLedger);
   const [nextIdentityName, setIdentityName] = useState<string>("");
   const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
@@ -90,6 +91,21 @@ export const LedgerAdmin = ({credView}: Props) => {
         <input
           type="submit"
           value={currentIdentity ? "update username" : "create identity"}
+        />
+        <br />
+        <input
+          type="button"
+          value="save ledger to disk"
+          onClick={() => {
+            fetch("data/ledger.json", {
+              headers: {
+                Accept: "text/plain",
+                "Content-Type": "text/plain",
+              },
+              method: "POST",
+              body: ledger.serialize(),
+            });
+          }}
         />
         {currentIdentity && (
           <>

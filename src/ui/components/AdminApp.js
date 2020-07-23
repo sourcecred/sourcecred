@@ -34,7 +34,10 @@ const customRoutes = (loadResult: LoadSuccess) => [
     <Redirect to="/explorer" />
   </Route>,
   <Route key="admin" exact path="/admin">
-    <LedgerAdmin credView={loadResult.credView} />
+    <LedgerAdmin
+      credView={loadResult.credView}
+      initialLedger={loadResult.ledger}
+    />
   </Route>,
 ];
 
