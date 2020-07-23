@@ -86,7 +86,6 @@ describe("ledger/ledger", () => {
             action: {
               type: "CREATE_IDENTITY",
               identity,
-              version: "1",
             },
           },
         ]);
@@ -106,7 +105,7 @@ describe("ledger/ledger", () => {
         const ledger = new Ledger();
         let identity = newIdentity("USER", "foo");
         identity = {...identity, aliases: [NodeAddress.empty]};
-        const action = {type: "CREATE_IDENTITY", identity, version: "1"};
+        const action = {type: "CREATE_IDENTITY", identity};
         const thunk = () => ledger._createIdentity(action);
         expect(thunk).toThrowError("new identities may not have aliases");
       });
@@ -136,7 +135,6 @@ describe("ledger/ledger", () => {
             version: "1",
             action: {
               type: "CREATE_IDENTITY",
-              version: "1",
               identity: initialIdentity,
             },
           },
@@ -145,7 +143,6 @@ describe("ledger/ledger", () => {
             version: "1",
             action: {
               type: "RENAME_IDENTITY",
-              version: "1",
               newName: "bar",
               identityId: id,
             },
@@ -204,7 +201,6 @@ describe("ledger/ledger", () => {
             version: "1",
             action: {
               type: "CREATE_IDENTITY",
-              version: "1",
               identity: expect.anything(),
             },
           },
@@ -213,7 +209,6 @@ describe("ledger/ledger", () => {
             version: "1",
             action: {
               type: "ADD_ALIAS",
-              version: "1",
               identityId: id,
               alias: a1,
             },
@@ -297,7 +292,7 @@ describe("ledger/ledger", () => {
         expect.anything(),
         {
           ledgerTimestamp: expect.anything(),
-          action: {type: "TOGGLE_ACTIVATION", version: "1", identityId: id1},
+          action: {type: "TOGGLE_ACTIVATION", identityId: id1},
           version: "1",
         },
       ]);
@@ -318,12 +313,12 @@ describe("ledger/ledger", () => {
         expect.anything(),
         {
           ledgerTimestamp: expect.anything(),
-          action: {type: "TOGGLE_ACTIVATION", version: "1", identityId: id1},
+          action: {type: "TOGGLE_ACTIVATION", identityId: id1},
           version: "1",
         },
         {
           ledgerTimestamp: expect.anything(),
-          action: {type: "TOGGLE_ACTIVATION", version: "1", identityId: id1},
+          action: {type: "TOGGLE_ACTIVATION", identityId: id1},
           version: "1",
         },
       ]);
@@ -391,7 +386,7 @@ describe("ledger/ledger", () => {
           {
             version: "1",
             ledgerTimestamp: 2,
-            action: {type: "DISTRIBUTE_GRAIN", version: "1", distribution},
+            action: {type: "DISTRIBUTE_GRAIN", distribution},
           },
         ]);
       });
@@ -580,7 +575,6 @@ describe("ledger/ledger", () => {
             version: "1",
             action: {
               type: "TRANSFER_GRAIN",
-              version: "1",
               amount: "80",
               memo: "test",
               from: id1,
