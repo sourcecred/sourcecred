@@ -17,7 +17,6 @@
 /dist
 
 # misc
-data/
 .token
 .env.local
 .env.development.local
