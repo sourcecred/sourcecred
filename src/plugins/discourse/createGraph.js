@@ -67,7 +67,7 @@ export function likeNode(
   postDescription: string
 ): Node {
   const address = likeAddress(serverUrl, like);
-  const description = `❤️ by ${like.username} on post ${postDescription}`;
+  const description = `❤️ by ${like.username} on ${postDescription}`;
   return {timestampMs: like.timestampMs, address, description};
 }
 
@@ -203,7 +203,7 @@ class _GraphCreator {
       const url = `${this.serverUrl}/t/${String(post.topicId)}/${String(
         post.indexWithinTopic
       )}`;
-      const description = `[post #${post.indexWithinTopic} on ${topicTitle}](${url})`;
+      const description = `[#${post.indexWithinTopic} on ${topicTitle}](${url})`;
       this.addPost(post, description);
       this.postIdToDescription.set(post.id, description);
     }

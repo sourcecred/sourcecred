@@ -189,7 +189,7 @@ describe("plugins/discourse/createGraph", () => {
 
     it("for posts", () => {
       const {url, posts} = example();
-      const description = "[post #2 on first topic](https://url.com/t/1/2)";
+      const description = "[#2 on first topic](https://url.com/t/1/2)";
       const node = postNode(url, posts[1], description);
       expect(node.description).toEqual(description);
       expect(node.timestampMs).toEqual(posts[1].timestampMs);
@@ -209,10 +209,10 @@ describe("plugins/discourse/createGraph", () => {
       const like = likes[0];
       const post = posts[1];
       expect(like.postId).toEqual(post.id);
-      const postDescription = `[post #2 on first topic](https://url.com/t/1/2)`;
+      const postDescription = `[#2 on first topic](https://url.com/t/1/2)`;
       const node = likeNode(url, like, postDescription);
       expect(node.description).toMatchInlineSnapshot(
-        `"❤️ by mzargham on post [post #2 on first topic](https://url.com/t/1/2)"`
+        `"❤️ by mzargham on [#2 on first topic](https://url.com/t/1/2)"`
       );
       expect(node.timestampMs).toEqual(like.timestampMs);
       expect(NodeAddress.toParts(node.address)).toMatchInlineSnapshot(`
@@ -255,7 +255,7 @@ describe("plugins/discourse/createGraph", () => {
       const postUrl = `${url}/t/${String(post.topicId)}/${String(
         post.indexWithinTopic
       )}`;
-      const expectedDescription = `[post #${post.indexWithinTopic} on [unknown topic]](${postUrl})`;
+      const expectedDescription = `[#${post.indexWithinTopic} on [unknown topic]](${postUrl})`;
       const actual = Array.from(graph.nodes({prefix: postNodeType.prefix}))[0];
       const expected = postNode(url, post, expectedDescription);
       expect(actual).toEqual(expected);
@@ -412,7 +412,7 @@ describe("plugins/discourse/createGraph", () => {
         const postUrl = `${url}/t/${String(x.topicId)}/${String(
           x.indexWithinTopic
         )}`;
-        const description = `[post #${x.indexWithinTopic} on ${topic.title}](${postUrl})`;
+        const description = `[#${x.indexWithinTopic} on ${topic.title}](${postUrl})`;
         return postNode(url, x, description);
       });
       expectNodesOfType(expected, postNodeType);
@@ -424,7 +424,7 @@ describe("plugins/discourse/createGraph", () => {
         const postUrl = `${url}/t/${String(post.topicId)}/${String(
           post.indexWithinTopic
         )}`;
-        const description = `[post #${post.indexWithinTopic} on ${topic.title}](${postUrl})`;
+        const description = `[#${post.indexWithinTopic} on ${topic.title}](${postUrl})`;
         postIdToDescription.set(post.id, description);
       }
       const expected = likes.map((x) =>
