@@ -89,6 +89,26 @@ async function makeConfig(
           "/config/",
           express.static(path.join(developmentInstancePath, "config"))
         );
+        app.use(
+          "/data/",
+          express.static(path.join(developmentInstancePath, "data"))
+        );
+
+        // configure the dev server to support writing the ledger to disk
+        app.use(express.text());
+        const ledgerPath = path.join(
+          developmentInstancePath,
+          "data/ledger.json"
+        );
+
+        app.post("/data/ledger.json", (req, res) => {
+          try {
+            fs.writeFileSync(ledgerPath, req.body, "utf8");
+          } catch (e) {
+            res.status(500).send(`error saving ledger.json file: ${e}`);
+          }
+          res.status(201).end();
+        });
       },
     },
     output: {
