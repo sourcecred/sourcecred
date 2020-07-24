@@ -8,6 +8,7 @@ import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
 import {Explorer} from "./Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
+import {GrainAccountOverview} from "./GrainAccountOverview";
 import {load, type LoadResult, type LoadSuccess} from "../load";
 import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
@@ -32,6 +33,12 @@ const customRoutes = (loadResult: LoadSuccess) => [
   </Route>,
   <Route key="root" exact path="/">
     <Redirect to="/explorer" />
+  </Route>,
+  <Route key="grain" exact path="/grain">
+    <GrainAccountOverview
+      credView={loadResult.credView}
+      ledger={loadResult.ledger}
+    />
   </Route>,
   <Route key="admin" exact path="/admin">
     <LedgerAdmin
