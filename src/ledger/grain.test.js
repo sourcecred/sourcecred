@@ -156,7 +156,7 @@ describe("src/ledger/grain", () => {
     });
   });
 
-  describe.only("G.fromFloatString", () => {
+  describe("G.fromFloatString", () => {
     it("converts human-readable floats to grain", () => {
       expect(G.fromFloatString("1.25")).toEqual(G.multiplyFloat(G.ONE, 1.25));
       expect(G.fromFloatString("0.252525")).toEqual(
