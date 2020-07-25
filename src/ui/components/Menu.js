@@ -6,6 +6,7 @@ import {MenuItemLink, getResources} from "react-admin";
 import {type LoadSuccess} from "../load";
 import TrendingUpIcon from "@material-ui/icons/TrendingUp";
 import DefaultIcon from "@material-ui/icons/ViewList";
+import TransformIcon from "@material-ui/icons/Transform";
 
 type menuProps = {|onMenuClick: Function|};
 
@@ -50,6 +51,13 @@ const Menu = ({bundledPlugins}: LoadSuccess) => ({onMenuClick}: menuProps) => {
         to="/admin"
         primaryText="Ledger Admin"
         leftIcon={<DefaultIcon />}
+        onClick={onMenuClick}
+        sidebarIsOpen={open}
+      />
+      <MenuItemLink
+        to="/transfer"
+        primaryText="Transfer Grain"
+        leftIcon={<TransformIcon />}
         onClick={onMenuClick}
         sidebarIsOpen={open}
       />

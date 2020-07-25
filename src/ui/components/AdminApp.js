@@ -9,6 +9,7 @@ import fakeDataProvider from "ra-data-fakerest";
 import {Explorer} from "./Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {GrainAccountOverview} from "./GrainAccountOverview";
+import {TransferGrain} from "./TransferGrain";
 import {load, type LoadResult, type LoadSuccess} from "../load";
 import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
@@ -45,6 +46,9 @@ const customRoutes = (loadResult: LoadSuccess) => [
       credView={loadResult.credView}
       initialLedger={loadResult.ledger}
     />
+  </Route>,
+  <Route key="transfer" exact path="/transfer">
+    <TransferGrain initialLedger={loadResult.ledger} />
   </Route>,
 ];
 
