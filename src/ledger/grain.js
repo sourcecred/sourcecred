@@ -179,6 +179,45 @@ export function fromInteger(x: number): Grain {
 }
 
 /**
+ * Accept human-readable numbers strings and convert them to precise grain amounts
+ *
+ * This is most useful for processing form input values before passing them
+ * into the ledger, since all form fields return strings
+ *
+ * In this case, a "float string" is a string that returns a number value
+ * when passed into `parseFloat`
+ *
+ * The reason to circumvent any floating point values is to avoid losses in
+ * precision. By modifying the string directly in a predictable pattern, we can
+ * convert uer-generated floating point values to grain at full fidelity, and avoid
+ * any fuzzy floating point arithmetic
+ *
+ * The tradeoff here is around versatility. Values with more decimals than the
+ * allowable precision will yield an error when passed in.
+ */
+export function fromFloatString(
+  x: string,
+  precision: number = DECIMAL_PRECISION
+): Grain {
+  if (typeof x !== "string") {
+    throw new Error(`not a string: ${x}`);
+  }
+  if (!(isFinite(x) && x.trim())) {
+    throw new Error(`input not a valid number: ${x}`);
+  }
+
+  const [whole = "", dec = ""] = x.split(".");
+  if (dec.length > precision) {
+    throw new Error(
+      `Provided decimals ${dec.length} exceed allowable precision ${precision}`
+    );
+  }
+  const paddedDecimal = dec.padEnd(precision, "0");
+
+  return BigInt(`${whole}${paddedDecimal}`).toString();
+}
+
+/**
  * Approximately create a grain balance from a float.
  *
  * This method tries to convert the floating point `amt` into a grain

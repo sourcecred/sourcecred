@@ -90,7 +90,7 @@ describe("src/ledger/grain", () => {
     });
   });
 
-  describe("conversion from strings", () => {
+  describe("G.fromString", () => {
     it("fromString works on valid Grain values", () => {
       expect(G.fromString(G.ONE)).toEqual(G.ONE);
     });
@@ -152,6 +152,55 @@ describe("src/ledger/grain", () => {
       for (const bad of [1.2, NaN, Infinity, -Infinity]) {
         const thunk = () => G.fromInteger(bad);
         expect(thunk).toThrowError(`not an integer: ${bad}`);
+      }
+    });
+  });
+
+  describe("G.fromFloatString", () => {
+    it("converts human-readable floats to grain", () => {
+      expect(G.fromFloatString("1.25")).toEqual(G.multiplyFloat(G.ONE, 1.25));
+      expect(G.fromFloatString("0.252525")).toEqual(
+        G.multiplyFloat(G.ONE, 0.252525)
+      );
+      expect(G.fromFloatString((55e5).toString())).toEqual(G.fromInteger(55e5));
+      expect(G.fromFloatString("5798.453463776456463539")).toEqual(
+        "5798453463776456463539"
+      );
+      expect(G.fromFloatString("5798.45346377645646353")).toEqual(
+        "5798453463776456463530"
+      );
+    });
+    it("handles falsy numbers correctly", () => {
+      expect(G.fromFloatString("0")).toEqual(G.fromInteger(0));
+    });
+    it("handles negative values", () => {
+      expect(G.fromFloatString("-5")).toEqual(G.fromInteger(-5));
+      expect(G.fromFloatString("-3.625")).toEqual(
+        G.multiplyFloat(G.ONE, -3.625)
+      );
+    });
+    it("rejects non-floatstring inputs", () => {
+      for (const bad of [9, 1.2, NaN, Infinity, -Infinity]) {
+        //$FlowIgnore intentional invalid inputs
+        const thunk = () => G.fromFloatString(bad);
+        expect(thunk).toThrowError(`not a string: ${bad}`);
+      }
+      for (const bad of ["a", "Bob", " ", "", "Infinity", "-Infinity"]) {
+        const thunk = () => G.fromFloatString(bad);
+        expect(thunk).toThrowError(`not a valid number: ${bad}`);
+      }
+    });
+    it("rejects excessive precision", () => {
+      for (const bad of [
+        ["0.125", 2],
+        ["0.575645643453", 11],
+        ["5798.4534637764564635439", G.DECIMAL_PRECISION],
+      ]) {
+        const thunk = () => G.fromFloatString(...bad);
+        const [, dec = ""] = bad[0].split(".");
+        expect(thunk).toThrowError(
+          `Provided decimals ${dec.length} exceed allowable precision ${bad[1]}`
+        );
       }
     });
   });
