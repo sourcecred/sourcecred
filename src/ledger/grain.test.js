@@ -173,6 +173,12 @@ describe("src/ledger/grain", () => {
     it("handles falsy numbers correctly", () => {
       expect(G.fromFloatString("0")).toEqual(G.fromInteger(0));
     });
+    it("handles negative values", () => {
+      expect(G.fromFloatString("-5")).toEqual(G.fromInteger(-5));
+      expect(G.fromFloatString("-3.625")).toEqual(
+        G.multiplyFloat(G.ONE, -3.625)
+      );
+    });
     it("rejects non-floatstring inputs", () => {
       for (const bad of [9, 1.2, NaN, Infinity, -Infinity]) {
         //$FlowIgnore intentional invalid inputs
