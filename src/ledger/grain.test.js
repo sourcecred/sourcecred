@@ -179,7 +179,7 @@ describe("src/ledger/grain", () => {
         const thunk = () => G.fromFloatString(bad);
         expect(thunk).toThrowError(`not a string: ${bad}`);
       }
-      for (const bad of ["a", "Bob", " ", ""]) {
+      for (const bad of ["a", "Bob", " ", "", "Infinity", "-Infinity"]) {
         const thunk = () => G.fromFloatString(bad);
         expect(thunk).toThrowError(`not a valid number: ${bad}`);
       }

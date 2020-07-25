@@ -202,7 +202,7 @@ export function fromFloatString(
   if (typeof x !== "string") {
     throw new Error(`not a string: ${x}`);
   }
-  if (Number.isNaN(parseFloat(x))) {
+  if (!(isFinite(x) && x.trim())) {
     throw new Error(`input not a valid number: ${x}`);
   }
 
