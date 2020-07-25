@@ -17,23 +17,14 @@ import {loadDirectory as _loadDirectory} from "./initiativesDirectory";
 import * as Weights from "../../core/weights";
 
 async function loadConfig(
-  dirContext: PluginDirectoryContext
+  ctx: PluginDirectoryContext
 ): Promise<InitiativesConfig> {
-  const dirname = dirContext.configDirectory();
-  const path = pathJoin(dirname, "config.json");
+  const path = pathJoin(ctx.configDirectory(), "config.json");
   return loadJson(path, parser);
 }
 
-const DIRECTORY_ENV_VAR_NAME = "SOURCECRED_INITIATIVES_DIRECTORY";
-
-function getDirectoryFromEnv(): string {
-  const rawDir = process.env[DIRECTORY_ENV_VAR_NAME] || "initiatives";
-  if (rawDir == null) {
-    throw new Error(
-      `No initiatives directory provided: set ${DIRECTORY_ENV_VAR_NAME}`
-    );
-  }
-  return rawDir;
+function getDirectoryFromContext(ctx: PluginDirectoryContext): string {
+  return pathJoin(ctx.configDirectory(), "initiatives");
 }
 
 export class InitiativesPlugin implements Plugin {
@@ -51,7 +42,7 @@ export class InitiativesPlugin implements Plugin {
     rd: ReferenceDetector
   ): Promise<WeightedGraph> {
     const {remoteUrl} = await loadConfig(ctx);
-    const localPath = getDirectoryFromEnv();
+    const localPath = getDirectoryFromContext(ctx);
 
     const {initiatives} = await _loadDirectory({
       remoteUrl,
@@ -70,7 +61,7 @@ export class InitiativesPlugin implements Plugin {
     ctx: PluginDirectoryContext
   ): Promise<ReferenceDetector> {
     const {remoteUrl} = await loadConfig(ctx);
-    const localPath = getDirectoryFromEnv();
+    const localPath = getDirectoryFromContext(ctx);
 
     const {referenceDetector} = await _loadDirectory({
       remoteUrl,
