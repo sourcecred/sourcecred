@@ -3,7 +3,7 @@
 import type {Database} from "better-sqlite3";
 import stringify from "json-stable-stringify";
 import dedent from "../../util/dedent";
-import type {TopicId, PostId, Topic, Post, LikeAction} from "./fetch";
+import type {TopicId, PostId, Topic, Post, LikeAction, User} from "./fetch";
 import {type TimestampMs} from "../../util/timestamp";
 
 // The version should be bumped any time the database schema is changed,
@@ -41,7 +41,7 @@ export interface ReadRepository {
    *
    * The order is unspecified.
    */
-  users(): $ReadOnlyArray<string>;
+  users(): $ReadOnlyArray<User>;
 
   /**
    * Gets all of the like actions in the history.
@@ -84,6 +84,8 @@ export type AddResult = {|
 // Read-write interface the mirror uses internally.
 export interface MirrorRepository extends ReadRepository {
   addLike(like: LikeAction): AddResult;
+
+  addUser(user: User): AddResult;
 
   /**
    * For the given topic ID, retrieves the bumpedMs value.
@@ -190,7 +192,11 @@ export class SqliteMirrorRepository
           key TEXT PRIMARY KEY,
           timestamp_ms INTEGER NOT NULL
         )`,
-      "CREATE TABLE users (username TEXT PRIMARY KEY)",
+      dedent`\
+        CREATE TABLE users (
+          username TEXT PRIMARY KEY,
+          trust_level INTEGER
+        )`,
       dedent`\
         CREATE TABLE topics (
             id INTEGER PRIMARY KEY,
@@ -208,6 +214,7 @@ export class SqliteMirrorRepository
             timestamp_ms INTEGER NOT NULL,
             author_username TEXT NOT NULL,
             topic_id INTEGER NOT NULL,
+            trust_level INTEGER,
             index_within_topic INTEGER NOT NULL,
             reply_to_post_index INTEGER,
             cooked TEXT NOT NULL,
@@ -220,6 +227,7 @@ export class SqliteMirrorRepository
           username TEXT NOT NULL,
           post_id INTEGER NOT NULL,
           timestamp_ms INTEGER NOT NULL,
+          trust_level INTEGER,
           CONSTRAINT username_post PRIMARY KEY (username, post_id),
           FOREIGN KEY(post_id) REFERENCES posts(id),
           FOREIGN KEY(username) REFERENCES users(username)
@@ -309,6 +317,7 @@ export class SqliteMirrorRepository
           timestamp_ms,
           author_username,
           topic_id,
+          trust_level,
           index_within_topic,
           reply_to_post_index,
           cooked
@@ -320,14 +329,37 @@ export class SqliteMirrorRepository
         timestampMs: x.timestamp_ms,
         authorUsername: x.author_username,
         topicId: x.topic_id,
+        trustLevel: x.trust_level,
         indexWithinTopic: x.index_within_topic,
         replyToPostIndex: x.reply_to_post_index,
         cooked: x.cooked,
       }));
   }
 
-  users(): $ReadOnlyArray<string> {
-    return this._db.prepare("SELECT username FROM users").pluck().all();
+  users(): $ReadOnlyArray<User> {
+    return this._db
+      .prepare("SELECT username, trust_level FROM users")
+      .all()
+      .map((x) => ({
+        username: x.username,
+        trustLevel: x.trust_level,
+      }));
+  }
+
+  findUserbyUsername(username: string): ?User {
+    return this._db
+      .prepare(
+        dedent`\
+          SELECT username, trust_level
+          FROM users
+          WHERE username = :username COLLATE NOCASE
+        `
+      )
+      .get({username})
+      .map((x) => ({
+        username: x.username,
+        trustLevel: x.trust_level,
+      }));
   }
 
   findUsername(username: string): ?string {
@@ -345,12 +377,13 @@ export class SqliteMirrorRepository
 
   likes(): $ReadOnlyArray<LikeAction> {
     return this._db
-      .prepare("SELECT post_id, username, timestamp_ms FROM likes")
+      .prepare("SELECT post_id, username, timestamp_ms, trust_level FROM likes")
       .all()
       .map((x) => ({
         postId: x.post_id,
         timestampMs: x.timestamp_ms,
         username: x.username,
+        trustLevel: x.trust_level,
       }));
   }
 
@@ -387,18 +420,20 @@ export class SqliteMirrorRepository
   }
 
   addLike(like: LikeAction): AddResult {
-    this.addUser(like.username);
+    this.addUser({username: like.username, trustLevel: like.trustLevel});
     const res = this._db
       .prepare(
         dedent`\
           INSERT OR IGNORE INTO likes (
               post_id,
               timestamp_ms,
-              username
+              username,
+              trust_level
           ) VALUES (
               :post_id,
               :timestamp_ms,
-              :username
+              :username,
+              :trust_level
           )
         `
       )
@@ -406,6 +441,7 @@ export class SqliteMirrorRepository
         post_id: like.postId,
         timestamp_ms: like.timestampMs,
         username: like.username,
+        trust_level: like.trustLevel,
       });
     return toAddResult(res);
   }
@@ -444,7 +480,10 @@ export class SqliteMirrorRepository
   }
 
   addPost(post: Post): AddResult {
-    this.addUser(post.authorUsername);
+    this.addUser({
+      username: post.authorUsername,
+      trustLevel: post.trustLevel,
+    });
     const res = this._db
       .prepare(
         dedent`\
@@ -453,6 +492,7 @@ export class SqliteMirrorRepository
               timestamp_ms,
               author_username,
               topic_id,
+              trust_level,
               index_within_topic,
               reply_to_post_index,
               cooked
@@ -461,6 +501,7 @@ export class SqliteMirrorRepository
               :timestamp_ms,
               :author_username,
               :topic_id,
+              :trust_level,
               :index_within_topic,
               :reply_to_post_index,
               :cooked
@@ -473,6 +514,7 @@ export class SqliteMirrorRepository
         reply_to_post_index: post.replyToPostIndex,
         index_within_topic: post.indexWithinTopic,
         topic_id: post.topicId,
+        trust_level: post.trustLevel,
         author_username: post.authorUsername,
         cooked: post.cooked,
       });
@@ -480,7 +522,7 @@ export class SqliteMirrorRepository
   }
 
   addTopic(topic: Topic): AddResult {
-    this.addUser(topic.authorUsername);
+    this.addUser({username: topic.authorUsername, trustLevel: null});
     const res = this._db
       .prepare(
         dedent`\
@@ -512,10 +554,20 @@ export class SqliteMirrorRepository
     return toAddResult(res);
   }
 
-  addUser(username: string): AddResult {
+  addUser(user: User): AddResult {
+    const {trustLevel, username} = user;
     const res = this._db
-      .prepare("INSERT OR IGNORE INTO users (username) VALUES (?)")
-      .run(username);
+      .prepare(
+        dedent`\
+          INSERT OR REPLACE INTO users (
+            username,
+            trust_level
+          ) VALUES (
+            :username,
+            :trust_level
+          )`
+      )
+      .run({username, trust_level: trustLevel});
     return toAddResult(res);
   }
 }

@@ -3,7 +3,7 @@
 import sortBy from "../../util/sortBy";
 import * as NullUtil from "../../util/null";
 import type {ReadRepository} from "./mirrorRepository";
-import type {Topic, Post, PostId, TopicId, LikeAction} from "./fetch";
+import type {Topic, Post, PostId, TopicId, LikeAction, User} from "./fetch";
 import {NodeAddress, EdgeAddress, type Node, type Edge} from "../../core/graph";
 import {
   createGraph,
@@ -55,16 +55,17 @@ describe("plugins/discourse/createGraph", () => {
     posts(): $ReadOnlyArray<Post> {
       return this._posts;
     }
-    users(): $ReadOnlyArray<string> {
-      const users = new Set();
+    users(): $ReadOnlyArray<User> {
+      const users = new Set<User>();
       for (const {authorUsername} of this.posts()) {
-        users.add(authorUsername);
+        users.add({username: authorUsername, trustLevel: 3});
       }
       for (const {authorUsername} of this.topics()) {
-        users.add(authorUsername);
+        users.add({username: authorUsername, trustLevel: 3});
       }
       return Array.from(users);
     }
+
     likes(): $ReadOnlyArray<LikeAction> {
       return this._likes;
     }
@@ -119,6 +120,7 @@ describe("plugins/discourse/createGraph", () => {
       // A reference to a post with different capitalization
       <a href="https://URL.com/t/irrelevant-slug/1/3?u=bla">Third post</a>
       </p>`,
+      trustLevel: 3,
     };
     const post2 = {
       id: 2,
@@ -130,6 +132,7 @@ describe("plugins/discourse/createGraph", () => {
       timestampMs: 1,
       authorUsername: "wchargin",
       cooked: "<h1>Hello</h1>",
+      trustLevel: 3,
     };
     const post3 = {
       id: 3,
@@ -139,10 +142,11 @@ describe("plugins/discourse/createGraph", () => {
       timestampMs: 1,
       authorUsername: "mzargham",
       cooked: "<h1>Hello</h1>",
+      trustLevel: 3,
     };
     const likes: $ReadOnlyArray<LikeAction> = [
-      {timestampMs: 3, username: "mzargham", postId: 2},
-      {timestampMs: 4, username: "decentralion", postId: 3},
+      {timestampMs: 3, username: "mzargham", postId: 2, trustLevel: null},
+      {timestampMs: 4, username: "decentralion", postId: 3, trustLevel: 2},
     ];
     const posts = [post1, post2, post3];
     const data = new MockData([topic], [post1, post2, post3], likes);
@@ -248,6 +252,7 @@ describe("plugins/discourse/createGraph", () => {
         timestampMs: 0,
         authorUsername: "decentralion",
         cooked: "<h1>Hello</h1>",
+        trustLevel: 3,
       };
       const data = new MockData([], [post], []);
       const url = "https://foo";

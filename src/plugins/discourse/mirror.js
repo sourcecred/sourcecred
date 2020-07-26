@@ -198,13 +198,17 @@ export class Mirror {
       let offset = 0;
       let upToDate = false;
       while (!upToDate) {
-        const likeActions = await this._fetcher.likesByUser(user, offset);
+        const likeActions = await this._fetcher.likesByUser(
+          user.username,
+          offset
+        );
         if (likeActions == null) {
           break;
         }
         possiblePageSize = Math.max(likeActions.length, possiblePageSize);
         for (const like of likeActions) {
-          if (addLike(like).doneWithUser) {
+          const newLike = {...like, trustLevel: user.trustLevel};
+          if (addLike(newLike).doneWithUser) {
             upToDate = true;
             break;
           }

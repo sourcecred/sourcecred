@@ -68,6 +68,8 @@ export type Post = {|
   // reply to the first post.
   +replyToPostIndex: number | null,
   +timestampMs: TimestampMs,
+  // user trustLevel
+  +trustLevel: number | null,
   +authorUsername: string,
   // The post HTML for rendering.
   +cooked: string,
@@ -81,7 +83,7 @@ export type TopicWithPosts = {|
 
 export type User = {|
   +username: string,
-  +trust_level: number,
+  +trustLevel: number | null,
 |};
 
 export type LikeAction = {|
@@ -90,6 +92,8 @@ export type LikeAction = {|
   // The post being liked
   +postId: PostId,
   +timestampMs: TimestampMs,
+  // user trustLevel
+  +trustLevel: number | null,
 |};
 
 /**
@@ -113,6 +117,9 @@ export interface Discourse {
     targetUsername: string,
     offset: number
   ): Promise<LikeAction[] | null>;
+
+  // Retrieves the User data for a specific username.
+  getUserData(username: string): Promise<User | null>;
 
   // Gets the topic IDs for every "about-x-category" topic.
   // Discourse calls this a "definition" topic.
@@ -287,11 +294,11 @@ export class Fetcher implements Discourse {
   }
 
   async likesByUser(
-    username: string,
+    targetUsername: string,
     offset: number
   ): Promise<LikeAction[] | null> {
     const response = await this._fetch(
-      `/user_actions.json?username=${username}&filter=1&offset=${offset}`
+      `/user_actions.json?username=${targetUsername}&filter=1&offset=${offset}`
     );
     const {status} = response;
     if (status === 404) {
@@ -398,6 +405,7 @@ function parsePost(json: any): Post {
     indexWithinTopic: json.post_number,
     replyToPostIndex: json.reply_to_post_number,
     topicId: json.topic_id,
+    trustLevel: json.trust_level,
     authorUsername: json.username,
     cooked: json.cooked,
   };
@@ -406,7 +414,7 @@ function parsePost(json: any): Post {
 function parseUser(json: any): User {
   return {
     username: json.username,
-    trust_level: json.trust_level,
+    trustLevel: json.trust_level,
   };
 }
 
@@ -415,6 +423,7 @@ function parseLike(json: any): LikeAction {
     username: json.target_username,
     postId: json.post_id,
     timestampMs: Date.parse(json.created_at),
+    trustLevel: json.trustLevel,
   };
 }
 
