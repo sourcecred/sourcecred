@@ -1,9 +1,9 @@
 // @flow
-import {Graph, type Edge} from "../../core/graph";
+
+import {Graph, type Node, type Edge} from "../../core/graph";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
-import {type Weights} from "../../core/weights";
 import {type WeightedGraph} from "../../core/weightedGraph";
-import {type PostId, type TopicId, type Post, type LikeAction} from "./fetch";
+import {type PostId, type TopicId, type Post} from "./fetch";
 import {type ReadRepository} from "./mirrorRepository";
 import {declaration} from "./declaration";
 import {
@@ -13,109 +13,134 @@ import {
 } from "./references";
 import * as NE from "./nodesAndEdges";
 
-export function createGraph(
+export type GraphUser = {|
+  +node: Node,
+|};
+
+export type GraphTopic = {|
+  +node: Node,
+  +hasAuthor: Edge,
+|};
+
+export type GraphPost = {|
+  +topicContains: Edge,
+  +node: Node,
+  +hasAuthor: Edge,
+  +references: $ReadOnlyArray<Edge>,
+  +postReplies: Edge | null,
+|};
+
+export type GraphLike = {|
+  +createsLike: Edge,
+  +likes: Edge,
+  +node: Node,
+|};
+
+export type GraphData = {
+  +users: $ReadOnlyArray<Node>,
+  +topics: $ReadOnlyArray<GraphTopic>,
+  +posts: $ReadOnlyArray<GraphPost>,
+  +likes: $ReadOnlyArray<GraphLike>,
+};
+
+export function _createGraphData(
   serverUrl: string,
-  data: ReadRepository
-): WeightedGraph {
-  const gc = new _GraphCreator(serverUrl, data);
-  return {graph: gc.graph, weights: gc.weights};
-}
+  repo: ReadRepository
+): GraphData {
+  const users = repo
+    .users()
+    .map(({username}) => NE.userNode(serverUrl, username));
 
-class _GraphCreator {
-  graph: Graph;
-  weights: Weights;
-  serverUrl: string;
-  data: ReadRepository;
-  topicIdToTitle: Map<TopicId, string>;
-  postIdToDescription: Map<PostId, string>;
+  const topicIdToTitle = new Map();
+  const topics: $ReadOnlyArray<GraphTopic> = repo.topics().map((topic) => {
+    const node = NE.topicNode(serverUrl, topic);
+    const hasAuthor = NE.authorsTopicEdge(serverUrl, topic);
+    topicIdToTitle.set(topic.id, topic.title);
+    return {node, hasAuthor};
+  });
 
-  constructor(serverUrl: string, data: ReadRepository) {
-    if (serverUrl.endsWith("/")) {
-      throw new Error(`by convention, serverUrl should not end with /`);
-    }
-    this.serverUrl = serverUrl;
-    this.data = data;
-    this.graph = new Graph();
-    this.weights = weightsForDeclaration(declaration);
-    this.topicIdToTitle = new Map();
-    this.postIdToDescription = new Map();
+  const findPostInTopic = repo.findPostInTopic.bind(repo);
+  const postIdToDescription = new Map();
+  const posts: $ReadOnlyArray<GraphPost> = repo.posts().map((post) => {
+    const topicTitle = topicIdToTitle.get(post.topicId) || "[unknown topic]";
+    const url = serverUrl + "/t/" + post.topicId + "/" + post.indexWithinTopic;
+    const description = `[#${post.indexWithinTopic} on ${topicTitle}](${url})`;
+    postIdToDescription.set(post.id, description);
+    const node = NE.postNode(serverUrl, post, description);
+    const hasAuthor = NE.authorsPostEdge(serverUrl, post);
 
-    for (const {username} of data.users()) {
-      this.graph.addNode(NE.userNode(serverUrl, username));
-    }
+    const references = _createReferenceEdges(serverUrl, post, findPostInTopic);
 
-    for (const topic of data.topics()) {
-      this.topicIdToTitle.set(topic.id, topic.title);
-      this.graph.addNode(NE.topicNode(serverUrl, topic));
-      this.graph.addEdge(NE.authorsTopicEdge(serverUrl, topic));
-    }
-
-    for (const post of data.posts()) {
-      const topicTitle =
-        this.topicIdToTitle.get(post.topicId) || `[unknown topic]`;
-      const url = `${this.serverUrl}/t/${String(post.topicId)}/${String(
-        post.indexWithinTopic
-      )}`;
-      const description = `[#${post.indexWithinTopic} on ${topicTitle}](${url})`;
-      this.addPost(post, description);
-      this.postIdToDescription.set(post.id, description);
-    }
-
-    for (const like of data.likes()) {
-      this.addLike(like);
-    }
-  }
-
-  addPost(post: Post, description: string) {
-    this.graph.addNode(NE.postNode(this.serverUrl, post, description));
-    this.graph.addEdge(NE.authorsPostEdge(this.serverUrl, post));
-    this.graph.addEdge(NE.topicContainsPostEdge(this.serverUrl, post));
-    this.maybeAddPostRepliesEdge(post);
-
-    const findPostInTopic = this.data.findPostInTopic.bind(this.data);
-    for (const referenceEdge of _createReferenceEdges(
-      this.serverUrl,
-      post,
-      findPostInTopic
-    )) {
-      this.graph.addEdge(referenceEdge);
-    }
-  }
-
-  addLike(like: LikeAction) {
-    const postDescription =
-      this.postIdToDescription.get(like.postId) || "[unknown post]";
-    this.graph.addNode(NE.likeNode(this.serverUrl, like, postDescription));
-    this.graph.addEdge(NE.likesEdge(this.serverUrl, like));
-    this.graph.addEdge(NE.createsLikeEdge(this.serverUrl, like));
-  }
-
-  /**
-   * Any post that is not the first post in the thread is a reply to some post.
-   * This method adds those reply edges. It is a bit hairy to work around unintuitive
-   * choices in the Discourse API.
-   */
-  maybeAddPostRepliesEdge(post: Post) {
+    let postReplies = null;
     let replyToPostIndex = post.replyToPostIndex;
     if (replyToPostIndex == null && post.indexWithinTopic > 1) {
-      // For posts that are a reply to the first posts (or, depending on how you look at it,
-      // replies to the topic), the replyToPostIndex gets set to null. For purposes of cred calculation,
-      // I think replies to the first post should have a reply edge, as any other reply would.
-      // So I correct for the API weirdness here.
+      // The replyToPostIndex gets set to null if it is actually a reply to
+      // the topic's own post.
       replyToPostIndex = 1;
     }
     if (replyToPostIndex != null) {
-      const basePostId = this.data.findPostInTopic(
-        post.topicId,
-        replyToPostIndex
-      );
-      if (basePostId != null) {
-        this.graph.addEdge(
-          NE.postRepliesEdge(this.serverUrl, post, basePostId)
-        );
+      const parentId = repo.findPostInTopic(post.topicId, replyToPostIndex);
+      if (parentId != null) {
+        postReplies = NE.postRepliesEdge(serverUrl, post, parentId);
       }
     }
+
+    const topicContains = NE.topicContainsPostEdge(serverUrl, post);
+
+    return {node, hasAuthor, references, postReplies, topicContains};
+  });
+
+  const likes: $ReadOnlyArray<GraphLike> = repo.likes().map((like) => {
+    const postDescription =
+      postIdToDescription.get(like.postId) || "[unknown post]";
+    const node = NE.likeNode(serverUrl, like, postDescription);
+    const createsLike = NE.createsLikeEdge(serverUrl, like);
+    const likes = NE.likesEdge(serverUrl, like);
+    return {node, createsLike, likes};
+  });
+  return {users, topics, posts, likes};
+}
+
+export function _graphFromData({
+  users,
+  topics,
+  posts,
+  likes,
+}: GraphData): WeightedGraph {
+  const g = new Graph();
+  const weights = weightsForDeclaration(declaration);
+  for (const user of users) {
+    g.addNode(user);
   }
+  for (const topic of topics) {
+    g.addNode(topic.node);
+    g.addEdge(topic.hasAuthor);
+  }
+  for (const post of posts) {
+    g.addNode(post.node);
+    g.addEdge(post.topicContains);
+    g.addEdge(post.hasAuthor);
+    if (post.postReplies != null) {
+      g.addEdge(post.postReplies);
+    }
+    for (const reference of post.references) {
+      g.addEdge(reference);
+    }
+  }
+  for (const like of likes) {
+    g.addNode(like.node);
+    g.addEdge(like.createsLike);
+    g.addEdge(like.likes);
+  }
+  return {graph: g, weights};
+}
+
+export function createGraph(
+  serverUrl: string,
+  repo: ReadRepository
+): WeightedGraph {
+  const data = _createGraphData(serverUrl, repo);
+  return _graphFromData(data);
 }
 
 export function _createReferenceEdges(
