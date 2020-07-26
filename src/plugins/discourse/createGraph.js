@@ -1,14 +1,6 @@
 // @flow
 
-import * as NullUtil from "../../util/null";
-import {
-  Graph,
-  EdgeAddress,
-  type Node,
-  type Edge,
-  type NodeAddressT,
-  type EdgeAddressT,
-} from "../../core/graph";
+import {Graph, EdgeAddress, type Node, type Edge} from "../../core/graph";
 import {
   type PostId,
   type TopicId,
@@ -31,6 +23,8 @@ import {
 import {userAddress, topicAddress, postAddress, likeAddress} from "./address";
 import {
   type DiscourseReference,
+  type DiscourseTopicReference,
+  type DiscourseUserReference,
   parseLinks,
   linksToReferences,
 } from "./references";
@@ -165,6 +159,54 @@ export function likesEdge(serverUrl: string, like: LikeAction): Edge {
   };
 }
 
+export function referencesTopicEdge(
+  serverUrl: string,
+  post: Post,
+  reference: DiscourseTopicReference
+): Edge {
+  const address = EdgeAddress.append(
+    referencesTopicEdgeType.prefix,
+    serverUrl,
+    String(post.id),
+    String(reference.topicId)
+  );
+  const src = postAddress(serverUrl, post.id);
+  const dst = topicAddress(serverUrl, reference.topicId);
+  return {src, dst, timestampMs: post.timestampMs, address};
+}
+
+export function referencesPostEdge(
+  serverUrl: string,
+  post: Post,
+  referredPostId: PostId
+): Edge {
+  const address = EdgeAddress.append(
+    referencesPostEdgeType.prefix,
+    serverUrl,
+    String(post.id),
+    String(referredPostId)
+  );
+  const src = postAddress(serverUrl, post.id);
+  const dst = postAddress(serverUrl, referredPostId);
+  return {src, dst, timestampMs: post.timestampMs, address};
+}
+
+export function referencesUserEdge(
+  serverUrl: string,
+  post: Post,
+  reference: DiscourseUserReference
+): Edge {
+  const address = EdgeAddress.append(
+    referencesUserEdgeType.prefix,
+    serverUrl,
+    String(post.id),
+    reference.username
+  );
+  const src = postAddress(serverUrl, post.id);
+  const dst = userAddress(serverUrl, reference.username);
+  return {src, dst, timestampMs: post.timestampMs, address};
+}
+
 export function createGraph(serverUrl: string, data: ReadRepository): Graph {
   const gc = new _GraphCreator(serverUrl, data);
   return gc.graph;
@@ -272,20 +314,9 @@ class _GraphCreator {
       // load one Discourse forum in a given instance.
       return null;
     }
-    const src = postAddress(this.serverUrl, post.id);
-    const timestampMs = post.timestampMs;
-    let dst: NodeAddressT | null = null;
-    let address: EdgeAddressT | null = null;
     switch (reference.type) {
       case "TOPIC": {
-        address = EdgeAddress.append(
-          referencesTopicEdgeType.prefix,
-          this.serverUrl,
-          String(post.id),
-          String(reference.topicId)
-        );
-        dst = topicAddress(this.serverUrl, reference.topicId);
-        break;
+        return referencesTopicEdge(this.serverUrl, post, reference);
       }
       case "POST": {
         const referredPostId = this.data.findPostInTopic(
@@ -296,24 +327,10 @@ class _GraphCreator {
           // Maybe a bad link, or the post or topic was deleted.
           return null;
         }
-        dst = postAddress(this.serverUrl, referredPostId);
-        address = EdgeAddress.append(
-          referencesPostEdgeType.prefix,
-          this.serverUrl,
-          String(post.id),
-          String(referredPostId)
-        );
-        break;
+        return referencesPostEdge(this.serverUrl, post, referredPostId);
       }
       case "USER": {
-        dst = userAddress(this.serverUrl, reference.username);
-        address = EdgeAddress.append(
-          referencesUserEdgeType.prefix,
-          this.serverUrl,
-          String(post.id),
-          reference.username
-        );
-        break;
+        return referencesUserEdge(this.serverUrl, post, reference);
       }
       default: {
         throw new Error(
@@ -321,11 +338,5 @@ class _GraphCreator {
         );
       }
     }
-    return {
-      src,
-      dst: NullUtil.get(dst),
-      timestampMs,
-      address: NullUtil.get(address),
-    };
   }
 }
