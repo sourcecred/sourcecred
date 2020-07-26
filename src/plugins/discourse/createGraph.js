@@ -40,7 +40,7 @@ class _GraphCreator {
     this.topicIdToTitle = new Map();
     this.postIdToDescription = new Map();
 
-    for (const username of data.users()) {
+    for (const {username} of data.users()) {
       this.graph.addNode(NE.userNode(serverUrl, username));
     }
 
