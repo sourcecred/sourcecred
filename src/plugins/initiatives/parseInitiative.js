@@ -33,10 +33,13 @@ const NodeEntryParser = C.object(
   }
 );
 
-const EdgeSpecParser = C.object({
-  urls: C.array(URLParser),
-  entries: C.array(NodeEntryParser),
-});
+const EdgeSpecParser = C.object(
+  {},
+  {
+    urls: C.array(URLParser),
+    entries: C.array(NodeEntryParser),
+  }
+);
 
 const Parse_020: C.Parser<InitiativeFileV020> = C.object(CommonFields, {
   contributions: EdgeSpecParser,

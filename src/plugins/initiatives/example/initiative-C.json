@@ -17,6 +17,7 @@
         {
           "title": "Add test contrib",
           "weight": 10,
+          "timestampIso": "2020-01-01T22:01:57.700Z",
           "contributors": ["https://foo.bar/C/contrib-user"]
         }
       ]
@@ -34,6 +35,7 @@
       "entries": [
         {
           "title": "Add test reference",
+          "timestampIso": "2020-01-03T22:01:57.700Z",
           "contributors": ["https://foo.bar/C/ref-user"]
         }
       ]
