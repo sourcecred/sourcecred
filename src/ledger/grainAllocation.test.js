@@ -145,5 +145,37 @@ describe("src/ledger/grainAllocation", () => {
         expect(allocation).toEqual(expectedAllocation);
       });
     });
+
+    describe("special policy", () => {
+      it("distributes the budget to the stated recipient", () => {
+        const i1 = aid(0, [1]);
+        const policy = {
+          policyType: "SPECIAL",
+          budget: ng(100),
+          memo: "something",
+          recipient: i1.id,
+        };
+        const allocation = computeAllocation(policy, [i1]);
+        const expectedReceipts = [{id: i1.id, amount: ng(100)}];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+      it("errors if the recipient is not available", () => {
+        const {id} = aid(0, [1]);
+        const other = aid(0, [1]);
+        const policy = {
+          policyType: "SPECIAL",
+          budget: ng(100),
+          memo: "something",
+          recipient: id,
+        };
+        const thunk = () => computeAllocation(policy, [other]);
+        expect(thunk).toThrowError("no active grain account for identity");
+      });
+    });
   });
 });
