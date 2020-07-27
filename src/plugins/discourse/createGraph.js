@@ -1,8 +1,10 @@
 // @flow
-
 import {Graph, type Edge} from "../../core/graph";
+import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
+import {type WeightedGraph} from "../../core/weightedGraph";
 import {type PostId, type TopicId, type Post, type LikeAction} from "./fetch";
 import {type ReadRepository} from "./mirrorRepository";
+import {declaration} from "./declaration";
 import {
   type DiscourseReference,
   parseLinks,
@@ -10,9 +12,13 @@ import {
 } from "./references";
 import * as NE from "./nodesAndEdges";
 
-export function createGraph(serverUrl: string, data: ReadRepository): Graph {
+export function createGraph(
+  serverUrl: string,
+  data: ReadRepository
+): WeightedGraph {
   const gc = new _GraphCreator(serverUrl, data);
-  return gc.graph;
+  const weights = weightsForDeclaration(declaration);
+  return {graph: gc.graph, weights};
 }
 
 class _GraphCreator {
