@@ -39,6 +39,8 @@ type PostOptions = {|
   authorUsername?: string,
   // Defaults to: "<h1>Hello World</h1>"
   cooked?: string,
+  // User trust_level
+  trustLevel?: number,
 |};
 
 type PostEdits = {|
@@ -259,6 +261,7 @@ class MockFetcher implements Discourse {
     replyToPostIndex,
     authorUsername,
     cooked,
+    trustLevel,
   }: PostOptions): PostId {
     if (!this._topicToPostIds.has(topicId)) {
       throw new Error(`Topic with ID ${topicId} not yet added.`);
@@ -290,7 +293,7 @@ class MockFetcher implements Discourse {
       replyToPostIndex: replyToPostIndex || null,
       authorUsername: authorUsername || "credbot",
       cooked: cooked || "<h1>Hello World</h1>",
-      trustLevel: null,
+      trustLevel: trustLevel || 4,
     };
     this._posts.set(postId, post);
     return postId;
@@ -557,12 +560,16 @@ describe("plugins/discourse/mirror", () => {
         fetcher.addTopic({authorUsername: "alpha"}),
         fetcher.addTopic({authorUsername: "beta"}),
       ];
-      fetcher.addPost({authorUsername: "delta", topicId: t2.topicId});
+      fetcher.addPost({
+        authorUsername: "delta",
+        topicId: t2.topicId,
+        trustLevel: 2,
+      });
       await mirror.update(reporter);
       expect([...repo.users()].sort()).toEqual([
-        {username: "alpha", trustLevel: null},
-        {username: "beta", trustLevel: null},
-        {username: "delta", trustLevel: null},
+        {username: "alpha", trustLevel: 4},
+        {username: "beta", trustLevel: 4},
+        {username: "delta", trustLevel: 2},
       ]);
     });
 

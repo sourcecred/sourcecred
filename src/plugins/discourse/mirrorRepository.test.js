@@ -142,7 +142,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       timestampMs: 456789,
       authorUsername: "credbot",
       cooked: "<p>Valid post</p>",
-      trustLevel: null,
+      trustLevel: 1,
     };
     const p2: Post = {
       id: 101,
@@ -152,7 +152,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       timestampMs: 456888,
       authorUsername: "credbot",
       cooked: "<p>Follow up 1</p>",
-      trustLevel: null,
+      trustLevel: 2,
     };
     const p3: Post = {
       id: 102,
@@ -162,7 +162,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       timestampMs: 456999,
       authorUsername: "credbot",
       cooked: "<p>Follow up, replacement</p>",
-      trustLevel: null,
+      trustLevel: 3,
     };
 
     // When
@@ -198,7 +198,7 @@ describe("plugins/discourse/mirrorRepository", () => {
         timestampMs: 456789,
         authorUsername: "credbot",
         cooked: "<p>Valid post</p>",
-        trustLevel: null,
+        trustLevel: 2,
       },
       {
         id: 456,
@@ -208,7 +208,7 @@ describe("plugins/discourse/mirrorRepository", () => {
         timestampMs: 456999,
         authorUsername: "credbot",
         cooked: "<p>Invalid post, topic ID foreign key constraint.</p>",
-        trustLevel: null,
+        trustLevel: 3,
       },
     ];
 
@@ -317,7 +317,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       timestampMs: 456789,
       authorUsername: "credbot",
       cooked: "<p>Valid post</p>",
-      trustLevel: null,
+      trustLevel: 4,
     };
     const l1: LikeAction = {
       postId: 100,

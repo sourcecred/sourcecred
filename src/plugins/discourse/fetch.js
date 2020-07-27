@@ -69,7 +69,7 @@ export type Post = {|
   +replyToPostIndex: number | null,
   +timestampMs: TimestampMs,
   // user trustLevel
-  +trustLevel: number | null,
+  +trustLevel: number,
   +authorUsername: string,
   // The post HTML for rendering.
   +cooked: string,

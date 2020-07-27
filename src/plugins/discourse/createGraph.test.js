@@ -46,13 +46,19 @@ describe("plugins/discourse/createGraph", () => {
     }
     users(): $ReadOnlyArray<User> {
       const users = [];
+      const userNames = new Set();
+
       for (const {authorUsername} of this.posts()) {
+        userNames.add(authorUsername);
         users.push({username: authorUsername, trustLevel: 3});
       }
       for (const {authorUsername} of this.topics()) {
-        users.push({username: authorUsername, trustLevel: 3});
+        if (!userNames.has(authorUsername)) {
+          userNames.add(authorUsername);
+          users.push({username: authorUsername, trustLevel: 3});
+        }
       }
-      return Array.from(users);
+      return users;
     }
     likes(): $ReadOnlyArray<LikeAction> {
       return this._likes;

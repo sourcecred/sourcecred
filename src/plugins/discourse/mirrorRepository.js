@@ -214,7 +214,7 @@ export class SqliteMirrorRepository
             timestamp_ms INTEGER NOT NULL,
             author_username TEXT NOT NULL,
             topic_id INTEGER NOT NULL,
-            trust_level INTEGER,
+            trust_level INTEGER NOT NULL,
             index_within_topic INTEGER NOT NULL,
             reply_to_post_index INTEGER,
             cooked TEXT NOT NULL,
