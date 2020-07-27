@@ -574,15 +574,8 @@ Array [
 
 exports[`plugins/discourse/fetch snapshot testing loads user data from snapshot dl-proto 1`] = `
 Object {
-  "trust_level": 1,
+  "trustLevel": 1,
   "username": "dl-proto",
-}
-`;
-
-exports[`plugins/discourse/fetch snapshot testing loads user data from snapshot system 1`] = `
-Object {
-  "trust_level": 4,
-  "username": "system",
 }
 `;
 

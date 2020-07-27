@@ -81,7 +81,7 @@ export type TopicWithPosts = {|
 
 export type User = {|
   +username: string,
-  +trust_level: number,
+  +trustLevel: number,
 |};
 
 export type LikeAction = {|
@@ -406,7 +406,7 @@ function parsePost(json: any): Post {
 function parseUser(json: any): User {
   return {
     username: json.username,
-    trust_level: json.trust_level,
+    trustLevel: json.trust_level,
   };
 }
 
