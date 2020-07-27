@@ -10,7 +10,6 @@ import type {WeightedGraph} from "../../core/weightedGraph";
 import {createGraph} from "./createGraph";
 import {declaration} from "./declaration";
 import {parser, type DiscourseConfig} from "./config";
-import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {Fetcher} from "./fetch";
 import {Mirror} from "./mirror";

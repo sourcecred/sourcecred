@@ -1,6 +1,7 @@
 // @flow
 import {Graph, type Edge} from "../../core/graph";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
+import {type Weights} from "../../core/weights";
 import {type WeightedGraph} from "../../core/weightedGraph";
 import {type PostId, type TopicId, type Post, type LikeAction} from "./fetch";
 import {type ReadRepository} from "./mirrorRepository";
@@ -17,12 +18,12 @@ export function createGraph(
   data: ReadRepository
 ): WeightedGraph {
   const gc = new _GraphCreator(serverUrl, data);
-  const weights = weightsForDeclaration(declaration);
-  return {graph: gc.graph, weights};
+  return {graph: gc.graph, weights: gc.weights};
 }
 
 class _GraphCreator {
   graph: Graph;
+  weights: Weights;
   serverUrl: string;
   data: ReadRepository;
   topicIdToTitle: Map<TopicId, string>;
@@ -35,6 +36,7 @@ class _GraphCreator {
     this.serverUrl = serverUrl;
     this.data = data;
     this.graph = new Graph();
+    this.weights = weightsForDeclaration(declaration);
     this.topicIdToTitle = new Map();
     this.postIdToDescription = new Map();
 
