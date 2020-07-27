@@ -163,11 +163,12 @@ export class Mirror {
   }
 
   async _updateUsers(reporter: TaskReporter) {
-    const addUser = (user) => this._repo.addUser(user);
+    const addUser = (user) => this._repo.addOrReplaceUser(user);
 
     reporter.start("discourse/users");
     for (const {username} of this._repo.usersWithNullTrustLevel()) {
       const user = await this._fetcher.getUserData(username);
+      console.warn({ username, user })
       if (user) {
         addUser(user);
       }

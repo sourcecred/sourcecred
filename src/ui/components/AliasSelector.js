@@ -101,7 +101,7 @@ export function AliasSelector({
         <h2>Aliases:</h2>
       </label>
       <div>
-        {selectedItems.map((selectedItem, index) => (
+        {selectedItems.filter(getNodeDescription).map((selectedItem, index) => (
           <span
             key={`selected-item-${index}`}
             {...getSelectedItemProps({selectedItem, index})}

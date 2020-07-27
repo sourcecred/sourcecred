@@ -299,12 +299,19 @@ class MockFetcher implements Discourse {
     return postId;
   }
 
+  // Adds a User.
+  addUserIfNotExists(action: User) {
+    this._users.push(action);
+    return action;
+  }
+
   /**
    * Adds a LikeAction.
    *
    * Note: a Post to add this LikeAction to must be added first.
    */
   addLike(action: LikeAction) {
+    this.addUserIfNotExists({ username: action.username, trustLevel: null})
     if (!this._posts.has(action.postId)) {
       throw new Error(`Post with ID ${action.postId} not yet added.`);
     }
@@ -871,6 +878,37 @@ describe("plugins/discourse/mirror", () => {
         fetcher._post(p2),
       ]);
       expect(repo.likes()).toEqual([l1]);
+    });
+
+    it("inserts trust level if user trust level is missing", async () => {
+      const {mirror, fetcher, reporter, repo} = example();
+      const t1 = fetcher.addTopic({authorUsername: "otheruser"});
+      const p2 = fetcher.addPost({
+        topicId: t1.topicId,
+        authorUsername: "otheruser",
+      });
+      const l1 = fetcher.addLike({
+        username: "system",
+        postId: t1.postId,
+        timestampMs: 123,
+      });
+      const _likesByUser = fetcher.likesByUser.bind(fetcher);
+      (fetcher: any).likesByUser = async (
+        targetUsername: string,
+        offset: number
+      ) => {
+        if (targetUsername === "credbot") return null;
+        return await _likesByUser(targetUsername, offset);
+      };
+      const userBefore = await fetcher.getUserData("system")
+      expect(userBefore).toEqual({ username: "system", trustLevel: null})
+      await mirror.update(reporter);
+      expect(repo.topics()).toEqual([fetcher._topic(1)]);
+      expect(repo.posts()).toEqual([
+        fetcher._post(t1.postId),
+        fetcher._post(p2),
+      ]);
+      expect(repo.users()).toEqual([{ username: "system", trustLevel: 4}]);
     });
 
     it("sends the right tasks to the TaskReporter", async () => {

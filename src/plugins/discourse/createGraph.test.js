@@ -61,14 +61,7 @@ describe("plugins/discourse/createGraph", () => {
       return users;
     }
     usersWithNullTrustLevel(): $ReadOnlyArray<User> {
-      const users = new Set<User>();
-      for (const {authorUsername} of this.posts()) {
-        users.add({username: authorUsername, trustLevel: null});
-      }
-      for (const {authorUsername} of this.topics()) {
-        users.add({username: authorUsername, trustLevel: null});
-      }
-      return Array.from(users);
+      throw new Error('Method usersWithNullTrustLevel should be unused by createGraph');
     }
     likes(): $ReadOnlyArray<LikeAction> {
       return this._likes;
