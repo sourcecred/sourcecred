@@ -34,7 +34,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
 
     // When
-    repository.addUser({username, trustLevel: null});
+    repository.addOrReplaceUser({username, trustLevel: 3});
     const result1 = repository.findUsername("pascalfan1988");
     const result2 = repository.findUsername(username);
 
@@ -335,5 +335,55 @@ describe("plugins/discourse/mirrorRepository", () => {
     // Then
     expect(likes).toEqual([l1]);
     expect(likingUser).toEqual({username: "crunkle", trustLevel: null});
+  });
+
+  it("After addPost, addLike does not null out user trustLevel", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+    const topic: Topic = {
+      id: 123,
+      categoryId: 1,
+      title: "Sample topic",
+      timestampMs: 456789,
+      bumpedMs: 456999,
+      authorUsername: "credbot",
+    };
+    const p1: Post = {
+      id: 100,
+      topicId: 123,
+      indexWithinTopic: 0,
+      replyToPostIndex: null,
+      timestampMs: 456789,
+      authorUsername: "crunkle",
+      cooked: "<p>Valid post</p>",
+      trustLevel: 2,
+    };
+    const p2: Post = {
+      id: 101,
+      topicId: 123,
+      indexWithinTopic: 0,
+      replyToPostIndex: null,
+      timestampMs: 456789,
+      authorUsername: "credbot",
+      cooked: "<p>Valid post</p>",
+      trustLevel: 3,
+    };
+    const l1: LikeAction = {
+      postId: 101,
+      timestampMs: 456800,
+      username: "crunkle",
+    };
+
+    // When
+    repository.addTopic(topic);
+    repository.addPost(p1);
+    repository.addPost(p2);
+    repository.addLike(l1);
+    const likingUser = repository.findUserbyUsername("crunkle");
+
+    // Then
+    expect(likingUser).toEqual({username: "crunkle", trustLevel: 2});
   });
 });
