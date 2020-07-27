@@ -1,6 +1,7 @@
 // @flow
 
 import {Graph, type Node, type Edge} from "../../core/graph";
+import {type NodeWeight} from "../../core/weights";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {type WeightedGraph} from "../../core/weightedGraph";
 import {type PostId, type TopicId, type Post} from "./fetch";
@@ -34,6 +35,7 @@ export type GraphLike = {|
   +createsLike: Edge,
   +likes: Edge,
   +node: Node,
+  +weight: NodeWeight,
 |};
 
 export type GraphData = {
@@ -43,13 +45,52 @@ export type GraphData = {
   +likes: $ReadOnlyArray<GraphLike>,
 };
 
+// TODO: Make this configurable.
+// For details on trust levels:
+// https://blog.discourse.org/2018/06/understanding-discourse-trust-levels/
+export const DEFAULT_TRUST_LEVEL_TO_WEIGHT = Object.freeze({
+  "0": 0,
+  // Trust level 1 indicates little engagement (doesn't even require any posts)
+  // so I gave them a very small weight.
+  "1": 0.1,
+  // Trust level 2 in my mind indicates being a "full member" so it feels
+  // like a good anchor for a standard weight of 1.
+  "2": 1,
+  // Trust level 3 requires that you are highly active and have earned lots of
+  // likes, so feels trusted enough for some bonus minting.
+  "3": 1.25,
+  // Trust level 4 means you've been designated as high trust by the admins, so
+  // we give a bigger bonus. Could make this even larger (2?)
+  "4": 1.5,
+});
+
+export function weightForTrustLevel(trustLevel: ?number): NodeWeight {
+  if (trustLevel == null) {
+    // The null trust level shouldn't happen in practice, right now users who
+    // only like but never post will have null trust level (will be fixed by #2045).
+    // This means they could have trust level 1. But to be conservative, we treat anyone
+    // with a null trust level as if they have trust level 0.
+    // Possibly this could come up with deleted users too.
+    return 0;
+  }
+
+  const key = String(trustLevel);
+  const weight = DEFAULT_TRUST_LEVEL_TO_WEIGHT[key];
+  if (weight == null) {
+    throw new Error(`invalid trust level: ${String(key)}`);
+  }
+  return weight;
+}
+
 export function _createGraphData(
   serverUrl: string,
   repo: ReadRepository
 ): GraphData {
-  const users = repo
-    .users()
-    .map(({username}) => NE.userNode(serverUrl, username));
+  const usernameToTrustLevel = new Map();
+  const users = repo.users().map(({username, trustLevel}) => {
+    usernameToTrustLevel.set(username, trustLevel);
+    return NE.userNode(serverUrl, username);
+  });
 
   const topicIdToTitle = new Map();
   const topics: $ReadOnlyArray<GraphTopic> = repo.topics().map((topic) => {
@@ -96,7 +137,9 @@ export function _createGraphData(
     const node = NE.likeNode(serverUrl, like, postDescription);
     const createsLike = NE.createsLikeEdge(serverUrl, like);
     const likes = NE.likesEdge(serverUrl, like);
-    return {node, createsLike, likes};
+    const userTrustLevel = usernameToTrustLevel.get(like.username);
+    const weight = weightForTrustLevel(userTrustLevel);
+    return {node, createsLike, likes, weight};
   });
   return {users, topics, posts, likes};
 }
@@ -131,6 +174,7 @@ export function _graphFromData({
     g.addNode(like.node);
     g.addEdge(like.createsLike);
     g.addEdge(like.likes);
+    weights.nodeWeights.set(like.node.address, like.weight);
   }
   return {graph: g, weights};
 }
