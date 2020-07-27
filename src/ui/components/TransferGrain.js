@@ -6,7 +6,7 @@ import {
   format,
   gt,
   fromInteger,
-  fromApproximateFloat, // TODO: utilize `fromFloatString`
+  fromFloatString,
   type Grain,
 } from "../../ledger/grain";
 import {type Identity} from "../../ledger/identity";
@@ -40,7 +40,7 @@ export const TransferGrain = ({initialLedger}: Props) => {
       const nextLedger = ledger.transferGrain({
         from: sourceIdentity.id,
         to: destIdentity.id,
-        amount: fromApproximateFloat(parseFloat(amount)),
+        amount: fromFloatString(amount),
         memo: memo,
       });
       setLedger(nextLedger);
@@ -72,12 +72,13 @@ export const TransferGrain = ({initialLedger}: Props) => {
             type="number"
             name="amount"
             min="0"
+            step="any"
             placeholder={`max: ${maxAmount}`}
             required
             value={amount}
             onChange={(e) => setAmount(e.currentTarget.value)}
           />
-          <span>{` max: ${format(maxAmount, 5)}`}</span>
+          <span>{sourceIdentity && ` max: ${format(maxAmount, 5)}`}</span>
         </p>
         <p>
           <label htmlFor="memo">Memo</label> <br />
@@ -91,7 +92,8 @@ export const TransferGrain = ({initialLedger}: Props) => {
         <input
           disabled={
             !Number(amount) ||
-            gt(fromApproximateFloat(parseFloat(amount)), maxAmount)
+            !(sourceIdentity && destIdentity) ||
+            gt(fromFloatString(amount), maxAmount)
           }
           type="submit"
           value="transfer grain"
