@@ -101,21 +101,18 @@ export function AliasSelector({
         <h2>Aliases:</h2>
       </label>
       <div>
-        {selectedItems.map(
-          (selectedItem, index) =>
-            getNodeDescription(selectedItem) && (
-              <span
-                key={`selected-item-${index}`}
-                {...getSelectedItemProps({selectedItem, index})}
-              >
-                <Markdown
-                  renderers={{paragraph: "span"}}
-                  source={getNodeDescription(selectedItem)}
-                />
-                <br />
-              </span>
-            )
-        )}
+        {selectedItems.filter(getNodeDescription).map((selectedItem, index) => (
+          <span
+            key={`selected-item-${index}`}
+            {...getSelectedItemProps({selectedItem, index})}
+          >
+            <Markdown
+              renderers={{paragraph: "span"}}
+              source={getNodeDescription(selectedItem)}
+            />
+            <br />
+          </span>
+        ))}
         <div style={comboboxStyles} {...getComboboxProps()}>
           <input
             {...getInputProps(getDropdownProps({preventKeyAction: isOpen}))}
