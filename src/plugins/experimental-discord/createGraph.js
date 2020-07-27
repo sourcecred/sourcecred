@@ -216,10 +216,7 @@ export function createGraph(
 
         const reactingMember = memberMap.get(reaction.authorId);
         if (!reactingMember) {
-          console.warn(
-            `Reacting member not loaded ${reaction.authorId} (reacted ${emojiRef}), maybe a Deleted User?\n` +
-              `${messageUrl(guild, channel.id, message.id)}`
-          );
+          // Probably this user left the server.
           continue;
         }
 
@@ -239,10 +236,7 @@ export function createGraph(
       for (const userId of message.mentions) {
         const mentionedMember = memberMap.get(userId);
         if (!mentionedMember) {
-          console.warn(
-            `Mentioned member not loaded ${userId}, maybe a Deleted User?\n` +
-              `${messageUrl(guild, channel.id, message.id)}`
-          );
+          // Probably this user left the server.
           continue;
         }
         wg.graph.addNode(memberNode(mentionedMember));
