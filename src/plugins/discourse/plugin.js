@@ -10,7 +10,6 @@ import type {WeightedGraph} from "../../core/weightedGraph";
 import {createGraph} from "./createGraph";
 import {declaration} from "./declaration";
 import {parser, type DiscourseConfig} from "./config";
-import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import {Fetcher} from "./fetch";
 import {Mirror} from "./mirror";
@@ -64,9 +63,7 @@ export class DiscoursePlugin implements Plugin {
     const _ = rd; // TODO(#1808): not yet used
     const config = await loadConfig(ctx);
     const repo = await repository(ctx, config.serverUrl);
-    const graph = createGraph(config.serverUrl, repo);
-    const weights = weightsForDeclaration(declaration);
-    return {graph, weights};
+    return createGraph(config.serverUrl, repo);
   }
 
   async referenceDetector(
