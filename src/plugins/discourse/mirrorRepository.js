@@ -44,6 +44,13 @@ export interface ReadRepository {
   users(): $ReadOnlyArray<User>;
 
   /**
+   * Get usernames for all users with NULL trust_level.
+   *
+   * The order is unspecified.
+   */
+  usersWithNullTrustLevel(): $ReadOnlyArray<User>;
+
+  /**
    * Gets all of the like actions in the history.
    */
   likes(): $ReadOnlyArray<LikeAction>;
@@ -343,6 +350,13 @@ export class SqliteMirrorRepository
         username: x.username,
         trustLevel: x.trust_level,
       }));
+  }
+
+  usersWithNullTrustLevel(): $ReadOnlyArray<User> {
+    return this._db
+      .prepare("SELECT username FROM users WHERE trust_level IS NULL")
+      .pluck()
+      .all();
   }
 
   findUserbyUsername(username: string): ?User {
