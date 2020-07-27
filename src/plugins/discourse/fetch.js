@@ -68,7 +68,7 @@ export type Post = {|
   // reply to the first post.
   +replyToPostIndex: number | null,
   +timestampMs: TimestampMs,
-  // user trustLevel
+  // the Discourse trust level of the author of the post
   +trustLevel: number,
   +authorUsername: string,
   // The post HTML for rendering.
