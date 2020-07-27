@@ -72,14 +72,13 @@ class _GraphCreator {
     this.graph.addEdge(NE.topicContainsPostEdge(this.serverUrl, post));
     this.maybeAddPostRepliesEdge(post);
 
-    const discourseReferences = linksToReferences(
-      parseLinks(post.cooked, this.serverUrl)
-    );
-    for (const reference of discourseReferences) {
-      const edge = this.referenceEdge(post, reference);
-      if (edge != null) {
-        this.graph.addEdge(edge);
-      }
+    const findPostInTopic = this.data.findPostInTopic.bind(this.data);
+    for (const referenceEdge of _createReferenceEdges(
+      this.serverUrl,
+      post,
+      findPostInTopic
+    )) {
+      this.graph.addEdge(referenceEdge);
     }
   }
 
@@ -117,39 +116,64 @@ class _GraphCreator {
       }
     }
   }
+}
 
-  referenceEdge(post: Post, reference: DiscourseReference): Edge | null {
-    if (
-      reference.serverUrl != null &&
-      reference.serverUrl.toLowerCase() !== this.serverUrl.toLowerCase()
-    ) {
-      // Don't attempt to make cross-instance links for now, since we only
-      // load one Discourse forum in a given instance.
-      return null;
+export function _createReferenceEdges(
+  serverUrl: string,
+  post: Post,
+  findPostInTopic: (topicId: TopicId, indexWithinTopic: number) => ?PostId,
+  // This is available as a helper for testing, so we don't need to construct posts
+  // with fake html containing links.
+  _manualLinks: ?$ReadOnlyArray<string>
+): $ReadOnlyArray<Edge> {
+  const links = _manualLinks
+    ? _manualLinks
+    : parseLinks(post.cooked, serverUrl);
+  const references = linksToReferences(links);
+  const result = [];
+  for (const reference of references) {
+    const edge = _referenceEdge(serverUrl, post, reference, findPostInTopic);
+    if (edge != null) {
+      result.push(edge);
     }
-    switch (reference.type) {
-      case "TOPIC": {
-        return NE.referencesTopicEdge(this.serverUrl, post, reference);
+  }
+  return result;
+}
+
+function _referenceEdge(
+  serverUrl: string,
+  post: Post,
+  reference: DiscourseReference,
+  findPostInTopic: (topicId: TopicId, indexWithinTopic: number) => ?PostId
+): Edge | null {
+  if (
+    reference.serverUrl != null &&
+    reference.serverUrl.toLowerCase() !== serverUrl.toLowerCase()
+  ) {
+    // Don't attempt to make cross-instance links for now, since we only
+    // load one Discourse forum in a given instance.
+    return null;
+  }
+  switch (reference.type) {
+    case "TOPIC": {
+      return NE.referencesTopicEdge(serverUrl, post, reference);
+    }
+    case "POST": {
+      const referredPostId = findPostInTopic(
+        reference.topicId,
+        reference.postIndex
+      );
+      if (referredPostId == null) {
+        // Maybe a bad link, or the post or topic was deleted.
+        return null;
       }
-      case "POST": {
-        const referredPostId = this.data.findPostInTopic(
-          reference.topicId,
-          reference.postIndex
-        );
-        if (referredPostId == null) {
-          // Maybe a bad link, or the post or topic was deleted.
-          return null;
-        }
-        return NE.referencesPostEdge(this.serverUrl, post, referredPostId);
-      }
-      case "USER": {
-        return NE.referencesUserEdge(this.serverUrl, post, reference);
-      }
-      default: {
-        throw new Error(
-          `Unexpected reference type: ${(reference.type: empty)}`
-        );
-      }
+      return NE.referencesPostEdge(serverUrl, post, referredPostId);
+    }
+    case "USER": {
+      return NE.referencesUserEdge(serverUrl, post, reference);
+    }
+    default: {
+      throw new Error(`Unexpected reference type: ${(reference.type: empty)}`);
     }
   }
 }

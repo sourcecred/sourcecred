@@ -5,7 +5,7 @@ import * as NullUtil from "../../util/null";
 import type {ReadRepository} from "./mirrorRepository";
 import type {Topic, Post, PostId, TopicId, LikeAction} from "./fetch";
 import {EdgeAddress, type Node, type Edge} from "../../core/graph";
-import {createGraph} from "./createGraph";
+import {createGraph, _createReferenceEdges} from "./createGraph";
 import * as NE from "./nodesAndEdges";
 
 import {userAddress, postAddress, topicAddress} from "./address";
@@ -323,6 +323,82 @@ describe("plugins/discourse/createGraph", () => {
         timestampMs: posts[0].timestampMs,
       };
       expectEdgesOfType([edge], referencesUserEdgeType);
+    });
+  });
+
+  describe("_createReferenceEdges", () => {
+    it("works for user and topic references", () => {
+      const {posts, url} = example();
+      const post = posts[0];
+      const links = [
+        url + "/u/foo",
+        url + "/u/bar/",
+        url + "/t/some-title/42",
+        url + "/t/title-slug/1337/",
+      ];
+      const findPostInTopic = () => undefined;
+      const edges = _createReferenceEdges(url, post, findPostInTopic, links);
+      const expected = [
+        NE.referencesUserEdge(url, post, {
+          type: "USER",
+          username: "foo",
+          serverUrl: url,
+        }),
+        NE.referencesUserEdge(url, post, {
+          type: "USER",
+          username: "bar",
+          serverUrl: url,
+        }),
+        NE.referencesTopicEdge(url, post, {
+          type: "TOPIC",
+          topicId: 42,
+          serverUrl: url,
+        }),
+        NE.referencesTopicEdge(url, post, {
+          type: "TOPIC",
+          topicId: 1337,
+          serverUrl: url,
+        }),
+      ];
+      expect(edges).toEqual(expected);
+    });
+    it("works for post references", () => {
+      const {posts, url} = example();
+      const post = posts[0];
+      const links = [
+        url + "/t/some-slug/42/1",
+        url + "/t/some-slug/42/2/",
+        // The following two posts won't be discovered by findPostInTopic
+        url + "/t/some-slug/42/3",
+        url + "/t/some-slug/42/4/",
+      ];
+      const findPostInTopic = (_, index) => {
+        switch (index) {
+          case 1:
+            return 1337;
+          case 2:
+            return 4242;
+        }
+      };
+      const edges = _createReferenceEdges(url, post, findPostInTopic, links);
+      const expected = [
+        NE.referencesPostEdge(url, post, 1337),
+        NE.referencesPostEdge(url, post, 4242),
+      ];
+      expect(edges).toEqual(expected);
+    });
+    it("won't match posts, topics, or users with a different serverUrl", () => {
+      const {posts, url} = example();
+      const otherUrl = "https://discourse.sourcecred.io";
+      const post = posts[0];
+      const links = [
+        otherUrl + "/t/some-slug/42/1",
+        otherUrl + "/t/some-slug/42",
+        otherUrl + "/u/foo",
+      ];
+      const findPostInTopic = () => 4242;
+      const edges = _createReferenceEdges(url, post, findPostInTopic, links);
+      expect(edges).toEqual([]);
     });
   });
 });
