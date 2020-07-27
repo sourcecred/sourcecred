@@ -85,7 +85,9 @@ export type AddResult = {|
 export interface MirrorRepository extends ReadRepository {
   addLike(like: LikeAction): AddResult;
 
-  addUser(user: User): AddResult;
+  addOrReplaceUser(user: User): AddResult;
+
+  addUserIfNotExists(user: User): AddResult;
 
   /**
    * For the given topic ID, retrieves the bumpedMs value.
@@ -415,7 +417,7 @@ export class SqliteMirrorRepository
   }
 
   addLike(like: LikeAction): AddResult {
-    this.addUser({username: like.username, trustLevel: null});
+    this.addUserIfNotExists({username: like.username, trustLevel: null});
     const res = this._db
       .prepare(
         dedent`\
@@ -472,7 +474,7 @@ export class SqliteMirrorRepository
   }
 
   addPost(post: Post): AddResult {
-    this.addUser({
+    this.addOrReplaceUser({
       username: post.authorUsername,
       trustLevel: post.trustLevel,
     });
@@ -514,7 +516,7 @@ export class SqliteMirrorRepository
   }
 
   addTopic(topic: Topic): AddResult {
-    this.addUser({username: topic.authorUsername, trustLevel: null});
+    this.addUserIfNotExists({username: topic.authorUsername, trustLevel: null});
     const res = this._db
       .prepare(
         dedent`\
@@ -546,7 +548,24 @@ export class SqliteMirrorRepository
     return toAddResult(res);
   }
 
-  addUser(user: User): AddResult {
+  addUserIfNotExists(user: User): AddResult {
+    const {trustLevel, username} = user;
+    const res = this._db
+      .prepare(
+        dedent`\
+          INSERT OR IGNORE INTO users (
+            username,
+            trust_level
+          ) VALUES (
+            :username,
+            :trust_level
+          )`
+      )
+      .run({username, trust_level: trustLevel});
+    return toAddResult(res);
+  }
+
+  addOrReplaceUser(user: User): AddResult {
     const {trustLevel, username} = user;
     const res = this._db
       .prepare(

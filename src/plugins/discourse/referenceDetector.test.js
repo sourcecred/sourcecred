@@ -24,7 +24,7 @@ describe("plugins/discourse/referenceDetector", () => {
       const repo = emptyRepository();
       const detector = new DiscourseReferenceDetector(repo);
       const username = "PascalFan1988";
-      repo.addUser({username, trustLevel: null});
+      repo.addOrReplaceUser({username, trustLevel: 2});
 
       // When
       const result = detector.addressFromUrl(`${TEST_URL}/u/pascalfan1988`);
