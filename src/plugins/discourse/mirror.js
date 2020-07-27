@@ -81,6 +81,7 @@ export class Mirror {
     reporter.start("discourse");
     await this._updateTopicsV2(reporter);
     await this._updateLikes(reporter);
+    await this._updateUsers(reporter);
     reporter.finish("discourse");
   }
 
@@ -159,6 +160,19 @@ export class Mirror {
     }
 
     reporter.finish("discourse/topics");
+  }
+
+  async _updateUsers(reporter: TaskReporter) {
+    const addUser = (user) => this._repo.addUser(user);
+
+    reporter.start("discourse/users");
+    for (const {username} of this._repo.usersWithNullTrustLevel()) {
+      const user = await this._fetcher.getUserData(username);
+      if (user) {
+        addUser(user);
+      }
+    }
+    reporter.finish("discourse/users");
   }
 
   async _updateLikes(reporter: TaskReporter) {

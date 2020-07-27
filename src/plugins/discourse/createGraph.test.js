@@ -65,7 +65,16 @@ describe("plugins/discourse/createGraph", () => {
       }
       return Array.from(users);
     }
-
+    usersWithNullTrustLevel(): $ReadOnlyArray<User> {
+      const users = new Set<User>();
+      for (const {authorUsername} of this.posts()) {
+        users.add({username: authorUsername, trustLevel: null});
+      }
+      for (const {authorUsername} of this.topics()) {
+        users.add({username: authorUsername, trustLevel: null});
+      }
+      return Array.from(users);
+    }
     likes(): $ReadOnlyArray<LikeAction> {
       return this._likes;
     }

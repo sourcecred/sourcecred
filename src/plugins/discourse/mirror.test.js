@@ -893,6 +893,8 @@ describe("plugins/discourse/mirror", () => {
         {type: "FINISH", taskId: "discourse/topics"},
         {type: "START", taskId: "discourse/likes"},
         {type: "FINISH", taskId: "discourse/likes"},
+        {type: "START", taskId: "discourse/users"},
+        {type: "FINISH", taskId: "discourse/users"},
         {type: "FINISH", taskId: "discourse"},
       ]);
     });

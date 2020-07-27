@@ -4,7 +4,7 @@ import Database from "better-sqlite3";
 import fs from "fs";
 import tmp from "tmp";
 import {SqliteMirrorRepository} from "./mirrorRepository";
-import type {Topic, Post, LikeAction} from "./fetch";
+import type {Topic, Post, LikeAction, User} from "./fetch";
 
 describe("plugins/discourse/mirrorRepository", () => {
   it("rejects a different server url without changing the database", () => {
@@ -336,5 +336,33 @@ describe("plugins/discourse/mirrorRepository", () => {
     // Then
     expect(likes).toEqual([l1]);
     expect(likingUser).toEqual({username: "crunkle", trustLevel: null});
+  });
+
+  it("usersWithNullTrustLevel only returns users where trustLevel is null", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+    const u1: User = {
+      username: "u1",
+      trustLevel: null,
+    };
+    const u2: User = {
+      username: "u2",
+      trustLevel: null,
+    };
+    const u3: User = {
+      username: "u3",
+      trustLevel: 4,
+    };
+
+    // When
+    repository.addUser(u1);
+    repository.addUser(u2);
+    repository.addUser(u3);
+    const nullUsers = repository.usersWithNullTrustLevel();
+
+    // Then
+    expect(nullUsers).toEqual(["u1", "u2"]);
   });
 });

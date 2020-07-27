@@ -44,6 +44,13 @@ export interface ReadRepository {
   users(): $ReadOnlyArray<User>;
 
   /**
+   * Get usernames for all users with NULL trust_level.
+   *
+   * The order is unspecified.
+   */
+  usersWithNullTrustLevel(): $ReadOnlyArray<User>;
+
+  /**
    * Gets all of the like actions in the history.
    */
   likes(): $ReadOnlyArray<LikeAction>;
@@ -346,8 +353,15 @@ export class SqliteMirrorRepository
       }));
   }
 
-  findUserbyUsername(username: string): ?User {
+  usersWithNullTrustLevel(): $ReadOnlyArray<User> {
     return this._db
+      .prepare("SELECT username FROM users WHERE trust_level IS NULL")
+      .pluck()
+      .all();
+  }
+
+  findUserbyUsername(username: string): ?User {
+    const user = this._db
       .prepare(
         dedent`\
           SELECT username, trust_level
@@ -355,11 +369,8 @@ export class SqliteMirrorRepository
           WHERE username = :username COLLATE NOCASE
         `
       )
-      .get({username})
-      .map((x) => ({
-        username: x.username,
-        trustLevel: x.trust_level,
-      }));
+      .get({username});
+    return {username: user.username, trustLevel: user.trust_level};
   }
 
   findUsername(username: string): ?string {
@@ -377,7 +388,9 @@ export class SqliteMirrorRepository
 
   likes(): $ReadOnlyArray<LikeAction> {
     return this._db
-      .prepare("SELECT post_id, username, timestamp_ms, trust_level FROM likes")
+      .prepare(
+        "SELECT post_id, username, timestamp_ms, trust_level FROM likes "
+      )
       .all()
       .map((x) => ({
         postId: x.post_id,
