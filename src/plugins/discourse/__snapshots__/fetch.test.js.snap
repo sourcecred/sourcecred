@@ -608,7 +608,6 @@ Array [
   Object {
     "postId": 14,
     "timestampMs": 1564744498189,
-    "trustLevel": undefined,
     "username": "dl-proto",
   },
 ]

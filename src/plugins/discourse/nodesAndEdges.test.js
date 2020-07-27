@@ -63,8 +63,8 @@ describe("plugins/discourse/nodesAndEdges", () => {
       trustLevel: 3,
     };
     const likes: $ReadOnlyArray<LikeAction> = [
-      {timestampMs: 3, username: "mzargham", postId: 2, trustLevel: null},
-      {timestampMs: 4, username: "decentralion", postId: 3, trustLevel: null},
+      {timestampMs: 3, username: "mzargham", postId: 2},
+      {timestampMs: 4, username: "decentralion", postId: 3},
     ];
     const posts = [post1, post2, post3];
     return {topic, url, posts, likes};

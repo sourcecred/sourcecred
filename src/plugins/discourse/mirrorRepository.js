@@ -227,7 +227,6 @@ export class SqliteMirrorRepository
           username TEXT NOT NULL,
           post_id INTEGER NOT NULL,
           timestamp_ms INTEGER NOT NULL,
-          trust_level INTEGER,
           CONSTRAINT username_post PRIMARY KEY (username, post_id),
           FOREIGN KEY(post_id) REFERENCES posts(id),
           FOREIGN KEY(username) REFERENCES users(username)
@@ -374,13 +373,12 @@ export class SqliteMirrorRepository
 
   likes(): $ReadOnlyArray<LikeAction> {
     return this._db
-      .prepare("SELECT post_id, username, timestamp_ms, trust_level FROM likes")
+      .prepare("SELECT post_id, username, timestamp_ms FROM likes")
       .all()
       .map((x) => ({
         postId: x.post_id,
         timestampMs: x.timestamp_ms,
         username: x.username,
-        trustLevel: x.trust_level,
       }));
   }
 
@@ -417,20 +415,18 @@ export class SqliteMirrorRepository
   }
 
   addLike(like: LikeAction): AddResult {
-    this.addUser({username: like.username, trustLevel: like.trustLevel});
+    this.addUser({username: like.username, trustLevel: null});
     const res = this._db
       .prepare(
         dedent`\
           INSERT OR IGNORE INTO likes (
               post_id,
               timestamp_ms,
-              username,
-              trust_level
+              username
           ) VALUES (
               :post_id,
               :timestamp_ms,
-              :username,
-              :trust_level
+              :username
           )
         `
       )
@@ -438,7 +434,6 @@ export class SqliteMirrorRepository
         post_id: like.postId,
         timestamp_ms: like.timestampMs,
         username: like.username,
-        trust_level: like.trustLevel,
       });
     return toAddResult(res);
   }

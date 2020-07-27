@@ -92,8 +92,6 @@ export type LikeAction = {|
   // The post being liked
   +postId: PostId,
   +timestampMs: TimestampMs,
-  // user trustLevel
-  +trustLevel: number | null,
 |};
 
 /**
@@ -423,7 +421,6 @@ function parseLike(json: any): LikeAction {
     username: json.target_username,
     postId: json.post_id,
     timestampMs: Date.parse(json.created_at),
-    trustLevel: json.trustLevel,
   };
 }
 

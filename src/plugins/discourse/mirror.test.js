@@ -578,25 +578,21 @@ describe("plugins/discourse/mirror", () => {
           username: "beta",
           postId: t1.postId,
           timestampMs: 5,
-          trustLevel: null,
         }),
         fetcher.addLike({
           username: "beta",
           postId: t2.postId,
           timestampMs: 6,
-          trustLevel: null,
         }),
         fetcher.addLike({
           username: "beta",
           postId: t3.postId,
           timestampMs: 7,
-          trustLevel: null,
         }),
         fetcher.addLike({
           username: "alpha",
           postId: t1.postId,
           timestampMs: 8,
-          trustLevel: null,
         }),
       ];
       await mirror.update(reporter);
@@ -608,19 +604,16 @@ describe("plugins/discourse/mirror", () => {
           username: "alpha",
           postId: t2.postId,
           timestampMs: 9,
-          trustLevel: null,
         }),
         fetcher.addLike({
           username: "credbot",
           postId: t2.postId,
           timestampMs: 10,
-          trustLevel: null,
         }),
         fetcher.addLike({
           username: "beta",
           postId: t4.postId,
           timestampMs: 11,
-          trustLevel: null,
         }),
       ];
 
@@ -635,7 +628,6 @@ describe("plugins/discourse/mirror", () => {
         username: "nope",
         postId: t1.postId,
         timestampMs: 1,
-        trustLevel: null,
       });
       await mirror.update(reporter);
       expect(repo.likes()).toEqual([]);
@@ -767,19 +759,16 @@ describe("plugins/discourse/mirror", () => {
         username: "credbot",
         postId: t1.postId,
         timestampMs: 1,
-        trustLevel: null,
       });
       fetcher.addLike({
         username: "credbot",
         postId: t2.postId,
         timestampMs: 2,
-        trustLevel: null,
       });
       fetcher.addLike({
         username: "credbot",
         postId: t3.postId,
         timestampMs: 3,
-        trustLevel: null,
       });
       const fetchLikes = jest.spyOn(fetcher, "likesByUser");
       await mirror.update(reporter);
@@ -799,20 +788,17 @@ describe("plugins/discourse/mirror", () => {
         username: "credbot",
         postId: t1.postId,
         timestampMs: 1,
-        trustLevel: null,
       });
       fetcher.addLike({
         username: "credbot",
         postId: t2.postId,
         timestampMs: 2,
-        trustLevel: null,
       });
       await mirror.update(reporter);
       fetcher.addLike({
         username: "credbot",
         postId: t3.postId,
         timestampMs: 3,
-        trustLevel: null,
       });
       const fetchLikes = jest.spyOn(fetcher, "likesByUser");
       await mirror.update(reporter);
@@ -827,7 +813,6 @@ describe("plugins/discourse/mirror", () => {
         username: "credbot",
         postId: 37,
         timestampMs: 0,
-        trustLevel: null,
       };
       fetcher._likes.push(badLike);
       await mirror.update(reporter);
@@ -863,7 +848,6 @@ describe("plugins/discourse/mirror", () => {
         username: "otheruser",
         postId: t1.postId,
         timestampMs: 123,
-        trustLevel: null,
       });
       const _likesByUser = fetcher.likesByUser.bind(fetcher);
       (fetcher: any).likesByUser = async (

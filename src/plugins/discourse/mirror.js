@@ -207,8 +207,7 @@ export class Mirror {
         }
         possiblePageSize = Math.max(likeActions.length, possiblePageSize);
         for (const like of likeActions) {
-          const newLike = {...like, trustLevel: user.trustLevel};
-          if (addLike(newLike).doneWithUser) {
+          if (addLike(like).doneWithUser) {
             upToDate = true;
             break;
           }

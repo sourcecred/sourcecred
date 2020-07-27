@@ -322,7 +322,6 @@ describe("plugins/discourse/mirrorRepository", () => {
     const l1: LikeAction = {
       postId: 100,
       timestampMs: 456800,
-      trustLevel: null,
       username: "crunkle",
     };
 
