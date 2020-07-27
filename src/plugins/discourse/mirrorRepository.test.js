@@ -4,7 +4,7 @@ import Database from "better-sqlite3";
 import fs from "fs";
 import tmp from "tmp";
 import {SqliteMirrorRepository} from "./mirrorRepository";
-import type {Topic, Post} from "./fetch";
+import type {Topic, Post, LikeAction} from "./fetch";
 
 describe("plugins/discourse/mirrorRepository", () => {
   it("rejects a different server url without changing the database", () => {
@@ -34,7 +34,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
 
     // When
-    repository.addUser(username);
+    repository.addUser({username, trustLevel: null});
     const result1 = repository.findUsername("pascalfan1988");
     const result2 = repository.findUsername(username);
 
@@ -142,6 +142,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       timestampMs: 456789,
       authorUsername: "credbot",
       cooked: "<p>Valid post</p>",
+      trustLevel: 1,
     };
     const p2: Post = {
       id: 101,
@@ -151,6 +152,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       timestampMs: 456888,
       authorUsername: "credbot",
       cooked: "<p>Follow up 1</p>",
+      trustLevel: 2,
     };
     const p3: Post = {
       id: 102,
@@ -160,6 +162,7 @@ describe("plugins/discourse/mirrorRepository", () => {
       timestampMs: 456999,
       authorUsername: "credbot",
       cooked: "<p>Follow up, replacement</p>",
+      trustLevel: 3,
     };
 
     // When
@@ -195,6 +198,7 @@ describe("plugins/discourse/mirrorRepository", () => {
         timestampMs: 456789,
         authorUsername: "credbot",
         cooked: "<p>Valid post</p>",
+        trustLevel: 2,
       },
       {
         id: 456,
@@ -204,6 +208,7 @@ describe("plugins/discourse/mirrorRepository", () => {
         timestampMs: 456999,
         authorUsername: "credbot",
         cooked: "<p>Invalid post, topic ID foreign key constraint.</p>",
+        trustLevel: 3,
       },
     ];
 
@@ -256,5 +261,79 @@ describe("plugins/discourse/mirrorRepository", () => {
     // Then
     expect(actualT1).toEqual(topic1);
     expect(actualT2).toEqual(topic2);
+  });
+
+  it("on addPost, user trustLevel is equal to post trustLevel", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+    const topic: Topic = {
+      id: 123,
+      categoryId: 1,
+      title: "Sample topic",
+      timestampMs: 456789,
+      bumpedMs: 456999,
+      authorUsername: "credbot",
+    };
+    const p1: Post = {
+      id: 100,
+      topicId: 123,
+      indexWithinTopic: 0,
+      replyToPostIndex: null,
+      timestampMs: 456789,
+      authorUsername: "crunkle",
+      cooked: "<p>Valid post</p>",
+      trustLevel: 3,
+    };
+
+    // When
+    repository.addTopic(topic);
+    repository.addPost(p1);
+    const postingUser = repository.findUserbyUsername("crunkle");
+
+    // Then
+    expect(postingUser).toEqual({username: "crunkle", trustLevel: 3});
+  });
+
+  it("on addLike, user trustLevel is null", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+    const topic: Topic = {
+      id: 123,
+      categoryId: 1,
+      title: "Sample topic",
+      timestampMs: 456789,
+      bumpedMs: 456999,
+      authorUsername: "credbot",
+    };
+    const p1: Post = {
+      id: 100,
+      topicId: 123,
+      indexWithinTopic: 0,
+      replyToPostIndex: null,
+      timestampMs: 456789,
+      authorUsername: "credbot",
+      cooked: "<p>Valid post</p>",
+      trustLevel: 4,
+    };
+    const l1: LikeAction = {
+      postId: 100,
+      timestampMs: 456800,
+      username: "crunkle",
+    };
+
+    // When
+    repository.addTopic(topic);
+    repository.addPost(p1);
+    repository.addLike(l1);
+    const likes = repository.likes();
+    const likingUser = repository.findUserbyUsername("crunkle");
+
+    // Then
+    expect(likes).toEqual([l1]);
+    expect(likingUser).toEqual({username: "crunkle", trustLevel: null});
   });
 });

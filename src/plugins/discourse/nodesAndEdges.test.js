@@ -38,6 +38,7 @@ describe("plugins/discourse/nodesAndEdges", () => {
       // A reference to a post with different capitalization
       <a href="https://URL.com/t/irrelevant-slug/1/3?u=bla">Third post</a>
       </p>`,
+      trustLevel: 3,
     };
     const post2 = {
       id: 2,
@@ -49,6 +50,7 @@ describe("plugins/discourse/nodesAndEdges", () => {
       timestampMs: 1,
       authorUsername: "wchargin",
       cooked: "<h1>Hello</h1>",
+      trustLevel: 3,
     };
     const post3 = {
       id: 3,
@@ -58,6 +60,7 @@ describe("plugins/discourse/nodesAndEdges", () => {
       timestampMs: 1,
       authorUsername: "mzargham",
       cooked: "<h1>Hello</h1>",
+      trustLevel: 3,
     };
     const likes: $ReadOnlyArray<LikeAction> = [
       {timestampMs: 3, username: "mzargham", postId: 2},

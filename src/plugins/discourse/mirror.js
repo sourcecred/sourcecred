@@ -194,11 +194,11 @@ export class Mirror {
     // section of the update significantly.
 
     reporter.start("discourse/likes");
-    for (const user of this._repo.users()) {
+    for (const {username} of this._repo.users()) {
       let offset = 0;
       let upToDate = false;
       while (!upToDate) {
-        const likeActions = await this._fetcher.likesByUser(user, offset);
+        const likeActions = await this._fetcher.likesByUser(username, offset);
         if (likeActions == null) {
           break;
         }

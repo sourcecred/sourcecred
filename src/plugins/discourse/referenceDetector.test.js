@@ -24,7 +24,7 @@ describe("plugins/discourse/referenceDetector", () => {
       const repo = emptyRepository();
       const detector = new DiscourseReferenceDetector(repo);
       const username = "PascalFan1988";
-      repo.addUser(username);
+      repo.addUser({username, trustLevel: null});
 
       // When
       const result = detector.addressFromUrl(`${TEST_URL}/u/pascalfan1988`);
@@ -90,6 +90,7 @@ describe("plugins/discourse/referenceDetector", () => {
         timestampMs: 456789,
         authorUsername: "credbot",
         cooked: "<p>Valid post</p>",
+        trustLevel: 3,
       };
       repo.addTopic(topic);
       repo.addPost(p1);

@@ -68,6 +68,8 @@ export type Post = {|
   // reply to the first post.
   +replyToPostIndex: number | null,
   +timestampMs: TimestampMs,
+  // the Discourse trust level of the author of the post
+  +trustLevel: number,
   +authorUsername: string,
   // The post HTML for rendering.
   +cooked: string,
@@ -81,7 +83,7 @@ export type TopicWithPosts = {|
 
 export type User = {|
   +username: string,
-  +trustLevel: number,
+  +trustLevel: number | null,
 |};
 
 export type LikeAction = {|
@@ -113,6 +115,9 @@ export interface Discourse {
     targetUsername: string,
     offset: number
   ): Promise<LikeAction[] | null>;
+
+  // Retrieves the User data for a specific username.
+  getUserData(username: string): Promise<User | null>;
 
   // Gets the topic IDs for every "about-x-category" topic.
   // Discourse calls this a "definition" topic.
@@ -287,11 +292,11 @@ export class Fetcher implements Discourse {
   }
 
   async likesByUser(
-    username: string,
+    targetUsername: string,
     offset: number
   ): Promise<LikeAction[] | null> {
     const response = await this._fetch(
-      `/user_actions.json?username=${username}&filter=1&offset=${offset}`
+      `/user_actions.json?username=${targetUsername}&filter=1&offset=${offset}`
     );
     const {status} = response;
     if (status === 404) {
@@ -398,6 +403,7 @@ function parsePost(json: any): Post {
     indexWithinTopic: json.post_number,
     replyToPostIndex: json.reply_to_post_number,
     topicId: json.topic_id,
+    trustLevel: json.trust_level,
     authorUsername: json.username,
     cooked: json.cooked,
   };

@@ -16,6 +16,7 @@ import {
   type Post,
   type TopicWithPosts,
   type LikeAction,
+  type User,
 } from "./fetch";
 import * as MapUtil from "../../util/map";
 import * as NullUtil from "../../util/null";
@@ -38,6 +39,8 @@ type PostOptions = {|
   authorUsername?: string,
   // Defaults to: "<h1>Hello World</h1>"
   cooked?: string,
+  // User trust_level
+  trustLevel?: number,
 |};
 
 type PostEdits = {|
@@ -80,6 +83,7 @@ class MockFetcher implements Discourse {
   _topicToCategory: Map<TopicId, CategoryId>;
   _topicToPostIds: Map<TopicId, PostId[]>;
   _posts: Map<PostId, Post>;
+  _users: User[];
   _likes: LikeAction[];
 
   constructor() {
@@ -92,6 +96,7 @@ class MockFetcher implements Discourse {
     this._topicToCategory = new Map();
     this._topicToPostIds = new Map();
     this._posts = new Map();
+    this._users = [];
     this._likes = [];
   }
 
@@ -121,6 +126,13 @@ class MockFetcher implements Discourse {
       return post;
     });
     return {topic: this._topicView(id), posts};
+  }
+
+  async getUserData(targetUsername: string): Promise<User | null> {
+    const matchingUser = this._users.find(
+      ({username}) => username === targetUsername
+    );
+    return matchingUser || null;
   }
 
   async likesByUser(
@@ -249,6 +261,7 @@ class MockFetcher implements Discourse {
     replyToPostIndex,
     authorUsername,
     cooked,
+    trustLevel,
   }: PostOptions): PostId {
     if (!this._topicToPostIds.has(topicId)) {
       throw new Error(`Topic with ID ${topicId} not yet added.`);
@@ -280,6 +293,7 @@ class MockFetcher implements Discourse {
       replyToPostIndex: replyToPostIndex || null,
       authorUsername: authorUsername || "credbot",
       cooked: cooked || "<h1>Hello World</h1>",
+      trustLevel: trustLevel || 4,
     };
     this._posts.set(postId, post);
     return postId;
@@ -546,9 +560,17 @@ describe("plugins/discourse/mirror", () => {
         fetcher.addTopic({authorUsername: "alpha"}),
         fetcher.addTopic({authorUsername: "beta"}),
       ];
-      fetcher.addPost({authorUsername: "delta", topicId: t2.topicId});
+      fetcher.addPost({
+        authorUsername: "delta",
+        topicId: t2.topicId,
+        trustLevel: 2,
+      });
       await mirror.update(reporter);
-      expect([...repo.users()].sort()).toEqual(["alpha", "beta", "delta"]);
+      expect([...repo.users()].sort()).toEqual([
+        {username: "alpha", trustLevel: 4},
+        {username: "beta", trustLevel: 4},
+        {username: "delta", trustLevel: 2},
+      ]);
     });
 
     it("provides all the likes by users that have posted", async () => {
@@ -559,23 +581,47 @@ describe("plugins/discourse/mirror", () => {
         fetcher.addTopic({authorUsername: "beta"}),
       ];
       const [l1, l2, l3, l4] = [
-        fetcher.addLike({username: "beta", postId: t1.postId, timestampMs: 5}),
-        fetcher.addLike({username: "beta", postId: t2.postId, timestampMs: 6}),
-        fetcher.addLike({username: "beta", postId: t3.postId, timestampMs: 7}),
-        fetcher.addLike({username: "alpha", postId: t1.postId, timestampMs: 8}),
+        fetcher.addLike({
+          username: "beta",
+          postId: t1.postId,
+          timestampMs: 5,
+        }),
+        fetcher.addLike({
+          username: "beta",
+          postId: t2.postId,
+          timestampMs: 6,
+        }),
+        fetcher.addLike({
+          username: "beta",
+          postId: t3.postId,
+          timestampMs: 7,
+        }),
+        fetcher.addLike({
+          username: "alpha",
+          postId: t1.postId,
+          timestampMs: 8,
+        }),
       ];
       await mirror.update(reporter);
       expectLikesSorted(repo.likes(), [l1, l2, l3, l4]);
 
       const t4 = fetcher.addTopic({authorUsername: "credbot"});
       const [l5, l6, l7] = [
-        fetcher.addLike({username: "alpha", postId: t2.postId, timestampMs: 9}),
+        fetcher.addLike({
+          username: "alpha",
+          postId: t2.postId,
+          timestampMs: 9,
+        }),
         fetcher.addLike({
           username: "credbot",
           postId: t2.postId,
           timestampMs: 10,
         }),
-        fetcher.addLike({username: "beta", postId: t4.postId, timestampMs: 11}),
+        fetcher.addLike({
+          username: "beta",
+          postId: t4.postId,
+          timestampMs: 11,
+        }),
       ];
 
       await mirror.update(reporter);
@@ -585,7 +631,11 @@ describe("plugins/discourse/mirror", () => {
     it("doesn't find likes of users that never posted", async () => {
       const {mirror, fetcher, reporter, repo} = example();
       const t1 = fetcher.addTopic();
-      fetcher.addLike({username: "nope", postId: t1.postId, timestampMs: 1});
+      fetcher.addLike({
+        username: "nope",
+        postId: t1.postId,
+        timestampMs: 1,
+      });
       await mirror.update(reporter);
       expect(repo.likes()).toEqual([]);
     });
@@ -712,9 +762,21 @@ describe("plugins/discourse/mirror", () => {
         fetcher.addTopic({authorUsername: "credbot"}),
         fetcher.addTopic({authorUsername: "credbot"}),
       ];
-      fetcher.addLike({username: "credbot", postId: t1.postId, timestampMs: 1});
-      fetcher.addLike({username: "credbot", postId: t2.postId, timestampMs: 2});
-      fetcher.addLike({username: "credbot", postId: t3.postId, timestampMs: 3});
+      fetcher.addLike({
+        username: "credbot",
+        postId: t1.postId,
+        timestampMs: 1,
+      });
+      fetcher.addLike({
+        username: "credbot",
+        postId: t2.postId,
+        timestampMs: 2,
+      });
+      fetcher.addLike({
+        username: "credbot",
+        postId: t3.postId,
+        timestampMs: 3,
+      });
       const fetchLikes = jest.spyOn(fetcher, "likesByUser");
       await mirror.update(reporter);
       expect(fetchLikes).toHaveBeenCalledTimes(2);
@@ -729,10 +791,22 @@ describe("plugins/discourse/mirror", () => {
         fetcher.addTopic({authorUsername: "credbot"}),
         fetcher.addTopic({authorUsername: "credbot"}),
       ];
-      fetcher.addLike({username: "credbot", postId: t1.postId, timestampMs: 1});
-      fetcher.addLike({username: "credbot", postId: t2.postId, timestampMs: 2});
+      fetcher.addLike({
+        username: "credbot",
+        postId: t1.postId,
+        timestampMs: 1,
+      });
+      fetcher.addLike({
+        username: "credbot",
+        postId: t2.postId,
+        timestampMs: 2,
+      });
       await mirror.update(reporter);
-      fetcher.addLike({username: "credbot", postId: t3.postId, timestampMs: 3});
+      fetcher.addLike({
+        username: "credbot",
+        postId: t3.postId,
+        timestampMs: 3,
+      });
       const fetchLikes = jest.spyOn(fetcher, "likesByUser");
       await mirror.update(reporter);
       expect(fetchLikes).toHaveBeenCalledTimes(1);
@@ -742,7 +816,11 @@ describe("plugins/discourse/mirror", () => {
     it("warns if it gets a like that doesn't correspond to any post", async () => {
       const {mirror, fetcher, reporter, repo} = example();
       const t1 = fetcher.addTopic({authorUsername: "credbot"});
-      const badLike = {username: "credbot", postId: 37, timestampMs: 0};
+      const badLike = {
+        username: "credbot",
+        postId: 37,
+        timestampMs: 0,
+      };
       fetcher._likes.push(badLike);
       await mirror.update(reporter);
       expect(repo.topics()).toEqual([fetcher._topic(t1.topicId)]);
