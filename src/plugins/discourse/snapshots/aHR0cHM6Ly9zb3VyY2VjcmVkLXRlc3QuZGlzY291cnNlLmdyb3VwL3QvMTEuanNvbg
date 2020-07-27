@@ -160,14 +160,54 @@
   "timeline_lookup": [
     [
       1,
-      89
+      348
     ],
     [
       3,
-      86
+      346
     ]
   ],
   "suggested_topics": [
+    {
+      "id": 19,
+      "title": "This post will be a wiki",
+      "fancy_title": "This post will be a wiki",
+      "slug": "this-post-will-be-a-wiki",
+      "posts_count": 2,
+      "reply_count": 0,
+      "highest_post_number": 2,
+      "image_url": null,
+      "created_at": "2019-10-02T20:51:31.690Z",
+      "last_posted_at": "2019-10-02T20:57:16.311Z",
+      "bumped": true,
+      "bumped_at": "2019-10-02T20:57:16.311Z",
+      "archetype": "regular",
+      "unseen": false,
+      "pinned": false,
+      "unpinned": null,
+      "visible": true,
+      "closed": false,
+      "archived": false,
+      "bookmarked": null,
+      "liked": null,
+      "like_count": 0,
+      "views": 524,
+      "category_id": 1,
+      "featured_link": null,
+      "has_accepted_answer": false,
+      "posters": [
+        {
+          "extras": "latest single",
+          "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": 2,
+            "username": "d11",
+            "name": "D",
+            "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
+          }
+        }
+      ]
+    },
     {
       "id": 21,
       "title": "A Post With References",
@@ -181,6 +221,7 @@
       "last_posted_at": "2019-10-23T18:26:31.281Z",
       "bumped": true,
       "bumped_at": "2019-10-23T18:26:31.281Z",
+      "archetype": "regular",
       "unseen": false,
       "pinned": false,
       "unpinned": null,
@@ -189,9 +230,8 @@
       "archived": false,
       "bookmarked": null,
       "liked": null,
-      "archetype": "regular",
       "like_count": 0,
-      "views": 9,
+      "views": 535,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
@@ -221,6 +261,7 @@
       "last_posted_at": "2019-10-07T03:49:19.922Z",
       "bumped": true,
       "bumped_at": "2019-10-07T03:49:19.922Z",
+      "archetype": "regular",
       "unseen": false,
       "pinned": false,
       "unpinned": null,
@@ -229,9 +270,8 @@
       "archived": false,
       "bookmarked": null,
       "liked": null,
-      "archetype": "regular",
       "like_count": 0,
-      "views": 8,
+      "views": 529,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
@@ -261,6 +301,7 @@
       "last_posted_at": "2019-10-02T20:50:10.625Z",
       "bumped": true,
       "bumped_at": "2019-10-02T20:50:10.625Z",
+      "archetype": "regular",
       "unseen": false,
       "pinned": false,
       "unpinned": null,
@@ -269,9 +310,8 @@
       "archived": false,
       "bookmarked": null,
       "liked": null,
-      "archetype": "regular",
       "like_count": 0,
-      "views": 8,
+      "views": 522,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
@@ -289,18 +329,19 @@
       ]
     },
     {
-      "id": 19,
-      "title": "This post will be a wiki",
-      "fancy_title": "This post will be a wiki",
-      "slug": "this-post-will-be-a-wiki",
+      "id": 13,
+      "title": "A Thread With Links",
+      "fancy_title": "A Thread With Links",
+      "slug": "a-thread-with-links",
       "posts_count": 2,
       "reply_count": 0,
       "highest_post_number": 2,
       "image_url": null,
-      "created_at": "2019-10-02T20:51:31.690Z",
-      "last_posted_at": "2019-10-02T20:57:16.311Z",
+      "created_at": "2019-08-02T11:15:53.843Z",
+      "last_posted_at": "2019-08-02T11:16:31.313Z",
       "bumped": true,
-      "bumped_at": "2019-10-02T20:57:16.311Z",
+      "bumped_at": "2019-08-02T11:17:12.755Z",
+      "archetype": "regular",
       "unseen": false,
       "pinned": false,
       "unpinned": null,
@@ -309,62 +350,30 @@
       "archived": false,
       "bookmarked": null,
       "liked": null,
-      "archetype": "regular",
       "like_count": 0,
-      "views": 9,
+      "views": 533,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
       "posters": [
         {
-          "extras": "latest single",
+          "extras": "latest",
           "description": "Original Poster, Most Recent Poster",
+          "user": {
+            "id": 3,
+            "username": "dl-proto",
+            "name": "dandelion protocol acct",
+            "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png"
+          }
+        },
+        {
+          "extras": null,
+          "description": "Frequent Poster",
           "user": {
             "id": 2,
             "username": "d11",
             "name": "D",
             "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
-          }
-        }
-      ]
-    },
-    {
-      "id": 7,
-      "title": "Welcome to Discourse",
-      "fancy_title": "Welcome to Discourse",
-      "slug": "welcome-to-discourse",
-      "posts_count": 1,
-      "reply_count": 0,
-      "highest_post_number": 1,
-      "image_url": "https://sjc3.discourse-cdn.com/free1/images/welcome/discourse-edit-post-animated.gif",
-      "created_at": "2019-04-02T20:20:12.879Z",
-      "last_posted_at": "2019-04-02T20:20:12.933Z",
-      "bumped": true,
-      "bumped_at": "2019-04-10T23:16:19.399Z",
-      "unseen": false,
-      "pinned": true,
-      "unpinned": null,
-      "excerpt": "This is a test instance. \nThe first paragraph of this pinned topic will be visible as a welcome message to all new visitors on your homepage. It’s important! \nEdit this into a brief description of your community: \n\nWho i&hellip;",
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "archetype": "regular",
-      "like_count": 0,
-      "views": 8,
-      "category_id": 1,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": -1,
-            "username": "system",
-            "name": "system",
-            "avatar_template": "/user_avatar/sourcecred-test.discourse.group/system/{size}/1_2.png"
           }
         }
       ]
@@ -375,7 +384,7 @@
   "fancy_title": "My First Test Post",
   "posts_count": 3,
   "created_at": "2019-08-02T11:12:29.408Z",
-  "views": 34,
+  "views": 574,
   "reply_count": 0,
   "like_count": 1,
   "last_posted_at": "2019-08-04T20:50:39.667Z",
@@ -423,11 +432,12 @@
     }
   ],
   "chunk_size": 20,
-  "bookmarked": null,
+  "bookmarked": false,
   "topic_timer": null,
-  "message_bus_last_id": 1,
+  "message_bus_last_id": 0,
   "participant_count": 2,
   "show_read_indicator": false,
+  "thumbnails": null,
   "tags_disable_ads": false,
   "details": {
     "notification_level": 1,

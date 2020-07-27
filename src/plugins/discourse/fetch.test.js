@@ -16,6 +16,9 @@ describe("plugins/discourse/fetch", () => {
         await snapshotFetcher().likesByUser("dl-proto", 0)
       ).toMatchSnapshot();
     });
+    it("loads user data from snapshot dl-proto", async () => {
+      expect(await snapshotFetcher().getUserData("dl-proto")).toMatchSnapshot();
+    });
     it("loads topic IDs that are category definition topics", async () => {
       expect(
         await snapshotFetcher().categoryDefinitionTopicIds()
