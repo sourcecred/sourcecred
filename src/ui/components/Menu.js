@@ -40,6 +40,13 @@ const Menu = ({bundledPlugins}: LoadSuccess) => ({onMenuClick}: menuProps) => {
           );
         })}
       <MenuItemLink
+        to="/grain"
+        primaryText="Grain Accounts"
+        leftIcon={<DefaultIcon />}
+        onClick={onMenuClick}
+        sidebarIsOpen={open}
+      />
+      <MenuItemLink
         to="/admin"
         primaryText="Ledger Admin"
         leftIcon={<DefaultIcon />}

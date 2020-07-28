@@ -86,6 +86,10 @@ async function makeConfig(
           express.static(path.join(developmentInstancePath, "output"))
         );
         app.use(
+          "/data/",
+          express.static(path.join(developmentInstancePath, "data"))
+        );
+        app.use(
           "/config/",
           express.static(path.join(developmentInstancePath, "config"))
         );
