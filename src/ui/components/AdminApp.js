@@ -57,7 +57,6 @@ const AdminApp = () => {
   React.useEffect(() => {
     load().then(setLoadResult);
   }, []);
-  const history = useHistory();
 
   if (!loadResult) {
     return (
@@ -76,7 +75,7 @@ const AdminApp = () => {
         </div>
       );
     case "SUCCESS":
-      return AdminInner(loadResult);
+      return <AdminInner loadResult={loadResult} />;
     default:
       throw new Error((loadResult.type: empty));
   }
@@ -88,8 +87,9 @@ const AdminApp = () => {
  * initial one. We may want to handle CredViews the same way, since the
  * explorer can re-calculate it.
  */
-const AdminInner = (loadSuccess: LoadSuccess) => {
+const AdminInner = ({loadResult: loadSuccess}) => {
   const [ledger, setLedger] = React.useState<Ledger>(loadSuccess.ledger);
+  const history = useHistory();
   return (
     <Admin
       layout={AppLayout(loadSuccess)}
