@@ -4,8 +4,15 @@ import sortBy from "../../util/sortBy";
 import * as NullUtil from "../../util/null";
 import type {ReadRepository} from "./mirrorRepository";
 import type {Topic, Post, PostId, TopicId, LikeAction, User} from "./fetch";
-import {EdgeAddress, type Node, type Edge} from "../../core/graph";
-import {createGraph, _createReferenceEdges} from "./createGraph";
+import {EdgeAddress, type Node, type Edge, Graph} from "../../core/graph";
+import {
+  createGraph,
+  _createReferenceEdges,
+  weightForTrustLevel,
+  _createGraphData,
+  _graphFromData,
+  DEFAULT_TRUST_LEVEL_TO_WEIGHT,
+} from "./createGraph";
 import * as NE from "./nodesAndEdges";
 
 import {userAddress, postAddress, topicAddress} from "./address";
@@ -409,6 +416,108 @@ describe("plugins/discourse/createGraph", () => {
       const findPostInTopic = () => 4242;
       const edges = _createReferenceEdges(url, post, findPostInTopic, links);
       expect(edges).toEqual([]);
+    });
+  });
+
+  describe("weightForTrustLevel", () => {
+    it("has a weight of 0 for a null or undefined trustLevel", () => {
+      expect(weightForTrustLevel(null)).toEqual(0);
+      expect(weightForTrustLevel(undefined)).toEqual(0);
+    });
+    it("throws an error for an invalid trustLevel", () => {
+      const thunk = () => weightForTrustLevel(-1);
+      expect(thunk).toThrowError("invalid trust level");
+    });
+    it("works as expected for a regular user", () => {
+      expect(weightForTrustLevel(0)).toEqual(0);
+      expect(weightForTrustLevel(1)).toEqual(0.1);
+      expect(weightForTrustLevel(2)).toEqual(1);
+      expect(weightForTrustLevel(3)).toEqual(1.25);
+      expect(weightForTrustLevel(4)).toEqual(1.5);
+    });
+  });
+
+  describe("_createGraphData", () => {
+    it("adds weights to likes based on user trust levels", () => {
+      const like1 = {username: "foo", timestampMs: 4, postId: 42};
+      const like2 = {username: "nope", timestampMs: 5, postId: 37};
+      class MockData implements ReadRepository {
+        topics(): $ReadOnlyArray<Topic> {
+          return [];
+        }
+        posts(): $ReadOnlyArray<Post> {
+          return [];
+        }
+        users(): $ReadOnlyArray<User> {
+          return [{username: "foo", trustLevel: 4}];
+        }
+        likes(): $ReadOnlyArray<LikeAction> {
+          return [like1, like2];
+        }
+        findPostInTopic(): ?PostId {
+          throw new Error("Unused");
+        }
+        maxIds() {
+          throw new Error("Unused");
+        }
+        findUsername() {
+          throw new Error(
+            "Method findUsername should be unused by createGraph"
+          );
+        }
+        topicById() {
+          throw new Error("Method topicById should be unused by createGraph");
+        }
+      }
+      const url = "https://example.com";
+      const data = _createGraphData(url, new MockData());
+      const expectedData = {
+        users: [NE.userNode(url, "foo")],
+        topics: [],
+        posts: [],
+        likes: [
+          {
+            createsLike: expect.anything(),
+            likes: expect.anything(),
+            node: NE.likeNode(url, like1, "[unknown post]"),
+            weight: DEFAULT_TRUST_LEVEL_TO_WEIGHT[4],
+          },
+          {
+            createsLike: expect.anything(),
+            likes: expect.anything(),
+            node: NE.likeNode(url, like2, "[unknown post]"),
+            // 0 weight because this user didn't appear in the data
+            weight: 0,
+          },
+        ],
+      };
+      expect(data).toEqual(expectedData);
+    });
+  });
+
+  describe("_graphFromData", () => {
+    it("applies likes' weight", () => {
+      const likeAction = {username: "foo", postId: 43, timestampMs: 17};
+      const url = "";
+      const graphLike = {
+        node: NE.likeNode(url, likeAction, "[unknown post]"),
+        createsLike: NE.createsLikeEdge(url, likeAction),
+        likes: NE.likesEdge(url, likeAction),
+        weight: 0.33,
+      };
+      const data = {
+        users: [],
+        topics: [],
+        posts: [],
+        likes: [graphLike],
+      };
+      const {weights, graph} = _graphFromData(data);
+      const expectedGraph = new Graph()
+        .addNode(graphLike.node)
+        .addEdge(graphLike.createsLike)
+        .addEdge(graphLike.likes);
+      expect(expectedGraph.equals(graph)).toBe(true);
+      expect(weights.nodeWeights.get(graphLike.node.address)).toEqual(0.33);
     });
   });
 });
