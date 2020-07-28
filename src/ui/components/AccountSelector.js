@@ -97,7 +97,6 @@ export const menuStyles = (isOpen: boolean) => ({
   zIndex: 1000,
   listStyle: "none",
   padding: 0,
-  //left: "135px",
 });
 
 export const comboboxStyles = {display: "inline-block"};
