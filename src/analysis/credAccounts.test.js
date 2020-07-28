@@ -4,7 +4,7 @@ import {NodeAddress} from "../core/graph";
 import {_computeCredAccounts} from "./credAccounts";
 import {Ledger} from "../ledger/ledger";
 
-describe("ledger/credAccounts", () => {
+describe("analysis/credAccounts", () => {
   describe("_computeCredAccounts", () => {
     it("works in a simple case", () => {
       const ledger = new Ledger();

@@ -10,7 +10,7 @@ import {
   newIdentity,
 } from "./identity";
 
-describe("ledger/identity", () => {
+describe("analysis/identity", () => {
   const example: Identity = deepFreeze(newIdentity("USER", "foo"));
   describe("newIdentity", () => {
     it("new identities don't have aliases", () => {
