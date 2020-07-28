@@ -3,7 +3,7 @@
 import React, {useState, useMemo} from "react";
 import {useCombobox, useMultipleSelection} from "downshift";
 import {Ledger} from "../../ledger/ledger";
-import {type Identity} from "../../ledger/identity";
+import {type Identity} from "../../analysis/identity";
 import {CredView} from "../../analysis/credView";
 import {type NodeAddressT} from "../../core/graph";
 import Markdown from "react-markdown";

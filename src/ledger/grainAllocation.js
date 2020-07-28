@@ -13,7 +13,7 @@ import {
   random as randomUuid,
   parser as uuidParser,
 } from "../util/uuid";
-import {type IdentityId} from "./identity";
+import {type IdentityId} from "../analysis/identity";
 
 /**
  * The Balanced policy attempts to pay Grain to everyone so that their

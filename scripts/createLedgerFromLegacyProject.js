@@ -6,7 +6,6 @@ import * as C from "../src/util/combo";
 import {Ledger} from "../src/ledger/ledger";
 import type {NodeAddressT} from "../src/core/graph";
 import {resolveAlias} from "../src/cli/alias";
-import {identityNameFromString} from "../src/ledger/identity";
 
 const URL_PATTERN = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 

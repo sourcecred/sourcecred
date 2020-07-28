@@ -25,7 +25,7 @@ import * as Params from "../analysis/timeline/params";
 import {
   contractions as identityContractions,
   declaration as identityDeclaration,
-} from "../ledger/identity";
+} from "../analysis/identity";
 import {Ledger, parser as ledgerParser} from "../ledger/ledger";
 import {computeCredAccounts} from "../ledger/credAccounts";
 

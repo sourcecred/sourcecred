@@ -36,8 +36,8 @@ import {
   type NodeContraction,
   EdgeAddress,
 } from "../core/graph";
-import type {NodeType} from "../analysis/types";
-import type {PluginDeclaration} from "../analysis/pluginDeclaration";
+import type {NodeType} from "./types";
+import type {PluginDeclaration} from "./pluginDeclaration";
 
 /**
  * We validate identityNames using GitHub-esque rules.

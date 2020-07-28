@@ -1,7 +1,7 @@
 // @flow
 
 import React, {useState} from "react";
-import {type Identity} from "../../ledger/identity";
+import {type Identity} from "../../analysis/identity";
 import {Ledger} from "../../ledger/ledger";
 import {CredView} from "../../analysis/credView";
 import {AliasSelector} from "./AliasSelector";

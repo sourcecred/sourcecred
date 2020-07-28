@@ -17,7 +17,7 @@ import {
   newIdentity,
   identityNameParser,
   identityNameFromString,
-} from "./identity";
+} from "../analysis/identity";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";

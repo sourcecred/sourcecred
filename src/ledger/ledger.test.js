@@ -3,7 +3,7 @@
 import cloneDeep from "lodash.clonedeep";
 import {NodeAddress} from "../core/graph";
 import {Ledger, parser} from "./ledger";
-import {newIdentity} from "./identity";
+import {newIdentity} from "../analysis/identity";
 import * as G from "./grain";
 import * as uuid from "../util/uuid"; // for spy purposes
 
