@@ -2,7 +2,7 @@
 
 import {NodeAddress} from "../core/graph";
 import {_computeCredAccounts} from "./credAccounts";
-import {Ledger} from "./ledger";
+import {Ledger} from "../ledger/ledger";
 
 describe("ledger/credAccounts", () => {
   describe("_computeCredAccounts", () => {

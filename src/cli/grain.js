@@ -7,7 +7,7 @@ import {fromJSON as credResultFromJson} from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import {Ledger, parser as ledgerParser} from "../ledger/ledger";
 import {applyDistributions} from "../ledger/applyDistributions";
-import {computeCredAccounts} from "../ledger/credAccounts";
+import {computeCredAccounts} from "../analysis/credAccounts";
 import stringify from "json-stable-stringify";
 import * as G from "../ledger/grain";
 

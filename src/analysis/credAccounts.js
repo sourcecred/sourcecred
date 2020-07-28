@@ -10,7 +10,7 @@
  * changes to it in the future.
  */
 import {sum} from "d3-array";
-import {Ledger, type Account} from "./ledger";
+import {Ledger, type Account} from "../ledger/ledger";
 import {CredView} from "../analysis/credView";
 import {type TimestampMs} from "../util/timestamp";
 import {NodeAddress, type NodeAddressT} from "../core/graph";

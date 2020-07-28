@@ -4,7 +4,7 @@ import {type TimestampMs} from "../util/timestamp";
 import {Ledger} from "./ledger";
 import {type AllocationPolicy} from "./grainAllocation";
 import {CredView} from "../analysis/credView";
-import {computeCredAccounts} from "./credAccounts";
+import {computeCredAccounts} from "../analysis/credAccounts";
 import {computeDistribution} from "./computeDistribution";
 import {type Distribution} from "./distribution";
 

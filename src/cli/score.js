@@ -27,7 +27,7 @@ import {
   declaration as identityDeclaration,
 } from "../analysis/identity";
 import {Ledger, parser as ledgerParser} from "../ledger/ledger";
-import {computeCredAccounts} from "../ledger/credAccounts";
+import {computeCredAccounts} from "../analysis/credAccounts";
 
 function die(std, message) {
   std.err("fatal: " + message);

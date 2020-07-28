@@ -7,7 +7,7 @@ import {
   type AllocationIdentity,
   computeAllocation,
 } from "./grainAllocation";
-import {type CredAccountData} from "./credAccounts";
+import {type CredAccountData} from "../analysis/credAccounts";
 import {type Distribution} from "./distribution";
 
 /**
