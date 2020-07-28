@@ -8,6 +8,8 @@ import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
 import {Explorer} from "./Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
+import {CredView} from "../../analysis/credView";
+import {Ledger} from "../../ledger/ledger";
 import {GrainAccountOverview} from "./GrainAccountOverview";
 import {TransferGrain} from "./TransferGrain";
 import {load, type LoadResult, type LoadSuccess} from "../load";
@@ -28,27 +30,25 @@ const AppLayout = (loadResult: LoadSuccess) => (props) => (
   <Layout {...props} appBar={AppBar} menu={withRouter(Menu(loadResult))} />
 );
 
-const customRoutes = (loadResult: LoadSuccess) => [
+const customRoutes = (
+  credView: CredView,
+  ledger: Ledger,
+  setLedger: (Ledger) => void
+) => [
   <Route key="explorer" exact path="/explorer">
-    <Explorer initialView={loadResult.credView} />
+    <Explorer initialView={credView} />
   </Route>,
   <Route key="root" exact path="/">
     <Redirect to="/explorer" />
   </Route>,
   <Route key="grain" exact path="/grain">
-    <GrainAccountOverview
-      credView={loadResult.credView}
-      ledger={loadResult.ledger}
-    />
+    <GrainAccountOverview credView={credView} ledger={ledger} />
   </Route>,
   <Route key="admin" exact path="/admin">
-    <LedgerAdmin
-      credView={loadResult.credView}
-      initialLedger={loadResult.ledger}
-    />
+    <LedgerAdmin credView={credView} ledger={ledger} setLedger={setLedger} />
   </Route>,
   <Route key="transfer" exact path="/transfer">
-    <TransferGrain initialLedger={loadResult.ledger} />
+    <TransferGrain ledger={ledger} setLedger={setLedger} />
   </Route>,
 ];
 
@@ -57,7 +57,6 @@ const AdminApp = () => {
   React.useEffect(() => {
     load().then(setLoadResult);
   }, []);
-  const history = useHistory();
 
   if (!loadResult) {
     return (
@@ -76,24 +75,40 @@ const AdminApp = () => {
         </div>
       );
     case "SUCCESS":
-      return (
-        <Admin
-          layout={AppLayout(loadResult)}
-          theme={theme}
-          dataProvider={dataProvider}
-          history={history}
-          customRoutes={customRoutes(loadResult)}
-        >
-          {/*
-          This dummy resource is required to get react
-          admin working beyond the hello world screen
-        */}
-          <Resource name="dummyResource" />
-        </Admin>
-      );
+      return <AdminInner loadResult={loadResult} />;
     default:
       throw new Error((loadResult.type: empty));
   }
 };
+
+/**
+ * AdminInner keeps track of the Ledger state so that if one component
+ * changes the ledger, the others use the updated ledger instead of the
+ * initial one. We may want to handle CredViews the same way, since the
+ * explorer can re-calculate it.
+ */
+const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
+  const [ledger, setLedger] = React.useState<Ledger>(loadSuccess.ledger);
+  const history = useHistory();
+  return (
+    <Admin
+      layout={AppLayout(loadSuccess)}
+      theme={theme}
+      dataProvider={dataProvider}
+      history={history}
+      customRoutes={customRoutes(loadSuccess.credView, ledger, setLedger)}
+    >
+      {/*
+          This dummy resource is required to get react
+          admin working beyond the hello world screen
+        */}
+      <Resource name="dummyResource" />
+    </Admin>
+  );
+};
+
+type AdminInnerProps = {|
+  +loadResult: LoadSuccess,
+|};
 
 export default AdminApp;

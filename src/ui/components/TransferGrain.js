@@ -14,11 +14,11 @@ import {Ledger, type Account} from "../../ledger/ledger";
 import AccountDropdown from "./AccountSelector";
 
 export type Props = {|
-  +initialLedger: Ledger,
+  +ledger: Ledger,
+  +setLedger: (Ledger) => void,
 |};
 
-export const TransferGrain = ({initialLedger}: Props) => {
-  const [ledger, setLedger] = useState<Ledger>(initialLedger);
+export const TransferGrain = ({ledger, setLedger}: Props) => {
   const [sourceIdentity, setSourceIdentity] = useState<Identity | null>(null);
   const [destIdentity, setDestIdentity] = useState<Identity | null>(null);
   const [amount, setAmount] = useState<string>("0");

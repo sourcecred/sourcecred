@@ -8,11 +8,11 @@ import {AliasSelector} from "./AliasSelector";
 
 export type Props = {|
   +credView: CredView,
-  +initialLedger: Ledger,
+  +ledger: Ledger,
+  +setLedger: (Ledger) => void,
 |};
 
-export const LedgerAdmin = ({credView, initialLedger}: Props) => {
-  const [ledger, setLedger] = useState<Ledger>(initialLedger);
+export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
   const [nextIdentityName, setIdentityName] = useState<string>("");
   const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
