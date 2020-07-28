@@ -87,7 +87,7 @@ const AdminApp = () => {
  * initial one. We may want to handle CredViews the same way, since the
  * explorer can re-calculate it.
  */
-const AdminInner = ({loadResult: loadSuccess}) => {
+const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const [ledger, setLedger] = React.useState<Ledger>(loadSuccess.ledger);
   const history = useHistory();
   return (
@@ -106,5 +106,9 @@ const AdminInner = ({loadResult: loadSuccess}) => {
     </Admin>
   );
 };
+
+type AdminInnerProps = {|
+  +loadResult: LoadSuccess,
+|};
 
 export default AdminApp;
