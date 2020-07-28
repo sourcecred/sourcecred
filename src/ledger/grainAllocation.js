@@ -26,6 +26,7 @@ import {type IdentityId} from "./identity";
  * contributions.
  */
 export type Balanced = "BALANCED";
+
 /**
  * The Immediate policy evenly distributes its Grain budget
  * across users based on their Cred in the most recent interval.
@@ -35,11 +36,30 @@ export type Balanced = "BALANCED";
  * We recommend using a smaller budget for the Immediate policy.
  */
 export type Immediate = "IMMEDIATE";
-export type PolicyType = Immediate | Balanced;
 
-export type AllocationPolicy = {|
-  +policyType: PolicyType,
+/**
+ * The Special policy is a power-maintainer tool for directly paying Grain
+ * to a target identity. I'm including it because we will use it to create
+ * "initialization" payouts to contributors with prior Grain balances in our old
+ * ledger.
+ *
+ * This has potential for abuse, I don't recommend making it easy to make special
+ * payouts from the UI, since it subverts the "Grain comes from Cred" model.
+ */
+export type Special = "SPECIAL";
+
+export type AllocationPolicy = RegularPolicy | SpecialPolicy;
+
+export type RegularPolicy = {|
+  +policyType: Immediate | Balanced,
   +budget: G.Grain,
+|};
+
+export type SpecialPolicy = {|
+  +policyType: Special,
+  +budget: G.Grain,
+  +memo: string,
+  +recipient: IdentityId,
 |};
 
 export type GrainReceipt = {|
@@ -126,12 +146,8 @@ function _processIdentities(
   return results;
 }
 
-opaque type ValidatedPolicy = {|
-  +policyType: PolicyType,
-  +budget: G.Grain,
-|};
 function _validatePolicy(p: AllocationPolicy) {
-  policyTypeParser.parseOrThrow(p.policyType);
+  allocationPolicyParser.parseOrThrow(p);
   if (G.lt(p.budget, G.ZERO)) {
     throw new Error(`invalid budget: ${p.budget}`);
   }
@@ -150,7 +166,7 @@ export function _validateAllocationBudget(a: Allocation): Allocation {
 }
 
 function receipts(
-  policy: ValidatedPolicy,
+  policy: AllocationPolicy,
   identities: ProcessedIdentities
 ): $ReadOnlyArray<GrainReceipt> {
   switch (policy.policyType) {
@@ -158,6 +174,8 @@ function receipts(
       return immediateReceipts(policy.budget, identities);
     case "BALANCED":
       return balancedReceipts(policy.budget, identities);
+    case "SPECIAL":
+      return specialReceipts(policy, identities);
     // istanbul ignore next: unreachable per Flow
     default:
       throw new Error(`Unknown policyType: ${(policy.policyType: empty)}`);
@@ -232,11 +250,35 @@ function balancedReceipts(
   return identities.map(({id}, i) => ({id, amount: grainAmounts[i]}));
 }
 
-const policyTypeParser = P.exactly(["IMMEDIATE", "BALANCED"]);
-export const allocationPolicyParser: P.Parser<AllocationPolicy> = P.object({
-  policyType: policyTypeParser,
+function specialReceipts(
+  policy: SpecialPolicy,
+  identities: ProcessedIdentities
+): $ReadOnlyArray<GrainReceipt> {
+  for (const {id} of identities) {
+    if (id === policy.recipient) {
+      return [{id, amount: policy.budget}];
+    }
+  }
+  throw new Error(`no active grain account for identity: ${policy.recipient}`);
+}
+
+const regularPolicyParser: P.Parser<RegularPolicy> = P.object({
+  policyType: P.exactly(["IMMEDIATE", "BALANCED"]),
   budget: G.parser,
 });
+
+const specialPolicyParser: P.Parser<SpecialPolicy> = P.object({
+  policyType: P.exactly(["SPECIAL"]),
+  budget: G.parser,
+  memo: P.string,
+  recipient: uuidParser,
+});
+
+export const allocationPolicyParser: P.Parser<AllocationPolicy> = P.orElse([
+  regularPolicyParser,
+  specialPolicyParser,
+]);
+
 const grainReceiptParser: P.Parser<GrainReceipt> = P.object({
   id: uuidParser,
   amount: G.parser,
