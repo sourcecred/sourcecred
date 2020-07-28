@@ -10,15 +10,36 @@ import * as uuid from "../util/uuid"; // for spy purposes
 describe("ledger/ledger", () => {
   // Helper for constructing Grain values.
   const g = (s) => G.fromString(s);
+
+  let nextFakeDate = 0;
+  function resetFakeDate() {
+    nextFakeDate = 0;
+  }
   function setFakeDate(ts: number) {
+    // Use this when you want specific timestamps, rather than just
+    // auto-incrementing
     jest.spyOn(global.Date, "now").mockImplementationOnce(() => ts);
   }
+  jest.spyOn(global.Date, "now").mockImplementation(() => nextFakeDate++);
 
+  const randomMock = jest.spyOn(uuid, "random");
+
+  let nextFakeUuidIndex = 0;
+  function resetFakeUuid() {
+    nextFakeUuidIndex = 0;
+  }
+  function nextFakeUuid(): uuid.Uuid {
+    const uuidString = String(nextFakeUuidIndex).padStart(21, "0") + "A";
+    nextFakeUuidIndex++;
+    return uuid.fromString(uuidString);
+  }
+
+  randomMock.mockImplementation(nextFakeUuid);
   const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
   const id2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
   const id3 = uuid.fromString("EpbMqV0HmcolKvpXTwSddA");
   function setNextUuid(x: uuid.Uuid) {
-    jest.spyOn(uuid, "random").mockImplementationOnce(() => x);
+    randomMock.mockImplementationOnce(() => x);
   }
 
   // Verify that a method fails, throwing an error, without mutating the ledger.
@@ -42,21 +63,19 @@ describe("ledger/ledger", () => {
   };
 
   function ledgerWithIdentities() {
+    resetFakeUuid();
+    resetFakeDate();
     const ledger = new Ledger();
     setNextUuid(id1);
-    setFakeDate(1);
     ledger.createIdentity("USER", "steven");
     setNextUuid(id2);
-    setFakeDate(2);
     ledger.createIdentity("ORGANIZATION", "crystal-gems");
     return ledger;
   }
 
   function ledgerWithActiveIdentities() {
     const ledger = ledgerWithIdentities();
-    setFakeDate(2);
     ledger.activate(id1);
-    setFakeDate(2);
     ledger.activate(id2);
     return ledger;
   }
