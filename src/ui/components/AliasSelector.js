@@ -28,7 +28,7 @@ export function AliasSelector({
     getSelectedItemProps,
     getDropdownProps,
     addSelectedItem,
-    //removeSelectedItem, will be utilzed again when #2059 is merged
+    removeSelectedItem,
     selectedItems,
   } = useMultipleSelection({
     initialSelectedItems: [],
@@ -37,9 +37,12 @@ export function AliasSelector({
   // this memo is utilized to repopulate the selected Items
   // list each time the user is changed in the interface
   useMemo(() => {
-    // This memo will be reimplemented once the
-    // alias primitives (#2059) are merged into this
-    // branch or master
+    selectedItems.forEach((alias: Alias) => {
+      removeSelectedItem(alias);
+    });
+    if (currentIdentity) {
+      currentIdentity.aliases.forEach((alias) => addSelectedItem(alias));
+    }
   }, [currentIdentity && currentIdentity.id]);
 
   const claimedAddresses: Set<NodeAddressT> = new Set();
