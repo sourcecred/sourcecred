@@ -16,6 +16,11 @@ type Props = {|
   +setCurrentIdentity: (Identity) => void,
 |};
 
+type Alias = {|
+  +address: NodeAddressT,
+  +description: string,
+|};
+
 export function AliasSelector({
   currentIdentity,
   ledger,
@@ -44,22 +49,27 @@ export function AliasSelector({
     }
   }, [currentIdentity]);
 
-  const getNodeDescription = (nodeAddress: NodeAddressT): string => {
-    const node = credView.node(nodeAddress);
-    if (node) {
-      return node.description;
+  const claimedAddresses: Set<NodeAddressT> = new Set();
+  for (const {identity} of ledger.accounts()) {
+    claimedAddresses.add(identity.address);
+    for (const address of identity.aliases) {
+      claimedAddresses.add(address);
     }
-    return "";
-  };
+  }
 
-  const getFilteredItems = (items) =>
-    items.filter(
-      (item) =>
-        !ledger._aliases.has(item) &&
-        getNodeDescription(item)
-          .toLowerCase()
-          .startsWith(inputValue.toLowerCase())
+  const potentialAliases = credView
+    .userNodes()
+    .map(({address, description}) => ({
+      address,
+      description,
+    }))
+    .filter(({address}) => !claimedAddresses.has(address));
+
+  function filteredAliasesMatchingString(input: string): Alias[] {
+    return potentialAliases.filter(({description}) =>
+      description.toLowerCase().startsWith(input.toLowerCase())
     );
+  }
 
   const {
     isOpen,
@@ -72,7 +82,7 @@ export function AliasSelector({
     selectItem,
   } = useCombobox({
     inputValue,
-    items: getFilteredItems(credView.userNodes().map((i) => i.address)),
+    items: filteredAliasesMatchingString(inputValue),
     onStateChange: ({inputValue, type, selectedItem}) => {
       switch (type) {
         case useCombobox.stateChangeTypes.InputChange:
@@ -82,7 +92,9 @@ export function AliasSelector({
         case useCombobox.stateChangeTypes.ItemClick:
         case useCombobox.stateChangeTypes.InputBlur:
           if (selectedItem && currentIdentity) {
-            setLedger(ledger.addAlias(currentIdentity.id, selectedItem));
+            setLedger(
+              ledger.addAlias(currentIdentity.id, selectedItem.address)
+            );
             setCurrentIdentity(ledger.account(currentIdentity.id).identity);
             setInputValue("");
             addSelectedItem(selectedItem);
@@ -101,14 +113,14 @@ export function AliasSelector({
         <h2>Aliases:</h2>
       </label>
       <div>
-        {selectedItems.filter(getNodeDescription).map((selectedItem, index) => (
+        {selectedItems.map((selectedItem, index) => (
           <span
             key={`selected-item-${index}`}
             {...getSelectedItemProps({selectedItem, index})}
           >
             <Markdown
               renderers={{paragraph: "span"}}
-              source={getNodeDescription(selectedItem)}
+              source={selectedItem.description}
             />
             <br />
           </span>
@@ -124,22 +136,20 @@ export function AliasSelector({
       </div>
       <ul {...getMenuProps()} style={menuMultipleStyles}>
         {isOpen &&
-          getFilteredItems(credView.userNodes().map((i) => i.address)).map(
-            (item, index) => (
-              <li
-                style={
-                  highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
-                }
-                key={`${item}${index}`}
-                {...getItemProps({item, index})}
-              >
-                <Markdown
-                  renderers={{paragraph: "span"}}
-                  source={getNodeDescription(item)}
-                />
-              </li>
-            )
-          )}
+          potentialAliases.map((item, index) => (
+            <li
+              style={
+                highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
+              }
+              key={`${item.address}${index}`}
+              {...getItemProps({item, index})}
+            >
+              <Markdown
+                renderers={{paragraph: "span"}}
+                source={item.description}
+              />
+            </li>
+          ))}
       </ul>
     </div>
   );
