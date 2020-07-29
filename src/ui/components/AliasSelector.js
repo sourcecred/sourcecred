@@ -33,21 +33,19 @@ export function AliasSelector({
     getSelectedItemProps,
     getDropdownProps,
     addSelectedItem,
-    removeSelectedItem,
+    //removeSelectedItem, will be utilzed again when #2059 is merged
     selectedItems,
   } = useMultipleSelection({
     initialSelectedItems: [],
   });
+
+  // this memo is utilized to repopulate the selected Items
+  // list each time the user is changed in the interface
   useMemo(() => {
-    selectedItems.forEach((item) => {
-      removeSelectedItem(item);
-    });
-    if (currentIdentity) {
-      currentIdentity.aliases.forEach((aliasAddress) =>
-        addSelectedItem(aliasAddress)
-      );
-    }
-  }, [currentIdentity]);
+    // This memo will be reimplemented once the
+    // alias primitives (#2059) are merged into this
+    // branch or master
+  }, [currentIdentity && currentIdentity.id]);
 
   const claimedAddresses: Set<NodeAddressT> = new Set();
   for (const {identity} of ledger.accounts()) {
@@ -71,6 +69,18 @@ export function AliasSelector({
     );
   }
 
+  const [inputItems, setInputItems] = useState(
+    filteredAliasesMatchingString("")
+  );
+
+  const setAliasSearch = (input: string = "") => {
+    setInputItems(filteredAliasesMatchingString(input));
+  };
+
+  useMemo(() => {
+    setAliasSearch();
+  }, [currentIdentity && currentIdentity.aliases]);
+
   const {
     isOpen,
     getToggleButtonProps,
@@ -82,11 +92,12 @@ export function AliasSelector({
     selectItem,
   } = useCombobox({
     inputValue,
-    items: filteredAliasesMatchingString(inputValue),
+    items: inputItems,
     onStateChange: ({inputValue, type, selectedItem}) => {
       switch (type) {
         case useCombobox.stateChangeTypes.InputChange:
           setInputValue(inputValue);
+          setAliasSearch(inputValue);
           break;
         case useCombobox.stateChangeTypes.InputKeyDownEnter:
         case useCombobox.stateChangeTypes.ItemClick:
@@ -99,6 +110,7 @@ export function AliasSelector({
             setInputValue("");
             addSelectedItem(selectedItem);
             selectItem(null);
+            claimedAddresses.add(selectedItem.address);
           }
 
           break;
@@ -136,7 +148,7 @@ export function AliasSelector({
       </div>
       <ul {...getMenuProps()} style={menuMultipleStyles}>
         {isOpen &&
-          potentialAliases.map((item, index) => (
+          inputItems.map((item, index) => (
             <li
               style={
                 highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
@@ -168,5 +180,4 @@ const menuMultipleStyles = {
   zIndex: 1000,
   listStyle: "none",
   padding: 0,
-  //right: "40px",
 };
