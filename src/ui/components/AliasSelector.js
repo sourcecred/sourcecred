@@ -1,6 +1,6 @@
 // @flow
 
-import React, {useState, useMemo} from "react";
+import React, {useState} from "react";
 import {useCombobox} from "downshift";
 import {Ledger} from "../../ledger/ledger";
 import {type Identity, type Alias} from "../../ledger/identity";
@@ -56,10 +56,6 @@ export function AliasSelector({
     setInputItems(filteredAliasesMatchingString(input));
   };
 
-  useMemo(() => {
-    setAliasSearch();
-  }, [currentIdentity && currentIdentity.aliases]);
-
   const {
     isOpen,
     getToggleButtonProps,
@@ -86,6 +82,7 @@ export function AliasSelector({
             setCurrentIdentity(ledger.account(currentIdentity.id).identity);
             setInputValue("");
             selectItem(null);
+            setAliasSearch();
             claimedAddresses.add(selectedItem.address);
           }
 
