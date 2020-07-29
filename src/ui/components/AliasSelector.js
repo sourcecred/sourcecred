@@ -7,6 +7,7 @@ import {type Identity, type Alias} from "../../ledger/identity";
 import {CredView} from "../../analysis/credView";
 import {type NodeAddressT} from "../../core/graph";
 import Markdown from "react-markdown";
+import removeMd from "remove-markdown";
 
 type Props = {|
   +currentIdentity: Identity | null,
@@ -62,7 +63,7 @@ export function AliasSelector({
 
   function filteredAliasesMatchingString(input: string): Alias[] {
     return potentialAliases.filter(({description}) =>
-      description.toLowerCase().startsWith(input.toLowerCase())
+      removeMd(description).toLowerCase().startsWith(input.toLowerCase())
     );
   }
 
