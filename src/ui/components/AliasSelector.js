@@ -3,27 +3,30 @@
 import React, {useState} from "react";
 import {useCombobox} from "downshift";
 import {Ledger} from "../../ledger/ledger";
-import {type Identity, type Alias} from "../../ledger/identity";
+import {type Alias, type IdentityId} from "../../ledger/identity";
 import {CredView} from "../../analysis/credView";
 import {type NodeAddressT} from "../../core/graph";
 import Markdown from "react-markdown";
 import removeMd from "remove-markdown";
 
 type Props = {|
-  +currentIdentity: Identity,
+  +selectedIdentityId: IdentityId,
   +ledger: Ledger,
   +credView: CredView,
   +setLedger: (Ledger) => void,
-  +setCurrentIdentity: (Identity) => void,
 |};
 
 export function AliasSelector({
-  currentIdentity,
+  selectedIdentityId,
   ledger,
   setLedger,
-  setCurrentIdentity,
   credView,
 }: Props) {
+  const selectedAccount = ledger.account(selectedIdentityId);
+  if (selectedAccount == null) {
+    throw new Error("Selected identity not present in ledger");
+  }
+  const selectedIdentity = selectedAccount.identity;
   const [inputValue, setInputValue] = useState("");
 
   const claimedAddresses: Set<NodeAddressT> = new Set();
@@ -78,14 +81,11 @@ export function AliasSelector({
         case useCombobox.stateChangeTypes.ItemClick:
         case useCombobox.stateChangeTypes.InputBlur:
           if (selectedItem) {
-            setLedger(ledger.addAlias(currentIdentity.id, selectedItem));
-            setCurrentIdentity(ledger.account(currentIdentity.id).identity);
+            setLedger(ledger.addAlias(selectedIdentityId, selectedItem));
             setInputValue("");
             selectItem(null);
             setAliasSearch();
-            claimedAddresses.add(selectedItem.address);
           }
-
           break;
         default:
           break;
@@ -98,11 +98,11 @@ export function AliasSelector({
         <h2>Aliases:</h2>
       </label>
       <div>
-        {currentIdentity.aliases.map((selectedItem, index) => (
+        {selectedIdentity.aliases.map((alias, index) => (
           <span key={`selected-item-${index}`}>
             <Markdown
               renderers={{paragraph: "span"}}
-              source={selectedItem.description}
+              source={alias.description}
             />
             <br />
           </span>
@@ -116,17 +116,17 @@ export function AliasSelector({
       </div>
       <ul {...getMenuProps()} style={menuMultipleStyles}>
         {isOpen &&
-          inputItems.map((item, index) => (
+          inputItems.map((alias, index) => (
             <li
               style={
                 highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
               }
-              key={`${item.address}${index}`}
-              {...getItemProps({item, index})}
+              key={`${alias.address}${index}`}
+              {...getItemProps({alias, index})}
             >
               <Markdown
                 renderers={{link: "span", paragraph: "span"}}
-                source={item.description}
+                source={alias.description}
               />
             </li>
           ))}

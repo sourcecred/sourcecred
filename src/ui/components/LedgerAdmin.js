@@ -125,10 +125,9 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
             />
             <label htmlFor="active">Account is active</label>
             <AliasSelector
-              currentIdentity={currentIdentity}
+              selectedIdentityId={currentIdentity.id}
               ledger={ledger}
               setLedger={setLedger}
-              setCurrentIdentity={setCurrentIdentity}
               credView={credView}
             />
           </>
