@@ -16,6 +16,11 @@ type Props = {|
   +setCurrentIdentity: (Identity) => void,
 |};
 
+type Alias = {|
+  +address: NodeAddressT,
+  +description: string,
+|};
+
 export function AliasSelector({
   currentIdentity,
   ledger,
@@ -28,38 +33,53 @@ export function AliasSelector({
     getSelectedItemProps,
     getDropdownProps,
     addSelectedItem,
-    removeSelectedItem,
+    //removeSelectedItem, will be utilzed again when #2059 is merged
     selectedItems,
   } = useMultipleSelection({
     initialSelectedItems: [],
   });
-  useMemo(() => {
-    selectedItems.forEach((item) => {
-      removeSelectedItem(item);
-    });
-    if (currentIdentity) {
-      currentIdentity.aliases.forEach((aliasAddress) =>
-        addSelectedItem(aliasAddress)
-      );
-    }
-  }, [currentIdentity]);
 
-  const getNodeDescription = (nodeAddress: NodeAddressT): string => {
-    const node = credView.node(nodeAddress);
-    if (node) {
-      return node.description;
+  // this memo is utilized to repopulate the selected Items
+  // list each time the user is changed in the interface
+  useMemo(() => {
+    // This memo will be reimplemented once the
+    // alias primitives (#2059) are merged into this
+    // branch or master
+  }, [currentIdentity && currentIdentity.id]);
+
+  const claimedAddresses: Set<NodeAddressT> = new Set();
+  for (const {identity} of ledger.accounts()) {
+    claimedAddresses.add(identity.address);
+    for (const address of identity.aliases) {
+      claimedAddresses.add(address);
     }
-    return "";
+  }
+
+  const potentialAliases = credView
+    .userNodes()
+    .map(({address, description}) => ({
+      address,
+      description,
+    }))
+    .filter(({address}) => !claimedAddresses.has(address));
+
+  function filteredAliasesMatchingString(input: string): Alias[] {
+    return potentialAliases.filter(({description}) =>
+      description.toLowerCase().startsWith(input.toLowerCase())
+    );
+  }
+
+  const [inputItems, setInputItems] = useState(
+    filteredAliasesMatchingString("")
+  );
+
+  const setAliasSearch = (input: string = "") => {
+    setInputItems(filteredAliasesMatchingString(input));
   };
 
-  const getFilteredItems = (items) =>
-    items.filter(
-      (item) =>
-        !ledger._aliases.has(item) &&
-        getNodeDescription(item)
-          .toLowerCase()
-          .startsWith(inputValue.toLowerCase())
-    );
+  useMemo(() => {
+    setAliasSearch();
+  }, [currentIdentity && currentIdentity.aliases]);
 
   const {
     isOpen,
@@ -72,21 +92,25 @@ export function AliasSelector({
     selectItem,
   } = useCombobox({
     inputValue,
-    items: getFilteredItems(credView.userNodes().map((i) => i.address)),
+    items: inputItems,
     onStateChange: ({inputValue, type, selectedItem}) => {
       switch (type) {
         case useCombobox.stateChangeTypes.InputChange:
           setInputValue(inputValue);
+          setAliasSearch(inputValue);
           break;
         case useCombobox.stateChangeTypes.InputKeyDownEnter:
         case useCombobox.stateChangeTypes.ItemClick:
         case useCombobox.stateChangeTypes.InputBlur:
           if (selectedItem && currentIdentity) {
-            setLedger(ledger.addAlias(currentIdentity.id, selectedItem));
+            setLedger(
+              ledger.addAlias(currentIdentity.id, selectedItem.address)
+            );
             setCurrentIdentity(ledger.account(currentIdentity.id).identity);
             setInputValue("");
             addSelectedItem(selectedItem);
             selectItem(null);
+            claimedAddresses.add(selectedItem.address);
           }
 
           break;
@@ -101,14 +125,14 @@ export function AliasSelector({
         <h2>Aliases:</h2>
       </label>
       <div>
-        {selectedItems.filter(getNodeDescription).map((selectedItem, index) => (
+        {selectedItems.map((selectedItem, index) => (
           <span
             key={`selected-item-${index}`}
             {...getSelectedItemProps({selectedItem, index})}
           >
             <Markdown
               renderers={{paragraph: "span"}}
-              source={getNodeDescription(selectedItem)}
+              source={selectedItem.description}
             />
             <br />
           </span>
@@ -124,22 +148,20 @@ export function AliasSelector({
       </div>
       <ul {...getMenuProps()} style={menuMultipleStyles}>
         {isOpen &&
-          getFilteredItems(credView.userNodes().map((i) => i.address)).map(
-            (item, index) => (
-              <li
-                style={
-                  highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
-                }
-                key={`${item}${index}`}
-                {...getItemProps({item, index})}
-              >
-                <Markdown
-                  renderers={{paragraph: "span"}}
-                  source={getNodeDescription(item)}
-                />
-              </li>
-            )
-          )}
+          inputItems.map((item, index) => (
+            <li
+              style={
+                highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
+              }
+              key={`${item.address}${index}`}
+              {...getItemProps({item, index})}
+            >
+              <Markdown
+                renderers={{paragraph: "span"}}
+                source={item.description}
+              />
+            </li>
+          ))}
       </ul>
     </div>
   );
@@ -158,5 +180,4 @@ const menuMultipleStyles = {
   zIndex: 1000,
   listStyle: "none",
   padding: 0,
-  //right: "40px",
 };
