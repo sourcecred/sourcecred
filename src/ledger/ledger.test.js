@@ -80,7 +80,10 @@ describe("ledger/ledger", () => {
     return ledger;
   }
 
-  const a1 = NodeAddress.fromParts(["a1"]);
+  const alias = {
+    address: NodeAddress.fromParts(["alias"]),
+    description: "alias",
+  };
 
   describe("identity updates", () => {
     describe("createIdentity", () => {
@@ -124,7 +127,10 @@ describe("ledger/ledger", () => {
       it("throws an error given an identity with aliases", () => {
         const ledger = new Ledger();
         let identity = newIdentity("USER", "foo");
-        identity = {...identity, aliases: [NodeAddress.empty]};
+        identity = {
+          ...identity,
+          aliases: [{address: NodeAddress.empty, description: "foo"}],
+        };
         const action = {type: "CREATE_IDENTITY", identity};
         const thunk = () => ledger._createIdentity(action);
         expect(thunk).toThrowError("new identities may not have aliases");
@@ -214,9 +220,9 @@ describe("ledger/ledger", () => {
         setFakeDate(0);
         const id = ledger.createIdentity("USER", "foo");
         setFakeDate(1);
-        ledger.addAlias(id, a1);
+        ledger.addAlias(id, alias);
         const identity = ledger.account(id).identity;
-        expect(identity.aliases).toEqual([a1]);
+        expect(identity.aliases).toEqual([alias]);
         expect(ledger.eventLog()).toEqual([
           {
             ledgerTimestamp: 0,
@@ -234,43 +240,60 @@ describe("ledger/ledger", () => {
             action: {
               type: "ADD_ALIAS",
               identityId: id,
-              alias: a1,
+              alias: alias,
             },
           },
         ]);
+      });
+      it("adding multiple aliases with the same description is fine", () => {
+        const ledger = new Ledger();
+        const id = ledger.createIdentity("USER", "foo");
+        const a1 = {
+          address: NodeAddress.fromParts(["1"]),
+          description: "alias",
+        };
+        const a2 = {
+          address: NodeAddress.fromParts(["2"]),
+          description: "alias",
+        };
+        ledger.addAlias(id, a1);
+        ledger.addAlias(id, a2);
+        const identity = ledger.account(id).identity;
+        expect(identity.aliases).toEqual([a1, a2]);
       });
       it("errors if there's no matching identity", () => {
         const ledger = new Ledger();
         failsWithoutMutation(
           ledger,
-          (l) => l.addAlias(uuid.random(), a1),
+          (l) => l.addAlias(uuid.random(), alias),
           "no identity matches id"
         );
       });
       it("throws an error if the identity already has that alias", () => {
         const ledger = new Ledger();
         const id = ledger.createIdentity("USER", "foo");
-        ledger.addAlias(id, a1);
-        const thunk = () => ledger.addAlias(id, a1);
+        ledger.addAlias(id, alias);
+        const thunk = () => ledger.addAlias(id, alias);
         failsWithoutMutation(ledger, thunk, "identity already has alias");
       });
       it("errors if the address is another identity's alias", () => {
         const ledger = new Ledger();
         const id1 = ledger.createIdentity("USER", "foo");
         const id2 = ledger.createIdentity("USER", "bar");
-        ledger.addAlias(id1, a1);
-        const thunk = () => ledger.addAlias(id2, a1);
+        ledger.addAlias(id1, alias);
+        const thunk = () => ledger.addAlias(id2, alias);
         failsWithoutMutation(
           ledger,
           thunk,
-          `addAlias: alias ${NodeAddress.toString(a1)} already bound`
+          `addAlias: alias ${NodeAddress.toString(alias.address)} already bound`
         );
       });
       it("errors if the address is the identity's innate address", () => {
         const ledger = new Ledger();
         const id = ledger.createIdentity("USER", "foo");
         const identity = ledger.account(id).identity;
-        const thunk = () => ledger.addAlias(id, identity.address);
+        const thunk = () =>
+          ledger.addAlias(id, {address: identity.address, description: ""});
         failsWithoutMutation(
           ledger,
           thunk,
@@ -281,7 +304,8 @@ describe("ledger/ledger", () => {
       });
       it("errors if the address is another identity's innate address", () => {
         const ledger = ledgerWithIdentities();
-        const thunk = () => ledger.addAlias(id2, identity1().address);
+        const thunk = () =>
+          ledger.addAlias(id2, {address: identity1().address, description: ""});
         failsWithoutMutation(
           ledger,
           thunk,
@@ -744,7 +768,7 @@ describe("ledger/ledger", () => {
     function richLedger(): Ledger {
       const ledger = ledgerWithIdentities();
       setFakeDate(3);
-      ledger.addAlias(id1, a1);
+      ledger.addAlias(id1, alias);
 
       const distributionId = uuid.fromString("f9xPz9YGH0PuBpPAg2824Q");
       const allocationId = uuid.fromString("yYNur0NEEkh7fMaUn6n9QQ");

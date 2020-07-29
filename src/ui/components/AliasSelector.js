@@ -3,7 +3,7 @@
 import React, {useState, useMemo} from "react";
 import {useCombobox, useMultipleSelection} from "downshift";
 import {Ledger} from "../../ledger/ledger";
-import {type Identity} from "../../ledger/identity";
+import {type Identity, type Alias} from "../../ledger/identity";
 import {CredView} from "../../analysis/credView";
 import {type NodeAddressT} from "../../core/graph";
 import Markdown from "react-markdown";
@@ -14,11 +14,6 @@ type Props = {|
   +credView: CredView,
   +setLedger: (Ledger) => void,
   +setCurrentIdentity: (Identity) => void,
-|};
-
-type Alias = {|
-  +address: NodeAddressT,
-  +description: string,
 |};
 
 export function AliasSelector({
@@ -50,7 +45,7 @@ export function AliasSelector({
   const claimedAddresses: Set<NodeAddressT> = new Set();
   for (const {identity} of ledger.accounts()) {
     claimedAddresses.add(identity.address);
-    for (const address of identity.aliases) {
+    for (const {address} of identity.aliases) {
       claimedAddresses.add(address);
     }
   }
@@ -103,9 +98,7 @@ export function AliasSelector({
         case useCombobox.stateChangeTypes.ItemClick:
         case useCombobox.stateChangeTypes.InputBlur:
           if (selectedItem && currentIdentity) {
-            setLedger(
-              ledger.addAlias(currentIdentity.id, selectedItem.address)
-            );
+            setLedger(ledger.addAlias(currentIdentity.id, selectedItem));
             setCurrentIdentity(ledger.account(currentIdentity.id).identity);
             setInputValue("");
             addSelectedItem(selectedItem);
