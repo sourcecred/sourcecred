@@ -52,10 +52,18 @@ export function AliasSelector({
     return "";
   };
 
+  const claimedAddresses: Set<NodeAddressT> = new Set();
+  for (const {identity} of ledger.accounts()) {
+    claimedAddresses.add(identity.address);
+    for (const address of identity.aliases) {
+      claimedAddresses.add(address);
+    }
+  }
+
   const getFilteredItems = (items) =>
     items.filter(
       (item) =>
-        !ledger._aliases.has(item) &&
+        !claimedAddresses.has(item) &&
         getNodeDescription(item)
           .toLowerCase()
           .startsWith(inputValue.toLowerCase())
