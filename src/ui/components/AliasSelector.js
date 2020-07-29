@@ -125,7 +125,7 @@ export function AliasSelector({
               {...getItemProps({item, index})}
             >
               <Markdown
-                renderers={{paragraph: "span"}}
+                renderers={{link: "span", paragraph: "span"}}
                 source={item.description}
               />
             </li>
