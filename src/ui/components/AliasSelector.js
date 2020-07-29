@@ -25,7 +25,6 @@ export function AliasSelector({
 }: Props) {
   const [inputValue, setInputValue] = useState("");
   const {
-    getSelectedItemProps,
     getDropdownProps,
     addSelectedItem,
     removeSelectedItem,
@@ -122,10 +121,7 @@ export function AliasSelector({
       </label>
       <div>
         {selectedItems.map((selectedItem, index) => (
-          <span
-            key={`selected-item-${index}`}
-            {...getSelectedItemProps({selectedItem, index})}
-          >
+          <span key={`selected-item-${index}`}>
             <Markdown
               renderers={{paragraph: "span"}}
               source={selectedItem.description}
