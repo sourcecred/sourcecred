@@ -10,7 +10,7 @@ import Markdown from "react-markdown";
 import removeMd from "remove-markdown";
 
 type Props = {|
-  +currentIdentity: Identity | null,
+  +currentIdentity: Identity,
   +ledger: Ledger,
   +credView: CredView,
   +setLedger: (Ledger) => void,
@@ -100,7 +100,7 @@ export function AliasSelector({
         case useCombobox.stateChangeTypes.InputKeyDownEnter:
         case useCombobox.stateChangeTypes.ItemClick:
         case useCombobox.stateChangeTypes.InputBlur:
-          if (selectedItem && currentIdentity) {
+          if (selectedItem) {
             setLedger(ledger.addAlias(currentIdentity.id, selectedItem));
             setCurrentIdentity(ledger.account(currentIdentity.id).identity);
             setInputValue("");
@@ -116,12 +116,12 @@ export function AliasSelector({
     },
   });
   return (
-    <div style={{visibility: currentIdentity ? "visible" : "hidden"}}>
+    <div>
       <label>
         <h2>Aliases:</h2>
       </label>
       <div>
-        {selectedItems.map((selectedItem, index) => (
+        {currentIdentity.aliases.map((selectedItem, index) => (
           <span key={`selected-item-${index}`}>
             <Markdown
               renderers={{paragraph: "span"}}

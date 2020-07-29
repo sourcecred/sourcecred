@@ -124,19 +124,16 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
               onChange={() => toggleIdentityActivation(currentIdentity)}
             />
             <label htmlFor="active">Account is active</label>
+            <AliasSelector
+              currentIdentity={currentIdentity}
+              ledger={ledger}
+              setLedger={setLedger}
+              setCurrentIdentity={setCurrentIdentity}
+              credView={credView}
+            />
           </>
         )}
       </form>
-      <div>
-        {/* Warning: don't conditionally render AliasSelector because it contains react hooks*/}
-        <AliasSelector
-          currentIdentity={currentIdentity}
-          ledger={ledger}
-          setLedger={setLedger}
-          setCurrentIdentity={setCurrentIdentity}
-          credView={credView}
-        />
-      </div>
     </div>
   );
 
