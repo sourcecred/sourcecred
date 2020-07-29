@@ -1,7 +1,7 @@
 // @flow
 
 import React, {useState, useMemo} from "react";
-import {useCombobox, useMultipleSelection} from "downshift";
+import {useCombobox} from "downshift";
 import {Ledger} from "../../ledger/ledger";
 import {type Identity, type Alias} from "../../ledger/identity";
 import {CredView} from "../../analysis/credView";
@@ -25,25 +25,6 @@ export function AliasSelector({
   credView,
 }: Props) {
   const [inputValue, setInputValue] = useState("");
-  const {
-    getDropdownProps,
-    addSelectedItem,
-    removeSelectedItem,
-    selectedItems,
-  } = useMultipleSelection({
-    initialSelectedItems: [],
-  });
-
-  // this memo is utilized to repopulate the selected Items
-  // list each time the user is changed in the interface
-  useMemo(() => {
-    selectedItems.forEach((alias: Alias) => {
-      removeSelectedItem(alias);
-    });
-    if (currentIdentity) {
-      currentIdentity.aliases.forEach((alias) => addSelectedItem(alias));
-    }
-  }, [currentIdentity && currentIdentity.id]);
 
   const claimedAddresses: Set<NodeAddressT> = new Set();
   for (const {identity} of ledger.accounts()) {
@@ -104,7 +85,6 @@ export function AliasSelector({
             setLedger(ledger.addAlias(currentIdentity.id, selectedItem));
             setCurrentIdentity(ledger.account(currentIdentity.id).identity);
             setInputValue("");
-            addSelectedItem(selectedItem);
             selectItem(null);
             claimedAddresses.add(selectedItem.address);
           }
@@ -131,9 +111,7 @@ export function AliasSelector({
           </span>
         ))}
         <div style={comboboxStyles} {...getComboboxProps()}>
-          <input
-            {...getInputProps(getDropdownProps({preventKeyAction: isOpen}))}
-          />
+          <input {...getInputProps()} />
           <button {...getToggleButtonProps()} aria-label={"toggle menu"}>
             &#8595;
           </button>
