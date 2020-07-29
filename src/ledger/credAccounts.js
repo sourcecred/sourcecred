@@ -14,6 +14,7 @@ import {Ledger, type Account} from "./ledger";
 import {CredView} from "../analysis/credView";
 import {type TimestampMs} from "../util/timestamp";
 import {NodeAddress, type NodeAddressT} from "../core/graph";
+import {type Alias} from "./identity";
 
 export type Cred = $ReadOnlyArray<number>;
 
@@ -24,10 +25,7 @@ export type CredAccount = {|
 |};
 
 export type UnclaimedAlias = {|
-  +address: NodeAddressT,
-  // We include the description for convenience in figuring out who this user is,
-  // rendering in a UI, etc. This is just the description from the Graph.
-  +description: string,
+  +alias: Alias,
   +totalCred: number,
   +cred: Cred,
 |};
@@ -67,7 +65,7 @@ export function _computeCredAccounts(
   userlikeInfo: Map<NodeAddressT, {|+cred: Cred, +description: string|}>,
   intervalEndpoints: $ReadOnlyArray<TimestampMs>
 ): CredAccountData {
-  const aliases: Set<NodeAddressT> = new Set();
+  const aliasAddresses: Set<NodeAddressT> = new Set();
   const accountAddresses: Set<NodeAddressT> = new Set();
 
   const accounts = [];
@@ -76,7 +74,7 @@ export function _computeCredAccounts(
   for (const account of grainAccounts) {
     accountAddresses.add(account.identity.address);
     for (const alias of account.identity.aliases) {
-      aliases.add(alias);
+      aliasAddresses.add(alias.address);
     }
     const info = userlikeInfo.get(account.identity.address);
     if (info == null) {
@@ -89,24 +87,23 @@ export function _computeCredAccounts(
     accounts.push(credAccount);
   }
 
-  for (const [userAddress, info] of userlikeInfo.entries()) {
-    if (accountAddresses.has(userAddress)) {
+  for (const [address, info] of userlikeInfo.entries()) {
+    if (accountAddresses.has(address)) {
       // This userlike actually has an explicit account
       continue;
     }
-    if (aliases.has(userAddress)) {
+    const {cred, description} = info;
+    if (aliasAddresses.has(address)) {
       throw new Error(
         `cred sync error: alias ${NodeAddress.toString(
-          userAddress
-        )} included in Cred scores`
+          address
+        )} (aka ${description}) included in Cred scores`
       );
     }
-    const {cred, description} = info;
     unclaimedAliases.push({
-      address: userAddress,
+      alias: {address, description},
       cred,
       totalCred: sum(cred),
-      description,
     });
   }
   return {accounts, unclaimedAliases, intervalEndpoints};

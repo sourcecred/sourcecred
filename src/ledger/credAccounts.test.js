@@ -23,10 +23,12 @@ describe("ledger/credAccounts", () => {
       const intervalEndpoints = [123, 125, 127];
       const expectedCredAccount = {cred: accountCred, account, totalCred: 3};
       const expectedUnclaimedAccount = {
+        alias: {
+          address: userAddress,
+          description: "Little lost user",
+        },
         cred: userCred,
         totalCred: 2,
-        address: userAddress,
-        description: "Little lost user",
       };
       const expectedData = {
         accounts: [expectedCredAccount],
@@ -40,8 +42,8 @@ describe("ledger/credAccounts", () => {
     it("errors if an alias address is in the cred scores", () => {
       const ledger = new Ledger();
       const id = ledger.createIdentity("USER", "sourcecred");
-      const userAddress = NodeAddress.empty;
-      ledger.addAlias(id, userAddress);
+      const alias = {address: NodeAddress.empty, description: "user"};
+      ledger.addAlias(id, alias);
 
       const account = ledger.accounts()[0];
       const accountCred = [0, 1, 2];
@@ -51,7 +53,7 @@ describe("ledger/credAccounts", () => {
           account.identity.address,
           {cred: accountCred, description: "irrelevant"},
         ],
-        [userAddress, {cred: userCred, description: "irrelevant"}],
+        [alias.address, {cred: userCred, description: "irrelevant"}],
       ]);
       const intervalEndpoints = [123, 125, 127];
 
@@ -59,8 +61,8 @@ describe("ledger/credAccounts", () => {
         _computeCredAccounts([account], info, intervalEndpoints);
       expect(thunk).toThrowError(
         `cred sync error: alias ${NodeAddress.toString(
-          userAddress
-        )} included in Cred scores`
+          NodeAddress.empty
+        )} (aka irrelevant) included in Cred scores`
       );
     });
     it("errors if an account doesn't have cred info", () => {
