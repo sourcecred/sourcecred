@@ -24,7 +24,7 @@ const adminCommand: Command = async (args, std) => {
 
   // serve the static admin site and all subdirectories
   // also enables GETing data/ledger.json
-  server.use(express.static("."));
+  server.use(express.static("./site"));
 
   // middleware that parses text request bodies for us
   server.use(express.text());
