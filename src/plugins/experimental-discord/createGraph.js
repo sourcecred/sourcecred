@@ -248,10 +248,7 @@ export function createGraph(
       if (hasEdges) {
         const author = memberMap.get(message.authorId);
         if (!author) {
-          console.warn(
-            `Message author not loaded ${message.authorId}, maybe a Deleted User?\n` +
-              `${messageUrl(guild, channel.id, message.id)}`
-          );
+          // Probably this user left the server.
           continue;
         }
         wg.graph.addNode(memberNode(author));
