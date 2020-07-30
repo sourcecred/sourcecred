@@ -1,8 +1,7 @@
 // @flow
 
 import React from "react";
-import {type CredAccount, computeCredAccounts} from "../../ledger/credAccounts";
-import {Ledger} from "../../ledger/ledger";
+import {Ledger, type Account} from "../../ledger/ledger";
 import {CredView} from "../../analysis/credView";
 import * as G from "../../ledger/grain";
 
@@ -13,15 +12,12 @@ export type Props = {|
 
 export class GrainAccountOverview extends React.Component<Props> {
   render() {
-    const {accounts} = computeCredAccounts(
-      this.props.ledger,
-      this.props.credView
-    );
-    function comparator(a: CredAccount, b: CredAccount) {
-      if (a.account.balance === b.account.balance) {
+    const accounts = this.props.ledger.accounts();
+    function comparator(a: Account, b: Account) {
+      if (a.balance === b.balance) {
         return 0;
       }
-      return G.gt(a.account.balance, b.account.balance) ? -1 : 1;
+      return G.gt(a.balance, b.balance) ? -1 : 1;
     }
     const sortedAccounts = accounts.slice().sort(comparator);
     return (
@@ -52,9 +48,9 @@ export class GrainAccountOverview extends React.Component<Props> {
   }
 }
 
-function AccountRow({account}: CredAccount) {
+function AccountRow(account: Account) {
   return (
-    <tr>
+    <tr key={account.identity.id}>
       <td>{account.identity.name}</td>
       <td>{account.active ? "✅" : "🛑"}</td>
       <td>{G.format(account.balance)}</td>
