@@ -12,6 +12,7 @@ import {CredView} from "../../analysis/credView";
 import {Ledger} from "../../ledger/ledger";
 import {GrainAccountOverview} from "./GrainAccountOverview";
 import {TransferGrain} from "./TransferGrain";
+import {SpecialGrainDistribution} from "./SpecialGrainDistribution";
 import {load, type LoadResult, type LoadSuccess} from "../load";
 import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
@@ -49,6 +50,9 @@ const customRoutes = (
   </Route>,
   <Route key="transfer" exact path="/transfer">
     <TransferGrain ledger={ledger} setLedger={setLedger} />
+  </Route>,
+  <Route key="special-distribution" exact path="/special-distribution">
+    <SpecialGrainDistribution ledger={ledger} setLedger={setLedger} />
   </Route>,
 ];
 
