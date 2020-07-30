@@ -77,8 +77,10 @@
     "eslint-plugin-react": "7.16.0",
     "file-loader": "^6.0.0",
     "flow-bin": "^0.127.0",
+    "husky": ">=4",
     "jest": "^26.0.1",
     "jest-fetch-mock": "^3.0.2",
+    "lint-staged": ">=10",
     "npm-run-all": "^4.1.5",
     "null-loader": "^4.0.0",
     "postinstall-postinstall": "^2.1.0",
@@ -155,6 +157,13 @@
       "mjs"
     ]
   },
-  "files": ["/bin"],
-  "bin": "./bin/sourcecred.js"
+  "files": [
+    "/bin"
+  ],
+  "bin": "./bin/sourcecred.js",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  }
 }
