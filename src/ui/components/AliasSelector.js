@@ -1,46 +1,33 @@
 // @flow
 
-import React, {useState, useMemo} from "react";
-import {useCombobox, useMultipleSelection} from "downshift";
+import React, {useState, useEffect} from "react";
+import {useCombobox} from "downshift";
 import {Ledger} from "../../ledger/ledger";
-import {type Identity, type Alias} from "../../ledger/identity";
+import {type Alias, type IdentityId} from "../../ledger/identity";
 import {CredView} from "../../analysis/credView";
 import {type NodeAddressT} from "../../core/graph";
 import Markdown from "react-markdown";
+import removeMd from "remove-markdown";
 
 type Props = {|
-  +currentIdentity: Identity | null,
+  +selectedIdentityId: IdentityId,
   +ledger: Ledger,
   +credView: CredView,
   +setLedger: (Ledger) => void,
-  +setCurrentIdentity: (Identity) => void,
 |};
 
 export function AliasSelector({
-  currentIdentity,
+  selectedIdentityId,
   ledger,
   setLedger,
-  setCurrentIdentity,
   credView,
 }: Props) {
+  const selectedAccount = ledger.account(selectedIdentityId);
+  if (selectedAccount == null) {
+    throw new Error("Selected identity not present in ledger");
+  }
+  const selectedIdentity = selectedAccount.identity;
   const [inputValue, setInputValue] = useState("");
-  const {
-    getSelectedItemProps,
-    getDropdownProps,
-    addSelectedItem,
-    //removeSelectedItem, will be utilzed again when #2059 is merged
-    selectedItems,
-  } = useMultipleSelection({
-    initialSelectedItems: [],
-  });
-
-  // this memo is utilized to repopulate the selected Items
-  // list each time the user is changed in the interface
-  useMemo(() => {
-    // This memo will be reimplemented once the
-    // alias primitives (#2059) are merged into this
-    // branch or master
-  }, [currentIdentity && currentIdentity.id]);
 
   const claimedAddresses: Set<NodeAddressT> = new Set();
   for (const {identity} of ledger.accounts()) {
@@ -60,7 +47,7 @@ export function AliasSelector({
 
   function filteredAliasesMatchingString(input: string): Alias[] {
     return potentialAliases.filter(({description}) =>
-      description.toLowerCase().startsWith(input.toLowerCase())
+      removeMd(description).toLowerCase().startsWith(input.toLowerCase())
     );
   }
 
@@ -72,9 +59,9 @@ export function AliasSelector({
     setInputItems(filteredAliasesMatchingString(input));
   };
 
-  useMemo(() => {
+  useEffect(() => {
     setAliasSearch();
-  }, [currentIdentity && currentIdentity.aliases]);
+  }, [selectedAccount.identity.aliases]);
 
   const {
     isOpen,
@@ -97,15 +84,11 @@ export function AliasSelector({
         case useCombobox.stateChangeTypes.InputKeyDownEnter:
         case useCombobox.stateChangeTypes.ItemClick:
         case useCombobox.stateChangeTypes.InputBlur:
-          if (selectedItem && currentIdentity) {
-            setLedger(ledger.addAlias(currentIdentity.id, selectedItem));
-            setCurrentIdentity(ledger.account(currentIdentity.id).identity);
+          if (selectedItem) {
+            setLedger(ledger.addAlias(selectedIdentityId, selectedItem));
             setInputValue("");
-            addSelectedItem(selectedItem);
             selectItem(null);
-            claimedAddresses.add(selectedItem.address);
           }
-
           break;
         default:
           break;
@@ -113,27 +96,22 @@ export function AliasSelector({
     },
   });
   return (
-    <div style={{visibility: currentIdentity ? "visible" : "hidden"}}>
+    <div>
       <label>
         <h2>Aliases:</h2>
       </label>
       <div>
-        {selectedItems.map((selectedItem, index) => (
-          <span
-            key={`selected-item-${index}`}
-            {...getSelectedItemProps({selectedItem, index})}
-          >
+        {selectedIdentity.aliases.map((alias, index) => (
+          <span key={`selected-item-${index}`}>
             <Markdown
               renderers={{paragraph: "span"}}
-              source={selectedItem.description}
+              source={alias.description}
             />
             <br />
           </span>
         ))}
         <div style={comboboxStyles} {...getComboboxProps()}>
-          <input
-            {...getInputProps(getDropdownProps({preventKeyAction: isOpen}))}
-          />
+          <input {...getInputProps()} />
           <button {...getToggleButtonProps()} aria-label={"toggle menu"}>
             &#8595;
           </button>
@@ -141,17 +119,17 @@ export function AliasSelector({
       </div>
       <ul {...getMenuProps()} style={menuMultipleStyles}>
         {isOpen &&
-          inputItems.map((item, index) => (
+          inputItems.map((alias, index) => (
             <li
               style={
                 highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
               }
-              key={`${item.address}${index}`}
-              {...getItemProps({item, index})}
+              key={`${alias.address}${index}`}
+              {...getItemProps({alias, index})}
             >
               <Markdown
-                renderers={{paragraph: "span"}}
-                source={item.description}
+                renderers={{link: "span", paragraph: "span"}}
+                source={alias.description}
               />
             </li>
           ))}

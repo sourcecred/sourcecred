@@ -92,51 +92,46 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
           type="submit"
           value={currentIdentity ? "update username" : "create identity"}
         />
-        <br />
-        <input
-          type="button"
-          value="save ledger to disk"
-          onClick={() => {
-            fetch("data/ledger.json", {
-              headers: {
-                Accept: "text/plain",
-                "Content-Type": "text/plain",
-              },
-              method: "POST",
-              body: ledger.serialize(),
-            });
-          }}
-        />
-        {currentIdentity && (
-          <>
-            <br />
-            <input
-              type="button"
-              value="New identity"
-              onClick={() => setActiveIdentity(currentIdentity)}
-            />
-            <br />
-            <input
-              type="checkbox"
-              id="active"
-              name="active"
-              checked={checkboxSelected}
-              onChange={() => toggleIdentityActivation(currentIdentity)}
-            />
-            <label htmlFor="active">Account is active</label>
-          </>
-        )}
       </form>
-      <div>
-        {/* Warning: don't conditionally render AliasSelector because it contains react hooks*/}
-        <AliasSelector
-          currentIdentity={currentIdentity}
-          ledger={ledger}
-          setLedger={setLedger}
-          setCurrentIdentity={setCurrentIdentity}
-          credView={credView}
-        />
-      </div>
+      <input
+        type="button"
+        value="save ledger to disk"
+        onClick={() => {
+          fetch("data/ledger.json", {
+            headers: {
+              Accept: "text/plain",
+              "Content-Type": "text/plain",
+            },
+            method: "POST",
+            body: ledger.serialize(),
+          });
+        }}
+      />
+      {currentIdentity && (
+        <>
+          <br />
+          <input
+            type="button"
+            value="New identity"
+            onClick={() => setActiveIdentity(currentIdentity)}
+          />
+          <br />
+          <input
+            type="checkbox"
+            id="active"
+            name="active"
+            checked={checkboxSelected}
+            onChange={() => toggleIdentityActivation(currentIdentity)}
+          />
+          <label htmlFor="active">Account is active</label>
+          <AliasSelector
+            selectedIdentityId={currentIdentity.id}
+            ledger={ledger}
+            setLedger={setLedger}
+            credView={credView}
+          />
+        </>
+      )}
     </div>
   );
 
