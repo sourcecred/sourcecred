@@ -27,8 +27,8 @@ const theme = createMuiTheme({
   },
 });
 
-const AppLayout = (loadResult: LoadSuccess) => (props) => (
-  <Layout {...props} appBar={AppBar} menu={withRouter(Menu(loadResult))} />
+const AppLayout = (props) => (
+  <Layout {...props} appBar={AppBar} menu={withRouter(Menu)} />
 );
 
 const customRoutes = (
@@ -96,7 +96,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const history = useHistory();
   return (
     <Admin
-      layout={AppLayout(loadSuccess)}
+      layout={AppLayout}
       theme={theme}
       dataProvider={dataProvider}
       history={history}
