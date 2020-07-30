@@ -3,11 +3,13 @@
 import fs from "fs-extra";
 
 import type {Command} from "./command";
-import {join as pathJoin} from "path";
+import {join} from "path";
+import {loadInstanceConfig} from "./common";
 
 const SITE_TEMPLATE_DIR = "site-template";
 const SITE_OUTPUT = "site"; // under instance dir
-const SITE_SYMLINKS = ["index.html", "favicon.png", "static"];
+// Targets to symlink from the instance into the site dir
+const SYMLINK_TARGETS = ["sourcecred.json", "data", "config", "output"];
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -18,10 +20,18 @@ const siteCommand: Command = async (args, std) => {
   if (args.length !== 0) {
     return die(std, "usage: sourcecred site");
   }
-  const siteTemplate = pathJoin(__dirname, SITE_TEMPLATE_DIR);
+  const siteTemplate = join(__dirname, SITE_TEMPLATE_DIR);
   await fs.copy(siteTemplate, SITE_OUTPUT, {dereference: true});
-  for (const symlink of SITE_SYMLINKS) {
-    await lnsf(pathJoin(SITE_OUTPUT, symlink), symlink);
+
+  const instanceDir = process.cwd();
+  // Will error if we aren't in a valid SourceCred instance.
+  await loadInstanceConfig(instanceDir);
+
+  // Link in all the instance data that is referenced by the site.
+  for (const target of SYMLINK_TARGETS) {
+    const src = join(instanceDir, target);
+    const dst = join(SITE_OUTPUT, target);
+    await lnsf(src, dst);
   }
   return 0;
 };
