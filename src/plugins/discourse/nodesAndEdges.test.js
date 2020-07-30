@@ -75,7 +75,7 @@ describe("plugins/discourse/nodesAndEdges", () => {
       const {url} = example();
       const node = NE.userNode(url, "decentralion");
       expect(node.description).toMatchInlineSnapshot(
-        `"[@decentralion](https://url.com/u/decentralion/)"`
+        `"discourse/[@decentralion](https://url.com/u/decentralion/)"`
       );
       expect(node.timestampMs).toEqual(null);
       expect(NodeAddress.toParts(node.address)).toMatchInlineSnapshot(`

@@ -422,7 +422,7 @@ exports[`plugins/github/relationalView Review has timestampMs 1`] = `15198782100
 
 exports[`plugins/github/relationalView Review has url 1`] = `"https://github.com/sourcecred-test/example-github/pull/5#pullrequestreview-100313899"`;
 
-exports[`plugins/github/relationalView Userlike has description 1`] = `"[@wchargin](https://github.com/wchargin)"`;
+exports[`plugins/github/relationalView Userlike has description 1`] = `"github/[@wchargin](https://github.com/wchargin)"`;
 
 exports[`plugins/github/relationalView Userlike has login 1`] = `"wchargin"`;
 

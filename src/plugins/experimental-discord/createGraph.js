@@ -67,7 +67,7 @@ function reactionAddress(reaction: Model.Reaction): NodeAddressT {
 }
 
 function memberNode(member: Model.GuildMember): Node {
-  const description = `${escape(member.user.username)}#${
+  const description = `discord/${escape(member.user.username.slice(0, 20))}#${
     member.user.discriminator
   }`;
   return {
