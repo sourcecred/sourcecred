@@ -10,6 +10,7 @@
     "base-64": "^0.1.0",
     "base64url": "^3.0.1",
     "better-sqlite3": "^7.0.0",
+    "big-integer": "^1.6.48",
     "bottleneck": "^2.19.5",
     "chalk": "^4.0.0",
     "commonmark": "^0.29.1",
@@ -155,6 +156,8 @@
       "mjs"
     ]
   },
-  "files": ["/bin"],
+  "files": [
+    "/bin"
+  ],
   "bin": "./bin/sourcecred.js"
 }
