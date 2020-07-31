@@ -59,7 +59,18 @@ export type Identity = {|
   // Every other node in the graph that this identity corresponds to.
   // Does not include the identity's "own" address, i.e. the result
   // of calling (identityAddress(identity.id)).
-  +aliases: $ReadOnlyArray<NodeAddressT>,
+  +aliases: $ReadOnlyArray<Alias>,
+|};
+
+/**
+ * An Alias is basically another graph Node which resolves to this identity. We
+ * ignore the timestamp because it's generally not significant for users; we
+ * keep the address out of obvious necessity, and we keep the description so we
+ * can describe this alias in UIs (e.g. the ledger admin panel).
+ */
+export type Alias = {|
+  +description: string,
+  +address: NodeAddressT,
 |};
 
 export function newIdentity(subtype: IdentitySubtype, name: string): Identity {
@@ -109,7 +120,10 @@ export function graphNode({name, address}: Identity): GraphNode {
 export function contractions(
   identities: $ReadOnlyArray<Identity>
 ): $ReadOnlyArray<NodeContraction> {
-  return identities.map((i) => ({replacement: graphNode(i), old: i.aliases}));
+  return identities.map((i) => ({
+    replacement: graphNode(i),
+    old: i.aliases.map((a) => a.address),
+  }));
 }
 
 export const identityNameParser: C.Parser<IdentityName> = C.fmap(
@@ -124,12 +138,17 @@ export const identitySubtypeParser: C.Parser<IdentitySubtype> = C.exactly([
   "PROJECT",
 ]);
 
+export const aliasParser: C.Parser<Alias> = C.object({
+  address: NodeAddress.parser,
+  description: C.string,
+});
+
 export const identityParser: C.Parser<Identity> = C.object({
   id: uuidParser,
   subtype: identitySubtypeParser,
   name: identityNameParser,
   address: NodeAddress.parser,
-  aliases: C.array(NodeAddress.parser),
+  aliases: C.array(aliasParser),
 });
 
 const userNodeType: NodeType = {

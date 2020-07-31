@@ -4,9 +4,12 @@ import fs from "fs-extra";
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
+import {loadJsonWithDefault} from "../util/disk";
 
+import {Ledger, parser as ledgerParser} from "../ledger/ledger";
 import * as NullUtil from "../util/null";
 import {LoggingTaskReporter} from "../util/taskReporter";
+import {type ReferenceDetector} from "../core/references/referenceDetector";
 import {CascadingReferenceDetector} from "../core/references/cascadingReferenceDetector";
 import type {Command} from "./command";
 import {type InstanceConfig} from "../api/instanceConfig";
@@ -80,7 +83,40 @@ async function buildReferenceDetector(baseDir, config, taskReporter) {
     taskReporter.finish(task);
   }
   taskReporter.finish("reference detector");
+  rds.push(await makeHackyIdentityNameReferenceDetector(baseDir));
   return new CascadingReferenceDetector(rds);
+}
+
+async function makeHackyIdentityNameReferenceDetector(
+  baseDir
+): Promise<ReferenceDetector> {
+  // Hack to support old-school (deprecated) "initiatives files":
+  // We need to be able to parse references to usernames, e.g. "@yalor", so
+  // we need a reference detector that will match these to identities in the
+  // Ledger. This isn't a robust addressing scheme, since identities are re-nameable;
+  // in v2 the initiatives plugin will be re-written to use identity node addresses instead.
+  // This hack can be safely deleted once we no longer support initiatives files that refer
+  // to identities by their names instead of their IDs.
+  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
+  const ledger = await loadJsonWithDefault(
+    ledgerPath,
+    ledgerParser,
+    () => new Ledger()
+  );
+  return _hackyIdentityNameReferenceDetector(ledger);
+}
+
+export function _hackyIdentityNameReferenceDetector(
+  ledger: Ledger
+): ReferenceDetector {
+  const usernameToAddress = new Map(
+    ledger.accounts().map((a) => [a.identity.name, a.identity.address])
+  );
+  function addressFromUrl(potentialUsername: string) {
+    const prepped = potentialUsername.replace("@", "").toLowerCase();
+    return usernameToAddress.get(prepped);
+  }
+  return {addressFromUrl};
 }
 
 export default graphCommand;

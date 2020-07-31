@@ -67,7 +67,7 @@ function reactionAddress(reaction: Model.Reaction): NodeAddressT {
 }
 
 function memberNode(member: Model.GuildMember): Node {
-  const description = `${escape(member.user.username)}#${
+  const description = `discord/${escape(member.user.username.slice(0, 20))}#${
     member.user.discriminator
   }`;
   return {
@@ -216,10 +216,7 @@ export function createGraph(
 
         const reactingMember = memberMap.get(reaction.authorId);
         if (!reactingMember) {
-          console.warn(
-            `Reacting member not loaded ${reaction.authorId} (reacted ${emojiRef}), maybe a Deleted User?\n` +
-              `${messageUrl(guild, channel.id, message.id)}`
-          );
+          // Probably this user left the server.
           continue;
         }
 
@@ -239,10 +236,7 @@ export function createGraph(
       for (const userId of message.mentions) {
         const mentionedMember = memberMap.get(userId);
         if (!mentionedMember) {
-          console.warn(
-            `Mentioned member not loaded ${userId}, maybe a Deleted User?\n` +
-              `${messageUrl(guild, channel.id, message.id)}`
-          );
+          // Probably this user left the server.
           continue;
         }
         wg.graph.addNode(memberNode(mentionedMember));
@@ -254,10 +248,7 @@ export function createGraph(
       if (hasEdges) {
         const author = memberMap.get(message.authorId);
         if (!author) {
-          console.warn(
-            `Message author not loaded ${message.authorId}, maybe a Deleted User?\n` +
-              `${messageUrl(guild, channel.id, message.id)}`
-          );
+          // Probably this user left the server.
           continue;
         }
         wg.graph.addNode(memberNode(author));

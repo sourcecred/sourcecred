@@ -25,7 +25,9 @@ const NodeEntryParser = C.object(
   {
     title: C.string,
     timestampIso: TimestampParser,
-    contributors: C.array(URLParser),
+    // Conceputally should use URLParser, but we allow strings
+    // as part of a hack fix to https://github.com/sourcecred/sourcecred/issues/1807
+    contributors: C.array(C.string),
   },
   {
     key: C.string,
@@ -45,7 +47,9 @@ const Parse_020: C.Parser<InitiativeFileV020> = C.object(CommonFields, {
   contributions: EdgeSpecParser,
   dependencies: EdgeSpecParser,
   references: EdgeSpecParser,
-  champions: C.array(URLParser),
+  // Conceputally should use URLParser, but we allow strings
+  // as part of a hack fix to https://github.com/sourcecred/sourcecred/issues/1807
+  champions: C.array(C.string),
 });
 
 const Parse_010: C.Parser<InitiativeFileV010> = (() => {

@@ -77,10 +77,11 @@ export async function loadLedger(legacyDir: string): Promise<Ledger> {
   identities.forEach(({username, aliases}) => {
     username = username.replace("_", "-");
     const userId = ledger.createIdentity("USER", username);
-    const addresses = aliasParser.parseOrThrow(aliases);
-    addresses.forEach((a) => {
-      ledger.addAlias(userId, a);
-    });
+    const fullAliases = aliases.map((a) => ({
+      address: resolveAlias(a, discourseServer.serverUrl),
+      description: a,
+    }));
+    fullAliases.forEach((a) => ledger.addAlias(userId, a));
   });
 
   return ledger;

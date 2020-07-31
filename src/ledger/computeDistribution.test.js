@@ -20,10 +20,12 @@ describe("ledger/computeDistribution", () => {
       }));
       const unclaimedAliases = [
         {
-          address: NodeAddress.empty,
+          alias: {
+            address: NodeAddress.empty,
+            description: "irrelevant",
+          },
           cred: [4, 5, 6],
           totalCred: 15,
-          description: "irrelevant",
         },
       ];
       const accountsData = {

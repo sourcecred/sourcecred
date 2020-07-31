@@ -17,11 +17,13 @@ import {
   newIdentity,
   identityNameParser,
   identityNameFromString,
+  type Alias,
+  aliasParser,
 } from "./identity";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
-import {parser as uuidParser} from "../util/uuid";
+import * as uuid from "../util/uuid";
 import {type Distribution, parser as distributionParser} from "./distribution";
 import * as G from "./grain";
 import {JsonLog} from "../util/jsonLog";
@@ -74,7 +76,7 @@ export type Account = $ReadOnly<MutableAccount>;
 export class Ledger {
   _ledgerEventLog: JsonLog<LedgerEvent>;
   _identityNameToId: Map<IdentityName, IdentityId>;
-  _aliases: Map<NodeAddressT, IdentityId>;
+  _aliasAddressToIdentity: Map<NodeAddressT, IdentityId>;
   _accounts: Map<IdentityId, MutableAccount>;
   _latestTimestamp: TimestampMs = -Infinity;
   _lastDistributionTimestamp: TimestampMs = -Infinity;
@@ -82,7 +84,7 @@ export class Ledger {
   constructor() {
     this._ledgerEventLog = new JsonLog();
     this._identityNameToId = new Map();
-    this._aliases = new Map();
+    this._aliasAddressToIdentity = new Map();
     this._accounts = new Map();
   }
 
@@ -141,7 +143,7 @@ export class Ledger {
       throw new Error(`createIdentity: new identities may not have aliases`);
     }
     // istanbul ignore if
-    if (this._aliases.has(identity.address)) {
+    if (this._aliasAddressToIdentity.has(identity.address)) {
       // This should never happen, as it implies a UUID conflict.
       throw new Error(
         `createIdentity: innate address already claimed ${identity.id}`
@@ -151,7 +153,7 @@ export class Ledger {
     // Mutations! Method must not fail after this comment.
     this._identityNameToId.set(identity.name, identity.id);
     // Reserve this identity's own address
-    this._aliases.set(identity.address, identity.id);
+    this._aliasAddressToIdentity.set(identity.address, identity.id);
     // Every identity has a corresponding Account.
     this._accounts.set(identity.id, {
       balance: G.ZERO,
@@ -216,7 +218,7 @@ export class Ledger {
    * Will fail if the identity does not exist.
    * Will fail if the alias is already claimed by any identity.
    */
-  addAlias(identityId: IdentityId, alias: NodeAddressT): Ledger {
+  addAlias(identityId: IdentityId, alias: Alias): Ledger {
     this._createAndProcessEvent({
       type: "ADD_ALIAS",
       identityId,
@@ -231,22 +233,22 @@ export class Ledger {
     const account = this._mutableAccount(identityId);
     const existingIdentity = account.identity;
     const existingAliases = existingIdentity.aliases;
-    if (existingAliases.indexOf(alias) !== -1) {
+    if (existingAliases.map((a) => a.address).indexOf(alias.address) !== -1) {
       throw new Error(
         `addAlias: identity already has alias: ${
           existingIdentity.name
-        }, ${NodeAddress.toString(alias)}`
+        }, ${NodeAddress.toString(alias.address)}`
       );
     }
-    if (this._aliases.has(alias)) {
+    if (this._aliasAddressToIdentity.has(alias.address)) {
       // Some other identity has this alias; fail.
       throw new Error(
-        `addAlias: alias ${NodeAddress.toString(alias)} already bound`
+        `addAlias: alias ${NodeAddress.toString(alias.address)} already bound`
       );
     }
 
     // Mutations below; method must not fail after this line.
-    this._aliases.set(alias, identityId);
+    this._aliasAddressToIdentity.set(alias.address, identityId);
     const updatedAliases = existingIdentity.aliases.slice();
     updatedAliases.push(alias);
     const updatedIdentity = {
@@ -491,7 +493,12 @@ export class Ledger {
 
   _createAndProcessEvent(action: Action) {
     const ledgerTimestamp = _getTimestamp();
-    const ledgerEvent = {ledgerTimestamp, action, version: "1"};
+    const ledgerEvent = {
+      ledgerTimestamp,
+      action,
+      version: "1",
+      uuid: uuid.random(),
+    };
     this._processEvent(ledgerEvent);
   }
 
@@ -504,18 +511,13 @@ export class Ledger {
   }
 }
 
-/**
- * The log of all Actions in the Ledger.
- *
- * This is an opaque type; clients must not modify the log, since they
- * could put it in an inconsistent state.
- */
-export opaque type LedgerLog = $ReadOnlyArray<LedgerEvent>;
+export type LedgerLog = $ReadOnlyArray<LedgerEvent>;
 
-type LedgerEvent = {|
+export type LedgerEvent = {|
   +action: Action,
   +ledgerTimestamp: TimestampMs,
   +version: "1",
+  +uuid: uuid.Uuid,
 |};
 
 /**
@@ -545,19 +547,19 @@ type RenameIdentity = {|
 |};
 const renameIdentityParser: C.Parser<RenameIdentity> = C.object({
   type: C.exactly(["RENAME_IDENTITY"]),
-  identityId: uuidParser,
+  identityId: uuid.parser,
   newName: identityNameParser,
 });
 
 type AddAlias = {|
   +type: "ADD_ALIAS",
   +identityId: IdentityId,
-  +alias: NodeAddressT,
+  +alias: Alias,
 |};
 const addAliasParser: C.Parser<AddAlias> = C.object({
   type: C.exactly(["ADD_ALIAS"]),
-  identityId: uuidParser,
-  alias: NodeAddress.parser,
+  identityId: uuid.parser,
+  alias: aliasParser,
 });
 
 type ToggleActivation = {|
@@ -566,7 +568,7 @@ type ToggleActivation = {|
 |};
 const toggleActivationParser: C.Parser<ToggleActivation> = C.object({
   type: C.exactly(["TOGGLE_ACTIVATION"]),
-  identityId: uuidParser,
+  identityId: uuid.parser,
 });
 
 type DistributeGrain = {|
@@ -587,8 +589,8 @@ type TransferGrain = {|
 |};
 const transferGrainParser: C.Parser<TransferGrain> = C.object({
   type: C.exactly(["TRANSFER_GRAIN"]),
-  from: uuidParser,
-  to: uuidParser,
+  from: uuid.parser,
+  to: uuid.parser,
   amount: G.parser,
   memo: C.orElse([C.string, C.null_]),
 });
@@ -606,6 +608,7 @@ const ledgerEventParser: C.Parser<LedgerEvent> = C.object({
   action: actionParser,
   ledgerTimestamp: C.number,
   version: C.exactly(["1"]),
+  uuid: uuid.parser,
 });
 
 export const parser: C.Parser<Ledger> = C.fmap(

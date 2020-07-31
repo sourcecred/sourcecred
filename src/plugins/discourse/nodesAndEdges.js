@@ -21,7 +21,7 @@ import {
 
 export function userNode(serverUrl: string, username: string): Node {
   const url = `${serverUrl}/u/${username}/`;
-  const description = `[@${username}](${url})`;
+  const description = `discourse/[@${username}](${url})`;
   return {
     address: userAddress(serverUrl, username),
     description,

@@ -1,65 +1,67 @@
 // @flow
 
-import React, {useState, useMemo} from "react";
-import {useCombobox, useMultipleSelection} from "downshift";
+import React, {useState, useEffect} from "react";
+import {useCombobox} from "downshift";
 import {Ledger} from "../../ledger/ledger";
-import {type Identity} from "../../ledger/identity";
+import {type Alias, type IdentityId} from "../../ledger/identity";
 import {CredView} from "../../analysis/credView";
 import {type NodeAddressT} from "../../core/graph";
 import Markdown from "react-markdown";
+import removeMd from "remove-markdown";
 
 type Props = {|
-  +currentIdentity: Identity | null,
+  +selectedIdentityId: IdentityId,
   +ledger: Ledger,
   +credView: CredView,
   +setLedger: (Ledger) => void,
-  +setCurrentIdentity: (Identity) => void,
 |};
 
 export function AliasSelector({
-  currentIdentity,
+  selectedIdentityId,
   ledger,
   setLedger,
-  setCurrentIdentity,
   credView,
 }: Props) {
+  const selectedAccount = ledger.account(selectedIdentityId);
+  if (selectedAccount == null) {
+    throw new Error("Selected identity not present in ledger");
+  }
+  const selectedIdentity = selectedAccount.identity;
   const [inputValue, setInputValue] = useState("");
-  const {
-    getSelectedItemProps,
-    getDropdownProps,
-    addSelectedItem,
-    removeSelectedItem,
-    selectedItems,
-  } = useMultipleSelection({
-    initialSelectedItems: [],
-  });
-  useMemo(() => {
-    selectedItems.forEach((item) => {
-      removeSelectedItem(item);
-    });
-    if (currentIdentity) {
-      currentIdentity.aliases.forEach((aliasAddress) =>
-        addSelectedItem(aliasAddress)
-      );
-    }
-  }, [currentIdentity]);
 
-  const getNodeDescription = (nodeAddress: NodeAddressT): string => {
-    const node = credView.node(nodeAddress);
-    if (node) {
-      return node.description;
+  const claimedAddresses: Set<NodeAddressT> = new Set();
+  for (const {identity} of ledger.accounts()) {
+    claimedAddresses.add(identity.address);
+    for (const {address} of identity.aliases) {
+      claimedAddresses.add(address);
     }
-    return "";
+  }
+
+  const potentialAliases = credView
+    .userNodes()
+    .map(({address, description}) => ({
+      address,
+      description,
+    }))
+    .filter(({address}) => !claimedAddresses.has(address));
+
+  function filteredAliasesMatchingString(input: string): Alias[] {
+    return potentialAliases.filter(({description}) =>
+      removeMd(description).toLowerCase().startsWith(input.toLowerCase())
+    );
+  }
+
+  const [inputItems, setInputItems] = useState(
+    filteredAliasesMatchingString("")
+  );
+
+  const setAliasSearch = (input: string = "") => {
+    setInputItems(filteredAliasesMatchingString(input));
   };
 
-  const getFilteredItems = (items) =>
-    items.filter(
-      (item) =>
-        !ledger._aliases.has(item) &&
-        getNodeDescription(item)
-          .toLowerCase()
-          .startsWith(inputValue.toLowerCase())
-    );
+  useEffect(() => {
+    setAliasSearch();
+  }, [selectedAccount.identity.aliases]);
 
   const {
     isOpen,
@@ -72,23 +74,21 @@ export function AliasSelector({
     selectItem,
   } = useCombobox({
     inputValue,
-    items: getFilteredItems(credView.userNodes().map((i) => i.address)),
+    items: inputItems,
     onStateChange: ({inputValue, type, selectedItem}) => {
       switch (type) {
         case useCombobox.stateChangeTypes.InputChange:
           setInputValue(inputValue);
+          setAliasSearch(inputValue);
           break;
         case useCombobox.stateChangeTypes.InputKeyDownEnter:
         case useCombobox.stateChangeTypes.ItemClick:
         case useCombobox.stateChangeTypes.InputBlur:
-          if (selectedItem && currentIdentity) {
-            setLedger(ledger.addAlias(currentIdentity.id, selectedItem));
-            setCurrentIdentity(ledger.account(currentIdentity.id).identity);
+          if (selectedItem) {
+            setLedger(ledger.addAlias(selectedIdentityId, selectedItem));
             setInputValue("");
-            addSelectedItem(selectedItem);
             selectItem(null);
           }
-
           break;
         default:
           break;
@@ -96,27 +96,22 @@ export function AliasSelector({
     },
   });
   return (
-    <div style={{visibility: currentIdentity ? "visible" : "hidden"}}>
+    <div>
       <label>
         <h2>Aliases:</h2>
       </label>
       <div>
-        {selectedItems.map((selectedItem, index) => (
-          <span
-            key={`selected-item-${index}`}
-            {...getSelectedItemProps({selectedItem, index})}
-          >
+        {selectedIdentity.aliases.map((alias, index) => (
+          <span key={`selected-item-${index}`}>
             <Markdown
               renderers={{paragraph: "span"}}
-              source={getNodeDescription(selectedItem)}
+              source={alias.description}
             />
             <br />
           </span>
         ))}
         <div style={comboboxStyles} {...getComboboxProps()}>
-          <input
-            {...getInputProps(getDropdownProps({preventKeyAction: isOpen}))}
-          />
+          <input {...getInputProps()} />
           <button {...getToggleButtonProps()} aria-label={"toggle menu"}>
             &#8595;
           </button>
@@ -124,22 +119,20 @@ export function AliasSelector({
       </div>
       <ul {...getMenuProps()} style={menuMultipleStyles}>
         {isOpen &&
-          getFilteredItems(credView.userNodes().map((i) => i.address)).map(
-            (item, index) => (
-              <li
-                style={
-                  highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
-                }
-                key={`${item}${index}`}
-                {...getItemProps({item, index})}
-              >
-                <Markdown
-                  renderers={{paragraph: "span"}}
-                  source={getNodeDescription(item)}
-                />
-              </li>
-            )
-          )}
+          inputItems.map((alias, index) => (
+            <li
+              style={
+                highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
+              }
+              key={`${alias.address}${index}`}
+              {...getItemProps({alias, index})}
+            >
+              <Markdown
+                renderers={{link: "span", paragraph: "span"}}
+                source={alias.description}
+              />
+            </li>
+          ))}
       </ul>
     </div>
   );
@@ -158,5 +151,4 @@ const menuMultipleStyles = {
   zIndex: 1000,
   listStyle: "none",
   padding: 0,
-  //right: "40px",
 };

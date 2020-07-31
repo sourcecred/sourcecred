@@ -1100,7 +1100,7 @@ export class Userlike extends _Entity<UserlikeEntry> {
     return null;
   }
   description(): string {
-    return `[@${this.login()}](${this.url()})`;
+    return `github/[@${this.login()}](${this.url()})`;
   }
 }
 
