@@ -1,18 +1,23 @@
 // @flow
 
-import {loadJsonWithDefault, loadJson, mkdirx} from "./disk";
+import {
+  loadFileWithDefault,
+  loadJsonWithDefault,
+  loadJson,
+  mkdirx,
+} from "./disk";
 import tmp from "tmp";
 import fs from "fs-extra";
 import * as P from "./combo";
 import {join as pathJoin} from "path";
 
 describe("util/disk", () => {
-  function tmpWithContents(contents: mixed) {
-    const name = tmp.tmpNameSync();
-    fs.writeFileSync(name, JSON.stringify(contents));
-    return name;
-  }
   describe("loadJson / loadJsonWithDefault", () => {
+    function tmpWithContents(contents: mixed) {
+      const name = tmp.tmpNameSync();
+      fs.writeFileSync(name, JSON.stringify(contents));
+      return name;
+    }
     const badPath = () => pathJoin(tmp.dirSync().name, "not-a-real-path");
     const fooParser = P.object({foo: P.number});
     const fooInstance = Object.freeze({foo: 42});
@@ -64,6 +69,33 @@ describe("util/disk", () => {
       const directoryPath = tmp.dirSync().name;
       const fail = async () =>
         await loadJsonWithDefault(directoryPath, fooParser, fooDefault);
+      await expect(fail).rejects.toThrow("EISDIR");
+    });
+  });
+
+  describe("loadFileWithDefault", () => {
+    const badPath = () => pathJoin(tmp.dirSync().name, "not-a-real-path");
+    const unreachable = () => {
+      throw new Error("Should not get here");
+    };
+    function tmpWithData(data: string) {
+      const name = tmp.tmpNameSync();
+      fs.writeFileSync(name, data);
+      return name;
+    }
+    it("works when valid file is present", async () => {
+      const f = tmpWithData("hello\n");
+      expect(await loadFileWithDefault(f, unreachable)).toEqual("hello\n");
+    });
+    it("loads default if file not present", async () => {
+      expect(await loadFileWithDefault(badPath(), () => "backup")).toEqual(
+        "backup"
+      );
+    });
+    it("errors if file loading fails for a non-ENOENT reason", async () => {
+      const directoryPath = tmp.dirSync().name;
+      const fail = async () =>
+        await loadFileWithDefault(directoryPath, unreachable);
       await expect(fail).rejects.toThrow("EISDIR");
     });
   });

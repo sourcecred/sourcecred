@@ -2,6 +2,7 @@
 
 import {JsonLog} from "./jsonLog";
 import * as C from "./combo";
+import dedent from "./dedent";
 
 describe("util/jsonLog", () => {
   it("initializes to an empty log", () => {
@@ -23,10 +24,9 @@ describe("util/jsonLog", () => {
     expect(Array.from(arrValues)).toEqual([1, 2, 3]);
   });
 
-  it("converts empty log to empty json array", () => {
+  it("converts empty log to empty file", () => {
     const emptyLogString = new JsonLog().toString();
-    expect(JSON.parse(emptyLogString)).toEqual([]);
-    expect(new JsonLog().toString()).toEqual("[]");
+    expect(emptyLogString).toEqual("");
   });
   it("parses an empty string as an empty log", () => {
     expect(JsonLog.fromString("[]", C.number)).toEqual(new JsonLog());
@@ -35,16 +35,19 @@ describe("util/jsonLog", () => {
   it("converts logs to a json representation with each item on its own line", () => {
     const s = new JsonLog().append([{name: "foo"}, {name: "bar"}]).toString();
     expect(s).toMatchInlineSnapshot(`
-      "[
-      {\\"name\\":\\"foo\\"},
+      "{\\"name\\":\\"foo\\"}
       {\\"name\\":\\"bar\\"}
-      ]"
+      "
     `);
   });
   it("outputs valid json", () => {
     const items = [{name: "foo"}, {name: "bar"}];
     const s = new JsonLog().append(items).toString();
-    expect(JSON.parse(s)).toEqual(items);
+    const lines = s.split("\n");
+    expect(lines).toHaveLength(3);
+    expect(JSON.parse(lines[0])).toEqual(items[0]);
+    expect(JSON.parse(lines[1])).toEqual(items[1]);
+    expect(lines[2]).toEqual("");
   });
   it("parses from the serialized format correctly", () => {
     const parser = C.object({foo: C.number});
@@ -53,5 +56,28 @@ describe("util/jsonLog", () => {
     const log = JsonLog.fromString(logString, parser);
     const items = Array.from(log.values());
     expect(items).toEqual(ts);
+  });
+  describe("parses from the legacy serialized format correctly", () => {
+    it("for non-empty data", () => {
+      const parser = C.object({foo: C.number});
+      const ts = [{foo: 1}, {foo: 2}, {foo: 3}];
+      const oldFormat = dedent`\
+      [
+      {"foo":1}
+      {"foo":2}
+      {"foo":3}
+      ]`; // no trailing newline
+      const log = JsonLog.fromString(oldFormat, parser);
+      const items = Array.from(log.values());
+      expect(items).toEqual(ts);
+    });
+    it("for empty", () => {
+      const parser = C.object({foo: C.number});
+      const ts = [];
+      const oldFormat = "[]"; // no trailing newline
+      const log = JsonLog.fromString(oldFormat, parser);
+      const items = Array.from(log.values());
+      expect(items).toEqual(ts);
+    });
   });
 });

@@ -38,15 +38,40 @@ export class JsonLog<T: C.JsonObject> {
   }
 
   toString(): string {
-    if (this._items.length === 0) {
-      return "[]";
-    }
-    const stringifiedItems = this._items.map(stringify).join(",\n");
-    return `[\n${stringifiedItems}\n]`;
+    const stringifiedItems = this._items.map((x) => stringify(x) + "\n");
+    return stringifiedItems.join("");
   }
 
   static fromString(log: string, parser: C.Parser<T>): JsonLog<T> {
-    const items = C.array(parser).parseOrThrow(JSON.parse(log));
-    return new JsonLog().append(items);
+    const result = new JsonLog();
+    _extractLogLines(log).forEach((line, i) => {
+      let parsed;
+      try {
+        parsed = parser.parse(JSON.parse(line));
+      } catch (e) {
+        throw new Error(`[${i}] = ${line}; ${e}`);
+      }
+      if (parsed.ok) {
+        result.append([parsed.value]);
+      } else {
+        throw new Error(`line ${i + 1}: ${parsed.err}`);
+      }
+    });
+    return result;
   }
+}
+
+function _extractLogLines(log: string): string[] {
+  if (!log.endsWith("\n")) {
+    // Temporarily compatibility measure for raw JSON arrays (not NDJSON),
+    // in the specific form written by previous versions of this module.
+    if (log === "[]") {
+      return [];
+    }
+    const dataLines = log.split("\n").slice(1, -1);
+    return dataLines.map((line) =>
+      line.endsWith(",") ? line.slice(0, -1) : line
+    );
+  }
+  return log.slice(0, -1).split("\n");
 }

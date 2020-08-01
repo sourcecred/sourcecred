@@ -2,7 +2,7 @@
 
 import cloneDeep from "lodash.clonedeep";
 import {NodeAddress} from "../core/graph";
-import {Ledger, parser} from "./ledger";
+import {Ledger} from "./ledger";
 import {newIdentity} from "./identity";
 import * as G from "./grain";
 import * as uuid from "../util/uuid"; // for spy purposes
@@ -810,10 +810,10 @@ describe("ledger/ledger", () => {
       expect(Ledger.fromEventLog(ledger.eventLog())).toEqual(ledger);
     });
     it("serialized LedgerLogs may be parsed", () => {
-      const ledger = richLedger();
-      const ledgerString = ledger.serialize();
-      const ledgerJson = JSON.parse(ledgerString);
-      expect(parser.parseOrThrow(ledgerJson)).toEqual(ledger);
+      const oldLedger = richLedger();
+      const ledgerString = oldLedger.serialize();
+      const newLedger = Ledger.parse(ledgerString);
+      expect(newLedger).toEqual(oldLedger);
     });
     it("serialized ledger snapshots as expected", () => {
       expect(richLedger().serialize()).toMatchSnapshot();

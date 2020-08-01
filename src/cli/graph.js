@@ -4,9 +4,9 @@ import fs from "fs-extra";
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
-import {loadJsonWithDefault} from "../util/disk";
+import {loadFileWithDefault} from "../util/disk";
 
-import {Ledger, parser as ledgerParser} from "../ledger/ledger";
+import {Ledger} from "../ledger/ledger";
 import * as NullUtil from "../util/null";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {type ReferenceDetector} from "../core/references/referenceDetector";
@@ -98,10 +98,8 @@ async function makeHackyIdentityNameReferenceDetector(
   // This hack can be safely deleted once we no longer support initiatives files that refer
   // to identities by their names instead of their IDs.
   const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
-  const ledger = await loadJsonWithDefault(
-    ledgerPath,
-    ledgerParser,
-    () => new Ledger()
+  const ledger = Ledger.parse(
+    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
   );
   return _hackyIdentityNameReferenceDetector(ledger);
 }
