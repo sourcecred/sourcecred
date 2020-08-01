@@ -49,7 +49,7 @@ export class JsonLog<T: C.JsonObject> {
       try {
         parsed = parser.parse(JSON.parse(line));
       } catch (e) {
-        throw new Error(`[${i}] = ${line}; ${e}`);
+        throw new Error(`line ${i + 1} is not valid JSON: ${e}`);
       }
       if (parsed.ok) {
         result.append([parsed.value]);
@@ -62,7 +62,12 @@ export class JsonLog<T: C.JsonObject> {
 }
 
 function _extractLogLines(log: string): string[] {
-  if (!log.endsWith("\n")) {
+  // In the legacy format, all automatically written ledgers erroneously
+  // lacked trailing LF, but some hand-edited ones have them. In the new
+  // format, all automatically written ledgers include a trailing LF.
+  // Strip it, if present, for ease of `split("\n")`.
+  log = log.trimRight();
+  if (log.startsWith("[")) {
     // Temporarily compatibility measure for raw JSON arrays (not NDJSON),
     // in the specific form written by previous versions of this module.
     if (log === "[]") {
@@ -73,5 +78,5 @@ function _extractLogLines(log: string): string[] {
       line.endsWith(",") ? line.slice(0, -1) : line
     );
   }
-  return log.slice(0, -1).split("\n");
+  return log.split("\n");
 }

@@ -49,35 +49,68 @@ describe("util/jsonLog", () => {
     expect(JSON.parse(lines[1])).toEqual(items[1]);
     expect(lines[2]).toEqual("");
   });
-  it("parses from the serialized format correctly", () => {
-    const parser = C.object({foo: C.number});
-    const ts = [{foo: 1}, {foo: 2}, {foo: 3}];
-    const logString = new JsonLog().append(ts).toString();
-    const log = JsonLog.fromString(logString, parser);
-    const items = Array.from(log.values());
-    expect(items).toEqual(ts);
-  });
-  describe("parses from the legacy serialized format correctly", () => {
-    it("for non-empty data", () => {
+  describe("fromString", () => {
+    it("round-trips after toString", () => {
+      const parser = C.object({foo: C.number});
+      const ts = [{foo: 1}, {foo: 2}, {foo: 3}];
+      const logString = new JsonLog().append(ts).toString();
+      const log = JsonLog.fromString(logString, parser);
+      const items = Array.from(log.values());
+      expect(items).toEqual(ts);
+    });
+    it("it parses the legacy form of non-empty data", () => {
       const parser = C.object({foo: C.number});
       const ts = [{foo: 1}, {foo: 2}, {foo: 3}];
       const oldFormat = dedent`\
-      [
-      {"foo":1}
-      {"foo":2}
-      {"foo":3}
-      ]`; // no trailing newline
+        [
+        {"foo":1}
+        {"foo":2}
+        {"foo":3}
+        ]`; // no trailing newline
       const log = JsonLog.fromString(oldFormat, parser);
       const items = Array.from(log.values());
       expect(items).toEqual(ts);
     });
-    it("for empty", () => {
+    it("it parses the legacy form of non-empty data with trailing LF", () => {
+      const parser = C.object({foo: C.number});
+      const ts = [{foo: 1}, {foo: 2}, {foo: 3}];
+      const oldFormat = dedent`\
+        [
+        {"foo":1}
+        {"foo":2}
+        {"foo":3}
+        ]
+      `;
+      const log = JsonLog.fromString(oldFormat, parser);
+      const items = Array.from(log.values());
+      expect(items).toEqual(ts);
+    });
+    it("it parses the legacy form of empty data", () => {
       const parser = C.object({foo: C.number});
       const ts = [];
       const oldFormat = "[]"; // no trailing newline
       const log = JsonLog.fromString(oldFormat, parser);
       const items = Array.from(log.values());
       expect(items).toEqual(ts);
+    });
+    it("has a friendly error for invalid JSON", () => {
+      const parser = C.object({foo: C.number});
+      const serialized = '{"foo":1}\nwat\n';
+      expect(() => void JsonLog.fromString(serialized, parser)).toThrow(
+        /line 2.*Unexpected token w/
+      );
+    });
+    it("has a friendly error for sub-parser errors", () => {
+      const parser = C.fmap(C.raw, (x) => {
+        if (x !== 777) {
+          throw new Error("get out of here");
+        }
+        return x;
+      });
+      const serialized = "777\n666\n";
+      expect(() => void JsonLog.fromString(serialized, parser)).toThrow(
+        "line 2: get out of here"
+      );
     });
   });
 });
