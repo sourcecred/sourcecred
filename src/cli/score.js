@@ -6,7 +6,7 @@ import {join as pathJoin} from "path";
 
 import type {Command} from "./command";
 import {makePluginDir, loadInstanceConfig} from "./common";
-import {loadJsonWithDefault} from "../util/disk";
+import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
 import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
 import {
   type WeightedGraph,
@@ -26,7 +26,7 @@ import {
   contractions as identityContractions,
   declaration as identityDeclaration,
 } from "../ledger/identity";
-import {Ledger, parser as ledgerParser} from "../ledger/ledger";
+import {Ledger} from "../ledger/ledger";
 import {computeCredAccounts} from "../ledger/credAccounts";
 
 function die(std, message) {
@@ -65,10 +65,8 @@ const scoreCommand: Command = async (args, std) => {
   const weightedGraph = overrideWeights(combinedGraph, weights);
 
   const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
-  const ledger = await loadJsonWithDefault(
-    ledgerPath,
-    ledgerParser,
-    () => new Ledger()
+  const ledger = Ledger.parse(
+    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
   );
   const identities = ledger.accounts().map((a) => a.identity);
   const contractedGraph = weightedGraph.graph.contractNodes(
