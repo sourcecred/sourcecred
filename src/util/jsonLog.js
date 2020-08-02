@@ -26,7 +26,12 @@ export class JsonLog<T: C.JsonObject> {
     this._items = [];
   }
 
-  append(items: Iterable<T>): JsonLog<T> {
+  append(item: T): JsonLog<T> {
+    this._items.push(item);
+    return this;
+  }
+
+  extend(items: Iterable<T>): JsonLog<T> {
     for (const item of items) {
       this._items.push(item);
     }
@@ -52,7 +57,7 @@ export class JsonLog<T: C.JsonObject> {
         throw new Error(`line ${i + 1} is not valid JSON: ${e}`);
       }
       if (parsed.ok) {
-        result.append([parsed.value]);
+        result.append(parsed.value);
       } else {
         throw new Error(`line ${i + 1}: ${parsed.err}`);
       }

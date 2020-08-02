@@ -495,7 +495,7 @@ export class Ledger {
     }
     this._processAction(action);
     this._latestTimestamp = ledgerTimestamp;
-    this._ledgerEventLog.append([e]);
+    this._ledgerEventLog.append(e);
   }
 
   _createAndProcessEvent(action: Action) {
