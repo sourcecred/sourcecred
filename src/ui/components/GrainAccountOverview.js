@@ -1,60 +1,56 @@
 // @flow
 
 import React from "react";
-import {Ledger, type Account} from "../../ledger/ledger";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import {type Account, Ledger} from "../../ledger/ledger";
 import {CredView} from "../../analysis/credView";
 import * as G from "../../ledger/grain";
-
 export type Props = {|
   +ledger: Ledger,
   +credView: CredView,
 |};
 
-export class GrainAccountOverview extends React.Component<Props> {
-  render() {
-    const accounts = this.props.ledger.accounts();
-    function comparator(a: Account, b: Account) {
-      if (a.balance === b.balance) {
-        return 0;
-      }
-      return G.gt(a.balance, b.balance) ? -1 : 1;
-    }
-    const sortedAccounts = accounts.slice().sort(comparator);
-    return (
-      <div>
-        <table
-          style={{
-            width: "100%",
-            marginLeft: "80px",
-            marginRight: "80px",
-            tableLayout: "fixed",
-            margin: "0 auto",
-            padding: "20px 10px",
-            color: "white",
-          }}
-        >
-          <thead>
-            <tr style={{fontSize: "1.4em"}}>
-              <th style={{textAlign: "left"}}>Username</th>
-              <th style={{textAlign: "left"}}>Active?</th>
-              <th style={{textAlign: "left"}}>Current Balance</th>
-              <th style={{textAlign: "left"}}>Grain Earned</th>
-            </tr>
-          </thead>
-          <tbody>{sortedAccounts.map((a) => AccountRow(a))}</tbody>
-        </table>
-      </div>
-    );
-  }
-}
+export const GrainAccountOverview = (props: Props) => {
+  const accounts = props.ledger.accounts();
 
-function AccountRow(account: Account) {
+  function comparator(a: Account, b: Account) {
+    if (a.balance === b.balance) {
+      return 0;
+    }
+    return G.gt(a.balance, b.balance) ? -1 : 1;
+  }
+
+  const sortedAccounts = accounts.slice().sort(comparator);
   return (
-    <tr key={account.identity.id}>
-      <td>{account.identity.name}</td>
-      <td>{account.active ? "✅" : "🛑"}</td>
-      <td>{G.format(account.balance)}</td>
-      <td>{G.format(account.paid)}</td>
-    </tr>
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Username</TableCell>
+            <TableCell align="right">Active?</TableCell>
+            <TableCell align="right">Current Balance</TableCell>
+            <TableCell align="right">Grain Earned</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>{sortedAccounts.map((a) => AccountRow(a))}</TableBody>
+      </Table>
+    </TableContainer>
   );
-}
+};
+
+const AccountRow = (account: Account) => (
+  <TableRow key={account.identity.id}>
+    <TableCell component="th" scope="row">
+      {account.identity.name}
+    </TableCell>
+    <TableCell align="right">{account.active ? "✅" : "🛑"}</TableCell>
+    <TableCell align="right">{G.format(account.balance)}</TableCell>
+    <TableCell align="right">{G.format(account.paid)}</TableCell>
+  </TableRow>
+);
