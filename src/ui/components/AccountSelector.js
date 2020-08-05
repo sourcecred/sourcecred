@@ -1,102 +1,52 @@
 // @flow
 
-import React, {useState} from "react";
+import React from "react";
+import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
+import {TextField} from "@material-ui/core";
+import {format} from "../../ledger/grain";
+import {Autocomplete} from "@material-ui/lab";
 import {Ledger, type Account} from "../../ledger/ledger";
-import {useCombobox} from "downshift";
 
 type DropdownProps = {|
   +ledger: Ledger,
-  +setCurrentIdentity: (Account) => void,
+  +setCurrentIdentity: (Account | null) => void,
+  +placeholder?: string,
 |};
 
+const theme = createMuiTheme({
+  overrides: {
+    // Name of the rule
+    text: {
+      // Some CSS
+      color: "black",
+    },
+  },
+});
+
 export default function AccountDropdown({
+  placeholder,
   setCurrentIdentity,
   ledger,
 }: DropdownProps) {
   const items = ledger.accounts().filter((a) => a.active);
-  const [inputItems, setInputItems] = useState<$ReadOnlyArray<Account>>(items);
-  const [inputValue, setInputValue] = useState<string>("");
-  const {
-    isOpen,
-    getToggleButtonProps,
-    getMenuProps,
-    getInputProps,
-    getComboboxProps,
-    highlightedIndex,
-    getItemProps,
-  } = useCombobox({
-    inputValue,
-    items: inputItems,
-    onStateChange: ({inputValue, type, selectedItem}) => {
-      switch (type) {
-        case useCombobox.stateChangeTypes.InputChange:
-          setInputValue(inputValue);
-          setInputItems(
-            items.filter((item) =>
-              item.identity.name
-                .toLowerCase()
-                .startsWith(inputValue.toLowerCase())
-            )
-          );
-          break;
-        case useCombobox.stateChangeTypes.InputKeyDownEnter:
-        case useCombobox.stateChangeTypes.ItemClick:
-        case useCombobox.stateChangeTypes.InputBlur:
-          if (selectedItem) {
-            setCurrentIdentity(selectedItem);
-            setInputValue(selectedItem.identity.name);
-          } else {
-            setInputValue("");
-          }
 
-          break;
-        default:
-          break;
-      }
-    },
-  });
+  const onComboChange = (e, inputObj) => setCurrentIdentity(inputObj);
 
   return (
-    <div>
-      <div style={comboboxStyles} {...getComboboxProps()}>
-        <input {...getInputProps()} />
-        <button
-          type="button"
-          {...getToggleButtonProps()}
-          aria-label="toggle menu"
-        >
-          &#8595;
-        </button>
-      </div>
-      <ul {...getMenuProps()} style={menuStyles(isOpen)}>
-        {isOpen &&
-          inputItems.map((item, index) => (
-            <li
-              style={
-                highlightedIndex === index ? {backgroundColor: "#bde4ff"} : {}
-              }
-              key={`${item.identity.id}`}
-              {...getItemProps({item, index})}
-            >
-              {item.identity.name}
-            </li>
-          ))}
-      </ul>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Autocomplete
+        onChange={onComboChange}
+        fullWidth
+        id="combo-box-demo"
+        options={items}
+        getOptionLabel={(item) =>
+          `${item.identity.name} (${format(item.balance, 2)})`
+        }
+        style={{margin: "20px"}}
+        renderInput={(params) => (
+          <TextField fullWidth {...params} label={placeholder} />
+        )}
+      />
+    </ThemeProvider>
   );
 }
-
-export const menuStyles = (isOpen: boolean) => ({
-  maxHeight: "180px",
-  overflowY: "auto",
-  width: "135px",
-  margin: 0,
-  border: isOpen ? "1px solid black" : 0,
-  background: "white",
-  position: "absolute",
-  zIndex: 1000,
-  listStyle: "none",
-  padding: 0,
-});
-
-export const comboboxStyles = {display: "inline-block"};
