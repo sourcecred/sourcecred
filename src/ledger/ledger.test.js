@@ -587,6 +587,19 @@ describe("ledger/ledger", () => {
         });
         expect(l.lastDistributionTimestamp()).toEqual(102);
       });
+      it("fails if the distribution doesn't parse", () => {
+        const ledger = new Ledger();
+        const distribution = {
+          // Error: should be number
+          credTimestamp: "1",
+          allocations: [],
+          id: uuid.random(),
+        };
+        setFakeDate(2);
+        // $FlowExpectedError
+        const thunk = () => ledger.distributeGrain(distribution);
+        expect(thunk).toThrowError("invalid distribution");
+      });
     });
 
     describe("transferGrain", () => {
