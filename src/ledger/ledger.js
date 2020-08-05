@@ -327,6 +327,10 @@ export class Ledger {
     return this;
   }
   _distributeGrain({distribution}: DistributeGrain) {
+    const parseResult = distributionParser.parse(distribution);
+    if (!parseResult.ok) {
+      throw new Error(`invalid distribution: ${parseResult.err}`);
+    }
     for (const {receipts} of distribution.allocations) {
       for (const {id, amount} of receipts) {
         if (!this._accounts.has(id)) {
