@@ -327,6 +327,10 @@ export class Ledger {
     return this;
   }
   _distributeGrain({distribution}: DistributeGrain) {
+    const parseResult = distributionParser.parse(distribution);
+    if (!parseResult.ok) {
+      throw new Error(`invalid distribution: ${parseResult.err}`);
+    }
     for (const {receipts} of distribution.allocations) {
       for (const {id, amount} of receipts) {
         if (!this._accounts.has(id)) {
@@ -431,13 +435,20 @@ export class Ledger {
   }
 
   /**
-   * Serialize the events as a JsonLog-style string.
-   *
-   * Will be a valid JSON string formatted so as to
-   * have one action per line.
+   * Serialize the events as a JsonLog-style newline-delimited JSON
+   * string.
    */
   serialize(): string {
     return this._ledgerEventLog.toString();
+  }
+
+  /**
+   * Parse events serialized as a JsonLog-style newline-delimited JSON
+   * string (e.g., by `serialize`).
+   */
+  static parse(eventLog: string): Ledger {
+    const jsonLog = JsonLog.fromString(eventLog, ledgerEventParser);
+    return Ledger.fromEventLog(Array.from(jsonLog.values()));
   }
 
   /**
@@ -610,10 +621,5 @@ const ledgerEventParser: C.Parser<LedgerEvent> = C.object({
   version: C.exactly(["1"]),
   uuid: uuid.parser,
 });
-
-export const parser: C.Parser<Ledger> = C.fmap(
-  C.array(ledgerEventParser),
-  (x) => Ledger.fromEventLog(x)
-);
 
 const _getTimestamp = () => Date.now();

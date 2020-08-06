@@ -42,7 +42,7 @@ export default function render(
       <style>${require("./index.css")}</style>
       <style data-aphrodite>${css.content}</style>
       </head>
-      <body style="overflow-y:scroll">
+      <body>
       <div id="root" data-initial-root="${root}">${html}</div>
       <script src="${assets.resolve(bundlePath)}"></script>
       </body>

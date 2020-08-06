@@ -44,6 +44,7 @@ export default function AccountDropdown({
           `${item.identity.name} (${format(item.balance, 2)})`
         }
         style={{margin: "20px", marginTop: "-16px"}}
+        style={{margin: "20px"}}
         renderInput={(params) => (
           <TextField fullWidth {...params} label={placeholder} />
         )}

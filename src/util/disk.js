@@ -65,3 +65,34 @@ export async function loadJsonWithDefault<T>(
     }
   }
 }
+
+/**
+ * Read a text file from disk, with a default string value to use if the
+ * file is not found. The file is read in the default encoding, UTF-8.
+ *
+ * This is intended as a convenience for situations where the user may
+ * optionally provide configuration in a non-JSON file saved to disk.
+ *
+ * The default must be provided as a function that returns a default, in
+ * case constructing the default may be expensive.
+ *
+ * If no file is present at that location, then the default constructor is
+ * invoked to create a default value, and that is returned.
+ *
+ * If attempting to load the file fails for any reason other than ENOENT
+ * (e.g. the path actually is a directory), then the error is thrown.
+ */
+export async function loadFileWithDefault(
+  path: string,
+  def: () => string
+): Promise<string> {
+  try {
+    return (await fs.readFile(path)).toString();
+  } catch (e) {
+    if (e.code === "ENOENT") {
+      return def();
+    } else {
+      throw e;
+    }
+  }
+}

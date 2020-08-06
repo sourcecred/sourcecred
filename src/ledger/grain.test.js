@@ -96,7 +96,7 @@ describe("src/ledger/grain", () => {
     });
     it("fromString errors on invalid Grain values", () => {
       expect(() => G.fromString("123.4")).toThrowError(
-        "Cannot convert 123.4 to a BigInt"
+        "Invalid integer: 123.4"
       );
     });
   });
