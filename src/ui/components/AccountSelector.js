@@ -37,7 +37,6 @@ export default function AccountDropdown({
       <Autocomplete
         onChange={onComboChange}
         fullWidth
-        id="combo-box-demo"
         options={items}
         getOptionLabel={(item) =>
           `${item.identity.name} (${format(item.balance, 2)})`
