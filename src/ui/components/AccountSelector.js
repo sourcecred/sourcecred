@@ -11,6 +11,7 @@ type DropdownProps = {|
   +ledger: Ledger,
   +setCurrentIdentity: (Account | null) => void,
   +placeholder?: string,
+  +disableUnderline?: boolean,
 |};
 
 const theme = createMuiTheme({
@@ -27,6 +28,7 @@ export default function AccountDropdown({
   placeholder,
   setCurrentIdentity,
   ledger,
+  disableUnderline,
 }: DropdownProps) {
   const items = ledger.accounts().filter((a) => a.active);
 
@@ -37,12 +39,11 @@ export default function AccountDropdown({
       <Autocomplete
         onChange={onComboChange}
         fullWidth
-        id="combo-box-demo"
         options={items}
         getOptionLabel={(item) =>
           `${item.identity.name} (${format(item.balance, 2)})`
         }
-        style={{margin: "20px"}}
+        style={{margin: "20px", marginTop: "-16px"}}
         renderInput={(params) => (
           <TextField fullWidth {...params} label={placeholder} />
         )}
