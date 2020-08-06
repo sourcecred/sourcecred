@@ -25,13 +25,13 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
   const [maxAmount, setMaxAmount] = useState<Grain>(fromInteger(0));
   const [memo, setMemo] = useState<string>("");
 
-  const setSender = (acct: Account) => {
-    setMaxAmount(acct.balance);
-    setSourceIdentity(acct.identity);
+  const setSender = (acct: Account | null) => {
+    setMaxAmount(acct ? acct.balance : fromInteger(0));
+    setSourceIdentity(acct ? acct.identity : null);
   };
 
-  const setReceiver = (acct: Account) => {
-    setDestIdentity(acct.identity);
+  const setReceiver = (acct: Account | null) => {
+    setDestIdentity(acct ? acct.identity : null);
   };
 
   const submitTransfer = (e) => {

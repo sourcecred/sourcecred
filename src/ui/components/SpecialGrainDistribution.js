@@ -20,8 +20,8 @@ export const SpecialGrainDistribution = ({ledger, setLedger}: Props) => {
   const [amount, setAmount] = useState<string>("0");
   const [memo, setMemo] = useState<string>("");
 
-  const setRecipientFromAccount = (acct: Account) => {
-    setRecipient(acct.identity.id);
+  const setRecipientFromAccount = (acct: Account | null) => {
+    setRecipient(acct ? acct.identity.id : null);
   };
 
   const submitDistribution = (e) => {
