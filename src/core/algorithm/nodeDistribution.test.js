@@ -5,6 +5,7 @@ import {
   weightedDistribution,
   distributionToNodeDistribution,
 } from "./nodeDistribution";
+import * as N from "../../util/numerics";
 
 describe("core/algorithm/nodeDistribution", () => {
   const n1 = NodeAddress.fromParts(["n1"]);
@@ -31,25 +32,31 @@ describe("core/algorithm/nodeDistribution", () => {
       );
     });
     it("gives a uniform distribution for a map with 0 weight", () => {
-      const map = new Map().set(a, 0);
+      const map = new Map().set(a, N.finiteNonnegative(0));
       expect(weightedDistribution(order(), map)).toEqual(
         new Float64Array([0.25, 0.25, 0.25, 0.25])
       );
     });
     it("can put all weight on one node", () => {
-      const map = new Map().set(b, 0.1);
+      const map = new Map().set(b, N.finiteNonnegative(0.1));
       expect(weightedDistribution(order(), map)).toEqual(
         new Float64Array([0, 1, 0, 0])
       );
     });
     it("can split weight unequally", () => {
-      const map = new Map().set(b, 1).set(c, 3);
+      const map = new Map()
+        .set(b, N.finiteNonnegative(1))
+        .set(c, N.finiteNonnegative(3));
       expect(weightedDistribution(order(), map)).toEqual(
         new Float64Array([0, 0.25, 0.75, 0])
       );
     });
     it("can create a uniform distribution if all weights are equal", () => {
-      const map = new Map().set(a, 1).set(b, 1).set(c, 1).set(d, 1);
+      const map = new Map()
+        .set(a, N.finiteNonnegative(1))
+        .set(b, N.finiteNonnegative(1))
+        .set(c, N.finiteNonnegative(1))
+        .set(d, N.finiteNonnegative(1));
       expect(weightedDistribution(order(), map)).toEqual(
         new Float64Array([0.25, 0.25, 0.25, 0.25])
       );
@@ -57,25 +64,28 @@ describe("core/algorithm/nodeDistribution", () => {
     describe("errors if", () => {
       it("has a weighted node that is not in the order", () => {
         const z = NodeAddress.fromParts(["z"]);
-        const map = new Map().set(z, 1);
+        const map = new Map().set(z, N.finiteNonnegative(1));
         expect(() => weightedDistribution(order(), map)).toThrowError(
           "weights included nodes not present in the nodeOrder"
         );
       });
       it("has a node with negative weight", () => {
         const map = new Map().set(a, -1);
+        // $FlowExpectedError
         expect(() => weightedDistribution(order(), map)).toThrowError(
           "Invalid weight -1"
         );
       });
       it("has a node with NaN weight", () => {
         const map = new Map().set(a, NaN);
+        // $FlowExpectedError
         expect(() => weightedDistribution(order(), map)).toThrowError(
           "Invalid weight NaN"
         );
       });
       it("has a node with infinite weight", () => {
         const map = new Map().set(a, Infinity);
+        // $FlowExpectedError
         expect(() => weightedDistribution(order(), map)).toThrowError(
           "Invalid weight Infinity"
         );

@@ -16,6 +16,7 @@ import {
   type EdgeWeight,
 } from "./graphToMarkovChain";
 import {type SparseMarkovChain} from "./markovChain";
+import * as N from "../../util/numerics";
 
 describe("src/core/algorithm/timelinePagerank", () => {
   describe("_timelineNodeWeights", () => {
@@ -23,9 +24,10 @@ describe("src/core/algorithm/timelinePagerank", () => {
       const foo = node("foo");
       const bar = node("bar");
       const nodeCreationHistory = [[foo], [], [bar]];
-      const evaluator = (n) => (n === foo.address ? 4 : 1);
+      const evaluator = (n) =>
+        n === foo.address ? N.finiteNonnegative(4) : N.finiteNonnegative(1);
       const weights = Array.from(
-        _timelineNodeWeights(nodeCreationHistory, evaluator, 0.5)
+        _timelineNodeWeights(nodeCreationHistory, evaluator, N.proportion(0.5))
       );
       const expected = [
         new Map([[foo.address, 2]]),
@@ -41,9 +43,13 @@ describe("src/core/algorithm/timelinePagerank", () => {
       const foo = node("foo");
       const history = new Array(100).fill([]);
       history[0] = [foo];
-      const evaluator = (_) => 42;
+      const evaluator = (_) => N.finiteNonnegative(42);
       const sumWeight = (decay: number) => {
-        const weightsIterator = _timelineNodeWeights(history, evaluator, decay);
+        const weightsIterator = _timelineNodeWeights(
+          history,
+          evaluator,
+          N.proportion(decay)
+        );
         return sum(weightsIterator, (x) => x.get(foo.address));
       };
       expect(sumWeight(0.5)).toBeCloseTo(42);
@@ -51,7 +57,11 @@ describe("src/core/algorithm/timelinePagerank", () => {
       expect(sumWeight(0.1)).toBeCloseTo(42);
     });
     it("handles an empty history", () => {
-      const weights = _timelineNodeWeights([], (_) => 1, 0.5);
+      const weights = _timelineNodeWeights(
+        [],
+        (_) => N.finiteNonnegative(1),
+        N.proportion(0.5)
+      );
       expect(Array.from(weights)).toHaveLength(0);
     });
   });
@@ -78,7 +88,10 @@ describe("src/core/algorithm/timelinePagerank", () => {
       }
 
       const edgeCreationHistory = [[], [e1], [], [e2]];
-      const edgeEvaluator = (_) => ({forwards: 1, backwards: 0});
+      const edgeEvaluator = (_) => ({
+        forwards: N.finiteNonnegative(1),
+        backwards: N.finiteNonnegative(0),
+      });
       const nodeToConnectionsIterator = _timelineNodeToConnections(
         graph,
         edgeCreationHistory,
@@ -114,17 +127,24 @@ describe("src/core/algorithm/timelinePagerank", () => {
       const {graph1, nodes} = advancedGraph();
       const g = graph1();
       const nodeWeights = new Map()
-        .set(nodes.src.address, 1)
-        .set(nodes.isolated.address, 2);
-      const edgeFn = (_unused_edge) => ({forwards: 1, backwards: 0.5});
-      const nodeToConnections = createConnections(g, edgeFn, 1e-3);
+        .set(nodes.src.address, N.finiteNonnegative(1))
+        .set(nodes.isolated.address, N.finiteNonnegative(2));
+      const edgeFn = (_unused_edge) => ({
+        forwards: N.finiteNonnegative(1),
+        backwards: N.finiteNonnegative(0.5),
+      });
+      const nodeToConnections = createConnections(
+        g,
+        edgeFn,
+        N.proportion(1e-3)
+      );
       const nodeOrder = Array.from(g.nodes()).map((x) => x.address);
       const edgeOrder = Array.from(g.edges({showDangling: false})).map(
         (x) => x.address
       );
       const interval = {endTimeMs: 1000, startTimeMs: 0};
       const pi0 = null;
-      const alpha = 0.05;
+      const alpha = N.proportion(0.05);
       const result = await _intervalResult(
         nodeWeights,
         nodeToConnections,

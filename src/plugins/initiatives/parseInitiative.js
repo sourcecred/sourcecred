@@ -9,6 +9,7 @@ import type {
 } from "./initiativeFile";
 import {_validateUrl} from "./initiativesDirectory";
 import {fromISO, toISO} from "../../util/timestamp";
+import * as N from "../../util/numerics";
 
 const URLParser = C.fmap(C.string, _validateUrl);
 
@@ -17,7 +18,10 @@ const TimestampParser = C.fmap(C.string, (t) => toISO(fromISO(t)));
 const CommonFields = {
   title: C.string,
   timestampIso: TimestampParser,
-  weight: C.object({incomplete: C.number, complete: C.number}),
+  weight: C.object({
+    incomplete: N.finiteNonnegativeParser,
+    complete: N.finiteNonnegativeParser,
+  }),
   completed: C.boolean,
 };
 
@@ -31,7 +35,7 @@ const NodeEntryParser = C.object(
   },
   {
     key: C.string,
-    weight: C.number,
+    weight: N.finiteNonnegativeParser,
   }
 );
 

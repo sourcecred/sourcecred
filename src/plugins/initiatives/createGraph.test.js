@@ -25,6 +25,7 @@ import {
   championsEdgeType,
   contributesToEntryEdgeType,
 } from "./declaration";
+import * as N from "../../util/numerics";
 
 const exampleEntry = (overrides: $Shape<NodeEntry>): NodeEntry => ({
   key: overrides.title ? _titleSlug(overrides.title) : "sample-title",
@@ -163,7 +164,10 @@ describe("plugins/initiatives/createGraph", () => {
         id: createId("TEST_INITIATIVE_WEIGHTS", "41"),
         title: "Weights set, not completed",
         completed: false,
-        weight: {incomplete: 222, complete: 333},
+        weight: {
+          incomplete: N.finiteNonnegative(222),
+          complete: N.finiteNonnegative(333),
+        },
       });
 
       // When
@@ -179,7 +183,10 @@ describe("plugins/initiatives/createGraph", () => {
         id: createId("TEST_INITIATIVE_WEIGHTS", "41"),
         title: "Weights set, completed",
         completed: true,
-        weight: {incomplete: 222, complete: 333},
+        weight: {
+          incomplete: N.finiteNonnegative(222),
+          complete: N.finiteNonnegative(333),
+        },
       });
 
       // When
@@ -222,10 +229,23 @@ describe("plugins/initiatives/createGraph", () => {
     it("should add node weights for initiatives with weights", () => {
       // Given
       const {repo, refs} = example();
-      repo.addInitiative({weight: {incomplete: 360, complete: 420}});
-      repo.addInitiative({weight: {incomplete: 42, complete: 69}});
       repo.addInitiative({
-        weight: {incomplete: 42, complete: 69},
+        weight: {
+          incomplete: N.finiteNonnegative(360),
+          complete: N.finiteNonnegative(420),
+        },
+      });
+      repo.addInitiative({
+        weight: {
+          incomplete: N.finiteNonnegative(42),
+          complete: N.finiteNonnegative(69),
+        },
+      });
+      repo.addInitiative({
+        weight: {
+          incomplete: N.finiteNonnegative(42),
+          complete: N.finiteNonnegative(69),
+        },
         completed: true,
       });
 
@@ -704,7 +724,10 @@ describe("plugins/initiatives/createGraph", () => {
             urls: [],
             entries: [
               exampleEntry({title: "Without weight", weight: null}),
-              exampleEntry({title: "With weight", weight: 360}),
+              exampleEntry({
+                title: "With weight",
+                weight: N.finiteNonnegative(360),
+              }),
             ],
           },
         });
@@ -743,7 +766,10 @@ describe("plugins/initiatives/createGraph", () => {
             urls: [],
             entries: [
               exampleEntry({title: "Without weight", weight: null}),
-              exampleEntry({title: "With weight", weight: 360}),
+              exampleEntry({
+                title: "With weight",
+                weight: N.finiteNonnegative(360),
+              }),
             ],
           },
         });
@@ -782,7 +808,10 @@ describe("plugins/initiatives/createGraph", () => {
             urls: [],
             entries: [
               exampleEntry({title: "Without weight", weight: null}),
-              exampleEntry({title: "With weight", weight: 360}),
+              exampleEntry({
+                title: "With weight",
+                weight: N.finiteNonnegative(360),
+              }),
             ],
           },
         });

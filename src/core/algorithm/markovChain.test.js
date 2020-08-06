@@ -13,6 +13,7 @@ import {
   type StationaryDistributionResult,
   type PagerankParams,
 } from "./markovChain";
+import * as N from "../../util/numerics";
 
 describe("core/algorithm/markovChain", () => {
   /** A distribution that is 1 at the chosen index, and 0 elsewhere.*/
@@ -197,10 +198,10 @@ describe("core/algorithm/markovChain", () => {
     }
 
     const standardOptions = () => ({
-      maxIterations: 255,
-      convergenceThreshold: 1e-7,
+      maxIterations: N.nonnegativeInteger(255),
+      convergenceThreshold: N.finiteNonnegative(1e-7),
       verbose: false,
-      yieldAfterMs: 1,
+      yieldAfterMs: N.finiteNonnegative(1),
     });
 
     it("finds an all-accumulating stationary distribution", async () => {
@@ -211,7 +212,7 @@ describe("core/algorithm/markovChain", () => {
       ]);
       const params: PagerankParams = {
         chain,
-        alpha: 0,
+        alpha: N.proportion(0),
         seed: uniformDistribution(chain.length),
         pi0: uniformDistribution(chain.length),
       };
@@ -244,7 +245,7 @@ describe("core/algorithm/markovChain", () => {
       const chain = satelliteChain();
       const params: PagerankParams = {
         chain,
-        alpha: 0,
+        alpha: N.proportion(0),
         seed: uniformDistribution(chain.length),
         pi0: uniformDistribution(chain.length),
       };
@@ -263,7 +264,7 @@ describe("core/algorithm/markovChain", () => {
 
     it("finds the same stationary distribution regardless of initialDistribution", async () => {
       const chain = satelliteChain();
-      const alpha = 0.1;
+      const alpha = N.proportion(0.1);
       const seed = uniformDistribution(chain.length);
       const initialDistribution1 = singleIndexDistribution(chain.length, 0);
       const params1 = {chain, alpha, seed, pi0: initialDistribution1};
@@ -285,7 +286,7 @@ describe("core/algorithm/markovChain", () => {
 
     it("finds a non-degenerate stationary distribution with seed and non-zero alpha", async () => {
       const chain = satelliteChain();
-      const alpha = 0.1;
+      const alpha = N.proportion(0.1);
       const seed = singleIndexDistribution(chain.length, 0);
       const pi0 = uniformDistribution(chain.length);
       const result = await findStationaryDistribution(
@@ -309,7 +310,7 @@ describe("core/algorithm/markovChain", () => {
 
     it("converges immediately when initialDistribution equals the stationary distribution", async () => {
       const chain = satelliteChain();
-      const alpha = 0.1;
+      const alpha = N.proportion(0.1);
       const seed = singleIndexDistribution(chain.length, 0);
       // determine the expected stationary distribtution via Linear algebra
       // from python3:
@@ -355,7 +356,7 @@ describe("core/algorithm/markovChain", () => {
       ]);
       const params: PagerankParams = {
         chain,
-        alpha: 0,
+        alpha: N.proportion(0),
         seed: uniformDistribution(chain.length),
         pi0: uniformDistribution(chain.length),
       };
@@ -379,13 +380,13 @@ describe("core/algorithm/markovChain", () => {
       ]);
       const params: PagerankParams = {
         chain,
-        alpha: 0,
+        alpha: N.proportion(0),
         seed: uniformDistribution(chain.length),
         pi0: uniformDistribution(chain.length),
       };
       const result = await findStationaryDistribution(params, {
         ...standardOptions(),
-        maxIterations: 0,
+        maxIterations: N.nonnegativeInteger(0),
       });
       const expected = new Float64Array([0.5, 0.5]);
       expect(result.pi).toEqual(expected);
@@ -397,7 +398,7 @@ describe("core/algorithm/markovChain", () => {
         [0.75, 0.25],
         [0.5, 0.5],
       ]);
-      const alpha = 0.1;
+      const alpha = N.proportion(0.1);
       const seed1 = singleIndexDistribution(chain.length, 0);
       const seed2 = singleIndexDistribution(chain.length, 1);
       const seedUniform = uniformDistribution(chain.length);
@@ -452,7 +453,7 @@ describe("core/algorithm/markovChain", () => {
         [0.75, 0.25],
         [0.5, 0.5],
       ]);
-      const alpha = 0;
+      const alpha = N.proportion(0);
       const seed1 = singleIndexDistribution(chain.length, 0);
       const seed2 = singleIndexDistribution(chain.length, 1);
       const pi0 = uniformDistribution(chain.length);
@@ -483,7 +484,7 @@ describe("core/algorithm/markovChain", () => {
         [0.75, 0.25],
         [0.5, 0.5],
       ]);
-      const alpha = 1;
+      const alpha = N.proportion(1);
       const seed = singleIndexDistribution(chain.length, 0);
       const pi0 = uniformDistribution(chain.length);
 
@@ -499,7 +500,7 @@ describe("core/algorithm/markovChain", () => {
         [0.75, 0.25],
         [0.5, 0.5],
       ]);
-      const alpha = 0.2;
+      const alpha = N.proportion(0.2);
       const seed = singleIndexDistribution(chain.length, 0);
       const pi0 = uniformDistribution(chain.length);
       const result = await findStationaryDistribution(

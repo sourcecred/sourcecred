@@ -16,7 +16,7 @@ type Props = {|
   +nodeWeights: Map<NodeAddressT, NodeWeight>,
   // Map from EdgeType prefix to weight.
   +edgeWeights: Map<EdgeAddressT, EdgeWeight>,
-  +onNodeWeightChange: (NodeAddressT, number) => void,
+  +onNodeWeightChange: (NodeAddressT, NodeWeight) => void,
   +onEdgeWeightChange: (EdgeAddressT, EdgeWeight) => void,
 |};
 

@@ -11,6 +11,7 @@ import {
   normalizeNodeEntry,
   _titleSlug,
 } from "./nodeEntry";
+import * as N from "../../util/numerics";
 
 describe("plugins/initiatives/nodeEntry", () => {
   describe("addressForNodeEntry", () => {
@@ -73,13 +74,16 @@ describe("plugins/initiatives/nodeEntry", () => {
 
     it("should handle an entry with weights", () => {
       const timestampMs: TimestampMs = 123;
-      const entry: NodeEntryJson = {title: "Include weight", weight: 42};
+      const entry: NodeEntryJson = {
+        title: "Include weight",
+        weight: N.finiteNonnegative(42),
+      };
       const expected: NodeEntry = {
         title: "Include weight",
         key: "include-weight",
         contributors: [],
         timestampMs,
-        weight: 42,
+        weight: N.finiteNonnegative(42),
       };
       expect(normalizeNodeEntry(entry, timestampMs)).toEqual(expected);
     });

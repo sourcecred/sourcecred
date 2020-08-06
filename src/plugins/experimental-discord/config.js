@@ -3,6 +3,7 @@
 import * as Combo from "../../util/combo";
 import * as Model from "./models";
 import {type EmojiWeightMap} from "./createGraph";
+import * as N from "../../util/numerics";
 
 export type {BotToken as DiscordToken} from "./models";
 
@@ -28,6 +29,6 @@ export const parser: Combo.Parser<DiscordConfig> = (() => {
   const C = Combo;
   return C.object({
     guildId: C.string,
-    reactionWeights: C.dict(C.number),
+    reactionWeights: C.dict(N.finiteNonnegativeParser),
   });
 })();

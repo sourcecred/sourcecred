@@ -5,12 +5,13 @@ import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import * as N from "./nodes";
 import * as E from "./edges";
 import dedent from "../../util/dedent";
+import * as Num from "../../util/numerics";
 
 export const repoNodeType = deepFreeze({
   name: "Repository",
   pluralName: "Repositories",
   prefix: N.Prefix.repo,
-  defaultWeight: 0,
+  defaultWeight: Num.finiteNonnegative(0),
   description: "NodeType for a GitHub repository",
 });
 
@@ -18,7 +19,7 @@ const issueNodeType = deepFreeze({
   name: "Issue",
   pluralName: "Issues",
   prefix: N.Prefix.issue,
-  defaultWeight: 0,
+  defaultWeight: Num.finiteNonnegative(0),
   description: "NodeType for a GitHub issue",
 });
 
@@ -26,7 +27,7 @@ const pullNodeType = deepFreeze({
   name: "Pull request",
   pluralName: "Pull requests",
   prefix: N.Prefix.pull,
-  defaultWeight: 4,
+  defaultWeight: Num.finiteNonnegative(4),
   description: "NodeType for a GitHub pull request",
 });
 
@@ -34,7 +35,7 @@ const reviewNodeType = deepFreeze({
   name: "Pull request review",
   pluralName: "Pull request reviews",
   prefix: N.Prefix.review,
-  defaultWeight: 1,
+  defaultWeight: Num.finiteNonnegative(1),
   description: "NodeType for a GitHub code review",
 });
 
@@ -42,7 +43,7 @@ const commentNodeType = deepFreeze({
   name: "Comment",
   pluralName: "Comments",
   prefix: N.Prefix.comment,
-  defaultWeight: 0,
+  defaultWeight: Num.finiteNonnegative(0),
   description: "NodeType for a GitHub comment",
 });
 
@@ -50,7 +51,7 @@ const commitNodeType = deepFreeze({
   name: "Commit",
   pluralName: "Commits",
   prefix: N.Prefix.commit,
-  defaultWeight: 0,
+  defaultWeight: Num.finiteNonnegative(0),
   description:
     "Represents a particular Git commit on GitHub, i.e. scoped to a particular repository",
 });
@@ -59,7 +60,7 @@ export const userNodeType = deepFreeze({
   name: "User",
   pluralName: "Users",
   prefix: N.Prefix.user,
-  defaultWeight: 0,
+  defaultWeight: Num.finiteNonnegative(0),
   description: "NodeType for a GitHub user",
 });
 
@@ -67,7 +68,7 @@ const botNodeType = deepFreeze({
   name: "Bot",
   pluralName: "Bots",
   prefix: N.Prefix.bot,
-  defaultWeight: 0,
+  defaultWeight: Num.finiteNonnegative(0),
   description: "NodeType for a GitHub bot account",
 });
 
@@ -85,7 +86,10 @@ const nodeTypes = deepFreeze([
 const authorsEdgeType = deepFreeze({
   forwardName: "authors",
   backwardName: "is authored by",
-  defaultWeight: {forwards: 1 / 2, backwards: 1},
+  defaultWeight: {
+    forwards: Num.finiteNonnegative(1 / 2),
+    backwards: Num.finiteNonnegative(1),
+  },
   prefix: E.Prefix.authors,
   description: dedent`\
     Connects a GitHub account to a post that they authored.
@@ -97,7 +101,10 @@ const authorsEdgeType = deepFreeze({
 const hasParentEdgeType = deepFreeze({
   forwardName: "has parent",
   backwardName: "has child",
-  defaultWeight: {forwards: 1, backwards: 1 / 4},
+  defaultWeight: {
+    forwards: Num.finiteNonnegative(1),
+    backwards: Num.finiteNonnegative(1 / 4),
+  },
   prefix: E.Prefix.hasParent,
   description: dedent`\
     Connects a GitHub entity to its child entities.
@@ -110,7 +117,10 @@ const hasParentEdgeType = deepFreeze({
 const mergedAsEdgeType = deepFreeze({
   forwardName: "merges",
   backwardName: "is merged by",
-  defaultWeight: {forwards: 1 / 2, backwards: 1},
+  defaultWeight: {
+    forwards: Num.finiteNonnegative(1 / 2),
+    backwards: Num.finiteNonnegative(1),
+  },
   prefix: E.Prefix.mergedAs,
   description: dedent`\
     Connects a GitHub pull request to the Git commit that it merges.
@@ -120,7 +130,10 @@ const mergedAsEdgeType = deepFreeze({
 const referencesEdgeType = deepFreeze({
   forwardName: "references",
   backwardName: "is referenced by",
-  defaultWeight: {forwards: 1, backwards: 0},
+  defaultWeight: {
+    forwards: Num.finiteNonnegative(1),
+    backwards: Num.finiteNonnegative(0),
+  },
   prefix: E.Prefix.references,
   description: dedent`\
     Connects a GitHub post to an entity that it references.
@@ -134,7 +147,10 @@ const referencesEdgeType = deepFreeze({
 const reactsHeartEdgeType = deepFreeze({
   forwardName: "reacted ❤️ to",
   backwardName: "got ❤️ from",
-  defaultWeight: {forwards: 2, backwards: 0},
+  defaultWeight: {
+    forwards: Num.finiteNonnegative(2),
+    backwards: Num.finiteNonnegative(0),
+  },
   prefix: E.Prefix.reactsHeart,
   description: dedent`\
     Connects users to posts to which they gave a ❤️ reaction.
@@ -144,7 +160,10 @@ const reactsHeartEdgeType = deepFreeze({
 const reactsThumbsUpEdgeType = deepFreeze({
   forwardName: "reacted 👍 to",
   backwardName: "got 👍 from",
-  defaultWeight: {forwards: 1, backwards: 0},
+  defaultWeight: {
+    forwards: Num.finiteNonnegative(1),
+    backwards: Num.finiteNonnegative(0),
+  },
   prefix: E.Prefix.reactsThumbsUp,
   description: dedent`\
     Connects users to posts to which they gave a 👍 reaction.
@@ -154,7 +173,10 @@ const reactsThumbsUpEdgeType = deepFreeze({
 const reactsHoorayEdgeType = deepFreeze({
   forwardName: "reacted 🎉 to",
   backwardName: "got 🎉 from",
-  defaultWeight: {forwards: 4, backwards: 0},
+  defaultWeight: {
+    forwards: Num.finiteNonnegative(4),
+    backwards: Num.finiteNonnegative(0),
+  },
   prefix: E.Prefix.reactsHooray,
   description: dedent`\
     Connects users to posts to which they gave a 🎉 reaction.
@@ -164,7 +186,10 @@ const reactsHoorayEdgeType = deepFreeze({
 const reactsRocketEdgeType = deepFreeze({
   forwardName: "reacted 🚀 to",
   backwardName: "got 🚀 from",
-  defaultWeight: {forwards: 1, backwards: 0},
+  defaultWeight: {
+    forwards: Num.finiteNonnegative(1),
+    backwards: Num.finiteNonnegative(0),
+  },
   prefix: E.Prefix.reactsRocket,
   description: dedent`\
     Connects users to posts to which they gave a 🚀 reaction.
@@ -174,7 +199,10 @@ const reactsRocketEdgeType = deepFreeze({
 const correspondsToCommitEdgeType = deepFreeze({
   forwardName: "corresponds to Git commit",
   backwardName: "merged on GitHub as",
-  defaultWeight: {forwards: 1, backwards: 1},
+  defaultWeight: {
+    forwards: Num.finiteNonnegative(1),
+    backwards: Num.finiteNonnegative(1),
+  },
   prefix: E.Prefix.correspondsToCommit,
   description: dedent`\
     Connects a commit on GitHub to the corresponding raw Git commit.

@@ -4,15 +4,19 @@ import stringify from "json-stable-stringify";
 import {NodeAddress, EdgeAddress} from "../core/graph";
 import {type Weights as WeightsT} from "./weights";
 import * as Weights from "./weights";
+import * as N from "../util/numerics";
 import {toCompat} from "../util/compat";
 
 describe("core/weights", () => {
   it("copy makes a copy", () => {
     const w = Weights.empty();
     const w1 = Weights.copy(w);
-    w1.nodeWeights.set(NodeAddress.empty, 33);
-    w1.edgeWeights.set(EdgeAddress.empty, {forwards: 34, backwards: 39});
-    w1.nodeWeights.set(NodeAddress.empty, 35);
+    w1.nodeWeights.set(NodeAddress.empty, N.finiteNonnegative(33));
+    w1.edgeWeights.set(EdgeAddress.empty, {
+      forwards: N.finiteNonnegative(34),
+      backwards: N.finiteNonnegative(39),
+    });
+    w1.nodeWeights.set(NodeAddress.empty, N.finiteNonnegative(35));
     expect(w1).not.toEqual(w);
     expect(w1.nodeWeights).not.toEqual(w.nodeWeights);
     expect(w1.edgeWeights).not.toEqual(w.edgeWeights);
@@ -42,10 +46,10 @@ describe("core/weights", () => {
 
     it("works for non-default weights", () => {
       const weights = Weights.empty();
-      weights.nodeWeights.set(NodeAddress.empty, 32);
+      weights.nodeWeights.set(NodeAddress.empty, N.finiteNonnegative(32));
       weights.edgeWeights.set(EdgeAddress.empty, {
-        forwards: 7,
-        backwards: 9,
+        forwards: N.finiteNonnegative(7),
+        backwards: N.finiteNonnegative(9),
       });
       const json = Weights.toJSON(weights);
       const jsonString = stringify(json, {space: 4});
@@ -92,10 +96,16 @@ describe("core/weights", () => {
     ): WeightsT {
       const w = Weights.empty();
       for (const [addrPart, weight] of nodeWeights) {
-        w.nodeWeights.set(NodeAddress.fromParts([addrPart]), weight);
+        w.nodeWeights.set(
+          NodeAddress.fromParts([addrPart]),
+          N.finiteNonnegative(weight)
+        );
       }
       for (const [addrPart, forwards, backwards] of edgeWeights) {
-        const weight = {forwards, backwards};
+        const weight = {
+          forwards: N.finiteNonnegative(forwards),
+          backwards: N.finiteNonnegative(backwards),
+        };
         w.edgeWeights.set(EdgeAddress.fromParts([addrPart]), weight);
       }
       return w;
@@ -142,7 +152,7 @@ describe("core/weights", () => {
       );
       const w2 = simpleWeights([["hit", 100]], []);
       const w3 = simpleWeights([["hit", 100]], []);
-      const nodeResolver = (a, b) => a + b;
+      const nodeResolver = (a, b) => N.finiteNonnegative(a + b);
       const edgeResolver = (_unused_a, _unused_b) => {
         throw new Error("edge");
       };
@@ -184,10 +194,10 @@ describe("core/weights", () => {
       );
       const w2 = simpleWeights([], [["hit", 3, 3]]);
       const w3 = simpleWeights([], [["hit", 3, 3]]);
-      const nodeResolver = (a, b) => a + b;
+      const nodeResolver = (a, b) => N.finiteNonnegative(a + b);
       const edgeResolver = (a, b) => ({
-        forwards: a.forwards + b.forwards,
-        backwards: a.backwards * b.backwards,
+        forwards: N.finiteNonnegative(a.forwards + b.forwards),
+        backwards: N.finiteNonnegative(a.backwards * b.backwards),
       });
       const merged = Weights.merge([w1, w2, w3], {nodeResolver, edgeResolver});
       const expected = simpleWeights(

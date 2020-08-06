@@ -20,16 +20,17 @@ import {
   type PagerankOptions as CorePagerankOptions,
 } from "../core/algorithm/markovChain";
 import {uniformDistribution} from "../core/algorithm/distribution";
+import * as N from "../util/numerics";
 
 export type {NodeDistribution} from "../core/algorithm/nodeDistribution";
 export type {PagerankNodeDecomposition} from "./pagerankNodeDecomposition";
 export type FullPagerankOptions = {|
-  +selfLoopWeight: number,
+  +selfLoopWeight: N.FiniteNonnegative,
   +verbose: boolean,
-  +convergenceThreshold: number,
-  +maxIterations: number,
+  +convergenceThreshold: N.FiniteNonnegative,
+  +maxIterations: N.NonnegativeInteger,
   // Scores will be normalized so that scores sum to totalScore
-  +totalScore: number,
+  +totalScore: N.FiniteNonnegative,
   // Only nodes matching this prefix will count for normalization
   +totalScoreNodePrefix: NodeAddressT,
 |};
@@ -38,9 +39,9 @@ export type PagerankOptions = $Shape<FullPagerankOptions>;
 export type {EdgeWeight} from "../core/algorithm/graphToMarkovChain";
 export type EdgeEvaluator = (Edge) => EdgeWeight;
 
-export const DEFAULT_SYNTHETIC_LOOP_WEIGHT = 1e-3;
-export const DEFAULT_MAX_ITERATIONS = 255;
-export const DEFAULT_CONVERGENCE_THRESHOLD = 1e-7;
+export const DEFAULT_SYNTHETIC_LOOP_WEIGHT = N.finiteNonnegative(1e-3);
+export const DEFAULT_MAX_ITERATIONS = N.nonnegativeInteger(255);
+export const DEFAULT_CONVERGENCE_THRESHOLD = N.finiteNonnegative(1e-7);
 
 function defaultOptions(): PagerankOptions {
   return {
@@ -48,7 +49,7 @@ function defaultOptions(): PagerankOptions {
     selfLoopWeight: DEFAULT_SYNTHETIC_LOOP_WEIGHT,
     convergenceThreshold: DEFAULT_CONVERGENCE_THRESHOLD,
     maxIterations: DEFAULT_MAX_ITERATIONS,
-    totalScore: 1000,
+    totalScore: N.finiteNonnegative(1000),
     totalScoreNodePrefix: NodeAddress.empty,
   };
 }
@@ -70,7 +71,7 @@ export async function pagerank(
   const osmc = createOrderedSparseMarkovChain(connections);
   const params: PagerankParams = {
     chain: osmc.chain,
-    alpha: 0,
+    alpha: N.proportion(0),
     pi0: uniformDistribution(osmc.chain.length),
     seed: uniformDistribution(osmc.chain.length),
   };
@@ -78,7 +79,7 @@ export async function pagerank(
     verbose: fullOptions.verbose,
     convergenceThreshold: fullOptions.convergenceThreshold,
     maxIterations: fullOptions.maxIterations,
-    yieldAfterMs: 30,
+    yieldAfterMs: N.finiteNonnegative(30),
   };
   const distributionResult = await findStationaryDistribution(
     params,

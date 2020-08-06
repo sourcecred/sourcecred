@@ -5,6 +5,7 @@ import {WeightSlider, type Props as WeightSliderProps} from "./WeightSlider";
 
 import type {EdgeType} from "../../analysis/types";
 import type {EdgeWeight} from "../../core/weights";
+import * as N from "../../util/numerics";
 
 export class EdgeTypeConfig extends React.Component<{
   +weight: EdgeWeight,
@@ -22,7 +23,10 @@ export class EdgeTypeConfig extends React.Component<{
           weight={forwards}
           description={description}
           onChange={(newForwards) => {
-            this.props.onChange({forwards: newForwards, backwards});
+            this.props.onChange({
+              forwards: N.finiteNonnegative(newForwards),
+              backwards,
+            });
           }}
         />
         <EdgeWeightSlider
@@ -32,7 +36,7 @@ export class EdgeTypeConfig extends React.Component<{
           onChange={(newBackwards) => {
             this.props.onChange({
               forwards,
-              backwards: newBackwards,
+              backwards: N.finiteNonnegative(newBackwards),
             });
           }}
         />

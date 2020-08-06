@@ -10,12 +10,13 @@ import {
   DEFAULT_INTERVAL_DECAY,
   parser,
 } from "./params";
+import * as N from "../../util/numerics";
 
 describe("analysis/timeline/params", () => {
   it("JSON round trip", () => {
     const p: TimelineCredParameters = {
-      alpha: 0.1337,
-      intervalDecay: 0.31337,
+      alpha: N.proportion(0.1337),
+      intervalDecay: N.proportion(0.31337),
     };
     const j = paramsToJSON(p);
     const p_ = paramsFromJSON(j);
@@ -36,12 +37,12 @@ describe("analysis/timeline/params", () => {
       expect(params).toEqual(defaultParams());
     });
     it("accepts an alpha override", () => {
-      const params = partialParams({alpha: 0.99});
+      const params = partialParams({alpha: N.proportion(0.99)});
       expect(params.alpha).toEqual(0.99);
       expect(params.intervalDecay).toEqual(DEFAULT_INTERVAL_DECAY);
     });
     it("accepts intervalDecay override", () => {
-      const params = partialParams({intervalDecay: 0.1});
+      const params = partialParams({intervalDecay: N.proportion(0.1)});
       expect(params.alpha).toEqual(DEFAULT_ALPHA);
       expect(params.intervalDecay).toEqual(0.1);
     });
@@ -49,7 +50,10 @@ describe("analysis/timeline/params", () => {
 
   describe("parser", () => {
     it("works on a full object", () => {
-      const params: TimelineCredParameters = {alpha: 0.34, intervalDecay: 0.1};
+      const params: TimelineCredParameters = {
+        alpha: N.proportion(0.34),
+        intervalDecay: N.proportion(0.1),
+      };
       expect(parser.parseOrThrow(params)).toEqual(params);
     });
     it("works on a partial object", () => {

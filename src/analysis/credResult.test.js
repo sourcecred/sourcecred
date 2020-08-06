@@ -3,6 +3,7 @@
 import stringify from "json-stable-stringify";
 import {Graph, NodeAddress, EdgeAddress} from "../core/graph";
 import * as Weights from "../core/weights";
+import * as N from "../util/numerics";
 import type {NodeType, EdgeType} from "./types";
 import type {PluginDeclaration} from "./pluginDeclaration";
 import {defaultParams} from "./timeline/params";
@@ -15,14 +16,17 @@ describe("analysis/credResult", () => {
         name: "node",
         pluralName: "nodes",
         prefix: NodeAddress.fromParts(["node"]),
-        defaultWeight: 2,
+        defaultWeight: N.finiteNonnegative(2),
         description: "a type",
       };
       const edgeType: EdgeType = {
         forwardName: "points",
         backwardName: "is pointed to",
         prefix: EdgeAddress.fromParts(["edge"]),
-        defaultWeight: {forwards: 2, backwards: 3},
+        defaultWeight: {
+          forwards: N.finiteNonnegative(2),
+          backwards: N.finiteNonnegative(3),
+        },
         description: "a type",
       };
       const declaration: PluginDeclaration = {

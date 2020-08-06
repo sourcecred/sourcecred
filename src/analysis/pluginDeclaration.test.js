@@ -11,20 +11,24 @@ import {
   fromJSON,
 } from "./pluginDeclaration";
 import * as Weights from "../core/weights";
+import * as N from "../util/numerics";
 
 describe("analysis/pluginDeclaration", () => {
   const nodeType: NodeType = deepFreeze({
     name: "node",
     pluralName: "nodes",
     prefix: NodeAddress.fromParts(["node"]),
-    defaultWeight: 2,
+    defaultWeight: N.finiteNonnegative(2),
     description: "a type",
   });
   const edgeType: EdgeType = deepFreeze({
     forwardName: "points",
     backwardName: "is pointed to",
     prefix: EdgeAddress.fromParts(["edge"]),
-    defaultWeight: {forwards: 2, backwards: 3},
+    defaultWeight: {
+      forwards: N.finiteNonnegative(2),
+      backwards: N.finiteNonnegative(3),
+    },
     description: "a type",
   });
   const emptyDeclaration: PluginDeclaration = deepFreeze({

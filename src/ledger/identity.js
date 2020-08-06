@@ -38,6 +38,7 @@ import {
 } from "../core/graph";
 import type {NodeType} from "../analysis/types";
 import type {PluginDeclaration} from "../analysis/pluginDeclaration";
+import * as N from "../util/numerics";
 
 /**
  * We validate identityNames using GitHub-esque rules.
@@ -154,28 +155,28 @@ export const identityParser: C.Parser<Identity> = C.object({
 const userNodeType: NodeType = {
   name: "user",
   pluralName: "users",
-  defaultWeight: 0,
+  defaultWeight: N.finiteNonnegative(0),
   description: "a canonical user identity",
   prefix: NodeAddress.append(IDENTITY_PREFIX, "USER"),
 };
 const projectNodeType: NodeType = {
   name: "project",
   pluralName: "projects",
-  defaultWeight: 0,
+  defaultWeight: N.finiteNonnegative(0),
   description: "a canonical project identity",
   prefix: NodeAddress.append(IDENTITY_PREFIX, "PROJECT"),
 };
 const organizationNodeType: NodeType = {
   name: "organization",
   pluralName: "organizations",
-  defaultWeight: 0,
+  defaultWeight: N.finiteNonnegative(0),
   description: "a canonical organization identity",
   prefix: NodeAddress.append(IDENTITY_PREFIX, "ORGANIZATION"),
 };
 const botNodeType: NodeType = {
   name: "bot",
   pluralName: "bots",
-  defaultWeight: 0,
+  defaultWeight: N.finiteNonnegative(0),
   description: "a canonical bot identity",
   prefix: NodeAddress.append(IDENTITY_PREFIX, "BOT"),
 };

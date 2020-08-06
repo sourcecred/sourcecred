@@ -1,6 +1,7 @@
 // @flow
 
 import * as C from "../../util/combo";
+import * as N from "../../util/numerics";
 
 /**
  * Parameters for computing TimelineCred
@@ -11,18 +12,18 @@ export type TimelineCredParameters = {|
   // Determines how quickly cred returns to the PageRank seed vector. If alpha
   // is high, then cred will tend to "stick" to nodes that are seeded, e.g.
   // issues and pull requests. Alpha should be between 0 and 1.
-  +alpha: number,
+  +alpha: N.Proportion,
   // Determines how quickly cred decays. The decay is 1, then cred never
   // decays, and old nodes and edges will retain full weight forever. (This
   // would result in cred that is highly biased towards old contributions, as
   // they would continue earning cred in every timeslice, forever.) If the
   // decay is 0, then weights go to zero the first week after their node/edge
   // was created. Should be between 0 and 1.
-  +intervalDecay: number,
+  +intervalDecay: N.Proportion,
 |};
 
-export const DEFAULT_ALPHA = 0.2;
-export const DEFAULT_INTERVAL_DECAY = 0.5;
+export const DEFAULT_ALPHA = N.proportion(0.2);
+export const DEFAULT_INTERVAL_DECAY = N.proportion(0.5);
 
 export type TimelineCredParametersJSON = {|
   +alpha: number,
@@ -42,14 +43,14 @@ export function paramsFromJSON(
   p: TimelineCredParametersJSON
 ): TimelineCredParameters {
   return {
-    alpha: p.alpha,
-    intervalDecay: p.intervalDecay,
+    alpha: N.proportion(p.alpha),
+    intervalDecay: N.proportion(p.intervalDecay),
   };
 }
 
 const partialParser: C.Parser<$Shape<TimelineCredParameters>> = C.shape({
-  alpha: C.number,
-  intervalDecay: C.number,
+  alpha: N.proportionParser,
+  intervalDecay: N.proportionParser,
 });
 
 export const parser: C.Parser<TimelineCredParameters> = C.fmap(

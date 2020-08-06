@@ -10,13 +10,14 @@ import {TimelineCred} from "./timelineCred";
 import {defaultParams} from "./params";
 import {type PluginDeclaration} from "../pluginDeclaration";
 import {type NodeType} from "../types";
+import * as N from "../../util/numerics";
 
 describe("src/analysis/timeline/timelineCred", () => {
   const userType: NodeType = {
     name: "user",
     pluralName: "users",
     prefix: NodeAddress.fromParts(["user"]),
-    defaultWeight: 0,
+    defaultWeight: N.finiteNonnegative(0),
     description: "a user",
   };
   const userPrefix = userType.prefix;
@@ -24,7 +25,7 @@ describe("src/analysis/timeline/timelineCred", () => {
     name: "foo",
     pluralName: "foos",
     prefix: NodeAddress.fromParts(["foo"]),
-    defaultWeight: 0,
+    defaultWeight: N.finiteNonnegative(0),
     description: "a foo",
   };
   const fooPrefix = fooType.prefix;

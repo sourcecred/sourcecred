@@ -9,6 +9,7 @@ import * as N from "./nodes";
 import * as R from "./relationalView";
 import {createEdge} from "./edges";
 import {ReactionContent$Values as Reactions} from "./graphqlTypes";
+import * as Num from "../../util/numerics";
 
 export function createGraph(view: R.RelationalView): WeightedGraph {
   const creator = new GraphCreator();
@@ -53,7 +54,7 @@ class GraphCreator {
       } else {
         const addr = N.toRaw(pull.address());
         // Un-merged PRs do not mint cred.
-        this.weights.nodeWeights.set(addr, 0);
+        this.weights.nodeWeights.set(addr, Num.finiteNonnegative(0));
       }
     }
 

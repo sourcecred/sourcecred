@@ -16,6 +16,7 @@ import {
   type PagerankNodeDecomposition,
 } from "./pagerankNodeDecomposition";
 import * as MapUtil from "../util/map";
+import * as N from "../util/numerics";
 
 import {advancedGraph, node, edge} from "../core/graphTestUtil";
 
@@ -137,15 +138,15 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const osmc = createOrderedSparseMarkovChain(connections);
       const params: PagerankParams = {
         chain: osmc.chain,
-        alpha: 0,
+        alpha: N.proportion(0),
         seed: uniformDistribution(osmc.chain.length),
         pi0: uniformDistribution(osmc.chain.length),
       };
       const distributionResult = await findStationaryDistribution(params, {
         verbose: false,
-        convergenceThreshold: 1e-6,
-        maxIterations: 255,
-        yieldAfterMs: 1,
+        convergenceThreshold: N.finiteNonnegative(1e-6),
+        maxIterations: N.nonnegativeInteger(255),
+        yieldAfterMs: N.finiteNonnegative(1),
       });
       const pr = distributionToNodeDistribution(
         osmc.nodeOrder,
@@ -163,15 +164,15 @@ describe("analysis/pagerankNodeDecomposition", () => {
       const osmc = createOrderedSparseMarkovChain(connections);
       const params: PagerankParams = {
         chain: osmc.chain,
-        alpha: 0,
+        alpha: N.proportion(0),
         seed: uniformDistribution(osmc.chain.length),
         pi0: uniformDistribution(osmc.chain.length),
       };
       const distributionResult = await findStationaryDistribution(params, {
         verbose: false,
-        convergenceThreshold: 1e-6,
-        maxIterations: 255,
-        yieldAfterMs: 1,
+        convergenceThreshold: N.finiteNonnegative(1e-6),
+        maxIterations: N.nonnegativeInteger(255),
+        yieldAfterMs: N.finiteNonnegative(1),
       });
       const pr = distributionToNodeDistribution(
         osmc.nodeOrder,

@@ -4,6 +4,7 @@ import React from "react";
 import {WeightSlider} from "./WeightSlider";
 import type {NodeType} from "../../analysis/types";
 import type {NodeWeight} from "../../core/weights";
+import * as N from "../../util/numerics";
 
 export class NodeTypeConfig extends React.Component<{
   +weight: NodeWeight,
@@ -16,7 +17,7 @@ export class NodeTypeConfig extends React.Component<{
         name={this.props.type.name}
         weight={this.props.weight}
         description={this.props.type.description}
-        onChange={(weight) => this.props.onChange(weight)}
+        onChange={(weight) => this.props.onChange(N.finiteNonnegative(weight))}
       />
     );
   }

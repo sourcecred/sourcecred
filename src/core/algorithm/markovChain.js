@@ -1,6 +1,8 @@
 // @flow
 
 import {computeDelta, type Distribution} from "./distribution";
+import * as N from "../../util/numerics";
+
 /**
  * The data inputs to running PageRank.
  *
@@ -19,7 +21,7 @@ export type PagerankParams = {|
   // The probability of teleporting back to the seed vector.
   // If alpha=0, then the seed vector is irrelevant.
   // If alpha=1, then it trivially converges to the seed vector.
-  +alpha: number,
+  +alpha: N.Proportion,
 |};
 
 /**
@@ -32,12 +34,12 @@ export type PagerankOptions = {|
   // A distribution is considered stationary if the action of the Markov
   // chain on the distribution does not change any component by more than
   // `convergenceThreshold` in absolute value.
-  +convergenceThreshold: number,
+  +convergenceThreshold: N.FiniteNonnegative,
   // We will run maxIterations markov chain steps at most.
-  +maxIterations: number,
+  +maxIterations: N.NonnegativeInteger,
   // To prevent locking the rest of the application, PageRank will yield control
   // after this many miliseconds, allowing UI updates, etc.
-  +yieldAfterMs: number,
+  +yieldAfterMs: N.FiniteNonnegative,
 |};
 
 export type StationaryDistributionResult = {|

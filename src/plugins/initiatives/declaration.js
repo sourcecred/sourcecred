@@ -5,6 +5,7 @@ import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {NodeType, EdgeType} from "../../analysis/types";
 import {NodeAddress, EdgeAddress} from "../../core/graph";
 import type {NodeEntryField} from "./nodeEntry";
+import * as N from "../../util/numerics";
 
 export const nodePrefix = NodeAddress.fromParts(["sourcecred", "initiatives"]);
 export const edgePrefix = EdgeAddress.fromParts(["sourcecred", "initiatives"]);
@@ -13,7 +14,7 @@ export const initiativeNodeType: NodeType = deepFreeze({
   name: "Initiative",
   pluralName: "Initiatives",
   prefix: NodeAddress.append(nodePrefix, "initiative"),
-  defaultWeight: 1,
+  defaultWeight: N.finiteNonnegative(1),
   description:
     "An initiative supernode, describing a scoped improvement to a project from proposal to completion.",
 });
@@ -29,7 +30,7 @@ function nodeEntryType(field: NodeEntryField): NodeType {
     name: `${displayField} Entry`,
     pluralName: `${displayField} Entries`,
     prefix: NodeAddress.append(nodePrefix, String(field)),
-    defaultWeight: 1,
+    defaultWeight: N.finiteNonnegative(1),
     description:
       `A ${displayField.toLowerCase()} entry node, to easily include` +
       `contributions when other plugins don't add it to the graph.`,
@@ -66,7 +67,10 @@ export const dependsOnEdgeType: EdgeType = deepFreeze({
   forwardName: "depends on",
   backwardName: "is a dependency for",
   prefix: EdgeAddress.append(edgePrefix, "dependsOn"),
-  defaultWeight: {forwards: 1, backwards: 1 / 16},
+  defaultWeight: {
+    forwards: N.finiteNonnegative(1),
+    backwards: N.finiteNonnegative(1 / 16),
+  },
   description: "Connects an initiative to it's dependencies.",
 });
 
@@ -82,7 +86,10 @@ export const referencesEdgeType: EdgeType = deepFreeze({
   forwardName: "references",
   backwardName: "is referenced for",
   prefix: EdgeAddress.append(edgePrefix, "references"),
-  defaultWeight: {forwards: 1 / 2, backwards: 1 / 16},
+  defaultWeight: {
+    forwards: N.finiteNonnegative(1 / 2),
+    backwards: N.finiteNonnegative(1 / 16),
+  },
   description: "Connects an initiative to it's references.",
 });
 
@@ -97,7 +104,10 @@ export const contributesToEdgeType: EdgeType = deepFreeze({
   forwardName: "contributes to",
   backwardName: "is contributed to by",
   prefix: EdgeAddress.append(edgePrefix, "contributesTo"),
-  defaultWeight: {forwards: 1, backwards: 1},
+  defaultWeight: {
+    forwards: N.finiteNonnegative(1),
+    backwards: N.finiteNonnegative(1),
+  },
   description: "Connects an initiative to it's contributions.",
 });
 
@@ -112,7 +122,10 @@ export const contributesToEntryEdgeType: EdgeType = deepFreeze({
   forwardName: "contributes to entry",
   backwardName: "entry is contributed to by",
   prefix: EdgeAddress.append(edgePrefix, "contributesToEntry"),
-  defaultWeight: {forwards: 1 / 16, backwards: 1},
+  defaultWeight: {
+    forwards: N.finiteNonnegative(1 / 16),
+    backwards: N.finiteNonnegative(1),
+  },
   description: "Connects a contributor to an entry node.",
 });
 
@@ -131,7 +144,10 @@ export const championsEdgeType: EdgeType = deepFreeze({
   forwardName: "champions",
   backwardName: "is championed by",
   prefix: EdgeAddress.append(edgePrefix, "champions"),
-  defaultWeight: {forwards: 1, backwards: 4},
+  defaultWeight: {
+    forwards: N.finiteNonnegative(1),
+    backwards: N.finiteNonnegative(4),
+  },
   description: "Connects an initiative to users who champion it.",
 });
 

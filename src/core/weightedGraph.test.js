@@ -4,6 +4,7 @@ import * as Weights from "./weights";
 import {Graph, NodeAddress, EdgeAddress} from "./graph";
 import * as WeightedGraph from "./weightedGraph";
 import * as GraphTest from "./graphTestUtil";
+import * as N from "../util/numerics";
 
 describe("core/weightedGraph", () => {
   function expectEqual(wg1, wg2) {
@@ -33,7 +34,7 @@ describe("core/weightedGraph", () => {
       const node = GraphTest.node("foo");
       const graph = new Graph().addNode(node);
       const weights = Weights.empty();
-      weights.nodeWeights.set(node.address, 5);
+      weights.nodeWeights.set(node.address, N.finiteNonnegative(5));
       const wg = {graph, weights};
       const wgJSON = WeightedGraph.toJSON(wg);
       const wg_ = WeightedGraph.fromJSON(wgJSON);
@@ -49,9 +50,9 @@ describe("core/weightedGraph", () => {
       const g1 = new Graph().addNode(foo);
       const g2 = new Graph().addNode(bar);
       const w1 = Weights.empty();
-      w1.nodeWeights.set(foo.address, 1);
+      w1.nodeWeights.set(foo.address, N.finiteNonnegative(1));
       const w2 = Weights.empty();
-      w2.nodeWeights.set(bar.address, 2);
+      w2.nodeWeights.set(bar.address, N.finiteNonnegative(2));
       const wg1 = {graph: g1, weights: w1};
       const wg2 = {graph: g2, weights: w2};
       const g = Graph.merge([g1, g2]);
@@ -66,10 +67,16 @@ describe("core/weightedGraph", () => {
     const example = () => {
       const graph = new Graph().addNode(foo).addNode(bar);
       const weights = Weights.empty();
-      weights.nodeWeights.set(NodeAddress.empty, 0);
-      weights.nodeWeights.set(foo.address, 1);
-      weights.edgeWeights.set(foobar.address, {forwards: 2, backwards: 2});
-      weights.edgeWeights.set(EdgeAddress.empty, {forwards: 3, backwards: 3});
+      weights.nodeWeights.set(NodeAddress.empty, N.finiteNonnegative(0));
+      weights.nodeWeights.set(foo.address, N.finiteNonnegative(1));
+      weights.edgeWeights.set(foobar.address, {
+        forwards: N.finiteNonnegative(2),
+        backwards: N.finiteNonnegative(2),
+      });
+      weights.edgeWeights.set(EdgeAddress.empty, {
+        forwards: N.finiteNonnegative(3),
+        backwards: N.finiteNonnegative(3),
+      });
       return {graph, weights};
     };
     it("has no effect if the overrides are empty", () => {
@@ -79,18 +86,24 @@ describe("core/weightedGraph", () => {
     });
     it("takes weights from base and overrides, choosing overrides on conflicts", () => {
       const overrides = Weights.empty();
-      overrides.nodeWeights.set(foo.address, 101);
-      overrides.nodeWeights.set(bar.address, 102);
+      overrides.nodeWeights.set(foo.address, N.finiteNonnegative(101));
+      overrides.nodeWeights.set(bar.address, N.finiteNonnegative(102));
       overrides.edgeWeights.set(foobar.address, {
-        forwards: 103,
-        backwards: 103,
+        forwards: N.finiteNonnegative(103),
+        backwards: N.finiteNonnegative(103),
       });
       const expected = Weights.empty();
-      expected.nodeWeights.set(NodeAddress.empty, 0);
-      expected.nodeWeights.set(foo.address, 101);
-      expected.nodeWeights.set(bar.address, 102);
-      expected.edgeWeights.set(foobar.address, {forwards: 103, backwards: 103});
-      expected.edgeWeights.set(EdgeAddress.empty, {forwards: 3, backwards: 3});
+      expected.nodeWeights.set(NodeAddress.empty, N.finiteNonnegative(0));
+      expected.nodeWeights.set(foo.address, N.finiteNonnegative(101));
+      expected.nodeWeights.set(bar.address, N.finiteNonnegative(102));
+      expected.edgeWeights.set(foobar.address, {
+        forwards: N.finiteNonnegative(103),
+        backwards: N.finiteNonnegative(103),
+      });
+      expected.edgeWeights.set(EdgeAddress.empty, {
+        forwards: N.finiteNonnegative(3),
+        backwards: N.finiteNonnegative(3),
+      });
       const actual = WeightedGraph.overrideWeights(example(), overrides)
         .weights;
       expect(expected).toEqual(actual);

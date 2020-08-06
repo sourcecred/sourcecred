@@ -1,7 +1,7 @@
 // @flow
 
 import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
-import {type EdgeWeight} from "../core/weights";
+import {type EdgeWeight, type NodeWeight} from "../core/weights";
 
 /**
  * This module defines `NodeType`s and `EdgeType`s, both of which are
@@ -66,7 +66,7 @@ export type NodeType = {|
   // The default weight to assign to nodes of this type. We use `1` to mean "of
   // normal importance", and the weights scale linearly from there (i.e. 2
   // means twice as important).
-  +defaultWeight: number,
+  +defaultWeight: NodeWeight,
   // The `description` property should be a human-readable string that makes
   // it clear to a user what each NodeType does
   +description: string,

@@ -2,6 +2,7 @@
 
 import {NodeAddress} from "../core/graph";
 import {scoreByMaximumProbability, scoreByConstantTotal} from "./nodeScore";
+import * as N from "../util/numerics";
 
 describe("analysis/nodeScore", () => {
   const foo = NodeAddress.fromParts(["foo"]);
@@ -14,7 +15,10 @@ describe("analysis/nodeScore", () => {
       distribution.set(foo, 0.5);
       distribution.set(bar, 0.3);
       distribution.set(zod, 0.2);
-      const result = scoreByMaximumProbability(distribution, 100);
+      const result = scoreByMaximumProbability(
+        distribution,
+        N.finiteNonnegative(100)
+      );
       expect(result.get(foo)).toEqual(100);
       expect(result.get(bar)).toEqual(60);
       expect(result.get(zod)).toEqual(40);
@@ -24,7 +28,10 @@ describe("analysis/nodeScore", () => {
       distribution.set(foo, 0.5);
       distribution.set(bar, 0.3);
       distribution.set(zod, 0.2);
-      const result = scoreByMaximumProbability(distribution, 1000);
+      const result = scoreByMaximumProbability(
+        distribution,
+        N.finiteNonnegative(1000)
+      );
       expect(result.get(foo)).toEqual(1000);
       expect(result.get(bar)).toEqual(600);
       expect(result.get(zod)).toEqual(400);
@@ -32,19 +39,24 @@ describe("analysis/nodeScore", () => {
     it("handles a case with only a single node", () => {
       const distribution = new Map();
       distribution.set(foo, 1.0);
-      const result = scoreByMaximumProbability(distribution, 1000);
+      const result = scoreByMaximumProbability(
+        distribution,
+        N.finiteNonnegative(1000)
+      );
       expect(result.get(foo)).toEqual(1000);
     });
     it("errors if maxScore <= 0", () => {
       const distribution = new Map();
       distribution.set(foo, 1.0);
-      const result = () => scoreByMaximumProbability(distribution, 0);
+      const result = () =>
+        scoreByMaximumProbability(distribution, N.finiteNonnegative(0));
       expect(result).toThrowError("Invalid argument");
     });
     it("throws an error rather than divide by 0", () => {
       const distribution = new Map();
       distribution.set(foo, 0.0);
-      const result = () => scoreByMaximumProbability(distribution, 1000);
+      const result = () =>
+        scoreByMaximumProbability(distribution, N.finiteNonnegative(1000));
       expect(result).toThrowError("Invariant violation");
     });
   });
@@ -54,7 +66,11 @@ describe("analysis/nodeScore", () => {
       distribution.set(foo, 0.5);
       distribution.set(bar, 0.3);
       distribution.set(zod, 0.2);
-      const result = scoreByConstantTotal(distribution, 100, NodeAddress.empty);
+      const result = scoreByConstantTotal(
+        distribution,
+        N.finiteNonnegative(100),
+        NodeAddress.empty
+      );
       expect(result.get(foo)).toEqual(50);
       expect(result.get(bar)).toEqual(30);
       expect(result.get(zod)).toEqual(20);
@@ -66,7 +82,7 @@ describe("analysis/nodeScore", () => {
       distribution.set(zod, 0.2);
       const result = scoreByConstantTotal(
         distribution,
-        1000,
+        N.finiteNonnegative(1000),
         NodeAddress.empty
       );
       expect(result.get(foo)).toEqual(500);
@@ -79,7 +95,11 @@ describe("analysis/nodeScore", () => {
       distribution.set(foobar, 0.5);
       distribution.set(bar, 0.3);
       distribution.set(zod, 0.2);
-      const result = scoreByConstantTotal(distribution, 1000, foo);
+      const result = scoreByConstantTotal(
+        distribution,
+        N.finiteNonnegative(1000),
+        foo
+      );
       expect(result.get(foo)).toEqual(500);
       expect(result.get(foobar)).toEqual(500);
       expect(result.get(bar)).toEqual(300);
@@ -90,7 +110,7 @@ describe("analysis/nodeScore", () => {
       distribution.set(foo, 1.0);
       const result = scoreByConstantTotal(
         distribution,
-        1000,
+        N.finiteNonnegative(1000),
         NodeAddress.empty
       );
       expect(result.get(foo)).toEqual(1000);
@@ -98,13 +118,15 @@ describe("analysis/nodeScore", () => {
     it("errors if maxScore <= 0", () => {
       const distribution = new Map();
       distribution.set(foo, 1.0);
-      const result = () => scoreByConstantTotal(distribution, 0, foo);
+      const result = () =>
+        scoreByConstantTotal(distribution, N.finiteNonnegative(0), foo);
       expect(result).toThrowError("Invalid argument");
     });
     it("throws an error rather than divide by 0", () => {
       const distribution = new Map();
       distribution.set(foo, 1.0);
-      const result = () => scoreByConstantTotal(distribution, 1000, bar);
+      const result = () =>
+        scoreByConstantTotal(distribution, N.finiteNonnegative(1000), bar);
       expect(result).toThrowError(
         "Tried to normalize based on nodes with no score"
       );

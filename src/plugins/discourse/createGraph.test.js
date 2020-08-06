@@ -14,6 +14,7 @@ import {
   DEFAULT_TRUST_LEVEL_TO_WEIGHT,
 } from "./createGraph";
 import * as NE from "./nodesAndEdges";
+import * as N from "../../util/numerics";
 
 import {userAddress, postAddress, topicAddress} from "./address";
 
@@ -480,7 +481,7 @@ describe("plugins/discourse/createGraph", () => {
             createsLike: expect.anything(),
             likes: expect.anything(),
             node: NE.likeNode(url, like1, "[unknown post]"),
-            weight: DEFAULT_TRUST_LEVEL_TO_WEIGHT[4],
+            weight: DEFAULT_TRUST_LEVEL_TO_WEIGHT["4"],
           },
           {
             createsLike: expect.anything(),
@@ -503,7 +504,7 @@ describe("plugins/discourse/createGraph", () => {
         node: NE.likeNode(url, likeAction, "[unknown post]"),
         createsLike: NE.createsLikeEdge(url, likeAction),
         likes: NE.likesEdge(url, likeAction),
-        weight: 0.33,
+        weight: N.finiteNonnegative(0.33),
       };
       const data = {
         users: [],

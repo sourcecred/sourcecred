@@ -4,6 +4,7 @@ import {exampleGraph, exampleRelationalView} from "./example/example";
 import {empty as emptyWeights} from "../../core/weights";
 import {createGraph} from "./createGraph";
 import * as N from "./nodes";
+import * as Num from "../../util/numerics";
 
 describe("plugins/github/createGraph", () => {
   it("example graph matches snapshot", () => {
@@ -26,7 +27,7 @@ describe("plugins/github/createGraph", () => {
     const expectedWeights = emptyWeights();
     for (const unmerged of unmergedPrs) {
       const addr = N.toRaw(unmerged.address());
-      expectedWeights.nodeWeights.set(addr, 0);
+      expectedWeights.nodeWeights.set(addr, Num.finiteNonnegative(0));
     }
     const {weights} = createGraph(view);
     expect(weights).toEqual(expectedWeights);

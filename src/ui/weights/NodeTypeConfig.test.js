@@ -6,6 +6,7 @@ import {shallow} from "enzyme";
 import {WeightSlider} from "./WeightSlider";
 import {NodeTypeConfig} from "./NodeTypeConfig";
 import {inserterNodeType} from "../../plugins/demo/declaration";
+import * as N from "../../util/numerics";
 
 require("../../webutil/testUtil").configureEnzyme();
 
@@ -14,7 +15,7 @@ describe("ui/weights/NodeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();
       const type = inserterNodeType;
-      const weight = 0.125;
+      const weight = N.finiteNonnegative(0.125);
       const element = shallow(
         <NodeTypeConfig onChange={onChange} weight={weight} type={type} />
       );

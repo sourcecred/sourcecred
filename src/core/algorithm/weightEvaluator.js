@@ -3,6 +3,7 @@
 import type {NodeAddressT, EdgeAddressT} from "../graph";
 import type {Weights as WeightsT, EdgeWeight, NodeWeight} from "../weights";
 import {NodeTrie, EdgeTrie} from "../trie";
+import * as N from "../../util/numerics";
 
 export type NodeWeightEvaluator = (NodeAddressT) => NodeWeight;
 export type EdgeWeightEvaluator = (EdgeAddressT) => EdgeWeight;
@@ -27,7 +28,8 @@ export function nodeWeightEvaluator(weights: WeightsT): NodeWeightEvaluator {
   }
   return function nodeWeight(a: NodeAddressT): NodeWeight {
     const matchingWeights = nodeTrie.get(a);
-    return matchingWeights.reduce((a, b) => a * b, 1);
+    const product = matchingWeights.reduce((a, b) => a * b, 1);
+    return N.finiteNonnegative(product);
   };
 }
 
@@ -52,12 +54,16 @@ export function edgeWeightEvaluator(weights: WeightsT): EdgeWeightEvaluator {
   }
   return function evaluator(address: EdgeAddressT): EdgeWeight {
     const weights = edgeTrie.get(address);
-    return weights.reduce(
-      (a: EdgeWeight, b: EdgeWeight) => ({
+    const productWeight = weights.reduce(
+      (a, b) => ({
         forwards: a.forwards * b.forwards,
         backwards: a.backwards * b.backwards,
       }),
       {forwards: 1, backwards: 1}
     );
+    return {
+      forwards: N.finiteNonnegative(productWeight.forwards),
+      backwards: N.finiteNonnegative(productWeight.backwards),
+    };
   };
 }

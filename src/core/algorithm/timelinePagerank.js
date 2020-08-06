@@ -6,6 +6,7 @@
 import deepFreeze from "deep-freeze";
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
+import * as N from "../../util/numerics";
 import {
   Graph,
   type NodeAddressT,
@@ -30,6 +31,7 @@ import {
   type NodeToConnections,
 } from "./graphToMarkovChain";
 import {findStationaryDistribution, type PagerankParams} from "./markovChain";
+import {type NodeWeight} from "../weights";
 
 export type IntervalResult = {|
   // The interval for this slice
@@ -121,15 +123,9 @@ export const SYNTHETIC_LOOP_WEIGHT = 1e-3;
  */
 export async function timelinePagerank(
   weightedGraph: WeightedGraph,
-  intervalDecay: number,
-  alpha: number
+  intervalDecay: N.Proportion,
+  alpha: N.Proportion
 ): Promise<TimelineDistributions> {
-  if (intervalDecay < 0 || intervalDecay > 1 || !isFinite(intervalDecay)) {
-    throw new Error(`invalid intervalDecay: ${intervalDecay}`);
-  }
-  if (alpha < 0 || alpha > 1 || !isFinite(alpha)) {
-    throw new Error(`invalid alpha: ${alpha}`);
-  }
   // Produce the evaluators we will use to get the baseline weight for each
   // node and edge
   const nodeEvaluator = nodeWeightEvaluator(weightedGraph.weights);
@@ -172,20 +168,22 @@ export async function timelinePagerank(
 export function* _timelineNodeWeights(
   nodeCreationHistory: $ReadOnlyArray<$ReadOnlyArray<Node>>,
   nodeEvaluator: NodeWeightEvaluator,
-  intervalDecay: number
-): Iterator<Map<NodeAddressT, number>> {
+  intervalDecay: N.Proportion
+): Iterator<Map<NodeAddressT, NodeWeight>> {
   let lastNodeWeights = new Map();
   for (const nodes of nodeCreationHistory) {
     const nodeWeights = new Map();
     // Decay all the previous weights.
     for (const [address, weight] of lastNodeWeights.entries()) {
-      nodeWeights.set(address, weight * intervalDecay);
+      nodeWeights.set(address, N.finiteNonnegative(weight * intervalDecay));
     }
     // Add new nodes at full weight.
     for (const {address} of nodes) {
       // Normalize by (1 - intervalDecay) so that the total weight of a node across
       // intervals converges to the full base weight
-      const normalizedWeight = nodeEvaluator(address) * (1 - intervalDecay);
+      const normalizedWeight = N.finiteNonnegative(
+        nodeEvaluator(address) * (1 - intervalDecay)
+      );
       nodeWeights.set(address, normalizedWeight);
     }
     yield nodeWeights;
@@ -224,9 +222,9 @@ export async function _computeTimelineDistribution(
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
   edgeOrder: $ReadOnlyArray<EdgeAddressT>,
   intervals: $ReadOnlyArray<Interval>,
-  nodeWeightIterator: Iterator<Map<NodeAddressT, number>>,
+  nodeWeightIterator: Iterator<Map<NodeAddressT, NodeWeight>>,
   nodeToConnectionsIterator: Iterator<NodeToConnections>,
-  alpha: number
+  alpha: N.Proportion
 ): Promise<TimelineDistributions> {
   const results = [];
   let pi0: Distribution | null = null;
@@ -254,13 +252,13 @@ export async function _computeTimelineDistribution(
 }
 
 export async function _intervalResult(
-  nodeWeights: Map<NodeAddressT, number>,
+  nodeWeights: Map<NodeAddressT, NodeWeight>,
   nodeToConnections: NodeToConnections,
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
   edgeOrder: $ReadOnlyArray<EdgeAddressT>,
   interval: Interval,
   pi0: Distribution | null,
-  alpha: number
+  alpha: N.Proportion
 ): Promise<IntervalResult> {
   const {chain} = createOrderedSparseMarkovChain(nodeToConnections);
   const nodeToIndex = new Map(nodeOrder.map((x, i) => [x, i]));
@@ -273,9 +271,9 @@ export async function _intervalResult(
   const params: PagerankParams = {chain, alpha, seed, pi0};
   const distributionResult = await findStationaryDistribution(params, {
     verbose: false,
-    convergenceThreshold: 1e-7,
-    maxIterations: 255,
-    yieldAfterMs: 30,
+    convergenceThreshold: N.finiteNonnegative(1e-7),
+    maxIterations: N.nonnegativeInteger(255),
+    yieldAfterMs: N.finiteNonnegative(30),
   });
   const intervalWeight = sum(nodeWeights.values());
   const forwardFlow = new Float64Array(edgeOrder.length);

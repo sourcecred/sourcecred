@@ -6,6 +6,7 @@ import {shallow} from "enzyme";
 import {WeightSlider} from "./WeightSlider";
 import {EdgeTypeConfig, EdgeWeightSlider} from "./EdgeTypeConfig";
 import {assemblesEdgeType} from "../../plugins/demo/declaration";
+import * as N from "../../util/numerics";
 
 require("../../webutil/testUtil").configureEnzyme();
 
@@ -14,7 +15,10 @@ describe("ui/weights/EdgeTypeConfig", () => {
     function example() {
       const onChange = jest.fn();
       const type = assemblesEdgeType;
-      const weight = {forwards: 1, backwards: 0.5};
+      const weight = {
+        forwards: N.finiteNonnegative(1),
+        backwards: N.finiteNonnegative(0.5),
+      };
       const element = shallow(
         <EdgeTypeConfig onChange={onChange} type={type} weight={weight} />
       );

@@ -2,6 +2,7 @@
 
 import * as MapUtil from "../util/map";
 import * as C from "../util/combo";
+import * as N from "../util/numerics";
 import {
   type NodeAddressT,
   type EdgeAddressT,
@@ -15,7 +16,7 @@ import {toCompat, type Compatible, compatibleParser} from "../util/compat";
  * Weight 1 is the default value and signifies normal importance.
  * Weights are linear, so 2 is twice as important as 1.
  */
-export type NodeWeight = number;
+export type NodeWeight = N.FiniteNonnegative;
 
 export type NodeOperator = (NodeWeight, NodeWeight) => NodeWeight;
 
@@ -25,7 +26,10 @@ export type NodeOperator = (NodeWeight, NodeWeight) => NodeWeight;
  * Weight 1 is the default value and signifies normal importance.
  * Weights are linear, so 2 is twice as important as 1.
  */
-export type EdgeWeight = {|+forwards: number, +backwards: number|};
+export type EdgeWeight = {|
+  +forwards: N.FiniteNonnegative,
+  +backwards: N.FiniteNonnegative,
+|};
 
 export type EdgeOperator = (EdgeWeight, EdgeWeight) => EdgeWeight;
 
@@ -142,9 +146,12 @@ function deserialize_0_2_0(weights: SerializedWeights_0_2_0): Weights {
 }
 
 const Parse_0_2_0: C.Parser<SerializedWeights_0_2_0> = (() => {
-  const parseEdgeWeight = C.object({forwards: C.number, backwards: C.number});
+  const parseEdgeWeight = C.object({
+    forwards: N.finiteNonnegativeParser,
+    backwards: N.finiteNonnegativeParser,
+  });
   return C.object({
-    nodeWeights: C.dict(C.number, NodeAddress.parser),
+    nodeWeights: C.dict(N.finiteNonnegativeParser, NodeAddress.parser),
     edgeWeights: C.dict(parseEdgeWeight, EdgeAddress.parser),
   });
 })();

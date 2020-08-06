@@ -19,11 +19,15 @@ import {
   _createReferenceMap,
 } from "./initiativesDirectory";
 import {type InitiativeFile} from "./initiativeFile";
+import * as N from "../../util/numerics";
 
 const exampleInitiativeFile = (): InitiativeFile => ({
   title: "Sample initiative",
   timestampIso: Timestamp.toISO(Date.parse("2020-01-08T22:01:57.766Z")),
-  weight: {incomplete: 360, complete: 420},
+  weight: {
+    incomplete: N.finiteNonnegative(360),
+    complete: N.finiteNonnegative(420),
+  },
   completed: false,
   champions: ["http://foo.bar/champ"],
   contributions: {

@@ -5,6 +5,7 @@ import {type Distribution, uniformDistribution} from "./distribution";
 
 export type Probability = number;
 export type NodeDistribution = Map<NodeAddressT, Probability>;
+import type {NodeWeight} from "../weights";
 
 export function distributionToNodeDistribution(
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
@@ -35,10 +36,12 @@ export function distributionToNodeDistribution(
  */
 export function weightedDistribution(
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
-  weights: Map<NodeAddressT, number>
+  weights: Map<NodeAddressT, NodeWeight>
 ): Distribution {
   let totalWeight = 0;
   for (const [address, weight] of weights.entries()) {
+    // This check is redundant with the type signature, and could be removed.
+    // (Left it in out of conserativism, and for a simpler refactor PR.)
     if (weight < 0 || !isFinite(weight)) {
       throw new Error(
         `Invalid weight ${weight} associated with address ${NodeAddress.toString(

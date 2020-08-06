@@ -13,6 +13,7 @@ import {
   linksToReferences,
 } from "./references";
 import * as NE from "./nodesAndEdges";
+import * as N from "../../util/numerics";
 
 export type GraphUser = {|
   +node: Node,
@@ -48,20 +49,22 @@ export type GraphData = {
 // TODO: Make this configurable.
 // For details on trust levels:
 // https://blog.discourse.org/2018/06/understanding-discourse-trust-levels/
-export const DEFAULT_TRUST_LEVEL_TO_WEIGHT = Object.freeze({
-  "0": 0,
+export const DEFAULT_TRUST_LEVEL_TO_WEIGHT: {
+  [string]: NodeWeight,
+} = Object.freeze({
+  "0": N.finiteNonnegative(0),
   // Trust level 1 indicates little engagement (doesn't even require any posts)
   // so I gave them a very small weight.
-  "1": 0.1,
+  "1": N.finiteNonnegative(0.1),
   // Trust level 2 in my mind indicates being a "full member" so it feels
   // like a good anchor for a standard weight of 1.
-  "2": 1,
+  "2": N.finiteNonnegative(1),
   // Trust level 3 requires that you are highly active and have earned lots of
   // likes, so feels trusted enough for some bonus minting.
-  "3": 1.25,
+  "3": N.finiteNonnegative(1.25),
   // Trust level 4 means you've been designated as high trust by the admins, so
   // we give a bigger bonus. Could make this even larger (2?)
-  "4": 1.5,
+  "4": N.finiteNonnegative(1.5),
 });
 
 export function weightForTrustLevel(trustLevel: ?number): NodeWeight {
@@ -71,7 +74,7 @@ export function weightForTrustLevel(trustLevel: ?number): NodeWeight {
     // This means they could have trust level 1. But to be conservative, we treat anyone
     // with a null trust level as if they have trust level 0.
     // Possibly this could come up with deleted users too.
-    return 0;
+    return N.finiteNonnegative(0);
   }
 
   const key = String(trustLevel);

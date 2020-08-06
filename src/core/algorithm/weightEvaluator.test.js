@@ -3,6 +3,7 @@
 import {NodeAddress, EdgeAddress} from "../graph";
 import {nodeWeightEvaluator, edgeWeightEvaluator} from "./weightEvaluator";
 import * as Weights from "../weights";
+import * as N from "../../util/numerics";
 
 describe("src/core/algorithm/weightEvaluator", () => {
   describe("nodeWeightEvaluator", () => {
@@ -17,8 +18,8 @@ describe("src/core/algorithm/weightEvaluator", () => {
     });
     it("composes matching weights multiplicatively", () => {
       const weights = Weights.empty();
-      weights.nodeWeights.set(foo, 2);
-      weights.nodeWeights.set(foobar, 3);
+      weights.nodeWeights.set(foo, N.finiteNonnegative(2));
+      weights.nodeWeights.set(foobar, N.finiteNonnegative(3));
       const evaluator = nodeWeightEvaluator(weights);
       expect(evaluator(empty)).toEqual(1);
       expect(evaluator(foo)).toEqual(2);
@@ -30,12 +31,21 @@ describe("src/core/algorithm/weightEvaluator", () => {
     const foobar = EdgeAddress.fromParts(["foo", "bar"]);
     it("gives default 1,1 weights if no matching type", () => {
       const evaluator = edgeWeightEvaluator(Weights.empty());
-      expect(evaluator(foo)).toEqual({forwards: 1, backwards: 1});
+      expect(evaluator(foo)).toEqual({
+        forwards: N.finiteNonnegative(1),
+        backwards: N.finiteNonnegative(1),
+      });
     });
     it("composes weights multiplicatively for all matching types", () => {
       const weights = Weights.empty();
-      weights.edgeWeights.set(foo, {forwards: 2, backwards: 3});
-      weights.edgeWeights.set(foobar, {forwards: 4, backwards: 5});
+      weights.edgeWeights.set(foo, {
+        forwards: N.finiteNonnegative(2),
+        backwards: N.finiteNonnegative(3),
+      });
+      weights.edgeWeights.set(foobar, {
+        forwards: N.finiteNonnegative(4),
+        backwards: N.finiteNonnegative(5),
+      });
       const evaluator = edgeWeightEvaluator(weights);
       expect(evaluator(foo)).toEqual({forwards: 2, backwards: 3});
       expect(evaluator(foobar)).toEqual({forwards: 8, backwards: 15});

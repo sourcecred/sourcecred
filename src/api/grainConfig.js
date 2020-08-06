@@ -4,17 +4,18 @@ import {type DistributionPolicy} from "../ledger/applyDistributions";
 import * as G from "../ledger/grain";
 import * as C from "../util/combo";
 import * as NullUtil from "../util/null";
+import * as N from "../util/numerics";
 
 export type GrainConfig = {|
-  +immediatePerWeek: number,
-  +balancedPerWeek: number,
+  +immediatePerWeek: N.NonnegativeInteger,
+  +balancedPerWeek: N.NonnegativeInteger,
   +maxSimultaneousDistributions?: number,
 |};
 
 export const parser: C.Parser<GrainConfig> = C.object(
   {
-    immediatePerWeek: C.number,
-    balancedPerWeek: C.number,
+    immediatePerWeek: N.nonnegativeIntegerParser,
+    balancedPerWeek: N.nonnegativeIntegerParser,
   },
   {
     maxSimultaneousDistributions: C.number,
@@ -22,16 +23,6 @@ export const parser: C.Parser<GrainConfig> = C.object(
 );
 
 export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
-  if (!isNonnegativeInteger(x.immediatePerWeek)) {
-    throw new Error(
-      `immediate budget must be nonnegative integer, got ${x.immediatePerWeek}`
-    );
-  }
-  if (!isNonnegativeInteger(x.balancedPerWeek)) {
-    throw new Error(
-      `balanced budget must be nonnegative integer, got ${x.balancedPerWeek}`
-    );
-  }
   const allocationPolicies = [];
   if (x.immediatePerWeek > 0) {
     allocationPolicies.push({
@@ -50,8 +41,4 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
     Infinity
   );
   return {allocationPolicies, maxSimultaneousDistributions};
-}
-
-function isNonnegativeInteger(x: number): boolean {
-  return x >= 0 && isFinite(x) && Math.floor(x) === x;
 }

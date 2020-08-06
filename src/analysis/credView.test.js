@@ -10,6 +10,7 @@ import {
 import {defaultParams} from "./timeline/params";
 import {compute} from "./credResult";
 import {CredView} from "./credView";
+import * as N from "../util/numerics";
 
 describe("analysis/credView", () => {
   async function example() {
@@ -18,28 +19,34 @@ describe("analysis/credView", () => {
       name: "foo",
       pluralName: "foos",
       prefix: NodeAddress.fromParts(["foo"]),
-      defaultWeight: 2,
+      defaultWeight: N.finiteNonnegative(2),
       description: "foo type",
     };
     const userType: NodeType = {
       name: "user",
       pluralName: "users",
       prefix: NodeAddress.fromParts(["user"]),
-      defaultWeight: 0,
+      defaultWeight: N.finiteNonnegative(0),
       description: "user type",
     };
     const flowType: EdgeType = {
       forwardName: "flows to",
       backwardName: "is flowed to by",
       prefix: EdgeAddress.fromParts(["flow"]),
-      defaultWeight: {forwards: 2, backwards: 3},
+      defaultWeight: {
+        forwards: N.finiteNonnegative(2),
+        backwards: N.finiteNonnegative(3),
+      },
       description: "flow type",
     };
     const streamType: EdgeType = {
       forwardName: "streams to",
       backwardName: "is stramed to by",
       prefix: EdgeAddress.fromParts(["stream"]),
-      defaultWeight: {forwards: 1, backwards: 0},
+      defaultWeight: {
+        forwards: N.finiteNonnegative(1),
+        backwards: N.finiteNonnegative(0),
+      },
       description: "stream type",
     };
     const declaration: PluginDeclaration = {
