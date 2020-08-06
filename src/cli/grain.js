@@ -2,10 +2,10 @@
 
 import fs from "fs-extra";
 import {join} from "path";
-import {loadJson, loadJsonWithDefault} from "../util/disk";
+import {loadFileWithDefault, loadJson} from "../util/disk";
 import {fromJSON as credResultFromJson} from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
-import {Ledger, parser as ledgerParser} from "../ledger/ledger";
+import {Ledger} from "../ledger/ledger";
 import {applyDistributions} from "../ledger/applyDistributions";
 import {computeCredAccounts} from "../ledger/credAccounts";
 import stringify from "json-stable-stringify";
@@ -35,10 +35,8 @@ const grainCommand: Command = async (args, std) => {
   const credView = new CredView(credResult);
 
   const ledgerPath = join(baseDir, "data", "ledger.json");
-  const ledger = await loadJsonWithDefault(
-    ledgerPath,
-    ledgerParser,
-    () => new Ledger()
+  const ledger = Ledger.parse(
+    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
   );
 
   const distributions = applyDistributions(

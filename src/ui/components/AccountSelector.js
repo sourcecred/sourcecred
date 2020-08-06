@@ -11,7 +11,6 @@ type DropdownProps = {|
   +ledger: Ledger,
   +setCurrentIdentity: (Account | null) => void,
   +placeholder?: string,
-  +disableUnderline?: boolean,
 |};
 
 const theme = createMuiTheme({
@@ -28,7 +27,6 @@ export default function AccountDropdown({
   placeholder,
   setCurrentIdentity,
   ledger,
-  disableUnderline,
 }: DropdownProps) {
   const items = ledger.accounts().filter((a) => a.active);
 

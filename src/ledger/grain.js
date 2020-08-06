@@ -1,6 +1,7 @@
 // @flow
 
 import * as P from "../util/combo";
+import bigInt from "big-integer";
 
 /**
  * This module contains the types for tracking Grain, which is the native
@@ -10,19 +11,32 @@ import * as P from "../util/combo";
  * properties of all Grains are that they are minted/distributed based on cred
  * scores, and that they can be used to Boost contributions in a cred graph.
  *
- * Grain is represented by [BigInt]s so that we can avoid precision issues.
- * Following the convention for ERC20 tokens, we will track and format Grain
- * with 18 decimals of precision.
+ * We track Grain using big integer arithmetic, so that we can be precise with
+ * Grain values and avoid float imprecision issues. Following the convention of
+ * ERC20 tokens, we track Grain at 18 decimals of precision, although we can
+ * make this project-specific if there's a future need.
  *
- * Unfortunately Flow does not support BigInts yet. For now, we will hack
- * around this by lying to Flow and claiming that the BigInts are actually
- * numbers. Whenever we actually construct a BigInt, we will
- * suppress the flow error at that declaration. Mixing BigInts with other types
- * (e.g. 5n + 3) produces a runtime error, so even though Flow will not save
- * us from these, they will be easy to detect. See [facebook/flow#6639][flow]
+ * At rest, we represent Grain as strings. This is a convenient decision around
+ * serialization boundaries, so that we can just directly stringify objects containing
+ * Grain values and it will Just Work. The downside is that we need to convert them to/fro
+ * string representations any time we need to do Grain arithmetic, which could create
+ * perf hot spots. If so, we can factor out the hot loop and do them in a way
+ * that has less overhead. You can see context for this decision in [#1936] and [#1938].
+ *
+ * Ideally, we would just use the native [BigInt] type. However, at time of
+ * writing it's not well supported by [flow] or Safari, so we use the
+ * big-integer library. That library delegates out to native BigInt when
+ * available, so this should be fine.
+ *
+ * Since the big-integer library does have a sensible `toString` method defined
+ * on the integers, we could switch to representing Grain at rest via
+ * big-integers rather than as strings. However, this would require re-writing
+ * a lot of test code. If perf becomes an issue that would be a principled fix.
  *
  * [BigInt]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt
  * [flow]: https://github.com/facebook/flow/issues/6639
+ * [#1936]: https://github.com/sourcecred/sourcecred/pull/1936
+ * [#1938]: https://github.com/sourcecred/sourcecred/pull/1938
  */
 export opaque type Grain: string = string;
 
@@ -32,39 +46,38 @@ export const ZERO: Grain = "0";
 export const DECIMAL_PRECISION = 18;
 
 // One "full" grain
-// $FlowExpectedError
-export const ONE: Grain = (10n ** BigInt(DECIMAL_PRECISION)).toString();
+export const ONE: Grain = bigInt(10).pow(DECIMAL_PRECISION).toString();
 
 export function add(a: Grain, b: Grain): Grain {
-  return (BigInt(a) + BigInt(b)).toString();
+  return bigInt(a).plus(bigInt(b)).toString();
 }
 export function sub(a: Grain, b: Grain): Grain {
-  return (BigInt(a) - BigInt(b)).toString();
+  return bigInt(a).subtract(bigInt(b)).toString();
 }
 export function mul(a: Grain, b: Grain): Grain {
-  return (BigInt(a) * BigInt(b)).toString();
+  return bigInt(a).times(bigInt(b)).toString();
 }
 export function div(a: Grain, b: Grain): Grain {
-  return (BigInt(a) / BigInt(b)).toString();
+  return bigInt(a).divide(bigInt(b)).toString();
 }
 export function lt(a: Grain, b: Grain): boolean {
-  return BigInt(a) < BigInt(b);
+  return bigInt(a).lt(bigInt(b));
 }
 export function gt(a: Grain, b: Grain): boolean {
-  return BigInt(a) > BigInt(b);
+  return bigInt(a).gt(bigInt(b));
 }
 export function lte(a: Grain, b: Grain): boolean {
-  return BigInt(a) <= BigInt(b);
+  return bigInt(a).leq(bigInt(b));
 }
 export function gte(a: Grain, b: Grain): boolean {
-  return BigInt(a) >= BigInt(b);
+  return bigInt(a).geq(bigInt(b));
 }
 export function eq(a: Grain, b: Grain): boolean {
-  return BigInt(a) === BigInt(b);
+  return bigInt(a).eq(bigInt(b));
 }
 
 export function fromString(s: string): Grain {
-  return BigInt(s).toString();
+  return bigInt(s).toString();
 }
 
 export const DEFAULT_SUFFIX = "g";
@@ -164,7 +177,7 @@ export function multiplyFloat(grain: Grain, num: number): Grain {
   }
 
   const floatProduct = Number(grain) * num;
-  return BigInt(Math.floor(floatProduct)).toString();
+  return bigInt(Math.floor(floatProduct)).toString();
 }
 
 /**
@@ -175,7 +188,7 @@ export function fromInteger(x: number): Grain {
   if (!isFinite(x) || Math.floor(x) !== x) {
     throw new Error(`not an integer: ${x}`);
   }
-  return (BigInt(ONE) * BigInt(x)).toString();
+  return bigInt(ONE).times(bigInt(x)).toString();
 }
 
 /**
@@ -214,7 +227,7 @@ export function fromFloatString(
   }
   const paddedDecimal = dec.padEnd(precision, "0");
 
-  return BigInt(`${whole}${paddedDecimal}`).toString();
+  return bigInt(`${whole}${paddedDecimal}`).toString();
 }
 
 /**
@@ -342,10 +355,9 @@ export function splitBudget(
  * Sum a sequence of Grain values.
  */
 export function sum(xs: Iterable<Grain>): Grain {
-  // $FlowExpectedError
-  let total = 0n;
+  let total = bigInt(0);
   for (const x of xs) {
-    total += BigInt(x);
+    total = total.add(bigInt(x));
   }
   return total.toString();
 }

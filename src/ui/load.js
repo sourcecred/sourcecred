@@ -2,7 +2,7 @@
 import * as pluginId from "../api/pluginId";
 import {CredView} from "../analysis/credView";
 import {fromJSON as credResultFromJSON} from "../analysis/credResult";
-import {Ledger, parser as ledgerParser} from "../ledger/ledger";
+import {Ledger} from "../ledger/ledger";
 
 export type LoadResult = LoadSuccess | LoadFailure;
 export type LoadSuccess = {|
@@ -32,8 +32,8 @@ export async function load(): Promise<LoadResult> {
     const credResult = credResultFromJSON(json);
     const credView = new CredView(credResult);
     const {bundledPlugins} = await responses[1].json();
-    const ledgerJson = await responses[2].json();
-    const ledger = ledgerParser.parseOrThrow(ledgerJson);
+    const rawLedger = await responses[2].text();
+    const ledger = Ledger.parse(rawLedger);
     return {type: "SUCCESS", credView, bundledPlugins, ledger};
   } catch (e) {
     console.error(e);

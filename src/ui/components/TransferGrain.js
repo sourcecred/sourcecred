@@ -119,7 +119,6 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
               ledger={ledger}
               setCurrentIdentity={setSender}
               placeholder="From..."
-              disableUnderline
             />
           </div>
           <div className={`${classes.centerRow} ${classes.third}`}>
@@ -145,7 +144,6 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
               ledger={ledger}
               setCurrentIdentity={setReceiver}
               placeholder="To..."
-              disableUnderline
             />
           </div>
         </div>

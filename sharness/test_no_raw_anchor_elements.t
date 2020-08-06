@@ -19,7 +19,7 @@ test_description='check that bare <a> elements are never directly used'
 
 # shellcheck disable=SC1004
 test_expect_success "application components must use <Link> instead of <a>" '
-    test_must_fail git grep -nF "</a>" \
+    test_must_fail git grep -nF "</a>" -- \
         ":/src/*.js" \
         ":(exclude,top)*/__snapshots__/*" \
         ":(exclude,top)*/snapshots/*" \
