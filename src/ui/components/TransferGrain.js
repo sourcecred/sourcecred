@@ -22,13 +22,13 @@ export type Props = {|
 
 const useStyles = makeStyles({
   root: {
-    width: "60%",
+    width: "1100px",
     margin: "0 auto",
     background: "white",
     padding: "0 5em 5em",
   },
   arrowBody: {
-    width: "280px",
+    width: "300px",
     marginLeft: "20px",
     background: "#C9CED2",
     padding: "5px 20px",
@@ -75,17 +75,19 @@ const useStyles = makeStyles({
 export const TransferGrain = ({ledger, setLedger}: Props) => {
   const classes = useStyles();
   const [sourceIdentity, setSourceIdentity] = useState<Identity | null>(null);
+  const [sourceBalance, setSourceBalance] = useState<Grain>(fromInteger(0));
   const [destIdentity, setDestIdentity] = useState<Identity | null>(null);
+  const [destBalance, setDestBalance] = useState<Grain>(fromInteger(0));
   const [amount, setAmount] = useState<string>("0");
-  const [maxAmount, setMaxAmount] = useState<Grain>(fromInteger(0));
   const [memo, setMemo] = useState<string>("");
 
   const setSender = (acct: Account | null) => {
-    setMaxAmount(acct ? acct.balance : fromInteger(0));
+    setSourceBalance(acct ? acct.balance : fromInteger(0));
     setSourceIdentity(acct ? acct.identity : null);
   };
 
   const setReceiver = (acct: Account | null) => {
+    setDestBalance(acct ? acct.balance : fromInteger(0));
     setDestIdentity(acct ? acct.identity : null);
   };
 
@@ -101,6 +103,7 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
       setLedger(nextLedger);
       setAmount(fromInteger(0));
       setSender(nextLedger.account(sourceIdentity.id));
+      setReceiver(nextLedger.account(destIdentity.id));
       setMemo("");
     }
   };
@@ -119,21 +122,26 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
               ledger={ledger}
               setCurrentIdentity={setSender}
               placeholder="From..."
+              balance={sourceBalance}
             />
           </div>
           <div className={`${classes.centerRow} ${classes.third}`}>
             <div className={classes.arrowBody}>
-              <Input
-                disableUnderline
-                type="number"
-                name="amount"
-                min="0"
-                step="any"
-                placeholder="(amount)"
-                value={amount !== "0" ? amount : ""}
-                onChange={(e) => setAmount(e.currentTarget.value)}
-              />
-              <span>{sourceIdentity && ` max: ${format(maxAmount, 2)}`}</span>
+              <div style={{width: "100px", display: "inline-block"}}>
+                <Input
+                  style={{color: "black", "-webkit-appearance": "none"}}
+                  disableUnderline
+                  type="number"
+                  name="amount"
+                  min="0"
+                  placeholder="(amount)"
+                  value={amount !== "0" ? amount : ""}
+                  onChange={(e) => setAmount(e.currentTarget.value)}
+                />
+              </div>
+              <span>
+                {sourceIdentity && ` max: ${format(sourceBalance, 2)}`}
+              </span>
             </div>
             <div className={classes.triangle} />
           </div>
@@ -144,6 +152,7 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
               ledger={ledger}
               setCurrentIdentity={setReceiver}
               placeholder="To..."
+              balance={destBalance}
             />
           </div>
         </div>
@@ -163,10 +172,11 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
             className={`${classes.centerRow} ${classes.half}`}
             style={{background: "#6558F5"}}
             variant="contained"
+            type="submit"
             disabled={
               !Number(amount) ||
               !(sourceIdentity && destIdentity) ||
-              gt(fromFloatString(amount), maxAmount)
+              gt(fromFloatString(amount), sourceBalance)
             }
           >
             transfer grain
