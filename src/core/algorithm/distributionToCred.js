@@ -5,7 +5,6 @@
  */
 
 import {sum} from "d3-array";
-import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import {type Interval} from "../interval";
 import {type TimelineDistributions} from "./timelinePagerank";
 import {NodeAddress, type NodeAddressT} from "../../core/graph";
@@ -89,65 +88,5 @@ export function distributionToCred(
         syntheticLoopFlow: normalize(syntheticLoopFlow),
       };
     }
-  );
-}
-
-const COMPAT_INFO = {type: "sourcecred/timelineCredScores", version: "0.2.0"};
-
-export type TimelineCredScoresJSON = Compatible<
-  $ReadOnlyArray<{|
-    +interval: Interval,
-    // TODO: Serializing floats as strings is space-inefficient. We can likely
-    // get space savings if we base64 encode a byte representation of the
-    // floats.
-    +cred: $ReadOnlyArray<number>,
-    +forwardFlow: $ReadOnlyArray<number>,
-    +backwardFlow: $ReadOnlyArray<number>,
-    +seedFlow: $ReadOnlyArray<number>,
-    +syntheticLoopFlow: $ReadOnlyArray<number>,
-  |}>
->;
-
-export function toJSON(s: TimelineCredScores): TimelineCredScoresJSON {
-  return toCompat(
-    COMPAT_INFO,
-    s.map(
-      ({
-        interval,
-        cred,
-        forwardFlow,
-        backwardFlow,
-        seedFlow,
-        syntheticLoopFlow,
-      }) => ({
-        interval,
-        cred: Array.from(cred),
-        forwardFlow: Array.from(forwardFlow),
-        backwardFlow: Array.from(backwardFlow),
-        seedFlow: Array.from(seedFlow),
-        syntheticLoopFlow: Array.from(syntheticLoopFlow),
-      })
-    )
-  );
-}
-
-export function fromJSON(j: TimelineCredScoresJSON): TimelineCredScores {
-  const scoreArray = fromCompat(COMPAT_INFO, j);
-  return scoreArray.map(
-    ({
-      cred,
-      interval,
-      forwardFlow,
-      backwardFlow,
-      seedFlow,
-      syntheticLoopFlow,
-    }) => ({
-      cred: new Float64Array(cred),
-      forwardFlow: new Float64Array(forwardFlow),
-      backwardFlow: new Float64Array(backwardFlow),
-      seedFlow: new Float64Array(seedFlow),
-      syntheticLoopFlow: new Float64Array(syntheticLoopFlow),
-      interval,
-    })
   );
 }
