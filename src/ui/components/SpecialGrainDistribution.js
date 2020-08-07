@@ -44,7 +44,7 @@ export const SpecialGrainDistribution = ({ledger, setLedger}: Props) => {
       const nextLedger = ledger.distributeGrain(distribution);
       setLedger(nextLedger);
       setAmount(fromInteger(0));
-      setMemo("");
+      setRecipient(null);
     }
   };
 
@@ -95,7 +95,13 @@ export const SpecialGrainDistribution = ({ledger, setLedger}: Props) => {
             type="number"
             name="timestamp"
             value={credTimestamp}
-            onChange={(e) => setCredTimestamp(e.currentTarget.value)}
+            onChange={(e) => {
+              const newTimestamp = +e.currentTarget.value;
+              if (!Number.isFinite(newTimestamp)) {
+                throw new Error(`invalid timestamp: ${e.currentTarget.value}`);
+              }
+              setCredTimestamp(newTimestamp);
+            }}
           />
         </p>
         <input
