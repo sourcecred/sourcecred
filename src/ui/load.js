@@ -16,7 +16,7 @@ export type LoadFailure = {|+type: "FAILURE", +error: any|};
 export async function load(): Promise<LoadResult> {
   const queries = [
     fetch("output/credResult.json"),
-    fetch("/sourcecred.json"),
+    fetch("sourcecred.json"),
     fetch("data/ledger.json"),
   ];
   const responses = await Promise.all(queries);
