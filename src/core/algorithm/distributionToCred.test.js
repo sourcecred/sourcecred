@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress} from "../graph";
-import {distributionToCred, toJSON, fromJSON} from "./distributionToCred";
+import {distributionToCred} from "./distributionToCred";
 
 describe("src/core/algorithm/distributionToCred", () => {
   const na = (...parts) => NodeAddress.fromParts(parts);
@@ -235,89 +235,6 @@ describe("src/core/algorithm/distributionToCred", () => {
 
     it("returns empty CredScores if no intervals are present", () => {
       expect(distributionToCred([], [], [])).toEqual([]);
-    });
-  });
-  describe("to/from JSON", () => {
-    const exampleCred = () => {
-      const ds = [
-        {
-          interval: {startTimeMs: 0, endTimeMs: 10},
-          intervalWeight: 2,
-          distribution: new Float64Array([0.5, 0.5]),
-          backwardFlow: new Float64Array([]),
-          forwardFlow: new Float64Array([]),
-          seedFlow: new Float64Array([0.5, 0.5]),
-          syntheticLoopFlow: new Float64Array([0, 0]),
-        },
-        {
-          interval: {startTimeMs: 10, endTimeMs: 20},
-          intervalWeight: 10,
-          distribution: new Float64Array([0.9, 0.1]),
-          backwardFlow: new Float64Array([]),
-          forwardFlow: new Float64Array([]),
-          seedFlow: new Float64Array([0.9, 0.1]),
-          syntheticLoopFlow: new Float64Array([0, 0]),
-        },
-      ];
-      const nodeOrder = [na("foo"), na("bar")];
-      return distributionToCred(ds, nodeOrder, [na("bar")]);
-    };
-    it("satisfies round-trip equality", () => {
-      const json = toJSON(exampleCred());
-      const result = fromJSON(json);
-      expect(result).toEqual(exampleCred());
-    });
-    it("snapshots as expected", () => {
-      expect(toJSON(exampleCred())).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "type": "sourcecred/timelineCredScores",
-            "version": "0.2.0",
-          },
-          Array [
-            Object {
-              "backwardFlow": Array [],
-              "cred": Array [
-                2,
-                2,
-              ],
-              "forwardFlow": Array [],
-              "interval": Object {
-                "endTimeMs": 10,
-                "startTimeMs": 0,
-              },
-              "seedFlow": Array [
-                2,
-                2,
-              ],
-              "syntheticLoopFlow": Array [
-                0,
-                0,
-              ],
-            },
-            Object {
-              "backwardFlow": Array [],
-              "cred": Array [
-                90,
-                10,
-              ],
-              "forwardFlow": Array [],
-              "interval": Object {
-                "endTimeMs": 20,
-                "startTimeMs": 10,
-              },
-              "seedFlow": Array [
-                90,
-                10,
-              ],
-              "syntheticLoopFlow": Array [
-                0,
-                0,
-              ],
-            },
-          ],
-        ]
-      `);
     });
   });
 });
