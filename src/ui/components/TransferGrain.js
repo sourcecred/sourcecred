@@ -9,9 +9,7 @@ import {
   gt,
   fromInteger,
   fromFloatString,
-  type Grain,
 } from "../../ledger/grain";
-import {type Identity} from "../../ledger/identity";
 import {Ledger, type Account} from "../../ledger/ledger";
 import AccountDropdown from "./AccountSelector";
 
@@ -74,36 +72,37 @@ const useStyles = makeStyles({
 
 export const TransferGrain = ({ledger, setLedger}: Props) => {
   const classes = useStyles();
-  const [sourceIdentity, setSourceIdentity] = useState<Identity | null>(null);
-  const [sourceBalance, setSourceBalance] = useState<Grain>(fromInteger(0));
-  const [destIdentity, setDestIdentity] = useState<Identity | null>(null);
-  const [destBalance, setDestBalance] = useState<Grain>(fromInteger(0));
+  const [sourceAccount, setSourceAccount] = useState<Account | null>(null);
+  const [destAccount, setDestAccount] = useState<Account | null>(null);
   const [amount, setAmount] = useState<string>("0");
   const [memo, setMemo] = useState<string>("");
 
   const setSender = (acct: Account | null) => {
-    setSourceBalance(acct ? acct.balance : fromInteger(0));
-    setSourceIdentity(acct ? acct.identity : null);
+    setSourceAccount(acct);
   };
 
   const setReceiver = (acct: Account | null) => {
-    setDestBalance(acct ? acct.balance : fromInteger(0));
-    setDestIdentity(acct ? acct.identity : null);
+    setDestAccount(acct);
   };
 
   const submitTransfer = (e) => {
     e.preventDefault();
-    if (sourceIdentity && destIdentity) {
+    if (
+      sourceAccount &&
+      sourceAccount.identity &&
+      destAccount &&
+      destAccount.identity
+    ) {
       const nextLedger = ledger.transferGrain({
-        from: sourceIdentity.id,
-        to: destIdentity.id,
+        from: sourceAccount.identity.id,
+        to: destAccount.identity.id,
         amount: fromFloatString(amount),
         memo: memo,
       });
       setLedger(nextLedger);
       setAmount(fromInteger(0));
-      setSender(nextLedger.account(sourceIdentity.id));
-      setReceiver(nextLedger.account(destIdentity.id));
+      setSender(nextLedger.account(sourceAccount.identity.id));
+      setReceiver(nextLedger.account(destAccount.identity.id));
       setMemo("");
     }
   };
@@ -122,7 +121,6 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
               ledger={ledger}
               setCurrentIdentity={setSender}
               placeholder="From..."
-              balance={sourceBalance}
             />
           </div>
           <div className={`${classes.centerRow} ${classes.third}`}>
@@ -140,7 +138,9 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
                 />
               </div>
               <span>
-                {sourceIdentity && ` max: ${format(sourceBalance, 2)}`}
+                {sourceAccount &&
+                  sourceAccount.identity &&
+                  ` max: ${format(sourceAccount.balance, 2)}`}
               </span>
             </div>
             <div className={classes.triangle} />
@@ -152,7 +152,6 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
               ledger={ledger}
               setCurrentIdentity={setReceiver}
               placeholder="To..."
-              balance={destBalance}
             />
           </div>
         </div>
@@ -175,8 +174,13 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
             type="submit"
             disabled={
               !Number(amount) ||
-              !(sourceIdentity && destIdentity) ||
-              gt(fromFloatString(amount), sourceBalance)
+              !(
+                sourceAccount &&
+                sourceAccount.identity &&
+                destAccount &&
+                destAccount.identity
+              ) ||
+              gt(fromFloatString(amount), sourceAccount.balance)
             }
           >
             transfer grain

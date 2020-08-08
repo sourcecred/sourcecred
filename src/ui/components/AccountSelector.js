@@ -3,7 +3,7 @@
 import React, {useState} from "react";
 import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
 import {TextField} from "@material-ui/core";
-import {format, fromInteger, type Grain} from "../../ledger/grain";
+import {format, fromInteger} from "../../ledger/grain";
 import {Autocomplete} from "@material-ui/lab";
 import {Ledger, type Account} from "../../ledger/ledger";
 
@@ -11,7 +11,6 @@ type DropdownProps = {|
   +ledger: Ledger,
   +setCurrentIdentity: (Account | null) => void,
   +placeholder?: string,
-  +balance?: Grain,
 |};
 
 const theme = createMuiTheme({
@@ -26,7 +25,6 @@ export default function AccountDropdown({
   placeholder,
   setCurrentIdentity,
   ledger,
-  balance,
 }: DropdownProps) {
   const items = ledger.accounts().filter((a) => a.active);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
@@ -57,9 +55,11 @@ export default function AccountDropdown({
         onChange={onComboChange}
         fullWidth
         options={items}
-        getOptionLabel={(item) => {
+        getOptionLabel={(item: Account) => {
           const balStr = format(
-            balance !== fromInteger(0) && balance ? balance : item.balance,
+            selectedAccount && selectedAccount.balance !== fromInteger(0)
+              ? selectedAccount.balance
+              : item.balance,
             2
           );
           return `${item.identity.name} (${balStr})`;
