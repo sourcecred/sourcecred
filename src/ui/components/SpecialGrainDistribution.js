@@ -66,7 +66,7 @@ export const SpecialGrainDistribution = ({ledger, setLedger}: Props) => {
         <label>Recipient</label>
         <AccountDropdown
           ledger={ledger}
-          setCurrentIdentity={setRecipientFromAccount}
+          setCurrentAccount={setRecipientFromAccount}
         />
         <p>
           <label htmlFor="amount">Amount</label> <br />

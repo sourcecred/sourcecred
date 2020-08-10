@@ -1,51 +1,46 @@
 // @flow
-
 import React from "react";
-import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
+import {makeStyles} from "@material-ui/core/styles";
 import {TextField} from "@material-ui/core";
-import {format} from "../../ledger/grain";
 import {Autocomplete} from "@material-ui/lab";
 import {Ledger, type Account} from "../../ledger/ledger";
 
 type DropdownProps = {|
   +ledger: Ledger,
-  +setCurrentIdentity: (Account | null) => void,
+  +setCurrentAccount: (Account | null) => void,
   +placeholder?: string,
 |};
 
-const theme = createMuiTheme({
-  overrides: {
-    // Name of the rule
-    text: {
-      // Some CSS
-      color: "black",
-    },
-  },
-});
+const useStyles = makeStyles({combobox: {margin: "0px 16px 16px"}});
 
 export default function AccountDropdown({
   placeholder,
-  setCurrentIdentity,
+  setCurrentAccount,
   ledger,
 }: DropdownProps) {
+  const classes = useStyles();
   const items = ledger.accounts().filter((a) => a.active);
 
-  const onComboChange = (e, inputObj) => setCurrentIdentity(inputObj);
-
   return (
-    <ThemeProvider theme={theme}>
-      <Autocomplete
-        onChange={onComboChange}
-        fullWidth
-        options={items}
-        getOptionLabel={(item) =>
-          `${item.identity.name} (${format(item.balance, 2)})`
-        }
-        style={{margin: "20px"}}
-        renderInput={(params) => (
-          <TextField fullWidth {...params} label={placeholder} />
-        )}
-      />
-    </ThemeProvider>
+    <Autocomplete
+      size="medium"
+      className={classes.combobox}
+      onChange={(...args) => {
+        const [, inputObj] = args;
+        setCurrentAccount(inputObj);
+      }}
+      fullWidth
+      options={items}
+      getOptionLabel={(item: Account) => item.identity.name}
+      renderInput={(params) => (
+        <TextField
+          size="large"
+          fullWidth
+          {...params}
+          InputProps={{...params.InputProps, disableUnderline: true}}
+          label={placeholder}
+        />
+      )}
+    />
   );
 }
