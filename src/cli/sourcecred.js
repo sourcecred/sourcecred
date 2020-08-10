@@ -8,7 +8,7 @@ import graph from "./graph";
 import score from "./score";
 import site from "./site";
 import go from "./go";
-import admin from "./admin";
+import serve from "./serve";
 import grain from "./grain";
 import help from "./help";
 
@@ -34,8 +34,8 @@ const sourcecred: Command = async (args, std) => {
       return site(args.slice(1), std);
     case "go":
       return go(args.slice(1), std);
-    case "admin":
-      return admin(args.slice(1), std);
+    case "serve":
+      return serve(args.slice(1), std);
     case "grain":
       return grain(args.slice(1), std);
     default:
