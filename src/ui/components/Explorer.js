@@ -204,8 +204,6 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           padding: "0 5em 5em",
         }}
       >
-        <h1>Nodes: {view.nodes().length}</h1>
-        <h1>Edges: {view.edges().length}</h1>
         {this.renderConfigurationRow()}
         {recalculating ? <h1>Recalculating...</h1> : ""}
         <table
