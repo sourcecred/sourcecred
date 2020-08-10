@@ -23,7 +23,7 @@ export const GrainAccountOverview = (props: Props) => {
     if (a.balance === b.balance) {
       return 0;
     }
-    return G.gt(a.balance, b.balance) ? -1 : 1;
+    return G.gt(a.paid, b.paid) ? -1 : 1;
   }
 
   const sortedAccounts = accounts.slice().sort(comparator);
