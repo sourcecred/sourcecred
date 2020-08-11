@@ -88,6 +88,14 @@ describe("plugins/discourse/createGraph", () => {
     topicById() {
       throw new Error("Method topicById should be unused by createGraph");
     }
+    postById(id: PostId): ?Post {
+      for (const p of this._posts) {
+        if (p.id === id) {
+          return p;
+        }
+      }
+      return null;
+    }
   }
 
   function example() {
@@ -467,6 +475,9 @@ describe("plugins/discourse/createGraph", () => {
         }
         topicById() {
           throw new Error("Method topicById should be unused by createGraph");
+        }
+        postById() {
+          return null;
         }
       }
       const url = "https://example.com";
