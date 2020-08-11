@@ -86,11 +86,7 @@ export function _createGraphData(
   serverUrl: string,
   repo: ReadRepository
 ): GraphData {
-  const usernameToTrustLevel = new Map();
-  const users = repo.users().map(({username, trustLevel}) => {
-    usernameToTrustLevel.set(username, trustLevel);
-    return NE.userNode(serverUrl, username);
-  });
+  const users = repo.users().map((u) => NE.userNode(serverUrl, u.username));
 
   const topicIdToTitle = new Map();
   const topics: $ReadOnlyArray<GraphTopic> = repo.topics().map((topic) => {
@@ -137,8 +133,8 @@ export function _createGraphData(
     const node = NE.likeNode(serverUrl, like, postDescription);
     const createsLike = NE.createsLikeEdge(serverUrl, like);
     const likes = NE.likesEdge(serverUrl, like);
-    const userTrustLevel = usernameToTrustLevel.get(like.username);
-    const weight = weightForTrustLevel(userTrustLevel);
+    const user = repo.findUser(like.username);
+    const weight = weightForTrustLevel(user != null ? user.trustLevel : null);
     return {node, createsLike, likes, weight};
   });
   return {users, topics, posts, likes};
