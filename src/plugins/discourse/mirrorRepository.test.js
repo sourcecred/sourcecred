@@ -26,7 +26,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     expect(fs.readFileSync(filename).toJSON()).toEqual(data);
   });
 
-  it("findUsername does a case-insensitive query", () => {
+  it("findUser does a case-insensitive query", () => {
     // Given
     const db = new Database(":memory:");
     const url = "http://example.com";
@@ -34,13 +34,13 @@ describe("plugins/discourse/mirrorRepository", () => {
     const repository = new SqliteMirrorRepository(db, url);
 
     // When
-    repository.addOrReplaceUser({username, trustLevel: 3});
-    const result1 = repository.findUsername("pascalfan1988");
-    const result2 = repository.findUsername(username);
+    const user = {username, trustLevel: 3};
+    repository.addOrReplaceUser(user);
 
     // Then
-    expect(result1).toEqual(username);
-    expect(result2).toEqual(username);
+    expect(repository.findUser(username.toLowerCase())).toEqual(user);
+    expect(repository.findUser(username)).toEqual(user);
+    expect(repository.findUser("nonexistent")).toEqual(null);
   });
 
   it("bumpedMsForTopic finds an existing topic's bumpedMs", () => {
@@ -324,7 +324,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     // When
     repository.addTopic(topic);
     repository.addPost(p1);
-    const postingUser = repository.findUserbyUsername("crunkle");
+    const postingUser = repository.findUser("crunkle");
 
     // Then
     expect(postingUser).toEqual({username: "crunkle", trustLevel: 3});
@@ -364,7 +364,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     repository.addPost(p1);
     repository.addLike(l1);
     const likes = repository.likes();
-    const likingUser = repository.findUserbyUsername("crunkle");
+    const likingUser = repository.findUser("crunkle");
 
     // Then
     expect(likes).toEqual([l1]);
@@ -415,7 +415,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     repository.addPost(p1);
     repository.addPost(p2);
     repository.addLike(l1);
-    const likingUser = repository.findUserbyUsername("crunkle");
+    const likingUser = repository.findUser("crunkle");
 
     // Then
     expect(likingUser).toEqual({username: "crunkle", trustLevel: 2});

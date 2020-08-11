@@ -49,11 +49,11 @@ export interface ReadRepository {
   likes(): $ReadOnlyArray<LikeAction>;
 
   /**
-   * Gets the username of a user, if it exists.
+   * Gets the user with a given name, if they exist.
    *
    * Note: input username is case-insensitive.
    */
-  findUsername(username: string): ?string;
+  findUser(username: string): ?User;
 
   /**
    * Gets a Topic by ID.
@@ -386,7 +386,7 @@ export class SqliteMirrorRepository
       }));
   }
 
-  findUserbyUsername(username: string): ?User {
+  findUser(username: string): ?User {
     const user = this._db
       .prepare(
         dedent`\
@@ -396,20 +396,10 @@ export class SqliteMirrorRepository
         `
       )
       .get({username});
+    if (user == null) {
+      return null;
+    }
     return {username: user.username, trustLevel: user.trust_level};
-  }
-
-  findUsername(username: string): ?string {
-    return this._db
-      .prepare(
-        dedent`\
-          SELECT username
-          FROM users
-          WHERE username = :username COLLATE NOCASE
-        `
-      )
-      .pluck()
-      .get({username});
   }
 
   likes(): $ReadOnlyArray<LikeAction> {

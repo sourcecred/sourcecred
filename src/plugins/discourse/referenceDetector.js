@@ -47,9 +47,9 @@ export class DiscourseReferenceDetector implements ReferenceDetector {
       case "USER": {
         // Look up the username to validate it exists, and make sure we use
         // the result. As this should correct our capitalization. See #1479.
-        const username = this.data.findUsername(reference.username);
-        if (username) {
-          return userAddress(reference.serverUrl, username);
+        const user = this.data.findUser(reference.username);
+        if (user) {
+          return userAddress(reference.serverUrl, user.username);
         }
         break;
       }
