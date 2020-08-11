@@ -488,6 +488,41 @@ describe("plugins/discourse/createGraph", () => {
       // the problematic null case.
       expect(seenTrustLevels).toEqual(new Set([null, 0, 2, 3]));
     });
+    it("creates hasLikedPost edges from topics to posts", () => {
+      const {repo, data, likes, url} = example();
+      const postLikeWeight = {};
+      for (const post of repo.posts()) {
+        postLikeWeight[post.id] = 0;
+      }
+      likes.forEach((like) => {
+        const user = repo.findUser(like.username);
+        const trustLevel = user == null ? null : user.trustLevel;
+        const weight = weightForTrustLevel(trustLevel);
+        postLikeWeight[like.postId] += weight;
+      });
+      const expectedTopicHasLikedPosts = [];
+      for (const post of repo.posts()) {
+        if (postLikeWeight[post.id] > 0) {
+          const edge = NE.topicHasLikedPostEdge(url, post);
+          const weight = postLikeWeight[post.id];
+          expectedTopicHasLikedPosts.push({edge, weight});
+        }
+      }
+      expect(data.topicHasLikedPosts).toEqual(expectedTopicHasLikedPosts);
+      expect(expectedTopicHasLikedPosts).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "edge": Object {
+              "address": "E sourcecred discourse topicHasLikedPost https://url.com 1 3 ",
+              "dst": "N sourcecred discourse post https://url.com 3 ",
+              "src": "N sourcecred discourse topic https://url.com 1 ",
+              "timestampMs": 1,
+            },
+            "weight": 2.25,
+          },
+        ]
+      `);
+    });
   });
 
   describe("_graphFromData", () => {
@@ -505,6 +540,7 @@ describe("plugins/discourse/createGraph", () => {
         topics: [],
         posts: [],
         likes: [graphLike],
+        topicHasLikedPosts: [],
       };
       const {weights, graph} = _graphFromData(data);
       const expectedGraph = new Graph()
@@ -513,6 +549,16 @@ describe("plugins/discourse/createGraph", () => {
         .addEdge(graphLike.likes);
       expect(expectedGraph.equals(graph)).toBe(true);
       expect(weights.nodeWeights.get(graphLike.node.address)).toEqual(0.33);
+    });
+    it("creates topicHasLikedPosts edges with the right weights", () => {
+      const {graph, weights, data} = example();
+      const {topicHasLikedPosts} = data;
+      const {edge, weight} = topicHasLikedPosts[0];
+      expect(graph.edge(edge.address)).toEqual(edge);
+      expect(weights.edgeWeights.get(edge.address)).toEqual({
+        forwards: weight,
+        backwards: 0,
+      });
     });
   });
 });

@@ -49,6 +49,15 @@ export const topicContainsPostEdgeType: EdgeType = deepFreeze({
   description: "Connects a topic to the posts that it contains.",
 });
 
+export const topicHasLikedPostEdgeType: EdgeType = deepFreeze({
+  forwardName: "has post with likes",
+  backwardName: "is liked post within topic",
+  prefix: EdgeAddress.append(edgePrefix, "topicHasLikedPost"),
+  defaultWeight: {forwards: 1, backwards: 0},
+  description:
+    "Connects a topic to posts with likes, with weight proportional to the number of likes",
+});
+
 export const postRepliesEdgeType: EdgeType = deepFreeze({
   forwardName: "post is reply to",
   backwardName: "post replied to by",
@@ -123,6 +132,7 @@ export const declaration: PluginDeclaration = deepFreeze({
     authorsTopicEdgeType,
     authorsPostEdgeType,
     topicContainsPostEdgeType,
+    topicHasLikedPostEdgeType,
     likesEdgeType,
     createsLikeEdgeType,
     referencesPostEdgeType,
