@@ -261,6 +261,40 @@ describe("plugins/discourse/mirrorRepository", () => {
     // Then
     expect(actualT1).toEqual(topic1);
     expect(actualT2).toEqual(topic2);
+    expect(repository.topicById(1337)).toEqual(null);
+  });
+
+  it("topicById gets the matching topics", () => {
+    // Given
+    const db = new Database(":memory:");
+    const url = "http://example.com";
+    const repository = new SqliteMirrorRepository(db, url);
+    const topic: Topic = {
+      id: 123,
+      categoryId: 42,
+      title: "Sample topic 1",
+      timestampMs: 456789,
+      bumpedMs: 456999,
+      authorUsername: "credbot",
+    };
+    const post: Post = {
+      id: 100,
+      topicId: 123,
+      indexWithinTopic: 0,
+      replyToPostIndex: null,
+      timestampMs: 456789,
+      authorUsername: "credbot",
+      cooked: "<p>Valid post</p>",
+      trustLevel: 3,
+    };
+
+    // When
+    repository.addTopic(topic);
+    repository.addPost(post);
+
+    // Then
+    expect(repository.postById(post.id)).toEqual(post);
+    expect(repository.postById(1337)).toEqual(null);
   });
 
   it("on addPost, user trustLevel is equal to post trustLevel", () => {

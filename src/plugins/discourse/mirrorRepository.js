@@ -59,6 +59,11 @@ export interface ReadRepository {
    * Gets a Topic by ID.
    */
   topicById(id: TopicId): ?Topic;
+
+  /**
+   * Gets a Post by ID.
+   */
+  postById(id: PostId): ?Post;
 }
 
 export type SyncHeads = {|
@@ -335,6 +340,40 @@ export class SqliteMirrorRepository
         replyToPostIndex: x.reply_to_post_index,
         cooked: x.cooked,
       }));
+  }
+
+  postById(id: PostId): ?Post {
+    const res = this._db
+      .prepare(
+        dedent`\
+        SELECT
+          id,
+          timestamp_ms,
+          author_username,
+          topic_id,
+          trust_level,
+          index_within_topic,
+          reply_to_post_index,
+          cooked
+        FROM posts
+        WHERE id = :id`
+      )
+      .get({id});
+
+    if (!res) {
+      return null;
+    }
+
+    return {
+      id: res.id,
+      timestampMs: res.timestamp_ms,
+      authorUsername: res.author_username,
+      topicId: res.topic_id,
+      trustLevel: res.trust_level,
+      indexWithinTopic: res.index_within_topic,
+      replyToPostIndex: res.reply_to_post_index,
+      cooked: res.cooked,
+    };
   }
 
   users(): $ReadOnlyArray<User> {
