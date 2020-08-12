@@ -45,7 +45,7 @@ export const topicContainsPostEdgeType: EdgeType = deepFreeze({
   forwardName: "contains post",
   backwardName: "is contained by topic",
   prefix: EdgeAddress.append(edgePrefix, "topicContainsPost"),
-  defaultWeight: {forwards: 0, backwards: 1 / 8},
+  defaultWeight: {forwards: 1 / 8, backwards: 1},
   description: "Connects a topic to the posts that it contains.",
 });
 
@@ -62,7 +62,7 @@ export const postRepliesEdgeType: EdgeType = deepFreeze({
   forwardName: "post is reply to",
   backwardName: "post replied to by",
   prefix: EdgeAddress.append(edgePrefix, "replyTo"),
-  defaultWeight: {forwards: 1 / 2, backwards: 0},
+  defaultWeight: {forwards: 1, backwards: 0},
   description: "Connects a post to the post that it is a reply to.",
 });
 
@@ -70,7 +70,7 @@ export const authorsTopicEdgeType: EdgeType = deepFreeze({
   forwardName: "authors topic",
   backwardName: "topic is authored by",
   prefix: EdgeAddress.append(edgePrefix, "authors", "topic"),
-  defaultWeight: {forwards: 0, backwards: 1},
+  defaultWeight: {forwards: 0, backwards: 0},
   description: "Connects an author to a topic they created.",
 });
 
@@ -78,7 +78,7 @@ export const authorsPostEdgeType: EdgeType = deepFreeze({
   forwardName: "authors post",
   backwardName: "post is authored by",
   prefix: EdgeAddress.append(edgePrefix, "authors", "post"),
-  defaultWeight: {forwards: 0, backwards: 1},
+  defaultWeight: {forwards: 1 / 4, backwards: 1},
   description: "Connects an author to a post they've created.",
 });
 
@@ -118,7 +118,7 @@ export const referencesUserEdgeType: EdgeType = deepFreeze({
   forwardName: "mentions",
   backwardName: "is mentioned by",
   prefix: EdgeAddress.append(edgePrefix, "references", "user"),
-  defaultWeight: {forwards: 1 / 4, backwards: 0},
+  defaultWeight: {forwards: 1 / 2, backwards: 0},
   description: "Connects a Discourse post to a user it mentions",
 });
 
