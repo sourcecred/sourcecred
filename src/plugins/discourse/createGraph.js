@@ -101,18 +101,17 @@ export function _createGraphData(
 ): GraphData {
   const users = repo.users().map((u) => NE.userNode(serverUrl, u.username));
 
-  const topicIdToTitle = new Map();
   const topics: $ReadOnlyArray<GraphTopic> = repo.topics().map((topic) => {
     const node = NE.topicNode(serverUrl, topic);
     const hasAuthor = NE.authorsTopicEdge(serverUrl, topic);
-    topicIdToTitle.set(topic.id, topic.title);
     return {node, hasAuthor};
   });
 
   const findPostInTopic = repo.findPostInTopic.bind(repo);
   const postIdToDescription = new Map();
   const posts: $ReadOnlyArray<GraphPost> = repo.posts().map((post) => {
-    const topicTitle = topicIdToTitle.get(post.topicId) || "[unknown topic]";
+    const topic = repo.topicById(post.topicId);
+    const topicTitle = topic != null ? topic.title : "[unknown topic]";
     const url = serverUrl + "/t/" + post.topicId + "/" + post.indexWithinTopic;
     const description = `[#${post.indexWithinTopic} on ${topicTitle}](${url})`;
     postIdToDescription.set(post.id, description);
