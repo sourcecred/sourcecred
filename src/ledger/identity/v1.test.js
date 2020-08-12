@@ -1,11 +1,11 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
-import {fromString as uuidFromString} from "../util/uuid";
-import {NodeAddress} from "../core/graph";
-import {graphNode, type Identity, newIdentity} from "./identity";
+import {fromString as uuidFromString} from "../../util/uuid";
+import {NodeAddress} from "../../core/graph";
+import {graphNode, type Identity, newIdentity} from "./v1";
 
-describe("ledger/identity", () => {
+describe("ledger/identity/v1", () => {
   const example: Identity = deepFreeze(newIdentity("USER", "foo"));
   describe("newIdentity", () => {
     it("new identities don't have aliases", () => {

@@ -1,7 +1,7 @@
 // @flow
 
 import React, {useState} from "react";
-import {type Identity} from "../../ledger/identity";
+import {type IdentityV1} from "../../ledger/identity";
 import {Ledger} from "../../ledger/ledger";
 import {CredView} from "../../analysis/credView";
 import {AliasSelector} from "./AliasSelector";
@@ -14,7 +14,9 @@ export type Props = {|
 
 export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
   const [nextIdentityName, setIdentityName] = useState<string>("");
-  const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
+  const [currentIdentity, setCurrentIdentity] = useState<IdentityV1 | null>(
+    null
+  );
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
 
@@ -38,7 +40,7 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
     setLedger(ledger);
   }
 
-  function toggleIdentityActivation({id}: Identity) {
+  function toggleIdentityActivation({id}: IdentityV1) {
     let nextLedger;
     if (ledger.account(id).active) {
       nextLedger = ledger.deactivate(id);
@@ -51,7 +53,7 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
     setCurrentIdentity(nextLedger.account(id).identity);
   }
 
-  function setActiveIdentity(identity: Identity) {
+  function setActiveIdentity(identity: IdentityV1) {
     const {name} = identity;
     if (currentIdentity && name === currentIdentity.name) {
       setIdentityName("");
@@ -136,7 +138,7 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
   );
 
   function renderIdentities() {
-    function renderIdentity(i: Identity) {
+    function renderIdentity(i: IdentityV1) {
       return (
         <li onClick={() => setActiveIdentity(i)} key={i.id}>
           {i.name}
