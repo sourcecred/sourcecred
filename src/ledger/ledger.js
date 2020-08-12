@@ -11,12 +11,12 @@
 import {
   type IdentityId,
   type Identity,
-  type IdentityName,
+  type Login,
   type IdentitySubtype,
   identityParser,
   newIdentity,
-  identityNameParser,
-  identityNameFromString,
+  loginParser,
+  loginFromString,
   type Alias,
   aliasParser,
 } from "./identity";
@@ -75,7 +75,7 @@ export type Account = $ReadOnly<MutableAccount>;
  */
 export class Ledger {
   _ledgerEventLog: JsonLog<LedgerEvent>;
-  _identityNameToId: Map<IdentityName, IdentityId>;
+  _loginToId: Map<Login, IdentityId>;
   _aliasAddressToIdentity: Map<NodeAddressT, IdentityId>;
   _accounts: Map<IdentityId, MutableAccount>;
   _latestTimestamp: TimestampMs = -Infinity;
@@ -83,7 +83,7 @@ export class Ledger {
 
   constructor() {
     this._ledgerEventLog = new JsonLog();
-    this._identityNameToId = new Map();
+    this._loginToId = new Map();
     this._aliasAddressToIdentity = new Map();
     this._accounts = new Map();
   }
@@ -116,12 +116,12 @@ export class Ledger {
   /**
    * Create an account in the ledger.
    *
-   * This will reserve the identity's identityName, and its innate address.
+   * This will reserve the identity's login, and its innate address.
    *
    * This returns the newly created Identity's ID, so that the caller
    * store it for future reference.
    *
-   * Will fail if the identityName is not valid, or already taken.
+   * Will fail if the login is not valid, or already taken.
    */
   createIdentity(subtype: IdentitySubtype, name: string): IdentityId {
     const identity = newIdentity(subtype, name);
@@ -130,14 +130,12 @@ export class Ledger {
       identity,
     };
     this._createAndProcessEvent(action);
-    return NullUtil.get(this._identityNameToId.get(identity.name));
+    return NullUtil.get(this._loginToId.get(identity.name));
   }
   _createIdentity({identity}: CreateIdentity) {
-    if (this._identityNameToId.has(identity.name)) {
+    if (this._loginToId.has(identity.name)) {
       // This identity already exists; return.
-      throw new Error(
-        `createIdentity: identityName already taken: ${identity.name}`
-      );
+      throw new Error(`createIdentity: login already taken: ${identity.name}`);
     }
     if (identity.aliases.length !== 0) {
       throw new Error(`createIdentity: new identities may not have aliases`);
@@ -151,7 +149,7 @@ export class Ledger {
     }
 
     // Mutations! Method must not fail after this comment.
-    this._identityNameToId.set(identity.name, identity.id);
+    this._loginToId.set(identity.name, identity.id);
     // Reserve this identity's own address
     this._aliasAddressToIdentity.set(identity.address, identity.id);
     // Every identity has a corresponding Account.
@@ -173,7 +171,7 @@ export class Ledger {
     this._createAndProcessEvent({
       type: "RENAME_IDENTITY",
       identityId,
-      newName: identityNameFromString(newName),
+      newName: loginFromString(newName),
     });
     return this;
   }
@@ -189,10 +187,10 @@ export class Ledger {
       // idempotent, since they do add to the ledger logs)
       throw new Error(`renameIdentity: identity already has name ${newName}`);
     }
-    if (this._identityNameToId.has(newName)) {
+    if (this._loginToId.has(newName)) {
       // We already checked that the name is not owned by this identity,
       // so it is a conflict. Fail.
-      throw new Error(`renameIdentity: conflict on identityName ${newName}`);
+      throw new Error(`renameIdentity: conflict on login ${newName}`);
     }
     const updatedIdentity = {
       id: identityId,
@@ -203,8 +201,8 @@ export class Ledger {
     };
 
     // Mutations! Method must not fail after this comment.
-    this._identityNameToId.delete(existingIdentity.name);
-    this._identityNameToId.set(newName, identityId);
+    this._loginToId.delete(existingIdentity.name);
+    this._loginToId.set(newName, identityId);
     account.identity = updatedIdentity;
   }
 
@@ -554,12 +552,12 @@ const createIdentityParser: C.Parser<CreateIdentity> = C.object({
 type RenameIdentity = {|
   +type: "RENAME_IDENTITY",
   +identityId: IdentityId,
-  +newName: IdentityName,
+  +newName: Login,
 |};
 const renameIdentityParser: C.Parser<RenameIdentity> = C.object({
   type: C.exactly(["RENAME_IDENTITY"]),
   identityId: uuid.parser,
-  newName: identityNameParser,
+  newName: loginParser,
 });
 
 type AddAlias = {|

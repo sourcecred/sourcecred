@@ -5,7 +5,7 @@
  *
  * The scope for this data type is to model:
  * - a unique identifier for each identity
- * - a unique (renameable) identityName they choose
+ * - a unique (but changeable) login name they choose
  * - the address of every node they correspond to in the graph
  *
  * Unlike most other state in SourceCred, the Identity state is
@@ -40,19 +40,23 @@ import type {NodeType} from "../analysis/types";
 import type {PluginDeclaration} from "../analysis/pluginDeclaration";
 
 /**
- * We validate identityNames using GitHub-esque rules.
- *
- * IdentityNames are always lower-case.
+ * A Login is an identity name which has the following properties:
+ * - It consists of lowercase alphanumeric ASCII and of dashes, which
+ *   makes it suitable for including in urls (so we can give each contributor
+ *   a hardcoded URL showing their contributions, Cred, and Grain).
+ * - It is unique within an instance.
+ * - It's chosen by (and changeable by) the owner of the identity.
  */
-export opaque type IdentityName: string = string;
-const IDENTITY_NAME_PATTERN = /^[A-Za-z0-9-]+$/;
+export opaque type Login: string = string;
+const LOGIN_PATTERN = /^[A-Za-z0-9-]+$/;
 
 export type IdentitySubtype = "USER" | "PROJECT" | "ORGANIZATION" | "BOT";
 export type IdentityId = Uuid;
 export type Identity = {|
   // UUID, assigned when the identity is created.
   +id: IdentityId,
-  +name: IdentityName,
+  // TODO (@decentralion): Rename this to `login` in the upcoming identity refactor
+  +name: Login,
   +subtype: IdentitySubtype,
   // The identity's own node address.
   +address: NodeAddressT,
@@ -73,7 +77,7 @@ export type Alias = {|
   +address: NodeAddressT,
 |};
 
-export function newIdentity(subtype: IdentitySubtype, name: string): Identity {
+export function newIdentity(subtype: IdentitySubtype, login: string): Identity {
   const id = randomUuid();
   try {
     identitySubtypeParser.parseOrThrow(subtype);
@@ -84,12 +88,12 @@ export function newIdentity(subtype: IdentitySubtype, name: string): Identity {
     id,
     subtype,
     address: NodeAddress.append(IDENTITY_PREFIX, subtype, id),
-    name: identityNameFromString(name),
+    name: loginFromString(login),
     aliases: [],
   };
 }
 
-// It's not in the typical [owner, name] format because it isn't provided by a plugin.
+// It's not in the typical [owner, login] format because it isn't provided by a plugin.
 // Instead, it's a raw type owned by SourceCred project.
 export const IDENTITY_PREFIX = NodeAddress.fromParts([
   "sourcecred",
@@ -98,15 +102,15 @@ export const IDENTITY_PREFIX = NodeAddress.fromParts([
 ]);
 
 /**
- * Parse a IdentityName from a string.
+ * Parse a Login from a string.
  *
- * Throws an error if the identityName is invalid.
+ * Throws an error if the Login is invalid.
  */
-export function identityNameFromString(identityName: string): IdentityName {
-  if (!identityName.match(IDENTITY_NAME_PATTERN)) {
-    throw new Error(`invalid identityName: ${identityName}`);
+export function loginFromString(login: string): Login {
+  if (!login.match(LOGIN_PATTERN)) {
+    throw new Error(`invalid login: ${login}`);
   }
-  return identityName.toLowerCase();
+  return login.toLowerCase();
 }
 
 export function graphNode({name, address}: Identity): GraphNode {
@@ -126,10 +130,7 @@ export function contractions(
   }));
 }
 
-export const identityNameParser: C.Parser<IdentityName> = C.fmap(
-  C.string,
-  identityNameFromString
-);
+export const loginParser: C.Parser<Login> = C.fmap(C.string, loginFromString);
 
 export const identitySubtypeParser: C.Parser<IdentitySubtype> = C.exactly([
   "USER",
@@ -146,7 +147,7 @@ export const aliasParser: C.Parser<Alias> = C.object({
 export const identityParser: C.Parser<Identity> = C.object({
   id: uuidParser,
   subtype: identitySubtypeParser,
-  name: identityNameParser,
+  name: loginParser,
   address: NodeAddress.parser,
   aliases: C.array(aliasParser),
 });

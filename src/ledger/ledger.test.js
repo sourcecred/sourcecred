@@ -113,16 +113,16 @@ describe("ledger/ledger", () => {
           },
         ]);
       });
-      it("throws an error if the identityName is invalid", () => {
+      it("throws an error if the login is invalid", () => {
         const ledger = new Ledger();
         const thunk = () => ledger.createIdentity("USER", "foo bar");
-        failsWithoutMutation(ledger, thunk, "invalid identityName");
+        failsWithoutMutation(ledger, thunk, "invalid login");
       });
-      it("throws an error if the identityName is taken", () => {
+      it("throws an error if the login is taken", () => {
         const ledger = new Ledger();
         ledger.createIdentity("USER", "foo");
         const thunk = () => ledger.createIdentity("USER", "foo");
-        failsWithoutMutation(ledger, thunk, "identityName already taken");
+        failsWithoutMutation(ledger, thunk, "login already taken");
       });
       it("throws an error given an identity with aliases", () => {
         const ledger = new Ledger();
@@ -195,7 +195,7 @@ describe("ledger/ledger", () => {
           "renameIdentity: no identity matches id"
         );
       });
-      it("fails on identityName conflict", () => {
+      it("fails on login conflict", () => {
         const ledger = new Ledger();
         const fooId = ledger.createIdentity("USER", "foo");
         ledger.createIdentity("USER", "bar");
@@ -203,14 +203,14 @@ describe("ledger/ledger", () => {
         failsWithoutMutation(
           ledger,
           thunk,
-          "renameIdentity: conflict on identityName bar"
+          "renameIdentity: conflict on login bar"
         );
       });
-      it("fails on invalid identityName", () => {
+      it("fails on invalid login", () => {
         const ledger = new Ledger();
         const fooId = ledger.createIdentity("USER", "foo");
         const thunk = () => ledger.renameIdentity(fooId, "foo bar");
-        failsWithoutMutation(ledger, thunk, "invalid identityName");
+        failsWithoutMutation(ledger, thunk, "invalid login");
       });
     });
 
