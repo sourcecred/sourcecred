@@ -10,16 +10,15 @@
  */
 import {
   type IdentityId,
-  type Identity,
   type Login,
-  type IdentitySubtype,
-  identityParser,
-  newIdentity,
+  type IdentityType,
   loginParser,
   loginFromString,
   type Alias,
   aliasParser,
+  type IdentityV1,
 } from "./identity";
+import {newIdentity, parser as identityParser} from "./identity/v1";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
@@ -33,7 +32,7 @@ import * as C from "../util/combo";
  * Every Identity in the ledger has an Account.
  */
 type MutableAccount = {|
-  identity: Identity,
+  identity: IdentityV1,
   // The current Grain balance of this account
   balance: G.Grain,
   // The amount of Grain this account has received in past Distributions
@@ -123,7 +122,7 @@ export class Ledger {
    *
    * Will fail if the login is not valid, or already taken.
    */
-  createIdentity(subtype: IdentitySubtype, name: string): IdentityId {
+  createIdentity(subtype: IdentityType, name: string): IdentityId {
     const identity = newIdentity(subtype, name);
     const action = {
       type: "CREATE_IDENTITY",
@@ -542,7 +541,7 @@ type Action =
 
 type CreateIdentity = {|
   +type: "CREATE_IDENTITY",
-  +identity: Identity,
+  +identity: IdentityV1,
 |};
 const createIdentityParser: C.Parser<CreateIdentity> = C.object({
   type: C.exactly(["CREATE_IDENTITY"]),
