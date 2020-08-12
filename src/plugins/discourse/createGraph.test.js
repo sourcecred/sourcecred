@@ -6,12 +6,10 @@ import type {ReadRepository} from "./mirrorRepository";
 import type {Topic, Post, PostId, TopicId, LikeAction, User} from "./fetch";
 import {EdgeAddress, type Node, type Edge, Graph} from "../../core/graph";
 import {
-  createGraph,
   _createReferenceEdges,
   weightForTrustLevel,
   _createGraphData,
   _graphFromData,
-  DEFAULT_TRUST_LEVEL_TO_WEIGHT,
 } from "./createGraph";
 import * as NE from "./nodesAndEdges";
 
@@ -35,7 +33,7 @@ import {
 import type {EdgeType, NodeType} from "../../analysis/types";
 
 describe("plugins/discourse/createGraph", () => {
-  class MockData implements ReadRepository {
+  class MockRepository implements ReadRepository {
     _topics: $ReadOnlyArray<Topic>;
     _posts: $ReadOnlyArray<Post>;
     _likes: $ReadOnlyArray<LikeAction>;
@@ -52,20 +50,26 @@ describe("plugins/discourse/createGraph", () => {
       return this._posts;
     }
     users(): $ReadOnlyArray<User> {
-      const users = [];
-      const userNames = new Set();
+      const usernames = new Set();
+      const trustLevels: Map<string, number> = new Map();
 
-      for (const {authorUsername} of this.posts()) {
-        userNames.add(authorUsername);
-        users.push({username: authorUsername, trustLevel: 3});
+      for (const {authorUsername, trustLevel} of this.posts()) {
+        usernames.add(authorUsername);
+        trustLevels.set(authorUsername, trustLevel);
       }
       for (const {authorUsername} of this.topics()) {
-        if (!userNames.has(authorUsername)) {
-          userNames.add(authorUsername);
-          users.push({username: authorUsername, trustLevel: 3});
-        }
+        usernames.add(authorUsername);
       }
-      return users;
+      for (const {username} of this.likes()) {
+        usernames.add(username);
+      }
+      return Array.from(usernames).map((username) => {
+        const trustLevel = trustLevels.get(username);
+        return {
+          username,
+          trustLevel: trustLevel === undefined ? null : trustLevel,
+        };
+      });
     }
     likes(): $ReadOnlyArray<LikeAction> {
       return this._likes;
@@ -82,7 +86,7 @@ describe("plugins/discourse/createGraph", () => {
         maxTopicId: this._topics.reduce((max, t) => Math.max(t.id, max), 0),
       };
     }
-    findUser(username: string) {
+    findUser(username: string): ?User {
       for (const user of this.users()) {
         if (user.username === username) {
           return user;
@@ -90,8 +94,13 @@ describe("plugins/discourse/createGraph", () => {
       }
       return null;
     }
-    topicById() {
-      throw new Error("Method topicById should be unused by createGraph");
+    topicById(id: TopicId): ?Topic {
+      for (const topic of this.topics()) {
+        if (topic.id === id) {
+          return topic;
+        }
+      }
+      return null;
     }
     postById(id: PostId): ?Post {
       for (const p of this._posts) {
@@ -146,7 +155,7 @@ describe("plugins/discourse/createGraph", () => {
       timestampMs: 1,
       authorUsername: "wchargin",
       cooked: "<h1>Hello</h1>",
-      trustLevel: 3,
+      trustLevel: 2,
     };
     const post3 = {
       id: 3,
@@ -156,28 +165,43 @@ describe("plugins/discourse/createGraph", () => {
       timestampMs: 1,
       authorUsername: "mzargham",
       cooked: "<h1>Hello</h1>",
-      trustLevel: 3,
+      trustLevel: 0,
     };
     const likes: $ReadOnlyArray<LikeAction> = [
       {timestampMs: 3, username: "mzargham", postId: 2},
       {timestampMs: 4, username: "decentralion", postId: 3},
+      {timestampMs: 4, username: "wchargin", postId: 3},
+      // The mystery-user will have null trust level
+      {timestampMs: 5, username: "mystery-user", postId: 3},
     ];
     const posts = [post1, post2, post3];
-    const data = new MockData([topic], [post1, post2, post3], likes);
-    const {graph} = createGraph(url, data);
-    return {graph, topic, url, posts, likes};
+    const repo = new MockRepository([topic], [post1, post2, post3], likes);
+    const data = _createGraphData(url, repo);
+    const {graph, weights} = _graphFromData(data);
+    return {graph, weights, repo, data, topic, url, posts, likes};
   }
+
+  it("MockRepository trust levels are correct", () => {
+    const {repo} = example();
+    const decentralion = {username: "decentralion", trustLevel: 3};
+    const wchargin = {username: "wchargin", trustLevel: 2};
+    const mzargham = {username: "mzargham", trustLevel: 0};
+    const mystery = {username: "mystery-user", trustLevel: null};
+    expect(repo.findUser("decentralion")).toEqual(decentralion);
+    expect(repo.findUser("wchargin")).toEqual(wchargin);
+    expect(repo.findUser("mzargham")).toEqual(mzargham);
+    expect(repo.findUser("mystery-user")).toEqual(mystery);
+    expect(repo.users()).toEqual([decentralion, wchargin, mzargham, mystery]);
+  });
 
   describe("nodes are constructed correctly", () => {
     it("gives an [unknown post] description for likes without a matching post", () => {
-      const {likes} = example();
-      const like = likes[0];
-      const data = new MockData([], [], [like]);
+      const like = {timestampMs: 5, username: "mystery-user", postId: 9999};
+      const repo = new MockRepository([], [], [like]);
       const url = "https://foo";
-      const {graph} = createGraph(url, data);
-      const actual = Array.from(graph.nodes())[0];
-      const expected = NE.likeNode(url, like, "[unknown post]");
-      expect(actual).toEqual(expected);
+      const data = _createGraphData(url, repo);
+      const expectedNode = NE.likeNode(url, like, "[unknown post]");
+      expect(data.likes[0].node).toEqual(expectedNode);
     });
 
     it("gives an [unknown topic] description for posts without a matching topic", () => {
@@ -191,16 +215,15 @@ describe("plugins/discourse/createGraph", () => {
         cooked: "<h1>Hello</h1>",
         trustLevel: 3,
       };
-      const data = new MockData([], [post], []);
+      const repo = new MockRepository([], [post], []);
       const url = "https://foo";
-      const {graph} = createGraph(url, data);
+      const data = _createGraphData(url, repo);
       const postUrl = `${url}/t/${String(post.topicId)}/${String(
         post.indexWithinTopic
       )}`;
       const expectedDescription = `[#${post.indexWithinTopic} on [unknown topic]](${postUrl})`;
-      const actual = Array.from(graph.nodes({prefix: postNodeType.prefix}))[0];
-      const expected = NE.postNode(url, post, expectedDescription);
-      expect(actual).toEqual(expected);
+      const expectedNode = NE.postNode(url, post, expectedDescription);
+      expect(data.posts[0].node).toEqual(expectedNode);
     });
   });
 
@@ -213,14 +236,13 @@ describe("plugins/discourse/createGraph", () => {
       expect(addressSort(expected)).toEqual(addressSort(nodesOfType(type)));
     }
     it("for users", () => {
-      const {url} = example();
-      const usernames = ["decentralion", "wchargin", "mzargham"];
-      const expected = usernames.map((x) => NE.userNode(url, x));
+      const {url, repo} = example();
+      const expected = repo.users().map((x) => NE.userNode(url, x.username));
       expectNodesOfType(expected, userNodeType);
     });
     it("for topics", () => {
-      const {url, topic} = example();
-      const expected = [NE.topicNode(url, topic)];
+      const {url, repo} = example();
+      const expected = repo.topics().map((t) => NE.topicNode(url, t));
       expectNodesOfType(expected, topicNodeType);
     });
     it("for posts", () => {
@@ -452,65 +474,19 @@ describe("plugins/discourse/createGraph", () => {
 
   describe("_createGraphData", () => {
     it("adds weights to likes based on user trust levels", () => {
-      const like1 = {username: "foo", timestampMs: 4, postId: 42};
-      const like2 = {username: "nope", timestampMs: 5, postId: 37};
-      class MockData implements ReadRepository {
-        topics(): $ReadOnlyArray<Topic> {
-          return [];
-        }
-        posts(): $ReadOnlyArray<Post> {
-          return [];
-        }
-        users(): $ReadOnlyArray<User> {
-          return [{username: "foo", trustLevel: 4}];
-        }
-        likes(): $ReadOnlyArray<LikeAction> {
-          return [like1, like2];
-        }
-        findPostInTopic(): ?PostId {
-          throw new Error("Unused");
-        }
-        maxIds() {
-          throw new Error("Unused");
-        }
-        findUser(username: string) {
-          for (const user of this.users()) {
-            if (user.username === username) {
-              return user;
-            }
-          }
-          return null;
-        }
-        topicById() {
-          throw new Error("Method topicById should be unused by createGraph");
-        }
-        postById() {
-          return null;
-        }
-      }
-      const url = "https://example.com";
-      const data = _createGraphData(url, new MockData());
-      const expectedData = {
-        users: [NE.userNode(url, "foo")],
-        topics: [],
-        posts: [],
-        likes: [
-          {
-            createsLike: expect.anything(),
-            likes: expect.anything(),
-            node: NE.likeNode(url, like1, "[unknown post]"),
-            weight: DEFAULT_TRUST_LEVEL_TO_WEIGHT[4],
-          },
-          {
-            createsLike: expect.anything(),
-            likes: expect.anything(),
-            node: NE.likeNode(url, like2, "[unknown post]"),
-            // 0 weight because this user didn't appear in the data
-            weight: 0,
-          },
-        ],
-      };
-      expect(data).toEqual(expectedData);
+      const {repo, data, likes} = example();
+      const seenTrustLevels = new Set();
+      likes.forEach((like, i) => {
+        const user = repo.findUser(like.username);
+        const trustLevel = user == null ? null : user.trustLevel;
+        seenTrustLevels.add(trustLevel);
+        const expectedWeight = weightForTrustLevel(trustLevel);
+        expect(data.likes[i].weight).toEqual(expectedWeight);
+      });
+      // Validation: Just to double check this test is working as intended,
+      // we want to see that we saw a number of different trust levels, including
+      // the problematic null case.
+      expect(seenTrustLevels).toEqual(new Set([null, 0, 2, 3]));
     });
   });
 
