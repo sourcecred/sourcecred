@@ -82,8 +82,13 @@ describe("plugins/discourse/createGraph", () => {
         maxTopicId: this._topics.reduce((max, t) => Math.max(t.id, max), 0),
       };
     }
-    findUsername() {
-      throw new Error("Method findUsername should be unused by createGraph");
+    findUser(username: string) {
+      for (const user of this.users()) {
+        if (user.username === username) {
+          return user;
+        }
+      }
+      return null;
     }
     topicById() {
       throw new Error("Method topicById should be unused by createGraph");
@@ -468,10 +473,13 @@ describe("plugins/discourse/createGraph", () => {
         maxIds() {
           throw new Error("Unused");
         }
-        findUsername() {
-          throw new Error(
-            "Method findUsername should be unused by createGraph"
-          );
+        findUser(username: string) {
+          for (const user of this.users()) {
+            if (user.username === username) {
+              return user;
+            }
+          }
+          return null;
         }
         topicById() {
           throw new Error("Method topicById should be unused by createGraph");
