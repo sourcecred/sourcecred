@@ -3,12 +3,7 @@
 import deepFreeze from "deep-freeze";
 import {fromString as uuidFromString} from "../util/uuid";
 import {NodeAddress} from "../core/graph";
-import {
-  loginFromString,
-  graphNode,
-  type Identity,
-  newIdentity,
-} from "./identity";
+import {graphNode, type Identity, newIdentity} from "./identity";
 
 describe("ledger/identity", () => {
   const example: Identity = deepFreeze(newIdentity("USER", "foo"));
@@ -52,29 +47,5 @@ describe("ledger/identity", () => {
     expect(node.description).toEqual(example.name);
     expect(node.address).toEqual(example.address);
     expect(node.timestampMs).toEqual(null);
-  });
-  describe("loginFromString", () => {
-    it("fails on invalid logins", () => {
-      const bad = [
-        "With Space",
-        "With.Period",
-        "A/Slash",
-        "",
-        "with_underscore",
-        "@name",
-      ];
-      for (const b of bad) {
-        expect(() => loginFromString(b)).toThrowError("invalid login");
-      }
-    });
-    it("succeeds on valid logins", () => {
-      const names = ["h", "hi-there", "ZaX99324cab"];
-      for (const n of names) {
-        expect(loginFromString(n)).toEqual(n.toLowerCase());
-      }
-    });
-    it("lower-cases logins", () => {
-      expect(loginFromString("FooBAR")).toEqual("foobar");
-    });
   });
 });
