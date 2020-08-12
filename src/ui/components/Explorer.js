@@ -223,7 +223,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             </tr>
           </thead>
           <tbody>
-            {sortedNodes.slice(0, 40).map((node) => (
+            {sortedNodes.slice(0, 200).map((node) => (
               <NodeRow
                 depth={0}
                 key={node.address}
