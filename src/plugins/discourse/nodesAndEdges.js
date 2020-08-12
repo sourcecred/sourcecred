@@ -7,6 +7,7 @@ import {
   authorsTopicEdgeType,
   postRepliesEdgeType,
   topicContainsPostEdgeType,
+  topicHasLikedPostEdgeType,
   likesEdgeType,
   createsLikeEdgeType,
   referencesTopicEdgeType,
@@ -88,6 +89,21 @@ export function authorsPostEdge(serverUrl: string, post: Post): Edge {
 export function topicContainsPostEdge(serverUrl: string, post: Post): Edge {
   const address = EdgeAddress.append(
     topicContainsPostEdgeType.prefix,
+    serverUrl,
+    String(post.topicId),
+    String(post.id)
+  );
+  return {
+    address,
+    timestampMs: post.timestampMs,
+    src: topicAddress(serverUrl, post.topicId),
+    dst: postAddress(serverUrl, post.id),
+  };
+}
+
+export function topicHasLikedPostEdge(serverUrl: string, post: Post): Edge {
+  const address = EdgeAddress.append(
+    topicHasLikedPostEdgeType.prefix,
     serverUrl,
     String(post.topicId),
     String(post.id)

@@ -38,11 +38,24 @@ export type GraphLike = {|
   +weight: NodeWeight,
 |};
 
+/**
+ * TopicHasLikedPost edges connect a Topic to the posts
+ * in that topic that were liked, in proportion to the
+ * total like weight of the post in question.
+ *
+ * See: https://github.com/sourcecred/sourcecred/issues/1896
+ */
+export type TopicHasLikedPost = {|
+  +edge: Edge,
+  +weight: number,
+|};
+
 export type GraphData = {
   +users: $ReadOnlyArray<Node>,
   +topics: $ReadOnlyArray<GraphTopic>,
   +posts: $ReadOnlyArray<GraphPost>,
   +likes: $ReadOnlyArray<GraphLike>,
+  +topicHasLikedPosts: $ReadOnlyArray<TopicHasLikedPost>,
 };
 
 // TODO: Make this configurable.
@@ -127,6 +140,7 @@ export function _createGraphData(
     return {node, hasAuthor, references, postReplies, topicContains};
   });
 
+  const postIdToLikeWeight = new Map();
   const likes: $ReadOnlyArray<GraphLike> = repo.likes().map((like) => {
     const postDescription =
       postIdToDescription.get(like.postId) || "[unknown post]";
@@ -135,9 +149,31 @@ export function _createGraphData(
     const likes = NE.likesEdge(serverUrl, like);
     const user = repo.findUser(like.username);
     const weight = weightForTrustLevel(user != null ? user.trustLevel : null);
+
+    // Update how much total like weight this post has, so that we can
+    // set up a hasLikedPost edge flowing cred from the topic
+    const existingWeight = postIdToLikeWeight.get(like.postId) || 0;
+    postIdToLikeWeight.set(like.postId, existingWeight + weight);
+
     return {node, createsLike, likes, weight};
   });
-  return {users, topics, posts, likes};
+
+  const topicHasLikedPosts = [];
+  for (const [postId, weight] of postIdToLikeWeight.entries()) {
+    if (weight === 0) {
+      // This could happen if all of the likes were from untrusted users
+      continue;
+    }
+    const post = repo.postById(postId);
+    if (post == null) {
+      // The like didn't correspond to a valid post--maybe a cache/deletion
+      // thing--let's ignore it.
+      continue;
+    }
+    const edge = NE.topicHasLikedPostEdge(serverUrl, post);
+    topicHasLikedPosts.push({edge, weight});
+  }
+  return {users, topics, posts, likes, topicHasLikedPosts};
 }
 
 export function _graphFromData({
@@ -145,6 +181,7 @@ export function _graphFromData({
   topics,
   posts,
   likes,
+  topicHasLikedPosts,
 }: GraphData): WeightedGraph {
   const g = new Graph();
   const weights = weightsForDeclaration(declaration);
@@ -171,6 +208,11 @@ export function _graphFromData({
     g.addEdge(like.createsLike);
     g.addEdge(like.likes);
     weights.nodeWeights.set(like.node.address, like.weight);
+  }
+
+  for (const {edge, weight} of topicHasLikedPosts) {
+    g.addEdge(edge);
+    weights.edgeWeights.set(edge.address, {forwards: weight, backwards: 0});
   }
   return {graph: g, weights};
 }

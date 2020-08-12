@@ -210,6 +210,26 @@ describe("plugins/discourse/nodesAndEdges", () => {
                         ]
                   `);
     });
+    it("for topicHasLikedPost", () => {
+      const {url, posts, topic} = example();
+      const post = posts[1];
+      const expectedSrc = NE.topicNode(url, topic).address;
+      const expectedDst = NE.postNode(url, post, topic.title).address;
+      const edge = NE.topicHasLikedPostEdge(url, post);
+      expect(edge.src).toEqual(expectedSrc);
+      expect(edge.dst).toEqual(expectedDst);
+      expect(edge.timestampMs).toEqual(post.timestampMs);
+      expect(EdgeAddress.toParts(edge.address)).toMatchInlineSnapshot(`
+        Array [
+          "sourcecred",
+          "discourse",
+          "topicHasLikedPost",
+          "https://url.com",
+          "1",
+          "2",
+        ]
+      `);
+    });
     it("for postReplies", () => {
       const {url, posts, topic} = example();
       const post = posts[2];
