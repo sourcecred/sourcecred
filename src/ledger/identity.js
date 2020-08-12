@@ -36,19 +36,19 @@ import {
   type NodeContraction,
   EdgeAddress,
 } from "../core/graph";
+import {
+  type Login,
+  loginFromString,
+  parser as loginParser,
+} from "./identity/login";
+import {type Alias, parser as aliasParser} from "./identity/alias";
 import type {NodeType} from "../analysis/types";
 import type {PluginDeclaration} from "../analysis/pluginDeclaration";
 
-/**
- * A Login is an identity name which has the following properties:
- * - It consists of lowercase alphanumeric ASCII and of dashes, which
- *   makes it suitable for including in urls (so we can give each contributor
- *   a hardcoded URL showing their contributions, Cred, and Grain).
- * - It is unique within an instance.
- * - It's chosen by (and changeable by) the owner of the identity.
- */
-export opaque type Login: string = string;
-const LOGIN_PATTERN = /^[A-Za-z0-9-]+$/;
+export {loginFromString, parser as loginParser} from "./identity/login";
+export type {Login} from "./identity/login";
+export {parser as aliasParser} from "./identity/alias";
+export type {Alias} from "./identity/alias";
 
 export type IdentitySubtype = "USER" | "PROJECT" | "ORGANIZATION" | "BOT";
 export type IdentityId = Uuid;
@@ -64,17 +64,6 @@ export type Identity = {|
   // Does not include the identity's "own" address, i.e. the result
   // of calling (identityAddress(identity.id)).
   +aliases: $ReadOnlyArray<Alias>,
-|};
-
-/**
- * An Alias is basically another graph Node which resolves to this identity. We
- * ignore the timestamp because it's generally not significant for users; we
- * keep the address out of obvious necessity, and we keep the description so we
- * can describe this alias in UIs (e.g. the ledger admin panel).
- */
-export type Alias = {|
-  +description: string,
-  +address: NodeAddressT,
 |};
 
 export function newIdentity(subtype: IdentitySubtype, login: string): Identity {
@@ -101,18 +90,6 @@ export const IDENTITY_PREFIX = NodeAddress.fromParts([
   "IDENTITY",
 ]);
 
-/**
- * Parse a Login from a string.
- *
- * Throws an error if the Login is invalid.
- */
-export function loginFromString(login: string): Login {
-  if (!login.match(LOGIN_PATTERN)) {
-    throw new Error(`invalid login: ${login}`);
-  }
-  return login.toLowerCase();
-}
-
 export function graphNode({name, address}: Identity): GraphNode {
   return {
     address,
@@ -130,19 +107,12 @@ export function contractions(
   }));
 }
 
-export const loginParser: C.Parser<Login> = C.fmap(C.string, loginFromString);
-
 export const identitySubtypeParser: C.Parser<IdentitySubtype> = C.exactly([
   "USER",
   "BOT",
   "ORGANIZATION",
   "PROJECT",
 ]);
-
-export const aliasParser: C.Parser<Alias> = C.object({
-  address: NodeAddress.parser,
-  description: C.string,
-});
 
 export const identityParser: C.Parser<Identity> = C.object({
   id: uuidParser,
