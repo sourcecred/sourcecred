@@ -4,7 +4,7 @@ import deepFreeze from "deep-freeze";
 import {fromString as uuidFromString} from "../util/uuid";
 import {NodeAddress} from "../core/graph";
 import {
-  identityNameFromString,
+  loginFromString,
   graphNode,
   type Identity,
   newIdentity,
@@ -39,7 +39,7 @@ describe("ledger/identity", () => {
     });
     it("errors on invalid names", () => {
       const fail = () => newIdentity("USER", "bad string");
-      expect(fail).toThrowError("invalid identityName");
+      expect(fail).toThrowError("invalid login");
     });
     it("errors on invalid subtype", () => {
       // $FlowExpectedError
@@ -53,8 +53,8 @@ describe("ledger/identity", () => {
     expect(node.address).toEqual(example.address);
     expect(node.timestampMs).toEqual(null);
   });
-  describe("identityNameFromString", () => {
-    it("fails on invalid identityNames", () => {
+  describe("loginFromString", () => {
+    it("fails on invalid logins", () => {
       const bad = [
         "With Space",
         "With.Period",
@@ -64,19 +64,17 @@ describe("ledger/identity", () => {
         "@name",
       ];
       for (const b of bad) {
-        expect(() => identityNameFromString(b)).toThrowError(
-          "invalid identityName"
-        );
+        expect(() => loginFromString(b)).toThrowError("invalid login");
       }
     });
-    it("succeeds on valid identityNames", () => {
+    it("succeeds on valid logins", () => {
       const names = ["h", "hi-there", "ZaX99324cab"];
       for (const n of names) {
-        expect(identityNameFromString(n)).toEqual(n.toLowerCase());
+        expect(loginFromString(n)).toEqual(n.toLowerCase());
       }
     });
-    it("lower-cases identityNames", () => {
-      expect(identityNameFromString("FooBAR")).toEqual("foobar");
+    it("lower-cases logins", () => {
+      expect(loginFromString("FooBAR")).toEqual("foobar");
     });
   });
 });
