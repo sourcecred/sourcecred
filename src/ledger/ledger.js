@@ -161,6 +161,64 @@ export class Ledger {
   }
 
   /**
+   * Merge two identities together.
+   *
+   * One identity is considered the "base" and the other is the "target".
+   * The target is absorbed into the base, meaning:
+   * - Base gets the Grain balance, and lifetime paid amount added to its account.
+   * - Base gets every alias that the target had.
+   * - Base gets the target's own address as an alias.
+   * - The target account is removed from the ledger.
+   * - The target's login name is freed.
+   *
+   * Attempting to merge an identity that doesn't exist, or to merge an identity into
+   * itself, will error.
+   */
+  mergeIdentities(opts: {base: IdentityId, target: IdentityId}): Ledger {
+    const {base, target} = opts;
+    const action = {
+      type: "MERGE_IDENTITIES",
+      base,
+      target,
+    };
+    this._createAndProcessEvent(action);
+    return this;
+  }
+  _mergeIdentities({base, target}: MergeIdentities) {
+    const baseAccount = this._mutableAccount(base);
+    const targetAccount = this.account(target);
+    const baseIdentity = baseAccount.identity;
+    const targetIdentity = targetAccount.identity;
+    if (base === target) {
+      throw new Error(
+        `tried to merge identity @${baseIdentity.name} with itself`
+      );
+    }
+
+    const updatedAliases = baseIdentity.aliases.slice();
+    const transferAlias = (alias: Alias) => {
+      updatedAliases.push(alias);
+      this._aliasAddressToIdentity.set(alias.address, baseIdentity.id);
+    };
+    // Mutation follows. Nothing after this line may throw.
+    targetIdentity.aliases.forEach((a) => transferAlias(a));
+    const innateAlias = {
+      address: targetIdentity.address,
+      description: `identity @${targetIdentity.name} (id: ${targetIdentity.id})`,
+    };
+    transferAlias(innateAlias);
+    const updatedIdentity = {
+      ...baseIdentity,
+      aliases: updatedAliases,
+    };
+    baseAccount.identity = updatedIdentity;
+    baseAccount.paid = G.add(baseAccount.paid, targetAccount.paid);
+    baseAccount.balance = G.add(baseAccount.balance, targetAccount.balance);
+    this._accounts.delete(targetIdentity.id);
+    this._loginToId.delete(targetIdentity.name);
+  }
+
+  /**
    * Change a identity's name.
    *
    * Will fail if no identity matches the identityId, or if the identity already has that
@@ -469,6 +527,9 @@ export class Ledger {
       case "ADD_ALIAS":
         this._addAlias(action);
         break;
+      case "MERGE_IDENTITIES":
+        this._mergeIdentities(action);
+        break;
       case "TOGGLE_ACTIVATION":
         this._toggleActivation(action);
         break;
@@ -535,6 +596,7 @@ type Action =
   | CreateIdentity
   | RenameIdentity
   | AddAlias
+  | MergeIdentities
   | ToggleActivation
   | DistributeGrain
   | TransferGrain;
@@ -568,6 +630,17 @@ const addAliasParser: C.Parser<AddAlias> = C.object({
   type: C.exactly(["ADD_ALIAS"]),
   identityId: uuid.parser,
   alias: aliasParser,
+});
+
+type MergeIdentities = {|
+  +type: "MERGE_IDENTITIES",
+  +base: IdentityId,
+  +target: IdentityId,
+|};
+const mergeIdentitiesParser: C.Parser<MergeIdentities> = C.object({
+  type: C.exactly(["MERGE_IDENTITIES"]),
+  base: uuid.parser,
+  target: uuid.parser,
 });
 
 type ToggleActivation = {|
@@ -607,6 +680,7 @@ const actionParser: C.Parser<Action> = C.orElse([
   createIdentityParser,
   renameIdentityParser,
   addAliasParser,
+  mergeIdentitiesParser,
   toggleActivationParser,
   distributeGrainParser,
   transferGrainParser,

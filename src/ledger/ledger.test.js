@@ -315,6 +315,126 @@ describe("ledger/ledger", () => {
         );
       });
     });
+
+    describe("mergeIdentitiy", () => {
+      it("gives the target's grain balance and paid to the base account", () => {
+        const ledger = ledgerWithActiveIdentities();
+        ledger._allocateGrain(id1, g("100"));
+        ledger._allocateGrain(id2, g("10"));
+        ledger.mergeIdentities({base: id1, target: id2});
+
+        const account = ledger.account(id1);
+        expect(account.balance).toEqual(g("110"));
+        expect(account.paid).toEqual(g("110"));
+      });
+      it("gives the target's aliases to the base account", () => {
+        const alias = {
+          address: NodeAddress.fromParts(["1"]),
+          description: "alias",
+        };
+        const ledger = ledgerWithActiveIdentities();
+        ledger.addAlias(id2, alias);
+        ledger.mergeIdentities({base: id1, target: id2});
+
+        const aliases = ledger.account(id1).identity.aliases;
+        expect(aliases).toContain(alias);
+        expect(ledger._aliasAddressToIdentity.get(alias.address)).toEqual(id1);
+      });
+      it("base account keeps its aliases", () => {
+        const alias = {
+          address: NodeAddress.fromParts(["1"]),
+          description: "alias",
+        };
+        const ledger = ledgerWithActiveIdentities();
+        ledger.addAlias(id1, alias);
+        ledger.mergeIdentities({base: id1, target: id2});
+
+        const aliases = ledger.account(id1).identity.aliases;
+        expect(aliases).toContain(alias);
+      });
+      it("gives the target's innate address as an alias to the base account", () => {
+        const ledger = ledgerWithActiveIdentities();
+        const target = ledger.account(id2).identity;
+        ledger.mergeIdentities({base: id1, target: id2});
+        const aliases = ledger.account(id1).identity.aliases;
+        const expectedAlias = {
+          address: target.address,
+          description: `identity @${target.name} (id: ${target.id})`,
+        };
+        expect(aliases).toContainEqual(expectedAlias);
+        expect(ledger._aliasAddressToIdentity.get(target.address)).toEqual(id1);
+      });
+      it("frees up the target's login", () => {
+        const ledger = ledgerWithActiveIdentities();
+        const target = ledger.account(id2).identity;
+        ledger.mergeIdentities({base: id1, target: id2});
+        ledger.createIdentity("USER", target.name);
+      });
+      it("removes the target's account", () => {
+        const ledger = ledgerWithActiveIdentities();
+        ledger.mergeIdentities({base: id1, target: id2});
+        expect(() => ledger.account(id2)).toThrowError(
+          "no Account for identity"
+        );
+      });
+      it("does not change the base account's login or id", () => {
+        const ledger = ledgerWithActiveIdentities();
+        const before = ledger.account(id1).identity;
+        ledger.mergeIdentities({base: id1, target: id2});
+        const after = ledger.account(id1).identity;
+        expect(before.id).toEqual(after.id);
+        expect(before.name).toEqual(after.name);
+      });
+      it("fails without mutation when base identity doesn't exist", () => {
+        const ledger = ledgerWithActiveIdentities();
+        failsWithoutMutation(
+          ledger,
+          () => ledger.mergeIdentities({base: id3, target: id1}),
+          "no Account for identity"
+        );
+      });
+      it("fails without mutation when target identity doesn't exist", () => {
+        const ledger = ledgerWithActiveIdentities();
+        failsWithoutMutation(
+          ledger,
+          () => ledger.mergeIdentities({base: id1, target: id3}),
+          "no Account for identity"
+        );
+      });
+      it("fails without mutation when the base and target are the same", () => {
+        const ledger = ledgerWithActiveIdentities();
+        failsWithoutMutation(
+          ledger,
+          () => ledger.mergeIdentities({base: id1, target: id1}),
+          "tried to merge identity @steven with itself"
+        );
+      });
+      it("does not change the activation status of the base account", () => {
+        let ledger = ledgerWithIdentities();
+        ledger.mergeIdentities({base: id1, target: id2});
+        expect(ledger.account(id1).active).toBe(false);
+
+        ledger = ledgerWithIdentities();
+        ledger.activate(id1);
+        ledger.mergeIdentities({base: id1, target: id2});
+        expect(ledger.account(id1).active).toBe(true);
+      });
+      it("writes the correct event to the log", () => {
+        const ledger = ledgerWithIdentities();
+        const ledgerLength = ledger.eventLog().length;
+        ledger.mergeIdentities({base: id1, target: id2});
+        const events = ledger.eventLog();
+        // Only one event should be added.
+        expect(events).toHaveLength(ledgerLength + 1);
+        const latest = events[events.length - 1];
+        const action = latest.action;
+        expect(action).toEqual({
+          type: "MERGE_IDENTITIES",
+          base: id1,
+          target: id2,
+        });
+      });
+    });
   });
 
   describe("grain accounts", () => {
@@ -811,6 +931,9 @@ describe("ledger/ledger", () => {
         amount: g("10"),
         memo: null,
       });
+
+      setFakeDate(6);
+      ledger.mergeIdentities({base: id1, target: id2});
       return ledger;
     }
     it("fromEventLog with an empty action log results in an empty ledger", () => {
