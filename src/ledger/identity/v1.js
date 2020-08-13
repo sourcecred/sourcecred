@@ -26,6 +26,10 @@ export type Identity = {|
   +name: Login,
   +subtype: IdentityType,
   // The identity's own node address.
+  // The address is guaranteed to start with IDENTITY_PREFIX, and to
+  // include the identity id for uniqueness. Beyond that, you may NOT make any
+  // assumptions about the particular address structure. Remember that these
+  // addresses are permanent.
   +address: NodeAddressT,
   // Every other node in the graph that this identity corresponds to.
   // Does not include the identity's "own" address, i.e. the result
@@ -43,7 +47,7 @@ export function newIdentity(subtype: IdentityType, login: string): Identity {
   return {
     id,
     subtype,
-    address: NodeAddress.append(IDENTITY_PREFIX, subtype, id),
+    address: NodeAddress.append(IDENTITY_PREFIX, id),
     name: loginFromString(login),
     aliases: [],
   };
