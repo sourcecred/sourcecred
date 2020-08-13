@@ -19,12 +19,8 @@ type Props = {|
 |};
 
 const useStyles = makeStyles({
-  aliasesHeader: {marginBottom: 0},
-  /* This are temporary and will be fixed on next branch!
-    Only here to get this Autocomplete to be useable
-    before redoing the ledger admin components */
-  temporaryAutocompleteStyling: {width: "20%", border: "1px solid black"},
-  temporaryInputStyles: {color: "black"},
+  element: {margin: "20px"},
+  aliasesHeader: {margin: "20px", marginBottom: 0},
 });
 
 export function AliasSelector({
@@ -99,21 +95,14 @@ export function AliasSelector({
             setInputValue("");
           }
         }}
-        className={classes.temporaryAutocompleteStyling}
+        className={classes.element}
         freeSolo
         disableClearable
         options={inputItems}
         getOptionLabel={({description}) => description || ""}
         inputValue={inputValue}
         renderInput={(params) => (
-          <TextField
-            {...params}
-            placeholder="Alias"
-            InputProps={{
-              ...params.InputProps,
-              className: classes.temporaryInputStyles,
-            }}
-          />
+          <TextField {...params} variant="outlined" label="Alias" />
         )}
       />
     </>
