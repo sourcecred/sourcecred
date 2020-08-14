@@ -16,9 +16,10 @@ import {
   loginFromString,
   type Alias,
   aliasParser,
-  type IdentityV1,
+  type Identity,
+  newIdentity,
+  identityParser,
 } from "./identity";
-import {newIdentity, parser as identityParser} from "./identity/v1";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
 import * as NullUtil from "../util/null";
@@ -32,7 +33,7 @@ import * as C from "../util/combo";
  * Every Identity in the ledger has an Account.
  */
 type MutableAccount = {|
-  identity: IdentityV1,
+  identity: Identity,
   // The current Grain balance of this account
   balance: G.Grain,
   // The amount of Grain this account has received in past Distributions
@@ -541,7 +542,7 @@ type Action =
 
 type CreateIdentity = {|
   +type: "CREATE_IDENTITY",
-  +identity: IdentityV1,
+  +identity: Identity,
 |};
 const createIdentityParser: C.Parser<CreateIdentity> = C.object({
   type: C.exactly(["CREATE_IDENTITY"]),
