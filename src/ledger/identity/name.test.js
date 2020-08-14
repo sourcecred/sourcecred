@@ -20,11 +20,11 @@ describe("ledger/identity/name", () => {
     it("succeeds on valid names", () => {
       const names = ["h", "hi-there", "ZaX99324cab"];
       for (const n of names) {
-        expect(nameFromString(n)).toEqual(n.toLowerCase());
+        expect(nameFromString(n)).toEqual(n);
       }
     });
-    it("lower-cases names", () => {
-      expect(nameFromString("FooBAR")).toEqual("foobar");
+    it("does not lower-case names", () => {
+      expect(nameFromString("FooBAR")).toEqual("FooBAR");
     });
   });
 });

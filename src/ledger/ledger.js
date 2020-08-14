@@ -76,6 +76,7 @@ export type Account = $ReadOnly<MutableAccount>;
 export class Ledger {
   _ledgerEventLog: JsonLog<LedgerEvent>;
   _nameToId: Map<Name, IdentityId>;
+  _lowercaseNames: Set<string>;
   _aliasAddressToIdentity: Map<NodeAddressT, IdentityId>;
   _accounts: Map<IdentityId, MutableAccount>;
   _latestTimestamp: TimestampMs = -Infinity;
@@ -84,6 +85,7 @@ export class Ledger {
   constructor() {
     this._ledgerEventLog = new JsonLog();
     this._nameToId = new Map();
+    this._lowercaseNames = new Set();
     this._aliasAddressToIdentity = new Map();
     this._accounts = new Map();
   }
@@ -137,6 +139,11 @@ export class Ledger {
       // This identity already exists; return.
       throw new Error(`createIdentity: name already taken: ${identity.name}`);
     }
+    if (this._lowercaseNames.has(identity.name.toLowerCase())) {
+      throw new Error(
+        `createIdentity: already have same name with different capitalization: ${identity.name}`
+      );
+    }
     if (identity.aliases.length !== 0) {
       throw new Error(`createIdentity: new identities may not have aliases`);
     }
@@ -150,6 +157,7 @@ export class Ledger {
 
     // Mutations! Method must not fail after this comment.
     this._nameToId.set(identity.name, identity.id);
+    this._lowercaseNames.add(identity.name.toLowerCase());
     // Reserve this identity's own address
     this._aliasAddressToIdentity.set(identity.address, identity.id);
     // Every identity has a corresponding Account.
@@ -239,7 +247,8 @@ export class Ledger {
     }
     const account = this._mutableAccount(identityId);
     const existingIdentity = account.identity;
-    if (existingIdentity.name === newName) {
+    const existingName = existingIdentity.name;
+    if (existingName === newName) {
       // We error rather than silently succeed because we don't want the ledger
       // to get polluted with no-op records (no successful operations are
       // idempotent, since they do add to the ledger logs)
@@ -249,6 +258,15 @@ export class Ledger {
       // We already checked that the name is not owned by this identity,
       // so it is a conflict. Fail.
       throw new Error(`renameIdentity: conflict on name ${newName}`);
+    }
+    const lowerCased = newName.toLowerCase();
+    if (
+      this._lowercaseNames.has(lowerCased) &&
+      lowerCased !== existingName.toLowerCase()
+    ) {
+      throw new Error(
+        `renameIdentity: already have same name with different capitalization: ${newName}`
+      );
     }
     const updatedIdentity = {
       id: identityId,
@@ -261,6 +279,8 @@ export class Ledger {
     // Mutations! Method must not fail after this comment.
     this._nameToId.delete(existingIdentity.name);
     this._nameToId.set(newName, identityId);
+    this._lowercaseNames.delete(existingIdentity.name.toLowerCase());
+    this._lowercaseNames.add(newName.toLowerCase());
     account.identity = updatedIdentity;
   }
 

@@ -124,6 +124,16 @@ describe("ledger/ledger", () => {
         const thunk = () => ledger.createIdentity("USER", "foo");
         failsWithoutMutation(ledger, thunk, "name already taken");
       });
+      it("throws an error if the name would create a lowercased conflict", () => {
+        const ledger = new Ledger();
+        ledger.createIdentity("USER", "foo");
+        const thunk = () => ledger.createIdentity("USER", "FOO");
+        failsWithoutMutation(
+          ledger,
+          thunk,
+          "already have same name with different capitalization"
+        );
+      });
       it("throws an error given an identity with aliases", () => {
         const ledger = new Ledger();
         let identity = newIdentity("USER", "foo");
@@ -211,6 +221,55 @@ describe("ledger/ledger", () => {
         const fooId = ledger.createIdentity("USER", "foo");
         const thunk = () => ledger.renameIdentity(fooId, "foo bar");
         failsWithoutMutation(ledger, thunk, "invalid name");
+      });
+      it("fails if it would create a lower-cased name conflict", () => {
+        const ledger = new Ledger();
+        const fooId = ledger.createIdentity("USER", "foo");
+        ledger.createIdentity("USER", "case");
+        const thunk = () => ledger.renameIdentity(fooId, "CASE");
+        failsWithoutMutation(
+          ledger,
+          thunk,
+          "already have same name with different capitalization"
+        );
+      });
+      it("allows changing case on an existing name", () => {
+        const ledger = new Ledger();
+        const fooId = ledger.createIdentity("USER", "foo");
+        ledger.renameIdentity(fooId, "FOO");
+        const identity = ledger.account(fooId).identity;
+        expect(identity.name).toEqual("FOO");
+        // Verify that we keep the name in the lowercase set afterwards, too.
+        const thunk = () => ledger.createIdentity("USER", "FoO");
+        failsWithoutMutation(
+          ledger,
+          thunk,
+          "same name with different capitalization"
+        );
+      });
+      it("reserves the new name", () => {
+        const ledger = new Ledger();
+        const fooId = ledger.createIdentity("USER", "foo");
+        ledger.renameIdentity(fooId, "bar");
+        const thunk = () => ledger.createIdentity("USER", "bar");
+        failsWithoutMutation(ledger, thunk, "name already taken");
+      });
+      it("unlocks the old lower-cased name", () => {
+        const ledger = new Ledger();
+        const fooId = ledger.createIdentity("USER", "FOO");
+        ledger.renameIdentity(fooId, "BAR");
+        ledger.createIdentity("USER", "foo");
+      });
+      it("reserves the new lower-cased name", () => {
+        const ledger = new Ledger();
+        const fooId = ledger.createIdentity("USER", "foo");
+        ledger.renameIdentity(fooId, "BaR");
+        const thunk = () => ledger.createIdentity("USER", "bar");
+        failsWithoutMutation(
+          ledger,
+          thunk,
+          "same name with different capitalization"
+        );
       });
     });
 
