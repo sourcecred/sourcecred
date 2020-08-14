@@ -429,6 +429,13 @@ describe("ledger/ledger", () => {
         ledger.mergeIdentities({base: id1, target: id2});
         ledger.createIdentity("USER", target.name);
       });
+      it("frees up the target's login (for alternative capitalizations)", () => {
+        const ledger = ledgerWithActiveIdentities();
+        const target = ledger.account(id2).identity;
+        ledger.mergeIdentities({base: id1, target: id2});
+        expect(target.name).not.toEqual(target.name.toUpperCase());
+        ledger.createIdentity("USER", target.name.toUpperCase());
+      });
       it("removes the target's account", () => {
         const ledger = ledgerWithActiveIdentities();
         ledger.mergeIdentities({base: id1, target: id2});
