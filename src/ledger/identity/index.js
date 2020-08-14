@@ -11,8 +11,8 @@ export {
 
 export type {IdentityType} from "./identityType";
 
-export type {Login} from "./login";
-export {loginFromString, parser as loginParser} from "./login";
+export type {Name} from "./name";
+export {nameFromString, parser as nameParser} from "./name";
 
 export type {Alias} from "./alias";
 export {parser as aliasParser} from "./alias";

@@ -6,7 +6,7 @@ import {
   random as randomUuid,
   parser as uuidParser,
 } from "../../util/uuid";
-import {type Login, parser as loginParser, loginFromString} from "./login";
+import {type Name, parser as nameParser, nameFromString} from "./name";
 import {type Alias, parser as aliasParser} from "./alias";
 import {type IdentityType, parser as identityTypeParser} from "./identityType";
 import {
@@ -22,8 +22,7 @@ export type IdentityId = Uuid;
 export type Identity = {|
   // UUID, assigned when the identity is created.
   +id: IdentityId,
-  // TODO (@decentralion): Rename this to `login` in the upcoming identity refactor
-  +name: Login,
+  +name: Name,
   +subtype: IdentityType,
   // The identity's own node address.
   // The address is guaranteed to start with IDENTITY_PREFIX, and to
@@ -37,7 +36,7 @@ export type Identity = {|
   +aliases: $ReadOnlyArray<Alias>,
 |};
 
-export function newIdentity(subtype: IdentityType, login: string): Identity {
+export function newIdentity(subtype: IdentityType, name: string): Identity {
   const id = randomUuid();
   try {
     identityTypeParser.parseOrThrow(subtype);
@@ -48,7 +47,7 @@ export function newIdentity(subtype: IdentityType, login: string): Identity {
     id,
     subtype,
     address: NodeAddress.append(IDENTITY_PREFIX, id),
-    name: loginFromString(login),
+    name: nameFromString(name),
     aliases: [],
   };
 }
@@ -73,7 +72,7 @@ export function contractions(
 export const parser: C.Parser<Identity> = C.object({
   id: uuidParser,
   subtype: identityTypeParser,
-  name: loginParser,
+  name: nameParser,
   address: NodeAddress.parser,
   aliases: C.array(aliasParser),
 });
