@@ -224,7 +224,8 @@ export class Ledger {
     baseAccount.paid = G.add(baseAccount.paid, targetAccount.paid);
     baseAccount.balance = G.add(baseAccount.balance, targetAccount.balance);
     this._accounts.delete(targetIdentity.id);
-    this._loginToId.delete(targetIdentity.name);
+    this._nameToId.delete(targetIdentity.name);
+    this._lowercaseNames.delete(targetIdentity.name.toLowerCase());
   }
 
   /**
