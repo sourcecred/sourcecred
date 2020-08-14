@@ -26,4 +26,14 @@ export function nameFromString(name: string): Name {
   return name;
 }
 
+const COERCE_PATTERN = /[^A-Za-z0-9-]/g;
+/**
+ * Attempt to coerce a string into a valid name, by replacing invalid
+ * characters like `_` or `#` with hyphens.
+ */
+export function coerce(name: string): Name {
+  const coerced = name.replace(COERCE_PATTERN, "-");
+  return nameFromString(coerced);
+}
+
 export const parser: C.Parser<Name> = C.fmap(C.string, nameFromString);

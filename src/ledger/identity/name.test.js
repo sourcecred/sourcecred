@@ -1,6 +1,6 @@
 // @flow
 
-import {nameFromString} from "./name";
+import {nameFromString, coerce} from "./name";
 
 describe("ledger/identity/name", () => {
   describe("nameFromString", () => {
@@ -25,6 +25,18 @@ describe("ledger/identity/name", () => {
     });
     it("does not lower-case names", () => {
       expect(nameFromString("FooBAR")).toEqual("FooBAR");
+    });
+  });
+
+  describe("coerce", () => {
+    it("does not change valid names", () => {
+      const names = ["hi", "Foo-123-Bar", "X"];
+      const coerced = names.map(coerce);
+      expect(names).toEqual(coerced);
+    });
+    it("replaces invalid characters with dashes", () => {
+      expect(coerce("My Special Name")).toEqual("My-Special-Name");
+      expect(coerce("A!@#$%^Z")).toEqual("A------Z");
     });
   });
 });
