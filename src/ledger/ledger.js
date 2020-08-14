@@ -116,6 +116,21 @@ export class Ledger {
   }
 
   /**
+   * Return whether the IdentityName in question is available.
+   *
+   * For convenience in test code (and consistency with createIdentity and renameIdentity),
+   * the name is provided as a string. If the string is not a valid name, an error will be
+   * thrown.
+   */
+  nameAvailable(name: string): boolean {
+    // Error if the name is not valid.
+    nameFromString(name);
+    // We don't need to explicitly test the name itself, since if a name
+    // is reserved, its lowercased version is also reserved.
+    return !this._lowercaseNames.has(name.toLowerCase());
+  }
+
+  /**
    * Create an account in the ledger.
    *
    * This will reserve the identity's name, and its innate address.

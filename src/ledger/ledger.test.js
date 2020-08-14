@@ -423,7 +423,7 @@ describe("ledger/ledger", () => {
         expect(aliases).toContainEqual(expectedAlias);
         expect(ledger._aliasAddressToIdentity.get(target.address)).toEqual(id1);
       });
-      it("frees up the target's login", () => {
+      it("frees up the target's name", () => {
         const ledger = ledgerWithActiveIdentities();
         const target = ledger.account(id2).identity;
         ledger.mergeIdentities({base: id1, target: id2});
@@ -499,6 +499,43 @@ describe("ledger/ledger", () => {
           base: id1,
           target: id2,
         });
+      });
+    });
+
+    describe("nameAvailable", () => {
+      it("works through a sequence of name changes", () => {
+        const ledger = new Ledger();
+        // All names are available in empty ledger
+        expect(ledger.nameAvailable("Foo")).toBe(true);
+
+        // Once we add a name, alternative capitalizations become
+        // unavailable.
+        const id1 = ledger.createIdentity("USER", "Foo");
+        expect(ledger.nameAvailable("Foo")).toBe(false);
+        expect(ledger.nameAvailable("fOO")).toBe(false);
+
+        // Rename frees up the original name, but reserves the new one.
+        ledger.renameIdentity(id1, "bar");
+        expect(ledger.nameAvailable("Foo")).toBe(true);
+        expect(ledger.nameAvailable("fOO")).toBe(true);
+        expect(ledger.nameAvailable("bar")).toBe(false);
+        expect(ledger.nameAvailable("BAR")).toBe(false);
+
+        // Now neither FOO nor BAR are available (in any
+        // capitalizations)
+        const id2 = ledger.createIdentity("USER", "foo");
+        expect(ledger.nameAvailable("FOO")).toBe(false);
+        expect(ledger.nameAvailable("BAR")).toBe(false);
+
+        // Post merge, Foo gets freed up, but Bar is still reserved.
+        ledger.mergeIdentities({base: id1, target: id2});
+        expect(ledger.nameAvailable("FOO")).toBe(true);
+        expect(ledger.nameAvailable("BAR")).toBe(false);
+      });
+      it("errors if given an invalid name", () => {
+        const ledger = new Ledger();
+        const thunk = () => ledger.nameAvailable("");
+        expect(thunk).toThrow("invalid name");
       });
     });
   });
