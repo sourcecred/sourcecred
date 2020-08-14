@@ -8,5 +8,6 @@ exports[`ledger/ledger state reconstruction serialized ledger snapshots as expec
 {\\"action\\":{\\"identityId\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\",\\"type\\":\\"TOGGLE_ACTIVATION\\"},\\"ledgerTimestamp\\":4,\\"uuid\\":\\"000000000000000000004A\\",\\"version\\":\\"1\\"}
 {\\"action\\":{\\"distribution\\":{\\"allocations\\":[{\\"id\\":\\"yYNur0NEEkh7fMaUn6n9QQ\\",\\"policy\\":{\\"budget\\":\\"100\\",\\"policyType\\":\\"IMMEDIATE\\"},\\"receipts\\":[{\\"amount\\":\\"50\\",\\"id\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\"},{\\"amount\\":\\"50\\",\\"id\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\"}]}],\\"credTimestamp\\":1,\\"id\\":\\"f9xPz9YGH0PuBpPAg2824Q\\"},\\"type\\":\\"DISTRIBUTE_GRAIN\\"},\\"ledgerTimestamp\\":4,\\"uuid\\":\\"000000000000000000005A\\",\\"version\\":\\"1\\"}
 {\\"action\\":{\\"amount\\":\\"10\\",\\"from\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"memo\\":null,\\"to\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\",\\"type\\":\\"TRANSFER_GRAIN\\"},\\"ledgerTimestamp\\":5,\\"uuid\\":\\"000000000000000000006A\\",\\"version\\":\\"1\\"}
+{\\"action\\":{\\"base\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"target\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\",\\"type\\":\\"MERGE_IDENTITIES\\"},\\"ledgerTimestamp\\":6,\\"uuid\\":\\"000000000000000000007A\\",\\"version\\":\\"1\\"}
 "
 `;
