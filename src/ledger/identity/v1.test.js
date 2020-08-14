@@ -17,13 +17,11 @@ describe("ledger/identity/v1", () => {
       for (const subtype of subtypes) {
         const identity = newIdentity(subtype, "foo");
         expect(identity.address).toEqual(
-          NodeAddress.fromParts([
-            "sourcecred",
-            "core",
-            "IDENTITY",
-            subtype,
-            identity.id,
-          ])
+          // subtypes are NOT included in the address, because
+          // subtypes can be modified after identity creation.
+          // Note that some old identities that are in productionized cred instances
+          // do contain subtypes in the address.
+          NodeAddress.fromParts(["sourcecred", "core", "IDENTITY", identity.id])
         );
       }
     });
