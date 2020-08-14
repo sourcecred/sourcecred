@@ -642,6 +642,40 @@ describe("ledger/ledger", () => {
         active: false,
       });
     });
+
+    describe("accountByAddress", () => {
+      it("returns null if no account matches the address", () => {
+        const ledger = new Ledger();
+        expect(ledger.accountByAddress(NodeAddress.empty)).toBe(null);
+      });
+      it("retrieves an account by innate address", () => {
+        const ledger = ledgerWithIdentities();
+        const account = ledger.account(id1);
+        const address = account.identity.address;
+        expect(ledger.accountByAddress(address)).toEqual(account);
+      });
+      it("retrieves an account by alias address", () => {
+        const ledger = ledgerWithIdentities();
+        ledger.addAlias(id1, alias);
+        const account = ledger.account(id1);
+        const address = alias.address;
+        expect(ledger.accountByAddress(address)).toEqual(account);
+      });
+      it("after merge, retrieves an account by target's innate address", () => {
+        const ledger = ledgerWithIdentities();
+        const addr2 = ledger.account(id2).identity.address;
+        ledger.mergeIdentities({base: id1, target: id2});
+        const account = ledger.account(id1);
+        expect(ledger.accountByAddress(addr2)).toBe(account);
+      });
+      it("after merge, retrieves an account by target's alias address", () => {
+        const ledger = ledgerWithIdentities();
+        ledger.addAlias(id2, alias);
+        ledger.mergeIdentities({base: id1, target: id2});
+        const account = ledger.account(id1);
+        expect(ledger.accountByAddress(alias.address)).toBe(account);
+      });
+    });
   });
 
   describe("grain updates", () => {
