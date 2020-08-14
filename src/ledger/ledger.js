@@ -131,6 +131,19 @@ export class Ledger {
   }
 
   /**
+   * Return the account matching a given NodeAddress, if one exists.
+   *
+   * Returns null if there is no account matching that address.
+   */
+  accountByAddress(address: NodeAddressT): Account | null {
+    const identityId = this._aliasAddressToIdentity.get(address);
+    if (identityId == null) {
+      return null;
+    }
+    return this.account(identityId);
+  }
+
+  /**
    * Create an account in the ledger.
    *
    * This will reserve the identity's name, and its innate address.
