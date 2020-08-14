@@ -32,7 +32,7 @@ describe("ledger/identity/identity", () => {
     });
     it("errors on invalid names", () => {
       const fail = () => newIdentity("USER", "bad string");
-      expect(fail).toThrowError("invalid login");
+      expect(fail).toThrowError("invalid name");
     });
     it("errors on invalid subtype", () => {
       // $FlowExpectedError

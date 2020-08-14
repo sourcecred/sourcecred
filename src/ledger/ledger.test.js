@@ -113,16 +113,16 @@ describe("ledger/ledger", () => {
           },
         ]);
       });
-      it("throws an error if the login is invalid", () => {
+      it("throws an error if the name is invalid", () => {
         const ledger = new Ledger();
         const thunk = () => ledger.createIdentity("USER", "foo bar");
-        failsWithoutMutation(ledger, thunk, "invalid login");
+        failsWithoutMutation(ledger, thunk, "invalid name");
       });
-      it("throws an error if the login is taken", () => {
+      it("throws an error if the name is taken", () => {
         const ledger = new Ledger();
         ledger.createIdentity("USER", "foo");
         const thunk = () => ledger.createIdentity("USER", "foo");
-        failsWithoutMutation(ledger, thunk, "login already taken");
+        failsWithoutMutation(ledger, thunk, "name already taken");
       });
       it("throws an error given an identity with aliases", () => {
         const ledger = new Ledger();
@@ -195,7 +195,7 @@ describe("ledger/ledger", () => {
           "renameIdentity: no identity matches id"
         );
       });
-      it("fails on login conflict", () => {
+      it("fails on name conflict", () => {
         const ledger = new Ledger();
         const fooId = ledger.createIdentity("USER", "foo");
         ledger.createIdentity("USER", "bar");
@@ -203,14 +203,14 @@ describe("ledger/ledger", () => {
         failsWithoutMutation(
           ledger,
           thunk,
-          "renameIdentity: conflict on login bar"
+          "renameIdentity: conflict on name bar"
         );
       });
-      it("fails on invalid login", () => {
+      it("fails on invalid name", () => {
         const ledger = new Ledger();
         const fooId = ledger.createIdentity("USER", "foo");
         const thunk = () => ledger.renameIdentity(fooId, "foo bar");
-        failsWithoutMutation(ledger, thunk, "invalid login");
+        failsWithoutMutation(ledger, thunk, "invalid name");
       });
     });
 
