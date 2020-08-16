@@ -101,7 +101,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const [ledger, setLedger] = React.useState<Ledger>(loadSuccess.ledger);
   const history = useHistory();
   const wrapSetLedger = (l) => {
-    console.log("wrapSetLedger");
+    console.log("the ledger was changed!");
     setLedger(l);
   };
   return (

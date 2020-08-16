@@ -1,9 +1,9 @@
 // @flow
-import React, {useState} from "react";
-import {type Identity} from "../../ledger/identity";
+import React, {useState, useEffect} from "react";
+import {Autocomplete} from "@material-ui/lab";
+import {type Identity, type IdentityId} from "../../ledger/identity";
 import {Ledger} from "../../ledger/ledger";
 import {AliasView} from "./AliasView";
-import {IdentityMerger} from "./IdentityMerger";
 import {makeStyles} from "@material-ui/core/styles";
 import {
   Button,
@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme) => {
 });
 
 export const LedgerAdmin = ({ledger, setLedger}: Props) => {
-  console.log("LedgerAdmin");
+  console.log("render LedgerAdmin");
   const classes = useStyles();
   const [nextIdentityName, setIdentityName] = useState<string>("");
   const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
@@ -78,15 +78,14 @@ export const LedgerAdmin = ({ledger, setLedger}: Props) => {
   };
 
   const toggleIdentityActivation = ({id}: Identity) => {
-    let nextLedger;
     if (ledger.account(id).active) {
-      nextLedger = ledger.deactivate(id);
+      ledger.deactivate(id);
       setCheckBoxSelected(false);
     } else {
-      nextLedger = ledger.activate(id);
+      ledger.activate(id);
       setCheckBoxSelected(true);
     }
-    setLedger(nextLedger);
+    setLedger(ledger);
   };
 
   const resetIdentity = () => {
@@ -212,3 +211,74 @@ export const LedgerAdmin = ({ledger, setLedger}: Props) => {
     </Container>
   );
 };
+
+type IdentityProps = {|
+  +selectedIdentityId: IdentityId,
+  +ledger: Ledger,
+  +setLedger: (Ledger) => void,
+|};
+
+const identityUseStyles = makeStyles({
+  element: {margin: "20px"},
+  aliasesHeader: {margin: "20px", marginBottom: 0},
+});
+
+export function IdentityMerger({
+  selectedIdentityId,
+  ledger,
+  setLedger,
+}: IdentityProps) {
+  const classes = identityUseStyles();
+  const [inputValue, setInputValue] = useState("");
+
+  const potentialIdentities = ledger
+    .accounts()
+    .map((a) => a.identity)
+    .filter((i) => i.id !== selectedIdentityId);
+
+  const identitiesMatchingSearch = (input: string): Identity[] =>
+    potentialIdentities.filter(({name}) =>
+      name.toLowerCase().includes(input.toLowerCase())
+    );
+
+  const [inputItems, setInputItems] = useState(identitiesMatchingSearch(""));
+
+  const setSearch = (input: string = "") =>
+    setInputItems(identitiesMatchingSearch(input));
+
+  useEffect(() => setSearch(), [selectedIdentityId]);
+
+  return (
+    <>
+      <Autocomplete
+        onInputChange={(_, value, reason) => {
+          if (reason === "input") {
+            setSearch(value);
+            setInputValue(value);
+          }
+        }}
+        onChange={(_, selectedItem, reason) => {
+          if (reason === "select-option") {
+            console.log("setLedger in IdentityMerger");
+            const newLedger = ledger.mergeIdentities({
+              base: selectedIdentityId,
+              target: selectedItem.id,
+            });
+            setLedger(newLedger);
+            setSearch("");
+            setInputValue("");
+          }
+        }}
+        className={classes.element}
+        freeSolo
+        disableClearable
+        options={inputItems}
+        getOptionLabel={({name}) => name || ""}
+        inputValue={inputValue}
+        renderInput={(params) => (
+          <TextField {...params} variant="outlined" label="Identity" />
+        )}
+      />
+    </>
+  );
+}
