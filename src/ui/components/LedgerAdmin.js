@@ -1,6 +1,7 @@
 // @flow
+
 import React, {useState} from "react";
-import {type Identity} from "../../ledger/identity";
+import {type Identity, type IdentityId} from "../../ledger/identity";
 import {CredView} from "../../analysis/credView";
 import {AliasSelector} from "./AliasSelector";
 import {makeStyles} from "@material-ui/core/styles";
@@ -57,7 +58,7 @@ export const LedgerAdmin = ({credView}: Props) => {
 
   const classes = useStyles();
   const [nextIdentityName, setIdentityName] = useState<string>("");
-  const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
+  const [selectedId, setSelectedId] = useState<IdentityId | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
 
@@ -65,19 +66,16 @@ export const LedgerAdmin = ({credView}: Props) => {
     setIdentityName(event.currentTarget.value);
 
   const createOrUpdateIdentity = () => {
-    if (!currentIdentity) {
+    if (!selectedId) {
       const newID = ledger.createIdentity("USER", nextIdentityName);
       setActiveIdentity(ledger.account(newID).identity);
     } else {
-      const {id} = currentIdentity;
-      ledger.renameIdentity(id, nextIdentityName);
-      setIdentityName("");
-      setCurrentIdentity(null);
+      ledger.renameIdentity(selectedId, nextIdentityName);
     }
     updateLedger(ledger);
   };
 
-  const toggleIdentityActivation = ({id}: Identity) => {
+  const toggleIdentityActivation = (id: IdentityId) => {
     let nextLedger;
     if (ledger.account(id).active) {
       nextLedger = ledger.deactivate(id);
@@ -87,19 +85,18 @@ export const LedgerAdmin = ({credView}: Props) => {
       setCheckBoxSelected(true);
     }
     updateLedger(nextLedger);
-    setCurrentIdentity(nextLedger.account(id).identity);
   };
 
   const resetIdentity = () => {
     setIdentityName("");
-    setCurrentIdentity(null);
+    setSelectedId(null);
     setCheckBoxSelected(false);
     setPromptString("Add Identity: ");
   };
 
   const setActiveIdentity = (identity: Identity) => {
     setIdentityName(identity.name);
-    setCurrentIdentity(identity);
+    setSelectedId(identity.id);
     setCheckBoxSelected(ledger.account(identity.id).active);
     setPromptString("Update Identity: ");
   };
@@ -148,14 +145,14 @@ export const LedgerAdmin = ({credView}: Props) => {
           value={nextIdentityName}
           label={"Name"}
         />
-        {currentIdentity && (
+        {selectedId && (
           <FormControlLabel
             fullWidth
             className={classes.checkboxElement}
             control={
               <Checkbox
                 checked={checkboxSelected}
-                onChange={() => toggleIdentityActivation(currentIdentity)}
+                onChange={() => toggleIdentityActivation(selectedId)}
                 name="active"
                 color="primary"
               />
@@ -172,7 +169,7 @@ export const LedgerAdmin = ({credView}: Props) => {
           variant="contained"
           onClick={createOrUpdateIdentity}
         >
-          {currentIdentity ? "update username" : "create identity"}
+          {selectedId ? "update username" : "create identity"}
         </Button>
         <Button
           className={classes.element}
@@ -192,7 +189,7 @@ export const LedgerAdmin = ({credView}: Props) => {
         >
           save ledger to disk
         </Button>
-        {currentIdentity && (
+        {selectedId && (
           <Button
             className={classes.element}
             size="large"
@@ -204,11 +201,8 @@ export const LedgerAdmin = ({credView}: Props) => {
           </Button>
         )}
       </div>
-      {currentIdentity && (
-        <AliasSelector
-          selectedIdentityId={currentIdentity.id}
-          credView={credView}
-        />
+      {selectedId && (
+        <AliasSelector selectedIdentityId={selectedId} credView={credView} />
       )}
     </Container>
   );
