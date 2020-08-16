@@ -16,14 +16,8 @@ import * as weightedGraph from "../core/weightedGraph";
 import * as weights from "../core/weights";
 import * as graphToMarkovChain from "../core/algorithm/graphToMarkovChain";
 import * as markovChain from "../core/algorithm/markovChain";
-import * as timelineCred from "../analysis/timeline/timelineCred";
 
 export default deepFreeze({
-  analysis: {
-    timeline: {
-      timelineCred,
-    },
-  },
   core: {
     address,
     algorithm: {
