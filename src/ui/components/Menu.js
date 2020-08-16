@@ -8,7 +8,7 @@ import TransformIcon from "@material-ui/icons/Transform";
 
 type menuProps = {|onMenuClick: Function|};
 
-const Menu = ({onMenuClick}: menuProps) => {
+const Menu = (hasBackend: Boolean) => ({onMenuClick}: menuProps) => {
   const open = useSelector((state) => state.admin.ui.sidebarOpen);
   return (
     <>
@@ -26,20 +26,24 @@ const Menu = ({onMenuClick}: menuProps) => {
         onClick={onMenuClick}
         sidebarIsOpen={open}
       />
-      <MenuItemLink
-        to="/admin"
-        primaryText="Ledger Admin"
-        leftIcon={<DefaultIcon />}
-        onClick={onMenuClick}
-        sidebarIsOpen={open}
-      />
-      <MenuItemLink
-        to="/transfer"
-        primaryText="Transfer Grain"
-        leftIcon={<TransformIcon />}
-        onClick={onMenuClick}
-        sidebarIsOpen={open}
-      />
+      {hasBackend && (
+        <>
+          <MenuItemLink
+            to="/admin"
+            primaryText="Ledger Admin"
+            leftIcon={<DefaultIcon />}
+            onClick={onMenuClick}
+            sidebarIsOpen={open}
+          />
+          <MenuItemLink
+            to="/transfer"
+            primaryText="Transfer Grain"
+            leftIcon={<TransformIcon />}
+            onClick={onMenuClick}
+            sidebarIsOpen={open}
+          />
+        </>
+      )}
     </>
   );
 };

@@ -27,34 +27,40 @@ const theme = createMuiTheme({
   },
 });
 
-const AppLayout = (props) => (
-  <Layout {...props} appBar={AppBar} menu={withRouter(Menu)} />
+const AppLayout = (hasBackend: Boolean) => (props) => (
+  <Layout {...props} appBar={AppBar} menu={withRouter(Menu(hasBackend))} />
 );
 
 const customRoutes = (
   credView: CredView,
+  hasBackend: Boolean,
   ledger: Ledger,
   setLedger: (Ledger) => void
-) => [
-  <Route key="explorer" exact path="/explorer">
-    <Explorer initialView={credView} />
-  </Route>,
-  <Route key="root" exact path="/">
-    <Redirect to="/explorer" />
-  </Route>,
-  <Route key="grain" exact path="/grain">
-    <GrainAccountOverview credView={credView} ledger={ledger} />
-  </Route>,
-  <Route key="admin" exact path="/admin">
-    <LedgerAdmin credView={credView} ledger={ledger} setLedger={setLedger} />
-  </Route>,
-  <Route key="transfer" exact path="/transfer">
-    <TransferGrain ledger={ledger} setLedger={setLedger} />
-  </Route>,
-  <Route key="special-distribution" exact path="/special-distribution">
-    <SpecialGrainDistribution ledger={ledger} setLedger={setLedger} />
-  </Route>,
-];
+) => {
+  const routes = [
+    <Route key="explorer" exact path="/explorer">
+      <Explorer initialView={credView} />
+    </Route>,
+    <Route key="root" exact path="/">
+      <Redirect to="/explorer" />
+    </Route>,
+    <Route key="grain" exact path="/grain">
+      <GrainAccountOverview credView={credView} ledger={ledger} />
+    </Route>,
+  ];
+  const backendRoutes = [
+    <Route key="admin" exact path="/admin">
+      <LedgerAdmin credView={credView} ledger={ledger} setLedger={setLedger} />
+    </Route>,
+    <Route key="transfer" exact path="/transfer">
+      <TransferGrain ledger={ledger} setLedger={setLedger} />
+    </Route>,
+    <Route key="special-distribution" exact path="/special-distribution">
+      <SpecialGrainDistribution ledger={ledger} setLedger={setLedger} />
+    </Route>,
+  ];
+  return routes.concat(hasBackend ? backendRoutes : []);
+};
 
 const AdminApp = () => {
   const [loadResult, setLoadResult] = React.useState<LoadResult | null>(null);
@@ -96,11 +102,16 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const history = useHistory();
   return (
     <Admin
-      layout={AppLayout}
+      layout={AppLayout(loadSuccess.hasBackend)}
       theme={theme}
       dataProvider={dataProvider}
       history={history}
-      customRoutes={customRoutes(loadSuccess.credView, ledger, setLedger)}
+      customRoutes={customRoutes(
+        loadSuccess.credView,
+        loadSuccess.hasBackend,
+        ledger,
+        setLedger
+      )}
     >
       {/*
           This dummy resource is required to get react

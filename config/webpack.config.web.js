@@ -76,6 +76,14 @@ async function makeConfig(
         app.get(`/cache`, rejectCache);
         app.get(`/cache/*`, rejectCache);
 
+        // override static config to enable ledger updates
+        app.get("/static/server-info.json", (
+          _unused_req,
+          res /*: ExpressResponse */
+        ) => {
+          res.status(200).send({hasBackend: true});
+        });
+
         // It's important that we individually whitelist directories (and the
         // sourcecred.json file) rather than indiscriminately serving from
         // root, because there might be a "permanent" frontend installed in
@@ -92,10 +100,6 @@ async function makeConfig(
         app.use(
           "/config/",
           express.static(path.join(developmentInstancePath, "config"))
-        );
-        app.use(
-          "/data/",
-          express.static(path.join(developmentInstancePath, "data"))
         );
 
         // configure the dev server to support writing the ledger to disk
@@ -265,7 +269,10 @@ async function plugins(mode /*: "development" | "production" */) {
       paths: ["/"],
       locals: {},
     }),
-    new CopyPlugin([{from: paths.favicon, to: "favicon.png"}]),
+    new CopyPlugin([
+      {from: paths.favicon, to: "favicon.png"},
+      {from: paths.serverInfoJson, to: "static/server-info.json"},
+    ]),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
     // It is absolutely essential that NODE_ENV was set to production here.

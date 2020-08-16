@@ -2,6 +2,7 @@
 
 import type {Command} from "./command";
 import {loadInstanceConfig} from "./common";
+import type {$Response as ExpressResponse} from "express";
 
 const fs = require("fs");
 const express = require("express");
@@ -21,6 +22,14 @@ const adminCommand: Command = async (args, std) => {
   }
 
   const server = express();
+
+  // override static config to enable ledger updates
+  server.get(
+    "/static/server-info.json",
+    (_unused_req, res: ExpressResponse) => {
+      res.status(200).send({hasBackend: true});
+    }
+  );
 
   // serve the static admin site and all subdirectories
   // also enables GETing data/ledger.json
