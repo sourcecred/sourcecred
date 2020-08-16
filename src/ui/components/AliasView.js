@@ -24,30 +24,23 @@ export function AliasView({selectedIdentityId, ledger}: Props) {
   if (selectedAccount == null) {
     throw new Error("Selected identity not present in ledger");
   }
-  const [inputValue, setInputValue] = useState("");
-
-  const claimedAddresses: Set<NodeAddressT> = new Set();
-  for (const {identity} of ledger.accounts()) {
-    claimedAddresses.add(identity.address);
-    for (const {address} of identity.aliases) {
-      claimedAddresses.add(address);
-    }
-  }
 
   return (
     <>
-      <h3 className={classes.aliasesHeader}>Aliases:</h3>
       {selectedAccount.identity.aliases.length > 0 && (
-        <List dense>
-          {selectedAccount.identity.aliases.map((alias, index) => (
-            <ListItem key={`selected-item-${index}`}>
-              <Markdown
-                renderers={{paragraph: "span"}}
-                source={alias.description}
-              />
-            </ListItem>
-          ))}
-        </List>
+        <>
+          <h3 className={classes.aliasesHeader}>Aliases:</h3>
+          <List dense>
+            {selectedAccount.identity.aliases.map((alias, index) => (
+              <ListItem key={alias.address}>
+                <Markdown
+                  renderers={{paragraph: "span"}}
+                  source={alias.description}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </>
       )}
     </>
   );

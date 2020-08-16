@@ -100,6 +100,10 @@ const AdminApp = () => {
 const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const [ledger, setLedger] = React.useState<Ledger>(loadSuccess.ledger);
   const history = useHistory();
+  const wrapSetLedger = (l) => {
+    console.log("wrapSetLedger");
+    setLedger(l);
+  };
   return (
     <Admin
       layout={AppLayout(loadSuccess.hasBackend)}
@@ -110,7 +114,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
         loadSuccess.credView,
         loadSuccess.hasBackend,
         ledger,
-        setLedger
+        wrapSetLedger
       )}
     >
       {/*

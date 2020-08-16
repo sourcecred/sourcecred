@@ -54,6 +54,7 @@ const useStyles = makeStyles((theme) => {
 });
 
 export const LedgerAdmin = ({ledger, setLedger}: Props) => {
+  console.log("LedgerAdmin");
   const classes = useStyles();
   const [nextIdentityName, setIdentityName] = useState<string>("");
   const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
@@ -86,7 +87,6 @@ export const LedgerAdmin = ({ledger, setLedger}: Props) => {
       setCheckBoxSelected(true);
     }
     setLedger(nextLedger);
-    setCurrentIdentity(nextLedger.account(id).identity);
   };
 
   const resetIdentity = () => {
@@ -105,12 +105,12 @@ export const LedgerAdmin = ({ledger, setLedger}: Props) => {
 
   const renderIdentities = () => {
     const renderIdentity = (i: Identity, notLastElement: boolean) => (
-      <>
-        <ListItem button onClick={() => setActiveIdentity(i)} key={i.id}>
+      <React.Fragment key={i.id}>
+        <ListItem button onClick={() => setActiveIdentity(i)}>
           {i.name}
         </ListItem>
         {notLastElement && <Divider />}
-      </>
+      </React.Fragment>
     );
     const numAccounts = ledger.accounts().length;
     return (
@@ -132,14 +132,11 @@ export const LedgerAdmin = ({ledger, setLedger}: Props) => {
         {ledger.accounts().length > 0 && <h3> (click one to update it)</h3>}
       </span>
       <div className={classes.centerRow}>
-        <List fullWidth className={classes.identityList}>
-          {renderIdentities()}
-        </List>
+        <List className={classes.identityList}>{renderIdentities()}</List>
       </div>
       <h3 className={classes.promptStringHeader}>{promptString}</h3>
       <div className={classes.centerRow}>
         <TextField
-          fullWidth
           className={classes.updateElement}
           variant="outlined"
           type="text"
@@ -149,7 +146,6 @@ export const LedgerAdmin = ({ledger, setLedger}: Props) => {
         />
         {currentIdentity && (
           <FormControlLabel
-            fullWidth
             className={classes.checkboxElement}
             control={
               <Checkbox

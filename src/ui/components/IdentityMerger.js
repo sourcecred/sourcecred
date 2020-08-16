@@ -22,9 +22,6 @@ const useStyles = makeStyles({
 export function IdentityMerger({selectedIdentityId, ledger, setLedger}: Props) {
   const classes = useStyles();
   const selectedAccount = ledger.account(selectedIdentityId);
-  if (selectedAccount == null) {
-    throw new Error("Selected identity not present in ledger");
-  }
   const [inputValue, setInputValue] = useState("");
 
   const potentialIdentities = ledger
@@ -55,6 +52,7 @@ export function IdentityMerger({selectedIdentityId, ledger, setLedger}: Props) {
         }}
         onChange={(_, selectedItem, reason) => {
           if (reason === "select-option") {
+            console.log("setLedger in IdentityMerger");
             setLedger(
               ledger.mergeIdentities({
                 base: selectedIdentityId,
