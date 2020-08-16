@@ -18,7 +18,7 @@ export function _createIdentity(member: Model.GuildMember): IdentityProposal {
   };
   const type = member.user.bot ? "BOT" : "USER";
   return {
-    pluginName: nameFromString("github"),
+    pluginName: nameFromString("discord"),
     name: coerce(name),
     type,
     alias,

@@ -20,6 +20,8 @@ import {
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
+import {createIdentities} from "./createIdentities";
+import type {IdentityProposal} from "../../ledger/identityProposal";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
@@ -72,5 +74,13 @@ export class DiscoursePlugin implements Plugin {
     const config = await loadConfig(ctx);
     const repo = await repository(ctx, config.serverUrl);
     return new DiscourseReferenceDetector(repo);
+  }
+
+  async identities(
+    ctx: PluginDirectoryContext
+  ): Promise<$ReadOnlyArray<IdentityProposal>> {
+    const config = await loadConfig(ctx);
+    const repo = await repository(ctx, config.serverUrl);
+    return createIdentities(config.serverUrl, repo);
   }
 }

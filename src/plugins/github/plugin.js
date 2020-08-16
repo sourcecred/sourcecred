@@ -26,6 +26,8 @@ import {
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
+import {createIdentities} from "./createIdentities";
+import type {IdentityProposal} from "../../ledger/identityProposal";
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_GITHUB_TOKEN";
 
@@ -121,5 +123,22 @@ export class GithubPlugin implements Plugin {
       rvs.push(rv);
     }
     return referenceDetectorFromRelationalViews(rvs);
+  }
+
+  async identities(
+    ctx: PluginDirectoryContext
+  ): Promise<$ReadOnlyArray<IdentityProposal>> {
+    const cache = new CacheProviderImpl(ctx);
+    const token = getTokenFromEnv();
+    const config = await loadConfig(ctx);
+
+    let identities = [];
+    for (const repoId of config.repoIds) {
+      const repo = await fetchGithubRepoFromCache(repoId, {token, cache});
+      const rv = new RelationalView();
+      rv.addRepository(repo);
+      identities = [...identities, ...createIdentities(rv)];
+    }
+    return identities;
   }
 }

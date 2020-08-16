@@ -21,6 +21,8 @@ import {
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
+import {createIdentities} from "./createIdentities";
+import type {IdentityProposal} from "../../ledger/identityProposal";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
@@ -81,6 +83,14 @@ export class DiscordPlugin implements Plugin {
     // TODO: Implement Discord reference detection
     // (low priority bc ppl rarely hardlink to Discord messages)
     return {addressFromUrl: () => undefined};
+  }
+
+  async identities(
+    ctx: PluginDirectoryContext
+  ): Promise<$ReadOnlyArray<IdentityProposal>> {
+    const {guildId} = await loadConfig(ctx);
+    const repo = await repository(ctx, guildId);
+    return createIdentities(repo);
   }
 }
 

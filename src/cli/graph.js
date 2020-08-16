@@ -20,6 +20,7 @@ import {
 } from "./common";
 import {toJSON as weightedGraphToJSON} from "../core/weightedGraph";
 import * as pluginId from "../api/pluginId";
+import {ensureIdentityExists} from "../ledger/identityProposal";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -31,6 +32,11 @@ const graphCommand: Command = async (args, std) => {
   taskReporter.start("graph");
   const baseDir = process.cwd();
   const config: InstanceConfig = await loadInstanceConfig(baseDir);
+
+  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
+  const ledger = Ledger.parse(
+    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
+  );
 
   let pluginsToLoad = [];
   if (args.length === 0) {
@@ -51,7 +57,12 @@ const graphCommand: Command = async (args, std) => {
 
   const graphOutputPrefix = ["output", "graphs"];
 
-  const rd = await buildReferenceDetector(baseDir, config, taskReporter);
+  const rd = await buildReferenceDetector(
+    baseDir,
+    config,
+    taskReporter,
+    ledger
+  );
   for (const name of pluginsToLoad) {
     const plugin = NullUtil.get(config.bundledPlugins.get(name));
     const task = `${name}: generating graph`;
@@ -62,13 +73,19 @@ const graphCommand: Command = async (args, std) => {
     const outputDir = makePluginDir(baseDir, graphOutputPrefix, name);
     const outputPath = pathJoin(outputDir, "graph.json");
     await fs.writeFile(outputPath, serializedGraph);
+
+    const identities = await plugin.identities(dirContext, taskReporter);
+    for (const identityProposal of identities) {
+      ensureIdentityExists(ledger, identityProposal);
+    }
     taskReporter.finish(task);
   }
+  await fs.writeFile(ledgerPath, ledger.serialize());
   taskReporter.finish("graph");
   return 0;
 };
 
-async function buildReferenceDetector(baseDir, config, taskReporter) {
+async function buildReferenceDetector(baseDir, config, taskReporter, ledger) {
   taskReporter.start("reference detector");
   const rds = [];
   for (const [name, plugin] of sortBy(
@@ -83,27 +100,17 @@ async function buildReferenceDetector(baseDir, config, taskReporter) {
     taskReporter.finish(task);
   }
   taskReporter.finish("reference detector");
-  rds.push(await makeHackyIdentityNameReferenceDetector(baseDir));
+  rds.push(_hackyIdentityNameReferenceDetector(ledger));
   return new CascadingReferenceDetector(rds);
 }
 
-async function makeHackyIdentityNameReferenceDetector(
-  baseDir
-): Promise<ReferenceDetector> {
-  // Hack to support old-school (deprecated) "initiatives files":
-  // We need to be able to parse references to usernames, e.g. "@yalor", so
-  // we need a reference detector that will match these to identities in the
-  // Ledger. This isn't a robust addressing scheme, since identities are re-nameable;
-  // in v2 the initiatives plugin will be re-written to use identity node addresses instead.
-  // This hack can be safely deleted once we no longer support initiatives files that refer
-  // to identities by their names instead of their IDs.
-  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
-  const ledger = Ledger.parse(
-    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
-  );
-  return _hackyIdentityNameReferenceDetector(ledger);
-}
-
+// Hack to support old-school (deprecated) "initiatives files":
+// We need to be able to parse references to usernames, e.g. "@yalor", so
+// we need a reference detector that will match these to identities in the
+// Ledger. This isn't a robust addressing scheme, since identities are re-nameable;
+// in v2 the initiatives plugin will be re-written to use identity node addresses instead.
+// This hack can be safely deleted once we no longer support initiatives files that refer
+// to identities by their names instead of their IDs.
 export function _hackyIdentityNameReferenceDetector(
   ledger: Ledger
 ): ReferenceDetector {
