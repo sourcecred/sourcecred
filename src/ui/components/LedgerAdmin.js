@@ -2,8 +2,8 @@
 import React, {useState} from "react";
 import {type Identity} from "../../ledger/identity";
 import {Ledger} from "../../ledger/ledger";
-import {CredView} from "../../analysis/credView";
-import {AliasSelector} from "./AliasSelector";
+import {AliasView} from "./AliasView";
+import {IdentityMerger} from "./IdentityMerger";
 import {makeStyles} from "@material-ui/core/styles";
 import {
   Button,
@@ -17,7 +17,6 @@ import {
 } from "@material-ui/core";
 
 export type Props = {|
-  +credView: CredView,
   +ledger: Ledger,
   +setLedger: (Ledger) => void,
 |};
@@ -54,7 +53,7 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
+export const LedgerAdmin = ({ledger, setLedger}: Props) => {
   const classes = useStyles();
   const [nextIdentityName, setIdentityName] = useState<string>("");
   const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
@@ -205,12 +204,14 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
         )}
       </div>
       {currentIdentity && (
-        <AliasSelector
-          selectedIdentityId={currentIdentity.id}
-          ledger={ledger}
-          setLedger={setLedger}
-          credView={credView}
-        />
+        <>
+          <AliasView selectedIdentityId={currentIdentity.id} ledger={ledger} />
+          <IdentityMerger
+            selectedIdentityId={currentIdentity.id}
+            ledger={ledger}
+            setLedger={setLedger}
+          />
+        </>
       )}
     </Container>
   );

@@ -50,7 +50,7 @@ const customRoutes = (
   ];
   const backendRoutes = [
     <Route key="admin" exact path="/admin">
-      <LedgerAdmin credView={credView} ledger={ledger} setLedger={setLedger} />
+      <LedgerAdmin ledger={ledger} setLedger={setLedger} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
       <TransferGrain ledger={ledger} setLedger={setLedger} />
