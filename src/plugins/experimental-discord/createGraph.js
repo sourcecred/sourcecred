@@ -39,7 +39,7 @@ export function userAddress(userId: Model.Snowflake): NodeAddressT {
   return NodeAddress.append(memberNodeType.prefix, "user", userId);
 }
 
-function memberAddress(member: Model.GuildMember): NodeAddressT {
+export function memberAddress(member: Model.GuildMember): NodeAddressT {
   return NodeAddress.append(
     memberNodeType.prefix,
     member.user.bot ? "bot" : "user",
