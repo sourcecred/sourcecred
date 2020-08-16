@@ -5,6 +5,7 @@ import type {WeightedGraph} from "../core/weightedGraph";
 import type {ReferenceDetector} from "../core/references/referenceDetector";
 import type {TaskReporter} from "../util/taskReporter";
 import type {PluginId} from "./pluginId";
+import type {IdentityProposal} from "../ledger/identityProposal";
 
 export interface Plugin {
   +id: PluginId;
@@ -19,6 +20,10 @@ export interface Plugin {
     PluginDirectoryContext,
     TaskReporter
   ): Promise<ReferenceDetector>;
+  identities(
+    PluginDirectoryContext,
+    TaskReporter
+  ): Promise<$ReadOnlyArray<IdentityProposal>>;
 }
 
 export interface PluginDirectoryContext {

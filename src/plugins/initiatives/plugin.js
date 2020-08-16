@@ -15,6 +15,7 @@ import {
 import {loadJson} from "../../util/disk";
 import {loadDirectory as _loadDirectory} from "./initiativesDirectory";
 import * as Weights from "../../core/weights";
+import type {IdentityProposal} from "../../ledger/identityProposal";
 
 async function loadConfig(
   ctx: PluginDirectoryContext
@@ -69,5 +70,10 @@ export class InitiativesPlugin implements Plugin {
     });
 
     return referenceDetector;
+  }
+
+  async identities(): Promise<$ReadOnlyArray<IdentityProposal>> {
+    // Initiatives plugin is a consumer of identities, but not a producer.
+    return [];
   }
 }
