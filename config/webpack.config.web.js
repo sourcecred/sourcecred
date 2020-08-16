@@ -101,10 +101,6 @@ async function makeConfig(
           "/config/",
           express.static(path.join(developmentInstancePath, "config"))
         );
-        app.use(
-          "/data/",
-          express.static(path.join(developmentInstancePath, "data"))
-        );
 
         // configure the dev server to support writing the ledger to disk
         app.use(express.text());
