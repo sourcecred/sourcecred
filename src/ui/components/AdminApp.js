@@ -92,13 +92,32 @@ const AdminApp = () => {
 };
 
 /**
+ * The ledger is a piece of mutable state.
+ * React does not play nicely with mutable state--it sees that the state referentially
+ * equal and sometimes doesn't rerender even though it actually changed.
+ *
+ * Therefore, we start storing the ledger in the containing state with a mutation count.
+ * Thus, any time the ledger changes, the mutation count changes, the state is re-constructed,
+ * and thus we don't have referentially equal but semantically distinct state anymore.
+ */
+type LedgerWithMutationCount = {|
+  +ledger: Ledger,
+  +count: number,
+|};
+function ledgerWithMutationCount(ledger: Ledger): LedgerWithMutationCount {
+  return {ledger, count: ledger.eventLog().length};
+}
+
+/**
  * AdminInner keeps track of the Ledger state so that if one component
  * changes the ledger, the others use the updated ledger instead of the
  * initial one. We may want to handle CredViews the same way, since the
  * explorer can re-calculate it.
  */
 const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
-  const [ledger, setLedger] = React.useState<Ledger>(loadSuccess.ledger);
+  const [ledger, setLedger] = React.useState<LedgerWithMutationCount>(
+    ledgerWithMutationCount(loadSuccess.ledger)
+  );
   const history = useHistory();
   return (
     <Admin
@@ -109,8 +128,8 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
       customRoutes={customRoutes(
         loadSuccess.credView,
         loadSuccess.hasBackend,
-        ledger,
-        setLedger
+        ledger.ledger,
+        (ledger: Ledger) => setLedger(ledgerWithMutationCount(ledger))
       )}
     >
       {/*
