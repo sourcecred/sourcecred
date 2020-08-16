@@ -14,6 +14,7 @@ module.exports = {
   favicon: resolveApp("src/assets/logo/rasterized/logo_32.png"),
   appBuild: resolveApp("build"),
   appIndexJs: resolveApp("src/ui/index.js"),
+  serverInfoJson: resolveApp("src/ui/server-info.json"),
   appServerSideRenderingIndexJs: resolveApp("src/ui/server.js"),
   appPackageJson: resolveApp("package.json"),
   appSrc: resolveApp("src"),
