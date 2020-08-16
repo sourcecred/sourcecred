@@ -1,10 +1,20 @@
 // @flow
-
 import React, {useState} from "react";
 import {type Identity} from "../../ledger/identity";
 import {Ledger} from "../../ledger/ledger";
 import {CredView} from "../../analysis/credView";
 import {AliasSelector} from "./AliasSelector";
+import {makeStyles} from "@material-ui/core/styles";
+import {
+  Button,
+  Checkbox,
+  Container,
+  Divider,
+  FormControlLabel,
+  List,
+  ListItem,
+  TextField,
+} from "@material-ui/core";
 
 export type Props = {|
   +credView: CredView,
@@ -12,20 +22,49 @@ export type Props = {|
   +setLedger: (Ledger) => void,
 |};
 
+const useStyles = makeStyles((theme) => {
+  const marginNum = 20;
+  const flexBasis = marginNum * 2;
+  return {
+    root: {
+      color: theme.palette.text.primary,
+      width: "80%",
+      margin: "0 auto",
+      padding: "0 5em 5em",
+    },
+    identityList: {
+      backgroundColor: theme.palette.background.paper,
+      width: "100%",
+      margin: `${marginNum}px`,
+    },
+    centerRow: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    element: {flex: 1, margin: `${marginNum}px`},
+    updateElement: {
+      flexGrow: 2,
+      flexBasis: `${flexBasis}px`,
+      margin: `${marginNum}px`,
+    },
+    checkboxElement: {flexGrow: 1, flexBasis: 0, margin: `${marginNum}px`},
+    promptStringHeader: {margin: `${marginNum}px`, marginBottom: 0},
+    IdentitiesHeader: {margin: `${marginNum}px`},
+  };
+});
+
 export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
+  const classes = useStyles();
   const [nextIdentityName, setIdentityName] = useState<string>("");
   const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
 
-  function changeIdentityName(event: SyntheticInputEvent<HTMLInputElement>) {
+  const changeIdentityName = (event: SyntheticInputEvent<HTMLInputElement>) =>
     setIdentityName(event.currentTarget.value);
-  }
 
-  function createOrUpdateIdentity(
-    event: SyntheticInputEvent<HTMLInputElement>
-  ) {
-    event.preventDefault();
+  const createOrUpdateIdentity = () => {
     if (!currentIdentity) {
       const newID = ledger.createIdentity("USER", nextIdentityName);
       setActiveIdentity(ledger.account(newID).identity);
@@ -36,9 +75,9 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
       setCurrentIdentity(null);
     }
     setLedger(ledger);
-  }
+  };
 
-  function toggleIdentityActivation({id}: Identity) {
+  const toggleIdentityActivation = ({id}: Identity) => {
     let nextLedger;
     if (ledger.account(id).active) {
       nextLedger = ledger.deactivate(id);
@@ -49,107 +88,130 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
     }
     setLedger(nextLedger);
     setCurrentIdentity(nextLedger.account(id).identity);
-  }
+  };
 
-  function setActiveIdentity(identity: Identity) {
-    const {name} = identity;
-    if (currentIdentity && name === currentIdentity.name) {
-      setIdentityName("");
-      setCurrentIdentity(null);
-      setCheckBoxSelected(false);
-      setPromptString("Add Identity: ");
-    } else {
-      setIdentityName(name);
-      setCurrentIdentity(identity);
-      setCheckBoxSelected(ledger.account(identity.id).active);
-      setPromptString("Update Identity: ");
-    }
-  }
-  return (
-    <div
-      style={{
-        width: "80%",
-        margin: "0 auto",
-        background: "white",
-        padding: "0 5em 5em",
-      }}
-    >
-      <h1>Identities</h1>
-      {ledger.accounts().length > 0 && <h3>click one to update it</h3>}
-      <ul>{renderIdentities()}</ul>
-      <h1>{promptString}</h1>
-      <form onSubmit={(e) => createOrUpdateIdentity(e)}>
-        <p>
-          <label htmlFor="Name">Name</label> <br />
-          <input
-            type="text"
-            name="Name"
-            value={nextIdentityName}
-            onChange={(e) => changeIdentityName(e)}
-          />
-        </p>
-        <input
-          type="submit"
-          value={currentIdentity ? "update username" : "create identity"}
-        />
-      </form>
-      <input
-        type="button"
-        value="save ledger to disk"
-        onClick={() => {
-          fetch("data/ledger.json", {
-            headers: {
-              Accept: "text/plain",
-              "Content-Type": "text/plain",
-            },
-            method: "POST",
-            body: ledger.serialize(),
-          });
-        }}
-      />
-      {currentIdentity && (
-        <>
-          <br />
-          <input
-            type="button"
-            value="New identity"
-            onClick={() => setActiveIdentity(currentIdentity)}
-          />
-          <br />
-          <input
-            type="checkbox"
-            id="active"
-            name="active"
-            checked={checkboxSelected}
-            onChange={() => toggleIdentityActivation(currentIdentity)}
-          />
-          <label htmlFor="active">Account is active</label>
-          <AliasSelector
-            selectedIdentityId={currentIdentity.id}
-            ledger={ledger}
-            setLedger={setLedger}
-            credView={credView}
-          />
-        </>
-      )}
-    </div>
-  );
+  const resetIdentity = () => {
+    setIdentityName("");
+    setCurrentIdentity(null);
+    setCheckBoxSelected(false);
+    setPromptString("Add Identity: ");
+  };
 
-  function renderIdentities() {
-    function renderIdentity(i: Identity) {
-      return (
-        <li onClick={() => setActiveIdentity(i)} key={i.id}>
+  const setActiveIdentity = (identity: Identity) => {
+    setIdentityName(identity.name);
+    setCurrentIdentity(identity);
+    setCheckBoxSelected(ledger.account(identity.id).active);
+    setPromptString("Update Identity: ");
+  };
+
+  const renderIdentities = () => {
+    const renderIdentity = (i: Identity, notLastElement: boolean) => (
+      <>
+        <ListItem button onClick={() => setActiveIdentity(i)} key={i.id}>
           {i.name}
-        </li>
-      );
-    }
+        </ListItem>
+        {notLastElement && <Divider />}
+      </>
+    );
+    const numAccounts = ledger.accounts().length;
     return (
-      <div>
+      <>
         {ledger
           .accounts()
           .map((a) => a.identity)
-          .map(renderIdentity)}
-      </div>
+          .map((identity, index) =>
+            renderIdentity(identity, index < numAccounts - 1)
+          )}
+      </>
     );
-  }
+  };
+
+  return (
+    <Container className={classes.root}>
+      <span className={classes.centerRow}>
+        <h1 className={classes.IdentitiesHeader}>Identities</h1>{" "}
+        {ledger.accounts().length > 0 && <h3> (click one to update it)</h3>}
+      </span>
+      <div className={classes.centerRow}>
+        <List fullWidth className={classes.identityList}>
+          {renderIdentities()}
+        </List>
+      </div>
+      <h3 className={classes.promptStringHeader}>{promptString}</h3>
+      <div className={classes.centerRow}>
+        <TextField
+          fullWidth
+          className={classes.updateElement}
+          variant="outlined"
+          type="text"
+          onChange={changeIdentityName}
+          value={nextIdentityName}
+          label={"Name"}
+        />
+        {currentIdentity && (
+          <FormControlLabel
+            fullWidth
+            className={classes.checkboxElement}
+            control={
+              <Checkbox
+                checked={checkboxSelected}
+                onChange={() => toggleIdentityActivation(currentIdentity)}
+                name="active"
+                color="primary"
+              />
+            }
+            label="Account is active"
+          />
+        )}
+      </div>
+      <div className={classes.centerRow}>
+        <Button
+          className={classes.element}
+          size="large"
+          color="primary"
+          variant="contained"
+          onClick={createOrUpdateIdentity}
+        >
+          {currentIdentity ? "update username" : "create identity"}
+        </Button>
+        <Button
+          className={classes.element}
+          size="large"
+          color="primary"
+          variant="contained"
+          onClick={() => {
+            fetch("data/ledger.json", {
+              headers: {
+                Accept: "text/plain",
+                "Content-Type": "text/plain",
+              },
+              method: "POST",
+              body: ledger.serialize(),
+            });
+          }}
+        >
+          save ledger to disk
+        </Button>
+        {currentIdentity && (
+          <Button
+            className={classes.element}
+            size="large"
+            color="primary"
+            variant="contained"
+            onClick={resetIdentity}
+          >
+            New identity
+          </Button>
+        )}
+      </div>
+      {currentIdentity && (
+        <AliasSelector
+          selectedIdentityId={currentIdentity.id}
+          ledger={ledger}
+          setLedger={setLedger}
+          credView={credView}
+        />
+      )}
+    </Container>
+  );
 };
