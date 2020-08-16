@@ -10,6 +10,7 @@ export type LoadSuccess = {|
   +credView: CredView,
   +ledger: Ledger,
   +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
+  +hasBackend: Boolean,
 |};
 export type LoadFailure = {|+type: "FAILURE", +error: any|};
 
@@ -18,6 +19,7 @@ export async function load(): Promise<LoadResult> {
     fetch("output/credResult.json"),
     fetch("sourcecred.json"),
     fetch("data/ledger.json"),
+    fetch("static/server-info.json"),
   ];
   const responses = await Promise.all(queries);
 
@@ -34,7 +36,8 @@ export async function load(): Promise<LoadResult> {
     const {bundledPlugins} = await responses[1].json();
     const rawLedger = await responses[2].text();
     const ledger = Ledger.parse(rawLedger);
-    return {type: "SUCCESS", credView, bundledPlugins, ledger};
+    const {hasBackend} = await responses[3].json();
+    return {type: "SUCCESS", credView, bundledPlugins, ledger, hasBackend};
   } catch (e) {
     console.error(e);
     return {type: "FAILURE", error: e};
