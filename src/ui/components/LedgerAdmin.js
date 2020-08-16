@@ -1,7 +1,6 @@
 // @flow
 import React, {useState} from "react";
 import {type Identity} from "../../ledger/identity";
-import {Ledger} from "../../ledger/ledger";
 import {CredView} from "../../analysis/credView";
 import {AliasSelector} from "./AliasSelector";
 import {makeStyles} from "@material-ui/core/styles";
@@ -15,11 +14,10 @@ import {
   ListItem,
   TextField,
 } from "@material-ui/core";
+import {useLedger} from "../utils/LedgerContext";
 
 export type Props = {|
   +credView: CredView,
-  +ledger: Ledger,
-  +setLedger: (Ledger) => void,
 |};
 
 const useStyles = makeStyles((theme) => {
@@ -54,7 +52,9 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
+export const LedgerAdmin = ({credView}: Props) => {
+  const {ledger, updateLedger} = useLedger();
+
   const classes = useStyles();
   const [nextIdentityName, setIdentityName] = useState<string>("");
   const [currentIdentity, setCurrentIdentity] = useState<Identity | null>(null);
@@ -74,7 +74,7 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
       setIdentityName("");
       setCurrentIdentity(null);
     }
-    setLedger(ledger);
+    updateLedger(ledger);
   };
 
   const toggleIdentityActivation = ({id}: Identity) => {
@@ -86,7 +86,7 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
       nextLedger = ledger.activate(id);
       setCheckBoxSelected(true);
     }
-    setLedger(nextLedger);
+    updateLedger(nextLedger);
     setCurrentIdentity(nextLedger.account(id).identity);
   };
 
@@ -207,8 +207,6 @@ export const LedgerAdmin = ({credView, ledger, setLedger}: Props) => {
       {currentIdentity && (
         <AliasSelector
           selectedIdentityId={currentIdentity.id}
-          ledger={ledger}
-          setLedger={setLedger}
           credView={credView}
         />
       )}

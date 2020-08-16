@@ -3,18 +3,16 @@
 import React, {useState} from "react";
 import {div, fromInteger, fromFloatString, ZERO} from "../../ledger/grain";
 import {type IdentityId} from "../../ledger/identity";
-import {Ledger, type Account} from "../../ledger/ledger";
+import {type Account} from "../../ledger/ledger";
 import AccountDropdown from "./AccountSelector";
 import {computeAllocation} from "../../ledger/grainAllocation";
 import * as uuid from "../../util/uuid";
 import type {TimestampMs} from "../../util/timestamp";
+import {useLedger} from "../utils/LedgerContext";
 
-export type Props = {|
-  +ledger: Ledger,
-  +setLedger: (Ledger) => void,
-|};
+export const SpecialGrainDistribution = () => {
+  const {ledger, updateLedger} = useLedger();
 
-export const SpecialGrainDistribution = ({ledger, setLedger}: Props) => {
   const [credTimestamp, setCredTimestamp] = useState<TimestampMs>(+Date.now());
   const [recipient, setRecipient] = useState<IdentityId | null>(null);
   const [amount, setAmount] = useState<string>("0");
@@ -42,7 +40,7 @@ export const SpecialGrainDistribution = ({ledger, setLedger}: Props) => {
         allocations: [allocation],
       };
       const nextLedger = ledger.distributeGrain(distribution);
-      setLedger(nextLedger);
+      updateLedger(nextLedger);
       setAmount(fromInteger(0));
       setRecipient(null);
     }
