@@ -10,6 +10,7 @@ export {
 } from "./identity";
 
 export type {IdentityType} from "./identityType";
+export {parser as identityTypeParser} from "./identityType";
 
 export type {Name} from "./name";
 export {nameFromString, parser as nameParser} from "./name";

@@ -1091,5 +1091,12 @@ describe("ledger/ledger", () => {
     it("serialized ledger snapshots as expected", () => {
       expect(richLedger().serialize()).toMatchSnapshot();
     });
+    it("eventLog is a separate copy from the ledger's underlying log", () => {
+      const ledger = new Ledger();
+      const log = ledger.eventLog();
+      ledger.createIdentity("USER", "foo");
+      // Ledger's own log mutated; retrieved log is static.
+      expect(log).not.toEqual(ledger.eventLog());
+    });
   });
 });
