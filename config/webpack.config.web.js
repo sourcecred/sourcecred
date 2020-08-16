@@ -76,6 +76,14 @@ async function makeConfig(
         app.get(`/cache`, rejectCache);
         app.get(`/cache/*`, rejectCache);
 
+        // override static config to enable ledger updates
+        app.get("/static/server-info.json", (
+          _unused_req,
+          res /*: ExpressResponse */
+        ) => {
+          res.status(200).send({hasBackend: true});
+        });
+
         // It's important that we individually whitelist directories (and the
         // sourcecred.json file) rather than indiscriminately serving from
         // root, because there might be a "permanent" frontend installed in
