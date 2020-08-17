@@ -9,9 +9,9 @@ import fakeDataProvider from "ra-data-fakerest";
 import {Explorer} from "./Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
-import {GrainAccountOverview} from "./GrainAccountOverview";
-import {TransferGrain} from "./TransferGrain";
-import {SpecialGrainDistribution} from "./SpecialGrainDistribution";
+import {AccountOverview} from "./AccountOverview";
+import {Transfer} from "./Transfer";
+import {SpecialDistribution} from "./SpecialDistribution";
 import {
   load,
   type LoadResult,
@@ -53,7 +53,7 @@ const customRoutes = (
       <Redirect to="/explorer" />
     </Route>,
     <Route key="grain" exact path="/grain">
-      <GrainAccountOverview currency={currency} />
+      <AccountOverview currency={currency} />
     </Route>,
   ];
   const backendRoutes = [
@@ -61,10 +61,10 @@ const customRoutes = (
       <LedgerAdmin credView={credView} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
-      <TransferGrain currency={currency} />
+      <Transfer currency={currency} />
     </Route>,
     <Route key="special-distribution" exact path="/special-distribution">
-      <SpecialGrainDistribution />
+      <SpecialDistribution />
     </Route>,
   ];
   return routes.concat(hasBackend ? backendRoutes : []);

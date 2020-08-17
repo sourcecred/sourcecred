@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 
 type TransferProps = {|currency: CurrencyDetails|};
 
-export const TransferGrain = ({
+export const Transfer = ({
   currency: {name: currencyName, suffix: currencySuffix},
 }: TransferProps) => {
   const {ledger, updateLedger} = useLedger();

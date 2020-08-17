@@ -15,7 +15,7 @@ import {useLedger} from "../utils/LedgerContext";
 
 type OverviewProps = {|currency: CurrencyDetails|};
 
-export const GrainAccountOverview = ({
+export const AccountOverview = ({
   currency: {suffix: currencySuffix},
 }: OverviewProps) => {
   const {ledger} = useLedger();
