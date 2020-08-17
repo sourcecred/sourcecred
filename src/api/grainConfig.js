@@ -9,6 +9,8 @@ export type GrainConfig = {|
   +immediatePerWeek: number,
   +balancedPerWeek: number,
   +maxSimultaneousDistributions?: number,
+  +currencyName?: string,
+  +currencySuffix?: string,
 |};
 
 export const parser: C.Parser<GrainConfig> = C.object(
@@ -18,6 +20,8 @@ export const parser: C.Parser<GrainConfig> = C.object(
   },
   {
     maxSimultaneousDistributions: C.number,
+    currencyName: C.string,
+    currencySuffix: C.string,
   }
 );
 

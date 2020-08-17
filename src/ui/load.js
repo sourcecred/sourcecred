@@ -4,6 +4,7 @@ import {CredView} from "../analysis/credView";
 import {fromJSON as credResultFromJSON} from "../analysis/credResult";
 import {Ledger} from "../ledger/ledger";
 import {DEFAULT_SUFFIX} from "../ledger/grain.js";
+import {parser as grainConfigParser} from "../api/grainConfig";
 
 export type LoadResult = LoadSuccess | LoadFailure;
 export type CurrencyDetails = {|+name: string, +suffix: string|};
@@ -44,7 +45,7 @@ export async function load(): Promise<LoadResult> {
     const {
       currencySuffix: suffix = DEFAULT_SUFFIX,
       currencyName: name = "Grain",
-    } = await responses[4].json();
+    } = grainConfigParser.parseOrThrow(await responses[4].json());
     return {
       type: "SUCCESS",
       credView,
