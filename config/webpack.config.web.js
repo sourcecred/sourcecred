@@ -103,7 +103,7 @@ async function makeConfig(
         );
 
         // configure the dev server to support writing the ledger to disk
-        app.use(express.text());
+        app.use(express.text({limit: "50mb"}));
         const ledgerPath = path.join(
           developmentInstancePath,
           "data/ledger.json"
