@@ -3,14 +3,17 @@ import * as pluginId from "../api/pluginId";
 import {CredView} from "../analysis/credView";
 import {fromJSON as credResultFromJSON} from "../analysis/credResult";
 import {Ledger} from "../ledger/ledger";
+import {DEFAULT_SUFFIX} from "../ledger/grain.js";
 
 export type LoadResult = LoadSuccess | LoadFailure;
+export type CurrencyDetails = {|+name: string, +suffix: string|};
 export type LoadSuccess = {|
   +type: "SUCCESS",
   +credView: CredView,
   +ledger: Ledger,
   +bundledPlugins: $ReadOnlyArray<pluginId.PluginId>,
   +hasBackend: Boolean,
+  +currency: CurrencyDetails,
 |};
 export type LoadFailure = {|+type: "FAILURE", +error: any|};
 
@@ -20,6 +23,7 @@ export async function load(): Promise<LoadResult> {
     fetch("sourcecred.json"),
     fetch("data/ledger.json"),
     fetch("static/server-info.json"),
+    fetch("config/grain.json"),
   ];
   const responses = await Promise.all(queries);
 
@@ -37,7 +41,18 @@ export async function load(): Promise<LoadResult> {
     const rawLedger = await responses[2].text();
     const ledger = Ledger.parse(rawLedger);
     const {hasBackend} = await responses[3].json();
-    return {type: "SUCCESS", credView, bundledPlugins, ledger, hasBackend};
+    const {
+      currencySuffix: suffix = DEFAULT_SUFFIX,
+      currencyName: name = "Grain",
+    } = await responses[4].json();
+    return {
+      type: "SUCCESS",
+      credView,
+      bundledPlugins,
+      ledger,
+      hasBackend,
+      currency: {name, suffix},
+    };
   } catch (e) {
     console.error(e);
     return {type: "FAILURE", error: e};

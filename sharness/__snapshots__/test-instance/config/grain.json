@@ -1,5 +1,7 @@
 {
   "immediatePerWeek": 0,
   "balancedPerWeek": 1000,
-  "maxSimultaneousDistributions": 1
+  "maxSimultaneousDistributions": 1,
+  "currencyName": "Dai",
+  "currencySuffix": " DAI"
 }

@@ -12,7 +12,12 @@ import {CredView} from "../../analysis/credView";
 import {GrainAccountOverview} from "./GrainAccountOverview";
 import {TransferGrain} from "./TransferGrain";
 import {SpecialGrainDistribution} from "./SpecialGrainDistribution";
-import {load, type LoadResult, type LoadSuccess} from "../load";
+import {
+  load,
+  type LoadResult,
+  type LoadSuccess,
+  type CurrencyDetails,
+} from "../load";
 import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
 import Menu from "./Menu";
@@ -27,11 +32,19 @@ const theme = createMuiTheme({
   },
 });
 
-const AppLayout = (hasBackend: Boolean) => (props) => (
-  <Layout {...props} appBar={AppBar} menu={withRouter(Menu(hasBackend))} />
+const AppLayout = ({hasBackend, currency}: LoadSuccess) => (props) => (
+  <Layout
+    {...props}
+    appBar={AppBar}
+    menu={withRouter(Menu(hasBackend, currency))}
+  />
 );
 
-const customRoutes = (credView: CredView, hasBackend: Boolean) => {
+const customRoutes = (
+  credView: CredView,
+  hasBackend: Boolean,
+  currency: CurrencyDetails
+) => {
   const routes = [
     <Route key="explorer" exact path="/explorer">
       <Explorer initialView={credView} />
@@ -40,7 +53,7 @@ const customRoutes = (credView: CredView, hasBackend: Boolean) => {
       <Redirect to="/explorer" />
     </Route>,
     <Route key="grain" exact path="/grain">
-      <GrainAccountOverview credView={credView} />
+      <GrainAccountOverview currency={currency} />
     </Route>,
   ];
   const backendRoutes = [
@@ -48,7 +61,7 @@ const customRoutes = (credView: CredView, hasBackend: Boolean) => {
       <LedgerAdmin credView={credView} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
-      <TransferGrain />
+      <TransferGrain currency={currency} />
     </Route>,
     <Route key="special-distribution" exact path="/special-distribution">
       <SpecialGrainDistribution />
@@ -96,15 +109,17 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const history = useHistory();
 
   return (
+    // TODO (@topocount) create context for read-only instance state
     <LedgerProvider initialLedger={loadSuccess.ledger}>
       <Admin
-        layout={AppLayout(loadSuccess.hasBackend)}
+        layout={AppLayout(loadSuccess)}
         theme={theme}
         dataProvider={dataProvider}
         history={history}
         customRoutes={customRoutes(
           loadSuccess.credView,
-          loadSuccess.hasBackend
+          loadSuccess.hasBackend,
+          loadSuccess.currency
         )}
       >
         {/*
