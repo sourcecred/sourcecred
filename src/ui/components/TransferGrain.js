@@ -3,13 +3,9 @@ import React, {useState} from "react";
 import {Button, Container, TextField} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {div, format, gt, lt, fromFloatString} from "../../ledger/grain";
-import {Ledger, type Account} from "../../ledger/ledger";
+import {type Account} from "../../ledger/ledger";
 import AccountDropdown from "./AccountSelector";
-
-export type Props = {|
-  +ledger: Ledger,
-  +setLedger: (Ledger) => void,
-|};
+import {useLedger} from "../utils/LedgerContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,7 +44,9 @@ const useStyles = makeStyles((theme) => ({
   pageHeader: {color: theme.palette.text.primary},
 }));
 
-export const TransferGrain = ({ledger, setLedger}: Props) => {
+export const TransferGrain = () => {
+  const {ledger, updateLedger} = useLedger();
+
   const classes = useStyles();
   const [sender, setSender] = useState<Account | null>(null);
   const [receiver, setReceiver] = useState<Account | null>(null);
@@ -63,7 +61,7 @@ export const TransferGrain = ({ledger, setLedger}: Props) => {
         amount: fromFloatString(amount),
         memo: memo,
       });
-      setLedger(nextLedger);
+      updateLedger(nextLedger);
       setAmount("");
       setSender(nextLedger.account(sender.identity.id));
       setReceiver(nextLedger.account(receiver.identity.id));

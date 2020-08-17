@@ -9,7 +9,6 @@ import fakeDataProvider from "ra-data-fakerest";
 import {Explorer} from "./Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
-import {Ledger} from "../../ledger/ledger";
 import {GrainAccountOverview} from "./GrainAccountOverview";
 import {TransferGrain} from "./TransferGrain";
 import {SpecialGrainDistribution} from "./SpecialGrainDistribution";
@@ -17,6 +16,7 @@ import {load, type LoadResult, type LoadSuccess} from "../load";
 import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
 import Menu from "./Menu";
+import {LedgerProvider} from "../utils/LedgerContext";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -31,12 +31,7 @@ const AppLayout = (hasBackend: Boolean) => (props) => (
   <Layout {...props} appBar={AppBar} menu={withRouter(Menu(hasBackend))} />
 );
 
-const customRoutes = (
-  credView: CredView,
-  hasBackend: Boolean,
-  ledger: Ledger,
-  setLedger: (Ledger) => void
-) => {
+const customRoutes = (credView: CredView, hasBackend: Boolean) => {
   const routes = [
     <Route key="explorer" exact path="/explorer">
       <Explorer initialView={credView} />
@@ -45,18 +40,18 @@ const customRoutes = (
       <Redirect to="/explorer" />
     </Route>,
     <Route key="grain" exact path="/grain">
-      <GrainAccountOverview credView={credView} ledger={ledger} />
+      <GrainAccountOverview credView={credView} />
     </Route>,
   ];
   const backendRoutes = [
     <Route key="admin" exact path="/admin">
-      <LedgerAdmin credView={credView} ledger={ledger} setLedger={setLedger} />
+      <LedgerAdmin credView={credView} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
-      <TransferGrain ledger={ledger} setLedger={setLedger} />
+      <TransferGrain />
     </Route>,
     <Route key="special-distribution" exact path="/special-distribution">
-      <SpecialGrainDistribution ledger={ledger} setLedger={setLedger} />
+      <SpecialGrainDistribution />
     </Route>,
   ];
   return routes.concat(hasBackend ? backendRoutes : []);
@@ -98,27 +93,27 @@ const AdminApp = () => {
  * explorer can re-calculate it.
  */
 const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
-  const [ledger, setLedger] = React.useState<Ledger>(loadSuccess.ledger);
   const history = useHistory();
+
   return (
-    <Admin
-      layout={AppLayout(loadSuccess.hasBackend)}
-      theme={theme}
-      dataProvider={dataProvider}
-      history={history}
-      customRoutes={customRoutes(
-        loadSuccess.credView,
-        loadSuccess.hasBackend,
-        ledger,
-        setLedger
-      )}
-    >
-      {/*
+    <LedgerProvider initialLedger={loadSuccess.ledger}>
+      <Admin
+        layout={AppLayout(loadSuccess.hasBackend)}
+        theme={theme}
+        dataProvider={dataProvider}
+        history={history}
+        customRoutes={customRoutes(
+          loadSuccess.credView,
+          loadSuccess.hasBackend
+        )}
+      >
+        {/*
           This dummy resource is required to get react
           admin working beyond the hello world screen
         */}
-      <Resource name="dummyResource" />
-    </Admin>
+        <Resource name="dummyResource" />
+      </Admin>
+    </LedgerProvider>
   );
 };
 

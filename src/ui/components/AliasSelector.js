@@ -1,6 +1,5 @@
 // @flow
 import React, {useState, useEffect} from "react";
-import {Ledger} from "../../ledger/ledger";
 import {type Alias, type IdentityId} from "../../ledger/identity";
 import {CredView} from "../../analysis/credView";
 import {type NodeAddressT} from "../../core/graph";
@@ -10,12 +9,11 @@ import removeMd from "remove-markdown";
 import {makeStyles} from "@material-ui/core/styles";
 import {List, ListItem, TextField} from "@material-ui/core";
 import {Autocomplete} from "@material-ui/lab";
+import {useLedger} from "../utils/LedgerContext";
 
 type Props = {|
   +selectedIdentityId: IdentityId,
-  +ledger: Ledger,
   +credView: CredView,
-  +setLedger: (Ledger) => void,
 |};
 
 const useStyles = makeStyles({
@@ -23,13 +21,10 @@ const useStyles = makeStyles({
   aliasesHeader: {margin: "20px", marginBottom: 0},
 });
 
-export function AliasSelector({
-  selectedIdentityId,
-  ledger,
-  setLedger,
-  credView,
-}: Props) {
+export function AliasSelector({selectedIdentityId, credView}: Props) {
   const classes = useStyles();
+  const {ledger, updateLedger} = useLedger();
+
   const selectedAccount = ledger.account(selectedIdentityId);
   if (selectedAccount == null) {
     throw new Error("Selected identity not present in ledger");
@@ -90,7 +85,7 @@ export function AliasSelector({
         }}
         onChange={(_, selectedItem, reason) => {
           if (reason === "select-option") {
-            setLedger(ledger.addAlias(selectedIdentityId, selectedItem));
+            updateLedger(ledger.addAlias(selectedIdentityId, selectedItem));
             setAliasSearch("");
             setInputValue("");
           }

@@ -8,16 +8,14 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import {type Account, Ledger} from "../../ledger/ledger";
-import {CredView} from "../../analysis/credView";
+import {type Account} from "../../ledger/ledger";
 import * as G from "../../ledger/grain";
-export type Props = {|
-  +ledger: Ledger,
-  +credView: CredView,
-|};
+import {useLedger} from "../utils/LedgerContext";
 
-export const GrainAccountOverview = (props: Props) => {
-  const accounts = props.ledger.accounts();
+export const GrainAccountOverview = () => {
+  const {ledger} = useLedger();
+
+  const accounts = ledger.accounts();
 
   function comparator(a: Account, b: Account) {
     if (a.balance === b.balance) {
