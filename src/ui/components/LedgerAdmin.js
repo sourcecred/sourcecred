@@ -2,8 +2,8 @@
 
 import React, {useState} from "react";
 import {type Identity, type IdentityId} from "../../ledger/identity";
-import {CredView} from "../../analysis/credView";
-import {AliasSelector} from "./AliasSelector";
+import {AliasView} from "./AliasView";
+import {IdentityMerger} from "./IdentityMerger";
 import {makeStyles} from "@material-ui/core/styles";
 import {
   Button,
@@ -16,10 +16,6 @@ import {
   TextField,
 } from "@material-ui/core";
 import {useLedger} from "../utils/LedgerContext";
-
-export type Props = {|
-  +credView: CredView,
-|};
 
 const useStyles = makeStyles((theme) => {
   const marginNum = 20;
@@ -53,7 +49,7 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-export const LedgerAdmin = ({credView}: Props) => {
+export const LedgerAdmin = () => {
   const {ledger, updateLedger} = useLedger();
 
   const classes = useStyles();
@@ -202,7 +198,10 @@ export const LedgerAdmin = ({credView}: Props) => {
         )}
       </div>
       {selectedId && (
-        <AliasSelector selectedIdentityId={selectedId} credView={credView} />
+        <>
+          <AliasView selectedId={selectedId} />
+          <IdentityMerger selectedId={selectedId} />
+        </>
       )}
     </Container>
   );
