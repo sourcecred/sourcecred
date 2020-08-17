@@ -120,7 +120,8 @@
     "sharness-full": "make -sC ./sharness prove PROVE_OPTS=-vf TEST_OPTS='-v --chain-lint --long'",
     "coverage": "yarn run unit --coverage",
     "flow": "flow",
-    "lint": "eslint src config --max-warnings 0"
+    "lint": "eslint src config --max-warnings 0",
+    "prepublishOnly": "yarn build"
   },
   "license": "(MIT OR Apache-2.0)",
   "jest": {
