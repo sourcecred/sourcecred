@@ -36,7 +36,7 @@ const adminCommand: Command = async (args, std) => {
   server.use(express.static("./site"));
 
   // middleware that parses text request bodies for us
-  server.use(express.text());
+  server.use(express.text({limit: "50mb"}));
   // write posted ledger.json files to disk
   server.post("/data/ledger.json", (req, res) => {
     try {
