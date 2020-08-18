@@ -51,7 +51,7 @@ import {type TimestampMs} from "../util/timestamp";
 export type DependencyMintPolicy = {|
   // The node address that will receieve the extra minted Cred
   +address: NodeAddressT,
-  // Information on how the minted Cred varies in time.
+  // Information on how the Cred minting weight varies in time.
   +periods: $ReadOnlyArray<DependencyMintPeriod>,
 |};
 
@@ -59,7 +59,7 @@ export type DependencyMintPeriod = {|
   // What proportion of the project's raw Cred should be minted to this
   // dependency during this period. For example, if the weight is 0.05, and the
   // project has a pre-dependencies total Cred of 1000 in a given interval,
-  // then this dependench will receive an additional 50 Cred.
+  // then this dependency will receive an additional 50 Cred.
   +weight: number,
   // Timestamp or number because we allow -Infinity as the first "timestamp"
   // Within any policy, the period timestamps must be in sorted order, or else
@@ -68,13 +68,13 @@ export type DependencyMintPeriod = {|
 |};
 
 /**
- * The ProcessedMintPolicy is a DependencyMintPolicy which has
+ * The ProcessedDependencyMintPolicy is a DependencyMintPolicy which has
  * been transformed so that it matches the abstractions available when
  * we're doing raw cred computation: instead of an address, we track an index
  * into the canonical node order, and rather than arbitrary client-provided
  * periods, we compute the weight for each Interval.
  */
-export type ProcessedMintPolicy = {|
+export type ProcessedDependencyMintPolicy = {|
   +nodeIndex: number,
   +intervalWeights: $ReadOnlyArray<number>,
 |};
@@ -83,7 +83,7 @@ export function processMintPolicy(
   policy: DependencyMintPolicy,
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
   intervalStarts: $ReadOnlyArray<TimestampMs>
-): ProcessedMintPolicy {
+): ProcessedDependencyMintPolicy {
   const {address, periods} = policy;
   const nodeIndex = nodeOrder.indexOf(address);
   if (nodeIndex === -1) {

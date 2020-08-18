@@ -34,6 +34,21 @@ describe("core/dependenciesMintPolicy", () => {
         _alignPeriodsToIntervals([period1, period2], [0, 5, 10, 15, 20, 25])
       ).toEqual([0, 0, 0.5, 0.5, 0.1, 0.1]);
     });
+    it("handles a case where the period starts in-between intervals", () => {
+      const period1 = {startTimeMs: 15, weight: 0.5};
+      expect(_alignPeriodsToIntervals([period1], [0, 10, 20])).toEqual([
+        0,
+        0,
+        0.5,
+      ]);
+    });
+    it("handles a case where there are multiple periods within one interval", () => {
+      const period1 = {startTimeMs: 15, weight: 0.5};
+      const period2 = {startTimeMs: 16, weight: 0.1};
+      expect(
+        _alignPeriodsToIntervals([period1, period2], [0, 10, 20])
+      ).toEqual([0, 0, 0.1]);
+    });
     it("ignores a period if the next period has the same startTime", () => {
       const period1 = {startTimeMs: 1, weight: 0.5};
       const period2 = {startTimeMs: 1, weight: 0.1};
