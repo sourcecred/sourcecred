@@ -2,6 +2,7 @@
 
 import type {TimestampMs} from "../util/timestamp";
 import type {TimelineCredScores} from "../core/algorithm/distributionToCred";
+import type {ProcessedDependencyMintPolicy} from "../core/dependenciesMintPolicy";
 
 /**
  * Comprehensive data on a cred distribution.
@@ -20,9 +21,14 @@ export type CredData = {|
  * CredData includes this information for every node in the graph, regardless of its score.
  */
 export type NodeCredSummary = {|
+  // Total Cred for this node
   +cred: number,
+  // How much of the total Cred came from the seed
   +seedFlow: number,
+  // How much of the total Cred came from synthetic self loop
   +syntheticLoopFlow: number,
+  // How much of the total Cred came from dependency minting
+  +dependencyMintedCred: number,
 |};
 
 /**
@@ -36,6 +42,7 @@ export type NodeCredOverTime = {|
   +cred: $ReadOnlyArray<number>,
   +seedFlow: $ReadOnlyArray<number> | null,
   +syntheticLoopFlow: $ReadOnlyArray<number> | null,
+  +dependencyMintedCred: $ReadOnlyArray<number> | null,
 |};
 
 /**
@@ -59,7 +66,10 @@ export type EdgeCredOverTime = {|
   +backwardFlow: $ReadOnlyArray<number> | null,
 |};
 
-export function computeCredData(scores: TimelineCredScores): CredData {
+export function computeCredData(
+  scores: TimelineCredScores,
+  mintPolicies: $ReadOnlyArray<ProcessedDependencyMintPolicy>
+): CredData {
   const numIntervals = scores.length;
   if (numIntervals === 0) {
     return {
@@ -77,11 +87,13 @@ export function computeCredData(scores: TimelineCredScores): CredData {
     cred: 0,
     seedFlow: 0,
     syntheticLoopFlow: 0,
+    dependencyMintedCred: 0,
   }));
   const nodeOverTime = new Array(numNodes).fill(null).map(() => ({
     cred: new Array(numIntervals),
     seedFlow: new Array(numIntervals),
     syntheticLoopFlow: new Array(numIntervals),
+    dependencyMintedCred: new Array(numIntervals),
   }));
   const edgeSummaries = new Array(numEdges).fill(null).map(() => ({
     forwardFlow: 0,
@@ -99,13 +111,28 @@ export function computeCredData(scores: TimelineCredScores): CredData {
       seedFlow,
       syntheticLoopFlow,
     } = scores[i];
+    let intervalTotalCred = 0;
     for (let n = 0; n < numNodes; n++) {
+      intervalTotalCred += cred[n];
       nodeSummaries[n].cred += cred[n];
       nodeOverTime[n].cred[i] = cred[n];
       nodeSummaries[n].seedFlow += seedFlow[n];
       nodeOverTime[n].seedFlow[i] = seedFlow[n];
       nodeSummaries[n].syntheticLoopFlow += syntheticLoopFlow[n];
       nodeOverTime[n].syntheticLoopFlow[i] = syntheticLoopFlow[n];
+      // Pre-fill with 0 to ensure a value for every node
+      nodeOverTime[n].dependencyMintedCred[i] = 0;
+    }
+    for (const {nodeIndex, intervalWeights} of mintPolicies) {
+      const weight = intervalWeights[i];
+      const mintedCred = weight * intervalTotalCred;
+      // The following is needed to avoid flow errors.
+      // I have no idea why. It's already typed as number.
+      const idx = (nodeIndex: number);
+      nodeSummaries[idx].cred += mintedCred;
+      nodeSummaries[idx].dependencyMintedCred += mintedCred;
+      nodeOverTime[idx].cred[i] += mintedCred;
+      nodeOverTime[idx].dependencyMintedCred[i] = mintedCred;
     }
     for (let e = 0; e < numEdges; e++) {
       edgeSummaries[e].forwardFlow += forwardFlow[e];
@@ -170,6 +197,8 @@ export function compressByThreshold(x: CredData, threshold: number): CredData {
       seedFlow: s.seedFlow < threshold ? null : d.seedFlow,
       syntheticLoopFlow:
         s.syntheticLoopFlow < threshold ? null : d.syntheticLoopFlow,
+      dependencyMintedCred:
+        s.dependencyMintedCred < threshold ? null : d.dependencyMintedCred,
     };
   });
 
@@ -231,7 +260,12 @@ export function compressDownToMatchingIndices(
       return null;
     }
     if (inclusionIndices.has(i)) {
-      return {cred: d.cred, seedFlow: null, syntheticLoopFlow: null};
+      return {
+        cred: d.cred,
+        seedFlow: null,
+        syntheticLoopFlow: null,
+        dependencyMintedCred: null,
+      };
     } else {
       return null;
     }

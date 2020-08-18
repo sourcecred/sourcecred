@@ -25,10 +25,21 @@ export type TimelineCredScores = $ReadOnlyArray<IntervalCred>;
 
 export type IntervalCred = {|
   +interval: Interval,
+  // For each node: Its raw Cred score for this interval based on running
+  // TimelinePagerank on the Contribution Graph.
+  // Does not include dependency mintedCred.
   +cred: NodeOrderedCredScores,
+  // For each edge: How much raw Cred flowed along its forward direction.
   +forwardFlow: EdgeOrderedCredScores,
+  // For each edge: How much raw Cred flowed along its backward direction.
   +backwardFlow: EdgeOrderedCredScores,
+  // For each Node: How much of its Cred came via its connection to the seed
+  // (source of all Cred). This is already included in the cred score, is
+  // computed separately for analysis purposes.
   +seedFlow: NodeOrderedCredScores,
+  // For each Node: How much of its Cred came via its synthetic self loop. This
+  // is already included in the cred score, is computed separately for analysis
+  // purposes.
   +syntheticLoopFlow: NodeOrderedCredScores,
 |};
 
