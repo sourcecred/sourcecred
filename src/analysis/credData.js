@@ -83,13 +83,23 @@ export function computeCredData(
   const intervalEnds = scores.map((x) => x.interval.endTimeMs);
   const numNodes = scores[0].cred.length;
   const numEdges = scores[0].forwardFlow.length;
-  const nodeSummaries = new Array(numNodes).fill(null).map(() => ({
+  const nodeSummaries: $ReadOnlyArray<{|
+    cred: number,
+    dependencyMintedCred: number,
+    seedFlow: number,
+    syntheticLoopFlow: number,
+  |}> = new Array(numNodes).fill(null).map(() => ({
     cred: 0,
     seedFlow: 0,
     syntheticLoopFlow: 0,
     dependencyMintedCred: 0,
   }));
-  const nodeOverTime = new Array(numNodes).fill(null).map(() => ({
+  const nodeOverTime: $ReadOnlyArray<{|
+    +cred: number[],
+    +dependencyMintedCred: number[],
+    +seedFlow: number[],
+    +syntheticLoopFlow: number[],
+  |}> = new Array(numNodes).fill(null).map(() => ({
     cred: new Array(numIntervals),
     seedFlow: new Array(numIntervals),
     syntheticLoopFlow: new Array(numIntervals),
@@ -128,7 +138,7 @@ export function computeCredData(
       const mintedCred = weight * intervalTotalCred;
       // The following is needed to avoid flow errors.
       // I have no idea why. It's already typed as number.
-      const idx = (nodeIndex: number);
+      const idx = nodeIndex;
       nodeSummaries[idx].cred += mintedCred;
       nodeSummaries[idx].dependencyMintedCred += mintedCred;
       nodeOverTime[idx].cred[i] += mintedCred;
