@@ -136,13 +136,10 @@ export function computeCredData(
     for (const {nodeIndex, intervalWeights} of mintPolicies) {
       const weight = intervalWeights[i];
       const mintedCred = weight * intervalTotalCred;
-      // The following is needed to avoid flow errors.
-      // I have no idea why. It's already typed as number.
-      const idx = nodeIndex;
-      nodeSummaries[idx].cred += mintedCred;
-      nodeSummaries[idx].dependencyMintedCred += mintedCred;
-      nodeOverTime[idx].cred[i] += mintedCred;
-      nodeOverTime[idx].dependencyMintedCred[i] = mintedCred;
+      nodeSummaries[nodeIndex].cred += mintedCred;
+      nodeSummaries[nodeIndex].dependencyMintedCred += mintedCred;
+      nodeOverTime[nodeIndex].cred[i] += mintedCred;
+      nodeOverTime[nodeIndex].dependencyMintedCred[i] = mintedCred;
     }
     for (let e = 0; e < numEdges; e++) {
       edgeSummaries[e].forwardFlow += forwardFlow[e];
