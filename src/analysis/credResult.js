@@ -58,7 +58,7 @@ export async function compute(
     params.alpha
   );
   const credScores = distributionToCred(distribution, nodeOrder, scorePrefixes);
-  const credData = computeCredData(credScores);
+  const credData = computeCredData(credScores, []);
   return {weightedGraph: wg, credData, params, plugins};
 }
 
