@@ -390,6 +390,8 @@ function FlowRow(view: CredView, f: Flow, total: number, depth: number) {
         return "Mint from Seed";
       case "SYNTHETIC_LOOP":
         return "Synthetic self-loop";
+      case "DEPENDENCY_MINT":
+        return "Dependency Minted Cred";
       default:
         throw new Error((f.type: empty));
     }
