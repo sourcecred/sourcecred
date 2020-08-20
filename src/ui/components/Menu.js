@@ -23,7 +23,7 @@ const Menu = (hasBackend: Boolean, {name: currencyName}: CurrencyDetails) => ({
         sidebarIsOpen={open}
       />
       <MenuItemLink
-        to="/grain"
+        to="/accounts"
         primaryText={`${currencyName} Accounts`}
         leftIcon={<DefaultIcon />}
         onClick={onMenuClick}

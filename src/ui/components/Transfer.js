@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
   pageHeader: {color: theme.palette.text.primary},
 }));
 
-type TransferProps = {|currency: CurrencyDetails|};
+type TransferProps = {|+currency: CurrencyDetails|};
 
 export const Transfer = ({
   currency: {name: currencyName, suffix: currencySuffix},

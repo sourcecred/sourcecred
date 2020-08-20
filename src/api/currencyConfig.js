@@ -2,6 +2,7 @@
 
 import {DEFAULT_SUFFIX} from "../ledger/grain";
 import * as C from "../util/combo";
+import * as NullUtil from "../util/null";
 
 /**
  * Shape of concurrencyDetails.json on disk
@@ -29,8 +30,8 @@ export const DEFAULT_NAME = "Grain";
  */
 function upgrade(c: SerializedCurrencyDetails): CurrencyDetails {
   return {
-    name: c.currencyName || DEFAULT_NAME,
-    suffix: c.currencySuffix || DEFAULT_SUFFIX,
+    name: NullUtil.orElse(c.currencyName, DEFAULT_NAME),
+    suffix: NullUtil.orElse(c.currencySuffix, DEFAULT_SUFFIX),
   };
 }
 

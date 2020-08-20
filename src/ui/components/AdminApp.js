@@ -48,7 +48,7 @@ const customRoutes = (
     <Route key="root" exact path="/">
       <Redirect to="/explorer" />
     </Route>,
-    <Route key="grain" exact path="/grain">
+    <Route key="accounts" exact path="/accounts">
       <AccountOverview currency={currency} />
     </Route>,
   ];

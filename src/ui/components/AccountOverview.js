@@ -13,7 +13,7 @@ import {type CurrencyDetails} from "../../api/currencyConfig";
 import * as G from "../../ledger/grain";
 import {useLedger} from "../utils/LedgerContext";
 
-type OverviewProps = {|currency: CurrencyDetails|};
+type OverviewProps = {|+currency: CurrencyDetails|};
 
 export const AccountOverview = ({
   currency: {suffix: currencySuffix},
