@@ -12,12 +12,8 @@ import {CredView} from "../../analysis/credView";
 import {AccountOverview} from "./AccountOverview";
 import {Transfer} from "./Transfer";
 import {SpecialDistribution} from "./SpecialDistribution";
-import {
-  load,
-  type LoadResult,
-  type LoadSuccess,
-  type CurrencyDetails,
-} from "../load";
+import {load, type LoadResult, type LoadSuccess} from "../load";
+import {type CurrencyDetails} from "../../api/currencyConfig";
 import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
 import Menu from "./Menu";

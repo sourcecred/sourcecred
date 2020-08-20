@@ -9,7 +9,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import {type Account} from "../../ledger/ledger";
-import {type CurrencyDetails} from "../load";
+import {type CurrencyDetails} from "../../api/currencyConfig";
 import * as G from "../../ledger/grain";
 import {useLedger} from "../utils/LedgerContext";
 

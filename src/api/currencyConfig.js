@@ -1,0 +1,40 @@
+// @flow
+
+import {DEFAULT_SUFFIX} from "../ledger/grain";
+import * as C from "../util/combo";
+
+/**
+ * Shape of concurrencyDetails.json on disk
+ */
+type SerializedCurrencyDetails = {|
+  +currencyName?: string,
+  +currencySuffix?: string,
+|};
+
+/**
+ * Shape of currencyDetails json in memory after parsing
+ */
+export type CurrencyDetails = {|
+  +name: string,
+  +suffix: string,
+|};
+
+export const DEFAULT_NAME = "Grain";
+
+/**
+ * Utilized by combo.fmap to enforce default currency values
+ * when parsing. This engenders a "canonical default" since there
+ * will be no need to add default fallbacks when handling currency
+ * detail values after parsing the serialized file.
+ */
+function upgrade(c: SerializedCurrencyDetails): CurrencyDetails {
+  return {
+    name: c.currencyName || DEFAULT_NAME,
+    suffix: c.currencySuffix || DEFAULT_SUFFIX,
+  };
+}
+
+export const parser: C.Parser<CurrencyDetails> = C.fmap(
+  C.object({}, {currencyName: C.string, currencySuffix: C.string}),
+  upgrade
+);

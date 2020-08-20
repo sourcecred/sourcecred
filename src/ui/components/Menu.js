@@ -5,7 +5,7 @@ import {MenuItemLink} from "react-admin";
 import TrendingUpIcon from "@material-ui/icons/TrendingUp";
 import DefaultIcon from "@material-ui/icons/ViewList";
 import TransformIcon from "@material-ui/icons/Transform";
-import {type CurrencyDetails} from "../load";
+import {type CurrencyDetails} from "../../api/currencyConfig";
 
 type menuProps = {|onMenuClick: Function|};
 
