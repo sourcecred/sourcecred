@@ -1,6 +1,7 @@
 // @flow
 
 import React, {type Node as ReactNode} from "react";
+import {Button} from "@material-ui/core";
 import deepEqual from "lodash.isequal";
 import {StyleSheet, css} from "aphrodite/no-important";
 import Markdown from "react-markdown";
@@ -139,12 +140,13 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     const paramsUpToDate =
       deepEqual(params, view.params()) && deepEqual(weights, view.weights());
     const analyzeButton = (
-      <button
+      <Button
+        variant="contained"
         disabled={this.state.recalculating || paramsUpToDate}
         onClick={() => this.analyzeCred()}
       >
         re-compute cred
-      </button>
+      </Button>
     );
     return (
       <div>
@@ -152,7 +154,8 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           <span style={{flexGrow: 1}} />
           {this.renderFilterSelect()}
           <span style={{flexGrow: 1}} />
-          <button
+          <Button
+            variant="contained"
             onClick={() => {
               this.setState(({showWeightConfig}) => ({
                 showWeightConfig: !showWeightConfig,
@@ -162,7 +165,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             {showWeightConfig
               ? "Hide weight configuration"
               : "Show weight configuration"}
-          </button>
+          </Button>
           {analyzeButton}
         </div>
         {showWeightConfig && (
@@ -340,7 +343,8 @@ class TableRow extends React.Component<TableRowProps, TableRowState> {
       <React.Fragment>
         <tr style={{backgroundImage}} className={css(styles.hoverHighlight)}>
           <td>
-            <button
+            <Button
+              variant="contained"
               style={{
                 marginRight: 5,
                 marginLeft: 15 * indent + 5,
@@ -352,7 +356,7 @@ class TableRow extends React.Component<TableRowProps, TableRowState> {
               }}
             >
               {expanded ? "\u2212" : "+"}
-            </button>
+            </Button>
             <Markdown renderers={{paragraph: "span"}} source={description} />
           </td>
           <td style={{textAlign: "right"}}>{format(".1d")(cred)}</td>
