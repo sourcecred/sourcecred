@@ -8,6 +8,8 @@ import deepFreeze from "deep-freeze";
 import * as address from "../core/address";
 import * as discourseAddress from "../plugins/discourse/address";
 import * as discourseDeclaration from "../plugins/discourse/declaration";
+import * as discordDeclaration from "../plugins/experimental-discord/declaration";
+import * as initiativesDeclaration from "../plugins/initiatives/declaration";
 import * as githubDeclaration from "../plugins/github/declaration";
 import * as githubEdges from "../plugins/github/edges";
 import * as githubNodes from "../plugins/github/nodes";
@@ -16,6 +18,9 @@ import * as weightedGraph from "../core/weightedGraph";
 import * as weights from "../core/weights";
 import * as graphToMarkovChain from "../core/algorithm/graphToMarkovChain";
 import * as markovChain from "../core/algorithm/markovChain";
+import * as credView from "../analysis/credView";
+import * as credData from "../analysis/credData";
+import * as credResult from "../analysis/credResult";
 
 export default deepFreeze({
   core: {
@@ -28,6 +33,11 @@ export default deepFreeze({
     weightedGraph,
     weights,
   },
+  analysis: {
+    credView,
+    credData,
+    credResult,
+  },
   plugins: {
     github: {
       declaration: githubDeclaration,
@@ -37,6 +47,12 @@ export default deepFreeze({
     discourse: {
       address: discourseAddress,
       declaration: discourseDeclaration,
+    },
+    discord: {
+      declaration: discordDeclaration,
+    },
+    initiatives: {
+      declaration: initiativesDeclaration,
     },
   },
 });
