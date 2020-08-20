@@ -55,7 +55,7 @@ const AccountRow = (account: Account, suffix: string) => (
       {account.identity.name}
     </TableCell>
     <TableCell align="right">{account.active ? "✅" : "🛑"}</TableCell>
-    <TableCell align="right">{G.format(account.balance, 0, suffix)}</TableCell>
-    <TableCell align="right">{G.format(account.paid, 0, suffix)}</TableCell>
+    <TableCell align="right">{G.format(account.balance, 2, suffix)}</TableCell>
+    <TableCell align="right">{G.format(account.paid, 2, suffix)}</TableCell>
   </TableRow>
 );
