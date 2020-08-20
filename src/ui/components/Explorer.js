@@ -1,10 +1,9 @@
 // @flow
 
 import React, {type Node as ReactNode} from "react";
-import {Button, IconButton} from "@material-ui/core";
+import {Button, IconButton, Grid} from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import RemoveIcon from "@material-ui/icons/Remove";
-import {styled} from "@material-ui/core/styles";
 import deepEqual from "lodash.isequal";
 import {StyleSheet, css} from "aphrodite/no-important";
 import Markdown from "react-markdown";
@@ -143,36 +142,46 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     const paramsUpToDate =
       deepEqual(params, view.params()) && deepEqual(weights, view.weights());
     const analyzeButton = (
-      <Button
-        variant="contained"
-        color="primary"
-        disabled={this.state.recalculating || paramsUpToDate}
-        onClick={() => this.analyzeCred()}
-      >
-        re-compute cred
-      </Button>
+      <Grid container item xs>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={this.state.recalculating || paramsUpToDate}
+          onClick={() => this.analyzeCred()}
+        >
+          re-compute cred
+        </Button>
+      </Grid>
     );
     return (
-      <div>
-        <div style={{marginTop: 30, display: "flex"}}>
-          <span style={{flexGrow: 1}} />
-          {this.renderFilterSelect()}
-          <span style={{flexGrow: 1}} />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              this.setState(({showWeightConfig}) => ({
-                showWeightConfig: !showWeightConfig,
-              }));
-            }}
-          >
-            {showWeightConfig
-              ? "Hide weight configuration"
-              : "Show weight configuration"}
-          </Button>
+      <Grid container>
+        <Grid
+          container
+          direction="row"
+          justify="space-between"
+          alignItems="center"
+          style={{marginTop: 30}}
+        >
+          <Grid container item xs>
+            {this.renderFilterSelect()}
+          </Grid>
+          <Grid container item xs>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                this.setState(({showWeightConfig}) => ({
+                  showWeightConfig: !showWeightConfig,
+                }));
+              }}
+            >
+              {showWeightConfig
+                ? "Hide weight configuration"
+                : "Show weight configuration"}
+            </Button>
+          </Grid>
           {analyzeButton}
-        </div>
+        </Grid>
         {showWeightConfig && (
           <div style={{marginTop: 10}}>
             <span>Upload/Download weights:</span>
@@ -183,7 +192,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             {weightConfig}
           </div>
         )}
-      </div>
+      </Grid>
     );
   }
 
