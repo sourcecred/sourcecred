@@ -144,6 +144,21 @@ export class Ledger {
   }
 
   /**
+   * Return the account with the given name, if one exists.
+   *
+   * Returns null if there is no account matching that address.
+   *
+   * Note: This is case sensitive.
+   */
+  accountByName(name: string): Account | null {
+    const identityId = this._nameToId.get(nameFromString(name));
+    if (identityId == null) {
+      return null;
+    }
+    return this.account(identityId);
+  }
+
+  /**
    * Create an account in the ledger.
    *
    * This will reserve the identity's name, and its innate address.
