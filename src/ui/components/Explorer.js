@@ -1,7 +1,10 @@
 // @flow
 
 import React, {type Node as ReactNode} from "react";
-import {Button} from "@material-ui/core";
+import {Button, IconButton} from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
+import RemoveIcon from "@material-ui/icons/Remove";
+import {styled} from "@material-ui/core/styles";
 import deepEqual from "lodash.isequal";
 import {StyleSheet, css} from "aphrodite/no-important";
 import Markdown from "react-markdown";
@@ -142,6 +145,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     const analyzeButton = (
       <Button
         variant="contained"
+        color="primary"
         disabled={this.state.recalculating || paramsUpToDate}
         onClick={() => this.analyzeCred()}
       >
@@ -156,6 +160,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           <span style={{flexGrow: 1}} />
           <Button
             variant="contained"
+            color="primary"
             onClick={() => {
               this.setState(({showWeightConfig}) => ({
                 showWeightConfig: !showWeightConfig,
@@ -343,8 +348,10 @@ class TableRow extends React.Component<TableRowProps, TableRowState> {
       <React.Fragment>
         <tr style={{backgroundImage}} className={css(styles.hoverHighlight)}>
           <td>
-            <Button
-              variant="contained"
+            <IconButton
+              aria-label="expand"
+              color="primary"
+              size="medium"
               style={{
                 marginRight: 5,
                 marginLeft: 15 * indent + 5,
@@ -355,8 +362,8 @@ class TableRow extends React.Component<TableRowProps, TableRowState> {
                 }));
               }}
             >
-              {expanded ? "\u2212" : "+"}
-            </Button>
+              {expanded ? <RemoveIcon /> : <AddIcon />}
+            </IconButton>
             <Markdown renderers={{paragraph: "span"}} source={description} />
           </td>
           <td style={{textAlign: "right"}}>{format(".1d")(cred)}</td>
