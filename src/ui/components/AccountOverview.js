@@ -9,10 +9,15 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import {type Account} from "../../ledger/ledger";
+import {type CurrencyDetails} from "../../api/currencyConfig";
 import * as G from "../../ledger/grain";
 import {useLedger} from "../utils/LedgerContext";
 
-export const GrainAccountOverview = () => {
+type OverviewProps = {|+currency: CurrencyDetails|};
+
+export const AccountOverview = ({
+  currency: {suffix: currencySuffix},
+}: OverviewProps) => {
   const {ledger} = useLedger();
 
   const accounts = ledger.accounts();
@@ -36,19 +41,21 @@ export const GrainAccountOverview = () => {
             <TableCell align="right">Grain Earned</TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>{sortedAccounts.map((a) => AccountRow(a))}</TableBody>
+        <TableBody>
+          {sortedAccounts.map((a) => AccountRow(a, currencySuffix))}
+        </TableBody>
       </Table>
     </TableContainer>
   );
 };
 
-const AccountRow = (account: Account) => (
+const AccountRow = (account: Account, suffix: string) => (
   <TableRow key={account.identity.id}>
     <TableCell component="th" scope="row">
       {account.identity.name}
     </TableCell>
     <TableCell align="right">{account.active ? "✅" : "🛑"}</TableCell>
-    <TableCell align="right">{G.format(account.balance)}</TableCell>
-    <TableCell align="right">{G.format(account.paid)}</TableCell>
+    <TableCell align="right">{G.format(account.balance, 2, suffix)}</TableCell>
+    <TableCell align="right">{G.format(account.paid, 2, suffix)}</TableCell>
   </TableRow>
 );

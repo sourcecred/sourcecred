@@ -4,6 +4,7 @@ import {Button, Container, TextField} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {div, format, gt, lt, fromFloatString} from "../../ledger/grain";
 import {type Account} from "../../ledger/ledger";
+import {type CurrencyDetails} from "../../api/currencyConfig";
 import AccountDropdown from "./AccountSelector";
 import {useLedger} from "../utils/LedgerContext";
 
@@ -44,7 +45,11 @@ const useStyles = makeStyles((theme) => ({
   pageHeader: {color: theme.palette.text.primary},
 }));
 
-export const TransferGrain = () => {
+type TransferProps = {|+currency: CurrencyDetails|};
+
+export const Transfer = ({
+  currency: {name: currencyName, suffix: currencySuffix},
+}: TransferProps) => {
   const {ledger, updateLedger} = useLedger();
 
   const classes = useStyles();
@@ -82,7 +87,7 @@ export const TransferGrain = () => {
   return (
     <Container className={classes.root}>
       <h1 className={`${classes.centerRow} ${classes.pageHeader}`}>
-        Transfer Grain
+        Transfer {`${currencyName}`}
       </h1>
       <div className={classes.centerRow}>
         <div
@@ -105,7 +110,9 @@ export const TransferGrain = () => {
               value={amount}
               onChange={(e) => setAmount(e.currentTarget.value)}
             />
-            <span>{sender && ` max: ${format(sender.balance, 2)}`}</span>
+            <span>
+              {sender && ` max: ${format(sender.balance, 2, currencySuffix)}`}
+            </span>
           </div>
           <div className={classes.triangle} />
         </div>

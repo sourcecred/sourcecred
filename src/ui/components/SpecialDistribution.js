@@ -10,7 +10,7 @@ import * as uuid from "../../util/uuid";
 import type {TimestampMs} from "../../util/timestamp";
 import {useLedger} from "../utils/LedgerContext";
 
-export const SpecialGrainDistribution = () => {
+export const SpecialDistribution = () => {
   const {ledger, updateLedger} = useLedger();
 
   const [credTimestamp, setCredTimestamp] = useState<TimestampMs>(+Date.now());

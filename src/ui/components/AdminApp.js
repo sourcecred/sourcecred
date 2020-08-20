@@ -9,10 +9,11 @@ import fakeDataProvider from "ra-data-fakerest";
 import {Explorer} from "./Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
-import {GrainAccountOverview} from "./GrainAccountOverview";
-import {TransferGrain} from "./TransferGrain";
-import {SpecialGrainDistribution} from "./SpecialGrainDistribution";
+import {AccountOverview} from "./AccountOverview";
+import {Transfer} from "./Transfer";
+import {SpecialDistribution} from "./SpecialDistribution";
 import {load, type LoadResult, type LoadSuccess} from "../load";
+import {type CurrencyDetails} from "../../api/currencyConfig";
 import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
 import Menu from "./Menu";
@@ -27,11 +28,19 @@ const theme = createMuiTheme({
   },
 });
 
-const AppLayout = (hasBackend: Boolean) => (props) => (
-  <Layout {...props} appBar={AppBar} menu={withRouter(Menu(hasBackend))} />
+const AppLayout = ({hasBackend, currency}: LoadSuccess) => (props) => (
+  <Layout
+    {...props}
+    appBar={AppBar}
+    menu={withRouter(Menu(hasBackend, currency))}
+  />
 );
 
-const customRoutes = (credView: CredView, hasBackend: Boolean) => {
+const customRoutes = (
+  credView: CredView,
+  hasBackend: Boolean,
+  currency: CurrencyDetails
+) => {
   const routes = [
     <Route key="explorer" exact path="/explorer">
       <Explorer initialView={credView} />
@@ -39,8 +48,8 @@ const customRoutes = (credView: CredView, hasBackend: Boolean) => {
     <Route key="root" exact path="/">
       <Redirect to="/explorer" />
     </Route>,
-    <Route key="grain" exact path="/grain">
-      <GrainAccountOverview credView={credView} />
+    <Route key="accounts" exact path="/accounts">
+      <AccountOverview currency={currency} />
     </Route>,
   ];
   const backendRoutes = [
@@ -48,10 +57,10 @@ const customRoutes = (credView: CredView, hasBackend: Boolean) => {
       <LedgerAdmin credView={credView} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
-      <TransferGrain />
+      <Transfer currency={currency} />
     </Route>,
     <Route key="special-distribution" exact path="/special-distribution">
-      <SpecialGrainDistribution />
+      <SpecialDistribution />
     </Route>,
   ];
   return routes.concat(hasBackend ? backendRoutes : []);
@@ -96,15 +105,17 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
   const history = useHistory();
 
   return (
+    // TODO (@topocount) create context for read-only instance state
     <LedgerProvider initialLedger={loadSuccess.ledger}>
       <Admin
-        layout={AppLayout(loadSuccess.hasBackend)}
+        layout={AppLayout(loadSuccess)}
         theme={theme}
         dataProvider={dataProvider}
         history={history}
         customRoutes={customRoutes(
           loadSuccess.credView,
-          loadSuccess.hasBackend
+          loadSuccess.hasBackend,
+          loadSuccess.currency
         )}
       >
         {/*
