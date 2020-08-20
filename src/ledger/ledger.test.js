@@ -676,6 +676,47 @@ describe("ledger/ledger", () => {
         expect(ledger.accountByAddress(alias.address)).toBe(account);
       });
     });
+
+    describe("accountByName", () => {
+      it("returns null if no account matches the name", () => {
+        const ledger = new Ledger();
+        expect(ledger.accountByName("hmm")).toBe(null);
+      });
+      it("retrieves an account by that name", () => {
+        const ledger = new Ledger();
+        const id = ledger.createIdentity("USER", "foo");
+        const account = ledger.account(id);
+        expect(ledger.accountByName("foo")).toEqual(account);
+      });
+      it("is case-sensitive", () => {
+        const ledger = new Ledger();
+        const id = ledger.createIdentity("USER", "Foo");
+        const account = ledger.account(id);
+        expect(ledger.accountByName("Foo")).toEqual(account);
+        expect(ledger.accountByName("foo")).toEqual(null);
+      });
+      it("respects renames", () => {
+        const ledger = new Ledger();
+        const id = ledger.createIdentity("USER", "Foo");
+        ledger.renameIdentity(id, "Bar");
+        const account = ledger.account(id);
+        expect(ledger.accountByName("Foo")).toEqual(null);
+        expect(ledger.accountByName("Bar")).toEqual(account);
+      });
+      it("throws an error for invalid names", () => {
+        const ledger = new Ledger();
+        const invalid = "not a valid name";
+        const thunk = () => ledger.accountByName(invalid);
+        failsWithoutMutation(ledger, thunk, "invalid name");
+      });
+      it("returns null for accounts merged out of existence", () => {
+        const ledger = new Ledger();
+        const base = ledger.createIdentity("USER", "base");
+        const target = ledger.createIdentity("USER", "target");
+        ledger.mergeIdentities({base, target});
+        expect(ledger.accountByName("target")).toEqual(null);
+      });
+    });
   });
 
   describe("grain updates", () => {
