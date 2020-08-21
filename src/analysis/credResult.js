@@ -28,6 +28,10 @@ import {
   compressDownToMatchingIndices,
 } from "./credData";
 import {distributionToCred} from "../core/algorithm/distributionToCred";
+import {
+  type DependencyMintPolicy,
+  processMintPolicy,
+} from "../core/dependenciesMintPolicy";
 
 /**
  * Comprehensive cred output data, including the graph, the scores, the params, and the plugins.
@@ -41,12 +45,15 @@ export type CredResult = {|
   +params: TimelineCredParameters,
   // Plugin declarations used to compute this cred data
   +plugins: PluginDeclarations,
+  // Policies on minting Cred
+  +dependencyPolicies: $ReadOnlyArray<DependencyMintPolicy>,
 |};
 
 export async function compute(
   wg: WeightedGraph,
   params: TimelineCredParameters,
-  plugins: PluginDeclarations
+  plugins: PluginDeclarations,
+  dependencyPolicies: $ReadOnlyArray<DependencyMintPolicy>
 ): Promise<CredResult> {
   const {graph} = wg;
   const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
@@ -57,9 +64,13 @@ export async function compute(
     params.intervalDecay,
     params.alpha
   );
+  const intervals = distribution.map((d) => d.interval);
+  const processedPolicies = dependencyPolicies.map((p) =>
+    processMintPolicy(p, nodeOrder, intervals)
+  );
   const credScores = distributionToCred(distribution, nodeOrder, scorePrefixes);
-  const credData = computeCredData(credScores, []);
-  return {weightedGraph: wg, credData, params, plugins};
+  const credData = computeCredData(credScores, processedPolicies);
+  return {weightedGraph: wg, credData, params, plugins, dependencyPolicies};
 }
 
 // Lossily compress a CredResult, by throwing away time-specific cred
@@ -70,17 +81,18 @@ export function compressByThreshold(
   x: CredResult,
   threshold: number
 ): CredResult {
-  const {params, plugins, weightedGraph, credData} = x;
+  const {params, plugins, weightedGraph, credData, dependencyPolicies} = x;
   return {
     params,
     plugins,
     weightedGraph,
     credData: _compressByThreshold(credData, threshold),
+    dependencyPolicies,
   };
 }
 
 export function stripOverTimeDataForNonUsers(x: CredResult): CredResult {
-  const {params, plugins, weightedGraph, credData} = x;
+  const {params, plugins, weightedGraph, credData, dependencyPolicies} = x;
   const userPrefixes = []
     .concat(...plugins.map((x) => x.userTypes))
     .map((x) => x.prefix);
@@ -94,7 +106,13 @@ export function stripOverTimeDataForNonUsers(x: CredResult): CredResult {
     }
   });
   const newCredData = compressDownToMatchingIndices(credData, inclusionIndices);
-  return {params, plugins, weightedGraph, credData: newCredData};
+  return {
+    params,
+    plugins,
+    weightedGraph,
+    credData: newCredData,
+    dependencyPolicies,
+  };
 }
 
 const COMPAT_INFO = {type: "sourcecred/credResult", version: "0.1.0"};
@@ -104,6 +122,7 @@ export type CredResultJSON = Compatible<{|
   +credData: CredData,
   +params: TimelineCredParametersJSON,
   +plugins: PluginDeclarationsJSON,
+  +dependencyPolicies: $ReadOnlyArray<DependencyMintPolicy>,
 |}>;
 
 export function toJSON(x: CredResult): CredResultJSON {
@@ -113,16 +132,18 @@ export function toJSON(x: CredResult): CredResultJSON {
     credData,
     params: paramsToJSON(params),
     plugins: pluginsToJSON(plugins),
+    dependencyPolicies: x.dependencyPolicies,
   });
 }
 
 export function fromJSON(j: CredResultJSON): CredResult {
   const x = fromCompat(COMPAT_INFO, j);
-  const {weightedGraph, credData, params, plugins} = x;
+  const {weightedGraph, credData, params, plugins, dependencyPolicies} = x;
   return {
     weightedGraph: wgFromJSON(weightedGraph),
     credData,
     params: paramsFromJSON(params),
     plugins: pluginsFromJSON(plugins),
+    dependencyPolicies: dependencyPolicies,
   };
 }
