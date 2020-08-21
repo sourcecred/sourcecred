@@ -1,5 +1,6 @@
 // @flow
 
+import sortedIndex from "lodash.sortedindex";
 import {type Weights, type EdgeWeight} from "../core/weights";
 import {type CredResult, compute} from "./credResult";
 import {type TimelineCredParameters} from "./timeline/params";
@@ -38,10 +39,13 @@ export type CredNode = {|
   +address: NodeAddressT,
   +description: string,
   +minted: number,
-  +timestamp: TimestampMs | null,
   +credSummary: NodeCredSummary,
   +credOverTime: NodeCredOverTime | null,
   +type: NodeType | null,
+  +timestamp: TimestampMs | null,
+  // Index of the interval in which this node was created, assuming
+  // non-null timestamp.
+  +intervalIndex: number | null,
 |};
 
 export type CredEdge = {|
@@ -51,8 +55,10 @@ export type CredEdge = {|
   +rawWeight: EdgeWeight,
   +credSummary: EdgeCredSummary,
   +credOverTime: EdgeCredOverTime | null,
-  +timestamp: TimestampMs,
   +type: EdgeType | null,
+  +timestamp: TimestampMs,
+  // Index of the interval in which this edge was created
+  +intervalIndex: number,
 |};
 
 export type EdgeFlow = {|
@@ -143,16 +149,25 @@ export class CredView {
     return this._credResult.plugins;
   }
 
+  intervalEnds(): $ReadOnlyArray<TimestampMs> {
+    return this._credResult.credData.intervalEnds;
+  }
+
   credResult(): CredResult {
     return this._credResult;
   }
 
   _promoteNode(n: GraphNode): CredNode {
+    const timestamp = n.timestampMs;
     const idx = nullGet(this._nodeAddressToIndex.get(n.address));
     const credSummary = this._credResult.credData.nodeSummaries[idx];
     const credOverTime = this._credResult.credData.nodeOverTime[idx];
     const minted = this._nodeEvaluator(n.address);
     const type = this._nodeTypeTrie.getLast(n.address);
+    const intervalIndex =
+      timestamp == null
+        ? null
+        : _getIntervalIndex(this.intervalEnds(), timestamp);
     return {
       timestamp: n.timestampMs,
       description: n.description,
@@ -161,6 +176,7 @@ export class CredView {
       credOverTime,
       minted,
       type: type ? type : null,
+      intervalIndex,
     };
   }
   node(a: NodeAddressT): ?CredNode {
@@ -201,6 +217,7 @@ export class CredView {
       credOverTime,
       rawWeight,
       type: type ? type : null,
+      intervalIndex: _getIntervalIndex(this.intervalEnds(), e.timestampMs),
     };
   }
   edge(a: EdgeAddressT): ?CredEdge {
@@ -280,4 +297,15 @@ export class CredView {
 
 function xor(a: boolean, b: boolean): boolean {
   return (a && !b) || (!a && b);
+}
+
+// Exported separately for testing purposes.
+export function _getIntervalIndex(
+  intervals: $ReadOnlyArray<TimestampMs>,
+  ts: TimestampMs
+): number {
+  if (ts > intervals[intervals.length - 1]) {
+    throw new Error(`timestamp out of interval range`);
+  }
+  return sortedIndex(intervals, ts);
 }

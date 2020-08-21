@@ -9,7 +9,7 @@ import {
 } from "./pluginDeclaration";
 import {defaultParams} from "./timeline/params";
 import {compute} from "./credResult";
-import {CredView} from "./credView";
+import {CredView, _getIntervalIndex} from "./credView";
 
 describe("analysis/credView", () => {
   async function example() {
@@ -153,6 +153,7 @@ describe("analysis/credView", () => {
         description,
         minted,
         timestamp,
+        intervalIndex,
       } = nullGet(credView.node(foo1.address));
       expect({address, description, timestampMs: timestamp}).toEqual(foo1);
       expect(minted).toEqual(2);
@@ -160,6 +161,9 @@ describe("analysis/credView", () => {
       const index = nodeOrder.findIndex((x) => x === foo1.address);
       expect(credOverTime).toEqual(credResult.credData.nodeOverTime[index]);
       expect(credSummary).toEqual(credResult.credData.nodeSummaries[index]);
+      expect(intervalIndex).toEqual(
+        _getIntervalIndex(credView.intervalEnds(), nullGet(timestamp))
+      );
     });
     it("returns undefined for non-existent node", async () => {
       const {credView} = await example();
@@ -178,6 +182,7 @@ describe("analysis/credView", () => {
       );
     });
   });
+
   describe("edges", () => {
     it("can retrieve a CredEdge", async () => {
       const {credView, flow1, credResult, graph} = await example();
@@ -189,6 +194,7 @@ describe("analysis/credView", () => {
         credSummary,
         rawWeight,
         timestamp,
+        intervalIndex,
       } = nullGet(credView.edge(flow1.address));
       expect({
         address,
@@ -205,6 +211,9 @@ describe("analysis/credView", () => {
       expect(rawWeight).toEqual({forwards: 2, backwards: 3});
       expect(credOverTime).toEqual(credResult.credData.edgeOverTime[index]);
       expect(credSummary).toEqual(credResult.credData.edgeSummaries[index]);
+      expect(intervalIndex).toEqual(
+        _getIntervalIndex(credView.intervalEnds(), timestamp)
+      );
     });
     it("returns undefined for non-existent edge", async () => {
       const {credView} = await example();
@@ -238,6 +247,29 @@ describe("analysis/credView", () => {
         credView.edge(flow1.address),
         credView.edge(flow2.address),
       ]);
+    });
+  });
+
+  describe("_getIntervalIndex", () => {
+    it("works for the zero-th index", () => {
+      const intervals = [100, 200, 300];
+      expect(_getIntervalIndex(intervals, 0)).toEqual(0);
+      expect(_getIntervalIndex(intervals, 100)).toEqual(0);
+    });
+    it("works for a middle index", () => {
+      const intervals = [100, 200, 300];
+      expect(_getIntervalIndex(intervals, 101)).toEqual(1);
+      expect(_getIntervalIndex(intervals, 200)).toEqual(1);
+    });
+    it("works for the last index", () => {
+      const intervals = [100, 200, 300];
+      expect(_getIntervalIndex(intervals, 299)).toEqual(2);
+      expect(_getIntervalIndex(intervals, 300)).toEqual(2);
+    });
+    it("errors for an index out of bound", () => {
+      const intervals = [100, 200, 300];
+      const thunk = () => _getIntervalIndex(intervals, 301);
+      expect(thunk).toThrowError("timestamp out of interval range");
     });
   });
 });
