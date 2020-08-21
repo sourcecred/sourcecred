@@ -20,6 +20,7 @@ import * as markovChain from "../core/algorithm/markovChain";
 import * as credView from "../analysis/credView";
 import * as credData from "../analysis/credData";
 import * as credResult from "../analysis/credResult";
+import * as experimental from "./experimental";
 
 export default deepFreeze({
   core: {
@@ -32,6 +33,7 @@ export default deepFreeze({
     weightedGraph,
     weights,
   },
+  experimental,
   analysis: {
     credView,
     credData,
