@@ -101,7 +101,7 @@ describe("analysis/credView", () => {
     const weights = weightsForDeclaration(declaration);
     const wg = {graph, weights};
     const params = defaultParams();
-    const result = await compute(wg, params, [declaration]);
+    const result = await compute(wg, params, [declaration], []);
     const credView = new CredView(result);
     return {
       credView,

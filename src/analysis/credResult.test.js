@@ -48,7 +48,7 @@ describe("analysis/credResult", () => {
       const weights = Weights.empty();
       const wg = {graph, weights};
       const params = defaultParams();
-      const result = await compute(wg, params, [declaration]);
+      const result = await compute(wg, params, [declaration], []);
       return result;
     }
 

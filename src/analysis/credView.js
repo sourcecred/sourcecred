@@ -308,7 +308,12 @@ export class CredView {
     params: TimelineCredParameters
   ): Promise<CredView> {
     const wg = overrideWeights(this._credResult.weightedGraph, weights);
-    const credResult = await compute(wg, params, this.plugins());
+    const credResult = await compute(
+      wg,
+      params,
+      this.plugins(),
+      this._credResult.dependencyPolicies
+    );
     return new CredView(credResult);
   }
 }

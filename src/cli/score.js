@@ -94,7 +94,8 @@ const scoreCommand: Command = async (args, std) => {
   const credResult = await compute(
     contractedWeightedGraph,
     params,
-    declarations
+    declarations,
+    []
   );
   // Throw away over-time data for all non-user nodes; we may not have that
   // information available once we merge CredRank, anyway.

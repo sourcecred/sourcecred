@@ -60,6 +60,8 @@ exports[`analysis/credResult to/fro JSON to/froJSON snapshots as expected 1`] = 
         }
       ]
     },
+    \\"dependencyPolicies\\": [
+    ],
     \\"params\\": {
       \\"alpha\\": 0.2,
       \\"intervalDecay\\": 0.5
