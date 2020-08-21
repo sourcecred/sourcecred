@@ -90,11 +90,17 @@ describe("core/dependenciesMintPolicy", () => {
     const n3 = NodeAddress.fromParts(["3"]);
     const nx = NodeAddress.fromParts(["x"]);
     const nodeOrder = deepFreeze([n1, n2, n3]);
-    const intervals = deepFreeze([1, 2, 3, 4]);
+    const intervals = deepFreeze([
+      {startTimeMs: 1, endTimeMs: 2},
+      {startTimeMs: 2, endTimeMs: 3},
+      {startTimeMs: 3, endTimeMs: 4},
+      {startTimeMs: 4, endTimeMs: 5},
+    ]);
     const periods = [deepFreeze({startTimeMs: 2, weight: 0.5})];
     it("converts the address and periods correctly", () => {
       const policy = {address: n2, periods};
-      const intervalWeights = _alignPeriodsToIntervals(periods, intervals);
+      const intervalStarts = intervals.map((i) => i.startTimeMs);
+      const intervalWeights = _alignPeriodsToIntervals(periods, intervalStarts);
       const actual = processMintPolicy(policy, nodeOrder, intervals);
       const expected = {nodeIndex: 1, intervalWeights};
       expect(actual).toEqual(expected);

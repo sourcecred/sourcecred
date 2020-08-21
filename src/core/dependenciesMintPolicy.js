@@ -47,6 +47,7 @@
  */
 import {type NodeAddressT, NodeAddress} from "./graph";
 import {type TimestampMs} from "../util/timestamp";
+import {type Interval} from "./interval";
 
 export type DependencyMintPolicy = {|
   // The node address that will receieve the extra minted Cred
@@ -82,7 +83,7 @@ export type ProcessedDependencyMintPolicy = {|
 export function processMintPolicy(
   policy: DependencyMintPolicy,
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
-  intervalStarts: $ReadOnlyArray<TimestampMs>
+  intervals: $ReadOnlyArray<Interval>
 ): ProcessedDependencyMintPolicy {
   const {address, periods} = policy;
   const nodeIndex = nodeOrder.indexOf(address);
@@ -91,6 +92,7 @@ export function processMintPolicy(
       `address not in nodeOrder: ${NodeAddress.toString(address)}`
     );
   }
+  const intervalStarts = intervals.map((i) => i.startTimeMs);
   const intervalWeights = _alignPeriodsToIntervals(periods, intervalStarts);
   return {nodeIndex, intervalWeights};
 }
