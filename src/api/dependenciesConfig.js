@@ -58,7 +58,6 @@ export type DependencyWeight = number;
 export type DependencyConfig = {|
   // The id of the dependency in the ledger. If unset, it will be set automatically
   // the first time the dependency config is used in cred analysis.
-  // set by default.
   +id?: IdentityId,
   // The Name of the dependency in question. This is intended as a convenience
   // for the user; the user can write in a name here, and it will be used to
@@ -85,6 +84,7 @@ export type DependencyConfig = {|
   // ledger, it will also be automatically activated.
   // (Mostly included so we can have SourceCred default opt-in to receiving Grain
   // in new instances.)
+  // Defaults to false if unset.
   +autoActivateOnIdentityCreation?: boolean,
 |};
 

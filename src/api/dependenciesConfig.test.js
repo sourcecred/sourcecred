@@ -2,16 +2,20 @@
 
 import {Ledger} from "../ledger/ledger";
 import {toDependencyPolicy, ensureIdentityExists} from "./dependenciesConfig";
-import {nameFromString} from "../ledger/identity";
+import {nameFromString as n} from "../ledger/identity";
 import {random as randomUuid} from "../util/uuid";
 
 describe("api/dependenciesConfig", () => {
-  const n = (s) => nameFromString(s);
   describe("ensureIdentityExists", () => {
     it("no-ops if the identity is already in the ledger", () => {
       const ledger = new Ledger();
       const id = ledger.createIdentity("PROJECT", "foo");
-      const config = {id, name: n("foo"), startWeight: 0};
+      const config = {
+        id,
+        name: n("foo"),
+        startWeight: 0,
+        autoActivateOnIdentityCreation: true,
+      };
       const events = ledger.eventLog();
       const config_ = ensureIdentityExists(config, ledger);
       expect(config).toEqual(config_);
@@ -34,6 +38,7 @@ describe("api/dependenciesConfig", () => {
       const config = {name: n("foo"), startWeight: 0};
       const {id} = ensureIdentityExists(config, ledger);
       if (id == null) {
+        // Will never happen in practice, but needed to appease Flow
         throw new Error("invariant violation");
       }
       const account = ledger.account(id);
@@ -50,12 +55,42 @@ describe("api/dependenciesConfig", () => {
       };
       const {id} = ensureIdentityExists(config, ledger);
       if (id == null) {
+        // Will never happen in practice, but needed to appease Flow
         throw new Error("invariant violation");
       }
       const account = ledger.account(id);
       expect(account.identity.name).toEqual(config.name);
       expect(account.identity.subtype).toEqual("PROJECT");
       expect(account.active).toBe(true);
+    });
+    it("does not activate new identities if autoActivateOnIdentityCreation is unset", () => {
+      const ledger = new Ledger();
+      const config = {
+        name: n("foo"),
+        startWeight: 0,
+      };
+      const {id} = ensureIdentityExists(config, ledger);
+      if (id == null) {
+        // Will never happen in practice, but needed to appease Flow
+        throw new Error("invariant violation");
+      }
+      const account = ledger.account(id);
+      expect(account.active).toBe(false);
+    });
+    it("does not activate new identities if autoActivateOnIdentityCreation is set to false", () => {
+      const ledger = new Ledger();
+      const config = {
+        name: n("foo"),
+        startWeight: 0,
+        autoActivateOnIdentityCreation: false,
+      };
+      const {id} = ensureIdentityExists(config, ledger);
+      if (id == null) {
+        // Will never happen in practice, but needed to appease Flow
+        throw new Error("invariant violation");
+      }
+      const account = ledger.account(id);
+      expect(account.active).toBe(false);
     });
     it("does not activate if the identity already exists (specified by id)", () => {
       const ledger = new Ledger();
