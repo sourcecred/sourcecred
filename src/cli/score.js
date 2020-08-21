@@ -3,6 +3,7 @@
 import fs from "fs-extra";
 import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
+import deepEqual from "lodash.isequal";
 
 import type {Command} from "./command";
 import {makePluginDir, loadInstanceConfig} from "./common";
@@ -28,6 +29,11 @@ import {
 } from "../ledger/identity";
 import {Ledger} from "../ledger/ledger";
 import {computeCredAccounts} from "../ledger/credAccounts";
+import {
+  parser as dependenciesParser,
+  ensureIdentityExists,
+  toDependencyPolicy,
+} from "../api/dependenciesConfig";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -68,6 +74,30 @@ const scoreCommand: Command = async (args, std) => {
   const ledger = Ledger.parse(
     await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
   );
+
+  const dependenciesPath = pathJoin(baseDir, "config", "dependencies.json");
+  const dependencies = await loadJsonWithDefault(
+    dependenciesPath,
+    dependenciesParser,
+    () => []
+  );
+  const dependenciesWithIds = dependencies.map((d) =>
+    ensureIdentityExists(d, ledger)
+  );
+  if (!deepEqual(dependenciesWithIds, dependencies)) {
+    // Save the new dependencies, with canonical IDs set.
+    await fs.writeFile(
+      dependenciesPath,
+      stringify(dependenciesWithIds, {space: 4})
+    );
+    // Save the Ledger, since we may have added/activated identities.
+    await fs.writeFile(ledgerPath, ledger.serialize());
+  }
+
+  const dependencyPolicies = dependenciesWithIds.map((d) =>
+    toDependencyPolicy(d, ledger)
+  );
+
   const identities = ledger.accounts().map((a) => a.identity);
   const contractedGraph = weightedGraph.graph.contractNodes(
     identityContractions(identities)
@@ -95,7 +125,7 @@ const scoreCommand: Command = async (args, std) => {
     contractedWeightedGraph,
     params,
     declarations,
-    []
+    dependencyPolicies
   );
   // Throw away over-time data for all non-user nodes; we may not have that
   // information available once we merge CredRank, anyway.
