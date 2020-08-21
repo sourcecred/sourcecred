@@ -83,7 +83,17 @@ export type SyntheticLoopFlow = {|
   +flow: number,
 |};
 
-export type Flow = EdgeFlow | MintFlow | ReturnFlow | SyntheticLoopFlow;
+export type DependencyMintFlow = {|
+  +type: "DEPENDENCY_MINT",
+  +flow: number,
+|};
+
+export type Flow =
+  | EdgeFlow
+  | MintFlow
+  | ReturnFlow
+  | SyntheticLoopFlow
+  | DependencyMintFlow;
 
 export type EdgesOptions = {|
   // An edge address prefix. Only show edges whose addresses match this prefix.
@@ -249,9 +259,17 @@ export class CredView {
     }
     const {alpha} = this.params();
     const flows: Flow[] = [];
-    const {seedFlow, syntheticLoopFlow, cred} = credNode.credSummary;
+    const {
+      seedFlow,
+      syntheticLoopFlow,
+      cred,
+      dependencyMintedCred,
+    } = credNode.credSummary;
     if (syntheticLoopFlow > 0) {
       flows.push({type: "SYNTHETIC_LOOP", flow: syntheticLoopFlow});
+    }
+    if (dependencyMintedCred > 0) {
+      flows.push({type: "DEPENDENCY_MINT", flow: dependencyMintedCred});
     }
     if (direction === Direction.IN) {
       if (seedFlow > 0) {
