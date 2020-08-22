@@ -6,6 +6,7 @@ import {type CredResult, compute} from "./credResult";
 import {type TimelineCredParameters} from "./timeline/params";
 import {type PluginDeclarations} from "./pluginDeclaration";
 import {type NodeType, type EdgeType} from "./types";
+import {IDENTITY_PREFIX} from "../ledger/identity";
 
 import {get as nullGet} from "../util/null";
 import type {TimestampMs} from "../util/timestamp";
@@ -201,13 +202,7 @@ export class CredView {
     return graphNodes.map((x) => this._promoteNode(x));
   }
   userNodes(): $ReadOnlyArray<CredNode> {
-    const userPrefixes = []
-      .concat(...this.plugins().map((x) => x.userTypes))
-      .map((x) => x.prefix);
-    const nodes = this.nodes();
-    return nodes.filter((n) =>
-      userPrefixes.some((p) => NodeAddress.hasPrefix(n.address, p))
-    );
+    return this.nodes({prefix: IDENTITY_PREFIX});
   }
 
   _promoteEdge(e: GraphEdge): CredEdge {
