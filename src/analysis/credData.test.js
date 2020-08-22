@@ -2,11 +2,13 @@
 
 import {computeCredData, compressByThreshold} from "./credData";
 import type {TimelineCredScores} from "../core/algorithm/distributionToCred";
-import type {ProcessedDependencyMintPolicy} from "../core/dependenciesMintPolicy";
+import type {DependencyMintPolicy} from "../core/dependenciesMintPolicy";
+import {NodeAddress} from "../core/graph";
+import {IDENTITY_PREFIX} from "../ledger/identity";
 
 describe("src/analysis/credData", () => {
   it("handles empty scores correctly", () => {
-    expect(computeCredData([], [])).toEqual({
+    expect(computeCredData([], [], [])).toEqual({
       nodeSummaries: [],
       nodeOverTime: [],
       edgeSummaries: [],
@@ -66,7 +68,11 @@ describe("src/analysis/credData", () => {
       ],
       edgeOverTime: [{forwardFlow: [1, 1], backwardFlow: [2, 0]}],
     };
-    expect(computeCredData(scores, [])).toEqual(expected);
+    const nodeOrder = [
+      NodeAddress.fromParts(["foo"]),
+      NodeAddress.fromParts(["bar"]),
+    ];
+    expect(computeCredData(scores, nodeOrder, [])).toEqual(expected);
   });
   it("handles dependency minting properly", () => {
     const scores: TimelineCredScores = [
@@ -87,27 +93,30 @@ describe("src/analysis/credData", () => {
         syntheticLoopFlow: new Float64Array([0.1, 0]),
       },
     ];
-    const mintPolicies: ProcessedDependencyMintPolicy[] = [
-      {nodeIndex: 0, intervalWeights: [1, 2]},
+    const mintPolicies: DependencyMintPolicy[] = [
+      {
+        address: IDENTITY_PREFIX,
+        periods: [{weight: 0.5, startTimeMs: -Infinity}],
+      },
     ];
     const expected = {
       intervalEnds: [100, 200],
       nodeSummaries: [
         {
-          // 14 base + 9 from interval1 + 22 from interval2
-          cred: 14 + 9 + 22,
+          // 14 base + 2 from interval1 + 5 from interval2
+          cred: 21,
           seedFlow: 0,
           syntheticLoopFlow: 0.2,
-          dependencyMintedCred: 9 + 22,
+          dependencyMintedCred: 7,
         },
         {cred: 6, seedFlow: 2, syntheticLoopFlow: 0, dependencyMintedCred: 0},
       ],
       nodeOverTime: [
         {
-          cred: [4 + 9, 10 + 22],
+          cred: [4 + 2, 10 + 5],
           seedFlow: [0, 0],
           syntheticLoopFlow: [0.1, 0.1],
-          dependencyMintedCred: [9, 22],
+          dependencyMintedCred: [2, 5],
         },
         {
           cred: [5, 1],
@@ -124,7 +133,10 @@ describe("src/analysis/credData", () => {
       ],
       edgeOverTime: [{forwardFlow: [1, 1], backwardFlow: [2, 0]}],
     };
-    expect(computeCredData(scores, mintPolicies)).toEqual(expected);
+    // Only the first node address is a participant, so we mint
+    // based on its Cred alone.
+    const nodeOrder = [IDENTITY_PREFIX, NodeAddress.empty];
+    expect(computeCredData(scores, nodeOrder, mintPolicies)).toEqual(expected);
   });
   it("compresses by threshold correctly", () => {
     const intervalEnds = [100, 200];
