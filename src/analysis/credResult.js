@@ -32,6 +32,7 @@ import {
   type DependencyMintPolicy,
   processMintPolicy,
 } from "../core/dependenciesMintPolicy";
+import {IDENTITY_PREFIX} from "../ledger/identity";
 
 /**
  * Comprehensive cred output data, including the graph, the scores, the params, and the plugins.
@@ -57,8 +58,7 @@ export async function compute(
 ): Promise<CredResult> {
   const {graph} = wg;
   const nodeOrder = Array.from(graph.nodes()).map((x) => x.address);
-  const userTypes = [].concat(...plugins.map((x) => x.userTypes));
-  const scorePrefixes = userTypes.map((x) => x.prefix);
+  const scorePrefixes = [IDENTITY_PREFIX];
   const distribution = await timelinePagerank(
     wg,
     params.intervalDecay,
@@ -93,15 +93,12 @@ export function compressByThreshold(
 
 export function stripOverTimeDataForNonUsers(x: CredResult): CredResult {
   const {params, plugins, weightedGraph, credData, dependencyPolicies} = x;
-  const userPrefixes = []
-    .concat(...plugins.map((x) => x.userTypes))
-    .map((x) => x.prefix);
   const nodeOrder = Array.from(weightedGraph.graph.nodes()).map(
     (x) => x.address
   );
   const inclusionIndices = new Set();
   nodeOrder.forEach((a, i) => {
-    if (userPrefixes.some((p) => NodeAddress.hasPrefix(a, p))) {
+    if (NodeAddress.hasPrefix(a, IDENTITY_PREFIX)) {
       inclusionIndices.add(i);
     }
   });

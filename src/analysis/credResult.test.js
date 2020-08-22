@@ -7,6 +7,7 @@ import type {NodeType, EdgeType} from "./types";
 import type {PluginDeclaration} from "./pluginDeclaration";
 import {defaultParams} from "./timeline/params";
 import {compute, toJSON, fromJSON} from "./credResult";
+import {IDENTITY_PREFIX} from "../ledger/identity";
 
 describe("analysis/credResult", () => {
   describe("to/fro JSON", () => {
@@ -14,7 +15,7 @@ describe("analysis/credResult", () => {
       const nodeType: NodeType = {
         name: "node",
         pluralName: "nodes",
-        prefix: NodeAddress.fromParts(["node"]),
+        prefix: IDENTITY_PREFIX,
         defaultWeight: 2,
         description: "a type",
       };
@@ -36,12 +37,12 @@ describe("analysis/credResult", () => {
 
       const graph = new Graph()
         .addNode({
-          address: NodeAddress.fromParts(["node", "1"]),
+          address: NodeAddress.append(IDENTITY_PREFIX, "1"),
           description: "n1",
           timestampMs: 100000,
         })
         .addNode({
-          address: NodeAddress.fromParts(["node", "2"]),
+          address: NodeAddress.append(IDENTITY_PREFIX, "2"),
           description: "n2",
           timestampMs: 110000,
         });

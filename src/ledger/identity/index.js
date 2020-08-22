@@ -18,4 +18,4 @@ export {nameFromString, parser as nameParser} from "./name";
 export type {Alias} from "./alias";
 export {parser as aliasParser} from "./alias";
 
-export {declaration} from "./declaration";
+export {declaration, IDENTITY_PREFIX} from "./declaration";
