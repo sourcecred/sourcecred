@@ -17,12 +17,8 @@ export type PluginDeclaration = {|
   +nodeTypes: $ReadOnlyArray<NodeType>,
   +edgeTypes: $ReadOnlyArray<EdgeType>,
   // Which node types represent user identities.
-  // Important for computing score and for display in the frontend.
-  // It's expected that the userTypes will also be included in the array of
-  // nodeTypes.
-  // It's expected that every userType will have a default weight of 0, as
-  // users should not mint cred. UIs and interfaces should disallow changing
-  // user type weights.
+  // This is vestigial, as now all users are automatically made into Identities.
+  // It will be removed in the future.
   +userTypes: $ReadOnlyArray<NodeType>,
 |};
 

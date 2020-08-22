@@ -94,7 +94,7 @@ exports[`analysis/credResult to/fro JSON to/froJSON snapshots as expected 1`] = 
               \\"description\\": \\"a type\\",
               \\"name\\": \\"node\\",
               \\"pluralName\\": \\"nodes\\",
-              \\"prefix\\": \\"N\\\\u0000node\\\\u0000\\"
+              \\"prefix\\": \\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000IDENTITY\\\\u0000\\"
             }
           ],
           \\"userTypes\\": [
@@ -103,7 +103,7 @@ exports[`analysis/credResult to/fro JSON to/froJSON snapshots as expected 1`] = 
               \\"description\\": \\"a type\\",
               \\"name\\": \\"node\\",
               \\"pluralName\\": \\"nodes\\",
-              \\"prefix\\": \\"N\\\\u0000node\\\\u0000\\"
+              \\"prefix\\": \\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000IDENTITY\\\\u0000\\"
             }
           ]
         }
@@ -137,11 +137,15 @@ exports[`analysis/credResult to/fro JSON to/froJSON snapshots as expected 1`] = 
             ],
             \\"sortedNodeAddresses\\": [
               [
-                \\"node\\",
+                \\"sourcecred\\",
+                \\"core\\",
+                \\"IDENTITY\\",
                 \\"1\\"
               ],
               [
-                \\"node\\",
+                \\"sourcecred\\",
+                \\"core\\",
+                \\"IDENTITY\\",
                 \\"2\\"
               ]
             ]
