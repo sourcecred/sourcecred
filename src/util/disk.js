@@ -96,3 +96,13 @@ export async function loadFileWithDefault(
     }
   }
 }
+
+/**
+ * Check if a directory is empty
+ *
+ * Will error if a path that resolves to anything other
+ * than a directory is provided
+ */
+export function isDirEmpty(dirPath: string): boolean {
+  return fs.readdirSync(dirPath).length === 0;
+}
