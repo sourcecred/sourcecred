@@ -36,7 +36,7 @@ module.exports = {
       },
     ],
     "no-constant-condition": ["warn", {checkLoops: false}],
-    "no-inner-decalartions": ["off"],
+    "no-inner-declarations": ["off"],
     "no-use-before-define": ["off"],
     "no-useless-constructor": ["off"],
     "no-case-declarations": ["off"],
