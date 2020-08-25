@@ -11,7 +11,7 @@ type DropdownProps = {|
   +placeholder?: string,
 |};
 
-const useStyles = makeStyles({combobox: {margin: "0px 16px 16px"}});
+const useStyles = makeStyles({combobox: {margin: "0px 32px 16px"}});
 
 export default function AccountDropdown({
   placeholder,
