@@ -141,6 +141,10 @@ describe("util/disk", () => {
     });
     it("returns false if directory is not empty", () => {
       const dir = tmp.dirSync();
+      fs.mkdirSync(pathJoin(dir.name, "childDir"));
+      expect(isDirEmpty(dir.name)).toBe(false);
+      fs.writeFileSync(pathJoin(dir.name, ".temphidden.txt"), "");
+      expect(isDirEmpty(dir.name)).toBe(false);
       fs.writeFileSync(pathJoin(dir.name, "temp.txt"), "");
       expect(isDirEmpty(dir.name)).toBe(false);
       // cleanup: tmpDirs won't auto-delete if not empty
