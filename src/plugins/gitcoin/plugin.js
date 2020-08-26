@@ -95,4 +95,12 @@ export class GitcoinPlugin implements Plugin {
     //TODO
     return {addressFromUrl: () => undefined};
   }
+
+  async identities(
+    ctx: PluginDirectoryContext
+  ): Promise<$ReadOnlyArray<IdentityProposal>> {
+    const {pgDatabaseUrl} = await loadConfig(ctx);
+    const repo = await repository(ctx, pgDatabaseUrl);
+    return createIdentities(repo);
+  }
 }
