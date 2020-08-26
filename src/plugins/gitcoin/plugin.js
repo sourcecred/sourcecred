@@ -16,6 +16,7 @@ import {parser, type GitcoinConfig} from "./config";
 import {declaration} from "./declaration";
 import {createGraph} from "./createGraph";
 import {PostgresMirrorRepository} from "./mirrorRepository";
+import {createIdentities} from './createIdentities';
 
 async function loadConfig(
   dirContext: PluginDirectoryContext

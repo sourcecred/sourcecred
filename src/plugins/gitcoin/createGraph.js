@@ -82,7 +82,6 @@ export function _graphFromData(
     graph.addNode(user);
 
     if (usersWithPrefix.indexOf(user.description) !== -1) {
-      console.log(`Setting weight for user ${user.description}`);
       weights.nodeWeights.set(user.address, 12);
     }
   }
