@@ -3,7 +3,7 @@
 import * as NullUtil from "../util/null";
 import type {Command} from "./command";
 import {loadInstanceConfig, pluginDirectoryContext} from "./common";
-import {LoggingTaskReporter} from "../util/taskReporter";
+import {LoggingTaskReporter, ScopedTaskReporter} from "../util/taskReporter";
 import {type PluginId, parser as pluginIdParser} from "../api/pluginId";
 import {isDirEmpty} from "../util/disk";
 import fs from "fs-extra";
@@ -48,7 +48,7 @@ const loadCommand: Command = async (args, std) => {
     const task = `loading ${name}`;
     taskReporter.start(task);
     const dirContext = pluginDirectoryContext(baseDir, name);
-    const childTaskReporter = new LoggingTaskReporter({scopedPrefix: name});
+    const childTaskReporter = new ScopedTaskReporter(taskReporter, name);
 
     const loadPlugin = () =>
       plugin
@@ -56,14 +56,15 @@ const loadCommand: Command = async (args, std) => {
         .then(() => taskReporter.finish(task));
 
     const endChildRunners = () => {
-      console.log("[debug] activeTasks: ", childTaskReporter.activeTasks);
-      Array.from(childTaskReporter.activeTasks.keys()).forEach(
-        (taskKey: string) => {
-          console.log("[debug] killing: ", taskKey);
-          childTaskReporter.finish(taskKey);
-          warn(std, taskKey, "Retrying");
-        }
-      );
+      const prefixRegex = new RegExp("^" + name);
+      // create static array of taskIds from active map
+      Array.from(taskReporter.activeTasks.keys())
+        .filter((taskId) => prefixRegex.test(taskId))
+        .forEach((taskId: string) => {
+          console.log("[debug] killing: ", taskId);
+          taskReporter.finish(taskId);
+          warn(std, taskId, "Retrying");
+        });
     };
 
     const restartParentRunner = (error: string) => {
