@@ -112,7 +112,7 @@
     "build": "run-p build:* && cp -r ./build ./bin/site-template && chmod +x ./bin/sourcecred.js",
     "build:frontend": "NODE_ENV=production webpack --config config/webpack.config.web.js",
     "build:backend": "NODE_ENV=development webpack --config config/webpack.config.backend.js",
-    "api": "webpack --config config/webpack.config.api.js",
+    "build:api": "NODE_ENV=production webpack --config config/webpack.config.api.js",
     "test": "node ./config/test.js",
     "createLedger": "babel-node ./scripts/createLedgerFromLegacyProject.js",
     "unit": "BABEL_ENV=test NODE_ENV=test jest --env=jsdom",
