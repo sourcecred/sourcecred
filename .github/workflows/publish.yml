@@ -14,11 +14,6 @@ jobs:
           node-version: 12
           registry-url: 'https://registry.npmjs.org'
 
-      - uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: nodeModules-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-
       - name: Install packages
         run: yarn --frozen-lockfile
 
