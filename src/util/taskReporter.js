@@ -116,12 +116,18 @@ export class SilentTaskReporter implements TaskReporter {
  * in which the current task is running.
  *
  * This allows for reliable filtering and searching on existing tasks
- * by prefix, so long as no child contexts attempt to utilize the same prefix
- * and then filter on it. Care should be taken to ensure that the same prefix does
- * not exist in different scopes, so far as error handling is concerned, or a
- * filter may incorrectly catch and finish an sill-running scope while error-handling
+ * by prefix. Care should be taken to ensure that the same prefix does
+ * not exist in peer task contexts, so far as error handling is concerned,
+ * or a filter may incorrectly catch and finish a still-running task while
+ * error-handling. This risk can be mitigated by only designating prefixes via
+ * a Scoped Task Reporter, as opposed to passing prefixes into the `start`
+ * and `finish` methods manually. For example, this block will always throw:
  *
- * Any instance of a TaskReporter may be used with the scopedTaskReporter
+ * function f(top: SilentTaskReporter) {
+ *  top.start("my-prefix: foo");
+ *  const scoped = new ScopedTaskReporter(top, "my-prefix");
+ *  scoped.start("foo"); // Error: task my-prefix: foo already active
+ * }
  */
 export class ScopedTaskReporter implements TaskReporter {
   _delegate: TaskReporter;
