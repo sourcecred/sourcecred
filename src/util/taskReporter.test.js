@@ -3,6 +3,7 @@
 import {
   LoggingTaskReporter,
   SilentTaskReporter,
+  ScopedTaskReporter,
   formatTimeElapsed,
   startMessage,
   finishMessage,
@@ -162,6 +163,77 @@ describe("util/taskReporter", () => {
       });
       new SilentTaskReporter().start("foo").start("bar").finish("foo");
       expect(usedConsole).toEqual(false);
+    });
+  });
+
+  describe("Scoped Task Reporter", () => {
+    const noopLogMock = () => {};
+
+    it("works with LoggingTaskReporter", () => {
+      const ltr = new LoggingTaskReporter(noopLogMock);
+      const str = new ScopedTaskReporter(ltr, "subtask");
+      ltr.start("foo").start("bar");
+      expect(Array.from(ltr.activeTasks.keys())).toEqual(["foo", "bar"]);
+      str.start("bar").start("foo");
+      expect(Array.from(ltr.activeTasks.keys())).toEqual([
+        "foo",
+        "bar",
+        "subtask: bar",
+        "subtask: foo",
+      ]);
+      ltr.finish("bar").finish("foo");
+      expect(Array.from(ltr.activeTasks.keys())).toEqual([
+        "subtask: bar",
+        "subtask: foo",
+      ]);
+      str.finish("foo").finish("bar");
+      expect(ltr.activeTasks).toEqual(new Map());
+    });
+    it("works with SilentTaskReporter", () => {
+      const silent = new SilentTaskReporter();
+      const scoped = new ScopedTaskReporter(silent, "outer task");
+
+      silent.start("foo");
+      scoped.start("bar");
+      scoped.finish("bar");
+      silent.finish("foo");
+
+      expect(silent.entries()).toEqual([
+        {
+          taskId: "foo",
+          type: "START",
+        },
+        {
+          taskId: "outer task: bar",
+          type: "START",
+        },
+        {
+          taskId: "outer task: bar",
+          type: "FINISH",
+        },
+        {
+          taskId: "foo",
+          type: "FINISH",
+        },
+      ]);
+    });
+    it("can be stacked to create nested scopes", () => {
+      const ltr = new LoggingTaskReporter(noopLogMock);
+      const str = new ScopedTaskReporter(ltr, "subtask");
+      const inner = new ScopedTaskReporter(str, "inner");
+      inner.start("foo").start("bar").finish("bar").start("baz");
+      expect(Array.from(ltr.activeTasks.keys())).toEqual([
+        "subtask: inner: foo",
+        "subtask: inner: baz",
+      ]);
+    });
+    it("cannot finish parent tasks", () => {
+      const silent = new SilentTaskReporter();
+      const inner = new ScopedTaskReporter(silent, "inner");
+
+      silent.start("foo");
+      const thunk = () => inner.finish("foo");
+      expect(thunk).toThrow("task inner: foo not active");
     });
   });
 });

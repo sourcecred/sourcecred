@@ -108,6 +108,45 @@ export class SilentTaskReporter implements TaskReporter {
   }
 }
 
+/**
+ * ScopedTaskReporter is a higher-order task reporter
+ * for generating opaque scopes meant to be passed into child contexts.
+ *
+ * In this case, a scope is a log prefix indicating the parent context
+ * in which the current task is running.
+ *
+ * This allows for reliable filtering and searching on existing tasks
+ * by prefix, so long as no child contexts attempt to utilize the same prefix
+ * and then filter on it. Care should be taken to ensure that the same prefix does
+ * not exist in different scopes, so far as error handling is concerned, or a
+ * filter may incorrectly catch and finish an sill-running scope while error-handling
+ *
+ * Any instance of a TaskReporter may be used with the scopedTaskReporter
+ */
+export class ScopedTaskReporter implements TaskReporter {
+  _delegate: TaskReporter;
+  _prefix: string;
+
+  constructor(delegate: TaskReporter, prefix: string) {
+    this._delegate = delegate;
+    this._prefix = prefix;
+  }
+
+  _scoped(taskId: TaskId): TaskId {
+    return `${this._prefix}: ${taskId}`;
+  }
+
+  start(taskId: TaskId) {
+    this._delegate.start(this._scoped(taskId));
+    return this;
+  }
+
+  finish(taskId: TaskId) {
+    this._delegate.finish(this._scoped(taskId));
+    return this;
+  }
+}
+
 export function formatTimeElapsed(elapsed: MsSinceEpoch): string {
   if (elapsed < 0) {
     throw new Error("nonegative time expected");
