@@ -24,6 +24,8 @@ jobs:
 
       - name: Test
         run: yarn test --full --ci
+        env:
+          SOURCECRED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Uses the version defined by the tag created in the Release
       # and pushes a commit that updates the version in package.json
