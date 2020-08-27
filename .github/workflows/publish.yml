@@ -23,7 +23,7 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Test
-        run: yarn test --ci
+        run: yarn test --full --ci
 
       # Uses the version defined by the tag created in the Release
       # and pushes a commit that updates the version in package.json
