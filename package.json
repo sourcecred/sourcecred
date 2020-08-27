@@ -160,7 +160,9 @@
     ]
   },
   "files": [
-    "/bin"
+    "/bin",
+    "/dist"
   ],
+  "main": "dist/api.js",
   "bin": "./bin/sourcecred.js"
 }
