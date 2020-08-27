@@ -16,7 +16,12 @@ function die(std, message) {
 
 function warn(std, task: string, message: string) {
   const label = chalk.bgYellow.bold.white(" WARN ");
-  std.out(`${label} ${task}: ${message}`);
+  std.err(`${label} ${task}: ${message}`);
+}
+
+function fail(std, task: string, message: string = "") {
+  const label = chalk.bgRed.bold.white(" FAIL ");
+  std.err(`${label} ${task}${message ? `: ${message}` : ""}`);
 }
 
 const loadCommand: Command = async (args, std) => {
@@ -38,7 +43,7 @@ const loadCommand: Command = async (args, std) => {
       }
     }
   }
-  const taskReporter = new LoggingTaskReporter();
+  const taskReporter = new LoggingTaskReporter(std.out);
   taskReporter.start("load");
   const failedPlugins = [];
   const loadPromises = [];
@@ -57,7 +62,7 @@ const loadCommand: Command = async (args, std) => {
 
     const endChildRunners = () => {
       const prefixRegex = new RegExp("^" + name);
-      // create static array of taskIds from active map
+      // create static array of taskIds from activeTasks map
       Array.from(taskReporter.activeTasks.keys())
         .filter((taskId) => prefixRegex.test(taskId))
         .forEach((taskId: string) => {
@@ -87,7 +92,7 @@ const loadCommand: Command = async (args, std) => {
         throw e;
       })
       .catch((e) => {
-        console.error(e);
+        fail(std, name, e);
         failedPlugins.push(name);
       });
     loadPromises.push(loadWithPossibleRetry);
