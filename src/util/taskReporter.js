@@ -108,6 +108,51 @@ export class SilentTaskReporter implements TaskReporter {
   }
 }
 
+/**
+ * ScopedTaskReporter is a higher-order task reporter
+ * for generating opaque scopes meant to be passed into child contexts.
+ *
+ * In this case, a scope is a log prefix indicating the parent context
+ * in which the current task is running.
+ *
+ * This allows for reliable filtering and searching on existing tasks
+ * by prefix. Care should be taken to ensure that the same prefix does
+ * not exist in peer task contexts, so far as error handling is concerned,
+ * or a filter may incorrectly catch and finish a still-running task while
+ * error-handling. This risk can be mitigated by only designating prefixes via
+ * a Scoped Task Reporter, as opposed to passing prefixes into the `start`
+ * and `finish` methods manually. For example, this block will always throw:
+ *
+ * function f(top: SilentTaskReporter) {
+ *  top.start("my-prefix: foo");
+ *  const scoped = new ScopedTaskReporter(top, "my-prefix");
+ *  scoped.start("foo"); // Error: task my-prefix: foo already active
+ * }
+ */
+export class ScopedTaskReporter implements TaskReporter {
+  _delegate: TaskReporter;
+  _prefix: string;
+
+  constructor(delegate: TaskReporter, prefix: string) {
+    this._delegate = delegate;
+    this._prefix = prefix;
+  }
+
+  _scoped(taskId: TaskId): TaskId {
+    return `${this._prefix}: ${taskId}`;
+  }
+
+  start(taskId: TaskId) {
+    this._delegate.start(this._scoped(taskId));
+    return this;
+  }
+
+  finish(taskId: TaskId) {
+    this._delegate.finish(this._scoped(taskId));
+    return this;
+  }
+}
+
 export function formatTimeElapsed(elapsed: MsSinceEpoch): string {
   if (elapsed < 0) {
     throw new Error("nonegative time expected");
