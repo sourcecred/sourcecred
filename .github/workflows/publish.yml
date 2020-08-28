@@ -29,7 +29,12 @@ jobs:
           git config --global user.name $GITHUB_ACTOR
           git config --global user.email ${GITHUB_ACTOR}@users.noreply.github.com
           yarn publish --new-version ${GITHUB_REF#"refs/tags/"} --no-git-tag-version
-          git push
+          git add package.json
+          git commit -m "Release v${GITHUB_REF#"refs/tags/"}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Push to master
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
