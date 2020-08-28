@@ -6,10 +6,12 @@ import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
+import {Contributions} from "./Contributions";
 import {Explorer} from "./Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
 import {AccountOverview} from "./AccountOverview";
+import {Participant} from "./Participant";
 import {Transfer} from "./Transfer";
 import {SpecialDistribution} from "./SpecialDistribution";
 import {load, type LoadResult, type LoadSuccess} from "../load";
@@ -55,6 +57,12 @@ const customRoutes = (
   const backendRoutes = [
     <Route key="admin" exact path="/admin">
       <LedgerAdmin credView={credView} />
+    </Route>,
+    <Route key="participant" exact path="/participant">
+      <Participant initialView={credView} />
+    </Route>,
+    <Route key="contributions" exact path="/contributions">
+      <Contributions initialView={credView} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
       <Transfer currency={currency} />
