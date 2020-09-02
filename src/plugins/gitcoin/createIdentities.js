@@ -7,11 +7,11 @@ import {userAddress} from "./address";
 import {type IdentityProposal} from "../../ledger/identityProposal";
 import {coerce, nameFromString} from "../../ledger/identity/name";
 
-export function _createIdentity(user: User): IdentityProposal {
+export function _createIdentity(user: User, serverUrl: string): IdentityProposal {
   const description = `gitcoin/${escape(user.name)}`;
   const alias = {
     description,
-    address: userAddress("", user.name),
+    address: userAddress(serverUrl, user.name),
   };
   const type = "USER";
   return {
@@ -23,7 +23,8 @@ export function _createIdentity(user: User): IdentityProposal {
 }
 
 export function createIdentities(
-  repo: PostgresMirrorRepository
+  repo: PostgresMirrorRepository,
+  serverUrl: string
 ): $ReadOnlyArray<IdentityProposal> {
-  return repo.users().map((u) => _createIdentity(u));
+  return repo.users().map((u) => _createIdentity(u, serverUrl));
 }
