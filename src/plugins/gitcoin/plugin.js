@@ -102,8 +102,8 @@ export class GitcoinPlugin implements Plugin {
   async identities(
     ctx: PluginDirectoryContext
   ): Promise<$ReadOnlyArray<IdentityProposal>> {
-    const {pgDatabaseUrl} = await loadConfig(ctx);
+    const {pgDatabaseUrl, gitcoinHost} = await loadConfig(ctx);
     const repo = await repository(ctx, pgDatabaseUrl);
-    return createIdentities(repo);
+    return createIdentities(repo, gitcoinHost);
   }
 }
