@@ -69,7 +69,7 @@ export const SpecialDistribution = ({
         policyType: "SPECIAL",
         budget: fromFloatString(amount),
         memo,
-        recipientId: recipient.identity.id,
+        recipient: recipient.identity.id,
       };
       const allocation = computeAllocation(policy, [
         {cred: [1], paid: ZERO, id: recipient.identity.id},
