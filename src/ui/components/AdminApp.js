@@ -60,7 +60,7 @@ const customRoutes = (
       <Transfer currency={currency} />
     </Route>,
     <Route key="special-distribution" exact path="/special-distribution">
-      <SpecialDistribution />
+      <SpecialDistribution currency={currency} />
     </Route>,
   ];
   return routes.concat(hasBackend ? backendRoutes : []);
