@@ -153,7 +153,7 @@ describe("src/ledger/grainAllocation", () => {
           policyType: "SPECIAL",
           budget: ng(100),
           memo: "something",
-          recipient: i1.id,
+          recipientId: i1.id,
         };
         const allocation = computeAllocation(policy, [i1]);
         const expectedReceipts = [{id: i1.id, amount: ng(100)}];
@@ -171,7 +171,7 @@ describe("src/ledger/grainAllocation", () => {
           policyType: "SPECIAL",
           budget: ng(100),
           memo: "something",
-          recipient: id,
+          recipientId: id,
         };
         const thunk = () => computeAllocation(policy, [other]);
         expect(thunk).toThrowError("no active grain account for identity");
