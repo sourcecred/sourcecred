@@ -7,7 +7,10 @@ import {userAddress} from "./address";
 import {type IdentityProposal} from "../../ledger/identityProposal";
 import {coerce, nameFromString} from "../../ledger/identity/name";
 
-export function _createIdentity(user: User, serverUrl: string): IdentityProposal {
+export function _createIdentity(
+  user: User,
+  serverUrl: string
+): IdentityProposal {
   const description = `gitcoin/${escape(user.name)}`;
   const alias = {
     description,
