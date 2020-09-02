@@ -2,6 +2,7 @@
 
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {Graph, type Node, type Edge} from "../../core/graph";
+import {type WeightedGraph} from "../../core/weightedGraph";
 
 import {declaration} from "./declaration";
 import {ReadRepository} from "./mirrorRepository";
@@ -30,7 +31,8 @@ export type GraphData = {
   +users: $ReadOnlyArray<GraphUser>,
   +posts: $ReadOnlyArray<GraphPost>,
   +comments: $ReadOnlyArray<GraphComment>,
-  +likes: $ReadOnlyArray<GraphLike>,
+  +postLikes: $ReadOnlyArray<GraphLike>,
+  +commentLikes: $ReadOnlyArray<GraphLike>,
 };
 
 export function _createGraphData(
@@ -38,7 +40,7 @@ export function _createGraphData(
   repo: ReadRepository
 ): GraphData {
   const users: $ReadOnlyArray<GraphUser> = repo.users().map((user) => {
-    return NE.userNode(serverUrl, user);
+    return {node: NE.userNode(serverUrl, user)};
   });
 
   const posts: $ReadOnlyArray<GraphPost> = repo.posts().map((post) => {
@@ -57,21 +59,25 @@ export function _createGraphData(
       return {node, createsComment, postHasReply};
     });
 
-  const likes = repo.likes().map((like) => {
-    if (like.postId !== null) {
-      return NE.createLikePostEdge(serverUrl, like);
-    } else if (like.commentId !== null) {
-      return NE.createLikeCommentEdge(serverUrl, like);
-    }
+  const postLikes = repo.postLikes().map((like) => {
+    return {
+      likes: NE.createLikePostEdge(serverUrl, like),
+    };
   });
 
-  const data = {users, posts, comments, likes};
+  const commentLikes = repo.commentLikes().map((like) => {
+    return {
+      likes: NE.createLikeCommentEdge(serverUrl, like),
+    };
+  });
+
+  const data = {users, posts, comments, postLikes, commentLikes};
 
   return data;
 }
 
 export function _graphFromData(
-  {users, posts, comments, likes}: GraphData,
+  {users, posts, comments, postLikes, commentLikes}: GraphData,
   trustedUsers: $ReadOnlyArray<string>
 ): WeightedGraph {
   const graph = new Graph();
@@ -79,10 +85,10 @@ export function _graphFromData(
   const usersWithPrefix = trustedUsers.map((username) => `user/${username}`);
 
   for (const user of users) {
-    graph.addNode(user);
+    graph.addNode(user.node);
 
-    if (usersWithPrefix.indexOf(user.description) !== -1) {
-      weights.nodeWeights.set(user.address, 12);
+    if (usersWithPrefix.indexOf(user.node.description) !== -1) {
+      weights.nodeWeights.set(user.node.address, 12);
     }
   }
 
@@ -97,8 +103,12 @@ export function _graphFromData(
     graph.addEdge(comment.postHasReply);
   }
 
-  for (const like of likes) {
-    graph.addEdge(like);
+  for (const like of postLikes) {
+    graph.addEdge(like.likes);
+  }
+
+  for (const like of commentLikes) {
+    graph.addEdge(like.likes);
   }
 
   return {graph, weights};

@@ -11,12 +11,12 @@ export function _createIdentity(user: User): IdentityProposal {
   const description = `gitcoin/${escape(user.name)}`;
   const alias = {
     description,
-    address: userAddress(user),
+    address: userAddress("", user.name),
   };
   const type = "USER";
   return {
     pluginName: nameFromString("gitcoin"),
-    name: coerce(user.name),
+    name: user.name ? coerce(user.name) : coerce("shouldnthappen"),
     type,
     alias,
   };

@@ -6,6 +6,7 @@ export type Username = string | null;
 export type CommentId = number;
 export type PostActivityId = number;
 export type LikeId = number;
+export type TipId = number;
 
 export type User = {|
   +id: UserId,
@@ -28,12 +29,19 @@ export type PostActivity = {|
   +timestampMs: TimestampMs,
 |};
 
-export type Like = {|
+export type CommentLike = {|
   +id: LikeId,
   authorUsername: Username,
   +authorId: UserId,
-  +postId: PostActivityId | null,
-  +commentId: CommentId | null,
+  +commentId: CommentId,
+  +timestampMs: TimestampMs,
+|};
+
+export type PostLike = {|
+  +id: LikeId,
+  authorUsername: Username,
+  +authorId: UserId,
+  +postId: PostActivityId,
   +timestampMs: TimestampMs,
 |};
 

@@ -4,8 +4,11 @@ import fs from "fs";
 import Client from "pg-native";
 
 import type {Plugin, PluginDirectoryContext} from "../../api/plugin";
+import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
+import type {ReferenceDetector} from "../../core/references";
 import {type TaskReporter} from "../../util/taskReporter";
 import type {WeightedGraph} from "../../core/weightedGraph";
+import type {IdentityProposal} from "../../ledger/identityProposal";
 import {
   type PluginId,
   fromString as pluginIdFromString,
@@ -16,7 +19,7 @@ import {parser, type GitcoinConfig} from "./config";
 import {declaration} from "./declaration";
 import {createGraph} from "./createGraph";
 import {PostgresMirrorRepository} from "./mirrorRepository";
-import {createIdentities} from './createIdentities';
+import {createIdentities} from "./createIdentities";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext
@@ -50,8 +53,7 @@ export class GitcoinPlugin implements Plugin {
     const path = pathJoin(configDir, "config.json");
     const pgDatabaseUrl = process.env.GITCOIN_POSTGRES_URL;
     const gitcoinHost = process.env.GITCOIN_HOST;
-    const task = `gitcoin: config file generating`
-
+    const task = `gitcoin: config file generating`;
 
     if (fs.existsSync(path)) {
       return;
@@ -74,7 +76,7 @@ export class GitcoinPlugin implements Plugin {
 
     fs.writeFileSync(path, JSON.stringify(config));
 
-    reporter.end(task);
+    reporter.finish(task);
   }
 
   async graph(
