@@ -12,7 +12,13 @@ import {
   tipsPostEdgeType,
 } from "./declaration";
 
-import {type User, type Comment, type PostActivity, type Like} from "./fetch";
+import {
+  type User,
+  type Comment,
+  type PostActivity,
+  type PostLike,
+  type CommentLike,
+} from "./fetch";
 
 export function userNode(serverUrl: string, user: User): Node {
   let description;
@@ -80,7 +86,7 @@ export function createsPostEdge(serverUrl: string, post: PostActivity): Edge {
   };
 }
 
-export function createLikePostEdge(serverUrl: string, like: Like): Edge {
+export function createLikePostEdge(serverUrl: string, like: PostLike): Edge {
   const address = EdgeAddress.append(
     likesPostEdgeType.prefix,
     serverUrl,
@@ -95,7 +101,10 @@ export function createLikePostEdge(serverUrl: string, like: Like): Edge {
   };
 }
 
-export function createLikeCommentEdge(serverUrl: string, like: Like): Edge {
+export function createLikeCommentEdge(
+  serverUrl: string,
+  like: CommentLike
+): Edge {
   const address = EdgeAddress.append(
     likesCommentEdgeType.prefix,
     serverUrl,
