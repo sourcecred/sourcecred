@@ -21,6 +21,9 @@ import * as markovChain from "../core/algorithm/markovChain";
 import * as credView from "../analysis/credView";
 import * as credData from "../analysis/credData";
 import * as credResult from "../analysis/credResult";
+import * as ledger from "../ledger/ledger";
+import * as grain from "../ledger/grain";
+import * as identity from "../ledger/identity";
 
 export default deepFreeze({
   core: {
@@ -37,6 +40,11 @@ export default deepFreeze({
     credView,
     credData,
     credResult,
+  },
+  ledger: {
+    ledger,
+    identity,
+    grain,
   },
   plugins: {
     github: {
