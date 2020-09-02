@@ -1,13 +1,18 @@
 // @flow
-
-import {type User, type Like, type Comment, type PostActivity} from "./fetch";
+import {Client} from "pg-native";
 
 import dedent from "../../util/dedent";
 
-import {Client} from "pg-native";
+import {
+  type User,
+  type PostLike,
+  type CommentLike,
+  type Comment,
+  type PostActivity,
+} from "./fetch";
 
 /**
- * Interface for reading GitCoin data
+ * Interface for reading Gitcoin data
  */
 export interface ReadRepository {
   /**
@@ -23,11 +28,17 @@ export interface ReadRepository {
    */
   posts(): $ReadOnlyArray<PostActivity>;
   /**
-   * Retrieve all likes associated with Posts and Comments
+   * Retrieve all likes associated with Posts
    *
    * The order is unspecified
    */
-  likes(): $ReadOnlyArray<Like>;
+  postLikes(): $ReadOnlyArray<PostLike>;
+  /**
+   * Retrieve all likes associated with Comments
+   *
+   * The order is unspecified
+   */
+  commentLikes(): $ReadOnlyArray<CommentLike>;
   /**
    * Retrieve all Comments
    *
@@ -43,35 +54,35 @@ export interface MirrorRepository extends ReadRepository {
   /**
    * Create a PostActivity from a Postgres comment row
    */
-  createPost(postData): PostActivity;
+  createPost(postData: PostData): PostActivity;
   /**
    * Create a Comment from a Postgres comment row
    */
-  createComment(commentData): Comment;
+  createComment(commentData: CommentData): Comment;
   /**
    * Create a Like from a Postgres like row
    */
-  createPostLike(likeData): Like;
+  createPostLike(likeData: LikeData): PostLike;
   /**
    * Creates an array of Like objects from a Postgres comment row
    */
-  createLikesFromComment(commentData): Like[];
+  createLikesFromComment(commentData: CommentData): $ReadOnlyArray<CommentLike>;
   /**
    * Create a User from a Postgres user row
    */
-  createUser(userData): User;
+  createUser(userData: UserData): User;
   /**
    * Retrieve all Likes associated with Posts
    *
    * The order is unspecified
    */
-  postLikes(): $ReadOnlyArray<Likes>;
+  postLikes(): $ReadOnlyArray<PostLike>;
   /**
    * Retrieve all Likes associated with Comments
    *
    * The order is unspecified
    */
-  commentLikes(): $ReadOnlyArray<Likes>;
+  commentLikes(): $ReadOnlyArray<CommentLike>;
 }
 
 export class PostgresMirrorRepository
@@ -82,7 +93,7 @@ export class PostgresMirrorRepository
     this._db = db;
   }
 
-  createPost(postData): PostActivity {
+  createPost(postData: PostData): PostActivity {
     const timestampIso = Date.parse(postData.created);
 
     return {
@@ -93,7 +104,7 @@ export class PostgresMirrorRepository
     };
   }
 
-  createComment(commentData): Comment {
+  createComment(commentData: CommentData): Comment {
     const timestampIso = Date.parse(commentData.created_on);
 
     return {
@@ -105,7 +116,7 @@ export class PostgresMirrorRepository
     };
   }
 
-  createPostLike(likeData): Like {
+  createPostLike(likeData: LikeData): PostLike {
     const timestampIso = Date.parse(likeData.created_on);
 
     return {
@@ -113,12 +124,13 @@ export class PostgresMirrorRepository
       authorUsername: likeData.handle,
       authorId: likeData.profile_id,
       postId: likeData.activity_id,
-      commentId: null,
       timestampMs: timestampIso,
     };
   }
 
-  createLikesFromComment(commentData): Like[] {
+  createLikesFromComment(
+    commentData: CommentData
+  ): $ReadOnlyArray<CommentLike> {
     // Use comment createdOn time as likes associated with comments do not
     // have an associated timestamp
     const timestampIso = Date.parse(commentData.created_on);
@@ -132,14 +144,13 @@ export class PostgresMirrorRepository
         id: likeId,
         authorUsername: commentData.likes_handles[idx],
         authorId: likeProfileId,
-        postId: null,
         commentId: commentData.id,
         timestampMs: timestampIso,
       };
     });
   }
 
-  createUser(userData): User {
+  createUser(userData: UserData): User {
     const timestampIso = Date.parse(userData.created_on);
 
     return {
@@ -153,13 +164,13 @@ export class PostgresMirrorRepository
     return this._db
       .querySync(
         dedent`SELECT da.id,
-                                          da.created,
-                                          da.profile_id,
-                                          dp.handle
-                                   FROM dashboard_activity as da,
-                                        dashboard_profile as dp
-                                   WHERE da.activity_type LIKE 'status_update'
-                                     AND dp.id = da.profile_id`
+                      da.created,
+                      da.profile_id,
+                      dp.handle
+               FROM dashboard_activity as da,
+                    dashboard_profile as dp
+               WHERE da.activity_type LIKE 'status_update'
+                 AND dp.id = da.profile_id`
       )
       .map(this.createPost);
   }
@@ -168,89 +179,79 @@ export class PostgresMirrorRepository
     return this._db
       .querySync(
         dedent`SELECT tc.id,
-                                          tc.created_on,
-                                          tc.activity_id,
-                                          tc.profile_id,
-                                          dp.handle
-                                   FROM townsquare_comment as tc,
-                                        dashboard_profile as dp
-                                   WHERE tc.profile_id = dp.id`
+                      tc.created_on,
+                      tc.activity_id,
+                      tc.profile_id,
+                      dp.handle
+               FROM townsquare_comment as tc,
+                    dashboard_profile as dp
+               WHERE tc.profile_id = dp.id`
       )
       .map(this.createComment);
   }
 
-  postLikes(): $ReadOnlyArray<Like> {
+  postLikes(): $ReadOnlyArray<PostLike> {
     return this._db
       .querySync(
         dedent`SELECT tl.id,
-                                          tl.created_on,
-                                          tl.activity_id,
-                                          tl.profile_id,
-                                          dp.handle
-                                   FROM townsquare_like as tl,
-                                        dashboard_profile as dp
-                                   WHERE tl.profile_id = dp.id`
+                      tl.created_on,
+                      tl.activity_id,
+                      tl.profile_id,
+                      dp.handle
+               FROM townsquare_like as tl,
+                    dashboard_profile as dp
+               WHERE tl.profile_id = dp.id`
       )
       .map(this.createPostLike);
   }
 
-  commentLikes(): $ReadOnlyArray<Like> {
+  commentLikes(): $ReadOnlyArray<CommentLike> {
     return this._db
       .querySync(
         dedent`SELECT tc.id,
-                                          tc.likes,
-                                          tc.likes_handles,
-                                          tc.created_on
-                                   FROM townsquare_comment as tc`
+                      tc.likes,
+                      tc.likes_handles,
+                      tc.created_on
+               FROM townsquare_comment as tc`
       )
       .filter((likeData) => likeData.likes.length > 0)
       .map(this.createLikesFromComment)
       .flat();
   }
 
-  likes(): $ReadOnlyArray<Like> {
-    const postLikes = this.postLikes();
-    const commentLikes = this.commentLikes();
-
-    return [...postLikes, ...commentLikes];
-  }
-
   users(): $ReadOnlyArray<User> {
     const postUsers = this._db
       .querySync(
-        dedent`SELECT DISTINCT
-                                                da.profile_id,
-                                                dp.handle,
-                                                dp.created_on
-                                              FROM dashboard_activity as da,
-                                                   dashboard_profile as dp
-                                              WHERE da.activity_type
-                                                    LIKE 'status_update'
-                                                AND da.profile_id = dp.id`
+        dedent`SELECT DISTINCT da.profile_id,
+                               dp.handle,
+                               dp.created_on
+                      FROM dashboard_activity as da,
+                           dashboard_profile as dp
+                      WHERE da.activity_type
+                            LIKE 'status_update'
+                        AND da.profile_id = dp.id`
       )
       .map(this.createUser);
 
     const commentUsers = this._db
       .querySync(
-        dedent`SELECT DISTINCT
-                                                    tc.profile_id,
-                                                    dp.handle,
-                                                    dp.created_on
-                                                 FROM townsquare_comment as tc,
-                                                      dashboard_profile as dp
-                                                 WHERE tc.profile_id = dp.id`
+        dedent`SELECT DISTINCT tc.profile_id,
+                               dp.handle,
+                               dp.created_on
+                           FROM townsquare_comment as tc,
+                                dashboard_profile as dp
+                           WHERE tc.profile_id = dp.id`
       )
       .map(this.createUser);
 
     const likeUsers = this._db
       .querySync(
-        dedent`SELECT DISTINCT
-                                                tl.profile_id,
-                                                dp.handle,
-                                                dp.created_on
-                                              FROM townsquare_like as tl,
-                                                   dashboard_profile as dp
-                                              WHERE tl.profile_id = dp.id`
+        dedent`SELECT DISTINCT tl.profile_id,
+                               dp.handle,
+                               dp.created_on
+                            FROM townsquare_like as tl,
+                                 dashboard_profile as dp
+                            WHERE tl.profile_id = dp.id`
       )
       .map(this.createUser);
 
@@ -284,9 +285,9 @@ export class PostgresMirrorRepository
     const commentLikeUsers = this._db
       .querySync(
         dedent`SELECT tc.likes,
-                                                            tc.likes_handles
-                                                     FROM
-                                                      townsquare_comment as tc`
+                      tc.likes_handles
+               FROM
+                townsquare_comment as tc`
       )
       .map(createUsersFromComment)
       .flat()
@@ -303,3 +304,34 @@ export class PostgresMirrorRepository
     return allUsers;
   }
 }
+
+type PostData = {|
+  id: number,
+  handle: string,
+  profile_id: number,
+  created: string,
+|};
+
+type CommentData = {|
+  id: number,
+  handle: string,
+  profile_id: number,
+  activity_id: number,
+  created_on: string,
+  likes: $ReadOnlyArray<number>,
+  likes_handles: $ReadOnlyArray<string>,
+|};
+
+type LikeData = {|
+  id: number,
+  handle: string,
+  profile_id: number,
+  activity_id: number,
+  created_on: string,
+|};
+
+type UserData = {|
+  profile_id: number,
+  handle: string,
+  created_on: string,
+|};
