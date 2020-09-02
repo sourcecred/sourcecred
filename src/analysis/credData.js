@@ -2,7 +2,12 @@
 
 import type {TimestampMs} from "../util/timestamp";
 import type {TimelineCredScores} from "../core/algorithm/distributionToCred";
-import type {ProcessedDependencyMintPolicy} from "../core/dependenciesMintPolicy";
+import {
+  type DependencyMintPolicy,
+  processMintPolicy,
+} from "../core/dependenciesMintPolicy";
+import {type NodeAddressT, NodeAddress} from "../core/graph";
+import {IDENTITY_PREFIX} from "../ledger/identity";
 
 /**
  * Comprehensive data on a cred distribution.
@@ -68,7 +73,8 @@ export type EdgeCredOverTime = {|
 
 export function computeCredData(
   scores: TimelineCredScores,
-  mintPolicies: $ReadOnlyArray<ProcessedDependencyMintPolicy>
+  nodeOrder: $ReadOnlyArray<NodeAddressT>,
+  dependencyPolicies: $ReadOnlyArray<DependencyMintPolicy>
 ): CredData {
   const numIntervals = scores.length;
   if (numIntervals === 0) {
@@ -80,7 +86,11 @@ export function computeCredData(
       intervalEnds: [],
     };
   }
-  const intervalEnds = scores.map((x) => x.interval.endTimeMs);
+  const intervals = scores.map((d) => d.interval);
+  const processedDependencyPolicies = dependencyPolicies.map((p) =>
+    processMintPolicy(p, nodeOrder, intervals)
+  );
+  const intervalEnds = intervals.map((i) => i.endTimeMs);
   const numNodes = scores[0].cred.length;
   const numEdges = scores[0].forwardFlow.length;
   const nodeSummaries: $ReadOnlyArray<{|
@@ -121,9 +131,15 @@ export function computeCredData(
       seedFlow,
       syntheticLoopFlow,
     } = scores[i];
-    let intervalTotalCred = 0;
+    let intervalTotalParticipantCred = 0;
     for (let n = 0; n < numNodes; n++) {
-      intervalTotalCred += cred[n];
+      const addr = nodeOrder[n];
+      if (NodeAddress.hasPrefix(addr, IDENTITY_PREFIX)) {
+        // We want the dependency's mint amount to be a fraction of the
+        // total participant Cred, not the total Cred of all participants plus
+        // all contributions.
+        intervalTotalParticipantCred += cred[n];
+      }
       nodeSummaries[n].cred += cred[n];
       nodeOverTime[n].cred[i] = cred[n];
       nodeSummaries[n].seedFlow += seedFlow[n];
@@ -133,9 +149,9 @@ export function computeCredData(
       // Pre-fill with 0 to ensure a value for every node
       nodeOverTime[n].dependencyMintedCred[i] = 0;
     }
-    for (const {nodeIndex, intervalWeights} of mintPolicies) {
+    for (const {nodeIndex, intervalWeights} of processedDependencyPolicies) {
       const weight = intervalWeights[i];
-      const mintedCred = weight * intervalTotalCred;
+      const mintedCred = weight * intervalTotalParticipantCred;
       nodeSummaries[nodeIndex].cred += mintedCred;
       nodeSummaries[nodeIndex].dependencyMintedCred += mintedCred;
       nodeOverTime[nodeIndex].cred[i] += mintedCred;

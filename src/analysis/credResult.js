@@ -28,10 +28,7 @@ import {
   compressDownToMatchingIndices,
 } from "./credData";
 import {distributionToCred} from "../core/algorithm/distributionToCred";
-import {
-  type DependencyMintPolicy,
-  processMintPolicy,
-} from "../core/dependenciesMintPolicy";
+import {type DependencyMintPolicy} from "../core/dependenciesMintPolicy";
 import {IDENTITY_PREFIX} from "../ledger/identity";
 
 /**
@@ -64,12 +61,8 @@ export async function compute(
     params.intervalDecay,
     params.alpha
   );
-  const intervals = distribution.map((d) => d.interval);
-  const processedPolicies = dependencyPolicies.map((p) =>
-    processMintPolicy(p, nodeOrder, intervals)
-  );
   const credScores = distributionToCred(distribution, nodeOrder, scorePrefixes);
-  const credData = computeCredData(credScores, processedPolicies);
+  const credData = computeCredData(credScores, nodeOrder, dependencyPolicies);
   return {weightedGraph: wg, credData, params, plugins, dependencyPolicies};
 }
 
