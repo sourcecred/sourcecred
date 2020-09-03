@@ -5,15 +5,7 @@
 #
 version: 2.1
 
-orbs:
-  # https://circleci.com/orbs/registry/orb/circleci/docker
-  docker: circleci/docker@0.5.20
-
 executors:
-  node10:
-    docker:
-      - image: circleci/node:10
-    working_directory: ~/repo
   node12:
     docker:
       - image: circleci/node:12
@@ -52,13 +44,6 @@ jobs:
       - checkout
       - set_up_node_modules
       - run: yarn test --full --ci
-  test_full_10:
-    executor: node10
-    steps:
-      - checkout
-      - set_up_node_modules:
-          node_version: 10
-      - run: yarn test --full --ci
 
 workflows:
   version: 2.0
@@ -70,37 +55,6 @@ workflows:
       # to merge your pull request, they provide information, and otherwise
       # they don't get in your way.
       - test_full
-      - test_full_10
-
-      - docker/publish:
-          deploy: false
-          image: sourcecred/sourcecred
-          tag: latest
-          cache_from: node:12,sourcecred/sourcecred:dev
-          requires:
-            - test
-          filters:
-            branches:
-              ignore: 
-                - master
-          after_build:
-            - run:
-                name: Preview Docker Tag for Build
-                command: |
-                   DOCKER_TAG=$(docker run sourcecred/sourcecred --version | cut -d' ' -f2)
-                   echo "Version that would be used for Docker tag is ${DOCKER_TAG}"
-
-      - docker/publish:
-          image: sourcecred/sourcecred
-          cache_from: node:12,sourcecred/sourcecred:dev
-          requires:
-            - test
-            - test_full
-            - test_full_10
-          tag: dev
-          filters:
-            branches:
-              only: master
 
   # Separate workflow just for version tag releases.
   tagged-release:
@@ -115,28 +69,6 @@ workflows:
       - test_full:
           filters: *version-tag-only
 
-      - test_full_10:
-          filters: *version-tag-only
-
-      - docker/publish:
-          filters: *version-tag-only
-          requires:
-            - test
-            - test_full
-            - test_full_10
-          image: sourcecred/sourcecred
-          tag: latest
-          cache_from: node:12,sourcecred/sourcecred:dev
-          after_build:
-            - run:
-                name: Publish Docker Tag with Sourcecred Version
-                command: |
-                   DOCKER_TAG=$(docker run sourcecred/sourcecred --version | cut -d' ' -f2)
-                   echo "Version for Docker tag is ${DOCKER_TAG}"
-                   docker tag sourcecred/sourcecred:latest sourcecred/sourcecred:${DOCKER_TAG}
-                   docker push sourcecred/sourcecred:${DOCKER_TAG}
-                   docker push sourcecred/sourcecred:latest
-
   nightly:
     triggers:
       - schedule:
@@ -147,4 +79,3 @@ workflows:
                 - master
     jobs:
       - test_full
-      - test_full_10
