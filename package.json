@@ -112,7 +112,7 @@
     "build": "run-p build:* && cp -r ./build ./bin/site-template && chmod +x ./bin/sourcecred.js",
     "build:frontend": "NODE_ENV=production webpack --config config/webpack.config.web.js",
     "build:backend": "NODE_ENV=development webpack --config config/webpack.config.backend.js",
-    "api": "webpack --config config/webpack.config.api.js",
+    "build:api": "NODE_ENV=production webpack --config config/webpack.config.api.js",
     "test": "node ./config/test.js",
     "createLedger": "babel-node ./scripts/createLedgerFromLegacyProject.js",
     "unit": "BABEL_ENV=test NODE_ENV=test jest --env=jsdom",
@@ -120,7 +120,8 @@
     "sharness-full": "make -sC ./sharness prove PROVE_OPTS=-vf TEST_OPTS='-v --chain-lint --long'",
     "coverage": "yarn run unit --coverage",
     "flow": "flow",
-    "lint": "eslint src config --max-warnings 0"
+    "lint": "eslint src config --max-warnings 0",
+    "prepublishOnly": "yarn build"
   },
   "license": "(MIT OR Apache-2.0)",
   "jest": {
@@ -159,7 +160,9 @@
     ]
   },
   "files": [
-    "/bin"
+    "/bin",
+    "/dist"
   ],
+  "main": "dist/api.js",
   "bin": "./bin/sourcecred.js"
 }

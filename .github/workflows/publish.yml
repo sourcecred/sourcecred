@@ -1,0 +1,40 @@
+name: Publish Release
+on:
+  # Publish when a new release is created on GitHub
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install packages
+        run: yarn --frozen-lockfile
+
+      - name: Test
+        run: yarn test --full --ci
+        env:
+          SOURCECRED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Uses the version defined by the tag created in the Release
+      # and pushes a commit that updates the version in package.json
+      - name: Publish to NPM
+        run: |
+          git config --global user.name $GITHUB_ACTOR
+          git config --global user.email ${GITHUB_ACTOR}@users.noreply.github.com
+          yarn publish --new-version ${GITHUB_REF#"refs/tags/"} --no-git-tag-version
+          git add package.json
+          git commit -m "Release v${GITHUB_REF#"refs/tags/"}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Push to master
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.CREDBOT_TOKEN }}
