@@ -28,9 +28,9 @@ jobs:
         run: |
           git config --global user.name $GITHUB_ACTOR
           git config --global user.email ${GITHUB_ACTOR}@users.noreply.github.com
-          yarn publish --new-version ${GITHUB_REF#"refs/tags/"} --no-git-tag-version
+          yarn publish --new-version ${GITHUB_REF#"refs/tags/v"} --no-git-tag-version
           git add package.json
-          git commit -m "Release v${GITHUB_REF#"refs/tags/"}"
+          git commit -m "Release v${GITHUB_REF#"refs/tags/v"}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
