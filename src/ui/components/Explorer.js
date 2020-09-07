@@ -1,6 +1,25 @@
 // @flow
 
 import React, {type Node as ReactNode} from "react";
+import {
+  Button,
+  IconButton,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Collapse,
+  Menu,
+  MenuItem,
+  ListItem,
+  ListItemText,
+  List,
+  Divider,
+} from "@material-ui/core";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import deepEqual from "lodash.isequal";
 import {StyleSheet, css} from "aphrodite/no-important";
 import Markdown from "react-markdown";
@@ -17,7 +36,6 @@ import {scaleLinear} from "d3-scale";
 import {line} from "d3-shape";
 import {type NodeAddressT} from "../../core/graph";
 import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
-import * as NullUtil from "../../util/null";
 import {type Weights, copy as weightsCopy} from "../../core/weights";
 import {WeightConfig} from "../weights/WeightConfig";
 import {WeightsFileManager} from "../weights/WeightsFileManager";
@@ -36,6 +54,8 @@ export type ExplorerState = {|
   showWeightConfig: boolean,
   view: CredView,
   recalculating: boolean,
+  anchorEl: HTMLElement | null,
+  name: string | null,
 |};
 
 export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
@@ -49,44 +69,109 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
       params: {...view.params()},
       showWeightConfig: false,
       recalculating: false,
+      anchorEl: null,
+      name: null,
     };
   }
 
+  handleMenuClose = () => {
+    this.setState({
+      anchorEl: null,
+    });
+  };
+
   // Renders the dropdown that lets the user select a type
   renderFilterSelect() {
+    const plugins = this.state.view.plugins();
     const optionGroup = (declaration: PluginDeclaration) => {
       const header = (
-        <option
+        <MenuItem
           key={declaration.nodePrefix}
           value={declaration.nodePrefix}
           style={{fontWeight: "bold"}}
+          onClick={() =>
+            this.setState({
+              anchorEl: null,
+              filter: declaration.nodePrefix,
+              name: declaration.name,
+            })
+          }
         >
           {declaration.name}
-        </option>
+        </MenuItem>
       );
-      const entries = declaration.nodeTypes.map((type) => (
-        <option key={type.prefix} value={type.prefix}>
+      const entries = declaration.nodeTypes.map((type, index) => (
+        <MenuItem
+          key={index}
+          value={type.prefix}
+          onClick={() =>
+            this.setState({
+              anchorEl: null,
+              filter: type.prefix,
+              name: type.name,
+            })
+          }
+        >
           {"\u2003" + type.name}
-        </option>
+        </MenuItem>
       ));
       return [header, ...entries];
     };
     return (
-      <label>
-        <span style={{marginLeft: "5px"}}>Showing: </span>
-        <select
-          value={NullUtil.orElse(this.state.filter, "")}
-          onChange={(e) => {
-            const filter = e.target.value || null;
-            this.setState({filter});
-          }}
+      <>
+        <List component="div" aria-label="Device settings">
+          <ListItem
+            button
+            aria-haspopup="true"
+            aria-controls="filter-menu"
+            aria-label="filters"
+            onClick={(event) =>
+              this.setState({
+                anchorEl: event.currentTarget,
+              })
+            }
+          >
+            <ListItemText
+              primary={
+                this.state.name ? `Filter: ${this.state.name}` : "Filter"
+              }
+            />
+            {this.state.anchorEl ? (
+              <KeyboardArrowUpIcon />
+            ) : (
+              <KeyboardArrowDownIcon />
+            )}
+          </ListItem>
+          <Divider style={{backgroundColor: "#F20057", height: "2px"}} />
+        </List>
+
+        <Menu
+          id="lock-menu"
+          anchorEl={this.state.anchorEl}
+          keepMounted
+          open={Boolean(this.state.anchorEl)}
+          onClose={this.handleMenuClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{vertical: "bottom", horizontal: "left"}}
+          transformOrigin={{vertical: "top", horizontal: "left"}}
         >
-          <option key={"All users"} value={""}>
+          <MenuItem
+            key={"All users"}
+            value={""}
+            style={{fontWeight: "bold"}}
+            onClick={() =>
+              this.setState({
+                anchorEl: null,
+                filter: null,
+                name: "All users",
+              })
+            }
+          >
             All users
-          </option>
-          {this.state.view.plugins().map(optionGroup)}
-        </select>
-      </label>
+          </MenuItem>
+          {plugins.map(optionGroup)}
+        </Menu>
+      </>
     );
   }
 
@@ -139,32 +224,46 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     const paramsUpToDate =
       deepEqual(params, view.params()) && deepEqual(weights, view.weights());
     const analyzeButton = (
-      <button
-        disabled={this.state.recalculating || paramsUpToDate}
-        onClick={() => this.analyzeCred()}
-      >
-        re-compute cred
-      </button>
+      <Grid container item xs>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={this.state.recalculating || paramsUpToDate}
+          onClick={() => this.analyzeCred()}
+        >
+          re-compute cred
+        </Button>
+      </Grid>
     );
     return (
-      <div>
-        <div style={{marginTop: 30, display: "flex"}}>
-          <span style={{flexGrow: 1}} />
-          {this.renderFilterSelect()}
-          <span style={{flexGrow: 1}} />
-          <button
-            onClick={() => {
-              this.setState(({showWeightConfig}) => ({
-                showWeightConfig: !showWeightConfig,
-              }));
-            }}
-          >
-            {showWeightConfig
-              ? "Hide weight configuration"
-              : "Show weight configuration"}
-          </button>
+      <Grid container>
+        <Grid
+          container
+          direction="row"
+          justify="space-between"
+          alignItems="center"
+          style={{marginTop: 30}}
+        >
+          <Grid container item xs>
+            {this.renderFilterSelect()}
+          </Grid>
+          <Grid container item xs>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                this.setState(({showWeightConfig}) => ({
+                  showWeightConfig: !showWeightConfig,
+                }));
+              }}
+            >
+              {showWeightConfig
+                ? "Hide weight configuration"
+                : "Show weight configuration"}
+            </Button>
+          </Grid>
           {analyzeButton}
-        </div>
+        </Grid>
         {showWeightConfig && (
           <div style={{marginTop: 10}}>
             <span>Upload/Download weights:</span>
@@ -175,7 +274,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             {weightConfig}
           </div>
         )}
-      </div>
+      </Grid>
     );
   }
 
@@ -189,7 +288,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
   }
 
   render() {
-    const {filter, view, recalculating} = this.state;
+    const {filter, view, recalculating, name} = this.state;
     const nodes =
       filter == null ? view.userNodes() : view.nodes({prefix: filter});
     // TODO: Allow sorting/displaying only recent cred...
@@ -206,7 +305,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
       >
         {this.renderConfigurationRow()}
         {recalculating ? <h1>Recalculating...</h1> : ""}
-        <table
+        <Table
           style={{
             width: "100%",
             tableLayout: "fixed",
@@ -214,15 +313,24 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             padding: "20px 10px",
           }}
         >
-          <thead>
-            <tr>
-              <th style={{textAlign: "left", width: "50%"}}>Node</th>
-              <th style={{textAlign: "right", width: "10%"}}>Cred</th>
-              <th style={{textAlign: "right", width: "10%"}}>% Total</th>
-              <th style={{textAlign: "right", width: "30%"}}></th>
-            </tr>
-          </thead>
-          <tbody>
+          <TableHead>
+            <TableRow>
+              <TableCell align="left" style={{color: "black"}}>
+                {name ? name : "All users"}
+              </TableCell>
+              <TableCell align="right" style={{width: "10%", color: "black"}}>
+                Cred
+              </TableCell>
+              <TableCell align="right" style={{width: "10%", color: "black"}}>
+                % Total
+              </TableCell>
+              <TableCell
+                align="right"
+                style={{width: "30%", color: "black"}}
+              ></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {sortedNodes.slice(0, 200).map((node) => (
               <NodeRow
                 depth={0}
@@ -236,8 +344,8 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
                 showChart={filter == null}
               />
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     );
   }
@@ -263,7 +371,7 @@ class NodeRow extends React.Component<NodeRowProps> {
         <FlowsRow key={node.address} node={node} view={view} depth={depth} />,
       ];
       return (
-        <TableRow
+        <CredRow
           depth={depth}
           indent={0}
           key={node.address}
@@ -273,7 +381,7 @@ class NodeRow extends React.Component<NodeRowProps> {
           data={credTimeline}
         >
           {children}
-        </TableRow>
+        </CredRow>
       );
     }
   }
@@ -293,16 +401,16 @@ class FlowsRow extends React.Component<{|
 
     const sortedFlows = sortBy(inflows, (x) => -x.flow);
     return (
-      <React.Fragment>
+      <>
         {sortedFlows
           .slice(0, 10)
           .map((f) => FlowRow(view, f, node.credSummary.cred, depth))}
-      </React.Fragment>
+      </>
     );
   }
 }
 
-type TableRowProps = {|
+type CredRowProps = {|
   +description: string | ReactNode,
   +depth: number,
   +indent: number,
@@ -311,11 +419,11 @@ type TableRowProps = {|
   +children: ReactNode,
   +data: $ReadOnlyArray<number> | null,
 |};
-type TableRowState = {|
+type CredRowState = {|
   expanded: boolean,
 |};
-class TableRow extends React.Component<TableRowProps, TableRowState> {
-  constructor(props: TableRowProps) {
+class CredRow extends React.Component<CredRowProps, CredRowState> {
+  constructor(props: CredRowProps) {
     super(props);
     this.state = {expanded: false};
   }
@@ -337,32 +445,53 @@ class TableRow extends React.Component<TableRowProps, TableRowState> {
     const highlightBackground = makeGradient("#D8E1E8");
     const backgroundImage = `${normalBackground}, ${highlightBackground}`;
     return (
-      <React.Fragment>
-        <tr style={{backgroundImage}} className={css(styles.hoverHighlight)}>
-          <td>
-            <button
+      <>
+        <TableRow
+          style={{backgroundImage, marginLeft: depth * indent + 5}}
+          className={css(styles.hoverHighlight)}
+          onClick={() => {
+            this.setState(({expanded}) => ({
+              expanded: !expanded,
+            }));
+          }}
+        >
+          <TableCell
+            style={{
+              color: "black",
+            }}
+          >
+            <IconButton
+              aria-label="expand"
+              color="primary"
+              size="medium"
               style={{
                 marginRight: 5,
                 marginLeft: 15 * indent + 5,
               }}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 this.setState(({expanded}) => ({
                   expanded: !expanded,
                 }));
               }}
             >
-              {expanded ? "\u2212" : "+"}
-            </button>
-            <Markdown renderers={{paragraph: "span"}} source={description} />
-          </td>
-          <td style={{textAlign: "right"}}>{format(".1d")(cred)}</td>
-          <td style={{textAlign: "right"}}>{format(".1%")(cred / total)}</td>
-          <td>
+              {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </IconButton>
+            <Markdown renderers={{paragraph: "span"}} source={description} />{" "}
+          </TableCell>
+          <TableCell style={{textAlign: "right", color: "black"}}>
+            {format(".1d")(cred)}
+          </TableCell>
+          <TableCell style={{textAlign: "right", color: "black"}}>
+            {format(".1%")(cred / total)}
+          </TableCell>
+          <TableCell>
             <CredTimeline data={data} />
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
+        <Collapse in={expanded} timeout="auto" unmountOnExit></Collapse>
         {expanded ? children : null}
-      </React.Fragment>
+      </>
     );
   }
 }
@@ -411,7 +540,7 @@ function FlowRow(view: CredView, f: Flow, total: number, depth: number) {
     children.push(nodeRow);
   }
   return (
-    <TableRow
+    <CredRow
       key={key(f)}
       description={description}
       cred={f.flow}
@@ -421,7 +550,7 @@ function FlowRow(view: CredView, f: Flow, total: number, depth: number) {
       indent={1}
     >
       {children}
-    </TableRow>
+    </CredRow>
   );
 }
 
@@ -466,6 +595,13 @@ const styles = StyleSheet.create({
     },
     ":focus-within": {
       backgroundSize: "100% 100%, 100% 100%",
+    },
+  },
+  expandDivider: {
+    transition: "width 0.3s",
+    width: "100%",
+    ":hover": {
+      width: "150%",
     },
   },
 });
