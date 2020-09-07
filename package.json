@@ -52,8 +52,7 @@
     "retry": "^0.12.0",
     "rimraf": "^3.0.2",
     "svg-react-loader": "^0.4.6",
-    "tmp": "0.0.33",
-    "whatwg-fetch": "^3.4.0"
+    "tmp": "0.0.33"
   },
   "devDependencies": {
     "@babel/core": "^7.8.7",
@@ -101,7 +100,6 @@
       "history",
       "react-dev-utils",
       "react-router",
-      "whatwg-fetch",
       "tmp"
     ]
   },
