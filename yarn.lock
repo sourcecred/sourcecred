@@ -2499,9 +2499,9 @@ bcrypt-pbkdf@^1.0.0:
     tweetnacl "^0.14.3"
 
 better-sqlite3@^7.0.0:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.0.1.tgz#7d086130b42d7d5c9d2847899c57ee59eec9cbb3"
-  integrity sha512-fsVcoGXxnseNajbfFbth0BKnDWebPY6x77UWfrBHApCKq1yo41DlWnFsffOsLpjkQ4VKgDU5C3aUtiw3wGGU0Q==
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.1.0.tgz#4894d0fa4002bd7859a0a539577f14f24b245f6a"
+  integrity sha512-FV/snQ8F/kyqhdxsevzbojVtMowDWOfe1A5N3lYu1KJwoho2t7JgITmdlSc7DkOh3Zq65I+ZyeNWXQrkLEDFTg==
   dependencies:
     bindings "^1.5.0"
     prebuild-install "^5.3.3"
