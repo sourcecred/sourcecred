@@ -6,7 +6,6 @@ import {
   IconButton,
   Grid,
   Table,
-  TableContainer,
   TableBody,
   TableCell,
   TableHead,
@@ -37,7 +36,6 @@ import {scaleLinear} from "d3-scale";
 import {line} from "d3-shape";
 import {type NodeAddressT} from "../../core/graph";
 import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
-import * as NullUtil from "../../util/null";
 import {type Weights, copy as weightsCopy} from "../../core/weights";
 import {WeightConfig} from "../weights/WeightConfig";
 import {WeightsFileManager} from "../weights/WeightsFileManager";
@@ -56,8 +54,7 @@ export type ExplorerState = {|
   showWeightConfig: boolean,
   view: CredView,
   recalculating: boolean,
-  anchorEl: any,
-  selectedIndex: number,
+  anchorEl: HTMLElement | null,
   name: string | null,
 |};
 
@@ -73,25 +70,9 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
       showWeightConfig: false,
       recalculating: false,
       anchorEl: null,
-      selectedIndex: 1,
       name: null,
     };
   }
-
-  handleClickListItem = (event) => {
-    this.setState({
-      anchorEl: event.currentTarget,
-    });
-  };
-
-  handleMenuItemClick = (index, filter, name) => {
-    this.setState({
-      selectedIndex: index,
-      anchorEl: null,
-      filter,
-      name,
-    });
-  };
 
   handleMenuClose = () => {
     this.setState({
@@ -108,12 +89,12 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           key={declaration.nodePrefix}
           value={declaration.nodePrefix}
           style={{fontWeight: "bold"}}
-          onClick={(event) =>
-            this.handleMenuItemClick(
-              0,
-              declaration.nodePrefix,
-              declaration.name
-            )
+          onClick={() =>
+            this.setState({
+              anchorEl: null,
+              filter: declaration.nodePrefix,
+              name: declaration.name,
+            })
           }
         >
           {declaration.name}
@@ -121,10 +102,14 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
       );
       const entries = declaration.nodeTypes.map((type, index) => (
         <MenuItem
-          key={type.prefix}
+          key={index}
           value={type.prefix}
-          onClick={(event) =>
-            this.handleMenuItemClick(index + 1, type.prefix, type.name)
+          onClick={() =>
+            this.setState({
+              anchorEl: null,
+              filter: type.prefix,
+              name: type.name,
+            })
           }
         >
           {"\u2003" + type.name}
@@ -140,11 +125,13 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             aria-haspopup="true"
             aria-controls="filter-menu"
             aria-label="filters"
-            onClick={this.handleClickListItem}
+            onClick={(event) =>
+              this.setState({
+                anchorEl: event.currentTarget,
+              })
+            }
           >
-            <ListItemText
-              primary={NullUtil.orElse(this.state.name, "Filter")}
-            />
+            <ListItemText primary={"Filter"} />
             {this.state.anchorEl ? (
               <KeyboardArrowUpIcon />
             ) : (
@@ -160,12 +147,21 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           keepMounted
           open={Boolean(this.state.anchorEl)}
           onClose={this.handleMenuClose}
+          getContentAnchorEl={null}
+          anchorOrigin={{vertical: "bottom", horizontal: "center"}}
+          transformOrigin={{vertical: "top", horizontal: "center"}}
         >
           <MenuItem
             key={"All users"}
             value={""}
             style={{fontWeight: "bold"}}
-            onClick={(event) => this.handleMenuItemClick(0, null, "All users")}
+            onClick={() =>
+              this.setState({
+                anchorEl: null,
+                filter: null,
+                name: "All users",
+              })
+            }
           >
             All users
           </MenuItem>
@@ -288,7 +284,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
   }
 
   render() {
-    const {filter, view, recalculating} = this.state;
+    const {filter, view, recalculating, name} = this.state;
     const nodes =
       filter == null ? view.userNodes() : view.nodes({prefix: filter});
     // TODO: Allow sorting/displaying only recent cred...
@@ -316,7 +312,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           <TableHead>
             <TableRow>
               <TableCell align="left" style={{color: "black"}}>
-                Node
+                {name ? name : "All users"}
               </TableCell>
               <TableCell align="right" style={{width: "10%", color: "black"}}>
                 Cred
@@ -401,11 +397,11 @@ class FlowsRow extends React.Component<{|
 
     const sortedFlows = sortBy(inflows, (x) => -x.flow);
     return (
-      <React.Fragment>
+      <>
         {sortedFlows
           .slice(0, 10)
           .map((f) => FlowRow(view, f, node.credSummary.cred, depth))}
-      </React.Fragment>
+      </>
     );
   }
 }
@@ -419,11 +415,11 @@ type CredRowProps = {|
   +children: ReactNode,
   +data: $ReadOnlyArray<number> | null,
 |};
-type TableRowState = {|
+type CredRowState = {|
   expanded: boolean,
 |};
-class CredRow extends React.Component<TableRowProps, TableRowState> {
-  constructor(props: TableRowProps) {
+class CredRow extends React.Component<CredRowProps, CredRowState> {
+  constructor(props: CredRowProps) {
     super(props);
     this.state = {expanded: false};
   }
@@ -445,7 +441,7 @@ class CredRow extends React.Component<TableRowProps, TableRowState> {
     const highlightBackground = makeGradient("#D8E1E8");
     const backgroundImage = `${normalBackground}, ${highlightBackground}`;
     return (
-      <React.Fragment>
+      <>
         <TableRow
           style={{backgroundImage, marginLeft: depth * indent + 5}}
           className={css(styles.hoverHighlight)}
@@ -491,7 +487,7 @@ class CredRow extends React.Component<TableRowProps, TableRowState> {
         </TableRow>
         <Collapse in={expanded} timeout="auto" unmountOnExit></Collapse>
         {expanded ? children : null}
-      </React.Fragment>
+      </>
     );
   }
 }
