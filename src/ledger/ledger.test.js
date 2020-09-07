@@ -273,6 +273,73 @@ describe("ledger/ledger", () => {
       });
     });
 
+    describe("changeIdentityType", () => {
+      it("changes a USER identity type into a PROJECT identity type", () => {
+        const ledger = new Ledger();
+        setFakeDate(0);
+        const id = ledger.createIdentity("USER", "foo");
+        const initialIdentity = ledger.account(id).identity;
+        setFakeDate(1);
+        ledger.changeIdentityType(id, "PROJECT");
+        const identity = ledger.account(id).identity;
+
+        expect(identity).toEqual({
+          id,
+          name: "foo",
+          subtype: "PROJECT",
+          address: initialIdentity.address,
+          aliases: [],
+        });
+
+        expect(ledger.eventLog()).toEqual([
+          {
+            ledgerTimestamp: 0,
+            uuid: expect.anything(),
+            version: "1",
+            action: {
+              type: "CREATE_IDENTITY",
+              identity: initialIdentity,
+            },
+          },
+          {
+            ledgerTimestamp: 1,
+            uuid: expect.anything(),
+            version: "1",
+            action: {
+              type: "CHANGE_IDENTITY_TYPE",
+              newType: "PROJECT",
+              identityId: id,
+            },
+          },
+        ]);
+      });
+      it("fails if the identity already has that type", () => {
+        const ledger = new Ledger();
+        const id = ledger.createIdentity("USER", "foo");
+        const thunk = () => ledger.changeIdentityType(id, "USER");
+        failsWithoutMutation(
+          ledger,
+          thunk,
+          "changeIdentityType: identity already has type USER"
+        );
+      });
+      it("fails on nonexistent identity id", () => {
+        const ledger = new Ledger();
+        failsWithoutMutation(
+          ledger,
+          (l) => l.changeIdentityType(uuid.random(), "USER"),
+          "changeIdentityType: no identity matches id"
+        );
+      });
+      it("fails on invalid type", () => {
+        const ledger = new Ledger();
+        const fooId = ledger.createIdentity("USER", "foo");
+        // $FlowExpectedError
+        const thunk = () => ledger.changeIdentityType(fooId, "ENTITY");
+        failsWithoutMutation(ledger, thunk, "invalid type ENTITY");
+      });
+    });
+
     describe("addAlias", () => {
       it("works", () => {
         const ledger = new Ledger();
@@ -1112,6 +1179,8 @@ describe("ledger/ledger", () => {
 
       setFakeDate(6);
       ledger.mergeIdentities({base: id1, target: id2});
+      setFakeDate(7);
+      ledger.changeIdentityType(id1, "PROJECT");
       return ledger;
     }
     it("fromEventLog with an empty action log results in an empty ledger", () => {
