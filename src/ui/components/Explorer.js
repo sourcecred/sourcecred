@@ -131,7 +131,11 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
               })
             }
           >
-            <ListItemText primary={"Filter"} />
+            <ListItemText
+              primary={
+                this.state.name ? `Filter: ${this.state.name}` : "Filter"
+              }
+            />
             {this.state.anchorEl ? (
               <KeyboardArrowUpIcon />
             ) : (
@@ -148,8 +152,8 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           open={Boolean(this.state.anchorEl)}
           onClose={this.handleMenuClose}
           getContentAnchorEl={null}
-          anchorOrigin={{vertical: "bottom", horizontal: "center"}}
-          transformOrigin={{vertical: "top", horizontal: "center"}}
+          anchorOrigin={{vertical: "bottom", horizontal: "left"}}
+          transformOrigin={{vertical: "top", horizontal: "left"}}
         >
           <MenuItem
             key={"All users"}
