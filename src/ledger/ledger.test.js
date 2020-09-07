@@ -274,7 +274,7 @@ describe("ledger/ledger", () => {
     });
 
     describe("changeIdentityType", () => {
-      it("works", () => {
+      it("changes a USER identity type into a PROJECT identity type", () => {
         const ledger = new Ledger();
         setFakeDate(0);
         const id = ledger.createIdentity("USER", "foo");
