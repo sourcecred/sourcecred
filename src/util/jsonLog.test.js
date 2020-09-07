@@ -10,15 +10,19 @@ describe("util/jsonLog", () => {
     expect(Array.from(l.values())).toHaveLength(0);
   });
   it("can append values to log", () => {
-    const l = new JsonLog().append([1, 2]).append([3]);
+    const l = new JsonLog<number>().append(1).append(2).append(3);
+    expect(Array.from(l.values())).toEqual([1, 2, 3]);
+  });
+  it("can extend sequences into log", () => {
+    const l = new JsonLog<number>().extend([1, 2]).extend([3]);
     expect(Array.from(l.values())).toEqual([1, 2, 3]);
   });
   it("values has the same iteration semantics as the underlying array", () => {
-    const log = new JsonLog().append([1, 2]);
+    const log = new JsonLog().extend([1, 2]);
     const arr = [1, 2];
     const logValues = log.values();
     const arrValues = arr.values();
-    log.append([3]);
+    log.append(3);
     arr.push(3);
     expect(Array.from(logValues)).toEqual([1, 2, 3]);
     expect(Array.from(arrValues)).toEqual([1, 2, 3]);
@@ -33,7 +37,7 @@ describe("util/jsonLog", () => {
   });
 
   it("converts logs to a json representation with each item on its own line", () => {
-    const s = new JsonLog().append([{name: "foo"}, {name: "bar"}]).toString();
+    const s = new JsonLog().extend([{name: "foo"}, {name: "bar"}]).toString();
     expect(s).toMatchInlineSnapshot(`
       "{\\"name\\":\\"foo\\"}
       {\\"name\\":\\"bar\\"}
@@ -42,7 +46,7 @@ describe("util/jsonLog", () => {
   });
   it("outputs valid json", () => {
     const items = [{name: "foo"}, {name: "bar"}];
-    const s = new JsonLog().append(items).toString();
+    const s = new JsonLog().extend(items).toString();
     const lines = s.split("\n");
     expect(lines).toHaveLength(3);
     expect(JSON.parse(lines[0])).toEqual(items[0]);
@@ -53,7 +57,7 @@ describe("util/jsonLog", () => {
     it("round-trips after toString", () => {
       const parser = C.object({foo: C.number});
       const ts = [{foo: 1}, {foo: 2}, {foo: 3}];
-      const logString = new JsonLog().append(ts).toString();
+      const logString = new JsonLog().extend(ts).toString();
       const log = JsonLog.fromString(logString, parser);
       const items = Array.from(log.values());
       expect(items).toEqual(ts);
