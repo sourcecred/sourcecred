@@ -79,6 +79,12 @@ function makeTasks(
   }).name;
   console.log("tmpdir for backend output: " + backendOutput);
 
+  const frontendOutput = tmp.dirSync({
+    unsafeCleanup: true,
+    prefix: "sourcecred-test-",
+  }).name;
+  console.log("tmpdir for frontend output: " + frontendOutput);
+
   function withSourcecredBinEnv(
     invocation /*: $ReadOnlyArray<string> */
   ) /*: string[] */ {
@@ -137,6 +143,18 @@ function makeTasks(
     {
       id: "check-gnu-coreutils",
       cmd: ["./scripts/check-gnu-coreutils.sh"],
+      deps: [],
+    },
+    {
+      id: "frontend",
+      cmd: [
+        "yarn",
+        "run",
+        "--silent",
+        "build:frontend",
+        "--output-path",
+        frontendOutput,
+      ],
       deps: [],
     },
     {
