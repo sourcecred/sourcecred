@@ -1,8 +1,7 @@
 // @flow
-
 import React from "react";
-import {Explorer} from "./Explorer.js";
-import {load, type LoadResult} from "../load";
+import {Explorer} from "./Explorer";
+import {load, type LoadResult} from "../../load";
 
 export type Props = {||};
 export type State = {|
@@ -10,10 +9,8 @@ export type State = {|
 |};
 
 export default class App extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {loadResult: null};
-  }
+  state = {loadResult: null};
+
   async componentDidMount() {
     this.setState({loadResult: await load()});
   }

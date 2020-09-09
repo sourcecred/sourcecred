@@ -1,12 +1,12 @@
 // @flow
 
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
-import {Explorer} from "./Explorer";
+import {Explorer} from "./Explorer/Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
 import {AccountOverview} from "./AccountOverview";
@@ -70,8 +70,8 @@ const customRoutes = (
 };
 
 const AdminApp = () => {
-  const [loadResult, setLoadResult] = React.useState<LoadResult | null>(null);
-  React.useEffect(() => {
+  const [loadResult, setLoadResult] = useState<LoadResult | null>(null);
+  useEffect(() => {
     load().then(setLoadResult);
   }, []);
 
