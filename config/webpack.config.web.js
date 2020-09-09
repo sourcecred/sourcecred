@@ -218,6 +218,9 @@ async function makeConfig(
             {
               test: /\.css$/,
               loader: "css-loader", // TODO(@wchargin): add csso-loader
+              options: {
+                esModule: false,
+              },
             },
             {
               test: /\.svg$/,
