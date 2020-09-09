@@ -1,16 +1,13 @@
 // @flow
-
-import React, {type Node as ReactNode} from "react";
+import React from "react";
 import {
   Button,
-  IconButton,
   Grid,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Collapse,
   Menu,
   MenuItem,
   ListItem,
@@ -21,25 +18,18 @@ import {
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import deepEqual from "lodash.isequal";
-import {StyleSheet, css} from "aphrodite/no-important";
-import Markdown from "react-markdown";
 import {format} from "d3-format";
-import {sum, extent} from "d3-array";
-import {
-  CredView,
-  type CredNode,
-  type Flow,
-  type EdgeFlow,
-} from "../../analysis/credView";
-import sortBy from "../../util/sortBy";
-import {scaleLinear} from "d3-scale";
-import {line} from "d3-shape";
-import {type NodeAddressT} from "../../core/graph";
-import {type PluginDeclaration} from "../../analysis/pluginDeclaration";
-import {type Weights, copy as weightsCopy} from "../../core/weights";
-import {WeightConfig} from "../weights/WeightConfig";
-import {WeightsFileManager} from "../weights/WeightsFileManager";
-import {type TimelineCredParameters} from "../../analysis/timeline/params";
+import {sum} from "d3-array";
+import {CredView} from "../../../analysis/credView";
+import sortBy from "../../../util/sortBy";
+import {type NodeAddressT} from "../../../core/graph";
+import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
+import {type Weights, copy as weightsCopy} from "../../../core/weights";
+import {WeightConfig} from "../../weights/WeightConfig";
+import {WeightsFileManager} from "../../weights/WeightsFileManager";
+import {type TimelineCredParameters} from "../../../analysis/timeline/params";
+
+import NodeRow from "./NodeRow";
 
 export type ExplorerProps = {|
   +initialView: CredView,
@@ -350,258 +340,3 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     );
   }
 }
-
-type NodeRowProps = {
-  +node: CredNode,
-  +total: number,
-  +view: CredView,
-  +depth: number,
-  +showChart: boolean,
-};
-
-class NodeRow extends React.Component<NodeRowProps> {
-  render() {
-    {
-      const {node, total, view, depth, showChart} = this.props;
-      const {credSummary, credOverTime} = node;
-      const cred = credSummary.cred;
-      const credTimeline =
-        !showChart || credOverTime == null ? null : credOverTime.cred;
-      const children = [
-        <FlowsRow key={node.address} node={node} view={view} depth={depth} />,
-      ];
-      return (
-        <CredRow
-          depth={depth}
-          indent={0}
-          key={node.address}
-          description={node.description}
-          cred={cred}
-          total={total}
-          data={credTimeline}
-        >
-          {children}
-        </CredRow>
-      );
-    }
-  }
-}
-
-class FlowsRow extends React.Component<{|
-  +view: CredView,
-  +node: CredNode,
-  +depth: number,
-|}> {
-  render() {
-    const {view, node, depth} = this.props;
-    const inflows = view.inflows(node.address);
-    if (inflows == null) {
-      throw new Error("no flows");
-    }
-
-    const sortedFlows = sortBy(inflows, (x) => -x.flow);
-    return (
-      <>
-        {sortedFlows
-          .slice(0, 10)
-          .map((f) => FlowRow(view, f, node.credSummary.cred, depth))}
-      </>
-    );
-  }
-}
-
-type CredRowProps = {|
-  +description: string | ReactNode,
-  +depth: number,
-  +indent: number,
-  +cred: number,
-  +total: number,
-  +children: ReactNode,
-  +data: $ReadOnlyArray<number> | null,
-|};
-type CredRowState = {|
-  expanded: boolean,
-|};
-class CredRow extends React.Component<CredRowProps, CredRowState> {
-  constructor(props: CredRowProps) {
-    super(props);
-    this.state = {expanded: false};
-  }
-  render() {
-    const {
-      children,
-      total,
-      cred,
-      data,
-      description,
-      depth,
-      indent,
-    } = this.props;
-    const {expanded} = this.state;
-    const backgroundColor = `hsla(150,100%,28%,${1 - 0.9 ** depth})`;
-    const makeGradient = (color) =>
-      `linear-gradient(to top, ${color}, ${color})`;
-    const normalBackground = makeGradient(backgroundColor);
-    const highlightBackground = makeGradient("#D8E1E8");
-    const backgroundImage = `${normalBackground}, ${highlightBackground}`;
-    return (
-      <>
-        <TableRow
-          style={{backgroundImage, marginLeft: depth * indent + 5}}
-          className={css(styles.hoverHighlight)}
-          onClick={() => {
-            this.setState(({expanded}) => ({
-              expanded: !expanded,
-            }));
-          }}
-        >
-          <TableCell
-            style={{
-              color: "black",
-            }}
-          >
-            <IconButton
-              aria-label="expand"
-              color="primary"
-              size="medium"
-              style={{
-                marginRight: 5,
-                marginLeft: 15 * indent + 5,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                this.setState(({expanded}) => ({
-                  expanded: !expanded,
-                }));
-              }}
-            >
-              {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>
-            <Markdown renderers={{paragraph: "span"}} source={description} />{" "}
-          </TableCell>
-          <TableCell style={{textAlign: "right", color: "black"}}>
-            {format(".1d")(cred)}
-          </TableCell>
-          <TableCell style={{textAlign: "right", color: "black"}}>
-            {format(".1%")(cred / total)}
-          </TableCell>
-          <TableCell>
-            <CredTimeline data={data} />
-          </TableCell>
-        </TableRow>
-        <Collapse in={expanded} timeout="auto" unmountOnExit></Collapse>
-        {expanded ? children : null}
-      </>
-    );
-  }
-}
-
-function edgeDescription(f: EdgeFlow) {
-  const {neighbor, edge} = f;
-  const type = edge.type;
-  const forwards = neighbor.address === edge.dst.address;
-  let name = "Unknown edge to";
-  if (type != null) {
-    name = forwards ? type.forwardName : type.backwardName;
-  }
-  return name + " " + neighbor.description;
-}
-
-function FlowRow(view: CredView, f: Flow, total: number, depth: number) {
-  const key = (f) => (f.type === "EDGE" ? f.edge.address : f.type);
-  const description = (() => {
-    switch (f.type) {
-      case "RADIATE":
-        return "Radiation To Seed";
-      case "EDGE":
-        return edgeDescription(f);
-      case "MINT":
-        return "Mint from Seed";
-      case "SYNTHETIC_LOOP":
-        return "Synthetic self-loop";
-      case "DEPENDENCY_MINT":
-        return "Dependency Minted Cred";
-      default:
-        throw new Error((f.type: empty));
-    }
-  })();
-  const children = [];
-  if (f.type === "EDGE") {
-    const nodeRow = (
-      <NodeRow
-        key={"node"}
-        view={view}
-        node={f.neighbor}
-        total={f.neighbor.credSummary.cred}
-        depth={depth + 1}
-        showChart={false}
-      />
-    );
-    children.push(nodeRow);
-  }
-  return (
-    <CredRow
-      key={key(f)}
-      description={description}
-      cred={f.flow}
-      total={total}
-      data={null}
-      depth={depth}
-      indent={1}
-    >
-      {children}
-    </CredRow>
-  );
-}
-
-class CredTimeline extends React.Component<{|
-  +data: $ReadOnlyArray<number> | null,
-|}> {
-  render() {
-    const {data} = this.props;
-    if (data == null) {
-      return "";
-    }
-
-    const width = 300;
-    const height = 25;
-
-    const ext = extent(data);
-    const xScale = scaleLinear().domain([0, data.length]).range([0, width]);
-    const yScale = scaleLinear().domain(ext).range([height, 0]);
-    const gen = line()
-      .x((_, i) => xScale(i))
-      .y((d) => yScale(d));
-
-    return (
-      <svg width={width} height={height}>
-        <path d={gen(data)} stroke="blue" fill="none" stokewidth={1} />
-      </svg>
-    );
-  }
-}
-
-const styles = StyleSheet.create({
-  /* To apply 'hoverHighlight', provide a backgroundImage containing two <image>
-   * data types (eg linear gradients). The first backgroundImage will be
-   * the default background. The second backgroundImage will be applied on top
-   * of the first background when the user hovers or tabs over the element.
-   */
-
-  hoverHighlight: {
-    backgroundSize: "100% 100%, 0 0",
-    ":hover": {
-      backgroundSize: "100% 100%, 100% 100%",
-    },
-    ":focus-within": {
-      backgroundSize: "100% 100%, 100% 100%",
-    },
-  },
-  expandDivider: {
-    transition: "width 0.3s",
-    width: "100%",
-    ":hover": {
-      width: "150%",
-    },
-  },
-});
