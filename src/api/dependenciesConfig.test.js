@@ -4,6 +4,7 @@ import {Ledger} from "../ledger/ledger";
 import {toDependencyPolicy, ensureIdentityExists} from "./dependenciesConfig";
 import {nameFromString as n} from "../ledger/identity";
 import {random as randomUuid} from "../util/uuid";
+import {fromISO, validateTimestampISO} from "../util/timestamp";
 
 describe("api/dependenciesConfig", () => {
   describe("ensureIdentityExists", () => {
@@ -138,7 +139,7 @@ describe("api/dependenciesConfig", () => {
       const policy = toDependencyPolicy(config, ledger);
       expect(policy.address).toEqual(address);
     });
-    it("creates a policy with a single period matching the startWeight", () => {
+    it("creates a policy with a single period matching the startWeight (when no additional periods set)", () => {
       const ledger = new Ledger();
       ledger.createIdentity("USER", "foo");
       const config = ensureIdentityExists(
@@ -148,6 +149,25 @@ describe("api/dependenciesConfig", () => {
       const policy = toDependencyPolicy(config, ledger);
       expect(policy.periods).toEqual([
         {startTimeMs: -Infinity, weight: 0.1337},
+      ]);
+    });
+    it("creates a policy with the start period and additional periods", () => {
+      const ledger = new Ledger();
+      ledger.createIdentity("USER", "foo");
+      const timestampISO = validateTimestampISO("2020-09-09");
+      const timestampMs = fromISO(timestampISO);
+      const config = ensureIdentityExists(
+        {
+          name: n("foo"),
+          startWeight: 0.1337,
+          periods: [{startTime: timestampISO, weight: 0.1}],
+        },
+        ledger
+      );
+      const policy = toDependencyPolicy(config, ledger);
+      expect(policy.periods).toEqual([
+        {startTimeMs: -Infinity, weight: 0.1337},
+        {startTimeMs: timestampMs, weight: 0.1},
       ]);
     });
     it("errors if the config is missing an id", () => {
