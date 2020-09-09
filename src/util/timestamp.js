@@ -1,5 +1,7 @@
 // @flow
 
+import * as C from "./combo";
+
 /**
  * We have a convention of using TimestampMs as our default representation.
  * However TimestampISO has the benefit of being human readable / writable,
@@ -22,7 +24,7 @@ export opaque type TimestampISO: string = string;
  * than a forced refactor across the codebase.
  */
 export function toISO(timestampLike: TimestampMs | number): TimestampISO {
-  const timestampMs: TimestampMs = validate(timestampLike);
+  const timestampMs: TimestampMs = validateTimestampMs(timestampLike);
   return new Date(timestampMs).toISOString();
 }
 
@@ -52,7 +54,7 @@ export function fromISO(timestampISO: TimestampISO | string): TimestampMs {
  * This checks that the number is a finite integer, which avoids some potential
  * numbers that are not valid timestamps.
  */
-export function validate(timestampMs: number): TimestampMs {
+export function validateTimestampMs(timestampMs: number): TimestampMs {
   const asNumber = Number(timestampMs);
   if (
     timestampMs === null ||
@@ -66,3 +68,18 @@ export function validate(timestampMs: number): TimestampMs {
   }
   return new Date(asNumber).valueOf();
 }
+
+export function validateTimestampISO(timestampISO: string): TimestampISO {
+  // Verify that it can be converted without throwing an error
+  fromISO(timestampISO);
+  return timestampISO;
+}
+
+export const timestampMsParser: C.Parser<TimestampMs> = C.fmap(
+  C.number,
+  validateTimestampMs
+);
+export const timestampISOParser: C.Parser<TimestampISO> = C.fmap(
+  C.string,
+  validateTimestampISO
+);
