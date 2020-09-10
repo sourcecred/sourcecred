@@ -1,5 +1,6 @@
 {
   "trailingComma": "es5",
   "bracketSpacing": false,
-  "arrowParens": "always"
+  "arrowParens": "always",
+  "quoteProps": "preserve"
 }
