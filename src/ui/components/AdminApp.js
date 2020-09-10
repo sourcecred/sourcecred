@@ -6,7 +6,7 @@ import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
-import {Explorer} from "./Explorer";
+import {Explorer} from "./Explorer/Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
 import {AccountOverview} from "./AccountOverview";

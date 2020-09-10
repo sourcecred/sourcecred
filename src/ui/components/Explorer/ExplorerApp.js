@@ -1,8 +1,7 @@
 // @flow
-
 import React from "react";
 import {Explorer} from "./Explorer.js";
-import {load, type LoadResult} from "../load";
+import {load, type LoadResult} from "../../load";
 
 export type Props = {||};
 export type State = {|
