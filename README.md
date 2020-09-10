@@ -91,6 +91,14 @@ Discord's #programming channel if anyone has something you can contribute to.
 [Contributing Guidelines]: ./CONTRIBUTING.md
 [contributions welcome]: https://github.com/sourcecred/sourcecred/issues?q=is%3Aopen+is%3Aissue+label%3Acontributions-welcome
 
+## Getting Support
+
+If you need help with SourceCred, try asking for help in the #tech-support channel
+on our Discord. You can also come to our weekly dev meeting, on Mondays at 12pm PT.
+(Check out the [SourceCred calendar].)
+
+[SourceCred calendar]: https://sourcecred.io/calendar
+
 ## Development Setup
 
 ### Dependencies
