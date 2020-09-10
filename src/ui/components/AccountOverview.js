@@ -12,13 +12,23 @@ import {type Account} from "../../ledger/ledger";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 import * as G from "../../ledger/grain";
 import {useLedger} from "../utils/LedgerContext";
+import {makeStyles} from "@material-ui/core/styles";
 
 type OverviewProps = {|+currency: CurrencyDetails|};
+
+const useStyles = makeStyles(() => {
+  return {
+    container: {
+      maxHeight: "40em",
+    },
+  };
+});
 
 export const AccountOverview = ({
   currency: {suffix: currencySuffix},
 }: OverviewProps) => {
   const {ledger} = useLedger();
+  const classes = useStyles();
 
   const accounts = ledger.accounts();
 
@@ -31,8 +41,8 @@ export const AccountOverview = ({
 
   const sortedAccounts = accounts.slice().sort(comparator);
   return (
-    <TableContainer component={Paper}>
-      <Table>
+    <TableContainer component={Paper} className={classes.container}>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell>Username</TableCell>
