@@ -218,6 +218,9 @@ async function makeConfig(
             {
               test: /\.css$/,
               loader: "css-loader", // TODO(@wchargin): add csso-loader
+              options: {
+                esModule: false,
+              },
             },
             {
               test: /\.svg$/,
@@ -269,10 +272,12 @@ async function plugins(mode /*: "development" | "production" */) {
       paths: ["/"],
       locals: {},
     }),
-    new CopyPlugin([
-      {from: paths.favicon, to: "favicon.png"},
-      {from: paths.serverInfoJson, to: "static/server-info.json"},
-    ]),
+    new CopyPlugin({
+      patterns: [
+        {from: paths.favicon, to: "favicon.png"},
+        {from: paths.serverInfoJson, to: "static/server-info.json"},
+      ],
+    }),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
     // It is absolutely essential that NODE_ENV was set to production here.

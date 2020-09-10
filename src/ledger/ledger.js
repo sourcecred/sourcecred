@@ -19,6 +19,7 @@ import {
   type Identity,
   newIdentity,
   identityParser,
+  identityTypeParser,
 } from "./identity";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {type TimestampMs} from "../util/timestamp";
@@ -168,8 +169,8 @@ export class Ledger {
    *
    * Will fail if the name is not valid, or already taken.
    */
-  createIdentity(subtype: IdentityType, name: string): IdentityId {
-    const identity = newIdentity(subtype, name);
+  createIdentity(type: IdentityType, name: string): IdentityId {
+    const identity = newIdentity(type, name);
     const action = {
       type: "CREATE_IDENTITY",
       identity,
@@ -534,6 +535,46 @@ export class Ledger {
     toAccount.balance = G.add(toAccount.balance, amount);
   }
 
+  changeIdentityType(identityId: IdentityId, newType: IdentityType): Ledger {
+    this._createAndProcessEvent({
+      type: "CHANGE_IDENTITY_TYPE",
+      newType,
+      identityId,
+    });
+    return this;
+  }
+  _changeIdentityType({identityId, newType}: ChangeIdentityType) {
+    const parseResult = identityTypeParser.parse(newType);
+    if (!parseResult.ok) {
+      throw new Error(`changeIdentityType: invalid type ${newType}`);
+    }
+    if (!this._accounts.has(identityId)) {
+      throw new Error(
+        `changeIdentityType: no identity matches id ${identityId}`
+      );
+    }
+    const account = this._mutableAccount(identityId);
+    const existingIdentity = account.identity;
+    if (existingIdentity.subtype === newType) {
+      // We error rather than silently succeed because we don't want the ledger
+      // to get polluted with no-op records (no successful operations are
+      // idempotent, since they do add to the ledger logs)
+      throw new Error(
+        `changeIdentityType: identity already has type ${newType}`
+      );
+    }
+    const updatedIdentity = {
+      id: identityId,
+      name: existingIdentity.name,
+      subtype: newType,
+      address: existingIdentity.address,
+      aliases: existingIdentity.aliases,
+    };
+
+    // Mutations! Method must not fail after this comment.
+    account.identity = updatedIdentity;
+  }
+
   /**
    * Retrieve the log of all actions in the Ledger's history.
    *
@@ -604,6 +645,9 @@ export class Ledger {
       case "TRANSFER_GRAIN":
         this._transferGrain(action);
         break;
+      case "CHANGE_IDENTITY_TYPE":
+        this._changeIdentityType(action);
+        break;
       // istanbul ignore next: unreachable per Flow
       default:
         throw new Error(`Unknown type: ${(action.type: empty)}`);
@@ -622,7 +666,7 @@ export class Ledger {
     }
     this._processAction(action);
     this._latestTimestamp = ledgerTimestamp;
-    this._ledgerEventLog.append([e]);
+    this._ledgerEventLog.append(e);
   }
 
   _createAndProcessEvent(action: Action) {
@@ -664,7 +708,8 @@ type Action =
   | MergeIdentities
   | ToggleActivation
   | DistributeGrain
-  | TransferGrain;
+  | TransferGrain
+  | ChangeIdentityType;
 
 type CreateIdentity = {|
   +type: "CREATE_IDENTITY",
@@ -684,6 +729,17 @@ const renameIdentityParser: C.Parser<RenameIdentity> = C.object({
   type: C.exactly(["RENAME_IDENTITY"]),
   identityId: uuid.parser,
   newName: nameParser,
+});
+
+type ChangeIdentityType = {|
+  +type: "CHANGE_IDENTITY_TYPE",
+  +identityId: IdentityId,
+  +newType: IdentityType,
+|};
+const changeIdentityTypeParser = C.object({
+  type: C.exactly(["CHANGE_IDENTITY_TYPE"]),
+  identityId: uuid.parser,
+  newType: identityTypeParser,
 });
 
 type AddAlias = {|
@@ -744,6 +800,7 @@ const transferGrainParser: C.Parser<TransferGrain> = C.object({
 const actionParser: C.Parser<Action> = C.orElse([
   createIdentityParser,
   renameIdentityParser,
+  changeIdentityTypeParser,
   addAliasParser,
   mergeIdentitiesParser,
   toggleActivationParser,

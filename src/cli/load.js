@@ -3,23 +3,36 @@
 import * as NullUtil from "../util/null";
 import type {Command} from "./command";
 import {loadInstanceConfig, pluginDirectoryContext} from "./common";
-import {LoggingTaskReporter} from "../util/taskReporter";
-import * as pluginId from "../api/pluginId";
+import {LoggingTaskReporter, ScopedTaskReporter} from "../util/taskReporter";
+import {type PluginId, parser as pluginIdParser} from "../api/pluginId";
+import {isDirEmpty} from "../util/disk";
+import fs from "fs-extra";
+import chalk from "chalk";
 
 function die(std, message) {
   std.err("fatal: " + message);
   return 1;
 }
 
+function warn(std, task: string, message: string) {
+  const label = chalk.bgYellow.bold.white(" WARN ");
+  std.err(`${label} ${task}: ${message}`);
+}
+
+function fail(std, task: string, message: string = "") {
+  const label = chalk.bgRed.bold.white(" FAIL ");
+  std.err(`${label} ${task}${message ? `: ${message}` : ""}`);
+}
+
 const loadCommand: Command = async (args, std) => {
-  let pluginsToLoad = [];
+  let pluginsToLoad: PluginId[] = [];
   const baseDir = process.cwd();
   const config = await loadInstanceConfig(baseDir);
   if (args.length === 0) {
-    pluginsToLoad = config.bundledPlugins.keys();
+    pluginsToLoad = Array.from(config.bundledPlugins.keys());
   } else {
     for (const arg of args) {
-      const id = pluginId.fromString(arg);
+      const id = pluginIdParser.parseOrThrow(arg);
       if (config.bundledPlugins.has(id)) {
         pluginsToLoad.push(id);
       } else {
@@ -30,23 +43,59 @@ const loadCommand: Command = async (args, std) => {
       }
     }
   }
-  const taskReporter = new LoggingTaskReporter();
+  const taskReporter = new LoggingTaskReporter(std.out);
   taskReporter.start("load");
   const failedPlugins = [];
   const loadPromises = [];
+  const cacheEmpty = new Map<PluginId, boolean>();
   for (const name of pluginsToLoad) {
     const plugin = NullUtil.get(config.bundledPlugins.get(name));
     const task = `loading ${name}`;
     taskReporter.start(task);
     const dirContext = pluginDirectoryContext(baseDir, name);
-    const promise = plugin
-      .load(dirContext, taskReporter)
-      .then(() => taskReporter.finish(task))
+    const childTaskReporter = new ScopedTaskReporter(taskReporter, name);
+
+    const loadPlugin = () =>
+      plugin
+        .load(dirContext, childTaskReporter)
+        .then(() => taskReporter.finish(task));
+
+    const endChildRunners = () => {
+      const prefixRegex = new RegExp("^" + name);
+      // create static array of taskIds from activeTasks map
+      Array.from(taskReporter.activeTasks.keys())
+        .filter((taskId) => prefixRegex.test(taskId))
+        .forEach((taskId: string) => {
+          console.log("[debug] killing: ", taskId);
+          taskReporter.finish(taskId);
+          warn(std, taskId, "Retrying");
+        });
+    };
+
+    const restartParentRunner = (error: string) => {
+      taskReporter.finish(task);
+      warn(std, task, `${error}; clearing cache`);
+      taskReporter.start(task);
+    };
+
+    cacheEmpty.set(name, isDirEmpty(dirContext.cacheDirectory()));
+    const loadWithPossibleRetry = loadPlugin()
       .catch((e) => {
-        console.error(e);
+        if (!cacheEmpty.get(name)) {
+          // remove child runner entries
+          endChildRunners();
+          restartParentRunner(e);
+          // clear the cache and try again
+          fs.emptyDirSync(dirContext.cacheDirectory());
+          return loadPlugin();
+        }
+        throw e;
+      })
+      .catch((e) => {
+        fail(std, name, e);
         failedPlugins.push(name);
       });
-    loadPromises.push(promise);
+    loadPromises.push(loadWithPossibleRetry);
   }
   await Promise.all(loadPromises);
   taskReporter.finish("load");

@@ -4,20 +4,22 @@ import stringify from "json-stable-stringify";
 import * as C from "./combo";
 
 /**
- * JsonLog tracks and serializes append-only logs of JSON objects.
+ * JsonLog tracks and serializes append-only logs of JSON values.
  *
  * At its heart, it's basically a simple wrapper around an array, which
  * enforces the rule that items may be appended to it, but never removed.
  *
- * It also provides serialization logic. We store the log as a JSON object
- * with custom formatting, so that each entry appears on its own line in the
- * output JSON file.
+ * It also provides serialization logic. We store the log as a
+ * newline-delimited stream of JSON values, with a one-to-one correspondence
+ * between POSIX lines and elements in the sequence. That is, the serialized
+ * form of an element will never contain an embedded newline, and there are no
+ * empty lines. JSON streams can be easily inspected and manipulatedwith tools
+ * like `jq` as well as standard Unix filters, and can be stored and
+ * transmitted efficiently in Git repositories thanks to packfiles and delta
+ * compression.
  *
- * This way the log can be stored efficiently in Git repositories, thanks to
- * Git packfiles.
- *
- * The JsonLog is always parsed using a Combo.Parser, which ensures type safety
- * at runtime.
+ * Elements of a `JsonLog` are always parsed using a Combo.Parser, which
+ * ensures type safety at runtime.
  */
 export class JsonLog<T: C.JsonObject> {
   +_items: T[];
@@ -26,7 +28,12 @@ export class JsonLog<T: C.JsonObject> {
     this._items = [];
   }
 
-  append(items: Iterable<T>): JsonLog<T> {
+  append(item: T): JsonLog<T> {
+    this._items.push(item);
+    return this;
+  }
+
+  extend(items: Iterable<T>): JsonLog<T> {
     for (const item of items) {
       this._items.push(item);
     }
@@ -38,8 +45,8 @@ export class JsonLog<T: C.JsonObject> {
   }
 
   toString(): string {
-    const stringifiedItems = this._items.map((x) => stringify(x) + "\n");
-    return stringifiedItems.join("");
+    const lines = this._items.map((x) => stringify(x) + "\n");
+    return lines.join("");
   }
 
   static fromString(log: string, parser: C.Parser<T>): JsonLog<T> {
@@ -52,7 +59,7 @@ export class JsonLog<T: C.JsonObject> {
         throw new Error(`line ${i + 1} is not valid JSON: ${e}`);
       }
       if (parsed.ok) {
-        result.append([parsed.value]);
+        result.append(parsed.value);
       } else {
         throw new Error(`line ${i + 1}: ${parsed.err}`);
       }

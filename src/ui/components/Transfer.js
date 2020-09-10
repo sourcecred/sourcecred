@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     borderLeft: `30px solid ${theme.palette.background.paper}`,
   },
   dropdownWrapper: {
-    border: "1px solid #9EADBA",
+    border: `1px solid ${theme.palette.text.primary}`,
     borderRadius: "50px",
   },
   centerRow: {

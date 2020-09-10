@@ -6,7 +6,7 @@ import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
-import {Explorer} from "./Explorer";
+import {Explorer} from "./Explorer/Explorer";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
 import {AccountOverview} from "./AccountOverview";
@@ -16,7 +16,7 @@ import {load, type LoadResult, type LoadSuccess} from "../load";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
-import Menu from "./Menu";
+import createMenu from "./Menu";
 import {LedgerProvider} from "../utils/LedgerContext";
 
 const dataProvider = fakeDataProvider({}, true);
@@ -28,13 +28,16 @@ const theme = createMuiTheme({
   },
 });
 
-const AppLayout = ({hasBackend, currency}: LoadSuccess) => (props) => (
-  <Layout
-    {...props}
-    appBar={AppBar}
-    menu={withRouter(Menu(hasBackend, currency))}
-  />
-);
+const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
+  const AppLayout = (props) => (
+    <Layout
+      {...props}
+      appBar={AppBar}
+      menu={withRouter(createMenu(hasBackend, currency))}
+    />
+  );
+  return AppLayout;
+};
 
 const customRoutes = (
   credView: CredView,
@@ -60,7 +63,7 @@ const customRoutes = (
       <Transfer currency={currency} />
     </Route>,
     <Route key="special-distribution" exact path="/special-distribution">
-      <SpecialDistribution />
+      <SpecialDistribution currency={currency} />
     </Route>,
   ];
   return routes.concat(hasBackend ? backendRoutes : []);
@@ -108,7 +111,7 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
     // TODO (@topocount) create context for read-only instance state
     <LedgerProvider initialLedger={loadSuccess.ledger}>
       <Admin
-        layout={AppLayout(loadSuccess)}
+        layout={createAppLayout(loadSuccess)}
         theme={theme}
         dataProvider={dataProvider}
         history={history}
