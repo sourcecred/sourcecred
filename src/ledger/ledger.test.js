@@ -334,7 +334,7 @@ describe("ledger/ledger", () => {
       it("fails on invalid type", () => {
         const ledger = new Ledger();
         const fooId = ledger.createIdentity("USER", "foo");
-        // $FlowExpectedError
+        // $FlowIgnore[incompatible-call]
         const thunk = () => ledger.changeIdentityType(fooId, "ENTITY");
         failsWithoutMutation(ledger, thunk, "invalid type ENTITY");
       });
@@ -961,7 +961,7 @@ describe("ledger/ledger", () => {
           id: uuid.random(),
         };
         setFakeDate(2);
-        // $FlowExpectedError
+        // $FlowIgnore[incompatible-call]
         const thunk = () => ledger.distributeGrain(distribution);
         expect(thunk).toThrowError("invalid distribution");
       });

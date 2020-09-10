@@ -8,7 +8,7 @@ describe("plugins/github/cacheId", () => {
 
   describe("CacheId type", () => {
     it("manually constructing a CacheId is illegal", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-type]
       const _unused_cacheId: CacheId = "foo/bar";
     });
     it("casting CacheId to string is legal", () => {

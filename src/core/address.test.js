@@ -54,7 +54,7 @@ describe("core/address", () => {
     it("returns an object with read-only properties", () => {
       const {FooAddress} = makeModules();
       expect(() => {
-        // $FlowExpectedError
+        // $FlowIgnore[cannot-write]
         FooAddress.assertValid = FooAddress.assertValid; // eslint-disable-line no-self-assign
       }).toThrow(/read.only property/);
     });
@@ -71,13 +71,13 @@ describe("core/address", () => {
       const {FooAddress, BarAddress, WatAddress} = makeModules();
       it("rejects `undefined`", () => {
         expect(() => {
-          // $FlowExpectedError
+          // $FlowIgnore[incompatible-call]
           FooAddress.assertValid(undefined, "widget");
         }).toThrow("widget: expected FooAddress, got: undefined");
       });
       it("rejects `null`", () => {
         expect(() => {
-          // $FlowExpectedError
+          // $FlowIgnore[incompatible-call]
           FooAddress.assertValid(null, "widget");
         }).toThrow("widget: expected FooAddress, got: null");
       });
@@ -116,19 +116,19 @@ describe("core/address", () => {
       const {FooAddress} = makeModules();
       it("rejects `undefined`", () => {
         expect(() => {
-          // $FlowExpectedError
+          // $FlowIgnore[incompatible-call]
           FooAddress.assertValidParts(undefined, "widget");
         }).toThrow("widget: expected array of parts, got: undefined");
       });
       it("rejects `null`", () => {
         expect(() => {
-          // $FlowExpectedError
+          // $FlowIgnore[incompatible-call]
           FooAddress.assertValidParts(null, "widget");
         }).toThrow("widget: expected array of parts, got: null");
       });
       it("rejects an array containing `undefined`", () => {
         expect(() => {
-          // $FlowExpectedError
+          // $FlowIgnore[incompatible-call]
           FooAddress.assertValidParts(["hello", undefined, "world"], "widget");
         }).toThrow(
           "widget: expected array of parts, got undefined in: " +
@@ -137,7 +137,7 @@ describe("core/address", () => {
       });
       it("rejects an array containing `null`", () => {
         expect(() => {
-          // $FlowExpectedError
+          // $FlowIgnore[incompatible-call]
           FooAddress.assertValidParts(["hello", null, "world"], "widget");
         }).toThrow(
           "widget: expected array of parts, got null in: " +
@@ -222,7 +222,7 @@ describe("core/address", () => {
       // `assertValidParts`.
       it("validates parts", () => {
         expect(() => {
-          // $FlowExpectedError
+          // $FlowIgnore[incompatible-call]
           FooAddress.fromParts(["hello", null, "world"]);
         }).toThrow(
           'expected array of parts, got null in: ["hello",null,"world"]'
@@ -337,7 +337,7 @@ describe("core/address", () => {
       it("validates components", () => {
         const foo = FooAddress.fromParts(["hello"]);
         expect(() => {
-          // $FlowExpectedError
+          // $FlowIgnore[incompatible-call]
           FooAddress.append(foo, "world", null);
         }).toThrow('expected array of parts, got null in: ["world",null]');
       });

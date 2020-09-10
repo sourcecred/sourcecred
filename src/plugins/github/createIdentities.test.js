@@ -21,7 +21,7 @@ describe("plugins/github/createIdentities", () => {
     });
     it("coerces the name if needed", () => {
       const {userlike} = exampleEntities();
-      // $FlowExpectedError
+      // $FlowIgnore[cannot-write]
       userlike.login = () => "coerce?me";
       const identity = _createIdentity(userlike);
       expect(identity.name).toEqual("coerce-me");
@@ -33,7 +33,7 @@ describe("plugins/github/createIdentities", () => {
         ...address,
         subtype: "BOT",
       };
-      // $FlowExpectedError
+      // $FlowIgnore[cannot-write]
       userlike.address = () => fakeAddress;
       const identity = _createIdentity(userlike);
       expect(identity.type).toEqual("BOT");

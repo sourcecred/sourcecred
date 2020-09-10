@@ -119,11 +119,11 @@ describe("src/util/combo", () => {
       (C.exactly([1, 2, 3]): C.Parser<1 | 2 | 3>);
       (C.exactly(["one", 2]): C.Parser<"one" | 2>);
       (C.exactly([]): C.Parser<empty>);
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.exactly([1, 2, 3]): C.Parser<1 | 2>);
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.exactly(["one", 2]): C.Parser<1 | "two">);
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.exactly([false]): C.Parser<empty>);
     });
     it("accepts any matching value", () => {
@@ -200,10 +200,10 @@ describe("src/util/combo", () => {
     });
     it("is type-safe", () => {
       // input safety
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-call]
       C.fmap(C.string, (n: number) => n.toFixed());
       // output safety
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.fmap(C.number, (n: number) => n.toFixed()): C.Parser<number>);
     });
   });
@@ -215,9 +215,9 @@ describe("src/util/combo", () => {
       (C.orElse([C.number, C.null_]): C.Parser<?number>);
       (C.orElse([C.number, C.null_]): C.Parser<number | null | boolean>);
       (C.orElse([]): C.Parser<empty>);
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.orElse([C.number, C.string]): C.Parser<number | boolean>);
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.orElse([C.number, C.string]): C.Parser<empty>);
     });
 
@@ -319,29 +319,29 @@ describe("src/util/combo", () => {
       expect(thunk).toThrow("index 2: index 0: expected string, got number");
     });
     it("is type-safe", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.array(C.string): C.Parser<string>);
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-call]
       (C.array(C.string): C.Parser<number[]>);
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-call]
       (C.array(C.string): C.Parser<string[][]>);
     });
   });
 
   describe("object", () => {
     it("type-errors if the unique field doesn't match", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.object({name: C.string}): C.Parser<{|+name: number|}>);
     });
     it("type-errors if two fields on an object are swapped", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.object({name: C.string, age: C.number}): C.Parser<{|
         +name: number,
         +age: string,
       |}>);
     });
     it("type-errors if two optional fields on an object are swapped", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.object(
         {id: C.string},
         {maybeName: C.string, maybeAge: C.number}
@@ -352,7 +352,7 @@ describe("src/util/combo", () => {
       |}>);
     });
     it("type-errors on bad required fields when optionals present", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.object({name: C.string, age: C.number}, {hmm: C.boolean}): C.Parser<{|
         +name: number,
         +age: string,
@@ -360,7 +360,7 @@ describe("src/util/combo", () => {
       |}>);
     });
     it("type-errors on bad required fields when empty optionals present", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.object({name: C.string, age: C.number}, {}): C.Parser<{|
         +name: number,
         +age: string,
@@ -511,11 +511,11 @@ describe("src/util/combo", () => {
       // implementation detail doesn't leak past the opaque type
       // boundary.
       const rename = C.rename("old", C.string);
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (rename: C.Parser<string>);
     });
     it("forbids renaming a rename at the type level", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-call]
       C.rename("hmm", C.rename("old", C.string));
     });
   });
@@ -537,7 +537,7 @@ describe("src/util/combo", () => {
       expect(p.parseOrThrow({one: 1, dos: 2})).toEqual({one: 1, two: 2});
     });
     it("type-errors if the output has any required fields", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-type-arg]
       const _: C.Parser<{|+a?: null, +b: null /* bad */|}> = C.shape({
         a: C.null_,
         b: C.null_,
@@ -561,7 +561,7 @@ describe("src/util/combo", () => {
     describe("for a heterogeneous tuple type", () => {
       it("is typesafe", () => {
         (C.tuple([C.string, C.number]): C.Parser<[string, number]>);
-        // $FlowExpectedError
+        // $FlowIgnore[incompatible-cast]
         (C.tuple([C.string, C.number]): C.Parser<[string, string]>);
       });
       const makeParser = (): C.Parser<[string, number]> =>
@@ -592,7 +592,7 @@ describe("src/util/combo", () => {
     const makeParser = (): C.Parser<{|[string]: number|}> => C.dict(C.number);
     it("is type-safe", () => {
       // when no key parser is given, key type must be string
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-cast]
       (C.dict(C.string): C.Parser<{["hmm"]: string}>);
     });
     it("rejects null", () => {
@@ -656,7 +656,7 @@ describe("src/util/combo", () => {
         const asciiNumber: C.Parser<number> = C.fmap(C.string, (x) =>
           parseInt(x, 10)
         );
-        // $FlowExpectedError
+        // $FlowIgnore[incompatible-call]
         C.dict(C.boolean, asciiNumber);
       });
     });

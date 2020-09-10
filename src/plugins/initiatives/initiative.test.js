@@ -6,12 +6,12 @@ import {createId, addressFromId} from "./initiative";
 describe("plugins/initiatives/initiative", () => {
   describe("createId", () => {
     it("should require a subtype as first argument", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-call]
       createId();
     });
 
     it("should require at least one ID component as second argument", () => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-call]
       createId("SUBTYPE");
     });
 

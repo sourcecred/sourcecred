@@ -5,9 +5,9 @@ export function configureEnzyme() {
   const Adapter = require("enzyme-adapter-react-16");
   Enzyme.configure({adapter: new Adapter()});
   beforeEach(() => {
-    // $FlowExpectedError
+    // $FlowIgnore[cannot-write]
     console.error = jest.fn();
-    // $FlowExpectedError
+    // $FlowIgnore[cannot-write]
     console.warn = jest.fn();
   });
   afterEach(() => {

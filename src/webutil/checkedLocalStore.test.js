@@ -56,21 +56,21 @@ describe("webutil/checkedLocalStore", () => {
 
   it("errors on non-string keys with `get`", () => {
     checkErrorCase((cls) => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-call]
       expect(() => cls.get(12)).toThrow("bad key (number): 12");
     });
   });
 
   it("errors on non-string keys with `set`", () => {
     checkErrorCase((cls) => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-call]
       expect(() => cls.set(12, "twelve")).toThrow("bad key (number): 12");
     });
   });
 
   it("errors on non-string keys with `del`", () => {
     checkErrorCase((cls) => {
-      // $FlowExpectedError
+      // $FlowIgnore[incompatible-call]
       expect(() => cls.del(12)).toThrow("bad key (number): 12");
     });
   });
