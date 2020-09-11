@@ -32,7 +32,8 @@ export function textBlocks(string: string): string[] {
   const walker = ast.walker();
   const results = [];
   for (let step; (step = walker.next()); ) {
-    const node: any /*Node*/ = step.node;
+    // $FlowIgnore[value-as-type]
+    const node: Node = step.node;
     const type: NodeType = node.type;
     if (type === "text") {
       results.push(node.literal);
@@ -65,7 +66,8 @@ type NodeType =
   | "custom_inline"
   | "custom_block";
 
-export function deformat(ast: any /*Node*/): void {
+// $FlowIgnore[value-as-type]
+export function deformat(ast: Node): void {
   const walker = ast.walker();
   // We ignore the contents of HTML "code" elements and their subtrees.
   // This variable tracks how deep we are in such a tree. It is 0 if we
@@ -77,7 +79,8 @@ export function deformat(ast: any /*Node*/): void {
   const reCloseTag = new RegExp(`^(?:${CLOSETAG})`);
 
   for (let step; (step = walker.next()); ) {
-    const node: any /*Node*/ = step.node;
+    // $FlowIgnore[value-as-type]
+    const node: Node = step.node;
     const type: NodeType = node.type;
     if (htmlDepth > 0) {
       if (type === "html_inline") {
@@ -145,12 +148,14 @@ export function deformat(ast: any /*Node*/): void {
   }
 }
 
-export function coalesceText(ast: any /*Node*/): void {
+// $FlowIgnore[value-as-type]
+export function coalesceText(ast: Node): void {
   const walker = ast.walker();
   let acc = [];
   let firstTextNode = null;
   for (let step; (step = walker.next()); ) {
-    const node: any /*Node*/ = step.node;
+    // $FlowIgnore[value-as-type]
+    const node: Node = step.node;
     const type: NodeType = node.type;
     if (type === "text") {
       acc.push(node.literal);
