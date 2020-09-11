@@ -87,8 +87,8 @@ practices.
 You can check out the issues marked [contributions welcome], or ask in the
 Discord's #programming channel if anyone has something you can contribute to.
 
-[our Discord]: https://sourcecred.io/discord
-[Contributing Guidelines]: ./CONTRIBUTING.md
+[our discord]: https://sourcecred.io/discord
+[contributing guidelines]: ./CONTRIBUTING.md
 [contributions welcome]: https://github.com/sourcecred/sourcecred/issues?q=is%3Aopen+is%3Aissue+label%3Acontributions-welcome
 
 ## Getting Support
@@ -97,28 +97,29 @@ If you need help with SourceCred, try asking for help in the #tech-support chann
 on our Discord. You can also come to our weekly dev meeting, on Mondays at 12pm PT.
 (Check out the [SourceCred calendar].)
 
-[SourceCred calendar]: https://sourcecred.io/calendar
+[sourcecred calendar]: https://sourcecred.io/calendar
 
 ## Development Setup
 
 ### Dependencies
 
-  - Install [Node] (tested on v12.x.x and v10.x.x).
-  - Install [Yarn] (tested on v1.7.0).
-  - For macOS users: Ensure that your environment provides GNU
-    coreutils. [See this comment for details about what, how, and
-    why.][macos-gnu]
+- Install [Node] (tested on v12.x.x and v10.x.x).
+- Install [Yarn] (tested on v1.7.0).
+- For macOS users: Ensure that your environment provides GNU
+  coreutils. [See this comment for details about what, how, and
+  why.][macos-gnu]
 
-[Node]: https://nodejs.org/en/
-[Yarn]: https://yarnpkg.com/lang/en/
+[node]: https://nodejs.org/en/
+[yarn]: https://yarnpkg.com/lang/en/
 [macos-gnu]: https://github.com/sourcecred/sourcecred/issues/698#issuecomment-417202213
 
 If you want to work on the GitHub plugin, you should
 create a [GitHub API token]. No special permissions are required.
 
-[GitHub API token]: https://github.com/settings/tokens
+[github api token]: https://github.com/settings/tokens
 
 Then, set it in your environment:
+
 ```Bash
 export SOURCECRED_GITHUB_TOKEN=1234....asdf
 ```
@@ -152,6 +153,7 @@ cd $MY_SC_INSTANCE
 # Run the `sourcecred go` command, in your instance, using your modified code.
 scdev go
 ```
+
 ### Using a Modified Frontend
 
 If you've made changes to the SourceCred frontend, you can preview and test it using our builtin development server:
@@ -166,11 +168,11 @@ If you'd like to run it in your instance instead, start it via:
 
 SourceCred is dual-licensed under Apache 2.0 and MIT terms:
 
-  * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>)
-  * MIT License ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>)
+- MIT License ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
 
 ## Acknowledgements
 
 We’d like to thank [Protocol Labs] for funding and support of SourceCred.
 
-[Protocol Labs]: https://protocol.ai
+[protocol labs]: https://protocol.ai
