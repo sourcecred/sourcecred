@@ -14,8 +14,8 @@ describe("api/dependenciesConfig", () => {
       const config = {
         id,
         name: n("foo"),
-        startWeight: 0,
         autoActivateOnIdentityCreation: true,
+        periods: [],
       };
       const events = ledger.eventLog();
       const config_ = ensureIdentityExists(config, ledger);
@@ -27,7 +27,7 @@ describe("api/dependenciesConfig", () => {
       const ledger = new Ledger();
       // Note: this ID is of a user, not a project; no problem.
       const id = ledger.createIdentity("USER", "foo");
-      const config = {name: n("foo"), startWeight: 0};
+      const config = {name: n("foo"), periods: []};
       const events = ledger.eventLog();
       const config_ = ensureIdentityExists(config, ledger);
       expect(config_.id).toEqual(id);
@@ -36,7 +36,7 @@ describe("api/dependenciesConfig", () => {
     });
     it("assigns an id and creates identity if needed", () => {
       const ledger = new Ledger();
-      const config = {name: n("foo"), startWeight: 0};
+      const config = {name: n("foo"), periods: []};
       const {id} = ensureIdentityExists(config, ledger);
       if (id == null) {
         // Will never happen in practice, but needed to appease Flow
@@ -51,7 +51,7 @@ describe("api/dependenciesConfig", () => {
       const ledger = new Ledger();
       const config = {
         name: n("foo"),
-        startWeight: 0,
+        periods: [],
         autoActivateOnIdentityCreation: true,
       };
       const {id} = ensureIdentityExists(config, ledger);
@@ -68,7 +68,7 @@ describe("api/dependenciesConfig", () => {
       const ledger = new Ledger();
       const config = {
         name: n("foo"),
-        startWeight: 0,
+        periods: [],
       };
       const {id} = ensureIdentityExists(config, ledger);
       if (id == null) {
@@ -82,7 +82,7 @@ describe("api/dependenciesConfig", () => {
       const ledger = new Ledger();
       const config = {
         name: n("foo"),
-        startWeight: 0,
+        periods: [],
         autoActivateOnIdentityCreation: false,
       };
       const {id} = ensureIdentityExists(config, ledger);
@@ -99,7 +99,7 @@ describe("api/dependenciesConfig", () => {
       const config = {
         id,
         name: n("foo"),
-        startWeight: 0,
+        periods: [],
         autoActivateOnIdentityCreation: true,
       };
       ensureIdentityExists(config, ledger);
@@ -111,7 +111,7 @@ describe("api/dependenciesConfig", () => {
       const id = ledger.createIdentity("USER", "foo");
       const config = {
         name: n("foo"),
-        startWeight: 0,
+        periods: [],
         autoActivateOnIdentityCreation: true,
       };
       ensureIdentityExists(config, ledger);
@@ -121,7 +121,7 @@ describe("api/dependenciesConfig", () => {
     it("errors if the name in the config doesn't match name in the ledger", () => {
       const ledger = new Ledger();
       const id = ledger.createIdentity("USER", "foo");
-      const config = {id, name: n("bar"), startWeight: 0};
+      const config = {id, name: n("bar"), periods: []};
       const thunk = () => ensureIdentityExists(config, ledger);
       expect(thunk).toThrowError("dependency name discrepancy");
     });
@@ -133,25 +133,13 @@ describe("api/dependenciesConfig", () => {
       const id = ledger.createIdentity("USER", "foo");
       const address = ledger.account(id).identity.address;
       const config = ensureIdentityExists(
-        {name: n("foo"), startWeight: 0},
+        {name: n("foo"), periods: []},
         ledger
       );
       const policy = toDependencyPolicy(config, ledger);
       expect(policy.address).toEqual(address);
     });
-    it("creates a policy with a single period matching the startWeight (when no additional periods set)", () => {
-      const ledger = new Ledger();
-      ledger.createIdentity("USER", "foo");
-      const config = ensureIdentityExists(
-        {name: n("foo"), startWeight: 0.1337},
-        ledger
-      );
-      const policy = toDependencyPolicy(config, ledger);
-      expect(policy.periods).toEqual([
-        {startTimeMs: -Infinity, weight: 0.1337},
-      ]);
-    });
-    it("creates a policy with the start period and additional periods", () => {
+    it("creates a policy with specified periods", () => {
       const ledger = new Ledger();
       ledger.createIdentity("USER", "foo");
       const timestampISO = validateTimestampISO("2020-09-09");
@@ -159,19 +147,28 @@ describe("api/dependenciesConfig", () => {
       const config = ensureIdentityExists(
         {
           name: n("foo"),
-          startWeight: 0.1337,
           periods: [{startTime: timestampISO, weight: 0.1}],
         },
         ledger
       );
       const policy = toDependencyPolicy(config, ledger);
-      expect(policy.periods).toEqual([
-        {startTimeMs: -Infinity, weight: 0.1337},
-        {startTimeMs: timestampMs, weight: 0.1},
-      ]);
+      expect(policy.periods).toEqual([{startTimeMs: timestampMs, weight: 0.1}]);
+    });
+    it("creates a policy with empty periods", () => {
+      const ledger = new Ledger();
+      ledger.createIdentity("USER", "foo");
+      const config = ensureIdentityExists(
+        {
+          name: n("foo"),
+          periods: [],
+        },
+        ledger
+      );
+      const policy = toDependencyPolicy(config, ledger);
+      expect(policy.periods).toEqual([]);
     });
     it("errors if the config is missing an id", () => {
-      const config = {name: n("foo"), startWeight: 0};
+      const config = {name: n("foo"), periods: []};
       const ledger = new Ledger();
       const thunk = () => toDependencyPolicy(config, ledger);
       expect(thunk).toThrowError(
@@ -180,7 +177,7 @@ describe("api/dependenciesConfig", () => {
     });
     it("errors if the id is not in the ledger", () => {
       const id = randomUuid();
-      const config = {id, name: n("foo"), startWeight: 0};
+      const config = {id, name: n("foo"), periods: []};
       const ledger = new Ledger();
       const thunk = () => toDependencyPolicy(config, ledger);
       expect(thunk).toThrowError("no Account for identity");
