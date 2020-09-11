@@ -20,7 +20,11 @@ describe("ledger/credAccounts", () => {
         ],
         [userAddress, {cred: userCred, description: "Little lost user"}],
       ]);
-      const intervalEndpoints = [123, 125, 127];
+      const intervals = [
+        {startTimeMs: 121, endTimeMs: 123},
+        {startTimeMs: 123, endTimeMs: 125},
+        {startTimeMs: 125, endTimeMs: 127},
+      ];
       const expectedCredAccount = {cred: accountCred, account, totalCred: 3};
       const expectedUnclaimedAccount = {
         alias: {
@@ -33,9 +37,9 @@ describe("ledger/credAccounts", () => {
       const expectedData = {
         accounts: [expectedCredAccount],
         unclaimedAliases: [expectedUnclaimedAccount],
-        intervalEndpoints,
+        intervals,
       };
-      expect(_computeCredAccounts([account], info, intervalEndpoints)).toEqual(
+      expect(_computeCredAccounts([account], info, intervals)).toEqual(
         expectedData
       );
     });
@@ -55,10 +59,13 @@ describe("ledger/credAccounts", () => {
         ],
         [alias.address, {cred: userCred, description: "irrelevant"}],
       ]);
-      const intervalEndpoints = [123, 125, 127];
+      const intervals = [
+        {startTimeMs: 121, endTimeMs: 123},
+        {startTimeMs: 123, endTimeMs: 125},
+        {startTimeMs: 125, endTimeMs: 127},
+      ];
 
-      const thunk = () =>
-        _computeCredAccounts([account], info, intervalEndpoints);
+      const thunk = () => _computeCredAccounts([account], info, intervals);
       expect(thunk).toThrowError(
         `cred sync error: alias ${NodeAddress.toString(
           NodeAddress.empty
@@ -71,10 +78,13 @@ describe("ledger/credAccounts", () => {
 
       const account = ledger.accounts()[0];
       const scores = new Map();
-      const intervalEndpoints = [123, 125, 127];
+      const intervals = [
+        {startTimeMs: 121, endTimeMs: 123},
+        {startTimeMs: 123, endTimeMs: 125},
+        {startTimeMs: 125, endTimeMs: 127},
+      ];
 
-      const thunk = () =>
-        _computeCredAccounts([account], scores, intervalEndpoints);
+      const thunk = () => _computeCredAccounts([account], scores, intervals);
       expect(thunk).toThrowError(`cred sync error: no info for account`);
     });
   });

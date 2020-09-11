@@ -12,8 +12,8 @@
 import {sum} from "d3-array";
 import {Ledger, type Account} from "./ledger";
 import {CredView} from "../analysis/credView";
-import {type TimestampMs} from "../util/timestamp";
 import {NodeAddress, type NodeAddressT} from "../core/graph";
+import type {Interval} from "../core/interval";
 import {type Alias} from "./identity";
 
 export type Cred = $ReadOnlyArray<number>;
@@ -36,10 +36,9 @@ export type CredAccountData = {|
   // Unclaimed aliases: An account on some platform that hasn't yet been
   // connected to any SourceCred identity
   +unclaimedAliases: $ReadOnlyArray<UnclaimedAlias>,
-  // The timestamps demarcating the ends of the Cred intervals.
   // For interpreting the Cred data associated with cred accounts and
   // unclaimed accounts.
-  +intervalEndpoints: $ReadOnlyArray<TimestampMs>,
+  +intervals: $ReadOnlyArray<Interval>,
 |};
 
 export function computeCredAccounts(
@@ -56,14 +55,14 @@ export function computeCredAccounts(
     }
     userlikeInfo.set(address, {cred: credOverTime.cred, description});
   }
-  const intervalEndpoints = credView.credResult().credData.intervalEnds;
-  return _computeCredAccounts(grainAccounts, userlikeInfo, intervalEndpoints);
+  const intervals = credView.intervals();
+  return _computeCredAccounts(grainAccounts, userlikeInfo, intervals);
 }
 
 export function _computeCredAccounts(
   grainAccounts: $ReadOnlyArray<Account>,
   userlikeInfo: Map<NodeAddressT, {|+cred: Cred, +description: string|}>,
-  intervalEndpoints: $ReadOnlyArray<TimestampMs>
+  intervals: $ReadOnlyArray<Interval>
 ): CredAccountData {
   const aliasAddresses: Set<NodeAddressT> = new Set();
   const accountAddresses: Set<NodeAddressT> = new Set();
@@ -106,5 +105,5 @@ export function _computeCredAccounts(
       totalCred: sum(cred),
     });
   }
-  return {accounts, unclaimedAliases, intervalEndpoints};
+  return {accounts, unclaimedAliases, intervals};
 }

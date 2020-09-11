@@ -12,8 +12,11 @@ exports[`analysis/credResult to/fro JSON to/froJSON snapshots as expected 1`] = 
       ],
       \\"edgeSummaries\\": [
       ],
-      \\"intervalEnds\\": [
-        259200000
+      \\"intervals\\": [
+        {
+          \\"endTimeMs\\": 259200000,
+          \\"startTimeMs\\": -345600000
+        }
       ],
       \\"nodeOverTime\\": [
         {
