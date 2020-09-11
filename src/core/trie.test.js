@@ -6,17 +6,17 @@ import {NodeAddress, EdgeAddress} from "./graph";
 describe("core/trie", () => {
   describe("type safety", () => {
     it("NodeTrie and EdgeTrie are distinct", () => {
-      // $FlowExpectedError
+      // $FlowFixMe[incompatible-type]
       const _unused_trie: NodeTrie<number> = new EdgeTrie();
     });
     it("NodeTrie rejects edge addresses", () => {
-      // $FlowExpectedError
+      // $FlowFixMe[incompatible-call]
       expect(() => new NodeTrie().add(EdgeAddress.empty, 7)).toThrowError(
         "EdgeAddress"
       );
     });
     it("EdgeTrie rejects node addresses", () => {
-      // $FlowExpectedError
+      // $FlowFixMe[incompatible-call]
       expect(() => new EdgeTrie().add(NodeAddress.empty, 7)).toThrowError(
         "EdgeAddress"
       );

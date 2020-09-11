@@ -15,7 +15,7 @@ describe("util/pathNormalize", () => {
         ["wat"],
         Symbol("wat"),
       ]) {
-        // $FlowExpectedError
+        // $FlowExpectedError[incompatible-call]
         expect(() => normalize(bad)).toThrow(
           "Path must be a string. Received " + String(bad)
         );
