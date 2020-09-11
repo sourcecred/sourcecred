@@ -3,7 +3,7 @@
         "autoActivateOnIdentityCreation": true,
         "id": "2zWwkGHnBGXmEcYneeWAzw",
         "name": "SourceCred",
-        "startWeight": 0.05
+        "periods": [{"startTime": "2019-01-01", "weight": 0.05}]
     }
 ]
 

@@ -77,14 +77,9 @@ export type DependencyConfig = {|
   // Thus, if the dependency identity is re-named in the ledger, this file will
   // also need to be edited to reflect the new name.
   +name: Name,
-  // The starting weight for the dependency, i.e. the weight that will apply
-  // from the start of the project up until the first specified weightPeriod.
-  // If this is set and there are no explicit weightPeriods, this weight will
-  // prevail for the whole timeline of the project.
-  +startWeight: number,
   // The time periods for which we're minting Cred. Each period has a start time and a
   // mint weight; it is assumed to end as soon as the next period begins.
-  +periods?: $ReadOnlyArray<MintPeriod>,
+  +periods: $ReadOnlyArray<MintPeriod>,
   // Whether the dependency should be "active" for Grain collection by default.
   // If this is true, then when the corresponding account is auto-created in the
   // ledger, it will also be automatically activated.
@@ -107,11 +102,10 @@ export const mintPeriodParser: C.Parser<MintPeriod> = C.object({
 export const dependencyConfigParser: C.Parser<DependencyConfig> = C.object(
   {
     name: nameParser,
-    startWeight: C.number,
+    periods: C.array(mintPeriodParser),
   },
   {
     id: uuidParser,
-    periods: C.array(mintPeriodParser),
     autoActivateOnIdentityCreation: C.boolean,
   }
 );
@@ -165,13 +159,10 @@ export function toDependencyPolicy(
       `cannot convert config to policy before it has an id. ensureIdentityExists must be called first.`
     );
   }
-  const rawPeriods = config.periods || [];
   const address = ledger.account(id).identity.address;
-  const startPeriod = {weight: config.startWeight, startTimeMs: -Infinity};
-  const processedPeriods = rawPeriods.map(({startTime, weight}) => ({
+  const periods = config.periods.map(({startTime, weight}) => ({
     weight,
     startTimeMs: fromISO(startTime),
   }));
-  const periods = [startPeriod].concat(processedPeriods);
   return {address, periods};
 }
