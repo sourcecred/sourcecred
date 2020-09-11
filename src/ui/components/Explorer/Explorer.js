@@ -17,6 +17,7 @@ import {
 } from "@material-ui/core";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
+import {StyleSheet, css} from "aphrodite/no-important";
 import deepEqual from "lodash.isequal";
 import {format} from "d3-format";
 import {sum} from "d3-array";
@@ -30,6 +31,31 @@ import {WeightsFileManager} from "../../weights/WeightsFileManager";
 import {type TimelineCredParameters} from "../../../analysis/timeline/params";
 
 import NodeRow from "./NodeRow";
+
+const styles = StyleSheet.create({
+  combobox: {margin: "0px 32px 16px"},
+  menuHeader: {fontWeight: "bold"},
+  divider: {backgroundColor: "#F20057", height: "2px"},
+  parentGrid: {marginTop: 30},
+  weightConfig: {marginTop: 10},
+  root: {
+    width: "80%",
+    margin: "0 auto",
+    padding: "0 5em 5em",
+  },
+  table: {
+    width: "100%",
+    tableLayout: "fixed",
+    margin: "0 auto",
+    padding: "20px 10px",
+  },
+  credCell: {
+    width: "10%",
+  },
+  endCell: {
+    width: "30%",
+  },
+});
 
 export type ExplorerProps = {|
   +initialView: CredView,
@@ -78,7 +104,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         <MenuItem
           key={declaration.nodePrefix}
           value={declaration.nodePrefix}
-          style={{fontWeight: "bold"}}
+          className={css(styles.menuHeader)}
           onClick={() =>
             this.setState({
               anchorEl: null,
@@ -132,7 +158,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
               <KeyboardArrowDownIcon />
             )}
           </ListItem>
-          <Divider style={{backgroundColor: "#F20057", height: "2px"}} />
+          <Divider className={css(styles.divider)} />
         </List>
 
         <Menu
@@ -148,7 +174,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           <MenuItem
             key={"All users"}
             value={""}
-            style={{fontWeight: "bold"}}
+            className={css(styles.menuHeader)}
             onClick={() =>
               this.setState({
                 anchorEl: null,
@@ -232,7 +258,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           direction="row"
           justify="space-between"
           alignItems="center"
-          style={{marginTop: 30}}
+          className={css(styles.parentGrid)}
         >
           <Grid container item xs>
             {this.renderFilterSelect()}
@@ -255,7 +281,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           {analyzeButton}
         </Grid>
         {showWeightConfig && (
-          <div style={{marginTop: 10}}>
+          <div className={css(styles.weightConfig)}>
             <span>Upload/Download weights:</span>
             {weightFileManager}
             <span>α</span>
@@ -285,38 +311,22 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     const sortedNodes = sortBy(nodes, (n) => -n.credSummary.cred);
     const total = sum(nodes.map((n) => n.credSummary.cred));
     return (
-      <div
-        style={{
-          width: "80%",
-          margin: "0 auto",
-          background: "white",
-          padding: "0 5em 5em",
-        }}
-      >
+      <div className={css(styles.root)}>
         {this.renderConfigurationRow()}
         {recalculating ? <h1>Recalculating...</h1> : ""}
-        <Table
-          style={{
-            width: "100%",
-            tableLayout: "fixed",
-            margin: "0 auto",
-            padding: "20px 10px",
-          }}
-        >
+        <Table className={css(styles.table)}>
           <TableHead>
             <TableRow>
-              <TableCell align="left" style={{color: "black"}}>
-                {name ? name : "All users"}
-              </TableCell>
-              <TableCell align="right" style={{width: "10%", color: "black"}}>
+              <TableCell align="left">{name ? name : "All users"}</TableCell>
+              <TableCell align="right" className={css(styles.credCell)}>
                 Cred
               </TableCell>
-              <TableCell align="right" style={{width: "10%", color: "black"}}>
+              <TableCell align="right" className={css(styles.credCell)}>
                 % Total
               </TableCell>
               <TableCell
                 align="right"
-                style={{width: "30%", color: "black"}}
+                className={css(styles.endCell)}
               ></TableCell>
             </TableRow>
           </TableHead>
