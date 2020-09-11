@@ -20,6 +20,7 @@ describe("ledger/applyDistributions", () => {
         _chooseDistributionIntervals(
           credIntervals,
           lastDistributionTimestamp,
+          299,
           maxSimultaneousDistributions
         )
       ).toEqual(expected);
@@ -37,6 +38,7 @@ describe("ledger/applyDistributions", () => {
         _chooseDistributionIntervals(
           credIntervals,
           lastDistributionTimestamp,
+          299,
           maxSimultaneousDistributions
         )
       ).toEqual(expected);
@@ -54,6 +56,7 @@ describe("ledger/applyDistributions", () => {
         _chooseDistributionIntervals(
           credIntervals,
           lastDistributionTimestamp,
+          299,
           maxSimultaneousDistributions
         )
       ).toEqual(expected);
@@ -71,6 +74,25 @@ describe("ledger/applyDistributions", () => {
         _chooseDistributionIntervals(
           credIntervals,
           lastDistributionTimestamp,
+          299,
+          maxSimultaneousDistributions
+        )
+      ).toEqual(expected);
+    });
+    it("handles the case where the latest interval is complete", () => {
+      const credIntervals = [
+        {startTimeMs: 0, endTimeMs: 100},
+        {startTimeMs: 100, endTimeMs: 200},
+        {startTimeMs: 200, endTimeMs: 300},
+      ];
+      const lastDistributionTimestamp = -Infinity;
+      const maxSimultaneousDistributions = 1;
+      const expected = [{startTimeMs: 200, endTimeMs: 300}];
+      expect(
+        _chooseDistributionIntervals(
+          credIntervals,
+          lastDistributionTimestamp,
+          300,
           maxSimultaneousDistributions
         )
       ).toEqual(expected);

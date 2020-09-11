@@ -41,12 +41,14 @@ export type DistributionPolicy = {|
 export function applyDistributions(
   policy: DistributionPolicy,
   view: CredView,
-  ledger: Ledger
+  ledger: Ledger,
+  currentTimestamp: TimestampMs
 ): $ReadOnlyArray<Distribution> {
   const credIntervals = view.intervals();
   const distributionIntervals = _chooseDistributionIntervals(
     credIntervals,
     ledger.lastDistributionTimestamp(),
+    currentTimestamp,
     policy.maxSimultaneousDistributions
   );
   return distributionIntervals.map((interval) => {
@@ -66,10 +68,13 @@ export function applyDistributions(
 export function _chooseDistributionIntervals(
   credIntervals: $ReadOnlyArray<Interval>,
   lastDistributionTimestamp: TimestampMs,
+  currentTimestamp: TimestampMs,
   maxSimultaneousDistributions: number
 ): $ReadOnlyArray<Interval> {
   // Slice off the final interval--we may assume that it is not yet finished.
-  const completeIntervals = credIntervals.slice(0, credIntervals.length - 1);
+  const completeIntervals = credIntervals.filter(
+    (x) => x.endTimeMs <= currentTimestamp
+  );
   const undistributedIntervals = completeIntervals.filter(
     (i) => i.endTimeMs > lastDistributionTimestamp
   );
