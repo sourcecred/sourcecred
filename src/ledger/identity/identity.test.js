@@ -35,7 +35,7 @@ describe("ledger/identity/identity", () => {
       expect(fail).toThrowError("invalid name");
     });
     it("errors on invalid subtype", () => {
-      // $FlowIgnore[incompatible-call]
+      // $FlowExpectedError[incompatible-call]
       const fail = () => newIdentity("FOO", "name");
       expect(fail).toThrowError("invalid identity subtype: ");
     });

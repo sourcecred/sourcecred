@@ -11,7 +11,7 @@ import {
 describe("plugins/github/repoId", () => {
   describe("RepoId type", () => {
     it("manually constructing a RepoId is illegal", () => {
-      // $FlowIgnore[incompatible-type]
+      // $FlowExpectedError[incompatible-type]
       const _unused_repoId: RepoId = {
         owner: "foo",
         name: "bar",
@@ -25,7 +25,7 @@ describe("plugins/github/repoId", () => {
   });
   describe("RepoIdString type", () => {
     it("manually constructing a RepoIdString is illegal", () => {
-      // $FlowIgnore[incompatible-type]
+      // $FlowExpectedError[incompatible-type]
       const _unused_repoIdString: RepoIdString = "foobar";
     });
   });

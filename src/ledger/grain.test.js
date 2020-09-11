@@ -181,7 +181,7 @@ describe("src/ledger/grain", () => {
     });
     it("rejects non-floatstring inputs", () => {
       for (const bad of [9, 1.2, NaN, Infinity, -Infinity]) {
-        //$FlowIgnore[incompatible-call]
+        //$FlowExpectedError[incompatible-call]
         const thunk = () => G.fromFloatString(bad);
         expect(thunk).toThrowError(`not a string: ${bad}`);
       }

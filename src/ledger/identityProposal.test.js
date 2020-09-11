@@ -86,7 +86,7 @@ describe("ledger/identityProposal", () => {
     });
     it("adds a further numeric discriminator if needed", () => {
       function checkAvailable(n) {
-        // $FlowIgnore[incompatible-type]
+        // $FlowExpectedError[incompatible-type]
         return n !== "foo" && n !== "foo-bar";
       }
       expect(_chooseIdentityName(proposal, checkAvailable)).toEqual(
@@ -95,7 +95,7 @@ describe("ledger/identityProposal", () => {
     });
     it("increments the numeric discriminator if needed", () => {
       function checkAvailable(n) {
-        // $FlowIgnore[incompatible-type]
+        // $FlowExpectedError[incompatible-type]
         return n !== "foo" && n !== "foo-bar" && n !== "foo-bar-1";
       }
       expect(_chooseIdentityName(proposal, checkAvailable)).toEqual(

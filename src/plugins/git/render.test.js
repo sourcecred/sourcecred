@@ -113,7 +113,7 @@ describe("plugins/git/render", () => {
       expect(console.error).toHaveBeenCalledWith(
         `Unable to find repoIds for commit ${commit.hash}`
       );
-      // $FlowIgnore[cannot-write]
+      // $FlowExpectedError[cannot-write]
       console.error = jest.fn();
 
       expect(el.find(Link)).toHaveLength(0);
