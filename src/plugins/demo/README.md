@@ -10,4 +10,4 @@ available.
 The plugin is loosely based on the wonderful video game [Factorio], which the
 SourceCred developers heartily recommend.
 
-[Factorio]: https://www.factorio.com/
+[factorio]: https://www.factorio.com/

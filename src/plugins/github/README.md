@@ -30,17 +30,19 @@ cred than a clean, elegant pull request (which merges with a minimum of fuss).
 
 We intend to improve the cred robustness of the GitHub plugin by
 adding better heuristics for assigning cred, e.g.:
+
 - Minting cred when PRs are merged, rather than when they are created.
 - Allowing custom labels that influence the cred minted to pulls.
 - Modifying cred minting based on metrics like the size of the pull request.
 
 We also intend to move cred minting away from raw activity and towards
 actions that require review, e.g.:
+
 - Minting cred when a pull request merges.
 - Minting cred when a release is created.
 - Minting cred when a feature is added (via the Initiatives Plugin).
 
-[GitHub]: https://github.com/
+[github]: https://github.com/
 
 ## Nodes
 
@@ -56,8 +58,7 @@ node has no timestamp, so setting a weight on the repository will have no
 effect (i.e. repos do not mint cred). This may change when we switch to
 [CredRank].
 
-[CredRank]: https://github.com/sourcecred/sourcecred/issues/1686
-
+[credrank]: https://github.com/sourcecred/sourcecred/issues/1686
 [sourcecred/sourcecred]: https://github.com/sourcecred/sourcecred
 
 - **Issue**:
@@ -82,7 +83,6 @@ that they created when merged.
 A review of a GitHub pull request, e.g. [this review]. Reviews are connected to
 their author(s), to entities they reference, to their comments, and to the pull
 they review. Note that review assignments are not currently tracked.
-
 
 [this review]: https://github.com/sourcecred/sourcecred/pull/91#pullrequestreview-105254836
 
@@ -134,7 +134,6 @@ Bots have the same connections as users.
 
 [bots.js]: https://github.com/sourcecred/sourcecred/blob/master/src/plugins/github/bots.js
 
-
 ## Edges
 
 - **Authors**:
@@ -160,7 +159,6 @@ hyphen or colon, so that the below are all valid "paired with" designators:
 > Paired With: @wchargin
 >
 > Paired-With: @wchargin
->
 
 - **References**:
 
@@ -186,20 +184,19 @@ reactions as nodes, so as to support reaction-minted cred, in the style of
 A has-parent edge connects a "child" node to its "parent" node. Here's a table
 summarizing these relationships:
 
-| Child | Parent |
-| --- | --- |
-| Issue | Repository |
-| Issue Comment | Issue |
-| Pull Request | Repository |
-| Pull Comment | Pull Request |
-| Pull Request Review | Pull Request |
+| Child                       | Parent              |
+| --------------------------- | ------------------- |
+| Issue                       | Repository          |
+| Issue Comment               | Issue               |
+| Pull Request                | Repository          |
+| Pull Comment                | Pull Request        |
+| Pull Request Review         | Pull Request        |
 | Pull Request Review Comment | Pull Request Review |
 
 - **Merged As**:
 
 A merged-as edge connects a pull request to the commit that it merged, assuming
 the pull request was merged.
-
 
 ## Implementation
 

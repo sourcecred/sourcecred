@@ -103,8 +103,8 @@
     ]
   },
   "scripts": {
-    "prettify": "prettier --write '**/*.js'",
-    "check-pretty": "prettier --list-different '**/*.js'",
+    "prettify": "prettier --write '**/*.{js,md}'",
+    "check-pretty": "prettier --list-different '**/*.{js,md}'",
     "start": "NODE_ENV=development webpack-dev-server --config config/webpack.config.web.js",
     "build": "run-p build:* && cp -r ./build ./bin/site-template && chmod +x ./bin/sourcecred.js",
     "build:frontend": "NODE_ENV=production webpack --config config/webpack.config.web.js",
