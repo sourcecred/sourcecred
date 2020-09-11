@@ -1,6 +1,7 @@
 // @flow
 
 import {type TimestampMs} from "../util/timestamp";
+import {type Interval} from "../core/interval";
 import {Ledger} from "./ledger";
 import {type AllocationPolicy} from "./grainAllocation";
 import {CredView} from "../analysis/credView";
@@ -42,20 +43,20 @@ export function applyDistributions(
   view: CredView,
   ledger: Ledger
 ): $ReadOnlyArray<Distribution> {
-  const credIntervals = view.credResult().credData.intervalEnds;
+  const credIntervals = view.intervals();
   const distributionIntervals = _chooseDistributionIntervals(
     credIntervals,
     ledger.lastDistributionTimestamp(),
     policy.maxSimultaneousDistributions
   );
-  return distributionIntervals.map((endpoint) => {
+  return distributionIntervals.map((interval) => {
     // Recompute for every endpoint because the Ledger will be in a different state
     // (wrt paid balances)
     const accountsData = computeCredAccounts(ledger, view);
     const distribution = computeDistribution(
       policy.allocationPolicies,
       accountsData,
-      endpoint
+      interval.endTimeMs
     );
     ledger.distributeGrain(distribution);
     return distribution;
@@ -63,14 +64,14 @@ export function applyDistributions(
 }
 
 export function _chooseDistributionIntervals(
-  credIntervals: $ReadOnlyArray<TimestampMs>,
+  credIntervals: $ReadOnlyArray<Interval>,
   lastDistributionTimestamp: TimestampMs,
   maxSimultaneousDistributions: number
-): $ReadOnlyArray<TimestampMs> {
+): $ReadOnlyArray<Interval> {
   // Slice off the final interval--we may assume that it is not yet finished.
   const completeIntervals = credIntervals.slice(0, credIntervals.length - 1);
   const undistributedIntervals = completeIntervals.filter(
-    (i) => i > lastDistributionTimestamp
+    (i) => i.endTimeMs > lastDistributionTimestamp
   );
   return undistributedIntervals.slice(
     undistributedIntervals.length - maxSimultaneousDistributions,

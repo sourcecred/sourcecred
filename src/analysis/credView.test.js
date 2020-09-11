@@ -162,7 +162,7 @@ describe("analysis/credView", () => {
       expect(credOverTime).toEqual(credResult.credData.nodeOverTime[index]);
       expect(credSummary).toEqual(credResult.credData.nodeSummaries[index]);
       expect(intervalIndex).toEqual(
-        _getIntervalIndex(credView.intervalEnds(), nullGet(timestamp))
+        _getIntervalIndex(credView.intervals(), nullGet(timestamp))
       );
     });
     it("returns undefined for non-existent node", async () => {
@@ -212,7 +212,7 @@ describe("analysis/credView", () => {
       expect(credOverTime).toEqual(credResult.credData.edgeOverTime[index]);
       expect(credSummary).toEqual(credResult.credData.edgeSummaries[index]);
       expect(intervalIndex).toEqual(
-        _getIntervalIndex(credView.intervalEnds(), timestamp)
+        _getIntervalIndex(credView.intervals(), timestamp)
       );
     });
     it("returns undefined for non-existent edge", async () => {
@@ -252,22 +252,38 @@ describe("analysis/credView", () => {
 
   describe("_getIntervalIndex", () => {
     it("works for the zero-th index", () => {
-      const intervals = [100, 200, 300];
+      const intervals = [
+        {startTimeMs: 0, endTimeMs: 100},
+        {startTimeMs: 100, endTimeMs: 200},
+        {startTimeMs: 200, endTimeMs: 300},
+      ];
       expect(_getIntervalIndex(intervals, 0)).toEqual(0);
       expect(_getIntervalIndex(intervals, 100)).toEqual(0);
     });
     it("works for a middle index", () => {
-      const intervals = [100, 200, 300];
+      const intervals = [
+        {startTimeMs: 0, endTimeMs: 100},
+        {startTimeMs: 100, endTimeMs: 200},
+        {startTimeMs: 200, endTimeMs: 300},
+      ];
       expect(_getIntervalIndex(intervals, 101)).toEqual(1);
       expect(_getIntervalIndex(intervals, 200)).toEqual(1);
     });
     it("works for the last index", () => {
-      const intervals = [100, 200, 300];
+      const intervals = [
+        {startTimeMs: 0, endTimeMs: 100},
+        {startTimeMs: 100, endTimeMs: 200},
+        {startTimeMs: 200, endTimeMs: 300},
+      ];
       expect(_getIntervalIndex(intervals, 299)).toEqual(2);
       expect(_getIntervalIndex(intervals, 300)).toEqual(2);
     });
     it("errors for an index out of bound", () => {
-      const intervals = [100, 200, 300];
+      const intervals = [
+        {startTimeMs: 0, endTimeMs: 100},
+        {startTimeMs: 100, endTimeMs: 200},
+        {startTimeMs: 200, endTimeMs: 300},
+      ];
       const thunk = () => _getIntervalIndex(intervals, 301);
       expect(thunk).toThrowError("timestamp out of interval range");
     });

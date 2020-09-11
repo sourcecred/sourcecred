@@ -13,7 +13,7 @@ describe("src/analysis/credData", () => {
       nodeOverTime: [],
       edgeSummaries: [],
       edgeOverTime: [],
-      intervalEnds: [],
+      intervals: [],
     });
   });
   it("handles non-empty scores correctly", () => {
@@ -36,7 +36,10 @@ describe("src/analysis/credData", () => {
       },
     ];
     const expected = {
-      intervalEnds: [100, 200],
+      intervals: [
+        {startTimeMs: 0, endTimeMs: 100},
+        {startTimeMs: 100, endTimeMs: 200},
+      ],
       nodeSummaries: [
         {
           cred: 14,
@@ -100,7 +103,10 @@ describe("src/analysis/credData", () => {
       },
     ];
     const expected = {
-      intervalEnds: [100, 200],
+      intervals: [
+        {startTimeMs: 0, endTimeMs: 100},
+        {startTimeMs: 100, endTimeMs: 200},
+      ],
       nodeSummaries: [
         {
           // 14 base + 2 from interval1 + 5 from interval2
@@ -139,7 +145,10 @@ describe("src/analysis/credData", () => {
     expect(computeCredData(scores, nodeOrder, mintPolicies)).toEqual(expected);
   });
   it("compresses by threshold correctly", () => {
-    const intervalEnds = [100, 200];
+    const intervals = [
+      {startTimeMs: 0, endTimeMs: 100},
+      {startTimeMs: 100, endTimeMs: 200},
+    ];
     const nodeSummaries = [
       {cred: 14, seedFlow: 0, syntheticLoopFlow: 0.2, dependencyMintedCred: 0},
       {cred: 20, seedFlow: 20, syntheticLoopFlow: 0, dependencyMintedCred: 0},
@@ -179,14 +188,14 @@ describe("src/analysis/credData", () => {
       {forwardFlow: [1, 0], backwardFlow: [0, 1]},
     ];
     const input = {
-      intervalEnds,
+      intervals,
       nodeSummaries,
       nodeOverTime,
       edgeSummaries,
       edgeOverTime,
     };
     const expected = {
-      intervalEnds,
+      intervals,
       nodeSummaries,
       nodeOverTime: [
         {
