@@ -42,7 +42,8 @@ const grainCommand: Command = async (args, std) => {
   const distributions = applyDistributions(
     distributionPolicy,
     credView,
-    ledger
+    ledger,
+    +Date.now()
   );
 
   let totalDistributed = G.ZERO;
