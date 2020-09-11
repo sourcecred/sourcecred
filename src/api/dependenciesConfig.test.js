@@ -154,6 +154,19 @@ describe("api/dependenciesConfig", () => {
       const policy = toDependencyPolicy(config, ledger);
       expect(policy.periods).toEqual([{startTimeMs: timestampMs, weight: 0.1}]);
     });
+    it("creates a policy with empty periods", () => {
+      const ledger = new Ledger();
+      ledger.createIdentity("USER", "foo");
+      const config = ensureIdentityExists(
+        {
+          name: n("foo"),
+          periods: [],
+        },
+        ledger
+      );
+      const policy = toDependencyPolicy(config, ledger);
+      expect(policy.periods).toEqual([]);
+    });
     it("errors if the config is missing an id", () => {
       const config = {name: n("foo"), periods: []};
       const ledger = new Ledger();
