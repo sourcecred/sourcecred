@@ -125,6 +125,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
               primary={
                 this.state.name ? `Filter: ${this.state.name}` : "Filter"
               }
+              style={{color: "black"}}
             />
             {this.state.anchorEl ? (
               <KeyboardArrowUpIcon />
