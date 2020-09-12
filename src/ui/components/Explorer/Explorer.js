@@ -256,7 +256,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           {analyzeButton}
         </Grid>
         {showWeightConfig && (
-          <div style={{marginTop: 10}}>
+          <div style={{color: "black", marginTop: 10}}>
             <span>Upload/Download weights:</span>
             {weightFileManager}
             <span>α</span>
