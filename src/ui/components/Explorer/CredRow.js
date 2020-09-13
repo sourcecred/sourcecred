@@ -115,6 +115,9 @@ const styles = StyleSheet.create({
   },
   customLink: {
     color: "cyan",
+    ":visited": {
+      color: "DeepPink",
+    }
   },
   credCell: {textAlign: "right"},
 });
