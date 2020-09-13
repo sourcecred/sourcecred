@@ -23,10 +23,7 @@ import {
 } from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import * as Params from "../analysis/timeline/params";
-import {
-  contractions as identityContractions,
-  declaration as identityDeclaration,
-} from "../ledger/identity";
+import {contractions as identityContractions} from "../ledger/identity";
 import {Ledger} from "../ledger/ledger";
 import {computeCredAccounts} from "../ledger/credAccounts";
 import {
@@ -109,9 +106,6 @@ const scoreCommand: Command = async (args, std) => {
 
   const plugins = Array.from(config.bundledPlugins.values());
   const declarations = plugins.map((x) => x.declaration());
-  if (identities.length) {
-    declarations.push(identityDeclaration);
-  }
 
   // TODO(@decentralion): This is snapshot tested, add unit tests?
   const paramsPath = pathJoin(baseDir, "config", "params.json");
