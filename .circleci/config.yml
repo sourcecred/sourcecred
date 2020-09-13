@@ -72,7 +72,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
-          cron: "0 22 * * *"  # 22:00 UTC
+          cron: "0 22 * * *" # 22:00 UTC
           filters:
             branches:
               only:
