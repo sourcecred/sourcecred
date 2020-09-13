@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     color: "cyan",
     ":visited": {
       color: "DeepPink",
-    }
+    },
   },
   credCell: {textAlign: "right"},
 });
