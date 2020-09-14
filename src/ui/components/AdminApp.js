@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
@@ -70,8 +70,8 @@ const customRoutes = (
 };
 
 const AdminApp = () => {
-  const [loadResult, setLoadResult] = React.useState<LoadResult | null>(null);
-  React.useEffect(() => {
+  const [loadResult, setLoadResult] = useState<LoadResult | null>(null);
+  useEffect(() => {
     load().then(setLoadResult);
   }, []);
 

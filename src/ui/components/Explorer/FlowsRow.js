@@ -10,8 +10,7 @@ import {
   type EdgeFlow,
 } from "../../../analysis/credView";
 
-function edgeDescription(f: EdgeFlow) {
-  const {neighbor, edge} = f;
+const edgeDescription = ({neighbor, edge}: EdgeFlow) => {
   const type = edge.type;
   const forwards = neighbor.address === edge.dst.address;
   let name = "Unknown edge to";
@@ -19,9 +18,9 @@ function edgeDescription(f: EdgeFlow) {
     name = forwards ? type.forwardName : type.backwardName;
   }
   return name + " " + neighbor.description;
-}
+};
 
-function FlowRow(view: CredView, f: Flow, total: number, depth: number) {
+const FlowRow = (view: CredView, f: Flow, total: number, depth: number) => {
   const key = (f) => (f.type === "EDGE" ? f.edge.address : f.type);
   const description = (() => {
     switch (f.type) {
@@ -66,29 +65,30 @@ function FlowRow(view: CredView, f: Flow, total: number, depth: number) {
       {children}
     </CredRow>
   );
-}
+};
 
-class FlowsRow extends React.Component<{|
+const FlowsRow = ({
+  view,
+  node,
+  depth,
+}: {|
   +view: CredView,
   +node: CredNode,
   +depth: number,
-|}> {
-  render() {
-    const {view, node, depth} = this.props;
-    const inflows = view.inflows(node.address);
-    if (inflows == null) {
-      throw new Error("no flows");
-    }
-
-    const sortedFlows = sortBy(inflows, (x) => -x.flow);
-    return (
-      <>
-        {sortedFlows
-          .slice(0, 10)
-          .map((f) => FlowRow(view, f, node.credSummary.cred, depth))}
-      </>
-    );
+|}) => {
+  const inflows = view.inflows(node.address);
+  if (inflows == null) {
+    throw new Error("no flows");
   }
-}
+
+  const sortedFlows = sortBy(inflows, (x) => -x.flow);
+  return (
+    <>
+      {sortedFlows
+        .slice(0, 10)
+        .map((f) => FlowRow(view, f, node.credSummary.cred, depth))}
+    </>
+  );
+};
 
 export default FlowsRow;
