@@ -1,7 +1,13 @@
 // @flow
 import React, {type Node as ReactNode} from "react";
 import Markdown from "react-markdown";
-import {Collapse, IconButton, TableCell, TableRow} from "@material-ui/core";
+import {
+  Collapse,
+  IconButton,
+  Link,
+  TableCell,
+  TableRow,
+} from "@material-ui/core";
 import {StyleSheet, css} from "aphrodite/no-important";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -75,7 +81,7 @@ class CredRow extends React.Component<CredRowProps, CredRowState> {
               renderers={{
                 paragraph: "span",
                 link: (props) => (
-                  <a {...props} className={css(styles.customLink)} />
+                  <Link {...props} className={css(styles.customLink)} />
                 ),
               }}
               source={description}
@@ -114,10 +120,7 @@ const styles = StyleSheet.create({
     },
   },
   customLink: {
-    color: "cyan",
-    ":visited": {
-      color: "DeepPink",
-    },
+    ":visited": {color: "DeepPink"},
   },
   credCell: {textAlign: "right"},
 });
