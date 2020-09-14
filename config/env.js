@@ -1,12 +1,9 @@
 // @flow
-const {spawnSync, execFileSync} = require("child_process");
 const fs = require("fs");
 const stringify = require("json-stable-stringify");
 const path = require("path");
 
 const paths = require("./paths");
-
-/*:: import type {GitState} from "../src/core/version"; */
 
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve("./paths")];
@@ -60,79 +57,6 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
   .map((folder) => path.resolve(appDirectory, folder))
   .join(path.delimiter);
 
-// Get the state of the SourceCred Git repository. This requires that
-// Git be installed. If this fails for you, please install Git.
-//
-// If the dependency on Git becomes a problem, we can consider making
-// this optional. However, note that this computation is performed at
-// build time, so end users of SourceCred as a library or application
-// should not need this dependency.
-//
-// Note: Calling `getGitState` inside test code seems to increase memory usage,
-// potentially leading to CI out-of-memory failures. We should investigate
-// this, and consider making `getGitState` a compile step for test code.
-function getGitState() /*: GitState */ {
-  const env = {
-    GIT_ATTR_NOSYSTEM: "1",
-    GIT_CONFIG_NOSYSTEM: "1",
-    LANG: "C",
-    LC_ALL: "C",
-    PATH: process.env.PATH,
-    TZ: "UTC",
-  };
-
-  const diffIndex = spawnSync(
-    "git",
-    ["-C", __dirname, "diff-index", "--quiet", "HEAD", "--"],
-    {env}
-  );
-  const dirty = diffIndex.status !== 0;
-  if (diffIndex.status !== 0 && diffIndex.status !== 1) {
-    throw new Error(diffIndex.status + ": " + diffIndex.stderr.toString());
-  }
-
-  const commitHash = execFileSync(
-    "git",
-    ["-C", __dirname, "rev-parse", "--short=12", "--verify", "HEAD"],
-    {env}
-  )
-    .toString()
-    .trim();
-
-  const iso8601Timestamp = execFileSync(
-    "git",
-    [
-      "-C",
-      __dirname,
-      "show",
-      "--no-patch",
-      "--format=%cd",
-      "--date=iso8601",
-      commitHash,
-    ],
-    {env}
-  )
-    .toString()
-    .trim();
-  const commitDate = new Date(iso8601Timestamp);
-  function zeroPad(number /*: number */, length /*: number */) /*: string */ {
-    return String(number).padStart(length, "0");
-  }
-  const commitTimestamp = [
-    zeroPad(commitDate.getFullYear(), 4),
-    zeroPad(commitDate.getMonth() + 1, 2),
-    zeroPad(commitDate.getDate(), 2),
-    "-",
-    zeroPad(commitDate.getHours(), 2),
-    zeroPad(commitDate.getMinutes(), 2),
-  ].join("");
-
-  return {commitHash, commitTimestamp, dirty};
-}
-
-const SOURCECRED_GIT_STATE = stringify(getGitState());
-process.env.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
-
 // TODO: When we have switched fully to the instance system, we can remove
 // the projectIds argument.
 function getClientEnvironment(projectIds /*: $ReadOnlyArray<string> | null*/) {
@@ -140,8 +64,6 @@ function getClientEnvironment(projectIds /*: $ReadOnlyArray<string> | null*/) {
   // Useful for determining whether we’re running in production mode.
   // Most importantly, it switches React into the correct mode.
   raw.NODE_ENV = process.env.NODE_ENV || "development";
-  // Used by `src/core/version.js`.
-  raw.SOURCECRED_GIT_STATE = SOURCECRED_GIT_STATE;
   // Optional. Used by `src/homepage/routeData.js`
   raw.PROJECT_IDS = stringify(projectIds);
 
