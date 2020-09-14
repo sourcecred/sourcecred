@@ -25,7 +25,7 @@ class CredTimeline extends React.Component<{|
 
     return (
       <svg width={width} height={height}>
-        <path d={gen(data)} stroke="blue" fill="none" stokewidth={1} />
+        <path d={gen(data)} stroke="cyan" fill="none" stokewidth={1} />
       </svg>
     );
   }

@@ -71,7 +71,7 @@ export class WeightConfig extends React.Component<Props> {
     const nodeConfigs = nonUserTypes.map((t) => this._nodeConfig(t));
     const edgeConfigs = edgeTypes.map((t) => this._edgeConfig(t));
     return (
-      <div key={name} style={{color: "black", padding: "1rem"}}>
+      <div key={name} style={{padding: "1rem"}}>
         <h3>{name}</h3>
         <h4 style={{marginBottom: "0.3em"}}>Node weights</h4>
         {nodeConfigs}
