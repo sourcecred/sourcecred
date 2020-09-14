@@ -1,7 +1,13 @@
 // @flow
 import React, {type Node as ReactNode} from "react";
 import Markdown from "react-markdown";
-import {Collapse, IconButton, TableCell, TableRow} from "@material-ui/core";
+import {
+  Collapse,
+  IconButton,
+  Link,
+  TableCell,
+  TableRow,
+} from "@material-ui/core";
 import {StyleSheet, css} from "aphrodite/no-important";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -40,7 +46,7 @@ class CredRow extends React.Component<CredRowProps, CredRowState> {
     const makeGradient = (color) =>
       `linear-gradient(to top, ${color}, ${color})`;
     const normalBackground = makeGradient(backgroundColor);
-    const highlightBackground = makeGradient("#D8E1E8");
+    const highlightBackground = makeGradient("#494949");
     const backgroundImage = `${normalBackground}, ${highlightBackground}`;
     return (
       <>
@@ -53,11 +59,7 @@ class CredRow extends React.Component<CredRowProps, CredRowState> {
             }));
           }}
         >
-          <TableCell
-            style={{
-              color: "black",
-            }}
-          >
+          <TableCell>
             <IconButton
               aria-label="expand"
               color="primary"
@@ -74,13 +76,21 @@ class CredRow extends React.Component<CredRowProps, CredRowState> {
               }}
             >
               {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>
-            <Markdown renderers={{paragraph: "span"}} source={description} />{" "}
+            </IconButton>{" "}
+            <Markdown
+              renderers={{
+                paragraph: "span",
+                link: (props) => (
+                  <Link {...props} className={css(styles.customLink)} />
+                ),
+              }}
+              source={description}
+            />
           </TableCell>
-          <TableCell style={{textAlign: "right", color: "black"}}>
+          <TableCell className={css(styles.credCell)}>
             {format(".1d")(cred)}
           </TableCell>
-          <TableCell style={{textAlign: "right", color: "black"}}>
+          <TableCell className={css(styles.credCell)}>
             {format(".1%")(cred / total)}
           </TableCell>
           <TableCell>
@@ -100,7 +110,6 @@ const styles = StyleSheet.create({
    * the default background. The second backgroundImage will be applied on top
    * of the first background when the user hovers or tabs over the element.
    */
-
   hoverHighlight: {
     backgroundSize: "100% 100%, 0 0",
     ":hover": {
@@ -110,13 +119,10 @@ const styles = StyleSheet.create({
       backgroundSize: "100% 100%, 100% 100%",
     },
   },
-  expandDivider: {
-    transition: "width 0.3s",
-    width: "100%",
-    ":hover": {
-      width: "150%",
-    },
+  customLink: {
+    ":visited": {color: "DeepPink"},
   },
+  credCell: {textAlign: "right"},
 });
 
 export default CredRow;

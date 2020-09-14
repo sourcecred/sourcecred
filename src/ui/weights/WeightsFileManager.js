@@ -21,7 +21,6 @@ export class WeightsFileManager extends React.Component<Props> {
           download="weights.json"
           title="Download your weights.json"
           href={`data:text/json,${weightsJSON}`}
-          style={{color: "black"}}
         >
           <MdFileDownload style={{margin: "2px"}} />
         </Link>
