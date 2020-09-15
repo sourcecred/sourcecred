@@ -1,5 +1,5 @@
 // @flow
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import {
   Button,
   Grid,
@@ -23,9 +23,17 @@ import {format} from "d3-format";
 import {sum} from "d3-array";
 import {CredView} from "../../../analysis/credView";
 import sortBy from "../../../util/sortBy";
-import {type NodeAddressT} from "../../../core/graph";
-import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
-import {type Weights, copy as weightsCopy} from "../../../core/weights";
+import type {NodeType} from "../../../analysis/types";
+import {type NodeAddressT, type EdgeAddressT} from "../../../core/graph";
+import {
+  type PluginDeclaration,
+  type PluginDeclarations,
+} from "../../../analysis/pluginDeclaration";
+import {
+  type Weights,
+  type EdgeWeight,
+  copy as weightsCopy,
+} from "../../../core/weights";
 import {WeightConfig} from "../../weights/WeightConfig";
 import {WeightsFileManager} from "../../weights/WeightsFileManager";
 import {type TimelineCredParameters} from "../../../analysis/timeline/params";
@@ -74,6 +82,40 @@ export type ExplorerState = {|
   name: string | null,
 |};
 
+export type RenderFilterSelectProps = {|
+  +handleMenuClose: () => void,
+  +anchorEl: HTMLElement | null,
+  +declarations: PluginDeclarations,
+  +filterByNodeType: (nodeType: NodeType) => void,
+  +filterByDeclaration: (declaration: PluginDeclaration) => void,
+  +setAnchorEl: (anchorEl: HTMLElement | null) => void,
+  +name: string | null,
+  +resetFilter: () => void,
+|};
+
+export type RenderConfigureRowProps = {|
+  +analyzeCred: () => Promise<void>,
+  +recalculating: boolean,
+  +setParams: (params: TimelineCredParameters) => void,
+  +weights: Weights,
+  +params: TimelineCredParameters,
+  +showWeightConfig: boolean,
+  +toggleShowWeightConfig: () => void,
+  +onNodeWeightChange: (prefix: NodeAddressT, weight: number) => void,
+  +onEdgeWeightChange: (prefix: EdgeAddressT, weight: EdgeWeight) => void,
+  +view: CredView,
+  +setWeights: (weights: Weights) => void,
+  +handleMenuClose: () => void,
+  +anchorEl: HTMLElement | null,
+  +declarations: PluginDeclarations,
+  +filterByNodeType: (nodeType: NodeType) => void,
+  +filterByDeclaration: (declaration: PluginDeclaration) => void,
+  +setAnchorEl: (anchorEl: HTMLElement | null) => void,
+  +name: string | null,
+  +resetFilter: () => void,
+  +renderFilterSelect: (props: RenderFilterSelectProps) => ReactNode,
+|};
+
 export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
   constructor(props: ExplorerProps) {
     super(props);
@@ -90,45 +132,80 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     };
   }
 
-  handleMenuClose = () => {
+  setAnchorEl = (anchorEl: HTMLElement | null) => this.setState({anchorEl});
+  setWeights = (weights: Weights) => this.setState({weights});
+  toggleShowWeightConfig = () =>
+    this.setState(({showWeightConfig}) => ({
+      showWeightConfig: !showWeightConfig,
+    }));
+
+  handleMenuClose = () => this.setAnchorEl(null);
+
+  filterByNodeType = (nodeType: NodeType) =>
     this.setState({
       anchorEl: null,
+      filter: nodeType.prefix,
+      name: nodeType.name,
     });
-  };
+
+  filterByDeclaration = (declaration: PluginDeclaration) =>
+    this.setState({
+      anchorEl: null,
+      filter: declaration.nodePrefix,
+      name: declaration.name,
+    });
+
+  resetFilter = () =>
+    this.setState({
+      anchorEl: null,
+      filter: null,
+      name: "All users",
+    });
+
+  onNodeWeightChange = (prefix: NodeAddressT, weight: number) =>
+    this.setState(({weights}) => {
+      weights.nodeWeights.set(prefix, weight);
+      return {weights};
+    });
+
+  onEdgeWeightChange = (prefix: EdgeAddressT, weight: EdgeWeight) =>
+    this.setState(({weights}) => {
+      weights.edgeWeights.set(prefix, weight);
+      return {weights};
+    });
+
+  setParams = (newParams: TimelineCredParameters) =>
+    this.setState({params: newParams});
 
   // Renders the dropdown that lets the user select a type
-  renderFilterSelect() {
-    const plugins = this.state.view.plugins();
+  renderFilterSelect({
+    handleMenuClose,
+    resetFilter,
+    filterByNodeType,
+    filterByDeclaration,
+    name,
+    anchorEl,
+    setAnchorEl,
+    declarations,
+  }: RenderFilterSelectProps) {
     const optionGroup = (declaration: PluginDeclaration) => {
       const header = (
         <MenuItem
           key={declaration.nodePrefix}
           value={declaration.nodePrefix}
           className={css(styles.menuHeader)}
-          onClick={() =>
-            this.setState({
-              anchorEl: null,
-              filter: declaration.nodePrefix,
-              name: declaration.name,
-            })
-          }
+          onClick={() => filterByDeclaration(declaration)}
         >
           {declaration.name}
         </MenuItem>
       );
-      const entries = declaration.nodeTypes.map((type, index) => (
+      const entries = declaration.nodeTypes.map((nodeType, index) => (
         <MenuItem
           key={index}
-          value={type.prefix}
-          onClick={() =>
-            this.setState({
-              anchorEl: null,
-              filter: type.prefix,
-              name: type.name,
-            })
-          }
+          value={nodeType.prefix}
+          onClick={() => filterByNodeType(nodeType)}
         >
-          {"\u2003" + type.name}
+          {"\u2003" + nodeType.name}
         </MenuItem>
       ));
       return [header, ...entries];
@@ -141,32 +218,20 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             aria-haspopup="true"
             aria-controls="filter-menu"
             aria-label="filters"
-            onClick={(event) =>
-              this.setState({
-                anchorEl: event.currentTarget,
-              })
-            }
+            onClick={(event) => setAnchorEl(event.currentTarget)}
           >
-            <ListItemText
-              primary={
-                this.state.name ? `Filter: ${this.state.name}` : "Filter"
-              }
-            />
-            {this.state.anchorEl ? (
-              <KeyboardArrowUpIcon />
-            ) : (
-              <KeyboardArrowDownIcon />
-            )}
+            <ListItemText primary={name ? `Filter: ${name}` : "Filter"} />
+            {anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </ListItem>
           <Divider className={css(styles.divider)} />
         </List>
 
         <Menu
           id="lock-menu"
-          anchorEl={this.state.anchorEl}
+          anchorEl={anchorEl}
           keepMounted
-          open={Boolean(this.state.anchorEl)}
-          onClose={this.handleMenuClose}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
           getContentAnchorEl={null}
           anchorOrigin={{vertical: "bottom", horizontal: "left"}}
           transformOrigin={{vertical: "top", horizontal: "left"}}
@@ -175,49 +240,48 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             key={"All users"}
             value={""}
             className={css(styles.menuHeader)}
-            onClick={() =>
-              this.setState({
-                anchorEl: null,
-                filter: null,
-                name: "All users",
-              })
-            }
+            onClick={resetFilter}
           >
             All users
           </MenuItem>
-          {plugins.map(optionGroup)}
+          {declarations.map(optionGroup)}
         </Menu>
       </>
     );
   }
 
-  renderConfigurationRow() {
-    const {showWeightConfig, view, params, weights} = this.state;
+  renderConfigurationRow({
+    analyzeCred,
+    recalculating,
+    setParams,
+    setWeights,
+    toggleShowWeightConfig,
+    renderFilterSelect,
+    showWeightConfig,
+    onNodeWeightChange,
+    onEdgeWeightChange,
+    view,
+    params,
+    weights,
+    handleMenuClose,
+    resetFilter,
+    filterByNodeType,
+    filterByDeclaration,
+    name,
+    anchorEl,
+    setAnchorEl,
+    declarations,
+  }: RenderConfigureRowProps) {
     const weightFileManager = (
-      <WeightsFileManager
-        weights={weights}
-        onWeightsChange={(weights: Weights) => {
-          this.setState({weights});
-        }}
-      />
+      <WeightsFileManager weights={weights} onWeightsChange={setWeights} />
     );
     const weightConfig = (
       <WeightConfig
-        declarations={view.plugins()}
+        declarations={declarations}
         nodeWeights={weights.nodeWeights}
         edgeWeights={weights.edgeWeights}
-        onNodeWeightChange={(prefix, weight) => {
-          this.setState(({weights}) => {
-            weights.nodeWeights.set(prefix, weight);
-            return {weights};
-          });
-        }}
-        onEdgeWeightChange={(prefix, weight) => {
-          this.setState(({weights}) => {
-            weights.edgeWeights.set(prefix, weight);
-            return {weights};
-          });
-        }}
+        onNodeWeightChange={onNodeWeightChange}
+        onEdgeWeightChange={onEdgeWeightChange}
       />
     );
 
@@ -233,7 +297,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             ...params,
             alpha: e.target.valueAsNumber,
           };
-          this.setState({params: newParams});
+          setParams(newParams);
         }}
       />
     );
@@ -244,13 +308,14 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         <Button
           variant="contained"
           color="primary"
-          disabled={this.state.recalculating || paramsUpToDate}
-          onClick={() => this.analyzeCred()}
+          disabled={recalculating || paramsUpToDate}
+          onClick={analyzeCred}
         >
           re-compute cred
         </Button>
       </Grid>
     );
+
     return (
       <Grid container>
         <Grid
@@ -261,17 +326,22 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           className={css(styles.parentGrid)}
         >
           <Grid container item xs>
-            {this.renderFilterSelect()}
+            {renderFilterSelect({
+              handleMenuClose,
+              resetFilter,
+              filterByNodeType,
+              filterByDeclaration,
+              name,
+              anchorEl,
+              setAnchorEl,
+              declarations,
+            })}
           </Grid>
           <Grid container item xs>
             <Button
               variant="contained"
               color="primary"
-              onClick={() => {
-                this.setState(({showWeightConfig}) => ({
-                  showWeightConfig: !showWeightConfig,
-                }));
-              }}
+              onClick={toggleShowWeightConfig}
             >
               {showWeightConfig
                 ? "Hide weight configuration"
@@ -286,7 +356,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
             {weightFileManager}
             <span>α</span>
             {alphaSlider}
-            <span>{format(".2f")(this.state.params.alpha)}</span>
+            <span>{format(".2f")(params.alpha)}</span>
             {weightConfig}
           </div>
         )}
@@ -304,7 +374,30 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
   }
 
   render() {
-    const {filter, view, recalculating, name} = this.state;
+    const {
+      analyzeCred,
+      setParams,
+      setAnchorEl,
+      setWeights,
+      toggleShowWeightConfig,
+      handleMenuClose,
+      renderFilterSelect,
+      resetFilter,
+      filterByNodeType,
+      filterByDeclaration,
+      onNodeWeightChange,
+      onEdgeWeightChange,
+    } = this;
+    const {
+      filter,
+      view,
+      recalculating,
+      name,
+      showWeightConfig,
+      params,
+      weights,
+      anchorEl,
+    } = this.state;
     const nodes =
       filter == null ? view.userNodes() : view.nodes({prefix: filter});
     // TODO: Allow sorting/displaying only recent cred...
@@ -312,7 +405,28 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     const total = sum(nodes.map((n) => n.credSummary.cred));
     return (
       <div className={css(styles.root)}>
-        {this.renderConfigurationRow()}
+        {this.renderConfigurationRow({
+          analyzeCred,
+          recalculating,
+          setParams,
+          setWeights,
+          toggleShowWeightConfig,
+          renderFilterSelect,
+          showWeightConfig,
+          onNodeWeightChange,
+          onEdgeWeightChange,
+          view,
+          params,
+          weights,
+          handleMenuClose,
+          resetFilter,
+          filterByNodeType,
+          filterByDeclaration,
+          name,
+          anchorEl,
+          setAnchorEl,
+          declarations: view.plugins(),
+        })}
         {recalculating ? <h1>Recalculating...</h1> : ""}
         <Table className={css(styles.table)}>
           <TableHead>
