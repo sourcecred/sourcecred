@@ -3,11 +3,14 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {HashRouter} from "react-router-dom";
 import App from "./components/AdminApp";
+import {VERSION_SHORT} from "../core/version";
 
 const target = document.getElementById("root");
 if (target == null) {
   throw new Error("Unable to find root element!");
 }
+
+console.log(`SourceCred version: ${VERSION_SHORT}`);
 
 ReactDOM.hydrate(
   <HashRouter>

@@ -15,7 +15,6 @@ import {
   type Node as GraphNode,
   type NodeContraction,
 } from "../../core/graph";
-import {IDENTITY_PREFIX} from "./declaration";
 
 export type IdentityId = Uuid;
 
@@ -35,6 +34,14 @@ export type Identity = {|
   // of calling (identityAddress(identity.id)).
   +aliases: $ReadOnlyArray<Alias>,
 |};
+
+// It's not in the typical [owner, name] format because it isn't provided by a plugin.
+// Instead, it's a raw type owned by SourceCred project.
+export const IDENTITY_PREFIX = NodeAddress.fromParts([
+  "sourcecred",
+  "core",
+  "IDENTITY",
+]);
 
 export function newIdentity(subtype: IdentityType, name: string): Identity {
   const id = randomUuid();
