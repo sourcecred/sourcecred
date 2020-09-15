@@ -3,7 +3,7 @@
   "description": "a tool for communities to measure and reward value creation",
   "homepage": "https://sourcecred.io",
   "repository": "github:sourcecred/sourcecred",
-  "version": "0.7.0-beta-15",
+  "version": "0.7.0-beta-16",
   "private": false,
   "dependencies": {
     "@material-ui/lab": "^4.0.0-alpha.56",
@@ -103,8 +103,8 @@
     ]
   },
   "scripts": {
-    "prettify": "prettier --write '**/*.{js,md}'",
-    "check-pretty": "prettier --list-different '**/*.{js,md}'",
+    "prettify": "prettier --write '**/*.{js,md,yml}'",
+    "check-pretty": "prettier --list-different '**/*.{js,md,yml}'",
     "start": "NODE_ENV=development webpack-dev-server --config config/webpack.config.web.js",
     "build": "run-p build:* && cp -r ./build ./bin/site-template && chmod +x ./bin/sourcecred.js",
     "build:frontend": "NODE_ENV=production webpack --config config/webpack.config.web.js",

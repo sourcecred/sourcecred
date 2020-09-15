@@ -1,7 +1,7 @@
 // @flow
 import React, {type Node as ReactNode} from "react";
 import Markdown from "react-markdown";
-import {Collapse, IconButton, TableCell, TableRow} from "@material-ui/core";
+import {IconButton, Link, TableCell, TableRow} from "@material-ui/core";
 import {StyleSheet, css} from "aphrodite/no-important";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -45,7 +45,7 @@ class CredRow extends React.Component<CredRowProps, CredRowState> {
     return (
       <>
         <TableRow
-          style={{backgroundImage, marginLeft: depth * indent + 5}}
+          style={{backgroundImage, marginLeft: depth * indent}}
           className={css(styles.hoverHighlight)}
           onClick={() => {
             this.setState(({expanded}) => ({
@@ -58,10 +58,7 @@ class CredRow extends React.Component<CredRowProps, CredRowState> {
               aria-label="expand"
               color="primary"
               size="medium"
-              style={{
-                marginRight: 5,
-                marginLeft: 15 * indent + 5,
-              }}
+              style={{marginLeft: 15 * indent}}
               onClick={(e) => {
                 e.stopPropagation();
                 this.setState(({expanded}) => ({
@@ -70,8 +67,16 @@ class CredRow extends React.Component<CredRowProps, CredRowState> {
               }}
             >
               {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>
-            <Markdown renderers={{paragraph: "span"}} source={description} />{" "}
+            </IconButton>{" "}
+            <Markdown
+              renderers={{
+                paragraph: "span",
+                link: (props) => (
+                  <Link {...props} className={css(styles.customLink)} />
+                ),
+              }}
+              source={description}
+            />
           </TableCell>
           <TableCell className={css(styles.credCell)}>
             {format(".1d")(cred)}
@@ -83,7 +88,6 @@ class CredRow extends React.Component<CredRowProps, CredRowState> {
             <CredTimeline data={data} />
           </TableCell>
         </TableRow>
-        <Collapse in={expanded} timeout="auto" unmountOnExit></Collapse>
         {expanded ? children : null}
       </>
     );
@@ -104,6 +108,9 @@ const styles = StyleSheet.create({
     ":focus-within": {
       backgroundSize: "100% 100%, 100% 100%",
     },
+  },
+  customLink: {
+    ":visited": {color: "DeepPink"},
   },
   credCell: {textAlign: "right"},
 });
