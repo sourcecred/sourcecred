@@ -1,5 +1,5 @@
 // @flow
-import React, {type Node as ReactNode} from "react";
+import React, {type Node as ReactNode, useState} from "react";
 import Markdown from "react-markdown";
 import {IconButton, Link, TableCell, TableRow} from "@material-ui/core";
 import {StyleSheet, css} from "aphrodite/no-important";
@@ -17,82 +17,65 @@ type CredRowProps = {|
   +children: ReactNode,
   +data: $ReadOnlyArray<number> | null,
 |};
-type CredRowState = {|
-  expanded: boolean,
-|};
-class CredRow extends React.Component<CredRowProps, CredRowState> {
-  constructor(props: CredRowProps) {
-    super(props);
-    this.state = {expanded: false};
-  }
-  render() {
-    const {
-      children,
-      total,
-      cred,
-      data,
-      description,
-      depth,
-      indent,
-    } = this.props;
-    const {expanded} = this.state;
-    const backgroundColor = `hsla(150,100%,28%,${1 - 0.9 ** depth})`;
-    const makeGradient = (color) =>
-      `linear-gradient(to top, ${color}, ${color})`;
-    const normalBackground = makeGradient(backgroundColor);
-    const highlightBackground = makeGradient("#494949");
-    const backgroundImage = `${normalBackground}, ${highlightBackground}`;
-    return (
-      <>
-        <TableRow
-          style={{backgroundImage, marginLeft: depth * indent}}
-          className={css(styles.hoverHighlight)}
-          onClick={() => {
-            this.setState(({expanded}) => ({
-              expanded: !expanded,
-            }));
-          }}
-        >
-          <TableCell>
-            <IconButton
-              aria-label="expand"
-              color="primary"
-              size="medium"
-              style={{marginLeft: 15 * indent}}
-              onClick={(e) => {
-                e.stopPropagation();
-                this.setState(({expanded}) => ({
-                  expanded: !expanded,
-                }));
-              }}
-            >
-              {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>{" "}
-            <Markdown
-              renderers={{
-                paragraph: "span",
-                link: (props) => (
-                  <Link {...props} className={css(styles.customLink)} />
-                ),
-              }}
-              source={description}
-            />
-          </TableCell>
-          <TableCell className={css(styles.credCell)}>
-            {format(".1d")(cred)}
-          </TableCell>
-          <TableCell className={css(styles.credCell)}>
-            {format(".1%")(cred / total)}
-          </TableCell>
-          <TableCell>
-            <CredTimeline data={data} />
-          </TableCell>
-        </TableRow>
-        {expanded ? children : null}
-      </>
-    );
-  }
-}
+
+const CredRow = ({
+  children,
+  total,
+  cred,
+  data,
+  description,
+  depth,
+  indent,
+}: CredRowProps) => {
+  const [expanded, setExpanded] = useState(false);
+  const backgroundColor = `hsla(150,100%,28%,${1 - 0.9 ** depth})`;
+  const makeGradient = (color) => `linear-gradient(to top, ${color}, ${color})`;
+  const normalBackground = makeGradient(backgroundColor);
+  const highlightBackground = makeGradient("#494949");
+  const backgroundImage = `${normalBackground}, ${highlightBackground}`;
+  const linkOverride = (props) => (
+    <Link {...props} className={css(styles.customLink)} />
+  );
+
+  return (
+    <>
+      <TableRow
+        style={{backgroundImage, marginLeft: depth * indent}}
+        className={css(styles.hoverHighlight)}
+        onClick={() => setExpanded(!expanded)}
+      >
+        <TableCell>
+          <IconButton
+            aria-label="expand"
+            color="primary"
+            size="medium"
+            style={{marginLeft: 15 * indent}}
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpanded(!expanded);
+            }}
+          >
+            {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>{" "}
+          <Markdown
+            renderers={{paragraph: "span", link: linkOverride}}
+            source={description}
+          />
+        </TableCell>
+        <TableCell className={css(styles.credCell)}>
+          {format(".1d")(cred)}
+        </TableCell>
+        <TableCell className={css(styles.credCell)}>
+          {format(".1%")(cred / total)}
+        </TableCell>
+        <TableCell>
+          <CredTimeline data={data} />
+        </TableCell>
+      </TableRow>
+      {expanded ? children : null}
+    </>
+  );
+};
 
 const styles = StyleSheet.create({
   /* To apply 'hoverHighlight', provide a backgroundImage containing two <image>

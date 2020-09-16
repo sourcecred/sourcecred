@@ -1,6 +1,7 @@
 // @flow
 
 import React from "react";
+import {Grid, Slider, Tooltip} from "@material-ui/core";
 
 /**
  * The Weight that the user supplies via a WeightSlider.
@@ -55,25 +56,29 @@ export type Props = {|
 export class WeightSlider extends React.Component<Props> {
   render() {
     return (
-      <label style={{display: "flex"}} title={this.props.description}>
-        <span style={{flexGrow: 1}}>{this.props.name}</span>
-        <input
-          type="range"
-          min={MIN_SLIDER}
-          max={MAX_SLIDER}
-          step={1}
-          value={weightToSlider(this.props.weight)}
-          onChange={(e) => {
-            const weight: Weight = sliderToWeight(e.target.valueAsNumber);
-            this.props.onChange(weight);
-          }}
-        />{" "}
-        <span
-          style={{minWidth: 45, display: "inline-block", textAlign: "right"}}
-        >
-          {formatWeight(this.props.weight)}
-        </span>
-      </label>
+      <Tooltip title={this.props.description} placement="top">
+        <Grid container justify="space-between">
+          <Grid item xs={4}>
+            {this.props.name}
+          </Grid>
+          <Grid item xs={5}>
+            <Slider
+              value={weightToSlider(this.props.weight)}
+              min={MIN_SLIDER}
+              max={MAX_SLIDER}
+              step={1}
+              valueLabelDisplay="off"
+              onChange={(_, val) => {
+                const weight: Weight = sliderToWeight(val);
+                this.props.onChange(weight);
+              }}
+            />
+          </Grid>
+          <Grid item xs={1}>
+            {formatWeight(this.props.weight)}
+          </Grid>
+        </Grid>
+      </Tooltip>
     );
   }
 }
