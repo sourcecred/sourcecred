@@ -1,13 +1,7 @@
 // @flow
 import React, {type Node as ReactNode, useState} from "react";
 import Markdown from "react-markdown";
-import {
-  Collapse,
-  IconButton,
-  Link,
-  TableCell,
-  TableRow,
-} from "@material-ui/core";
+import {IconButton, Link, TableCell, TableRow} from "@material-ui/core";
 import {StyleSheet, css} from "aphrodite/no-important";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -46,7 +40,7 @@ const CredRow = ({
   return (
     <>
       <TableRow
-        style={{backgroundImage, marginLeft: depth * indent + 5}}
+        style={{backgroundImage, marginLeft: depth * indent}}
         className={css(styles.hoverHighlight)}
         onClick={() => setExpanded(!expanded)}
       >
@@ -55,10 +49,7 @@ const CredRow = ({
             aria-label="expand"
             color="primary"
             size="medium"
-            style={{
-              marginRight: 5,
-              marginLeft: 15 * indent + 5,
-            }}
+            style={{marginLeft: 15 * indent}}
             onClick={(e) => {
               e.stopPropagation();
               setExpanded(!expanded);
@@ -81,7 +72,6 @@ const CredRow = ({
           <CredTimeline data={data} />
         </TableCell>
       </TableRow>
-      <Collapse in={expanded} timeout="auto" unmountOnExit></Collapse>
       {expanded ? children : null}
     </>
   );

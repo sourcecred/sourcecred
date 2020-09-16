@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as NullUtil from "../../util/null";
-
+import {Grid} from "@material-ui/core";
 import {type NodeAddressT, type EdgeAddressT} from "../../core/graph";
 import {type EdgeWeight, type NodeWeight} from "../../core/weights";
 import {type NodeType, type EdgeType} from "../../analysis/types";
@@ -71,7 +71,7 @@ export class WeightConfig extends React.Component<Props> {
     const nodeConfigs = nonUserTypes.map((t) => this._nodeConfig(t));
     const edgeConfigs = edgeTypes.map((t) => this._edgeConfig(t));
     return (
-      <div key={name} style={{padding: "1rem"}}>
+      <Grid item xs={4} key={name}>
         <h3>{name}</h3>
         <h4 style={{marginBottom: "0.3em"}}>Node weights</h4>
         {nodeConfigs}
@@ -80,23 +80,15 @@ export class WeightConfig extends React.Component<Props> {
           Flow cred from {styledVariable("β")} to {styledVariable("α")} when:
         </p>
         {edgeConfigs}
-      </div>
+      </Grid>
     );
   }
 
   render() {
     return (
-      <React.Fragment>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-          }}
-        >
-          {this.props.declarations.map((x) => this._renderPlugin(x))}
-        </div>
-      </React.Fragment>
+      <Grid container spacing={2}>
+        {this.props.declarations.map((x) => this._renderPlugin(x))}
+      </Grid>
     );
   }
 }

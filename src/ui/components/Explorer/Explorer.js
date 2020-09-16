@@ -255,6 +255,8 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
       <Grid container>
         <Grid
           container
+          item
+          xs={12}
           direction="row"
           justify="space-between"
           alignItems="center"
@@ -281,14 +283,22 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
           {analyzeButton}
         </Grid>
         {showWeightConfig && (
-          <div className={css(styles.weightConfig)}>
-            <span>Upload/Download weights:</span>
-            {weightFileManager}
-            <span>α</span>
-            {alphaSlider}
-            <span>{format(".2f")(this.state.params.alpha)}</span>
-            {weightConfig}
-          </div>
+          <Grid container className={css(styles.weightConfig)} spacing={2}>
+            <Grid container item xs={12} direction="column">
+              <Grid>
+                <Grid>Upload/Download weights:</Grid>
+                <Grid>{weightFileManager}</Grid>
+              </Grid>
+              <Grid container item spacing={2} alignItems="center">
+                <span>α</span>
+                {alphaSlider}
+                <span>{format(".2f")(this.state.params.alpha)}</span>
+              </Grid>
+            </Grid>
+            <Grid spacing={2} container item xs={12} style={{display: "flex"}}>
+              {weightConfig}
+            </Grid>
+          </Grid>
         )}
       </Grid>
     );
@@ -317,17 +327,10 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
         <Table className={css(styles.table)}>
           <TableHead>
             <TableRow>
-              <TableCell align="left">{name ? name : "All users"}</TableCell>
-              <TableCell align="right" className={css(styles.credCell)}>
-                Cred
-              </TableCell>
-              <TableCell align="right" className={css(styles.credCell)}>
-                % Total
-              </TableCell>
-              <TableCell
-                align="right"
-                className={css(styles.endCell)}
-              ></TableCell>
+              <TableCell>{name ? name : "All users"}</TableCell>
+              <TableCell className={css(styles.credCell)}>Cred</TableCell>
+              <TableCell className={css(styles.credCell)}>% Total</TableCell>
+              <TableCell className={css(styles.endCell)} />
             </TableRow>
           </TableHead>
           <TableBody>
