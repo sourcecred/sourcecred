@@ -14,6 +14,7 @@ import {
   ListItemText,
   List,
   Divider,
+  Slider,
 } from "@material-ui/core";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -221,22 +222,6 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
       />
     );
 
-    const alphaSlider = (
-      <input
-        type="range"
-        min={0.05}
-        max={0.95}
-        step={0.05}
-        value={params.alpha}
-        onChange={(e) => {
-          const newParams = {
-            ...params,
-            alpha: e.target.valueAsNumber,
-          };
-          this.setState({params: newParams});
-        }}
-      />
-    );
     const paramsUpToDate =
       deepEqual(params, view.params()) && deepEqual(weights, view.weights());
     const analyzeButton = (
@@ -290,9 +275,24 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
                 <Grid>{weightFileManager}</Grid>
               </Grid>
               <Grid container item spacing={2} alignItems="center">
-                <span>α</span>
-                {alphaSlider}
-                <span>{format(".2f")(this.state.params.alpha)}</span>
+                <Grid>α</Grid>
+                <Grid item xs={2}>
+                  <Slider
+                    value={params.alpha}
+                    min={0.05}
+                    max={0.95}
+                    step={0.05}
+                    valueLabelDisplay="auto"
+                    onChange={(_, val) => {
+                      const newParams = {
+                        ...params,
+                        alpha: val,
+                      };
+                      this.setState({params: newParams});
+                    }}
+                  />
+                </Grid>
+                <Grid>{format(".2f")(this.state.params.alpha)}</Grid>
               </Grid>
             </Grid>
             <Grid spacing={2} container item xs={12} style={{display: "flex"}}>
