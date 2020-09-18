@@ -26,8 +26,8 @@
  *
  * The Markov process graphs in this module have three kinds of nodes:
  *
- *   - *contribution nodes*, which are in 1-to-1 correspondence with the
- *     nodes in the underlying core graph (including users);
+ *   - *base nodes*, which are in 1-to-1 correspondence with the nodes
+ *     in the underlying core graph (including users);
  *   - *epoch nodes*, which are created for each time period for each
  *     scoring node; and
  *   - the *seed node*, which reifies the teleportation vector and
@@ -37,11 +37,11 @@
  *
  * The edges include:
  *
- *   - *contribution edges* between nodes in the underlying graph, which
- *     are lifted to their corresponding contribution nodes or to epoch
- *     nodes if either endpoint has been fibrated;
+ *   - *base edges* due to edges in the underlying graph, whose
+ *     endpoints are lifted to the corresponding base nodes or to epoch
+ *     nodes for endpoints that have been fibrated;
  *   - *radiation edges* edges from nodes to the seed node;
- *   - *minting* edges from the seed node to cred-minting nodes;
+ *   - *minting edges* from the seed node to cred-minting nodes;
  *   - *webbing edges* between temporally adjacent epoch nodes; and
  *   - *payout edges* from an epoch node to its owner (a scoring node).
  *
@@ -99,7 +99,7 @@ export type MarkovEdge = {|
   // Destination node at the Markov chain level.
   +dst: NodeAddressT,
   // Transition probability: $Pr[X_{n+1} = dst | X_{n} = src]$. Must sum
-  // to unity for a given `src`.
+  // to 1.0 for a given `src`.
   +transitionProbability: TransitionProbability,
 |};
 export opaque type MarkovEdgeAddressT: string = string;
@@ -453,7 +453,7 @@ export class MarkovProcessGraph {
     };
 
     const srcNodes: Map<
-      NodeAddressT /* domain: (nodes with out-edges) U (epoch nodes) */,
+      NodeAddressT /* domain: nodes with positive weight from base edges */,
       {totalOutWeight: number, outEdges: _UnidirectionalGraphEdge[]}
     > = new Map();
     for (const graphEdge of unidirectionalGraphEdges()) {
@@ -569,7 +569,7 @@ export class MarkovProcessGraph {
       if (Math.abs(discrepancy) > 1e-3) {
         const name = NodeAddress.toString(node);
         throw new Error(
-          `Transition weights for ${name} do not sum to unity: ${outMass}`
+          `Transition weights for ${name} do not sum to 1.0: ${outMass}`
         );
       }
     }
@@ -589,11 +589,11 @@ export class MarkovProcessGraph {
         // such that `neighbor[j] === k` for a given `k` when there are
         // parallel edges in the source graph. This should just work
         // down the stack.
-        const result = nodeIndex.get(e.src);
-        if (result == null) {
+        const srcIndex = nodeIndex.get(e.src);
+        if (srcIndex == null) {
           throw new Error(e.src);
         }
-        neighbor[i] = result;
+        neighbor[i] = srcIndex;
         weight[i] = e.transitionProbability;
       });
       return {neighbor, weight};
