@@ -123,15 +123,17 @@ export type OrderedSparseMarkovChain = {|
   +chain: SparseMarkovChain,
 |};
 
+const CORE_NODE_PREFIX = NodeAddress.fromParts(["sourcecred", "core"]);
+
 // Address of a seed node. All graph nodes tithe $\alpha$ to this node,
 // and this node flows out to nodes in proportion to their weight. This
 // is also a node prefix for the "seed node" type, which contains only
 // one node.
-const SEED_ADDRESS = NodeAddress.fromParts(["sourcecred", "core", "SEED"]);
+const SEED_ADDRESS = NodeAddress.append(CORE_NODE_PREFIX, "SEED");
 const SEED_DESCRIPTION = "\u{1f331}"; // U+1F331 SEEDLING
 
 // Node address prefix for epoch nodes.
-const EPOCH_PREFIX = NodeAddress.fromParts(["sourcecred", "core", "EPOCH"]);
+const EPOCH_PREFIX = NodeAddress.append(CORE_NODE_PREFIX, "EPOCH");
 
 export type EpochNodeAddress = {|
   +type: "EPOCH_NODE",
@@ -170,11 +172,13 @@ const FIBRATION_EDGE = EdgeAddress.fromParts([
 ]);
 const EPOCH_PAYOUT = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_PAYOUT");
 const EPOCH_WEBBING = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_WEBBING");
+const EPOCH_RADIATION = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_RADIATION");
+
 // Prefixes for seed edges.
-const SEED_RADIATION = EdgeAddress.fromParts([
+const CONTRIBUTION_RADIATION = EdgeAddress.fromParts([
   "sourcecred",
   "core",
-  "SEED_RADIATION",
+  "CONTRIBUTION_RADIATION",
 ]);
 const SEED_MINT = EdgeAddress.fromParts(["sourcecred", "core", "SEED_MINT"]);
 
@@ -227,7 +231,12 @@ export class MarkovProcessGraph {
     const _edges = new Map();
     const _scoringAddresses = _findScoringAddresses(wg.graph, fibration.what);
 
+    // _nodeOutMasses[a] = sum(e.pr for e in edges if e.src == a)
+    // Used for computing remainder-to-seed edges.
+    const _nodeOutMasses = new Map();
+
     const epochTransitionRemainder = (() => {
+      const {alpha} = seed;
       const {beta, gammaForward, gammaBackward} = fibration;
       if (beta < 0 || gammaForward < 0 || gammaBackward < 0) {
         throw new Error(
@@ -235,7 +244,7 @@ export class MarkovProcessGraph {
             [beta, gammaForward, gammaBackward].join(" or ")
         );
       }
-      const result = 1 - (beta + gammaForward + gammaBackward);
+      const result = 1 - (alpha + beta + gammaForward + gammaBackward);
       if (result < 0) {
         throw new Error("Overlarge transition probability: " + (1 - result));
       }
@@ -263,7 +272,13 @@ export class MarkovProcessGraph {
       if (_edges.has(mae)) {
         throw new Error("Edge conflict: " + mae);
       }
+      const pr = edge.transitionProbability;
+      if (pr < 0 || pr > 1) {
+        const name = MarkovEdgeAddress.toString(mae);
+        throw new Error(`Invalid transition probability for ${name}: ${pr}`);
+      }
       _edges.set(mae, edge);
+      _nodeOutMasses.set(edge.src, _nodeOutMasses.get(edge.src) || 0 + pr);
     };
 
     // Add seed node
@@ -341,20 +356,6 @@ export class MarkovProcessGraph {
         }
         lastBoundary = boundary;
       }
-    }
-
-    // Add radiation edges, from graph nodes back to the seed
-    for (const node of wg.graph.nodes()) {
-      addEdge({
-        address: EdgeAddress.append(
-          SEED_RADIATION,
-          ...NodeAddress.toParts(node.address)
-        ),
-        reversed: false,
-        src: node.address,
-        dst: SEED_ADDRESS,
-        transitionProbability: seed.alpha,
-      });
     }
 
     // Add minting edges, from the seed to positive-weight graph nodes
@@ -471,6 +472,30 @@ export class MarkovProcessGraph {
           transitionProbability: pr,
         });
       }
+    }
+
+    // Add radiation edges
+    for (const node of _nodes.values()) {
+      if (node.address === SEED_ADDRESS) continue;
+      let type;
+      if (NodeAddress.hasPrefix(node.address, EPOCH_PREFIX)) {
+        type = EPOCH_RADIATION;
+      } else if (NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX)) {
+        throw new Error(
+          "invariant violation: unknown core node: " +
+            NodeAddress.toString(node.address)
+        );
+      } else {
+        type = CONTRIBUTION_RADIATION;
+      }
+      addEdge({
+        address: EdgeAddress.append(type, ...NodeAddress.toParts(node.address)),
+        reversed: false,
+        src: node.address,
+        dst: SEED_ADDRESS,
+        transitionProbability:
+          1 - NullUtil.orElse(_nodeOutMasses.get(node.address), 0),
+      });
     }
 
     return new MarkovProcessGraph(_nodes, _edges, _scoringAddresses);
