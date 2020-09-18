@@ -28,7 +28,7 @@ describe("cli/sourcecred", () => {
   it("responds to '--version'", async () => {
     expect(await run(sourcecred, ["--version"])).toEqual({
       exitCode: 0,
-      stdout: [expect.stringMatching(/^sourcecred v\d+\.\d+\.\d+$/)],
+      stdout: [expect.stringMatching(/^sourcecred v\d+\.\d+\.[a-z\d-]+$/)],
       stderr: [],
     });
   });
