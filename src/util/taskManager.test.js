@@ -76,8 +76,8 @@ describe("util/taskManager", () => {
     const case0 = new TestCase().start("fo").start("foo");
     const case1 = new TestCase().start("foo").start("fo");
     it("creates new branches when a potential parent is added after children", () => {
-      expect(case0.taskManager._activeTaskRoot).not.toEqual(
-        case1.taskManager._activeTaskRoot
+      expect(case0.taskManager._taskRoot).not.toEqual(
+        case1.taskManager._taskRoot
       );
     });
     it("cannot start duplicate tasks when tree diverges", () => {
@@ -89,8 +89,8 @@ describe("util/taskManager", () => {
     it("can finish tasks in divergent trees", () => {
       case0.finish("fo");
       case1.finish("fo").finish("foo");
-      expect(case0.taskManager._activeTaskRoot.children).toEqual(new Map());
-      expect(case1.taskManager._activeTaskRoot.children).toEqual(new Map());
+      expect(case0.taskManager._taskRoot.children).toEqual(new Map());
+      expect(case1.taskManager._taskRoot.children).toEqual(new Map());
     });
   });
 
@@ -101,14 +101,14 @@ describe("util/taskManager", () => {
       testCase.start("ct");
       const scoped = testCase.taskManager.createScope("ctx1");
       const fail = () => scoped.finish("ct");
-      expect(fail).toThrow("Task ctx1: ct not registered");
+      expect(fail).toThrow("Task ct not registered");
     });
     it("cannot terminate scope root", () => {
       const testCase = new TestCase();
       testCase.start("ctx1");
       const scoped = testCase.taskManager.createScope("ctx1");
       const fail = () => scoped.finish("");
-      expect(fail).toThrow("Task ctx1:  not registered");
+      expect(fail).toThrow("Task  not registered");
     });
     it("can create and and finish tasks", () => {
       const testCase = new TestCase();

@@ -4,6 +4,7 @@ import {
   type TaskId,
   type TaskReporter,
   ScopedTaskReporter,
+  SilentTaskReporter,
 } from "./taskReporter";
 
 type TaskNode = {|
@@ -25,15 +26,15 @@ type TaskNode = {|
  */
 
 export class TaskManager {
-  _activeTaskRoot: TaskNode;
+  _taskRoot: TaskNode;
   reporter: TaskReporter;
 
-  constructor(reporter: TaskReporter) {
-    this.reporter = reporter;
-    this._activeTaskRoot = {
+  constructor(reporter: ?TaskReporter, rootNode: ?TaskNode) {
+    this._taskRoot = rootNode || {
       id: "",
       children: new Map(),
     };
+    this.reporter = reporter || new SilentTaskReporter();
   }
 
   start(taskId: TaskId) {
@@ -49,7 +50,7 @@ export class TaskManager {
     return this;
   }
 
-  _createTask(taskId: TaskId, startRoot: TaskNode = this._activeTaskRoot) {
+  _createTask(taskId: TaskId, startRoot: TaskNode = this._taskRoot) {
     const newTask = {
       id: taskId,
       children: new Map(),
@@ -61,7 +62,7 @@ export class TaskManager {
 
   _findandFinishTask(
     taskId: TaskId,
-    node: TaskNode = this._activeTaskRoot,
+    node: TaskNode = this._taskRoot,
     parent: ?TaskNode
   ) {
     if (node.id === taskId) {
@@ -97,7 +98,7 @@ export class TaskManager {
     }
   }
 
-  findTask(taskId: TaskId, node: TaskNode = this._activeTaskRoot): ?TaskNode {
+  findTask(taskId: TaskId, node: TaskNode = this._taskRoot): ?TaskNode {
     if (node.id === taskId) {
       return node;
     }
@@ -108,51 +109,23 @@ export class TaskManager {
     }
   }
 
-  createScope(taskId: TaskId): ScopedTaskManager {
+  createScope(taskId: TaskId): TaskManager {
     const contextRoot = this.findTask(taskId);
     if (!contextRoot) {
       throw new Error(`task ${taskId} does not exist`);
     }
-    return new ScopedTaskManager(this, contextRoot);
+    return new TaskManager(
+      new ScopedTaskReporter(this.reporter, taskId),
+      contextRoot
+    );
   }
 
-  _findTaskParent(
-    taskId: TaskId,
-    node: TaskNode = this._activeTaskRoot
-  ): TaskNode {
+  _findTaskParent(taskId: TaskId, node: TaskNode = this._taskRoot): TaskNode {
     for (const child of node.children.values()) {
       if (taskId.startsWith(child.id)) {
         return this._findTaskParent(taskId, child);
       }
     }
     return node;
-  }
-}
-
-export class ScopedTaskManager {
-  _mgr: TaskManager;
-  _subRoot: TaskNode;
-  reporter: ScopedTaskReporter;
-
-  constructor(parentManager: TaskManager, scopedRoot: TaskNode) {
-    this._subRoot = scopedRoot;
-    this._mgr = parentManager;
-  }
-
-  start(taskId: TaskId) {
-    const fullId = this._scoped(taskId);
-    if (this._mgr.findTask(fullId)) {
-      throw new Error(`task ${fullId} already registered`);
-    }
-    this._mgr._createTask(fullId, this._subRoot);
-  }
-
-  finish(taskId: TaskId) {
-    const fullId = this._scoped(taskId);
-    this._mgr._findandFinishTask(fullId, this._subRoot);
-  }
-
-  _scoped(taskId: TaskId): TaskId {
-    return `${this._subRoot.id}: ${taskId}`;
   }
 }
