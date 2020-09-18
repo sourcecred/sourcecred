@@ -15,10 +15,10 @@ import {
   fromJSON as weightedGraphFromJSON,
 } from "../core/weightedGraph";
 
-const DEFAULT_ALPHA = 0.2;
-const DEFAULT_BETA = 0.5;
-const DEFAULT_GAMMA_FORWARD = 0.15;
-const DEFAULT_GAMMA_BACKWARD = 0.15;
+const DEFAULT_ALPHA = 0.1;
+const DEFAULT_BETA = 0.4;
+const DEFAULT_GAMMA_FORWARD = 0.1;
+const DEFAULT_GAMMA_BACKWARD = 0.1;
 
 function die(std, message) {
   std.err("fatal: " + message);
