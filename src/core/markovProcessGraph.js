@@ -294,9 +294,9 @@ export class MarkovProcessGraph {
     const nwe = nodeWeightEvaluator(wg.weights);
     for (const node of wg.graph.nodes()) {
       const weight = nwe(node.address);
-      if (weight < 0) {
+      if (weight < 0 || !Number.isFinite(weight)) {
         const name = NodeAddress.toString(node.address);
-        throw new Error(`Negative node weight for ${name}: ${weight}`);
+        throw new Error(`Bad node weight for ${name}: ${weight}`);
       }
       if (NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX)) {
         throw new Error(
