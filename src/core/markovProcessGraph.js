@@ -280,7 +280,7 @@ export class MarkovProcessGraph {
         throw new Error(`Invalid transition probability for ${name}: ${pr}`);
       }
       _edges.set(mae, edge);
-      _nodeOutMasses.set(edge.src, _nodeOutMasses.get(edge.src) || 0 + pr);
+      _nodeOutMasses.set(edge.src, (_nodeOutMasses.get(edge.src) || 0) + pr);
     };
 
     // Add seed node
@@ -551,6 +551,28 @@ export class MarkovProcessGraph {
     nodeOrder.forEach((n, i) => {
       nodeIndex.set(n, i);
     });
+
+    // Check that out-edges sum to about 1.
+    const nodeOutMasses = new Map();
+    for (const node of this._nodes.keys()) {
+      nodeOutMasses.set(node, 0);
+    }
+    for (const edge of this._edges.values()) {
+      const a = edge.src;
+      nodeOutMasses.set(
+        a,
+        NullUtil.get(nodeOutMasses.get(a)) + edge.transitionProbability
+      );
+    }
+    for (const [node, outMass] of nodeOutMasses) {
+      const discrepancy = outMass - 1;
+      if (Math.abs(discrepancy) > 1e-3) {
+        const name = NodeAddress.toString(node);
+        throw new Error(
+          `Transition weights for ${name} do not sum to unity: ${outMass}`
+        );
+      }
+    }
 
     const inNeighbors: Map<NodeAddressT, MarkovEdge[]> = new Map();
     for (const edge of this._edges.values()) {
