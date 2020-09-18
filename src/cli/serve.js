@@ -1,8 +1,10 @@
 // @flow
 
+import type {$Response as ExpressResponse} from "express";
+
 import type {Command} from "./command";
 import {loadInstanceConfig} from "./common";
-import type {$Response as ExpressResponse} from "express";
+import site from "./site";
 
 const fs = require("fs");
 const express = require("express");
@@ -13,6 +15,10 @@ function die(std, message) {
 }
 
 const adminCommand: Command = async (args, std) => {
+  const returnVal = await site([], std);
+  if (returnVal !== 0) {
+    return die(std, `site: SourceCred site instance failed to update`);
+  }
   const basedir = process.cwd();
   // check to ensure service is running within an instance directory
   await loadInstanceConfig(basedir);
