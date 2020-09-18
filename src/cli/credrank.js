@@ -8,8 +8,12 @@ import {credrank} from "../core/algorithm/credrank";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {MarkovProcessGraph} from "../core/markovProcessGraph";
 import type {Command} from "./command";
-import {loadInstanceConfig} from "./common";
-import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
+import {makePluginDir, loadInstanceConfig} from "./common";
+import {
+  type WeightedGraph,
+  merge,
+  fromJSON as weightedGraphFromJSON,
+} from "../core/weightedGraph";
 
 const DEFAULT_ALPHA = 0.2;
 const DEFAULT_BETA = 0.5;
@@ -34,11 +38,19 @@ const credrankCommand: Command = async (args, std) => {
   const plugins = Array.from(config.bundledPlugins.values());
   const declarations = plugins.map((x) => x.declaration());
 
-  taskReporter.start("read weighted graph");
-  const wgPath = pathJoin(baseDir, "output", "graph.json");
-  const wgJson = JSON.parse(await fs.readFile(wgPath));
-  const wg = weightedGraphFromJSON(wgJson);
-  taskReporter.finish("read weighted graph");
+  const graphOutputPrefix = ["output", "graphs"];
+  async function loadGraph(pluginName): Promise<WeightedGraph> {
+    const outputDir = makePluginDir(baseDir, graphOutputPrefix, pluginName);
+    const outputPath = pathJoin(outputDir, "graph.json");
+    const graphJSON = JSON.parse(await fs.readFile(outputPath));
+    return weightedGraphFromJSON(graphJSON);
+  }
+
+  taskReporter.start("merge graphs");
+  const pluginNames = Array.from(config.bundledPlugins.keys());
+  const graphs = await Promise.all(pluginNames.map(loadGraph));
+  const wg = merge(graphs);
+  taskReporter.finish("merge graphs");
 
   taskReporter.start("create Markov process graph");
   // TODO: Support loading transition probability params from config.
