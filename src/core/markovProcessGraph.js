@@ -8,7 +8,7 @@
  * weights are raw transition probabilities (which must sum to 1) rather
  * than unnormalized weights, and there are no dangling edges. Unlike a
  * fully general transition matrix, parallel edges are still reified,
- * not collapsed; nodes have weights, representing sources of flow, and
+ * not collapsed; nodes have weights, representing sources of flow; and
  * a few SourceCred-specific concepts are made first-class:
  * specifically, cred minting and time period fibration. The
  * "teleportation vector" from PageRank is also made explicit via the
