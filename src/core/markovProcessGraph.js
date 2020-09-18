@@ -125,10 +125,10 @@ export type OrderedSparseMarkovChain = {|
 
 const CORE_NODE_PREFIX = NodeAddress.fromParts(["sourcecred", "core"]);
 
-// Address of a seed node. All graph nodes tithe $\alpha$ to this node,
-// and this node flows out to nodes in proportion to their weight. This
-// is also a node prefix for the "seed node" type, which contains only
-// one node.
+// Address of the seed node. All graph nodes radiate $\alpha$ to this
+// node, and this node flows out to nodes in proportion to their weight
+// (mint). This is also a node prefix for the "seed node" type, which
+// contains only one node.
 const SEED_ADDRESS = NodeAddress.append(CORE_NODE_PREFIX, "SEED");
 const SEED_DESCRIPTION = "\u{1f331}"; // U+1F331 SEEDLING
 
@@ -235,7 +235,9 @@ export class MarkovProcessGraph {
     // Used for computing remainder-to-seed edges.
     const _nodeOutMasses = new Map();
 
-    const epochTransitionRemainder = (() => {
+    // Amount of mass allocated to contribution edges flowing from epoch
+    // nodes.
+    const epochTransitionRemainder: number = (() => {
       const {alpha} = seed;
       const {beta, gammaForward, gammaBackward} = fibration;
       if (beta < 0 || gammaForward < 0 || gammaBackward < 0) {
