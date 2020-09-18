@@ -2,9 +2,9 @@
 
 import {get} from "../util/null";
 import {Ledger} from "../ledger/ledger";
-import {_hackyIdentityNameReferenceDetector} from "./graph";
+import {_hackyIdentityNameReferenceDetector} from "./score";
 
-describe("cli/graph", () => {
+describe("cli/score", () => {
   describe("hacky reference detector", () => {
     it("works", () => {
       const ledger = new Ledger();

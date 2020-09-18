@@ -13,7 +13,6 @@ function mockCommand(name) {
 
 jest.mock("./help", () => mockCommand("help"));
 jest.mock("./load", () => mockCommand("load"));
-jest.mock("./graph", () => mockCommand("graph"));
 jest.mock("./score", () => mockCommand("score"));
 
 describe("cli/sourcecred", () => {

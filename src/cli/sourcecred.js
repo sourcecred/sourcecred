@@ -4,7 +4,6 @@ import type {Command} from "./command";
 import {VERSION_SHORT} from "../core/version";
 
 import load from "./load";
-import graph from "./graph";
 import score from "./score";
 import site from "./site";
 import go from "./go";
@@ -26,8 +25,6 @@ const sourcecred: Command = async (args, std) => {
       return help(args.slice(1), std);
     case "load":
       return load(args.slice(1), std);
-    case "graph":
-      return graph(args.slice(1), std);
     case "score":
       return score(args.slice(1), std);
     case "site":

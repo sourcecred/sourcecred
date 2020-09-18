@@ -3,7 +3,6 @@
 import type {Command} from "./command";
 
 import load from "./load";
-import graph from "./graph";
 import score from "./score";
 
 function die(std, message) {
@@ -17,7 +16,6 @@ const goCommand: Command = async (args, std) => {
   }
   const commandSequence = [
     {name: "load", command: load},
-    {name: "graph", command: graph},
     {name: "score", command: score},
   ];
   for (const {name, command} of commandSequence) {
