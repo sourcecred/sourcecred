@@ -180,8 +180,8 @@ const SEED_MINT = EdgeAddress.fromParts(["sourcecred", "core", "SEED_MINT"]);
 
 export type FibrationOptions = {|
   // List of node prefixes for temporal fibration. A node with address
-  // `a` will be fibrated if `NodeAddress.hasPrefix(node, prefix)` for
-  // some element `prefix` of `what`.
+  // `a` will be fibrated if `NodeAddress.hasPrefix(a, prefix)` for some
+  // element `prefix` of `what`.
   +what: $ReadOnlyArray<NodeAddressT>,
   // Transition probability for payout edges from epoch nodes to their
   // owners.
