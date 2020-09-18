@@ -296,6 +296,12 @@ export class MarkovProcessGraph {
         const name = NodeAddress.toString(node.address);
         throw new Error(`Negative node weight for ${name}: ${weight}`);
       }
+      if (NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX)) {
+        throw new Error(
+          "Unexpected core node in underlying graph: " +
+            NodeAddress.toString(node.address)
+        );
+      }
       addNode({
         address: node.address,
         description: node.description,
