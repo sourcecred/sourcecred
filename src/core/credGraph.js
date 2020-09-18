@@ -48,7 +48,7 @@ export class CredGraph {
   }
 
   _credFlow(edge: MarkovEdge): number {
-    const srcCred = this._cred(edge.src);
+    const srcCred /* heh */ = this._cred(edge.src);
     return srcCred * edge.transitionProbability;
   }
 
