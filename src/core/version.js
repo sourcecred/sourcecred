@@ -1,5 +1,5 @@
 // @flow
 
-const packageJSON = require("../../package.json");
+const packageJson = require("../../package.json");
 
-export const VERSION_SHORT: string = `v${packageJSON.version}`;
+export const VERSION_SHORT: string = `v${packageJson.version}`;
