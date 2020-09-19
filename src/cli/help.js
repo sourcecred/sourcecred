@@ -5,6 +5,7 @@ import type {Command} from "./command";
 import {goHelp} from "./go";
 import {grainHelp} from "./grain";
 import {graphHelp} from "./graph";
+import {scoreHelp} from "./score";
 import {serveHelp} from "./serve";
 import {loadHelp} from "./load";
 import dedent from "../util/dedent";
@@ -21,6 +22,7 @@ const help: Command = async (args, std) => {
     go: goHelp,
     grain: grainHelp,
     graph: graphHelp,
+    score: scoreHelp,
     serve: serveHelp,
   };
   if (subHelps[command] !== undefined) {

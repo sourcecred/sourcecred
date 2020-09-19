@@ -8,6 +8,7 @@ import deepEqual from "lodash.isequal";
 import type {Command} from "./command";
 import {makePluginDir, loadInstanceConfig} from "./common";
 import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
+import dedent from "../util/dedent";
 import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
 import {
   type WeightedGraph,
@@ -137,6 +138,19 @@ const scoreCommand: Command = async (args, std) => {
   await fs.writeFile(accountsPath, stringify(credAccounts));
 
   taskReporter.finish("score");
+  return 0;
+};
+
+export const scoreHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred score
+
+      Calculate cred scores from existing graph
+
+      'sourcecred graph' must be run prior to this command.
+      `.trimRight()
+  );
   return 0;
 };
 
