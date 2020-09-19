@@ -4,7 +4,7 @@ import type {$Response as ExpressResponse} from "express";
 
 import type {Command} from "./command";
 import {loadInstanceConfig} from "./common";
-import site from "./site";
+import siteCommand from "./site";
 
 const fs = require("fs");
 const express = require("express");
@@ -14,8 +14,8 @@ function die(std, message) {
   return 1;
 }
 
-const adminCommand: Command = async (args, std) => {
-  const returnVal = await site([], std);
+const serveCommand: Command = async (args, std) => {
+  const returnVal = await siteCommand([], std);
   if (returnVal !== 0) {
     return die(std, `site: SourceCred site instance failed to update`);
   }
@@ -59,4 +59,4 @@ const adminCommand: Command = async (args, std) => {
   return 0;
 };
 
-export default adminCommand;
+export default serveCommand;
