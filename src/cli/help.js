@@ -5,9 +5,10 @@ import type {Command} from "./command";
 import {goHelp} from "./go";
 import {grainHelp} from "./grain";
 import {graphHelp} from "./graph";
+import {loadHelp} from "./load";
 import {scoreHelp} from "./score";
 import {serveHelp} from "./serve";
-import {loadHelp} from "./load";
+import {siteHelp} from "./site";
 import dedent from "../util/dedent";
 
 const help: Command = async (args, std) => {
@@ -18,11 +19,12 @@ const help: Command = async (args, std) => {
   const command = args[0];
   const subHelps: {[string]: Command} = {
     help: metaHelp,
-    load: loadHelp,
     go: goHelp,
-    grain: grainHelp,
+    load: loadHelp,
     graph: graphHelp,
     score: scoreHelp,
+    grain: grainHelp,
+    site: siteHelp,
     serve: serveHelp,
   };
   if (subHelps[command] !== undefined) {

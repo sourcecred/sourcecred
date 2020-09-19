@@ -5,6 +5,7 @@ import fs from "fs-extra";
 import type {Command} from "./command";
 import {join} from "path";
 import {loadInstanceConfig} from "./common";
+import dedent from "../util/dedent";
 
 const SITE_TEMPLATE_DIR = "site-template";
 const SITE_OUTPUT = "site"; // under instance dir
@@ -48,5 +49,19 @@ async function lnsf(src: string, dst: string): Promise<void> {
   await fs.unlink(dst);
   await fs.symlink(src, dst);
 }
+
+export const siteHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred site
+
+      Update your instance site to the latest release.
+
+      Running 'sourcecred site' will copy the latest frontend from the sourcecred 
+      CLI into the current sourcecred instance.
+      `.trimRight()
+  );
+  return 0;
+};
 
 export default siteCommand;
