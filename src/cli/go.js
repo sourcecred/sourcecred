@@ -1,6 +1,7 @@
 // @flow
 
 import type {Command} from "./command";
+import dedent from "../util/dedent";
 
 import load from "./load";
 import graph from "./graph";
@@ -34,6 +35,22 @@ const goCommand: Command = async (args, std) => {
       return die(std, `go: failed on command ${name}`);
     }
   }
+  return 0;
+};
+
+export const goHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred go [--no-load]
+
+      Load data from plugins, build a graph and generate cred scores.
+      
+      Under the hood, this runs 'sourcecred load', 'sourcecred graph'
+      and 'sourcecred score' in sequence.
+      If any command in the sequence fails, the sequence will bail and
+      subsequent commands will not be executed.
+      `.trimRight()
+  );
   return 0;
 };
 

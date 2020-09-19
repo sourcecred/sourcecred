@@ -2,6 +2,7 @@
 // Implementation of `sourcecred help`.
 
 import type {Command} from "./command";
+import {goHelp} from "./go";
 import dedent from "../util/dedent";
 
 const help: Command = async (args, std) => {
@@ -12,6 +13,7 @@ const help: Command = async (args, std) => {
   const command = args[0];
   const subHelps: {[string]: Command} = {
     help: metaHelp,
+    go: goHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);
