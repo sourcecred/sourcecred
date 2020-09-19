@@ -11,15 +11,21 @@ function die(std, message) {
   return 1;
 }
 
+const noLoadArg = "--no-load";
+
 const goCommand: Command = async (args, std) => {
-  if (args.length !== 0) {
-    return die(std, "usage: sourcecred go");
-  }
   const commandSequence = [
     {name: "load", command: load},
     {name: "graph", command: graph},
     {name: "score", command: score},
   ];
+
+  if (args.length === 1 && args[0] === noLoadArg) {
+    commandSequence.shift();
+  } else if (args.length !== 0) {
+    return die(std, "usage: sourcecred go [--no-load]");
+  }
+
   for (const {name, command} of commandSequence) {
     const ret = await command([], std);
     if (ret !== 0) {
