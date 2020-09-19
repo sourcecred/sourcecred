@@ -10,6 +10,7 @@ import {applyDistributions} from "../ledger/applyDistributions";
 import {computeCredAccounts} from "../ledger/credAccounts";
 import stringify from "json-stable-stringify";
 import * as G from "../ledger/grain";
+import dedent from "../util/dedent";
 
 import * as GrainConfig from "../api/grainConfig";
 import type {Command} from "./command";
@@ -69,6 +70,31 @@ const grainCommand: Command = async (args, std) => {
   const accountsPath = join(baseDir, "output", "accounts.json");
   await fs.writeFile(accountsPath, stringify(credAccounts));
 
+  return 0;
+};
+
+export const grainHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred grain
+
+      Distribute Grain (or the configured name in currencyDetails.json) in 
+      accordance with the instance configuration.
+
+      Grain is distributed based on the configuration in the config/grain.json
+      file. The fields are as follows:
+
+      immediatePerWeek: The amount of grain to distribute for activity in the most
+      recent period. (value type: integer)
+
+      balancedPerWeek: The amount of grain to distribute according to all-time cred
+      scores. (value type: integer)
+
+      maxSimultaneousDistributions: The maximum number of distributions to create in
+      a single 'sourcecred grain' call if distributions have been missed. 
+      (value type: integer)
+      `.trimRight()
+  );
   return 0;
 };
 
