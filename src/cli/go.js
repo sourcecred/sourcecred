@@ -11,22 +11,24 @@ function die(std, message) {
   return 1;
 }
 
-const noLoadArg = "--no-load";
+const NO_LOAD_ARG = "--no-load";
 
 const goCommand: Command = async (args, std) => {
+  let noLoad = false;
+  if (args.length === 1 && args[0] === NO_LOAD_ARG) {
+    noLoad = true;
+  } else if (args.length !== 0) {
+    return die(std, "usage: sourcecred go [--no-load]");
+  }
+
   const commandSequence = [
     {name: "load", command: load},
     {name: "graph", command: graph},
     {name: "score", command: score},
   ];
 
-  if (args.length === 1 && args[0] === noLoadArg) {
-    commandSequence.shift();
-  } else if (args.length !== 0) {
-    return die(std, "usage: sourcecred go [--no-load]");
-  }
-
   for (const {name, command} of commandSequence) {
+    if (name === "load" && noLoad) continue;
     const ret = await command([], std);
     if (ret !== 0) {
       return die(std, `go: failed on command ${name}`);
