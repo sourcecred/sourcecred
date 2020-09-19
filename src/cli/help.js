@@ -6,6 +6,7 @@ import {goHelp} from "./go";
 import {grainHelp} from "./grain";
 import {graphHelp} from "./graph";
 import {serveHelp} from "./serve";
+import {loadHelp} from "./load";
 import dedent from "../util/dedent";
 
 const help: Command = async (args, std) => {
@@ -16,6 +17,7 @@ const help: Command = async (args, std) => {
   const command = args[0];
   const subHelps: {[string]: Command} = {
     help: metaHelp,
+    load: loadHelp,
     go: goHelp,
     grain: grainHelp,
     graph: graphHelp,

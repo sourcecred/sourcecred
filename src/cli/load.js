@@ -6,6 +6,7 @@ import {loadInstanceConfig, pluginDirectoryContext} from "./common";
 import {LoggingTaskReporter, ScopedTaskReporter} from "../util/taskReporter";
 import {type PluginId, parser as pluginIdParser} from "../api/pluginId";
 import {isDirEmpty} from "../util/disk";
+import dedent from "../util/dedent";
 import fs from "fs-extra";
 import chalk from "chalk";
 
@@ -102,6 +103,19 @@ const loadCommand: Command = async (args, std) => {
   if (failedPlugins.length) {
     return die(std, `load failed for plugins: ${failedPlugins.join(", ")}`);
   }
+  return 0;
+};
+
+export const loadHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred load
+
+      Load user activity into the cache via plugins
+
+      load pulls user data from each plugin listed in sourcecred.json
+      `.trimRight()
+  );
   return 0;
 };
 
