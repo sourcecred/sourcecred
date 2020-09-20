@@ -1,6 +1,6 @@
 // @flow
 
-import {TaskManager} from "./taskManager";
+import {TaskManager, createNode as createTaskNode} from "./taskManager";
 
 import {SilentTaskReporter} from "./taskReporter";
 
@@ -10,7 +10,7 @@ describe("util/taskManager", () => {
     reporter: SilentTaskReporter;
     constructor() {
       this.reporter = new SilentTaskReporter();
-      this.taskManager = new TaskManager(this.reporter);
+      this.taskManager = new TaskManager(createTaskNode(this.reporter));
     }
     start(task: string) {
       this.taskManager.start(task);
@@ -27,25 +27,11 @@ describe("util/taskManager", () => {
   });
   it("errors when starting a a task twice", () => {
     const fail = () => new TestCase().start("foo").start("foo");
-    expect(fail).toThrow("task foo already registered");
+    expect(fail).toThrow("Task foo already registered");
   });
   it("errors when finishing a task twice", () => {
     const fail = () => new TestCase().start("foo").finish("foo").finish("foo");
     expect(fail).toThrow("Task foo not registered");
-  });
-  it("works for a task that immediately finishes", () => {
-    const {reporter} = new TestCase().start("foo").finish("foo");
-    //expect(reporter.entries()).toEqual(["derp"]);
-    expect(reporter.entries()).toEqual([
-      {
-        "taskId": "foo",
-        "type": "START",
-      },
-      {
-        "taskId": "foo",
-        "type": "FINISH",
-      },
-    ]);
   });
   it("works when a parent task is started with a child and finishes, terminating both tasks", () => {
     const testCase = new TestCase().start("foo");
@@ -73,28 +59,27 @@ describe("util/taskManager", () => {
     ]);
   });
   describe("task creation order", () => {
-    const case0 = new TestCase().start("fo").start("foo");
-    const case1 = new TestCase().start("foo").start("fo");
-    it("creates new branches when a potential parent is added after children", () => {
-      expect(case0.taskManager._taskRoot).not.toEqual(
-        case1.taskManager._taskRoot
-      );
-    });
-    it("cannot start duplicate tasks when tree diverges", () => {
-      const fails = [() => case0.start("foo"), () => case1.start("foo")];
-      fails.forEach((fail) => {
-        expect(fail).toThrow("task foo already registered");
+    const case0 = new TestCase().start("fo").start("fo: foo");
+    const case1 = new TestCase().start("foo").start("foo: fo: f");
+    it("cannot start duplicate tasks beyond root level", () => {
+      const fails = [
+        {task: "fo: foo", err: () => case0.start("fo: foo")},
+        {task: "foo: fo", err: () => case1.start("foo: fo")},
+      ];
+      fails.forEach(({task, err}) => {
+        expect(err).toThrow(`Task ${task} already registered`);
       });
     });
-    it("can finish tasks in divergent trees", () => {
+    it("can finish tasks in below the root level", () => {
       case0.finish("fo");
-      case1.finish("fo").finish("foo");
+      case1.finish("foo: fo").finish("foo");
       expect(case0.taskManager._taskRoot.children).toEqual(new Map());
       expect(case1.taskManager._taskRoot.children).toEqual(new Map());
     });
   });
 
-  describe("ScopedTaskManager", () => {
+  describe("Scoped TaskManager", () => {
+    it("cannot create scope on nonexistent task", () => {});
     it("cannot terminate tasks outside of scope", () => {
       const testCase = new TestCase();
       testCase.start("ctx1");
