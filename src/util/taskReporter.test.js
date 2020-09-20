@@ -20,8 +20,12 @@ describe("util/taskReporter", () => {
     tc("50ms", 50);
     tc("999ms", 999);
     const secs = 1000;
-    tc("1s", 1 * secs + 400);
-    tc("2s", 1 * secs + 600);
+    tc("1000ms", 1 * secs);
+    tc("1001ms", 1 * secs + 1);
+    tc("9999ms", 9 * secs + 999);
+    tc("10s", 10 * secs);
+    tc("10s", 10 * secs + 400);
+    tc("11s", 10 * secs + 600);
     tc("59s", 59 * secs);
     const mins = secs * 60;
     tc("1m 3s", mins + 3 * secs);
