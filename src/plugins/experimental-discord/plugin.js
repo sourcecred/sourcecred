@@ -7,7 +7,7 @@ import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {parser, type DiscordConfig, type DiscordToken} from "./config";
 import {declaration} from "./declaration";
 import {join as pathJoin} from "path";
-import {type TaskReporter} from "../../util/taskReporter";
+import {TaskManager} from "../../util/taskManager";
 import {Fetcher} from "./fetcher";
 import {Mirror} from "./mirror";
 import type {ReferenceDetector} from "../../core/references";
@@ -50,16 +50,13 @@ export class DiscordPlugin implements Plugin {
     return declaration;
   }
 
-  async load(
-    ctx: PluginDirectoryContext,
-    reporter: TaskReporter
-  ): Promise<void> {
+  async load(ctx: PluginDirectoryContext, manager: TaskManager): Promise<void> {
     const {guildId} = await loadConfig(ctx);
     const token = getTokenFromEnv();
     const fetcher = new Fetcher({token});
     const repo = await repository(ctx, guildId);
     const mirror = new Mirror(repo, fetcher, guildId);
-    await mirror.update(reporter);
+    await mirror.update(manager);
   }
 
   async graph(

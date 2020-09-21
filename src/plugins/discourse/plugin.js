@@ -14,7 +14,8 @@ import {SqliteMirrorRepository} from "./mirrorRepository";
 import {Fetcher} from "./fetch";
 import {Mirror} from "./mirror";
 import {DiscourseReferenceDetector} from "./referenceDetector";
-import {type TaskReporter} from "../../util/taskReporter";
+import {TaskManager} from "../../util/taskManager";
+
 import {
   type PluginId,
   fromString as pluginIdFromString,
@@ -47,15 +48,12 @@ export class DiscoursePlugin implements Plugin {
     return declaration;
   }
 
-  async load(
-    ctx: PluginDirectoryContext,
-    reporter: TaskReporter
-  ): Promise<void> {
+  async load(ctx: PluginDirectoryContext, manager: TaskManager): Promise<void> {
     const {serverUrl, mirrorOptions} = await loadConfig(ctx);
     const repo = await repository(ctx, serverUrl);
     const fetcher = new Fetcher({serverUrl});
     const mirror = new Mirror(repo, fetcher, serverUrl, mirrorOptions);
-    await mirror.update(reporter);
+    await mirror.update(manager);
   }
 
   async graph(
