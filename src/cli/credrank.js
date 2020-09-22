@@ -81,11 +81,14 @@ const credrankCommand: Command = async (args, std) => {
   const seedOptions = {
     alpha: DEFAULT_ALPHA,
   };
-  const mpg = MarkovProcessGraph.new(
-    contractedWeightedGraph,
-    fibrationOptions,
-    seedOptions
-  );
+  const dependencyOptions = {
+    policies: [],
+  };
+  const mpg = MarkovProcessGraph.new(contractedWeightedGraph, {
+    fibration: fibrationOptions,
+    seed: seedOptions,
+    dependencies: dependencyOptions,
+  });
   taskReporter.finish("create Markov process graph");
 
   taskReporter.start("run CredRank");
