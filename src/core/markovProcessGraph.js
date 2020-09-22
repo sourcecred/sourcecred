@@ -138,13 +138,15 @@ const SEED_DESCRIPTION = "\u{1f331}"; // U+1F331 SEEDLING
 // Node address prefix for epoch nodes.
 const USER_EPOCH_PREFIX = NodeAddress.append(CORE_NODE_PREFIX, "USER_EPOCH");
 
-export type EpochNodeAddress = {|
+export type UserEpochNodeAddress = {|
   +type: "USER_EPOCH",
   +owner: NodeAddressT,
   +epochStart: TimestampMs,
 |};
 
-export function epochNodeAddressToRaw(addr: EpochNodeAddress): NodeAddressT {
+export function userEpochNodeAddressToRaw(
+  addr: UserEpochNodeAddress
+): NodeAddressT {
   return NodeAddress.append(
     USER_EPOCH_PREFIX,
     String(addr.epochStart),
@@ -152,7 +154,9 @@ export function epochNodeAddressToRaw(addr: EpochNodeAddress): NodeAddressT {
   );
 }
 
-export function epochNodeAddressFromRaw(addr: NodeAddressT): EpochNodeAddress {
+export function userEpochNodeAddressFromRaw(
+  addr: NodeAddressT
+): UserEpochNodeAddress {
   if (!NodeAddress.hasPrefix(addr, USER_EPOCH_PREFIX)) {
     throw new Error("Not an epoch node address: " + NodeAddress.toString(addr));
   }
@@ -372,7 +376,7 @@ export class MarkovProcessGraph {
         mint: 0,
       });
       for (const scoringAddress of _scoringAddresses) {
-        const thisEpoch = epochNodeAddressToRaw({
+        const thisEpoch = userEpochNodeAddressToRaw({
           type: "USER_EPOCH",
           owner: scoringAddress,
           epochStart: boundary,
@@ -394,7 +398,7 @@ export class MarkovProcessGraph {
           transitionProbability: fibration.beta,
         });
         if (lastBoundary != null) {
-          const lastEpoch = epochNodeAddressToRaw({
+          const lastEpoch = userEpochNodeAddressToRaw({
             type: "USER_EPOCH",
             owner: scoringAddress,
             epochStart: lastBoundary,
@@ -464,7 +468,7 @@ export class MarkovProcessGraph {
       const epochEndIndex = sortedIndex(timeBoundaries, edgeTimestampMs);
       const epochStartIndex = epochEndIndex - 1;
       const epochTimestampMs = timeBoundaries[epochStartIndex];
-      return epochNodeAddressToRaw({
+      return userEpochNodeAddressToRaw({
         type: "USER_EPOCH",
         owner: address,
         epochStart: epochTimestampMs,
