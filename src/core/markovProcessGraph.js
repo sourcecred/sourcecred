@@ -50,15 +50,19 @@ import {type Uuid} from "../util/uuid";
  *   - *webbing edges* between temporally adjacent user-epoch nodes; and
  *   - *payout edges* from a user-epoch node to the accumulator for its
  *     epoch.
+ *   - *dependency edges* from an epoch accumulator node to the
+ *     user-epoch nodes for the dependencies for that epoch (or the base
+ *     nodes if the dependencies are not scoring nodes).
  *
  * A Markov process graph can be converted to a pure Markov chain for
  * spectral analysis via the `toMarkovChain` method.
  */
 
-import {max, min} from "d3-array";
+import {max, min, sum} from "d3-array";
 import {weekIntervals} from "./interval";
 import sortedIndex from "lodash.sortedindex";
 import sortBy from "../util/sortBy";
+import sortedLastIndexBy from "lodash.sortedlastindexby";
 import {makeAddressModule, type AddressModule} from "./address";
 import {
   type NodeAddressT,
@@ -66,6 +70,7 @@ import {
   type EdgeAddressT,
   EdgeAddress,
 } from "./graph";
+import type {DependencyMintPolicy} from "./dependenciesMintPolicy";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
 import {
   nodeWeightEvaluator,
@@ -252,6 +257,13 @@ const EPOCH_ACCUMULATOR_RADIATION = EdgeAddress.append(
   "EPOCH_RADIATION"
 );
 
+// Prefixes for dependency edges.
+const DEPENDENCY_PAYOUT = EdgeAddress.fromParts([
+  "sourcecred",
+  "core",
+  "DEPENDENCY_PAYOUT",
+]);
+
 // Prefixes for seed edges.
 const CONTRIBUTION_RADIATION = EdgeAddress.fromParts([
   "sourcecred",
@@ -271,6 +283,16 @@ export type FibrationOptions = {|
 |};
 export type SeedOptions = {|
   +alpha: TransitionProbability,
+|};
+export type DependencyOptions = {|
+  +policies: $ReadOnlyArray<DependencyMintPolicy>,
+|};
+
+export type Options = {|
+  +fibration: FibrationOptions,
+  +seed: SeedOptions,
+  +dependencies: DependencyOptions,
+  +participants: $ReadOnlyArray<Participant>,
 |};
 
 export const COMPAT_INFO = {
@@ -314,12 +336,8 @@ export class MarkovProcessGraph {
     this._participants = deepFreeze(participants);
   }
 
-  static new(
-    wg: WeightedGraphT,
-    participants: $ReadOnlyArray<Participant>,
-    fibration: FibrationOptions,
-    seed: SeedOptions
-  ): MarkovProcessGraph {
+  static new(wg: WeightedGraphT, options: Options): MarkovProcessGraph {
+    const {fibration, seed, dependencies: deps, participants} = options;
     const _nodes = new Map();
     const _edges = new Map();
 
@@ -411,7 +429,7 @@ export class MarkovProcessGraph {
       });
     }
 
-    // Add epoch nodes, epoch accumulators, payout edges, and epoch webbing
+    // Add epoch-related contents
     let lastBoundary = null;
     for (const boundary of timeBoundaries) {
       const accumulator = epochAccumulatorAddressToRaw({
@@ -423,6 +441,8 @@ export class MarkovProcessGraph {
         description: `Epoch accumulator starting ${boundary} ms past epoch`,
         mint: 0,
       });
+
+      // User epoch nodes, payout edges, epoch webbing
       for (const scoringAddress of _scoringAddresses) {
         const thisEpochStructured = {
           type: "USER_EPOCH",
@@ -472,6 +492,66 @@ export class MarkovProcessGraph {
       }
     }
 
+    /**
+     * Find an epoch node, or just the original node if it's not a
+     * scoring address.
+     */
+    const rewriteEpochNode = (
+      address: NodeAddressT,
+      edgeTimestampMs: TimestampMs
+    ): NodeAddressT => {
+      if (!_scoringAddresses.has(address)) {
+        return address;
+      }
+      const epochEndIndex = sortedIndex(timeBoundaries, edgeTimestampMs);
+      const epochStartIndex = epochEndIndex === 0 ? 0 : epochEndIndex - 1;
+      const epochTimestampMs = timeBoundaries[epochStartIndex];
+      if (epochTimestampMs == null) {
+        throw new Error(`bad timestamp for edgeTimestamp: ${edgeTimestampMs}`);
+      }
+      return userEpochNodeAddressToRaw({
+        type: "USER_EPOCH",
+        owner: address,
+        epochStart: epochTimestampMs,
+      });
+    };
+
+    // Add dependency edges
+    for (const boundary of timeBoundaries) {
+      const accumulator = epochAccumulatorAddressToRaw({
+        type: "EPOCH_ACCUMULATOR",
+        epochStart: boundary,
+      });
+      const dependencies = deps.policies.map((policy) => {
+        const periodIdx = Math.min(
+          sortedLastIndexBy(policy.periods, boundary, (p) => p.startTimeMs),
+          policy.periods.length - 1
+        );
+        const weight = periodIdx < 0 ? 0 : policy.periods[periodIdx].weight;
+        return {dependency: policy.address, weight};
+      });
+      const totalDependencyWeight = sum(dependencies, (d) => d.weight);
+      const dependencyNormalization = 1 / (1 + totalDependencyWeight);
+      if (boundary === undefined) {
+        throw new Error(`bad boundary`);
+      }
+      for (const {dependency, weight} of dependencies) {
+        const pr = weight * dependencyNormalization;
+        const address = EdgeAddress.append(
+          DEPENDENCY_PAYOUT,
+          String(boundary),
+          ...NodeAddress.toParts(dependency)
+        );
+        addEdge({
+          address,
+          reversed: false,
+          src: accumulator,
+          dst: rewriteEpochNode(dependency, boundary),
+          transitionProbability: pr,
+        });
+      }
+    }
+
     // Add minting edges, from the seed to positive-weight graph nodes
     {
       let totalNodeWeight = 0.0;
@@ -498,27 +578,6 @@ export class MarkovProcessGraph {
         });
       }
     }
-
-    /**
-     * Find an epoch node, or just the original node if it's not a
-     * scoring address.
-     */
-    const rewriteEpochNode = (
-      address: NodeAddressT,
-      edgeTimestampMs: TimestampMs
-    ): NodeAddressT => {
-      if (!_scoringAddresses.has(address)) {
-        return address;
-      }
-      const epochEndIndex = sortedIndex(timeBoundaries, edgeTimestampMs);
-      const epochStartIndex = epochEndIndex - 1;
-      const epochTimestampMs = timeBoundaries[epochStartIndex];
-      return userEpochNodeAddressToRaw({
-        type: "USER_EPOCH",
-        owner: address,
-        epochStart: epochTimestampMs,
-      });
-    };
 
     // Add graph edges. First, split by direction.
     type _UnidirectionalGraphEdge = {|
@@ -729,8 +788,8 @@ export class MarkovProcessGraph {
     const indexedEdges = Array.from(this._edges.values()).map((e) => ({
       address: e.address,
       reversed: e.reversed,
-      src: NullUtil.get(nodeIndex.get(e.src)),
-      dst: NullUtil.get(nodeIndex.get(e.dst)),
+      src: NullUtil.get(nodeIndex.get(e.src), e.src),
+      dst: NullUtil.get(nodeIndex.get(e.dst), e.dst),
       transitionProbability: e.transitionProbability,
     }));
     return toCompat(COMPAT_INFO, {

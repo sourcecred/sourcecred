@@ -33,7 +33,7 @@ const credrankCommand: Command = async (args, std) => {
   const config = await loadInstanceConfig(baseDir);
 
   taskReporter.start("load data");
-  const {graph, ledger} = await prepareCredData(baseDir, config);
+  const {graph, ledger, dependencies} = await prepareCredData(baseDir, config);
   taskReporter.finish("load data");
 
   taskReporter.start("create Markov process graph");
@@ -51,12 +51,12 @@ const credrankCommand: Command = async (args, std) => {
     address: identity.address,
     id: identity.id,
   }));
-  const mpg = MarkovProcessGraph.new(
-    graph,
+  const mpg = MarkovProcessGraph.new(graph, {
     participants,
-    fibrationOptions,
-    seedOptions
-  );
+    fibration: fibrationOptions,
+    seed: seedOptions,
+    dependencies: {policies: dependencies},
+  });
   taskReporter.finish("create Markov process graph");
 
   taskReporter.start("run CredRank");
