@@ -61,7 +61,6 @@ import {
   NodeAddress,
   type EdgeAddressT,
   EdgeAddress,
-  type Graph,
 } from "./graph";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
 import {
@@ -229,10 +228,8 @@ const CONTRIBUTION_RADIATION = EdgeAddress.fromParts([
 const SEED_MINT = EdgeAddress.fromParts(["sourcecred", "core", "SEED_MINT"]);
 
 export type FibrationOptions = {|
-  // List of node prefixes for temporal fibration. A node with address
-  // `a` will be fibrated if `NodeAddress.hasPrefix(a, prefix)` for some
-  // element `prefix` of `what`.
-  +what: $ReadOnlyArray<NodeAddressT>,
+  // Set of node addresses for temporal fibration.
+  +scoringAddresses: Set<NodeAddressT>,
   // Transition probability for payout edges from epoch nodes to their
   // owners.
   +beta: TransitionProbability,
@@ -275,7 +272,7 @@ export class MarkovProcessGraph {
   ) {
     const _nodes = new Map();
     const _edges = new Map();
-    const _scoringAddresses = _findScoringAddresses(wg.graph, fibration.what);
+    const _scoringAddresses = new Set(fibration.scoringAddresses);
 
     // _nodeOutMasses[a] = sum(e.pr for e in edges if e.src == a)
     // Used for computing remainder-to-seed edges.
@@ -683,18 +680,4 @@ export class MarkovProcessGraph {
       new Set(data.scoringAddresses)
     );
   }
-}
-
-/** Find addresses of all nodes matching any of the scoring prefixes. */
-function _findScoringAddresses(
-  graph: Graph,
-  scoringPrefixes: $ReadOnlyArray<NodeAddressT>
-): Set<NodeAddressT> {
-  const result = new Set();
-  for (const {address} of graph.nodes()) {
-    if (scoringPrefixes.some((p) => NodeAddress.hasPrefix(address, p))) {
-      result.add(address);
-    }
-  }
-  return result;
 }

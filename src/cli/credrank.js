@@ -5,6 +5,7 @@ import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
 
 import {credrank} from "../core/algorithm/credrank";
+import {NodeAddress, type Graph, type NodeAddressT} from "../core/graph";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {MarkovProcessGraph} from "../core/markovProcessGraph";
 import type {Command} from "./command";
@@ -55,8 +56,9 @@ const credrankCommand: Command = async (args, std) => {
   taskReporter.start("create Markov process graph");
   // TODO: Support loading transition probability params from config.
   const fibrationOptions = {
-    what: [].concat(
-      ...declarations.map((d) => d.userTypes.map((t) => t.prefix))
+    scoringAddresses: findScoringAddresses(
+      wg.graph,
+      [].concat(...declarations.map((d) => d.userTypes.map((t) => t.prefix)))
     ),
     beta: DEFAULT_BETA,
     gammaForward: DEFAULT_GAMMA_FORWARD,
@@ -80,5 +82,19 @@ const credrankCommand: Command = async (args, std) => {
 
   return 0;
 };
+
+/** Find addresses of all nodes matching any of the scoring prefixes. */
+function findScoringAddresses(
+  graph: Graph,
+  scoringPrefixes: $ReadOnlyArray<NodeAddressT>
+): Set<NodeAddressT> {
+  const result = new Set();
+  for (const {address} of graph.nodes()) {
+    if (scoringPrefixes.some((p) => NodeAddress.hasPrefix(address, p))) {
+      result.add(address);
+    }
+  }
+  return result;
+}
 
 export default credrankCommand;
