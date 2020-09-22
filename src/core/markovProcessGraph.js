@@ -27,9 +27,11 @@
  * The Markov process graphs in this module have three kinds of nodes:
  *
  *   - *base nodes*, which are in 1-to-1 correspondence with the nodes
- *     in the underlying core graph (including users);
- *   - *epoch nodes*, which are created for each time period for each
- *     scoring node; and
+ *     in the underlying core graph that are not scoring nodes;
+ *   - *user-epoch nodes*, which are created for each time period for
+ *     each scoring node; and
+ *   - *epoch accumulators*, which are created once for each epoch to
+ *     aggregate over the epoch nodes,
  *   - the *seed node*, which reifies the teleportation vector and
  *     forces well-definedness and ergodicity of the Markov process (for
  *     nonzero alpha, and assuming that there is at least one edge in
@@ -38,12 +40,13 @@
  * The edges include:
  *
  *   - *base edges* due to edges in the underlying graph, whose
- *     endpoints are lifted to the corresponding base nodes or to epoch
- *     nodes for endpoints that have been fibrated;
+ *     endpoints are lifted to the corresponding base nodes or to
+ *     user-epoch nodes for endpoints that have been fibrated;
  *   - *radiation edges* edges from nodes to the seed node;
  *   - *minting edges* from the seed node to cred-minting nodes;
- *   - *webbing edges* between temporally adjacent epoch nodes; and
- *   - *payout edges* from an epoch node to its owner (a scoring node).
+ *   - *webbing edges* between temporally adjacent user-epoch nodes; and
+ *   - *payout edges* from a user-epoch node to the accumulator for its
+ *     epoch.
  *
  * A Markov process graph can be converted to a pure Markov chain for
  * spectral analysis via the `toMarkovChain` method.
@@ -133,33 +136,69 @@ const SEED_ADDRESS = NodeAddress.append(CORE_NODE_PREFIX, "SEED");
 const SEED_DESCRIPTION = "\u{1f331}"; // U+1F331 SEEDLING
 
 // Node address prefix for epoch nodes.
-const EPOCH_PREFIX = NodeAddress.append(CORE_NODE_PREFIX, "EPOCH");
+const USER_EPOCH_PREFIX = NodeAddress.append(CORE_NODE_PREFIX, "USER_EPOCH");
 
-export type EpochNodeAddress = {|
-  +type: "EPOCH_NODE",
+export type UserEpochNodeAddress = {|
+  +type: "USER_EPOCH",
   +owner: NodeAddressT,
   +epochStart: TimestampMs,
 |};
 
-export function epochNodeAddressToRaw(addr: EpochNodeAddress): NodeAddressT {
+export function userEpochNodeAddressToRaw(
+  addr: UserEpochNodeAddress
+): NodeAddressT {
   return NodeAddress.append(
-    EPOCH_PREFIX,
+    USER_EPOCH_PREFIX,
     String(addr.epochStart),
     ...NodeAddress.toParts(addr.owner)
   );
 }
 
-export function epochNodeAddressFromRaw(addr: NodeAddressT): EpochNodeAddress {
-  if (!NodeAddress.hasPrefix(addr, EPOCH_PREFIX)) {
+export function userEpochNodeAddressFromRaw(
+  addr: NodeAddressT
+): UserEpochNodeAddress {
+  if (!NodeAddress.hasPrefix(addr, USER_EPOCH_PREFIX)) {
     throw new Error("Not an epoch node address: " + NodeAddress.toString(addr));
   }
-  const epochPrefixLength = NodeAddress.toParts(EPOCH_PREFIX).length;
+  const epochPrefixLength = NodeAddress.toParts(USER_EPOCH_PREFIX).length;
   const parts = NodeAddress.toParts(addr);
   const epochStart = +parts[epochPrefixLength];
   const owner = NodeAddress.fromParts(parts.slice(epochPrefixLength + 1));
   return {
-    type: "EPOCH_NODE",
+    type: "USER_EPOCH",
     owner,
+    epochStart,
+  };
+}
+
+// TODO(@wchargin): Expose more cleanly.
+export const EPOCH_ACCUMULATOR_PREFIX = NodeAddress.append(
+  CORE_NODE_PREFIX,
+  "EPOCH"
+);
+
+export type EpochAccumulatorAddress = {|
+  +type: "EPOCH_ACCUMULATOR",
+  +epochStart: TimestampMs,
+|};
+
+export function epochAccumulatorAddressToRaw(
+  addr: EpochAccumulatorAddress
+): NodeAddressT {
+  return NodeAddress.append(EPOCH_ACCUMULATOR_PREFIX, String(addr.epochStart));
+}
+
+export function epochAccumulatorAddressFromRaw(
+  addr: NodeAddressT
+): EpochAccumulatorAddress {
+  if (!NodeAddress.hasPrefix(addr, EPOCH_ACCUMULATOR_PREFIX)) {
+    throw new Error("Not an epoch node address: " + NodeAddress.toString(addr));
+  }
+  const prefixLength = NodeAddress.toParts(EPOCH_ACCUMULATOR_PREFIX).length;
+  const parts = NodeAddress.toParts(addr);
+  const epochStart = +parts[prefixLength];
+  return {
+    type: "EPOCH_ACCUMULATOR",
     epochStart,
   };
 }
@@ -172,7 +211,14 @@ const FIBRATION_EDGE = EdgeAddress.fromParts([
 ]);
 const EPOCH_PAYOUT = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_PAYOUT");
 const EPOCH_WEBBING = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_WEBBING");
-const EPOCH_RADIATION = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_RADIATION");
+const USER_EPOCH_RADIATION = EdgeAddress.append(
+  FIBRATION_EDGE,
+  "USER_EPOCH_RADIATION"
+);
+const EPOCH_ACCUMULATOR_RADIATION = EdgeAddress.append(
+  FIBRATION_EDGE,
+  "EPOCH_RADIATION"
+);
 
 // Prefixes for seed edges.
 const CONTRIBUTION_RADIATION = EdgeAddress.fromParts([
@@ -293,6 +339,12 @@ export class MarkovProcessGraph {
     // Add graph nodes
     const nwe = nodeWeightEvaluator(wg.weights);
     for (const node of wg.graph.nodes()) {
+      if (_scoringAddresses.has(node.address)) {
+        // Scoring nodes are not included in the Markov process graph:
+        // the cred for a scoring node is given implicitly by the
+        // weight-sum of its epoch accumulation edges.
+        continue;
+      }
       const weight = nwe(node.address);
       if (weight < 0 || !Number.isFinite(weight)) {
         const name = NodeAddress.toString(node.address);
@@ -311,12 +363,21 @@ export class MarkovProcessGraph {
       });
     }
 
-    // Add epoch nodes, payout edges, and epoch webbing
-    for (const scoringAddress of _scoringAddresses) {
-      let lastBoundary = null;
-      for (const boundary of timeBoundaries) {
-        const thisEpoch = epochNodeAddressToRaw({
-          type: "EPOCH_NODE",
+    // Add epoch nodes, epoch accumulators, payout edges, and epoch webbing
+    let lastBoundary = null;
+    for (const boundary of timeBoundaries) {
+      const accumulator = epochAccumulatorAddressToRaw({
+        type: "EPOCH_ACCUMULATOR",
+        epochStart: boundary,
+      });
+      addNode({
+        address: accumulator,
+        description: `Epoch accumulator starting ${boundary} ms past epoch`,
+        mint: 0,
+      });
+      for (const scoringAddress of _scoringAddresses) {
+        const thisEpoch = userEpochNodeAddressToRaw({
+          type: "USER_EPOCH",
           owner: scoringAddress,
           epochStart: boundary,
         });
@@ -333,12 +394,12 @@ export class MarkovProcessGraph {
           ),
           reversed: false,
           src: thisEpoch,
-          dst: scoringAddress,
+          dst: accumulator,
           transitionProbability: fibration.beta,
         });
         if (lastBoundary != null) {
-          const lastEpoch = epochNodeAddressToRaw({
-            type: "EPOCH_NODE",
+          const lastEpoch = userEpochNodeAddressToRaw({
+            type: "USER_EPOCH",
             owner: scoringAddress,
             epochStart: lastBoundary,
           });
@@ -407,8 +468,8 @@ export class MarkovProcessGraph {
       const epochEndIndex = sortedIndex(timeBoundaries, edgeTimestampMs);
       const epochStartIndex = epochEndIndex - 1;
       const epochTimestampMs = timeBoundaries[epochStartIndex];
-      return epochNodeAddressToRaw({
-        type: "EPOCH_NODE",
+      return userEpochNodeAddressToRaw({
+        type: "USER_EPOCH",
         owner: address,
         epochStart: epochTimestampMs,
       });
@@ -467,7 +528,7 @@ export class MarkovProcessGraph {
       datum.outEdges.push(graphEdge);
     }
     for (const [src, {totalOutWeight, outEdges}] of srcNodes) {
-      const totalOutPr = NodeAddress.hasPrefix(src, EPOCH_PREFIX)
+      const totalOutPr = NodeAddress.hasPrefix(src, USER_EPOCH_PREFIX)
         ? epochTransitionRemainder
         : 1 - seed.alpha;
       for (const outEdge of outEdges) {
@@ -486,8 +547,12 @@ export class MarkovProcessGraph {
     for (const node of _nodes.values()) {
       if (node.address === SEED_ADDRESS) continue;
       let type;
-      if (NodeAddress.hasPrefix(node.address, EPOCH_PREFIX)) {
-        type = EPOCH_RADIATION;
+      if (NodeAddress.hasPrefix(node.address, USER_EPOCH_PREFIX)) {
+        type = USER_EPOCH_RADIATION;
+      } else if (
+        NodeAddress.hasPrefix(node.address, EPOCH_ACCUMULATOR_PREFIX)
+      ) {
+        type = EPOCH_ACCUMULATOR_RADIATION;
       } else if (NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX)) {
         throw new Error(
           "invariant violation: unknown core node: " +

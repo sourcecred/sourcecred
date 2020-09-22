@@ -12,7 +12,10 @@ import {type NodeAddressT} from "../graph";
 import {distributionToNodeDistribution} from "./graphToMarkovChain";
 
 import {uniformDistribution} from "./distribution";
-import type {MarkovProcessGraph} from "../markovProcessGraph";
+import {
+  type MarkovProcessGraph,
+  EPOCH_ACCUMULATOR_PREFIX,
+} from "../markovProcessGraph";
 import {CredGraph} from "../credGraph";
 
 export const DEFAULT_MAX_ITERATIONS = 255;
@@ -45,7 +48,9 @@ export async function credrank(
   );
 
   const matchingScore = sum(
-    Array.from(mpg.scoringAddresses()).map((a) => NullUtil.get(pi.get(a)))
+    Array.from(mpg.nodes({prefix: EPOCH_ACCUMULATOR_PREFIX})).map((n) =>
+      NullUtil.get(pi.get(n.address))
+    )
   );
   const cred: Map<NodeAddressT, number> = new Map();
   let totalNodeWeight = 0;
