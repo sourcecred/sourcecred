@@ -72,6 +72,7 @@ import * as NullUtil from "../util/null";
 import * as MapUtil from "../util/map";
 import type {TimestampMs} from "../util/timestamp";
 import {type SparseMarkovChain} from "./algorithm/markovChain";
+import {IDENTITY_PREFIX} from "../ledger/identity/identity";
 
 export type TransitionProbability = number;
 
@@ -347,7 +348,10 @@ export class MarkovProcessGraph {
         const name = NodeAddress.toString(node.address);
         throw new Error(`Bad node weight for ${name}: ${weight}`);
       }
-      if (NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX)) {
+      if (
+        NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX) &&
+        !NodeAddress.hasPrefix(node.address, IDENTITY_PREFIX)
+      ) {
         throw new Error(
           "Unexpected core node in underlying graph: " +
             NodeAddress.toString(node.address)
@@ -550,7 +554,10 @@ export class MarkovProcessGraph {
         NodeAddress.hasPrefix(node.address, EPOCH_ACCUMULATOR_PREFIX)
       ) {
         type = EPOCH_ACCUMULATOR_RADIATION;
-      } else if (NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX)) {
+      } else if (
+        NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX) &&
+        !NodeAddress.hasPrefix(node.address, IDENTITY_PREFIX)
+      ) {
         throw new Error(
           "invariant violation: unknown core node: " +
             NodeAddress.toString(node.address)

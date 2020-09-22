@@ -5,16 +5,18 @@ import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
 
 import {credrank} from "../core/algorithm/credrank";
-import {NodeAddress, type Graph, type NodeAddressT} from "../core/graph";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {MarkovProcessGraph} from "../core/markovProcessGraph";
 import type {Command} from "./command";
+import {loadFileWithDefault} from "../util/disk";
 import {makePluginDir, loadInstanceConfig} from "./common";
 import {
   type WeightedGraph,
   merge,
   fromJSON as weightedGraphFromJSON,
 } from "../core/weightedGraph";
+import {contractions as identityContractions} from "../ledger/identity";
+import {Ledger} from "../ledger/ledger";
 
 const DEFAULT_ALPHA = 0.1;
 const DEFAULT_BETA = 0.4;
@@ -36,9 +38,6 @@ const credrankCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const config = await loadInstanceConfig(baseDir);
 
-  const plugins = Array.from(config.bundledPlugins.values());
-  const declarations = plugins.map((x) => x.declaration());
-
   const graphOutputPrefix = ["output", "graphs"];
   async function loadGraph(pluginName): Promise<WeightedGraph> {
     const outputDir = makePluginDir(baseDir, graphOutputPrefix, pluginName);
@@ -47,19 +46,34 @@ const credrankCommand: Command = async (args, std) => {
     return weightedGraphFromJSON(graphJSON);
   }
 
+  taskReporter.start("load ledger");
+  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
+  const ledger = Ledger.parse(
+    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
+  );
+  taskReporter.finish("load ledger");
+
   taskReporter.start("merge graphs");
   const pluginNames = Array.from(config.bundledPlugins.keys());
   const graphs = await Promise.all(pluginNames.map(loadGraph));
-  const wg = merge(graphs);
+  const weightedGraph = merge(graphs);
   taskReporter.finish("merge graphs");
+
+  taskReporter.start("apply identities");
+  const identities = ledger.accounts().map((a) => a.identity);
+  const contractedGraph = weightedGraph.graph.contractNodes(
+    identityContractions(identities)
+  );
+  const contractedWeightedGraph = {
+    graph: contractedGraph,
+    weights: weightedGraph.weights,
+  };
+  taskReporter.finish("apply identities");
 
   taskReporter.start("create Markov process graph");
   // TODO: Support loading transition probability params from config.
   const fibrationOptions = {
-    scoringAddresses: findScoringAddresses(
-      wg.graph,
-      [].concat(...declarations.map((d) => d.userTypes.map((t) => t.prefix)))
-    ),
+    scoringAddresses: new Set(identities.map((i) => i.address)),
     beta: DEFAULT_BETA,
     gammaForward: DEFAULT_GAMMA_FORWARD,
     gammaBackward: DEFAULT_GAMMA_BACKWARD,
@@ -67,7 +81,11 @@ const credrankCommand: Command = async (args, std) => {
   const seedOptions = {
     alpha: DEFAULT_ALPHA,
   };
-  const mpg = MarkovProcessGraph.new(wg, fibrationOptions, seedOptions);
+  const mpg = MarkovProcessGraph.new(
+    contractedWeightedGraph,
+    fibrationOptions,
+    seedOptions
+  );
   taskReporter.finish("create Markov process graph");
 
   taskReporter.start("run CredRank");
@@ -82,19 +100,5 @@ const credrankCommand: Command = async (args, std) => {
 
   return 0;
 };
-
-/** Find addresses of all nodes matching any of the scoring prefixes. */
-function findScoringAddresses(
-  graph: Graph,
-  scoringPrefixes: $ReadOnlyArray<NodeAddressT>
-): Set<NodeAddressT> {
-  const result = new Set();
-  for (const {address} of graph.nodes()) {
-    if (scoringPrefixes.some((p) => NodeAddress.hasPrefix(address, p))) {
-      result.add(address);
-    }
-  }
-  return result;
-}
 
 export default credrankCommand;
