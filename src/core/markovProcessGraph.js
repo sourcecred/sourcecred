@@ -61,7 +61,6 @@ import {
   NodeAddress,
   type EdgeAddressT,
   EdgeAddress,
-  type Graph,
 } from "./graph";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
 import {
