@@ -71,6 +71,9 @@ export const serveHelp: Command = async (args, std) => {
       grain transfers between users, and update user identities. It also shows
       the dashboards available on the publicly available static site generated
       by the instance.
+
+      Running serve will automatically run site first, so that the version of the
+      site being served matches the version of SourceCred currently being used.
       `.trimRight()
   );
   return 0;
