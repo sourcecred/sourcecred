@@ -44,13 +44,13 @@ function usage(print: (string) => void): void {
            sourcecred [--version] [--help]
 
     Commands:
-      
+
       MAIN
       go            load plugin data and generate cred scores
       serve         serve admin site locally to update Ledger and Identities
       grain         calculate and record grain distribution(s) in the ledger
 
-      AUXIlIARY
+      AUXILIARY
       load          load plugin data into cache
       graph         build Cred graph from cached plugin data
       score         generate Cred Scores from from graph
