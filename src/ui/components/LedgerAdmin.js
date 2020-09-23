@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme) => {
     identityList: {
       backgroundColor: theme.palette.background.paper,
       width: "100%",
+      height: "20em",
       margin: `${marginNum}px`,
     },
     centerRow: {
