@@ -78,8 +78,14 @@ export const grainHelp: Command = async (args, std) => {
     dedent`\
       usage: sourcecred grain
 
-      Distribute Grain (or the configured name in currencyDetails.json) in 
-      accordance with the instance configuration.
+      Distribute Grain (or whatever currency this Cred instance is tracking)
+      for Cred intervals in which Grain was not already distributed.
+
+      When run, this will identify all the completed Cred intervals (currently, weeks)
+      and find the latest Cred interval for which there was no Grain distribution.
+      Then, it will distribute Grain for all of them, making a corresponding change
+      to the Ledger. This could result in zero or more distributions, depending on how
+      many recent Cred intervals had no corresponding Grain distribution.
 
       Grain is distributed based on the configuration in the config/grain.json
       file. The fields are as follows:
@@ -91,7 +97,9 @@ export const grainHelp: Command = async (args, std) => {
       scores. (value type: integer)
 
       maxSimultaneousDistributions: The maximum number of distributions to create in
-      a single 'sourcecred grain' call if distributions have been missed. 
+      a single 'sourcecred grain' call if distributions have been missed. If set to
+      1, then the command will create at most one distribution. If unset, defaults
+      to Infinity.
       (value type: integer)
       `.trimRight()
   );
