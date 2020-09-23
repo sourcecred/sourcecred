@@ -44,9 +44,11 @@ export const goHelp: Command = async (args, std) => {
       usage: sourcecred go [--no-load]
 
       Load data from plugins, build a graph and generate cred scores.
-      
-      Under the hood, this runs 'sourcecred load', 'sourcecred graph'
-      and 'sourcecred score' in sequence.
+
+      Under the hood, this runs 'sourcecred load', 'sourcecred graph' and
+      'sourcecred score' in sequence. If the '--no-load' argument is provided,
+      then the load step will be skipped, using data from cache instead.
+
       If any command in the sequence fails, the sequence will bail and
       subsequent commands will not be executed.
       `.trimRight()
