@@ -16,6 +16,7 @@ import {
   TextField,
 } from "@material-ui/core";
 import {useLedger} from "../utils/LedgerContext";
+import {useAutocomplete} from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => {
   const marginNum = 20;
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme) => {
     },
     centerRow: {
       display: "flex",
-      justifyContent: "center",
+      justifyContent: "space-around",
       alignItems: "center",
     },
     element: {flex: 1, margin: `${marginNum}px`},
@@ -47,6 +48,9 @@ const useStyles = makeStyles((theme) => {
     checkboxElement: {flexGrow: 1, flexBasis: 0, margin: `${marginNum}px`},
     promptStringHeader: {margin: `${marginNum}px`, marginBottom: 0},
     IdentitiesHeader: {margin: `${marginNum}px`},
+    input: {
+      margin: `${marginNum}px`,
+    },
   };
 });
 
@@ -58,6 +62,18 @@ export const LedgerAdmin = () => {
   const [selectedId, setSelectedId] = useState<IdentityId | null>(null);
   const [promptString, setPromptString] = useState<string>("Add Identity:");
   const [checkboxSelected, setCheckBoxSelected] = useState<boolean>(false);
+
+  const {
+    getInputProps,
+    getListboxProps,
+    getOptionProps,
+    groupedOptions,
+    inputValue,
+  } = useAutocomplete({
+    id: "autocomplete-accounts",
+    options: ledger.accounts(),
+    getOptionLabel: ({identity}) => identity.name,
+  });
 
   const changeIdentityName = (event: SyntheticInputEvent<HTMLInputElement>) =>
     setIdentityName(event.currentTarget.value);
@@ -71,7 +87,6 @@ export const LedgerAdmin = () => {
     }
     updateLedger(ledger);
   };
-
   const toggleIdentityActivation = (id: IdentityId) => {
     let nextLedger;
     if (ledger.account(id).active) {
@@ -99,35 +114,58 @@ export const LedgerAdmin = () => {
   };
 
   const renderIdentities = () => {
-    const renderIdentity = (i: Identity, notLastElement: boolean) => (
+    const renderIdentity = (
+      i: Identity,
+      index: number,
+      notLastElement: boolean
+    ) => (
       <>
-        <ListItem button onClick={() => setActiveIdentity(i)} key={i.id}>
+        <ListItem
+          {...getOptionProps({i, index})}
+          button
+          onClick={() => setActiveIdentity(i)}
+          key={i.id}
+        >
           {i.name}
         </ListItem>
         {notLastElement && <Divider />}
       </>
     );
     const numAccounts = ledger.accounts().length;
+    const accounts = inputValue ? groupedOptions : ledger.accounts();
     return (
       <>
-        {ledger
-          .accounts()
-          .map((a) => a.identity)
-          .map((identity, index) =>
-            renderIdentity(identity, index < numAccounts - 1)
-          )}
+        {accounts.length > 0 ? (
+          accounts
+            .map((a) => a.identity)
+            .sort(function (a, b) {
+              return a.name.localeCompare(b.name);
+            })
+            .map((identity, index) =>
+              renderIdentity(identity, index, index < numAccounts - 1)
+            )
+        ) : (
+          <ListItem>{"No Identities are here"}</ListItem>
+        )}
       </>
     );
   };
-
   return (
     <Container className={classes.root}>
       <span className={classes.centerRow}>
-        <h1 className={classes.IdentitiesHeader}>Identities</h1>{" "}
-        {ledger.accounts().length > 0 && <h3> (click one to update it)</h3>}
+        <h1 className={classes.IdentitiesHeader}>Identities</h1>
+        <TextField
+          className={classes.input}
+          label="Search"
+          handleHomeEndKeys
+          selectOnFocus
+          clearOnBlur
+          {...getInputProps()}
+          variant="outlined"
+        />
       </span>
       <div className={classes.centerRow}>
-        <List fullWidth className={classes.identityList}>
+        <List {...getListboxProps} fullWidth className={classes.identityList}>
           {renderIdentities()}
         </List>
       </div>
