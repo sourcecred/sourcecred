@@ -2,6 +2,13 @@
 // Implementation of `sourcecred help`.
 
 import type {Command} from "./command";
+import {goHelp} from "./go";
+import {grainHelp} from "./grain";
+import {graphHelp} from "./graph";
+import {loadHelp} from "./load";
+import {scoreHelp} from "./score";
+import {serveHelp} from "./serve";
+import {siteHelp} from "./site";
 import dedent from "../util/dedent";
 
 const help: Command = async (args, std) => {
@@ -12,6 +19,13 @@ const help: Command = async (args, std) => {
   const command = args[0];
   const subHelps: {[string]: Command} = {
     help: metaHelp,
+    go: goHelp,
+    load: loadHelp,
+    graph: graphHelp,
+    score: scoreHelp,
+    grain: grainHelp,
+    site: siteHelp,
+    serve: serveHelp,
   };
   if (subHelps[command] !== undefined) {
     return subHelps[command](args.slice(1), std);
@@ -30,6 +44,18 @@ function usage(print: (string) => void): void {
            sourcecred [--version] [--help]
 
     Commands:
+
+      MAIN
+      go            load plugin data and generate cred scores
+      serve         serve admin site locally to update Ledger and Identities
+      grain         calculate and record grain distribution(s) in the ledger
+
+      AUXILIARY
+      load          load plugin data into cache
+      graph         build Cred graph from cached plugin data
+      score         generate Cred Scores from from graph
+      site          update your cred site with the latest changes
+
       help          show this help message
 
     Use 'sourcecred help COMMAND' for help about an individual command.
