@@ -48,6 +48,7 @@ import {
   type TimestampISO,
   timestampISOParser,
   fromISO,
+  toISO,
 } from "../util/timestamp";
 import {type IdentityId, type Name, nameParser} from "../ledger/identity";
 import {parser as uuidParser} from "../util/uuid";
@@ -94,6 +95,8 @@ export type MintPeriod = {|
   +weight: number,
 |};
 
+const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
+
 export const mintPeriodParser: C.Parser<MintPeriod> = C.object({
   startTime: timestampISOParser,
   weight: C.number,
@@ -132,6 +135,16 @@ export function ensureIdentityExists(
       const id = ledger.createIdentity("PROJECT", dep.name);
       if (dep.autoActivateOnIdentityCreation) {
         ledger.activate(id);
+      }
+      if (!dep.periods.length) {
+        // Set default start period to one week from adding the dependency
+        return {
+          ...dep,
+          id,
+          periods: [
+            {"startTime": toISO(Date.now() + ONE_WEEK_IN_MS), "weight": 0.05},
+          ],
+        };
       }
       return {...dep, id};
     }
