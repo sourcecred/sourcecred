@@ -7,6 +7,7 @@ import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
 import fakeDataProvider from "ra-data-fakerest";
 import {Explorer} from "./Explorer/Explorer";
+import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
 import {LedgerAdmin} from "./LedgerAdmin";
 import {CredView} from "../../analysis/credView";
 import {AccountOverview} from "./AccountOverview";
@@ -58,6 +59,9 @@ const customRoutes = (
   const backendRoutes = [
     <Route key="admin" exact path="/admin">
       <LedgerAdmin credView={credView} />
+    </Route>,
+    <Route key="explorer-home" exact path="/explorer-home">
+      <ExplorerHome initialView={credView} />
     </Route>,
     <Route key="transfer" exact path="/transfer">
       <Transfer currency={currency} />

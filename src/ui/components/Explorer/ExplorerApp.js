@@ -1,6 +1,6 @@
 // @flow
 import React, {useState, useEffect} from "react";
-import {Explorer} from "./Explorer";
+import {Explorer} from "./Explorer.js";
 import {load, type LoadResult} from "../../load";
 
 const App = () => {

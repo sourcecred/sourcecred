@@ -38,7 +38,6 @@ const FlowRow = (view: CredView, f: Flow, total: number, depth: number) => {
         throw new Error((f.type: empty));
     }
   })();
-
   const children = [];
   if (f.type === "EDGE") {
     const nodeRow = (
@@ -53,7 +52,6 @@ const FlowRow = (view: CredView, f: Flow, total: number, depth: number) => {
     );
     children.push(nodeRow);
   }
-
   return (
     <CredRow
       key={key(f)}

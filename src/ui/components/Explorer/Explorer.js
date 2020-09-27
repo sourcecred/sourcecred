@@ -1,8 +1,7 @@
 // @flow
-import React, {Component} from "react";
+import React from "react";
 import {
   Button,
-  CircularProgress,
   Grid,
   Table,
   TableBody,
@@ -17,9 +16,9 @@ import {
   Divider,
   Slider,
 } from "@material-ui/core";
-import {css, StyleSheet} from "aphrodite/no-important";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
+import {StyleSheet, css} from "aphrodite/no-important";
 import deepEqual from "lodash.isequal";
 import {format} from "d3-format";
 import {sum} from "d3-array";
@@ -31,9 +30,9 @@ import {type Weights, copy as weightsCopy} from "../../../core/weights";
 import {WeightConfig} from "../../weights/WeightConfig";
 import {WeightsFileManager} from "../../weights/WeightsFileManager";
 import {type TimelineCredParameters} from "../../../analysis/timeline/params";
+
 import NodeRow from "./NodeRow";
 
-// cannot use material-ui stylesheets inside of class components
 const styles = StyleSheet.create({
   combobox: {margin: "0px 32px 16px"},
   menuHeader: {fontWeight: "bold"},
@@ -76,7 +75,7 @@ export type ExplorerState = {|
   name: string | null,
 |};
 
-export class Explorer extends Component<ExplorerProps, ExplorerState> {
+export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
   constructor(props: ExplorerProps) {
     super(props);
     const view = props.initialView;
@@ -92,46 +91,49 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
     };
   }
 
-  handleMenuClose = () => this.setState({anchorEl: null});
-
-  optionGroup = (declaration: PluginDeclaration) => {
-    const header = (
-      <MenuItem
-        key={declaration.nodePrefix}
-        value={declaration.nodePrefix}
-        className={css(styles.menuHeader)}
-        onClick={() =>
-          this.setState({
-            anchorEl: null,
-            filter: declaration.nodePrefix,
-            name: declaration.name,
-          })
-        }
-      >
-        {declaration.name}
-      </MenuItem>
-    );
-    const entries = declaration.nodeTypes.map((type, index) => (
-      <MenuItem
-        key={index}
-        value={type.prefix}
-        onClick={() =>
-          this.setState({
-            anchorEl: null,
-            filter: type.prefix,
-            name: type.name,
-          })
-        }
-      >
-        {"\u2003" + type.name}
-      </MenuItem>
-    ));
-    return [header, ...entries];
+  handleMenuClose = () => {
+    this.setState({
+      anchorEl: null,
+    });
   };
 
   // Renders the dropdown that lets the user select a type
   renderFilterSelect() {
     const plugins = this.state.view.plugins();
+    const optionGroup = (declaration: PluginDeclaration) => {
+      const header = (
+        <MenuItem
+          key={declaration.nodePrefix}
+          value={declaration.nodePrefix}
+          className={css(styles.menuHeader)}
+          onClick={() =>
+            this.setState({
+              anchorEl: null,
+              filter: declaration.nodePrefix,
+              name: declaration.name,
+            })
+          }
+        >
+          {declaration.name}
+        </MenuItem>
+      );
+      const entries = declaration.nodeTypes.map((type, index) => (
+        <MenuItem
+          key={index}
+          value={type.prefix}
+          onClick={() =>
+            this.setState({
+              anchorEl: null,
+              filter: type.prefix,
+              name: type.name,
+            })
+          }
+        >
+          {"\u2003" + type.name}
+        </MenuItem>
+      ));
+      return [header, ...entries];
+    };
     return (
       <>
         <List component="div" aria-label="Device settings">
@@ -184,15 +186,14 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
           >
             All users
           </MenuItem>
-          {plugins.map(this.optionGroup)}
+          {plugins.map(optionGroup)}
         </Menu>
       </>
     );
   }
 
   renderConfigurationRow() {
-    const {showWeightConfig, view, params, recalculating, weights} = this.state;
-
+    const {showWeightConfig, view, params, weights} = this.state;
     const weightFileManager = (
       <WeightsFileManager
         weights={weights}
@@ -201,7 +202,6 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
         }}
       />
     );
-
     const weightConfig = (
       <WeightConfig
         declarations={view.plugins()}
@@ -224,26 +224,18 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
 
     const paramsUpToDate =
       deepEqual(params, view.params()) && deepEqual(weights, view.weights());
-
     const analyzeButton = (
       <Grid container item xs>
         <Button
           variant="contained"
           color="primary"
-          disabled={recalculating || paramsUpToDate}
+          disabled={this.state.recalculating || paramsUpToDate}
           onClick={() => this.analyzeCred()}
         >
-          {!recalculating ? (
-            "re-compute cred"
-          ) : (
-            <span>
-              <CircularProgress size={20} /> Recalculating...
-            </span>
-          )}
+          re-compute cred
         </Button>
       </Grid>
     );
-
     return (
       <Grid container>
         <Grid
@@ -322,7 +314,7 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
   }
 
   render() {
-    const {filter, view, name, recalculating} = this.state;
+    const {filter, view, recalculating, name} = this.state;
     const nodes =
       filter == null ? view.userNodes() : view.nodes({prefix: filter});
     // TODO: Allow sorting/displaying only recent cred...
