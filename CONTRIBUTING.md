@@ -71,6 +71,7 @@ number of commits only entails 3 additional steps of bisection, which is
 not a big deal. On the other hand, once the offending commit is
 identified, the cause is more apparent if the commit is tiny than if it
 is large.
+
 </details>
 
 ### Checks
@@ -78,44 +79,44 @@ is large.
 Each commit will need to pass all tests. Run `yarn test` or `npm test`
 to run them all. This will run:
 
-  - **Flow** (`yarn flow`). Your code must type-check with no errors or
-    warnings. Using `any`-casts is permitted, but should be truly a last
-    resort. You should put significant effort into avoiding every
-    `any`-cast.
+- **Flow** (`yarn flow`). Your code must type-check with no errors or
+  warnings. Using `any`-casts is permitted, but should be truly a last
+  resort. You should put significant effort into avoiding every
+  `any`-cast.
 
-  - **Unit tests** (`yarn unit`). You can also run `yarn unit --watch`
-    to automatically re-run tests when you change a relevant file.
+- **Unit tests** (`yarn unit`). You can also run `yarn unit --watch`
+  to automatically re-run tests when you change a relevant file.
 
-  - **Sharness** (`yarn sharness`). This runs shell-based tests, located
-    in the `sharness/` directory.
+- **Sharness** (`yarn sharness`). This runs shell-based tests, located
+  in the `sharness/` directory.
 
-  - **Prettier** (`check-pretty`). You can simply run `yarn prettify` to
-    reformat all files. It can be convenient to set up your editor to
-    run `yarn prettier --write CURRENT_FILENAME` whenever you save a
-    file.
+- **Prettier** (`check-pretty`). You can simply run `yarn prettify` to
+  reformat all files. It can be convenient to set up your editor to
+  run `yarn prettier --write CURRENT_FILENAME` whenever you save a
+  file.
 
-  - **Lint** (`yarn lint`). You’ll have to fix lint errors manually.
-    These are almost always unused imports or unused variables, and
-    sometimes catch logic errors before unit tests do. Feel free to
-    disable spurious lint errors on a per-line basis by inserting a
-    preceding line with `// eslint-disable-next-line LINT_RULE_NAME`.
+- **Lint** (`yarn lint`). You’ll have to fix lint errors manually.
+  These are almost always unused imports or unused variables, and
+  sometimes catch logic errors before unit tests do. Feel free to
+  disable spurious lint errors on a per-line basis by inserting a
+  preceding line with `// eslint-disable-next-line LINT_RULE_NAME`.
 
-  - **Backend applications build** (`yarn build:backend`). This makes
-    sure that the CLI still builds.
+- **Backend applications build** (`yarn build:backend`). This makes
+  sure that the CLI still builds.
 
-  - **Check for `@flow` pragmas** (`./scripts/ensure-flow.sh`). This
-    makes sure that every file includes a `// @flow` directive or an
-    explicit `// @no-flow` directive. The former is required for Flow to
-    consider a file. The latter has no effect, but we assert its
-    existence to make sure that we don’t simply forget to mark a file
-    for Flow. If this is failing, you probably added a new file and just
-    need to add `// @flow` to the top. Exceptional circumstances
-    excepted, all new files should have `// @flow`.
+- **Check for `@flow` pragmas** (`./scripts/ensure-flow.sh`). This
+  makes sure that every file includes a `// @flow` directive or an
+  explicit `// @no-flow` directive. The former is required for Flow to
+  consider a file. The latter has no effect, but we assert its
+  existence to make sure that we don’t simply forget to mark a file
+  for Flow. If this is failing, you probably added a new file and just
+  need to add `// @flow` to the top. Exceptional circumstances
+  excepted, all new files should have `// @flow`.
 
-  - **Check for stopships.** The sequence `STOPSHIP` (in any case) is
-    not allowed to appear in the codebase, except in Markdown files. You
-    can take advantage of this to insert a quick hack and make sure that
-    you remember to remove it later.
+- **Check for stopships.** The sequence `STOPSHIP` (in any case) is
+  not allowed to appear in the codebase, except in Markdown files. You
+  can take advantage of this to insert a quick hack and make sure that
+  you remember to remove it later.
 
 This is the same set of tests that is run on our CI system, CircleCI.
 
@@ -125,7 +126,7 @@ If your patch makes a change that would be visible or interesting to a
 user of SourceCred—for example, fixing a bug—please add a description of
 the change under the `[Unreleased]` heading of `CHANGELOG.md`. Your new
 change should be the first entry in the section. The format of your
-entry should be: ```<description of change> (#<PR number>)```.
+entry should be: `<description of change> (#<PR number>)`.
 
 ## When writing commit messages
 
@@ -138,11 +139,11 @@ summary should either be in sentence case (i.e., the first letter of the
 first word capitalized), or of the form “area: change description”. For
 instance, all of the following are examples of good summaries:
 
-  - Improve error messages when GitHub query fails
-  - Make deploy script wait for valid response
-  - Upgrade Flow to v0.76.0
-  - new-webpack: replace old scripts in `package.json`
-  - fetchGithubRepo: remove vestigial data field
+- Improve error messages when GitHub query fails
+- Make deploy script wait for valid response
+- Upgrade Flow to v0.76.0
+- new-webpack: replace old scripts in `package.json`
+- fetchGithubRepo: remove vestigial data field
 
 If you find that you can’t concisely explain your change in 50
 characters, move non-essential information into the body of the commit
@@ -159,6 +160,7 @@ this information. The particular style of the summary is chosen to be
 consistent with those commits emitted by Git itself: commands like
 `git-revert` and `git-merge` are of this form, so it’s a good standard
 to pick.
+
 </details>
 
 ### Description
@@ -180,6 +182,7 @@ the change was necessary. Documenting the motivation, alternate
 formulations, etc. is helpful both in the present (for reviewers) and in
 the future (for people using `git-blame` to try to understand how a
 piece of code came to be).
+
 </details>
 
 ### Test plan
@@ -206,6 +209,7 @@ plan is as simple as “standard unit tests suffice”, this indicates to
 observers that no additional testing is required. The test plan is
 useful for reviewers, and for anyone bisecting through the history or
 trying to learn more about the development or intention of a commit.
+
 </details>
 
 ### Wrapping
@@ -222,6 +226,7 @@ this amount of padding exists.
 
 (Yes, people really still use 80-character terminals. When each of your
 terminals has bounded width, you can display more of them on a screen!)
+
 </details>
 
 ### Example

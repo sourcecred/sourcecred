@@ -1,37 +1,36 @@
 // @flow
-import React from "react";
+import React, {useState, useEffect} from "react";
 import {Explorer} from "./Explorer";
 import {load, type LoadResult} from "../../load";
 
-export type Props = {||};
-export type State = {|
-  loadResult: LoadResult | null,
-|};
+const App = () => {
+  const [loadResult: LoadResult | null, setLoadResult] = useState(null);
 
-export default class App extends React.Component<Props, State> {
-  state = {loadResult: null};
+  useEffect(() => {
+    const fetchData = async () => {
+      const loadResult = await load();
+      setLoadResult(loadResult);
+    };
 
-  async componentDidMount() {
-    this.setState({loadResult: await load()});
+    fetchData();
+  }, []);
+
+  if (loadResult == null) {
+    return <h1>Loading...</h1>;
   }
-
-  render() {
-    const {loadResult} = this.state;
-    if (loadResult == null) {
-      return <h1>Loading...</h1>;
-    }
-    switch (loadResult.type) {
-      case "FAILURE":
-        return (
-          <div>
-            <h1>Load Failure</h1>
-            <p>Check console for details.</p>
-          </div>
-        );
-      case "SUCCESS":
-        return <Explorer initialView={loadResult.credView} />;
-      default:
-        throw new Error((loadResult.type: empty));
-    }
+  switch (loadResult.type) {
+    case "FAILURE":
+      return (
+        <div>
+          <h1>Load Failure</h1>
+          <p>Check console for details.</p>
+        </div>
+      );
+    case "SUCCESS":
+      return <Explorer initialView={loadResult.credView} />;
+    default:
+      throw new Error((loadResult.type: empty));
   }
-}
+};
+
+export default App;

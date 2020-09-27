@@ -32,6 +32,7 @@ export function textBlocks(string: string): string[] {
   const walker = ast.walker();
   const results = [];
   for (let step; (step = walker.next()); ) {
+    // $FlowIgnore[value-as-type]
     const node: Node = step.node;
     const type: NodeType = node.type;
     if (type === "text") {
@@ -65,6 +66,7 @@ type NodeType =
   | "custom_inline"
   | "custom_block";
 
+// $FlowIgnore[value-as-type]
 export function deformat(ast: Node): void {
   const walker = ast.walker();
   // We ignore the contents of HTML "code" elements and their subtrees.
@@ -77,6 +79,7 @@ export function deformat(ast: Node): void {
   const reCloseTag = new RegExp(`^(?:${CLOSETAG})`);
 
   for (let step; (step = walker.next()); ) {
+    // $FlowIgnore[value-as-type]
     const node: Node = step.node;
     const type: NodeType = node.type;
     if (htmlDepth > 0) {
@@ -145,11 +148,13 @@ export function deformat(ast: Node): void {
   }
 }
 
+// $FlowIgnore[value-as-type]
 export function coalesceText(ast: Node): void {
   const walker = ast.walker();
   let acc = [];
   let firstTextNode = null;
   for (let step; (step = walker.next()); ) {
+    // $FlowIgnore[value-as-type]
     const node: Node = step.node;
     const type: NodeType = node.type;
     if (type === "text") {

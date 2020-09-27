@@ -1,7 +1,7 @@
 // @flow
 import React, {type Node as ReactNode, useState} from "react";
 import Markdown from "react-markdown";
-import {IconButton, TableCell, TableRow} from "@material-ui/core";
+import {IconButton, Link, TableCell, TableRow} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -33,22 +33,36 @@ const useStyles = makeStyles({
       backgroundSize: "100% 100%, 100% 100%",
     },
   },
+  customLink: {
+    ":visited": {color: "DeepPink"},
+  },
   credCell: {textAlign: "right"},
 });
 
-const CredRow = (props: CredRowProps) => {
-  const {children, total, cred, data, description, depth, indent} = props;
+const CredRow = ({
+  children,
+  total,
+  cred,
+  data,
+  description,
+  depth,
+  indent,
+}: CredRowProps) => {
   const classes = useStyles();
   const [expanded, setExpanded] = useState(false);
   const backgroundColor = `hsla(150,100%,28%,${1 - 0.9 ** depth})`;
   const makeGradient = (color) => `linear-gradient(to top, ${color}, ${color})`;
   const normalBackground = makeGradient(backgroundColor);
-  const highlightBackground = makeGradient("#D8E1E8");
+  const highlightBackground = makeGradient("#494949");
   const backgroundImage = `${normalBackground}, ${highlightBackground}`;
+  const linkOverride = (props) => (
+    <Link {...props} className={classes.customLink} />
+  );
+
   return (
     <>
       <TableRow
-        style={{backgroundImage, marginLeft: depth * indent + 5}}
+        style={{backgroundImage, marginLeft: depth * indent}}
         className={classes.hoverHighlight}
         onClick={() => setExpanded(!expanded)}
       >
@@ -57,18 +71,18 @@ const CredRow = (props: CredRowProps) => {
             aria-label="expand"
             color="primary"
             size="medium"
-            style={{
-              marginRight: 5,
-              marginLeft: 15 * indent + 5,
-            }}
+            style={{marginLeft: 15 * indent}}
             onClick={(e) => {
               e.stopPropagation();
               setExpanded(!expanded);
             }}
           >
             {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-          <Markdown renderers={{paragraph: "span"}} source={description} />{" "}
+          </IconButton>{" "}
+          <Markdown
+            renderers={{paragraph: "span", link: linkOverride}}
+            source={description}
+          />
         </TableCell>
         <TableCell className={classes.credCell}>
           {format(".1d")(cred)}

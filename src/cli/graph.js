@@ -12,6 +12,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import {type ReferenceDetector} from "../core/references/referenceDetector";
 import {CascadingReferenceDetector} from "../core/references/cascadingReferenceDetector";
 import type {Command} from "./command";
+import dedent from "../util/dedent";
 import {type InstanceConfig} from "../api/instanceConfig";
 import {
   makePluginDir,
@@ -123,5 +124,19 @@ export function _hackyIdentityNameReferenceDetector(
   }
   return {addressFromUrl};
 }
+
+export const graphHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred graph
+
+      Generate a graph from cached plugin data
+
+      Either 'sourcecred load' must immediately precede this command or
+      a cache directory must exist for all plugins specified in sourcecred.json
+      `.trimRight()
+  );
+  return 0;
+};
 
 export default graphCommand;

@@ -7,6 +7,7 @@ import {type TimelineCredParameters} from "./timeline/params";
 import {type PluginDeclarations} from "./pluginDeclaration";
 import {type NodeType, type EdgeType} from "./types";
 import {IDENTITY_PREFIX} from "../ledger/identity";
+import {type Interval} from "../core/interval";
 
 import {get as nullGet} from "../util/null";
 import type {TimestampMs} from "../util/timestamp";
@@ -160,8 +161,8 @@ export class CredView {
     return this._credResult.plugins;
   }
 
-  intervalEnds(): $ReadOnlyArray<TimestampMs> {
-    return this._credResult.credData.intervalEnds;
+  intervals(): $ReadOnlyArray<Interval> {
+    return this._credResult.credData.intervals;
   }
 
   credResult(): CredResult {
@@ -176,9 +177,7 @@ export class CredView {
     const minted = this._nodeEvaluator(n.address);
     const type = this._nodeTypeTrie.getLast(n.address);
     const intervalIndex =
-      timestamp == null
-        ? null
-        : _getIntervalIndex(this.intervalEnds(), timestamp);
+      timestamp == null ? null : _getIntervalIndex(this.intervals(), timestamp);
     return {
       timestamp: n.timestampMs,
       description: n.description,
@@ -222,7 +221,7 @@ export class CredView {
       credOverTime,
       rawWeight,
       type: type ? type : null,
-      intervalIndex: _getIntervalIndex(this.intervalEnds(), e.timestampMs),
+      intervalIndex: _getIntervalIndex(this.intervals(), e.timestampMs),
     };
   }
   edge(a: EdgeAddressT): ?CredEdge {
@@ -319,11 +318,12 @@ function xor(a: boolean, b: boolean): boolean {
 
 // Exported separately for testing purposes.
 export function _getIntervalIndex(
-  intervals: $ReadOnlyArray<TimestampMs>,
+  intervals: $ReadOnlyArray<Interval>,
   ts: TimestampMs
 ): number {
-  if (ts > intervals[intervals.length - 1]) {
+  const ends = intervals.map((x) => x.endTimeMs);
+  if (ts > ends[ends.length - 1]) {
     throw new Error(`timestamp out of interval range`);
   }
-  return sortedIndex(intervals, ts);
+  return sortedIndex(ends, ts);
 }

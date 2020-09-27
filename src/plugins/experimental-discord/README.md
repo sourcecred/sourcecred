@@ -20,7 +20,6 @@ Discord app
 You can create both on the developer portal here:
 https://discordapp.com/developers/applications
 
-
 Permissions this bot will need:
 
 - `View Channels`
@@ -57,7 +56,6 @@ You can find some of those out by using the browser version of Discord and inspe
 
 Otherwise you can also use the API and query for it yourself with tools like Postman or CURL.
 
-
 With the bot invited and auth set up. Find out the Guild ID using:
 
 `GET https://discordapp.com/api/users/@me/guilds`
@@ -65,4 +63,3 @@ With the bot invited and auth set up. Find out the Guild ID using:
 Find your custom emoji using:
 
 `GET https://discordapp.com/api/guilds/{{discordGuildId}}/emojis`
-

@@ -1,7 +1,7 @@
 // @flow
 
 import React from "react";
-import {shallow} from "enzyme";
+import {mount} from "enzyme";
 
 import {
   WeightSlider,
@@ -19,7 +19,7 @@ describe("ui/weights/WeightSlider", () => {
   describe("WeightSlider", () => {
     function example(weight: Weight) {
       const onChange = jest.fn();
-      const element = shallow(
+      const element = mount(
         <WeightSlider
           weight={weight}
           name="foo"
@@ -27,7 +27,7 @@ describe("ui/weights/WeightSlider", () => {
           description="A test description"
         />
       );
-      return {element, onChange};
+      return {element};
     }
     // These are all valid weights, but not all of them correspond to a valid
     // slider position.
@@ -36,45 +36,25 @@ describe("ui/weights/WeightSlider", () => {
       for (const w of exampleWeights) {
         const expectedSlider = weightToSlider(w);
         const {element} = example(w);
-        expect(element.find("input").props().value).toBe(expectedSlider);
+        const inputVal = element.find("input").props().value;
+        expect(parseInt(inputVal, 10)).toBe(expectedSlider);
       }
     });
     it("prints the provided weight", () => {
       for (const w of exampleWeights) {
         const {element} = example(w);
-        expect(element.find("span").at(1).text()).toBe(formatWeight(w));
+        expect(element.find("div").at(3).text()).toBe(formatWeight(w));
       }
     });
     it("displays the provided name", () => {
       const {element} = example(0);
-      expect(element.find("span").at(0).text()).toBe("foo");
-    });
-    it("changes to the slider trigger the onChange with the corresponding weight", () => {
-      const sliderVals = [MIN_SLIDER, 0, MAX_SLIDER];
-      for (const sliderVal of sliderVals) {
-        const {element, onChange} = example(0);
-        const input = element.find("input");
-        input.simulate("change", {target: {valueAsNumber: sliderVal}});
-        expect(onChange).toHaveBeenCalledTimes(1);
-        expect(onChange).toHaveBeenCalledWith(sliderToWeight(sliderVal));
-      }
+      expect(element.find("div").at(1).text()).toBe("foo");
     });
     it("has a description tooltip", () => {
       const {element} = example(0);
-      expect(element.find("label").at(0).prop("title")).toBe(
+      expect(element.find("div").at(0).prop("title")).toBe(
         "A test description"
       );
-    });
-    it("the weight and slider position may be inconsistent", () => {
-      // If the weight does not correspond to an integer slider value, then
-      // changing the slider to its current position can change the weight.
-      // See the docstring on `weightToSlider` for justification.
-      const imperfectWeight = 1 / 3;
-      const {element, onChange} = example(imperfectWeight);
-      const input = element.find("input");
-      const elementSliderValue = input.props().value;
-      input.simulate("change", {target: {valueAsNumber: elementSliderValue}});
-      expect(onChange).not.toHaveBeenCalledWith(imperfectWeight);
     });
   });
 

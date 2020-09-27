@@ -8,6 +8,7 @@ import deepEqual from "lodash.isequal";
 import type {Command} from "./command";
 import {makePluginDir, loadInstanceConfig} from "./common";
 import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
+import dedent from "../util/dedent";
 import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
 import {
   type WeightedGraph,
@@ -23,10 +24,7 @@ import {
 } from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import * as Params from "../analysis/timeline/params";
-import {
-  contractions as identityContractions,
-  declaration as identityDeclaration,
-} from "../ledger/identity";
+import {contractions as identityContractions} from "../ledger/identity";
 import {Ledger} from "../ledger/ledger";
 import {computeCredAccounts} from "../ledger/credAccounts";
 import {
@@ -109,9 +107,6 @@ const scoreCommand: Command = async (args, std) => {
 
   const plugins = Array.from(config.bundledPlugins.values());
   const declarations = plugins.map((x) => x.declaration());
-  if (identities.length) {
-    declarations.push(identityDeclaration);
-  }
 
   // TODO(@decentralion): This is snapshot tested, add unit tests?
   const paramsPath = pathJoin(baseDir, "config", "params.json");
@@ -143,6 +138,19 @@ const scoreCommand: Command = async (args, std) => {
   await fs.writeFile(accountsPath, stringify(credAccounts));
 
   taskReporter.finish("score");
+  return 0;
+};
+
+export const scoreHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred score
+
+      Calculate cred scores from existing graph
+
+      'sourcecred graph' must be run prior to this command.
+      `.trimRight()
+  );
   return 0;
 };
 

@@ -6,6 +6,7 @@ import {loadInstanceConfig, pluginDirectoryContext} from "./common";
 import {LoggingTaskReporter, ScopedTaskReporter} from "../util/taskReporter";
 import {type PluginId, parser as pluginIdParser} from "../api/pluginId";
 import {isDirEmpty} from "../util/disk";
+import dedent from "../util/dedent";
 import fs from "fs-extra";
 import chalk from "chalk";
 
@@ -61,20 +62,24 @@ const loadCommand: Command = async (args, std) => {
         .then(() => taskReporter.finish(task));
 
     const endChildRunners = () => {
-      const prefixRegex = new RegExp("^" + name);
       // create static array of taskIds from activeTasks map
       Array.from(taskReporter.activeTasks.keys())
-        .filter((taskId) => prefixRegex.test(taskId))
+        .filter((taskId) => taskId.startsWith(name))
         .forEach((taskId: string) => {
-          console.log("[debug] killing: ", taskId);
           taskReporter.finish(taskId);
-          warn(std, taskId, "Retrying");
+          warn(std, taskId, "Parent task restarting. Retrying");
         });
     };
 
     const restartParentRunner = (error: string) => {
       taskReporter.finish(task);
-      warn(std, task, `${error}; clearing cache`);
+      warn(
+        std,
+        task,
+        `Error updating cache. clearing cache and restarting.
+        This is the error from the plugin:\n
+        ${error}`
+      );
       taskReporter.start(task);
     };
 
@@ -102,6 +107,19 @@ const loadCommand: Command = async (args, std) => {
   if (failedPlugins.length) {
     return die(std, `load failed for plugins: ${failedPlugins.join(", ")}`);
   }
+  return 0;
+};
+
+export const loadHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred load
+
+      Load user activity into the cache via plugins
+
+      load pulls user data from each plugin listed in sourcecred.json
+      `.trimRight()
+  );
   return 0;
 };
 

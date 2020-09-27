@@ -10,8 +10,7 @@ import {
   type EdgeFlow,
 } from "../../../analysis/credView";
 
-const edgeDescription = (f: EdgeFlow) => {
-  const {neighbor, edge} = f;
+const edgeDescription = ({neighbor, edge}: EdgeFlow) => {
   const type = edge.type;
   const forwards = neighbor.address === edge.dst.address;
   let name = "Unknown edge to";
@@ -70,12 +69,15 @@ const FlowRow = (view: CredView, f: Flow, total: number, depth: number) => {
   );
 };
 
-const FlowsRow = (props: {|
+const FlowsRow = ({
+  view,
+  node,
+  depth,
+}: {|
   +view: CredView,
   +node: CredNode,
   +depth: number,
 |}) => {
-  const {view, node, depth} = props;
   const inflows = view.inflows(node.address);
   if (inflows == null) {
     throw new Error("no flows");

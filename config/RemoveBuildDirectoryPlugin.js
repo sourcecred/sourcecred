@@ -8,6 +8,7 @@ const path = require("path");
 
 const pluginName = "RemoveBuildDirectoryPlugin";
 class RemoveBuildDirectoryPlugin {
+  // $FlowIgnore[value-as-type]
   apply(compiler /*: Compiler */) {
     compiler.hooks.run.tap(pluginName, () => {
       const outputPath = compiler.options.output.path;

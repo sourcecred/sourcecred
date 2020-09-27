@@ -28,8 +28,13 @@ describe("ledger/computeDistribution", () => {
           totalCred: 15,
         },
       ];
+      const intervals = [
+        {startTimeMs: 121, endTimeMs: 123},
+        {startTimeMs: 123, endTimeMs: 125},
+        {startTimeMs: 125, endTimeMs: 127},
+      ];
       const accountsData = {
-        intervalEndpoints: [123, 125, 127],
+        intervals,
         accounts,
         unclaimedAliases,
       };
@@ -51,12 +56,18 @@ describe("ledger/computeDistribution", () => {
         cred: [1, 2, 3],
         totalCred: 6,
       }));
+      const intervals = [
+        {startTimeMs: 121, endTimeMs: 123},
+        {startTimeMs: 123, endTimeMs: 125},
+        {startTimeMs: 125, endTimeMs: 127},
+      ];
       const accountsData = {
-        intervalEndpoints: [123, 125, 127],
+        intervals,
         accounts,
         unclaimedAliases: [],
       };
       const expectedAllocationIdentites = [{id: active, cred: [1], paid: "1"}];
+      // Only includes the first time slice, b.c. it's the only one that is completed
       expect(_allocationIdentities(accountsData, 123)).toEqual(
         expectedAllocationIdentites
       );

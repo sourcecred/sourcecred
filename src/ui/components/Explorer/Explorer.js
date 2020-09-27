@@ -15,6 +15,7 @@ import {
   ListItemText,
   List,
   Divider,
+  Slider,
 } from "@material-ui/core";
 import {css, StyleSheet} from "aphrodite/no-important";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
@@ -131,7 +132,6 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
   // Renders the dropdown that lets the user select a type
   renderFilterSelect() {
     const plugins = this.state.view.plugins();
-
     return (
       <>
         <List component="div" aria-label="Device settings">
@@ -222,23 +222,6 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
       />
     );
 
-    const alphaSlider = (
-      <input
-        type="range"
-        min={0.05}
-        max={0.95}
-        step={0.05}
-        value={params.alpha}
-        onChange={(e) => {
-          const newParams = {
-            ...params,
-            alpha: e.target.valueAsNumber,
-          };
-          this.setState({params: newParams});
-        }}
-      />
-    );
-
     const paramsUpToDate =
       deepEqual(params, view.params()) && deepEqual(weights, view.weights());
 
@@ -265,6 +248,8 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
       <Grid container>
         <Grid
           container
+          item
+          xs={12}
           direction="row"
           justify="space-between"
           alignItems="center"
@@ -291,14 +276,37 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
           {analyzeButton}
         </Grid>
         {showWeightConfig && (
-          <div className={css(styles.weightConfig)}>
-            <span>Upload/Download weights:</span>
-            {weightFileManager}
-            <span>α</span>
-            {alphaSlider}
-            <span>{format(".2f")(this.state.params.alpha)}</span>
-            {weightConfig}
-          </div>
+          <Grid container className={css(styles.weightConfig)} spacing={2}>
+            <Grid container item xs={12} direction="column">
+              <Grid>
+                <Grid>Upload/Download weights:</Grid>
+                <Grid>{weightFileManager}</Grid>
+              </Grid>
+              <Grid container item spacing={2} alignItems="center">
+                <Grid>α</Grid>
+                <Grid item xs={2}>
+                  <Slider
+                    value={params.alpha}
+                    min={0.05}
+                    max={0.95}
+                    step={0.05}
+                    valueLabelDisplay="auto"
+                    onChange={(_, val) => {
+                      const newParams = {
+                        ...params,
+                        alpha: val,
+                      };
+                      this.setState({params: newParams});
+                    }}
+                  />
+                </Grid>
+                <Grid>{format(".2f")(this.state.params.alpha)}</Grid>
+              </Grid>
+            </Grid>
+            <Grid spacing={2} container item xs={12} style={{display: "flex"}}>
+              {weightConfig}
+            </Grid>
+          </Grid>
         )}
       </Grid>
     );
@@ -314,7 +322,7 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
   }
 
   render() {
-    const {filter, view, name} = this.state;
+    const {filter, view, name, recalculating} = this.state;
     const nodes =
       filter == null ? view.userNodes() : view.nodes({prefix: filter});
     // TODO: Allow sorting/displaying only recent cred...
@@ -323,22 +331,14 @@ export class Explorer extends Component<ExplorerProps, ExplorerState> {
     return (
       <div className={css(styles.root)}>
         {this.renderConfigurationRow()}
+        {recalculating ? <h1>Recalculating...</h1> : ""}
         <Table className={css(styles.table)}>
           <TableHead>
             <TableRow>
-              <TableCell align="left" className={css(styles.user)}>
-                {name ? name : "All users"}
-              </TableCell>
-              <TableCell align="right" className={css(styles.credCell)}>
-                Cred
-              </TableCell>
-              <TableCell align="right" className={css(styles.credCell)}>
-                % Total
-              </TableCell>
-              <TableCell
-                align="right"
-                className={css(styles.endCell)}
-              ></TableCell>
+              <TableCell>{name ? name : "All users"}</TableCell>
+              <TableCell className={css(styles.credCell)}>Cred</TableCell>
+              <TableCell className={css(styles.credCell)}>% Total</TableCell>
+              <TableCell className={css(styles.endCell)} />
             </TableRow>
           </TableHead>
           <TableBody>

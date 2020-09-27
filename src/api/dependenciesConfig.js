@@ -44,6 +44,11 @@
  */
 import * as C from "../util/combo";
 import {Ledger} from "../ledger/ledger";
+import {
+  type TimestampISO,
+  timestampISOParser,
+  fromISO,
+} from "../util/timestamp";
 import {type IdentityId, type Name, nameParser} from "../ledger/identity";
 import {parser as uuidParser} from "../util/uuid";
 import {type DependencyMintPolicy} from "../core/dependenciesMintPolicy";
@@ -72,13 +77,9 @@ export type DependencyConfig = {|
   // Thus, if the dependency identity is re-named in the ledger, this file will
   // also need to be edited to reflect the new name.
   +name: Name,
-  // The starting weight for the dependency, i.e. the weight that will apply
-  // from the start of the project up until the first specified weightPeriod.
-  // If this is set and there are no explicit weightPeriods, this weight will
-  // prevail for the whole timeline of the project.
-  // Currently, weight periods aren't yet implemented, so whatever startWeight is
-  // set will apply across all time.
-  +startWeight: number,
+  // The time periods for which we're minting Cred. Each period has a start time and a
+  // mint weight; it is assumed to end as soon as the next period begins.
+  +periods: $ReadOnlyArray<MintPeriod>,
   // Whether the dependency should be "active" for Grain collection by default.
   // If this is true, then when the corresponding account is auto-created in the
   // ledger, it will also be automatically activated.
@@ -88,10 +89,20 @@ export type DependencyConfig = {|
   +autoActivateOnIdentityCreation?: boolean,
 |};
 
+export type MintPeriod = {|
+  +startTime: TimestampISO,
+  +weight: number,
+|};
+
+export const mintPeriodParser: C.Parser<MintPeriod> = C.object({
+  startTime: timestampISOParser,
+  weight: C.number,
+});
+
 export const dependencyConfigParser: C.Parser<DependencyConfig> = C.object(
   {
     name: nameParser,
-    startWeight: C.number,
+    periods: C.array(mintPeriodParser),
   },
   {
     id: uuidParser,
@@ -149,7 +160,9 @@ export function toDependencyPolicy(
     );
   }
   const address = ledger.account(id).identity.address;
-  const period = {weight: config.startWeight, startTimeMs: -Infinity};
-  const policy = {address, periods: [period]};
-  return policy;
+  const periods = config.periods.map(({startTime, weight}) => ({
+    weight,
+    startTimeMs: fromISO(startTime),
+  }));
+  return {address, periods};
 }

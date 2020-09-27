@@ -54,8 +54,8 @@ export function _allocationIdentities(
     paid: x.account.paid,
     cred: x.cred,
   }));
-  const numIntervals = accountsData.intervalEndpoints.filter(
-    (x) => x <= effectiveTimestamp
+  const numIntervals = accountsData.intervals.filter(
+    (x) => x.endTimeMs <= effectiveTimestamp
   ).length;
   const timeSlicedAllocationIdentities = allocationIdentities.map((x) => ({
     id: x.id,

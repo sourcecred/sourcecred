@@ -221,7 +221,7 @@ describe("plugins/github/relationalView", () => {
       ).not.toEqual(expect.anything());
     });
     it("errors for bad address type", () => {
-      // $FlowExpectedError
+      // $FlowExpectedError[incompatible-call]
       expect(() => view.entity({type: "BAD"})).toThrow("address type");
     });
   });

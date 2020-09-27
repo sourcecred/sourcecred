@@ -1,6 +1,5 @@
 // @flow
 
-import type {TimestampMs} from "../util/timestamp";
 import type {TimelineCredScores} from "../core/algorithm/distributionToCred";
 import {
   type DependencyMintPolicy,
@@ -8,6 +7,7 @@ import {
 } from "../core/dependenciesMintPolicy";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {IDENTITY_PREFIX} from "../ledger/identity";
+import type {Interval} from "../core/interval";
 
 /**
  * Comprehensive data on a cred distribution.
@@ -18,7 +18,7 @@ export type CredData = {|
   +nodeOverTime: $ReadOnlyArray<NodeCredOverTime | null>,
   +edgeSummaries: $ReadOnlyArray<EdgeCredSummary>,
   +edgeOverTime: $ReadOnlyArray<EdgeCredOverTime | null>,
-  +intervalEnds: $ReadOnlyArray<TimestampMs>,
+  +intervals: $ReadOnlyArray<Interval>,
 |};
 
 /** Summary of a node's cred across all time.
@@ -83,14 +83,13 @@ export function computeCredData(
       nodeOverTime: [],
       edgeSummaries: [],
       edgeOverTime: [],
-      intervalEnds: [],
+      intervals: [],
     };
   }
   const intervals = scores.map((d) => d.interval);
   const processedDependencyPolicies = dependencyPolicies.map((p) =>
     processMintPolicy(p, nodeOrder, intervals)
   );
-  const intervalEnds = intervals.map((i) => i.endTimeMs);
   const numNodes = scores[0].cred.length;
   const numEdges = scores[0].forwardFlow.length;
   const nodeSummaries: $ReadOnlyArray<{|
@@ -169,7 +168,7 @@ export function computeCredData(
     nodeOverTime,
     edgeSummaries,
     edgeOverTime,
-    intervalEnds,
+    intervals,
   };
 }
 
@@ -193,7 +192,7 @@ export function compressByThreshold(x: CredData, threshold: number): CredData {
     nodeOverTime,
     edgeSummaries,
     edgeOverTime,
-    intervalEnds,
+    intervals,
   } = x;
 
   const newNodeOverTime = nodeOverTime.map((d, i) => {
@@ -252,7 +251,7 @@ export function compressByThreshold(x: CredData, threshold: number): CredData {
     edgeOverTime: newEdgeOverTime,
     nodeSummaries,
     edgeSummaries,
-    intervalEnds,
+    intervals,
   };
 }
 
@@ -272,7 +271,7 @@ export function compressDownToMatchingIndices(
     nodeOverTime,
     edgeSummaries,
     edgeOverTime,
-    intervalEnds,
+    intervals,
   } = x;
 
   const newNodeOverTime = nodeOverTime.map((d, i) => {
@@ -299,6 +298,6 @@ export function compressDownToMatchingIndices(
     edgeOverTime: newEdgeOverTime,
     nodeSummaries,
     edgeSummaries,
-    intervalEnds,
+    intervals,
   };
 }
