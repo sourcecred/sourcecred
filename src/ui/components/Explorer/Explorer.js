@@ -181,6 +181,7 @@ const FilterSelect = ({
 };
 
 type WeightConfigSectionProps = {|
+  show: boolean,
   credView: CredView,
   weights: Weights,
   setWeightsState: ({weights: Weights}) => void,
@@ -189,12 +190,14 @@ type WeightConfigSectionProps = {|
 |};
 
 const WeightsConfigSection = ({
+  show,
   credView,
   weights,
   setWeightsState,
   params,
   setParams,
 }: WeightConfigSectionProps) => {
+  if (!show) return [];
   return (
     <Grid container>
       <Grid container className={css(styles.weightConfig)} spacing={2}>
@@ -351,6 +354,7 @@ export const Explorer = ({initialView}: {initialView: CredView}) => {
         </Grid>
       </Grid>
       <WeightsConfigSection
+        show={showWeightConfig}
         credView={credView}
         weights={weights}
         setWeightsState={setWeightsState}
