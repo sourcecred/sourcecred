@@ -19,7 +19,7 @@ type OverviewProps = {|+currency: CurrencyDetails|};
 const useStyles = makeStyles(() => {
   return {
     container: {
-      maxHeight: "40em",
+      maxHeight: "80vh",
     },
   };
 });
