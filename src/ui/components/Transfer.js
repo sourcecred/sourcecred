@@ -1,5 +1,6 @@
 // @flow
-import type {Node} from "React";import React, {useState} from "react";
+import type {Node} from "React";
+import React, {useState} from "react";
 import {Button, Container, TextField} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {div, format, gt, lt, fromFloatString} from "../../ledger/grain";

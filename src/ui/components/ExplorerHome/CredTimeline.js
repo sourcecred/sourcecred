@@ -1,5 +1,6 @@
 // @flow
-import type {Element} from "React";import React from "react";
+import type {Element} from "React";
+import React from "react";
 import {extent} from "d3-array";
 import {scaleLinear} from "d3-scale";
 import {line} from "d3-shape";

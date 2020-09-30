@@ -1,6 +1,7 @@
 // @flow
 
-import type {Node, Element} from "React";import React from "react";
+import type {Node, Element} from "React";
+import React from "react";
 import {WeightSlider, type Props as WeightSliderProps} from "./WeightSlider";
 
 import type {EdgeType} from "../../analysis/types";

@@ -1,5 +1,6 @@
 // @flow
-import type {Node as $IMPORTED_TYPE$_Node} from "React";import React, {type Node as ReactNode, useState} from "react";
+import type {Node as $IMPORTED_TYPE$_Node} from "React";
+import React, {type Node as ReactNode, useState} from "react";
 import Markdown from "react-markdown";
 import {IconButton, Link, TableCell, TableRow} from "@material-ui/core";
 import {StyleSheet, css} from "aphrodite/no-important";

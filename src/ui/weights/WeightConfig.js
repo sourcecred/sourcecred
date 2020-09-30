@@ -1,6 +1,7 @@
 // @flow
 
-import type {Node} from "React";import React from "react";
+import type {Node} from "React";
+import React from "react";
 import * as NullUtil from "../../util/null";
 import {Grid} from "@material-ui/core";
 import {type NodeAddressT, type EdgeAddressT} from "../../core/graph";

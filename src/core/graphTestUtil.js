@@ -1,7 +1,8 @@
 // @flow
 
 import type {NodeAddressT, EdgeAddressT} from "./graph.js";
-import type {TimestampMs} from "../util/timestamp.js";import deepFreeze from "deep-freeze";
+import type {TimestampMs} from "../util/timestamp.js";
+import deepFreeze from "deep-freeze";
 import {EdgeAddress, Graph, NodeAddress, type Node, type Edge} from "./graph";
 
 /**

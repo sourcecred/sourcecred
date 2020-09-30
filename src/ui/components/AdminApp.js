@@ -1,6 +1,7 @@
 // @flow
 
-import type {Node, Element} from "React";import React, {useEffect, useState} from "react";
+import type {Node, Element} from "React";
+import React, {useEffect, useState} from "react";
 import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";

@@ -1,6 +1,7 @@
 // @flow
 
-import type {NodeAddressT} from "../../core/graph.js";import deepFreeze from "deep-freeze";
+import type {NodeAddressT} from "../../core/graph.js";
+import deepFreeze from "deep-freeze";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import * as N from "./nodes";
 import * as E from "./edges";

@@ -11,7 +11,8 @@ import type {
   ChildAddress as $IMPORTED_TYPE$_ChildAddress,
   AuthorableAddress as $IMPORTED_TYPE$_AuthorableAddress,
 } from "./nodes.js";
-import type {CommitAddress as $IMPORTED_TYPE$_CommitAddress_1} from "../git/nodes.js";import deepFreeze from "deep-freeze";
+import type {CommitAddress as $IMPORTED_TYPE$_CommitAddress_1} from "../git/nodes.js";
+import deepFreeze from "deep-freeze";
 import {
   type Edge,
   type EdgeAddressT,

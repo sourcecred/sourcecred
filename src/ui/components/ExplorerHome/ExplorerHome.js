@@ -1,5 +1,6 @@
 // @flow
-import type {Node} from "React";import React, {useState} from "react";
+import type {Node} from "React";
+import React, {useState} from "react";
 import {
   Checkbox,
   Container,

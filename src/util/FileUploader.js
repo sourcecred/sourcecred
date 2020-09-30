@@ -1,6 +1,7 @@
 // @flow
 
-import type {Element} from "React";import React, {type Node} from "react";
+import type {Element} from "React";
+import React, {type Node} from "react";
 
 export type Props = {|
   +onUpload: (any) => void,

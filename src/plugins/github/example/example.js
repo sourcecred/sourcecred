@@ -1,6 +1,15 @@
 // @flow
 
-import type {Userlike, Review, Repo, Pull, Issue, Commit, Comment} from "/home/wchargin/tmp/flowcodemod/relationalView.js";import {RelationalView} from "../relationalView";
+import type {
+  Userlike,
+  Review,
+  Repo,
+  Pull,
+  Issue,
+  Commit,
+  Comment,
+} from "/home/wchargin/tmp/flowcodemod/relationalView.js";
+import {RelationalView} from "../relationalView";
 import type {Repository} from "../graphqlTypes";
 import {type WeightedGraph} from "../../../core/weightedGraph";
 import cloneDeep from "lodash.clonedeep";

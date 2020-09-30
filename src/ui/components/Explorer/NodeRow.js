@@ -1,5 +1,6 @@
 // @flow
-import type {Node} from "React";import React from "react";
+import type {Node} from "React";
+import React from "react";
 import CredRow from "./CredRow";
 import FlowsRow from "./FlowsRow";
 import {CredView, type CredNode} from "../../../analysis/credView";

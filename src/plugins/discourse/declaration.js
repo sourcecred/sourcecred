@@ -1,12 +1,19 @@
 // @flow
 
-import type {NodeAddressT, EdgeAddressT} from "../../core/graph.js";import deepFreeze from "deep-freeze";
+import type {NodeAddressT, EdgeAddressT} from "../../core/graph.js";
+import deepFreeze from "deep-freeze";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {NodeType, EdgeType} from "../../analysis/types";
 import {NodeAddress, EdgeAddress} from "../../core/graph";
 
-export const nodePrefix: NodeAddressT = NodeAddress.fromParts(["sourcecred", "discourse"]);
-export const edgePrefix: EdgeAddressT = EdgeAddress.fromParts(["sourcecred", "discourse"]);
+export const nodePrefix: NodeAddressT = NodeAddress.fromParts([
+  "sourcecred",
+  "discourse",
+]);
+export const edgePrefix: EdgeAddressT = EdgeAddress.fromParts([
+  "sourcecred",
+  "discourse",
+]);
 
 export const topicNodeType: NodeType = deepFreeze({
   name: "Topic",

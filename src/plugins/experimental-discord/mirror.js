@@ -5,7 +5,8 @@ import type {
   Message as $IMPORTED_TYPE$_Message,
   GuildMember,
   Channel,
-} from "./models.js";import {TaskReporter} from "../../util/taskReporter";
+} from "./models.js";
+import {TaskReporter} from "../../util/taskReporter";
 import {type DiscordApi} from "./fetcher";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import * as Model from "./models";
@@ -45,9 +46,11 @@ export class Mirror {
     reporter.finish(`discord/${guild.name}`);
   }
 
-  async validateGuildId(): Promise<
-  {|+id: $IMPORTED_TYPE$_Snowflake, +name: string, +permissions: number|},
-> {
+  async validateGuildId(): Promise<{|
+    +id: $IMPORTED_TYPE$_Snowflake,
+    +name: string,
+    +permissions: number,
+  |}> {
     const guilds = await this._api.guilds();
     const guild = guilds.find((g) => g.id === this.guild);
     if (!guild) {
@@ -76,7 +79,10 @@ export class Mirror {
     return this._repo.channels();
   }
 
-  async addMessages(channel: Model.Snowflake, messageLimit?: number): Promise<$ReadOnlyArray<$IMPORTED_TYPE$_Message>> {
+  async addMessages(
+    channel: Model.Snowflake,
+    messageLimit?: number
+  ): Promise<$ReadOnlyArray<$IMPORTED_TYPE$_Message>> {
     const loadStart = this._repo.nthMessageFromTail(channel, RELOAD_DEPTH);
     // console.log(channel, (loadStart || {}).id);
 

@@ -1,6 +1,7 @@
 // @flow
 
-import type {Node} from "React";import React from "react";
+import type {Node} from "React";
+import React from "react";
 import {type IdentityId} from "../../ledger/identity";
 import Markdown from "react-markdown";
 

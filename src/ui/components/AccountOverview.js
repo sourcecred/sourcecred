@@ -1,6 +1,7 @@
 // @flow
 
-import type {Node} from "React";import React from "react";
+import type {Node} from "React";
+import React from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";

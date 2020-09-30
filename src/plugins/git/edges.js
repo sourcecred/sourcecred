@@ -1,6 +1,7 @@
 // @flow
 
-import type {CommitAddress as $IMPORTED_TYPE$_CommitAddress} from "./nodes.js";import deepFreeze from "deep-freeze";
+import type {CommitAddress as $IMPORTED_TYPE$_CommitAddress} from "./nodes.js";
+import deepFreeze from "deep-freeze";
 import {
   type Edge,
   type EdgeAddressT,
@@ -23,10 +24,12 @@ function gitEdgeAddress(...parts: string[]): RawAddress {
   return EdgeAddress.append(GIT_PREFIX, ...parts);
 }
 
-export const Prefix: {|base: EdgeAddressT, hasParent: RawAddress|} = deepFreeze({
-  base: GIT_PREFIX,
-  hasParent: gitEdgeAddress(HAS_PARENT_TYPE),
-});
+export const Prefix: {|base: EdgeAddressT, hasParent: RawAddress|} = deepFreeze(
+  {
+    base: GIT_PREFIX,
+    hasParent: gitEdgeAddress(HAS_PARENT_TYPE),
+  }
+);
 
 export type HasParentAddress = {|
   type: typeof HAS_PARENT_TYPE,

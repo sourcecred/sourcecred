@@ -1,5 +1,6 @@
 // @flow
-import type {Node, Element} from "React";import React from "react";
+import type {Node, Element} from "React";
+import React from "react";
 import {
   Button,
   Grid,
@@ -91,7 +92,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     };
   }
 
-  handleMenuClose: (() => void) = () => {
+  handleMenuClose: () => void = () => {
     this.setState({
       anchorEl: null,
     });

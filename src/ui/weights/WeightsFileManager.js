@@ -1,6 +1,7 @@
 // @flow
 
-import type {Element} from "React";import stringify from "json-stable-stringify";
+import type {Element} from "React";
+import stringify from "json-stable-stringify";
 import React from "react";
 import {FileUploader} from "../../util/FileUploader";
 import Link from "../../webutil/Link";

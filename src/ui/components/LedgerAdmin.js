@@ -1,6 +1,7 @@
 // @flow
 
-import type {Node} from "React";import React, {useState} from "react";
+import type {Node} from "React";
+import React, {useState} from "react";
 import {type Identity, type IdentityId} from "../../ledger/identity";
 import {AliasView} from "./AliasView";
 import {IdentityMerger} from "./IdentityMerger";

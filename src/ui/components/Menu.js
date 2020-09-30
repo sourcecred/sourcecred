@@ -1,5 +1,6 @@
 // @flow
-import type {Node} from "React";import React from "react";
+import type {Node} from "React";
+import React from "react";
 import {useSelector} from "react-redux";
 import {MenuItemLink} from "react-admin";
 import TrendingUpIcon from "@material-ui/icons/TrendingUp";

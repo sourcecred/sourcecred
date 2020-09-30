@@ -1,5 +1,6 @@
 // @flow
-import type {Node, Element} from "React";import React, {useState, useEffect} from "react";
+import type {Node, Element} from "React";
+import React, {useState, useEffect} from "react";
 import {Explorer} from "./Explorer.js";
 import {load, type LoadResult} from "../../load";
 

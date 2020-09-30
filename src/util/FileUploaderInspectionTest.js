@@ -1,6 +1,7 @@
 // @flow
 
-import type {Element} from "React";import React from "react";
+import type {Element} from "React";
+import React from "react";
 import Markdown from "react-markdown";
 import {MdFileUpload} from "react-icons/md";
 
