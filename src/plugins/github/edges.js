@@ -1,17 +1,5 @@
 // @flow
 
-import type {
-  UserlikeAddress as $IMPORTED_TYPE$_UserlikeAddress,
-  TextContentAddress as $IMPORTED_TYPE$_TextContentAddress,
-  ReferentAddress as $IMPORTED_TYPE$_ReferentAddress,
-  ReactableAddress as $IMPORTED_TYPE$_ReactableAddress,
-  PullAddress as $IMPORTED_TYPE$_PullAddress,
-  ParentAddress as $IMPORTED_TYPE$_ParentAddress,
-  CommitAddress as $IMPORTED_TYPE$_CommitAddress,
-  ChildAddress as $IMPORTED_TYPE$_ChildAddress,
-  AuthorableAddress as $IMPORTED_TYPE$_AuthorableAddress,
-} from "./nodes.js";
-import type {CommitAddress as $IMPORTED_TYPE$_CommitAddress_1} from "../git/nodes.js";
 import deepFreeze from "deep-freeze";
 import {
   type Edge,
@@ -110,34 +98,34 @@ export type StructuredAddress =
 
 export const createEdge: {|
   authors: (
-    author: $IMPORTED_TYPE$_UserlikeAddress,
-    content: $IMPORTED_TYPE$_AuthorableAddress,
+    author: GithubNode.UserlikeAddress,
+    content: GithubNode.AuthorableAddress,
     timestampMs: TimestampMs
   ) => Edge,
   correspondsToCommit: (
-    githubCommit: $IMPORTED_TYPE$_CommitAddress,
-    gitCommit: $IMPORTED_TYPE$_CommitAddress_1,
+    githubCommit: GithubNode.CommitAddress,
+    gitCommit: GitNode.CommitAddress,
     timestampMs: TimestampMs
   ) => Edge,
   hasParent: (
-    child: $IMPORTED_TYPE$_ChildAddress,
-    parent: $IMPORTED_TYPE$_ParentAddress,
+    child: GithubNode.ChildAddress,
+    parent: GithubNode.ParentAddress,
     timestampMs: TimestampMs
   ) => Edge,
   mergedAs: (
-    pull: $IMPORTED_TYPE$_PullAddress,
-    commit: $IMPORTED_TYPE$_CommitAddress,
+    pull: GithubNode.PullAddress,
+    commit: GithubNode.CommitAddress,
     timestampMs: TimestampMs
   ) => Edge,
   reacts: (
     reactionType: ReactionContent,
-    user: $IMPORTED_TYPE$_UserlikeAddress,
-    reactable: $IMPORTED_TYPE$_ReactableAddress,
+    user: GithubNode.UserlikeAddress,
+    reactable: GithubNode.ReactableAddress,
     timestampMs: TimestampMs
   ) => Edge,
   references: (
-    referrer: $IMPORTED_TYPE$_TextContentAddress,
-    referent: $IMPORTED_TYPE$_ReferentAddress,
+    referrer: GithubNode.TextContentAddress,
+    referent: GithubNode.ReferentAddress,
     timestampMs: TimestampMs
   ) => Edge,
 |} = deepFreeze({

@@ -1,6 +1,5 @@
 // @flow
 
-import type {CommitAddress as $IMPORTED_TYPE$_CommitAddress} from "./nodes.js";
 import deepFreeze from "deep-freeze";
 import {
   type Edge,
@@ -41,8 +40,8 @@ export type StructuredAddress = HasParentAddress;
 
 export const createEdge: {|
   hasParent: (
-    child: $IMPORTED_TYPE$_CommitAddress,
-    parent: $IMPORTED_TYPE$_CommitAddress,
+    child: GitNode.CommitAddress,
+    parent: GitNode.CommitAddress,
     timestampMs: TimestampMs
   ) => Edge,
 |} = deepFreeze({

@@ -1,11 +1,6 @@
 // @flow
 
-import type {
-  Snowflake as $IMPORTED_TYPE$_Snowflake,
-  Message as $IMPORTED_TYPE$_Message,
-  GuildMember,
-  Channel,
-} from "./models.js";
+import type {GuildMember, Channel} from "./models.js";
 import {TaskReporter} from "../../util/taskReporter";
 import {type DiscordApi} from "./fetcher";
 import {SqliteMirrorRepository} from "./mirrorRepository";
@@ -47,7 +42,7 @@ export class Mirror {
   }
 
   async validateGuildId(): Promise<{|
-    +id: $IMPORTED_TYPE$_Snowflake,
+    +id: Model.Snowflake,
     +name: string,
     +permissions: number,
   |}> {
@@ -82,7 +77,7 @@ export class Mirror {
   async addMessages(
     channel: Model.Snowflake,
     messageLimit?: number
-  ): Promise<$ReadOnlyArray<$IMPORTED_TYPE$_Message>> {
+  ): Promise<$ReadOnlyArray<Model.Message>> {
     const loadStart = this._repo.nthMessageFromTail(channel, RELOAD_DEPTH);
     // console.log(channel, (loadStart || {}).id);
 
