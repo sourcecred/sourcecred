@@ -1,8 +1,9 @@
 name: Publish Release
 on:
   # Publish when a new release is created on GitHub
-  release:
-    types: [published]
+  # disable for now in favor of authenticated CLI workflow
+  # release:
+  #   types: [published]
 
 jobs:
   publish:
