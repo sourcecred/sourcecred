@@ -25,7 +25,7 @@ import * as ledger from "../ledger/ledger";
 import * as grain from "../ledger/grain";
 import * as identity from "../ledger/identity";
 
-export default deepFreeze({
+const api = {
   core: {
     address,
     algorithm: {
@@ -63,4 +63,6 @@ export default deepFreeze({
       declaration: initiativesDeclaration,
     },
   },
-});
+};
+
+export default (deepFreeze(api): typeof api);
