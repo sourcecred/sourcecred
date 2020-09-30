@@ -57,9 +57,29 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
   .map((folder) => path.resolve(appDirectory, folder))
   .join(path.delimiter);
 
+/*::
+type Env = {|
+  // Environment like `process.env`: e.g., `raw["NODE_ENV"] === "development"`.
+  +raw: {|+[string]: string|},
+  // Environment whose values are stringified for transclusion into JS
+  // source code: e.g.,
+  //
+  //     stringified["process.env"]["NODE_ENV"] === '"development"'
+  //
+  // (note extra quotes).
+  +stringified: {|+"process.env": {|+[string]: string|}|},
+  // Like `stringified`, but the keys are `process.env.*` expressions:
+  //
+  //     individuallyStringified["process.env.NODE_ENV"] === '"development"'
+  +individuallyStringified: {|+[string]: string|},
+|};
+ */
+
 // TODO: When we have switched fully to the instance system, we can remove
 // the projectIds argument.
-function getClientEnvironment(projectIds /*: $ReadOnlyArray<string> | null*/) {
+function getClientEnvironment(
+  projectIds /*: $ReadOnlyArray<string> | null */
+) /*: Env */ {
   const raw = {};
   // Useful for determining whether we’re running in production mode.
   // Most importantly, it switches React into the correct mode.

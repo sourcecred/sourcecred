@@ -12,7 +12,7 @@ const getClientEnvironment = require("./env");
 
 const env = getClientEnvironment(null);
 
-module.exports = {
+module.exports = ({
   // Don't attempt to continue if there are any errors.
   bail: true,
   node: {
@@ -72,4 +72,4 @@ module.exports = {
     new webpack.DefinePlugin(env.individuallyStringified),
   ],
   mode: process.env.NODE_ENV,
-};
+} /*: any */);
