@@ -10,6 +10,7 @@ import {applyDistributions} from "../ledger/applyDistributions";
 import {computeCredAccounts} from "../ledger/credAccounts";
 import stringify from "json-stable-stringify";
 import * as G from "../ledger/grain";
+import dedent from "../util/dedent";
 
 import * as GrainConfig from "../api/grainConfig";
 import type {Command} from "./command";
@@ -69,6 +70,39 @@ const grainCommand: Command = async (args, std) => {
   const accountsPath = join(baseDir, "output", "accounts.json");
   await fs.writeFile(accountsPath, stringify(credAccounts));
 
+  return 0;
+};
+
+export const grainHelp: Command = async (args, std) => {
+  std.out(
+    dedent`\
+      usage: sourcecred grain
+
+      Distribute Grain (or whatever currency this Cred instance is tracking)
+      for Cred intervals in which Grain was not already distributed.
+
+      When run, this will identify all the completed Cred intervals (currently, weeks)
+      and find the latest Cred interval for which there was no Grain distribution.
+      Then, it will distribute Grain for all of them, making a corresponding change
+      to the Ledger. This could result in zero or more distributions, depending on how
+      many recent Cred intervals had no corresponding Grain distribution.
+
+      Grain is distributed based on the configuration in the config/grain.json
+      file. The fields are as follows:
+
+      immediatePerWeek: The amount of grain to distribute for activity in the most
+      recent period. (value type: integer)
+
+      balancedPerWeek: The amount of grain to distribute according to all-time cred
+      scores. (value type: integer)
+
+      maxSimultaneousDistributions: The maximum number of distributions to create in
+      a single 'sourcecred grain' call if distributions have been missed. If set to
+      1, then the command will create at most one distribution. If unset, defaults
+      to Infinity.
+      (value type: integer)
+      `.trimRight()
+  );
   return 0;
 };
 

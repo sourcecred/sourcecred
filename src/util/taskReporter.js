@@ -157,7 +157,7 @@ export function formatTimeElapsed(elapsed: MsSinceEpoch): string {
   if (elapsed < 0) {
     throw new Error("nonegative time expected");
   }
-  if (elapsed < 1000) {
+  if (elapsed < 10 * 1000) {
     return `${elapsed}ms`;
   }
   const seconds = Math.round(elapsed / 1000);
