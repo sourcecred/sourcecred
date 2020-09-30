@@ -1,6 +1,5 @@
 // @flow
 
-import type {GuildMember, Channel} from "./models.js";
 import {TaskReporter} from "../../util/taskReporter";
 import {type DiscordApi} from "./fetcher";
 import {SqliteMirrorRepository} from "./mirrorRepository";
@@ -57,7 +56,7 @@ export class Mirror {
     return guild;
   }
 
-  async addMembers(): Promise<$ReadOnlyArray<GuildMember>> {
+  async addMembers(): Promise<$ReadOnlyArray<Model.GuildMember>> {
     const members = await this._api.members(this.guild);
     for (const member of members) {
       this._repo.addMember(member);
@@ -65,7 +64,7 @@ export class Mirror {
     return this._repo.members();
   }
 
-  async addTextChannels(): Promise<$ReadOnlyArray<Channel>> {
+  async addTextChannels(): Promise<$ReadOnlyArray<Model.Channel>> {
     const channels = await this._api.channels(this.guild);
     for (const channel of channels) {
       if (channel.type !== "GUILD_TEXT") continue;

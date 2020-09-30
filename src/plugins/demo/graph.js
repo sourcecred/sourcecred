@@ -1,8 +1,7 @@
 // @flow
 
-import type {Node, Edge} from "../../core/graph.js";
 import deepFreeze from "deep-freeze";
-import {Graph} from "../../core/graph";
+import {Graph, type Node, type Edge} from "../../core/graph";
 import {partsNode, partsEdge} from "../../core/graphTestUtil";
 
 export const nodes: {|

@@ -1,9 +1,16 @@
 // @flow
 
-import type {NodeAddressT, EdgeAddressT} from "./graph.js";
-import type {TimestampMs} from "../util/timestamp.js";
 import deepFreeze from "deep-freeze";
-import {EdgeAddress, Graph, NodeAddress, type Node, type Edge} from "./graph";
+import {
+  EdgeAddress,
+  Graph,
+  NodeAddress,
+  type Node,
+  type Edge,
+  type NodeAddressT,
+  type EdgeAddressT,
+} from "./graph";
+import type {TimestampMs} from "../util/timestamp";
 
 /**
  * Create a new Node from an array of string address parts.

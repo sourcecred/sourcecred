@@ -1,10 +1,10 @@
 // @flow
 
-import type {NodeAddressT} from "../../core/graph.js";
 import deepFreeze from "deep-freeze";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import * as N from "./nodes";
 import * as E from "./edges";
+import type {NodeAddressT} from "../../core/graph";
 import dedent from "../../util/dedent";
 
 export const repoNodeType: {|
