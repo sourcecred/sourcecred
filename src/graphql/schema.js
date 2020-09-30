@@ -111,7 +111,7 @@ export function faithful(): Fidelity {
 
 export function unfaithful(
   actualTypenames: $ReadOnlyArray<Typename>
-): {|actualTypenames: {[Typename]: true}, type: string|} {
+): Fidelity {
   const actualTypenamesObject: {|[Typename]: true|} = ({}: any);
   for (const t of actualTypenames) {
     actualTypenamesObject[t] = true;
