@@ -8,7 +8,7 @@ import type {
   Issue,
   Commit,
   Comment,
-} from "/home/wchargin/tmp/flowcodemod/relationalView.js";
+} from "../relationalView";
 import {RelationalView} from "../relationalView";
 import type {Repository} from "../graphqlTypes";
 import {type WeightedGraph} from "../../../core/weightedGraph";
