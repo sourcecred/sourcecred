@@ -1,6 +1,5 @@
 // @flow
-import type {Node} from "React";
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import sortBy from "../../../util/sortBy";
 import CredRow from "./CredRow";
 import NodeRow from "./NodeRow";
@@ -76,7 +75,7 @@ const FlowsRow = ({
   +view: CredView,
   +node: CredNode,
   +depth: number,
-|}): Node => {
+|}): ReactNode => {
   const inflows = view.inflows(node.address);
   if (inflows == null) {
     throw new Error("no flows");

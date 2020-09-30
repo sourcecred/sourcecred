@@ -1,7 +1,6 @@
 // @flow
 
-import type {Node} from "React";
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import * as NullUtil from "../../util/null";
 import {Grid} from "@material-ui/core";
 import {type NodeAddressT, type EdgeAddressT} from "../../core/graph";
@@ -24,7 +23,7 @@ type Props = {|
 /**
  * A React component that lets users set Type-level weights.
  *
- * The WeightConfig component renders a slider for every Node and Edge type
+ * The WeightConfig component renders a slider for every ReactNode and Edge type
  * within the array of declarations it's been provided. The sliders are
  * organized by plugin at the top level, and then by whether they represent
  * node or edge types at the level beneath.
@@ -34,7 +33,7 @@ type Props = {|
  * `onNodeWeightChange` or `onEdgeWeightChange` is called with the new weight.
  */
 export class WeightConfig extends React.Component<Props> {
-  _nodeConfig(type: NodeType): Node {
+  _nodeConfig(type: NodeType): ReactNode {
     const {prefix, defaultWeight} = type;
     const {onNodeWeightChange, nodeWeights} = this.props;
     const weight = NullUtil.orElse(nodeWeights.get(prefix), defaultWeight);
@@ -49,7 +48,7 @@ export class WeightConfig extends React.Component<Props> {
     );
   }
 
-  _edgeConfig(type: EdgeType): Node {
+  _edgeConfig(type: EdgeType): ReactNode {
     const {prefix, defaultWeight} = type;
     const {onEdgeWeightChange, edgeWeights} = this.props;
     const weight = NullUtil.orElse(edgeWeights.get(prefix), defaultWeight);
@@ -64,7 +63,7 @@ export class WeightConfig extends React.Component<Props> {
     );
   }
 
-  _renderPlugin(declaration: PluginDeclaration): Node {
+  _renderPlugin(declaration: PluginDeclaration): ReactNode {
     const {name, nodeTypes, edgeTypes, userTypes} = declaration;
     const nonUserTypes = nodeTypes.filter(
       ({prefix}) => !userTypes.some((t) => t.prefix === prefix)
@@ -74,7 +73,7 @@ export class WeightConfig extends React.Component<Props> {
     return (
       <Grid item xs={4} key={name}>
         <h3>{name}</h3>
-        <h4 style={{marginBottom: "0.3em"}}>Node weights</h4>
+        <h4 style={{marginBottom: "0.3em"}}>ReactNode weights</h4>
         {nodeConfigs}
         <h4 style={{marginBottom: "0.3em"}}>Edge weights</h4>
         <p style={{marginBottom: "0.6em", marginTop: "0.6em"}}>
@@ -85,7 +84,7 @@ export class WeightConfig extends React.Component<Props> {
     );
   }
 
-  render(): Node {
+  render(): ReactNode {
     return (
       <Grid container spacing={2}>
         {this.props.declarations.map((x) => this._renderPlugin(x))}

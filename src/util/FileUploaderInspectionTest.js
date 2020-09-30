@@ -1,7 +1,6 @@
 // @flow
 
-import type {Element} from "React";
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import Markdown from "react-markdown";
 import {MdFileUpload} from "react-icons/md";
 
@@ -15,7 +14,7 @@ export default class FileUploaderInspectionTest extends React.Component<
   {|json: ?mixed|}
 > {
   state: {|json: mixed|} = {json: null};
-  render(): Element<"div"> {
+  render(): ReactNode {
     const onUpload = (json) => {
       this.setState({json});
     };

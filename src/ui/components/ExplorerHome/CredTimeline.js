@@ -1,6 +1,5 @@
 // @flow
-import type {Element} from "React";
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import {extent} from "d3-array";
 import {scaleLinear} from "d3-scale";
 import {line} from "d3-shape";
@@ -11,7 +10,7 @@ type CredTimelineProps = {|
   +height?: number,
 |};
 
-const CredTimeline = (props: CredTimelineProps): Element<"svg"> | string => {
+const CredTimeline = (props: CredTimelineProps): ReactNode => {
   const {data} = props;
   if (data == null) {
     return "";

@@ -1,7 +1,6 @@
 // @flow
 
-import type {Node} from "React";
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import {Grid, Slider, Tooltip} from "@material-ui/core";
 
 /**
@@ -55,7 +54,7 @@ export type Props = {|
  * [range input]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/range
  */
 export class WeightSlider extends React.Component<Props> {
-  render(): Node {
+  render(): ReactNode {
     return (
       <Tooltip title={this.props.description} placement="top">
         <Grid container justify="space-between">

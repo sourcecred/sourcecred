@@ -1,7 +1,6 @@
 // @flow
 
-import type {Node} from "React";
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import {type IdentityId} from "../../ledger/identity";
 import Markdown from "react-markdown";
 
@@ -18,7 +17,7 @@ const useStyles = makeStyles({
   aliasesHeader: {margin: "20px", marginBottom: 0},
 });
 
-export function AliasView({selectedId}: Props): Node {
+export function AliasView({selectedId}: Props): ReactNode {
   const {ledger} = useLedger();
   const classes = useStyles();
   const selectedAccount = ledger.account(selectedId);

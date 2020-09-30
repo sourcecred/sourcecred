@@ -1,7 +1,6 @@
 // @flow
 
-import type {Node} from "React";
-import React, {useState} from "react";
+import React, {useState, type Node as ReactNode} from "react";
 import {type Identity, type IdentityId} from "../../ledger/identity";
 import {AliasView} from "./AliasView";
 import {IdentityMerger} from "./IdentityMerger";
@@ -50,7 +49,7 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-export const LedgerAdmin = (): Node => {
+export const LedgerAdmin = (): ReactNode => {
   const {ledger, updateLedger} = useLedger();
 
   const classes = useStyles();

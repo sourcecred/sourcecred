@@ -1,10 +1,9 @@
 // @flow
-import type {Node, Element} from "React";
-import React, {useState, useEffect} from "react";
+import React, {type Node as ReactNode, useState, useEffect} from "react";
 import {Explorer} from "./Explorer.js";
 import {load, type LoadResult} from "../../load";
 
-const App = (): Element<"div"> | Element<"h1"> | Node => {
+const App = (): ReactNode => {
   const [loadResult: LoadResult | null, setLoadResult] = useState(null);
 
   useEffect(() => {

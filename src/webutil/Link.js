@@ -1,7 +1,6 @@
 // @flow
 
-import type {Node, Element} from "React";
-import React, {Component} from "react";
+import React, {Component, type Node as ReactNode} from "react";
 import {Link as RouterLink} from "react-router-dom";
 import {StyleSheet, css} from "aphrodite/no-important";
 
@@ -30,7 +29,7 @@ type LinkProps = $ReadOnly<{
   > /* Aphrodite styles, as passed to `css` */,
 }>;
 export default class Link extends Component<LinkProps> {
-  render(): Node | Element<string> {
+  render(): ReactNode {
     const {styles: customStyles, children, ...rest} = this.props;
     const linkClass = css(styles.link, customStyles);
     const className = this.props.className

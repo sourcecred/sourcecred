@@ -1,6 +1,5 @@
 // @flow
-import type {Node} from "React";
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import {useSelector} from "react-redux";
 import {MenuItemLink} from "react-admin";
 import TrendingUpIcon from "@material-ui/icons/TrendingUp";
@@ -13,7 +12,7 @@ type menuProps = {|onMenuClick: Function|};
 const createMenu = (
   hasBackend: Boolean,
   {name: currencyName}: CurrencyDetails
-): ((menuProps) => Node) => {
+): ((menuProps) => ReactNode) => {
   const Menu = ({onMenuClick}: menuProps) => {
     const open = useSelector((state) => state.admin.ui.sidebarOpen);
     return (
