@@ -1,6 +1,11 @@
 // @flow
 
-import {TaskReporter} from "../../util/taskReporter";
+import type {
+  Snowflake as $IMPORTED_TYPE$_Snowflake,
+  Message as $IMPORTED_TYPE$_Message,
+  GuildMember,
+  Channel,
+} from "./models.js";import {TaskReporter} from "../../util/taskReporter";
 import {type DiscordApi} from "./fetcher";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import * as Model from "./models";
@@ -40,7 +45,9 @@ export class Mirror {
     reporter.finish(`discord/${guild.name}`);
   }
 
-  async validateGuildId() {
+  async validateGuildId(): Promise<
+  {|+id: $IMPORTED_TYPE$_Snowflake, +name: string, +permissions: number|},
+> {
     const guilds = await this._api.guilds();
     const guild = guilds.find((g) => g.id === this.guild);
     if (!guild) {
@@ -52,7 +59,7 @@ export class Mirror {
     return guild;
   }
 
-  async addMembers() {
+  async addMembers(): Promise<$ReadOnlyArray<GuildMember>> {
     const members = await this._api.members(this.guild);
     for (const member of members) {
       this._repo.addMember(member);
@@ -60,7 +67,7 @@ export class Mirror {
     return this._repo.members();
   }
 
-  async addTextChannels() {
+  async addTextChannels(): Promise<$ReadOnlyArray<Channel>> {
     const channels = await this._api.channels(this.guild);
     for (const channel of channels) {
       if (channel.type !== "GUILD_TEXT") continue;
@@ -69,7 +76,7 @@ export class Mirror {
     return this._repo.channels();
   }
 
-  async addMessages(channel: Model.Snowflake, messageLimit?: number) {
+  async addMessages(channel: Model.Snowflake, messageLimit?: number): Promise<$ReadOnlyArray<$IMPORTED_TYPE$_Message>> {
     const loadStart = this._repo.nthMessageFromTail(channel, RELOAD_DEPTH);
     // console.log(channel, (loadStart || {}).id);
 

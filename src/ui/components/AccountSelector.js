@@ -1,5 +1,5 @@
 // @flow
-import React from "react";
+import type {Node} from "React";import React from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import {TextField} from "@material-ui/core";
 import {Autocomplete} from "@material-ui/lab";
@@ -17,7 +17,7 @@ export default function AccountDropdown({
   placeholder,
   setCurrentAccount,
   ledger,
-}: DropdownProps) {
+}: DropdownProps): Node {
   const classes = useStyles();
   const items = ledger.accounts().filter((a) => a.active);
 

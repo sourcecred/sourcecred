@@ -1,5 +1,5 @@
 // @flow
-import React, {useState} from "react";
+import type {Node} from "React";import React, {useState} from "react";
 import {
   Checkbox,
   Container,
@@ -94,7 +94,7 @@ type ExplorerHomeProps = {|
   +initialView: CredView,
 |};
 
-export const ExplorerHome = ({initialView}: ExplorerHomeProps) => {
+export const ExplorerHome = ({initialView}: ExplorerHomeProps): Node => {
   const classes = useStyles();
   const [tab, setTab] = useState<number>(1);
   const [checkboxes, setCheckboxes] = useState({

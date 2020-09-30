@@ -18,7 +18,7 @@
  *
  * Lines that contain only whitespace are not used for measuring.
  */
-export default function dedent(strings: string[], ...values: string[]) {
+export default function dedent(strings: string[], ...values: string[]): string {
   const lineLengths = strings
     .join("")
     .split("\n")

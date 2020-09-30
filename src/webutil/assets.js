@@ -31,7 +31,7 @@ export class Assets {
    * represent the same file. It is an error to specify a file that is
    * above the root, like "../bad".
    */
-  resolve(path: string) {
+  resolve(path: string): any {
     if (normalize(path.replace(/^\/+/, "")).startsWith("..")) {
       // It doesn't make sense to traverse past the site's root. This is
       // likely an error in the caller.
@@ -55,7 +55,7 @@ export class Assets {
  *
  * If the argument does not start with "/", an error will be thrown.
  */
-export function rootFromPath(path: string) {
+export function rootFromPath(path: string): any {
   const normalized = normalize(path);
   if (normalized[0] !== "/") {
     throw new Error("expected absolute path: " + JSON.stringify(path));

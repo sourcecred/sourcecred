@@ -162,6 +162,6 @@ export function toJSON(weights: Weights): WeightsJSON {
   return toCompat(COMPAT_INFO, serialize_0_2_0(weights));
 }
 
-export function fromJSON(json: WeightsJSON) {
+export function fromJSON(json: WeightsJSON): Weights {
   return parser.parseOrThrow(json);
 }

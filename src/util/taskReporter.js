@@ -40,7 +40,7 @@ export class LoggingTaskReporter implements TaskReporter {
     this.activeTasks = new Map();
   }
 
-  start(taskId: TaskId) {
+  start(taskId: TaskId): this {
     if (this.activeTasks.has(taskId)) {
       throw new Error(`task ${taskId} already registered`);
     }
@@ -49,7 +49,7 @@ export class LoggingTaskReporter implements TaskReporter {
     return this;
   }
 
-  finish(taskId: TaskId) {
+  finish(taskId: TaskId): this {
     const startTime = this.activeTasks.get(taskId);
     if (startTime == null) {
       throw new Error(`task ${taskId} not registered`);
@@ -84,7 +84,7 @@ export class SilentTaskReporter implements TaskReporter {
     this._activeTasks = new Set();
     this._entries = [];
   }
-  start(taskId: TaskId) {
+  start(taskId: TaskId): this {
     if (this._activeTasks.has(taskId)) {
       throw new Error(`task ${taskId} already active`);
     }
@@ -92,7 +92,7 @@ export class SilentTaskReporter implements TaskReporter {
     this._entries.push({taskId, type: "START"});
     return this;
   }
-  finish(taskId: TaskId) {
+  finish(taskId: TaskId): this {
     if (!this._activeTasks.has(taskId)) {
       throw new Error(`task ${taskId} not active`);
     }
@@ -142,12 +142,12 @@ export class ScopedTaskReporter implements TaskReporter {
     return `${this._prefix}: ${taskId}`;
   }
 
-  start(taskId: TaskId) {
+  start(taskId: TaskId): this {
     this._delegate.start(this._scoped(taskId));
     return this;
   }
 
-  finish(taskId: TaskId) {
+  finish(taskId: TaskId): this {
     this._delegate.finish(this._scoped(taskId));
     return this;
   }

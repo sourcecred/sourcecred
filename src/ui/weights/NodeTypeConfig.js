@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import type {Node} from "React";import React from "react";
 import {WeightSlider} from "./WeightSlider";
 import type {NodeType} from "../../analysis/types";
 import type {NodeWeight} from "../../core/weights";
@@ -10,7 +10,7 @@ export class NodeTypeConfig extends React.Component<{
   +type: NodeType,
   +onChange: (NodeWeight) => void,
 }> {
-  render() {
+  render(): Node {
     return (
       <WeightSlider
         name={this.props.type.name}

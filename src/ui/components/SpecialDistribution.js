@@ -1,5 +1,5 @@
 // @flow
-import React, {useState} from "react";
+import type {Node} from "React";import React, {useState} from "react";
 import {Button, Container, TextField} from "@material-ui/core";
 import {Alert} from "@material-ui/lab";
 import {makeStyles} from "@material-ui/core/styles";
@@ -53,7 +53,7 @@ type SpecialDistributionProps = {|+currency: CurrencyDetails|};
 
 export const SpecialDistribution = ({
   currency: {name: currencyName},
-}: SpecialDistributionProps) => {
+}: SpecialDistributionProps): Node => {
   const {ledger, updateLedger} = useLedger();
 
   const classes = useStyles();

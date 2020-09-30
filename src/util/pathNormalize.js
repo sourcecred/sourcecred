@@ -29,7 +29,7 @@
  *
  * A `TypeError` is thrown if `path` is not a string.
  */
-export default function normalize(path: string) {
+export default function normalize(path: string): string {
   assertPath(path);
 
   if (path.length === 0) return ".";

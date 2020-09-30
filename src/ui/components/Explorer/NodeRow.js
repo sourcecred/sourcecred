@@ -1,5 +1,5 @@
 // @flow
-import React from "react";
+import type {Node} from "React";import React from "react";
 import CredRow from "./CredRow";
 import FlowsRow from "./FlowsRow";
 import {CredView, type CredNode} from "../../../analysis/credView";
@@ -12,7 +12,7 @@ type NodeRowProps = {
   +showChart: boolean,
 };
 
-const NodeRow = ({node, total, view, depth, showChart}: NodeRowProps) => {
+const NodeRow = ({node, total, view, depth, showChart}: NodeRowProps): Node => {
   const {address, description, credSummary, credOverTime} = node;
   const cred = credSummary.cred;
   const credTimeline =

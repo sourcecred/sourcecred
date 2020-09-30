@@ -1,5 +1,5 @@
 // @flow
-import React from "react";
+import type {Node, Element} from "React";import React from "react";
 import {
   Button,
   Grid,
@@ -91,14 +91,14 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     };
   }
 
-  handleMenuClose = () => {
+  handleMenuClose: (() => void) = () => {
     this.setState({
       anchorEl: null,
     });
   };
 
   // Renders the dropdown that lets the user select a type
-  renderFilterSelect() {
+  renderFilterSelect(): Node {
     const plugins = this.state.view.plugins();
     const optionGroup = (declaration: PluginDeclaration) => {
       const header = (
@@ -192,7 +192,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     );
   }
 
-  renderConfigurationRow() {
+  renderConfigurationRow(): Node {
     const {showWeightConfig, view, params, weights} = this.state;
     const weightFileManager = (
       <WeightsFileManager
@@ -313,7 +313,7 @@ export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
     this.setState({view, recalculating: false});
   }
 
-  render() {
+  render(): Element<"div"> {
     const {filter, view, recalculating, name} = this.state;
     const nodes =
       filter == null ? view.userNodes() : view.nodes({prefix: filter});

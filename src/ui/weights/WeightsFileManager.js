@@ -1,6 +1,6 @@
 // @flow
 
-import stringify from "json-stable-stringify";
+import type {Element} from "React";import stringify from "json-stable-stringify";
 import React from "react";
 import {FileUploader} from "../../util/FileUploader";
 import Link from "../../webutil/Link";
@@ -12,7 +12,7 @@ export type Props = {|
   +onWeightsChange: (Weights) => void,
 |};
 export class WeightsFileManager extends React.Component<Props> {
-  render() {
+  render(): Element<"div"> {
     const weightsJSON = stringify(toJSON(this.props.weights));
     const onUpload = (json) => this.props.onWeightsChange(fromJSON(json));
     return (

@@ -19,7 +19,7 @@ export type Connection = {|
   +weight: Probability,
 |};
 
-export function adjacencySource(target: NodeAddressT, adjacency: Adjacency) {
+export function adjacencySource(target: NodeAddressT, adjacency: Adjacency): NodeAddressT {
   switch (adjacency.type) {
     case "SYNTHETIC_LOOP":
       return target;

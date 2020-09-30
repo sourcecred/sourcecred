@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import type {Node} from "React";import React from "react";
 import * as NullUtil from "../../util/null";
 import {Grid} from "@material-ui/core";
 import {type NodeAddressT, type EdgeAddressT} from "../../core/graph";
@@ -33,7 +33,7 @@ type Props = {|
  * `onNodeWeightChange` or `onEdgeWeightChange` is called with the new weight.
  */
 export class WeightConfig extends React.Component<Props> {
-  _nodeConfig(type: NodeType) {
+  _nodeConfig(type: NodeType): Node {
     const {prefix, defaultWeight} = type;
     const {onNodeWeightChange, nodeWeights} = this.props;
     const weight = NullUtil.orElse(nodeWeights.get(prefix), defaultWeight);
@@ -48,7 +48,7 @@ export class WeightConfig extends React.Component<Props> {
     );
   }
 
-  _edgeConfig(type: EdgeType) {
+  _edgeConfig(type: EdgeType): Node {
     const {prefix, defaultWeight} = type;
     const {onEdgeWeightChange, edgeWeights} = this.props;
     const weight = NullUtil.orElse(edgeWeights.get(prefix), defaultWeight);
@@ -63,7 +63,7 @@ export class WeightConfig extends React.Component<Props> {
     );
   }
 
-  _renderPlugin(declaration: PluginDeclaration) {
+  _renderPlugin(declaration: PluginDeclaration): Node {
     const {name, nodeTypes, edgeTypes, userTypes} = declaration;
     const nonUserTypes = nodeTypes.filter(
       ({prefix}) => !userTypes.some((t) => t.prefix === prefix)
@@ -84,7 +84,7 @@ export class WeightConfig extends React.Component<Props> {
     );
   }
 
-  render() {
+  render(): Node {
     return (
       <Grid container spacing={2}>
         {this.props.declarations.map((x) => this._renderPlugin(x))}

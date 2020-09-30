@@ -20,7 +20,7 @@ export function uniformDistribution(n: number): Distribution {
  *
  * Equivalent to $\norm{pi0 - pi1}_\infty$.
  */
-export function computeDelta(pi0: Distribution, pi1: Distribution) {
+export function computeDelta(pi0: Distribution, pi1: Distribution): number {
   if (pi0.length === 0 || pi0.length !== pi1.length) {
     throw new Error("invalid input");
   }

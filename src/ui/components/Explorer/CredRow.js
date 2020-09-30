@@ -1,5 +1,5 @@
 // @flow
-import React, {type Node as ReactNode, useState} from "react";
+import type {Node as $IMPORTED_TYPE$_Node} from "React";import React, {type Node as ReactNode, useState} from "react";
 import Markdown from "react-markdown";
 import {IconButton, Link, TableCell, TableRow} from "@material-ui/core";
 import {StyleSheet, css} from "aphrodite/no-important";
@@ -26,7 +26,7 @@ const CredRow = ({
   description,
   depth,
   indent,
-}: CredRowProps) => {
+}: CredRowProps): $IMPORTED_TYPE$_Node => {
   const [expanded, setExpanded] = useState(false);
   const backgroundColor = `hsla(150,100%,28%,${1 - 0.9 ** depth})`;
   const makeGradient = (color) => `linear-gradient(to top, ${color}, ${color})`;

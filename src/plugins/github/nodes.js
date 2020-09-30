@@ -21,7 +21,21 @@ export const USERLIKE_TYPE: "USERLIKE" = "USERLIKE";
 export const USER_SUBTYPE: "USER" = "USER";
 export const BOT_SUBTYPE: "BOT" = "BOT";
 
-export const Prefix = deepFreeze({
+export const Prefix: {|
+  base: NodeAddressT,
+  bot: RawAddress,
+  comment: RawAddress,
+  commit: RawAddress,
+  issue: RawAddress,
+  issueComment: RawAddress,
+  pull: RawAddress,
+  pullComment: RawAddress,
+  repo: RawAddress,
+  review: RawAddress,
+  reviewComment: RawAddress,
+  user: RawAddress,
+  userlike: RawAddress,
+|} = deepFreeze({
   base: GITHUB_PREFIX,
   repo: _githubAddress(REPO_TYPE),
   issue: _githubAddress(ISSUE_TYPE),

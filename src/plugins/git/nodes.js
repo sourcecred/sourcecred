@@ -13,7 +13,7 @@ export function _gitAddress(...parts: string[]): RawAddress {
 
 export const COMMIT_TYPE: "COMMIT" = "COMMIT";
 
-export const Prefix = deepFreeze({
+export const Prefix: {|base: NodeAddressT, commit: RawAddress|} = deepFreeze({
   base: GIT_PREFIX,
   commit: _gitAddress(COMMIT_TYPE),
 });

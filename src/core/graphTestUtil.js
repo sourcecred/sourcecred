@@ -1,6 +1,7 @@
 // @flow
 
-import deepFreeze from "deep-freeze";
+import type {NodeAddressT, EdgeAddressT} from "./graph.js";
+import type {TimestampMs} from "../util/timestamp.js";import deepFreeze from "deep-freeze";
 import {EdgeAddress, Graph, NodeAddress, type Node, type Edge} from "./graph";
 
 /**
@@ -57,7 +58,86 @@ export function edge(name: string, src: Node, dst: Node): Edge {
   return partsEdge([name], src, dst);
 }
 
-export function advancedGraph() {
+export function advancedGraph(): {|
+  edges: {|
+    fullDanglingEdge: {|
+      +address: EdgeAddressT,
+      +dst: NodeAddressT,
+      +src: NodeAddressT,
+      +timestampMs: TimestampMs,
+    |},
+    halfDanglingEdge: {|
+      +address: EdgeAddressT,
+      +dst: NodeAddressT,
+      +src: NodeAddressT,
+      +timestampMs: TimestampMs,
+    |},
+    hom1: {|
+      +address: EdgeAddressT,
+      +dst: NodeAddressT,
+      +src: NodeAddressT,
+      +timestampMs: TimestampMs,
+    |},
+    hom2: {|
+      +address: EdgeAddressT,
+      +dst: NodeAddressT,
+      +src: NodeAddressT,
+      +timestampMs: TimestampMs,
+    |},
+    loopLoop: {|
+      +address: EdgeAddressT,
+      +dst: NodeAddressT,
+      +src: NodeAddressT,
+      +timestampMs: TimestampMs,
+    |},
+    phantomEdge1: {|
+      +address: EdgeAddressT,
+      +dst: NodeAddressT,
+      +src: NodeAddressT,
+      +timestampMs: TimestampMs,
+    |},
+    phantomEdge2: {|
+      +address: EdgeAddressT,
+      +dst: NodeAddressT,
+      +src: NodeAddressT,
+      +timestampMs: TimestampMs,
+    |},
+  |},
+  graph1: () => Graph,
+  graph2: () => Graph,
+  nodes: {|
+    dst: {|
+      +address: NodeAddressT,
+      +description: string,
+      +timestampMs: TimestampMs | null,
+    |},
+    halfIsolated: {|
+      +address: NodeAddressT,
+      +description: string,
+      +timestampMs: TimestampMs | null,
+    |},
+    isolated: {|
+      +address: NodeAddressT,
+      +description: string,
+      +timestampMs: TimestampMs | null,
+    |},
+    loop: {|
+      +address: NodeAddressT,
+      +description: string,
+      +timestampMs: TimestampMs | null,
+    |},
+    phantomNode: {|
+      +address: NodeAddressT,
+      +description: string,
+      +timestampMs: TimestampMs | null,
+    |},
+    src: {|
+      +address: NodeAddressT,
+      +description: string,
+      +timestampMs: TimestampMs | null,
+    |},
+  |},
+|} {
   // The advanced graph has the following features:
   // - Multiple edges of same hom, from `src` to `dst`
   // - An isolated node, `isolated`
