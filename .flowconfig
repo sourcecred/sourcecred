@@ -10,6 +10,5 @@ flow-typed
 
 [options]
 include_warnings=true
-types_first=false
 
 [strict]
