@@ -58,7 +58,7 @@ const customRoutes = (
   ];
   const backendRoutes = [
     <Route key="admin" exact path="/admin">
-      <LedgerAdmin credView={credView} />
+      <LedgerAdmin />
     </Route>,
     <Route key="explorer-home" exact path="/explorer-home">
       <ExplorerHome initialView={credView} />
