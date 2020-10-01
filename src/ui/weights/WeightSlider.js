@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import {Grid, Slider, Tooltip} from "@material-ui/core";
 
 /**
@@ -54,7 +54,7 @@ export type Props = {|
  * [range input]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/range
  */
 export class WeightSlider extends React.Component<Props> {
-  render() {
+  render(): ReactNode {
     return (
       <Tooltip title={this.props.description} placement="top">
         <Grid container justify="space-between">
@@ -137,7 +137,7 @@ export function sliderToWeight(sliderPosition: SliderPosition): Weight {
   return sliderPosition === MIN_SLIDER ? 0 : 2 ** sliderPosition;
 }
 
-export function formatWeight(n: number) {
+export function formatWeight(n: number): string {
   if (n < 0 || !isFinite(n)) {
     throw new Error(`Invalid weight: ${n}`);
   }

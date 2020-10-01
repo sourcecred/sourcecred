@@ -1,10 +1,14 @@
 // @flow
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import {extent} from "d3-array";
 import {scaleLinear} from "d3-scale";
 import {line} from "d3-shape";
 
-const CredTimeline = ({data}: {|+data: $ReadOnlyArray<number> | null|}) => {
+const CredTimeline = ({
+  data,
+}: {|
+  +data: $ReadOnlyArray<number> | null,
+|}): ReactNode => {
   if (data == null) {
     return "";
   }

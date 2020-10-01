@@ -40,7 +40,11 @@ export class Mirror {
     reporter.finish(`discord/${guild.name}`);
   }
 
-  async validateGuildId() {
+  async validateGuildId(): Promise<{|
+    +id: Model.Snowflake,
+    +name: string,
+    +permissions: number,
+  |}> {
     const guilds = await this._api.guilds();
     const guild = guilds.find((g) => g.id === this.guild);
     if (!guild) {
@@ -52,7 +56,7 @@ export class Mirror {
     return guild;
   }
 
-  async addMembers() {
+  async addMembers(): Promise<$ReadOnlyArray<Model.GuildMember>> {
     const members = await this._api.members(this.guild);
     for (const member of members) {
       this._repo.addMember(member);
@@ -60,7 +64,7 @@ export class Mirror {
     return this._repo.members();
   }
 
-  async addTextChannels() {
+  async addTextChannels(): Promise<$ReadOnlyArray<Model.Channel>> {
     const channels = await this._api.channels(this.guild);
     for (const channel of channels) {
       if (channel.type !== "GUILD_TEXT") continue;
@@ -69,7 +73,10 @@ export class Mirror {
     return this._repo.channels();
   }
 
-  async addMessages(channel: Model.Snowflake, messageLimit?: number) {
+  async addMessages(
+    channel: Model.Snowflake,
+    messageLimit?: number
+  ): Promise<$ReadOnlyArray<Model.Message>> {
     const loadStart = this._repo.nthMessageFromTail(channel, RELOAD_DEPTH);
     // console.log(channel, (loadStart || {}).id);
 

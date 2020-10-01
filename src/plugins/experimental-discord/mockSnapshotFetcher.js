@@ -17,7 +17,7 @@ async function snapshotFetch(url: string | Request | URL): Promise<Response> {
   }
 }
 
-export const snapshotFetcher = () =>
+export const snapshotFetcher = (): Fetcher =>
   new Fetcher({
     fetch: snapshotFetch,
     token: "mock-token",

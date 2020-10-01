@@ -4,9 +4,16 @@ import deepFreeze from "deep-freeze";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import * as N from "./nodes";
 import * as E from "./edges";
+import type {NodeAddressT} from "../../core/graph";
 import dedent from "../../util/dedent";
 
-export const repoNodeType = deepFreeze({
+export const repoNodeType: {|
+  +defaultWeight: number,
+  +description: string,
+  +name: string,
+  +pluralName: string,
+  +prefix: NodeAddressT,
+|} = deepFreeze({
   name: "Repository",
   pluralName: "Repositories",
   prefix: N.Prefix.repo,
@@ -55,7 +62,13 @@ const commitNodeType = deepFreeze({
     "Represents a particular Git commit on GitHub, i.e. scoped to a particular repository",
 });
 
-export const userNodeType = deepFreeze({
+export const userNodeType: {|
+  +defaultWeight: number,
+  +description: string,
+  +name: string,
+  +pluralName: string,
+  +prefix: NodeAddressT,
+|} = deepFreeze({
   name: "User",
   pluralName: "Users",
   prefix: N.Prefix.user,

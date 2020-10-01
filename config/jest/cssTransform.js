@@ -3,10 +3,10 @@
 // http://facebook.github.io/jest/docs/en/webpack.html
 
 module.exports = {
-  process() {
+  process() /*: string */ {
     return "module.exports = {};";
   },
-  getCacheKey() {
+  getCacheKey() /*: string */ {
     // The output is always the same.
     return "cssTransform";
   },

@@ -80,7 +80,7 @@ const useStyles = makeStyles(
  *    );
  *};
  */
-const AppBar = (props: Props) => {
+const AppBar = (props: Props): React.Node => {
   const {
     children,
     classes: _ /*classesOverride*/,

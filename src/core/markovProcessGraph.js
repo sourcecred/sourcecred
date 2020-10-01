@@ -171,7 +171,7 @@ export function userEpochNodeAddressFromRaw(
 }
 
 // TODO(@wchargin): Expose more cleanly.
-export const EPOCH_ACCUMULATOR_PREFIX = NodeAddress.append(
+export const EPOCH_ACCUMULATOR_PREFIX: NodeAddressT = NodeAddress.append(
   CORE_NODE_PREFIX,
   "EPOCH"
 );
@@ -269,7 +269,7 @@ export class MarkovProcessGraph {
     wg: WeightedGraphT,
     fibration: FibrationOptions,
     seed: SeedOptions
-  ) {
+  ): MarkovProcessGraph {
     const _nodes = new Map();
     const _edges = new Map();
     const _scoringAddresses = new Set(fibration.scoringAddresses);

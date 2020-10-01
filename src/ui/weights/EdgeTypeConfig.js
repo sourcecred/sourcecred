@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import {WeightSlider, type Props as WeightSliderProps} from "./WeightSlider";
 
 import type {EdgeType} from "../../analysis/types";
@@ -11,7 +11,7 @@ export class EdgeTypeConfig extends React.Component<{
   +type: EdgeType,
   +onChange: (EdgeWeight) => void,
 }> {
-  render() {
+  render(): ReactNode {
     const {weight, type} = this.props;
     const {forwards, backwards} = weight;
     const {forwardName, backwardName, description} = type;
@@ -41,7 +41,7 @@ export class EdgeTypeConfig extends React.Component<{
   }
 }
 
-export function styledVariable(letter: string) {
+export function styledVariable(letter: string): ReactNode {
   return (
     // marginRight accounts for italicization
     <span style={{fontWeight: 700, fontStyle: "italic", marginRight: "0.15em"}}>
@@ -51,7 +51,7 @@ export function styledVariable(letter: string) {
 }
 
 export class EdgeWeightSlider extends React.Component<WeightSliderProps> {
-  render() {
+  render(): ReactNode {
     const modifiedName = (
       <React.Fragment>
         {styledVariable("α")} {this.props.name} {styledVariable("β")}

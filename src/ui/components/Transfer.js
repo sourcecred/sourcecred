@@ -1,5 +1,5 @@
 // @flow
-import React, {useState} from "react";
+import React, {useState, type Node as ReactNode} from "react";
 import {Button, Container, TextField} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {div, format, gt, lt, fromFloatString} from "../../ledger/grain";
@@ -49,7 +49,7 @@ type TransferProps = {|+currency: CurrencyDetails|};
 
 export const Transfer = ({
   currency: {name: currencyName, suffix: currencySuffix},
-}: TransferProps) => {
+}: TransferProps): ReactNode => {
   const {ledger, updateLedger} = useLedger();
 
   const classes = useStyles();

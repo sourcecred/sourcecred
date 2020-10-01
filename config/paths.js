@@ -4,43 +4,46 @@ const fs = require("fs");
 
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebookincubator/create-react-app/issues/637
-const appDirectory = fs.realpathSync(process.cwd());
-const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath);
+const appDirectory /*: string */ = fs.realpathSync(process.cwd());
+const resolveApp = (relativePath /*: string */) /*: string */ =>
+  path.resolve(appDirectory, relativePath);
 
 // config after eject: we're in ./config/
 module.exports = {
   root: appDirectory,
-  dotenv: resolveApp(".env"),
-  favicon: resolveApp("src/assets/logo/rasterized/logo_32.png"),
-  appBuild: resolveApp("build"),
-  appIndexJs: resolveApp("src/ui/index.js"),
-  serverInfoJson: resolveApp("src/ui/server-info.json"),
-  appServerSideRenderingIndexJs: resolveApp("src/ui/server.js"),
-  appPackageJson: resolveApp("package.json"),
-  appSrc: resolveApp("src"),
-  yarnLockFile: resolveApp("yarn.lock"),
-  appNodeModules: resolveApp("node_modules"),
+  dotenv: (resolveApp(".env") /*: string */),
+  favicon: (resolveApp("src/assets/logo/rasterized/logo_32.png") /*: string */),
+  appBuild: (resolveApp("build") /*: string */),
+  appIndexJs: (resolveApp("src/ui/index.js") /*: string */),
+  serverInfoJson: (resolveApp("src/ui/server-info.json") /*: string */),
+  appServerSideRenderingIndexJs: (resolveApp("src/ui/server.js") /*: string */),
+  appPackageJson: (resolveApp("package.json") /*: string */),
+  appSrc: (resolveApp("src") /*: string */),
+  yarnLockFile: (resolveApp("yarn.lock") /*: string */),
+  appNodeModules: (resolveApp("node_modules") /*: string */),
 
-  apiIndexJs: resolveApp("src/api/index.js"),
-  apiBuild: resolveApp("dist"),
+  apiIndexJs: (resolveApp("src/api/index.js") /*: string */),
+  apiBuild: (resolveApp("dist") /*: string */),
 
-  backendBuild: resolveApp("bin"),
+  backendBuild: (resolveApp("bin") /*: string */),
   // This object should have one key-value pair per entry point. For
   // each key, the value should be the path to the entry point for the
   // source file, and the key will be the filename of the bundled entry
   // point within the build directory.
   backendEntryPoints: {
-    sourcecred: resolveApp("src/cli/main.js"),
+    sourcecred: (resolveApp("src/cli/main.js") /*: string */),
     //
-    generateGithubGraphqlFlowTypes: resolveApp(
+    generateGithubGraphqlFlowTypes: (resolveApp(
       "src/plugins/github/bin/generateGraphqlFlowTypes.js"
-    ),
-    fetchAndPrintGithubRepo: resolveApp(
+    ) /*: string */),
+    fetchAndPrintGithubRepo: (resolveApp(
       "src/plugins/github/bin/fetchAndPrintGithubRepo.js"
-    ),
-    fetchAndPrintGithubOrg: resolveApp(
+    ) /*: string */),
+    fetchAndPrintGithubOrg: (resolveApp(
       "src/plugins/github/bin/fetchAndPrintGithubOrg.js"
-    ),
-    createExampleRepo: resolveApp("src/plugins/git/bin/createExampleRepo.js"),
+    ) /*: string */),
+    createExampleRepo: (resolveApp(
+      "src/plugins/git/bin/createExampleRepo.js"
+    ) /*: string */),
   },
 };

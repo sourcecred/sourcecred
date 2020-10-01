@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import React, {type Element as ReactElement} from "react";
 import Link from "../../webutil/Link";
 import * as N from "./nodes";
 import type {Repository} from "./types";
@@ -11,7 +11,7 @@ export function description(
   address: N.StructuredAddress,
   repository: Repository,
   gateway: GitGateway
-) {
+): ReactElement<"code"> | ReactElement<"span"> {
   switch (address.type) {
     case "COMMIT": {
       const hash = address.hash;

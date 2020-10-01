@@ -37,7 +37,7 @@ export type Identity = {|
 
 // It's not in the typical [owner, name] format because it isn't provided by a plugin.
 // Instead, it's a raw type owned by SourceCred project.
-export const IDENTITY_PREFIX = NodeAddress.fromParts([
+export const IDENTITY_PREFIX: NodeAddressT = NodeAddress.fromParts([
   "sourcecred",
   "core",
   "IDENTITY",

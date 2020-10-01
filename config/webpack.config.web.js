@@ -318,4 +318,4 @@ function getMode() {
   return mode;
 }
 
-module.exports = makeConfig(getMode());
+module.exports = (makeConfig(getMode()) /*: any */);

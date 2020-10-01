@@ -1,5 +1,5 @@
 // @flow
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, type Node as ReactNode} from "react";
 import {useLedger} from "../utils/LedgerContext";
 import {type IdentityId, type Identity} from "../../ledger/identity";
 
@@ -16,7 +16,7 @@ const useStyles = makeStyles({
   aliasesHeader: {margin: "20px", marginBottom: 0},
 });
 
-export function IdentityMerger({selectedId}: Props) {
+export function IdentityMerger({selectedId}: Props): ReactNode {
   const {ledger, updateLedger} = useLedger();
   const classes = useStyles();
   const [inputValue, setInputValue] = useState("");

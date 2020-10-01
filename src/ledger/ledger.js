@@ -495,7 +495,7 @@ export class Ledger {
     to: IdentityId,
     amount: G.Grain,
     memo: string | null,
-  |}) {
+  |}): this {
     const {from, to, amount, memo} = opts;
     this._createAndProcessEvent({
       from,

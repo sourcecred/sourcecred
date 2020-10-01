@@ -16,7 +16,7 @@ const env = getClientEnvironment(null);
 
 // This is the backend configuration. It builds applications that target
 // Node and will not run in a browser.
-module.exports = {
+module.exports = ({
   // Don't attempt to continue if there are any errors.
   bail: true,
   // Target Node instead of the browser.
@@ -75,4 +75,4 @@ module.exports = {
     new webpack.BannerPlugin({banner: "#!/usr/bin/env node", raw: true}),
   ],
   mode: process.env.NODE_ENV,
-};
+} /*: any */);

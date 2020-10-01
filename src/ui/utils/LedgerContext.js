@@ -21,7 +21,7 @@ type LedgerProviderProps = {|
 export const LedgerProvider = ({
   children,
   initialLedger,
-}: LedgerProviderProps) => {
+}: LedgerProviderProps): React.Node => {
   const [{ledger}, setLedgerState] = React.useState({ledger: initialLedger});
 
   const updateLedger = (ledger: Ledger) => setLedgerState({ledger});
@@ -33,6 +33,6 @@ export const LedgerProvider = ({
   );
 };
 
-export const useLedger = () => {
+export const useLedger = (): LedgerContextValue => {
   return React.useContext(LedgerContext);
 };

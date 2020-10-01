@@ -1,17 +1,26 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
-import {Graph} from "../../core/graph";
+import {Graph, type Node, type Edge} from "../../core/graph";
 import {partsNode, partsEdge} from "../../core/graphTestUtil";
 
-export const nodes = deepFreeze({
+export const nodes: {|
+  inserter1: Node,
+  inserter2: Node,
+  machine1: Node,
+  machine2: Node,
+|} = deepFreeze({
   inserter1: partsNode(["factorio", "inserter", "1"]),
   machine1: partsNode(["factorio", "machine", "1"]),
   inserter2: partsNode(["factorio", "inserter", "2"]),
   machine2: partsNode(["factorio", "machine", "2"]),
 });
 
-export const edges = deepFreeze({
+export const edges: {|
+  assembles1: Edge,
+  transports1: Edge,
+  transports2: Edge,
+|} = deepFreeze({
   transports1: partsEdge(
     ["factorio", "transports", "1"],
     nodes.inserter1,
@@ -29,7 +38,7 @@ export const edges = deepFreeze({
   ),
 });
 
-export function graph() {
+export function graph(): Graph {
   return new Graph()
     .addNode(nodes.inserter1)
     .addNode(nodes.inserter2)

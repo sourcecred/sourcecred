@@ -2341,7 +2341,11 @@ type UpdateResult = {
     | NodeConnectionsUpdateResult,
 };
 
-export const _FIELD_PREFIXES = deepFreeze({
+export const _FIELD_PREFIXES: {|
+  NODE_CONNECTIONS: string,
+  OWN_DATA: string,
+  TYPENAMES: string,
+|} = deepFreeze({
   /**
    * A key of an `UpdateResult` has this prefix if and only if the
    * corresponding value represents `TypenamesUpdateResult`s.

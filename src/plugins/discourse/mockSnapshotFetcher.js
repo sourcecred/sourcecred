@@ -21,4 +21,5 @@ async function snapshotFetch(url: string | Request | URL): Promise<Response> {
     throw new Error(`couldn't load snapshot for ${file}`);
   }
 }
-export const snapshotFetcher = () => new Fetcher(options, snapshotFetch, 0);
+export const snapshotFetcher = (): Fetcher =>
+  new Fetcher(options, snapshotFetch, 0);

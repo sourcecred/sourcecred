@@ -33,7 +33,19 @@ function githubEdgeAddress(...parts: string[]): RawAddress {
   return EdgeAddress.append(GITHUB_PREFIX, ...parts);
 }
 
-export const Prefix = deepFreeze({
+export const Prefix: {|
+  authors: RawAddress,
+  base: EdgeAddressT,
+  correspondsToCommit: RawAddress,
+  hasParent: RawAddress,
+  mergedAs: RawAddress,
+  reacts: RawAddress,
+  reactsHeart: RawAddress,
+  reactsHooray: RawAddress,
+  reactsRocket: RawAddress,
+  reactsThumbsUp: RawAddress,
+  references: RawAddress,
+|} = deepFreeze({
   base: GITHUB_PREFIX,
   authors: githubEdgeAddress(AUTHORS_TYPE),
   mergedAs: githubEdgeAddress(MERGED_AS_TYPE),
@@ -84,7 +96,39 @@ export type StructuredAddress =
   | ReactsAddress
   | CorrespondsToCommitAddress;
 
-export const createEdge = deepFreeze({
+export const createEdge: {|
+  authors: (
+    author: GithubNode.UserlikeAddress,
+    content: GithubNode.AuthorableAddress,
+    timestampMs: TimestampMs
+  ) => Edge,
+  correspondsToCommit: (
+    githubCommit: GithubNode.CommitAddress,
+    gitCommit: GitNode.CommitAddress,
+    timestampMs: TimestampMs
+  ) => Edge,
+  hasParent: (
+    child: GithubNode.ChildAddress,
+    parent: GithubNode.ParentAddress,
+    timestampMs: TimestampMs
+  ) => Edge,
+  mergedAs: (
+    pull: GithubNode.PullAddress,
+    commit: GithubNode.CommitAddress,
+    timestampMs: TimestampMs
+  ) => Edge,
+  reacts: (
+    reactionType: ReactionContent,
+    user: GithubNode.UserlikeAddress,
+    reactable: GithubNode.ReactableAddress,
+    timestampMs: TimestampMs
+  ) => Edge,
+  references: (
+    referrer: GithubNode.TextContentAddress,
+    referent: GithubNode.ReferentAddress,
+    timestampMs: TimestampMs
+  ) => Edge,
+|} = deepFreeze({
   authors: (
     author: GithubNode.UserlikeAddress,
     content: GithubNode.AuthorableAddress,

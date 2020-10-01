@@ -23,10 +23,12 @@ function gitEdgeAddress(...parts: string[]): RawAddress {
   return EdgeAddress.append(GIT_PREFIX, ...parts);
 }
 
-export const Prefix = deepFreeze({
-  base: GIT_PREFIX,
-  hasParent: gitEdgeAddress(HAS_PARENT_TYPE),
-});
+export const Prefix: {|base: EdgeAddressT, hasParent: RawAddress|} = deepFreeze(
+  {
+    base: GIT_PREFIX,
+    hasParent: gitEdgeAddress(HAS_PARENT_TYPE),
+  }
+);
 
 export type HasParentAddress = {|
   type: typeof HAS_PARENT_TYPE,
@@ -36,7 +38,13 @@ export type HasParentAddress = {|
 
 export type StructuredAddress = HasParentAddress;
 
-export const createEdge = deepFreeze({
+export const createEdge: {|
+  hasParent: (
+    child: GitNode.CommitAddress,
+    parent: GitNode.CommitAddress,
+    timestampMs: TimestampMs
+  ) => Edge,
+|} = deepFreeze({
   hasParent: (
     child: GitNode.CommitAddress,
     parent: GitNode.CommitAddress,

@@ -15,7 +15,7 @@ const useStyles = makeStyles(
   {name: "RaLoadingIndicator"}
 );
 
-const LoadingIndicator = (props: Props) => {
+const LoadingIndicator = (props: Props): React.Node | boolean => {
   const {classes: _ /*classesOverride*/, className} = props;
   useRefreshWhenVisible();
   const loading = useSelector((state) => state.admin.loading > 0);

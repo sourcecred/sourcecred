@@ -9,7 +9,7 @@ import {
 } from "./graph";
 import * as NullUtil from "../util/null";
 
-const EMPTY_ENTRY_SYMBOL = Symbol("EMPTY");
+const EMPTY_ENTRY_SYMBOL: symbol = Symbol("EMPTY");
 
 type Entry<V> = {|+map: RecursiveMap<V>, value: V | typeof EMPTY_ENTRY_SYMBOL|};
 type RecursiveMap<V> = Map<string, Entry<V>>;

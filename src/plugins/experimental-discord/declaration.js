@@ -3,10 +3,21 @@
 import deepFreeze from "deep-freeze";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {NodeType, EdgeType} from "../../analysis/types";
-import {NodeAddress, EdgeAddress} from "../../core/graph";
+import {
+  NodeAddress,
+  EdgeAddress,
+  type NodeAddressT,
+  type EdgeAddressT,
+} from "../../core/graph";
 
-export const nodePrefix = NodeAddress.fromParts(["sourcecred", "discord"]);
-export const edgePrefix = EdgeAddress.fromParts(["sourcecred", "discord"]);
+export const nodePrefix: NodeAddressT = NodeAddress.fromParts([
+  "sourcecred",
+  "discord",
+]);
+export const edgePrefix: EdgeAddressT = EdgeAddress.fromParts([
+  "sourcecred",
+  "discord",
+]);
 
 export const memberNodeType: NodeType = deepFreeze({
   name: "Member",

@@ -1,11 +1,11 @@
 // @flow
 
-import React, {type Node} from "react";
+import React, {type Node as ReactNode} from "react";
 
 export type Props = {|
   +onUpload: (any) => void,
   +title: string,
-  +children: Node,
+  +children: ReactNode,
 |};
 
 /**
@@ -20,7 +20,7 @@ export type Props = {|
 // You may do so by running `yarn start` and navigating to:
 // http://localhost:8080/test/FileUploader/
 export class FileUploader extends React.Component<Props> {
-  render() {
+  render(): ReactNode {
     const onUpload = (e) => {
       const file = e.target.files[0];
       const reader = new FileReader();

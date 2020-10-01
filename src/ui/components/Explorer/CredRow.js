@@ -26,7 +26,7 @@ const CredRow = ({
   description,
   depth,
   indent,
-}: CredRowProps) => {
+}: CredRowProps): ReactNode => {
   const [expanded, setExpanded] = useState(false);
   const backgroundColor = `hsla(150,100%,28%,${1 - 0.9 ** depth})`;
   const makeGradient = (color) => `linear-gradient(to top, ${color}, ${color})`;

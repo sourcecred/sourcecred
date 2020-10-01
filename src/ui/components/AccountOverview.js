@@ -1,6 +1,6 @@
 // @flow
 
-import React from "react";
+import React, {type Node as ReactNode} from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -26,7 +26,7 @@ const useStyles = makeStyles(() => {
 
 export const AccountOverview = ({
   currency: {suffix: currencySuffix},
-}: OverviewProps) => {
+}: OverviewProps): ReactNode => {
   const {ledger} = useLedger();
   const classes = useStyles();
 

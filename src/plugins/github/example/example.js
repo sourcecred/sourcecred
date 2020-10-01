@@ -1,5 +1,14 @@
 // @flow
 
+import type {
+  Userlike,
+  Review,
+  Repo,
+  Pull,
+  Issue,
+  Commit,
+  Comment,
+} from "../relationalView";
 import {RelationalView} from "../relationalView";
 import type {Repository} from "../graphqlTypes";
 import {type WeightedGraph} from "../../../core/weightedGraph";
@@ -20,7 +29,15 @@ export function exampleGraph(): WeightedGraph {
   return createGraph(exampleRelationalView());
 }
 
-export function exampleEntities() {
+export function exampleEntities(): {|
+  comment: Comment,
+  commit: Commit,
+  issue: Issue,
+  pull: Pull,
+  repo: Repo,
+  review: Review,
+  userlike: Userlike,
+|} {
   const view = exampleRelationalView();
   const repo = Array.from(view.repos())[0];
   const issue = Array.from(repo.issues())[1];
