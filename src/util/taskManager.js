@@ -7,9 +7,7 @@ import {
   SilentTaskReporter,
 } from "./taskReporter";
 
-type TaskNodeId = string;
-type RootedTaskId = TaskNodeId[];
-type TaskNode = {|
+export type TaskNode = {|
   reporter: TaskReporter,
   children: Map<TaskId, TaskNode>,
 |};
@@ -39,82 +37,48 @@ type TaskNode = {|
 export class TaskManager {
   _taskRoot: TaskNode;
 
-  constructor(rootNode: ?TaskNode) {
-    this._taskRoot = rootNode || createNode();
+  constructor(reporter?: TaskReporter) {
+    this._constructor(createNode(reporter || new SilentTaskReporter()));
   }
 
-  start(id: TaskId) {
-    const rootId = fromTaskId(id);
-    if (this.findTask(rootId)) {
+  _constructor(rootNode: TaskNode): TaskManager {
+    this._taskRoot = rootNode;
+    return this;
+  }
+
+  start(id: TaskId): TaskManager {
+    if (this._findTask(id)) {
       throw new Error(`Task ${id} already registered`);
     }
-    this._createTask(rootId);
+    const childTask = this._createTask(id);
+    const newMgr = new TaskManager();
+    return newMgr._constructor(childTask);
+  }
+
+  finish(id: TaskId): this {
+    this._finishTask(id);
     return this;
   }
 
-  finish(id: TaskId) {
-    const rootId = fromTaskId(id);
-    if (!this.findTask(rootId)) {
-      throw new Error(`Task ${id} not registered`);
-    }
-    this._findandFinishTask(rootId);
-    return this;
+  _findTask(id: TaskId, node: TaskNode = this._taskRoot): ?TaskNode {
+    return node.children.get(id);
   }
 
-  createScope(id: TaskId): TaskManager {
-    const rootId = fromTaskId(id);
-    const contextRoot = this.findTask(rootId);
-    if (!contextRoot) {
-      throw new Error(`task ${id} not registered`);
-    }
-    return new TaskManager(contextRoot);
+  _createTask(id: TaskId, node: TaskNode = this._taskRoot): TaskNode {
+    const newTask = createNode(new ScopedTaskReporter(node.reporter, id));
+    node.children.set(id, newTask);
+    node.reporter.start(id);
+    return newTask;
   }
 
-  findTask(rootId: RootedTaskId, node: TaskNode = this._taskRoot): ?TaskNode {
-    // don't want to modify the Id passed into findTask here
-    // so we create and operate on a duplicate
-    const idCopy = [...rootId];
-    if (!rootId.length) return node;
-    const id = idCopy.shift();
-    const child = node.children.get(id);
-    if (child) {
-      return this.findTask(idCopy, child);
+  _finishTask(idToKill: TaskId, parent: TaskNode = this._taskRoot) {
+    const tasktoKill = this._findTask(idToKill, parent);
+    if (!tasktoKill) {
+      throw new Error(`Task ${idToKill} not registered`);
     }
-  }
-
-  _createTask(rootId: RootedTaskId, node: TaskNode = this._taskRoot) {
-    if (rootId.length === 0) return;
-    const id = rootId.shift();
-    let currentTask = node.children.get(id);
-    if (!currentTask) {
-      const newTask = createNode(new ScopedTaskReporter(node.reporter, id));
-      node.children.set(id, newTask);
-      node.reporter.start(id);
-
-      currentTask = newTask;
-    }
-    this._createTask(rootId, currentTask);
-  }
-
-  _findandFinishTask(rootId: RootedTaskId, node: TaskNode = this._taskRoot) {
-    const id = rootId.shift();
-    const currentTask = node.children.get(id);
-    if (rootId.length === 0) {
-      this._finishTask(id, node);
-
-      return;
-    }
-    this._findandFinishTask(rootId, currentTask);
-  }
-
-  _finishTask(idToKill: TaskNodeId, parent: TaskNode) {
-    const tasktoKill = parent.children.get(idToKill);
-    // Keep Flow Happy
-    if (tasktoKill) {
-      this._finishChildren(tasktoKill);
-      parent.children.delete(idToKill);
-      parent.reporter.finish(idToKill);
-    }
+    this._finishChildren(tasktoKill);
+    parent.children.delete(idToKill);
+    parent.reporter.finish(idToKill);
   }
 
   _finishChildren(task: TaskNode) {
@@ -125,12 +89,6 @@ export class TaskManager {
   }
 }
 
-export function createNode(
-  reporter: TaskReporter = new SilentTaskReporter()
-): TaskNode {
+function createNode(reporter: TaskReporter): TaskNode {
   return {reporter, children: new Map()};
-}
-
-function fromTaskId(id: TaskId): RootedTaskId {
-  return id.split(": ");
 }
