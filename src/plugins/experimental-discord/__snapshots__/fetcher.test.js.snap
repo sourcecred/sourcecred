@@ -47,19 +47,9 @@ Array [
 exports[`plugins/experimental-discord/fetcher snapshot testing loads guilds 1`] = `
 Array [
   Object {
-    "id": "453243919774253079",
-    "name": "sourcecred",
-    "permissions": 104193601,
-  },
-  Object {
-    "id": "629411177947987986",
-    "name": "MetaGame",
-    "permissions": 104324673,
-  },
-  Object {
     "id": "678348980639498428",
     "name": "SourceCred Test Server",
-    "permissions": 33620992,
+    "permissions": 2147483647,
   },
 ]
 `;
@@ -87,7 +77,7 @@ Array [
     ],
     "user": Object {
       "bot": false,
-      "discriminator": "8636",
+      "discriminator": "1337",
       "id": "420341518948237331",
       "username": "decentralion",
     },
@@ -121,6 +111,30 @@ Array [
   Object {
     "nick": null,
     "roles": Array [
+      "678350026946117694",
+    ],
+    "user": Object {
+      "bot": false,
+      "discriminator": "1337",
+      "id": "489154203714060300",
+      "username": "topocount",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [
+      "678350026946117694",
+    ],
+    "user": Object {
+      "bot": false,
+      "discriminator": "3969",
+      "id": "579830927287386126",
+      "username": "sandpiper",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [
       "678359229433905152",
     ],
     "user": Object {
@@ -128,6 +142,30 @@ Array [
       "discriminator": "1705",
       "id": "678351352770068560",
       "username": "CredBot-Beanow",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [
+      "728740243926286386",
+    ],
+    "user": Object {
+      "bot": true,
+      "discriminator": "3557",
+      "id": "728738433199112280",
+      "username": "sts-credbot",
+    },
+  },
+  Object {
+    "nick": null,
+    "roles": Array [
+      "761706197606334535",
+    ],
+    "user": Object {
+      "bot": true,
+      "discriminator": "6627",
+      "id": "761705425870782516",
+      "username": "SourceCred Test",
     },
   },
 ]
@@ -369,6 +407,15 @@ Array [
     },
     "messageId": "678394436757094410",
   },
+  Object {
+    "authorId": "439050857921904640",
+    "channelId": "678394406507905129",
+    "emoji": Object {
+      "id": "678399364418502669",
+      "name": "sourcecred",
+    },
+    "messageId": "678394436757094410",
+  },
 ]
 `;
 
@@ -389,6 +436,14 @@ Array [
   Object {
     "id": "678359229433905152",
     "name": "CredBot-Beanow",
+  },
+  Object {
+    "id": "728740243926286386",
+    "name": "sts-credbot",
+  },
+  Object {
+    "id": "761706197606334535",
+    "name": "SourceCred Test",
   },
 ]
 `;
