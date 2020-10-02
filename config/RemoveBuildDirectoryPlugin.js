@@ -3,12 +3,10 @@
 const fs = require("fs-extra");
 const path = require("path");
 
-// Note: the following type-import just resolves to `any`.
-/*:: import type {Compiler} from "webpack"; */
+/*:: type Compiler = any; */
 
 const pluginName = "RemoveBuildDirectoryPlugin";
 class RemoveBuildDirectoryPlugin {
-  // $FlowIgnore[value-as-type]
   apply(compiler /*: Compiler */) {
     compiler.hooks.run.tap(pluginName, () => {
       const outputPath = compiler.options.output.path;
