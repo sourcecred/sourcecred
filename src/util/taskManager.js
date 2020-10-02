@@ -19,20 +19,18 @@ export type TaskNode = {|
  * maintain their own task state for internal use. The primary concern of
  * the manager is creating and enforcing task scopes via a tree structure.
  *
- * Motivation
- * When a plugin task needs to be terminated in the load command, it is
- * important that all child tasks also are terminated in case a restart of the
- * task is necessary. A well-behaved plugin should terminate all tasks it
- * spawns on its own, but in the case of a cache error or other unexpected
- * error, this class makes it possible to quickly find and safely terminate all
- * child tasks.
- *
  * Scopes
- * A plugin can safely manage its own subset of tasks through the use of
- * TaskManager.prototype.createScope. An existing TaskId can be passed in to
- * create new TaskManager instance that has the plugin task as root, allowing
- * the plugin context to manage its own tasks without the possiblity of
- * terminating any out-of-scope tasks, or its own root process.
+ * A parent task can safely manage its own subset of tasks through the use of
+ * scopes. TaskManager.prototype.start returns a new new TaskManager instance
+ * that is rooted on the newly created task. For this reason, TaskManager does not
+ * implement the TaskReporter interface.
+ *
+ * Motivation
+ * When a task needs to be terminated, it is important that all its child tasks
+ * also finish, especially the in the case of a restart. A well-behaved task should
+ * terminate all tasks it spawns within its own context, but in the case of an
+ * unexpected error, this class makes it possible to quickly find and safely terminate
+ * all child tasks.
  */
 export class TaskManager {
   _taskRoot: TaskNode;
