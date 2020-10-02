@@ -7,7 +7,8 @@
     "color": 0,
     "hoist": false,
     "managed": false,
-    "mentionable": false
+    "mentionable": false,
+    "permissions_new": "33620992"
   },
   {
     "id": "678349848684003359",
@@ -17,7 +18,8 @@
     "color": 2123412,
     "hoist": false,
     "managed": false,
-    "mentionable": false
+    "mentionable": false,
+    "permissions_new": "104324673"
   },
   {
     "id": "678350026946117694",
@@ -27,7 +29,8 @@
     "color": 15105570,
     "hoist": false,
     "managed": false,
-    "mentionable": false
+    "mentionable": false,
+    "permissions_new": "104324681"
   },
   {
     "id": "678359229433905152",
@@ -37,6 +40,38 @@
     "color": 0,
     "hoist": false,
     "managed": true,
-    "mentionable": false
+    "mentionable": false,
+    "tags": {
+      "bot_id": "678351352770068560"
+    },
+    "permissions_new": "66560"
+  },
+  {
+    "id": "728740243926286386",
+    "name": "sts-credbot",
+    "permissions": 66560,
+    "position": 1,
+    "color": 0,
+    "hoist": false,
+    "managed": true,
+    "mentionable": false,
+    "tags": {
+      "bot_id": "728738433199112280"
+    },
+    "permissions_new": "66560"
+  },
+  {
+    "id": "761706197606334535",
+    "name": "SourceCred Test",
+    "permissions": 8,
+    "position": 1,
+    "color": 0,
+    "hoist": false,
+    "managed": true,
+    "mentionable": false,
+    "tags": {
+      "bot_id": "761705425870782516"
+    },
+    "permissions_new": "8"
   }
 ]

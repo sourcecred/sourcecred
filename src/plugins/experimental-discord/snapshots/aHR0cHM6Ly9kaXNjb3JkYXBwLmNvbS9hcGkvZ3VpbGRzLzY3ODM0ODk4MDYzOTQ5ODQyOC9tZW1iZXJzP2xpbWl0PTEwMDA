@@ -4,7 +4,8 @@
       "id": "143776454050709505",
       "username": "Beanow",
       "avatar": "6496446fe1455f31f9536b132dcc4ac8",
-      "discriminator": "5887"
+      "discriminator": "5887",
+      "public_flags": 0
     },
     "roles": [
       "678349848684003359",
@@ -12,16 +13,18 @@
     ],
     "nick": null,
     "premium_since": null,
+    "joined_at": "2020-02-15T21:16:40.215000+00:00",
+    "is_pending": false,
     "mute": false,
-    "deaf": false,
-    "joined_at": "2020-02-15T21:16:40.215000+00:00"
+    "deaf": false
   },
   {
     "user": {
       "id": "420341518948237331",
       "username": "decentralion",
-      "avatar": "d54a9b690fd2e47abd4268c55cc25b8f",
-      "discriminator": "8636"
+      "avatar": "a70b70bc0471e6a1efe5124c39c76020",
+      "discriminator": "1337",
+      "public_flags": 0
     },
     "roles": [
       "678349848684003359",
@@ -29,16 +32,18 @@
     ],
     "nick": null,
     "premium_since": null,
+    "joined_at": "2020-02-15T22:31:31.243000+00:00",
+    "is_pending": false,
     "mute": false,
-    "deaf": false,
-    "joined_at": "2020-02-15T22:31:31.243000+00:00"
+    "deaf": false
   },
   {
     "user": {
       "id": "432981598858903585",
       "username": "wchargin",
       "avatar": "012988df3eab485878fd588696097802",
-      "discriminator": "8658"
+      "discriminator": "8658",
+      "public_flags": 0
     },
     "roles": [
       "678349848684003359",
@@ -46,16 +51,18 @@
     ],
     "nick": null,
     "premium_since": null,
+    "joined_at": "2020-02-15T22:21:55.613000+00:00",
+    "is_pending": false,
     "mute": false,
-    "deaf": false,
-    "joined_at": "2020-02-15T22:21:55.613000+00:00"
+    "deaf": false
   },
   {
     "user": {
       "id": "439050857921904640",
       "username": "Brian Litwin",
       "avatar": "1cc439c3506ede04a77be8105d934df4",
-      "discriminator": "2386"
+      "discriminator": "2386",
+      "public_flags": 0
     },
     "roles": [
       "678349848684003359",
@@ -63,16 +70,54 @@
     ],
     "nick": null,
     "premium_since": null,
+    "joined_at": "2020-02-16T00:45:23.478000+00:00",
+    "is_pending": false,
     "mute": false,
-    "deaf": false,
-    "joined_at": "2020-02-16T00:45:23.478000+00:00"
+    "deaf": false
+  },
+  {
+    "user": {
+      "id": "489154203714060300",
+      "username": "topocount",
+      "avatar": "2a6e5d43226461f0bd0f3ddff15f7753",
+      "discriminator": "1337",
+      "public_flags": 0
+    },
+    "roles": [
+      "678350026946117694"
+    ],
+    "nick": null,
+    "premium_since": null,
+    "joined_at": "2020-10-02T18:07:37.732000+00:00",
+    "is_pending": false,
+    "mute": false,
+    "deaf": false
+  },
+  {
+    "user": {
+      "id": "579830927287386126",
+      "username": "sandpiper",
+      "avatar": "9d5df48f961f46e5a79b5af3e1c82fcd",
+      "discriminator": "3969",
+      "public_flags": 0
+    },
+    "roles": [
+      "678350026946117694"
+    ],
+    "nick": null,
+    "premium_since": null,
+    "joined_at": "2020-10-02T18:07:44.893000+00:00",
+    "is_pending": false,
+    "mute": false,
+    "deaf": false
   },
   {
     "user": {
       "id": "678351352770068560",
       "username": "CredBot-Beanow",
-      "avatar": "04fdfc8af8cca3c0b3155a946dccc435",
+      "avatar": "6f5b83041061a114c9f0fb26b863622c",
       "discriminator": "1705",
+      "public_flags": 0,
       "bot": true
     },
     "roles": [
@@ -80,8 +125,47 @@
     ],
     "nick": null,
     "premium_since": null,
+    "joined_at": "2020-02-15T21:57:23.609000+00:00",
+    "is_pending": false,
     "mute": false,
-    "deaf": false,
-    "joined_at": "2020-02-15T21:57:23.609000+00:00"
+    "deaf": false
+  },
+  {
+    "user": {
+      "id": "728738433199112280",
+      "username": "sts-credbot",
+      "avatar": null,
+      "discriminator": "3557",
+      "public_flags": 0,
+      "bot": true
+    },
+    "roles": [
+      "728740243926286386"
+    ],
+    "nick": null,
+    "premium_since": null,
+    "joined_at": "2020-07-03T22:33:33.496000+00:00",
+    "is_pending": false,
+    "mute": false,
+    "deaf": false
+  },
+  {
+    "user": {
+      "id": "761705425870782516",
+      "username": "SourceCred Test",
+      "avatar": null,
+      "discriminator": "6627",
+      "public_flags": 0,
+      "bot": true
+    },
+    "roles": [
+      "761706197606334535"
+    ],
+    "nick": null,
+    "premium_since": null,
+    "joined_at": "2020-10-02T21:48:29.344000+00:00",
+    "is_pending": false,
+    "mute": false,
+    "deaf": false
   }
 ]
