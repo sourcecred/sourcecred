@@ -1,13 +1,12 @@
 // @flow
 
 import fs from "fs-extra";
-import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
-import deepEqual from "lodash.isequal";
+import stringify from "json-stable-stringify";
 
 import type {Command} from "./command";
-import {loadInstanceConfig, loadWeightedGraph} from "./common";
-import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
+import {loadInstanceConfig, prepareCredData} from "./common";
+import {loadJsonWithDefault} from "../util/disk";
 import dedent from "../util/dedent";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {
@@ -17,14 +16,7 @@ import {
 } from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import * as Params from "../analysis/timeline/params";
-import {contractions as identityContractions} from "../ledger/identity";
-import {Ledger} from "../ledger/ledger";
 import {computeCredAccounts} from "../ledger/credAccounts";
-import {
-  parser as dependenciesParser,
-  ensureIdentityExists,
-  toDependencyPolicy,
-} from "../api/dependenciesConfig";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -40,44 +32,7 @@ const scoreCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const config = await loadInstanceConfig(baseDir);
 
-  const weightedGraph = await loadWeightedGraph(baseDir, config);
-
-  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
-  const ledger = Ledger.parse(
-    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
-  );
-
-  const dependenciesPath = pathJoin(baseDir, "config", "dependencies.json");
-  const dependencies = await loadJsonWithDefault(
-    dependenciesPath,
-    dependenciesParser,
-    () => []
-  );
-  const dependenciesWithIds = dependencies.map((d) =>
-    ensureIdentityExists(d, ledger)
-  );
-  if (!deepEqual(dependenciesWithIds, dependencies)) {
-    // Save the new dependencies, with canonical IDs set.
-    await fs.writeFile(
-      dependenciesPath,
-      stringify(dependenciesWithIds, {space: 4})
-    );
-    // Save the Ledger, since we may have added/activated identities.
-    await fs.writeFile(ledgerPath, ledger.serialize());
-  }
-
-  const dependencyPolicies = dependenciesWithIds.map((d) =>
-    toDependencyPolicy(d, ledger)
-  );
-
-  const identities = ledger.accounts().map((a) => a.identity);
-  const contractedGraph = weightedGraph.graph.contractNodes(
-    identityContractions(identities)
-  );
-  const contractedWeightedGraph = {
-    graph: contractedGraph,
-    weights: weightedGraph.weights,
-  };
+  const {graph, ledger, dependencies} = await prepareCredData(baseDir, config);
 
   const plugins = Array.from(config.bundledPlugins.values());
   const declarations = plugins.map((x) => x.declaration());
@@ -90,12 +45,7 @@ const scoreCommand: Command = async (args, std) => {
     Params.defaultParams
   );
 
-  const credResult = await compute(
-    contractedWeightedGraph,
-    params,
-    declarations,
-    dependencyPolicies
-  );
+  const credResult = await compute(graph, params, declarations, dependencies);
   // Throw away over-time data for all non-user nodes; we may not have that
   // information available once we merge CredRank, anyway.
   const stripped = stripOverTimeDataForNonUsers(credResult);
