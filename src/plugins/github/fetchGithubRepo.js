@@ -261,11 +261,15 @@ export async function postQuery(
           );
           break;
         case "RATE_LIMIT_EXCEEDED":
-          console.error(
+          console.warn(
             "You've exceeded your hourly GitHub rate limit.\n" +
               "You'll need to wait until it resets."
           );
-          break;
+          return setTimeout(
+            () => retryGithubFetch(fetch, fetchOptions),
+            // wait 1 hour for rate limit to reset
+            1000 * 60 * 60
+          );
         case "FETCH_ERROR":
           // Network error; no need for additional commentary.
           break;
