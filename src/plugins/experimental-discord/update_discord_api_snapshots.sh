@@ -11,7 +11,7 @@ if [ ! "$(jq --version)" ]; then
 fi
 
 if [ -z "${SOURCECRED_TEST_SERVER_TOKEN:-}" ]; then
-  printf >&2 "Please set the SOURCECRED_DISCORD_TOKEN environment variable.\n"
+  printf >&2 "Please set the SOURCECRED_TEST_SERVER_TOKEN environment variable.\n"
   exit 1
 fi
 
@@ -40,7 +40,7 @@ fetch "/guilds/$GUILD_ID"
 fetch "/guilds/$GUILD_ID/channels"
 fetch "/guilds/$GUILD_ID/roles"
 fetch "/guilds/$GUILD_ID/emojis"
-fetch "/guilds/$GUILD_ID/members?limit=1000"
+fetch "/guilds/$GUILD_ID/members?after=0&limit=1000"
 fetch "/channels/$CHANNEL_ID/messages?after=0&limit=10"
 fetch "/channels/$CHANNEL_ID/messages?after=678394455849566208&limit=10"
 fetch "/channels/$CHANNEL_ID/messages/$MESSAGE_ID/reactions/$EMOJI_NAME:$EMOJI_ID?after=0&limit=100"

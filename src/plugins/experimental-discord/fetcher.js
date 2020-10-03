@@ -105,16 +105,22 @@ export class Fetcher implements DiscordApi {
   async members(
     guild: Model.Snowflake
   ): Promise<$ReadOnlyArray<Model.GuildMember>> {
-    // TODO: hack, should have pagination.
-    const members = await this._fetchJson(
-      `/guilds/${guild}/members?limit=1000`
-    );
-    if (members.length === 1000) {
-      throw new Error(
-        "TODO: getting 1000 members, needs to implement pagination"
+    const limit = 1000;
+    let doneLoading = false;
+    let allMembers = [];
+    let after = "0";
+    while (!doneLoading) {
+      const newMembers: Array<Model.GuildMember> = await this._fetchJson(
+        `/guilds/${guild}/members?after=${after}&limit=${limit}`
       );
+      if (newMembers.length < limit) {
+        doneLoading = true;
+      } else {
+        after = newMembers[newMembers.length - 1].user.id;
+      }
+      allMembers = [...allMembers, ...newMembers];
     }
-    return members.map((x) => ({
+    return allMembers.map((x) => ({
       user: {
         id: x.user.id,
         username: x.user.username,
@@ -151,17 +157,24 @@ export class Fetcher implements DiscordApi {
     message: Model.Snowflake,
     emoji: Model.Emoji
   ): Promise<$ReadOnlyArray<Model.Reaction>> {
-    // TODO: implement pagination.
-    const after = "0";
+    let doneLoading = false;
+    let allReactingUsers: Array<Model.User> = [];
+    let after = "0";
     const limit = 100;
     const emojiRef = Model.emojiToRef(emoji);
-    const reactingUsers = await this._fetchJson(
-      `/channels/${channel}/messages/${message}/reactions/${emojiRef}?after=${after}&limit=${limit}`
-    );
-    if (reactingUsers.length === 100) {
-      throw new Error("TODO: implement reactions pagination");
+    while (!doneLoading) {
+      const newReactingUsers: Array<Model.User> = await this._fetchJson(
+        `/channels/${channel}/messages/${message}/reactions/${emojiRef}?after=${after}&limit=${limit}`
+      );
+      if (newReactingUsers.length < limit) {
+        doneLoading = true;
+      } else {
+        after = newReactingUsers[newReactingUsers.length - 1].id;
+      }
+      allReactingUsers = [...allReactingUsers, ...newReactingUsers];
     }
-    return reactingUsers.map((x) => ({
+
+    return allReactingUsers.map((x) => ({
       channelId: channel,
       messageId: message,
       emoji,
