@@ -7,11 +7,10 @@ import {join as pathJoin} from "path";
 import sortBy from "../util/sortBy";
 import {credrank} from "../core/algorithm/credrank";
 import {CredGraph} from "../core/credGraph";
-import {NodeAddress, type Graph, type NodeAddressT} from "../core/graph";
 import {LoggingTaskReporter} from "../util/taskReporter";
-import {MarkovProcessGraph, type Participant} from "../core/markovProcessGraph";
+import {MarkovProcessGraph} from "../core/markovProcessGraph";
 import type {Command} from "./command";
-import {loadInstanceConfig, loadWeightedGraph} from "./common";
+import {loadInstanceConfig, prepareCredData} from "./common";
 
 const DEFAULT_ALPHA = 0.1;
 const DEFAULT_BETA = 0.4;
@@ -33,12 +32,9 @@ const credrankCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const config = await loadInstanceConfig(baseDir);
 
-  const plugins = Array.from(config.bundledPlugins.values());
-  const declarations = plugins.map((x) => x.declaration());
-
-  taskReporter.start("load weighted graph");
-  const wg = await loadWeightedGraph(baseDir, config);
-  taskReporter.finish("load weighted graph");
+  taskReporter.start("load data");
+  const {weightedGraph, ledger} = await prepareCredData(baseDir, config);
+  taskReporter.finish("load data");
 
   taskReporter.start("create Markov process graph");
   // TODO: Support loading transition probability params from config.
@@ -50,12 +46,13 @@ const credrankCommand: Command = async (args, std) => {
   const seedOptions = {
     alpha: DEFAULT_ALPHA,
   };
-  const participants = findParticipants(
-    wg.graph,
-    [].concat(...declarations.map((d) => d.userTypes.map((t) => t.prefix)))
-  );
+  const participants = ledger.accounts().map(({identity}) => ({
+    description: identity.name,
+    address: identity.address,
+    id: identity.id,
+  }));
   const mpg = MarkovProcessGraph.new(
-    wg,
+    weightedGraph,
     participants,
     fibrationOptions,
     seedOptions
@@ -88,19 +85,6 @@ function printCredSummaryTable(credGraph: CredGraph) {
   sortedParticipants
     .slice(0, 20)
     .forEach((n) => console.log(`| ${n.description} | ${n.cred.toFixed(1)} |`));
-}
-
-function findParticipants(
-  graph: Graph,
-  scoringPrefixes: $ReadOnlyArray<NodeAddressT>
-): $ReadOnlyArray<Participant> {
-  const result = [];
-  for (const {address, description} of graph.nodes()) {
-    if (scoringPrefixes.some((p) => NodeAddress.hasPrefix(address, p))) {
-      result.push({address, description});
-    }
-  }
-  return result;
 }
 
 export default credrankCommand;
