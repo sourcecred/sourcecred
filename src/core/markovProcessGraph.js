@@ -1,5 +1,7 @@
 // @flow
 
+import deepFreeze from "deep-freeze";
+
 /**
  * Data structure representing a particular kind of Markov process, as
  * kind of a middle ground between the semantic SourceCred graph (in the
@@ -55,6 +57,7 @@
 import {max, min} from "d3-array";
 import {weekIntervals} from "./interval";
 import sortedIndex from "lodash.sortedindex";
+import sortBy from "../util/sortBy";
 import {makeAddressModule, type AddressModule} from "./address";
 import {
   type NodeAddressT,
@@ -104,6 +107,12 @@ export type MarkovEdge = {|
   // to 1.0 for a given `src`.
   +transitionProbability: TransitionProbability,
 |};
+
+export type Participant = {|
+  +address: NodeAddressT,
+  +description: string,
+|};
+
 export opaque type MarkovEdgeAddressT: string = string;
 export const MarkovEdgeAddress: AddressModule<MarkovEdgeAddressT> = (makeAddressModule(
   {
@@ -113,11 +122,21 @@ export const MarkovEdgeAddress: AddressModule<MarkovEdgeAddressT> = (makeAddress
   }
 ): AddressModule<string>);
 
-function rawEdgeAddress(edge: MarkovEdge): MarkovEdgeAddressT {
+export function markovEdgeAddress(
+  edgeAddress: EdgeAddressT,
+  direction: "B" | /* Backward */ "F" /* Forward */
+): MarkovEdgeAddressT {
   return MarkovEdgeAddress.fromParts([
-    edge.reversed ? "B" /* Backward */ : "F" /* Forward */,
-    ...EdgeAddress.toParts(edge.address),
+    direction,
+    ...EdgeAddress.toParts(edgeAddress),
   ]);
+}
+
+function markovEdgeAddressFromMarkovEdge(edge: MarkovEdge): MarkovEdgeAddressT {
+  return markovEdgeAddress(
+    edge.address,
+    edge.reversed ? "B" /* Backward */ : "F" /* Forward */
+  );
 }
 
 export type OrderedSparseMarkovChain = {|
@@ -209,6 +228,18 @@ const FIBRATION_EDGE = EdgeAddress.fromParts([
   "fibration",
 ]);
 const EPOCH_PAYOUT = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_PAYOUT");
+
+export function payoutAddressForEpoch(
+  participantEpoch: UserEpochNodeAddress
+): EdgeAddressT {
+  const {epochStart, owner} = participantEpoch;
+  return EdgeAddress.append(
+    EPOCH_PAYOUT,
+    String(epochStart),
+    ...NodeAddress.toParts(owner)
+  );
+}
+
 const EPOCH_WEBBING = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_WEBBING");
 const USER_EPOCH_RADIATION = EdgeAddress.append(
   FIBRATION_EDGE,
@@ -228,8 +259,6 @@ const CONTRIBUTION_RADIATION = EdgeAddress.fromParts([
 const SEED_MINT = EdgeAddress.fromParts(["sourcecred", "core", "SEED_MINT"]);
 
 export type FibrationOptions = {|
-  // Set of node addresses for temporal fibration.
-  +scoringAddresses: Set<NodeAddressT>,
   // Transition probability for payout edges from epoch nodes to their
   // owners.
   +beta: TransitionProbability,
@@ -242,37 +271,57 @@ export type SeedOptions = {|
   +alpha: TransitionProbability,
 |};
 
-const COMPAT_INFO = {type: "sourcecred/markovProcessGraph", version: "0.1.0"};
+export const COMPAT_INFO = {
+  type: "sourcecred/markovProcessGraph",
+  version: "0.1.0",
+};
 
+// A MarkovEdge in which the src and dst have been replaced with indices instead
+// of full addresses. The indexing is based on the order of nodes in the MarkovProcessGraphJSON.
+export type IndexedMarkovEdge = {|
+  +address: EdgeAddressT,
+  +reversed: boolean,
+  +src: number,
+  +dst: number,
+  +transitionProbability: TransitionProbability,
+|};
 export type MarkovProcessGraphJSON = Compatible<{|
-  +nodes: {|+[NodeAddressT]: MarkovNode|},
-  +edges: {|+[MarkovEdgeAddressT]: MarkovEdge|},
-  +scoringAddresses: $ReadOnlyArray<NodeAddressT>,
+  +sortedNodes: $ReadOnlyArray<MarkovNode>,
+  +indexedEdges: $ReadOnlyArray<IndexedMarkovEdge>,
+  +participants: $ReadOnlyArray<Participant>,
+  // The -Infinity and +Infinity epoch boundaries must be stripped before
+  // JSON serialization.
+  +finiteEpochBoundaries: $ReadOnlyArray<number>,
 |}>;
 
 export class MarkovProcessGraph {
   _nodes: Map<NodeAddressT, MarkovNode>;
   _edges: Map<MarkovEdgeAddressT, MarkovEdge>;
-  _scoringAddresses: Set<NodeAddressT>;
+  _participants: $ReadOnlyArray<Participant>;
+  _epochBoundaries: $ReadOnlyArray<number>;
 
   constructor(
     nodes: Map<NodeAddressT, MarkovNode>,
     edges: Map<MarkovEdgeAddressT, MarkovEdge>,
-    scoringAddresses: Set<NodeAddressT>
+    participants: $ReadOnlyArray<Participant>,
+    epochBoundaries: $ReadOnlyArray<number>
   ) {
     this._nodes = nodes;
     this._edges = edges;
-    this._scoringAddresses = scoringAddresses;
+    this._epochBoundaries = deepFreeze(epochBoundaries);
+    this._participants = deepFreeze(participants);
   }
 
   static new(
     wg: WeightedGraphT,
+    participants: $ReadOnlyArray<Participant>,
     fibration: FibrationOptions,
     seed: SeedOptions
   ): MarkovProcessGraph {
     const _nodes = new Map();
     const _edges = new Map();
-    const _scoringAddresses = new Set(fibration.scoringAddresses);
+
+    const _scoringAddresses = new Set(participants.map((p) => p.address));
 
     // _nodeOutMasses[a] = sum(e.pr for e in edges if e.src == a)
     // Used for computing remainder-to-seed edges.
@@ -313,7 +362,7 @@ export class MarkovProcessGraph {
       _nodes.set(node.address, node);
     };
     const addEdge = (edge: MarkovEdge) => {
-      const mae = rawEdgeAddress(edge);
+      const mae = markovEdgeAddressFromMarkovEdge(edge);
       if (_edges.has(mae)) {
         throw new Error("Edge conflict: " + mae);
       }
@@ -373,22 +422,19 @@ export class MarkovProcessGraph {
         mint: 0,
       });
       for (const scoringAddress of _scoringAddresses) {
-        const thisEpoch = userEpochNodeAddressToRaw({
+        const thisEpochStructured = {
           type: "USER_EPOCH",
           owner: scoringAddress,
           epochStart: boundary,
-        });
+        };
+        const thisEpoch = userEpochNodeAddressToRaw(thisEpochStructured);
         addNode({
           address: thisEpoch,
           description: `Epoch starting ${boundary} ms past epoch`,
           mint: 0,
         });
         addEdge({
-          address: EdgeAddress.append(
-            EPOCH_PAYOUT,
-            String(boundary),
-            ...NodeAddress.toParts(scoringAddress)
-          ),
+          address: payoutAddressForEpoch(thisEpochStructured),
           reversed: false,
           src: thisEpoch,
           dst: accumulator,
@@ -568,11 +614,15 @@ export class MarkovProcessGraph {
       });
     }
 
-    return new MarkovProcessGraph(_nodes, _edges, _scoringAddresses);
+    return new MarkovProcessGraph(_nodes, _edges, participants, timeBoundaries);
   }
 
-  scoringAddresses(): Set<NodeAddressT> {
-    return new Set(this._scoringAddresses);
+  epochBoundaries(): $ReadOnlyArray<number> {
+    return this._epochBoundaries;
+  }
+
+  participants(): $ReadOnlyArray<Participant> {
+    return this._participants;
   }
 
   node(address: NodeAddressT): MarkovNode | null {
@@ -665,19 +715,53 @@ export class MarkovProcessGraph {
   }
 
   toJSON(): MarkovProcessGraphJSON {
+    const nodes = Array.from(this._nodes.values());
+    const sortedNodes = sortBy(nodes, (n) => n.address);
+    const nodeIndex: Map<
+      NodeAddressT,
+      number /* index into nodeOrder */
+    > = new Map();
+    sortedNodes.forEach((n, i) => {
+      nodeIndex.set(n.address, i);
+    });
+    const indexedEdges = Array.from(this._edges.values()).map((e) => ({
+      address: e.address,
+      reversed: e.reversed,
+      src: NullUtil.get(nodeIndex.get(e.src)),
+      dst: NullUtil.get(nodeIndex.get(e.dst)),
+      transitionProbability: e.transitionProbability,
+    }));
     return toCompat(COMPAT_INFO, {
-      nodes: MapUtil.toObject(this._nodes),
-      edges: MapUtil.toObject(this._edges),
-      scoringAddresses: Array.from(this._scoringAddresses),
+      sortedNodes,
+      indexedEdges,
+      participants: this._participants,
+      finiteEpochBoundaries: this._epochBoundaries.slice(
+        1,
+        this._epochBoundaries.length - 1
+      ),
     });
   }
 
   static fromJSON(j: MarkovProcessGraphJSON): MarkovProcessGraph {
-    const data = fromCompat(COMPAT_INFO, j);
+    const {
+      sortedNodes,
+      indexedEdges,
+      participants,
+      finiteEpochBoundaries,
+    } = fromCompat(COMPAT_INFO, j);
+    const edges = indexedEdges.map((e) => ({
+      address: e.address,
+      reversed: e.reversed,
+      src: sortedNodes[e.src].address,
+      dst: sortedNodes[e.dst].address,
+      transitionProbability: e.transitionProbability,
+    }));
+
     return new MarkovProcessGraph(
-      MapUtil.fromObject(data.nodes),
-      MapUtil.fromObject(data.edges),
-      new Set(data.scoringAddresses)
+      new Map(sortedNodes.map((n) => [n.address, n])),
+      new Map(edges.map((e) => [e.address, e])),
+      participants,
+      [-Infinity, ...finiteEpochBoundaries, Infinity]
     );
   }
 }

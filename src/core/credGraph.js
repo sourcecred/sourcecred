@@ -2,12 +2,14 @@
 
 import * as NullUtil from "../util/null";
 import * as MapUtil from "../util/map";
-import type {NodeAddressT, EdgeAddressT} from "./graph";
+import {type NodeAddressT, type EdgeAddressT} from "./graph";
 import {
   MarkovProcessGraph,
   type MarkovProcessGraphJSON,
   type MarkovEdge,
   type TransitionProbability,
+  markovEdgeAddress,
+  payoutAddressForEpoch,
 } from "./markovProcessGraph";
 
 export type Node = {|
@@ -24,6 +26,13 @@ export type Edge = {|
   +dst: NodeAddressT,
   +transitionProbability: TransitionProbability,
   +credFlow: number,
+|};
+
+export type Participant = {|
+  +address: NodeAddressT,
+  +description: string,
+  +cred: number,
+  +credPerEpoch: $ReadOnlyArray<number>,
 |};
 
 export type CredGraphJSON = {|
@@ -70,9 +79,28 @@ export class CredGraph {
     }
   }
 
-  *scoringNodes(): Iterator<Node> {
-    for (const addr of this._mpg.scoringAddresses()) {
-      yield NullUtil.get(this.node(addr));
+  *participants(): Iterator<Participant> {
+    for (const {address, description} of this._mpg.participants()) {
+      const epochs = this._mpg.epochBoundaries().map((epochStart) => ({
+        type: "USER_EPOCH",
+        owner: address,
+        epochStart,
+      }));
+      let totalCred = 0;
+      const credPerEpoch = epochs.map((e) => {
+        const payoutEdgeAddress = payoutAddressForEpoch(e);
+        const payoutMarkovEdgeAddress = markovEdgeAddress(
+          payoutEdgeAddress,
+          "F"
+        );
+        const payoutMarkovEdge = NullUtil.get(
+          this._mpg._edges.get(payoutMarkovEdgeAddress)
+        );
+        const cred = this._credFlow(payoutMarkovEdge);
+        totalCred += cred;
+        return cred;
+      });
+      yield {address, description, credPerEpoch, cred: totalCred};
     }
   }
 

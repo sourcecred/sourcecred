@@ -4,10 +4,12 @@ import fs from "fs-extra";
 import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
 
+import sortBy from "../util/sortBy";
 import {credrank} from "../core/algorithm/credrank";
+import {CredGraph} from "../core/credGraph";
 import {NodeAddress, type Graph, type NodeAddressT} from "../core/graph";
 import {LoggingTaskReporter} from "../util/taskReporter";
-import {MarkovProcessGraph} from "../core/markovProcessGraph";
+import {MarkovProcessGraph, type Participant} from "../core/markovProcessGraph";
 import type {Command} from "./command";
 import {makePluginDir, loadInstanceConfig} from "./common";
 import {
@@ -56,10 +58,6 @@ const credrankCommand: Command = async (args, std) => {
   taskReporter.start("create Markov process graph");
   // TODO: Support loading transition probability params from config.
   const fibrationOptions = {
-    scoringAddresses: findScoringAddresses(
-      wg.graph,
-      [].concat(...declarations.map((d) => d.userTypes.map((t) => t.prefix)))
-    ),
     beta: DEFAULT_BETA,
     gammaForward: DEFAULT_GAMMA_FORWARD,
     gammaBackward: DEFAULT_GAMMA_BACKWARD,
@@ -67,7 +65,16 @@ const credrankCommand: Command = async (args, std) => {
   const seedOptions = {
     alpha: DEFAULT_ALPHA,
   };
-  const mpg = MarkovProcessGraph.new(wg, fibrationOptions, seedOptions);
+  const participants = findParticipants(
+    wg.graph,
+    [].concat(...declarations.map((d) => d.userTypes.map((t) => t.prefix)))
+  );
+  const mpg = MarkovProcessGraph.new(
+    wg,
+    participants,
+    fibrationOptions,
+    seedOptions
+  );
   taskReporter.finish("create Markov process graph");
 
   taskReporter.start("run CredRank");
@@ -80,18 +87,32 @@ const credrankCommand: Command = async (args, std) => {
   await fs.writeFile(outputPath, cgJson);
   taskReporter.finish("write cred graph");
 
+  printCredSummaryTable(credGraph);
+
+  taskReporter.finish("credrank");
   return 0;
 };
 
-/** Find addresses of all nodes matching any of the scoring prefixes. */
-function findScoringAddresses(
+function printCredSummaryTable(credGraph: CredGraph) {
+  console.log(`# Top Participants By Cred`);
+  console.log();
+  console.log(`| Description | Cred |`);
+  console.log(`| --- | --- |`);
+  const credParticipants = Array.from(credGraph.participants());
+  const sortedParticipants = sortBy(credParticipants, (p) => -p.cred);
+  sortedParticipants
+    .slice(0, 20)
+    .forEach((n) => console.log(`| ${n.description} | ${n.cred.toFixed(1)} |`));
+}
+
+function findParticipants(
   graph: Graph,
   scoringPrefixes: $ReadOnlyArray<NodeAddressT>
-): Set<NodeAddressT> {
-  const result = new Set();
-  for (const {address} of graph.nodes()) {
+): $ReadOnlyArray<Participant> {
+  const result = [];
+  for (const {address, description} of graph.nodes()) {
     if (scoringPrefixes.some((p) => NodeAddress.hasPrefix(address, p))) {
-      result.add(address);
+      result.push({address, description});
     }
   }
   return result;
