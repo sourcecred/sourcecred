@@ -6,16 +6,9 @@ import {join as pathJoin} from "path";
 import deepEqual from "lodash.isequal";
 
 import type {Command} from "./command";
-import {makePluginDir, loadInstanceConfig} from "./common";
+import {loadInstanceConfig, loadWeightedGraph} from "./common";
 import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
 import dedent from "../util/dedent";
-import {fromJSON as weightedGraphFromJSON} from "../core/weightedGraph";
-import {
-  type WeightedGraph,
-  merge,
-  overrideWeights,
-} from "../core/weightedGraph";
-import * as Weights from "../core/weights";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {
   compute,
@@ -47,26 +40,7 @@ const scoreCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const config = await loadInstanceConfig(baseDir);
 
-  const graphOutputPrefix = ["output", "graphs"];
-  async function loadGraph(pluginName): Promise<WeightedGraph> {
-    const outputDir = makePluginDir(baseDir, graphOutputPrefix, pluginName);
-    const outputPath = pathJoin(outputDir, "graph.json");
-    const graphJSON = JSON.parse(await fs.readFile(outputPath));
-    return weightedGraphFromJSON(graphJSON);
-  }
-
-  const pluginNames = Array.from(config.bundledPlugins.keys());
-  const graphs = await Promise.all(pluginNames.map(loadGraph));
-  const combinedGraph = merge(graphs);
-
-  // TODO(@decentralion): This is snapshot tested, add unit tests?
-  const weightsPath = pathJoin(baseDir, "config", "weights.json");
-  const weights = await loadJsonWithDefault(
-    weightsPath,
-    Weights.parser,
-    Weights.empty
-  );
-  const weightedGraph = overrideWeights(combinedGraph, weights);
+  const weightedGraph = await loadWeightedGraph(baseDir, config);
 
   const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
   const ledger = Ledger.parse(

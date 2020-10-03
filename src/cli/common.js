@@ -1,6 +1,7 @@
 // @flow
 
 import {join as pathJoin} from "path";
+import fs from "fs-extra";
 import {loadJson, mkdirx} from "../util/disk";
 
 import type {PluginDirectoryContext} from "../api/plugin";
@@ -8,6 +9,16 @@ import {
   parser as configParser,
   type InstanceConfig,
 } from "../api/instanceConfig";
+
+import {
+  type WeightedGraph,
+  merge,
+  overrideWeights,
+  fromJSON as weightedGraphFromJSON,
+} from "../core/weightedGraph";
+import {loadJsonWithDefault} from "../util/disk";
+
+import * as Weights from "../core/weights";
 
 export function loadInstanceConfig(baseDir: string): Promise<InstanceConfig> {
   const projectFilePath = pathJoin(baseDir, "sourcecred.json");
@@ -47,4 +58,31 @@ export function pluginDirectoryContext(
       return cacheDir;
     },
   };
+}
+
+export async function loadWeightedGraph(
+  baseDir: string,
+  config: InstanceConfig
+): Promise<WeightedGraph> {
+  const graphOutputPrefix = ["output", "graphs"];
+  async function loadGraph(pluginName): Promise<WeightedGraph> {
+    const outputDir = makePluginDir(baseDir, graphOutputPrefix, pluginName);
+    const outputPath = pathJoin(outputDir, "graph.json");
+    const graphJSON = JSON.parse(await fs.readFile(outputPath));
+    return weightedGraphFromJSON(graphJSON);
+  }
+
+  const pluginNames = Array.from(config.bundledPlugins.keys());
+  const graphs = await Promise.all(pluginNames.map(loadGraph));
+  const combinedGraph = merge(graphs);
+
+  // TODO(@decentralion): This is snapshot tested via TimelineCred, add unit
+  // tests?
+  const weightsPath = pathJoin(baseDir, "config", "weights.json");
+  const weights = await loadJsonWithDefault(
+    weightsPath,
+    Weights.parser,
+    Weights.empty
+  );
+  return overrideWeights(combinedGraph, weights);
 }
