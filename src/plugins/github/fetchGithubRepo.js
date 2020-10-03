@@ -134,7 +134,7 @@ const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 type GithubResponseError =
   | {|+type: "FETCH_ERROR", retry: false, error: Error|}
   | {|+type: "GRAPHQL_ERROR", retry: false, error: mixed|}
-  | {|+type: "RATE_LIMIT_EXCEEDED", retry: false, error: mixed|}
+  | {|+type: "RATE_LIMIT_EXCEEDED", retry: true, error: mixed|}
   | {|+type: "GITHUB_INTERNAL_EXECUTION_ERROR", retry: true, error: mixed|}
   | {|+type: "BAD_CREDENTIALS", retry: false, error: mixed|}
   | {|+type: "NO_DATA", retry: true, error: mixed|};
@@ -165,7 +165,7 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
             return Promise.reject(
               ({
                 type: "RATE_LIMIT_EXCEEDED",
-                retry: false,
+                retry: true,
                 error: x,
               }: GithubResponseError)
             );
@@ -206,7 +206,24 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
 
 function retryGithubFetch(fetch, fetchOptions) {
   return new Promise((resolve, reject) => {
-    const operation = retry.operation();
+    // The retry parameters are tuned so that we will have one retry that is
+    // just after 1 hour after the initial request. This way, if we hit a
+    // GitHub rate limit exceeded error, we will be sure to have a retry after
+    // the limit has reset.
+    // In principle, we shouldn't bother having a bunch of immediate retrys
+    // when we hit rate limit exceeded, but it won't cause any problems, and the
+    // retry library does not offer any way to vary the retry period based
+    // on the specific error received.
+    //
+    // Verification that we will issue a retry after an hour:
+    // 2.8 ** 8 = 3778
+    // Minimum timeout is one second (1000 ms)
+    // 3778 seconds = 1.05 hours
+    const operation = retry.operation({
+      factor: 2.8,
+      minTimeout: 1000,
+      retries: 8,
+    });
     operation.attempt(() => {
       tryGithubFetch(fetch, fetchOptions)
         .then((result) => {
@@ -261,10 +278,9 @@ export async function postQuery(
           );
           break;
         case "RATE_LIMIT_EXCEEDED":
-          console.error(
-            "You've exceeded your hourly GitHub rate limit.\n" +
-              "You'll need to wait until it resets."
-          );
+          // Commentary would be a little spammy since our retry strategy
+          // will produce several rate limit failures in a row.
+          // Consider re-adding a message if the long hang is confusing.
           break;
         case "FETCH_ERROR":
           // Network error; no need for additional commentary.
