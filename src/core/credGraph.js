@@ -1,7 +1,6 @@
 // @flow
 
 import * as NullUtil from "../util/null";
-import * as MapUtil from "../util/map";
 import {type NodeAddressT, type EdgeAddressT} from "./graph";
 import {
   MarkovProcessGraph,
@@ -10,7 +9,9 @@ import {
   type TransitionProbability,
   markovEdgeAddress,
   payoutAddressForEpoch,
+  COMPAT_INFO as MPG_COMPAT_INFO,
 } from "./markovProcessGraph";
+import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
 export type Node = {|
   +address: NodeAddressT,
@@ -35,10 +36,13 @@ export type Participant = {|
   +credPerEpoch: $ReadOnlyArray<number>,
 |};
 
-export type CredGraphJSON = {|
+export type CredGraphJSON = Compatible<{|
   +mpg: MarkovProcessGraphJSON,
-  +scores: {|+[NodeAddressT]: number|},
-|};
+  // scores for each node in the same node order used by the markov process graph
+  +scores: $ReadOnlyArray<number>,
+|}>;
+
+export const COMPAT_INFO = {type: "sourcecred/credGraph", version: "0.1.0"};
 
 export class CredGraph {
   _mpg: MarkovProcessGraph;
@@ -111,16 +115,24 @@ export class CredGraph {
   }
 
   toJSON(): CredGraphJSON {
-    return {
-      mpg: this._mpg.toJSON(),
-      scores: MapUtil.toObject(this._scores),
-    };
+    const mpgJson = this._mpg.toJSON();
+    const {sortedNodes} = fromCompat(MPG_COMPAT_INFO, mpgJson);
+    const scores = sortedNodes.map((n) =>
+      NullUtil.get(this._scores.get(n.address))
+    );
+    return toCompat(COMPAT_INFO, {
+      mpg: mpgJson,
+      scores,
+    });
   }
 
   static fromJSON(j: CredGraphJSON): CredGraph {
-    return new CredGraph(
-      MarkovProcessGraph.fromJSON(j.mpg),
-      MapUtil.fromObject(j.scores)
-    );
+    const {mpgJson, scores} = fromCompat(COMPAT_INFO, j);
+    const {sortedNodes} = fromCompat(MPG_COMPAT_INFO, mpgJson);
+    const scoresMap = new Map();
+    sortedNodes.forEach((n, i) => {
+      scoresMap.set(n.address, scores[i]);
+    });
+    return new CredGraph(MarkovProcessGraph.fromJSON(mpgJson), scoresMap);
   }
 }
