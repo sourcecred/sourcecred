@@ -3,20 +3,29 @@
 import {join as pathJoin} from "path";
 import fs from "fs-extra";
 import {loadJson, mkdirx} from "../util/disk";
+import deepEqual from "lodash.isequal";
+import stringify from "json-stable-stringify";
 
+import {type DependencyMintPolicy} from "../core/dependenciesMintPolicy";
 import type {PluginDirectoryContext} from "../api/plugin";
 import {
   parser as configParser,
   type InstanceConfig,
 } from "../api/instanceConfig";
-
+import {Ledger} from "../ledger/ledger";
+import {contractions as identityContractions} from "../ledger/identity";
+import {
+  parser as dependenciesParser,
+  ensureIdentityExists,
+  toDependencyPolicy,
+} from "../api/dependenciesConfig";
 import {
   type WeightedGraph,
   merge,
   overrideWeights,
   fromJSON as weightedGraphFromJSON,
 } from "../core/weightedGraph";
-import {loadJsonWithDefault} from "../util/disk";
+import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
 
 import * as Weights from "../core/weights";
 
@@ -60,6 +69,71 @@ export function pluginDirectoryContext(
   };
 }
 
+/**
+ * This method pipelines the data loading needed to run Cred analysis.
+ *
+ * It's a bit of a kitchen sink, but I think it's still valuable to have as its
+ * own method. In particular, there are some non-obvious relationships between
+ * the constituent components: it's important that the identities be computed
+ * after loading the dependencies, because loading the dependencies may create
+ * new identities. Thus, I prefer to expose this API which sequences the steps
+ * correctly, rather than trusting the caller to do this themselves.
+ */
+export async function prepareCredData(
+  baseDir: string,
+  config: InstanceConfig
+): Promise<{|
+  weightedGraph: WeightedGraph,
+  ledger: Ledger,
+  dependencies: $ReadOnlyArray<DependencyMintPolicy>,
+|}> {
+  const [weightedGraph, ledger] = await Promise.all([
+    await loadWeightedGraph(baseDir, config),
+    await loadLedger(baseDir),
+  ]);
+
+  // We need to load the dependencies before we get identities, because
+  // this step may create new identities in the ledger.
+  const dependencies = await loadDependenciesAndWriteChanges(baseDir, ledger);
+
+  const identities = ledger.accounts().map((a) => a.identity);
+  const contractedGraph = weightedGraph.graph.contractNodes(
+    identityContractions(identities)
+  );
+  const contractedWeightedGraph = {
+    graph: contractedGraph,
+    weights: weightedGraph.weights,
+  };
+  return {weightedGraph: contractedWeightedGraph, ledger, dependencies};
+}
+
+async function loadDependenciesAndWriteChanges(
+  baseDir: string,
+  ledger: Ledger
+): Promise<$ReadOnlyArray<DependencyMintPolicy>> {
+  const dependenciesPath = pathJoin(baseDir, "config", "dependencies.json");
+  const dependencies = await loadJsonWithDefault(
+    dependenciesPath,
+    dependenciesParser,
+    () => []
+  );
+  const dependenciesWithIds = dependencies.map((d) =>
+    // This mutates the ledger, adding new identites when needed.
+    ensureIdentityExists(d, ledger)
+  );
+  if (!deepEqual(dependenciesWithIds, dependencies)) {
+    // Save the new dependencies, with canonical IDs set.
+    await fs.writeFile(
+      dependenciesPath,
+      stringify(dependenciesWithIds, {space: 4})
+    );
+    // Save the Ledger, since we may have added/activated identities.
+    await saveLedger(baseDir, ledger);
+  }
+
+  return dependenciesWithIds.map((d) => toDependencyPolicy(d, ledger));
+}
+
 export async function loadWeightedGraph(
   baseDir: string,
   config: InstanceConfig
@@ -85,4 +159,19 @@ export async function loadWeightedGraph(
     Weights.empty
   );
   return overrideWeights(combinedGraph, weights);
+}
+
+export async function loadLedger(baseDir: string): Promise<Ledger> {
+  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
+  return Ledger.parse(
+    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
+  );
+}
+
+export async function saveLedger(
+  baseDir: string,
+  ledger: Ledger
+): Promise<void> {
+  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
+  await fs.writeFile(ledgerPath, ledger.serialize());
 }
