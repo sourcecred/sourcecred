@@ -12,6 +12,7 @@ import {LoggingTaskReporter} from "../util/taskReporter";
 import {MarkovProcessGraph} from "../core/markovProcessGraph";
 import type {Command} from "./command";
 import {loadInstanceConfig, prepareCredData} from "./common";
+import {graphIntervals} from "../core/interval";
 
 const DEFAULT_ALPHA = 0.1;
 const DEFAULT_BETA = 0.4;
@@ -38,13 +39,11 @@ const credrankCommand: Command = async (args, std) => {
   taskReporter.finish("load data");
 
   taskReporter.start("create Markov process graph");
-  // TODO: Support loading transition probability params from config.
-  const fibrationOptions = {
+  // TODO: Support loading params from config.
+  const parameters = {
     beta: DEFAULT_BETA,
     gammaForward: DEFAULT_GAMMA_FORWARD,
     gammaBackward: DEFAULT_GAMMA_BACKWARD,
-  };
-  const seedOptions = {
     alpha: DEFAULT_ALPHA,
   };
   const participants = ledger.accounts().map(({identity}) => ({
@@ -52,12 +51,13 @@ const credrankCommand: Command = async (args, std) => {
     address: identity.address,
     id: identity.id,
   }));
-  const mpg = MarkovProcessGraph.new(
+  const intervals = graphIntervals(weightedGraph.graph);
+  const mpg = MarkovProcessGraph.new({
     weightedGraph,
     participants,
-    fibrationOptions,
-    seedOptions
-  );
+    parameters,
+    intervals,
+  });
   taskReporter.finish("create Markov process graph");
 
   taskReporter.start("run CredRank");
