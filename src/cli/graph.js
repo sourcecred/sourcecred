@@ -4,7 +4,6 @@ import fs from "fs-extra";
 import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
-import {loadFileWithDefault} from "../util/disk";
 
 import {Ledger} from "../ledger/ledger";
 import * as NullUtil from "../util/null";
@@ -18,6 +17,8 @@ import {
   makePluginDir,
   loadInstanceConfig,
   pluginDirectoryContext,
+  loadLedger,
+  saveLedger,
 } from "./common";
 import {toJSON as weightedGraphToJSON} from "../core/weightedGraph";
 import * as pluginId from "../api/pluginId";
@@ -34,10 +35,7 @@ const graphCommand: Command = async (args, std) => {
   const baseDir = process.cwd();
   const config: InstanceConfig = await loadInstanceConfig(baseDir);
 
-  const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
-  const ledger = Ledger.parse(
-    await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
-  );
+  const ledger = await loadLedger(baseDir);
 
   let pluginsToLoad = [];
   if (args.length === 0) {
@@ -81,7 +79,7 @@ const graphCommand: Command = async (args, std) => {
     }
     taskReporter.finish(task);
   }
-  await fs.writeFile(ledgerPath, ledger.serialize());
+  await saveLedger(baseDir, ledger);
   taskReporter.finish("graph");
   return 0;
 };

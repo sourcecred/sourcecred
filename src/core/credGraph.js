@@ -1,6 +1,7 @@
 // @flow
 
 import * as NullUtil from "../util/null";
+import {type Uuid} from "../util/uuid";
 import {type NodeAddressT, type EdgeAddressT} from "./graph";
 import {
   MarkovProcessGraph,
@@ -34,6 +35,7 @@ export type Participant = {|
   +description: string,
   +cred: number,
   +credPerEpoch: $ReadOnlyArray<number>,
+  +id: Uuid,
 |};
 
 export type CredGraphJSON = Compatible<{|
@@ -84,7 +86,7 @@ export class CredGraph {
   }
 
   *participants(): Iterator<Participant> {
-    for (const {address, description} of this._mpg.participants()) {
+    for (const {address, description, id} of this._mpg.participants()) {
       const epochs = this._mpg.epochBoundaries().map((epochStart) => ({
         type: "USER_EPOCH",
         owner: address,
@@ -104,7 +106,7 @@ export class CredGraph {
         totalCred += cred;
         return cred;
       });
-      yield {address, description, credPerEpoch, cred: totalCred};
+      yield {address, description, credPerEpoch, cred: totalCred, id};
     }
   }
 
