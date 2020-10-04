@@ -107,9 +107,9 @@ export default async function retry<T, E>(
         const now = io.now();
         const delayMs = outcome.until - now;
         if (delayMs < 0) {
+          const fmt = (d: Date): string => `@${(+d / 1000).toFixed(3)}`;
           throw new Error(
-            "wait-until time in the past: " +
-              `@${String(+outcome.until)} < @${String(+now)}`
+            `wait-until time in the past: ${fmt(outcome.until)} < ${fmt(now)}`
           );
         }
         await io.sleepMs(delayMs);
