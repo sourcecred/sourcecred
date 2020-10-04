@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ledger/ledger state reconstruction serialized ledger snapshots as expected 1`] = `
+exports[`core/ledger/ledger state reconstruction serialized ledger snapshots as expected 1`] = `
 "{\\"action\\":{\\"identity\\":{\\"address\\":\\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000IDENTITY\\\\u0000YVZhbGlkVXVpZEF0TGFzdA\\\\u0000\\",\\"aliases\\":[],\\"id\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"name\\":\\"steven\\",\\"subtype\\":\\"USER\\"},\\"type\\":\\"CREATE_IDENTITY\\"},\\"ledgerTimestamp\\":0,\\"uuid\\":\\"000000000000000000000A\\",\\"version\\":\\"1\\"}
 {\\"action\\":{\\"identity\\":{\\"address\\":\\"N\\\\u0000sourcecred\\\\u0000core\\\\u0000IDENTITY\\\\u0000URgLrCxgvjHxtGJ9PgmckQ\\\\u0000\\",\\"aliases\\":[],\\"id\\":\\"URgLrCxgvjHxtGJ9PgmckQ\\",\\"name\\":\\"crystal-gems\\",\\"subtype\\":\\"ORGANIZATION\\"},\\"type\\":\\"CREATE_IDENTITY\\"},\\"ledgerTimestamp\\":1,\\"uuid\\":\\"000000000000000000001A\\",\\"version\\":\\"1\\"}
 {\\"action\\":{\\"alias\\":{\\"address\\":\\"N\\\\u0000alias\\\\u0000\\",\\"description\\":\\"alias\\"},\\"identityId\\":\\"YVZhbGlkVXVpZEF0TGFzdA\\",\\"type\\":\\"ADD_ALIAS\\"},\\"ledgerTimestamp\\":3,\\"uuid\\":\\"000000000000000000002A\\",\\"version\\":\\"1\\"}

@@ -4,7 +4,7 @@ import {computeCredData, compressByThreshold} from "./credData";
 import type {TimelineCredScores} from "../core/algorithm/distributionToCred";
 import type {DependencyMintPolicy} from "../core/dependenciesMintPolicy";
 import {NodeAddress} from "../core/graph";
-import {IDENTITY_PREFIX} from "../ledger/identity";
+import {IDENTITY_PREFIX} from "../core/identity";
 import {intervalSequence} from "../core/interval";
 
 describe("src/analysis/credData", () => {

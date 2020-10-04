@@ -27,7 +27,7 @@ import {
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
 import {createIdentities} from "./createIdentities";
-import type {IdentityProposal} from "../../ledger/identityProposal";
+import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
 const TOKEN_ENV_VAR_NAME = "SOURCECRED_GITHUB_TOKEN";
 

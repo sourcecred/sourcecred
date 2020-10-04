@@ -21,9 +21,9 @@ import * as markovChain from "../core/algorithm/markovChain";
 import * as credView from "../analysis/credView";
 import * as credData from "../analysis/credData";
 import * as credResult from "../analysis/credResult";
-import * as ledger from "../ledger/ledger";
-import * as grain from "../ledger/grain";
-import * as identity from "../ledger/identity";
+import * as ledger from "../core/ledger/ledger";
+import * as grain from "../core/ledger/grain";
+import * as identity from "../core/identity";
 
 const api = {
   core: {

@@ -22,7 +22,7 @@ import {
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
 import {createIdentities} from "./createIdentities";
-import type {IdentityProposal} from "../../ledger/identityProposal";
+import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
 async function loadConfig(
   dirContext: PluginDirectoryContext

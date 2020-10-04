@@ -6,7 +6,7 @@ import {
   processMintPolicy,
 } from "../core/dependenciesMintPolicy";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
-import {IDENTITY_PREFIX} from "../ledger/identity";
+import {IDENTITY_PREFIX} from "../core/identity";
 import {type IntervalSequence, intervalSequence} from "../core/interval";
 
 /**

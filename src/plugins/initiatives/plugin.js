@@ -15,7 +15,7 @@ import {
 import {loadJson} from "../../util/disk";
 import {loadDirectory as _loadDirectory} from "./initiativesDirectory";
 import * as Weights from "../../core/weights";
-import type {IdentityProposal} from "../../ledger/identityProposal";
+import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
 async function loadConfig(
   ctx: PluginDirectoryContext

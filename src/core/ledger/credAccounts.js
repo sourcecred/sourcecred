@@ -11,10 +11,10 @@
  */
 import {sum} from "d3-array";
 import {Ledger, type Account} from "./ledger";
-import {CredView} from "../analysis/credView";
-import {NodeAddress, type NodeAddressT} from "../core/graph";
-import {type IntervalSequence} from "../core/interval";
-import {type Alias} from "./identity";
+import {CredView} from "../../analysis/credView";
+import {NodeAddress, type NodeAddressT} from "../graph";
+import {type IntervalSequence} from "../interval";
+import {type Alias} from "../identity";
 
 export type Cred = $ReadOnlyArray<number>;
 

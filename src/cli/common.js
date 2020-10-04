@@ -12,8 +12,8 @@ import {
   parser as configParser,
   type InstanceConfig,
 } from "../api/instanceConfig";
-import {Ledger} from "../ledger/ledger";
-import {contractions as identityContractions} from "../ledger/identity";
+import {Ledger} from "../core/ledger/ledger";
+import {contractions as identityContractions} from "../core/identity";
 import {
   parser as dependenciesParser,
   ensureIdentityExists,

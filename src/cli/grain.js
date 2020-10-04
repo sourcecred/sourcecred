@@ -5,11 +5,11 @@ import {join} from "path";
 import {loadFileWithDefault, loadJson} from "../util/disk";
 import {fromJSON as credResultFromJson} from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
-import {Ledger} from "../ledger/ledger";
-import {applyDistributions} from "../ledger/applyDistributions";
-import {computeCredAccounts} from "../ledger/credAccounts";
+import {Ledger} from "../core/ledger/ledger";
+import {applyDistributions} from "../core/ledger/applyDistributions";
+import {computeCredAccounts} from "../core/ledger/credAccounts";
 import stringify from "json-stable-stringify";
-import * as G from "../ledger/grain";
+import * as G from "../core/ledger/grain";
 import dedent from "../util/dedent";
 
 import * as GrainConfig from "../api/grainConfig";

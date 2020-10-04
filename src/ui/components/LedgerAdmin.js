@@ -1,7 +1,7 @@
 // @flow
 
 import React, {useState, type Node as ReactNode} from "react";
-import {type Identity, type IdentityId} from "../../ledger/identity";
+import {type Identity, type IdentityId} from "../../core/identity";
 import {AliasView} from "./AliasView";
 import {IdentityMerger} from "./IdentityMerger";
 import {makeStyles} from "@material-ui/core/styles";

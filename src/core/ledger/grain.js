@@ -1,6 +1,6 @@
 // @flow
 
-import * as P from "../util/combo";
+import * as P from "../../util/combo";
 import bigInt from "big-integer";
 
 /**

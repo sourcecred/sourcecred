@@ -1,12 +1,12 @@
 // @flow
 
 import {Ledger} from "./ledger";
-import {NodeAddress} from "../core/graph";
+import {NodeAddress} from "../graph";
 import {_allocationIdentities} from "./computeDistribution";
 import * as G from "./grain";
-import {intervalSequence} from "../core/interval";
+import {intervalSequence} from "../interval";
 
-describe("ledger/computeDistribution", () => {
+describe("core/ledger/computeDistribution", () => {
   describe("_allocationIdentities", () => {
     it("only includes active GrainAccounts", () => {
       const ledger = new Ledger();

@@ -7,7 +7,7 @@ import type {NodeType, EdgeType} from "./types";
 import type {PluginDeclaration} from "./pluginDeclaration";
 import {defaultParams} from "./timeline/params";
 import {compute, toJSON, fromJSON} from "./credResult";
-import {IDENTITY_PREFIX} from "../ledger/identity";
+import {IDENTITY_PREFIX} from "../core/identity";
 
 describe("analysis/credResult", () => {
   describe("to/fro JSON", () => {

@@ -1,8 +1,8 @@
 // @flow
 
-import {type IdentityProposal} from "../../ledger/identityProposal";
-import {type IdentityType} from "../../ledger/identity";
-import {coerce, nameFromString} from "../../ledger/identity/name";
+import {type IdentityProposal} from "../../core/ledger/identityProposal";
+import {type IdentityType} from "../../core/identity";
+import {coerce, nameFromString} from "../../core/identity/name";
 import {type ReadRepository} from "./mirrorRepository";
 import {type User} from "./fetch";
 import {userAddress} from "./address";

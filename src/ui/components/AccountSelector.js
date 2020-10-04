@@ -3,7 +3,7 @@ import React, {type Node as ReactNode} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import {TextField} from "@material-ui/core";
 import {Autocomplete} from "@material-ui/lab";
-import {Ledger, type Account} from "../../ledger/ledger";
+import {Ledger, type Account} from "../../core/ledger/ledger";
 
 type DropdownProps = {|
   +ledger: Ledger,

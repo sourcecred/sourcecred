@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from "react";
-import {Ledger} from "../../ledger/ledger";
+import {Ledger} from "../../core/ledger/ledger";
 
 const LedgerContext = React.createContext<LedgerContextValue>({
   ledger: new Ledger(),

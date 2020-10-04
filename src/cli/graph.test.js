@@ -1,7 +1,7 @@
 // @flow
 
 import {get} from "../util/null";
-import {Ledger} from "../ledger/ledger";
+import {Ledger} from "../core/ledger/ledger";
 import {_hackyIdentityNameReferenceDetector} from "./graph";
 
 describe("cli/graph", () => {

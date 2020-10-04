@@ -5,7 +5,7 @@ import {fromString as uuidFromString} from "../../util/uuid";
 import {NodeAddress} from "../../core/graph";
 import {graphNode, type Identity, newIdentity} from "./identity";
 
-describe("ledger/identity/identity", () => {
+describe("core/identity/identity", () => {
   const example: Identity = deepFreeze(newIdentity("USER", "foo"));
   describe("newIdentity", () => {
     it("new identities don't have aliases", () => {

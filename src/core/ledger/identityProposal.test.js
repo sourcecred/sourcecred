@@ -1,12 +1,12 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
-import {NodeAddress} from "../core/graph";
+import {NodeAddress} from "../graph";
 import {Ledger} from "./ledger";
-import {nameFromString} from "./identity";
+import {nameFromString} from "../identity";
 import {ensureIdentityExists, _chooseIdentityName} from "./identityProposal";
 
-describe("ledger/identityProposal", () => {
+describe("core/ledger/identityProposal", () => {
   const alias = {description: "example", address: NodeAddress.empty};
   const proposal = deepFreeze({
     name: nameFromString("foo"),

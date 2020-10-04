@@ -1,7 +1,7 @@
 // @flow
 
 import React, {type Node as ReactNode} from "react";
-import {type IdentityId} from "../../ledger/identity";
+import {type IdentityId} from "../../core/identity";
 import Markdown from "react-markdown";
 
 import {makeStyles} from "@material-ui/core/styles";

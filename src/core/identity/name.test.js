@@ -2,7 +2,7 @@
 
 import {nameFromString, coerce} from "./name";
 
-describe("ledger/identity/name", () => {
+describe("core/identity/name", () => {
   describe("nameFromString", () => {
     it("fails on very long names", () => {
       const bad = "1234567890123456789012345678901234567890";

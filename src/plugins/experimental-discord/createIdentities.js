@@ -4,8 +4,8 @@ import {escape} from "entities";
 import {SqliteMirrorRepository} from "./mirrorRepository";
 import * as Model from "./models";
 import {memberAddress} from "./createGraph";
-import {type IdentityProposal} from "../../ledger/identityProposal";
-import {coerce, nameFromString} from "../../ledger/identity/name";
+import {type IdentityProposal} from "../../core/ledger/identityProposal";
+import {coerce, nameFromString} from "../../core/identity/name";
 
 export function _createIdentity(member: Model.GuildMember): IdentityProposal {
   let name = member.nick !== null ? member.nick : member.user.username;

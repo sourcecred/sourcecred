@@ -6,9 +6,9 @@ import {
   _validateAllocationBudget,
 } from "./grainAllocation";
 import * as G from "./grain";
-import {random as randomUuid, parser as uuidParser} from "../util/uuid";
+import {random as randomUuid, parser as uuidParser} from "../../util/uuid";
 
-describe("src/ledger/grainAllocation", () => {
+describe("core/ledger/grainAllocation", () => {
   // concise helper for grain from a string
   const g = (x: string) => G.fromString(x);
   // concise helper for grain from a number
