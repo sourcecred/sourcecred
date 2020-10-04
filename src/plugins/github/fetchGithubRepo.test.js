@@ -1,6 +1,6 @@
 // @flow
 
-import {_guessTypename} from "./fetchGithubRepo";
+import {_guessTypename, _resolveRefreshTime} from "./fetchGithubRepo";
 
 describe("plugins/github/fetchGithubRepo", () => {
   describe("_guessTypename", () => {
@@ -24,6 +24,54 @@ describe("plugins/github/fetchGithubRepo", () => {
     it("fails cleanly on an unknown ID format", () => {
       const id = ":spooky:";
       expect(_guessTypename(id)).toBe(null);
+    });
+  });
+
+  describe("resolveRefreshTime", () => {
+    const now = () => new Date(981162245678); // 2001-02-03 01:04:05.678 UTC
+    const oneMinuteMs = 60 * 1000;
+    const oneHourMs = 60 * 60 * 1000;
+
+    function spyWarn(): JestMockFn<[string], void> {
+      return ((console.warn: any): JestMockFn<any, void>);
+    }
+    beforeEach(() => {
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+    });
+    afterEach(() => {
+      try {
+        expect(console.warn).not.toHaveBeenCalled();
+      } finally {
+        spyWarn().mockRestore();
+      }
+    });
+
+    it("clamps dates in the past", () => {
+      const result = _resolveRefreshTime(now(), new Date(+now() - 1));
+      expect(result).toEqual(new Date(+now() + oneMinuteMs));
+      expect(console.warn).toHaveBeenCalledWith(
+        "clamping refresh delay from -1 ms to 0 ms"
+      );
+      spyWarn().mockReset();
+    });
+
+    it("clamps dates in the far future", () => {
+      const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+      const result = _resolveRefreshTime(now(), new Date(+now() + oneWeekMs));
+      expect(result).toEqual(new Date(+now() + oneHourMs + oneMinuteMs));
+      expect(console.warn).toHaveBeenCalledWith(
+        `clamping refresh delay from ${oneWeekMs} ms to ${oneHourMs} ms`
+      );
+      spyWarn().mockReset();
+    });
+
+    it("pads reasonable dates", () => {
+      const fiveMinutesMs = 5 * 60 * 1000;
+      const result = _resolveRefreshTime(
+        now(),
+        new Date(+now() + fiveMinutesMs)
+      );
+      expect(result).toEqual(new Date(+now() + fiveMinutesMs + oneMinuteMs));
     });
   });
 });
