@@ -6,7 +6,6 @@
 
 import Database from "better-sqlite3";
 import fetch from "isomorphic-fetch";
-import retry from "retry";
 
 import {type RepoId, repoIdToString} from "./repoId";
 import {Mirror} from "../../graphql/mirror";
@@ -18,6 +17,7 @@ import schema from "./schema";
 import {type GithubToken} from "./token";
 import {cacheIdForRepoId} from "./cacheId";
 import {type CacheProvider} from "../../backend/cache";
+import retry from "../../util/retry";
 
 type FetchRepoOptions = {|
   +token: GithubToken,
@@ -204,23 +204,31 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
   );
 }
 
-function retryGithubFetch(fetch, fetchOptions) {
-  return new Promise((resolve, reject) => {
-    const operation = retry.operation();
-    operation.attempt(() => {
-      tryGithubFetch(fetch, fetchOptions)
-        .then((result) => {
-          resolve(result);
-        })
-        .catch((error) => {
-          if (error.retry && operation.retry(true)) {
-            return;
-          } else {
-            reject(error);
-          }
-        });
-    });
-  });
+async function retryGithubFetch(
+  fetch,
+  fetchOptions
+): Promise<any /* or rejects to GithubResponseError */> {
+  const policy = {maxRetries: 10, jitterRatio: 1.0};
+  const retryResult = await retry(async () => {
+    try {
+      return {type: "DONE", value: await tryGithubFetch(fetch, fetchOptions)};
+    } catch (errAny) {
+      const err: GithubResponseError = errAny;
+      if (err.retry) {
+        return {type: "RETRY", err};
+      } else {
+        return {type: "FATAL", err};
+      }
+    }
+  }, policy);
+  switch (retryResult.type) {
+    case "DONE":
+      return retryResult.value;
+    case "FAILED":
+      throw retryResult.err;
+    default:
+      throw new Error((retryResult.type: empty));
+  }
 }
 
 export async function postQuery(
