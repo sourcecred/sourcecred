@@ -1,6 +1,7 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
+import {type Uuid} from "../util/uuid";
 
 /**
  * Data structure representing a particular kind of Markov process, as
@@ -111,6 +112,7 @@ export type MarkovEdge = {|
 export type Participant = {|
   +address: NodeAddressT,
   +description: string,
+  +id: Uuid,
 |};
 
 export opaque type MarkovEdgeAddressT: string = string;
