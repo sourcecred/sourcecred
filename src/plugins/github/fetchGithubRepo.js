@@ -208,12 +208,25 @@ async function retryGithubFetch(
   fetch,
   fetchOptions
 ): Promise<any /* or rejects to GithubResponseError */> {
-  const policy = {maxRetries: 5, jitterRatio: 1.2};
+  const policy = {
+    maxRetries: 5,
+    jitterRatio: 1.2,
+    // We wait in 15-minute intervals, and quotas reset every hour, so
+    // we shouldn't give up before waiting 4 times.
+    maxWaits: 4,
+  };
   const retryResult = await retry(async () => {
     try {
       return {type: "DONE", value: await tryGithubFetch(fetch, fetchOptions)};
     } catch (errAny) {
       const err: GithubResponseError = errAny;
+      if (err.type === "RATE_LIMIT_EXCEEDED") {
+        // Wait in 15-minute increments. TODO(@wchargin): Ask GitHub
+        // when our token resets (`{ rateLimit { resetAt } }`) and wait
+        // until just then.
+        const delayMs = 15 * 60 * 1000;
+        return {type: "WAIT", until: new Date(Date.now() + delayMs), err};
+      }
       if (err.retry) {
         return {type: "RETRY", err};
       } else {
