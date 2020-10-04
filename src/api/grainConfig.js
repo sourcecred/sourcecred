@@ -1,7 +1,7 @@
 // @flow
 
-import {type DistributionPolicy} from "../ledger/applyDistributions";
-import * as G from "../ledger/grain";
+import {type DistributionPolicy} from "../core/ledger/applyDistributions";
+import * as G from "../core/ledger/grain";
 import * as C from "../util/combo";
 import * as NullUtil from "../util/null";
 

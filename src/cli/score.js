@@ -16,7 +16,7 @@ import {
 } from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import * as Params from "../analysis/timeline/params";
-import {computeCredAccounts} from "../ledger/credAccounts";
+import {computeCredAccounts} from "../core/ledger/credAccounts";
 
 function die(std, message) {
   std.err("fatal: " + message);

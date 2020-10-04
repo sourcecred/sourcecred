@@ -1,7 +1,7 @@
 // @flow
 import React, {useState, useEffect, type Node as ReactNode} from "react";
 import {useLedger} from "../utils/LedgerContext";
-import {type IdentityId, type Identity} from "../../ledger/identity";
+import {type IdentityId, type Identity} from "../../core/identity";
 
 import {makeStyles} from "@material-ui/core/styles";
 import {TextField} from "@material-ui/core";

@@ -2,7 +2,7 @@
 
 import * as G from "./grain";
 
-describe("src/ledger/grain", () => {
+describe("core/ledger/grain", () => {
   describe("G.format", () => {
     const almostOne = G.sub(G.ONE, G.fromString("1"));
 

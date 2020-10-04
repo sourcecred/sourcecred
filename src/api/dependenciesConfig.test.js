@@ -1,8 +1,8 @@
 // @flow
 
-import {Ledger} from "../ledger/ledger";
+import {Ledger} from "../core/ledger/ledger";
 import {toDependencyPolicy, ensureIdentityExists} from "./dependenciesConfig";
-import {nameFromString as n} from "../ledger/identity";
+import {nameFromString as n} from "../core/identity";
 import {random as randomUuid} from "../util/uuid";
 import {fromISO, validateTimestampISO} from "../util/timestamp";
 

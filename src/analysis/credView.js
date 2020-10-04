@@ -6,7 +6,7 @@ import {type CredResult, compute} from "./credResult";
 import {type TimelineCredParameters} from "./timeline/params";
 import {type PluginDeclarations} from "./pluginDeclaration";
 import {type NodeType, type EdgeType} from "./types";
-import {IDENTITY_PREFIX} from "../ledger/identity";
+import {IDENTITY_PREFIX} from "../core/identity";
 import {type IntervalSequence} from "../core/interval";
 
 import {get as nullGet} from "../util/null";

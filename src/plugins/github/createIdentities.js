@@ -1,7 +1,7 @@
 // @flow
 
-import {type IdentityProposal} from "../../ledger/identityProposal";
-import {coerce, nameFromString} from "../../ledger/identity/name";
+import {type IdentityProposal} from "../../core/ledger/identityProposal";
+import {coerce, nameFromString} from "../../core/identity/name";
 import {RelationalView, Userlike} from "./relationalView";
 import {toRaw} from "./nodes";
 

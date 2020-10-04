@@ -29,7 +29,7 @@ import {
 } from "./credData";
 import {distributionToCred} from "../core/algorithm/distributionToCred";
 import {type DependencyMintPolicy} from "../core/dependenciesMintPolicy";
-import {IDENTITY_PREFIX} from "../ledger/identity";
+import {IDENTITY_PREFIX} from "../core/identity";
 
 /**
  * Comprehensive cred output data, including the graph, the scores, the params, and the plugins.

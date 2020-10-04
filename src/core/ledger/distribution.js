@@ -1,8 +1,8 @@
 // @flow
 
-import * as C from "../util/combo";
-import * as Uuid from "../util/uuid";
-import {type TimestampMs} from "../util/timestamp";
+import * as C from "../../util/combo";
+import * as Uuid from "../../util/uuid";
+import {type TimestampMs} from "../../util/timestamp";
 import {type Allocation, allocationParser} from "./grainAllocation";
 
 export type Distribution = {|

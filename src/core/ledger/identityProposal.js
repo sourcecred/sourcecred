@@ -1,7 +1,7 @@
 // @flow
 
 import stringify from "json-stable-stringify";
-import * as C from "../util/combo";
+import * as C from "../../util/combo";
 import {Ledger} from "./ledger";
 import {
   type Name,
@@ -11,7 +11,7 @@ import {
   aliasParser,
   type IdentityType,
   identityTypeParser,
-} from "./identity";
+} from "../identity";
 
 /**
  * An IdentityProposal allows a plugin to report a participant identity,

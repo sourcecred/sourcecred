@@ -43,13 +43,13 @@
  * affordance to make the files generatable by hand.)
  */
 import * as C from "../util/combo";
-import {Ledger} from "../ledger/ledger";
+import {Ledger} from "../core/ledger/ledger";
 import {
   type TimestampISO,
   timestampISOParser,
   fromISO,
 } from "../util/timestamp";
-import {type IdentityId, type Name, nameParser} from "../ledger/identity";
+import {type IdentityId, type Name, nameParser} from "../core/identity";
 import {parser as uuidParser} from "../util/uuid";
 import {type DependencyMintPolicy} from "../core/dependenciesMintPolicy";
 

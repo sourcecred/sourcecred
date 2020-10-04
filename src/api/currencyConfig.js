@@ -1,6 +1,6 @@
 // @flow
 
-import {DEFAULT_SUFFIX} from "../ledger/grain";
+import {DEFAULT_SUFFIX} from "../core/ledger/grain";
 import * as C from "../util/combo";
 import * as NullUtil from "../util/null";
 

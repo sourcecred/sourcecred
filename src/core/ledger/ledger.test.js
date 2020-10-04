@@ -1,13 +1,13 @@
 // @flow
 
 import cloneDeep from "lodash.clonedeep";
-import {NodeAddress} from "../core/graph";
+import {NodeAddress} from "../graph";
 import {Ledger} from "./ledger";
-import {newIdentity} from "./identity";
+import {newIdentity} from "../identity";
 import * as G from "./grain";
-import * as uuid from "../util/uuid"; // for spy purposes
+import * as uuid from "../../util/uuid"; // for spy purposes
 
-describe("ledger/ledger", () => {
+describe("core/ledger/ledger", () => {
   // Helper for constructing Grain values.
   const g = (s) => G.fromString(s);
 

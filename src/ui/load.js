@@ -2,7 +2,7 @@
 import * as pluginId from "../api/pluginId";
 import {CredView} from "../analysis/credView";
 import {fromJSON as credResultFromJSON} from "../analysis/credResult";
-import {Ledger} from "../ledger/ledger";
+import {Ledger} from "../core/ledger/ledger";
 import {
   type CurrencyDetails,
   parser as currencyParser,

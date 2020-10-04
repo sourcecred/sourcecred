@@ -7,13 +7,13 @@
  */
 import {sum} from "d3-array";
 import * as G from "./grain";
-import * as P from "../util/combo";
+import * as P from "../../util/combo";
 import {
   type Uuid,
   random as randomUuid,
   parser as uuidParser,
-} from "../util/uuid";
-import {type IdentityId} from "./identity";
+} from "../../util/uuid";
+import {type IdentityId} from "../identity";
 
 /**
  * The Balanced policy attempts to pay Grain to everyone so that their

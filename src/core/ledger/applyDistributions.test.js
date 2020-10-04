@@ -1,9 +1,9 @@
 // @flow
 
 import {_chooseDistributionIntervals} from "./applyDistributions";
-import {intervalSequence} from "../core/interval";
+import {intervalSequence} from "../interval";
 
-describe("ledger/applyDistributions", () => {
+describe("core/ledger/applyDistributions", () => {
   describe("_chooseDistributionIntervals", () => {
     it("handles a case where we want to distribute for every interval except latest", () => {
       const credIntervals = intervalSequence([

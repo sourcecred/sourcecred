@@ -2,8 +2,8 @@
 import React, {useState, type Node as ReactNode} from "react";
 import {Button, Container, TextField} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {div, format, gt, lt, fromFloatString} from "../../ledger/grain";
-import {type Account} from "../../ledger/ledger";
+import {div, format, gt, lt, fromFloatString} from "../../core/ledger/grain";
+import {type Account} from "../../core/ledger/ledger";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 import AccountDropdown from "./AccountSelector";
 import {useLedger} from "../utils/LedgerContext";

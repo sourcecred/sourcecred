@@ -1,11 +1,11 @@
 // @flow
 
-import {NodeAddress} from "../core/graph";
+import {NodeAddress} from "../graph";
 import {_computeCredAccounts} from "./credAccounts";
 import {Ledger} from "./ledger";
-import {intervalSequence} from "../core/interval";
+import {intervalSequence} from "../interval";
 
-describe("ledger/credAccounts", () => {
+describe("core/ledger/credAccounts", () => {
   describe("_computeCredAccounts", () => {
     it("works in a simple case", () => {
       const ledger = new Ledger();

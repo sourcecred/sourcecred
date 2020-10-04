@@ -5,7 +5,7 @@ import sortBy from "lodash.sortby";
 import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
 
-import {Ledger} from "../ledger/ledger";
+import {Ledger} from "../core/ledger/ledger";
 import * as NullUtil from "../util/null";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {type ReferenceDetector} from "../core/references/referenceDetector";
@@ -22,7 +22,7 @@ import {
 } from "./common";
 import {toJSON as weightedGraphToJSON} from "../core/weightedGraph";
 import * as pluginId from "../api/pluginId";
-import {ensureIdentityExists} from "../ledger/identityProposal";
+import {ensureIdentityExists} from "../core/ledger/identityProposal";
 
 function die(std, message) {
   std.err("fatal: " + message);

@@ -1,7 +1,7 @@
 // @flow
 
-import * as uuid from "../util/uuid";
-import {type TimestampMs} from "../util/timestamp";
+import * as uuid from "../../util/uuid";
+import {type TimestampMs} from "../../util/timestamp";
 import {
   type AllocationPolicy,
   type AllocationIdentity,

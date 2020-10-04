@@ -8,9 +8,9 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import {type Account} from "../../ledger/ledger";
+import {type Account} from "../../core/ledger/ledger";
 import {type CurrencyDetails} from "../../api/currencyConfig";
-import * as G from "../../ledger/grain";
+import * as G from "../../core/ledger/grain";
 import {useLedger} from "../utils/LedgerContext";
 import {makeStyles} from "@material-ui/core/styles";
 
