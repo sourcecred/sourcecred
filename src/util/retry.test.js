@@ -1,6 +1,6 @@
 // @flow
 
-import retry, {type AttemptOutcome, type Io, type Result} from "./retry";
+import retry, {type Io} from "./retry";
 
 /**
  * Simple world with a self-contained clock, treated consistently across

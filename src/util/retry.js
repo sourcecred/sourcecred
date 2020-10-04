@@ -121,6 +121,8 @@ export default async function retry<T, E>(
     }
   }
   // istanbul ignore next: unreachable
+  // ESLint knows that this next line is unreachable, but Flow doesn't. :-)
+  // eslint-disable-next-line no-unreachable
   throw new Error("unreachable");
 }
 
