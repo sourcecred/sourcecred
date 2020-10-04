@@ -1,7 +1,7 @@
 // @flow
 
 import {type TimestampMs} from "../util/timestamp";
-import {type Interval} from "../core/interval";
+import {type IntervalSequence, intervalSequence} from "../core/interval";
 import {Ledger} from "./ledger";
 import {type AllocationPolicy} from "./grainAllocation";
 import {CredView} from "../analysis/credView";
@@ -66,11 +66,11 @@ export function applyDistributions(
 }
 
 export function _chooseDistributionIntervals(
-  credIntervals: $ReadOnlyArray<Interval>,
+  credIntervals: IntervalSequence,
   lastDistributionTimestamp: TimestampMs,
   currentTimestamp: TimestampMs,
   maxSimultaneousDistributions: number
-): $ReadOnlyArray<Interval> {
+): IntervalSequence {
   // Slice off the final interval--we may assume that it is not yet finished.
   const completeIntervals = credIntervals.filter(
     (x) => x.endTimeMs <= currentTimestamp
@@ -78,8 +78,9 @@ export function _chooseDistributionIntervals(
   const undistributedIntervals = completeIntervals.filter(
     (i) => i.endTimeMs > lastDistributionTimestamp
   );
-  return undistributedIntervals.slice(
+  const sequence = undistributedIntervals.slice(
     undistributedIntervals.length - maxSimultaneousDistributions,
     undistributedIntervals.length
   );
+  return intervalSequence(sequence);
 }

@@ -14,7 +14,12 @@ import {
   type Node,
 } from "../graph";
 import {type WeightedGraph} from "../weightedGraph";
-import {type Interval, partitionGraph} from "../interval";
+import {
+  type Interval,
+  partitionGraph,
+  type IntervalSequence,
+  intervalSequence,
+} from "../interval";
 import {
   nodeWeightEvaluator,
   edgeWeightEvaluator,
@@ -139,7 +144,9 @@ export async function timelinePagerank(
   if (graphPartitionSlices.length === 0) {
     return [];
   }
-  const intervals = graphPartitionSlices.map((x) => x.interval);
+  const intervals = intervalSequence(
+    graphPartitionSlices.map((x) => x.interval)
+  );
   const nodeCreationHistory = graphPartitionSlices.map((x) => x.nodes);
   const edgeCreationHistory = graphPartitionSlices.map((x) => x.edges);
   const nodeOrder = Array.from(weightedGraph.graph.nodes()).map(
@@ -223,7 +230,7 @@ export function* _timelineNodeToConnections(
 export async function _computeTimelineDistribution(
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
   edgeOrder: $ReadOnlyArray<EdgeAddressT>,
-  intervals: $ReadOnlyArray<Interval>,
+  intervals: IntervalSequence,
   nodeWeightIterator: Iterator<Map<NodeAddressT, number>>,
   nodeToConnectionsIterator: Iterator<NodeToConnections>,
   alpha: number

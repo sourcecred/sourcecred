@@ -3,6 +3,7 @@
 import {NodeAddress} from "../core/graph";
 import {_computeCredAccounts} from "./credAccounts";
 import {Ledger} from "./ledger";
+import {intervalSequence} from "../core/interval";
 
 describe("ledger/credAccounts", () => {
   describe("_computeCredAccounts", () => {
@@ -20,11 +21,11 @@ describe("ledger/credAccounts", () => {
         ],
         [userAddress, {cred: userCred, description: "Little lost user"}],
       ]);
-      const intervals = [
+      const intervals = intervalSequence([
         {startTimeMs: 121, endTimeMs: 123},
         {startTimeMs: 123, endTimeMs: 125},
         {startTimeMs: 125, endTimeMs: 127},
-      ];
+      ]);
       const expectedCredAccount = {cred: accountCred, account, totalCred: 3};
       const expectedUnclaimedAccount = {
         alias: {
@@ -59,11 +60,11 @@ describe("ledger/credAccounts", () => {
         ],
         [alias.address, {cred: userCred, description: "irrelevant"}],
       ]);
-      const intervals = [
+      const intervals = intervalSequence([
         {startTimeMs: 121, endTimeMs: 123},
         {startTimeMs: 123, endTimeMs: 125},
         {startTimeMs: 125, endTimeMs: 127},
-      ];
+      ]);
 
       const thunk = () => _computeCredAccounts([account], info, intervals);
       expect(thunk).toThrowError(
@@ -78,11 +79,11 @@ describe("ledger/credAccounts", () => {
 
       const account = ledger.accounts()[0];
       const scores = new Map();
-      const intervals = [
+      const intervals = intervalSequence([
         {startTimeMs: 121, endTimeMs: 123},
         {startTimeMs: 123, endTimeMs: 125},
         {startTimeMs: 125, endTimeMs: 127},
-      ];
+      ]);
 
       const thunk = () => _computeCredAccounts([account], scores, intervals);
       expect(thunk).toThrowError(`cred sync error: no info for account`);

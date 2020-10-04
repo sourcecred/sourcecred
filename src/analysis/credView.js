@@ -7,7 +7,7 @@ import {type TimelineCredParameters} from "./timeline/params";
 import {type PluginDeclarations} from "./pluginDeclaration";
 import {type NodeType, type EdgeType} from "./types";
 import {IDENTITY_PREFIX} from "../ledger/identity";
-import {type Interval} from "../core/interval";
+import {type IntervalSequence} from "../core/interval";
 
 import {get as nullGet} from "../util/null";
 import type {TimestampMs} from "../util/timestamp";
@@ -161,7 +161,7 @@ export class CredView {
     return this._credResult.plugins;
   }
 
-  intervals(): $ReadOnlyArray<Interval> {
+  intervals(): IntervalSequence {
     return this._credResult.credData.intervals;
   }
 
@@ -318,7 +318,7 @@ function xor(a: boolean, b: boolean): boolean {
 
 // Exported separately for testing purposes.
 export function _getIntervalIndex(
-  intervals: $ReadOnlyArray<Interval>,
+  intervals: IntervalSequence,
   ts: TimestampMs
 ): number {
   const ends = intervals.map((x) => x.endTimeMs);

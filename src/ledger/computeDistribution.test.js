@@ -4,6 +4,7 @@ import {Ledger} from "./ledger";
 import {NodeAddress} from "../core/graph";
 import {_allocationIdentities} from "./computeDistribution";
 import * as G from "./grain";
+import {intervalSequence} from "../core/interval";
 
 describe("ledger/computeDistribution", () => {
   describe("_allocationIdentities", () => {
@@ -28,11 +29,11 @@ describe("ledger/computeDistribution", () => {
           totalCred: 15,
         },
       ];
-      const intervals = [
+      const intervals = intervalSequence([
         {startTimeMs: 121, endTimeMs: 123},
         {startTimeMs: 123, endTimeMs: 125},
         {startTimeMs: 125, endTimeMs: 127},
-      ];
+      ]);
       const accountsData = {
         intervals,
         accounts,
@@ -56,11 +57,11 @@ describe("ledger/computeDistribution", () => {
         cred: [1, 2, 3],
         totalCred: 6,
       }));
-      const intervals = [
+      const intervals = intervalSequence([
         {startTimeMs: 121, endTimeMs: 123},
         {startTimeMs: 123, endTimeMs: 125},
         {startTimeMs: 125, endTimeMs: 127},
-      ];
+      ]);
       const accountsData = {
         intervals,
         accounts,
