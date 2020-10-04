@@ -5,6 +5,7 @@ import type {TimelineCredScores} from "../core/algorithm/distributionToCred";
 import type {DependencyMintPolicy} from "../core/dependenciesMintPolicy";
 import {NodeAddress} from "../core/graph";
 import {IDENTITY_PREFIX} from "../ledger/identity";
+import {intervalSequence} from "../core/interval";
 
 describe("src/analysis/credData", () => {
   it("handles empty scores correctly", () => {
@@ -145,10 +146,10 @@ describe("src/analysis/credData", () => {
     expect(computeCredData(scores, nodeOrder, mintPolicies)).toEqual(expected);
   });
   it("compresses by threshold correctly", () => {
-    const intervals = [
+    const intervals = intervalSequence([
       {startTimeMs: 0, endTimeMs: 100},
       {startTimeMs: 100, endTimeMs: 200},
-    ];
+    ]);
     const nodeSummaries = [
       {cred: 14, seedFlow: 0, syntheticLoopFlow: 0.2, dependencyMintedCred: 0},
       {cred: 20, seedFlow: 20, syntheticLoopFlow: 0, dependencyMintedCred: 0},

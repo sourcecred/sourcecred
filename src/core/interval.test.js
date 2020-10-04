@@ -3,9 +3,88 @@
 import {utcWeek} from "d3-time";
 import {node, edge} from "./graphTestUtil";
 import {Graph} from "./graph";
-import {partitionGraph, graphIntervals, weekIntervals} from "./interval";
+import {
+  partitionGraph,
+  graphIntervals,
+  weekIntervals,
+  intervalSequence,
+} from "./interval";
 
 describe("src/core/interval", () => {
+  describe("intervalSequence", () => {
+    it("accepts an empty sequence", () => {
+      expect(intervalSequence([])).toEqual([]);
+    });
+    it("accepts a sequence with a single interval", () => {
+      const i = {startTimeMs: 0, endTimeMs: 100};
+      expect(intervalSequence([i])).toEqual([i]);
+    });
+    it("accepts the dual-infinity interval", () => {
+      const i = {startTimeMs: -Infinity, endTimeMs: Infinity};
+      expect(intervalSequence([i])).toEqual([i]);
+    });
+    it("accepts a good sequence with two intervals", () => {
+      const i0 = {startTimeMs: 0, endTimeMs: 100};
+      const i1 = {startTimeMs: 100, endTimeMs: 200};
+      expect(intervalSequence([i0, i1])).toEqual([i0, i1]);
+    });
+    it("rejects a sequence with a gap", () => {
+      const i0 = {startTimeMs: 0, endTimeMs: 100};
+      const i1 = {startTimeMs: 101, endTimeMs: 200};
+      const thunk = () => intervalSequence([i0, i1]);
+      expect(thunk).toThrowError(
+        "last interval ended at 100 but this interval starts at 101"
+      );
+    });
+    it("rejects a sequence with overlap", () => {
+      const i0 = {startTimeMs: 0, endTimeMs: 100};
+      const i1 = {startTimeMs: 99, endTimeMs: 200};
+      const thunk = () => intervalSequence([i0, i1]);
+      expect(thunk).toThrowError(
+        "last interval ended at 100 but this interval starts at 99"
+      );
+    });
+    it("rejects a sequence with a zero-length interval", () => {
+      const i0 = {startTimeMs: 0, endTimeMs: 100};
+      const i1 = {startTimeMs: 100, endTimeMs: 100};
+      const thunk = () => intervalSequence([i0, i1]);
+      expect(thunk).toThrowError("must have positive length");
+    });
+    it("rejects a sequence that is out of order", () => {
+      const i0 = {startTimeMs: 0, endTimeMs: 100};
+      const i1 = {startTimeMs: 100, endTimeMs: 200};
+      const thunk = () => intervalSequence([i1, i0]);
+      expect(thunk).toThrowError(
+        "last interval ended at 200 but this interval starts at 0"
+      );
+    });
+    it("rejects a sequence with a negative length interval", () => {
+      const i0 = {startTimeMs: 0, endTimeMs: 100};
+      const i1 = {startTimeMs: 100, endTimeMs: 99};
+      const thunk = () => intervalSequence([i1, i0]);
+      expect(thunk).toThrowError("interval must have positive length");
+    });
+    it("accepts a sequence with -Infinity and +Infinity", () => {
+      const i0 = {startTimeMs: -Infinity, endTimeMs: 100};
+      const i1 = {startTimeMs: 100, endTimeMs: +Infinity};
+      expect(intervalSequence([i0, i1])).toEqual([i0, i1]);
+    });
+    it("rejects a sequence with NaNs", () => {
+      const i0 = {startTimeMs: 0, endTimeMs: NaN};
+      const i1 = {startTimeMs: 100, endTimeMs: 200};
+      const thunk = () => intervalSequence([i0, i1]);
+      expect(thunk).toThrowError("NaN");
+    });
+    it("resists mutation of the intervals", () => {
+      const i0 = {startTimeMs: 0, endTimeMs: 100};
+      const i1 = {startTimeMs: 100, endTimeMs: 200};
+      const is = intervalSequence([i0, i1]);
+      i1.startTimeMs = 300;
+      intervalSequence(is);
+      expect(is[0].startTimeMs).toEqual(0);
+    });
+  });
+
   const WEEK_MID = 1562501362239;
   const WEEK_START = +utcWeek.floor(WEEK_MID);
   const WEEK_END = +utcWeek.ceil(WEEK_MID);

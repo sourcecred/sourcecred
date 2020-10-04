@@ -19,6 +19,43 @@ export type Interval = {|
 |};
 
 /**
+ * An interval sequence is an array of intervals with the following guarantees:
+ * - Every interval has positive time span (i.e. the end time is greater
+ *   than the start time).
+ * - Every interval except for the first starts at the same time that the
+ *   previous interval ended.
+ * - No interval may have a NaN start or end time. (Infinity is OK.)
+ */
+export opaque type IntervalSequence: $ReadOnlyArray<Interval> = $ReadOnlyArray<Interval>;
+
+export function intervalSequence(
+  intervals: $ReadOnlyArray<Interval>
+): IntervalSequence {
+  let lastEndTime = null;
+  for (const {startTimeMs, endTimeMs} of intervals) {
+    if (isNaN(startTimeMs) || isNaN(endTimeMs)) {
+      throw new Error(`NaN in interval [${startTimeMs}, ${endTimeMs}]`);
+    }
+    if (lastEndTime != null && startTimeMs !== lastEndTime) {
+      throw new Error(
+        `last interval ended at ${lastEndTime} but this interval starts at ${startTimeMs}`
+      );
+    }
+    if (endTimeMs <= startTimeMs) {
+      throw new Error(
+        `interval must have positive length, but got [${startTimeMs}, ${endTimeMs}]`
+      );
+    }
+    lastEndTime = endTimeMs;
+  }
+  // Reconstruct the objects so mutating the input won't break the IntervalSequence
+  return intervals.map(({startTimeMs, endTimeMs}) => ({
+    startTimeMs,
+    endTimeMs,
+  }));
+}
+
+/**
  * Represents a slice of a time-partitioned graph
  * Includes the interval, as well as all of the nodes and edges whose timestamps
  * are within the interval.
@@ -80,7 +117,7 @@ export function partitionGraph(graph: Graph): GraphIntervalPartition {
  * This function is basically a wrapper around weekIntervals that makes sure
  * the graph's nodes and edges are all accounted for properly.
  */
-export function graphIntervals(graph: Graph): Interval[] {
+export function graphIntervals(graph: Graph): IntervalSequence {
   const nodeTimestamps = Array.from(graph.nodes())
     .map((x) => x.timestampMs)
     .filter((x) => x != null)
@@ -110,7 +147,10 @@ export function graphIntervals(graph: Graph): Interval[] {
  * startMs and endMs are the same value, then the produced interval will be the
  * start and end of the last week that starts on or before startMs.)
  */
-export function weekIntervals(startMs: number, endMs: number): Interval[] {
+export function weekIntervals(
+  startMs: number,
+  endMs: number
+): IntervalSequence {
   if (!isFinite(startMs) || !isFinite(endMs)) {
     throw new Error("invalid non-finite input");
   }
@@ -135,5 +175,5 @@ export function weekIntervals(startMs: number, endMs: number): Interval[] {
       endTimeMs: +boundaries[i + 1],
     });
   }
-  return intervals;
+  return intervalSequence(intervals);
 }

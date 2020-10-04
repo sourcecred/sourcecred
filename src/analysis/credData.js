@@ -7,7 +7,7 @@ import {
 } from "../core/dependenciesMintPolicy";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {IDENTITY_PREFIX} from "../ledger/identity";
-import type {Interval} from "../core/interval";
+import {type IntervalSequence, intervalSequence} from "../core/interval";
 
 /**
  * Comprehensive data on a cred distribution.
@@ -18,7 +18,7 @@ export type CredData = {|
   +nodeOverTime: $ReadOnlyArray<NodeCredOverTime | null>,
   +edgeSummaries: $ReadOnlyArray<EdgeCredSummary>,
   +edgeOverTime: $ReadOnlyArray<EdgeCredOverTime | null>,
-  +intervals: $ReadOnlyArray<Interval>,
+  +intervals: IntervalSequence,
 |};
 
 /** Summary of a node's cred across all time.
@@ -83,10 +83,10 @@ export function computeCredData(
       nodeOverTime: [],
       edgeSummaries: [],
       edgeOverTime: [],
-      intervals: [],
+      intervals: intervalSequence([]),
     };
   }
-  const intervals = scores.map((d) => d.interval);
+  const intervals = intervalSequence(scores.map((d) => d.interval));
   const processedDependencyPolicies = dependencyPolicies.map((p) =>
     processMintPolicy(p, nodeOrder, intervals)
   );
@@ -168,7 +168,7 @@ export function computeCredData(
     nodeOverTime,
     edgeSummaries,
     edgeOverTime,
-    intervals,
+    intervals: intervalSequence(intervals),
   };
 }
 

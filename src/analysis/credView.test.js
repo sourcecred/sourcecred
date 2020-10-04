@@ -10,6 +10,7 @@ import {
 import {defaultParams} from "./timeline/params";
 import {compute} from "./credResult";
 import {CredView, _getIntervalIndex} from "./credView";
+import {intervalSequence} from "../core/interval";
 
 describe("analysis/credView", () => {
   async function example() {
@@ -252,38 +253,38 @@ describe("analysis/credView", () => {
 
   describe("_getIntervalIndex", () => {
     it("works for the zero-th index", () => {
-      const intervals = [
+      const intervals = intervalSequence([
         {startTimeMs: 0, endTimeMs: 100},
         {startTimeMs: 100, endTimeMs: 200},
         {startTimeMs: 200, endTimeMs: 300},
-      ];
+      ]);
       expect(_getIntervalIndex(intervals, 0)).toEqual(0);
       expect(_getIntervalIndex(intervals, 100)).toEqual(0);
     });
     it("works for a middle index", () => {
-      const intervals = [
+      const intervals = intervalSequence([
         {startTimeMs: 0, endTimeMs: 100},
         {startTimeMs: 100, endTimeMs: 200},
         {startTimeMs: 200, endTimeMs: 300},
-      ];
+      ]);
       expect(_getIntervalIndex(intervals, 101)).toEqual(1);
       expect(_getIntervalIndex(intervals, 200)).toEqual(1);
     });
     it("works for the last index", () => {
-      const intervals = [
+      const intervals = intervalSequence([
         {startTimeMs: 0, endTimeMs: 100},
         {startTimeMs: 100, endTimeMs: 200},
         {startTimeMs: 200, endTimeMs: 300},
-      ];
+      ]);
       expect(_getIntervalIndex(intervals, 299)).toEqual(2);
       expect(_getIntervalIndex(intervals, 300)).toEqual(2);
     });
     it("errors for an index out of bound", () => {
-      const intervals = [
+      const intervals = intervalSequence([
         {startTimeMs: 0, endTimeMs: 100},
         {startTimeMs: 100, endTimeMs: 200},
         {startTimeMs: 200, endTimeMs: 300},
-      ];
+      ]);
       const thunk = () => _getIntervalIndex(intervals, 301);
       expect(thunk).toThrowError("timestamp out of interval range");
     });
