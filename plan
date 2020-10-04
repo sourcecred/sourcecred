@@ -1,0 +1,7 @@
+goals:
+    P1: switch SC to CredRank; delete timeline cred
+        if we don't achieve this, we are miserable failures
+        if we achieve this, the nerds are happy
+    corollary: have a good API for accessing the output data, dogfooded by `sourcecred go`
+    P2: implement cred tithing
+        if we achieve this, we are happy and other people are, too
