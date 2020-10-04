@@ -208,7 +208,7 @@ async function retryGithubFetch(
   fetch,
   fetchOptions
 ): Promise<any /* or rejects to GithubResponseError */> {
-  const policy = {maxRetries: 10, jitterRatio: 1.0};
+  const policy = {maxRetries: 5, jitterRatio: 1.2};
   const retryResult = await retry(async () => {
     try {
       return {type: "DONE", value: await tryGithubFetch(fetch, fetchOptions)};
