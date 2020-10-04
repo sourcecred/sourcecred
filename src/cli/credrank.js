@@ -3,6 +3,7 @@
 import fs from "fs-extra";
 import stringify from "json-stable-stringify";
 import {join as pathJoin} from "path";
+import {sum} from "d3-array";
 
 import sortBy from "../util/sortBy";
 import {credrank} from "../core/algorithm/credrank";
@@ -78,13 +79,18 @@ const credrankCommand: Command = async (args, std) => {
 function printCredSummaryTable(credGraph: CredGraph) {
   console.log(`# Top Participants By Cred`);
   console.log();
-  console.log(`| Description | Cred |`);
-  console.log(`| --- | --- |`);
+  console.log(`| Description | Cred | % |`);
+  console.log(`| --- | --- | --- |`);
   const credParticipants = Array.from(credGraph.participants());
   const sortedParticipants = sortBy(credParticipants, (p) => -p.cred);
-  sortedParticipants
-    .slice(0, 20)
-    .forEach((n) => console.log(`| ${n.description} | ${n.cred.toFixed(1)} |`));
+  const totalCred = sum(sortedParticipants, (p) => p.cred);
+  function row({cred, description}) {
+    const percentage = (100 * cred) / totalCred;
+    return `| ${description} | ${cred.toFixed(1)} | ${percentage.toFixed(
+      1
+    )}% |`;
+  }
+  sortedParticipants.slice(0, 20).forEach((n) => console.log(row(n)));
 }
 
 export default credrankCommand;
