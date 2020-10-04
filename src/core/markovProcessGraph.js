@@ -133,7 +133,9 @@ export function markovEdgeAddress(
   ]);
 }
 
-function markovEdgeAddressFromMarkovEdge(edge: MarkovEdge): MarkovEdgeAddressT {
+export function markovEdgeAddressFromMarkovEdge(
+  edge: MarkovEdge
+): MarkovEdgeAddressT {
   return markovEdgeAddress(
     edge.address,
     edge.reversed ? "B" /* Backward */ : "F" /* Forward */
@@ -145,14 +147,20 @@ export type OrderedSparseMarkovChain = {|
   +chain: SparseMarkovChain,
 |};
 
-const CORE_NODE_PREFIX = NodeAddress.fromParts(["sourcecred", "core"]);
+export const CORE_NODE_PREFIX: NodeAddressT = NodeAddress.fromParts([
+  "sourcecred",
+  "core",
+]);
 
 // Address of the seed node. All graph nodes radiate $\alpha$ to this
 // node, and this node flows out to nodes in proportion to their weight
 // (mint). This is also a node prefix for the "seed node" type, which
 // contains only one node.
-const SEED_ADDRESS = NodeAddress.append(CORE_NODE_PREFIX, "SEED");
-const SEED_DESCRIPTION = "\u{1f331}"; // U+1F331 SEEDLING
+export const SEED_ADDRESS: NodeAddressT = NodeAddress.append(
+  CORE_NODE_PREFIX,
+  "SEED"
+);
+export const SEED_DESCRIPTION: string = "\u{1f331}"; // U+1F331 SEEDLING
 
 // Node address prefix for epoch nodes.
 const USER_EPOCH_PREFIX = NodeAddress.append(CORE_NODE_PREFIX, "USER_EPOCH");
@@ -241,23 +249,30 @@ export function payoutAddressForEpoch(
   );
 }
 
-const EPOCH_WEBBING = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_WEBBING");
-const USER_EPOCH_RADIATION = EdgeAddress.append(
+export const EPOCH_WEBBING: EdgeAddressT = EdgeAddress.append(
+  FIBRATION_EDGE,
+  "EPOCH_WEBBING"
+);
+export const USER_EPOCH_RADIATION: EdgeAddressT = EdgeAddress.append(
   FIBRATION_EDGE,
   "USER_EPOCH_RADIATION"
 );
-const EPOCH_ACCUMULATOR_RADIATION = EdgeAddress.append(
+export const EPOCH_ACCUMULATOR_RADIATION: EdgeAddressT = EdgeAddress.append(
   FIBRATION_EDGE,
   "EPOCH_RADIATION"
 );
 
 // Prefixes for seed edges.
-const CONTRIBUTION_RADIATION = EdgeAddress.fromParts([
+export const CONTRIBUTION_RADIATION: EdgeAddressT = EdgeAddress.fromParts([
   "sourcecred",
   "core",
   "CONTRIBUTION_RADIATION",
 ]);
-const SEED_MINT = EdgeAddress.fromParts(["sourcecred", "core", "SEED_MINT"]);
+export const SEED_MINT: EdgeAddressT = EdgeAddress.fromParts([
+  "sourcecred",
+  "core",
+  "SEED_MINT",
+]);
 
 export type Arguments = {|
   +weightedGraph: WeightedGraphT,
@@ -334,10 +349,16 @@ export class MarkovProcessGraph {
     // Amount of mass allocated to contribution edges flowing from epoch
     // nodes.
     const epochTransitionRemainder: number = (() => {
-      if (beta < 0 || gammaForward < 0 || gammaBackward < 0) {
+      const valid = (x) => x >= 0 && x <= 1;
+      if (
+        !valid(beta) ||
+        !valid(gammaForward) ||
+        !valid(gammaBackward) ||
+        !valid(alpha)
+      ) {
         throw new Error(
-          "Negative transition probability: " +
-            [beta, gammaForward, gammaBackward].join(" or ")
+          "Invalid transition probability: " +
+            [beta, gammaForward, gammaBackward, alpha].join(" or ")
         );
       }
       const result = 1 - (alpha + beta + gammaForward + gammaBackward);
@@ -635,6 +656,11 @@ export class MarkovProcessGraph {
         yield node;
       }
     }
+  }
+
+  edge(address: MarkovEdgeAddressT): MarkovEdge | null {
+    MarkovEdgeAddress.assertValid(address);
+    return this._edges.get(address) || null;
   }
 
   *edges(): Iterator<MarkovEdge> {
