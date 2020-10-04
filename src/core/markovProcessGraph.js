@@ -55,8 +55,6 @@ import {type Uuid} from "../util/uuid";
  * spectral analysis via the `toMarkovChain` method.
  */
 
-import {max, min} from "d3-array";
-import {weekIntervals} from "./interval";
 import sortedIndex from "lodash.sortedindex";
 import sortBy from "../util/sortBy";
 import {makeAddressModule, type AddressModule} from "./address";
@@ -76,6 +74,7 @@ import * as NullUtil from "../util/null";
 import * as MapUtil from "../util/map";
 import type {TimestampMs} from "../util/timestamp";
 import {type SparseMarkovChain} from "./algorithm/markovChain";
+import {type IntervalSequence} from "./interval";
 
 export type TransitionProbability = number;
 
@@ -260,7 +259,16 @@ const CONTRIBUTION_RADIATION = EdgeAddress.fromParts([
 ]);
 const SEED_MINT = EdgeAddress.fromParts(["sourcecred", "core", "SEED_MINT"]);
 
-export type FibrationOptions = {|
+export type Arguments = {|
+  +weightedGraph: WeightedGraphT,
+  +participants: $ReadOnlyArray<Participant>,
+  +intervals: IntervalSequence,
+  +parameters: Parameters,
+|};
+
+export type Parameters = {|
+  // Transition probability from every organic node back to the seed node.
+  +alpha: TransitionProbability,
   // Transition probability for payout edges from epoch nodes to their
   // owners.
   +beta: TransitionProbability,
@@ -268,9 +276,6 @@ export type FibrationOptions = {|
   // next epoch node for the same owner.
   +gammaForward: TransitionProbability,
   +gammaBackward: TransitionProbability,
-|};
-export type SeedOptions = {|
-  +alpha: TransitionProbability,
 |};
 
 export const COMPAT_INFO = {
@@ -314,12 +319,9 @@ export class MarkovProcessGraph {
     this._participants = deepFreeze(participants);
   }
 
-  static new(
-    wg: WeightedGraphT,
-    participants: $ReadOnlyArray<Participant>,
-    fibration: FibrationOptions,
-    seed: SeedOptions
-  ): MarkovProcessGraph {
+  static new(args: Arguments): MarkovProcessGraph {
+    const {weightedGraph, participants, parameters, intervals} = args;
+    const {alpha, beta, gammaForward, gammaBackward} = parameters;
     const _nodes = new Map();
     const _edges = new Map();
 
@@ -332,8 +334,6 @@ export class MarkovProcessGraph {
     // Amount of mass allocated to contribution edges flowing from epoch
     // nodes.
     const epochTransitionRemainder: number = (() => {
-      const {alpha} = seed;
-      const {beta, gammaForward, gammaBackward} = fibration;
       if (beta < 0 || gammaForward < 0 || gammaBackward < 0) {
         throw new Error(
           "Negative transition probability: " +
@@ -347,15 +347,11 @@ export class MarkovProcessGraph {
       return result;
     })();
 
-    const timeBoundaries = (() => {
-      const edgeTimestamps = Array.from(
-        wg.graph.edges({showDangling: false})
-      ).map((x) => x.timestampMs);
-      const start = min(edgeTimestamps);
-      const end = max(edgeTimestamps);
-      const boundaries = weekIntervals(start, end).map((x) => x.startTimeMs);
-      return [-Infinity, ...boundaries, Infinity];
-    })();
+    const timeBoundaries = [
+      -Infinity,
+      ...intervals.map((x) => x.startTimeMs),
+      Infinity,
+    ];
 
     const addNode = (node: MarkovNode) => {
       if (_nodes.has(node.address)) {
@@ -385,8 +381,8 @@ export class MarkovProcessGraph {
     });
 
     // Add graph nodes
-    const nwe = nodeWeightEvaluator(wg.weights);
-    for (const node of wg.graph.nodes()) {
+    const nwe = nodeWeightEvaluator(weightedGraph.weights);
+    for (const node of weightedGraph.graph.nodes()) {
       if (_scoringAddresses.has(node.address)) {
         // Scoring nodes are not included in the Markov process graph:
         // the cred for a scoring node is given implicitly by the
@@ -440,7 +436,7 @@ export class MarkovProcessGraph {
           reversed: false,
           src: thisEpoch,
           dst: accumulator,
-          transitionProbability: fibration.beta,
+          transitionProbability: beta,
         });
         if (lastBoundary != null) {
           const lastEpoch = userEpochNodeAddressToRaw({
@@ -458,14 +454,14 @@ export class MarkovProcessGraph {
             reversed: false,
             src: lastEpoch,
             dst: thisEpoch,
-            transitionProbability: fibration.gammaForward,
+            transitionProbability: gammaForward,
           });
           addEdge({
             address: webAddress,
             reversed: true,
             src: thisEpoch,
             dst: lastEpoch,
-            transitionProbability: fibration.gammaBackward,
+            transitionProbability: gammaBackward,
           });
         }
         lastBoundary = boundary;
@@ -530,9 +526,9 @@ export class MarkovProcessGraph {
       +weight: number,
     |};
     const unidirectionalGraphEdges = function* (): Iterator<_UnidirectionalGraphEdge> {
-      const ewe = edgeWeightEvaluator(wg.weights);
+      const ewe = edgeWeightEvaluator(weightedGraph.weights);
       for (const edge of (function* () {
-        for (const edge of wg.graph.edges({showDangling: false})) {
+        for (const edge of weightedGraph.graph.edges({showDangling: false})) {
           const weight = ewe(edge.address);
           yield {
             address: edge.address,
@@ -575,7 +571,7 @@ export class MarkovProcessGraph {
     for (const [src, {totalOutWeight, outEdges}] of srcNodes) {
       const totalOutPr = NodeAddress.hasPrefix(src, USER_EPOCH_PREFIX)
         ? epochTransitionRemainder
-        : 1 - seed.alpha;
+        : 1 - alpha;
       for (const outEdge of outEdges) {
         const pr = (outEdge.weight / totalOutWeight) * totalOutPr;
         addEdge({
