@@ -90,7 +90,7 @@ export type DependencyConfig = {|
   +autoActivateOnIdentityCreation?: boolean,
 
   // If this is set, then a default time period will be injected in the
-  // dependency config with the weight set to this value (e.g. 0.05 = 5% of total cred).
+  // dependency config with the weight set to this value (e.g. 0.05 = 5% additional cred minted).
   // (Mostly included so we can have SourceCred receiving cred by default)
   // Does not inject a starting period if unset.
   +autoInjectStartingPeriodWeight?: number,
@@ -107,8 +107,7 @@ export const mintPeriodParser: C.Parser<MintPeriod> = C.object({
 });
 
 function checkWeightValid(x: number): number {
-  if (x > 1 || x < 0)
-    throw new Error(`must be a number between 0 and 1, got ${x}`);
+  if (x < 0) throw new Error(`must be a non-negative number, got ${x}`);
   return x;
 }
 
@@ -149,7 +148,6 @@ export function ensureIdentityExists(
       }
       const weight = dep.autoInjectStartingPeriodWeight;
       if (weight != null && !dep.periods.length) {
-        // Set default start period to one week from adding the dependency
         return {
           ...dep,
           id,

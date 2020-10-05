@@ -70,7 +70,7 @@ describe("api/dependenciesConfig", () => {
       expect(periods[0].weight).toBe(autoInjectStartingPeriodWeight);
       expect(fromISO(periods[0].startTime)).toBe(fakeNow);
     });
-    it("does not inject default period if it already exists", () => {
+    it("does not inject default period if any period already exists", () => {
       const ledger = new Ledger();
       const config = {
         name: n("foo"),
