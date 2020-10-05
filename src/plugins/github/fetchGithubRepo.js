@@ -17,7 +17,7 @@ import schema from "./schema";
 import {type GithubToken} from "./token";
 import {cacheIdForRepoId} from "./cacheId";
 import {type CacheProvider} from "../../backend/cache";
-import retry from "../../util/retry";
+import retry, {type AttemptOutcome} from "../../util/retry";
 
 type FetchRepoOptions = {|
   +token: GithubToken,
@@ -132,12 +132,12 @@ export function _guessTypename(
 const GITHUB_GRAPHQL_SERVER = "https://api.github.com/graphql";
 
 type GithubResponseError =
-  | {|+type: "FETCH_ERROR", retry: false, error: Error|}
-  | {|+type: "GRAPHQL_ERROR", retry: false, error: mixed|}
-  | {|+type: "RATE_LIMIT_EXCEEDED", retry: false, error: mixed|}
-  | {|+type: "GITHUB_INTERNAL_EXECUTION_ERROR", retry: true, error: mixed|}
-  | {|+type: "BAD_CREDENTIALS", retry: false, error: mixed|}
-  | {|+type: "NO_DATA", retry: true, error: mixed|};
+  | {|+type: "FETCH_ERROR", error: Error|}
+  | {|+type: "GRAPHQL_ERROR", error: mixed|}
+  | {|+type: "RATE_LIMIT_EXCEEDED", error: mixed|}
+  | {|+type: "GITHUB_INTERNAL_EXECUTION_ERROR", error: mixed|}
+  | {|+type: "BAD_CREDENTIALS", error: mixed|}
+  | {|+type: "NO_DATA", error: mixed|};
 
 // Fetch against the GitHub API with the provided options, returning a
 // promise that either resolves to the GraphQL result data or rejects
@@ -154,7 +154,6 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
             return Promise.reject(
               ({
                 type: "GITHUB_INTERNAL_EXECUTION_ERROR",
-                retry: true,
                 error: x,
               }: GithubResponseError)
             );
@@ -163,45 +162,54 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
             x.errors[0].type === "RATE_LIMITED"
           ) {
             return Promise.reject(
-              ({
-                type: "RATE_LIMIT_EXCEEDED",
-                retry: false,
-                error: x,
-              }: GithubResponseError)
+              ({type: "RATE_LIMIT_EXCEEDED", error: x}: GithubResponseError)
             );
           } else {
             return Promise.reject(
-              ({
-                type: "GRAPHQL_ERROR",
-                retry: false,
-                error: x,
-              }: GithubResponseError)
+              ({type: "GRAPHQL_ERROR", error: x}: GithubResponseError)
             );
           }
         }
         if (x.data === undefined) {
           if (x.message && x.message.includes("Bad credentials")) {
             return Promise.reject(
-              ({
-                type: "BAD_CREDENTIALS",
-                retry: false,
-                error: x,
-              }: GithubResponseError)
+              ({type: "BAD_CREDENTIALS", error: x}: GithubResponseError)
             );
           } else {
             // See https://github.com/sourcecred/sourcecred/issues/350
             return Promise.reject(
-              ({type: "NO_DATA", retry: true, error: x}: GithubResponseError)
+              ({type: "NO_DATA", error: x}: GithubResponseError)
             );
           }
         }
         return Promise.resolve(x.data);
       }),
     (e) =>
-      Promise.reject(
-        ({type: "FETCH_ERROR", retry: false, error: e}: GithubResponseError)
-      )
+      Promise.reject(({type: "FETCH_ERROR", error: e}: GithubResponseError))
   );
+}
+
+function errorDisposition(
+  e: GithubResponseError
+): AttemptOutcome<empty, GithubResponseError> {
+  if (
+    e.type === "FETCH_ERROR" ||
+    e.type === "GRAPHQL_ERROR" ||
+    e.type === "BAD_CREDENTIALS"
+  ) {
+    return {type: "FATAL", err: e};
+  }
+  if (e.type === "GITHUB_INTERNAL_EXECUTION_ERROR" || e.type === "NO_DATA") {
+    return {type: "RETRY", err: e};
+  }
+  if (e.type === "RATE_LIMIT_EXCEEDED") {
+    // Wait in 15-minute increments. TODO(@wchargin): Ask GitHub
+    // when our token resets (`{ rateLimit { resetAt } }`) and wait
+    // until just then.
+    const delayMs = 15 * 60 * 1000;
+    return {type: "WAIT", until: new Date(Date.now() + delayMs), err: e};
+  }
+  throw new Error((e.type: empty));
 }
 
 async function retryGithubFetch(
@@ -220,18 +228,7 @@ async function retryGithubFetch(
       return {type: "DONE", value: await tryGithubFetch(fetch, fetchOptions)};
     } catch (errAny) {
       const err: GithubResponseError = errAny;
-      if (err.type === "RATE_LIMIT_EXCEEDED") {
-        // Wait in 15-minute increments. TODO(@wchargin): Ask GitHub
-        // when our token resets (`{ rateLimit { resetAt } }`) and wait
-        // until just then.
-        const delayMs = 15 * 60 * 1000;
-        return {type: "WAIT", until: new Date(Date.now() + delayMs), err};
-      }
-      if (err.retry) {
-        return {type: "RETRY", err};
-      } else {
-        return {type: "FATAL", err};
-      }
+      return errorDisposition(err);
     }
   }, policy);
   switch (retryResult.type) {
