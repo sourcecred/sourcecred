@@ -2,9 +2,10 @@
 import React, {type Node as ReactNode} from "react";
 import {useSelector} from "react-redux";
 import {MenuItemLink} from "react-admin";
-import TrendingUpIcon from "@material-ui/icons/TrendingUp";
-import DefaultIcon from "@material-ui/icons/ViewList";
-import TransformIcon from "@material-ui/icons/Transform";
+import ExplorerIcon from "@material-ui/icons/Equalizer";
+import AccountIcon from "@material-ui/icons/AccountBalanceWallet";
+import TransferIcon from "@material-ui/icons/SwapCalls";
+import SettingsIcon from "@material-ui/icons/Settings";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 
 type menuProps = {|onMenuClick: Function|};
@@ -20,14 +21,14 @@ const createMenu = (
         <MenuItemLink
           to="/explorer"
           primaryText="Explorer"
-          leftIcon={<TrendingUpIcon />}
+          leftIcon={<ExplorerIcon />}
           onClick={onMenuClick}
           sidebarIsOpen={open}
         />
         <MenuItemLink
           to="/accounts"
           primaryText={`${currencyName} Accounts`}
-          leftIcon={<DefaultIcon />}
+          leftIcon={<AccountIcon />}
           onClick={onMenuClick}
           sidebarIsOpen={open}
         />
@@ -36,14 +37,14 @@ const createMenu = (
             <MenuItemLink
               to="/admin"
               primaryText="Ledger Admin"
-              leftIcon={<DefaultIcon />}
+              leftIcon={<SettingsIcon />}
               onClick={onMenuClick}
               sidebarIsOpen={open}
             />
             <MenuItemLink
               to="/transfer"
               primaryText={`Transfer ${currencyName}`}
-              leftIcon={<TransformIcon />}
+              leftIcon={<TransferIcon />}
               onClick={onMenuClick}
               sidebarIsOpen={open}
             />
