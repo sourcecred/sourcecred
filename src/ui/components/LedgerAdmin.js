@@ -1,10 +1,8 @@
 // @flow
 
 import React, {useState, type Node as ReactNode} from "react";
-import {type Identity, type IdentityId} from "../../core/identity";
-import {AliasView} from "./AliasView";
-import {IdentityMerger} from "./IdentityMerger";
 import {makeStyles} from "@material-ui/core/styles";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
 import {
   Button,
   Checkbox,
@@ -16,36 +14,37 @@ import {
   TextField,
 } from "@material-ui/core";
 import {useLedger} from "../utils/LedgerContext";
+import {IdentityMerger} from "./IdentityMerger";
+import {type Identity, type IdentityId} from "../../core/identity";
+import {AliasView} from "./AliasView";
 
 const useStyles = makeStyles((theme) => {
-  const marginNum = 20;
-  const flexBasis = marginNum * 2;
   return {
     root: {
       color: theme.palette.text.primary,
-      width: "80%",
-      margin: "0 auto",
+      width: "100%",
+      maxWidth: "50em",
       padding: "0 5em 5em",
     },
     identityList: {
       backgroundColor: theme.palette.background.paper,
       width: "100%",
-      margin: `${marginNum}px`,
+      marginTop: theme.spacing(3),
+      overflow: "auto",
+      maxHeight: 500,
     },
     centerRow: {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
     },
-    element: {flex: 1, margin: `${marginNum}px`},
     updateElement: {
       flexGrow: 2,
-      flexBasis: `${flexBasis}px`,
-      margin: `${marginNum}px`,
+      flexBasis: theme.spacing(5),
+      margin: theme.spacing(3, 0),
     },
-    checkboxElement: {flexGrow: 1, flexBasis: 0, margin: `${marginNum}px`},
-    promptStringHeader: {margin: `${marginNum}px`, marginBottom: 0},
-    IdentitiesHeader: {margin: `${marginNum}px`},
+    checkboxElement: {flexGrow: 1, flexBasis: 0, margin: theme.spacing(3)},
+    IdentitiesHeader: {margin: theme.spacing(3, 0)},
   };
 });
 
@@ -125,12 +124,7 @@ export const LedgerAdmin = (): ReactNode => {
         <h1 className={classes.IdentitiesHeader}>Identities</h1>{" "}
         {ledger.accounts().length > 0 && <h3> (click one to update it)</h3>}
       </span>
-      <div className={classes.centerRow}>
-        <List fullWidth className={classes.identityList}>
-          {renderIdentities()}
-        </List>
-      </div>
-      <h3 className={classes.promptStringHeader}>{promptString}</h3>
+      <h3>{promptString}</h3>
       <div className={classes.centerRow}>
         <TextField
           fullWidth
@@ -157,21 +151,11 @@ export const LedgerAdmin = (): ReactNode => {
           />
         )}
       </div>
-      <div className={classes.centerRow}>
-        <Button
-          className={classes.element}
-          size="large"
-          color="primary"
-          variant="contained"
-          onClick={createOrUpdateIdentity}
-        >
+      <ButtonGroup color="primary" variant="contained">
+        <Button onClick={createOrUpdateIdentity}>
           {selectedId ? "update username" : "create identity"}
         </Button>
         <Button
-          className={classes.element}
-          size="large"
-          color="primary"
-          variant="contained"
           onClick={() => {
             fetch("data/ledger.json", {
               headers: {
@@ -185,24 +169,19 @@ export const LedgerAdmin = (): ReactNode => {
         >
           save ledger to disk
         </Button>
-        {selectedId && (
-          <Button
-            className={classes.element}
-            size="large"
-            color="primary"
-            variant="contained"
-            onClick={resetIdentity}
-          >
-            New identity
-          </Button>
-        )}
-      </div>
+        {selectedId && <Button onClick={resetIdentity}>New identity</Button>}
+      </ButtonGroup>
       {selectedId && (
         <>
           <AliasView selectedId={selectedId} />
           <IdentityMerger selectedId={selectedId} />
         </>
       )}
+      <div className={classes.centerRow}>
+        <List fullWidth className={classes.identityList}>
+          {renderIdentities()}
+        </List>
+      </div>
     </Container>
   );
 };

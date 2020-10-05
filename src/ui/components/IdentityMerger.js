@@ -58,7 +58,7 @@ export function IdentityMerger({selectedId}: Props): ReactNode {
         getOptionLabel={({name}) => name || ""}
         inputValue={inputValue}
         renderInput={(params) => (
-          <TextField {...params} variant="outlined" label="Merge Identity" />
+          <TextField {...params} variant="outlined" label="Add Alias" />
         )}
       />
     </>
