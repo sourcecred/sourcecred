@@ -36,7 +36,7 @@ describe("api/dependenciesConfig", () => {
       // No modification to the Ledger.
       expect(ledger.eventLog()).toEqual(events);
     });
-    it("assigns an id and creates identity + default period if needed", () => {
+    it("assigns an id and creates identity", () => {
       const ledger = new Ledger();
       const config = {name: n("foo"), periods: []};
       const {id, periods} = ensureIdentityExists(config, ledger);
@@ -48,25 +48,49 @@ describe("api/dependenciesConfig", () => {
       expect(account.identity.name).toEqual(config.name);
       expect(account.identity.subtype).toEqual("PROJECT");
       expect(account.active).toBe(false);
-      expect(periods).toHaveLength(1);
+      expect(periods).toHaveLength(0);
     });
-    it("sets default period if needed", () => {
+    it("can inject default period with weight", () => {
       const ledger = new Ledger();
-      const config = {name: n("foo"), periods: []};
+      const autoInjectStartingPeriodWeight = 0.05;
+      const fakeNow = Date.now();
+
+      jest
+        .spyOn(global.Date, "now")
+        .mockImplementationOnce(() => fakeNow)
+        .mockImplementationOnce(() => fakeNow);
+
+      const config = {
+        name: n("foo"),
+        periods: [],
+        autoInjectStartingPeriodWeight,
+      };
       const {periods} = ensureIdentityExists(config, ledger);
       expect(periods).toHaveLength(1);
-      expect(periods[0].weight).toBe(0.05);
-      expect(fromISO(periods[0].startTime)).toBeGreaterThan(Date.now());
+      expect(periods[0].weight).toBe(autoInjectStartingPeriodWeight);
+      expect(fromISO(periods[0].startTime)).toBe(fakeNow);
     });
-    it("does not set default period if it already exists", () => {
+    it("does not inject default period if it already exists", () => {
       const ledger = new Ledger();
       const config = {
         name: n("foo"),
         periods: [{startTime: toISO(1), weight: 0.05}],
+        autoInjectStartingPeriodWeight: 0.01,
       };
       const {periods} = ensureIdentityExists(config, ledger);
       expect(periods).toEqual(config.periods);
     });
+
+    it("does not inject default period if autoInjectStartingPeriodWeight is unset", () => {
+      const ledger = new Ledger();
+      const config = {
+        name: n("foo"),
+        periods: [],
+      };
+      const {periods} = ensureIdentityExists(config, ledger);
+      expect(periods).toEqual(config.periods);
+    });
+
     it("can activate newly-created identities", () => {
       const ledger = new Ledger();
       const config = {
@@ -83,7 +107,7 @@ describe("api/dependenciesConfig", () => {
       expect(account.identity.name).toEqual(config.name);
       expect(account.identity.subtype).toEqual("PROJECT");
       expect(account.active).toBe(true);
-      expect(periods).toHaveLength(1);
+      expect(periods).toHaveLength(0);
     });
     it("does not activate new identities if autoActivateOnIdentityCreation is unset", () => {
       const ledger = new Ledger();
@@ -98,7 +122,7 @@ describe("api/dependenciesConfig", () => {
       }
       const account = ledger.account(id);
       expect(account.active).toBe(false);
-      expect(periods).toHaveLength(1);
+      expect(periods).toHaveLength(0);
     });
     it("does not activate new identities if autoActivateOnIdentityCreation is set to false", () => {
       const ledger = new Ledger();
@@ -107,14 +131,13 @@ describe("api/dependenciesConfig", () => {
         periods: [],
         autoActivateOnIdentityCreation: false,
       };
-      const {id, periods} = ensureIdentityExists(config, ledger);
+      const {id} = ensureIdentityExists(config, ledger);
       if (id == null) {
         // Will never happen in practice, but needed to appease Flow
         throw new Error("invariant violation");
       }
       const account = ledger.account(id);
       expect(account.active).toBe(false);
-      expect(periods).toHaveLength(1);
     });
     it("does not activate if the identity already exists (specified by id)", () => {
       const ledger = new Ledger();

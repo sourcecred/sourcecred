@@ -88,6 +88,12 @@ export type DependencyConfig = {|
   // in new instances.)
   // Defaults to false if unset.
   +autoActivateOnIdentityCreation?: boolean,
+
+  // If this is set, then a default time period will be injected in the
+  // dependency config with the weight set to this value (e.g. 0.05 = 5% of total cred).
+  // (Mostly included so we can have SourceCred receiving cred by default)
+  // Does not inject a starting period if unset.
+  +autoInjectStartingPeriodWeight?: number,
 |};
 
 export type MintPeriod = {|
@@ -95,12 +101,16 @@ export type MintPeriod = {|
   +weight: number,
 |};
 
-const ONE_WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
-
 export const mintPeriodParser: C.Parser<MintPeriod> = C.object({
   startTime: timestampISOParser,
   weight: C.number,
 });
+
+function checkWeightValid(x: number): number {
+  if (x > 1 || x < 0)
+    throw new Error(`must be a number between 0 and 1, got ${x}`);
+  return x;
+}
 
 export const dependencyConfigParser: C.Parser<DependencyConfig> = C.object(
   {
@@ -110,6 +120,7 @@ export const dependencyConfigParser: C.Parser<DependencyConfig> = C.object(
   {
     id: uuidParser,
     autoActivateOnIdentityCreation: C.boolean,
+    autoInjectStartingPeriodWeight: C.fmap(C.number, checkWeightValid),
   }
 );
 
@@ -136,13 +147,17 @@ export function ensureIdentityExists(
       if (dep.autoActivateOnIdentityCreation) {
         ledger.activate(id);
       }
-      if (!dep.periods.length) {
+      const weight = dep.autoInjectStartingPeriodWeight;
+      if (weight != null && !dep.periods.length) {
         // Set default start period to one week from adding the dependency
         return {
           ...dep,
           id,
           periods: [
-            {"startTime": toISO(Date.now() + ONE_WEEK_IN_MS), "weight": 0.05},
+            {
+              "startTime": toISO(Date.now()),
+              weight,
+            },
           ],
         };
       }
