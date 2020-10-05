@@ -83,10 +83,10 @@ const FilterSelect = ({
   setFilterState: (FilterState) => void,
 }) => {
   const plugins = credView.plugins();
-  
+
   const handleMenuClose = () =>
     setFilterState({...filterState, anchorEl: null});
-  
+
   const optionGroup = (declaration: PluginDeclaration) => {
     const header = (
       <MenuItem
@@ -149,7 +149,7 @@ const FilterSelect = ({
         </ListItem>
         <Divider className={css(styles.divider)} />
       </List>
-      
+
       <Menu
         id="lock-menu"
         anchorEl={filterState.anchorEl}
@@ -240,7 +240,7 @@ const WeightsConfigSection = ({
             edgeWeights={weights.edgeWeights}
             onNodeWeightChange={(prefix, weight) => {
               weights.nodeWeights.set(prefix, weight);
-              
+
               setWeightsState({weights});
             }}
             onEdgeWeightChange={(prefix, weight) => {
@@ -254,23 +254,23 @@ const WeightsConfigSection = ({
   );
 };
 
-export const Explorer = ({initialView}: {initialView: CredView}) => {
+export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
   const [{credView}, setCredViewState] = useState({
     credView: initialView,
   });
-  
+
   const updateCredView = (credView: CredView) => setCredViewState({credView});
-  
+
   const [filterState, setFilterState] = useState<FilterState>({
     anchorEl: null,
     filter: null,
     name: null,
   });
-  
+
   const [recalculating, setRecalculating] = useState(false);
-  
+
   const [showWeightConfig, setShowWeightConfig] = useState(false);
-  
+
   // TODO: Allow sorting/displaying only recent cred...
   const {sortedNodes, total} = useMemo(() => {
     if (!credView) return {sortedNodes: [], total: 0};
@@ -282,14 +282,14 @@ export const Explorer = ({initialView}: {initialView: CredView}) => {
     const total: number = sum(nodes.map((n) => n.credSummary.cred));
     return {sortedNodes, total};
   }, [filterState.filter, credView]);
-  
+
   const [{weights}, setWeightsState] = useState<{weights: Weights}>({
     weights: credView ? weightsCopy(credView.weights()) : emptyWeights(),
   });
   const [params, setParams] = useState<TimelineCredParameters>({
     ...(credView ? credView.params() : defaultParams()),
   });
-  
+
   const recomputeCred = async (
     weights: Weights,
     params: TimelineCredParameters
@@ -307,13 +307,11 @@ export const Explorer = ({initialView}: {initialView: CredView}) => {
     }
   };
 
-  const paramsUpToDate = useMemo(() => {
-    if (!credView) return false;
-    return (
-      deepEqual(params, credView.params()) &&
-      deepEqual(weights, credView.weights())
-    );
-  }, [weights, params, credView]);
+  const currentParams = credView ? credView.params() : null;
+  const currentWeights = credView ? credView.weights() : null;
+
+  const paramsUpToDate =
+    deepEqual(params, currentParams) && deepEqual(weights, currentWeights);
 
   if (!credView) return null;
 
