@@ -48,6 +48,7 @@ import {
   type TimestampISO,
   timestampISOParser,
   fromISO,
+  toISO,
 } from "../util/timestamp";
 import {type IdentityId, type Name, nameParser} from "../core/identity";
 import {parser as uuidParser} from "../util/uuid";
@@ -87,6 +88,12 @@ export type DependencyConfig = {|
   // in new instances.)
   // Defaults to false if unset.
   +autoActivateOnIdentityCreation?: boolean,
+
+  // If this is set, then a default time period will be injected in the
+  // dependency config with the weight set to this value (e.g. 0.05 = 5% additional cred minted).
+  // (Mostly included so we can have SourceCred receiving cred by default)
+  // Does not inject a starting period if unset.
+  +autoInjectStartingPeriodWeight?: number,
 |};
 
 export type MintPeriod = {|
@@ -99,6 +106,11 @@ export const mintPeriodParser: C.Parser<MintPeriod> = C.object({
   weight: C.number,
 });
 
+function checkWeightValid(x: number): number {
+  if (x < 0) throw new Error(`must be a non-negative number, got ${x}`);
+  return x;
+}
+
 export const dependencyConfigParser: C.Parser<DependencyConfig> = C.object(
   {
     name: nameParser,
@@ -107,6 +119,7 @@ export const dependencyConfigParser: C.Parser<DependencyConfig> = C.object(
   {
     id: uuidParser,
     autoActivateOnIdentityCreation: C.boolean,
+    autoInjectStartingPeriodWeight: C.fmap(C.number, checkWeightValid),
   }
 );
 
@@ -132,6 +145,19 @@ export function ensureIdentityExists(
       const id = ledger.createIdentity("PROJECT", dep.name);
       if (dep.autoActivateOnIdentityCreation) {
         ledger.activate(id);
+      }
+      const weight = dep.autoInjectStartingPeriodWeight;
+      if (weight != null && !dep.periods.length) {
+        return {
+          ...dep,
+          id,
+          periods: [
+            {
+              "startTime": toISO(Date.now()),
+              weight,
+            },
+          ],
+        };
       }
       return {...dep, id};
     }
