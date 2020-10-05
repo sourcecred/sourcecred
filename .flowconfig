@@ -1,5 +1,7 @@
 # If modifying this file, please modify .flowconfig-ci too!
 [ignore]
+# Cypress dep imports an intentionally invalid json file
+<PROJECT_ROOT>/node_modules/module-deps/test/.*
 
 [include]
 
