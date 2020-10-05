@@ -142,7 +142,7 @@ type GithubResponseError =
 // Fetch against the GitHub API with the provided options, returning a
 // promise that either resolves to the GraphQL result data or rejects
 // to a `GithubResponseError`.
-function tryGithubFetch(postBody: string, token: string): Promise<any> {
+function tryGithubFetch(postBody: string, token: GithubToken): Promise<any> {
   const fetchOptions = {
     method: "POST",
     body: postBody,
@@ -198,7 +198,7 @@ function tryGithubFetch(postBody: string, token: string): Promise<any> {
 
 async function errorDisposition(
   e: GithubResponseError,
-  token: string
+  token: GithubToken
 ): Promise<AttemptOutcome<empty, GithubResponseError>> {
   if (
     e.type === "FETCH_ERROR" ||
@@ -215,13 +215,13 @@ async function errorDisposition(
       const nominalRefreshTime = await quotaRefreshAt(token);
       const refreshTime = _resolveRefreshTime(new Date(), nominalRefreshTime);
       console.warn(
-        "rate limit exceeded; waiting for refresh at " +
+        "GitHub rate limit exceeded; waiting for refresh at " +
           refreshTime.toISOString()
       );
       return {type: "WAIT", until: refreshTime, err: e};
     } catch (refreshError) {
       // Fall back to waiting in 15-minute increments.
-      console.warn("rate limit exceeded; waiting 15 minutes");
+      console.warn("GitHub rate limit exceeded; waiting 15 minutes");
       const delayMs = 15 * 60 * 1000;
       return {type: "WAIT", until: new Date(Date.now() + delayMs), err: e};
     }
@@ -235,7 +235,7 @@ async function errorDisposition(
  * The returned promise may reject with a `GithubResponseError` or
  * string error message.
  */
-async function quotaRefreshAt(token: string): Promise<Date> {
+async function quotaRefreshAt(token: GithubToken): Promise<Date> {
   const b = Queries.build;
   const query = b.query(
     "RateLimitReset",
@@ -276,7 +276,7 @@ export function _resolveRefreshTime(now: Date, nominalRefreshTime: Date): Date {
 
 async function retryGithubFetch(
   postBody: string,
-  token: string
+  token: GithubToken
 ): Promise<any /* or rejects to GithubResponseError */> {
   const policy = {
     maxRetries: 5,
