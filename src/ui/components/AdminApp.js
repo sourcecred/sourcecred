@@ -19,6 +19,7 @@ import {withRouter} from "react-router-dom";
 import AppBar from "./AppBar";
 import createMenu from "./Menu";
 import {LedgerProvider} from "../utils/LedgerContext";
+import {LedgerViewer} from "./LedgerViewer";
 
 const dataProvider = fakeDataProvider({}, true);
 
@@ -26,6 +27,16 @@ const theme = createMuiTheme({
   palette: {
     type: "dark",
     primary: pink,
+  },
+  overrides: {
+    MuiChip: {
+      sizeSmall: {
+        height: "21px",
+      },
+      labelSmall: {
+        fontSize: "0.66rem",
+      },
+    },
   },
 });
 
@@ -54,6 +65,9 @@ const customRoutes = (
     </Route>,
     <Route key="accounts" exact path="/accounts">
       <AccountOverview currency={currency} />
+    </Route>,
+    <Route key="ledger" exact path="/ledger">
+      <LedgerViewer />
     </Route>,
   ];
   const backendRoutes = [
