@@ -1,12 +1,13 @@
 // @flow
 module.exports = {
   parser: "babel-eslint",
-  plugins: ["flowtype", "react"],
+  plugins: ["flowtype", "react", "cypress"],
   env: {
     browser: true,
     es6: true,
     node: true,
     jest: true,
+    "cypress/globals": true,
   },
   parserOptions: {
     ecmaVersion: 2018,
