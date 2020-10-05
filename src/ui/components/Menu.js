@@ -4,6 +4,7 @@ import {useSelector} from "react-redux";
 import {MenuItemLink} from "react-admin";
 import ExplorerIcon from "@material-ui/icons/Equalizer";
 import AccountIcon from "@material-ui/icons/AccountBalanceWallet";
+import HistoryIcon from "@material-ui/icons/History";
 import TransferIcon from "@material-ui/icons/SwapCalls";
 import SettingsIcon from "@material-ui/icons/Settings";
 import {type CurrencyDetails} from "../../api/currencyConfig";
@@ -29,6 +30,13 @@ const createMenu = (
           to="/accounts"
           primaryText={`${currencyName} Accounts`}
           leftIcon={<AccountIcon />}
+          onClick={onMenuClick}
+          sidebarIsOpen={open}
+        />
+        <MenuItemLink
+          to="/ledger"
+          primaryText="Ledger History"
+          leftIcon={<HistoryIcon />}
           onClick={onMenuClick}
           sidebarIsOpen={open}
         />
