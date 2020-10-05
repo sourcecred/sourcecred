@@ -193,7 +193,6 @@ function tryGithubFetch(postBody: string, token: GithubToken): Promise<any> {
       }),
     (e) =>
       Promise.reject(({type: "FETCH_ERROR", error: e}: GithubResponseError))
-<<<<<<< HEAD
   );
 }
 
@@ -242,8 +241,6 @@ async function quotaRefreshAt(token: GithubToken): Promise<Date> {
     "RateLimitReset",
     [],
     [b.field("rateLimit", {}, [b.field("resetAt")])]
-=======
->>>>>>> 7995c9dd98112dd68b88f76984d25d874a789cd5
   );
   const postBody = JSON.stringify({
     query: stringify.body([query], inlineLayout()),
@@ -277,29 +274,6 @@ export function _resolveRefreshTime(now: Date, nominalRefreshTime: Date): Date {
   return new Date(+now + delayMs);
 }
 
-function errorDisposition(
-  e: GithubResponseError
-): AttemptOutcome<empty, GithubResponseError> {
-  if (
-    e.type === "FETCH_ERROR" ||
-    e.type === "GRAPHQL_ERROR" ||
-    e.type === "BAD_CREDENTIALS"
-  ) {
-    return {type: "FATAL", err: e};
-  }
-  if (e.type === "GITHUB_INTERNAL_EXECUTION_ERROR" || e.type === "NO_DATA") {
-    return {type: "RETRY", err: e};
-  }
-  if (e.type === "RATE_LIMIT_EXCEEDED") {
-    // Wait in 15-minute increments. TODO(@wchargin): Ask GitHub
-    // when our token resets (`{ rateLimit { resetAt } }`) and wait
-    // until just then.
-    const delayMs = 15 * 60 * 1000;
-    return {type: "WAIT", until: new Date(Date.now() + delayMs), err: e};
-  }
-  throw new Error((e.type: empty));
-}
-
 async function retryGithubFetch(
   postBody: string,
   token: GithubToken
@@ -316,11 +290,7 @@ async function retryGithubFetch(
       return {type: "DONE", value: await tryGithubFetch(postBody, token)};
     } catch (errAny) {
       const err: GithubResponseError = errAny;
-<<<<<<< HEAD
       return await errorDisposition(err, token);
-=======
-      return errorDisposition(err);
->>>>>>> 7995c9dd98112dd68b88f76984d25d874a789cd5
     }
   }, policy);
   switch (retryResult.type) {
