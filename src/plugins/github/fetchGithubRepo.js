@@ -142,7 +142,14 @@ type GithubResponseError =
 // Fetch against the GitHub API with the provided options, returning a
 // promise that either resolves to the GraphQL result data or rejects
 // to a `GithubResponseError`.
-function tryGithubFetch(fetch, fetchOptions): Promise<any> {
+function tryGithubFetch(postBody: string, token: GithubToken): Promise<any> {
+  const fetchOptions = {
+    method: "POST",
+    body: postBody,
+    headers: {
+      Authorization: `bearer ${token}`,
+    },
+  };
   return fetch(GITHUB_GRAPHQL_SERVER, fetchOptions).then(
     (x) =>
       x.json().then((x) => {
@@ -189,9 +196,10 @@ function tryGithubFetch(fetch, fetchOptions): Promise<any> {
   );
 }
 
-function errorDisposition(
-  e: GithubResponseError
-): AttemptOutcome<empty, GithubResponseError> {
+async function errorDisposition(
+  e: GithubResponseError,
+  token: GithubToken
+): Promise<AttemptOutcome<empty, GithubResponseError>> {
   if (
     e.type === "FETCH_ERROR" ||
     e.type === "GRAPHQL_ERROR" ||
@@ -203,18 +211,72 @@ function errorDisposition(
     return {type: "RETRY", err: e};
   }
   if (e.type === "RATE_LIMIT_EXCEEDED") {
-    // Wait in 15-minute increments. TODO(@wchargin): Ask GitHub
-    // when our token resets (`{ rateLimit { resetAt } }`) and wait
-    // until just then.
-    const delayMs = 15 * 60 * 1000;
-    return {type: "WAIT", until: new Date(Date.now() + delayMs), err: e};
+    try {
+      const nominalRefreshTime = await quotaRefreshAt(token);
+      const refreshTime = _resolveRefreshTime(new Date(), nominalRefreshTime);
+      console.warn(
+        "GitHub rate limit exceeded; waiting for refresh at " +
+          refreshTime.toISOString()
+      );
+      return {type: "WAIT", until: refreshTime, err: e};
+    } catch (refreshError) {
+      // Fall back to waiting in 15-minute increments.
+      console.warn("GitHub rate limit exceeded; waiting 15 minutes");
+      const delayMs = 15 * 60 * 1000;
+      return {type: "WAIT", until: new Date(Date.now() + delayMs), err: e};
+    }
   }
   throw new Error((e.type: empty));
 }
 
+/**
+ * Determine the instant at which our GitHub quota will refresh.
+ *
+ * The returned promise may reject with a `GithubResponseError` or
+ * string error message.
+ */
+async function quotaRefreshAt(token: GithubToken): Promise<Date> {
+  const b = Queries.build;
+  const query = b.query(
+    "RateLimitReset",
+    [],
+    [b.field("rateLimit", {}, [b.field("resetAt")])]
+  );
+  const postBody = JSON.stringify({
+    query: stringify.body([query], inlineLayout()),
+    variables: {},
+  });
+  const data = await tryGithubFetch(postBody, token);
+  const dateString = data.rateLimit.resetAt;
+  const result = new Date(dateString);
+  if (isNaN(result)) {
+    throw "got NaN quota reset time: " + JSON.stringify(data);
+  }
+  return result;
+}
+
+/**
+ * Given a `resetAt` date response from GitHub, determine the actual
+ * date until which we want to wait. We clamp to a reasonable range and
+ * apply some padding.
+ */
+export function _resolveRefreshTime(now: Date, nominalRefreshTime: Date): Date {
+  let delayMs = +nominalRefreshTime - +now;
+  const [minDelayMs, maxDelayMs] = [0, 60 * 60 * 1000];
+  if (delayMs < minDelayMs || delayMs > maxDelayMs) {
+    const newDelayMs = Math.max(minDelayMs, Math.min(delayMs, maxDelayMs));
+    console.warn(
+      `clamping refresh delay from ${delayMs} ms to ${newDelayMs} ms`
+    );
+    delayMs = newDelayMs;
+  }
+  delayMs += 60 * 1000; // add 1 minute for padding around clock skew
+  return new Date(+now + delayMs);
+}
+
 async function retryGithubFetch(
-  fetch,
-  fetchOptions
+  postBody: string,
+  token: GithubToken
 ): Promise<any /* or rejects to GithubResponseError */> {
   const policy = {
     maxRetries: 5,
@@ -225,10 +287,10 @@ async function retryGithubFetch(
   };
   const retryResult = await retry(async () => {
     try {
-      return {type: "DONE", value: await tryGithubFetch(fetch, fetchOptions)};
+      return {type: "DONE", value: await tryGithubFetch(postBody, token)};
     } catch (errAny) {
       const err: GithubResponseError = errAny;
-      return errorDisposition(err);
+      return await errorDisposition(err, token);
     }
   }, policy);
   switch (retryResult.type) {
@@ -249,14 +311,7 @@ export async function postQuery(
     query: stringify.body(body, inlineLayout()),
     variables: variables,
   });
-  const fetchOptions = {
-    method: "POST",
-    body: postBody,
-    headers: {
-      Authorization: `bearer ${token}`,
-    },
-  };
-  return retryGithubFetch(fetch, fetchOptions).catch(
+  return retryGithubFetch(postBody, token).catch(
     (error: GithubResponseError) => {
       const type = error.type;
       switch (type) {
