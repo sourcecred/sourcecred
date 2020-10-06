@@ -68,8 +68,7 @@ export function ensureIdentityExists(
     return;
   }
   const name = _chooseIdentityName(proposal, (n) => ledger.nameAvailable(n));
-  const id = ledger.createIdentity(proposal.type, name);
-  ledger.addAlias(id, proposal.alias);
+  ledger.createIdentity(proposal.type, name, [proposal.alias]);
 }
 
 const MAX_NUMERIC_DISCRIMINATOR = 100;

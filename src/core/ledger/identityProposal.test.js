@@ -42,6 +42,11 @@ describe("core/ledger/identityProposal", () => {
       expect(account.identity.name).toEqual(proposal.name);
       expect(account.identity.aliases).toEqual([alias]);
     });
+    it("creates only one ledger event when creating a single identity", () => {
+      const ledger = new Ledger();
+      ensureIdentityExists(ledger, proposal);
+      expect(ledger.eventLog()).toHaveLength(1);
+    });
     it("uses the discriminator logic from _chooseIdentityName if needed", () => {
       const ledger = new Ledger();
       ledger.createIdentity("USER", "foo");
