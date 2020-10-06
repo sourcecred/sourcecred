@@ -3,7 +3,6 @@ import React, {useState, useEffect, type Node as ReactNode} from "react";
 import {useLedger} from "../utils/LedgerContext";
 import {type IdentityId, type Identity} from "../../core/identity";
 
-import {makeStyles} from "@material-ui/core/styles";
 import {TextField} from "@material-ui/core";
 import {Autocomplete} from "@material-ui/lab";
 
@@ -11,14 +10,8 @@ type Props = {|
   +selectedId: IdentityId,
 |};
 
-const useStyles = makeStyles({
-  element: {margin: "20px"},
-  aliasesHeader: {margin: "20px", marginBottom: 0},
-});
-
 export function IdentityMerger({selectedId}: Props): ReactNode {
   const {ledger, updateLedger} = useLedger();
-  const classes = useStyles();
   const [inputValue, setInputValue] = useState("");
 
   const potentialIdentities = ledger
@@ -59,14 +52,13 @@ export function IdentityMerger({selectedId}: Props): ReactNode {
             setInputValue("");
           }
         }}
-        className={classes.element}
         freeSolo
         disableClearable
         options={inputItems}
         getOptionLabel={({name}) => name || ""}
         inputValue={inputValue}
         renderInput={(params) => (
-          <TextField {...params} variant="outlined" label="Identity" />
+          <TextField {...params} variant="outlined" label="Add Alias" />
         )}
       />
     </>

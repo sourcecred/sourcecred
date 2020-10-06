@@ -2,11 +2,11 @@
 import React, {type Node as ReactNode} from "react";
 import {useSelector} from "react-redux";
 import {MenuItemLink} from "react-admin";
+import PeopleIcon from "@material-ui/icons/People";
 import ExplorerIcon from "@material-ui/icons/Equalizer";
 import AccountIcon from "@material-ui/icons/AccountBalanceWallet";
 import HistoryIcon from "@material-ui/icons/History";
 import TransferIcon from "@material-ui/icons/SwapCalls";
-import SettingsIcon from "@material-ui/icons/Settings";
 import {type CurrencyDetails} from "../../api/currencyConfig";
 
 type menuProps = {|onMenuClick: Function|};
@@ -44,8 +44,8 @@ const createMenu = (
           <>
             <MenuItemLink
               to="/admin"
-              primaryText="Ledger Admin"
-              leftIcon={<SettingsIcon />}
+              primaryText="Identities"
+              leftIcon={<PeopleIcon />}
               onClick={onMenuClick}
               sidebarIsOpen={open}
             />
