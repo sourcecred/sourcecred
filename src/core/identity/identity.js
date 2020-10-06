@@ -43,19 +43,29 @@ export const IDENTITY_PREFIX: NodeAddressT = NodeAddress.fromParts([
   "IDENTITY",
 ]);
 
-export function newIdentity(subtype: IdentityType, name: string): Identity {
+export function newIdentity(
+  subtype: IdentityType,
+  name: string,
+  aliases?: $ReadOnlyArray<Alias>
+): Identity {
   const id = randomUuid();
   try {
     identityTypeParser.parseOrThrow(subtype);
   } catch (e) {
     throw new Error(`invalid identity subtype: ${subtype}`);
   }
+  const actualAliases = aliases == null ? [] : aliases;
+  const addresses = actualAliases.map((a) => a.address);
+  const numDistinctAddresses = new Set(addresses).size;
+  if (numDistinctAddresses !== actualAliases.length) {
+    throw new Error(`multiple aliases share an address`);
+  }
   return {
     id,
     subtype,
     address: NodeAddress.append(IDENTITY_PREFIX, id),
     name: nameFromString(name),
-    aliases: [],
+    aliases: actualAliases,
   };
 }
 

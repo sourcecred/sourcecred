@@ -8,9 +8,20 @@ import {graphNode, type Identity, newIdentity} from "./identity";
 describe("core/identity/identity", () => {
   const example: Identity = deepFreeze(newIdentity("USER", "foo"));
   describe("newIdentity", () => {
-    it("new identities don't have aliases", () => {
+    it("by default, new identities don't have aliases", () => {
       const identity = newIdentity("USER", "foo");
       expect(identity.aliases).toEqual([]);
+    });
+    it("new identities may have aliases", () => {
+      const alias = {description: "alias", address: NodeAddress.empty};
+      const identity = newIdentity("USER", "foo", [alias]);
+      expect(identity.aliases).toEqual([alias]);
+    });
+    it("errors if a new identity has multiple aliases with the same address", () => {
+      const a1 = {description: "a1", address: NodeAddress.empty};
+      const a2 = {description: "a2", address: NodeAddress.empty};
+      const thunk = () => newIdentity("USER", "foo", [a1, a2]);
+      expect(thunk).toThrowError("multiple aliases share an address");
     });
     it("identity addresses are as expected", () => {
       const subtypes = ["USER", "BOT", "PROJECT", "ORGANIZATION"];
