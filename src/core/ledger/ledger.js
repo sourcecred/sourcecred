@@ -169,8 +169,12 @@ export class Ledger {
    *
    * Will fail if the name is not valid, or already taken.
    */
-  createIdentity(type: IdentityType, name: string): IdentityId {
-    const identity = newIdentity(type, name);
+  createIdentity(
+    type: IdentityType,
+    name: string,
+    aliases?: $ReadOnlyArray<Alias>
+  ): IdentityId {
+    const identity = newIdentity(type, name, aliases);
     const action = {
       type: "CREATE_IDENTITY",
       identity,
@@ -188,8 +192,14 @@ export class Ledger {
         `createIdentity: already have same name with different capitalization: ${identity.name}`
       );
     }
-    if (identity.aliases.length !== 0) {
-      throw new Error(`createIdentity: new identities may not have aliases`);
+    for (const alias of identity.aliases) {
+      if (this._aliasAddressToIdentity.has(alias.address)) {
+        throw new Error(
+          `createIdentity: alias address already claimed: ${NodeAddress.toString(
+            alias.address
+          )}`
+        );
+      }
     }
     // istanbul ignore if
     if (this._aliasAddressToIdentity.has(identity.address)) {
@@ -204,6 +214,9 @@ export class Ledger {
     this._lowercaseNames.add(identity.name.toLowerCase());
     // Reserve this identity's own address
     this._aliasAddressToIdentity.set(identity.address, identity.id);
+    for (const alias of identity.aliases) {
+      this._aliasAddressToIdentity.set(alias.address, identity.id);
+    }
     // Every identity has a corresponding Account.
     this._accounts.set(identity.id, {
       balance: G.ZERO,

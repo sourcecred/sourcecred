@@ -87,7 +87,7 @@ describe("core/ledger/ledger", () => {
 
   describe("identity updates", () => {
     describe("createIdentity", () => {
-      it("works", () => {
+      it("works in a case with no aliases", () => {
         setFakeDate(123);
         const l = new Ledger();
         const id = l.createIdentity("USER", "steven");
@@ -134,16 +134,29 @@ describe("core/ledger/ledger", () => {
           "already have same name with different capitalization"
         );
       });
-      it("throws an error given an identity with aliases", () => {
+      it("throws an error if the aliases are already taken", () => {
         const ledger = new Ledger();
-        let identity = newIdentity("USER", "foo");
-        identity = {
-          ...identity,
-          aliases: [{address: NodeAddress.empty, description: "foo"}],
-        };
-        const action = {type: "CREATE_IDENTITY", identity};
-        const thunk = () => ledger._createIdentity(action);
-        expect(thunk).toThrowError("new identities may not have aliases");
+        const alias = {address: NodeAddress.empty, description: "foo"};
+
+        const id1 = ledger.createIdentity("USER", "steven");
+        ledger.addAlias(id1, alias);
+        const thunk = () => ledger.createIdentity("USER", "pearl", [alias]);
+        failsWithoutMutation(
+          ledger,
+          thunk,
+          "createIdentity: alias address already claimed"
+        );
+      });
+      it("throws an error if an identity has multiple aliases with the same address", () => {
+        const ledger = new Ledger();
+        const a1 = {address: NodeAddress.empty, description: "foo"};
+        const a2 = {address: NodeAddress.empty, description: "bar"};
+        const thunk = () => ledger.createIdentity("USER", "foo", [a1, a2]);
+        failsWithoutMutation(
+          ledger,
+          thunk,
+          "multiple aliases share an address"
+        );
       });
     });
 
