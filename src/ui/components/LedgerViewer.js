@@ -28,6 +28,7 @@ import {makeStyles} from "@material-ui/core/styles";
 import {formatTimestamp} from "../utils/dateHelpers";
 import type {IdentityId} from "../../core/identity/identity";
 import type {Allocation, GrainReceipt} from "../../core/ledger/grainAllocation";
+import type {CurrencyDetails} from "../../api/currencyConfig";
 
 const useStyles = makeStyles(() => {
   return {
@@ -45,12 +46,14 @@ const useStyles = makeStyles(() => {
 
 export const LedgerViewer = ({
   currency: {suffix: currencySuffix},
+}: {
+  currency: CurrencyDetails,
 }): ReactNode => {
   const {ledger} = useLedger();
   const classes = useStyles();
   const [allocation, setAllocation] = useState<Allocation | null>(null);
 
-  const handleClickOpen = useCallback((allocation: Distribution) => {
+  const handleClickOpen = useCallback((allocation: Allocation) => {
     setAllocation(allocation);
   }, []);
 
@@ -58,7 +61,7 @@ export const LedgerViewer = ({
     setAllocation(null);
   }, []);
 
-  const events = useMemo(() => ledger.eventLog().reverse(), [ledger]);
+  const events = useMemo(() => [...ledger.eventLog()].reverse(), [ledger]);
 
   return (
     <TableContainer component={Paper} className={classes.container}>
@@ -108,10 +111,11 @@ const GrainReceiptTable = memo(
     ledger,
     currencySuffix,
   }: {
-    allocation: Allocation,
+    allocation: Allocation | null,
     ledger: Ledger,
     currencySuffix: string,
   }) => {
+    if (!allocation) return null;
     return (
       <Table stickyHeader>
         <TableHead>
@@ -122,7 +126,7 @@ const GrainReceiptTable = memo(
         </TableHead>
         <TableBody>
           {allocation
-            ? allocation.receipts.sort(comparator).map((r) => {
+            ? [...allocation.receipts].sort(comparator).map((r) => {
                 const account = ledger.account(r.id);
 
                 return (
