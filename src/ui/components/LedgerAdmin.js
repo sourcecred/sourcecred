@@ -1,6 +1,6 @@
 // @flow
 
-import React, {useState, type Node as ReactNode} from "react";
+import React, {useState, type Node as ReactNode, useMemo} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import {
@@ -118,6 +118,12 @@ export const LedgerAdmin = (): ReactNode => {
     );
   };
 
+  const memoizedIdentities = useMemo(() => renderIdentities(), [
+    // Only recalculate the identity list when a new identity is added
+    // or identities are merged
+    ledger.accounts().length,
+  ]);
+
   return (
     <Container className={classes.root}>
       <span className={classes.centerRow}>
@@ -179,7 +185,7 @@ export const LedgerAdmin = (): ReactNode => {
       )}
       <div className={classes.centerRow}>
         <List fullWidth className={classes.identityList}>
-          {renderIdentities()}
+          {memoizedIdentities}
         </List>
       </div>
     </Container>
