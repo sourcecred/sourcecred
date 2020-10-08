@@ -11,6 +11,7 @@ import Table from "@material-ui/core/Table";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import TableBody from "@material-ui/core/TableBody";
+import VisibilityIcon from "@material-ui/icons/Visibility";
 import Dialog from "@material-ui/core/Dialog";
 import * as G from "../../core/ledger/grain";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -199,8 +200,11 @@ const LedgerEventRow = React.memo(
                   0,
                   currencySuffix
                 )}`}
+                clickable
                 onClick={() => handleClickOpen(a)}
+                onDelete={() => handleClickOpen(a)}
                 size="small"
+                deleteIcon={<VisibilityIcon />}
               />
             </Box>
           ));
