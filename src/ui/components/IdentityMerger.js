@@ -3,7 +3,8 @@ import React, {useState, useEffect, type Node as ReactNode} from "react";
 import {useLedger} from "../utils/LedgerContext";
 import {type IdentityId, type Identity} from "../../core/identity";
 
-import {TextField} from "@material-ui/core";
+import TextField from "@material-ui/core/TextField";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import {Autocomplete} from "@material-ui/lab";
 
 type Props = {|
@@ -13,6 +14,8 @@ type Props = {|
 export function IdentityMerger({selectedId}: Props): ReactNode {
   const {ledger, updateLedger} = useLedger();
   const [inputValue, setInputValue] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [targetId, setTargetId] = useState<?IdentityId>();
 
   const potentialIdentities = ledger
     .accounts()
@@ -29,7 +32,26 @@ export function IdentityMerger({selectedId}: Props): ReactNode {
   const setSearch = (input: string = "") =>
     setInputItems(identitiesMatchingSearch(input));
 
-  useEffect(() => setSearch(), [selectedId]);
+  useEffect(() => {
+    setSearch();
+  }, [selectedId]);
+
+  useEffect(() => {
+    // This effect just defers the ledger update until after
+    // the render that shows some loading state
+    // This is a bit of a hack because we haven't full async'd ledger changes yet
+    // but it definitely improves UI responsiveness, especially for larger communities
+    if (targetId) {
+      updateLedger(
+        ledger.mergeIdentities({
+          base: selectedId,
+          target: targetId,
+        })
+      );
+      setTargetId();
+      setLoading(false);
+    }
+  }, [targetId]);
 
   return (
     <>
@@ -42,12 +64,8 @@ export function IdentityMerger({selectedId}: Props): ReactNode {
         }}
         onChange={(_, selectedItem, reason) => {
           if (reason === "select-option") {
-            updateLedger(
-              ledger.mergeIdentities({
-                base: selectedId,
-                target: selectedItem.id,
-              })
-            );
+            setLoading(true);
+            setTargetId(selectedItem.id);
             setSearch("");
             setInputValue("");
           }
@@ -57,8 +75,23 @@ export function IdentityMerger({selectedId}: Props): ReactNode {
         options={inputItems}
         getOptionLabel={({name}) => name || ""}
         inputValue={inputValue}
+        loading={loading}
         renderInput={(params) => (
-          <TextField {...params} variant="outlined" label="Add Alias" />
+          <TextField
+            {...params}
+            variant="outlined"
+            label="Add Alias"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? (
+                    <CircularProgress disableShrink color="inherit" size={20} />
+                  ) : null}
+                </>
+              ),
+            }}
+          />
         )}
       />
     </>
