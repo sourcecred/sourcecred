@@ -272,15 +272,29 @@ export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
   const [showWeightConfig, setShowWeightConfig] = useState(false);
 
   // TODO: Allow sorting/displaying only recent cred...
-  const {sortedNodes, total} = useMemo(() => {
+  const sortedNodes = useMemo(() => {
     if (!credView) return {sortedNodes: [], total: 0};
     const nodes =
       filterState.filter == null
         ? credView.userNodes()
         : credView.nodes({prefix: filterState.filter});
-    const sortedNodes = sortBy(nodes, (n) => -n.credSummary.cred);
     const total: number = sum(nodes.map((n) => n.credSummary.cred));
-    return {sortedNodes, total};
+    const sortedNodes = sortBy(nodes, (n) => -n.credSummary.cred)
+      .slice(0, 200)
+      .map((node) => (
+        <NodeRow
+          depth={0}
+          key={node.address}
+          node={node}
+          view={credView}
+          total={total}
+          // We only show the cred charts for users, because in CredRank we might not have
+          // cred-over-time data available for non-users.
+          // Would rather not add a feature that we may later need to remove.
+          showChart={!filterState.filter}
+        />
+      ));
+    return sortedNodes;
   }, [filterState.filter, credView]);
 
   const [{weights}, setWeightsState] = useState<{weights: Weights}>({
@@ -377,21 +391,7 @@ export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
             <TableCell className={css(styles.endCell)} />
           </TableRow>
         </TableHead>
-        <TableBody>
-          {sortedNodes.slice(0, 200).map((node) => (
-            <NodeRow
-              depth={0}
-              key={node.address}
-              node={node}
-              view={credView}
-              total={total}
-              // We only show the cred charts for users, because in CredRank we might not have
-              // cred-over-time data available for non-users.
-              // Would rather not add a feature that we may later need to remove.
-              showChart={!filterState.filter}
-            />
-          ))}
-        </TableBody>
+        <TableBody>{sortedNodes}</TableBody>
       </Table>
     </div>
   );
