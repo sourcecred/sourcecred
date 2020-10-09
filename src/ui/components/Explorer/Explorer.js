@@ -371,6 +371,7 @@ export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
           </Button>
         </Grid>
       </Grid>
+      {recalculating ? <h1>Recalculating...</h1> : ""}
       <WeightsConfigSection
         show={showWeightConfig}
         credView={credView}
@@ -379,7 +380,6 @@ export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
         params={params}
         setParams={setParams}
       />
-      {recalculating ? <h1>Recalculating...</h1> : ""}
       <Table className={css(styles.table)}>
         <TableHead>
           <TableRow>
