@@ -290,22 +290,22 @@ export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
     ...(credView ? credView.params() : defaultParams()),
   });
 
-  const recomputeCred = async (
-    weights: Weights,
-    params: TimelineCredParameters
-  ) => {
-    if (!credView) return;
-    setRecalculating(true);
-    try {
-      const newCredView = await credView.recompute(weights, params);
-      updateCredView(newCredView);
-    } catch (e) {
-      console.log(e);
-      alert("Error recomputing cred, check console");
-    } finally {
-      setRecalculating(false);
-    }
-  };
+  const recomputeCred = async () =>
+    //weights: Weights,
+    //params: TimelineCredParameters
+    {
+      if (!credView) return;
+      setRecalculating(true);
+      try {
+        const newCredView = await credView.recompute(weights, params);
+        updateCredView(newCredView);
+      } catch (e) {
+        console.log(e);
+        alert("Error recomputing cred, check console");
+      } finally {
+        setRecalculating(false);
+      }
+    };
 
   const currentParams = credView ? credView.params() : null;
   const currentWeights = credView ? credView.weights() : null;
