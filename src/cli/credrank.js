@@ -6,10 +6,10 @@ import {join as pathJoin} from "path";
 import {sum} from "d3-array";
 
 import sortBy from "../util/sortBy";
-import {credrank} from "../core/algorithm/credrank";
-import {CredGraph} from "../core/credGraph";
+import {credrank} from "../core/credrank/compute";
+import {CredGraph} from "../core/credrank/credGraph";
 import {LoggingTaskReporter} from "../util/taskReporter";
-import {MarkovProcessGraph} from "../core/markovProcessGraph";
+import {MarkovProcessGraph} from "../core/credrank/markovProcessGraph";
 import type {Command} from "./command";
 import {loadInstanceConfig, prepareCredData} from "./common";
 import {graphIntervals} from "../core/interval";

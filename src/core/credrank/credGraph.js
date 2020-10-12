@@ -1,8 +1,8 @@
 // @flow
 
-import * as NullUtil from "../util/null";
-import {type Uuid} from "../util/uuid";
-import {type NodeAddressT, type EdgeAddressT} from "./graph";
+import * as NullUtil from "../../util/null";
+import {type Uuid} from "../../util/uuid";
+import {type NodeAddressT, type EdgeAddressT} from "../graph";
 import {
   MarkovProcessGraph,
   type MarkovProcessGraphJSON,
@@ -11,7 +11,7 @@ import {
   markovEdgeAddress,
   payoutAddressForEpoch,
 } from "./markovProcessGraph";
-import {toCompat, fromCompat, type Compatible} from "../util/compat";
+import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 
 export type Node = {|
   +address: NodeAddressT,

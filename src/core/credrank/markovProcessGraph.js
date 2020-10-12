@@ -1,7 +1,7 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
-import {type Uuid} from "../util/uuid";
+import {type Uuid} from "../../util/uuid";
 
 /**
  * Data structure representing a particular kind of Markov process, as
@@ -56,24 +56,24 @@ import {type Uuid} from "../util/uuid";
  */
 
 import sortedIndex from "lodash.sortedindex";
-import {makeAddressModule, type AddressModule} from "./address";
+import {makeAddressModule, type AddressModule} from "../address";
 import {
   type NodeAddressT,
   NodeAddress,
   type EdgeAddressT,
   EdgeAddress,
-} from "./graph";
-import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
+} from "../graph";
+import {type WeightedGraph as WeightedGraphT} from "../weightedGraph";
 import {
   nodeWeightEvaluator,
   edgeWeightEvaluator,
-} from "./algorithm/weightEvaluator";
-import {toCompat, fromCompat, type Compatible} from "../util/compat";
-import * as NullUtil from "../util/null";
-import * as MapUtil from "../util/map";
-import type {TimestampMs} from "../util/timestamp";
-import {type SparseMarkovChain} from "./algorithm/markovChain";
-import {type IntervalSequence} from "./interval";
+} from "../algorithm/weightEvaluator";
+import {toCompat, fromCompat, type Compatible} from "../../util/compat";
+import * as NullUtil from "../../util/null";
+import * as MapUtil from "../../util/map";
+import type {TimestampMs} from "../../util/timestamp";
+import {type SparseMarkovChain} from "../algorithm/markovChain";
+import {type IntervalSequence} from "../interval";
 
 export type TransitionProbability = number;
 
