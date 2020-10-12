@@ -16,6 +16,12 @@ import * as uuid from "../../util/uuid"; // for spy purposes
 import {intervalSequence} from "../interval";
 
 import {seedGadget, accumulatorGadget, epochGadget} from "./nodeGadgets";
+import {
+  contributionRadiationGadget,
+  accumulatorRadiationGadget,
+  epochRadiationGadget,
+  seedMintGadget,
+} from "./edgeGadgets";
 
 describe("core/credrank/markovProcessGraph", () => {
   const na = (name) => NA.fromParts([name]);
@@ -200,39 +206,20 @@ describe("core/credrank/markovProcessGraph", () => {
       });
       it("the seed has outbound edges to contributions in proportion to their mint amount", () => {
         const mpg = markovProcessGraph();
-        const m0 = {
-          address: EA.append(MPG.SEED_MINT, ...NA.toParts(c0.address)),
-          reversed: false,
-          src: seedGadget.prefix,
-          dst: c0.address,
-          transitionProbability: 1 / 3,
-        };
+        const m0 = seedMintGadget.markovEdge(c0.address, 1 / 3);
         checkMarkovEdge(mpg, m0);
-        const m1 = {
-          address: EA.append(MPG.SEED_MINT, ...NA.toParts(c1.address)),
-          reversed: false,
-          src: seedGadget.prefix,
-          dst: c1.address,
-          transitionProbability: 2 / 3,
-        };
+        const m1 = seedMintGadget.markovEdge(c1.address, 2 / 3);
         checkMarkovEdge(mpg, m1);
       });
       it("seed node has a radiation-in edge for each organic contribution with pr === alpha", () => {
         const mpg = markovProcessGraph();
         const organicNodes = [c0, c1];
-        for (const organic of organicNodes) {
-          const address = EA.append(
-            MPG.CONTRIBUTION_RADIATION,
-            ...NA.toParts(organic.address)
-          );
-          const expectedMarkovEdge = {
+        for (const {address} of organicNodes) {
+          const edge = contributionRadiationGadget.markovEdge(
             address,
-            reversed: false,
-            src: organic.address,
-            dst: seedGadget.prefix,
-            transitionProbability: parameters.alpha,
-          };
-          checkMarkovEdge(mpg, expectedMarkovEdge);
+            parameters.alpha
+          );
+          checkMarkovEdge(mpg, edge);
         }
       });
     });
@@ -256,13 +243,7 @@ describe("core/credrank/markovProcessGraph", () => {
           owner: participant.address,
           epochStart: boundary,
         };
-        const epochAddress = epochGadget.toRaw(structuredAddress);
 
-        // Find the radiation edge
-        const radiationAddress = EA.append(
-          MPG.USER_EPOCH_RADIATION,
-          ...NA.toParts(epochAddress)
-        );
         const radiationTransitionProbability = NullUtil.get(
           new Map()
             // .65 -- because this one has no incident organic edges, and no backwards webbing
@@ -281,13 +262,10 @@ describe("core/credrank/markovProcessGraph", () => {
             .set(Infinity, 1 - parameters.gammaBackward - parameters.beta)
             .get(boundary)
         );
-        const radiationEdgeExpected = {
-          address: radiationAddress,
-          reversed: false,
-          src: epochAddress,
-          dst: seedGadget.prefix,
-          transitionProbability: radiationTransitionProbability,
-        };
+        const radiationEdgeExpected = epochRadiationGadget.markovEdge(
+          structuredAddress,
+          radiationTransitionProbability
+        );
         checkMarkovEdge(mpg, radiationEdgeExpected);
       }
     });
@@ -361,24 +339,16 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       for (const boundary of mpg.epochBoundaries()) {
         // There's an epoch accumulator node
-        const accumulatorAddress = accumulatorGadget.toRaw({
+        const accumulatorAddress = {
           epochStart: boundary,
-        });
-        expect(mpg.node(accumulatorAddress)).toEqual(
-          accumulatorGadget.node({epochStart: boundary})
-        );
-
-        const radiationAddress = EA.append(
-          MPG.EPOCH_ACCUMULATOR_RADIATION,
-          ...NA.toParts(accumulatorAddress)
-        );
-        const radiationEdge = {
-          address: radiationAddress,
-          reversed: false,
-          src: accumulatorAddress,
-          dst: seedGadget.prefix,
-          transitionProbability: 1,
         };
+        expect(mpg.node(accumulatorGadget.toRaw(accumulatorAddress))).toEqual(
+          accumulatorGadget.node(accumulatorAddress)
+        );
+        const radiationEdge = accumulatorRadiationGadget.markovEdge(
+          accumulatorAddress,
+          1
+        );
         checkMarkovEdge(mpg, radiationEdge);
       }
     });
