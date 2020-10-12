@@ -10,7 +10,6 @@ import {
   type TransitionProbability,
   markovEdgeAddress,
   payoutAddressForEpoch,
-  COMPAT_INFO as MPG_COMPAT_INFO,
 } from "./markovProcessGraph";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
@@ -48,7 +47,11 @@ export const COMPAT_INFO = {type: "sourcecred/credGraph", version: "0.1.0"};
 
 export class CredGraph {
   _mpg: MarkovProcessGraph;
-  _scores: Map<NodeAddressT, number>;
+  // Scores must be inserted in the same order as the nodes in the underlying
+  // MarkovProcessGraph
+  // TODO(@decentralion, @wchargin): Can probably replace this with an array if
+  // we add a `nodeIndex` method to the underlying MarkovProcessGraph
+  _scores: $ReadOnlyMap<NodeAddressT, number>;
 
   constructor(
     markovProcessGraph: MarkovProcessGraph,
@@ -56,6 +59,27 @@ export class CredGraph {
   ) {
     this._mpg = markovProcessGraph;
     this._scores = scores;
+    // Invariant check: the scores must have the same iteration order as the
+    // nodes in the underlying markovProcessGraph
+    // TODO(@decentralion,@wchargin): Can optimize this out by just testing for
+    // it without any runtime invariant checks
+    const nodeOrder = this._mpg.nodeOrder();
+    const scoreNodeOrder = scores.keys();
+    while (true) {
+      const a1 = nodeOrder.next();
+      const a2 = scoreNodeOrder.next();
+      if (a1.done !== a2.done) {
+        throw new Error(`nodeOrder And scoreNodeOrder have different lengths`);
+      }
+      if (a1.done) {
+        break;
+      }
+      if (a1.value !== a2.value) {
+        throw new Error(
+          `MarkovProcessGraph and scores have different node orders`
+        );
+      }
+    }
   }
 
   _cred(addr: NodeAddressT): number {
@@ -68,7 +92,7 @@ export class CredGraph {
   }
 
   node(addr: NodeAddressT): ?Node {
-    const node = this._mpg._nodes.get(addr);
+    const node = this._mpg.node(addr);
     if (node == null) return undefined;
     return {...node, cred: this._cred(addr)};
   }
@@ -100,7 +124,7 @@ export class CredGraph {
           "F"
         );
         const payoutMarkovEdge = NullUtil.get(
-          this._mpg._edges.get(payoutMarkovEdgeAddress)
+          this._mpg.edge(payoutMarkovEdgeAddress)
         );
         const cred = this._credFlow(payoutMarkovEdge);
         totalCred += cred;
@@ -118,10 +142,7 @@ export class CredGraph {
 
   toJSON(): CredGraphJSON {
     const mpgJson = this._mpg.toJSON();
-    const {sortedNodes} = fromCompat(MPG_COMPAT_INFO, mpgJson);
-    const scores = sortedNodes.map((n) =>
-      NullUtil.get(this._scores.get(n.address))
-    );
+    const scores = Array.from(this._scores.values());
     return toCompat(COMPAT_INFO, {
       mpg: mpgJson,
       scores,
@@ -130,11 +151,13 @@ export class CredGraph {
 
   static fromJSON(j: CredGraphJSON): CredGraph {
     const {mpgJson, scores} = fromCompat(COMPAT_INFO, j);
-    const {sortedNodes} = fromCompat(MPG_COMPAT_INFO, mpgJson);
+    const mpg = MarkovProcessGraph.fromJSON(mpgJson);
+    const nodeOrder = mpg.nodeOrder();
     const scoresMap = new Map();
-    sortedNodes.forEach((n, i) => {
-      scoresMap.set(n.address, scores[i]);
-    });
-    return new CredGraph(MarkovProcessGraph.fromJSON(mpgJson), scoresMap);
+    let i = 0;
+    for (const address of nodeOrder) {
+      scoresMap.set(address, scores[i++]);
+    }
+    return new CredGraph(mpg, scoresMap);
   }
 }
