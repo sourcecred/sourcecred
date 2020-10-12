@@ -140,9 +140,9 @@ const AdminInner = ({loadResult: loadSuccess}: AdminInnerProps) => {
         )}
       >
         {/*
-          This dummy resource is required to get react
-          admin working beyond the hello world screen
-        */}
+            This dummy resource is required to get react
+            admin working beyond the hello world screen
+          */}
         <Resource name="dummyResource" />
       </Admin>
     </LedgerProvider>

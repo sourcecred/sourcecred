@@ -1,5 +1,5 @@
 // @flow
-import React, {type Node as ReactNode} from "react";
+import React, {useMemo, useState, type Node as ReactNode} from "react";
 import {
   Button,
   Grid,
@@ -26,10 +26,17 @@ import {CredView} from "../../../analysis/credView";
 import sortBy from "../../../util/sortBy";
 import {type NodeAddressT} from "../../../core/graph";
 import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
-import {type Weights, copy as weightsCopy} from "../../../core/weights";
+import {
+  type Weights,
+  copy as weightsCopy,
+  empty as emptyWeights,
+} from "../../../core/weights";
 import {WeightConfig} from "../../weights/WeightConfig";
 import {WeightsFileManager} from "../../weights/WeightsFileManager";
-import {type TimelineCredParameters} from "../../../analysis/timeline/params";
+import {
+  defaultParams,
+  type TimelineCredParameters,
+} from "../../../analysis/timeline/params";
 
 import NodeRow from "./NodeRow";
 
@@ -58,298 +65,334 @@ const styles = StyleSheet.create({
   },
 });
 
-export type ExplorerProps = {|
-  +initialView: CredView,
-|};
-
-export type ExplorerState = {|
+export type FilterState = {|
   // Whether to filter down to a particular type prefix.
   // If unset, shows all user-typed nodes
   filter: NodeAddressT | null,
-  weights: Weights,
-  params: TimelineCredParameters,
-  showWeightConfig: boolean,
-  view: CredView,
-  recalculating: boolean,
   anchorEl: HTMLElement | null,
   name: string | null,
 |};
 
-export class Explorer extends React.Component<ExplorerProps, ExplorerState> {
-  constructor(props: ExplorerProps) {
-    super(props);
-    const view = props.initialView;
-    this.state = {
-      view,
-      filter: null,
-      weights: weightsCopy(view.weights()),
-      params: {...view.params()},
-      showWeightConfig: false,
-      recalculating: false,
-      anchorEl: null,
-      name: null,
-    };
-  }
+const FilterSelect = ({
+  credView,
+  filterState,
+  setFilterState,
+}: {
+  credView: CredView,
+  filterState: FilterState,
+  setFilterState: (FilterState) => void,
+}) => {
+  const plugins = credView.plugins();
 
-  handleMenuClose: () => void = () => {
-    this.setState({
-      anchorEl: null,
-    });
+  const handleMenuClose = () =>
+    setFilterState({...filterState, anchorEl: null});
+
+  const optionGroup = (declaration: PluginDeclaration) => {
+    const header = (
+      <MenuItem
+        key={declaration.nodePrefix}
+        value={declaration.nodePrefix}
+        className={css(styles.menuHeader)}
+        onClick={() =>
+          setFilterState({
+            anchorEl: null,
+            filter: declaration.nodePrefix,
+            name: declaration.name,
+          })
+        }
+      >
+        {declaration.name}
+      </MenuItem>
+    );
+    const entries = declaration.nodeTypes.map((type, index) => (
+      <MenuItem
+        key={index}
+        value={type.prefix}
+        onClick={() =>
+          setFilterState({
+            anchorEl: null,
+            filter: type.prefix,
+            name: type.name,
+          })
+        }
+      >
+        {"\u2003" + type.name}
+      </MenuItem>
+    ));
+    return [header, ...entries];
   };
+  return (
+    <>
+      <List component="div" aria-label="Device settings">
+        <ListItem
+          button
+          aria-haspopup="true"
+          aria-controls="filter-menu"
+          aria-label="filters"
+          onClick={(event) =>
+            setFilterState({
+              ...filterState,
+              anchorEl: event.currentTarget,
+            })
+          }
+        >
+          <ListItemText
+            primary={
+              filterState.name ? `Filter: ${filterState.name}` : "Filter"
+            }
+          />
+          {filterState.anchorEl ? (
+            <KeyboardArrowUpIcon />
+          ) : (
+            <KeyboardArrowDownIcon />
+          )}
+        </ListItem>
+        <Divider className={css(styles.divider)} />
+      </List>
 
-  // Renders the dropdown that lets the user select a type
-  renderFilterSelect(): ReactNode {
-    const plugins = this.state.view.plugins();
-    const optionGroup = (declaration: PluginDeclaration) => {
-      const header = (
+      <Menu
+        id="lock-menu"
+        anchorEl={filterState.anchorEl}
+        keepMounted
+        open={Boolean(filterState.anchorEl)}
+        onClose={handleMenuClose}
+        getContentAnchorEl={null}
+        anchorOrigin={{vertical: "bottom", horizontal: "left"}}
+        transformOrigin={{vertical: "top", horizontal: "left"}}
+      >
         <MenuItem
-          key={declaration.nodePrefix}
-          value={declaration.nodePrefix}
+          key={"All users"}
+          value={""}
           className={css(styles.menuHeader)}
           onClick={() =>
-            this.setState({
+            setFilterState({
               anchorEl: null,
-              filter: declaration.nodePrefix,
-              name: declaration.name,
+              filter: null,
+              name: "All users",
             })
           }
         >
-          {declaration.name}
+          All users
         </MenuItem>
-      );
-      const entries = declaration.nodeTypes.map((type, index) => (
-        <MenuItem
-          key={index}
-          value={type.prefix}
-          onClick={() =>
-            this.setState({
-              anchorEl: null,
-              filter: type.prefix,
-              name: type.name,
-            })
-          }
-        >
-          {"\u2003" + type.name}
-        </MenuItem>
-      ));
-      return [header, ...entries];
-    };
-    return (
-      <>
-        <List component="div" aria-label="Device settings">
-          <ListItem
-            button
-            aria-haspopup="true"
-            aria-controls="filter-menu"
-            aria-label="filters"
-            onClick={(event) =>
-              this.setState({
-                anchorEl: event.currentTarget,
-              })
-            }
-          >
-            <ListItemText
-              primary={
-                this.state.name ? `Filter: ${this.state.name}` : "Filter"
-              }
-            />
-            {this.state.anchorEl ? (
-              <KeyboardArrowUpIcon />
-            ) : (
-              <KeyboardArrowDownIcon />
-            )}
-          </ListItem>
-          <Divider className={css(styles.divider)} />
-        </List>
+        {plugins.map(optionGroup)}
+      </Menu>
+    </>
+  );
+};
 
-        <Menu
-          id="lock-menu"
-          anchorEl={this.state.anchorEl}
-          keepMounted
-          open={Boolean(this.state.anchorEl)}
-          onClose={this.handleMenuClose}
-          getContentAnchorEl={null}
-          anchorOrigin={{vertical: "bottom", horizontal: "left"}}
-          transformOrigin={{vertical: "top", horizontal: "left"}}
-        >
-          <MenuItem
-            key={"All users"}
-            value={""}
-            className={css(styles.menuHeader)}
-            onClick={() =>
-              this.setState({
-                anchorEl: null,
-                filter: null,
-                name: "All users",
-              })
-            }
-          >
-            All users
-          </MenuItem>
-          {plugins.map(optionGroup)}
-        </Menu>
-      </>
-    );
-  }
+type WeightConfigSectionProps = {|
+  show: boolean,
+  credView: CredView,
+  weights: Weights,
+  setWeightsState: ({weights: Weights}) => void,
+  params: TimelineCredParameters,
+  setParams: (TimelineCredParameters) => void,
+|};
 
-  renderConfigurationRow(): ReactNode {
-    const {showWeightConfig, view, params, weights} = this.state;
-    const weightFileManager = (
-      <WeightsFileManager
-        weights={weights}
-        onWeightsChange={(weights: Weights) => {
-          this.setState({weights});
-        }}
-      />
-    );
-    const weightConfig = (
-      <WeightConfig
-        declarations={view.plugins()}
-        nodeWeights={weights.nodeWeights}
-        edgeWeights={weights.edgeWeights}
-        onNodeWeightChange={(prefix, weight) => {
-          this.setState(({weights}) => {
-            weights.nodeWeights.set(prefix, weight);
-            return {weights};
-          });
-        }}
-        onEdgeWeightChange={(prefix, weight) => {
-          this.setState(({weights}) => {
-            weights.edgeWeights.set(prefix, weight);
-            return {weights};
-          });
-        }}
-      />
-    );
-
-    const paramsUpToDate =
-      deepEqual(params, view.params()) && deepEqual(weights, view.weights());
-    const analyzeButton = (
-      <Grid container item xs>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={this.state.recalculating || paramsUpToDate}
-          onClick={() => this.analyzeCred()}
-        >
-          re-compute cred
-        </Button>
-      </Grid>
-    );
-    return (
-      <Grid container>
-        <Grid
-          container
-          item
-          xs={12}
-          direction="row"
-          justify="space-between"
-          alignItems="center"
-          className={css(styles.parentGrid)}
-        >
-          <Grid container item xs>
-            {this.renderFilterSelect()}
-          </Grid>
-          <Grid container item xs>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                this.setState(({showWeightConfig}) => ({
-                  showWeightConfig: !showWeightConfig,
-                }));
-              }}
-            >
-              {showWeightConfig
-                ? "Hide weight configuration"
-                : "Show weight configuration"}
-            </Button>
-          </Grid>
-          {analyzeButton}
-        </Grid>
-        {showWeightConfig && (
-          <Grid container className={css(styles.weightConfig)} spacing={2}>
-            <Grid container item xs={12} direction="column">
-              <Grid>
-                <Grid>Upload/Download weights:</Grid>
-                <Grid>{weightFileManager}</Grid>
-              </Grid>
-              <Grid container item spacing={2} alignItems="center">
-                <Grid>α</Grid>
-                <Grid item xs={2}>
-                  <Slider
-                    value={params.alpha}
-                    min={0.05}
-                    max={0.95}
-                    step={0.05}
-                    valueLabelDisplay="auto"
-                    onChange={(_, val) => {
-                      const newParams = {
-                        ...params,
-                        alpha: val,
-                      };
-                      this.setState({params: newParams});
-                    }}
-                  />
-                </Grid>
-                <Grid>{format(".2f")(this.state.params.alpha)}</Grid>
-              </Grid>
-            </Grid>
-            <Grid spacing={2} container item xs={12} style={{display: "flex"}}>
-              {weightConfig}
-            </Grid>
-          </Grid>
-        )}
-      </Grid>
-    );
-  }
-
-  async analyzeCred() {
-    this.setState({recalculating: true});
-    const view = await this.state.view.recompute(
-      this.state.weights,
-      this.state.params
-    );
-    this.setState({view, recalculating: false});
-  }
-
-  render(): ReactNode {
-    const {filter, view, recalculating, name} = this.state;
-    const nodes =
-      filter == null ? view.userNodes() : view.nodes({prefix: filter});
-    // TODO: Allow sorting/displaying only recent cred...
-    const sortedNodes = sortBy(nodes, (n) => -n.credSummary.cred);
-    const total = sum(nodes.map((n) => n.credSummary.cred));
-    return (
-      <div className={css(styles.root)}>
-        {this.renderConfigurationRow()}
-        {recalculating ? <h1>Recalculating...</h1> : ""}
-        <Table className={css(styles.table)}>
-          <TableHead>
-            <TableRow>
-              <TableCell>{name ? name : "All users"}</TableCell>
-              <TableCell className={css(styles.credCell)}>Cred</TableCell>
-              <TableCell className={css(styles.credCell)}>% Total</TableCell>
-              <TableCell className={css(styles.endCell)} />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedNodes.slice(0, 200).map((node) => (
-              <NodeRow
-                depth={0}
-                key={node.address}
-                node={node}
-                view={view}
-                total={total}
-                // We only show the cred charts for users, because in CredRank we might not have
-                // cred-over-time data available for non-users.
-                // Would rather not add a feature that we may later need to remove.
-                showChart={filter == null}
+const WeightsConfigSection = ({
+  show,
+  credView,
+  weights,
+  setWeightsState,
+  params,
+  setParams,
+}: WeightConfigSectionProps) => {
+  if (!show) return [];
+  return (
+    <Grid container>
+      <Grid container className={css(styles.weightConfig)} spacing={2}>
+        <Grid container item xs={12} direction="column">
+          <Grid>
+            <Grid>Upload/Download weights:</Grid>
+            <Grid>
+              <WeightsFileManager
+                weights={weights}
+                onWeightsChange={(weights: Weights) => {
+                  setWeightsState({weights});
+                }}
               />
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }
-}
+            </Grid>
+          </Grid>
+          <Grid container item spacing={2} alignItems="center">
+            <Grid>α</Grid>
+            <Grid item xs={2}>
+              <Slider
+                value={params.alpha}
+                min={0.05}
+                max={0.95}
+                step={0.05}
+                valueLabelDisplay="auto"
+                onChange={(_, val) => {
+                  setParams({
+                    ...params,
+                    alpha: val,
+                  });
+                }}
+              />
+            </Grid>
+            <Grid>{format(".2f")(params.alpha)}</Grid>
+          </Grid>
+        </Grid>
+        <Grid spacing={2} container item xs={12} style={{display: "flex"}}>
+          <WeightConfig
+            declarations={credView.plugins()}
+            nodeWeights={weights.nodeWeights}
+            edgeWeights={weights.edgeWeights}
+            onNodeWeightChange={(prefix, weight) => {
+              weights.nodeWeights.set(prefix, weight);
+
+              setWeightsState({weights});
+            }}
+            onEdgeWeightChange={(prefix, weight) => {
+              weights.edgeWeights.set(prefix, weight);
+              setWeightsState({weights});
+            }}
+          />
+        </Grid>
+      </Grid>
+    </Grid>
+  );
+};
+
+export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
+  const [{credView}, setCredViewState] = useState({
+    credView: initialView,
+  });
+
+  const updateCredView = (credView: CredView) => setCredViewState({credView});
+
+  const [filterState, setFilterState] = useState<FilterState>({
+    anchorEl: null,
+    filter: null,
+    name: null,
+  });
+
+  const [recalculating, setRecalculating] = useState(false);
+
+  const [showWeightConfig, setShowWeightConfig] = useState(false);
+
+  // TODO: Allow sorting/displaying only recent cred...
+  const sortedNodes = useMemo(() => {
+    if (!credView) return {sortedNodes: [], total: 0};
+    const nodes =
+      filterState.filter == null
+        ? credView.userNodes()
+        : credView.nodes({prefix: filterState.filter});
+    const total: number = sum(nodes.map((n) => n.credSummary.cred));
+    const sortedNodes = sortBy(nodes, (n) => -n.credSummary.cred)
+      .slice(0, 200)
+      .map((node) => (
+        <NodeRow
+          depth={0}
+          key={node.address}
+          node={node}
+          view={credView}
+          total={total}
+          // We only show the cred charts for users, because in CredRank we might not have
+          // cred-over-time data available for non-users.
+          // Would rather not add a feature that we may later need to remove.
+          showChart={!filterState.filter}
+        />
+      ));
+    return sortedNodes;
+  }, [filterState.filter, credView]);
+
+  const [{weights}, setWeightsState] = useState<{weights: Weights}>({
+    weights: credView ? weightsCopy(credView.weights()) : emptyWeights(),
+  });
+  const [params, setParams] = useState<TimelineCredParameters>({
+    ...(credView ? credView.params() : defaultParams()),
+  });
+
+  const recomputeCred = async () =>
+    //weights: Weights,
+    //params: TimelineCredParameters
+    {
+      if (!credView) return;
+      setRecalculating(true);
+      try {
+        const newCredView = await credView.recompute(weights, params);
+        updateCredView(newCredView);
+      } catch (e) {
+        console.log(e);
+        alert("Error recomputing cred, check console");
+      } finally {
+        setRecalculating(false);
+      }
+    };
+
+  const currentParams = credView ? credView.params() : null;
+  const currentWeights = credView ? credView.weights() : null;
+
+  const paramsUpToDate =
+    deepEqual(params, currentParams) && deepEqual(weights, currentWeights);
+
+  if (!credView) return null;
+
+  return (
+    <div className={css(styles.root)}>
+      <Grid
+        container
+        item
+        xs={12}
+        direction="row"
+        justify="space-between"
+        alignItems="center"
+        className={css(styles.parentGrid)}
+      >
+        <Grid container item xs>
+          <FilterSelect
+            credView={credView}
+            filterState={filterState}
+            setFilterState={setFilterState}
+          />
+        </Grid>
+        <Grid container item xs>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setShowWeightConfig((show) => !show);
+            }}
+          >
+            {showWeightConfig
+              ? "Hide weight configuration"
+              : "Show weight configuration"}
+          </Button>
+        </Grid>
+        <Grid container item xs>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={recalculating || paramsUpToDate}
+            onClick={recomputeCred}
+          >
+            re-compute cred
+          </Button>
+        </Grid>
+      </Grid>
+      {recalculating ? <h1>Recalculating...</h1> : ""}
+      <WeightsConfigSection
+        show={showWeightConfig}
+        credView={credView}
+        weights={weights}
+        setWeightsState={setWeightsState}
+        params={params}
+        setParams={setParams}
+      />
+      <Table className={css(styles.table)}>
+        <TableHead>
+          <TableRow>
+            <TableCell>
+              {filterState.name ? filterState.name : "All users"}
+            </TableCell>
+            <TableCell className={css(styles.credCell)}>Cred</TableCell>
+            <TableCell className={css(styles.credCell)}>% Total</TableCell>
+            <TableCell className={css(styles.endCell)} />
+          </TableRow>
+        </TableHead>
+        <TableBody>{sortedNodes}</TableBody>
+      </Table>
+    </div>
+  );
+};
