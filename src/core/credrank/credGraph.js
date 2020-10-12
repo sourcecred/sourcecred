@@ -6,11 +6,13 @@ import {type NodeAddressT, type EdgeAddressT} from "../graph";
 import {
   MarkovProcessGraph,
   type MarkovProcessGraphJSON,
+  payoutAddressForEpoch,
+} from "./markovProcessGraph";
+import {
   type MarkovEdge,
   type TransitionProbability,
   markovEdgeAddress,
-  payoutAddressForEpoch,
-} from "./markovProcessGraph";
+} from "./markovEdge";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 
 export type Node = {|

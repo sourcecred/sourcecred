@@ -3,13 +3,13 @@
 import deepFreeze from "deep-freeze";
 import * as NullUtil from "../../util/null";
 import {Graph} from "../graph";
+import {MarkovProcessGraph} from "./markovProcessGraph";
 import {
-  MarkovProcessGraph,
   markovEdgeAddress,
   MarkovEdgeAddress,
   markovEdgeAddressFromMarkovEdge,
   type MarkovEdge,
-} from "./markovProcessGraph";
+} from "./markovEdge";
 import * as MPG from "./markovProcessGraph";
 import {NodeAddress as NA, EdgeAddress as EA} from "../graph";
 import * as uuid from "../../util/uuid"; // for spy purposes
