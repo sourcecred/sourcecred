@@ -114,7 +114,6 @@ export class CredGraph {
   *participants(): Iterator<Participant> {
     for (const {address, description, id} of this._mpg.participants()) {
       const epochs = this._mpg.epochBoundaries().map((epochStart) => ({
-        type: "USER_EPOCH",
         owner: address,
         epochStart,
       }));
