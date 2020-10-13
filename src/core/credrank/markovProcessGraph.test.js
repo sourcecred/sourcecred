@@ -230,7 +230,7 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       for (const boundary of mpg.epochBoundaries()) {
         const address = {
-          owner: participant.address,
+          owner: participant.id,
           epochStart: boundary,
         };
         const node = epochGadget.node(address);
@@ -242,7 +242,7 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       for (const boundary of mpg.epochBoundaries()) {
         const structuredAddress = {
-          owner: participant.address,
+          owner: participant.id,
           epochStart: boundary,
         };
 
@@ -276,7 +276,7 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       for (const boundary of mpg.epochBoundaries()) {
         const structuredAddress = {
-          owner: participant.address,
+          owner: participant.id,
           epochStart: boundary,
         };
         // Find the "payout" edge, directed to the correct epoch accumulator
@@ -293,7 +293,7 @@ describe("core/credrank/markovProcessGraph", () => {
       let lastBoundary = null;
       for (const boundary of mpg.epochBoundaries()) {
         const epochAddress = {
-          owner: participant.address,
+          owner: participant.id,
           epochStart: boundary,
         };
         // Find the epoch node
@@ -305,7 +305,7 @@ describe("core/credrank/markovProcessGraph", () => {
           const webbingAddress = {
             lastStart: lastBoundary,
             thisStart: boundary,
-            owner: participant.address,
+            owner: participant.id,
           };
           const forwardWebbing = forwardWebbingGadget.markovEdge(
             webbingAddress,
@@ -343,11 +343,11 @@ describe("core/credrank/markovProcessGraph", () => {
     it("re-writes edges incident to the participants so that they touch the participant epoch node", () => {
       const mpg = markovProcessGraph();
       const epoch0 = epochGadget.toRaw({
-        owner: participant.address,
+        owner: participant.id,
         epochStart: 0,
       });
       const epoch2 = epochGadget.toRaw({
-        owner: participant.address,
+        owner: participant.id,
         epochStart: 2,
       });
       const e0F = {
