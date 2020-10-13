@@ -4608,10 +4608,10 @@ extsprintf@^1.2.0:
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
   integrity sha1-4mifjzVvrWLMplo6kcXfX5VRaS8=
 
-fakerest@~2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/fakerest/-/fakerest-2.1.0.tgz#f66d0b8fbae7455efa7c666e3f6cdeec70a83860"
-  integrity sha512-c5x7iayu46Qa/h/W7k3PJiElNc56yxCkWY4mxs38be/D9YNfQSy8fn8xtlIPYGIUxDHAcpmVF9YXrA/SqJp1cA==
+fakerest@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/fakerest/-/fakerest-2.2.0.tgz#68fc7663baee9243d998dcdb20c9f555ae7b6065"
+  integrity sha512-6ByPB2f7NfK7UJ7W4xt2oz6Cq/gefYCV5NJTCkDmZS+hh2scheLl7eLqOCmdx/yw67JinTvG8TgOufjhkM0UOg==
   dependencies:
     babel-runtime "^6.22.0"
 
@@ -8521,11 +8521,11 @@ ra-core@^3.8.5:
     reselect "~3.0.0"
 
 ra-data-fakerest@^3.6.2:
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/ra-data-fakerest/-/ra-data-fakerest-3.6.2.tgz#07412bae43993947fd067a75cb4a49cda3bad158"
-  integrity sha512-lYZb039YLCZBXowM5nRMfsQ6kRosHBb3O2O+g7Q7/dbeORMXvWPVULBa31tRks25kp9AKnEgbEROQy+KGc7Q1Q==
+  version "3.9.3"
+  resolved "https://registry.yarnpkg.com/ra-data-fakerest/-/ra-data-fakerest-3.9.3.tgz#5c00b8b890feaa441fd971c8444b44d6ea188cee"
+  integrity sha512-yIZx38mcUqtmczU1Ws2PRnqhN+1AMuBa+4Cp96N9K/A0Z0wAEBvsnYun/14wIJYntshFeJ1PhiJL56EQy86aXw==
   dependencies:
-    fakerest "~2.1.0"
+    fakerest "^2.2.0"
 
 ra-i18n-polyglot@^3.8.5:
   version "3.8.5"
