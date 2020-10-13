@@ -1,5 +1,6 @@
 // @flow
 
+import type {TimestampMs} from "../../util/timestamp";
 import {
   NodeAddress,
   type NodeAddressT,
@@ -151,4 +152,98 @@ export const payoutGadget: EdgeGadget<ParticipantEpochAddress> = (() => {
     transitionProbability,
   });
   return Object.freeze({prefix, toRaw, fromRaw, markovEdge});
+})();
+
+export type WebbingAddress = {|
+  +thisStart: TimestampMs,
+  +lastStart: TimestampMs,
+  +owner: NodeAddressT,
+|};
+const webbingEdgePrefix = EdgeAddress.fromParts([
+  "sourcecred",
+  "core",
+  "EPOCH_WEBBING",
+]);
+
+/**
+ * The forward webbing edges flow Cred forwards from participant epoch nodes to
+ * the temporally next epoch node from the same participant. The intention is
+ * to "smooth out" Cred over time by having some of it flow forwards in time.
+ */
+export const forwardWebbingGadget: EdgeGadget<WebbingAddress> = (() => {
+  const prefix = markovEdgeAddress(webbingEdgePrefix, "F");
+  const prefixLength = MarkovEdgeAddress.toParts(prefix).length;
+  const toRaw = ({thisStart, lastStart, owner}) =>
+    MarkovEdgeAddress.append(
+      prefix,
+      String(lastStart),
+      String(thisStart),
+      ...NodeAddress.toParts(owner)
+    );
+  const fromRaw = (address) => {
+    const parts = MarkovEdgeAddress.toParts(address).slice(prefixLength);
+    const lastStart = +parts[0];
+    const thisStart = +parts[1];
+    const owner = NodeAddress.fromParts(parts.slice(2));
+    return {lastStart, thisStart, owner};
+  };
+  const markovEdge = ({thisStart, lastStart, owner}, transitionProbability) => {
+    const thisEpoch = {epochStart: thisStart, owner};
+    const lastEpoch = {epochStart: lastStart, owner};
+    return {
+      address: EdgeAddress.append(
+        webbingEdgePrefix,
+        String(lastStart),
+        String(thisStart),
+        ...NodeAddress.toParts(owner)
+      ),
+      reversed: false,
+      src: epochGadget.toRaw(lastEpoch),
+      dst: epochGadget.toRaw(thisEpoch),
+      transitionProbability,
+    };
+  };
+  return {prefix, toRaw, fromRaw, markovEdge};
+})();
+
+/**
+ * The backward webbing edges flow Cred backwards from participant epoch nodes
+ * to the temporally previous epoch node from the same participant. The
+ * intention is to "smooth out" Cred over time by having some of it flow
+ * backwards in time.
+ */
+export const backwardWebbingGadget: EdgeGadget<WebbingAddress> = (() => {
+  const prefix = markovEdgeAddress(webbingEdgePrefix, "B");
+  const prefixLength = MarkovEdgeAddress.toParts(prefix).length;
+  const toRaw = ({thisStart, lastStart, owner}) =>
+    MarkovEdgeAddress.append(
+      prefix,
+      String(lastStart),
+      String(thisStart),
+      ...NodeAddress.toParts(owner)
+    );
+  const fromRaw = (address) => {
+    const parts = MarkovEdgeAddress.toParts(address).slice(prefixLength);
+    const lastStart = +parts[0];
+    const thisStart = +parts[1];
+    const owner = NodeAddress.fromParts(parts.slice(2));
+    return {lastStart, thisStart, owner};
+  };
+  const markovEdge = ({thisStart, lastStart, owner}, transitionProbability) => {
+    const thisEpoch = {epochStart: thisStart, owner};
+    const lastEpoch = {epochStart: lastStart, owner};
+    return {
+      address: EdgeAddress.append(
+        webbingEdgePrefix,
+        String(lastStart),
+        String(thisStart),
+        ...NodeAddress.toParts(owner)
+      ),
+      reversed: true,
+      src: epochGadget.toRaw(thisEpoch),
+      dst: epochGadget.toRaw(lastEpoch),
+      transitionProbability,
+    };
+  };
+  return {prefix, toRaw, fromRaw, markovEdge};
 })();

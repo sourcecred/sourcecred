@@ -10,7 +10,6 @@ import {
   markovEdgeAddressFromMarkovEdge,
   type MarkovEdge,
 } from "./markovEdge";
-import * as MPG from "./markovProcessGraph";
 import {NodeAddress as NA, EdgeAddress as EA} from "../graph";
 import * as uuid from "../../util/uuid"; // for spy purposes
 import {intervalSequence} from "../interval";
@@ -22,6 +21,8 @@ import {
   epochRadiationGadget,
   seedMintGadget,
   payoutGadget,
+  forwardWebbingGadget,
+  backwardWebbingGadget,
 } from "./edgeGadgets";
 
 describe("core/credrank/markovProcessGraph", () => {
@@ -289,42 +290,35 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("user epoch nodes have temporal webbing", () => {
       const mpg = markovProcessGraph();
-      let lastEpochNodeAddress = null;
+      let lastBoundary = null;
       for (const boundary of mpg.epochBoundaries()) {
-        const structuredAddress = {
+        const epochAddress = {
           owner: participant.address,
           epochStart: boundary,
         };
-        const epochAddress = epochGadget.toRaw(structuredAddress);
-        // Find the node
-        expect(mpg.node(epochAddress)).toEqual(
-          epochGadget.node(structuredAddress)
-        );
-        // Find the webbing addresses
-        if (lastEpochNodeAddress != null) {
-          const webAddress = EA.append(
-            MPG.EPOCH_WEBBING,
-            String(boundary),
-            ...NA.toParts(participant.address)
+        // Find the epoch node
+        const epochNode = epochGadget.node(epochAddress);
+        expect(mpg.node(epochNode.address)).toEqual(epochNode);
+
+        if (lastBoundary != null) {
+          // Find the forward and backwards webbing edges
+          const webbingAddress = {
+            lastStart: lastBoundary,
+            thisStart: boundary,
+            owner: participant.address,
+          };
+          const forwardWebbing = forwardWebbingGadget.markovEdge(
+            webbingAddress,
+            parameters.gammaForward
           );
-          const webF = {
-            address: webAddress,
-            reversed: false,
-            src: lastEpochNodeAddress,
-            dst: epochAddress,
-            transitionProbability: parameters.gammaForward,
-          };
-          checkMarkovEdge(mpg, webF);
-          const webB = {
-            address: webAddress,
-            reversed: true,
-            src: epochAddress,
-            dst: lastEpochNodeAddress,
-            transitionProbability: parameters.gammaBackward,
-          };
-          checkMarkovEdge(mpg, webB);
+          checkMarkovEdge(mpg, forwardWebbing);
+          const backwardWebbing = backwardWebbingGadget.markovEdge(
+            webbingAddress,
+            parameters.gammaBackward
+          );
+          checkMarkovEdge(mpg, backwardWebbing);
         }
-        lastEpochNodeAddress = epochAddress;
+        lastBoundary = boundary;
       }
     });
 
