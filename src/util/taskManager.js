@@ -7,11 +7,6 @@ import {
   SilentTaskReporter,
 } from "./taskReporter";
 
-export type TaskNode = {|
-  reporter: TaskReporter,
-  children: Map<TaskId, TaskNode>,
-|};
-
 /**
  * TaskManager organizes and maintains a hierarchy of active tasks
  *
@@ -33,60 +28,51 @@ export type TaskNode = {|
  * all child tasks.
  */
 export class TaskManager {
-  _taskRoot: TaskNode;
+  _reporter: TaskReporter;
+  _children: Map<TaskId, TaskManager>;
 
   constructor(reporter?: TaskReporter) {
-    this._constructor(createNode(reporter || new SilentTaskReporter()));
-  }
-
-  _constructor(rootNode: TaskNode): TaskManager {
-    this._taskRoot = rootNode;
-    return this;
+    this._reporter = reporter || new SilentTaskReporter();
+    this._children = new Map();
   }
 
   start(id: TaskId): TaskManager {
     if (this._findTask(id)) {
       throw new Error(`Task ${id} already registered`);
     }
-    const childTask = this._createTask(id);
-    const newMgr = new TaskManager();
-    return newMgr._constructor(childTask);
+    return this._createTask(id);
   }
 
   finish(id: TaskId): this {
-    this._finishTask(id);
+    this._finishTask(id, this);
     return this;
   }
 
-  _findTask(id: TaskId, node: TaskNode = this._taskRoot): ?TaskNode {
-    return node.children.get(id);
+  _findTask(id: TaskId): ?TaskManager {
+    return this._children.get(id);
   }
 
-  _createTask(id: TaskId, node: TaskNode = this._taskRoot): TaskNode {
-    const newTask = createNode(new ScopedTaskReporter(node.reporter, id));
-    node.children.set(id, newTask);
-    node.reporter.start(id);
+  _createTask(id: TaskId): TaskManager {
+    const newTask = new TaskManager(new ScopedTaskReporter(this._reporter, id));
+    this._children.set(id, newTask);
+    this._reporter.start(id);
     return newTask;
   }
 
-  _finishTask(idToKill: TaskId, parent: TaskNode = this._taskRoot) {
-    const tasktoKill = this._findTask(idToKill, parent);
+  _finishTask(idToKill: TaskId, parent: TaskManager) {
+    const tasktoKill = parent._findTask(idToKill);
     if (!tasktoKill) {
       throw new Error(`Task ${idToKill} not registered`);
     }
     this._finishChildren(tasktoKill);
-    parent.children.delete(idToKill);
-    parent.reporter.finish(idToKill);
+    parent._children.delete(idToKill);
+    parent._reporter.finish(idToKill);
   }
 
-  _finishChildren(task: TaskNode) {
-    const children = Array.from(task.children.keys());
+  _finishChildren(task: TaskManager) {
+    const children = Array.from(task._children.keys());
     for (const id of children) {
       this._finishTask(id, task);
     }
   }
-}
-
-function createNode(reporter: TaskReporter): TaskNode {
-  return {reporter, children: new Map()};
 }
