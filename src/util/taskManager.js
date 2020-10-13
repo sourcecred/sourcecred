@@ -44,7 +44,7 @@ export class TaskManager {
   }
 
   finish(id: TaskId): this {
-    this._finishTask(id, this);
+    this._finishTask(id);
     return this;
   }
 
@@ -59,20 +59,19 @@ export class TaskManager {
     return newTask;
   }
 
-  _finishTask(idToKill: TaskId, parent: TaskManager) {
-    const tasktoKill = parent._findTask(idToKill);
+  _finishTask(idToKill: TaskId) {
+    const tasktoKill = this._findTask(idToKill);
     if (!tasktoKill) {
       throw new Error(`Task ${idToKill} not registered`);
     }
-    this._finishChildren(tasktoKill);
-    parent._children.delete(idToKill);
-    parent._reporter.finish(idToKill);
+    tasktoKill._finishChildren();
+    this._children.delete(idToKill);
+    this._reporter.finish(idToKill);
   }
 
-  _finishChildren(task: TaskManager) {
-    const children = Array.from(task._children.keys());
-    for (const id of children) {
-      this._finishTask(id, task);
+  _finishChildren() {
+    for (const id of this._children.keys()) {
+      this._finishTask(id);
     }
   }
 }
