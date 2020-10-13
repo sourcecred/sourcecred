@@ -68,7 +68,6 @@ describe("util/taskManager", () => {
   });
 
   describe("Scoped TaskManager", () => {
-    it("cannot create scope on nonexistent task", () => {});
     it("cannot terminate tasks outside of scope", () => {
       const testCase = new TestCase();
       const scoped = testCase.start("ctx1");
