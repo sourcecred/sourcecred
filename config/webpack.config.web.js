@@ -21,10 +21,7 @@ const getClientEnvironment = require("./env");
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
-
-async function makeConfig(
-  mode /*: "production" | "development" */
-) /*: Promise<mixed> */ {
+function makeConfig(mode /*: "production" | "development" */) /*: Object */ {
   return {
     // Don't attempt to continue if there are any errors.
     bail: true,
@@ -248,7 +245,7 @@ async function makeConfig(
         },
       ],
     },
-    plugins: await plugins(mode),
+    plugins: plugins(mode),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
     node: {
@@ -262,7 +259,7 @@ async function makeConfig(
   };
 }
 
-async function plugins(mode /*: "development" | "production" */) {
+function plugins(mode /*: "development" | "production" */) {
   // TODO: When we have switched fully to the instance system, we can remove
   // the projectIds argument.
   const env = getClientEnvironment(null);
