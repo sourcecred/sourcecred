@@ -113,3 +113,42 @@ export const seedMintGadget: EdgeGadget<NodeAddressT> = makeSeedGadget({
   toParts: (x) => NodeAddress.toParts(x),
   fromParts: (x) => NodeAddress.fromParts(x),
 });
+
+/**
+ * The payout gadget creates edges that connect participant epoch nodes to the
+ * epoch accumulator nodes. Each payout edge represents the flow of Cred from a
+ * participant's epoch back to the seed (by means of the accumulator). Thus,
+ * the Cred flow on this edge actually represents Cred score for the
+ * participant. (The Cred score of the epoch node can't be seen as the user's
+ * score, because some of it flows to other contributions, to other epoch
+ * nodes, etc.)
+ */
+export const payoutGadget: EdgeGadget<ParticipantEpochAddress> = (() => {
+  const edgePrefix = EdgeAddress.fromParts(["sourcecred", "core", "PAYOUT"]);
+  const prefix = markovEdgeAddress(edgePrefix, "F");
+  const prefixLength = MarkovEdgeAddress.toParts(prefix).length;
+  const toRaw = ({epochStart, owner}) =>
+    MarkovEdgeAddress.append(
+      prefix,
+      String(epochStart),
+      ...NodeAddress.toParts(owner)
+    );
+  const fromRaw = (addr) => {
+    const parts = MarkovEdgeAddress.toParts(addr).slice(prefixLength);
+    const epochStart = +parts[0];
+    const owner = NodeAddress.fromParts(parts.slice(1));
+    return {epochStart, owner};
+  };
+  const markovEdge = ({owner, epochStart}, transitionProbability) => ({
+    address: EdgeAddress.append(
+      edgePrefix,
+      String(epochStart),
+      ...NodeAddress.toParts(owner)
+    ),
+    reversed: false,
+    src: epochGadget.toRaw({owner, epochStart}),
+    dst: accumulatorGadget.toRaw({epochStart}),
+    transitionProbability,
+  });
+  return Object.freeze({prefix, toRaw, fromRaw, markovEdge});
+})();

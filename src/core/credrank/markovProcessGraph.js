@@ -88,7 +88,6 @@ import {
   seedGadget,
   accumulatorGadget,
   epochGadget,
-  type ParticipantEpochAddress,
   CORE_NODE_PREFIX,
 } from "./nodeGadgets";
 
@@ -97,6 +96,7 @@ import {
   epochRadiationGadget,
   contributionRadiationGadget,
   seedMintGadget,
+  payoutGadget,
 } from "./edgeGadgets";
 
 export type Participant = {|
@@ -116,18 +116,6 @@ const FIBRATION_EDGE = EdgeAddress.fromParts([
   "core",
   "fibration",
 ]);
-const EPOCH_PAYOUT = EdgeAddress.append(FIBRATION_EDGE, "EPOCH_PAYOUT");
-
-export function payoutAddressForEpoch(
-  participantEpoch: ParticipantEpochAddress
-): EdgeAddressT {
-  const {epochStart, owner} = participantEpoch;
-  return EdgeAddress.append(
-    EPOCH_PAYOUT,
-    String(epochStart),
-    ...NodeAddress.toParts(owner)
-  );
-}
 
 export const EPOCH_WEBBING: EdgeAddressT = EdgeAddress.append(
   FIBRATION_EDGE,
@@ -297,13 +285,7 @@ export class MarkovProcessGraph {
         };
         const thisEpoch = epochGadget.toRaw(thisEpochStructured);
         addNode(epochGadget.node(thisEpochStructured));
-        addEdge({
-          address: payoutAddressForEpoch(thisEpochStructured),
-          reversed: false,
-          src: thisEpoch,
-          dst: accumulatorGadget.toRaw(accumulator),
-          transitionProbability: beta,
-        });
+        addEdge(payoutGadget.markovEdge(thisEpochStructured, beta));
         if (lastBoundary != null) {
           const lastEpoch = epochGadget.toRaw({
             owner: scoringAddress,

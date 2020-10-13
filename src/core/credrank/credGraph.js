@@ -6,14 +6,10 @@ import {type NodeAddressT, type EdgeAddressT} from "../graph";
 import {
   MarkovProcessGraph,
   type MarkovProcessGraphJSON,
-  payoutAddressForEpoch,
 } from "./markovProcessGraph";
-import {
-  type MarkovEdge,
-  type TransitionProbability,
-  markovEdgeAddress,
-} from "./markovEdge";
+import {type MarkovEdge, type TransitionProbability} from "./markovEdge";
 import {toCompat, fromCompat, type Compatible} from "../../util/compat";
+import {payoutGadget} from "./edgeGadgets";
 
 export type Node = {|
   +address: NodeAddressT,
@@ -119,14 +115,8 @@ export class CredGraph {
       }));
       let totalCred = 0;
       const credPerEpoch = epochs.map((e) => {
-        const payoutEdgeAddress = payoutAddressForEpoch(e);
-        const payoutMarkovEdgeAddress = markovEdgeAddress(
-          payoutEdgeAddress,
-          "F"
-        );
-        const payoutMarkovEdge = NullUtil.get(
-          this._mpg.edge(payoutMarkovEdgeAddress)
-        );
+        const payoutAddress = payoutGadget.toRaw(e);
+        const payoutMarkovEdge = NullUtil.get(this._mpg.edge(payoutAddress));
         const cred = this._credFlow(payoutMarkovEdge);
         totalCred += cred;
         return cred;
