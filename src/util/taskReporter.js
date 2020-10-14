@@ -2,7 +2,7 @@
 
 const chalk = require("chalk");
 
-type TaskId = string;
+export type TaskId = string;
 
 type MsSinceEpoch = number;
 type ConsoleLog = (string) => void;
