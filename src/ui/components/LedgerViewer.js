@@ -9,11 +9,12 @@ import React, {
 } from "react";
 import Table from "@material-ui/core/Table";
 import Typography from "@material-ui/core/Typography";
+import TablePagination from "@material-ui/core/TablePagination";
 import Box from "@material-ui/core/Box";
 import TableBody from "@material-ui/core/TableBody";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import Dialog from "@material-ui/core/Dialog";
-import * as G from "../../core/ledger/grain";
+import Toolbar from "@material-ui/core/Toolbar";
 import DialogContent from "@material-ui/core/DialogContent";
 import Tooltip from "@material-ui/core/Tooltip";
 import Chip from "@material-ui/core/Chip";
@@ -29,17 +30,24 @@ import {formatTimestamp} from "../utils/dateHelpers";
 import type {IdentityId} from "../../core/identity/identity";
 import type {Allocation, GrainReceipt} from "../../core/ledger/grainAllocation";
 import type {CurrencyDetails} from "../../api/currencyConfig";
+import * as G from "../../core/ledger/grain";
 
-const useStyles = makeStyles(() => {
+const useStyles = makeStyles((theme) => {
   return {
     container: {
-      maxHeight: "90vh",
       maxWidth: "60em",
-      margin: "0 auto",
+      width: "100%",
+    },
+    table: {
+      maxHeight: "75vh",
     },
     dialog: {
       paddingTop: "0 !important",
       padding: 0,
+    },
+    toolbar: {
+      paddingLeft: theme.spacing(2),
+      paddingRight: theme.spacing(1),
     },
   };
 });
@@ -52,6 +60,8 @@ export const LedgerViewer = ({
   const {ledger} = useLedger();
   const classes = useStyles();
   const [allocation, setAllocation] = useState<Allocation | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(25);
 
   const handleClickOpen = useCallback((allocation: Allocation) => {
     setAllocation(allocation);
@@ -61,40 +71,68 @@ export const LedgerViewer = ({
     setAllocation(null);
   }, []);
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const events = useMemo(() => [...ledger.eventLog()].reverse(), [ledger]);
 
   return (
-    <TableContainer component={Paper} className={classes.container}>
-      <Table stickyHeader size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Event</TableCell>
-            <TableCell>Details</TableCell>
-            <TableCell align="right">Date</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {events.map((e) => (
-            <LedgerEventRow
-              key={e.uuid}
-              event={e}
+    <Paper className={classes.container}>
+      <Toolbar className={classes.toolbar}>
+        <Typography variant="h6" id="tableTitle" component="div">
+          Ledger Event History
+        </Typography>
+      </Toolbar>
+      <TableContainer className={classes.table}>
+        <Table stickyHeader size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>Event</TableCell>
+              <TableCell>Details</TableCell>
+              <TableCell align="right">Date</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {events
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((e) => (
+                <LedgerEventRow
+                  key={e.uuid}
+                  event={e}
+                  ledger={ledger}
+                  currencySuffix={currencySuffix}
+                  handleClickOpen={handleClickOpen}
+                />
+              ))}
+          </TableBody>
+        </Table>
+        <Dialog open={!!allocation} onClose={handleClose} scroll="paper">
+          <DialogContent className={classes.dialog}>
+            <GrainReceiptTable
+              allocation={allocation}
               ledger={ledger}
               currencySuffix={currencySuffix}
-              handleClickOpen={handleClickOpen}
             />
-          ))}
-        </TableBody>
-      </Table>
-      <Dialog open={!!allocation} onClose={handleClose} scroll="paper">
-        <DialogContent className={classes.dialog}>
-          <GrainReceiptTable
-            allocation={allocation}
-            ledger={ledger}
-            currencySuffix={currencySuffix}
-          />
-        </DialogContent>
-      </Dialog>
-    </TableContainer>
+          </DialogContent>
+        </Dialog>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[25, 50, 100]}
+        component="div"
+        count={events.length}
+        labelRowsPerPage="Rows"
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
+    </Paper>
   );
 };
 
@@ -117,7 +155,7 @@ const GrainReceiptTable = memo(
   }) => {
     if (!allocation) return null;
     return (
-      <Table stickyHeader>
+      <Table stickyHeader size="small">
         <TableHead>
           <TableRow>
             <TableCell>Participant</TableCell>
@@ -226,7 +264,13 @@ const LedgerEventRow = React.memo(
           </Typography>
         </TableCell>
         <TableCell>
-          <Box display="flex" flexDirection="row" alignItems="center">
+          <Box
+            display="flex"
+            flexDirection="row"
+            alignItems="center"
+            flexWrap="wrap"
+            maxWidth={50}
+          >
             {getEventDetails()}
           </Box>
         </TableCell>
