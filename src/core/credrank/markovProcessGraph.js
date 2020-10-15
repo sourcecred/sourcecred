@@ -168,7 +168,9 @@ export class MarkovProcessGraph {
     this._epochBoundaries = deepFreeze(epochBoundaries);
     this._participants = deepFreeze(participants);
     // Precompute the index maps
-    this._nodeIndex = new Map([...nodes.keys()].map((a, i) => [a, i]));
+    this._nodeIndex = new Map(
+      [...nodes.keys(), ...virtualizedNodeAddresses()].map((a, i) => [a, i])
+    );
     this._edgeIndex = new Map([...edges.keys()].map((a, i) => [a, i]));
   }
 
@@ -234,8 +236,6 @@ export class MarkovProcessGraph {
       _edges.set(mae, edge);
       _nodeOutMasses.set(edge.src, (_nodeOutMasses.get(edge.src) || 0) + pr);
     };
-
-    addNode(seedGadget.node());
 
     // Add graph nodes
     const nwe = nodeWeightEvaluator(weightedGraph.weights);
@@ -402,8 +402,15 @@ export class MarkovProcessGraph {
       }
     }
 
+    function* realAndVirtualNodes(): Iterator<MarkovNode> {
+      yield* _nodes.values();
+      for (const nodeAddress of virtualizedNodeAddresses()) {
+        yield NullUtil.get(virtualizedNode(nodeAddress));
+      }
+    }
+
     // Add radiation edges
-    for (const node of _nodes.values()) {
+    for (const node of realAndVirtualNodes()) {
       const transitionProbability =
         1 - NullUtil.orElse(_nodeOutMasses.get(node.address), 0);
       if (node.address === seedGadget.prefix) continue;
@@ -459,11 +466,12 @@ export class MarkovProcessGraph {
    */
   *nodeOrder(): Iterator<NodeAddressT> {
     yield* this._nodes.keys();
+    yield* virtualizedNodeAddresses();
   }
 
   node(address: NodeAddressT): MarkovNode | null {
     NodeAddress.assertValid(address);
-    return this._nodes.get(address) || null;
+    return this._nodes.get(address) || virtualizedNode(address);
   }
 
   /**
@@ -477,6 +485,11 @@ export class MarkovProcessGraph {
     for (const [address, markovNode] of this._nodes) {
       if (NodeAddress.hasPrefix(address, prefix)) {
         yield markovNode;
+      }
+    }
+    for (const address of virtualizedNodeAddresses()) {
+      if (NodeAddress.hasPrefix(address, prefix)) {
+        yield NullUtil.get(virtualizedNode(address));
       }
     }
   }
@@ -577,7 +590,7 @@ export class MarkovProcessGraph {
   }
 
   toJSON(): MarkovProcessGraphJSON {
-    const indexedEdges = Array.from(this.edges()).map((e) => ({
+    const indexedEdges = Array.from(this._edges.values()).map((e) => ({
       address: e.address,
       reversed: e.reversed,
       src: NullUtil.get(this.nodeIndex(e.src)),
@@ -602,11 +615,15 @@ export class MarkovProcessGraph {
       participants,
       finiteEpochBoundaries,
     } = fromCompat(COMPAT_INFO, j);
+    const nodeOrder = [
+      ...nodes.map((n) => n.address),
+      ...virtualizedNodeAddresses(),
+    ];
     const edges = indexedEdges.map((e) => ({
       address: e.address,
       reversed: e.reversed,
-      src: nodes[e.src].address,
-      dst: nodes[e.dst].address,
+      src: nodeOrder[e.src],
+      dst: nodeOrder[e.dst],
       transitionProbability: e.transitionProbability,
     }));
 
@@ -617,4 +634,19 @@ export class MarkovProcessGraph {
       [-Infinity, ...finiteEpochBoundaries, Infinity]
     );
   }
+}
+
+/**
+ * Return an array containing the node addresses for every
+ * virtualized node. The order must be stable.
+ */
+function* virtualizedNodeAddresses(): Iterable<NodeAddressT> {
+  yield seedGadget.prefix;
+}
+
+function virtualizedNode(address: NodeAddressT): MarkovNode | null {
+  if (NodeAddress.hasPrefix(address, seedGadget.prefix)) {
+    return seedGadget.node();
+  }
+  return null;
 }
