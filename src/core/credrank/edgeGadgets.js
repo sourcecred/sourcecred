@@ -1,6 +1,7 @@
 // @flow
 
 import type {TimestampMs} from "../../util/timestamp";
+import {fromString as uuidFromString, type Uuid} from "../../util/uuid";
 import {
   NodeAddress,
   type NodeAddressT,
@@ -129,23 +130,15 @@ export const payoutGadget: EdgeGadget<ParticipantEpochAddress> = (() => {
   const prefix = markovEdgeAddress(edgePrefix, "F");
   const prefixLength = MarkovEdgeAddress.toParts(prefix).length;
   const toRaw = ({epochStart, owner}) =>
-    MarkovEdgeAddress.append(
-      prefix,
-      String(epochStart),
-      ...NodeAddress.toParts(owner)
-    );
+    MarkovEdgeAddress.append(prefix, String(epochStart), owner);
   const fromRaw = (addr) => {
     const parts = MarkovEdgeAddress.toParts(addr).slice(prefixLength);
     const epochStart = +parts[0];
-    const owner = NodeAddress.fromParts(parts.slice(1));
+    const owner = uuidFromString(parts[1]);
     return {epochStart, owner};
   };
   const markovEdge = ({owner, epochStart}, transitionProbability) => ({
-    address: EdgeAddress.append(
-      edgePrefix,
-      String(epochStart),
-      ...NodeAddress.toParts(owner)
-    ),
+    address: EdgeAddress.append(edgePrefix, String(epochStart), owner),
     reversed: false,
     src: epochGadget.toRaw({owner, epochStart}),
     dst: accumulatorGadget.toRaw({epochStart}),
@@ -157,7 +150,7 @@ export const payoutGadget: EdgeGadget<ParticipantEpochAddress> = (() => {
 export type WebbingAddress = {|
   +thisStart: TimestampMs,
   +lastStart: TimestampMs,
-  +owner: NodeAddressT,
+  +owner: Uuid,
 |};
 const webbingEdgePrefix = EdgeAddress.fromParts([
   "sourcecred",
@@ -178,13 +171,13 @@ export const forwardWebbingGadget: EdgeGadget<WebbingAddress> = (() => {
       prefix,
       String(lastStart),
       String(thisStart),
-      ...NodeAddress.toParts(owner)
+      owner
     );
   const fromRaw = (address) => {
     const parts = MarkovEdgeAddress.toParts(address).slice(prefixLength);
     const lastStart = +parts[0];
     const thisStart = +parts[1];
-    const owner = NodeAddress.fromParts(parts.slice(2));
+    const owner = uuidFromString(parts[2]);
     return {lastStart, thisStart, owner};
   };
   const markovEdge = ({thisStart, lastStart, owner}, transitionProbability) => {
@@ -195,7 +188,7 @@ export const forwardWebbingGadget: EdgeGadget<WebbingAddress> = (() => {
         webbingEdgePrefix,
         String(lastStart),
         String(thisStart),
-        ...NodeAddress.toParts(owner)
+        owner
       ),
       reversed: false,
       src: epochGadget.toRaw(lastEpoch),
@@ -220,13 +213,13 @@ export const backwardWebbingGadget: EdgeGadget<WebbingAddress> = (() => {
       prefix,
       String(lastStart),
       String(thisStart),
-      ...NodeAddress.toParts(owner)
+      owner
     );
   const fromRaw = (address) => {
     const parts = MarkovEdgeAddress.toParts(address).slice(prefixLength);
     const lastStart = +parts[0];
     const thisStart = +parts[1];
-    const owner = NodeAddress.fromParts(parts.slice(2));
+    const owner = uuidFromString(parts[2]);
     return {lastStart, thisStart, owner};
   };
   const markovEdge = ({thisStart, lastStart, owner}, transitionProbability) => {
@@ -237,7 +230,7 @@ export const backwardWebbingGadget: EdgeGadget<WebbingAddress> = (() => {
         webbingEdgePrefix,
         String(lastStart),
         String(thisStart),
-        ...NodeAddress.toParts(owner)
+        owner
       ),
       reversed: true,
       src: epochGadget.toRaw(thisEpoch),
