@@ -92,6 +92,13 @@ import {
   CORE_NODE_PREFIX,
 } from "./nodeGadgets";
 
+import {
+  accumulatorRadiationGadget,
+  epochRadiationGadget,
+  contributionRadiationGadget,
+  seedMintGadget,
+} from "./edgeGadgets";
+
 export type Participant = {|
   +address: NodeAddressT,
   +description: string,
@@ -126,26 +133,6 @@ export const EPOCH_WEBBING: EdgeAddressT = EdgeAddress.append(
   FIBRATION_EDGE,
   "EPOCH_WEBBING"
 );
-export const USER_EPOCH_RADIATION: EdgeAddressT = EdgeAddress.append(
-  FIBRATION_EDGE,
-  "USER_EPOCH_RADIATION"
-);
-export const EPOCH_ACCUMULATOR_RADIATION: EdgeAddressT = EdgeAddress.append(
-  FIBRATION_EDGE,
-  "EPOCH_RADIATION"
-);
-
-// Prefixes for seed edges.
-export const CONTRIBUTION_RADIATION: EdgeAddressT = EdgeAddress.fromParts([
-  "sourcecred",
-  "core",
-  "CONTRIBUTION_RADIATION",
-]);
-export const SEED_MINT: EdgeAddressT = EdgeAddress.fromParts([
-  "sourcecred",
-  "core",
-  "SEED_MINT",
-]);
 
 export type Arguments = {|
   +weightedGraph: WeightedGraphT,
@@ -360,16 +347,7 @@ export class MarkovProcessGraph {
         throw new Error("No outflow from seed; add cred-minting nodes");
       }
       for (const [address, weight] of positiveNodeWeights) {
-        addEdge({
-          address: EdgeAddress.append(
-            SEED_MINT,
-            ...NodeAddress.toParts(address)
-          ),
-          reversed: false,
-          src: seedGadget.toRaw(),
-          dst: address,
-          transitionProbability: weight / totalNodeWeight,
-        });
+        addEdge(seedMintGadget.markovEdge(address, weight / totalNodeWeight));
       }
     }
 
@@ -463,30 +441,32 @@ export class MarkovProcessGraph {
 
     // Add radiation edges
     for (const node of _nodes.values()) {
+      const transitionProbability =
+        1 - NullUtil.orElse(_nodeOutMasses.get(node.address), 0);
       if (node.address === seedGadget.prefix) continue;
-      let type;
       if (NodeAddress.hasPrefix(node.address, epochGadget.prefix)) {
-        type = USER_EPOCH_RADIATION;
+        const target = epochGadget.fromRaw(node.address);
+        addEdge(epochRadiationGadget.markovEdge(target, transitionProbability));
       } else if (
         NodeAddress.hasPrefix(node.address, accumulatorGadget.prefix)
       ) {
-        type = EPOCH_ACCUMULATOR_RADIATION;
+        const target = accumulatorGadget.fromRaw(node.address);
+        addEdge(
+          accumulatorRadiationGadget.markovEdge(target, transitionProbability)
+        );
       } else if (NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX)) {
         throw new Error(
           "invariant violation: unknown core node: " +
             NodeAddress.toString(node.address)
         );
       } else {
-        type = CONTRIBUTION_RADIATION;
+        addEdge(
+          contributionRadiationGadget.markovEdge(
+            node.address,
+            transitionProbability
+          )
+        );
       }
-      addEdge({
-        address: EdgeAddress.append(type, ...NodeAddress.toParts(node.address)),
-        reversed: false,
-        src: node.address,
-        dst: seedGadget.prefix,
-        transitionProbability:
-          1 - NullUtil.orElse(_nodeOutMasses.get(node.address), 0),
-      });
     }
 
     return new MarkovProcessGraph(_nodes, _edges, participants, timeBoundaries);
