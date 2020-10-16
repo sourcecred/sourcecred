@@ -73,7 +73,7 @@ export class WeightConfig extends React.Component<Props> {
     return (
       <Grid item xs={4} key={name}>
         <h3>{name}</h3>
-        <h4 style={{marginBottom: "0.3em"}}>ReactNode weights</h4>
+        <h4 style={{marginBottom: "0.3em"}}>Node weights</h4>
         {nodeConfigs}
         <h4 style={{marginBottom: "0.3em"}}>Edge weights</h4>
         <p style={{marginBottom: "0.6em", marginTop: "0.6em"}}>
