@@ -21,6 +21,7 @@ import {
   accumulatorRadiationGadget,
   epochRadiationGadget,
   seedMintGadget,
+  payoutGadget,
 } from "./edgeGadgets";
 
 describe("core/credrank/markovProcessGraph", () => {
@@ -277,19 +278,11 @@ describe("core/credrank/markovProcessGraph", () => {
           owner: participant.address,
           epochStart: boundary,
         };
-        const epochAddress = epochGadget.toRaw(structuredAddress);
-        const accumulatorAddress = accumulatorGadget.toRaw({
-          epochStart: boundary,
-        });
         // Find the "payout" edge, directed to the correct epoch accumulator
-        const payoutAddress = MPG.payoutAddressForEpoch(structuredAddress);
-        const payoutEdge = {
-          address: payoutAddress,
-          reversed: false,
-          src: epochAddress,
-          dst: accumulatorAddress,
-          transitionProbability: parameters.beta,
-        };
+        const payoutEdge = payoutGadget.markovEdge(
+          structuredAddress,
+          parameters.beta
+        );
         checkMarkovEdge(mpg, payoutEdge);
       }
     });
