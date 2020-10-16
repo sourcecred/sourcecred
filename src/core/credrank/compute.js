@@ -12,10 +12,8 @@ import {type NodeAddressT} from "../graph";
 import {distributionToNodeDistribution} from "../algorithm/graphToMarkovChain";
 
 import {uniformDistribution} from "../algorithm/distribution";
-import {
-  type MarkovProcessGraph,
-  EPOCH_ACCUMULATOR_PREFIX,
-} from "./markovProcessGraph";
+import {accumulatorGadget} from "./nodeGadgets";
+import {type MarkovProcessGraph} from "./markovProcessGraph";
 import {CredGraph} from "./credGraph";
 
 export const DEFAULT_MAX_ITERATIONS = 255;
@@ -48,7 +46,7 @@ export async function credrank(
   );
 
   const matchingScore = sum(
-    Array.from(mpg.nodes({prefix: EPOCH_ACCUMULATOR_PREFIX})).map((n) =>
+    Array.from(mpg.nodes({prefix: accumulatorGadget.prefix})).map((n) =>
       NullUtil.get(pi.get(n.address))
     )
   );
