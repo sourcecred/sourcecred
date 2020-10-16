@@ -268,6 +268,19 @@ function plugins(mode /*: "development" | "production" */) {
       entry: "ssr",
       paths: ["/"],
       locals: {},
+      globals: {
+        self:
+          mode === "development"
+            ? {
+                addEventListener: () => {},
+                postMessage: () => {},
+                location: {
+                  protocol: "http:",
+                  port: "",
+                },
+              }
+            : undefined,
+      },
     }),
     new CopyPlugin({
       patterns: [
