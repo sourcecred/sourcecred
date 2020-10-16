@@ -446,4 +446,21 @@ describe("core/markovProcessGraph", () => {
       checkMarkovEdge(mpg, e1B);
     });
   });
+
+  describe("accessors", () => {
+    it("nodes() yields nodes in nodeOrder", () => {
+      const mpg = markovProcessGraph();
+      const nodeOrder = [...mpg.nodeOrder()];
+      const nodesActual = [...mpg.nodes()];
+      const nodesExpected = nodeOrder.map((x) => mpg.node(x));
+      expect(nodesActual).toEqual(nodesExpected);
+    });
+    it("edges() yields edges in edgeOrder", () => {
+      const mpg = markovProcessGraph();
+      const edgeOrder = [...mpg.edgeOrder()];
+      const edgesActual = [...mpg.edges()];
+      const edgesExpected = edgeOrder.map((x) => mpg.edge(x));
+      expect(edgesActual).toEqual(edgesExpected);
+    });
+  });
 });
