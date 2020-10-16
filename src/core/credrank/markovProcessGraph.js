@@ -56,12 +56,7 @@ import {type Uuid} from "../../util/uuid";
  */
 
 import sortedIndex from "lodash.sortedindex";
-import {
-  type NodeAddressT,
-  NodeAddress,
-  type EdgeAddressT,
-  EdgeAddress,
-} from "../graph";
+import {type NodeAddressT, NodeAddress, type EdgeAddressT} from "../graph";
 import {type WeightedGraph as WeightedGraphT} from "../weightedGraph";
 import {
   nodeWeightEvaluator,
@@ -97,6 +92,8 @@ import {
   contributionRadiationGadget,
   seedMintGadget,
   payoutGadget,
+  forwardWebbingGadget,
+  backwardWebbingGadget,
 } from "./edgeGadgets";
 
 export type Participant = {|
@@ -109,18 +106,6 @@ export type OrderedSparseMarkovChain = {|
   +nodeOrder: $ReadOnlyArray<NodeAddressT>,
   +chain: SparseMarkovChain,
 |};
-
-// Prefixes for fibration edges.
-const FIBRATION_EDGE = EdgeAddress.fromParts([
-  "sourcecred",
-  "core",
-  "fibration",
-]);
-
-export const EPOCH_WEBBING: EdgeAddressT = EdgeAddress.append(
-  FIBRATION_EDGE,
-  "EPOCH_WEBBING"
-);
 
 export type Arguments = {|
   +weightedGraph: WeightedGraphT,
@@ -279,37 +264,24 @@ export class MarkovProcessGraph {
       };
       addNode(accumulatorGadget.node(accumulator));
       for (const scoringAddress of _scoringAddresses) {
-        const thisEpochStructured = {
+        const thisEpoch = {
           owner: scoringAddress,
           epochStart: boundary,
         };
-        const thisEpoch = epochGadget.toRaw(thisEpochStructured);
-        addNode(epochGadget.node(thisEpochStructured));
-        addEdge(payoutGadget.markovEdge(thisEpochStructured, beta));
+        addNode(epochGadget.node(thisEpoch));
+        addEdge(payoutGadget.markovEdge(thisEpoch, beta));
         if (lastBoundary != null) {
-          const lastEpoch = epochGadget.toRaw({
+          const webbingAddress = {
+            thisStart: boundary,
+            lastStart: lastBoundary,
             owner: scoringAddress,
-            epochStart: lastBoundary,
-          });
-          const webAddress = EdgeAddress.append(
-            EPOCH_WEBBING,
-            String(boundary),
-            ...NodeAddress.toParts(scoringAddress)
+          };
+          addEdge(
+            forwardWebbingGadget.markovEdge(webbingAddress, gammaForward)
           );
-          addEdge({
-            address: webAddress,
-            reversed: false,
-            src: lastEpoch,
-            dst: thisEpoch,
-            transitionProbability: gammaForward,
-          });
-          addEdge({
-            address: webAddress,
-            reversed: true,
-            src: thisEpoch,
-            dst: lastEpoch,
-            transitionProbability: gammaBackward,
-          });
+          addEdge(
+            backwardWebbingGadget.markovEdge(webbingAddress, gammaBackward)
+          );
         }
         lastBoundary = boundary;
       }
