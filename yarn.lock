@@ -327,11 +327,11 @@
     js-tokens "^4.0.0"
 
 "@babel/node@^7.8.7":
-  version "7.10.5"
-  resolved "https://registry.yarnpkg.com/@babel/node/-/node-7.10.5.tgz#30866322aa2c0251a9bdd73d07a9167bd1f4ed64"
-  integrity sha512-suosS7zZ2roj+fYVCnDuVezUbRc0sdoyF0Gj/1FzWxD4ebbGiBGtL5qyqHH4NO34B5m4vWWYWgyNhSsrqS8vwA==
+  version "7.12.1"
+  resolved "https://registry.yarnpkg.com/@babel/node/-/node-7.12.1.tgz#66b5ae07b6bf76636e83906405fcfa69bab16c8a"
+  integrity sha512-S4tWOqo3V3ZuJjJNuheSMFIlDaQd6kbvqnQll+tdJTirksTdFHrauQf3d/xW4rgAM+mHJpxTZMHVeIXjCiDViw==
   dependencies:
-    "@babel/register" "^7.10.5"
+    "@babel/register" "^7.12.1"
     commander "^4.0.1"
     core-js "^3.2.1"
     lodash "^4.17.19"
@@ -982,10 +982,10 @@
     "@babel/plugin-transform-react-jsx-source" "^7.12.1"
     "@babel/plugin-transform-react-pure-annotations" "^7.12.1"
 
-"@babel/register@^7.10.5":
-  version "7.11.5"
-  resolved "https://registry.yarnpkg.com/@babel/register/-/register-7.11.5.tgz#79becf89e0ddd0fba8b92bc279bc0f5d2d7ce2ea"
-  integrity sha512-CAml0ioKX+kOAvBQDHa/+t1fgOt3qkTIz0TrRtRAT6XY0m5qYZXR85k6/sLCNPMGhYDlCFHCYuU0ybTJbvlC6w==
+"@babel/register@^7.12.1":
+  version "7.12.1"
+  resolved "https://registry.yarnpkg.com/@babel/register/-/register-7.12.1.tgz#cdb087bdfc4f7241c03231f22e15d211acf21438"
+  integrity sha512-XWcmseMIncOjoydKZnWvWi0/5CUCD+ZYKhRwgYlWOrA8fGZ/FjuLRpqtIhLOVD/fvR1b9DQHtZPn68VvhpYf+Q==
   dependencies:
     find-cache-dir "^2.0.0"
     lodash "^4.17.19"
