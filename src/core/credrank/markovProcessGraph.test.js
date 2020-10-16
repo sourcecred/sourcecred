@@ -1,8 +1,8 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
-import * as NullUtil from "../util/null";
-import {Graph} from "./graph";
+import * as NullUtil from "../../util/null";
+import {Graph} from "../graph";
 import {
   MarkovProcessGraph,
   markovEdgeAddress,
@@ -11,11 +11,11 @@ import {
   type MarkovEdge,
 } from "./markovProcessGraph";
 import * as MPG from "./markovProcessGraph";
-import {NodeAddress as NA, EdgeAddress as EA} from "./graph";
-import * as uuid from "../util/uuid"; // for spy purposes
-import {intervalSequence} from "./interval";
+import {NodeAddress as NA, EdgeAddress as EA} from "../graph";
+import * as uuid from "../../util/uuid"; // for spy purposes
+import {intervalSequence} from "../interval";
 
-describe("core/markovProcessGraph", () => {
+describe("core/credrank/markovProcessGraph", () => {
   const na = (name) => NA.fromParts([name]);
   const ea = (name) => EA.fromParts([name]);
 

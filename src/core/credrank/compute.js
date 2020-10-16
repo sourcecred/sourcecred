@@ -6,17 +6,17 @@ import {
   findStationaryDistribution,
   type PagerankParams,
   type PagerankOptions,
-} from "./markovChain";
+} from "../algorithm/markovChain";
 
 import {type NodeAddressT} from "../graph";
-import {distributionToNodeDistribution} from "./graphToMarkovChain";
+import {distributionToNodeDistribution} from "../algorithm/graphToMarkovChain";
 
-import {uniformDistribution} from "./distribution";
+import {uniformDistribution} from "../algorithm/distribution";
 import {
   type MarkovProcessGraph,
   EPOCH_ACCUMULATOR_PREFIX,
-} from "../markovProcessGraph";
-import {CredGraph} from "../credGraph";
+} from "./markovProcessGraph";
+import {CredGraph} from "./credGraph";
 
 export const DEFAULT_MAX_ITERATIONS = 255;
 export const DEFAULT_CONVERGENCE_THRESHOLD = 1e-7;
