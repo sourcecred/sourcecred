@@ -591,7 +591,7 @@ export class MarkovProcessGraph {
 
   static fromJSON(j: MarkovProcessGraphJSON): MarkovProcessGraph {
     const {
-      sortedNodes,
+      nodes,
       indexedEdges,
       participants,
       finiteEpochBoundaries,
@@ -599,14 +599,14 @@ export class MarkovProcessGraph {
     const edges = indexedEdges.map((e) => ({
       address: e.address,
       reversed: e.reversed,
-      src: sortedNodes[e.src].address,
-      dst: sortedNodes[e.dst].address,
+      src: nodes[e.src].address,
+      dst: nodes[e.dst].address,
       transitionProbability: e.transitionProbability,
     }));
 
     return new MarkovProcessGraph(
-      new Map(sortedNodes.map((n) => [n.address, n])),
-      new Map(edges.map((e) => [e.address, e])),
+      new Map(nodes.map((n) => [n.address, n])),
+      new Map(edges.map((e) => [markovEdgeAddressFromMarkovEdge(e), e])),
       participants,
       [-Infinity, ...finiteEpochBoundaries, Infinity]
     );

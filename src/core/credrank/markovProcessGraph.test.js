@@ -401,4 +401,23 @@ describe("core/credrank/markovProcessGraph", () => {
       expect(edgesActual).toEqual(edgesExpected);
     });
   });
+
+  describe("to/froJSON", () => {
+    it("has round trip equality", () => {
+      const mpg = markovProcessGraph();
+      const mpgJson = mpg.toJSON();
+      const mpg_ = MarkovProcessGraph.fromJSON(mpgJson);
+      const mpgJson_ = mpg_.toJSON();
+      expect(mpg).toEqual(mpg_);
+      expect(mpgJson).toEqual(mpgJson_);
+    });
+    it("serialization does not change node/edge iteration order", () => {
+      const mpg1 = markovProcessGraph();
+      const mpg2 = MarkovProcessGraph.fromJSON(mpg1.toJSON());
+      expect([...mpg1.nodeOrder()]).toEqual([...mpg2.nodeOrder()]);
+      expect([...mpg1.edgeOrder()]).toEqual([...mpg2.edgeOrder()]);
+      expect([...mpg1.nodes()]).toEqual([...mpg2.nodes()]);
+      expect([...mpg1.edges()]).toEqual([...mpg2.edges()]);
+    });
+  });
 });
