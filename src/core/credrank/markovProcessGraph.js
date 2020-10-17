@@ -293,8 +293,8 @@ export class MarkovProcessGraph {
             backwardWebbingGadget.markovEdge(webbingAddress, gammaBackward)
           );
         }
-        lastBoundary = boundary;
       }
+      lastBoundary = boundary;
     }
 
     // Add minting edges, from the seed to positive-weight graph nodes

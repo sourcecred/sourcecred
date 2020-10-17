@@ -29,16 +29,28 @@ describe("core/credrank/markovProcessGraph", () => {
   const na = (name) => NA.fromParts([name]);
   const ea = (name) => EA.fromParts([name]);
 
-  const participantNode = {
-    description: "participant",
-    address: na("participant"),
+  const participantNode1 = {
+    description: "participant1",
+    address: na("participant1"),
     timestampMs: null,
   };
   const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
-  const participant = {
-    description: participantNode.description,
-    address: participantNode.address,
+  const participant1 = {
+    description: participantNode1.description,
+    address: participantNode1.address,
     id: id1,
+  };
+
+  const participantNode2 = {
+    description: "participant2",
+    address: na("participant2"),
+    timestampMs: null,
+  };
+  const id2 = uuid.fromString("YVZhbGlkVXVpZE20TGFzdA");
+  const participant2 = {
+    description: participantNode2.description,
+    address: participantNode2.address,
+    id: id2,
   };
 
   const interval0 = {startTimeMs: 0, endTimeMs: 2};
@@ -51,13 +63,13 @@ describe("core/credrank/markovProcessGraph", () => {
   const e0 = {
     address: ea("e0"),
     src: c0.address,
-    dst: participantNode.address,
+    dst: participantNode1.address,
     timestampMs: 1,
   };
   const e1 = {
     address: ea("e1"),
     src: c1.address,
-    dst: participantNode.address,
+    dst: participantNode1.address,
     timestampMs: 3,
   };
   const e2 = {
@@ -73,7 +85,7 @@ describe("core/credrank/markovProcessGraph", () => {
     timestampMs: 4,
   };
 
-  deepFreeze([participant, c0, c1, e0, e1]);
+  deepFreeze([participant1, participant2, c0, c1, e0, e1]);
 
   const parameters = deepFreeze({
     beta: 0.2,
@@ -84,7 +96,8 @@ describe("core/credrank/markovProcessGraph", () => {
 
   const graph = () =>
     new Graph()
-      .addNode(participantNode)
+      .addNode(participantNode1)
+      .addNode(participantNode2)
       .addNode(c0)
       .addNode(c1)
       .addEdge(e0)
@@ -106,7 +119,7 @@ describe("core/credrank/markovProcessGraph", () => {
     weightedGraph: weightedGraph(),
     parameters,
     intervals,
-    participants: [participant],
+    participants: [participant1, participant2],
   });
   const markovProcessGraph = () => MarkovProcessGraph.new(args());
 
@@ -158,7 +171,7 @@ describe("core/credrank/markovProcessGraph", () => {
     });
     it("the participant is not present", () => {
       const mpg = markovProcessGraph();
-      expect(mpg.node(participant.address)).toEqual(null);
+      expect(mpg.node(participant1.address)).toEqual(null);
     });
     it("the edge between contributions corresponds to two MarkovEdges", () => {
       const mpg = markovProcessGraph();
@@ -225,7 +238,7 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       for (const boundary of mpg.epochBoundaries()) {
         const address = {
-          owner: participant.id,
+          owner: participant1.id,
           epochStart: boundary,
         };
         const node = epochGadget.node(address);
@@ -237,7 +250,7 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       for (const boundary of mpg.epochBoundaries()) {
         const structuredAddress = {
-          owner: participant.id,
+          owner: participant1.id,
           epochStart: boundary,
         };
 
@@ -271,7 +284,7 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       for (const boundary of mpg.epochBoundaries()) {
         const structuredAddress = {
-          owner: participant.id,
+          owner: participant1.id,
           epochStart: boundary,
         };
         // Find the "payout" edge, directed to the correct epoch accumulator
@@ -285,35 +298,37 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("user epoch nodes have temporal webbing", () => {
       const mpg = markovProcessGraph();
-      let lastBoundary = null;
-      for (const boundary of mpg.epochBoundaries()) {
-        const epochAddress = {
-          owner: participant.id,
-          epochStart: boundary,
-        };
-        // Find the epoch node
-        const epochNode = epochGadget.node(epochAddress);
-        expect(mpg.node(epochNode.address)).toEqual(epochNode);
-
-        if (lastBoundary != null) {
-          // Find the forward and backwards webbing edges
-          const webbingAddress = {
-            lastStart: lastBoundary,
-            thisStart: boundary,
+      for (const participant of [participant1, participant2]) {
+        let lastBoundary = null;
+        for (const boundary of mpg.epochBoundaries()) {
+          const epochAddress = {
             owner: participant.id,
+            epochStart: boundary,
           };
-          const forwardWebbing = forwardWebbingGadget.markovEdge(
-            webbingAddress,
-            parameters.gammaForward
-          );
-          checkMarkovEdge(mpg, forwardWebbing);
-          const backwardWebbing = backwardWebbingGadget.markovEdge(
-            webbingAddress,
-            parameters.gammaBackward
-          );
-          checkMarkovEdge(mpg, backwardWebbing);
+          // Find the epoch node
+          const epochNode = epochGadget.node(epochAddress);
+          expect(mpg.node(epochNode.address)).toEqual(epochNode);
+
+          if (lastBoundary != null) {
+            // Find the forward and backwards webbing edges
+            const webbingAddress = {
+              lastStart: lastBoundary,
+              thisStart: boundary,
+              owner: participant.id,
+            };
+            const forwardWebbing = forwardWebbingGadget.markovEdge(
+              webbingAddress,
+              parameters.gammaForward
+            );
+            checkMarkovEdge(mpg, forwardWebbing);
+            const backwardWebbing = backwardWebbingGadget.markovEdge(
+              webbingAddress,
+              parameters.gammaBackward
+            );
+            checkMarkovEdge(mpg, backwardWebbing);
+          }
+          lastBoundary = boundary;
         }
-        lastBoundary = boundary;
       }
     });
 
@@ -338,11 +353,11 @@ describe("core/credrank/markovProcessGraph", () => {
     it("re-writes edges incident to the participants so that they touch the participant epoch node", () => {
       const mpg = markovProcessGraph();
       const epoch0 = epochGadget.toRaw({
-        owner: participant.id,
+        owner: participant1.id,
         epochStart: 0,
       });
       const epoch2 = epochGadget.toRaw({
-        owner: participant.id,
+        owner: participant1.id,
         epochStart: 2,
       });
       const e0F = {
@@ -380,6 +395,12 @@ describe("core/credrank/markovProcessGraph", () => {
     });
   });
 
+  describe("toMarkovChain", () => {
+    it("does not violate its own invariant checker", () => {
+      markovProcessGraph().toMarkovChain();
+    });
+  });
+
   describe("accessors", () => {
     it("nodes() yields nodes in nodeOrder", () => {
       const mpg = markovProcessGraph();
@@ -414,7 +435,10 @@ describe("core/credrank/markovProcessGraph", () => {
       expect(markovProcessGraph().epochBoundaries()).toEqual(expected);
     });
     it("has the right participants", () => {
-      expect(markovProcessGraph().participants()).toEqual([participant]);
+      expect(markovProcessGraph().participants()).toEqual([
+        participant1,
+        participant2,
+      ]);
     });
     it("has the right parameters", () => {
       expect(markovProcessGraph().parameters()).toEqual(parameters);
