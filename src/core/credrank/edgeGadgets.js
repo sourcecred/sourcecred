@@ -17,7 +17,6 @@ import {
 } from "./markovEdge";
 import {
   seedGadget,
-  type EpochAccumulatorAddress,
   accumulatorGadget,
   type ParticipantEpochAddress,
   epochGadget,
@@ -70,44 +69,12 @@ function makeSeedGadget<T>({
   return Object.freeze({prefix, toRaw, fromRaw, markovEdge});
 }
 
-export const contributionRadiationGadget: EdgeGadget<NodeAddressT> = makeSeedGadget(
-  {
-    edgePrefix: EdgeAddress.fromParts([
-      "sourcecred",
-      "core",
-      "CONTRIBUTION_RADIATION",
-    ]),
-    seedIsSrc: false,
-    toParts: (x) => NodeAddress.toParts(x),
-    fromParts: (x) => NodeAddress.fromParts(x),
-  }
-);
-
-export const accumulatorRadiationGadget: EdgeGadget<EpochAccumulatorAddress> = makeSeedGadget(
-  {
-    edgePrefix: EdgeAddress.fromParts([
-      "sourcecred",
-      "core",
-      "ACCUMULATOR_RADIATION",
-    ]),
-    seedIsSrc: false,
-    toParts: (x) => NodeAddress.toParts(accumulatorGadget.toRaw(x)),
-    fromParts: (x) => accumulatorGadget.fromRaw(NodeAddress.fromParts(x)),
-  }
-);
-
-export const epochRadiationGadget: EdgeGadget<ParticipantEpochAddress> = makeSeedGadget(
-  {
-    edgePrefix: EdgeAddress.fromParts([
-      "sourcecred",
-      "core",
-      "PARTICIPANT_EPOCH",
-    ]),
-    seedIsSrc: false,
-    toParts: (x) => NodeAddress.toParts(epochGadget.toRaw(x)),
-    fromParts: (x) => epochGadget.fromRaw(NodeAddress.fromParts(x)),
-  }
-);
+export const radiationGadget: EdgeGadget<NodeAddressT> = makeSeedGadget({
+  edgePrefix: EdgeAddress.fromParts(["sourcecred", "core", "RADIATION"]),
+  seedIsSrc: false,
+  toParts: (x) => NodeAddress.toParts(x),
+  fromParts: (x) => NodeAddress.fromParts(x),
+});
 
 export const seedMintGadget: EdgeGadget<NodeAddressT> = makeSeedGadget({
   edgePrefix: EdgeAddress.fromParts(["sourcecred", "core", "SEED_MINT"]),

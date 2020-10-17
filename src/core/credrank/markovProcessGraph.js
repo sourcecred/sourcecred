@@ -87,9 +87,7 @@ import {
 } from "./nodeGadgets";
 
 import {
-  accumulatorRadiationGadget,
-  epochRadiationGadget,
-  contributionRadiationGadget,
+  radiationGadget,
   seedMintGadget,
   payoutGadget,
   forwardWebbingGadget,
@@ -428,29 +426,7 @@ export class MarkovProcessGraph {
       const transitionProbability =
         1 - NullUtil.orElse(_nodeOutMasses.get(node.address), 0);
       if (node.address === seedGadget.prefix) continue;
-      if (NodeAddress.hasPrefix(node.address, epochGadget.prefix)) {
-        const target = epochGadget.fromRaw(node.address);
-        addEdge(epochRadiationGadget.markovEdge(target, transitionProbability));
-      } else if (
-        NodeAddress.hasPrefix(node.address, accumulatorGadget.prefix)
-      ) {
-        const target = accumulatorGadget.fromRaw(node.address);
-        addEdge(
-          accumulatorRadiationGadget.markovEdge(target, transitionProbability)
-        );
-      } else if (NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX)) {
-        throw new Error(
-          "invariant violation: unknown core node: " +
-            NodeAddress.toString(node.address)
-        );
-      } else {
-        addEdge(
-          contributionRadiationGadget.markovEdge(
-            node.address,
-            transitionProbability
-          )
-        );
-      }
+      addEdge(radiationGadget.markovEdge(node.address, transitionProbability));
     }
 
     return new MarkovProcessGraph(

@@ -16,9 +16,7 @@ import {intervalSequence} from "../interval";
 
 import {seedGadget, accumulatorGadget, epochGadget} from "./nodeGadgets";
 import {
-  contributionRadiationGadget,
-  accumulatorRadiationGadget,
-  epochRadiationGadget,
+  radiationGadget,
   seedMintGadget,
   payoutGadget,
   forwardWebbingGadget,
@@ -225,10 +223,7 @@ describe("core/credrank/markovProcessGraph", () => {
         const mpg = markovProcessGraph();
         const organicNodes = [c0, c1];
         for (const {address} of organicNodes) {
-          const edge = contributionRadiationGadget.markovEdge(
-            address,
-            parameters.alpha
-          );
+          const edge = radiationGadget.markovEdge(address, parameters.alpha);
           checkMarkovEdge(mpg, edge);
         }
       });
@@ -272,8 +267,8 @@ describe("core/credrank/markovProcessGraph", () => {
             .set(Infinity, 1 - parameters.gammaBackward - parameters.beta)
             .get(boundary)
         );
-        const radiationEdgeExpected = epochRadiationGadget.markovEdge(
-          structuredAddress,
+        const radiationEdgeExpected = radiationGadget.markovEdge(
+          epochGadget.toRaw(structuredAddress),
           radiationTransitionProbability
         );
         checkMarkovEdge(mpg, radiationEdgeExpected);
@@ -342,8 +337,8 @@ describe("core/credrank/markovProcessGraph", () => {
         expect(mpg.node(accumulatorGadget.toRaw(accumulatorAddress))).toEqual(
           accumulatorGadget.node(accumulatorAddress)
         );
-        const radiationEdge = accumulatorRadiationGadget.markovEdge(
-          accumulatorAddress,
+        const radiationEdge = radiationGadget.markovEdge(
+          accumulatorGadget.toRaw(accumulatorAddress),
           1
         );
         checkMarkovEdge(mpg, radiationEdge);
