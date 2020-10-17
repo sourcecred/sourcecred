@@ -154,6 +154,8 @@ export class MarkovProcessGraph {
   _edges: $ReadOnlyMap<MarkovEdgeAddressT, MarkovEdge>;
   _participants: $ReadOnlyArray<Participant>;
   _epochBoundaries: $ReadOnlyArray<number>;
+  _nodeIndex: $ReadOnlyMap<NodeAddressT, number>;
+  _edgeIndex: $ReadOnlyMap<MarkovEdgeAddressT, number>;
 
   constructor(
     nodes: Map<NodeAddressT, MarkovNode>,
@@ -165,6 +167,9 @@ export class MarkovProcessGraph {
     this._edges = edges;
     this._epochBoundaries = deepFreeze(epochBoundaries);
     this._participants = deepFreeze(participants);
+    // Precompute the index maps
+    this._nodeIndex = new Map([...nodes.keys()].map((a, i) => [a, i]));
+    this._edgeIndex = new Map([...edges.keys()].map((a, i) => [a, i]));
   }
 
   static new(args: Arguments): MarkovProcessGraph {
@@ -439,6 +444,14 @@ export class MarkovProcessGraph {
   }
 
   /**
+   * Return the node address's canonical index in the
+   * node order, if it is present.
+   */
+  nodeIndex(address: NodeAddressT): number | null {
+    return NullUtil.orElse(this._nodeIndex.get(address), null);
+  }
+
+  /**
    * Returns a canonical ordering of the nodes in the graph.
    *
    * No assumptions should be made about the node order, other than
@@ -466,6 +479,14 @@ export class MarkovProcessGraph {
         yield markovNode;
       }
     }
+  }
+
+  /**
+   * Return the edge address's canonical index in the
+   * edge order, if it is present.
+   */
+  edgeIndex(address: MarkovEdgeAddressT): number | null {
+    return NullUtil.orElse(this._edgeIndex.get(address), null);
   }
 
   /**
@@ -504,13 +525,6 @@ export class MarkovProcessGraph {
   toMarkovChain(): OrderedSparseMarkovChain {
     // We will need to map over the nodes, so we array-ify it upfront
     const nodes = Array.from(this.nodes());
-    const nodeIndex: Map<
-      NodeAddressT,
-      number /* index into nodeOrder */
-    > = new Map();
-    nodes.forEach((n, i) => {
-      nodeIndex.set(n.address, i);
-    });
 
     // Check that out-edges sum to about 1.
     const nodeOutMasses = new Map();
@@ -549,7 +563,7 @@ export class MarkovProcessGraph {
         // such that `neighbor[j] === k` for a given `k` when there are
         // parallel edges in the source graph. This should just work
         // down the stack.
-        const srcIndex = nodeIndex.get(e.src);
+        const srcIndex = this.nodeIndex(e.src);
         if (srcIndex == null) {
           throw new Error(e.src);
         }
@@ -563,19 +577,11 @@ export class MarkovProcessGraph {
   }
 
   toJSON(): MarkovProcessGraphJSON {
-    const nodeIndex: Map<
-      NodeAddressT,
-      number /* index into nodeOrder */
-    > = new Map();
-    let i = 0;
-    for (const addr of this.nodeOrder()) {
-      nodeIndex.set(addr, i++);
-    }
     const indexedEdges = Array.from(this.edges()).map((e) => ({
       address: e.address,
       reversed: e.reversed,
-      src: NullUtil.get(nodeIndex.get(e.src)),
-      dst: NullUtil.get(nodeIndex.get(e.dst)),
+      src: NullUtil.get(this.nodeIndex(e.src)),
+      dst: NullUtil.get(this.nodeIndex(e.dst)),
       transitionProbability: e.transitionProbability,
     }));
     return toCompat(COMPAT_INFO, {

@@ -8,7 +8,6 @@ import {
   type PagerankOptions,
 } from "../algorithm/markovChain";
 
-import {type NodeAddressT} from "../graph";
 import {distributionToNodeDistribution} from "../algorithm/graphToMarkovChain";
 
 import {uniformDistribution} from "../algorithm/distribution";
@@ -50,16 +49,12 @@ export async function credrank(
       NullUtil.get(pi.get(n.address))
     )
   );
-  const cred: Map<NodeAddressT, number> = new Map();
   let totalNodeWeight = 0;
   for (const {mint: weight} of mpg.nodes()) {
     totalNodeWeight += weight;
   }
-  osmc.nodeOrder.forEach((node, index) => {
-    cred.set(
-      node,
-      (distributionResult.pi[index] / matchingScore) * totalNodeWeight
-    );
-  });
-  return new CredGraph(mpg, cred);
+  const scores = osmc.nodeOrder.map(
+    (_, i) => (distributionResult.pi[i] / matchingScore) * totalNodeWeight
+  );
+  return new CredGraph(mpg, scores);
 }

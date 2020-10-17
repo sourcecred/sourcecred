@@ -400,6 +400,20 @@ describe("core/credrank/markovProcessGraph", () => {
       const edgesExpected = edgeOrder.map((x) => mpg.edge(x));
       expect(edgesActual).toEqual(edgesExpected);
     });
+    it("nodeIndex is consonant with nodeOrder", () => {
+      const mpg = markovProcessGraph();
+      const nodeOrder = [...mpg.nodeOrder()];
+      nodeOrder.forEach((n, i) => {
+        expect(mpg.nodeIndex(n)).toEqual(i);
+      });
+    });
+    it("edgeIndex is consonant with edgeOrder", () => {
+      const mpg = markovProcessGraph();
+      const edgeOrder = [...mpg.edgeOrder()];
+      edgeOrder.forEach((n, i) => {
+        expect(mpg.edgeIndex(n)).toEqual(i);
+      });
+    });
   });
 
   describe("to/froJSON", () => {
