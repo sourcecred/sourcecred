@@ -178,7 +178,12 @@ export class MarkovProcessGraph {
         ...virtualizedNodeAddresses(epochBoundaries, participants),
       ].map((a, i) => [a, i])
     );
-    this._edgeIndex = new Map([...edges.keys()].map((a, i) => [a, i]));
+    this._edgeIndex = new Map(
+      [
+        ...edges.keys(),
+        ...virtualizedMarkovEdgeAddresses(epochBoundaries, participants),
+      ].map((a, i) => [a, i])
+    );
   }
 
   static new(args: Arguments): MarkovProcessGraph {
@@ -235,12 +240,16 @@ export class MarkovProcessGraph {
       if (_edges.has(mae)) {
         throw new Error("Edge conflict: " + mae);
       }
+      _edges.set(mae, edge);
+      recordTransitionProbability(edge);
+    };
+    const recordTransitionProbability = (edge: MarkovEdge) => {
       const pr = edge.transitionProbability;
       if (pr < 0 || pr > 1) {
+        const mae = markovEdgeAddressFromMarkovEdge(edge);
         const name = MarkovEdgeAddress.toString(mae);
         throw new Error(`Invalid transition probability for ${name}: ${pr}`);
       }
-      _edges.set(mae, edge);
       _nodeOutMasses.set(edge.src, (_nodeOutMasses.get(edge.src) || 0) + pr);
     };
 
@@ -279,17 +288,17 @@ export class MarkovProcessGraph {
           owner: participant.id,
           epochStart: boundary,
         };
-        addEdge(payoutGadget.markovEdge(thisEpoch, beta));
+        recordTransitionProbability(payoutGadget.markovEdge(thisEpoch, beta));
         if (lastBoundary != null) {
           const webbingAddress = {
             thisStart: boundary,
             lastStart: lastBoundary,
             owner: participant.id,
           };
-          addEdge(
+          recordTransitionProbability(
             forwardWebbingGadget.markovEdge(webbingAddress, gammaForward)
           );
-          addEdge(
+          recordTransitionProbability(
             backwardWebbingGadget.markovEdge(webbingAddress, gammaBackward)
           );
         }
@@ -528,11 +537,18 @@ export class MarkovProcessGraph {
    */
   *edgeOrder(): Iterator<MarkovEdgeAddressT> {
     yield* this._edges.keys();
+    yield* virtualizedMarkovEdgeAddresses(
+      this._epochBoundaries,
+      this._participants
+    );
   }
 
   edge(address: MarkovEdgeAddressT): MarkovEdge | null {
     MarkovEdgeAddress.assertValid(address);
-    return this._edges.get(address) || null;
+    return (
+      this._edges.get(address) ||
+      virtualizedMarkovEdge(address, this._parameters)
+    );
   }
 
   /**
@@ -542,6 +558,12 @@ export class MarkovProcessGraph {
    */
   *edges(): Iterator<MarkovEdge> {
     yield* this._edges.values();
+    for (const addr of virtualizedMarkovEdgeAddresses(
+      this._epochBoundaries,
+      this._participants
+    )) {
+      yield NullUtil.get(virtualizedMarkovEdge(addr, this._parameters));
+    }
   }
 
   *inNeighbors(nodeAddress: NodeAddressT): Iterator<MarkovEdge> {
@@ -686,6 +708,49 @@ function virtualizedNode(address: NodeAddressT): MarkovNode | null {
   }
   if (NodeAddress.hasPrefix(address, seedGadget.prefix)) {
     return seedGadget.node();
+  }
+  return null;
+}
+
+function* virtualizedMarkovEdgeAddresses(
+  epochBoundaries: $ReadOnlyArray<TimestampMs>,
+  participants: $ReadOnlyArray<Participant>
+): Iterable<MarkovEdgeAddressT> {
+  let lastStart = null;
+  for (const epochStart of epochBoundaries) {
+    for (const {id} of participants) {
+      yield payoutGadget.toRaw({owner: id, epochStart});
+      if (lastStart != null) {
+        const webbingAddress = {thisStart: epochStart, lastStart, owner: id};
+        yield forwardWebbingGadget.toRaw(webbingAddress);
+        yield backwardWebbingGadget.toRaw(webbingAddress);
+      }
+    }
+    lastStart = epochStart;
+  }
+}
+
+function virtualizedMarkovEdge(
+  address: MarkovEdgeAddressT,
+  parameters: Parameters
+): MarkovEdge | null {
+  if (MarkovEdgeAddress.hasPrefix(address, payoutGadget.prefix)) {
+    return payoutGadget.markovEdge(
+      payoutGadget.fromRaw(address),
+      parameters.beta
+    );
+  }
+  if (MarkovEdgeAddress.hasPrefix(address, forwardWebbingGadget.prefix)) {
+    return forwardWebbingGadget.markovEdge(
+      forwardWebbingGadget.fromRaw(address),
+      parameters.gammaForward
+    );
+  }
+  if (MarkovEdgeAddress.hasPrefix(address, backwardWebbingGadget.prefix)) {
+    return backwardWebbingGadget.markovEdge(
+      backwardWebbingGadget.fromRaw(address),
+      parameters.gammaBackward
+    );
   }
   return null;
 }
