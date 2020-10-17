@@ -171,7 +171,7 @@ export class MarkovProcessGraph {
     this._nodeIndex = new Map(
       [
         ...nodes.keys(),
-        ...virtualizedNodeAddresses(epochBoundaries),
+        ...virtualizedNodeAddresses(epochBoundaries, participants),
       ].map((a, i) => [a, i])
     );
     this._edgeIndex = new Map([...edges.keys()].map((a, i) => [a, i]));
@@ -275,7 +275,6 @@ export class MarkovProcessGraph {
           owner: participant.id,
           epochStart: boundary,
         };
-        addNode(epochGadget.node(thisEpoch));
         addEdge(payoutGadget.markovEdge(thisEpoch, beta));
         if (lastBoundary != null) {
           const webbingAddress = {
@@ -403,7 +402,10 @@ export class MarkovProcessGraph {
 
     function* realAndVirtualNodes(): Iterator<MarkovNode> {
       yield* _nodes.values();
-      for (const nodeAddress of virtualizedNodeAddresses(timeBoundaries)) {
+      for (const nodeAddress of virtualizedNodeAddresses(
+        timeBoundaries,
+        participants
+      )) {
         yield NullUtil.get(virtualizedNode(nodeAddress));
       }
     }
@@ -465,7 +467,7 @@ export class MarkovProcessGraph {
    */
   *nodeOrder(): Iterator<NodeAddressT> {
     yield* this._nodes.keys();
-    yield* virtualizedNodeAddresses(this._epochBoundaries);
+    yield* virtualizedNodeAddresses(this._epochBoundaries, this._participants);
   }
 
   node(address: NodeAddressT): MarkovNode | null {
@@ -486,7 +488,10 @@ export class MarkovProcessGraph {
         yield markovNode;
       }
     }
-    for (const address of virtualizedNodeAddresses(this._epochBoundaries)) {
+    for (const address of virtualizedNodeAddresses(
+      this._epochBoundaries,
+      this._participants
+    )) {
       if (NodeAddress.hasPrefix(address, prefix)) {
         yield NullUtil.get(virtualizedNode(address));
       }
@@ -617,7 +622,7 @@ export class MarkovProcessGraph {
     const epochBoundaries = [-Infinity, ...finiteEpochBoundaries, Infinity];
     const nodeOrder = [
       ...nodes.map((n) => n.address),
-      ...virtualizedNodeAddresses(epochBoundaries),
+      ...virtualizedNodeAddresses(epochBoundaries, participants),
     ];
     const edges = indexedEdges.map((e) => ({
       address: e.address,
@@ -641,20 +646,29 @@ export class MarkovProcessGraph {
  * virtualized node. The order must be stable.
  */
 function* virtualizedNodeAddresses(
-  epochBoundaries: $ReadOnlyArray<TimestampMs>
+  epochBoundaries: $ReadOnlyArray<TimestampMs>,
+  participants: $ReadOnlyArray<Participant>
 ): Iterable<NodeAddressT> {
   yield seedGadget.prefix;
   for (const epochStart of epochBoundaries) {
     yield accumulatorGadget.toRaw({epochStart});
+    for (const {id} of participants) {
+      yield epochGadget.toRaw({owner: id, epochStart});
+    }
   }
 }
 
 function virtualizedNode(address: NodeAddressT): MarkovNode | null {
-  if (NodeAddress.hasPrefix(address, seedGadget.prefix)) {
-    return seedGadget.node();
+  // Perf tweak: Check the most common node types first, and rarest
+  // last.
+  if (NodeAddress.hasPrefix(address, epochGadget.prefix)) {
+    return epochGadget.node(epochGadget.fromRaw(address));
   }
   if (NodeAddress.hasPrefix(address, accumulatorGadget.prefix)) {
     return accumulatorGadget.node(accumulatorGadget.fromRaw(address));
+  }
+  if (NodeAddress.hasPrefix(address, seedGadget.prefix)) {
+    return seedGadget.node();
   }
   return null;
 }
