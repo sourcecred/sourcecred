@@ -2,7 +2,7 @@
 
 import * as Combo from "../../util/combo";
 import * as Model from "./models";
-import {type EmojiWeightMap, type RoleWeightMap} from "./createGraph";
+import {type EmojiWeightMap, type RoleWeightConfig} from "./createGraph";
 
 export type {BotToken as DiscordToken} from "./models";
 
@@ -30,7 +30,7 @@ export type DiscordConfig = {|
   // }
   // Note that roles have a snowflake identifier.
   // default is used to set weights for members who don't have a specified role
-  +roleWeights: RoleWeightMap,
+  +roleWeightConfig: RoleWeightConfig,
 |};
 
 export const parser: Combo.Parser<DiscordConfig> = (() => {
@@ -38,6 +38,9 @@ export const parser: Combo.Parser<DiscordConfig> = (() => {
   return C.object({
     guildId: C.string,
     reactionWeights: C.dict(C.number),
-    roleWeights: C.dict(C.number),
+    roleWeightConfig: C.object({
+      defaultWeight: C.number,
+      roleWeights: C.dict(C.number),
+    }),
   });
 })();

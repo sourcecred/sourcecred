@@ -66,7 +66,7 @@ export class DiscordPlugin implements Plugin {
     rd: ReferenceDetector
   ): Promise<WeightedGraph> {
     const _ = rd; // TODO(#1808): not yet used
-    const {guildId, reactionWeights, roleWeights} = await loadConfig(ctx);
+    const {guildId, reactionWeights, roleWeightConfig} = await loadConfig(ctx);
     const repo = await repository(ctx, guildId);
     const declarationWeights = weightsForDeclaration(declaration);
     return await createGraph(
@@ -74,7 +74,7 @@ export class DiscordPlugin implements Plugin {
       repo,
       declarationWeights,
       reactionWeights,
-      roleWeights
+      roleWeightConfig
     );
   }
 

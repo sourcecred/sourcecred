@@ -187,14 +187,19 @@ function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
 }
 
 export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
-export type RoleWeightMap = {[ref: string]: NodeWeight};
+export type RoleWeightMap = {[ref: Model.Snowflake]: NodeWeight};
+
+export type RoleWeightConfig = {|
+  +defaultWeight: number,
+  +roleWeights: RoleWeightMap,
+|};
 
 export function createGraph(
   guild: Model.Snowflake,
   repo: SqliteMirrorRepository,
   declarationWeights: Weights,
   emojiWeights: EmojiWeightMap,
-  roleWeights: RoleWeightMap
+  roleWeightConfig: RoleWeightConfig
 ): WeightedGraphT {
   const wg = {
     graph: new Graph(),
@@ -223,7 +228,8 @@ export function createGraph(
         }
 
         // get the weight of the highest weight role the reacting user has
-        let roleWeight = roleWeights.default || 1;
+        let roleWeight = roleWeightConfig.defaultWeight || 1;
+        const roleWeights = roleWeightConfig.roleWeights;
         for (const roleRef of reactingMember.roles) {
           if (roleWeights[roleRef] > roleWeight) {
             roleWeight = roleWeights[roleRef];
