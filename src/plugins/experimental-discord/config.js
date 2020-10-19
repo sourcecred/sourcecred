@@ -2,7 +2,7 @@
 
 import * as Combo from "../../util/combo";
 import * as Model from "./models";
-import {type EmojiWeightMap} from "./createGraph";
+import {type EmojiWeightMap, type RoleWeightConfig} from "./createGraph";
 
 export type {BotToken as DiscordToken} from "./models";
 
@@ -22,6 +22,15 @@ export type DiscordConfig = {|
   // You can get a custom emoji ID by right clicking the custom emoji and
   // copying it's URL, with the ID being the image file name.
   +reactionWeights: EmojiWeightMap,
+  // An object mapping a role to a weight, as in:
+  // {
+  //   "default": 0,
+  //   "core:626763367893303303": 2,
+  //   "contributor:456763457893303303": 1,
+  // }
+  // Note that roles have a snowflake identifier.
+  // default is used to set weights for members who don't have a specified role
+  +roleWeightConfig: RoleWeightConfig,
 |};
 
 export const parser: Combo.Parser<DiscordConfig> = (() => {
@@ -29,5 +38,9 @@ export const parser: Combo.Parser<DiscordConfig> = (() => {
   return C.object({
     guildId: C.string,
     reactionWeights: C.dict(C.number),
+    roleWeightConfig: C.object({
+      defaultWeight: C.number,
+      roleWeights: C.dict(C.number),
+    }),
   });
 })();

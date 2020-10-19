@@ -67,7 +67,7 @@ const customRoutes = (
       <AccountOverview currency={currency} />
     </Route>,
     <Route key="ledger" exact path="/ledger">
-      <LedgerViewer />
+      <LedgerViewer currency={currency} />
     </Route>,
   ];
   const backendRoutes = [
