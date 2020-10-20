@@ -219,7 +219,10 @@ export function createGraph(
       const reactions = repo.reactions(channel.id, message.id);
       for (const reaction of reactions) {
         const emojiRef = Model.emojiToRef(reaction.emoji);
-        const reactionWeight = emojiWeights[emojiRef];
+        let reactionWeight = emojiWeights[emojiRef];
+        if (reactionWeight === null || reactionWeight === undefined) {
+          reactionWeight = 1;
+        }
 
         const reactingMember = memberMap.get(reaction.authorId);
         if (!reactingMember) {
@@ -228,7 +231,7 @@ export function createGraph(
         }
 
         // get the weight of the highest weight role the reacting user has
-        let roleWeight = roleWeightConfig.defaultWeight || 1;
+        let roleWeight = roleWeightConfig.defaultWeight;
         const roleWeights = roleWeightConfig.roleWeights;
         for (const roleRef of reactingMember.roles) {
           if (roleWeights[roleRef] > roleWeight) {
@@ -237,9 +240,7 @@ export function createGraph(
         }
 
         const node = reactionNode(reaction, message.timestampMs, guild);
-        if (reactionWeight != null) {
-          wg.weights.nodeWeights.set(node.address, roleWeight * reactionWeight);
-        }
+        wg.weights.nodeWeights.set(node.address, roleWeight * reactionWeight);
         wg.graph.addNode(node);
         wg.graph.addNode(memberNode(reactingMember));
         wg.graph.addEdge(reactsToEdge(reaction, message));
