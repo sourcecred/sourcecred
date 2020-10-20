@@ -12,8 +12,7 @@ import {
   type PluginId,
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
-import {loadFileWithDefault} from "../../util/disk";
-import type {Compatible} from "../../util/compat";
+import {loadJson} from "../../util/disk";
 import {join as pathJoin} from "path";
 import {
   empty as emptyWeightedGraph,
@@ -22,18 +21,9 @@ import {
 import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
-export function parseRawCompatibleEntries(s: string): Compatible<string> {
-  const compatibleAddresses = JSON.parse(s);
-  return compatibleAddresses;
-}
 async function loadEthJson(ctx: PluginDirectoryContext) {
   const path = pathJoin(ctx.configDirectory(), "ethereumAddresses.json");
-  const rawEthEntries = await loadFileWithDefault(path, () => {
-    console.error("Error: Ethereum address registry not found");
-    return "";
-  });
-  const compatibleEthEntries = parseRawCompatibleEntries(rawEthEntries);
-  return ethJsonParser.parseOrThrow(compatibleEthEntries);
+  return loadJson(path, ethJsonParser);
 }
 
 export class EthereumPlugin implements Plugin {
@@ -43,7 +33,7 @@ export class EthereumPlugin implements Plugin {
     return declaration;
   }
 
-  // We dont need to load any data since all the initiative files are on disk
+  // We dont need to load any data since all the addresses are on disk
   async load(): Promise<void> {}
 
   // TODO: Implement weighted graph generation logic

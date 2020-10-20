@@ -2,7 +2,6 @@
 
 import {type IdentityProposal} from "../../core/ledger/identityProposal";
 import {coerce, nameFromString} from "../../core/identity/name";
-import {JsonLog} from "../../util/jsonLog";
 import {
   truncateEthAddress as truncate,
   type EthAddress,
@@ -24,7 +23,7 @@ export function _createIdentity(address: EthAddress): IdentityProposal {
 }
 
 export function createIdentities(
-  ethAddresses: JsonLog<EthAddress>
+  ethAddresses: $ReadOnlyArray<EthAddress>
 ): $ReadOnlyArray<IdentityProposal> {
-  return Array.from(ethAddresses.values()).map(_createIdentity);
+  return ethAddresses.map(_createIdentity);
 }

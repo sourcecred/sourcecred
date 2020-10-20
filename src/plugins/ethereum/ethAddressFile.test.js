@@ -9,7 +9,6 @@ import {
   type EthAddress,
 } from "./ethAddressFile";
 import {NodeAddress} from "../../core/graph";
-import {JsonLog} from "../../util/jsonLog";
 import {toCompat} from "../../util/compat";
 
 describe("plugins/ethereum/ethAddressFile", () => {
@@ -70,11 +69,7 @@ describe("plugins/ethereum/ethAddressFile", () => {
     const address3 = "0x8401Eb5ff34cc943f096A32EF3d5113FEbE8D4Eb";
     const addressArray = [address1, address2, address3];
     it("can create an exported JsonLog instance", () => {
-      const ethLog = new JsonLog();
-      const compatibleEthLog = toCompat(
-        COMPAT_INFO,
-        ethLog.extend(addressArray).toString()
-      );
+      const compatibleEthLog = toCompat(COMPAT_INFO, addressArray);
       const result = parser.parseOrThrow(compatibleEthLog).values();
       expect(Array.from(result)).toEqual(addressArray);
     });

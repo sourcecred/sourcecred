@@ -4,7 +4,6 @@ import {isAddress, toChecksumAddress} from "web3-utils";
 
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
 import * as C from "../../util/combo";
-import {JsonLog} from "../../util/jsonLog";
 import {compatibleParser} from "../../util/compat";
 import {nodePrefix} from "./declaration";
 
@@ -40,10 +39,8 @@ export const COMPAT_INFO = {
   version: "0.0.1",
 };
 
-const addressEntriesParser = C.fmap(C.string, (s: string) =>
-  JsonLog.fromString(s, ethAddressParser)
-);
+const addressEntriesParser = C.array(ethAddressParser);
 
 export const parser: C.Parser<
-  JsonLog<EthAddress>
+  Array<EthAddress>
 > = compatibleParser(COMPAT_INFO.type, {"0.0.1": addressEntriesParser});
