@@ -68,6 +68,7 @@ import * as MapUtil from "../../util/map";
 import type {TimestampMs} from "../../util/timestamp";
 import {type SparseMarkovChain} from "../algorithm/markovChain";
 import {type IntervalSequence} from "../interval";
+import type {DependencyMintPolicy} from "../dependenciesMintPolicy";
 
 import {type MarkovNode} from "./markovNode";
 
@@ -92,6 +93,8 @@ import {
   payoutGadget,
   forwardWebbingGadget,
   backwardWebbingGadget,
+  dependencyEdgeGadget,
+  type DependencyAddress,
 } from "./edgeGadgets";
 
 export type Participant = {|
@@ -110,6 +113,7 @@ export type Arguments = {|
   +participants: $ReadOnlyArray<Participant>,
   +intervals: IntervalSequence,
   +parameters: Parameters,
+  +dependencies: $ReadOnlyArray<DependencyMintPolicy>,
 |};
 
 export type Parameters = {|
@@ -147,6 +151,7 @@ export type MarkovProcessGraphJSON = Compatible<{|
   +finiteEpochBoundaries: $ReadOnlyArray<number>,
   +parameters: Parameters,
   +radiationTransitionProbabilities: $ReadOnlyArray<number>,
+  +dependencyTransitionProbabilities: {[MarkovEdgeAddressT]: number},
   // Array of [nodeIndex, transitionProbability] tuples representing all of the
   // connections from the seed node to nodes minting Cred.
   +indexedMints: $ReadOnlyArray<[number, number]>,
@@ -160,6 +165,7 @@ export class MarkovProcessGraph {
   _parameters: Parameters;
   _mintTransitionProbabilties: $ReadOnlyMap<NodeAddressT, number>;
   _radiationTransitionProbabilties: $ReadOnlyArray<number>;
+  _dependencyTransitionProbabilities: $ReadOnlyMap<MarkovEdgeAddressT, number>;
   _nodeIndex: $ReadOnlyMap<NodeAddressT, number>;
   _edgeIndex: $ReadOnlyMap<MarkovEdgeAddressT, number>;
 
@@ -173,7 +179,8 @@ export class MarkovProcessGraph {
     // transition probability from the seed node). Must sum to about 1.
     mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
     // Transition probabilities for radiation edges, in node order
-    radiationTransitionProbabilities: $ReadOnlyArray<number>
+    radiationTransitionProbabilities: $ReadOnlyArray<number>,
+    dependencyTransitionProbabilities: $ReadOnlyMap<MarkovEdgeAddressT, number>
   ) {
     this._nodes = nodes;
     this._edges = edges;
@@ -184,6 +191,7 @@ export class MarkovProcessGraph {
       radiationTransitionProbabilities
     );
     this._mintTransitionProbabilties = mintTransitionProbabilities;
+    this._dependencyTransitionProbabilities = dependencyTransitionProbabilities;
     // Precompute the index maps
     this._nodeIndex = new Map(
       [..._nodeOrder(nodes, epochBoundaries, participants)].map((a, i) => [
@@ -198,6 +206,7 @@ export class MarkovProcessGraph {
           epochBoundaries,
           participants,
           mintTransitionProbabilities,
+          dependencyTransitionProbabilities,
           _nodeOrder(nodes, epochBoundaries, participants)
         ),
       ].map((a, i) => [a, i])
@@ -205,7 +214,13 @@ export class MarkovProcessGraph {
   }
 
   static new(args: Arguments): MarkovProcessGraph {
-    const {weightedGraph, participants, parameters, intervals} = args;
+    const {
+      weightedGraph,
+      participants,
+      parameters,
+      intervals,
+      dependencies,
+    } = args;
     const {alpha, beta, gammaForward, gammaBackward} = parameters;
     const _nodes = new Map();
     const _edges = new Map();
@@ -343,6 +358,29 @@ export class MarkovProcessGraph {
       }
     }
 
+    const dependencyTransitionProbabilities = new Map();
+    {
+      for (const {address, weight, totalWeight} of _dependencyEpochs(
+        dependencies,
+        timeBoundaries
+      )) {
+        const transitionProbability = _dependencyTransitionProbability(
+          weight,
+          totalWeight,
+          parameters
+        );
+        dependencyTransitionProbabilities.set(
+          dependencyEdgeGadget.toRaw(address),
+          transitionProbability
+        );
+        const edge = dependencyEdgeGadget.markovEdge(
+          address,
+          transitionProbability
+        );
+        recordTransitionProbability(edge);
+      }
+    }
+
     /**
      * Find an epoch node, or just the original node if it's not a
      * scoring address.
@@ -455,7 +493,8 @@ export class MarkovProcessGraph {
       timeBoundaries,
       parameters,
       mintTransitionProbabilities,
-      radiationTransitionProbabilities
+      radiationTransitionProbabilities,
+      dependencyTransitionProbabilities
     );
   }
 
@@ -537,6 +576,7 @@ export class MarkovProcessGraph {
       this._epochBoundaries,
       this._participants,
       this._mintTransitionProbabilties,
+      this._dependencyTransitionProbabilities,
       this.nodeOrder()
     );
   }
@@ -550,7 +590,8 @@ export class MarkovProcessGraph {
         this._parameters,
         this._nodeIndex,
         this._mintTransitionProbabilties,
-        this._radiationTransitionProbabilties
+        this._radiationTransitionProbabilties,
+        this._dependencyTransitionProbabilities
       )
     );
   }
@@ -566,6 +607,7 @@ export class MarkovProcessGraph {
       this._epochBoundaries,
       this._participants,
       this._mintTransitionProbabilties,
+      this._dependencyTransitionProbabilities,
       this.nodeOrder()
     )) {
       yield NullUtil.get(
@@ -574,7 +616,8 @@ export class MarkovProcessGraph {
           this._parameters,
           this._nodeIndex,
           this._mintTransitionProbabilties,
-          this._radiationTransitionProbabilties
+          this._radiationTransitionProbabilties,
+          this._dependencyTransitionProbabilities
         )
       );
     }
@@ -665,6 +708,9 @@ export class MarkovProcessGraph {
       parameters: this._parameters,
       radiationTransitionProbabilities: this._radiationTransitionProbabilties,
       indexedMints,
+      dependencyTransitionProbabilities: MapUtil.toObject(
+        this._dependencyTransitionProbabilities
+      ),
     });
   }
 
@@ -677,6 +723,7 @@ export class MarkovProcessGraph {
       parameters,
       radiationTransitionProbabilities,
       indexedMints,
+      dependencyTransitionProbabilities,
     } = fromCompat(COMPAT_INFO, j);
     const epochBoundaries = [-Infinity, ...finiteEpochBoundaries, Infinity];
     const nodeOrder = [
@@ -701,7 +748,8 @@ export class MarkovProcessGraph {
       epochBoundaries,
       parameters,
       mintTransitionProbabilities,
-      radiationTransitionProbabilities
+      radiationTransitionProbabilities,
+      MapUtil.fromObject(dependencyTransitionProbabilities)
     );
   }
 }
@@ -755,6 +803,7 @@ function* virtualizedMarkovEdgeAddresses(
   epochBoundaries: $ReadOnlyArray<TimestampMs>,
   participants: $ReadOnlyArray<Participant>,
   mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
+  dependencyTransitionProbabilities: $ReadOnlyMap<MarkovEdgeAddressT, number>,
   nodeOrder: Iterable<NodeAddressT>
 ): Iterable<MarkovEdgeAddressT> {
   let lastStart = null;
@@ -772,6 +821,9 @@ function* virtualizedMarkovEdgeAddresses(
   for (const addr of mintTransitionProbabilities.keys()) {
     yield seedMintGadget.toRaw(addr);
   }
+  for (const addr of dependencyTransitionProbabilities.keys()) {
+    yield addr;
+  }
   for (const addr of nodeOrder) {
     if (addr === seedGadget.prefix) {
       continue;
@@ -785,7 +837,8 @@ function virtualizedMarkovEdge(
   parameters: Parameters,
   nodeIndex: $ReadOnlyMap<NodeAddressT, number>,
   mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
-  radiationTransitionProbabilities: $ReadOnlyArray<number>
+  radiationTransitionProbabilities: $ReadOnlyArray<number>,
+  dependencyTransitionProbabilities: $ReadOnlyMap<MarkovEdgeAddressT, number>
 ): MarkovEdge | null {
   if (MarkovEdgeAddress.hasPrefix(address, radiationGadget.prefix)) {
     const nodeAddress = radiationGadget.fromRaw(address);
@@ -818,5 +871,77 @@ function virtualizedMarkovEdge(
       parameters.gammaBackward
     );
   }
+  if (MarkovEdgeAddress.hasPrefix(address, dependencyEdgeGadget.prefix)) {
+    const pr = dependencyTransitionProbabilities.get(address);
+    if (pr == null) {
+      // No dependency edge exists for this dependency within this epoch (e.g. the weight was 0)
+      return null;
+    }
+    return dependencyEdgeGadget.markovEdge(
+      dependencyEdgeGadget.fromRaw(address),
+      pr
+    );
+  }
   return null;
+}
+
+export function _dependencyTransitionProbability(
+  _unused_weight: number,
+  _unused_totalWeight: number,
+  _unused_parameters: Parameters
+): number {
+  return 0.1; // TODO: Figure out a viable function here
+}
+
+/**
+ * Represents the info needed to create a dependency edge within a given epoch.
+ *
+ * Provides the DependencyAddress (see edgeGadgets.js), the weight for this dep, and
+ * the total weight across all dependencies in the epoch.
+ */
+export type DependencyEpoch = {|
+  +address: DependencyAddress,
+  +weight: number,
+  +totalWeight: number,
+|};
+export function _dependencyEpochs(
+  policies: $ReadOnlyArray<DependencyMintPolicy>,
+  epochBoundaries: $ReadOnlyArray<TimestampMs>
+): $ReadOnlyArray<DependencyEpoch> {
+  if (new Set(policies.map((p) => p.id)).size !== policies.length) {
+    throw new Error("some recipients have multiple dependency policies");
+  }
+  const epochToTotalWeight = new Map();
+  const entries = [];
+  for (const {periods, id} of policies) {
+    let currentWeight = 0;
+    let nextPeriodIndex = 0;
+    for (const epochStart of epochBoundaries) {
+      while (
+        periods[nextPeriodIndex] &&
+        periods[nextPeriodIndex].startTimeMs <= epochStart
+      ) {
+        currentWeight = periods[nextPeriodIndex].weight;
+        if (
+          periods[nextPeriodIndex + 1] &&
+          periods[nextPeriodIndex + 1].startTimeMs <
+            periods[nextPeriodIndex].startTimeMs
+        ) {
+          throw new Error("policy periods out of order");
+        }
+        nextPeriodIndex++;
+      }
+      if (currentWeight > 0) {
+        const existingTotal = epochToTotalWeight.get(epochStart) || 0;
+        epochToTotalWeight.set(epochStart, existingTotal + currentWeight);
+        const address = {recipient: id, epochStart};
+        entries.push({address, weight: currentWeight});
+      }
+    }
+  }
+  return entries.map(({address, weight}) => ({
+    address,
+    weight,
+    totalWeight: NullUtil.get(epochToTotalWeight.get(address.epochStart)),
+  }));
 }

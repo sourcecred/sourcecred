@@ -188,7 +188,6 @@ describe("api/dependenciesConfig", () => {
     it("creates a policy with the right id", () => {
       const ledger = new Ledger();
       const id = ledger.createIdentity("USER", "foo");
-      const address = ledger.account(id).identity.address;
       const config = ensureIdentityExists(
         {name: n("foo"), periods: []},
         ledger

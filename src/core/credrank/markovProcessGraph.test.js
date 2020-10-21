@@ -2,8 +2,12 @@
 
 import deepFreeze from "deep-freeze";
 import * as NullUtil from "../../util/null";
-import {Graph} from "../graph";
-import {MarkovProcessGraph} from "./markovProcessGraph";
+import {Graph, NodeAddress} from "../graph";
+import {
+  MarkovProcessGraph,
+  _dependencyTransitionProbability,
+  _dependencyEpochs,
+} from "./markovProcessGraph";
 import {
   markovEdgeAddress,
   MarkovEdgeAddress,
@@ -21,6 +25,7 @@ import {
   payoutGadget,
   forwardWebbingGadget,
   backwardWebbingGadget,
+  dependencyEdgeGadget,
 } from "./edgeGadgets";
 
 describe("core/credrank/markovProcessGraph", () => {
@@ -54,6 +59,12 @@ describe("core/credrank/markovProcessGraph", () => {
   const interval0 = {startTimeMs: 0, endTimeMs: 2};
   const interval1 = {startTimeMs: 2, endTimeMs: 4};
   const intervals = deepFreeze(intervalSequence([interval0, interval1]));
+
+  const dependencyPolicy = deepFreeze({
+    address: participant2.address,
+    id: participant2.id,
+    periods: [{weight: 0.1, startTimeMs: 2}],
+  });
 
   const c0 = {description: "c0", address: na("c0"), timestampMs: 0};
   const c1 = {description: "c1", address: na("c1"), timestampMs: 2};
@@ -118,6 +129,7 @@ describe("core/credrank/markovProcessGraph", () => {
     parameters,
     intervals,
     participants: [participant1, participant2],
+    dependencies: [dependencyPolicy],
   });
   const markovProcessGraph = () => MarkovProcessGraph.new(args());
 
@@ -337,9 +349,15 @@ describe("core/credrank/markovProcessGraph", () => {
         expect(mpg.node(accumulatorGadget.toRaw(accumulatorAddress))).toEqual(
           accumulatorGadget.node(accumulatorAddress)
         );
+        expect(dependencyPolicy.periods).toHaveLength(1);
+        const {weight, startTimeMs} = dependencyPolicy.periods[0];
+        const transitionProbability =
+          boundary < startTimeMs
+            ? 1
+            : 1 - _dependencyTransitionProbability(weight, weight, parameters);
         const radiationEdge = radiationGadget.markovEdge(
           accumulatorGadget.toRaw(accumulatorAddress),
-          1
+          transitionProbability
         );
         checkMarkovEdge(mpg, radiationEdge);
       }
@@ -387,6 +405,31 @@ describe("core/credrank/markovProcessGraph", () => {
           parameters.gammaBackward,
       };
       checkMarkovEdge(mpg, e1B);
+    });
+
+    it("adds dependency minting edges", () => {
+      const mpg = markovProcessGraph();
+      expect(dependencyPolicy.periods).toHaveLength(1);
+      const {startTimeMs, weight} = dependencyPolicy.periods[0];
+      for (const epochStart of mpg.epochBoundaries()) {
+        const mintAddress = {recipient: dependencyPolicy.id, epochStart};
+        if (epochStart < startTimeMs) {
+          // there should not be any mint edge yet
+          const rawAddress = dependencyEdgeGadget.toRaw(mintAddress);
+          expect(mpg.edge(rawAddress)).toBe(null);
+          continue;
+        }
+        const transitionProbability = _dependencyTransitionProbability(
+          weight,
+          weight,
+          parameters
+        );
+        const edge = dependencyEdgeGadget.markovEdge(
+          mintAddress,
+          transitionProbability
+        );
+        checkMarkovEdge(mpg, edge);
+      }
     });
   });
 
@@ -456,6 +499,151 @@ describe("core/credrank/markovProcessGraph", () => {
       expect([...mpg1.edgeOrder()]).toEqual([...mpg2.edgeOrder()]);
       expect([...mpg1.nodes()]).toEqual([...mpg2.nodes()]);
       expect([...mpg1.edges()]).toEqual([...mpg2.edges()]);
+    });
+  });
+
+  describe("dependencies helper functions", () => {
+    describe("dependencyEpochs", () => {
+      it("returns no entries in a case with no policies or epochs", () => {
+        expect(_dependencyEpochs([], [])).toEqual([]);
+      });
+      it("returns no entries in a case with no policies", () => {
+        expect(_dependencyEpochs([], [-Infinity, 0, Infinity])).toEqual([]);
+      });
+      it("returns no entries in a case with no epochs", () => {
+        expect(_dependencyEpochs([dependencyPolicy], [])).toEqual([]);
+      });
+      it("returns appropriate epochs with a single policy", () => {
+        const p = {
+          address: NodeAddress.empty,
+          id: id1,
+          periods: [{startTimeMs: 2, weight: 0.1}],
+        };
+        const actual = _dependencyEpochs([p], [-Infinity, 0, 2, Infinity]);
+        expect(actual).toEqual([
+          {
+            address: {epochStart: 2, recipient: id1},
+            weight: 0.1,
+            totalWeight: 0.1,
+          },
+          {
+            address: {epochStart: Infinity, recipient: id1},
+            weight: 0.1,
+            totalWeight: 0.1,
+          },
+        ]);
+      });
+      it("returns appropriate epochs with a multi-period policy", () => {
+        const p = {
+          address: NodeAddress.empty,
+          id: id1,
+          periods: [
+            {startTimeMs: 0, weight: 0.1},
+            {startTimeMs: 1, weight: 9},
+            {startTimeMs: 2, weight: 0.2},
+            {startTimeMs: 4, weight: 0},
+          ],
+        };
+        expect(_dependencyEpochs([p], [-Infinity, 0, 2, Infinity])).toEqual([
+          {
+            address: {epochStart: 0, recipient: id1},
+            weight: 0.1,
+            totalWeight: 0.1,
+          },
+          {
+            address: {epochStart: 2, recipient: id1},
+            weight: 0.2,
+            totalWeight: 0.2,
+          },
+        ]);
+      });
+      it("handles periods that don't align with the boundaries", () => {
+        const p = {
+          address: NodeAddress.empty,
+          id: id1,
+          periods: [{startTimeMs: 1, weight: 2}],
+        };
+        expect(_dependencyEpochs([p], [-Infinity, 0, 2, Infinity])).toEqual([
+          {
+            address: {epochStart: 2, recipient: id1},
+            weight: 2,
+            totalWeight: 2,
+          },
+          {
+            address: {epochStart: Infinity, recipient: id1},
+            weight: 2,
+            totalWeight: 2,
+          },
+        ]);
+      });
+      it("computes totalWeight appropriately", () => {
+        const p1 = {
+          address: NodeAddress.empty,
+          id: id1,
+          periods: [
+            {startTimeMs: 0, weight: 1},
+            {startTimeMs: 100, weight: 0},
+          ],
+        };
+        const p2 = {
+          address: NodeAddress.empty,
+          id: id2,
+          periods: [{startTimeMs: 2, weight: 2}],
+        };
+        expect(
+          _dependencyEpochs([p1, p2], [-Infinity, 0, 2, Infinity])
+        ).toEqual([
+          {
+            address: {epochStart: 0, recipient: id1},
+            weight: 1,
+            totalWeight: 1,
+          },
+          {
+            address: {epochStart: 2, recipient: id1},
+            weight: 1,
+            totalWeight: 3,
+          },
+          {
+            address: {epochStart: 2, recipient: id2},
+            weight: 2,
+            totalWeight: 3,
+          },
+          {
+            address: {epochStart: Infinity, recipient: id2},
+            weight: 2,
+            totalWeight: 2,
+          },
+        ]);
+      });
+      it("throws an error if multiple policies refer to the same identity", () => {
+        const p1 = {
+          address: NodeAddress.empty,
+          id: id1,
+          periods: [],
+        };
+        const p2 = {
+          address: NodeAddress.empty,
+          id: id1,
+          periods: [],
+        };
+        expect(() =>
+          _dependencyEpochs([p1, p2], [-Infinity, 0, 2, Infinity])
+        ).toThrow("some recipients have multiple dependency policies");
+      });
+      it("throws an error if policies have periods out-of-order", () => {
+        const p = {
+          address: NodeAddress.empty,
+          id: id1,
+          periods: [
+            {startTimeMs: 0, weight: 0},
+            {startTimeMs: -1, weight: 0},
+            {startTimeMs: 2, weight: 0},
+          ],
+        };
+        expect(() =>
+          _dependencyEpochs([p], [-Infinity, 0, 2, Infinity])
+        ).toThrow("policy periods out of order");
+      });
     });
   });
 });
