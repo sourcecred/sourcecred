@@ -28,7 +28,7 @@ export const ethAddressParser: C.Parser<EthAddress> = C.fmap(
 );
 
 export const COMPAT_INFO = {
-  type: "sourcecred/ethAddressFile",
+  type: "sourcecred/ethAddress",
   version: "0.0.1",
 };
 
