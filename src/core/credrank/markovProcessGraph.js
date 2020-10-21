@@ -147,6 +147,9 @@ export type MarkovProcessGraphJSON = Compatible<{|
   +finiteEpochBoundaries: $ReadOnlyArray<number>,
   +parameters: Parameters,
   +radiationTransitionProbabilities: $ReadOnlyArray<number>,
+  // Array of [nodeIndex, transitionProbability] tuples representing all of the
+  // connections from the seed node to nodes minting Cred.
+  +indexedMints: $ReadOnlyArray<[number, number]>,
 |}>;
 
 export class MarkovProcessGraph {
@@ -155,6 +158,7 @@ export class MarkovProcessGraph {
   _participants: $ReadOnlyArray<Participant>;
   _epochBoundaries: $ReadOnlyArray<number>;
   _parameters: Parameters;
+  _mintTransitionProbabilties: $ReadOnlyMap<NodeAddressT, number>;
   _radiationTransitionProbabilties: $ReadOnlyArray<number>;
   _nodeIndex: $ReadOnlyMap<NodeAddressT, number>;
   _edgeIndex: $ReadOnlyMap<MarkovEdgeAddressT, number>;
@@ -165,6 +169,9 @@ export class MarkovProcessGraph {
     participants: $ReadOnlyArray<Participant>,
     epochBoundaries: $ReadOnlyArray<number>,
     parameters: Parameters,
+    // Map from each node address to the proportion of total minting (i.e. its
+    // transition probability from the seed node). Must sum to about 1.
+    mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
     // Transition probabilities for radiation edges, in node order
     radiationTransitionProbabilities: $ReadOnlyArray<number>
   ) {
@@ -176,6 +183,7 @@ export class MarkovProcessGraph {
     this._radiationTransitionProbabilties = deepFreeze(
       radiationTransitionProbabilities
     );
+    this._mintTransitionProbabilties = mintTransitionProbabilities;
     // Precompute the index maps
     this._nodeIndex = new Map(
       [..._nodeOrder(nodes, epochBoundaries, participants)].map((a, i) => [
@@ -189,6 +197,7 @@ export class MarkovProcessGraph {
         ...virtualizedMarkovEdgeAddresses(
           epochBoundaries,
           participants,
+          mintTransitionProbabilities,
           _nodeOrder(nodes, epochBoundaries, participants)
         ),
       ].map((a, i) => [a, i])
@@ -315,6 +324,7 @@ export class MarkovProcessGraph {
       lastBoundary = boundary;
     }
 
+    const mintTransitionProbabilities = new Map();
     // Add minting edges, from the seed to positive-weight graph nodes
     {
       let totalNodeWeight = 0.0;
@@ -329,7 +339,7 @@ export class MarkovProcessGraph {
         throw new Error("No outflow from seed; add cred-minting nodes");
       }
       for (const [address, weight] of positiveNodeWeights) {
-        addEdge(seedMintGadget.markovEdge(address, weight / totalNodeWeight));
+        mintTransitionProbabilities.set(address, weight / totalNodeWeight);
       }
     }
 
@@ -444,6 +454,7 @@ export class MarkovProcessGraph {
       participants,
       timeBoundaries,
       parameters,
+      mintTransitionProbabilities,
       radiationTransitionProbabilities
     );
   }
@@ -525,6 +536,7 @@ export class MarkovProcessGraph {
     yield* virtualizedMarkovEdgeAddresses(
       this._epochBoundaries,
       this._participants,
+      this._mintTransitionProbabilties,
       this.nodeOrder()
     );
   }
@@ -537,6 +549,7 @@ export class MarkovProcessGraph {
         address,
         this._parameters,
         this._nodeIndex,
+        this._mintTransitionProbabilties,
         this._radiationTransitionProbabilties
       )
     );
@@ -552,6 +565,7 @@ export class MarkovProcessGraph {
     for (const addr of virtualizedMarkovEdgeAddresses(
       this._epochBoundaries,
       this._participants,
+      this._mintTransitionProbabilties,
       this.nodeOrder()
     )) {
       yield NullUtil.get(
@@ -559,6 +573,7 @@ export class MarkovProcessGraph {
           addr,
           this._parameters,
           this._nodeIndex,
+          this._mintTransitionProbabilties,
           this._radiationTransitionProbabilties
         )
       );
@@ -636,6 +651,9 @@ export class MarkovProcessGraph {
       dst: NullUtil.get(this.nodeIndex(e.dst)),
       transitionProbability: e.transitionProbability,
     }));
+    const indexedMints = Array.from(
+      this._mintTransitionProbabilties
+    ).map(([addr, pr]) => [NullUtil.get(this.nodeIndex(addr)), pr]);
     return toCompat(COMPAT_INFO, {
       nodes: [...this._nodes.values()],
       indexedEdges,
@@ -646,6 +664,7 @@ export class MarkovProcessGraph {
       ),
       parameters: this._parameters,
       radiationTransitionProbabilities: this._radiationTransitionProbabilties,
+      indexedMints,
     });
   }
 
@@ -657,6 +676,7 @@ export class MarkovProcessGraph {
       finiteEpochBoundaries,
       parameters,
       radiationTransitionProbabilities,
+      indexedMints,
     } = fromCompat(COMPAT_INFO, j);
     const epochBoundaries = [-Infinity, ...finiteEpochBoundaries, Infinity];
     const nodeOrder = [
@@ -670,6 +690,9 @@ export class MarkovProcessGraph {
       dst: nodeOrder[e.dst],
       transitionProbability: e.transitionProbability,
     }));
+    const mintTransitionProbabilities = new Map(
+      indexedMints.map(([i, pr]) => [nodeOrder[i], pr])
+    );
 
     return new MarkovProcessGraph(
       new Map(nodes.map((n) => [n.address, n])),
@@ -677,6 +700,7 @@ export class MarkovProcessGraph {
       participants,
       epochBoundaries,
       parameters,
+      mintTransitionProbabilities,
       radiationTransitionProbabilities
     );
   }
@@ -730,6 +754,7 @@ function virtualizedNode(address: NodeAddressT): MarkovNode | null {
 function* virtualizedMarkovEdgeAddresses(
   epochBoundaries: $ReadOnlyArray<TimestampMs>,
   participants: $ReadOnlyArray<Participant>,
+  mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
   nodeOrder: Iterable<NodeAddressT>
 ): Iterable<MarkovEdgeAddressT> {
   let lastStart = null;
@@ -744,6 +769,9 @@ function* virtualizedMarkovEdgeAddresses(
     }
     lastStart = epochStart;
   }
+  for (const addr of mintTransitionProbabilities.keys()) {
+    yield seedMintGadget.toRaw(addr);
+  }
   for (const addr of nodeOrder) {
     if (addr === seedGadget.prefix) {
       continue;
@@ -756,6 +784,7 @@ function virtualizedMarkovEdge(
   address: MarkovEdgeAddressT,
   parameters: Parameters,
   nodeIndex: $ReadOnlyMap<NodeAddressT, number>,
+  mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
   radiationTransitionProbabilities: $ReadOnlyArray<number>
 ): MarkovEdge | null {
   if (MarkovEdgeAddress.hasPrefix(address, radiationGadget.prefix)) {
@@ -763,6 +792,13 @@ function virtualizedMarkovEdge(
     const index = NullUtil.get(nodeIndex.get(nodeAddress));
     const probability = radiationTransitionProbabilities[index];
     return radiationGadget.markovEdge(nodeAddress, probability);
+  }
+  if (MarkovEdgeAddress.hasPrefix(address, seedMintGadget.prefix)) {
+    const nodeAddress = seedMintGadget.fromRaw(address);
+    const probability = NullUtil.get(
+      mintTransitionProbabilities.get(nodeAddress)
+    );
+    return seedMintGadget.markovEdge(nodeAddress, probability);
   }
   if (MarkovEdgeAddress.hasPrefix(address, payoutGadget.prefix)) {
     return payoutGadget.markovEdge(
