@@ -7,6 +7,7 @@ import {
   processMintPolicy,
 } from "./dependenciesMintPolicy";
 import {intervalSequence} from "./interval";
+import * as uuid from "../util/uuid";
 
 describe("core/dependenciesMintPolicy", () => {
   describe("_alignPeriodsToIntervals", () => {
@@ -86,6 +87,7 @@ describe("core/dependenciesMintPolicy", () => {
   });
 
   describe("processMintPolicy", () => {
+    const id = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
     const n1 = NodeAddress.fromParts(["1"]);
     const n2 = NodeAddress.fromParts(["2"]);
     const n3 = NodeAddress.fromParts(["3"]);
@@ -101,7 +103,11 @@ describe("core/dependenciesMintPolicy", () => {
     );
     const periods = [deepFreeze({startTimeMs: 2, weight: 0.5})];
     it("converts the address and periods correctly", () => {
-      const policy = {address: n2, periods};
+      const policy = {
+        address: n2,
+        periods,
+        id,
+      };
       const intervalStarts = intervals.map((i) => i.startTimeMs);
       const intervalWeights = _alignPeriodsToIntervals(periods, intervalStarts);
       const actual = processMintPolicy(policy, nodeOrder, intervals);
@@ -109,7 +115,7 @@ describe("core/dependenciesMintPolicy", () => {
       expect(actual).toEqual(expected);
     });
     it("errors if the node address isn't in the ordering", () => {
-      const policy = {address: nx, periods};
+      const policy = {address: nx, periods, id};
       const thunk = () => processMintPolicy(policy, nodeOrder, intervals);
       expect(thunk).toThrowError("address not in nodeOrder");
     });

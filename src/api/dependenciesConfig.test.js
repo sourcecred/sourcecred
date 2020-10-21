@@ -185,6 +185,17 @@ describe("api/dependenciesConfig", () => {
       const policy = toDependencyPolicy(config, ledger);
       expect(policy.address).toEqual(address);
     });
+    it("creates a policy with the right id", () => {
+      const ledger = new Ledger();
+      const id = ledger.createIdentity("USER", "foo");
+      const address = ledger.account(id).identity.address;
+      const config = ensureIdentityExists(
+        {name: n("foo"), periods: []},
+        ledger
+      );
+      const policy = toDependencyPolicy(config, ledger);
+      expect(policy.id).toEqual(id);
+    });
     it("creates a policy with specified periods", () => {
       const ledger = new Ledger();
       ledger.createIdentity("USER", "foo");

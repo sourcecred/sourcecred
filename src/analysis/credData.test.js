@@ -6,6 +6,7 @@ import type {DependencyMintPolicy} from "../core/dependenciesMintPolicy";
 import {NodeAddress} from "../core/graph";
 import {IDENTITY_PREFIX} from "../core/identity";
 import {intervalSequence} from "../core/interval";
+import * as uuid from "../util/uuid"; // for spy purposes
 
 describe("src/analysis/credData", () => {
   it("handles empty scores correctly", () => {
@@ -99,6 +100,7 @@ describe("src/analysis/credData", () => {
     ];
     const mintPolicies: DependencyMintPolicy[] = [
       {
+        id: uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA"),
         address: IDENTITY_PREFIX,
         periods: [{weight: 0.5, startTimeMs: -Infinity}],
       },
