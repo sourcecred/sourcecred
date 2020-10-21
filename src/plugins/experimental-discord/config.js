@@ -24,12 +24,15 @@ export type DiscordConfig = {|
   +reactionWeights: EmojiWeightMap,
   // An object mapping a role to a weight, as in:
   // {
-  //   "default": 0,
-  //   "core:626763367893303303": 2,
-  //   "contributor:456763457893303303": 1,
+  //   "defaultWeight": 0,
+  //   "roleWeights": {
+  //     "759191073943191613": 0.5,
+  //     "762085832181153872": 1,
+  //     "698296035889381403": 1
+  //   }
   // }
-  // Note that roles have a snowflake identifier.
-  // default is used to set weights for members who don't have a specified role
+  // Note that roles use a snowflake id only.
+  // defaultWeight is used to set weights for members who don't have a specified role
   +roleWeightConfig: RoleWeightConfig,
 |};
 

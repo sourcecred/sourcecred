@@ -13,8 +13,9 @@ describe("plugins/experimental-discord/config", () => {
       roleWeightConfig: {
         defaultWeight: 0,
         roleWeights: {
-          "core:626763367893303303": 2,
-          "contributor:456763457893303303": 1,
+          "759191073943191613": 0.5,
+          "762085832181153872": 1,
+          "698296035889381403": 1,
         },
       },
     };

@@ -1,6 +1,7 @@
 // @flow
 
 import {escape} from "entities";
+import * as NullUtil from "../../util/null";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import {type Weights, type NodeWeight} from "../../core/weights";
 import {
@@ -219,12 +220,9 @@ export function createGraph(
       const reactions = repo.reactions(channel.id, message.id);
       for (const reaction of reactions) {
         const emojiRef = Model.emojiToRef(reaction.emoji);
-        let reactionWeight = emojiWeights[emojiRef];
-        if (reactionWeight === null || reactionWeight === undefined) {
-          reactionWeight = 1;
-        }
-
+        const reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
         const reactingMember = memberMap.get(reaction.authorId);
+
         if (!reactingMember) {
           // Probably this user left the server.
           continue;
@@ -234,8 +232,9 @@ export function createGraph(
         let roleWeight = roleWeightConfig.defaultWeight;
         const roleWeights = roleWeightConfig.roleWeights;
         for (const roleRef of reactingMember.roles) {
-          if (roleWeights[roleRef] > roleWeight) {
-            roleWeight = roleWeights[roleRef];
+          const matchingWeight = roleWeights[roleRef];
+          if (matchingWeight != null && matchingWeight > roleWeight) {
+            roleWeight = matchingWeight;
           }
         }
 
