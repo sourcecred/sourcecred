@@ -51,15 +51,15 @@ describe("plugins/ethereum/ethAddress", () => {
     });
   });
 
-  describe("compatible JsonLog", () => {
+  describe("compatible ethAddress", () => {
     const address1 = "0x2Ccc7cD913677553766873483ed9eEDdB77A0Bb0";
     const address2 = "0xb4124cEB3451635DAcedd11767f004d8a28c6eE7";
     const address3 = "0x8401Eb5ff34cc943f096A32EF3d5113FEbE8D4Eb";
     const addressArray = [address1, address2, address3];
-    it("can create an exported JsonLog instance", () => {
+    it("can create an exported ethAddress instance", () => {
       const compatibleEthLog = toCompat(COMPAT_INFO, addressArray);
-      const result = parser.parseOrThrow(compatibleEthLog).values();
-      expect(Array.from(result)).toEqual(addressArray);
+      const result = parser.parseOrThrow(compatibleEthLog);
+      expect(result).toEqual(addressArray);
     });
   });
 });
