@@ -207,3 +207,43 @@ export const backwardWebbingGadget: EdgeGadget<WebbingAddress> = (() => {
   };
   return {prefix, toRaw, fromRaw, markovEdge};
 })();
+
+/**
+ * Dependency minting is a process where we switch a proportion of the total
+ * instance Cred to flow to the project's dependencies.
+ *
+ * From an implementation standpoint, in CredRank, we add an edge from each
+ * epoch's accumulator back to the dependency's epoch node. That will result in
+ * a portion of that epoch's total Cred flowing to the dependency.
+ */
+export type DependencyAddress = {|
+  // Recipient of the dependency minting. Will receive Cred
+  +recipient: Uuid,
+  // Start of the epoch when this dependency minting occurs
+  +epochStart: TimestampMs,
+|};
+export const dependencyEdgeGadget: EdgeGadget<DependencyAddress> = (() => {
+  const edgePrefix = EdgeAddress.fromParts([
+    "sourcecred",
+    "core",
+    "DEPENDENCY_MINT",
+  ]);
+  const prefix = markovEdgeAddress(edgePrefix, "F");
+  const prefixLength = MarkovEdgeAddress.toParts(prefix).length;
+  const toRaw = ({epochStart, recipient}) =>
+    MarkovEdgeAddress.append(prefix, String(epochStart), recipient);
+  const fromRaw = (addr) => {
+    const parts = MarkovEdgeAddress.toParts(addr).slice(prefixLength);
+    const epochStart = +parts[0];
+    const recipient = uuidFromString(parts[1]);
+    return {epochStart, recipient};
+  };
+  const markovEdge = ({recipient, epochStart}, transitionProbability) => ({
+    address: EdgeAddress.append(edgePrefix, String(epochStart), recipient),
+    reversed: false,
+    src: accumulatorGadget.toRaw({epochStart}),
+    dst: epochGadget.toRaw({owner: recipient, epochStart}),
+    transitionProbability,
+  });
+  return Object.freeze({prefix, toRaw, fromRaw, markovEdge});
+})();
