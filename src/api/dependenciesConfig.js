@@ -190,5 +190,5 @@ export function toDependencyPolicy(
     weight,
     startTimeMs: fromISO(startTime),
   }));
-  return {address, periods};
+  return {id, address, periods};
 }

@@ -48,8 +48,11 @@
 import {type NodeAddressT, NodeAddress} from "./graph";
 import {type TimestampMs} from "../util/timestamp";
 import {type IntervalSequence} from "./interval";
+import {type IdentityId} from "./identity";
 
 export type DependencyMintPolicy = {|
+  // The id of the dependency minting Cred
+  +id: IdentityId,
   // The node address that will receieve the extra minted Cred
   +address: NodeAddressT,
   // Information on how the Cred minting weight varies in time.
