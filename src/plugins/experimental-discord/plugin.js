@@ -21,6 +21,7 @@ import {
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
+import * as NullUtil from "../../util/null";
 import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
@@ -82,8 +83,8 @@ export class DiscordPlugin implements Plugin {
       repo,
       declarationWeights,
       reactionWeights,
-      roleWeightConfig || defaultRoleWeightConfig,
-      channelWeightConfig || defaultChannelWeightConfig
+      NullUtil.orElse(roleWeightConfig, defaultRoleWeightConfig),
+      NullUtil.orElse(channelWeightConfig, defaultChannelWeightConfig)
     );
   }
 

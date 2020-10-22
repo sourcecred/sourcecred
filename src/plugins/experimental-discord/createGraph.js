@@ -247,9 +247,10 @@ export function createGraph(
 
         // get the weight of a given channel
         const channelWeights = channelWeightConfig.channelWeights;
-        const channelWeight =
-          channelWeights[reaction.channelId] ||
-          channelWeightConfig.defaultWeight;
+        const channelWeight = NullUtil.orElse(
+          channelWeights[reaction.channelId],
+          channelWeightConfig.defaultWeight
+        );
 
         const node = reactionNode(reaction, message.timestampMs, guild);
         wg.weights.nodeWeights.set(
