@@ -18,6 +18,12 @@ describe("plugins/experimental-discord/config", () => {
           "698296035889381403": 1,
         },
       },
+      channelWeightConfig: {
+        defaultWeight: 0,
+        channelWeights: {
+          "759191073943191613": 0.25,
+        },
+      },
     };
     const parsed: DiscordConfig = parser.parseOrThrow(raw);
     expect(parsed).toEqual(raw);
