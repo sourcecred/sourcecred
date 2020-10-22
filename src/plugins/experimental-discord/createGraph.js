@@ -220,8 +220,12 @@ export function createGraph(
       const reactions = repo.reactions(channel.id, message.id);
       for (const reaction of reactions) {
         const emojiRef = Model.emojiToRef(reaction.emoji);
-        const reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
         const reactingMember = memberMap.get(reaction.authorId);
+        let reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
+
+        if (message.authorId === reaction.authorId) {
+          reactionWeight = 0;
+        }
 
         if (!reactingMember) {
           // Probably this user left the server.
