@@ -33,17 +33,21 @@ export type DiscordConfig = {|
   // }
   // Note that roles use a snowflake id only.
   // defaultWeight is used to set weights for members who don't have a specified role
-  +roleWeightConfig: RoleWeightConfig,
+  +roleWeightConfig?: RoleWeightConfig,
 |};
 
 export const parser: Combo.Parser<DiscordConfig> = (() => {
   const C = Combo;
-  return C.object({
-    guildId: C.string,
-    reactionWeights: C.dict(C.number),
-    roleWeightConfig: C.object({
-      defaultWeight: C.number,
-      roleWeights: C.dict(C.number),
-    }),
-  });
+  return C.object(
+    {
+      guildId: C.string,
+      reactionWeights: C.dict(C.number),
+    },
+    {
+      roleWeightConfig: C.object({
+        defaultWeight: C.number,
+        roleWeights: C.dict(C.number),
+      }),
+    }
+  );
 })();

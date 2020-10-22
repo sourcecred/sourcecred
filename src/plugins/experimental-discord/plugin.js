@@ -69,12 +69,13 @@ export class DiscordPlugin implements Plugin {
     const {guildId, reactionWeights, roleWeightConfig} = await loadConfig(ctx);
     const repo = await repository(ctx, guildId);
     const declarationWeights = weightsForDeclaration(declaration);
+    const defaultRoleWeightConfig = {defaultWeight: 1, roleWeights: {}};
     return await createGraph(
       guildId,
       repo,
       declarationWeights,
       reactionWeights,
-      roleWeightConfig
+      roleWeightConfig || defaultRoleWeightConfig
     );
   }
 
