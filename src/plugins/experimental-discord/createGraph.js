@@ -187,7 +187,12 @@ function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
   };
 }
 
-function sharedReactionWeights({
+/* This function creates edges and nodes for discord reactions.
+
+By default weights for all reactions are linear. Setting the 
+useAsymptoticReactionWeights flag makes the weights of multiple reactions
+given by the same member dropoff exponentially by powers of 2 */
+function createReactionEdgesAndNodes({
   guild,
   emojiWeights,
   roleWeightConfig,
@@ -195,16 +200,15 @@ function sharedReactionWeights({
   memberMap,
   message,
   reactions,
+  hasEdges,
   useAsymptoticReactionWeights,
-}) {
-  let hasEdges = false;
-
-  for (const [ind, reaction] of reactions.entries()) {
+}): boolean {
+  for (const [index, reaction] of reactions.entries()) {
     const emojiRef = Model.emojiToRef(reaction.emoji);
     let reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
     if (useAsymptoticReactionWeights) {
       // drop off reactionWeight by powers of 2
-      reactionWeight *= 0.5 ** ind;
+      reactionWeight *= 0.5 ** index;
     }
 
     const reactingMember = memberMap.get(reaction.authorId);
@@ -236,43 +240,49 @@ function sharedReactionWeights({
   return hasEdges;
 }
 
-function asymptoticReactionWeights({
-  guild,
-  emojiWeights,
-  roleWeightConfig,
-  wg,
-  memberMap,
-  message,
-  reactions,
-  useAsymptoticReactionWeights,
-}) {
+/* This function prepares data fetched in the createGraph function for asymptotic
+dropoff in weights for multiple reactions from a single member.
+
+The reactions fetched in the createGraph function are sorted from highest to lowest,
+and separated into sub arrays of reactions grouped by reacting member.
+
+Each of these member specific reaction arrays are then run through the createReactionEdgesAndNodes
+function */
+function prepareAsymptoticReactionWeights(args): boolean {
+  const {emojiWeights, reactions} = args;
+  let {hasEdges} = args;
   // sort reactions from highest to lowest weight emojis
   const sortedReactions = [...reactions].sort((a, b) => {
-    const bEmojiWeight = emojiWeights[Model.emojiToRef(b.emoji)] || 1;
-    const aEmojiWeight = emojiWeights[Model.emojiToRef(a.emoji)] || 1;
+    const bEmojiWeight = NullUtil.orElse(
+      emojiWeights[Model.emojiToRef(b.emoji)],
+      1
+    );
+    const aEmojiWeight = NullUtil.orElse(
+      emojiWeights[Model.emojiToRef(a.emoji)],
+      1
+    );
     return bEmojiWeight - aEmojiWeight;
   });
 
   // separate reactions into groups per member (retains sorted order)
-  const mapMemberIdToReactions = new Map();
+  const memberIdToReactionsMap = new Map();
   sortedReactions.forEach((reaction) => {
-    const authorData = mapMemberIdToReactions.get(reaction.authorId) || [];
+    const authorData = NullUtil.orElse(
+      memberIdToReactionsMap.get(reaction.authorId),
+      []
+    );
     authorData.push(reaction);
-    mapMemberIdToReactions.set(reaction.authorId, authorData);
+    memberIdToReactionsMap.set(reaction.authorId, authorData);
   });
 
-  for (const memberReactions of mapMemberIdToReactions.values()) {
-    return sharedReactionWeights({
-      guild,
-      emojiWeights,
-      roleWeightConfig,
-      wg,
-      memberMap,
-      message,
+  for (const memberReactions of memberIdToReactionsMap.values()) {
+    hasEdges = createReactionEdgesAndNodes({
+      ...args,
+      hasEdges,
       reactions: memberReactions,
-      useAsymptoticReactionWeights,
     });
   }
+  return hasEdges;
 }
 
 export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
@@ -305,6 +315,7 @@ export function createGraph(
         continue;
       if (message.nonUserAuthor) continue;
 
+      let hasEdges = false;
       const reactions = repo.reactions(channel.id, message.id);
 
       const sharedReactionWeightsArgs = {
@@ -315,12 +326,13 @@ export function createGraph(
         memberMap,
         message,
         reactions,
+        hasEdges,
         useAsymptoticReactionWeights,
       };
 
-      let hasEdges = useAsymptoticReactionWeights
-        ? asymptoticReactionWeights(sharedReactionWeightsArgs)
-        : sharedReactionWeights(sharedReactionWeightsArgs);
+      hasEdges = useAsymptoticReactionWeights
+        ? prepareAsymptoticReactionWeights(sharedReactionWeightsArgs)
+        : createReactionEdgesAndNodes(sharedReactionWeightsArgs);
 
       for (const userId of message.mentions) {
         const mentionedMember = memberMap.get(userId);

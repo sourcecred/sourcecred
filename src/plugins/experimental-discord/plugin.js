@@ -7,6 +7,7 @@ import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import {parser, type DiscordConfig, type DiscordToken} from "./config";
 import {declaration} from "./declaration";
 import {join as pathJoin} from "path";
+import * as NullUtil from "../../util/null";
 import {type TaskReporter} from "../../util/taskReporter";
 import {Fetcher} from "./fetcher";
 import {Mirror} from "./mirror";
@@ -77,11 +78,11 @@ export class DiscordPlugin implements Plugin {
     const defaultRoleWeightConfig = {defaultWeight: 1, roleWeights: {}};
     return await createGraph(
       guildId,
-      useAsymptoticReactionWeights || false,
+      NullUtil.orElse(useAsymptoticReactionWeights, false),
       repo,
       declarationWeights,
       reactionWeights,
-      roleWeightConfig || defaultRoleWeightConfig
+      NullUtil.orElse(roleWeightConfig, defaultRoleWeightConfig)
     );
   }
 

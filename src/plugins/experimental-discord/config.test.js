@@ -9,7 +9,7 @@ describe("plugins/experimental-discord/config", () => {
       useAsymptoticReactionWeights: true,
       reactionWeights: {
         "🥰": 4,
-        ":sourcecred:626763367893303303": 16,
+        "sourcecred:626763367893303303": 16,
       },
       roleWeightConfig: {
         defaultWeight: 0,
