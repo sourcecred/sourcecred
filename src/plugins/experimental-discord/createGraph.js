@@ -1,6 +1,7 @@
 // @flow
 
 import {escape} from "entities";
+import * as NullUtil from "../../util/null";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import {type Weights, type NodeWeight} from "../../core/weights";
 import {
@@ -187,12 +188,19 @@ function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
 }
 
 export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
+export type RoleWeightMap = {[ref: Model.Snowflake]: NodeWeight};
+
+export type RoleWeightConfig = {|
+  +defaultWeight: number,
+  +roleWeights: RoleWeightMap,
+|};
 
 export function createGraph(
   guild: Model.Snowflake,
   repo: SqliteMirrorRepository,
   declarationWeights: Weights,
-  emojiWeights: EmojiWeightMap
+  emojiWeights: EmojiWeightMap,
+  roleWeightConfig: RoleWeightConfig
 ): WeightedGraphT {
   const wg = {
     graph: new Graph(),
@@ -212,18 +220,26 @@ export function createGraph(
       const reactions = repo.reactions(channel.id, message.id);
       for (const reaction of reactions) {
         const emojiRef = Model.emojiToRef(reaction.emoji);
-        const reactionWeight = emojiWeights[emojiRef];
-
+        const reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
         const reactingMember = memberMap.get(reaction.authorId);
+
         if (!reactingMember) {
           // Probably this user left the server.
           continue;
         }
 
-        const node = reactionNode(reaction, message.timestampMs, guild);
-        if (reactionWeight != null) {
-          wg.weights.nodeWeights.set(node.address, reactionWeight);
+        // get the weight of the highest weight role the reacting user has
+        let roleWeight = roleWeightConfig.defaultWeight;
+        const roleWeights = roleWeightConfig.roleWeights;
+        for (const roleRef of reactingMember.roles) {
+          const matchingWeight = roleWeights[roleRef];
+          if (matchingWeight != null && matchingWeight > roleWeight) {
+            roleWeight = matchingWeight;
+          }
         }
+
+        const node = reactionNode(reaction, message.timestampMs, guild);
+        wg.weights.nodeWeights.set(node.address, roleWeight * reactionWeight);
         wg.graph.addNode(node);
         wg.graph.addNode(memberNode(reactingMember));
         wg.graph.addEdge(reactsToEdge(reaction, message));

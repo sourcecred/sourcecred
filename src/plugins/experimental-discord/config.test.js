@@ -10,6 +10,14 @@ describe("plugins/experimental-discord/config", () => {
         "🥰": 4,
         ":sourcecred:626763367893303303": 16,
       },
+      roleWeightConfig: {
+        defaultWeight: 0,
+        roleWeights: {
+          "759191073943191613": 0.5,
+          "762085832181153872": 1,
+          "698296035889381403": 1,
+        },
+      },
     };
     const parsed: DiscordConfig = parser.parseOrThrow(raw);
     expect(parsed).toEqual(raw);
