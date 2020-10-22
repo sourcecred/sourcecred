@@ -187,6 +187,94 @@ function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
   };
 }
 
+function sharedReactionWeights({
+  guild,
+  emojiWeights,
+  roleWeightConfig,
+  wg,
+  memberMap,
+  message,
+  reactions,
+  useAsymptoticReactionWeights,
+}) {
+  let hasEdges = false;
+
+  for (const [ind, reaction] of reactions.entries()) {
+    const emojiRef = Model.emojiToRef(reaction.emoji);
+    let reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
+    if (useAsymptoticReactionWeights) {
+      // drop off reactionWeight by powers of 2
+      reactionWeight *= 0.5 ** ind;
+    }
+
+    const reactingMember = memberMap.get(reaction.authorId);
+    if (!reactingMember) {
+      // Probably this user left the server.
+      continue;
+    }
+
+    // get the weight of the highest weight role the reacting user has
+    let roleWeight = roleWeightConfig.defaultWeight;
+    const roleWeights = roleWeightConfig.roleWeights;
+    for (const roleRef of reactingMember.roles) {
+      const matchingWeight = roleWeights[roleRef];
+      if (matchingWeight != null && matchingWeight > roleWeight) {
+        roleWeight = matchingWeight;
+      }
+    }
+
+    const node = reactionNode(reaction, message.timestampMs, guild);
+    wg.weights.nodeWeights.set(node.address, roleWeight * reactionWeight);
+    wg.graph.addNode(node);
+    wg.graph.addNode(memberNode(reactingMember));
+    wg.graph.addEdge(reactsToEdge(reaction, message));
+    wg.graph.addEdge(
+      addsReactionEdge(reaction, reactingMember, message.timestampMs)
+    );
+    hasEdges = true;
+  }
+  return hasEdges;
+}
+
+function asymptoticReactionWeights({
+  guild,
+  emojiWeights,
+  roleWeightConfig,
+  wg,
+  memberMap,
+  message,
+  reactions,
+  useAsymptoticReactionWeights,
+}) {
+  // sort reactions from highest to lowest weight emojis
+  const sortedReactions = [...reactions].sort((a, b) => {
+    const bEmojiWeight = emojiWeights[Model.emojiToRef(b.emoji)] || 1;
+    const aEmojiWeight = emojiWeights[Model.emojiToRef(a.emoji)] || 1;
+    return bEmojiWeight - aEmojiWeight;
+  });
+
+  // separate reactions into groups per member (retains sorted order)
+  const mapMemberIdToReactions = new Map();
+  sortedReactions.forEach((reaction) => {
+    const authorData = mapMemberIdToReactions.get(reaction.authorId) || [];
+    authorData.push(reaction);
+    mapMemberIdToReactions.set(reaction.authorId, authorData);
+  });
+
+  for (const memberReactions of mapMemberIdToReactions.values()) {
+    return sharedReactionWeights({
+      guild,
+      emojiWeights,
+      roleWeightConfig,
+      wg,
+      memberMap,
+      message,
+      reactions: memberReactions,
+      useAsymptoticReactionWeights,
+    });
+  }
+}
+
 export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
 export type RoleWeightMap = {[ref: Model.Snowflake]: NodeWeight};
 
@@ -197,6 +285,7 @@ export type RoleWeightConfig = {|
 
 export function createGraph(
   guild: Model.Snowflake,
+  useAsymptoticReactionWeights: boolean,
   repo: SqliteMirrorRepository,
   declarationWeights: Weights,
   emojiWeights: EmojiWeightMap,
@@ -216,38 +305,22 @@ export function createGraph(
         continue;
       if (message.nonUserAuthor) continue;
 
-      let hasEdges = false;
       const reactions = repo.reactions(channel.id, message.id);
-      for (const reaction of reactions) {
-        const emojiRef = Model.emojiToRef(reaction.emoji);
-        const reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
-        const reactingMember = memberMap.get(reaction.authorId);
 
-        if (!reactingMember) {
-          // Probably this user left the server.
-          continue;
-        }
+      const sharedReactionWeightsArgs = {
+        guild,
+        emojiWeights,
+        roleWeightConfig,
+        wg,
+        memberMap,
+        message,
+        reactions,
+        useAsymptoticReactionWeights,
+      };
 
-        // get the weight of the highest weight role the reacting user has
-        let roleWeight = roleWeightConfig.defaultWeight;
-        const roleWeights = roleWeightConfig.roleWeights;
-        for (const roleRef of reactingMember.roles) {
-          const matchingWeight = roleWeights[roleRef];
-          if (matchingWeight != null && matchingWeight > roleWeight) {
-            roleWeight = matchingWeight;
-          }
-        }
-
-        const node = reactionNode(reaction, message.timestampMs, guild);
-        wg.weights.nodeWeights.set(node.address, roleWeight * reactionWeight);
-        wg.graph.addNode(node);
-        wg.graph.addNode(memberNode(reactingMember));
-        wg.graph.addEdge(reactsToEdge(reaction, message));
-        wg.graph.addEdge(
-          addsReactionEdge(reaction, reactingMember, message.timestampMs)
-        );
-        hasEdges = true;
-      }
+      let hasEdges = useAsymptoticReactionWeights
+        ? asymptoticReactionWeights(sharedReactionWeightsArgs)
+        : sharedReactionWeights(sharedReactionWeightsArgs);
 
       for (const userId of message.mentions) {
         const mentionedMember = memberMap.get(userId);
