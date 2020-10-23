@@ -38,7 +38,7 @@ export type DiscordConfig = {|
   // Note that roles use a snowflake id only.
   // defaultWeight is used to set weights for members who don't have a specified role
   +roleWeightConfig?: RoleWeightConfig,
-  // An object mapping a role to a weight, as in:
+  // An object mapping a channel to a weight, as in:
   // {
   //   "defaultWeight": 0,
   //   "channelWeights": {
