@@ -17,6 +17,10 @@ describe("plugins/ethereum/ethAddress", () => {
         "0x2Ccc7cD913677553766873483ed9eEDdB77A0Bb0",
         "0x2Ccc7cD913677553766873483ed9eEDdB77A0Bb0".toUpperCase(),
         "0x2Ccc7cD913677553766873483ed9eEDdB77A0Bb0".toLowerCase(),
+        // upper-case with lower-cased `0x`
+        "0x2CCC7CD913677553766873483ED9EEDDB77A0BB0",
+        // lower-case with upper-cased `0x`
+        "0X2ccc7cd913677553766873483ed9eeddb77a0bb0",
       ].forEach((a: string) => {
         expect(parseAddress(a)).toBe(
           "0x2Ccc7cD913677553766873483ed9eEDdB77A0Bb0"
@@ -26,10 +30,11 @@ describe("plugins/ethereum/ethAddress", () => {
     it("throws when attempting to parse a malformed address", () => {
       [
         "0x",
-        // malformed mixed-case
-        "0x2ccc7cD913677553766873483ed9eEDdB77A0Bb0",
         "abc123",
         "",
+        // malformed mixed-case
+        "0x2ccc7cD913677553766873483ed9eEDdB77A0Bb0",
+        "2ccc7cD913677553766873483ed9eEDdB77A0Bb0",
       ].forEach((a: string) => {
         expect(() => parseAddress(a)).toThrow(
           `not a valid ethereum address: ${a}`
@@ -38,13 +43,17 @@ describe("plugins/ethereum/ethAddress", () => {
     });
   });
 
-  describe("truncateEthAddres", () => {
+  describe("truncateEthAddress", () => {
     it("creates well-formed truncated addresses", () => {
       [
-        //$FlowExpectedError[incompatible-type]
-        ["0x2Ccc7cD913677553766873483ed9eEDdB77A0Bb0", "0x2Ccc...0Bb0"],
-        //$FlowExpectedError[incompatible-type]
-        ["0xb4124cEB3451635DAcedd11767f004d8a28c6eE7", "0xb412...6eE7"],
+        [
+          parseAddress("0x2Ccc7cD913677553766873483ed9eEDdB77A0Bb0"),
+          "0x2Ccc...0Bb0",
+        ],
+        [
+          parseAddress("0xb4124cEB3451635DAcedd11767f004d8a28c6eE7"),
+          "0xb412...6eE7",
+        ],
       ].forEach(([a, t]: [EthAddress, string]) => {
         expect(truncate(a)).toBe(t);
       });
