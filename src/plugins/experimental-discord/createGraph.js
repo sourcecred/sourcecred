@@ -187,6 +187,115 @@ function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
   };
 }
 
+/* This function creates edges and nodes for discord reactions.
+
+By default weights for all reactions are linear. Setting the 
+useAsymptoticReactionWeights flag makes the weights of multiple reactions
+given by the same member dropoff exponentially by powers of 2 */
+function createReactionEdgesAndNodes({
+  guild,
+  emojiWeights,
+  roleWeightConfig,
+  channelWeightConfig,
+  wg,
+  memberMap,
+  message,
+  reactions,
+  hasEdges,
+  useAsymptoticReactionWeights,
+}): boolean {
+  for (const [index, reaction] of reactions.entries()) {
+    const emojiRef = Model.emojiToRef(reaction.emoji);
+    let reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
+    if (useAsymptoticReactionWeights) {
+      // drop off reactionWeight by powers of 2
+      reactionWeight *= 0.5 ** index;
+    }
+
+    const reactingMember = memberMap.get(reaction.authorId);
+    if (!reactingMember) {
+      // Probably this user left the server.
+      continue;
+    }
+
+    // get the weight of the highest weight role the reacting user has
+    let roleWeight = roleWeightConfig.defaultWeight;
+    const roleWeights = roleWeightConfig.roleWeights;
+    for (const roleRef of reactingMember.roles) {
+      const matchingWeight = roleWeights[roleRef];
+      if (matchingWeight != null && matchingWeight > roleWeight) {
+        roleWeight = matchingWeight;
+      }
+    }
+
+    // get the weight of a given channel
+    const channelWeights = channelWeightConfig.channelWeights;
+    const channelWeight = NullUtil.orElse(
+      channelWeights[reaction.channelId],
+      channelWeightConfig.defaultWeight
+    );
+
+    const node = reactionNode(reaction, message.timestampMs, guild);
+    wg.weights.nodeWeights.set(
+      node.address,
+      channelWeight * roleWeight * reactionWeight
+    );
+    wg.graph.addNode(node);
+    wg.graph.addNode(memberNode(reactingMember));
+    wg.graph.addEdge(reactsToEdge(reaction, message));
+    wg.graph.addEdge(
+      addsReactionEdge(reaction, reactingMember, message.timestampMs)
+    );
+    hasEdges = true;
+  }
+  return hasEdges;
+}
+
+/* This function prepares data fetched in the createGraph function for asymptotic
+dropoff in weights for multiple reactions from a single member.
+
+The reactions fetched in the createGraph function are sorted from highest to lowest,
+and separated into sub arrays of reactions grouped by reacting member.
+
+Each of these member specific reaction arrays are then run through the createReactionEdgesAndNodes
+function */
+function prepareAsymptoticReactionWeights(args): boolean {
+  const {emojiWeights, reactions} = args;
+  let {hasEdges} = args;
+  // sort reactions from highest to lowest weight emojis
+  const sortedReactions = [...reactions].sort((a, b) => {
+    const bEmojiWeight = NullUtil.orElse(
+      emojiWeights[Model.emojiToRef(b.emoji)],
+      1
+    );
+    const aEmojiWeight = NullUtil.orElse(
+      emojiWeights[Model.emojiToRef(a.emoji)],
+      1
+    );
+    return bEmojiWeight - aEmojiWeight;
+  });
+
+  // separate reactions into groups per member (retains sorted order)
+  const memberIdToReactionsMap = new Map();
+  sortedReactions.forEach((reaction) => {
+    const authorData = NullUtil.orElse(
+      memberIdToReactionsMap.get(reaction.authorId),
+      []
+    );
+    authorData.push(reaction);
+    memberIdToReactionsMap.set(reaction.authorId, authorData);
+  });
+
+  for (const memberReactions of memberIdToReactionsMap.values()) {
+    hasEdges = createReactionEdgesAndNodes({
+      ...args,
+      hasEdges,
+      reactions: memberReactions,
+    });
+  }
+  return hasEdges;
+}
+
 export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
 export type RoleWeightMap = {[ref: Model.Snowflake]: NodeWeight};
 export type ChannelWeightMap = {[ref: Model.Snowflake]: NodeWeight};
@@ -203,6 +312,7 @@ export type ChannelWeightConfig = {|
 
 export function createGraph(
   guild: Model.Snowflake,
+  useAsymptoticReactionWeights: boolean,
   repo: SqliteMirrorRepository,
   declarationWeights: Weights,
   emojiWeights: EmojiWeightMap,
@@ -225,50 +335,23 @@ export function createGraph(
 
       let hasEdges = false;
       const reactions = repo.reactions(channel.id, message.id);
-      for (const reaction of reactions) {
-        const emojiRef = Model.emojiToRef(reaction.emoji);
-        const reactingMember = memberMap.get(reaction.authorId);
-        let reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
 
-        if (message.authorId === reaction.authorId) {
-          reactionWeight = 0;
-        }
+      const sharedReactionWeightsArgs = {
+        guild,
+        emojiWeights,
+        roleWeightConfig,
+        channelWeightConfig,
+        wg,
+        memberMap,
+        message,
+        reactions,
+        hasEdges,
+        useAsymptoticReactionWeights,
+      };
 
-        if (!reactingMember) {
-          // Probably this user left the server.
-          continue;
-        }
-
-        // get the weight of the highest weight role the reacting user has
-        let roleWeight = roleWeightConfig.defaultWeight;
-        const roleWeights = roleWeightConfig.roleWeights;
-        for (const roleRef of reactingMember.roles) {
-          const matchingWeight = roleWeights[roleRef];
-          if (matchingWeight != null && matchingWeight > roleWeight) {
-            roleWeight = matchingWeight;
-          }
-        }
-
-        // get the weight of a given channel
-        const channelWeights = channelWeightConfig.channelWeights;
-        const channelWeight = NullUtil.orElse(
-          channelWeights[reaction.channelId],
-          channelWeightConfig.defaultWeight
-        );
-
-        const node = reactionNode(reaction, message.timestampMs, guild);
-        wg.weights.nodeWeights.set(
-          node.address,
-          channelWeight * roleWeight * reactionWeight
-        );
-        wg.graph.addNode(node);
-        wg.graph.addNode(memberNode(reactingMember));
-        wg.graph.addEdge(reactsToEdge(reaction, message));
-        wg.graph.addEdge(
-          addsReactionEdge(reaction, reactingMember, message.timestampMs)
-        );
-        hasEdges = true;
-      }
+      hasEdges = useAsymptoticReactionWeights
+        ? prepareAsymptoticReactionWeights(sharedReactionWeightsArgs)
+        : createReactionEdgesAndNodes(sharedReactionWeightsArgs);
 
       for (const userId of message.mentions) {
         const mentionedMember = memberMap.get(userId);

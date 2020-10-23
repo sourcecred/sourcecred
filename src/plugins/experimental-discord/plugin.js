@@ -69,6 +69,7 @@ export class DiscordPlugin implements Plugin {
     const _ = rd; // TODO(#1808): not yet used
     const {
       guildId,
+      useAsymptoticReactionWeights,
       reactionWeights,
       roleWeightConfig,
       channelWeightConfig,
@@ -80,6 +81,7 @@ export class DiscordPlugin implements Plugin {
 
     return await createGraph(
       guildId,
+      NullUtil.orElse(useAsymptoticReactionWeights, false),
       repo,
       declarationWeights,
       reactionWeights,

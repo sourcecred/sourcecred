@@ -16,6 +16,11 @@ export type DiscordConfig = {|
   // go to the "Advanced" section and enable "Developer Mode".
   // Then right click on the server icon and choose "copy ID".
   +guildId: Model.Snowflake,
+  // Decay a member's subsequent reactions on the same message by powers of 2.
+  //
+  // This is to avoid spamming emojis on messages and small group collusion
+  // from producing outsized amounts of cred
+  +useAsymptoticReactionWeights?: boolean,
   // An object mapping a reaction to a weight, as in:
   // {
   //   "🥰": 16,
@@ -58,6 +63,7 @@ export const parser: Combo.Parser<DiscordConfig> = (() => {
       reactionWeights: C.dict(C.number),
     },
     {
+      useAsymptoticReactionWeights: C.boolean,
       roleWeightConfig: C.object({
         defaultWeight: C.number,
         roleWeights: C.dict(C.number),
