@@ -2,7 +2,11 @@
 
 import * as Combo from "../../util/combo";
 import * as Model from "./models";
-import {type EmojiWeightMap, type RoleWeightConfig} from "./createGraph";
+import {
+  type EmojiWeightMap,
+  type RoleWeightConfig,
+  type ChannelWeightConfig,
+} from "./createGraph";
 
 export type {BotToken as DiscordToken} from "./models";
 
@@ -34,6 +38,16 @@ export type DiscordConfig = {|
   // Note that roles use a snowflake id only.
   // defaultWeight is used to set weights for members who don't have a specified role
   +roleWeightConfig?: RoleWeightConfig,
+  // An object mapping a channel to a weight, as in:
+  // {
+  //   "defaultWeight": 0,
+  //   "channelWeights": {
+  //     "759191073943191613": 0.25
+  //   }
+  // }
+  // Note that channels use a snowflake id only.
+  // defaultWeight is used to set weights for channels that don't have a specified weight
+  +channelWeightConfig?: ChannelWeightConfig,
 |};
 
 export const parser: Combo.Parser<DiscordConfig> = (() => {
@@ -47,6 +61,10 @@ export const parser: Combo.Parser<DiscordConfig> = (() => {
       roleWeightConfig: C.object({
         defaultWeight: C.number,
         roleWeights: C.dict(C.number),
+      }),
+      channelWeightConfig: C.object({
+        defaultWeight: C.number,
+        channelWeights: C.dict(C.number),
       }),
     }
   );
