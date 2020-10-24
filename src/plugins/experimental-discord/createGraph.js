@@ -200,9 +200,9 @@ function createReactionEdgesAndNodes({
   memberMap,
   message,
   reactions,
-  hasEdges,
   useAsymptoticReactionWeights,
 }): boolean {
+  let atLeastOneNodeHasEdges = false;
   for (const [index, reaction] of reactions.entries()) {
     const emojiRef = Model.emojiToRef(reaction.emoji);
     let reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
@@ -235,9 +235,9 @@ function createReactionEdgesAndNodes({
     wg.graph.addEdge(
       addsReactionEdge(reaction, reactingMember, message.timestampMs)
     );
-    hasEdges = true;
+    atLeastOneNodeHasEdges = true;
   }
-  return hasEdges;
+  return atLeastOneNodeHasEdges;
 }
 
 /* This function prepares data fetched in the createGraph function for asymptotic
@@ -250,7 +250,6 @@ Each of these member specific reaction arrays are then run through the createRea
 function */
 function prepareAsymptoticReactionWeights(args): boolean {
   const {emojiWeights, reactions} = args;
-  let {hasEdges} = args;
   // sort reactions from highest to lowest weight emojis
   const sortedReactions = [...reactions].sort((a, b) => {
     const bEmojiWeight = NullUtil.orElse(
@@ -275,14 +274,15 @@ function prepareAsymptoticReactionWeights(args): boolean {
     memberIdToReactionsMap.set(reaction.authorId, authorData);
   });
 
+  let atLeastOneNodeHasEdges = false;
   for (const memberReactions of memberIdToReactionsMap.values()) {
-    hasEdges = createReactionEdgesAndNodes({
+    const iterationHasEdges = createReactionEdgesAndNodes({
       ...args,
-      hasEdges,
       reactions: memberReactions,
     });
+    if (iterationHasEdges) atLeastOneNodeHasEdges = true;
   }
-  return hasEdges;
+  return atLeastOneNodeHasEdges;
 }
 
 export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
@@ -315,7 +315,6 @@ export function createGraph(
         continue;
       if (message.nonUserAuthor) continue;
 
-      let hasEdges = false;
       const reactions = repo.reactions(channel.id, message.id);
 
       const sharedReactionWeightsArgs = {
@@ -326,11 +325,10 @@ export function createGraph(
         memberMap,
         message,
         reactions,
-        hasEdges,
         useAsymptoticReactionWeights,
       };
 
-      hasEdges = useAsymptoticReactionWeights
+      let atLeastOneNodeHasEdges = useAsymptoticReactionWeights
         ? prepareAsymptoticReactionWeights(sharedReactionWeightsArgs)
         : createReactionEdgesAndNodes(sharedReactionWeightsArgs);
 
@@ -342,11 +340,11 @@ export function createGraph(
         }
         wg.graph.addNode(memberNode(mentionedMember));
         wg.graph.addEdge(mentionsEdge(message, mentionedMember));
-        hasEdges = true;
+        atLeastOneNodeHasEdges = true;
       }
 
       // Don't bloat the graph with isolated messages.
-      if (hasEdges) {
+      if (atLeastOneNodeHasEdges) {
         const author = memberMap.get(message.authorId);
         if (!author) {
           // Probably this user left the server.
