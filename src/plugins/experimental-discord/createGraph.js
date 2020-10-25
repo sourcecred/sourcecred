@@ -189,10 +189,16 @@ function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
 
 export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
 export type RoleWeightMap = {[ref: Model.Snowflake]: NodeWeight};
+export type ChannelWeightMap = {[ref: Model.Snowflake]: NodeWeight};
 
 export type RoleWeightConfig = {|
   +defaultWeight: number,
   +roleWeights: RoleWeightMap,
+|};
+
+export type ChannelWeightConfig = {|
+  +defaultWeight: number,
+  +channelWeights: ChannelWeightMap,
 |};
 
 export function createGraph(
@@ -200,7 +206,8 @@ export function createGraph(
   repo: SqliteMirrorRepository,
   declarationWeights: Weights,
   emojiWeights: EmojiWeightMap,
-  roleWeightConfig: RoleWeightConfig
+  roleWeightConfig: RoleWeightConfig,
+  channelWeightConfig: ChannelWeightConfig
 ): WeightedGraphT {
   const wg = {
     graph: new Graph(),
@@ -242,8 +249,18 @@ export function createGraph(
           }
         }
 
+        // get the weight of a given channel
+        const channelWeights = channelWeightConfig.channelWeights;
+        const channelWeight = NullUtil.orElse(
+          channelWeights[reaction.channelId],
+          channelWeightConfig.defaultWeight
+        );
+
         const node = reactionNode(reaction, message.timestampMs, guild);
-        wg.weights.nodeWeights.set(node.address, roleWeight * reactionWeight);
+        wg.weights.nodeWeights.set(
+          node.address,
+          channelWeight * roleWeight * reactionWeight
+        );
         wg.graph.addNode(node);
         wg.graph.addNode(memberNode(reactingMember));
         wg.graph.addEdge(reactsToEdge(reaction, message));
