@@ -32,6 +32,7 @@ module.exports = {
   // point within the build directory.
   backendEntryPoints: {
     sourcecred: (resolveApp("src/cli/main.js") /*: string */),
+    api: (resolveApp("src/api/index.js") /*: string */),
     //
     generateGithubGraphqlFlowTypes: (resolveApp(
       "src/plugins/github/bin/generateGraphqlFlowTypes.js"

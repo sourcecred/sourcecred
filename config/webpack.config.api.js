@@ -47,9 +47,6 @@ module.exports = ({
       new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
     ],
   },
-  externals: {
-    "crypto": "crypto",
-  },
   module: {
     strictExportPresence: true,
     rules: [
