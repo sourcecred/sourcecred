@@ -3,7 +3,7 @@
 import {type IdentityProposal} from "../../core/ledger/identityProposal";
 import {coerce, nameFromString} from "../../core/identity/name";
 import {JsonLog} from "../../util/jsonLog";
-import {truncateEthAddress as truncate, type EthAddress} from "./ethAddress";
+import {type EthAddress} from "./ethAddress";
 import {nodeAddressForEthAddress} from "./ethAddressNode";
 
 export function _createIdentity(address: EthAddress): IdentityProposal {
@@ -14,7 +14,7 @@ export function _createIdentity(address: EthAddress): IdentityProposal {
 
   return {
     pluginName: nameFromString("ethereum"),
-    name: coerce(truncate(address)),
+    name: coerce(address),
     type: "USER",
     alias,
   };
