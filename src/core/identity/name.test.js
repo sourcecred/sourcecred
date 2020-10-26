@@ -5,7 +5,7 @@ import {nameFromString, coerce} from "./name";
 describe("core/identity/name", () => {
   describe("nameFromString", () => {
     it("fails on very long names", () => {
-      const bad = "1234567890123456789012345678901234567890";
+      const bad = "1234567890123456789012345678901234567890123";
       expect(() => nameFromString(bad)).toThrowError("too long");
     });
     it("fails on names with invalid characters", () => {
@@ -45,7 +45,7 @@ describe("core/identity/name", () => {
     it("still fails on names with invalid length", () => {
       const t1 = () => coerce("");
       expect(t1).toThrowError("invalid name");
-      const t2 = () => coerce("1234567890123456789012345678901234567890");
+      const t2 = () => coerce("1234567890123456789012345678901234567890123");
       expect(t2).toThrowError("too long");
     });
   });
