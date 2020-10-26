@@ -65,7 +65,7 @@ describe("plugins/ethereum/ethAddress", () => {
     const address2 = "0xb4124cEB3451635DAcedd11767f004d8a28c6eE7";
     const address3 = "0x8401Eb5ff34cc943f096A32EF3d5113FEbE8D4Eb";
     const addressArray = [address1, address2, address3];
-    it("can create an exported ethAddress instance", () => {
+    it("can create a parseable ethAddress compat array", () => {
       const compatibleEthLog = toCompat(COMPAT_INFO, addressArray);
       const result = parser.parseOrThrow(compatibleEthLog);
       expect(result).toEqual(addressArray);
