@@ -39,6 +39,6 @@ export type Message = {|
   +thread: boolean, // if this is true, the message is part of a thread
   +in_reply_to: string, // id of the thread-starting message, self id = thread starting message
   +authorId: string, // user id
-  +reactions: $Array<MessageReaction>, // array of reacts to a message. MessageReaction is the name of the reaction and reacted_by
-  +mentions: $Array<string> // array of mentioned users
+  +reactions: string, // array of reacts to a message. ([{name: 'reaction_name', users: ['<array of user ids>'], count: <number of reacts>}, {...}, {...}])
+  +mentions: Array<string> // array of mentioned users
 |}
