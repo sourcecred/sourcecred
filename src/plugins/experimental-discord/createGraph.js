@@ -3,7 +3,7 @@
 import {escape} from "entities";
 import * as NullUtil from "../../util/null";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
-import {type Weights, type NodeWeight} from "../../core/weights";
+import {type NodeWeight, empty as emptyWeights} from "../../core/weights";
 import {
   Graph,
   NodeAddress,
@@ -204,14 +204,13 @@ export type ChannelWeightConfig = {|
 export function createGraph(
   guild: Model.Snowflake,
   repo: SqliteMirrorRepository,
-  declarationWeights: Weights,
   emojiWeights: EmojiWeightMap,
   roleWeightConfig: RoleWeightConfig,
   channelWeightConfig: ChannelWeightConfig
 ): WeightedGraphT {
   const wg = {
     graph: new Graph(),
-    weights: declarationWeights,
+    weights: emptyWeights(),
   };
 
   const memberMap = new Map(repo.members().map((m) => [m.user.id, m]));

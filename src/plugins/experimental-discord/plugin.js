@@ -12,6 +12,7 @@ import {Fetcher} from "./fetcher";
 import {Mirror} from "./mirror";
 import type {ReferenceDetector} from "../../core/references";
 import type {WeightedGraph} from "../../core/weightedGraph";
+import {merge as mergeWeights} from "../../core/weights";
 import {weightsForDeclaration} from "../../analysis/pluginDeclaration";
 import {createGraph} from "./createGraph";
 import * as Model from "./models";
@@ -74,18 +75,24 @@ export class DiscordPlugin implements Plugin {
       channelWeightConfig,
     } = await loadConfig(ctx);
     const repo = await repository(ctx, guildId);
-    const declarationWeights = weightsForDeclaration(declaration);
     const defaultRoleWeightConfig = {defaultWeight: 1, roleWeights: {}};
     const defaultChannelWeightConfig = {defaultWeight: 1, channelWeights: {}};
 
-    return await createGraph(
+    const weightedGraph = await createGraph(
       guildId,
       repo,
-      declarationWeights,
       reactionWeights,
       NullUtil.orElse(roleWeightConfig, defaultRoleWeightConfig),
       NullUtil.orElse(channelWeightConfig, defaultChannelWeightConfig)
     );
+
+    const declarationWeights = weightsForDeclaration(declaration);
+    // Add in the type-level weights from the plugin spec
+    const combinedWeights = mergeWeights([
+      weightedGraph.weights,
+      declarationWeights,
+    ]);
+    return {graph: weightedGraph.graph, weights: combinedWeights};
   }
 
   async referenceDetector(
