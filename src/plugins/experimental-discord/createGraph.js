@@ -188,9 +188,85 @@ function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
   };
 }
 
+export type GraphReaction = {|
+  +reaction: Model.Reaction,
+  +reactingMember: Model.GuildMember,
+|};
+
+/**
+ * All of the information necessary to add a message to
+ * the graph, along with its reactions and its mentions.
+ */
+export type GraphMessage = {|
+  +message: Model.Message,
+  +author: Model.GuildMember | null,
+  +reactions: $ReadOnlyArray<GraphReaction>,
+  +mentions: $ReadOnlyArray<Model.GuildMember>,
+  // Included because we want the channel name in the node description.
+  +channelName: string,
+|};
+
+/**
+ * Find all of the messages that should go into the graph.
+ * This will deliberately ignore messages that have no reactions, since
+ * they have no Cred impact and don't need to go into the graph.
+ */
+export function* findGraphMessages(
+  repo: SqliteMirrorRepository
+): Iterable<GraphMessage> {
+  const memberMap = new Map(repo.members().map((m) => [m.user.id, m]));
+  for (const channel of repo.channels()) {
+    for (const message of repo.messages(channel.id)) {
+      if (message.nonUserAuthor) {
+        continue;
+      }
+
+      const reactions = [];
+      for (const reaction of repo.reactions(channel.id, message.id)) {
+        const reactingMember = memberMap.get(reaction.authorId);
+        if (!reactingMember) {
+          // Probably this user left the server.
+          // Let's ignore this reaction (keeping the rest of the message)
+          continue;
+        }
+        reactions.push({reaction, reactingMember});
+      }
+
+      const mentions = [];
+      for (const userId of message.mentions) {
+        const mentionedMember = memberMap.get(userId);
+        if (!mentionedMember) {
+          // Probably this user left the server.
+          // We'll skip this mention (keeping the rest of the message)
+          continue;
+        }
+        mentions.push(mentionedMember);
+      }
+      if (mentions.length === 0 && reactions.length === 0) {
+        // No valid mentions or reactions, meaning this message won't have real Cred effects.
+        // let's skip it.
+        continue;
+      }
+
+      const author = memberMap.get(message.authorId) || null;
+
+      yield {message, author, reactions, mentions, channelName: channel.name};
+    }
+  }
+}
+
 export function createGraph(
   guild: Model.Snowflake,
   repo: SqliteMirrorRepository,
+  weights: WeightConfig
+): WeightedGraphT {
+  const graphMessages = findGraphMessages(repo);
+  return _createGraphFromMessages(guild, graphMessages, weights);
+}
+
+export function _createGraphFromMessages(
+  guild: Model.Snowflake,
+  messages: Iterable<GraphMessage>,
   weights: WeightConfig
 ): WeightedGraphT {
   const wg = {
@@ -198,60 +274,31 @@ export function createGraph(
     weights: emptyWeights(),
   };
 
-  const memberMap = new Map(repo.members().map((m) => [m.user.id, m]));
-  const channels = repo.channels();
-  for (const channel of channels) {
-    const messages = repo.messages(channel.id);
-    for (const message of messages) {
-      if (message.mentions.length === 0 && message.reactionEmoji.length === 0)
-        continue;
-      if (message.nonUserAuthor) continue;
+  for (const graphMessage of messages) {
+    const {message, author, reactions, mentions, channelName} = graphMessage;
+    if (author) {
+      wg.graph.addNode(memberNode(author));
+      wg.graph.addNode(messageNode(message, guild, channelName));
+      wg.graph.addEdge(authorsMessageEdge(message, author));
+    }
 
-      let hasEdges = false;
-      const reactions = repo.reactions(channel.id, message.id);
-      for (const reaction of reactions) {
-        const reactingMember = memberMap.get(reaction.authorId);
-        if (!reactingMember) {
-          // Probably this user left the server.
-          continue;
-        }
+    for (const {reaction, reactingMember} of reactions) {
+      const node = reactionNode(reaction, message.timestampMs, guild);
+      wg.weights.nodeWeights.set(
+        node.address,
+        reactionWeight(weights, message, reaction, reactingMember)
+      );
+      wg.graph.addNode(node);
+      wg.graph.addNode(memberNode(reactingMember));
+      wg.graph.addEdge(reactsToEdge(reaction, message));
+      wg.graph.addEdge(
+        addsReactionEdge(reaction, reactingMember, message.timestampMs)
+      );
+    }
 
-        const node = reactionNode(reaction, message.timestampMs, guild);
-        wg.weights.nodeWeights.set(
-          node.address,
-          reactionWeight(weights, message, reaction, reactingMember)
-        );
-        wg.graph.addNode(node);
-        wg.graph.addNode(memberNode(reactingMember));
-        wg.graph.addEdge(reactsToEdge(reaction, message));
-        wg.graph.addEdge(
-          addsReactionEdge(reaction, reactingMember, message.timestampMs)
-        );
-        hasEdges = true;
-      }
-
-      for (const userId of message.mentions) {
-        const mentionedMember = memberMap.get(userId);
-        if (!mentionedMember) {
-          // Probably this user left the server.
-          continue;
-        }
-        wg.graph.addNode(memberNode(mentionedMember));
-        wg.graph.addEdge(mentionsEdge(message, mentionedMember));
-        hasEdges = true;
-      }
-
-      // Don't bloat the graph with isolated messages.
-      if (hasEdges) {
-        const author = memberMap.get(message.authorId);
-        if (!author) {
-          // Probably this user left the server.
-          continue;
-        }
-        wg.graph.addNode(memberNode(author));
-        wg.graph.addNode(messageNode(message, guild, channel.name));
-        wg.graph.addEdge(authorsMessageEdge(message, author));
-      }
+    for (const mentionedMember of mentions) {
+      wg.graph.addNode(memberNode(mentionedMember));
+      wg.graph.addEdge(mentionsEdge(message, mentionedMember));
     }
   }
 
