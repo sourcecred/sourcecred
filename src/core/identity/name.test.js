@@ -22,7 +22,13 @@ describe("core/identity/name", () => {
       }
     });
     it("succeeds on valid names", () => {
-      const names = ["h", "hi-there", "ZaX99324cab"];
+      const names = [
+        "h",
+        "hi-there",
+        "ZaX99324cab",
+        // full ethereum address
+        "0xb4124cEB3451635DAcedd11767f004d8a28c6eE7",
+      ];
       for (const n of names) {
         expect(nameFromString(n)).toEqual(n);
       }
