@@ -7,6 +7,7 @@
   "private": false,
   "dependencies": {
     "@material-ui/lab": "^4.0.0-alpha.56",
+    "@slack/web-api": "^5.13.0",
     "aphrodite": "^2.4.0",
     "base-64": "^1.0.0",
     "base64url": "^3.0.1",
