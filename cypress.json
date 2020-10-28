@@ -1,4 +1,9 @@
 {
   "viewportWidth": 1920,
-  "viewportHeight": 1080
+  "viewportHeight": 1080,
+  "ignoreTestFiles": [
+    "**/__snapshots__/*",
+    "**/__image_snapshots__/*"
+  ],
+  "baseUrl": "http://localhost:8080/#/"
 }

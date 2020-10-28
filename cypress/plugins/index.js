@@ -1,6 +1,9 @@
 // @flow
 
 const browserify = require("@cypress/browserify-preprocessor");
+const {
+  initPlugin: initSnapshotPlugin,
+} = require("cypress-plugin-snapshots/plugin");
 
 /*::
 declare type Cypress$EventHook = (
@@ -23,12 +26,17 @@ declare type Cypress$EventHook = (
 // the project's config changing)
 
 // TODO (@topocount): create Cypress Config File flow type
-module.exports = (on /*: Cypress$EventHook*/, _unused_config /*: any*/) => {
+module.exports = (on /*: Cypress$EventHook*/, config /*: any*/) /*: any*/ => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
+
+  // initialize the snapshot testing plugin
+  initSnapshotPlugin(on, config);
 
   // utilize the cypress browserify plugin to strip flow type syntax
   const options = browserify.defaultOptions;
   options.browserifyOptions.transform[1][1].presets.push("@babel/preset-flow");
   on("file:preprocessor", browserify(options));
+
+  return config;
 };

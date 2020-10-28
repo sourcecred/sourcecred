@@ -15,6 +15,7 @@
     "bottleneck": "^2.19.5",
     "chalk": "^4.0.0",
     "commonmark": "0.29.1",
+    "cypress-plugin-snapshots": "^1.4.4",
     "d3-array": "^2.4.0",
     "d3-format": "^2.0.0",
     "d3-scale": "^3.2.1",
