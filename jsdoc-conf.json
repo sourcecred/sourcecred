@@ -1,0 +1,24 @@
+{
+  "plugins": ["node_modules/jsdoc-babel"],
+  "babel": {
+    "plugins": ["transform-flow-strip-types"]
+  },
+  "templates": {
+    "opts": {
+      "template": "node_modules/docdash",
+      "encoding": "utf8",
+      "destination": "docs/",
+      "recurse": true,
+      "verbose": true
+    },
+    "default": {
+      "outputSourceFiles": false,
+      "outputSourcePath": false
+    }
+  },
+  "source": {
+    "include": "src",
+    "includePattern": "\\.?js$",
+    "excludePattern": "(node_modules/|docs)"
+  }
+}
