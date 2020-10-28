@@ -1,7 +1,9 @@
 <a name="DiscordFetcher"></a>
 
 ## DiscordFetcher
+
 Fetcher is responsible for:
+
 - Returning the correct endpoint to fetch against for Guilds, Channels,
   Members, and Reactions.
 - Formatting the returned results into the correct Typed objects
@@ -18,4 +20,4 @@ Fetcher is responsible for:
   returning an array of Channel objects in the corresponding method.
   See: https://discordapp.com/developers/docs/resources/guild#get-guild-channels
 
-**Kind**: global class  
+**Kind**: global class

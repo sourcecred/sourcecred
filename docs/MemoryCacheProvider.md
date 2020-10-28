@@ -1,6 +1,7 @@
 <a name="MemoryCacheProvider"></a>
 
 ## MemoryCacheProvider
+
 An in-memory CacheProvider.
 
 Using the same ID's will produce the same cache, however data will be lost when
@@ -12,9 +13,10 @@ Useful for tests or less I/O intense commands which should run in isolation.
 <a name="MemoryCacheProvider+database"></a>
 
 ### memoryCacheProvider.database()
+
 Returns a Database handle associated with this `id`,
-an existing Database from the cache *may* be provided.
+an existing Database from the cache _may_ be provided.
 
 Note: the exact Database object may be shared within the process.
 
-**Kind**: instance method of [<code>MemoryCacheProvider</code>](#MemoryCacheProvider)  
+**Kind**: instance method of [<code>MemoryCacheProvider</code>](#MemoryCacheProvider)

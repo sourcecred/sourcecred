@@ -1,7 +1,9 @@
 <a name="Ledger"></a>
 
 ## Ledger
+
 The Ledger is an append-only auditable data store which tracks
+
 - Identities and what aliases they possess
 - Identities' grain balances
 
@@ -28,41 +30,43 @@ Every Ledger action has a timestamp, and the Ledger's actions must always be
 in timestamp-sorted order. Adding a new Action with a timestamp older than a
 previous action is illegal.
 
- [ Github](https://github.com/sourcecred/sourcecred/blob/master/src/core/ledger/ledger.js)
+[ Github](https://github.com/sourcecred/sourcecred/blob/master/src/core/ledger/ledger.js)
 
-**Kind**: global class  
+**Kind**: global class
 
-* [Ledger](#Ledger)
-    * _instance_
-        * [.accounts()](#Ledger+accounts)
-        * [.account()](#Ledger+account)
-        * [.nameAvailable()](#Ledger+nameAvailable)
-        * [.accountByAddress()](#Ledger+accountByAddress)
-        * [.accountByName()](#Ledger+accountByName)
-        * [.createIdentity()](#Ledger+createIdentity)
-        * [.mergeIdentities()](#Ledger+mergeIdentities)
-        * [.renameIdentity()](#Ledger+renameIdentity)
-        * [.addAlias()](#Ledger+addAlias)
-        * [.activate()](#Ledger+activate)
-        * [.deactivate()](#Ledger+deactivate)
-        * [.distributeGrain()](#Ledger+distributeGrain)
-        * [.transferGrain()](#Ledger+transferGrain)
-        * [.eventLog()](#Ledger+eventLog)
-        * [.serialize()](#Ledger+serialize)
-        * [.lastDistributionTimestamp()](#Ledger+lastDistributionTimestamp)
-    * _static_
-        * [.fromEventLog()](#Ledger.fromEventLog)
-        * [.parse()](#Ledger.parse)
+- [Ledger](#Ledger)
+  - _instance_
+    - [.accounts()](#Ledger+accounts)
+    - [.account()](#Ledger+account)
+    - [.nameAvailable()](#Ledger+nameAvailable)
+    - [.accountByAddress()](#Ledger+accountByAddress)
+    - [.accountByName()](#Ledger+accountByName)
+    - [.createIdentity()](#Ledger+createIdentity)
+    - [.mergeIdentities()](#Ledger+mergeIdentities)
+    - [.renameIdentity()](#Ledger+renameIdentity)
+    - [.addAlias()](#Ledger+addAlias)
+    - [.activate()](#Ledger+activate)
+    - [.deactivate()](#Ledger+deactivate)
+    - [.distributeGrain()](#Ledger+distributeGrain)
+    - [.transferGrain()](#Ledger+transferGrain)
+    - [.eventLog()](#Ledger+eventLog)
+    - [.serialize()](#Ledger+serialize)
+    - [.lastDistributionTimestamp()](#Ledger+lastDistributionTimestamp)
+  - _static_
+    - [.fromEventLog()](#Ledger.fromEventLog)
+    - [.parse()](#Ledger.parse)
 
 <a name="Ledger+accounts"></a>
 
 ### ledger.accounts()
+
 Return all the Accounts in the ledger.
 
 **Kind**: instance method of [<code>Ledger</code>](#Ledger)  
 <a name="Ledger+account"></a>
 
 ### ledger.account()
+
 Get the Account associated with a particular identity.
 
 If the identity is not in the ledger, an error is thrown.
@@ -71,6 +75,7 @@ If the identity is not in the ledger, an error is thrown.
 <a name="Ledger+nameAvailable"></a>
 
 ### ledger.nameAvailable()
+
 Return whether the IdentityName in question is available.
 
 For convenience in test code (and consistency with createIdentity and renameIdentity),
@@ -81,6 +86,7 @@ thrown.
 <a name="Ledger+accountByAddress"></a>
 
 ### ledger.accountByAddress()
+
 Return the account matching a given NodeAddress, if one exists.
 
 Returns null if there is no account matching that address.
@@ -89,6 +95,7 @@ Returns null if there is no account matching that address.
 <a name="Ledger+accountByName"></a>
 
 ### ledger.accountByName()
+
 Return the account with the given name, if one exists.
 
 Returns null if there is no account matching that address.
@@ -99,6 +106,7 @@ Note: This is case sensitive.
 <a name="Ledger+createIdentity"></a>
 
 ### ledger.createIdentity()
+
 Create an account in the ledger.
 
 This will reserve the identity's name, and its innate address.
@@ -112,10 +120,12 @@ Will fail if the name is not valid, or already taken.
 <a name="Ledger+mergeIdentities"></a>
 
 ### ledger.mergeIdentities()
+
 Merge two identities together.
 
 One identity is considered the "base" and the other is the "target".
 The target is absorbed into the base, meaning:
+
 - Base gets the Grain balance, and lifetime paid amount added to its account.
 - Base gets every alias that the target had.
 - Base gets the target's own address as an alias.
@@ -129,6 +139,7 @@ itself, will error.
 <a name="Ledger+renameIdentity"></a>
 
 ### ledger.renameIdentity()
+
 Change a identity's name.
 
 Will fail if no identity matches the identityId, or if the identity already has that
@@ -138,6 +149,7 @@ name, or if the identity's new name is claimed by another identity.
 <a name="Ledger+addAlias"></a>
 
 ### ledger.addAlias()
+
 Add an alias for a identity.
 
 If that alias is associated with past Grain payments (because it
@@ -151,6 +163,7 @@ Will fail if the alias is already claimed by any identity.
 <a name="Ledger+activate"></a>
 
 ### ledger.activate()
+
 Activate an account, making it eligible to send and recieve Grain.
 
 If the account is already active, this will no-op (without emitting any
@@ -160,6 +173,7 @@ event).
 <a name="Ledger+deactivate"></a>
 
 ### ledger.deactivate()
+
 Deactivate an account, making it ineligible to send or recieve Grain.
 
 The account's Grain balance will remain untouched until it is reactivated.
@@ -171,6 +185,7 @@ event).
 <a name="Ledger+distributeGrain"></a>
 
 ### ledger.distributeGrain()
+
 Canonicalize a Grain distribution in the ledger.
 
 Fails if any of the recipients are not active.
@@ -179,6 +194,7 @@ Fails if any of the recipients are not active.
 <a name="Ledger+transferGrain"></a>
 
 ### ledger.transferGrain()
+
 Transfer Grain from one account to another.
 
 Fails if the sender does not have enough Grain, or if the Grain amount is
@@ -195,6 +211,7 @@ and which one is `to`.
 <a name="Ledger+eventLog"></a>
 
 ### ledger.eventLog()
+
 Retrieve the log of all actions in the Ledger's history.
 
 May be used to reconstruct the Ledger after serialization.
@@ -203,6 +220,7 @@ May be used to reconstruct the Ledger after serialization.
 <a name="Ledger+serialize"></a>
 
 ### ledger.serialize()
+
 Serialize the events as a JsonLog-style newline-delimited JSON
 string.
 
@@ -210,6 +228,7 @@ string.
 <a name="Ledger+lastDistributionTimestamp"></a>
 
 ### ledger.lastDistributionTimestamp()
+
 Return the cred-effective timestamp for the last Grain distribution.
 
 We provide this because we may want to have a policy that issues one
@@ -219,13 +238,15 @@ distribution for each interval in the history of the project.
 <a name="Ledger.fromEventLog"></a>
 
 ### Ledger.fromEventLog()
+
 Reconstruct a Ledger from a LedgerLog.
 
 **Kind**: static method of [<code>Ledger</code>](#Ledger)  
 <a name="Ledger.parse"></a>
 
 ### Ledger.parse()
+
 Parse events serialized as a JsonLog-style newline-delimited JSON
 string (e.g., by `serialize`).
 
-**Kind**: static method of [<code>Ledger</code>](#Ledger)  
+**Kind**: static method of [<code>Ledger</code>](#Ledger)

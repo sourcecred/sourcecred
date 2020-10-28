@@ -1,6 +1,7 @@
 <a name="TaskManager"></a>
 
 ## TaskManager
+
 TaskManager organizes and maintains a hierarchy of active tasks
 
 It utilizes TaskReporters internally for logging, and allows them to
@@ -20,4 +21,4 @@ terminate all tasks it spawns within its own context, but in the case of an
 unexpected error, this class makes it possible to quickly find and safely terminate
 all child tasks.
 
-**Kind**: global class  
+**Kind**: global class
