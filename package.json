@@ -8,6 +8,7 @@
   "dependencies": {
     "@material-ui/lab": "^4.0.0-alpha.56",
     "aphrodite": "^2.4.0",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "base-64": "^1.0.0",
     "base64url": "^3.0.1",
     "better-sqlite3": "^7.0.0",
@@ -79,6 +80,9 @@
     "flow-bin": "^0.135.0",
     "jest": "^26.0.1",
     "jest-fetch-mock": "^3.0.2",
+    "jsdoc": "^3.6.6",
+    "jsdoc-babel": "^0.5.0",
+    "jsdoc-to-markdown": "^6.0.1",
     "npm-run-all": "^4.1.5",
     "null-loader": "^4.0.0",
     "postinstall-postinstall": "^2.1.0",
