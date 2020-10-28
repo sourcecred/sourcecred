@@ -1,3 +1,4 @@
+// @flow
 const fs = require("fs");
 const path = require("path");
 const jsdoc2md = require("jsdoc-to-markdown");
