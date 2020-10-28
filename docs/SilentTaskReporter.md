@@ -1,6 +1,7 @@
 <a name="SilentTaskReporter"></a>
 
 ## SilentTaskReporter
+
 SilentTaskReporter is a task reporter that collects some information, but does not
 emit any visible notifications.
 
@@ -15,4 +16,4 @@ sequence of tasks.
 Callers can also check what tasks are still active (e.g. to verify that there are no
 active tasks unfinished at the end of a method.)
 
-**Kind**: global class  
+**Kind**: global class

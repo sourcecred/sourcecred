@@ -1,6 +1,7 @@
 <a name="SqliteMirror"></a>
 
 ## SqliteMirror
+
 Persists a local copy of data from a Discord Guild.
 Implements create and read functionality.
 
@@ -14,15 +15,16 @@ reactions, etc. In our model, Members have a property, User, which
 represents a full User object. Because of this, we save the User in the
 AddMember method.
 
-**Kind**: global class  
+**Kind**: global class
 
-* [SqliteMirror](#SqliteMirror)
-    * [new SqliteMirror()](#new_SqliteMirror_new)
-    * [.addMember()](#SqliteMirror+addMember)
+- [SqliteMirror](#SqliteMirror)
+  - [new SqliteMirror()](#new_SqliteMirror_new)
+  - [.addMember()](#SqliteMirror+addMember)
 
 <a name="new_SqliteMirror_new"></a>
 
 ### new SqliteMirror()
+
 Construct a new SqliteMirror instance.
 
 Takes a Database and GuildId.
@@ -30,7 +32,8 @@ Takes a Database and GuildId.
 <a name="SqliteMirror+addMember"></a>
 
 ### sqliteMirror.addMember()
+
 Because a User is represented in a Member object, we save the User in
 `addMember`.
 
-**Kind**: instance method of [<code>SqliteMirror</code>](#SqliteMirror)  
+**Kind**: instance method of [<code>SqliteMirror</code>](#SqliteMirror)

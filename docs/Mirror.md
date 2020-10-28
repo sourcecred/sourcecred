@@ -1,6 +1,7 @@
 <a name="Mirror"></a>
 
 ## Mirror
+
 Mirrors data from the Discourse API into a local sqlite db.
 
 This class allows us to persist a local copy of data from a Discourse
@@ -21,6 +22,7 @@ for multiple Discourse servers is not permitted; use separate Mirrors.
 <a name="new_Mirror_new"></a>
 
 ### new Mirror()
+
 Construct a new Mirror instance.
 
 Takes a Database, which may be a pre-existing Mirror database. The
@@ -28,4 +30,3 @@ provided DiscourseInterface will be used to retrieve new data from Discourse.
 
 A serverUrl is required so that we can ensure that this Mirror is only storing
 data from a particular Discourse server.
-

@@ -1,6 +1,7 @@
 <a name="WeightConfig"></a>
 
 ## WeightConfig
+
 A React component that lets users set Type-level weights.
 
 The WeightConfig component renders a slider for every ReactNode and Edge type
@@ -12,4 +13,4 @@ Each slider displays the weight associated in the `nodeWeights` or
 `edgeWeights` maps provided in props. When the user changes the weight,
 `onNodeWeightChange` or `onEdgeWeightChange` is called with the new weight.
 
-**Kind**: global class  
+**Kind**: global class

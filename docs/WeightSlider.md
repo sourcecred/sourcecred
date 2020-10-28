@@ -1,6 +1,7 @@
 <a name="WeightSlider"></a>
 
 ## WeightSlider
+
 The WeightSlider is a [controlled component] which lets the user choose a
 numeric weight by dragging a slider.
 
@@ -21,4 +22,4 @@ the slider position.
 [controlled component]: https://reactjs.org/docs/forms.html#controlled-components
 [range input]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/range
 
-**Kind**: global class  
+**Kind**: global class

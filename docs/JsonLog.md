@@ -1,6 +1,7 @@
 <a name="JsonLog"></a>
 
 ## JsonLog
+
 JsonLog tracks and serializes append-only logs of JSON values.
 
 At its heart, it's basically a simple wrapper around an array, which
@@ -18,4 +19,4 @@ compression.
 Elements of a `JsonLog` are always parsed using a Combo.Parser, which
 ensures type safety at runtime.
 
-**Kind**: global class  
+**Kind**: global class

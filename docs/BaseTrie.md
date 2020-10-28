@@ -1,28 +1,32 @@
 <a name="BaseTrie"></a>
 
 ## BaseTrie
-**Kind**: global class  
 
-* [BaseTrie](#BaseTrie)
-    * [new BaseTrie()](#new_BaseTrie_new)
-    * [.add()](#BaseTrie+add)
-    * [.get()](#BaseTrie+get)
-    * [.getLast()](#BaseTrie+getLast)
+**Kind**: global class
+
+- [BaseTrie](#BaseTrie)
+  - [new BaseTrie()](#new_BaseTrie_new)
+  - [.add()](#BaseTrie+add)
+  - [.get()](#BaseTrie+get)
+  - [.getLast()](#BaseTrie+getLast)
 
 <a name="new_BaseTrie_new"></a>
 
 ### new BaseTrie()
+
 Create an empty trie backed by the given address module.
 
 <a name="BaseTrie+add"></a>
 
 ### baseTrie.add()
+
 Add key `k` to this trie with value `v`. Return `this`.
 
 **Kind**: instance method of [<code>BaseTrie</code>](#BaseTrie)  
 <a name="BaseTrie+get"></a>
 
 ### baseTrie.get()
+
 Get the values in this trie along the path to `k`.
 
 More specifically, this method has the following observable
@@ -38,7 +42,8 @@ was added to this trie with value `v`, then append `v` to
 <a name="BaseTrie+getLast"></a>
 
 ### baseTrie.getLast()
+
 Get the last stored value `v` in the path to key `k`.
 Returns undefined if no value is available.
 
-**Kind**: instance method of [<code>BaseTrie</code>](#BaseTrie)  
+**Kind**: instance method of [<code>BaseTrie</code>](#BaseTrie)
