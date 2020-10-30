@@ -12,7 +12,7 @@
  * Fill the given buffer with cryptographically secure random bytes. The
  * buffer length must not exceed 65536.
  */
-function getRandomValues(buf: Uint8Array): Uint8Array {
+export default function getRandomValues(buf: Uint8Array): Uint8Array {
   if (typeof window !== "undefined") {
     if (window.crypto && window.crypto.getRandomValues) {
       return window.crypto.getRandomValues(buf);
@@ -28,7 +28,8 @@ function getRandomValues(buf: Uint8Array): Uint8Array {
   if (typeof require !== "undefined") {
     // Late-import `crypto` to avoid `require` in Observable notebooks,
     // and avoid using a literal `require(...)` to prevent Webpack from
-    // rewriting this. (Getting Webpack externals to work properly is .)
+    // rewriting this. (Getting Webpack externals to work properly is
+    // daunting.)
     //
     /* eslint-disable camelcase */
     /* eslint-disable no-undef */
@@ -51,5 +52,3 @@ function getRandomValues(buf: Uint8Array): Uint8Array {
   }
   throw new Error("No secure random number generator available.");
 }
-
-module.exports = getRandomValues;
