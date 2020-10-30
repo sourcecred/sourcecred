@@ -29,14 +29,15 @@ function getRandomValues(buf: Uint8Array): Uint8Array {
     // Late-import `crypto` to avoid `require` in Observable notebooks,
     // and avoid using a literal `require(...)` to prevent Webpack from
     // rewriting this. (Getting Webpack externals to work properly is .)
+    //
+    /* eslint-disable camelcase */
+    /* eslint-disable no-undef */
     const realRequire =
       // $FlowExpectedError[cannot-resolve-name]
       typeof __non_webpack_require__ !== "undefined"
         ? __non_webpack_require__
         : require; /* needed for Jest */
     const nodeCrypto = realRequire("crypto");
-    if (!nodeCrypto.randomBytes) {
-    }
     if (buf.length > 65536) {
       const e = new Error();
       (e: any).code = 22;
