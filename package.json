@@ -27,7 +27,7 @@
     "fs-extra": "^9.0.0",
     "globby": "^11.0.0",
     "history": "^5.0.0",
-    "htmlparser2": "^4.1.0",
+    "htmlparser2": "^5.0.1",
     "isomorphic-fetch": "^3.0.0",
     "json-stable-stringify": "^1.0.1",
     "lodash.clonedeep": "^4.5.0",
