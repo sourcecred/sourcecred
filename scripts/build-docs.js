@@ -2,6 +2,17 @@
 const fs = require("fs");
 const path = require("path");
 const jsdoc2md = require("jsdoc-to-markdown");
+const chalk = require("chalk");
+
+function success(message) {
+  const label = chalk.bgGreen.bold.white(" SUCCESS ");
+  console.log(`${label} ${message}`);
+}
+
+function error(message) {
+  const label = chalk.bgRed.bold.white(" FAIL ");
+  console.log(`${label} ${message}`);
+}
 
 // Return a list of files of the specified fileTypes in the provided dir,
 // with the file path relative to the given dir
@@ -46,20 +57,17 @@ async function generateDocs(inputFile) {
   /* create a documentation file for each class */
   for (const className of classNames) {
     const template = `{{#class name="${className}"}}{{>docs}}{{/class}}`;
-    console.log(`rendering ${className}, template: ${template}`);
     const output = jsdoc2md.renderSync({
       data: templateData,
       template: template,
     });
     fs.writeFileSync(path.resolve(outputDir, `${className}.md`), output);
-    console.log(className);
+    success(`rendering ${className}`);
   }
 }
 
-(async () => {
-  try {
-    getFilesFromDir("./src", [".js"]).map((fileDir) => generateDocs(fileDir));
-  } catch (e) {
-    console.error("We've thrown! Whoops!", e);
-  }
-})();
+getFilesFromDir("./src", [".js"]).map((fileDir) =>
+  generateDocs(fileDir).catch((err) => {
+    error(err);
+  })
+);
