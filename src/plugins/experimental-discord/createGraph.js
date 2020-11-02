@@ -1,9 +1,8 @@
 // @flow
 
 import {escape} from "entities";
-import * as NullUtil from "../../util/null";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
-import {type NodeWeight, empty as emptyWeights} from "../../core/weights";
+import {empty as emptyWeights} from "../../core/weights";
 import {
   Graph,
   NodeAddress,
@@ -24,6 +23,8 @@ import {
   mentionsEdgeType,
 } from "./declaration";
 import * as Model from "./models";
+
+import {type WeightConfig, reactionWeight} from "./reactionWeights";
 
 // Display this many characters in description.
 const MESSAGE_LENGTH = 30;
@@ -187,26 +188,10 @@ function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
   };
 }
 
-export type EmojiWeightMap = {[ref: Model.EmojiRef]: NodeWeight};
-export type RoleWeightMap = {[ref: Model.Snowflake]: NodeWeight};
-export type ChannelWeightMap = {[ref: Model.Snowflake]: NodeWeight};
-
-export type RoleWeightConfig = {|
-  +defaultWeight: number,
-  +roleWeights: RoleWeightMap,
-|};
-
-export type ChannelWeightConfig = {|
-  +defaultWeight: number,
-  +channelWeights: ChannelWeightMap,
-|};
-
 export function createGraph(
   guild: Model.Snowflake,
   repo: SqliteMirrorRepository,
-  emojiWeights: EmojiWeightMap,
-  roleWeightConfig: RoleWeightConfig,
-  channelWeightConfig: ChannelWeightConfig
+  weights: WeightConfig
 ): WeightedGraphT {
   const wg = {
     graph: new Graph(),
@@ -225,40 +210,16 @@ export function createGraph(
       let hasEdges = false;
       const reactions = repo.reactions(channel.id, message.id);
       for (const reaction of reactions) {
-        const emojiRef = Model.emojiToRef(reaction.emoji);
         const reactingMember = memberMap.get(reaction.authorId);
-        let reactionWeight = NullUtil.orElse(emojiWeights[emojiRef], 1);
-
-        if (message.authorId === reaction.authorId) {
-          reactionWeight = 0;
-        }
-
         if (!reactingMember) {
           // Probably this user left the server.
           continue;
         }
 
-        // get the weight of the highest weight role the reacting user has
-        let roleWeight = roleWeightConfig.defaultWeight;
-        const roleWeights = roleWeightConfig.roleWeights;
-        for (const roleRef of reactingMember.roles) {
-          const matchingWeight = roleWeights[roleRef];
-          if (matchingWeight != null && matchingWeight > roleWeight) {
-            roleWeight = matchingWeight;
-          }
-        }
-
-        // get the weight of a given channel
-        const channelWeights = channelWeightConfig.channelWeights;
-        const channelWeight = NullUtil.orElse(
-          channelWeights[reaction.channelId],
-          channelWeightConfig.defaultWeight
-        );
-
         const node = reactionNode(reaction, message.timestampMs, guild);
         wg.weights.nodeWeights.set(
           node.address,
-          channelWeight * roleWeight * reactionWeight
+          reactionWeight(weights, message, reaction, reactingMember)
         );
         wg.graph.addNode(node);
         wg.graph.addNode(memberNode(reactingMember));

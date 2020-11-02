@@ -22,7 +22,6 @@ import {
   fromString as pluginIdFromString,
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
-import * as NullUtil from "../../util/null";
 import {createIdentities} from "./createIdentities";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
@@ -68,23 +67,10 @@ export class DiscordPlugin implements Plugin {
     rd: ReferenceDetector
   ): Promise<WeightedGraph> {
     const _ = rd; // TODO(#1808): not yet used
-    const {
-      guildId,
-      reactionWeights,
-      roleWeightConfig,
-      channelWeightConfig,
-    } = await loadConfig(ctx);
+    const {guildId, weights} = await loadConfig(ctx);
     const repo = await repository(ctx, guildId);
-    const defaultRoleWeightConfig = {defaultWeight: 1, roleWeights: {}};
-    const defaultChannelWeightConfig = {defaultWeight: 1, channelWeights: {}};
 
-    const weightedGraph = await createGraph(
-      guildId,
-      repo,
-      reactionWeights,
-      NullUtil.orElse(roleWeightConfig, defaultRoleWeightConfig),
-      NullUtil.orElse(channelWeightConfig, defaultChannelWeightConfig)
-    );
+    const weightedGraph = await createGraph(guildId, repo, weights);
 
     const declarationWeights = weightsForDeclaration(declaration);
     // Add in the type-level weights from the plugin spec
