@@ -35,7 +35,6 @@ import * as G from "../../core/ledger/grain";
 const useStyles = makeStyles((theme) => {
   return {
     container: {
-      maxWidth: "60em",
       width: "100%",
     },
     table: {
@@ -266,10 +265,10 @@ const LedgerEventRow = React.memo(
         <TableCell>
           <Box
             display="flex"
+            flex={1}
             flexDirection="row"
             alignItems="center"
             flexWrap="wrap"
-            maxWidth={50}
           >
             {getEventDetails()}
           </Box>
