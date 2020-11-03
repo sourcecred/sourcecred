@@ -53,6 +53,7 @@ export class GitcoinPlugin implements Plugin {
     const path = pathJoin(configDir, "config.json");
     const pgDatabaseUrl = process.env.GITCOIN_POSTGRES_URL;
     const gitcoinHost = process.env.GITCOIN_HOST;
+    const userWhitelist = process.env.GITCOIN_USER_WHITELIST;
     const task = `gitcoin: config file generating`;
 
     if (fs.existsSync(path)) {
@@ -69,9 +70,14 @@ export class GitcoinPlugin implements Plugin {
       throw new Error("missing GITCOIN_HOST environmental variable");
     }
 
+    if (!userWhitelist) {
+      throw new Error("missing GITCOIN_USER_WHITELIST environmental variable");
+    }
+
     const config = {
       pgDatabaseUrl,
       gitcoinHost,
+      userWhitelist
     };
 
     fs.writeFileSync(path, JSON.stringify(config));
