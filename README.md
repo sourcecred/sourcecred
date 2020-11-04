@@ -144,11 +144,11 @@ yarn build
 You'll likely want to test out your modified version of SourceCred on an
 instance you're familiar with. A convenient way to do that is to create an
 alias for your altered version of SourceCred. Here's an example of how to do
-so:
+so in a bash shell:
 
 ```Bash
 SC_REPOSITORY_DIR=`pwd`
-alias scdev=node "$SC_REPOSITORY_DIR"/bin/sourcecred.js
+alias scdev='node "$SC_REPOSITORY_DIR"/bin/sourcecred.js'
 cd $MY_SC_INSTANCE
 # Run the `sourcecred go` command, in your instance, using your modified code.
 scdev go
