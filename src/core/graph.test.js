@@ -18,6 +18,7 @@ import {
   edgeToString,
   edgeToStrings,
   edgeToParts,
+  compareGraphs,
 } from "./graph";
 import {advancedGraph, node, partsNode, edge, partsEdge} from "./graphTestUtil";
 
@@ -1661,6 +1662,144 @@ describe("core/graph", () => {
         timestampMs: 0,
       };
       expect(edgeToParts(edge)).toEqual(expected);
+    });
+  });
+
+  describe("compareGraphs", () => {
+    describe("simple graphs are equal with no differences", () => {
+      const graph1 = new Graph().addNode(src).addNode(dst).addEdge(simpleEdge);
+      const graph2 = new Graph().addNode(src).addNode(dst).addEdge(simpleEdge);
+
+      it("returns empty arrays", () => {
+        const expected = {
+          graphsAreEqual: true,
+          uniqueNodesInFirst: [],
+          uniqueNodesInSecond: [],
+          nodeTuplesWithDifferences: [],
+          uniqueEdgesInFirst: [],
+          uniqueEdgesInSecond: [],
+          edgeTuplesWithDifferences: [],
+        };
+        expect(compareGraphs(graph1, graph2)).toEqual(expected);
+      });
+    });
+
+    describe("advanced graphs are equal with no differences", () => {
+      const advanced = advancedGraph();
+
+      it("returns empty arrays", () => {
+        const expected = {
+          graphsAreEqual: true,
+          uniqueNodesInFirst: [],
+          uniqueNodesInSecond: [],
+          nodeTuplesWithDifferences: [],
+          uniqueEdgesInFirst: [],
+          uniqueEdgesInSecond: [],
+          edgeTuplesWithDifferences: [],
+        };
+        expect(compareGraphs(advanced.graph1(), advanced.graph2())).toEqual(
+          expected
+        );
+      });
+    });
+
+    describe("each graph has unique full dangling edge", () => {
+      const danglingEdge = edge(
+        "dangling edge",
+        node("unknown src"),
+        node("unknown dst")
+      );
+      const danglingEdge2 = edge(
+        "dangling edge 2",
+        node("unknown src"),
+        node("unknown dst")
+      );
+      const graph1 = new Graph()
+        .addNode(src)
+        .addNode(dst)
+        .addEdge(simpleEdge)
+        .addEdge(danglingEdge);
+      const graph2 = new Graph()
+        .addNode(src)
+        .addNode(dst)
+        .addEdge(simpleEdge)
+        .addEdge(danglingEdge2);
+
+      it("returns unique dangling edge", () => {
+        const expected = {
+          graphsAreEqual: false,
+          uniqueNodesInFirst: [],
+          uniqueNodesInSecond: [],
+          nodeTuplesWithDifferences: [],
+          uniqueEdgesInFirst: [danglingEdge],
+          uniqueEdgesInSecond: [danglingEdge2],
+          edgeTuplesWithDifferences: [],
+        };
+        expect(compareGraphs(graph1, graph2)).toEqual(expected);
+      });
+    });
+
+    describe("first graph has unique contents", () => {
+      const graph1 = new Graph().addNode(src).addNode(dst).addEdge(simpleEdge);
+      const graph2 = new Graph().addNode(src);
+
+      it("returns unique contents", () => {
+        const expected = {
+          graphsAreEqual: false,
+          uniqueNodesInFirst: [dst],
+          uniqueNodesInSecond: [],
+          nodeTuplesWithDifferences: [],
+          uniqueEdgesInFirst: [simpleEdge],
+          uniqueEdgesInSecond: [],
+          edgeTuplesWithDifferences: [],
+        };
+        expect(compareGraphs(graph1, graph2)).toEqual(expected);
+      });
+    });
+
+    describe("second graph has unique contents", () => {
+      const graph1 = new Graph().addNode(src);
+      const graph2 = new Graph().addNode(src).addNode(dst).addEdge(simpleEdge);
+
+      it("returns unique contents", () => {
+        const expected = {
+          graphsAreEqual: false,
+          uniqueNodesInFirst: [],
+          uniqueNodesInSecond: [dst],
+          nodeTuplesWithDifferences: [],
+          uniqueEdgesInFirst: [],
+          uniqueEdgesInSecond: [simpleEdge],
+          edgeTuplesWithDifferences: [],
+        };
+        expect(compareGraphs(graph1, graph2)).toEqual(expected);
+      });
+    });
+
+    describe("attribute differences", () => {
+      const dst2 = {
+        address: NodeAddress.fromParts(["dst"]),
+        description: "unique description",
+        timestampMs: null,
+      };
+      const simpleEdge2 = edge("edge", src, node("unique dst"));
+      const graph1 = new Graph().addNode(src).addNode(dst).addEdge(simpleEdge);
+      const graph2 = new Graph()
+        .addNode(src)
+        .addNode(dst2)
+        .addEdge(simpleEdge2);
+
+      it("returns tuples with differences", () => {
+        const expected = {
+          graphsAreEqual: false,
+          uniqueNodesInFirst: [],
+          uniqueNodesInSecond: [],
+          nodeTuplesWithDifferences: [[dst, dst2]],
+          uniqueEdgesInFirst: [],
+          uniqueEdgesInSecond: [],
+          edgeTuplesWithDifferences: [[simpleEdge, simpleEdge2]],
+        };
+        expect(compareGraphs(graph1, graph2)).toEqual(expected);
+      });
     });
   });
 });
