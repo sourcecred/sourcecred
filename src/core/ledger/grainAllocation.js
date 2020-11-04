@@ -48,10 +48,15 @@ export type Immediate = "IMMEDIATE";
  */
 export type Special = "SPECIAL";
 
-export type AllocationPolicy = RegularPolicy | SpecialPolicy;
+export type AllocationPolicy = BalancedPolicy | ImmediatePolicy | SpecialPolicy;
 
-export type RegularPolicy = {|
-  +policyType: Immediate | Balanced,
+export type BalancedPolicy = {|
+  +policyType: Balanced,
+  +budget: G.Grain,
+|};
+
+export type ImmediatePolicy = {|
+  +policyType: Immediate,
   +budget: G.Grain,
 |};
 
@@ -262,8 +267,13 @@ function specialReceipts(
   throw new Error(`no active grain account for identity: ${policy.recipient}`);
 }
 
-const regularPolicyParser: P.Parser<RegularPolicy> = P.object({
-  policyType: P.exactly(["IMMEDIATE", "BALANCED"]),
+const balancedPolicyParser: P.Parser<BalancedPolicy> = P.object({
+  policyType: P.exactly(["BALANCED"]),
+  budget: G.parser,
+});
+
+const immediatePolicyParser: P.Parser<ImmediatePolicy> = P.object({
+  policyType: P.exactly(["IMMEDIATE"]),
   budget: G.parser,
 });
 
@@ -275,7 +285,8 @@ const specialPolicyParser: P.Parser<SpecialPolicy> = P.object({
 });
 
 export const allocationPolicyParser: P.Parser<AllocationPolicy> = P.orElse([
-  regularPolicyParser,
+  balancedPolicyParser,
+  immediatePolicyParser,
   specialPolicyParser,
 ]);
 
