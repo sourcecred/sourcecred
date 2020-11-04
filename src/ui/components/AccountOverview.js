@@ -25,7 +25,7 @@ const useStyles = makeStyles(() => {
 });
 
 export const AccountOverview = ({
-  currency: {suffix: currencySuffix},
+  currency: {name: currencyName, suffix: currencySuffix},
 }: OverviewProps): ReactNode => {
   const {ledger} = useLedger();
   const classes = useStyles();
@@ -48,7 +48,7 @@ export const AccountOverview = ({
             <TableCell>Username</TableCell>
             <TableCell align="right">Active?</TableCell>
             <TableCell align="right">Current Balance</TableCell>
-            <TableCell align="right">Grain Earned</TableCell>
+            <TableCell align="right">{`${currencyName}`} Earned</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
