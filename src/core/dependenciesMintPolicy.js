@@ -44,6 +44,8 @@
  * than "out-of-band" fiat/configuration like the mint policies in this module.
  * Thus, we're naming it the dependencyMintPolicy to communicate that
  * intention.
+ *
+ * TODO(#1686, @decentralion): Rewrite these docs when we switch to CredRank.
  */
 import {type NodeAddressT, NodeAddress} from "./graph";
 import {type TimestampMs} from "../util/timestamp";
@@ -74,6 +76,8 @@ export type DependencyMintPeriod = {|
  * we're doing raw cred computation: instead of an address, we track an index
  * into the canonical node order, and rather than arbitrary client-provided
  * periods, we compute the weight for each Interval.
+ *
+ * TODO(#1686, @decentralion): Remove this once we switch to CredRank.
  */
 export type ProcessedDependencyMintPolicy = {|
   +nodeIndex: number,
