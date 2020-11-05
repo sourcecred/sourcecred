@@ -7,6 +7,21 @@ import * as Weights from "./weights";
 import {toCompat} from "../util/compat";
 
 describe("core/weights", () => {
+  function simpleWeights(
+    nodeWeights: [string, number][],
+    edgeWeights: [string, number, number][]
+  ): WeightsT {
+    const w = Weights.empty();
+    for (const [addrPart, weight] of nodeWeights) {
+      w.nodeWeights.set(NodeAddress.fromParts([addrPart]), weight);
+    }
+    for (const [addrPart, forwards, backwards] of edgeWeights) {
+      const weight = {forwards, backwards};
+      w.edgeWeights.set(EdgeAddress.fromParts([addrPart]), weight);
+    }
+    return w;
+  }
+
   it("copy makes a copy", () => {
     const w = Weights.empty();
     const w1 = Weights.copy(w);
@@ -86,20 +101,6 @@ describe("core/weights", () => {
   });
 
   describe("merge", () => {
-    function simpleWeights(
-      nodeWeights: [string, number][],
-      edgeWeights: [string, number, number][]
-    ): WeightsT {
-      const w = Weights.empty();
-      for (const [addrPart, weight] of nodeWeights) {
-        w.nodeWeights.set(NodeAddress.fromParts([addrPart]), weight);
-      }
-      for (const [addrPart, forwards, backwards] of edgeWeights) {
-        const weight = {forwards, backwards};
-        w.edgeWeights.set(EdgeAddress.fromParts([addrPart]), weight);
-      }
-      return w;
-    }
     it("produces empty weights when given an empty array", () => {
       expect(Weights.merge([])).toEqual(Weights.empty());
     });
@@ -228,6 +229,166 @@ describe("core/weights", () => {
         expect(() => Weights.merge([w1, w2])).toThrowError(
           "edge weight conflict"
         );
+      });
+    });
+  });
+
+  describe("compareWeights", () => {
+    describe("simple weights are equal with no differences", () => {
+      const w1 = simpleWeights(
+        [
+          ["foo", 3],
+          ["zod", 4],
+        ],
+        [
+          ["bar", 2, 3],
+          ["zoink", 4, 5],
+        ]
+      );
+      const w2 = simpleWeights(
+        [
+          ["foo", 3],
+          ["zod", 4],
+        ],
+        [
+          ["bar", 2, 3],
+          ["zoink", 4, 5],
+        ]
+      );
+
+      it("returns empty arrays", () => {
+        const expected = {
+          weightsAreEqual: true,
+          nodeWeightDiffs: [],
+          edgeWeightDiffs: [],
+        };
+        expect(Weights.compareWeights(w1, w2)).toEqual(expected);
+      });
+    });
+
+    describe("simple weights are equal but in different orders", () => {
+      const w1 = simpleWeights(
+        [
+          ["zod", 4],
+          ["foo", 3],
+        ],
+        [
+          ["zoink", 4, 5],
+          ["bar", 2, 3],
+        ]
+      );
+      const w2 = simpleWeights(
+        [
+          ["foo", 3],
+          ["zod", 4],
+        ],
+        [
+          ["bar", 2, 3],
+          ["zoink", 4, 5],
+        ]
+      );
+
+      it("returns empty arrays", () => {
+        const expected = {
+          weightsAreEqual: true,
+          nodeWeightDiffs: [],
+          edgeWeightDiffs: [],
+        };
+        expect(Weights.compareWeights(w1, w2)).toEqual(expected);
+      });
+    });
+
+    describe("both weights have unique addresses", () => {
+      const w1 = simpleWeights(
+        [
+          ["unique1", 3],
+          ["zod", 4],
+        ],
+        [
+          ["unique2", 2, 3],
+          ["zoink", 4, 5],
+        ]
+      );
+      const w2 = simpleWeights(
+        [
+          ["unique3", 3],
+          ["zod", 4],
+        ],
+        [
+          ["unique4", 2, 3],
+          ["zoink", 4, 5],
+        ]
+      );
+
+      it("returns the unique contents", () => {
+        const expected = {
+          weightsAreEqual: false,
+          nodeWeightDiffs: [
+            {
+              address: NodeAddress.fromParts(["unique1"]),
+              first: 3,
+              second: undefined,
+            },
+            {
+              address: NodeAddress.fromParts(["unique3"]),
+              first: undefined,
+              second: 3,
+            },
+          ],
+          edgeWeightDiffs: [
+            {
+              address: EdgeAddress.fromParts(["unique2"]),
+              first: {forwards: 2, backwards: 3},
+              second: undefined,
+            },
+            {
+              address: EdgeAddress.fromParts(["unique4"]),
+              first: undefined,
+              second: {forwards: 2, backwards: 3},
+            },
+          ],
+        };
+        expect(Weights.compareWeights(w1, w2)).toEqual(expected);
+      });
+    });
+
+    describe("weights have different values", () => {
+      const w1 = simpleWeights(
+        [
+          ["foo", 3],
+          ["zod", 6],
+        ],
+        [
+          ["bar", 2, 3],
+          ["zoink", 4, 5],
+        ]
+      );
+      const w2 = simpleWeights(
+        [
+          ["foo", 3],
+          ["zod", 4],
+        ],
+        [
+          ["bar", 2, 3],
+          ["zoink", 5, 4],
+        ]
+      );
+
+      it("returns the differing pairs", () => {
+        const expected = {
+          weightsAreEqual: false,
+          nodeWeightDiffs: [
+            {address: NodeAddress.fromParts(["zod"]), first: 6, second: 4},
+          ],
+          edgeWeightDiffs: [
+            {
+              address: EdgeAddress.fromParts(["zoink"]),
+              first: {forwards: 4, backwards: 5},
+              second: {forwards: 5, backwards: 4},
+            },
+          ],
+        };
+        expect(Weights.compareWeights(w1, w2)).toEqual(expected);
       });
     });
   });

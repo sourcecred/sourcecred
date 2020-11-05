@@ -1,5 +1,6 @@
 // @flow
 
+import deepEqual from "lodash.isequal";
 import * as MapUtil from "../util/map";
 import * as C from "../util/combo";
 import {
@@ -164,4 +165,69 @@ export function toJSON(weights: Weights): WeightsJSON {
 
 export function fromJSON(json: WeightsJSON): Weights {
   return parser.parseOrThrow(json);
+}
+
+export type NodeWeightDiff = {|
+  +address: NodeAddressT,
+  +first: ?NodeWeight,
+  +second: ?NodeWeight,
+|};
+
+export type EdgeWeightDiff = {|
+  +address: EdgeAddressT,
+  +first: ?EdgeWeight,
+  +second: ?EdgeWeight,
+|};
+
+export type WeightsComparison = {|
+  +weightsAreEqual: boolean,
+  +nodeWeightDiffs: $ReadOnlyArray<NodeWeightDiff>,
+  +edgeWeightDiffs: $ReadOnlyArray<EdgeWeightDiff>,
+|};
+
+export function compareWeights(
+  firstWeights: Weights,
+  secondWeights: Weights
+): WeightsComparison {
+  const nodeWeightDiffs = [];
+  const edgeWeightDiffs = [];
+
+  const nodeAddresses = new Set([
+    ...firstWeights.nodeWeights.keys(),
+    ...secondWeights.nodeWeights.keys(),
+  ]);
+  for (const a of nodeAddresses) {
+    const first = firstWeights.nodeWeights.get(a);
+    const second = secondWeights.nodeWeights.get(a);
+    if (!deepEqual(first, second)) {
+      nodeWeightDiffs.push({
+        address: a,
+        first: first,
+        second: second,
+      });
+    }
+  }
+  const edgeAddresses = new Set([
+    ...firstWeights.edgeWeights.keys(),
+    ...secondWeights.edgeWeights.keys(),
+  ]);
+  for (const a of edgeAddresses) {
+    const first = firstWeights.edgeWeights.get(a);
+    const second = secondWeights.edgeWeights.get(a);
+    if (!deepEqual(first, second)) {
+      edgeWeightDiffs.push({
+        address: a,
+        first: first,
+        second: second,
+      });
+    }
+  }
+  const weightsAreEqual =
+    nodeWeightDiffs.length === 0 && edgeWeightDiffs.length === 0;
+
+  return {
+    weightsAreEqual,
+    nodeWeightDiffs,
+    edgeWeightDiffs,
+  };
 }
