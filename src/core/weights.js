@@ -1,5 +1,6 @@
 // @flow
 
+import deepEqual from "lodash.isequal";
 import * as MapUtil from "../util/map";
 import * as C from "../util/combo";
 import {
@@ -164,4 +165,73 @@ export function toJSON(weights: Weights): WeightsJSON {
 
 export function fromJSON(json: WeightsJSON): Weights {
   return parser.parseOrThrow(json);
+}
+
+export type WeightsComparison = {|
+  +weightsAreEqual: boolean,
+  +uniqueNodesInFirst: $ReadOnlyArray<[NodeAddressT, NodeWeight]>,
+  +uniqueNodesInSecond: $ReadOnlyArray<[NodeAddressT, NodeWeight]>,
+  +nodeTuplesWithDifferences: $ReadOnlyArray<
+    [[NodeAddressT, NodeWeight], [NodeAddressT, NodeWeight]]
+  >,
+  +uniqueEdgesInFirst: $ReadOnlyArray<[EdgeAddressT, EdgeWeight]>,
+  +uniqueEdgesInSecond: $ReadOnlyArray<[EdgeAddressT, EdgeWeight]>,
+  +edgeTuplesWithDifferences: $ReadOnlyArray<
+    [[EdgeAddressT, EdgeWeight], [EdgeAddressT, EdgeWeight]]
+  >,
+|};
+
+export function compareWeights(
+  firstWeights: Weights,
+  secondWeights: Weights
+): WeightsComparison {
+  const uniqueNodesInFirst = [];
+  const uniqueNodesInSecond = [];
+  const nodeTuplesWithDifferences = [];
+  const uniqueEdgesInFirst = [];
+  const uniqueEdgesInSecond = [];
+  const edgeTuplesWithDifferences = [];
+  const weightsAreEqual = deepEqual(firstWeights, secondWeights);
+
+  if (!weightsAreEqual) {
+    for (const firstNode of firstWeights.nodeWeights) {
+      const secondWeight = secondWeights.nodeWeights.get(firstNode[0]);
+      if (secondWeight !== undefined) {
+        const secondNode = [firstNode[0], secondWeight];
+        if (!deepEqual(firstNode, secondNode))
+          nodeTuplesWithDifferences.push([firstNode, secondNode]);
+      } else {
+        uniqueNodesInFirst.push(firstNode);
+      }
+    }
+    for (const secondNode of secondWeights.nodeWeights) {
+      if (firstWeights.nodeWeights.get(secondNode[0]) === undefined)
+        uniqueNodesInSecond.push(secondNode);
+    }
+
+    for (const firstEdge of firstWeights.edgeWeights) {
+      const secondWeight = secondWeights.edgeWeights.get(firstEdge[0]);
+      if (secondWeight !== undefined) {
+        const secondEdge = [firstEdge[0], secondWeight];
+        if (!deepEqual(firstEdge, secondEdge))
+          edgeTuplesWithDifferences.push([firstEdge, secondEdge]);
+      } else {
+        uniqueEdgesInFirst.push(firstEdge);
+      }
+    }
+    for (const secondEdge of secondWeights.edgeWeights) {
+      if (firstWeights.edgeWeights.get(secondEdge[0]) === undefined)
+        uniqueEdgesInSecond.push(secondEdge);
+    }
+  }
+
+  return {
+    weightsAreEqual,
+    uniqueNodesInFirst,
+    uniqueNodesInSecond,
+    nodeTuplesWithDifferences,
+    uniqueEdgesInFirst,
+    uniqueEdgesInSecond,
+    edgeTuplesWithDifferences,
+  };
 }
