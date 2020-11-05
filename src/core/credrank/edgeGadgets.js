@@ -69,15 +69,21 @@ function makeSeedGadget<T>({
   return Object.freeze({prefix, toRaw, fromRaw, markovEdge});
 }
 
+export const GADGET_EDGE_PREFIX: EdgeAddressT = EdgeAddress.fromParts([
+  "sourcecred",
+  "core",
+  "gadget",
+]);
+
 export const radiationGadget: EdgeGadget<NodeAddressT> = makeSeedGadget({
-  edgePrefix: EdgeAddress.fromParts(["sourcecred", "core", "RADIATION"]),
+  edgePrefix: EdgeAddress.append(GADGET_EDGE_PREFIX, "RADIATION"),
   seedIsSrc: false,
   toParts: (x) => NodeAddress.toParts(x),
   fromParts: (x) => NodeAddress.fromParts(x),
 });
 
 export const seedMintGadget: EdgeGadget<NodeAddressT> = makeSeedGadget({
-  edgePrefix: EdgeAddress.fromParts(["sourcecred", "core", "SEED_MINT"]),
+  edgePrefix: EdgeAddress.append(GADGET_EDGE_PREFIX, "SEED_MINT"),
   seedIsSrc: true,
   toParts: (x) => NodeAddress.toParts(x),
   fromParts: (x) => NodeAddress.fromParts(x),
@@ -93,7 +99,7 @@ export const seedMintGadget: EdgeGadget<NodeAddressT> = makeSeedGadget({
  * nodes, etc.)
  */
 export const payoutGadget: EdgeGadget<ParticipantEpochAddress> = (() => {
-  const edgePrefix = EdgeAddress.fromParts(["sourcecred", "core", "PAYOUT"]);
+  const edgePrefix = EdgeAddress.append(GADGET_EDGE_PREFIX, "PAYOUT");
   const prefix = markovEdgeAddress(edgePrefix, "F");
   const prefixLength = MarkovEdgeAddress.toParts(prefix).length;
   const toRaw = ({epochStart, owner}) =>
@@ -119,11 +125,10 @@ export type WebbingAddress = {|
   +lastStart: TimestampMs,
   +owner: Uuid,
 |};
-const webbingEdgePrefix = EdgeAddress.fromParts([
-  "sourcecred",
-  "core",
-  "EPOCH_WEBBING",
-]);
+const webbingEdgePrefix = EdgeAddress.append(
+  GADGET_EDGE_PREFIX,
+  "EPOCH_WEBBING"
+);
 
 /**
  * The forward webbing edges flow Cred forwards from participant epoch nodes to

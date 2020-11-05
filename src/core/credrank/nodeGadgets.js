@@ -10,9 +10,10 @@ import type {TimestampMs} from "../../util/timestamp";
 import type {MarkovNode} from "./markovNode";
 import stringify from "json-stable-stringify";
 
-export const CORE_NODE_PREFIX: NodeAddressT = NodeAddress.fromParts([
+export const GADGET_NODE_PREFIX: NodeAddressT = NodeAddress.fromParts([
   "sourcecred",
   "core",
+  "gadget",
 ]);
 
 export interface NodeGadget<T> {
@@ -29,7 +30,7 @@ export interface NodeGadget<T> {
 
 export const seedGadget: NodeGadget<void> = (() => {
   const description: string = "\u{1f331}"; // U+1F331 SEEDLING
-  const prefix = NodeAddress.append(CORE_NODE_PREFIX, "SEED");
+  const prefix = NodeAddress.append(GADGET_NODE_PREFIX, "SEED");
   const toRaw = () => prefix;
   const fromRaw = (address) => {
     if (address !== prefix) {
@@ -45,7 +46,7 @@ export type EpochAccumulatorAddress = {|
   +epochStart: TimestampMs,
 |};
 export const accumulatorGadget: NodeGadget<EpochAccumulatorAddress> = (() => {
-  const prefix = NodeAddress.append(CORE_NODE_PREFIX, "EPOCH_ACCUMULATOR");
+  const prefix = NodeAddress.append(GADGET_NODE_PREFIX, "EPOCH_ACCUMULATOR");
   const prefixLength = NodeAddress.toParts(prefix).length;
   function toRaw(addr) {
     return NodeAddress.append(prefix, String(addr.epochStart));
@@ -83,7 +84,7 @@ export type ParticipantEpochAddress = {|
   +epochStart: TimestampMs,
 |};
 export const epochGadget: NodeGadget<ParticipantEpochAddress> = (() => {
-  const prefix = NodeAddress.append(CORE_NODE_PREFIX, "USER_EPOCH");
+  const prefix = NodeAddress.append(GADGET_NODE_PREFIX, "USER_EPOCH");
   const epochPrefixLength = NodeAddress.toParts(prefix).length;
   function toRaw(addr: ParticipantEpochAddress): NodeAddressT {
     return NodeAddress.append(prefix, String(addr.epochStart), addr.owner);
