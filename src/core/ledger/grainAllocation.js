@@ -38,6 +38,15 @@ export type Balanced = "BALANCED";
 export type Immediate = "IMMEDIATE";
 
 /**
+ * The Recent policy distributes cred using a time discount factor, weighing
+ * recent contributions higher.
+ *
+ * Note that this is a generalization of the Immediate policy, where Immediate
+ * is the same as Recent with a discount factor 1 (100%).
+ */
+export type Recent = "RECENT";
+
+/**
  * The Special policy is a power-maintainer tool for directly paying Grain
  * to a target identity. I'm including it because we will use it to create
  * "initialization" payouts to contributors with prior Grain balances in our old
@@ -48,7 +57,11 @@ export type Immediate = "IMMEDIATE";
  */
 export type Special = "SPECIAL";
 
-export type AllocationPolicy = BalancedPolicy | ImmediatePolicy | SpecialPolicy;
+export type AllocationPolicy =
+  | BalancedPolicy
+  | ImmediatePolicy
+  | RecentPolicy
+  | SpecialPolicy;
 
 export type BalancedPolicy = {|
   +policyType: Balanced,
@@ -58,6 +71,12 @@ export type BalancedPolicy = {|
 export type ImmediatePolicy = {|
   +policyType: Immediate,
   +budget: G.Grain,
+|};
+
+export type RecentPolicy = {|
+  +policyType: Recent,
+  +budget: G.Grain,
+  +discount: Discount,
 |};
 
 export type SpecialPolicy = {|
@@ -177,6 +196,8 @@ function receipts(
   switch (policy.policyType) {
     case "IMMEDIATE":
       return immediateReceipts(policy.budget, identities);
+    case "RECENT":
+      return recentReceipts(policy.budget, identities, policy.discount);
     case "BALANCED":
       return balancedReceipts(policy.budget, identities);
     case "SPECIAL":
@@ -189,7 +210,7 @@ function receipts(
 
 /**
  * Split a grain budget in proportion to the cred scores in
- * the most recent time interval
+ * the most recent time interval.
  */
 function immediateReceipts(
   budget: G.Grain,
@@ -199,6 +220,23 @@ function immediateReceipts(
     budget,
     identities.map((i) => i.mostRecentCred)
   );
+  return identities.map(({id}, i) => ({id, amount: amounts[i]}));
+}
+
+/**
+ * Split a grain budget based on exponentially weighted recent
+ * cred.
+ */
+function recentReceipts(
+  budget: G.Grain,
+  identities: ProcessedIdentities,
+  discount: Discount
+): $ReadOnlyArray<GrainReceipt> {
+  const computeDecayedCred = (i) =>
+    i.cred.reduce((acc, cred) => acc * (1 - discount) + cred, 0);
+  const decayedCredPerIdentity = identities.map(computeDecayedCred);
+  const amounts = G.splitBudget(budget, decayedCredPerIdentity);
+
   return identities.map(({id}, i) => ({id, amount: amounts[i]}));
 }
 
@@ -277,6 +315,12 @@ const immediatePolicyParser: P.Parser<ImmediatePolicy> = P.object({
   budget: G.parser,
 });
 
+const recentPolicyParser: P.Parser<RecentPolicy> = P.object({
+  policyType: P.exactly(["RECENT"]),
+  budget: G.parser,
+  discount: P.fmap(P.number, toDiscount),
+});
+
 const specialPolicyParser: P.Parser<SpecialPolicy> = P.object({
   policyType: P.exactly(["SPECIAL"]),
   budget: G.parser,
@@ -287,6 +331,7 @@ const specialPolicyParser: P.Parser<SpecialPolicy> = P.object({
 export const allocationPolicyParser: P.Parser<AllocationPolicy> = P.orElse([
   balancedPolicyParser,
   immediatePolicyParser,
+  recentPolicyParser,
   specialPolicyParser,
 ]);
 
@@ -299,3 +344,12 @@ export const allocationParser: P.Parser<Allocation> = P.object({
   id: uuidParser,
   receipts: P.array(grainReceiptParser),
 });
+
+export opaque type Discount: number = number;
+export function toDiscount(n: number): Discount {
+  if (n < 0 || n > 1) {
+    throw new Error(`Discount must be in range [0,1]`);
+  }
+
+  return n;
+}
