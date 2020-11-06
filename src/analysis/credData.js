@@ -1,10 +1,7 @@
 // @flow
 
 import type {TimelineCredScores} from "../core/algorithm/distributionToCred";
-import {
-  type DependencyMintPolicy,
-  processMintPolicy,
-} from "../core/dependenciesMintPolicy";
+import {type BonusPolicy, processBonusPolicy} from "../core/bonusMinting";
 import {type NodeAddressT, NodeAddress} from "../core/graph";
 import {IDENTITY_PREFIX} from "../core/identity";
 import {type IntervalSequence, intervalSequence} from "../core/interval";
@@ -74,7 +71,7 @@ export type EdgeCredOverTime = {|
 export function computeCredData(
   scores: TimelineCredScores,
   nodeOrder: $ReadOnlyArray<NodeAddressT>,
-  dependencyPolicies: $ReadOnlyArray<DependencyMintPolicy>
+  bonusPolicies: $ReadOnlyArray<BonusPolicy>
 ): CredData {
   const numIntervals = scores.length;
   if (numIntervals === 0) {
@@ -87,8 +84,8 @@ export function computeCredData(
     };
   }
   const intervals = intervalSequence(scores.map((d) => d.interval));
-  const processedDependencyPolicies = dependencyPolicies.map((p) =>
-    processMintPolicy(p, nodeOrder, intervals)
+  const processedBonusPolicies = bonusPolicies.map((p) =>
+    processBonusPolicy(p, nodeOrder, intervals)
   );
   const numNodes = scores[0].cred.length;
   const numEdges = scores[0].forwardFlow.length;
@@ -148,7 +145,7 @@ export function computeCredData(
       // Pre-fill with 0 to ensure a value for every node
       nodeOverTime[n].dependencyMintedCred[i] = 0;
     }
-    for (const {nodeIndex, intervalWeights} of processedDependencyPolicies) {
+    for (const {nodeIndex, intervalWeights} of processedBonusPolicies) {
       const weight = intervalWeights[i];
       const mintedCred = weight * intervalTotalParticipantCred;
       nodeSummaries[nodeIndex].cred += mintedCred;

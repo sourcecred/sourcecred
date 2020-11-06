@@ -6,7 +6,7 @@ import {loadJson, mkdirx} from "../util/disk";
 import deepEqual from "lodash.isequal";
 import stringify from "json-stable-stringify";
 
-import {type DependencyMintPolicy} from "../core/dependenciesMintPolicy";
+import {type BonusPolicy} from "../core/bonusMinting";
 import type {PluginDirectoryContext} from "../api/plugin";
 import {
   parser as configParser,
@@ -17,7 +17,7 @@ import {contractions as identityContractions} from "../core/identity";
 import {
   parser as dependenciesParser,
   ensureIdentityExists,
-  toDependencyPolicy,
+  toBonusPolicy,
 } from "../api/dependenciesConfig";
 import {
   type WeightedGraph,
@@ -85,7 +85,7 @@ export async function prepareCredData(
 ): Promise<{|
   weightedGraph: WeightedGraph,
   ledger: Ledger,
-  dependencies: $ReadOnlyArray<DependencyMintPolicy>,
+  dependencies: $ReadOnlyArray<BonusPolicy>,
 |}> {
   const [weightedGraph, ledger] = await Promise.all([
     await loadWeightedGraph(baseDir, config),
@@ -110,7 +110,7 @@ export async function prepareCredData(
 async function loadDependenciesAndWriteChanges(
   baseDir: string,
   ledger: Ledger
-): Promise<$ReadOnlyArray<DependencyMintPolicy>> {
+): Promise<$ReadOnlyArray<BonusPolicy>> {
   const dependenciesPath = pathJoin(baseDir, "config", "dependencies.json");
   const dependencies = await loadJsonWithDefault(
     dependenciesPath,
@@ -131,7 +131,7 @@ async function loadDependenciesAndWriteChanges(
     await saveLedger(baseDir, ledger);
   }
 
-  return dependenciesWithIds.map((d) => toDependencyPolicy(d, ledger));
+  return dependenciesWithIds.map((d) => toBonusPolicy(d, ledger));
 }
 
 export async function loadWeightedGraph(
