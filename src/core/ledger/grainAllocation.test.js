@@ -4,6 +4,7 @@ import {
   computeAllocation,
   type AllocationIdentity,
   _validateAllocationBudget,
+  toDiscount,
 } from "./grainAllocation";
 import * as G from "./grain";
 import {random as randomUuid, parser as uuidParser} from "../../util/uuid";
@@ -18,6 +19,11 @@ describe("core/ledger/grainAllocation", () => {
     return {id: randomUuid(), paid: ng(paid), cred};
   }
   const immediate = (n: number) => ({policyType: "IMMEDIATE", budget: ng(n)});
+  const recent = (n: number, discount: number) => ({
+    policyType: "RECENT",
+    budget: ng(n),
+    discount: toDiscount(discount),
+  });
   const balanced = (n: number) => ({policyType: "BALANCED", budget: ng(n)});
 
   describe("computeAllocation", () => {
@@ -81,6 +87,78 @@ describe("core/ledger/grainAllocation", () => {
         const policy = immediate(0);
         const i1 = aid(3, [1, 1]);
         const i2 = aid(0, [3, 0]);
+        const allocation = computeAllocation(policy, [i1, i2]);
+        const expectedReceipts = [
+          {id: i1.id, amount: ng(0)},
+          {id: i2.id, amount: ng(0)},
+        ];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+    });
+
+    describe("recent policy", () => {
+      it("splits based on discounted cred", () => {
+        const policy = recent(100, 0.1);
+        const i1 = aid(0, [0, 0, 100]);
+        const i2 = aid(100, [100, 0, 0]);
+        const i3 = aid(0, [100, 0, 0]);
+        const allocation = computeAllocation(policy, [i1, i2, i3]);
+        const expectedReceipts = [
+          {id: i1.id, amount: ng(38)},
+          {id: i2.id, amount: ng(31)},
+          {id: i3.id, amount: ng(31)},
+        ];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+
+      it("is not influenced by grain paid", () => {
+        const policy = recent(100, 0.1);
+        const i1 = aid(0, [100, 100, 100]);
+        const i2 = aid(100, [100, 100, 100]);
+        const allocation = computeAllocation(policy, [i1, i2]);
+        const expectedReceipts = [
+          {id: i1.id, amount: ng(50)},
+          {id: i2.id, amount: ng(50)},
+        ];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+
+      it("handles full discount correctly", () => {
+        const policy = recent(100, 1);
+        const i1 = aid(50, [0, 50, 0]);
+        const i2 = aid(0, [0, 10, 100]);
+        const allocation = computeAllocation(policy, [i1, i2]);
+        const expectedReceipts = [
+          {id: i1.id, amount: ng(0)},
+          {id: i2.id, amount: ng(100)},
+        ];
+        const expectedAllocation = {
+          receipts: expectedReceipts,
+          id: uuidParser.parseOrThrow(allocation.id),
+          policy,
+        };
+        expect(allocation).toEqual(expectedAllocation);
+      });
+
+      it("handles 0 budget correctly", () => {
+        const policy = recent(0, 0.1);
+        const i1 = aid(50, [100, 50, 10]);
+        const i2 = aid(0, [0, 10, 100]);
         const allocation = computeAllocation(policy, [i1, i2]);
         const expectedReceipts = [
           {id: i1.id, amount: ng(0)},
