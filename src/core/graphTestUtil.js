@@ -10,6 +10,12 @@ import {
   type NodeAddressT,
   type EdgeAddressT,
 } from "./graph";
+import {
+  type NodeWithWeight,
+  type EdgeWithWeight,
+  type WeightedGraph,
+} from "./weightedGraph";
+import {empty as emptyWeights} from "./weights";
 import type {TimestampMs} from "../util/timestamp";
 
 /**
@@ -261,4 +267,25 @@ export function advancedGraph(): {|
     fullDanglingEdge,
   };
   return {nodes, edges, graph1, graph2};
+}
+
+export function testWeightedGraph(
+  nodesWithWeights: NodeWithWeight[],
+  edgesWithWeights: EdgeWithWeight[]
+): WeightedGraph {
+  const graph = new Graph();
+  const weights = emptyWeights();
+  for (const nodeWithWeight of nodesWithWeights) {
+    const weight = nodeWithWeight.weight;
+    graph.addNode(nodeWithWeight.node);
+    if (weight == null) continue;
+    weights.nodeWeights.set(nodeWithWeight.node.address, weight);
+  }
+  for (const edgeWithWeight of edgesWithWeights) {
+    const weight = edgeWithWeight.weight;
+    graph.addEdge(edgeWithWeight.edge);
+    if (weight == null) continue;
+    weights.edgeWeights.set(edgeWithWeight.edge.address, weight);
+  }
+  return {graph, weights};
 }

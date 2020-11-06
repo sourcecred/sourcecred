@@ -1,6 +1,7 @@
 // @flow
 
-import {Graph, type GraphJSON} from "./graph";
+import deepEqual from "lodash.isequal";
+import {Graph, type GraphJSON, type Node, type Edge} from "./graph";
 import {type Weights as WeightsT, type WeightsJSON} from "./weights";
 import * as Weights from "./weights";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
@@ -75,4 +76,109 @@ export function overrideWeights(
     edgeResolver: (a, b) => b,
   });
   return {graph: wg.graph, weights};
+}
+
+export type NodeWithWeight = {|
+  +node: Node,
+  +weight: ?Weights.NodeWeight,
+|};
+
+export type EdgeWithWeight = {|
+  +edge: Edge,
+  +weight: ?Weights.EdgeWeight,
+|};
+
+export type WeightedGraphComparison = {|
+  +weightedGraphsAreEqual: boolean,
+  +uniqueNodesInFirst: $ReadOnlyArray<NodeWithWeight>,
+  +uniqueNodesInSecond: $ReadOnlyArray<NodeWithWeight>,
+  +nodeTuplesWithDifferences: $ReadOnlyArray<[NodeWithWeight, NodeWithWeight]>,
+  +uniqueEdgesInFirst: $ReadOnlyArray<EdgeWithWeight>,
+  +uniqueEdgesInSecond: $ReadOnlyArray<EdgeWithWeight>,
+  +edgeTuplesWithDifferences: $ReadOnlyArray<[EdgeWithWeight, EdgeWithWeight]>,
+|};
+
+export function compareWeightedGraphs(
+  firstGraph: WeightedGraph,
+  secondGraph: WeightedGraph
+): WeightedGraphComparison {
+  const uniqueNodesInFirst = [];
+  const uniqueNodesInSecond = [];
+  const nodeTuplesWithDifferences = [];
+  const uniqueEdgesInFirst = [];
+  const uniqueEdgesInSecond = [];
+  const edgeTuplesWithDifferences = [];
+  const weightedGraphsAreEqual =
+    firstGraph.graph.equals(secondGraph.graph) &&
+    deepEqual(firstGraph.weights, secondGraph.weights);
+
+  if (!weightedGraphsAreEqual) {
+    for (const firstNode of firstGraph.graph.nodes()) {
+      const firstWeight = firstGraph.weights.nodeWeights.get(firstNode.address);
+      const secondNode = secondGraph.graph.node(firstNode.address);
+      if (secondNode) {
+        const secondWeight = secondGraph.weights.nodeWeights.get(
+          secondNode.address
+        );
+        if (
+          !deepEqual(firstNode, secondNode) ||
+          !deepEqual(firstWeight, secondWeight)
+        )
+          nodeTuplesWithDifferences.push([
+            {node: firstNode, weight: firstWeight},
+            {node: secondNode, weight: secondWeight},
+          ]);
+      } else {
+        uniqueNodesInFirst.push({node: firstNode, weight: firstWeight});
+      }
+    }
+    for (const secondNode of secondGraph.graph.nodes()) {
+      const secondWeight = secondGraph.weights.nodeWeights.get(
+        secondNode.address
+      );
+      const firstNode = firstGraph.graph.node(secondNode.address);
+      if (!firstNode) {
+        uniqueNodesInSecond.push({node: secondNode, weight: secondWeight});
+      }
+    }
+
+    for (const firstEdge of firstGraph.graph.edges({showDangling: true})) {
+      const firstWeight = firstGraph.weights.edgeWeights.get(firstEdge.address);
+      const secondEdge = secondGraph.graph.edge(firstEdge.address);
+      if (secondEdge) {
+        const secondWeight = secondGraph.weights.edgeWeights.get(
+          secondEdge.address
+        );
+        if (
+          !deepEqual(firstEdge, secondEdge) ||
+          !deepEqual(firstWeight, secondWeight)
+        )
+          edgeTuplesWithDifferences.push([
+            {edge: firstEdge, weight: firstWeight},
+            {edge: secondEdge, weight: secondWeight},
+          ]);
+      } else {
+        uniqueEdgesInFirst.push({edge: firstEdge, weight: firstWeight});
+      }
+    }
+    for (const secondEdge of secondGraph.graph.edges({showDangling: true})) {
+      const secondWeight = secondGraph.weights.edgeWeights.get(
+        secondEdge.address
+      );
+      const firstEdge = firstGraph.graph.edge(secondEdge.address);
+      if (!firstEdge) {
+        uniqueEdgesInSecond.push({edge: secondEdge, weight: secondWeight});
+      }
+    }
+  }
+
+  return {
+    weightedGraphsAreEqual,
+    uniqueNodesInFirst,
+    uniqueNodesInSecond,
+    nodeTuplesWithDifferences,
+    uniqueEdgesInFirst,
+    uniqueEdgesInSecond,
+    edgeTuplesWithDifferences,
+  };
 }
