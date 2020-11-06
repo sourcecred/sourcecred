@@ -8,7 +8,7 @@ import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {ReferenceDetector} from "../../core/references";
 import {type TaskReporter} from "../../util/taskReporter";
 import type {WeightedGraph} from "../../core/weightedGraph";
-import type {IdentityProposal} from "../../ledger/identityProposal";
+import type {IdentityProposal} from "../../core/ledger/identityProposal";
 import {
   type PluginId,
   fromString as pluginIdFromString,
