@@ -83,7 +83,7 @@ import {
   seedGadget,
   accumulatorGadget,
   epochGadget,
-  CORE_NODE_PREFIX,
+  GADGET_NODE_PREFIX,
 } from "./nodeGadgets";
 
 import {
@@ -285,7 +285,7 @@ export class MarkovProcessGraph {
         const name = NodeAddress.toString(node.address);
         throw new Error(`Bad node weight for ${name}: ${weight}`);
       }
-      if (NodeAddress.hasPrefix(node.address, CORE_NODE_PREFIX)) {
+      if (NodeAddress.hasPrefix(node.address, GADGET_NODE_PREFIX)) {
         throw new Error(
           "Unexpected core node in underlying graph: " +
             NodeAddress.toString(node.address)
