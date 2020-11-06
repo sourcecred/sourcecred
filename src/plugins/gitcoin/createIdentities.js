@@ -4,8 +4,8 @@ import {escape} from "entities";
 import {PostgresMirrorRepository} from "./mirrorRepository";
 import {type User} from "./fetch";
 import {userAddress} from "./address";
-import {type IdentityProposal} from "../../ledger/identityProposal";
-import {coerce, nameFromString} from "../../ledger/identity/name";
+import {type IdentityProposal} from "../../core/ledger/identityProposal";
+import {coerce, nameFromString} from "../../core/identity/name";
 
 export function _createIdentity(
   user: User,
