@@ -29,9 +29,18 @@ import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
 
 import * as Weights from "../core/weights";
 
-export function loadInstanceConfig(baseDir: string): Promise<InstanceConfig> {
+export async function loadInstanceConfig(
+  baseDir: string
+): Promise<InstanceConfig> {
   const projectFilePath = pathJoin(baseDir, "sourcecred.json");
-  return loadJson(projectFilePath, configParser);
+  const config = await loadJson(projectFilePath, configParser);
+  if (config.bundledPlugins.size === 0) {
+    throw new Error(
+      "No plugins configured; Please set up at least one plugin: " +
+        "https://github.com/sourcecred/template-instance#supported-plugins"
+    );
+  }
+  return config;
 }
 
 export function makePluginDir(
