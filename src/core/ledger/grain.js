@@ -60,6 +60,9 @@ export function mul(a: Grain, b: Grain): Grain {
 export function div(a: Grain, b: Grain): Grain {
   return bigInt(a).divide(bigInt(b)).toString();
 }
+export function pow(a: Grain, b: Grain): Grain {
+  return bigInt(a).pow(bigInt(b)).toString();
+}
 export function lt(a: Grain, b: Grain): boolean {
   return bigInt(a).lt(bigInt(b));
 }
