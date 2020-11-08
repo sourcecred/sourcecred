@@ -66,17 +66,20 @@ export type AllocationPolicy =
 export type BalancedPolicy = {|
   +policyType: Balanced,
   +budget: G.Grain,
+  +credMapping?: CredMapping,
 |};
 
 export type ImmediatePolicy = {|
   +policyType: Immediate,
   +budget: G.Grain,
+  +credMapping?: CredMapping,
 |};
 
 export type RecentPolicy = {|
   +policyType: Recent,
   +budget: G.Grain,
   +discount: Discount,
+  +credMapping?: CredMapping,
 |};
 
 export type SpecialPolicy = {|
@@ -85,6 +88,9 @@ export type SpecialPolicy = {|
   +memo: string,
   +recipient: IdentityId,
 |};
+
+export type CredScores = $ReadOnlyArray<number>;
+export type CredMapping = (CredScores) => CredScores;
 
 export type GrainReceipt = {|
   +id: IdentityId,
@@ -98,7 +104,7 @@ export type Allocation = {|
 |};
 
 export type AllocationIdentity = {|
-  +cred: $ReadOnlyArray<number>,
+  +cred: CredScores,
   +paid: G.Grain,
   +id: IdentityId,
 |};
@@ -124,7 +130,7 @@ export function computeAllocation(
 opaque type ProcessedIdentities = $ReadOnlyArray<{|
   +paid: G.Grain,
   +id: IdentityId,
-  +cred: $ReadOnlyArray<number>,
+  +cred: CredScores,
   +lifetimeCred: number,
   +mostRecentCred: number,
 |}>;
@@ -194,12 +200,17 @@ function receipts(
   identities: ProcessedIdentities
 ): $ReadOnlyArray<GrainReceipt> {
   switch (policy.policyType) {
-    case "IMMEDIATE":
-      return immediateReceipts(policy.budget, identities);
-    case "RECENT":
-      return recentReceipts(policy.budget, identities, policy.discount);
     case "BALANCED":
-      return balancedReceipts(policy.budget, identities);
+      return balancedReceipts(policy.budget, identities, policy.credMapping);
+    case "IMMEDIATE":
+      return immediateReceipts(policy.budget, identities, policy.credMapping);
+    case "RECENT":
+      return recentReceipts(
+        policy.budget,
+        identities,
+        policy.discount,
+        policy.credMapping
+      );
     case "SPECIAL":
       return specialReceipts(policy, identities);
     // istanbul ignore next: unreachable per Flow
@@ -214,12 +225,13 @@ function receipts(
  */
 function immediateReceipts(
   budget: G.Grain,
-  identities: ProcessedIdentities
+  identities: ProcessedIdentities,
+  credMapping?: CredMapping = (id) => id
 ): $ReadOnlyArray<GrainReceipt> {
-  const amounts = G.splitBudget(
-    budget,
-    identities.map((i) => i.mostRecentCred)
-  );
+  const credPerIdentity: CredScores = identities.map((i) => i.mostRecentCred);
+  const modifiedCred: CredScores = credMapping(credPerIdentity);
+
+  const amounts = G.splitBudget(budget, modifiedCred);
   return identities.map(({id}, i) => ({id, amount: amounts[i]}));
 }
 
@@ -230,13 +242,15 @@ function immediateReceipts(
 function recentReceipts(
   budget: G.Grain,
   identities: ProcessedIdentities,
-  discount: Discount
+  discount: Discount,
+  credMapping?: CredMapping = (id) => id
 ): $ReadOnlyArray<GrainReceipt> {
   const computeDecayedCred = (i) =>
     i.cred.reduce((acc, cred) => acc * (1 - discount) + cred, 0);
-  const decayedCredPerIdentity = identities.map(computeDecayedCred);
-  const amounts = G.splitBudget(budget, decayedCredPerIdentity);
+  const decayedCred: CredScores = identities.map(computeDecayedCred);
+  const modifiedCred: CredScores = credMapping(decayedCred);
 
+  const amounts = G.splitBudget(budget, modifiedCred);
   return identities.map(({id}, i) => ({id, amount: amounts[i]}));
 }
 
@@ -267,7 +281,8 @@ function recentReceipts(
  */
 function balancedReceipts(
   budget: G.Grain,
-  identities: ProcessedIdentities
+  identities: ProcessedIdentities,
+  credMapping?: CredMapping = (id) => id
 ): $ReadOnlyArray<GrainReceipt> {
   const totalCred = sum(identities.map((x) => x.lifetimeCred));
   const totalEverPaid = G.sum(identities.map((i) => i.paid));
@@ -287,9 +302,10 @@ function balancedReceipts(
     }
   });
 
-  const floatUnderpayment = userUnderpayment.map((x) => Number(x));
+  const floatUnderpayment: CredScores = userUnderpayment.map((x) => Number(x));
+  const modifiedCred: CredScores = credMapping(floatUnderpayment);
 
-  const grainAmounts = G.splitBudget(budget, floatUnderpayment);
+  const grainAmounts = G.splitBudget(budget, modifiedCred);
   return identities.map(({id}, i) => ({id, amount: grainAmounts[i]}));
 }
 
