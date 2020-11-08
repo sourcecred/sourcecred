@@ -53,6 +53,47 @@ export class LedgerManager {
     return diffLedger(remoteLedger, this._ledger);
   }
 
+  /**
+   * Persists the local (in-memory) Ledger to the ledger storage. Reloads the
+   * remote ledger from storage right before persisting it to minimize the
+   * possibility of overwriting remote changes that were not synced to the local
+   * ledger and ensure consistency of the ledger events (e.g. no double spends).
+   *
+   * A race condition is present in this function: if client A runs reloadLedger
+   * and then client B writes to the remote ledger before client A finishes writing,
+   * then the changes to the ledger that client B made would be overwritten by the
+   * changes from client A. The correctness and consistency of the ledger will still
+   * be maintained, its just that client B might experience data loss of whatever
+   * events they were trying to sync. To detect if this has occurred, we reload
+   * the ledger again after writing the data to ensure the local changes were
+   * not overwritten. If they were, we can show an error message to client B with
+   * a list of changes that failed to sync.
+   */
+  async persist(): Promise<ReloadResult> {
+    // START RACE CONDITION
+    const preWriteReloadRes = await this.reloadLedger();
+    if (preWriteReloadRes.error) {
+      return preWriteReloadRes;
+    }
+    await this._storage.write(this._ledger);
+    // END RACE CONDITION
+
+    // Reload ledger again to ensure all the changes were persisted into storage
+    const postWriteReloadRes = await this.reloadLedger();
+    if (postWriteReloadRes.error) {
+      return postWriteReloadRes;
+    }
+
+    if (postWriteReloadRes.localChanges.length !== 0) {
+      return {
+        ...postWriteReloadRes,
+        error: "Some local changes have not been persisted",
+      };
+    }
+
+    return postWriteReloadRes;
+  }
+
   /** Reloads the persisted Ledger from storage and replays any local changes
    *  on top of any new remote changes, if they exist.
    *
