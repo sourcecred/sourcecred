@@ -18,13 +18,22 @@ describe("core/ledger/grainAllocation", () => {
   function aid(paid: number, cred: $ReadOnlyArray<number>): AllocationIdentity {
     return {id: randomUuid(), paid: ng(paid), cred};
   }
-  const immediate = (n: number) => ({policyType: "IMMEDIATE", budget: ng(n)});
-  const recent = (n: number, discount: number) => ({
+  const balanced = (n: number, mapping?: Function) => ({
+    policyType: "BALANCED",
+    budget: ng(n),
+    mapping,
+  });
+  const immediate = (n: number, mapping?: Function) => ({
+    policyType: "IMMEDIATE",
+    budget: ng(n),
+    mapping,
+  });
+  const recent = (n: number, discount: number, mapping?: Function) => ({
     policyType: "RECENT",
     budget: ng(n),
     discount: toDiscount(discount),
+    mapping,
   });
-  const balanced = (n: number) => ({policyType: "BALANCED", budget: ng(n)});
 
   describe("computeAllocation", () => {
     describe("validation", () => {
@@ -101,6 +110,21 @@ describe("core/ledger/grainAllocation", () => {
       });
     });
 
+    describe("quadratic immediate policy", () => {
+      const pow = (exp) => (c) => (a) => (c * a) ** exp;
+      const policy = immediate(100, pow(0.5)(1));
+      const i1 = aid(0, [16, 64, 25]);
+      const i2 = aid(100, [100, 100, 100]);
+      const i3 = aid(0, [100, 144, 400]);
+      const allocation = computeAllocation(policy, [i1, i2, i3]);
+      const expectedReceipts = [
+        {id: i1.id, amount: ng(14)},
+        {id: i2.id, amount: ng(28)},
+        {id: i3.id, amount: ng(58)},
+      ];
+      expect(allocation.receipts).toEqual(expectedReceipts);
+    });
+
     describe("recent policy", () => {
       it("splits based on discounted cred", () => {
         const policy = recent(100, 0.1);
@@ -173,6 +197,21 @@ describe("core/ledger/grainAllocation", () => {
       });
     });
 
+    describe("quadratic recent policy", () => {
+      const pow = (exp) => (c) => (a) => (c * a) ** exp;
+      const policy = recent(100, 0.5, pow(0.5)(1));
+      const i1 = aid(0, [16, 64, 100]);
+      const i2 = aid(100, [100, 100, 100]);
+      const i3 = aid(0, [100, 144, 0]);
+      const allocation = computeAllocation(policy, [i1, i2, i3]);
+      const expectedReceipts = [
+        {id: i1.id, amount: ng(33)},
+        {id: i2.id, amount: ng(38)},
+        {id: i3.id, amount: ng(29)},
+      ];
+      expect(allocation.receipts).toEqual(expectedReceipts);
+    });
+
     describe("balanced policy", () => {
       it("splits based on lifetime Cred when there's no paid amounts", () => {
         const policy = balanced(100);
@@ -222,6 +261,19 @@ describe("core/ledger/grainAllocation", () => {
         };
         expect(allocation).toEqual(expectedAllocation);
       });
+    });
+
+    describe("quadratic balanced policy", () => {
+      const pow = (exp) => (c) => (a) => (c * a) ** exp;
+      const policy = balanced(100, pow(0.5)(1));
+      const i1 = aid(0, [1, 1]);
+      const i2 = aid(0, [3, 0]);
+      const allocation = computeAllocation(policy, [i1, i2]);
+      const expectedReceipts = [
+        {id: i1.id, amount: ng(44)},
+        {id: i2.id, amount: ng(56)},
+      ];
+      expect(allocation.receipts).toEqual(expectedReceipts);
     });
 
     describe("special policy", () => {

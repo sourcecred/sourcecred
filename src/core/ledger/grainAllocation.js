@@ -66,17 +66,20 @@ export type AllocationPolicy =
 export type BalancedPolicy = {|
   +policyType: Balanced,
   +budget: G.Grain,
+  +mapping?: Function,
 |};
 
 export type ImmediatePolicy = {|
   +policyType: Immediate,
   +budget: G.Grain,
+  +mapping?: Function,
 |};
 
 export type RecentPolicy = {|
   +policyType: Recent,
   +budget: G.Grain,
   +discount: Discount,
+  +mapping?: Function,
 |};
 
 export type SpecialPolicy = {|
@@ -194,12 +197,17 @@ function receipts(
   identities: ProcessedIdentities
 ): $ReadOnlyArray<GrainReceipt> {
   switch (policy.policyType) {
-    case "IMMEDIATE":
-      return immediateReceipts(policy.budget, identities);
-    case "RECENT":
-      return recentReceipts(policy.budget, identities, policy.discount);
     case "BALANCED":
-      return balancedReceipts(policy.budget, identities);
+      return balancedReceipts(policy.budget, identities, policy.mapping);
+    case "IMMEDIATE":
+      return immediateReceipts(policy.budget, identities, policy.mapping);
+    case "RECENT":
+      return recentReceipts(
+        policy.budget,
+        identities,
+        policy.discount,
+        policy.mapping
+      );
     case "SPECIAL":
       return specialReceipts(policy, identities);
     // istanbul ignore next: unreachable per Flow
@@ -214,12 +222,13 @@ function receipts(
  */
 function immediateReceipts(
   budget: G.Grain,
-  identities: ProcessedIdentities
+  identities: ProcessedIdentities,
+  mapping?: Function = (id) => id
 ): $ReadOnlyArray<GrainReceipt> {
-  const amounts = G.splitBudget(
-    budget,
-    identities.map((i) => i.mostRecentCred)
-  );
+  const credPerIdentity = identities.map((i) => i.mostRecentCred);
+  // if (!mapping) mapping = (id) => id
+  const modifiedCred = credPerIdentity.map(mapping);
+  const amounts = G.splitBudget(budget, modifiedCred);
   return identities.map(({id}, i) => ({id, amount: amounts[i]}));
 }
 
@@ -230,12 +239,15 @@ function immediateReceipts(
 function recentReceipts(
   budget: G.Grain,
   identities: ProcessedIdentities,
-  discount: Discount
+  discount: Discount,
+  mapping?: Function = (id) => id
 ): $ReadOnlyArray<GrainReceipt> {
   const computeDecayedCred = (i) =>
     i.cred.reduce((acc, cred) => acc * (1 - discount) + cred, 0);
   const decayedCredPerIdentity = identities.map(computeDecayedCred);
-  const amounts = G.splitBudget(budget, decayedCredPerIdentity);
+  const modifiedCred = decayedCredPerIdentity.map(mapping);
+
+  const amounts = G.splitBudget(budget, modifiedCred);
 
   return identities.map(({id}, i) => ({id, amount: amounts[i]}));
 }
@@ -267,7 +279,8 @@ function recentReceipts(
  */
 function balancedReceipts(
   budget: G.Grain,
-  identities: ProcessedIdentities
+  identities: ProcessedIdentities,
+  mapping?: Function = (id) => id
 ): $ReadOnlyArray<GrainReceipt> {
   const totalCred = sum(identities.map((x) => x.lifetimeCred));
   const totalEverPaid = G.sum(identities.map((i) => i.paid));
@@ -288,8 +301,9 @@ function balancedReceipts(
   });
 
   const floatUnderpayment = userUnderpayment.map((x) => Number(x));
+  const modifiedCred = floatUnderpayment.map(mapping);
 
-  const grainAmounts = G.splitBudget(budget, floatUnderpayment);
+  const grainAmounts = G.splitBudget(budget, modifiedCred);
   return identities.map(({id}, i) => ({id, amount: grainAmounts[i]}));
 }
 
