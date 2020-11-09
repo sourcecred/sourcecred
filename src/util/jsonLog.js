@@ -74,6 +74,10 @@ function _extractLogLines(log: string): string[] {
   // format, all automatically written ledgers include a trailing LF.
   // Strip it, if present, for ease of `split("\n")`.
   log = log.trimRight();
+  // If the file is empty, return no entries to parse
+  if (log.length === 0) {
+    return [];
+  }
   if (log.startsWith("[")) {
     // Temporarily compatibility measure for raw JSON arrays (not NDJSON),
     // in the specific form written by previous versions of this module.
