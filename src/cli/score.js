@@ -6,7 +6,7 @@ import stringify from "json-stable-stringify";
 
 import type {Command} from "./command";
 import {loadInstanceConfig, prepareCredData} from "./common";
-import {loadJsonWithDefault} from "../util/disk";
+import {loadJsonWithDefault, mkdirx} from "../util/disk";
 import dedent from "../util/dedent";
 import {LoggingTaskReporter} from "../util/taskReporter";
 import {
@@ -58,7 +58,9 @@ const scoreCommand: Command = async (args, std) => {
   // information available once we merge CredRank, anyway.
   const stripped = stripOverTimeDataForNonUsers(credResult);
   const credJSON = stringify(credResultToJSON(stripped));
-  const outputPath = pathJoin(baseDir, "output", "credResult.json");
+  const outputDir = pathJoin(baseDir, "output");
+  mkdirx(outputDir);
+  const outputPath = pathJoin(outputDir, "credResult.json");
   await fs.writeFile(outputPath, credJSON);
 
   // Write out the account data for convenient usage.
