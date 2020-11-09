@@ -34,12 +34,6 @@ export async function loadInstanceConfig(
 ): Promise<InstanceConfig> {
   const projectFilePath = pathJoin(baseDir, "sourcecred.json");
   const config = await loadJson(projectFilePath, configParser);
-  if (config.bundledPlugins.size === 0) {
-    throw new Error(
-      "No plugins configured; Please set up at least one plugin: " +
-        "https://github.com/sourcecred/template-instance#supported-plugins"
-    );
-  }
   return config;
 }
 
