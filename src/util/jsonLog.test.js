@@ -33,6 +33,9 @@ describe("util/jsonLog", () => {
     expect(emptyLogString).toEqual("");
   });
   it("parses an empty string as an empty log", () => {
+    expect(JsonLog.fromString("", C.number)).toEqual(new JsonLog());
+  });
+  it("parses an empty array as an empty log", () => {
     expect(JsonLog.fromString("[]", C.number)).toEqual(new JsonLog());
   });
 
