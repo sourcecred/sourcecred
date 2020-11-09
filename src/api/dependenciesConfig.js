@@ -5,7 +5,7 @@
  * which allows a project to mint excess Cred for its dependencies.
  *
  * To learn about the semantics of the dependencies system, read the module
- * docstring for core/dependenciesMintPolicy.js
+ * docstring for core/bonusMinting.js
  *
  * At a high level, this config type allows the instance maintainer to specify
  * identities (usually PROJECT-type identities) to mint extra Cred over time,
@@ -52,7 +52,7 @@ import {
 } from "../util/timestamp";
 import {type IdentityId, type Name, nameParser} from "../core/identity";
 import {parser as uuidParser} from "../util/uuid";
-import {type DependencyMintPolicy} from "../core/dependenciesMintPolicy";
+import {type BonusPolicy} from "../core/bonusMinting";
 
 // A finite nonnegative value (usually in range [0, 1]) which specifies how
 // much extra Cred to mint for a given dependency, as a proportion of the raw
@@ -175,10 +175,10 @@ export function ensureIdentityExists(
   }
 }
 
-export function toDependencyPolicy(
+export function toBonusPolicy(
   config: DependencyConfig,
   ledger: Ledger
-): DependencyMintPolicy {
+): BonusPolicy {
   const {id} = config;
   if (id == null) {
     throw new Error(

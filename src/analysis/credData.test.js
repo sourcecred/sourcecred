@@ -2,7 +2,7 @@
 
 import {computeCredData, compressByThreshold} from "./credData";
 import type {TimelineCredScores} from "../core/algorithm/distributionToCred";
-import type {DependencyMintPolicy} from "../core/dependenciesMintPolicy";
+import type {BonusPolicy} from "../core/bonusMinting";
 import {NodeAddress} from "../core/graph";
 import {IDENTITY_PREFIX} from "../core/identity";
 import {intervalSequence} from "../core/interval";
@@ -97,7 +97,7 @@ describe("src/analysis/credData", () => {
         syntheticLoopFlow: new Float64Array([0.1, 0]),
       },
     ];
-    const mintPolicies: DependencyMintPolicy[] = [
+    const bonusPolicies: BonusPolicy[] = [
       {
         address: IDENTITY_PREFIX,
         periods: [{weight: 0.5, startTimeMs: -Infinity}],
@@ -143,7 +143,7 @@ describe("src/analysis/credData", () => {
     // Only the first node address is a participant, so we mint
     // based on its Cred alone.
     const nodeOrder = [IDENTITY_PREFIX, NodeAddress.empty];
-    expect(computeCredData(scores, nodeOrder, mintPolicies)).toEqual(expected);
+    expect(computeCredData(scores, nodeOrder, bonusPolicies)).toEqual(expected);
   });
   it("compresses by threshold correctly", () => {
     const intervals = intervalSequence([

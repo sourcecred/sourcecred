@@ -306,7 +306,7 @@ export class CredView {
       wg,
       params,
       this.plugins(),
-      this._credResult.dependencyPolicies
+      this._credResult.bonusPolicies
     );
     return new CredView(credResult);
   }

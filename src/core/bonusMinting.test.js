@@ -2,13 +2,10 @@
 
 import deepFreeze from "deep-freeze";
 import {NodeAddress} from "./graph";
-import {
-  _alignPeriodsToIntervals,
-  processMintPolicy,
-} from "./dependenciesMintPolicy";
+import {_alignPeriodsToIntervals, processBonusPolicy} from "./bonusMinting";
 import {intervalSequence} from "./interval";
 
-describe("core/dependenciesMintPolicy", () => {
+describe("core/bonusMinting", () => {
   describe("_alignPeriodsToIntervals", () => {
     it("handles a case with no periods and no intervals", () => {
       expect(_alignPeriodsToIntervals([], [])).toEqual([]);
@@ -85,7 +82,7 @@ describe("core/dependenciesMintPolicy", () => {
     });
   });
 
-  describe("processMintPolicy", () => {
+  describe("processBonusPolicy", () => {
     const n1 = NodeAddress.fromParts(["1"]);
     const n2 = NodeAddress.fromParts(["2"]);
     const n3 = NodeAddress.fromParts(["3"]);
@@ -104,13 +101,13 @@ describe("core/dependenciesMintPolicy", () => {
       const policy = {address: n2, periods};
       const intervalStarts = intervals.map((i) => i.startTimeMs);
       const intervalWeights = _alignPeriodsToIntervals(periods, intervalStarts);
-      const actual = processMintPolicy(policy, nodeOrder, intervals);
+      const actual = processBonusPolicy(policy, nodeOrder, intervals);
       const expected = {nodeIndex: 1, intervalWeights};
       expect(actual).toEqual(expected);
     });
     it("errors if the node address isn't in the ordering", () => {
       const policy = {address: nx, periods};
-      const thunk = () => processMintPolicy(policy, nodeOrder, intervals);
+      const thunk = () => processBonusPolicy(policy, nodeOrder, intervals);
       expect(thunk).toThrowError("address not in nodeOrder");
     });
   });

@@ -1,7 +1,7 @@
 // @flow
 
 import {Ledger} from "../core/ledger/ledger";
-import {toDependencyPolicy, ensureIdentityExists} from "./dependenciesConfig";
+import {toBonusPolicy, ensureIdentityExists} from "./dependenciesConfig";
 import {nameFromString as n} from "../core/identity";
 import {random as randomUuid} from "../util/uuid";
 import {fromISO, toISO, validateTimestampISO} from "../util/timestamp";
@@ -173,7 +173,7 @@ describe("api/dependenciesConfig", () => {
     });
   });
 
-  describe("toDependencyPolicy", () => {
+  describe("toBonusPolicy", () => {
     it("creates a policy with the right address", () => {
       const ledger = new Ledger();
       const id = ledger.createIdentity("USER", "foo");
@@ -182,7 +182,7 @@ describe("api/dependenciesConfig", () => {
         {name: n("foo"), periods: []},
         ledger
       );
-      const policy = toDependencyPolicy(config, ledger);
+      const policy = toBonusPolicy(config, ledger);
       expect(policy.address).toEqual(address);
     });
     it("creates a policy with specified periods", () => {
@@ -197,7 +197,7 @@ describe("api/dependenciesConfig", () => {
         },
         ledger
       );
-      const policy = toDependencyPolicy(config, ledger);
+      const policy = toBonusPolicy(config, ledger);
       expect(policy.periods).toEqual([{startTimeMs: timestampMs, weight: 0.1}]);
     });
     it("creates a policy with empty periods", () => {
@@ -210,13 +210,13 @@ describe("api/dependenciesConfig", () => {
         },
         ledger
       );
-      const policy = toDependencyPolicy(config, ledger);
+      const policy = toBonusPolicy(config, ledger);
       expect(policy.periods).toEqual([]);
     });
     it("errors if the config is missing an id", () => {
       const config = {name: n("foo"), periods: []};
       const ledger = new Ledger();
-      const thunk = () => toDependencyPolicy(config, ledger);
+      const thunk = () => toBonusPolicy(config, ledger);
       expect(thunk).toThrowError(
         "cannot convert config to policy before it has an id"
       );
@@ -225,7 +225,7 @@ describe("api/dependenciesConfig", () => {
       const id = randomUuid();
       const config = {id, name: n("foo"), periods: []};
       const ledger = new Ledger();
-      const thunk = () => toDependencyPolicy(config, ledger);
+      const thunk = () => toBonusPolicy(config, ledger);
       expect(thunk).toThrowError("no Account for identity");
     });
   });
