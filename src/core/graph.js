@@ -1162,7 +1162,9 @@ export class Graph {
  */
 export function nodeToString(node: Node): string {
   const address = NodeAddress.toString(node.address);
-  return `{address: ${address}}`;
+  const timestamp =
+    node.timestampMs == null ? "null" : String(node.timestampMs);
+  return `{address: ${address}, description: ${node.description}, timestampMs: ${timestamp}}`;
 }
 
 /**

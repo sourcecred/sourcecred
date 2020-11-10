@@ -1623,8 +1623,16 @@ describe("core/graph", () => {
   describe("nodeToString", () => {
     it("works", () => {
       const string = nodeToString(node("foo"));
+      const string2 = nodeToString({
+        address: NodeAddress.fromParts(["bar"]),
+        description: "test",
+        timestampMs: 123,
+      });
       expect(string).toMatchInlineSnapshot(
-        `"{address: NodeAddress[\\"foo\\"]}"`
+        `"{address: NodeAddress[\\"foo\\"], description: foo, timestampMs: null}"`
+      );
+      expect(string2).toMatchInlineSnapshot(
+        `"{address: NodeAddress[\\"bar\\"], description: test, timestampMs: 123}"`
       );
     });
   });
