@@ -1213,69 +1213,59 @@ export function edgeToParts(
   return {addressParts, srcParts, dstParts, timestampMs};
 }
 
+export type NodeDiff = {|
+  +first: ?Node,
+  +second: ?Node,
+|};
+
+export type EdgeDiff = {|
+  +first: ?Edge,
+  +second: ?Edge,
+|};
+
 export type GraphComparison = {|
   +graphsAreEqual: boolean,
-  +uniqueNodesInFirst: $ReadOnlyArray<Node>,
-  +uniqueNodesInSecond: $ReadOnlyArray<Node>,
-  +nodeTuplesWithDifferences: $ReadOnlyArray<[Node, Node]>,
-  +uniqueEdgesInFirst: $ReadOnlyArray<Edge>,
-  +uniqueEdgesInSecond: $ReadOnlyArray<Edge>,
-  +edgeTuplesWithDifferences: $ReadOnlyArray<[Edge, Edge]>,
+  +nodeDiffs: $ReadOnlyArray<NodeDiff>,
+  +edgeDiffs: $ReadOnlyArray<EdgeDiff>,
 |};
 
 export function compareGraphs(
   firstGraph: Graph,
   secondGraph: Graph
 ): GraphComparison {
-  const uniqueNodesInFirst = [];
-  const uniqueNodesInSecond = [];
-  const nodeTuplesWithDifferences = [];
-  const uniqueEdgesInFirst = [];
-  const uniqueEdgesInSecond = [];
-  const edgeTuplesWithDifferences = [];
+  const nodeDiffs = [];
+  const edgeDiffs = [];
   const graphsAreEqual = firstGraph.equals(secondGraph);
 
   if (!graphsAreEqual) {
     for (const firstNode of firstGraph.nodes()) {
       const secondNode = secondGraph.node(firstNode.address);
-      if (secondNode) {
-        if (!deepEqual(firstNode, secondNode))
-          nodeTuplesWithDifferences.push([firstNode, secondNode]);
-      } else {
-        uniqueNodesInFirst.push(firstNode);
-      }
+      if (!deepEqual(firstNode, secondNode))
+        nodeDiffs.push({first: firstNode, second: secondNode});
     }
     for (const secondNode of secondGraph.nodes()) {
       const firstNode = firstGraph.node(secondNode.address);
       if (!firstNode) {
-        uniqueNodesInSecond.push(secondNode);
+        nodeDiffs.push({first: firstNode, second: secondNode});
       }
     }
 
     for (const firstEdge of firstGraph.edges({showDangling: true})) {
       const secondEdge = secondGraph.edge(firstEdge.address);
-      if (secondEdge) {
-        if (!deepEqual(firstEdge, secondEdge))
-          edgeTuplesWithDifferences.push([firstEdge, secondEdge]);
-      } else {
-        uniqueEdgesInFirst.push(firstEdge);
-      }
+      if (!deepEqual(firstEdge, secondEdge))
+        edgeDiffs.push({first: firstEdge, second: secondEdge});
     }
     for (const secondEdge of secondGraph.edges({showDangling: true})) {
       const firstEdge = firstGraph.edge(secondEdge.address);
       if (!firstEdge) {
-        uniqueEdgesInSecond.push(secondEdge);
+        edgeDiffs.push({first: firstEdge, second: secondEdge});
       }
     }
   }
 
   return {
     graphsAreEqual,
-    uniqueNodesInFirst,
-    uniqueNodesInSecond,
-    nodeTuplesWithDifferences,
-    uniqueEdgesInFirst,
-    uniqueEdgesInSecond,
-    edgeTuplesWithDifferences,
+    nodeDiffs,
+    edgeDiffs,
   };
 }

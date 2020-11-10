@@ -1673,12 +1673,8 @@ describe("core/graph", () => {
       it("returns empty arrays", () => {
         const expected = {
           graphsAreEqual: true,
-          uniqueNodesInFirst: [],
-          uniqueNodesInSecond: [],
-          nodeTuplesWithDifferences: [],
-          uniqueEdgesInFirst: [],
-          uniqueEdgesInSecond: [],
-          edgeTuplesWithDifferences: [],
+          nodeDiffs: [],
+          edgeDiffs: [],
         };
         expect(compareGraphs(graph1, graph2)).toEqual(expected);
       });
@@ -1690,12 +1686,8 @@ describe("core/graph", () => {
       it("returns empty arrays", () => {
         const expected = {
           graphsAreEqual: true,
-          uniqueNodesInFirst: [],
-          uniqueNodesInSecond: [],
-          nodeTuplesWithDifferences: [],
-          uniqueEdgesInFirst: [],
-          uniqueEdgesInSecond: [],
-          edgeTuplesWithDifferences: [],
+          nodeDiffs: [],
+          edgeDiffs: [],
         };
         expect(compareGraphs(advanced.graph1(), advanced.graph2())).toEqual(
           expected
@@ -1728,12 +1720,11 @@ describe("core/graph", () => {
       it("returns unique dangling edge", () => {
         const expected = {
           graphsAreEqual: false,
-          uniqueNodesInFirst: [],
-          uniqueNodesInSecond: [],
-          nodeTuplesWithDifferences: [],
-          uniqueEdgesInFirst: [danglingEdge],
-          uniqueEdgesInSecond: [danglingEdge2],
-          edgeTuplesWithDifferences: [],
+          nodeDiffs: [],
+          edgeDiffs: [
+            {first: danglingEdge, second: undefined},
+            {first: undefined, second: danglingEdge2},
+          ],
         };
         expect(compareGraphs(graph1, graph2)).toEqual(expected);
       });
@@ -1746,12 +1737,8 @@ describe("core/graph", () => {
       it("returns unique contents", () => {
         const expected = {
           graphsAreEqual: false,
-          uniqueNodesInFirst: [dst],
-          uniqueNodesInSecond: [],
-          nodeTuplesWithDifferences: [],
-          uniqueEdgesInFirst: [simpleEdge],
-          uniqueEdgesInSecond: [],
-          edgeTuplesWithDifferences: [],
+          nodeDiffs: [{first: dst, second: undefined}],
+          edgeDiffs: [{first: simpleEdge, second: undefined}],
         };
         expect(compareGraphs(graph1, graph2)).toEqual(expected);
       });
@@ -1764,12 +1751,8 @@ describe("core/graph", () => {
       it("returns unique contents", () => {
         const expected = {
           graphsAreEqual: false,
-          uniqueNodesInFirst: [],
-          uniqueNodesInSecond: [dst],
-          nodeTuplesWithDifferences: [],
-          uniqueEdgesInFirst: [],
-          uniqueEdgesInSecond: [simpleEdge],
-          edgeTuplesWithDifferences: [],
+          nodeDiffs: [{first: undefined, second: dst}],
+          edgeDiffs: [{first: undefined, second: simpleEdge}],
         };
         expect(compareGraphs(graph1, graph2)).toEqual(expected);
       });
@@ -1791,12 +1774,8 @@ describe("core/graph", () => {
       it("returns tuples with differences", () => {
         const expected = {
           graphsAreEqual: false,
-          uniqueNodesInFirst: [],
-          uniqueNodesInSecond: [],
-          nodeTuplesWithDifferences: [[dst, dst2]],
-          uniqueEdgesInFirst: [],
-          uniqueEdgesInSecond: [],
-          edgeTuplesWithDifferences: [[simpleEdge, simpleEdge2]],
+          nodeDiffs: [{first: dst, second: dst2}],
+          edgeDiffs: [{first: simpleEdge, second: simpleEdge2}],
         };
         expect(compareGraphs(graph1, graph2)).toEqual(expected);
       });
