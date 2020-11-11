@@ -14,8 +14,8 @@ import * as C from "../../util/combo";
 export opaque type Name: string = string;
 const NAME_PATTERN = /^[A-Za-z0-9-]+$/;
 
-// Based on GitHub's requirements.
-const MAXIMUM_NAME_LENGTH = 39;
+// Based on the length of an Ethereum address (with '0x' prefix)
+const MAXIMUM_NAME_LENGTH = 42;
 
 /**
  * Parse a Name from a string.
