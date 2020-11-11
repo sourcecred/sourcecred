@@ -9,22 +9,27 @@
  * - Reacts: reactions left by other members of a channel on a message
  */
 
+/**
+ * OAuth token, generated from the application dashboard from
+ * https://api.slack.com/apps
+ * automatically generated when the app is installed to the slack org.
+ */
 export type SlackToken = string;
 
 // Only humans
 export type User = {|
   +id: string,
   +name: string,
-  +email: string
-|}
+  +email: string,
+|};
 
 // https://api.slack.com/methods#conversations
 // Conversations are channels
 
 export type Conversation = {|
   +id: string,
-  +name: string
-|}
+  +name: string,
+|};
 
 // https://api.slack.com/events/message#stars__pins__and_reactions
 // export type MessageReaction = {|
