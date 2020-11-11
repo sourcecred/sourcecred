@@ -52,9 +52,10 @@ export class Fetcher {
   /**
    * Get all channels (public and private) from the Slack org
    * Not considering Group DMs 
+   * will fetch only the channels where the app/bot is a part of
    * @todo only public channels and private channels considered for now, include `type` type for public,private,group dms etc.
    */
-  async channels(): Promise<Array<Conversation>> {
+  async channels(): Array<Conversation> {
     const channels: any = [];
     let cursor: any;
     let response: any;
