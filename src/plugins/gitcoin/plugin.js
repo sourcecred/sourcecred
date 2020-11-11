@@ -77,7 +77,7 @@ export class GitcoinPlugin implements Plugin {
     const config = {
       pgDatabaseUrl,
       gitcoinHost,
-      userWhitelist
+      userWhitelist,
     };
 
     fs.writeFileSync(path, JSON.stringify(config));
