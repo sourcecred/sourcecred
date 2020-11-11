@@ -171,6 +171,28 @@ export class Fetcher implements Discourse {
     this._fetchImplementation = limiter.wrap(unlimitedFetch);
   }
 
+  async _fetchWithRetryOn520(
+    fullUrl: string,
+    fetchOptions: RequestOptions
+  ): Promise<Response> {
+    // We've started sporadically seeing 520 errors when hitting Discourse API
+    // endpoints. It's generally while fetching topics, but is always a
+    // different topic, so I think it's a rare/ephemeral bug on the Discourse
+    // side.
+    // We can just retry a few times if we get a 520 and it's unlikely to fail
+    // 3 times in a row.
+    // See https://github.com/sourcecred/sourcecred/issues/2491
+    let tries = 3;
+    while (tries > 0) {
+      tries--;
+      const response = await this._fetchImplementation(fullUrl, fetchOptions);
+      if (response.status !== 520) {
+        return response;
+      }
+    }
+    throw new Error(`repeated 520 errors on ${fullUrl}`);
+  }
+
   _fetch(endpoint: string): Promise<Response> {
     const {serverUrl} = this.options;
     if (!endpoint.startsWith("/")) {
@@ -186,7 +208,7 @@ export class Fetcher implements Discourse {
       },
     };
     const fullUrl = `${serverUrl}${endpoint}`;
-    return this._fetchImplementation(fullUrl, fetchOptions);
+    return this._fetchWithRetryOn520(fullUrl, fetchOptions);
   }
 
   async categoryDefinitionTopicIds(): Promise<Set<TopicId>> {
