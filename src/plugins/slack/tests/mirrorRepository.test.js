@@ -1,3 +1,5 @@
+// @flow
+
 /**
  * @jest-environment node
  */
@@ -9,8 +11,7 @@ import {SqliteMirrorRepository} from "../mirrorRepository.js";
 describe("plugins/slack/mirrorRepository", () => {
   let repo;
   beforeEach(() => {
-    const SLACK_TOKEN = "EXAMPLE_TOKEN";
-    repo = new SqliteMirrorRepository(new Database(":memory:"), SLACK_TOKEN);
+    repo = new SqliteMirrorRepository(new Database(":memory:"));
   });
   it("initialises the tables correctly", () => {
     const stmt = repo._db.prepare("select * from meta");
@@ -19,12 +20,11 @@ describe("plugins/slack/mirrorRepository", () => {
     expect(get[0].config).toEqual(`{"version":"slack_mirror_v0"}`);
   });
   it("adds to channels table", () => {
-    const db = repo._db;
     const channel: Model.Conversation = {
       id: "123",
       name: "Test",
     };
-    const add = repo.addChannel(channel);
+    repo.addChannel(channel);
     const stmt = repo._db.prepare(
       "select * from channels where channel_id = ?"
     );
@@ -32,25 +32,23 @@ describe("plugins/slack/mirrorRepository", () => {
     expect(get.name).toEqual(channel.name);
   });
   it("adds to members table", () => {
-    const db = repo._db;
     const member: Model.User = {
       id: "user1",
       name: "Test Name",
       email: "test@email.com",
     };
-    const add = repo.addMember(member);
+    repo.addMember(member);
     const stmt = repo._db.prepare("select * from members where user_id = ?");
     const get = stmt.get(member.id);
     expect(get.name).toEqual(member.name);
     expect(get.email).toEqual(member.email);
   });
   it("adds to messages table", () => {
-    const db = repo._db;
     // need to insert a member before adding the message - foreign key constraint
     const member: Model.User = {
+      email: "test@email.com",
       id: "user1",
       name: "Test Name",
-      email: "test@email.com",
     };
     repo.addMember(member);
     const message: Model.Message = {

@@ -14,11 +14,11 @@ const VERSION = "slack_mirror_v0";
 export class SqliteMirrorRepository {
   +_db: Database;
 
-  constructor(db: Database, token: Model.SlackToken) {
+  constructor(db: Database) {
     if (db == null) throw new Error("db: " + String(db));
     this._db = db;
     this._transaction(() => {
-      this._initialize(token);
+      this._initialize();
     });
   }
 
@@ -40,7 +40,7 @@ export class SqliteMirrorRepository {
     }
   }
 
-  _initialize(token: Model.SlackToken) {
+  _initialize() {
     const db = this._db;
     // We store the config in a singleton table `meta`, whose unique row
     // has primary key `0`. Only the first ever insert will succeed; we
@@ -160,9 +160,9 @@ export class SqliteMirrorRepository {
 
   addMessage(message: Model.Message) {
     // explicit cast to integer is required since no boolean bindings exist in sqlite
-    let is_thread;
-    if (message.thread) is_thread = 1;
-    else is_thread = 0;
+    let isThread;
+    if (message.thread) isThread = 1;
+    else isThread = 0;
     this._db
       .prepare(
         dedent`\
@@ -178,7 +178,7 @@ export class SqliteMirrorRepository {
         timestamp_ms: message.id,
         author_id: message.authorId,
         message_body: message.text,
-        thread: is_thread,
+        thread: isThread,
         in_reply_to: message.in_reply_to,
       });
     for (const reaction of message.reactions) {
@@ -201,7 +201,7 @@ export class SqliteMirrorRepository {
           });
       }
     }
-    for (const mentioned_user of message.mentions) {
+    for (const mentionedUser of message.mentions) {
       this._db
         .prepare(
           dedent`\
@@ -214,7 +214,7 @@ export class SqliteMirrorRepository {
         )
         .run({
           message_id: message.id,
-          mentioned_user_id: mentioned_user,
+          mentioned_user_id: mentionedUser,
         });
     }
   }
