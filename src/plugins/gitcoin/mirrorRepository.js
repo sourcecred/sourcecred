@@ -87,9 +87,9 @@ export interface MirrorRepository extends ReadRepository {
 
 export class PostgresMirrorRepository
   implements ReadRepository, MirrorRepository {
-  +_db: Client;
+  +_db: typeof Client;
 
-  constructor(db: Client) {
+  constructor(db: typeof Client) {
     this._db = db;
   }
 
