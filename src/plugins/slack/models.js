@@ -25,25 +25,25 @@ export type User = {|
 
 // https://api.slack.com/methods#conversations
 // Conversations are channels
-
 export type Conversation = {|
   +id: string,
   +name: string,
 |};
 
 // https://api.slack.com/events/message#stars__pins__and_reactions
-// export type MessageReaction = {|
-//   +name: string, // reaction name
-//   +users: $Array<User>
-// |}
+export type MessageReaction = {|
+  +name: string, // reaction name
+  +users: Array<Buffer>,
+  +count: Number,
+|};
 
 export type Message = {|
   +id: string, // message id (can use either client_message_id or timestamp value here, slack identifies messages uniquely using timestamp - since it is measured in microseconds)
   +channel: string, // channel id (conversation id)
   +text: string,
-  +thread: boolean, // if this is true, the message is part of a thread
+  +thread: Boolean, // if this is true, the message is part of a thread
   +in_reply_to: string, // id of the thread-starting message, self id = thread starting message
   +authorId: string, // user id
-  +reactions: string, // array of reacts to a message. ([{name: 'reaction_name', users: ['<array of user ids>'], count: <number of reacts>}, {...}, {...}])
-  +mentions: Array<string>, // array of mentioned users
+  +reactions: Array<MessageReaction>, // array of reacts to a message. ([{name: 'reaction_name', users: ['<array of user ids>'], count: <number of reacts>}, {...}, {...}])
+  +mentions: Array<Buffer>, // array of mentioned users
 |};
