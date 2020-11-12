@@ -19,8 +19,20 @@ import {
   pluginDirectoryContext,
   loadLedger,
   saveLedger,
+  loadWeightedGraphForPlugin,
 } from "./common";
-import {toJSON as weightedGraphToJSON} from "../core/weightedGraph";
+import {
+  compareGraphs,
+  nodeToString,
+  edgeToString,
+  NodeAddress,
+  EdgeAddress,
+} from "../core/graph";
+import {compareWeights} from "../core/weights";
+import {
+  toJSON as weightedGraphToJSON,
+  type WeightedGraph,
+} from "../core/weightedGraph";
 import * as pluginId from "../api/pluginId";
 import {ensureIdentityExists} from "../core/ledger/identityProposal";
 
@@ -30,6 +42,17 @@ function die(std, message) {
 }
 
 const graphCommand: Command = async (args, std) => {
+  let shouldIncludeDiff = false;
+  const processedArgs = args.filter((arg) => {
+    switch (arg) {
+      case "-d":
+        shouldIncludeDiff = true;
+        return false;
+      default:
+        return true;
+    }
+  });
+
   const taskReporter = new LoggingTaskReporter();
   taskReporter.start("graph");
   const baseDir = process.cwd();
@@ -38,10 +61,10 @@ const graphCommand: Command = async (args, std) => {
   const ledger = await loadLedger(baseDir);
 
   let pluginsToLoad = [];
-  if (args.length === 0) {
+  if (processedArgs.length === 0) {
     pluginsToLoad = config.bundledPlugins.keys();
   } else {
-    for (const arg of args) {
+    for (const arg of processedArgs) {
       const id = pluginId.fromString(arg);
       if (config.bundledPlugins.has(id)) {
         pluginsToLoad.push(id);
@@ -67,8 +90,26 @@ const graphCommand: Command = async (args, std) => {
     const task = `${name}: generating graph`;
     taskReporter.start(task);
     const dirContext = pluginDirectoryContext(baseDir, name);
-    const graph = await plugin.graph(dirContext, rd, taskReporter);
-    const serializedGraph = stringify(weightedGraphToJSON(graph));
+    const weightedGraph = await plugin.graph(dirContext, rd, taskReporter);
+
+    if (shouldIncludeDiff) {
+      const diffTask = `${name}: diffing with existing graph`;
+      taskReporter.start(diffTask);
+      try {
+        const oldWeightedGraph = await loadWeightedGraphForPlugin(
+          name,
+          baseDir
+        );
+        computeAndLogDiff(oldWeightedGraph, weightedGraph, name);
+      } catch (error) {
+        console.log(
+          `Could not find or compare existing graph.json for ${name}. ${error}`
+        );
+      }
+      taskReporter.finish(diffTask);
+    }
+
+    const serializedGraph = stringify(weightedGraphToJSON(weightedGraph));
     const outputDir = makePluginDir(baseDir, graphOutputPrefix, name);
     const outputPath = pathJoin(outputDir, "graph.json");
     await fs.writeFile(outputPath, serializedGraph);
@@ -126,15 +167,127 @@ export function _hackyIdentityNameReferenceDetector(
 export const graphHelp: Command = async (args, std) => {
   std.out(
     dedent`\
-      usage: sourcecred graph
+      usage: sourcecred graph [-d]
 
       Generate a graph from cached plugin data
 
       Either 'sourcecred load' must immediately precede this command or
       a cache directory must exist for all plugins specified in sourcecred.json
+
+      If the -d flag is provided, it will also compute and output
+      any resulting graph changes since the last generated graph.
       `.trimRight()
   );
   return 0;
 };
+
+function computeAndLogDiff(
+  oldWeightedGraph: WeightedGraph,
+  newWeightedGraph: WeightedGraph,
+  pluginName: string
+) {
+  const graphDiff = compareGraphs(
+    oldWeightedGraph.graph,
+    newWeightedGraph.graph
+  );
+  const weightDiff = compareWeights(
+    oldWeightedGraph.weights,
+    newWeightedGraph.weights
+  );
+  const horizontalRule =
+    "=============================================================";
+  if (graphDiff.nodeDiffs.length > 0) {
+    console.log(
+      `${horizontalRule}\n  ${pluginName} - Node Diffs\n${horizontalRule}`
+    );
+    for (const nodeDiff of graphDiff.nodeDiffs) {
+      console.log(
+        `Old:\t${
+          nodeDiff.first ? nodeToString(nodeDiff.first) : "No matching address"
+        }`
+      );
+      console.log(
+        `New:\t${
+          nodeDiff.second
+            ? nodeToString(nodeDiff.second)
+            : "No matching address"
+        }\n`
+      );
+    }
+  }
+  if (weightDiff.nodeWeightDiffs.length > 0) {
+    console.log(
+      `${horizontalRule}\n  ${pluginName} - Node Weight Diffs\n${horizontalRule}`
+    );
+    for (const nodeWeightDiff of weightDiff.nodeWeightDiffs) {
+      console.log(`${NodeAddress.toString(nodeWeightDiff.address)}`);
+      console.log(
+        `Old:\t${
+          nodeWeightDiff.first != null
+            ? nodeWeightDiff.first.toString()
+            : "No matching address"
+        }`
+      );
+      console.log(
+        `New:\t${
+          nodeWeightDiff.second != null
+            ? nodeWeightDiff.second.toString()
+            : "No matching address"
+        }\n`
+      );
+    }
+  }
+  if (graphDiff.edgeDiffs.length > 0) {
+    console.log(
+      `${horizontalRule}\n  ${pluginName} - Edge Diffs\n${horizontalRule}`
+    );
+    for (const edgeDiff of graphDiff.edgeDiffs) {
+      console.log(
+        `Old:\t${
+          edgeDiff.first ? edgeToString(edgeDiff.first) : "No matching address"
+        }`
+      );
+      console.log(
+        `New:\t${
+          edgeDiff.second
+            ? edgeToString(edgeDiff.second)
+            : "No matching address"
+        }\n`
+      );
+    }
+  }
+  if (weightDiff.edgeWeightDiffs.length > 0) {
+    console.log(
+      `${horizontalRule}\n  ${pluginName} - Edge Weight Diffs\n${horizontalRule}`
+    );
+    for (const edgeWeightDiff of weightDiff.edgeWeightDiffs) {
+      console.log(`${EdgeAddress.toString(edgeWeightDiff.address)}`);
+      console.log(
+        `Old:\t${
+          edgeWeightDiff.first
+            ? stringify(edgeWeightDiff.first)
+            : "No matching address"
+        }`
+      );
+      console.log(
+        `New:\t${
+          edgeWeightDiff.second
+            ? stringify(edgeWeightDiff.second)
+            : "No matching address"
+        }\n`
+      );
+    }
+  }
+  if (graphDiff.graphsAreEqual && weightDiff.weightsAreEqual)
+    console.log(
+      `${horizontalRule}\n  ${pluginName} - Unchanged\n${horizontalRule}`
+    );
+  else
+    console.log(`${horizontalRule}\n  ${pluginName} - Summary of Changes\n${horizontalRule}
+Node Diffs: ${graphDiff.nodeDiffs.length}
+Node Weight Diffs: ${weightDiff.nodeWeightDiffs.length}
+Edge Diffs: ${graphDiff.edgeDiffs.length}
+Edge Weight Diffs: ${weightDiff.edgeWeightDiffs.length}`);
+}
 
 export default graphCommand;

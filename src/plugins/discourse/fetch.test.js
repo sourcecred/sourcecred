@@ -40,6 +40,37 @@ describe("plugins/discourse/fetch", () => {
     };
     const fetcherWithStatus = (status: number) =>
       new Fetcher(options, fakeFetch(status), 0);
+
+    it("retries on 520", async () => {
+      const mockFetch = jest.fn();
+      mockFetch
+        .mockReturnValueOnce(
+          Promise.resolve(new Response("", {status: 520, url: "/something"}))
+        )
+        .mockReturnValueOnce(
+          Promise.resolve(new Response("", {status: 520, url: "/something"}))
+        )
+        .mockReturnValue(
+          Promise.resolve(new Response("", {status: 200, url: "/something"}))
+        );
+
+      const fetcher = new Fetcher(options, mockFetch, 0);
+      const response = await fetcher._fetch("/something");
+
+      expect(response.status).toEqual(200);
+      expect(mockFetch.mock.calls.length).toEqual(3);
+    });
+
+    it("errors after repeated 520 errors", async () => {
+      const mockFetch = jest.fn();
+      mockFetch.mockReturnValue(
+        Promise.resolve(new Response("", {status: 520, url: "/something"}))
+      );
+      const fetcher = new Fetcher(options, mockFetch, 0);
+      const response = fetcher._fetch("/something");
+      await expect(response).rejects.toThrow("repeated 520 errors");
+    });
+
     function expectError(name, f, status) {
       it(`${name} errors on ${String(status)}`, () => {
         const fetcher = fetcherWithStatus(status);
