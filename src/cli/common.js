@@ -134,20 +134,25 @@ async function loadDependenciesAndWriteChanges(
   return dependenciesWithIds.map((d) => toBonusPolicy(d, ledger));
 }
 
+export async function loadWeightedGraphForPlugin(
+  pluginName: string,
+  baseDir: string
+): Promise<WeightedGraph> {
+  const graphOutputPrefix = ["output", "graphs"];
+  const outputDir = makePluginDir(baseDir, graphOutputPrefix, pluginName);
+  const outputPath = pathJoin(outputDir, "graph.json");
+  const graphJSON = JSON.parse(await fs.readFile(outputPath));
+  return weightedGraphFromJSON(graphJSON);
+}
+
 export async function loadWeightedGraph(
   baseDir: string,
   config: InstanceConfig
 ): Promise<WeightedGraph> {
-  const graphOutputPrefix = ["output", "graphs"];
-  async function loadGraph(pluginName): Promise<WeightedGraph> {
-    const outputDir = makePluginDir(baseDir, graphOutputPrefix, pluginName);
-    const outputPath = pathJoin(outputDir, "graph.json");
-    const graphJSON = JSON.parse(await fs.readFile(outputPath));
-    return weightedGraphFromJSON(graphJSON);
-  }
-
   const pluginNames = Array.from(config.bundledPlugins.keys());
-  const graphs = await Promise.all(pluginNames.map(loadGraph));
+  const graphs = await Promise.all(
+    pluginNames.map((name) => loadWeightedGraphForPlugin(name, baseDir))
+  );
   const combinedGraph = merge(graphs);
 
   // TODO(@decentralion): This is snapshot tested via TimelineCred, add unit

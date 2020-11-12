@@ -196,14 +196,14 @@ export function compareWeights(
     ...firstWeights.nodeWeights.keys(),
     ...secondWeights.nodeWeights.keys(),
   ]);
-  for (const a of nodeAddresses) {
-    const first = firstWeights.nodeWeights.get(a);
-    const second = secondWeights.nodeWeights.get(a);
+  for (const address of nodeAddresses) {
+    const first = firstWeights.nodeWeights.get(address);
+    const second = secondWeights.nodeWeights.get(address);
     if (!deepEqual(first, second)) {
       nodeWeightDiffs.push({
-        address: a,
-        first: first,
-        second: second,
+        address,
+        first,
+        second,
       });
     }
   }
@@ -211,14 +211,14 @@ export function compareWeights(
     ...firstWeights.edgeWeights.keys(),
     ...secondWeights.edgeWeights.keys(),
   ]);
-  for (const a of edgeAddresses) {
-    const first = firstWeights.edgeWeights.get(a);
-    const second = secondWeights.edgeWeights.get(a);
+  for (const address of edgeAddresses) {
+    const first = firstWeights.edgeWeights.get(address);
+    const second = secondWeights.edgeWeights.get(address);
     if (!deepEqual(first, second)) {
       edgeWeightDiffs.push({
-        address: a,
-        first: first,
-        second: second,
+        address,
+        first,
+        second,
       });
     }
   }
