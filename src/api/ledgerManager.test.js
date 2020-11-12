@@ -4,30 +4,17 @@ import {Ledger} from "../core/ledger/ledger";
 import * as uuid from "../util/uuid";
 import {LedgerManager} from "./ledgerManager";
 import type {LedgerLog} from "../core/ledger/ledger";
-import * as G from "../core/ledger/grain"; // for spy purposes
+import * as G from "../core/ledger/grain";
+import {createUuidMock} from "../core/ledger/testUtils";
 
 describe("api/ledgerManager", () => {
   // Helper for constructing Grain values.
   const g = (s) => G.fromString(s);
 
-  const randomMock = jest.spyOn(uuid, "random");
+  const {resetFakeUuid, setNextUuid} = createUuidMock();
 
-  let nextFakeUuidIndex = 0;
-  function resetFakeUuid() {
-    nextFakeUuidIndex = 0;
-  }
-  function nextFakeUuid(): uuid.Uuid {
-    const uuidString = String(nextFakeUuidIndex).padStart(21, "0") + "A";
-    nextFakeUuidIndex++;
-    return uuid.fromString(uuidString);
-  }
-
-  randomMock.mockImplementation(nextFakeUuid);
   const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
   const id2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
-  function setNextUuid(x: uuid.Uuid) {
-    randomMock.mockImplementationOnce(() => x);
-  }
 
   function ledgerWithIdentities() {
     resetFakeUuid();
