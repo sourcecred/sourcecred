@@ -31,6 +31,12 @@ const loadCommand: Command = async (args, std) => {
   const config = await loadInstanceConfig(baseDir);
   if (args.length === 0) {
     pluginsToLoad = Array.from(config.bundledPlugins.keys());
+    if (pluginsToLoad.length === 0) {
+      std.err(
+        "No plugins configured; Please set up at least one plugin: " +
+          "https://github.com/sourcecred/template-instance#supported-plugins"
+      );
+    }
   } else {
     for (const arg of args) {
       const id = pluginIdParser.parseOrThrow(arg);
