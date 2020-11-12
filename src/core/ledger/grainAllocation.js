@@ -39,10 +39,21 @@ export type Immediate = "IMMEDIATE";
 
 /**
  * The Recent policy distributes cred using a time discount factor, weighing
- * recent contributions higher.
+ * recent contributions higher. The policy takes a history of cred scores, progressively
+ * discounting past cred scores, and then taking the sum over the discounted scores.
+ *
+ * A cred score at time t reads as follows: "The discounted cred c' at a timestep which is
+ * n timesteps back from the most recent one is its cred score c multiplied by the discount
+ * factor to the nth power."
+ *
+ * c' =  c * (1 - discount) ** n
+ *
+ * Discounts range from 0 to 1, with a higher discount weighing recent contribution
+ * higher.
  *
  * Note that this is a generalization of the Immediate policy, where Immediate
- * is the same as Recent with a discount factor 1 (100%).
+ * is the same as Recent with a full discount, i.e. a discount factor 1 (100%).
+ *
  */
 export type Recent = "RECENT";
 
