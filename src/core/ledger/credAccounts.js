@@ -47,15 +47,19 @@ export function computeCredAccounts(
 ): CredAccountData {
   const grainAccounts = ledger.accounts();
   const userlikeInfo = new Map();
+  const intervals = credView.intervals();
+  const noIntervals = intervals.length === 0;
   for (const {address, credOverTime, description} of credView.userNodes()) {
-    if (credOverTime == null) {
+    if (noIntervals) {
+      userlikeInfo.set(address, {cred: [], description});
+    } else if (credOverTime === null) {
       throw new Error(
         `userlike ${NodeAddress.toString(address)} does not have detailed cred`
       );
+    } else {
+      userlikeInfo.set(address, {cred: credOverTime.cred, description});
     }
-    userlikeInfo.set(address, {cred: credOverTime.cred, description});
   }
-  const intervals = credView.intervals();
   return _computeCredAccounts(grainAccounts, userlikeInfo, intervals);
 }
 

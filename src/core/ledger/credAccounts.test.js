@@ -7,6 +7,11 @@ import {intervalSequence} from "../interval";
 
 describe("core/ledger/credAccounts", () => {
   describe("_computeCredAccounts", () => {
+    it("works in an empty case", () => {
+      expect(
+        _computeCredAccounts([], new Map(), intervalSequence([]))
+      ).toEqual({"accounts": [], "intervals": [], unclaimedAliases: []});
+    });
     it("works in a simple case", () => {
       const ledger = new Ledger();
       ledger.createIdentity("USER", "sourcecred");
@@ -43,6 +48,42 @@ describe("core/ledger/credAccounts", () => {
       expect(_computeCredAccounts([account], info, intervals)).toEqual(
         expectedData
       );
+    });
+    it("returns credAccountData even if no intervals have passed", () => {
+      // note: this is the default case in our template intance
+      // By default, we mean:
+      // 1. single identity exists and
+      // 2. no cred intervals have been computed
+      const ledger = new Ledger();
+      ledger.createIdentity("USER", "sourcecred");
+      const userAddress = NodeAddress.empty;
+      const emptyCred = [];
+      const account = ledger.accounts()[0];
+      const intervals = intervalSequence([]);
+      const info = new Map([
+        [
+          account.identity.address,
+          {cred: emptyCred, description: "irrelevant"},
+        ],
+        [userAddress, {cred: emptyCred, description: "Little lost user"}],
+      ]);
+
+      const expectedCredAccount = {cred: emptyCred, account, totalCred: 0};
+      const expectedUnclaimedAccount = {
+        alias: {
+          address: userAddress,
+          description: "Little lost user",
+        },
+        cred: emptyCred,
+        totalCred: 0,
+      };
+      const expectedData = {
+        accounts: [expectedCredAccount],
+        unclaimedAliases: [expectedUnclaimedAccount],
+        intervals,
+      };
+      const result = _computeCredAccounts([account], info, intervals);
+      expect(result).toEqual(expectedData);
     });
     it("errors if an alias address is in the cred scores", () => {
       const ledger = new Ledger();
