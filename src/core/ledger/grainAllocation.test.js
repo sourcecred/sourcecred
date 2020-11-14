@@ -1,13 +1,13 @@
 // @flow
 
+import * as G from "./grain";
+import {random as randomUuid, parser as uuidParser} from "../../util/uuid";
 import {
   computeAllocation,
   type AllocationIdentity,
   _validateAllocationBudget,
-  toDiscount,
 } from "./grainAllocation";
-import * as G from "./grain";
-import {random as randomUuid, parser as uuidParser} from "../../util/uuid";
+import {toDiscount} from "./policies/recent";
 
 describe("core/ledger/grainAllocation", () => {
   // concise helper for grain from a string
