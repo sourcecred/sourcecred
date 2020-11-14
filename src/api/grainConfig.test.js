@@ -3,114 +3,193 @@
 import {parser, toDistributionPolicy, type GrainConfig} from "./grainConfig";
 import {type DistributionPolicy} from "../core/ledger/applyDistributions";
 import {toDiscount} from "../core/ledger/grainAllocation";
-import {fromInteger} from "../core/ledger/grain";
+import {fromString} from "../core/ledger/grain";
+import {random as randomUuid} from "../util/uuid.js";
 
 describe("api/grainConfig", () => {
   describe("parser", () => {
-    it("errors if missing params", () => {
-      const grainConfig = {};
-      expect(() => parser.parseOrThrow(grainConfig)).toThrowError(
-        "missing key"
+    it("works with valid config", () => {
+      const uuid = randomUuid();
+      const config = {
+        allocationPolicies: [
+          {
+            policyType: "BALANCED",
+            budget: "50", // TODO: need to make this parse a number
+          },
+          {
+            policyType: "IMMEDIATE",
+            budget: "10",
+          },
+          {
+            policyType: "RECENT",
+            budget: "20",
+            discount: 0.1,
+          },
+          {
+            policyType: "RECENT",
+            budget: "30",
+            discount: 0.2,
+          },
+          {
+            policyType: "SPECIAL",
+            budget: "100",
+            memo: "howdy",
+            recipient: uuid,
+          },
+        ],
+        maxSimultaneousDistributions: 2,
+      };
+      const expected: GrainConfig = {
+        allocationPolicies: [
+          {
+            policyType: "BALANCED",
+            budget: fromString("50"),
+          },
+          {
+            policyType: "IMMEDIATE",
+            budget: fromString("10"),
+          },
+          {
+            policyType: "RECENT",
+            budget: fromString("20"),
+            discount: toDiscount(0.1),
+          },
+          {
+            policyType: "RECENT",
+            budget: fromString("30"),
+            discount: toDiscount(0.2),
+          },
+          {
+            policyType: "SPECIAL",
+            budget: fromString("100"),
+            memo: "howdy",
+            recipient: uuid,
+          },
+        ],
+        maxSimultaneousDistributions: 2,
+      };
+      expect(parser.parseOrThrow(config)).toEqual(expected);
+    });
+
+    it("can take multiple of the same policy", () => {
+      const config = {
+        allocationPolicies: [
+          {
+            policyType: "RECENT",
+            budget: "20",
+            discount: 0.1,
+          },
+          {
+            policyType: "RECENT",
+            budget: "30",
+            discount: 0.2,
+          },
+        ],
+        maxSimultaneousDistributions: 2,
+      };
+      const expected: GrainConfig = {
+        allocationPolicies: [
+          {
+            policyType: "RECENT",
+            budget: fromString("20"),
+            discount: toDiscount(0.1),
+          },
+          {
+            policyType: "RECENT",
+            budget: fromString("30"),
+            discount: toDiscount(0.2),
+          },
+        ],
+        maxSimultaneousDistributions: 2,
+      };
+      expect(parser.parseOrThrow(config)).toEqual(expected);
+    });
+
+    it("errors on invalid discount", () => {
+      const config = {
+        allocationPolicies: [
+          {
+            policyType: "RECENT",
+            budget: "-1",
+            discount: -5,
+          },
+        ],
+        maxSimultaneousDistributions: 2,
+      };
+      expect(() => parser.parseOrThrow(config)).toThrowError(
+        "Discount must be in range"
       );
-    });
-
-    it("errors if malformed params", () => {
-      const grainConfig = {
-        balancedPerWeek: {},
-        immediatePerWeek: 10,
-        recentPerWeek: 10,
-      };
-      expect(() => parser.parseOrThrow(grainConfig)).toThrowError(
-        "expected number"
-      );
-    });
-
-    it("ignores extra params", () => {
-      const grainConfig = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
-        recentPerWeek: 30,
-        EXTRA: 30,
-      };
-
-      const to = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
-        recentPerWeek: 30,
-      };
-
-      expect(parser.parseOrThrow(grainConfig)).toEqual(to);
-    });
-
-    it("does not throw on negative or zero budgets", () => {
-      const grainConfig = {
-        balancedPerWeek: -1,
-        immediatePerWeek: 0,
-        recentPerWeek: -100,
-        recentWeeklyDecayRate: 0.5,
-      };
-
-      expect(parser.parseOrThrow(grainConfig)).toEqual(grainConfig);
-    });
-
-    it("works on well formed object", () => {
-      const grainConfig = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
-        recentPerWeek: 30,
-        recentWeeklyDecayRate: 0.5,
-      };
-
-      expect(parser.parseOrThrow(grainConfig)).toEqual(grainConfig);
     });
   });
 
   describe("toDistributionPolicy", () => {
-    it("errors on missing discount", () => {
+    it("errors if non positive budget", () => {
       const x: GrainConfig = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
-        recentPerWeek: 10,
+        allocationPolicies: [
+          {
+            policyType: "BALANCED",
+            budget: fromString("0"),
+          },
+        ],
       };
-
       expect(() => toDistributionPolicy(x)).toThrowError(
-        "no recentWeeklyDecayRate specified"
+        `budget must be nonnegative integer`
       );
     });
 
-    it("does not error for missing recentWeeklyDecayRate if 0 recent budget", () => {
+    it("errors if no policies provided", () => {
       const x: GrainConfig = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
-        recentPerWeek: 0,
+        allocationPolicies: [],
       };
-
-      expect(() => toDistributionPolicy(x)).not.toThrow();
+      expect(() => toDistributionPolicy(x)).toThrowError(
+        `no valid allocation policies provided`
+      );
     });
 
     it("creates DistributionPolicy from valid GrainConfig", () => {
       const x: GrainConfig = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
-        recentPerWeek: 30,
-        recentWeeklyDecayRate: 0.1,
+        allocationPolicies: [
+          {
+            policyType: "BALANCED",
+            budget: fromString("50"),
+          },
+          {
+            policyType: "IMMEDIATE",
+            budget: fromString("10"),
+          },
+          {
+            policyType: "RECENT",
+            budget: fromString("20"),
+            discount: toDiscount(0.1),
+          },
+          {
+            policyType: "RECENT",
+            budget: fromString("30"),
+            discount: toDiscount(0.2),
+          },
+        ],
         maxSimultaneousDistributions: 2,
       };
 
       const expectedDistributionPolicy: DistributionPolicy = {
         allocationPolicies: [
           {
-            budget: fromInteger(20),
-            policyType: "IMMEDIATE",
+            policyType: "BALANCED",
+            budget: fromString("50"),
           },
           {
-            budget: fromInteger(30),
+            policyType: "IMMEDIATE",
+            budget: fromString("10"),
+          },
+          {
             policyType: "RECENT",
+            budget: fromString("20"),
             discount: toDiscount(0.1),
           },
           {
-            budget: fromInteger(10),
-            policyType: "BALANCED",
+            policyType: "RECENT",
+            budget: fromString("30"),
+            discount: toDiscount(0.2),
           },
         ],
         maxSimultaneousDistributions: 2,
