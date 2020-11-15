@@ -154,6 +154,10 @@ cd $MY_SC_INSTANCE
 scdev go
 ```
 
+While making backend changes, you may find it useful to view a diff between the last generated graph and
+a newly generated graph by running `scdev graph -d`  
+The graph.json is stored in the instance, so you can easily compare results across backend branches.
+
 ### Using a Modified Frontend
 
 If you've made changes to the SourceCred frontend, you can preview and test it using our builtin development server:
