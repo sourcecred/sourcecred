@@ -276,5 +276,108 @@ describe("api/ledgerManager", () => {
         ...expectedRemoteChanges,
       ]);
     });
+
+    it("should not discard local changes that were successfully applied before a conflicting change", async () => {
+      const {manager, baseEventLog} = syncEventsFixture();
+
+      // Transferring 1g should succeed, leaving the user with 3g
+      manager.ledger.transferGrain({
+        from: id1,
+        to: id2,
+        amount: g("1"),
+        memo: "local transfer 1g",
+      });
+
+      // Transferring 4g should fail since the user now only has 3
+      manager.ledger.transferGrain({
+        from: id1,
+        to: id2,
+        amount: g("4"),
+        memo: "local transfer 4g",
+      });
+
+      // Any event after the conflicting one should not be applied, even if its valid
+      manager.ledger.transferGrain({
+        from: id2,
+        to: id1,
+        amount: g("1"),
+        memo: "id2 local transfer 1g",
+      });
+
+      const expectedRemoteChanges = [
+        {
+          ledgerTimestamp: expect.anything(),
+          uuid: expect.anything(),
+          version: "1",
+          action: {
+            type: "TRANSFER_GRAIN",
+            amount: "6",
+            memo: "remote transfer",
+            from: id1,
+            to: id2,
+          },
+        },
+      ];
+
+      const expectedSuccessfulLocalChanges = [
+        {
+          ledgerTimestamp: expect.anything(),
+          uuid: expect.anything(),
+          version: "1",
+          action: {
+            type: "TRANSFER_GRAIN",
+            amount: "1",
+            memo: "local transfer 1g",
+            from: id1,
+            to: id2,
+          },
+        },
+      ];
+
+      const expectedConflictingLocalChanges = [
+        {
+          ledgerTimestamp: expect.anything(),
+          uuid: expect.anything(),
+          version: "1",
+          action: {
+            type: "TRANSFER_GRAIN",
+            amount: "4",
+            memo: "local transfer 4g",
+            from: id1,
+            to: id2,
+          },
+        },
+        {
+          ledgerTimestamp: expect.anything(),
+          uuid: expect.anything(),
+          version: "1",
+          action: {
+            type: "TRANSFER_GRAIN",
+            amount: "1",
+            memo: "id2 local transfer 1g",
+            from: id2,
+            to: id1,
+          },
+        },
+      ];
+
+      const res = await manager.reloadLedger();
+
+      expect(res.error).toBe(
+        `Unable to apply local changes: transferGrain: ${id1} has insufficient balance for transfer: 4 > 3, resetting to remote ledger`
+      );
+      expect(res.remoteChanges).toEqual(expectedRemoteChanges);
+
+      expect(res.localChanges).toEqual([
+        ...expectedSuccessfulLocalChanges,
+        ...expectedConflictingLocalChanges,
+      ]);
+
+      expect(manager.ledger.eventLog()).toEqual([
+        ...baseEventLog,
+        ...expectedRemoteChanges,
+        ...expectedSuccessfulLocalChanges,
+      ]);
+    });
   });
 });

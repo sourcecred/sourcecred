@@ -87,7 +87,7 @@ export class LedgerManager {
         localChanges,
       };
     } catch (e) {
-      // Reset local ledger to remote state
+      // Set local ledger to the remote state + the local actions that were successfully applied
       this._ledger = remoteLedger;
       return {
         error: `Unable to apply local changes: ${e.message}, resetting to remote ledger`,
