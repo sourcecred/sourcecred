@@ -75,8 +75,13 @@ export const LedgerViewer = ({
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    // Keep the user from losing their place when changing # of results per page
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    const currentFirstVisibleRow = page * rowsPerPage;
+    const newPage = Math.floor(currentFirstVisibleRow / newRowsPerPage);
+
+    setRowsPerPage(newRowsPerPage);
+    setPage(newPage);
   };
 
   const events = useMemo(() => [...ledger.eventLog()].reverse(), [ledger]);
