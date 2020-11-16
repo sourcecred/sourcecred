@@ -2,11 +2,8 @@
 
 import * as uuid from "../../util/uuid";
 import {type TimestampMs} from "../../util/timestamp";
-import {
-  type AllocationPolicy,
-  type AllocationIdentity,
-  computeAllocation,
-} from "./grainAllocation";
+import {type AllocationIdentity, computeAllocation} from "./grainAllocation";
+import {type AllocationPolicy} from "./policies";
 import {type CredAccountData} from "./credAccounts";
 import {type Distribution} from "./distribution";
 

@@ -2,7 +2,7 @@
 
 import {parser, toDistributionPolicy, type GrainConfig} from "./grainConfig";
 import {type DistributionPolicy} from "../core/ledger/applyDistributions";
-import {toDiscount} from "../core/ledger/grainAllocation";
+import {toDiscount} from "../core/ledger/policies/recent";
 import {fromInteger} from "../core/ledger/grain";
 
 describe("api/grainConfig", () => {

@@ -4,7 +4,7 @@ import {type DistributionPolicy} from "../core/ledger/applyDistributions";
 import * as G from "../core/ledger/grain";
 import * as C from "../util/combo";
 import * as NullUtil from "../util/null";
-import {toDiscount} from "../core/ledger/grainAllocation";
+import {toDiscount} from "../core/ledger/policies/recent";
 
 export type GrainConfig = {|
   +immediatePerWeek: number,

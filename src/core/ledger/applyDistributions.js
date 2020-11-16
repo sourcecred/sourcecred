@@ -3,7 +3,7 @@
 import {type TimestampMs} from "../../util/timestamp";
 import {type IntervalSequence, intervalSequence} from "../interval";
 import {Ledger} from "./ledger";
-import {type AllocationPolicy} from "./grainAllocation";
+import {type AllocationPolicy} from "./policies";
 import {CredView} from "../../analysis/credView";
 import {computeCredAccounts} from "./credAccounts";
 import {computeDistribution} from "./computeDistribution";
