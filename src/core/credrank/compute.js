@@ -12,15 +12,65 @@ import {distributionToNodeDistribution} from "../algorithm/graphToMarkovChain";
 
 import {uniformDistribution} from "../algorithm/distribution";
 import {accumulatorGadget} from "./nodeGadgets";
-import {type MarkovProcessGraph} from "./markovProcessGraph";
+import {
+  MarkovProcessGraph,
+  type Parameters as MarkovProcessGraphParameters,
+} from "./markovProcessGraph";
 import {CredGraph} from "./credGraph";
+import {type WeightedGraph} from "../weightedGraph";
+import {Ledger} from "../ledger/ledger";
+import {graphIntervals} from "../interval";
 
 export const DEFAULT_MAX_ITERATIONS = 255;
 export const DEFAULT_CONVERGENCE_THRESHOLD = 1e-7;
 export const DEFAULT_YIELD_AFTER_MS = 30;
 export const DEFAULT_VERBOSE = false;
 
-export async function credrank(
+const DEFAULT_ALPHA = 0.1;
+const DEFAULT_BETA = 0.4;
+const DEFAULT_GAMMA_FORWARD = 0.1;
+const DEFAULT_GAMMA_BACKWARD = 0.1;
+
+/**
+ * Compute CredRank results given a WeightedGraph, a Ledger, and optional
+ * parameters.
+ */
+export function credrank(
+  weightedGraph: WeightedGraph,
+  ledger: Ledger,
+  markovProcessGraphParameters?: $Shape<MarkovProcessGraphParameters> = {},
+  pagerankOptions?: $Shape<PagerankOptions>
+): Promise<CredGraph> {
+  const defaultParameters: MarkovProcessGraphParameters = {
+    alpha: DEFAULT_ALPHA,
+    beta: DEFAULT_BETA,
+    gammaForward: DEFAULT_GAMMA_FORWARD,
+    gammaBackward: DEFAULT_GAMMA_BACKWARD,
+  };
+
+  const parameters: MarkovProcessGraphParameters = {
+    ...defaultParameters,
+    ...markovProcessGraphParameters,
+  };
+  const participants = ledger.accounts().map(({identity}) => ({
+    description: identity.name,
+    address: identity.address,
+    id: identity.id,
+  }));
+  const intervals = graphIntervals(weightedGraph.graph);
+  const mpg = MarkovProcessGraph.new({
+    weightedGraph,
+    participants,
+    parameters,
+    intervals,
+  });
+  return markovProcessGraphPagerank(mpg, pagerankOptions);
+}
+
+/**
+ * Given a MarkovProcessGraph, compute PageRank scores on it.
+ */
+export async function markovProcessGraphPagerank(
   mpg: MarkovProcessGraph,
   options?: $Shape<PagerankOptions> = {}
 ): Promise<CredGraph> {
