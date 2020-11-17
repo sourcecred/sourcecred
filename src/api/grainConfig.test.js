@@ -7,11 +7,8 @@ import {fromInteger} from "../core/ledger/grain";
 
 describe("api/grainConfig", () => {
   describe("parser", () => {
-    it("errors if missing params", () => {
-      const grainConfig = {};
-      expect(() => parser.parseOrThrow(grainConfig)).toThrowError(
-        "missing key"
-      );
+    it("does not throw with no params", () => {
+      expect(parser.parseOrThrow({})).toEqual({});
     });
 
     it("errors if malformed params", () => {
@@ -27,15 +24,11 @@ describe("api/grainConfig", () => {
 
     it("ignores extra params", () => {
       const grainConfig = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
         recentPerWeek: 30,
         EXTRA: 30,
       };
 
       const to = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
         recentPerWeek: 30,
       };
 
@@ -66,7 +59,20 @@ describe("api/grainConfig", () => {
   });
 
   describe("toDistributionPolicy", () => {
-    it("errors on missing discount", () => {
+    it("can handle missing policies", () => {
+      const x: GrainConfig = {
+        maxSimultaneousDistributions: 100,
+      };
+
+      const expected: DistributionPolicy = {
+        allocationPolicies: [],
+        maxSimultaneousDistributions: 100,
+      };
+
+      expect(toDistributionPolicy(x)).toEqual(expected);
+    });
+
+    it("errors on missing discount for recent policy", () => {
       const x: GrainConfig = {
         balancedPerWeek: 10,
         immediatePerWeek: 20,
