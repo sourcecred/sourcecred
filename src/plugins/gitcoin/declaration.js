@@ -3,7 +3,12 @@
 import deepFreeze from "deep-freeze";
 import type {PluginDeclaration} from "../../analysis/pluginDeclaration";
 import type {NodeType, EdgeType} from "../../analysis/types";
-import {NodeAddress, EdgeAddress} from "../../core/graph";
+import {
+  NodeAddress,
+  EdgeAddress,
+  type NodeAddressT,
+  type EdgeAddressT,
+} from "../../core/graph";
 
 export const nodePrefix = NodeAddress.fromParts(["sourcecred", "gitcoin"]);
 export const edgePrefix = EdgeAddress.fromParts(["sourcecred", "gitcoin"]);
