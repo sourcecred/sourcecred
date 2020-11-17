@@ -2,25 +2,11 @@
 
 import {diffLedger} from "./diffLedger";
 import * as uuid from "../../util/uuid";
-import {Ledger} from "./ledger"; // for spy purposes
+import {Ledger} from "./ledger";
+import {createUuidMock} from "./testUtils"; // for spy purposes
 
 describe("core/ledger/diffLedger", () => {
-  const randomMock = jest.spyOn(uuid, "random");
-
-  let nextFakeUuidIndex = 0;
-  function resetFakeUuid() {
-    nextFakeUuidIndex = 0;
-  }
-  function nextFakeUuid(): uuid.Uuid {
-    const uuidString = String(nextFakeUuidIndex).padStart(21, "0") + "A";
-    nextFakeUuidIndex++;
-    return uuid.fromString(uuidString);
-  }
-
-  randomMock.mockImplementation(nextFakeUuid);
-  function setNextUuid(x: uuid.Uuid) {
-    randomMock.mockImplementationOnce(() => x);
-  }
+  const {resetFakeUuid, setNextUuid} = createUuidMock();
 
   const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
   const id2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");

@@ -5,7 +5,8 @@ import {NodeAddress} from "../graph";
 import {Ledger} from "./ledger";
 import {newIdentity} from "../identity";
 import * as G from "./grain";
-import * as uuid from "../../util/uuid"; // for spy purposes
+import * as uuid from "../../util/uuid";
+import {createUuidMock} from "./testUtils"; // for spy purposes
 
 describe("core/ledger/ledger", () => {
   // Helper for constructing Grain values.
@@ -22,25 +23,11 @@ describe("core/ledger/ledger", () => {
   }
   jest.spyOn(global.Date, "now").mockImplementation(() => nextFakeDate++);
 
-  const randomMock = jest.spyOn(uuid, "random");
+  const {resetFakeUuid, setNextUuid} = createUuidMock();
 
-  let nextFakeUuidIndex = 0;
-  function resetFakeUuid() {
-    nextFakeUuidIndex = 0;
-  }
-  function nextFakeUuid(): uuid.Uuid {
-    const uuidString = String(nextFakeUuidIndex).padStart(21, "0") + "A";
-    nextFakeUuidIndex++;
-    return uuid.fromString(uuidString);
-  }
-
-  randomMock.mockImplementation(nextFakeUuid);
   const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
   const id2 = uuid.fromString("URgLrCxgvjHxtGJ9PgmckQ");
   const id3 = uuid.fromString("EpbMqV0HmcolKvpXTwSddA");
-  function setNextUuid(x: uuid.Uuid) {
-    randomMock.mockImplementationOnce(() => x);
-  }
 
   // Verify that a method fails, throwing an error, without mutating the ledger.
   function failsWithoutMutation(
