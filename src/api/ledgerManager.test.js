@@ -45,7 +45,9 @@ describe("api/ledgerManager", () => {
   };
 
   const setRemoteLedger = (remoteLedger: Ledger) => {
-    mockStorage.read.mockImplementation(() => Promise.resolve(remoteLedger));
+    mockStorage.read.mockImplementation(() =>
+      Promise.resolve(Ledger.fromEventLog(remoteLedger.eventLog()))
+    );
   };
 
   const createLedgerManager = (initLogs?: LedgerLog) => {
@@ -55,18 +57,31 @@ describe("api/ledgerManager", () => {
     });
   };
 
+  const allocation = {
+    policy: {policyType: "IMMEDIATE", budget: g("15")},
+    id: uuid.random(),
+    receipts: [
+      {amount: g("10"), id: id1},
+      {amount: g("5"), id: id2},
+    ],
+  };
+
+  const distribution = {
+    credTimestamp: 1,
+    allocations: [allocation],
+    id: uuid.random(),
+  };
+
   // fixture for testing sync conflicts
   const syncEventsFixture = () => {
     const baseLedger = ledgerWithIdentities();
     baseLedger.activate(id1);
     baseLedger.activate(id2);
+    baseLedger.distributeGrain(distribution);
 
     const baseEventLog = baseLedger.eventLog();
     const remoteLedger = Ledger.fromEventLog(baseEventLog);
     const manager = createLedgerManager(baseEventLog);
-
-    remoteLedger._allocateGrain(id1, g("10"));
-    manager.ledger._allocateGrain(id1, g("10"));
 
     remoteLedger.transferGrain({
       from: id1,
@@ -119,7 +134,7 @@ describe("api/ledgerManager", () => {
       expect(res.remoteChanges).toEqual(remoteLedger.eventLog());
       expect(res.localChanges).toEqual([]);
       expect(mockStorage.read).toBeCalledTimes(1);
-      expect(manager.ledger).toBe(remoteLedger);
+      expect(manager.ledger).toEqual(remoteLedger);
     });
 
     it("should load an empty remote ledger while preserving local ledger changes", async () => {
@@ -277,7 +292,7 @@ describe("api/ledgerManager", () => {
       ]);
     });
 
-    it("should not discard local changes that were successfully applied before a conflicting change", async () => {
+    it("should discard any local changes that were successfully applied before a conflicting change", async () => {
       const {manager, baseEventLog} = syncEventsFixture();
 
       // Transferring 1g should succeed, leaving the user with 3g
@@ -296,14 +311,6 @@ describe("api/ledgerManager", () => {
         memo: "local transfer 4g",
       });
 
-      // Any event after the conflicting one should not be applied, even if its valid
-      manager.ledger.transferGrain({
-        from: id2,
-        to: id1,
-        amount: g("1"),
-        memo: "id2 local transfer 1g",
-      });
-
       const expectedRemoteChanges = [
         {
           ledgerTimestamp: expect.anything(),
@@ -319,7 +326,7 @@ describe("api/ledgerManager", () => {
         },
       ];
 
-      const expectedSuccessfulLocalChanges = [
+      const expectedConflictingLocalChanges = [
         {
           ledgerTimestamp: expect.anything(),
           uuid: expect.anything(),
@@ -332,9 +339,6 @@ describe("api/ledgerManager", () => {
             to: id2,
           },
         },
-      ];
-
-      const expectedConflictingLocalChanges = [
         {
           ledgerTimestamp: expect.anything(),
           uuid: expect.anything(),
@@ -347,18 +351,6 @@ describe("api/ledgerManager", () => {
             to: id2,
           },
         },
-        {
-          ledgerTimestamp: expect.anything(),
-          uuid: expect.anything(),
-          version: "1",
-          action: {
-            type: "TRANSFER_GRAIN",
-            amount: "1",
-            memo: "id2 local transfer 1g",
-            from: id2,
-            to: id1,
-          },
-        },
       ];
 
       const res = await manager.reloadLedger();
@@ -368,15 +360,11 @@ describe("api/ledgerManager", () => {
       );
       expect(res.remoteChanges).toEqual(expectedRemoteChanges);
 
-      expect(res.localChanges).toEqual([
-        ...expectedSuccessfulLocalChanges,
-        ...expectedConflictingLocalChanges,
-      ]);
+      expect(res.localChanges).toEqual([...expectedConflictingLocalChanges]);
 
       expect(manager.ledger.eventLog()).toEqual([
         ...baseEventLog,
         ...expectedRemoteChanges,
-        ...expectedSuccessfulLocalChanges,
       ]);
     });
   });

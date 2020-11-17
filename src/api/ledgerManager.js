@@ -1,8 +1,7 @@
 // @flow
-import {Ledger} from "../core/ledger/ledger";
-import type {LedgerLog} from "../core/ledger/ledger";
-import {diffLedger} from "../core/ledger/diffLedger";
-import type {LedgerDiff} from "../core/ledger/diffLedger";
+
+import {Ledger, type LedgerLog} from "../core/ledger/ledger";
+import {diffLedger, type LedgerDiff} from "../core/ledger/diffLedger";
 
 /**
  * Generic adaptor for persisting a Ledger to some storage backend
@@ -87,8 +86,8 @@ export class LedgerManager {
         localChanges,
       };
     } catch (e) {
-      // Set local ledger to the remote state + the local actions that were successfully applied
-      this._ledger = remoteLedger;
+      // Reset local ledger to the remote state
+      this._ledger = await this._storage.read();
       return {
         error: `Unable to apply local changes: ${e.message}, resetting to remote ledger`,
         remoteChanges,
