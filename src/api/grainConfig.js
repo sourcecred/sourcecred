@@ -8,22 +8,37 @@ import {toDiscount} from "../core/ledger/policies/recent";
 
 export type GrainConfig = {|
   +immediatePerWeek: number,
-  +balancedPerWeek: number,
   +recentPerWeek: number,
+  +balancedPerWeek: number,
   +recentWeeklyDecayRate?: number,
   +maxSimultaneousDistributions?: number,
 |};
 
-export const parser: C.Parser<GrainConfig> = C.object(
-  {
-    immediatePerWeek: C.number,
-    balancedPerWeek: C.number,
-    recentPerWeek: C.number,
-  },
-  {
-    recentWeeklyDecayRate: C.number,
-    maxSimultaneousDistributions: C.number,
-  }
+/**
+ * Used by parser to zero missing budgets.
+ */
+export function zeroMissingBudgets(x: Object): GrainConfig {
+  return {
+    balancedPerWeek: NullUtil.orElse(x.balancedPerWeek, 0),
+    immediatePerWeek: NullUtil.orElse(x.immediatePerWeek, 0),
+    recentPerWeek: NullUtil.orElse(x.recentPerWeek, 0),
+    recentWeeklyDecayRate: x.recentWeeklyDecayRate,
+    maxSimultaneousDistributions: x.maxSimultaneousDistributions,
+  };
+}
+
+export const parser: C.Parser<GrainConfig> = C.fmap(
+  C.object(
+    {},
+    {
+      immediatePerWeek: C.number,
+      recentPerWeek: C.number,
+      balancedPerWeek: C.number,
+      recentWeeklyDecayRate: C.number,
+      maxSimultaneousDistributions: C.number,
+    }
+  ),
+  zeroMissingBudgets
 );
 
 export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {

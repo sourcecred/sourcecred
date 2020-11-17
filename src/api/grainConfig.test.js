@@ -1,17 +1,23 @@
 // @flow
 
-import {parser, toDistributionPolicy, type GrainConfig} from "./grainConfig";
+import {
+  zeroMissingBudgets,
+  parser,
+  toDistributionPolicy,
+  type GrainConfig,
+} from "./grainConfig";
 import {type DistributionPolicy} from "../core/ledger/applyDistributions";
 import {toDiscount} from "../core/ledger/policies/recent";
 import {fromInteger} from "../core/ledger/grain";
 
 describe("api/grainConfig", () => {
   describe("parser", () => {
-    it("errors if missing params", () => {
-      const grainConfig = {};
-      expect(() => parser.parseOrThrow(grainConfig)).toThrowError(
-        "missing key"
-      );
+    it("does not throw with no params", () => {
+      expect(parser.parseOrThrow({})).toEqual({
+        balancedPerWeek: 0,
+        immediatePerWeek: 0,
+        recentPerWeek: 0,
+      });
     });
 
     it("errors if malformed params", () => {
@@ -27,15 +33,13 @@ describe("api/grainConfig", () => {
 
     it("ignores extra params", () => {
       const grainConfig = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
         recentPerWeek: 30,
         EXTRA: 30,
       };
 
       const to = {
-        balancedPerWeek: 10,
-        immediatePerWeek: 20,
+        balancedPerWeek: 0,
+        immediatePerWeek: 0,
         recentPerWeek: 30,
       };
 
@@ -117,6 +121,38 @@ describe("api/grainConfig", () => {
       };
 
       expect(toDistributionPolicy(x)).toEqual(expectedDistributionPolicy);
+    });
+  });
+
+  describe("helpers", () => {
+    describe("zeroMissingBudgets", () => {
+      it("returns a zeroed GrainConfig given empty object", () => {
+        const expected: GrainConfig = {
+          balancedPerWeek: 0,
+          immediatePerWeek: 0,
+          recentPerWeek: 0,
+        };
+
+        expect(zeroMissingBudgets({})).toEqual(expected);
+      });
+
+      it("passes other parameteres unaffected", () => {
+        const x = {
+          recentPerWeek: 10,
+          recentWeeklyDecayRate: 0.5,
+          maxSimultaneousDistributions: 100,
+        };
+
+        const expected = {
+          balancedPerWeek: 0,
+          immediatePerWeek: 0,
+          recentPerWeek: 10,
+          recentWeeklyDecayRate: 0.5,
+          maxSimultaneousDistributions: 100,
+        };
+
+        expect(zeroMissingBudgets(x)).toEqual(expected);
+      });
     });
   });
 });
