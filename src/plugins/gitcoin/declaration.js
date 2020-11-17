@@ -10,8 +10,14 @@ import {
   type EdgeAddressT,
 } from "../../core/graph";
 
-export const nodePrefix = NodeAddress.fromParts(["sourcecred", "gitcoin"]);
-export const edgePrefix = EdgeAddress.fromParts(["sourcecred", "gitcoin"]);
+export const nodePrefix: NodeAddressT = NodeAddress.fromParts([
+  "sourcecred",
+  "gitcoin",
+]);
+export const edgePrefix: EdgeAddressT = EdgeAddress.fromParts([
+  "sourcecred",
+  "gitcoin",
+]);
 
 export const userNodeType: NodeType = deepFreeze({
   name: "User",
