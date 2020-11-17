@@ -11,6 +11,12 @@ case "$1" in
 	"dev-server")
 		exec yarn -s start --host 0.0.0.0
 		;;
+	"start")
+		shift
+		node /code/bin/sourcecred.js graph || exit 1
+		node /code/bin/sourcecred.js score || exit 1
+		exec yarn -s start --host 0.0.0.0 --instance .
+		;;
 	"build")
 		shift
 		exec yarn -s build "$@"
