@@ -7,62 +7,69 @@ import * as NullUtil from "../util/null";
 import {toDiscount} from "../core/ledger/policies/recent";
 
 export type GrainConfig = {|
-  +immediatePerWeek: number,
-  +balancedPerWeek: number,
-  +recentPerWeek: number,
+  +immediatePerWeek?: number,
+  +balancedPerWeek?: number,
+  +recentPerWeek?: number,
   +recentWeeklyDecayRate?: number,
   +maxSimultaneousDistributions?: number,
 |};
 
 export const parser: C.Parser<GrainConfig> = C.object(
+  {},
   {
     immediatePerWeek: C.number,
     balancedPerWeek: C.number,
     recentPerWeek: C.number,
-  },
-  {
     recentWeeklyDecayRate: C.number,
     maxSimultaneousDistributions: C.number,
   }
 );
 
+/**
+ * Create a DistributionPolicy from GrainConfig, checking that config
+ * fields can form valid policies.
+ */
 export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
-  if (!isNonnegativeInteger(x.immediatePerWeek)) {
+  const immediatePerWeek = NullUtil.orElse(x.immediatePerWeek, 0);
+  const recentPerWeek = NullUtil.orElse(x.recentPerWeek, 0);
+  const balancedPerWeek = NullUtil.orElse(x.balancedPerWeek, 0);
+
+  if (!isNonnegativeInteger(immediatePerWeek)) {
     throw new Error(
-      `immediate budget must be nonnegative integer, got ${x.immediatePerWeek}`
+      `immediate budget must be nonnegative integer, got ${immediatePerWeek}`
     );
   }
-  if (!isNonnegativeInteger(x.recentPerWeek)) {
+  if (!isNonnegativeInteger(recentPerWeek)) {
     throw new Error(
-      `recent budget must be nonnegative integer, got ${x.recentPerWeek}`
+      `recent budget must be nonnegative integer, got ${recentPerWeek}`
     );
   }
-  if (!isNonnegativeInteger(x.balancedPerWeek)) {
+  if (!isNonnegativeInteger(balancedPerWeek)) {
     throw new Error(
-      `balanced budget must be nonnegative integer, got ${x.balancedPerWeek}`
+      `balanced budget must be nonnegative integer, got ${balancedPerWeek}`
     );
   }
   const allocationPolicies = [];
-  if (x.immediatePerWeek > 0) {
+  if (immediatePerWeek > 0) {
     allocationPolicies.push({
-      budget: G.fromInteger(x.immediatePerWeek),
+      budget: G.fromInteger(immediatePerWeek),
       policyType: "IMMEDIATE",
     });
   }
-  if (x.recentPerWeek > 0) {
+  if (recentPerWeek > 0) {
     const {recentWeeklyDecayRate} = x;
     if (recentWeeklyDecayRate == null) {
       throw new Error(`no recentWeeklyDecayRate specified for recent policy`);
     }
     allocationPolicies.push({
-      budget: G.fromInteger(x.recentPerWeek),
+      budget: G.fromInteger(recentPerWeek),
       policyType: "RECENT",
       discount: toDiscount(recentWeeklyDecayRate),
     });
   }
-  if (x.balancedPerWeek > 0) {
+  if (balancedPerWeek > 0) {
     allocationPolicies.push({
-      budget: G.fromInteger(x.balancedPerWeek),
+      budget: G.fromInteger(balancedPerWeek),
       policyType: "BALANCED",
     });
   }
