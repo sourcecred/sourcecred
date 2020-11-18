@@ -9,8 +9,10 @@ import sortBy from "../util/sortBy";
 import {credrank} from "../core/credrank/compute";
 import {CredGraph} from "../core/credrank/credGraph";
 import {LoggingTaskReporter} from "../util/taskReporter";
+import {computeBonusMinting, createBonusGraph} from "../core/bonusMinting";
 import type {Command} from "./command";
 import {loadInstanceConfig, prepareCredData} from "./common";
+import {merge} from "../core/weightedGraph";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -28,11 +30,18 @@ const credrankCommand: Command = async (args, std) => {
   const config = await loadInstanceConfig(baseDir);
 
   taskReporter.start("load data");
-  const {weightedGraph, ledger} = await prepareCredData(baseDir, config);
+  const {weightedGraph, ledger, dependencies} = await prepareCredData(
+    baseDir,
+    config
+  );
+  const bonusGraph = createBonusGraph(
+    computeBonusMinting(weightedGraph, dependencies)
+  );
+  const combinedWeightedGraph = merge([weightedGraph, bonusGraph]);
   taskReporter.finish("load data");
 
   taskReporter.start("run CredRank");
-  const credGraph = await credrank(weightedGraph, ledger);
+  const credGraph = await credrank(combinedWeightedGraph, ledger);
   taskReporter.finish("run CredRank");
 
   taskReporter.start("write cred graph");
