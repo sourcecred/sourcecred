@@ -135,7 +135,7 @@ export class Fetcher {
         intermediateResult = await this.web.conversations.replies({
           channel: channel.id,
           ts: timestamp,
-          cursor
+          cursor,
         });
       } catch (e) {
         throw new Error("Error in fetching replies");
