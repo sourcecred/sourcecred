@@ -53,7 +53,9 @@ export class GitcoinPlugin implements Plugin {
     const path = pathJoin(configDir, "config.json");
     const pgDatabaseUrl = process.env.GITCOIN_POSTGRES_URL;
     const gitcoinHost = process.env.GITCOIN_HOST;
-    const userWhitelist = process.env.GITCOIN_USER_WHITELIST ? JSON.parse(process.env.GITCOIN_USER_WHITELIST) : null;
+    const userWhitelist = process.env.GITCOIN_USER_WHITELIST
+      ? JSON.parse(process.env.GITCOIN_USER_WHITELIST)
+      : null;
     const task = `gitcoin: config file generating`;
 
     if (fs.existsSync(path)) {
