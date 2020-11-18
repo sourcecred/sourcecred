@@ -2,12 +2,15 @@
 
 import fs from "fs-extra";
 import {join} from "path";
+
+import sortBy from "../util/sortBy";
 import {loadFileWithDefault, loadJson} from "../util/disk";
 import {fromJSON as credResultFromJson} from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import {Ledger} from "../core/ledger/ledger";
 import {applyDistributions} from "../core/ledger/applyDistributions";
 import {computeCredAccounts} from "../core/ledger/credAccounts";
+import {type GrainReceipt} from "../core/ledger/grainAllocation";
 import stringify from "json-stable-stringify";
 import * as G from "../core/ledger/grain";
 import dedent from "../util/dedent";
@@ -47,21 +50,31 @@ const grainCommand: Command = async (args, std) => {
     +Date.now()
   );
 
-  let totalDistributed = G.ZERO;
-  const recipientIdentities = new Set();
-  for (const {allocations} of distributions) {
-    for (const {receipts} of allocations) {
-      for (const {amount, id} of receipts) {
-        totalDistributed = G.add(amount, totalDistributed);
-        recipientIdentities.add(id);
-      }
-    }
-  }
+  // Print MD table for each policy.
+  distributions.map(({allocations}) =>
+    allocations.map(({policy, receipts}) =>
+      printAllocationMarkdownTable(
+        receipts,
+        ledger,
+        `${policy.policyType} Grain Allocation..`
+      )
+    )
+  );
 
-  console.log(
-    `Distributed ${G.format(totalDistributed)} to ${
-      recipientIdentities.size
-    } identities in ${distributions.length} distributions`
+  // Aggregate all receipts across distributions.
+  const aggregateReceipts = distributions.reduce((acc, distribution) => {
+    return acc.concat(
+      distribution.allocations.reduce((acc, allocation) => {
+        return acc.concat(allocation.receipts);
+      }, [])
+    );
+  }, []);
+
+  // Print MD table of aggregate grain distribution.
+  printAllocationMarkdownTable(
+    aggregateReceipts,
+    ledger,
+    `Aggregate Grain Distribution`
   );
 
   await fs.writeFile(ledgerPath, ledger.serialize());
@@ -72,6 +85,38 @@ const grainCommand: Command = async (args, std) => {
 
   return 0;
 };
+
+function printAllocationMarkdownTable(
+  receipts: $ReadOnlyArray<GrainReceipt>,
+  ledger: Ledger,
+  title: string
+) {
+  const totalDistributed = receipts.reduce((sum, {amount}) => {
+    return G.add(amount, sum);
+  }, G.ZERO);
+
+  console.log(`# ${title}`);
+  console.log(
+    `### ${G.toFloatRatio(totalDistributed, G.ONE).toFixed(0)} grain budget`
+  );
+  console.log();
+  console.log(`| % | grain | name |`);
+  console.log(`| --- | --- | --- |`);
+  const sorted = sortBy(receipts, ({amount}) => -Number(amount));
+  sorted.map((n) => console.log(row(n)));
+  console.log();
+
+  function row({amount, id}) {
+    const percentage = 100 * G.toFloatRatio(amount, totalDistributed);
+
+    // get alias from ledger
+    const {name} = ledger.account(id).identity;
+    return `| ${percentage.toFixed(2)}% | ${G.toFloatRatio(
+      amount,
+      G.ONE
+    ).toFixed(2)} | ${name} |`;
+  }
+}
 
 export const grainHelp: Command = async (args, std) => {
   std.out(
