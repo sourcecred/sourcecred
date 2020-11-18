@@ -296,6 +296,43 @@ by pushing it to any branch on the main SourceCred repository. This will
 restart the full test suite, which will now actually run. Once your
 tests pass and the PR is approved, we’ll delete the extra branch.
 
-## After your pull request is merged
+## Merging your Pull Request
 
-…you’re done! :-)
+If you're a new contributor, one of the repository maintainers will merge your pull requests
+for you, once they've been approved by the team. After you've become a seasoned contributor, you can
+ask a maintainer to give you merge permissions.
+
+Once you have merge permissions, the expectations are:
+
+1. Only merge your own pull requests (until you become a maintainer yourself)
+2. Ensure that we have a clean Git history. Every commit in our history should
+   leave the codebase in a functional state, with all tests passing. (This
+   ensures that we can use `git bisect` to hunt down regressions.)
+
+In general, you can ensure that the git history is clean by only using "squash
+and merge", and only merging pull requests that pass CI. "Rebase and merge"
+should be used only in special circumstances.
+
+## Our Code Review Practices
+
+### Nit-and-approve
+
+When reviewing, distinguish between substantive comments and "nits". "Nits" are
+suggested changes that only superficially affect the code, e.g. asking for a
+variable name to be tweaked, replacing a for loop with a map, et cetera. If you
+think the code you're reviewing is good except for some nits, we encourage you
+to approve it (nit-and-approve), trusting that the pull request author will
+address your nits before merging.
+
+### When to request changes
+
+When reviewing and suggesting changes, we usually use the "comment"
+functionality in GitHub reviews, rather than "requesting changes". Since
+requesting changes blocks the PR and sets a visually red state on it, we think
+it's too aggressive / extreme for most proposed changes.
+
+We formally request changes when there actually _is_ a reason to hard-block the
+PR until issues are addressed. Examples include PRs that introduce security
+vulnerabilites, or that break fundamental assumptions in the codebase.
+
+
