@@ -18,10 +18,10 @@ import {type IntervalSequence} from "./interval";
  * Cred and Grain data for a given participant.
  *
  * Implicitly has an associated time scope, which will
- * be the time scope of the TimeScopedCredLedger that generated
+ * be the time scope of the TimeScopedCredGrainView that generated
  * this.
  */
-export type ParticipantData = {|
+export type ParticipantCredGrain = {|
   +identity: Identity,
   // Total Cred earned during the time scope.
   +cred: number,
@@ -35,36 +35,31 @@ export type ParticipantData = {|
 
 export type ParticipantSort = "BY_CRED" | "BY_GRAIN";
 export type ParticipantsOptions = {|
+  // How to sort. Always sorts from highest to lowest.
+  // Defaults to BY_CRED
   +sort?: ParticipantSort,
   // Which identity types should be included.
   // Defaults to including all types.
   +includedTypes?: Set<IdentityType>,
-  // Minimum Cred required to be included in the results.
-  // Defaults to including all participants regardless of
-  // Cred.
-  +minCred?: number,
-  // Minimum Grain earnings required to be included in results.
-  // Defaults to including all participants regardless of Grain.
-  +minGrain?: Grain,
 |};
 
 /**
  * Aggregates data across a CredGraph and Ledger.
  *
  * By default, it includes data across all time present in the instance.
- * Callers can call `withTimeScope` to get a `TimeScopedCredLedger` which
+ * Callers can call `withTimeScope` to get a `TimeScopedCredGrainView` which
  * returns data that only includes a continuous subset of cred and grain data
  * across time.
  */
-export class CredLedger {
+export class CredGrainView {
   _credGraph: CredGraph;
   _ledger: Ledger;
-  _defaultTimeScope: TimeScopedCredLedger;
+  _defaultTimeScope: TimeScopedCredGrainView;
 
   constructor(credGraph: CredGraph, ledger: Ledger) {
     this._credGraph = credGraph;
     this._ledger = ledger;
-    this._defaultTimeScope = new TimeScopedCredLedger(
+    this._defaultTimeScope = new TimeScopedCredGrainView(
       credGraph,
       ledger,
       -Infinity,
@@ -72,8 +67,11 @@ export class CredLedger {
     );
   }
 
-  withTimeScope(startTimeMs: number, endTimeMs: number): TimeScopedCredLedger {
-    return new TimeScopedCredLedger(
+  withTimeScope(
+    startTimeMs: number,
+    endTimeMs: number
+  ): TimeScopedCredGrainView {
+    return new TimeScopedCredGrainView(
       this._credGraph,
       this._ledger,
       startTimeMs,
@@ -85,16 +83,18 @@ export class CredLedger {
     return this._defaultTimeScope.intervals();
   }
 
-  participant(id: IdentityId): ParticipantData | null {
+  participant(id: IdentityId): ParticipantCredGrain | null {
     return this._defaultTimeScope.participant(id);
   }
 
-  participants(options: ParticipantsOptions): $ReadOnlyArray<ParticipantData> {
+  participants(
+    options: ParticipantsOptions
+  ): $ReadOnlyArray<ParticipantCredGrain> {
     return this._defaultTimeScope.participants(options);
   }
 }
 
-export class TimeScopedCredLedger {
+export class TimeScopedCredGrainView {
   _credGraph: CredGraph;
   _ledger: Ledger;
   _startTimeMs: TimestampMs;
@@ -112,12 +112,14 @@ export class TimeScopedCredLedger {
     this._endTimeMs = endTimeMs;
   }
 
-  participants(options: ParticipantsOptions): $ReadOnlyArray<ParticipantData> {
+  participants(
+    options: ParticipantsOptions
+  ): $ReadOnlyArray<ParticipantCredGrain> {
     const _ = options;
     throw new Error("not yet implemented");
   }
 
-  participant(id: IdentityId): ParticipantData | null {
+  participant(id: IdentityId): ParticipantCredGrain | null {
     const _ = id;
     throw new Error("not yet implemented");
   }
