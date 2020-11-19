@@ -2,7 +2,7 @@
 
 import fs from "fs-extra";
 import {join} from "path";
-import {loadFileWithDefault, loadJson} from "../util/disk";
+import {loadFileWithDefault, loadJson, loadJsonWithDefault} from "../util/disk";
 import {fromJSON as credResultFromJson} from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import {Ledger} from "../core/ledger/ledger";
@@ -13,6 +13,7 @@ import * as G from "../core/ledger/grain";
 import dedent from "../util/dedent";
 
 import * as GrainConfig from "../api/grainConfig";
+import * as CurrencyConfig from "../api/currencyConfig";
 import type {Command} from "./command";
 
 function die(std, message) {
@@ -30,6 +31,14 @@ const grainCommand: Command = async (args, std) => {
   const grainConfig = await loadJson(grainConfigPath, GrainConfig.parser);
   const distributionPolicy = GrainConfig.toDistributionPolicy(grainConfig);
 
+  const currencyDetailsPath = join(baseDir, "config", "currencyDetails.json");
+  const {
+    suffix: currencySuffix,
+  } = await loadJsonWithDefault(
+    currencyDetailsPath,
+    CurrencyConfig.parser,
+    () => ({})
+  );
   const credResultPath = join(baseDir, "output", "credResult.json");
   const credResultJson = JSON.parse(await fs.readFile(credResultPath));
   const credResult = credResultFromJson(credResultJson);
@@ -59,7 +68,7 @@ const grainCommand: Command = async (args, std) => {
   }
 
   console.log(
-    `Distributed ${G.format(totalDistributed)} to ${
+    `Distributed ${G.format(totalDistributed, 0, currencySuffix)} to ${
       recipientIdentities.size
     } identities in ${distributions.length} distributions`
   );
