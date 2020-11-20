@@ -5,7 +5,6 @@ import {GithubPlugin} from "../plugins/github/plugin";
 import {DiscoursePlugin} from "../plugins/discourse/plugin";
 import {DiscordPlugin} from "../plugins/experimental-discord/plugin";
 import {InitiativesPlugin} from "../plugins/initiatives/plugin";
-import {GitcoinPlugin} from "../plugins/gitcoin/plugin";
 
 /**
  * Returns an object mapping owner-name pairs to CLI plugin
@@ -18,6 +17,5 @@ export function bundledPlugins(): {[pluginId: string]: Plugin} {
     "sourcecred/discourse": new DiscoursePlugin(),
     "sourcecred/discord": new DiscordPlugin(),
     "sourcecred/initiatives": new InitiativesPlugin(),
-    "sourcecred/gitcoin": new GitcoinPlugin(),
   };
 }

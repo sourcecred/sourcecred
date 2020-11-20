@@ -37,7 +37,6 @@
     "lodash.sortedindex": "^4.1.0",
     "object-assign": "^4.1.1",
     "pako": "^1.0.11",
-    "pg-native": "^3.0.0",
     "promise": "^8.1.0",
     "ra-data-fakerest": "^3.6.2",
     "react": "^16.13.0",
