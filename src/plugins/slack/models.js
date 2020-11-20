@@ -2,7 +2,7 @@
 
 /**
  * Data model for fetched data from Slack API
- * Ways of interaction include 
+ * Ways of interaction include
  * - Channels: public, private, group DMs and DMs
  * - Messages: Conversations inside channels
  * - Threads: replies to a message inside a channel
@@ -45,5 +45,5 @@ export type Message = {|
   +in_reply_to: string, // id of the thread-starting message, self id = thread starting message
   +authorId: string, // user id
   +reactions: string, // array of reacts to a message. ([{name: 'reaction_name', users: ['<array of user ids>'], count: <number of reacts>}, {...}, {...}])
-  +mentions: Array<string> // array of mentioned users
-|}
+  +mentions: Array<string>, // array of mentioned users
+|};

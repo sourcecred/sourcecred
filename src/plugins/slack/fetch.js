@@ -53,7 +53,7 @@ export class Fetcher {
    * will fetch only the channels where the app/bot is a part of
    * @todo only public channels and private channels considered for now, include `type` type for public,private,group dms etc.
    */
-  async channels(): Array<Conversation> {
+  async channels(): Promise<Array<Conversation>> {
     const channels: any = [];
     let cursor: any;
     let response: any;
@@ -115,9 +115,9 @@ export class Fetcher {
       channel: channel.id,
       text: message.text,
       thread: message.thread_ts ? true : false,
-      in_reply_to: message.thread_ts,
+      in_reply_to: message.thread_ts ? message.thread_ts : "-1",
       authorId: message.user,
-      reactions: message.reactions ? JSON.stringify(message.reactions) : "",
+      reactions: message.reactions ? message.reactions : "",
       mentions: mentionedUsers,
     };
     return detailedMessage;
@@ -129,7 +129,7 @@ export class Fetcher {
   ): Promise<Array<Message>> {
     let intermediateResult: any,
       cursor: any = "";
-    let allReplies: any = [];
+    const allReplies: any = [];
     do {
       try {
         intermediateResult = await this.web.conversations.replies({
