@@ -4,6 +4,7 @@ import {StyleSheetServer} from "aphrodite/no-important";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import {StaticRouter} from "react-router";
+import {ServerStyleSheets} from "@material-ui/core/styles";
 
 import dedent from "../util/dedent";
 import {Assets, rootFromPath} from "../webutil/assets";
@@ -22,13 +23,20 @@ export default function render(
 
   function renderStandardRoute() {
     const bundlePath = locals.assets["main"];
+
+    // Reference for MUI stylesheet injections into SSR HTML:
+    // https://material-ui.com/guides/server-rendering/#handling-the-request
+    const sheets = new ServerStyleSheets();
     const {html, css} = StyleSheetServer.renderStatic(() =>
       ReactDOMServer.renderToString(
-        <StaticRouter location={path} context={context}>
-          <App />
-        </StaticRouter>
+        sheets.collect(
+          <StaticRouter location={path} context={context}>
+            <App />
+          </StaticRouter>
+        )
       )
     );
+
     const page = dedent`\
       <!DOCTYPE html>
       <html>
@@ -41,6 +49,7 @@ export default function render(
       <title>SourceCred</title>
       <style>${require("./index.css")}</style>
       <style data-aphrodite>${css.content}</style>
+      <style id="jss-server-side">${sheets.toString()}</style>
       </head>
       <body>
       <div id="root" data-initial-root="${root}">${html}</div>
