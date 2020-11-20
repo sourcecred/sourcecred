@@ -1,0 +1,106 @@
+{
+  "token": "xoxb-1446499062611-1431587619463-6zeV4N5VOtUJQDAniAY0h1QN",
+  "users": [
+    {
+      "id": "U01D48KV0HY",
+      "name": "angela.gilhotra",
+      "email": "angela.gilhotra@gmail.com"
+    },
+    {
+      "id": "U01DAUY8SMQ",
+      "name": "sachin",
+      "email": "sachin@gitcoin.co"
+    }
+  ],
+  "channels": [
+    {
+      "id": "C01CPGVGXSB",
+      "name": "testing-out-things"
+    }
+  ],
+  "messages": [
+    {
+      "id": "1603782590.000300",
+      "channel": "C01CPGVGXSB",
+      "text": "<@U01D48KV0HY> tagging me here",
+      "thread": true,
+      "in_reply_to": "1603782590.000300",
+      "authorId": "U01D48KV0HY",
+      "reactions": [
+        {"name": "heart", "users": ["U01D48KV0HY"], "count": 1},
+        {"name": "open_mouth", "users": ["U01D48KV0HY"], "count": 1}
+      ],
+      "mentions": ["U01D48KV0HY"]
+    },
+    {
+      "id": "1603792056.000100",
+      "channel": "C01CPGVGXSB",
+      "text": "guess this is the first threaded message",
+      "thread": true,
+      "in_reply_to": "1603782590.000300",
+      "authorId": "U01D48KV0HY",
+      "reactions": "",
+      "mentions": []
+    },
+    {
+      "id": "1603374917.001600",
+      "channel": "C01CPGVGXSB",
+      "text": "<@U01CPH9J7DM> has joined the channel",
+      "thread": false,
+      "in_reply_to": "-1",
+      "authorId": "U01CPH9J7DM",
+      "reactions": "",
+      "mentions": []
+    },
+    {
+      "id": "1603374546.001400",
+      "channel": "C01CPGVGXSB",
+      "text": "channel name is <#C01CPGVGXSB|testing-out-things>",
+      "thread": false,
+      "in_reply_to": "-1",
+      "authorId": "U01D48KV0HY",
+      "reactions": "",
+      "mentions": []
+    },
+    {
+      "id": "1603374538.001100",
+      "channel": "C01CPGVGXSB",
+      "text": "channel id is C01CPGVGXSB",
+      "thread": false,
+      "in_reply_to": "-1",
+      "authorId": "U01D48KV0HY",
+      "reactions": "",
+      "mentions": []
+    },
+    {
+      "id": "1603374526.000800",
+      "channel": "C01CPGVGXSB",
+      "text": "<https://cosycomunidad.slack.com/archives/C01CPGVGXSB>",
+      "thread": false,
+      "in_reply_to": "-1",
+      "authorId": "U01D48KV0HY",
+      "reactions": "",
+      "mentions": []
+    },
+    {
+      "id": "1603373681.000400",
+      "channel": "C01CPGVGXSB",
+      "text": ":wave: Hello, team!",
+      "thread": false,
+      "in_reply_to": "-1",
+      "authorId": "U01D48KV0HY",
+      "reactions": "",
+      "mentions": []
+    },
+    {
+      "id": "1603373669.000200",
+      "channel": "C01CPGVGXSB",
+      "text": "<@U01D48KV0HY> has joined the channel",
+      "thread": false,
+      "in_reply_to": "-1",
+      "authorId": "U01D48KV0HY",
+      "reactions": "",
+      "mentions": []
+    }
+  ]
+}

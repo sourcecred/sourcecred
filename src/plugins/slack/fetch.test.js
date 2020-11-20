@@ -1,39 +1,30 @@
 /**
  * @jest-environment node
  */
+// @flow
 
-// import { testFetcher } from './mockFetch';
-import {Fetcher} from "../fetch";
-
-/**
- * This is in no form a good test suite. Only written to check sanity of the code. Need to update to include better snapshot testing.
- */
+import {Fetcher} from "./fetch";
+import {token, users, channels, messages} from "./testUtils/data.json";
 
 describe("plugins/slack/fetch", () => {
-  const fetcher = new Fetcher(process.env.SLACK_TOKEN);
+  const fetcher = new Fetcher(token);
   jest.setTimeout(30000); // 30 seconds timeout (takes longer due to pagination)
 
   describe("testing with the kernel org", () => {
     it("loads users", async () => {
-      //   expect (await fetcher.users());
-      const users = await fetcher.users();
-      console.log("all users:", users);
+      const _users = await fetcher.users();
+      expect(_users).toEqual(users);
     });
 
     it("loads channels", async () => {
-      //   expect (await fetcher.channels());
-      const channels = await fetcher.channels();
-      console.log("all channels:", channels);
+      const _channels = await fetcher.channels();
+      expect(_channels).toEqual(channels);
     });
 
     it("loads messages", async () => {
-      const channel = {
-        id: "C01CPGVGXSB",
-        name: "#testing-out-things",
-      };
-      //   expect (await fetcher.messages(channel))
-      const messages = await fetcher.messages(channel);
-      console.log("all messages:", messages);
+      const channel = channels[0];
+      const _messages = await fetcher.messages(channel);
+      expect(_messages).toEqual(messages);
     });
   });
 });
