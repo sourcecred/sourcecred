@@ -21,10 +21,12 @@ import {
   addsReactionEdgeType,
   reactsToEdgeType,
   mentionsEdgeType,
+  propsEdgeType,
 } from "./declaration";
 import * as Model from "./models";
 
-import {type WeightConfig, reactionWeight} from "./reactionWeights";
+import {type DiscordConfig} from "./config";
+import {reactionWeight} from "./reactionWeights";
 
 // Display this many characters in description.
 const MESSAGE_LENGTH = 30;
@@ -188,6 +190,23 @@ function mentionsEdge(message: Model.Message, member: Model.GuildMember): Edge {
   };
 }
 
+function propsEdge(message: Model.Message, member: Model.GuildMember): Edge {
+  const address: EdgeAddressT = EdgeAddress.append(
+    propsEdgeType.prefix,
+    message.channelId,
+    message.authorId,
+    message.id,
+    member.user.bot ? "bot" : "user",
+    member.user.id
+  );
+  return {
+    address,
+    timestampMs: message.timestampMs,
+    src: messageAddress(message),
+    dst: memberAddress(member),
+  };
+}
+
 export type GraphReaction = {|
   +reaction: Model.Reaction,
   +reactingMember: Model.GuildMember,
@@ -202,6 +221,9 @@ export type GraphMessage = {|
   +author: Model.GuildMember | null,
   +reactions: $ReadOnlyArray<GraphReaction>,
   +mentions: $ReadOnlyArray<Model.GuildMember>,
+  // Included so we can apply any channel-based rules (e.g. creating props
+  // edges intsead of mentions edges) at graph construction time.
+  +channelId: Model.Snowflake,
   // Included because we want the channel name in the node description.
   +channelName: string,
 |};
@@ -250,40 +272,54 @@ export function* findGraphMessages(
 
       const author = memberMap.get(message.authorId) || null;
 
-      yield {message, author, reactions, mentions, channelName: channel.name};
+      yield {
+        message,
+        author,
+        reactions,
+        mentions,
+        channelName: channel.name,
+        channelId: channel.id,
+      };
     }
   }
 }
 
 export function createGraph(
-  guild: Model.Snowflake,
-  repo: SqliteMirrorRepository,
-  weights: WeightConfig
+  config: DiscordConfig,
+  repo: SqliteMirrorRepository
 ): WeightedGraphT {
   const graphMessages = findGraphMessages(repo);
-  return _createGraphFromMessages(guild, graphMessages, weights);
+  return _createGraphFromMessages(config, graphMessages);
 }
 
 export function _createGraphFromMessages(
-  guild: Model.Snowflake,
-  messages: Iterable<GraphMessage>,
-  weights: WeightConfig
+  config: DiscordConfig,
+  messages: Iterable<GraphMessage>
 ): WeightedGraphT {
+  const {guildId, weights} = config;
+  const propsChannels = new Set(config.propsChannels);
   const wg = {
     graph: new Graph(),
     weights: emptyWeights(),
   };
 
   for (const graphMessage of messages) {
-    const {message, author, reactions, mentions, channelName} = graphMessage;
+    const {
+      message,
+      author,
+      reactions,
+      mentions,
+      channelName,
+      channelId,
+    } = graphMessage;
     if (author) {
       wg.graph.addNode(memberNode(author));
-      wg.graph.addNode(messageNode(message, guild, channelName));
+      wg.graph.addNode(messageNode(message, guildId, channelName));
       wg.graph.addEdge(authorsMessageEdge(message, author));
     }
 
     for (const {reaction, reactingMember} of reactions) {
-      const node = reactionNode(reaction, message.timestampMs, guild);
+      const node = reactionNode(reaction, message.timestampMs, guildId);
       wg.weights.nodeWeights.set(
         node.address,
         reactionWeight(weights, message, reaction, reactingMember)
@@ -298,7 +334,11 @@ export function _createGraphFromMessages(
 
     for (const mentionedMember of mentions) {
       wg.graph.addNode(memberNode(mentionedMember));
-      wg.graph.addEdge(mentionsEdge(message, mentionedMember));
+      if (propsChannels.has(channelId)) {
+        wg.graph.addEdge(propsEdge(message, mentionedMember));
+      } else {
+        wg.graph.addEdge(mentionsEdge(message, mentionedMember));
+      }
     }
   }
 

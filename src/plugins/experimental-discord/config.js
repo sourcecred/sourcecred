@@ -58,6 +58,12 @@ export type DiscordConfigJson = {|
   // Note that channels use a snowflake id only.
   // defaultWeight is used to set weights for channels that don't have a specified weight
   +channelWeightConfig?: ChannelWeightConfig,
+  // List of channels which are considered "props channels".
+  // In a props channel, we have an extra rule: if someone is mentioned in a message,
+  // we create a "props" edge to the mentioned user instead of a regular "mentions" edge.
+  // We can set a higher weight on these props edges, which allows us to flow Cred in a props
+  // mostly to the people getting propsed, rather than to the author of the props message.
+  +propsChannels?: $ReadOnlyArray<Model.Snowflake>,
 |};
 
 const parserJson: C.Parser<DiscordConfigJson> = C.object(
@@ -74,12 +80,14 @@ const parserJson: C.Parser<DiscordConfigJson> = C.object(
       defaultWeight: C.number,
       weights: C.dict(C.number),
     }),
+    propsChannels: C.array(C.string),
   }
 );
 
 export type DiscordConfig = {|
   +guildId: Model.Snowflake,
   +weights: WeightConfig,
+  +propsChannels: $ReadOnlyArray<Model.Snowflake>,
 |};
 
 /**
@@ -106,6 +114,7 @@ export function _upgrade(json: DiscordConfigJson): DiscordConfig {
         defaultWeight: 1,
       },
     },
+    propsChannels: json.propsChannels || [],
   };
 }
 

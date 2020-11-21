@@ -75,6 +75,14 @@ export const mentionsEdgeType: EdgeType = deepFreeze({
   description: "Connects a message to the member being mentioned.",
 });
 
+export const propsEdgeType: EdgeType = deepFreeze({
+  forwardName: "gives props to",
+  backwardName: "recevies props from",
+  prefix: EdgeAddress.append(edgePrefix, "PROPS"),
+  defaultWeight: {forwards: 19, backwards: 1 / 16},
+  description: "Connects a props message to the person getting props",
+});
+
 export const declaration: PluginDeclaration = deepFreeze({
   name: "Discord",
   nodePrefix,
@@ -85,6 +93,7 @@ export const declaration: PluginDeclaration = deepFreeze({
     addsReactionEdgeType,
     reactsToEdgeType,
     mentionsEdgeType,
+    propsEdgeType,
   ],
   userTypes: [memberNodeType],
 });

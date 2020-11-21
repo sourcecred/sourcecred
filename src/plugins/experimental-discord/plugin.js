@@ -67,10 +67,10 @@ export class DiscordPlugin implements Plugin {
     rd: ReferenceDetector
   ): Promise<WeightedGraph> {
     const _ = rd; // TODO(#1808): not yet used
-    const {guildId, weights} = await loadConfig(ctx);
-    const repo = await repository(ctx, guildId);
+    const config = await loadConfig(ctx);
+    const repo = await repository(ctx, config.guildId);
 
-    const weightedGraph = await createGraph(guildId, repo, weights);
+    const weightedGraph = await createGraph(config, repo);
 
     const declarationWeights = weightsForDeclaration(declaration);
     // Add in the type-level weights from the plugin spec
