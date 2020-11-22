@@ -80,6 +80,7 @@ export function fromString(s: string): Grain {
   return bigInt(s).toString();
 }
 
+export const DEFAULT_NAME = "grain";
 export const DEFAULT_SUFFIX = "g";
 
 /**
