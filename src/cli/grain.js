@@ -21,8 +21,11 @@ function die(std, message) {
 }
 
 const grainCommand: Command = async (args, std) => {
-  if (args.length !== 0) {
-    return die(std, "usage: sourcecred grain");
+  let simulation = false;
+  if (args.length === 1 && (args[0] === "--simulation" || args[0] === "-s")) {
+    simulation = true;
+  } else if (args.length !== 0) {
+    return die(std, "usage: sourcecred grain [--simulation]");
   }
 
   const baseDir = process.cwd();
@@ -59,16 +62,19 @@ const grainCommand: Command = async (args, std) => {
   }
 
   console.log(
+    simulation ? `——SIMULATED DISTRIBUTION——\n` : ``,
     `Distributed ${G.format(totalDistributed)} to ${
       recipientIdentities.size
     } identities in ${distributions.length} distributions`
   );
 
-  await fs.writeFile(ledgerPath, ledger.serialize());
+  if (!simulation) {
+    await fs.writeFile(ledgerPath, ledger.serialize());
 
-  const credAccounts = computeCredAccounts(ledger, credView);
-  const accountsPath = join(baseDir, "output", "accounts.json");
-  await fs.writeFile(accountsPath, stringify(credAccounts));
+    const credAccounts = computeCredAccounts(ledger, credView);
+    const accountsPath = join(baseDir, "output", "accounts.json");
+    await fs.writeFile(accountsPath, stringify(credAccounts));
+  }
 
   return 0;
 };
@@ -76,10 +82,13 @@ const grainCommand: Command = async (args, std) => {
 export const grainHelp: Command = async (args, std) => {
   std.out(
     dedent`\
-      usage: sourcecred grain
+      usage: sourcecred grain [--simulation || -s]
 
       Distribute Grain (or whatever currency this Cred instance is tracking)
       for Cred intervals in which Grain was not already distributed.
+
+      When the '--simulation' (-s) flag is provided, no grain will actually be distributed,
+      allowing for testing the output of various configurations.
 
       When run, this will identify all the completed Cred intervals (currently, weeks)
       and find the latest Cred interval for which there was no Grain distribution.
