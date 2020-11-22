@@ -2,18 +2,18 @@
 
 import fs from "fs-extra";
 import {join} from "path";
-import {loadFileWithDefault, loadJson} from "../util/disk";
+import {loadFileWithDefault, loadJson, loadJsonWithDefault} from "../util/disk";
 import {fromJSON as credResultFromJson} from "../analysis/credResult";
 import {CredView} from "../analysis/credView";
 import {Ledger} from "../core/ledger/ledger";
 import {applyDistributions} from "../core/ledger/applyDistributions";
 import {computeCredAccounts} from "../core/ledger/credAccounts";
 import stringify from "json-stable-stringify";
-import * as G from "../core/ledger/grain";
 import dedent from "../util/dedent";
-
 import * as GrainConfig from "../api/grainConfig";
 import type {Command} from "./command";
+import {distributionMarkdownSummary} from "../util/distributionSummary";
+import * as CurrencyConfig from "../api/currencyConfig";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -29,6 +29,16 @@ const grainCommand: Command = async (args, std) => {
   const grainConfigPath = join(baseDir, "config", "grain.json");
   const grainConfig = await loadJson(grainConfigPath, GrainConfig.parser);
   const distributionPolicy = GrainConfig.toDistributionPolicy(grainConfig);
+
+  const currencyDetailsPath = join(baseDir, "config", "currencyDetails.json");
+  const {
+    name: currencyName,
+    suffix: currencySuffix,
+  } = await loadJsonWithDefault(
+    currencyDetailsPath,
+    CurrencyConfig.parser,
+    () => ({})
+  );
 
   const credResultPath = join(baseDir, "output", "credResult.json");
   const credResultJson = JSON.parse(await fs.readFile(credResultPath));
@@ -47,21 +57,13 @@ const grainCommand: Command = async (args, std) => {
     +Date.now()
   );
 
-  let totalDistributed = G.ZERO;
-  const recipientIdentities = new Set();
-  for (const {allocations} of distributions) {
-    for (const {receipts} of allocations) {
-      for (const {amount, id} of receipts) {
-        totalDistributed = G.add(amount, totalDistributed);
-        recipientIdentities.add(id);
-      }
-    }
-  }
-
-  console.log(
-    `Distributed ${G.format(totalDistributed)} to ${
-      recipientIdentities.size
-    } identities in ${distributions.length} distributions`
+  distributions.map((distribution) =>
+    distributionMarkdownSummary(
+      distribution,
+      ledger,
+      currencySuffix,
+      currencyName
+    )
   );
 
   await fs.writeFile(ledgerPath, ledger.serialize());
