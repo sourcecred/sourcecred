@@ -321,7 +321,7 @@ When reviewing, distinguish between substantive comments and "nits". "Nits" are
 suggested changes that only superficially affect the code, e.g. asking for a
 variable name to be tweaked, replacing a for loop with a map, et cetera. If you
 think the code you're reviewing is good except for some nits, we encourage you
-to approve it (nit-and-approve), trusting that the pull request author will
+to approve it (nit-and-approve), prefacing nit requests with 'nit:' and trusting that the pull request author will
 address your nits before merging.
 
 ### When to request changes
@@ -334,5 +334,4 @@ it's too aggressive / extreme for most proposed changes.
 We formally request changes when there actually _is_ a reason to hard-block the
 PR until issues are addressed. Examples include PRs that introduce security
 vulnerabilites, or that break fundamental assumptions in the codebase.
-
 
