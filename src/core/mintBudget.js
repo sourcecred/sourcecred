@@ -3,6 +3,7 @@
 import {sum} from "d3-array";
 import * as NullUtil from "../util/null";
 import * as Weights from "./weights";
+import * as C from "../util/combo";
 import {type NodeAddressT, NodeAddress} from "./graph";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
 import {
@@ -23,6 +24,10 @@ import type {TimestampMs} from "../util/timestamp";
  */
 
 export type IntervalLength = "WEEKLY";
+
+export const intervalLengthParser: C.Parser<IntervalLength> = C.exactly([
+  "WEEKLY",
+]);
 
 export type BudgetPeriod = {|
   // When this budget policy starts
