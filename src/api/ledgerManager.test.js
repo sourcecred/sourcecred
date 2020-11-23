@@ -48,7 +48,7 @@ describe("api/ledgerManager", () => {
   };
 
   const allocation = {
-    policy: {policyType: "IMMEDIATE", budget: g("15")},
+    policy: {policyType: "IMMEDIATE", budget: g("15"), numPeriodsLookback: 1},
     id: uuid.random(),
     receipts: [
       {amount: g("10"), id: id1},
