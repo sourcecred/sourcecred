@@ -183,6 +183,14 @@ describe("core/credrank/markovProcessGraph", () => {
             )
             // .2 -- because this has incident organic edges
             .set(2, parameters.alpha)
+            // .55 -- because this one has no incident organic edges
+            .set(
+              4,
+              1 -
+                parameters.gammaForward -
+                parameters.gammaBackward -
+                parameters.beta
+            )
             // 0.7 -- because this has no incident organic edges, and no forward webbing
             .set(Infinity, 1 - parameters.gammaBackward - parameters.beta)
             .get(boundary)
@@ -346,7 +354,7 @@ describe("core/credrank/markovProcessGraph", () => {
       });
     });
     it("has the correct epoch boundaries for the given intervals", () => {
-      const expected = [-Infinity, 0, 2, Infinity];
+      const expected = [-Infinity, 0, 2, 4, Infinity];
       expect(markovProcessGraph().epochBoundaries()).toEqual(expected);
     });
     it("has the right participants", () => {

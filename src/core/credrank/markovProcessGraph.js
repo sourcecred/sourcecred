@@ -266,6 +266,7 @@ export class MarkovProcessGraph {
     const timeBoundaries = [
       -Infinity,
       ...intervals.map((x) => x.startTimeMs),
+      intervals[intervals.length - 1].endTimeMs,
       Infinity,
     ];
 
