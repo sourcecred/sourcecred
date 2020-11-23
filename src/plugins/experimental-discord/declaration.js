@@ -75,6 +75,18 @@ export const mentionsEdgeType: EdgeType = deepFreeze({
   description: "Connects a message to the member being mentioned.",
 });
 
+export const propsEdgeType: EdgeType = deepFreeze({
+  forwardName: "gives props to",
+  backwardName: "recieves props from",
+  prefix: EdgeAddress.append(edgePrefix, "PROPS"),
+  // We set the default forward weight to 19x because message authors get a
+  // 1x weight by default, so in the most common case of a props with a
+  // single recipient, the props author will get 5% of the Cred and the
+  // props-ee will get 95%.
+  defaultWeight: {forwards: 19, backwards: 1 / 16},
+  description: "Connects a props message to the person getting props",
+});
+
 export const declaration: PluginDeclaration = deepFreeze({
   name: "Discord",
   nodePrefix,
@@ -85,6 +97,7 @@ export const declaration: PluginDeclaration = deepFreeze({
     addsReactionEdgeType,
     reactsToEdgeType,
     mentionsEdgeType,
+    propsEdgeType,
   ],
   userTypes: [memberNodeType],
 });
