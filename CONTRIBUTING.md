@@ -334,4 +334,3 @@ it's too aggressive / extreme for most proposed changes.
 We formally request changes when there actually _is_ a reason to hard-block the
 PR until issues are addressed. Examples include PRs that introduce security
 vulnerabilites, or that break fundamental assumptions in the codebase.
-
