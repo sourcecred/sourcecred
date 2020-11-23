@@ -11,8 +11,8 @@ import {
 } from "../nonnegativeGrain";
 
 /**
- * The Immediate policy evenly distributes its Grain budget
- * across users based on their Cred in the most recent interval.
+ * The Immediate policy evenly distributes its Grain budget across users
+ * based on their Cred in the most recent interval.
  *
  * It's used when you want to ensure that everyone gets some consistent reward
  * for participating (even if they may be "overpaid" in a lifetime sense).
@@ -23,31 +23,52 @@ export type Immediate = "IMMEDIATE";
 export type ImmediatePolicy = {|
   +policyType: Immediate,
   +budget: NonnegativeGrain,
+  +numIntervalsLookback: number,
 |};
 
 /**
  * Split a grain budget in proportion to the cred scores in
- * the most recent time interval.
+ * the most recent time interval, with the option to extend the interval
+ * to include the last {numIntervalsLookback} weeks.
  */
 export function immediateReceipts(
-  budget: G.Grain,
+  policy: ImmediatePolicy,
   identities: ProcessedIdentities
 ): $ReadOnlyArray<GrainReceipt> {
-  const amounts = G.splitBudget(
-    budget,
-    identities.map((i) => i.mostRecentCred)
+  if (policy.numIntervalsLookback < 1) {
+    throw new Error(
+      `numIntervalsLookback must be at least 1, got ${policy.numIntervalsLookback}`
+    );
+  }
+  if (!Number.isInteger(policy.numIntervalsLookback)) {
+    throw new Error(
+      `numIntervalsLookback must be an integer, got ${policy.numIntervalsLookback}`
+    );
+  }
+
+  const totalIntervals = identities[0].cred.length;
+  const shortTermCredPerIdentity = identities.map(({cred}) =>
+    cred
+      .slice(
+        cred.length - Math.min(policy.numIntervalsLookback, totalIntervals)
+      )
+      .reduce((sum, cred) => sum + cred, 0)
   );
+
+  const amounts = G.splitBudget(policy.budget, shortTermCredPerIdentity);
   return identities.map(({id}, i) => ({id, amount: amounts[i]}));
 }
 
 export const immediateConfigParser: P.Parser<ImmediatePolicy> = P.object({
   policyType: P.exactly(["IMMEDIATE"]),
   budget: numberParser,
+  numIntervalsLookback: P.number,
 });
 
 export const immediatePolicyParser: P.Parser<ImmediatePolicy> = P.object({
   policyType: P.exactly(["IMMEDIATE"]),
   budget: grainParser,
+  numIntervalsLookback: P.number,
 });
 
 export function toString(policy: ImmediatePolicy): string {

@@ -17,6 +17,7 @@ const balanced = (budget: number): BalancedPolicy => ({
 const immediate = (budget: number): ImmediatePolicy => ({
   policyType: "IMMEDIATE",
   budget: toNonnegativeGrain(budget),
+  numIntervalsLookback: 1,
 });
 const recent = (budget: number, discount: number): RecentPolicy => ({
   policyType: "RECENT",
@@ -112,6 +113,7 @@ describe("api/grainConfig", () => {
           {
             policyType: "IMMEDIATE",
             budget: 10,
+            numIntervalsLookback: 1,
           },
           {
             policyType: "RECENT",
@@ -168,10 +170,12 @@ describe("api/grainConfig", () => {
 
     it("parses deprecated policy config", () => {
       const config = {
+        allocationPolicies: [],
         balancedPerWeek: 10,
         immediatePerWeek: 20,
         recentPerWeek: 30,
-        allocationPolicies: [],
+        recentWeeklyDecayRate: 0.5,
+        maxSimultaneousDistributions: 100,
       };
 
       expect(parser.parseOrThrow(config)).toEqual(config);
@@ -230,7 +234,30 @@ describe("api/grainConfig", () => {
       expect(toDistributionPolicy(x)).toEqual(expected);
     });
 
-    it("creates DistributionPolicy with at least 1 allocation policy with positive budgets", () => {
+    it("default immediate's numIntervalsLookback to 1", () => {
+      const x: GrainConfig = {
+        balancedPerWeek: 0,
+        immediatePerWeek: 100,
+        recentPerWeek: 0,
+        recentWeeklyDecayRate: 0.1,
+        maxSimultaneousDistributions: 2,
+      };
+
+      const expectedDistributionPolicy: DistributionPolicy = {
+        allocationPolicies: [
+          {
+            budget: toNonnegativeGrain(100),
+            policyType: "IMMEDIATE",
+            numIntervalsLookback: 1,
+          },
+        ],
+        maxSimultaneousDistributions: 2,
+      };
+
+      expect(toDistributionPolicy(x)).toEqual(expectedDistributionPolicy);
+    });
+
+    it("creates DistributionPolicy from valid GrainConfig", () => {
       const x: GrainConfig = {
         allocationPolicies: [immediate(20), recent(30, 0.1), balanced(10)],
         maxSimultaneousDistributions: 2,

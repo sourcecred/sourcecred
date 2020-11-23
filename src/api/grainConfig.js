@@ -67,6 +67,7 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
     allocationPoliciesDeprecated.push({
       budget: toNonnegativeGrain(immediatePerWeek),
       policyType: "IMMEDIATE",
+      numIntervalsLookback: 1, // TODO(eli): no customization until after #2600.
     });
   }
   if (recentPerWeek > 0) {
