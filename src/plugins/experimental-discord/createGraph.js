@@ -222,7 +222,7 @@ export type GraphMessage = {|
   +reactions: $ReadOnlyArray<GraphReaction>,
   +mentions: $ReadOnlyArray<Model.GuildMember>,
   // Included so we can apply any channel-based rules (e.g. creating props
-  // edges intsead of mentions edges) at graph construction time.
+  // edges instead of mentions edges) at graph construction time.
   +channelId: Model.Snowflake,
   // Included because we want the channel name in the node description.
   +channelName: string,

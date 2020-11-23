@@ -62,7 +62,7 @@ export type DiscordConfigJson = {|
   // In a props channel, we have an extra rule: if someone is mentioned in a message,
   // we create a "props" edge to the mentioned user instead of a regular "mentions" edge.
   // We can set a higher weight on these props edges, which allows us to flow Cred in a props
-  // mostly to the people getting propsed, rather than to the author of the props message.
+  // mostly to the people receiving props, rather than to the author of the props message.
   +propsChannels?: $ReadOnlyArray<Model.Snowflake>,
 |};
 
