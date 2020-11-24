@@ -26,6 +26,8 @@ import {
   fromJSON as weightedGraphFromJSON,
 } from "../core/weightedGraph";
 import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
+import {parser as pluginBudgetParser} from "../api/pluginBudgetConfig";
+import {applyBudget, type Budget} from "../core/mintBudget";
 
 import * as Weights from "../core/weights";
 
@@ -92,6 +94,7 @@ export async function prepareCredData(
     await loadLedger(baseDir),
   ]);
 
+  const budget = await loadPluginBudget(baseDir);
   // We need to load the dependencies before we get identities, because
   // this step may create new identities in the ledger.
   const dependencies = await loadDependenciesAndWriteChanges(baseDir, ledger);
@@ -100,10 +103,13 @@ export async function prepareCredData(
   const contractedGraph = weightedGraph.graph.contractNodes(
     identityContractions(identities)
   );
-  const contractedWeightedGraph = {
+  let contractedWeightedGraph = {
     graph: contractedGraph,
     weights: weightedGraph.weights,
   };
+  if (budget != null) {
+    contractedWeightedGraph = applyBudget(contractedWeightedGraph, budget);
+  }
   return {weightedGraph: contractedWeightedGraph, ledger, dependencies};
 }
 
@@ -179,4 +185,9 @@ export async function saveLedger(
 ): Promise<void> {
   const ledgerPath = pathJoin(baseDir, "data", "ledger.json");
   await fs.writeFile(ledgerPath, ledger.serialize());
+}
+
+function loadPluginBudget(baseDir: string): Promise<Budget | null> {
+  const budgetPath = pathJoin(baseDir, "config", "pluginBudgets.json");
+  return loadJsonWithDefault(budgetPath, pluginBudgetParser, () => null);
 }
