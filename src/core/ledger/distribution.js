@@ -5,8 +5,10 @@ import * as Uuid from "../../util/uuid";
 import {type TimestampMs} from "../../util/timestamp";
 import {type Allocation, allocationParser} from "./grainAllocation";
 
+export type DistributionId = Uuid.Uuid;
+
 export type Distribution = {|
-  +id: Uuid.Uuid,
+  +id: DistributionId,
   +allocations: $ReadOnlyArray<Allocation>,
   +credTimestamp: TimestampMs,
 |};

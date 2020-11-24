@@ -26,13 +26,15 @@ import {
   processIdentities,
 } from "./processedIdentities";
 
+export type AllocationId = Uuid;
+
 export type GrainReceipt = {|
   +id: IdentityId,
   +amount: G.Grain,
 |};
 
 export type Allocation = {|
-  +id: Uuid,
+  +id: AllocationId,
   +policy: AllocationPolicy,
   +receipts: $ReadOnlyArray<GrainReceipt>,
 |};
