@@ -219,6 +219,29 @@ const LedgerEventRow = React.memo(
               <Chip label={action.identity.subtype} size="small" />
             </>
           );
+        case "ADD_ALIAS":
+          try {
+            const account = ledger.account(action.identityId);
+            // description has format: channel/[@handle](url). url has little value in the UI, so cut it
+            const aliasHandle = action.alias.description.replace(/\(.*\)$/, "");
+            return (
+              <>
+                <IdentityDetails
+                  id={action.identityId}
+                  name={`${aliasHandle} ⇒ ${account.identity.name}`}
+                />
+                <Chip label={account.identity.subtype} size="small" />
+              </>
+            );
+          } catch (e) {
+            console.warn("Unable to find account for action: ", action);
+            return (
+              <IdentityDetails
+                id={action.identityId}
+                name="[Unknown Account]"
+              />
+            );
+          }
         case "TOGGLE_ACTIVATION":
           try {
             const account = ledger.account(action.identityId);
