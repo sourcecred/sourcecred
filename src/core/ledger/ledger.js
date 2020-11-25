@@ -25,10 +25,15 @@ import {type NodeAddressT, NodeAddress} from "../graph";
 import {type TimestampMs} from "../../util/timestamp";
 import * as NullUtil from "../../util/null";
 import * as uuid from "../../util/uuid";
-import {type Distribution, parser as distributionParser} from "./distribution";
+import {
+  type Distribution,
+  type DistributionId,
+  parser as distributionParser,
+} from "./distribution";
 import * as G from "./grain";
 import {JsonLog} from "../../util/jsonLog";
 import * as C from "../../util/combo";
+import {type Allocation, type AllocationId} from "./grainAllocation";
 
 /**
  * Every Identity in the ledger has an Account.
@@ -80,6 +85,9 @@ export class Ledger {
   _lowercaseNames: Set<string>;
   _aliasAddressToIdentity: Map<NodeAddressT, IdentityId>;
   _accounts: Map<IdentityId, MutableAccount>;
+  _allocations: Map<AllocationId, $ReadOnly<Allocation>>;
+  _distributions: Map<DistributionId, $ReadOnly<Distribution>>;
+  _allocationsToDistributions: Map<AllocationId, DistributionId>;
   _latestTimestamp: TimestampMs = -Infinity;
   _lastDistributionTimestamp: TimestampMs = -Infinity;
 
@@ -89,6 +97,9 @@ export class Ledger {
     this._lowercaseNames = new Set();
     this._aliasAddressToIdentity = new Map();
     this._accounts = new Map();
+    this._allocations = new Map();
+    this._distributions = new Map();
+    this._allocationsToDistributions = new Map();
   }
 
   /**
@@ -157,6 +168,54 @@ export class Ledger {
       return null;
     }
     return this.account(identityId);
+  }
+
+  /**
+   * Get the Allocation associated with a particular Allocation ID.
+   *
+   * If the ID is not in the ledger, an error is thrown.
+   */
+  allocation(id: AllocationId): Allocation {
+    const allocation = this._allocations.get(id);
+    if (allocation == null) throw new Error(`no Allocation for id: ${id}`);
+    return allocation;
+  }
+
+  /**
+   * Get an Iterator over all Allocations in the order they occur in the Ledger.
+   */
+  allocations(): Iterator<Allocation> {
+    return this._allocations.values();
+  }
+
+  /**
+   * Get the Distribution associated with a particular Distribution ID.
+   *
+   * If the ID is not in the ledger, an error is thrown.
+   */
+  distribution(id: DistributionId): Distribution {
+    const distribution = this._distributions.get(id);
+    if (distribution == null) throw new Error(`no Distribution for id: ${id}`);
+    return distribution;
+  }
+
+  /**
+   * Get an Iterator over all Distributions in the order they occur in the Ledger.
+   */
+  distributions(): Iterator<Distribution> {
+    return this._distributions.values();
+  }
+
+  /**
+   * Get the Distribution associated with a particular Allocation ID.
+   *
+   * If the Allocation ID is not associated with a distribution, an error is thrown.
+   */
+  distributionByAllocationId(allocationId: AllocationId): Distribution {
+    const distributionId = this._allocationsToDistributions.get(allocationId);
+    if (distributionId == null)
+      throw new Error(`no Distribution for allocation id: ${allocationId}`);
+    return this.distribution(distributionId);
   }
 
   /**
@@ -467,8 +526,11 @@ export class Ledger {
       }
     }
     // Mutations beckon: method must not fail after this comment
-    for (const {receipts} of distribution.allocations) {
-      for (const {id, amount} of receipts) {
+    this._distributions.set(distribution.id, distribution);
+    for (const allocation of distribution.allocations) {
+      this._allocations.set(allocation.id, allocation);
+      this._allocationsToDistributions.set(allocation.id, distribution.id);
+      for (const {id, amount} of allocation.receipts) {
         this._allocateGrain(id, amount);
       }
     }

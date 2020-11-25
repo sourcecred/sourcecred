@@ -775,27 +775,41 @@ describe("core/ledger/ledger", () => {
 
   describe("grain updates", () => {
     describe("distributeGrain", () => {
-      it("works for an empty distribution", () => {
-        const ledger = new Ledger();
+      describe("when the distribution is empty", () => {
+        let ledger;
         const distribution = {
           credTimestamp: 1,
           allocations: [],
           id: uuid.random(),
         };
-        setFakeDate(2);
-        ledger.distributeGrain(distribution);
-        expect(ledger.accounts()).toEqual([]);
-        expect(ledger.eventLog()).toEqual([
-          {
-            version: "1",
-            ledgerTimestamp: 2,
-            uuid: expect.anything(),
-            action: {type: "DISTRIBUTE_GRAIN", distribution},
-          },
-        ]);
+
+        beforeEach(() => {
+          ledger = new Ledger();
+          setFakeDate(2);
+          ledger.distributeGrain(distribution);
+        });
+
+        it("should create an empty distribution event", () => {
+          expect(ledger.accounts()).toEqual([]);
+          expect(ledger.eventLog()).toEqual([
+            {
+              version: "1",
+              ledgerTimestamp: 2,
+              uuid: expect.anything(),
+              action: {type: "DISTRIBUTE_GRAIN", distribution},
+            },
+          ]);
+        });
+
+        it("should record the empty distribution", () => {
+          expect(ledger.distribution(distribution.id)).toEqual(distribution);
+          expect(Array.from(ledger.allocations())).toEqual([]);
+          expect(Array.from(ledger.distributions())).toEqual([distribution]);
+        });
       });
-      it("handles a case with a single allocation", () => {
-        const ledger = ledgerWithActiveIdentities();
+
+      describe("when the distribution has a single allocation", () => {
+        let ledger;
         const allocation = {
           policy: {policyType: "IMMEDIATE", budget: g("10")},
           id: uuid.random(),
@@ -809,23 +823,41 @@ describe("core/ledger/ledger", () => {
           allocations: [allocation],
           id: uuid.random(),
         };
-        ledger.distributeGrain(distribution);
-        const ac1 = {
-          identity: identity1(),
-          balance: g("3"),
-          paid: g("3"),
-          active: true,
-        };
-        const ac2 = {
-          identity: identity2(),
-          balance: g("7"),
-          paid: g("7"),
-          active: true,
-        };
-        expect(ledger.accounts()).toEqual([ac1, ac2]);
+
+        beforeEach(() => {
+          ledger = ledgerWithActiveIdentities();
+          ledger.distributeGrain(distribution);
+        });
+
+        it("should record the payments in the accounts", () => {
+          const ac1 = {
+            identity: identity1(),
+            balance: g("3"),
+            paid: g("3"),
+            active: true,
+          };
+          const ac2 = {
+            identity: identity2(),
+            balance: g("7"),
+            paid: g("7"),
+            active: true,
+          };
+          expect(ledger.accounts()).toEqual([ac1, ac2]);
+        });
+
+        it("should record the allocation and distribution", () => {
+          expect(ledger.allocation(allocation.id)).toEqual(allocation);
+          expect(ledger.distribution(distribution.id)).toEqual(distribution);
+          expect(Array.from(ledger.allocations())).toEqual([allocation]);
+          expect(Array.from(ledger.distributions())).toEqual([distribution]);
+          expect(ledger.distributionByAllocationId(allocation.id)).toEqual(
+            distribution
+          );
+        });
       });
-      it("handles multiple allocations", () => {
-        const ledger = ledgerWithActiveIdentities();
+
+      describe("when the distribution has multiple allocations", () => {
+        let ledger;
         const allocation1 = {
           policy: {policyType: "IMMEDIATE", budget: g("10")},
           id: uuid.random(),
@@ -847,21 +879,119 @@ describe("core/ledger/ledger", () => {
           allocations: [allocation1, allocation2],
           id: uuid.random(),
         };
-        ledger.distributeGrain(distribution);
-        const ac1 = {
-          identity: identity1(),
-          balance: g("13"),
-          paid: g("13"),
-          active: true,
-        };
-        const ac2 = {
-          identity: identity2(),
-          balance: g("17"),
-          paid: g("17"),
-          active: true,
-        };
-        expect(ledger.accounts()).toEqual([ac1, ac2]);
+
+        beforeEach(() => {
+          ledger = ledgerWithActiveIdentities();
+          ledger.distributeGrain(distribution);
+        });
+
+        it("should record the payments in the accounts", () => {
+          const ac1 = {
+            identity: identity1(),
+            balance: g("13"),
+            paid: g("13"),
+            active: true,
+          };
+          const ac2 = {
+            identity: identity2(),
+            balance: g("17"),
+            paid: g("17"),
+            active: true,
+          };
+          expect(ledger.accounts()).toEqual([ac1, ac2]);
+        });
+
+        it("should record the allocations and distribution", () => {
+          expect(ledger.allocation(allocation1.id)).toEqual(allocation1);
+          expect(ledger.allocation(allocation2.id)).toEqual(allocation2);
+          expect(ledger.distribution(distribution.id)).toEqual(distribution);
+          expect(Array.from(ledger.allocations())).toEqual([
+            allocation1,
+            allocation2,
+          ]);
+          expect(Array.from(ledger.distributions())).toEqual([distribution]);
+          expect(ledger.distributionByAllocationId(allocation1.id)).toEqual(
+            distribution
+          );
+          expect(ledger.distributionByAllocationId(allocation2.id)).toEqual(
+            distribution
+          );
+        });
       });
+
+      describe("when there are multiple distributions", () => {
+        let ledger;
+        const allocation1 = {
+          policy: {policyType: "IMMEDIATE", budget: g("10")},
+          id: uuid.random(),
+          receipts: [
+            {amount: g("3"), id: id1},
+            {amount: g("7"), id: id2},
+          ],
+        };
+        const allocation2 = {
+          id: uuid.random(),
+          policy: {policyType: "BALANCED", budget: g("20")},
+          receipts: [
+            {amount: g("10"), id: id1},
+            {amount: g("10"), id: id2},
+          ],
+        };
+        const distribution1 = {
+          credTimestamp: 1,
+          allocations: [allocation1],
+          id: uuid.random(),
+        };
+        const distribution2 = {
+          credTimestamp: 2,
+          allocations: [allocation2],
+          id: uuid.random(),
+        };
+
+        beforeEach(() => {
+          ledger = ledgerWithActiveIdentities();
+          ledger.distributeGrain(distribution1);
+          ledger.distributeGrain(distribution2);
+        });
+
+        it("should record the payments in the accounts", () => {
+          const ac1 = {
+            identity: identity1(),
+            balance: g("13"),
+            paid: g("13"),
+            active: true,
+          };
+          const ac2 = {
+            identity: identity2(),
+            balance: g("17"),
+            paid: g("17"),
+            active: true,
+          };
+          expect(ledger.accounts()).toEqual([ac1, ac2]);
+        });
+
+        it("should record the allocations and distributions", () => {
+          expect(ledger.allocation(allocation1.id)).toEqual(allocation1);
+          expect(ledger.allocation(allocation2.id)).toEqual(allocation2);
+          expect(ledger.distribution(distribution1.id)).toEqual(distribution1);
+          expect(ledger.distribution(distribution2.id)).toEqual(distribution2);
+          expect(Array.from(ledger.allocations())).toEqual([
+            allocation1,
+            allocation2,
+          ]);
+          expect(Array.from(ledger.distributions())).toEqual([
+            distribution1,
+            distribution2,
+          ]);
+          expect(ledger.distributionByAllocationId(allocation1.id)).toEqual(
+            distribution1
+          );
+          expect(ledger.distributionByAllocationId(allocation2.id)).toEqual(
+            distribution2
+          );
+        });
+      });
+
       it("fails if any receipt has invalid id", () => {
         const ledger = ledgerWithActiveIdentities();
         const allocation = {
@@ -1095,6 +1225,26 @@ describe("core/ledger/ledger", () => {
           });
         failsWithoutMutation(ledger, thunk, "transfer to inactive account");
       });
+    });
+  });
+
+  describe("distribution and allocation lookups", () => {
+    it("allocation throws when an invalid ID is provided", () => {
+      const ledger = new Ledger();
+      const thunk = () => ledger.allocation(uuid.random());
+      expect(thunk).toThrowError("no Allocation for id");
+    });
+
+    it("distribution throws when an invalid ID is provided", () => {
+      const ledger = new Ledger();
+      const thunk = () => ledger.distribution(uuid.random());
+      expect(thunk).toThrowError("no Distribution for id");
+    });
+
+    it("distributionByAllocationId throws when an invalid ID is provided", () => {
+      const ledger = new Ledger();
+      const thunk = () => ledger.distributionByAllocationId(uuid.random());
+      expect(thunk).toThrowError("no Distribution for allocation id");
     });
   });
 
