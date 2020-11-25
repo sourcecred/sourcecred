@@ -1,8 +1,7 @@
 // @flow
 
-import deepFreeze from "deep-freeze";
+import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
-import {Graph} from "../graph";
 import {MarkovProcessGraph} from "./markovProcessGraph";
 import {
   markovEdgeAddress,
@@ -10,10 +9,6 @@ import {
   markovEdgeAddressFromMarkovEdge,
   type MarkovEdge,
 } from "./markovEdge";
-import {NodeAddress as NA, EdgeAddress as EA} from "../graph";
-import * as uuid from "../../util/uuid"; // for spy purposes
-import {intervalSequence} from "../interval";
-
 import {seedGadget, accumulatorGadget, epochGadget} from "./nodeGadgets";
 import {
   radiationGadget,
@@ -23,104 +18,22 @@ import {
   backwardWebbingGadget,
 } from "./edgeGadgets";
 
+import {
+  args,
+  markovProcessGraph,
+  contributions,
+  e0,
+  e1,
+  e2,
+  e3,
+  nodeWeight,
+  edgeWeight,
+  participant1,
+  parameters,
+  participants,
+} from "./testUtils";
+
 describe("core/credrank/markovProcessGraph", () => {
-  const na = (name) => NA.fromParts([name]);
-  const ea = (name) => EA.fromParts([name]);
-
-  const participantNode1 = {
-    description: "participant1",
-    address: na("participant1"),
-    timestampMs: null,
-  };
-  const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");
-  const participant1 = {
-    description: participantNode1.description,
-    address: participantNode1.address,
-    id: id1,
-  };
-
-  const participantNode2 = {
-    description: "participant2",
-    address: na("participant2"),
-    timestampMs: null,
-  };
-  const id2 = uuid.fromString("YVZhbGlkVXVpZE20TGFzdA");
-  const participant2 = {
-    description: participantNode2.description,
-    address: participantNode2.address,
-    id: id2,
-  };
-
-  const interval0 = {startTimeMs: 0, endTimeMs: 2};
-  const interval1 = {startTimeMs: 2, endTimeMs: 4};
-  const intervals = deepFreeze(intervalSequence([interval0, interval1]));
-
-  const c0 = {description: "c0", address: na("c0"), timestampMs: 0};
-  const c1 = {description: "c1", address: na("c1"), timestampMs: 2};
-
-  const e0 = {
-    address: ea("e0"),
-    src: c0.address,
-    dst: participantNode1.address,
-    timestampMs: 1,
-  };
-  const e1 = {
-    address: ea("e1"),
-    src: c1.address,
-    dst: participantNode1.address,
-    timestampMs: 3,
-  };
-  const e2 = {
-    address: ea("e2"),
-    src: c0.address,
-    dst: c1.address,
-    timestampMs: 4,
-  };
-  const e3 = {
-    address: ea("e3"),
-    src: c0.address,
-    dst: c1.address,
-    timestampMs: 4,
-  };
-
-  deepFreeze([participant1, participant2, c0, c1, e0, e1]);
-
-  const parameters = deepFreeze({
-    beta: 0.2,
-    gammaForward: 0.15,
-    gammaBackward: 0.1,
-    alpha: 0.2,
-  });
-
-  const graph = () =>
-    new Graph()
-      .addNode(participantNode1)
-      .addNode(participantNode2)
-      .addNode(c0)
-      .addNode(c1)
-      .addEdge(e0)
-      .addEdge(e1)
-      .addEdge(e2)
-      .addEdge(e3);
-  const nodeWeights = () => new Map().set(c0.address, 1).set(c1.address, 2);
-  const edgeWeights = () =>
-    new Map()
-      .set(e0.address, {forwards: 1, backwards: 0})
-      .set(e1.address, {forwards: 2, backwards: 1})
-      .set(e3.address, {forwards: 0, backwards: 0});
-  const weights = () => ({
-    nodeWeights: nodeWeights(),
-    edgeWeights: edgeWeights(),
-  });
-  const weightedGraph = () => ({weights: weights(), graph: graph()});
-  const args = () => ({
-    weightedGraph: weightedGraph(),
-    parameters,
-    intervals,
-    participants: [participant1, participant2],
-  });
-  const markovProcessGraph = () => MarkovProcessGraph.new(args());
-
   function checkMarkovEdge(mpg: MarkovProcessGraph, me: MarkovEdge) {
     const addr = markovEdgeAddressFromMarkovEdge(me);
     const actual = mpg.edge(addr);
@@ -162,10 +75,12 @@ describe("core/credrank/markovProcessGraph", () => {
   describe("organic nodes / edges", () => {
     it("each contribution is present with the correct weight", () => {
       const mpg = markovProcessGraph();
-      const n0 = NullUtil.get(mpg.node(c0.address));
-      expect(n0.mint).toEqual(nodeWeights().get(n0.address));
-      const n1 = NullUtil.get(mpg.node(c1.address));
-      expect(n1.mint).toEqual(nodeWeights().get(n1.address));
+      for (const contrib of contributions) {
+        const node = NullUtil.get(mpg.node(contrib.address));
+        const mint = node.mint;
+        const expectedMint = nodeWeight(contrib.address);
+        expect(mint).toEqual(expectedMint);
+      }
     });
     it("the participant is not present", () => {
       const mpg = markovProcessGraph();
@@ -195,12 +110,13 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("an edge with weights of 0 will not appear in the graph whatsoever", () => {
       const mpg = markovProcessGraph();
-      expect(edgeWeights().get(e3.address)).toEqual({
+      const addr = e3.address;
+      expect(edgeWeight(addr)).toEqual({
         forwards: 0,
         backwards: 0,
       });
-      const f = markovEdgeAddress(e3.address, "F");
-      const b = markovEdgeAddress(e3.address, "B");
+      const f = markovEdgeAddress(addr, "F");
+      const b = markovEdgeAddress(addr, "B");
       expect(mpg.edge(f)).toEqual(null);
       expect(mpg.edge(b)).toEqual(null);
     });
@@ -214,15 +130,16 @@ describe("core/credrank/markovProcessGraph", () => {
       });
       it("the seed has outbound edges to contributions in proportion to their mint amount", () => {
         const mpg = markovProcessGraph();
-        const m0 = seedMintGadget.markovEdge(c0.address, 1 / 3);
-        checkMarkovEdge(mpg, m0);
-        const m1 = seedMintGadget.markovEdge(c1.address, 2 / 3);
-        checkMarkovEdge(mpg, m1);
+        const totalMint = sum(contributions.map((x) => nodeWeight(x.address)));
+        for (const {address} of contributions) {
+          const proportion = nodeWeight(address) / totalMint;
+          const edge = seedMintGadget.markovEdge(address, proportion);
+          checkMarkovEdge(mpg, edge);
+        }
       });
       it("seed node has a radiation-in edge for each organic contribution with pr === alpha", () => {
         const mpg = markovProcessGraph();
-        const organicNodes = [c0, c1];
-        for (const {address} of organicNodes) {
+        for (const {address} of contributions) {
           const edge = radiationGadget.markovEdge(address, parameters.alpha);
           checkMarkovEdge(mpg, edge);
         }
@@ -293,7 +210,7 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("user epoch nodes have temporal webbing", () => {
       const mpg = markovProcessGraph();
-      for (const participant of [participant1, participant2]) {
+      for (const participant of participants) {
         let lastBoundary = null;
         for (const boundary of mpg.epochBoundaries()) {
           const epochAddress = {
@@ -430,10 +347,7 @@ describe("core/credrank/markovProcessGraph", () => {
       expect(markovProcessGraph().epochBoundaries()).toEqual(expected);
     });
     it("has the right participants", () => {
-      expect(markovProcessGraph().participants()).toEqual([
-        participant1,
-        participant2,
-      ]);
+      expect(markovProcessGraph().participants()).toEqual(participants);
     });
     it("has the right parameters", () => {
       expect(markovProcessGraph().parameters()).toEqual(parameters);
