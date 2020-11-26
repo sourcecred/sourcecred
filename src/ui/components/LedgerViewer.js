@@ -222,13 +222,22 @@ const LedgerEventRow = React.memo(
         case "ADD_ALIAS":
           try {
             const account = ledger.account(action.identityId);
-            // description has format: channel/[@handle](url). url has little value in the UI, so cut it
-            const aliasHandle = action.alias.description.replace(/\(.*\)$/, "");
+            let alias = action.alias.description;
+            // description has format: channel/[@handle](url). Parse out alias, account, url
+            const descriptionParts = alias.match(
+              /^([^/]*)\/\[(@[^\]]*)\]\(([^)]*)\)$/
+            );
+
+            if (descriptionParts) {
+              const [, channel, handle] = descriptionParts;
+              alias = `${channel}/${handle}`;
+            }
+
             return (
               <>
                 <IdentityDetails
                   id={action.identityId}
-                  name={`${aliasHandle} ⇒ ${account.identity.name}`}
+                  name={`${account.identity.name} ⇐ ${alias}`}
                 />
                 <Chip label={account.identity.subtype} size="small" />
               </>
