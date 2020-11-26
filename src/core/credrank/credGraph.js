@@ -1,14 +1,15 @@
 // @flow
 
+import * as C from "../../util/combo";
 import * as NullUtil from "../../util/null";
 import {type Uuid} from "../../util/uuid";
 import {type NodeAddressT, type EdgeAddressT} from "../graph";
 import {
   MarkovProcessGraph,
   type MarkovProcessGraphJSON,
+  jsonParser as markovProcessGraphJSONParser,
 } from "./markovProcessGraph";
 import {type MarkovEdge, type TransitionProbability} from "./markovEdge";
-import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import {payoutGadget} from "./edgeGadgets";
 
 export type Node = {|
@@ -35,13 +36,11 @@ export type Participant = {|
   +id: Uuid,
 |};
 
-export type CredGraphJSON = Compatible<{|
+export type CredGraphJSON = {|
   +mpg: MarkovProcessGraphJSON,
   // scores for each node in the same node order used by the markov process graph
   +scores: $ReadOnlyArray<number>,
-|}>;
-
-export const COMPAT_INFO = {type: "sourcecred/credGraph", version: "0.1.0"};
+|};
 
 export class CredGraph {
   _mpg: MarkovProcessGraph;
@@ -110,15 +109,23 @@ export class CredGraph {
 
   toJSON(): CredGraphJSON {
     const mpgJson = this._mpg.toJSON();
-    return toCompat(COMPAT_INFO, {
+    return {
       mpg: mpgJson,
       scores: this._scores,
-    });
+    };
   }
 
   static fromJSON(j: CredGraphJSON): CredGraph {
-    const {mpgJson, scores} = fromCompat(COMPAT_INFO, j);
-    const mpg = MarkovProcessGraph.fromJSON(mpgJson);
-    return new CredGraph(mpg, scores);
+    return new CredGraph(MarkovProcessGraph.fromJSON(j.mpg), j.scores);
   }
 }
+
+export const jsonParser: C.Parser<CredGraphJSON> = C.object({
+  mpg: markovProcessGraphJSONParser,
+  scores: C.array(C.number),
+});
+
+export const parser: C.Parser<CredGraph> = C.fmap(
+  jsonParser,
+  CredGraph.fromJSON
+);

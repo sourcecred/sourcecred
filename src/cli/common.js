@@ -25,6 +25,7 @@ import {
   overrideWeights,
   fromJSON as weightedGraphFromJSON,
 } from "../core/weightedGraph";
+import {CredGraph, parser as credGraphParser} from "../core/credrank/credGraph";
 import {loadFileWithDefault, loadJsonWithDefault} from "../util/disk";
 import {parser as pluginBudgetParser} from "../api/pluginBudgetConfig";
 import {applyBudget, type Budget} from "../core/mintBudget";
@@ -170,6 +171,11 @@ export async function loadWeightedGraph(
     Weights.empty
   );
   return overrideWeights(combinedGraph, weights);
+}
+
+export async function loadCredGraph(baseDir: string): Promise<CredGraph> {
+  const credGraphPath = pathJoin(baseDir, "output", "credGraph.json");
+  return await loadJson(credGraphPath, credGraphParser);
 }
 
 export async function loadLedger(baseDir: string): Promise<Ledger> {

@@ -1,5 +1,6 @@
 // @flow
 
+import {CredGraph, parser as credGraphParser} from "./credGraph";
 import {markovProcessGraph, credGraph} from "./testUtils";
 
 describe("core/credrank/credGraph", () => {
@@ -47,6 +48,22 @@ describe("core/credrank/credGraph", () => {
         participantCred += cred;
       }
       expect(totalMint).toBeCloseTo(participantCred);
+    });
+  });
+
+  describe("to/fromJSON", () => {
+    it("has round trip equality", async () => {
+      const cg1 = await credGraph();
+      const cgJson1 = cg1.toJSON();
+      const cg2 = CredGraph.fromJSON(cgJson1);
+      const cgJson2 = cg2.toJSON();
+      expect(cg1).toEqual(cg2);
+      expect(cgJson1).toEqual(cgJson2);
+    });
+    it("parser works", async () => {
+      const cg = await credGraph();
+      const cgJson = cg.toJSON();
+      expect(credGraphParser.parseOrThrow(cgJson)).toEqual(cg);
     });
   });
 });

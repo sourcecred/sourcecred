@@ -1,6 +1,7 @@
 // @flow
 
-import {type NodeAddressT} from "../graph";
+import * as C from "../../util/combo";
+import {type NodeAddressT, NodeAddress} from "../graph";
 
 export type MarkovNode = {|
   // Node address, unique within a Markov process graph. This is either
@@ -12,3 +13,9 @@ export type MarkovNode = {|
   // Amount of cred to mint at this node.
   +mint: number,
 |};
+
+export const parser: C.Parser<MarkovNode> = C.object({
+  address: NodeAddress.parser,
+  description: C.string,
+  mint: C.number,
+});
