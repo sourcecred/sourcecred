@@ -5,8 +5,8 @@
  */
 
 import Database from "better-sqlite3";
-import * as Model from "../models.js";
-import {SqliteMirrorRepository} from "../mirrorRepository.js";
+import * as Model from "./models.js";
+import {SqliteMirrorRepository} from "./mirrorRepository.js";
 
 describe("plugins/slack/mirrorRepository", () => {
   let repo;
