@@ -45,5 +45,5 @@ export type Message = {|
   +in_reply_to: string, // id of the thread-starting message, self id = thread starting message
   +authorId: string, // user id
   +reactions: Array<MessageReaction>, // array of reacts to a message. ([{name: 'reaction_name', users: ['<array of user ids>'], count: <number of reacts>}, {...}, {...}])
-  +mentions: Array<Buffer>, // array of mentioned users
+  +mentions: Array<String>, // array of mentioned users
 |};
