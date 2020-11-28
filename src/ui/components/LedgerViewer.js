@@ -55,6 +55,12 @@ const useStyles = makeStyles((theme) => {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(1),
     },
+    chip: {
+      fontSize: "0.55rem",
+      color: "#828282",
+      backgroundColor: "#383838",
+      textShadow: "0 1px 0 rgba(0,0,0, 0.4)",
+    },
   };
 });
 
@@ -220,6 +226,7 @@ const LedgerEventRow = React.memo(
     currencySuffix: string,
     handleClickOpen: (a: Allocation) => void,
   }) => {
+    const classes = useStyles();
     const {action} = event;
     const getEventDetails = () => {
       switch (action.type) {
@@ -230,17 +237,19 @@ const LedgerEventRow = React.memo(
                 id={action.identity.id}
                 name={action.identity.name}
               />
-              <Chip label={action.identity.subtype} size="small" />
+              <Chip
+                className={classes.chip}
+                label={action.identity.subtype}
+                size="small"
+              />
             </>
           );
         case "ADD_ALIAS":
           try {
             const account = ledger.account(action.identityId);
             let alias = action.alias.description;
-            // description has format: channel/[@handle](url). Parse out alias, account, url
-            const descriptionParts = alias.match(
-              /^([^/]*)\/\[(@[^\]]*)\]\(([^)]*)\)$/
-            );
+            // description has format: channel/[handle](optional url). Parse out channel & handle
+            const descriptionParts = alias.match(/^([^/]*)\/\[([^\]]*)\]/);
 
             if (descriptionParts) {
               const [, channel, handle] = descriptionParts;
@@ -253,7 +262,11 @@ const LedgerEventRow = React.memo(
                   id={action.identityId}
                   name={`${account.identity.name} ⇐ ${alias}`}
                 />
-                <Chip label={account.identity.subtype} size="small" />
+                <Chip
+                  className={classes.chip}
+                  label={account.identity.subtype}
+                  size="small"
+                />
               </>
             );
           } catch (e) {
@@ -300,6 +313,74 @@ const LedgerEventRow = React.memo(
               />
             </Box>
           ));
+        case "TRANSFER_GRAIN":
+          //   amount: "3454650000000000000000"
+          // from: "brHJbQhd4Mg80tjbtQ1TNA"
+          // memo: "https://etherscan.io/tx/0x710ba7aa963e677373f1c72819964dd94fb9337ca6048100c66087455292e2bc"
+          // to: "Ec60d6PWymrN0ylmsZOHkg"
+          // type: "TRANSFER_GRAIN"
+          let sender;
+          let recipient;
+          const amount = G.formatAndTrim(action.amount);
+          try {
+            const senderAccount = ledger.account(action.from);
+            sender = (
+              <>
+                <IdentityDetails
+                  id={senderAccount.identity.id}
+                  name={senderAccount.identity.name}
+                />
+                <Chip
+                  className={classes.chip}
+                  label={senderAccount.identity.subtype}
+                  size="small"
+                />
+              </>
+            );
+          } catch (e) {
+            console.warn(
+              "Unable to find account for sender in action: ",
+              action
+            );
+            sender = (
+              <IdentityDetails id={action.from} name="[Unknown Account]" />
+            );
+          }
+
+          try {
+            const recipientAccount = ledger.account(action.to);
+            recipient = (
+              <>
+                <IdentityDetails
+                  id={recipientAccount.identity.id}
+                  name={recipientAccount.identity.name}
+                />
+                <Chip
+                  className={classes.chip}
+                  label={recipientAccount.identity.subtype}
+                  size="small"
+                />
+              </>
+            );
+          } catch (e) {
+            console.warn(
+              "Unable to find account for recipient in action: ",
+              action
+            );
+            recipient = (
+              <IdentityDetails id={action.to} name="[Unknown Account]" />
+            );
+          }
+
+          return (
+            <>
+              {sender}
+              &nbsp; &rArr; &nbsp;
+              {amount}
+              &nbsp; &rArr; &nbsp;
+              {recipient}
+            </>
+          );
 
         default:
           return "";
