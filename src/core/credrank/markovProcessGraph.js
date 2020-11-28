@@ -1,7 +1,7 @@
 // @flow
 
 import deepFreeze from "deep-freeze";
-import {type Uuid} from "../../util/uuid";
+import {type Uuid, parser as uuidParser} from "../../util/uuid";
 
 /**
  * Data structure representing a particular kind of Markov process, as
@@ -55,21 +55,26 @@ import {type Uuid} from "../../util/uuid";
  * spectral analysis via the `toMarkovChain` method.
  */
 
+import * as C from "../../util/combo";
 import sortedIndex from "lodash.sortedindex";
-import {type NodeAddressT, NodeAddress, type EdgeAddressT} from "../graph";
+import {
+  type NodeAddressT,
+  NodeAddress,
+  type EdgeAddressT,
+  EdgeAddress,
+} from "../graph";
 import {type WeightedGraph as WeightedGraphT} from "../weightedGraph";
 import {
   nodeWeightEvaluator,
   edgeWeightEvaluator,
 } from "../algorithm/weightEvaluator";
-import {toCompat, fromCompat, type Compatible} from "../../util/compat";
 import * as NullUtil from "../../util/null";
 import * as MapUtil from "../../util/map";
 import type {TimestampMs} from "../../util/timestamp";
 import {type SparseMarkovChain} from "../algorithm/markovChain";
 import {type IntervalSequence} from "../interval";
 
-import {type MarkovNode} from "./markovNode";
+import {type MarkovNode, parser as markovNodeParser} from "./markovNode";
 
 import {
   type MarkovEdge,
@@ -100,6 +105,12 @@ export type Participant = {|
   +id: Uuid,
 |};
 
+export const participantParser: C.Parser<Participant> = C.object({
+  address: NodeAddress.parser,
+  description: C.string,
+  id: uuidParser,
+});
+
 export type OrderedSparseMarkovChain = {|
   +nodeOrder: $ReadOnlyArray<NodeAddressT>,
   +chain: SparseMarkovChain,
@@ -124,10 +135,12 @@ export type Parameters = {|
   +gammaBackward: TransitionProbability,
 |};
 
-export const COMPAT_INFO = {
-  type: "sourcecred/markovProcessGraph",
-  version: "0.1.0",
-};
+export const parametersParser: C.Parser<Parameters> = C.object({
+  alpha: C.number,
+  beta: C.number,
+  gammaForward: C.number,
+  gammaBackward: C.number,
+});
 
 // A MarkovEdge in which the src and dst have been replaced with indices instead
 // of full addresses. The indexing is based on the order of nodes in the MarkovProcessGraphJSON.
@@ -138,7 +151,16 @@ export type IndexedMarkovEdge = {|
   +dst: number,
   +transitionProbability: TransitionProbability,
 |};
-export type MarkovProcessGraphJSON = Compatible<{|
+
+const indexedEdgeParser: C.Parser<IndexedMarkovEdge> = C.object({
+  address: EdgeAddress.parser,
+  reversed: C.boolean,
+  src: C.number,
+  dst: C.number,
+  transitionProbability: C.number,
+});
+
+export type MarkovProcessGraphJSON = {|
   +nodes: $ReadOnlyArray<MarkovNode>,
   +indexedEdges: $ReadOnlyArray<IndexedMarkovEdge>,
   +participants: $ReadOnlyArray<Participant>,
@@ -150,7 +172,7 @@ export type MarkovProcessGraphJSON = Compatible<{|
   // Array of [nodeIndex, transitionProbability] tuples representing all of the
   // connections from the seed node to nodes minting Cred.
   +indexedMints: $ReadOnlyArray<[number, number]>,
-|}>;
+|};
 
 export class MarkovProcessGraph {
   _nodes: $ReadOnlyMap<NodeAddressT, MarkovNode>;
@@ -654,7 +676,7 @@ export class MarkovProcessGraph {
     const indexedMints = Array.from(
       this._mintTransitionProbabilties
     ).map(([addr, pr]) => [NullUtil.get(this.nodeIndex(addr)), pr]);
-    return toCompat(COMPAT_INFO, {
+    return {
       nodes: [...this._nodes.values()],
       indexedEdges,
       participants: this._participants,
@@ -665,7 +687,7 @@ export class MarkovProcessGraph {
       parameters: this._parameters,
       radiationTransitionProbabilities: this._radiationTransitionProbabilties,
       indexedMints,
-    });
+    };
   }
 
   static fromJSON(j: MarkovProcessGraphJSON): MarkovProcessGraph {
@@ -677,7 +699,7 @@ export class MarkovProcessGraph {
       parameters,
       radiationTransitionProbabilities,
       indexedMints,
-    } = fromCompat(COMPAT_INFO, j);
+    } = j;
     const epochBoundaries = [-Infinity, ...finiteEpochBoundaries, Infinity];
     const nodeOrder = [
       ...nodes.map((n) => n.address),
@@ -820,3 +842,18 @@ function virtualizedMarkovEdge(
   }
   return null;
 }
+
+export const jsonParser: C.Parser<MarkovProcessGraphJSON> = C.object({
+  nodes: C.array(markovNodeParser),
+  indexedEdges: C.array(indexedEdgeParser),
+  participants: C.array(participantParser),
+  finiteEpochBoundaries: C.array(C.number),
+  parameters: parametersParser,
+  radiationTransitionProbabilities: C.array(C.number),
+  indexedMints: C.array(C.tuple([C.number, C.number])),
+});
+
+export const parser: C.Parser<MarkovProcessGraph> = C.fmap(
+  jsonParser,
+  MarkovProcessGraph.fromJSON
+);
