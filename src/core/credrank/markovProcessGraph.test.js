@@ -2,7 +2,10 @@
 
 import {sum} from "d3-array";
 import * as NullUtil from "../../util/null";
-import {MarkovProcessGraph} from "./markovProcessGraph";
+import {
+  MarkovProcessGraph,
+  parser as markovProcessGraphParser,
+} from "./markovProcessGraph";
 import {
   markovEdgeAddress,
   MarkovEdgeAddress,
@@ -356,12 +359,17 @@ describe("core/credrank/markovProcessGraph", () => {
 
   describe("to/froJSON", () => {
     it("has round trip equality", () => {
-      const mpg = markovProcessGraph();
-      const mpgJson = mpg.toJSON();
-      const mpg_ = MarkovProcessGraph.fromJSON(mpgJson);
-      const mpgJson_ = mpg_.toJSON();
-      expect(mpg).toEqual(mpg_);
-      expect(mpgJson).toEqual(mpgJson_);
+      const mpg1 = markovProcessGraph();
+      const mpgJson1 = mpg1.toJSON();
+      const mpg2 = MarkovProcessGraph.fromJSON(mpgJson1);
+      const mpgJson2 = mpg2.toJSON();
+      expect(mpg1).toEqual(mpg2);
+      expect(mpgJson1).toEqual(mpgJson2);
+    });
+    it("parser works", async () => {
+      const mpg = await markovProcessGraph();
+      const mpgJson = markovProcessGraph().toJSON();
+      expect(markovProcessGraphParser.parseOrThrow(mpgJson)).toEqual(mpg);
     });
     it("serialization does not change node/edge iteration order", () => {
       const mpg1 = markovProcessGraph();
