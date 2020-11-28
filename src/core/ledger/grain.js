@@ -154,6 +154,29 @@ export function format(
 }
 
 /**
+ * Formats a grain balance as a human-readable number using the format()
+ * method, but trims any unnecessary decimal information.
+ *
+ * The intended use is for UI presentation where less visual clutter is
+ * desired.
+ *
+ * Here are some examples of its behavior
+ *
+ * format(100000000000000) === "0.0001g"
+ * format(150000000000000000000) === "150g"
+ * format(15000000000000000000000) === "15,000g"
+ * format(15000000000000000000000, "seeds") === "15,000seeds"
+ * format(15000000000000000000000, "") === "15,000"
+ *
+ */
+export function formatAndTrim(
+  grain: Grain,
+  suffix: string = DEFAULT_SUFFIX
+): string {
+  return format(grain, DECIMAL_PRECISION, "").replace(/\.?0+$/, "") + suffix;
+}
+
+/**
  * Multiply a grain amount by a floating point number.
  *
  * Use this method when you need to multiply a grain balance by a floating
