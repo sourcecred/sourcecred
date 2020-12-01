@@ -2,6 +2,7 @@
 
 import * as P from "../../util/combo";
 import bigInt from "big-integer";
+import {DEFAULT_SUFFIX} from "../../api/currencyConfig";
 
 /**
  * This module contains the types for tracking Grain, which is the native
@@ -79,8 +80,6 @@ export function eq(a: Grain, b: Grain): boolean {
 export function fromString(s: string): Grain {
   return bigInt(s).toString();
 }
-
-export const DEFAULT_SUFFIX = "g";
 
 /**
  * Formats a grain balance as a human-readable number, dividing the
