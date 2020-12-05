@@ -5,6 +5,7 @@ import {Redirect, Route, useHistory} from "react-router-dom";
 import {Admin, Resource, Layout, Loading} from "react-admin";
 import {createMuiTheme} from "@material-ui/core/styles";
 import pink from "@material-ui/core/colors/pink";
+import {makeStyles} from "@material-ui/core/styles";
 import fakeDataProvider from "ra-data-fakerest";
 import {Explorer} from "./Explorer/Explorer";
 import {ExplorerHome} from "./ExplorerHome/ExplorerHome";
@@ -40,14 +41,26 @@ const theme = createMuiTheme({
   },
 });
 
+const useLayoutStyles = makeStyles(
+  (theme) => ({
+    layout: {
+     overflowX: 'hidden',
+    },
+  }),
+  {name: "RaLayout"}
+);
 const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
-  const AppLayout = (props) => (
-    <Layout
-      {...props}
-      appBar={AppBar}
-      menu={withRouter(createMenu(hasBackend, currency))}
-    />
-  );
+  const AppLayout = (props) => {
+    const classes = useLayoutStyles(props);
+    return (
+      <Layout
+        className={classes.layout}
+        {...props}
+        appBar={AppBar}
+        menu={withRouter(createMenu(hasBackend, currency))}
+      />
+    );
+  }
   return AppLayout;
 };
 
