@@ -46,7 +46,6 @@
     "react-markdown": "^4.3.1",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
-    "recharts": "^1.8.5",
     "remove-markdown": "^0.3.0",
     "rimraf": "^3.0.2",
     "svg-react-loader": "^0.4.6",
