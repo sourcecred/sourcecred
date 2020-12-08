@@ -42,9 +42,9 @@ const theme = createMuiTheme({
 });
 
 const useLayoutStyles = makeStyles(
-  (theme) => ({
+  () => ({
     layout: {
-     overflowX: 'hidden',
+      overflowX: "hidden",
     },
   }),
   {name: "RaLayout"}
@@ -60,7 +60,7 @@ const createAppLayout = ({hasBackend, currency}: LoadSuccess) => {
         menu={withRouter(createMenu(hasBackend, currency))}
       />
     );
-  }
+  };
   return AppLayout;
 };
 
