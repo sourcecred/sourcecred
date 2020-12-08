@@ -9,11 +9,14 @@ import {Ledger} from "../core/ledger/ledger";
 import {applyDistributions} from "../core/ledger/applyDistributions";
 import {computeCredAccounts} from "../core/ledger/credAccounts";
 import stringify from "json-stable-stringify";
-import * as G from "../core/ledger/grain";
 import dedent from "../util/dedent";
-
 import * as GrainConfig from "../api/grainConfig";
 import type {Command} from "./command";
+import {distributionMarkdownSummary} from "../core/ledger/distributionSummary/distributionSummary";
+import {loadCurrencyDetails} from "../cli/common";
+import {type CurrencyDetails} from "../api/currencyConfig";
+import {allocationMarkdownSummary} from "../core/ledger/distributionSummary/allocationSummary";
+import * as G from "../core/ledger/grain";
 
 function die(std, message) {
   std.err("fatal: " + message);
@@ -43,6 +46,11 @@ const grainCommand: Command = async (args, std) => {
     await loadFileWithDefault(ledgerPath, () => new Ledger().serialize())
   );
 
+  const currencyDetailsPath = join(baseDir, "config", "currencyDetails.json");
+  const currencyDetails: CurrencyDetails = await loadCurrencyDetails(
+    currencyDetailsPath
+  );
+
   const distributions = applyDistributions(
     distributionPolicy,
     credView,
@@ -65,8 +73,16 @@ const grainCommand: Command = async (args, std) => {
     simulation ? `——SIMULATED DISTRIBUTION——\n` : ``,
     `Distributed ${G.format(totalDistributed)} to ${
       recipientIdentities.size
-    } identities in ${distributions.length} distributions`
+    } identities in ${distributions.length} distributions`,
+    `\n`
   );
+
+  distributions.map((d) => {
+    console.log(distributionMarkdownSummary(d, ledger, currencyDetails));
+    d.allocations.map((a) => {
+      console.log(allocationMarkdownSummary(d, a, ledger));
+    });
+  });
 
   if (!simulation) {
     await fs.writeFile(ledgerPath, ledger.serialize());
