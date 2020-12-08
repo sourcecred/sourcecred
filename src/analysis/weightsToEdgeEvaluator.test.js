@@ -1,7 +1,7 @@
 // @flow
 
 import {NodeAddress, EdgeAddress} from "../core/graph";
-import {type Weights as WeightsT} from "../core/weights";
+import {type WeightsT} from "../core/weights";
 import * as Weights from "../core/weights";
 import {weightsToEdgeEvaluator} from "./weightsToEdgeEvaluator";
 
