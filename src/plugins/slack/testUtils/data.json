@@ -102,5 +102,19 @@
       "reactions": "",
       "mentions": []
     }
+  ],
+  "messagesMock": [
+    {
+      "id": "1603782590.000300",
+      "channel": "C01CPGVGXSB",
+      "text": "<@U016C8XH6NR> tagging me here",
+      "thread": true,
+      "in_reply_to": "1603782590.000300",
+      "authorId": "U01DAUY8SMQ",
+      "reactions": [
+        {"name": "purple_heart", "users": ["U01D48KV0HY", "U01DAUY8SMQ"], "count": 1}
+      ],
+      "mentions": ["U016C8XH6NR"]
+    }
   ]
 }
