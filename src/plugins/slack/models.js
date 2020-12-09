@@ -18,7 +18,7 @@ export type SlackToken = string;
 
 // Only humans
 export type User = {|
-  +id: string,
+  +id: Buffer,
   +name: string,
   +email: string,
 |};
@@ -31,6 +31,7 @@ export type Conversation = {|
 |};
 
 // https://api.slack.com/events/message#stars__pins__and_reactions
+// Message -> all reactions
 export type MessageReaction = {|
   +name: string, // reaction name
   +users: Array<Buffer>,
@@ -43,7 +44,7 @@ export type Message = {|
   +text: string,
   +thread: Boolean, // if this is true, the message is part of a thread
   +in_reply_to: string, // id of the thread-starting message, self id = thread starting message
-  +authorId: string, // user id
+  +authorId: Buffer, // user id
   +reactions: Array<MessageReaction>, // array of reacts to a message. ([{name: 'reaction_name', users: ['<array of user ids>'], count: <number of reacts>}, {...}, {...}])
-  +mentions: Array<String>, // array of mentioned users
+  +mentions: Array<Buffer>, // array of mentioned users
 |};
