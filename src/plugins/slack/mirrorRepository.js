@@ -98,7 +98,9 @@ export class SqliteMirrorRepository {
           timestamp_ms TEXT NOT NULL,
           author_id TEXT NOT NULL,
           message_body TEXT,
-          thread INT,
+          thread INT, 
+          reactions INT,
+          mentions INT,
           in_reply_to TEXT
         )
       `,
@@ -112,6 +114,7 @@ export class SqliteMirrorRepository {
       `,
       dedent`\
         CREATE TABLE message_mentions (
+          channel_id TEXT NOT NULL,
           message_id TEXT NOT NULL,
           mentioned_user_id TEXT NOT NULL
         )
@@ -160,16 +163,18 @@ export class SqliteMirrorRepository {
 
   addMessage(message: Model.Message) {
     // explicit cast to integer is required since no boolean bindings exist in sqlite
-    let isThread;
+    let isThread = 0, hasReactions = 0, hasMentions = 0;
     if (message.thread) isThread = 1;
-    else isThread = 0;
+    if (message.reactions.length > 0) hasReactions = 1;
+    if (message.mentions.length > 0) hasMentions = 1;
+
     this._db
       .prepare(
         dedent`\
           INSERT INTO messages (
-            channel_id, timestamp_ms, author_id, message_body, thread, in_reply_to
+            channel_id, timestamp_ms, author_id, message_body, thread, reactions, mentions, in_reply_to
           ) VALUES (
-            :channel_id, :timestamp_ms, :author_id, :message_body, :thread, :in_reply_to
+            :channel_id, :timestamp_ms, :author_id, :message_body, :thread, :reactions, :mentions, :in_reply_to
           )
         `
       )
@@ -179,6 +184,8 @@ export class SqliteMirrorRepository {
         author_id: message.authorId,
         message_body: message.text,
         thread: isThread,
+        reactions: hasReactions,
+        mentions: hasMentions,
         in_reply_to: message.in_reply_to,
       });
     for (const reaction of message.reactions) {
@@ -206,16 +213,114 @@ export class SqliteMirrorRepository {
         .prepare(
           dedent`\
             INSERT INTO message_mentions (
-              message_id, mentioned_user_id
+              channel_id, message_id, mentioned_user_id
             ) VALUES (
-              :message_id, :mentioned_user_id
+              :channel_id, :message_id, :mentioned_user_id
             )
           `
         )
         .run({
+          channel_id: message.channel,
           message_id: message.id,
           mentioned_user_id: mentionedUser,
         });
     }
   }
+
+  messages(channel: string): $ReadOnlyArray<any>{
+    let messages = this._db
+      .prepare(
+        dedent`\
+        SELECT 
+          timestamp_ms as id, 
+          channel_id as channel,
+          message_body as text,
+          author_id as authorId,
+          thread as isThread,
+          reactions as hasReactions,
+          mentions as hasMentions,
+          in_reply_to as inReplyTo,
+          FROM messages
+          WHERE channel_id = :channel_id
+        `
+      )
+      .all({channel_id: channel})
+      .map((m) => ({
+        id: m.id, 
+        channel: m.channel,
+        text: m.text,
+        authorId: m.authorId,
+        isThread: m.isThread,
+        hasReactions: m.hasReactions,
+        hasMentions: m.hasMentions,
+        inReplyTo: m.inReplyTo,
+        mentions: this.mentions(m.channel, m.id)
+      }))
+      return 
+  }
+
+  reactions(channel: string, message: string): $ReadOnlyArray<any> {
+    return this._db 
+      .prepare(
+        dedent`\
+        SELECT 
+          channel_id,
+          message_ts,
+          reaction_name as reaction,
+          reactor
+        FROM 
+          message_reactions
+        WHERE channel_id = :channel_id 
+        AND message_ts = :message_ts
+        `
+      )
+      .all({
+        channel_id: channel,
+        message_ts: message
+      })
+  }
+
+  mentions(channel: string, messageId: string): $ReadOnlyArray<any> {
+      return this._db
+        .prepare(
+          dedent `\
+          SELECT mentioned_user_id
+          FROM message_mentions
+          WHERE channel_id = :channel_id 
+            AND message_id = :message_id
+          `
+        )
+        .all({
+          channel_id: channel, message_id: messageId
+        })
+        .map((res) => res.mentioned_user_id)
+  }
+
+  members(): $ReadOnlyArray<any>{
+    return this._db 
+      .prepare(
+        dedent`\
+        SELECT
+          user_id as id,
+          name, 
+          email
+        FROM members
+        `
+      )
+      .all()
+  }
+
+  channels(): $ReadOnlyArray<any>{
+    return this._db
+      .prepare(
+        dedent`\
+        SELECT
+          channel_id as id, 
+          name
+        FROM channels
+        `
+      )
+      .all();
+  }
+
 }
