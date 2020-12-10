@@ -20,7 +20,6 @@ export type WeightConfig = {|
 
 export function reactionWeight(
   weights: WeightConfig,
-  message: string,
   reaction: string,
   reactingMember: Buffer,
   messageAuthor: Buffer,

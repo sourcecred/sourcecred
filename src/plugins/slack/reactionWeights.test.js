@@ -1,4 +1,5 @@
 // @flow
+
 import {
   _channelWeight,
   _emojiWeight,
@@ -44,7 +45,7 @@ describe("plugins/experimental-discord/reactionWeights", () => {
       };
       const weights = {emojiWeights, channelWeights};
       expect(
-        reactionWeight(weights, message, message.reactions[0].name, message.reactions[0].users[0], message.authorId, message.channel)
+        reactionWeight(weights, message.reactions[0].name, message.reactions[0].users[0], message.authorId, message.channel)
       ).toEqual(4 * 6);
     });
     it("sets the weight to 0 for a self-reaction", () => {
@@ -52,7 +53,7 @@ describe("plugins/experimental-discord/reactionWeights", () => {
       const channelWeights = {defaultWeight: 1, weights: {}};
       const weights = {emojiWeights, channelWeights};
       expect(
-        reactionWeight(weights, message, message.reactions[0].name, message.reactions[0].users[1], message.authorId, message.channel)
+        reactionWeight(weights, message.reactions[0].name, message.reactions[0].users[1], message.authorId, message.channel)
       ).toEqual(0);
     });
   });
