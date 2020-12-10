@@ -117,7 +117,7 @@ export class Fetcher {
       thread: message.thread_ts ? true : false,
       in_reply_to: message.thread_ts ? message.thread_ts : "-1",
       authorId: message.user,
-      reactions: message.reactions ? message.reactions : "",
+      reactions: message.reactions ? message.reactions : [],
       mentions: mentionedUsers,
     };
     return detailedMessage;
