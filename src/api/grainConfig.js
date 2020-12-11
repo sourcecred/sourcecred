@@ -9,9 +9,12 @@ import {toDiscount} from "../core/ledger/policies/recent";
 export type GrainConfig = {|
   +immediatePerWeek?: number,
   +balancedPerWeek?: number,
+  +underpaidPerWeek?: number,
   +recentPerWeek?: number,
   +recentWeeklyDecayRate?: number,
   +maxSimultaneousDistributions?: number,
+  +underpaidThreshold?: number,
+  +underpaidExponent?: number,
 |};
 
 export const parser: C.Parser<GrainConfig> = C.object(
@@ -19,8 +22,11 @@ export const parser: C.Parser<GrainConfig> = C.object(
   {
     immediatePerWeek: C.number,
     balancedPerWeek: C.number,
+    underpaidPerWeek: C.number,
     recentPerWeek: C.number,
     recentWeeklyDecayRate: C.number,
+    underpaidThreshold: C.number,
+    underpaidExponent: C.number,
     maxSimultaneousDistributions: C.number,
   }
 );
@@ -33,6 +39,7 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
   const immediatePerWeek = NullUtil.orElse(x.immediatePerWeek, 0);
   const recentPerWeek = NullUtil.orElse(x.recentPerWeek, 0);
   const balancedPerWeek = NullUtil.orElse(x.balancedPerWeek, 0);
+  const underpaidPerWeek = NullUtil.orElse(x.underpaidPerWeek, 0);
 
   if (!isNonnegativeInteger(immediatePerWeek)) {
     throw new Error(
@@ -47,6 +54,11 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
   if (!isNonnegativeInteger(balancedPerWeek)) {
     throw new Error(
       `balanced budget must be nonnegative integer, got ${balancedPerWeek}`
+    );
+  }
+  if (!isNonnegativeInteger(underpaidPerWeek)) {
+    throw new Error(
+      `underpaid budget must be nonnegative integer, got ${balancedPerWeek}`
     );
   }
   const allocationPolicies = [];
@@ -71,6 +83,23 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
     allocationPolicies.push({
       budget: G.fromInteger(balancedPerWeek),
       policyType: "BALANCED",
+    });
+  }
+  if (underpaidPerWeek > 0) {
+    const {underpaidThreshold, underpaidExponent: exponent} = x;
+    if (underpaidThreshold == null) {
+      throw new Error(`no threshold specified for underpaid policy`);
+    }
+
+    if (exponent == null) {
+      throw new Error(`no exponent specified for underpaid policy`);
+    }
+
+    allocationPolicies.push({
+      budget: G.fromInteger(underpaidPerWeek),
+      policyType: "UNDERPAID",
+      threshold: G.fromApproximateFloat(underpaidThreshold),
+      exponent,
     });
   }
   const maxSimultaneousDistributions = NullUtil.orElse(

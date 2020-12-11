@@ -20,6 +20,7 @@ import {
   immediateReceipts,
   recentReceipts,
   specialReceipts,
+  underpaidReceipts,
 } from "./policies";
 import {
   type ProcessedIdentities,
@@ -88,6 +89,13 @@ function receipts(
       return recentReceipts(policy.budget, identities, policy.discount);
     case "BALANCED":
       return balancedReceipts(policy.budget, identities);
+    case "UNDERPAID":
+      return underpaidReceipts(
+        policy.budget,
+        identities,
+        policy.threshold,
+        policy.exponent
+      );
     case "SPECIAL":
       return specialReceipts(policy, identities);
     // istanbul ignore next: unreachable per Flow

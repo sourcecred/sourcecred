@@ -7,6 +7,11 @@ import {
   balancedPolicyParser,
 } from "./balanced";
 import {
+  type UnderpaidPolicy,
+  underpaidReceipts,
+  underpaidPolicyParser,
+} from "./underpaid";
+import {
   type ImmediatePolicy,
   immediateReceipts,
   immediatePolicyParser,
@@ -19,18 +24,21 @@ import {
 } from "./special";
 
 export {balancedReceipts, balancedPolicyParser};
+export {underpaidReceipts, underpaidPolicyParser};
 export {immediateReceipts, immediatePolicyParser};
 export {recentReceipts, recentPolicyParser};
 export {specialReceipts, specialPolicyParser};
 
 export type AllocationPolicy =
   | BalancedPolicy
+  | UnderpaidPolicy
   | ImmediatePolicy
   | RecentPolicy
   | SpecialPolicy;
 
 export const allocationPolicyParser: P.Parser<AllocationPolicy> = P.orElse([
   balancedPolicyParser,
+  underpaidPolicyParser,
   immediatePolicyParser,
   recentPolicyParser,
   specialPolicyParser,
