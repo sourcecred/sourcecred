@@ -164,7 +164,7 @@ export type MarkovProcessGraphJSON = {|
   +nodes: $ReadOnlyArray<MarkovNode>,
   +indexedEdges: $ReadOnlyArray<IndexedMarkovEdge>,
   +participants: $ReadOnlyArray<Participant>,
-  +epochBoundaries: $ReadOnlyArray<number>,
+  +epochStarts: $ReadOnlyArray<number>,
   +parameters: Parameters,
   +radiationTransitionProbabilities: $ReadOnlyArray<number>,
   // Array of [nodeIndex, transitionProbability] tuples representing all of the
@@ -176,7 +176,7 @@ export class MarkovProcessGraph {
   _nodes: $ReadOnlyMap<NodeAddressT, MarkovNode>;
   _edges: $ReadOnlyMap<MarkovEdgeAddressT, MarkovEdge>;
   _participants: $ReadOnlyArray<Participant>;
-  _epochBoundaries: $ReadOnlyArray<number>;
+  _epochStarts: $ReadOnlyArray<number>;
   _parameters: Parameters;
   _mintTransitionProbabilties: $ReadOnlyMap<NodeAddressT, number>;
   _radiationTransitionProbabilties: $ReadOnlyArray<number>;
@@ -187,7 +187,7 @@ export class MarkovProcessGraph {
     nodes: Map<NodeAddressT, MarkovNode>,
     edges: Map<MarkovEdgeAddressT, MarkovEdge>,
     participants: $ReadOnlyArray<Participant>,
-    epochBoundaries: $ReadOnlyArray<number>,
+    epochStarts: $ReadOnlyArray<number>,
     parameters: Parameters,
     // Map from each node address to the proportion of total minting (i.e. its
     // transition probability from the seed node). Must sum to about 1.
@@ -197,7 +197,7 @@ export class MarkovProcessGraph {
   ) {
     this._nodes = nodes;
     this._edges = edges;
-    this._epochBoundaries = deepFreeze(epochBoundaries);
+    this._epochStarts = deepFreeze(epochStarts);
     this._participants = deepFreeze(participants);
     this._parameters = deepFreeze(parameters);
     this._radiationTransitionProbabilties = deepFreeze(
@@ -206,19 +206,16 @@ export class MarkovProcessGraph {
     this._mintTransitionProbabilties = mintTransitionProbabilities;
     // Precompute the index maps
     this._nodeIndex = new Map(
-      [..._nodeOrder(nodes, epochBoundaries, participants)].map((a, i) => [
-        a,
-        i,
-      ])
+      [..._nodeOrder(nodes, epochStarts, participants)].map((a, i) => [a, i])
     );
     this._edgeIndex = new Map(
       [
         ...edges.keys(),
         ...virtualizedMarkovEdgeAddresses(
-          epochBoundaries,
+          epochStarts,
           participants,
           mintTransitionProbabilities,
-          _nodeOrder(nodes, epochBoundaries, participants)
+          _nodeOrder(nodes, epochStarts, participants)
         ),
       ].map((a, i) => [a, i])
     );
@@ -261,7 +258,7 @@ export class MarkovProcessGraph {
       return result;
     })();
 
-    const timeBoundaries = intervals.map((x) => x.startTimeMs);
+    const epochStarts = intervals.map((x) => x.startTimeMs);
     const addNode = (node: MarkovNode) => {
       if (_nodes.has(node.address)) {
         throw new Error("Node conflict: " + node.address);
@@ -314,18 +311,18 @@ export class MarkovProcessGraph {
     }
 
     // Add epoch nodes, epoch accumulators, payout edges, and epoch webbing
-    let lastBoundary = null;
-    for (const boundary of timeBoundaries) {
+    let lastEpochStart = null;
+    for (const epochStart of epochStarts) {
       for (const participant of participants) {
         const thisEpoch = {
           owner: participant.id,
-          epochStart: boundary,
+          epochStart,
         };
         recordTransitionProbability(payoutGadget.markovEdge(thisEpoch, beta));
-        if (lastBoundary != null) {
+        if (lastEpochStart != null) {
           const webbingAddress = {
-            thisStart: boundary,
-            lastStart: lastBoundary,
+            thisStart: epochStart,
+            lastStart: lastEpochStart,
             owner: participant.id,
           };
           recordTransitionProbability(
@@ -335,12 +332,12 @@ export class MarkovProcessGraph {
             backwardWebbingGadget.markovEdge(webbingAddress, gammaBackward)
           );
         } else {
-          // There is no lastBoundary, which means this is the first epoch. We will instead create a "backwards"
+          // There is no lastEpochStart, which means this is the first epoch. We will instead create a "backwards"
           // edge which is actually a loop, so as to avoid Cred distortion where scores are biased downward
           // for the first epoch.
           const webbingAddress = {
-            thisStart: boundary,
-            lastStart: boundary,
+            thisStart: epochStart,
+            lastStart: epochStart,
             owner: participant.id,
           };
           const edge = backwardWebbingGadget.markovEdge(
@@ -350,18 +347,18 @@ export class MarkovProcessGraph {
           recordTransitionProbability(edge);
         }
       }
-      lastBoundary = boundary;
+      lastEpochStart = epochStart;
     }
-    if (lastBoundary == null) {
+    if (lastEpochStart == null) {
       // Just to satisfy flow when adding the final "forward" webbing edges (which are loops).
       throw new Error(`invariant violation: there were no epochs`);
     }
-    // Now for the last boundary, we create a "forwards" webbing edge which is actually a loop, as as to
+    // Now for the last epochStart, we create a "forwards" webbing edge which is actually a loop, as as to
     // avoid Cred distortion where the scores are biased downward for the last epoch.
     for (const participant of participants) {
       const webbingAddress = {
-        thisStart: lastBoundary,
-        lastStart: lastBoundary,
+        thisStart: lastEpochStart,
+        lastStart: lastEpochStart,
         owner: participant.id,
       };
       const edge = forwardWebbingGadget.markovEdge(
@@ -402,9 +399,9 @@ export class MarkovProcessGraph {
       if (owner == null) {
         return address;
       }
-      const epochEndIndex = sortedIndex(timeBoundaries, edgeTimestampMs);
+      const epochEndIndex = sortedIndex(epochStarts, edgeTimestampMs);
       const epochStartIndex = epochEndIndex - 1;
-      const epochTimestampMs = timeBoundaries[epochStartIndex];
+      const epochTimestampMs = epochStarts[epochStartIndex];
       return epochGadget.toRaw({
         owner,
         epochStart: epochTimestampMs,
@@ -482,7 +479,7 @@ export class MarkovProcessGraph {
     function* realAndVirtualNodes(): Iterator<MarkovNode> {
       yield* _nodes.values();
       for (const nodeAddress of virtualizedNodeAddresses(
-        timeBoundaries,
+        epochStarts,
         participants
       )) {
         yield NullUtil.get(virtualizedNode(nodeAddress));
@@ -499,15 +496,15 @@ export class MarkovProcessGraph {
       _nodes,
       _edges,
       participants,
-      timeBoundaries,
+      epochStarts,
       parameters,
       mintTransitionProbabilities,
       radiationTransitionProbabilities
     );
   }
 
-  epochBoundaries(): $ReadOnlyArray<number> {
-    return this._epochBoundaries;
+  epochStarts(): $ReadOnlyArray<number> {
+    return this._epochStarts;
   }
 
   participants(): $ReadOnlyArray<Participant> {
@@ -533,7 +530,7 @@ export class MarkovProcessGraph {
    * that it is stable for any given MarkovProcessGraph.
    */
   *nodeOrder(): Iterator<NodeAddressT> {
-    yield* _nodeOrder(this._nodes, this._epochBoundaries, this._participants);
+    yield* _nodeOrder(this._nodes, this._epochStarts, this._participants);
   }
 
   node(address: NodeAddressT): MarkovNode | null {
@@ -555,7 +552,7 @@ export class MarkovProcessGraph {
       }
     }
     for (const address of virtualizedNodeAddresses(
-      this._epochBoundaries,
+      this._epochStarts,
       this._participants
     )) {
       if (NodeAddress.hasPrefix(address, prefix)) {
@@ -581,7 +578,7 @@ export class MarkovProcessGraph {
   *edgeOrder(): Iterator<MarkovEdgeAddressT> {
     yield* this._edges.keys();
     yield* virtualizedMarkovEdgeAddresses(
-      this._epochBoundaries,
+      this._epochStarts,
       this._participants,
       this._mintTransitionProbabilties,
       this.nodeOrder()
@@ -610,7 +607,7 @@ export class MarkovProcessGraph {
   *edges(): Iterator<MarkovEdge> {
     yield* this._edges.values();
     for (const addr of virtualizedMarkovEdgeAddresses(
-      this._epochBoundaries,
+      this._epochStarts,
       this._participants,
       this._mintTransitionProbabilties,
       this.nodeOrder()
@@ -705,7 +702,7 @@ export class MarkovProcessGraph {
       nodes: [...this._nodes.values()],
       indexedEdges,
       participants: this._participants,
-      epochBoundaries: this._epochBoundaries,
+      epochStarts: this._epochStarts,
       parameters: this._parameters,
       radiationTransitionProbabilities: this._radiationTransitionProbabilties,
       indexedMints,
@@ -717,14 +714,14 @@ export class MarkovProcessGraph {
       nodes,
       indexedEdges,
       participants,
-      epochBoundaries,
+      epochStarts,
       parameters,
       radiationTransitionProbabilities,
       indexedMints,
     } = j;
     const nodeOrder = [
       ...nodes.map((n) => n.address),
-      ...virtualizedNodeAddresses(epochBoundaries, participants),
+      ...virtualizedNodeAddresses(epochStarts, participants),
     ];
     const edges = indexedEdges.map((e) => ({
       address: e.address,
@@ -741,7 +738,7 @@ export class MarkovProcessGraph {
       new Map(nodes.map((n) => [n.address, n])),
       new Map(edges.map((e) => [markovEdgeAddressFromMarkovEdge(e), e])),
       participants,
-      epochBoundaries,
+      epochStarts,
       parameters,
       mintTransitionProbabilities,
       radiationTransitionProbabilities
@@ -755,11 +752,11 @@ export class MarkovProcessGraph {
  */
 function* _nodeOrder(
   nodes: $ReadOnlyMap<NodeAddressT, MarkovNode>,
-  epochBoundaries: $ReadOnlyArray<TimestampMs>,
+  epochStarts: $ReadOnlyArray<TimestampMs>,
   participants: $ReadOnlyArray<Participant>
 ): Iterable<NodeAddressT> {
   yield* nodes.keys();
-  yield* virtualizedNodeAddresses(epochBoundaries, participants);
+  yield* virtualizedNodeAddresses(epochStarts, participants);
 }
 
 /**
@@ -767,11 +764,11 @@ function* _nodeOrder(
  * virtualized node. The order must be stable.
  */
 function* virtualizedNodeAddresses(
-  epochBoundaries: $ReadOnlyArray<TimestampMs>,
+  epochStarts: $ReadOnlyArray<TimestampMs>,
   participants: $ReadOnlyArray<Participant>
 ): Iterable<NodeAddressT> {
   yield seedGadget.prefix;
-  for (const epochStart of epochBoundaries) {
+  for (const epochStart of epochStarts) {
     yield accumulatorGadget.toRaw({epochStart});
     for (const {id} of participants) {
       yield epochGadget.toRaw({owner: id, epochStart});
@@ -795,13 +792,13 @@ function virtualizedNode(address: NodeAddressT): MarkovNode | null {
 }
 
 function* virtualizedMarkovEdgeAddresses(
-  epochBoundaries: $ReadOnlyArray<TimestampMs>,
+  epochStarts: $ReadOnlyArray<TimestampMs>,
   participants: $ReadOnlyArray<Participant>,
   mintTransitionProbabilities: $ReadOnlyMap<NodeAddressT, number>,
   nodeOrder: Iterable<NodeAddressT>
 ): Iterable<MarkovEdgeAddressT> {
   let lastStart = null;
-  for (const epochStart of epochBoundaries) {
+  for (const epochStart of epochStarts) {
     for (const {id} of participants) {
       yield payoutGadget.toRaw({owner: id, epochStart});
       if (lastStart != null) {
@@ -883,7 +880,7 @@ export const jsonParser: C.Parser<MarkovProcessGraphJSON> = C.object({
   nodes: C.array(markovNodeParser),
   indexedEdges: C.array(indexedEdgeParser),
   participants: C.array(participantParser),
-  epochBoundaries: C.array(C.number),
+  epochStarts: C.array(C.number),
   parameters: parametersParser,
   radiationTransitionProbabilities: C.array(C.number),
   indexedMints: C.array(C.tuple([C.number, C.number])),

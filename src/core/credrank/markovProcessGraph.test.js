@@ -151,7 +151,7 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("creates participant epoch nodes", () => {
       const mpg = markovProcessGraph();
-      for (const boundary of mpg.epochBoundaries()) {
+      for (const boundary of mpg.epochStarts()) {
         const address = {
           owner: participant1.id,
           epochStart: boundary,
@@ -163,7 +163,7 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("participant epoch nodes have radiation edges out", () => {
       const mpg = markovProcessGraph();
-      for (const boundary of mpg.epochBoundaries()) {
+      for (const boundary of mpg.epochStarts()) {
         const structuredAddress = {
           owner: participant1.id,
           epochStart: boundary,
@@ -196,7 +196,7 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("user epoch nodes have payout edges to the accumulator", () => {
       const mpg = markovProcessGraph();
-      for (const boundary of mpg.epochBoundaries()) {
+      for (const boundary of mpg.epochStarts()) {
         const structuredAddress = {
           owner: participant1.id,
           epochStart: boundary,
@@ -214,7 +214,7 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       for (const participant of participants) {
         let lastBoundary = null;
-        for (const boundary of mpg.epochBoundaries()) {
+        for (const boundary of mpg.epochStarts()) {
           const epochAddress = {
             owner: participant.id,
             epochStart: boundary,
@@ -275,7 +275,7 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("sets up epoch accumulator nodes, with radiation to seed", () => {
       const mpg = markovProcessGraph();
-      for (const boundary of mpg.epochBoundaries()) {
+      for (const boundary of mpg.epochStarts()) {
         // There's an epoch accumulator node
         const accumulatorAddress = {
           epochStart: boundary,
@@ -373,7 +373,7 @@ describe("core/credrank/markovProcessGraph", () => {
     });
     it("has the correct epoch boundaries for the given intervals", () => {
       const expected = args().intervals.map((x) => x.startTimeMs);
-      const actual = markovProcessGraph().epochBoundaries();
+      const actual = markovProcessGraph().epochStarts();
       expect(actual).toEqual(expected);
     });
     it("has the right participants", () => {
