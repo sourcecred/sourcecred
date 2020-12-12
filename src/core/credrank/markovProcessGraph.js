@@ -165,7 +165,7 @@ export type MarkovProcessGraphJSON = {|
   +indexedEdges: $ReadOnlyArray<IndexedMarkovEdge>,
   +participants: $ReadOnlyArray<Participant>,
   +epochStarts: $ReadOnlyArray<number>,
-  +lastEpochEndMs: number,
+  +lastEpochEnd: number,
   +parameters: Parameters,
   +radiationTransitionProbabilities: $ReadOnlyArray<number>,
   // Array of [nodeIndex, transitionProbability] tuples representing all of the
@@ -178,7 +178,7 @@ export class MarkovProcessGraph {
   _edges: $ReadOnlyMap<MarkovEdgeAddressT, MarkovEdge>;
   _participants: $ReadOnlyArray<Participant>;
   _epochStarts: $ReadOnlyArray<number>;
-  +_lastEpochEndMs: number;
+  +_lastEpochEnd: number;
   _parameters: Parameters;
   _mintTransitionProbabilties: $ReadOnlyMap<NodeAddressT, number>;
   _radiationTransitionProbabilties: $ReadOnlyArray<number>;
@@ -190,7 +190,7 @@ export class MarkovProcessGraph {
     edges: Map<MarkovEdgeAddressT, MarkovEdge>,
     participants: $ReadOnlyArray<Participant>,
     epochStarts: $ReadOnlyArray<number>,
-    lastEpochEndMs: number,
+    lastEpochEnd: number,
     parameters: Parameters,
     // Map from each node address to the proportion of total minting (i.e. its
     // transition probability from the seed node). Must sum to about 1.
@@ -201,7 +201,7 @@ export class MarkovProcessGraph {
     this._nodes = nodes;
     this._edges = edges;
     this._epochStarts = deepFreeze(epochStarts);
-    this._lastEpochEndMs = lastEpochEndMs;
+    this._lastEpochEnd = lastEpochEnd;
     this._participants = deepFreeze(participants);
     this._parameters = deepFreeze(parameters);
     this._radiationTransitionProbabilties = deepFreeze(
@@ -266,7 +266,7 @@ export class MarkovProcessGraph {
       throw new Error("need at least one interval");
     }
     const epochStarts = intervals.map((x) => x.startTimeMs);
-    const lastEpochEndMs = intervals[intervals.length - 1].endTimeMs;
+    const lastEpochEnd = intervals[intervals.length - 1].endTimeMs;
     const addNode = (node: MarkovNode) => {
       if (_nodes.has(node.address)) {
         throw new Error("Node conflict: " + node.address);
@@ -505,7 +505,7 @@ export class MarkovProcessGraph {
       _edges,
       participants,
       epochStarts,
-      lastEpochEndMs,
+      lastEpochEnd,
       parameters,
       mintTransitionProbabilities,
       radiationTransitionProbabilities
@@ -521,7 +521,7 @@ export class MarkovProcessGraph {
     const intervals = [];
     for (let i = 0; i < es.length; i++) {
       const startTimeMs = es[i];
-      const endTimeMs = i + 1 < es.length ? es[i + 1] : this._lastEpochEndMs;
+      const endTimeMs = i + 1 < es.length ? es[i + 1] : this._lastEpochEnd;
       intervals.push({startTimeMs, endTimeMs});
     }
     return intervalSequence(intervals);
@@ -723,7 +723,7 @@ export class MarkovProcessGraph {
       indexedEdges,
       participants: this._participants,
       epochStarts: this._epochStarts,
-      lastEpochEndMs: this._lastEpochEndMs,
+      lastEpochEnd: this._lastEpochEnd,
       parameters: this._parameters,
       radiationTransitionProbabilities: this._radiationTransitionProbabilties,
       indexedMints,
@@ -736,7 +736,7 @@ export class MarkovProcessGraph {
       indexedEdges,
       participants,
       epochStarts,
-      lastEpochEndMs,
+      lastEpochEnd,
       parameters,
       radiationTransitionProbabilities,
       indexedMints,
@@ -761,7 +761,7 @@ export class MarkovProcessGraph {
       new Map(edges.map((e) => [markovEdgeAddressFromMarkovEdge(e), e])),
       participants,
       epochStarts,
-      lastEpochEndMs,
+      lastEpochEnd,
       parameters,
       mintTransitionProbabilities,
       radiationTransitionProbabilities
@@ -904,7 +904,7 @@ export const jsonParser: C.Parser<MarkovProcessGraphJSON> = C.object({
   indexedEdges: C.array(indexedEdgeParser),
   participants: C.array(participantParser),
   epochStarts: C.array(C.number),
-  lastEpochEndMs: C.number,
+  lastEpochEnd: C.number,
   parameters: parametersParser,
   radiationTransitionProbabilities: C.array(C.number),
   indexedMints: C.array(C.tuple([C.number, C.number])),
