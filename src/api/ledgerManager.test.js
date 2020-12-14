@@ -4,13 +4,10 @@ import {Ledger} from "../core/ledger/ledger";
 import * as uuid from "../util/uuid";
 import {LedgerManager} from "./ledgerManager";
 import type {LedgerLog} from "../core/ledger/ledger";
-import * as G from "../core/ledger/grain";
 import {createUuidMock} from "../core/ledger/testUtils";
+import {fromString as g} from "../core/ledger/policies/nonnegativeGrain";
 
 describe("api/ledgerManager", () => {
-  // Helper for constructing Grain values.
-  const g = (s) => G.fromString(s);
-
   const {resetFakeUuid, setNextUuid} = createUuidMock();
 
   const id1 = uuid.fromString("YVZhbGlkVXVpZEF0TGFzdA");

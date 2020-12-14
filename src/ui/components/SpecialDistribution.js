@@ -11,6 +11,7 @@ import {computeAllocation} from "../../core/ledger/grainAllocation";
 import * as uuid from "../../util/uuid";
 import type {TimestampMs} from "../../util/timestamp";
 import {useLedger} from "../utils/LedgerContext";
+import {fromGrain as nonnegative} from "../../core/ledger/policies/nonnegativeGrain";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -67,7 +68,7 @@ export const SpecialDistribution = ({
     if (recipient && amount && amount !== ZERO) {
       const policy = {
         policyType: "SPECIAL",
-        budget: fromFloatString(amount),
+        budget: nonnegative(fromFloatString(amount)),
         memo,
         recipient: recipient.identity.id,
       };

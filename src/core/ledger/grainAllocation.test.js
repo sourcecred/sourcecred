@@ -1,17 +1,15 @@
 // @flow
 
-import * as G from "./grain";
 import {random as randomUuid, parser as uuidParser} from "../../util/uuid";
 import {
   computeAllocation,
   type AllocationIdentity,
   _validateAllocationBudget,
 } from "./grainAllocation";
+import {fromString as g} from "./policies/nonnegativeGrain";
 import {toDiscount} from "./policies/recent";
 
 describe("core/ledger/grainAllocation", () => {
-  // concise helper for grain from a string
-  const g = (x: string) => G.fromString(x);
   // concise helper for grain from a number
   const ng = (x: number) => g(x.toString());
   // concise helper for an allocation identity
@@ -32,18 +30,9 @@ describe("core/ledger/grainAllocation", () => {
         const thunk = () => computeAllocation(immediate(5), []);
         expect(thunk).toThrowError("must have at least one identity");
       });
-      it("errors if the budget is negative", () => {
-        const id = aid(5, [1]);
-        const thunk = () => computeAllocation(immediate(-5), [id]);
-        expect(thunk).toThrowError("invalid budget");
-      });
       it("errors if the total cred is zero", () => {
         const thunk = () => computeAllocation(immediate(5), [aid(0, [0])]);
         expect(thunk).toThrowError("cred is zero");
-      });
-      it("errors if there's negative paid", () => {
-        const thunk = () => computeAllocation(immediate(5), [aid(-1, [0])]);
-        expect(thunk).toThrowError("negative paid");
       });
       it("errors if there's NaN or Infinity in Cred", () => {
         const thunk = () => computeAllocation(immediate(5), [aid(0, [NaN])]);

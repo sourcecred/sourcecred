@@ -4,6 +4,11 @@ import * as G from "../grain";
 import * as P from "../../../util/combo";
 import {type GrainReceipt} from "../grainAllocation";
 import {type ProcessedIdentities} from "../processedIdentities";
+import {
+  type NonnegativeGrain,
+  numberParser,
+  grainParser,
+} from "./nonnegativeGrain";
 
 /**
  * The Recent policy distributes cred using a time discount factor, weighing
@@ -27,7 +32,7 @@ export type Recent = "RECENT";
 
 export type RecentPolicy = {|
   +policyType: Recent,
-  +budget: G.Grain,
+  +budget: NonnegativeGrain,
   +discount: Discount,
 |};
 
@@ -48,9 +53,15 @@ export function recentReceipts(
   return identities.map(({id}, i) => ({id, amount: amounts[i]}));
 }
 
+export const recentConfigParser: P.Parser<RecentPolicy> = P.object({
+  policyType: P.exactly(["RECENT"]),
+  budget: numberParser,
+  discount: P.fmap(P.number, toDiscount),
+});
+
 export const recentPolicyParser: P.Parser<RecentPolicy> = P.object({
   policyType: P.exactly(["RECENT"]),
-  budget: G.parser,
+  budget: grainParser,
   discount: P.fmap(P.number, toDiscount),
 });
 

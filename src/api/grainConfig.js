@@ -1,33 +1,44 @@
 // @flow
 
 import {type DistributionPolicy} from "../core/ledger/applyDistributions";
-import * as G from "../core/ledger/grain";
 import * as C from "../util/combo";
 import * as NullUtil from "../util/null";
+import {
+  type AllocationPolicy,
+  policyConfigParser,
+} from "../core/ledger/policies";
+import {fromInteger as toNonnegativeGrain} from "../core/ledger/policies/nonnegativeGrain";
 import {toDiscount} from "../core/ledger/policies/recent";
 
 export type GrainConfig = {|
-  +immediatePerWeek?: number,
-  +balancedPerWeek?: number,
-  +recentPerWeek?: number,
-  +recentWeeklyDecayRate?: number,
+  +immediatePerWeek?: number, // (deprecated)
+  +balancedPerWeek?: number, // (deprecated)
+  +recentPerWeek?: number, // (deprecated)
+  +recentWeeklyDecayRate?: number, // (deprecated)
+  +allocationPolicies: $ReadOnlyArray<AllocationPolicy>,
   +maxSimultaneousDistributions?: number,
 |};
 
 export const parser: C.Parser<GrainConfig> = C.object(
-  {},
   {
+    allocationPolicies: C.array<AllocationPolicy>(policyConfigParser),
+  },
+  {
+    maxSimultaneousDistributions: C.number,
     immediatePerWeek: C.number,
     balancedPerWeek: C.number,
     recentPerWeek: C.number,
     recentWeeklyDecayRate: C.number,
-    maxSimultaneousDistributions: C.number,
   }
 );
 
 /**
  * Create a DistributionPolicy from GrainConfig, checking that config
  * fields can form valid policies.
+ *
+ * Moving forward, policies will need to be passed in the `allocationPolicies`
+ * parameter; however to avoid backcompatability issues, we optionally allow
+ * the deprecated fields for the time being.
  */
 export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
   const immediatePerWeek = NullUtil.orElse(x.immediatePerWeek, 0);
@@ -49,10 +60,11 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
       `balanced budget must be nonnegative integer, got ${balancedPerWeek}`
     );
   }
-  const allocationPolicies = [];
+
+  const allocationPoliciesDeprecated: Array<AllocationPolicy> = [];
   if (immediatePerWeek > 0) {
-    allocationPolicies.push({
-      budget: G.fromInteger(immediatePerWeek),
+    allocationPoliciesDeprecated.push({
+      budget: toNonnegativeGrain(immediatePerWeek),
       policyType: "IMMEDIATE",
     });
   }
@@ -61,23 +73,29 @@ export function toDistributionPolicy(x: GrainConfig): DistributionPolicy {
     if (recentWeeklyDecayRate == null) {
       throw new Error(`no recentWeeklyDecayRate specified for recent policy`);
     }
-    allocationPolicies.push({
-      budget: G.fromInteger(recentPerWeek),
+    allocationPoliciesDeprecated.push({
+      budget: toNonnegativeGrain(recentPerWeek),
       policyType: "RECENT",
       discount: toDiscount(recentWeeklyDecayRate),
     });
   }
   if (balancedPerWeek > 0) {
-    allocationPolicies.push({
-      budget: G.fromInteger(balancedPerWeek),
+    allocationPoliciesDeprecated.push({
+      budget: toNonnegativeGrain(balancedPerWeek),
       policyType: "BALANCED",
     });
   }
+
   const maxSimultaneousDistributions = NullUtil.orElse(
     x.maxSimultaneousDistributions,
     Infinity
   );
-  return {allocationPolicies, maxSimultaneousDistributions};
+  return {
+    allocationPolicies: x.allocationPolicies.concat(
+      allocationPoliciesDeprecated
+    ),
+    maxSimultaneousDistributions,
+  };
 }
 
 function isNonnegativeInteger(x: number): boolean {

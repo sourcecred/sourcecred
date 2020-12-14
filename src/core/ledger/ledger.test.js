@@ -7,11 +7,9 @@ import {newIdentity} from "../identity";
 import * as G from "./grain";
 import * as uuid from "../../util/uuid";
 import {createUuidMock} from "./testUtils"; // for spy purposes
+import {fromString as g} from "./policies/nonnegativeGrain";
 
 describe("core/ledger/ledger", () => {
-  // Helper for constructing Grain values.
-  const g = (s) => G.fromString(s);
-
   let nextFakeDate = 0;
   function resetFakeDate() {
     nextFakeDate = 0;
@@ -1145,7 +1143,7 @@ describe("core/ledger/ledger", () => {
           id: uuid.random(),
           receipts: [
             {id: id1, amount: g("3")},
-            {id: id2, amount: g("-4")},
+            {id: id2, amount: G.fromString("-4")},
           ],
         };
         const distribution = {
@@ -1357,7 +1355,7 @@ describe("core/ledger/ledger", () => {
           ledger.transferGrain({
             from: id1,
             to: id2,
-            amount: g("-3"),
+            amount: G.fromString("-3"),
             memo: "test",
           });
         failsWithoutMutation(
