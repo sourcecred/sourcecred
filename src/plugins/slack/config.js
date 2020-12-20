@@ -11,6 +11,7 @@ import {
 
 export type SlackConfigJson = {|
   +token: Model.SlackToken,
+  +name: string,
   +reactionWeightConfig: EmojiWeightConfig,
   +channelWeightConfig?: ChannelWeightConfig
 |}
@@ -18,6 +19,7 @@ export type SlackConfigJson = {|
 const parserJson: C.Parser<SlackConfigJson> = C.object(
   {
     token: C.string,
+    name: C.string,
     reactionWeightConfig: C.object({
       defaultWeight: C.number,
       weights: C.dict(C.number),
@@ -33,6 +35,7 @@ const parserJson: C.Parser<SlackConfigJson> = C.object(
 
 export type SlackConfig = {|
   +token: Model.SlackToken,
+  +name: string,
   +weights: WeightConfig,
 |};
 
@@ -41,6 +44,7 @@ export function _upgrade(json: SlackConfigJson): SlackConfig {
   const defaultEmojiWeights = {defaultWeight: 1, weights: {}};
   return {
     token: json.token,
+    name: json.name,
     weights: {
       channelWeights: NullUtil.orElse(
         json.channelWeightConfig,

@@ -6,6 +6,7 @@ describe("plugins/slack/config", () => {
   it ("can load a basic config", () => {
     const raw = {
       token: "token123",
+      name: "my slack org",
       reactionWeightConfig: {
         defaultWeight: 0,
         weights: {
@@ -27,6 +28,7 @@ describe("plugins/slack/config", () => {
   it ("fills in optional parameters", () => {
     const raw = {
       token: "token123",
+      name: "my slack org",
       reactionWeightConfig: {
         defaultWeight: 0,
         weights: {
