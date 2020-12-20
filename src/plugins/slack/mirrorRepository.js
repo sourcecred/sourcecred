@@ -119,6 +119,12 @@ export class SqliteMirrorRepository {
           mentioned_user_id TEXT NOT NULL
         )
       `,
+      dedent`\
+        CREATE TABLE replies (
+          thread_starter TEXT NOT NULL,
+          reply_id TEXT NOT NULL
+        )
+      `
     ];
 
     for (const table of tables) {
@@ -225,10 +231,27 @@ export class SqliteMirrorRepository {
           mentioned_user_id: mentionedUser,
         });
     }
+    // if message is a thread, store in replies table
+    if (isThread) {
+      this._db
+        .prepare(
+          dedent`\
+            INSERT INTO replies (
+              thread_starter, reply_id
+            ) VALUES (
+              :thread_starter, :reply_id
+            )
+          `
+        )
+        .run({
+          thread_starter: message.in_reply_to,
+          reply_id: message.id
+        })
+    }
   }
 
   messages(channel: string): $ReadOnlyArray<any>{
-    let messages = this._db
+    return this._db
       .prepare(
         dedent`\
         SELECT 
@@ -256,7 +279,37 @@ export class SqliteMirrorRepository {
         inReplyTo: m.inReplyTo,
         mentions: this.mentions(m.channel, m.id)
       }))
-      return 
+  }
+
+  message(messageId: string): any {
+    return this._db
+      .prepare(
+        dedent`\
+        SELECT 
+          timestamp_ms as id, 
+          channel_id as channel,
+          message_body as text,
+          author_id as authorId,
+          thread as isThread,
+          reactions as hasReactions,
+          mentions as hasMentions,
+          in_reply_to as inReplyTo,
+          FROM messages
+          WHERE timestamp_ms = :timestamp_ms
+        `
+      )
+      .get({timestamp_ms: messageId})
+      .map((m) => ({
+        id: m.id, 
+        channel: m.channel,
+        text: m.text,
+        authorId: m.authorId,
+        isThread: m.isThread,
+        hasReactions: m.hasReactions,
+        hasMentions: m.hasMentions,
+        inReplyTo: m.inReplyTo,
+        mentions: this.mentions(m.channel, m.id)
+      }))
   }
 
   reactions(channel: string, message: string): $ReadOnlyArray<any> {
@@ -294,6 +347,36 @@ export class SqliteMirrorRepository {
           channel_id: channel, message_id: messageId
         })
         .map((res) => res.mentioned_user_id)
+  }
+
+  // Takes id of the thread starter and returns all message IDs in that thread
+  thread(messageId: string): $ReadOnlyArray<any> {
+    return this._db 
+      .prepare(
+        dedent`\
+          SELECT reply_id
+          FROM replies
+          WHERE thread_starter = :thread_starter
+        `
+      )
+      .all({
+        thread_starter: messageId
+      })
+  }
+
+  // takes message id and returns thread starter
+  threadStarterOf (messageId: string): string {
+    return this._db
+      .prepare(
+        dedent`\
+          SELECT thread_starter
+          FROM replies
+          WHERE reply_id = :reply_id
+        `
+      )
+      .get({
+        reply_id: messageId
+      })
   }
 
   members(): $ReadOnlyArray<any>{
