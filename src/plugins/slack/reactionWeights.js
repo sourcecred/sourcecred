@@ -5,7 +5,7 @@ import {type NodeWeight} from "../../core/weights";
 
 export type ChannelWeightConfig = {|
   +defaultWeight: NodeWeight,
-  +weights: {string: NodeWeight},
+  +weights: {[string]: NodeWeight},
 |};
 
 export type EmojiWeightConfig = {|
