@@ -34,7 +34,7 @@ export function userAddress(userId: Buffer): NodeAddressT {
 export function memberAddress(member: Model.User): NodeAddressT {
   return NodeAddress.append(
     memberNodeType.prefix,
-    member.id
+    member.email
   );
 }
 
@@ -65,9 +65,7 @@ function reactionAddress(reaction: string, message: Model.Message): NodeAddressT
 //----------------------
 
 function memberNode(member: Model.User): Node {
-  const description = `slack/${escape(member.user.username.slice(0, 20))}#${
-    member.user.discriminator
-  }`;
+  const description = `slack/#${escape(member.id.slice(0, 20))}`;
   return {
     address: memberAddress(member),
     description,
@@ -85,7 +83,7 @@ function messageNode(
   return {
     address: messageAddress(message),
     description,
-    timestampMs: message.id,
+    timestampMs: Number(parseFloat(message.id) * 1000),
   };
 }
 
@@ -98,7 +96,8 @@ function reactionNode(
   const description = `Reacted \`${reactionStr}\` to message [${message.id}] in channel ${message.channel}`;
   return {
     address: reactionAddress(reaction, message),
-    description
+    description,
+    timestampMs: Number(parseFloat(message.id) * 1000)
   };
 }
 
@@ -114,13 +113,13 @@ function authorsMessageEdge(
 ): Edge {
   const address: EdgeAddressT = EdgeAddress.append(
     authorsMessageEdgeType.prefix,
-    author.id,
+    String(author.id),
     message.channel,
     message.id
   );
   return {
     address,
-    timestampMs: message.timestampMs,
+    timestampMs: Number(parseFloat(message.id) * 1000),
     src: memberAddress(author),
     dst: messageAddress(message),
   };
@@ -133,7 +132,7 @@ function addsReactionEdge(
 ): Edge {
   const address: EdgeAddressT = EdgeAddress.append(
     addsReactionEdgeType.prefix,
-    member.id,
+    String(member.id),
     reaction,
     message.channel,
     message.id
@@ -142,7 +141,7 @@ function addsReactionEdge(
     address,
     // TODO: for now using timestamp of the message,
     // as reactions don't have timestamps.
-    timestampMs: message.id,
+    timestampMs: Number(parseFloat(message.id) * 1000),
     src: memberAddress(member),
     dst: reactionAddress(reaction, message),
   };
@@ -152,7 +151,7 @@ function reactsToEdge(reaction: string, message: Model.Message): Edge {
   const address: EdgeAddressT = EdgeAddress.append(
     reactsToEdgeType.prefix,
     reaction,
-    message.authorId,
+    String(message.authorId),
     message.channel,
     message.id
   );
@@ -160,7 +159,7 @@ function reactsToEdge(reaction: string, message: Model.Message): Edge {
     address,
     // TODO: for now using timestamp of the message,
     // as reactions don't have timestamps.
-    timestampMs: message.timestampMs,
+    timestampMs: Number(parseFloat(message.id) * 1000),
     src: reactionAddress(reaction, message),
     dst: messageAddress(message),
   };
@@ -170,31 +169,31 @@ function mentionsEdge(message: Model.Message, member: Model.User): Edge {
   const address: EdgeAddressT = EdgeAddress.append(
     mentionsEdgeType.prefix,
     message.channel,
-    message.authorId,
+    String(message.authorId),
     message.id,
-    member.id
+    String(member.id)
   );
   return {
     address,
-    timestampMs: message.id,
+    timestampMs: Number(parseFloat(message.id) * 1000),
     src: messageAddress(message),
     dst: memberAddress(member),
   };
 }
 
-function repliesEdge(message: Model.message, reply: Model.message): Edge {
+function repliesEdge(message: Model.Message, reply: Model.Message): Edge {
   const address: EdgeAddressT = EdgeAddress.append(
     messageRepliesEdgeType.prefix,
     message.channel, 
-    message.authorId,
+    String(message.authorId),
     message.id, 
     reply.channel,
-    reply.authorId, 
+    String(reply.authorId), 
     reply.id
   );
   return {
     address, 
-    timestampMs: message.id, 
+    timestampMs: Number(parseFloat(message.id) * 1000), 
     src: messageAddress(message), 
     dst: messageAddress(reply)
   };
@@ -209,13 +208,10 @@ export function createGraph(
     graph: new Graph(),
     weights: emptyWeights(),
   };
-  
   // create a member map from fetched members
   const memberMap = new Map(repo.members().map((m) => [m.id, m]));
-
   //fetch all channels (conversations)
   const channels = repo.channels();
-  
   for (const channel of channels) {
     // fetch all messages of the channel
     const messages = repo.messages(channel.id);
@@ -224,7 +220,8 @@ export function createGraph(
       
       let hasEdges = false;
       const reactions = repo.reactions(message.channel, message.id);
-
+      
+      // add reaction nodes & edges
       for (const reaction of reactions) {
         const reactingMember = memberMap.get(reaction.reactor);
         if (!reactingMember) continue;
@@ -242,6 +239,7 @@ export function createGraph(
         hasEdges = true;
       }
 
+      // add message mentions nodes & edges
       for (const user of message.mentions) {
         const mentionedMember = memberMap.get(user);
         if (!mentionedMember) continue;
@@ -250,10 +248,15 @@ export function createGraph(
         hasEdges = true;
       }
 
-      // message is either a thread starter or part of a thread
-      if (message.isThread) {
-        // @todo: need to create edge for replies
-        // @question: how to fetch only threaded replies and only once?
+      // message is a thread starter
+      if (message.isThread && message.inReplyTo === message.id) {
+        const allReplies = repo.thread(message.id);
+        wg.graph.addNode(messageNode(message, channel.name));
+        for (const replyId of allReplies) {
+          const replyMessage = repo.message(replyId);
+          wg.graph.addNode(messageNode(replyMessage, channel.name));
+          wg.graph.addEdge(repliesEdge(message, replyMessage));
+        }
       }
 
       // Don't bloat the graph with isolated messages.
@@ -267,5 +270,5 @@ export function createGraph(
 
     }
   }
-
+  return wg;
 }
