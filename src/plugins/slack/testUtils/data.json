@@ -39,7 +39,7 @@
       "thread": true,
       "in_reply_to": "1603782590.000300",
       "authorId": "U01D48KV0HY",
-      "reactions": "",
+      "reactions": [],
       "mentions": []
     },
     {
@@ -49,7 +49,7 @@
       "thread": false,
       "in_reply_to": "-1",
       "authorId": "U01CPH9J7DM",
-      "reactions": "",
+      "reactions": [],
       "mentions": []
     },
     {
@@ -59,7 +59,7 @@
       "thread": false,
       "in_reply_to": "-1",
       "authorId": "U01D48KV0HY",
-      "reactions": "",
+      "reactions": [],
       "mentions": []
     },
     {
@@ -69,7 +69,7 @@
       "thread": false,
       "in_reply_to": "-1",
       "authorId": "U01D48KV0HY",
-      "reactions": "",
+      "reactions": [],
       "mentions": []
     },
     {
@@ -79,7 +79,7 @@
       "thread": false,
       "in_reply_to": "-1",
       "authorId": "U01D48KV0HY",
-      "reactions": "",
+      "reactions": [],
       "mentions": []
     },
     {
@@ -89,7 +89,7 @@
       "thread": false,
       "in_reply_to": "-1",
       "authorId": "U01D48KV0HY",
-      "reactions": "",
+      "reactions": [],
       "mentions": []
     },
     {
@@ -99,7 +99,7 @@
       "thread": false,
       "in_reply_to": "-1",
       "authorId": "U01D48KV0HY",
-      "reactions": "",
+      "reactions": [],
       "mentions": []
     }
   ],
