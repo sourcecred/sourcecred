@@ -43,10 +43,15 @@ function die(std, message) {
 
 const graphCommand: Command = async (args, std) => {
   let shouldIncludeDiff = false;
+  let isSimulation = false;
   const processedArgs = args.filter((arg) => {
     switch (arg) {
       case "-d":
         shouldIncludeDiff = true;
+        return false;
+      case "--simulation":
+      case "-s":
+        isSimulation = true;
         return false;
       default:
         return true;
@@ -86,11 +91,17 @@ const graphCommand: Command = async (args, std) => {
     ledger
   );
   for (const name of pluginsToLoad) {
+    const generateGraphTask = `${name}: generating graph`;
+    taskReporter.start(generateGraphTask);
     const plugin = NullUtil.get(config.bundledPlugins.get(name));
-    const task = `${name}: generating graph`;
-    taskReporter.start(task);
     const dirContext = pluginDirectoryContext(baseDir, name);
     const weightedGraph = await plugin.graph(dirContext, rd, taskReporter);
+
+    const identities = await plugin.identities(dirContext, taskReporter);
+    for (const identityProposal of identities) {
+      ensureIdentityExists(ledger, identityProposal);
+    }
+    taskReporter.finish(generateGraphTask);
 
     if (shouldIncludeDiff) {
       const diffTask = `${name}: diffing with existing graph`;
@@ -109,18 +120,19 @@ const graphCommand: Command = async (args, std) => {
       taskReporter.finish(diffTask);
     }
 
-    const serializedGraph = stringify(weightedGraphToJSON(weightedGraph));
-    const outputDir = makePluginDir(baseDir, graphOutputPrefix, name);
-    const outputPath = pathJoin(outputDir, "graph.json");
-    await fs.writeFile(outputPath, serializedGraph);
-
-    const identities = await plugin.identities(dirContext, taskReporter);
-    for (const identityProposal of identities) {
-      ensureIdentityExists(ledger, identityProposal);
+    if (!isSimulation) {
+      const writeTask = `${name}: writing graph`;
+      taskReporter.start(writeTask);
+      const serializedGraph = stringify(weightedGraphToJSON(weightedGraph));
+      const outputDir = makePluginDir(baseDir, graphOutputPrefix, name);
+      const outputPath = pathJoin(outputDir, "graph.json");
+      await fs.writeFile(outputPath, serializedGraph);
+      taskReporter.finish(writeTask);
     }
-    taskReporter.finish(task);
   }
-  await saveLedger(baseDir, ledger);
+  if (!isSimulation) {
+    await saveLedger(baseDir, ledger);
+  }
   taskReporter.finish("graph");
   return 0;
 };
@@ -167,15 +179,16 @@ export function _hackyIdentityNameReferenceDetector(
 export const graphHelp: Command = async (args, std) => {
   std.out(
     dedent`\
-      usage: sourcecred graph [-d]
+      usage: sourcecred graph [options]
+
+      options:
+      -d  Outputs the diff of changes compared to the last saved graph.
+      -s, --simulation  Skips writing changes to the graph and ledger jsons.
 
       Generate a graph from cached plugin data
 
       Either 'sourcecred load' must immediately precede this command or
       a cache directory must exist for all plugins specified in sourcecred.json
-
-      If the -d flag is provided, it will also compute and output
-      any resulting graph changes since the last generated graph.
       `.trimRight()
   );
   return 0;
