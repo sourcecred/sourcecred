@@ -23,10 +23,15 @@ function die(std, message) {
 
 const credrankCommand: Command = async (args, std) => {
   let shouldIncludeDiff = false;
+  let isSimulation = false;
   const processedArgs = args.filter((arg) => {
     switch (arg) {
       case "-d":
         shouldIncludeDiff = true;
+        return false;
+      case "-s":
+      case "--simulate":
+        isSimulation = true;
         return false;
       default:
         return true;
@@ -73,11 +78,13 @@ const credrankCommand: Command = async (args, std) => {
     printCredSummaryTable(credGraph);
   }
 
-  taskReporter.start("write cred graph");
-  const cgJson = stringify(credGraph.toJSON());
-  const outputPath = pathJoin(baseDir, "output", "credGraph.json");
-  await fs.writeFile(outputPath, cgJson);
-  taskReporter.finish("write cred graph");
+  if (!isSimulation) {
+    taskReporter.start("write cred graph");
+    const cgJson = stringify(credGraph.toJSON());
+    const outputPath = pathJoin(baseDir, "output", "credGraph.json");
+    await fs.writeFile(outputPath, cgJson);
+    taskReporter.finish("write cred graph");
+  }
 
   taskReporter.finish("credrank");
   return 0;
