@@ -27,7 +27,7 @@ import sortBy from "../../../util/sortBy";
 import {type NodeAddressT} from "../../../core/graph";
 import {type PluginDeclaration} from "../../../analysis/pluginDeclaration";
 import {
-  type Weights,
+  type WeightsT,
   copy as weightsCopy,
   empty as emptyWeights,
 } from "../../../core/weights";
@@ -183,8 +183,8 @@ const FilterSelect = ({
 type WeightConfigSectionProps = {|
   show: boolean,
   credView: CredView,
-  weights: Weights,
-  setWeightsState: ({weights: Weights}) => void,
+  weights: WeightsT,
+  setWeightsState: ({weights: WeightsT}) => void,
   params: TimelineCredParameters,
   setParams: (TimelineCredParameters) => void,
 |};
@@ -207,7 +207,7 @@ const WeightsConfigSection = ({
             <Grid>
               <WeightsFileManager
                 weights={weights}
-                onWeightsChange={(weights: Weights) => {
+                onWeightsChange={(weights: WeightsT) => {
                   setWeightsState({weights});
                 }}
               />
@@ -297,7 +297,7 @@ export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
     return sortedNodes;
   }, [filterState.filter, credView]);
 
-  const [{weights}, setWeightsState] = useState<{weights: Weights}>({
+  const [{weights}, setWeightsState] = useState<{weights: WeightsT}>({
     weights: credView ? weightsCopy(credView.weights()) : emptyWeights(),
   });
   const [params, setParams] = useState<TimelineCredParameters>({
@@ -305,7 +305,7 @@ export const Explorer = ({initialView}: {initialView: CredView}): ReactNode => {
   });
 
   const recomputeCred = async () =>
-    //weights: Weights,
+    //weights: WeightsT,
     //params: TimelineCredParameters
     {
       if (!credView) return;

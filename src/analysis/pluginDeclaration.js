@@ -3,7 +3,7 @@
 import {type NodeAddressT, type EdgeAddressT} from "../core/graph";
 import type {EdgeType, NodeType, NodeAndEdgeTypes} from "./types";
 import * as Weights from "../core/weights";
-import {type Weights as WeightsT} from "../core/weights";
+import {type WeightsT} from "../core/weights";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 
 const COMPAT_INFO = {type: "sourcecred/pluginDeclarations", version: "0.1.0"};

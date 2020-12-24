@@ -36,7 +36,7 @@ export type EdgeOperator = (EdgeWeight, EdgeWeight) => EdgeWeight;
  * The weights are stored by address prefix, i.e. multiple weights may apply
  * to a given node or edge.
  */
-export type Weights = {|
+export type WeightsT = {|
   nodeWeights: Map<NodeAddressT, NodeWeight>,
   // Map from an edge prefix or address to a weight
   edgeWeights: Map<EdgeAddressT, EdgeWeight>,
@@ -45,14 +45,14 @@ export type Weights = {|
 /**
  * Creates new, empty weights.
  */
-export function empty(): Weights {
+export function empty(): WeightsT {
   return {
     nodeWeights: new Map(),
     edgeWeights: new Map(),
   };
 }
 
-export function copy(w: Weights): Weights {
+export function copy(w: WeightsT): WeightsT {
   return {
     nodeWeights: new Map(w.nodeWeights),
     edgeWeights: new Map(w.edgeWeights),
@@ -73,9 +73,9 @@ export function copy(w: Weights): Weights {
  * conservative "error on conflict" resolvers.
  */
 export function merge(
-  ws: $ReadOnlyArray<Weights>,
+  ws: $ReadOnlyArray<WeightsT>,
   resolvers: ?{|+nodeResolver: NodeOperator, +edgeResolver: EdgeOperator|}
-): Weights {
+): WeightsT {
   if (resolvers == null) {
     const nodeResolver = (_unused_a, _unused_b) => {
       throw new Error(
@@ -89,7 +89,7 @@ export function merge(
     };
     resolvers = {nodeResolver, edgeResolver};
   }
-  const weights: Weights = empty();
+  const weights: WeightsT = empty();
   const {nodeWeights, edgeWeights} = weights;
   const {nodeResolver, edgeResolver} = resolvers;
   for (const w of ws) {
@@ -128,14 +128,14 @@ export type SerializedWeights_0_2_0 = {|
   +edgeWeights: {[EdgeAddressT]: EdgeWeight},
 |};
 
-function serialize_0_2_0(weights: Weights): SerializedWeights_0_2_0 {
+function serialize_0_2_0(weights: WeightsT): SerializedWeights_0_2_0 {
   return {
     nodeWeights: MapUtil.toObject(weights.nodeWeights),
     edgeWeights: MapUtil.toObject(weights.edgeWeights),
   };
 }
 
-function deserialize_0_2_0(weights: SerializedWeights_0_2_0): Weights {
+function deserialize_0_2_0(weights: SerializedWeights_0_2_0): WeightsT {
   return {
     nodeWeights: MapUtil.fromObject(weights.nodeWeights),
     edgeWeights: MapUtil.fromObject(weights.edgeWeights),
@@ -152,18 +152,18 @@ const Parse_0_2_0: C.Parser<SerializedWeights_0_2_0> = (() => {
 
 const COMPAT_INFO = {type: "sourcecred/weights", version: "0.2.0"};
 
-export const parser: C.Parser<Weights> = compatibleParser(COMPAT_INFO.type, {
+export const parser: C.Parser<WeightsT> = compatibleParser(COMPAT_INFO.type, {
   "0.2.0": C.fmap(Parse_0_2_0, deserialize_0_2_0),
 });
 
 export type WeightsJSON_0_2_0 = Compatible<SerializedWeights_0_2_0>;
 export type WeightsJSON = WeightsJSON_0_2_0;
 
-export function toJSON(weights: Weights): WeightsJSON {
+export function toJSON(weights: WeightsT): WeightsJSON {
   return toCompat(COMPAT_INFO, serialize_0_2_0(weights));
 }
 
-export function fromJSON(json: WeightsJSON): Weights {
+export function fromJSON(json: WeightsJSON): WeightsT {
   return parser.parseOrThrow(json);
 }
 
@@ -186,8 +186,8 @@ export type WeightsComparison = {|
 |};
 
 export function compareWeights(
-  firstWeights: Weights,
-  secondWeights: Weights
+  firstWeights: WeightsT,
+  secondWeights: WeightsT
 ): WeightsComparison {
   const nodeWeightDiffs = [];
   const edgeWeightDiffs = [];

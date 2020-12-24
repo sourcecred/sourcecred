@@ -1,7 +1,7 @@
 // @flow
 
 import type {Edge} from "../core/graph";
-import type {Weights} from "../core/weights";
+import type {WeightsT} from "../core/weights";
 import type {EdgeEvaluator} from "./pagerank";
 import {
   nodeWeightEvaluator,
@@ -29,7 +29,7 @@ import {
  * cred weighting) rather than as a component of the edge weight. This method
  * will be removed when the 'legacy cred' UI is removed.
  */
-export function weightsToEdgeEvaluator(weights: Weights): EdgeEvaluator {
+export function weightsToEdgeEvaluator(weights: WeightsT): EdgeEvaluator {
   const nodeWeight = nodeWeightEvaluator(weights);
   const edgeWeight = edgeWeightEvaluator(weights);
 

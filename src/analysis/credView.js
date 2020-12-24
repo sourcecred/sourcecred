@@ -1,7 +1,7 @@
 // @flow
 
 import sortedIndex from "lodash.sortedindex";
-import {type Weights, type EdgeWeight} from "../core/weights";
+import {type WeightsT, type EdgeWeight} from "../core/weights";
 import {type CredResult, compute} from "./credResult";
 import {type TimelineCredParameters} from "./timeline/params";
 import {type PluginDeclarations} from "./pluginDeclaration";
@@ -149,7 +149,7 @@ export class CredView {
     return this._credResult.weightedGraph.graph;
   }
 
-  weights(): Weights {
+  weights(): WeightsT {
     return this._credResult.weightedGraph.weights;
   }
 
@@ -298,7 +298,7 @@ export class CredView {
    * graph from this CredView.
    */
   async recompute(
-    weights: Weights,
+    weights: WeightsT,
     params: TimelineCredParameters
   ): Promise<CredView> {
     const wg = overrideWeights(this._credResult.weightedGraph, weights);

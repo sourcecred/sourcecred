@@ -8,7 +8,7 @@ import {
   type Edge as GraphEdge,
   Graph,
 } from "../graph";
-import {type Weights as WeightsT} from "../weights";
+import {type WeightsT} from "../weights";
 import {type WeightedGraph} from "../weightedGraph";
 import {
   type NodeWeightEvaluator,
