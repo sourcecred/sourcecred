@@ -73,7 +73,7 @@ export const DEFAULT_SORT = SortOrders.ASC;
             ts.sortName === DATE_SORT.name ? ts.sortOrder : DEFAULT_SORT
           }
           onClick={() => ts.setSortFn(DATE_SORT.name, DATE_SORT.fn)}
-      >Date</TableSortLabel>
+      >{DATE_SORT.name.description}</TableSortLabel>
  */
 export type TableState<T> = {|
   /**
