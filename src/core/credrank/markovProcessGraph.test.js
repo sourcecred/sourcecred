@@ -171,9 +171,9 @@ describe("core/credrank/markovProcessGraph", () => {
 
         const radiationTransitionProbability = NullUtil.get(
           new Map()
-            // .65 -- because this one has no incident organic edges, and no backwards webbing
-            .set(-Infinity, 1 - parameters.gammaForward - parameters.beta)
-            // .55 -- because this one has no incident organic edges
+            // The participant has no organic incident edges in the first
+            // interval, so everything that isn't synthetically accounted for
+            // (via the webbing, or payout edge) goes back to seed.
             .set(
               0,
               1 -
@@ -181,10 +181,9 @@ describe("core/credrank/markovProcessGraph", () => {
                 parameters.gammaBackward -
                 parameters.beta
             )
-            // .2 -- because this has incident organic edges
+            // This is a regular interval, (has organic edges),
+            // so it sends only `alpha` probability back to seed.
             .set(2, parameters.alpha)
-            // 0.7 -- because this has no incident organic edges, and no forward webbing
-            .set(Infinity, 1 - parameters.gammaBackward - parameters.beta)
             .get(boundary)
         );
         const radiationEdgeExpected = radiationGadget.markovEdge(
@@ -241,9 +240,36 @@ describe("core/credrank/markovProcessGraph", () => {
               parameters.gammaBackward
             );
             checkMarkovEdge(mpg, backwardWebbing);
+          } else {
+            // Find the looped backwards edge
+            const loopAddress = {
+              lastStart: boundary,
+              thisStart: boundary,
+              owner: participant.id,
+            };
+            const loop = backwardWebbingGadget.markovEdge(
+              loopAddress,
+              parameters.gammaBackward
+            );
+            checkMarkovEdge(mpg, loop);
           }
           lastBoundary = boundary;
         }
+        if (lastBoundary == null) {
+          // Satisfy flow.
+          throw new Error("invariant violation: no epochs");
+        }
+        // Find the final looped forward edge
+        const loopAddress = {
+          lastStart: lastBoundary,
+          thisStart: lastBoundary,
+          owner: participant.id,
+        };
+        const loop = forwardWebbingGadget.markovEdge(
+          loopAddress,
+          parameters.gammaForward
+        );
+        checkMarkovEdge(mpg, loop);
       }
     });
 
@@ -346,8 +372,9 @@ describe("core/credrank/markovProcessGraph", () => {
       });
     });
     it("has the correct epoch boundaries for the given intervals", () => {
-      const expected = [-Infinity, 0, 2, Infinity];
-      expect(markovProcessGraph().epochBoundaries()).toEqual(expected);
+      const expected = args().intervals.map((x) => x.startTimeMs);
+      const actual = markovProcessGraph().epochBoundaries();
+      expect(actual).toEqual(expected);
     });
     it("has the right participants", () => {
       expect(markovProcessGraph().participants()).toEqual(participants);

@@ -164,9 +164,7 @@ export type MarkovProcessGraphJSON = {|
   +nodes: $ReadOnlyArray<MarkovNode>,
   +indexedEdges: $ReadOnlyArray<IndexedMarkovEdge>,
   +participants: $ReadOnlyArray<Participant>,
-  // The -Infinity and +Infinity epoch boundaries must be stripped before
-  // JSON serialization.
-  +finiteEpochBoundaries: $ReadOnlyArray<number>,
+  +epochBoundaries: $ReadOnlyArray<number>,
   +parameters: Parameters,
   +radiationTransitionProbabilities: $ReadOnlyArray<number>,
   // Array of [nodeIndex, transitionProbability] tuples representing all of the
@@ -263,12 +261,7 @@ export class MarkovProcessGraph {
       return result;
     })();
 
-    const timeBoundaries = [
-      -Infinity,
-      ...intervals.map((x) => x.startTimeMs),
-      Infinity,
-    ];
-
+    const timeBoundaries = intervals.map((x) => x.startTimeMs);
     const addNode = (node: MarkovNode) => {
       if (_nodes.has(node.address)) {
         throw new Error("Node conflict: " + node.address);
@@ -341,9 +334,41 @@ export class MarkovProcessGraph {
           recordTransitionProbability(
             backwardWebbingGadget.markovEdge(webbingAddress, gammaBackward)
           );
+        } else {
+          // There is no lastBoundary, which means this is the first epoch. We will instead create a "backwards"
+          // edge which is actually a loop, so as to avoid Cred distortion where scores are biased downward
+          // for the first epoch.
+          const webbingAddress = {
+            thisStart: boundary,
+            lastStart: boundary,
+            owner: participant.id,
+          };
+          const edge = backwardWebbingGadget.markovEdge(
+            webbingAddress,
+            gammaBackward
+          );
+          recordTransitionProbability(edge);
         }
       }
       lastBoundary = boundary;
+    }
+    if (lastBoundary == null) {
+      // Just to satisfy flow when adding the final "forward" webbing edges (which are loops).
+      throw new Error(`invariant violation: there were no epochs`);
+    }
+    // Now for the last boundary, we create a "forwards" webbing edge which is actually a loop, as as to
+    // avoid Cred distortion where the scores are biased downward for the last epoch.
+    for (const participant of participants) {
+      const webbingAddress = {
+        thisStart: lastBoundary,
+        lastStart: lastBoundary,
+        owner: participant.id,
+      };
+      const edge = forwardWebbingGadget.markovEdge(
+        webbingAddress,
+        gammaForward
+      );
+      recordTransitionProbability(edge);
     }
 
     const mintTransitionProbabilities = new Map();
@@ -680,10 +705,7 @@ export class MarkovProcessGraph {
       nodes: [...this._nodes.values()],
       indexedEdges,
       participants: this._participants,
-      finiteEpochBoundaries: this._epochBoundaries.slice(
-        1,
-        this._epochBoundaries.length - 1
-      ),
+      epochBoundaries: this._epochBoundaries,
       parameters: this._parameters,
       radiationTransitionProbabilities: this._radiationTransitionProbabilties,
       indexedMints,
@@ -695,12 +717,11 @@ export class MarkovProcessGraph {
       nodes,
       indexedEdges,
       participants,
-      finiteEpochBoundaries,
+      epochBoundaries,
       parameters,
       radiationTransitionProbabilities,
       indexedMints,
     } = j;
-    const epochBoundaries = [-Infinity, ...finiteEpochBoundaries, Infinity];
     const nodeOrder = [
       ...nodes.map((n) => n.address),
       ...virtualizedNodeAddresses(epochBoundaries, participants),
@@ -787,9 +808,24 @@ function* virtualizedMarkovEdgeAddresses(
         const webbingAddress = {thisStart: epochStart, lastStart, owner: id};
         yield forwardWebbingGadget.toRaw(webbingAddress);
         yield backwardWebbingGadget.toRaw(webbingAddress);
+      } else {
+        const webbingAddress = {
+          thisStart: epochStart,
+          lastStart: epochStart,
+          owner: id,
+        };
+        yield backwardWebbingGadget.toRaw(webbingAddress);
       }
     }
     lastStart = epochStart;
+  }
+  if (lastStart == null) {
+    // Needed to satisfy flow when adding the final "forward" webbing edges (which are loops).
+    throw new Error(`invariant violation: there were no epochs`);
+  }
+  for (const {id} of participants) {
+    const webbingAddress = {thisStart: lastStart, lastStart, owner: id};
+    yield forwardWebbingGadget.toRaw(webbingAddress);
   }
   for (const addr of mintTransitionProbabilities.keys()) {
     yield seedMintGadget.toRaw(addr);
@@ -847,7 +883,7 @@ export const jsonParser: C.Parser<MarkovProcessGraphJSON> = C.object({
   nodes: C.array(markovNodeParser),
   indexedEdges: C.array(indexedEdgeParser),
   participants: C.array(participantParser),
-  finiteEpochBoundaries: C.array(C.number),
+  epochBoundaries: C.array(C.number),
   parameters: parametersParser,
   radiationTransitionProbabilities: C.array(C.number),
   indexedMints: C.array(C.tuple([C.number, C.number])),
