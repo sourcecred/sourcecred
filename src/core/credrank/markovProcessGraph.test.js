@@ -20,6 +20,7 @@ import {
   forwardWebbingGadget,
   backwardWebbingGadget,
 } from "./edgeGadgets";
+import {intervalSequence} from "../interval";
 
 import {
   args,
@@ -50,6 +51,11 @@ describe("core/credrank/markovProcessGraph", () => {
   }
 
   describe("basic validation", () => {
+    it("errors if there are no intervals", () => {
+      const badArgs = {...args(), intervals: intervalSequence([])};
+      const thunk = () => MarkovProcessGraph.new(badArgs);
+      expect(thunk).toThrowError("need at least one interval");
+    });
     it("errors for negative parameters", () => {
       const badParameters = [
         {alpha: -0.1, beta: 0.1, gammaForward: 0.1, gammaBackward: 0.1},
@@ -375,6 +381,20 @@ describe("core/credrank/markovProcessGraph", () => {
       const expected = args().intervals.map((x) => x.startTimeMs);
       const actual = markovProcessGraph().epochStarts();
       expect(actual).toEqual(expected);
+    });
+    it("has the correct intervals", () => {
+      const expected = args().intervals;
+      const actual = markovProcessGraph().intervals();
+      expect(actual).toEqual(expected);
+    });
+    it("there are the same number of epochs as intervals", () => {
+      // This test is just a santiy test. If we were to add extra
+      // epochs (e.g. padding epochs like we used to have in the past),
+      // we'd need to make sure that corresponding intervals get added too.
+      const mpg = markovProcessGraph();
+      const intervals = mpg.intervals();
+      const epochStarts = mpg.epochStarts();
+      expect(intervals.length).toEqual(epochStarts.length);
     });
     it("has the right participants", () => {
       expect(markovProcessGraph().participants()).toEqual(participants);
