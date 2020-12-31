@@ -2,7 +2,7 @@
 
 import {type URL} from "../../core/references";
 import {type NodeAddressT, NodeAddress} from "../../core/graph";
-import {type NodeWeight} from "../../core/weights";
+import {type NodeWeight} from "../../core/weights/nodeWeights";
 import {type TimestampMs} from "../../util/timestamp";
 import {type EdgeSpec} from "./edgeSpec";
 import {initiativeNodeType} from "./declaration";

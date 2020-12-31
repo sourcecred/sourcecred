@@ -7,11 +7,9 @@ import {
   type NodeAddressT,
   Graph,
 } from "./graph";
-import {
-  type NodeWeight,
-  type EdgeWeight,
-  type WeightsComparison,
-} from "./weights";
+import {type NodeWeight} from "./weights/nodeWeights";
+import {type EdgeWeight} from "./weights/edgeWeights";
+import {type WeightsComparison} from "./weights/weightsT";
 import {NodeTrie, EdgeTrie} from "./trie";
 
 /**

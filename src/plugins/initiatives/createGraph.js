@@ -11,7 +11,7 @@ import {
 import type {ReferenceDetector, URL} from "../../core/references";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
 import * as WeightedGraph from "../../core/weightedGraph";
-import type {NodeWeight} from "../../core/weights";
+import type {NodeWeight} from "../../core/weights/nodeWeights";
 import type {EdgeSpec} from "./edgeSpec";
 import {
   type Initiative,
@@ -109,7 +109,7 @@ export function createWeightedGraph(
     const weight = initiativeWeight(initiative);
     graph.addNode(node);
     if (weight) {
-      weights.nodeWeights.set(node.address, weight);
+      weights.nodeWeightsT.set(node.address, weight);
     }
 
     // Generic approach to adding edges when the reference detector has a hit.
@@ -142,7 +142,7 @@ export function createWeightedGraph(
         graph.addNode(entryNode);
         graph.addEdge(createEdge(initiative, entryNode.address));
         if (entry.weight != null) {
-          weights.nodeWeights.set(entryNode.address, entry.weight);
+          weights.nodeWeightsT.set(entryNode.address, entry.weight);
         }
 
         // Add edges to the contributors.

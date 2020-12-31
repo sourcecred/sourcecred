@@ -1,7 +1,8 @@
 // @flow
 
 import sortedIndex from "lodash.sortedindex";
-import {type WeightsT, type EdgeWeight} from "../core/weights";
+import {type WeightsT} from "../core/weights";
+import type {EdgeWeight} from "../core/weights/edgeWeights";
 import {type CredResult, compute} from "./credResult";
 import {type TimelineCredParameters} from "./timeline/params";
 import {type PluginDeclarations} from "./pluginDeclaration";
@@ -131,8 +132,8 @@ export class CredView {
     const edges = Array.from(graph.edges({showDangling: false}));
     this._nodeAddressToIndex = new Map(nodes.map((n, i) => [n.address, i]));
     this._edgeAddressToIndex = new Map(edges.map((n, i) => [n.address, i]));
-    this._nodeEvaluator = nodeWeightEvaluator(weights);
-    this._edgeEvaluator = edgeWeightEvaluator(weights);
+    this._nodeEvaluator = nodeWeightEvaluator(weights.nodeWeightsT);
+    this._edgeEvaluator = edgeWeightEvaluator(weights.edgeWeightsT);
     const nodeTypes = [].concat(...result.plugins.map((p) => p.nodeTypes));
     this._nodeTypeTrie = new NodeTrie();
     for (const t of nodeTypes) {

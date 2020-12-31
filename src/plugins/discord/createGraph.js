@@ -2,7 +2,7 @@
 
 import {escape} from "entities";
 import {type WeightedGraph as WeightedGraphT} from "../../core/weightedGraph";
-import {empty as emptyWeights} from "../../core/weights";
+import {empty as emptyWeightsT} from "../../core/weights";
 import {
   Graph,
   NodeAddress,
@@ -300,7 +300,7 @@ export function _createGraphFromMessages(
   const propsChannels = new Set(config.propsChannels);
   const wg = {
     graph: new Graph(),
-    weights: emptyWeights(),
+    weights: emptyWeightsT(),
   };
 
   for (const graphMessage of messages) {
@@ -320,7 +320,7 @@ export function _createGraphFromMessages(
 
     for (const {reaction, reactingMember} of reactions) {
       const node = reactionNode(reaction, message.timestampMs, guildId);
-      wg.weights.nodeWeights.set(
+      wg.weights.nodeWeightsT.set(
         node.address,
         reactionWeight(weights, message, reaction, reactingMember)
       );

@@ -11,7 +11,7 @@ import {
   type WeightedGraph,
   merge as mergeWeightedGraph,
 } from "../../core/weightedGraph";
-import {merge as mergeWeights} from "../../core/weights";
+import {merge as mergeWeightsT} from "../../core/weights";
 import {RelationalView} from "./relationalView";
 import {createGraph} from "./createGraph";
 import {declaration} from "./declaration";
@@ -104,7 +104,7 @@ export class GithubPlugin implements Plugin {
       })
     );
     const pluginDefaultWeights = weightsForDeclaration(declaration);
-    const weights = mergeWeights([wg.weights, pluginDefaultWeights]);
+    const weights = mergeWeightsT([wg.weights, pluginDefaultWeights]);
     return {graph: wg.graph, weights};
   }
 

@@ -30,8 +30,8 @@ import {
  * will be removed when the 'legacy cred' UI is removed.
  */
 export function weightsToEdgeEvaluator(weights: WeightsT): EdgeEvaluator {
-  const nodeWeight = nodeWeightEvaluator(weights);
-  const edgeWeight = edgeWeightEvaluator(weights);
+  const nodeWeight = nodeWeightEvaluator(weights.nodeWeightsT);
+  const edgeWeight = edgeWeightEvaluator(weights.edgeWeightsT);
 
   return function evaluator(edge: Edge) {
     const srcWeight = nodeWeight(edge.src);

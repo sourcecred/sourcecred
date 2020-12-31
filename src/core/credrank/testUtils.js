@@ -143,17 +143,21 @@ export function graph(): Graph {
   return g;
 }
 export function weights(): WeightsT {
-  const nodeWeights = new Map().set(c0.address, 1).set(c1.address, 2);
-  const edgeWeights = new Map()
+  const nodeWeightsT = new Map().set(c0.address, 1).set(c1.address, 2);
+  const edgeWeightsT = new Map()
     .set(e0.address, {forwards: 1, backwards: 0})
     .set(e1.address, {forwards: 2, backwards: 1})
     // e2 is unset, which results in implicit {1, 1}
     .set(e3.address, {forwards: 0, backwards: 0});
-  return {nodeWeights, edgeWeights};
+  return {nodeWeightsT, edgeWeightsT};
 }
 
-export const nodeWeight: NodeWeightEvaluator = nodeWeightEvaluator(weights());
-export const edgeWeight: EdgeWeightEvaluator = edgeWeightEvaluator(weights());
+export const nodeWeight: NodeWeightEvaluator = nodeWeightEvaluator(
+  weights().nodeWeightsT
+);
+export const edgeWeight: EdgeWeightEvaluator = edgeWeightEvaluator(
+  weights().edgeWeightsT
+);
 export const weightedGraph: () => WeightedGraph = () => ({
   weights: weights(),
   graph: graph(),

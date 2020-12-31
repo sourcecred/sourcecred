@@ -6,7 +6,7 @@ import {type TimestampMs} from "../util/timestamp";
 import {NodeAddress} from "./graph";
 import {Graph, type NodeAddressT} from "./graph";
 import * as WG from "./weightedGraph";
-import {empty as emptyWeights} from "./weights";
+import {empty as emptyWeightsT} from "./weights";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
 import {nodeWeightEvaluator} from "./algorithm/weightEvaluator";
 
@@ -43,7 +43,7 @@ describe("core/mintBudget", () => {
       class TestWeightedGraph {
         wg: WeightedGraphT;
         constructor() {
-          this.wg = {weights: emptyWeights(), graph: new Graph()};
+          this.wg = {weights: emptyWeightsT(), graph: new Graph()};
         }
         addNode(opts: {|
           +id: number,
@@ -54,7 +54,7 @@ describe("core/mintBudget", () => {
           const {id, timestampMs, mint} = opts;
           const prefix = opts.prefix == null ? "" : opts.prefix;
           const address = this.addressForId(id, prefix);
-          this.wg.weights.nodeWeights.set(address, mint);
+          this.wg.weights.nodeWeightsT.set(address, mint);
           this.wg.graph.addNode({
             address,
             description: prefix + "/" + String(id),
@@ -84,7 +84,9 @@ describe("core/mintBudget", () => {
         const entry = {prefix: NodeAddress.empty, periods: [period]};
         const budget = {intervalLength: "WEEKLY", entries: [entry]};
         const reweightedGraph = applyBudget(testWeightedGraph.wg, budget);
-        const reweightEvaluator = nodeWeightEvaluator(reweightedGraph.weights);
+        const reweightEvaluator = nodeWeightEvaluator(
+          reweightedGraph.weights.nodeWeightsT
+        );
         const a1 = testWeightedGraph.addressForId(1);
         expect(reweightEvaluator(a1)).toEqual(50); // w1 conforms to budget
         const a2 = testWeightedGraph.addressForId(2);
@@ -98,7 +100,9 @@ describe("core/mintBudget", () => {
         const entry = {prefix: NodeAddress.empty, periods: [period]};
         const budget = {intervalLength: "WEEKLY", entries: [entry]};
         const reweightedGraph = applyBudget(testWeightedGraph.wg, budget);
-        const reweightEvaluator = nodeWeightEvaluator(reweightedGraph.weights);
+        const reweightEvaluator = nodeWeightEvaluator(
+          reweightedGraph.weights.nodeWeightsT
+        );
         const a1 = testWeightedGraph.addressForId(1);
         expect(reweightEvaluator(a1)).toEqual(1);
         const a2 = testWeightedGraph.addressForId(2);
@@ -112,7 +116,9 @@ describe("core/mintBudget", () => {
         const entry = {prefix: NodeAddress.empty, periods: [period]};
         const budget = {intervalLength: "WEEKLY", entries: [entry]};
         const reweightedGraph = applyBudget(testWeightedGraph.wg, budget);
-        const reweightEvaluator = nodeWeightEvaluator(reweightedGraph.weights);
+        const reweightEvaluator = nodeWeightEvaluator(
+          reweightedGraph.weights.nodeWeightsT
+        );
         const a1 = testWeightedGraph.addressForId(1);
         expect(reweightEvaluator(a1)).toEqual(5);
         const a2 = testWeightedGraph.addressForId(2);
@@ -130,7 +136,9 @@ describe("core/mintBudget", () => {
         };
         const budget = {intervalLength: "WEEKLY", entries: [entry]};
         const reweightedGraph = applyBudget(testWeightedGraph.wg, budget);
-        const reweightEvaluator = nodeWeightEvaluator(reweightedGraph.weights);
+        const reweightEvaluator = nodeWeightEvaluator(
+          reweightedGraph.weights.nodeWeightsT
+        );
         const a1 = testWeightedGraph.addressForId(1, "foo");
         expect(reweightEvaluator(a1)).toEqual(1);
         const a2 = testWeightedGraph.addressForId(2, "foo");
@@ -148,7 +156,9 @@ describe("core/mintBudget", () => {
         };
         const budget = {intervalLength: "WEEKLY", entries: [entry]};
         const reweightedGraph = applyBudget(testWeightedGraph.wg, budget);
-        const reweightEvaluator = nodeWeightEvaluator(reweightedGraph.weights);
+        const reweightEvaluator = nodeWeightEvaluator(
+          reweightedGraph.weights.nodeWeightsT
+        );
         const a1 = testWeightedGraph.addressForId(1);
         expect(reweightEvaluator(a1)).toEqual(5);
         const a2 = testWeightedGraph.addressForId(2);
@@ -165,7 +175,9 @@ describe("core/mintBudget", () => {
         };
         const budget = {intervalLength: "WEEKLY", entries: [entry]};
         const reweightedGraph = applyBudget(testWeightedGraph.wg, budget);
-        const reweightEvaluator = nodeWeightEvaluator(reweightedGraph.weights);
+        const reweightEvaluator = nodeWeightEvaluator(
+          reweightedGraph.weights.nodeWeightsT
+        );
         const a1 = testWeightedGraph.addressForId(1);
         expect(reweightEvaluator(a1)).toEqual(5);
         const a2 = testWeightedGraph.addressForId(2);

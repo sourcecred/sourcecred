@@ -6,7 +6,7 @@ import {
   EdgeAddress,
   NodeAddress,
 } from "../../core/graph";
-import * as Weights from "../../core/weights";
+import * as WeightsT from "../../core/weights/weightsT";
 import sortBy from "../../util/sortBy";
 import type {ReferenceDetector, URL} from "../../core/references";
 import {createWeightedGraph, initiativeWeight} from "./createGraph";
@@ -216,7 +216,7 @@ describe("plugins/initiatives/createGraph", () => {
           address: testInitiativeAddress(2),
         },
       ]);
-      expect(weights).toEqual(Weights.empty());
+      expect(weights).toEqual(WeightsT.empty());
     });
 
     it("should add node weights for initiatives with weights", () => {
@@ -233,8 +233,8 @@ describe("plugins/initiatives/createGraph", () => {
       const {weights} = createWeightedGraph(repo, refs);
 
       // Then
-      expect(weights.edgeWeights.size).toEqual(0);
-      expect([...weights.nodeWeights.values()]).toEqual([360, 42, 69]);
+      expect(weights.edgeWeightsT.size).toEqual(0);
+      expect([...weights.nodeWeightsT.values()]).toEqual([360, 42, 69]);
     });
 
     it("should add initiative file urls to the description", () => {
@@ -725,8 +725,8 @@ describe("plugins/initiatives/createGraph", () => {
         );
 
         const actual = {
-          [(withoutAddress: string)]: weights.nodeWeights.get(withoutAddress),
-          [(withAddress: string)]: weights.nodeWeights.get(withAddress),
+          [(withoutAddress: string)]: weights.nodeWeightsT.get(withoutAddress),
+          [(withAddress: string)]: weights.nodeWeightsT.get(withAddress),
         };
         expect(actual).toEqual({
           [(withoutAddress: string)]: undefined,
@@ -764,8 +764,8 @@ describe("plugins/initiatives/createGraph", () => {
         );
 
         const actual = {
-          [(withoutAddress: string)]: weights.nodeWeights.get(withoutAddress),
-          [(withAddress: string)]: weights.nodeWeights.get(withAddress),
+          [(withoutAddress: string)]: weights.nodeWeightsT.get(withoutAddress),
+          [(withAddress: string)]: weights.nodeWeightsT.get(withAddress),
         };
         expect(actual).toEqual({
           [(withoutAddress: string)]: undefined,
@@ -803,8 +803,8 @@ describe("plugins/initiatives/createGraph", () => {
         );
 
         const actual = {
-          [(withoutAddress: string)]: weights.nodeWeights.get(withoutAddress),
-          [(withAddress: string)]: weights.nodeWeights.get(withAddress),
+          [(withoutAddress: string)]: weights.nodeWeightsT.get(withoutAddress),
+          [(withAddress: string)]: weights.nodeWeightsT.get(withAddress),
         };
         expect(actual).toEqual({
           [(withoutAddress: string)]: undefined,

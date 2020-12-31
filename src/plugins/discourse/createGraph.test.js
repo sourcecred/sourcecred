@@ -18,7 +18,7 @@ import {
   _graphFromData,
 } from "./createGraph";
 import * as NE from "./nodesAndEdges";
-import {type NodeWeight} from "../../core/weights";
+import {type NodeWeight} from "../../core/weights/nodeWeights";
 import {likeWeight} from "./weights";
 import {type DiscourseConfig, parser as configParser} from "./config";
 
@@ -574,14 +574,14 @@ describe("plugins/discourse/createGraph", () => {
         .addEdge(graphLike.createsLike)
         .addEdge(graphLike.likes);
       expect(expectedGraph.equals(graph)).toBe(true);
-      expect(weights.nodeWeights.get(graphLike.node.address)).toEqual(0.33);
+      expect(weights.nodeWeightsT.get(graphLike.node.address)).toEqual(0.33);
     });
     it("creates topicHasLikedPosts edges with the right weights", () => {
       const {graph, weights, data} = example();
       const {topicHasLikedPosts} = data;
       const {edge, weight} = topicHasLikedPosts[0];
       expect(graph.edge(edge.address)).toEqual(edge);
-      expect(weights.edgeWeights.get(edge.address)).toEqual({
+      expect(weights.edgeWeightsT.get(edge.address)).toEqual({
         forwards: weight,
         backwards: 0,
       });

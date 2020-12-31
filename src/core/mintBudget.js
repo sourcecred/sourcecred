@@ -3,7 +3,7 @@
 import {sum} from "d3-array";
 import findLast from "lodash.findlast";
 import * as NullUtil from "../util/null";
-import * as Weights from "./weights";
+import * as WeightsT from "./weights/weightsT";
 import * as C from "../util/combo";
 import {type NodeAddressT, NodeAddress} from "./graph";
 import {type WeightedGraph as WeightedGraphT} from "./weightedGraph";
@@ -97,7 +97,7 @@ export function _computeReweighting(
   wg: WeightedGraphT,
   budget: Budget
 ): Reweighting {
-  const evaluator = nodeWeightEvaluator(wg.weights);
+  const evaluator = nodeWeightEvaluator(wg.weights.nodeWeightsT);
   const partition = partitionGraph(wg.graph);
   const reweightingsForEachBudget: $ReadOnlyArray<Reweighting> = budget.entries.map(
     (entry) => _reweightingForEntry({evaluator, partition, entry})
@@ -159,13 +159,13 @@ export function _reweightGraph(
   wg: WeightedGraphT,
   reweighting: Reweighting
 ): WeightedGraphT {
-  const newWeights = Weights.copy(wg.weights);
+  const newWeights = WeightsT.copy(wg.weights);
   for (const {address, weight} of reweighting) {
     const existingWeight = NullUtil.orElse(
-      wg.weights.nodeWeights.get(address),
+      wg.weights.nodeWeightsT.get(address),
       1
     );
-    newWeights.nodeWeights.set(address, existingWeight * weight);
+    newWeights.nodeWeightsT.set(address, existingWeight * weight);
   }
 
   return {graph: wg.graph.copy(), weights: newWeights};

@@ -14,7 +14,7 @@ import {
 } from "../../api/pluginId";
 import {loadJson} from "../../util/disk";
 import {loadDirectory as _loadDirectory} from "./initiativesDirectory";
-import * as Weights from "../../core/weights";
+import * as WeightsT from "../../core/weights/weightsT";
 import type {IdentityProposal} from "../../core/ledger/identityProposal";
 
 async function loadConfig(
@@ -53,7 +53,7 @@ export class InitiativesPlugin implements Plugin {
     const {graph, weights} = createWeightedGraph(initiatives, rd);
 
     const declarationWeights = weightsForDeclaration(declaration);
-    const combinedWeights = Weights.merge([weights, declarationWeights]);
+    const combinedWeights = WeightsT.merge([weights, declarationWeights]);
 
     return {graph, weights: combinedWeights};
   }

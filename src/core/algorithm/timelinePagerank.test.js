@@ -1,9 +1,10 @@
 // @flow
 
 import {sum} from "d3-array";
+import {type EdgeWeightsT} from "../../core/weights/edgeWeights";
 import * as NullUtil from "../../util/null";
 import {node, edge, advancedGraph} from "../graphTestUtil";
-import {Graph, type NodeAddressT, type EdgeAddressT, type Edge} from "../graph";
+import {Graph, type NodeAddressT, type Edge} from "../graph";
 import {
   _timelineNodeWeights,
   _timelineNodeToConnections,
@@ -13,7 +14,6 @@ import {
 import {
   createConnections,
   createOrderedSparseMarkovChain,
-  type EdgeWeight,
 } from "./graphToMarkovChain";
 import {type SparseMarkovChain} from "./markovChain";
 
@@ -64,9 +64,7 @@ describe("src/core/algorithm/timelinePagerank", () => {
       const e2 = edge("e2", a, a);
       const graph = new Graph().addNode(a).addNode(b).addEdge(e1).addEdge(e2);
 
-      function weightsToChain(
-        w: Map<EdgeAddressT, EdgeWeight>
-      ): SparseMarkovChain {
+      function weightsToChain(w: EdgeWeightsT): SparseMarkovChain {
         const edgeWeight = (e: Edge) =>
           NullUtil.orElse(w.get(e.address), {forwards: 0, backwards: 0});
         const nodeToConnections = createConnections(
@@ -113,7 +111,7 @@ describe("src/core/algorithm/timelinePagerank", () => {
     async function example() {
       const {graph1, nodes} = advancedGraph();
       const g = graph1();
-      const nodeWeights = new Map()
+      const nodeWeightsT = new Map()
         .set(nodes.src.address, 1)
         .set(nodes.isolated.address, 2);
       const edgeFn = (_unused_edge) => ({forwards: 1, backwards: 0.5});
@@ -126,7 +124,7 @@ describe("src/core/algorithm/timelinePagerank", () => {
       const pi0 = null;
       const alpha = 0.05;
       const result = await _intervalResult(
-        nodeWeights,
+        nodeWeightsT,
         nodeToConnections,
         nodeOrder,
         edgeOrder,
@@ -139,7 +137,7 @@ describe("src/core/algorithm/timelinePagerank", () => {
         nodes,
         nodeOrder,
         edgeOrder,
-        nodeWeights,
+        nodeWeightsT,
         edgeFn,
         nodeToConnections,
         interval,
@@ -153,8 +151,8 @@ describe("src/core/algorithm/timelinePagerank", () => {
       expect(result.interval).toEqual(interval);
     });
     it("computes the summed nodeWeight", async () => {
-      const {result, nodeWeights} = await example();
-      const actualIntervalWeight = sum(nodeWeights.values());
+      const {result, nodeWeightsT} = await example();
+      const actualIntervalWeight = sum(nodeWeightsT.values());
       expect(result.intervalWeight).toEqual(actualIntervalWeight);
     });
     it("produces sane score distribution on an example graph", async () => {

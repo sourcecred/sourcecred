@@ -1,6 +1,6 @@
 // @flow
 
-import {type NodeWeight} from "../../core/weights";
+import {type NodeWeight} from "../../core/weights/nodeWeights";
 import * as C from "../../util/combo";
 import * as MapUtil from "../../util/map";
 import {orElse as either} from "../../util/null";

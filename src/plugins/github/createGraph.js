@@ -3,7 +3,7 @@
 import * as NullUtil from "../../util/null";
 import {Graph} from "../../core/graph";
 import {type WeightedGraph} from "../../core/weightedGraph";
-import {type WeightsT, empty as emptyWeights} from "../../core/weights";
+import {type WeightsT, empty as emptyWeightsT} from "../../core/weights";
 import * as GitNode from "../git/nodes";
 import * as N from "./nodes";
 import * as R from "./relationalView";
@@ -22,7 +22,7 @@ class GraphCreator {
 
   constructor() {
     this.graph = new Graph();
-    this.weights = emptyWeights();
+    this.weights = emptyWeightsT();
   }
 
   addData(view: R.RelationalView) {
@@ -53,7 +53,7 @@ class GraphCreator {
       } else {
         const addr = N.toRaw(pull.address());
         // Un-merged PRs do not mint cred.
-        this.weights.nodeWeights.set(addr, 0);
+        this.weights.nodeWeightsT.set(addr, 0);
       }
     }
 
