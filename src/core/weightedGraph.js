@@ -1,7 +1,7 @@
 // @flow
 
 import {Graph, type GraphJSON} from "./graph";
-import {type Weights as WeightsT, type WeightsJSON} from "./weights";
+import {type WeightsT, type WeightsJSON} from "./weights";
 import * as Weights from "./weights";
 import {toCompat, fromCompat, type Compatible} from "../util/compat";
 

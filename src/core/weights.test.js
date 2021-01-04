@@ -2,7 +2,7 @@
 
 import stringify from "json-stable-stringify";
 import {NodeAddress, EdgeAddress} from "../core/graph";
-import {type Weights as WeightsT} from "./weights";
+import {type WeightsT} from "./weights";
 import * as Weights from "./weights";
 import {toCompat} from "../util/compat";
 

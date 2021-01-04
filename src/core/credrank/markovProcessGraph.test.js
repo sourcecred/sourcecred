@@ -20,6 +20,7 @@ import {
   forwardWebbingGadget,
   backwardWebbingGadget,
 } from "./edgeGadgets";
+import {intervalSequence} from "../interval";
 
 import {
   args,
@@ -50,6 +51,11 @@ describe("core/credrank/markovProcessGraph", () => {
   }
 
   describe("basic validation", () => {
+    it("errors if there are no intervals", () => {
+      const badArgs = {...args(), intervals: intervalSequence([])};
+      const thunk = () => MarkovProcessGraph.new(badArgs);
+      expect(thunk).toThrowError("need at least one interval");
+    });
     it("errors for negative parameters", () => {
       const badParameters = [
         {alpha: -0.1, beta: 0.1, gammaForward: 0.1, gammaBackward: 0.1},
@@ -151,7 +157,7 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("creates participant epoch nodes", () => {
       const mpg = markovProcessGraph();
-      for (const boundary of mpg.epochBoundaries()) {
+      for (const boundary of mpg.epochStarts()) {
         const address = {
           owner: participant1.id,
           epochStart: boundary,
@@ -163,7 +169,7 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("participant epoch nodes have radiation edges out", () => {
       const mpg = markovProcessGraph();
-      for (const boundary of mpg.epochBoundaries()) {
+      for (const boundary of mpg.epochStarts()) {
         const structuredAddress = {
           owner: participant1.id,
           epochStart: boundary,
@@ -171,9 +177,9 @@ describe("core/credrank/markovProcessGraph", () => {
 
         const radiationTransitionProbability = NullUtil.get(
           new Map()
-            // .65 -- because this one has no incident organic edges, and no backwards webbing
-            .set(-Infinity, 1 - parameters.gammaForward - parameters.beta)
-            // .55 -- because this one has no incident organic edges
+            // The participant has no organic incident edges in the first
+            // interval, so everything that isn't synthetically accounted for
+            // (via the webbing, or payout edge) goes back to seed.
             .set(
               0,
               1 -
@@ -181,10 +187,9 @@ describe("core/credrank/markovProcessGraph", () => {
                 parameters.gammaBackward -
                 parameters.beta
             )
-            // .2 -- because this has incident organic edges
+            // This is a regular interval, (has organic edges),
+            // so it sends only `alpha` probability back to seed.
             .set(2, parameters.alpha)
-            // 0.7 -- because this has no incident organic edges, and no forward webbing
-            .set(Infinity, 1 - parameters.gammaBackward - parameters.beta)
             .get(boundary)
         );
         const radiationEdgeExpected = radiationGadget.markovEdge(
@@ -197,7 +202,7 @@ describe("core/credrank/markovProcessGraph", () => {
 
     it("user epoch nodes have payout edges to the accumulator", () => {
       const mpg = markovProcessGraph();
-      for (const boundary of mpg.epochBoundaries()) {
+      for (const boundary of mpg.epochStarts()) {
         const structuredAddress = {
           owner: participant1.id,
           epochStart: boundary,
@@ -215,7 +220,7 @@ describe("core/credrank/markovProcessGraph", () => {
       const mpg = markovProcessGraph();
       for (const participant of participants) {
         let lastBoundary = null;
-        for (const boundary of mpg.epochBoundaries()) {
+        for (const boundary of mpg.epochStarts()) {
           const epochAddress = {
             owner: participant.id,
             epochStart: boundary,
@@ -241,15 +246,42 @@ describe("core/credrank/markovProcessGraph", () => {
               parameters.gammaBackward
             );
             checkMarkovEdge(mpg, backwardWebbing);
+          } else {
+            // Find the looped backwards edge
+            const loopAddress = {
+              lastStart: boundary,
+              thisStart: boundary,
+              owner: participant.id,
+            };
+            const loop = backwardWebbingGadget.markovEdge(
+              loopAddress,
+              parameters.gammaBackward
+            );
+            checkMarkovEdge(mpg, loop);
           }
           lastBoundary = boundary;
         }
+        if (lastBoundary == null) {
+          // Satisfy flow.
+          throw new Error("invariant violation: no epochs");
+        }
+        // Find the final looped forward edge
+        const loopAddress = {
+          lastStart: lastBoundary,
+          thisStart: lastBoundary,
+          owner: participant.id,
+        };
+        const loop = forwardWebbingGadget.markovEdge(
+          loopAddress,
+          parameters.gammaForward
+        );
+        checkMarkovEdge(mpg, loop);
       }
     });
 
     it("sets up epoch accumulator nodes, with radiation to seed", () => {
       const mpg = markovProcessGraph();
-      for (const boundary of mpg.epochBoundaries()) {
+      for (const boundary of mpg.epochStarts()) {
         // There's an epoch accumulator node
         const accumulatorAddress = {
           epochStart: boundary,
@@ -346,8 +378,23 @@ describe("core/credrank/markovProcessGraph", () => {
       });
     });
     it("has the correct epoch boundaries for the given intervals", () => {
-      const expected = [-Infinity, 0, 2, Infinity];
-      expect(markovProcessGraph().epochBoundaries()).toEqual(expected);
+      const expected = args().intervals.map((x) => x.startTimeMs);
+      const actual = markovProcessGraph().epochStarts();
+      expect(actual).toEqual(expected);
+    });
+    it("has the correct intervals", () => {
+      const expected = args().intervals;
+      const actual = markovProcessGraph().intervals();
+      expect(actual).toEqual(expected);
+    });
+    it("there are the same number of epochs as intervals", () => {
+      // This test is just a santiy test. If we were to add extra
+      // epochs (e.g. padding epochs like we used to have in the past),
+      // we'd need to make sure that corresponding intervals get added too.
+      const mpg = markovProcessGraph();
+      const intervals = mpg.intervals();
+      const epochStarts = mpg.epochStarts();
+      expect(intervals.length).toEqual(epochStarts.length);
     });
     it("has the right participants", () => {
       expect(markovProcessGraph().participants()).toEqual(participants);

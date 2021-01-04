@@ -5,11 +5,11 @@ import stringify from "json-stable-stringify";
 import {FileUploader} from "../../util/FileUploader";
 import Link from "../../webutil/Link";
 import {MdFileDownload, MdFileUpload} from "react-icons/md";
-import {type Weights, toJSON, fromJSON} from "../../core/weights";
+import {type WeightsT, toJSON, fromJSON} from "../../core/weights";
 
 export type Props = {|
-  +weights: Weights,
-  +onWeightsChange: (Weights) => void,
+  +weights: WeightsT,
+  +onWeightsChange: (WeightsT) => void,
 |};
 export class WeightsFileManager extends React.Component<Props> {
   render(): ReactNode {

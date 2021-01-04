@@ -5,13 +5,18 @@ import {NodeAddress} from "../graph";
 import {_allocationIdentities} from "./computeDistribution";
 import * as G from "./grain";
 import {intervalSequence} from "../interval";
+import {random as randomUuid} from "../../util/uuid";
 
 describe("core/ledger/computeDistribution", () => {
   describe("_allocationIdentities", () => {
     it("only includes active GrainAccounts", () => {
       const ledger = new Ledger();
       const active = ledger.createIdentity("USER", "active");
-      ledger._allocateGrain(active, G.fromString("1"));
+      ledger._allocateGrain({
+        grainReceipt: {id: active, amount: G.fromString("1")},
+        allocationId: randomUuid(),
+        credTimestampMs: 1,
+      });
       ledger.activate(active);
       ledger.createIdentity("USER", "inactive");
       const accounts = ledger.accounts().map((a) => ({
@@ -49,7 +54,11 @@ describe("core/ledger/computeDistribution", () => {
     it("time slices the cred as expected", () => {
       const ledger = new Ledger();
       const active = ledger.createIdentity("USER", "active");
-      ledger._allocateGrain(active, G.fromString("1"));
+      ledger._allocateGrain({
+        grainReceipt: {id: active, amount: G.fromString("1")},
+        allocationId: randomUuid(),
+        credTimestampMs: 1,
+      });
       ledger.activate(active);
       ledger.createIdentity("USER", "inactive");
       const accounts = ledger.accounts().map((a) => ({
