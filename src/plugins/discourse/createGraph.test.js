@@ -2,9 +2,16 @@
 
 import sortBy from "../../util/sortBy";
 import * as NullUtil from "../../util/null";
+import {type TimestampMs} from "../../util/timestamp";
 import type {ReadRepository} from "./mirrorRepository";
 import type {Topic, Post, PostId, TopicId, LikeAction, User} from "./fetch";
-import {EdgeAddress, type Node, type Edge, Graph} from "../../core/graph";
+import {
+  EdgeAddress,
+  NodeAddress,
+  type Node,
+  type Edge,
+  Graph,
+} from "../../core/graph";
 import {
   _createReferenceEdges,
   weightForTrustLevel,
@@ -489,6 +496,20 @@ describe("plugins/discourse/createGraph", () => {
       expect(seenTrustLevels).toEqual(new Set([null, 0, 2, 3]));
     });
     it("creates hasLikedPost edges from topics to posts", () => {
+      type SafeEdge = {|
+        +address: string[],
+        +dst: string[],
+        +src: string[],
+        +timestampMs: TimestampMs,
+      |};
+      function getSafeEdge(e: Edge): SafeEdge {
+        return {
+          address: EdgeAddress.toParts(e.address),
+          dst: NodeAddress.toParts(e.dst),
+          src: NodeAddress.toParts(e.src),
+          timestampMs: e.timestampMs,
+        };
+      }
       const {repo, data, likes, url} = example();
       const postLikeWeight = {};
       for (const post of repo.posts()) {
@@ -504,24 +525,18 @@ describe("plugins/discourse/createGraph", () => {
       for (const post of repo.posts()) {
         if (postLikeWeight[post.id] > 0) {
           const edge = NE.topicHasLikedPostEdge(url, post);
+          const textSafeEdge = getSafeEdge(edge);
           const weight = postLikeWeight[post.id];
-          expectedTopicHasLikedPosts.push({edge, weight});
+          expectedTopicHasLikedPosts.push({textSafeEdge, weight});
         }
       }
-      expect(data.topicHasLikedPosts).toEqual(expectedTopicHasLikedPosts);
-      expect(expectedTopicHasLikedPosts).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "edge": Object {
-              "address": "E sourcecred discourse topicHasLikedPost https://url.com 1 3 ",
-              "dst": "N sourcecred discourse post https://url.com 3 ",
-              "src": "N sourcecred discourse topic https://url.com 1 ",
-              "timestampMs": 1,
-            },
-            "weight": 2.25,
-          },
-        ]
-      `);
+      const likedPostsFromTopic = [];
+      for (const {edge, weight} of data.topicHasLikedPosts) {
+        const textSafeEdge = getSafeEdge(edge);
+        likedPostsFromTopic.push({textSafeEdge, weight});
+      }
+      expect(likedPostsFromTopic).toEqual(expectedTopicHasLikedPosts);
+      expect(likedPostsFromTopic.length).toBe(1);
     });
   });
 
