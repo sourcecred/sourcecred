@@ -38,7 +38,7 @@
         "topics_day": 0,
         "topics_week": 0,
         "topics_month": 0,
-        "topics_year": 1,
+        "topics_year": 0,
         "topics_all_time": 1,
         "uploaded_logo": null,
         "uploaded_background": null,
@@ -70,7 +70,7 @@
               "id": 5,
               "username": "beanow.sc-test",
               "name": "Beanow",
-              "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+              "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/b/7ea924/{size}.png"
             }
           }
         ]

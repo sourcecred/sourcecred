@@ -5,7 +5,7 @@
         "id": 54,
         "name": "Beanow",
         "username": "beanow.sc-test",
-        "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png",
+        "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/b/7ea924/{size}.png",
         "created_at": "2019-11-15T17:44:32.244Z",
         "cooked": "<p>The quick brown fox jumps over the lazy dog.</p>\n<h2>Post <span class=\"hashtag\">#21</span>\n</h2>",
         "post_number": 21,
@@ -33,6 +33,7 @@
         "can_wiki": false,
         "read": true,
         "user_title": null,
+        "bookmarked": false,
         "actions_summary": [],
         "moderator": false,
         "admin": true,
@@ -77,227 +78,16 @@
   "timeline_lookup": [
     [
       1,
-      243
+      416
     ]
   ],
-  "suggested_topics": [
-    {
-      "id": 13,
-      "title": "A Thread With Links",
-      "fancy_title": "A Thread With Links",
-      "slug": "a-thread-with-links",
-      "posts_count": 2,
-      "reply_count": 0,
-      "highest_post_number": 2,
-      "image_url": null,
-      "created_at": "2019-08-02T11:15:53.843Z",
-      "last_posted_at": "2019-08-02T11:16:31.313Z",
-      "bumped": true,
-      "bumped_at": "2019-08-02T11:17:12.755Z",
-      "archetype": "regular",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "like_count": 0,
-      "views": 533,
-      "category_id": 1,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 3,
-            "username": "dl-proto",
-            "name": "dandelion protocol acct",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png"
-          }
-        },
-        {
-          "extras": null,
-          "description": "Frequent Poster",
-          "user": {
-            "id": 2,
-            "username": "d11",
-            "name": "D",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
-          }
-        }
-      ]
-    },
-    {
-      "id": 30,
-      "title": "Filler Topic #4",
-      "fancy_title": "Filler Topic #4",
-      "slug": "filler-topic-4",
-      "posts_count": 1,
-      "reply_count": 0,
-      "highest_post_number": 1,
-      "image_url": null,
-      "created_at": "2019-11-15T17:52:15.060Z",
-      "last_posted_at": "2019-11-15T17:52:15.123Z",
-      "bumped": true,
-      "bumped_at": "2019-11-15T17:52:15.123Z",
-      "archetype": "regular",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "like_count": 0,
-      "views": 527,
-      "category_id": 5,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 5,
-            "username": "beanow.sc-test",
-            "name": "Beanow",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
-          }
-        }
-      ]
-    },
-    {
-      "id": 32,
-      "title": "Filler Topic #6",
-      "fancy_title": "Filler Topic #6",
-      "slug": "filler-topic-6",
-      "posts_count": 1,
-      "reply_count": 0,
-      "highest_post_number": 1,
-      "image_url": null,
-      "created_at": "2019-11-15T17:52:34.599Z",
-      "last_posted_at": "2019-11-15T17:52:34.669Z",
-      "bumped": true,
-      "bumped_at": "2019-11-15T17:52:34.669Z",
-      "archetype": "regular",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "like_count": 0,
-      "views": 605,
-      "category_id": 5,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 5,
-            "username": "beanow.sc-test",
-            "name": "Beanow",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
-          }
-        }
-      ]
-    },
-    {
-      "id": 42,
-      "title": "Filler Topic #16",
-      "fancy_title": "Filler Topic #16",
-      "slug": "filler-topic-16",
-      "posts_count": 1,
-      "reply_count": 0,
-      "highest_post_number": 1,
-      "image_url": null,
-      "created_at": "2019-11-15T17:54:46.242Z",
-      "last_posted_at": "2019-11-15T17:54:46.299Z",
-      "bumped": true,
-      "bumped_at": "2019-11-15T17:54:46.299Z",
-      "archetype": "regular",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "like_count": 0,
-      "views": 521,
-      "category_id": 5,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 5,
-            "username": "beanow.sc-test",
-            "name": "Beanow",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
-          }
-        }
-      ]
-    },
-    {
-      "id": 44,
-      "title": "Filler Topic #18",
-      "fancy_title": "Filler Topic #18",
-      "slug": "filler-topic-18",
-      "posts_count": 1,
-      "reply_count": 0,
-      "highest_post_number": 1,
-      "image_url": null,
-      "created_at": "2019-11-15T17:55:02.978Z",
-      "last_posted_at": "2019-11-15T17:55:03.032Z",
-      "bumped": true,
-      "bumped_at": "2019-11-15T17:55:03.032Z",
-      "archetype": "regular",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "like_count": 0,
-      "views": 520,
-      "category_id": 5,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 5,
-            "username": "beanow.sc-test",
-            "name": "Beanow",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
-          }
-        }
-      ]
-    }
-  ],
+  "suggested_topics": [],
   "id": 26,
   "title": "Big Filler Topic 1",
   "fancy_title": "Big Filler Topic 1",
   "posts_count": 21,
   "created_at": "2019-11-15T17:42:13.506Z",
-  "views": 552,
+  "views": 4021,
   "reply_count": 0,
   "like_count": 0,
   "last_posted_at": "2019-11-15T17:44:32.244Z",
@@ -316,6 +106,7 @@
   "pinned_at": null,
   "pinned_until": null,
   "image_url": null,
+  "slow_mode_seconds": 0,
   "draft": null,
   "draft_key": "topic_26",
   "draft_sequence": null,
@@ -353,13 +144,14 @@
   "thumbnails": null,
   "tags_disable_ads": false,
   "details": {
+    "can_edit": false,
     "notification_level": 1,
     "participants": [
       {
         "id": 5,
         "username": "beanow.sc-test",
         "name": "Beanow",
-        "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png",
+        "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/b/7ea924/{size}.png",
         "post_count": 21,
         "primary_group_name": null,
         "primary_group_flair_url": null,
@@ -371,13 +163,13 @@
       "id": 5,
       "username": "beanow.sc-test",
       "name": "Beanow",
-      "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/b/7ea924/{size}.png"
     },
     "last_poster": {
       "id": 5,
       "username": "beanow.sc-test",
       "name": "Beanow",
-      "avatar_template": "https://avatars.discourse.org/v4/letter/b/7ea924/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/b/7ea924/{size}.png"
     }
   }
 }

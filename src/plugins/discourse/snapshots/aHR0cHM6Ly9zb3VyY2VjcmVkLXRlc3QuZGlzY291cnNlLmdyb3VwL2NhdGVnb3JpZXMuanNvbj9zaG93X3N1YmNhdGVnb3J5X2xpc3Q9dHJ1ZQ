@@ -37,7 +37,7 @@
         "topics_day": 0,
         "topics_week": 0,
         "topics_month": 0,
-        "topics_year": 32,
+        "topics_year": 0,
         "topics_all_time": 32,
         "subcategory_ids": [
           6
@@ -76,7 +76,7 @@
         "topics_day": 0,
         "topics_week": 0,
         "topics_month": 0,
-        "topics_year": 6,
+        "topics_year": 0,
         "topics_all_time": 7,
         "is_uncategorized": true,
         "uploaded_logo": null,
