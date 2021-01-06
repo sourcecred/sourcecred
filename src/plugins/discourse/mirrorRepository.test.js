@@ -7,6 +7,118 @@ import {SqliteMirrorRepository} from "./mirrorRepository";
 import type {Topic, Post, LikeAction} from "./fetch";
 
 describe("plugins/discourse/mirrorRepository", () => {
+  describe("topic tags", () => {
+    it("topicById works on a topic with no tags", () => {
+      const db = new Database(":memory:");
+      const url = "http://example.com";
+      const repository = new SqliteMirrorRepository(db, url);
+      const topic: Topic = {
+        id: 123,
+        categoryId: 42,
+        tags: [],
+        title: "Sample topic 1",
+        timestampMs: 456789,
+        bumpedMs: 456999,
+        authorUsername: "credbot",
+      };
+      repository.addTopic(topic);
+      const actual = repository.topicById(topic.id);
+      expect(actual).toEqual(topic);
+    });
+    it("topicById gets a topic with tags", () => {
+      const db = new Database(":memory:");
+      const url = "http://example.com";
+      const repository = new SqliteMirrorRepository(db, url);
+      const topic: Topic = {
+        id: 123,
+        categoryId: 42,
+        tags: ["example", "some"],
+        title: "Sample topic 1",
+        timestampMs: 456789,
+        bumpedMs: 456999,
+        authorUsername: "credbot",
+      };
+      repository.addTopic(topic);
+      const actual = repository.topicById(topic.id);
+      expect(actual).toEqual(topic);
+    });
+    it("if the tags are updated, the later tags win", () => {
+      const db = new Database(":memory:");
+      const url = "http://example.com";
+      const repository = new SqliteMirrorRepository(db, url);
+      const oldTopic: Topic = {
+        id: 123,
+        categoryId: 42,
+        tags: ["example", "some"],
+        title: "Sample topic 1",
+        timestampMs: 456789,
+        bumpedMs: 456999,
+        authorUsername: "credbot",
+      };
+      const newTopic: Topic = {
+        id: 123,
+        categoryId: 42,
+        tags: ["example", "other"],
+        title: "Sample topic 1",
+        timestampMs: 456789,
+        bumpedMs: 456999,
+        authorUsername: "credbot",
+      };
+      repository.addTopic(oldTopic);
+      repository.addTopic(newTopic);
+      const actual = repository.topicById(newTopic.id);
+      expect(actual).toEqual(newTopic);
+    });
+    it("tags are returned in sorted order", () => {
+      const db = new Database(":memory:");
+      const url = "http://example.com";
+      const repository = new SqliteMirrorRepository(db, url);
+      const topic: Topic = {
+        id: 123,
+        categoryId: 42,
+        tags: ["c", "b", "a"],
+        title: "Sample topic 1",
+        timestampMs: 456789,
+        bumpedMs: 456999,
+        authorUsername: "credbot",
+      };
+      repository.addTopic(topic);
+      const actual = repository.topicById(topic.id);
+      const expected = {
+        ...actual,
+        tags: ["a", "b", "c"],
+      };
+      expect(actual).toEqual(expected);
+    });
+    it("topics endpoint works with tags", () => {
+      const db = new Database(":memory:");
+      const url = "http://example.com";
+      const repository = new SqliteMirrorRepository(db, url);
+      const topic1: Topic = {
+        id: 123,
+        categoryId: 42,
+        tags: ["example", "some"],
+        title: "Sample topic 1",
+        timestampMs: 456789,
+        bumpedMs: 456999,
+        authorUsername: "credbot",
+      };
+      const topic2: Topic = {
+        id: 124,
+        categoryId: 42,
+        tags: [],
+        title: "Sample topic 2",
+        timestampMs: 456789,
+        bumpedMs: 456999,
+        authorUsername: "credbot",
+      };
+      repository.addTopic(topic1);
+      repository.addTopic(topic2);
+      const actual = repository.topics();
+      expect(actual).toEqual([topic1, topic2]);
+    });
+  });
+
   it("rejects a different server url without changing the database", () => {
     // We use an on-disk database file here so that we can dump the
     // contents to ensure that the database is physically unchanged.
@@ -51,6 +163,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic: Topic = {
       id: 123,
       categoryId: 1,
+      tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
       bumpedMs: 456999,
@@ -73,6 +186,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic: Topic = {
       id: 123,
       categoryId: 1,
+      tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
       bumpedMs: 456999,
@@ -129,6 +243,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic: Topic = {
       id: 123,
       categoryId: 1,
+      tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
       bumpedMs: 456999,
@@ -184,6 +299,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic: Topic = {
       id: 123,
       categoryId: 1,
+      tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
       bumpedMs: 456999,
@@ -238,6 +354,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic1: Topic = {
       id: 123,
       categoryId: 42,
+      tags: ["example", "some"],
       title: "Sample topic 1",
       timestampMs: 456789,
       bumpedMs: 456999,
@@ -246,6 +363,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic2: Topic = {
       id: 456,
       categoryId: 42,
+      tags: ["example", "some"],
       title: "Sample topic 2",
       timestampMs: 456789,
       bumpedMs: 456999,
@@ -272,6 +390,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic: Topic = {
       id: 123,
       categoryId: 42,
+      tags: ["example", "some"],
       title: "Sample topic 1",
       timestampMs: 456789,
       bumpedMs: 456999,
@@ -305,6 +424,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic: Topic = {
       id: 123,
       categoryId: 1,
+      tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
       bumpedMs: 456999,
@@ -338,6 +458,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic: Topic = {
       id: 123,
       categoryId: 1,
+      tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
       bumpedMs: 456999,
@@ -379,6 +500,7 @@ describe("plugins/discourse/mirrorRepository", () => {
     const topic: Topic = {
       id: 123,
       categoryId: 1,
+      tags: ["example", "some"],
       title: "Sample topic",
       timestampMs: 456789,
       bumpedMs: 456999,
