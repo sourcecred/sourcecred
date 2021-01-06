@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import deepFreeze from "deep-freeze";
 import Table from "@material-ui/core/Table";
 import Typography from "@material-ui/core/Typography";
 import TablePagination from "@material-ui/core/TablePagination";
@@ -18,6 +19,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import DialogContent from "@material-ui/core/DialogContent";
 import Tooltip from "@material-ui/core/Tooltip";
 import Chip from "@material-ui/core/Chip";
+import TableSortLabel from "@material-ui/core/TableSortLabel";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
@@ -30,6 +32,11 @@ import {formatTimestamp} from "../utils/dateHelpers";
 import type {IdentityId} from "../../core/identity/identity";
 import type {Allocation, GrainReceipt} from "../../core/ledger/grainAllocation";
 import type {CurrencyDetails} from "../../api/currencyConfig";
+import {
+  useTableState,
+  SortOrders,
+  DEFAULT_SORT,
+} from "../../webutil/tableState";
 import * as G from "../../core/ledger/grain";
 
 const useStyles = makeStyles((theme) => {
@@ -51,6 +58,13 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
+const DATE_SORT = deepFreeze({
+  name: Symbol("Date"),
+  fn: (e: LedgerEvent) => e.ledgerTimestamp,
+});
+
+const PAGINATION_OPTIONS = deepFreeze([25, 50, 100]);
+
 export const LedgerViewer = ({
   currency: {suffix: currencySuffix},
 }: {
@@ -59,8 +73,6 @@ export const LedgerViewer = ({
   const {ledger} = useLedger();
   const classes = useStyles();
   const [allocation, setAllocation] = useState<Allocation | null>(null);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(25);
 
   const handleClickOpen = useCallback((allocation: Allocation) => {
     setAllocation(allocation);
@@ -70,21 +82,15 @@ export const LedgerViewer = ({
     setAllocation(null);
   }, []);
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    // Keep the user from losing their place when changing # of results per page
-    const newRowsPerPage = parseInt(event.target.value, 10);
-    const currentFirstVisibleRow = page * rowsPerPage;
-    const newPage = Math.floor(currentFirstVisibleRow / newRowsPerPage);
-
-    setRowsPerPage(newRowsPerPage);
-    setPage(newPage);
-  };
-
-  const events = useMemo(() => [...ledger.eventLog()].reverse(), [ledger]);
+  const eventLog = useMemo(() => [...ledger.eventLog()], [ledger]);
+  const ts = useTableState(eventLog, {
+    initialRowsPerPage: PAGINATION_OPTIONS[0],
+    initialSort: {
+      sortName: DATE_SORT.name,
+      sortOrder: SortOrders.DESC,
+      sortFn: DATE_SORT.fn,
+    },
+  });
 
   return (
     <Paper className={classes.container}>
@@ -99,21 +105,29 @@ export const LedgerViewer = ({
             <TableRow>
               <TableCell>Event</TableCell>
               <TableCell>Details</TableCell>
-              <TableCell align="right">Date</TableCell>
+              <TableCell align="right">
+                <TableSortLabel
+                  active={ts.sortName === DATE_SORT.name}
+                  direction={
+                    ts.sortName === DATE_SORT.name ? ts.sortOrder : DEFAULT_SORT
+                  }
+                  onClick={() => ts.setSortFn(DATE_SORT.name, DATE_SORT.fn)}
+                >
+                  {DATE_SORT.name.description}
+                </TableSortLabel>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {events
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((e) => (
-                <LedgerEventRow
-                  key={e.uuid}
-                  event={e}
-                  ledger={ledger}
-                  currencySuffix={currencySuffix}
-                  handleClickOpen={handleClickOpen}
-                />
-              ))}
+            {ts.currentPage.map((e) => (
+              <LedgerEventRow
+                key={e.uuid}
+                event={e}
+                ledger={ledger}
+                currencySuffix={currencySuffix}
+                handleClickOpen={handleClickOpen}
+              />
+            ))}
           </TableBody>
         </Table>
         <Dialog open={!!allocation} onClose={handleClose} scroll="paper">
@@ -127,14 +141,14 @@ export const LedgerViewer = ({
         </Dialog>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[25, 50, 100]}
+        rowsPerPageOptions={PAGINATION_OPTIONS}
         component="div"
-        count={events.length}
+        count={ts.length}
         labelRowsPerPage="Rows"
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
+        rowsPerPage={ts.rowsPerPage}
+        page={ts.pageIndex}
+        onChangePage={(event, newPage) => ts.setPageIndex(newPage)}
+        onChangeRowsPerPage={(event) => ts.setRowsPerPage(event.target.value)}
       />
     </Paper>
   );
