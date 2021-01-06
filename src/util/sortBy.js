@@ -1,6 +1,6 @@
 //@flow
 
-type PluckFn<T> = (T) => any;
+export type PluckFn<T> = (T) => any;
 
 const identity = (x) => x;
 
