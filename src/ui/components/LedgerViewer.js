@@ -300,11 +300,6 @@ const LedgerEventRow = React.memo(
             </Box>
           ));
         case "TRANSFER_GRAIN":
-          //   amount: "3454650000000000000000"
-          // from: "brHJbQhd4Mg80tjbtQ1TNA"
-          // memo: "https://etherscan.io/tx/0x710ba7aa963e677373f1c72819964dd94fb9337ca6048100c66087455292e2bc"
-          // to: "Ec60d6PWymrN0ylmsZOHkg"
-          // type: "TRANSFER_GRAIN"
           let sender;
           let recipient;
           const amount = G.formatAndTrim(action.amount);
