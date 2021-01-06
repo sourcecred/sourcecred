@@ -91,7 +91,7 @@ export async function prepareCredData(
   dependencies: $ReadOnlyArray<BonusPolicy>,
 |}> {
   const [weightedGraph, ledger] = await Promise.all([
-    await loadWeightedGraph(baseDir, config),
+    await loadAndMergePluginWeigtedGraphs(baseDir, config),
     await loadLedger(baseDir),
   ]);
 
@@ -152,7 +152,11 @@ export async function loadWeightedGraphForPlugin(
   return weightedGraphFromJSON(graphJSON);
 }
 
-export async function loadWeightedGraph(
+/**
+ * Loads a weighted graph of all plugins' weighted graphs
+ * merged together.
+ */
+export async function loadAndMergePluginWeigtedGraphs(
   baseDir: string,
   config: InstanceConfig
 ): Promise<WeightedGraph> {
