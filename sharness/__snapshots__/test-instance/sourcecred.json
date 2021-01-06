@@ -1,1 +1,1 @@
-{"bundledPlugins": ["sourcecred/discourse", "sourcecred/github"]}
+{"bundledPlugins": ["sourcecred/discourse", "sourcecred/github", "sourcecred/ethereum"]}
