@@ -5,7 +5,7 @@
         "id": 14,
         "name": "D",
         "username": "d11",
-        "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+        "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/47e85d/{size}.png",
         "created_at": "2019-08-02T11:12:29.476Z",
         "cooked": "<p>This is a test post.</p>\n<p>EDIT: This test post was edited on October 24, 2019.</p>",
         "post_number": 1,
@@ -33,6 +33,7 @@
         "can_wiki": false,
         "read": true,
         "user_title": null,
+        "bookmarked": false,
         "actions_summary": [
           {
             "id": 2,
@@ -58,7 +59,7 @@
         "id": 16,
         "name": "dandelion protocol acct",
         "username": "dl-proto",
-        "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png",
+        "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png",
         "created_at": "2019-08-02T11:14:56.285Z",
         "cooked": "<p>Ah, an excellent post. I will like it and reply.</p>",
         "post_number": 2,
@@ -86,6 +87,7 @@
         "can_wiki": false,
         "read": true,
         "user_title": null,
+        "bookmarked": false,
         "actions_summary": [],
         "moderator": false,
         "admin": false,
@@ -106,7 +108,7 @@
         "id": 22,
         "name": "D",
         "username": "d11",
-        "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+        "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/47e85d/{size}.png",
         "created_at": "2019-08-04T20:50:39.667Z",
         "cooked": "<p>Adding another post, after having deleted a whole thread.</p>",
         "post_number": 3,
@@ -134,6 +136,7 @@
         "can_wiki": false,
         "read": true,
         "user_title": null,
+        "bookmarked": false,
         "actions_summary": [],
         "moderator": false,
         "admin": true,
@@ -160,67 +163,27 @@
   "timeline_lookup": [
     [
       1,
-      348
+      522
     ],
     [
       3,
-      346
+      520
     ]
   ],
   "suggested_topics": [
     {
-      "id": 19,
-      "title": "This post will be a wiki",
-      "fancy_title": "This post will be a wiki",
-      "slug": "this-post-will-be-a-wiki",
-      "posts_count": 2,
-      "reply_count": 0,
-      "highest_post_number": 2,
-      "image_url": null,
-      "created_at": "2019-10-02T20:51:31.690Z",
-      "last_posted_at": "2019-10-02T20:57:16.311Z",
-      "bumped": true,
-      "bumped_at": "2019-10-02T20:57:16.311Z",
-      "archetype": "regular",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "like_count": 0,
-      "views": 524,
-      "category_id": 1,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 2,
-            "username": "d11",
-            "name": "D",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
-          }
-        }
-      ]
-    },
-    {
-      "id": 21,
-      "title": "A Post With References",
-      "fancy_title": "A Post With References",
-      "slug": "a-post-with-references",
+      "id": 58,
+      "title": "Topic with a Tag",
+      "fancy_title": "Topic with a Tag",
+      "slug": "topic-with-a-tag",
       "posts_count": 1,
       "reply_count": 0,
       "highest_post_number": 1,
       "image_url": null,
-      "created_at": "2019-10-23T18:26:31.140Z",
-      "last_posted_at": "2019-10-23T18:26:31.281Z",
+      "created_at": "2021-01-06T05:24:39.121Z",
+      "last_posted_at": "2021-01-06T05:24:39.216Z",
       "bumped": true,
-      "bumped_at": "2019-10-23T18:26:31.281Z",
+      "bumped_at": "2021-01-06T05:24:39.216Z",
       "archetype": "regular",
       "unseen": false,
       "pinned": false,
@@ -230,161 +193,33 @@
       "archived": false,
       "bookmarked": null,
       "liked": null,
+      "tags": [],
       "like_count": 0,
-      "views": 535,
+      "views": 2,
       "category_id": 1,
       "featured_link": null,
       "has_accepted_answer": false,
       "posters": [
         {
           "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 2,
-            "username": "d11",
-            "name": "D",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
-          }
-        }
-      ]
-    },
-    {
-      "id": 20,
-      "title": "123 a post with numbers in slug",
-      "fancy_title": "123 a post with numbers in slug",
-      "slug": "123-a-post-with-numbers-in-slug",
-      "posts_count": 1,
-      "reply_count": 0,
-      "highest_post_number": 1,
-      "image_url": null,
-      "created_at": "2019-10-07T03:49:19.868Z",
-      "last_posted_at": "2019-10-07T03:49:19.922Z",
-      "bumped": true,
-      "bumped_at": "2019-10-07T03:49:19.922Z",
-      "archetype": "regular",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "like_count": 0,
-      "views": 529,
-      "category_id": 1,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 2,
-            "username": "d11",
-            "name": "D",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
-          }
-        }
-      ]
-    },
-    {
-      "id": 18,
-      "title": "Test Poll Please Ignore",
-      "fancy_title": "Test Poll Please Ignore",
-      "slug": "test-poll-please-ignore",
-      "posts_count": 1,
-      "reply_count": 0,
-      "highest_post_number": 1,
-      "image_url": null,
-      "created_at": "2019-10-02T20:50:10.568Z",
-      "last_posted_at": "2019-10-02T20:50:10.625Z",
-      "bumped": true,
-      "bumped_at": "2019-10-02T20:50:10.625Z",
-      "archetype": "regular",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "like_count": 0,
-      "views": 522,
-      "category_id": 1,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest single",
-          "description": "Original Poster, Most Recent Poster",
-          "user": {
-            "id": 2,
-            "username": "d11",
-            "name": "D",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
-          }
-        }
-      ]
-    },
-    {
-      "id": 13,
-      "title": "A Thread With Links",
-      "fancy_title": "A Thread With Links",
-      "slug": "a-thread-with-links",
-      "posts_count": 2,
-      "reply_count": 0,
-      "highest_post_number": 2,
-      "image_url": null,
-      "created_at": "2019-08-02T11:15:53.843Z",
-      "last_posted_at": "2019-08-02T11:16:31.313Z",
-      "bumped": true,
-      "bumped_at": "2019-08-02T11:17:12.755Z",
-      "archetype": "regular",
-      "unseen": false,
-      "pinned": false,
-      "unpinned": null,
-      "visible": true,
-      "closed": false,
-      "archived": false,
-      "bookmarked": null,
-      "liked": null,
-      "like_count": 0,
-      "views": 533,
-      "category_id": 1,
-      "featured_link": null,
-      "has_accepted_answer": false,
-      "posters": [
-        {
-          "extras": "latest",
           "description": "Original Poster, Most Recent Poster",
           "user": {
             "id": 3,
             "username": "dl-proto",
             "name": "dandelion protocol acct",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png"
-          }
-        },
-        {
-          "extras": null,
-          "description": "Frequent Poster",
-          "user": {
-            "id": 2,
-            "username": "d11",
-            "name": "D",
-            "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
+            "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png"
           }
         }
       ]
     }
   ],
+  "tags": [],
   "id": 11,
   "title": "My First Test Post",
   "fancy_title": "My First Test Post",
   "posts_count": 3,
   "created_at": "2019-08-02T11:12:29.408Z",
-  "views": 574,
+  "views": 4033,
   "reply_count": 0,
   "like_count": 1,
   "last_posted_at": "2019-08-04T20:50:39.667Z",
@@ -403,6 +238,7 @@
   "pinned_at": null,
   "pinned_until": null,
   "image_url": null,
+  "slow_mode_seconds": 0,
   "draft": null,
   "draft_key": "topic_11",
   "draft_sequence": null,
@@ -440,13 +276,14 @@
   "thumbnails": null,
   "tags_disable_ads": false,
   "details": {
+    "can_edit": false,
     "notification_level": 1,
     "participants": [
       {
         "id": 2,
         "username": "d11",
         "name": "D",
-        "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png",
+        "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/47e85d/{size}.png",
         "post_count": 2,
         "primary_group_name": null,
         "primary_group_flair_url": null,
@@ -457,7 +294,7 @@
         "id": 3,
         "username": "dl-proto",
         "name": "dandelion protocol acct",
-        "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png",
+        "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png",
         "post_count": 1,
         "primary_group_name": null,
         "primary_group_flair_url": null,
@@ -469,13 +306,13 @@
       "id": 2,
       "username": "d11",
       "name": "D",
-      "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/47e85d/{size}.png"
     },
     "last_poster": {
       "id": 2,
       "username": "d11",
       "name": "D",
-      "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/47e85d/{size}.png"
     }
   }
 }

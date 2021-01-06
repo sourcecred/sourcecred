@@ -96,7 +96,7 @@
       "id": 3,
       "username": "dl-proto",
       "name": "dandelion protocol acct",
-      "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png",
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png",
       "moderator": false,
       "admin": false
     },
@@ -122,9 +122,9 @@
     "id": 3,
     "username": "dl-proto",
     "name": "dandelion protocol acct",
-    "avatar_template": "https://avatars.discourse.org/v4/letter/d/8797f3/{size}.png",
-    "last_posted_at": "2019-08-02T11:15:53.905Z",
-    "last_seen_at": "2020-02-09T02:17:34.361Z",
+    "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/8797f3/{size}.png",
+    "last_posted_at": "2021-01-06T05:24:39.216Z",
+    "last_seen_at": "2021-01-06T05:24:19.787Z",
     "created_at": "2019-08-02T11:14:13.800Z",
     "ignored": false,
     "muted": false,
@@ -154,7 +154,9 @@
     "can_edit_name": false,
     "uploaded_avatar_id": null,
     "pending_count": 0,
-    "profile_view_count": 4,
+    "profile_view_count": 14,
+    "can_upload_profile_header": false,
+    "can_upload_user_card_background": false,
     "mailing_list_posts_per_day": 0,
     "featured_user_badge_ids": [
       12,
@@ -165,7 +167,7 @@
       "id": 2,
       "username": "d11",
       "name": "D",
-      "avatar_template": "https://avatars.discourse.org/v4/letter/d/47e85d/{size}.png"
+      "avatar_template": "https://avatars.discourse-cdn.com/v4/letter/d/47e85d/{size}.png"
     },
     "groups": []
   }

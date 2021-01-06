@@ -328,6 +328,20 @@ Array [
     "title": "Welcome to Discourse",
   },
   Object {
+    "bumpedMs": 1609910999621,
+    "categoryId": 5,
+    "id": 37,
+    "timestampMs": 1573840450242,
+    "title": "Filler Topic #11",
+  },
+  Object {
+    "bumpedMs": 1609910679216,
+    "categoryId": 1,
+    "id": 58,
+    "timestampMs": 1609910679121,
+    "title": "Topic with a Tag",
+  },
+  Object {
     "bumpedMs": 1573840598964,
     "categoryId": 5,
     "id": 57,
@@ -466,13 +480,6 @@ Array [
     "id": 38,
     "timestampMs": 1573840464152,
     "title": "Filler Topic #12",
-  },
-  Object {
-    "bumpedMs": 1573840450294,
-    "categoryId": 5,
-    "id": 37,
-    "timestampMs": 1573840450242,
-    "title": "Filler Topic #11",
   },
   Object {
     "bumpedMs": 1573840428729,
