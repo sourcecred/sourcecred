@@ -154,8 +154,9 @@ cd $MY_SC_INSTANCE
 scdev go
 ```
 
-While making backend changes, you may find it useful to view a diff between the last generated graph and
-a newly generated graph by running `scdev graph -d`  
+While making backend changes, you may find it useful to view a diff between
+the last generated graph and a newly generated graph by running `scdev graph -d`
+and/or running a no-write simulation by running `scdev graph -s`
 The graph.json is stored in the instance, so you can easily compare results across backend branches.
 
 ### Using a Modified Frontend
